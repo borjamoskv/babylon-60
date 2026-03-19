@@ -22,7 +22,7 @@ class IngestionFact(BaseModel):
     project: str = Field(..., min_length=1)
     content: str = Field(..., min_length=10)
     tenant_id: str = Field(..., min_length=1)
-    confidence: str = Field(..., pattern=r"^(C[1-5]|stated|inferred)$")
+    confidence: str = Field(..., pattern=r"^(C[0-5](-[A-Za-z]+)?|stated|inferred)$")
     source: Provenance = Field(
         default=Provenance.SYSTEM, description="Provenance / Data origin (Source Monitoring)"
     )

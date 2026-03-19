@@ -17,16 +17,17 @@ class ByzantineNode:
         self.reputation = reputation
 
 
-class ByzantineConsensus:
+class ByzantineArbiter:
     """
     Implements Zero-Trust consensus for multi-model / multi-agent swarms.
     Operates under the absolute premise that peripheral nodes hallucinate or lie.
     """
 
-    def __init__(self, tolerance_threshold: float = 0.67):
+    def __init__(self, tolerance_threshold: float = 0.67, signal_bus: Any = None):
         # By default, a 2/3 majority weighted by reputation is required.
         self.tolerance_threshold = tolerance_threshold
         self.nodes: dict[str, ByzantineNode] = {}
+        self._signal_bus = signal_bus
 
     def register_node(self, node_id: str, initial_reputation: float = 1.0) -> None:
         self.nodes[node_id] = ByzantineNode(node_id, initial_reputation)
@@ -109,6 +110,25 @@ class ByzantineConsensus:
                 self.nodes[node_id].reputation = min(
                     1.0, self.nodes[node_id].reputation * 1.05
                 )
+                self._emit_trust_signal("trust:reward", node_id, self.nodes[node_id].reputation, "Proposed winning hash")
             else:
                 # Slash
                 self.nodes[node_id].reputation *= 0.8
+                self._emit_trust_signal("trust:slash", node_id, self.nodes[node_id].reputation, "Byzantine lie or hallucination")
+
+    def _emit_trust_signal(self, event_type: str, node_id: str, new_reputation: float, reason: str) -> None:
+        if self._signal_bus is None:
+            return
+        try:
+            self._signal_bus.emit(
+                event_type,
+                {
+                    "node_id": node_id,
+                    "new_reputation": round(new_reputation, 4),
+                    "reason": reason,
+                },
+                source="byzantine_arbiter",
+                project="CORTEX_SWARM",
+            )
+        except Exception:
+            pass
