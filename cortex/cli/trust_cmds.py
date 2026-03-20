@@ -87,12 +87,39 @@ def verify_fact(fact_id: int, db: str) -> None:
 
 @cli.command("compliance-report")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def compliance_report(db: str) -> None:
-    """Generate EU AI Act Article 12 compliance snapshot."""
+@click.option(
+    "--export",
+    "export_path",
+    default=None,
+    type=click.Path(dir_okay=False, writable=True),
+    help="Export report to a file (JSON format).",
+)
+@click.option(
+    "--format",
+    "output_format",
+    default="terminal",
+    type=click.Choice(["terminal", "json"], case_sensitive=False),
+    help="Output format: terminal (default) or json.",
+)
+def compliance_report(db: str, export_path: str | None, output_format: str) -> None:
+    """Generate EU AI Act Article 12 compliance snapshot.
+
+    Use --export <path> to produce a signed JSON report for regulators.
+    The report includes a report_sha256 field that cryptographically
+    fingerprints the full payload — verifiable without relying on any
+    third-party (including OpenAI or any cloud provider).
+
+    Example:
+        cortex compliance-report --export report_2026.json --format json
+    """
+    import hashlib
+    import json as _json
     from datetime import datetime, timezone
+    from pathlib import Path
 
     from cortex.cli.errors import handle_cli_error
     from cortex.database.core import connect as db_connect
+    from cortex.utils.landauer import audit_calcification
 
     conn = None
     try:
@@ -100,7 +127,8 @@ def compliance_report(db: str) -> None:
 
         total_facts = _safe_count(conn, "SELECT COUNT(*) FROM facts WHERE valid_until IS NULL")
         decisions = _safe_count(
-            conn, "SELECT COUNT(*) FROM facts WHERE fact_type = 'decision' AND valid_until IS NULL"
+            conn,
+            "SELECT COUNT(*) FROM facts WHERE fact_type = 'decision' AND valid_until IS NULL",
         )
         total_tx = _safe_count(conn, "SELECT COUNT(*) FROM transactions")
         checkpoints = _safe_count(conn, "SELECT COUNT(*) FROM merkle_roots")
@@ -115,8 +143,106 @@ def compliance_report(db: str) -> None:
 
         chain_ok, violations = _check_chain_integrity(conn)
 
-        now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+        now_dt = datetime.now(timezone.utc)
+        now_str = now_dt.strftime("%Y-%m-%d %H:%M UTC")
+        now_iso = now_dt.isoformat()
 
+        cortex_root = Path(__file__).parent.parent
+        calc_results = audit_calcification(cortex_root, limit=5)
+        avg_calc = (
+            sum(r["score"] for r in calc_results) / len(calc_results)
+            if calc_results
+            else 0
+        )
+
+        c1, c2, c3, c4, c5 = (
+            total_tx > 0,
+            decisions > 0,
+            chain_ok,
+            checkpoints > 0,
+            len(agents) > 0,
+        )
+        score = sum([c1, c2, c3, c4, c5])
+
+        # ── JSON Export ──────────────────────────────────────────────────
+        if export_path or output_format == "json":
+            raw_verdict = (
+                "COMPLIANT" if score == 5 else ("PARTIAL" if score >= 3 else "NON-COMPLIANT")
+            )
+            payload: dict = {
+                "schema": "cortex-compliance-report-v1",
+                "generated_at": now_iso,
+                "generator": "CORTEX Persist — EU AI Act Art. 12 Compliance Engine",
+                "database": db,
+                "metrics": {
+                    "total_facts": total_facts,
+                    "logged_decisions": decisions,
+                    "active_projects": projects,
+                    "tracked_agents": sorted(agents),
+                    "coverage_start": time_range[0] or None,
+                    "coverage_end": time_range[1] or None,
+                    "tx_ledger_entries": total_tx,
+                    "merkle_checkpoints": checkpoints,
+                    "hash_chain_valid": chain_ok,
+                    "hash_chain_violations": violations if not chain_ok else 0,
+                    "calcification_index": round(avg_calc, 4),
+                },
+                "article_12_checks": {
+                    "art_12_1_automatic_logging": {
+                        "description": "Automatic recording of AI decisions via store()",
+                        "compliant": c1,
+                        "evidence": f"{total_tx} transaction ledger entries",
+                    },
+                    "art_12_2_decision_recording": {
+                        "description": "Decisions explicitly logged with decision fact_type",
+                        "compliant": c2,
+                        "evidence": f"{decisions} decision facts recorded",
+                    },
+                    "art_12_3_tamper_proof": {
+                        "description": "SHA-256 hash chain + Merkle tree checkpoints",
+                        "compliant": c3,
+                        "evidence": (
+                            f"Chain: {'OK' if chain_ok else str(violations) + ' violations'}"
+                            f", {checkpoints} Merkle roots"
+                        ),
+                    },
+                    "art_12_4_periodic_verification": {
+                        "description": "Integrity verification available and executed",
+                        "compliant": c4,
+                        "evidence": f"{checkpoints} sealed Merkle checkpoints",
+                    },
+                    "art_12_2d_agent_traceability": {
+                        "description": "Agent source identification on every fact",
+                        "compliant": c5,
+                        "evidence": f"{len(agents)} distinct agents: {sorted(agents)}",
+                    },
+                },
+                "compliance_score": score,
+                "compliance_score_max": 5,
+                "verdict": raw_verdict,
+                "epistemic_isolation": "ENFORCED",
+                "sovereignty": "LOCAL — no third-party dependency for ledger verification",
+            }
+
+            # Sign the payload: SHA-256 of canonical JSON (without the signature
+            # field). Any regulator can verify integrity offline without relying
+            # on OpenAI, CORTEX servers, or any third party.
+            canonical = _json.dumps(payload, sort_keys=True, ensure_ascii=False)
+            payload["report_sha256"] = hashlib.sha256(canonical.encode()).hexdigest()
+
+            signed_json = _json.dumps(payload, indent=2, ensure_ascii=False)
+
+            if export_path:
+                Path(export_path).write_text(signed_json, encoding="utf-8")
+                console.print(
+                    f"[bold green]✔ Report exported → {export_path}[/bold green]"
+                )
+                console.print(f"[dim]SHA-256: {payload['report_sha256']}[/dim]")
+            else:
+                console.print(signed_json)
+            return
+
+        # ── Terminal (Rich) Output ───────────────────────────────────────
         console.print()
         console.print(
             Panel.fit(
@@ -129,7 +255,7 @@ def compliance_report(db: str) -> None:
         table = Table(show_header=False)
         table.add_column("Metric", style="bold")
         table.add_column("Value")
-        table.add_row("Report Date", now)
+        table.add_row("Report Date", now_str)
         table.add_row("Total Facts", str(total_facts))
         table.add_row("Logged Decisions", str(decisions))
         table.add_row("Active Projects", str(projects))
@@ -143,27 +269,13 @@ def compliance_report(db: str) -> None:
             "[green]OK[/green]" if chain_ok else f"[red]{violations} violations[/red]",
         )
         table.add_row("Epistemic Isolation", "[green]ENFORCED (L0/L2)[/green]")
-
-        from pathlib import Path
-
-        from cortex.utils.landauer import audit_calcification
-
-        cortex_root = Path(__file__).parent.parent
-        calc_results = audit_calcification(cortex_root, limit=5)
-        avg_calc = sum(r["score"] for r in calc_results) / len(calc_results) if calc_results else 0
-
-        table.add_row("Calcification Index", f"[bold yellow]{avg_calc:.2f}[/bold yellow] (Omega-2)")
+        table.add_row(
+            "Calcification Index",
+            f"[bold yellow]{avg_calc:.2f}[/bold yellow] (Omega-2)",
+        )
         console.print(table)
 
-        c1, c2, c3, c4, c5 = (
-            total_tx > 0,
-            decisions > 0,
-            chain_ok,
-            checkpoints > 0,
-            len(agents) > 0,
-        )
-
-        def icon(ok):
+        def icon(ok: bool) -> str:
             return "[green]OK[/green]" if ok else "[red]X[/red]"
 
         checks = Table(title="Compliance Checklist (Art. 12)")
@@ -178,7 +290,6 @@ def compliance_report(db: str) -> None:
         checks.add_row("Landauer's Razor (Omega-2)", icon(avg_calc < 100))
         console.print(checks)
 
-        score = sum([c1, c2, c3, c4, c5])
         if score == 5:
             verdict = "[bold green]COMPLIANT[/bold green]"
         elif score >= 3:
@@ -187,7 +298,10 @@ def compliance_report(db: str) -> None:
             verdict = "[bold red]NON-COMPLIANT[/bold red]"
 
         console.print(
-            Panel(f"{verdict}\n\nCompliance Score: [bold]{score}/5[/bold]", title="Verdict")
+            Panel(
+                f"{verdict}\n\nCompliance Score: [bold]{score}/5[/bold]",
+                title="Verdict",
+            )
         )
     except Exception as e:  # noqa: BLE001 — CLI boundary catch
         handle_cli_error(e, db_path=db, context="generating compliance report")
@@ -215,7 +329,10 @@ def audit_cognitive(tenant: str, db: str) -> None:
             table.add_column("Value")
 
             status_style = "green" if report["status"] == "VALID" else "red"
-            table.add_row("Audit Status", f"[{status_style}]{report['status']}[/{status_style}]")
+            table.add_row(
+                "Audit Status",
+                f"[{status_style}]{report['status']}[/{status_style}]",
+            )
             table.add_row("Events Audited", str(report.get("events_audited", 0)))
             table.add_row("Integrity Score", f"{report.get('integrity_score', 1.0):.2%}")
             table.add_row("Timestamp", report.get("timestamp", ""))

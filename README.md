@@ -4,7 +4,7 @@ Tamper-evident memory, audit trails, and verifiable lineage for AI agents.
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)](https://github.com/borjamoskv/cortex/actions)
+[![CI](https://github.com/borjamoskv/Cortex-Persist/actions/workflows/ci.yml/badge.svg)](https://github.com/borjamoskv/Cortex-Persist/actions)
 
 CORTEX is a middleware layer that enforces cryptographic integrity on top of existing AI memory stores (Mem0, Zep, Custom). It ensures that once an autonomous agent reads context or makes a decision, that state cannot be silently altered.
 
@@ -87,6 +87,23 @@ CORTEX integrates as a standard Python SDK or a standalone REST/MCP gateway.
                             ├─ Merkle Checkpoints
                             └─ Cryptographic Verification
 ```
+
+## Repository Structure
+
+This repository is a monorepo. The Python core is the primary artifact; the
+remaining directories are satellite projects and SDKs that build on top of it.
+
+| Path | Language | Description |
+|:-----|:---------|:------------|
+| `cortex/` | Python | Core engine — ledger, memory, guards, CLI, API |
+| `sdks/python/` | Python | Thin zero-dependency HTTP client for the CORTEX API |
+| `sdks/js/` | TypeScript | TypeScript SDK for the CORTEX API |
+| `sdks/mac_maestro/` | Python | macOS automation layer (Accessibility API, AppleScript, CGEvents) |
+| `cortex-sdk/` | Python | Standalone packaging of the HTTP client (pre-publish) |
+| `experimental/` | Python | Incubation modules — autonomous cycle substrate (see `experimental/README.md`) |
+| `resources/prompts/` | JSON | Versioned specialist personas for LLM routing |
+| `infra/` | — | Deployment and infrastructure configuration |
+| `docs/` | Markdown | Architecture, security model, API reference |
 
 ## Documentation
 

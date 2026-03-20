@@ -237,9 +237,30 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
     ("gateway", "cortex.cli.gateway_cmds", "gateway_cmds", "CORTEX gateway management."),
     ("memory", "cortex.cli.memory_cmds", "memory_cmds", "CORTEX memory management."),
     ("doctor", "cortex.cli.doctor_cmds", "doctor", "🩺 CORTEX Doctor — Diagnostic tool."),
-    ("chomsky", "cortex.cli.chomsky_cmds", "chomsky_group", "CHOMSKY-Ω Syntactic Compressor (0% Fact Drop)."),
-    ("research", "cortex.cli.research_cmds", "research_cmds", "🚀 Sovereign Research: Architectural Innovation & Exergy."),
-    ("session", "cortex.cli.session_mgr_cmds", "session_cmds", "🤖 Autonomous agent session management."),
+    (
+        "chomsky",
+        "cortex.cli.chomsky_cmds",
+        "chomsky_group",
+        "CHOMSKY-Ω Syntactic Compressor (0% Fact Drop).",
+    ),
+    (
+        "research",
+        "cortex.cli.research_cmds",
+        "research_cmds",
+        "🚀 Sovereign Research: Architectural Innovation & Exergy.",
+    ),
+    (
+        "session",
+        "cortex.cli.session_mgr_cmds",
+        "session_cmds",
+        "🤖 Autonomous agent session management.",
+    ),
+    (
+        "suno",
+        "cortex.cli.suno_cmds",
+        "suno_cmds",
+        "🎵 SUNO-Ω: Music Generation + Detective Inverso.",
+    ),
 ]
 
 # ─── Lazy standalone commands ────────────────────────────────────────────

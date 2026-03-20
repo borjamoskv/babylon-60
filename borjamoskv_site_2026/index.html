@@ -1,17 +1,267 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BORJA MOSKV — 3D PORTFOLIO</title>
+    <title>BORJA MOSKV — Música, DJ & Producción · Madrid</title>
+    <meta name="description" content="Borja Moskv — IDM, Dark Disco y electrónica experimental. DJ y productor con base en Madrid. Más de 50 lanzamientos." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
-    <!-- 3D Canvas -->
+
+    <!-- ── 3D CANVAS (background layer, z-index: 0) ── -->
     <canvas id="webgl-canvas"></canvas>
+
+    <!-- ── UI OVERLAY (z-index: 10) ── -->
+    <div id="ui-overlay">
+
+      <!-- NAV -->
+      <nav class="nav">
+        <a href="#home" class="nav-logo">BORJA<span>.</span>MOSKV</a>
+        <ul class="nav-links">
+          <li><a href="#works">Works</a></li>
+          <li><a href="#bio">Bio</a></li>
+          <li><a href="#links">Links</a></li>
+          <li><a href="https://borjamoskv.bandcamp.com" target="_blank" rel="noopener" class="nav-cta" id="nav-bandcamp">Bandcamp ↗</a></li>
+        </ul>
+      </nav>
+
+      <!-- HERO -->
+      <section class="hero" id="home">
+        <p class="hero-eyebrow">Madrid · Barcelona · 2026</p>
+        <h1 class="hero-title">
+          <span class="stroke">Borja</span>
+          <span class="accent">Moskv</span>
+        </h1>
+        <p class="hero-sub">
+          IDM, Dark Disco y electrónica experimental.
+          DJ, productor y artista visual operando desde Madrid.
+          Lanzamientos propios, remixes y arquitectura de sonido.
+        </p>
+        <div class="hero-actions">
+          <a href="https://borjamoskv.bandcamp.com" target="_blank" rel="noopener" class="btn-primary" id="hero-bandcamp-btn">
+            Escuchar en Bandcamp ↗
+          </a>
+          <a href="#works" class="btn-outline" id="hero-works-btn">Ver Works</a>
+        </div>
+        <div class="hero-scroll">
+          <div class="scroll-line"></div>
+          Scroll
+        </div>
+      </section>
+
+      <!-- STATS STRIP -->
+      <div class="stats-strip" id="stats">
+        <div class="stat">
+          <span class="stat-num">50+</span>
+          <span class="stat-label">Lanzamientos</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">12</span>
+          <span class="stat-label">Años activo</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">3</span>
+          <span class="stat-label">Sellos</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">∞</span>
+          <span class="stat-label">BPM</span>
+        </div>
+      </div>
+
+      <!-- MARQUEE -->
+      <div class="marquee-outer" aria-hidden="true">
+        <div class="marquee-track">
+          <div class="marquee-item">Re[al]Works[50] <span>●</span></div>
+          <div class="marquee-item">Instructions for Flying <span>●</span></div>
+          <div class="marquee-item">This Was In Rainbows <span>●</span></div>
+          <div class="marquee-item">Run Trump Run <span>●</span></div>
+          <div class="marquee-item">Dark Disco <span>●</span></div>
+          <div class="marquee-item">IDM Madrid <span>●</span></div>
+          <div class="marquee-item">Jarana Sound <span>●</span></div>
+          <!-- duplicado para loop sin gaps -->
+          <div class="marquee-item">Re[al]Works[50] <span>●</span></div>
+          <div class="marquee-item">Instructions for Flying <span>●</span></div>
+          <div class="marquee-item">This Was In Rainbows <span>●</span></div>
+          <div class="marquee-item">Run Trump Run <span>●</span></div>
+          <div class="marquee-item">Dark Disco <span>●</span></div>
+          <div class="marquee-item">IDM Madrid <span>●</span></div>
+          <div class="marquee-item">Jarana Sound <span>●</span></div>
+        </div>
+      </div>
+
+      <!-- WORKS -->
+      <section class="section" id="works">
+        <div class="section-header">
+          <div>
+            <span class="section-tag">Discografía</span>
+            <h2 class="section-title">Works</h2>
+          </div>
+          <a href="https://borjamoskv.bandcamp.com" target="_blank" rel="noopener" class="btn-outline" id="all-works-btn">Ver todo ↗</a>
+        </div>
+        <div class="works-grid">
+
+          <article class="work-card" id="card-realworks">
+            <a href="https://borjamoskv.bandcamp.com/album/re-al-works-50-by-borjamoskv" target="_blank" rel="noopener" class="work-card-link" aria-label="Re[al]Works[50]"></a>
+            <div class="work-card-bg card-grad-blue"></div>
+            <div class="work-card-content">
+              <span class="work-card-tag">Álbum · 2025</span>
+              <h3 class="work-card-title">Re[al]Works[50]</h3>
+              <span class="work-card-year">by Borja Moskv</span>
+            </div>
+          </article>
+
+          <article class="work-card" id="card-instructions">
+            <a href="https://borjamoskv.bandcamp.com/album/instructions-for-flying" target="_blank" rel="noopener" class="work-card-link" aria-label="Instructions for Flying"></a>
+            <div class="work-card-bg card-grad-red"></div>
+            <div class="work-card-content">
+              <span class="work-card-tag">EP · 2025</span>
+              <h3 class="work-card-title">Instructions for Flying</h3>
+              <span class="work-card-year">by Borja Moskv</span>
+            </div>
+          </article>
+
+          <article class="work-card" id="card-rainbows">
+            <a href="https://borjamoskv.bandcamp.com/album/this-was-in-rainbows" target="_blank" rel="noopener" class="work-card-link" aria-label="This Was In Rainbows"></a>
+            <div class="work-card-bg card-grad-dark"></div>
+            <div class="work-card-content">
+              <span class="work-card-tag">Rework · 2025</span>
+              <h3 class="work-card-title">This Was In Rainbows</h3>
+              <span class="work-card-year">by Borja Moskv</span>
+            </div>
+          </article>
+
+          <article class="work-card" id="card-trump">
+            <a href="https://borjamoskv.bandcamp.com" target="_blank" rel="noopener" class="work-card-link" aria-label="Run Trump Run"></a>
+            <div class="work-card-bg card-grad-split"></div>
+            <div class="work-card-content">
+              <span class="work-card-tag">Single · 2025</span>
+              <h3 class="work-card-title">Run Trump Run</h3>
+              <span class="work-card-year">by Borja Moskv</span>
+            </div>
+          </article>
+
+          <article class="work-card" id="card-djsets">
+            <a href="https://soundcloud.com/borjamoskv" target="_blank" rel="noopener" class="work-card-link" aria-label="DJ Sets"></a>
+            <div class="work-card-bg card-grad-mid"></div>
+            <div class="work-card-content">
+              <span class="work-card-tag">DJ Sets · SoundCloud</span>
+              <h3 class="work-card-title">Dark Disco / IDM Sets</h3>
+              <span class="work-card-year">Live & Studio</span>
+            </div>
+          </article>
+
+          <article class="work-card" id="card-archivo">
+            <a href="https://borjamoskv.bandcamp.com" target="_blank" rel="noopener" class="work-card-link" aria-label="Catálogo completo"></a>
+            <div class="work-card-bg card-grad-deep"></div>
+            <div class="work-card-content">
+              <span class="work-card-tag">Archivo · 2013–2024</span>
+              <h3 class="work-card-title">Catálogo Completo</h3>
+              <span class="work-card-year">50+ releases</span>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- BIO -->
+      <section class="section section-sep" id="bio">
+        <div class="bio-grid">
+          <div class="bio-portrait">
+            <img src="/src/assets/hero.png" alt="Borja Moskv" class="bio-portrait-img" />
+            <div class="bio-portrait-overlay"></div>
+            <span class="bio-portrait-label">Madrid, Spain</span>
+          </div>
+          <div class="bio-text">
+            <span class="section-tag">Artista</span>
+            <h3>Música que no<br><em>pide permiso</em></h3>
+            <p>
+              Borja Moskv lleva más de una década construyendo un lenguaje sonoro
+              propio en la intersección de IDM, Dark Disco y electrónica experimental.
+              Madrid como base de operaciones. El resto, sin fronteras.
+            </p>
+            <p>
+              Más de 50 lanzamientos propios. Remixes para artistas nacionales e
+              internacionales. DJ residente en clubes y festivales. Compositor para
+              cortometrajes y piezas de vídeo arte.
+            </p>
+            <p>
+              La producción es el laboratorio. El directo es el veredicto.
+            </p>
+            <div class="bio-tags">
+              <span class="bio-tag">IDM</span>
+              <span class="bio-tag">Dark Disco</span>
+              <span class="bio-tag">Experimental</span>
+              <span class="bio-tag">DJ</span>
+              <span class="bio-tag">Producción</span>
+              <span class="bio-tag">Mastering</span>
+              <span class="bio-tag">Madrid</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LINKS -->
+      <section class="section section-sep-top" id="links">
+        <div class="section-header">
+          <div>
+            <span class="section-tag">Plataformas</span>
+            <h2 class="section-title">Encuéntrame</h2>
+          </div>
+        </div>
+        <div class="links-grid">
+          <a href="https://borjamoskv.bandcamp.com" target="_blank" rel="noopener" class="link-card" id="link-bandcamp">
+            <span class="link-card-platform">Música</span>
+            <span class="link-card-name">Bandcamp</span>
+            <span class="link-card-desc">Catálogo completo, descarga y escucha directa.</span>
+          </a>
+          <a href="https://soundcloud.com/borjamoskv" target="_blank" rel="noopener" class="link-card" id="link-soundcloud">
+            <span class="link-card-platform">Streaming</span>
+            <span class="link-card-name">SoundCloud</span>
+            <span class="link-card-desc">DJ sets, demos y temas en abierto.</span>
+          </a>
+          <a href="https://open.spotify.com" target="_blank" rel="noopener" class="link-card" id="link-spotify">
+            <span class="link-card-platform">Streaming</span>
+            <span class="link-card-name">Spotify</span>
+            <span class="link-card-desc">Escucha y guarda en tu biblioteca.</span>
+          </a>
+          <a href="https://instagram.com/borjamoskv" target="_blank" rel="noopener" class="link-card" id="link-instagram">
+            <span class="link-card-platform">Social</span>
+            <span class="link-card-name">Instagram</span>
+            <span class="link-card-desc">Proceso, live visuals y novedades.</span>
+          </a>
+          <a href="https://x.com/borjamoskv" target="_blank" rel="noopener" class="link-card" id="link-x">
+            <span class="link-card-platform">Social</span>
+            <span class="link-card-name">X / Twitter</span>
+            <span class="link-card-desc">Pensamientos, releases y contexto.</span>
+          </a>
+          <a href="mailto:hola@borjamoskv.com" class="link-card" id="link-email">
+            <span class="link-card-platform">Contacto</span>
+            <span class="link-card-name">Email directo</span>
+            <span class="link-card-desc">Bookings, colaboraciones y prensa.</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- FOOTER -->
+      <footer class="footer">
+        <span class="footer-logo">BORJA<span>.</span>MOSKV</span>
+        <span class="footer-copy">© 2026 Borja Moskv · Madrid · All rights reserved</span>
+      </footer>
+
+    </div><!-- /ui-overlay -->
+
+    <!-- 3D WORLD HINT (fixed badge) -->
+    <div class="zone-hint" id="zone-hint">
+      <div class="zone-hint-dot"></div>
+      3D World · WASD para explorar
+    </div>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

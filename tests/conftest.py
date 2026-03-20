@@ -1,10 +1,16 @@
-"""Global test configuration for CORTEX test suite."""
+import sys
 
-from __future__ import annotations
+# SOVEREIGN PATCH: Override standard sqlite3 with pysqlite3 to enable load_extension on macOS
+try:
+    import pysqlite3
+    sys.modules["sqlite3"] = pysqlite3
+except ImportError:
+    pass
 
 import asyncio
 import warnings
 
+import aiosqlite  # noqa: F401
 import pytest
 
 # Suppress Python 3.14+ deprecation warning for DefaultEventLoopPolicy

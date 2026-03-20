@@ -62,6 +62,20 @@ export const NaroaPlayerTransition: React.FC<{
     { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
   );
 
+  const analogGrainOpacity = interpolate(
+    frame,
+    [10, 20, durationInFrames],
+    [0.02, 0.08, 0.04],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+  );
+
+  const titleLetterSpacing = interpolate(
+    frame,
+    [15, durationInFrames],
+    [0.1, -0.02],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+  );
+
   return (
     <AbsoluteFill style={{ backgroundColor: '#050505', overflow: 'hidden' }}>
       {/* Saliente */}
@@ -78,6 +92,13 @@ export const NaroaPlayerTransition: React.FC<{
           src={nextImageUrl} 
           style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
         />
+        {/* Cinematic Vignette */}
+        <AbsoluteFill 
+          style={{
+            background: 'radial-gradient(circle, transparent 40%, rgba(0,0,0,0.6) 100%)',
+            pointerEvents: 'none',
+          }}
+        />
       </AbsoluteFill>
 
       {/* Título de Obra Revelado */}
@@ -91,23 +112,25 @@ export const NaroaPlayerTransition: React.FC<{
         <h1 
           style={{
              fontFamily: 'Outfit, sans-serif',
-             fontWeight: 300,
+             fontWeight: 200,
              fontSize: '7vw',
              color: '#EAEAEA',
-             letterSpacing: '-0.02em',
+             letterSpacing: `${titleLetterSpacing}em`,
              transform: `translateY(${titleY}px)`,
              opacity: titleOpacity,
-             textTransform: 'uppercase'
+             textTransform: 'uppercase',
+             textShadow: '0 0 40px rgba(0,0,0,0.4)',
+             mixBlendMode: 'difference'
           }}
         >
           {title}
         </h1>
       </AbsoluteFill>
 
-      {/* Noise Overlay Cinematográfico Fijo */}
+      {/* Noise Overlay Cinematográfico Dinámico */}
       <AbsoluteFill 
         style={{
-          opacity: 0.04,
+          opacity: analogGrainOpacity,
           mixBlendMode: 'overlay',
           background: 'url("https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Dissolve_Noise_Texture.png") repeat',
           pointerEvents: 'none',
