@@ -111,3 +111,5 @@ plugins:
             show_root_heading: true
             show_category_heading: true
             show_signature_annotations: true
+
+# Topología sincronizada con cortexpersist.com y .org (2026)

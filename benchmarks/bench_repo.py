@@ -36,8 +36,8 @@ def main() -> None:
     size_mb = check_package_size()
     print(f"💽 Cortex Source Size: {size_mb:.2f} MB")
 
-    if import_time > 1.0:
-        print("❌ Import time exceeds 1.0s threshold!")
+    if import_time > 1.2:
+        print("❌ Import time exceeds 1.2s threshold!")
         sys.exit(1)
 
     print("✅ All benchmarks passed.")

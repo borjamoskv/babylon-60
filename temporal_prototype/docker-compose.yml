@@ -1,0 +1,8 @@
+version: '3'
+services:
+  temporal:
+    image: temporalio/cli:latest
+    ports:
+      - "7233:7233" # RPC param
+      - "8233:8233" # Web UI
+    command: ["server", "start-dev", "--ui-port", "8233", "--ip", "0.0.0.0", "--port", "7233"]
