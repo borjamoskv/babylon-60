@@ -179,3 +179,7 @@ logging, and external verification when required.
 - [`docs/AXIOMS.md`](docs/AXIOMS.md) — epistemic and design axioms (incl. AX-034 & Ω₁₃)
 - [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) — contribution workflow
 - [`docs/OPERATIONS.md`](docs/OPERATIONS.md) — runtime and maintenance procedures
+
+## AlphaZero Autodidact Assimilation
+
+- **Ω_SOVEREIGN_LEARNING**: The CORTEX ecosystem incorporates the AlphaZero self-play engine (`alphazero-autodidact-omega`) as a core capability for zero-spread, continuous local reinforcement learning capability, ensuring all derived knowledge is cryptographically verified (C5-Dynamic) without arbitrary external LLM dependency.

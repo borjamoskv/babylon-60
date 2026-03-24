@@ -13,6 +13,8 @@ repos:
     hooks:
       - id: check-merge-conflict       # blocks <<<<<<< markers
       - id: check-yaml                 # validates all .yml / .yaml
+        args: ["--allow-multiple-documents"]
+        exclude: ^cortex/mcp/toolbox/tools\.yaml$
       - id: check-json                 # validates .json files
       - id: check-toml                 # validates pyproject.toml et al.
       - id: check-added-large-files    # blocks blobs > 500 KB (default)
