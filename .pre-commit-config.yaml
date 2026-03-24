@@ -1,22 +1,80 @@
 # CORTEX Pre-commit hooks
-# Install: pre-commit install
-# Run manually: pre-commit run --all-files
+# Mirrors CI quality gates locally — fail fast, fail cheap.
+# Install:     pre-commit install && pre-commit install --hook-type commit-msg
+# Run manual:  pre-commit run --all-files
+
+default_language_version:
+  python: python3.13
 
 repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.0
+  # ── Stdlib hygiene ──────────────────────────────────────────────────────────
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
     hooks:
-      - id: ruff
-        args: [--fix]
-      - id: ruff-format
-        args: [--check]
+      - id: check-merge-conflict       # blocks <<<<<<< markers
+      - id: check-yaml                 # validates all .yml / .yaml
+      - id: check-json                 # validates .json files
+      - id: check-toml                 # validates pyproject.toml et al.
+      - id: check-added-large-files    # blocks blobs > 500 KB (default)
+        args: ["--maxkb=500"]
+      - id: trailing-whitespace        # strips trailing whitespace
+        args: ["--markdown-linebreak-ext=md"]
+      - id: end-of-file-fixer          # ensures files end with a newline
+      - id: mixed-line-ending          # normalises to LF
+        args: ["--fix=lf"]
+      - id: detect-private-key         # never commit real secrets
+      - id: check-case-conflict        # catches case-insensitive FS clashes
+      - id: debug-statements           # blocks pdb / ipdb / breakpoint()
 
+  # ── Secrets detection (second layer) ────────────────────────────────────────
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ["--baseline", ".secrets.baseline"]
+        exclude: |
+          (?x)^(
+            tests/.*|
+            \.env\.example|
+            uv\.lock|
+            .*\.lock
+          )$
+
+  # ── Ruff — lint + format (mirrors CI exactly) ────────────────────────────────
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.2
+    hooks:
+      - id: ruff            # lint with autofix
+        args: ["--fix"]
+      - id: ruff-format     # format; fail if changes needed
+        args: ["--check"]
+
+  # ── SAST — Bandit (medium+ severity, mirrors CI) ─────────────────────────────
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.8.3
+    hooks:
+      - id: bandit
+        name: bandit (SAST)
+        args: ["-r", "cortex/", "--severity-level", "medium", "-q"]
+        pass_filenames: false
+        types: [python]
+
+  # ── Commit-msg — conventional commits ───────────────────────────────────────
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.6.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: []  # allows: feat fix docs style refactor perf test chore ci
+
+  # ── Fast smoke tests (no slow/integration tests) ─────────────────────────────
   - repo: local
     hooks:
       - id: cortex-fast-tests
-        name: CORTEX Fast Tests
-        entry: .venv/bin/pytest tests/ -m "not slow" --tb=line -q --no-header
-        language: system
+        name: "CORTEX fast tests"
+        language: python
+        entry: python -m pytest tests/ -m "not slow and not integration" --tb=line -q --no-header -x
         pass_filenames: false
-        always_run: true
-        stages: [pre-commit]
+        always_run: false      # only runs when Python files change
+        types: [python]
+        stages: [pre-push]     # moved to pre-push to keep commits snappy
