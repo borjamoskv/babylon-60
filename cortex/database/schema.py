@@ -75,7 +75,7 @@ __all__ = [
     "get_init_meta",
 ]
 
-SCHEMA_VERSION = "5.3.0"
+SCHEMA_VERSION = "5.4.0"
 
 # ─── Core Facts Table ────────────────────────────────────────────────
 CREATE_FACTS = """
@@ -91,12 +91,21 @@ CREATE TABLE IF NOT EXISTS facts (
     valid_from  TEXT,
     valid_until TEXT,
     source      TEXT,
-    confidence  TEXT DEFAULT 'C3',
-    tx_id       INTEGER,
-    created_at  TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
-    is_tombstoned INTEGER NOT NULL DEFAULT 0,
-    is_quarantined INTEGER NOT NULL DEFAULT 0
+    confidence      TEXT DEFAULT 'C3',
+    tx_id           INTEGER,
+    cognitive_layer TEXT DEFAULT 'semantic'
+        CHECK( cognitive_layer IN
+            ('working', 'episodic', 'semantic', 'relationship', 'emotional') ),
+    parent_decision_id INTEGER REFERENCES facts(id),
+    consensus_score REAL DEFAULT 0.0,
+    last_accessed   TEXT,
+    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    is_tombstoned   INTEGER NOT NULL DEFAULT 0,
+    is_quarantined  INTEGER NOT NULL DEFAULT 0,
+    quarantined_at  TEXT,
+    quarantine_reason TEXT,
+    tombstoned_at   TEXT
 );
 """
 
@@ -105,6 +114,8 @@ CREATE INDEX IF NOT EXISTS idx_facts_tenant ON facts(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_facts_project ON facts(project);
 CREATE INDEX IF NOT EXISTS idx_facts_type ON facts(fact_type);
 CREATE INDEX IF NOT EXISTS idx_facts_proj_type ON facts(project, fact_type);
+CREATE INDEX IF NOT EXISTS idx_facts_tx_id ON facts(tx_id);
+CREATE INDEX IF NOT EXISTS idx_facts_parent_decision ON facts(parent_decision_id);
 CREATE INDEX IF NOT EXISTS idx_facts_tombstone ON facts(is_tombstoned);
 CREATE INDEX IF NOT EXISTS idx_facts_tenant_valid ON facts(tenant_id, valid_until);
 CREATE INDEX IF NOT EXISTS idx_facts_proj_valid ON facts(project, valid_until);

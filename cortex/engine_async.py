@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import logging
 import random
@@ -5,7 +7,10 @@ import sqlite3
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from cortex.crypto.vault import Vault
 
 import aiosqlite
 
@@ -15,12 +20,11 @@ from cortex.embeddings import LocalEmbedder
 from cortex.engine.agent_mixin import AgentMixin
 from cortex.engine.consensus import ConsensusMixin
 from cortex.engine.history import HistoryMixin
-from cortex.engine.ledger import SovereignLedger
 from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
-from cortex.extensions.cuatrida.models import Dimension
 from cortex.graph import get_graph as _get_graph
+from cortex.ledger import SovereignLedger
 from cortex.memory.temporal import now_iso
 from cortex.utils.canonical import canonical_json, compute_tx_hash
 from cortex.utils.result import Err, Ok, Result
@@ -38,17 +42,17 @@ class AsyncCortexEngine(
     def __init__(
         self,
         pool: CortexConnectionPool,
-        db_path: str,
+        db_path: str | Path,
         writer: SqliteWriteWorker | None = None,
     ):
+        super().__init__()
         self._pool = pool
         self._db_path = Path(db_path)
         self._writer = writer
+        self.vault: Vault | None = None
         self._embedder: LocalEmbedder | None = None
         self._ledger: SovereignLedger | None = None
-        self.vault: Any | None = None
 
-        from cortex.extensions.cuatrida.orchestrator import CuatridaOrchestrator
 
         self._cuatrida = CuatridaOrchestrator(self)
 
@@ -109,14 +113,19 @@ class AsyncCortexEngine(
     @asynccontextmanager
     async def session(self) -> AsyncIterator[aiosqlite.Connection]:
         async with self._pool.acquire() as conn:
-            yield conn
+            try:
+                yield conn
+            except Exception:
+                try:
+                    await conn.rollback()
+                except Exception:  # noqa: BLE001
+                    pass
+                raise
 
     def _get_embedder(self) -> LocalEmbedder:
         if self._embedder is None:
             self._embedder = LocalEmbedder()
         return self._embedder
-
-
 
     def _get_ledger(self) -> SovereignLedger:
         if self._ledger is None:
@@ -124,18 +133,21 @@ class AsyncCortexEngine(
         return self._ledger
 
     async def _log_transaction(
-        self, conn: aiosqlite.Connection, project: str, action: str, detail: dict[str, Any]
+        self, conn: aiosqlite.Connection, project: str, action: str, detail: dict[str, Any], tenant_id: str = "default"
     ) -> int:
+        tenant_id = self._resolve_tenant(tenant_id)
         dj = canonical_json(detail)
         ts = now_iso()
-        prev_hash = await self._get_previous_hash(conn)
+        prev_hash = await self._get_previous_hash(conn, tenant_id)
         th = compute_tx_hash(prev_hash, project, action, dj, ts)
 
         cursor = await conn.execute(
-            "INSERT INTO transactions (project, action, detail, prev_hash, hash, timestamp) "
-            "VALUES (?, ?, ?, ?, ?, ?)",
-            (project, action, dj, prev_hash, th, ts),
+            "INSERT INTO transactions (project, action, detail, prev_hash, hash, timestamp, tenant_id) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (project, action, dj, prev_hash, th, ts, tenant_id),
         )
+        if cursor.lastrowid is None:
+            raise RuntimeError("Failed to resolve transaction rowid after INSERT")
         await self._update_transaction_hash_if_needed(
             conn,
             cursor.lastrowid,
@@ -146,7 +158,14 @@ class AsyncCortexEngine(
             prev_hash,  # type: ignore[type-error]
         )
         tx_id = cursor.lastrowid
-        self._get_ledger().record_write()
+        ledger = self._get_ledger()
+        record_write = getattr(ledger, "record_write_metric", None) or getattr(
+            ledger,
+            "record_write",
+            None,
+        )
+        if callable(record_write):
+            record_write()
 
         if self._cuatrida:
             await self._cuatrida.log_decision(
@@ -158,8 +177,11 @@ class AsyncCortexEngine(
             )
         return tx_id  # type: ignore[type-error]
 
-    async def _get_previous_hash(self, conn: aiosqlite.Connection) -> str:
-        async with conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1") as cursor:
+    async def _get_previous_hash(self, conn: aiosqlite.Connection, tenant_id: str) -> str:
+        async with conn.execute(
+            "SELECT hash FROM transactions WHERE tenant_id = ? ORDER BY id DESC LIMIT 1",
+            (tenant_id,),
+        ) as cursor:
             prev = await cursor.fetchone()
             return prev[0] if prev else "GENESIS"
 
@@ -180,20 +202,30 @@ class AsyncCortexEngine(
                 th = compute_tx_hash(actual_ph, project, action, dj, ts)
                 await conn.execute("UPDATE transactions SET hash = ? WHERE id = ?", (th, tx_id))
 
-    async def verify_ledger(self) -> dict[str, Any]:
-        return await self._get_ledger().verify_integrity_async()
+    async def verify_ledger(self, tenant_id: str = "default") -> dict[str, Any]:
+        tenant_id = self._resolve_tenant(tenant_id)
+        return await self._get_ledger().verify_integrity_async(tenant_id=tenant_id)
 
-    async def create_checkpoint(self) -> int | None:
-        return await self._get_ledger().create_checkpoint_async()
+    async def create_checkpoint(self, tenant_id: str = "default") -> int | str | None:
+        tenant_id = self._resolve_tenant(tenant_id)
+        return await self._get_ledger().create_checkpoint_async(tenant_id=tenant_id)
 
-    async def verify_vote_ledger(self) -> dict[str, Any]:
-        return await super().verify_vote_ledger()
+    async def verify_vote_ledger(self, tenant_id: str = "default") -> dict[str, Any]:
+        return await super().verify_vote_ledger(tenant_id)
+
+    async def create_vote_checkpoint(self, tenant_id: str = "default") -> str | None:
+        return await super().create_vote_checkpoint(tenant_id)
 
     async def get_graph(self, project: str | None = None, limit: int = 50) -> dict[str, Any]:
         async with self.session() as conn:
             return await _get_graph(conn, project, limit)
 
-    async def health_check(self) -> bool:
+    @property
+    def pool(self) -> CortexConnectionPool:
+        """Access the underlying connection pool."""
+        return self._pool
+
+    async def initialize(self) -> bool:
         try:
             async with self.session() as conn:
                 async with conn.execute("SELECT 1") as cursor:

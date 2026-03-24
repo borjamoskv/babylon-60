@@ -23,7 +23,7 @@ import logging
 import sqlite3
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from cortex.compaction.compaction_drift import apply_drift_check as _apply_drift_check
 from cortex.compaction.compaction_ttl import apply_ttl_prune as _apply_ttl_prune
@@ -58,6 +58,7 @@ class CompactionStrategy(str, Enum):
     STALENESS_PRUNE = "staleness_prune"
     TTL_PRUNE = "ttl_prune"
     DRIFT_CHECK = "drift_check"
+    SHANNON_PRUNE = "shannon_prune"
 
     @classmethod
     def all(cls) -> list[CompactionStrategy]:
@@ -166,11 +167,25 @@ async def _apply_strategies(
     if CompactionStrategy.DRIFT_CHECK in strategies:
         await _apply_drift_check(engine, project, result)
 
+    if CompactionStrategy.SHANNON_PRUNE in strategies:
+        # Shannon compaction reduces ledger and bus entropy.
+        # Historical debt is pruned from the ledger.
+        ledger_res = await engine.shannon.prune_historical_debt(days=max_age_days)
+        if ledger_res.get("status") == "success" and ledger_res.get("pruned", 0) > 0:
+            result.strategies_applied.append("shannon_ledger")
+            result.details.append(f"Shannon Ledger: Pruned {ledger_res['pruned']} events")
+
+        # Bus entropy is pruned from agent_messages.
+        bus_res = await engine.shannon.prune_bus_entropy(days=7)
+        if bus_res.get("status") == "success" and bus_res.get("pruned", 0) > 0:
+            result.strategies_applied.append("shannon_bus")
+            result.details.append(f"Shannon Bus: Pruned {bus_res['pruned']} messages")
+
 
 async def compact(
     engine: CortexEngine,
     project: str,
-    strategies: Optional[list[CompactionStrategy]] = None,
+    strategies: list[CompactionStrategy] | None = None,
     dry_run: bool = False,
     similarity_threshold: float = 0.85,
     max_age_days: int = 90,
@@ -334,7 +349,7 @@ def _append_type_section(lines: list[str], fact_type: str, facts: list[Any]) -> 
 
 async def get_compaction_stats(
     engine: CortexEngine,
-    project: Optional[str] = None,
+    project: str | None = None,
 ) -> dict[str, Any]:
     """Get compaction history and statistics."""
     conn = await engine.get_conn()

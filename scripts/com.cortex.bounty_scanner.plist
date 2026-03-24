@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Unique label — used by launchctl -->
+  <key>Label</key>
+  <string>com.cortex.bounty_scanner</string>
+
+  <!-- Python executable + script path (absolute) -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/env</string>
+    <string>python3</string>
+    <string>/Users/borjafernandezangulo/30_CORTEX/scripts/bounty_scanner.py</string>
+  </array>
+
+  <!-- Run every 6 hours (21600 seconds) -->
+  <key>StartInterval</key>
+  <integer>21600</integer>
+
+  <!-- Working directory -->
+  <key>WorkingDirectory</key>
+  <string>/Users/borjafernandezangulo/30_CORTEX</string>
+
+  <!-- Environment — source .env values here (launchd does NOT inherit shell env) -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <!-- Set GITHUB_TOKEN here or via: launchctl setenv GITHUB_TOKEN <value> -->
+    <!-- <key>GITHUB_TOKEN</key><string>ghp_xxx</string> -->
+    <!-- <key>CORTEX_DB_PATH</key><string>/Users/borjafernandezangulo/30_CORTEX/cortex.db</string> -->
+    <!-- <key>SCANNER_MIN_REWARD</key><string>100</string> -->
+    <!-- <key>SCANNER_MIN_RATIO</key><string>3.0</string> -->
+  </dict>
+
+  <!-- Logs -->
+  <key>StandardOutPath</key>
+  <string>/Users/borjafernandezangulo/30_CORTEX/logs/bounty_scanner.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/borjafernandezangulo/30_CORTEX/logs/bounty_scanner_err.log</string>
+
+  <!-- Keep alive on failure -->
+  <key>KeepAlive</key>
+  <false/>
+
+  <!-- Run immediately on load, then on schedule -->
+  <key>RunAtLoad</key>
+  <true/>
+</dict>
+</plist>

@@ -45,7 +45,7 @@ async def export_project(
             raise HTTPException(status_code=400, detail=get_trans("error_invalid_path_chars", lang))
 ```
 
-**Impact:** 
+**Impact:**
 - Data exfiltration without authentication
 - Potential path traversal if validation is bypassed
 
@@ -93,7 +93,7 @@ async def handoff_generate(
 
 **Description:** All tips endpoints (`/tips`, `/tips/categories`, `/tips/category/{category}`, `/tips/project/{project}`) lack authentication. While tips may be considered public, this creates inconsistency in the API security model.
 
-**Impact:** 
+**Impact:**
 - Inconsistent security posture
 - Potential information disclosure about available tip categories and projects
 

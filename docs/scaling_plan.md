@@ -104,7 +104,7 @@ CORTEX_DB = "file:~/.cortex/cortex.db"
 
 # Cloud mode (Turso)  
 CORTEX_DB = os.environ.get(
-    "CORTEX_DB", 
+    "CORTEX_DB",
     "libsql://cortex-borjamoskv.turso.io"
 )
 CORTEX_DB_TOKEN = os.environ.get("CORTEX_DB_TOKEN", "")
@@ -176,7 +176,7 @@ TIERS = {
         "max_projects": -1,  # ilimitado
         "max_searches_day": -1,
         "embeddings": "advanced",
-        "features": ["consensus", "hybrid_search", "export", 
+        "features": ["consensus", "hybrid_search", "export",
                      "multi_agent", "dashboard", "audit_trail"],
     },
 }

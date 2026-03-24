@@ -14,7 +14,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 
@@ -23,6 +23,7 @@ from cortex.core.paths import SKILLS_DIR as SKILLS_BASE_DIR
 
 SKILL_FILENAME = "SKILL.md"
 FRONTMATTER_PATTERN = re.compile(r"^---\s*\n(.*?)\n---", re.DOTALL)
+BUNDLED_SKILLS_DIR = Path(__file__).resolve().parents[1] / "moltbook" / "skills"
 
 
 # ─── Dataclasses ─────────────────────────────────────────────────────────────
@@ -139,7 +140,7 @@ class SkillRegistry:
         all_skills = registry.all()
     """
 
-    def __init__(self, base_dir: Optional[Path] = None) -> None:
+    def __init__(self, base_dir: Path | None = None) -> None:
         self._base_dir = base_dir or SKILLS_BASE_DIR
         self._registry: dict[str, SkillManifest] = {}
         self._loaded = False
@@ -158,26 +159,27 @@ class SkillRegistry:
         discovered = 0
         failed = 0
 
-        for skill_dir in sorted(self._base_dir.iterdir()):
-            if not skill_dir.is_dir():
-                continue
-            skill_file = skill_dir / SKILL_FILENAME
-            if not skill_file.exists():
-                continue
-            try:
-                manifest = self._parse_skill_file(skill_file)
-                self._registry[manifest.slug] = manifest
-                discovered += 1
-            except (ValueError, yaml.YAMLError, KeyError):
-                failed += 1
-                # Skills con frontmatter malformado se registran con nombre
-                # derivado del directorio para no perder visibilidad
-                fallback = SkillManifest(
-                    name=skill_dir.name,
-                    path=skill_file,
-                    description="[manifest parse error]",
-                )
-                self._registry[fallback.slug] = fallback
+        for base_dir in self._iter_base_dirs():
+            for skill_dir in sorted(base_dir.iterdir()):
+                if not skill_dir.is_dir():
+                    continue
+                skill_file = skill_dir / SKILL_FILENAME
+                if not skill_file.exists():
+                    continue
+                try:
+                    manifest = self._parse_skill_file(skill_file)
+                    self._registry[manifest.slug] = manifest
+                    discovered += 1
+                except (ValueError, yaml.YAMLError, KeyError):
+                    failed += 1
+                    # Skills con frontmatter malformado se registran con nombre
+                    # derivado del directorio para no perder visibilidad
+                    fallback = SkillManifest(
+                        name=skill_dir.name,
+                        path=skill_file,
+                        description="[manifest parse error]",
+                    )
+                    self._registry[fallback.slug] = fallback
 
         self._loaded = True
         self._discovered = discovered
@@ -190,7 +192,7 @@ class SkillRegistry:
 
     # ── Acceso ─────────────────────────────────────────────────────────────
 
-    def get(self, name: str) -> Optional[SkillManifest]:
+    def get(self, name: str) -> SkillManifest | None:
         """Obtiene un manifest por nombre (case-insensitive, slug-normalized)."""
         slug = name.lower().replace(" ", "-").replace("_", "-")
         return self._registry.get(slug)
@@ -244,6 +246,21 @@ class SkillRegistry:
             "failed": getattr(self, "_failed", 0),
             "total": self.count,
         }
+
+    def _iter_base_dirs(self) -> list[Path]:
+        """Return existing skill roots, using bundled repo skills as a safe fallback."""
+        candidates = [BUNDLED_SKILLS_DIR, self._base_dir]
+        base_dirs: list[Path] = []
+        seen: set[Path] = set()
+
+        for candidate in candidates:
+            path = candidate.expanduser()
+            if path in seen or not path.exists():
+                continue
+            seen.add(path)
+            base_dirs.append(path)
+
+        return base_dirs
 
     # ── Parsing ────────────────────────────────────────────────────────────
 

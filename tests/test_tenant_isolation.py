@@ -8,6 +8,7 @@ import pytest
 from cortex.engine import CortexEngine
 from cortex.extensions.security.tenant import tenant_id_var
 
+pytestmark = [pytest.mark.usefixtures("skip_exergy_validation")]
 
 @pytest.fixture
 def temp_db():

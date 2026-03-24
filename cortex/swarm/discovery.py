@@ -6,6 +6,9 @@ import yaml
 
 logger = logging.getLogger("cortex.swarm.discovery")
 
+DEFAULT_SKILLS_PATH = Path("~/.gemini/antigravity/skills").expanduser()
+BUNDLED_SKILLS_PATH = Path(__file__).resolve().parents[1] / "extensions" / "moltbook" / "skills"
+
 
 class SkillMetadata(dict[str, Any]):
     """Parsed metadata from a SKILL.md manifest."""
@@ -28,31 +31,39 @@ class SkillRegistry:
     """
 
     def __init__(self, base_path: Path | None = None) -> None:
-        # Default to the standard CORTEX skills directory
-        self.base_path = base_path or Path("~/.gemini/antigravity/skills").expanduser()
+        # Prefer bundled repo skills, while still allowing operator overrides.
+        self.base_path = base_path or DEFAULT_SKILLS_PATH
         self._skills: dict[str, SkillMetadata] = {}
         self._category_to_skills: dict[str, list[SkillMetadata]] = {}
         self.is_scanned: bool = False
 
     def scan(self) -> dict[str, SkillMetadata]:
         """Scan the base path for SKILL.md manifests and parse them (Synchronous)."""
-        if not self.base_path.exists():
-            logger.warning("SkillRegistry: Base path %s does not exist", self.base_path)
-            return {}
-
         self._skills = {}
         self._category_to_skills = {}
-        for skill_dir in self.base_path.iterdir():
-            if not skill_dir.is_dir() or skill_dir.name.startswith((".", "_")):
-                continue
+        discovered_paths = list(self._iter_skill_paths())
+        if not discovered_paths:
+            logger.warning(
+                "SkillRegistry: No skill directories available (checked %s and bundled path %s)",
+                self.base_path,
+                BUNDLED_SKILLS_PATH,
+            )
+            return {}
 
-            manifest_path = skill_dir / "SKILL.md"
-            if manifest_path.exists():
-                try:
-                    metadata = self._parse_manifest(manifest_path)
-                    self._register_skill(metadata)
-                except Exception as e:
-                    logger.error("SkillRegistry: Failed to parse %s: %s", manifest_path, e)
+        for base_path in discovered_paths:
+            for skill_dir in base_path.iterdir():
+                if not skill_dir.is_dir() or skill_dir.name.startswith((".", "_")):
+                    continue
+
+                manifest_path = skill_dir / "SKILL.md"
+                if manifest_path.exists():
+                    try:
+                        metadata = self._parse_manifest(manifest_path)
+                        self._skills[metadata.name] = metadata
+                    except Exception as e:
+                        logger.error("SkillRegistry: Failed to parse %s: %s", manifest_path, e)
+
+        self._rebuild_categories()
 
         logger.info("SkillRegistry: Discovered %d sovereign skills (sync)", len(self._skills))
         self.is_scanned = True
@@ -62,33 +73,67 @@ class SkillRegistry:
         """Scan the base path for SKILL.md manifests asynchronously (\u03a9\u2082)."""
         import anyio
 
-        if not self.base_path.exists():
-            logger.warning("SkillRegistry: Base path %s does not exist", self.base_path)
-            return {}
-
         self._skills = {}
         self._category_to_skills = {}
 
-        try:
-            skill_dirs = await anyio.to_thread.run_sync(lambda: list(self.base_path.iterdir()))
-        except Exception as e:
-            logger.error("SkillRegistry: Failed to list directory %s: %s", self.base_path, e)
+        discovered_paths = list(self._iter_skill_paths())
+        if not discovered_paths:
+            logger.warning(
+                "SkillRegistry: No skill directories available (checked %s and bundled path %s)",
+                self.base_path,
+                BUNDLED_SKILLS_PATH,
+            )
             return {}
 
-        for skill_dir in skill_dirs:
-            if not skill_dir.is_dir() or skill_dir.name.startswith((".", "_")):
+        for base_path in discovered_paths:
+            try:
+                import anyio.to_thread
+                skill_dirs = await anyio.to_thread.run_sync( # type: ignore
+                    lambda p=base_path: list(p.iterdir())
+                )
+            except Exception as e:
+                logger.error("SkillRegistry: Failed to list directory %s: %s", base_path, e)
                 continue
 
-            manifest_path = skill_dir / "SKILL.md"
-            if await anyio.to_thread.run_sync(manifest_path.exists):
-                try:
-                    metadata = await self._async_parse_manifest(manifest_path)
-                    self._register_skill(metadata)
-                except Exception as e:
-                    logger.error("SkillRegistry: Failed to parse %s: %s", manifest_path, e)
+            for skill_dir in skill_dirs:
+                if not skill_dir.is_dir() or skill_dir.name.startswith((".", "_")):
+                    continue
+
+                manifest_path = skill_dir / "SKILL.md"
+                import anyio.to_thread
+                if await anyio.to_thread.run_sync(manifest_path.exists): # type: ignore
+                    try:
+                        metadata = await self._async_parse_manifest(manifest_path)
+                        self._skills[metadata.name] = metadata
+                    except Exception as e:
+                        logger.error("SkillRegistry: Failed to parse %s: %s", manifest_path, e)
+
+        self._rebuild_categories()
 
         logger.info("SkillRegistry: Discovered %d sovereign skills (async)", len(self._skills))
         return self._skills
+
+    def _iter_skill_paths(self) -> list[Path]:
+        """Return unique skill roots, keeping external overrides after bundled skills."""
+        candidates = [BUNDLED_SKILLS_PATH, self.base_path]
+        resolved: list[Path] = []
+        seen: set[Path] = set()
+
+        for candidate in candidates:
+            path = candidate.expanduser()
+            if path in seen or not path.exists():
+                continue
+            seen.add(path)
+            resolved.append(path)
+
+        return resolved
+
+    def _rebuild_categories(self) -> None:
+        """Rebuild category indexes after the last discovered version of each skill wins."""
+        self._category_to_skills = {}
+        for metadata in self._skills.values():
+            cat = metadata.category or "unspecified"
+            self._category_to_skills.setdefault(cat, []).append(metadata)
 
     def _register_skill(self, metadata: SkillMetadata) -> None:
         """Internal helper to update indexes."""
@@ -108,8 +153,8 @@ class SkillRegistry:
             try:
                 parts = content.split("---", 2)
                 if len(parts) >= 3:
-                     data = yaml.safe_load(parts[1])
-                     return SkillMetadata(data, path)
+                    data = yaml.safe_load(parts[1])
+                    return SkillMetadata(data, path)
             except (ValueError, yaml.YAMLError) as e:
                 logger.warning("SkillRegistry: Malformed frontmatter in %s: %s", path, e)
 
@@ -125,7 +170,7 @@ class SkillRegistry:
             if len(parts) >= 3:
                 data = yaml.safe_load(parts[1])
                 return SkillMetadata(data, path)
-        
+
         return SkillMetadata({"name": path.parent.name}, path)
 
     def get_skill(self, name: str) -> SkillMetadata | None:

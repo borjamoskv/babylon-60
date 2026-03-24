@@ -12,8 +12,6 @@ Usage:
 
 from __future__ import annotations
 
-from typing import Optional
-
 import click
 from rich.table import Table
 from rich.text import Text
@@ -51,7 +49,7 @@ def routing() -> None:
 
 @routing.command("matrix")
 @click.option("--intent", default=None, help="Filter by intent (code, reasoning, architect...)")
-def routing_matrix(intent: Optional[str]) -> None:
+def routing_matrix(intent: str | None) -> None:
     """Show the full intent→provider→model routing matrix."""
     from cortex.extensions.llm._presets import load_presets
 

@@ -259,7 +259,7 @@ parameters:
     description: "Filter related facts by a specific tag."
 statement: |
   SELECT g.id as ghost_id, g.reference, g.status,
-         f.id as related_fact_id, f.content as fact_content, 
+         f.id as related_fact_id, f.content as fact_content,
          f.fact_type, f.confidence as fact_confidence, f.tags
   FROM ghosts g
   LEFT JOIN facts f ON (

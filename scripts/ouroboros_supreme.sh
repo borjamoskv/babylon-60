@@ -147,51 +147,51 @@ while true; do
   echo ""
   log_sys "CICLO METABÓLICO INICIADO"
   log_action "🌍 L0-PERCEPTION: Analizando tejido del ecosistema global..."
-  
+
   if ! check_nervous_system; then
       continue
   fi
-  
+
   GHOST_TARGET=$(check_ghosts)
 
   if [ -n "$GHOST_TARGET" ]; then
     log_warn "FANTASMA DETECTADO: Interrupción Causal Requerida."
     afplay /System/Library/Sounds/Glass.aiff 2>/dev/null || true
-    
+
     # Nexo Automático
     NEXUS_ID=$(nexus_create_issue "GHOST PROTOCOL: Fantasma Aislado" "Target: $GHOST_TARGET")
     if [ -n "$NEXUS_ID" ]; then log_action "⬢ NEXUS-TRACKER: Tarjeta Kanban Creada [ID: $NEXUS_ID / IN_PROGRESS]"; fi
-    
+
     log_council "Invocando 5 Porqués (L1-CAUSAL) sobre: $GHOST_TARGET"
     log_action "Desplegando Enjambre (Modo DIAGNOSE)..."
-    
-    PROMPT="ULTRATHINK-INFINITE. Ejecuta ouro-diagnose sobre este objetivo: '$GHOST_TARGET'. 
-    1. Realiza los 5 Porqués hasta la causa raíz. 
-    2. Convoca al Consejo de Guerra (L2) para evaluar el plan. 
-    3. Construye el Fix Técnico y la Puerta de Prevención. 
+
+    PROMPT="ULTRATHINK-INFINITE. Ejecuta ouro-diagnose sobre este objetivo: '$GHOST_TARGET'.
+    1. Realiza los 5 Porqués hasta la causa raíz.
+    2. Convoca al Consejo de Guerra (L2) para evaluar el plan.
+    3. Construye el Fix Técnico y la Puerta de Prevención.
     4. Cierra el ghost/error en CORTEX. Actúa con máxima brutalidad técnica."
-    
+
     execute_agent "$PROMPT"
     MODE="GHOST_HEAL"
     TARGET="$GHOST_TARGET"
     post_execution_commit "$TARGET" "$MODE"
-    
+
     nexus_complete_issue "$NEXUS_ID"
     if [ -n "$NEXUS_ID" ]; then log_ok "⬢ NEXUS-TRACKER: Tarjeta Kanban movida a [DONE]"; fi
   else
     log_ok "Ecosistema Libre de Bloqueos. CORTEX Sincronizado."
-    
+
     RTARGET=$(get_random_target)
     log_action "Selección de entropía (L1): $RTARGET"
-    
+
     ACTION_TYPE=$((RANDOM % 5))
-    
+
     # Nexo Automático
     NEXUS_ID=$(nexus_create_issue "ENTROPY PURGE: $(basename "$RTARGET")" "Auto-Evolution Mode: $ACTION_TYPE")
     if [ -n "$NEXUS_ID" ]; then log_action "⬢ NEXUS-TRACKER: Tarjeta Kanban Creada [ID: $NEXUS_ID / IN_PROGRESS]"; fi
 
     log_council "Invocando Consejo de Guerra (L2) para Invasión de Entropía..."
-    
+
     case $ACTION_TYPE in
         0)
             log_action "Decisión: ENDURECIMIENTO DE FORTALEZA (ouro-fortress)"
@@ -214,12 +214,12 @@ while true; do
             PROMPT="ULTRATHINK-INFINITE. Muta hacia GÉNESIS-∞ en $RTARGET. No solo limpies deuda: busca PATRONES que puedan conectarse como BRIDGES a otros proyectos de la constelación MOSKV. Persiste los puentes detectados en CORTEX."
             ;;
     esac
-    
+
     execute_agent "$PROMPT"
     MODE="ENTROPY_CRUSH_$ACTION_TYPE"
     TARGET="$RTARGET"
     post_execution_commit "$TARGET" "$MODE"
-    
+
     nexus_complete_issue "$NEXUS_ID"
     if [ -n "$NEXUS_ID" ]; then log_ok "⬢ NEXUS-TRACKER: Tarjeta Kanban movida a [DONE]"; fi
   fi

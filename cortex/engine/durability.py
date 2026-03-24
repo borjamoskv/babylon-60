@@ -9,7 +9,7 @@ import asyncio
 import atexit
 import logging
 import sys
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.durability")
 
@@ -21,7 +21,7 @@ class PersistenceSupervisor:
         self._engine = engine
         self._interval = interval
         self._stop_event = asyncio.Event()
-        self._task: Optional[asyncio.Task] = None
+        self._task: asyncio.Task | None = None
         self._queue: list[dict[str, Any]] = []
         self._lock = asyncio.Lock()
 
@@ -65,7 +65,7 @@ class PersistenceSupervisor:
         logger.debug("PersistenceSupervisor: Flushing %d facts (Reason: %s)", len(to_store), reason)
         try:
             for fact in to_store:
-                await self._engine.store(**fact)
+                await self._engine.store(**fact, bicameral=False)
             logger.info("PersistenceSupervisor: Flushed %d facts.", len(to_store))
         except (OSError, RuntimeError) as e:
             logger.error("PersistenceSupervisor: Flush failed: %s", e)

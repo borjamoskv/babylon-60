@@ -123,9 +123,10 @@ def emit_fact_stored(
             cursor = conn.execute(
                 "SELECT COUNT(*) FROM signals "
                 "WHERE event_type = 'fact:stored' "
+                "AND tenant_id = ? "
                 "AND project = ? "
                 "AND consumed_by = '[]'",
-                (project,),
+                (tenant_id, project),
             )
             row = cursor.fetchone()
             unconsumed = row[0] if row else 0
@@ -147,7 +148,8 @@ def emit_fact_stored(
                     tenant_id=tenant_id,
                 )
                 logger.info(
-                    "compact:needed emitted for project=%s (unconsumed=%d)",
+                    "compact:needed emitted for tenant=%s project=%s (unconsumed=%d)",
+                    tenant_id,
                     project,
                     unconsumed,
                 )

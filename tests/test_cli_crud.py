@@ -18,8 +18,10 @@ def runner():
 
 
 @pytest.fixture
-def db_path(tmp_path):
+def db_path(tmp_path, monkeypatch):
     """Create a temp database with test data."""
+    # Bypass exergy filter so test content can be stored
+    monkeypatch.setenv("CORTEX_SKIP_EXERGY_VALIDATION", "1")
     path = tmp_path / "test.db"
     engine = CortexEngine(db_path=path)
     engine.init_db_sync()

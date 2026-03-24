@@ -152,11 +152,13 @@ class AsyncCausalGraph:
         project = "unknown"
         try:
             async with self.conn.execute(
-                "SELECT project FROM facts WHERE id = ?",
-                (fact_id,),
+                "SELECT project FROM facts WHERE id = ? AND tenant_id = ?",
+                (fact_id, tenant_id),
             ) as cur:
                 row = await cur.fetchone()
-                if row and row[0]:
+                if not row:
+                    return TaintReport(source_fact_id=fact_id, affected_count=0)
+                if row[0]:
                     project = row[0]
         except Exception:  # noqa: BLE001
             pass
@@ -172,26 +174,36 @@ class AsyncCausalGraph:
             if depth > 0:
                 # Read current confidence
                 old_conf = "C5"
-                old_meta: dict[str, Any] = {}
+                old_meta_raw = "{}"
                 async with self.conn.execute(
-                    "SELECT confidence, metadata FROM facts WHERE id = ?",
-                    (current_id,),
+                    "SELECT confidence, metadata FROM facts WHERE id = ? AND tenant_id = ?",
+                    (current_id, tenant_id),
                 ) as cur:
                     row = await cur.fetchone()
                     if row:
                         old_conf = row[0] or "C5"
-                        try:
-                            old_meta = json.loads(row[1] or "{}")
-                        except (json.JSONDecodeError, TypeError):
-                            old_meta = {}
+                        old_meta_raw = row[1] or "{}"
 
-                new_conf = _downgrade_confidence(old_conf, depth)
-                old_meta["tainted_by"] = fact_id
-                old_meta["taint_timestamp"] = now
+                from cortex.crypto import get_default_encrypter
+
+                enc = get_default_encrypter()
+                try:
+                    old_meta = enc.decrypt_json(old_meta_raw, tenant_id=tenant_id) or {}
+                    new_conf = _downgrade_confidence(old_conf, depth)
+                    old_meta["tainted_by"] = fact_id
+                    old_meta["taint_timestamp"] = now
+                    encrypted_meta = enc.encrypt_json(old_meta, tenant_id=tenant_id)
+                except (RuntimeError, ValueError):
+                    logger.warning(
+                        "Metadata crypto round-trip failed for fact %d during taint propagation. Skipping.",
+                        current_id,
+                    )
+                    continue
 
                 await self.conn.execute(
-                    "UPDATE facts SET confidence = ?, metadata = ? WHERE id = ?",
-                    (new_conf, json.dumps(old_meta), current_id),
+                    "UPDATE facts SET confidence = ?, metadata = ? "
+                    "WHERE id = ? AND tenant_id = ?",
+                    (new_conf, encrypted_meta, current_id, tenant_id),
                 )
 
                 # Record taint edge
@@ -226,8 +238,9 @@ class AsyncCausalGraph:
 
             # Traverse structural edges only
             async with self.conn.execute(
-                "SELECT fact_id FROM causal_edges WHERE parent_id = ? AND edge_type != ?",
-                (current_id, EDGE_TAINTED_BY),
+                "SELECT fact_id FROM causal_edges "
+                "WHERE parent_id = ? AND tenant_id = ? AND edge_type != ?",
+                (current_id, tenant_id, EDGE_TAINTED_BY),
             ) as cursor:
                 async for row in cursor:
                     child_id: int = row[0]
@@ -237,9 +250,9 @@ class AsyncCausalGraph:
 
         # Record to Ledger (Ω₃)
         if len(changes) > 0:
-            from cortex.engine.ledger import SovereignLedger
+            from cortex.ledger import SovereignLedger
             ledger = SovereignLedger(self.conn)
-            await ledger.record_transaction(
+            ledger.record_transaction(
                 project=project,
                 action="propagate_taint",
                 detail={
@@ -341,10 +354,10 @@ class EpisodicSealer:
         """
         project = metadata.get("project", "CORTEX_SYSTEM")
         tenant_id = metadata.get("tenant_id", "default")
-        
+
         # We seal context as a 'compaction' event in the ledger
         # This allows future retrieval for 'Historical Context Recovery'
-        await self.ledger.record_transaction(
+        self.ledger.record_transaction(
             project=project,
             action="anamnesis_seal",
             detail={

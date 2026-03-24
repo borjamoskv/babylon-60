@@ -23,7 +23,7 @@ async def execute_thermodynamic_flow():
 
     # 1. Initialize Ledger
     console.print("\n[dim]Initializing cryptographic ledger (trust boundary)...[/dim]")
-    
+
     db_conn = sqlite3.connect(":memory:")
     ledger = SovereignLedger(db_conn=db_conn)
 
@@ -73,25 +73,25 @@ async def execute_thermodynamic_flow():
     # 6. Display Yield & Audit Trace
     console.print("\n[bold cyan]Thermodynamic Ledger Audit (Proof of Work):[/bold cyan]")
     records = ledger.get_transactions(project="swarm")
-    
+
     table = Table(title="Sovereign Swarm Cryptographic Ledger", box=box.ROUNDED)
     table.add_column("ID", style="dim")
     table.add_column("Action", style="cyan")
     table.add_column("Details", style="white", overflow="ellipsis")
     table.add_column("Hash", style="magenta", justify="right")
-    
+
     total_exergy = 0.0
     for r in records:
         tx_id, ts, action, detail_json, prev_hash, h = r
         detail = json.loads(detail_json)
         table.add_row(str(tx_id), action, str(detail)[:65] + "...", h[:20] + "...")
-        
+
         # Accumulate exergy from success records
         if action == "execution_success":
             total_exergy += detail.get("exergy_yield", 0.0)
-            
+
     console.print(table)
-    
+
     console.print("\n[bold green]Thermodynamic Yield Report:[/bold green]")
     console.print(f" - Tasks executed: {len(missions)}")
     console.print(f" - Total Exergy Yielded: {total_exergy} U (Ω₉ Claim)")
@@ -100,4 +100,3 @@ async def execute_thermodynamic_flow():
 
 if __name__ == "__main__":
     asyncio.run(execute_thermodynamic_flow())
-

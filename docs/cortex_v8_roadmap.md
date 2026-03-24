@@ -55,17 +55,17 @@ El objetivo es no estar ciegos ante la calidad de los datos que almacena el sist
 
 Impedir que memoria de baja calidad o corrompida entre siquiera a la Vault.
 
-*   [ ] **Validation Layer en `store`**: Implementar validación Pydantic fuerte sobre `_facts.json` antes de pasar a SQLite. Exigir `provenance` y `confidence_score` OBLIGATORIAMENTE.
-*   [ ] **Deduplicación Semántica**: Antes de insertar `X`, vectorizar y comprobar similitud del `>90%` con los N *facts* más parecidos del proyecto. Si es idéntico, actualizar `last_accessed` y descartar inserción.
-*   [ ] **Conflict Resolution Rules**: Si entra un hecho que colisiona con el *schema* (C2 Speculative vs C5 Confirmed), rechazar el C2.
+*   [x] **Validation Layer en `store`**: Implementar validación Pydantic fuerte sobre `_facts.json` antes de pasar a SQLite. Exigir `provenance` y `confidence_score` OBLIGATORIAMENTE.
+*   [x] **Deduplicación Semántica**: Antes de insertar `X`, vectorizar y comprobar similitud del `>90%` con los N *facts* más parecidos del proyecto. Si es idéntico, actualizar `last_accessed` y descartar inserción.
+*   [x] **Conflict Resolution Rules**: Si entra un hecho que colisiona con el *schema* (C2 Speculative vs C5 Confirmed), rechazar el C2.
 
 ### Semana 3: Retrieval v2 (El Buscador Híbrido)
 
 El paso de *grep* a Recuperación Basada en Inteligencia.
 
-*   [ ] **Hybrid Search Core**: Reemplazar/Aumentar la extracción con BM25 (keyword matching) + Text Embeddings (dense semantic).
-*   [ ] **Reglas de Prioridad `fact_type`**: Dar mayor weight a `decision` y `error` sobre observaciones estándar según el contexto operativo.
-*   [ ] **Context Slicing**: Paginación inteligente y filtrado por tarea, recencia y trust para que el LLM no reciba `cat snapshot.md` crudo si es de >20k tokens.
+*   [x] **Hybrid Search Core**: Reemplazar/Aumentar la extracción con BM25 (keyword matching) + Text Embeddings (dense semantic).
+*   [x] **Reglas de Prioridad `fact_type`**: Dar mayor weight a `decision` y `error` sobre observaciones estándar según el contexto operativo.
+*   [x] **Context Slicing**: Paginación inteligente y filtrado por tarea, recencia y trust para que el LLM no reciba `cat snapshot.md` crudo si es de >20k tokens.
 
 ### Semana 4: Operativización Total (Closed Loop & Aislamiento)
 
@@ -79,4 +79,3 @@ Hacer de CORTEX una API empresarial indestructible.
 
 > 💡 **[SOVEREIGN TIP]** (KAIROS-Ω)
 > La construcción de la capa de Evaluación (Semana 1) es el apalancamiento epistémico definitivo. Construir memoria persistente sin medir *qué tan útil* resulta esa recuperación es optimizar a ciegas. **Nunca insertes lo que no puedes evaluar y nunca almacenes lo que no puedes deduduplicar.**
-

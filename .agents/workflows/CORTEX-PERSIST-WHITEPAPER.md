@@ -115,14 +115,14 @@ Ninguna creencia vive sola. Si cae el cimiento, cae la estructura subordinada de
 
 ## 8. Swarm Sync y resolución de conflictos
 
-Sincronizar cien agentes autónomos requiere convergencia matemática. El sistema emplea **CRDTs Semánticos** (Tipos de Datos Replicados Libres de Conflictos). 
+Sincronizar cien agentes autónomos requiere convergencia matemática. El sistema emplea **CRDTs Semánticos** (Tipos de Datos Replicados Libres de Conflictos).
 
 A diferencia de los CRDTs estándar basados en el reloj del sistema (LWW - Last Writer Wins), el modelo de Cortex prioriza la causalidad lógica. LWW es peligroso en sistemas cognitivos: un reloj más reciente no hace que un argumento sea más válido.
 
 Si dos agentes divergen fuertemente:
 - Se invoca la capa de consenso (LogOP - Logarithmic Opinion Pool).
 - Los vetos aplican una penalización epistémica saturante.
-- La retirada de soporte operativo o deactivación de un consenso requiere superar un umbral predefinido (*consensus collapse threshold*) o el requisito de auditoría definido por política. 
+- La retirada de soporte operativo o deactivación de un consenso requiere superar un umbral predefinido (*consensus collapse threshold*) o el requisito de auditoría definido por política.
 
 CRDTs proporcionan convergencia estructural de réplicas y causalidad operativa suficiente para propagación distribuida. No determinan por sí mismos superioridad evidencial ni corrección semántica. La resolución epistémica ocurre por encima de la capa de réplica.
 

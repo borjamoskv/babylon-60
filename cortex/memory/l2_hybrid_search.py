@@ -35,11 +35,15 @@ DECISION: Operate on L2's sync conn to avoid aiosqlite overhead for
 
 from __future__ import annotations
 
+import hashlib
 import logging
 import re
 import sqlite3
+import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Final
+
+from cortex.telemetry.metrics import metrics
 
 if TYPE_CHECKING:
     from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
@@ -91,7 +95,7 @@ class L2SearchResult:
             "content": self.content,
             "project": self.project_id,
             "layer": self.cognitive_layer,
-            "score": round(self.rrf_score, 6),
+            "score": round(float(self.rrf_score), 6),
             "signals": self.source_signals,
             "diamond": self.is_diamond,
         }
@@ -142,10 +146,12 @@ class L2HybridSearch:
         )
     """
 
-    __slots__ = ("_store",)
+    __slots__ = ("_store", "_jit_cache")
+    _CACHE_LIMIT: Final[int] = 128
 
     def __init__(self, store: SovereignVectorStoreL2) -> None:
         self._store = store
+        self._jit_cache: dict[str, list[L2SearchResult]] = {}
 
     # ─── Schema Bootstrap ─────────────────────────────────────────────────────
 
@@ -403,19 +409,16 @@ class L2HybridSearch:
 
         Dispatches vector KNN and FTS5 BM25 in sequence (sync conn),
         fuses with RRF, and returns hydrated results with UUID Trick applied.
-
-        Args:
-            query: Natural language query string.
-            query_embedding: Pre-computed embedding vector for the query.
-            tenant_id: Partition key for multi-tenancy.
-            project_id: Project partition key.
-            top_k: Number of results to return.
-            vector_weight: Weight for vector branch (default 0.6).
-            text_weight: Weight for FTS5 branch (default 0.4).
-
-        Returns:
-            List of L2SearchResult sorted by descending RRF score.
         """
+        # 0. JIT Cache Check (Azkartu Ω-High)
+        query_hash = hashlib.sha256(
+            f"{query}:{tenant_id}:{project_id}:{top_k}:{vector_weight}:{text_weight}".encode()
+        ).hexdigest()
+        if query_hash in self._jit_cache:
+            logger.debug("L2HybridSearch: Azkartu JIT Hit for '%s'", str(query)[0:40])
+            return self._jit_cache[query_hash]
+
+        start_time = time.perf_counter()
         conn = self._store._get_conn()
         fetch_k = top_k * 2  # Overfetch for RRF overlap
 
@@ -429,9 +432,18 @@ class L2HybridSearch:
         fused = self._rrf_fuse(vec_results, fts_results, vector_weight, text_weight, top_k)
         results = self._hydrate(conn, fused)
 
+        duration = time.perf_counter() - start_time
+        metrics.observe("cortex_l2_search_duration_seconds", duration, {"project": project_id})
+
+        # 4. JIT Cache Update (with eviction)
+        if len(self._jit_cache) >= self._CACHE_LIMIT:
+            # Simple random eviction for O(1) maintenance
+            self._jit_cache.pop(next(iter(self._jit_cache)))
+        self._jit_cache[query_hash] = results
+
         logger.debug(
             "L2HybridSearch: query='%s' → vec=%d fts=%d fused=%d",
-            query[:40],
+            str(query)[0:40],
             len(vec_results),
             len(fts_results),
             len(results),

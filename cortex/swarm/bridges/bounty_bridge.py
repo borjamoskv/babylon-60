@@ -53,13 +53,14 @@ class BountySwarmBridge:
 
             # 3. Task Distribution
             task_prompt = self.bounty_service.generate_claim_prompt(lead)
-            
+
             # 4. Kinetic Execution (Ω₃)
             responses = await self.manager.shard_task(agent_ids, task_prompt)
-            
+
             # 5. Ledger Record (Ω₉)
             if self.ledger:
-                self.ledger.record_transaction(
+                import asyncio
+                asyncio.create_task(self.ledger.record_transaction(
                     project="swarm",
                     action="kinetic_bridge_activation",
                     detail={
@@ -69,14 +70,14 @@ class BountySwarmBridge:
                         "squad_size": len(agent_ids),
                         "agent_ids": agent_ids,
                         "mechanical_justification": (
-                            f"Kinetic bridge triggered by high-exergy lead ({lead.reward_usd} "
-                            "USD). Recruited specialists via SwarmFactory. "
+                            f"Kinetic bridge triggered by thermodynamic ev-filter "
+                            f"(Expected Value). Baseline Reward: {lead.reward_usd} USD. "
                             "Task sharded with consensus verification. "
                             "Execution entropy reduced via autonomic sharding."
                         )
                     }
-                )
-            
+                ))
+
             results.append({
                 "bounty": lead.number,
                 "agents": agent_ids,

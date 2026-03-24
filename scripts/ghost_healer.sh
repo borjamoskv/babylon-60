@@ -44,7 +44,7 @@ while true; do
                         if exists (button "Allow") then click button "Allow"
                         if exists (button "Permitir") then click button "Permitir"
                         if exists (button "OK") then click button "OK"
-                        
+
                         -- Si el popup es un "Sheet" (alerta desplegable desde la barra superior)
                         if exists (sheet 1) then
                             tell sheet 1
@@ -55,7 +55,7 @@ while true; do
                     end tell
                 end if
             end tell
-            
+
             -- Monitoreo específico de alertas del sistema (CoreServicesUIAgent / SecurityAgent)
             if exists (process "SecurityAgent") then
                 tell process "SecurityAgent"

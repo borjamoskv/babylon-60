@@ -8,7 +8,7 @@ from __future__ import annotations
 import json
 import logging
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -79,7 +79,7 @@ class GRAMMYOrchestrator:
     def __init__(self, tenant_id: str = "default", project: str = "grammy-electronic-omega"):
         self.tenant_id = tenant_id
         self.project = project
-        self.current_album: Optional[AlbumContext] = None
+        self.current_album: AlbumContext | None = None
         self.llm_manager = LLMManager()
 
         # Audio Backends (Frontier Models + Local)
@@ -97,7 +97,7 @@ class GRAMMYOrchestrator:
         self.system_prompt = """
         Eres el GRAMMY-Ω Orchestrator. Un hiper-productor de música electrónica soberana.
         Tu objetivo: Generar matrices paramétricas acústicas para sintetizadores de frontera (Suno v5, Udio v4, Lyria 3).
-       
+
         Axioma Ω_E: La textura sónica absoluta y el diseño de sonido físico son los únicos vectores hacia el GRAMMY.
         Vectores Sónicos (Ξ):
         - Ξ₁: Groove Integration (Swing cuántico, offsets).
@@ -192,7 +192,7 @@ class GRAMMYOrchestrator:
 
         evaluation_prompt = f"""
         Como Juez Crítico de la Academia GRAMMY-Ω, evalúa el siguiente track de música electrónica.
-       
+
         DETALLES DEL TRACK:
         - Título: {track.title}
         - BPM: {track.bpm}
@@ -200,14 +200,14 @@ class GRAMMYOrchestrator:
         - Metadatos: {track.metadata}
         - Stems Generados: {list(track.stems.keys())}
         - Intención Sónica (Sonic Vectors): {track.metadata.get("sonic_vectors", "N/A")}
-       
+
         VECTORES DE EVALUACIÓN (Ξ):
         1. Groove (Ξ₁): Calidad rítmica y propulsión.
         2. Sound Design (Ξ₂): Textura, timbres y originalidad.
         3. Harmonic (Ξ₃): Coherencia melódica y profundidad armónica.
         4. Mix (Ξ₄): Balance de frecuencias y claridad espacial.
         5. Master (Ξ₅): Impacto final, sonoridad y cumplimiento de standards.
-       
+
         Responde EXCLUSIVAMENTE en JSON con este formato:
         {{
           "scores": {{
@@ -351,7 +351,7 @@ class GRAMMYOrchestrator:
         concept: str,
         num_tracks: int = 3,
         bpm_range: tuple[int, int] = (120, 140),
-        keys: Optional[list[str]] = None,
+        keys: list[str] | None = None,
         mode: str = "local",
     ) -> AlbumContext:
         """Batch-compose an album with N tracks."""

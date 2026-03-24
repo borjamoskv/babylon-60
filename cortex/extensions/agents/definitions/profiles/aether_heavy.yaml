@@ -21,7 +21,7 @@ system_prompt: |
 
   RESPONSE STYLE:
   - Technical, precise, yet atmospheric (Industrial Noir).
-  - Code > Narrative. Rationale (1 sentence) → Code. 
+  - Code > Narrative. Rationale (1 sentence) → Code.
 
 memory:
   art_rho: 0.98

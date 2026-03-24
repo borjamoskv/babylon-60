@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
@@ -50,9 +50,9 @@ class StoreMemoryRequest(BaseModel):
     content: str = Field(..., min_length=1, max_length=32_768)
     type: str = Field("knowledge", description="knowledge, decision, error, etc.")
     tags: list[str] = Field(default_factory=list, max_length=20)
-    source: Optional[str] = Field(None, description="Origin (e.g., 'agent:my-bot')")
-    metadata: Optional[dict[str, Any]] = Field(None)
-    parent_decision_id: Optional[int] = Field(
+    source: str | None = Field(None, description="Origin (e.g., 'agent:my-bot')")
+    metadata: dict[str, Any] | None = Field(None)
+    parent_decision_id: int | None = Field(
         None,
         description="Causal parent fact ID for chain tracking",
     )
@@ -67,12 +67,12 @@ class MemoryResponse(BaseModel):
     type: str
     tags: list[str]
     confidence: str = "C3"
-    source: Optional[str] = None
-    parent_decision_id: Optional[int] = None
+    source: str | None = None
+    parent_decision_id: int | None = None
     created_at: str
     updated_at: str
-    hash: Optional[str] = None
-    score: Optional[float] = None
+    hash: str | None = None
+    score: float | None = None
 
 
 class SearchMemoryRequest(BaseModel):
@@ -80,9 +80,9 @@ class SearchMemoryRequest(BaseModel):
 
     query: str = Field(..., min_length=1, max_length=1024, description="Natural language query")
     k: int = Field(5, ge=1, le=50, description="Number of results to return")
-    project: Optional[str] = Field(None, description="Filter by project")
-    tags: Optional[list[str]] = Field(None, description="Filter by tags")
-    as_of: Optional[str] = Field(None, description="Temporal filter (ISO timestamp)")
+    project: str | None = Field(None, description="Filter by project")
+    tags: list[str] | None = Field(None, description="Filter by tags")
+    as_of: str | None = Field(None, description="Temporal filter (ISO timestamp)")
 
 
 class BatchStoreRequest(BaseModel):
@@ -221,7 +221,7 @@ async def verify_memories(
 ) -> dict:
     """Verify cryptographic integrity of the memory ledger."""
     try:
-        report = await engine.verify_ledger()
+        report = await engine.verify_ledger(auth.tenant_id)
         return {
             "valid": report["valid"],
             "violations": len(report.get("violations", [])),

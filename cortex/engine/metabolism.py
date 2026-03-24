@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -87,7 +87,8 @@ class Metabolism:
             self.vitals.entropy = max(0.0, self.vitals.entropy - 0.1)
         else:
             self.vitals.signal = max(0.0, self.vitals.signal - 0.15)
-            self.vitals.entropy += 0.4  # Repetition is toxic
+            if action_type != "think":
+                self.vitals.entropy += 0.4  # Repetition is toxic for actions
 
         # ── Entropy Grace Period (Ω₅: Antifragile by Default) ──
         # "think" actions signal strategy reconsideration.
@@ -126,7 +127,7 @@ class Metabolism:
         self.history.append(diagnostic)
         return diagnostic
 
-    def render_vitals(self, diag: Optional[dict[str, Any]] = None) -> str:
+    def render_vitals(self, diag: dict[str, Any] | None = None) -> str:
         """Render a visual representation of current vitals."""
         v = self.vitals
         d = diag or {}

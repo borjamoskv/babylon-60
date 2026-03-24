@@ -122,7 +122,7 @@ Para memoria central, consenso, ledger, ejecución autónoma.
 
 ## 9. Riesgo de autoanticuerpos
 
-El sistema inmune puede degenerar en burocracia con esteroides. 
+El sistema inmune puede degenerar en burocracia con esteroides.
 *Síntomas:* todo lo raro cae en cuarentena, nada llega a seal, branches exploratorias se tratan como incidentes.
 
 **Mitigación:** Separar novedad de replicación riesgosa, no aplicar política de producción a zonas creativas, medir falsos positivos inmunes.

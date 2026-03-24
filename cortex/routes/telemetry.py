@@ -20,16 +20,15 @@ async def query_new_facts(
     engine: AsyncCortexEngine, last_id: int, fact_type: str
 ) -> tuple[int, list[dict[str, Any]]]:
     """Queries for new facts of specific type since last_id."""
-    conn = await engine.get_conn()
-    try:
+    async with engine.session() as conn:
         sql = """
-            SELECT id, content, meta 
-            FROM facts 
-            WHERE fact_type = ? AND id > ? 
+            SELECT id, content, metadata
+            FROM facts
+            WHERE fact_type = ? AND id > ?
             ORDER BY id ASC
         """
-        cursor = await conn.execute(sql, (fact_type, last_id))
-        rows = await cursor.fetchall()
+        async with conn.execute(sql, (fact_type, last_id)) as cursor:
+            rows = await cursor.fetchall()
 
         results = []
         max_id = last_id
@@ -42,8 +41,6 @@ async def query_new_facts(
             if fact_id > max_id:
                 max_id = fact_id
         return max_id, results
-    finally:
-        pass
 
 
 @router.websocket("/ast-oracle")
@@ -58,10 +55,10 @@ async def ast_oracle_ws(
 
     # We want to get the last known ID first so we only send *new* mutations
     # But for a slicker demo upon connection, we can fetch the last 10
-    conn = await engine.get_conn()
-    cursor = await conn.execute("SELECT MAX(id) FROM facts")
-    row = await cursor.fetchone()
-    last_id = (row[0] or 0) - 100  # look back a bit  # type: ignore[reportOptionalSubscript]
+    async with engine.session() as conn:
+        async with conn.execute("SELECT MAX(id) FROM facts") as cursor:
+            row = await cursor.fetchone()
+        last_id = (row[0] or 0) - 100  # look back a bit  # type: ignore[reportOptionalSubscript]
     if last_id < 0:
         last_id = 0
 

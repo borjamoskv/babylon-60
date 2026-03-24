@@ -369,7 +369,7 @@ class MetaSchema(TypedDict, total=False):
     source_file: str
     line_number: int
     confidence_score: float
-    
+
 class StoreRequest(BaseModel):
     meta: MetaSchema | None = Field(None, description="Structured metadata")
 ```

@@ -266,7 +266,7 @@ except (sqlite3.Error, RuntimeError) as e:
 ### P1: Import Cycles Detected
 
 #### Issue CIRC-001
-- **Files:** 
+- **Files:**
   - `cortex/engine/store_mixin.py` → `cortex/graph/__init__.py`
   - `cortex/graph/__init__.py` → `cortex/engine_async.py`
   - `cortex/engine_async.py` → `cortex/engine/store_mixin.py`
@@ -599,7 +599,7 @@ from functools import wraps
 def thread_safe_singleton(cls):
     instances = {}
     locks = {}
-    
+
     @wraps(cls)
     def get_instance(*args, **kwargs):
         if cls not in instances:

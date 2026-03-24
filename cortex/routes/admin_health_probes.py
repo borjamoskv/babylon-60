@@ -112,6 +112,15 @@ def build_health_probes(
         except Exception as e:  # noqa: BLE001 — health probe boundary isolates failures
             return "error", False, {"detail": str(e)}
 
+    def _probe_cloud_storage() -> ProbeResult:
+        return _probe_cloud_backend(request, "storage")
+
+    def _probe_cloud_vector() -> ProbeResult:
+        return _probe_cloud_backend(request, "vector")
+
+    def _probe_cloud_cache() -> ProbeResult:
+        return _probe_cloud_backend(request, "cache")
+
     return {
         "database": _probe_database,
         "schema": _probe_schema,
@@ -119,4 +128,31 @@ def build_health_probes(
         "search_fts": _probe_fts,
         "pool": _probe_pool,
         "semantic_memory": _probe_semantic_memory,
+        "cloud_storage": _probe_cloud_storage,
+        "cloud_vector": _probe_cloud_vector,
+        "cloud_cache": _probe_cloud_cache,
     }
+
+
+def _probe_cloud_backend(request: Request, backend_name: str) -> ProbeResult:
+    cloud_backends = getattr(request.app.state, "cloud_backends", None)
+    if not isinstance(cloud_backends, dict):
+        return "unavailable", True, {"detail": "Cloud backend status not initialized."}
+
+    backend_state = cloud_backends.get(backend_name)
+    if not isinstance(backend_state, dict):
+        return "unavailable", True, {"detail": f"{backend_name} backend status missing."}
+
+    status = str(backend_state.get("status", "unknown"))
+    ok = status in {"healthy", "local", "disabled", "not_configured"}
+    details: dict[str, str | int | float] = {}
+    for key, value in backend_state.items():
+        if key == "status":
+            continue
+        if isinstance(value, (str, int, float)):
+            details[key] = value
+        else:
+            details[key] = str(value)
+    if "detail" not in details:
+        details["detail"] = f"{backend_name} backend status: {status}"
+    return status, ok, details

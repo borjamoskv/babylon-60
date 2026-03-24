@@ -119,3 +119,35 @@ async def test_sovereign_lock_ttl_expiration(engine: CortexEngine):
     # Another agent can now acquire it without the first explicitly releasing
     acquired_b = await lock.acquire(resource, "patient_agent", timeout_s=1.0)
     assert acquired_b is True
+
+
+@pytest.mark.asyncio
+async def test_sovereign_lock_multi_tenant_isolation(engine: CortexEngine):
+    """Test that two tenants can hold a lock on the same resource name without blocking each other."""
+    lock_tenant_a = SovereignLock(engine, tenant_id="tenant_a")
+    lock_tenant_b = SovereignLock(engine, tenant_id="tenant_b")
+    resource = "shared_resource_name"
+
+    # Tenant A acquires the lock
+    acquired_a = await lock_tenant_a.acquire(resource, "agent_1", timeout_s=1.0)
+    assert acquired_a is True
+    assert await lock_tenant_a.is_locked(resource) is True
+
+    # Tenant B acquires the lock on the SAME resource name
+    acquired_b = await lock_tenant_b.acquire(resource, "agent_2", timeout_s=1.0)
+    assert acquired_b is True  # Should succeed because they are in different tenants
+    assert await lock_tenant_b.is_locked(resource) is True
+
+    # Check isolation
+    assert await lock_tenant_a.is_locked(resource) is True
+    assert await lock_tenant_b.is_locked(resource) is True
+
+    await lock_tenant_a.release(resource, "agent_1")
+    await asyncio.sleep(0.1)
+
+    assert await lock_tenant_a.is_locked(resource) is False
+    assert await lock_tenant_b.is_locked(resource) is True  # Tenant B still holds it
+
+    await lock_tenant_b.release(resource, "agent_2")
+    await asyncio.sleep(0.1)
+    assert await lock_tenant_b.is_locked(resource) is False

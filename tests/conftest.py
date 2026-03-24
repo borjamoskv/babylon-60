@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 import asyncio
+import os
 import warnings
 
 import pytest
+
+os.environ["CORTEX_SKIP_EXERGY_VALIDATION"] = "1"
+
 
 # Suppress Python 3.14+ deprecation warning for DefaultEventLoopPolicy
 # (scheduled for removal in 3.16, but pytest-asyncio 1.3.0 requires it)
@@ -29,13 +33,13 @@ def mock_local_embedder(monkeypatch):
     class DummyEmbedder:
         def embed(self, content: str | list[str]) -> list[float] | list[list[float]]:
             if isinstance(content, str):
-                return [0.0] * 768
-            return [[0.0] * 768 for _ in content]
+                return [0.0] * 384
+            return [[0.0] * 384 for _ in content]
 
         async def aembed(self, content: str | list[str]) -> list[float] | list[list[float]]:
             if isinstance(content, str):
-                return [0.0] * 768
-            return [[0.0] * 768 for _ in content]
+                return [0.0] * 384
+            return [[0.0] * 384 for _ in content]
 
     from cortex.engine import CortexEngine
 
@@ -50,10 +54,15 @@ def reset_anomaly_detector():
     DETECTOR.reset()
 
 
+@pytest.fixture
+def skip_exergy_validation(monkeypatch):
+    """Fixture to bypass exergy validation for specific tests."""
+    monkeypatch.setenv("CORTEX_SKIP_EXERGY_VALIDATION", "1")
+
+
 @pytest.fixture(autouse=True)
 def inject_test_master_key(monkeypatch):
     """Ensure a deterministic Master Key is available for tests."""
     monkeypatch.setenv("CORTEX_TESTING", "1")
-    monkeypatch.setenv("CORTEX_SKIP_EXERGY_VALIDATION", "1")
     # Base64 for 32 bytes of '0'
     monkeypatch.setenv("CORTEX_MASTER_KEY", "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=")

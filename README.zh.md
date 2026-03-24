@@ -1,14 +1,20 @@
 🌐 [English](README.md) | [Español](README.es.md) | **中文**
 
-# CORTEX — AI 系统的防篡改决策溯源
+# CORTEX — AI 群集的认知虚拟化引擎 (Cognitive Hypervisor)：记忆、账本与主权治理
 
-> 你的 AI 系统在做决策。
-> CORTEX 让这些决策**可追溯、可验证、可审计**。
->
-> *哈希链日志、Merkle 完整性证明和可查询的决策溯源，
-> 面向监管和高风险 AI 工作流。*
+<p align="center">
+  <img alt="CORTEX Premium Preview" src="assets/social-preview.png" width="800" />
+</p>
 
-包：`cortex-persist v0.3.0b1` · 引擎：`v8` · 许可证：`Apache-2.0`
+> [!IMPORTANT]
+> **"概率性智能需要确定性的治理。"**
+
+## ✦ 治理的基础设施 ✦
+
+**Cortex-Persist v0.3.1-b1** 是面向高功用 (High-Exergy) AI 群集的本地优先认知虚拟化引擎。
+
+> [!NOTE]
+> 传统的代理记忆是脆弱的——它在瞬时上下文中碎片化，并衰退为“幻觉循环”。CORTEX 捕捉随机推理并将其晶体化为**主权账本**：一个防篡改、哈希链化的代理事实、决策和时间状态库。
 
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)

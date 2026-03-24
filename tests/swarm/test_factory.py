@@ -41,15 +41,15 @@ async def test_recruit_squad(mock_registry, mock_manager):
     mock_skill = MagicMock()
     mock_skill.name = "test_specialist"
     mock_registry.list_by_category.return_value = [mock_skill]
-    
+
     factory = SwarmFactory(manager=mock_manager)
-    
+
     agent_ids = await factory.recruit_squad("P0", size=1)
-    
+
     assert len(agent_ids) == 1
     assert agent_ids[0].startswith("P0-")
     mock_manager.register_actuator.assert_called_once()
-    
+
     justification = factory.justify_recruitment("P0", agent_ids)
     assert "Exergy Target: 12.5" in justification
     assert "Estimated Yield: 12.5" in justification
@@ -58,10 +58,10 @@ def test_get_quadrant_skills(mock_registry, mock_manager):
     mock_skill = MagicMock()
     mock_skill.name = "test_skill"
     mock_registry.list_by_category.return_value = [mock_skill]
-    
+
     factory = SwarmFactory(manager=mock_manager)
     skills = factory.get_quadrant_skills("P0")
-    
+
     # Due to dedup logic and P0 having 5 categories, it might return multiple if mocked per category,
     # but here we mock it once.
     assert "test_skill" in skills

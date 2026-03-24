@@ -156,6 +156,20 @@ class LLMProvider(BaseProvider):
             headers["Authorization"] = f"Bearer {self._api_key}"
         return url, headers
 
+    # Cost-to-Token weights for PULMONES quota management
+    _COST_WEIGHTS: Final[dict[str, float]] = {
+        "free": 0.1,
+        "low": 0.5,
+        "medium": 1.0,
+        "high": 2.0,
+        "variable": 1.5,
+    }
+
+    @property
+    def token_weight(self) -> float:
+        """Token consumption weight for this provider based on cost_class."""
+        return self._COST_WEIGHTS.get(self._cost_class, 1.0)
+
     async def complete(
         self,
         prompt: str,
@@ -170,7 +184,7 @@ class LLMProvider(BaseProvider):
             intent: Intent profile for model selection. When the provider has an
                 ``intent_model_map``, this selects the optimal model for the task.
         """
-        await _QUOTA_MANAGER.acquire(tokens=1)
+        await _QUOTA_MANAGER.acquire(tokens=self.token_weight)
         url, headers = self._prepare_request()
 
         model_name = self._resolve_model(intent)
@@ -379,7 +393,7 @@ class LLMProvider(BaseProvider):
             intent: Intent profile for model selection. When the provider has an
                 ``intent_model_map``, this selects the optimal model for the task.
         """
-        await _QUOTA_MANAGER.acquire(tokens=1)
+        await _QUOTA_MANAGER.acquire(tokens=self.token_weight)
         url, headers = self._prepare_request()
 
         model_name = self._resolve_model(intent)
@@ -437,7 +451,7 @@ class LLMProvider(BaseProvider):
 
     async def invoke(self, prompt: CortexPrompt) -> str:
         """Traduce el CortexPrompt al formato nativo del LLM y ejecuta la inferencia."""
-        await _QUOTA_MANAGER.acquire(tokens=1)
+        await _QUOTA_MANAGER.acquire(tokens=self.token_weight)
         url, headers = self._prepare_request()
 
         model_name = self._resolve_model(prompt.intent)

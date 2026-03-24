@@ -1,4 +1,3 @@
-from typing import Optional
 
 """
 CORTEX v5.0 - Facts Router.
@@ -58,7 +57,7 @@ async def store_fact(
 async def recall_facts(
     project: str,
     request: Request,
-    limit: Optional[int] = Query(None, ge=1, le=1000),
+    limit: int | None = Query(None, ge=1, le=1000),
     auth: AuthResult = Depends(require_permission("read")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> list[FactResponse]:
@@ -114,7 +113,7 @@ async def cast_vote(
             fact_id=fact_id,
             agent=agent_id,
             vote=req.value,
-            new_consensus_score=score,
+            new_consensus_score=float(score),
             confidence=updated_fact["confidence"] if updated_fact else "unknown",
         )
     except HTTPException:
@@ -158,7 +157,7 @@ async def cast_vote_v2(
             fact_id=fact_id,
             agent=req.agent_id,
             vote=req.vote,
-            new_consensus_score=score,
+            new_consensus_score=float(score),
             confidence=updated_fact["confidence"] if updated_fact else "unknown",
         )
     except HTTPException:
@@ -189,10 +188,21 @@ async def list_votes(
 
     votes = await engine.get_votes(fact_id)
 
-    return [  # type: ignore[reportArgumentType]
-        {"agent": v[0], "vote": v[1], "tx_id": v[2]}  # type: ignore[type-error]
-        for v in votes
-    ]
+    normalized: list[dict[str, object]] = []
+    for vote in votes:
+        if isinstance(vote, dict):
+            normalized.append(
+                {
+                    "agent": vote.get("agent", vote.get("agent_id")),
+                    "vote": vote.get("vote"),
+                    "tx_id": vote.get("tx_id"),
+                }
+            )
+            continue
+
+        normalized.append({"agent": vote[0], "vote": vote[1], "tx_id": vote[2]})
+
+    return normalized
 
 
 @router.delete("/v1/facts/{fact_id}", response_model=dict)

@@ -25,9 +25,17 @@ class SovereignLock:
     130/100: Zero-friction append-only concurrency.
     """
 
-    def __init__(self, engine: Any):
+    def __init__(self, engine: Any, tenant_id: str | None = None):
         self._engine = engine
         self._db_path = getattr(engine, "db_path", None) or getattr(engine, "_db_path", None)
+        self._tenant_id = tenant_id
+
+    def _tenant(self) -> str:
+        resolver = getattr(self._engine, "_resolve_tenant", None)
+        tenant_id = self._tenant_id or "default"
+        if callable(resolver):
+            return resolver(tenant_id)
+        return tenant_id
 
     async def acquire(
         self,
@@ -48,13 +56,14 @@ class SovereignLock:
             priority: Higher priority intents take precedence in reduction.
         """
         expires_at = (datetime.now(timezone.utc) + timedelta(seconds=ttl_s)).isoformat()
+        tenant_id = self._tenant()
 
         # 1. Append Intent (Atomic operation in SQLite)
         async with self._engine.session() as conn:
             await conn.execute(
-                "INSERT INTO lock_intents (resource, agent_id, action, priority, expires_at) "
-                "VALUES (?, ?, ?, ?, ?)",
-                (resource, agent_id, "request", priority, expires_at),
+                "INSERT INTO lock_intents (tenant_id, resource, agent_id, action, priority, expires_at) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (tenant_id, resource, agent_id, "request", priority, expires_at),
             )
             await conn.commit()
 
@@ -65,8 +74,9 @@ class SovereignLock:
             start_time = datetime.now(timezone.utc)
             while (datetime.now(timezone.utc) - start_time).total_seconds() < timeout_s:
                 async with conn.execute(
-                    "SELECT holder_agent, expires_at FROM lock_state WHERE resource = ?",
-                    (resource,),
+                    "SELECT holder_agent, expires_at FROM lock_state "
+                    "WHERE resource = ? AND tenant_id = ?",
+                    (resource, tenant_id),
                 ) as cursor:
                     row = await cursor.fetchone()
                 if row:
@@ -90,10 +100,12 @@ class SovereignLock:
 
     async def release(self, resource: str, agent_id: str):
         """Registers a 'release' intent and flattens the result."""
+        tenant_id = self._tenant()
         async with self._engine.session() as conn:
             await conn.execute(
-                "INSERT INTO lock_intents (resource, agent_id, action) VALUES (?, ?, ?)",
-                (resource, agent_id, "release"),
+                "INSERT INTO lock_intents (tenant_id, resource, agent_id, action) "
+                "VALUES (?, ?, ?, ?)",
+                (tenant_id, resource, agent_id, "release"),
             )
             await conn.commit()
             await self._reduce_resource(conn, resource)
@@ -101,9 +113,12 @@ class SovereignLock:
 
     async def is_locked(self, resource: str) -> bool:
         """Check current state without waiting."""
+        tenant_id = self._tenant()
         async with self._engine.session() as conn:
             async with conn.execute(
-                "SELECT holder_agent, expires_at FROM lock_state WHERE resource = ?", (resource,)
+                "SELECT holder_agent, expires_at FROM lock_state "
+                "WHERE resource = ? AND tenant_id = ?",
+                (resource, tenant_id),
             ) as cursor:
                 row = await cursor.fetchone()
             if not row:
@@ -117,15 +132,19 @@ class SovereignLock:
 
     async def _reduce_resource(self, conn: aiosqlite.Connection, resource: str):
         """The 'Reduction' logic: flattens the intent history into current state."""
+        tenant_id = self._tenant()
         # 1. Clear expired intents
         now = datetime.now(timezone.utc).isoformat()
         await conn.execute(
-            "DELETE FROM lock_intents WHERE expires_at < ? AND action = 'request'", (now,)
+            "DELETE FROM lock_intents WHERE tenant_id = ? AND expires_at < ? "
+            "AND action = 'request'",
+            (tenant_id, now),
         )
 
         # 2. Get unhandled intents for this resource
         async with conn.execute(
-            "SELECT holder_agent FROM lock_state WHERE resource = ?", (resource,)
+            "SELECT holder_agent FROM lock_state WHERE resource = ? AND tenant_id = ?",
+            (resource, tenant_id),
         ) as cursor:
             state_row = await cursor.fetchone()
         current_holder = state_row[0] if state_row else None
@@ -133,51 +152,62 @@ class SovereignLock:
         # Check for release intent for current holder
         if current_holder:
             async with conn.execute(
-                "SELECT id FROM lock_intents WHERE resource = ? AND agent_id = ? "
-                "AND action = 'release' ORDER BY id DESC LIMIT 1",
-                (resource, current_holder),
+                "SELECT id FROM lock_intents WHERE tenant_id = ? AND resource = ? "
+                "AND agent_id = ? AND action = 'release' ORDER BY id DESC LIMIT 1",
+                (tenant_id, resource, current_holder),
             ) as cursor:
                 has_release = await cursor.fetchone() is not None
             if has_release:
                 # Holder released. Delete related intents and clear state.
                 await conn.execute(
-                    "DELETE FROM lock_intents WHERE resource = ? AND agent_id = ?",
-                    (resource, current_holder),
+                    "DELETE FROM lock_intents WHERE tenant_id = ? AND resource = ? "
+                    "AND agent_id = ?",
+                    (tenant_id, resource, current_holder),
                 )
-                await conn.execute("DELETE FROM lock_state WHERE resource = ?", (resource,))
+                await conn.execute(
+                    "DELETE FROM lock_state WHERE resource = ? AND tenant_id = ?",
+                    (resource, tenant_id),
+                )
                 current_holder = None
 
         # Pick the next candidate (FIFO + Priority)
         if not current_holder:
             async with conn.execute(
                 "SELECT agent_id, expires_at FROM lock_intents "
-                "WHERE resource = ? AND action = 'request' "
+                "WHERE tenant_id = ? AND resource = ? AND action = 'request' "
                 "ORDER BY priority DESC, id ASC LIMIT 1",
-                (resource,),
+                (tenant_id, resource),
             ) as cursor:
                 row = await cursor.fetchone()
             if row:
                 new_holder, new_expiry = row
                 await conn.execute(
-                    "INSERT OR REPLACE INTO lock_state (resource, holder_agent, acquired_at, "
-                    "expires_at) VALUES (?, ?, ?, ?)",
-                    (resource, new_holder, datetime.now(timezone.utc).isoformat(), new_expiry),
+                    "INSERT OR REPLACE INTO lock_state (resource, tenant_id, holder_agent, "
+                    "acquired_at, expires_at) VALUES (?, ?, ?, ?, ?)",
+                    (resource, tenant_id, new_holder,
+                     datetime.now(timezone.utc).isoformat(), new_expiry),
                 )
                 # Cleanup depth info
                 async with conn.execute(
-                    "SELECT COUNT(*) FROM lock_intents WHERE resource = ? AND action = 'request'",
-                    (resource,),
+                    "SELECT COUNT(*) FROM lock_intents "
+                    "WHERE tenant_id = ? AND resource = ? AND action = 'request'",
+                    (tenant_id, resource),
                 ) as cursor:
                     count_row = await cursor.fetchone()
                 depth = count_row[0] if count_row else 0
                 await conn.execute(
-                    "UPDATE lock_state SET queue_depth = ? WHERE resource = ?", (depth, resource)
+                    "UPDATE lock_state SET queue_depth = ? WHERE resource = ? AND tenant_id = ?",
+                    (depth, resource, tenant_id),
                 )
 
         await conn.commit()
 
     async def _clear_expired(self, conn: aiosqlite.Connection, resource: str):
         """Cleanup expired lock state."""
-        await conn.execute("DELETE FROM lock_state WHERE resource = ?", (resource,))
+        tenant_id = self._tenant()
+        await conn.execute(
+            "DELETE FROM lock_state WHERE resource = ? AND tenant_id = ?",
+            (resource, tenant_id),
+        )
         await conn.commit()
         await self._reduce_resource(conn, resource)

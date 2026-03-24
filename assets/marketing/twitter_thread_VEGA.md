@@ -2,14 +2,14 @@
 
 **Tweet 1:**
 Your AI agent makes thousands of decisions per day.
-Can you prove even *one* wasn't tampered with? 
+Can you prove even *one* wasn't tampered with?
 Or why it chose OAuth2 over PKCE?
 
 The Era of "Blind AI" is over.
 Welcome to **CORTEX**. 🏛️
 
 **Tweet 2:**
-Most AI systems suffer from "Session Amnesia." 
+Most AI systems suffer from "Session Amnesia."
 T₀ every time. Months of learning vanish.
 Hallucinations fill the void.
 
@@ -30,8 +30,8 @@ Compare the stack:
 - Mem0/Zep/Letta: Excellent memory layers.
 - CORTEX: The **Trust Engine** that certifies them.
 
-Every fact is SHA-256 hash-chained. 
-Tamper = Detectable. 
+Every fact is SHA-256 hash-chained.
+Tamper = Detectable.
 Audit = 1 Click. 🔗
 
 **Tweet 5:**
@@ -45,7 +45,7 @@ The Numbers:
 Integrate in 10 minutes.
 Available for Cursor, Windsurf, Antigravity, and any Agent framework.
 
-End the amnesia. 
+End the amnesia.
 Deploy Proof. 🏛️
 
 [Link: cortexpersist.com]

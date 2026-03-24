@@ -10,7 +10,7 @@ class AgentExergyProfile:
     failure_count: int = 0
     total_tokens: int = 0
     exergy_score: float = 100.0  # Base score
-    
+
     def record_success(self, tokens: int):
         self.success_count += 1
         self.total_tokens += tokens

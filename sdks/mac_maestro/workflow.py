@@ -98,7 +98,6 @@ class MacMaestroWorkflow:
             from .app_discovery import (
                 get_pid,
                 is_frontmost,
-                get_app_name,
             )
             from .ax_inspector import get_window_title
 

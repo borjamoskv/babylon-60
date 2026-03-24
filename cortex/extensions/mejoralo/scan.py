@@ -1,4 +1,3 @@
-from typing import Optional
 
 """
 CORTEX v5.0 — MEJORAlo X-Ray Scanner.
@@ -174,7 +173,7 @@ def _analyze_polyglot_nesting(lines: list[str], rel: str) -> list[str]:
 
 def _analyze_single_file(
     sf: Path, root: Path
-) -> tuple[int, Optional[str], list[str], list[str], list[str]]:
+) -> tuple[int, str | None, list[str], list[str], list[str]]:
     """Analyse a single file and return its metrics."""
     try:
         content = sf.read_text(errors="replace")

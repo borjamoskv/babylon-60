@@ -36,7 +36,7 @@ class MemoryMixin(EngineMixinBase):
         to avoid loading the ML model (~30s penalty per test).
         """
         from cortex.extensions.signals.bus import SignalBus
-        from cortex.memory.ledger import EventLedgerL3
+        from cortex.ledger.event_ledger import EventLedgerL3
         from cortex.memory.working import WorkingMemoryL1
 
         l1 = WorkingMemoryL1()

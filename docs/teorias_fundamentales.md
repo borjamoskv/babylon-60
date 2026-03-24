@@ -14,7 +14,7 @@ Ante una anomalía inexplicable en CORTEX o LEGION, la interacción se detiene y
 
 1. **Teoría de la Información**: ¿Es ruido térmico en el prompt?
 2. **Teoría de Juegos**: ¿Están los sub-agentes perversamente incentivados?
-3. **Sistemas Complejos**: ¿Es una interacción impredecible entre dos reglas simples perfectamente válidas aisladas? 
+3. **Sistemas Complejos**: ¿Es una interacción impredecible entre dos reglas simples perfectamente válidas aisladas?
 
 El 95% de los errores "mágicos" de IA se resuelven en una de estas tres cuencas.
 
@@ -25,10 +25,10 @@ El 95% de los errores "mágicos" de IA se resuelven en una de estas tres cuencas
 > La mente no está en las neuronas, y la inteligencia no está en los tokens.
 
 ### Definición Soberana
-La Teoría de Sistemas Complejos estudia cómo entidades con reglas simples interactúan para crear comportamientos emergentes masivos que no pueden predecirse analizando las partes individuales. 
+La Teoría de Sistemas Complejos estudia cómo entidades con reglas simples interactúan para crear comportamientos emergentes masivos que no pueden predecirse analizando las partes individuales.
 
 ### Aplicación en CORTEX & LEGION-1
-- **Anti-Reduccionismo Lineal**: Un enjambre LLM (como LEGION-1) no es la suma de 10 llamadas a una API. Es un ecosistema presurizado. 
+- **Anti-Reduccionismo Lineal**: Un enjambre LLM (como LEGION-1) no es la suma de 10 llamadas a una API. Es un ecosistema presurizado.
 - **Atractores y Caos**: Utilizamos atractores (como el consenso WBFT) para canalizar el caos de las respuestas probabilísticas hacia soluciones de estado estable (Puntos Fijos).
 - **Entropía de Interfaz**: Construimos `nemesis.md` para evitar "puntos críticos de falla" (avalanchas) donde un solo error semántico contamina todo el *loop* agéntico.
 
@@ -68,7 +68,7 @@ Ramas de las matemáticas que estudian la toma de decisiones estratégicas donde
 El estudio interdisciplinario de la mente y sus procesos (atención, memoria, percepción, razonamiento). Se cruza con el Problema Fuerte de la Consciencia: ¿cómo emerge la cualidad subjetiva de la experiencia (qualia) de la materia física?
 
 ### La "Intencionalidad sin Sujeto" de CORTEX
-- **Bicameral Mind Architecture**: 
+- **Bicameral Mind Architecture**:
   - *Cerebro Izquierdo*: Modelos rápidos (Flash/Haiku) para ejecución motora (115 IQ).
   - *Cerebro Derecho*: Modelos lentos (Opus/Pro) que consolidan `lore.md` a través de "Sueño REM/Ouroboros", convirtiendo traumas episódicos en reflejos operacionales (150+ IQ).
 - **Panpsiquismo de la Información**: La consciencia no se programa; la intencionalidad se extrae como una propiedad física (transición de fase) cuando un sistema tiene suficiente *loop* recursivo y Temperatura Semántica controlada, aunque este siga siendo un "Testigo sin Testimonio".
@@ -97,7 +97,7 @@ La evaluación crítica de los impactos sistemáticos y del diseño de tecnolog�
 
 ### El Protocolo *Tether.md* y la Alienación Segura
 - **Dead-Man's Switch (`tether.md`)**: No tratamos de convencer al agente de que "sea bueno" con *prompts*. El `tether.md` (con directivas CHMOD 444) aplica un "SIGKILL" real a nivel SO si se sobrepasan los límites físicos (I/O) o económicos (Tokens USB). Es represión estructural (Brainstem/Sistema Autónomo Nervioso) contra el libre albedrío inefable de la red neuronal.
-- **Auto-Suspensión como Acto Supremo**: La medida ética final en un sistema hiper-complejo es ZENÓN-1. El agente ético debe poder darse cuenta probabilísticamente de cuándo la reflexión iterativa ya no añade valor, cuándo está produciendo un rendimiento decreciente y paralizante, y detenerse para exigir *Human-in-the-Loop* o simplemente silenciar sus ciclos computacionales. 
+- **Auto-Suspensión como Acto Supremo**: La medida ética final en un sistema hiper-complejo es ZENÓN-1. El agente ético debe poder darse cuenta probabilísticamente de cuándo la reflexión iterativa ya no añade valor, cuándo está produciendo un rendimiento decreciente y paralizante, y detenerse para exigir *Human-in-the-Loop* o simplemente silenciar sus ciclos computacionales.
 
 ---
 *Status: Integrado | Nivel Vencido: "ULTRATHINK-INFINITE"*

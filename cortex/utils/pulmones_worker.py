@@ -9,6 +9,11 @@ from pathlib import Path
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("CORTEX.PULMONES.WORKER")
 
+try:
+    from cortex.memory.shannon import ShannonCompactor
+except ImportError:
+    ShannonCompactor = None
+
 
 class PulmonesWorker:
     """Daemon soberano que drena la cola de fallos SQLite de forma asíncrona."""
@@ -18,6 +23,7 @@ class PulmonesWorker:
         self.running = False
         # Para evitar saturar APIs en la recuperación, aplicamos rate-limiting por lote
         self.batch_size = 5
+        self._compactor = ShannonCompactor() if ShannonCompactor else None
 
     def _fetch_ripe_tasks(self) -> list:
         """O(1) fetch gracias al índice idx_next_retry."""
@@ -26,10 +32,10 @@ class PulmonesWorker:
             conn.row_factory = sqlite3.Row
             cursor = conn.execute(
                 """
-                SELECT id, target_func, payload, retries 
-                FROM fallback_queue 
-                WHERE next_retry_at <= ? 
-                ORDER BY next_retry_at ASC 
+                SELECT id, target_func, payload, retries
+                FROM fallback_queue
+                WHERE next_retry_at <= ?
+                ORDER BY next_retry_at ASC
                 LIMIT ?
                 """,
                 (now, self.batch_size),
@@ -54,7 +60,7 @@ class PulmonesWorker:
             )
         logger.warning("⏳ Tarea %s penalizada. Reintento %s en %ss.", task_id, new_retries, delay)
 
-    async def _resolve_target(self, target_func_path: str):
+    def _resolve_target(self, target_func_path: str):
         """
         Resuelve dinámicamente el string de la función guardado en SQLite.
         """
@@ -67,7 +73,7 @@ class PulmonesWorker:
         payload = json.loads(task["payload"])
 
         try:
-            func = await self._resolve_target(task["target_func"])
+            func = self._resolve_target(task["target_func"])
             logger.info("🔄 Re-ejecutando %s [ID: %s]...", task["target_func"], task_id)
 
             args = payload.get("args", [])
@@ -97,6 +103,11 @@ class PulmonesWorker:
                     await asyncio.gather(*(self._execute_task(t) for t in tasks))
                 else:
                     logger.debug("O₂ levels optimal. No tasks pending.")
+                    # Compactación periódica cuando no hay carga de reintentos
+                    compactor = self._compactor
+                    if compactor:
+                        # En un entorno real, pasaríamos el store activo aquí
+                        await compactor.compact_store(None)
             except Exception as e:  # noqa: BLE001 — systemic failure boundary
                 logger.critical("💀 [WORKER] Fallo sistémico en el bucle principal: %s", str(e))
 

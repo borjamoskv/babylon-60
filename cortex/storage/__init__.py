@@ -17,6 +17,8 @@ import os
 from enum import Enum
 from typing import Protocol, runtime_checkable
 
+from cortex.storage.env import get_postgres_dsn, get_turso_auth_token, get_turso_url
+
 logger = logging.getLogger("cortex.storage")
 
 
@@ -52,8 +54,8 @@ def get_storage_config() -> dict:
     config = {"mode": mode}
 
     if mode == StorageMode.TURSO:
-        url = os.environ.get("TURSO_DATABASE_URL", "")
-        token = os.environ.get("TURSO_AUTH_TOKEN", "")
+        url = get_turso_url()
+        token = get_turso_auth_token()
 
         if not url:
             raise ValueError(
@@ -70,11 +72,12 @@ def get_storage_config() -> dict:
         config["token"] = token  # type: ignore[reportArgumentType]
 
     elif mode == StorageMode.POSTGRES:
-        dsn = os.environ.get("POSTGRES_DSN", "")
+        dsn = get_postgres_dsn()
 
         if not dsn:
             raise ValueError(
-                "POSTGRES_DSN is required when CORTEX_STORAGE=postgres. "
+                "POSTGRES_DSN (or CORTEX_PG_DSN/CORTEX_PG_URL/DATABASE_URL) is required "
+                "when CORTEX_STORAGE=postgres. "
                 "Example: postgresql://user:pass@host:5432/cortex"
             )
 

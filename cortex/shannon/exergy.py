@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from decimal import Decimal
 from enum import Enum
 
 
@@ -12,8 +13,8 @@ class ActionRisk(str, Enum):
 
 @dataclass(frozen=True)
 class ExergyInput:
-    prior_uncertainty: float
-    posterior_uncertainty: float
+    prior_uncertainty: Decimal
+    posterior_uncertainty: Decimal
     tokens_consumed: int
     action_risk: ActionRisk
     had_backup: bool
@@ -22,10 +23,10 @@ class ExergyInput:
 
 @dataclass(frozen=True)
 class ExergyResult:
-    score: float
-    signal_gain: float
-    reversibility_penalty: float
-    waste_ratio: float
+    score: Decimal
+    signal_gain: Decimal
+    reversibility_penalty: Decimal
+    waste_ratio: Decimal
     below_threshold: bool
 
 
@@ -33,18 +34,21 @@ class ThermodynamicWasteError(RuntimeError):
     pass
 
 
-def calculate_exergy(inp: ExergyInput, threshold_min_work: float) -> ExergyResult:
+def calculate_exergy(inp: ExergyInput, threshold_min_work: Decimal) -> ExergyResult:
     if inp.tokens_consumed <= 0:
         raise ValueError("tokens_consumed must be > 0")
 
-    signal_gain = max(0.0, inp.prior_uncertainty - inp.posterior_uncertainty) / inp.tokens_consumed
+    prior = inp.prior_uncertainty
+    post = inp.posterior_uncertainty
 
+    # Calculate signal gain with high precision
+    signal_gain = max(Decimal("0"), prior - post) / Decimal(str(inp.tokens_consumed))
     risk_penalty_map = {
-        ActionRisk.READ_ONLY: 0.0,
-        ActionRisk.MEMORY_WRITE: 0.05,
-        ActionRisk.FILE_WRITE: 0.15,
-        ActionRisk.SCHEMA_MUTATION: 0.45,
-        ActionRisk.DESTRUCTIVE: 0.80,
+        ActionRisk.READ_ONLY: Decimal("0.0"),
+        ActionRisk.MEMORY_WRITE: Decimal("0.05"),
+        ActionRisk.FILE_WRITE: Decimal("0.15"),
+        ActionRisk.SCHEMA_MUTATION: Decimal("0.45"),
+        ActionRisk.DESTRUCTIVE: Decimal("0.80"),
     }
 
     reversibility_penalty = risk_penalty_map[inp.action_risk]
@@ -54,15 +58,17 @@ def calculate_exergy(inp: ExergyInput, threshold_min_work: float) -> ExergyResul
         ActionRisk.SCHEMA_MUTATION,
         ActionRisk.DESTRUCTIVE,
     }:
-        reversibility_penalty += 0.35
+        reversibility_penalty += Decimal("0.35")
 
     if inp.touched_persistent_state:
-        reversibility_penalty += 0.05
+        reversibility_penalty += Decimal("0.05")
 
     score = signal_gain - reversibility_penalty
-    waste_ratio = (
-        0.0 if signal_gain == 0 else max(0.0, reversibility_penalty / max(signal_gain, 1e-9))
-    )
+
+    if signal_gain == 0:
+        waste_ratio = Decimal("0")
+    else:
+        waste_ratio = max(Decimal("0"), reversibility_penalty / signal_gain)
 
     return ExergyResult(
         score=score,

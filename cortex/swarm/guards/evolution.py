@@ -9,7 +9,7 @@ class EvolutionGuard:
     Sovereign Code Evolution & Entropy Guard (Ω-Evolution).
     Detects 'ghost' code, dead logic, and enforces defensive mutation boundaries.
     """
-    
+
     def __init__(self) -> None:
         self.entropy_threshold = 0.85
         # Patterns for dead or decorative code
@@ -30,11 +30,11 @@ class EvolutionGuard:
             return 0.0
         import math
         from collections import Counter
-        
+
         counts = Counter(code)
         length = len(code)
         entropy = -sum((count / length) * math.log2(count / length) for count in counts.values())
-        
+
         # Normalize roughly to 0-1 (8 bits max entropy per char)
         return min(entropy / 8.0, 1.0)
 

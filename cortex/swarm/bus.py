@@ -60,10 +60,36 @@ class AsyncSignalBus:
             await asyncio.gather(*tasks, return_exceptions=True)
 
     async def broadcast_sharded(self, signal: SwarmSignal, shard_key: str) -> None:
-        """Targeted broadcast to specific agent shards to minimize context saturation."""
-        # TODO: Implement shard-aware routing based on shard_key
-        logger.debug("SignalBus: Sharded broadcast for key '%s'", shard_key)
-        await self.publish(signal)
+        """Targeted broadcast to subscribers whose topic starts with shard_key.
+
+        Routing logic:
+        - Collect all topics where the registered topic begins with `shard_key`.
+        - Dispatch signal only to those matching handler sets to minimize context
+          saturation across 100+ parallel agents.
+        - Falls back to a full publish() if no shard matches are found (safe default).
+        """
+        matched_handlers = [
+            handler
+            for topic, handlers in self._subscribers.items()
+            if topic.startswith(shard_key)
+            for handler in handlers
+        ]
+
+        if not matched_handlers:
+            logger.debug(
+                "SignalBus: No shard subscribers for key '%s' — falling back to full broadcast.",
+                shard_key,
+            )
+            await self.publish(signal)
+            return
+
+        logger.debug(
+            "SignalBus: Sharded broadcast for key '%s' → %d handler(s).",
+            shard_key,
+            len(matched_handlers),
+        )
+        tasks = [handler(signal) for handler in matched_handlers]
+        await asyncio.gather(*tasks, return_exceptions=True)
 
     async def acquire_resource_lock(self, resource_uri: str) -> asyncio.Lock:
         """Get or create a lock for a specific resource (e.g. file path)."""

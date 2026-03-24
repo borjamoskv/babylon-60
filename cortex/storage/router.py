@@ -10,9 +10,10 @@ import logging
 import os
 import sqlite3
 from collections import OrderedDict
-from typing import Any, Final, Optional
+from typing import Any, Final
 
 from cortex.storage import StorageMode, get_storage_mode
+from cortex.storage.env import get_postgres_dsn
 
 __all__ = ["TenantRouter", "get_router"]
 
@@ -32,9 +33,9 @@ class TenantRouter:
         self._connections: OrderedDict[str, Any] = OrderedDict()
         self._base_url = os.environ.get("TURSO_DATABASE_URL", "")
         self._auth_token = os.environ.get("TURSO_AUTH_TOKEN", "")
-        self._postgres_dsn = os.environ.get("POSTGRES_DSN", "")
+        self._postgres_dsn = get_postgres_dsn()
 
-    async def get_backend(self, tenant_id: str = "default", content: Optional[str] = None):
+    async def get_backend(self, tenant_id: str = "default", content: str | None = None):
         """Get the storage backend for a specific tenant.
 
         If sensitive content is detected, it FORCES local storage to prevent
@@ -134,7 +135,8 @@ class TenantRouter:
 
         if not self._postgres_dsn:
             raise RuntimeError(
-                "POSTGRES_DSN is required when CORTEX_STORAGE=postgres. "
+                "POSTGRES_DSN (or CORTEX_PG_DSN/CORTEX_PG_URL/DATABASE_URL) is required "
+                "when CORTEX_STORAGE=postgres. "
                 "Example: postgresql://user:pass@host:5432/cortex"
             )
 
@@ -172,7 +174,7 @@ class TenantRouter:
 
 # ─── Singleton ────────────────────────────────────────────────────────
 
-_router: Optional[TenantRouter] = None
+_router: TenantRouter | None = None
 
 
 def get_router() -> TenantRouter:

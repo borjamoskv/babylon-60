@@ -2,7 +2,7 @@ import asyncio
 import logging
 from typing import Any
 
-from cortex.engine.ledger import SovereignLedger
+from cortex.ledger import SovereignLedger
 from cortex.utils.pulmones import PulmonesQueue
 
 from .discovery import SkillRegistry
@@ -84,21 +84,21 @@ class MasterOrchestrator:
         3. Crystallization & Ledger Audit.
         """
         logger.info("Orchestrator: Initiating SWARM-100 for goal: '%s'", str(global_goal)[:50])
-        
+
         # 1. Recruitment
         squads = await self.factory.recruit_full_swarm()
-        
+
         # 2. Execution (Parallel across all available agents)
         all_agents = squads["P0"] + squads["P1"] + squads["P2"]
         manager = self.enclaves[SwarmEnclave.EXECUTION] # Primary execution surface
-        
+
         logger.info("Orchestrator: Dispatched goal to 100 agents.")
         responses = await manager.shard_task(all_agents, global_goal)
-        
+
         # 3. Crystallization (Synthesis)
         success_count = len([r for r in responses if r.get("status") == "success"])
         total_exergy = sum(r.get("metadata", {}).get("exergy_yield", 0.0) for r in responses)
-        
+
         synthesis = {
             "goal": global_goal,
             "agents_deployed": 100,
@@ -106,9 +106,9 @@ class MasterOrchestrator:
             "total_exergy_extracted": total_exergy,
             "status": "crystallized" if success_count > 50 else "partial_success",
         }
-        
+
         if self.ledger:
-            self.ledger.record_transaction(
+            await self.ledger.record_transaction(
                 project="swarm",
                 action="swarm_100_crystallization",
                 detail={
@@ -121,7 +121,7 @@ class MasterOrchestrator:
                     )
                 }
             )
-            
+
         return synthesis
 
     async def recruit_and_execute(self, quadrant: str, task: str) -> dict[str, Any]:
@@ -130,9 +130,9 @@ class MasterOrchestrator:
         """
         logger.info("Orchestrator: Recruiting for task '%s' in quadrant %s", str(task)[:30], quadrant)
         squad = await self.factory.recruit_squad(quadrant, size=3)
-        
+
         if not squad:
             return {"status": "error", "message": "No specialists recruited."}
-            
+
         # Execution will be distributed via Enclaves in next iteration
         return {"status": "success", "squad_size": len(squad), "task": task}

@@ -29,8 +29,32 @@ class AttackVector(Protocol):
     """Sovereign Attack Vector Interface."""
 
     name: str
+    is_dynamic: bool = False
 
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]: ...
+
+
+class ProcessLeakHunter:
+    """Vector: Process & Resource Leakage (The Leak Hunter)."""
+
+    name = "leak_hunter"
+    is_dynamic = True
+
+    async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
+        # Implementation will be handled by the Swarm Orchestrator 
+        # using the isolation manager's sandbox.
+        return []
+
+
+class SideEffectWatcher:
+    """Vector: Unauthorized Side Effects (The Watcher)."""
+
+    name = "side_effect_watcher"
+    is_dynamic = True
+
+    async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
+        # Implementation will be handled by the Swarm Orchestrator.
+        return []
 
 
 class OOMKiller:
@@ -271,5 +295,15 @@ class EpistemicJustice:
         return findings
 
 
-RED_TEAM_SWARM = {v.name: v for v in (OOMKiller(), Intruder(), EntropyDemon(), ChronosSniper())}
+RED_TEAM_SWARM = {
+    v.name: v
+    for v in (
+        OOMKiller(),
+        Intruder(),
+        EntropyDemon(),
+        ChronosSniper(),
+        ProcessLeakHunter(),
+        SideEffectWatcher(),
+    )
+}
 COMPLIANCE_SIEGE_SWARM = {v.name: v for v in (LedgerPoisoner(), VaultCracker(), EpistemicJustice())}

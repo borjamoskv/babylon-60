@@ -12,7 +12,7 @@ import logging
 import signal
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.cli import get_engine
 from cortex.extensions.daemon.monitors.canary import CanaryMonitor
@@ -39,8 +39,8 @@ class MejoraloDaemon:
         base_path: str | Path,
         scan_interval: int = DAEMON_DEFAULT_SCAN_INTERVAL,
         target_score: int = DAEMON_DEFAULT_TARGET_SCORE,
-        metrics: Optional[MetricsRegistry] = None,
-        db_path: Optional[str | Path] = None,
+        metrics: MetricsRegistry | None = None,
+        db_path: str | Path | None = None,
     ):
         self.project = project
         self.base_path = Path(base_path).resolve()
@@ -58,7 +58,7 @@ class MejoraloDaemon:
         self.canary = CanaryMonitor(self.base_path)  # type: ignore[reportCallIssue]
         self.fusion = ContextFusion(self.cortex_engine)
         self._running = False
-        self._loop_task: Optional[asyncio.Task] = None
+        self._loop_task: asyncio.Task | None = None
         self._consecutive_stagnant: int = 0
 
     async def start(self) -> None:
@@ -108,7 +108,8 @@ class MejoraloDaemon:
         self.canary.capture_baselines()  # type: ignore[reportAttributeAccessIssue]
 
         # 1. Pre-scan: capture baseline score
-        result = await self.engine.scan(  # type: ignore[reportGeneralTypeIssues]
+        result = await asyncio.to_thread(
+            self.engine.scan,
             self.project,
             self.base_path,
         )
@@ -140,20 +141,25 @@ class MejoraloDaemon:
                 "🔥 Stagnation detected (%d cycles). Escalating to relentless mode.",
                 self._consecutive_stagnant,
             )
-            success = await self.engine.relentless_heal(  # type: ignore[reportGeneralTypeIssues]
-                self.project, self.base_path, result, target_score=self.target_score
+            success = await asyncio.to_thread(
+                self.engine.relentless_heal,
+                self.project,
+                self.base_path,
+                result,
+                target_score=self.target_score,
             )
         else:
-            success = await self.engine.heal(
+            success = await asyncio.to_thread(
+                self.engine.heal,
                 self.project,
                 self.base_path,
                 self.target_score,
                 result,
-                fused_context=fused_context,  # type: ignore[reportCallIssue]
             )
 
         # 4. Post-heal verification: re-scan to measure real impact
-        result_after = await self.engine.scan(  # type: ignore[reportGeneralTypeIssues]
+        result_after = await asyncio.to_thread(
+            self.engine.scan,
             self.project,
             self.base_path,
         )

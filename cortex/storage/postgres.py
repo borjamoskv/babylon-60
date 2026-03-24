@@ -20,6 +20,7 @@ from __future__ import annotations
 import logging
 import os
 import time
+from contextlib import asynccontextmanager
 from typing import Any, Final
 
 __all__ = ["PostgresBackend"]
@@ -167,6 +168,13 @@ class PostgresBackend:
         if self._pool is None:
             raise RuntimeError("PostgresBackend not connected. Call connect() first.")
 
+    @asynccontextmanager
+    async def connection(self):
+        """Yield a raw asyncpg connection from the pool for transactional work."""
+        self._ensure_pool()
+        async with self._pool.acquire() as conn:
+            yield conn
+
     @staticmethod
     def _translate_params(sql: str, params: tuple[Any, ...] = ()) -> tuple[str, tuple[Any, ...]]:
         """Translate SQLite-style ? placeholders to PostgreSQL $N style.
@@ -226,6 +234,38 @@ class PostgresBackend:
             logger.error("PG Query Error: %s | Query: %s", exc, sql[:500])
             raise
 
+    async def fetch_with_conn(
+        self,
+        conn: Any,
+        sql: str,
+        params: tuple[Any, ...] = (),
+    ) -> list[dict[str, Any]]:
+        """Execute a query on an existing connection and return rows as dicts."""
+        pg_sql, pg_params = self._translate_params(sql, params)
+        rows = await conn.fetch(pg_sql, *pg_params)
+        return [dict(row) for row in rows]
+
+    async def fetchrow_with_conn(
+        self,
+        conn: Any,
+        sql: str,
+        params: tuple[Any, ...] = (),
+    ) -> dict[str, Any] | None:
+        """Execute a query on an existing connection and return a single row."""
+        pg_sql, pg_params = self._translate_params(sql, params)
+        row = await conn.fetchrow(pg_sql, *pg_params)
+        return dict(row) if row is not None else None
+
+    async def execute_with_conn(
+        self,
+        conn: Any,
+        sql: str,
+        params: tuple[Any, ...] = (),
+    ) -> None:
+        """Execute a statement on an existing connection without returning rows."""
+        pg_sql, pg_params = self._translate_params(sql, params)
+        await conn.execute(pg_sql, *pg_params)
+
     async def execute_insert(self, sql: str, params: tuple[Any, ...] = ()) -> int:
         """Execute an INSERT and return the last row ID.
 
@@ -248,6 +288,23 @@ class PostgresBackend:
         except Exception as exc:  # noqa: BLE001
             logger.error("PG Insert Error: %s", exc)
             raise
+
+    async def execute_insert_with_conn(
+        self,
+        conn: Any,
+        sql: str,
+        params: tuple[Any, ...] = (),
+    ) -> int:
+        """Execute an INSERT on an existing connection and return the last row ID."""
+        pg_sql, pg_params = self._translate_params(sql, params)
+
+        sql_upper = pg_sql.strip().upper()
+        if sql_upper.startswith("INSERT") and "RETURNING" not in sql_upper:
+            pg_sql = pg_sql.rstrip().rstrip(";")
+            pg_sql += " RETURNING id"
+
+        row = await conn.fetchrow(pg_sql, *pg_params)
+        return row["id"] if row else 0
 
     async def executemany(self, sql: str, params_list: list[tuple[Any, ...]]) -> None:
         """Execute a statement with multiple parameter sets within a transaction."""

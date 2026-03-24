@@ -33,13 +33,18 @@ class LLMActuator(ActuatorProtocol):
         """Execute a task via the LLM router."""
         logger.info("LLMActuator: Executing task %s with model %s", task_id or "anon", self._model_id)
 
+        try:
+            intent_profile = IntentProfile(self._intent)
+        except ValueError:
+            intent_profile = IntentProfile.GENERAL
+
         prompt = CortexPrompt(
             system_instruction=(
                 f"You are a specialized Swarm Agent with the following intent: {self._intent}. "
                 f"Context: {context.get('instructions', '')}"
             ),
             working_memory=[{"role": "user", "content": task}],
-            intent=IntentProfile(name=self._intent),
+            intent=intent_profile,
             project=context.get("project", "swarm"),
         )
 
@@ -56,12 +61,12 @@ class LLMActuator(ActuatorProtocol):
                     "task_id": task_id,
                 },
             )
-        
+
         return ActuatorResponse(
             content="",
-            metadata={"error": result.error},
+            metadata={"error": getattr(result, "error", str(result))},
             status="failure",
-            error=result.error,
+            error=getattr(result, "error", str(result)),
         )
 
     async def health_check(self) -> bool:

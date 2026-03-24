@@ -11,6 +11,8 @@ from cortex.migrations.mig_consensus import (
     _migration_008_consensus_refinement,
     _migration_009_reputation_consensus,
 )
+from cortex.migrations.mig_consolidation import _migration_023_schema_consolidation
+from cortex.migrations.mig_facts_contract import _migration_026_facts_contract
 from cortex.migrations.mig_fts import _migration_017_fts_decouple
 from cortex.migrations.mig_graph import _migration_006_graph_memory
 from cortex.migrations.mig_ha import _migration_013_cluster_nodes
@@ -21,10 +23,10 @@ from cortex.migrations.mig_ledger import (
     _migration_012_ghosts_table,
     _migration_014_vote_ledger_refinement,
 )
+from cortex.migrations.mig_lineage_tx import _migration_027_lineage_tx
+from cortex.migrations.mig_multitenant_isolation import _migration_025_multitenant_isolation
 from cortex.migrations.mig_security_hardening import _migration_018_security_hardening
 from cortex.migrations.mig_signals import _migration_019_signal_bus
-
-# migration 23 (mig_simplify_facts) removed — incompatible with live schema (Ω₃)
 from cortex.migrations.mig_solid_state import _migration_021_solid_state
 from cortex.migrations.mig_tenant import _migration_015_tenant_unification
 from cortex.migrations.mig_tombstone import _migration_020_tombstone
@@ -56,4 +58,8 @@ MIGRATIONS = [
     (21, "Solid-State Substrate (entity_events)", _migration_021_solid_state),
     (22, "Stratified Cognition + Causal Anchoring", _migration_022_cognitive_layer),
     # (23) removed — mig_simplify_facts was never applied and is incompatible with live schema
+    (24, "Schema Consolidation (Ghost Column Resolution)", _migration_023_schema_consolidation),
+    (25, "Multitenant isolation for ledger and locks", _migration_025_multitenant_isolation),
+    (26, "Canonical facts contract reconciliation", _migration_026_facts_contract),
+    (27, "Lineage tx_id backfill and search contract stabilization", _migration_027_lineage_tx),
 ]

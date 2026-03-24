@@ -40,5 +40,6 @@ async def test_swarm_manager_privacy_masking():
 async def test_swarm_manager_dispatch_error():
     manager = SwarmManager()
     # Unregistered actuator
-    with pytest.raises(ValueError, match="Unknown actuator"):
-        await manager.dispatch("non-existent", "task")
+    response = await manager.dispatch("non-existent", "task")
+    assert response["status"] == "failed"
+    assert "Unknown" in response["error"]

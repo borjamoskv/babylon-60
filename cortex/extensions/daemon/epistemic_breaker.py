@@ -100,11 +100,35 @@ class EpistemicBreakerDaemon:
             logger.error("Failed to record breaker trip: %s", e)
 
         logger.info(
-            "🧠 [SLEEP CYCLE] Running Autodidact Compression / Memory Compaction... (Simulating structural prune)"
+            "🧠 [SLEEP CYCLE] Running compaction / memory prune (Ω₁₃)."
         )
 
-        # TODO: Call actual `compaction` module or `autodidact-omega` to reduce H(X)
-        await asyncio.sleep(15)  # Cooldown: simulate deep compression cycle (Ω₁₃)
+        # Wire to the real compaction path; fall back gracefully if unavailable.
+        compacted = False
+        for method_name in ("compact", "prune"):
+            fn = getattr(self.engine, method_name, None)
+            if callable(fn):
+                try:
+                    result = fn()  # may or may not be a coroutine
+                    if asyncio.iscoroutine(result):
+                        await result
+                    logger.info(
+                        "🧠 [SLEEP CYCLE] engine.%s() completed — entropy reduced.",
+                        method_name,
+                    )
+                    compacted = True
+                    break
+                except Exception as exc:  # noqa: BLE001
+                    logger.warning(
+                        "engine.%s() raised: %s — trying next option.", method_name, exc
+                    )
+
+        if not compacted:
+            logger.warning(
+                "🧠 [SLEEP CYCLE] No compaction method on engine. "
+                "Falling back to 5s cooldown."
+            )
+            await asyncio.sleep(5)
 
         logger.info(
             "🟢 [EPISTEMIC BREAKER] Compression complete. Entropy reduced. CLOSING CIRCUIT."

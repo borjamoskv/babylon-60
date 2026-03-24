@@ -14,7 +14,7 @@ import logging
 import subprocess
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cortex.extensions.mejoralo.engine import MejoraloEngine
@@ -58,7 +58,7 @@ def _add_finding_to_issues(file_issues: dict[str, list[str]], dim_name: str, fin
         file_issues.setdefault(rel_path, []).append(f"({dim_name}) {finding}")
 
 
-def _extract_path_from_finding(finding: str) -> Optional[str]:
+def _extract_path_from_finding(finding: str) -> str | None:
     """Extract file relative path from typical MEJORAlo findings."""
     if " -> " in finding or " → " in finding:
         return finding.split(":", 1)[0].strip()
@@ -75,9 +75,9 @@ async def _heal_file_async(
     findings: list[str],
     level: int = 1,
     iteration: int = 0,
-    engine: Optional[MejoraloEngine] = None,  # type: ignore[reportGeneralTypeIssues]
-    project: Optional[str] = None,
-) -> Optional[str]:
+    engine: MejoraloEngine | None = None,  # type: ignore[reportGeneralTypeIssues]
+    project: str | None = None,
+) -> str | None:
     """Invoke the Sovereign Swarm to refactor a specific file with escalating intensity.
 
     Returns the new code if successful, None otherwise.
@@ -115,8 +115,8 @@ def _apply_and_verify(
     iteration: int,
     console: Any,
     current_score: int,
-    engine: Optional[MejoraloEngine] = None,  # type: ignore[reportGeneralTypeIssues]
-    project: Optional[str] = None,
+    engine: MejoraloEngine | None = None,  # type: ignore[reportGeneralTypeIssues]
+    project: str | None = None,
 ) -> bool:
     """Apply the already generated refactor, test it, and commit/rollback."""
     abs_path = Path(path).resolve() / top_file_rel
@@ -166,8 +166,8 @@ def _run_functional_inquisitor(
     original_code: str,
     top_file_rel: str,
     console: Any,
-    engine: Optional[MejoraloEngine],  # type: ignore[reportGeneralTypeIssues]
-    project: Optional[str],
+    engine: MejoraloEngine | None,  # type: ignore[reportGeneralTypeIssues]
+    project: str | None,
     abs_path: Path,
 ) -> bool:
     if abs_path.suffix != ".py":
@@ -212,8 +212,8 @@ def _run_delta_testing(
     original_code: str,
     abs_path: Path,
     console: Any,
-    engine: Optional[MejoraloEngine],  # type: ignore[reportGeneralTypeIssues]
-    project: Optional[str],
+    engine: MejoraloEngine | None,  # type: ignore[reportGeneralTypeIssues]
+    project: str | None,
     level: int = 1,
 ) -> bool:
     pytest_cmd = [sys.executable, "-m", "pytest"]
@@ -273,8 +273,8 @@ def _commit_healed_file(
     current_score: int,
     console: Any,
     complexity_delta: int = 0,
-    engine: Optional[MejoraloEngine] = None,
-    project: Optional[str] = None,
+    engine: MejoraloEngine | None = None,
+    project: str | None = None,
 ) -> bool:
     try:
         commit_msg = (
@@ -298,7 +298,7 @@ def _commit_healed_file(
         )
         # Ω₁₁ CHRONOS-1: Emit compound yield for this healed file
         if engine and project:
-            hours = calculate_chronos_yield(
+            yield_data = calculate_chronos_yield(
                 files_touched=1,
                 codepaths_affected=max(1, complexity_delta),
                 runtime_ms=0,
@@ -311,10 +311,10 @@ def _commit_healed_file(
                     score_after=current_score,  # Will be updated by caller on re-scan
                     actions=[
                         f"Healed {top_file_rel} (L{level}, iter {iteration})",
-                        f"CHRONOS-1 yield: {hours}h saved",
+                        yield_data.claim_text,
                     ],
                 )
-                console.print(f"  [dim]⏱ CHRONOS-1: {hours}h saved recorded in ledger.[/]")
+                console.print(f"  [dim]⏱ CHRONOS-1: {yield_data.hours}h saved recorded in ledger.[/]")
             except Exception:  # noqa: BLE001
                 logger.exception("Failed to record CHRONOS-1 yield for %s", top_file_rel)
         return True
@@ -340,7 +340,7 @@ def heal_project(
     path: str | Path,
     target_score: int,
     scan_result: ScanResult,
-    engine: Optional[MejoraloEngine] = None,  # type: ignore[reportGeneralTypeIssues]
+    engine: MejoraloEngine | None = None,  # type: ignore[reportGeneralTypeIssues]
 ) -> bool:
     """Orchestrate autonomous healing: detect, rewrite, test, commit — RELENTLESSLY."""
     from cortex.cli import console
@@ -392,7 +392,7 @@ def _run_healing_iteration(
     console: Any,
     current_result: ScanResult,
     healed_files: set[str],
-    engine: Optional[MejoraloEngine] = None,  # type: ignore[reportGeneralTypeIssues]
+    engine: MejoraloEngine | None = None,  # type: ignore[reportGeneralTypeIssues]
 ) -> tuple[bool, ScanResult]:
     """Execute a single multi-file healing pass with re-scan."""
     from cortex.extensions.mejoralo.scan import scan

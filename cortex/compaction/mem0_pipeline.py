@@ -61,7 +61,7 @@ class Mem0Pipeline:
             exergy = await self.evaluate_exergy(fact)
             if exergy.score >= self.exergy_threshold:
                 logger.info("Storing fact bypassing exergy threshold: %s", exergy.score)
-                # Implementation hooks into cortex.memory.ledger.store
+                # Implementation hooks into cortex.ledger.event_ledger.store
                 stored_count += 1
             else:
                 logger.debug(

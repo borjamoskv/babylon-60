@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.engine.ledger import SovereignLedger
+from cortex.ledger import SovereignLedger
 
 logger = logging.getLogger("cortex.swarm.auditor")
 
@@ -14,7 +14,7 @@ class SwarmAuditor:
     and trigger autonomous self-healing cycles.
     """
 
-    def __init__(self, ledger: SovereignLedger) -> None:
+    def __init__(self, ledger: SovereignLedger | None = None) -> None:
         self.ledger = ledger
 
     async def audit_exergy(self) -> list[dict[str, Any]]:
@@ -25,10 +25,13 @@ class SwarmAuditor:
         - Low Cache-Hit rates (<20%)
         """
         logger.info("SwarmAuditor: Initiating recursive exergy audit...")
-        
+        if self.ledger is None:
+            logger.info("SwarmAuditor: No ledger attached, skipping audit.")
+            return []
+
         # In a real implementation, this would query the SQLite/AIOVEC ledger
-        transactions = await self.ledger.get_transactions(project="swarm", limit=100)
-        
+        transactions = await self.ledger.get_transactions(project="swarm", limit=100) # type: ignore
+
         bottlenecks = []
         for tx in transactions:
             if tx.get("action") == "execution_failure":
@@ -37,10 +40,10 @@ class SwarmAuditor:
                     "actuator": tx["detail"].get("actuator"),
                     "fix_vector": "devin-autodidact-refactor"
                 })
-        
+
         if bottlenecks:
             logger.warning("SwarmAuditor: Detected %d architectural ghosts. Triggering heal cycle.", len(bottlenecks))
-            
+
         return bottlenecks
 
     async def trigger_self_heal(self, bottleneck: dict[str, Any]) -> bool:

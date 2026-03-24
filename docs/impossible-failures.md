@@ -17,7 +17,7 @@ def test_constants_are_hardcoded_not_env_injectable():
     """
     Reads its own source as text and asserts structural invariants.
     Validates STRUCTURE, not behavior.
-    
+
     The code can behave correctly today and be architecturally broken
     at the same time. This test closes that gap.
     """

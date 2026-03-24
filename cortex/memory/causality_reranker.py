@@ -60,7 +60,7 @@ class CausalityReranker:
         boosted = []
         # Ensure objective_id is a string for the edge provider
         obj_id_str = str(objective_id)
-        
+
         for item in results:
             engram_id = str(item.get("id", ""))
 

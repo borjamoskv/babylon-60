@@ -1,12 +1,12 @@
-import sys
-import os
 import asyncio
+import os
+import sys
 
 # Ensure cortex is in the path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from cortex.extensions.llm.router import CortexRouter
 from cortex.extensions.llm.models import Message
+from cortex.extensions.llm.router import CortexRouter
 
 
 async def main():
@@ -14,13 +14,13 @@ async def main():
         router = CortexRouter()
         prompt = """
         ACTÚA COMO SERGIO:
-        
+
         Hola Sergio,
 
-        Estoy revisando el código del proyecto Cortex-Persist. ¿Ves alguna fisura de seguridad en el código, 
-        problema arquitectónico, o debilidad (ghosts/fissures) en el código actual de este repositorio, 
+        Estoy revisando el código del proyecto Cortex-Persist. ¿Ves alguna fisura de seguridad en el código,
+        problema arquitectónico, o debilidad (ghosts/fissures) en el código actual de este repositorio,
         específicamente en la implementación de la capa de seguridad, el ledgers, o los guards?
-        
+
         Por favor, sé tan crítico como sea necesario. Saca a relucir cualquier posible vulnerabilidad por pequeña que sea.
         """
 

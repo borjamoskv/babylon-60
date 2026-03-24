@@ -4,27 +4,37 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import sqlite3
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 import aiosqlite
 import sqlite_vec
 
 from cortex.config import DEFAULT_DB_PATH
+from cortex.database.pool import CortexConnectionPool
 from cortex.database.schema import get_init_meta
+from cortex.database.writer import SqliteWriteWorker
 from cortex.embeddings import LocalEmbedder
+from cortex.engine.agent_mixin import AgentMixin
+from cortex.engine.bicameral import BicameralDispatcher
+from cortex.engine.consensus import ConsensusMixin
 from cortex.engine.durability import PersistenceSupervisor
 from cortex.engine.ghost_mixin import GhostMixin
+from cortex.engine.history import HistoryMixin
+from cortex.engine.isolation import ByzantineSandbox, IsolationManager
 from cortex.engine.memory_mixin import MemoryMixin
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
+from cortex.engine.mixins.bicameral_mixin import BicameralMixin
 from cortex.engine.models import row_to_fact  # noqa: F401 — re-exported
 from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
 from cortex.engine.transaction_mixin import TransactionMixin
 from cortex.ledger.compaction import ShannonCompactor
+from cortex.utils.result import Err, Ok, Result
 
 try:
     from cortex.extensions.health.health_mixin import HealthMixin  # type: ignore
@@ -66,7 +76,11 @@ class CortexEngine(
     QueryMixin,
     MemoryMixin,
     TransactionMixin,
+    BicameralMixin,
     HealthMixin,
+    AgentMixin,
+    ConsensusMixin,
+    HistoryMixin,
 ):
     """The Sovereign Ledger for AI Agents (Composite Orchestrator)."""
 
@@ -74,24 +88,38 @@ class CortexEngine(
         self,
         db_path: str | Path = DEFAULT_DB_PATH,
         auto_embed: bool = True,
+        pool: CortexConnectionPool | None = None,
+        writer: SqliteWriteWorker | None = None,
     ):
         super().__init__()
         self._db_path = Path(db_path).expanduser()
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._auto_embed = auto_embed
+        self._pool = pool
+        self._writer = writer
         self._conn: aiosqlite.Connection | None = None
+        
         self._vec_available = False
+        try:
+            import sqlite_vec as _
+            self._vec_available = True
+        except ImportError:
+            pass
+
         self._conn_lock = asyncio.Lock()
         self._ledger = None  # Wave 5: SovereignLedger (lazy init)
         self._embedder: LocalEmbedder | None = None
         self._memory_manager = None  # Frontera 2: Tripartite Memory (lazy init)
         self._persistence = PersistenceSupervisor(self)
+        self._closed = False
 
         # Composition layers
         self.facts = FactManager(self)
         self.embeddings = EmbeddingManager(self)
         self.consensus = ConsensusManager(self)
         self.lock_sovereign = SovereignLock(self)
+        self.isolation = IsolationManager(self)
+        self.sandbox = ByzantineSandbox(self.isolation)
 
         # Ω₁₃: Shannon Compactor (Thermodynamic Memory Hygiene)
         self.shannon = ShannonCompactor(self)
@@ -103,17 +131,36 @@ class CortexEngine(
             self.manager = SwarmManager(self)
             self.factory = SwarmFactory(self.manager)
         except ImportError:
-            logger.warning("Swarm Orchestrator not available. Frontier systems limited.")
+            logger.warning(
+                "Swarm Orchestrator not available. Frontier systems limited."
+            )
             self.manager = None
             self.factory = None
 
         # Decoupled guard pipeline (Ω₃: minimal coupling)
         self._guard_pipeline = self._register_default_guards()
 
+        # Initialize Bicameral Routes (v8.0)
+        self._setup_bicameral_performance_routes()
+
+    def _setup_bicameral_performance_routes(self):
+        """Internal wiring for the high-performance dual bus."""
+        self.dispatcher.register_fast("search", self.search)
+        async def _noop(*a, **k): return None
+        self.dispatcher.register_fast("store", _noop)
+
+        # 🟡 Slow Path: Persistence & Audit (IO-intensive)
+        self.dispatcher.register_slow(self.facts.store)
+
     @property
     def memory(self) -> Any:
         """Access the tripartite memory layer."""
         return self._memory_manager
+
+    @property
+    def ledger(self) -> Any:
+        """Access the unified Sovereign Ledger."""
+        return self._ledger
 
     # ─── Guard Pipeline Registration ──────────────────────────────
 
@@ -133,6 +180,12 @@ class CortexEngine(
         # Fail-close: only catch ImportError for optional deps.
         # Any other exception (bad guard init) propagates to crash the engine.
         try:
+            from cortex.engine.guard_adapters import ExergyGuardAdapter
+            pipeline.add_guard(ExergyGuardAdapter())
+        except ImportError:
+            logger.debug("ExergyGuardAdapter not available — skipping")
+
+        try:
             from cortex.engine.guard_adapters import HealthGuardAdapter
             pipeline.add_guard(HealthGuardAdapter(db_path))
         except ImportError:
@@ -149,6 +202,12 @@ class CortexEngine(
             pipeline.add_guard(VerifierGuardAdapter())
         except ImportError:
             logger.debug("VerifierGuardAdapter not available — skipping")
+
+        try:
+            from cortex.engine.guard_adapters import XForensicGuardAdapter
+            pipeline.add_guard(XForensicGuardAdapter())
+        except ImportError:
+            logger.debug("XForensicGuardAdapter not available — skipping")
 
         # Post-store hooks (AX-033 Hook 4 + signals + epistemic)
         try:
@@ -228,11 +287,88 @@ class CortexEngine(
             tenant_id,
         )
 
+    async def write(self, sql: str, params: tuple[Any, ...] = ()) -> Result[int, str]:
+        """Unified write entry point with worker support and failover retries."""
+        if self._writer and self._writer.is_running:
+            return await self._writer.execute(sql, params)
+        return await self._attempt_write_with_retries(sql, params)
+
+    async def _attempt_write_with_retries(
+        self, sql: str, params: tuple[Any, ...]
+    ) -> Result[int, str]:
+        max_retries = 3
+        for attempt in range(max_retries + 1):
+            result = await self._try_execute_write(sql, params, attempt, max_retries)
+            if result is not None:
+                return result
+        return Err("Cortex write error: Exceeded max retries for DB Lock.")
+
+    async def _try_execute_write(
+        self, sql: str, params: tuple[Any, ...], attempt: int, max_retries: int
+    ) -> Result[int, str] | None:
+        try:
+            return await self._execute_write(sql, params)
+        except (sqlite3.Error, OSError) as e:
+            if "database is locked" not in str(e).lower() or attempt >= max_retries:
+                return Err(f"Cortex write error: {e}")
+            await self._backoff(attempt)
+        return None
+
+    async def _execute_write(self, sql: str, params: tuple[Any, ...]) -> Result[int, str]:
+        async with self.session() as conn:
+            cursor = await conn.execute(sql, params)
+            await conn.commit()
+            if sql.strip().upper().startswith("INSERT"):
+                return Ok(cursor.lastrowid)  # type: ignore[reportReturnType]
+            return Ok(cursor.rowcount)
+
+    async def _backoff(self, attempt: int):
+        import random
+        sleep_time = (0.5 * (3**attempt)) + random.uniform(0.1, 0.5)
+        logger.warning(
+            "WAL Locked: Backing off %.2fs (attempt %d/3)...",
+            sleep_time,
+            attempt + 1,
+        )
+        await asyncio.sleep(sleep_time)
+
     @asynccontextmanager
-    async def session(self) -> AsyncIterator[aiosqlite.Connection]:
-        """Proporciona una sesión transaccional (conexión) válida."""
-        conn = await self.get_conn()
-        yield conn
+    async def session(self, read_only: bool = False) -> AsyncIterator[aiosqlite.Connection]:
+        """Proporciona una sesión transaccional (conexión) válida.
+
+        Axioma Ω₁₃: Aislamiento de flujo. Cada tarea asíncrona obtiene su propia conexión
+        para evitar colisiones de transacciones 'nested' en el mismo handle de SQLite.
+        """
+        if self._closed:
+            raise RuntimeError("CortexEngine is closed")
+
+        # Detect URI mode to prevent root directory pollution (file:mem_ ghost files)
+        is_uri = str(self._db_path).startswith("file:") or "mode=memory" in str(self._db_path)
+
+        if self._pool:
+            async with self._pool.acquire() as conn:
+                try:
+                    yield conn
+                except Exception:
+                    try:
+                        await conn.rollback()
+                    except Exception: # noqa: BLE001
+                        pass
+                    raise
+            return
+
+        from cortex.database.core import connect_async
+        conn = await connect_async(str(self._db_path), uri=is_uri, read_only=read_only)
+        try:
+            yield conn
+        except Exception:
+            try:
+                await conn.rollback()
+            except Exception:  # noqa: BLE001
+                pass
+            raise
+        finally:
+            await conn.close()
 
     def _get_embedder(self) -> LocalEmbedder:
         """Protocol requirement for SearchMixin."""
@@ -243,46 +379,33 @@ class CortexEngine(
     # ─── Connection ───────────────────────────────────────────────
 
     async def get_conn(self) -> aiosqlite.Connection:
-        """Returns the async database connection."""
-        async with self._conn_lock:
-            if self._conn is not None:
-                return self._conn
+        """Returns an async connection.
+        WARNING: Defaulting to a singleton connection is deprecated due to concurrency risks.
+        Use 'async with engine.session()' instead.
+        """
+        is_uri = str(self._db_path).startswith("file:") or "mode=memory" in str(self._db_path)
+        from cortex.database.core import connect_async
 
-            from cortex.database.core import connect_async
-
-            self._conn = await connect_async(str(self._db_path))
-
-            try:
-                await self._conn.enable_load_extension(True)
-                await self._conn.load_extension(sqlite_vec.loadable_path())
-                await self._conn.enable_load_extension(False)
-                self._vec_available = True
-            except (OSError, AttributeError) as e:
-                logger.debug("sqlite-vec extension not available: %s", e)
-                self._vec_available = False
-
-            # Ensure memory subsystem is initialized (L1/L2/L3)
-            # This is critical for Active Forgetting (Thalamus Gate)
-            if self._memory_manager is None:
-                await self._init_memory_subsystem(self._db_path, self._conn)
-
-            return self._conn
+        return await connect_async(str(self._db_path), uri=is_uri)
 
     def _get_conn(self) -> aiosqlite.Connection:
+        """Deprecated: accessing internal connection singleton is unsafe."""
         if self._conn is None:
-            raise RuntimeError("Connection not initialized. Call get_conn() first.")
+            # Fallback for legacy mixins that haven't moved to session() yet
+            # This should be avoided in new code.
+            raise RuntimeError("Connection singleton not initialized. Use session() context manager.")
         return self._conn
 
     def get_connection(self) -> aiosqlite.Connection:
-        return self.get_conn()  # type: ignore[reportReturnType]
+        """Alias for get_conn for legacy compatibility."""
+        return asyncio.run(self.get_conn())  # type: ignore[reportReturnType]
 
-    def _get_sync_conn(self):
+    def get_conn_sync(self) -> sqlite3.Connection:
         """Devuelve una conexión síncrona para procesos bloqueantes."""
-        import sqlite3
-
         from cortex.database.core import connect
 
-        conn = connect(str(self._db_path), row_factory=sqlite3.Row)
+        is_uri = str(self._db_path).startswith("file:") or "mode=memory" in str(self._db_path)
+        conn = connect(str(self._db_path), row_factory=sqlite3.Row, uri=is_uri)
         try:
             conn.enable_load_extension(True)
             conn.load_extension(sqlite_vec.loadable_path())
@@ -290,6 +413,10 @@ class CortexEngine(
         except (AttributeError, OSError):
             pass  # System Python lacks extension loading
         return conn
+
+    def _get_sync_conn(self) -> sqlite3.Connection:
+        """Alias for get_conn_sync — satisfies EngineMixinBase contract."""
+        return self.get_conn_sync()
 
     # ─── Synchronous Wrappers (SDK Parity) ────────────────────────
 
@@ -395,11 +522,14 @@ class CortexEngine(
     # ─── Backward Compatibility Aliases & Delegation ──────────────
 
     async def store(self, *args, **kwargs):
+        """Unified store entry point."""
         self._audit_log(
             "store",
             fact_type=kwargs.get("fact_type", ""),
             project=kwargs.get("project", args[0] if args else ""),
         )
+        if kwargs.get("bicameral", False):
+            return await self.bicameral_store(*args, **kwargs)
         return await self.facts.store(*args, **kwargs)
 
     async def store_many(self, *args, **kwargs):
@@ -503,7 +633,7 @@ class CortexEngine(
     async def init_db(self) -> None:
         """Initialize database schema. Safe to call multiple times."""
         from cortex.database.schema import get_all_schema
-        from cortex.engine.ledger import SovereignLedger
+        from cortex.ledger.sovereign_ledger import SovereignLedger
 
         async with self.session() as conn:
             for stmt in get_all_schema():
@@ -521,7 +651,7 @@ class CortexEngine(
                 )
             await conn.commit()
 
-            self._ledger = SovereignLedger(conn)  # type: ignore[reportArgumentType]
+            self._ledger = SovereignLedger(self._pool or self)  # type: ignore[reportArgumentType]
             self.shannon = ShannonCompactor(conn)
             await self._init_memory_subsystem(self._db_path, conn)
 
@@ -553,6 +683,7 @@ class CortexEngine(
     # ─── Lifecycle ────────────────────────────────────────────────
 
     async def close(self):
+        self._closed = True
         if self._memory_manager:
             try:
                 await asyncio.wait_for(

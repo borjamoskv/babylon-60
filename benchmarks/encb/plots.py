@@ -12,10 +12,6 @@ Plots:
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-from typing import Any
-
 from benchmarks.encb.metrics import MetricsReport
 
 

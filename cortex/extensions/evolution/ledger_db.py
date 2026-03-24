@@ -117,7 +117,7 @@ class EvolutionLedgerDB:
                 conn.executemany(
                     """
                     INSERT INTO mutations (
-                        id, agent_id, mutation_type, prev_hash, new_hash, 
+                        id, agent_id, mutation_type, prev_hash, new_hash,
                         delta_fitness, metrics, metadata, timestamp
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
@@ -161,9 +161,9 @@ class EvolutionLedgerDB:
                 conn.row_factory = sqlite3.Row
                 cursor = conn.execute(
                     """
-                    SELECT * FROM mutations 
-                    WHERE agent_id = ? 
-                    ORDER BY rowid DESC 
+                    SELECT * FROM mutations
+                    WHERE agent_id = ?
+                    ORDER BY rowid DESC
                     LIMIT ?
                 """,
                     (agent_id, limit),
@@ -182,9 +182,9 @@ class EvolutionLedgerDB:
                 conn.row_factory = sqlite3.Row
                 cursor = conn.execute(
                     """
-                    SELECT value, timestamp FROM metrics 
+                    SELECT value, timestamp FROM metrics
                     WHERE agent_id = ? AND metric_name = ?
-                    ORDER BY id DESC 
+                    ORDER BY id DESC
                     LIMIT ?
                 """,
                     (agent_id, metric_name, limit),

@@ -162,7 +162,7 @@ Impact
   5 │
     └──┬─────────┬─────────┬─────────┬─────────┬────────┬
        S (1-3)   M (4-6)   L (7-9)         Effort
-       
+
 Legend: [Wave.Item]  S=Simple  M=Medium  L=Large
 ```
 

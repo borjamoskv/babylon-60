@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.daemon.models import CompactionAlert
 
@@ -19,7 +19,7 @@ class CompactionMonitor:
 
     def __init__(
         self,
-        projects: Optional[list[str]] = None,
+        projects: list[str] | None = None,
         interval_seconds: int = 28800,  # 8 hours standard sleep cycle
         engine: Any = None,
     ):
@@ -28,11 +28,11 @@ class CompactionMonitor:
         self._last_runs: dict[str, float] = {}
         self._engine = engine
 
-    def _compact_project(
+    async def _compact_project(
         self,
         project: str,
         now: float,
-    ) -> Optional[CompactionAlert]:
+    ) -> CompactionAlert | None:
         """Helper to compact a single project's memory."""
         last_run = self._last_runs.get(project, 0)
 
@@ -46,16 +46,17 @@ class CompactionMonitor:
             logger.info("Autonomous Compaction (REM Sleep) running on %s", project)
 
             # Run the actual compaction directly using the injected engine
-            result = compact(engine=self._engine, project=project, dry_run=False)
+            result = await compact(engine=self._engine, project=project, dry_run=False)
             self._last_runs[project] = now
 
             # We only alert if there was actual garbage collected
-            if result.reduction > 0 or result.deprecated_ids:  # type: ignore[reportAttributeAccessIssue]
+            if result.reduction > 0 or result.deprecated_ids:
+                msg = f"Sueño Reparador: {project} compactado. -{result.reduction} facts ruidosos."
                 return CompactionAlert(
                     project=project,
-                    reduction=result.reduction,  # type: ignore[reportAttributeAccessIssue]
-                    deprecated=len(result.deprecated_ids),  # type: ignore[reportAttributeAccessIssue]
-                    message=f"Sueño Reparador: {project} compactado. -{result.reduction} facts ruidosos eliminados.",  # type: ignore[reportAttributeAccessIssue]
+                    reduction=result.reduction,
+                    deprecated=len(result.deprecated_ids),
+                    message=msg,
                 )
 
             return None
@@ -64,7 +65,7 @@ class CompactionMonitor:
             logger.error("Autonomous Compaction failed on %s: %s", project, e)
             return None
 
-    def check(self) -> list[CompactionAlert]:
+    async def check(self) -> list[CompactionAlert]:
         """Run Compaction if interval has elapsed for registered projects."""
         if not self.projects or not self._engine:
             return []
@@ -73,7 +74,7 @@ class CompactionMonitor:
         now = time.monotonic()
 
         for project in self.projects:
-            alert = self._compact_project(project, now)
+            alert = await self._compact_project(project, now)
             if alert:
                 alerts.append(alert)
 

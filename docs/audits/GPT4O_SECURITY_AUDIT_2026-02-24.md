@@ -27,7 +27,7 @@ Following the initial KIMI-Swarm audit, a subsequent deep-dive analysis by GPT-4
 - **Strategy:** Refactor skill loading to use explicit module paths without modifying the global `sys.path[0]` namespace. Alternatively, append to the END of `sys.path` or rely on standard subpackage imports.
 
 ### 2. GPT-APO-01: PYTHONPATH Sandbox Escape (`autopoiesis.py`)
-- **Finding:** The KIMI audit introduced an environment variable whitelist that explicitly includes `PYTHONPATH`. 
+- **Finding:** The KIMI audit introduced an environment variable whitelist that explicitly includes `PYTHONPATH`.
 - **Impact:** **HIGH**. Allowing `PYTHONPATH` permits a generated script (or a compromised parent process) to define arbitrary directories for module loading. This trivially bypasses the intended sandbox isolation.
 - **Strategy:** Remove `PYTHONPATH` from the safe environment whitelist. The sandbox must run with a pristine Python path.
 
@@ -37,7 +37,7 @@ Following the initial KIMI-Swarm audit, a subsequent deep-dive analysis by GPT-4
 - **Strategy:** Enforce a strict minimum viable temperature (e.g., `0.1` or `0.05`) to preserve biological "survival" instinct and ensure functional output even under extreme stress.
 
 ### 4. GPT-APO-02: Low Entropy Naming (`autopoiesis.py`)
-- **Finding:** Generated tools use `uuid.uuid4().hex[:8]`. 
+- **Finding:** Generated tools use `uuid.uuid4().hex[:8]`.
 - **Impact:** **MEDIUM**. A 32-bit namespace is susceptible to local collision attacks or predictability if temp directories are shared.
 - **Strategy:** Increase entropy to a full UUID or utilize `secrets.token_hex(8)`.
 

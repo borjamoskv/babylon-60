@@ -18,7 +18,7 @@ def test_decorative_mode_triggers():
 
     # context expansion > reduction -> triggering
     c3 = ThermodynamicCounters(
-        context_expansion_rate=Decimal("0.5"), 
+        context_expansion_rate=Decimal("0.5"),
         uncertainty_reduction_rate=Decimal("0.1")
     )
     triggered, reasons = should_enter_decorative_mode(c3)

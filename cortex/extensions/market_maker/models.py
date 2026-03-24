@@ -8,7 +8,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum, auto
-from typing import Optional
 
 
 class Verdict(Enum):
@@ -68,7 +67,7 @@ class MVPArtifact:
     """Phase 3: Rendered zero-click MVP."""
 
     html_content: str
-    stripe_price_id: Optional[str] = None
+    stripe_price_id: str | None = None
 
 
 @dataclass
@@ -78,6 +77,6 @@ class Experiment:
     id: str
     topic: str
     status: ExperimentStatus
-    opportunity: Optional[Opportunity] = None
-    mvp: Optional[MVPArtifact] = None
-    validation: Optional[ValidationResult] = None
+    opportunity: Opportunity | None = None
+    mvp: MVPArtifact | None = None
+    validation: ValidationResult | None = None

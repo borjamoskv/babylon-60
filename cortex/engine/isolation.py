@@ -1,0 +1,241 @@
+"""
+CORTEX Isolation Engine — Parallel Sovereign Workspaces (Ω-Architecture).
+
+This module implements the Parallel Isolation Engine, providing isolated,
+monitored, and restricted execution environments for swarm actuators.
+Inspired by Devin's Alpha (March 2026).
+"""
+
+from __future__ import annotations
+
+import asyncio
+import logging
+import time
+import uuid
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+from dataclasses import dataclass, field, make_dataclass
+from enum import Enum
+from pathlib import Path
+from typing import Any, cast
+
+from cortex.utils.result import Err, Ok, Result
+
+logger = logging.getLogger("cortex.engine.isolation")
+
+
+class IsolationLevel(Enum):
+    """Degrees of containment for a workspace."""
+
+    LOCAL = "local"  # Subprocess on host (minimal)
+    SANDBOX = "sandbox"  # gVisor / User-mode Linux (moderate)
+    IMAGE = "image"  # Docker / Podman (high)
+    VM = "vm"  # Firecracker / KVM (sovereign)
+
+
+@dataclass
+class WorkspaceMetadata:
+    """State and identity of an isolated workspace."""
+
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    level: IsolationLevel = IsolationLevel.LOCAL
+    root: Path | None = None
+    created_at: float = field(default_factory=time.time)
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+class IsolationManager:
+    """
+    Orchestrator for parallel isolated environments.
+
+    Manages the lifecycle of workspaces, enforcing exergy limits
+    and monitoring for escaping attempts (Ω-Immunity).
+    """
+
+    def __init__(self, engine: Any | None = None):
+        self.engine = engine
+        self.workspaces: dict[str, WorkspaceMetadata] = {}
+        self._lock = asyncio.Lock()
+
+    async def create_workspace(
+        self,
+        level: IsolationLevel = IsolationLevel.LOCAL,
+        project: str = "default",
+        persistent: bool = False,
+    ) -> Result[WorkspaceMetadata, str]:
+        """Spawn a new isolated workspace."""
+        async with self._lock:
+            if level != IsolationLevel.LOCAL:
+                return Err(
+                    f"IsolationLevel.{level.name} requires an external runtime which is not yet bound."
+                )
+
+            ws = WorkspaceMetadata(level=level)
+            ws.metadata["project"] = project
+            ws.metadata["persistent"] = persistent
+
+            # Logic for directory creation or container spawning goes here
+            # For now, we simulate a local folder isolation
+            ws.root = Path(f"/tmp/cortex_iso_{ws.id}")
+            try:
+                ws.root.mkdir(parents=True, exist_ok=True)
+            except OSError as e:
+                return Err(f"Failed to initialize workspace root: {e}")
+
+            self.workspaces[ws.id] = ws
+
+            if self.engine and hasattr(self.engine, "ledger") and self.engine.ledger:
+                await self.engine.ledger.record_transaction(
+                    project=project,
+                    action="workspace_created",
+                    detail={"workspace_id": ws.id, "level": level.value, "root": str(ws.root)},
+                )
+
+            logger.info("IsolationManager: Created workspace %s at %s", ws.id, ws.root)
+            return Ok(ws)
+
+    async def execute(
+        self, workspace_id: str, command: str, args: list[str], timeout: float = 30.0
+    ) -> Result[dict[str, Any], str]:
+        """Execute a command within the specified isolation boundary."""
+        if workspace_id not in self.workspaces:
+            return Err(f"Workspace {workspace_id} not found")
+
+        ws = self.workspaces[workspace_id]
+        logger.info("IsolationManager: Executing %s in %s", command, workspace_id)
+
+        start_time = time.monotonic()
+
+        try:
+            # Native asyncio subprocess execution
+            process = await asyncio.create_subprocess_exec(
+                command,
+                *args,
+                cwd=str(ws.root) if ws.root else None,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+
+            try:
+                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout)
+                out_str = stdout.decode() if stdout else ""
+                err_str = stderr.decode() if stderr else ""
+
+                if self.engine and hasattr(self.engine, "ledger") and self.engine.ledger:
+                    await self.engine.ledger.record_transaction(
+                        project=ws.metadata.get("project", "default"),
+                        action="workspace_execution",
+                        detail={
+                            "workspace_id": ws.id,
+                            "command": f"{command} {' '.join(args)}",
+                            "exit_code": process.returncode,
+                            "stdout_size": len(out_str),
+                            "duration_s": float(round(time.monotonic() - start_time, 3)),
+                        },
+                    )
+                return Ok(
+                    {
+                        "stdout": out_str,
+                        "stderr": err_str,
+                        "exit_code": process.returncode,
+                    }
+                )
+            except asyncio.TimeoutError:
+                try:
+                    process.kill()
+                    await process.wait()
+                except ProcessLookupError:
+                    pass
+
+                if self.engine and hasattr(self.engine, "ledger") and self.engine.ledger:
+                    await self.engine.ledger.record_transaction(
+                        project=ws.metadata.get("project", "default"),
+                        action="workspace_execution_failed",
+                        detail={
+                            "workspace_id": ws.id,
+                            "command": f"{command} {' '.join(args)}",
+                            "reason": "timeout",
+                            "duration_s": float(timeout),
+                        },
+                    )
+                return Err(f"Command timed out after {timeout}s")
+
+        except Exception as e:
+            if self.engine and hasattr(self.engine, "ledger") and self.engine.ledger:
+                await self.engine.ledger.record_transaction(
+                    project=ws.metadata.get("project", "default"),
+                    action="workspace_execution_failed",
+                    detail={
+                        "workspace_id": ws.id,
+                        "command": f"{command} {' '.join(args)}",
+                        "reason": str(e),
+                        "duration_s": float(round(time.monotonic() - start_time, 3)),
+                    },
+                )
+            return Err(f"Execution failed: {e}")
+
+    async def destroy_workspace(self, workspace_id: str) -> Result[bool, str]:
+        """Wipe an isolated workspace and all its data."""
+        async with self._lock:
+            if workspace_id not in self.workspaces:
+                return Err("Workspace not found")
+
+            ws = self.workspaces.pop(workspace_id)
+            if ws.root and ws.root.exists() and not ws.metadata.get("persistent", False):
+                import shutil
+
+                try:
+                    if ws.root.is_dir():
+                        shutil.rmtree(str(ws.root))
+                except Exception as e:
+                    logger.warning("Failed to cleanup workspace %s: %s", workspace_id, e)
+
+            logger.info("IsolationManager: Destroyed workspace %s", workspace_id)
+            return Ok(True)
+
+    @asynccontextmanager
+    async def provision_sandbox(
+        self, level: IsolationLevel = IsolationLevel.LOCAL, label: str = "sandbox"
+    ) -> AsyncIterator[ByzantineSandbox]:
+        """Context manager for temporary isolated execution."""
+        res = await self.create_workspace(level=level, project=label)
+        if isinstance(res, Err):
+            raise RuntimeError(f"Could not provision sandbox: {res.err}")
+
+        ws = res.ok
+        sandbox = ByzantineSandbox(self, ws.id)
+        try:
+            yield sandbox
+        finally:
+            await self.destroy_workspace(ws.id)
+
+
+class ByzantineSandbox:
+    """Handle for an active isolated environment (Ω-Sandbox)."""
+
+    def __init__(self, manager: IsolationManager, workspace_id: str):
+        self.manager = manager
+        self.workspace_id = workspace_id
+
+    async def write_file(self, filename: str, content: str) -> bool:
+        """Write content to a file inside the sandbox."""
+        ws = self.manager.workspaces.get(self.workspace_id)
+        if not ws or not ws.root:
+            return False
+
+        path = ws.root / filename
+        try:
+            path.write_text(content)
+            return True
+        except OSError:
+            return False
+
+    async def execute_python(self, script_name: str, args: list[str] | None = None) -> Any:
+        """Run a python script within the sandbox."""
+        _args = ["python3", script_name] + (args or [])
+        res = await self.manager.execute(self.workspace_id, _args[0], _args[1:])
+        if isinstance(res, Ok):
+            res_dict = cast(dict[str, Any], res.ok)
+            ExecutionResult = make_dataclass("ExecutionResult", ["stdout", "stderr", "exit_code"])
+            return ExecutionResult(**res_dict)
+        return None

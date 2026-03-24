@@ -218,7 +218,7 @@ async def retrieve_episodic_context(
     # 7. Final truncation and Hebbian ranking (legacy support)
     results = results[:max_episodes]
     results = _apply_hebbian_boost(manager, results)
-    
+
     return results
 
 

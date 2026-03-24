@@ -14,7 +14,7 @@ import logging
 import sqlite3
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 
@@ -23,25 +23,18 @@ try:
 except ImportError:
     sqlite_vec = None
 
-from cortex.guards.exergy_guard import calculate_exergy
+from cortex.engine.membrane import calculate_exergy
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.models import CortexFactModel
+from cortex.memory.temporal import cortex_decay
 
 __all__ = ["SovereignVectorStoreL2"]
 
 # Lazy imports to avoid circular deps at module load
 # L2HybridSearch and PIISanitizer only needed at runtime
-_L2_HYBRID_SEARCH_AVAILABLE: Optional[bool] = None  # None = not yet checked
+_L2_HYBRID_SEARCH_AVAILABLE: bool | None = None  # None = not yet checked
 
 logger = logging.getLogger("cortex.memory.sqlite_vec_store")
-
-
-def cortex_decay(is_diamond: int, timestamp: float, current_time: float, half_life: float) -> float:
-    """Calcula el decaimiento temporal soberano."""
-    if is_diamond:
-        return 1.0
-    age = max(0.0, current_time - timestamp)
-    return float(0.5 ** (age / half_life))
 
 
 class SovereignVectorStoreL2:
@@ -62,6 +55,7 @@ class SovereignVectorStoreL2:
         "_hybrid",
         "_sanitizer",
         "_vector_enabled",
+        "_shard_cache",
     )
 
     MAX_DOMAIN_ENTROPY = 5000  # Axiom Ω8: Critical mass for Universe Splitting
@@ -75,7 +69,7 @@ class SovereignVectorStoreL2:
         self._encoder = encoder
         self._db_path = Path(db_path).expanduser()
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
-        self._conn: Optional[sqlite3.Connection] = None
+        self._conn: sqlite3.Connection | None = None
         self._lock = asyncio.Lock()
         self._ready = False
         self._half_life = half_life_days * 24 * 3600
@@ -83,6 +77,7 @@ class SovereignVectorStoreL2:
         # Lazy-initialized subsystems
         self._hybrid = None  # L2HybridSearch — created after conn is ready
         self._sanitizer = None  # PIISanitizer singleton
+        self._shard_cache: set[str] = set()
 
     def _get_conn(self) -> sqlite3.Connection:
         if self._conn is None:
@@ -96,7 +91,9 @@ class SovereignVectorStoreL2:
                 timeout=5.0,  # opening-policy: O(1) fail-fast
             )
             # runtime-policy: wait up to 5s for WAL write-lock contention (Axiom Ω6)
+            self._conn.execute("PRAGMA journal_mode=WAL")
             self._conn.execute("PRAGMA busy_timeout=5000")
+            self._conn.execute("PRAGMA synchronous=NORMAL")
 
             try:
                 self._conn.enable_load_extension(True)
@@ -189,30 +186,46 @@ class SovereignVectorStoreL2:
                 pass
         return self._sanitizer
 
-    def _get_domain_tables(
-        self, conn: sqlite3.Connection, tenant_id: str, project_id: str
-    ) -> tuple[str, str]:
-        """Axiom Ω8: Vertical Domain Cut.
-        If a corpus weighs too much, we split the universe and migrate only distilled axioms.
-        """
+    def _get_shard_name(self, tenant_id: str, project_id: str) -> str:
+        """Generates a safe shard name."""
         safe_tenant = "".join(c for c in tenant_id if c.isalnum() or c == "_")
         safe_proj = "".join(c for c in project_id if c.isalnum() or c == "_")
         if not safe_tenant or not safe_proj:
-            return "facts_meta", "vec_facts"
+            return "facts_meta"  # Fallback to global table
+        return f"facts_meta_{safe_tenant}_{safe_proj}"
 
-        meta_tb = f"facts_meta_{safe_tenant}_{safe_proj}"
-        vec_tb = f"vec_facts_{safe_tenant}_{safe_proj}"
+    async def _get_domain_tables(self, tenant_id: str, project_id: str) -> tuple[str, str]:
+        """Axiom Ω8: Vertical Domain Cut.
+        If a corpus weighs too much, we split the universe and migrate only distilled axioms.
+        """
+        shard_name = self._get_shard_name(tenant_id, project_id)
+        vec_shard_name = f"vec_{shard_name}"
+        if shard_name in self._shard_cache:
+            return shard_name, vec_shard_name
 
-        cursor = conn.cursor()
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (meta_tb,))
-        if cursor.fetchone():
-            return meta_tb, vec_tb
+        # Check if shard table exists in DB (offload to thread)
+        def _check_existence():
+            conn = self._get_conn()
+            cursor = conn.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name=?", (shard_name,)
+            )
+            return cursor.fetchone() is not None
 
-        cursor.execute(
-            "SELECT count(1) FROM facts_meta WHERE tenant_id = ? AND project_id = ?",
-            (tenant_id, project_id),
-        )
-        count = cursor.fetchone()[0]
+        exists = await asyncio.to_thread(_check_existence)
+        if exists:
+            self._shard_cache.add(shard_name)
+            return shard_name, vec_shard_name
+
+        # Check mass threshold (offload to thread)
+        def _check_mass():
+            conn = self._get_conn()
+            cursor = conn.execute(
+                "SELECT count(1) FROM facts_meta WHERE tenant_id = ? AND project_id = ?",
+                (tenant_id, project_id),
+            )
+            return cursor.fetchone()[0]
+
+        count = await asyncio.to_thread(_check_mass)
 
         if count >= self.MAX_DOMAIN_ENTROPY:
             logger.warning(
@@ -221,69 +234,87 @@ class SovereignVectorStoreL2:
                 project_id,
                 count,
             )
-            # Create sharded schema
-            conn.execute(f"""
-                CREATE TABLE {meta_tb} (
-                    id TEXT PRIMARY KEY,
-                    tenant_id TEXT NOT NULL,
-                    project_id TEXT NOT NULL,
-                    content TEXT,
-                    timestamp REAL,
-                    is_diamond INTEGER,
-                    is_bridge INTEGER,
-                    confidence TEXT,
-                    success_rate REAL,
-                    cognitive_layer TEXT,
-                    parent_decision_id TEXT,
-                    metadata TEXT
-                )
-            """)
-            conn.execute(
-                f"CREATE VIRTUAL TABLE {vec_tb} USING "
-                f"vec0(embedding float[{self._encoder.dimension}])"
-            )
-
-            # Migrate only distilled axioms (is_diamond = 1)
-            conn.execute(
-                f"""
-                INSERT INTO {meta_tb} (
-                    rowid, id, tenant_id, project_id, content, timestamp,
-                    is_diamond, is_bridge, confidence, success_rate,
-                    cognitive_layer, parent_decision_id, metadata
-                )
-                SELECT
-                    rowid, id, tenant_id, project_id, content, timestamp,
-                    is_diamond, is_bridge, confidence, success_rate,
-                    cognitive_layer, parent_decision_id, metadata
-                FROM facts_meta
-                WHERE tenant_id = ? AND project_id = ? AND is_diamond = 1
-            """,
-                (tenant_id, project_id),
-            )
-
-            conn.execute(
-                f"""
-                INSERT INTO {vec_tb}(rowid, embedding)
-                SELECT v.rowid, v.embedding
-                FROM vec_facts v
-                JOIN facts_meta m ON v.rowid = m.rowid
-                WHERE m.tenant_id = ? AND m.project_id = ? AND m.is_diamond = 1
-            """,
-                (tenant_id, project_id),
-            )
-
-            conn.execute(
-                f"CREATE INDEX idx_tenant_proj_{safe_tenant}_{safe_proj} "
-                f"ON {meta_tb}(tenant_id, project_id)"
-            )
-            conn.execute(
-                f"CREATE INDEX idx_bridge_{safe_tenant}_{safe_proj} ON {meta_tb}(is_bridge)"
-            )
-
-            conn.commit()
-            return meta_tb, vec_tb
+            await self._trigger_split(tenant_id, project_id, shard_name)
+            return shard_name, vec_shard_name
 
         return "facts_meta", "vec_facts"
+
+        return "facts_meta", "vec_facts"
+
+    async def _trigger_split(self, tenant_id: str, project_id: str, shard_name: str) -> None:
+        """Execute physical split of metadata and vectors."""
+        logger.info("⚔️ Universe Split: Sharding [%s/%s] -> %s", tenant_id, project_id, shard_name)
+        conn = self._get_conn()
+        vec_shard_name = f"vec_{shard_name}"
+
+        # 1. Create shard table
+        conn.execute(f"""
+            CREATE TABLE {shard_name} (
+                id TEXT PRIMARY KEY,
+                tenant_id TEXT NOT NULL,
+                project_id TEXT NOT NULL,
+                content TEXT,
+                timestamp REAL,
+                is_diamond INTEGER,
+                is_bridge INTEGER,
+                confidence TEXT,
+                success_rate REAL,
+                cognitive_layer TEXT,
+                parent_decision_id TEXT,
+                metadata TEXT
+            )
+        """)
+
+        # 2. Create vector shard
+        conn.execute(
+            f"CREATE VIRTUAL TABLE {vec_shard_name} "
+            f"USING vec0(embedding float[{self._encoder.dimension}])"
+        )
+
+        # 3. Migrate data (Only Diamonds)
+        # MUST PRESERVE rowid for sqlite-vec alignment
+        columns = (
+            "id, tenant_id, project_id, content, timestamp, "
+            "is_diamond, is_bridge, confidence, success_rate, "
+            "cognitive_layer, parent_decision_id, metadata"
+        )
+        conn.execute(
+            f"INSERT INTO {shard_name} (rowid, {columns}) "
+            f"SELECT rowid, {columns} FROM facts_meta "
+            "WHERE tenant_id = ? AND project_id = ? AND is_diamond = 1",
+            (tenant_id, project_id),
+        )
+
+        # 4. Migrate vectors
+        conn.execute(
+            f"INSERT INTO {vec_shard_name} (rowid, embedding) "
+            f"SELECT v.rowid, v.embedding FROM vec_facts v "
+            f"JOIN facts_meta m ON v.rowid = m.rowid "
+            f"WHERE m.tenant_id = ? AND m.project_id = ? AND m.is_diamond = 1",
+            (tenant_id, project_id),
+        )
+
+        # 5. Cleanup source (delete migrated diamonds from global tables)
+        conn.execute(
+            "DELETE FROM facts_meta WHERE tenant_id = ? AND project_id = ? AND is_diamond = 1",
+            (tenant_id, project_id),
+        )
+        # Delete corresponding vectors from global vec_facts
+        conn.execute(
+            "DELETE FROM vec_facts WHERE rowid NOT IN (SELECT rowid FROM facts_meta)"
+        )
+
+        # 6. Create indexes for the new shard
+        conn.execute(
+            f"CREATE INDEX IF NOT EXISTS idx_tenant_proj_{shard_name} "
+            f"ON {shard_name}(tenant_id, project_id)"
+        )
+        conn.execute(
+            f"CREATE INDEX IF NOT EXISTS idx_bridge_{shard_name} ON {shard_name}(is_bridge)"
+        )
+
+        conn.commit()
+        self._shard_cache.add(shard_name)
 
     async def memorize(self, fact: CortexFactModel) -> None:
         """Encode and store a multi-tenant CortexFactModel.
@@ -296,7 +327,7 @@ class SovereignVectorStoreL2:
 
         # ─── PII Sanitization Gate (Moved outside the DB Lock) ────────
         sanitized_content = fact.content
-        sanitized_meta = dict(fact.metadata) if fact.metadata else {}
+        sanitized_meta: dict[str, Any] = dict(fact.metadata) if fact.metadata else {}
 
         sanitizer = self._get_sanitizer()
         if sanitizer and fact.content:
@@ -318,51 +349,51 @@ class SovereignVectorStoreL2:
         # ──────────────────────────────────────────────────────────────
 
         async with self._lock:
-            embedding_bytes = np.array(fact.embedding, dtype=np.float32).tobytes()
+            conn = self._get_conn()
 
-            cursor = conn.cursor()
-            try:
-                meta_tb, vec_tb = self._get_domain_tables(conn, fact.tenant_id, fact.project_id)
-                cursor.execute(
-                    f"""
-                    INSERT INTO {meta_tb} (
-                        id, tenant_id, project_id, content, timestamp,
-                        is_diamond, is_bridge, confidence, success_rate,
-                        cognitive_layer, parent_decision_id, metadata
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """,
-                    (
-                        fact.id,
-                        fact.tenant_id,
-                        fact.project_id,
-                        sanitized_content,  # PII-sanitized content
-                        fact.timestamp,
-                        int(fact.is_diamond),
-                        int(fact.is_bridge),
-                        fact.confidence,
-                        fact.success_rate,
-                        fact.cognitive_layer,
-                        fact.parent_decision_id,
-                        json.dumps(sanitized_meta),  # Includes PII encrypted fragments
-                    ),
-                )
-                rowid = cursor.lastrowid
+            # Shard Selection
+            meta_tb, vec_tb = await self._get_domain_tables(fact.tenant_id, fact.project_id)
 
-                if self._vector_enabled:
-                    cursor.execute(
-                        f"INSERT INTO {vec_tb}(rowid, embedding) VALUES (?, ?)",
-                        (rowid, embedding_bytes),
+            # Transactional Append
+            def _do_append():
+                try:
+                    conn.execute(
+                        f"INSERT INTO {meta_tb} (id, tenant_id, project_id, content, timestamp, "
+                        "is_diamond, is_bridge, confidence, success_rate, cognitive_layer, "
+                        "parent_decision_id, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        (
+                            fact.id,
+                            fact.tenant_id,
+                            fact.project_id,
+                            sanitized_content,  # Use sanitized content
+                            fact.timestamp,
+                            int(fact.is_diamond),
+                            int(fact.is_bridge),
+                            fact.confidence,
+                            fact.success_rate,
+                            fact.cognitive_layer,
+                            fact.parent_decision_id,
+                            json.dumps(sanitized_meta),  # Use sanitized metadata
+                        ),
                     )
-                conn.commit()
-            except (sqlite3.Error, RuntimeError) as e:
-                # LEGION-OMEGA (Chronos Sniper): Prevent DB from entering corrupt
-                # transaction state after error.
-                conn.rollback()
-                logger.error(
-                    "SovereignVectorStoreL2: Database integrity breach during memorize: %s",
-                    e,
-                )
-                raise
+                    if self._vector_enabled:
+                        conn.execute(
+                            f"INSERT INTO {vec_tb} (rowid, embedding) VALUES (last_insert_rowid(), ?)",
+                            (np.array(fact.embedding, dtype=np.float32).tobytes(),),
+                        )
+                    conn.commit()
+                except (sqlite3.Error, RuntimeError) as e:
+                    # LEGION-OMEGA (Chronos Sniper): Prevent DB from entering corrupt
+                    # transaction state after error.
+                    conn.rollback()
+                    logger.error(
+                        "SovereignVectorStoreL2: Database integrity breach during memorize: %s",
+                        e,
+                    )
+                    raise
+
+            await asyncio.to_thread(_do_append)
+
 
     async def recall_secure(
         self,
@@ -370,7 +401,7 @@ class SovereignVectorStoreL2:
         project_id: str,
         query: str,
         limit: int = 5,
-        layer: Optional[str] = None,
+        layer: str | None = None,
     ) -> list[CortexFactModel]:
         """[C5] Recuperación particionada Zero-Trust con ranking SQL nativo."""
         conn = self._get_conn()
@@ -378,48 +409,62 @@ class SovereignVectorStoreL2:
         embedding_bytes = np.array(query_vector, dtype=np.float32).tobytes()
         now = time.time()
 
-        # Vector search + Reranking in SQL
-        cursor = conn.cursor()
-        meta_tb, vec_tb = self._get_domain_tables(conn, tenant_id, project_id)
+        async with self._lock:
+            meta_tb, vec_tb = await self._get_domain_tables(tenant_id, project_id)
 
-        if not self._vector_enabled:
-            # Fallback to pure metadata/content search (no similarity scoring)
-            sql = (
-                f"SELECT * FROM {meta_tb} WHERE tenant_id = ? AND (project_id = ? OR is_bridge = 1)"
-            )
-            params: list[Any] = [tenant_id, project_id]
-            if layer:
-                sql += " AND cognitive_layer = ?"
-                params.append(layer)
-            sql += " ORDER BY timestamp DESC LIMIT ?"
-            params.append(limit)
-
-            cursor.execute(sql, tuple(params))
-            rows = cursor.fetchall()
-            final_facts = []
-            for row in rows:
-                fact = CortexFactModel(
-                    id=row["id"],
-                    tenant_id=row["tenant_id"],
-                    project_id=row["project_id"],
-                    content=row["content"],
-                    embedding=[],  # No embedding available
-                    timestamp=row["timestamp"],
-                    is_diamond=bool(row["is_diamond"]),
-                    is_bridge=bool(row["is_bridge"]),
-                    confidence=row["confidence"],
-                    cognitive_layer=row["cognitive_layer"] or "semantic",
-                    parent_decision_id=row["parent_decision_id"],
-                    metadata=json.loads(row["metadata"]) if row["metadata"] else {},
+        def _do_recall() -> list[CortexFactModel]:
+            cursor = conn.cursor()
+            if not self._vector_enabled:
+                # Fallback to pure metadata/content search (no similarity scoring)
+                sql = (
+                    f"SELECT * FROM {meta_tb} WHERE tenant_id = ? AND (project_id = ? OR is_bridge = 1)"
                 )
-                object.__setattr__(fact, "_recall_score", 0.0)
-                final_facts.append(fact)
-            return final_facts
+                params: list[Any] = [tenant_id, project_id]
+                if layer:
+                    sql += " AND cognitive_layer = ?"
+                    params.append(layer)
+                sql += " ORDER BY timestamp DESC LIMIT ?"
+                params.append(limit)
 
-        sql = f"""
-            SELECT * FROM (
+                cursor.execute(sql, tuple(params))
+                rows = cursor.fetchall()
+                facts = []
+                for row in rows:
+                    fact = CortexFactModel(
+                        id=row["id"],
+                        tenant_id=row["tenant_id"],
+                        project_id=row["project_id"],
+                        content=row["content"],
+                        embedding=[],  # No embedding available
+                        timestamp=row["timestamp"],
+                        is_diamond=bool(row["is_diamond"]),
+                        is_bridge=bool(row["is_bridge"]),
+                        confidence=row["confidence"],
+                        cognitive_layer=row["cognitive_layer"] or "semantic",
+                        parent_decision_id=row["parent_decision_id"],
+                        metadata=json.loads(row["metadata"]) if row["metadata"] else {},
+                    )
+                    object.__setattr__(fact, "_recall_score", 0.0)
+                    facts.append(fact)
+                return facts
+
+            # Use UNION ALL to include bridges from the global table if we are in a shard
+            from_clause = f"FROM {meta_tb} m JOIN {vec_tb} v ON m.rowid = v.rowid"
+            if meta_tb != "facts_meta":
+                from_clause = (
+                    f"FROM ("
+                    f"SELECT rowid, * FROM {meta_tb} UNION ALL "
+                    f"SELECT rowid, * FROM facts_meta WHERE is_bridge = 1"
+                    f") m JOIN ("
+                    f"SELECT rowid, embedding FROM {vec_tb} UNION ALL "
+                    f"SELECT rowid, embedding FROM vec_facts "
+                    f"WHERE rowid IN (SELECT rowid FROM facts_meta WHERE is_bridge = 1)"
+                    f") v ON m.rowid = v.rowid"
+                )
+
+            sql = f"""
                 SELECT
-                    m.rowid, m.id, m.tenant_id, m.project_id, m.content, m.timestamp,
+                    m.id, m.tenant_id, m.project_id, m.content, m.timestamp,
                     m.is_diamond, m.is_bridge, m.confidence, m.success_rate,
                     m.cognitive_layer, m.parent_decision_id, m.metadata,
                     v.embedding,
@@ -428,57 +473,60 @@ class SovereignVectorStoreL2:
                      cortex_decay(m.is_diamond, m.timestamp, ?, ?) *
                      m.success_rate *
                      cortex_exergy(m.content)) as final_score
-                FROM {meta_tb} m
-                JOIN {vec_tb} v ON m.rowid = v.rowid
+                {from_clause}
                 WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
-            )
-            WHERE base_similarity > 0.3
-        """
-        params = [embedding_bytes, embedding_bytes, now, self._half_life, tenant_id, project_id]
+            """
+            params = [
+                embedding_bytes,
+                embedding_bytes,
+                now,
+                self._half_life,
+                tenant_id,
+                project_id,
+            ]
 
-        if layer:
-            sql += " AND cognitive_layer = ?"
-            params.append(layer)
+            if layer:
+                sql += " AND cognitive_layer = ?"
+                params.append(layer)
 
-        sql += " ORDER BY final_score DESC LIMIT ?"
-        params.append(limit)
+            sql += " ORDER BY final_score DESC LIMIT ?"
+            params.append(limit)
 
-        cursor.execute(sql, tuple(params))
+            cursor.execute(sql, tuple(params))
+            rows = cursor.fetchall()
+            facts = []
 
-        rows = cursor.fetchall()
-        final_facts = []
+            for row in rows:
+                score = row["final_score"]
+                emb_bytes = row["embedding"]
+                emb = np.frombuffer(emb_bytes, dtype=np.float32).tolist() if emb_bytes else []
 
-        for row in rows:
-            score = row["final_score"]
+                fact = CortexFactModel(
+                    id=row["id"],
+                    tenant_id=row["tenant_id"],
+                    project_id=row["project_id"],
+                    content=row["content"],
+                    embedding=emb,
+                    timestamp=row["timestamp"],
+                    is_diamond=bool(row["is_diamond"]),
+                    is_bridge=bool(row["is_bridge"]),
+                    confidence=row["confidence"],
+                    cognitive_layer=row["cognitive_layer"] or "semantic",
+                    parent_decision_id=row["parent_decision_id"],
+                    metadata=json.loads(row["metadata"]) if row["metadata"] else {},
+                )
+                object.__setattr__(fact, "_recall_score", score)
+                facts.append(fact)
 
-            # LEGION-OMEGA (Entropy Demon): N+1 Subquery actually eliminated.
-            emb_bytes = row["embedding"]
-            emb = np.frombuffer(emb_bytes, dtype=np.float32).tolist() if emb_bytes else []
+            return facts
 
-            fact = CortexFactModel(
-                id=row["id"],
-                tenant_id=row["tenant_id"],
-                project_id=row["project_id"],
-                content=row["content"],
-                embedding=emb,
-                timestamp=row["timestamp"],
-                is_diamond=bool(row["is_diamond"]),
-                is_bridge=bool(row["is_bridge"]),
-                confidence=row["confidence"],
-                cognitive_layer=row["cognitive_layer"] or "semantic",
-                parent_decision_id=row["parent_decision_id"],
-                metadata=json.loads(row["metadata"]) if row["metadata"] else {},
-            )
-            object.__setattr__(fact, "_recall_score", score)
-            final_facts.append(fact)
-
-        return final_facts
+        return await asyncio.to_thread(_do_recall)
 
     async def recall(
         self,
         query: str,
         limit: int = 5,
-        project: Optional[str] = None,
+        project: str | None = None,
         tenant_id: str = "default",
     ) -> list[CortexFactModel]:
         """Backward-compatible recall for legacy callers. Maps to recall_secure."""
@@ -514,14 +562,82 @@ class SovereignVectorStoreL2:
                 text_weight=text_weight,
             )
 
-        # Fallback: pure semantic recall
-        logger.warning("recall_hybrid: L2HybridSearch unavailable — falling back to recall_secure")
         return await self.recall_secure(
             tenant_id=tenant_id,
             project_id=project_id,
             query=query,
             limit=limit,
         )
+
+    async def compact_shard(
+        self, tenant_id: str, project_id: str, min_success_rate: float = 0.4
+    ) -> dict[str, int]:
+        """Axiom Ω2: Thermodynamic Refinement.
+        Purifies the sharded domain by eliminating latent entropy (noise).
+        Returns a report of pruned facts.
+        """
+        async with self._lock:
+            meta_tb, vec_tb = await self._get_domain_tables(tenant_id, project_id)
+            if meta_tb == "facts_meta":
+                logger.warning("compact_shard: Cannot compact global table directly. Shard first.")
+                return {"pruned": 0}
+
+            conn = self._get_conn()
+
+            def _do_compact():
+                # Count before
+                before_count = conn.execute(f"SELECT COUNT(*) FROM {meta_tb}").fetchone()[0]
+
+                # 1. Prune low-success noise (Axiom Ω2)
+                conn.execute(
+                    f"DELETE FROM {meta_tb} WHERE success_rate < ? AND is_diamond = 0",
+                    (min_success_rate,),
+                )
+
+                # 2. Sync vector shard (Delete orphaned vectors)
+                conn.execute(
+                    f"DELETE FROM {vec_tb} WHERE rowid NOT IN (SELECT rowid FROM {meta_tb})"
+                )
+
+                # Count after
+                after_count = conn.execute(f"SELECT COUNT(*) FROM {meta_tb}").fetchone()[0]
+                pruned = before_count - after_count
+
+                conn.commit()
+                return {"pruned": pruned, "remaining": after_count}
+
+            report = await asyncio.to_thread(_do_compact)
+
+            logger.info(
+                "❄️ [PURIFICATION] Shard %s compacted: %d pruned.", meta_tb, report["pruned"]
+            )
+            return report
+
+    async def periodic_maintenance(self) -> None:
+        """Triggers compaction across all cached shards."""
+        logger.info("📡 Starting CORTEX Periodic Maintenance (Axiom Ω2)...")
+        shards_to_process = list(self._shard_cache)
+        total_pruned = 0
+
+        for shard_name in shards_to_process:
+            # Format: facts_meta_{tenant}_{project}
+            parts = shard_name.split("_")
+            if len(parts) >= 4:
+                tenant_id = str(parts[2])
+                project_id = "_".join(str(p) for p in parts[3:])
+
+                report = await self.compact_shard(tenant_id, project_id)
+                if isinstance(report, dict) and "pruned" in report:
+                    num_pruned = int(report["pruned"])
+                    total_pruned = total_pruned + num_pruned
+
+        if total_pruned > 0:
+            async with self._lock:
+                conn = self._get_conn()
+                await asyncio.to_thread(conn.execute, "VACUUM")
+                logger.info(
+                    "❄️ [COMPACTION] Global VACUUM completed. Total pruned: %d", total_pruned
+                )
 
     async def close(self) -> None:
         async with self._lock:

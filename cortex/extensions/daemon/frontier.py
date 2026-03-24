@@ -64,8 +64,8 @@ class FrontierDaemon:
     async def _run_ingestion(self):
         """Ingests new intelligence and scans for high-exergy bounties."""
         logger.info("[FRONTIER] Scanning frontier for Cognitive Ingestion...")
-        
-        # Dynamic discovery potential: In a real scenario, this would poll 
+
+        # Dynamic discovery potential: In a real scenario, this would poll
         # an external API or a local 'AgentLandscape' registry.
         discovery_targets = [
             ("google-deepmind", "jules"),
@@ -84,13 +84,13 @@ class FrontierDaemon:
             ledger=self.engine.ledger if self.engine else None,
             reward_threshold=250.0  # Ω₂: High-exergy filter
         )
-        
+
         for owner, repo in discovery_targets:
             leads = await bounty_service.scan_repository(owner, repo)
             ranked = bounty_service.rank_leads(leads)
             for lead in ranked:
                 logger.info("[FRONTIER] High-exergy bounty found: %s (%s)", lead.title, lead.reward_usd)
-                
+
                 # Ω₄: Trigger dynamic recruitment via SwarmFactory
                 if self.engine and hasattr(self.engine, 'factory'):
                     logger.info("[FRONTIER] Initializing 'Next Cycle' for %s", lead.title)
@@ -104,7 +104,7 @@ class FrontierDaemon:
                     # For now, we log the cycle initiation
                     msg = f"Forged Swarm Cycle for bounty '{lead.title}' (${lead.reward_usd})."
                     self._log_evolution("swarm", msg)
-                
+
                 self._log_evolution("bounty", f"Discovered bounty: {lead.title} (${lead.reward_usd})")
 
     def _log_evolution(self, type: str, content: str):

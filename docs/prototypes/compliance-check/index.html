@@ -1413,7 +1413,7 @@ function showResults() {
     else if (s.raw >= 1) type = 'warning';
 
     var text = ART12_RISK_TEXT[i][s.raw];
-    
+
     var iconStr = '🔴';
     if (type === 'good') iconStr = '🟢';
     else if (type === 'warning') iconStr = '🟠';
@@ -1463,7 +1463,7 @@ function showResults() {
     { name: "Apotheosis Trace", coverage: "100% Art. 12(2)(d)", desc: "Autonomous agent ID tagging per decision." },
     { name: "MerkleCheck Protocol", coverage: "100% Art. 12(4)", desc: "Verification triggers for O(log N) auditing." }
   ];
-  
+
   coveragePanel.innerHTML = `
     <div style="font-size:11px; font-weight:700; color:var(--lime); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:20px;">CORTEX Sovereign Coverage</div>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">

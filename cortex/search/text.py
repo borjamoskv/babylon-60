@@ -56,7 +56,7 @@ async def text_search(
     except (sqlite3.Error, OSError, ValueError) as e:
         logger.error("Text search failed: %s", e)
         return []
-    return _rows_to_results(rows, is_fts=use_fts)
+    return _rows_to_results(rows, tenant_id=tenant_id, is_fts=use_fts)
 
 
 async def _fts5_search(
@@ -74,10 +74,9 @@ async def _fts5_search(
     sql = """
         SELECT f.id, f.content, f.project, f.fact_type, f.confidence,
                f.valid_from, f.valid_until, f.tags, f.source, f.metadata,
-               f.created_at, f.updated_at, f.tx_id, t.hash,
+               f.created_at, f.updated_at, f.tx_id, f.hash,
                bm25(facts_fts) AS rank
         FROM facts_fts fts JOIN facts f ON f.id = fts.rowid
-        LEFT JOIN transactions t ON f.tx_id = t.id
         WHERE f.tenant_id = ? AND fts.content MATCH ?
     """
     params: list = [tenant_id, fts_query]
@@ -122,8 +121,8 @@ async def _like_search(
     sql = """
         SELECT f.id, f.content, f.project, f.fact_type, f.confidence,
                f.valid_from, f.valid_until, f.tags, f.source, f.metadata,
-               f.created_at, f.updated_at, f.tx_id, t.hash
-        FROM facts f LEFT JOIN transactions t ON f.tx_id = t.id
+               f.created_at, f.updated_at, f.tx_id, f.hash
+        FROM facts f
         WHERE f.tenant_id = ? AND (f.content LIKE ? OR f.tags LIKE ? OR f.source LIKE ?)
     """
     params: list = [tenant_id, f"%{query}%", f"%{query}%", f"%{query}%"]
@@ -168,7 +167,7 @@ def text_search_sync(
             fts_query = _sanitize_fts_query(query)
             sql = """
                 SELECT f.id, f.content, f.project, f.fact_type, f.confidence,
-                       f.source, f.tags, bm25(facts_fts) AS rank
+                       f.source, f.tags, f.tx_id, f.hash, bm25(facts_fts) AS rank
                 FROM facts_fts fts JOIN facts f ON f.id = fts.rowid
                 WHERE f.tenant_id = ? AND fts.content MATCH ? AND f.valid_until IS NULL
             """
@@ -180,7 +179,7 @@ def text_search_sync(
             params.append(limit)
         else:
             sql = (
-                "SELECT id, content, project, fact_type, confidence, source, tags "
+                "SELECT id, content, project, fact_type, confidence, source, tags, tx_id, hash "
                 "FROM facts WHERE tenant_id = ? AND content LIKE ? AND valid_until IS NULL"
             )
             params = [tenant_id, f"%{query}%"]
@@ -195,4 +194,4 @@ def text_search_sync(
     except (sqlite3.Error, OSError, ValueError) as e:
         logger.error("Text search sync failed: %s", e)
         return []
-    return [_parse_row_sync(row, use_fts) for row in rows]
+    return [_parse_row_sync(row, use_fts, tenant_id) for row in rows]

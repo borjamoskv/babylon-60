@@ -11,7 +11,7 @@ function mount_drive() {
         echo "Cloud already mounted at $MOUNT_POINT"
     else
         echo "Mounting $REMOTE to $MOUNT_POINT..."
-        # Note: mount on macOS via rclone requires FUSE or nfsmount. 
+        # Note: mount on macOS via rclone requires FUSE or nfsmount.
         # Since FUSE might not be installed, we use a background sync or rclone serve if mount fails.
         # However, for simply moving files and symlinking, we can use rclone directly.
         rclone mount $REMOTE $MOUNT_POINT --vfs-cache-mode full --daemon

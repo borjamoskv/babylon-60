@@ -9,7 +9,7 @@ import logging
 import time
 from collections import OrderedDict
 from enum import Enum
-from typing import Generic, Optional, TypeVar
+from typing import Generic, TypeVar
 
 __all__ = ["T", "CacheEvent", "TieredCache"]
 
@@ -40,7 +40,7 @@ class TieredCache(Generic[T]):
         self.ttl = ttl_seconds
         self._subscribers: list[asyncio.Queue] = []
 
-    async def get(self, key: str) -> Optional[T]:
+    async def get(self, key: str) -> T | None:
         """Get value from cache."""
         # L1 check
         if key in self.l1:
@@ -55,7 +55,7 @@ class TieredCache(Generic[T]):
 
         return None
 
-    async def set(self, key: str, value: T, ttl: Optional[float] = None):
+    async def set(self, key: str, value: T, ttl: float | None = None):
         """Set value in cache."""
         expiry = time.monotonic() + (ttl or self.ttl)
 

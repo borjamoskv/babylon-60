@@ -10,7 +10,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import sqlite3
-from typing import Final, Optional
+from typing import Final
 
 import aiosqlite
 
@@ -38,12 +38,12 @@ async def hybrid_search(
     query_embedding: list[float],
     top_k: int = 10,
     tenant_id: str = "default",
-    project: Optional[str] = None,
-    as_of: Optional[str] = None,
+    project: str | None = None,
+    as_of: str | None = None,
     vector_weight: float = 0.6,
     text_weight: float = 0.4,
-    confidence: Optional[str] = None,
-    causal_gap: Optional[CausalGap] = None,
+    confidence: str | None = None,
+    causal_gap: CausalGap | None = None,
     **kwargs,
 ) -> list[SearchResult]:
     """
@@ -133,10 +133,10 @@ def hybrid_search_sync(
     query_embedding: list[float],
     top_k: int = 10,
     tenant_id: str = "default",
-    project: Optional[str] = None,
+    project: str | None = None,
     vector_weight: float = 0.6,
     text_weight: float = 0.4,
-    causal_gap: Optional[CausalGap] = None,
+    causal_gap: CausalGap | None = None,
 ) -> list[SearchResult]:
     """Hybrid search combining semantic + text via RRF (sync)."""
     fetch_limit = top_k * 2

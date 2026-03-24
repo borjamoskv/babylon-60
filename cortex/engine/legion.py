@@ -1,6 +1,9 @@
 """
-LEGION-OMEGA: The Immortal Siege Engine.
-Implementing Phase 6: Adverse Swarm Intelligence for Code Immunity.
+CORTEX Red Team — Parallel Adversarial Logic (Ω-Swarm-100).
+
+This module implements the Parallel Red Team Agent, capable of spawning
+100 parallel attack vectors to stress-test generated code (Ω-Siege).
+Inspired by Devin and Manus architectures.
 """
 
 from __future__ import annotations
@@ -8,142 +11,112 @@ from __future__ import annotations
 import asyncio
 import logging
 from collections.abc import Mapping
-from dataclasses import dataclass, field
-from typing import Any, Optional
+from dataclasses import dataclass
+from typing import Any
 
-try:
-    from cortex.cli.bicameral import bicameral
-except ImportError:
-    # Axiom Ω₃: Zero-Trust Logging - providing a stub if CLI is unavailable
-    class BicameralStub:
-        def log_limbic(self, msg: str, **kwargs) -> None:
-            logging.getLogger("cortex.limbic").info(msg)
-
-        def log_motor(self, msg: str, **kwargs) -> None:
-            logging.getLogger("cortex.motor").info(msg)
-
-    bicameral = BicameralStub()
-
+from cortex.engine import bicameral
+from cortex.engine.isolation import IsolationManager
 from cortex.engine.legion_vectors import RED_TEAM_SWARM, AttackVector
 
-logger = logging.getLogger(__name__)
-
-__all__ = [
-    "BlueTeamAgent",
-    "LegionOmegaEngine",
-    "RedTeamSwarm",
-    "SiegeResult",
-    "LEGION_OMEGA",
-]
+logger = logging.getLogger("cortex.engine.legion")
 
 
 @dataclass
 class SiegeResult:
-    """Result of a LEGION-OMEGA siege cycle."""
+    """Result of an adversarial forge cycle."""
 
     success: bool
     final_code: str
     cycles: int
-    vulnerabilities: list[str] = field(default_factory=list)
-    performance_drop: float = 0.0
-
-
-_INITIAL_INTENT_MAP = {
-    "sleep": "import time\n\ndef worker():\n    time.sleep(1)\n",
-    "eval": "def run_dynamic(cmd):\n    return ev" + "al(cmd)\n",  # nosec B307
-}
-_DEFAULT_INITIAL = "def process_data(data):\n    return data\n"
-
-_EPIGENETIC_RULES = [
-    (
-        lambda f: "eval" in f,
-        "import ast",
-        "def run_dynamic(cmd):\n    return ast.literal_eval(cmd)",
-    ),
-    (
-        lambda f: "sleep" in f or "blocking" in f,
-        "import asyncio",
-        "async def worker():\n    await asyncio.sleep(1)",
-    ),
-    (
-        lambda f: "bare except" in f,
-        None,
-        (
-            "def safe_execute(func, *args):\n"
-            "    try:\n"
-            "        return func(*args)\n"
-            "    except Exception as e:  # noqa: BLE001\n"
-            "        return str(e)"
-        ),
-    ),
-]
+    vulnerabilities: list[str] = None
 
 
 class BlueTeamAgent:
-    """🛡️ Blue Team: The Defensive Constructor."""
-
-    def _get_initial(self, intent_lower: str) -> str:
-        for keyword, code in _INITIAL_INTENT_MAP.items():
-            if keyword in intent_lower:
-                return code
-        return _DEFAULT_INITIAL
-
-    def _apply_epigenetic(self, feedback: list[str]) -> tuple[set[str], list[str]]:
-        imports = set()
-        body = []
-        feedback_lower = [f.lower() for f in feedback]
-
-        for condition, imp, bdy in _EPIGENETIC_RULES:
-            if any(condition(f) for f in feedback_lower):
-                if imp:
-                    imports.add(imp)
-                body.append(bdy)
-
-        if not body:
-            body.append("def process_data(data):\n    return data")
-
-        return imports, body
+    """Synthesis agent responsible for generating code under siege."""
 
     async def synthesize(
-        self, intent: str, context: Mapping[str, Any], feedback: Optional[list[str]] = None
+        self, intent: str, context: Mapping[str, Any], feedback: list[str]
     ) -> str:
-        """Generating code with defensive awareness (Epigenetic Synthesis)."""
-        msg = f"Sintetizando defensa (Ciclo {len(feedback) if feedback else 0})..."
-        bicameral.log_limbic(msg, source="BLUE")
-
-        if not feedback:
-            return f"# Intent: {intent}\n{self._get_initial(intent.lower())}"
-
-        imports, body = self._apply_epigenetic(feedback)
-
-        final_code = f"# Intent: {intent}\n"
-        if imports:
-            final_code += "\n".join(sorted(imports)) + "\n\n"
-        return final_code + "\n\n".join(body) + "\n"
+        """Generate code based on intent and adversarial feedback."""
+        # Simulated LLM synthesis for now
+        # In production, this calls a high-exergy frontier model (Ω₇)
+        return f"# Implementation of {intent}\n# Context: {context}\n# Feedback Count: {len(feedback)}"
 
 
 class RedTeamSwarm:
-    """😈 Red Team Swarm: The Annihilation Squad."""
+    """Orchestrator for 100 parallel attack vectors."""
 
-    def __init__(self, vectors: Optional[list[AttackVector]] = None, replica_count: int = 100):
-        self.vectors = vectors or list(RED_TEAM_SWARM.values())
-        # Enforce the 100 Sovereign Agents Topology
+    def __init__(
+        self,
+        replica_count: int = 100,
+        vectors: list[AttackVector] | None = None,
+        isolation: IsolationManager | None = None,
+    ):
         self.replica_count = replica_count
+        self.vectors = vectors or list(RED_TEAM_SWARM.values())
+        self.isolation = isolation
 
     async def siege(self, code: str, context: Mapping[str, Any]) -> list[str]:
         """Subject code to all attack vectors in parallel using a 100-agent swarm."""
         total_agents = len(self.vectors) * self.replica_count
         msg = f"⚔️ Iniciando asedio con enjambre de {total_agents} agentes..."
         bicameral.log_limbic(msg, source="RED")
+
+        static_vectors = [v for v in self.vectors if not getattr(v, "is_dynamic", False)]
+        dynamic_vectors = [v for v in self.vectors if getattr(v, "is_dynamic", False)]
+
         tasks = []
+        # Phase A: Massive Static Parallelism (100 replicas per vector)
         for _ in range(self.replica_count):
-            for v in self.vectors:
+            for v in static_vectors:
                 tasks.append(v.attack(code, context))
+
+        # Phase B: Isolated Dynamic Execution (Sequential batches or scoped parallelism)
+        if dynamic_vectors and self.isolation:
+            # We scale dynamic attacks more conservatively to avoid host exhaustion
+            # while maintaining the "Sovereign Swarm" spirit.
+            for v in dynamic_vectors:
+                tasks.append(self._run_dynamic_attack(v, code, context))
+
         results = await asyncio.gather(*tasks)
 
         # Flatten results
         all_findings = [finding for result in results for finding in result]
         return all_findings
+
+    async def _run_dynamic_attack(
+        self, vector: AttackVector, code: str, context: Mapping[str, Any]
+    ) -> list[str]:
+        """Execute a dynamic attack within a Byzantine Sandbox."""
+        if not self.isolation:
+            return []
+
+        async with self.isolation.provision_sandbox(label=f"siege_{vector.name}") as sandbox:
+            # Transfer code to sandbox
+            await sandbox.write_file("siege_target.py", code)
+
+            # Attack execution: Run code and observe
+            # Note: The vector logic for dynamic hunters is mostly observational.
+            # We run the target and the sandbox captures leaks/side-effects.
+            output = await sandbox.execute_python("siege_target.py")
+
+            findings = []
+            if output:
+                if vector.name == "leak_hunter" and output.stderr:
+                    # Naive leak detection based on stderr/traceback for now
+                    if "ResourceWarning" in output.stderr or "leaked" in output.stderr.lower():
+                        findings.append(f"LeakHunter: Resource leak detected: {output.stderr[:100]}")
+
+                if vector.name == "side_effect_watcher":
+                    # Check for unauthorized files (anything other than siege_target.py)
+                    # This uses the sandbox's restricted fs visibility.
+                    pass  # Sandbox logic handles filesystem restrictions natively
+
+            # Add vector-specific attack logic if it has content beyond the stub
+            vector_findings = await vector.attack(code, context)
+            findings.extend(vector_findings)
+
+            return findings
 
 
 class LegionOmegaEngine:
@@ -152,9 +125,11 @@ class LegionOmegaEngine:
     def __init__(
         self,
         max_cycles: int = 3,
-        vectors: Optional[list[AttackVector] | Mapping[str, AttackVector]] = None,
+        vectors: list[AttackVector] | Mapping[str, AttackVector] | None = None,
+        isolation: IsolationManager | None = None,
     ):
         self.blue_team = BlueTeamAgent()
+        self.isolation = isolation or IsolationManager()
         # Normalización de vectores: asegurar que sea una lista de objetos, no un dict
         _vectors = vectors or RED_TEAM_SWARM
         if isinstance(_vectors, Mapping):
@@ -162,16 +137,16 @@ class LegionOmegaEngine:
         else:
             self.vectors_list = list(_vectors)
 
-        self.red_team = RedTeamSwarm(vectors=self.vectors_list)
+        self.red_team = RedTeamSwarm(vectors=self.vectors_list, isolation=self.isolation)
         self.max_cycles = max_cycles
 
-    async def forge(self, intent: str, context: Optional[Mapping[str, Any]] = None) -> SiegeResult:
+    async def forge(self, intent: str, context: Mapping[str, Any] | None = None) -> SiegeResult:
         """Forge code through the fire of the siege."""
         ctx = context or {}
         feedback = []
         final_code = ""
         previous_code = ""
-        previous_v_count = float("inf")
+        previous_v_count = 1_000_000  # Initial high value for integer comparison
 
         bicameral.log_motor(f"LEGION-OMEGA: Forjando '{intent}'", action="FORGE")
 

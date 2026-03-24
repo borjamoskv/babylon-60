@@ -6,7 +6,7 @@
 
 ## 1. EXECUTIVE SUMMARY
 
-An autonomous security audit was conducted on March 2, 2026, focusing on three domains: Static Analysis (SAST), Supply Chain Integrity, and Engine Integrity. 
+An autonomous security audit was conducted on March 2, 2026, focusing on three domains: Static Analysis (SAST), Supply Chain Integrity, and Engine Integrity.
 
 A **Critical Indeterminacy** was detected in the `NemesisProtocol` which rendered the system's "immune system" inert. This was resolved immediately. SAST scans (Bandit) and dependency audits (Safety) show a clean baseline for the rest of the codebase.
 

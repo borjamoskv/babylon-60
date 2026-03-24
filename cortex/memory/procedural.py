@@ -12,7 +12,7 @@ import math
 import sqlite3
 import time
 from dataclasses import dataclass, field
-from typing import ClassVar, Final, Optional
+from typing import ClassVar, Final
 
 # ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -87,7 +87,7 @@ class ProceduralMemory:
 
     BASELINE_LATENCY_MS: ClassVar[float] = 100.0
 
-    def __init__(self, db_path: Optional[str] = None) -> None:
+    def __init__(self, db_path: str | None = None) -> None:
         self._buffer: dict[str, ProceduralEngram] = {}
         self._db_path = db_path
         self._load_from_db()
@@ -168,7 +168,7 @@ class ProceduralMemory:
 
             cur.execute(
                 """
-                INSERT INTO procedural_engrams 
+                INSERT INTO procedural_engrams
                 (skill_name, invocations, success_rate, avg_latency_ms, last_invoked, permanent)
                 VALUES (?, ?, ?, ?, ?, ?)
                 ON CONFLICT(skill_name) DO UPDATE SET
@@ -196,7 +196,7 @@ class ProceduralMemory:
         finally:
             conn.close()
 
-    def get_engram(self, skill_name: str) -> Optional[ProceduralEngram]:
+    def get_engram(self, skill_name: str) -> ProceduralEngram | None:
         """Fetch the engram for a specific skill. O(1)."""
         return self._buffer.get(skill_name)
 

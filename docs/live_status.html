@@ -207,18 +207,18 @@
 
     function connectSSE() {
       if (evtSource) evtSource.close();
-      
+
       tsEl.innerText = 'STATUS: CONNECTING TO EVENT HORIZON...';
       badgeEl.innerText = '● CONNECTING...';
       badgeEl.style.color = 'var(--text-secondary)';
       badgeEl.style.borderColor = 'var(--border)';
 
       evtSource = new EventSource('http://0.0.0.0:7070/stream');
-      
+
       evtSource.onmessage = function(event) {
         try {
           const data = JSON.parse(event.data);
-          
+
           if (data.status === 'SOVEREIGN_LINK_ESTABLISHED') {
             badgeEl.innerText = '● KINETIC LINK ACTIVE';
             badgeEl.style.color = 'var(--lime)';
@@ -228,23 +228,23 @@
 
           document.getElementById('integrity-val').innerText = data.architecture_integrity + '%';
           document.getElementById('integrity-bar').style.width = data.architecture_integrity + '%';
-          
+
           const latestRoi = (data.efficiency && data.efficiency.latest_roi) ? (data.efficiency.latest_roi.roi_ratio || 0) : 0;
           document.getElementById('roi-val').innerText = latestRoi + 'x';
           document.getElementById('edges-val').innerText = data.causality ? data.causality.total_edges : '--';
-          
+
           const ghostsVal = document.getElementById('ghosts-val');
           const currentGhosts = data.active_ghosts || 0;
-          
+
           // Glitch animation if ghosts increase (entropic instability)
           if (oldGhosts !== -1 && currentGhosts > oldGhosts) {
              ghostsVal.classList.add('glitch-anim');
              setTimeout(() => ghostsVal.classList.remove('glitch-anim'), 600);
           }
           oldGhosts = currentGhosts;
-          
+
           ghostsVal.innerHTML = '<span class="ghost-pulse"></span>' + currentGhosts;
-          
+
           tsEl.innerText = 'Last sync: ' + new Date(data.timestamp).toLocaleString();
           tsEl.style.color = 'var(--text-secondary)';
         } catch (e) {
@@ -260,12 +260,12 @@
         tsEl.innerText = 'STATUS: OFFLINE (Wake the Daemon / reporterd.py)';
         tsEl.style.color = '#FF3B3B';
         evtSource.close();
-        
+
         // Reconnect loop (Trampolin protocol logic)
         setTimeout(connectSSE, 3000);
       };
     }
-    
+
     // Init Sovereign Link
     connectSSE();
   </script>

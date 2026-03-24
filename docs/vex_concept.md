@@ -98,16 +98,16 @@ The core loop that executes each step and produces hash-chained receipts.
 async def vex_execute(plan: TaskPlan) -> ExecutionReceipt:
     """Execute a plan with full cryptographic verification."""
     receipt = ExecutionReceipt(task_id=plan.task_id)
-    
+
     for step in plan.steps:
         # 1. TETHER CHECK (Brainstem)
         if not await tether_allows(step):
             receipt.abort(reason="tether_violation", step=step)
             break
-        
+
         # 2. EXECUTE (Left Brain)
         result = await execute_step(step)
-        
+
         # 3. RECORD (Hash-chain)
         tx = await ledger.log_transaction(
             project=plan.task_id,
@@ -120,7 +120,7 @@ async def vex_execute(plan: TaskPlan) -> ExecutionReceipt:
                 "success": result.success,
             }
         )
-        
+
         # 4. PERSIST MEMORY (L3)
         await cortex.store(
             project=plan.task_id,
@@ -128,16 +128,16 @@ async def vex_execute(plan: TaskPlan) -> ExecutionReceipt:
             fact_type="execution_step",
             meta={"tx_hash": tx.hash, "step_id": step.step_id}
         )
-        
+
         receipt.add_step(step, result, tx)
-    
+
     # 5. MERKLE CHECKPOINT
     receipt.merkle_root = await ledger.create_merkle_checkpoint()
-    
+
     # 6. OPTIONAL: CONSENSUS (if multi-agent)
     if plan.requires_consensus:
         receipt.consensus = await consensus.request_votes(receipt)
-    
+
     return receipt
 ```
 
@@ -157,11 +157,11 @@ class ExecutionReceipt:
     status: str                     # "completed" | "aborted" | "partial"
     consensus_score: float          # WBFT consensus (1.0 = unanimous)
     receipt_hash: str               # SHA-256 of the entire receipt
-    
+
     def verify(self) -> bool:
         """Self-verification: recompute receipt_hash and compare."""
         ...
-    
+
     def export_proof(self) -> dict:
         """Export as a portable JSON proof for third-party verification."""
         ...
@@ -292,7 +292,7 @@ GET  /v1/vex/history      — List executions with filters
 
 ```
 DECISION: CORTEX Verifiable Execution (VEX) concept
-DERIVATION: 
+DERIVATION:
   Ω₀ (Self-Reference) — This document describes the next form of CORTEX; reading it executes it.
   Ω₂ (Entropic Asymmetry) — VEX reduces entropy: one system for both memory AND execution trust.
   Ω₃ (Byzantine Default) — No runner is trusted. VEX makes trust verifiable, not assumed.

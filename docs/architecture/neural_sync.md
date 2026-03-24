@@ -7,7 +7,7 @@
 
 ## 🏗️ 1. Arquitectura Base (Desacoplada)
 
-El sistema **Neural-Bandwidth Sync** se apoya en un bucle asíncrono e independiente (`_run_neural_loop`) que forma parte del demonio de MOSKV-1 (`MoskvDaemon`). 
+El sistema **Neural-Bandwidth Sync** se apoya en un bucle asíncrono e independiente (`_run_neural_loop`) que forma parte del demonio de MOSKV-1 (`MoskvDaemon`).
 A diferencia de los monitores pesados (ej. disco o bases de datos) que se ejecutan cada 300 segundos, el Neural Sync mantiene un muestreo agresivo de **1Hz (1 vez por segundo)**.
 
 **¿Por qué desacoplado?**
@@ -15,7 +15,7 @@ Para evitar bloquear el *event loop* del demonio principal. Si un rastreo neural
 
 ## ⚡ 2. Zero-Latency Sensors (Sensores PyObjC)
 
-Originalmente, los sensores del sistema leían el estado de macOS usando subprocesos costosos (`osascript` para leer ventanas y `pbpaste` para leer el portapapeles). 
+Originalmente, los sensores del sistema leían el estado de macOS usando subprocesos costosos (`osascript` para leer ventanas y `pbpaste` para leer el portapapeles).
 Bajo el estándar MEJORAlo 130/100, estos se refactorizaron a llamadas nativas usando **PyObjC**:
 
 1. **`ActiveWindowSensor`**: Utiliza `AppKit.NSWorkspace.sharedWorkspace().frontmostApplication()` para detectar milimétricamente el cambio de ventana activa.

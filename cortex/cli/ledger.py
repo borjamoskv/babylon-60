@@ -2,8 +2,9 @@
 
 import click
 from rich.console import Console
+from rich.panel import Panel
 
-from cortex.cli.common import DEFAULT_DB, _run_async, get_engine
+from cortex.cli.common import DEFAULT_DB, _run_async, get_engine, get_tracker
 
 console = Console()
 
@@ -26,11 +27,13 @@ def verify_ledger(db):
             result = await engine.verify_ledger()
             if result.get("valid"):
                 console.print(
-                    f"[bold green]Ledger is VALID[/bold green] ({result.get('tx_checked')} TXs, {result.get('roots_checked')} Roots)"
+                    f"[bold green]Ledger is VALID[/bold green] "
+                    f"({result.get('tx_checked')} TXs, {result.get('roots_checked')} Roots)"
                 )
             else:
                 console.print(
-                    f"[bold red]Ledger is COMPROMISED[/bold red]: {len(result.get('violations', []))} violations"
+                    f"[bold red]Ledger is COMPROMISED[/bold red]: "
+                    f"{len(result.get('violations', []))} violations"
                 )
                 for v in result.get("violations", [])[:5]:
                     console.print(f"  - {v}")
@@ -49,13 +52,11 @@ def create_checkpoint(db):
         engine = get_engine(db)
         try:
             await engine.init_db()
-            ledger_inst = getattr(engine, "_ledger", None)
-            if not ledger_inst:
-                from cortex.engine.ledger import SovereignLedger
+            ledger_inst = engine.ledger
 
-                # Re-using the connection from the engine
-                conn = await engine.get_conn()
-                ledger_inst = SovereignLedger(conn)  # type: ignore[reportArgumentType]
+            if not ledger_inst:
+                console.print("[bold red]Error:[/] Ledger not available in engine.")
+                return
 
             root_id = await ledger_inst.create_checkpoint()
             if root_id:
@@ -64,6 +65,38 @@ def create_checkpoint(db):
                 )
             else:
                 console.print("[yellow]No new transactions to checkpoint.[/yellow]")
+        finally:
+            await engine.close()
+
+    _run_async(_run())
+
+
+@ledger_cmds.command(name="list")
+@click.option("--project", default="", help="Filter by project")
+@click.option("--limit", default=20, help="Max entries to show")
+@click.option("--days", default=7, help="Show last N days")
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def list_ledger_cmd(project: str, limit: int, days: int, db: str):
+    """List ledger entries (unified view)."""
+
+    async def _run():
+        engine = get_engine(db)
+        try:
+            await engine.init_db()
+            tracker = await get_tracker(engine)
+            report = await tracker.report(project=project, days=days)
+
+            if not report.entries and not report.heartbeats:
+                console.print("[yellow]No entries found for the selected period.[/]")
+                return
+
+            console.print(Panel(
+                f"[bold blue]Ledger Summary[/]\n"
+                f"Project: {project or 'ALL'}\n"
+                f"Last {days} days: {report.total_seconds / 3600:.1f}h total\n"
+                f"Entries: {report.entries} | Heartbeats: {report.heartbeats}",
+                title="CORTEX"
+            ))
         finally:
             await engine.close()
 
@@ -84,15 +117,13 @@ def record_transaction(project, action, detail, db):
         try:
             await engine.init_db()
             det = json.loads(detail)
-            
-            # Use engine's ledger if it exists, otherwise create one
-            ledger_inst = getattr(engine, "_ledger", None)
-            if not ledger_inst:
-                from cortex.engine.ledger import SovereignLedger
-                conn = await engine.get_conn()
-                ledger_inst = SovereignLedger(conn)
 
-            h = await ledger_inst.record_transaction(project, action, det)
+            ledger_inst = engine.ledger
+            if not ledger_inst:
+                console.print("[bold red]Error:[/] Ledger not available in engine.")
+                return
+
+            h = ledger_inst.record_transaction(project, action, det)
             console.print(f"[bold green]Transaction recorded.[/] Hash: [dim]{h}[/]")
         except json.JSONDecodeError:
             console.print("[bold red]Error:[/] 'detail' must be a valid JSON string.")

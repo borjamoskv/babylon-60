@@ -192,7 +192,8 @@ Para más detalles, consulta: [**OMEGA_MANIFOLD.md**](architecture/OMEGA_MANIFOL
 | `embeddings/__init__.py` | ONNX-optimized MiniLM-L6-v2 (384-dim) |
 | `embeddings/api_embedder.py` | Cloud embeddings (Gemini/OpenAI) |
 | `embeddings/manager.py` | Mode-aware switcher (`local` / `api`) |
-| `search/` | Advanced semantic search with graph context |
+| `shannon/` | Medición de entropía informacional | `IMPLEMENTED` — vía `AutodidactRouter` |
+| `search/` | Búsqueda por gradiente | `DECORATIVE` — busca similitud, no gap causal |
 
 ### Memory Intelligence
 
@@ -203,6 +204,7 @@ Para más detalles, consulta: [**OMEGA_MANIFOLD.md**](architecture/OMEGA_MANIFOL
 | `memory/` | Memory management and lifecycle |
 | `episodic/` | Session snapshots, boot-time recall |
 | `thinking/` | Thought Orchestra, semantic routing |
+| `llm/autodidact_router.py` | [**Autodidact-Ω**](AUTODIDACT-ROUTING.md) — Entropy-aware cognitive routing |
 
 ### Trust & Security
 

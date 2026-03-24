@@ -22,13 +22,13 @@ tmp_path = PosixPath('/private/var/folders/r_/hw1ds2nj49zffr6r4m_81r5h0000gn/T/p
 >       e = CortexEngine(db_path=db, auto_embed=False)
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-tests/test_purge_bounded.py:11: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_purge_bounded.py:11:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 cortex/engine/__init__.py:93: in __init__
     self._enforce_frontier_policy()
 cortex/engine/__init__.py:100: in _enforce_frontier_policy
     FrontierModelGuard().validate_config(provider=config.LLM_PROVIDER, model=config.LLM_MODEL)
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 self = <cortex.guards.frontier_guard.FrontierModelGuard object at 0x10a720440>
 provider = '', model = ''
@@ -36,25 +36,25 @@ provider = '', model = ''
     def validate_config(self, provider: str, model: str | None = None) -> None:
         """
         Validates the current LLM configuration against Rule 1.3.
-    
+
         Args:
             provider: The LLM provider (e.g., 'openai', 'ollama').
             model: Optional specific model name. If None, checks provider default.
-    
+
         Raises:
             SovereignViolation: If the model/provider tier is not 'frontier' or 'high'.
         """
         if not self.presets_path.exists():
             logger.warning("FrontierModelGuard: presets file not found at %s. Skipping validation.", self.presets_path)
             return
-    
+
         try:
             with open(self.presets_path) as f:
                 presets = json.load(f)
         except Exception as e:
             logger.error("FrontierModelGuard: Failed to load presets: %s", e)
             return
-    
+
         if provider not in presets:
             msg = f"FrontierModelGuard: Unknown provider '{provider}'. Rejecting for safety (Rule 1.3)."
             logger.error(msg)
@@ -75,13 +75,13 @@ tmp_path = PosixPath('/private/var/folders/r_/hw1ds2nj49zffr6r4m_81r5h0000gn/T/p
 >       e = CortexEngine(db_path=db, auto_embed=False)
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-tests/test_purge_bounded.py:11: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_purge_bounded.py:11:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 cortex/engine/__init__.py:93: in __init__
     self._enforce_frontier_policy()
 cortex/engine/__init__.py:100: in _enforce_frontier_policy
     FrontierModelGuard().validate_config(provider=config.LLM_PROVIDER, model=config.LLM_MODEL)
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 self = <cortex.guards.frontier_guard.FrontierModelGuard object at 0x10a742c10>
 provider = '', model = ''
@@ -89,25 +89,25 @@ provider = '', model = ''
     def validate_config(self, provider: str, model: str | None = None) -> None:
         """
         Validates the current LLM configuration against Rule 1.3.
-    
+
         Args:
             provider: The LLM provider (e.g., 'openai', 'ollama').
             model: Optional specific model name. If None, checks provider default.
-    
+
         Raises:
             SovereignViolation: If the model/provider tier is not 'frontier' or 'high'.
         """
         if not self.presets_path.exists():
             logger.warning("FrontierModelGuard: presets file not found at %s. Skipping validation.", self.presets_path)
             return
-    
+
         try:
             with open(self.presets_path) as f:
                 presets = json.load(f)
         except Exception as e:
             logger.error("FrontierModelGuard: Failed to load presets: %s", e)
             return
-    
+
         if provider not in presets:
             msg = f"FrontierModelGuard: Unknown provider '{provider}'. Rejecting for safety (Rule 1.3)."
             logger.error(msg)
@@ -128,13 +128,13 @@ tmp_path = PosixPath('/private/var/folders/r_/hw1ds2nj49zffr6r4m_81r5h0000gn/T/p
 >       e = CortexEngine(db_path=db, auto_embed=False)
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-tests/test_purge_bounded.py:11: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_purge_bounded.py:11:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 cortex/engine/__init__.py:93: in __init__
     self._enforce_frontier_policy()
 cortex/engine/__init__.py:100: in _enforce_frontier_policy
     FrontierModelGuard().validate_config(provider=config.LLM_PROVIDER, model=config.LLM_MODEL)
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 self = <cortex.guards.frontier_guard.FrontierModelGuard object at 0x10a775950>
 provider = '', model = ''
@@ -142,25 +142,25 @@ provider = '', model = ''
     def validate_config(self, provider: str, model: str | None = None) -> None:
         """
         Validates the current LLM configuration against Rule 1.3.
-    
+
         Args:
             provider: The LLM provider (e.g., 'openai', 'ollama').
             model: Optional specific model name. If None, checks provider default.
-    
+
         Raises:
             SovereignViolation: If the model/provider tier is not 'frontier' or 'high'.
         """
         if not self.presets_path.exists():
             logger.warning("FrontierModelGuard: presets file not found at %s. Skipping validation.", self.presets_path)
             return
-    
+
         try:
             with open(self.presets_path) as f:
                 presets = json.load(f)
         except Exception as e:
             logger.error("FrontierModelGuard: Failed to load presets: %s", e)
             return
-    
+
         if provider not in presets:
             msg = f"FrontierModelGuard: Unknown provider '{provider}'. Rejecting for safety (Rule 1.3)."
             logger.error(msg)

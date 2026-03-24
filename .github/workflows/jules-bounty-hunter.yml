@@ -1,0 +1,108 @@
+name: Jules Bounty Hunter
+
+on:
+  issues:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: "Task for Jules to execute"
+        required: true
+        type: string
+      repo:
+        description: "Target repo (owner/name)"
+        required: false
+        default: "borjamoskv/Cortex-Persist"
+        type: string
+      branch:
+        description: "Starting branch"
+        required: false
+        default: "main"
+        type: string
+  schedule:
+    - cron: '0 4 * * 1'  # Weekly Monday 4 AM UTC — security sweep
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  bounty-hunt:
+    runs-on: ubuntu-latest
+
+    # Issue trigger: only fire on 'jules' or 'bounty' labels from trusted users
+    if: >-
+      github.event_name != 'issues' ||
+      (
+        (github.event.label.name == 'jules' || github.event.label.name == 'bounty') &&
+        contains(fromJSON('["borjamoskv"]'), github.event.issue.user.login)
+      )
+
+    steps:
+      # --- Issue-triggered ---
+      - name: Jules — Fix Issue
+        if: github.event_name == 'issues'
+        uses: google-labs-code/jules-invoke@v1
+        with:
+          prompt: |
+            You are a sovereign CORTEX agent. Diagnose and fix the following issue:
+
+            ## ${{ github.event.issue.title }}
+
+            ${{ github.event.issue.body }}
+
+            Process:
+            1. Analyze the bug report and identify root cause
+            2. Trace the issue through the codebase
+            3. Implement a minimal, targeted fix
+            4. Add a regression test
+            5. Run `pytest tests/ -x` to verify
+
+            Constraints:
+            - Keep changes under 200 lines
+            - All existing tests must pass
+            - Follow ruff formatting (line length 100)
+          jules_api_key: ${{ secrets.JULES_API_KEY }}
+          starting_branch: 'main'
+
+      # --- Manual dispatch ---
+      - name: Jules — Manual Task
+        if: github.event_name == 'workflow_dispatch'
+        uses: google-labs-code/jules-invoke@v1
+        with:
+          prompt: ${{ inputs.prompt }}
+          jules_api_key: ${{ secrets.JULES_API_KEY }}
+          starting_branch: ${{ inputs.branch }}
+
+      # --- Scheduled weekly sweep ---
+      - name: Jules — Weekly Security & Perf Sweep
+        if: github.event_name == 'schedule'
+        uses: google-labs-code/jules-invoke@v1
+        with:
+          prompt: |
+            You are a security and performance agent for cortex-persist.
+
+            CRITICAL (fix immediately):
+            - Hardcoded secrets, API keys, passwords
+            - SQL injection, command injection
+            - Missing auth on sensitive endpoints
+            - Unsafe deserialization
+
+            HIGH PRIORITY:
+            - XSS, CSRF vulnerabilities
+            - Missing input validation
+            - Deprecated dependency versions with known CVEs
+
+            PERFORMANCE:
+            - Run `pytest tests/ -x --tb=short` and identify slow tests
+            - Look for O(N²) patterns in hot paths
+            - Check for blocking calls in async code
+
+            Rules:
+            - Fix highest severity first
+            - Keep changes under 150 lines per file
+            - All existing tests must pass
+            - Follow ruff formatting (line length 100)
+          jules_api_key: ${{ secrets.JULES_API_KEY }}
+          starting_branch: 'main'
+          include_commit_log: true

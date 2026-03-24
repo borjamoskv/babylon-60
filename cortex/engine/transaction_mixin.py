@@ -32,9 +32,13 @@ class TransactionMixin(EngineMixinBase):
     ) -> int:
         from cortex.utils.canonical import canonical_json, compute_tx_hash
 
+        tenant_id = self._resolve_tenant(tenant_id)
         dj = canonical_json(detail)
         ts = now_iso()
-        cursor = await conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1")
+        cursor = await conn.execute(
+            "SELECT hash FROM transactions WHERE tenant_id = ? ORDER BY id DESC LIMIT 1",
+            (tenant_id,),
+        )
         prev = await cursor.fetchone()
         await cursor.close()
         ph = prev[0] if prev else "GENESIS"
@@ -43,9 +47,8 @@ class TransactionMixin(EngineMixinBase):
         c = await conn.execute(
             "INSERT INTO transactions "
             "(project, action, detail, prev_hash, hash, timestamp, tenant_id) "
-            "VALUES (?, ?, ?, COALESCE((SELECT hash FROM transactions "
-            "ORDER BY id DESC LIMIT 1), 'GENESIS'), ?, ?, ?)",
-            (project, action, dj, th, ts, tenant_id),
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (project, action, dj, ph, th, ts, tenant_id),
         )
         tx_id = c.lastrowid
 
@@ -59,8 +62,14 @@ class TransactionMixin(EngineMixinBase):
 
         if getattr(self, "_ledger", None):
             try:
-                self._ledger.record_write()
-                await self._ledger.create_checkpoint_async()
+                record_write = getattr(self._ledger, "record_write_metric", None) or getattr(
+                    self._ledger,
+                    "record_write",
+                    None,
+                )
+                if callable(record_write):
+                    record_write()
+                await self._ledger.create_checkpoint_async(tenant_id=tenant_id)
             except (sqlite3.Error, OSError, RuntimeError, AttributeError) as e:
                 logger.warning("Auto-checkpoint failed: %s", e)
                 from cortex.telemetry.metrics import metrics
@@ -72,16 +81,17 @@ class TransactionMixin(EngineMixinBase):
 
         return int(tx_id) if tx_id is not None else 0
 
-    async def verify_ledger(self) -> dict[str, Any]:
+    async def verify_ledger(self, tenant_id: str = "default") -> dict[str, Any]:
+        tenant_id = self._resolve_tenant(tenant_id)
         if getattr(self, "_get_ledger", None):
             ledger = self._get_ledger()
-            return await ledger.verify_integrity_async()
-            
+            return await ledger.verify_integrity_async(tenant_id=tenant_id)
+
         if not getattr(self, "_ledger", None):
-            from cortex.engine.ledger import SovereignLedger
-            
+            from cortex.ledger import SovereignLedger
+
             async with self.session() as conn:
                 ledger = SovereignLedger(conn)
-                return await ledger.verify_integrity_async()
-        
-        return await self._ledger.verify_integrity_async()
+                return await ledger.verify_integrity_async(tenant_id=tenant_id)
+
+        return await self._ledger.verify_integrity_async(tenant_id=tenant_id)

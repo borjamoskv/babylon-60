@@ -12,7 +12,7 @@ import uuid
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.swarm.budget import get_budget_manager
 
@@ -33,13 +33,13 @@ class SwarmTask:
     agent_name: str = "UniversalAgent"
     status: TaskStatus = TaskStatus.PENDING
     result: Any = None
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class CapatazOrchestrator:
     """The Capataz (Foreman). Coordinates a polyphony of agents."""
 
-    def __init__(self, mission_id: Optional[str] = None):
+    def __init__(self, mission_id: str | None = None):
         self.mission_id = mission_id or f"mission-{uuid.uuid4().hex[:8]}"
         self.tasks: dict[str, SwarmTask] = {}
         self.budget = get_budget_manager()
@@ -50,7 +50,7 @@ class CapatazOrchestrator:
         url: str,
         headers: dict[str, str],
         payload: dict[str, Any],
-        mission_id: Optional[str] = None,
+        mission_id: str | None = None,
     ) -> str:
         # This method is intended to be implemented later, likely involving
         # an HTTP call to an LLM endpoint and tracking its budget.
@@ -63,9 +63,9 @@ class CapatazOrchestrator:
         agent_name: str,
         coro_func: Callable,
         args: list | tuple = (),
-        kwargs: Optional[dict] = None,
-        lock_resource: Optional[str] = None,
-        lock_manager: Optional[Any] = None,
+        kwargs: dict | None = None,
+        lock_resource: str | None = None,
+        lock_manager: Any | None = None,
         lock_timeout_s: float = 10.0,
         lock_ttl_s: float = 30.0,
     ) -> Any:

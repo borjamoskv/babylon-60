@@ -23,7 +23,7 @@ AGENCIA SOBERANA =
   intercambiando resoluciones (Teoría de Información → CORTEX: Tombstoning / Semantic RAM)
   de incertidumbre            (Ciencias Cognitivas  → noosphere-omega: Global Workspace)
   mientras rediseñan          (Teoría del Aprendizaje → ouroboros + trampolin: AST auto-mutante)
-  sus propios pesos           
+  sus propios pesos  
   bajo fronteras de impacto   (Ética Aplicada       → immune-system-v1: Cierre Operacional)
   inquebrantables
 ```

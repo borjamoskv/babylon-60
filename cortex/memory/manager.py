@@ -10,10 +10,11 @@ from typing import Any
 
 # Memory OS (RFC-CORTEX-MEMORY-OS)
 from cortex.compaction.mem0_pipeline import Mem0Pipeline
+from cortex.engine.membrane import Action, SovereignMembrane
+from cortex.ledger.event_ledger import EventLedgerL3
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.engrams import CortexSemanticEngram
 from cortex.memory.hdc import HDCEncoder, HDCVectorStoreL2
-from cortex.memory.ledger import EventLedgerL3
 from cortex.memory.memory_compression import compress_and_store
 from cortex.memory.memory_retrieval import retrieve_episodic_context
 from cortex.memory.models import MemoryEvent
@@ -21,6 +22,12 @@ from cortex.memory.resonance import AdaptiveResonanceGate
 from cortex.memory.schemas import SchemaEngine
 from cortex.memory.thalamus import ThalamusGate
 from cortex.memory.working import WorkingMemoryL1
+from cortex.telemetry.metrics import metrics
+
+try:
+    from cortex.routes.notch_ws import notify_notch_pruning
+except ImportError:
+    async def notify_notch_pruning(*args, **kwargs): pass
 
 try:
     from cortex.extensions.policy.memory_os import MemoryOS
@@ -40,8 +47,6 @@ try:
     from cortex.extensions.sovereign.endocrine import DigitalEndocrine
 except ImportError:
     DigitalEndocrine = None  # type: ignore
-
-from cortex.telemetry.metrics import metrics
 
 try:
     from cortex.extensions.thinking.fusion import ContextFusion
@@ -98,6 +103,9 @@ class CortexMemoryManager:
         "metamemory",
         "_mem0_pipeline",
         "_memory_os",
+        "_membrane",
+        "_tool_fails",
+        "_stale_reads",
     )
 
     DEFAULT_MAX_BG_TASKS: int = 100
@@ -147,6 +155,9 @@ class CortexMemoryManager:
         # Memory OS subsystems (RFC-CORTEX-MEMORY-OS / Axiom Ω₁₃)
         self._mem0_pipeline = Mem0Pipeline()
         self._memory_os = MemoryOS() if MemoryOS else None
+        self._membrane = SovereignMembrane()
+        self._tool_fails = 0
+        self._stale_reads = 0
 
         # ART-v2 Resonance Engine [v6.2]
         _sensor = None
@@ -205,14 +216,39 @@ class CortexMemoryManager:
     ) -> MemoryEvent:
         """Process a new interaction through the memory pipeline.
 
-        1. Persist to L3 (immutable ledger)
-        2. Push to L1 (working memory)
-        3. If overflow → compress and embed to L2 in background
+        1. Sovereign Membrane Gate (Ω₁)
+        2. Persist to L3 (immutable ledger)
+        3. Push to L1 (working memory)
+        4. If overflow → compress and embed to L2 in background
         """
         tenant_id = tenant_id or get_tenant_id()
         _meta = metadata or {}
         _meta["tenant_id"] = tenant_id
         _meta["project_id"] = project_id
+
+        # ── Sovereign Membrane Gate (Ω₁) ───────────────────────
+        counters = {
+            "consecutive_tool_fails": self._tool_fails,
+            "file_reads_without_delta": self._stale_reads,
+        }
+
+        result = self._membrane.evaluate(
+            content=content,
+            fact_type="interaction",
+            counters=counters,
+            metadata=_meta,
+        )
+
+        # Apply membrane patches
+        if result.metadata_patch:
+            _meta.update(result.metadata_patch)
+
+        # We don't REJECT interactions (to avoid breaking chat),
+        # but we mark them for quarantine if breached.
+        if result.action == Action.REJECT:
+            _meta["membrane_breach"] = True
+            _meta["quarantined"] = True
+            logger.warning("CortexMemoryManager: Membrane breach detected in interaction.")
 
         event = MemoryEvent(
             role=role,
@@ -242,6 +278,18 @@ class CortexMemoryManager:
                 )
 
         return event
+
+    def record_behavioral_telemetry(self, tool_fail: bool = False, stale_read: bool = False) -> None:
+        """Update behavioral telemetry counters for the membrane (Ω₁)."""
+        if tool_fail:
+            self._tool_fails += 1
+        else:
+            self._tool_fails = 0
+
+        if stale_read:
+            self._stale_reads += 1
+        else:
+            self._stale_reads = 0
 
     def _check_deduplication(self, tenant_id: str, project_id: str, content: str) -> str | None:
         """Return deduplicated ID if fact exists, else None."""
@@ -326,18 +374,37 @@ class CortexMemoryManager:
         tenant_id = tenant_id or get_tenant_id()
         conn = self._l2._get_conn() if hasattr(self._l2, "_get_conn") else None
 
-        # ── Mem0 Exergy Pre-Filter (RFC-CORTEX-MEMORY-OS) ──────────
-        exergy = await self._mem0_pipeline.evaluate_exergy(
-            {"content": content, "fact_type": fact_type, "metadata": metadata}
-        )
-        if exergy.score < self._mem0_pipeline.exergy_threshold:
-            logger.info(
-                "CortexMemoryManager: Fact rejected by Mem0 exergy gate: %s",
-                exergy.score,
-            )
-            return f"filtered:low_exergy:{exergy.score}"
+        # ── Sovereign Membrane (OAXACA-1) ───────────────────────
+        # Combines semantic density (Exergy) and behavioral telemetry.
+        # Replaces fragmented Mem0 and Thalamus pre-filters.
 
-        should_process, action, _ = await self.thalamus.filter(
+        # Gather behavioral counters (if available)
+        counters = {
+            "consecutive_tool_fails": getattr(self, "_tool_fails", 0),
+            "file_reads_without_delta": getattr(self, "_stale_reads", 0)
+        }
+
+        result = self._membrane.evaluate(
+            content=content,
+            fact_type=fact_type,
+            counters=counters,
+            metadata=metadata
+        )
+
+        if result.action == Action.REJECT:
+            return f"filtered:membrane_reject:{result.diagnostic.reasons[0]}"
+
+        if result.action == Action.DEGRADE:
+            logger.info("CortexMemoryManager: Fact degraded to decorative by membrane.")
+            fact_type = "decorative"
+
+        _meta = metadata or {}
+        if result.metadata_patch:
+            _meta.update(result.metadata_patch)
+
+        # Thalamus level 2: Semantic Redundancy & Causal Saturation
+        # (Membrane handles L1 filters: Density & Exergy)
+        should_process, thalamus_action, _ = await self.thalamus.filter(
             content=content,
             project_id=project_id,
             tenant_id=tenant_id,
@@ -346,11 +413,9 @@ class CortexMemoryManager:
             conn=conn,
         )
         if not should_process:
-            logger.info("CortexMemoryManager: Fact filtered by Thalamus. Action: %s", action)
-            from cortex.routes.notch_ws import notify_notch_pruning
-
+            logger.info("CortexMemoryManager: Fact filtered by Thalamus. Action: %s", thalamus_action)
             await notify_notch_pruning()
-            return f"filtered:{action}"
+            return f"filtered:{thalamus_action}"
 
         dedup_id = self._check_deduplication(tenant_id, project_id, content)
         if dedup_id:

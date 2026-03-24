@@ -6,8 +6,6 @@ breaks automatically.
 
 from __future__ import annotations
 
-from typing import Optional
-
 from cortex.extensions.health.collector import (
     CollectorRegistry,
     create_default_registry,
@@ -17,7 +15,7 @@ from cortex.extensions.health.models import Grade
 
 
 def verify_health_system(
-    registry: Optional[CollectorRegistry] = None,
+    registry: CollectorRegistry | None = None,
 ) -> list[str]:
     """Verify all health system invariants.
 

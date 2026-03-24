@@ -23,6 +23,7 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from cortex.ledger.event_ledger import EventLedgerL3
     from cortex.memory.consolidation import SilentEngram, SystemsConsolidator
     from cortex.memory.drift import DriftMonitor, DriftSignature
     from cortex.memory.encoder import AsyncEncoder
@@ -34,7 +35,6 @@ if TYPE_CHECKING:
         RetrievalBand,
     )
     from cortex.memory.homeostasis import DynamicSynapseUpdate, EntropyPruner
-    from cortex.memory.ledger import EventLedgerL3
     from cortex.memory.manager import CortexMemoryManager
     from cortex.memory.metamemory import (
         MemoryCard,
@@ -141,7 +141,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "DynamicSynapseUpdate": ("cortex.memory.homeostasis", "DynamicSynapseUpdate"),
     "EntropyPruner": ("cortex.memory.homeostasis", "EntropyPruner"),
     # ledger
-    "EventLedgerL3": ("cortex.memory.ledger", "EventLedgerL3"),
+    "EventLedgerL3": ("cortex.ledger.event_ledger", "EventLedgerL3"),
     # manager
     "CortexMemoryManager": ("cortex.memory.manager", "CortexMemoryManager"),
     # metamemory

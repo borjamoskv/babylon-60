@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-pytestmark = pytest.mark.slow
+pytestmark = [pytest.mark.slow, pytest.mark.usefixtures("skip_exergy_validation")]
 
 
 @pytest.fixture
@@ -22,9 +22,6 @@ async def tracker(tmp_path: Path):
     t._ensure_init()
     yield t
     t.close()
-
-
-# ─── log_decision ─────────────────────────────────────────────────────
 
 
 class TestLogDecision:
@@ -44,7 +41,7 @@ class TestLogDecision:
         )
         # Retrieve the fact and check meta
         conn = await tracker._engine.get_conn()
-        cursor = await conn.execute("SELECT meta FROM facts WHERE id = ?", (fact_id,))
+        cursor = await conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id,))
         row = await cursor.fetchone()
         assert row is not None
 
@@ -64,7 +61,7 @@ class TestLogDecision:
             meta={"model": "gpt-4", "latency_ms": 230},
         )
         conn = await tracker._engine.get_conn()
-        cursor = await conn.execute("SELECT meta FROM facts WHERE id = ?", (fact_id,))
+        cursor = await conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id,))
         row = await cursor.fetchone()
 
         from cortex.crypto import get_default_encrypter

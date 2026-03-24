@@ -4,6 +4,21 @@ All notable changes to CORTEX, derived from the git history.
 
 ---
 
+## v8.2.0 — Azkartu & Swarm-100 (March 24, 2026)
+
+### Added
+
+- **Squadron Orchestration**: Dedicated P0/P1/P2 task forces in `SwarmManager` via `deploy_squad()`.
+- **Azkartu JIT Cache**: High-frequency sub-ms search caching in `SovereignVectorStoreL2`.
+- **Shannon Compaction**: Proactive entropy reduction and memory hygiene integrated into the `Pulmones` loop.
+- **Autonomous Recovery**: `PulmonesWorker` daemon for high-availability tool retry and maintenance.
+
+---
+
+## v8.1.0 — Autodidact-Ω (March 24, 2026)
+
+---
+
 ## v8.0.0 — Sovereign Cloud (February 24, 2026)
 
 ### Added

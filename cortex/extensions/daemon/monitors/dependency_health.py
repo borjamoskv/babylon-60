@@ -13,9 +13,10 @@ Each check is Optional — if the service isn't configured, it's skipped.
 from __future__ import annotations
 
 import logging
-import os
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
+
+from cortex.storage.env import get_postgres_dsn, get_qdrant_url, get_redis_url
 
 __all__ = ["DependencyHealthMonitor", "DependencyAlert"]
 
@@ -41,7 +42,7 @@ class HealthCheck:
     name: str
     enabled: bool = True
 
-    def check(self) -> Optional[DependencyAlert]:
+    def check(self) -> DependencyAlert | None:
         """Return an alert if unhealthy, None if OK."""
         raise NotImplementedError
 
@@ -49,13 +50,13 @@ class HealthCheck:
 class SQLiteHealthCheck(HealthCheck):
     """Verify SQLite database is accessible and not corrupt."""
 
-    def __init__(self, db_path: Optional[str] = None):
+    def __init__(self, db_path: str | None = None):
         super().__init__(name="sqlite")
         from cortex.config import DEFAULT_DB_PATH
 
         self.db_path = db_path or str(DEFAULT_DB_PATH)
 
-    def check(self) -> Optional[DependencyAlert]:
+    def check(self) -> DependencyAlert | None:
         import sqlite3
         from pathlib import Path
 
@@ -77,10 +78,10 @@ class PostgreSQLHealthCheck(HealthCheck):
 
     def __init__(self):
         super().__init__(name="postgresql")
-        self.dsn = os.environ.get("CORTEX_PG_DSN", "")
+        self.dsn = get_postgres_dsn()
         self.enabled = bool(self.dsn)
 
-    def check(self) -> Optional[DependencyAlert]:
+    def check(self) -> DependencyAlert | None:
         if not self.enabled:
             return None
         try:
@@ -103,10 +104,10 @@ class QdrantHealthCheck(HealthCheck):
 
     def __init__(self):
         super().__init__(name="qdrant")
-        self.url = os.environ.get("CORTEX_QDRANT_URL", "")
+        self.url = get_qdrant_url(default="")
         self.enabled = bool(self.url)
 
-    def check(self) -> Optional[DependencyAlert]:
+    def check(self) -> DependencyAlert | None:
         if not self.enabled:
             return None
         try:
@@ -125,10 +126,10 @@ class RedisHealthCheck(HealthCheck):
 
     def __init__(self):
         super().__init__(name="redis")
-        self.url = os.environ.get("CORTEX_REDIS_URL", "")
+        self.url = get_redis_url(default="")
         self.enabled = bool(self.url)
 
-    def check(self) -> Optional[DependencyAlert]:
+    def check(self) -> DependencyAlert | None:
         if not self.enabled:
             return None
         try:
@@ -149,7 +150,7 @@ class EmbeddingModelHealthCheck(HealthCheck):
     def __init__(self):
         super().__init__(name="embedding_model")
 
-    def check(self) -> Optional[DependencyAlert]:
+    def check(self) -> DependencyAlert | None:
         try:
             from cortex.embeddings.manager import EmbeddingManager
 
@@ -174,8 +175,8 @@ class DependencyHealthMonitor:
 
     def __init__(
         self,
-        db_path: Optional[str] = None,
-        extra_checks: Optional[list[HealthCheck]] = None,
+        db_path: str | None = None,
+        extra_checks: list[HealthCheck] | None = None,
     ):
         self.checks: list[HealthCheck] = [
             SQLiteHealthCheck(db_path),

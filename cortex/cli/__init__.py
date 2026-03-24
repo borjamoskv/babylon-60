@@ -55,7 +55,7 @@ class _LazyCommand(click.Command):
         self._module_path = module_path
         self._attr_name = attr_name
         self._help_text = help_text
-        self._resolved: Optional[click.Command] = None
+        self._resolved: click.Command | None = None
 
     def _resolve(self) -> click.Command:
         if self._resolved is None:
@@ -94,9 +94,9 @@ class _LazyCommand(click.Command):
 
     def make_context(
         self,
-        info_name: Optional[str],
+        info_name: str | None,
         args: list[str],
-        parent: Optional[click.Context] = None,
+        parent: click.Context | None = None,
         **extra,
     ) -> click.Context:
         return self._resolve().make_context(info_name, args, parent=parent, **extra)
@@ -120,7 +120,7 @@ class _LazyGroup(_LazyCommand, click.Group):
             return resolved.list_commands(ctx)
         return []
 
-    def get_command(self, ctx: click.Context, cmd_name: str) -> Optional[click.Command]:
+    def get_command(self, ctx: click.Context, cmd_name: str) -> click.Command | None:
         resolved = self._resolve()
         if isinstance(resolved, click.Group):
             return resolved.get_command(ctx, cmd_name)
@@ -163,6 +163,7 @@ _SELF_REGISTERING_MODULES: list[str] = [
     "cortex.cli.tips_cmds",
     "cortex.cli.trust_cmds",
     "cortex.cli.vote_ledger",
+    "cortex.cli.x_cmds",
 ]
 
 # ─── Standalone groups (@click.group) — need LazyGroup proxy ────────────
@@ -201,6 +202,7 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
     ("security", "cortex.cli.security_cmds", "security_cli", "Security audit commands."),
     ("sovereign", "cortex.cli.keter_cmds", "sovereign_cmds", "Sovereign engine control."),
     ("mcp", "cortex.cli.mcp_cmds", "mcp_cmds", "Model Context Protocol tools."),
+    ("skills", "cortex.cli.skills_cmds", "skills_cmds", "Skill registry and canonical KPI tools."),
     ("josu", "cortex.cli.commands.josu_start", "app", "Manage the JOSU proactive daemon."),
     ("genesis", "cortex.cli.genesis_cmds", "genesis_group", "Genesis Engine — create systems."),
     ("health", "cortex.cli.health_cmds", "health_group", "Health Index — system monitoring."),
@@ -227,6 +229,13 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
         "Domain intelligence and market anomaly arbitrage.",
     ),
     ("wealth", "cortex.cli.wealth_cmds", "wealth_cmds", "Wealth engine."),
+    ("wallet", "cortex.cli.wallet_cmds", "wallet_cmds", "Manage cryptographic wallets and keys."),
+    (
+        "vector-l",
+        "cortex.cli.vector_l_cmds",
+        "vector_l_cmds",
+        "Vector L — PYME bottleneck detection and CORTEX agent sales engine.",
+    ),
 ]
 
 # ─── Lazy standalone commands ────────────────────────────────────────────
@@ -262,7 +271,7 @@ def _patched_list_commands(ctx: click.Context) -> list[str]:
     return _original_list_commands(ctx)
 
 
-def _patched_get_command(ctx: click.Context, cmd_name: str) -> Optional[click.Command]:
+def _patched_get_command(ctx: click.Context, cmd_name: str) -> click.Command | None:
     """Get a command, loading self-registering modules if not found."""
     # First try without loading (catches lazy groups + already loaded commands)
     cmd = _original_get_command(ctx, cmd_name)

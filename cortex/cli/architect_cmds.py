@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from typing import Optional
 
 import click
 from rich.panel import Panel
@@ -40,10 +39,10 @@ Tú debes reescribir esta instrucción bajo la siguiente estructura OBLIGATORIA 
 Define la tarea final medible y los criterios de éxito absolutos. Qué debe lograrse exactamente.
 
 2. PAREDES DE CONTEXTO (CONTEXT)
-Lista de reglas absolutas, constraints técnicos, e información que debe respetarse. 
+Lista de reglas absolutas, constraints técnicos, e información que debe respetarse.
 
 3. REFERENCIA Y ESTRUCTURA (REVERSE ENGINEERING)
-Instrucción secundaria para que el modelo extraiga reglas de tono y estructura si se aplica. 
+Instrucción secundaria para que el modelo extraiga reglas de tono y estructura si se aplica.
 
 4. CRITERIOS DE RECHAZO (ANTI-PATRONES)
 Lista de lo que NO debe hacerse (ej. disclaimers, voz de IA genérica).
@@ -56,7 +55,7 @@ Genera SOLO la instrucción final en markdown, lista para ser copiada y pegada e
 
 _REVERSE_SYSTEM_PROMPT = """
 Eres el SOVEREIGN PROMPT ARCHITECT.
-Has recibido un fragmento de texto "Golden Master". 
+Has recibido un fragmento de texto "Golden Master".
 Tu tarea es hacer Ingeniería Inversa de su estructura y estilo.
 Debes devolver una lista rígida de reglas bajo las categorías "SIEMPRE HACER" y "NUNCA HACER".
 Analiza: el ritmo, la longitud media de la frase, la densidad de información (ratio señal/ruido), la voz (técnica, cínica, académica, industrial noir), y cómo se organizan los párrafos.
@@ -120,7 +119,7 @@ def architect_instruct(filepath: str) -> None:
 
 @architect.command("reverse")
 @click.argument("text", required=False)
-def architect_reverse(text: Optional[str]) -> None:
+def architect_reverse(text: str | None) -> None:
     """Reverse engineer style and structural rules.
 
     Extracts the underlying vector rules (tone, signal/noise ratio, sentence length)

@@ -1,14 +1,20 @@
 🌐 [English](README.md) | **Español** | [中文](README.zh.md)
 
-# CORTEX — Linaje de Decisiones a Prueba de Manipulación para Sistemas de IA
+# CORTEX — Hipervisor Cognitivo para Enjambres de IA: Memoria, Ledger y Gobernanza Soberana
 
-> Tus sistemas de IA toman decisiones.
-> CORTEX las hace **trazables, verificables y auditables**.
->
-> *Logs encadenados por hash, pruebas de integridad Merkle y linaje de decisiones
-> consultable para flujos de trabajo regulados y de alto riesgo.*
+<p align="center">
+  <img alt="CORTEX Premium Preview" src="assets/social-preview.png" width="800" />
+</p>
 
-Paquete: `cortex-persist v0.3.0b1` · Motor: `v8` · Licencia: `Apache-2.0`
+> [!IMPORTANT]
+> **"La inteligencia probabilística requiere gobernanza determinista."**
+
+## ✦ La Infraestructura de Gobernanza ✦
+
+**Cortex-Persist v0.3.1-b1** es el hipervisor cognitivo local-first para enjambres de IA de alta exergía.
+
+> [!NOTE]
+> La memoria tradicional de agentes es frágil—se fragmenta en contextos efímeros y decae en el "hallucination loop". CORTEX atrapa la inferencia estocástica y la cristaliza en un **Ledger Soberano**: un repositorio de hechos, decisiones y estados temporales encadenado por hash y a prueba de manipulaciones.
 
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)

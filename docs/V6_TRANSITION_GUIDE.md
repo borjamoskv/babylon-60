@@ -46,8 +46,8 @@ await manager.process_interaction(role="user", content="...")
 
 # v6 (Current Standard)
 await manager.process_interaction(
-    role="user", 
-    content="...", 
+    role="user",
+    content="...",
     tenant_id="enterprise-customer-id"
 )
 ```

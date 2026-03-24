@@ -53,7 +53,7 @@ class SwarmFactory:
         self.bus = manager.bus
         self.registry = manager.registry
         self.router = router
-        
+
         # Avoid redundant scanning (O(N) reduction)
         if not getattr(self.registry, "is_scanned", False):
             self.registry.scan()
@@ -85,7 +85,7 @@ class SwarmFactory:
                 "exergy_target": 8.0,
             },
         }
-        
+
     @property
     def QUADRANTS(self) -> dict[str, dict[str, Any]]:
         """Public access to Tactical Quadrants (Ω-Structure)."""
@@ -100,7 +100,7 @@ class SwarmFactory:
             raise ValueError(f"Unknown Tactical Quadrant: {quadrant}")
 
         spec = self._quadrants[quadrant]
-        
+
         # Discover matching skills
         matching_skills = []
         for cat in spec["categories"]:
@@ -113,7 +113,7 @@ class SwarmFactory:
                 config = getattr(self.router, "default_config", {}) or {}
                 model_id = config.get("model", "gemini-3-pro")
                 provider = config.get("provider", "google")
-                
+
                 actuator = LLMActuator(
                     self.router,
                     model_id=model_id,
@@ -122,18 +122,18 @@ class SwarmFactory:
                 )
                 self.manager.register_actuator(agent_id, actuator)
                 logger.info("SwarmFactory: Enlisted LLM Leader '%s' for %s", agent_id, spec["role"])
-            
+
             # Spawn Skill Specialists for the rest
             elif matching_skills:
                 skill = matching_skills[index % len(matching_skills)]
                 actuator = SkillActuator(skill)
                 self.manager.register_actuator(agent_id, actuator)
                 logger.info("SwarmFactory: Enlisted Skill Specialist '%s' (%s)", agent_id, skill.name)
-            
+
             # Fallback to JIT specialist
             else:
                 return await self._forge_jit_specialist(spec["intent"])
-            
+
             return agent_id
 
         # Parallelize recruitment
@@ -155,13 +155,13 @@ class SwarmFactory:
                     "audit": "mechanical_justification_v5.6_optimized",
                 },
             )
-            
+
         return list(agent_ids)
 
     async def generate_cycle(
-        self, 
-        quadrant: str, 
-        size: int = 3, 
+        self,
+        quadrant: str,
+        size: int = 3,
         task_context: dict[str, Any] | None = None
     ) -> SwarmCycle:
         """
@@ -170,7 +170,7 @@ class SwarmFactory:
         """
         # 1. Recruit the squad
         agent_ids = await self.recruit_squad(quadrant, size=size)
-        
+
         # 2. Create the Cycle ID (Deterministic)
         cycle_hash = hashlib.sha256(
             f"{quadrant}:{size}:{','.join(agent_ids)}:{datetime.now().timestamp()}".encode()
@@ -179,7 +179,7 @@ class SwarmFactory:
 
         # 3. Record Decision in CausalEngine (Ω₂)
         parent_fact_id = None
-        engine = self.manager.engine
+        engine = getattr(self.manager, "engine", None)
         if engine:
             parent_fact_id = await engine.store(
                 project="swarm",
@@ -215,16 +215,16 @@ class SwarmFactory:
             self.recruit_squad("P2", size=30),
         ]
         results = await asyncio.gather(*tasks)
-        
+
         # Explicit type hinting for linter
         squad_results: list[list[str]] = list(results) # type: ignore
-        
+
         squads = {
             "P0": squad_results[0],
             "P1": squad_results[1],
             "P2": squad_results[2],
         }
-        
+
         logger.info("SwarmFactory: 100 Agents recruited across %d squads (Ω-Structure).", len(squads))
         return squads
 
@@ -249,7 +249,7 @@ class SwarmFactory:
             logger.info("SwarmFactory: Autonomic recruitment for capability '%s' -> %s", capability, agent_id)
             self._capability_cache[capability] = agent_id
             return agent_id
-        
+
         # JIT Fallback logic (Ω₁)
         logger.info("SwarmFactory: Capability '%s' not found. Forging JIT specialist...", capability)
         return await self._forge_jit_specialist(capability)
@@ -279,10 +279,10 @@ class SwarmFactory:
         spec = self._quadrants.get(quadrant)
         if not spec:
             return "Unknown quadrant recruitment."
-        
+
         exergy_target = spec["exergy_target"]
         total_yield = exergy_target * len(agent_ids)
-        
+
         return (
             f"Exergy Target: {exergy_target} | "
             f"Estimated Yield: {total_yield} | "

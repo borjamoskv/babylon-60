@@ -18,7 +18,7 @@ La unidad atómica es el **Belief Object**.
 
 ## 3. El Core API
 La gobernanza del Hipervisor se expone mediante 5 operaciones atómicas de alta densidad:
-1.  `ingest_episode(event_obj)`: Segregación binaria del ruido episódico de la atención inmediata del agente. 
+1.  `ingest_episode(event_obj)`: Segregación binaria del ruido episódico de la atención inmediata del agente.
 2.  `revise_belief(belief_id, evidence_ref)`: Dispara el Sistema de Mantenimiento de Verdad (ATMS). Ejecuta el cierre transitivo de dependencias.
 3.  `resolve_context(query_params)`: Evalúa la ecuación tensorial de inyección de contexto en microsegundos y emite un Paquete de Contexto optimizado (KV-Cache-Refs).
 4.  `attest_lineage(artifact_id)`: Traza el linaje causal para pruebas ZK en industrias reguladas, respondiendo criptográficamente a la pregunta "¿Por qué el modelo creyó esto?".
@@ -44,7 +44,7 @@ La arquitectura destrona al frágil GIL (Global Interpreter Lock) asimilando una
 *   **Integrity Layer (Árboles Merkle - mssmt)**: Almacenamiento matemáticamente inmutable de estado ($O(\log N)$). Proporciona los cimientos estructurales descentralizados donde descansar la confianza normativa.
 
 ## 7. Memory Consolidation (El "Sueño" del Enjambre)
-Cortex-Persist abstrae la red topológicamente en 3 subgrafos ($G_e$: Episódico, $G_s$: Semántica de Entidades, $G_c$: Entidades Comunitarias / Memoria Procedimental). 
+Cortex-Persist abstrae la red topológicamente en 3 subgrafos ($G_e$: Episódico, $G_s$: Semántica de Entidades, $G_c$: Entidades Comunitarias / Memoria Procedimental).
 Durante los ciclos *idle* (inactividad del modelo fundacional), los procesos en background ejecutan heurísticas que consolidan inferencias complejas y *olvidan algorítmicamente* el ruido episódico. Esto detiene implacablemente la expansión letal e incontrolable del contexto del LLM.
 
 ## 8. Conclusión

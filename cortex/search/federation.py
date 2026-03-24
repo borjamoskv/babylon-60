@@ -19,7 +19,6 @@ from __future__ import annotations
 import logging
 import sqlite3
 from pathlib import Path
-from typing import Optional
 
 from cortex.core.paths import COLD_STORAGE_DB, PERSONAL_DB
 from cortex.search.models import SearchResult, SearchScope
@@ -38,7 +37,7 @@ _FEDERATION_MAP: dict[str, tuple[Path, str]] = {
 
 def attach_federated_dbs(
     conn: sqlite3.Connection,
-    scopes: Optional[list[str]] = None,
+    scopes: list[str] | None = None,
 ) -> list[str]:
     """ATTACH secondary databases to an existing connection.
 
@@ -87,7 +86,8 @@ def _search_attached_db(
     conn: sqlite3.Connection,
     alias: str,
     query: str,
-    project: Optional[str] = None,
+    tenant_id: str = "default",
+    project: str | None = None,
     limit: int = 20,
 ) -> list[SearchResult]:
     """Search an attached database's facts table.
@@ -101,14 +101,14 @@ def _search_attached_db(
     enc = get_default_encrypter()
     v6_prefix = CortexEncrypter.PREFIX
 
-    # Fetch active facts (capped at 500 to limit memory)
+    # Fetch active facts scoped to tenant (capped at 500 to limit memory)
     sql = (
         f"SELECT f.id, f.content, f.project, f.fact_type, "
         f"f.confidence, f.source, f.tags "
         f"FROM {alias}.facts f "
-        f"WHERE f.valid_until IS NULL"
+        f"WHERE f.tenant_id = ? AND f.valid_until IS NULL"
     )
-    params: list = []
+    params: list = [tenant_id]
     if project:
         sql += " AND f.project = ?"
         params.append(project)
@@ -129,7 +129,7 @@ def _search_attached_db(
         content_raw = row[1] or ""
         if str(content_raw).startswith(v6_prefix):
             try:
-                content = enc.decrypt_str(content_raw, tenant_id="default")
+                content = enc.decrypt_str(content_raw, tenant_id=tenant_id)
             except (ValueError, TypeError, OSError):
                 continue
         else:
@@ -171,7 +171,8 @@ def federated_search_sync(
     conn: sqlite3.Connection,
     query: str,
     scope: str = "core",
-    project: Optional[str] = None,
+    tenant_id: str = "default",
+    project: str | None = None,
     limit: int = 20,
 ) -> list[SearchResult]:
     """Federated text search across partitioned databases.
@@ -199,6 +200,7 @@ def federated_search_sync(
         core_results = text_search_sync(
             conn,
             query,
+            tenant_id=tenant_id,
             project=project,
             limit=limit,
         )
@@ -224,6 +226,7 @@ def federated_search_sync(
                     conn,
                     alias,
                     query,
+                    tenant_id=tenant_id,
                     project=project,
                     limit=limit,
                 )

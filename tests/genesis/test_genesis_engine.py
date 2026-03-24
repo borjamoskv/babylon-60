@@ -22,6 +22,7 @@ def test_root(tmp_path: Path) -> Path:
     return tmp_path / "genesis_test_workspace"
 
 
+@pytest.mark.usefixtures("skip_exergy_validation")
 class TestGenesisEngineCreate:
     """Core create() flow tests."""
 
@@ -153,6 +154,7 @@ class TestGenesisEngineCreate:
         assert result.validation_passed
 
 
+@pytest.mark.usefixtures("skip_exergy_validation")
 class TestGenesisEngineSelfCreate:
     """Ω₀: Self-referential auto-creation tests."""
 
@@ -224,6 +226,7 @@ class TestGenesisEnginePreview:
 class TestChronosCalculation:
     """CHRONOS-1 yield calculation tests."""
 
+    @pytest.mark.usefixtures("skip_exergy_validation")
     def test_chronos_positive_for_any_creation(self, test_root: Path) -> None:
         """Any genesis operation should report positive hours saved."""
         engine = GenesisEngine(cortex_root=test_root)
@@ -234,6 +237,7 @@ class TestChronosCalculation:
         result = engine.create(spec)
         assert result.hours_saved > 0
 
+    @pytest.mark.usefixtures("skip_exergy_validation")
     def test_chronos_scales_with_complexity(self, test_root: Path) -> None:
         """More components = more hours saved."""
         engine = GenesisEngine(cortex_root=test_root)
@@ -332,6 +336,7 @@ class TestGenesisValidator:
         assert any("Syntax error" in e for e in errors)
 
 
+@pytest.mark.usefixtures("skip_exergy_validation")
 class TestGenesisExtend:
     """Incremental genesis tests (#1)."""
 

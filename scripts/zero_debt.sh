@@ -12,10 +12,10 @@ if [ -f "scripts/entropy_gate.py" ]; then
     else
         PYTHON_EXEC="python3"
     fi
-    
+
     # Ejecutamos el guardián.
     $PYTHON_EXEC scripts/entropy_gate.py
-    
+
     # Si devuelve distinto de 0 (detectó entropía), bloqueamos el commit
     if [ $? -ne 0 ]; then
         exit 1

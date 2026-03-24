@@ -131,6 +131,25 @@ class GitHubCortexBridge:
         resp.raise_for_status()
         return resp.json()
 
+    async def post_bounty_invoice(self, repo: str, number: int, amount: int) -> dict[str, Any]:
+        """Post a payment invoice to a PR using the Algora Invoice Bridge."""
+        try:
+            from cortex.extensions.algora.invoice_injector import AlgoraInvoiceBridge
+        except ImportError:
+            logger.error("AlgoraInvoiceBridge not found.")
+            raise
+
+        injector = AlgoraInvoiceBridge()
+        comment_body = injector.compose_invoice_comment(amount)
+
+        resp = await self._client.post(
+            f"{_GH_API}/repos/{repo}/issues/{number}/comments",
+            json={"body": comment_body}
+        )
+        resp.raise_for_status()
+        logger.info("💰 Injected bounty invoice of $%d into %s#%d", amount, repo, number)
+        return resp.json()
+
     # ─── Repo Discovery ──────────────────────────────────────────────
 
     async def discover_repos(self, repo_filter: str | None = None) -> list[str]:
@@ -378,7 +397,7 @@ class GitHubCortexBridge:
             conn = await self._engine.get_conn()
             cursor = await conn.execute(
                 "SELECT id, metadata FROM facts "
-                "WHERE fact_type = 'bridge' AND valid_until IS NULL "
+                "WHERE fact_type = 'bridge' AND is_tombstoned = 0 "
                 "AND source = ?",
                 (_SOURCE,),
             )
@@ -397,7 +416,8 @@ class GitHubCortexBridge:
                 except (ValueError, TypeError, OSError):
                     continue  # Skip corrupted or non-GitHub entries
         except Exception as exc:  # noqa: BLE001
-            logger.warning("Failed to load existing GitHub keys: %s", exc)
+            logger.exception("Failed to load existing GitHub keys: %s", exc)
+            raise
 
         logger.debug("Loaded %d existing GitHub bridge keys", len(index))
         return index

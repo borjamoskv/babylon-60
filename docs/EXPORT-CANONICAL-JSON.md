@@ -32,7 +32,7 @@ This is canonical internal truth. Adapters (e.g., to EU AI Act compliance format
 
 ## 3. Top-Level Envelope
 
-Every export is a JSON sequence or a singular JSON artifact wrapped in `.cortex_export`. 
+Every export is a JSON sequence or a singular JSON artifact wrapped in `.cortex_export`.
 
 ```json
 {

@@ -2,26 +2,27 @@ import os
 import re
 import sys
 
+
 def fix_file(filepath):
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             content = f.read()
     except UnicodeDecodeError:
         return
 
     changed = False
-    
+
     # 1. Replace 'A | B' with 'Union[A, B]'
     # Handle multiple pipes A | B | C -> Union[A, Union[B, C]]
     # This regex is a bit greedy but should work for most type hints.
     # We look for words, brackets, and dots separated by '|'.
-    
+
     original_content = content
-    
+
     # Simple replacement for common case 'type | None' -> 'Optional[type]'
     content = re.sub(r'([\w\.]+(?:\[[^\]]+\])?)\s*\|\s*None', r'Optional[\1]', content)
     content = re.sub(r'None\s*\|\s*([\w\.]+(?:\[[^\]]+\])?)', r'Optional[\1]', content)
-    
+
     # General replacement for 'A | B' -> 'Union[A, B]'
     # We repeat until no more pipes are found to handle A | B | C
     while ' | ' in content or '|' in content:
@@ -33,15 +34,15 @@ def fix_file(filepath):
 
     if content != original_content:
         changed = True
-        
+
         # 2. Fix imports
         has_union = "Union[" in content
         has_optional = "Optional[" in content
-        
+
         needed = []
         if has_union: needed.append("Union")
         if has_optional: needed.append("Optional")
-        
+
         if needed:
             # Look for existing typing import
             typing_match = re.search(r'from typing import (.*)', content)
@@ -70,7 +71,7 @@ def main():
     target_dir = 'cortex'
     if len(sys.argv) > 1:
         target_dir = sys.argv[1]
-        
+
     print(f"Scanning {target_dir}...")
     for root, dirs, files in os.walk(target_dir):
         # Skip pycache and hidden dirs

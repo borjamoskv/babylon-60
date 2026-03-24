@@ -9,7 +9,7 @@ import logging
 import os
 import typing
 from abc import ABC, abstractmethod
-from typing import Any, Final, Optional, TypedDict
+from typing import Any, Final, TypedDict
 
 from cortex.utils.errors import CortexError
 
@@ -36,6 +36,10 @@ class KeterPayload(TypedDict, total=False):
     fv_audit: str
     score_130_100: float
     status: str
+    is_adrenal_bypass: bool
+    is_quarantined: bool
+    thinking_persist: str
+    taint: str
     # Catch-all for other dynamic kwargs passed to ignite
     kwargs: dict[str, Any]
 
@@ -49,7 +53,7 @@ class SovereignPhase(ABC):
     @abstractmethod
     async def execute(self, payload: KeterPayload) -> KeterPayload:
         """Runs the KETER phase on the given payload."""
-        pass
+        return payload
 
 
 class IntentAlchemist(SovereignPhase):
@@ -204,7 +208,7 @@ class KeterReservoir:
         """)
         self._conn.commit()
 
-    def get(self, mission_id: str) -> Optional[KeterPayload]:
+    def get(self, mission_id: str) -> KeterPayload | None:
         import json
         import sqlite3
 
@@ -255,7 +259,7 @@ class KeterEngine:
         db_path = os.path.join(config_dir, "keter_reservoir.db")
         self._reservoir = KeterReservoir(db_path)
 
-    def _dispatch_skill(self, manifest: Any) -> Optional[SovereignPhase]:
+    def _dispatch_skill(self, manifest: Any) -> SovereignPhase | None:
         slug = getattr(manifest, "slug", "")
         if "evolv" in slug or "intencion" in slug:
             return IntentAlchemist()
@@ -304,12 +308,21 @@ class KeterEngine:
 
     def _check_thermal_bypass(
         self, intent: str, formation: str, thermal_audit: bool
-    ) -> tuple[str, Optional[KeterPayload]]:
+    ) -> tuple[str, KeterPayload | None]:
         import hashlib
 
         mission_id = hashlib.sha256(f"{intent}:{formation}".encode()).hexdigest()
         cached_payload = self._reservoir.get(mission_id)
         if cached_payload and cached_payload.get("status") == "SINGULARITY_REACHED":
+            # Ω₂: Strict Quarantine enforcement. Adrenal bypasses cannot masquerade as healthy.
+            if cached_payload.get("is_quarantined"):
+                logger.warning(
+                    "🚫 [KETER] CAUSAL TAINT DETECTED. Mission %s is Quarantined. "
+                    "Thermal Bypass denied.",
+                    mission_id,
+                )
+                return mission_id, None
+
             if thermal_audit:
                 logger.info("⚡ [KETER] Identity Short-Circuit: Intent and formation stabilized.")
             return mission_id, cached_payload
@@ -350,6 +363,8 @@ class KeterEngine:
         """
         thermal_audit = kwargs.get("thermal_audit", False)
         formation = kwargs.get("formation", "BLITZ")
+        is_adrenal_bypass = kwargs.get("is_adrenal_bypass", False)
+        thinking_persist = kwargs.get("thinking_persist", "")
 
         # Axiom Ω₂: Identity Short-Circuit (Thermal Bypass)
         mission_id, bypass_payload = self._check_thermal_bypass(intent, formation, thermal_audit)
@@ -364,6 +379,17 @@ class KeterEngine:
         logger.info("=" * 60)
 
         payload = typing.cast(KeterPayload, {"intent": intent, **kwargs})
+
+        # V9.3: Adrenal Overdrive & Thinking Persist
+        if is_adrenal_bypass:
+            payload["is_quarantined"] = True
+            payload["taint"] = "ADRENAL_OVERDRIVE"
+            logger.warning("⚡ [KETER] Adrenal Bypass detected. Payload quarantined with TAINT.")
+        if thinking_persist:
+            logger.info(
+                "🧠 [KETER] Thinking Persist engaged. Storing epistemic reasoning in reservoir."
+            )
+
         execution_sequence = self._build_execution_sequence(intent)
 
         try:

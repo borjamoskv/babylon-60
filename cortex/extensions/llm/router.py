@@ -6,7 +6,7 @@ import logging
 import time
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.llm._cascade import CascadeManager, classify_tier
 from cortex.extensions.llm._hedging import HedgedRequestStrategy
@@ -19,11 +19,14 @@ from cortex.extensions.llm._models import (
     IntentProfile,
 )
 from cortex.extensions.llm._telemetry import CascadeTelemetry
+from cortex.extensions.llm.masking import StealthMasker
+from cortex.extensions.llm.quota import SovereignQuotaManager
 from cortex.utils.result import Err, Ok, Result
 
 logger = logging.getLogger("cortex.extensions.llm.router")
 
-# Re-exports for backward compatibility
+_QUOTA_MANAGER = SovereignQuotaManager()
+
 __all__ = [
     "BaseProvider",
     "CascadeEvent",
@@ -44,12 +47,12 @@ class CortexLLMRouter:
     def __init__(
         self,
         primary: BaseProvider,
-        fallbacks: Optional[Sequence[BaseProvider]] = None,
+        fallbacks: Sequence[BaseProvider] | None = None,
         *,
         negative_ttl: float = 300.0,
         positive_ttl: float = 600.0,
-        hedging_providers: Optional[Sequence[BaseProvider]] = None,
-        db_path: Optional[str | Path] = None,
+        hedging_providers: Sequence[BaseProvider] | None = None,
+        db_path: str | Path | None = None,
     ) -> None:
         self._primary = primary
         self._fallbacks = list(fallbacks or [])
@@ -58,6 +61,7 @@ class CortexLLMRouter:
         self._telemetry = CascadeTelemetry(db_path=str(db_path) if db_path else None)
         # Thermal Heat-Sink: coalesce identical inflight prompts (Ω₂)
         self._inflight: dict[str, asyncio.Future[Result[str, str]]] = {}
+        self._masker = StealthMasker(self)
 
     @property
     def primary(self) -> BaseProvider:
@@ -136,15 +140,42 @@ class CortexLLMRouter:
         if LLM_LOCAL_FIRST:
             tier_order["local"] = -1  # Promote above frontier (0)
 
+        # ─── Quota-Aware Optimization (Conserve Mode) ───
+        quota = _QUOTA_MANAGER.status()
+        conserve_mode = quota.fill_pct < 20.0
+        if conserve_mode:
+            logger.warning(
+                "📉 [ROUTER] Quota critical (%.1f%%). Scaling down to cheap models.",
+                quota.fill_pct,
+            )
+
+        def cost_with_penalty(p: BaseProvider) -> int:
+            base_cost = self._COST_ORDER.get(p.cost_class, 4)
+            # Penalize expensive models significantly in conserve mode
+            if conserve_mode and p.cost_class in ("high", "medium", "variable"):
+                return base_cost + 10
+            return base_cost
+
         unknown.sort(
             key=lambda p: (
                 self._COST_ORDER.get(p.cost_class, 4),
                 tier_order.get(p.tier, 2),
             )
         )
-        return known + unknown
+        combined = known + unknown
 
-    async def execute_hedged(self, prompt: CortexPrompt) -> Optional[Result[str, str]]:
+        # In conserve mode, we must enforce cost-first ordering even over known latency
+        if conserve_mode:
+            combined.sort(
+                key=lambda p: (
+                    cost_with_penalty(p),
+                    tier_order.get(p.tier, 2),
+                )
+            )
+
+        return combined
+
+    async def execute_hedged(self, prompt: CortexPrompt) -> Result[str, str] | None:
         """Attempt hedged (parallel) execution if peers are available."""
         if not self._hedging_providers:
             return None
@@ -263,7 +294,14 @@ class CortexLLMRouter:
 
         try:
             result = await self._execute_resilient_impl(prompt)
-            future.set_result(result)
+
+            # Evasión Termodinámica: Aplicar máscara si se requiere
+            if result.is_ok() and prompt.apply_stealth_mask:
+                masked_content = await self._masker.mask(result.unwrap())
+                result = Ok(masked_content)
+
+            if not future.done():
+                future.set_result(result)
             return result
         except Exception as exc:  # noqa: BLE001
             if not future.done():
@@ -358,7 +396,7 @@ class CortexLLMRouter:
         """Aggregated cascade metrics."""
         return self._telemetry.stats()
 
-    def select_model_for_intent(self, intent: str) -> Optional[str]:
+    def select_model_for_intent(self, intent: str) -> str | None:
         """Resolve the optimal model for the primary provider's intent.
 
         Uses the preset routing functions to find the best model

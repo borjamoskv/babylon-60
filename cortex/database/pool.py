@@ -13,7 +13,6 @@ import os
 import sqlite3
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import Optional
 
 import aiosqlite
 
@@ -39,8 +38,8 @@ class CortexConnectionPool:
     def __init__(
         self,
         db_path: str,
-        min_connections: Optional[int] = None,
-        max_connections: Optional[int] = None,
+        min_connections: int | None = None,
+        max_connections: int | None = None,
         max_idle_time: float = 300.0,
         read_only: bool = True,
     ):
@@ -113,7 +112,7 @@ class CortexConnectionPool:
 
         # Enforce max concurrency
         await self._semaphore.acquire()
-        conn: Optional[aiosqlite.Connection] = None
+        conn: aiosqlite.Connection | None = None
 
         try:
             # 1. Get or create connection
@@ -131,9 +130,11 @@ class CortexConnectionPool:
             raise
 
         finally:
-            self._semaphore.release()
-            if conn:
-                await self._pool.put(conn)
+            try:
+                if conn and await self._reset_conn_for_pool(conn):
+                    await self._pool.put(conn)
+            finally:
+                self._semaphore.release()
 
     async def _get_or_create_conn(self) -> aiosqlite.Connection:
         """Get a connection from the pool or create a new one."""
@@ -178,6 +179,23 @@ class CortexConnectionPool:
             logger.warning("Error closing connection: %s", e)
         async with self._lock:
             self._active_count = max(0, self._active_count - 1)
+
+    async def _reset_conn_for_pool(self, conn: aiosqlite.Connection) -> bool:
+        """Return only clean, healthy connections to the pool."""
+        if getattr(conn, "in_transaction", False):
+            try:
+                await conn.rollback()
+            except (sqlite3.Error, OSError, ValueError) as e:
+                logger.warning("Connection rollback before pool return failed: %s", e)
+                await self._close_conn(conn)
+                return False
+
+        if not await self._is_healthy(conn):
+            logger.warning("Connection unhealthy during pool return, discarding.")
+            await self._close_conn(conn)
+            return False
+
+        return True
 
     async def close(self) -> None:
         """Close all connections in the pool."""

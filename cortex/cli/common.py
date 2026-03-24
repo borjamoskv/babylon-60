@@ -54,7 +54,7 @@ def get_tracker(engine: CortexEngine) -> TimingTracker:
     """Create a timing tracker from an engine (lazy import)."""
     from cortex.extensions.timing import TimingTracker
 
-    return TimingTracker(engine._get_conn())  # type: ignore[reportArgumentType]
+    return TimingTracker(engine.get_conn_sync())
 
 
 def close_engine_sync(engine: CortexEngine) -> None:

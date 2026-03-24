@@ -4,28 +4,46 @@
 
 from __future__ import annotations
 
+import json
 import logging
+import types
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Any
 
 import aiosqlite
 
+from cortex.crypto import get_default_encrypter
+from cortex.engine.autopoiesis import AutopoiesisEngine
+
 __all__ = ["EngineMixinBase"]
 
 logger = logging.getLogger("cortex.engine")
 
-# Canonical Fact query structure — all 16 columns matching row_to_fact contract
+_autopoiesis = AutopoiesisEngine()
+
+# Canonical Fact query structure — append-only to preserve older tuple offsets
 FACT_COLUMNS = (
     "f.id, f.tenant_id, f.project, f.content, f.fact_type, f.tags, f.metadata, "
     "f.hash, f.valid_from, f.valid_until, f.source, f.confidence, "
-    "f.created_at, f.updated_at, f.is_tombstoned, f.is_quarantined"
+    "f.created_at, f.updated_at, f.is_tombstoned, f.is_quarantined, "
+    "f.consensus_score, f.last_accessed, f.tx_id, f.cognitive_layer, "
+    "f.parent_decision_id"
 )
+FACT_INDEX = {col.split('.')[-1].strip(): i for i, col in enumerate(FACT_COLUMNS.split(','))}
 FACT_JOIN = "FROM facts f"
 
 
 class EngineMixinBase:
     """Base class for all Engine Mixins to share core database and security logic."""
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        # Ω₁₀ Autopoietic Subclassing: Wrap all new public methods for AST evolution
+        for attr_name, attr_value in cls.__dict__.items():
+            if not attr_name.startswith("_") and isinstance(attr_value, types.FunctionType):
+                wrapped = _autopoiesis.observe_and_mutate(attr_value)
+                setattr(cls, attr_name, wrapped)
 
     @asynccontextmanager
     async def session(self) -> AsyncIterator[aiosqlite.Connection]:
@@ -48,7 +66,12 @@ class EngineMixinBase:
         raise NotImplementedError
 
     async def _log_transaction(
-        self, conn: aiosqlite.Connection, project: str, action: str, details: dict[str, Any]
+        self,
+        conn: aiosqlite.Connection,
+        project: str,
+        action: str,
+        details: dict[str, Any],
+        tenant_id: str = "default",
     ) -> int:
         """Log a transaction to the ledger."""
         raise NotImplementedError
@@ -58,59 +81,79 @@ class EngineMixinBase:
         raise NotImplementedError
 
     def _row_to_fact(self, row: dict | aiosqlite.Row, tenant_id: str) -> dict[str, Any]:
-        """Convert a database row to a decrypted fact dictionary.
+        """Convert a database row to a decrypted fact dictionary (Ω₂).
 
-        Builds the dict directly from the row tuple — no intermediate Fact
-        allocation. Columns must match FACT_COLUMNS order (16 columns).
+        Uses FACT_INDEX to ensure O(1) attribute mapping without magic numbers.
         """
-        import json
-
-        from cortex.crypto import get_default_encrypter
-
         enc = get_default_encrypter()
         r = list(row)
-        while len(r) < 16:
+
+        # Ensure row has enough columns for the current schema
+        while len(r) < len(FACT_INDEX):
             r.append(None)
 
-        db_tenant_id = r[1] or "default"
+        idx = FACT_INDEX
+        db_tenant_id = r[idx["tenant_id"]] or "default"
 
-        # Decrypt content
+        # Decrypt primary payload
         try:
-            content = enc.decrypt_str(r[3], tenant_id=db_tenant_id) if r[3] else ""
-        except ValueError:
-            content = f"[ENCRYPTED — decryption failed] (fact #{r[0]})"
+            content = enc.decrypt_str(r[idx["content"]], tenant_id=db_tenant_id) if r[idx["content"]] else ""
+        except (ValueError, TypeError):
+            content = f"[ENCRYPTED — decryption failed] (fact #{r[idx['id']]})"
 
         # Parse tags
         try:
-            tags = json.loads(r[5]) if r[5] else []
+            raw_tags = r[idx["tags"]]
+            tags = json.loads(raw_tags) if raw_tags else []
         except (json.JSONDecodeError, TypeError):
             tags = []
 
-        # Decrypt meta
+        # Decrypt metadata
         try:
-            meta = enc.decrypt_json(r[6], tenant_id=db_tenant_id) if r[6] else {}
-        except ValueError:
-            meta = {"error": "decryption_failed", "fact_id": r[0]}
+            raw_meta = r[idx["metadata"]]
+            meta = enc.decrypt_json(raw_meta, tenant_id=db_tenant_id) if raw_meta else {}
+        except (ValueError, TypeError):
+            meta = {"error": "decryption_failed", "fact_id": r[idx["id"]]}
+
+        # Resolution for derived/shadowed attributes
+        consensus_score = r[idx["consensus_score"]]
+        if consensus_score is None:
+            consensus_score = meta.get("consensus_score", 1.0) if meta else 1.0
+
+        tx_id = r[idx["tx_id"]]
+        if tx_id is None and meta:
+            tx_id = meta.get("tx_id")
+
+        cognitive_layer = r[idx["cognitive_layer"]]
+        if not cognitive_layer:
+            cognitive_layer = meta.get("cognitive_layer", "semantic") if meta else "semantic"
+
+        parent_id = r[idx["parent_decision_id"]]
+        if parent_id is None and meta:
+            parent_id = meta.get("parent_decision_id")
 
         return {
-            "id": r[0],
+            "id": r[idx["id"]],
             "tenant_id": db_tenant_id,
-            "project": r[2],
+            "project": r[idx["project"]],
             "content": content,
-            "fact_type": r[4],
-            "type": r[4],  # API compat alias
+            "fact_type": r[idx["fact_type"]],
+            "type": r[idx["fact_type"]],  # Legacy compatibility alias
             "tags": tags,
-            "confidence": r[11] or (meta.get("confidence", "C5") if meta else "C5"),
-            "valid_from": r[8] or (meta.get("valid_from") if meta else r[12]),
-            "valid_until": "9999-12-31T23:59:59Z" if bool(r[14]) else r[9],
-            "source": r[10] or (meta.get("source", "system") if meta else "system"),
+            "confidence": r[idx["confidence"]] or (meta.get("confidence", "C5") if meta else "C5"),
+            "valid_from": r[idx["valid_from"]] or (meta.get("valid_from") if meta else r[idx["created_at"]]),
+            "valid_until": "9999-12-31T23:59:59Z" if bool(r[idx["is_tombstoned"]]) else r[idx["valid_until"]],
+            "source": r[idx["source"]] or (meta.get("source", "system") if meta else "system"),
             "meta": meta,
-            "consensus_score": meta.get("consensus_score", 1.0) if meta else 1.0,
-            "created_at": r[12],
-            "updated_at": r[13],
-            "tx_id": meta.get("tx_id") if meta else None,
-            "parent_decision_id": meta.get("parent_decision_id") if meta else None,
-            "hash": r[7],
+            "consensus_score": consensus_score,
+            "last_accessed": r[idx["last_accessed"]],
+            "created_at": r[idx["created_at"]],
+            "updated_at": r[idx["updated_at"]],
+            "tx_id": tx_id,
+            "cognitive_layer": cognitive_layer,
+            "parent_decision_id": parent_id,
+            "hash": r[idx["hash"]],
+            "is_quarantined": bool(r[idx["is_quarantined"]]),
         }
 
     def _resolve_tenant(self, tenant_id: str) -> str:

@@ -20,7 +20,7 @@ class SwarmPartitioner:
     async def partition_task(task_description: str) -> SwarmEnclave:
         """Analyze task text using regex patterns to determine the optimal Enclave."""
         desc = task_description.lower()
-        
+
         # Prioritized patterns for higher accuracy
         patterns = {
             SwarmEnclave.EXECUTION: [
@@ -36,17 +36,17 @@ class SwarmPartitioner:
                 r"credentials|password|token|identity|privacy",
             ],
         }
-        
+
         # Check for specific patterns first
         for enclave, regex_list in patterns.items():
             if any(re.search(p, desc) for p in regex_list):
                 return enclave
-        
+
         # If no specific pattern matches, default to GOVERNANCE
         # GOVERNANCE can also be explicitly triggered by certain keywords if needed
         if re.search(r"\b(audit|policy|review|oversight|compliance|monitor|govern)\b", desc):
             return SwarmEnclave.GOVERNANCE
-            
+
         return SwarmEnclave.GOVERNANCE
 
     @staticmethod
@@ -54,7 +54,7 @@ class SwarmPartitioner:
         """Splits a complex multi-hop task into atomic sub-tasks by Enclave."""
         # Simplified recursive split for Level 200 prototype
         shards: dict[SwarmEnclave, list[str]] = {e: [] for e in SwarmEnclave}
-        
+
         # Mock splitting logic: Assume task segments separated by ';' or 'then'
         segments = complex_task.replace("then", ";").split(";")
         for seg in segments:
@@ -63,6 +63,6 @@ class SwarmPartitioner:
                 continue
             enclave = await SwarmPartitioner.partition_task(seg)
             shards[enclave].append(seg)
-            
+
         logger.info("SwarmPartitioner: Sharded complex task into %d enclaves.", len([s for s in shards.values() if s]))
         return shards

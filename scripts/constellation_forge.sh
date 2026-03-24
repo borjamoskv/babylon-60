@@ -24,7 +24,7 @@ if [[ -z "${CORTEX_ALLOW_HOME_MUTATION}" ]]; then
     exit 1
 fi
 
-# 1. CORTEX 3D HOLOGRAPH 
+# 1. CORTEX 3D HOLOGRAPH
 log_action "PILLAR I: Forjando CORTEX 3D Holograph (Interfaz Neurológica)"
 mkdir -p ~/game/cortex-holograph/src/components
 mkdir -p ~/game/cortex-holograph/public/models

@@ -10,7 +10,7 @@ import asyncio
 import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Any, Optional
+from typing import Any
 
 from cortex.engine.models import Fact
 
@@ -37,7 +37,7 @@ class AnomalyHunterEngine:
         self.window = timedelta(hours=lookback_hours)
         self.anomalies: list[Anomaly] = []
 
-    def _get_fact_timestamp(self, fact_id: int) -> Optional[datetime]:
+    def _get_fact_timestamp(self, fact_id: int) -> datetime | None:
         """Helper para extraer timestamp de forma síncrona si es necesario
         (En la versión final usaremos el engine async directamente).
         """
@@ -81,9 +81,22 @@ class AnomalyHunterEngine:
         # Limitamos la query para Nightshift (asumiendo que hay un recall con as_of o limitamos manualmente)
         # Aquí usamos history para tener todos los estados y luego filtramos
 
-        recent_raw_facts = await self.cortex.history(
-            project="anomaly-hunter"
-        )  # TODO we should scan all projects
+        # Fan-out across all available projects to get a complete anomaly surface.
+        # Falls back to a single sentinel project if list_projects() is unavailable.
+        all_raw_facts: list[dict] = []
+        try:
+            projects: list[str] = await self.cortex.list_projects()
+        except (AttributeError, NotImplementedError):
+            projects = ["anomaly-hunter"]
+
+        for project in projects:
+            try:
+                batch = await self.cortex.history(project=project)
+                all_raw_facts.extend(batch)
+            except Exception as exc:
+                logger.warning("AnomalyHunter: skipping project '%s' — %s", project, exc)
+
+        recent_raw_facts = all_raw_facts
         recent_facts = [
             Fact(**f) for f in recent_raw_facts if f.get("created_at", "") > time_filter
         ]
@@ -145,7 +158,9 @@ class AnomalyHunterEngine:
         contradictions = []
         for i, fact_a in enumerate(facts):
             for fact_b in facts[i + 1 :]:
-                if self._is_same_entity(fact_a, fact_b) and self._are_contradictory(fact_a, fact_b):
+                same = self._is_same_entity(fact_a, fact_b)
+                contradictory = self._are_contradictory(fact_a, fact_b)
+                if same and contradictory:
                     contradictions.append(
                         Anomaly(
                             type="SPATIAL_CONTRADICTION",

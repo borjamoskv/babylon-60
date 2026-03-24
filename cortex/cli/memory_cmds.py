@@ -110,8 +110,9 @@ def store(
                 parent_decision_id=parent_id,
             )
         )
+        latencia_zero = " [bold green]\\[LATENCIA ZERO][/]" if getattr(engine, "_vec_available", False) else ""
         console.print(
-            f"[[noir.cyber]✓[/]] Stored fact [[noir.gold]#{fact_id}[/]] in [[noir.yinmn]{project}[/]] [dim](source: {source})[/]"
+            f"[[noir.cyber]✓[/]] Stored fact [[noir.gold]#{fact_id}[/]] in [[noir.yinmn]{project}[/]] [dim](source: {source})[/]{latencia_zero}"
         )
         _show_tip(engine)
     finally:

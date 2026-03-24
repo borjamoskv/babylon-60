@@ -110,7 +110,7 @@ def create_aether_server(
 
             results = await engine.search(
                 query,
-                project or None,
+                project or "default",
                 min(max(top_k, 5), 50),
             )
 

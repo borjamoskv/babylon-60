@@ -14,6 +14,7 @@ __all__ = [
     "is_valid_at",
     "now_iso",
     "time_travel_filter",
+    "cortex_decay",
 ]
 
 
@@ -110,7 +111,12 @@ def time_travel_filter(
         prefix = ""
 
     return (
-        f"json_extract({prefix}metadata, '$.tx_id') <= ? AND ("  # nosec B608
+        f"COALESCE("
+        f"{prefix}tx_id, "
+        f"CASE WHEN json_valid({prefix}metadata) "
+        f"THEN json_extract({prefix}metadata, '$.tx_id') END, "
+        f"0"
+        f") <= ? AND ("  # nosec B608
         f"{prefix}is_tombstoned = 0 OR "
         f"json_extract({prefix}metadata, '$.valid_until') > "
         "(SELECT timestamp FROM transactions WHERE id = ?) OR "
@@ -118,3 +124,11 @@ def time_travel_filter(
         "(SELECT timestamp FROM transactions WHERE id = ?))",
         [tx_id, tx_id, tx_id],
     )
+
+
+def cortex_decay(is_diamond: int, timestamp: float, current_time: float, half_life: float) -> float:
+    """Calcula el decaimiento temporal soberano."""
+    if is_diamond:
+        return 1.0
+    age = max(0.0, current_time - timestamp)
+    return float(0.5 ** (age / half_life))

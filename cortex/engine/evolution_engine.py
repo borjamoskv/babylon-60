@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import random
 import time
-from typing import Any, Optional
+from typing import Any
 
 from cortex.engine.evolution_metrics import CortexMetrics
 from cortex.engine.evolution_types import (
@@ -17,6 +17,7 @@ from cortex.engine.evolution_types import (
     SubAgent,
 )
 from cortex.engine.zero_prompting import ZeroPromptingEvolutionStrategy
+from cortex.guards.exergy_guard import calculate_exergy  # Ω₂ Injector
 
 # ==============================================================================
 # EVOLUTIONARY STRATEGIES
@@ -35,7 +36,7 @@ class ParameterTuningStrategy:
         subagent: SubAgent,
         metrics: DomainMetrics,
         cortex_metrics: CortexMetrics,
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         if metrics.health_score > 0.9:
             return None  # Sovereign-grade: no tuning needed
 
@@ -63,7 +64,7 @@ class PruneDeadPathStrategy:
         subagent: SubAgent,
         metrics: DomainMetrics,
         cortex_metrics: CortexMetrics,
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         if subagent.generation <= 5:
             return None
 
@@ -103,7 +104,7 @@ class HeuristicInjectionStrategy:
         subagent: SubAgent,
         metrics: DomainMetrics,
         cortex_metrics: CortexMetrics,
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         if subagent.fitness >= 80.0:
             return None
 
@@ -139,7 +140,7 @@ class BridgeImportStrategy:
         subagent: SubAgent,
         metrics: DomainMetrics,
         cortex_metrics: CortexMetrics,
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         best = sovereign.get_best_subagent()
         worst = sovereign.get_worst_subagent()
         if not best or not worst or best.agent_id == worst.agent_id:
@@ -151,15 +152,27 @@ class BridgeImportStrategy:
         if gap <= 30.0:
             return None
 
-        multiplier = 0.1 + 0.15 * metrics.bridge_score
+        # Ω₂: Exergy Multiplier. Only high-utility knowledge provides high boost.
+        # We sample the best agent's parameters (simulated content representation)
+        content_sample = str(best.mutation.parameters)
+        exergy_multiplier = calculate_exergy(content_sample)
+
+        if exergy_multiplier < 0.5:
+            # High gap but low exergy = decorative/bloated source. Reduced boost.
+            exergy_multiplier *= 0.1
+
+        multiplier = (0.1 + 0.15 * metrics.bridge_score) * exergy_multiplier
         delta_fitness = gap * multiplier
         subagent.mutation.parameters.update(best.mutation.parameters)
         subagent.fitness += delta_fitness
 
-        subagent.mutation.record_change(f"BridgeImport from {best.agent_id}: +{delta_fitness:.2f}")
+        subagent.mutation.record_change(
+            f"BridgeImport from {best.agent_id} (exergy={exergy_multiplier:.2f}): +{delta_fitness:.2f}"
+        )
         return {
             "strategy": "BridgeImport",
             "gap": gap,
+            "exergy": round(float(exergy_multiplier), 3),
             "multiplier": multiplier,
             "delta_fitness": delta_fitness,
             "source": best.agent_id,
@@ -178,11 +191,11 @@ class AdversarialStressStrategy:
         subagent: SubAgent,
         metrics: DomainMetrics,
         cortex_metrics: CortexMetrics,
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         if subagent.fitness <= 100.0:
             return None
 
-        p_queen = 0.1 + 0.5 * min(1.0, max(0.0, metrics.fitness_delta))
+        p_queen = 0.1 + 0.5 * min(1.0, max(0.0, float(metrics.fitness_delta)))
         if random.random() > p_queen:
             return None
 
@@ -223,7 +236,7 @@ class EntropyReductionStrategy:
         subagent: SubAgent,
         metrics: DomainMetrics,
         cortex_metrics: CortexMetrics,
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         if subagent.generation < 5 or subagent.fitness <= 50.0:
             return None
 
@@ -261,7 +274,7 @@ class CrossoverRecombinationStrategy:
         subagent: SubAgent,
         metrics: DomainMetrics,
         cortex_metrics: CortexMetrics,
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         best = sovereign.get_best_subagent()
         worst = sovereign.get_worst_subagent()
         if not best or not worst:
@@ -307,7 +320,7 @@ class StagnationBreakerStrategy:
         subagent: SubAgent,
         metrics: DomainMetrics,
         cortex_metrics: CortexMetrics,
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         if subagent.fitness <= self._CIRCUIT_BREAKER_FITNESS:
             return None
 
@@ -367,7 +380,7 @@ class CortexEvolutionEngine:
         self._evaluation_count = 0
         self._prev_avg_fitness: dict[str, float] = {}
 
-    def _dm(self, domain_id: str, ttl_seconds: int = 60) -> Optional[DomainMetrics]:
+    def _dm(self, domain_id: str, ttl_seconds: int = 60) -> DomainMetrics | None:
         return self.metrics_backend.get_metrics(domain_id, ttl_seconds)
 
     def inject_telemetry(self, domain_id: str, **kwargs: Any) -> None:

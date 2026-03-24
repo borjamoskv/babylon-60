@@ -133,12 +133,16 @@ class QueryMixin(EngineMixinBase):
                 params.append(fact_type)
 
             # Unified Scoring: Bayesian reputation + Temporal decay
-            # Guard json_extract against encrypted meta (v6_aesgcm: prefix)
             q += """
                 ORDER BY (
-                    CASE WHEN f.metadata LIKE 'v6_aesgcm:%' THEN 1.0
-                         ELSE coalesce(json_extract(f.metadata, '$.consensus_score'), 1.0)
-                    END * 0.8
+                    COALESCE(
+                        f.consensus_score,
+                        CASE
+                            WHEN json_valid(f.metadata)
+                                THEN json_extract(f.metadata, '$.consensus_score')
+                        END,
+                        1.0
+                    ) * 0.8
                     + (1.0 / (1.0 + (
                         julianday('now') - julianday(f.created_at)
                     ))) * 0.2
@@ -218,7 +222,7 @@ class QueryMixin(EngineMixinBase):
                 return await self.recall(project, tenant_id=tenant_id)
 
             async with conn.execute(
-                "SELECT created_at FROM transactions WHERE id = ? AND tenant_id = ?",
+                "SELECT timestamp FROM transactions WHERE id = ? AND tenant_id = ?",
                 (tx_id, tenant_id),
             ) as cursor:
                 tx = await cursor.fetchone()
@@ -230,7 +234,7 @@ class QueryMixin(EngineMixinBase):
                 f"SELECT {FACT_COLUMNS} {FACT_JOIN} "  # nosec B608
                 "WHERE f.tenant_id = ? AND f.project = ? "
                 "AND f.is_tombstoned = 0 "
-                "AND f.created_at <= ? "
+                "AND COALESCE(f.tx_id, json_extract(f.metadata, '$.tx_id'), 0) <= ? "
                 "AND (f.is_tombstoned = 0 OR "
                 "json_extract(f.metadata, '$.tombstoned_at') > ? OR "
                 "json_extract(f.metadata, '$.valid_until') > ?) "
@@ -238,7 +242,7 @@ class QueryMixin(EngineMixinBase):
             )
             async with conn.execute(
                 q,
-                [tenant_id, project, tx_time, tx_time, tx_time],
+                [tenant_id, project, tx_id, tx_time, tx_time],
             ) as cursor:
                 rows = await cursor.fetchall()
             return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
@@ -280,47 +284,70 @@ class QueryMixin(EngineMixinBase):
                     rows = await cursor.fetchall()
             return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
 
-    async def stats(self) -> dict:
+    async def stats(self, tenant_id: str = "default") -> dict[str, Any]:
+        """Return engine health and storage statistics (Ω₂).
+
+        Now tenant-aware to prevent statistical leakage (Ω₁₃).
+        """
+        tenant_id = self._resolve_tenant(tenant_id)
         async with self.session() as conn:
-            async with conn.execute("SELECT COUNT(*) FROM facts") as cursor:
+            # Table counts (Tenant-isolated)
+            async with conn.execute(
+                "SELECT COUNT(*) FROM facts WHERE tenant_id = ?", (tenant_id,)
+            ) as cursor:
                 row = await cursor.fetchone()
                 total = row[0] if row else 0
-            async with conn.execute("SELECT COUNT(*) FROM facts WHERE is_tombstoned = 0") as cursor:
+
+            async with conn.execute(
+                "SELECT COUNT(*) FROM facts WHERE tenant_id = ? AND is_tombstoned = 0",
+                (tenant_id,),
+            ) as cursor:
                 row = await cursor.fetchone()
                 active = row[0] if row else 0
+
             async with conn.execute(
-                "SELECT DISTINCT project FROM facts WHERE is_tombstoned = 0"
+                "SELECT project, COUNT(*) FROM facts "
+                "WHERE tenant_id = ? AND is_tombstoned = 0 GROUP BY project",
+                (tenant_id,),
             ) as cursor:
-                projects = [p[0] for p in await cursor.fetchall()]
-            async with conn.execute("SELECT COUNT(*) FROM transactions") as cursor:
+                projects = {r[0]: r[1] for r in await cursor.fetchall()}
+
+            async with conn.execute(
+                "SELECT COUNT(*) FROM transactions WHERE tenant_id = ?", (tenant_id,)
+            ) as cursor:
                 row = await cursor.fetchone()
                 tx_count = row[0] if row else 0
 
+            # Embeddings (Tenant-isolated via join)
             try:
-                async with conn.execute("SELECT COUNT(*) FROM fact_embeddings") as cursor:
+                async with conn.execute(
+                    "SELECT COUNT(*) FROM fact_embeddings e JOIN facts f ON e.id = f.id "
+                    "WHERE f.tenant_id = ?",
+                    (tenant_id,),
+                ) as cursor:
                     row = await cursor.fetchone()
                     embeddings = row[0] if row else 0
             except (sqlite3.Error, OSError, ValueError):
                 embeddings = 0
 
-            async with conn.execute(
-                "SELECT fact_type, COUNT(*) FROM facts WHERE is_tombstoned = 0 GROUP BY fact_type"
-            ) as cursor:
-                types = {row[0]: row[1] for row in await cursor.fetchall()}
-
-            # Causal chain coverage (zero-cost: indexed column)
+            # Causal chain coverage (Tenant-isolated)
             try:
                 async with conn.execute(
                     "SELECT COUNT(*) FROM facts "
-                    "WHERE json_extract(metadata, '$.parent_decision_id') IS NOT NULL "
-                    "AND is_tombstoned = 0"
+                    "WHERE tenant_id = ? AND is_tombstoned = 0 AND "
+                    "COALESCE("
+                    "parent_decision_id, "
+                    "CASE WHEN json_valid(metadata) "
+                    "THEN json_extract(metadata, '$.parent_decision_id') END"
+                    ") IS NOT NULL ",
+                    (tenant_id,),
                 ) as cursor:
                     row = await cursor.fetchone()
                     causal_facts = row[0] if row else 0
             except (sqlite3.Error, OSError):
                 causal_facts = 0
 
-            # Database size via PRAGMA (zero-overhead, no filesystem stat needed)
+            # Database size via PRAGMA (Global context)
             try:
                 async with conn.execute(
                     "SELECT page_count * page_size FROM pragma_page_count(), pragma_page_size()"
@@ -329,7 +356,7 @@ class QueryMixin(EngineMixinBase):
                     db_size_bytes = row[0] if row else 0
             except (sqlite3.Error, OSError):
                 db_size_bytes = 0
-            db_size_mb = round(db_size_bytes / (1024 * 1024), 2)
+            db_size_mb = round(float(db_size_bytes) / (1024.0 * 1024.0), 2)
 
             return {
                 "total_facts": total,
@@ -339,11 +366,11 @@ class QueryMixin(EngineMixinBase):
                 "orphan_facts": active - causal_facts,
                 "projects": projects,
                 "project_count": len(projects),
-                "types": types,
                 "transactions": tx_count,
                 "embeddings": embeddings,
                 "db_size_mb": db_size_mb,
-                "db_path": str(getattr(self, "_db_path", "unknown")),
+                "tenant_id": tenant_id,
+                "mode": "sovereign_async_v8",
             }
 
     async def graph(self, project: str | None = None, tenant_id: str = "default"):
@@ -426,9 +453,21 @@ class QueryMixin(EngineMixinBase):
                     SELECT id, 0 FROM facts
                     WHERE id = ? AND tenant_id = ?
                     UNION ALL
-                    SELECT json_extract(f.metadata, '$.parent_decision_id'), c.depth + 1
+                    SELECT COALESCE(
+                        f.parent_decision_id,
+                        CASE
+                            WHEN json_valid(f.metadata)
+                                THEN json_extract(f.metadata, '$.parent_decision_id')
+                        END
+                    ), c.depth + 1
                     FROM facts f JOIN chain c ON f.id = c.id
-                    WHERE json_extract(f.metadata, '$.parent_decision_id') IS NOT NULL
+                    WHERE COALESCE(
+                        f.parent_decision_id,
+                        CASE
+                            WHEN json_valid(f.metadata)
+                                THEN json_extract(f.metadata, '$.parent_decision_id')
+                        END
+                    ) IS NOT NULL
                         AND c.depth < ?
                 )
                 SELECT id, depth FROM chain ORDER BY depth
@@ -441,7 +480,13 @@ class QueryMixin(EngineMixinBase):
                     UNION ALL
                     SELECT f.id, c.depth + 1
                     FROM facts f JOIN chain c
-                        ON json_extract(f.metadata, '$.parent_decision_id') = c.id
+                        ON COALESCE(
+                            f.parent_decision_id,
+                            CASE
+                                WHEN json_valid(f.metadata)
+                                    THEN json_extract(f.metadata, '$.parent_decision_id')
+                            END
+                        ) = c.id
                     WHERE c.depth < ?
                 )
                 SELECT id, depth FROM chain ORDER BY depth

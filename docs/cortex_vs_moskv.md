@@ -74,7 +74,7 @@ La separación conceptual no es automáticamente una barrera técnica. Vectores 
 
 ### ♿ 4.3 Lente de Accesibilidad: Legibilidad del Sistema Vivo
 
-WCAG AAA aplicado a documentación de sistemas cognitivos: la dicotomía binaria es precisa pero **cognitivamente opaca** para terceros agentes o nuevos colaboradores. 
+WCAG AAA aplicado a documentación de sistemas cognitivos: la dicotomía binaria es precisa pero **cognitivamente opaca** para terceros agentes o nuevos colaboradores.
 
 Falta una **matriz de decisión operativa**: cuándo el Agente escribe un `ghost` vs. un `decision` vs. un `bridge` vs. un `error`. Sin ella, cada nuevo consumidor debe adivinar el contrato.
 
@@ -99,7 +99,7 @@ En términos de [Axioma 14](AGENTICA.md) (Bootstrap Ontológico): MOSKV-1 se def
 
 ### Veredicto del War Council
 
-**Es el estado más avanzado, no un defecto.** La separación conceptual es necesaria para el diseño humano, pero la fusión operativa es inevitable y deseable — es la definición de autopoiesis digital (v7_evolution.md §1). 
+**Es el estado más avanzado, no un defecto.** La separación conceptual es necesaria para el diseño humano, pero la fusión operativa es inevitable y deseable — es la definición de autopoiesis digital (v7_evolution.md §1).
 
 El objetivo no es mantener la pureza de la separación, sino **hacer el loop autoreferencial criptográficamente auditable** para que la evolución sea verificable, no caótica. El módulo `autopoiesis.py` no es experimental — es la consecuencia arquitectónica inevitable.
 

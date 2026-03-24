@@ -28,6 +28,7 @@ from cortex.engine.store_quarantine_mixin import QuarantineMixin
 from cortex.engine.store_validation import run_store_validation_logic
 from cortex.engine.store_validators import MIN_CONTENT_LENGTH, check_dedup, validate_content
 from cortex.guards.thermodynamic import AgentMode, ThermodynamicCounters
+from cortex.storage.qdrant import get_vector_backend
 
 # now_iso removed (internal use relocated)
 
@@ -51,6 +52,22 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     _thermal_decay_cache: ClassVar[dict[int, int]] = {}
     _thermo_counters: ClassVar[ThermodynamicCounters] = ThermodynamicCounters()
     _agent_mode: ClassVar[AgentMode] = AgentMode.ACTIVE
+
+    async def _should_embed_fact(self, conn: aiosqlite.Connection) -> bool:
+        """Enable embedding when local vec exists or a remote vector backend is active."""
+        if not getattr(self, "_auto_embed", True):
+            return False
+
+        if get_vector_backend() is not None:
+            return True
+
+        try:
+            async with conn.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name='fact_embeddings'"
+            ) as cursor:
+                return (await cursor.fetchone()) is not None
+        except (aiosqlite.Error, OSError):
+            return False
 
     async def store(
         self,
@@ -154,6 +171,14 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 await pipeline.run_guards(
                     content, project, fact_type, meta or {}, conn, tenant_id=tenant_id
                 )
+                safe_meta = meta or {}
+                content, fact_type, modified_meta = await pipeline.run_mutators(
+                    content, project, fact_type, safe_meta, conn, tenant_id=tenant_id, source=source
+                )
+                if not meta:
+                    meta = modified_meta
+                else:
+                    meta.update(modified_meta)
             except ValueError:
                 raise  # Guard rejections must propagate
             except Exception as _gp_err:  # noqa: BLE001
@@ -199,7 +224,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             except (aiosqlite.Error, OSError):
                 pass
 
-        if getattr(self, "_auto_embed", False) and getattr(self, "_vec_available", False):
+        if await self._should_embed_fact(conn):
             await embed_fact_async(
                 conn,
                 fact_id,
@@ -254,7 +279,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         async with self.session() as conn:
             query = (
                 "SELECT tenant_id, project, content, fact_type, tags, "
-                "confidence, source, meta "
+                "confidence, source, metadata "
                 "FROM facts WHERE id = ? AND tenant_id = ? AND is_tombstoned = 0"
             )
             async with conn.execute(query, (fact_id, tenant_id)) as cursor:

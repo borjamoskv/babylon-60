@@ -2,6 +2,7 @@ import ast
 import os
 import sys
 
+
 def get_union_str(node):
     def collect(n):
         if isinstance(n, ast.BinOp) and isinstance(n.op, ast.BitOr):
@@ -20,7 +21,7 @@ def get_union_str(node):
 
 def fix_file(path):
     try:
-        with open(path, "r") as f: source = f.read()
+        with open(path) as f: source = f.read()
     except: return False
     try: tree = ast.parse(source)
     except: return False
@@ -33,8 +34,8 @@ def fix_file(path):
         for child in ast.walk(node):
             if isinstance(child, ast.BinOp) and isinstance(child.op, ast.BitOr):
                 # Only take the top-most BinOp in a chain
-                # (ast.walk visits parent before children, so if we find it, 
-                # we should skip its children in the next steps? 
+                # (ast.walk visits parent before children, so if we find it,
+                # we should skip its children in the next steps?
                 # Actually, if we use a list of replaced nodes, we can avoid duplicates.)
                 pass
 
@@ -43,11 +44,11 @@ def fix_file(path):
     for node in ast.walk(tree):
         if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitOr):
             all_binops.append(node)
-    
+
     # We only care about BinOps that are part of an annotation
     # To find if a node is in an annotation, we can check parents, but AST doesn't have them.
     # Instead, let's use a Visitor to mark nodes.
-    
+
     parents = {}
     for node in ast.walk(tree):
         for child in ast.iter_child_nodes(node):
@@ -81,7 +82,7 @@ def fix_file(path):
 
     for b in top_binops:
         new_text = get_union_str(b)
-        replacements.append((b.lineno, b.col_offset, 
+        replacements.append((b.lineno, b.col_offset,
                              getattr(b, "end_lineno", b.lineno),
                              getattr(b, "end_col_offset", b.col_offset),
                              new_text))

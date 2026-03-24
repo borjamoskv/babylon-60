@@ -10,7 +10,7 @@ import logging
 from typing import Any
 
 from cortex.events.bus import DistributedEventBus
-from cortex.memory.ledger import EventLedgerL3
+from cortex.ledger.event_ledger import EventLedgerL3
 
 logger = logging.getLogger("cortex.extensions.agents.scavenger_governance")
 

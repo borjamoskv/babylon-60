@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Optional
 
 import aiosqlite
 
@@ -102,7 +101,7 @@ class BridgeGuard:
         return result
 
     @staticmethod
-    def _extract_source_project(content: str, target_project: str) -> Optional[str]:
+    def _extract_source_project(content: str, target_project: str) -> str | None:
         """Extract source project name from bridge content."""
         # Try regex pattern first
         match = _BRIDGE_SOURCE_RE.search(content)
@@ -149,7 +148,7 @@ class BridgeGuard:
         content: str,
         current_project: str,
         tenant_id: str = "default",
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Ω₁: Detect if this content already exists in another project.
 
@@ -185,16 +184,32 @@ class BridgeGuard:
         async with conn.execute(
             "SELECT id, project, content FROM facts "
             "WHERE fact_type = 'bridge' AND valid_until IS NULL "
-            "AND is_quarantined = 0",
+            "AND is_quarantined = 0 AND tenant_id = ?",
+            (tenant_id,),
         ) as cursor:
             rows = await cursor.fetchall()
 
         results = []
         for row in rows:
             fact_id, project, content = row[0], row[1], row[2]
+            plaintext_content = BridgeGuard._decrypt_audit_content(content, tenant_id)
+            if plaintext_content is None:
+                results.append(
+                    {
+                        "fact_id": fact_id,
+                        "project": project,
+                        "source_project": None,
+                        "quarantine_ratio": 0.0,
+                        "allowed": False,
+                        "reason": "Bridge audit skipped: content could not be decrypted safely.",
+                        "skipped": True,
+                    }
+                )
+                continue
+
             validation = await BridgeGuard.validate_bridge(
                 conn,
-                content,
+                plaintext_content,
                 project,
                 tenant_id,
             )
@@ -206,7 +221,24 @@ class BridgeGuard:
                     "quarantine_ratio": validation["quarantine_ratio"],
                     "allowed": validation["allowed"],
                     "reason": validation["reason"],
+                    "skipped": False,
                 }
             )
 
         return results
+
+    @staticmethod
+    def _decrypt_audit_content(content: str, tenant_id: str) -> str | None:
+        """Return plaintext bridge content for audit or ``None`` if unreadable."""
+        from cortex.crypto import get_default_encrypter
+
+        enc = get_default_encrypter()
+        try:
+            return enc.decrypt_str(content, tenant_id=tenant_id)
+        except (RuntimeError, ValueError) as exc:
+            logger.warning(
+                "Skipping bridge audit for tenant=%s because content could not be decrypted: %s",
+                tenant_id,
+                exc,
+            )
+            return None

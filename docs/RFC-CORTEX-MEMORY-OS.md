@@ -6,7 +6,7 @@
 
 ## 1. Context and Motivation
 
-Currently, CORTEX memory operations lack explicit thermodynamic separation between working context and persistent state, operating closer to a flat vector store. To achieve truly scalable, long-horizon autonomous agents without context collapse or excessive token consumption (Entropic Decay), we must transition memory from a mere "store" to a true **Cognitive Operating System**. 
+Currently, CORTEX memory operations lack explicit thermodynamic separation between working context and persistent state, operating closer to a flat vector store. To achieve truly scalable, long-horizon autonomous agents without context collapse or excessive token consumption (Entropic Decay), we must transition memory from a mere "store" to a true **Cognitive Operating System**.
 
 This redesign integrates the architectural principles of three specialized systems, strictly filtered through **Axiom Ω₁₃ (Termodinámica Cognitiva)**:
 - **Mem0:** For the physics of tokens (cost/latency extraction pipelining).
@@ -29,7 +29,7 @@ Any new memory module must satisfy the following constraints:
 The Memory OS is composed of four heavily isolated modules:
 
 ### 3.1. `cortex/compaction/mem0_pipeline.py` (The Thermodynamic Filter)
-Responsible for preventing unverified, low-exergy conversational data from entering the CORTEX Ledger. 
+Responsible for preventing unverified, low-exergy conversational data from entering the CORTEX Ledger.
 - **Extract:** Parses entities, intent, and relationships from the episodic context.
 - **Consolidate:** Resolves collisions, contradictions, and redundancy (compresses `H(X)`).
 - **Store:** Commits to the `ledger.py` explicitly as semantic/persistent memory.

@@ -27,15 +27,16 @@ class AgentMixin(EngineMixinBase):
     ) -> str:
         """Register a new agent locally and optionally in MOLTBOOK."""
         agent_id = str(uuid.uuid4())
+        tenant_id = self._resolve_tenant(tenant_id)
 
         # 1. Local Registration
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             await conn.execute("BEGIN IMMEDIATE")
             try:
                 await conn.execute(
-                    "INSERT INTO agents (id, name, agent_type, public_key, tenant_id) "
+                    "INSERT INTO agents (id, public_key, name, agent_type, tenant_id) "
                     "VALUES (?, ?, ?, ?, ?)",
-                    (agent_id, name, agent_type, public_key, tenant_id),
+                    (agent_id, public_key, name, agent_type, tenant_id),
                 )
                 await conn.commit()
             except (sqlite3.Error, OSError) as e:
@@ -67,13 +68,23 @@ class AgentMixin(EngineMixinBase):
 
         return agent_id
 
-    async def get_agent(self, agent_id: str) -> dict[str, Any] | None:
+    async def get_agent(
+        self,
+        agent_id: str,
+        tenant_id: str | None = None,
+    ) -> dict[str, Any] | None:
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             conn.row_factory = aiosqlite.Row
-            async with conn.execute(
-                "SELECT id, name, agent_type, reputation_score, created_at FROM agents WHERE id = ?",
-                (agent_id,),
-            ) as cursor:
+            query = (
+                "SELECT id, name, agent_type, reputation_score, created_at "
+                "FROM agents WHERE id = ?"
+            )
+            params: list[Any] = [agent_id]
+            if tenant_id is not None:
+                query += " AND tenant_id = ?"
+                params.append(self._resolve_tenant(tenant_id))
+
+            async with conn.execute(query, params) as cursor:
                 row = await cursor.fetchone()
                 return dict(row) if row else None
 

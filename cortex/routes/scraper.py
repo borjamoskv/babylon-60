@@ -9,7 +9,7 @@ Endpoints:
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -57,7 +57,7 @@ class ScrapeResponseItem(BaseModel):
     strategy_used: str
     elapsed_ms: float
     status: str
-    error: Optional[str] = None
+    error: str | None = None
 
 
 # ── Endpoints ────────────────────────────────────────────────────────

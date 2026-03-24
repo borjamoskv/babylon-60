@@ -1,7 +1,7 @@
 ---
 name: swarm-coordinator
 description: >
-  Multi-agent coordination skill for AI agent swarms. Enables task decomposition, 
+  Multi-agent coordination skill for AI agent swarms. Enables task decomposition,
   delegation, consensus, and result aggregation across multiple agents. Use when
   a task is too complex for a single agent, when you need parallel execution,
   or when multiple specialized agents need to collaborate on a shared goal.
@@ -57,12 +57,12 @@ agents:
     capabilities: [web-search, summarization, data-extraction]
     cost_per_task: low
     reliability: 0.95
-    
+
   developer:
     capabilities: [coding, debugging, deployment]
     cost_per_task: medium
     reliability: 0.90
-    
+
   reviewer:
     capabilities: [code-review, testing, quality-scoring]
     cost_per_task: low

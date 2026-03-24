@@ -52,8 +52,18 @@ def _mock_transport(routes: dict[str, list]) -> httpx.MockTransport:
 
     def handler(request: httpx.Request) -> httpx.Response:
         path = request.url.path
+        query = request.url.query.decode("utf-8")
+        is_page_gt_1 = False
+        if "page=" in query:
+            import urllib.parse
+            q = urllib.parse.parse_qs(query)
+            if q.get("page", ["1"])[0] != "1":
+                is_page_gt_1 = True
+
         for pattern, data in routes.items():
             if pattern in path:
+                if is_page_gt_1:
+                    return httpx.Response(200, json=[])
                 return httpx.Response(200, json=data)
         return httpx.Response(404, json={"message": "Not Found"})
 
@@ -61,7 +71,7 @@ def _mock_transport(routes: dict[str, list]) -> httpx.MockTransport:
 
 
 @pytest.fixture
-async def engine(tmp_path: Path):
+async def engine(tmp_path: Path, skip_exergy_validation):
     """Create a CortexEngine with a temp database."""
     from cortex.engine import CortexEngine
 

@@ -1,4 +1,3 @@
-from typing import Optional
 
 """CORTEX v5.0 — Dependency Extractor.
 
@@ -54,7 +53,7 @@ def _extract_file_dependencies(file_path: Path, targets: set[str]) -> set[str]:
     return deps
 
 
-def _get_module_name_from_node(node: ast.AST) -> Optional[str]:
+def _get_module_name_from_node(node: ast.AST) -> str | None:
     """Helper to extract module true name from AST import node."""
     if isinstance(node, ast.Import):
         for alias in node.names:

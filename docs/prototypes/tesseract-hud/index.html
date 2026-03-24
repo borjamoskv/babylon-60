@@ -19,7 +19,7 @@
             --c-text: #F0F0F0;
             --c-text-muted: #888888;
             --c-error: #FF3366;
-            
+
             --spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
             --glass: blur(12px);
             --border-glow: 0 0 15px rgba(204, 255, 0, 0.15);
@@ -38,7 +38,7 @@
             gap: 1.5rem;
             padding: 1.5rem;
             box-sizing: border-box;
-            background-image: 
+            background-image:
                 radial-gradient(circle at 50% -20%, rgba(46, 80, 144, 0.15), transparent 60%),
                 linear-gradient(rgba(204, 255, 0, 0.02) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(204, 255, 0, 0.02) 1px, transparent 1px);
@@ -192,7 +192,7 @@
         .log-entry.warning { border-left-color: var(--c-gold); background: rgba(212, 175, 55, 0.05); }
         .log-entry.error { border-left-color: var(--c-error); background: rgba(255, 51, 102, 0.05); }
         .log-time { color: var(--c-text-muted); font-size: 0.7rem; margin-bottom: 0.2rem; display:block; }
-        
+
         .log-list::-webkit-scrollbar { width: 4px; }
         .log-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
 
@@ -236,7 +236,7 @@
     <div class="panel dimensions">
         <h2>DIMENSIONAL FOLDS</h2>
         <div style="height: 1rem;"></div>
-        
+
         <div class="dim-node" id="d1-node">
             <div class="dim-header">
                 <h3>D1: PERCEPTION</h3>
@@ -277,7 +277,7 @@
     <div class="viewport" id="viewport">
         <div class="ring"></div>
         <div class="ring ring2"></div>
-        
+
         <div class="cube-container" id="hypercube">
             <div class="face front"></div>
             <div class="face back"></div>
@@ -285,7 +285,7 @@
             <div class="face left"></div>
             <div class="face top"></div>
             <div class="face bottom"></div>
-            
+
             <div class="inner-cube">
                 <div class="inner-face i-front"></div>
                 <div class="inner-face i-back"></div>
@@ -352,10 +352,10 @@
             DOM.met.entropy.innerHTML = `${ent > 0 ? '+' : ''}${ent.toFixed(2)} <span>bits</span>`;
             DOM.met.fitness.innerHTML = `${fit.toFixed(2)} <span>/ 1.0</span>`;
             DOM.met.siege.innerHTML = `${(sge * 100).toFixed(0)}% <span>pass</span>`;
-            
+
             if (ent <= 0) DOM.met.entropy.parentNode.style.borderLeftColor = 'var(--c-cyber-lime)';
             else DOM.met.entropy.parentNode.style.borderLeftColor = 'var(--c-yinmn-blue)';
-            
+
             if (fit >= 0.85) DOM.met.fitness.parentNode.style.borderLeftColor = 'var(--c-cyber-lime)';
             if (sge >= 0.95) DOM.met.siege.parentNode.style.borderLeftColor = 'var(--c-cyber-lime)';
         }
@@ -363,7 +363,7 @@
         // --- Demo Simulation -----------------
         addLog("TESSERACT-Ω Local Manifold Initialized.", 'success');
         addLog("Target: CORTEX core rewrite - Phase 1");
-        
+
         setTimeout(() => {
             addLog("Executing CYCLE 1...", 'warning');
             setDim('d1', 0.8, true);
@@ -426,16 +426,16 @@
             setDim('d4', 1.0, true);
             addLog("D4 Siege: 100% Passed. Zero Vulnerabilities.", 'success');
             updateMetrics(-0.35, 0.98, 1.0);
-            
+
             DOM.cube.classList.add('converging');
             DOM.viewport.classList.add('converging');
             document.querySelector('header').classList.add('converging');
-            
+
             DOM.status.innerText = "CONVERGED. STATE CRYSTALLIZED.";
             DOM.status.style.background = 'rgba(204,255,0,0.2)';
             DOM.status.style.color = 'var(--c-cyber-lime)';
             DOM.status.style.boxShadow = '0 0 20px rgba(204,255,0,0.4)';
-            
+
             addLog("◈ MANIFOLD CONVERGENCE ACHIEVED.", 'success');
             addLog("State persisting to CORTEX db.");
         }, 17500);

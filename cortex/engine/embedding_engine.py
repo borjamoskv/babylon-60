@@ -8,9 +8,11 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
-from typing import Any, Optional, Protocol
+from typing import Any, Protocol
 
 import aiosqlite
+
+from cortex.storage.qdrant import get_vector_backend
 
 
 class EmbedderProtocol(Protocol):
@@ -26,8 +28,8 @@ class HDCMemoryProto(Protocol):
 
 
 class MemoryManagerProtocol(Protocol):
-    _hdc_encoder: Optional[HDCEncoderProto]
-    _hdc: Optional[HDCMemoryProto]
+    _hdc_encoder: HDCEncoderProto | None
+    _hdc: HDCMemoryProto | None
 
     def get_context_vector(self) -> Any: ...
 
@@ -40,11 +42,13 @@ async def embed_fact_async(
     fact_id: int,
     project: str,
     content: str,
-    embedder: Optional[EmbedderProtocol] = None,
-    memory_manager: Optional[MemoryManagerProtocol] = None,
+    embedder: EmbedderProtocol | None = None,
+    memory_manager: MemoryManagerProtocol | None = None,
     tenant_id: str = "default",
 ) -> None:
     """Generate and store embedding for a fact asynchronously."""
+    embedding: list[float] | None = None
+
     # 1. Legacy Vector Store (L2 Dense)
     if embedder:
         try:
@@ -55,6 +59,26 @@ async def embed_fact_async(
             )
         except (sqlite3.Error, OSError, ValueError) as e:
             logger.warning("Embedding failed for fact %d: %s", fact_id, e)
+
+    # 1b. Production Vector Store (Qdrant)
+    vector_backend = get_vector_backend()
+    if vector_backend is not None:
+        if embedding is None and embedder:
+            try:
+                embedding = embedder.embed(content)
+            except (OSError, ValueError, RuntimeError) as e:
+                logger.warning("Embedding generation failed for Qdrant fact %d: %s", fact_id, e)
+
+        if embedding is not None:
+            try:
+                await vector_backend.upsert(
+                    fact_id,
+                    embedding,
+                    tenant_id=tenant_id,
+                    payload={"project": project},
+                )
+            except (OSError, ValueError, RuntimeError) as e:
+                logger.warning("Qdrant indexing failed for fact %d: %s", fact_id, e)
 
     # 2. Vector Alpha (G10 Specular Memory)
     if (

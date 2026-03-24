@@ -169,8 +169,8 @@ The current vector search uses `sqlite-vec` which performs exact (brute-force) s
 **Root Cause:**
 ```sql
 -- search/vector.py - exact search, no index
-SELECT fact_id, distance FROM fact_embeddings 
-WHERE embedding MATCH ? 
+SELECT fact_id, distance FROM fact_embeddings
+WHERE embedding MATCH ?
 ORDER BY distance LIMIT ?
 ```
 

@@ -1,10 +1,10 @@
-...mantiene un registro (contador de visitas) que aproxima empíricamente la distribución posterior de los estados latentes dadas las observaciones históricas. La transición entre clips durante la "deliberación" del agente simula un muestreo de trayectorias futuras posibles, ponderado por las energías libres esperadas. 
+...mantiene un registro (contador de visitas) que aproxima empíricamente la distribución posterior de los estados latentes dadas las observaciones históricas. La transición entre clips durante la "deliberación" del agente simula un muestreo de trayectorias futuras posibles, ponderado por las energías libres esperadas.
 
 Esta estructura permite que la **percepción y la planificación ocurran en el mismo sustrato**. Durante la percepción, la red se actualiza para reflejar qué estados latentes explican mejor las observaciones actuales (minimizando la energía libre variacional). Durante la planificación (inferencia activa), la simulación proyectiva explora caminos hacia observaciones preferidas, actualizando las políticas de acción para minimizar la energía libre esperada. Lo excepcional de FEPS es que **todo este proceso es tratable analíticamente y matemáticamente transparente**, eliminando la naturaleza de caja negra típica de los enfoques deep learning profunda, sin sacrificar la capacidad de realizar inferencia bayesiana rigurosa.
 
 ### 3.2 Arquitecturas de Control Actor-Crítico Basadas en Entropía (MaxEnt RL)
 
-El éxito práctico más contundente de la integración entre información, decisión y control en IA contemporánea se encuentra en la familia de algoritmos **Soft Actor-Critic (SAC)**. SAC es una materialización directa del principio de máxima entropía aplicado al control óptimo estocástico. 
+El éxito práctico más contundente de la integración entre información, decisión y control en IA contemporánea se encuentra en la familia de algoritmos **Soft Actor-Critic (SAC)**. SAC es una materialización directa del principio de máxima entropía aplicado al control óptimo estocástico.
 
 A diferencia del RL estándar que busca maximizar exclusivamente la suma de recompensas corporizadas, SAC maximiza una **función objetivo compuesta: la recompensa esperada más la entropía de la política**. Esto se logra implementando una arquitectura de dos componentes (actor y crítico) donde el actor (la política de decisión) se actualiza para minimizar la Divergencia KL con respecto a la distribución softmax de la función Q (el valor de control) estimada por el crítico.
 
@@ -48,7 +48,7 @@ A diferencia de los ciclos REPL simples o bucles OODA básicos, el bucle IDC ope
 
 ### 4.4 El "Pegamento Teórico": Equivalencia Marginal
 
-El gran desafío de integrar dominios dispares es la magnitud de sus unidades (bits vs utilidades abstractas vs tasas de error). El Framework IDC plantea el **Principio de Equivalencia Marginal**: En un agente óptimo cerca del equilibrio, el costo en el margen de un bit extra de incertidumbre (entropía) equivale exactamente a la pérdida marginal de utilidad (regret bayesiano) y al aumento marginal de inestabilidad cibernética (varianza del error de control). 
+El gran desafío de integrar dominios dispares es la magnitud de sus unidades (bits vs utilidades abstractas vs tasas de error). El Framework IDC plantea el **Principio de Equivalencia Marginal**: En un agente óptimo cerca del equilibrio, el costo en el margen de un bit extra de incertidumbre (entropía) equivale exactamente a la pérdida marginal de utilidad (regret bayesiano) y al aumento marginal de inestabilidad cibernética (varianza del error de control).
 
 Esta equivalencia permite derivar un "tipo de cambio" endógeno para el agente, dándole una base matemática formal a la "Temperatura" en MaxEnt RL. La temperatura $T$ transduciría *bits* de entropía a *útiles* de recompensa, unificando la termodinámica del canal informacional con la economía de la decisión.
 
@@ -72,58 +72,58 @@ Para operar y monitorear un Agente IDC en producción, se requiere telemetría e
 graph TD
     %% Entorno
     Entorno[Mundo Parcialmente Observable]
-    
+
     %% Flujo Sensorial
     Entorno -- o_t (Observación) --> FiltroSensor[Restricción de Canal / Ancho de Banda]
-    
+
     subgraph "IDC Agent Core (MOSKV-1)"
         FiltroSensor -- o_t filtrado --> InfoLayer
-        
+
         %% CAPA 1: INFORMACIÓN
         subgraph InfoLayer["1. Information Layer (Epistemología)"]
             Prior[(Creencia Previa B_t-1)]
             Actualizacion[Inferencia Bayesiana / VAE]
             Posterior[(Creencia Actual B_t)]
             CalculoH[Cálculo de Entropía y Sorpresa]
-            
+
             Prior --> Actualizacion
             Actualizacion --> Posterior
             Actualizacion --> CalculoH
         end
-        
+
         Posterior -- Estado Latente Incierto --> DecisionLayer
-        
+
         %% CAPA 2: DECISIÓN
         subgraph DecisionLayer["2. Decision Layer (Motor Pragmático)"]
             Proyeccion[Muestreo de Thompson / Simulación]
             Valuacion[Cálculo de Utilidad Esperada]
             BalancedPolicy{Minimizar F_idc}
-            
+
             Proyeccion --> Valuacion
             Valuacion --> BalancedPolicy
             CalculoH -- Valor Epistémico --> BalancedPolicy
         end
-        
+
         BalancedPolicy -- a_t_propuesta --> ControlLayer
-        
+
         %% CAPA 3: CONTROL
         subgraph ControlLayer["3. Control Layer (Estabilizador)"]
             Setpoint[Objetivos Homeostáticos / Safety]
             EvaluadorLyapunov[Evaluador de Estabilidad PID]
             ModeradorAccion[Actuador Restringido]
-            
+
             Setpoint --> EvaluadorLyapunov
             CalculoH -- Señal de Alarma (Alta Sorpresa) --> EvaluadorLyapunov
             EvaluadorLyapunov --> ModeradorAccion
         end
-        
+
         %% Conexiones internas
         Posterior -. feedback t-1 .-> Prior
     end
-    
+
     %% Bucle completo
     ModeradorAccion -- a_t (Acción Ejecutada) --> Entorno
-    
+
     %% Estilos de las capas
     style InfoLayer fill:#0c1e3e,stroke:#2e5090,stroke-width:2px,color:#fff
     style DecisionLayer fill:#1e0c3e,stroke:#6600ff,stroke-width:2px,color:#fff

@@ -11,12 +11,9 @@ Four metrics that measure epistemic debt, not just accuracy:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
-from benchmarks.encb.agents import NodeProfile, AdversaryType
-from benchmarks.encb.belief_object import BeliefType
+from benchmarks.encb.agents import AdversaryType, NodeProfile
 from benchmarks.encb.strategies import PropState
-
 
 # ── PFBR — Persistent False Belief Rate ──────────────────────────────────
 

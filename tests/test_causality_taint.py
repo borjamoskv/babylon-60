@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import json
 import sqlite3
 
 import pytest
 
+from cortex.crypto import get_default_encrypter
 from cortex.engine.causality import (
     CONFIDENCE_LEVELS,
     EDGE_DERIVED_FROM,
@@ -105,20 +105,41 @@ async def test_propagate_taint_single_child() -> None:
     graph = AsyncCausalGraph(conn)
     await graph.ensure_table()
     await conn.execute(
-        "CREATE TABLE transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, project TEXT, action TEXT, detail TEXT, prev_hash TEXT, hash TEXT, timestamp TEXT, tenant_id TEXT DEFAULT 'default')"
+        """CREATE TABLE transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            project TEXT,
+            action TEXT,
+            detail TEXT,
+            prev_hash TEXT,
+            hash TEXT,
+            timestamp TEXT,
+            tenant_id TEXT DEFAULT 'default'
+        )"""
     )
     await conn.execute(
-        "CREATE TABLE facts (id INTEGER PRIMARY KEY, content TEXT, confidence TEXT, metadata TEXT DEFAULT '{}', project TEXT, tenant_id TEXT DEFAULT 'default', valid_until TEXT)"
+        """CREATE TABLE facts (
+            id INTEGER PRIMARY KEY,
+            content TEXT,
+            confidence TEXT,
+            metadata TEXT DEFAULT '{}',
+            project TEXT,
+            tenant_id TEXT DEFAULT 'default',
+            valid_until TEXT
+        )"""
     )
+
+    # Use encrypter for metadata — Ω₁₃ §15.9.
+    enc = get_default_encrypter()
+    encrypted_meta = enc.encrypt_json({}, tenant_id="default")
 
     # Create facts: 1 → 2 (parent → child)
     await conn.execute(
-        "INSERT INTO facts (id, content, confidence) VALUES (?, ?, ?)",
-        (1, "parent-fact", "C5"),
+        "INSERT INTO facts (id, content, confidence, metadata) VALUES (?, ?, ?, ?)",
+        (1, "parent-fact", "C5", encrypted_meta),
     )
     await conn.execute(
-        "INSERT INTO facts (id, content, confidence) VALUES (?, ?, ?)",
-        (2, "child-fact", "C5"),
+        "INSERT INTO facts (id, content, confidence, metadata) VALUES (?, ?, ?, ?)",
+        (2, "child-fact", "C5", encrypted_meta),
     )
     await conn.execute(
         "INSERT INTO causal_edges (fact_id, parent_id, edge_type, tenant_id) VALUES (?, ?, ?, ?)",
@@ -144,7 +165,7 @@ async def test_propagate_taint_single_child() -> None:
     async with conn.execute("SELECT confidence, metadata FROM facts WHERE id = 2") as cursor:
         row = await cursor.fetchone()
     assert row[0] == "C4"
-    metadata = json.loads(row[1])
+    metadata = enc.decrypt_json(row[1], tenant_id="default")
     assert metadata["tainted_by"] == 1
     assert "taint_timestamp" in metadata
 
@@ -157,21 +178,43 @@ async def test_propagate_taint_chain() -> None:
     import aiosqlite
 
     conn = await aiosqlite.connect(":memory:")
-    graph_mod = __import__("cortex.engine.causality", fromlist=["AsyncCausalGraph"])
-    graph = graph_mod.AsyncCausalGraph(conn)
+    from cortex.engine.causality import AsyncCausalGraph
+
+    graph = AsyncCausalGraph(conn)
     await graph.ensure_table()
     await conn.execute(
-        "CREATE TABLE transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, project TEXT, action TEXT, detail TEXT, prev_hash TEXT, hash TEXT, timestamp TEXT, tenant_id TEXT DEFAULT 'default')"
+        """CREATE TABLE transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            project TEXT,
+            action TEXT,
+            detail TEXT,
+            prev_hash TEXT,
+            hash TEXT,
+            timestamp TEXT,
+            tenant_id TEXT DEFAULT 'default'
+        )"""
     )
     await conn.execute(
-        "CREATE TABLE facts (id INTEGER PRIMARY KEY, content TEXT, confidence TEXT, metadata TEXT DEFAULT '{}', project TEXT, tenant_id TEXT DEFAULT 'default', valid_until TEXT)"
+        """CREATE TABLE facts (
+            id INTEGER PRIMARY KEY,
+            content TEXT,
+            confidence TEXT,
+            metadata TEXT DEFAULT '{}',
+            project TEXT,
+            tenant_id TEXT DEFAULT 'default',
+            valid_until TEXT
+        )"""
     )
+
+    # Use encrypter for metadata — Ω₁₃ §15.9.
+    enc = get_default_encrypter()
+    encrypted_meta = enc.encrypt_json({}, tenant_id="default")
 
     # Chain: 1 → 2 → 3 → 4
     for fid in range(1, 5):
         await conn.execute(
-            "INSERT INTO facts (id, content, confidence) VALUES (?, ?, ?)",
-            (fid, f"fact-{fid}", "C5"),
+            "INSERT INTO facts (id, content, confidence, metadata) VALUES (?, ?, ?, ?)",
+            (fid, f"fact-{fid}", "C5", encrypted_meta),
         )
     for parent, child in [(1, 2), (2, 3), (3, 4)]:
         await conn.execute(
@@ -199,14 +242,32 @@ async def test_propagate_taint_no_descendants() -> None:
     import aiosqlite
 
     conn = await aiosqlite.connect(":memory:")
-    graph_mod = __import__("cortex.engine.causality", fromlist=["AsyncCausalGraph"])
-    graph = graph_mod.AsyncCausalGraph(conn)
+    from cortex.engine.causality import AsyncCausalGraph
+
+    graph = AsyncCausalGraph(conn)
     await graph.ensure_table()
     await conn.execute(
-        "CREATE TABLE transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, project TEXT, action TEXT, detail TEXT, prev_hash TEXT, hash TEXT, timestamp TEXT, tenant_id TEXT DEFAULT 'default')"
+        """CREATE TABLE transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            project TEXT,
+            action TEXT,
+            detail TEXT,
+            prev_hash TEXT,
+            hash TEXT,
+            timestamp TEXT,
+            tenant_id TEXT DEFAULT 'default'
+        )"""
     )
     await conn.execute(
-        "CREATE TABLE facts (id INTEGER PRIMARY KEY, content TEXT, confidence TEXT, metadata TEXT DEFAULT '{}', project TEXT, tenant_id TEXT DEFAULT 'default', valid_until TEXT)"
+        """CREATE TABLE facts (
+            id INTEGER PRIMARY KEY,
+            content TEXT,
+            confidence TEXT,
+            metadata TEXT DEFAULT '{}',
+            project TEXT,
+            tenant_id TEXT DEFAULT 'default',
+            valid_until TEXT
+        )"""
     )
 
     await conn.execute(
@@ -228,14 +289,32 @@ async def test_propagate_taint_cyclic_graph() -> None:
     import aiosqlite
 
     conn = await aiosqlite.connect(":memory:")
-    graph_mod = __import__("cortex.engine.causality", fromlist=["AsyncCausalGraph"])
-    graph = graph_mod.AsyncCausalGraph(conn)
+    from cortex.engine.causality import AsyncCausalGraph
+
+    graph = AsyncCausalGraph(conn)
     await graph.ensure_table()
     await conn.execute(
-        "CREATE TABLE transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, project TEXT, action TEXT, detail TEXT, prev_hash TEXT, hash TEXT, timestamp TEXT, tenant_id TEXT DEFAULT 'default')"
+        """CREATE TABLE transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            project TEXT,
+            action TEXT,
+            detail TEXT,
+            prev_hash TEXT,
+            hash TEXT,
+            timestamp TEXT,
+            tenant_id TEXT DEFAULT 'default'
+        )"""
     )
     await conn.execute(
-        "CREATE TABLE facts (id INTEGER PRIMARY KEY, content TEXT, confidence TEXT, metadata TEXT DEFAULT '{}', project TEXT, tenant_id TEXT DEFAULT 'default', valid_until TEXT)"
+        """CREATE TABLE facts (
+            id INTEGER PRIMARY KEY,
+            content TEXT,
+            confidence TEXT,
+            metadata TEXT DEFAULT '{}',
+            project TEXT,
+            tenant_id TEXT DEFAULT 'default',
+            valid_until TEXT
+        )"""
     )
 
     # Chain: 1 → 2 → 3 → 1 (Cycle)

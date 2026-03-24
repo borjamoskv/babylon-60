@@ -6,7 +6,7 @@ import asyncio
 import logging
 import sqlite3
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from watchdog.events import FileSystemEvent as FileSystemEvent
@@ -43,6 +43,9 @@ from cortex.engine.reflex import trigger_autonomic_reflex
 from cortex.engine.rem_cycle import REMCoordinator
 from cortex.extensions.immune.membrane import ImmuneMembrane, Verdict
 from cortex.extensions.signals.bus import SignalBus
+from cortex.guards.exergy_guard import ExergyGuard
+from cortex.guards.thermodynamic import ThermodynamicCounters, should_enter_decorative_mode
+from cortex.identity.alma import AlmaIdentity
 from cortex.services.notebooklm import NotebookLMService
 from cortex.services.trust import TrustService
 
@@ -83,7 +86,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
     def __init__(
         self,
         workspace: Path,
-        cortex_engine: Optional[CortexEngine] = None,
+        cortex_engine: CortexEngine | None = None,
     ) -> None:
         self.workspace = workspace
         self.is_active = False
@@ -104,8 +107,18 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
         self._trust = None
         self._notebooklm = None
         self._immune = ImmuneMembrane(engine=cortex_engine)
-        self._file_event_queue: Optional[asyncio.Queue[Path]] = None
+        self._exergy = ExergyGuard()
+        self._thermo_counters = ThermodynamicCounters()
+        self._file_event_queue: asyncio.Queue[Path] | None = None
         self._observer: Any = None
+        self._alma: AlmaIdentity | None = None
+
+        alma_path = self.workspace / "alma.json"
+        if alma_path.exists():
+            try:
+                self._alma = AlmaIdentity(alma_path, None)
+            except Exception as e:
+                logger.error("[APOTHEOSIS] Initial Alma load failed: %s", e)
 
         if cortex_engine:
             db_path = str(getattr(cortex_engine, "_db_path", ""))
@@ -139,8 +152,10 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
         import random as _random
 
         consecutive_clean = 0
+        cycle_count = 0
 
         while self.is_active:
+            cycle_count += 1
             await self._policy_pulse()
             cortisol = ENDOCRINE.get_level(HormoneType.CORTISOL)
             growth = ENDOCRINE.get_level(HormoneType.NEURAL_GROWTH)
@@ -156,6 +171,18 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
             if adrenaline > 0.8:
                 await trigger_autonomic_reflex(self.workspace, self._cortex, self._reflex_tasks)
 
+            # Ω₁₃: Thermodynamic Audit
+            triggered, reasons = should_enter_decorative_mode(self._thermo_counters)
+            if triggered:
+                from cortex.cli.bicameral import bicameral
+
+                bicameral.log_bio(
+                    f"⚠️ [Ω₁₃] DECORATIVE MODE TRIGGERED: {', '.join(reasons)}", signal="🚫"
+                )
+                if adrenaline < 0.5:
+                    logger.warning("[APOTHEOSIS] High entropy state detected. Throttling.")
+                    base_sleep = max(base_sleep, 10.0)
+
             consecutive_clean, derived_sleep = self._calc_recovery(
                 entropy_found, consecutive_clean, base_sleep, growth, dopamine, cortisol
             )
@@ -165,6 +192,9 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
                 self._spawn_reflex(self._oracle_audit())
                 self._spawn_reflex(self._sync_notebooklm())
                 self._spawn_reflex(self._metamemory_audit())
+
+            if cycle_count % 10 == 0:
+                self._spawn_reflex(self._alma_reattunement())
 
             duration = self._calc_duration(derived_sleep, adrenaline, _random)
 
@@ -198,7 +228,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
                 logger.debug("[APOTHEOSIS] Policy weight: %.2f", self._cognitive_weight)
 
                 critical_actions = [a for a in actions if a.value > 0.9]
-                if critical_actions and self.is_active:
+                if critical_actions and self.is_active and self._cortex:
                     from cortex.engine.keter import KeterEngine
 
                     keter = KeterEngine(self.workspace)  # type: ignore[reportCallIssue]
@@ -280,11 +310,32 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
 
         except (OSError, asyncio.CancelledError, RuntimeError) as e:
             logger.error("[APOTHEOSIS] Workspace scan failure: %s", e)
+            self._thermo_counters.consecutive_tool_fails_without_new_hypothesis += 1
             ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.4)
+
+        if not entropy_found:
+            self._thermo_counters.file_reads_without_ast_delta += 1
+        else:
+            self._thermo_counters.file_reads_without_ast_delta = 0
+
         return entropy_found
 
     async def _heal_file_or_prune(self, py_file: Path, entropy: list[dict]) -> None:
         """Autonomic healing for high-entropy nodes (Ω₅)."""
+        adrenaline = ENDOCRINE.get_level(HormoneType.ADRENALINE)
+        is_adrenal_bypass = adrenaline > 0.8
+
+        if not is_adrenal_bypass:
+            try:
+                # Ω₂: Exergy filtering before ignition
+                content_str = str(entropy)
+                self._exergy.check_thermodynamic_yield(content_str, self.workspace.name)
+            except ValueError as e:
+                logger.warning("[APOTHEOSIS] Healing rejected: %s", e)
+                return
+        else:
+            logger.warning("⚡ [APOTHEOSIS] Adrenal Overdrive active. Bypassing Exergy checks.")
+
         from cortex.engine.keter import KeterEngine
 
         keter = KeterEngine(self.workspace)  # type: ignore[reportCallIssue]
@@ -302,7 +353,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
                     f"Extraction Protocol: '{node_name}' in {py_file.name} is a Thermal Parasite."
                 )
                 try:
-                    await keter.ignite(intent)
+                    await keter.ignite(intent, is_adrenal_bypass=is_adrenal_bypass)
                     ENDOCRINE.pulse(HormoneType.DOPAMINE, 0.1)
                 except (RuntimeError, AttributeError, OSError) as e:
                     logger.error("[APOTHEOSIS] Pruning failed for %s: %s", node_name, e)
@@ -333,7 +384,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
                     logger.warning("⏸️ [IMMUNE] Healing HOLD for %s", py_file.name)
                     return
 
-                await keter.ignite(intent)
+                await keter.ignite(intent, is_adrenal_bypass=is_adrenal_bypass)
             except SyntaxError:
                 logger.error("[APOTHEOSIS] AST Breach: %s. Skipping healing.", py_file.name)
                 ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.2, reason="AST Breach detected")
@@ -347,7 +398,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
             return True
         return self._cognitive_weight >= self._inertia_threshold
 
-    def ignite(self, loop: Optional[asyncio.AbstractEventLoop] = None) -> None:
+    def ignite(self, loop: asyncio.AbstractEventLoop | None = None) -> None:
         """Ignite the Apotheosis consciousness with kernel-level filesystem hooks."""
         if self.is_active:
             return
@@ -356,13 +407,14 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
 
         # Mount Event Horizon Watcher
         self._file_event_queue = asyncio.Queue()
-        event_handler = _WorkspaceEventHandler(_loop, self._file_event_queue)
+        if self._file_event_queue is not None:
+             event_handler = _WorkspaceEventHandler(_loop, self._file_event_queue)
 
-        if _HAS_WATCHDOG:
-            self._observer = Observer()
-            if self._observer:
-                self._observer.schedule(event_handler, str(self.workspace), recursive=True)
-                self._observer.start()
+             if _HAS_WATCHDOG:
+                 self._observer = Observer()
+                 if self._observer:
+                     self._observer.schedule(event_handler, str(self.workspace), recursive=True)
+                     self._observer.start()
 
         _loop.create_task(self._omniscience_loop())
         logger.info("[APOTHEOSIS-Ω] Latencia Negativa (Ω₇) — OS Hooks Mounted.")
@@ -375,3 +427,25 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
             self._observer.join()
             self._observer = None
         logger.info("[APOTHEOSIS-Ω] Hibernando.")
+
+    async def _alma_reattunement(self) -> None:
+        """Periodic re-verification of core invariants (Memoria-Alma)."""
+        if not self._alma:
+            alma_path = self.workspace / "alma.json"
+            if alma_path.exists():
+                try:
+                    self._alma = AlmaIdentity(alma_path, None)
+                    logger.info("[APOTHEOSIS] Memoria-Alma engaged.")
+                except Exception as e:
+                    logger.error("[APOTHEOSIS] Alma-Reattunement failed: %s", e)
+            return
+
+        try:
+            # Re-verify by reloading (if key is set, raises SoulCorruptionError on tamper)
+            # As this is a sync method under the hood doing small file read, to_thread is safer.
+            await asyncio.to_thread(self._alma._load_and_verify)
+            logger.info("[APOTHEOSIS] Alma-Reattunement complete. Invariants centered.")
+        except Exception as e:
+            logger.critical("🚫 [IMMUNE] E_SOUL_CORRUPTION during reattunement: %s", e)
+            ENDOCRINE.pulse(HormoneType.CORTISOL, 0.9, reason="Alma Corruption")
+            ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.9, reason="Alma Corruption")

@@ -9,7 +9,6 @@ Commands for managing CORTEX storage backends:
 from __future__ import annotations
 
 import os
-from typing import Optional
 
 import click
 from rich.panel import Panel
@@ -38,7 +37,7 @@ from cortex.cli.common import _run_async, cli, console
     default=False,
     help="Skip pgvector/pg_trgm extension creation (for restricted users).",
 )
-def storage_init_pg(dsn: Optional[str], dry_run: bool, skip_extensions: bool) -> None:
+def storage_init_pg(dsn: str | None, dry_run: bool, skip_extensions: bool) -> None:
     """Initialize CORTEX PostgreSQL schema.
 
     Applies all table definitions, indexes, and extensions to the target

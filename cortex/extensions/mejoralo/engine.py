@@ -50,7 +50,7 @@ class MejoraloEngine:
         """
         return heal_project(project, path, target_score, scan_result, engine=self)
 
-    async def relentless_heal(
+    def relentless_heal(
         self,
         project: str,
         path: str | Path,
@@ -70,8 +70,7 @@ class MejoraloEngine:
             effective_target,
             scan_result.score,
         )
-        # Assuming heal_project will be updated or is already compatible with async awaiting
-        return await heal_project(project, path, effective_target, scan_result, engine=self)
+        return heal_project(project, path, effective_target, scan_result, engine=self)
 
     # ── Fase 3: Specialized ──────────────────────────────────────────
 

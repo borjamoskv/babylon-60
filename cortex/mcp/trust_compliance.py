@@ -10,7 +10,7 @@ import logging
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
-from cortex.engine.ledger import SovereignLedger
+from cortex.ledger import SovereignLedger
 
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP

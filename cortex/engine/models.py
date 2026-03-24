@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any
 
 __all__ = ["Fact", "row_to_fact"]
 
@@ -17,16 +17,21 @@ class Fact:
     content: str
     fact_type: str
     tags: list[str]
-    meta: dict
+    meta: dict[str, Any]
     created_at: str
     updated_at: str
     is_tombstoned: bool = False
     is_quarantined: bool = False
-    hash: Optional[str] = None
-    valid_from: Optional[str] = None
-    valid_until: Optional[str] = None
-    source: Optional[str] = None
+    hash: str | None = None
+    valid_from: str | None = None
+    valid_until: str | None = None
+    source: str | None = None
     confidence: str = "C3"
+    tx_id: int | None = None
+    consensus_score: float = 1.0
+    last_accessed: str | None = None
+    cognitive_layer: str = "semantic"
+    parent_decision_id: int | None = None
 
     def is_active(self) -> bool:
         """Evaluate logical validity using valid_until and physical state."""
@@ -38,10 +43,21 @@ class Fact:
             "tenant_id": self.tenant_id,
             "project": self.project,
             "content": self.content,
+            "fact_type": self.fact_type,
             "type": self.fact_type,
             "tags": self.tags,
             "meta": self.meta,
             "active": self.is_active(),
+            "confidence": self.confidence,
+            "valid_from": self.valid_from,
+            "valid_until": self.valid_until,
+            "source": self.source,
+            "hash": self.hash,
+            "tx_id": self.tx_id,
+            "consensus_score": self.consensus_score,
+            "last_accessed": self.last_accessed,
+            "cognitive_layer": self.cognitive_layer,
+            "parent_decision_id": self.parent_decision_id,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
         }
@@ -52,13 +68,8 @@ def row_to_fact(row: tuple) -> Fact:
 
     enc = get_default_encrypter()
 
-    # New schema expects 16 columns
-    # row[0]=id, row[1]=tenant_id, row[2]=project, row[3]=content, row[4]=fact_type,
-    # row[5]=tags, row[6]=meta, row[7]=hash, row[8]=valid_from, row[9]=valid_until,
-    # row[10]=source, row[11]=confidence, row[12]=created_at, row[13]=updated_at,
-    # row[14]=is_tombstoned, row[15]=is_quarantined
     r = list(row)
-    while len(r) < 16:
+    while len(r) < 21:
         r.append(None)
 
     tenant_id = r[1] or "default"
@@ -78,6 +89,22 @@ def row_to_fact(row: tuple) -> Fact:
     except ValueError:
         meta = {"error": "decryption_failed", "fact_id": r[0]}
 
+    consensus_score = r[16]
+    if consensus_score is None:
+        consensus_score = meta.get("consensus_score", 1.0) if meta else 1.0
+
+    tx_id = r[18]
+    if tx_id is None and meta:
+        tx_id = meta.get("tx_id")
+
+    cognitive_layer = r[19]
+    if not cognitive_layer:
+        cognitive_layer = meta.get("cognitive_layer", "semantic") if meta else "semantic"
+
+    parent_decision_id = r[20]
+    if parent_decision_id is None and meta:
+        parent_decision_id = meta.get("parent_decision_id")
+
     return Fact(
         id=r[0],
         tenant_id=tenant_id,
@@ -95,4 +122,9 @@ def row_to_fact(row: tuple) -> Fact:
         updated_at=r[13],
         is_tombstoned=bool(r[14]),
         is_quarantined=bool(r[15]),
+        tx_id=tx_id,
+        consensus_score=float(consensus_score),
+        last_accessed=r[17],
+        cognitive_layer=cognitive_layer,
+        parent_decision_id=parent_decision_id,
     )

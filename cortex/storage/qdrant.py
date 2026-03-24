@@ -18,7 +18,9 @@ This ensures true vector-level isolation between tenants.
 from __future__ import annotations
 
 import logging
-from typing import Any, Final, Optional, Protocol, runtime_checkable
+from typing import Any, Final, Protocol, runtime_checkable
+
+from cortex.storage.env import get_qdrant_api_key, get_qdrant_url
 
 __all__ = ["VectorBackend", "QdrantVectorBackend", "get_vector_backend"]
 
@@ -45,6 +47,28 @@ class VectorBackend(Protocol):
     - health_check: Verify connectivity
     """
 
+    async def upsert(
+        self,
+        fact_id: int,
+        embedding: list[float],
+        tenant_id: str = "default",
+        payload: dict[str, Any] | None = None,
+    ) -> None: ...
+
+    async def search(
+        self,
+        query_embedding: list[float],
+        top_k: int = 5,
+        tenant_id: str = "default",
+        project: str | None = None,
+    ) -> list[tuple[int, float]]: ...
+
+    async def delete(self, fact_id: int, tenant_id: str = "default") -> None: ...
+
+    async def health_check(self) -> bool: ...
+
+    async def close(self) -> None: ...
+
 
 # ─── Qdrant Implementation ───────────────────────────────────────────
 
@@ -63,7 +87,7 @@ class QdrantVectorBackend:
     def __init__(
         self,
         url: str = "http://localhost:6333",
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         *,
         dim: int = VECTOR_DIM,
     ):
@@ -133,7 +157,7 @@ class QdrantVectorBackend:
         fact_id: int,
         embedding: list[float],
         tenant_id: str = "default",
-        payload: Optional[dict[str, Any]] = None,
+        payload: dict[str, Any] | None = None,
     ) -> None:
         """Upsert a vector embedding.
 
@@ -171,7 +195,7 @@ class QdrantVectorBackend:
         query_embedding: list[float],
         top_k: int = 5,
         tenant_id: str = "default",
-        project: Optional[str] = None,
+        project: str | None = None,
     ) -> list[tuple[int, float]]:
         """KNN vector search with optional project filter.
 
@@ -265,18 +289,18 @@ class QdrantVectorBackend:
 
 # ─── Factory ─────────────────────────────────────────────────────────
 
-_vector_backend: Optional[VectorBackend] = None
+_vector_backend: VectorBackend | None = None
 
 
-def get_vector_backend() -> Optional[VectorBackend]:
+def get_vector_backend() -> VectorBackend | None:
     """Get the active vector backend singleton (None if using local sqlite-vec)."""
     return _vector_backend
 
 
 async def init_vector_backend(
-    url: Optional[str] = None,
-    api_key: Optional[str] = None,
-) -> Optional[VectorBackend]:
+    url: str | None = None,
+    api_key: str | None = None,
+) -> VectorBackend | None:
     """Initialize the global vector backend from environment or parameters.
 
     Returns None if CORTEX_VECTOR_BACKEND is not set (uses sqlite-vec).
@@ -297,8 +321,8 @@ async def init_vector_backend(
         )
         return None
 
-    qdrant_url = url or os.environ.get("QDRANT_URL", "http://localhost:6333")
-    qdrant_key = api_key or os.environ.get("QDRANT_API_KEY")
+    qdrant_url = url or get_qdrant_url()
+    qdrant_key = api_key or get_qdrant_api_key()
 
     backend = QdrantVectorBackend(url=qdrant_url, api_key=qdrant_key)
     await backend.connect()

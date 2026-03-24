@@ -12,19 +12,19 @@ The stochastic execution of the LLM is tightly bounded by a parser/guard pipelin
 graph TD
     A[Message Inbox] -->|JSON| B(Dispatcher)
     B -->|task.request| C{Planner LLM}
-    
+
     C -->|I know the answer| D[task.completed]
     C -->|I need a Tool| E[tool.call]
     C -->|I need Verification| F[verification.request]
     C -->|I need Security Check| G[security.scan.request]
     C -->|I don't know / Blocked| H[handoff.request]
-    
+
     E -->|Tool Invocation Envelope| I[Tool Execution]
     I -->|tool.result| J{Executor LLM}
-    
+
     J -->|Task done| D
     J -->|More tools needed| E
-    
+
     D -->|Task Envelope| K[bus.publish]
     E -->|Tool Envelope| K
     F -->|Verification Envelope| K

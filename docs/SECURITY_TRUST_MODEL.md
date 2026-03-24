@@ -249,6 +249,13 @@ Fact content and meta are encrypted at rest.
 
 "Encrypted primary store + plaintext side channel" is not security. It is cosplay.
 
+### FTS Policy
+
+- `facts_fts` is a standalone manual index, never trigger-synchronized from `facts`
+- if `facts.content` is encrypted at rest, that fact is excluded from `facts_fts`
+- if a fact is stored in plaintext, the same plaintext may be indexed in `facts_fts`
+- migrations must preserve this rule; they must not decrypt encrypted facts into FTS
+
 ---
 
 ## Tenant Isolation
@@ -264,7 +271,7 @@ All new data operations should be tenant-aware by default.
 
 ### Expectation
 
-Isolation must be explicit in APIs, search, caching, and persistence behavior.
+Isolation must be explicit in APIs, search, caching, and persistence behavior. The `transactions` ledger enforces isolation at the hash-chain level using `(hash, tenant_id)` composite uniqueness as of March 2026.
 
 ---
 

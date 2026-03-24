@@ -68,6 +68,15 @@ def run_migrations(conn: sqlite3.Connection) -> int:
 def _apply_base_schema(conn: sqlite3.Connection) -> None:
     """Apply base schema if database is fresh."""
     logger.info("Fresh database detected. Applying base schema...")
+
+    try:
+        import sqlite_vec
+        conn.enable_load_extension(True)
+        conn.load_extension(sqlite_vec.loadable_path())
+        conn.enable_load_extension(False)
+    except Exception as e:
+        logger.debug("Could not load sqlite_vec in _apply_base_schema: %s", e)
+
     for stmt in get_all_schema():
         try:
             conn.executescript(stmt)
@@ -139,6 +148,15 @@ async def run_migrations_async(conn: aiosqlite.Connection) -> int:
 async def _apply_base_schema_async(conn: aiosqlite.Connection) -> None:
     """Apply base schema asynchronously."""
     logger.info("Fresh database detected. Applying base schema (async)...")
+
+    try:
+        import sqlite_vec
+        await conn.enable_load_extension(True)
+        await conn.load_extension(sqlite_vec.loadable_path())
+        await conn.enable_load_extension(False)
+    except Exception as e:
+        logger.debug("Could not load sqlite_vec in _apply_base_schema_async: %s", e)
+
     for stmt in get_all_schema():
         try:
             await conn.executescript(stmt)

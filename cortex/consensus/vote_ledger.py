@@ -1,7 +1,8 @@
 """
 CORTEX v5.0 — Registro Inmutable de Votos.
 
-Almacenamiento de votos a prueba de manipulaciones criptográficas mediante encadenamiento de hashes y árboles de Merkle.
+Almacenamiento de votos a prueba de manipulaciones criptográficas mediante
+encadenamiento de hashes y árboles de Merkle.
 Parte de la Arquitectura de Soberanía Wave 5.
 """
 
@@ -12,7 +13,8 @@ import logging
 import sqlite3
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any, Optional
+from decimal import Decimal
+from typing import Any
 
 import aiosqlite
 
@@ -29,11 +31,11 @@ class VoteEntry:
     fact_id: int
     agent_id: str
     vote: int
-    vote_weight: float
+    vote_weight: Decimal
     prev_hash: str
     hash: str
     timestamp: str
-    signature: Optional[str] = None
+    signature: str | None = None
 
 
 class ImmutableVoteLedger:
@@ -50,7 +52,7 @@ class ImmutableVoteLedger:
         self._db = pool_or_conn
 
     def _compute_hash(
-        self, prev_hash: str, fact_id: int, agent_id: str, vote: int, weight: float, ts: str
+        self, prev_hash: str, fact_id: int, agent_id: str, vote: int, weight: Decimal, ts: str
     ) -> str:
         """Cálculo determinista del hash del bloque/voto."""
         payload = f"{prev_hash}:{fact_id}:{agent_id}:{vote}:{weight}:{ts}"
@@ -67,7 +69,7 @@ class ImmutableVoteLedger:
         if hasattr(self._db, "release"):
             await self._db.release(conn)
         elif hasattr(self._db, "acquire"):
-            # Si entramos con __aenter__, salimos con __aexit__ (cerrado por caller o manual)
+            # Si entramos con __aenter__, salimos con __aexit__
             pass
 
     async def append_vote(
@@ -75,8 +77,8 @@ class ImmutableVoteLedger:
         fact_id: int,
         agent_id: str,
         vote: int,
-        vote_weight: float = 1.0,
-        signature: Optional[str] = None,
+        vote_weight: Decimal = Decimal("1.0"),
+        signature: str | None = None,
     ) -> VoteEntry:
         """
         Añade un voto de forma segura y sellada.
@@ -139,9 +141,7 @@ class ImmutableVoteLedger:
             await self._release_conn(conn)
 
     async def verify_chain_integrity(self) -> dict[str, Any]:
-        """
-        Audita toda la cadena de votos.
-        """
+        """ Audita toda la cadena de votos. """
         violations = []
         conn = await self._get_conn()
         try:
@@ -164,7 +164,9 @@ class ImmutableVoteLedger:
                         }
                     )
 
-                actual_hash = self._compute_hash(p_hash, f_id, a_id, v_val, weight, ts)
+                actual_hash = self._compute_hash(
+                    p_hash, f_id, a_id, v_val, Decimal(str(weight)), ts
+                )
                 if actual_hash != c_hash:
                     violations.append(
                         {
@@ -197,7 +199,7 @@ class ImmutableVoteLedger:
         if count >= self.MERKLE_BATCH_SIZE:
             await self._create_checkpoint_internal(conn)
 
-    async def create_checkpoint(self) -> Optional[str]:
+    async def create_checkpoint(self) -> str | None:
         """Dispara manualmente un punto de control."""
         conn = await self._get_conn()
         try:
@@ -217,7 +219,7 @@ class ImmutableVoteLedger:
         finally:
             await self._release_conn(conn)
 
-    async def _create_checkpoint_internal(self, conn: aiosqlite.Connection) -> Optional[str]:
+    async def _create_checkpoint_internal(self, conn: aiosqlite.Connection) -> str | None:
         """Lógica interna de creación de punto de control."""
         async with conn.execute("SELECT MAX(vote_end_id) FROM vote_merkle_roots") as cursor:
             row = await cursor.fetchone()
@@ -240,7 +242,9 @@ class ImmutableVoteLedger:
 
         ts = datetime.now(timezone.utc).isoformat()
         await conn.execute(
-            "INSERT INTO vote_merkle_roots (vote_start_id, vote_end_id, root_hash, vote_count, created_at) VALUES (?, ?, ?, ?, ?)",
+            """INSERT INTO vote_merkle_roots
+               (vote_start_id, vote_end_id, root_hash, vote_count, created_at)
+               VALUES (?, ?, ?, ?, ?)""",
             (start_id, end_id, root_hash, len(hashes), ts),
         )
 
@@ -253,7 +257,8 @@ class ImmutableVoteLedger:
         conn = await self._get_conn()
         try:
             async with conn.execute(
-                "SELECT id, vote_start_id, vote_end_id, root_hash FROM vote_merkle_roots ORDER BY id"
+                "SELECT id, vote_start_id, vote_end_id, root_hash "
+                "FROM vote_merkle_roots ORDER BY id"
             ) as cursor:
                 checkpoints = await cursor.fetchall()
 

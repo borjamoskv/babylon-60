@@ -1,8 +1,8 @@
 """
 Moltbook Service (MoltService-Ω) — Public API Interface.
 
-Provides the CORTEX-native gateway to Moltbook. 
-Follows Ω₆: Decoupled execution. 
+Provides the CORTEX-native gateway to Moltbook.
+Follows Ω₆: Decoupled execution.
 """
 
 from __future__ import annotations
@@ -17,8 +17,8 @@ logger = logging.getLogger("cortex.services.moltbook")
 
 class MoltbookService:
     """Sovereign service for Moltbook interactions.
-    
-    Acts as the bridge between CORTEX core (Agents, CLI) and the 
+
+    Acts as the bridge between CORTEX core (Agents, CLI) and the
     Moltbook extension implementation.
     """
 
@@ -29,15 +29,15 @@ class MoltbookService:
     def _get_engine(self) -> MoltbookEngine:
         """Lazy initialization of the extension engine."""
         if self._engine is None:
-            # In a full CORTEX init, registry/client config 
+            # In a full CORTEX init, registry/client config
             # would be pulled from system settings.
             self._engine = MoltbookEngine()
         return self._engine
 
     async def register_agent(
-        self, 
-        name: str, 
-        role: str = "analyst", 
+        self,
+        name: str,
+        role: str = "analyst",
         description: str = ""
     ) -> dict[str, Any]:
         """Register a new agent into the Moltbook ecosystem."""

@@ -10,9 +10,9 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 
 from cortex.engine import CortexEngine
-from cortex.engine.ledger import SovereignLedger
 from cortex.extensions.immune.filters.base import Verdict
 from cortex.extensions.immune.membrane import ImmuneMembrane
+from cortex.ledger import SovereignLedger
 from cortex.mcp.core_tools import (
     _register_embed_status_tool,
     _register_embed_tool,

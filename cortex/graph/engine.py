@@ -1,4 +1,3 @@
-from typing import Optional
 
 """Graph Processing Engine.
 
@@ -199,7 +198,7 @@ def process_fact_graph_sync(
 
 
 async def get_graph(
-    conn, project: Optional[str] = None, limit: int = 50, tenant_id: str = "default"
+    conn, project: str | None = None, limit: int = 50, tenant_id: str = "default"
 ) -> dict:
     """Get graph data for a project or all projects.
 
@@ -214,7 +213,7 @@ async def get_graph(
 
 
 def get_graph_sync(
-    conn, project: Optional[str] = None, limit: int = 50, tenant_id: str = "default"
+    conn, project: str | None = None, limit: int = 50, tenant_id: str = "default"
 ) -> dict:
     """Get graph data synchronously."""
     backend = get_backend(conn)
@@ -222,8 +221,8 @@ def get_graph_sync(
 
 
 async def query_entity(
-    conn, name: str, project: Optional[str] = None, tenant_id: str = "default"
-) -> Optional[dict]:
+    conn, name: str, project: str | None = None, tenant_id: str = "default"
+) -> dict | None:
     """Query a specific entity by name.
 
     Args:
@@ -237,8 +236,8 @@ async def query_entity(
 
 
 def query_entity_sync(
-    conn, name: str, project: Optional[str] = None, tenant_id: str = "default"
-) -> Optional[dict]:
+    conn, name: str, project: str | None = None, tenant_id: str = "default"
+) -> dict | None:
     """Query entity synchronously."""
     backend = get_backend(conn)
     return backend.query_entity_sync(name, project, tenant_id)  # type: ignore[reportAttributeAccessIssue]

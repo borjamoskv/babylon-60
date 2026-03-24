@@ -15,7 +15,6 @@ import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -82,9 +81,9 @@ class CascadeEvent:
     """
 
     intent: IntentProfile
-    resolved_by: Optional[str]
+    resolved_by: str | None
     tier: CascadeTier
-    project: Optional[str] = None
+    project: str | None = None
     depth: int = 1  # how many providers attempted before success
     latency_ms: float = 0.0
     errors: list[str] = field(default_factory=list)
@@ -128,13 +127,13 @@ class CortexPrompt(BaseModel):
         default_factory=list,
         description="Historial reciente o contexto de trabajo (rol/contenido).",
     )
-    episodic_context: list[dict[str, Optional[str]]] = Field(
+    episodic_context: list[dict[str, str | None]] = Field(
         default_factory=list,
         description="Recuerdos comprimidos o contexto a largo plazo recuperado.",
     )
     temperature: float = Field(default=0.3, ge=0.0, le=2.0)
     max_tokens: int = Field(default=4096, gt=0)
-    project: Optional[str] = Field(
+    project: str | None = Field(
         default=None,
         description="Project to which this prompt belongs. Used for telemetry and billing.",
     )
@@ -143,6 +142,13 @@ class CortexPrompt(BaseModel):
         description=(
             "Tipo de intención del prompt. Determina qué fallbacks son "
             "elegibles para el cascade determinista. GENERAL usa todos."
+        ),
+    )
+    apply_stealth_mask: bool = Field(
+        default=False,
+        description=(
+            "Evasión Termodinámica: Activa la máscara 'no-ia-omega' "
+            "para de-AI-ficar el output."
         ),
     )
 

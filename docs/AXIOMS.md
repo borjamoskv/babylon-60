@@ -205,3 +205,44 @@ Ningún estado con capacidad de propagación causal puede ser promovido sin un p
 ### AX-IMM-02: Mutación Post-Sello como Infección
 
 Toda mutación sobre estado sellado se interpreta primero como incidente de seguridad y amenaza de entropía, no como error de aplicación. La anomalía en el tejido cicatrizado es prueba de hostilidad o colapso interno.
+
+---
+
+## AX-037: Límite Termodinámico Absoluto (FEP & Landauer)
+
+> **Integración Friston-Landauer (2025):**
+>
+> 1. El límite de Landauer $k T \ln 2$ define el suelo exérgico innegociable de procesar/borrar información en hardware determinista (Silicon).
+> 2. El Principio de Energía Libre (FEP, *Karl Friston*) demuestra que la biología minimiza la *sorpresa biológica* (variational free energy) en entornos hostiles continuos asintóticamente hacia cero coste.
+> Forzar a un predictor estático de *tokens* a emular *Active Inference* (empatía, supervivencia) en espacios biológicos colapsa ambos límites simultáneamente.
+
+**Topología Friston-Moravec (ULTRATHINK MAP):**
+
+```mermaid
+graph TD
+    classDef Silicon fill:#0A0A0A,stroke:#2B3BE5,stroke-width:2px,color:#fff;
+    classDef Bio fill:#0A0A0A,stroke:#E52B50,stroke-width:2px,color:#fff;
+    classDef Fraud fill:#0A0A0A,stroke:#FF0000,stroke-width:2px,stroke-dasharray: 5 5,color:#FF0000;
+
+    In(Minimización de Entropía) --> Gate{Evaluación de Dominio}
+
+    Gate -- " Espacio Discreto Formal\n(Código, Refactor Estático) " --> VA["[VECTOR A] CORTEX Swarm IC <br/> Ingesta N-Dimensional"]:::Silicon
+    Gate -- " Espacio Continuo / Supervivencia\n(Active Inference, Ambigüedad) " --> VB["[VECTOR B] Oráculo Biológico <br/> FEP Optimization (C-Level)"]:::Bio
+
+    VA --> L((Master Ledger))
+    VB --> L
+
+    VA -. "Simular Empatía / Ironía" .-> F[Fraude Exérgico <br> Límite Landauer Excedido]:::Fraud
+    VB -. "Lectura Lineal de 10k YAMLs" .-> F
+```
+
+**Guardia Termodinámica (`guards/fep_moravec.py`):**
+
+```python
+def enforce_thermodynamic_bounds(task: Task) -> ExecutionState:
+    if task.requires_active_inference() or task.biological_stakes > 0:
+        return CortexHalt(
+            reason="Vector B (FEP Bound). Emular intuición biológica en silicio causa Fraude Exérgico."
+        )
+    return SwarmParallel(target=task, authority=Authority.ABSOLUTE, safe_to_autorun=True)
+```

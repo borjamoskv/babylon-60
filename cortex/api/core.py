@@ -10,7 +10,8 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-from contextlib import asynccontextmanager
+from contextlib import AsyncExitStack, asynccontextmanager
+from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -90,6 +91,7 @@ from cortex.routes import (
 from cortex.routes import (
     search as search_router,
 )
+from cortex.routes import skills as skills_router
 from cortex.routes import (
     telemetry as telemetry_router,
 )
@@ -132,9 +134,11 @@ logger = logging.getLogger("uvicorn.error")
 async def lifespan(app: FastAPI):
     """Initialize async connection pool, engine, auth, and timing on startup."""
     from cortex.database.pool import CortexConnectionPool
-    from cortex.engine.causality import EpisodicSealer
     from cortex.engine_async import AsyncCortexEngine
     from cortex.memory.distributed_cache import DistributedSovereignCache
+    from cortex.storage import StorageMode, get_storage_mode
+    from cortex.storage.qdrant import init_vector_backend
+    from cortex.storage.router import get_router
 
     db_path = config.DB_PATH
     logger.info("Lifespan: Initializing CORTEX with DB_PATH: %s", db_path)
@@ -152,15 +156,70 @@ async def lifespan(app: FastAPI):
     await pool.initialize()
     async_engine = AsyncCortexEngine(pool, db_path)
 
-    # 2.5. Distributed Cache & Ω-Anamnesis Sealer
+    # 2.5. Cloud runtime surfaces (L3/L2/L1)
     cache = None
+    cloud_backends: dict[str, dict[str, Any]] = {
+        "storage": {
+            "status": "local",
+            "mode": "local",
+            "detail": "Local SQLite storage active.",
+        },
+        "vector": {
+            "status": "local",
+            "backend": "sqlite-vec",
+            "detail": "Local sqlite-vec vector backend active.",
+        },
+        "cache": {
+            "status": "disabled",
+            "backend": "local",
+            "detail": "Distributed cache disabled.",
+        },
+    }
+    app.state.storage_router = None
+    app.state.storage_backend = None
+    app.state.vector_backend = None
+    app.state.primary_async_engine = None
+    app.state.cloud_backends = cloud_backends
+
+    cloud_exit_stack = AsyncExitStack()
+    app.state._cloud_exit_stack = cloud_exit_stack
+
+    storage_mode = get_storage_mode()
+    if storage_mode in {StorageMode.POSTGRES, StorageMode.TURSO}:
+        router = get_router()
+        backend = await router.get_backend(tenant_id="system")
+        app.state.storage_router = router
+        app.state.storage_backend = backend
+        cloud_backends["storage"] = {
+            "status": "healthy",
+            "mode": storage_mode.value,
+            "detail": f"{storage_mode.value} storage backend connected.",
+        }
+        if storage_mode is StorageMode.POSTGRES:
+            from cortex.engine.postgres_primary import PostgresPrimaryEngine
+
+            app.state.primary_async_engine = PostgresPrimaryEngine(
+                backend=backend,
+                fallback_engine=async_engine,
+            )
+
+    vector_backend = await init_vector_backend()
+    if vector_backend is not None:
+        app.state.vector_backend = vector_backend
+        cloud_backends["vector"] = {
+            "status": "healthy",
+            "backend": "qdrant",
+            "detail": "Qdrant vector backend connected.",
+        }
+
     if config.DISTRIBUTED_CACHE_ENABLED:
-        sealer = EpisodicSealer(engine)
-        cache = DistributedSovereignCache(
-            redis_url=config.REDIS_URL,
-            sealer=sealer
-        )
-        logger.info("Lifespan: Ω-Anamnesis Distributed Cache ENABLED")
+        cache = await cloud_exit_stack.enter_async_context(DistributedSovereignCache.from_env())
+        cloud_backends["cache"] = {
+            "status": "healthy",
+            "backend": "redis",
+            "detail": "Redis distributed cache connected.",
+        }
+        logger.info("Lifespan: Distributed cache enabled.")
 
     # 3. Global Auth Registration
     import cortex.auth
@@ -196,6 +255,18 @@ async def lifespan(app: FastAPI):
         yield
     finally:
         logger.info("Lifespan: Shutting down CORTEX endpoints.")
+        cloud_stack: AsyncExitStack | None = getattr(app.state, "_cloud_exit_stack", None)
+        if cloud_stack is not None:
+            await cloud_stack.aclose()
+
+        vector = getattr(app.state, "vector_backend", None)
+        if vector is not None:
+            await vector.close()
+
+        storage_router = getattr(app.state, "storage_router", None)
+        if storage_router is not None:
+            await storage_router.close_all()
+
         await pool.close()
         await engine.close()
         await auth_manager.close()
@@ -379,6 +450,7 @@ app.include_router(health_index_router.router)
 app.include_router(notebooklm_router.router)
 app.include_router(observatory_router.router)
 app.include_router(scraper_router.router)
+app.include_router(skills_router.router)
 
 # Gateway — Universal Intelligence Entry Point
 from cortex.gateway.adapters import (  # noqa: E402

@@ -8,6 +8,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 import pytest_asyncio
 
+from cortex.engine.membrane import Action, AdmitResult, Diagnostic, MembraneState
 from cortex.memory.engrams import CortexSemanticEngram
 from cortex.memory.manager import CortexMemoryManager
 from cortex.memory.models import MemoryEvent
@@ -28,6 +29,8 @@ def mock_l2():
     # Mock upsert or insert for L2 if needed
     l2.upsert = AsyncMock()
     l2.search_similar = AsyncMock(return_value=[])
+    l2._encoder = AsyncMock()
+    l2._encoder.encode = AsyncMock(return_value=[0.1] * 384)
     return l2
 
 
@@ -98,11 +101,10 @@ async def test_process_interaction_no_overflow(manager, mock_l1, mock_l3):
     assert appended_event.content == "Test processing"
 
     # 2. Endocrine ingested context
-    manager._endocrine.ingest_context.assert_called_once_with(
-        "Test processing",
-        tenant_id="tenant_x",
-        metadata={"tenant_id": "tenant_x", "project_id": "cortex"},
-    )
+    manager._endocrine.ingest_context.assert_called_once()
+    args, kwargs = manager._endocrine.ingest_context.call_args
+    assert args[0] == "Test processing"
+    assert kwargs["tenant_id"] == "tenant_x"
 
     # 3. Pushed to L1
     mock_l1.add_event.assert_called_once()
@@ -137,8 +139,9 @@ async def test_process_interaction_with_overflow(manager, mock_l1):
     with patch("cortex.memory.manager.compress_and_store", new_callable=AsyncMock):
         # Give worker a tick to pick it up
         await asyncio.sleep(0.01)
-        # However, the task was added *before* this patch. The worker might have already processed it
-        # using the real compress_and_store and failed. We should patch it before calling process_interaction.
+        # However, the task was added *before* this patch. The worker might have
+        # already processed it using the real compress_and_store and failed.
+        # We should patch it before calling process_interaction.
         pass
 
 
@@ -178,8 +181,20 @@ async def test_process_interaction_with_overflow_clean():
 
 @pytest.mark.asyncio
 async def test_store_direct_pipeline(manager, mock_mem0_pipeline):
-    """Test the direct L2 store pipeline (Mem0 -> Thalamus -> Schema -> L2)."""
-    manager._mem0_pipeline = mock_mem0_pipeline
+    """Test the direct L2 store pipeline (Membrane → Thalamus → dedup → encode → resonance → L2)."""
+    # Mock SovereignMembrane to admit the fact
+    admit_result = AdmitResult(
+        action=Action.ADMIT,
+        diagnostic=Diagnostic(
+            exergy_score=0.9,
+            behavioral_score=1.0,
+            state=MembraneState.ACTIVE,
+            reasons=[],
+        ),
+        metadata_patch={"membrane_state": "active", "exergy": 0.9},
+    )
+    manager._membrane = MagicMock()
+    manager._membrane.evaluate = MagicMock(return_value=admit_result)
 
     # Mock Thalamus to pass
     manager.thalamus.filter = AsyncMock(return_value=(True, "encode:new", None))
@@ -217,22 +232,32 @@ async def test_store_direct_pipeline(manager, mock_mem0_pipeline):
         )
 
     assert result_id == "engram_123"
-    mock_mem0_pipeline.evaluate_exergy.assert_called_once()
+    manager._membrane.evaluate.assert_called_once()
     manager.thalamus.filter.assert_called_once()
 
 
 @pytest.mark.asyncio
 async def test_store_rejection_low_exergy(manager, mock_mem0_pipeline):
-    """Test store abortion if Mem0 exergy is too low."""
-    manager._mem0_pipeline = mock_mem0_pipeline
-    mock_mem0_pipeline.evaluate_exergy.return_value.score = 0.1  # Below 0.5 threshold
+    """Test store abortion if Membrane exergy is too low."""
+    # Mock SovereignMembrane to reject the fact
+    reject_result = AdmitResult(
+        action=Action.REJECT,
+        diagnostic=Diagnostic(
+            exergy_score=0.1,
+            behavioral_score=0.5,
+            state=MembraneState.QUARANTINED,
+            reasons=["low_exergy_score:0.10", "high_tool_failure_rate", "membrane_breach_detected"],
+        ),
+    )
+    manager._membrane = MagicMock()
+    manager._membrane.evaluate = MagicMock(return_value=reject_result)
 
     result = await manager.store(
         tenant_id="t1",
         content="Useless noise",
     )
 
-    assert result == "filtered:low_exergy:0.1"
+    assert "filtered:membrane_reject" in result
 
 
 @pytest.mark.asyncio

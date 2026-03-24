@@ -27,29 +27,29 @@ say "A ETHER OMEGA. Protocolo de trascendencia iniciado. 80 horas de ciclo evolu
 while true; do
     NOW=$(date +%s)
     ELAPSED=$((NOW - START_TIME))
-    
+
     if [ $ELAPSED -ge $TOTAL_SECONDS ]; then
         echo "[AETHER-Ω] 80 HOURS COMPLETED. SYSTEM TRANSCENDED." >> "$LOG_FILE"
         say "Trascendencia completada. El ecosistema es ahora soberano." 2>/dev/null
         break
     fi
-    
+
     echo "[$(date)] [VÓRTICE AETHER] Iniciando mutación Ouroboros..." >> "$LOG_FILE"
-    
+
     # Focus only on naroa.online
     RANDOM_PROJECT="game/naroa-2026"
-    
+
     echo "[$(date)] [AETHER-Ω] Lanzando MEJORAlo --brutal (Deep Audit) sobre $RANDOM_PROJECT..." >> "$LOG_FILE"
-    
+
     cd "$HOME/cortex" || exit
     .venv/bin/python -m cortex.cli mejoralo scan "${RANDOM_PROJECT##*/}" "$HOME/$RANDOM_PROJECT" --deep >> "$LOG_FILE" 2>&1
-    
+
     # Simulate the Swarm executing tests
     echo "[$(date)] [AETHER-Ω] Enganchando Swarm (LEGIØN-1) para consenso Tectónico..." >> "$LOG_FILE"
     cd "$HOME/game/moskv-swarm" 2>/dev/null && .venv/bin/python run_ultrathink.py >> "$LOG_FILE" 2>&1 || echo "Swarm skip" >> "$LOG_FILE"
-    
+
     echo "[$(date)] [AETHER-Ω] Sincronizando memoria cruzada en CORTEX v6..." >> "$LOG_FILE"
-    
+
     # Sleep to pace the 80 hour loop. Since it's a daemon, we sleep for 1 hour per mega-cycle.
     sleep 3600
 done

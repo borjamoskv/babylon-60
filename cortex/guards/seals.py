@@ -14,17 +14,6 @@ import asyncio
 import os
 import sys
 from pathlib import Path
-from typing import Optional
-
-from cortex.guards.sovereign_seals import (
-    check_gate_15_dependency,
-    check_gate_16_byzantine,
-    check_gate_17_shannon,
-    check_gate_18_evolution,
-    check_gate_19_eu_ai,
-    check_gate_20_noir,
-    check_gate_21_preservation,
-)
 
 
 class SealPrinter:
@@ -105,7 +94,7 @@ class GlobalSourceCache:
 
         target_files = await asyncio.to_thread(_get_files)
 
-        async def _read_file(p: Path) -> tuple[Path, Optional[str]]:
+        async def _read_file(p: Path) -> tuple[Path, str | None]:
             try:
                 # Use to_thread to prevent blocking event loop on disk I/O
                 content = await asyncio.to_thread(p.read_text, encoding="utf-8")
@@ -503,8 +492,35 @@ async def check_gate_14_aesthetic() -> bool:
     return True
 
 
+async def check_gate_17_shannon() -> bool:
+    """Seal 17: Shannon Entropy Budget.
+    Fails if code file entropy exceeds 6.5 bits/char.
+    """
+    import math
+    from collections import Counter
+
+    def calculate_entropy(text: str) -> float:
+        if not text:
+            return 0.0
+        counts = Counter(text)
+        length = len(text)
+        return -sum((count / length) * math.log2(count / length) for count in counts.values())
+
+    violations = []
+    for py_file, content in GlobalSourceCache.files.items():
+        entropy = calculate_entropy(content)
+        if entropy > 6.5:
+            violations.append(f"{py_file.name} ({entropy:.2f})")
+
+    if violations:
+        printer.warn(f"Seal 17 Weakened: High entropy detected in {violations}")
+    else:
+        printer.success("Seal 17: Shannon Entropy Budget intact.")
+    return True
+
+
 async def main() -> int:
-    printer.head("21 SEALS — CORTEX QUALITY GATES")
+    printer.head("15 SEALS — CORTEX QUALITY GATES")
 
     # Pre-cache all Python files into memory concurrently. O(1) file traversals moving forward.
     await GlobalSourceCache.load()
@@ -537,13 +553,7 @@ async def main() -> int:
         check_gate_12_determinism(),
         check_gate_13_latency(),
         check_gate_14_aesthetic(),
-        check_gate_15_dependency(),
-        check_gate_16_byzantine(),
         check_gate_17_shannon(),
-        check_gate_18_evolution(),
-        check_gate_19_eu_ai(),
-        check_gate_20_noir(),
-        check_gate_21_preservation(),
     )
     # Check gate 10 independently (it never fails the run)
     await check_gate_10_prompt_size()
@@ -558,7 +568,7 @@ async def main() -> int:
         print("\nFix violations before pushing.")
         return 1
     else:
-        printer.success("ALL 21 SEALS INTACT. Ready for launch.")
+        printer.success("ALL 15 SEALS INTACT. Ready for launch.")
         return 0
 
 

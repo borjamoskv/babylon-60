@@ -175,7 +175,7 @@
         const svg = d3.select("svg");
         const width = window.innerWidth;
         const height = window.innerHeight - 100;
-        
+
         const simulation = d3.forceSimulation()
             .force("link", d3.forceLink().id(d => d.id).distance(50))
             .force("charge", d3.forceManyBody().strength(-100))
@@ -232,30 +232,30 @@
                 isAnomaly = true;
                 document.body.classList.add('anomaly-active');
                 document.getElementById('status-text').innerText = 'ANOMALY DETECTED';
-                
+
                 // Recolor instantly
                 node.transition().duration(50)
                     .attr("fill", "#FF0033")
                     .style("filter", "drop-shadow(0 0 8px #FF0033)");
                 link.transition().duration(50)
                     .attr("stroke", "rgba(255,0,51,0.6)");
-                    
+
                 // Agitate physics
                 simulation.force("charge", d3.forceManyBody().strength(-200));
                 simulation.alpha(1).restart();
-                
+
             } else if (!active && isAnomaly) {
                 isAnomaly = false;
                 document.body.classList.remove('anomaly-active');
                 document.getElementById('status-text').innerText = 'SSE LINK: ACTIVE';
-                
+
                 // Revert color
                 node.transition().duration(500)
                     .attr("fill", "#CCFF00")
                     .style("filter", "drop-shadow(0 0 4px #CCFF00)");
                 link.transition().duration(500)
                     .attr("stroke", "rgba(204,255,0,0.3)");
-                    
+
                 // Calm physics
                 simulation.force("charge", d3.forceManyBody().strength(-100));
                 simulation.alpha(0.3).restart();
@@ -275,7 +275,7 @@
 
             // Synthesize visual nodes based on total_edges for aesthetic demo
             const targetNodesCount = Math.min(targetEdges + 5, 200); // Cap for performance
-            
+
             if (nodes.length < targetNodesCount) {
                 const newNodesCount = targetNodesCount - nodes.length;
                 for(let i=0; i<newNodesCount; i++) {
@@ -292,7 +292,7 @@
 
         // Connect to Server-Sent Events Daemon
         const evtSource = new EventSource("http://127.0.0.1:7070/stream");
-        
+
         evtSource.onmessage = function(event) {
             try {
                 const data = JSON.parse(event.data);

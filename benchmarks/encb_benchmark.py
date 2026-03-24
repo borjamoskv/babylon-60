@@ -35,23 +35,23 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from typing import Any
+
 from rich import box
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from benchmarks.encb.resolvers import Resolver, AppendOnlyResolver, OracleResolver
 from benchmarks.encb.metrics import (
-    calculate_recovery_rate,
     calculate_f1_score,
     calculate_kl_divergence,
+    calculate_recovery_rate,
 )
-from typing import Any
+from benchmarks.encb.resolvers import AppendOnlyResolver, OracleResolver, Resolver
 from benchmarks.encb_chaos_generator import (
     ChaosEvent,
     ChaosModality,
     EpistemicChaosOrchestrator,
-    GroundTruth,
 )
 
 console = Console()
@@ -84,7 +84,7 @@ class CortexResolver(Resolver):
                         await self.engine.vote(fact_id, event.agent_id, vote_value)
                     except Exception:
                         pass
-            except Exception as exc:
+            except Exception:
                 if event.meta.get("is_byzantine", False):
                     self._detected_byzantine.add(event.agent_id)
 

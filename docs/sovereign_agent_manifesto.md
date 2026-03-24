@@ -213,23 +213,23 @@ autolysis_protocol:
   "lineage_id": "cortex_v6_sovereign_001",
   "parent_agent": "MOSKV-1",
   "spawn_timestamp": "2026-03-02T18:00:00Z",
-  
+
   "traits_inherited": {
     "speed_bias": 0.9,
     "risk_tolerance": 0.2
   },
-  
+
   "critical_lore_subset": [
     "ep_0042: SQLite driver locks on concurrent writes. Use WAL mode.",
     "ep_0091: GPT-OSS 120B lacks function-calling support. Hard crash without degradation."
   ],
-  
+
   "nemesis_active_genes": [
     "Reject TailwindCSS",
     "Reject innerHTML",
     "Reject except Exception (specific exceptions only)"
   ],
-  
+
   "mutation_rate": 0.10,
   "trust_lineage_hash": "sha256:a3f2..."
 }
@@ -352,18 +352,18 @@ async def run_sovereign_agent(objective: str):
     # 1. INJECT BIOGRAPHY AND ALLERGIES
     identity = await load_soul_and_nemesis()
     relevant_lore = await get_relevant_episodes(objective)
-    
+
     while True:
         # 2. TETHER CHECK (Brainstem — before thinking)
         if await check_tether_breach(env):
             await autolysis_protocol()  # SIGKILL
-        
+
         # 3. CAUSAL REFLECTION (Right Brain — OUROBOROS)
         strategy = await ouroboros.reason(objective, identity, relevant_lore)
-        
+
         if strategy.intent == "SINGULARITY_REACHED":
             break
-        
+
         # 4. EXECUTION WITH DEGRADATION (Left Brain — AETHER + Ω₅)
         try:
             execution = await forge_reality(strategy)
@@ -371,11 +371,11 @@ async def run_sovereign_agent(objective: str):
             # L4: Graceful degradation — operate with reduced capability
             execution = await degrade_gracefully(strategy, e)
             await cortex.store(type="error", content=str(e), recovery="degraded")
-        
+
         # 5. TRAUMA CAPTURE (Right Brain — Lore metabolism)
         if execution.is_catastrophic_failure:
             await relevant_lore.consolidate_scar(execution.root_cause)
-        
+
         # 6. ANTIBODY GENERATION (Ω₅ — Antifragile)
         if execution.generated_insight:
             await nemesis.add_antibody(execution.generated_insight)

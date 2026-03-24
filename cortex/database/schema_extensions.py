@@ -35,6 +35,9 @@ CREATE TABLE IF NOT EXISTS agents (
     total_votes         INTEGER DEFAULT 0,
     successful_votes    INTEGER DEFAULT 0,
     disputed_votes      INTEGER DEFAULT 0,
+    alignment_hits      INTEGER NOT NULL DEFAULT 0,
+    alignment_misses    INTEGER NOT NULL DEFAULT 0,
+    base_reputation     REAL NOT NULL DEFAULT 0.5,
     last_active_at      TEXT NOT NULL DEFAULT (datetime('now')),
     is_active           BOOLEAN DEFAULT TRUE,
     is_verified         BOOLEAN DEFAULT FALSE,
@@ -215,6 +218,7 @@ CREATE INDEX IF NOT EXISTS idx_ee_timestamp ON entity_events(timestamp);
 CREATE_LOCK_INTENTS = """
 CREATE TABLE IF NOT EXISTS lock_intents (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     resource        TEXT NOT NULL,
     agent_id        TEXT NOT NULL,
     action          TEXT NOT NULL, -- 'request', 'release'
@@ -226,11 +230,13 @@ CREATE TABLE IF NOT EXISTS lock_intents (
 
 CREATE_LOCK_STATE = """
 CREATE TABLE IF NOT EXISTS lock_state (
-    resource        TEXT PRIMARY KEY,
+    resource        TEXT,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     holder_agent    TEXT,
     acquired_at     TEXT,
     expires_at      TEXT,
-    queue_depth     INTEGER DEFAULT 0
+    queue_depth     INTEGER DEFAULT 0,
+    PRIMARY KEY (resource, tenant_id)
 );
 """
 
@@ -259,6 +265,7 @@ CREATE INDEX IF NOT EXISTS idx_llm_telemetry_timestamp ON llm_telemetry(timestam
 CREATE_LOCK_INDEXES = """
 CREATE INDEX IF NOT EXISTS idx_lock_intents_resource ON lock_intents(resource);
 CREATE INDEX IF NOT EXISTS idx_lock_intents_agent ON lock_intents(agent_id);
+CREATE INDEX IF NOT EXISTS idx_lock_intents_tenant_resource ON lock_intents(tenant_id, resource);
 """
 
 # ─── Full-Text Search (Standalone in v5) ────────────────────────────
@@ -269,9 +276,9 @@ CREATE INDEX IF NOT EXISTS idx_lock_intents_agent ON lock_intents(agent_id);
 # and leaking ciphertext into unencrypted FTS storage.
 #
 # The sole indexing path is the manual INSERT in:
-#   cortex/engine/fact_store_core.py::insert_fact_record()
-# which inserts decrypted plaintext (or empty string when encryption is
-# active and plaintext is unavailable).
+#   cortex/search/fts_index.py
+# called from the fact write/delete lifecycle. It indexes plaintext only
+# when the stored fact is already plaintext.
 #
 # Migration 017 (mig_fts.py) drops any pre-existing triggers if they
 # survived from an older schema version.
@@ -292,6 +299,7 @@ CREATE_FACTS_FTS_TRIGGERS = ""  # noqa: E501 — tombstoned; kept for import com
 CREATE_MERKLE_ROOTS = """
 CREATE TABLE IF NOT EXISTS merkle_roots (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     root_hash       TEXT NOT NULL,
     tx_start_id     INTEGER NOT NULL,
     tx_end_id       INTEGER NOT NULL,
@@ -328,7 +336,10 @@ BEGIN
     UPDATE lock_state
     SET holder_agent = NULL, acquired_at = NULL,
         expires_at = NULL, queue_depth = MAX(0, queue_depth - 1)
-    WHERE expires_at IS NOT NULL AND expires_at < datetime('now');
+    WHERE resource = NEW.resource
+      AND tenant_id = NEW.tenant_id
+      AND expires_at IS NOT NULL
+      AND expires_at < datetime('now');
 END;
 """
 

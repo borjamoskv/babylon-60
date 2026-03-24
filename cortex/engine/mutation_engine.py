@@ -23,7 +23,7 @@ import hashlib
 import json
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 import aiosqlite
 
@@ -397,7 +397,7 @@ class FactMutationEngine:
         self,
         conn: aiosqlite.Connection,
         entity_id: int,
-        as_of: Optional[str] = None,
+        as_of: str | None = None,
     ) -> dict[str, Any]:
         """Reconstruct the projected state of an entity from its event log.
 

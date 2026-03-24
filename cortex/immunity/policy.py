@@ -4,7 +4,7 @@ import datetime
 import hashlib
 import json
 from collections.abc import Mapping
-from typing import Any, Optional
+from typing import Any
 
 from cortex.immunity.types import (
     ImmuneArtifact,
@@ -36,7 +36,7 @@ def can_transition(current: ImmunityState, target: ImmunityState) -> bool:
 
 
 def transition_artifact(
-    artifact: ImmuneArtifact, target: ImmunityState, reason: Optional[str] = None
+    artifact: ImmuneArtifact, target: ImmunityState, reason: str | None = None
 ) -> None:
     """Transiciona un artefacto de estado si es válido."""
     if not can_transition(artifact.state, target):
@@ -124,9 +124,25 @@ def profile_artifact(payload: Mapping[str, Any]) -> PathogenProfile:
     Esta función debe expandirse con lógica real de modelado.
     Por defecto, devuelve riesgo moderado en base a heurísticas.
     """
-    # Placeholder for actual analysis
     entropy = payload.get("measured_entropy", 0.5)
-    contradiction = 0.0  # TODO: Semantic analysis
+
+    # Derive contradiction_density from payload — prefer structured fields,
+    # fall back to a lexical negation scan on free-text summary/content.
+    if "contradiction_count" in payload:
+        total = max(int(payload.get("total_facts", 1)), 1)
+        contradiction = min(int(payload["contradiction_count"]) / total, 1.0)
+    else:
+        # Lexical proxy: presence of negation or conflict markers in free text.
+        _CONFLICT_MARKERS = (
+            " not ", " no ", " never ", "conflict", "contradict",
+            "inconsistent", "mismatch", "invalid", "denied",
+        )
+        text = " ".join(
+            str(payload.get(k, "")) for k in ("summary", "content", "description")
+        ).lower()
+        hits = sum(1 for m in _CONFLICT_MARKERS if m in text)
+        contradiction = min(hits * 0.15, 1.0)  # each marker → +0.15, capped at 1.0
+
     provenance = 1.0 if "source" in payload else 0.5
 
     return PathogenProfile(

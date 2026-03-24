@@ -11,7 +11,7 @@ Este documento describe un **experimento de blog** para el dominio **cortexpersi
 
 ## Metodología
 - **Contenido**: publicar una serie de 5 artículos semanales que cubran temas como *memoria holográfica*, *agentes retrocausales* y *arquitecturas morfogenéticas*.
-- **Herramientas**: 
+- **Herramientas**:
   - Generación de texto con **Antigravity**.
   - Conversión a HTML estático mediante **MkDocs**.
   - Deploy en **Cloudflare Pages** con CDN.

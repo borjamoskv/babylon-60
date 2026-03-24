@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import dataclasses
 from dataclasses import dataclass, field
-from typing import Optional
 
 from cortex.core.paths import (
     AGENT_DIR,
@@ -93,7 +92,7 @@ class GhostAlert:
     last_activity: str
     hours_stale: float
     mood: str = ""
-    blocked_by: Optional[str] = None
+    blocked_by: str | None = None
 
 
 @dataclass
@@ -173,12 +172,15 @@ class EntropyAlert:
 
 @dataclass
 class CloudSyncAlert:
-    """Alert triggered on successful edge sync to Turso."""
+    """Alert triggered on successful sync to a cloud persistence backend."""
 
     synced_count: int
     last_id: int
     message: str
     latency_ms: float
+    target: str = "cloud"
+    synced_transactions: int = 0
+    synced_facts: int = 0
 
 
 @dataclass
@@ -220,7 +222,7 @@ class SignalAlert:
 
     event_type: str
     message: str
-    project: Optional[str] = None
+    project: str | None = None
     payload: dict = field(default_factory=dict)
 
 

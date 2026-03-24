@@ -23,7 +23,6 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Optional
 
 from cortex.extensions.hypervisor.belief_object import (
     BeliefConfidence,
@@ -116,7 +115,7 @@ class CognitiveHandoff:
     async def process_belief(
         self,
         belief: BeliefObject,
-        context: Optional[list[BeliefObject]] = None,
+        context: list[BeliefObject] | None = None,
     ) -> BeliefVerdict:
         """Cost-aware belief processing pipeline.
 

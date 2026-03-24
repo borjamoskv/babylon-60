@@ -14,6 +14,7 @@ import aiosqlite
 
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
 from cortex.engine.mutation_engine import MUTATION_ENGINE
+from cortex.guards.exergy_guard import calculate_exergy  # Ω₂ Injector
 
 logger = logging.getLogger("cortex.growth")
 
@@ -95,10 +96,20 @@ class NeuralGrowthEngine:
 
         count = 0
         for content, p_count in candidates:
+            # Ω₂: Exergy Validation. Reject decorative bridges from promotion.
+            exergy_score = calculate_exergy(content)
+            if exergy_score < 0.5:
+                logger.warning(
+                    "⚠️ [GROWTH] Bridge promotion rejected: Low exergy (%.2f). '%s'...",
+                    exergy_score,
+                    content[:40],
+                )
+                continue
+
             logger.info(
-                "🏆 [GROWTH] Promoting bridge to GLOBAL AXIOM: '%s' (%d projects)",
+                "🏆 [GROWTH] Promoting bridge (Exergy: %.2f) to GLOBAL AXIOM: '%s'...",
+                exergy_score,
                 content[:50],
-                p_count,
             )
 
             if storer and hasattr(storer, "store"):

@@ -1,7 +1,7 @@
 # Akash Network (SDL) - The Cloud Resurrection Configuration
 # Derivation: Axiom Ω₅ (Antifragile by Default). This defines the Swarm Seed.
 # If the local Mac logic fails to pulse the `OuroborosLifeline` for 48 hours,
-# the funds released from the Smart Contract are used to deploy this SDL 
+# the funds released from the Smart Contract are used to deploy this SDL
 # to a decentralized compute provider, guaranteeing CORTEX survival.
 
 version: "2.0"
@@ -41,7 +41,7 @@ profiles:
                 - model: rtx4090
 
   placement:
-    # Bidding preferences. CORTEX chooses the provider using the funds 
+    # Bidding preferences. CORTEX chooses the provider using the funds
     # it accumulated from moneytv-1. Sovereign negotiation.
     dcloud:
       attributes:

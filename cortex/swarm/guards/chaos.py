@@ -24,34 +24,33 @@ class ChaosGuards:
         """
         if len(responses) < min_agreement:
             return False
-        
+
         # Group by status and basic content fingerprint
         agreements: dict[str, dict[str, Any]] = {}
         for resp in responses:
-            # Enhanced fingerprint: normalized status + content snippet hash
-            content_snippet = str(resp.content).strip()[:100].lower()
-            fingerprint = f"{resp.status}_{hash(content_snippet)}"
-        
+            content_snippet = str(resp.get("content", "")).strip()[:100].lower()
+            fingerprint = f"{resp.get('status', 'unknown')}_{hash(content_snippet)}"
+
             if fingerprint not in agreements:
                 agreements[fingerprint] = {"count": 0, "responses": []}
-        
+
             agreements[fingerprint]["count"] += 1
             agreements[fingerprint]["responses"].append(resp)
-        
+
         if not agreements:
             return False
 
         # Find the consensus with highest agreement
         winning_fingerprint = max(agreements.keys(), key=lambda k: agreements[k]["count"])
         max_agreement = agreements[winning_fingerprint]["count"]
-    
+
         logger.info("ChaosGuards: BFT Consensus: %d/%d agreement", max_agreement, len(responses))
-    
+
         # Evolution Guard: Detect high-entropy outliers
         if max_agreement < min_agreement:
             logger.warning("ChaosGuards: Consensus FAILED (Entropy too high)")
             return False
-        
+
         return True
 
     @staticmethod

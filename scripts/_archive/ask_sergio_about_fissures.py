@@ -1,5 +1,6 @@
 import asyncio
-from cortex.extensions.llm.router import Router, HedgedRequests
+
+from cortex.extensions.llm.router import Router
 
 
 async def main():
@@ -7,10 +8,10 @@ async def main():
     prompt = """
     Hola Sergio,
 
-    Estoy revisando el código del proyecto Cortex-Persist. ¿Ves alguna fisura de seguridad, 
-    problema arquitectónico, o debilidad (ghosts/fissures) en el código actual, 
+    Estoy revisando el código del proyecto Cortex-Persist. ¿Ves alguna fisura de seguridad,
+    problema arquitectónico, o debilidad (ghosts/fissures) en el código actual,
     específicamente en la implementación de la capa de seguridad, el ledgers, o los guards?
-    
+
     Por favor, sé tan crítico como sea necesario.
     """
 

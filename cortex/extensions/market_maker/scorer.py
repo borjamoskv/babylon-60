@@ -9,7 +9,6 @@ from __future__ import annotations
 import logging
 import random
 from decimal import Decimal
-from typing import Optional
 
 from cortex.extensions.market_maker.models import Opportunity, TrendSignal, Verdict
 
@@ -22,7 +21,7 @@ class OpportunityScorer:
     EXECUTE_THRESHOLD = Decimal("70")
     MONITOR_THRESHOLD = Decimal("40")
 
-    def __init__(self, random_seed: Optional[int] = None) -> None:
+    def __init__(self, random_seed: int | None = None) -> None:
         self._rng = random.Random(random_seed)
 
     async def score(self, signal: TrendSignal) -> Opportunity:

@@ -1,4 +1,4 @@
-"""Tests for algorithmic scaling: indices, FTS5 triggers, WAL checkpoint, pool."""
+"""Tests for algorithmic scaling: indices, manual FTS, WAL checkpoint, pool."""
 
 from __future__ import annotations
 
@@ -56,11 +56,11 @@ class TestCoveringIndices:
         conn.close()
 
 
-# ─── FTS5 Trigger Tests ──────────────────────────────────────────────
+# ─── FTS5 Manual Index Tests ─────────────────────────────────────────
 
 
-class TestFTS5Triggers:
-    """Verify FTS5 auto-sync triggers fire correctly."""
+class TestFTS5ManualIndex:
+    """Verify facts_fts is maintained by the application, not by triggers."""
 
     def _setup_db(self, db_path: str) -> sqlite3.Connection:
         """Create facts table + FTS5 + triggers."""
@@ -81,10 +81,18 @@ class TestFTS5Triggers:
                 conn.execute(s + ";")
         # FTS5 virtual table
         conn.executescript(CREATE_FACTS_FTS)
-        # Triggers
+        # Trigger DDL is intentionally tombstoned; this should be a no-op.
         conn.executescript(CREATE_FACTS_FTS_TRIGGERS)
         conn.commit()
         return conn
+
+    def test_triggers_remain_tombstoned(self, tmp_path):
+        conn = self._setup_db(str(tmp_path / "test.db"))
+        rows = conn.execute(
+            "SELECT name FROM sqlite_master WHERE type = 'trigger' AND sql LIKE '%facts_fts%'"
+        ).fetchall()
+        assert rows == []
+        conn.close()
 
     def test_insert_trigger_populates_fts(self, tmp_path):
         """Manual FTS insert works (triggers are tombstoned per dual-index remediation)."""
@@ -151,7 +159,7 @@ class TestFTS5Triggers:
 
         # Update both tables (application-level sync)
         conn.execute("UPDATE facts SET content = 'new sovereign content' WHERE id = ?", (fact_id,))
-        conn.execute("INSERT INTO facts_fts(facts_fts, rowid, content) VALUES ('delete', ?, ?)", (fact_id, "old content here"))
+        conn.execute("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,))
         conn.execute("INSERT INTO facts_fts(rowid, content) VALUES (?, ?)", (fact_id, "new sovereign content"))
         conn.commit()
 

@@ -25,7 +25,7 @@ while [ $CYCLE -lt $MAX_CYCLES ]; do
   CYCLE=$((CYCLE + 1))
   echo "[CYCLE $CYCLE/$MAX_CYCLES]"
   echo "[$(date +'%Y-%m-%d %H:%M:%S')] 🔍 Buscando siguiente Fantasma o Tarea en CORTEX..."
-  
+
   # Buscar un ghost bloqueante o tarea
   NEXT_TARGET=$(.venv/bin/python -m cortex.cli search "type:ghost OR type:task" -k 1 | grep "-" | head -n 1)
 

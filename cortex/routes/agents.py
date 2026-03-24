@@ -35,7 +35,7 @@ async def register_agent(
             tenant_id=auth.tenant_id,
         )
 
-        agent = await engine.get_agent(agent_id)
+        agent = await engine.get_agent(agent_id, tenant_id=auth.tenant_id)
         if not agent:
             lang = request.headers.get("Accept-Language", "en")
             raise HTTPException(
@@ -67,7 +67,7 @@ async def get_agent(
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> AgentResponse:
     """Get agent details and current reputation."""
-    agent = await engine.get_agent(agent_id)
+    agent = await engine.get_agent(agent_id, tenant_id=auth.tenant_id)
     if not agent:
         lang = request.headers.get("Accept-Language", "en")
         raise HTTPException(status_code=404, detail=get_trans("error_agent_not_found", lang))

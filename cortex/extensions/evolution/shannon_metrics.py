@@ -192,7 +192,7 @@ class CortexMetrics:
         case_sql = "CASE " + " ".join(case_parts) + " ELSE 'OTHER' END"
 
         query = f"""
-            SELECT 
+            SELECT
                 {case_sql} as domain_name,
                 fact_type,
                 COUNT(*) as count
@@ -249,7 +249,7 @@ class CortexMetrics:
 
         # ── 4. Batch LLM Telemetry ──
         query_llm = f"""
-            SELECT 
+            SELECT
                 {case_sql} as domain_name,
                 COUNT(*) FILTER (WHERE tier = 'none') as err_count,
                 AVG(latency_ms) as avg_lat,

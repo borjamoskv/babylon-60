@@ -25,13 +25,13 @@ from cortex.swarm.factory import create_sovereign_swarm
 async def execute_p0_swarm_mission():
     ledger = SovereignLedger(db_path=":memory:")
     swarm = create_sovereign_swarm(ledger=ledger)
-    
+
     # Task 1: Code evolution
     response_devin = await swarm.dispatch(
         actuator_name="devin",
         task="Optimize routing pipeline reducing allocations by 14% via zero-spread patterns."
     )
-    
+
     # Task 2: Capital extraction based on market inefficiencies
     response_ouro = await swarm.dispatch(
         actuator_name="ouroboros",

@@ -5,7 +5,6 @@ import shutil
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger("cortex.extensions.swarm.worktree")
 
@@ -18,7 +17,7 @@ class WorktreeIsolationError(Exception):
 
 @asynccontextmanager
 async def isolated_worktree(
-    branch_name: str, base_path: Optional[str | Path] = None
+    branch_name: str, base_path: str | Path | None = None
 ) -> AsyncGenerator[Path, None]:
     """
     Gestor O(1) de Workspaces aislados usando `git worktree`.

@@ -7,11 +7,12 @@ synthesizing their insights into a single sovereign refactor.
 from __future__ import annotations
 
 import ast
+import asyncio
 import logging
 import re
 import textwrap
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from cortex.cli import console
 from cortex.extensions.mejoralo.constants import (
@@ -97,9 +98,9 @@ class MejoraloSwarm:
         file_path: Path,
         findings: list[str],
         iteration: int = 0,
-        engine: Optional[MejoraloEngine] = None,
-        project: Optional[str] = None,
-    ) -> Optional[str]:
+        engine: MejoraloEngine | None = None,
+        project: str | None = None,
+    ) -> str | None:
         """Refactor code using surgical AST mode when possible, full-file fallback.
 
         Surgical mode:
@@ -119,7 +120,9 @@ class MejoraloSwarm:
 
         findings_str = "- " + "\n- ".join(findings)
         scars_str = self._get_scars_prompt(engine, project, file_path.name)
-        swarm_system = self._build_swarm_system(self._select_specialists(findings_str), iteration)
+        swarm_system = self._build_swarm_system(
+            self._select_specialists(findings_str, file_path.name), iteration
+        )
         console.print(f"  [dim]🐝 Swarm (L{self.level}) pensando en {file_path.name}...[/]")
 
         # ✂️ Attempt surgical AST mode first (Python only)
@@ -142,7 +145,7 @@ class MejoraloSwarm:
     # ── Surgical AST Mode ──────────────────────────────────────────────────
 
     @staticmethod
-    def _extract_infected_line(findings: list[str]) -> Optional[int]:
+    def _extract_infected_line(findings: list[str]) -> int | None:
         """Parse the first line number from MEJORAlo finding strings.
 
         Findings look like: 'path/to/file.py:42 -> High Complexity (15)'
@@ -158,7 +161,7 @@ class MejoraloSwarm:
     @staticmethod
     def _extract_infected_node(
         source: str, target_line: int
-    ) -> Optional[tuple[ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef, str]]:
+    ) -> tuple[ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef, str] | None:
         """Find the innermost function/class definition that contains target_line.
 
         Returns (node, dedented_source_of_node) or None.
@@ -169,7 +172,7 @@ class MejoraloSwarm:
             return None
 
         lines = source.splitlines(keepends=True)
-        best: Optional[ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef] = None
+        best: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef | None = None
 
         for node in ast.walk(tree):
             if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
@@ -203,7 +206,7 @@ class MejoraloSwarm:
         original_source: str,
         node: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef,
         patched_node_source: str,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Replace the original node in the source with the patched version.
 
         Preserves original indentation by detecting the leading whitespace
@@ -241,7 +244,7 @@ class MejoraloSwarm:
         findings_str: str,
         scars_str: str,
         swarm_system: str,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Execute surgical AST refactor: extract node, patch, reintegrate."""
         # 1. Determine the infected line number
         target_line = self._extract_infected_line(findings)
@@ -303,7 +306,7 @@ class MejoraloSwarm:
 
     # ── Full-File Prompt Builder ───────────────────────────────────────────────
 
-    def _read_source(self, file_path: Path) -> Optional[str]:
+    def _read_source(self, file_path: Path) -> str | None:
         try:
             return file_path.read_text(errors="replace")
         except OSError as e:
@@ -311,7 +314,7 @@ class MejoraloSwarm:
             return None
 
     def _build_prompt(
-        self, file_path: Path, content: str, findings_str: str, engine: Any, project: Optional[str]
+        self, file_path: Path, content: str, findings_str: str, engine: Any, project: str | None
     ) -> str:
         scars_str = self._get_scars_prompt(engine, project, file_path.name)
         return (
@@ -320,7 +323,7 @@ class MejoraloSwarm:
             f"Current Code:\n```python\n{content}\n```"
         )
 
-    async def _run_orchestra(self, base_prompt: str, swarm_system: str) -> Optional[str]:
+    async def _run_orchestra(self, base_prompt: str, swarm_system: str) -> str | None:
         console.rule(f"[cyan]SOVEREIGN SWARM L{self.level} ENGAGED")
         with console.status("[bold green]Synthesizing specialists insights...", spinner="point"):
             try:
@@ -336,7 +339,7 @@ class MejoraloSwarm:
                 logger.error("Swarm orchestration failed: %s", e)
                 return None
 
-    def _get_scars_prompt(self, engine: Any, project: Optional[str], filename: str) -> str:
+    def _get_scars_prompt(self, engine: Any, project: str | None, filename: str) -> str:
         """Helper to format previous failure scars without bloating main flow."""
         if not engine or not project:
             return ""
@@ -347,7 +350,7 @@ class MejoraloSwarm:
         scars_list = [f"SCAR: {s['error_trace']}" for s in scars]
         return "\n\nCRITICAL: DO NOT REPEAT:\n" + "\n---\n".join(scars_list)
 
-    def _select_specialists(self, findings_str: str) -> list[str]:
+    def _select_specialists(self, findings_str: str, filename: str = "") -> list[str]:
         """Dynamically build the specialist squad with zero-nesting logic."""
         squad_size = SWARM_SQUAD_SIZES.get(self.level, SWARM_DEFAULT_SQUAD_SIZE)
         fs_lower = findings_str.lower()
@@ -358,15 +361,26 @@ class MejoraloSwarm:
             "PerformanceGhost": ["perform", "slow", "loop", "complex"],
             "RobustnessGuardian": ["error", "fail", "type", "except"],
             "AestheticShiva": ["format", "lint", "style", "aesthetic"],
-            "AwwwardsSovereign": ["awwward", "ui", "ux", "animation", "css", "scroll", "gpu"],
         }
+
+        is_frontend = filename.endswith((".tsx", ".ts", ".js", ".jsx", ".css", ".html"))
+        if is_frontend:
+            mapping["AwwwardsSovereign"] = [
+                "awwward",
+                "ui",
+                "ux",
+                "animation",
+                "css",
+                "scroll",
+                "gpu",
+            ]
 
         # Functional-style specialist selection
         dynamic = [s for s, kw in mapping.items() if any(k in fs_lower for k in kw)]
         active = (["ArchitectPrime", "CodeNinja"] + dynamic)[:squad_size]
 
         # Force AwwwardsSovereign if explicitly requested
-        if "awwwards" in fs_lower and "AwwwardsSovereign" not in active:
+        if is_frontend and "awwwards" in fs_lower and "AwwwardsSovereign" not in active:
             if len(active) == squad_size:
                 active[-1] = "AwwwardsSovereign"
             else:
@@ -409,7 +423,7 @@ class MejoraloSwarm:
             "Return ONLY high-density Python code inside ```python blocks. No fluff."
         )
 
-    def _extract_code(self, content: str) -> Optional[str]:
+    def _extract_code(self, content: str) -> str | None:
         """Extract and validate python code from LLM string output."""
         clean_code = None
         match = re.search(r"```python\n(.*?)```", content, re.DOTALL)
@@ -434,13 +448,24 @@ class MejoraloSwarm:
             return None
 
     async def audit_files(self, file_paths: list[Path]) -> list[str]:
-        """Perform a semantic audit of a set of files using the swarm."""
+        """Perform a semantic audit of a set of files using the swarm in parallel."""
         findings = []
+        semaphore = asyncio.Semaphore(5)  # Max 5 parallel audits to avoid 429s
+
+        async def _bounded_audit(orchestra: ThoughtOrchestra, fp: Path) -> list[str]:
+            async with semaphore:
+                return await self._audit_single_file(orchestra, fp)
+
         try:
             async with ThoughtOrchestra(config=self.config) as orchestra:
-                for fp in file_paths:
-                    file_findings = await self._audit_single_file(orchestra, fp)
-                    findings.extend(file_findings)
+                tasks = [_bounded_audit(orchestra, fp) for fp in file_paths]
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+
+                for r in results:
+                    if isinstance(r, Exception):
+                        logger.error("Parallel audit failed: %s", r)
+                    else:
+                        findings.extend(r)
         except (OSError, RuntimeError, ValueError) as e:
             logger.error("Audit orchestra failed: %s", e)
         return findings

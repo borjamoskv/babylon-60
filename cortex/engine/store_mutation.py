@@ -2,19 +2,22 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
+
 import aiosqlite
-from cortex.utils.canonical import now_iso
+
 from cortex.immune.quarantine import BlastRadiusReport, evaluate_demolition
+from cortex.utils.canonical import now_iso
 
 logger = logging.getLogger("cortex.engine.mutation")
 
 async def deprecate_impl_logic(
-    mixin_instance: Any, conn: aiosqlite.Connection, fact_id: int, reason: Optional[str], tenant_id: str
+    mixin_instance: Any, conn: aiosqlite.Connection, fact_id: int, reason: str | None, tenant_id: str
 ) -> bool:
-    from cortex.engine.mutation_engine import MUTATION_ENGINE
     from cortex.engine.causality import AsyncCausalGraph
-    
+    from cortex.engine.mutation_engine import MUTATION_ENGINE
+    from cortex.search.fts_index import remove_fact_fts_async
+
     ts = now_iso()
     async with conn.execute(
         "SELECT project FROM facts WHERE id = ? AND tenant_id = ? AND is_tombstoned = 0",
@@ -24,26 +27,24 @@ async def deprecate_impl_logic(
     if not row:
         return False
     project = row[0]
-    
+
     await MUTATION_ENGINE.apply(
         conn, fact_id=fact_id, tenant_id=tenant_id, event_type="deprecate",
         payload={"reason": reason or "deprecated", "timestamp": ts},
         signer="store_mixin:deprecate", commit=False
     )
     await AsyncCausalGraph(conn).propagate_taint(fact_id=fact_id, tenant_id=tenant_id)
-    try:
-        await conn.execute("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,))
-    except Exception:
-        pass
+    await remove_fact_fts_async(conn, fact_id)
     await mixin_instance._log_transaction(conn, project, "deprecate", {"fact_id": fact_id, "reason": reason})
     return True
 
 async def invalidate_impl_logic(
-    mixin_instance: Any, conn: aiosqlite.Connection, fact_id: int, reason: Optional[str], tenant_id: str
+    mixin_instance: Any, conn: aiosqlite.Connection, fact_id: int, reason: str | None, tenant_id: str
 ) -> bool:
-    from cortex.engine.mutation_engine import MUTATION_ENGINE
     from cortex.engine.causality import AsyncCausalGraph
-    
+    from cortex.engine.mutation_engine import MUTATION_ENGINE
+    from cortex.search.fts_index import remove_fact_fts_async
+
     ts = now_iso()
     async with conn.execute(
         "SELECT project FROM facts WHERE id = ? AND tenant_id = ? AND is_tombstoned = 0",
@@ -65,10 +66,7 @@ async def invalidate_impl_logic(
         signer="store_mixin:invalidate:force", commit=False
     )
     await AsyncCausalGraph(conn).propagate_taint(fact_id=fact_id, tenant_id=tenant_id)
-    try:
-        await conn.execute("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,))
-    except Exception:
-        pass
+    await remove_fact_fts_async(conn, fact_id)
     await mixin_instance._log_transaction(conn, project, "invalidate", {"fact_id": fact_id, "reason": reason})
     return True
 
@@ -77,6 +75,7 @@ async def purge_logic(
 ) -> bool:
     async with mixin_instance.session() as conn:
         from cortex.engine.causality import AsyncCausalGraph
+        from cortex.search.fts_index import remove_fact_fts_async
         graph = AsyncCausalGraph(conn)
         async with conn.execute(
             "SELECT project, fact_type FROM facts WHERE id = ? AND tenant_id = ?",
@@ -96,13 +95,14 @@ async def purge_logic(
                 await mixin_instance.invalidate(
                     fact_id, reason=f"Quarantined: {decision.reason}", conn=conn, tenant_id=tenant_id
                 )
-            raise RuntimeError(f"Demolition Denied: {decision.reason}")
-        await conn.execute("DELETE FROM facts WHERE id = ?", (fact_id,))
-        await conn.execute("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,))
+            raise RuntimeError(f"Bounded Demolition Denied: {decision.reason}")
+        # Delete causal edges BEFORE the fact row to avoid FK constraint failures
         await conn.execute(
             "DELETE FROM causal_edges WHERE fact_id = ? OR parent_id = ?",
             (fact_id, fact_id)
         )
+        await conn.execute("DELETE FROM facts WHERE id = ?", (fact_id,))
+        await remove_fact_fts_async(conn, fact_id)
         await mixin_instance._log_transaction(
             conn, project, "purge", {"fact_id": fact_id, "blast_radius": dep_count}
         )

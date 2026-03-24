@@ -202,7 +202,7 @@ def compliance_report(db: str) -> None:
 def audit_cognitive(tenant: str, db: str) -> None:
     """Run a deep cryptographic audit of the Cognitive Event Ledger (L3)."""
     from cortex.database.core import connect_async
-    from cortex.memory.ledger import EventLedgerL3
+    from cortex.ledger.event_ledger import EventLedgerL3
 
     async def _run_audit():
         conn = await connect_async(db)
@@ -310,7 +310,7 @@ def siege(db: str) -> None:
             )
         )
 
-        tasks = [vector.attack(engine, {}) for vector in COMPLIANCE_SIEGE_SWARM]  # type: ignore[type-error]
+        tasks = [vector.attack(engine, {}) for vector in COMPLIANCE_SIEGE_SWARM.values()]
 
         import asyncio
 

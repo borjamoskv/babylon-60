@@ -9,7 +9,7 @@ Audience: New Integrators, Swarm Developers, Platform Architects
 
 ## 1. Purpose
 
-This document provides definitive **Onboarding Flows** for engineers adopting the SORTU-Ω public SDK. 
+This document provides definitive **Onboarding Flows** for engineers adopting the SORTU-Ω public SDK.
 
 Instead of reading raw endpoint documentation in isolation, integrators should start here to understand the four primary operational loops:
 
@@ -41,7 +41,7 @@ This is the most common integration: storing facts and retrieving them for gener
 1. **Client** calls `sdk.memory.query(intent="lookup", strategy="auto")`.
 2. **SORTU-Ω** determines the optimal execution plan.
    - **Happy Path:** Returns `QueryResult` with vector-enriched, temporally accurate items. `plan.fallback_used` is `false`.
-   - **Degraded Path:** Returns `QueryResult` but `plan.degraded_mode` is `true` (e.g., vector search failed, fell back to basic text retrieval). 
+   - **Degraded Path:** Returns `QueryResult` but `plan.degraded_mode` is `true` (e.g., vector search failed, fell back to basic text retrieval).
    - *Integration Rule:* If `degraded_mode` is true, the client SHOULD warn the user or lower the temperature of the subsequent LLM generation, as the context density is compromised.
 
 ---
@@ -77,7 +77,7 @@ This flow is used to ensure the memory hasn't been tampered with or silently cor
 1. **Client** calls `sdk.verification.verify(scope="project", project_id="alpha")`.
 2. **SORTU-Ω** recalculates the Merkle roots and cross-references the Master Ledger.
    - **Happy Path:** Returns `VerifyResult` with status `verified`. The client can proceed with high-stakes autonomous execution.
-   - **Failed Path:** Returns status `failed`. 
+   - **Failed Path:** Returns status `failed`.
    - *Integration Rule:* If `failed`, the client MUST immediately halt autonomous execution for that project and alert a human operator or the Immune System daemon.
 
 ### 4.2 The Taint Check
@@ -105,7 +105,7 @@ This flow is used by multi-agent swarms to vote, reach consensus, and share stat
 1. **Clients (Agents A, B, C)** call `sdk.coordination.vote(topic_id="deploy_42", decision="approve")`.
 2. **SORTU-Ω** aggregates votes against quorum rules.
    - **Happy Path:** Quorum reached. The system emits a `consensus.reached` event via Webhooks/SSE.
-   - **Rejection Path:** Returns `ERR_AGENT_STALE` for Agent C. 
+   - **Rejection Path:** Returns `ERR_AGENT_STALE` for Agent C.
    - *Integration Rule:* The swarm orchestration layer MUST listen for `consensus.failed` or `consensus.reached` events via the Event Bus, rather than polling the database.
 
 ---

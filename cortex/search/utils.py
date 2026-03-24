@@ -66,32 +66,30 @@ def _sanitize_fts_query(query: str) -> str:
 
 def get_higher_confidences(confidence: str) -> list[str]:
     """Return a list of confidence levels greater than or equal to the requested one.
-    
+
     CORTEX confidence levels: C1 < C2 < C3 < C4 < C5-Static < C5-Dynamic
     Also supports 'stated' (maps to all) and 'verified' (maps to C5-Static+).
     """
     levels = ["C1", "C2", "C3", "C4", "C5-Static", "C5-Dynamic"]
-    
+
     if confidence == "verified":
         return ["verified", "C5-Static", "C5-Dynamic"]
     if confidence == "stated":
         return levels + ["stated", "verified"]
-        
+
     try:
         idx = levels.index(confidence)
         return levels[idx:] + ["verified"]
     except ValueError:
         return [confidence]
 
-
-
-def _row_to_result(row: tuple, is_fts: bool = False) -> SearchResult:
+def _row_to_result(row: tuple, tenant_id: str = "default", is_fts: bool = False) -> SearchResult:
     """Parse a database row into a SearchResult object with decryption logic.
 
     Column order from _fts5_search / _like_search:
       0: f.id, 1: f.content, 2: f.project, 3: f.fact_type, 4: f.confidence,
       5: f.valid_from, 6: f.valid_until, 7: f.tags, 8: f.source, 9: f.metadata,
-      10: f.created_at, 11: f.updated_at, 12: f.tx_id, 13: t.hash,
+      10: f.created_at, 11: f.updated_at, 12: f.tx_id, 13: f.hash,
       14: bm25(facts_fts) AS rank  [FTS only]
     """
     from cortex.crypto import get_default_encrypter
@@ -99,7 +97,6 @@ def _row_to_result(row: tuple, is_fts: bool = False) -> SearchResult:
     enc = get_default_encrypter()
 
     fact_id = row[0]
-    tenant_id = "default"
 
     # Decrypt Content
     content = _decrypt_row_content(row[1], tenant_id, enc)
@@ -166,27 +163,35 @@ def _parse_row_meta(meta_raw: Any, tenant_id: str, enc: Any) -> dict[str, Any]:
         return {}
 
 
-def _rows_to_results(rows: list, is_fts: bool = False) -> list[SearchResult]:
+def _rows_to_results(
+    rows: list,
+    tenant_id: str = "default",
+    is_fts: bool = False,
+) -> list[SearchResult]:
     """Convert raw DB rows to SearchResult objects."""
-    return [_row_to_result(row, is_fts) for row in rows]
+    return [_row_to_result(row, tenant_id=tenant_id, is_fts=is_fts) for row in rows]
 
 
-def _parse_row_sync(row: tuple, has_rank: bool) -> SearchResult:
+def _parse_row_sync(row: tuple, has_rank: bool, tenant_id: str = "default") -> SearchResult:
     """Parse a database row into a SearchResult (sync)."""
     try:
         tags = json.loads(row[6]) if row[6] else []
     except (json.JSONDecodeError, TypeError):
         tags = []
 
-    if has_rank and len(row) > 7:
-        score = -row[7] if row[7] else 0.5
+    rank_idx = None
+    if has_rank:
+        rank_idx = 9 if len(row) > 9 else 7 if len(row) > 7 else None
+
+    if rank_idx is not None:
+        score = -row[rank_idx] if row[rank_idx] else 0.5
     else:
         score = 0.5
 
     from cortex.crypto import get_default_encrypter
 
     enc = get_default_encrypter()
-    content = _decrypt_row_content(row[1], "default", enc)  # type: ignore[reportGeneralTypeIssues]
+    content = _decrypt_row_content(row[1], tenant_id, enc)  # type: ignore[reportGeneralTypeIssues]
 
     return SearchResult(
         fact_id=row[0],  # type: ignore[reportGeneralTypeIssues]
@@ -201,4 +206,6 @@ def _parse_row_sync(row: tuple, has_rank: bool) -> SearchResult:
         valid_until=None,
         created_at="unknown",
         updated_at="unknown",
+        tx_id=row[7] if ((has_rank and len(row) > 9) or (not has_rank and len(row) > 8)) else None,
+        hash=row[8] if ((has_rank and len(row) > 9) or (not has_rank and len(row) > 8)) else None,
     )

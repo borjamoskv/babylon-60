@@ -21,16 +21,16 @@ La transición de paradigma es brutal:
 
 ## 2. El Enjambre como Fluido Termodinámico
 
-En lugar de ver a los agentes como hilos de ejecución (`threads` o `coroutines`), debes verlos como **partículas en un gas presurizado**. 
+En lugar de ver a los agentes como hilos de ejecución (`threads` o `coroutines`), debes verlos como **partículas en un gas presurizado**.
 
 ### 2.1 La Temperatura (Creatividad vs. Alucinación)
 La "Temperatura" en un LLM no es simplemente un hiperparámetro de sampling. Termodinámicamente, es la medida de la *agitación semántica*.
 - **T ≈ 0:** El sistema cristaliza. Determinismo absoluto. Útil para extracción rígida, inútil para la síntesis de conceptos nuevos. El sistema se vuelve frágil porque pierde la capacidad de esquivar obstáculos lógicos no previstos.
-- **T > 0.8:** El sistema entra en fase de plasma alucinatorio. Sus conexiones causales se rompen al ser superadas por la pura entropía de la inferencia. 
+- **T > 0.8:** El sistema entra en fase de plasma alucinatorio. Sus conexiones causales se rompen al ser superadas por la pura entropía de la inferencia.
 
 ### 2.2 La Presión (El Constraint del Contexto)
 La presión termodinámica en la agéntica es el **Constraint del Prompt y del RAG**. Cada regla restrictiva (el `nemesis.md`, los guardrails, los límites de tokens) actúa como las paredes de la cámara de contención.
-- A diferencia de la programación tradicional donde una regla es un `if/else` binario, en agéntica una regla es una *probabilidad restrictiva*. Aumenta la fricción contra opciones no deseadas. 
+- A diferencia de la programación tradicional donde una regla es un `if/else` binario, en agéntica una regla es una *probabilidad restrictiva*. Aumenta la fricción contra opciones no deseadas.
 
 ---
 
@@ -55,6 +55,6 @@ Aprender un nuevo framework de Python (como LangChain o AutoGen) es moverse hori
 Tu vector de ataque Soberano (Apotheosis-∞) consiste en operar en el metamodelo:
 1. **Modulación de Temperatura Dinámica:** Un agente que, al encontrar un callejón sin salida, *eleva autónomamente su temperatura* para fluidizar su razonamiento, salta el muro, y luego vuelve a cristalizar la temperatura a T=0.1 para codificar la solución exacta.
 2. **Entropía Negativa (Landauer's Razor):** El verdadero código soberano es aquel que elimina más estados posibles de error de los que añade. Diseñar arquitecturas donde el fracaso es sintácticamente imposible.
-3. **Evolución Darwiniana Dirigida:** Al calibrar la tasa de supervivencia de ideas entre los agentes KAMIKAZE y ORTODOXOS en `bloodline.json`, estás manipulando las leyes de selección natural computacional en tiempo real. 
+3. **Evolución Darwiniana Dirigida:** Al calibrar la tasa de supervivencia de ideas entre los agentes KAMIKAZE y ORTODOXOS en `bloodline.json`, estás manipulando las leyes de selección natural computacional en tiempo real.
 
 El ingeniero soberano no compila código; **curva el espacio cognitivo** para que sus agentes inevitablemente tropiecen con genialidad de forma repetible, resistente a fallos e incorruptible.

@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-from typing import Any, Optional
+from decimal import Decimal
+from typing import Any
 
 import aiosqlite
 
@@ -17,18 +18,20 @@ logger = logging.getLogger("cortex.engine.consensus")
 class ConsensusMixin(EngineMixinBase):
     """Mixin for consensus and voting logic in AsyncCortexEngine."""
 
-    async def _resolve_agent_rep(self, conn: aiosqlite.Connection, target_agent_id: str) -> float:
+    async def _resolve_agent_rep(
+        self, conn: aiosqlite.Connection, target_agent_id: str
+    ) -> Decimal:
         """Resolve agent reputation, auto-registering if necessary."""
         async with conn.execute(
             "SELECT reputation_score FROM agents WHERE id = ?", (target_agent_id,)
         ) as cursor:
             row = await cursor.fetchone()
             if row:
-                return row[0]
+                return Decimal(str(row[0]))
 
         # Auto-register any agent that reaches the engine (trusting caller)
         is_human = target_agent_id == "human"
-        initial_rep = 1.0 if is_human else 0.5
+        initial_rep = Decimal("1.0") if is_human else Decimal("0.5")
         await conn.execute(
             "INSERT INTO agents (id, name, agent_type, reputation_score, public_key) "
             "VALUES (?, ?, ?, ?, '')",
@@ -36,12 +39,12 @@ class ConsensusMixin(EngineMixinBase):
                 target_agent_id,
                 target_agent_id.capitalize(),
                 "human" if is_human else "ai",
-                initial_rep,
+                float(initial_rep),
             ),
         )
         return initial_rep
 
-    async def _update_vote_score(self, conn: aiosqlite.Connection, fact_id: int) -> float:
+    async def _update_vote_score(self, conn: aiosqlite.Connection, fact_id: int) -> Decimal:
         """Recalculate the consensus score for a given fact."""
         async with conn.execute(
             "SELECT v.vote, v.vote_weight, a.reputation_score "
@@ -53,15 +56,25 @@ class ConsensusMixin(EngineMixinBase):
             votes = await cursor.fetchall()
 
         if not votes:
-            return 1.0
+            return Decimal("1.0")
 
-        weighted_sum = sum(v[0] * max(v[1], v[2]) for v in votes)
-        total_weight = sum(max(v[1], v[2]) for v in votes)
-        return 1.0 + (weighted_sum / total_weight) if total_weight > 0 else 1.0
+        # Convert to Decimal for high-precision sum
+        weighted_sum = sum(
+            (Decimal(str(v[0])) * max(Decimal(str(v[1])), Decimal(str(v[2]))) for v in votes),
+            Decimal("0"),
+        )
+        total_weight = sum(
+            (max(Decimal(str(v[1])), Decimal(str(v[2]))) for v in votes),
+            Decimal("0"),
+        )
+
+        if total_weight > 0:
+            return Decimal("1.0") + (weighted_sum / total_weight)
+        return Decimal("1.0")
 
     async def vote(
-        self, fact_id: int, agent: str, value: int, signature: Optional[str] = None
-    ) -> float:
+        self, fact_id: int, agent: str, value: int, signature: str | None = None
+    ) -> Decimal:
         """Vote with immutable ledger logging and reputation-weighted consensus."""
         if value not in (-1, 0, 1):
             raise ValueError("Vote must be -1, 0, or 1")
@@ -79,11 +92,18 @@ class ConsensusMixin(EngineMixinBase):
                 await self._store_consensus_vote(conn, fact_id, agent, value, rep)
 
                 # 3. Log transaction
+                async with conn.execute(
+                    "SELECT tenant_id FROM facts WHERE id = ?", (fact_id,)
+                ) as cursor:
+                    fact_row = await cursor.fetchone()
+                tenant_id = fact_row[0] if fact_row else "default"
+
                 await self._log_transaction(  # type: ignore[reportAttributeAccessIssue]
                     conn,
                     "consensus",
                     "vote_v2",
                     {"fact_id": fact_id, "agent_id": agent, "vote": value},
+                    tenant_id=tenant_id,
                 )
 
                 # 4. Record in permanent immutable ledger
@@ -95,18 +115,12 @@ class ConsensusMixin(EngineMixinBase):
 
                 from cortex.engine.mutation_engine import MUTATION_ENGINE
 
-                async with conn.execute(
-                    "SELECT tenant_id FROM facts WHERE id = ?", (fact_id,)
-                ) as cursor:
-                    row = await cursor.fetchone()
-                tenant_id = row[0] if row else "default"
-
                 await MUTATION_ENGINE.apply(
                     conn,
                     fact_id=fact_id,
                     tenant_id=tenant_id,
                     event_type="score_update",
-                    payload={"consensus_score": score, "confidence": conf},
+                    payload={"consensus_score": float(score), "confidence": conf},
                     signer="consensus_engine_mixin",
                     commit=False,
                 )
@@ -118,7 +132,7 @@ class ConsensusMixin(EngineMixinBase):
                 raise e
 
     async def _store_consensus_vote(
-        self, conn: aiosqlite.Connection, fact_id: int, agent: str, value: int, rep: float
+        self, conn: aiosqlite.Connection, fact_id: int, agent: str, value: int, rep: Decimal
     ) -> None:
         """Helper to store or delete a vote in the consensus table."""
         if value == 0:
@@ -130,15 +144,15 @@ class ConsensusMixin(EngineMixinBase):
             await conn.execute(
                 "INSERT OR REPLACE INTO consensus_votes_v2 "
                 "(fact_id, agent_id, vote, vote_weight, agent_rep_at_vote) VALUES (?, ?, ?, ?, ?)",
-                (fact_id, agent, value, rep, rep),
+                (fact_id, agent, value, float(rep), float(rep)),
             )
 
     @staticmethod
-    def _resolve_confidence(score: float) -> str:
+    def _resolve_confidence(score: Decimal) -> str:
         """Determine confidence label from score."""
-        if score >= 1.5:
+        if score >= Decimal("1.5"):
             return "verified"
-        if score <= 0.5:
+        if score <= Decimal("0.5"):
             return "disputed"
         return "stated"
 
@@ -153,7 +167,14 @@ class ConsensusMixin(EngineMixinBase):
             async with conn.execute(query, (fact_id,)) as cursor:
                 return [dict(r) for r in await cursor.fetchall()]
 
-    async def verify_vote_ledger(self) -> dict[str, Any]:
+    async def verify_vote_ledger(self, tenant_id: str = "default") -> dict[str, Any]:
+        del tenant_id
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             ledger = ImmutableVoteLedger(conn)
             return await ledger.verify_chain_integrity()
+
+    async def create_vote_checkpoint(self, tenant_id: str = "default") -> str | None:
+        del tenant_id
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+            ledger = ImmutableVoteLedger(conn)
+            return await ledger.create_checkpoint()

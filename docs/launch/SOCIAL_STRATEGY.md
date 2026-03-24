@@ -25,7 +25,7 @@ CORTEX provides native governance mapping. Unverifiable intelligence is unauthor
 
 **Post 5:**
 Stop the entropy of unverified state. Secure your agent's trust-boundary before production failure does it for you.
-Sovereign code is open code. 
+Sovereign code is open code.
 Star the repo. Implement the logic. Crush the hallucination loop.
 <https://github.com/borjamoskv/Cortex-Persist>
 #AI #AgenticAI #OpenSource #CORTEX

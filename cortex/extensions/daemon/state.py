@@ -30,7 +30,7 @@ class HotMemory:
             self.counters.pop(oldest, None)
         self.local_cache[key] = value
         self.counters[key] = time.time()
-        
+
         if self.distributed is not None:
             try:
                 # Store in Redis with high TTL for "Immortal Memory"
@@ -44,7 +44,7 @@ class HotMemory:
         if key in self.local_cache:
             self.counters[key] = time.time()
             return self.local_cache[key]
-        
+
         # 2. Try distributed
         if self.distributed is not None:
             try:
@@ -55,14 +55,14 @@ class HotMemory:
                     return val
             except Exception as e:
                 logger.warning("Failed to retrieve from distributed cache: %s", e)
-                
+
         return None
 
 
 class DaemonState:
     def __init__(self):
         self.active_tasks = []
-        
+
         # Initialize distributed cache if enabled
         self.distributed_cache = None
         if config.DISTRIBUTED_CACHE_ENABLED:
@@ -71,7 +71,7 @@ class DaemonState:
                 logger.info("DaemonState: Distributed Cache initialized.")
             except Exception as e:
                 logger.warning("DaemonState: Failed to init distributed cache: %s", e)
-        
+
         self.hot_memory = HotMemory(cache_impl=self.distributed_cache)
         self.daemons: dict[str, Any] = {
             "cortex": {

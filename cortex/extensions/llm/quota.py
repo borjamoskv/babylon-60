@@ -111,18 +111,18 @@ class SovereignQuotaManager:
                     (self.capacity, time.time()),
                 )
 
-    def _consume_sync(self, tokens: int) -> float:
+    def _consume_sync(self, tokens: float) -> float:
         """Intenta consumir tokens atómicamente.
 
         Args:
-            tokens: Number of tokens to consume (must be >= 1).
+            tokens: Number of tokens to consume (must be > 0).
 
         Returns:
             0.0  → consumo exitoso.
             > 0  → segundos de espera estimados.
         """
-        if tokens < 1:
-            raise ValueError(f"tokens must be >= 1, got {tokens}")
+        if tokens <= 0:
+            raise ValueError(f"tokens must be > 0, got {tokens}")
         now = time.time()
         try:
             with _db(self.db_path, exclusive=True) as conn:
@@ -155,14 +155,14 @@ class SovereignQuotaManager:
 
     # ─── Public API ───────────────────────────────────────────────────
 
-    async def acquire(self, tokens: int = 1, deadline: float = 120.0) -> bool:
+    async def acquire(self, tokens: float = 1.0, deadline: float = 120.0) -> bool:
         """Adquiere tokens asíncronamente siguiendo el Protocolo PULMONES.
 
         Usa backoff exponencial con jitter para prevenir thundering-herd
         cuando múltiples procesos compiten por el mismo bucket.
 
         Args:
-            tokens:   Tokens a consumir (1 = 1 API request).
+            tokens:   Tokens a consumir (1.0 = 1 API request estándar).
             deadline: Tiempo máximo de espera total en segundos.
 
         Returns:
@@ -179,7 +179,7 @@ class SovereignQuotaManager:
 
             elapsed = time.time() - start
             if elapsed >= deadline:
-                logger.error("PULMONES: Timeout tras %.1fs esperando %d tokens.", elapsed, tokens)
+                logger.error("PULMONES: Timeout tras %.1fs esperando %.1f tokens.", elapsed, tokens)
                 self._increment_timeouts()
                 return False
 
@@ -211,7 +211,7 @@ class SovereignQuotaManager:
             current_tokens=round(current, 2),
             fill_pct=round((current / self.capacity) * 100, 1),
             refill_rate_per_s=self.refill_rate,
-            time_to_full_s=round(max(0, (self.capacity - current) / self.refill_rate), 2),
+            time_to_full_s=round(max(0.0, (self.capacity - current) / self.refill_rate), 2),
             acquired=acquired,
             throttled=throttled,
             timeouts=timeouts,

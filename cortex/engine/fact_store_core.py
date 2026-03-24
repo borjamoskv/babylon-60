@@ -37,6 +37,7 @@ async def insert_fact_record(
     """Perform the actual SQL insert into the facts table."""
     from cortex.crypto import get_default_encrypter
     from cortex.extensions.security.signatures import get_default_signer
+    from cortex.search.fts_index import plaintext_for_fts, replace_fact_fts_async
 
     ts = ts or now_iso()
     tags_json = json.dumps(tags or [])
@@ -54,6 +55,16 @@ async def insert_fact_record(
             pub_b64 = signer.public_key_b64
     except (ImportError, ValueError, OSError) as e:
         logger.debug("Fact signing skipped: %s", e)
+
+    meta = meta or {}
+
+    canonical_tx_id = tx_id
+    if canonical_tx_id is None:
+        meta_tx_id = meta.get("tx_id")
+        if isinstance(meta_tx_id, int):
+            canonical_tx_id = meta_tx_id
+        elif isinstance(meta_tx_id, str) and meta_tx_id.isdigit():
+            canonical_tx_id = int(meta_tx_id)
 
     # ── Causal Infrastructure: Validate & Auto-Resolve parent_decision_id ──
     if parent_decision_id is not None:
@@ -86,16 +97,18 @@ async def insert_fact_record(
                 project,
             )
 
+    cognitive_layer = str(meta.get("cognitive_layer", "semantic") or "semantic")
+
     # Re-pack legacy fields into meta JSON payload
-    meta = meta or {}
     if confidence != "stated":
         meta["confidence"] = confidence
     if source:
         meta["source"] = source
-    if parent_decision_id:
+    if parent_decision_id is not None:
         meta["parent_decision_id"] = parent_decision_id
-    if tx_id:
-        meta["tx_id"] = tx_id
+    if canonical_tx_id is not None:
+        meta["tx_id"] = canonical_tx_id
+    meta.setdefault("cognitive_layer", cognitive_layer)
     if sig_b64:
         meta["signature"] = sig_b64
     if pub_b64:
@@ -105,8 +118,9 @@ async def insert_fact_record(
 
     cursor = await conn.execute(
         "INSERT INTO facts (tenant_id, project, content, fact_type, tags, metadata, "
-        "hash, created_at, updated_at, valid_from, confidence, source, tx_id) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "hash, created_at, updated_at, valid_from, confidence, source, tx_id, "
+        "cognitive_layer, parent_decision_id) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             tenant_id,
             project,
@@ -120,23 +134,23 @@ async def insert_fact_record(
             ts,
             confidence,
             source,
-            tx_id,
+            canonical_tx_id,
+            cognitive_layer,
+            parent_decision_id,
         ),
     )
     fact_id = cursor.lastrowid
     assert fact_id is not None
 
-    # FTS Update
-    # Ω₂ Security: Do not mirror plaintext content into FTS if it is encrypted at-rest.
-    fts_content = content if encrypted_content == content else ""
-    try:
-        await conn.execute(
-            "INSERT INTO facts_fts(rowid, content, project, tags, fact_type) "
-            "VALUES (?, ?, ?, ?, ?)",
-            (fact_id, fts_content, project, tags_json, fact_type),
-        )
-    except (sqlite3.Error, aiosqlite.Error) as e:
-        logger.warning("Failed to update FTS for fact %d: %s", fact_id, e)
+    # facts_fts is maintained manually. Encrypted rows are intentionally excluded.
+    await replace_fact_fts_async(
+        conn,
+        fact_id,
+        plaintext=plaintext_for_fts(content, encrypted_content),
+        project=project,
+        tags_json=tags_json,
+        fact_type=fact_type,
+    )
 
     # Causal Infrastructure (ANAMNESIS-Ω)
     try:

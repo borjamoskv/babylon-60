@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 # This file is part of CORTEX.
 # Licensed under the Apache License, Version 2.0.
 # See top-level LICENSE file for details.
@@ -52,11 +50,11 @@ class AskRequest(BaseModel):
     """RAG query: search CORTEX memory and synthesize an answer."""
 
     query: str = Field(..., min_length=1, max_length=4096, description="Natural language question")
-    project: Optional[str] = Field(None, description="Filter by project (optional)")
+    project: str | None = Field(None, description="Filter by project (optional)")
     k: int = Field(10, ge=1, le=50, description="Number of facts to retrieve")
     temperature: float = Field(0.3, ge=0.0, le=2.0, description="LLM sampling temperature")
     max_tokens: int = Field(2048, ge=64, le=8192, description="Max response tokens")
-    system_prompt: Optional[str] = Field(None, description="Override system prompt (optional)")
+    system_prompt: str | None = Field(None, description="Override system prompt (optional)")
 
 
 class AskSource(BaseModel):
@@ -83,7 +81,7 @@ class LLMStatusResponse(BaseModel):
 
     available: bool
     provider: str
-    model: Optional[str] = None
+    model: str | None = None
     supported_providers: list[str]
 
 
@@ -199,8 +197,8 @@ async def ask_cortex(
     return AskResponse(
         answer=answer,
         sources=sources,
-        model=provider.model if provider else "unknown",
-        provider=provider.provider_name if provider else "unknown",
+        model=getattr(provider, "model", "unknown") if provider else "unknown",
+        provider=getattr(provider, "provider_name", "unknown") if provider else "unknown",
         facts_found=len(results),
     )
 
@@ -285,6 +283,6 @@ async def llm_status(
     return LLMStatusResponse(
         available=_llm_manager.available,
         provider=_llm_manager.provider_name or "none",
-        model=provider.model if provider else None,
+        model=getattr(provider, "model_id", getattr(provider, "model", None)) if provider else None,
         supported_providers=LLMProvider.list_providers(),  # type: ignore[type-error]
     )

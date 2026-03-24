@@ -28,7 +28,7 @@ license: MIT
 runtime:
   type: docker                 # docker | wasm (future)
   image: org/plugin:tag
-  
+
 capabilities:
   - name: action_name
     description: "What this capability does"

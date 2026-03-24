@@ -7,10 +7,9 @@ with extreme cyclomatic complexity (entropic rot), and autonomously enqueues
 TESSERACT-Ω / Aether tasks to refactor and decouple itself in O(1).
 """
 
-import os
 import ast
+import os
 import subprocess
-import time
 from pathlib import Path
 
 
@@ -58,7 +57,7 @@ def run_ouroboros():
 
     for py_file in get_python_files(cortex_dir):
         try:
-            with open(py_file, "r", encoding="utf-8") as f:
+            with open(py_file, encoding="utf-8") as f:
                 tree = ast.parse(f.read(), filename=str(py_file))
 
             for node in ast.walk(tree):
@@ -76,7 +75,7 @@ def run_ouroboros():
             continue
     # Threshold for unacceptable entropy is 15
     if worst_file and worst_complexity >= 15:
-        print(f"\n\033[38;5;127m[OUROBOROS-Ω]\033[0m ⚠️ ANOMALÍA ESTRUCTURAL CRÍTICA DETECTADA")
+        print("\n\033[38;5;127m[OUROBOROS-Ω]\033[0m ⚠️ ANOMALÍA ESTRUCTURAL CRÍTICA DETECTADA")
         print(f"   Target: \033[1m{worst_file.relative_to(cortex_dir)}:{worst_func}\033[0m")
         print(
             f"   Gravedad Entrópica: \033[38;5;196m{worst_complexity} CC\033[0m (Vulnera Axioma 2: Asimetría Entrópica)"

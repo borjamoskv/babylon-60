@@ -52,13 +52,13 @@ run: |
 ```python
 def _migration_016_add_fact_hash(conn: sqlite3.Connection):
     # ... existing column add ...
-    
+
     # Backfill hashes for existing facts
     cursor = conn.execute("SELECT id, content FROM facts WHERE hash IS NULL")
     for fact_id, content in cursor.fetchall():
         f_hash = compute_fact_hash(content)
         conn.execute("UPDATE facts SET hash = ? WHERE id = ?", (f_hash, fact_id))
-    
+
     logger.info("Migration 016: Backfilled %d hashes", cursor.rowcount)
 ```
 

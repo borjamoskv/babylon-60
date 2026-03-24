@@ -20,6 +20,8 @@ __author__ = "by borjamoskv.com"
 # Lazy imports — CortexEngine and experimental modules load on first access
 _LAZY_IMPORTS = {
     "CortexEngine": "cortex.engine",
+    "SovereignLedger": "cortex.ledger",
+    "EventLedgerL3": "cortex.ledger",
 }
 
 _EXPERIMENTAL_MODULES = (

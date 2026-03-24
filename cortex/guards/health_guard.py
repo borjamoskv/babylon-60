@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import ClassVar, Optional
+from typing import ClassVar
 
 try:
     from cortex.extensions.health.health_mixin import HealthMixin  # type: ignore
@@ -47,7 +47,7 @@ class HealthGuard(HealthMixin):
     def __init__(self, db_path: str | Path) -> None:
         self._db_path = str(db_path)
 
-    async def check_write_safety(self, custom_sla: Optional[HealthSLA] = None) -> None:
+    async def check_write_safety(self, custom_sla: HealthSLA | None = None) -> None:
         """Verify the database is healthy enough to receive writes.
 
         Args:

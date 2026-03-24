@@ -1,4 +1,4 @@
-"""Tests for cortex.memory.ledger — EventLedgerL3.
+"""Tests for cortex.ledger.event_ledger — EventLedgerL3.
 
 Tests the immutable event sourcing ledger with a real `:memory:` aiosqlite DB.
 Covers: append, replay, count, session retrieval, chain verification.
@@ -9,7 +9,7 @@ from __future__ import annotations
 import aiosqlite
 import pytest
 
-from cortex.memory.ledger import EventLedgerL3
+from cortex.ledger.event_ledger import EventLedgerL3
 from cortex.memory.models import MemoryEvent
 
 # ─── Fixtures ────────────────────────────────────────────────────────────

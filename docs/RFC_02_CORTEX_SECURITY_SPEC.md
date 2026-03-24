@@ -98,7 +98,7 @@ CORTEX actively mitigates the following threat classes.
 ## 6. Persistence Semantics & Consensus
 
 - **Immutability vs State Correctness:** The CORTEX Ledger is append-only and immutable. If an incorrect state is committed, the hashes prove who committed what, and when. State correction is handled via **Supersession Semantics** (a new fact supersedes the old) while maintaining the original forensic trail.
-- **Consensus does not equal Truth:** If a 5-agent swarm achieves 100% consensus on a fact, the system tags the confidence high but STILL records it as probabilistic conjecture until it crosses an empirical validation test. 
+- **Consensus does not equal Truth:** If a 5-agent swarm achieves 100% consensus on a fact, the system tags the confidence high but STILL records it as probabilistic conjecture until it crosses an empirical validation test.
 
 ---
 *CORTEX Security Spec v1 - Approved for implementation in System Gates.*

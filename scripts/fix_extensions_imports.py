@@ -13,7 +13,7 @@ EXTENSIONS = [
 ]
 
 def process_file(filepath):
-    with open(filepath, "r") as f:
+    with open(filepath) as f:
         content = f.read()
 
     original = content
@@ -24,7 +24,7 @@ def process_file(filepath):
         content = re.sub(rf"import cortex\.{ext}\b", rf"import cortex.extensions.{ext}", content)
         # Also handle multiline imports or deeper imports
         # Actually \b takes care of `from cortex.extensions.skills.xxx import ...`
-        
+
     if content != original:
         with open(filepath, "w") as f:
             f.write(content)

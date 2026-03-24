@@ -104,6 +104,25 @@ CREATE INDEX IF NOT EXISTS idx_tx_project ON transactions(project);
 CREATE INDEX IF NOT EXISTS idx_tx_action ON transactions(action);
 """
 
+# ─── Immutable Ledger Checkpoints (Merkle) ──────────────────────────
+PG_CREATE_MERKLE_ROOTS = """
+CREATE TABLE IF NOT EXISTS merkle_roots (
+    id          BIGSERIAL PRIMARY KEY,
+    tenant_id   TEXT NOT NULL DEFAULT 'default',
+    root_hash   TEXT NOT NULL,
+    tx_start_id BIGINT NOT NULL,
+    tx_end_id   BIGINT NOT NULL,
+    tx_count    INTEGER NOT NULL,
+    timestamp   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+"""
+
+PG_CREATE_MERKLE_ROOTS_INDEX = """
+CREATE INDEX IF NOT EXISTS idx_merkle_tenant ON merkle_roots(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_merkle_roots_tenant_range
+    ON merkle_roots(tenant_id, tx_start_id, tx_end_id);
+"""
+
 # ─── Heartbeats ──────────────────────────────────────────────────────
 PG_CREATE_HEARTBEATS = """
 CREATE TABLE IF NOT EXISTS heartbeats (
@@ -202,9 +221,55 @@ CREATE TABLE IF NOT EXISTS consensus_votes_v2 (
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     decay_factor    DOUBLE PRECISION DEFAULT 1.0,
     vote_reason     TEXT,
+    tx_id           BIGINT REFERENCES transactions(id),
     meta            JSONB DEFAULT '{}',
     UNIQUE(fact_id, agent_id)
 );
+"""
+
+# ─── Immutable Vote Ledger ───────────────────────────────────────────
+PG_CREATE_VOTE_LEDGER = """
+CREATE TABLE IF NOT EXISTS vote_ledger (
+    id              BIGSERIAL PRIMARY KEY,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
+    fact_id         BIGINT NOT NULL REFERENCES facts(id),
+    agent_id        TEXT NOT NULL REFERENCES agents(id),
+    vote            INTEGER NOT NULL,
+    vote_weight     DOUBLE PRECISION NOT NULL,
+    prev_hash       TEXT NOT NULL,
+    hash            TEXT NOT NULL,
+    timestamp       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    signature       TEXT,
+    tx_id           BIGINT REFERENCES transactions(id),
+    UNIQUE(tenant_id, hash)
+);
+"""
+
+PG_CREATE_VOTE_LEDGER_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_vote_ledger_tenant ON vote_ledger(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_vote_ledger_fact ON vote_ledger(fact_id);
+CREATE INDEX IF NOT EXISTS idx_vote_ledger_agent ON vote_ledger(agent_id);
+CREATE INDEX IF NOT EXISTS idx_vote_ledger_timestamp ON vote_ledger(timestamp);
+CREATE INDEX IF NOT EXISTS idx_vote_ledger_tenant_id ON vote_ledger(tenant_id, id);
+"""
+
+PG_CREATE_VOTE_MERKLE_ROOTS = """
+CREATE TABLE IF NOT EXISTS vote_merkle_roots (
+    id              BIGSERIAL PRIMARY KEY,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
+    root_hash       TEXT NOT NULL,
+    vote_start_id   BIGINT NOT NULL,
+    vote_end_id     BIGINT NOT NULL,
+    vote_count      INTEGER NOT NULL,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(tenant_id, root_hash)
+);
+"""
+
+PG_CREATE_VOTE_MERKLE_ROOTS_INDEX = """
+CREATE INDEX IF NOT EXISTS idx_vote_merkle_tenant ON vote_merkle_roots(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_vote_merkle_range
+    ON vote_merkle_roots(tenant_id, vote_start_id, vote_end_id);
 """
 
 # ─── Trust Edges ──────────────────────────────────────────────────────
@@ -241,6 +306,7 @@ CREATE INDEX IF NOT EXISTS idx_agents_reputation ON agents(reputation_score DESC
 CREATE INDEX IF NOT EXISTS idx_agents_active ON agents(is_active, last_active_at);
 CREATE INDEX IF NOT EXISTS idx_votes_v2_fact ON consensus_votes_v2(fact_id);
 CREATE INDEX IF NOT EXISTS idx_votes_v2_agent ON consensus_votes_v2(agent_id);
+CREATE INDEX IF NOT EXISTS idx_votes_v2_tx_id ON consensus_votes_v2(tx_id);
 CREATE INDEX IF NOT EXISTS idx_trust_source ON trust_edges(source_agent);
 CREATE INDEX IF NOT EXISTS idx_trust_target ON trust_edges(target_agent);
 """
@@ -418,6 +484,8 @@ CREATE INDEX IF NOT EXISTS idx_ee_timestamp ON entity_events(timestamp);
 PG_ALL_SCHEMA = [
     PG_CREATE_TRANSACTIONS,
     PG_CREATE_TRANSACTIONS_INDEX,
+    PG_CREATE_MERKLE_ROOTS,
+    PG_CREATE_MERKLE_ROOTS_INDEX,
     PG_CREATE_FACTS,
     PG_CREATE_FACTS_INDEXES,
     PG_CREATE_SESSIONS,
@@ -429,6 +497,10 @@ PG_ALL_SCHEMA = [
     PG_CREATE_VOTES,
     PG_CREATE_AGENTS,
     PG_CREATE_VOTES_V2,
+    PG_CREATE_VOTE_LEDGER,
+    PG_CREATE_VOTE_LEDGER_INDEXES,
+    PG_CREATE_VOTE_MERKLE_ROOTS,
+    PG_CREATE_VOTE_MERKLE_ROOTS_INDEX,
     PG_CREATE_TRUST_EDGES,
     PG_CREATE_OUTCOMES,
     PG_CREATE_RWC_INDEXES,

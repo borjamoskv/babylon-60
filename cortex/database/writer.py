@@ -46,7 +46,7 @@ import logging
 import sqlite3
 import time
 from contextlib import asynccontextmanager
-from typing import Any, Optional
+from typing import Any
 
 from cortex.database.messages import (
     TransactionProxy as _TransactionProxy,
@@ -83,10 +83,10 @@ class SqliteWriteWorker:
     def __init__(self, db_path: str, *, queue_size: int = 10_000):
         self._db_path = db_path
         self._queue: asyncio.Queue[_Message] = asyncio.Queue(maxsize=queue_size)
-        self._task: Optional[asyncio.Task[None]] = None
-        self._conn: Optional[sqlite3.Connection] = None
+        self._task: asyncio.Task[None] | None = None
+        self._conn: sqlite3.Connection | None = None
         self._started = False
-        self._loop: Optional[asyncio.AbstractEventLoop] = None
+        self._loop: asyncio.AbstractEventLoop | None = None
         self._write_count: int = 0
         self._metrics: dict[str, float] = {
             "avg_wait_ms": 0.0,
@@ -127,8 +127,7 @@ class SqliteWriteWorker:
         conn = connect_writer(self._db_path)
         # Manual transaction control (autocommit mode)
         conn.isolation_level = None
-        # Performance pragmas (cache_size, temp_store, page_size) are now
-        # applied centrally by connect_writer() → _apply_pragmas_sync().
+        # Performance pragmas are applied centrally by connect_writer() → _apply_pragmas_sync().
         logger.debug("Writer connection configured via connect_writer() factory")
         return conn
 

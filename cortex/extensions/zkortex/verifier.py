@@ -14,7 +14,6 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass
-from typing import Optional
 
 from cortex.extensions.zkortex.commitment import KnowledgeCommitment
 from cortex.extensions.zkortex.merkle import ZKMembershipProof
@@ -31,7 +30,7 @@ class VerificationResult:
     proof_type: str
     verified_at: float
     details: str
-    public_root: Optional[str] = None
+    public_root: str | None = None
 
 
 class ZKOrtexVerifier:
@@ -48,7 +47,7 @@ class ZKOrtexVerifier:
     El Verifier puede ser ejecutado por terceros sin ningún acceso a CORTEX.
     """
 
-    def __init__(self, expected_root: Optional[str] = None) -> None:
+    def __init__(self, expected_root: str | None = None) -> None:
         """
         Args:
             expected_root: El Merkle Root publicado por CORTEX.

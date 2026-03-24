@@ -21,7 +21,6 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Optional
 
 from cortex.extensions.llm.router import IntentProfile
 
@@ -56,8 +55,19 @@ class LLMManager:
         try:
             from cortex.extensions.llm.provider import LLMProvider
 
-            self._provider = LLMProvider(provider=self._provider_name)
-            logger.info("LLM provider loaded: %s", self._provider)
+            primary = LLMProvider(provider=self._provider_name)
+
+            # Autodidact-Ω Integration: Wrap in dynamic router if enabled
+            if os.environ.get("CORTEX_AUTODIDACT_ROUTING", "true").lower() == "true":
+                from cortex.extensions.llm.autodidact_router import AutodidactRouter
+
+                # In basic mode, we use the primary as its own fallback for complexity analysis
+                # or we could load a default fallback set.
+                self._provider = AutodidactRouter(primary=primary)
+                logger.info("LLM [AUTODIDACT] Router active (Entropy-aware selection)")
+            else:
+                self._provider = primary
+                logger.info("LLM provider loaded: %s", self._provider)
         except (OSError, RuntimeError, ValueError) as e:
             logger.error(
                 "Failed to initialize LLM provider '%s': %s",
@@ -90,7 +100,7 @@ class LLMManager:
         temperature: float = 0.3,
         max_tokens: int = 2048,
         intent: IntentProfile = IntentProfile.GENERAL,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Complete via the active provider. Returns None if unavailable."""
         p = self._get_provider()
         if p is None:
