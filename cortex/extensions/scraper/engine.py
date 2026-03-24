@@ -11,6 +11,7 @@ import logging
 import time
 import uuid
 from typing import Optional
+from urllib.parse import urljoin, urlparse
 
 from cortex.extensions.scraper.extractors import (
     CASCADE_ORDER,
@@ -28,12 +29,70 @@ from cortex.extensions.scraper.models import (
 
 LOG = logging.getLogger("cortex.extensions.scraper.engine")
 
+# Allowed URL schemes for SSRF prevention
+_ALLOWED_SCHEMES = frozenset({"http", "https"})
+
+
+def _is_safe_url(url: str, base_domain: str) -> bool:
+    """Validate URL to prevent SSRF attacks.
+
+    Checks:
+    - Only http/https schemes allowed (blocks file://, ftp://, etc.)
+    - Must belong to the same domain as the base
+    - Blocks private/loopback IP ranges
+    """
+    try:
+        parsed = urlparse(url)
+    except Exception:
+        return False
+
+    # Only allow safe schemes
+    if parsed.scheme not in _ALLOWED_SCHEMES:
+        return False
+
+    netloc = parsed.netloc.lower().split(":")[0]  # strip port
+
+    # Must match the base domain (same-domain only policy)
+    if netloc != base_domain:
+        return False
+
+    # Block private/loopback addresses
+    _BLOCKED_HOSTS = (
+        "localhost",
+        "127.0.0.1",
+        "0.0.0.0",
+        "::1",
+        "169.254.",  # link-local
+        "10.",
+        "192.168.",
+        "172.16.",
+        "172.17.",
+        "172.18.",
+        "172.19.",
+        "172.20.",
+        "172.21.",
+        "172.22.",
+        "172.23.",
+        "172.24.",
+        "172.25.",
+        "172.26.",
+        "172.27.",
+        "172.28.",
+        "172.29.",
+        "172.30.",
+        "172.31.",
+    )
+    if any(netloc == h or netloc.startswith(h) for h in _BLOCKED_HOSTS):
+        return False
+
+    return True
+
 
 class ScraperEngine:
     """Sovereign Scraping Engine — orchestrates extraction strategies.
 
     Features:
-    - Automatic fallback cascade: HTTP → Jina → Firecrawl → Playwright
+    - Automatic fallback cascade: HTTP -> Jina -> Firecrawl -> Playwright
     - Content deduplication via SHA-256 hash
     - Rate limiting (configurable, default 1 req/sec)
     - Robots.txt compliance
@@ -75,12 +134,13 @@ class ScraperEngine:
 
         if result.status == "success":
             result.elapsed_ms = elapsed_ms
-            # Deduplication check
-            if result.content_hash in self._seen_hashes:
-                LOG.info("♻️ [DEDUP] Content already seen: %s", request.url)
-                result.metadata["deduplicated"] = True
-            else:
-                self._seen_hashes.add(result.content_hash)
+
+        # Deduplication check
+        if result.content_hash in self._seen_hashes:
+            LOG.info("[DEDUP] Content already seen: %s", request.url)
+            result.metadata["deduplicated"] = True
+        else:
+            self._seen_hashes.add(result.content_hash)
 
         return result
 
@@ -117,7 +177,7 @@ class ScraperEngine:
         self._jobs[job.job_id] = job
 
         LOG.info(
-            "📦 [BATCH] Starting job %s — %d URLs, concurrency=%d",
+            "[BATCH] Starting job %s — %d URLs, concurrency=%d",
             job.job_id,
             len(urls),
             concurrency,
@@ -154,15 +214,13 @@ class ScraperEngine:
 
         job.status = JobStatus.COMPLETED
         job.completed_at = time.time()
-
         LOG.info(
-            "✅ [BATCH] Job %s complete — %d/%d successful, %d errors",
+            "[BATCH] Job %s complete — %d/%d successful, %d errors",
             job.job_id,
             job.successful_count,
             len(urls),
             job.error_count,
         )
-
         return job
 
     async def map_site(self, url: str, max_depth: int = 2) -> list[str]:
@@ -175,20 +233,30 @@ class ScraperEngine:
         Returns:
             List of discovered URLs.
         """
-        LOG.info("🗺️ [MAP] Mapping site: %s (depth=%d)", url, max_depth)
+        LOG.info("[MAP] Mapping site: %s (depth=%d)", url, max_depth)
+
+        # SSRF fix: validate and restrict to the starting domain only
+        parsed_base = urlparse(url)
+        if parsed_base.scheme not in _ALLOWED_SCHEMES:
+            raise ValueError(f"Unsupported URL scheme: {parsed_base.scheme}")
+
+        base_domain = parsed_base.netloc.lower().split(":")[0]
 
         discovered: set[str] = set()
         to_visit: list[tuple[str, int]] = [(url, 0)]
         visited: set[str] = set()
 
-        from urllib.parse import urljoin, urlparse
-
-        base_domain = urlparse(url).netloc
-
         while to_visit:
             current_url, depth = to_visit.pop(0)
+
             if current_url in visited or depth > max_depth:
                 continue
+
+            # SSRF: validate every URL before requesting it
+            if not _is_safe_url(current_url, base_domain):
+                LOG.warning("[MAP] Skipping unsafe URL: %s", current_url)
+                continue
+
             visited.add(current_url)
             discovered.add(current_url)
 
@@ -196,36 +264,40 @@ class ScraperEngine:
             await self._rate_limit(1.0)
 
             try:
+                import re
+
                 import httpx as _httpx
 
-                async with _httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
+                async with _httpx.AsyncClient(
+                    timeout=10.0,
+                    follow_redirects=True,
+                    # Prevent redirects to internal hosts
+                    max_redirects=3,
+                ) as client:
                     response = await client.get(current_url)
                     if response.status_code != 200:
                         continue
 
                     # Simple link extraction via regex
-                    import re
-
-                    links = re.findall(r'href=["\']([^"\']+)["\']', response.text)
+                    links = re.findall(r'href=["\']([^"\']+ )["\']', response.text)
                     for link in links:
                         absolute = urljoin(current_url, link)
-                        parsed = urlparse(absolute)
-                        # Same domain only
-                        if parsed.netloc == base_domain and absolute not in visited:
+                        # SSRF: validate each discovered link before enqueuing
+                        if _is_safe_url(absolute, base_domain) and absolute not in visited:
                             to_visit.append((absolute, depth + 1))
                             discovered.add(absolute)
 
             except (OSError, ValueError):
                 continue
 
-        LOG.info("🗺️ [MAP] Discovered %d URLs from %s", len(discovered), url)
+        LOG.info("[MAP] Discovered %d URLs from %s", len(discovered), url)
         return sorted(discovered)
 
     def get_job(self, job_id: str) -> Optional[ScrapeJob]:
         """Get a batch job by ID."""
         return self._jobs.get(job_id)
 
-    # ── Internal ──────────────────────────────────────────────────────
+    # ── Internal ────────────────────────────────────────────────────────
 
     async def _execute_strategy(self, request: ScrapeRequest) -> ScrapeResult:
         """Execute extraction with the configured strategy."""
@@ -278,7 +350,7 @@ class ScraperEngine:
                 title, content = await extractor.extract(url, timeout)
                 elapsed = (time.monotonic() - start) * 1000
                 LOG.info(
-                    "✅ [CASCADE] %s succeeded for %s (%.0fms)",
+                    "[CASCADE] %s succeeded for %s (%.0fms)",
                     key.upper(),
                     url,
                     elapsed,
@@ -294,7 +366,7 @@ class ScraperEngine:
             except ExtractionError as e:
                 elapsed = (time.monotonic() - start) * 1000
                 LOG.warning(
-                    "⚠️ [CASCADE] %s failed for %s (%.0fms): %s",
+                    "[CASCADE] %s failed for %s (%.0fms): %s",
                     key.upper(),
                     url,
                     elapsed,
