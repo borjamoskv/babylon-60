@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import aiosqlite
 
@@ -34,9 +34,9 @@ async def semantic_search(
     query_embedding: list[float],
     top_k: int = 5,
     tenant_id: str = "default",
-    project: Optional[str] = None,
-    as_of: Optional[str] = None,
-    confidence: Optional[str] = None,
+    project: str | None = None,
+    as_of: str | None = None,
+    confidence: str | None = None,
 ) -> list[SearchResult]:
     """Perform semantic vector search using sqlite-vec."""
     embedding_json = json.dumps(query_embedding)
@@ -62,9 +62,9 @@ def _build_semantic_query(
     tenant_id: str,
     embedding_json: str,
     top_k: int,
-    project: Optional[str],
-    as_of: Optional[str],
-    confidence: Optional[str],
+    project: str | None,
+    as_of: str | None,
+    confidence: str | None,
 ) -> tuple[str, list]:
     """Internal helper to build semantic search SQL."""
     sql = """
@@ -93,8 +93,12 @@ def _build_semantic_query(
         sql += _FILTER_ACTIVE
 
     if confidence:
-        sql += " AND f.confidence >= ?"
-        params.append(float(confidence))
+        from cortex.search.utils import get_higher_confidences
+
+        allowed = get_higher_confidences(confidence)
+        placeholders = ", ".join("?" for _ in allowed)
+        sql += f" AND f.confidence IN ({placeholders})"
+        params.extend(allowed)
 
     sql += " ORDER BY ve.distance ASC"
     return sql, params
@@ -107,23 +111,10 @@ def _row_to_result(row: tuple, enc: CortexEncrypter, tenant_id: str) -> SearchRe
     except (json.JSONDecodeError, TypeError):
         tags = []
 
-    try:
-        meta = json.loads(row[9]) if row[9] else {}
-    except (json.JSONDecodeError, TypeError):
-        meta = {}
+    from cortex.search.utils import _decrypt_row_content, _parse_row_meta
 
-    content = row[1]
-    if content and str(content).startswith(enc.PREFIX):
-        try:
-            content = enc.decrypt_str(content, tenant_id=tenant_id)
-        except (ValueError, OSError) as e:
-            logger.error("Vector content decryption failed for tenant %s: %s", tenant_id, e)
-
-    if row[9] and str(row[9]).startswith(enc.PREFIX):
-        try:
-            meta = enc.decrypt_json(row[9], tenant_id=tenant_id)
-        except (ValueError, OSError) as e:
-            logger.error("Vector meta decryption failed for tenant %s: %s", tenant_id, e)
+    content = _decrypt_row_content(row[1], tenant_id, enc)
+    meta = _parse_row_meta(row[9], tenant_id, enc)
 
     score = 1.0 - (row[10] if row[10] else 0.0)
 
@@ -151,8 +142,8 @@ def semantic_search_sync(
     query_embedding: list[float],
     top_k: int = 5,
     tenant_id: str = "default",
-    project: Optional[str] = None,
-    confidence: Optional[str] = None,
+    project: str | None = None,
+    confidence: str | None = None,
 ) -> list[SearchResult]:
     """Vector KNN search (sync)."""
     embedding_json = json.dumps(query_embedding)
@@ -173,8 +164,12 @@ def semantic_search_sync(
         sql += _FILTER_PROJECT
         params.append(project)
     if confidence:
-        sql += " AND f.confidence >= ?"
-        params.append(float(confidence))
+        from cortex.search.utils import get_higher_confidences
+
+        allowed = get_higher_confidences(confidence)
+        placeholders = ", ".join("?" for _ in allowed)
+        sql += f" AND f.confidence IN ({placeholders})"
+        params.extend(allowed)
     sql += " ORDER BY ve.distance ASC"
 
     try:
@@ -185,6 +180,7 @@ def semantic_search_sync(
         return []
 
     from cortex.crypto import get_default_encrypter
+    from cortex.search.utils import _decrypt_row_content
 
     enc = get_default_encrypter()
 
@@ -195,12 +191,7 @@ def semantic_search_sync(
         except (json.JSONDecodeError, TypeError):
             tags = []
 
-        content = row[1]
-        if content and str(content).startswith(enc.PREFIX):
-            try:
-                content = enc.decrypt_str(content, tenant_id=tenant_id)
-            except (ValueError, OSError):
-                pass
+        content = _decrypt_row_content(row[1], tenant_id, enc)
 
         score = 1.0 - (row[7] if row[7] else 0.0)
         results.append(

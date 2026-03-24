@@ -78,7 +78,6 @@ class CortexEngine(
         super().__init__()
         self._db_path = Path(db_path).expanduser()
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
-        self._enforce_fs_permissions()
         self._auto_embed = auto_embed
         self._conn: aiosqlite.Connection | None = None
         self._vec_available = False
@@ -94,14 +93,18 @@ class CortexEngine(
         self.consensus = ConsensusManager(self)
         self.lock_sovereign = SovereignLock(self)
 
-        # 🐝 Swarm Orchestration (Ω₄: Sovereign High Command)
+        # Ω₁₃: Shannon Compactor (Thermodynamic Memory Hygiene)
+        self.shannon = ShannonCompactor(self)
+
+        # 🐝 Swarm High Command (Ω₄)
         try:
-            from cortex.swarm import MasterOrchestrator
-            self.swarm = MasterOrchestrator()
-            self.factory = self.swarm.factory # FrontierDaemon Compatibility
+            from cortex.swarm.factory import SwarmFactory
+            from cortex.swarm.manager import SwarmManager
+            self.manager = SwarmManager(self)
+            self.factory = SwarmFactory(self.manager)
         except ImportError:
             logger.warning("Swarm Orchestrator not available. Frontier systems limited.")
-            self.swarm = None
+            self.manager = None
             self.factory = None
 
         # Decoupled guard pipeline (Ω₃: minimal coupling)
@@ -127,48 +130,44 @@ class CortexEngine(
         db_path = str(self._db_path)
 
         # Pre-store guards (AX-033 Hooks 1-3)
+        # Fail-close: only catch ImportError for optional deps.
+        # Any other exception (bad guard init) propagates to crash the engine.
         try:
             from cortex.engine.guard_adapters import HealthGuardAdapter
-
             pipeline.add_guard(HealthGuardAdapter(db_path))
-        except (ImportError, Exception):  # noqa: BLE001
-            pass
+        except ImportError:
+            logger.debug("HealthGuardAdapter not available — skipping")
 
         try:
             from cortex.engine.guard_adapters import ContradictionGuardAdapter
-
             pipeline.add_guard(ContradictionGuardAdapter(db_path))
-        except (ImportError, Exception):  # noqa: BLE001
-            pass
+        except ImportError:
+            logger.debug("ContradictionGuardAdapter not available — skipping")
 
         try:
             from cortex.engine.guard_adapters import VerifierGuardAdapter
-
             pipeline.add_guard(VerifierGuardAdapter())
-        except (ImportError, Exception):  # noqa: BLE001
-            pass
+        except ImportError:
+            logger.debug("VerifierGuardAdapter not available — skipping")
 
         # Post-store hooks (AX-033 Hook 4 + signals + epistemic)
         try:
             from cortex.engine.guard_adapters import LedgerCheckpointHook
-
             pipeline.add_post_hook(LedgerCheckpointHook(self))
-        except (ImportError, Exception):  # noqa: BLE001
-            pass
+        except ImportError:
+            logger.debug("LedgerCheckpointHook not available — skipping")
 
         try:
             from cortex.engine.guard_adapters import SignalEmitHook
-
             pipeline.add_post_hook(SignalEmitHook())
-        except (ImportError, Exception):  # noqa: BLE001
-            pass
+        except ImportError:
+            logger.debug("SignalEmitHook not available — skipping")
 
         try:
             from cortex.engine.guard_adapters import EpistemicBreakerHook
-
             pipeline.add_post_hook(EpistemicBreakerHook())
-        except (ImportError, Exception):  # noqa: BLE001
-            pass
+        except ImportError:
+            logger.debug("EpistemicBreakerHook not available — skipping")
 
         logger.debug(
             "GuardPipeline: %d guards, %d hooks registered",
@@ -506,26 +505,28 @@ class CortexEngine(
         from cortex.database.schema import get_all_schema
         from cortex.engine.ledger import SovereignLedger
 
-        conn = await self.get_conn()
+        async with self.session() as conn:
+            for stmt in get_all_schema():
+                if "USING vec0" in stmt and not self._vec_available:
+                    continue
+                await conn.executescript(stmt)
+            await conn.commit()
 
-        for stmt in get_all_schema():
-            if "USING vec0" in stmt and not self._vec_available:
-                continue
-            await conn.executescript(stmt)
-        await conn.commit()
+            await run_migrations_async(conn)
 
-        await run_migrations_async(conn)
+            for k, v in get_init_meta():
+                await conn.execute(
+                    "INSERT OR IGNORE INTO cortex_meta (key, value) VALUES (?, ?)",
+                    (k, v),
+                )
+            await conn.commit()
 
-        for k, v in get_init_meta():
-            await conn.execute(
-                "INSERT OR IGNORE INTO cortex_meta (key, value) VALUES (?, ?)",
-                (k, v),
-            )
-        await conn.commit()
+            self._ledger = SovereignLedger(conn)  # type: ignore[reportArgumentType]
+            self.shannon = ShannonCompactor(conn)
+            await self._init_memory_subsystem(self._db_path, conn)
 
-        self._ledger = SovereignLedger(conn)  # type: ignore[reportArgumentType]
-        self.shannon = ShannonCompactor(conn)
-        await self._init_memory_subsystem(self._db_path, conn)
+        # Enforce 700/600 permissions NOW — db file exists on disk.
+        self._enforce_fs_permissions()
         await self._persistence.start()
         metrics.set_engine(self)
         logger.info("CORTEX database initialized (async) at %s", self._db_path)

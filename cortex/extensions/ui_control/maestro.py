@@ -260,7 +260,7 @@ class MaestroUI:
 
     async def inject_keystroke(self, key: str, modifiers: list[str] | None = None) -> InteractionResult:
         """Inyecta una pulsación de tecla con modificadores."""
-        mods = modifiers or []
+        # Note: mods could be used here if the underlying engine supported it
         return await self.keyboard.press_special(key)  # Simplificado para el test
 
     async def click_menu_item(self, app_name: str, menu_path: list[str]) -> InteractionResult:

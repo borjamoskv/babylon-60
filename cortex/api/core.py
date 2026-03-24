@@ -75,9 +75,18 @@ from cortex.routes import (
 from cortex.routes import (
     notch_ws as notch_ws_router,
 )
+from cortex.routes import (
+    notebooklm as notebooklm_router,
+)
+from cortex.routes import (
+    observatory as observatory_router,
+)
 from cortex.routes import onboarding as onboarding_router
 from cortex.routes import oracle as oracle_router
 from cortex.routes import runtime as runtime_router
+from cortex.routes import (
+    scraper as scraper_router,
+)
 from cortex.routes import (
     search as search_router,
 )
@@ -123,7 +132,9 @@ logger = logging.getLogger("uvicorn.error")
 async def lifespan(app: FastAPI):
     """Initialize async connection pool, engine, auth, and timing on startup."""
     from cortex.database.pool import CortexConnectionPool
+    from cortex.engine.causality import EpisodicSealer
     from cortex.engine_async import AsyncCortexEngine
+    from cortex.memory.distributed_cache import DistributedSovereignCache
 
     db_path = config.DB_PATH
     logger.info("Lifespan: Initializing CORTEX with DB_PATH: %s", db_path)
@@ -140,6 +151,16 @@ async def lifespan(app: FastAPI):
     pool = CortexConnectionPool(db_path, read_only=False)
     await pool.initialize()
     async_engine = AsyncCortexEngine(pool, db_path)
+
+    # 2.5. Distributed Cache & Ω-Anamnesis Sealer
+    cache = None
+    if config.DISTRIBUTED_CACHE_ENABLED:
+        sealer = EpisodicSealer(engine)
+        cache = DistributedSovereignCache(
+            redis_url=config.REDIS_URL,
+            sealer=sealer
+        )
+        logger.info("Lifespan: Ω-Anamnesis Distributed Cache ENABLED")
 
     # 3. Global Auth Registration
     import cortex.auth
@@ -158,6 +179,7 @@ async def lifespan(app: FastAPI):
     app.state.engine = engine
     app.state.auth_manager = auth_manager
     app.state.tracker = tracker
+    app.state.cache = cache
 
     # Global backward compatibility
     api_state.engine = engine
@@ -354,6 +376,9 @@ app.include_router(usage_router.router)
 app.include_router(runtime_router.router)
 app.include_router(onboarding_router.router)
 app.include_router(health_index_router.router)
+app.include_router(notebooklm_router.router)
+app.include_router(observatory_router.router)
+app.include_router(scraper_router.router)
 
 # Gateway — Universal Intelligence Entry Point
 from cortex.gateway.adapters import (  # noqa: E402

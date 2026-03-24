@@ -169,6 +169,7 @@ CREATE INDEX IF NOT EXISTS idx_evo_domain ON evolution_state(agent_domain);
 CREATE_SIGNALS = """
 CREATE TABLE IF NOT EXISTS signals (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id   TEXT NOT NULL DEFAULT 'default',
     event_type  TEXT NOT NULL,
     payload     TEXT NOT NULL DEFAULT '{}',
     source      TEXT NOT NULL,
@@ -179,10 +180,12 @@ CREATE TABLE IF NOT EXISTS signals (
 """
 
 CREATE_SIGNALS_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_signals_tenant ON signals(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_signals_type ON signals(event_type);
 CREATE INDEX IF NOT EXISTS idx_signals_source ON signals(source);
 CREATE INDEX IF NOT EXISTS idx_signals_created ON signals(created_at);
 CREATE INDEX IF NOT EXISTS idx_signals_project ON signals(project);
+CREATE INDEX IF NOT EXISTS idx_signals_tenant_project ON signals(tenant_id, project);
 """
 
 # ─── Entity Events (Solid-State Substrate — Append-Only Ledger) ──────
@@ -258,7 +261,20 @@ CREATE INDEX IF NOT EXISTS idx_lock_intents_resource ON lock_intents(resource);
 CREATE INDEX IF NOT EXISTS idx_lock_intents_agent ON lock_intents(agent_id);
 """
 
-# ─── Full-Text Search (Decoupled in v5) ─────────────────────────────
+# ─── Full-Text Search (Standalone in v5) ────────────────────────────
+# SECURITY: facts_fts is a STANDALONE table — NOT an external-content
+# FTS5 table tied to `facts`. Triggers on `facts` are PROHIBITED because
+# facts.content is stored as ciphertext (v6_aesgcm:…). Triggers would
+# blindly propagate ciphertext into the FTS index, making search useless
+# and leaking ciphertext into unencrypted FTS storage.
+#
+# The sole indexing path is the manual INSERT in:
+#   cortex/engine/fact_store_core.py::insert_fact_record()
+# which inserts decrypted plaintext (or empty string when encryption is
+# active and plaintext is unavailable).
+#
+# Migration 017 (mig_fts.py) drops any pre-existing triggers if they
+# survived from an older schema version.
 CREATE_FACTS_FTS = """
 CREATE VIRTUAL TABLE IF NOT EXISTS facts_fts USING fts5(
     content,
@@ -268,28 +284,9 @@ CREATE VIRTUAL TABLE IF NOT EXISTS facts_fts USING fts5(
 );
 """
 
-CREATE_FACTS_FTS_TRIGGERS = """
-CREATE TRIGGER IF NOT EXISTS trg_facts_fts_insert
-AFTER INSERT ON facts
-BEGIN
-  INSERT INTO facts_fts(rowid, content, project, tags, fact_type)
-  VALUES (NEW.id, NEW.content, NEW.project, NEW.tags, NEW.fact_type);
-END;
-
-CREATE TRIGGER IF NOT EXISTS trg_facts_fts_update
-AFTER UPDATE OF content, project, tags, fact_type ON facts
-BEGIN
-  DELETE FROM facts_fts WHERE rowid = OLD.id;
-  INSERT INTO facts_fts(rowid, content, project, tags, fact_type)
-  VALUES (NEW.id, NEW.content, NEW.project, NEW.tags, NEW.fact_type);
-END;
-
-CREATE TRIGGER IF NOT EXISTS trg_facts_fts_delete
-BEFORE DELETE ON facts
-BEGIN
-  DELETE FROM facts_fts WHERE rowid = OLD.id;
-END;
-"""
+# CREATE_FACTS_FTS_TRIGGERS is intentionally absent.
+# DO NOT re-add triggers here. See security note above.
+CREATE_FACTS_FTS_TRIGGERS = ""  # noqa: E501 — tombstoned; kept for import compat only
 
 # ─── Immutable Ledger (Merkle) ──────────────────────────────────────
 CREATE_MERKLE_ROOTS = """
@@ -319,7 +316,7 @@ BEFORE UPDATE OF permanent ON procedural_engrams
 FOR EACH ROW
 WHEN OLD.permanent = 1 AND NEW.permanent = 0
 BEGIN
-    SELECT RAISE(ABORT, 'Immunitas-Omega (Ω3): Unidirectional immutability violated. Cannot revert permanent=1 to permanent=0');
+    SELECT RAISE(ABORT, 'Immunitas-Omega: permanent=1 immutability violated, cannot revert to 0');
 END;
 """
 
@@ -378,6 +375,8 @@ EXTENSION_SCHEMA = [
     CREATE_CAUSAL_EDGES,
     CREATE_PROCEDURAL_ENGRAMS,
     CREATE_FACTS_FTS,
-    CREATE_FACTS_FTS_TRIGGERS,
+    # CREATE_FACTS_FTS_TRIGGERS intentionally excluded — triggers propagate
+    # ciphertext into FTS.  Manual insert in fact_store_core.py is the
+    # sole indexing path (inserts decrypted plaintext).
     CREATE_MERKLE_ROOTS,
 ]

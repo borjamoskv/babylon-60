@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
-from typing import Any, Optional
+from typing import Any
 
 import aiosqlite
 
@@ -62,6 +62,27 @@ def _sanitize_fts_query(query: str) -> str:
             safe_tokens.append(f'"{cleaned}"')
 
     return " ".join(safe_tokens) if safe_tokens else '""'
+
+
+def get_higher_confidences(confidence: str) -> list[str]:
+    """Return a list of confidence levels greater than or equal to the requested one.
+    
+    CORTEX confidence levels: C1 < C2 < C3 < C4 < C5-Static < C5-Dynamic
+    Also supports 'stated' (maps to all) and 'verified' (maps to C5-Static+).
+    """
+    levels = ["C1", "C2", "C3", "C4", "C5-Static", "C5-Dynamic"]
+    
+    if confidence == "verified":
+        return ["verified", "C5-Static", "C5-Dynamic"]
+    if confidence == "stated":
+        return levels + ["stated", "verified"]
+        
+    try:
+        idx = levels.index(confidence)
+        return levels[idx:] + ["verified"]
+    except ValueError:
+        return [confidence]
+
 
 
 def _row_to_result(row: tuple, is_fts: bool = False) -> SearchResult:
@@ -116,7 +137,7 @@ def _row_to_result(row: tuple, is_fts: bool = False) -> SearchResult:
     )
 
 
-def _decrypt_row_content(content: Optional[str], tenant_id: str, enc: Any) -> str:
+def _decrypt_row_content(content: str | None, tenant_id: str, enc: Any) -> str:
     """Helper to decrypt fact content if prefixed."""
     if content and str(content).startswith(V6_PREFIX):
         try:

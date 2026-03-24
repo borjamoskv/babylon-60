@@ -1,5 +1,4 @@
 import logging
-from typing import TYPE_CHECKING
 from datetime import datetime, timezone
 
 from cortex.ledger import SovereignLedger

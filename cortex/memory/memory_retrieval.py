@@ -8,11 +8,13 @@ No state mutations. Always returns serializable dicts.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cortex.memory.manager import CortexMemoryManager
     from cortex.memory.models import CortexFactModel
+
+from cortex.memory.causality_reranker import CausalityReranker
 
 __all__ = [
     "KnowledgeGapException",
@@ -30,7 +32,7 @@ class KnowledgeGapException(Exception):
     pass
 
 
-def fact_to_dict(fact: CortexFactModel, rrf_score: Optional[float] = None) -> dict[str, Any]:
+def fact_to_dict(fact: CortexFactModel, rrf_score: float | None = None) -> dict[str, Any]:
     """Convert a fact model to a context-ready dict."""
     return {
         "id": fact.id,
@@ -38,6 +40,7 @@ def fact_to_dict(fact: CortexFactModel, rrf_score: Optional[float] = None) -> di
         "timestamp": fact.timestamp,
         "score": rrf_score if rrf_score is not None else getattr(fact, "_recall_score", 0.0),
         "metadata": fact.metadata,
+        "fact_type": getattr(fact, "fact_type", "active"),
     }
 
 
@@ -72,7 +75,7 @@ async def _fetch_hdc_results(
     project_id: str,
     query: str,
     max_episodes: int,
-    layer: Optional[str] = None,
+    layer: str | None = None,
 ) -> list[CortexFactModel]:
     try:
         toxic_ids = await manager._hdc.get_toxic_ids(tenant_id=tenant_id, project_id=project_id)  # type: ignore[reportOptionalMemberAccess]
@@ -95,7 +98,7 @@ async def _fetch_dense_results(
     project_id: str,
     query: str,
     max_episodes: int,
-    layer: Optional[str] = None,
+    layer: str | None = None,
 ) -> list[CortexFactModel]:
     try:
         # [VECTOR-2] ZERO-FRICTION HOLOGRAPHIC RECALL
@@ -149,9 +152,9 @@ async def retrieve_episodic_context(
     manager: CortexMemoryManager,
     tenant_id: str,
     project_id: str,
-    query: Optional[str],
+    query: str | None,
     max_episodes: int,
-    layer: Optional[str] = None,
+    layer: str | None = None,
 ) -> list[dict[str, Any]]:
     """Retrieve and fuse facts from all available L2 layers.
 
@@ -159,6 +162,7 @@ async def retrieve_episodic_context(
         1. HDC (Vector Alpha + Gamma Inhibition) — preferred
         2. Dense fallback (sqlite-vec) — if HDC unavailable
         3. RRF fusion — if both return results
+        4. Causal Reranking (Structural Gap Reduction) — (Ω₂)
     """
     if not query:
         return []
@@ -198,14 +202,23 @@ async def retrieve_episodic_context(
 
     # 5. Fuse results
     if hdc_results and dense_results:
-        results = apply_rrf(dense_results, hdc_results, limit=max_episodes)
+        results = apply_rrf(dense_results, hdc_results, limit=max_episodes * 2)
     elif hdc_results:
-        results = [fact_to_dict(f) for f in hdc_results[:max_episodes]]
+        results = [fact_to_dict(f) for f in hdc_results[:max_episodes * 2]]
     else:
-        results = [fact_to_dict(f) for f in dense_results[:max_episodes]]
+        results = [fact_to_dict(f) for f in dense_results[:max_episodes * 2]]
 
-    # 6. Hebbian Ranking Boost (STDP edge weights)
+    # 6. Causal Reranking (Ω₂)
+    # Detect current goal from manager state or metadata
+    active_goal_id = getattr(manager, "active_objective_id", None)
+    if active_goal_id:
+        reranker = CausalityReranker(edge_provider=getattr(manager, "_stdp_engine", None))
+        results = reranker.rerank(results, objective_id=active_goal_id)
+
+    # 7. Final truncation and Hebbian ranking (legacy support)
+    results = results[:max_episodes]
     results = _apply_hebbian_boost(manager, results)
+    
     return results
 
 

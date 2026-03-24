@@ -95,7 +95,7 @@ class FrontierDaemon:
                 if self.engine and hasattr(self.engine, 'factory'):
                     logger.info("[FRONTIER] Initializing 'Next Cycle' for %s", lead.title)
                     # Generate a swarm cycle specifically for this bounty
-                    cycle = self.engine.factory.generate_cycle(
+                    self.engine.factory.generate_cycle(
                         quadrant="P1",
                         size=3,
                         context={"bounty": lead.title, "reward": lead.reward_usd}

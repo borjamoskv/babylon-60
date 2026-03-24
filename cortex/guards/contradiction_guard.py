@@ -338,7 +338,7 @@ async def _fetch_decision_rows(
             SELECT f.id, f.project, f.content, f.created_at
             FROM facts f
             JOIN facts_fts fts ON fts.rowid = f.id
-            WHERE fts.facts_fts MATCH ?
+            WHERE fts.content MATCH ?
               AND f.fact_type = 'decision'
             ORDER BY rank
             LIMIT 200

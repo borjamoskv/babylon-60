@@ -5,7 +5,10 @@ import hashlib
 import logging
 from typing import Any
 
+from cortex.engine.auth import ByzantineAuthLayer
+from cortex.extensions.git.poet import CommitPoet
 from cortex.ledger import SovereignLedger
+from cortex.utils.pulmones_worker import PulmonesWorker
 
 from .actuators.protocol import ActuatorProtocol, ActuatorResponse
 from .auditor import SwarmAuditor
@@ -28,11 +31,17 @@ class SwarmManager:
     guards and ledger logging for every external interaction.
     """
 
+    # Patterns that require Byzantine authorization before dispatch
+    _DESTRUCTIVE_TASK_SIGNALS: frozenset[str] = frozenset(
+        {"rm ", "delete", "drop table", "truncate", "destroy", "wipe", "format", "purge"}
+    )
+
     def __init__(
         self,
         ledger: SovereignLedger | None = None,
         bus: AsyncSignalBus | None = None,
         registry: SkillRegistry | None = None,
+        start_pulmones: bool = False,
     ) -> None:
         self.actuators: dict[str, ActuatorProtocol] = {}
         self.privacy_gate = PrivacyGate()
@@ -46,18 +55,54 @@ class SwarmManager:
         self.budget_limit = 1000.0
         self.current_spend = 0.0
         self._cache: dict[str, ActuatorResponse] = {}
+        self._poet = CommitPoet()
+        self._pulmones: PulmonesWorker | None = None
+        self._pulmones_task: asyncio.Task[None] | None = None
 
         if ledger:
             self.auditor = SwarmAuditor(ledger)
             logger.info("SwarmManager: Recursive Auditor online (Ω-Singularity)")
+
+        if start_pulmones:
+            self._pulmones = PulmonesWorker()
+            logger.info(
+                "SwarmManager: PulmonesWorker instantiated — call start_pulmones() to activate"
+            )
 
     def register_actuator(self, name: str, actuator: ActuatorProtocol) -> None:
         """Register a new governed actuator."""
         self.actuators[name] = actuator
         logger.info("SwarmManager: Registered actuator '%s' (%s)", name, actuator.provider_id)
 
+    async def start_pulmones(self, poll_interval: float = 30.0) -> None:
+        """Launch PulmonesWorker as a background asyncio Task (fire-and-forget)."""
+        if self._pulmones is None:
+            self._pulmones = PulmonesWorker()
+        if self._pulmones_task is None or self._pulmones_task.done():
+            self._pulmones_task = asyncio.create_task(
+                self._pulmones.start_loop(poll_interval),
+                name="cortex.pulmones.daemon",
+            )
+            logger.info(
+                "SwarmManager: 🫁 PulmonesWorker daemon started (poll=%.0fs)",
+                poll_interval,
+            )
+
+    async def stop_pulmones(self) -> None:
+        """Gracefully cancel the PulmonesWorker daemon."""
+        if self._pulmones:
+            self._pulmones.running = False
+        if self._pulmones_task is not None and not self._pulmones_task.done():
+            self._pulmones_task.cancel()
+            task = self._pulmones_task
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
+            logger.info("SwarmManager: 🛑 PulmonesWorker daemon stopped")
+
     async def broadcast(self, signal_name: str, payload: Any) -> None:
-        """Broadcast a signal to the swarm bus using SwarmSignal (\u03a9\u2082)."""
+        """Broadcast a signal to the swarm bus using SwarmSignal (Ω₂)."""
         from .bus import SwarmSignal
         logger.info("SwarmManager: Broadcasting signal '%s'...", signal_name)
         signal = SwarmSignal(
@@ -85,7 +130,7 @@ class SwarmManager:
             actuator = SkillActuator(skill)
             self.register_actuator(identifier, actuator)
             return actuator
-            
+
         raise ValueError(f"Unknown or unrecruited actuator: {identifier}")
 
     async def dispatch(
@@ -104,15 +149,40 @@ class SwarmManager:
         # 1. Privacy Filter (Ω-Guard)
         sanitized = self.privacy_gate.validate_outgoing(task, ctx)
         task_text = sanitized["task"]
-        
-        # 2. Evolution Guard (Ω-Mutation)
+
+        # 2. Byzantine Auth Gate (Ω₁ — verify before trust)
+        task_lower = task_text.lower()
+        is_destructive = any(sig in task_lower for sig in self._DESTRUCTIVE_TASK_SIGNALS)
+        if is_destructive:
+            zenith_score = ctx.get("zenith_score", 0.0)
+            approved = await ByzantineAuthLayer.acquire_lock(
+                intent="SWARM_DESTRUCTIVE_ACTION",
+                payload={"actuator": actuator_name, "task_snippet": task_text[:200]},
+                zenith_score=zenith_score,
+            )
+            if not approved:
+                logger.warning(
+                    "SwarmManager: 🛑 ByzantineAuth DENIED task on '%s': %s",
+                    actuator_name,
+                    task_text[:80],
+                )
+                return ActuatorResponse(
+                    content="",
+                    status="failed",
+                    error=(
+                        "ByzantineAuthLayer: Destructive action denied. "
+                        "Requires Zenith Consensus or operator approval."
+                    ),
+                )
+
+        # 3. Evolution Guard (Ω-Mutation)
         if not self.evolution_guard.validate_mutation(task_text):
             logger.warning("SwarmManager: Evolution Guard blocked mutation in task '%s'", task_text)
             return ActuatorResponse(
                 content="", status="failed", error="Evolution Guard blocked mutation."
             )
 
-        # 3. Exergy Check: Ghost-Bypass Cache (O(1) Path)
+        # 4. Exergy Check: Ghost-Bypass Cache (O(1) Path)
         cache_key = hashlib.sha256(f"{actuator_name}:{task_text}".encode()).hexdigest()
         if cache_key in self._cache:
             logger.debug("SwarmManager: Exergy Hit (Ghost-Bypass) for %s", actuator_name)
@@ -129,7 +199,7 @@ class SwarmManager:
                 "sanitized_task_hash": hashlib.sha256(sanitized["task"].encode()).hexdigest(),
                 "privacy_applied": True,
             }
-            tx_hash = ledger.record_transaction(
+            tx_hash = await ledger.record_transaction(
                 project="swarm", action="dispatch_attempt", detail=audit_data
             )
 
@@ -148,23 +218,31 @@ class SwarmManager:
                     response.metadata["exergy_score"] = float(exergy)
                     # Update reputation directly on dispatch success
                     profile = self.reputation.get_profile(actuator_name)
-                    profile.record_success(tokens=100) # Default tokens for dispatch
+                    profile.record_success(tokens=100)  # Default tokens for dispatch
 
                 # Persistence of success in cache for O(1) future dispatch
                 self._cache[cache_key] = response
 
-                # 6. Ledger Audit (Post-execution)
+                # 6. Ledger Audit (Post-execution) with CommitPoet narrative (Ω₂)
                 if ledger:
-                    ledger.record_transaction(
+                    poet_message = self._poet.compose(
+                        diff_summary=f"actuator={actuator_name} task={task_text[:60]}",
+                        files=[actuator_name],
+                        commit_type="feat",
+                    )
+                    await ledger.record_transaction(
                         project="swarm",
                         action="execution_success",
                         detail={
                             "actuator": actuator_name,
                             "correlation_hash": tx_hash,
-                            "content_hash": hashlib.sha256(response["content"].encode()).hexdigest(),
+                            "content_hash": hashlib.sha256(
+                                response["content"].encode()
+                            ).hexdigest(),
+                            "poet_narrative": poet_message,
                         }
                     )
-            
+
             # Inject correlation hash into response metadata
             if tx_hash:
                 if not response.metadata:
@@ -175,11 +253,11 @@ class SwarmManager:
         except Exception as e:
             logger.error("SwarmManager: Execution failed on %s: %s", actuator_name, e)
             if ledger:
-                ledger.record_transaction(
+                await ledger.record_transaction(
                     project="swarm",
                     action="execution_failure",
                     detail={
-                        "actuator": actuator_name, 
+                        "actuator": actuator_name,
                         "correlation_hash": tx_hash,
                         "error": str(e)
                     },
@@ -207,14 +285,17 @@ class SwarmManager:
 
         ranked_ids = self.reputation.rank_agents(agent_ids)
         logger.info("SwarmManager: Sharding task to %d agents (Ranked)...", len(ranked_ids))
-        
+
         tasks = [self.dispatch(aid, task) for aid in ranked_ids]
         responses = await asyncio.gather(*tasks)
-        
+
         # 1. Consensus Verification for critical tasks
         if self.chaos_guards.is_critical(task):
             if not await self.chaos_guards.validate_consensus(responses):
-                logger.error("SwarmManager: Consensus FAIL for critical task '%s'. Aborting write.", task)
+                logger.error(
+                    "SwarmManager: Consensus FAIL for critical task '%s'. Aborting write.",
+                    task,
+                )
                 return []
             logger.info("SwarmManager: Consensus REACHED for critical task.")
 
@@ -226,7 +307,7 @@ class SwarmManager:
                 profile.record_success(tokens)
             else:
                 profile.record_failure(tokens)
-            
+
             self.current_spend += tokens * 0.00001
-        
+
         return list(responses)

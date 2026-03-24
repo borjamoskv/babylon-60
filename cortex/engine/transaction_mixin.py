@@ -28,7 +28,7 @@ class TransactionMixin(EngineMixinBase):
     """
 
     async def _log_transaction(
-        self, conn: aiosqlite.Connection, project: str, action: str, detail: dict[str, Any]
+        self, conn: aiosqlite.Connection, project: str, action: str, detail: dict[str, Any], tenant_id: str = "default"
     ) -> int:
         from cortex.utils.canonical import canonical_json, compute_tx_hash
 
@@ -42,10 +42,10 @@ class TransactionMixin(EngineMixinBase):
 
         c = await conn.execute(
             "INSERT INTO transactions "
-            "(project, action, detail, prev_hash, hash, timestamp) "
+            "(project, action, detail, prev_hash, hash, timestamp, tenant_id) "
             "VALUES (?, ?, ?, COALESCE((SELECT hash FROM transactions "
-            "ORDER BY id DESC LIMIT 1), 'GENESIS'), ?, ?)",
-            (project, action, dj, th, ts),
+            "ORDER BY id DESC LIMIT 1), 'GENESIS'), ?, ?, ?)",
+            (project, action, dj, th, ts, tenant_id),
         )
         tx_id = c.lastrowid
 
@@ -73,9 +73,15 @@ class TransactionMixin(EngineMixinBase):
         return int(tx_id) if tx_id is not None else 0
 
     async def verify_ledger(self) -> dict[str, Any]:
+        if getattr(self, "_get_ledger", None):
+            ledger = self._get_ledger()
+            return await ledger.verify_integrity_async()
+            
         if not getattr(self, "_ledger", None):
             from cortex.engine.ledger import SovereignLedger
-
-            conn = await self.get_conn()
-            self._ledger = SovereignLedger(conn)
+            
+            async with self.session() as conn:
+                ledger = SovereignLedger(conn)
+                return await ledger.verify_integrity_async()
+        
         return await self._ledger.verify_integrity_async()

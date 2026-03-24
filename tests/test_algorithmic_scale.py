@@ -13,11 +13,11 @@ class TestCoveringIndices:
 
     def test_tenant_valid_index_exists(self, tmp_path):
         """idx_facts_tenant_valid covers (tenant_id, valid_until)."""
-        from cortex.database.schema import CREATE_FACTS_INDEXES, CREATE_FACTS_TABLE
+        from cortex.database.schema import CREATE_FACTS, CREATE_FACTS_INDEXES
 
         db = str(tmp_path / "test.db")
         conn = sqlite3.connect(db)
-        for stmt in CREATE_FACTS_TABLE.strip().split(";"):
+        for stmt in CREATE_FACTS.strip().split(";"):
             s = stmt.strip()
             if s:
                 conn.execute(s + ";")
@@ -35,11 +35,11 @@ class TestCoveringIndices:
 
     def test_proj_valid_index_exists(self, tmp_path):
         """idx_facts_proj_valid covers (project, valid_until)."""
-        from cortex.database.schema import CREATE_FACTS_INDEXES, CREATE_FACTS_TABLE
+        from cortex.database.schema import CREATE_FACTS, CREATE_FACTS_INDEXES
 
         db = str(tmp_path / "test.db")
         conn = sqlite3.connect(db)
-        for stmt in CREATE_FACTS_TABLE.strip().split(";"):
+        for stmt in CREATE_FACTS.strip().split(";"):
             s = stmt.strip()
             if s:
                 conn.execute(s + ";")
@@ -64,14 +64,14 @@ class TestFTS5Triggers:
 
     def _setup_db(self, db_path: str) -> sqlite3.Connection:
         """Create facts table + FTS5 + triggers."""
-        from cortex.database.schema import CREATE_FACTS_INDEXES, CREATE_FACTS_TABLE
+        from cortex.database.schema import CREATE_FACTS, CREATE_FACTS_INDEXES
         from cortex.database.schema_extensions import (
             CREATE_FACTS_FTS,
             CREATE_FACTS_FTS_TRIGGERS,
         )
 
         conn = sqlite3.connect(db_path)
-        for stmt in CREATE_FACTS_TABLE.strip().split(";"):
+        for stmt in CREATE_FACTS.strip().split(";"):
             s = stmt.strip()
             if s:
                 conn.execute(s + ";")
@@ -87,14 +87,14 @@ class TestFTS5Triggers:
         return conn
 
     def test_insert_trigger_populates_fts(self, tmp_path):
-        """INSERT into facts auto-populates facts_fts."""
+        """Manual FTS insert works (triggers are tombstoned per dual-index remediation)."""
         conn = self._setup_db(str(tmp_path / "test.db"))
         conn.execute(
             "INSERT INTO facts "
             "(tenant_id, project, content, fact_type, confidence, "
-            "valid_from, tags, source, meta, consensus_score, "
+            "valid_from, tags, source, metadata, "
             "created_at, updated_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 "default",
                 "test-proj",
@@ -105,28 +105,31 @@ class TestFTS5Triggers:
                 "[]",
                 "test",
                 "{}",
-                1.0,
                 "2026-01-01",
                 "2026-01-01",
             ),
         )
         conn.commit()
+        fact_id = conn.execute("SELECT id FROM facts WHERE content = 'sovereign memory system'").fetchone()[0]
+        # Application-level FTS insert (triggers tombstoned to prevent plaintext leakage)
+        conn.execute("INSERT INTO facts_fts(rowid, content) VALUES (?, ?)", (fact_id, "sovereign memory system"))
+        conn.commit()
 
         # Search FTS5
-        cursor = conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'sovereign'")
+        cursor = conn.execute("SELECT rowid FROM facts_fts WHERE facts_fts MATCH 'sovereign'")
         rows = cursor.fetchall()
         assert len(rows) == 1, f"Expected 1 FTS hit, got {len(rows)}"
         conn.close()
 
     def test_update_trigger_syncs_fts(self, tmp_path):
-        """UPDATE facts.content syncs to facts_fts."""
+        """Manual FTS update works (triggers tombstoned per dual-index remediation)."""
         conn = self._setup_db(str(tmp_path / "test.db"))
         conn.execute(
             "INSERT INTO facts "
             "(tenant_id, project, content, fact_type, confidence, "
-            "valid_from, tags, source, meta, consensus_score, "
+            "valid_from, tags, source, metadata, "
             "created_at, updated_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 "default",
                 "test-proj",
@@ -137,22 +140,27 @@ class TestFTS5Triggers:
                 "[]",
                 "test",
                 "{}",
-                1.0,
                 "2026-01-01",
                 "2026-01-01",
             ),
         )
         conn.commit()
+        fact_id = conn.execute("SELECT id FROM facts WHERE content = 'old content here'").fetchone()[0]
+        conn.execute("INSERT INTO facts_fts(rowid, content) VALUES (?, ?)", (fact_id, "old content here"))
+        conn.commit()
 
-        conn.execute("UPDATE facts SET content = 'new sovereign content' WHERE id = 1")
+        # Update both tables (application-level sync)
+        conn.execute("UPDATE facts SET content = 'new sovereign content' WHERE id = ?", (fact_id,))
+        conn.execute("INSERT INTO facts_fts(facts_fts, rowid, content) VALUES ('delete', ?, ?)", (fact_id, "old content here"))
+        conn.execute("INSERT INTO facts_fts(rowid, content) VALUES (?, ?)", (fact_id, "new sovereign content"))
         conn.commit()
 
         # Old content should be gone
-        cursor = conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'old'")
+        cursor = conn.execute("SELECT rowid FROM facts_fts WHERE facts_fts MATCH 'old'")
         assert cursor.fetchone() is None, "Old content still in FTS"
 
         # New content should be findable
-        cursor = conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'sovereign'")
+        cursor = conn.execute("SELECT rowid FROM facts_fts WHERE facts_fts MATCH 'sovereign'")
         assert cursor.fetchone() is not None, "New content missing from FTS"
         conn.close()
 
@@ -162,9 +170,9 @@ class TestFTS5Triggers:
         conn.execute(
             "INSERT INTO facts "
             "(tenant_id, project, content, fact_type, confidence, "
-            "valid_from, tags, source, meta, consensus_score, "
+            "valid_from, tags, source, metadata, "
             "created_at, updated_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 "default",
                 "test-proj",
@@ -175,7 +183,6 @@ class TestFTS5Triggers:
                 "[]",
                 "test",
                 "{}",
-                1.0,
                 "2026-01-01",
                 "2026-01-01",
             ),
@@ -231,9 +238,9 @@ class TestPoolExpansion:
 
         try:
             # Re-import to pick up clean env
-            from cortex.database.pool import AsyncConnectionPool
+            from cortex.database.pool import CortexConnectionPool
 
-            pool = AsyncConnectionPool(db_path=":memory:")
+            pool = CortexConnectionPool(db_path=":memory:")
             assert pool.min_connections == 4, f"Expected min=4, got {pool.min_connections}"
         finally:
             os.environ.clear()
@@ -246,9 +253,9 @@ class TestPoolExpansion:
         os.environ.pop("CORTEX_POOL_MAX", None)
 
         try:
-            from cortex.database.pool import AsyncConnectionPool
+            from cortex.database.pool import CortexConnectionPool
 
-            pool = AsyncConnectionPool(db_path=":memory:")
+            pool = CortexConnectionPool(db_path=":memory:")
             assert pool.max_connections == 32, f"Expected max=32, got {pool.max_connections}"
         finally:
             os.environ.clear()
@@ -260,9 +267,9 @@ class TestPoolExpansion:
         os.environ["CORTEX_POOL_MIN"] = "8"
 
         try:
-            from cortex.database.pool import AsyncConnectionPool
+            from cortex.database.pool import CortexConnectionPool
 
-            pool = AsyncConnectionPool(db_path=":memory:")
+            pool = CortexConnectionPool(db_path=":memory:")
             assert pool.min_connections == 8, f"Expected min=8, got {pool.min_connections}"
         finally:
             os.environ.clear()
@@ -274,9 +281,9 @@ class TestPoolExpansion:
         os.environ["CORTEX_POOL_MAX"] = "64"
 
         try:
-            from cortex.database.pool import AsyncConnectionPool
+            from cortex.database.pool import CortexConnectionPool
 
-            pool = AsyncConnectionPool(db_path=":memory:")
+            pool = CortexConnectionPool(db_path=":memory:")
             assert pool.max_connections == 64, f"Expected max=64, got {pool.max_connections}"
         finally:
             os.environ.clear()
@@ -289,9 +296,9 @@ class TestPoolExpansion:
         os.environ["CORTEX_POOL_MAX"] = "64"
 
         try:
-            from cortex.database.pool import AsyncConnectionPool
+            from cortex.database.pool import CortexConnectionPool
 
-            pool = AsyncConnectionPool(
+            pool = CortexConnectionPool(
                 db_path=":memory:",
                 min_connections=3,
                 max_connections=15,

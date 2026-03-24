@@ -297,7 +297,7 @@ def _text_arm(
         "SELECT f.id, f.project, f.content, f.fact_type, f.created_at"  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
         " FROM facts AS f"
         " JOIN facts_fts AS fts ON fts.rowid = f.id"
-        " WHERE facts_fts MATCH ?"
+        " WHERE fts.content MATCH ?"
         "   " + type_clause + "   AND f.deprecated_at IS NULL"
         " LIMIT ?"
     )

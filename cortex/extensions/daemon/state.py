@@ -6,6 +6,10 @@ import logging
 import tempfile
 import time
 from pathlib import Path
+from typing import Any
+
+from cortex.core.config import config
+from cortex.memory.distributed_cache import DistributedSovereignCache
 
 logger = logging.getLogger("cortex.extensions.daemon.state")
 
@@ -13,31 +17,63 @@ CORTEX_ROOT = Path.home() / "cortex"
 
 
 class HotMemory:
-    def __init__(self, capacity=50):
+    def __init__(self, capacity: int = 50, cache_impl: DistributedSovereignCache | None = None):
         self.capacity = capacity
-        self.cache = {}
-        self.counters = {}
+        self.local_cache: dict[str, Any] = {}
+        self.counters: dict[str, float] = {}
+        self.distributed = cache_impl
 
-    def store(self, key, value):
-        if len(self.cache) >= self.capacity:
-            oldest = min(self.counters, key=self.counters.get)  # type: ignore[type-error]
-            del self.cache[oldest]
-            del self.counters[oldest]
-        self.cache[key] = value
+    def store(self, key: str, value: Any):
+        if len(self.local_cache) >= self.capacity:
+            oldest = min(self.counters, key=lambda k: self.counters[k])
+            self.local_cache.pop(oldest, None)
+            self.counters.pop(oldest, None)
+        self.local_cache[key] = value
         self.counters[key] = time.time()
+        
+        if self.distributed is not None:
+            try:
+                # Store in Redis with high TTL for "Immortal Memory"
+                # Use a specific namespace for daemon state
+                self.distributed.set(f"daemon:hot:{key}", value, ttl=86400 * 7)
+            except Exception as e:
+                logger.warning("Failed to store in distributed cache: %s", e)
 
-    def retrieve(self, key):
-        if key in self.cache:
+    def retrieve(self, key: str):
+        # 1. Try local
+        if key in self.local_cache:
             self.counters[key] = time.time()
-            return self.cache[key]
+            return self.local_cache[key]
+        
+        # 2. Try distributed
+        if self.distributed is not None:
+            try:
+                val = self.distributed.get(f"daemon:hot:{key}")
+                if val is not None:
+                    # Promote to local
+                    self.store(key, val)
+                    return val
+            except Exception as e:
+                logger.warning("Failed to retrieve from distributed cache: %s", e)
+                
         return None
 
 
 class DaemonState:
     def __init__(self):
         self.active_tasks = []
-        self.hot_memory = HotMemory()
-        self.daemons = {
+        
+        # Initialize distributed cache if enabled
+        self.distributed_cache = None
+        if config.DISTRIBUTED_CACHE_ENABLED:
+            try:
+                self.distributed_cache = DistributedSovereignCache(redis_url=config.REDIS_URL)
+                logger.info("DaemonState: Distributed Cache initialized.")
+            except Exception as e:
+                logger.warning("DaemonState: Failed to init distributed cache: %s", e)
+        
+        self.hot_memory = HotMemory(cache_impl=self.distributed_cache)
+        self.daemons: dict[str, Any] = {
             "cortex": {
                 "handshake": "active",
                 "agents_active": 400,
@@ -130,10 +166,10 @@ class DaemonState:
                     data = json.load(f)
                     for k, v in data.items():
                         if k in self.daemons:
-                            if isinstance(v, dict) and isinstance(self.daemons[k], dict):
-                                self.daemons[k].update(v)
+                            if isinstance(v, dict) and isinstance(self.daemons[str(k)], dict):
+                                self.daemons[str(k)].update(v)
                             else:
-                                self.daemons[k] = v
+                                self.daemons[str(k)] = v
                 logger.info("HANDOFF: Immortal memory restored.")
                 return True
         except (json.JSONDecodeError, OSError, KeyError) as e:

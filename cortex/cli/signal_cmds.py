@@ -11,7 +11,6 @@ The nervous system of MOSKV-1 — exposed through the command line.
 from __future__ import annotations
 
 import json
-from typing import Optional
 
 import click
 from rich.table import Table
@@ -41,9 +40,15 @@ def signal_cmds() -> None:
 @click.argument("payload_json", default="{}")
 @click.option("--source", "-s", default="cli", help="Emitter identity")
 @click.option("--project", "-p", default=None, help="Project scope")
+@click.option("--tenant", "-t", default="default", help="Tenant scope")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def emit_cmd(
-    event_type: str, payload_json: str, source: str, project: Optional[str], db: str
+    event_type: str,
+    payload_json: str,
+    source: str,
+    project: str | None,
+    tenant: str,
+    db: str,
 ) -> None:
     """Emit a signal into the bus.
 
@@ -61,7 +66,9 @@ def emit_cmd(
 
     bus, conn = _get_signal_bus(db)
     try:
-        signal_id = bus.emit(event_type, payload, source=source, project=project)
+        signal_id = bus.emit(
+            event_type, payload, source=source, project=project, tenant_id=tenant,
+        )
         console.print(
             f"[green]⚡[/] Signal emitted: [bold cyan]{event_type}[/] "
             f"(#{signal_id}) from [dim]{source}[/]"
@@ -74,13 +81,15 @@ def emit_cmd(
 @click.option("--type", "event_type", default=None, help="Filter by event type")
 @click.option("--source", "-s", default=None, help="Filter by emitter")
 @click.option("--project", "-p", default=None, help="Filter by project")
+@click.option("--tenant", "-t", default="default", help="Tenant scope")
 @click.option("--consumer", "-c", default="cli", help="Consumer identity")
 @click.option("--limit", "-n", default=20, help="Max signals")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def poll_cmd(
-    event_type: Optional[str],
-    source: Optional[str],
-    project: Optional[str],
+    event_type: str | None,
+    source: str | None,
+    project: str | None,
+    tenant: str,
     consumer: str,
     limit: int,
     db: str,
@@ -92,6 +101,7 @@ def poll_cmd(
     bus, conn = _get_signal_bus(db)
     try:
         signals = bus.poll(
+            tenant_id=tenant,
             event_type=event_type,
             source=source,
             project=project,
@@ -134,12 +144,14 @@ def poll_cmd(
 @click.option("--type", "event_type", default=None, help="Filter by event type")
 @click.option("--source", "-s", default=None, help="Filter by emitter")
 @click.option("--project", "-p", default=None, help="Filter by project")
+@click.option("--tenant", "-t", default="default", help="Tenant scope")
 @click.option("--limit", "-n", default=20, help="Max signals")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def history_cmd(
-    event_type: Optional[str],
-    source: Optional[str],
-    project: Optional[str],
+    event_type: str | None,
+    source: str | None,
+    project: str | None,
+    tenant: str,
     limit: int,
     db: str,
 ) -> None:
@@ -147,6 +159,7 @@ def history_cmd(
     bus, conn = _get_signal_bus(db)
     try:
         signals = bus.history(
+            tenant_id=tenant,
             event_type=event_type,
             source=source,
             project=project,
@@ -172,7 +185,9 @@ def history_cmd(
             payload_str = json.dumps(sig.payload)
             if len(payload_str) > 32:
                 payload_str = payload_str[:32] + "..."
-            consumed = f"[green]✓ {len(sig.consumed_by)}[/]" if sig.consumed_by else "[dim]—[/]"
+            consumed = (
+                f"[green]✓ {len(sig.consumed_by)}[/]" if sig.consumed_by else "[dim]—[/]"
+            )
             table.add_row(
                 str(sig.id),
                 sig.event_type,
@@ -188,12 +203,13 @@ def history_cmd(
 
 
 @signal_cmds.command("stats")
+@click.option("--tenant", "-t", default="default", help="Tenant scope")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def stats_cmd(db: str) -> None:
+def stats_cmd(tenant: str, db: str) -> None:
     """Show signal bus statistics."""
     bus, conn = _get_signal_bus(db)
     try:
-        s = bus.stats()
+        s = bus.stats(tenant_id=tenant)
         console.print()
         console.print("[bold cyan]📊 Signal Bus Stats[/]")
         console.print(f"  Total signals:    [bold]{s['total']}[/]")
@@ -216,14 +232,16 @@ def stats_cmd(db: str) -> None:
 
 @signal_cmds.command("gc")
 @click.option("--days", default=30, help="Max age for consumed signals")
+@click.option("--tenant", "-t", default="default", help="Tenant scope")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def gc_cmd(days: int, db: str) -> None:
+def gc_cmd(days: int, tenant: str, db: str) -> None:
     """Garbage collect old consumed signals."""
     bus, conn = _get_signal_bus(db)
     try:
-        pruned = bus.gc(max_age_days=days)
+        pruned = bus.gc(max_age_days=days, tenant_id=tenant)
         console.print(
-            f"[green]🗑️[/] Pruned [bold]{pruned}[/] consumed signal(s) older than {days} days."
+            f"[green]🗑️[/] Pruned [bold]{pruned}[/] consumed signal(s) "
+            f"older than {days} days."
         )
     finally:
         conn.close()

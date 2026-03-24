@@ -4,9 +4,10 @@ import json
 import logging
 import time
 from collections import deque
+from contextlib import asynccontextmanager
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
-from dataclasses import dataclass
 
 import aiosqlite
 
@@ -72,20 +73,45 @@ class SovereignLedger:
         self._write_timestamps: deque[float] = deque(maxlen=5000)
         self._last_hash = "GENESIS"
 
+    async def ensure_table(self):
+        """Ensure the transactions and merkle_roots tables exist."""
+        async with self._acquire_conn() as conn:
+            await conn.execute(
+                """CREATE TABLE IF NOT EXISTS transactions (
+                    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                    project         TEXT,
+                    action          TEXT,
+                    detail          TEXT,
+                    prev_hash       TEXT,
+                    hash            TEXT UNIQUE,
+                    timestamp       TEXT,
+                    tenant_id       TEXT NOT NULL DEFAULT 'default'
+                )"""
+            )
+            await conn.execute(
+                """CREATE TABLE IF NOT EXISTS merkle_roots (
+                    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                    root_hash       TEXT NOT NULL,
+                    tx_start_id     INTEGER NOT NULL,
+                    tx_end_id       INTEGER NOT NULL,
+                    tx_count        INTEGER NOT NULL,
+                    timestamp       TEXT NOT NULL DEFAULT (datetime('now'))
+                )"""
+            )
+            await conn.commit()
+
+
+    @asynccontextmanager
     async def _acquire_conn(self):
         """Helper to handle both pool and direct connection types."""
         if not self.pool:
             raise RuntimeError("Ledger not initialized with a database connection.")
         
         if hasattr(self.pool, "acquire"):
-            return self.pool.acquire()
-        # For direct connection, we use a dummy context manager
-        from contextlib import asynccontextmanager
-
-        @asynccontextmanager
-        async def dummy():
+            async with self.pool.acquire() as conn:
+                yield conn
+        else:
             yield self.pool
-        return dummy()
 
     def record_write_metric(self) -> None:
         """Track write rate for adaptive checkpointing."""
@@ -110,7 +136,7 @@ class SovereignLedger:
         ts = datetime.now(timezone.utc).isoformat()
         self.record_write_metric()
 
-        async with await self._acquire_conn() as conn:
+        async with self._acquire_conn() as conn:
             # Find prev_hash safely
             cursor = await conn.execute(
                 "SELECT hash FROM transactions ORDER BY id DESC LIMIT 1"
@@ -134,7 +160,7 @@ class SovereignLedger:
         """Adaptive Merkle checkpointing."""
         batch_size = self.adaptive_batch_size
 
-        async with await self._acquire_conn() as conn:
+        async with self._acquire_conn() as conn:
             cursor = await conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots")
             row = await cursor.fetchone()
             last_covered = row[0] if row and row[0] else 0
@@ -159,11 +185,16 @@ class SovereignLedger:
             logger.info("Created Merkle checkpoint (TX %d-%d)", start_id, end_id)
             return root
 
+    async def verify_integrity_async(self) -> dict[str, Any]:
+        """Verify hash chain and Merkle roots (Sovereign Audit)."""
+        return await self.audit_integrity()
+
     async def audit_integrity(self) -> dict[str, Any]:
+
         """Verify hash chain and Merkle roots."""
         violations = []
         tx_count = 0
-        async with await self._acquire_conn() as conn:
+        async with self._acquire_conn() as conn:
             cursor = await conn.execute(
                 "SELECT id, project, action, detail, prev_hash, hash, timestamp FROM transactions ORDER BY id"
             )
@@ -199,7 +230,7 @@ class SovereignLedger:
 
     async def get_transactions(self, project: str | None = None, limit: int = 100) -> list[dict[str, Any]]:
         """Retrieve recent transactions."""
-        async with await self._acquire_conn() as conn:
+        async with self._acquire_conn() as conn:
             query = "SELECT id, project, action, detail, hash, timestamp FROM transactions"
             params = []
             if project:

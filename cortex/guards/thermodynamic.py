@@ -1,36 +1,20 @@
-from dataclasses import dataclass
 from enum import Enum
-
+from typing import Optional
 
 class AgentMode(str, Enum):
-    ACTIVE = "active"
-    DEGRADED = "degraded"
-    DECORATIVE = "decorative"
-    QUARANTINED = "quarantined"
+    PLANNING = "PLANNING"
+    EXECUTION = "EXECUTION"
+    VERIFICATION = "VERIFICATION"
+    DECORATIVE = "DECORATIVE"
+    ACTIVE = "ACTIVE"
 
-
-@dataclass
 class ThermodynamicCounters:
-    consecutive_tool_fails_without_new_hypothesis: int = 0
-    file_reads_without_ast_delta: int = 0
-    context_expansion_rate: float = 0.0
-    uncertainty_reduction_rate: float = 0.0
+    """Tracks exergy and thermodynamic metrics."""
+    def __init__(self):
+        self.total_exergy = 0.0
+        self.total_waste = 0.0
+        self.violations = 0
 
-
-class DecorativeModeTriggered(RuntimeError):
-    pass
-
-
-def should_enter_decorative_mode(c: ThermodynamicCounters) -> tuple[bool, list[str]]:
-    reasons: list[str] = []
-
-    if c.consecutive_tool_fails_without_new_hypothesis >= 3:
-        reasons.append("tool_fails_without_new_hypothesis>=3")
-
-    if c.file_reads_without_ast_delta >= 5:
-        reasons.append("file_reads_without_ast_delta>=5")
-
-    if c.context_expansion_rate > c.uncertainty_reduction_rate:
-        reasons.append("context_expansion_rate>uncertainty_reduction_rate")
-
-    return (len(reasons) > 0, reasons)
+def should_enter_decorative_mode(exergy_score: float, threshold: float = 0.5) -> bool:
+    """Returns True if the exergy score is low enough to trigger decorative mode (violation)."""
+    return exergy_score < threshold

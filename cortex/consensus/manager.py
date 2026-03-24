@@ -5,7 +5,6 @@ from __future__ import annotations
 import logging
 import math
 import uuid
-from typing import Optional
 
 from cortex.telemetry.metrics import metrics
 from cortex.telemetry.pulse import PULSE
@@ -40,7 +39,7 @@ class ConsensusManager:
         fact_id: int,
         agent: str,
         value: int,
-        agent_id: Optional[str] = None,
+        agent_id: str | None = None,
     ) -> float:
         """Legacy v1 vote path. DEPRECATED. Use vote_v2 instead."""
         import warnings
@@ -113,7 +112,7 @@ class ConsensusManager:
         fact_id: int,
         agent_id: str,
         value: int,
-        reason: Optional[str] = None,
+        reason: str | None = None,
     ) -> float:
         if value not in (-1, 0, 1):
             raise ValueError(f"vote value must be -1, 0, or 1, got {value}")
@@ -212,7 +211,13 @@ class ConsensusManager:
         await self._update_fact_score(fact_id, score, conn)
 
         # 🛡️ Aplicar Penalización de Entropía (Alignment Drift)
-        await self._update_agent_entropy(fact_id, score, conn)
+        # Resolve tenant_id once here and thread it into entropy update
+        cursor = await conn.execute(
+            "SELECT tenant_id FROM facts WHERE id = ?", (fact_id,)
+        )
+        row = await cursor.fetchone()
+        tenant_id = row[0] if row else "default"
+        await self._update_agent_entropy(fact_id, score, conn, tenant_id=tenant_id)
 
         return score
 
@@ -272,7 +277,14 @@ class ConsensusManager:
             commit=False,
         )
 
-    async def _update_agent_entropy(self, fact_id: int, final_consensus: float, conn) -> None:
+    async def _update_agent_entropy(
+        self,
+        fact_id: int,
+        final_consensus: float,
+        conn,
+        *,
+        tenant_id: str = "default",
+    ) -> None:
         """
         Ratifica el consenso final y castiga/premia la entropía de los votantes.
         Implementa el decaimiento de reputación por Deriva de Alineación (Ω2 + Ω5).
@@ -298,13 +310,13 @@ class ConsensusManager:
             # 2. Actualizar el ring_buffer de los últimos N votos (hits vs misses)
             await conn.execute(
                 """
-                UPDATE agents 
-                SET 
+                UPDATE agents
+                SET
                     alignment_hits = alignment_hits + (CASE WHEN ? > 0 THEN 1 ELSE 0 END),
                     alignment_misses = alignment_misses + (CASE WHEN ? < 0 THEN 1 ELSE 0 END),
-                    reputation_score = CASE 
+                    reputation_score = CASE
                         WHEN (alignment_hits - alignment_misses) < 0 THEN base_reputation * 0.5
-                        ELSE base_reputation 
+                        ELSE base_reputation
                     END
                 WHERE id = ? AND is_active = 1
             """,
@@ -322,4 +334,5 @@ class ConsensusManager:
                         "agent:alignment:drift",
                         payload={"agent_id": agent_id, "fact_id": fact_id},
                         source="consensus_manager",
+                        tenant_id=tenant_id,
                     )

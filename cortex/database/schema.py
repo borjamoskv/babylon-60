@@ -92,6 +92,7 @@ CREATE TABLE IF NOT EXISTS facts (
     valid_until TEXT,
     source      TEXT,
     confidence  TEXT DEFAULT 'C3',
+    tx_id       INTEGER,
     created_at  TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
     is_tombstoned INTEGER NOT NULL DEFAULT 0,

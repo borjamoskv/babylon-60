@@ -58,6 +58,7 @@ class DistributedEventBus:
                     payload=payload,
                     source=payload.get("source", "event-bus"),
                     project=payload.get("project"),
+                    tenant_id=payload.get("tenant_id", "default"),
                 )
             except Exception:  # noqa: BLE001 — persistence must not break event delivery
                 logger.warning(

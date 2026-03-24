@@ -33,6 +33,8 @@ class CortexConfig:
     # Database
     DB_PATH: str = ""
     PG_URL: str = ""  # PostgreSQL/AlloyDB URL for v6 L3
+    REDIS_URL: str = ""  # Redis URL for L1 Distributed Cache
+    DISTRIBUTED_CACHE_ENABLED: bool = False
 
     # Security
     ALLOWED_ORIGINS: list[str] = field(default_factory=list)
@@ -133,6 +135,8 @@ class CortexConfig:
         return cls(
             DB_PATH=os.environ.get("CORTEX_DB", str(DEFAULT_DB_PATH)),
             PG_URL=os.environ.get("CORTEX_PG_URL", ""),
+            REDIS_URL=os.environ.get("REDIS_URL", "redis://localhost:6379/0"),
+            DISTRIBUTED_CACHE_ENABLED=os.environ.get("CORTEX_DISTRIBUTED_CACHE", "0") == "1",
             RUNBOOT_MODE=os.environ.get("CORTEX_RUNBOOT", "local"),
             ALLOWED_ORIGINS=os.environ.get(
                 "CORTEX_ALLOWED_ORIGINS",

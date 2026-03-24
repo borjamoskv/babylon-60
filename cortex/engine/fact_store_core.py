@@ -57,13 +57,13 @@ async def insert_fact_record(
 
     # ── Causal Infrastructure: Validate & Auto-Resolve parent_decision_id ──
     if parent_decision_id is not None:
-        # FK validation — ensure parent exists
+        # FK validation — ensure parent exists within the SAME tenant scope
         async with conn.execute(
-            "SELECT id FROM facts WHERE id = ?", (parent_decision_id,)
+            "SELECT id FROM facts WHERE id = ? AND tenant_id = ?", (parent_decision_id, tenant_id)
         ) as cursor:
             if await cursor.fetchone() is None:
                 logger.warning(
-                    "parent_decision_id=%d references non-existent fact — cleared",
+                    "parent_decision_id=%d references non-existent fact or crosses tenant bounds — cleared",
                     parent_decision_id,
                 )
                 parent_decision_id = None
@@ -105,8 +105,8 @@ async def insert_fact_record(
 
     cursor = await conn.execute(
         "INSERT INTO facts (tenant_id, project, content, fact_type, tags, metadata, "
-        "hash, created_at, updated_at, valid_from, confidence, source) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "hash, created_at, updated_at, valid_from, confidence, source, tx_id) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             tenant_id,
             project,
@@ -120,17 +120,20 @@ async def insert_fact_record(
             ts,
             confidence,
             source,
+            tx_id,
         ),
     )
     fact_id = cursor.lastrowid
     assert fact_id is not None
 
     # FTS Update
+    # Ω₂ Security: Do not mirror plaintext content into FTS if it is encrypted at-rest.
+    fts_content = content if encrypted_content == content else ""
     try:
         await conn.execute(
             "INSERT INTO facts_fts(rowid, content, project, tags, fact_type) "
             "VALUES (?, ?, ?, ?, ?)",
-            (fact_id, content, project, tags_json, fact_type),
+            (fact_id, fts_content, project, tags_json, fact_type),
         )
     except (sqlite3.Error, aiosqlite.Error) as e:
         logger.warning("Failed to update FTS for fact %d: %s", fact_id, e)

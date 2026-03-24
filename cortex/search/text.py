@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-from typing import Optional
 
 import aiosqlite
 
@@ -21,6 +20,7 @@ from cortex.search.utils import (
     _parse_row_sync,
     _rows_to_results,
     _sanitize_fts_query,
+    get_higher_confidences,
 )
 
 __all__ = ["text_search", "text_search_sync"]
@@ -34,12 +34,12 @@ async def text_search(
     conn: aiosqlite.Connection,
     query: str,
     tenant_id: str = "default",
-    project: Optional[str] = None,
-    fact_type: Optional[str] = None,
-    tags: Optional[list[str]] = None,
+    project: str | None = None,
+    fact_type: str | None = None,
+    tags: list[str] | None = None,
     limit: int = 20,
-    as_of: Optional[str] = None,
-    confidence: Optional[str] = None,
+    as_of: str | None = None,
+    confidence: str | None = None,
     **kwargs,
 ) -> list[SearchResult]:
     """Perform text search (async)."""
@@ -63,12 +63,12 @@ async def _fts5_search(
     conn: aiosqlite.Connection,
     query: str,
     tenant_id: str,
-    project: Optional[str],
-    fact_type: Optional[str],
-    tags: Optional[list[str]],
+    project: str | None,
+    fact_type: str | None,
+    tags: list[str] | None,
     limit: int,
-    as_of: Optional[str],
-    confidence: Optional[str],
+    as_of: str | None,
+    confidence: str | None,
 ) -> list:
     fts_query = _sanitize_fts_query(query)
     sql = """
@@ -98,8 +98,10 @@ async def _fts5_search(
             sql += " AND json_extract(f.tags, '$') LIKE ?"
             params.append(f"%{tag}%")
     if confidence:
-        sql += " AND f.confidence >= ?"
-        params.append(confidence)
+        allowed = get_higher_confidences(confidence)
+        placeholders = ", ".join("?" for _ in allowed)
+        sql += f" AND f.confidence IN ({placeholders})"
+        params.extend(allowed)
     sql += " ORDER BY rank ASC LIMIT ?"
     params.append(limit)
     cursor = await conn.execute(sql, params)
@@ -110,21 +112,21 @@ async def _like_search(
     conn: aiosqlite.Connection,
     query: str,
     tenant_id: str,
-    project: Optional[str],
-    fact_type: Optional[str],
-    tags: Optional[list[str]],
+    project: str | None,
+    fact_type: str | None,
+    tags: list[str] | None,
     limit: int,
-    as_of: Optional[str],
-    confidence: Optional[str],
+    as_of: str | None,
+    confidence: str | None,
 ) -> list:
     sql = """
         SELECT f.id, f.content, f.project, f.fact_type, f.confidence,
                f.valid_from, f.valid_until, f.tags, f.source, f.metadata,
                f.created_at, f.updated_at, f.tx_id, t.hash
         FROM facts f LEFT JOIN transactions t ON f.tx_id = t.id
-        WHERE f.tenant_id = ? AND f.content LIKE ?
+        WHERE f.tenant_id = ? AND (f.content LIKE ? OR f.tags LIKE ? OR f.source LIKE ?)
     """
-    params: list = [tenant_id, f"%{query}%"]
+    params: list = [tenant_id, f"%{query}%", f"%{query}%", f"%{query}%"]
     if as_of:
         clause, t_params = build_temporal_filter_params(as_of, table_alias="f")
         sql += " AND " + clause
@@ -142,8 +144,10 @@ async def _like_search(
             sql += " AND json_extract(f.tags, '$') LIKE ?"
             params.append(f"%{tag}%")
     if confidence:
-        sql += " AND f.confidence >= ?"
-        params.append(confidence)
+        allowed = get_higher_confidences(confidence)
+        placeholders = ", ".join("?" for _ in allowed)
+        sql += f" AND f.confidence IN ({placeholders})"
+        params.extend(allowed)
     sql += " ORDER BY f.updated_at DESC LIMIT ?"
     params.append(limit)
     cursor = await conn.execute(sql, params)
@@ -154,7 +158,7 @@ def text_search_sync(
     conn: sqlite3.Connection,
     query: str,
     tenant_id: str = "default",
-    project: Optional[str] = None,
+    project: str | None = None,
     limit: int = 20,
 ) -> list[SearchResult]:
     """Full-text search (sync)."""

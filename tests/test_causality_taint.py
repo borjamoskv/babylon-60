@@ -52,7 +52,7 @@ def _create_db(conn: sqlite3.Connection) -> None:
             content TEXT,
             fact_type TEXT DEFAULT 'decision',
             confidence TEXT DEFAULT 'C5',
-            meta TEXT DEFAULT '{}',
+            metadata TEXT DEFAULT '{}',
             valid_from TEXT DEFAULT '',
             valid_until TEXT DEFAULT NULL,
             tenant_id TEXT DEFAULT 'default',
@@ -105,7 +105,10 @@ async def test_propagate_taint_single_child() -> None:
     graph = AsyncCausalGraph(conn)
     await graph.ensure_table()
     await conn.execute(
-        "CREATE TABLE facts (id INTEGER PRIMARY KEY, content TEXT, confidence TEXT, meta TEXT DEFAULT '{}', valid_until TEXT)"
+        "CREATE TABLE transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, project TEXT, action TEXT, detail TEXT, prev_hash TEXT, hash TEXT, timestamp TEXT, tenant_id TEXT DEFAULT 'default')"
+    )
+    await conn.execute(
+        "CREATE TABLE facts (id INTEGER PRIMARY KEY, content TEXT, confidence TEXT, metadata TEXT DEFAULT '{}', project TEXT, tenant_id TEXT DEFAULT 'default', valid_until TEXT)"
     )
 
     # Create facts: 1 → 2 (parent → child)
@@ -138,12 +141,12 @@ async def test_propagate_taint_single_child() -> None:
     assert change["hops"] == 1
 
     # Verify DB updated
-    async with conn.execute("SELECT confidence, meta FROM facts WHERE id = 2") as cursor:
+    async with conn.execute("SELECT confidence, metadata FROM facts WHERE id = 2") as cursor:
         row = await cursor.fetchone()
     assert row[0] == "C4"
-    meta = json.loads(row[1])
-    assert meta["tainted_by"] == 1
-    assert "taint_timestamp" in meta
+    metadata = json.loads(row[1])
+    assert metadata["tainted_by"] == 1
+    assert "taint_timestamp" in metadata
 
     await conn.close()
 
@@ -158,7 +161,10 @@ async def test_propagate_taint_chain() -> None:
     graph = graph_mod.AsyncCausalGraph(conn)
     await graph.ensure_table()
     await conn.execute(
-        "CREATE TABLE facts (id INTEGER PRIMARY KEY, content TEXT, confidence TEXT, meta TEXT DEFAULT '{}', valid_until TEXT)"
+        "CREATE TABLE transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, project TEXT, action TEXT, detail TEXT, prev_hash TEXT, hash TEXT, timestamp TEXT, tenant_id TEXT DEFAULT 'default')"
+    )
+    await conn.execute(
+        "CREATE TABLE facts (id INTEGER PRIMARY KEY, content TEXT, confidence TEXT, metadata TEXT DEFAULT '{}', project TEXT, tenant_id TEXT DEFAULT 'default', valid_until TEXT)"
     )
 
     # Chain: 1 → 2 → 3 → 4
@@ -197,7 +203,10 @@ async def test_propagate_taint_no_descendants() -> None:
     graph = graph_mod.AsyncCausalGraph(conn)
     await graph.ensure_table()
     await conn.execute(
-        "CREATE TABLE facts (id INTEGER PRIMARY KEY, content TEXT, confidence TEXT, meta TEXT DEFAULT '{}', valid_until TEXT)"
+        "CREATE TABLE transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, project TEXT, action TEXT, detail TEXT, prev_hash TEXT, hash TEXT, timestamp TEXT, tenant_id TEXT DEFAULT 'default')"
+    )
+    await conn.execute(
+        "CREATE TABLE facts (id INTEGER PRIMARY KEY, content TEXT, confidence TEXT, metadata TEXT DEFAULT '{}', project TEXT, tenant_id TEXT DEFAULT 'default', valid_until TEXT)"
     )
 
     await conn.execute(
@@ -223,7 +232,10 @@ async def test_propagate_taint_cyclic_graph() -> None:
     graph = graph_mod.AsyncCausalGraph(conn)
     await graph.ensure_table()
     await conn.execute(
-        "CREATE TABLE facts (id INTEGER PRIMARY KEY, content TEXT, confidence TEXT, meta TEXT DEFAULT '{}', valid_until TEXT)"
+        "CREATE TABLE transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, project TEXT, action TEXT, detail TEXT, prev_hash TEXT, hash TEXT, timestamp TEXT, tenant_id TEXT DEFAULT 'default')"
+    )
+    await conn.execute(
+        "CREATE TABLE facts (id INTEGER PRIMARY KEY, content TEXT, confidence TEXT, metadata TEXT DEFAULT '{}', project TEXT, tenant_id TEXT DEFAULT 'default', valid_until TEXT)"
     )
 
     # Chain: 1 → 2 → 3 → 1 (Cycle)

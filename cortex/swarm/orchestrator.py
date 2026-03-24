@@ -3,6 +3,7 @@ import logging
 from typing import Any
 
 from cortex.engine.ledger import SovereignLedger
+from cortex.utils.pulmones import PulmonesQueue
 
 from .discovery import SkillRegistry
 from .factory import SwarmFactory
@@ -28,12 +29,13 @@ class MasterOrchestrator:
         }
         self.partitioner = SwarmPartitioner()
         self.registry = SkillRegistry()
-        
+        self._fallback_queue = PulmonesQueue()
+
         # We associate the factory with the EXECUTION enclave by default
         execution_manager = self.enclaves[SwarmEnclave.EXECUTION]
         execution_manager.registry = self.registry
         self.factory = SwarmFactory(execution_manager)
-        
+
         self.global_context: dict[str, Any] = {}
 
     async def execute_global(self, complex_task: str) -> dict[str, Any]:
@@ -126,7 +128,7 @@ class MasterOrchestrator:
         """
         Higher-level flow: Recruit specialized agents for a task and execute it.
         """
-        logger.info("Orchestrator: Recruiting for task '%s' in quadrant %s", task[:30], quadrant)
+        logger.info("Orchestrator: Recruiting for task '%s' in quadrant %s", str(task)[:30], quadrant)
         squad = await self.factory.recruit_squad(quadrant, size=3)
         
         if not squad:

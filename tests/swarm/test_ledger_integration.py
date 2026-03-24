@@ -27,7 +27,10 @@ async def test_swarm_ledger_integration():
         # Create schema for transactions if needed, though record_transaction handles it?
         # Wait, the ledger expects the table to exist or it will fail on SELECT.
         await db.execute(
-            "CREATE TABLE transactions (id INTEGER PRIMARY KEY, project TEXT, action TEXT, detail TEXT, prev_hash TEXT, hash TEXT, timestamp TEXT, tenant_id TEXT)"
+            "CREATE TABLE transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, project TEXT, action TEXT, detail TEXT, prev_hash TEXT, hash TEXT, timestamp TEXT, tenant_id TEXT)"
+        )
+        await db.execute(
+            "CREATE TABLE merkle_roots (id INTEGER PRIMARY KEY AUTOINCREMENT, root_hash TEXT, tx_start_id INTEGER, tx_end_id INTEGER, tx_count INTEGER)"
         )
 
         ledger = SovereignLedger(db)
@@ -46,7 +49,8 @@ async def test_swarm_ledger_integration():
         assert txs[0][0] == "dispatch_attempt"
         assert txs[1][0] == "execution_success"
         # Verify that privacy was masked in the log record (hash of sanitized vs original)
-        detail = json.loads(txs[0][1])
+        row = txs[0]
+        detail = json.loads(row[1])
         assert "task_hash" in detail
         assert "sanitized_task_hash" in detail
         assert detail["task_hash"] != detail["sanitized_task_hash"]

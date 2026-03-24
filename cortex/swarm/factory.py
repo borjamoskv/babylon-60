@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import logging
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import Any
 
 from cortex.extensions.llm.router import CortexLLMRouter
@@ -10,6 +13,29 @@ from cortex.swarm.actuators.skill import SkillActuator
 from cortex.swarm.manager import SwarmManager
 
 logger = logging.getLogger("cortex.swarm.factory")
+
+
+@dataclass
+class SwarmCycle:
+    """Represents a discrete cycle of swarm activity (Ω-Architecture)."""
+    id: str
+    quadrant: str
+    size: int
+    agent_ids: list[str]
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    parent_fact_id: int | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "id": self.id,
+            "quadrant": self.quadrant,
+            "size": self.size,
+            "agent_ids": self.agent_ids,
+            "created_at": self.created_at.isoformat(),
+            "parent_fact_id": self.parent_fact_id,
+            "metadata": self.metadata,
+        }
 
 
 class SwarmFactory:
@@ -59,6 +85,11 @@ class SwarmFactory:
                 "exergy_target": 8.0,
             },
         }
+        
+    @property
+    def QUADRANTS(self) -> dict[str, dict[str, Any]]:
+        """Public access to Tactical Quadrants (Ω-Structure)."""
+        return self._quadrants
 
     async def recruit_squad(self, quadrant: str, size: int = 5) -> list[str]:
         """
@@ -112,7 +143,7 @@ class SwarmFactory:
         ledger = self.manager.ledger
         if ledger:
             exergy_yield = spec["exergy_target"] * len(agent_ids)
-            ledger.record_transaction(
+            await ledger.record_transaction(
                 project="swarm",
                 action="squad_recruitment",
                 detail={
@@ -120,17 +151,57 @@ class SwarmFactory:
                     "size": len(agent_ids),
                     "role": spec["role"],
                     "exergy_estimate": exergy_yield,
-                    "mechanical_justification": (
-                        f"Squad yield calculated as base_exergy ({spec['exergy_target']}) "
-                        f"x squad_size ({len(agent_ids)}). Total estimate: {exergy_yield} exergy units. "
-                        f"Recruitment latency reduced via parallel enlistment. "
-                        f"Trust Level: C5-Dynamic (Verified Parallel Spawn)."
-                    ),
+                    "mechanical_justification": self.justify_recruitment(quadrant, agent_ids),
                     "audit": "mechanical_justification_v5.6_optimized",
                 },
             )
-
+            
         return list(agent_ids)
+
+    async def generate_cycle(
+        self, 
+        quadrant: str, 
+        size: int = 3, 
+        task_context: dict[str, Any] | None = None
+    ) -> SwarmCycle:
+        """
+        Generates a consolidated SwarmCycle (Ω-Autonomic).
+        Recruits the squad and records the 'Decision' in the CausalEngine.
+        """
+        # 1. Recruit the squad
+        agent_ids = await self.recruit_squad(quadrant, size=size)
+        
+        # 2. Create the Cycle ID (Deterministic)
+        cycle_hash = hashlib.sha256(
+            f"{quadrant}:{size}:{','.join(agent_ids)}:{datetime.now().timestamp()}".encode()
+        ).hexdigest()[:12]
+        cycle_id = f"cycle-{quadrant.lower()}-{cycle_hash}"
+
+        # 3. Record Decision in CausalEngine (Ω₂)
+        parent_fact_id = None
+        engine = self.manager.engine
+        if engine:
+            parent_fact_id = await engine.store(
+                project="swarm",
+                fact_type="swarm_decision",
+                content=f"Decision to trigger {quadrant} swarm (size={size})",
+                metadata={
+                    "cycle_id": cycle_id,
+                    "quadrant": quadrant,
+                    "size": size,
+                    "agent_ids": agent_ids,
+                    "task_context": task_context or {},
+                }
+            )
+
+        return SwarmCycle(
+            id=cycle_id,
+            quadrant=quadrant,
+            size=size,
+            agent_ids=agent_ids,
+            parent_fact_id=parent_fact_id,
+            metadata=task_context or {}
+        )
 
     async def recruit_full_swarm(self) -> dict[str, list[str]]:
         """
@@ -200,4 +271,21 @@ class SwarmFactory:
         """Return names of available skills for a quadrant."""
         spec = self._quadrants.get(quadrant, {})
         categories = spec.get("categories", [])
+        # registry.list_by_category returns list[SkillMetadata]
         return [s.name for cat in categories for s in self.registry.list_by_category(cat)]
+
+    def justify_recruitment(self, quadrant: str, agent_ids: list[str]) -> str:
+        """Generates a Mechanical Justification (Ω₉) for recruitment."""
+        spec = self._quadrants.get(quadrant)
+        if not spec:
+            return "Unknown quadrant recruitment."
+        
+        exergy_target = spec["exergy_target"]
+        total_yield = exergy_target * len(agent_ids)
+        
+        return (
+            f"Exergy Target: {exergy_target} | "
+            f"Estimated Yield: {total_yield} | "
+            f"Squad Size: {len(agent_ids)} | "
+            f"Trust Level: C5-Dynamic (Verified Parallel Spawn)."
+        )
