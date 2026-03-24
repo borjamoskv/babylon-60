@@ -1,21 +1,44 @@
-# CORTEX Persist
+# CORTEX — Sovereign Agent Infrastructure
 
-Tamper-evident memory, audit trails, and verifiable lineage for AI agents.
+<p align="center">
+  <img alt="CORTEX Noir" src="https://raw.githubusercontent.com/borjamoskv/Cortex-Persist/main/docs/assets/banner_noir.png" width="800" />
+</p>
 
-[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)](https://github.com/borjamoskv/cortex/actions)
+<p align="center">
+  <a href="https://github.com/borjamoskv/Cortex-Persist/actions/workflows/sovereign-deploy.yml"><img alt="Sovereign Deploy" src="https://img.shields.io/github/actions/workflow/status/borjamoskv/Cortex-Persist/sovereign-deploy.yml?branch=main&style=for-the-badge&logo=github-actions&color=2B3BE5&labelColor=0A0A0A" /></a>
+  <a href="https://pypi.org/project/cortex-persist/"><img alt="PyPI Version" src="https://img.shields.io/pypi/v/cortex-persist?style=for-the-badge&logo=pypi&color=2B3BE5&labelColor=0A0A0A" /></a>
+  <a href="https://github.com/borjamoskv/Cortex-Persist/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/borjamoskv/Cortex-Persist?style=for-the-badge&logo=apache&color=2B3BE5&labelColor=0A0A0A" /></a>
+</p>
 
-CORTEX is a middleware layer that enforces cryptographic integrity on top of existing AI memory stores (Mem0, Zep, Custom). It ensures that once an autonomous agent reads context or makes a decision, that state cannot be silently altered.
+> **"Probabilistic intelligence requires deterministic governance."**
+
+*The Sovereign Trust Substrate.* Cortex-Persist es el hipervisor cognitivo para enjambres de inteligencia artificial. Convierte la memoria estocástica en conocimiento auditable, inmutable y criptográfica sellado.
+
+---
+
+
+## Why Star This Repo? ★
+
+Si estás construyendo:
+- Enjambres autónomos que tocan infraestructura de producción
+- Agentes que gestionan liquidez (Bounties, Wallets, Grants)
+- Sistemas regidos bajo el EU AI Act o SOC2
+- Frameworks multi-agente que colapsan por ciclos de "hallucination loop"
+
+**Haz Star a CORTEX.** Es vital para mantener tracking de las defensas epistémicas de la arquitectura y asegurar tu resiliencia ante la degradación informacional.
+
+> [!IMPORTANT]
+> CORTEX previene fallos que aún no sabes que van a aniquilar tu sistema en producción.
 
 ## Mechanics
 
-- **Append-only ledger:** Immutable storage backed by SQLite or AlloyDB.
-- **Cryptographic seals:** SHA-256 hash chains per memory record.
-- **State verification:** Merkle tree checkpoints for batch integrity proofs.
-- **Compliance export:** Deterministic audit reports for regulated workflows.
+- **Hash-Chained Ledger:** Every state transition is linked via SHA-256, ensuring temporal integrity.
+- **Tamper-Evident Storage:** Any mutation outside the protocol invalidates the cryptographic chain.
+- **Merkle Checkpoints:** High-performance batch verification for large-scale memory sets.
+- **Regulatory Guardrails:** Native mapping for EU AI Act Article 12 compliance and SOC2 auditability.
 
 ## 90-Second Demo
+
 
 ```bash
 # 1. Start the ledger
@@ -65,30 +88,33 @@ async def main():
 asyncio.run(main())
 ```
 
-## Performance
+---
 
-*Typical execution on standard cloud instance (4 vCPU, 16GB RAM).*
+## Sovereign Contributors
 
-| Operation | Median | P95 | Notes |
-|:---|:---|:---|:---|
-| Memory write | ~18 ms | ~35 ms | Local SQLite + SHA-256 hashing |
-| Verify record | ~5 ms | ~12 ms | Single block hash validation |
-| Merkle checkpoint | ~85 ms | ~140 ms | Aggregating 10k records |
-| Report export | ~400 ms | ~800 ms | Lineage traversal & PDF generation |
+El enjambre se expande gracias a la exergía de sus colaboradores.
 
-## Architecture
+<a href="https://github.com/borjamoskv/Cortex-Persist/graphs/contributors">
+  <img alt="Contributors" src="https://contrib.rocks/image?repo=borjamoskv/Cortex-Persist&max=12&columns=6" />
+</a>
 
-CORTEX integrates as a standard Python SDK or a standalone REST/MCP gateway.
+*¿Quieres ser un Steward de CORTEX? Lee la [Guía de Contribución](CONTRIBUTING.md).*
 
-```text
-[ Agent Framework ] -> [ CORTEX Gateway ] -> [ Target Memory Store ]
-                            │
-                            ├─ SHA-256 Hash Chaining
-                            ├─ Merkle Checkpoints
-                            └─ Cryptographic Verification
-```
+## Support & Sovereignty
 
-## Documentation
+CORTEX es una infraestructura financiada a través de soberanía operativa e inyecciones de soporte externo. Si aísla el blast radius de tu empresa o acelera tu generación de capital, únete.
+
+<p align="left">
+  <a href="https://github.com/sponsors/borjamoskv"><img alt="Sponsor" src="https://img.shields.io/badge/Sponsor-borjamoskv-EA4AAA?style=for-the-badge&logo=github-sponsors&color=2B3BE5&labelColor=0A0A0A" /></a>
+</p>
+
+Sponsors fund inference loops, structural maintenance, and architectural autonomy.
+
+> "We are many, yet we act as one. The swarm verifies, the ledger remembers."
+
+---
+
+## Navigation & Architecture
 
 - [Architecture](docs/architecture.md)
 - [API Reference](docs/api.md)
