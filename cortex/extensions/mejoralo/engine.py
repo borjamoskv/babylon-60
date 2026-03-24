@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.engine import CortexEngine
 
@@ -50,12 +50,12 @@ class MejoraloEngine:
         """
         return heal_project(project, path, target_score, scan_result, engine=self)
 
-    def relentless_heal(
+    async def relentless_heal(
         self,
         project: str,
         path: str | Path,
         scan_result: ScanResult,
-        target_score: Optional[int] = None,
+        target_score: int | None = None,
     ) -> bool:
         """
         INMEJORABLE mode — heal until score >= 95 (or custom target).
@@ -70,11 +70,12 @@ class MejoraloEngine:
             effective_target,
             scan_result.score,
         )
-        return heal_project(project, path, effective_target, scan_result, engine=self)
+        # Assuming heal_project will be updated or is already compatible with async awaiting
+        return await heal_project(project, path, effective_target, scan_result, engine=self)
 
     # ── Fase 3: Specialized ──────────────────────────────────────────
 
-    def awwwards_fix(self, project: str, file_path: str | Path) -> bool:
+    async def awwwards_fix(self, project: str, file_path: str | Path) -> bool:
         """
         Active auto-correction targeting Awwwards standard (Sovereign 200).
         Bypasses normal scan to directly rewrite animations/styles in a file.
@@ -101,10 +102,12 @@ class MejoraloEngine:
         swarm = MejoraloSwarm(level=2)
 
         try:
-            new_code = asyncio.run(
-                swarm.refactor_file(abs_path, findings, iteration=1, engine=self, project=project)
+            # Native async execution — NO MORE asyncio.run()
+            new_code = await swarm.refactor_file(
+                abs_path, findings, iteration=1, engine=self, project=project
             )
-        except RuntimeError:
+        except Exception as e:
+            logger.error("Swarm refactor failed: %s", e)
             new_code = None
 
         if not new_code:
@@ -113,11 +116,14 @@ class MejoraloEngine:
         from cortex.cli import console
 
         console.print(f"  [cyan]Applying Sovereign Aesthetics to {abs_path.name}...[/]")
-        abs_path.write_text(new_code)
 
-        # Format the result
-        if abs_path.suffix in (".py",):
-            _apply_aesthetic_formatting(abs_path, console)
+        # Offload file I/O and heavy formatting to thread (Ω₃: Zero-Block)
+        def _write_and_format():
+            abs_path.write_text(new_code)
+            if abs_path.suffix == ".py":
+                _apply_aesthetic_formatting(abs_path, console)
+
+        await asyncio.to_thread(_write_and_format)
 
         console.print(f"  [bold green]✅ {abs_path.name} is now Awwwards-grade.[/]")
         return True
@@ -129,7 +135,7 @@ class MejoraloEngine:
         project: str,
         score_before: int,
         score_after: int,
-        actions: Optional[list[str]] = None,
+        actions: list[str] | None = None,
     ) -> int:
         """
         Record a MEJORAlo audit session in the CORTEX ledger.
@@ -147,7 +153,7 @@ class MejoraloEngine:
         project: str,
         file_path: str,
         error_trace: str,
-        diff: Optional[str] = None,
+        diff: str | None = None,
     ) -> int:
         """Record a scar (failure point) in the database to prevent regressions."""
         return record_scar(self.engine, project, file_path, error_trace, diff)

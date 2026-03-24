@@ -171,11 +171,11 @@ def adk_ledger_verify() -> dict[str, Any]:
     Returns:
         A dict with verification results.
     """
-    from cortex.engine.ledger import ImmutableLedger
+    from cortex.engine.ledger import SovereignLedger
 
     try:
         with _sovereign_engine() as engine:
-            ledger = ImmutableLedger(engine._conn)  # type: ignore[reportArgumentType]
+            ledger = SovereignLedger(engine._conn)  # type: ignore[reportArgumentType]
             report = ledger.verify_integrity()  # type: ignore[reportAttributeAccessIssue]
             return {
                 "status": "success",

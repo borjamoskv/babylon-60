@@ -51,11 +51,11 @@ def create_checkpoint(db):
             await engine.init_db()
             ledger_inst = getattr(engine, "_ledger", None)
             if not ledger_inst:
-                from cortex.engine.ledger import ImmutableLedger
+                from cortex.engine.ledger import SovereignLedger
 
                 # Re-using the connection from the engine
                 conn = await engine.get_conn()
-                ledger_inst = ImmutableLedger(conn)  # type: ignore[reportArgumentType]
+                ledger_inst = SovereignLedger(conn)  # type: ignore[reportArgumentType]
 
             root_id = await ledger_inst.create_checkpoint_async()
             if root_id:

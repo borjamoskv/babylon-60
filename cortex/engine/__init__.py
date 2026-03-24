@@ -7,7 +7,7 @@ import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional
 
 import aiosqlite
 import sqlite_vec
@@ -16,6 +16,7 @@ from cortex.config import DEFAULT_DB_PATH
 from cortex.database.schema import get_init_meta
 from cortex.embeddings import LocalEmbedder
 from cortex.engine.durability import PersistenceSupervisor
+from cortex.engine.ghost_mixin import GhostMixin
 from cortex.engine.memory_mixin import MemoryMixin
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
 from cortex.engine.models import row_to_fact  # noqa: F401 — re-exported
@@ -60,6 +61,7 @@ MAX_TAGS_PER_FACT = 20
 class CortexEngine(
     SearchMixin,
     StoreMixin,
+    GhostMixin,
     QueryMixin,
     MemoryMixin,
     TransactionMixin,
@@ -77,11 +79,11 @@ class CortexEngine(
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._enforce_fs_permissions()
         self._auto_embed = auto_embed
-        self._conn: Optional[aiosqlite.Connection] = None
+        self._conn: aiosqlite.Connection | None = None
         self._vec_available = False
         self._conn_lock = asyncio.Lock()
-        self._ledger = None  # Wave 5: ImmutableLedger (lazy init)
-        self._embedder: Optional[LocalEmbedder] = None
+        self._ledger = None  # Wave 5: SovereignLedger (lazy init)
+        self._embedder: LocalEmbedder | None = None
         self._memory_manager = None  # Frontera 2: Tripartite Memory (lazy init)
         self._persistence = PersistenceSupervisor(self)
 
@@ -93,6 +95,11 @@ class CortexEngine(
 
         # Decoupled guard pipeline (Ω₃: minimal coupling)
         self._guard_pipeline = self._register_default_guards()
+
+    @property
+    def memory(self) -> Any:
+        """Access the tripartite memory layer."""
+        return self._memory_manager
 
     # ─── Guard Pipeline Registration ──────────────────────────────
 
@@ -342,7 +349,7 @@ class CortexEngine(
     async def trace_episode(
         self,
         fact_id: int,
-        max_depth: Optional[int] = None,
+        max_depth: int | None = None,
     ):
         """Trace the full causal DAG from a given fact ID."""
         from cortex.memory.episodic import CausalTracer
@@ -427,7 +434,7 @@ class CortexEngine(
 
         return [Fact(**{k: v for k, v in r.items() if k != "type"}) for r in results]
 
-    async def shannon_report(self, project: Optional[str] = None) -> dict:
+    async def shannon_report(self, project: str | None = None) -> dict:
         """Shannon entropy analysis of stored memory."""
         from cortex.extensions.shannon.report import EntropyReport
 
@@ -435,7 +442,7 @@ class CortexEngine(
 
     async def fingerprint(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
         top_domains: int = 15,
     ):
         """Cognitive Fingerprint — extract behavioral patterns from the Ledger.
@@ -457,7 +464,7 @@ class CortexEngine(
     def fingerprint_sync(self, *args, **kwargs):
         return self._run_sync(self.fingerprint(*args, **kwargs))
 
-    async def immortality_index(self, project: Optional[str] = None) -> dict:
+    async def immortality_index(self, project: str | None = None) -> dict:
         """Immortality Index (ι) — cognitive crystallization metric."""
         from cortex.extensions.shannon.immortality import ImmortalityIndex
 
@@ -468,7 +475,7 @@ class CortexEngine(
 
     async def prioritize(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
         tenant_id: str = "default",
     ) -> list:
         """Bellman Policy Engine — prioritized action queue.
@@ -486,7 +493,7 @@ class CortexEngine(
     async def init_db(self) -> None:
         """Initialize database schema. Safe to call multiple times."""
         from cortex.database.schema import get_all_schema
-        from cortex.engine.ledger import ImmutableLedger
+        from cortex.engine.ledger import SovereignLedger
 
         conn = await self.get_conn()
 
@@ -505,7 +512,7 @@ class CortexEngine(
             )
         await conn.commit()
 
-        self._ledger = ImmutableLedger(conn)  # type: ignore[reportArgumentType]
+        self._ledger = SovereignLedger(conn)  # type: ignore[reportArgumentType]
         await self._init_memory_subsystem(self._db_path, conn)
         await self._persistence.start()
         metrics.set_engine(self)

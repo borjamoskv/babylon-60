@@ -89,7 +89,7 @@ class GitHubCortexBridge:
         result = SyncResult()
 
         try:
-            repos = await self._discover_repos(repo_filter)
+            repos = await self.discover_repos(repo_filter)
         except httpx.HTTPStatusError as exc:
             result.errors.append(f"GitHub API error: {exc.response.status_code}")
             return result
@@ -112,11 +112,32 @@ class GitHubCortexBridge:
         """Close the underlying HTTP client."""
         await self._client.aclose()
 
+    async def get_repo_stats(self, repo: str) -> dict[str, Any]:
+        """Fetch repository statistics (stars, forks, watchers)."""
+        resp = await self._client.get(f"{_GH_API}/repos/{repo}")
+        resp.raise_for_status()
+        data = resp.json()
+        return {
+            "stars": data.get("stargazers_count", 0),
+            "forks": data.get("forks_count", 0),
+            "watchers": data.get("subscribers_count", 0),
+            "open_issues": data.get("open_issues_count", 0),
+            "updated_at": data.get("updated_at", ""),
+        }
+
+    async def get_issue_comments(self, repo: str, number: int) -> list[dict[str, Any]]:
+        """Fetch comments for a specific issue or PR."""
+        resp = await self._client.get(f"{_GH_API}/repos/{repo}/issues/{number}/comments")
+        resp.raise_for_status()
+        return resp.json()
+
     # ─── Repo Discovery ──────────────────────────────────────────────
 
-    async def _discover_repos(self, repo_filter: str | None) -> list[str]:
+    async def discover_repos(self, repo_filter: str | None = None) -> list[str]:
         """List public repos for the owner. Returns full names (owner/repo)."""
         if repo_filter:
+            if "/" in repo_filter:
+                return [repo_filter]
             return [f"{self._owner}/{repo_filter}"]
 
         repos: list[str] = []
@@ -171,6 +192,7 @@ class GitHubCortexBridge:
         repo: str,
         existing: dict[str, int],
         result: SyncResult,
+        include_comments: bool = True,
     ) -> None:
         """Process a single issue/PR item."""
         number: int = item["number"]
@@ -178,25 +200,30 @@ class GitHubCortexBridge:
         is_pr = "pull_request" in item
         state: str = item["state"]  # "open" or "closed"
 
+        fact_id = None
         if key in existing:
             # Already in CORTEX — check for crystallization
             if state == "closed":
-                await self._crystallize_decision(item, repo, existing[key])
+                fact_id = await self._crystallize_decision(item, repo, existing[key])
                 result.crystallized += 1
             else:
+                fact_id = existing[key]
                 result.skipped += 1
-            return
-
-        # New item — only store open ones as bridges
-        if state == "open":
-            await self._store_bridge(item, repo, key, is_pr)
-            if is_pr:
-                result.prs_synced += 1
-            else:
-                result.issues_synced += 1
-        # Closed items without a previous bridge are historical — skip
         else:
-            result.skipped += 1
+            # New item — only store open ones as bridges
+            if state == "open":
+                fact_id = await self._store_bridge(item, repo, key, is_pr)
+                if is_pr:
+                    result.prs_synced += 1
+                else:
+                    result.issues_synced += 1
+            # Closed items without a previous bridge are historical — skip
+            else:
+                result.skipped += 1
+
+        # Sync comments if a fact exists/was created
+        if include_comments and fact_id:
+            await self._sync_comments(repo, number, fact_id)
 
     # ─── Store / Crystallize ─────────────────────────────────────────
 
@@ -286,6 +313,56 @@ class GitHubCortexBridge:
             existing_fact_id,
             repo,
             item["number"],
+        )
+        return fact_id
+
+    async def _sync_comments(self, repo: str, number: int, parent_id: int) -> None:
+        """Fetch and store comments for an issue/PR."""
+        try:
+            comments = await self.get_issue_comments(repo, number)
+            for comment in comments:
+                # Use a combined key for comments: repo#issue#comment_id
+                c_key = f"{repo}#{number}#{comment['id']}"
+                c_hash = hashlib.sha256(c_key.encode()).hexdigest()[:16]
+
+                # Check if comment already exists as a fact (light check)
+                # For now, we just store it if it's new in the last sync
+                # Ideally we'd have a comment index too
+                await self._store_comment(comment, repo, number, parent_id, c_hash)
+        except Exception as e:
+            logger.debug("Failed to sync comments for %s#%d: %s", repo, number, e)
+
+    async def _store_comment(
+        self,
+        comment: dict[str, Any],
+        repo: str,
+        number: int,
+        parent_id: int,
+        key: str,
+    ) -> int:
+        """Store a GitHub comment as a bridge fact."""
+        user = comment.get("user", {}).get("login", "unknown")
+        body = (comment.get("body") or "")[:500]
+
+        content = f"[GitHub Comment] {repo}#{number} by @{user}: {body}".strip()
+
+        meta = {
+            "github_comment_id": comment["id"],
+            "github_user": user,
+            "github_url": comment["html_url"],
+            "parent_fact_id": parent_id,
+            "github_key": key,
+            "synced_at": now_iso(),
+        }
+
+        fact_id = await self._engine.store(
+            project=_PROJECT,
+            content=content,
+            fact_type="bridge",
+            tags=["github", "comment", repo.split("/")[-1]],
+            confidence="C4",
+            source=_SOURCE,
+            meta=meta,
         )
         return fact_id
 

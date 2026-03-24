@@ -10,7 +10,7 @@ import logging
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
-from cortex.engine.ledger import ImmutableLedger
+from cortex.engine.ledger import SovereignLedger
 
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
@@ -96,7 +96,7 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
             time_range = await cursor.fetchone()
 
         # Verify ledger integrity
-        ledger = ImmutableLedger(ctx.pool)  # type: ignore[reportArgumentType]
+        ledger = SovereignLedger(ctx.pool)  # type: ignore[reportArgumentType]
         integrity = await ledger.verify_integrity_async()
 
         now = datetime.now(timezone.utc).isoformat()

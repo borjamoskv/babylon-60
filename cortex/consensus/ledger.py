@@ -4,4 +4,4 @@ The canonical implementation lives in ``cortex.engine.ledger``.
 This module re-exports for backward compatibility.
 """
 
-from cortex.engine.ledger import ImmutableLedger  # noqa: F401
+from cortex.engine.ledger import SovereignLedger  # noqa: F401

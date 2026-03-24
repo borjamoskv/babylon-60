@@ -1,7 +1,7 @@
 """VEX Data Models — Cryptographically verifiable execution primitives.
 
 All models are immutable dataclasses designed for hash-chain integration
-with CORTEX's ImmutableLedger and WBFT consensus.
+with CORTEX's SovereignLedger and WBFT consensus.
 
 Derivation: Ω₃ (Byzantine Default) — every model is self-verifiable.
 """

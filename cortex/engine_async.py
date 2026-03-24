@@ -15,7 +15,7 @@ from cortex.embeddings import LocalEmbedder
 from cortex.engine.agent_mixin import AgentMixin
 from cortex.engine.consensus import ConsensusMixin
 from cortex.engine.history import HistoryMixin
-from cortex.engine.ledger import ImmutableLedger
+from cortex.engine.ledger import SovereignLedger
 from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
@@ -45,7 +45,7 @@ class AsyncCortexEngine(
         self._db_path = Path(db_path)
         self._writer = writer
         self._embedder: Optional[LocalEmbedder] = None
-        self._ledger: Optional[ImmutableLedger] = None
+        self._ledger: Optional[SovereignLedger] = None
         self.vault: Optional[Any] = None
 
         from cortex.extensions.cuatrida.orchestrator import CuatridaOrchestrator
@@ -119,9 +119,9 @@ class AsyncCortexEngine(
     async def get_conn(self) -> aiosqlite.Connection:
         return await self._pool.acquire().__aenter__()
 
-    def _get_ledger(self) -> ImmutableLedger:
+    def _get_ledger(self) -> SovereignLedger:
         if self._ledger is None:
-            self._ledger = ImmutableLedger(self._pool)
+            self._ledger = SovereignLedger(self._pool)
         return self._ledger
 
     async def _log_transaction(

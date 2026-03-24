@@ -11,7 +11,7 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 
 from cortex.engine import CortexEngine
-from cortex.engine.ledger import ImmutableLedger
+from cortex.engine.ledger import SovereignLedger
 from cortex.extensions.immune.filters.base import Verdict
 from cortex.extensions.immune.membrane import ImmuneMembrane
 from cortex.mcp.core_tools import (
@@ -261,8 +261,8 @@ def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
         """Perform a full integrity check on the CORTEX ledger."""
         await ctx.ensure_ready()
 
-        # ImmutableLedger expects a pool, not a single connection
-        ledger = ImmutableLedger(ctx.pool)  # type: ignore[reportArgumentType]
+        # SovereignLedger expects a pool, not a single connection
+        ledger = SovereignLedger(ctx.pool)  # type: ignore[reportArgumentType]
         report = await ledger.verify_integrity_async()
 
         if report["valid"]:

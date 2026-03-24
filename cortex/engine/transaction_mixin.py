@@ -21,7 +21,7 @@ class TransactionMixin(EngineMixinBase):
 
     Every write operation produces a transaction record chained to its predecessor
     via ``compute_tx_hash(prev_hash, project, action, detail, timestamp)``.
-    The chain is verified by ``ImmutableLedger.verify_integrity_async()``.
+    The chain is verified by ``SovereignLedger.verify_integrity_async()``.
 
     CDC Pattern: ``_log_transaction()`` is the single write-path for all
     state mutations (store, deprecate, quarantine, unquarantine).
@@ -74,8 +74,8 @@ class TransactionMixin(EngineMixinBase):
 
     async def verify_ledger(self) -> dict[str, Any]:
         if not getattr(self, "_ledger", None):
-            from cortex.engine.ledger import ImmutableLedger
+            from cortex.engine.ledger import SovereignLedger
 
             conn = await self.get_conn()
-            self._ledger = ImmutableLedger(conn)
+            self._ledger = SovereignLedger(conn)
         return await self._ledger.verify_integrity_async()
