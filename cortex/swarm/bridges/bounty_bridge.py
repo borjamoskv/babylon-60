@@ -1,3 +1,4 @@
+# CORTEX-TAINT: cazarecompensas-agent:ab12cd34:1742878308
 import logging
 from typing import Any
 
@@ -39,7 +40,7 @@ class BountySwarmBridge:
 
         # 1. Scan and Rank
         leads = await self.bounty_service.scan_repository(owner, repo)
-        ranked = self.bounty_service.rank_leads(leads)
+        ranked = await self.bounty_service.rank_leads(leads)
 
         if not ranked:
             logger.info("BountyBridge: No high-exergy leads found in %s/%s", owner, repo)
@@ -59,8 +60,7 @@ class BountySwarmBridge:
 
             # 5. Ledger Record (Ω₉)
             if self.ledger:
-                import asyncio
-                asyncio.create_task(self.ledger.record_transaction(
+                await self.ledger.record_transaction(
                     project="swarm",
                     action="kinetic_bridge_activation",
                     detail={
@@ -76,7 +76,7 @@ class BountySwarmBridge:
                             "Execution entropy reduced via autonomic sharding."
                         )
                     }
-                ))
+                )
 
             results.append({
                 "bounty": lead.number,

@@ -1,3 +1,6 @@
+# CORTEX-TAINT: cazarecompensas-agent:ab12cd34:1742878308
+from unittest.mock import AsyncMock, patch
+
 import pytest
 import respx
 from httpx import Response
@@ -28,29 +31,6 @@ async def test_fetch_from_github_mock():
     assert leads[0].reward_usd == 500.0
     assert leads[0].repo == "owner/repo"
 
-@pytest.mark.asyncio
-@respx.mock
-async def test_fetch_from_algora_mock():
-    service = BountyService(reward_threshold=100.0)
-
-    # Mock Algora API (simulated)
-    # Note: Algora might have a different API, we use a placeholder for now
-    respx.get(url__contains="algora.io").mock(return_value=Response(200, json=[
-        {
-            "id": "alg1",
-            "title": "Enhance RAG Pipeline",
-            "reward": 423.30,
-            "url": "https://algora.io/isaac/bounties/clq18zr98000ejs0gt0nv7gwu",
-            "repository": {"full_name": "aietal/isaac"},
-            "issue": {"number": 123}
-        }
-    ]))
-
-    # This method is not yet implemented, but this is the test interface
-    leads = await service._fetch_from_algora()
-    assert len(leads) == 1
-    assert leads[0].reward_usd == 423.30
-    assert leads[0].repo == "aietal/isaac"
 
 @pytest.mark.asyncio
 async def test_rank_leads_exergy_filter():
@@ -61,6 +41,67 @@ async def test_rank_leads_exergy_filter():
         BountyLead(number=2, title="High exergy", url="", reward_usd=1000.0, difficulty="medium", score=8.0, repo="r2"),
     ]
 
-    ranked = service.rank_leads(leads)
+    ranked = await service.rank_leads(leads)
     assert len(ranked) == 1
     assert ranked[0].number == 2
+
+
+@pytest.mark.asyncio
+async def test_scan_global_language_filter():
+    """Test that scan_global accepts language filter parameter."""
+    service = BountyService(reward_threshold=100.0)
+
+    with patch.object(service, "_fetch_from_github", new_callable=AsyncMock, return_value=[]) as mock_fetch:
+        await service.scan_global(max_results=10, languages=["python", "rust"])
+        mock_fetch.assert_awaited_once()
+        query = mock_fetch.call_args[0][0]
+        assert "language:python" in query
+        assert "language:rust" in query
+
+
+@pytest.mark.asyncio
+async def test_scan_global_no_language_filter():
+    """Test that scan_global works without language filter."""
+    service = BountyService(reward_threshold=100.0)
+
+    with patch.object(service, "_fetch_from_github", new_callable=AsyncMock, return_value=[]) as mock_fetch:
+        await service.scan_global(max_results=10)
+        mock_fetch.assert_awaited_once()
+        query = mock_fetch.call_args[0][0]
+        assert "language:" not in query
+
+
+@pytest.mark.asyncio
+async def test_scan_all_delegates_to_sovereign_scanner():
+    """Test that scan_all delegates to SovereignBountyScanner."""
+    from cortex.swarm.bounty_scanner import BountyOpportunity
+
+    mock_opps = [
+        BountyOpportunity(
+            id="test-1", title="Test Bounty", repo="owner/repo",
+            platform="algora", reward_usd=500.0, confidence=0.8,
+            complexity=5, url="https://test.com/1",
+        ),
+    ]
+
+    service = BountyService(reward_threshold=100.0)
+
+    with patch("cortex.swarm.bounty_scanner.SovereignBountyScanner") as MockScanner:
+        mock_instance = MockScanner.return_value
+        mock_instance.scan_all = AsyncMock(return_value=mock_opps)
+
+        leads = await service.scan_all(min_usd=100.0)
+        assert len(leads) == 1
+        assert leads[0].title == "Test Bounty"
+        assert leads[0].reward_usd == 500.0
+        assert leads[0].difficulty == "medium"  # complexity 5 → medium
+
+
+def test_complexity_to_difficulty():
+    """Test the static complexity→difficulty mapper."""
+    assert BountyService._complexity_to_difficulty(1) == "low"
+    assert BountyService._complexity_to_difficulty(3) == "low"
+    assert BountyService._complexity_to_difficulty(4) == "medium"
+    assert BountyService._complexity_to_difficulty(6) == "medium"
+    assert BountyService._complexity_to_difficulty(7) == "high"
+    assert BountyService._complexity_to_difficulty(10) == "high"

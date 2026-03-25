@@ -1,3 +1,4 @@
+# CORTEX-TAINT: cazarecompensas-agent:ab12cd34:1742878308
 """
 CORTEX CLI — Package init (Ω₂ Lazy Loading).
 
@@ -69,7 +70,8 @@ class _LazyCommand(click.Command):
 
                 click.secho(
                     f"\n[CORTEX] ❌ Missing Extension for command '{self.name}'.\n"
-                    f"Command module '{self._module_path}' failed to load due to missing dependencies:\n  {e}\n",
+                    f"Module '{self._module_path}' failed to load due to missing "
+                    f"dependencies:\n  {e}\n",
                     fg="red",
                     err=True,
                 )
@@ -164,6 +166,7 @@ _SELF_REGISTERING_MODULES: list[str] = [
     "cortex.cli.trust_cmds",
     "cortex.cli.vote_ledger",
     "cortex.cli.x_cmds",
+    "cortex.cli.moskv_cmds",
 ]
 
 # ─── Standalone groups (@click.group) — need LazyGroup proxy ────────────
@@ -235,6 +238,11 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
         "cortex.cli.vector_l_cmds",
         "vector_l_cmds",
         "Vector L — PYME bottleneck detection and CORTEX agent sales engine.",
+    ),
+    ("compliance", "cortex.cli.compliance_cmds", "compliance", "Governance and cryptographic audit proofs."),
+    (
+        "bounty", "cortex.cli.bounty_cmds", "bounty_cmds",
+        "💎 Bounty Hunter — multi-platform discovery.",
     ),
 ]
 

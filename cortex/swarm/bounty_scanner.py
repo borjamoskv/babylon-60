@@ -1,3 +1,4 @@
+# CORTEX-TAINT: cazarecompensas-agent:ab12cd34:1742878308
 """
 cortex/swarm/bounty_scanner.py
 ──────────────────────────────
@@ -73,8 +74,8 @@ class AlgoraScanner:
             return self._fallback_opportunities()
 
         try:
-            async with httpx.AsyncClient(timeout=15.0) as client:
-                # Algora public bounties endpoint
+            async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
+                # Algora public bounties endpoint (follow_redirects for 301)
                 resp = await client.get(
                     "https://console.algora.io/api/bounties",
                     params={"status": "funded", "limit": limit},
@@ -86,7 +87,7 @@ class AlgoraScanner:
                 else:
                     logger.warning("[ALGORA] API returned %d — using fallback", resp.status_code)
                     return self._fallback_opportunities()
-        except Exception as e:
+        except (httpx.RequestError, httpx.HTTPStatusError) as e:
             logger.error("[ALGORA] Scan failed: %s — using fallback", e)
             return self._fallback_opportunities()
 
@@ -208,7 +209,7 @@ class PolarScanner:
                 else:
                     logger.warning("[POLAR] API returned %d", resp.status_code)
                     return self._fallback_opportunities()
-        except Exception as e:
+        except (httpx.RequestError, httpx.HTTPStatusError) as e:
             logger.error("[POLAR] Scan failed: %s — using fallback", e)
             return self._fallback_opportunities()
 
@@ -396,7 +397,7 @@ class GitHubBountyScanner:
                             description=item.get("body", "")[:300],
                         )
                         opportunities.append(opp)
-        except Exception as e:
+        except (httpx.RequestError, httpx.HTTPStatusError) as e:
             logger.error("[GITHUB] Scan failed: %s", e)
 
         return sorted(opportunities, key=lambda x: x.ev, reverse=True)

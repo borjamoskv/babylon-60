@@ -1,3 +1,4 @@
+# CORTEX-TAINT: cazarecompensas-agent:ab12cd34:1742878308
 from decimal import Decimal
 from unittest.mock import AsyncMock, MagicMock
 
@@ -36,7 +37,7 @@ async def test_bounty_swarm_bridge_activation():
 
     mock_bounty_service = MagicMock(spec=BountyService)
     mock_bounty_service.scan_repository = AsyncMock(return_value=[mock_lead])
-    mock_bounty_service.rank_leads = MagicMock(return_value=[mock_lead])
+    mock_bounty_service.rank_leads = AsyncMock(return_value=[mock_lead])
     mock_bounty_service.generate_claim_prompt = MagicMock(return_value="Solve this!")
 
     # 2. Instantiate Bridge
@@ -73,7 +74,7 @@ async def test_bounty_swarm_bridge_no_leads():
     """Test the bridge when no high-exergy leads are found."""
     mock_bounty_service = MagicMock(spec=BountyService)
     mock_bounty_service.scan_repository = AsyncMock(return_value=[])
-    mock_bounty_service.rank_leads = MagicMock(return_value=[])
+    mock_bounty_service.rank_leads = AsyncMock(return_value=[])
 
     bridge = BountySwarmBridge(
         bounty_service=mock_bounty_service,
