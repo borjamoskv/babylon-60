@@ -86,6 +86,7 @@ Thumbs.db
 # ── Generated / Scratch ──────────────────────────
 *.out
 *.png
+!assets/*.png
 scratch_*.html
 *_generated.html
 *_output.txt
@@ -158,6 +159,10 @@ open-cortex/
 cortex-hypervisor/
 
 # ── Audio / Media (never track) ──────────────────
+*.wav
+*.mp4
+*.mkv
+*.mp3
 White_Pony_Master/
 White_Pony_Stems/
 Rework_POC_Generations/
