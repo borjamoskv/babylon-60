@@ -44,43 +44,29 @@ import asyncio
 import logging
 import os
 import time
-from dataclasses import dataclass, field
 from typing import Optional
 
-from cortex.extensions.llm._presets import load_presets
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.extensions.llm.router import IntentProfile
+from cortex.extensions.llm.config import load_presets
+from cortex.extensions.llm.providers.base import LLMProvider
+from cortex.extensions.llm.router import CortexLLMRouter, IntentProfile
+from cortex.pearl.registry import CrystalRegistry
+from cortex.shannon.sentinel import SovereignResult
+from cortex.shannon.sentinel import TopologyCorrection
 
 __all__ = ["SovereignLLM", "SovereignResult", "Inquisitor"]
 
-logger = logging.getLogger("cortex.extensions.llm.sovereign")
+logger = logging.getLogger(
+    "cortex.extensions.llm.sovereign"
+)
 
 # Default signature for template fallback — override via constructor
 _DEFAULT_SIGNATURE = (
-    "---\nby borjamoskv.com | MOSKV Systems\nSovereign Architecture · Industrial Noir 2026"
+    "---\nby borjamoskv.com | MOSKV Systems\n"
+    "Sovereign Architecture · Industrial Noir 2026"
 )
 
 
 # ─── Result ──────────────────────────────────────────────────────────
-
-
-@dataclass
-class SovereignResult:
-    """Result of a sovereign LLM call. Always has content."""
-
-    content: str
-    provider: str
-    model: str = ""
-    is_local: bool = False
-    is_template: bool = False
-    latency_ms: float = 0.0
-    fallback_chain: list[str] = field(default_factory=list)
-    error_log: list[str] = field(default_factory=list)
-
-    @property
-    def ok(self) -> bool:
-        """True if a real LLM answered (not template fallback)."""
-        return not self.is_template
 
 
 # ─── Provider Priority ──────────────────────────────────────────────
@@ -181,6 +167,37 @@ class SovereignLLM:
         # D3 fix: cache presets once per generate() call
         presets = load_presets()
 
+        # ── Layer 0: Silicon JIT (Neural Crystallization) ─────
+        # If the action has been 'baked' into a PeARL crystal, execute it O(1).
+        # We use the intent/action as the lookup key.
+        action_key = (
+            intent.name if isinstance(intent, IntentProfile) else str(intent)
+        )
+        crystal = CrystalRegistry.get_crystal(action_key)
+        if crystal:
+            logger.info("💎 [SILICON-JIT] Executing PeARL Crystal: %s",
+                        action_key)
+            start = time.monotonic()
+            try:
+                # We assume Crystals take **kwargs matching context/prompt needs
+                # For basic JIT, we pass the prompt as the core input.
+                result_content = crystal(prompt=prompt)
+                latency = (time.monotonic() - start) * 1000
+                return SovereignResult(
+                    content=str(result_content),
+                    provider="silicon-jit",
+                    model="pearl-crystal",
+                    latency_ms=latency,
+                    fallback_chain=["jit"],
+                )
+            except Exception as e:
+                logger.error(
+                    "Silicon JIT Execution Failed for %s: %s",
+                    action_key,
+                    e
+                )
+# (Deleted redundant result check)
+
         # ── Layer 1: ThoughtOrchestra (if available) ──────────
         if self._use_orchestra:
             result = await self._try_orchestra(
@@ -251,7 +268,9 @@ class SovereignLLM:
         """Attempt ThoughtOrchestra. Returns None on failure."""
         try:
             # Lazy import to avoid circular deps
-            from cortex.extensions.thinking.orchestra import ThoughtOrchestra
+            from cortex.extensions.thinking.orchestra import (
+                ThoughtOrchestra
+            )
 
             chain.append("orchestra")
             start = time.monotonic()
@@ -298,9 +317,9 @@ class SovereignLLM:
 
             start = time.monotonic()
             content = await asyncio.wait_for(
-                provider.complete(
+                provider.generate(
                     prompt,
-                    system=system,
+                    system,
                     temperature=self._temperature,
                     max_tokens=self._max_tokens,
                     intent=intent,
@@ -395,7 +414,10 @@ class SovereignLLM:
             try:
                 await provider.close()
             except (OSError, ValueError) as e:
-                logger.debug("Error closing provider: %s", e)
+                logger.debug(
+                    "Error closing provider: %s",
+                    e
+                )
         self._providers_cache.clear()
 
 
@@ -433,10 +455,14 @@ class Inquisitor(SovereignLLM):
             "No seas amable. No des sugerencias amigables. Sé letal."
         )
 
-    async def asediar(self, content: str, original_prompt: str = "") -> SovereignResult:
-        """Somete el contenido generado por el agente principal a asedio adversario."""
+    async def asediar(
+        self,
+        content: str,
+        original_prompt: str = ""
+    ) -> SovereignResult:
+        """Somete el contenido a asedio adversario."""
         prompt = (
-            f"=== CONTEXTO ORIGINAL (Intención del Creador) ===\n{original_prompt}\n\n"
+            f"=== CONTEXTO ORIGINAL ===\n{original_prompt}\n\n"
             f"=== OBJETIVO A DESTRUIR ===\n{content}\n\n"
             "Destrúyelo. Encuentra la brecha."
         )

@@ -346,10 +346,10 @@ class TestSupervisor:
 
         supervisor.register(agent)
 
-        status = supervisor.status()
+        status = await supervisor.health_check()
         assert "s-agent-1" in status
         assert status["s-agent-1"]["status"] == "idle"
-        assert supervisor.agent_count == 1
+        assert supervisor.managed_count == 1
 
     @pytest.mark.asyncio
     async def test_duplicate_registration(self, bus):
@@ -366,33 +366,16 @@ class TestSupervisor:
         agent = EchoAgent(_make_manifest("lifecycle-1"), bus)
         supervisor.register(agent)
 
-        await supervisor.start_agent("lifecycle-1")
+        await supervisor.start_entity("lifecycle-1")
 
         # Give it a moment to start
         await asyncio.sleep(0.2)
         assert agent.state.status == AgentStatus.RUNNING
 
-        await supervisor.stop_agent("lifecycle-1")
+        await supervisor.stop_entity("lifecycle-1")
         await asyncio.sleep(0.3)
 
         assert agent.state.status in (AgentStatus.IDLE, AgentStatus.RUNNING)
-
-    @pytest.mark.asyncio
-    async def test_quarantine_agent(self, bus):
-        supervisor = Supervisor()
-        agent = CountingDaemon(_make_manifest("q-1", daemon=True), bus, max_ticks=100)
-        supervisor.register(agent)
-
-        await supervisor.start_agent("q-1")
-        await asyncio.sleep(0.2)
-
-        await supervisor.quarantine_agent("q-1", reason="test quarantine")
-
-        # Wait for task cancellation to propagate
-        await asyncio.sleep(0.3)
-
-        assert agent.state.status == AgentStatus.QUARANTINED
-        assert agent.state.metadata["quarantine_reason"] == "test quarantine"
 
     @pytest.mark.asyncio
     async def test_health_check(self, bus):

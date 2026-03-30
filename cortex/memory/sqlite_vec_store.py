@@ -100,9 +100,14 @@ class SovereignVectorStoreL2:
 
             try:
                 self._conn.enable_load_extension(True)
-                sqlite_vec.load(self._conn)
-                self._vector_enabled = True
-                logger.info("✅ [VECTORS] sqlite-vec extension loaded successfully.")
+                vec_path = sqlite_vec.loadable_path()
+                if vec_path:
+                    self._conn.load_extension(vec_path)
+                    self._vector_enabled = True
+                    logger.info("✅ [VECTORS] sqlite-vec extension loaded successfully.")
+                else:
+                    self._vector_enabled = False
+                    logger.warning("⚠️ [VECTORS] sqlite_vec loadable_path() returned empty.")
             except (AttributeError, sqlite3.OperationalError, Exception) as e:
                 logger.warning(
                     "⚠️ [VECTORS] Fallback Mode ACTIVE: Could not load sqlite-vec: %s. "
@@ -110,6 +115,11 @@ class SovereignVectorStoreL2:
                     e,
                 )
                 self._vector_enabled = False
+            finally:
+                try:
+                    self._conn.enable_load_extension(False)
+                except Exception:
+                    pass
 
             self._conn.row_factory = sqlite3.Row
 

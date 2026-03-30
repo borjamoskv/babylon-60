@@ -1,14 +1,7 @@
-"""CORTEX Agent Runtime — Base Agent.
+"""CORTEX Agent Base Infrastructure (Ω₀).
 
-BaseAgent provides the event loop, message handling, and lifecycle
-management that distinguishes an agent from a tool.
-
-Subclasses implement:
-    - handle_message(message) — react to incoming messages
-    - tick() — periodic autonomous work (daemons override this)
-
-The loop: heartbeat → receive → handle_message/tick → repeat.
-Auto-quarantine after max_consecutive_errors.
+Provides core signaling and blackboard abstractions to prevent circular
+dependencies between the Commander, Sentinel, and Supervisors, and defines the BaseAgent class.
 """
 
 from __future__ import annotations
@@ -16,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
+from dataclasses import dataclass, field
 from typing import Any, Optional
 
 from cortex.agents.manifest import AgentManifest
@@ -54,11 +48,17 @@ class BaseAgent:
     def agent_id(self) -> str:
         return self.manifest.agent_id
 
+    @property
+    def status(self) -> AgentStatus:
+        return self.state.status
+
     # ── Abstract methods (subclasses implement) ──────────────────
 
     async def handle_message(self, message: AgentMessage) -> None:
         """Process an incoming message. Subclasses MUST override."""
-        raise NotImplementedError(f"{self.__class__.__name__} must implement handle_message()")
+        raise NotImplementedError(
+            f"{self.__class__.__name__} must implement handle_message()"
+        )
 
     async def tick(self) -> None:
         """Periodic autonomous work. Daemons override this.
@@ -116,8 +116,11 @@ class BaseAgent:
                     exc,
                 )
 
-                # Auto-quarantine after too many consecutive errors
-                if self.state.consecutive_errors >= self.manifest.max_consecutive_errors:
+                # Auto-quarantine after too macro-level errors
+                if (
+                    self.state.consecutive_errors
+                    >= self.manifest.max_consecutive_errors
+                ):
                     self.state.status = AgentStatus.QUARANTINED
                     logger.error(
                         "[%s] QUARANTINED after %d consecutive errors",
@@ -183,7 +186,9 @@ class BaseAgent:
 
     async def use_tool(self, tool_name: str, **kwargs: Any) -> Any:
         """Invoke a tool respecting manifest policy."""
-        tool = self.tools.get(tool_name, allowed=self.manifest.tools_allowed or None)
+        tool = self.tools.get(
+            tool_name, allowed=self.manifest.tools_allowed or None
+        )
         return await tool.execute(**kwargs)
 
     # ── Messaging helpers ────────────────────────────────────────
@@ -233,3 +238,41 @@ class BaseAgent:
             },
         )
         await self.bus.send(msg)
+
+
+@dataclass
+class BlackboardSignal:
+    """A sovereign signal emitted to the imperial blackboard."""
+    source_id: str
+    topic: str
+    payload: Any
+    timestamp: float = field(default_factory=time.time)
+
+
+class ImperialBlackboard:
+    """
+    Decentralized Consensus Layer (Ω₀ x Ω₂).
+
+    A global 'Blackboard' for cross-legion signal propagation.
+    Used for sharding triggers, emergency halts, and topology shifts.
+    """
+
+    def __init__(self) -> None:
+        self._signals: dict[str, list[BlackboardSignal]] = {}
+        self._lock = asyncio.Lock()
+
+    async def emit(self, signal: BlackboardSignal) -> None:
+        """Publish a signal to the imperial blackboard."""
+        async with self._lock:
+            if signal.topic not in self._signals:
+                self._signals[signal.topic] = []
+            self._signals[signal.topic].append(signal)
+            # Retention policy: 100 signals per topic
+            if len(self._signals[signal.topic]) > 100:
+                self._signals[signal.topic].pop(0)
+
+    async def query(self, topic: str) -> list[BlackboardSignal]:
+        """Query state from the blackboard (returns copy to prevent races)."""
+        async with self._lock:
+            signals = self._signals.get(topic, [])
+            return list(signals)

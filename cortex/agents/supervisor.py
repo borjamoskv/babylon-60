@@ -15,9 +15,8 @@ import asyncio
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any, Optional, Protocol, runtime_checkable
 
-from cortex.agents.base import BaseAgent
 from cortex.agents.state import AgentStatus
 
 logger = logging.getLogger("cortex.agents.supervisor")
@@ -26,11 +25,39 @@ DEFAULT_HEARTBEAT_TIMEOUT_S = 30.0
 DEFAULT_MAX_RESTARTS = 3
 
 
-@dataclass()
-class AgentEntry:
-    """Supervisor's internal record for a managed agent."""
+@runtime_checkable
+class Supervisable(Protocol):
+    """Interface for any component (Agent or Supervisor) that can be
+    managed (Ω₀)."""
 
-    agent: BaseAgent
+    @property
+    def agent_id(self) -> str:
+        """Unique identifier for the managed entity."""
+        ...
+
+    async def start(self) -> asyncio.Task[None]:
+        """Start the entity as an asyncio Task."""
+        ...
+
+    async def stop(self) -> None:
+        """Gracefully stop the entity."""
+        ...
+
+    def force_stop(self) -> None:
+        """Immediately terminate the entity."""
+        ...
+
+    @property
+    def status(self) -> AgentStatus:
+        """Current lifecycle status."""
+        ...
+
+
+@dataclass()
+class ManagedEntry:
+    """Supervisor's internal record for a managed entity (Supervisable)."""
+
+    entity: Supervisable
     task: Optional[asyncio.Task[None]] = None
     restart_count: int = 0
     max_restarts: int = DEFAULT_MAX_RESTARTS
@@ -38,133 +65,174 @@ class AgentEntry:
 
 
 class Supervisor:
-    """Agent lifecycle manager and health monitor.
+    """
+    Agent and Sub-Swarm lifecycle manager.
 
-    Manages a registry of BaseAgent instances, starts/stops them
-    as asyncio tasks, monitors heartbeats, and handles restarts
-    with a retry budget.
+    Implements Supervisable to allow hierarchical nesting (Ω₀).
+    Scaling from Swarm-100 to Swarm-10K requires recursive supervision.
     """
 
     def __init__(
         self,
+        id: str = "root-supervisor",
         heartbeat_timeout_s: float = DEFAULT_HEARTBEAT_TIMEOUT_S,
     ) -> None:
-        self._agents: dict[str, AgentEntry] = {}
+        self._id = id
+        self._managed: dict[str, ManagedEntry] = {}
         self._heartbeat_timeout_s = heartbeat_timeout_s
         self._monitor_task: Optional[asyncio.Task[None]] = None
         self._running = False
+        self._task: Optional[asyncio.Task[None]] = None
+
+    @property
+    def agent_id(self) -> str:
+        return self._id
+
+    @property
+    def status(self) -> AgentStatus:
+        if not self._running:
+            return AgentStatus.IDLE
+        return AgentStatus.RUNNING
 
     # ── Registration ─────────────────────────────────────────────
 
     def register(
         self,
-        agent: BaseAgent,
+        entity: Supervisable,
         max_restarts: int = DEFAULT_MAX_RESTARTS,
     ) -> None:
-        """Register an agent for lifecycle management."""
-        if agent.agent_id in self._agents:
-            raise ValueError(f"Agent '{agent.agent_id}' already registered")
+        """Register a Supervisable entity (Agent or Sub-Supervisor)."""
+        if entity.agent_id in self._managed:
+            raise ValueError(f"Entity '{entity.agent_id}' already registered")
 
-        self._agents[agent.agent_id] = AgentEntry(
-            agent=agent,
+        self._managed[entity.agent_id] = ManagedEntry(
+            entity=entity,
             max_restarts=max_restarts,
         )
         logger.info(
-            "Supervisor: Registered '%s' (restarts=%d)",
-            agent.agent_id,
+            "Supervisor[%s]: Registered '%s' (restarts=%d)",
+            self._id,
+            entity.agent_id,
             max_restarts,
         )
 
-    def unregister(self, agent_id: str) -> None:
-        """Remove an agent from supervision (must be stopped first)."""
-        entry = self._agents.get(agent_id)
+    def unregister(self, entity_id: str) -> None:
+        """Remove an entity from supervision."""
+        entry = self._managed.get(entity_id)
         if entry is None:
-            raise KeyError(f"Agent '{agent_id}' not registered")
+            raise KeyError(f"Entity '{entity_id}' not registered")
         if entry.task is not None and not entry.task.done():
-            raise RuntimeError(f"Agent '{agent_id}' is still running — stop it first")
-        del self._agents[agent_id]
-        logger.info("Supervisor: Unregistered '%s'", agent_id)
+            raise RuntimeError(
+                f"Entity '{entity_id}' is still running — stop it first"
+            )
+        del self._managed[entity_id]
+        logger.info("Supervisor[%s]: Unregistered '%s'", self._id, entity_id)
+
+    def get_entity(self, entity_id: str) -> Optional[Supervisable]:
+        """Recursive entity lookup (Ω₀)."""
+        if entity_id in self._managed:
+            return self._managed[entity_id].entity
+
+        for entry in self._managed.values():
+            if isinstance(entry.entity, Supervisor):
+                found = entry.entity.get_entity(entity_id)
+                if found:
+                    return found
+        return None
+
+    def _get_entry(self, entity_id: str) -> ManagedEntry:
+        if entity_id not in self._managed:
+            raise KeyError(f"Entity '{entity_id}' not found in Supervisor '{self._id}'")
+        return self._managed[entity_id]
 
     # ── Lifecycle ────────────────────────────────────────────────
 
-    async def start_agent(self, agent_id: str) -> None:
-        """Start a specific agent."""
-        entry = self._get_entry(agent_id)
+    async def start(self) -> asyncio.Task[None]:
+        """Implements Supervisable.start() for nesting."""
+        if self._running:
+            if self._task is None:
+                self._task = asyncio.current_task()
+            return self._task
+
+        self._running = True
+        await self.start_all()
+        # The 'task' of a supervisor is its heartbeat monitor
+        self._task = self._monitor_task
+        return self._task  # type: ignore
+
+    async def stop(self) -> None:
+        """Implements Supervisable.stop() for nesting."""
+        self._running = False
+        await self.stop_all()
+
+    def force_stop(self) -> None:
+        """Implements Supervisable.force_stop() for nesting."""
+        self._running = False
+        if self._monitor_task:
+            self._monitor_task.cancel()
+        for entry in self._managed.values():
+            entry.entity.force_stop()
+
+    async def start_entity(self, entity_id: str) -> None:
+        """Start a specific managed entity."""
+        entry = self._get_entry(entity_id)
         if entry.task is not None and not entry.task.done():
-            logger.warning("Supervisor: '%s' already running", agent_id)
+            logger.warning(
+                "Supervisor[%s]: '%s' already running", self._id, entity_id
+            )
             return
 
-        entry.task = await entry.agent.start()
-        logger.info("Supervisor: Started '%s'", agent_id)
+        entry.task = await entry.entity.start()
+        logger.info("Supervisor[%s]: Started '%s'", self._id, entity_id)
 
-    async def stop_agent(self, agent_id: str) -> None:
-        """Gracefully stop a specific agent."""
-        entry = self._get_entry(agent_id)
+    async def stop_entity(self, entity_id: str) -> None:
+        """Gracefully stop a specific managed entity."""
+        entry = self._get_entry(entity_id)
         if entry.task is None or entry.task.done():
-            logger.warning("Supervisor: '%s' not running", agent_id)
+            logger.warning(
+                "Supervisor[%s]: '%s' not running", self._id, entity_id
+            )
             return
 
-        await entry.agent.stop()
+        await entry.entity.stop()
 
         # Wait for graceful shutdown with timeout
         try:
             await asyncio.wait_for(entry.task, timeout=5.0)
         except asyncio.TimeoutError:
             logger.warning(
-                "Supervisor: '%s' did not stop gracefully, force-cancelling",
-                agent_id,
+                "Supervisor[%s]: '%s' did not stop gracefully, "
+                "force-cancelling",
+                self._id,
+                entity_id,
             )
-            entry.agent.force_stop()
+            entry.entity.force_stop()
 
-    async def quarantine_agent(self, agent_id: str, reason: str = "") -> None:
-        """Quarantine an agent — stop it and mark as quarantined."""
-        entry = self._get_entry(agent_id)
-        entry.agent.state.status = AgentStatus.QUARANTINED
-        entry.agent.state.metadata["quarantine_reason"] = reason
-
-        if entry.task is not None and not entry.task.done():
-            entry.agent.force_stop()
-
-        logger.warning(
-            "Supervisor: QUARANTINED '%s' — %s",
-            agent_id,
-            reason or "no reason given",
-        )
-
-    async def restart_agent(self, agent_id: str) -> bool:
-        """Restart an agent if within retry budget.
-
-        Returns True if restarted, False if budget exhausted.
-        """
-        entry = self._get_entry(agent_id)
+    async def restart_entity(self, entity_id: str) -> bool:
+        """Restart an entity if within retry budget."""
+        entry = self._get_entry(entity_id)
 
         if entry.restart_count >= entry.max_restarts:
             logger.error(
-                "Supervisor: '%s' exceeded restart budget (%d/%d) — quarantining",
-                agent_id,
+                "Supervisor[%s]: '%s' exceeded restart budget (%d/%d)",
+                self._id,
+                entity_id,
                 entry.restart_count,
                 entry.max_restarts,
-            )
-            await self.quarantine_agent(
-                agent_id,
-                f"Restart budget exhausted ({entry.restart_count}/{entry.max_restarts})",
             )
             return False
 
         # Stop if still running
         if entry.task is not None and not entry.task.done():
-            entry.agent.force_stop()
+            entry.entity.force_stop()
             await asyncio.sleep(0.1)
 
-        # Reset state for restart
-        entry.agent.state.status = AgentStatus.IDLE
-        entry.agent.state.consecutive_errors = 0
         entry.restart_count += 1
-
-        entry.task = await entry.agent.start()
+        entry.task = await entry.entity.start()
         logger.info(
-            "Supervisor: Restarted '%s' (attempt %d/%d)",
-            agent_id,
+            "Supervisor[%s]: Restarted '%s' (attempt %d/%d)",
+            self._id,
+            entity_id,
             entry.restart_count,
             entry.max_restarts,
         )
@@ -173,20 +241,25 @@ class Supervisor:
     # ── Batch operations ─────────────────────────────────────────
 
     async def start_all(self) -> None:
-        """Start all registered agents."""
+        """Start all registered entities."""
         self._running = True
-        for agent_id in self._agents:
-            await self.start_agent(agent_id)
+        for entity_id in self._managed:
+            await self.start_entity(entity_id)
 
         # Start health monitor
-        self._monitor_task = asyncio.create_task(
-            self._health_monitor_loop(),
-            name="supervisor-health-monitor",
+        if self._monitor_task is None or self._monitor_task.done():
+            self._monitor_task = asyncio.create_task(
+                self._health_monitor_loop(),
+                name=f"supervisor-{self._id}-monitor",
+            )
+        logger.info(
+            "Supervisor[%s]: All %d entities started",
+            self._id,
+            len(self._managed),
         )
-        logger.info("Supervisor: All %d agents started", len(self._agents))
 
     async def stop_all(self) -> None:
-        """Stop all agents and the health monitor."""
+        """Stop all entities and the health monitor."""
         self._running = False
 
         if self._monitor_task and not self._monitor_task.done():
@@ -196,18 +269,23 @@ class Supervisor:
             except asyncio.CancelledError:
                 pass
 
-        for agent_id in list(self._agents.keys()):
+        for entity_id in list(self._managed.keys()):
             try:
-                await self.stop_agent(agent_id)
+                await self.stop_entity(entity_id)
             except Exception as exc:  # noqa: BLE001
-                logger.error("Supervisor: Error stopping '%s': %s", agent_id, exc)
+                logger.error(
+                    "Supervisor[%s]: Error stopping '%s': %s",
+                    self._id,
+                    entity_id,
+                    exc,
+                )
 
-        logger.info("Supervisor: All agents stopped")
+        logger.info("Supervisor[%s]: All entities stopped", self._id)
 
     # ── Health monitoring ────────────────────────────────────────
 
     async def _health_monitor_loop(self) -> None:
-        """Periodic health check of all managed agents."""
+        """Periodic health check of all managed entities."""
         while self._running:
             try:
                 await asyncio.sleep(self._heartbeat_timeout_s / 2)
@@ -215,83 +293,72 @@ class Supervisor:
             except asyncio.CancelledError:
                 break
             except Exception as exc:  # noqa: BLE001
-                logger.error("Supervisor: Health monitor error: %s", exc)
+                logger.error(
+                    "Supervisor[%s]: Health monitor error: %s", self._id, exc
+                )
 
     async def health_check(self) -> dict[str, Any]:
-        """Run health check on all agents. Auto-restart failed ones."""
+        """Run health check on all entities. Auto-restart failed ones."""
         report: dict[str, Any] = {}
-        now = time.time()
 
-        for agent_id, entry in self._agents.items():
-            status = entry.agent.state.status
-            heartbeat = entry.agent.state.last_heartbeat_ts
+        for entity_id, entry in self._managed.items():
+            status = entry.entity.status
             task_alive = entry.task is not None and not entry.task.done()
 
-            agent_report: dict[str, Any] = {
+            entity_report: dict[str, Any] = {
                 "status": status.value,
                 "task_alive": task_alive,
-                "errors": entry.agent.state.error_count,
-                "consecutive_errors": entry.agent.state.consecutive_errors,
-                "messages_processed": entry.agent.state.total_messages_processed,
                 "restarts": entry.restart_count,
-                "last_heartbeat_age_s": (round(now - heartbeat, 1) if heartbeat else None),
             }
 
-            # Detect dead agents that should be running
+            # Detect dead entities that should be running
             if (
                 status == AgentStatus.RUNNING
                 and not task_alive
                 and entry.restart_count < entry.max_restarts
             ):
                 logger.warning(
-                    "Supervisor: '%s' task died unexpectedly — restarting",
-                    agent_id,
+                    "Supervisor[%s]: '%s' died unexpectedly — restarting",
+                    self._id,
+                    entity_id,
                 )
-                await self.restart_agent(agent_id)
-                agent_report["action"] = "restarted"
+                await self.restart_entity(entity_id)
+                entity_report["action"] = "restarted"
 
-            # Detect stale heartbeats
-            if task_alive and heartbeat and (now - heartbeat) > self._heartbeat_timeout_s:
-                logger.warning(
-                    "Supervisor: '%s' heartbeat stale (%.1fs) — restarting",
-                    agent_id,
-                    now - heartbeat,
-                )
-                await self.restart_agent(agent_id)
-                agent_report["action"] = "restarted_stale_heartbeat"
-
-            report[agent_id] = agent_report
+            report[entity_id] = entity_report
 
         return report
 
     # ── Status ───────────────────────────────────────────────────
 
-    def status(self) -> dict[str, Any]:
-        """Get status of all managed agents."""
+    def status_report(self) -> dict[str, Any]:
+        """Recursive status report for the entire sub-swarm."""
         return {
-            agent_id: {
-                "status": entry.agent.state.status.value,
-                "errors": entry.agent.state.error_count,
-                "messages": entry.agent.state.total_messages_processed,
-                "restarts": entry.restart_count,
-                "daemon": entry.agent.manifest.daemon,
-                "last_heartbeat": entry.agent.state.last_heartbeat_ts,
+            "id": self._id,
+            "status": self.status.value,
+            "managed_count": len(self._managed),
+            "children": {
+                eid: entry.entity.status.value
+                for eid, entry in self._managed.items()
             }
-            for agent_id, entry in self._agents.items()
         }
 
     @property
-    def agent_count(self) -> int:
-        return len(self._agents)
-
-    @property
-    def running_count(self) -> int:
-        return sum(1 for e in self._agents.values() if e.agent.state.status == AgentStatus.RUNNING)
+    def managed_count(self) -> int:
+        return len(self._managed)
 
     # ── Internal ─────────────────────────────────────────────────
 
-    def _get_entry(self, agent_id: str) -> AgentEntry:
-        entry = self._agents.get(agent_id)
-        if entry is None:
-            raise KeyError(f"Agent '{agent_id}' not registered")
-        return entry
+
+class LegionSupervisor(Supervisor):
+    """Manages a sub-swarm of Centurions (Ω₀)."""
+
+    def __init__(self, id: str) -> None:
+        super().__init__(id=f"legion-{id}")
+
+
+class CenturionSupervisor(Supervisor):
+    """Manages a sub-swarm of Agents (Ω₀)."""
+
+    def __init__(self, id: str) -> None:
+        super().__init__(id=f"centurion-{id}")
