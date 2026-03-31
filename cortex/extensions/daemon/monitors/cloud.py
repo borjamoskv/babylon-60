@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from contextlib import closing
 import logging
 import sqlite3
 import time
@@ -80,14 +81,13 @@ class CloudSyncMonitor:
         alerts: list[CloudSyncAlert] = []
         try:
             last_id = self._get_last_synced_id()
-            conn = self._engine._get_sync_conn()
-
-            cursor = conn.execute(
-                "SELECT id, project, action, detail, prev_hash, hash, timestamp "
-                "FROM transactions WHERE id > ? ORDER BY id ASC LIMIT ?",
-                (last_id, self._batch_size),
-            )
-            rows = cursor.fetchall()
+            with closing(self._engine._get_sync_conn()) as conn:
+                cursor = conn.execute(
+                    "SELECT id, project, action, detail, prev_hash, hash, timestamp "
+                    "FROM transactions WHERE id > ? ORDER BY id ASC LIMIT ?",
+                    (last_id, self._batch_size),
+                )
+                rows = cursor.fetchall()
 
             if rows:
                 params_list = []

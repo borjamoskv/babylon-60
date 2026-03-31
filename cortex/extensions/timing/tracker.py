@@ -41,6 +41,7 @@ class TimingTracker:
     def heartbeat(
         self,
         project: str,
+        tenant_id: str = "default",
         entity: str = "",
         category: Optional[str] = None,
         branch: Optional[str] = None,
@@ -54,13 +55,13 @@ class TimingTracker:
         meta_json = json.dumps(meta or {})
         cursor = self._conn.execute(
             """
-            INSERT INTO heartbeats (project, entity, category, branch, language, timestamp, meta)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO heartbeats (tenant_id, project, entity, category, branch, language, timestamp, meta)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (project, entity, cat, branch, language, ts, meta_json),
+            (tenant_id, project, entity, cat, branch, language, ts, meta_json),
         )
         self._conn.commit()
-        logger.debug("Heartbeat: %s/%s [%s]", project, entity, cat)
+        logger.debug("Heartbeat: %s/%s [%s] tenant=%s", project, entity, cat, tenant_id)
         return cursor.lastrowid  # type: ignore[reportReturnType]
 
     def flush(self, gap_seconds: Optional[int] = None) -> int:
@@ -76,13 +77,14 @@ class TimingTracker:
 
         if latest_end:
             rows = self._conn.execute(
-                "SELECT id, project, entity, category, timestamp "
+                "SELECT id, tenant_id, project, entity, category, timestamp "
                 "FROM heartbeats WHERE timestamp > ? ORDER BY id ASC",
                 (latest_end,),
             ).fetchall()
         else:
             rows = self._conn.execute(
-                "SELECT id, project, entity, category, timestamp FROM heartbeats ORDER BY id ASC"
+                "SELECT id, tenant_id, project, entity, category, timestamp "
+                "FROM heartbeats ORDER BY id ASC"
             ).fetchall()
 
         if not rows:
@@ -92,11 +94,12 @@ class TimingTracker:
         current_group: list[tuple] = [rows[0]]
 
         for row in rows[1:]:
-            prev_ts = datetime.fromisoformat(current_group[-1][4])
-            curr_ts = datetime.fromisoformat(row[4])
+            prev_ts = datetime.fromisoformat(current_group[-1][5])
+            curr_ts = datetime.fromisoformat(row[5])
             same_context = (
-                row[1] == current_group[0][1]  # same project
-                and row[3] == current_group[0][3]  # same category
+                row[1] == current_group[0][1]  # same tenant
+                and row[2] == current_group[0][2]  # same project
+                and row[4] == current_group[0][4]  # same category
             )
             within_gap = (curr_ts - prev_ts).total_seconds() <= gap
 
@@ -113,46 +116,70 @@ class TimingTracker:
         """Save a group of heartbeats as a time entry."""
         if not group:
             return 0
-        project = group[0][1]
-        category = group[0][3]
-        start_time = group[0][4]
-        end_time = group[-1][4]
+        tenant_id = group[0][1]
+        project = group[0][2]
+        category = group[0][4]
+        start_time = group[0][5]
+        end_time = group[-1][5]
         start_dt = datetime.fromisoformat(start_time)
         end_dt = datetime.fromisoformat(end_time)
         duration_s = max(int((end_dt - start_dt).total_seconds()), 30)
-        entities = list({row[2] for row in group if row[2]})
+        entities = list({row[3] for row in group if row[3]})
         entities_json = json.dumps(entities)
         self._conn.execute(
             "INSERT INTO time_entries "
-            "(project, category, start_time, end_time, duration_s, entities, heartbeats, meta) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, '{}')",
-            (project, category, start_time, end_time, duration_s, entities_json, len(group)),
+            "(tenant_id, project, category, start_time, end_time, duration_s, entities, heartbeats, meta) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, '{}')",
+            (
+                tenant_id,
+                project,
+                category,
+                start_time,
+                end_time,
+                duration_s,
+                entities_json,
+                len(group),
+            ),
         )
         self._conn.commit()
         return 1
 
-    def today(self, project: Optional[str] = None) -> TimeSummary:
+    def today(self, project: Optional[str] = None, tenant_id: Optional[str] = None) -> TimeSummary:
         """Get time summary for today."""
         today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        return self._summarize(f"{today_str}%", project)
+        return self._summarize(f"{today_str}%", project=project, tenant_id=tenant_id)
 
-    def report(self, project: Optional[str] = None, days: int = 7) -> TimeSummary:
+    def report(
+        self,
+        project: Optional[str] = None,
+        days: int = 7,
+        tenant_id: Optional[str] = None,
+    ) -> TimeSummary:
         """Get time report for the last N days."""
         cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
         where = ["start_time >= ?"]
         params: list = [cutoff]
+        if tenant_id:
+            where.append("tenant_id = ?")
+            params.append(tenant_id)
         if project:
             where.append("project = ?")
             params.append(project)
         return self._build_summary(" AND ".join(where), params)
 
     def timeline(
-        self, project: Optional[str] = None, date: Optional[str] = None
+        self,
+        project: Optional[str] = None,
+        date: Optional[str] = None,
+        tenant_id: Optional[str] = None,
     ) -> list[TimeEntry]:
         """Get detailed timeline for a date."""
         date_str = date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
         where = ["start_time LIKE ?"]
         params: list = [f"{date_str}%"]
+        if tenant_id:
+            where.append("tenant_id = ?")
+            params.append(tenant_id)
         if project:
             where.append("project = ?")
             params.append(project)
@@ -178,7 +205,7 @@ class TimingTracker:
             for r in rows
         ]
 
-    def daily(self, days: int = 7) -> list[dict]:
+    def daily(self, days: int = 7, tenant_id: Optional[str] = None, project: Optional[str] = None) -> list[dict]:
         """Get total seconds per day for the last N days."""
         end_date = datetime.now(timezone.utc).date()
         date_map = {}
@@ -186,10 +213,18 @@ class TimingTracker:
             d = (end_date - timedelta(days=i)).isoformat()
             date_map[d] = 0
         cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+        where = ["start_time >= ?"]
+        params: list = [cutoff]
+        if tenant_id:
+            where.append("tenant_id = ?")
+            params.append(tenant_id)
+        if project:
+            where.append("project = ?")
+            params.append(project)
         rows = self._conn.execute(
             "SELECT substr(start_time, 1, 10) as date, SUM(duration_s) "
-            "FROM time_entries WHERE start_time >= ? GROUP BY date",
-            (cutoff,),
+            f"FROM time_entries WHERE {' AND '.join(where)} GROUP BY date",
+            params,
         ).fetchall()
         for r in rows:
             if r[0] in date_map:
@@ -198,10 +233,18 @@ class TimingTracker:
 
     # ─── Internal Helpers ─────────────────────────────────────────
 
-    def _summarize(self, date_pattern: str, project: Optional[str]) -> TimeSummary:
+    def _summarize(
+        self,
+        date_pattern: str,
+        project: Optional[str],
+        tenant_id: Optional[str] = None,
+    ) -> TimeSummary:
         """Build summary for entries matching a date pattern."""
         where = ["start_time LIKE ?"]
         params: list = [date_pattern]
+        if tenant_id:
+            where.append("tenant_id = ?")
+            params.append(tenant_id)
         if project:
             where.append("project = ?")
             params.append(project)

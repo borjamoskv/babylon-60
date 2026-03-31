@@ -33,15 +33,11 @@ async def record_heartbeat(
     auth: AuthResult = Depends(require_permission("write")),
 ) -> dict:
     """Record an activity heartbeat for automatic time tracking."""
-    # Tenant Isolation
-    if auth.tenant_id != "default" and req.project != auth.tenant_id:
-        lang = request.headers.get("Accept-Language", "en")
-        raise HTTPException(status_code=403, detail=get_trans("error_timing_forbidden", lang))
-
     try:
         hb_id = await run_in_threadpool(
             api_state.tracker.heartbeat,  # type: ignore[reportOptionalMemberAccess]
             project=req.project,
+            tenant_id=auth.tenant_id,
             entity=req.entity,
             category=req.category,
             branch=req.branch,
@@ -65,19 +61,12 @@ async def time_today(
     auth: AuthResult = Depends(require_permission("read")),
 ) -> TimeSummaryResponse:
     """Get today's time tracking summary."""
-    # Tenant Isolation
-    if auth.tenant_id != "default":
-        if project and project != auth.tenant_id:
-            raise HTTPException(
-                status_code=403,
-                detail=get_trans(
-                    "error_timing_forbidden", request.headers.get("Accept-Language", "en")
-                ),
-            )
-        project = auth.tenant_id
-
     try:
-        summary = await run_in_threadpool(api_state.tracker.today, project=project)  # type: ignore[reportOptionalMemberAccess]
+        summary = await run_in_threadpool(
+            api_state.tracker.today,  # type: ignore[reportOptionalMemberAccess]
+            project=project,
+            tenant_id=auth.tenant_id,
+        )
         return TimeSummaryResponse(
             total_seconds=summary.total_seconds,
             total_hours=summary.total_hours,
@@ -105,19 +94,13 @@ async def time_report(
     auth: AuthResult = Depends(require_permission("read")),
 ) -> TimeSummaryResponse:
     """Get time tracking report for the last N days."""
-    # Tenant Isolation
-    if auth.tenant_id != "default":
-        if project and project != auth.tenant_id:
-            raise HTTPException(
-                status_code=403,
-                detail=get_trans(
-                    "error_timing_forbidden", request.headers.get("Accept-Language", "en")
-                ),
-            )
-        project = auth.tenant_id
-
     try:
-        summary = await run_in_threadpool(api_state.tracker.report, project=project, days=days)  # type: ignore[reportOptionalMemberAccess]
+        summary = await run_in_threadpool(
+            api_state.tracker.report,  # type: ignore[reportOptionalMemberAccess]
+            project=project,
+            days=days,
+            tenant_id=auth.tenant_id,
+        )
         return TimeSummaryResponse(
             total_seconds=summary.total_seconds,
             total_hours=summary.total_hours,
@@ -145,7 +128,11 @@ async def get_time_history(
 ) -> list:
     """Get daily time history."""
     try:
-        return await run_in_threadpool(api_state.tracker.daily, days=days)  # type: ignore[reportOptionalMemberAccess]
+        return await run_in_threadpool(
+            api_state.tracker.daily,  # type: ignore[reportOptionalMemberAccess]
+            days=days,
+            tenant_id=auth.tenant_id,
+        )
     except sqlite3.Error as e:
         logger.error("Time history failed: %s", e)
         raise HTTPException(
