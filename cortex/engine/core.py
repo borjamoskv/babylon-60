@@ -10,25 +10,23 @@ import threading
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional
 
-# Heavy imports deferred to method scope:
-# import aiosqlite
 # import sqlite_vec
-
 from cortex.config import DEFAULT_DB_PATH
+
 # from cortex.embeddings import LocalEmbedder (moved for lazy loading)
-from cortex.engine.durability import PersistenceSupervisor
 from cortex.engine.agent_mixin import AgentMixin
 from cortex.engine.consensus import ConsensusMixin
+from cortex.engine.durability import PersistenceSupervisor
 from cortex.engine.history import HistoryMixin
 from cortex.engine.memory_mixin import MemoryMixin
-from cortex.engine.transaction_mixin import TransactionMixin
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
 from cortex.engine.models import row_to_fact  # noqa: F401 — re-exported
 from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
+from cortex.engine.transaction_mixin import TransactionMixin
 from cortex.migrations.core import run_migrations_async
 from cortex.telemetry.metrics import metrics
 
@@ -47,15 +45,12 @@ except ImportError:
 logger = logging.getLogger("cortex")
 
 # Managers are imported lazily in __init__
-
 if TYPE_CHECKING:
     from cortex.embeddings import LocalEmbedder
     from cortex.engine.guard_pipeline import GuardPipeline
 
 # Limit the maximum number of tags per fact.
 MAX_TAGS_PER_FACT = 20
-
-# We use the unified GuardPipeline for AX-033 logic.
 
 
 class AsyncCortexEngine(
@@ -166,7 +161,6 @@ class AsyncCortexEngine(
             pipeline.add_post_hook(EpistemicBreakerHook())
         except (ImportError, Exception):  # noqa: BLE001
             pass
-
 
         logger.debug(
             "GuardPipeline: %d guards, %d hooks registered",
@@ -534,6 +528,7 @@ class AsyncCortexEngine(
 
     async def init_db(self) -> None:
         """Initialize database schema. Safe to call multiple times."""
+        # We use the unified GuardPipeline for AX-033 logic.
         from cortex.database.schema import get_all_schema, get_init_meta
         from cortex.engine.ledger import ImmutableLedger
 
@@ -573,7 +568,7 @@ class AsyncCortexEngine(
 
     def _row_to_fact(
         self,
-        row: Union[Any, dict],
+        row: Any | dict,
         tenant_id: str = "default",
     ) -> dict:
         """Delegate to MixinBase (supports tenant-scoped decryption)."""
@@ -608,6 +603,7 @@ class AsyncCortexEngine(
 
     async def __aexit__(self, *args):
         await self.close()
+
 
 # Maintain backwards compatibility for tests
 CortexEngine = AsyncCortexEngine

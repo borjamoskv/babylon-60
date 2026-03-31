@@ -1,8 +1,4 @@
-# This file is part of CORTEX.
-# Licensed under the Apache License, Version 2.0.
-# See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
-
 """CORTEX v5.0 — SovereignLLM: Zero-Trust LLM Access.
 
 The antidote to Axiom 4 violations. A self-contained LLM interface
@@ -48,10 +44,9 @@ from typing import Optional
 
 from cortex.extensions.llm.config import load_presets
 from cortex.extensions.llm.providers.base import LLMProvider
-from cortex.extensions.llm.router import CortexLLMRouter, IntentProfile
+from cortex.extensions.llm.router import IntentProfile
 from cortex.pearl.registry import CrystalRegistry
 from cortex.shannon.sentinel import SovereignResult
-from cortex.shannon.sentinel import TopologyCorrection
 
 __all__ = ["SovereignLLM", "SovereignResult", "Inquisitor"]
 
@@ -64,12 +59,6 @@ _DEFAULT_SIGNATURE = (
     "---\nby borjamoskv.com | MOSKV Systems\n"
     "Sovereign Architecture · Industrial Noir 2026"
 )
-
-
-# ─── Result ──────────────────────────────────────────────────────────
-
-
-# ─── Provider Priority ──────────────────────────────────────────────
 
 # Ordered by: cost-efficiency → reliability → speed
 _REMOTE_PRIORITY: list[str] = [
@@ -100,9 +89,6 @@ _LOCAL_PRIORITY: list[str] = [
     "vllm",  # Production local
     "jan",  # Electron-based
 ]
-
-
-# ─── SovereignLLM ─────────────────────────────────────────────────
 
 
 class SovereignLLM:
@@ -196,7 +182,6 @@ class SovereignLLM:
                     action_key,
                     e
                 )
-# (Deleted redundant result check)
 
         # ── Layer 1: ThoughtOrchestra (if available) ──────────
         if self._use_orchestra:
@@ -419,9 +404,6 @@ class SovereignLLM:
                     e
                 )
         self._providers_cache.clear()
-
-
-# ─── El Inquisidor (Red Team) ──────────────────────────────────────────────
 
 
 class Inquisitor(SovereignLLM):
