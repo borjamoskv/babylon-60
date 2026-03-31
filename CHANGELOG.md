@@ -1,6 +1,6 @@
 # Changelog
 
-> **Status:** Living release log. `Unreleased` is the current operational delta; released entries below are historical snapshots.
+> **Status:** Canonical release log. `Unreleased` is the current operational delta; released entries below are historical snapshots.
 
 All notable changes to this project will be documented in this file.
 

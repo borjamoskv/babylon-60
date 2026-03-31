@@ -7,9 +7,19 @@ independent of stochastic enrichment or external models.
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass, field
 from typing import Any
 
 logger = logging.getLogger("cortex.verification")
+
+
+@dataclass(frozen=True)
+class VerificationOracleResult:
+    """Lightweight compatibility result for verification checks."""
+
+    ok: bool
+    verdict: str
+    reasons: list[str] = field(default_factory=list)
 
 
 class VerificationOracle:
@@ -17,6 +27,34 @@ class VerificationOracle:
 
     def __init__(self, engine: Any):
         self.engine = engine
+
+    async def verify(self, subject: str, candidate: dict[str, Any]) -> VerificationOracleResult:
+        """Verify a candidate payload for the requested subject."""
+        if subject == "plan_step":
+            reasons: list[str] = []
+            if not candidate.get("objective"):
+                reasons.append("Plan step missing objective.")
+            if not candidate.get("steps"):
+                reasons.append("Plan step missing steps.")
+            ok = not reasons
+            return VerificationOracleResult(
+                ok=ok,
+                verdict="accepted" if ok else "rejected",
+                reasons=reasons,
+            )
+
+        if subject == "tool_result":
+            reasons = []
+            if candidate.get("ok") is False and not candidate.get("error"):
+                reasons.append("Tool result marked as failed but no error message provided.")
+            ok = not reasons
+            return VerificationOracleResult(
+                ok=ok,
+                verdict="accepted" if ok else "rejected",
+                reasons=reasons,
+            )
+
+        return VerificationOracleResult(ok=True, verdict="accepted")
 
     async def verify_fact_integrity(self, fact_id: int) -> bool:
         """Verify the cryptographic integrity of a fact record."""

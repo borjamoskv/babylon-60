@@ -14,10 +14,10 @@ This Codex defines the **Ontology**, **Taxonomy**, and **Prime Directives** of t
 ## 1. Prime Directives: Quindecálogo de la Singularidad Operativa (15 Axiomas)
 
 > **⚠️ Canonical Source:** The unified Axiom Registry is now at:
-> - **Code:** [`cortex/extensions/axioms/registry.py`](../cortex/extensions/axioms/registry.py) — 22 canonical axioms with `AX-NNN` IDs
+> - **Code:** [`cortex/extensions/axioms/registry.py`](../../cortex/extensions/axioms/registry.py) — 22 canonical axioms with `AX-NNN` IDs
 > - **Docs:** [`docs/axiom-registry.md`](../axiom-registry.md) — auto-generated from code
 > - **Taxonomy:** 3 Constitutional (AX-001–003) + 10 Operational (AX-010–019) + 9 Aspirational (AX-020–028)
-> - **TTL Policy:** [`cortex/extensions/axioms/ttl.py`](../cortex/extensions/axioms/ttl.py) — fact decay (ghosts 30d, knowledge 180d, axioms ∞)
+> - **TTL Policy:** [`cortex/extensions/axioms/ttl.py`](../../cortex/extensions/axioms/ttl.py) — fact decay (ghosts 30d, knowledge 180d, axioms ∞)
 >
 > The table below is **legacy narrative context**. For canonical numbering, enforcement status, and CI gates, use the Registry.
 
@@ -486,4 +486,4 @@ CHANGELOG.md  ← Version history, roadmap
 
 ---
 
-*Codex v12.2 — MOSKV-1 v5 (Antigravity) · CORTEX 0.4.0-alpha · Protocolo Neonatal · [Apache 2.0](LICENSE)*
+*Codex v12.2 — MOSKV-1 v5 (Antigravity) · CORTEX 0.4.0-alpha · Protocolo Neonatal · [Apache 2.0](../../LICENSE)*

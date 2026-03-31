@@ -86,6 +86,11 @@ cortex verify 1
 | [Quickstart](quickstart.md) | Get running in 5 minutes |
 | [Installation](installation.md) | All install methods and extras |
 | [Architecture](architecture.md) | Deep dive into the system design |
+| [CORTEX Capabilities](CORTEX-CAPABILITIES.md) | Structural properties and governance topology |
+| [SDK Surface](SDK-SURFACE.md) | Public SDK contract and stability guarantees |
+| [Trust Semantics](TRUST-SEMANTICS.md) | Meaning of trust signals and degraded states |
+| [Event Model](EVENT-MODEL.md) | Canonical event envelope and delivery semantics |
+| [Error Code Registry](ERROR-CODE-REGISTRY.md) | Stable rejection and failure codes |
 | [CLI Reference](cli.md) | All 38 commands documented |
 | [REST API Reference](api.md) | Versioned REST endpoints |
 | [MCP Server](mcp.md) | Model Context Protocol integration |

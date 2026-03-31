@@ -2,6 +2,7 @@
 
 > **Tamper-Evident Decision Lineage for AI Systems**
 > *Updated: Spring 2026 · Status: v0.3.0 in active development*
+> *Classification: Planning snapshot. Current release truth lives in `CHANGELOG.md`.*
 
 ---
 

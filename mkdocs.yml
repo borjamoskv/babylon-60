@@ -64,6 +64,11 @@ nav:
       - Configuration: configuration.md
   - Reference:
       - Architecture: architecture.md
+      - Capabilities: CORTEX-CAPABILITIES.md
+      - SDK Surface: SDK-SURFACE.md
+      - Trust Semantics: TRUST-SEMANTICS.md
+      - Event Model: EVENT-MODEL.md
+      - Error Code Registry: ERROR-CODE-REGISTRY.md
       - Operating Axioms: operating-axioms.md
       - Knowledge Architecture: knowledge-architecture.md
       - Peano Soberano (7 Axioms): peano-soberano.md
