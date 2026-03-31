@@ -1,12 +1,12 @@
 from fastapi import APIRouter
 
-from cortex.gateway.adapters import (
-    rest_router as gateway_rest_router,
-)
-from cortex.gateway.adapters import (
-    telegram_router as gateway_telegram_router,
-)
-
+# Temporarily removed due to P0 gateway module topological collapse
+# from cortex.gateway.adapters import (
+#     rest_router as gateway_rest_router,
+# )
+# from cortex.gateway.adapters import (
+#     telegram_router as gateway_telegram_router,
+# )
 from . import admin as admin_router
 from . import agents as agents_router
 from . import ask as ask_router
@@ -67,5 +67,5 @@ api_router.include_router(health_index_router.router)
 api_router.include_router(trust_router.router)
 
 # Gateway endpoints (SovereignLLM Entry Points)
-api_router.include_router(gateway_rest_router)
-api_router.include_router(gateway_telegram_router)
+# api_router.include_router(gateway_rest_router)
+# api_router.include_router(gateway_telegram_router)

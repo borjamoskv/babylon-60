@@ -229,8 +229,6 @@ async def get_fact_history(
         chain = await engine.get_causal_chain(
             fact_id=fact_id, direction="up", max_depth=50, tenant_id=auth.tenant_id
         )
-        for f in chain:
-            pass
         return [
             FactResponse(
                 id=f["id"],
