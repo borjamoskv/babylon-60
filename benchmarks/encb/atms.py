@@ -11,11 +11,7 @@ Simplified from de Kleer's full ATMS:
 
 from __future__ import annotations
 
-<<<<<<< HEAD
-from dataclasses import dataclass
-=======
 from dataclasses import dataclass, field
->>>>>>> origin/main
 
 
 @dataclass(frozen=True)
@@ -151,13 +147,9 @@ class ATMSLite:
 
         # Check if any justification's assumptions are still valid
         for label in labels:
-<<<<<<< HEAD
-            nogood_hit = any(label.contains(ng) for ng in self._nogoods)
-=======
             nogood_hit = any(
                 label.contains(ng) for ng in self._nogoods
             )
->>>>>>> origin/main
             if not nogood_hit:
                 # Also check that no premise in the entailment graph is invalid
                 premises = self._depends_on.get(belief_id, set())
@@ -180,10 +172,6 @@ class ATMSLite:
 
     def get_invalid_beliefs(self) -> set[str]:
         """Return all belief IDs with no valid justification."""
-<<<<<<< HEAD
-        return {bid for bid in self._justifications if not self.is_valid(bid)}
-=======
         return {
             bid for bid in self._justifications if not self.is_valid(bid)
         }
->>>>>>> origin/main

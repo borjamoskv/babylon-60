@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta, timezone
+
 import pytest
+
 from cortex.engine.anomaly_hunter import AnomalyHunterEngine
 from cortex.engine.models import Fact
 

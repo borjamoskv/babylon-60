@@ -82,7 +82,9 @@ def test_grant_beyond_ceiling_is_capped(analytics_guard: CapabilityGuard) -> Non
     assert analytics_guard.max_allowed_tier == RiskTier.TIER_1_LOCAL_SAFE
 
     # Granting TIER_3 should still result in TIER_1 ceiling enforcement
-    analytics_guard.grant_capability(Capability(name="fs:write", tier=RiskTier.TIER_3_LOCAL_MUTATION))
+    analytics_guard.grant_capability(
+        Capability(name="fs:write", tier=RiskTier.TIER_3_LOCAL_MUTATION)
+    )
     assert analytics_guard.max_allowed_tier == RiskTier.TIER_1_LOCAL_SAFE
 
 

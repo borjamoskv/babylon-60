@@ -5,10 +5,8 @@ Sovereign Signal Bus and Cross-Axiom Orchestration.
 
 from __future__ import annotations
 
-from cortex.gateway.bus import SignalBus
-from cortex.gateway.gateway import SignalGateway
+from cortex.extensions.signals.bus import SignalBus
 
 __all__ = [
     "SignalBus",
-    "SignalGateway",
 ]
