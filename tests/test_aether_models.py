@@ -7,12 +7,12 @@ from __future__ import annotations
 
 from cortex.extensions.aether.models import (
     AetherAlert,
+    AetherTestResult,
     AgentTask,
     CriticOutput,
     PlanOutput,
     TaskSource,
     TaskStatus,
-    AetherTestResult,
     ToolCall,
 )
 

@@ -2,6 +2,7 @@ import time
 from unittest.mock import AsyncMock
 
 import pytest
+import sqlite_vec
 
 from cortex.memory.models import CortexFactModel
 from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
@@ -17,6 +18,7 @@ def mock_encoder():
     encoder = AsyncMock()
     encoder.dimension = 384
     encoder.encode.return_value = [1] * 384
+    encoder.quantize = lambda x: sqlite_vec.serialize_int8(x) if isinstance(x, list) else x
     return encoder
 
 
@@ -49,6 +51,8 @@ async def test_exergy_prioritization(temp_db_path, mock_encoder):
         parent_decision_id=None,
         metadata={},
     )
+    # Give the fact the embedding_bytes attribute so sqlite_vec_store uses encoder.quantize
+    object.__setattr__(low_exergy_fact, "embedding_bytes", b"mock")
     await store.memorize(low_exergy_fact)
 
     # 2. Memorize High Exergy Fact (dense, high information value)
@@ -67,6 +71,7 @@ async def test_exergy_prioritization(temp_db_path, mock_encoder):
         parent_decision_id=None,
         metadata={},
     )
+    object.__setattr__(high_exergy_fact, "embedding_bytes", b"mock")
     await store.memorize(high_exergy_fact)
 
     # 3. Recall

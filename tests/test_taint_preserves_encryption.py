@@ -33,6 +33,8 @@ async def db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             fact_id INTEGER NOT NULL,
             parent_id INTEGER,
+            signal_id INTEGER,
+            project TEXT DEFAULT 'general',
             edge_type TEXT NOT NULL DEFAULT 'triggered_by',
             tenant_id TEXT NOT NULL DEFAULT 'default',
             created_at TEXT NOT NULL DEFAULT (datetime('now')),

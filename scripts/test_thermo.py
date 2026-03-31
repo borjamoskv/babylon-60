@@ -3,6 +3,7 @@ import time
 
 from cortex.extensions.daemon.sidecar.telemetry.thermodynamics_oracle import ThermodynamicsOracle
 
+
 class MockEngine:
     async def store(self, project, content, fact_type, meta):
         print(f"\\n[MASTER LEDGER STORE] {fact_type.upper()}")

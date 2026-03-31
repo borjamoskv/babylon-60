@@ -228,8 +228,12 @@ class TestRouterOrdering:
         p1 = _providers["groq"]
         p2 = _providers["deepseek"]
         # Force same cost but different tiers, and same capabilities to ensure they sort together
-        p1._model_config = {"tier": "high", "cost_class": "low", "capabilities": ["code", "chat"]}
-        p2._model_config = {"tier": "frontier", "cost_class": "low", "capabilities": ["code", "chat"]}
+        p1._tier = "high"
+        p1._cost_class = "low"
+        p1._capabilities = ["code", "chat"]
+        p2._tier = "frontier"
+        p2._cost_class = "low"
+        p2._capabilities = ["code", "chat"]
 
         router = CortexLLMRouter(
             primary=_providers["gemini"],
