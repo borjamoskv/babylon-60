@@ -7,9 +7,47 @@ from __future__ import annotations
 
 import enum
 import hashlib
+import ipaddress
 import time
 from dataclasses import dataclass, field
 from typing import Optional
+from urllib.parse import urlparse
+
+
+_BLOCKED_HOSTNAMES = {"localhost"}
+
+
+def validate_public_scrape_url(url: str) -> str:
+    """Reject localhost and private-network scrape targets."""
+    if not url:
+        raise ValueError("URL is required")
+
+    candidate = url if url.startswith(("http://", "https://")) else f"https://{url}"
+    parsed = urlparse(candidate)
+    if parsed.scheme not in {"http", "https"}:
+        raise ValueError("Only http and https URLs are allowed")
+
+    host = (parsed.hostname or "").strip().lower()
+    if not host:
+        raise ValueError("URL host is required")
+    if host in _BLOCKED_HOSTNAMES or host.endswith(".local"):
+        raise ValueError("Local and private network targets are not allowed")
+
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return candidate
+
+    if (
+        ip.is_private
+        or ip.is_loopback
+        or ip.is_link_local
+        or ip.is_reserved
+        or ip.is_multicast
+        or ip.is_unspecified
+    ):
+        raise ValueError("Local and private network targets are not allowed")
+    return candidate
 
 
 class ExtractionStrategy(enum.Enum):
@@ -44,9 +82,7 @@ class ScrapeRequest:
     max_depth: int = 2
 
     def __post_init__(self):
-        if not self.url or not self.url.startswith(("http://", "https://")):
-            if self.url and not self.url.startswith("http"):
-                self.url = f"https://{self.url}"
+        self.url = validate_public_scrape_url(self.url)
 
 
 @dataclass

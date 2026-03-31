@@ -11,8 +11,10 @@ from __future__ import annotations
 import logging
 from typing import Any, Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+
+from cortex.auth import AuthResult, require_permission
 
 LOG = logging.getLogger("cortex.routes.scraper")
 
@@ -64,7 +66,10 @@ class ScrapeResponseItem(BaseModel):
 
 
 @router.post("/scrape", response_model=ScrapeResponseItem)
-async def scrape_url(body: ScrapeRequestBody) -> dict[str, Any]:
+async def scrape_url(
+    body: ScrapeRequestBody,
+    auth: AuthResult = Depends(require_permission("read")),
+) -> dict[str, Any]:
     """Extract content from a single URL."""
     from cortex.extensions.scraper.engine import ScraperEngine
     from cortex.extensions.scraper.models import ExtractionStrategy, ScrapeRequest
@@ -79,12 +84,15 @@ async def scrape_url(body: ScrapeRequestBody) -> dict[str, Any]:
         )
 
     engine = ScraperEngine()
-    request = ScrapeRequest(
-        url=body.url,
-        strategy=strategy,
-        respect_robots=body.respect_robots,
-        timeout=body.timeout,
-    )
+    try:
+        request = ScrapeRequest(
+            url=body.url,
+            strategy=strategy,
+            respect_robots=body.respect_robots,
+            timeout=body.timeout,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from None
     result = await engine.scrape(request)
 
     if result.status == "error":
@@ -103,10 +111,13 @@ async def scrape_url(body: ScrapeRequestBody) -> dict[str, Any]:
 
 
 @router.post("/batch")
-async def batch_scrape(body: BatchScrapeRequestBody) -> dict[str, Any]:
+async def batch_scrape(
+    body: BatchScrapeRequestBody,
+    auth: AuthResult = Depends(require_permission("read")),
+) -> dict[str, Any]:
     """Batch extract content from multiple URLs."""
     from cortex.extensions.scraper.engine import ScraperEngine
-    from cortex.extensions.scraper.models import ExtractionStrategy
+    from cortex.extensions.scraper.models import ExtractionStrategy, validate_public_scrape_url
 
     try:
         strategy = ExtractionStrategy(body.strategy)
@@ -119,9 +130,14 @@ async def batch_scrape(body: BatchScrapeRequestBody) -> dict[str, Any]:
     if len(body.urls) > 100:
         raise HTTPException(status_code=400, detail="Maximum 100 URLs per batch")
 
+    try:
+        urls = [validate_public_scrape_url(url) for url in body.urls]
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from None
+
     engine = ScraperEngine()
     job = await engine.batch_scrape(
-        urls=body.urls,
+        urls=urls,
         strategy=strategy,
         concurrency=body.concurrency,
         rate_limit=body.rate_limit,
@@ -149,15 +165,24 @@ async def batch_scrape(body: BatchScrapeRequestBody) -> dict[str, Any]:
 
 
 @router.post("/map")
-async def map_site(body: MapRequestBody) -> dict[str, Any]:
+async def map_site(
+    body: MapRequestBody,
+    auth: AuthResult = Depends(require_permission("read")),
+) -> dict[str, Any]:
     """Discover URLs from a website."""
     from cortex.extensions.scraper.engine import ScraperEngine
+    from cortex.extensions.scraper.models import validate_public_scrape_url
 
     engine = ScraperEngine()
-    urls = await engine.map_site(body.url, max_depth=body.max_depth)
+    try:
+        target_url = validate_public_scrape_url(body.url)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from None
+
+    urls = await engine.map_site(target_url, max_depth=body.max_depth)
 
     return {
-        "url": body.url,
+        "url": target_url,
         "depth": body.max_depth,
         "total": len(urls),
         "discovered_urls": urls,
