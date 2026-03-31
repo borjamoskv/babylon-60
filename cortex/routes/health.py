@@ -6,8 +6,9 @@ powered by the Health Index engine.
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 
+from cortex.auth import AuthResult, require_permission
 from cortex.extensions.health import HealthCollector, HealthScorer
 from cortex.extensions.health.models import HealthReport
 
@@ -40,7 +41,10 @@ async def health_index_score(request: Request) -> dict:
 
 
 @router.get("/report")
-async def health_index_report(request: Request) -> dict:
+async def health_index_report(
+    request: Request,
+    auth: AuthResult = Depends(require_permission("read")),
+) -> dict:
     """Full health report with recommendations and warnings."""
     db_path = _get_db_path(request)
     collector = HealthCollector(db_path=db_path)
@@ -71,7 +75,10 @@ async def health_index_report(request: Request) -> dict:
 
 
 @router.get("/metrics")
-async def health_index_metrics(request: Request) -> dict:
+async def health_index_metrics(
+    request: Request,
+    auth: AuthResult = Depends(require_permission("read")),
+) -> dict:
     """Raw metric snapshots for monitoring dashboards."""
     db_path = _get_db_path(request)
     collector = HealthCollector(db_path=db_path)
