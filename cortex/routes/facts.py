@@ -135,15 +135,15 @@ async def recall_facts(
             fact_type=f["fact_type"],
             tags=f["tags"],
             confidence=f["confidence"],
-            valid_from=f["valid_from"],
-            valid_until=f["valid_until"],
-            source=f["source"],  # type: ignore[reportCallIssue]
-            meta=f["meta"],  # type: ignore[reportCallIssue]
-            created_at=f["created_at"],
-            updated_at=f["updated_at"],
-            tx_id=f["tx_id"],
-            hash=f["hash"],
-            consensus_score=f.get("consensus_score", 1.0),
+            valid_from=f.get("valid_from"),
+            valid_until=f.get("valid_until"),
+            source=f.get("source"),
+            meta=f.get("meta"),
+            created_at=str(f.get("created_at", "")),
+            updated_at=str(f.get("updated_at", "")),
+            tx_id=f.get("tx_id"),
+            hash=f.get("hash"),
+            consensus_score=float(f.get("consensus_score", 1.0)),
         )
         for f in facts
     ]
@@ -158,6 +158,10 @@ async def list_all_facts(
     """Retrieve all facts across projects (scoped to tenant)."""
     # Using recall with project=None should return global list if engine supports it.
     # If not, we use a custom query.
+    facts = await engine.recall(project="", tenant_id=auth.tenant_id, limit=limit)
+
+    return [
+        FactResponse(
     facts = await engine.recall(project=None, tenant_id=auth.tenant_id, limit=limit)
 
     return [
@@ -168,15 +172,15 @@ async def list_all_facts(
             fact_type=f["fact_type"],
             tags=f["tags"],
             confidence=f["confidence"],
-            valid_from=f["valid_from"],
-            valid_until=f["valid_until"],
-            source=f["source"],  # type: ignore[reportCallIssue]
-            meta=f["meta"],  # type: ignore[reportCallIssue]
-            created_at=f["created_at"],
-            updated_at=f["updated_at"],
-            tx_id=f["tx_id"],
-            hash=f["hash"],
-            consensus_score=f.get("consensus_score", 1.0),
+            valid_from=f.get("valid_from"),
+            valid_until=f.get("valid_until"),
+            source=f.get("source"),
+            meta=f.get("meta"),
+            created_at=str(f.get("created_at", "")),
+            updated_at=str(f.get("updated_at", "")),
+            tx_id=f.get("tx_id"),
+            hash=f.get("hash"),
+            consensus_score=float(f.get("consensus_score", 1.0)),
         )
         for f in facts
     ]
@@ -207,7 +211,7 @@ async def search_facts(
             created_at=r.created_at,
             updated_at=r.updated_at,
             hash=r.hash,
-            consensus_score=r.score,
+            consensus_score=float(r.score or 1.0),
             tx_id=r.tx_id,
         )
         for r in results

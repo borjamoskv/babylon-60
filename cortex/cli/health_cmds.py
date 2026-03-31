@@ -209,7 +209,7 @@ def history(db_path: str | None, limit: int) -> None:
     table.add_column("Grade", justify="center")
 
     for rec in records:
-        score_val = float(rec.get("score", 0))
+        score_val = float(rec.get("score") or 0.0)
         grade = str(rec.get("grade", ""))
         ts = str(rec.get("timestamp", ""))[:19]
         if score_val >= 85:

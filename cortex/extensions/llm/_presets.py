@@ -72,7 +72,8 @@ def _validate_model_policy(presets: dict[str, dict[str, Any]]) -> None:
         default_model = config.get("default_model", "")
         if _PROHIBITED_TIERS.search(default_model):
             logger.warning(
-                "Rule 1.3 Violation Warning: Provider %s uses prohibited default model pattern: %s",
+                "Rule 1.3 Violation Warning: Provider %s uses prohibited default "
+                "model pattern: %s",
                 name,
                 default_model,
             )

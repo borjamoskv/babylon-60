@@ -72,7 +72,7 @@ async def auto_heal(filepath: Path) -> None:
         console.print(f"[red]❌ Error al inicializar LLMProvider:[/red] {e}")
         raise click.Abort() from e
 
-    console.print(f"   ► Conectando cerebro arquitectónico ([blue]{provider.model}[/blue])...")
+    console.print(f"   ► Conectando cerebro arquitectónico ([blue]{provider.model_name}[/blue])...")
 
     prompt = CortexPrompt(
         system_instruction=HEALING_SYSTEM_PROMPT,
@@ -88,7 +88,7 @@ async def auto_heal(filepath: Path) -> None:
 
     try:
         raw_code = await provider.invoke(prompt)
-        healed_code = _clean_markdown(raw_code.value if hasattr(raw_code, "value") else raw_code)  # type: ignore[reportAttributeAccessIssue]
+        healed_code = _clean_markdown(raw_code)
 
         # Overwrite file
         filepath.write_text(healed_code + "\n", encoding="utf-8")

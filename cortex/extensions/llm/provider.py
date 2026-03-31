@@ -25,6 +25,7 @@ from cortex.extensions.llm._stealth import (
     sanitize_response,
 )
 from cortex.extensions.llm.quota import SovereignQuotaManager
+from cortex.extensions.llm._result_cache import ResultCache
 
 __all__ = ["LLMProvider"]
 
@@ -32,6 +33,7 @@ logger = logging.getLogger("cortex.extensions.llm")
 
 _CONTENT_TYPE_JSON: Final[str] = "application/json"
 _QUOTA_MANAGER: SovereignQuotaManager | None = None
+_RESULT_CACHE: ResultCache | None = None
 
 
 def _get_quota_manager() -> SovereignQuotaManager:
@@ -40,6 +42,14 @@ def _get_quota_manager() -> SovereignQuotaManager:
     if _QUOTA_MANAGER is None:
         _QUOTA_MANAGER = SovereignQuotaManager()
     return _QUOTA_MANAGER
+
+
+def _get_result_cache() -> ResultCache:
+    """Lazily create the shared result cache."""
+    global _RESULT_CACHE
+    if _RESULT_CACHE is None:
+        _RESULT_CACHE = ResultCache()
+    return _RESULT_CACHE
 
 
 class LLMProvider(BaseProvider):
@@ -162,6 +172,20 @@ class LLMProvider(BaseProvider):
         intent: IntentProfile = IntentProfile.GENERAL,
     ) -> str:
         """Send a chat completion request. Returns the response text."""
+        # ── LLM Cache Check ──
+        cache_key = {
+            "prompt": prompt,
+            "system": system,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+            "intent": intent.value,
+            "model": self._model,
+        }
+        if os.environ.get("CORTEX_LLM_CACHE", "1") == "1":
+            cached = _get_result_cache().get(cache_key)
+            if cached:
+                return cached
+
         await _get_quota_manager().acquire(tokens=1)
         url, headers = self._prepare_request()
         model_name = self._resolve_model(intent)
@@ -189,6 +213,11 @@ class LLMProvider(BaseProvider):
 
             # Spectral Audit check
             if spectral_audit(response_text):
+                # Cache the successful result if caching is enabled
+                if os.environ.get("CORTEX_LLM_CACHE", "1") == "1":
+                    _get_result_cache().set(
+                        cache_key, response_text, provider=self._provider, model=model_name
+                    )
                 return response_text
 
             if attempt < 2:
@@ -338,6 +367,20 @@ class LLMProvider(BaseProvider):
 
     async def invoke(self, prompt: CortexPrompt) -> str:
         """Traduce el CortexPrompt al formato nativo del LLM y ejecuta la inferencia."""
+        # ── LLM Cache Check ──
+        cache_key = {
+            "system_instruction": prompt.system_instruction,
+            "working_memory": prompt.working_memory,
+            "temperature": prompt.temperature,
+            "max_tokens": prompt.max_tokens,
+            "intent": prompt.intent.value,
+            "model": self._model,
+        }
+        if os.environ.get("CORTEX_LLM_CACHE", "1") == "1":
+            cached = _get_result_cache().get(cache_key)
+            if cached:
+                return cached
+
         await _get_quota_manager().acquire(tokens=1)
         url, headers = self._prepare_request()
 
@@ -364,7 +407,14 @@ class LLMProvider(BaseProvider):
         else:
             payload["max_tokens"] = prompt.max_tokens
 
-        return await self._execute_completion(url, headers, payload, wrap_errors=True)
+        response_text = await self._execute_completion(url, headers, payload, wrap_errors=True)
+
+        # Cache the result if caching is enabled
+        if os.environ.get("CORTEX_LLM_CACHE", "1") == "1":
+            _get_result_cache().set(
+                cache_key, response_text, provider=self._provider, model=model_name
+            )
+        return response_text
 
     @property
     def model_name(self) -> str:
