@@ -16,7 +16,7 @@ async def test_sharded_signal_bus_initialization(tmp_path: Path):
 
     assert len(bus._shards) == 16
     for i in range(16):
-        db_file = tmp_path / f"swarm_shard_{i:02x}.db"
+        db_file = tmp_path / f"swarm_shard_{i:03d}.db"
         assert db_file.exists(), f"Shard {i} must exist"
 
     await bus.close()
