@@ -1,5 +1,3 @@
-from typing import Optional
-
 """
 CORTEX v5.0 — MEJORAlo X-Ray Scanner.
 
@@ -12,6 +10,7 @@ import logging
 import os
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
+from typing import Optional
 
 from cortex.extensions.mejoralo.constants import (
     GHOST_MIN_SUBTREE_SIZE,
@@ -32,7 +31,7 @@ from cortex.extensions.mejoralo.constants import (
     SOVEREIGN_BONUS_FACTOR,
 )
 from cortex.extensions.mejoralo.models import DimensionResult, ScanResult
-from cortex.extensions.mejoralo.utils import detect_stack
+from cortex.extensions.mejoralo.utils import check_safe_path, detect_stack
 
 __all__ = ["scan"]
 
@@ -505,7 +504,7 @@ def scan(project: str, path: str | Path, deep: bool = False, brutal: bool = Fals
       CRITICAL (weight 40): Integrity, Architecture, Security
       HIGH (weight 35): Psi (toxic markers), Complexity
     """
-    root = Path(path).resolve()
+    root = check_safe_path(path)
     if root.is_file():
         # Single file scan mode
         source_files = [root]

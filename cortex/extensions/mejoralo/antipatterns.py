@@ -32,6 +32,7 @@ from cortex.extensions.mejoralo._scanner_visitors import (
 )
 from cortex.extensions.mejoralo.constants import MAX_FUNC_PARAMS, SKIP_DIRS, TOTAL_SCANNER_COUNT
 from cortex.extensions.mejoralo.models import AntipatternFinding, AntipatternReport
+from cortex.extensions.mejoralo.utils import check_safe_path
 
 __all__ = ["scan_antipatterns"]
 
@@ -354,7 +355,7 @@ def scan_antipatterns(
     Returns:
         AntipatternReport with all findings.
     """
-    root = Path(path).resolve()
+    root = check_safe_path(path)
     report = AntipatternReport()
 
     result = _gather_python_files(root)

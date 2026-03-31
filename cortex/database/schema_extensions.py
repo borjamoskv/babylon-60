@@ -12,12 +12,13 @@ from __future__ import annotations
 # ─── Consensus Votes (Neural Swarm Consensus) ───────────────────────
 CREATE_VOTES = """
 CREATE TABLE IF NOT EXISTS consensus_votes (
-    id      INTEGER PRIMARY KEY AUTOINCREMENT,
-    fact_id INTEGER NOT NULL REFERENCES facts(id),
-    agent   TEXT NOT NULL,
-    vote    INTEGER NOT NULL, -- 1 (verify), -1 (dispute)
-    timestamp TEXT NOT NULL DEFAULT (datetime('now')),
-    UNIQUE(fact_id, agent)
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id   TEXT NOT NULL DEFAULT 'default',
+    fact_id     INTEGER NOT NULL REFERENCES facts(id),
+    agent       TEXT NOT NULL,
+    vote        INTEGER NOT NULL, -- 1 (verify), -1 (dispute)
+    timestamp   TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(tenant_id, fact_id, agent)
 );
 """
 
@@ -45,6 +46,7 @@ CREATE TABLE IF NOT EXISTS agents (
 CREATE_VOTES_V2 = """
 CREATE TABLE IF NOT EXISTS consensus_votes_v2 (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     fact_id         INTEGER NOT NULL REFERENCES facts(id),
     agent_id        TEXT NOT NULL REFERENCES agents(id),
     vote            INTEGER NOT NULL,
@@ -55,25 +57,27 @@ CREATE TABLE IF NOT EXISTS consensus_votes_v2 (
     decay_factor    REAL DEFAULT 1.0,
     vote_reason     TEXT,
     meta            TEXT DEFAULT '{}',
-    UNIQUE(fact_id, agent_id)
+    UNIQUE(tenant_id, fact_id, agent_id)
 );
 """
 
 CREATE_TRUST_EDGES = """
 CREATE TABLE IF NOT EXISTS trust_edges (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     source_agent    TEXT NOT NULL REFERENCES agents(id),
     target_agent    TEXT NOT NULL REFERENCES agents(id),
     trust_weight    REAL NOT NULL,
     created_at      TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at      TEXT NOT NULL DEFAULT (datetime('now')),
-    UNIQUE(source_agent, target_agent)
+    UNIQUE(tenant_id, source_agent, target_agent)
 );
 """
 
 CREATE_OUTCOMES = """
 CREATE TABLE IF NOT EXISTS consensus_outcomes (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     fact_id         INTEGER NOT NULL REFERENCES facts(id),
     final_state     TEXT NOT NULL,
     final_score     REAL NOT NULL,
@@ -91,8 +95,11 @@ CREATE INDEX IF NOT EXISTS idx_agents_reputation ON agents(reputation_score DESC
 CREATE INDEX IF NOT EXISTS idx_agents_active ON agents(is_active, last_active_at);
 CREATE INDEX IF NOT EXISTS idx_votes_v2_fact ON consensus_votes_v2(fact_id);
 CREATE INDEX IF NOT EXISTS idx_votes_v2_agent ON consensus_votes_v2(agent_id);
+CREATE INDEX IF NOT EXISTS idx_votes_v2_tenant ON consensus_votes_v2(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_trust_source ON trust_edges(source_agent);
 CREATE INDEX IF NOT EXISTS idx_trust_target ON trust_edges(target_agent);
+CREATE INDEX IF NOT EXISTS idx_trust_tenant ON trust_edges(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_outcome_tenant ON consensus_outcomes(tenant_id);
 """
 
 # ─── Context Snapshots (Ambient Intelligence) ────────────────────────
@@ -169,6 +176,7 @@ CREATE INDEX IF NOT EXISTS idx_evo_domain ON evolution_state(agent_domain);
 CREATE_SIGNALS = """
 CREATE TABLE IF NOT EXISTS signals (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id   TEXT NOT NULL DEFAULT 'default',
     event_type  TEXT NOT NULL,
     payload     TEXT NOT NULL DEFAULT '{}',
     source      TEXT NOT NULL,
@@ -179,6 +187,7 @@ CREATE TABLE IF NOT EXISTS signals (
 """
 
 CREATE_SIGNALS_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_signals_tenant ON signals(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_signals_type ON signals(event_type);
 CREATE INDEX IF NOT EXISTS idx_signals_source ON signals(source);
 CREATE INDEX IF NOT EXISTS idx_signals_created ON signals(created_at);
@@ -212,6 +221,7 @@ CREATE INDEX IF NOT EXISTS idx_ee_timestamp ON entity_events(timestamp);
 CREATE_LOCK_INTENTS = """
 CREATE TABLE IF NOT EXISTS lock_intents (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     resource        TEXT NOT NULL,
     agent_id        TEXT NOT NULL,
     action          TEXT NOT NULL, -- 'request', 'release'
@@ -223,11 +233,13 @@ CREATE TABLE IF NOT EXISTS lock_intents (
 
 CREATE_LOCK_STATE = """
 CREATE TABLE IF NOT EXISTS lock_state (
-    resource        TEXT PRIMARY KEY,
+    resource        TEXT NOT NULL,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     holder_agent    TEXT,
     acquired_at     TEXT,
     expires_at      TEXT,
-    queue_depth     INTEGER DEFAULT 0
+    queue_depth     INTEGER DEFAULT 0,
+    PRIMARY KEY (resource, tenant_id)
 );
 """
 
@@ -254,6 +266,7 @@ CREATE INDEX IF NOT EXISTS idx_llm_telemetry_timestamp ON llm_telemetry(timestam
 
 
 CREATE_LOCK_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_lock_intents_tenant ON lock_intents(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_lock_intents_resource ON lock_intents(resource);
 CREATE INDEX IF NOT EXISTS idx_lock_intents_agent ON lock_intents(agent_id);
 """

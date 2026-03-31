@@ -34,6 +34,7 @@ from cortex.extensions.mejoralo.heal_prompts import (
 )
 from cortex.extensions.mejoralo.models import ScanResult
 from cortex.extensions.mejoralo.taint import is_file_tainted, mark_file_tainted
+from cortex.extensions.mejoralo.utils import check_safe_path
 
 __all__ = [
     "heal_project",
@@ -119,7 +120,7 @@ def _apply_and_verify(
     project: Optional[str] = None,
 ) -> bool:
     """Apply the already generated refactor, test it, and commit/rollback."""
-    abs_path = Path(path).resolve() / top_file_rel
+    abs_path = check_safe_path(path) / top_file_rel
     console.print(f"  [cyan]🔬 Verificando {top_file_rel} (Integridad Bizantina)...[/]")
 
     try:
@@ -414,7 +415,7 @@ def _run_healing_iteration(
         results = []
         for f, iss in targets:
             result = await _heal_file_async(
-                Path(path).resolve() / f,
+                check_safe_path(path) / f,
                 iss,
                 level=level,
                 iteration=iteration,

@@ -1,0 +1,13 @@
+[package]
+name = "cortex_rs"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "cortex_rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.23.0", features = ["extension-module", "abi3-py310"] }
+walkdir = "2.5"
+regex = "1.10"

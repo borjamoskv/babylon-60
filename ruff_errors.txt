@@ -1,0 +1,277 @@
+B007 Loop control variable `profile` not used within loop body
+   --> benchmarks/encb/metrics.py:137:18
+    |
+136 |     result: dict[str, int | None] = {}
+137 |     for node_id, profile in corrupt_nodes.items():
+    |                  ^^^^^^^
+138 |         history = reliability_history.get(node_id, [])
+139 |         contained_at = None
+    |
+help: Rename unused `profile` to `_profile`
+
+B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+  --> benchmarks/encb/plots.py:26:9
+   |
+24 |           return plt
+25 |       except ImportError:
+26 | /         raise ImportError(
+27 | |             "matplotlib is required for plotting. "
+28 | |             "Install with: pip install matplotlib"
+29 | |         )
+   | |_________^
+   |
+
+F841 Local variable `bars` is assigned to but never used
+   --> benchmarks/encb/plots.py:111:5
+    |
+109 |     x = np.arange(len(strategies))
+110 |
+111 |     bars = ax.bar(x, means, yerr=stds, capsize=5,
+    |     ^^^^
+112 |                   color=colors[: len(strategies)], alpha=0.85)
+    |
+help: Remove assignment to unused variable `bars`
+
+B007 Loop control variable `modality` not used within loop body
+   --> benchmarks/encb_benchmark.py:188:9
+    |
+187 |     gt_map = {}
+188 |     for modality, gt in ground_truths.items():
+    |         ^^^^^^^^
+189 |         for i, prop in enumerate(gt.signal_facts):
+190 |             gt_map[prop[:50]] = prop
+    |
+help: Rename unused `modality` to `_modality`
+
+B007 Loop control variable `i` not used within loop body
+   --> benchmarks/encb_benchmark.py:189:13
+    |
+187 |     gt_map = {}
+188 |     for modality, gt in ground_truths.items():
+189 |         for i, prop in enumerate(gt.signal_facts):
+    |             ^
+190 |             gt_map[prop[:50]] = prop
+191 |     resolvers.append(OracleResolver(gt_map))
+    |
+help: Rename unused `i` to `_i`
+
+F841 Local variable `data` is assigned to but never used
+   --> cortex-sdk/cortex_persist/async_client.py:165:9
+    |
+163 |     async def delete(self, fact_id: str, tenant_id: str = "default") -> AcceptanceResult:
+164 |         """Tombstone a fact asynchronously."""
+165 |         data = await self._request("DELETE", f"/v1/memory/facts/{fact_id}", params={"tenant_id": tenant_id})
+    |         ^^^^
+166 |         return AcceptanceResult(
+167 |             accepted=True,
+    |
+help: Remove assignment to unused variable `data`
+
+F841 Local variable `data` is assigned to but never used
+   --> cortex-sdk/cortex_persist/client.py:167:9
+    |
+165 |     def delete(self, fact_id: str, tenant_id: str = "default") -> AcceptanceResult:
+166 |         """Tombstone a fact."""
+167 |         data = self._request("DELETE", f"/v1/memory/facts/{fact_id}", params={"tenant_id": tenant_id})
+    |         ^^^^
+168 |         return AcceptanceResult(
+169 |             accepted=True,
+    |
+help: Remove assignment to unused variable `data`
+
+G004 Logging statement uses f-string
+  --> scripts/rotate_aether.py:34:24
+   |
+32 |     """Extract the active facts count from the context snapshot."""
+33 |     if not SNAPSHOT_FILE.exists():
+34 |         logger.warning(f"Snapshot not found at {SNAPSHOT_FILE}. Defaulting to 0 facts.")
+   |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+35 |         return 0
+   |
+help: Convert to lazy `%` formatting
+
+G004 Logging statement uses f-string
+  --> scripts/rotate_aether.py:50:22
+   |
+49 |     except Exception as e:
+50 |         logger.error(f"Failed to read snapshot: {e}")
+   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+51 |
+52 |     logger.warning("Could not parse active facts count. Defaulting to 0.")
+   |
+help: Convert to lazy `%` formatting
+
+G004 Logging statement uses f-string
+  --> scripts/rotate_aether.py:79:22
+   |
+77 |         )
+78 |     except Exception as e:
+79 |         logger.debug(f"Failed to record decision via CLI: {e}")
+   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+help: Convert to lazy `%` formatting
+
+G004 Logging statement uses f-string
+  --> scripts/rotate_aether.py:90:17
+   |
+89 |     active_facts = get_active_facts()
+90 |     logger.info(f"Detected Active Facts: {active_facts}")
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+91 |
+92 |     if active_facts > HEAVY_THRESHOLD_FACTS:
+   |
+help: Convert to lazy `%` formatting
+
+G004 Logging statement uses f-string
+  --> scripts/rotate_aether.py:93:21
+   |
+92 |     if active_facts > HEAVY_THRESHOLD_FACTS:
+93 |         logger.info(f"Context weight is HIGH (> {HEAVY_THRESHOLD_FACTS}). Selecting LIGHT profile.")
+   |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+94 |         source_profile = LIGHT_PROFILE
+95 |         profile_type = "LIGHT"
+   |
+help: Convert to lazy `%` formatting
+
+G004 Logging statement uses f-string
+   --> scripts/rotate_aether.py:98:13
+    |
+ 96 |     else:
+ 97 |         logger.info(
+ 98 |             f"Context weight is NORMAL (<= {HEAVY_THRESHOLD_FACTS}). Selecting HEAVY profile."
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 99 |         )
+100 |         source_profile = HEAVY_PROFILE
+    |
+help: Convert to lazy `%` formatting
+
+G004 Logging statement uses f-string
+   --> scripts/rotate_aether.py:110:21
+    |
+108 |             if current_symlink_target == source_profile:
+109 |                 logger.info(
+110 |                     f"Aether is already using the {profile_type} profile. No action needed."
+    |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+111 |                 )
+112 |                 return
+    |
+help: Convert to lazy `%` formatting
+
+G004 Logging statement uses f-string
+   --> scripts/rotate_aether.py:119:25
+    |
+117 |                 if TARGET_PROFILE.read_bytes() == source_profile.read_bytes():
+118 |                     logger.info(
+119 |                         f"Aether is already using the {profile_type} profile content. No action needed."
+    |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+120 |                     )
+121 |                     return
+    |
+help: Convert to lazy `%` formatting
+
+G004 Logging statement uses f-string
+   --> scripts/rotate_aether.py:142:22
+    |
+141 |     except Exception as e:
+142 |         logger.error(f"Failed to rotate profile: {e}")
+    |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+143 |         sys.exit(1)
+    |
+help: Convert to lazy `%` formatting
+
+G004 Logging statement uses f-string
+  --> scripts/swarm_10k_purge.py:54:21
+   |
+53 |     async def orkestrate(self, directory: Path):
+54 |         logger.info(f"👑 SWARM COMMANDER: Deploying CORTEX-SWARM-10K across '{directory}'...")
+   |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+55 |         
+56 |         # Load all lines of all text files in repo to distribute as atomic chunks
+   |
+help: Convert to lazy `%` formatting
+
+G004 Logging statement uses f-string
+  --> scripts/swarm_10k_purge.py:69:21
+   |
+68 |         total_chunks = len(atomic_chunks)
+69 |         logger.info(f"⚔️ 10,000 Agents mobilized. Sharding {total_chunks} atomic tasks across 100 Legions...")
+   |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+70 |         
+71 |         # Distribute chunks across Legions
+   |
+help: Convert to lazy `%` formatting
+
+G004 Logging statement uses f-string
+  --> scripts/swarm_10k_purge.py:85:21
+   |
+83 |             all_findings = []
+84 |             
+85 |         logger.info(f"◈ Swarm Aniquilation Phase: Found {len(all_findings)} compromised secrets.")
+   |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+86 |         for f in all_findings:
+87 |             logger.warning(f)
+   |
+help: Convert to lazy `%` formatting
+
+F401 `Quartz.CGEventCreate` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> sdks/mac_maestro/cgevents.py:12:9
+   |
+10 | try:
+11 |     from Quartz import (
+12 |         CGEventCreate,
+   |         ^^^^^^^^^^^^^
+13 |         CGEventCreateMouseEvent,
+14 |         CGEventPost,
+   |
+help: Remove unused import
+
+F401 `Quartz.kCGEventMouseMoved` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> sdks/mac_maestro/cgevents.py:19:9
+   |
+17 |         kCGEventLeftMouseDragged,
+18 |         kCGEventLeftMouseUp,
+19 |         kCGEventMouseMoved,
+   |         ^^^^^^^^^^^^^^^^^^
+20 |         kCGHIDEventTap,
+21 |         kCGMouseButtonLeft,
+   |
+help: Remove unused import
+
+F401 `Quartz.CGEventSetFlags` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> sdks/mac_maestro/keyboard.py:14:9
+   |
+12 |         CGEventCreateKeyboardEvent,
+13 |         CGEventPost,
+14 |         CGEventSetFlags,
+   |         ^^^^^^^^^^^^^^^
+15 |         kCGEventKeyDown,
+16 |         kCGEventKeyUp,
+   |
+help: Remove unused import
+
+F401 `Quartz.kCGEventKeyDown` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> sdks/mac_maestro/keyboard.py:15:9
+   |
+13 |         CGEventPost,
+14 |         CGEventSetFlags,
+15 |         kCGEventKeyDown,
+   |         ^^^^^^^^^^^^^^^
+16 |         kCGEventKeyUp,
+17 |         kCGHIDEventTap,
+   |
+help: Remove unused import
+
+F401 `Quartz.kCGEventKeyUp` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> sdks/mac_maestro/keyboard.py:16:9
+   |
+14 |         CGEventSetFlags,
+15 |         kCGEventKeyDown,
+16 |         kCGEventKeyUp,
+   |         ^^^^^^^^^^^^^
+17 |         kCGHIDEventTap,
+18 |     )
+   |
+help: Remove unused import
+
+Found 24 errors.
+No fixes available (4 hidden fixes can be enabled with the `--unsafe-fixes` option).

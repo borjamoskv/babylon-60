@@ -1,29 +1,14 @@
-from typing import Optional
-
-"""
-CORTEX v5.0 — Stripe Billing Routes.
-
-Full checkout flow: session creation, webhook processing, customer portal.
-Provisions API keys automatically on successful payment.
-
-Usage:
-    Registered opt-in in api.py when STRIPE_SECRET_KEY is set.
-
-Environment variables:
-    STRIPE_SECRET_KEY — sk_live_... or sk_test_...
-    STRIPE_WEBHOOK_SECRET — whsec_... from Stripe dashboard
-    STRIPE_PRICE_TABLE — JSON mapping plan names to Stripe Price IDs
-"""
-
 import hashlib
 import logging
 import os
 import time
+from typing import Optional
 
 from fastapi import APIRouter, Header, HTTPException, Request
 from pydantic import BaseModel
 
 from cortex import config
+from cortex.extensions.security.guards import mask_sensitive
 
 __all__ = [
     "CheckoutRequest",
@@ -112,10 +97,10 @@ async def _provision_api_key(email: str, plan: str) -> Optional[str]:
                 rate_limit=plan_cfg["rate_limit"],
             )
             logger.info(
-                "API key provisioned: %s → %s plan (prefix: %s...)",
+                "API key provisioned: %s → %s plan (key: %s)",
                 email,
                 plan,
-                raw_key[:12],
+                mask_sensitive(raw_key),
             )
             return raw_key
     except (RuntimeError, ValueError, OSError):

@@ -46,7 +46,9 @@ async def run_applescript(
     )
 
     try:
-        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout)
+        stdout, stderr = await asyncio.wait_for(
+            process.communicate(), timeout=timeout
+        )
     except asyncio.TimeoutError:
         process.kill()
         await process.wait()
@@ -60,12 +62,21 @@ async def run_applescript(
 
     if process.returncode != 0:
         if not require_success:
-            logger.warning("AppleScript falló (Exit %s): %s", process.returncode, decoded_err)
+            logger.warning(
+                "AppleScript falló (Exit %s): %s",
+                process.returncode,
+                decoded_err
+            )
             return None
 
         error_lower = decoded_err.lower()
-        if "is not running" in error_lower or "application isn't running" in error_lower:
-            raise AppNotRunningError(f"App objetivo no está en ejecución: {decoded_err}")
+        if (
+            "is not running" in error_lower
+            or "application isn't running" in error_lower
+        ):
+            raise AppNotRunningError(
+                f"App objetivo no está en ejecución: {decoded_err}"
+            )
 
         if (
             "can't get window" in error_lower
@@ -116,3 +127,21 @@ async def get_clipboard() -> Optional[str]:
     """Lee el contenido actual del clipboard del sistema."""
     script = "return (the clipboard as text)"
     return await run_applescript(script, require_success=False)
+
+
+async def open_url(url: str) -> bool:
+    """
+    Abre una URL, archivo o Deep Link con la aplicación predeterminada del sistema.
+    Equivale a `open <url>` en la terminal.
+    """
+    process = await asyncio.create_subprocess_exec(
+        "open",
+        url,
+        stdout=asyncio.subprocess.DEVNULL,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    _, stderr = await process.communicate()
+    if process.returncode != 0:
+        logger.error("Error al abrir URL '%s': %s", url, stderr.decode())
+        return False
+    return True

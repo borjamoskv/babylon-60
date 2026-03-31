@@ -47,8 +47,34 @@ class FactManager:
     ) -> int:
         """Sovereign Store: Delegates to engine with pre-validation."""
         tenant_id = self.engine._resolve_tenant(tenant_id)
-        conn = conn or await self.engine.get_conn()
+        
+        # If conn is provided, we use it directly (it's managed by the caller)
+        if conn:
+            return await self._store_inner(
+                conn, project, content, tenant_id, fact_type, tags, confidence, source, meta, valid_from, commit, tx_id
+            )
+        
+        # Otherwise, we acquire a temporary session
+        async with self.engine.session() as session_conn:
+            return await self._store_inner(
+                session_conn, project, content, tenant_id, fact_type, tags, confidence, source, meta, valid_from, commit, tx_id
+            )
 
+    async def _store_inner(
+        self,
+        conn: Any,
+        project: str,
+        content: str,
+        tenant_id: str,
+        fact_type: str,
+        tags: Optional[list[str]],
+        confidence: str,
+        source: Optional[str],
+        meta: Optional[dict[str, Any]],
+        valid_from: Optional[str],
+        commit: bool,
+        tx_id: Optional[int],
+    ) -> int:
         # Sovereign Pre-filtering Gate: Active Forgetting (#350/100)
         if (
             hasattr(self.engine, "memory")
@@ -130,9 +156,9 @@ class FactManager:
 
     async def _fetch(self, query: str, params: list | tuple = ()) -> list[Fact]:
         """Lower-level fetch from engine database."""
-        conn = await self.engine.get_conn()
-        cursor = await conn.execute(query, params)
-        return [row_to_fact(r) for r in await cursor.fetchall()]  # type: ignore[reportArgumentType]
+        async with self.engine.session() as conn:
+            cursor = await conn.execute(query, params)
+            return [row_to_fact(r) for r in await cursor.fetchall()]  # type: ignore[reportArgumentType]
 
     async def get_all_active_facts(
         self,

@@ -69,7 +69,14 @@ class BabestuTCell:
         2. Extrae bloques de código (Python).
         3. Realiza la autopsia del AST.
         """
-        is_youtube = "youtube.com" in source_url or "youtu.be" in source_url
+        from urllib.parse import urlparse
+        parsed = urlparse(source_url)
+        domain = parsed.netloc.lower()
+        is_youtube = (
+            domain == "youtube.com"
+            or domain.endswith(".youtube.com")
+            or domain == "youtu.be"
+        )
 
         if not is_youtube and cls.B64_HEURISTIC.search(raw_text):
             return cls._veredicto(

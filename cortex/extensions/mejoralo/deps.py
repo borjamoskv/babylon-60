@@ -1,5 +1,3 @@
-from typing import Optional
-
 """CORTEX v5.0 — Dependency Extractor.
 
 Calculates topological dependencies for topological sorting.
@@ -8,6 +6,9 @@ Calculates topological dependencies for topological sorting.
 import ast
 import logging
 from pathlib import Path
+from typing import Optional
+
+from cortex.extensions.mejoralo.utils import check_safe_path
 
 logger = logging.getLogger("cortex.extensions.mejoralo.deps")
 
@@ -20,7 +21,7 @@ def sort_by_topological_order(
 
     G = nx.DiGraph()
     files = set(file_issues.keys())
-    root = Path(root_path).resolve()
+    root = check_safe_path(root_path)
 
     for rel_path in files:
         G.add_node(rel_path)

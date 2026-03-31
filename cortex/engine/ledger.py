@@ -49,12 +49,25 @@ class ImmutableLedger:
 
     @contextlib.asynccontextmanager
     async def _acquire_conn(self):
-        if hasattr(self.pool, "acquire"):
+        # 1. Prefer session() context manager (AsyncCortexEngine pattern)
+        if hasattr(self.pool, "session"):
+            async with self.pool.session() as conn:
+                yield conn
+        # 2. Fallback to pool.acquire() (CortexConnectionPool pattern)
+        elif hasattr(self.pool, "acquire"):
             async with self.pool.acquire() as conn:
                 yield conn
+        # 3. Fallback to legacy get_conn (DEPRECATED - ensures release)
         elif hasattr(self.pool, "get_conn"):
             conn = await self.pool.get_conn()  # type: ignore[reportAttributeAccessIssue]
-            yield conn
+            try:
+                yield conn
+            finally:
+                if hasattr(conn, "close") and callable(conn.close):
+                    if hasattr(conn, "__aexit__"):
+                        await conn.__aexit__(None, None, None)
+                    else:
+                        await conn.close()
         else:
             yield self.pool
 

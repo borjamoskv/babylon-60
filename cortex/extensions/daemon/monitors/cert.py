@@ -8,7 +8,11 @@ import ssl
 from datetime import datetime, timezone
 from typing import Optional
 
-from cortex.extensions.daemon.models import DEFAULT_CERT_WARN_DAYS, DEFAULT_TIMEOUT, CertAlert
+from cortex.extensions.daemon.models import (
+    DEFAULT_CERT_WARN_DAYS,
+    DEFAULT_TIMEOUT,
+    CertAlert,
+)
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -34,16 +38,24 @@ class CertMonitor:
         return alerts
 
     def _check_one(self, hostname: str) -> Optional[CertAlert]:
-        """Check a single hostname's SSL certificate."""
+        """Check a single hostname's certificate expiry."""
         try:
-            ctx = ssl.create_default_context()
-            with socket.create_connection((hostname, 443), timeout=DEFAULT_TIMEOUT) as sock:
+            ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+            ctx.minimum_version = ssl.TLSVersion.TLSv1_2
+            ctx.maximum_version = ssl.TLSVersion.TLSv1_3
+            ctx.load_default_certs()
+            with socket.create_connection(
+                (hostname, 443), timeout=DEFAULT_TIMEOUT
+            ) as sock:
                 with ctx.wrap_socket(sock, server_hostname=hostname) as ssock:
                     cert = ssock.getpeercert()
-                    not_after = cert.get("notAfter", "")  # type: ignore[reportOptionalMemberAccess]
-                    expires = datetime.strptime(not_after, "%b %d %H:%M:%S %Y %Z").replace(  # type: ignore[reportArgumentType]
-                        tzinfo=timezone.utc
+                    not_after = cert.get(  # type: ignore[union-attr]
+                        "notAfter", ""
                     )
+                    expires = datetime.strptime(
+                        not_after,  # type: ignore[arg-type]
+                        "%b %d %H:%M:%S %Y %Z"
+                    ).replace(tzinfo=timezone.utc)
                     days_left = (expires - datetime.now(timezone.utc)).days
                     if days_left < self.warn_days:
                         return CertAlert(

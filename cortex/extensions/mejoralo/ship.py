@@ -13,6 +13,7 @@ from cortex.extensions.mejoralo.constants import SCAN_EXTENSIONS, SKIP_DIRS
 from cortex.extensions.mejoralo.models import ShipResult, ShipSeal
 from cortex.extensions.mejoralo.scan import scan
 from cortex.extensions.mejoralo.utils import (
+    check_safe_path,
     detect_stack,
     get_build_cmd,
     get_lint_cmd,
@@ -141,7 +142,7 @@ def _seal_psi(project: str, path: str | Path) -> ShipSeal:
 
 def check_ship_gate(project: str, path: str | Path) -> ShipResult:
     """Validate the 7 Seals for production readiness."""
-    p = Path(path).expanduser().resolve()
+    p = check_safe_path(Path(path).expanduser())
     stack = detect_stack(p)
     cwd = str(p)
 

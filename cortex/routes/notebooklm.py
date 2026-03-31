@@ -9,10 +9,14 @@ Provides REST endpoints for NotebookLM Ouroboros memory loop operations:
 
 from __future__ import annotations
 
+import os
+import shutil
+import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from cortex.auth import AuthResult, require_permission
 
@@ -23,11 +27,12 @@ router = APIRouter(tags=["notebooklm"])
 async def notebooklm_status(
     auth: AuthResult = Depends(require_permission("read")),
 ) -> dict:
-    """Get NotebookLM sync status — staleness, file inventory, cloud detection."""
-    import os
-    from datetime import datetime, timezone
-
-    from cortex.services.notebooklm import CLOUD_PROVIDERS, DIGEST_FILE, DOMAINS_DIR
+    """Sync status — staleness, inventory, cloud."""
+    from cortex.services.notebooklm import (
+        CLOUD_PROVIDERS,
+        DIGEST_FILE,
+        DOMAINS_DIR,
+    )
 
     result: dict = {}
 
@@ -38,7 +43,9 @@ async def notebooklm_status(
         result["digest"] = {
             "exists": True,
             "size_bytes": os.path.getsize(DIGEST_FILE),
-            "updated": datetime.fromtimestamp(mtime, tz=timezone.utc).isoformat(),
+            "updated": datetime.fromtimestamp(
+                mtime, tz=timezone.utc
+            ).isoformat(),
             "age_hours": round(age_h, 1),
         }
     else:
@@ -84,20 +91,27 @@ async def notebooklm_status(
 
 @router.post("/v1/notebooklm/digest")
 async def notebooklm_digest(
-    project: Optional[str] = Query(None, description="Optional project filter"),
-    output: str = Query("cortex_notebooklm_digest.md", description="Output file path"),
+    project: Optional[str] = Query(
+        None, description="Optional project filter"
+    ),
+    output: str = Query(
+        "cortex_notebooklm_digest.md", description="Output file path"
+    ),
     auth: AuthResult = Depends(require_permission("write")),
 ) -> dict:
     """Generate Master Digest with Shadow Key anchors."""
-    from fastapi import HTTPException
-
     from cortex.config import DEFAULT_DB_PATH
+    from cortex.extensions.security.guards import safe_path_join
     from cortex.services.notebooklm import NotebookLMService
 
-    base_dir = Path.cwd().resolve()
-    target_file = (base_dir / output).resolve()
-    if not str(target_file).startswith(str(base_dir)):
-        raise HTTPException(status_code=400, detail="Path traversal detected")
+    base_dir = Path.cwd()
+    try:
+        target_file = safe_path_join(base_dir, output)
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Path traversal detected",
+        ) from None
 
     svc = NotebookLMService(str(DEFAULT_DB_PATH))
     content = await svc.generate_digest(project=project)
@@ -114,19 +128,25 @@ async def notebooklm_digest(
 
 @router.post("/v1/notebooklm/fragment")
 async def notebooklm_fragment(
-    output_dir: str = Query("notebooklm_domains", description="Output directory"),
+    output_dir: str = Query(
+        "notebooklm_domains",
+        description="Output directory",
+    ),
     auth: AuthResult = Depends(require_permission("write")),
 ) -> dict:
     """Fragment CORTEX facts into semantic domain files."""
-    from fastapi import HTTPException
-
     from cortex.config import DEFAULT_DB_PATH
+    from cortex.extensions.security.guards import safe_path_join
     from cortex.services.notebooklm import NotebookLMService
 
-    base_dir = Path.cwd().resolve()
-    target_dir = (base_dir / output_dir).resolve()
-    if not str(target_dir).startswith(str(base_dir)):
-        raise HTTPException(status_code=400, detail="Path traversal detected")
+    base_dir = Path.cwd()
+    try:
+        target_dir = safe_path_join(base_dir, output_dir)
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Path traversal detected",
+        ) from None
 
     svc = NotebookLMService(str(DEFAULT_DB_PATH))
     counts = await svc.fragment_by_domain(target_dir)
@@ -136,30 +156,37 @@ async def notebooklm_fragment(
 
 @router.post("/v1/notebooklm/sync")
 async def notebooklm_sync(
-    drive_path: Optional[str] = Query(None, description="Explicit cloud folder path"),
-    mode: str = Query("both", description="What to sync: digest, domains, or both"),
+    drive_path: Optional[str] = Query(
+        None, description="Explicit cloud folder path"
+    ),
+    mode: str = Query(
+        "both", description="What to sync: digest, domains, or both"
+    ),
     auth: AuthResult = Depends(require_permission("write")),
 ) -> dict:
-    """Sync exported files to cloud storage for NotebookLM pickup."""
-    import os
-    import shutil
-    import time
-    from datetime import datetime, timezone
-
-    from cortex.services.notebooklm import CLOUD_PROVIDERS, DIGEST_FILE, DOMAINS_DIR
+    """Sync to cloud storage for NotebookLM."""
+    from cortex.services.notebooklm import (
+        CLOUD_PROVIDERS,
+        DIGEST_FILE,
+        DOMAINS_DIR,
+    )
 
     target = None
     provider_name = "Custom"
     if drive_path:
-        home = Path.home().resolve()
-        requested = Path(drive_path).expanduser().resolve()
-        if not str(requested).startswith(str(home)):
-            from fastapi import HTTPException
+        from cortex.extensions.security.guards import safe_path_join
 
+        home = Path.home()
+        try:
+            target = safe_path_join(home, drive_path)
+        except ValueError:
             raise HTTPException(
-                status_code=400, detail="Invalid drive_path. Must be within the home directory."
-            )
-        target = requested
+                status_code=400,
+                detail=(
+                    "Invalid drive_path."
+                    " Must be within home."
+                ),
+            ) from None
     else:
         for provider, paths in CLOUD_PROVIDERS.items():
             for p in paths:
@@ -171,7 +198,12 @@ async def notebooklm_sync(
                 break
 
     if not target:
-        return {"error": "No cloud sync provider detected. Specify drive_path."}
+        return {
+            "error": (
+                "No cloud sync provider."
+                " Specify drive_path."
+            ),
+        }
 
     target.mkdir(parents=True, exist_ok=True)
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d")

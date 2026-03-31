@@ -145,6 +145,14 @@ class CortexPrompt(BaseModel):
             "elegibles para el cascade determinista. GENERAL usa todos."
         ),
     )
+    tenant_id: str = Field(
+        default="system_default",
+        description="Tenant identifier to enforce and track LLM token budgets.",
+    )
+    plan: str = Field(
+        default="free",
+        description="Billing plan (free, pro, team) associated with the prompt.",
+    )
 
     def to_openai_messages(self) -> list[dict[str, str]]:
         """Convierte la estructura soberana al formato de mensajes de OpenAI."""

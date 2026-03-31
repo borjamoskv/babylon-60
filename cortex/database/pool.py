@@ -118,6 +118,7 @@ class CortexConnectionPool:
         try:
             # 1. Get or create connection
             conn = await self._get_or_create_conn()
+            logger.debug("Pool: Acquired connection %s (Remaining in queue: %d)", id(conn), self._pool.qsize())
 
             # 2. Health check and potential replacement
             conn = await self._ensure_healthy_conn(conn)

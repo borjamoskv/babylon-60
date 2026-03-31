@@ -13,6 +13,8 @@ from typing import Optional
 
 import httpx
 
+from cortex.extensions.security.guards import is_safe_url
+
 LOG = logging.getLogger("cortex.extensions.scraper.extractors")
 
 # ==============================================================================
@@ -50,7 +52,9 @@ _HEADING_MAP = {
     "h6": "###### ",
 }
 
-_SKIP_TAGS = frozenset({"script", "style", "noscript", "svg", "iframe", "nav", "footer"})
+_SKIP_TAGS = frozenset(
+    {"script", "style", "noscript", "svg", "iframe", "nav", "footer"}
+)
 
 
 class _HtmlToMarkdown(HTMLParser):
@@ -179,6 +183,10 @@ class HttpExtractor(BaseExtractor):
     """
 
     async def extract(self, url: str, timeout: float = 15.0) -> tuple[str, str]:
+        if not is_safe_url(url):
+            raise ExtractionError(
+                f"Blocked by security policy (SSRF protection): {url}"
+            )
         LOG.info("🔵 [HTTP_FAST] Extracting: %s", url)
         try:
             async with httpx.AsyncClient(
@@ -198,18 +206,27 @@ class HttpExtractor(BaseExtractor):
                 response.raise_for_status()
 
                 content_type = response.headers.get("content-type", "")
-                if "text/html" not in content_type and "application/xhtml" not in content_type:
+                if (
+                    "text/html" not in content_type
+                    and "application/xhtml" not in content_type
+                ):
                     raise ExtractionError(f"Non-HTML content type: {content_type}")
 
                 title, markdown = html_to_markdown(response.text)
                 if not markdown or len(markdown) < 50:
-                    raise ExtractionError("Extracted content too short — likely JS-rendered SPA")
+                    raise ExtractionError(
+                        "Extracted content too short — likely JS-rendered SPA"
+                    )
                 return title, markdown
 
         except httpx.HTTPStatusError as e:
-            raise ExtractionError(f"HTTP {e.response.status_code} for {url}") from e
+            LOG.error("HTTP status error for %s: %s", url, e)
+            raise ExtractionError(
+                f"Extraction failed: upstream status code {e.response.status_code}"
+            ) from None
         except httpx.RequestError as e:
-            raise ExtractionError(f"Network error for {url}: {e}") from e
+            LOG.error("Network error for %s: %s", url, e)
+            raise ExtractionError("Extraction failed: internal network error") from None
 
 
 # ==============================================================================
@@ -226,6 +243,10 @@ class JinaExtractor(BaseExtractor):
     JINA_ENDPOINT = "https://r.jina.ai"
 
     async def extract(self, url: str, timeout: float = 15.0) -> tuple[str, str]:
+        if not is_safe_url(url):
+            raise ExtractionError(
+                f"Blocked by security policy (SSRF protection): {url}"
+            )
         LOG.info("🟡 [JINA] Extracting: %s", url)
         import os
 
@@ -272,6 +293,10 @@ class FirecrawlExtractor(BaseExtractor):
     FIRECRAWL_ENDPOINT = "https://api.firecrawl.dev/v1/scrape"
 
     async def extract(self, url: str, timeout: float = 20.0) -> tuple[str, str]:
+        if not is_safe_url(url):
+            raise ExtractionError(
+                f"Blocked by security policy (SSRF protection): {url}"
+            )
         LOG.info("🟢 [FIRECRAWL] Extracting: %s", url)
         import os
 
@@ -291,7 +316,9 @@ class FirecrawlExtractor(BaseExtractor):
 
         try:
             async with httpx.AsyncClient(timeout=timeout) as client:
-                response = await client.post(self.FIRECRAWL_ENDPOINT, json=payload, headers=headers)
+                response = await client.post(
+                    self.FIRECRAWL_ENDPOINT, json=payload, headers=headers
+                )
                 response.raise_for_status()
                 data = response.json()
 
@@ -328,6 +355,10 @@ class PlaywrightExtractor(BaseExtractor):
     """
 
     async def extract(self, url: str, timeout: float = 30.0) -> tuple[str, str]:
+        if not is_safe_url(url):
+            raise ExtractionError(
+                f"Blocked by security policy (SSRF protection): {url}"
+            )
         LOG.info("🔴 [PLAYWRIGHT] Extracting: %s", url)
         try:
             from cortex.extensions.browser.engine import BrowserEngine
@@ -371,6 +402,9 @@ async def check_robots_txt(url: str, timeout: float = 5.0) -> bool:
     path = parsed.path or "/"
 
     try:
+        if not is_safe_url(robots_url):
+            return True  # Blocked robots.txt is assumed allowed (safety first)
+
         async with httpx.AsyncClient(timeout=timeout) as client:
             response = await client.get(robots_url)
             if response.status_code != 200:

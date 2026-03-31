@@ -61,6 +61,7 @@ HASH_VERSION = 2
 
 def compute_tx_hash(
     prev_hash: str,
+    tenant_id: str,
     project: str,
     action: str,
     detail_json: str,
@@ -68,11 +69,12 @@ def compute_tx_hash(
 ) -> str:
     """Compute transaction hash using null-byte separated canonical form.
 
-    Uses \\x00 (null byte) as field separator to prevent boundary
+    Uses \x00 (null byte) as field separator to prevent boundary
     confusion when fields contain colons or other delimiters.
 
     Args:
         prev_hash: Hash of the previous transaction, or "GENESIS".
+        tenant_id: Tenant identifier.
         project: Project identifier.
         action: Transaction action (store, deprecate, vote, etc.).
         detail_json: Canonical JSON string of transaction detail.
@@ -81,7 +83,7 @@ def compute_tx_hash(
     Returns:
         SHA-256 hex digest of the canonical input.
     """
-    h_input = f"{prev_hash}\x00{project}\x00{action}\x00{detail_json}\x00{timestamp}"
+    h_input = f"{prev_hash}\x00{tenant_id}\x00{project}\x00{action}\x00{detail_json}\x00{timestamp}"
     return hashlib.sha256(h_input.encode("utf-8")).hexdigest()
 
 

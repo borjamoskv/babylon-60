@@ -16,6 +16,8 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
+from cortex.extensions.security.guards import safe_path_join
+
 console = Console()
 
 
@@ -34,7 +36,9 @@ def scraper():
     default="auto",
     help="Extraction strategy.",
 )
-@click.option("--output", "-o", type=click.Path(), default=None, help="Output file path.")
+@click.option(
+    "--output", "-o", type=click.Path(), default=None, help="Output file path."
+)
 @click.option(
     "--format",
     "-f",
@@ -44,7 +48,9 @@ def scraper():
     help="Output format.",
 )
 @click.option("--no-robots", is_flag=True, default=False, help="Skip robots.txt check.")
-@click.option("--persist", is_flag=True, default=False, help="Persist result to CORTEX ledger.")
+@click.option(
+    "--persist", is_flag=True, default=False, help="Persist result to CORTEX ledger."
+)
 def scrape(
     url: str,
     strategy: str,
@@ -80,7 +86,9 @@ def scrape(
         raise SystemExit(1)
 
     # Display result
-    console.print(f"\n[bold green]✅ Extracted:[/bold green] {result.title or 'Untitled'}")
+    console.print(
+        f"\n[bold green]✅ Extracted:[/bold green] {result.title or 'Untitled'}"
+    )
     console.print(
         f"[dim]Strategy: {result.strategy_used.value} | "
         f"Time: {result.elapsed_ms:.0f}ms | "
@@ -128,9 +136,15 @@ def scrape(
     default="auto",
     help="Extraction strategy.",
 )
-@click.option("--concurrency", "-c", type=int, default=3, help="Max concurrent requests.")
-@click.option("--rate-limit", "-r", type=float, default=1.0, help="Requests per second.")
-@click.option("--output", "-o", type=click.Path(), default=None, help="Output directory.")
+@click.option(
+    "--concurrency", "-c", type=int, default=3, help="Max concurrent requests."
+)
+@click.option(
+    "--rate-limit", "-r", type=float, default=1.0, help="Requests per second."
+)
+@click.option(
+    "--output", "-o", type=click.Path(), default=None, help="Output directory."
+)
 def batch(
     file: str,
     strategy: str,
@@ -181,13 +195,18 @@ def batch(
         import os
 
         os.makedirs(output, exist_ok=True)
-        for _i, r in enumerate(job.results):
+        for r in job.results:
             if r.status == "success":
                 safe_name = r.url.replace("https://", "").replace("http://", "")
-                safe_name = safe_name.replace("/", "_")[:80]
-                filepath = os.path.join(output, f"{safe_name}.md")
-                with open(filepath, "w") as f:
-                    f.write(f"# {r.title}\n\n{r.content}")
+                safe_name = "".join(
+                    c if c.isalnum() or c in "._-" else "_" for c in safe_name
+                )[:80]
+                try:
+                    filepath = safe_path_join(output, f"{safe_name}.md")
+                    with open(filepath, "w") as f:
+                        f.write(f"# {r.title}\n\n{r.content}")
+                except (ValueError, OSError) as e:
+                    console.print(f"[dim red]⚠️ Failed to write {r.url}: {e}[/dim red]")
 
     console.print(
         f"\n[bold cyan]📦 BATCH COMPLETE:[/bold cyan] "
@@ -199,7 +218,9 @@ def batch(
 @scraper.command(name="map")
 @click.argument("url")
 @click.option("--depth", "-d", type=int, default=2, help="Max crawl depth.")
-@click.option("--output", "-o", type=click.Path(), default=None, help="Output file for URLs.")
+@click.option(
+    "--output", "-o", type=click.Path(), default=None, help="Output file for URLs."
+)
 def map_site(url: str, depth: int, output: Optional[str]):
     """Discover URLs from a website (sitemap)."""
     from cortex.cli.common import _run_async

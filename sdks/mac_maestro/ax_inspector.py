@@ -9,7 +9,6 @@ try:
     from ApplicationServices import (
         AXUIElementCopyAttributeValue,
         AXUIElementCreateApplication,
-        AXUIElementCreateSystemWide,
         kAXChildrenAttribute,
         kAXDescriptionAttribute,
         kAXEnabledAttribute,
@@ -116,6 +115,82 @@ def build_snapshot(
     return snapshot
 
 
+def compress_snapshot(
+    snapshot: AXNodeSnapshot,
+    indent: int = 0,
+    max_elements: int = 100,
+    current_count: list[int] | None = None,
+) -> str:
+    """
+    Compress an AX snapshot into a compact XML-like string for LLM.
+    Filters for relevant interactable elements.
+    """
+    if current_count is None:
+        current_count = [0]
+
+    if current_count[0] > max_elements:
+        return ""
+
+    # Filter: only keep elements with title, description, identifier or value
+    # AND skip container roles that are purely structural unless they have children
+    meaningful = any([
+        snapshot.title,
+        snapshot.description,
+        snapshot.identifier,
+        snapshot.value
+    ])
+
+    # Roles we ALWAYS want to see if they have content
+    INTERACTABLE_ROLES = {
+        "AXButton", "AXTextField", "AXTextArea", "AXMenuItem",
+        "AXCheckBox", "AXRadioButton", "AXComboBox", "AXPopUpButton",
+        "AXTabGroup", "AXTable", "AXStaticText", "AXLink", "AXImage"
+    }
+
+    if not meaningful and snapshot.role not in INTERACTABLE_ROLES:
+        # If not meaningful itself, maybe its children are?
+        child_strings = []
+        for child in snapshot.children:
+            child_strings.append(
+                compress_snapshot(child, indent, max_elements, current_count)
+            )
+        return "".join(filter(None, child_strings))
+
+    current_count[0] += 1
+
+    # Build tag
+    role = (snapshot.role or "element").replace("AX", "")
+    parts = [f"<{role}"]
+
+    if snapshot.title:
+        parts.append(f'title="{snapshot.title}"')
+    if snapshot.identifier:
+        parts.append(f'id="{snapshot.identifier}"')
+    if snapshot.value:
+        # Truncate long values
+        val = str(snapshot.value)
+        if len(val) > 30:
+            val = val[:27] + "..."
+        parts.append(f'value="{val}"')
+    if snapshot.description:
+        parts.append(f'desc="{snapshot.description}"')
+
+    opening = " ".join(parts)
+
+    child_strings = []
+    for child in snapshot.children:
+        child_strings.append(
+            compress_snapshot(child, indent + 1, max_elements, current_count)
+        )
+
+    children_content = "".join(filter(None, child_strings))
+
+    ind = "  " * indent
+    if children_content:
+        return f"{ind}{opening}>\n{children_content}{ind}</{role}>\n"
+    return f"{ind}{opening} />\n"
+
+
 def get_window_title(pid: int) -> str | None:
     """Extract the title of the first AXWindow of an application."""
     check_ax_availability()
@@ -133,4 +208,5 @@ def get_window_title(pid: int) -> str | None:
 def inspect_app(pid: int) -> AXNodeSnapshot:
     """Create an AX snapshot for an application."""
     check_ax_availability()
-    return build_snapshot(AXUIElementCreateApplication(pid))
+    element = AXUIElementCreateApplication(pid)
+    return build_snapshot(element)

@@ -224,16 +224,17 @@ class AsyncCausalGraph:
                     },
                 )
 
-            # Traverse structural edges only
-            async with self.conn.execute(
-                "SELECT fact_id FROM causal_edges WHERE parent_id = ? AND edge_type != ?",
-                (current_id, EDGE_TAINTED_BY),
-            ) as cursor:
-                async for row in cursor:
-                    child_id: int = row[0]
-                    if child_id not in visited:
-                        visited.add(child_id)
-                        queue.append((child_id, depth + 1))
+        # Traverse structural edges only for this tenant
+        async with self.conn.execute(
+            "SELECT fact_id FROM causal_edges "
+            "WHERE parent_id = ? AND edge_type != ? AND tenant_id = ?",
+            (current_id, EDGE_TAINTED_BY, tenant_id),
+        ) as cursor:
+            async for row in cursor:
+                child_id: int = row[0]
+                if child_id not in visited:
+                    visited.add(child_id)
+                    queue.append((child_id, depth + 1))
 
         return TaintReport(
             source_fact_id=fact_id,
@@ -250,7 +251,8 @@ class AsyncCausalGraph:
         while queue:
             current_id = queue.pop(0)
             async with self.conn.execute(
-                "SELECT fact_id FROM causal_edges WHERE parent_id = ? AND tenant_id = ?",
+                "SELECT fact_id FROM causal_edges "
+                "WHERE parent_id = ? AND tenant_id = ?",
                 (current_id, tenant_id),
             ) as cursor:
                 async for row in cursor:
@@ -267,14 +269,22 @@ class AsyncCausalOracle:
 
     @staticmethod
     async def find_parent_signal(
-        conn: aiosqlite.Connection, project: Optional[str] = None
+        conn: aiosqlite.Connection,
+        project: Optional[str] = None,
+        tenant_id: str = "default",
     ) -> Optional[int]:
         """Finds the most recent unconsumed causal signal."""
         try:
             bus = AsyncSignalBus(conn)
-            recent = await bus.history(project=project, limit=5)
+            recent = await bus.history(
+                project=project, tenant_id=tenant_id, limit=5
+            )
             for sig in recent:
-                if sig.event_type in ("plan:done", "task:start", "apotheosis:heal"):
+                if sig.event_type in (
+                    "plan:done",
+                    "task:start",
+                    "apotheosis:heal",
+                ):
                     return sig.id
         except Exception as e:
             logger.debug("Async causal lookup failed: %s", e)
@@ -285,16 +295,24 @@ class CausalOracle:
     """Interprets the Signal Bus to find the parent of a fact (sync)."""
 
     @staticmethod
-    def find_parent_signal(db_path: str, project: Optional[str] = None) -> Optional[int]:
+    def find_parent_signal(
+        db_path: str, project: Optional[str] = None, tenant_id: str = "default"
+    ) -> Optional[int]:
         """Finds the most recent unconsumed causal signal."""
         import sqlite3
 
         try:
             with sqlite3.connect(db_path) as conn:
                 bus = SignalBus(conn)
-                recent = bus.history(project=project, limit=5)
+                recent = bus.history(
+                    project=project, tenant_id=tenant_id, limit=5
+                )
                 for sig in recent:
-                    if sig.event_type in ("plan:done", "task:start", "apotheosis:heal"):
+                    if sig.event_type in (
+                        "plan:done",
+                        "task:start",
+                        "apotheosis:heal",
+                    ):
                         return sig.id
         except Exception as e:
             logger.debug("Sync causal lookup failed: %s", e)

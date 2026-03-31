@@ -169,7 +169,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             tx_id
             if tx_id is not None
             else await self._log_transaction(
-                conn, project, "store", {"fact_type": fact_type}
+                conn, tenant_id, project, "store", {"fact_type": fact_type}
             )
         )
         fact_id = await insert_fact_record(

@@ -86,27 +86,15 @@ def _get_auth_manager() -> ApiKeyManager:
 def _validate_export_path(path: Optional[str], project: str, lang: str) -> Path:
     """Validate and resolve export path with traversal protection.
 
-    Uses strict Path resolution to prevent TOCTOU and symlink attacks.
+    Uses safe_path_join to incarceration to prevent directory traversal.
     """
+    from cortex.extensions.security.guards import safe_path_join
+
     if not path:
         return Path.cwd() / f"{project}_export.json"
 
-    if any(c in path for c in _DANGEROUS_PATH_CHARS) or ".." in path:
-        raise HTTPException(
-            status_code=400,
-            detail=get_trans("error_invalid_path_chars", lang),
-        )
-
     try:
-        base_dir = Path.cwd().resolve(strict=True)
-        target_path = Path(path).resolve()
-        # Use os.path.commonpath for symlink-safe comparison
-        if not target_path.is_relative_to(base_dir):
-            raise HTTPException(
-                status_code=400,
-                detail=get_trans("error_path_workspace", lang),
-            )
-        return target_path
+        return safe_path_join(Path.cwd(), path)
     except (ValueError, RuntimeError, OSError):
         raise HTTPException(
             status_code=400, detail=get_trans("error_invalid_input", lang)

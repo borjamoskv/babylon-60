@@ -89,11 +89,13 @@ moskv-daemon = "cortex.daemon_cli:main"
 cortex-adk = "cortex.adk.runner:main"
 
 [build-system]
-requires = ["setuptools>=68.0"]
-build-backend = "setuptools.build_meta"
+requires = ["maturin>=1.4,<2.0"]
+build-backend = "maturin"
 
-[tool.setuptools.packages.find]
-include = ["cortex*"]
+[tool.maturin]
+features = ["pyo3/extension-module"]
+module-name = "cortex.cortex_rs"
+manifest-path = "src/cortex_rs/Cargo.toml"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

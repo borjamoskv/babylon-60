@@ -10,39 +10,35 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional
 
-__all__ = [
-    "Confidence",
-    "CONFIDENCE_ORDER",
-    "FactNode",
-    "REVERSE_CONFIDENCE_ORDER",
-    "TaintStatus",
-]
+try:
+    from cortex.cortex_rs import Confidence, FactNode, TaintStatus
+except ImportError:
+    # Fallback to Python if Rust extension is missing (pre-compilation state)
+    class Confidence(str, Enum):
+        C1 = "C1"
+        C2 = "C2"
+        C3 = "C3"
+        C4 = "C4"
+        C5 = "C5"
 
+    class TaintStatus(str, Enum):
+        CLEAN = "clean"
+        SUSPECT = "suspect"
+        TAINTED = "tainted"
 
-class Confidence(str, Enum):
-    """Epistemic confidence levels C1 (hypothesis) → C5 (confirmed)."""
-
-    C1 = "C1"
-    C2 = "C2"
-    C3 = "C3"
-    C4 = "C4"
-    C5 = "C5"
-
-
-class TaintStatus(str, Enum):
-    """Tri-state causal taint.
-
-    - CLEAN: no contamination detected
-    - SUSPECT: at least one parent is tainted, but threshold not reached
-    - TAINTED: node is invalidated or ≥50% parents are tainted
-    """
-
-    CLEAN = "clean"
-    SUSPECT = "suspect"
-    TAINTED = "tainted"
-
+    @dataclass
+    class FactNode:
+        fact_id: str
+        confidence: Confidence
+        effective_confidence: Confidence
+        invalidated: bool = False
+        taint_status: TaintStatus = TaintStatus.CLEAN
+        parents: list[str] = field(default_factory=list)
+        children: list[str] = field(default_factory=list)
+        source: Optional[str] = None
 
 # Ordinal mapping for confidence arithmetic
+# Note: cortex_rs enums start at 0, but we maintain the Python-style mapping for now
 CONFIDENCE_ORDER: dict[Confidence, int] = {
     Confidence.C1: 1,
     Confidence.C2: 2,
@@ -53,27 +49,3 @@ CONFIDENCE_ORDER: dict[Confidence, int] = {
 
 REVERSE_CONFIDENCE_ORDER: dict[int, Confidence] = {v: k for k, v in CONFIDENCE_ORDER.items()}
 
-
-@dataclass
-class FactNode:
-    """A node in the causal DAG with taint and confidence tracking.
-
-    Attributes:
-        fact_id: Unique identifier for this fact.
-        confidence: Original assessed confidence level.
-        effective_confidence: Confidence after taint propagation adjustments.
-        invalidated: Whether this fact has been explicitly invalidated.
-        taint_status: Current taint state (clean/suspect/tainted).
-        parents: IDs of parent nodes in the causal DAG.
-        children: IDs of child nodes in the causal DAG.
-        source: Origin of the fact (agent:gemini, human, cli, api).
-    """
-
-    fact_id: str
-    confidence: Confidence
-    effective_confidence: Confidence
-    invalidated: bool = False
-    taint_status: TaintStatus = TaintStatus.CLEAN
-    parents: list[str] = field(default_factory=list)
-    children: list[str] = field(default_factory=list)
-    source: Optional[str] = None

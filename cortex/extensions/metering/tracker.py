@@ -247,3 +247,18 @@ class UsageTracker:
                 tokens_used=tokens_used,
             )
         )
+
+    def register_token_spend(
+        self,
+        tenant_id: str,
+        endpoint: str,
+        tokens_used: int,
+    ) -> None:
+        """Enforces O(1) LLM token spend registration within current month bucket."""
+        self.record_call(
+            tenant_id=tenant_id,
+            endpoint=endpoint,
+            method="POST",
+            status_code=200,
+            tokens_used=tokens_used,
+        )

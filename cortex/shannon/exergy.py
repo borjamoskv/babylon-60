@@ -80,3 +80,20 @@ def enforce_exergy(result: ExergyResult) -> None:
             f"signal_gain={result.signal_gain:.6f}, "
             f"penalty={result.reversibility_penalty:.6f}"
         )
+
+
+def calculate_net_exergy(
+    original_tokens: int, compressed_tokens: int, compression_latency_ms: float
+) -> float:
+    """Calculates thermodynamic efficiency of token reduction layer.
+    
+    Returns >0 if profitable, <0 if compute cost outweighs token savings.
+    Uses heuristic: 1ms of sync compression latency is equivalent to 0.5 tokens of waste.
+    """
+    if original_tokens <= 0:
+        return 0.0
+
+    token_savings = original_tokens - compressed_tokens
+    compute_penalty = compression_latency_ms * 0.5
+
+    return float(token_savings - compute_penalty)

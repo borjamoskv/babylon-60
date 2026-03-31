@@ -33,6 +33,7 @@ class PlanQuota:
     search_depth: int  # Max graph_depth for search
     batch_size: int  # Max items per batch request
     ledger_verify: bool  # Can verify ledger integrity
+    token_budget: int  # Monthly token budget (-1 = unlimited)
 
 
 PLAN_QUOTAS: dict[str, PlanQuota] = {
@@ -45,6 +46,7 @@ PLAN_QUOTAS: dict[str, PlanQuota] = {
         search_depth=1,
         batch_size=10,
         ledger_verify=False,
+        token_budget=1_000_000,
     ),
     "pro": PlanQuota(
         name="pro",
@@ -55,6 +57,7 @@ PLAN_QUOTAS: dict[str, PlanQuota] = {
         search_depth=3,
         batch_size=100,
         ledger_verify=True,
+        token_budget=50_000_000,
     ),
     "team": PlanQuota(
         name="team",
@@ -65,6 +68,7 @@ PLAN_QUOTAS: dict[str, PlanQuota] = {
         search_depth=5,
         batch_size=500,
         ledger_verify=True,
+        token_budget=-1,
     ),
 }
 
@@ -80,6 +84,8 @@ class QuotaCheckResult:
     remaining: int
     limit: int
     used: int
+    token_limit: int
+    tokens_used: int
     plan: str
     reset_at: str  # ISO timestamp of month reset
 
@@ -110,25 +116,38 @@ class QuotaEnforcer:
         quota = PLAN_QUOTAS.get(plan, PLAN_QUOTAS["free"])
         usage = self._tracker.get_usage(tenant_id)
         calls_used = usage["calls_used"]
+        tokens_used = usage["tokens_used"]
 
         # Unlimited plan
-        if quota.calls_limit == -1:
+        if quota.calls_limit == -1 and quota.token_budget == -1:
             return QuotaCheckResult(
                 allowed=True,
                 remaining=-1,
                 limit=-1,
                 used=calls_used,
+                token_limit=-1,
+                tokens_used=tokens_used,
                 plan=plan,
                 reset_at=self._next_reset(),
             )
 
-        remaining = max(0, quota.calls_limit - calls_used)
+        r_calls = max(0, quota.calls_limit - calls_used)
+        remaining_calls = r_calls if quota.calls_limit != -1 else float("inf")
+
+        r_tokens = max(0, quota.token_budget - tokens_used)
+        remaining_tokens = r_tokens if quota.token_budget != -1 else float("inf")
+
+        allowed = remaining_calls > 0 and remaining_tokens > 0
+
+        rem_out = -1 if remaining_calls == float("inf") else int(remaining_calls)
 
         return QuotaCheckResult(
-            allowed=remaining > 0,
-            remaining=remaining,
+            allowed=allowed,
+            remaining=rem_out,
             limit=quota.calls_limit,
             used=calls_used,
+            token_limit=quota.token_budget,
+            tokens_used=tokens_used,
             plan=plan,
             reset_at=self._next_reset(),
         )
@@ -145,6 +164,7 @@ class QuotaEnforcer:
             "search_depth": quota.search_depth,
             "batch_size": quota.batch_size,
             "ledger_verify": quota.ledger_verify,
+            "token_budget": quota.token_budget,
         }
 
     @staticmethod

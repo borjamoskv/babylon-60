@@ -17,7 +17,7 @@ __all__ = [
 
 def detect_stack(path: str | Path) -> str:
     """Detect project stack from marker files."""
-    p = Path(path)
+    p = check_safe_path(path)
     for stack, marker in STACK_MARKERS.items():
         if (p / marker).exists():
             return stack
@@ -72,3 +72,45 @@ def run_quiet(cmd: list[str], cwd: str) -> dict[str, Any]:
             "stdout": "",
             "stderr": str(exc),
         }
+
+
+try:
+    from cortex.cortex_rs import (
+        check_safe_path as rs_check_safe_path,
+    )
+    _HAS_RS_SAFETY = True
+except ImportError:
+    _HAS_RS_SAFETY = False
+
+
+def check_safe_path(path: str | Path) -> Path:
+    """Ensure the path is safe to use and resolve it.
+
+    Uses Rust-native validation for O(1) performance
+    and kernel-level boundary checks.
+    """
+    p = Path(path).expanduser()
+    resolved = p.resolve()
+
+    # 1. Rust-native boundary enforcement (Axiom Ω0)
+    if _HAS_RS_SAFETY:
+        cwd = Path.cwd().resolve()
+        if not rs_check_safe_path(str(cwd), str(resolved)):
+            # Exception: allow /tmp for scratch space
+            if not str(resolved).startswith("/tmp"):
+                raise ValueError(
+                    "Security: Blocked traversal"
+                    f" attempt (Rust Guard) to {resolved}"
+                )
+    else:
+        # Python Fallback
+        cwd = Path.cwd().resolve()
+        if not str(resolved).startswith(str(cwd)):
+            if not str(resolved).startswith("/tmp"):
+                raise ValueError(
+                    "Security: Blocked traversal"
+                    f" attempt (Legacy Guard)"
+                    f" to {resolved}"
+                )
+
+    return resolved

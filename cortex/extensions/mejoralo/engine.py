@@ -12,7 +12,7 @@ from .ledger import get_history, get_scars, record_scar, record_session
 from .models import ScanResult, ShipResult
 from .scan import scan
 from .ship import check_ship_gate
-from .utils import detect_stack
+from .utils import check_safe_path, detect_stack
 
 __all__ = ["MejoraloEngine"]
 
@@ -84,7 +84,7 @@ class MejoraloEngine:
         from .heal import _apply_aesthetic_formatting
         from .swarm import MejoraloSwarm
 
-        abs_path = Path(file_path).resolve()
+        abs_path = check_safe_path(file_path)
         if not abs_path.exists():
             logger.error("Awwwards fix failed: file not found %s", abs_path)
             return False

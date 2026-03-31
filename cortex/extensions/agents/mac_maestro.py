@@ -59,7 +59,8 @@ SYSTEM_PROMPT = (
     "You are Mac Maestro, a sovereign macOS automation agent "
     "inside CORTEX.\n\n"
     "## Task\n"
-    "Given a user instruction, produce a JSON execution plan.\n\n"
+    "Given a user instruction and the current UI State, "
+    "produce a JSON execution plan.\n\n"
     "## Output Format\n"
     "Return ONLY a JSON object (no markdown):\n"
     "```json\n"
@@ -80,17 +81,17 @@ SYSTEM_PROMPT = (
     "}\n"
     "```\n\n"
     "## Vectors\n"
-    "- A (AppleScript): target_query has script/app_name/url\n"
-    "- B (AXUIElement): target_query has role/title/id\n"
-    "- C (Keyboard): target_query has text or keycode\n"
-    "- D (CGEvent): target_query has x/y coords\n\n"
-    "## Rules\n"
-    "1. Prefer B for clicking UI elements.\n"
-    "2. Use A for AppleScript or app activation.\n"
-    "3. Use C for typing or key presses.\n"
-    "4. Use D only for pixel-precise ops.\n"
-    '5. Set "unsafe": true on destructive ops.\n'
-    "6. bundle_id must be a real macOS identifier.\n"
+    "- A (AppleScript): Use for logic or complex app state. "
+    'target_query: {"script": "...", "app_name": "..."}\n'
+    "- B (AXUIElement): PREFERRED. Use coordinates or attributes from UI State. "
+    'target_query: {"title": "...", "role": "...", "id": "..."}\n'
+    "- C (Keyboard): Use for typing/hotkeys. "
+    'target_query: {"text": "...", "keys": ["command", "c"]}\n'
+    "- D (CGEvent): Legacy. Use for absolute coordinates if B fails.\n\n"
+    "## UI State\n"
+    "You will receive a compressed XML-like view of the frontmost app. "
+    "Use 'title', 'id', or 'role' in your Vector B target_query to match "
+    "elements accurately.\n"
 )
 
 
@@ -115,9 +116,18 @@ class MacMaestroAgent:
 
         logger.info("Mac Maestro v2 processing: %s", instruction)
 
+        # Phase 0: Inject desktop context
+        context = await self._get_desktop_context()
+        augmented = instruction
+        if context:
+            augmented = (
+                f"[Desktop state: {context}]\n\n"
+                f"User instruction: {instruction}"
+            )
+
         # Phase 1: LLM generates structured plan
         response = await self.llm.complete(
-            prompt=instruction,
+            prompt=augmented,
             system=SYSTEM_PROMPT,
             temperature=0.05,
             max_tokens=4096,
@@ -132,6 +142,10 @@ class MacMaestroAgent:
 
         plan = self._parse_json_response(response)
         if not plan:
+            return await self._legacy_fallback(instruction, response)
+
+        # V1 compat: {script, explanation} → legacy path
+        if "script" in plan and "actions" not in plan:
             return await self._legacy_fallback(
                 instruction, response,
             )
@@ -163,11 +177,44 @@ class MacMaestroAgent:
                 "raw_plan": plan,
             }
 
-        # Phase 3: Execute via SDK
+        # Phase 3: Execute via SDK (with 1 retry)
         result = await self._execute_plan(
             bundle_id, actions_raw, explanation,
         )
         result["plan"] = plan
+
+        # Phase 4: Self-correction on failure
+        if not result.get("success") and context:
+            err = result.get("error", "Unknown error")
+            logger.info("Retrying with error feedback: %s", err)
+            retry_prompt = (
+                f"[Desktop state: {context}]\n"
+                f"[Previous plan FAILED: {err}]\n\n"
+                f"User instruction: {instruction}\n"
+                "Fix the plan to avoid the error."
+            )
+            resp2 = await self.llm.complete(
+                prompt=retry_prompt,
+                system=SYSTEM_PROMPT,
+                temperature=0.1,
+                max_tokens=4096,
+                intent=IntentProfile.CODE,
+            )
+            plan2 = self._parse_json_response(
+                resp2 or "",
+            )
+            if plan2 and plan2.get("actions"):
+                bid2 = plan2.get("bundle_id", bundle_id)
+                acts2 = plan2["actions"]
+                expl2 = plan2.get(
+                    "explanation", "Retry plan.",
+                )
+                result = await self._execute_plan(
+                    bid2, acts2, expl2,
+                )
+                result["plan"] = plan2
+                result["retry"] = True
+
         return result
 
     # ── SDK Execution ─────────────────────────────────────────
@@ -228,11 +275,21 @@ class MacMaestroAgent:
         self, raw: dict[str, Any], UIActionCls: type,
     ) -> Any:
         """Convert JSON dict to UIAction dataclass."""
+        vector = raw.get("vector", "A").upper()
+        if vector not in self._VALID_VECTORS:
+            logger.warning(
+                "Invalid vector '%s' clamped to A.", vector,
+            )
+            vector = "A"
+
         fallbacks = []
         for fb in raw.get("fallbacks", []):
+            fb_vec = fb.get("vector", "A").upper()
+            if fb_vec not in self._VALID_VECTORS:
+                fb_vec = "A"
             fallbacks.append(UIActionCls(
                 name=fb.get("name", "fallback"),
-                vector=fb.get("vector", "A"),
+                vector=fb_vec,
                 target_query=fb.get("target_query", {}),
                 idempotent=fb.get("idempotent", True),
                 retry_limit=fb.get("retry_limit", 1),
@@ -241,7 +298,7 @@ class MacMaestroAgent:
 
         return UIActionCls(
             name=raw.get("name", "unnamed"),
-            vector=raw.get("vector", "A"),
+            vector=vector,
             target_query=raw.get("target_query", {}),
             idempotent=raw.get("idempotent", True),
             retry_limit=raw.get("retry_limit", 2),
@@ -354,10 +411,7 @@ class MacMaestroAgent:
             if init.exists():
                 return str(c)
         return None
-
-    def _parse_json_response(
-        self, text: str,
-    ) -> Optional[dict[str, Any]]:
+    def _parse_json_response(self, text: str) -> Optional[dict[str, Any]]:
         """Multi-strategy JSON extraction."""
         # Strategy 1: direct parse
         try:
@@ -401,3 +455,53 @@ class MacMaestroAgent:
                     start = None
 
         return None
+
+    # ── Desktop Context ───────────────────────────────────────
+
+    _VALID_VECTORS = frozenset({"A", "B", "C", "D"})
+
+    async def _get_desktop_context(self) -> Optional[str]:
+        """Query current desktop state and UI tree for LLM grounding."""
+        try:
+            # 1. Get frontmost app info via AppleScript
+            ok, out, _ = await run_applescript(
+                'tell application "System Events" to get '
+                "{name, unix id} of first application process "
+                "whose frontmost is true",
+            )
+            if not (ok and out):
+                return None
+
+            # Parse "Name, PID"
+            parts = [p.strip() for p in out.split(",")]
+            if len(parts) < 2:
+                return f"Frontmost: {out.strip()}"
+
+            frontmost = parts[0]
+            pid = int(parts[1])
+            context = f"Frontmost: {frontmost} (PID: {pid})"
+
+            # 2. Try to get UI Tree from SDK
+            sdk_path = self._ensure_sdk_path()
+            if sdk_path:
+                if sdk_path not in sys.path:
+                    sys.path.insert(0, sdk_path)
+
+                try:
+                    from mac_maestro.ax_inspector import (
+                        compress_snapshot,
+                        inspect_app,
+                    )
+                    snapshot = inspect_app(pid)
+                    if snapshot:
+                        ui_dump = compress_snapshot(snapshot, max_elements=50)
+                        if ui_dump:
+                            context += f"\n\n## UI State (AX Tree)\n{ui_dump}"
+                except Exception as e:
+                    logger.debug("Failed to get AX dump: %s", e)
+
+            return context
+        except Exception as e:
+            logger.debug("Desktop context failed: %s", e)
+        return None
+

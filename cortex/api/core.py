@@ -226,13 +226,19 @@ app.add_middleware(MeteringMiddleware)
 
 @app.exception_handler(ValueError)
 async def value_error_handler(request: Request, exc: ValueError) -> JSONResponse:
-    return JSONResponse(status_code=422, content={"detail": str(exc)})
+    """Handle validation errors without leaking sensitive internal details."""
+    lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
+    logger.warning("Validation Error [%s]: %s", request.url.path, type(exc).__name__)
+    return JSONResponse(
+        status_code=422,
+        content={"detail": get_trans("error_invalid_request", lang)},
+    )
 
 
 @app.exception_handler(sqlite3.Error)
 async def sqlite_error_handler(request: Request, exc: sqlite3.Error) -> JSONResponse:
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
-    logger.error("Sovereign DB Error: %s", exc)
+    logger.error("Sovereign DB Error: %s", type(exc).__name__)
 
     # PULMONES: Map WAL locks to graceful 503 (Triangulación Antifrágil)
     if "database is locked" in str(exc).lower():
@@ -249,11 +255,10 @@ async def sqlite_error_handler(request: Request, exc: sqlite3.Error) -> JSONResp
 async def universal_error_handler(request: Request, exc: Exception) -> JSONResponse:
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
     logger.error(
-        "Sovereign Critical Error | Path: %s | Method: %s | Exc: %s",
+        "Sovereign Critical Error | Path: %s | Method: %s | Type: %s",
         request.url.path,
         request.method,
-        exc,
-        exc_info=True,
+        type(exc).__name__,
     )
     return JSONResponse(status_code=500, content={"detail": get_trans("error_unexpected", lang)})
 

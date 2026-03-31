@@ -125,21 +125,27 @@ class AsyncCortexEngine(
         return self._ledger
 
     async def _log_transaction(
-        self, conn: aiosqlite.Connection, project: str, action: str, detail: dict[str, Any]
+        self,
+        conn: aiosqlite.Connection,
+        tenant_id: str,
+        project: str,
+        action: str,
+        detail: dict[str, Any],
     ) -> int:
         dj = canonical_json(detail)
         ts = now_iso()
-        prev_hash = await self._get_previous_hash(conn)
-        th = compute_tx_hash(prev_hash, project, action, dj, ts)
+        prev_hash = await self._get_previous_hash(conn, tenant_id)
+        th = compute_tx_hash(prev_hash, tenant_id, project, action, dj, ts)
 
         cursor = await conn.execute(
-            "INSERT INTO transactions (project, action, detail, prev_hash, hash, timestamp) "
-            "VALUES (?, ?, ?, ?, ?, ?)",
-            (project, action, dj, prev_hash, th, ts),
+            "INSERT INTO transactions (tenant_id, project, action, detail, prev_hash, hash, timestamp) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (tenant_id, project, action, dj, prev_hash, th, ts),
         )
         await self._update_transaction_hash_if_needed(
             conn,
             cursor.lastrowid,
+            tenant_id,
             project,
             action,
             dj,
@@ -159,8 +165,11 @@ class AsyncCortexEngine(
             )
         return tx_id  # type: ignore[type-error]
 
-    async def _get_previous_hash(self, conn: aiosqlite.Connection) -> str:
-        async with conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1") as cursor:
+    async def _get_previous_hash(self, conn: aiosqlite.Connection, tenant_id: str) -> str:
+        async with conn.execute(
+            "SELECT hash FROM transactions WHERE tenant_id = ? ORDER BY id DESC LIMIT 1",
+            (tenant_id,),
+        ) as cursor:
             prev = await cursor.fetchone()
             return prev[0] if prev else "GENESIS"
 
@@ -168,18 +177,23 @@ class AsyncCortexEngine(
         self,
         conn: aiosqlite.Connection,
         tx_id: int,
+        tenant_id: str,
         project: str,
         action: str,
         dj: str,
         ts: str,
         initial_ph: str,
     ):
-        async with conn.execute("SELECT prev_hash FROM transactions WHERE id = ?", (tx_id,)) as c2:
+        async with conn.execute(
+            "SELECT prev_hash FROM transactions WHERE id = ?", (tx_id,)
+        ) as c2:
             row = await c2.fetchone()
             actual_ph = row[0] if row else initial_ph
             if actual_ph != initial_ph:
-                th = compute_tx_hash(actual_ph, project, action, dj, ts)
-                await conn.execute("UPDATE transactions SET hash = ? WHERE id = ?", (th, tx_id))
+                th = compute_tx_hash(actual_ph, tenant_id, project, action, dj, ts)
+                await conn.execute(
+                    "UPDATE transactions SET hash = ? WHERE id = ?", (th, tx_id)
+                )
 
     async def verify_ledger(self) -> dict[str, Any]:
         return await self._get_ledger().verify_integrity_async()

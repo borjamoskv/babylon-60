@@ -25,6 +25,7 @@ from cortex.extensions.scraper.models import (
     ScrapeRequest,
     ScrapeResult,
 )
+from cortex.extensions.security.guards import is_safe_url
 
 LOG = logging.getLogger("cortex.extensions.scraper.engine")
 
@@ -54,6 +55,15 @@ class ScraperEngine:
         Returns:
             ScrapeResult with extracted content or error details.
         """
+        # SSRF Protection
+        if not is_safe_url(request.url):
+            return ScrapeResult.from_error(
+                url=request.url,
+                error="Blocked by security policy (SSRF protection)",
+                strategy=request.strategy,
+                elapsed_ms=0,
+            )
+
         # Robots.txt compliance
         if request.respect_robots:
             allowed = await check_robots_txt(request.url)
@@ -84,7 +94,9 @@ class ScraperEngine:
 
         return result
 
-    async def scrape_url(self, url: str, strategy: str = "auto") -> ScrapeResult:
+    async def scrape_url(
+        self, url: str, strategy: str = "auto",
+    ) -> ScrapeResult:
         """Convenience method — scrape a URL with minimal config."""
         strat = ExtractionStrategy(strategy)
         request = ScrapeRequest(url=url, strategy=strat)
@@ -143,10 +155,14 @@ class ScraperEngine:
             if isinstance(r, ScrapeResult):
                 job.results.append(r)
             elif isinstance(r, Exception):
+                LOG.error("Batch extraction error: %s", r)
                 job.results.append(
                     ScrapeResult.from_error(
                         url="unknown",
-                        error=str(r),
+                        error=(
+                            "Internal extraction error"
+                            " during batch processing"
+                        ),
                         strategy=strategy,
                         elapsed_ms=0,
                     )
@@ -198,7 +214,17 @@ class ScraperEngine:
             try:
                 import httpx as _httpx
 
-                async with _httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
+                async with _httpx.AsyncClient(
+                    timeout=10.0, follow_redirects=True
+                ) as client:
+                    if not is_safe_url(current_url):
+                        LOG.warning(
+                            "🛡️ [SSRF] Blocked "
+                            "internal URL: %s",
+                            current_url,
+                        )
+                        continue
+
                     response = await client.get(current_url)
                     if response.status_code != 200:
                         continue
@@ -206,12 +232,16 @@ class ScraperEngine:
                     # Simple link extraction via regex
                     import re
 
-                    links = re.findall(r'href=["\']([^"\']+)["\']', response.text)
+                    pat = r'href=["\']([^"\']+)["\']'
+                    links = re.findall(
+                        pat, response.text,
+                    )
                     for link in links:
                         absolute = urljoin(current_url, link)
                         parsed = urlparse(absolute)
                         # Same domain only
-                        if parsed.netloc == base_domain and absolute not in visited:
+                        same = parsed.netloc == base_domain
+                        if same and absolute not in visited:
                             to_visit.append((absolute, depth + 1))
                             discovered.add(absolute)
 
@@ -246,7 +276,9 @@ class ScraperEngine:
             )
 
         try:
-            title, content = await extractor.extract(request.url, request.timeout)
+            title, content = await extractor.extract(
+                request.url, request.timeout,
+            )
             return ScrapeResult.from_extraction(
                 url=request.url,
                 title=title,
@@ -303,9 +335,17 @@ class ScraperEngine:
                 errors.append(f"{key}: {e}")
 
         # All strategies exhausted
+        LOG.error(
+            "All strategies failed for %s: %s",
+            url,
+            "; ".join(errors),
+        )
         return ScrapeResult.from_error(
             url=url,
-            error=f"All strategies failed: {'; '.join(errors)}",
+            error=(
+                "All extraction strategies exhausted."
+                " Content could not be retrieved."
+            ),
             strategy=ExtractionStrategy.AUTO,
             elapsed_ms=0,
         )

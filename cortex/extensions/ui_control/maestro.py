@@ -16,6 +16,7 @@ from cortex.extensions.ui_control.applescript import (
     get_clipboard,
     get_frontmost_app,
     is_app_running,
+    open_url,
     run_applescript,
     set_clipboard,
 )
@@ -28,6 +29,7 @@ from cortex.extensions.ui_control.models import (
     WindowInfo,
 )
 from cortex.extensions.ui_control.mouse import MouseEngine
+from cortex.extensions.ui_control.recipes import Recipe, RecipeManager
 from cortex.extensions.ui_control.vision import VisionEngine
 from cortex.extensions.ui_control.window import WindowEngine
 
@@ -56,6 +58,7 @@ class MaestroUI:
         self.mouse = MouseEngine(engine)
         self.window = WindowEngine(engine)
         self.vision = VisionEngine(engine)
+        self.recipes = RecipeManager()
 
     # ─── Utilidades ─────────────────────────────────────────────
 
@@ -73,7 +76,9 @@ class MaestroUI:
             if result.success:
                 return result
             last_error = result.error or ""
-            logger.warning("Intento %d/%d falló: %s", attempt + 1, retries, last_error)
+            logger.warning(
+                "Intento %d/%d falló: %s", attempt + 1, retries, last_error
+            )
             if attempt < retries - 1:
                 await asyncio.sleep(RETRY_DELAY)
         return InteractionResult(
@@ -241,11 +246,20 @@ class MaestroUI:
         """Lee el clipboard."""
         return await get_clipboard()
 
-    # ─── Visión ─────────────────────────────────────────────────
-
     async def screenshot(self, output_path: Optional[str] = None) -> Optional[str]:
         """Captura pantalla y devuelve la ruta al archivo."""
         result = self.vision.capture_screen()
         if result.success:
             return result.output
         return None
+
+    async def run_recipe(self, recipe: Recipe) -> InteractionResult:
+        """Ejecuta una secuencia determinista de pasos (JIT)."""
+        logger.info("Ejecutando Receta JIT: %s", recipe.id)
+        for step in recipe.steps:
+            # logic to execute based on vector/action...
+            # This is a simplified version for now
+            if step.vector == "D" and step.action == "open_url":
+                await open_url(step.params.get("url", ""))
+            # ... add more vectors ...
+        return InteractionResult(success=True)

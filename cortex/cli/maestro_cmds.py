@@ -11,6 +11,9 @@ import asyncio
 from typing import Optional
 
 import click
+from rich.panel import Panel
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.table import Table
 
 from cortex.cli.common import console, get_engine
 from cortex.extensions.ui_control.maestro import MaestroUI
@@ -308,21 +311,158 @@ def capture_cmd(output: Optional[str]):
 @maestro.command("run")
 @click.argument("instruction", nargs=-1)
 def run_cmd(instruction: tuple[str, ...]):
-    """Ejecuta instrucción de lenguaje natural con Mac Maestro."""
+    """Ejecuta instrucción NL con Mac Maestro v2."""
     text = " ".join(instruction)
 
     async def _run():
         from cortex.extensions.agents.mac_maestro import MacMaestroAgent
 
         agent = MacMaestroAgent()
-        console.print(f"Maestro Ω procesando: '{text}'...")
-        res = await agent.execute(text)
+        
+        header = Panel(
+            f"[bold blue]MAC-MAESTRO Ω[/bold blue] [dim]v2.0[/dim]\n"
+            f"[white]Instruction:[/white] [cyan]{text}[/cyan]",
+            border_style="blue",
+            padding=(1, 2)
+        )
+        console.print(header)
+
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console,
+            transient=True,
+        ) as progress:
+            progress.add_task(description="Generating Execution Plan...", total=None)
+            res = await agent.execute(text)
+
+        if not res:
+            console.print("[red]✘ Agent returned no result.[/red]")
+            return
+
+        mode = res.get("mode", "sdk")
+        run_id = res.get("run_id", "n/a")
+        explanation = res.get("explanation", "No explanation provided.")
 
         if res.get("success"):
-            console.print(f"[green]✔ Éxito: {res.get('explanation')}[/green]")
-            if res.get("stdout"):
-                console.print(res["stdout"])
+            console.print(f"\n[bold green]✔ STRATEGY:[/bold green] [white]{explanation}[/white]")
+            
+            table = Table(box=None, padding=(0, 2))
+            table.add_column("State", width=3)
+            table.add_column("Action", style="cyan")
+            table.add_column("Vector", style="dim")
+
+            ar_list = res.get("action_results", [])
+            plan = res.get("plan", {})
+            actions_plan = plan.get("actions", [])
+
+            for i, ar in enumerate(ar_list):
+                nm = "Action"
+                vec = "?"
+                if i < len(actions_plan):
+                    nm = actions_plan[i].get("name", nm)
+                    vec = actions_plan[i].get("vector", vec)
+                
+                ok = False
+                if isinstance(ar, dict):
+                    ok = ar.get("success", False)
+                elif isinstance(ar, bool):
+                    ok = ar
+
+                mark = "[green]✔[/green]" if ok else "[red]✘[/red]"
+                table.add_row(mark, nm, f"Vector {vec}")
+
+            console.print(table)
+            console.print(f"\n[dim]Runtime: {mode} | ID: {run_id}[/dim]")
         else:
-            console.print(f"[red]✘ Error: {res.get('error') or res.get('stderr')}[/red]")
+            err = res.get("error") or res.get("stderr")
+            console.print("\n[bold red]✘ FAILURE[/bold red]")
+            console.print(f"[red]{err}[/red]")
+            if explanation:
+                console.print(f"[dim]{explanation}[/dim]")
 
     asyncio.run(_run())
+
+
+# ─── Chain (multi-instruction) ──────────────────────────────
+
+
+@maestro.command("chain")
+@click.argument("instructions", nargs=-1)
+@click.option(
+    "--separator", "-s", default="&&",
+    help="Delimitador entre instrucciones.",
+)
+def chain_cmd(instructions: tuple[str, ...], separator: str):
+    """Encadena múltiples instrucciones NL (&&-separadas)."""
+    raw = " ".join(instructions)
+    steps = [s.strip() for s in raw.split(separator) if s.strip()]
+
+    if not steps:
+        console.print("[red]No se proporcionaron pasos.[/red]")
+        return
+
+    async def _run():
+        from cortex.extensions.agents.mac_maestro import (
+            MacMaestroAgent,
+        )
+        agent = MacMaestroAgent()
+        total = len(steps)
+        ok_count = 0
+
+        for i, step in enumerate(steps, 1):
+            console.print(
+                f"\n[bold]Paso {i}/{total}:[/bold] {step}",
+            )
+            res = await agent.execute(step)
+            if res.get("success"):
+                console.print(
+                    f"  [green]✔ {res.get('explanation')}[/green]",
+                )
+                ok_count += 1
+            else:
+                err = res.get("error") or res.get("stderr")
+                console.print(f"  [red]✘ {err}[/red]")
+
+        console.print(
+            f"\n[bold]Resultado: {ok_count}/{total} OK[/bold]",
+        )
+
+    asyncio.run(_run())
+
+
+# ─── Wait For Element ────────────────────────────────────────
+
+
+@maestro.command("wait-for")
+@click.argument("app_name")
+@click.argument("identifier")
+@click.option(
+    "--timeout", "-t", default=10.0,
+    help="Timeout en segundos.",
+)
+def wait_for_cmd(app_name: str, identifier: str, timeout: float):
+    """Espera a que un elemento AX aparezca en una app."""
+
+    async def _run():
+        m = MaestroUI(engine=get_engine())
+        console.print(
+            f"Esperando '{identifier}' en {app_name}"
+            f" ({timeout}s)...",
+        )
+        el = await m.wait_for_element(
+            app_name, identifier, timeout,
+        )
+        if el:
+            console.print(
+                f"[green]✔ Elemento encontrado: "
+                f"{el.role} '{el.title}'[/green]",
+            )
+        else:
+            console.print(
+                f"[red]✘ Timeout: elemento "
+                f"'{identifier}' no encontrado[/red]",
+            )
+
+    asyncio.run(_run())
+

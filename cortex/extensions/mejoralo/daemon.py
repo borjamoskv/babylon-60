@@ -22,6 +22,7 @@ from cortex.extensions.mejoralo.constants import (
     DAEMON_DIM_SCORE_THRESHOLD,
 )
 from cortex.extensions.mejoralo.engine import MejoraloEngine
+from cortex.extensions.mejoralo.utils import check_safe_path
 from cortex.extensions.thinking.fusion import ContextFusion
 from cortex.telemetry.metrics import MetricsRegistry
 
@@ -43,7 +44,7 @@ class MejoraloDaemon:
         db_path: Optional[str | Path] = None,
     ):
         self.project = project
-        self.base_path = Path(base_path).resolve()
+        self.base_path = check_safe_path(base_path)
         self.scan_interval = scan_interval
         self.target_score = target_score
         self.metrics = metrics or MetricsRegistry()
