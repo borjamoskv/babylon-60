@@ -224,7 +224,7 @@ def cheapest_providers(intent: str = "general") -> list[tuple[str, str]]:
 def routing_matrix() -> dict[str, dict[str, str]]:
     """Return the full intent→provider→model routing matrix."""
     presets = load_presets()
-    intents = {"code", "reasoning", "creative", "architect", "general"}
+    intents = {"code", "reasoning", "creative", "architect", "general", "ultra"}
     matrix: dict[str, dict[str, str]] = {}
 
     for name, config in presets.items():
