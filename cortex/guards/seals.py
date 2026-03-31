@@ -505,20 +505,43 @@ async def main() -> int:
         int(g.strip()) for g in os.environ.get("SKIP_GATES", "").split(",") if g.strip().isdigit()
     }
 
+    async def _skip_gate(gate_num: int, desc: str) -> bool:
+        printer.seal(gate_num, "SKIPPED", f"{desc} — skipped via SKIP_GATES")
+        printer.warn(f"Gate {gate_num} skipped (SKIP_GATES env).")
+        return True
+
+    async def _gate1() -> bool:
+        if 1 in _skip:
+            return await _skip_gate(1, "Lint")
+        return await check_gate_1_lint()
+
+    async def _gate2() -> bool:
+        if 2 in _skip:
+            return await _skip_gate(2, "Type Check")
+        return await check_gate_2_type()
+
+    async def _gate3() -> bool:
+        if 3 in _skip:
+            return await _skip_gate(3, "Security Scan")
+        return await check_gate_3_security()
+
     async def _gate4() -> bool:
         if 4 in _skip:
-            printer.seal(4, "SKIPPED", "Tests — skipped via SKIP_GATES")
-            printer.warn("Gate 4 skipped (SKIP_GATES env). Run 'pytest tests/' separately.")
-            return True
+            return await _skip_gate(4, "Tests")
         return await check_gate_4_tests()
 
+    async def _gate6() -> bool:
+        if 6 in _skip:
+            return await _skip_gate(6, "Connection Guard")
+        return await check_gate_6_connection()
+
     results = await asyncio.gather(
-        check_gate_1_lint(),
-        check_gate_2_type(),
-        check_gate_3_security(),
+        _gate1(),
+        _gate2(),
+        _gate3(),
         _gate4(),
         check_gate_5_ledger(),
-        check_gate_6_connection(),
+        _gate6(),
         check_gate_7_async(),
         check_gate_8_loc(),
         check_gate_9_registry(),
