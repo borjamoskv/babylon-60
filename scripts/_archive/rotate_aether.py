@@ -83,7 +83,7 @@ def main():
     logger.info("Starting Aether Dynamic Profile Rotation...")
 
     if not LIGHT_PROFILE.exists() or not HEAVY_PROFILE.exists():
-        logger.error("Missing profile definitions in cortex/agents/definitions/profiles/")
+        logger.error("Missing profile definitions in cortex.agents/definitions/profiles/")
         sys.exit(1)
 
     active_facts = get_active_facts()

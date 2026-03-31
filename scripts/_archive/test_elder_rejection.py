@@ -30,13 +30,13 @@ async def main():
 
     engine = MockEngine(db_path)
     capataz = CapatazOrchestrator(mission_id="mission-high-risk-test")
-    
+
     # 🚩 Marcamos como High Risk usando la ruta completa
     tasks = [
         {
-            "name": "Update Core Models", 
-            "agent_name": "Agent-Worker-1", 
-            "func": worker_bad_proposal, 
+            "name": "Update Core Models",
+            "agent_name": "Agent-Worker-1",
+            "func": worker_bad_proposal,
             "role": AgentRole.WORKER,
             "args": (),
             "kwargs": {},
@@ -44,10 +44,10 @@ async def main():
             "engine": engine
         }
     ]
-    
+
     logger.info("🚀 Launching High-Risk Task (Expecting Rejection)...")
     results = await capataz.run_parallel(tasks)
-    
+
     rejection_caught = False
     for res in results:
         if isinstance(res, Exception):

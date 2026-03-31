@@ -16,19 +16,19 @@ async def main():
     group.add_argument("--type", type=str, nargs=2, metavar=('SELECTOR', 'TEXT'), help="CSS selector and text to type.")
     group.add_argument("--evaluate", type=str, help="JS code to evaluate.")
     group.add_argument("--screenshot", type=str, help="Take a screenshot and save to path.")
-    
+
     parser.add_argument("--wait", type=int, default=0, help="Wait N seconds before action.")
-    
+
     args = parser.parse_args()
-    
+
     ctl = MacControlOmega()
     if not await ctl.connect(args.target):
         sys.exit(1)
-        
+
     try:
         if args.wait > 0:
             await asyncio.sleep(args.wait)
-            
+
         if args.click:
             await ctl.click(args.click)
             print(f"Clicked: {args.click}")
@@ -40,7 +40,7 @@ async def main():
             print(f"Result: {res}")
         elif args.screenshot:
             await ctl.screenshot(args.screenshot)
-            
+
     except Exception as e:
         print(f"Action failed: {e}")
         sys.exit(1)

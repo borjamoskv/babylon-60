@@ -11,10 +11,10 @@ logger = logging.getLogger("swarm-test")
 class MockEngine:
     def __init__(self, db_path):
         self.db_path = db_path
-    
+
     def session(self):
         return sqlite3.connect(self.db_path)
-    
+
     def get_async_engine(self):
         return True
 
@@ -25,15 +25,15 @@ async def main():
     db_path = "cortex.db"
     engine = MockEngine(db_path)
     capataz = CapatazOrchestrator(mission_id="mission-delta-sync")
-    
+
     tasks = [
         {"name": f"Task {i}", "agent_name": f"Agent-{i}", "func": worker_logic, "args": (i,), "engine": engine}
         for i in range(10)
     ]
-    
+
     logger.info("🚀 Launching Swarm Discovery (10 agents)...")
     await capataz.run_parallel(tasks)
-    
+
     # Check signal bus for JIT context
     conn = sqlite3.connect(db_path)
     bus = SignalBus(conn)

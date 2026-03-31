@@ -14,17 +14,17 @@ async def main():
     
     Por favor, sé tan crítico como sea necesario.
     """
-    
+
     # We use HedgedRequests to ask the frontier models (Gemini 3.1 Pro / ChatGPT 5.2 / Claude 4.6)
     # to evaluate the codebase for security fissures, acting as 'Sergio' (or a critical security auditor).
     print("Consultando a Sergio (Frontend Models via Sovereign Router) sobre fisuras de seguridad...")
-    
+
     response = await router.query(
         prompt=prompt,
         intent="security_audit",
         require_frontier=True
     )
-    
+
     print("\nRespuesta de Sergio:")
     print("-" * 80)
     print(response.content)

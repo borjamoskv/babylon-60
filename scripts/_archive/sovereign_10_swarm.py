@@ -17,6 +17,8 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 # Standard Imports
+from cortex.engine.swarm import AsyncSignalBus, Squadron, SwarmAgent, SwarmSignal
+
 from cortex.engine.legion_vectors import (
     AttackVector,
     ChronosSniper,
@@ -29,7 +31,6 @@ from cortex.engine.legion_vectors import (
     VaultCracker,
 )
 from cortex.engine.squadrons import GhostHuntAgent, IntegrityAgent, KineticAgent
-from cortex.engine.swarm import AsyncSignalBus, Squadron, SwarmAgent, SwarmSignal
 
 logging.basicConfig(
     level=logging.INFO,
@@ -156,7 +157,7 @@ class DecathlonSquadron(Squadron):
     async def _crystallize(self, signals: list[SwarmSignal]) -> dict[str, Any]:
         """Crystallize findings with Sovereign Aesthetic."""
         report = await super()._crystallize(signals)
-        
+
         print("\n" + "=" * 80)
         target_name = report["raw"][0]["target"] if report["raw"] else "N/A"
         print(f"💎 SOVEREIGN DECATHLON REPORT: {target_name}")
@@ -170,7 +171,7 @@ class DecathlonSquadron(Squadron):
             status_emoji = "✅" if s.status == "VOID" else "❌" if s.status == "FAILURE" else "🔍"
             findings = s.payload.get("findings", [])
             findings_count = s.payload.get("found_count", len(findings))
-            
+
             # Special handling for SwarmAgent results (legacy payload)
             if not findings and "lint_warnings" in s.payload:
                 findings_count = s.payload["lint_warnings"] + s.payload["type_errors"]
@@ -185,14 +186,14 @@ class DecathlonSquadron(Squadron):
             print(f"{status_emoji} [{agent_label}] Impact: {findings_count}")
             for f in findings:
                 print(f"    ↳ {f}")
-        
+
         print("=" * 80 + "\n")
         return report
 
     async def _crystallize(self, signals: list[SwarmSignal]) -> dict[str, Any]:
         """Crystallize findings with Sovereign Aesthetic."""
         report = await super()._crystallize(signals)
-        
+
         print("\n" + "=" * 80)
         print("💎 SOVEREIGN DECATHLON REPORT: " + (report["raw"][0]["target"] if report["raw"] else "N/A"))
         print("=" * 80)
@@ -205,7 +206,7 @@ class DecathlonSquadron(Squadron):
             status_emoji = "✅" if s.status == "VOID" else "❌" if s.status == "FAILURE" else "🔍"
             findings = s.payload.get("findings", [])
             findings_count = s.payload.get("found_count", len(findings))
-            
+
             # Special handling for SwarmAgent results (legacy payload)
             if not findings and "lint_warnings" in s.payload:
                 findings_count = s.payload["lint_warnings"] + s.payload["type_errors"]
@@ -220,7 +221,7 @@ class DecathlonSquadron(Squadron):
             print(f"{status_emoji} [{agent_label}] Impact: {findings_count}")
             for f in findings:
                 print(f"    ↳ {f}")
-        
+
         print("=" * 80 + "\n")
         return report
 
@@ -232,10 +233,10 @@ async def main():
     await engine.init_db()
 
     target = sys.argv[1] if len(sys.argv) > 1 else "cortex/engine/ledger.py"
-    
+
     decathlon = DecathlonSquadron(engine=engine)
     _ = await decathlon.deploy(target)
-    
+
     await engine.close()
 
 

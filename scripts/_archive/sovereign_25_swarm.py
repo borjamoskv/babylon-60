@@ -18,6 +18,8 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 # Standard Imports
+from cortex.engine.swarm import AsyncSignalBus, Squadron, SwarmAgent, SwarmSignal
+
 from cortex.engine.legion_vectors import (
     ChronosSniper,
     EntropyDemon,
@@ -28,7 +30,6 @@ from cortex.engine.legion_vectors import (
     VaultCracker,
 )
 from cortex.engine.squadrons import GhostHuntAgent, IntegrityAgent, KineticAgent
-from cortex.engine.swarm import AsyncSignalBus, Squadron, SwarmAgent, SwarmSignal
 
 logging.basicConfig(
     level=logging.INFO,
@@ -46,8 +47,8 @@ class DeadlockDemon:
         if ".acquire(" in code and ".release(" not in code:
             if "async with" not in code:  # async with handles release automatically
                 findings.append("Potential Deadlock: Lock acquired without manual release.")
-        
-        # Hardened Check: Only flag identical nested locks if possible, 
+
+        # Hardened Check: Only flag identical nested locks if possible,
         # or flag >2 levels of nesting as a smells.
         if code.count("async with") > 2:
             findings.append("Deep Nesting: Risk of complex resource contention.")
@@ -203,7 +204,7 @@ class NobelAgent:
             # Context doesn't have path, but check code
             if "cortex/" in str(context.get("agent_id", "")):
                 findings.append("Architectural Leak: Core module importing from scripts/tests.")
-        
+
         # Check for non-async calls in P0-ledger paths (Self-referential)
         if "cortex/engine/ledger.py" in str(context.get("target", "")):
             if "time.sleep" in code:
@@ -219,7 +220,7 @@ class AuditorOmega:
         # Check for missing Axiomatic references in classes
         if "class " in code and "AX-" not in code:
             findings.append("Axiomatic Debt: Class definition missing formal AX-XXX reference.")
-        
+
         # Check for guard bypasses
         if "SKIP_GATES" in code or "DISABLE_GUARDS" in code:
             findings.append("Security Breach: Literal guard bypass signal detected.")
@@ -247,7 +248,7 @@ class TesseractOmega:
         for p in patterns:
             if p in code:
                 findings.append(f"Integrity Failure: Literal merge conflict marker `{p}` in code.")
-        
+
         # Check for 'Annihilation' leftovers
         if "Ghost ID 5230" in code:
              findings.append("Ghost residue: Unresolved annihilation reference in logic.")

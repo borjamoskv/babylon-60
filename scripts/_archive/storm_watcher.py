@@ -13,7 +13,7 @@ PYTHON_PATH = "./.venv/bin/python"
 def watch_and_fire():
     w3 = Web3(Web3.HTTPProvider(RPC_URL))
     print(f"📡 [CORTEX WATCHER] Monitoring funder {FUNDER_ADDR}...")
-    
+
     while True:
         try:
             bal = w3.eth.get_balance(FUNDER_ADDR)
@@ -30,7 +30,7 @@ def watch_and_fire():
                 pass
         except Exception as e:
             print(f"⚠️ [WATCHER ERROR] {e}")
-            
+
         time.sleep(30) # Poll every 30s for responsiveness
 
 if __name__ == "__main__":

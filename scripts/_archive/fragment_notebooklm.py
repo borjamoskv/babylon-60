@@ -8,7 +8,7 @@ each optimized for NotebookLM's 500K word/source limit.
 Domain taxonomy:
   - cortex-core:        CORTEX engine, CLI, API, schema, migrations
   - cortex-infra:       Deployment, MCP, daemons, security, system
-  - cortex-agents:      Swarm, consensus, agents, bridges
+  - cortex.agents:      Swarm, consensus, agents, bridges
   - cortex-products:    Naroa, NotchLive, Moltbook, NFT, Sonic, etc.
   - cortex-operations:  Ghost-control, autorouter, SAP, mailtv
   - cortex-strategy:    Commerce, pricing, marketing, ROI, monetization
@@ -83,7 +83,7 @@ DOMAIN_MAP: dict[str, list[str]] = {
         "TEST",
         "default",
     ],
-    "cortex-agents": [
+    "cortex.agents": [
         "AGENT_SCIENCE",
         "AGENTICA",
         "moskv-swarm",
@@ -238,7 +238,7 @@ DOMAIN_DESCRIPTIONS: dict[str, str] = {
         "Infraestructura y deployment: sistema operativo, daemons, "
         "seguridad, DNS, testing, y configuración."
     ),
-    "cortex-agents": (
+    "cortex.agents": (
         "Inteligencia de enjambre: agentes, swarm, consenso, bridges "
         "cross-project, Kimi, Centauro, y protocolos multi-agente."
     ),

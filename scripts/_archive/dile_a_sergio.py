@@ -25,7 +25,7 @@ async def main():
         Aconséjame el mejor y único siguiente paso más crítico para alguien que está aprendiendo pero 
         que quiere una infraestructura sólida, con el tono crítico pero constructivo que te caracteriza. 
         """
-        
+
         print("Enviando mensaje a Sergio...")
         response = await router.chat(
             messages=[Message(role="user", content=prompt)],

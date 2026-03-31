@@ -39,10 +39,10 @@ async def induce_temporal_friction():
 async def main():
     print("Iniciando Simulación Termodinámica en Vivo (C5-Dynamic)...")
     engine = MockEngine()
-    
+
     # Oráculo ultra-sensitivo
     oracle = ThermodynamicsOracle(engine=engine, poll_interval=2.0)
-    
+
     oracle_task = asyncio.create_task(oracle.start(), name="core_thermodynamics_oracle")
     p0_task = asyncio.create_task(p0_engine_core(), name="p0_engine_router")
     friction_task = asyncio.create_task(induce_temporal_friction(), name="stochastic_friction")
@@ -51,10 +51,10 @@ async def main():
     print("Inyectando 300 agentes durmientes para corromper la Exergía (Densidad al 600%)...")
     for i in range(300):
         asyncio.create_task(zombie_stochastic_agent(i))
-    
+
     # Observar la caída en espiral de la muerte y la subsecuente Aniquilación
     await asyncio.sleep(8.0)
-    
+
     print("\\nSimulación Concluida. Deteniendo oráculo...")
     await oracle.stop()
     oracle_task.cancel()

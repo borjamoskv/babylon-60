@@ -30,16 +30,16 @@ def calculate_complexity(node):
 def run_ouroboros():
     cortex_dir = os.path.expanduser("~/.gemini/antigravity/scratch/Cortex-Persist")
     print("\033[38;5;127m[OUROBOROS-Ω]\033[0m Iniciando disección del Árbol de Sintaxis Abstracta (AST) de MOSKV-CORTEX...")
-    
+
     worst_file = None
     worst_complexity = 0
     worst_func = None
-    
+
     for py_file in get_python_files(cortex_dir):
         try:
             with open(py_file, encoding='utf-8') as f:
                 tree = ast.parse(f.read(), filename=str(py_file))
-                
+
             for node in ast.walk(tree):
                 if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                     comp = calculate_complexity(node)
@@ -57,7 +57,7 @@ def run_ouroboros():
         print(f"   Target: \033[1m{worst_file.relative_to(cortex_dir)}:{worst_func}\033[0m")
         print(f"   Gravedad Entrópica: \033[38;5;196m{worst_complexity} CC\033[0m (Vulnera Axioma 2: Asimetría Entrópica)")
         print("\n\033[38;5;154m[OUROBOROS-Ω]\033[0m Autogenerando misión de auto-destrucción y re-forjado...")
-        
+
         # Enqueue the task
         subprocess.run([
             os.path.join(cortex_dir, ".venv", "bin", "python"), "-m", "cortex.aether.cli", "enqueue",
