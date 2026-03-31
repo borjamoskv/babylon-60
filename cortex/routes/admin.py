@@ -177,11 +177,7 @@ async def export_project(
     target_file = _validate_export_path(path, project, lang)
 
     try:
-        facts = await run_in_threadpool(  # type: ignore[reportCallIssue]
-            engine.search,
-            project=project,
-            limit=_MAX_EXPORT_FACTS,
-        )
+        facts = await engine.recall(project=project, limit=_MAX_EXPORT_FACTS)
         content = export_facts(facts, fmt="json")  # type: ignore[reportArgumentType]
 
         def _write_export() -> Path:

@@ -60,7 +60,7 @@ NUMBERS:
   - 444 modules
   - Apache 2.0. Free.
 
-GitHub: https://github.com/borjamoskv/cortex
+GitHub: https://github.com/borjamoskv/Cortex-Persist
 Docs:   https://cortexpersist.dev
 
 Happy to answer questions about the cryptographic design,
@@ -128,7 +128,7 @@ Happy to geek out on:
 - Why Merkle trees beat blockchain for low-latency agent use cases
 - The Privacy Shield secret-detection pipeline
 
-GitHub: https://github.com/borjamoskv/cortex
+GitHub: https://github.com/borjamoskv/Cortex-Persist
 Apache 2.0. 45K+ LOC. 1,162+ tests.
 ```
 
@@ -183,7 +183,7 @@ await engine.store_fact("Decision", fact_type="decision", project="agent")
 cortex verify 42
 → ✅ SHA-256 intact, Merkle sealed. 3ms.
 
-GitHub: github.com/borjamoskv/cortex
+GitHub: github.com/borjamoskv/Cortex-Persist
 ```
 
 ---

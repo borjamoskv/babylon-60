@@ -43,7 +43,7 @@ To verify a release:
 pip install sigstore
 sigstore verify identity \
   --cert-oidc-issuer https://token.actions.githubusercontent.com \
-  --cert-identity https://github.com/borjamoskv/cortex/.github/workflows/release.yml@refs/tags/v8.0.0 \
+  --cert-identity https://github.com/borjamoskv/Cortex-Persist/.github/workflows/release.yml@refs/tags/v8.0.0 \
   cortex_memory-8.0.0.tar.gz
 ```
 

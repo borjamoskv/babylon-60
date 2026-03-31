@@ -13,7 +13,7 @@ uvicorn cortex.api:app --host 0.0.0.0 --port 8484
 
 Interactive OpenAPI docs: `http://localhost:8484/docs`
 
-Full OpenAPI spec: [`openapi.yaml`](https://github.com/borjamoskv/cortex/blob/main/openapi.yaml) (70.5 KB)
+Full OpenAPI spec: [`openapi.yaml`](https://github.com/borjamoskv/Cortex-Persist/blob/main/openapi.yaml) (70.5 KB)
 
 ---
 

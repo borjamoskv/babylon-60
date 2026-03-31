@@ -22,7 +22,19 @@ __all__ = ["LLMProvider"]
 logger = logging.getLogger("cortex.extensions.llm")
 
 _CONTENT_TYPE_JSON: Final[str] = "application/json"
-_QUOTA_MANAGER = SovereignQuotaManager()
+_quota_manager: Optional[SovereignQuotaManager] = None
+
+
+def _get_quota_manager() -> SovereignQuotaManager:
+    """Lazily initialize the shared quota manager.
+
+    Avoid filesystem writes during module import so API startup remains
+    environment-agnostic until an actual LLM call is attempted.
+    """
+    global _quota_manager
+    if _quota_manager is None:
+        _quota_manager = SovereignQuotaManager()
+    return _quota_manager
 
 
 # ─── Implementation ───────────────────────────────────────────────────
@@ -170,7 +182,7 @@ class LLMProvider(BaseProvider):
             intent: Intent profile for model selection. When the provider has an
                 ``intent_model_map``, this selects the optimal model for the task.
         """
-        await _QUOTA_MANAGER.acquire(tokens=1)
+        await _get_quota_manager().acquire(tokens=1)
         url, headers = self._prepare_request()
 
         model_name = self._resolve_model(intent)
@@ -379,7 +391,7 @@ class LLMProvider(BaseProvider):
             intent: Intent profile for model selection. When the provider has an
                 ``intent_model_map``, this selects the optimal model for the task.
         """
-        await _QUOTA_MANAGER.acquire(tokens=1)
+        await _get_quota_manager().acquire(tokens=1)
         url, headers = self._prepare_request()
 
         model_name = self._resolve_model(intent)
@@ -437,7 +449,7 @@ class LLMProvider(BaseProvider):
 
     async def invoke(self, prompt: CortexPrompt) -> str:
         """Traduce el CortexPrompt al formato nativo del LLM y ejecuta la inferencia."""
-        await _QUOTA_MANAGER.acquire(tokens=1)
+        await _get_quota_manager().acquire(tokens=1)
         url, headers = self._prepare_request()
 
         model_name = self._resolve_model(prompt.intent)

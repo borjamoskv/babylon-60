@@ -4,7 +4,7 @@ Tamper-evident memory, audit trails, and verifiable lineage for AI agents.
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)](https://github.com/borjamoskv/cortex/actions)
+[![CI](https://github.com/borjamoskv/Cortex-Persist/actions/workflows/ci.yml/badge.svg)](https://github.com/borjamoskv/Cortex-Persist/actions)
 
 CORTEX is a middleware layer that enforces cryptographic integrity on top of existing AI memory stores (Mem0, Zep, Custom). It ensures that once an autonomous agent reads context or makes a decision, that state cannot be silently altered.
 

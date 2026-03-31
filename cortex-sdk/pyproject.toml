@@ -32,7 +32,7 @@ dependencies = [
 [project.urls]
 Homepage = "https://cortex.moskv.com"
 Documentation = "https://docs.cortex.moskv.com"
-Repository = "https://github.com/borjamoskv/cortex-persist"
+Repository = "https://github.com/borjamoskv/Cortex-Persist"
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-asyncio", "pytest-httpx"]

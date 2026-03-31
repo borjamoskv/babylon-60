@@ -1,8 +1,8 @@
 site_name: CORTEX Documentation
 site_description: Trust Infrastructure for Autonomous AI — cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory.
 site_url: https://cortexpersist.dev
-repo_url: https://github.com/borjamoskv/cortex
-repo_name: borjamoskv/cortex
+repo_url: https://github.com/borjamoskv/Cortex-Persist
+repo_name: borjamoskv/Cortex-Persist
 edit_uri: edit/master/docs/
 copyright: "© 2026 MOSKV-1 Sovereign Systems · Apache 2.0"
 
@@ -74,13 +74,73 @@ nav:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/borjamoskv/cortex
+      link: https://github.com/borjamoskv/Cortex-Persist
     - icon: fontawesome/brands/x-twitter
       link: https://x.com/borjamoskv
   homepage: https://cortexpersist.com
 
 extra_css:
   - stylesheets/industrial_noir.css
+
+not_in_nav: "*"
+
+exclude_docs: |
+  AGENTICA.md
+  AXIOMS.md
+  CONTRIBUTING.md
+  CORTEX-CAPABILITIES.md
+  CORTEX_ARCHITECTURE_WHITEPAPER.md
+  CORTEX_SECURITY_MANIFESTO.md
+  ERROR-CODE-REGISTRY.md
+  EVENT-MODEL.md
+  EXPORT-CANONICAL-JSON.md
+  IMMUNITY-LAYER.md
+  MANIFESTO.md
+  ONBOARDING-FLOWS.md
+  OPERATIONS.md
+  RFC-CORTEX-MEMORY-OS.md
+  RFC-CORTEX-TRUST-STANDARD.md
+  RFC_01_CORTEX_NATIVE_AI.md
+  RFC_02_CORTEX_SECURITY_SPEC.md
+  SDK-SURFACE.md
+  SECURITY_TRUST_MODEL.md
+  SOVEREIGN_HANDOFF.md
+  STATUS_WAVE5_V6.md
+  TRUST-SEMANTICS.md
+  V6_ARCHITECTURE.md
+  V6_TRANSITION_GUIDE.md
+  apotheosis_blueprint.md
+  axiom-registry.md
+  cognitive_sovereignty_architectures.md
+  cortex_v8_roadmap.md
+  cortex_vs_moskv.md
+  epistemic-bridges.md
+  impossible-failures.md
+  memory_architecture_and_roi.md
+  omega_handoff_roadmap_q1.md
+  plugin-registry.md
+  scaling_plan.md
+  sovereign_agent_manifesto.md
+  teorias_fundamentales.md
+  termodinamica_enjambres.md
+  thermodynamic-enforcement.md
+  toolbox.md
+  v7_evolution.md
+  vex_concept.md
+  wave_5_proposal.md
+  agents/
+  architecture/
+  articles/
+  audits/
+  blog/
+  data/
+  design/
+  intelligence/
+  internal/
+  launch/
+  ortu-omega/
+  proposals/
+  research/
 
 markdown_extensions:
   - pymdownx.highlight:
