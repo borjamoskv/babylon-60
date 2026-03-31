@@ -75,6 +75,7 @@ class ShardedAsyncSignalBus:
         *,
         source: str = "cli",
         project: str | None = None,
+        tenant_id: str = "default",
         routing_key: str | None = None,
     ) -> int:
         if not self._ready:
@@ -86,12 +87,14 @@ class ShardedAsyncSignalBus:
 
         try:
             cursor = await conn.execute(
-                "INSERT INTO signals (event_type, payload, source, project) VALUES (?, ?, ?, ?)",
+                "INSERT INTO signals "
+                "(event_type, payload, source, project, tenant_id) VALUES (?, ?, ?, ?, ?)",
                 (
                     event_type,
                     json.dumps(payload or {}, default=str),
                     source,
                     project,
+                    tenant_id,
                 ),
             )
             await conn.commit()
@@ -107,6 +110,7 @@ class ShardedAsyncSignalBus:
         event_type: str | None = None,
         source: str | None = None,
         project: str | None = None,
+        tenant_id: str = "default",
         since: datetime | None = None,
         limit: int = 50,
         routing_key: str | None = None,
@@ -118,6 +122,7 @@ class ShardedAsyncSignalBus:
             event_type=event_type,
             source=source,
             project=project,
+            tenant_id=tenant_id,
             order="DESC",
             limit=limit,
         )
@@ -146,6 +151,7 @@ class ShardedAsyncSignalBus:
         event_type: str | None = None,
         source: str | None = None,
         project: str | None = None,
+        tenant_id: str = "default",
         consumer: str = "default",
         limit: int = 50,
         routing_key: str | None = None,
@@ -157,6 +163,7 @@ class ShardedAsyncSignalBus:
             event_type=event_type,
             source=source,
             project=project,
+            tenant_id=tenant_id,
             unconsumed_by=consumer,
             limit=limit,
         )
@@ -180,8 +187,8 @@ class ShardedAsyncSignalBus:
             for sig in batch:
                 new_consumed = sig.consumed_by + [consumer]
                 await conn.execute(
-                    "UPDATE signals SET consumed_by = ? WHERE id = ?",
-                    (json.dumps(new_consumed), sig.id),
+                    "UPDATE signals SET consumed_by = ? WHERE id = ? AND tenant_id = ?",
+                    (json.dumps(new_consumed), sig.id, tenant_id),
                 )
             if batch:
                 await conn.commit()
@@ -189,7 +196,7 @@ class ShardedAsyncSignalBus:
 
         return polled_signals
 
-    async def gc(self, max_age_days: int = 30) -> int:
+    async def gc(self, max_age_days: int = 30, tenant_id: str | None = None) -> int:
         """Shannon Compaction: Auto-purge stale messages across all shards."""
         if not self._ready:
             await self.initialize()
@@ -197,11 +204,14 @@ class ShardedAsyncSignalBus:
         cutoff = (datetime.now(timezone.utc) - timedelta(days=max_age_days)).isoformat()
         total_pruned = 0
 
+        query = "DELETE FROM signals WHERE consumed_by != '[]' AND created_at < ?"
+        params = [cutoff]
+        if tenant_id:
+            query += " AND tenant_id = ?"
+            params.append(tenant_id)
+
         for conn in self._shards.values():
-            cursor = await conn.execute(
-                "DELETE FROM signals WHERE consumed_by != '[]' AND created_at < ?",
-                (cutoff,),
-            )
+            cursor = await conn.execute(query, params)
             await conn.commit()
             total_pruned += cursor.rowcount
 

@@ -27,9 +27,10 @@ class CenturionSuperv:
 
     CAPACITY = 100
 
-    def __init__(self, centurion_id: str, bus: ShardedAsyncSignalBus):
+    def __init__(self, centurion_id: str, bus: ShardedAsyncSignalBus, tenant_id: str = "default"):
         self.id = centurion_id
         self.bus = bus
+        self.tenant_id = tenant_id
         self.agents: list[str] = []
         self.metrics = NodeMetrics(exergy=1.0, uncertainty=0.0, active_children=0)
 
@@ -44,6 +45,7 @@ class CenturionSuperv:
             event_type="agent:spawn",
             payload={"agent_id": agent_id, "parent_node": self.id},
             source=self.id,
+            tenant_id=self.tenant_id,
             routing_key=agent_id,
         )
         return True
@@ -57,9 +59,10 @@ class CenturionSuperv:
 class LegionSupervisor:
     """L1 Domain Node: Manages multiple Centurions within an isolated context."""
 
-    def __init__(self, legion_id: str, bus: ShardedAsyncSignalBus):
+    def __init__(self, legion_id: str, bus: ShardedAsyncSignalBus, tenant_id: str = "default"):
         self.id = legion_id
         self.bus = bus
+        self.tenant_id = tenant_id
         self.centurions: dict[str, CenturionSuperv] = {}
         self.metrics = NodeMetrics(exergy=1.0, uncertainty=0.0, active_children=0)
 
@@ -70,7 +73,7 @@ class LegionSupervisor:
                 return c
 
         new_id = f"{self.id}-cen-{len(self.centurions)}"
-        new_cen = CenturionSuperv(new_id, self.bus)
+        new_cen = CenturionSuperv(new_id, self.bus, self.tenant_id)
         self.centurions[new_id] = new_cen
         self.metrics.active_children = len(self.centurions)
 
@@ -78,6 +81,7 @@ class LegionSupervisor:
             event_type="centurion:spawn",
             payload={"centurion_id": new_id, "parent_legion": self.id},
             source=self.id,
+            tenant_id=self.tenant_id,
             routing_key=self.id,
         )
         return new_cen
@@ -92,6 +96,7 @@ class LegionSupervisor:
             event_type="task:dispatch",
             payload={"task": task, "agent_id": agent_id},
             source=self.id,
+            tenant_id=self.tenant_id,
             routing_key=agent_id,
         )
 
@@ -99,22 +104,26 @@ class LegionSupervisor:
 class SwarmCommander:
     """L0 Apex Controller: Global exergy arbitration and Legion deployment."""
 
-    def __init__(self, bus_path: Path | str):
+    def __init__(self, bus_path: Path | str, tenant_id: str = "default"):
         self.bus = ShardedAsyncSignalBus(base_dir=bus_path)
+        self.tenant_id = tenant_id
         self.legions: dict[str, LegionSupervisor] = {}
 
     async def initialize(self) -> None:
         await self.bus.initialize()
-        await self.bus.emit("swarm:ignition", source="commander", routing_key="global")
+        await self.bus.emit(
+            "swarm:ignition", source="commander", tenant_id=self.tenant_id, routing_key="global"
+        )
 
     async def get_or_create_legion(self, domain: str) -> LegionSupervisor:
         if domain not in self.legions:
             legion_id = f"legion-{domain}"
-            self.legions[domain] = LegionSupervisor(legion_id, self.bus)
+            self.legions[domain] = LegionSupervisor(legion_id, self.bus, self.tenant_id)
             await self.bus.emit(
                 event_type="legion:spawn",
                 payload={"domain": domain},
                 source="commander",
+                tenant_id=self.tenant_id,
                 routing_key=domain,
             )
         return self.legions[domain]
@@ -142,13 +151,15 @@ class SwarmCommander:
 
     async def consolidate_and_annihilate(self) -> None:
         """Purge entropy at the end of Ω_3 cycle."""
-        await self.bus.emit("swarm:annihilation", source="commander", routing_key="global")
+        await self.bus.emit(
+            "swarm:annihilation", source="commander", tenant_id=self.tenant_id, routing_key="global"
+        )
         # Logic to extract final ledger states (placeholder)
 
         # Annihilation: Purging hierarchy logic
         self.legions.clear()
 
         # Shannon compaction
-        await self.bus.gc(max_age_days=0)
+        await self.bus.gc(max_age_days=0, tenant_id=self.tenant_id)
 
         await self.bus.close()
