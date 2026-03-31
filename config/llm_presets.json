@@ -142,7 +142,7 @@
       "reasoning": "grok-3",
       "creative":  "grok-3",
       "architect": "grok-4.1-fast",
-      "general":   "grok-3-mini"
+      "general":   "grok-3"
     }
   },
   "cohere": {

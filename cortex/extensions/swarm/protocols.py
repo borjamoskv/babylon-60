@@ -1,14 +1,16 @@
 """Swarm protocols and JIT communication schemas (Ω₁₄)."""
 
 from __future__ import annotations
+
 import json
 import logging
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.swarm.protocols")
+
 
 class SwarmIntent(str, Enum):
     DISCOVERY = "discovery"
@@ -17,10 +19,12 @@ class SwarmIntent(str, Enum):
     COMPLETION = "completion"
     HEALING = "healing"
 
+
 class AgentRole(str, Enum):
     CAPATAZ = "capataz"
     WORKER = "worker"
     ELDER = "elder"
+
 
 @dataclass
 class SwarmSignalSchema:
@@ -43,6 +47,7 @@ class SwarmSignalSchema:
         if "role" in data:
             data["role"] = AgentRole(data["role"])
         return cls(**data)
+
 
 def validate_swarm_signal(data: dict[str, Any]) -> bool:
     """Validate that a signal matches the Ω₁₄ schema."""
