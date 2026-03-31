@@ -72,7 +72,7 @@ def _validate_model_policy(presets: dict[str, dict[str, Any]]) -> None:
         default_model = config.get("default_model", "")
         if _PROHIBITED_TIERS.search(default_model):
             logger.warning(
-                "Rule 1.3 Violation Warning: Provider %s uses prohibited default model pattern: %s",
+                "MODEL POLICY (Rule 1.3) Violation Warning: Provider %s uses prohibited default model pattern: %s",
                 name,
                 default_model,
             )
@@ -82,7 +82,7 @@ def _validate_model_policy(presets: dict[str, dict[str, Any]]) -> None:
         for intent, model in intent_map.items():
             if _PROHIBITED_TIERS.search(model):
                 logger.warning(
-                    "Rule 1.3 Violation Warning: Provider %s uses prohibited model for "
+                    "MODEL POLICY (Rule 1.3) Violation Warning: Provider %s uses prohibited model for "
                     "intent '%s': %s",
                     name,
                     intent,

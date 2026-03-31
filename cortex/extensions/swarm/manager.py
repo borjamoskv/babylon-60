@@ -301,7 +301,7 @@ class CapatazOrchestrator:
                     await self._execute_completion_with_tracking(
                         url="",
                         headers={},
-                        payload={"rejection": v_res.reason, "proposal": str(result)},
+                        payload={"rejection": v_res.reason, "elder": v_res.elder_id},
                         engine=engine,
                         agent_name="Elder-0",
                         role=AgentRole.ELDER,
