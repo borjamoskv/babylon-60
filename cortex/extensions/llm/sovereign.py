@@ -253,9 +253,7 @@ class SovereignLLM:
         """Attempt ThoughtOrchestra. Returns None on failure."""
         try:
             # Lazy import to avoid circular deps
-            from cortex.extensions.thinking.orchestra import (
-                ThoughtOrchestra
-            )
+            from cortex.extensions.thinking.orchestra import ThoughtOrchestra
 
             chain.append("orchestra")
             start = time.monotonic()
