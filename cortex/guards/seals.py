@@ -37,7 +37,7 @@ from cortex.guards.sovereign_seals import (
 
 printer = SealPrinter()
 
-_VENV_BIN = ROOT_DIR / ".venv" / "bin"
+_VENV_BIN = Path(sys.executable).parent
 
 
 def _resolve_cmd(tool: str) -> str:
@@ -257,9 +257,7 @@ async def check_seal_3_security() -> GateResult:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_4_tests() -> GateResult:
     printer.seal(4, "AX-017 Ledger Integrity", "Tests & Coverage")
-    python_cmd = ROOT_DIR / ".venv" / "bin" / "python"
-    if not python_cmd.exists():
-        python_cmd = Path(sys.executable)
+    python_cmd = sys.executable
     cmd = [str(python_cmd), "-m", "pytest", "tests/", "-x", "-q", "--tb=short", "-p", "no:timeout"]
     code, out = await arun_cmd(cmd)
     if code == 0:
@@ -292,7 +290,7 @@ async def check_seal_5_ledger() -> GateResult:
         passed = False
 
     # ── Connection Guard ──
-    python_cmd = ROOT_DIR / ".venv" / "bin" / "python"
+    python_cmd = sys.executable
     code, out = await arun_cmd(
         [str(python_cmd), "-m", "cortex.database.connection_guard", "--root", "cortex"]
     )
@@ -531,13 +529,8 @@ async def main() -> int:
                 printer.fail(f"FAIL-FAST: Seal {gate_num} failed. Aborting.")
                 break
     else:
-
-        async def _run(gn: int) -> tuple[int, GateResult]:
-            return gn, await _timed_gate(gn, gate_fns[gn])
-
-        raw = await asyncio.gather(*(_run(gn) for gn in _GATE_ORDER))
-        for gn, result in raw:
-            gate_results[gn] = result
+        for gn in _GATE_ORDER:
+            gate_results[gn] = await _timed_gate(gn, gate_fns[gn])
 
     # ── Summary ──
     total_elapsed = (time.perf_counter() - total_start) * 1000
