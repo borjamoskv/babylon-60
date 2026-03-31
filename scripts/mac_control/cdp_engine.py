@@ -60,8 +60,16 @@ class MacControlOmega:
             "params": params or {}
         }
         await self.ws.send(json.dumps(payload))
-        res = await self.ws.recv()
-        return json.loads(res).get("result", {})
+        while True:
+            res_str = await self.ws.recv()
+            res = json.loads(res_str)
+            # CDP can send asynchronous events without 'id', wait for our response
+            if res.get("id") == self.msg_id:
+                # Check if it's an error response
+                if "error" in res:
+                    logger.error(f"CDP Error in {method}: {res['error']}")
+                return res.get("result", {})
+
 
     async def extract_selector(self, selector: str, extract_html: bool = False) -> Optional[str]:
         """Extract text or HTML content from a CSS selector."""
