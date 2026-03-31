@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Optional
 
-from fastapi import Depends, Header, HTTPException, Request
+from fastapi import Depends, Header, HTTPException, Request, WebSocket, WebSocketException, status
 
 from cortex.auth.manager import get_auth_manager
 from cortex.auth.models import AuthResult
@@ -16,11 +16,34 @@ __all__ = [
     "require_consensus",
     "require_permission",
     "require_verified_permission",
+    "require_websocket_auth",
+    "require_websocket_permission",
 ]
 
 logger = logging.getLogger(__name__)
 
 _DEFAULT_CONSENSUS_THRESHOLD = 0.8
+
+
+def _parse_bearer_token(authorization: str | None) -> str | None:
+    """Extract the raw API key from a Bearer header."""
+    if not authorization:
+        return None
+
+    parts = authorization.split(" ", 1)
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        raise ValueError("Invalid key format")
+
+    return parts[1]
+
+
+def _auth_has_permission(auth: AuthResult, permission: str | Permission) -> bool:
+    """Check whether an authenticated identity satisfies a permission requirement."""
+    if isinstance(permission, str) and permission in auth.permissions:
+        return True
+    if isinstance(permission, Permission) and RBAC.has_permission(auth.role, permission):
+        return True
+    return str(permission) in auth.permissions
 
 
 def _normalize_claim_text(value: str) -> str:
@@ -72,15 +95,17 @@ async def require_auth(
             detail=get_trans("error_missing_auth", lang),
         )
 
-    parts = authorization.split(" ", 1)
-    if len(parts) != 2 or parts[0].lower() != "bearer":
+    try:
+        raw_key = _parse_bearer_token(authorization)
+    except ValueError:
         raise HTTPException(
             status_code=401,
             detail=get_trans("error_invalid_key_format", lang),
         )
+    assert raw_key is not None
 
     manager = get_auth_manager()
-    result = await manager.authenticate_async(parts[1])
+    result = await manager.authenticate_async(raw_key)
     if not result.authenticated:
         error_msg = get_trans("error_invalid_revoked_key", lang) if result.error else result.error
         raise HTTPException(status_code=401, detail=error_msg)
@@ -90,6 +115,42 @@ async def require_auth(
 
     tenant_id_var.set(result.tenant_id)
 
+    return result
+
+
+async def require_websocket_auth(websocket: WebSocket) -> AuthResult:
+    """Authenticate a WebSocket handshake via Authorization header or query param."""
+    authorization = websocket.headers.get("authorization")
+    raw_key: str | None
+
+    if authorization:
+        try:
+            raw_key = _parse_bearer_token(authorization)
+        except ValueError as exc:
+            raise WebSocketException(
+                code=status.WS_1008_POLICY_VIOLATION,
+                reason="Invalid Authorization header",
+            ) from exc
+    else:
+        raw_key = websocket.query_params.get("api_key") or websocket.query_params.get("token")
+
+    if not raw_key:
+        raise WebSocketException(
+            code=status.WS_1008_POLICY_VIOLATION,
+            reason="Authentication required",
+        )
+
+    manager = get_auth_manager()
+    result = await manager.authenticate_async(raw_key)
+    if not result.authenticated:
+        raise WebSocketException(
+            code=status.WS_1008_POLICY_VIOLATION,
+            reason=result.error or "Invalid or revoked key",
+        )
+
+    from cortex.extensions.security.tenant import tenant_id_var
+
+    tenant_id_var.set(result.tenant_id)
     return result
 
 
@@ -103,16 +164,7 @@ def require_permission(permission: str | Permission):
         request: Request,
         auth: AuthResult = Depends(require_auth),
     ) -> AuthResult:
-        has_perm = False
-        if isinstance(permission, str) and permission in auth.permissions:
-            has_perm = True
-        elif isinstance(permission, Permission):
-            has_perm = RBAC.has_permission(auth.role, permission)
-
-        if not has_perm and str(permission) in auth.permissions:
-            has_perm = True
-
-        if not has_perm:
+        if not _auth_has_permission(auth, permission):
             from cortex.utils.i18n import get_trans
 
             lang = request.headers.get("Accept-Language", "en")
@@ -122,6 +174,24 @@ def require_permission(permission: str | Permission):
                 lang,
             ).format(permission=perm_name)
             raise HTTPException(status_code=403, detail=detail)
+        return auth
+
+    return checker
+
+
+def require_websocket_permission(permission: str | Permission):
+    """Factory for permission-checking WebSocket dependencies."""
+
+    async def checker(
+        websocket: WebSocket,
+        auth: AuthResult = Depends(require_websocket_auth),
+    ) -> AuthResult:
+        if not _auth_has_permission(auth, permission):
+            perm_name = permission.name if isinstance(permission, Permission) else permission
+            raise WebSocketException(
+                code=status.WS_1008_POLICY_VIOLATION,
+                reason=f"Missing permission: {perm_name}",
+            )
         return auth
 
     return checker

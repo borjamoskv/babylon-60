@@ -6,8 +6,9 @@ Streaming real-time graph updates and Doubt Circuit alerts to the dashboard.
 import json
 import logging
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 
+from cortex.auth import AuthResult, require_websocket_permission
 from cortex.engine.metacognition import DoubtCircuit
 
 router = APIRouter(tags=["topology"])
@@ -66,7 +67,10 @@ topology_manager = TopologyManager()
 
 
 @router.websocket("/ws/v1/topology")
-async def websocket_topology_endpoint(websocket: WebSocket):
+async def websocket_topology_endpoint(
+    websocket: WebSocket,
+    auth: AuthResult = Depends(require_websocket_permission("read")),
+):
     """
     WebSocket endpoint for real-time memory topology visualization.
     Path: /ws/v1/topology

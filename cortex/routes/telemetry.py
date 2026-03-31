@@ -10,6 +10,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 
 from cortex.api.deps import get_async_engine
+from cortex.auth import AuthResult, require_websocket_permission
 from cortex.engine_async import AsyncCortexEngine
 
 logger = logging.getLogger("cortex.api.telemetry")
@@ -17,17 +18,20 @@ router = APIRouter(prefix="/telemetry", tags=["telemetry"])
 
 
 async def query_new_facts(
-    engine: AsyncCortexEngine, last_id: int, fact_type: str
+    engine: AsyncCortexEngine,
+    last_id: int,
+    fact_type: str,
+    tenant_id: str,
 ) -> tuple[int, list[dict[str, Any]]]:
     """Queries for new facts of specific type since last_id."""
     async with engine.session() as conn:
         sql = """
             SELECT id, content, meta 
             FROM facts 
-            WHERE fact_type = ? AND id > ? 
+            WHERE tenant_id = ? AND fact_type = ? AND id > ? 
             ORDER BY id ASC
         """
-        cursor = await conn.execute(sql, (fact_type, last_id))
+        cursor = await conn.execute(sql, (tenant_id, fact_type, last_id))
         rows = await cursor.fetchall()
 
         results = []
@@ -45,7 +49,9 @@ async def query_new_facts(
 
 @router.websocket("/ast-oracle")
 async def ast_oracle_ws(
-    websocket: WebSocket, engine: AsyncCortexEngine = Depends(get_async_engine)
+    websocket: WebSocket,
+    auth: AuthResult = Depends(require_websocket_permission("read")),
+    engine: AsyncCortexEngine = Depends(get_async_engine),
 ):
     """
     WebSocket endpoint that streams realtime AST mutations to the Sovereign Web interface.
@@ -56,7 +62,10 @@ async def ast_oracle_ws(
     # We want to get the last known ID first so we only send *new* mutations
     # But for a slicker demo upon connection, we can fetch the last 10
     async with engine.session() as conn:
-        cursor = await conn.execute("SELECT MAX(id) FROM facts")
+        cursor = await conn.execute(
+            "SELECT MAX(id) FROM facts WHERE tenant_id = ? AND fact_type = ?",
+            (auth.tenant_id, "human_mutation"),
+        )
         row = await cursor.fetchone()
         last_id = (row[0] or 0) - 100  # look back a bit  # type: ignore[reportOptionalSubscript]
         if last_id < 0:
@@ -64,7 +73,12 @@ async def ast_oracle_ws(
 
     try:
         while True:
-            new_max, mutations = await query_new_facts(engine, last_id, "human_mutation")
+            new_max, mutations = await query_new_facts(
+                engine,
+                last_id,
+                "human_mutation",
+                auth.tenant_id,
+            )
             for mut in mutations:
                 await websocket.send_json({"event": "human_mutation", "data": mut})
             last_id = new_max
@@ -77,7 +91,9 @@ async def ast_oracle_ws(
 
 @router.websocket("/fiat-stream")
 async def fiat_stream_ws(
-    websocket: WebSocket, engine: AsyncCortexEngine = Depends(get_async_engine)
+    websocket: WebSocket,
+    auth: AuthResult = Depends(require_websocket_permission("read")),
+    engine: AsyncCortexEngine = Depends(get_async_engine),
 ):
     """
     WebSocket endpoint that streams realtime financial transactions.
@@ -88,14 +104,20 @@ async def fiat_stream_ws(
     # Fetch last known ID
     async with engine.session() as conn:
         async with conn.execute(
-            "SELECT MAX(id) FROM facts WHERE fact_type = 'fiat_transaction'"
+            "SELECT MAX(id) FROM facts WHERE tenant_id = ? AND fact_type = ?",
+            (auth.tenant_id, "fiat_transaction"),
         ) as cursor:
             row = await cursor.fetchone()
             last_id = row[0] or 0  # type: ignore[reportOptionalSubscript]
 
     try:
         while True:
-            new_max, txs = await query_new_facts(engine, last_id, "fiat_transaction")
+            new_max, txs = await query_new_facts(
+                engine,
+                last_id,
+                "fiat_transaction",
+                auth.tenant_id,
+            )
             for tx in txs:
                 await websocket.send_json({"event": "fiat_transaction", "data": tx})
             last_id = new_max

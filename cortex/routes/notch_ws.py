@@ -16,7 +16,9 @@ import asyncio
 import logging
 from typing import ClassVar, Optional
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
+
+from cortex.auth import AuthResult, require_websocket_permission
 
 __all__ = ["notch_hub", "router"]
 
@@ -84,7 +86,10 @@ notch_hub = NotchHub()
 
 
 @router.websocket("/ws/notch")
-async def notch_websocket(ws: WebSocket) -> None:
+async def notch_websocket(
+    ws: WebSocket,
+    auth: AuthResult = Depends(require_websocket_permission("read")),
+) -> None:
     """Bidirectional WebSocket for Notch Live ↔ CORTEX communication.
 
     Commands CORTEX → Notch:

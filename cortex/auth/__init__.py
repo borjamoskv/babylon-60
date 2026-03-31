@@ -12,6 +12,8 @@ from cortex.auth.deps import (
     require_consensus,
     require_permission,
     require_verified_permission,
+    require_websocket_auth,
+    require_websocket_permission,
 )
 from cortex.auth.manager import AuthManager, get_auth_manager, reset_auth_manager
 from cortex.auth.models import APIKey, AuthResult
@@ -28,5 +30,7 @@ __all__ = [
     "require_consensus",
     "require_permission",
     "require_verified_permission",
+    "require_websocket_auth",
+    "require_websocket_permission",
     "reset_auth_manager",
 ]
