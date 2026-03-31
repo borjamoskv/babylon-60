@@ -57,8 +57,13 @@ class MultiSpecialistAgent(SwarmAgent):
             # 2. Check Static Analysis (Simulated/Integrity)
             elif "Audit" in spec_id or "Integrity" in spec_id or "Code" in spec_id:
                 # Basic static check for MVP
-                if content and "TODO" in content:
-                    all_findings.append(f"[{spec_id}] Todo found in code.")
+                # Ignore lines that are clearly detection logic or structural definitions
+                if "TODO" in content and not any(p in content for p in ["if \"TODO\" in", "[\"TODO\",", "re.compile"]):
+                    # Check individual lines to ensure it's not a false positive
+                    for line in content.splitlines():
+                        if "TODO" in line and not any(p in line for p in ["if \"TODO\" in", "[\"TODO\",", "re.compile"]):
+                            all_findings.append(f"[{spec_id}] Actual debt found: {line.strip()}")
+                            break
 
         status = "SUCCESS" if all_findings else "VOID"
         return SwarmSignal(

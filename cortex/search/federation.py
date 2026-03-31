@@ -21,11 +21,18 @@ import sqlite3
 from pathlib import Path
 from typing import Optional
 
+import aiosqlite
+
 from cortex.core.paths import COLD_STORAGE_DB, PERSONAL_DB
 from cortex.search.models import SearchResult, SearchScope
-from cortex.search.text import text_search_sync
+from cortex.search.text import text_search, text_search_sync
 
-__all__ = ["federated_search_sync", "attach_federated_dbs"]
+__all__ = [
+    "federated_search",
+    "federated_search_sync",
+    "attach_federated_dbs",
+    "attach_federated_dbs_async",
+]
 
 logger = logging.getLogger("cortex.search.federation")
 
@@ -75,6 +82,33 @@ def attach_federated_dbs(
     return attached
 
 
+async def attach_federated_dbs_async(
+    conn: aiosqlite.Connection,
+    scopes: Optional[list[str]] = None,
+) -> list[str]:
+    """ATTACH secondary databases to an existing async connection."""
+    targets = scopes or list(_FEDERATION_MAP.keys())
+    attached: list[str] = []
+
+    for scope_name in targets:
+        if scope_name not in _FEDERATION_MAP:
+            continue
+        db_path, alias = _FEDERATION_MAP[scope_name]
+        if not db_path.exists():
+            continue
+
+        try:
+            await conn.execute(f"ATTACH DATABASE ? AS {alias}", (str(db_path),))
+            attached.append(alias)
+        except (aiosqlite.Error, sqlite3.Error) as e:
+            if "already" in str(e).lower():
+                attached.append(alias)
+            else:
+                logger.warning("Failed to attach %s: %s", alias, e)
+
+    return attached
+
+
 def detach_federated_dbs(
     conn: sqlite3.Connection,
     aliases: list[str],
@@ -87,6 +121,21 @@ def detach_federated_dbs(
         try:
             conn.execute(f"DETACH DATABASE {alias}")
         except sqlite3.OperationalError:
+            pass
+
+
+async def detach_federated_dbs_async(
+    conn: aiosqlite.Connection,
+    aliases: list[str],
+) -> None:
+    """DETACH previously attached databases (async)."""
+    valid_aliases = [v[1] for v in _FEDERATION_MAP.values()]
+    for alias in aliases:
+        if alias not in valid_aliases:
+            continue
+        try:
+            await conn.execute(f"DETACH DATABASE {alias}")
+        except (aiosqlite.Error, sqlite3.Error):
             pass
 
 
@@ -179,6 +228,142 @@ def _search_attached_db(
             break
 
     return results
+
+
+async def _search_attached_db_async(
+    conn: aiosqlite.Connection,
+    alias: str,
+    query: str,
+    project: Optional[str] = None,
+    limit: int = 20,
+) -> list[SearchResult]:
+    """Search an attached database's facts table (async)."""
+    from cortex.crypto import get_default_encrypter
+    from cortex.crypto.aes import CortexEncrypter
+
+    enc = get_default_encrypter()
+    v6_prefix = CortexEncrypter.PREFIX
+
+    valid_aliases = [v[1] for v in _FEDERATION_MAP.values()]
+    if alias not in valid_aliases:
+        return []
+
+    sql = (
+        f"SELECT f.id, f.content, f.project, f.fact_type, "
+        f"f.confidence, f.source, f.tags "
+        f"FROM {alias}.facts f "
+        f"WHERE f.valid_until IS NULL"
+    )
+    params: list = []
+    if project:
+        sql += " AND f.project = ?"
+        params.append(project)
+    sql += " LIMIT 500"
+
+    try:
+        async with conn.execute(sql, params) as cursor:
+            rows = await cursor.fetchall()
+    except (aiosqlite.Error, sqlite3.Error) as e:
+        logger.warning("Search on %s failed: %s", alias, e)
+        return []
+
+    query_lower = query.lower()
+    results: list[SearchResult] = []
+
+    for row in rows:
+        content_val = row[1]
+        if str(content_val).startswith(v6_prefix):
+            try:
+                content = enc.decrypt_str(content_val, tenant_id="default")
+            except (ValueError, TypeError, OSError):
+                continue
+        else:
+            content = str(content_val)
+
+        if content is None or query_lower not in content.lower():
+            continue
+
+        try:
+            tags = __import__("json").loads(row[6]) if row[6] else []
+        except (ValueError, TypeError):
+            tags = []
+
+        results.append(
+            SearchResult(
+                fact_id=row[0],
+                content=content,  # type: ignore[type-error]
+                project=row[2] or "",
+                fact_type=row[3] or "knowledge",
+                confidence=row[4] or "stated",
+                source=row[5],
+                tags=tags,
+                score=0.5,
+                valid_from="unknown",
+                valid_until=None,
+                created_at="unknown",
+                updated_at="unknown",
+                db_origin=alias,
+            )
+        )
+
+        if len(results) >= limit:
+            break
+
+    return results
+
+
+async def federated_search(
+    conn: aiosqlite.Connection,
+    query: str,
+    scope: str = "core",
+    project: Optional[str] = None,
+    limit: int = 20,
+) -> list[SearchResult]:
+    """Federated text search across (async)."""
+    try:
+        search_scope = SearchScope(scope)
+    except ValueError:
+        search_scope = SearchScope.CORE
+
+    all_results: list[SearchResult] = []
+
+    if search_scope in (SearchScope.CORE, SearchScope.ALL):
+        core_results = await text_search(
+            conn,
+            query,
+            project=project,
+            limit=limit,
+        )
+        for r in core_results:
+            r.db_origin = "core"
+        all_results.extend(core_results)
+
+    if search_scope in (SearchScope.PERSONAL, SearchScope.ALL):
+        targets = ["personal"]
+    elif search_scope == SearchScope.COLD:
+        targets = ["cold"]
+    elif search_scope == SearchScope.ALL:
+        targets = ["personal", "cold"]
+    else:
+        targets = []
+
+    if targets:
+        attached = await attach_federated_dbs_async(conn, targets)
+        try:
+            for alias in attached:
+                fed_results = await _search_attached_db_async(
+                    conn,
+                    alias,
+                    query,
+                    project=project,
+                    limit=limit,
+                )
+                all_results.extend(fed_results)
+        finally:
+            await detach_federated_dbs_async(conn, attached)
+
+    all_results.sort(key=lambda r: r.score, reverse=True)
+    return all_results[:limit]
 
 
 def federated_search_sync(
