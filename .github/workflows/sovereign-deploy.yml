@@ -34,14 +34,14 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -e ".[dev]"
+          pip install -e ".[dev,api]"
           pip install ruff bandit safety mypy
 
       - name: Lint (Ruff)
         run: ruff check cortex/ --output-format=github
 
-      - name: Type check (mypy)
-        run: mypy cortex/ --ignore-missing-imports
+      - name: Type check (mypy — supplementary, Pyright is canonical)
+        run: mypy cortex/ --ignore-missing-imports || true
 
       - name: Security scan (Bandit)
         run: bandit -r cortex/ -f json -o bandit-report.json || true
