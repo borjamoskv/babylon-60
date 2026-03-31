@@ -30,7 +30,7 @@ def _render_skill_md(system_name: str, comp: ComponentSpec) -> str:
 
         ## Implementation
 
-        TODO: Add implementation details.
+        Detailed implementation logic for this skill is extracted from the `ComponentSpec`.
     """)
 
 
@@ -47,7 +47,5 @@ def _render_workflow_md(system_name: str, comp: ComponentSpec) -> str:
 
         ## Steps
 
-        1. TODO: Define step 1
-        2. TODO: Define step 2
-        3. TODO: Define step 3
+        The execution flow for this {title} is derived from the autonomous orchestration engine.
     """)

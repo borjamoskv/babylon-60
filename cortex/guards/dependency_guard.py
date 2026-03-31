@@ -15,6 +15,8 @@ import logging
 import sys
 from pathlib import Path
 
+from rich.console import Console
+
 from cortex.guards import analysis
 from cortex.guards.models import DependencyViolation
 
@@ -103,30 +105,41 @@ def scan_directory(
 
 def main() -> None:
     """CLI entry point for DependencyGuard."""
+    console = Console()
     target = sys.argv[1] if len(sys.argv) > 1 else "."
     target_path = Path(target).expanduser().resolve()
 
-    print(f"🛡️  DependencyGuard v2 — Axiom 4 Enforcement\n   Scanning: {target_path}\n")
+    console.print(
+        f"\n[bold blue]🛡️  DependencyGuard v2 — Axiom 4 Enforcement[/]\n   Scanning: [dim]{target_path}[/]\n"
+    )
 
-    violations = scan_file(target_path) if target_path.is_file() else scan_directory(target_path)
+    violations = (
+        scan_file(target_path) if target_path.is_file() else scan_directory(target_path)
+    )
 
     if not violations:
-        print("✅ No Axiom 4 violations detected. Sovereignty intact.")
+        console.print("[bold green]✅ No Axiom 4 violations detected. Sovereignty intact.[/]")
         return
 
     critical = sum(1 for v in violations if not v.has_fallback)
     warnings = len(violations) - critical
 
     for v in violations:
-        print(f"   {v}")
+        # DependencyViolation.__str__ is already formatted with rich-like tags?
+        # No, it's just a string. Let's wrap it.
+        style = "bold red" if not v.has_fallback else "yellow"
+        console.print(f"   [{style}]![/] {v}")
 
-    print(
-        f"\n{'🔴' if critical else '🟡'} Total: {len(violations)} violations ({critical} CRITICAL, {warnings} warnings)"
+    status_icon = "🔴" if critical else "🟡"
+    console.print(
+        f"\n{status_icon} [bold white]Total:[/] {len(violations)} violations "
+        f"({critical} [bold red]CRITICAL[/], {warnings} [yellow]warnings[/])"
     )
 
     if critical > 0:
-        print(
-            "\n⚠️  CRITICAL violations detected. Use SovereignLLM (cortex/llm/sovereign.py) to replace subprocess oracle calls."
+        console.print(
+            "\n[bold red]⚠️  CRITICAL violations detected.[/]\n"
+            "Use [bold cyan]SovereignLLM[/] (cortex/llm/sovereign.py) to replace subprocess oracle calls."
         )
         sys.exit(1)
 
