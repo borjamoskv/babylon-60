@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import subprocess
+from typing import Any
 from pathlib import Path
 
 try:
@@ -122,7 +123,7 @@ def create_aether_server(
         output = [f"Found {len(results)} context chunks:"]
         for r in results:
             output.append(
-                f"[FACT #{r.fact_id} | PROJECT: {r.project} | TYPE: {r.fact_type} | SCORE: {r.score:.3f}]\n{r.content}\n---"
+                f"[FACT #{getattr(r, 'fact_id', '?')} | PROJECT: {r.project} | TYPE: {r.fact_type} | SCORE: {r.score:.3f}]\n{r.content}\n---"
             )
 
         final_str = "\n".join(output)
