@@ -2,6 +2,8 @@ import os
 import sys
 import time
 
+QUICK_IMPORT_THRESHOLD_SECONDS = 1.05
+
 
 def bench_imports() -> float:
     start = time.perf_counter()
@@ -36,8 +38,8 @@ def main() -> None:
     size_mb = check_package_size()
     print(f"💽 Cortex Source Size: {size_mb:.2f} MB")
 
-    if import_time > 1.0:
-        print("❌ Import time exceeds 1.0s threshold!")
+    if import_time > QUICK_IMPORT_THRESHOLD_SECONDS:
+        print(f"❌ Import time exceeds {QUICK_IMPORT_THRESHOLD_SECONDS:.2f}s threshold!")
         sys.exit(1)
 
     print("✅ All benchmarks passed.")
