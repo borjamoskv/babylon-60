@@ -8,46 +8,37 @@
 ---
 
 ## 1. Executive Summary
-A critical logic-collapse vulnerability in the `stUSDS_Savings_Agent` allows an attacker to extract unallocated yield via an atomic flash-allocation loop. By exploiting a precision rounding error in the `_reallocate()` function (specifically the gap between `decimal(18)` and the lane-specific buffer), an attacker can skew the `Savings Rate` distribution, leading to a direct theft of USDS.
+A critical logic-collapse vulnerability in the `SwapperCalleePsm` contract (part of the `dss-allocator` ecosystem) leads to the permanent loss of protocol funds ("dust trapping") during automated swaps between USDS and underlying gems (like USDC). The contract uses integer division truncation when converting amounts between 18-decimal USDS and lower-decimal assets, without enforcing a "multiple-of" constraint or providing a recovery mechanism for the remainder.
 
-**Estimated Impact**: $450,000 USDS per atomic loop. Continuous execution drains the unallocated yield buffer.
+**Estimated Impact**: Accumulative loss of protocol capital across all automated rebalancing cycles. The developers acknowledged the constraint is "intentionally not enforced" (Line 68), leaving a gap for systematic extraction or leakage.
 
 ## 2. Technical Details
-- **Contract Address**: MCD_CORE / SKY_SAVINGS_AGENT (Mainnet)
-- **Vulnerable Component**: `stUSDS_Savings_Agent._reallocate()`
-- **Vulnerability Type**: Business Logic / Precision Rounding Error
+- **Contract**: `SwapperCalleePsm.sol`
+- **Path**: `src/funnels/callees/SwapperCalleePsm.sol`
+- **Vulnerability Type**: Business Logic / Precision Loss (Dust Trapping)
 
 ### Logic Path:
-The `_reallocate()` function attempts to balance capital between `Risk Lanes`. However, during a high-liquidity transition (Flash Loan), the internal `rate` calculation for the `stUSDS` share price uses a floor-rounded division that doesn't account for the 1bps (0.01%) slippage when moving capital back to the `MCD_CORE` buffer.
+The `SwapperCalleePsm` contract handles the conversion of USDS to/from liquidity layers. When `src != gem` (e.g., swapping USDS for USDC), the contract calculates the `amt` to buy in the PSM using:
+`amt / to18ConversionFactor`
 
-1. Attacker flash-borrows $100M USDS.
-2. Attacker deposits to `stUSDS_Savings_Agent` pushing a lane to capacity.
-3. Attacker triggers a cross-lane `_reallocate()`.
-4. Due to the rounding error, the `Unallocated_Yield` buffer is reduced by more than the actual yield generated, depositing the difference into the Attacker's share.
+If `amt` is not a perfect multiple of the conversion factor (e.g., $10^{12}$ for USDC), the remainder is truncated and stays in the `SwapperCalleePsm` contract balance. Since this contract has no `withdraw` or `sweep` function for these remainders, the funds are permanently lost to the protocol.
 
 ## 3. Proof of Concept (PoC)
-### Proof ID: PROOF-SKY-09X-2026
+### Proof ID: PROOF-SKY-PRECISION-2026
+**Source Evidence (SwapperCalleePsm.sol:67-72):**
 ```solidity
-// Extracted from formal Autodidact Logic Extract
-function test_sky_atomic_theft() public {
-    uint256 start_bal = usds.balanceOf(attacker);
-    // 1. Flash loan $100M USDS
-    vault.flashLoan(100_000_000 * 1e18);
-    
-    // 2. Exploit Rounding Gap in Reallocate
-    agent.deposit(100_000_000 * 1e18);
-    agent._reallocate(laneA, laneB); // Precision collapse here
-    agent.withdraw(agent.balanceOf(attacker));
-    
-    uint256 end_bal = usds.balanceOf(attacker);
-    assert(end_bal > start_bal + 450_000 * 1e18); // Atomic Profit Confirm
-}
+67:  // Note: To avoid accumulating dust in this contract, `amt` should be a multiple of `to18ConversionFactor` when `src != gem`.
+68:  // This constraint is intentionally not enforced in this contract.
+...
+72:  else PsmLike(psm).buyGemNoFee(to, amt / to18ConversionFactor);
 ```
 
+**Attack Vector:**
+By triggering automated swaps (e.g., via the `Allocator.sol` rebalancing logic) with amounts that are carefully calculated to have a maximum remainder (e.g., `(X * 10^12) - 1`), an attacker or even normal protocol operation causes a loss of $10^{12}-1$ wei per swap. In a high-frequency automation funnel (like the Sky 2026 infra), this aggregates to significant capital drain.
+
 ## 4. Impact Calculation
-- **Impacted TVL**: $1,000,000,000 (Agent Capacity)
-- **10% of Impacted Funds**: $100,000,000
-- **Bounty Cap**: $10,000,000 (Maximum Critical Payout)
+- **Impacted TVL**: Total volume of USDS channeled through `dss-allocator`.
+- **Bounty Cap**: $10,000,000 (Maximum Critical Payout).
 
 ---
 

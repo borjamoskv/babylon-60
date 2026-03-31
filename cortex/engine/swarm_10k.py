@@ -46,6 +46,10 @@ class CenturionSuperv:
         start = time.perf_counter()
         res = await self.bus.emit(**kwargs)
         self.last_latency_ms = (time.perf_counter() - start) * 1000
+        
+        # O(1) Bit-Parallel Telemetry update (Ω₀)
+        if hasattr(self.bus, "update_metrics"):
+            self.bus.update_metrics(self.metrics.exergy, self.last_latency_ms, self.metrics.uncertainty)
 
         if self.last_latency_ms > 32.0:
             logger.warning("VOID BREACH: %.2fms on node %s", self.last_latency_ms, self.id)
@@ -86,10 +90,12 @@ class CenturionSuperv:
         return True
 
     async def get_exergy(self) -> float:
-        """Crystalline O(1) exergy calculation."""
+        """Crystalline O(1) exergy calculation and header sync."""
         self.metrics.exergy = ExergyOptimizer.calculate_node_exergy(
             self.metrics, self.last_latency_ms, self.CAPACITY
         )
+        # Mirror to SHM for L1/L0 visibility
+        self.bus.update_metrics(self.metrics.exergy, self.last_latency_ms, self.metrics.uncertainty)
         return self.metrics.exergy
 
 
@@ -111,7 +117,9 @@ class LegionSupervisor:
         best_exergy = -1.0
 
         for c in self.centurions.values():
-            exergy = await c.get_exergy()
+            # Fast-Path: Read metrics directly from bit-parallel SHM header (v8.5)
+            metrics = c.bus.metrics
+            exergy = metrics["exergy"]
             if exergy > best_exergy and len(c.agents) < c.CAPACITY:
                 best_exergy = exergy
                 best_cen = c
@@ -212,7 +220,10 @@ class SwarmCommander:
             logger.info("❄️ STRIKE MODE DEACTIVATED on domain: %s", domain)
 
     async def initialize(self) -> None:
-        await self.bus.initialize()
+        # Sovereign Bus v8.5 is implicitly ready upon instantiation
+        if hasattr(self.bus, "initialize"):
+            await self.bus.initialize()
+
         await self.bus.emit(
             "swarm:ignition", source="commander", tenant_id=self.tenant_id, routing_key="global"
         )
@@ -291,16 +302,14 @@ class SwarmCommander:
 
     async def consolidate_and_annihilate(self) -> None:
         """Purge entropy at the end of Ω_3 cycle."""
-        # Signal annihilation
-        if self.use_shm:
-            self.bus.emit("swarm:annihilation", 0, {"tenant_id": self.tenant_id})
-        else:
-            await self.bus.emit(
-                "swarm:annihilation",
-                source="commander",
-                tenant_id=self.tenant_id,
-                routing_key="global",
-            )
+        # Signal annihilation (Unified Ω₆ interface)
+        await self.bus.emit(
+            "swarm:annihilation",
+            source="commander",
+            tenant_id=self.tenant_id,
+            routing_key="global",
+        )
+        if not self.use_shm:
             # Shannon compaction (only for persistent bus)
             await self.bus.gc(max_age_days=0, tenant_id=self.tenant_id)
 
