@@ -125,15 +125,21 @@ async def insert_fact_record(
     relation_type = metadata_v2["relation_type"]
 
     # 2. SQL Persistence (facts table)
+    rank_map = {
+        "C5": 5, "C4": 4, "C3": 3, "C2": 2, "C1": 1,
+        "stated": 5, "verified": 5, "refuted": 0, "conjecture": 1
+    }
+    c_rank = rank_map.get(confidence, 3)
+
     async with conn.execute(
         """
         INSERT INTO facts (
             tenant_id, project, content, fact_type, metadata, hash, 
-            source, confidence, parent_id, relation_type,
+            source, confidence, confidence_rank, consensus_score, parent_id, relation_type,
             quadrant, storage_tier, exergy_score, category, yield_score,
-            semantic_status, tags
+            semantic_status, tags, tx_id
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             tenant_id,
@@ -144,6 +150,8 @@ async def insert_fact_record(
             f_hash,
             source,
             confidence,
+            c_rank,
+            float(meta.get("consensus_score", 1.0)),
             parent_decision_id,
             relation_type,
             quadrant,
@@ -153,6 +161,7 @@ async def insert_fact_record(
             yield_score,
             "pending",
             tags_json,
+            tx_id,
         ),
     ) as cursor:
         fact_id = cursor.lastrowid
@@ -202,11 +211,17 @@ async def insert_fact_record(
         )
 
     # 4. FTS Update (facts_fts virtual table)
+    # facts.content is encrypted at rest, so production FTS maintenance must
+    # happen explicitly from the plaintext payload instead of relying on SQL
+    # triggers over the facts table.
     try:
-        # We mirror a subset to FTS for fast keyword search
+        # We mirror a subset to FTS for fast keyword search.
         await conn.execute(
-            "INSERT INTO facts_fts (rowid, content, project, tags, fact_type) VALUES (?, ?, ?, ?, ?)",
-            (fact_id, content, project, tags_json, fact_type),
+            """
+            INSERT INTO facts_fts (rowid, content, project, tags, fact_type, tenant_id)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (fact_id, content, project, tags_json, fact_type, tenant_id),
         )
     except (sqlite3.Error, aiosqlite.Error) as e:
         if "unique" in str(e).lower() or "constraint failed" in str(e).lower():

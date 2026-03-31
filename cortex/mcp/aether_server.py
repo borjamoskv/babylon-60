@@ -110,6 +110,7 @@ def create_aether_server(
 
             results = await engine.search(
                 query=query,
+                tenant_id="default",
                 project=project or None,
                 top_k=min(max(top_k, 5), 50),
             )

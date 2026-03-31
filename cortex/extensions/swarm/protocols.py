@@ -1,12 +1,13 @@
 """Swarm protocols and JIT communication schemas (Ω₁₄)."""
 
 from __future__ import annotations
+
 import json
 import logging
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.swarm.protocols")
 

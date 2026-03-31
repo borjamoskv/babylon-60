@@ -1,8 +1,7 @@
 import asyncio
 import logging
-import sqlite3
-import os
-from cortex.extensions.swarm.budget import get_budget_manager, HARD_LIMIT_USD
+
+from cortex.extensions.swarm.budget import get_budget_manager
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("exergy-test")

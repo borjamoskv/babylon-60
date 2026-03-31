@@ -152,18 +152,18 @@ class SovereignHTTPClient:
     async def __aexit__(self, *exc) -> None:  # type: ignore[no-untyped-def]
         if self._client is not None:
             if self._backend == "httpx":
-                await self._client.aclose()
+                await self._client.aclose()  # type: ignore
             else:
-                await self._client.close()
+                await self._client.close()  # type: ignore
             self._client = None
 
     async def get(self, url: str, **kwargs) -> object:  # type: ignore
         """SSRF-safe GET request."""
         validate_url(url)
         if self._backend == "httpx":
-            return await self._client.get(url, **kwargs)
+            return await self._client.get(url, **kwargs)  # type: ignore
         elif self._backend == "aiohttp":
-            async with self._client.get(url, **kwargs) as resp:
+            async with self._client.get(url, **kwargs) as resp:  # type: ignore
                 return resp
         raise RuntimeError("Client not initialized — use async with")
 
@@ -171,9 +171,9 @@ class SovereignHTTPClient:
         """SSRF-safe POST request."""
         validate_url(url)
         if self._backend == "httpx":
-            return await self._client.post(url, **kwargs)
+            return await self._client.post(url, **kwargs)  # type: ignore
         elif self._backend == "aiohttp":
-            async with self._client.post(url, **kwargs) as resp:
+            async with self._client.post(url, **kwargs) as resp:  # type: ignore
                 return resp
         raise RuntimeError("Client not initialized — use async with")
 
@@ -181,9 +181,9 @@ class SovereignHTTPClient:
         """SSRF-safe arbitrary method request."""
         validate_url(url)
         if self._backend == "httpx":
-            return await self._client.request(method, url, **kwargs)
+            return await self._client.request(method, url, **kwargs)  # type: ignore
         elif self._backend == "aiohttp":
-            async with self._client.request(method, url, **kwargs) as resp:
+            async with self._client.request(method, url, **kwargs) as resp:  # type: ignore
                 return resp
         raise RuntimeError("Client not initialized — use async with")
 

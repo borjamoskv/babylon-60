@@ -205,8 +205,9 @@ class FactMutationEngine:
             if not row:
                 return
 
-        current_score, confidence = row
-        new_score = round((current_score or 1.0) * decay_factor, 3)
+        current_score_raw, confidence = row
+        current_score = float(current_score_raw) if current_score_raw is not None else 1.0
+        new_score = round(current_score * decay_factor, 3)
 
         # 2. State demotion (Verified -> Tentative -> Disputed)
         new_confidence = confidence

@@ -333,11 +333,11 @@ async def check_seal_9_compliance_impl() -> tuple[bool, str]:
 
         engine = CortexEngine(":memory:", auto_embed=False)
         await engine.init_db()
-        async with engine._get_conn() as conn:
+        async with engine.session() as conn:
             cursor = await conn.execute(
                 "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%audit%'"
             )
-            tables = await cursor.fetchall()
+            tables = list(await cursor.fetchall())
         await engine.close()
         if tables:
             printer.success(f"EU AI Act audit trail: {len(tables)} audit table(s) found.")

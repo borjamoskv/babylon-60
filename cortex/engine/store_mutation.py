@@ -147,6 +147,8 @@ async def purge_logic(
                 "DELETE FROM causal_edges WHERE (fact_id = ? OR parent_id = ?) AND tenant_id = ?",
                 (fact_id, fact_id, tenant_id),
             ),
+            # FTS cleanup is explicit because facts.content is encrypted in the
+            # primary table and trigger-driven sync is not reliable for writes.
             ("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,)),
         ]
         for statement, params in delete_specs:

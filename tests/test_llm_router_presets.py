@@ -22,10 +22,9 @@ import pytest
 from cortex.extensions.llm._models import BaseProvider, IntentProfile
 from cortex.extensions.llm._presets import (
     _PRESETS_CACHE,
-    providers_for_intent,
     frontier_providers,
-    cheapest_providers,
     load_presets,
+    providers_for_intent,
 )
 
 

@@ -194,7 +194,7 @@ async def retrieve_episodic_context(
     metamemory = getattr(manager, "metamemory", None)
     if metamemory is not None and candidate_engrams:
         query_embedding = await manager._encoder.encode(query)
-        judgment = metamemory.judge_fok(query_embedding, candidate_engrams)
+        judgment = metamemory.judge_fok(query_embedding, candidate_engrams)  # type: ignore
         threshold = getattr(metamemory, "_fok_threshold", 0.3)
         if judgment.fok_score < threshold:
             logger.warning(

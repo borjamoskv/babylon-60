@@ -18,7 +18,7 @@ from cortex.extensions.signals.bus import AsyncSignalBus
 from cortex.extensions.swarm.auto_fix import AutoFixPipeline
 from cortex.extensions.swarm.budget import get_budget_manager
 from cortex.extensions.swarm.protocols import AgentRole, SwarmIntent, SwarmSignalSchema
-from cortex.extensions.swarm.verification_gate import VerificationGate, RiskLevel
+from cortex.extensions.swarm.verification_gate import RiskLevel, VerificationGate
 from cortex.extensions.swarm.worktree_isolation import isolated_worktree
 
 logger = logging.getLogger("cortex.extensions.swarm.manager")
