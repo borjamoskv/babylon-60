@@ -12,6 +12,18 @@ logger = logging.getLogger("cortex.extensions.agent")
 __all__ = ["AgentMixin"]
 
 
+def _get_raw_conn(engine: Any) -> object:
+    """Isolate private access to engine's raw connection."""
+    return engine._get_sync_conn()
+
+
+def build_health_probes(
+    conn: Any, request: Any, schema_version: str
+) -> dict[str, Callable[[], tuple[str, bool, dict[str, Any]]]]:
+    """Placeholder for health probe logic."""
+    return {}
+
+
 class AgentMixin(EngineMixinBase):
     """Mixin for agent management operations.
     Ω₁: Seamless integration with MOLTBOOK for sovereign identity.
@@ -67,7 +79,7 @@ class AgentMixin(EngineMixinBase):
 
         return agent_id
 
-    async def get_agent(self, agent_id: str, tenant_id: str = "default") -> dict[str, Any] | None:
+    async def get_agent(self, agent_id: str, tenant_id: str = "default", include_metadata: bool = False) -> dict[str, Any] | None:
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             conn.row_factory = aiosqlite.Row
             async with conn.execute(
