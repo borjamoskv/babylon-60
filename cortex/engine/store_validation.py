@@ -10,6 +10,7 @@ from cortex.engine.storage_guard import StorageGuard
 from cortex.engine.membrane.sanitizer import SovereignSanitizer
 from cortex.engine.nemesis import NemesisProtocol
 from cortex.engine.bridge_guard import BridgeGuard
+from cortex.engine.guard_integration_patch import enforce_store_guards
 
 logger = logging.getLogger("cortex.engine.validation")
 
@@ -115,10 +116,12 @@ async def run_store_validation_logic(
     from cortex.engine.fact_store_core import resolve_causality_async
     meta = await resolve_causality_async(conn, project, meta)
 
+    nemesis_rejection = None
     if fact_type not in ("error", "ghost"):
         if rej := await NemesisProtocol.analyze_async(content, conn=conn):
-            raise ValueError(rej)
+            nemesis_rejection = rej
 
+    bridge_result = None
     if fact_type in ("knowledge", "decision", "rule", "ghost") and not (
         meta and meta.get("previous_fact_id")
     ):
@@ -129,10 +132,18 @@ async def run_store_validation_logic(
                 content = f"Pattern from {source_proj} → {project}. Adaptation: {content}"
 
     if fact_type == "bridge":
-        bridge_res = await BridgeGuard.validate_bridge(conn, content, project, tenant_id)
-        if not bridge_res["allowed"]:
-            raise ValueError(f"BRIDGE BLOCKED: {bridge_res['reason']}")
-        if bridge_res["meta_flags"]:
-            meta = {**(meta or {}), **bridge_res["meta_flags"]}
+        bridge_result = await BridgeGuard.validate_bridge(conn, content, project, tenant_id)
+        if bridge_result["meta_flags"]:
+            meta = {**(meta or {}), **bridge_result["meta_flags"]}
+
+    await enforce_store_guards(
+        content=content,
+        project=project,
+        tenant_id=tenant_id,
+        fact_type=fact_type,
+        meta=meta,
+        nemesis_rejection=nemesis_rejection,
+        bridge_result=bridge_result,
+    )
 
     return None, meta, content, fact_type
