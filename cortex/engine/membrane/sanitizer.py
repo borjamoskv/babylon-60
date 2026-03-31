@@ -15,9 +15,12 @@ class SovereignSanitizer:
     """
 
     # Simple regexes to ensure high performance (< 20ms write latency objective)
-    # WARNING: These are basic implementations and might need refinement for production
+    # EMAIL_REGEX: Standard email pattern, sufficiently linear for our bounds.
     EMAIL_REGEX = re.compile(r"([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)")
-    PHONE_REGEX = re.compile(r"(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}")
+
+    # PHONE_REGEX: Hardened against ReDoS (CodeQL #64). 
+    # Uses non-capturing groups and avoids overlapping quantifiers.
+    PHONE_REGEX = re.compile(r"\b(?:\+?\d{1,3}[-. ]?)?\(?\d{3}\)?[-. ]?\d{3}[-. ]?\d{4}\b")
 
     # Matches local paths (macOS/Unix & Windows)
     LOCAL_PATH_REGEX = re.compile(r"(/(Users|home|var|tmp|etc)/[^\s]+)|([A-Z]:\\[^\s]+)")
