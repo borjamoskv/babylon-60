@@ -3,7 +3,6 @@ CORTEX Nexus: Mercor-Sovereign-Omega Targeting Params
 RFC-047 / Project LEVIATHAN
 """
 
-from typing import List
 from pydantic import BaseModel
 
 
@@ -17,21 +16,13 @@ class TargetingParameter(BaseModel):
 
 # Initial targeting list for the first swarm wave
 FIRST_WAVE_TARGETS = [
+    TargetingParameter(region="France", sector="LLM Infrastructure", minimum_valuation=5_000_000.0),
     TargetingParameter(
-        region="France",
-        sector="LLM Infrastructure",
-        minimum_valuation=5_000_000.0
+        region="Germany", sector="Autonomous SaaS Agents", minimum_valuation=2_000_000.0
     ),
     TargetingParameter(
-        region="Germany",
-        sector="Autonomous SaaS Agents",
-        minimum_valuation=2_000_000.0
+        region="Spain", sector="Agentic BPO / Customer Service", minimum_valuation=1_000_000.0
     ),
-    TargetingParameter(
-        region="Spain",
-        sector="Agentic BPO / Customer Service",
-        minimum_valuation=1_000_000.0
-    )
 ]
 
 

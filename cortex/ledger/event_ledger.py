@@ -17,8 +17,10 @@ from cortex.memory.models import MemoryEvent
 try:
     from cortex.extensions.security.tenant import get_tenant_id
 except ImportError:
+
     def get_tenant_id() -> str:
         return "default"
+
 
 __all__ = ["EventLedgerL3", "get_default_ledger"]
 
@@ -46,6 +48,7 @@ CREATE INDEX IF NOT EXISTS idx_memory_events_session
 CREATE INDEX IF NOT EXISTS idx_memory_events_tenant_event_desc
     ON memory_events(tenant_id, event_id DESC);
 """
+
 
 class EventLedgerL3:
     """Immutable event sourcing ledger for cognitive memory."""
@@ -84,6 +87,7 @@ class EventLedgerL3:
 
     async def append_event(self, event: MemoryEvent) -> None:
         import hashlib
+
         await self.ensure_table()
 
         if not event.signature:
@@ -122,12 +126,13 @@ class EventLedgerL3:
     async def store_fact(self, fact: str, metadata: dict[str, Any] | None = None) -> None:
         """Compatibility method for semantic persistence from compaction pipelines."""
         from cortex.memory.models import MemoryEvent
+
         event = MemoryEvent(
             role="system",
             content=f"FACT_STORED: {fact}",
             metadata=metadata or {},
             session_id="system_compaction",
-            token_count=0
+            token_count=0,
         )
         await self.append_event(event)
 
@@ -164,6 +169,7 @@ class EventLedgerL3:
         )
         rows = await cursor.fetchall()
         from cortex.ledger.event_ledger import _row_to_event
+
         return [_row_to_event(row) for row in rows]
 
     async def count(self, tenant_id: str, session_id: str | None = None) -> int:
@@ -183,6 +189,7 @@ class EventLedgerL3:
 
     async def verify_chain(self, tenant_id: str) -> dict[str, Any]:
         import hashlib
+
         await self.ensure_table()
         cursor = await self._conn.execute(
             """SELECT event_id, timestamp, role, content, tenant_id, prev_hash, signature
@@ -221,6 +228,7 @@ class EventLedgerL3:
             "findings": audit_log or ["Memory event chain shows 100% integrity."],
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
+
 
 _DEFAULT_LEDGER: EventLedgerL3 | None = None
 

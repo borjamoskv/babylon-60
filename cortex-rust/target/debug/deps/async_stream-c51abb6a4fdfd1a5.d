@@ -1,0 +1,10 @@
+/Users/borjafernandezangulo/30_CORTEX/cortex-rust/target/debug/deps/async_stream-c51abb6a4fdfd1a5.d: /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/async-stream-0.3.6/src/lib.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/async-stream-0.3.6/src/async_stream.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/async-stream-0.3.6/src/next.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/async-stream-0.3.6/src/yielder.rs
+
+/Users/borjafernandezangulo/30_CORTEX/cortex-rust/target/debug/deps/libasync_stream-c51abb6a4fdfd1a5.rlib: /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/async-stream-0.3.6/src/lib.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/async-stream-0.3.6/src/async_stream.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/async-stream-0.3.6/src/next.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/async-stream-0.3.6/src/yielder.rs
+
+/Users/borjafernandezangulo/30_CORTEX/cortex-rust/target/debug/deps/libasync_stream-c51abb6a4fdfd1a5.rmeta: /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/async-stream-0.3.6/src/lib.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/async-stream-0.3.6/src/async_stream.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/async-stream-0.3.6/src/next.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/async-stream-0.3.6/src/yielder.rs
+
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/async-stream-0.3.6/src/lib.rs:
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/async-stream-0.3.6/src/async_stream.rs:
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/async-stream-0.3.6/src/next.rs:
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/async-stream-0.3.6/src/yielder.rs:

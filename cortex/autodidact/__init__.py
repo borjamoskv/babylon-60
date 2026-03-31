@@ -4,10 +4,10 @@
 """Autodidact: Capital × Knowledge in a single hash-chain."""
 
 from cortex.autodidact.dual_ledger import DualLedger, TxType
-from cortex.autodidact.kv_cache import KVPrefixCache
-from cortex.autodidact.pearl_staging import PeARLStagingValidator, StagingResult
-from cortex.autodidact.ouroboros_bridge import OuroborosBridge
 from cortex.autodidact.jit_synthesizer import JITSynthesizer
+from cortex.autodidact.kv_cache import KVPrefixCache
+from cortex.autodidact.ouroboros_bridge import OuroborosBridge
+from cortex.autodidact.pearl_staging import PeARLStagingValidator, StagingResult
 
 __all__ = [
     "DualLedger",

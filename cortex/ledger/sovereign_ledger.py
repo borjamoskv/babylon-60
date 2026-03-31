@@ -23,12 +23,14 @@ __all__ = ["SovereignLedger"]
 
 logger = logging.getLogger("cortex.ledger.sovereign")
 
+
 @dataclass(frozen=True)
 class MerkleNode:
     hash: str
     left: MerkleNode | None = None
     right: MerkleNode | None = None
     is_leaf: bool = False
+
 
 class MerkleTree:
     def __init__(self, hashes: list[str]):
@@ -53,6 +55,7 @@ class MerkleTree:
             next_level.append(MerkleNode(combined_hash, left, right))
         return self._build_tree(next_level)
 
+
 class SovereignLedger:
     """Unified Wave 8 Sovereign Ledger."""
 
@@ -65,7 +68,9 @@ class SovereignLedger:
         # Ω1 Byzantine Genesis: Allow external anchor (e.g. CORTEX_LEDGER_ANCHOR)
         anchor = os.getenv("CORTEX_LEDGER_ANCHOR")
         if not anchor:
-            logger.warning("Ω1_WARNING: CORTEX_LEDGER_ANCHOR not found. Using default 'GENESIS'. Internal entropy risk.")
+            logger.warning(
+                "Ω1_WARNING: CORTEX_LEDGER_ANCHOR not found. Using default 'GENESIS'. Internal entropy risk."
+            )
 
         self._genesis_hash = genesis_hash or anchor or "GENESIS"
         self._last_hash = self._genesis_hash
@@ -149,7 +154,7 @@ class SovereignLedger:
                 """INSERT INTO transactions
                    (project, action, detail, prev_hash, hash, timestamp, tenant_id)
                    VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                (project, action, detail_json, prev_hash, tx_hash, ts, tenant_id)
+                (project, action, detail_json, prev_hash, tx_hash, ts, tenant_id),
             )
             await conn.commit()
             self._last_hash = tx_hash

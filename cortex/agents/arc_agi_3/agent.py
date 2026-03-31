@@ -20,7 +20,7 @@ class ARCAgent:
         Executes the agentic workflow for a single ARC-AGI task.
         """
         program = await self.induce(input_data)
-        
+
         # Ensure test_input exists
         test_input = input_data.get("test", [{}])[0].get("input", [])
         if not test_input:
@@ -47,6 +47,7 @@ class ARCAgent:
         if not train_examples:
             logger.warning("No training examples provided for induction.")
             from cortex.agents.arc_agi_3.reasoning import PeARLProgram
+
             return PeARLProgram("def transform(grid):\n    return grid", 0.0)
 
         # Use the reasoning engine to search for the best program
@@ -55,15 +56,15 @@ class ARCAgent:
 
 if __name__ == "__main__":
     import argparse
-    import json
     import asyncio
+    import json
 
     async def main():
         parser = argparse.ArgumentParser(description="ARC-AGI-3 Sovereign Solver CLI.")
         parser.add_argument("--task", type=str, required=True, help="Path to ARC task JSON.")
         args = parser.parse_args()
 
-        with open(args.task, "r") as f:
+        with open(args.task) as f:
             task_data = json.load(f)
 
         agent = ARCAgent()

@@ -73,10 +73,7 @@ class Agent(ABC):
             not self.is_done(self.frames, self.frames[-1])
             and self.action_counter <= self.MAX_ACTIONS
         ):
-            action = self.choose_action(
-                self.frames,
-                self.frames[-1]
-            )
+            action = self.choose_action(self.frames, self.frames[-1])
             if frame := self.take_action(action):
                 self.append_frame(frame)
                 logger.info(
@@ -117,9 +114,7 @@ class Agent(ABC):
     def start_recording(self) -> None:
         filename = self.agent_name if self.is_playback else None
         self.recorder = Recorder(prefix=self.name, filename=filename)
-        logger.info(
-            f"created new recording for {self.name} into {self.recorder.filename}"
-        )
+        logger.info(f"created new recording for {self.name} into {self.recorder.filename}")
 
     def append_frame(self, frame: FrameData) -> None:
         self.frames.append(frame)
@@ -171,9 +166,7 @@ class Agent(ABC):
             if hasattr(self, "recorder") and not self.is_playback:
                 if scorecard:
                     self.recorder.record(scorecard.get(self.game_id))
-                logger.info(
-                    f"recording for {self.name} is available in {self.recorder.filename}"
-                )
+                logger.info(f"recording for {self.name} is available in {self.recorder.filename}")
             if self.action_counter >= self.MAX_ACTIONS:
                 logger.info(
                     f"Exiting: agent reached MAX_ACTIONS of {self.MAX_ACTIONS}, took {self.seconds} seconds ({self.fps} average fps)"
@@ -189,9 +182,7 @@ class Agent(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def choose_action(
-        self, frames: list[FrameData], latest_frame: FrameData
-    ) -> GameAction:
+    def choose_action(self, frames: list[FrameData], latest_frame: FrameData) -> GameAction:
         """Choose which action the Agent should take, fill in any arguments, and return it."""
         raise NotImplementedError
 
@@ -214,30 +205,20 @@ class Playback(Agent):
         if self.agent_name in Recorder.list():
             try:
                 self.recorded_actions = self.filter_actions()
-                logger.info(
-                    f"Loaded {len(self.recorded_actions)} actions from {self.agent_name}"
-                )
+                logger.info(f"Loaded {len(self.recorded_actions)} actions from {self.agent_name}")
             except Exception as e:
                 logger.error(f"Failed to load recording {self.agent_name}: {e}")
                 self.recorded_actions = []
         else:
-            logger.warning(
-                f"Recording {self.agent_name} not found in available recordings"
-            )
+            logger.warning(f"Recording {self.agent_name} not found in available recordings")
 
     def filter_actions(self) -> list[dict[str, Any]]:
-        return [
-            a
-            for a in self.recorder.get()
-            if "data" in a and "action_input" in a["data"]
-        ]
+        return [a for a in self.recorder.get() if "data" in a and "action_input" in a["data"]]
 
     def is_done(self, frames: list[FrameData], latest_frame: FrameData) -> bool:
         return bool(self.action_counter >= len(self.recorded_actions))
 
-    def choose_action(
-        self, frames: list[FrameData], latest_frame: FrameData
-    ) -> GameAction:
+    def choose_action(self, frames: list[FrameData], latest_frame: FrameData) -> GameAction:
         loop_start_time = time.time()
 
         if self.action_counter >= len(self.recorded_actions):
@@ -256,9 +237,7 @@ class Playback(Agent):
         if "reasoning" in action_input and action_input["reasoning"] is not None:
             action.reasoning = action_input["reasoning"]
 
-        logger.debug(
-            f"Playback action {self.action_counter}: {action.name} with data {data}"
-        )
+        logger.debug(f"Playback action {self.action_counter}: {action.name} with data {data}")
 
         target_frame_time = 1.0 / getattr(self, "PLAYBACK_FPS", 5)
         elapsed_time = time.time() - loop_start_time

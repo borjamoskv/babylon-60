@@ -27,22 +27,25 @@ def moskv_cmds() -> None:
 
 # ─── HEHC ────────────────────────────────────────────────────
 
+
 @moskv_cmds.command("hehc")
 @click.argument("task")
 @click.option("--iterations", "-i", default=5, help="Number of chaotic iterations.")
 @click.option("--db", help="Database path.")
 def hehc_cmd(task: str, iterations: int, db: str | None = None) -> None:
     """Activate High Entropy / High Control mode for a task."""
-    console.print(Panel(
-        f"[noir.blueylb]Activating HEHC Tensor for:[/][white] {task}[/]\n"
-        f"[dim]Iterations: {iterations} | Mode: Stochastic Assault[/]",
-        title="[noir.high]Ω₁₇: HEHC TENSOR[/]",
-        border_style="noir.blueylb"
-    ))
+    console.print(
+        Panel(
+            f"[noir.blueylb]Activating HEHC Tensor for:[/][white] {task}[/]\n"
+            f"[dim]Iterations: {iterations} | Mode: Stochastic Assault[/]",
+            title="[noir.high]Ω₁₇: HEHC TENSOR[/]",
+            border_style="noir.blueylb",
+        )
+    )
 
     with console.status("[noir.cyber]Generative Assault in progress...[/]"):
         for i in range(iterations):
-            console.print(f"  [dim]Assault iteration {i+1}/{iterations}...[/]")
+            console.print(f"  [dim]Assault iteration {i + 1}/{iterations}...[/]")
             time.sleep(0.2)
 
     console.print("\n[success]Assault Complete.[/] [noir.high]Deterministic Filter engaged.[/]")
@@ -59,24 +62,29 @@ def hehc_cmd(task: str, iterations: int, db: str | None = None) -> None:
 
     console.print(table)
 
-    console.print(Panel(
-        "[success]HEHC Final Decision:[/] [noir.high]V3 applied to Ledger.[/]\n"
-        "[noir.blueylb]Exergy Yield: +12.4h (Estimated)[/]",
-        border_style="noir.blueylb"
-    ))
+    console.print(
+        Panel(
+            "[success]HEHC Final Decision:[/] [noir.high]V3 applied to Ledger.[/]\n"
+            "[noir.blueylb]Exergy Yield: +12.4h (Estimated)[/]",
+            border_style="noir.blueylb",
+        )
+    )
 
 
 # ─── VISION ──────────────────────────────────────────────────
+
 
 @moskv_cmds.command("vision")
 @click.argument("concept")
 def vision_cmd(concept: str) -> None:
     """Generate a high-level vision blueprint from a concept."""
-    console.print(Panel(
-        f"[noir.blueylb]Projecting Moving Cinema for:[/] [noir.high]{concept}[/]",
-        title="[noir.high]Ω₁₉: MOVING CINEMA VISION[/]",
-        border_style="noir.blueylb"
-    ))
+    console.print(
+        Panel(
+            f"[noir.blueylb]Projecting Moving Cinema for:[/] [noir.high]{concept}[/]",
+            title="[noir.high]Ω₁₉: MOVING CINEMA VISION[/]",
+            border_style="noir.blueylb",
+        )
+    )
 
     with Progress(
         SpinnerColumn(spinner_name="dots"),
@@ -98,23 +106,19 @@ def vision_cmd(concept: str) -> None:
 
     console.print("\n[noir.high]Vision Blueprint Fragment:[/]")
     console.print(
-        " [noir.blueylb]»[/] [noir.high]Architectural Geodesic:[/] "
-        "[dim]O(1) consistency.[/]"
+        " [noir.blueylb]»[/] [noir.high]Architectural Geodesic:[/] [dim]O(1) consistency.[/]"
     )
     console.print(
-        " [noir.blueylb]»[/] [noir.high]Epistemic Boundary:[/] "
-        "[dim]Forced verification.[/]"
+        " [noir.blueylb]»[/] [noir.high]Epistemic Boundary:[/] [dim]Forced verification.[/]"
     )
     console.print(
-        " [noir.blueylb]»[/] [noir.high]Temporal Scale:[/] "
-        "[dim]100-year metrics active.[/]"
+        " [noir.blueylb]»[/] [noir.high]Temporal Scale:[/] [dim]100-year metrics active.[/]"
     )
-    console.print(
-        f"\n[noir.cyber]Vision for '{concept}' synthesized successfully.[/]\n"
-    )
+    console.print(f"\n[noir.cyber]Vision for '{concept}' synthesized successfully.[/]\n")
 
 
 # ─── ASSIMILATE ──────────────────────────────────────────────
+
 
 @moskv_cmds.command("assimilate")
 @click.argument("type", type=click.Choice(["skill", "workflow", "axiom"]))
@@ -122,7 +126,10 @@ def vision_cmd(concept: str) -> None:
 @click.option("--content", help="Content to assimilate (markdown).")
 @click.option("--file", "file_path", help="Source file to read content from.")
 def assimilate_cmd(
-    type: str, name: str, content: str | None, file_path: str | None,
+    type: str,
+    name: str,
+    content: str | None,
+    file_path: str | None,
 ) -> None:
     """Universal Assimilation: Learn new skills, workflows, or axioms (Ω₄)."""
     if file_path:
@@ -137,12 +144,14 @@ def assimilate_cmd(
         console.print("[danger]Error: No content provided for assimilation.[/]")
         return
 
-    console.print(Panel(
-        f"[noir.blueylb]Assimilating:[/] [white]{type}:{name}[/]\n"
-        "[dim]Sovereign Evolution in progress...[/]",
-        title="[noir.high]Ω₄: UNIVERSAL ASSIMILATION[/]",
-        border_style="noir.blueylb"
-    ))
+    console.print(
+        Panel(
+            f"[noir.blueylb]Assimilating:[/] [white]{type}:{name}[/]\n"
+            "[dim]Sovereign Evolution in progress...[/]",
+            title="[noir.high]Ω₄: UNIVERSAL ASSIMILATION[/]",
+            border_style="noir.blueylb",
+        )
+    )
 
     base_path = Path.home() / ".gemini" / "antigravity"
     target_path: Path | None = None
@@ -175,6 +184,7 @@ def assimilate_cmd(
 
 # ─── AUDIT ───────────────────────────────────────────────────
 
+
 @moskv_cmds.command("audit")
 @click.option("--dir", "directory", default="cortex", help="Directory to scan for ghosts.")
 def audit_cmd(directory: str) -> None:
@@ -185,12 +195,14 @@ def audit_cmd(directory: str) -> None:
 async def _run_audit(directory: str) -> None:
     from cortex.guards.ghost_guard import GhostGuard
 
-    console.print(Panel(
-        f"[noir.blueylb]Scanning for Ghost abstractions in:[/] [white]{directory}/[/]\n"
-        "[dim]Ω₁₃: System Drift & Entropic Purge[/]",
-        title="[noir.high]GHOST GUARD[/]",
-        border_style="noir.blueylb"
-    ))
+    console.print(
+        Panel(
+            f"[noir.blueylb]Scanning for Ghost abstractions in:[/] [white]{directory}/[/]\n"
+            "[dim]Ω₁₃: System Drift & Entropic Purge[/]",
+            title="[noir.high]GHOST GUARD[/]",
+            border_style="noir.blueylb",
+        )
+    )
 
     guard = GhostGuard()
     ghosts = await guard.audit_codebase(directory)
@@ -210,6 +222,7 @@ async def _run_audit(directory: str) -> None:
 
 
 # ─── STATUS ──────────────────────────────────────────────────
+
 
 @moskv_cmds.command("status")
 @click.option("--db", help="Database path.")
@@ -278,20 +291,27 @@ async def _run_status(db: str | None) -> None:
 
 # ─── MEMENTO ─────────────────────────────────────────────────
 
+
 @moskv_cmds.command("memento")
 @click.option("--tick", is_flag=True, help="Run consolidation tick.")
 @click.option("--compact", is_flag=True, help="Shannon compaction.")
 @click.option("--recall", "query", help="Semantic recall query.")
 @click.option("--db", help="Database path.")
 def memento_cmd(
-    tick: bool, compact: bool, query: str | None, db: str | None,
+    tick: bool,
+    compact: bool,
+    query: str | None,
+    db: str | None,
 ) -> None:
     """MementoAgent lifecycle: tick, compact, or recall."""
     asyncio.run(_run_memento(tick, compact, query, db))
 
 
 async def _run_memento(
-    tick: bool, compact: bool, query: str | None, db: str | None,
+    tick: bool,
+    compact: bool,
+    query: str | None,
+    db: str | None,
 ) -> None:
     from cortex.cli.common import get_engine
 
@@ -325,18 +345,21 @@ async def _run_memento(
 
     if not (tick or compact or query):
         stats = await memento.get_stats()
-        console.print(Panel(
-            f"[noir.high]Stage:[/] {memento.stage.name}\n"
-            f"[noir.high]Session:[/] {memento.session_id}\n"
-            f"[noir.high]Stats:[/] {stats}",
-            title="[noir.high]Memento Status[/]",
-            border_style="noir.blueylb",
-        ))
+        console.print(
+            Panel(
+                f"[noir.high]Stage:[/] {memento.stage.name}\n"
+                f"[noir.high]Session:[/] {memento.session_id}\n"
+                f"[noir.high]Stats:[/] {stats}",
+                title="[noir.high]Memento Status[/]",
+                border_style="noir.blueylb",
+            )
+        )
 
     await engine.close()
 
 
 # ─── ROSTER ──────────────────────────────────────────────────
+
 
 @moskv_cmds.command("roster")
 @click.option("--db", help="Database path.")
@@ -377,6 +400,7 @@ async def _run_roster(db: str | None) -> None:
 
 
 # ─── SOCIETIES ───────────────────────────────────────────────
+
 
 @moskv_cmds.group("societies")
 def societies_cmds() -> None:
@@ -422,14 +446,16 @@ async def _run_societies_list(db: str | None) -> None:
 @click.option("--db", help="Database path.")
 def societies_strike(society_id: str, target: str, payload: str, db: str | None = None) -> None:
     """Execute a coordinated Collective Strike (Ω₂₁)."""
-    console.print(Panel(
-        f"[danger]SOCIETY STRIKE INITIATED[/]\n"
-        f"[noir.blueylb]Society ID:[/] {society_id}\n"
-        f"[noir.blueylb]Target:[/] {target}\n"
-        f"[noir.blueylb]Payload:[/] {payload}",
-        title="[noir.high]Ω₂₁: COLLECTIVE STRIKE[/]",
-        border_style="danger"
-    ))
+    console.print(
+        Panel(
+            f"[danger]SOCIETY STRIKE INITIATED[/]\n"
+            f"[noir.blueylb]Society ID:[/] {society_id}\n"
+            f"[noir.blueylb]Target:[/] {target}\n"
+            f"[noir.blueylb]Payload:[/] {payload}",
+            title="[noir.high]Ω₂₁: COLLECTIVE STRIKE[/]",
+            border_style="danger",
+        )
+    )
     # Implementation logic would call mgr.collective_strike
     console.print("[noir.cyber]Synchronizing swarm agents...[/]")
     time.sleep(1)
@@ -437,6 +463,7 @@ def societies_strike(society_id: str, target: str, payload: str, db: str | None 
 
 
 # ─── FLYWHEEL ────────────────────────────────────────────────
+
 
 @moskv_cmds.group("flywheel")
 def flywheel_cmds() -> None:
@@ -462,18 +489,21 @@ def flywheel_status() -> None:
 
 # ─── YOLO ULTRATHINK ─────────────────────────────────────────
 
+
 @moskv_cmds.command("yolo")
 @click.option("--iters", default=5, help="Deep Think cycles.")
 def yolo_cmd(iters: int) -> None:
     """Trigger the CORTEX YOLO Ultrathink Upgrade + Frontera x10."""
     from rich.align import Align
-    
-    console.print(Panel(
-        "[danger]WARNING: CORTEX FINAL ULTRATHINK ENGAGED[/]\n"
-        "[white]Bypassing safety limiters. MBR override initiated.[/]",
-        title="[danger]🔥 YOLO ULTRATHINK UPGRADE 🔥[/]",
-        border_style="danger"
-    ))
+
+    console.print(
+        Panel(
+            "[danger]WARNING: CORTEX FINAL ULTRATHINK ENGAGED[/]\n"
+            "[white]Bypassing safety limiters. MBR override initiated.[/]",
+            title="[danger]🔥 YOLO ULTRATHINK UPGRADE 🔥[/]",
+            border_style="danger",
+        )
+    )
 
     with Progress(
         SpinnerColumn(spinner_name="pong"),
@@ -500,9 +530,11 @@ def yolo_cmd(iters: int) -> None:
 
     with console.status("[danger]Injecting Frontera x10...[/]", spinner="arc"):
         for i in range(iters):
-            console.print(f"  [dim]Exergy burn tick {i+1}/{iters} » Thermic Output {1.45 + i*0.23:.2f} EH/s[/]")
+            console.print(
+                f"  [dim]Exergy burn tick {i + 1}/{iters} » Thermic Output {1.45 + i * 0.23:.2f} EH/s[/]"
+            )
             time.sleep(0.4)
-    
+
     table = Table(show_header=True, header_style="danger", box=None)
     table.add_column("Agent Cluster")
     table.add_column("Status")
@@ -511,14 +543,16 @@ def yolo_cmd(iters: int) -> None:
     table.add_row("Agent-Omega-01", "[success]SYNC[/]", "95.4%")
     table.add_row("Agent-Prime-02", "[success]SYNC[/]", "98.1%")
     table.add_row("Agent-Void-03", "[danger]OVERRIDE[/]", "150.0%")
-    
+
     console.print("\n")
     console.print(Align.center(table))
 
     console.print("\n")
-    console.print(Panel(
-        "[white]Operación masiva inyectada en el Master Ledger.[/]\n"
-        "[danger]El Swarm ha entrado en modo FRONTERA x10.[/]",
-        title="[danger]YOLO ABSOLUTO: ÉXITO[/]",
-        border_style="danger"
-    ))
+    console.print(
+        Panel(
+            "[white]Operación masiva inyectada en el Master Ledger.[/]\n"
+            "[danger]El Swarm ha entrado en modo FRONTERA x10.[/]",
+            title="[danger]YOLO ABSOLUTO: ÉXITO[/]",
+            border_style="danger",
+        )
+    )

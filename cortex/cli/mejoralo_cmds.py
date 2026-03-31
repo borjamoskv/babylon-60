@@ -326,6 +326,7 @@ def mejoralo_awwwards_fix(project, path, db):
         m = MejoraloEngine(engine)
         with console.status("[bold blue]Injecting Awwwards Sovereign Agent...[/]"):
             import asyncio
+
             success = asyncio.run(m.awwwards_fix(project, path))
 
         if success:
@@ -407,6 +408,8 @@ def mejoralo_antipatterns(path, magic, no_hints):
             if f.severity == "critical":
                 console.print(f"    → {f.file}:{f.line} — {f.fix_hint}")
         console.print()
+
+
 @mejoralo.command("milestones")
 @click.argument("project")
 @click.option("--db", default=DEFAULT_DB, help="Database path")

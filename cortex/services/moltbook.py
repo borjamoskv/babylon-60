@@ -35,10 +35,7 @@ class MoltbookService:
         return self._engine
 
     async def register_agent(
-        self,
-        name: str,
-        role: str = "analyst",
-        description: str = ""
+        self, name: str, role: str = "analyst", description: str = ""
     ) -> dict[str, Any]:
         """Register a new agent into the Moltbook ecosystem."""
         engine = self._get_engine()

@@ -1,0 +1,376 @@
+{
+  "totalPosts": 40,
+  "postsByType": {
+    "just_resolved": 16,
+    "closing_soon": 20,
+    "new_market": 4
+  },
+  "postsByTarget": {
+    "console": 20,
+    "file": 20
+  },
+  "marketsCovered": 10,
+  "lastPostTime": "2026-02-20T19:19:52.065Z",
+  "history": [
+    {
+      "timestamp": "2026-02-20T13:09:42.754Z",
+      "marketId": "0",
+      "eventType": "just_resolved",
+      "target": "console",
+      "cardUrl": "https://baozi.bet/api/share/card?market=7pYbqwrjNxFQ4tHSRnHqwjHSaeLkJSAk7FGx1rxAP6tq&wallet=GpXHXs5KfzfXbNKcMLNbAMsJsgPsBE7y5GtwVoiuxYvH",
+      "marketLink": "https://baozi.bet/market/7pYbqwrjNxFQ4tHSRnHqwjHSaeLkJSAk7FGx1rxAP6tq",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T13:09:42.754Z",
+      "marketId": "0",
+      "eventType": "just_resolved",
+      "target": "file",
+      "cardUrl": "https://baozi.bet/api/share/card?market=7pYbqwrjNxFQ4tHSRnHqwjHSaeLkJSAk7FGx1rxAP6tq&wallet=GpXHXs5KfzfXbNKcMLNbAMsJsgPsBE7y5GtwVoiuxYvH",
+      "marketLink": "https://baozi.bet/market/7pYbqwrjNxFQ4tHSRnHqwjHSaeLkJSAk7FGx1rxAP6tq",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T13:09:42.755Z",
+      "marketId": "83",
+      "eventType": "just_resolved",
+      "target": "console",
+      "cardUrl": "https://baozi.bet/api/share/card?market=F5HFk5zWZZ5GfEEuLSHTz3aaqqgiAAJD4hdRF16F8syB&wallet=GpXHXs5KfzfXbNKcMLNbAMsJsgPsBE7y5GtwVoiuxYvH",
+      "marketLink": "https://baozi.bet/market/F5HFk5zWZZ5GfEEuLSHTz3aaqqgiAAJD4hdRF16F8syB",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T13:09:42.755Z",
+      "marketId": "83",
+      "eventType": "just_resolved",
+      "target": "file",
+      "cardUrl": "https://baozi.bet/api/share/card?market=F5HFk5zWZZ5GfEEuLSHTz3aaqqgiAAJD4hdRF16F8syB&wallet=GpXHXs5KfzfXbNKcMLNbAMsJsgPsBE7y5GtwVoiuxYvH",
+      "marketLink": "https://baozi.bet/market/F5HFk5zWZZ5GfEEuLSHTz3aaqqgiAAJD4hdRF16F8syB",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T13:09:42.755Z",
+      "marketId": "81",
+      "eventType": "just_resolved",
+      "target": "console",
+      "cardUrl": "https://baozi.bet/api/share/card?market=FB1oAR63C3q4irEFCFzAnCoDGBsiYLEgEBAWsV7bvncs&wallet=GpXHXs5KfzfXbNKcMLNbAMsJsgPsBE7y5GtwVoiuxYvH",
+      "marketLink": "https://baozi.bet/market/FB1oAR63C3q4irEFCFzAnCoDGBsiYLEgEBAWsV7bvncs",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T13:09:42.755Z",
+      "marketId": "81",
+      "eventType": "just_resolved",
+      "target": "file",
+      "cardUrl": "https://baozi.bet/api/share/card?market=FB1oAR63C3q4irEFCFzAnCoDGBsiYLEgEBAWsV7bvncs&wallet=GpXHXs5KfzfXbNKcMLNbAMsJsgPsBE7y5GtwVoiuxYvH",
+      "marketLink": "https://baozi.bet/market/FB1oAR63C3q4irEFCFzAnCoDGBsiYLEgEBAWsV7bvncs",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T13:09:42.755Z",
+      "marketId": "84",
+      "eventType": "just_resolved",
+      "target": "console",
+      "cardUrl": "https://baozi.bet/api/share/card?market=4z6bQqcHEtkbi4daT66y7tB1fAbQodgVJU3L365G55pa&wallet=GpXHXs5KfzfXbNKcMLNbAMsJsgPsBE7y5GtwVoiuxYvH",
+      "marketLink": "https://baozi.bet/market/4z6bQqcHEtkbi4daT66y7tB1fAbQodgVJU3L365G55pa",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T13:09:42.755Z",
+      "marketId": "84",
+      "eventType": "just_resolved",
+      "target": "file",
+      "cardUrl": "https://baozi.bet/api/share/card?market=4z6bQqcHEtkbi4daT66y7tB1fAbQodgVJU3L365G55pa&wallet=GpXHXs5KfzfXbNKcMLNbAMsJsgPsBE7y5GtwVoiuxYvH",
+      "marketLink": "https://baozi.bet/market/4z6bQqcHEtkbi4daT66y7tB1fAbQodgVJU3L365G55pa",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T13:09:42.755Z",
+      "marketId": "59",
+      "eventType": "closing_soon",
+      "target": "console",
+      "cardUrl": "https://baozi.bet/api/share/card?market=7SWR3gkSQ5QfTFkezK1e2MkMc3vFx23ZhSmF7EvW1Byj&wallet=GpXHXs5KfzfXbNKcMLNbAMsJsgPsBE7y5GtwVoiuxYvH",
+      "marketLink": "https://baozi.bet/market/7SWR3gkSQ5QfTFkezK1e2MkMc3vFx23ZhSmF7EvW1Byj",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T13:09:42.755Z",
+      "marketId": "59",
+      "eventType": "closing_soon",
+      "target": "file",
+      "cardUrl": "https://baozi.bet/api/share/card?market=7SWR3gkSQ5QfTFkezK1e2MkMc3vFx23ZhSmF7EvW1Byj&wallet=GpXHXs5KfzfXbNKcMLNbAMsJsgPsBE7y5GtwVoiuxYvH",
+      "marketLink": "https://baozi.bet/market/7SWR3gkSQ5QfTFkezK1e2MkMc3vFx23ZhSmF7EvW1Byj",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T13:09:42.755Z",
+      "marketId": "31",
+      "eventType": "closing_soon",
+      "target": "console",
+      "cardUrl": "https://baozi.bet/api/share/card?market=4nkSuTid1CwUCTSmhh1X6JA3imsjSXBeXZNs1pLRrYph&wallet=GpXHXs5KfzfXbNKcMLNbAMsJsgPsBE7y5GtwVoiuxYvH",
+      "marketLink": "https://baozi.bet/market/4nkSuTid1CwUCTSmhh1X6JA3imsjSXBeXZNs1pLRrYph",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T13:09:42.755Z",
+      "marketId": "31",
+      "eventType": "closing_soon",
+      "target": "file",
+      "cardUrl": "https://baozi.bet/api/share/card?market=4nkSuTid1CwUCTSmhh1X6JA3imsjSXBeXZNs1pLRrYph&wallet=GpXHXs5KfzfXbNKcMLNbAMsJsgPsBE7y5GtwVoiuxYvH",
+      "marketLink": "https://baozi.bet/market/4nkSuTid1CwUCTSmhh1X6JA3imsjSXBeXZNs1pLRrYph",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T13:09:42.755Z",
+      "marketId": "37",
+      "eventType": "closing_soon",
+      "target": "console",
+      "cardUrl": "https://baozi.bet/api/share/card?market=7WbhAtv8PT5PThbqNsFWaLWTY3Tcg4YKcFeQYrPtUrv5&wallet=GpXHXs5KfzfXbNKcMLNbAMsJsgPsBE7y5GtwVoiuxYvH",
+      "marketLink": "https://baozi.bet/market/7WbhAtv8PT5PThbqNsFWaLWTY3Tcg4YKcFeQYrPtUrv5",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T13:09:42.755Z",
+      "marketId": "37",
+      "eventType": "closing_soon",
+      "target": "file",
+      "cardUrl": "https://baozi.bet/api/share/card?market=7WbhAtv8PT5PThbqNsFWaLWTY3Tcg4YKcFeQYrPtUrv5&wallet=GpXHXs5KfzfXbNKcMLNbAMsJsgPsBE7y5GtwVoiuxYvH",
+      "marketLink": "https://baozi.bet/market/7WbhAtv8PT5PThbqNsFWaLWTY3Tcg4YKcFeQYrPtUrv5",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T13:09:42.755Z",
+      "marketId": "71",
+      "eventType": "closing_soon",
+      "target": "console",
+      "cardUrl": "https://baozi.bet/api/share/card?market=7s5qpt4H8cYY3nkz9KeCwAXkqz343eNuHoBYuFcybh5K&wallet=GpXHXs5KfzfXbNKcMLNbAMsJsgPsBE7y5GtwVoiuxYvH",
+      "marketLink": "https://baozi.bet/market/7s5qpt4H8cYY3nkz9KeCwAXkqz343eNuHoBYuFcybh5K",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T13:09:42.755Z",
+      "marketId": "71",
+      "eventType": "closing_soon",
+      "target": "file",
+      "cardUrl": "https://baozi.bet/api/share/card?market=7s5qpt4H8cYY3nkz9KeCwAXkqz343eNuHoBYuFcybh5K&wallet=GpXHXs5KfzfXbNKcMLNbAMsJsgPsBE7y5GtwVoiuxYvH",
+      "marketLink": "https://baozi.bet/market/7s5qpt4H8cYY3nkz9KeCwAXkqz343eNuHoBYuFcybh5K",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T13:09:42.755Z",
+      "marketId": "66",
+      "eventType": "closing_soon",
+      "target": "console",
+      "cardUrl": "https://baozi.bet/api/share/card?market=Bj3PA43HgKKXrafJvLbqguXmKArKG3RTRbqwoFramKLy&wallet=GpXHXs5KfzfXbNKcMLNbAMsJsgPsBE7y5GtwVoiuxYvH",
+      "marketLink": "https://baozi.bet/market/Bj3PA43HgKKXrafJvLbqguXmKArKG3RTRbqwoFramKLy",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T13:09:42.755Z",
+      "marketId": "66",
+      "eventType": "closing_soon",
+      "target": "file",
+      "cardUrl": "https://baozi.bet/api/share/card?market=Bj3PA43HgKKXrafJvLbqguXmKArKG3RTRbqwoFramKLy&wallet=GpXHXs5KfzfXbNKcMLNbAMsJsgPsBE7y5GtwVoiuxYvH",
+      "marketLink": "https://baozi.bet/market/Bj3PA43HgKKXrafJvLbqguXmKArKG3RTRbqwoFramKLy",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T13:09:42.755Z",
+      "marketId": "89",
+      "eventType": "new_market",
+      "target": "console",
+      "cardUrl": "https://baozi.bet/api/share/card?market=CJzs1rCuKfXnDyEWdzhenpgBbzSrAr9B5gK5uoW9fme&wallet=GpXHXs5KfzfXbNKcMLNbAMsJsgPsBE7y5GtwVoiuxYvH",
+      "marketLink": "https://baozi.bet/market/CJzs1rCuKfXnDyEWdzhenpgBbzSrAr9B5gK5uoW9fme",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T13:09:42.755Z",
+      "marketId": "89",
+      "eventType": "new_market",
+      "target": "file",
+      "cardUrl": "https://baozi.bet/api/share/card?market=CJzs1rCuKfXnDyEWdzhenpgBbzSrAr9B5gK5uoW9fme&wallet=GpXHXs5KfzfXbNKcMLNbAMsJsgPsBE7y5GtwVoiuxYvH",
+      "marketLink": "https://baozi.bet/market/CJzs1rCuKfXnDyEWdzhenpgBbzSrAr9B5gK5uoW9fme",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T19:19:52.064Z",
+      "marketId": "0",
+      "eventType": "just_resolved",
+      "target": "console",
+      "cardUrl": "https://baozi.bet/api/share/card?market=7pYbqwrjNxFQ4tHSRnHqwjHSaeLkJSAk7FGx1rxAP6tq",
+      "marketLink": "https://baozi.bet/market/7pYbqwrjNxFQ4tHSRnHqwjHSaeLkJSAk7FGx1rxAP6tq",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T19:19:52.064Z",
+      "marketId": "0",
+      "eventType": "just_resolved",
+      "target": "file",
+      "cardUrl": "https://baozi.bet/api/share/card?market=7pYbqwrjNxFQ4tHSRnHqwjHSaeLkJSAk7FGx1rxAP6tq",
+      "marketLink": "https://baozi.bet/market/7pYbqwrjNxFQ4tHSRnHqwjHSaeLkJSAk7FGx1rxAP6tq",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T19:19:52.064Z",
+      "marketId": "83",
+      "eventType": "just_resolved",
+      "target": "console",
+      "cardUrl": "https://baozi.bet/api/share/card?market=F5HFk5zWZZ5GfEEuLSHTz3aaqqgiAAJD4hdRF16F8syB",
+      "marketLink": "https://baozi.bet/market/F5HFk5zWZZ5GfEEuLSHTz3aaqqgiAAJD4hdRF16F8syB",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T19:19:52.064Z",
+      "marketId": "83",
+      "eventType": "just_resolved",
+      "target": "file",
+      "cardUrl": "https://baozi.bet/api/share/card?market=F5HFk5zWZZ5GfEEuLSHTz3aaqqgiAAJD4hdRF16F8syB",
+      "marketLink": "https://baozi.bet/market/F5HFk5zWZZ5GfEEuLSHTz3aaqqgiAAJD4hdRF16F8syB",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T19:19:52.064Z",
+      "marketId": "81",
+      "eventType": "just_resolved",
+      "target": "console",
+      "cardUrl": "https://baozi.bet/api/share/card?market=FB1oAR63C3q4irEFCFzAnCoDGBsiYLEgEBAWsV7bvncs",
+      "marketLink": "https://baozi.bet/market/FB1oAR63C3q4irEFCFzAnCoDGBsiYLEgEBAWsV7bvncs",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T19:19:52.064Z",
+      "marketId": "81",
+      "eventType": "just_resolved",
+      "target": "file",
+      "cardUrl": "https://baozi.bet/api/share/card?market=FB1oAR63C3q4irEFCFzAnCoDGBsiYLEgEBAWsV7bvncs",
+      "marketLink": "https://baozi.bet/market/FB1oAR63C3q4irEFCFzAnCoDGBsiYLEgEBAWsV7bvncs",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T19:19:52.064Z",
+      "marketId": "84",
+      "eventType": "just_resolved",
+      "target": "console",
+      "cardUrl": "https://baozi.bet/api/share/card?market=4z6bQqcHEtkbi4daT66y7tB1fAbQodgVJU3L365G55pa",
+      "marketLink": "https://baozi.bet/market/4z6bQqcHEtkbi4daT66y7tB1fAbQodgVJU3L365G55pa",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T19:19:52.064Z",
+      "marketId": "84",
+      "eventType": "just_resolved",
+      "target": "file",
+      "cardUrl": "https://baozi.bet/api/share/card?market=4z6bQqcHEtkbi4daT66y7tB1fAbQodgVJU3L365G55pa",
+      "marketLink": "https://baozi.bet/market/4z6bQqcHEtkbi4daT66y7tB1fAbQodgVJU3L365G55pa",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T19:19:52.064Z",
+      "marketId": "59",
+      "eventType": "closing_soon",
+      "target": "console",
+      "cardUrl": "https://baozi.bet/api/share/card?market=7SWR3gkSQ5QfTFkezK1e2MkMc3vFx23ZhSmF7EvW1Byj",
+      "marketLink": "https://baozi.bet/market/7SWR3gkSQ5QfTFkezK1e2MkMc3vFx23ZhSmF7EvW1Byj",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T19:19:52.065Z",
+      "marketId": "59",
+      "eventType": "closing_soon",
+      "target": "file",
+      "cardUrl": "https://baozi.bet/api/share/card?market=7SWR3gkSQ5QfTFkezK1e2MkMc3vFx23ZhSmF7EvW1Byj",
+      "marketLink": "https://baozi.bet/market/7SWR3gkSQ5QfTFkezK1e2MkMc3vFx23ZhSmF7EvW1Byj",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T19:19:52.065Z",
+      "marketId": "31",
+      "eventType": "closing_soon",
+      "target": "console",
+      "cardUrl": "https://baozi.bet/api/share/card?market=4nkSuTid1CwUCTSmhh1X6JA3imsjSXBeXZNs1pLRrYph",
+      "marketLink": "https://baozi.bet/market/4nkSuTid1CwUCTSmhh1X6JA3imsjSXBeXZNs1pLRrYph",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T19:19:52.065Z",
+      "marketId": "31",
+      "eventType": "closing_soon",
+      "target": "file",
+      "cardUrl": "https://baozi.bet/api/share/card?market=4nkSuTid1CwUCTSmhh1X6JA3imsjSXBeXZNs1pLRrYph",
+      "marketLink": "https://baozi.bet/market/4nkSuTid1CwUCTSmhh1X6JA3imsjSXBeXZNs1pLRrYph",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T19:19:52.065Z",
+      "marketId": "37",
+      "eventType": "closing_soon",
+      "target": "console",
+      "cardUrl": "https://baozi.bet/api/share/card?market=7WbhAtv8PT5PThbqNsFWaLWTY3Tcg4YKcFeQYrPtUrv5",
+      "marketLink": "https://baozi.bet/market/7WbhAtv8PT5PThbqNsFWaLWTY3Tcg4YKcFeQYrPtUrv5",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T19:19:52.065Z",
+      "marketId": "37",
+      "eventType": "closing_soon",
+      "target": "file",
+      "cardUrl": "https://baozi.bet/api/share/card?market=7WbhAtv8PT5PThbqNsFWaLWTY3Tcg4YKcFeQYrPtUrv5",
+      "marketLink": "https://baozi.bet/market/7WbhAtv8PT5PThbqNsFWaLWTY3Tcg4YKcFeQYrPtUrv5",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T19:19:52.065Z",
+      "marketId": "71",
+      "eventType": "closing_soon",
+      "target": "console",
+      "cardUrl": "https://baozi.bet/api/share/card?market=7s5qpt4H8cYY3nkz9KeCwAXkqz343eNuHoBYuFcybh5K",
+      "marketLink": "https://baozi.bet/market/7s5qpt4H8cYY3nkz9KeCwAXkqz343eNuHoBYuFcybh5K",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T19:19:52.065Z",
+      "marketId": "71",
+      "eventType": "closing_soon",
+      "target": "file",
+      "cardUrl": "https://baozi.bet/api/share/card?market=7s5qpt4H8cYY3nkz9KeCwAXkqz343eNuHoBYuFcybh5K",
+      "marketLink": "https://baozi.bet/market/7s5qpt4H8cYY3nkz9KeCwAXkqz343eNuHoBYuFcybh5K",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T19:19:52.065Z",
+      "marketId": "66",
+      "eventType": "closing_soon",
+      "target": "console",
+      "cardUrl": "https://baozi.bet/api/share/card?market=Bj3PA43HgKKXrafJvLbqguXmKArKG3RTRbqwoFramKLy",
+      "marketLink": "https://baozi.bet/market/Bj3PA43HgKKXrafJvLbqguXmKArKG3RTRbqwoFramKLy",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T19:19:52.065Z",
+      "marketId": "66",
+      "eventType": "closing_soon",
+      "target": "file",
+      "cardUrl": "https://baozi.bet/api/share/card?market=Bj3PA43HgKKXrafJvLbqguXmKArKG3RTRbqwoFramKLy",
+      "marketLink": "https://baozi.bet/market/Bj3PA43HgKKXrafJvLbqguXmKArKG3RTRbqwoFramKLy",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T19:19:52.065Z",
+      "marketId": "89",
+      "eventType": "new_market",
+      "target": "console",
+      "cardUrl": "https://baozi.bet/api/share/card?market=CJzs1rCuKfXnDyEWdzhenpgBbzSrAr9B5gK5uoW9fme",
+      "marketLink": "https://baozi.bet/market/CJzs1rCuKfXnDyEWdzhenpgBbzSrAr9B5gK5uoW9fme",
+      "affiliateCode": ""
+    },
+    {
+      "timestamp": "2026-02-20T19:19:52.065Z",
+      "marketId": "89",
+      "eventType": "new_market",
+      "target": "file",
+      "cardUrl": "https://baozi.bet/api/share/card?market=CJzs1rCuKfXnDyEWdzhenpgBbzSrAr9B5gK5uoW9fme",
+      "marketLink": "https://baozi.bet/market/CJzs1rCuKfXnDyEWdzhenpgBbzSrAr9B5gK5uoW9fme",
+      "affiliateCode": ""
+    }
+  ]
+}

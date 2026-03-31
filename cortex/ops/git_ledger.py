@@ -28,7 +28,7 @@ class GitLedgerOps:
             ["git", "diff", "--cached", "--name-only"],
             cwd=str(self._repo),
             capture_output=True,
-            text=True
+            text=True,
         ).stdout
 
         if not log_out:

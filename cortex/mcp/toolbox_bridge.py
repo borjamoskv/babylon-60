@@ -31,9 +31,27 @@ logger = logging.getLogger("cortex.mcp.toolbox_bridge")
 DEFAULT_SERVER_URL = "http://127.0.0.1:5050"
 
 _TOOLBOX_AVAILABLE = False
-try:
-    from toolbox_core import ToolboxClient  # type: ignore
+_TOOLBOX_PROTOCOL: Any | None = None
 
+
+def _patch_toolbox_schema_types(protocol_module: Any) -> None:
+    """Normalize JSON Schema numeric types for current toolbox-core releases.
+
+    toolbox-core 0.6.0 still expects ``float`` while current Toolbox servers emit
+    JSON Schema ``number`` for floating-point parameters over MCP.
+    """
+    type_map = getattr(protocol_module, "__TYPE_MAP", None)
+    if isinstance(type_map, dict) and "number" not in type_map:
+        type_map["number"] = float
+
+
+try:
+    import toolbox_core.protocol as toolbox_protocol  # type: ignore
+    from toolbox_core import ToolboxClient  # type: ignore
+    from toolbox_core.protocol import Protocol  # type: ignore
+
+    _patch_toolbox_schema_types(toolbox_protocol)
+    _TOOLBOX_PROTOCOL = Protocol.MCP_LATEST
     _TOOLBOX_AVAILABLE = True
 except ImportError:
     ToolboxClient = None  # type: ignore
@@ -115,7 +133,14 @@ class ToolboxBridge:
         self._validate_server_url()
 
         try:
-            self._client = ToolboxClient(self.config.server_url)  # type: ignore[reportOptionalCall]
+            client_kwargs: dict[str, Any] = {}
+            if _TOOLBOX_PROTOCOL is not None:
+                client_kwargs["protocol"] = _TOOLBOX_PROTOCOL
+
+            self._client = ToolboxClient(  # type: ignore[reportOptionalCall]
+                self.config.server_url,
+                **client_kwargs,
+            )
 
             # Load tools (all or specific set)
             load_coro = (
@@ -133,8 +158,13 @@ class ToolboxBridge:
                 len(self._tools),
             )
             return True
-        except (ConnectionError, RuntimeError) as exc:
+        except Exception as exc:
             logger.error("Toolbox Sync: [FAILED] %s | Error: %s", self.config.server_url, exc)
+            if self._client:
+                try:
+                    await self._client.close()
+                except Exception:
+                    pass
             self._client = None
             self._tools = []
             return False
@@ -147,7 +177,7 @@ class ToolboxBridge:
     @property
     def tool_names(self) -> list[str]:
         """Names of tools available on the remote bridge."""
-        return [getattr(t, "name", str(t)) for t in self._tools]
+        return [getattr(t, "__name__", getattr(t, "name", str(t))) for t in self._tools]
 
     async def close(self) -> None:
         """Gracefully release bridge resources."""

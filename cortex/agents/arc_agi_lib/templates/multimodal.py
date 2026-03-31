@@ -7,8 +7,9 @@ import json
 import logging
 import os
 import re
+from collections.abc import Sequence
 from textwrap import dedent
-from typing import Any, List, Optional, Sequence, Tuple
+from typing import Any, Optional
 
 import numpy as np
 import openai
@@ -22,7 +23,7 @@ from ..agent import Agent
 logger = logging.getLogger()
 
 # 16-color palette (RGBA, hex -> tuple)
-_PALETTE: List[tuple[int, int, int, int]] = [
+_PALETTE: list[tuple[int, int, int, int]] = [
     (0xFF, 0xFF, 0xFF, 0xFF),  # 0 White
     (0xCC, 0xCC, 0xCC, 0xFF),  # 1 Off-white
     (0x99, 0x99, 0x99, 0xFF),  # 2 Neutral light
@@ -92,7 +93,7 @@ def make_image_block(b64_string: str) -> dict[str, Any]:
 def image_diff(
     img_a: Image.Image,
     img_b: Image.Image,
-    highlight_rgb: Tuple[int, int, int] = (255, 0, 0),  # red
+    highlight_rgb: tuple[int, int, int] = (255, 0, 0),  # red
 ) -> Image.Image:
     """
     Compare img_a vs img_b (any common format), write a visual diff.
@@ -106,9 +107,7 @@ def image_diff(
     b = np.asarray(img_b.convert("RGB"))
 
     if a.shape != b.shape:
-        raise ValueError(
-            f"Images must have the same dimensions; got {a.shape} vs {b.shape}"
-        )
+        raise ValueError(f"Images must have the same dimensions; got {a.shape} vs {b.shape}")
 
     # Boolean mask: True where *any* channel differs
     diff_mask = np.any(a != b, axis=-1)
@@ -274,7 +273,7 @@ class MultiModalLLM(Agent):
     _memory_prompt = ""
     _previous_prompt = ""
     _previous_action = ""
-    _previous_images: List[Image.Image] = []
+    _previous_images: list[Image.Image] = []
     _previous_score = 0
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -297,7 +296,7 @@ class MultiModalLLM(Agent):
         """).strip()
         _previous_prompt = ""
         _previous_action = ""
-        _previous_images: List[Image.Image] = []
+        _previous_images: list[Image.Image] = []
         _previous_score = 0
 
     @property
@@ -308,9 +307,7 @@ class MultiModalLLM(Agent):
         """Decide if the agent is done playing or not."""
         return latest_frame.state == GameState.WIN  # type: ignore[no-any-return]
 
-    def choose_action(
-        self, frames: list[FrameData], latest_frame: FrameData
-    ) -> GameAction:
+    def choose_action(self, frames: list[FrameData], latest_frame: FrameData) -> GameAction:
         """Using a MultiModal LLM (one that can accept PNG Images and text) decide what to do"""
 
         # 1 - If the state is NOT_PLAYED or GAME_OVER no choices to be made, must RESET
@@ -426,9 +423,7 @@ class MultiModalLLM(Agent):
         #   c. Default or Updated memory prompt from Step 2
         #   d. Instruct for next action, reason for action, and expected outcome
         if len(analysis) > 20:
-            self._previous_prompt = (
-                f"{analysis}\n\n{self._memory_prompt}\n\n{self.ACTION_INSTRUCT}"
-            )
+            self._previous_prompt = f"{analysis}\n\n{self._memory_prompt}\n\n{self.ACTION_INSTRUCT}"
         else:
             self._previous_prompt = f"{self._memory_prompt}\n\n{self.ACTION_INSTRUCT}"
         try:
@@ -439,10 +434,7 @@ class MultiModalLLM(Agent):
                     {
                         "role": "user",
                         "content": [
-                            *[
-                                make_image_block(image_to_base64(i))
-                                for i in image_blocks
-                            ],
+                            *[make_image_block(image_to_base64(i)) for i in image_blocks],
                             {"type": "text", "text": self._previous_prompt},
                         ],
                     },
@@ -454,9 +446,7 @@ class MultiModalLLM(Agent):
             logger.info(f"Message dump: {self.messages}")
             raise e
 
-        self.track_tokens(
-            response.usage.prompt_tokens, response.usage.completion_tokens
-        )
+        self.track_tokens(response.usage.prompt_tokens, response.usage.completion_tokens)
         action_message = response.choices[0].message.content
 
         desired_action = extract_json(response)
@@ -479,9 +469,7 @@ class MultiModalLLM(Agent):
                             make_image_block(image_to_base64(image_blocks[-1])),
                             {
                                 "type": "text",
-                                "text": human_action
-                                + "\n\n"
-                                + self.FIND_ACTION_INSTRUCT,
+                                "text": human_action + "\n\n" + self.FIND_ACTION_INSTRUCT,
                             },
                         ],
                     },
@@ -494,9 +482,7 @@ class MultiModalLLM(Agent):
             raise e
 
         print(f"Assistant - Finding Action: {response.choices[0].message.content}")
-        self.track_tokens(
-            response.usage.prompt_tokens, response.usage.completion_tokens
-        )
+        self.track_tokens(response.usage.prompt_tokens, response.usage.completion_tokens)
         current_action = extract_json(response)
 
         logger.info(f"Assistant - Picking ARC Move: {current_action}")

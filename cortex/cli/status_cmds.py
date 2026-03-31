@@ -65,7 +65,9 @@ def status(db, json_output) -> None:
         table.add_row("Exergy Yield", f"[bold #2B3BE5]{exergy_yield:.4f}[/] [dim]Δ/fact[/]")
 
         # Causal Coverage
-        causal_coverage = (s["causal_facts"] / s["active_facts"] * 100) if s["active_facts"] > 0 else 0
+        causal_coverage = (
+            (s["causal_facts"] / s["active_facts"] * 100) if s["active_facts"] > 0 else 0
+        )
         table.add_row("Causal Coverage", f"{causal_coverage:.1f}%")
         table.add_section()
 

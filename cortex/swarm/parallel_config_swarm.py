@@ -18,6 +18,7 @@ Architecture:
 Concurrency: asyncio.Semaphore(max_concurrency) + per-file resource locks
 via AsyncSignalBus to prevent write collisions between parallel shards.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -286,9 +287,7 @@ class ParallelConfigSwarm:
         result.duration_s = time.monotonic() - t0
 
         if applied < len(shard_files):
-            result.error = (
-                f"{len(shard_files) - applied}/{len(shard_files)} files failed"
-            )
+            result.error = f"{len(shard_files) - applied}/{len(shard_files)} files failed"
 
         return result
 
@@ -316,9 +315,7 @@ class ParallelConfigSwarm:
         Returns:
             ConfigSwarmReport with per-shard results.
         """
-        session_id = (
-            f"pcfg-{hashlib.sha256(f'{directive}:{time.time()}'.encode()).hexdigest()[:8]}"
-        )
+        session_id = f"pcfg-{hashlib.sha256(f'{directive}:{time.time()}'.encode()).hexdigest()[:8]}"
 
         logger.info(
             "ParallelConfigSwarm[%s]: 🚀 Discovering files in %s...",
@@ -347,8 +344,7 @@ class ParallelConfigSwarm:
 
         # 3. Parallel dispatch
         tasks = [
-            self._execute_shard(i, shard, directive, handler)
-            for i, shard in enumerate(shards)
+            self._execute_shard(i, shard, directive, handler) for i, shard in enumerate(shards)
         ]
 
         t_start = time.monotonic()
@@ -410,9 +406,7 @@ class ParallelConfigSwarm:
                 ),
             },
         )
-        logger.info(
-            "ParallelConfigSwarm: Crystallized to ledger (tx=%s)", tx_hash
-        )
+        logger.info("ParallelConfigSwarm: Crystallized to ledger (tx=%s)", tx_hash)
         return tx_hash
 
 
@@ -496,9 +490,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     raw = args.extensions.split(",")
-    exts = tuple(
-        e.strip() if e.startswith(".") else f".{e.strip()}" for e in raw
-    )
+    exts = tuple(e.strip() if e.startswith(".") else f".{e.strip()}" for e in raw)
 
     console.print(
         Panel(

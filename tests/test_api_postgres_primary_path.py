@@ -144,6 +144,9 @@ class _FakePostgresBackend:
                     return
             raise AssertionError(f"Fact #{fact_id} not found for UPDATE")
 
+        if sql.startswith("SELECT set_config"):
+            return
+
         raise AssertionError(f"Unexpected execute SQL: {sql}")
 
     async def execute_insert_with_conn(

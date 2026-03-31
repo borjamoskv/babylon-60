@@ -451,9 +451,7 @@ class SignalBus:
         self._conn.commit()
         pruned = cursor.rowcount
         if pruned:
-            logger.info(
-                "GC: pruned %d consumed signal(s) older than %d days", pruned, max_age_days
-            )
+            logger.info("GC: pruned %d consumed signal(s) older than %d days", pruned, max_age_days)
         return pruned
 
     def _query(

@@ -7,10 +7,12 @@ from typing import Any
 
 try:
     import structlog
+
     _HAS_STRUCTLOG = True
     logger = structlog.get_logger(__name__)
 except ModuleNotFoundError:
     import logging
+
     _HAS_STRUCTLOG = False
     logger = logging.getLogger(__name__)
 
@@ -35,12 +37,14 @@ def log_warning(msg: str, **kwargs):
     else:
         logger.warning(f"{msg} {kwargs}")
 
+
 @dataclass
 class ObservationTrace:
     timestamp: datetime
     action: str
     observation: str
     metadata: dict[str, Any] = field(default_factory=dict)
+
 
 class HiAgent:
     """
@@ -62,7 +66,7 @@ class HiAgent:
             timestamp=datetime.now(),
             action=action,
             observation=observation,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
         self._trace_buffer.append(trace)
         log_debug("Trace added to buffer", session_id=self.session_id, action=action)
@@ -87,7 +91,9 @@ class HiAgent:
         """Forces 'Amnesia Local' - clears raw traces from memory."""
         count = len(self._trace_buffer)
         self._trace_buffer.clear()
-        log_warning("Amnesia Local enforced: raw traces flushed", session_id=self.session_id, count=count)
+        log_warning(
+            "Amnesia Local enforced: raw traces flushed", session_id=self.session_id, count=count
+        )
 
     @asynccontextmanager
     async def subgoal(self, name: str) -> AsyncIterator["HiAgent"]:
@@ -107,6 +113,7 @@ class HiAgent:
             await self.flush()
             self._is_active = False
             log_info("Exited subgoal block", name=name)
+
 
 # Example Usage:
 # async with HiAgent().subgoal("Refactoring Pipeline") as agent:

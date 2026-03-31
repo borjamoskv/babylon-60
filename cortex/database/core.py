@@ -230,6 +230,7 @@ async def connect_async(
 
     try:
         import sqlite_vec
+
         await conn.enable_load_extension(True)
         await conn.load_extension(sqlite_vec.loadable_path())
         await conn.enable_load_extension(False)

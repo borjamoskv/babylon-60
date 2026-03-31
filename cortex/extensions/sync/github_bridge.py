@@ -143,8 +143,7 @@ class GitHubCortexBridge:
         comment_body = injector.compose_invoice_comment(amount)
 
         resp = await self._client.post(
-            f"{_GH_API}/repos/{repo}/issues/{number}/comments",
-            json={"body": comment_body}
+            f"{_GH_API}/repos/{repo}/issues/{number}/comments", json={"body": comment_body}
         )
         resp.raise_for_status()
         logger.info("💰 Injected bounty invoice of $%d into %s#%d", amount, repo, number)

@@ -5,6 +5,7 @@ RFC-047 / Project LEVIATHAN
 
 import logging
 from typing import Any
+
 from .schema import TenantRegistry
 
 logger = logging.getLogger("cortex.nexus")
@@ -45,6 +46,7 @@ class BillingGuard:
 
 class NexusMasterGuard:
     """Orchestrates combined guards for the Nexus Cloud layer."""
+
     def __init__(self, billing: BillingGuard) -> None:
         self.billing = billing
 

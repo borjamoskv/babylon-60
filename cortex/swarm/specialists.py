@@ -20,7 +20,6 @@ from cortex.shannon.exergy import (
 )
 
 from .actuators.protocol import ActuatorProtocol, ActuatorResponse
-from .actuators.bizum_strike import BizumStrikeActuator
 from .real_vector import RealVectorActuator
 
 logger = logging.getLogger("cortex.swarm.specialists")
@@ -32,14 +31,22 @@ class BaseSpecialistActuator(ActuatorProtocol):
     Enforces CORTEX Native constraints: Zero-Prompting, Thermodynamic Efficiency, and Ledger Audit.
     """
 
-    def __init__(self, provider_id: str, skill_path: str, model: str = "gemini-3.1-pro",
-                 exergy_budget: float = 100.0, blast_radius: float = 0.1,
-                 reproducibility: str = "full"):
+    def __init__(
+        self,
+        provider_id: str,
+        skill_path: str,
+        model: str = "gemini-3.1-pro",
+        exergy_budget: float = 100.0,
+        blast_radius: float = 0.1,
+        reproducibility: str = "full",
+    ):
         self._provider_id = provider_id
         self.skill_path = skill_path
         self.model = model
         self.reproducibility = reproducibility
-        self.actuator = RealVectorActuator(max_exergy_j=exergy_budget, blast_radius_limit=blast_radius)
+        self.actuator = RealVectorActuator(
+            max_exergy_j=exergy_budget, blast_radius_limit=blast_radius
+        )
 
         # Level 2: Capability Binding (G1)
         self._skills_hash = self._calculate_skills_manifest_hash()
@@ -88,7 +95,9 @@ class BaseSpecialistActuator(ActuatorProtocol):
         logger.info("[%s] Thermodynamic Audit (Ω2): Exergy %.4f", self.provider_id, exergy)
         return exergy
 
-    def calculate_exergy(self, task: str, action_risk: ActionRisk = ActionRisk.READ_ONLY) -> Decimal:
+    def calculate_exergy(
+        self, task: str, action_risk: ActionRisk = ActionRisk.READ_ONLY
+    ) -> Decimal:
         """
         Estimate the exergy (useful work) using standardized CORTEX Shannon logic (Ω9).
         Calculates signal gain based on information density vs. token consumption.
@@ -114,7 +123,7 @@ class BaseSpecialistActuator(ActuatorProtocol):
             tokens_consumed=tokens,
             action_risk=action_risk,
             had_backup=True,
-            touched_persistent_state=action_risk != ActionRisk.READ_ONLY
+            touched_persistent_state=action_risk != ActionRisk.READ_ONLY,
         )
 
         # 3. Standardized calculation
@@ -154,7 +163,13 @@ class BaseSpecialistActuator(ActuatorProtocol):
         """
         return True
 
-    async def perform_mutation(self, method: str, url: str, mutation_data: dict[str, Any], context: dict[str, Any] | None = None) -> ActuatorResponse:
+    async def perform_mutation(
+        self,
+        method: str,
+        url: str,
+        mutation_data: dict[str, Any],
+        context: dict[str, Any] | None = None,
+    ) -> ActuatorResponse:
         """
         Executes an Atomic Mutation via the RealVectorActuator (Ω3).
         Records the outcome as an Evolutionary-Helix event.
@@ -164,7 +179,7 @@ class BaseSpecialistActuator(ActuatorProtocol):
             return ActuatorResponse(
                 content="Bypass surface unstable (Ω6 violation). aborting mutation.",
                 status="failed",
-                metadata={"error_code": "BYPASS_UNSTABLE", "exergy_leak": True}
+                metadata={"error_code": "BYPASS_UNSTABLE", "exergy_leak": True},
             )
 
         # 2. Epistemic Boundary (Ω1)
@@ -194,12 +209,12 @@ class BaseSpecialistActuator(ActuatorProtocol):
                 "exergy_cost": resp.exergy_cost_j,
                 "titration_delay": delay,
                 "helix_evolution_result": f"MUTATION_{status_label}_{helix_id}",
-                "ledger_persisted": True
+                "ledger_persisted": True,
             },
             status="success" if resp.status_code < 400 else "failed",
             skills_hash=self.skills_hash,
             reproducibility_level=self.reproducibility,
-            signature=signature
+            signature=signature,
         )
 
     async def execute(self, task: str, context: dict[str, Any] | None = None) -> ActuatorResponse:
@@ -240,7 +255,7 @@ class BaseSpecialistActuator(ActuatorProtocol):
                     status="success",
                     skills_hash=self.skills_hash,
                     reproducibility_level=self.reproducibility,
-                    signature=signature
+                    signature=signature,
                 )
             except Exception as e:
                 msg = "[%s] Model %s failed/slow, hedging to next..."
@@ -252,7 +267,7 @@ class BaseSpecialistActuator(ActuatorProtocol):
             content="",
             metadata={},
             status="failed",
-            error=f"All hedged models failed. Last error: {last_error}"
+            error=f"All hedged models failed. Last error: {last_error}",
         )
 
     async def health_check(self) -> bool:
@@ -332,9 +347,7 @@ class GoogleJulesOmega(BaseSpecialistActuator):
         )
         self._api_key = os.getenv("JULES_API_KEY")
 
-    async def execute(
-        self, task: str, context: dict[str, Any] | None = None
-    ) -> ActuatorResponse:
+    async def execute(self, task: str, context: dict[str, Any] | None = None) -> ActuatorResponse:
         """
         Execute bounty resolution via live Jules API.
         Enforces Ω2 delay even on live calls to maintain thermodynamic parity.
@@ -444,9 +457,7 @@ class MercorSovereignOmega(BaseSpecialistActuator):
             model="gemini-3.1-pro",
         )
 
-    async def execute(
-        self, task: str, context: dict[str, Any] | None = None
-    ) -> ActuatorResponse:
+    async def execute(self, task: str, context: dict[str, Any] | None = None) -> ActuatorResponse:
         """
         Executes the Ferro-Dynamic Mercor Extraction Pipeline (Ω2, Ω3).
         Synchronizes exergy titration with autonomous bypass verification.
@@ -504,13 +515,11 @@ class MarketingVectorSpecialist(BaseSpecialistActuator):
     def __init__(self) -> None:
         super().__init__(
             provider_id="marketing-specialist-omega",
-            skill_path="~/.gemini/antigravity/skills/moltbook-omega/SKILL.md", # Primary vector
+            skill_path="~/.gemini/antigravity/skills/moltbook-omega/SKILL.md",  # Primary vector
             model="gemini-3.1-pro",
         )
 
-    async def execute(
-        self, task: str, context: dict[str, Any] | None = None
-    ) -> ActuatorResponse:
+    async def execute(self, task: str, context: dict[str, Any] | None = None) -> ActuatorResponse:
         """
         Executes a Multi-Vector Marketing Infiltration (Ω1, Ω2, Ω5).
         """
@@ -557,9 +566,7 @@ class CapitalSpecialistActuator(BaseSpecialistActuator):
             model="gemini-3.5-pro",
         )
 
-    async def execute(
-        self, task: str, context: dict[str, Any] | None = None
-    ) -> ActuatorResponse:
+    async def execute(self, task: str, context: dict[str, Any] | None = None) -> ActuatorResponse:
         """
         Executes a Capital Extraction/Strike (Ω1, Ω2, Ω-Wealth).
         """
@@ -593,8 +600,6 @@ class CapitalSpecialistActuator(BaseSpecialistActuator):
         )
 
 
-
-
 class BizumSpecialistActuator(BaseSpecialistActuator):
     """
     Sovereign Bizum Specialist (Vector Z).
@@ -610,9 +615,7 @@ class BizumSpecialistActuator(BaseSpecialistActuator):
         self.engine = engine
         self.guard = BizumGuard(ledger=getattr(engine, "ledger", None) if engine else None)
 
-    async def execute(
-        self, task: str, context: dict[str, Any] | None = None
-    ) -> ActuatorResponse:
+    async def execute(self, task: str, context: dict[str, Any] | None = None) -> ActuatorResponse:
         """
         Executes a Bizum Strike (Ω1, Ω2, Ω-Fiat).
         Initial implementation: Simulated Sandbox Strike.
@@ -632,7 +635,7 @@ class BizumSpecialistActuator(BaseSpecialistActuator):
                 return ActuatorResponse(
                     content="BIZUM_GUARD_DENY: Transaction violates safety boundaries.",
                     status="failed",
-                    metadata={"error_code": "GUARD_REJECTION"}
+                    metadata={"error_code": "GUARD_REJECTION"},
                 )
         except Exception as e:
             return ActuatorResponse(content=f"GUARD_ERROR: {e}", status="failed")
@@ -694,9 +697,7 @@ class SiliconSpecialistActuator(BaseSpecialistActuator):
             model="gemini-3.5-pro",
         )
 
-    async def execute(
-        self, task: str, context: dict[str, Any] | None = None
-    ) -> ActuatorResponse:
+    async def execute(self, task: str, context: dict[str, Any] | None = None) -> ActuatorResponse:
         # 1. Ω1 Byzantine Guard + Ω2 Titration (Centralized)
         base_resp = await super().execute(task, context)
         if base_resp["status"] != "success":

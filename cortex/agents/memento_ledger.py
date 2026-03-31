@@ -12,6 +12,7 @@ from cortex.embeddings.manager import EmbeddingManager
 
 logger = logging.getLogger("cortex.specialists.memento.ledger")
 
+
 class MementoStage(str, Enum):
     BUFFERING = "BUFFERING"
     ANALYZING = "ANALYZING"
@@ -19,6 +20,7 @@ class MementoStage(str, Enum):
     PERSISTED = "PERSISTED"
     REJECTED = "REJECTED"
     GC = "GC"
+
 
 class MementoLedger:
     """CORTEX Ledger integration for Memento Specialist.
@@ -65,7 +67,9 @@ class MementoLedger:
 
             # Check if table exists and has correct dimension
             recreate_index = False
-            async with conn.execute(f"SELECT sql FROM sqlite_master WHERE name='{self.TABLE_NAME}_idx'") as cursor:
+            async with conn.execute(
+                f"SELECT sql FROM sqlite_master WHERE name='{self.TABLE_NAME}_idx'"
+            ) as cursor:
                 row = await cursor.fetchone()
                 if row:
                     existing_sql = row[0]
@@ -73,7 +77,7 @@ class MementoLedger:
                         recreate_index = True
                         logger.warning(
                             "[MementoLedger] Dimension mismatch in %s_idx. Dropping and re-creating.",
-                            self.TABLE_NAME
+                            self.TABLE_NAME,
                         )
 
             if recreate_index:
@@ -90,14 +94,18 @@ class MementoLedger:
             # Handle migration: Rename entropy_delta to exergy_delta
             async with conn.execute(f"PRAGMA table_info({self.TABLE_NAME})") as cursor:
                 columns = [row[1] for row in await cursor.fetchall()]
-                if 'exergy_delta' not in columns:
-                    if 'entropy_delta' in columns:
-                        await conn.execute(f"ALTER TABLE {self.TABLE_NAME} RENAME COLUMN entropy_delta TO exergy_delta")
+                if "exergy_delta" not in columns:
+                    if "entropy_delta" in columns:
+                        await conn.execute(
+                            f"ALTER TABLE {self.TABLE_NAME} RENAME COLUMN entropy_delta TO exergy_delta"
+                        )
                         logger.info("[MementoLedger] Migrated entropy_delta → exergy_delta (Ω₂)")
                     else:
-                        await conn.execute(f"ALTER TABLE {self.TABLE_NAME} ADD COLUMN exergy_delta REAL DEFAULT 0.0")
+                        await conn.execute(
+                            f"ALTER TABLE {self.TABLE_NAME} ADD COLUMN exergy_delta REAL DEFAULT 0.0"
+                        )
 
-                if 'session_id' not in columns:
+                if "session_id" not in columns:
                     await conn.execute(f"ALTER TABLE {self.TABLE_NAME} ADD COLUMN session_id TEXT")
                     logger.info("[MementoLedger] Added session_id column for isolation (Ω₄)")
 
@@ -145,19 +153,31 @@ class MementoLedger:
         if not self._initialized:
             await self.initialize()
 
-        fact = self._make_fact(session_id, trace_id, stage, summary, exergy_delta, hours_saved, evidence, extra)
+        fact = self._make_fact(
+            session_id, trace_id, stage, summary, exergy_delta, hours_saved, evidence, extra
+        )
 
         async with self._pool.acquire() as conn:
             # 1. Insert structured data
-            cursor = await conn.execute(f"""
+            cursor = await conn.execute(
+                f"""
                 INSERT INTO {self.TABLE_NAME}
                 (id, session_id, trace_id, stage, summary, evidence, exergy_delta, hours_saved, metadata, timestamp)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                fact["id"], fact["session_id"], fact["trace_id"], fact["stage"],
-                fact["summary"], fact["evidence"], fact["exergy_delta"],
-                fact["hours_saved"], fact["metadata"], fact["timestamp"]
-            ))
+            """,
+                (
+                    fact["id"],
+                    fact["session_id"],
+                    fact["trace_id"],
+                    fact["stage"],
+                    fact["summary"],
+                    fact["evidence"],
+                    fact["exergy_delta"],
+                    fact["hours_saved"],
+                    fact["metadata"],
+                    fact["timestamp"],
+                ),
+            )
             oid = cursor.lastrowid
 
             # 2. Insert vector embedding if possible
@@ -172,12 +192,12 @@ class MementoLedger:
                             embedding = embedding[0]
 
                         import struct
+
                         embedding_blob = struct.pack(f"{len(embedding)}f", *embedding)
 
                         await conn.execute(
-                            f"INSERT INTO {self.TABLE_NAME}_idx (rowid, embedding) "
-                            f"VALUES (?, ?)",
-                            (oid, embedding_blob)
+                            f"INSERT INTO {self.TABLE_NAME}_idx (rowid, embedding) VALUES (?, ?)",
+                            (oid, embedding_blob),
                         )
                 except Exception as e:
                     logger.warning("[MementoLedger] Vector embedding failed: %s", e)
@@ -186,10 +206,14 @@ class MementoLedger:
 
         logger.info("[MementoLedger] %s -> %s | Exergy Δ=%.3f", summary, stage.value, exergy_delta)
 
-    async def semantic_search(self, query: str, session_id: str | None = None, limit: int = 5) -> list[dict]:
+    async def semantic_search(
+        self, query: str, session_id: str | None = None, limit: int = 5
+    ) -> list[dict]:
         """Search cognitive transitions by semantic context."""
         if not self._initialized or not self._embedder:
-            logger.warning("[MementoLedger] Search called before initialization or without embedder.")
+            logger.warning(
+                "[MementoLedger] Search called before initialization or without embedder."
+            )
             return []
 
         # Wrap blocking NN inference in to_thread (Ω₇)
@@ -201,6 +225,7 @@ class MementoLedger:
             embedding = embedding[0]
 
         import struct
+
         embedding_blob = struct.pack(f"{len(embedding)}f", *embedding)
 
         async with self._pool.acquire() as conn:
@@ -211,14 +236,17 @@ class MementoLedger:
                 where_clause += " AND t.session_id = ?"
                 params.append(session_id)
 
-            cursor = await conn.execute(f"""
+            cursor = await conn.execute(
+                f"""
                 SELECT t.*, v.distance
                 FROM {self.TABLE_NAME} t
                 JOIN {self.TABLE_NAME}_idx v ON t.oid = v.rowid
                 {where_clause}
                 ORDER BY distance
                 LIMIT ?
-            """, (*params, int(limit)))
+            """,
+                (*params, int(limit)),
+            )
 
             rows = await cursor.fetchall()
             if not rows:
@@ -246,25 +274,32 @@ class MementoLedger:
         async with self._pool.acquire() as conn:
             count = 0
             total_hours = 0.0
-            async with conn.execute(f"SELECT COUNT(*), SUM(hours_saved) FROM {self.TABLE_NAME} {where_clause}", params) as cur:
+            async with conn.execute(
+                f"SELECT COUNT(*), SUM(hours_saved) FROM {self.TABLE_NAME} {where_clause}", params
+            ) as cur:
                 row = await cur.fetchone()
                 if row:
                     count = row[0] or 0
                     total_hours = row[1] or 0.0
 
             stages = {}
-            async with conn.execute(f"SELECT stage, COUNT(*) FROM {self.TABLE_NAME} {where_clause} GROUP BY stage", params) as cur:
+            async with conn.execute(
+                f"SELECT stage, COUNT(*) FROM {self.TABLE_NAME} {where_clause} GROUP BY stage",
+                params,
+            ) as cur:
                 async for stage_row in cur:
                     stages[stage_row[0]] = stage_row[1]
 
         return {
             "total_facts": count,
             "total_hours_saved": float(f"{total_hours:.2f}"),
-            "stages": stages
+            "stages": stages,
         }
 
     async def prune_low_exergy(
-        self, session_id: str | None = None, threshold: float = 0.05,
+        self,
+        session_id: str | None = None,
+        threshold: float = 0.05,
     ) -> int:
         """Remove traces below the exergy threshold. Returns rows deleted."""
         if not self._initialized:
@@ -281,27 +316,27 @@ class MementoLedger:
         async with self._pool.acquire() as conn:
             # Delete matching vector rows first (referential cleanup)
             cursor = await conn.execute(
-                f"SELECT oid FROM {self.TABLE_NAME} {where}", params,
+                f"SELECT oid FROM {self.TABLE_NAME} {where}",
+                params,
             )
             oids = [row[0] for row in await cursor.fetchall()]
 
             if oids:
                 placeholders = ",".join("?" * len(oids))
                 await conn.execute(
-                    f"DELETE FROM {self.TABLE_NAME}_idx "
-                    f"WHERE rowid IN ({placeholders})",
+                    f"DELETE FROM {self.TABLE_NAME}_idx WHERE rowid IN ({placeholders})",
                     oids,
                 )
                 await conn.execute(
-                    f"DELETE FROM {self.TABLE_NAME} "
-                    f"WHERE oid IN ({placeholders})",
+                    f"DELETE FROM {self.TABLE_NAME} WHERE oid IN ({placeholders})",
                     oids,
                 )
                 await conn.commit()
 
             logger.info(
                 "[MementoLedger] Pruned %d low-exergy traces (threshold=%.3f)",
-                len(oids), threshold,
+                len(oids),
+                threshold,
             )
             return len(oids)
 
@@ -318,13 +353,16 @@ class MementoLedger:
 
         async with self._pool.acquire() as conn:
             # Find duplicate groups, keep max(oid)
-            cursor = await conn.execute(f"""
+            cursor = await conn.execute(
+                f"""
                 SELECT GROUP_CONCAT(oid) AS oids
                 FROM {self.TABLE_NAME}
                 WHERE 1=1 {where}
                 GROUP BY summary, stage, session_id
                 HAVING COUNT(*) > 1
-            """, params)
+            """,
+                params,
+            )
 
             total_removed = 0
             for row in await cursor.fetchall():
@@ -334,18 +372,19 @@ class MementoLedger:
                 if remove:
                     ph = ",".join("?" * len(remove))
                     await conn.execute(
-                        f"DELETE FROM {self.TABLE_NAME}_idx "
-                        f"WHERE rowid IN ({ph})", remove,
+                        f"DELETE FROM {self.TABLE_NAME}_idx WHERE rowid IN ({ph})",
+                        remove,
                     )
                     await conn.execute(
-                        f"DELETE FROM {self.TABLE_NAME} "
-                        f"WHERE oid IN ({ph})", remove,
+                        f"DELETE FROM {self.TABLE_NAME} WHERE oid IN ({ph})",
+                        remove,
                     )
                     total_removed += len(remove)
 
             await conn.commit()
             logger.info(
-                "[MementoLedger] Merged %d duplicate traces", total_removed,
+                "[MementoLedger] Merged %d duplicate traces",
+                total_removed,
             )
             return total_removed
 

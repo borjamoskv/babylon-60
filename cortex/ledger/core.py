@@ -10,6 +10,7 @@ from .merkle import MerkleTree
 
 logger = logging.getLogger(__name__)
 
+
 class SovereignLedger:
     """
     The Custodian of Immutable History (CORTEX Wave 5).
@@ -44,7 +45,9 @@ class SovereignLedger:
         await self.conn.commit()
 
     async def _get_last_hash(self) -> str:
-        async with self.conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1") as cursor:
+        async with self.conn.execute(
+            "SELECT hash FROM transactions ORDER BY id DESC LIMIT 1"
+        ) as cursor:
             row = await cursor.fetchone()
             return row[0] if row else "0" * 64
 
@@ -61,7 +64,7 @@ class SovereignLedger:
         try:
             await self.conn.execute(
                 "INSERT INTO transactions (timestamp, project, action, detail, prev_hash, hash) VALUES (?, ?, ?, ?, ?, ?)",
-                (timestamp, project, action, detail_json, prev_hash, new_hash)
+                (timestamp, project, action, detail_json, prev_hash, new_hash),
             )
             await self.conn.commit()
             return new_hash
@@ -89,7 +92,7 @@ class SovereignLedger:
 
         async with self.conn.execute(
             "SELECT id, hash FROM transactions WHERE id > ? ORDER BY id ASC LIMIT ?",
-            (last_covered, batch_size)
+            (last_covered, batch_size),
         ) as cursor:
             rows = await cursor.fetchall()
 
@@ -106,7 +109,7 @@ class SovereignLedger:
         if root_hash:
             await self.conn.execute(
                 "INSERT INTO merkle_roots (timestamp, tx_start_id, tx_end_id, root_hash) VALUES (?, ?, ?, ?)",
-                (datetime.now(timezone.utc).isoformat(), start_id, end_id, root_hash)
+                (datetime.now(timezone.utc).isoformat(), start_id, end_id, root_hash),
             )
             await self.conn.commit()
 
@@ -114,20 +117,29 @@ class SovereignLedger:
 
     async def audit_integrity(self) -> bool:
         """Perform a full cryptographic audit of the chain."""
-        async with self.conn.execute("SELECT id, prev_hash, timestamp, detail, hash FROM transactions ORDER BY id ASC") as cursor:
+        async with self.conn.execute(
+            "SELECT id, prev_hash, timestamp, detail, hash FROM transactions ORDER BY id ASC"
+        ) as cursor:
             rows = await cursor.fetchall()
 
         current_prev = "0" * 64
         for row_id, prev_hash, ts, detail, h in rows:
             if prev_hash != current_prev:
-                logger.error("Chain broken at ID %d: Expected prev_hash %s, found %s", row_id, current_prev, prev_hash)
+                logger.error(
+                    "Chain broken at ID %d: Expected prev_hash %s, found %s",
+                    row_id,
+                    current_prev,
+                    prev_hash,
+                )
                 return False
 
             # Recompute hash
             payload = f"{prev_hash}{ts}{detail}"
             expected_hash = hashlib.sha256(payload.encode()).hexdigest()
             if h != expected_hash:
-                logger.error("Hash mismatch at ID %d: Recomputed %s, stored %s", row_id, expected_hash, h)
+                logger.error(
+                    "Hash mismatch at ID %d: Recomputed %s, stored %s", row_id, expected_hash, h
+                )
                 return False
 
             current_prev = h

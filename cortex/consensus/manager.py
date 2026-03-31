@@ -249,9 +249,7 @@ class ConsensusManager:
 
         # 🛡️ Aplicar Penalización de Entropía (Alignment Drift)
         # Resolve tenant_id once here and thread it into entropy update
-        cursor = await conn.execute(
-            "SELECT tenant_id FROM facts WHERE id = ?", (fact_id,)
-        )
+        cursor = await conn.execute("SELECT tenant_id FROM facts WHERE id = ?", (fact_id,))
         row = await cursor.fetchone()
         tenant_id = row[0] if row else "default"
         await self._update_agent_entropy(fact_id, score, conn, tenant_id=tenant_id)

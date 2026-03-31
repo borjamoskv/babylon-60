@@ -1,7 +1,7 @@
 import asyncio
 import json
-import os
 import logging
+import os
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -17,7 +17,7 @@ logger = logging.getLogger("cortex.agents.arc_agi_3.reasoning")
 
 
 # ─── DSL helpers injected into every sandbox execution ───────────────────────
-SANDBOX_PRELUDE = '''
+SANDBOX_PRELUDE = """
 import copy
 
 def grid_dims(g):
@@ -114,7 +114,7 @@ def most_common_color(g, exclude=None):
 
 def replace_color(g, old, new):
     return [[new if c == old else c for c in row] for row in g]
-'''
+"""
 
 
 @dataclass
@@ -136,7 +136,7 @@ class MCTSEnvironment:
     def __init__(
         self,
         llm_manager,
-        search_engine: 'NeuroSymbolicSearch',
+        search_engine: "NeuroSymbolicSearch",
         examples: list[dict],
     ):
         self.llm = llm_manager
@@ -158,6 +158,7 @@ class MCTSEnvironment:
     async def step_async(self, state: str, action: str) -> str:
         prompt = self._build_mcts_prompt()
         from cortex.extensions.llm.router import IntentProfile
+
         code = await self.llm.complete(
             prompt=prompt,
             system="fuckChatGPT MCTS Synthesis. Code ONLY. Zero markdown.",
@@ -180,8 +181,14 @@ class PeARLInductor:
 
     def __init__(self) -> None:
         self.primitives = [
-            "objects", "colors", "symmetry", "periodicity",
-            "translate", "rotate", "reflect", "flood_fill",
+            "objects",
+            "colors",
+            "symmetry",
+            "periodicity",
+            "translate",
+            "rotate",
+            "reflect",
+            "flood_fill",
         ]
 
     async def induce_candidates(
@@ -203,6 +210,7 @@ class PeARLInductor:
         is_stress_test = os.getenv("ARC_STRESS_TEST") == "true"
         if n >= 50 or is_stress_test:
             from cortex.engine.legion import SwarmInductor
+
             replica_count = 100 if is_stress_test else n
             inductor = SwarmInductor(replica_count=replica_count)
             context = {
@@ -266,7 +274,8 @@ class NeuroSymbolicSearch:
         # ── Pass 1: MCTS Deep Search (50 simulations) ──────────────────
         log_limbic(
             "fuckChatGPT: MCTS Deep Search (50 sims)...",
-            source="MCTS", vibe="cterm-deep-think",
+            source="MCTS",
+            vibe="cterm-deep-think",
         )
         env = MCTSEnvironment(llm, self, train_examples)
         network = PeARLNetwork(llm)
@@ -297,7 +306,8 @@ class NeuroSymbolicSearch:
         if best_score < 1.0:
             log_limbic(
                 f"fuckChatGPT: MCTS scored {best_score:.2f}. Trying direct induction...",
-                source="INDUCTOR", vibe="cterm-exergy",
+                source="INDUCTOR",
+                vibe="cterm-exergy",
             )
             candidates = await self.inductor.induce_candidates(train_examples, n=8)
             eval_tasks = [
@@ -317,7 +327,8 @@ class NeuroSymbolicSearch:
             log_limbic(
                 f"fuckChatGPT: Refinement pass {pass_num + 1}/{self.MAX_REFINEMENT_PASSES} "
                 f"(current best: {best_score:.2f})",
-                source="REFINE", vibe="cterm-deep-think",
+                source="REFINE",
+                vibe="cterm-deep-think",
             )
 
             errors = await self._collect_errors(best_program.source_code, train_examples)
@@ -334,13 +345,12 @@ class NeuroSymbolicSearch:
 
         log_limbic(
             f"fuckChatGPT: Final score {best_score:.2f}",
-            source="SEARCH", vibe="cterm-exergy",
+            source="SEARCH",
+            vibe="cterm-exergy",
         )
         return best_program
 
-    async def _verify_correctness(
-        self, program: str, train_examples: list[dict]
-    ) -> float:
+    async def _verify_correctness(self, program: str, train_examples: list[dict]) -> float:
         """Pure correctness scoring — no exergy penalty."""
         harness = f"""\
 import json
@@ -360,9 +370,7 @@ except Exception as e:
 """
         tasks = []
         for ex in train_examples:
-            tasks.append(
-                self.isolation.execute_sandbox(harness, args=[json.dumps(ex["input"])])
-            )
+            tasks.append(self.isolation.execute_sandbox(harness, args=[json.dumps(ex["input"])]))
 
         results = await asyncio.gather(*tasks)
 
@@ -401,9 +409,7 @@ except Exception as e:
 
         return float(exact_score * 0.85 + partial_score * 0.15)
 
-    async def _collect_errors(
-        self, program: str, train_examples: list[dict]
-    ) -> list[dict]:
+    async def _collect_errors(self, program: str, train_examples: list[dict]) -> list[dict]:
         """Returns list of {index, input, expected, got, error} for failed cases."""
         harness = f"""\
 import json
@@ -434,29 +440,35 @@ except Exception as e:
                 try:
                     pred = json.loads(res.stdout)
                     if pred != expected:
-                        errors.append({
+                        errors.append(
+                            {
+                                "index": i,
+                                "input": ex["input"],
+                                "expected": expected,
+                                "got": pred,
+                                "error": None,
+                            }
+                        )
+                except (json.JSONDecodeError, TypeError):
+                    errors.append(
+                        {
                             "index": i,
                             "input": ex["input"],
                             "expected": expected,
-                            "got": pred,
-                            "error": None,
-                        })
-                except (json.JSONDecodeError, TypeError):
-                    errors.append({
+                            "got": None,
+                            "error": f"JSON decode error: {res.stdout[:200]}",
+                        }
+                    )
+            else:
+                errors.append(
+                    {
                         "index": i,
                         "input": ex["input"],
                         "expected": expected,
                         "got": None,
-                        "error": f"JSON decode error: {res.stdout[:200]}",
-                    })
-            else:
-                errors.append({
-                    "index": i,
-                    "input": ex["input"],
-                    "expected": expected,
-                    "got": None,
-                    "error": res.stderr[:300] if res else "Execution failed",
-                })
+                        "error": res.stderr[:300] if res else "Execution failed",
+                    }
+                )
         return errors
 
     async def _refine_with_errors(
@@ -523,7 +535,8 @@ class ArcReasoningEngine:
     ) -> list[list[int]]:
         log_limbic(
             "fuckChatGPT: Initiating Neuro-Symbolic Search...",
-            source="REASONING", vibe="cterm-deep-think",
+            source="REASONING",
+            vibe="cterm-deep-think",
         )
 
         self.active_program = await self.search_engine.search(train_examples)
@@ -532,7 +545,8 @@ class ArcReasoningEngine:
         if prog and prog.confidence > 0:
             log_limbic(
                 f"fuckChatGPT: Crystallized (Conf: {prog.confidence:.2f})",
-                source="REASONING", vibe="cterm-exergy",
+                source="REASONING",
+                vibe="cterm-exergy",
             )
 
             # Execute with DSL helpers available
@@ -551,6 +565,7 @@ class ArcReasoningEngine:
 
 
 # ─── Utility functions ───────────────────────────────────────────────────────
+
 
 def _extract_code(raw: str) -> str:
     """Strips markdown fences from LLM output."""
@@ -587,9 +602,7 @@ def _build_fuckchatgpt_prompt(training_examples: list[dict]) -> str:
 
     return (
         "TASK: Solve this ARC-AGI grid transformation puzzle.\n\n"
-        "STRUCTURAL ANALYSIS:\n"
-        + "\n\n".join(analysis_parts)
-        + "\n\n"
+        "STRUCTURAL ANALYSIS:\n" + "\n\n".join(analysis_parts) + "\n\n"
         "INSTRUCTIONS:\n"
         "1. Study EVERY example carefully. Compare input and output grids cell by cell.\n"
         "2. Identify the EXACT transformation rule. Common patterns:\n"

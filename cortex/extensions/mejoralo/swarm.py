@@ -318,10 +318,14 @@ class MejoraloSwarm:
     ) -> str:
         scars_str = self._get_scars_prompt(engine, project, file_path.name)
         lang = "python"
-        if file_path.name.endswith((".ts", ".tsx")): lang = "typescript"
-        elif file_path.name.endswith((".js", ".jsx")): lang = "javascript"
-        elif file_path.name.endswith(".astro"): lang = "astro"
-        elif file_path.name.endswith(".css"): lang = "css"
+        if file_path.name.endswith((".ts", ".tsx")):
+            lang = "typescript"
+        elif file_path.name.endswith((".js", ".jsx")):
+            lang = "javascript"
+        elif file_path.name.endswith(".astro"):
+            lang = "astro"
+        elif file_path.name.endswith(".css"):
+            lang = "css"
 
         return (
             f"REFAC-TASK: Fix findings in {file_path.name}. Maintain EXACT functionality.\n"
@@ -423,10 +427,14 @@ class MejoraloSwarm:
         )
 
         lang = "python"
-        if filename.endswith((".ts", ".tsx")): lang = "typescript"
-        elif filename.endswith((".js", ".jsx")): lang = "javascript"
-        elif filename.endswith(".astro"): lang = "astro"
-        elif filename.endswith(".css"): lang = "css"
+        if filename.endswith((".ts", ".tsx")):
+            lang = "typescript"
+        elif filename.endswith((".js", ".jsx")):
+            lang = "javascript"
+        elif filename.endswith(".astro"):
+            lang = "astro"
+        elif filename.endswith(".css"):
+            lang = "css"
 
         return (
             f"You are the SOVEREIGN SWARM (Level {self.level}/3). Iteration: {iteration}.\n"

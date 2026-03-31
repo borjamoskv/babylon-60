@@ -3,12 +3,15 @@ from typing import Any
 
 try:
     import structlog
+
     _HAS_STRUCTLOG = True
     logger = structlog.get_logger(__name__)
 except ModuleNotFoundError:
     import logging
+
     _HAS_STRUCTLOG = False
     logger = logging.getLogger(__name__)
+
 
 def log_info(msg: str, **kwargs):
     if _HAS_STRUCTLOG:
@@ -16,11 +19,13 @@ def log_info(msg: str, **kwargs):
     else:
         logger.info(f"{msg} {kwargs}")
 
+
 def log_debug(msg: str, **kwargs):
     if _HAS_STRUCTLOG:
         logger.debug(msg, **kwargs)
     else:
         logger.debug(f"{msg} {kwargs}")
+
 
 def log_warning(msg: str, **kwargs):
     if _HAS_STRUCTLOG:
@@ -55,7 +60,7 @@ class Mem0Pipeline:
         # In a real implementation, this would call a model with a strategic prompt
         # Simulate extraction for now
         if "crystallized" in episodic_context.lower():
-             return [{"entity": "subgoal", "fact": episodic_context, "timestamp": "now"}]
+            return [{"entity": "subgoal", "fact": episodic_context, "timestamp": "now"}]
         return []
 
     async def consolidate(self, raw_facts: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -75,11 +80,10 @@ class Mem0Pipeline:
         signal_gain = 0.8 if len(fact_str) > 20 else 0.2
 
         # 2. Score mapping
-        score = signal_gain # In prod, this would be a full ExergyResult
+        score = signal_gain  # In prod, this would be a full ExergyResult
 
         return ExergyScore(
-            score=float(score),
-            justification=f"Signal density: {len(fact_str)} chars"
+            score=float(score), justification=f"Signal density: {len(fact_str)} chars"
         )
 
     async def store(self, facts: list[dict[str, Any]]) -> int:
@@ -99,14 +103,14 @@ class Mem0Pipeline:
                 # Store in ledger with exergy metadata
                 await ledger.store_fact(
                     fact=fact["fact"],
-                    metadata={"exergy": exergy.score, "justification": exergy.justification}
+                    metadata={"exergy": exergy.score, "justification": exergy.justification},
                 )
                 stored_count += 1
             else:
                 log_debug(
                     "Maxwell's Demon: Fact rejected (low exergy)",
                     score=exergy.score,
-                    threshold=self.exergy_threshold
+                    threshold=self.exergy_threshold,
                 )
 
         return stored_count

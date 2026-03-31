@@ -44,7 +44,7 @@ def register_suno_tools(mcp: FastMCP, ctx):
                     tags=["suno-omega", "headless-extraction"],
                     confidence="stated",
                     source="suno-headless-actuator",
-                    parent_decision_id=None
+                    parent_decision_id=None,
                 )
 
             return (

@@ -11,6 +11,7 @@ from typing import Any
 
 logger = logging.getLogger("cortex.guards.bizum")
 
+
 class BizumGuard:
     """
     Enforces deterministic boundaries on Bizum transactions.
@@ -33,7 +34,9 @@ class BizumGuard:
         Validates a single outbound Bizum transaction.
         """
         if amount > self.MAX_TX_AMOUNT:
-            logger.error("[BIZUM_GUARD] Transaction amount %s exceeds limit %s", amount, self.MAX_TX_AMOUNT)
+            logger.error(
+                "[BIZUM_GUARD] Transaction amount %s exceeds limit %s", amount, self.MAX_TX_AMOUNT
+            )
             return False
 
         if not destination or len(destination) < 9:
@@ -58,7 +61,12 @@ class BizumGuard:
                     daily_total = Decimal(str(row[0])) if row and row[0] else Decimal("0.00")
 
                     if daily_total + amount > self.MAX_DAILY_TOTAL:
-                        logger.error("[BIZUM_GUARD] Cumulative daily total %s + tx %s exceeds %s", daily_total, amount, self.MAX_DAILY_TOTAL)
+                        logger.error(
+                            "[BIZUM_GUARD] Cumulative daily total %s + tx %s exceeds %s",
+                            daily_total,
+                            amount,
+                            self.MAX_DAILY_TOTAL,
+                        )
                         return False
             except Exception as e:
                 logger.error("[BIZUM_GUARD] Ledger constraint failure: %s", e)

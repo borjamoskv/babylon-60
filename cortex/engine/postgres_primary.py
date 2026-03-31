@@ -251,6 +251,51 @@ class PostgresPrimaryEngine:
             (tenant_id, project, action, detail_json, prev_hash, tx_hash, ts),
         )
 
+    async def log_financial_transaction(
+        self,
+        *,
+        tenant_id: str = "default",
+        strike_vector: str,
+        expected_yield: float,
+        compute_cost: float,
+        net_yield: float,
+        status: str,
+    ) -> int:
+        """Log an immutable financial extraction event from Ouroboros."""
+        tenant_id = self._resolve_tenant(tenant_id)
+        ts = now_iso()
+        async with self._backend.connection() as conn:
+            async with conn.transaction():
+                tx_id = await self._log_transaction(
+                    conn,
+                    project="ouroboros-engine",
+                    action="financial_extraction",
+                    detail={
+                        "strike_vector": strike_vector,
+                        "expected_yield": expected_yield,
+                        "compute_cost": compute_cost,
+                        "net_yield": net_yield,
+                        "status": status,
+                    },
+                    tenant_id=tenant_id,
+                )
+                return await self._backend.execute_insert_with_conn(
+                    conn,
+                    "INSERT INTO financial_ledger "
+                    "(tenant_id, strike_vector, expected_yield, compute_cost, net_yield, status, timestamp, tx_id) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    (
+                        tenant_id,
+                        strike_vector,
+                        expected_yield,
+                        compute_cost,
+                        net_yield,
+                        status,
+                        ts,
+                        tx_id,
+                    ),
+                )
+
     async def recall(
         self,
         project: str,
@@ -308,9 +353,7 @@ class PostgresPrimaryEngine:
                     tenant_id=tenant_id,
                 )
                 await self._backend.execute_with_conn(
-                    conn,
-                    "DELETE FROM facts WHERE id = ? AND tenant_id = ?",
-                    (fact_id, tenant_id)
+                    conn, "DELETE FROM facts WHERE id = ? AND tenant_id = ?", (fact_id, tenant_id)
                 )
 
     async def tombstone(self, fact_id: int, tenant_id: str = "default") -> None:
@@ -332,7 +375,7 @@ class PostgresPrimaryEngine:
                 await self._backend.execute_with_conn(
                     conn,
                     "UPDATE facts SET is_tombstoned = TRUE, tombstoned_at = ?, updated_at = ? WHERE id = ? AND tenant_id = ?",
-                    (now_iso(), now_iso(), fact_id, tenant_id)
+                    (now_iso(), now_iso(), fact_id, tenant_id),
                 )
 
     async def vote(
@@ -359,7 +402,9 @@ class PostgresPrimaryEngine:
 
                 # Establecer tenant para RLS
                 await self._backend.execute_with_conn(
-                    conn, "SELECT set_config('cortex.tenant_id', ?, true)", (str(fact_row.get("tenant_id") or "default"),)
+                    conn,
+                    "SELECT set_config('cortex.tenant_id', ?, true)",
+                    (str(fact_row.get("tenant_id") or "default"),),
                 )
 
                 tenant_id = self._resolve_tenant(str(fact_row.get("tenant_id") or "default"))
@@ -855,12 +900,25 @@ class PostgresPrimaryEngine:
         """Apply Row-Level Security (RLS) policies to PostgreSQL schema."""
         logger.info("Bootstrapping Row-Level Security (RLS) policies...")
         policies = [
+            """CREATE TABLE IF NOT EXISTS financial_ledger (
+                id SERIAL PRIMARY KEY,
+                tenant_id VARCHAR(255) NOT NULL,
+                strike_vector VARCHAR(255) NOT NULL,
+                expected_yield FLOAT NOT NULL,
+                compute_cost FLOAT NOT NULL,
+                net_yield FLOAT NOT NULL,
+                status VARCHAR(255) NOT NULL,
+                timestamp VARCHAR(255) NOT NULL,
+                tx_id BIGINT
+            );""",
             "ALTER TABLE facts ENABLE ROW LEVEL SECURITY;",
             "ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;",
             "ALTER TABLE vote_ledger ENABLE ROW LEVEL SECURITY;",
+            "ALTER TABLE financial_ledger ENABLE ROW LEVEL SECURITY;",
             "CREATE POLICY tenant_isolation_facts ON facts USING (tenant_id = current_setting('cortex.tenant_id', true));",
             "CREATE POLICY tenant_isolation_txs ON transactions USING (tenant_id = current_setting('cortex.tenant_id', true));",
             "CREATE POLICY tenant_isolation_votes ON vote_ledger USING (tenant_id = current_setting('cortex.tenant_id', true));",
+            "CREATE POLICY tenant_isolation_financial ON financial_ledger USING (tenant_id = current_setting('cortex.tenant_id', true));",
         ]
         async with self._backend.connection() as conn:
             for sql in policies:
@@ -868,7 +926,6 @@ class PostgresPrimaryEngine:
                     await self._backend.execute_with_conn(conn, sql, ())
                 except _POSTGRES_VECTOR_ERRORS as exc:
                     logger.debug("RLS Policy exist or error: %s", exc)
-
 
     def _vector_literal(self, embedding: list[float]) -> str:
         return json.dumps([float(value) for value in embedding], separators=(",", ":"))

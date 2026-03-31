@@ -113,7 +113,7 @@ class CortexConfig:
 
     # Deployment
     DEPLOY_MODE: str = "local"
-    
+
     # ARC-AGI
     ARC_API_KEY: str = ""
 

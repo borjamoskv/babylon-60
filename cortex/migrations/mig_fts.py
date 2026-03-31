@@ -55,8 +55,7 @@ def _migration_017_fts_decouple(conn: sqlite3.Connection):
 
         # 4. Repopulate facts_fts using the canonical manual plaintext policy.
         cursor = conn.execute(
-            "SELECT id, content, project, tags, fact_type "
-            "FROM facts WHERE valid_until IS NULL"
+            "SELECT id, content, project, tags, fact_type FROM facts WHERE valid_until IS NULL"
         )
         rows = cursor.fetchall()
 

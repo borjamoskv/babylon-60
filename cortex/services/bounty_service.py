@@ -41,7 +41,9 @@ class BountyService:
         return await self._fetch_from_github(query)
 
     async def scan_global(
-        self, max_results: int = 20, languages: list[str] | None = None,
+        self,
+        max_results: int = 20,
+        languages: list[str] | None = None,
     ) -> list[BountyLead]:
         """
         Scans all of GitHub for open issues with the 'bounty' label.
@@ -137,12 +139,7 @@ class BountyService:
         if token:
             headers["Authorization"] = f"Bearer {token}"
 
-        params = {
-            "q": query,
-            "sort": "updated",
-            "order": "desc",
-            "per_page": limit
-        }
+        params = {"q": query, "sort": "updated", "order": "desc", "per_page": limit}
 
         leads = []
         try:
@@ -188,15 +185,13 @@ class BountyService:
                     reward_usd=reward_usd,
                     difficulty=difficulty,
                     score=score,
-                    repo=repo_name
+                    repo=repo_name,
                 )
             )
 
         if self.ledger:
             await self.ledger.record_transaction(
-                project="bounty",
-                action="scan",
-                detail={"query": query, "leads_found": len(leads)}
+                project="bounty", action="scan", detail={"query": query, "leads_found": len(leads)}
             )
 
         return leads
@@ -204,34 +199,32 @@ class BountyService:
     async def rank_leads(self, leads: list[BountyLead]) -> list[BountyLead]:
         """Rank leads by thermodynamic Exergy/Entropy ratio (Ω₂)."""
         from decimal import Decimal
-        
+
         filtered = []
         for L in leads:
             diff_weight = {"low": 2, "medium": 5, "high": 8, "critical": 10}.get(L.difficulty, 5)
             context_lines = 100 if diff_weight <= 2 else (300 if diff_weight <= 5 else 500)
-            
+
             exergy = Decimal(str(L.reward_usd))
             entropy_base = Decimal(diff_weight) * 50 + Decimal(context_lines) * Decimal("0.1")
-            
+
             ghost_penalty = (
                 Decimal(context_lines) * Decimal("0.5")
                 if diff_weight >= 5 and exergy < Decimal("200")
                 else Decimal("0")
             )
-            
+
             meta_penalty = (
-                Decimal(diff_weight) ** 2 * Decimal("4")
-                if diff_weight >= 8
-                else Decimal("0")
+                Decimal(diff_weight) ** 2 * Decimal("4") if diff_weight >= 8 else Decimal("0")
             )
-            
+
             entropy = max(entropy_base + ghost_penalty + meta_penalty, Decimal("1"))
             ratio = float(exergy / entropy)
-            
+
             min_ratio = max(3.0, self.reward_threshold / 100.0)
-            
+
             L.score = ratio
-            
+
             if ratio >= min_ratio:
                 filtered.append(L)
 
@@ -240,7 +233,7 @@ class BountyService:
             await self.ledger.record_transaction(
                 project="bounty",
                 action="lead_discard",
-                detail={"count": discard_count, "reason": "negative_net_exergy_or_threshold"}
+                detail={"count": discard_count, "reason": "negative_net_exergy_or_threshold"},
             )
 
         return sorted(filtered, key=lambda x: x.reward_usd, reverse=True)

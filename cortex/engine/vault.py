@@ -5,7 +5,6 @@ from typing import Any, Optional
 
 import aiosqlite
 
-
 logger = logging.getLogger("cortex.vault")
 
 _sentence_model: Any = None
@@ -20,6 +19,7 @@ async def _get_sentence_model():
             if _sentence_model is None:
                 logger.info("VAULT: Lazy loading sentence-transformers (all-MiniLM-L6-v2)")
                 from sentence_transformers import SentenceTransformer
+
                 # Use to_thread if SentenceTransformer load is slow
                 _sentence_model = await asyncio.to_thread(SentenceTransformer, "all-MiniLM-L6-v2")
     return _sentence_model
@@ -27,6 +27,7 @@ async def _get_sentence_model():
 
 def _get_sqlite_vec_path():
     import sqlite_vec
+
     return sqlite_vec.loadable_path()
 
 
@@ -80,16 +81,22 @@ class ConceptVault:
 
         async with aiosqlite.connect(self.db_path) as conn:
             await self._setup_conn(conn)
-            cursor = await conn.execute("""
+            cursor = await conn.execute(
+                """
                 INSERT INTO legion_concepts (intent, code_snippet, exergy)
                 VALUES (?, ?, ?)
-            """, (intent, code, exergy))
+            """,
+                (intent, code, exergy),
+            )
             rowid = cursor.lastrowid
 
-            await conn.execute("""
+            await conn.execute(
+                """
                 INSERT INTO vec_concepts(rowid, embedding)
                 VALUES (?, ?)
-            """, (rowid, emb))
+            """,
+                (rowid, emb),
+            )
             await conn.commit()
 
     async def find_warm_start(self, intent: str) -> Optional[str]:
@@ -100,7 +107,8 @@ class ConceptVault:
         async with aiosqlite.connect(self.db_path) as conn:
             await self._setup_conn(conn)
             try:
-                cursor = await conn.execute("""
+                cursor = await conn.execute(
+                    """
                     SELECT lc.code_snippet, sub.distance
                     FROM (
                         SELECT rowid, distance
@@ -110,13 +118,16 @@ class ConceptVault:
                         LIMIT 1
                     ) sub
                     JOIN legion_concepts lc ON lc.id = sub.rowid
-                """, (emb,))
+                """,
+                    (emb,),
+                )
                 row = await cursor.fetchone()
                 if row:
                     code_snippet, distance = row
                     if distance < 1.0:
-                        logger.debug("VAULT: Warm start found for '%s' (Distance: %.3f)",
-                                     intent, distance)
+                        logger.debug(
+                            "VAULT: Warm start found for '%s' (Distance: %.3f)", intent, distance
+                        )
                         return code_snippet
             except sqlite3.OperationalError as e:
                 logger.error("VAULT: Vector search failed: %s", e)

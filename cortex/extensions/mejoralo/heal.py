@@ -314,7 +314,9 @@ def _commit_healed_file(
                         yield_data.claim_text,
                     ],
                 )
-                console.print(f"  [dim]⏱ CHRONOS-1: {yield_data.hours}h saved recorded in ledger.[/]")
+                console.print(
+                    f"  [dim]⏱ CHRONOS-1: {yield_data.hours}h saved recorded in ledger.[/]"
+                )
             except Exception:  # noqa: BLE001
                 logger.exception("Failed to record CHRONOS-1 yield for %s", top_file_rel)
         return True

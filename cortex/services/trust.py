@@ -311,9 +311,7 @@ class TrustService:
     # Audit trail
     # ------------------------------------------------------------------
 
-    def get_audit_trail(
-        self, project: str | None = None, limit: int = 50
-    ) -> list[dict[str, Any]]:
+    def get_audit_trail(self, project: str | None = None, limit: int = 50) -> list[dict[str, Any]]:
         """Fetch audit trail rows via index-backed ordering."""
         conn = self._get_conn()
         if project:

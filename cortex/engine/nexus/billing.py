@@ -3,28 +3,25 @@ CORTEX Leviathan: Billing & Exergy Surcharge Manager
 Calculates real-time costs based on transaction entropy and risk.
 """
 
-import math
 import logging
-from typing import Dict, Any
+
 from pydantic import BaseModel
 
 logger = logging.getLogger("Leviathan-Billing")
 
+
 class BillingConfig(BaseModel):
     base_rate: float = 0.001  # USD per transaction
     entropy_multiplier: float = 0.05
-    risk_surcharge: Dict[str, float] = {
-        "LOW": 1.0,
-        "MEDIUM": 1.5,
-        "HIGH": 3.0,
-        "CRITICAL": 10.0
-    }
+    risk_surcharge: dict[str, float] = {"LOW": 1.0, "MEDIUM": 1.5, "HIGH": 3.0, "CRITICAL": 10.0}
+
 
 class BillingManager:
     """
     Manages the monetization layer of LEVIATHAN.
     Converts entropy and ascription events into exergy yield (revenue).
     """
+
     def __init__(self, config: BillingConfig = BillingConfig()):
         self.config = config
         self.total_yield = 0.0
@@ -35,7 +32,9 @@ class BillingManager:
         Formula: (Base + (Entropy * Mult)) * Risk_Surcharge
         """
         multiplier = self.config.risk_surcharge.get(risk_level, 1.0)
-        cost = (self.config.base_rate + (action_entropy * self.config.entropy_multiplier)) * multiplier
+        cost = (
+            self.config.base_rate + (action_entropy * self.config.entropy_multiplier)
+        ) * multiplier
         return round(cost, 6)
 
     async def charge_transaction(self, tx_hash: str, cost: float, tenant_id: str):
@@ -49,6 +48,7 @@ class BillingManager:
 
     def generate_invoice_summary(self, tenant_id: str) -> str:
         return f"Leviathan Monthly Invoice for {tenant_id}: Total Yield Extracted: {self.total_yield} USD"
+
 
 if __name__ == "__main__":
     bm = BillingManager()

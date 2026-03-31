@@ -220,7 +220,7 @@ def strike(post_id: str, nodes: str, payload: str):
             console.print(f"[yellow]⚠️ Node {node} has no API key in registry. Skipping.[/]")
             continue
 
-        console.print(f"[{idx+1}/{len(node_list)}] [cyan]Deploying {node}...[/]")
+        console.print(f"[{idx + 1}/{len(node_list)}] [cyan]Deploying {node}...[/]")
         client = MoltbookClient(api_key=api_key)
 
         node_payload = f"[NODE: {node}]\n{payload}"

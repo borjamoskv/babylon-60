@@ -300,9 +300,7 @@ class SovereignVectorStoreL2:
             (tenant_id, project_id),
         )
         # Delete corresponding vectors from global vec_facts
-        conn.execute(
-            "DELETE FROM vec_facts WHERE rowid NOT IN (SELECT rowid FROM facts_meta)"
-        )
+        conn.execute("DELETE FROM vec_facts WHERE rowid NOT IN (SELECT rowid FROM facts_meta)")
 
         # 6. Create indexes for the new shard
         conn.execute(
@@ -394,7 +392,6 @@ class SovereignVectorStoreL2:
 
             await asyncio.to_thread(_do_append)
 
-
     async def recall_secure(
         self,
         tenant_id: str,
@@ -416,9 +413,7 @@ class SovereignVectorStoreL2:
             cursor = conn.cursor()
             if not self._vector_enabled:
                 # Fallback to pure metadata/content search (no similarity scoring)
-                sql = (
-                    f"SELECT * FROM {meta_tb} WHERE tenant_id = ? AND (project_id = ? OR is_bridge = 1)"
-                )
+                sql = f"SELECT * FROM {meta_tb} WHERE tenant_id = ? AND (project_id = ? OR is_bridge = 1)"
                 params: list[Any] = [tenant_id, project_id]
                 if layer:
                     sql += " AND cognitive_layer = ?"

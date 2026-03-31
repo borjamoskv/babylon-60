@@ -204,9 +204,9 @@ async def retrieve_episodic_context(
     if hdc_results and dense_results:
         results = apply_rrf(dense_results, hdc_results, limit=max_episodes * 2)
     elif hdc_results:
-        results = [fact_to_dict(f) for f in hdc_results[:max_episodes * 2]]
+        results = [fact_to_dict(f) for f in hdc_results[: max_episodes * 2]]
     else:
-        results = [fact_to_dict(f) for f in dense_results[:max_episodes * 2]]
+        results = [fact_to_dict(f) for f in dense_results[: max_episodes * 2]]
 
     # 6. Causal Reranking (Ω₂)
     # Detect current goal from manager state or metadata

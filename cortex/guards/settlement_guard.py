@@ -13,9 +13,7 @@ class SettlementVerifierGuard:
     """
 
     def check_settlement_authenticity(
-        self,
-        content: str,
-        metadata: dict[str, Any] | None = None
+        self, content: str, metadata: dict[str, Any] | None = None
     ) -> bool:
         """
         Validates if a claim about yield contains verified settlement data.
@@ -24,7 +22,14 @@ class SettlementVerifierGuard:
 
         # Fast path: if it doesn't mention financial keywords, bypass check
         financial_keywords = (
-            "wallet", "eth", "stripe", "bounty", "yield", "recompensa", "usd", "eur"
+            "wallet",
+            "eth",
+            "stripe",
+            "bounty",
+            "yield",
+            "recompensa",
+            "usd",
+            "eur",
         )
         if not any(k in content_lower for k in financial_keywords):
             return True

@@ -14,11 +14,13 @@ from pydantic import BaseModel
 
 logger = logging.getLogger("cortex.engine.vector_i_activist")
 
+
 class TargetCorporation(BaseModel):
     ticker: str
     github_org: str
     market_cap: float
     short_allocation_usd: float
+
 
 class ActivistShortActuator:
     """
@@ -43,13 +45,15 @@ class ActivistShortActuator:
         muertas, dependencias rotas o features vaporware. Mide fraude técnico.
         """
         logger.info(f"[VECTOR_I] Desplegando AST Parser (JIL / Chomsky) sobre organización: {org}")
-        await asyncio.sleep(2) # Simulación de ingesta de código
+        await asyncio.sleep(2)  # Simulación de ingesta de código
 
         # En producción CORTEX utilizaría AST Trees deterministas para
         # cuantificar deuda técnica que no reportan a los accionistas.
-        detected_ghost_ratio = 0.52 # Simulación empírica
+        detected_ghost_ratio = 0.52  # Simulación empírica
 
-        logger.info(f"[VECTOR_I] Análisis fractal completado. Ghost Ratio termodinámico: {detected_ghost_ratio*100:.2f}%")
+        logger.info(
+            f"[VECTOR_I] Análisis fractal completado. Ghost Ratio termodinámico: {detected_ghost_ratio * 100:.2f}%"
+        )
         return detected_ghost_ratio
 
     async def _execute_short_position(self, ticker: str, size: float) -> str:
@@ -57,17 +61,20 @@ class ActivistShortActuator:
         Actuador hacia Alpaca API o Interactive Brokers.
         Venta en corto de acciones o compra direccional de Put Options.
         """
-        logger.warning(f"[VECTOR_I] ⚠️ EXTINGUIENDO LIQUIDEZ. Ejecutando SHRT {size} USD en ticker: {ticker}")
+        logger.warning(
+            f"[VECTOR_I] ⚠️ EXTINGUIENDO LIQUIDEZ. Ejecutando SHRT {size} USD en ticker: {ticker}"
+        )
         await asyncio.sleep(0.5)
 
         order_id = f"shrt_{ticker}_{hashlib.md5(str(time.time()).encode()).hexdigest()[:8]}"
 
         try:
             from cortex.engine.ledger import append_event
+
             append_event(
                 event_type="ACTIVIST_SHORT_OPENED",
                 payload={"ticker": ticker, "usd_size": size, "order_id": order_id},
-                source="VECTOR_I_ACTUATOR"
+                source="VECTOR_I_ACTUATOR",
             )
         except ImportError:
             pass
@@ -86,14 +93,16 @@ class ActivistShortActuator:
         [CORTEX AUTONOMOUS FORENSICS]
         Subject: {ticker}
         Action: SHORT.
-        Metric: True Output Entropy is {ghost_ratio*100:.2f}%.
+        Metric: True Output Entropy is {ghost_ratio * 100:.2f}%.
         Analysis: The codebase relies on 52% dead abstractions.
         The recent engineering claims in earning calls are fundamentally impossible
         under this thermodynamic constraint. Puts acquired.
         """
 
         await asyncio.sleep(0.5)
-        logger.info("[VECTOR_I] Informe diseminado vía sub-agentes. Esperando compresión del M-Cap.")
+        logger.info(
+            "[VECTOR_I] Informe diseminado vía sub-agentes. Esperando compresión del M-Cap."
+        )
         return report_content
 
     async def trigger_activist_strike(self, target: TargetCorporation) -> bool:
@@ -111,11 +120,15 @@ class ActivistShortActuator:
             # 1. Auditoría
             ghost_ratio = await self._audit_ast_entropy(target.github_org)
             if ghost_ratio < self.CRITICAL_GHOST_RATIO_THRESHOLD:
-                logger.info(f"[VECTOR_I] Fraude técnico menor al {self.CRITICAL_GHOST_RATIO_THRESHOLD*100}%. Target no rentable para colapso. Abortando.")
+                logger.info(
+                    f"[VECTOR_I] Fraude técnico menor al {self.CRITICAL_GHOST_RATIO_THRESHOLD * 100}%. Target no rentable para colapso. Abortando."
+                )
                 return False
 
             # 2. Posición (Striking pre-news)
-            order_id = await self._execute_short_position(target.ticker, target.short_allocation_usd)
+            order_id = await self._execute_short_position(
+                target.ticker, target.short_allocation_usd
+            )
             if not order_id:
                 return False
 
@@ -123,6 +136,8 @@ class ActivistShortActuator:
             await self._forge_and_publish_forensic_report(target.ticker, ghost_ratio)
 
             elapsed = time.monotonic() - start_time
-            logger.info(f"[VECTOR_I] Strike Algorítmico ejecutado en {elapsed:.2f}s. Exposición {target.short_allocation_usd}$ protegida por Master Ledger.")
+            logger.info(
+                f"[VECTOR_I] Strike Algorítmico ejecutado en {elapsed:.2f}s. Exposición {target.short_allocation_usd}$ protegida por Master Ledger."
+            )
 
             return True

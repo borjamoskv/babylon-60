@@ -242,17 +242,28 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
         "vector_l_cmds",
         "Vector L — PYME bottleneck detection and CORTEX agent sales engine.",
     ),
-    ("compliance", "cortex.cli.compliance_cmds", "compliance", "Governance and cryptographic audit proofs."),
     (
-        "bounty", "cortex.cli.bounty_cmds", "bounty_cmds",
+        "compliance",
+        "cortex.cli.compliance_cmds",
+        "compliance",
+        "Governance and cryptographic audit proofs.",
+    ),
+    (
+        "bounty",
+        "cortex.cli.bounty_cmds",
+        "bounty_cmds",
         "💎 Bounty Hunter — multi-platform discovery.",
     ),
     (
-        "arc", "cortex.agents.arc_agi_3.cli", "arc_cli",
+        "arc",
+        "cortex.agents.arc_agi_3.cli",
+        "arc_cli",
         "ARC-AGI-3 Sovereign Agent Commands.",
     ),
     (
-        "fuckchatgpt", "cortex.agents.fuckchatgpt.cli", "fuckchatgpt_cli",
+        "fuckchatgpt",
+        "cortex.agents.fuckchatgpt.cli",
+        "fuckchatgpt_cli",
         "FuckChatGPT Sovereign Agent Commands.",
     ),
 ]

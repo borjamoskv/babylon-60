@@ -18,7 +18,9 @@ async def check_for_drift(db_path: str) -> dict[str, Any]:
 
     try:
         # Load all facts ordered by ID
-        cursor = await conn.execute("SELECT id, content, source, created_at, meta FROM facts ORDER BY id")
+        cursor = await conn.execute(
+            "SELECT id, content, source, created_at, meta FROM facts ORDER BY id"
+        )
         rows = await cursor.fetchall()
 
         last_hash = "GENESIS"
@@ -36,13 +38,10 @@ async def check_for_drift(db_path: str) -> dict[str, Any]:
 
             last_hash = current_hash
 
-        return {
-            "valid": len(violations) == 0,
-            "tx_checked": tx_checked,
-            "violations": violations
-        }
+        return {"valid": len(violations) == 0, "tx_checked": tx_checked, "violations": violations}
     finally:
         await conn.close()
+
 
 async def ensure_sovereignty(db_path: str):
     """

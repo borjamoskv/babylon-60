@@ -9,6 +9,7 @@ from typing import Any, TypedDict, TypeVar, cast
 
 import langsmith as ls
 import PIL
+from agents.templates.llm_agents import LLM
 from arcengine import FrameData, GameAction
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.func import entrypoint
@@ -16,8 +17,6 @@ from langgraph.pregel import Pregel
 from langsmith.schemas import Attachment
 from openai import OpenAI
 from openai.types.chat import ChatCompletionMessage
-
-from agents.templates.llm_agents import LLM
 
 from ..agent import Agent
 
@@ -67,9 +66,7 @@ def build_agent(
         else:
             inbound = {
                 "role": "tool",
-                "tool_call_id": cast(ChatCompletionMessage, messages[-1])
-                .tool_calls[0]
-                .id,
+                "tool_call_id": cast(ChatCompletionMessage, messages[-1]).tool_calls[0].id,
                 "content": content,
             }
 
@@ -141,9 +138,7 @@ class LangGraphFunc(LLM, Agent):
         )
 
     @ls.traceable  # type: ignore[misc]
-    def choose_action(
-        self, frames: list[FrameData], latest_frame: FrameData
-    ) -> GameAction:
+    def choose_action(self, frames: list[FrameData], latest_frame: FrameData) -> GameAction:
         msg: ChatCompletionMessage = self.agent.invoke(
             {"frames": frames, "latest_frame": latest_frame},
             {"configurable": {"thread_id": self._thread_id}},

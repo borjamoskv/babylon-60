@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import json
 import logging
 from typing import Any, cast
 
 from cortex.engine.auth import ByzantineAuthLayer
+from cortex.engine.compaction_worker import CompactionWorker
 from cortex.extensions.git.poet import CommitPoet
 from cortex.ledger import SovereignLedger
 from cortex.swarm.actuators.protocol import ActuatorProtocol, ActuatorResponse
@@ -60,6 +62,7 @@ class SwarmManager:
         self._poet = CommitPoet()
         self._pulmones: PulmonesWorker | None = None
         self._pulmones_task: asyncio.Task[None] | None = None
+        self._compactor: CompactionWorker | None = None
         self._background_tasks: set[asyncio.Task] = set()
 
         if start_pulmones:
@@ -88,8 +91,7 @@ class SwarmManager:
         if should_start:
             # Launch loop
             self._pulmones_task = asyncio.create_task(
-                self._pulmones.start_loop(poll_interval),
-                name="cortex.pulmones.daemon"
+                self._pulmones.start_loop(poll_interval), name="cortex.pulmones.daemon"
             )
             logger.info(
                 "SwarmManager: 🫁 PulmonesWorker daemon started (poll=%.0fs)",
@@ -112,14 +114,27 @@ class SwarmManager:
             self._pulmones_task = None
             logger.info("SwarmManager: 🛑 PulmonesWorker daemon stopped")
 
+    async def start_compaction(self, engine: Any, interval_seconds: int = 3600) -> None:
+        """Launch the Thermodynamic Compaction Worker."""
+        if self._compactor is None:
+            self._compactor = CompactionWorker(engine, interval_seconds)
+        self._compactor.start()
+
+    async def stop_compaction(self) -> None:
+        """Stop the Thermodynamic Compaction Worker."""
+        if self._compactor:
+            await self._compactor.stop()
+            self._compactor = None
+
     async def broadcast(self, signal_name: str, payload: Any) -> None:
         """Broadcast a signal to the swarm bus using SwarmSignal (Ω₂)."""
         from .bus import SwarmSignal
+
         logger.info("SwarmManager: Broadcasting signal '%s'...", signal_name)
         signal = SwarmSignal(
             sender="manager",
             topic=signal_name,
-            payload=payload if isinstance(payload, dict) else {"data": payload}
+            payload=payload if isinstance(payload, dict) else {"data": payload},
         )
         await self.bus.publish(signal)
 
@@ -138,6 +153,7 @@ class SwarmManager:
             # In a real scenario, we'd use the Factory here, but for loose coupling
             # we can instantiate a SkillActuator directly if we have the skill metadata.
             from .actuators.skill import SkillActuator
+
             actuator = SkillActuator(skill)
             self.register_actuator(identifier, actuator)
             return actuator
@@ -160,6 +176,31 @@ class SwarmManager:
         # 1. Privacy Filter (Ω-Guard)
         sanitized = self.privacy_gate.validate_outgoing(task, ctx)
         task_text = sanitized["task"]
+        safe_context = sanitized["context"]
+
+        # 1.5 O(1) Tensor Routing (TurboQuant/Swarm-100)
+        if getattr(self.ledger, "turboquant_enabled", False) and safe_context:
+            ctx_str = json.dumps(safe_context)
+            ctx_hash = hashlib.sha256(ctx_str.encode("utf-8")).hexdigest()[:16]
+            tensor_id = f"tq_ctx_{ctx_hash}"
+
+            try:
+                if self.ledger and hasattr(self.ledger, "freeze_context_tensor"):
+                    await self.ledger.freeze_context_tensor(
+                        tenant_id="cortex",
+                        key=tensor_id,
+                        tensor=ctx_str.encode("utf-8"),
+                        ttl=3600,
+                    )
+                    logger.debug("SwarmManager: Context frozen to Void-State [%s]", tensor_id)
+                    safe_context = {
+                        "_cortex_void_ptr": tensor_id,
+                        "_turboquant_mode": "3bit_qjl",
+                    }
+            except Exception as e:
+                logger.warning(
+                    "SwarmManager: Void-State Tensor Freeze failed, falling back to JSON: %s", e
+                )
 
         # 2. Byzantine Auth Gate (Ω₁ — verify before trust)
         task_lower = task_text.lower()
@@ -219,14 +260,13 @@ class SwarmManager:
 
         # 5. Execution via Governed Actuator
         try:
-            response = await actuator.execute(task=sanitized["task"], context=sanitized["context"])
+            response = await actuator.execute(task=sanitized["task"], context=safe_context)
 
             if response["status"] == "success":
                 # 5.1 Thermodynamic Audit (Ω₂)
                 try:
                     await self.exergy_governor.audit_agent_work(
-                        agent_id=actuator_name,
-                        content=response["content"]
+                        agent_id=actuator_name, content=response["content"]
                     )
                 except ValueError:
                     # Content rejected after execution - downgrade response
@@ -234,7 +274,7 @@ class SwarmManager:
                         content="",
                         metadata={},
                         status="failed",
-                        error="Ω₂ Violation: Decorative/Low-utility output rejected."
+                        error="Ω₂ Violation: Decorative/Low-utility output rejected.",
                     )
 
                 # Calculate exergy if method exists (Ω₉)
@@ -267,7 +307,7 @@ class SwarmManager:
                                 response["content"].encode()
                             ).hexdigest(),
                             "poet_narrative": poet_message,
-                        }
+                        },
                     )
 
             if tx_hash:
@@ -285,7 +325,7 @@ class SwarmManager:
                     detail={
                         "actuator": actuator_name,
                         "correlation_hash": tx_hash,
-                        "error": str(e)
+                        "error": str(e),
                     },
                 )
             meta = {"cortex_tx_hash": tx_hash} if tx_hash else {}
@@ -315,10 +355,11 @@ class SwarmManager:
             "P0": {"name": "Structural Integrity", "default_count": 30},
             "P1": {"name": "Kinetic Extraction", "default_count": 40},
             "P2": {"name": "Ghost Hunt", "default_count": 30},
+            "OMEGA": {"name": "Legion Convergence", "default_count": 100},
         }
 
         if squad_type not in squad_configs:
-            raise ValueError(f"Unknown squad type: {squad_type}. Use P0, P1, or P2.")
+            raise ValueError(f"Unknown squad type: {squad_type}. Use P0, P1, P2, or OMEGA.")
 
         cfg = squad_configs[squad_type]
         final_count = count or cfg["default_count"]
@@ -330,7 +371,55 @@ class SwarmManager:
             final_count,
         )
 
-        # 1. Recruit agents (placeholder for finding agents with relevant skills)
+        # 1. Evaluate Legion Omega divergence
+        if squad_type == "OMEGA":
+            from cortex.engine.legion import LEGION_OMEGA
+
+            logger.info(
+                "SwarmManager: OMEGA deployment triggered. Relegating authority to Legion Engine."
+            )
+            siege_result = await LEGION_OMEGA.forge(
+                intent=task, context={"swarm_squad": squad_type}
+            )
+
+            # Record squad success in ledger
+            if self.ledger:
+                await self.ledger.record_transaction(
+                    project="swarm",
+                    action="squad_deployment",
+                    detail={
+                        "squad_type": squad_type,
+                        "squad_name": cfg["name"],
+                        "agent_count": 100,
+                        "exergy_score": getattr(siege_result, "exergy", 0.0),
+                        "entropy_delta": getattr(siege_result, "entropy_delta", 0.0),
+                        "cycles": getattr(siege_result, "cycles", 1),
+                        "success": getattr(siege_result, "success", False),
+                        "task_snippet": str(task)[:100],
+                    },
+                )
+            # Standardize output for upstream handlers
+            content_output = getattr(siege_result, "final_code", str(siege_result))
+            status = "success" if getattr(siege_result, "success", False) else "failed"
+            error = (
+                ""
+                if status == "success"
+                else f"Omega Legion vulnerabilities remain: {getattr(siege_result, 'vulnerabilities', [])}"
+            )
+
+            return [
+                ActuatorResponse(
+                    content=content_output,
+                    status=status,
+                    metadata={
+                        "cycles": getattr(siege_result, "cycles", 1),
+                        "exergy": getattr(siege_result, "exergy", 0.0),
+                    },
+                    error=error,
+                )
+            ]
+
+        # 2. Recruit local agents for P0, P1, P2 standard swarm variants
         available = await self.list_available()
         # In a real Swarm-100, we'd dynamically spawn 100 virtual agents
         # Here we use available actuators and scale them if needed.
@@ -420,22 +509,38 @@ class SwarmManager:
 
             self.current_spend += tokens * 0.00001
 
+        # AX-1000 OMEGA-SWARM-COMPACTION (Ω₁₃): Hit the event-driven trigger
+        if len(responses) > 10 and self._compactor:
+            try:
+                self._compactor.trigger_compaction()
+                logger.info(
+                    "SwarmManager: Heavy execution evaluated (%d agents). Sent signal for immediate Thermodynamic Compaction.",
+                    len(responses),
+                )
+            except Exception as e:
+                logger.warning("SwarmManager: Thermodynamic Compaction event failed: %s", e)
+
         return list(responses)
 
     async def _handle_x_signal(self, signal: Any):
         """Ω-Convergence: Handle incoming X-Intelligence signals."""
         from .bus import SwarmSignal
+
         sig = cast(SwarmSignal, signal)
         exergy_score = sig.payload.get("exergy", 0.0)
 
         if exergy_score > 0.8:
-            logger.info("SwarmManager: High-exergy signal detected on X. Triggering P2 Squad recruitment.")
+            logger.info(
+                "SwarmManager: High-exergy signal detected on X. Triggering P2 recruitment."
+            )
             # Trigger a Ghost Hunt (P2) mission for the detected signal
             # We use a separate task to avoid blocking the bus
-            t = asyncio.create_task(self.deploy_squad(
-                squad_type="P2",
-                task=f"Analyze and verify signal: {sig.payload.get('text')}",
-                count=5
-            ))
+            t = asyncio.create_task(
+                self.deploy_squad(
+                    squad_type="P2",
+                    task=f"Analyze and verify signal: {sig.payload.get('text')}",
+                    count=5,
+                )
+            )
             self._background_tasks.add(t)
             t.add_done_callback(self._background_tasks.discard)

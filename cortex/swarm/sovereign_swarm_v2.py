@@ -21,6 +21,7 @@ Each specialist:
 CLI:
     python -m cortex.swarm.sovereign_swarm_v2 [--vectors all] [--once] [--dry-run]
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -56,11 +57,12 @@ SCHEDULE_INTERVAL_H = 6  # Autonomous cycle every 6 hours
 
 # ─── Result Models ────────────────────────────────────────────────────────────
 
+
 @dataclass
 class ExtractionResult:
     specialist_id: str
     vector: str
-    status: str          # success | failed | skipped_ev | dry_run
+    status: str  # success | failed | skipped_ev | dry_run
     gross_yield_usd: float = 0.0
     compute_cost_usd: float = 0.0
     evidence: list[str] = field(default_factory=list)
@@ -105,6 +107,7 @@ class SwarmSession:
 
 # ─── Base Specialist ──────────────────────────────────────────────────────────
 
+
 class SovereignSpecialist:
     """Base class. Subclasses must implement `extract()`."""
 
@@ -133,6 +136,7 @@ class SovereignSpecialist:
 
 
 # ─── Algora Bounty Specialist ─────────────────────────────────────────────────
+
 
 class AlgoraBountySpecialist(SovereignSpecialist):
     """
@@ -296,6 +300,7 @@ class AlgoraBountySpecialist(SovereignSpecialist):
 
 # ─── Immunefi Red Team Specialist ─────────────────────────────────────────────
 
+
 class ImmuneFiSpecialist(SovereignSpecialist):
     """
     Scans Immunefi for high-TVL bug bounties.
@@ -351,6 +356,7 @@ class ImmuneFiSpecialist(SovereignSpecialist):
 
 
 # ─── Vector L: PYME B2B SaaS Specialist ──────────────────────────────────────
+
 
 class VectorLSpecialist(SovereignSpecialist):
     """
@@ -409,10 +415,12 @@ class VectorLSpecialist(SovereignSpecialist):
         active_targets = []
         for i in range(scale):
             for t in self.TARGETS:
-                active_targets.append({
-                    **t,
-                    "company": f"{t['company']} (Batch {i+1})" if i > 0 else t["company"],
-                })
+                active_targets.append(
+                    {
+                        **t,
+                        "company": f"{t['company']} (Batch {i + 1})" if i > 0 else t["company"],
+                    }
+                )
 
         # Monthly recurring revenue projection
         conversion_rate = 0.15  # 15% cold outreach conversion
@@ -431,12 +439,14 @@ class VectorLSpecialist(SovereignSpecialist):
         outreach_drafted = []
         for target in active_targets:
             pitch = self._generate_pitch(target)
-            outreach_drafted.append({
-                **target,
-                "pitch_preview": pitch[:200],
-                "stripe_link": f"https://buy.stripe.com/cortex-agent-{target['proposed_tier']}",
-                "status": "draft" if dry_run else "ready_to_send",
-            })
+            outreach_drafted.append(
+                {
+                    **target,
+                    "pitch_preview": pitch[:200],
+                    "stripe_link": f"https://buy.stripe.com/cortex-agent-{target['proposed_tier']}",
+                    "status": "draft" if dry_run else "ready_to_send",
+                }
+            )
 
         return self._make_result(
             status="dry_run" if dry_run else "success",
@@ -461,9 +471,8 @@ class VectorLSpecialist(SovereignSpecialist):
         )
 
 
-
-
 # ─── IP Forge Specialist ──────────────────────────────────────────────────────
+
 
 class IPForgeSpecialist(SovereignSpecialist):
     """
@@ -521,15 +530,11 @@ class IPForgeSpecialist(SovereignSpecialist):
         active_products = []
         for i in range(scale):
             for p in self.PRODUCTS:
-                active_products.append({
-                    **p,
-                    "name": f"{p['name']} (Vol {i+1})" if i > 0 else p["name"]
-                })
+                active_products.append(
+                    {**p, "name": f"{p['name']} (Vol {i + 1})" if i > 0 else p["name"]}
+                )
 
-        projected_mrr = sum(
-            p["price_usd"] * p["projected_sales_month"]
-            for p in active_products
-        )
+        projected_mrr = sum(p["price_usd"] * p["projected_sales_month"] for p in active_products)
 
         if not self.ev_gate(projected_mrr, confidence=0.40):
             return self._make_result(
@@ -542,13 +547,15 @@ class IPForgeSpecialist(SovereignSpecialist):
         product_listings = []
         for prod in active_products:
             monthly_rev = prod["price_usd"] * prod["projected_sales_month"]
-            product_listings.append({
-                **prod,
-                "monthly_revenue_usd": monthly_rev,
-                "annual_revenue_usd": monthly_rev * 12,
-                "gumroad_url": f"https://gumroad.com/l/cortex-{prod['name'].lower().replace(' ', '-')[:30]}",
-                "status": "listed" if not dry_run else "draft",
-            })
+            product_listings.append(
+                {
+                    **prod,
+                    "monthly_revenue_usd": monthly_rev,
+                    "annual_revenue_usd": monthly_rev * 12,
+                    "gumroad_url": f"https://gumroad.com/l/cortex-{prod['name'].lower().replace(' ', '-')[:30]}",
+                    "status": "listed" if not dry_run else "draft",
+                }
+            )
 
         return self._make_result(
             status="dry_run" if dry_run else "success",
@@ -566,6 +573,7 @@ class IPForgeSpecialist(SovereignSpecialist):
 
 
 # ─── GitHub Sponsors Specialist ───────────────────────────────────────────────
+
 
 class SponsorSpecialist(SovereignSpecialist):
     """
@@ -678,7 +686,7 @@ class VectorNSpecialist(SovereignSpecialist):
     async def extract(self, dry_run: bool = False, scale: int = 1) -> ExtractionResult:
         t0 = time.monotonic()
 
-        projected_yield = 5000.0 * (scale ** 0.85)  # Diminishing returns
+        projected_yield = 5000.0 * (scale**0.85)  # Diminishing returns
         confidence = 0.25  # Hyper volatile
 
         if not self.ev_gate(projected_yield, confidence):
@@ -697,10 +705,10 @@ class VectorNSpecialist(SovereignSpecialist):
                 f"Deployed {1 * scale} memetic assets to Base L2",
                 f"Orchestrated {50 * scale} sub-agents for Moltbook narrative hijacking",
                 f"Target liquidity: ${projected_yield:,.0f} (Mkt Cap 72h trajectory)",
-                "Zero-Utility Liquidity Extraction engaged."
+                "Zero-Utility Liquidity Extraction engaged.",
             ],
             opportunities=[
-                {"id": f"meme-base-{i}", "title": f"Cult Forging Vector {i+1}", "ev": 5000}
+                {"id": f"meme-base-{i}", "title": f"Cult Forging Vector {i + 1}", "ev": 5000}
                 for i in range(scale)[:3]  # Show top 3
             ],
             duration_s=time.monotonic() - t0,
@@ -721,7 +729,7 @@ class VectorKSpecialist(SovereignSpecialist):
     async def extract(self, dry_run: bool = False, scale: int = 1) -> ExtractionResult:
         t0 = time.monotonic()
 
-        projected_yield = 800.0 * (scale ** 0.85)  # Diminishing returns
+        projected_yield = 800.0 * (scale**0.85)  # Diminishing returns
         confidence = 0.60
 
         if not self.ev_gate(projected_yield, confidence):
@@ -740,10 +748,10 @@ class VectorKSpecialist(SovereignSpecialist):
                 f"Identified {5 * scale} spot instances with high compute gap",
                 f"Injected ML training payload across {10 * scale} nodes",
                 f"Projected compute arbitrage yield: ${projected_yield:,.0f}",
-                "Self-destruct sequence armed prior to billing cycle."
+                "Self-destruct sequence armed prior to billing cycle.",
             ],
             opportunities=[
-                {"id": f"spot-arb-{i}", "title": f"Akash Node Arbitrage {i+1}", "ev": 800}
+                {"id": f"spot-arb-{i}", "title": f"Akash Node Arbitrage {i + 1}", "ev": 800}
                 for i in range(scale)[:3]
             ],
             duration_s=time.monotonic() - t0,
@@ -753,15 +761,15 @@ class VectorKSpecialist(SovereignSpecialist):
 # ─── Live Dashboard ───────────────────────────────────────────────────────────
 
 SPECIALIST_META = {
-    "algora-bounty":    {"squad": "P1", "icon": "🎯", "color": "#00FF88"},
+    "algora-bounty": {"squad": "P1", "icon": "🎯", "color": "#00FF88"},
     "immunefi-redteam": {"squad": "P2", "icon": "🔴", "color": "#FF4444"},
-    "vector-l-pyme":    {"squad": "P1", "icon": "💼", "color": "#FFD700"},
-    "ip-forge":         {"squad": "P1", "icon": "⚗️",  "color": "#FF8C00"},
+    "vector-l-pyme": {"squad": "P1", "icon": "💼", "color": "#FFD700"},
+    "ip-forge": {"squad": "P1", "icon": "⚗️", "color": "#FF8C00"},
     "sovereign-sponsors": {"squad": "P0", "icon": "🤝", "color": "#2B3BE5"},
     "marketing-narrative": {"squad": "P1", "icon": "📢", "color": "#FF00FF"},
-    "hyper-memetic":    {"squad": "P2", "icon": "🧬", "color": "#FF1493"},
-    "cloud-parasite":   {"squad": "P0", "icon": "☁️",  "color": "#00CED1"},
-    "gtm-cortex":       {"squad": "P0", "icon": "🚀", "color": "#00FF88"},
+    "hyper-memetic": {"squad": "P2", "icon": "🧬", "color": "#FF1493"},
+    "cloud-parasite": {"squad": "P0", "icon": "☁️", "color": "#00CED1"},
+    "gtm-cortex": {"squad": "P0", "icon": "🚀", "color": "#00FF88"},
 }
 
 VECTOR_NAMES = {
@@ -813,12 +821,12 @@ def build_mission_table(results: list[ExtractionResult]) -> Table:
     table.add_column("⏱", width=6, justify="right", style="dim")
 
     status_styles = {
-        "success":    ("✓", "bold green"),
-        "dry_run":    ("◌", "bold #FFD700"),
-        "failed":     ("✗", "bold red"),
+        "success": ("✓", "bold green"),
+        "dry_run": ("◌", "bold #FFD700"),
+        "failed": ("✗", "bold red"),
         "skipped_ev": ("⊘", "dim red"),
-        "pending":    ("…", "dim white"),
-        "running":    ("⟳", "bold #2B3BE5"),
+        "pending": ("…", "dim white"),
+        "running": ("⟳", "bold #2B3BE5"),
     }
 
     for r in results:
@@ -850,7 +858,11 @@ def build_mission_table(results: list[ExtractionResult]) -> Table:
         net_summary_style = "bold green" if total_net >= 0 else "bold red"
         table.add_section()
         table.add_row(
-            "⚛", "Σ", "[bold]TOTAL[/bold]", "", "",
+            "⚛",
+            "Σ",
+            "[bold]TOTAL[/bold]",
+            "",
+            "",
             str(sum(len(r.opportunities) for r in results)),
             f"[bold]${total_gross:,.2f}[/bold]",
             f"[bold]${total_cost:.2f}[/bold]",
@@ -914,7 +926,7 @@ def build_treasury_panel(session: SwarmSession) -> Panel:
         f"  Net Exergy:       [{net_style}]${net:>+12,.2f}[/{net_style}]",
         "  ─────────────────────────────────",
         f"  Annualized EV:    [bold #FFD700]${annual_projection:>12,.0f}[/bold #FFD700]",
-        f"  Target: $1,000,000  Progress: [bold cyan]{(annual_projection/1e6)*100:.1f}%[/bold cyan]",
+        f"  Target: $1,000,000  Progress: [bold cyan]{(annual_projection / 1e6) * 100:.1f}%[/bold cyan]",
     ]
 
     return Panel(
@@ -929,7 +941,9 @@ def build_evidence_panel(results: list[ExtractionResult]) -> Panel:
     lines = []
     for r in results:
         if r.evidence:
-            lines.append(f"  [bold #{SPECIALIST_META.get(r.specialist_id, {}).get('color', 'white')}]V{r.vector}[/bold #{SPECIALIST_META.get(r.specialist_id, {}).get('color', 'white')}]")
+            lines.append(
+                f"  [bold #{SPECIALIST_META.get(r.specialist_id, {}).get('color', 'white')}]V{r.vector}[/bold #{SPECIALIST_META.get(r.specialist_id, {}).get('color', 'white')}]"
+            )
             for ev in r.evidence:
                 lines.append(f"    [dim]→[/dim] {ev}")
         if r.error:
@@ -963,6 +977,7 @@ def build_full_dashboard(session: SwarmSession, results: list[ExtractionResult])
 
 # ─── Swarm Orchestrator ───────────────────────────────────────────────────────
 
+
 class SovereignSwarmOrchestrator:
     """
     Orchestrates all specialist actuators across capital extraction vectors.
@@ -972,6 +987,7 @@ class SovereignSwarmOrchestrator:
     @property
     def ALL_SPECIALISTS(self) -> dict[str, type]:
         from cortex.swarm.gtm_specialist import GTMSpecialist
+
         return {
             "A": AlgoraBountySpecialist,
             "G": ImmuneFiSpecialist,
@@ -983,7 +999,6 @@ class SovereignSwarmOrchestrator:
             "K": VectorKSpecialist,
             "T": GTMSpecialist,
         }
-
 
     def __init__(
         self,
@@ -1036,8 +1051,7 @@ class SovereignSwarmOrchestrator:
 
                 # Update in_progress with this result matching on specialist_id
                 in_progress = [
-                    r if r.specialist_id != result.specialist_id else result
-                    for r in in_progress
+                    r if r.specialist_id != result.specialist_id else result for r in in_progress
                 ]
 
                 session.results = results
@@ -1070,8 +1084,7 @@ class SovereignSwarmOrchestrator:
                 console.print(f"[bold red]Cycle {cycle} failed: {e}[/bold red]")
 
             next_run = time.strftime(
-                "%H:%M:%S",
-                time.localtime(time.time() + SCHEDULE_INTERVAL_H * 3600)
+                "%H:%M:%S", time.localtime(time.time() + SCHEDULE_INTERVAL_H * 3600)
             )
             console.print(
                 f"\n[dim]Next cycle at {next_run} (+{SCHEDULE_INTERVAL_H}h). "
@@ -1085,7 +1098,11 @@ class SovereignSwarmOrchestrator:
         net = session.total_net
         cycles_per_day = 24 / SCHEDULE_INTERVAL_H
         annual = net * cycles_per_day * 365 if net > 0 else 0
-        net_markup = f"[bold green]${net:+,.2f}[/bold green]" if net >= 0 else f"[bold red]${net:+,.2f}[/bold red]"
+        net_markup = (
+            f"[bold green]${net:+,.2f}[/bold green]"
+            if net >= 0
+            else f"[bold red]${net:+,.2f}[/bold red]"
+        )
 
         console.print(
             Panel(
@@ -1096,7 +1113,7 @@ class SovereignSwarmOrchestrator:
                 f"  Compute   : [dim]${session.total_cost:.2f}[/dim]\n"
                 f"  Net Δ     : {net_markup}\n"
                 f"  Annual EV : [bold #FFD700]${annual:,.0f}[/bold #FFD700] "
-                f"([bold cyan]{(annual/1e6)*100:.1f}%[/bold cyan] to $1M)\n"
+                f"([bold cyan]{(annual / 1e6) * 100:.1f}%[/bold cyan] to $1M)\n"
                 f"  Duration  : [dim]{session.duration_s:.1f}s[/dim]\n",
                 border_style="#2B3BE5",
                 title="[bold]⚡ Exergy Report[/bold]",
@@ -1111,6 +1128,7 @@ class SovereignSwarmOrchestrator:
 
 
 # ─── CLI ──────────────────────────────────────────────────────────────────────
+
 
 def main() -> None:
     import argparse
@@ -1156,7 +1174,9 @@ Examples:
         help=f"Autonomous mode: repeat every {SCHEDULE_INTERVAL_H}h",
     )
     parser.add_argument(
-        "--output-json", type=str, default=None,
+        "--output-json",
+        type=str,
+        default=None,
         help="Write session JSON to path",
     )
     args = parser.parse_args()
@@ -1192,6 +1212,7 @@ Examples:
         asyncio.run(orchestrator.run_scheduled())
     else:
         import json
+
         session = asyncio.run(orchestrator.run_once())
 
         if args.output_json:
@@ -1209,7 +1230,9 @@ Examples:
                         "status": r.status,
                         "gross_usd": r.gross_yield_usd,
                         "net_usd": r.net_yield_usd,
-                        "exergy_ratio": round(r.exergy_ratio, 2) if r.exergy_ratio != float("inf") else 99.9,
+                        "exergy_ratio": round(r.exergy_ratio, 2)
+                        if r.exergy_ratio != float("inf")
+                        else 99.9,
                         "evidence": r.evidence,
                         "opportunities": r.opportunities[:5],
                         "error": r.error,

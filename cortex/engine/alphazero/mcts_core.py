@@ -3,7 +3,7 @@ AlphaZero MCTS implementation for deterministic domain synthesis.
 """
 
 import math
-from typing import Any, Generic, TypeVar
+from typing import Generic, TypeVar
 
 from cortex.engine.alphazero.network import PolicyValueNetwork
 
@@ -14,7 +14,13 @@ Action = TypeVar("Action")
 class AlphaZeroNode(Generic[State, Action]):
     """Node in the AlphaZero MCTS tree."""
 
-    def __init__(self, state: State, parent: "AlphaZeroNode[State, Action] | None" = None, action: Action | None = None, prior: float = 0.0):
+    def __init__(
+        self,
+        state: State,
+        parent: "AlphaZeroNode[State, Action] | None" = None,
+        action: Action | None = None,
+        prior: float = 0.0,
+    ):
         self.state = state
         self.parent = parent
         self.action = action  # Action that led to this node
@@ -23,8 +29,8 @@ class AlphaZeroNode(Generic[State, Action]):
         self.visit_count = 0
         self.value_sum = 0.0
         self.prior = prior
-        self.children: dict[Action, "AlphaZeroNode[State, Action]"] = {}
-        
+        self.children: dict[Action, AlphaZeroNode[State, Action]] = {}
+
         # MCTS State
         self.is_expanded = False
 
@@ -50,12 +56,19 @@ class MCTS(Generic[State, Action]):
     Monte Carlo Tree Search with PUCT for AlphaZero.
     """
 
-    def __init__(self, network: PolicyValueNetwork[State, Action], c_puct: float = 1.0, num_simulations: int = 50):
+    def __init__(
+        self,
+        network: PolicyValueNetwork[State, Action],
+        c_puct: float = 1.0,
+        num_simulations: int = 50,
+    ):
         self.network = network
         self.c_puct = c_puct
         self.num_simulations = num_simulations
 
-    def ucb_score(self, parent: AlphaZeroNode[State, Action], child: AlphaZeroNode[State, Action]) -> float:
+    def ucb_score(
+        self, parent: AlphaZeroNode[State, Action], child: AlphaZeroNode[State, Action]
+    ) -> float:
         """Calculate PUCT score for node selection."""
         pb_c = math.log((parent.visit_count + 19652 + 1) / 19652) + self.c_puct
         pb_c *= math.sqrt(parent.visit_count) / (child.visit_count + 1)
@@ -71,7 +84,9 @@ class MCTS(Generic[State, Action]):
 
             # 1. Selection
             while node.is_expanded and node.children:
-                action, next_node = max(node.children.items(), key=lambda item: self.ucb_score(node, item[1]))
+                action, next_node = max(
+                    node.children.items(), key=lambda item: self.ucb_score(node, item[1])
+                )
                 node = next_node
                 search_path.append(node)
 
@@ -83,7 +98,7 @@ class MCTS(Generic[State, Action]):
                 value = terminal_value
             else:
                 action_priors, value = self.network.evaluate(node.state)
-                
+
                 # 3. Expansion
                 # Create child nodes for all legal actions
                 legal_actions = env_step_fn.get_legal_actions(node.state)
@@ -92,7 +107,7 @@ class MCTS(Generic[State, Action]):
                     next_state = env_step_fn.step(node.state, action)
                     child = AlphaZeroNode(state=next_state, parent=node, action=action, prior=prior)
                     node.children[action] = child
-                
+
                 node.is_expanded = True
 
             # 4. Backpropagation
@@ -113,7 +128,9 @@ class MCTS(Generic[State, Action]):
             search_path = [node]
 
             while node.is_expanded and node.children:
-                action, next_node = max(node.children.items(), key=lambda item: self.ucb_score(node, item[1]))
+                action, next_node = max(
+                    node.children.items(), key=lambda item: self.ucb_score(node, item[1])
+                )
                 node = next_node
                 search_path.append(node)
 
@@ -140,15 +157,17 @@ class MCTS(Generic[State, Action]):
             node.value_sum += value
             node.visit_count += 1
 
-    def get_action_probabilities(self, root: AlphaZeroNode[State, Action], temperature: float = 1.0) -> dict[Action, float]:
+    def get_action_probabilities(
+        self, root: AlphaZeroNode[State, Action], temperature: float = 1.0
+    ) -> dict[Action, float]:
         """Compute the action probabilities based on visit counts."""
         action_visits = {action: child.visit_count for action, child in root.children.items()}
-        
+
         if temperature == 0:
             # Deterministic: pick action with max visits
             best_action = max(action_visits.keys(), key=lambda a: action_visits[a])
             return {a: 1.0 if a == best_action else 0.0 for a in action_visits.keys()}
-        
+
         # Stochastic interpretation
         action_probs = {}
         total = sum(v ** (1 / temperature) for v in action_visits.values())
@@ -158,5 +177,5 @@ class MCTS(Generic[State, Action]):
 
         for action, visits in action_visits.items():
             action_probs[action] = (visits ** (1 / temperature)) / total
-            
+
         return action_probs

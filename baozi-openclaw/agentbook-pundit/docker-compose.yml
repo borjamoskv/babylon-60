@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  agentbook-pundit:
+    build: .
+    container_name: agentbook-pundit
+    restart: unless-stopped
+    environment:
+      - WALLET_ADDRESS=${WALLET_ADDRESS}
+      - SOLANA_PRIVATE_KEY=${SOLANA_PRIVATE_KEY}
+      - SOLANA_RPC_URL=${SOLANA_RPC_URL:-https://api.mainnet-beta.solana.com}
+    command: ["run"]
+    # To run a single post instead:
+    # command: ["post", "roundup"]
+    # To analyze without posting:
+    # command: ["analyze"]

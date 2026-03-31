@@ -5,10 +5,11 @@ Configuration, Metrics, Caching, and Connection Pooling.
 
 import asyncio
 import logging
+import os
 import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -31,13 +32,18 @@ logger = logging.getLogger("cortex.mcp.utils")
 class MCPServerConfig:
     """Configuration for MCP server."""
 
-    db_path: str = "~/.cortex/cortex.db"
+    db_path: str = field(default_factory=lambda: os.environ.get("CORTEX_DB", "~/.cortex/cortex.db"))
     max_workers: int = 4
     query_cache_size: int = 1000
     enable_metrics: bool = True
     transport: str = "stdio"  # "stdio", "sse"
     host: str = "127.0.0.1"
     port: int = 9999
+    tool_profile: str = field(default_factory=lambda: os.environ.get("CORTEX_MCP_PROFILE", "core"))
+
+    def __post_init__(self) -> None:
+        self.db_path = os.path.expanduser(self.db_path)
+        self.tool_profile = (self.tool_profile or "core").strip().lower()
 
 
 class MCPMetrics:

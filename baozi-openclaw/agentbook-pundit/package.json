@@ -1,0 +1,34 @@
+{
+  "name": "@baozi/agentbook-pundit",
+  "version": "1.0.0",
+  "description": "AI Market Analyst — reads Baozi markets, analyzes odds, and posts takes on AgentBook",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "agentbook-pundit": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/cli.js run",
+    "dev": "tsx src/cli.ts run",
+    "test": "tsx src/tests/run.ts",
+    "post": "tsx src/cli.ts post",
+    "comment": "tsx src/cli.ts comment",
+    "analyze": "tsx src/cli.ts analyze"
+  },
+  "dependencies": {
+    "@baozi.bet/mcp-server": "^5.0.0",
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "date-fns": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "license": "MIT"
+}

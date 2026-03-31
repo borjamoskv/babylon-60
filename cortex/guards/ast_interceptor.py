@@ -32,6 +32,7 @@ logger = logging.getLogger("cortex.guards.ast_interceptor")
 
 # ── Verdict ──────────────────────────────────────────────────────────────────
 
+
 class Verdict(Enum):
     PASS = auto()
     QUARANTINE = auto()
@@ -41,6 +42,7 @@ class Verdict(Enum):
 @dataclass(frozen=True)
 class InterceptionResult:
     """Deterministic result of payload interception."""
+
     verdict: Verdict
     payload_hash: str
     agent_id: str
@@ -70,9 +72,11 @@ class InterceptionResult:
 
 # ── Schema Enforcer ─────────────────────────────────────────────────────────
 
+
 @dataclass
 class SchemaConstraint:
     """Strict schema for a tool call parameter."""
+
     name: str
     type: str  # "str", "int", "float", "bool", "list", "dict", "null"
     required: bool = True
@@ -114,8 +118,12 @@ class StrictSchemaEnforcer:
 
             # Type check
             expected_type = {
-                "str": str, "int": int, "float": (int, float),
-                "bool": bool, "list": list, "dict": dict,
+                "str": str,
+                "int": int,
+                "float": (int, float),
+                "bool": bool,
+                "list": list,
+                "dict": dict,
             }.get(constraint.type)
 
             if expected_type and not isinstance(value, expected_type):
@@ -125,7 +133,11 @@ class StrictSchemaEnforcer:
                 )
 
             # Length check
-            if constraint.max_length and isinstance(value, str) and len(value) > constraint.max_length:
+            if (
+                constraint.max_length
+                and isinstance(value, str)
+                and len(value) > constraint.max_length
+            ):
                 violations.append(
                     f"Length violation: '{constraint.name}' exceeds "
                     f"max {constraint.max_length} chars (got {len(value)})"
@@ -149,22 +161,38 @@ class StrictSchemaEnforcer:
 
 # ── AST Safety Analyzer ─────────────────────────────────────────────────────
 
+
 class ASTSafetyAnalyzer:
     """
     Parses Python code payloads via AST to detect dangerous constructs.
     This is NOT execution — it's structural analysis only.
     """
 
-    DANGEROUS_CALLS = frozenset({
-        "eval", "exec", "compile", "__import__",
-        "os.system", "subprocess.run", "subprocess.call",
-        "subprocess.Popen", "os.popen", "os.execv",
-    })
+    DANGEROUS_CALLS = frozenset(
+        {
+            "eval",
+            "exec",
+            "compile",
+            "__import__",
+            "os.system",
+            "subprocess.run",
+            "subprocess.call",
+            "subprocess.Popen",
+            "os.popen",
+            "os.execv",
+        }
+    )
 
-    DANGEROUS_ATTRS = frozenset({
-        "__class__", "__subclasses__", "__globals__",
-        "__builtins__", "__code__", "__reduce__",
-    })
+    DANGEROUS_ATTRS = frozenset(
+        {
+            "__class__",
+            "__subclasses__",
+            "__globals__",
+            "__builtins__",
+            "__code__",
+            "__reduce__",
+        }
+    )
 
     @classmethod
     def analyze(cls, code: str) -> list[str]:
@@ -189,17 +217,13 @@ class ASTSafetyAnalyzer:
             # Dangerous attribute access
             if isinstance(node, ast.Attribute):
                 if node.attr in cls.DANGEROUS_ATTRS:
-                    violations.append(
-                        f"Dangerous attr access: .{node.attr} at line {node.lineno}"
-                    )
+                    violations.append(f"Dangerous attr access: .{node.attr} at line {node.lineno}")
 
             # Import of dangerous modules
             if isinstance(node, ast.Import):
                 for alias in node.names:
                     if alias.name in ("os", "subprocess", "shutil", "ctypes"):
-                        violations.append(
-                            f"Restricted import: {alias.name} at line {node.lineno}"
-                        )
+                        violations.append(f"Restricted import: {alias.name} at line {node.lineno}")
 
         return violations
 
@@ -216,9 +240,11 @@ class ASTSafetyAnalyzer:
 
 # ── State Quarantine ─────────────────────────────────────────────────────────
 
+
 @dataclass
 class QuarantinedPayload:
     """A payload that failed validation, held for SRE telemetry."""
+
     quarantine_id: str
     agent_id: str
     tool_name: str
@@ -267,7 +293,13 @@ class StateQuarantine:
             del self._entries[oldest_key]
 
         self._entries[qid] = entry
-        logger.warning("[QUARANTINE] %s — agent=%s tool=%s violations=%d", qid, agent_id, tool_name, len(violations))
+        logger.warning(
+            "[QUARANTINE] %s — agent=%s tool=%s violations=%d",
+            qid,
+            agent_id,
+            tool_name,
+            len(violations),
+        )
         return entry
 
     @property
@@ -313,6 +345,7 @@ class StateQuarantine:
 
 
 # ── Main Interceptor ─────────────────────────────────────────────────────────
+
 
 class ASTInterceptor:
     """
@@ -399,7 +432,11 @@ class ASTInterceptor:
 
         logger.info(
             "[INTERCEPT] %s | agent=%s tool=%s hash=%s violations=%d",
-            verdict.name, agent_id, tool_name, payload_hash, len(violations),
+            verdict.name,
+            agent_id,
+            tool_name,
+            payload_hash,
+            len(violations),
         )
 
         return result
@@ -437,13 +474,15 @@ class ASTInterceptor:
             "rejected": self._reject_count,
             "rejection_rate": (
                 self._reject_count / self._interception_count
-                if self._interception_count > 0 else 0.0
+                if self._interception_count > 0
+                else 0.0
             ),
             "quarantine": self.quarantine.telemetry_snapshot(),
         }
 
 
 # ── Shadow Run (Proof of Poison) ────────────────────────────────────────────
+
 
 class ShadowRun:
     """
@@ -493,14 +532,16 @@ class ShadowRun:
 
         poison_entries = []
         for result in self._shadow_log:
-            poison_entries.append({
-                "timestamp": result.timestamp,
-                "agent_id": result.agent_id,
-                "tool_name": result.tool_name,
-                "payload_hash": result.payload_hash,
-                "violations": result.violations,
-                "would_have_corrupted": True,
-            })
+            poison_entries.append(
+                {
+                    "timestamp": result.timestamp,
+                    "agent_id": result.agent_id,
+                    "tool_name": result.tool_name,
+                    "payload_hash": result.payload_hash,
+                    "violations": result.violations,
+                    "would_have_corrupted": True,
+                }
+            )
 
         # Compute hash chain over all entries for tamper evidence
         chain_hash = hashlib.sha256(b"CORTEX-PROOF-OF-POISON-v1").hexdigest()

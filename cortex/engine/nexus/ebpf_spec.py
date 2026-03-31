@@ -3,7 +3,6 @@ CORTEX Nexus: eBPF Auditor Spec (Experimental)
 RFC-047 / Project LEVIATHAN X10
 """
 
-from typing import List
 from pydantic import BaseModel
 
 
@@ -26,7 +25,8 @@ class EBPFAuditor:
     Monitors process activity at the kernel level and streams audit events
     directly to the CORTEX Nexus ledger.
     """
-    def __init__(self, hooks: List[EBPFHook]) -> None:
+
+    def __init__(self, hooks: list[EBPFHook]) -> None:
         self.hooks = hooks
 
     async def start_auditing(self, tenant_id: str):

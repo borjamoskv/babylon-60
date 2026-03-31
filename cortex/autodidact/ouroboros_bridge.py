@@ -16,7 +16,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.autodidact.dual_ledger import DualLedger, TxType
+from cortex.autodidact.dual_ledger import DualLedger
 
 __all__ = ["OuroborosBridge"]
 
@@ -74,7 +74,10 @@ class OuroborosBridge:
 
         logger.info(
             "AX-044: Capital %s → Knowledge %s (problem=%s, $%.2f)",
-            capital_tx_hash[:12], tx_hash[:12], target_problem, allocated_exergy_usd,
+            capital_tx_hash[:12],
+            tx_hash[:12],
+            target_problem,
+            allocated_exergy_usd,
         )
         return tx_hash
 
@@ -111,7 +114,9 @@ class OuroborosBridge:
 
         logger.info(
             "AX-045: Proof %s validates %d capital entries → %s",
-            knowledge_tx_hash[:12], len(validated_capital_hashes), tx_hash[:12],
+            knowledge_tx_hash[:12],
+            len(validated_capital_hashes),
+            tx_hash[:12],
         )
         return tx_hash
 

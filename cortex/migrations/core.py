@@ -71,6 +71,7 @@ def _apply_base_schema(conn: sqlite3.Connection) -> None:
 
     try:
         import sqlite_vec
+
         conn.enable_load_extension(True)
         conn.load_extension(sqlite_vec.loadable_path())
         conn.enable_load_extension(False)
@@ -151,6 +152,7 @@ async def _apply_base_schema_async(conn: aiosqlite.Connection) -> None:
 
     try:
         import sqlite_vec
+
         await conn.enable_load_extension(True)
         await conn.load_extension(sqlite_vec.loadable_path())
         await conn.enable_load_extension(False)

@@ -209,9 +209,7 @@ class FactManager:
                 import cortex.graph
 
                 async with self.engine.session() as conn:
-                    return await getattr(cortex.graph, GM[name])(
-                        conn, *args, **kwargs
-                    )
+                    return await getattr(cortex.graph, GM[name])(conn, *args, **kwargs)
 
             return _g_proxy
         raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")

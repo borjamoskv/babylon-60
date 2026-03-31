@@ -88,7 +88,8 @@ class SkillRegistry:
         for base_path in discovered_paths:
             try:
                 import anyio.to_thread
-                skill_dirs = await anyio.to_thread.run_sync( # type: ignore
+
+                skill_dirs = await anyio.to_thread.run_sync(  # type: ignore
                     lambda p=base_path: list(p.iterdir())
                 )
             except Exception as e:
@@ -101,7 +102,8 @@ class SkillRegistry:
 
                 manifest_path = skill_dir / "SKILL.md"
                 import anyio.to_thread
-                if await anyio.to_thread.run_sync(manifest_path.exists): # type: ignore
+
+                if await anyio.to_thread.run_sync(manifest_path.exists):  # type: ignore
                     try:
                         metadata = await self._async_parse_manifest(manifest_path)
                         self._skills[metadata.name] = metadata
@@ -147,6 +149,7 @@ class SkillRegistry:
     async def _async_parse_manifest(self, path: Path) -> SkillMetadata:
         """Parse manifest metadata asynchronously."""
         import anyio
+
         content = await anyio.Path(path).read_text(encoding="utf-8")
 
         if content.startswith("---"):

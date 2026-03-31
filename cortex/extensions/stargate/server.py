@@ -14,7 +14,7 @@ app = FastAPI(title="CORTEX Stargate")
 # Environment Variables
 GITHUB_CLIENT_ID = os.environ.get("GITHUB_CLIENT_ID", "")
 GITHUB_CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET", "")
-TARGET_REPO = os.environ.get("STAR_TARGET_REPO", "borjamoskv/cortex-persist") # e.g. owner/repo
+TARGET_REPO = os.environ.get("STAR_TARGET_REPO", "borjamoskv/cortex-persist")  # e.g. owner/repo
 REWARD_URL = os.environ.get("STAR_REWARD_URL", "https://example.com/secret-reward")
 
 # In-memory session store (for POC)
@@ -131,6 +131,7 @@ UI_HTML = """
 </html>
 """
 
+
 @app.get("/", response_class=HTMLResponse)
 async def stargate_ui(request: Request, error: str = None, success: str = None):
     """Render the main UI for the Stargate."""
@@ -152,17 +153,18 @@ async def stargate_ui(request: Request, error: str = None, success: str = None):
             "client_id": GITHUB_CLIENT_ID,
             "redirect_uri": str(request.url_for("auth_callback")),
             "scope": "read:user",
-            "state": state
+            "state": state,
         }
-        github_auth_url = f"https://github.com/login/oauth/authorize?{urllib.parse.urlencode(params)}"
+        github_auth_url = (
+            f"https://github.com/login/oauth/authorize?{urllib.parse.urlencode(params)}"
+        )
         action_button = f'<a href="{github_auth_url}" class="btn">Login with GitHub</a>'
 
     html = UI_HTML.format(
-        target_repo=TARGET_REPO,
-        message_html=message_html,
-        action_button=action_button
+        target_repo=TARGET_REPO, message_html=message_html, action_button=action_button
     )
     return html
+
 
 @app.get("/api/auth/callback")
 async def auth_callback(request: Request, code: str, state: str):
@@ -179,8 +181,8 @@ async def auth_callback(request: Request, code: str, state: str):
                 "client_id": GITHUB_CLIENT_ID,
                 "client_secret": GITHUB_CLIENT_SECRET,
                 "code": code,
-                "state": state
-            }
+                "state": state,
+            },
         )
         token_data = token_res.json()
 
@@ -195,8 +197,8 @@ async def auth_callback(request: Request, code: str, state: str):
             headers={
                 "Authorization": f"Bearer {access_token}",
                 "Accept": "application/vnd.github.v3+json",
-                "X-GitHub-Api-Version": "2022-11-28"
-            }
+                "X-GitHub-Api-Version": "2022-11-28",
+            },
         )
 
         if star_res.status_code == 204:
@@ -204,11 +206,17 @@ async def auth_callback(request: Request, code: str, state: str):
             return RedirectResponse(url="/?success=1")
         elif star_res.status_code == 404:
             # User hasn't starred it
-            return RedirectResponse(url="/?error=You+must+star+the+repository+to+unlock+the+reward!+Please+star+it+and+try+again.")
+            return RedirectResponse(
+                url="/?error=You+must+star+the+repository+to+unlock+the+reward!+Please+star+it+and+try+again."
+            )
         else:
-            return RedirectResponse(url=f"/?error=Error+checking+star+status.+Status+code:+{star_res.status_code}")
+            return RedirectResponse(
+                url=f"/?error=Error+checking+star+status.+Status+code:+{star_res.status_code}"
+            )
+
 
 if __name__ == "__main__":
     import uvicorn
+
     # Minimal running hook
     uvicorn.run("server:app", host="127.0.0.1", port=8000, reload=True)

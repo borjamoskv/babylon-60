@@ -134,8 +134,15 @@ def profile_artifact(payload: Mapping[str, Any]) -> PathogenProfile:
     else:
         # Lexical proxy: presence of negation or conflict markers in free text.
         _CONFLICT_MARKERS = (
-            " not ", " no ", " never ", "conflict", "contradict",
-            "inconsistent", "mismatch", "invalid", "denied",
+            " not ",
+            " no ",
+            " never ",
+            "conflict",
+            "contradict",
+            "inconsistent",
+            "mismatch",
+            "invalid",
+            "denied",
         )
         text = " ".join(
             str(payload.get(k, "")) for k in ("summary", "content", "description")

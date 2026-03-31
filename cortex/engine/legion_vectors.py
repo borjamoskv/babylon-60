@@ -103,9 +103,7 @@ class Intruder:
 
         for pattern in ["os.system(", "subprocess.run(shell=True)"]:
             if pattern in code:
-                findings.append(
-                    f"Security Vulnerability: Use of dangerous function `{pattern}`."
-                )
+                findings.append(f"Security Vulnerability: Use of dangerous function `{pattern}`.")
         return findings
 
     def _check_ast(self, code: str) -> list[str]:
@@ -179,9 +177,7 @@ class ChronosSniper:
         if "async def" in code:
             for b in blocking:
                 if b in code:
-                    findings.append(
-                        f"Async Violation: Blocking call `{b}` inside async function."
-                    )
+                    findings.append(f"Async Violation: Blocking call `{b}` inside async function.")
         elif "sleep" in context.get("intent", "").lower() and "import asyncio" not in code:
             findings.append(
                 "Blocking Logic: Synchronous `time.sleep` in logic that requires asynchrony."

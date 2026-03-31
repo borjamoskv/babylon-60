@@ -14,9 +14,7 @@ class ChaosGuards:
 
     @staticmethod
     async def validate_consensus(
-        responses: list[ActuatorResponse],
-        min_agreement: int = 2,
-        required_exergy: float = 0.0
+        responses: list[ActuatorResponse], min_agreement: int = 2, required_exergy: float = 0.0
     ) -> bool:
         """
         Heavy Byzantine Fault Tolerance (BFT).

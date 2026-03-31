@@ -131,7 +131,9 @@ class PitchComposer:
                     first_name=first_name,
                     wins=wins,
                 )
-                subject = _SUBJECTS[0].format(company=company, hours_estimate=hours_estimate, tier=f"${tier}")
+                subject = _SUBJECTS[0].format(
+                    company=company, hours_estimate=hours_estimate, tier=f"${tier}"
+                )
                 return {"subject": subject, "body": body, "variant": "llm"}
             except Exception as exc:  # noqa: BLE001
                 logger.warning("LLM compose failed, falling back to template: %s", exc)
@@ -186,7 +188,7 @@ Monthly price: ${tier}
 Estimated hours saved/month: {hours_estimate}h
 Sender name: {sender_name}
 Recipient first name: {first_name}
-Key wins to mention: {'; '.join(wins)}
+Key wins to mention: {"; ".join(wins)}
 
 Rules:
 - Do NOT open with "I hope this email finds you well" or similar filler
@@ -238,9 +240,7 @@ class EmailDispatcher:
             True if sent (or dry_run), False on failure
         """
         if not self.configured:
-            logger.warning(
-                "[EmailDispatcher] SMTP not configured. Set VECTOR_L_SMTP_* env vars."
-            )
+            logger.warning("[EmailDispatcher] SMTP not configured. Set VECTOR_L_SMTP_* env vars.")
             return False
 
         if dry_run:
@@ -273,9 +273,7 @@ class EmailDispatcher:
                 )
             except ImportError:
                 # Fallback to sync smtplib in thread executor
-                await asyncio.get_event_loop().run_in_executor(
-                    None, self._send_sync, msg
-                )
+                await asyncio.get_event_loop().run_in_executor(None, self._send_sync, msg)
 
             logger.info("[EmailDispatcher] ✉️  Sent to %s | %s", to_email, subject)
             return True

@@ -1,0 +1,27 @@
+sources:
+  cortex-db:
+    kind: sqlite
+    database: ${CORTEX_DB}
+
+tools:
+  cortex-stats:
+    kind: sqlite-sql
+    source: cortex-db
+    description: >
+      Get aggregate statistics about CORTEX's knowledge base.
+      Returns counts of facts by type, ghost counts by status,
+      total signals, and latest activity timestamp.
+    parameters: []
+    statement: |
+      SELECT
+        (SELECT COUNT(*) FROM facts WHERE is_tombstoned = 0) AS total_facts,
+        (SELECT COUNT(*) FROM facts WHERE fact_type = 'knowledge' AND is_tombstoned = 0) AS knowledge_count,
+        (SELECT COUNT(*) FROM facts WHERE fact_type = 'decision' AND is_tombstoned = 0) AS decision_count,
+        (SELECT COUNT(*) FROM facts WHERE fact_type = 'error' AND is_tombstoned = 0) AS error_count,
+        (SELECT COUNT(*) FROM facts WHERE fact_type = 'ghost' AND is_tombstoned = 0) AS ghost_fact_count,
+        (SELECT COUNT(*) FROM facts WHERE fact_type = 'bridge' AND is_tombstoned = 0) AS bridge_count,
+        (SELECT COUNT(*) FROM ghosts WHERE status = 'open') AS open_ghosts,
+        (SELECT COUNT(*) FROM ghosts WHERE status = 'resolved') AS resolved_ghosts,
+        (SELECT COUNT(*) FROM signals) AS total_signals,
+        (SELECT MAX(created_at) FROM facts) AS latest_fact,
+        (SELECT MAX(created_at) FROM ghosts) AS latest_ghost;

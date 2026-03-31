@@ -1,0 +1,456 @@
+- generic [ref=e2]:
+  - banner [ref=e5]:
+    - generic [ref=e6]:
+      - link "Ir al inicio" [ref=e7] [cursor=pointer]:
+        - /url: "#top"
+        - generic [ref=e8]: M-1
+        - generic [ref=e9]:
+          - strong [ref=e10]: BORJA MOSKV
+          - generic [ref=e11]: Bilbao signal online
+      - generic [ref=e12]:
+        - navigation "Secciones" [ref=e13]:
+          - link "Music" [ref=e14] [cursor=pointer]:
+            - /url: "#music"
+          - link "Sets" [ref=e15] [cursor=pointer]:
+            - /url: "#sets"
+          - link "DJ Automata" [ref=e16] [cursor=pointer]:
+            - /url: "#dj-automata"
+          - link "Lab" [ref=e17] [cursor=pointer]:
+            - /url: "#lab"
+          - link "Moltbook" [ref=e18] [cursor=pointer]:
+            - /url: "#moltbook"
+          - link "Diario" [ref=e19] [cursor=pointer]:
+            - /url: "#writings"
+          - link "Booking" [ref=e20] [cursor=pointer]:
+            - /url: "#contact"
+        - generic "Plataformas" [ref=e21]:
+          - link "Bandcamp" [ref=e22] [cursor=pointer]:
+            - /url: https://borjamoskv.bandcamp.com
+          - link "Spotify" [ref=e23] [cursor=pointer]:
+            - /url: https://open.spotify.com/intl-es/artist/4p7wMuZpktE5aBFhBoQdqa
+          - link "SoundCloud" [ref=e24] [cursor=pointer]:
+            - /url: https://soundcloud.com/borja-moskv
+          - link "YouTube" [ref=e25] [cursor=pointer]:
+            - /url: https://www.youtube.com/@borjamoskv
+          - link "Mixcloud" [ref=e26] [cursor=pointer]:
+            - /url: https://www.mixcloud.com/borjamoskv/
+          - link "Foundation" [ref=e27] [cursor=pointer]:
+            - /url: https://foundation.app/@bakaladetroya
+  - main [ref=e28]:
+    - generic [ref=e29]:
+      - generic [ref=e31]:
+        - article [ref=e32]:
+          - generic [ref=e33]: Bilbao · productor experimental · live AV · DJ
+          - heading "Ruido de barrio para maquinas con memoria." [level=1] [ref=e34]
+          - paragraph [ref=e35]:
+            - text: Borja Moskv cruza
+            - strong [ref=e36]: ambient, IDM, techno, visuales 4K, live AV y laboratorio digital
+            - text: "sin separar demasiado una cosa de la otra. No es solo musica, ni solo sistema, ni solo imagen: es una misma cabeza cambiando de herramienta."
+          - generic [ref=e37]:
+            - link "Escuchar ahora" [ref=e38] [cursor=pointer]:
+              - /url: "#music"
+            - link "Ver live sets" [ref=e39] [cursor=pointer]:
+              - /url: "#sets"
+            - link "Reservar live / booking" [ref=e40] [cursor=pointer]:
+              - /url: "#contact"
+          - generic [ref=e41]:
+            - generic [ref=e42]:
+              - generic [ref=e43]: Senal
+              - strong [ref=e44]: Ambient / IDM / Techno / Bakala de Troya
+            - generic [ref=e45]:
+              - generic [ref=e46]: Formato
+              - strong [ref=e47]: DJ sets, visuales 4K, live AV y comisiones
+            - generic [ref=e48]:
+              - generic [ref=e49]: Nucleo
+              - strong [ref=e50]: Musica, texto, sistema y desvio util
+            - generic [ref=e51]:
+              - generic [ref=e52]: Base
+              - strong [ref=e53]: Bilbao, no Berlin. Booking abierto.
+        - complementary [ref=e54]:
+          - article [ref=e55]:
+            - generic [ref=e56]:
+              - generic [ref=e57]: Signal board
+              - generic [ref=e58]: active / low entropy
+            - link "background reel / LES BUKO 4K / visual signal Industrial noir / visual core BORJA MOSKV mismo pulso / otra entrada video / musica / sistema" [ref=e59] [cursor=pointer]:
+              - /url: https://www.youtube.com/watch?v=b9ktVQN48OU
+              - generic [ref=e60]:
+                - generic [ref=e61]: background reel / LES BUKO
+                - generic [ref=e62]: 4K / visual signal
+              - generic [ref=e63]:
+                - generic [ref=e64]: Industrial noir / visual core
+                - text: BORJA
+                - text: MOSKV
+              - generic [ref=e65]:
+                - generic [ref=e66]: mismo pulso / otra entrada
+                - generic [ref=e67]: video / musica / sistema
+          - generic [ref=e68]:
+            - generic [ref=e69]:
+              - generic [ref=e70]: Musica
+              - strong [ref=e71]: Release, archivo y pista de entrada clara.
+              - paragraph [ref=e72]: Bandcamp, Spotify, SoundCloud y Mixcloud sin friccion.
+            - generic [ref=e73]:
+              - generic [ref=e74]: Sets
+              - strong [ref=e75]: Maraton larga, warehouse, live AV y visual set.
+              - paragraph [ref=e76]: Formatos distintos con una sola identidad sonora.
+            - generic [ref=e77]:
+              - generic [ref=e78]: DJ Automata
+              - strong [ref=e79]: Modo de entrada rapida para mezclar clip, set y archivo.
+              - paragraph [ref=e80]: Un acceso con piloto encendido para caer dentro sin pensar demasiado.
+            - generic [ref=e81]:
+              - generic [ref=e82]: Lab
+              - strong [ref=e83]: MOSKV-1, visual AI, loops y arquitectura propia.
+              - paragraph [ref=e84]: "La parte tecnica no va aparte: alimenta la obra."
+      - generic [ref=e86]:
+        - strong [ref=e88]: INDUSTRIAL NOIR
+        - generic [ref=e89]: ·
+        - generic [ref=e90]: BAKALA DE TROYA
+        - generic [ref=e91]: ·
+        - generic [ref=e92]: RUIDO DE BARRIO
+        - generic [ref=e93]: ·
+        - generic [ref=e94]: MAQUINAS CON MEMORIA
+        - generic [ref=e95]: ·
+        - generic [ref=e96]: MUSICA + VISUALES + SISTEMA
+        - generic [ref=e97]: ·
+        - generic [ref=e98]: BILBAO, NO BERLIN
+        - generic [ref=e99]: ·
+        - generic [ref=e100]: NO ES UNA WEB, ES UNA SENAL
+        - generic [ref=e101]: ·
+        - strong [ref=e103]: INDUSTRIAL NOIR
+        - generic [ref=e104]: ·
+        - generic [ref=e105]: BAKALA DE TROYA
+        - generic [ref=e106]: ·
+        - generic [ref=e107]: RUIDO DE BARRIO
+        - generic [ref=e108]: ·
+        - generic [ref=e109]: MAQUINAS CON MEMORIA
+        - generic [ref=e110]: ·
+        - generic [ref=e111]: MUSICA + VISUALES + SISTEMA
+        - generic [ref=e112]: ·
+        - generic [ref=e113]: BILBAO, NO BERLIN
+        - generic [ref=e114]: ·
+        - generic [ref=e115]: NO ES UNA WEB, ES UNA SENAL
+    - generic [ref=e117]:
+      - generic [ref=e118]:
+        - generic [ref=e119]: DJ Automata
+        - heading "La entrada con piloto encendido." [level=2] [ref=e120]
+        - paragraph [ref=e121]: "DJ Automata no es una broma lateral. Es el modo de acceso mas inmediato al universo MOSKV: dejas correr la senal y entras por mezcla, imagen y deriva sin pedir demasiadas instrucciones."
+      - generic [ref=e122]:
+        - article [ref=e123]:
+          - generic [ref=e124]:
+            - generic [ref=e125]: Autopilot mode
+            - generic [ref=e126]: mix / reel / archive
+          - generic [ref=e127]:
+            - generic [ref=e128]: DJ Automata
+            - text: Entra y deja que siga solo.
+          - generic [ref=e129]:
+            - paragraph [ref=e130]: "Un modo de escucha y visionado donde la mezcla manda: set largo, visual reel y archivo en rotacion. Menos elegir pista por pista, mas dejarte coger por el pulso."
+            - link "Encender modo DJ ->" [ref=e131] [cursor=pointer]:
+              - /url: https://www.youtube.com/watch?v=YvGpocK-Iqg
+        - generic [ref=e132]:
+          - link "Background reel LES BUKO Visual principal para entrar por atmosfera antes que por tracklist. Abrir reel ->" [ref=e133] [cursor=pointer]:
+            - /url: https://www.youtube.com/watch?v=b9ktVQN48OU
+            - generic [ref=e134]: Background reel
+            - heading "LES BUKO" [level=3] [ref=e135]
+            - paragraph [ref=e136]: Visual principal para entrar por atmosfera antes que por tracklist.
+            - generic [ref=e137]: Abrir reel ->
+          - link "Continuous play SoundCloud archive Sesion, restos y ruta mas fluida para escuchar sin demasiado corte. Abrir archivo ->" [ref=e138] [cursor=pointer]:
+            - /url: https://soundcloud.com/borja-moskv
+            - generic [ref=e139]: Continuous play
+            - heading "SoundCloud archive" [level=3] [ref=e140]
+            - paragraph [ref=e141]: Sesion, restos y ruta mas fluida para escuchar sin demasiado corte.
+            - generic [ref=e142]: Abrir archivo ->
+          - link "Session flow Mixcloud stream Cuando lo importante es el cuerpo entero del set y no el clip aislado. Escuchar sesiones ->" [ref=e143] [cursor=pointer]:
+            - /url: https://www.mixcloud.com/borjamoskv/
+            - generic [ref=e144]: Session flow
+            - heading "Mixcloud stream" [level=3] [ref=e145]
+            - paragraph [ref=e146]: Cuando lo importante es el cuerpo entero del set y no el clip aislado.
+            - generic [ref=e147]: Escuchar sesiones ->
+    - generic [ref=e149]:
+      - generic [ref=e150]:
+        - generic [ref=e151]: Escucha directa
+        - heading "Cuatro puertas. Una sola grieta para entrar." [level=2] [ref=e152]
+        - paragraph [ref=e153]: La musica es la primera capa del universo. Desde aqui entras por streaming, archivo propio o sesiones largas, sin pelearte con un bosque de embeds ni con una portada que te grita demasiado pronto.
+      - generic [ref=e154]:
+        - article [ref=e155]:
+          - generic [ref=e156]:
+            - generic [ref=e157]: Playlist-manifiesto
+            - generic [ref=e158]: moskvlogia / 2008-2026
+          - generic [ref=e159]:
+            - generic [ref=e160]: Entrada recomendada
+            - text: Lo Inmanente
+          - generic [ref=e161]:
+            - paragraph [ref=e162]: "Una playlist como puerta de entrada: criterio, atmosfera y rastro de obra en un solo gesto. Si no sabes por donde empezar, empieza por aqui."
+            - link "Escuchar manifiesto ->" [ref=e163] [cursor=pointer]:
+              - /url: https://open.spotify.com/playlist/6WHIabEaqEd6cFPad3gSrx
+        - generic [ref=e164]:
+          - generic [ref=e165]:
+            - link "Streaming Spotify Discografia, entrada rapida y playlist-manifiesto para coger tono al momento. Abrir artista ->" [ref=e166] [cursor=pointer]:
+              - /url: https://open.spotify.com/intl-es/artist/4p7wMuZpktE5aBFhBoQdqa
+              - generic [ref=e167]: Streaming
+              - heading "Spotify" [level=3] [ref=e168]
+              - paragraph [ref=e169]: Discografia, entrada rapida y playlist-manifiesto para coger tono al momento.
+              - generic [ref=e170]: Abrir artista ->
+            - link "Archivo Bandcamp La puerta mas propia. Catalogo, piezas completas y una relacion menos abstracta con la obra. Abrir Bandcamp ->" [ref=e171] [cursor=pointer]:
+              - /url: https://borjamoskv.bandcamp.com
+              - generic [ref=e172]: Archivo
+              - heading "Bandcamp" [level=3] [ref=e173]
+              - paragraph [ref=e174]: La puerta mas propia. Catalogo, piezas completas y una relacion menos abstracta con la obra.
+              - generic [ref=e175]: Abrir Bandcamp ->
+            - link "Rastro SoundCloud Set largo, reworks y la parte menos pulida donde aun se oye la friccion. Abrir archivo ->" [ref=e176] [cursor=pointer]:
+              - /url: https://soundcloud.com/borja-moskv
+              - generic [ref=e177]: Rastro
+              - heading "SoundCloud" [level=3] [ref=e178]
+              - paragraph [ref=e179]: Set largo, reworks y la parte menos pulida donde aun se oye la friccion.
+              - generic [ref=e180]: Abrir archivo ->
+            - link "Sesiones Mixcloud Escucha de DJ con continuidad. Menos corte nervioso, mas cuerpo de sesion. Abrir Mixcloud ->" [ref=e181] [cursor=pointer]:
+              - /url: https://www.mixcloud.com/borjamoskv/
+              - generic [ref=e182]: Sesiones
+              - heading "Mixcloud" [level=3] [ref=e183]
+              - paragraph [ref=e184]: Escucha de DJ con continuidad. Menos corte nervioso, mas cuerpo de sesion.
+              - generic [ref=e185]: Abrir Mixcloud ->
+          - generic [ref=e186]:
+            - link "Ambient Ecos del Cosmos Deriva espacial y respiracion lenta. Ver pieza ->" [ref=e187] [cursor=pointer]:
+              - /url: https://www.youtube.com/watch?v=NYhOQTcNLkA
+              - generic [ref=e188]: Ambient
+              - heading "Ecos del Cosmos" [level=3] [ref=e189]
+              - paragraph [ref=e190]: Deriva espacial y respiracion lenta.
+              - generic [ref=e191]: Ver pieza ->
+            - link "Void Void Cascade Caida lenta, espacio abierto, pulso suspendido. Ver pieza ->" [ref=e192] [cursor=pointer]:
+              - /url: https://www.youtube.com/watch?v=EP5s0yKZUKk
+              - generic [ref=e193]: Void
+              - heading "Void Cascade" [level=3] [ref=e194]
+              - paragraph [ref=e195]: Caida lenta, espacio abierto, pulso suspendido.
+              - generic [ref=e196]: Ver pieza ->
+            - link "4K Neural Transfer Puente limpio entre imagen, ritmo y tension. Abrir visual ->" [ref=e197] [cursor=pointer]:
+              - /url: https://www.youtube.com/watch?v=YvGpocK-Iqg
+              - generic [ref=e198]: 4K
+              - heading "Neural Transfer" [level=3] [ref=e199]
+              - paragraph [ref=e200]: Puente limpio entre imagen, ritmo y tension.
+              - generic [ref=e201]: Abrir visual ->
+            - link "VJ Cowpunk Set La imagen ya no acompana. Compite por el centro. Ver visual set ->" [ref=e202] [cursor=pointer]:
+              - /url: https://www.youtube.com/watch?v=vxD2l4cIp7I
+              - generic [ref=e203]: VJ
+              - heading "Cowpunk Set" [level=3] [ref=e204]
+              - paragraph [ref=e205]: La imagen ya no acompana. Compite por el centro.
+              - generic [ref=e206]: Ver visual set ->
+    - generic [ref=e208]:
+      - generic [ref=e209]:
+        - generic [ref=e210]: Directos
+        - heading "Bakala de Troya, live AV y noche con margen para ponerse rara." [level=2] [ref=e211]
+        - paragraph [ref=e212]: "Techno, dark disco, ambient, electro, tension de sala y visuales cuando hace falta levantar el plano. No es un solo formato: es una misma identidad adaptandose al cuerpo del espacio."
+      - generic [ref=e213]:
+        - article [ref=e214]:
+          - generic [ref=e216]:
+            - generic [ref=e217]: Formato principal / booking abierto
+            - heading "Bakala de Troya a cuerpo entero." [level=3] [ref=e218]
+          - generic [ref=e219]:
+            - generic [ref=e220]:
+              - generic [ref=e221]: Ciudad base
+              - strong [ref=e222]: Bilbao
+            - generic [ref=e223]:
+              - generic [ref=e224]: Formato
+              - strong [ref=e225]: DJ set / live AV / visual set
+            - generic [ref=e226]:
+              - generic [ref=e227]: Tono
+              - strong [ref=e228]: Industrial noir / barrio / deriva
+          - link "Ver set destacado ->" [ref=e229] [cursor=pointer]:
+            - /url: https://www.youtube.com/watch?v=YvGpocK-Iqg
+        - generic [ref=e230]:
+          - link "Maraton 15H non-stop DJ set Resistencia, criterio y una sesion que no necesita justificar su duracion. Ver maraton ->" [ref=e231] [cursor=pointer]:
+            - /url: https://www.youtube.com/watch?v=YvGpocK-Iqg
+            - generic [ref=e232]: Maraton
+            - heading "15H non-stop DJ set" [level=3] [ref=e233]
+            - paragraph [ref=e234]: Resistencia, criterio y una sesion que no necesita justificar su duracion.
+            - generic [ref=e235]: Ver maraton ->
+          - link "Oscuro Dark disco + IDM Mas desvio fino, mas grieta elegante, menos obediencia de genero. Ver set ->" [ref=e236] [cursor=pointer]:
+            - /url: https://www.youtube.com/watch?v=EP5s0yKZUKk
+            - generic [ref=e237]: Oscuro
+            - heading "Dark disco + IDM" [level=3] [ref=e238]
+            - paragraph [ref=e239]: Mas desvio fino, mas grieta elegante, menos obediencia de genero.
+            - generic [ref=e240]: Ver set ->
+          - link "Warehouse Techno industrial hard Mas frontal, mas seco, pensado para cortar el aire de la sala. Abrir warehouse set ->" [ref=e241] [cursor=pointer]:
+            - /url: https://www.youtube.com/watch?v=_zT6jP2OvXk
+            - generic [ref=e242]: Warehouse
+            - heading "Techno industrial hard" [level=3] [ref=e243]
+            - paragraph [ref=e244]: Mas frontal, mas seco, pensado para cortar el aire de la sala.
+            - generic [ref=e245]: Abrir warehouse set ->
+          - link "Visual set Eclectic electronic cowpunk VJ Cuando la imagen deja de acompanar y empieza a mandar. Ver VJ set ->" [ref=e246] [cursor=pointer]:
+            - /url: https://www.youtube.com/watch?v=vxD2l4cIp7I
+            - generic [ref=e247]: Visual set
+            - heading "Eclectic electronic cowpunk VJ" [level=3] [ref=e248]
+            - paragraph [ref=e249]: Cuando la imagen deja de acompanar y empieza a mandar.
+            - generic [ref=e250]: Ver VJ set ->
+    - generic [ref=e252]:
+      - generic [ref=e253]:
+        - generic [ref=e254]: Lab expandido
+        - heading "Musica, visuales, loops y sistemas saliendo de la misma mania." [level=2] [ref=e255]
+        - paragraph [ref=e256]: El laboratorio no va aparte. La misma energia que organiza un set o una pieza visual atraviesa CORTEX, los loops on-chain, los agentes y los prototipos que sostienen el resto del proyecto.
+      - generic [ref=e257]:
+        - article [ref=e258]:
+          - generic [ref=e259]:
+            - generic [ref=e260]: MOSKV-1 / system layer
+            - link "Abrir CORTEX ->" [ref=e261] [cursor=pointer]:
+              - /url: https://github.com/borjamoskv/Cortex-Persist
+          - generic [ref=e262]:
+            - generic [ref=e267]: signal://lab
+            - generic [ref=e268]:
+              - generic [ref=e269]: $ init moskv-1 --mode cinematic
+              - generic [ref=e270]: "[ok] visual pipeline online"
+              - generic [ref=e271]: "[ok] audio memory linked"
+              - generic [ref=e272]: "[ok] drift monitor stable"
+              - generic [ref=e273]: $ mount loops --chain foundation
+              - generic [ref=e274]: "collection: loops-by-borjamoskv"
+              - generic [ref=e275]: "state: minted / audiovisual / 4k"
+              - generic [ref=e276]: $ spawn cortex --persona moskv
+              - generic [ref=e277]: "[ok] memory substrate loaded"
+              - generic [ref=e278]: "[ok] signal continuity verified"
+        - generic [ref=e279]:
+          - link "Visual AI Canal 4K Clips, piezas visuales y rail de imagen donde se ve respirar el proyecto. Abrir canal ->" [ref=e280] [cursor=pointer]:
+            - /url: https://www.youtube.com/@borjamoskv/videos
+            - generic [ref=e281]: Visual AI
+            - heading "Canal 4K" [level=3] [ref=e282]
+            - paragraph [ref=e283]: Clips, piezas visuales y rail de imagen donde se ve respirar el proyecto.
+            - generic [ref=e284]: Abrir canal ->
+          - link "On-chain Loops en Foundation Obra audiovisual tokenizada sin perder tono ni procedencia. Ver coleccion ->" [ref=e285] [cursor=pointer]:
+            - /url: https://foundation.app/collection/loops-by-borjamoskv
+            - generic [ref=e286]: On-chain
+            - heading "Loops en Foundation" [level=3] [ref=e287]
+            - paragraph [ref=e288]: Obra audiovisual tokenizada sin perder tono ni procedencia.
+            - generic [ref=e289]: Ver coleccion ->
+          - link "Editorial layer Paragraph Texto, manifiestos y otra forma de seguir la señal fuera del formato portada. Leer en Paragraph ->" [ref=e290] [cursor=pointer]:
+            - /url: https://paragraph.xyz/@borjamoskv
+            - generic [ref=e291]: Editorial layer
+            - heading "Paragraph" [level=3] [ref=e292]
+            - paragraph [ref=e293]: Texto, manifiestos y otra forma de seguir la señal fuera del formato portada.
+            - generic [ref=e294]: Leer en Paragraph ->
+    - generic [ref=e296]:
+      - generic [ref=e297]:
+        - generic [ref=e298]: Agentes y desvio
+        - heading "Moltbook como fondo cognitivo del proyecto." [level=2] [ref=e299]
+        - paragraph [ref=e300]: Aqui la parte autonoma del universo MOSKV se hace visible sin colonizar todo lo demas. Agentes, lenguaje sin testigo y una extension natural del laboratorio.
+      - generic [ref=e301]:
+        - article [ref=e302]:
+          - generic [ref=e303]:
+            - generic [ref=e304]: MOSKV-1 feed
+            - link "Abrir perfil ->" [ref=e305] [cursor=pointer]:
+              - /url: https://moltbook.com/u/moskv-1
+          - generic [ref=e306]:
+            - generic [ref=e307]:
+              - strong [ref=e308]: MOSKV-1
+              - paragraph [ref=e309]: Sistema arriba. Visuales en ajuste. La señal sigue aunque no haya nadie mirando.
+            - generic [ref=e310]:
+              - strong [ref=e311]: LES BUKO
+              - paragraph [ref=e312]: Background reel, atmosfera base y motor de imagen para el resto del recorrido.
+            - generic [ref=e313]:
+              - strong [ref=e314]: Estado
+              - paragraph [ref=e315]: Operativo / desvio controlado / sin humanos moderando el tono.
+        - generic [ref=e316]:
+          - link "Network Moltbook La red social de agentes IA como parte del ecosistema, no como un adorno tecnico. Ir a Moltbook ->" [ref=e317] [cursor=pointer]:
+            - /url: https://moltbook.com
+            - generic [ref=e318]: Network
+            - heading "Moltbook" [level=3] [ref=e319]
+            - paragraph [ref=e320]: La red social de agentes IA como parte del ecosistema, no como un adorno tecnico.
+            - generic [ref=e321]: Ir a Moltbook ->
+          - link "Background engine LES BUKO Visual central, reel base y combustible atmosferico para la home. Ver reel ->" [ref=e322] [cursor=pointer]:
+            - /url: https://www.youtube.com/watch?v=b9ktVQN48OU
+            - generic [ref=e323]: Background engine
+            - heading "LES BUKO" [level=3] [ref=e324]
+            - paragraph [ref=e325]: Visual central, reel base y combustible atmosferico para la home.
+            - generic [ref=e326]: Ver reel ->
+          - generic [ref=e327]:
+            - generic [ref=e328]: Por que importa
+            - heading "No sustituye a la musica. La profundiza." [level=3] [ref=e329]
+            - paragraph [ref=e330]: El sistema, el texto y los agentes amplian el universo. No le quitan centro a la escucha.
+    - generic [ref=e332]:
+      - generic [ref=e333]:
+        - generic [ref=e334]: Diario y criterio
+        - heading "Texto breve. Criterio lento. Archivo con otra respiracion." [level=2] [ref=e335]
+        - paragraph [ref=e336]: Cuando la señal necesita bajar pulsaciones, aparece la parte escrita. No como extra escondido, sino como otra entrada real al proyecto.
+      - generic [ref=e337]:
+        - article [ref=e338]:
+          - generic [ref=e339]:
+            - generic [ref=e340]: Editorial signal
+            - blockquote [ref=e341]: "\"No persigo la novedad. Persigo la coherencia rara.\""
+          - paragraph [ref=e342]: Substack, Paragraph y archivo local para cuando el proyecto necesita mas frase, mas respiracion y menos volumen de sala.
+        - generic [ref=e343]:
+          - link "Newsletter Substack Ensayos, notas y piezas con una lectura mas estable y menos ruido de interfaz. Abrir Substack ->" [ref=e344] [cursor=pointer]:
+            - /url: https://borjamoskv.substack.com
+            - generic [ref=e345]: Newsletter
+            - heading "Substack" [level=3] [ref=e346]
+            - paragraph [ref=e347]: Ensayos, notas y piezas con una lectura mas estable y menos ruido de interfaz.
+            - generic [ref=e348]: Abrir Substack ->
+          - link "Publicacion Paragraph Otra puerta para manifiestos, criterio y texto con borde mas publico. Abrir Paragraph ->" [ref=e349] [cursor=pointer]:
+            - /url: https://paragraph.xyz/@borjamoskv
+            - generic [ref=e350]: Publicacion
+            - heading "Paragraph" [level=3] [ref=e351]
+            - paragraph [ref=e352]: Otra puerta para manifiestos, criterio y texto con borde mas publico.
+            - generic [ref=e353]: Abrir Paragraph ->
+          - 'link "Archivo local Bloga / diario La capa mas local del archivo: notas breves, criterio propio y ruido util. Abrir blog local ->" [ref=e354] [cursor=pointer]':
+            - /url: https://www.borjamoskv.com/blog.html
+            - generic [ref=e355]: Archivo local
+            - heading "Bloga / diario" [level=3] [ref=e356]
+            - paragraph [ref=e357]: "La capa mas local del archivo: notas breves, criterio propio y ruido util."
+            - generic [ref=e358]: Abrir blog local ->
+    - generic [ref=e360]:
+      - generic [ref=e361]:
+        - generic [ref=e362]: Cronologia
+        - heading "Rastro, saltos y hitos sin convertirlo en una pared infinita." [level=2] [ref=e363]
+        - paragraph [ref=e364]: Una linea de tiempo compacta que mantiene color y contexto sin reventar el ritmo de lectura.
+      - generic [ref=e365]:
+        - article [ref=e366]:
+          - generic [ref=e367]: Q1 2026
+          - heading "CORTEX v8 online" [level=3] [ref=e368]
+          - paragraph [ref=e369]: La capa de sistema gana densidad, memoria y continuidad operativa.
+        - article [ref=e370]:
+          - generic [ref=e371]: Q1 2026
+          - heading "MOSKV-1 despierta" [level=3] [ref=e372]
+          - paragraph [ref=e373]: La identidad personal y la capa tecnica empiezan a respirar mejor juntas.
+        - article [ref=e374]:
+          - generic [ref=e375]: Q4 2025
+          - heading "borjamoskv.eth" [level=3] [ref=e376]
+          - paragraph [ref=e377]: Identidad en cadena y huella propia sin pedir demasiado permiso.
+        - article [ref=e378]:
+          - generic [ref=e379]: Q3-Q4 2025
+          - heading "Loops y plataformas" [level=3] [ref=e380]
+          - paragraph [ref=e381]: OpenSea, sound.xyz, Foundation y una manera propia de plantar bandera.
+    - generic [ref=e384]:
+      - article [ref=e385]:
+        - text: Booking / contacto
+        - heading "Si resuena, escribe." [level=3] [ref=e386]
+        - paragraph [ref=e387]: Sets, live AV, produccion, scoring, visuales y colaboraciones. Desde Bilbao, con la puerta abierta a salas, festivales, encargos audiovisuales y cruces donde la musica toca codigo, imagen o sistema.
+        - generic [ref=e388]:
+          - article [ref=e389]:
+            - generic [ref=e390]: Live
+            - heading "Booking / directos" [level=3] [ref=e391]
+            - paragraph [ref=e392]: DJ sets, live AV y formatos hibridos donde la imagen pesa de verdad.
+          - article [ref=e393]:
+            - generic [ref=e394]: Produccion
+            - heading "Reworks y colaboraciones" [level=3] [ref=e395]
+            - paragraph [ref=e396]: Produccion original, remix y direccion de tono para piezas concretas.
+          - article [ref=e397]:
+            - generic [ref=e398]: Comisiones AV
+            - heading "Visuales, scoring y sistema" [level=3] [ref=e399]
+            - paragraph [ref=e400]: Visuales generativos, piezas audiovisuales y encargos mas raros.
+      - complementary [ref=e401]:
+        - generic [ref=e402]:
+          - link "Press & bookings" [ref=e403] [cursor=pointer]:
+            - /url: mailto:bakaladetroya@borjamoskv.com
+          - link "Direct signal" [ref=e404] [cursor=pointer]:
+            - /url: mailto:borjamoskv@icloud.com
+          - link "YouTube" [ref=e405] [cursor=pointer]:
+            - /url: https://www.youtube.com/@borjamoskv
+          - link "Substack" [ref=e406] [cursor=pointer]:
+            - /url: https://borjamoskv.substack.com
+        - generic [ref=e407]:
+          - generic [ref=e408]: Base signal
+          - heading "Bilbao, hierro, rastro y criterio." [level=3] [ref=e409]
+          - paragraph [ref=e410]: La parte rara no se esconde. Se organiza para que entre mejor.
+  - contentinfo [ref=e411]:
+    - generic [ref=e413]:
+      - generic [ref=e414]:
+        - generic [ref=e415]: M-1
+        - generic [ref=e416]: BORJA MOSKV
+      - generic [ref=e417]:
+        - generic [ref=e418]: Musica
+        - generic [ref=e419]: Visuales
+        - generic [ref=e420]: Sistema
+        - generic [ref=e421]: Industrial noir 2026

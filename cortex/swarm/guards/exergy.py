@@ -5,6 +5,7 @@ from cortex.guards.exergy_guard import ExergyGuard
 
 logger = logging.getLogger("cortex.swarm.guards.exergy")
 
+
 class SwarmExergyGovernor:
     """
     Ω₂: The Swarm Thermodynamic Governor.
@@ -26,7 +27,7 @@ class SwarmExergyGovernor:
                 content=content,
                 project_id="swarm_audit",
                 fact_type=fact_type,
-                taint="SWARM_CONTRIBUTION"
+                taint="SWARM_CONTRIBUTION",
             )
 
             # Simple moving average for agent scoring
@@ -36,19 +37,24 @@ class SwarmExergyGovernor:
 
             if new_score < self.threshold:
                 if agent_id not in self.throttled_agents:
-                    logger.warning("Ω₂: Throttling agent %s due to low exergy yield (%.2f)",
-                                   agent_id, new_score)
+                    logger.warning(
+                        "Ω₂: Throttling agent %s due to low exergy yield (%.2f)",
+                        agent_id,
+                        new_score,
+                    )
                     self.throttled_agents.add(agent_id)
             else:
                 if agent_id in self.throttled_agents:
-                    logger.info("Ω₂: Reinstating agent %s (Exergy recovered to %.2f)",
-                                agent_id, new_score)
+                    logger.info(
+                        "Ω₂: Reinstating agent %s (Exergy recovered to %.2f)", agent_id, new_score
+                    )
                     self.throttled_agents.remove(agent_id)
 
             return score
         except ValueError as e:
-            logger.error("Ω₂ Violation: Agent %s rejected for 0% exergy contribution: %s",
-                         agent_id, e)
+            logger.error(
+                "Ω₂ Violation: Agent %s rejected for 0% exergy contribution: %s", agent_id, e
+            )
             self.agent_scores[agent_id] = 0.0
             self.throttled_agents.add(agent_id)
             raise

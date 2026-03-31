@@ -37,17 +37,42 @@ class LLMActuator(ActuatorProtocol):
             self._model_id,
         )
 
+        # 1.5 O(1) Tensor Rehydration (TurboQuant/Swarm-100)
+        if "_cortex_void_ptr" in context:
+            tensor_id = context["_cortex_void_ptr"]
+            try:
+                import json
+                import os
+
+                from cortex.storage.redis_bus import RedisBus
+
+                dsn = os.getenv("REDIS_URL", "redis://localhost:6379")
+                bus = RedisBus(dsn)
+                await bus.connect()
+                try:
+                    raw_ctx = await bus.get_raw_tensor("cortex", tensor_id)
+                    if raw_ctx:
+                        context = json.loads(raw_ctx.decode("utf-8"))
+                        logger.debug("LLMActuator: Resumed Void-State from L1 [%s]", tensor_id)
+                finally:
+                    await bus.disconnect()
+            except Exception as e:
+                logger.warning(
+                    "LLMActuator: Void-State Tensor Resume failed, continuing blind: %s", e
+                )
+
+        resolved_context = context
+
         try:
             intent_profile = IntentProfile(self._intent)
         except ValueError:
             intent_profile = IntentProfile.GENERAL
 
         working_memory = []
-        if instructions := context.get('instructions', ''):
-            working_memory.append({
-                "role": "system",
-                "content": f"Dynamic Context/Instructions: {instructions}"
-            })
+        if instructions := resolved_context.get("instructions", ""):
+            working_memory.append(
+                {"role": "system", "content": f"Dynamic Context/Instructions: {instructions}"}
+            )
         working_memory.append({"role": "user", "content": task})
 
         prompt = CortexPrompt(
@@ -57,7 +82,7 @@ class LLMActuator(ActuatorProtocol):
             ),
             working_memory=working_memory,
             intent=intent_profile,
-            project=context.get("project", "swarm"),
+            project=resolved_context.get("project", "swarm"),
         )
 
         # Use resilient routing for the task

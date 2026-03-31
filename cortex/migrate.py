@@ -191,7 +191,7 @@ def _migrate_project(engine: CortexEngine, path: Path, stats: dict) -> None:
             fact_type="AXIOM",
             tags=["migrated", "v4_knowledge"],
             source="migration",
-            confidence="Ω5"
+            confidence="Ω5",
         )
         stats["facts_imported"] += 1
 

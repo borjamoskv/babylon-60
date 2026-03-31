@@ -21,7 +21,10 @@ audit_agent = Agent(
     model=DEFAULT_MODEL,
 )
 
-async def run_byzantine_audit(records: list[dict[str, Any]], api_key: str | None = None) -> dict[str, Any]:
+
+async def run_byzantine_audit(
+    records: list[dict[str, Any]], api_key: str | None = None
+) -> dict[str, Any]:
     """
     Runs a GPT-5.4 based audit on a set of ledger records.
     """
@@ -32,12 +35,16 @@ async def run_byzantine_audit(records: list[dict[str, Any]], api_key: str | None
     client = openai.AsyncOpenAI(api_key=key)
 
     # Prepare logs for the agent
-    log_summary = "\n".join([
-        f"ID: {r.get('id')} | Source: {r.get('source')} | Confidence: {r.get('confidence')} | Content: {r.get('content')}"
-        for r in records
-    ])
+    log_summary = "\n".join(
+        [
+            f"ID: {r.get('id')} | Source: {r.get('source')} | Confidence: {r.get('confidence')} | Content: {r.get('content')}"
+            for r in records
+        ]
+    )
 
-    prompt = f"Analyze the following CORTEX ledger records for Byzantine anomalies:\n\n{log_summary}"
+    prompt = (
+        f"Analyze the following CORTEX ledger records for Byzantine anomalies:\n\n{log_summary}"
+    )
 
     try:
         result = await Runner.run(audit_agent, prompt, client=client)
@@ -46,8 +53,8 @@ async def run_byzantine_audit(records: list[dict[str, Any]], api_key: str | None
         return {
             "valid": "anomaly detected" not in output.lower(),
             "report": output,
-            "score": 0, # Placeholder for parsed score
-            "vectors": []
+            "score": 0,  # Placeholder for parsed score
+            "vectors": [],
         }
     except Exception as e:
         return {"error": str(e), "score": 0, "vectors": []}

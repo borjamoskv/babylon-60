@@ -62,9 +62,15 @@ class MilestoneManager:
         new_milestones = []
         for target in SCORE_THRESHOLDS:
             if current_score >= target and target not in achieved_targets:
-                name = "Foundational" if target == 80 else \
-                       "Advanced" if target == 90 else \
-                       "Inmejorable" if target == 95 else "Sovereign Standard"
+                name = (
+                    "Foundational"
+                    if target == 80
+                    else "Advanced"
+                    if target == 90
+                    else "Inmejorable"
+                    if target == 95
+                    else "Sovereign Standard"
+                )
 
                 m = Milestone(
                     name=f"{name} ({target}+)",
@@ -91,9 +97,15 @@ class MilestoneManager:
         new_milestones = []
         for target in YIELD_THRESHOLDS:
             if current_yield >= target and target not in achieved_targets:
-                name = "Standard 100h" if target == 100 else \
-                       "Sovereign 200h" if target == 200 else \
-                       "High Entropy 420h" if target == 420 else "Kiloyield 1000h"
+                name = (
+                    "Standard 100h"
+                    if target == 100
+                    else "Sovereign 200h"
+                    if target == 200
+                    else "High Entropy 420h"
+                    if target == 420
+                    else "Kiloyield 1000h"
+                )
 
                 m = Milestone(
                     name=name,

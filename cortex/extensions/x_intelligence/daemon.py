@@ -8,6 +8,7 @@ from cortex.swarm.bus import SwarmSignal
 
 logger = logging.getLogger("cortex.extensions.x_intelligence.daemon")
 
+
 class XIntelligenceDaemon:
     """
     Autonomous X-Intelligence Monitor (Ω-Signal).
@@ -20,13 +21,13 @@ class XIntelligenceDaemon:
         self,
         client: XIntelligenceClient | None = None,
         keywords: list[str] | None = None,
-        interval: int = 60
+        interval: int = 60,
     ):
         self.client = client or XIntelligenceClient()
         self.keywords = keywords or ["$CORTEX", "#AIAgent", "Cortex-Persist"]
         self.interval = interval
         self.running = False
-        self._bus = None # Will be set by SwarmManager or Engine
+        self._bus = None  # Will be set by SwarmManager or Engine
         self.exergy_guard = ExergyGuard()
 
     def set_bus(self, bus: Any):
@@ -50,14 +51,14 @@ class XIntelligenceDaemon:
                         # 2. Thermodynamic Filter (ExergyGuard - Ω₂)
                         try:
                             exergy_score = self.exergy_guard.check_thermodynamic_yield(
-                                content=tweet.full_text,
-                                project_id="x_intel",
-                                taint="X_SIGNAL"
+                                content=tweet.full_text, project_id="x_intel", taint="X_SIGNAL"
                             )
                         except ValueError:
                             # Skip low exergy content
-                            logger.debug("XIntelligenceDaemon: Skipping low exergy tweet from @%s",
-                                        tweet.user.screen_name)
+                            logger.debug(
+                                "XIntelligenceDaemon: Skipping low exergy tweet from @%s",
+                                tweet.user.screen_name,
+                            )
                             continue
 
                         if is_significant:
@@ -66,7 +67,7 @@ class XIntelligenceDaemon:
                 await asyncio.sleep(self.interval)
             except Exception as e:
                 logger.error("XIntelligenceDaemon: Error in loop: %s", e)
-                await asyncio.sleep(10) # Backoff on error
+                await asyncio.sleep(10)  # Backoff on error
 
     async def _broadcast_signal(self, tweet: Any, exergy_score: float):
         """Emit X_INTELLIGENCE_SIGNAL to the swarm bus."""
@@ -82,14 +83,14 @@ class XIntelligenceDaemon:
                 "author": tweet.user.screen_name,
                 "verified": tweet.user.is_blue_verified,
                 "exergy": exergy_score,
-                "engagement": {
-                    "likes": tweet.favorite_count,
-                    "retweets": tweet.retweet_count
-                }
-            }
+                "engagement": {"likes": tweet.favorite_count, "retweets": tweet.retweet_count},
+            },
         )
-        logger.info("XIntelligenceDaemon: 📡 Broadcasting high-exergy signal (%.2f) from @%s",
-                    exergy_score, tweet.user.screen_name)
+        logger.info(
+            "XIntelligenceDaemon: 📡 Broadcasting high-exergy signal (%.2f) from @%s",
+            exergy_score,
+            tweet.user.screen_name,
+        )
         await self._bus.publish(signal)
 
     async def stop(self):

@@ -1109,10 +1109,12 @@ dependencies = [
  "alloy",
  "eyre",
  "futures",
+ "hex",
  "pyo3",
  "revm",
  "serde",
  "serde_json",
+ "sha2",
  "tokio",
 ]
 

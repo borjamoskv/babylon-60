@@ -31,9 +31,7 @@ class Random(Agent):
             ]
         )
 
-    def choose_action(
-        self, frames: list[FrameData], latest_frame: FrameData
-    ) -> GameAction:
+    def choose_action(self, frames: list[FrameData], latest_frame: FrameData) -> GameAction:
         """Choose which action the Agent should take, fill in any arguments, and return it."""
         if latest_frame.state in [GameState.NOT_PLAYED, GameState.GAME_OVER]:
             # if game is not started (at init or after GAME_OVER) we need to reset

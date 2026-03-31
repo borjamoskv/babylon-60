@@ -34,6 +34,7 @@ _SOURCE = "agent:cazarecompensas"
 
 class BountyState(str, Enum):
     """Deterministic states for bounty extraction lifecycle."""
+
     DISCOVERED = "DISCOVERED"
     EXTRACTING = "EXTRACTING"
     PENDING_SETTLEMENT = "PENDING_SETTLEMENT"
@@ -94,7 +95,9 @@ class CazarecompensasAgent(BaseAgent):
                 len(self._bounty_states),
             )
         except Exception as e:
-            logger.warning("[%s] Failed to restore known bounties from Ledger: %s", self.agent_id, e)
+            logger.warning(
+                "[%s] Failed to restore known bounties from Ledger: %s", self.agent_id, e
+            )
 
     async def handle_message(self, message: AgentMessage) -> None:
         """Process manual tactical requests."""
@@ -180,7 +183,7 @@ class CazarecompensasAgent(BaseAgent):
         if not bounty_id or self._bounty_states.get(bounty_id) in (
             BountyState.EXTRACTING,
             BountyState.PENDING_SETTLEMENT,
-            BountyState.SETTLED
+            BountyState.SETTLED,
         ):
             return
 
@@ -189,16 +192,27 @@ class CazarecompensasAgent(BaseAgent):
         self._bounty_states[bounty_id] = BountyState.DISCOVERED
 
         if not eval_data["accepted"]:
-            logger.debug("[%s] 📉 REJECTED: %s (Ratio: %.2f)", self.agent_id, bounty["id"], eval_data["ratio"])
+            logger.debug(
+                "[%s] 📉 REJECTED: %s (Ratio: %.2f)",
+                self.agent_id,
+                bounty["id"],
+                eval_data["ratio"],
+            )
             return
 
         # 3. Semantic Validation (Ω₁)
         # If high value, double check with Perplexity or similar
         if eval_data["exergy_estimate"] >= 300.0:
-            logger.info("[%s] 🔍 SEMANTIC VERIFICATION: Validating high-value lead %s", self.agent_id, bounty_id)
+            logger.info(
+                "[%s] 🔍 SEMANTIC VERIFICATION: Validating high-value lead %s",
+                self.agent_id,
+                bounty_id,
+            )
             valid = await self._verify_lead_semantics(bounty)
             if not valid:
-                logger.warning("[%s] 🚫 SEMANTIC FAILURE: Lead %s failed validation.", self.agent_id, bounty_id)
+                logger.warning(
+                    "[%s] 🚫 SEMANTIC FAILURE: Lead %s failed validation.", self.agent_id, bounty_id
+                )
                 return
 
         # 4. Blast Radius / Immune Response
@@ -214,21 +228,24 @@ class CazarecompensasAgent(BaseAgent):
         decision = evaluate_demolition(report, has_snapshot=True, modifies_schema=(difficulty >= 8))
 
         if decision.requires_quarantine:
-            logger.warning("[%s] 🛡️ QUARANTINED: %s | %s", self.agent_id, bounty["id"], decision.reason)
+            logger.warning(
+                "[%s] 🛡️ QUARANTINED: %s | %s", self.agent_id, bounty["id"], decision.reason
+            )
             return
 
         # 5. Execute Extraction
-        logger.info("[%s] ⚡ ACCEPTED: %s (Ratio: %.2f)", self.agent_id, bounty["id"], eval_data["ratio"])
+        logger.info(
+            "[%s] ⚡ ACCEPTED: %s (Ratio: %.2f)", self.agent_id, bounty["id"], eval_data["ratio"]
+        )
         self._bounty_states[bounty_id] = BountyState.EXTRACTING
 
         try:
             res = await self._execute_extraction(bounty, eval_data)
             self._consecutive_failures = 0
             self._bounty_states[bounty_id] = BountyState.PENDING_SETTLEMENT
-            self._pending_settlements.append({
-                "id": bounty_id,
-                "final_yield_applied": res["final_yield_applied"]
-            })
+            self._pending_settlements.append(
+                {"id": bounty_id, "final_yield_applied": res["final_yield_applied"]}
+            )
             await self._persist_bounty_claim(bounty, res)
         except Exception as e:
             logger.error("[%s] ❌ EXTRACTION FAILED: %s | %s", self.agent_id, bounty_id, e)
@@ -238,7 +255,11 @@ class CazarecompensasAgent(BaseAgent):
             if self._consecutive_failures >= 3:
                 penalty = 300.0 * (2.0 ** (self._consecutive_failures - 3))
                 self._circuit_breaker_until = time.time() + penalty
-                logger.error("[%s] CIRCUIT BREAKER TRIPPED! Suppressing hunts for %.1f seconds.", self.agent_id, penalty)
+                logger.error(
+                    "[%s] CIRCUIT BREAKER TRIPPED! Suppressing hunts for %.1f seconds.",
+                    self.agent_id,
+                    penalty,
+                )
 
     async def _verify_lead_semantics(self, bounty: dict[str, Any]) -> bool:
         """Placeholder for external model verification (MCP perplexity_ask)."""
@@ -260,8 +281,7 @@ class CazarecompensasAgent(BaseAgent):
             else:
                 # Gather from multiple sources
                 results = await asyncio.gather(
-                    svc.scan_global(max_results=10),
-                    svc.scan_algora(limit=10)
+                    svc.scan_global(max_results=10), svc.scan_algora(limit=10)
                 )
                 leads = results[0] + results[1]
         except Exception as e:
@@ -269,16 +289,22 @@ class CazarecompensasAgent(BaseAgent):
 
         results = []
         for lead in leads:
-            difficulty_mapped = 8 if lead.difficulty == "high" else (5 if lead.difficulty == "medium" else 2)
-            results.append({
-                "id": f"{lead.repo}#{lead.number}" if lead.number else f"algora:{lead.url[-8:]}",
-                "title": lead.title,
-                "platform": "GitHub" if "github.com" in lead.url else "Algora",
-                "difficulty_score": difficulty_mapped,
-                "reward_usd": lead.reward_usd,
-                "context_lines": 500 if difficulty_mapped >= 5 else 100,
-                "url": lead.url
-            })
+            difficulty_mapped = (
+                8 if lead.difficulty == "high" else (5 if lead.difficulty == "medium" else 2)
+            )
+            results.append(
+                {
+                    "id": f"{lead.repo}#{lead.number}"
+                    if lead.number
+                    else f"algora:{lead.url[-8:]}",
+                    "title": lead.title,
+                    "platform": "GitHub" if "github.com" in lead.url else "Algora",
+                    "difficulty_score": difficulty_mapped,
+                    "reward_usd": lead.reward_usd,
+                    "context_lines": 500 if difficulty_mapped >= 5 else 100,
+                    "url": lead.url,
+                }
+            )
 
         return results
 
@@ -301,11 +327,15 @@ class CazarecompensasAgent(BaseAgent):
 
         # Penalties calculation (Dynamic Scalar Thermodynamics)
         ghost_vector_penalty: Decimal = (
-            Decimal("500.0") if lines == Decimal("0")
-            else (lines * Decimal("0.5")) if (difficulty >= Decimal("5") and base_reward < Decimal("200"))
+            Decimal("500.0")
+            if lines == Decimal("0")
+            else (lines * Decimal("0.5"))
+            if (difficulty >= Decimal("5") and base_reward < Decimal("200"))
             else Decimal("0.0")
         )
-        meta_stability_risk: Decimal = (difficulty ** 2) * Decimal("4.0") if difficulty >= Decimal("8") else Decimal("0.0")
+        meta_stability_risk: Decimal = (
+            (difficulty**2) * Decimal("4.0") if difficulty >= Decimal("8") else Decimal("0.0")
+        )
 
         exergy_base = (difficulty * Decimal("50")) + (lines * Decimal("0.1"))
         exergy_delta = exergy_base + ghost_vector_penalty + meta_stability_risk
@@ -339,7 +369,9 @@ class CazarecompensasAgent(BaseAgent):
             "meta_stability_risk": float(meta_stability_risk),
         }
 
-    async def _execute_extraction(self, bounty: dict[str, Any], evaluation: dict[str, Any]) -> dict[str, Any]:
+    async def _execute_extraction(
+        self, bounty: dict[str, Any], evaluation: dict[str, Any]
+    ) -> dict[str, Any]:
         """Trigger autonomous execution on accepted bounties (Law of Execution Ω₆)."""
         logger.info(
             "[%s] AUTO-EXECUTE: Invoking Sovereign Extraction for %s (Yield: $%.2f)",
@@ -360,7 +392,9 @@ class CazarecompensasAgent(BaseAgent):
             prior_uncertainty=(difficulty * Decimal("50")) + (lines * Decimal("0.1")),
             posterior_uncertainty=Decimal("0.0"),  # Task is solved
             tokens_consumed=max(1, int(float(lines) * 15)),
-            action_risk=ActionRisk.SCHEMA_MUTATION if difficulty >= Decimal("8") else ActionRisk.FILE_WRITE,
+            action_risk=ActionRisk.SCHEMA_MUTATION
+            if difficulty >= Decimal("8")
+            else ActionRisk.FILE_WRITE,
             had_backup=True,
             touched_persistent_state=True,
         )
@@ -387,7 +421,9 @@ class CazarecompensasAgent(BaseAgent):
             "final_yield_applied": float(final_yield),
         }
 
-    async def _persist_bounty_claim(self, bounty: dict[str, Any], exec_data: dict[str, Any]) -> None:
+    async def _persist_bounty_claim(
+        self, bounty: dict[str, Any], exec_data: dict[str, Any]
+    ) -> None:
         """Persist the accepted bounty to the CORTEX ledger tracking Exergy net gain.
 
         Enforces Cryptographic Irreversibility and Auditability (Ω₂, Ω₄).
@@ -419,11 +455,11 @@ class CazarecompensasAgent(BaseAgent):
                     "evaluation_metrics": {
                         "exergy_estimate": evaluation["exergy_estimate"],
                         "exergy_delta": evaluation["exergy_delta"],
-                        "ratio": evaluation["ratio"]
+                        "ratio": evaluation["ratio"],
                     },
                     "shannon_metrics": {
                         "exergy_score": exec_data["shannon_exergy_score"],
-                        "yield_applied": exec_data["final_yield_applied"]
+                        "yield_applied": exec_data["final_yield_applied"],
                     },
                     "claimed_at": now_iso(),
                 },

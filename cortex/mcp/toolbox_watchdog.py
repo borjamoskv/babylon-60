@@ -1,12 +1,12 @@
 """CORTEX Toolbox Watchdog — Subprocess Lifecycle Manager.
 
-Manages the genai-toolbox binary as a child process, auto-restarting
+Manages the Toolbox binary as a child process, auto-restarting
 on crash with exponential backoff. Designed to co-run alongside
 JosuProactiveDaemon.proactive_loop() as a sibling coroutine.
 
 Architecture:
     ToolboxWatchdog.run()
-      └─> _spawn_process()       # Launch genai-toolbox subprocess
+      └─> _spawn_process()       # Launch Toolbox subprocess
             └─> _health_loop()   # Periodic health probes
                   └─> on failure: _restart_with_backoff()
 
@@ -44,7 +44,7 @@ _DEFAULT_DB = Path.home() / ".cortex" / "cortex.db"
 
 
 class ToolboxWatchdog:
-    """Manages genai-toolbox as a supervised child process.
+    """Manages Toolbox as a supervised child process.
 
     Usage:
         watchdog = ToolboxWatchdog()
@@ -86,9 +86,9 @@ class ToolboxWatchdog:
         binary = self._find_binary()
         if not binary:
             logger.error(
-                "🚫 [WATCHDOG] genai-toolbox not found. "
-                "Install: go install "
-                "github.com/googleapis/genai-toolbox@latest",
+                "🚫 [WATCHDOG] toolbox binary not found. "
+                "Install the current Toolbox binary via Go: "
+                "go install github.com/googleapis/genai-toolbox@latest",
             )
             return
 
@@ -153,14 +153,16 @@ class ToolboxWatchdog:
     # ── Internals ─────────────────────────────────────────────────
 
     def _find_binary(self) -> str | None:
-        """Locate genai-toolbox in PATH or ~/go/bin."""
-        found = shutil.which("genai-toolbox")
-        if found:
-            return found
+        """Locate the current Toolbox binary in PATH or ~/go/bin."""
+        for candidate in ("toolbox", "genai-toolbox"):
+            found = shutil.which(candidate)
+            if found:
+                return found
 
-        go_bin = Path.home() / "go" / "bin" / "genai-toolbox"
-        if go_bin.exists():
-            return str(go_bin)
+        for candidate in ("toolbox", "genai-toolbox"):
+            go_bin = Path.home() / "go" / "bin" / candidate
+            if go_bin.exists():
+                return str(go_bin)
 
         return None
 
@@ -184,7 +186,7 @@ class ToolboxWatchdog:
         shutil.move(str(log_file), str(dst1))
 
     def _spawn(self, binary: str) -> None:
-        """Launch the genai-toolbox subprocess."""
+        """Launch the Toolbox subprocess."""
         env = os.environ.copy()
         env["CORTEX_DB"] = str(self._db_path)
 

@@ -141,7 +141,7 @@ class ImmutableVoteLedger:
             await self._release_conn(conn)
 
     async def verify_chain_integrity(self) -> dict[str, Any]:
-        """ Audita toda la cadena de votos. """
+        """Audita toda la cadena de votos."""
         violations = []
         conn = await self._get_conn()
         try:

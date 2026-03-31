@@ -9,7 +9,7 @@ This module provides:
   - classify_entry(): quality scoring per entry
 
 Usage (CLI): cortex guards noqa-report
-Usage (CI):  check_gate_12_noqa_drift() in seals.py
+Usage (CI):  Integrated into Seal 1 (Code Quality) in seals.py
 Usage (monthly): cortex guards noqa-report --since="30 days ago"
 """
 

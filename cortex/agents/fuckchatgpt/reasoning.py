@@ -45,6 +45,7 @@ class PeARLInductor:
 
         from cortex.extensions.llm.manager import LLMManager
         from cortex.extensions.llm.router import IntentProfile
+
         llm = LLMManager()
 
         # AX-042: Fixed bytes at the head for KV-Aware Routing (Prefix Caching)
@@ -64,7 +65,7 @@ class PeARLInductor:
                 prompt=prompt,
                 system="Sovereign ARC-AGI Inductor. Zero-shot 0% Fact Drop. Code ONLY.",
                 temperature=temp,
-                intent=IntentProfile.CODE
+                intent=IntentProfile.CODE,
             )
             if code_str:
                 candidates.append(self._guard_program(code_str))
@@ -146,8 +147,12 @@ except Exception as e:
                         if pred == out:
                             c["passed"] += 1
 
-                        if isinstance(pred, list) and isinstance(out, list) and \
-                           len(pred) == len(out) and len(pred[0]) == len(out[0]):
+                        if (
+                            isinstance(pred, list)
+                            and isinstance(out, list)
+                            and len(pred) == len(out)
+                            and len(pred[0]) == len(out[0])
+                        ):
                             for r_p, r_o in zip(pred, out, strict=True):
                                 for c_p, c_o in zip(r_p, r_o, strict=True):
                                     c["total"] += 1
@@ -181,16 +186,22 @@ class ArcReasoningEngine:
     async def synthesize_and_execute(
         self, train_examples: list[dict], test_input: list[list[int]]
     ) -> list[list[int]]:
-        log_limbic("ARC-3: Iniciando Búsqueda Neuro-Simbólica...",
-                   source="REASONING", vibe="cterm-deep-think")
+        log_limbic(
+            "ARC-3: Iniciando Búsqueda Neuro-Simbólica...",
+            source="REASONING",
+            vibe="cterm-deep-think",
+        )
 
         self.active_program = await self.search_engine.search(train_examples)
 
         # Guard against None
         prog = self.active_program
         if prog and prog.confidence > 0:
-            log_limbic(f"ARC-3: Concepto Cristalizado (Conf: {prog.confidence:.2f})",
-                       source="REASONING", vibe="cterm-exergy")
+            log_limbic(
+                f"ARC-3: Concepto Cristalizado (Conf: {prog.confidence:.2f})",
+                source="REASONING",
+                vibe="cterm-exergy",
+            )
 
             # Local JIT Execution (restricted)
             exec_globals: dict[str, Any] = {"__builtins__": {}}

@@ -30,19 +30,20 @@ from cortex.engine.bicameral import OaxacaEngine
 from cortex.engine.consensus import ConsensusMixin
 from cortex.engine.crystallizer import CrystallizerJIT as CausalCrystallizer
 from cortex.engine.durability import PersistenceSupervisor
+from cortex.engine.evolution import EvolutionEngine
 from cortex.engine.ghost_mixin import GhostMixin
 from cortex.engine.history import HistoryMixin
 from cortex.engine.isolation import ByzantineSandbox, IsolationManager
-from cortex.engine.evolution import EvolutionEngine
 from cortex.engine.memory_mixin import MemoryMixin
-from cortex.engine.pearl import PearlEngine
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
 from cortex.engine.mixins.bicameral_mixin import BicameralMixin
 from cortex.engine.models import row_to_fact  # noqa: F401 — re-exported
+from cortex.engine.pearl import PearlEngine
 from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
 from cortex.engine.transaction_mixin import TransactionMixin
+from cortex.engine.postgres_primary import PostgresPrimaryEngine
 from cortex.identity.alma import AlmaIdentity
 from cortex.ledger.compaction import ShannonCompactor
 from cortex.ops.git_ledger import GitLedgerOps
@@ -104,6 +105,7 @@ class CortexEngine(
         auto_embed: bool = True,
         pool: CortexConnectionPool | None = None,
         writer: SqliteWriteWorker | None = None,
+        turboquant_enabled: bool = True,
     ):
         super().__init__()
         self._db_path = Path(db_path).expanduser()
@@ -111,6 +113,7 @@ class CortexEngine(
         self._auto_embed = auto_embed
         self._pool = pool
         self._writer = writer
+        self.turboquant_enabled = turboquant_enabled
         self._conn: aiosqlite.Connection | None = None
 
         self._vec_available = False
@@ -148,6 +151,8 @@ class CortexEngine(
 
             self.manager = SwarmManager(self)
             self.factory = SwarmFactory(self.manager)
+            if self.turboquant_enabled:
+                logger.info("Swarm-100 L1 Routing enabled (TurboQuant 3-bit mode)")
         except ImportError:
             logger.warning("Swarm Orchestrator not available. Frontier systems limited.")
             self.manager = None
@@ -210,6 +215,50 @@ class CortexEngine(
 
         # Standard persistence (delegates to FactManager)
         return await self.facts.store(*args, **kwargs)
+
+    async def freeze_context_tensor(self, tenant_id: str, key: str, tensor: bytes, ttl: int = 3600):
+        """[Swarm-100] Fast-path routing to L1 cache using raw QJL Tensor bytes (TurboQuant)."""
+        if not self.turboquant_enabled:
+            raise RuntimeError("TurboQuant is disabled")
+        import os
+
+        from cortex.storage.redis_bus import RedisBus
+
+        dsn = os.getenv("REDIS_URL", "redis://localhost:6379")
+        bus = RedisBus(dsn)
+        await bus.connect()
+        try:
+            await bus.set_raw_tensor(tenant_id, key, tensor, ttl)
+
+            # AX-041/AX-100: Record L1 injection to Sovereign Ledger for deterministic accountability
+            if self.ledger:
+                try:
+                    await self.ledger.record_transaction(
+                        project="swarm100",
+                        action="context_freeze",
+                        detail={"void_hash": key, "l1_ttl": ttl},
+                        tenant_id=tenant_id,
+                    )
+                except Exception as exc:
+                    logger.warning("Swarm-100 L1 Audit failed for void-state %s: %s", key, exc)
+        finally:
+            await bus.disconnect()
+
+    async def resume_context_tensor(self, tenant_id: str, key: str) -> bytes | None:
+        """[Swarm-100] Instant resume of QJL Tensor from L1 Working Memory."""
+        if not self.turboquant_enabled:
+            raise RuntimeError("TurboQuant is disabled")
+        import os
+
+        from cortex.storage.redis_bus import RedisBus
+
+        dsn = os.getenv("REDIS_URL", "redis://localhost:6379")
+        bus = RedisBus(dsn)
+        await bus.connect()
+        try:
+            return await bus.get_raw_tensor(tenant_id, key)
+        finally:
+            await bus.disconnect()
 
     @property
     def memory(self) -> Any:

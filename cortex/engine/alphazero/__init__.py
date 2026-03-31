@@ -6,6 +6,6 @@ Enforces zero external inference for continuous local reinforcement learning.
 """
 
 from cortex.engine.alphazero.mcts_core import MCTS, AlphaZeroNode
-from cortex.engine.alphazero.network import PolicyValueNetwork, LocalHeuristicNetwork
+from cortex.engine.alphazero.network import LocalHeuristicNetwork, PolicyValueNetwork
 
 __all__ = ["MCTS", "AlphaZeroNode", "PolicyValueNetwork", "LocalHeuristicNetwork"]

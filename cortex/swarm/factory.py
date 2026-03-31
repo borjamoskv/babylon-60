@@ -18,6 +18,7 @@ logger = logging.getLogger("cortex.swarm.factory")
 @dataclass
 class SwarmCycle:
     """Represents a discrete cycle of swarm activity (Ω-Architecture)."""
+
     id: str
     quadrant: str
     size: int
@@ -128,7 +129,9 @@ class SwarmFactory:
                 skill = matching_skills[index % len(matching_skills)]
                 actuator = SkillActuator(skill)
                 self.manager.register_actuator(agent_id, actuator)
-                logger.info("SwarmFactory: Enlisted Skill Specialist '%s' (%s)", agent_id, skill.name)
+                logger.info(
+                    "SwarmFactory: Enlisted Skill Specialist '%s' (%s)", agent_id, skill.name
+                )
 
             # Fallback to JIT specialist
             else:
@@ -159,10 +162,7 @@ class SwarmFactory:
         return list(agent_ids)
 
     async def generate_cycle(
-        self,
-        quadrant: str,
-        size: int = 3,
-        task_context: dict[str, Any] | None = None
+        self, quadrant: str, size: int = 3, task_context: dict[str, Any] | None = None
     ) -> SwarmCycle:
         """
         Generates a consolidated SwarmCycle (Ω-Autonomic).
@@ -191,7 +191,7 @@ class SwarmFactory:
                     "size": size,
                     "agent_ids": agent_ids,
                     "task_context": task_context or {},
-                }
+                },
             )
 
         return SwarmCycle(
@@ -200,7 +200,7 @@ class SwarmFactory:
             size=size,
             agent_ids=agent_ids,
             parent_fact_id=parent_fact_id,
-            metadata=task_context or {}
+            metadata=task_context or {},
         )
 
     async def recruit_full_swarm(self) -> dict[str, list[str]]:
@@ -217,7 +217,7 @@ class SwarmFactory:
         results = await asyncio.gather(*tasks)
 
         # Explicit type hinting for linter
-        squad_results: list[list[str]] = list(results) # type: ignore
+        squad_results: list[list[str]] = list(results)  # type: ignore
 
         squads = {
             "P0": squad_results[0],
@@ -225,7 +225,9 @@ class SwarmFactory:
             "P2": squad_results[2],
         }
 
-        logger.info("SwarmFactory: 100 Agents recruited across %d squads (Ω-Structure).", len(squads))
+        logger.info(
+            "SwarmFactory: 100 Agents recruited across %d squads (Ω-Structure).", len(squads)
+        )
         return squads
 
     async def recruit_by_capability(self, capability: str) -> str:
@@ -239,19 +241,27 @@ class SwarmFactory:
         skills = self.registry.list_by_category(capability)
         if not skills:
             # Try keyword search
-            skills = [s for s in self.registry.skills.values() if capability.lower() in s.name.lower()]
+            skills = [
+                s for s in self.registry.skills.values() if capability.lower() in s.name.lower()
+            ]
 
         if skills:
-            skill = skills[0] # Best match
+            skill = skills[0]  # Best match
             agent_id = f"auto-{skill.name}"
             actuator = SkillActuator(skill)
             self.manager.register_actuator(agent_id, actuator)
-            logger.info("SwarmFactory: Autonomic recruitment for capability '%s' -> %s", capability, agent_id)
+            logger.info(
+                "SwarmFactory: Autonomic recruitment for capability '%s' -> %s",
+                capability,
+                agent_id,
+            )
             self._capability_cache[capability] = agent_id
             return agent_id
 
         # JIT Fallback logic (Ω₁)
-        logger.info("SwarmFactory: Capability '%s' not found. Forging JIT specialist...", capability)
+        logger.info(
+            "SwarmFactory: Capability '%s' not found. Forging JIT specialist...", capability
+        )
         return await self._forge_jit_specialist(capability)
 
     async def _forge_jit_specialist(self, capability: str) -> str:
@@ -261,7 +271,9 @@ class SwarmFactory:
             return agent_id
 
         if self.router:
-            actuator = LLMActuator(self.router, model_id="gemini-3-pro", intent=f"jit_specialist_{capability}")
+            actuator = LLMActuator(
+                self.router, model_id="gemini-3-pro", intent=f"jit_specialist_{capability}"
+            )
             self.manager.register_actuator(agent_id, actuator)
             self._capability_cache[capability] = agent_id
             return agent_id

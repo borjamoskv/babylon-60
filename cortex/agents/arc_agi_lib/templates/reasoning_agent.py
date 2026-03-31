@@ -3,7 +3,7 @@ import io
 import json
 import logging
 import textwrap
-from typing import Any, Dict, List, Literal
+from typing import Any, Literal
 
 from arcengine import FrameData, GameAction
 from openai import OpenAI
@@ -53,8 +53,8 @@ class ReasoningAgent(ReasoningLLM):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        self.history: List[ReasoningActionResponse] = []
-        self.screen_history: List[bytes] = []
+        self.history: list[ReasoningActionResponse] = []
+        self.screen_history: list[bytes] = []
         self.max_screen_history = 10  # Limit screen history to prevent memory leak
         self.client = OpenAI()
 
@@ -63,9 +63,7 @@ class ReasoningAgent(ReasoningLLM):
         self.history = []
         self.screen_history = []
 
-    def generate_grid_image_with_zone(
-        self, grid: List[List[int]], cell_size: int = 40
-    ) -> bytes:
+    def generate_grid_image_with_zone(self, grid: list[list[int]], cell_size: int = 40) -> bytes:
         """Generate PIL image of the grid with colored cells and zone coordinates."""
         if not grid or not grid[0]:
             # Create empty image
@@ -245,7 +243,7 @@ Hint:
         )
 
     def call_llm_with_structured_output(
-        self, messages: List[Dict[str, Any]]
+        self, messages: list[dict[str, Any]]
     ) -> ReasoningActionResponse:
         """Call LLM with structured output parsing for reasoning agent."""
         try:
@@ -258,9 +256,7 @@ Hint:
                 tool_choice="required",
             )
 
-            self.track_tokens(
-                response.usage.total_tokens, response.choices[0].message.content
-            )
+            self.track_tokens(response.usage.total_tokens, response.choices[0].message.content)
             self.capture_reasoning_from_response(response)
 
             response_message = response.choices[0].message
@@ -290,7 +286,7 @@ Hint:
         latest_action = self.history[-1] if self.history else None
 
         # Build user message with images
-        user_message_content: List[Dict[str, Any]] = []
+        user_message_content: list[dict[str, Any]] = []
 
         # Use the last screen from history as the 'previous_screen'
         previous_screen = self.screen_history[-1] if self.screen_history else None
@@ -327,7 +323,7 @@ Hint:
         )
 
         # Build messages
-        messages: List[Dict[str, Any]] = [
+        messages: list[dict[str, Any]] = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_message_content},
         ]
@@ -342,9 +338,7 @@ Hint:
 
         return result
 
-    def choose_action(
-        self, frames: List[FrameData], latest_frame: FrameData
-    ) -> GameAction:
+    def choose_action(self, frames: list[FrameData], latest_frame: FrameData) -> GameAction:
         """Choose action using parent class tool calling with reasoning enhancement."""
         if latest_frame.full_reset:
             self.clear_history()

@@ -1,5 +1,6 @@
 use pyo3::prelude::*;
 use std::collections::HashSet;
+use sha2::{Sha256, Digest};
 
 #[pyfunction]
 fn move_grid(grid: Vec<Vec<u8>>, dx: i32, dy: i32) -> PyResult<Vec<Vec<u8>>> {
@@ -143,6 +144,35 @@ fn get_objects(grid: Vec<Vec<u8>>) -> PyResult<Vec<PyObject>> {
     })
 }
 
+#[pyfunction]
+fn compute_tx_hash_fast(
+    prev_hash: &str,
+    project: &str,
+    action: &str,
+    detail_json: &str,
+    timestamp: &str,
+) -> PyResult<String> {
+    let mut hasher = Sha256::new();
+    hasher.update(prev_hash.as_bytes());
+    hasher.update(b"\x00");
+    hasher.update(project.as_bytes());
+    hasher.update(b"\x00");
+    hasher.update(action.as_bytes());
+    hasher.update(b"\x00");
+    hasher.update(detail_json.as_bytes());
+    hasher.update(b"\x00");
+    hasher.update(timestamp.as_bytes());
+    
+    Ok(hex::encode(hasher.finalize()))
+}
+
+#[pyfunction]
+fn compute_fact_hash_fast(content: &str) -> PyResult<String> {
+    let mut hasher = Sha256::new();
+    hasher.update(content.as_bytes());
+    Ok(hex::encode(hasher.finalize()))
+}
+
 #[pymodule]
 fn cortex_rust(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(move_grid, m)?)?;
@@ -150,5 +180,7 @@ fn cortex_rust(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(reflect_grid, m)?)?;
     m.add_function(wrap_pyfunction!(scale_grid, m)?)?;
     m.add_function(wrap_pyfunction!(get_objects, m)?)?;
+    m.add_function(wrap_pyfunction!(compute_tx_hash_fast, m)?)?;
+    m.add_function(wrap_pyfunction!(compute_fact_hash_fast, m)?)?;
     Ok(())
 }

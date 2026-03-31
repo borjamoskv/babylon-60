@@ -10,6 +10,7 @@ from pathlib import Path
 
 logger = logging.getLogger("cortex.soul")
 
+
 class SoulStore:
     """Persistence layer for Agent Souls."""
 

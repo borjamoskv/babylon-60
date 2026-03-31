@@ -161,9 +161,7 @@ def snapshot_skill(
         click.echo(json.dumps(payload, indent=2, ensure_ascii=False))
         return
 
-    click.echo(
-        f"Stored KPI snapshot for {skill.name} as fact #{fact_id} in project '{project}'"
-    )
+    click.echo(f"Stored KPI snapshot for {skill.name} as fact #{fact_id} in project '{project}'")
 
 
 @skills_cmds.command("history")

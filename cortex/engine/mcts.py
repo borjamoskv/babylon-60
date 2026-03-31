@@ -34,7 +34,7 @@ class MCTSNode:
         state: Mapping[str, Any],
         intent: str,
         parent: MCTSNode | None = None,
-        action: Any = None
+        action: Any = None,
     ):
         self.state = state
         self.intent = intent
@@ -70,6 +70,7 @@ class TestTimeComputeActuator:
     def __init__(self, legion=None, iterations: int = 10, batch_size: int = 3):
         if legion is None:
             from cortex.engine.legion import LEGION_OMEGA
+
             self.legion = LEGION_OMEGA
         else:
             self.legion = legion
@@ -80,8 +81,10 @@ class TestTimeComputeActuator:
         """
         Execute parallelized MCTS Test-Time Compute loop.
         """
-        msg = (f"🚀 Iniciando MCTS Active Inference ({self.iterations} iters, "
-               f"batch={self.batch_size})...")
+        msg = (
+            f"🚀 Iniciando MCTS Active Inference ({self.iterations} iters, "
+            f"batch={self.batch_size})..."
+        )
         log_limbic(msg, source="MCTS", vibe="cterm-exergy")
 
         root = MCTSNode(state=context, intent=intent)
@@ -120,9 +123,9 @@ class TestTimeComputeActuator:
 
             # 2. Parallel Simulation (Forge Batch)
             log_motor(
-                f"MCTS Batch {batch_idx//self.batch_size + 1} | Size: {len(batch_tasks)}",
+                f"MCTS Batch {batch_idx // self.batch_size + 1} | Size: {len(batch_tasks)}",
                 action="MCTS_BATCH_SIM",
-                vibe="cterm-sys"
+                vibe="cterm-sys",
             )
 
             results = await asyncio.gather(*batch_tasks)
@@ -133,10 +136,7 @@ class TestTimeComputeActuator:
 
                 # Expansion
                 new_node = MCTSNode(
-                    state=leaf_node.state,
-                    intent=intent,
-                    parent=leaf_node,
-                    action=result.final_code
+                    state=leaf_node.state, intent=intent, parent=leaf_node, action=result.final_code
                 )
                 leaf_node.children.append(new_node)
 
@@ -158,10 +158,9 @@ class TestTimeComputeActuator:
                     curr = curr.parent
 
                 # Track best
-                is_better_vulns = (result.final_code and vulns < min_vulns)
-                is_better_exergy = (
-                    best_result is None or
-                    (vulns == min_vulns and result.exergy > best_result.exergy)
+                is_better_vulns = result.final_code and vulns < min_vulns
+                is_better_exergy = best_result is None or (
+                    vulns == min_vulns and result.exergy > best_result.exergy
                 )
 
                 if result.success or is_better_vulns or is_better_exergy:
@@ -193,12 +192,13 @@ class TestTimeComputeActuator:
             success=False,
             final_code="",
             cycles=self.iterations,
-            vulnerabilities=["MCTS_FAILED_TO_CONVERGE"]
+            vulnerabilities=["MCTS_FAILED_TO_CONVERGE"],
         )
 
 
 class KineticActuator(TestTimeComputeActuator):
     """Alias for TestTimeComputeActuator specializing in Kinetic Common Sense."""
+
     pass
 
 

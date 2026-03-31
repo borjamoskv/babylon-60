@@ -6,15 +6,15 @@ from queue import Queue
 
 import click
 from rich.console import Console
-from rich.panel import Panel
 from rich.live import Live
+from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
 import cortex.agents.arc_agi_agent as _agent_reg  # noqa: F401 # Register CortexArcAgent
 from cortex.agents.arc_agi_3.agent import ARCAgent
-from cortex.agents.arc_agi_lib import AVAILABLE_AGENTS
 from cortex.agents.arc_agi_agent import CortexArcAgent
+from cortex.agents.arc_agi_lib import AVAILABLE_AGENTS
 
 # Ensure the agent is registered for Swarm
 AVAILABLE_AGENTS["cortexarcagent"] = CortexArcAgent
@@ -41,20 +41,20 @@ def create_limbic_dashboard(step: str, status: str, thoughts: list[str]) -> Pane
     table.add_row(f"[bold blue]Step:[/bold blue] {step}")
     table.add_row(f"[bold blue]Status:[/bold blue] {status}")
     table.add_row("")
-    
+
     thought_text = Text()
     # Show last 5 thoughts
     start_idx = max(0, len(thoughts) - 5)
     for i in range(start_idx, len(thoughts)):
         thought_text.append(f"• {thoughts[i]}\n", style="italic cyan")
-    
+
     table.add_row(Panel(thought_text, title="[dim]Thought Process[/dim]", border_style="dim"))
 
     return Panel(
         table,
         title="[bold white]CORTEX ARC-AGI V3[/bold white]",
         border_style="blue",
-        padding=(1, 2)
+        padding=(1, 2),
     )
 
 
@@ -80,17 +80,19 @@ def solve_cmd(task_file: Path, model: str):
     thought_queue = Queue()
     handler = LimbicHandler(thought_queue)
     handler.setFormatter(logging.Formatter("%(message)s"))
-    
+
     # Attach to limbic logger (Ω3)
     limbic_logger = logging.getLogger("cortex.engine.limbic")
     limbic_logger.addHandler(handler)
     limbic_logger.setLevel(logging.INFO)
 
-    console.print(Panel(
-        f"Task: [bold]{task_file.name}[/bold]\nAX-046: JIT Concept Formation Active",
-        title="[bold green]Sovereign Solver Loaded[/bold green]",
-        border_style="green"
-    ))
+    console.print(
+        Panel(
+            f"Task: [bold]{task_file.name}[/bold]\nAX-046: JIT Concept Formation Active",
+            title="[bold green]Sovereign Solver Loaded[/bold green]",
+            border_style="green",
+        )
+    )
 
     thoughts = []
 
@@ -100,29 +102,36 @@ def solve_cmd(task_file: Path, model: str):
             create_limbic_dashboard("Synthesis", "Synthesizing PeARL Program...", thoughts),
             refresh_per_second=4,
         ) as live:
-            
+
             async def run_and_track():
                 task = asyncio.create_task(agent.run(task_data))
                 while not task.done():
                     while not thought_queue.empty():
                         thoughts.append(thought_queue.get())
-                    live.update(create_limbic_dashboard("Reasoning", "Exploring Program Space...", thoughts))
+                    live.update(
+                        create_limbic_dashboard("Reasoning", "Exploring Program Space...", thoughts)
+                    )
                     await asyncio.sleep(0.1)
                 return await task
 
-            from typing import Any, cast
+            from typing import cast
+
             result = cast(list[list[int]], asyncio.run(run_and_track()))
-            live.update(create_limbic_dashboard("Execution", "Applying Transformation to Grid...", thoughts))
+            live.update(
+                create_limbic_dashboard("Execution", "Applying Transformation to Grid...", thoughts)
+            )
 
         console.print("\n[bold green]✅ Prediction Generated[/bold green]")
-        
+
         prog = agent.reasoning.active_program
         if prog and prog.confidence > 0.5:
-            console.print(Panel(
-                Text(prog.source_code, style="green"),
-                title=f"[bold white]Crystallized Program (Conf: {prog.confidence:.2f})[/bold white]",
-                border_style="white"
-            ))
+            console.print(
+                Panel(
+                    Text(prog.source_code, style="green"),
+                    title=f"[bold white]Crystallized Program (Conf: {prog.confidence:.2f})[/bold white]",
+                    border_style="white",
+                )
+            )
 
         console.print(f"Resulting Grid: {len(result)}x{len(result[0]) if result else 0}")
 
@@ -147,14 +156,15 @@ def solve_cmd(task_file: Path, model: str):
 def run_cmd(game: str, agent: str, url: str):
     """Run an ARC game using the Swarm orchestrator."""
     from cortex.agents.arc_agi_lib import Swarm
-    import cortex.agents.arc_agi_agent  # Register CortexArcAgent
 
-    console.print(Panel(
-        f"Game: [bold]{game}[/bold]\nAgent: [bold]{agent}[/bold]\n"
-        "AX-044: Kinetic Intelligence Active",
-        title="[bold blue]Sovereign Swarm Initializing[/bold blue]",
-        border_style="blue"
-    ))
+    console.print(
+        Panel(
+            f"Game: [bold]{game}[/bold]\nAgent: [bold]{agent}[/bold]\n"
+            "AX-044: Kinetic Intelligence Active",
+            title="[bold blue]Sovereign Swarm Initializing[/bold blue]",
+            border_style="blue",
+        )
+    )
 
     try:
         swarm = Swarm(agent=agent, games=[game], ROOT_URL=url)

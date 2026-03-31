@@ -2,12 +2,14 @@
 Migration: mig_mutation_columns
 Adds quarantined_at, quarantine_reason, and tombstoned_at to the facts table.
 """
+
 import logging
 import sqlite3
 
 import aiosqlite
 
 logger = logging.getLogger("cortex.migrations")
+
 
 async def upgrade(conn: aiosqlite.Connection) -> None:
     for col, col_def in [
@@ -21,6 +23,7 @@ async def upgrade(conn: aiosqlite.Connection) -> None:
             if "duplicate column name" not in str(e).lower():
                 raise
     logger.info("mig_mutation_columns: Added new ghost columns to facts table")
+
 
 async def downgrade(conn: aiosqlite.Connection) -> None:
     for col in ["quarantined_at", "quarantine_reason", "tombstoned_at"]:

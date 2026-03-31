@@ -168,6 +168,32 @@ class SkillActuator(ActuatorProtocol):
             task_id or "anon",
         )
 
+        # 1.5 O(1) Tensor Rehydration (Backward Compatible Subprocess Environment)
+        if "_cortex_void_ptr" in context:
+            tensor_id = context["_cortex_void_ptr"]
+            try:
+                import json
+                import os
+
+                from cortex.storage.redis_bus import RedisBus
+
+                dsn = os.getenv("REDIS_URL", "redis://localhost:6379")
+                bus = RedisBus(dsn)
+                await bus.connect()
+                try:
+                    raw_ctx = await bus.get_raw_tensor("cortex", tensor_id)
+                    if raw_ctx:
+                        context = json.loads(raw_ctx.decode("utf-8"))
+                        logger.debug("SkillActuator: Resumed Void-State from L1 [%s]", tensor_id)
+                finally:
+                    await bus.disconnect()
+            except Exception as e:
+                logger.warning(
+                    "SkillActuator: Void-State Tensor Resume failed, ignoring pointer: %s", e
+                )
+
+        resolved_context = context
+
         canonical_response = self._build_canonical_kpi_response()
         if canonical_response is not None:
             return canonical_response
@@ -190,9 +216,9 @@ class SkillActuator(ActuatorProtocol):
 
         env = os.environ.copy()
         env["CORTEX_TASK"] = task
-        if context:
+        if resolved_context:
             try:
-                env["CORTEX_CONTEXT"] = json.dumps(context)
+                env["CORTEX_CONTEXT"] = json.dumps(resolved_context)
             except Exception as e:
                 logger.warning("SkillActuator: failed to serialize context: %s", e)
 

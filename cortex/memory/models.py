@@ -49,6 +49,7 @@ class ReasoningPathFingerprint:
     structural_hash: str = ""  # Hash of the topology + content types
     drift_score: float = 0.0  # Deviation from user's prior CognitiveFingerprint
 
+
 @dataclass()
 class CausalEpisode:
     """A DAG of causally-linked facts forming a coherent temporal episode.

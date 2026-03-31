@@ -117,7 +117,9 @@ class LinkedInProbe(BaseProbe):
         "?keywords={query}&f_TPR=r86400&sortBy=DD&start={start}"
     )
 
-    async def scan(self, query: str = "data entry OR office manager", limit: int = 50) -> list[ProspectSignal]:
+    async def scan(
+        self, query: str = "data entry OR office manager", limit: int = 50
+    ) -> list[ProspectSignal]:
         signals: dict[str, list[str]] = {}
         encoded = quote_plus(query)
         for start in range(0, min(limit, 100), 25):
@@ -127,9 +129,7 @@ class LinkedInProbe(BaseProbe):
                 break
 
             # Parse company names + job titles from LinkedIn job cards
-            companies = re.findall(
-                r'"companyName"\s*:\s*"([^"]{3,80})"', html
-            ) or re.findall(
+            companies = re.findall(r'"companyName"\s*:\s*"([^"]{3,80})"', html) or re.findall(
                 r'class="job-search-card__subtitle[^"]*"[^>]*>\s*<a[^>]*>([^<]{3,60})</a>',
                 html,
             )
@@ -274,7 +274,9 @@ class IndeedProbe(BaseProbe):
 
     _SEARCH_URL = "https://www.indeed.com/jobs?q={query}&sort=date&limit=25&fromage=3"
 
-    async def scan(self, query: str = "office manager OR data entry", limit: int = 30) -> list[ProspectSignal]:
+    async def scan(
+        self, query: str = "office manager OR data entry", limit: int = 30
+    ) -> list[ProspectSignal]:
         encoded = quote_plus(query)
         url = self._SEARCH_URL.format(query=encoded)
         html = await _fetch(url)

@@ -53,6 +53,18 @@ class ScraperEngine:
         Returns:
             ScrapeResult with extracted content or error details.
         """
+        from cortex.http import validate_url, SSRFBlockedError
+
+        try:
+            request.url = validate_url(request.url)
+        except SSRFBlockedError as e:
+            return ScrapeResult.from_error(
+                url=request.url,
+                error=f"SSRF Blocked: {e}",
+                strategy=request.strategy,
+                elapsed_ms=0,
+            )
+
         # Robots.txt compliance
         if request.respect_robots:
             allowed = await check_robots_txt(request.url)
@@ -175,6 +187,14 @@ class ScraperEngine:
             List of discovered URLs.
         """
         LOG.info("🗺️ [MAP] Mapping site: %s (depth=%d)", url, max_depth)
+
+        from cortex.http import validate_url, SSRFBlockedError
+
+        try:
+            url = validate_url(url)
+        except SSRFBlockedError as e:
+            LOG.error("🗺️ [MAP] SSRF Blocked: %s", e)
+            return []
 
         discovered: set[str] = set()
         to_visit: list[tuple[str, int]] = [(url, 0)]

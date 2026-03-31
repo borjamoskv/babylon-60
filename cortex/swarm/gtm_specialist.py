@@ -119,8 +119,8 @@ class GTMSpecialist(SovereignSpecialist):
     DISCOUNT_MAX_PCT = 15.0
 
     # Conversion assumptions (conservative)
-    PROSPECT_TO_DEMO_RATE = 0.30   # 30% of leads accept demo
-    DEMO_TO_CLOSE_RATE = 0.20      # 20% of demos convert
+    PROSPECT_TO_DEMO_RATE = 0.30  # 30% of leads accept demo
+    DEMO_TO_CLOSE_RATE = 0.20  # 20% of demos convert
 
     # ── Fallback targets when Perplexity is unavailable ───────────────────
 
@@ -217,8 +217,7 @@ class GTMSpecialist(SovereignSpecialist):
             # Aggregate pipeline metrics
             total_pipeline_value = sum(ld.proposed_tier_eur for ld in close_leads)
             weighted_ev = sum(
-                ld.proposed_tier_eur * ld.confidence * self.DEMO_TO_CLOSE_RATE
-                for ld in close_leads
+                ld.proposed_tier_eur * ld.confidence * self.DEMO_TO_CLOSE_RATE for ld in close_leads
             )
 
             # EV gate on the full pipeline
@@ -383,9 +382,7 @@ class GTMSpecialist(SovereignSpecialist):
 
     # ── Phase 3: Close ────────────────────────────────────────────────────
 
-    async def _generate_close_sequences(
-        self, demo_leads: list[Lead], dry_run: bool
-    ) -> list[Lead]:
+    async def _generate_close_sequences(self, demo_leads: list[Lead], dry_run: bool) -> list[Lead]:
         """
         Apply the Sierra-AI close pattern:
           - Stochastic discount within [DISCOUNT_MIN_PCT, DISCOUNT_MAX_PCT]
@@ -401,9 +398,7 @@ class GTMSpecialist(SovereignSpecialist):
         for lead in close_leads:
             # Stochastic discount — locked once generated
             lead.discount_pct = self._generate_discount()
-            discounted_price = int(
-                lead.proposed_tier_eur * (1 - lead.discount_pct / 100)
-            )
+            discounted_price = int(lead.proposed_tier_eur * (1 - lead.discount_pct / 100))
             lead.stripe_link = self._generate_stripe_link(lead, discounted_price, dry_run)
             lead.status = "closing" if not dry_run else "close_draft"
 
@@ -419,21 +414,11 @@ class GTMSpecialist(SovereignSpecialist):
         Stochastic discount within bounded range.
         Uses uniform distribution — simple, auditable.
         """
-        return round(
-            random.uniform(self.DISCOUNT_MIN_PCT, self.DISCOUNT_MAX_PCT), 1
-        )
+        return round(random.uniform(self.DISCOUNT_MIN_PCT, self.DISCOUNT_MAX_PCT), 1)
 
-    def _generate_stripe_link(
-        self, lead: Lead, discounted_price: int, dry_run: bool
-    ) -> str:
+    def _generate_stripe_link(self, lead: Lead, discounted_price: int, dry_run: bool) -> str:
         """Generate a Stripe payment link for the lead."""
         slug = lead.company.lower().replace(" ", "-").replace(".", "")[:30]
         if dry_run:
-            return (
-                f"https://buy.stripe.com/cortex-agent-{slug}"
-                f"-{discounted_price}eur [DRAFT]"
-            )
-        return (
-            f"https://buy.stripe.com/cortex-agent-{slug}"
-            f"-{discounted_price}eur"
-        )
+            return f"https://buy.stripe.com/cortex-agent-{slug}-{discounted_price}eur [DRAFT]"
+        return f"https://buy.stripe.com/cortex-agent-{slug}-{discounted_price}eur"

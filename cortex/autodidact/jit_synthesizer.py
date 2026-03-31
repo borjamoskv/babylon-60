@@ -20,7 +20,7 @@ try:
 except ImportError:  # pragma: no cover
     torch = None  # type: ignore[assignment]
 
-from cortex.autodidact.dual_ledger import DualLedger, TxType
+from cortex.autodidact.dual_ledger import DualLedger
 from cortex.engine.pearl import PearlEngine
 from cortex.utils.errors import PearlError
 
@@ -175,7 +175,11 @@ class JITSynthesizer:
 
         logger.info(
             "JIT-SYN [%s] norm=%.4f device=%s %.1fms → %s",
-            concept_name, norm, self.device_name, elapsed, tx_hash[:12],
+            concept_name,
+            norm,
+            self.device_name,
+            elapsed,
+            tx_hash[:12],
         )
 
         return SynthesisResult(

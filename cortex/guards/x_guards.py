@@ -7,6 +7,7 @@ from cortex.utils.canonical import compute_tx_hash
 
 logger = logging.getLogger("cortex.guards.x_intelligence")
 
+
 class XForensicGuard:
     """Forensic-Grade X Intelligence Guard (AX-033/Ω₁₃).
 
@@ -63,9 +64,7 @@ class XForensicGuard:
         # 4. Anomaly detection: Zero content but high metrics
         likes = meta.get("favorite_count", 0)
         if not content.strip() and likes > 100:
-            raise ValueError(
-                "[AX-033] Inconsistent X Fact: High engagement but empty content."
-            )
+            raise ValueError("[AX-033] Inconsistent X Fact: High engagement but empty content.")
 
         # 5. Content length gate
         if len(content) > 10000:  # X supports long posts, but 10k+ is suspicious

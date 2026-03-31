@@ -56,12 +56,14 @@ class SovereignBrowserAgent:
                     LOG.info("BROWSER-Ω: Objective complete. Result: %s", action.get("result"))
                     break
                 elif cmd == "click":
-                    cortex_id = action.get("cortex_id")
-                    await self.engine.click(int(cortex_id))  # type: ignore[reportArgumentType]
+                    cortex_id = self._extract_cortex_id(action)
+                    await self.engine.click(cortex_id)
                 elif cmd == "type":
-                    cortex_id = action.get("cortex_id")
+                    cortex_id = self._extract_cortex_id(action)
                     text = action.get("text")
-                    await self.engine.type(int(cortex_id), text)  # type: ignore[reportArgumentType]
+                    if not isinstance(text, str):
+                        raise ValueError("BROWSER-Ω: Type action requires a string 'text' field.")
+                    await self.engine.type(cortex_id, text)
                 elif cmd == "goto":
                     url = action.get("url")
                     await self.engine.goto(url)  # type: ignore[reportArgumentType]
@@ -81,6 +83,21 @@ class SovereignBrowserAgent:
         finally:
             await self.engine.stop()
 
+    @staticmethod
+    def _extract_cortex_id(action: dict[str, Any]) -> int:
+        """Return the target element id from an action payload.
+
+        Older prompts and some models may emit ``id`` instead of ``cortex_id``.
+        We normalize both to keep the browser loop resilient.
+        """
+        raw_id = action.get("cortex_id", action.get("id"))
+        if raw_id is None:
+            raise ValueError("BROWSER-Ω: Missing 'cortex_id' in action payload.")
+        try:
+            return int(raw_id)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"BROWSER-Ω: Invalid cortex_id value: {raw_id!r}") from exc
+
     async def _decide_next_action(self, dom_tree: str) -> dict[str, Any]:
         """Provides the LLM with the context and gets the next action."""
 
@@ -94,7 +111,7 @@ You must respond ONLY with a JSON object representing your next action. No forma
 
 Actions:
 1. Click an element: {"cmd": "click", "cortex_id": 12}
-2. Type into an element: {"cmd": "type", "id": 15, "text": "query"}
+2. Type into an element: {"cmd": "type", "cortex_id": 15, "text": "query"}
 3. Navigate to a URL: {"cmd": "goto", "url": "https://example.com"}
 4. Wait for page to load: {"cmd": "wait", "seconds": 2}
 5. Objective achieved: {"cmd": "done", "result": "Extracted information here"}

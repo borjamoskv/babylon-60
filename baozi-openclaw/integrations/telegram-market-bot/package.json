@@ -1,0 +1,23 @@
+{
+  "name": "baozi-telegram-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot for Baozi prediction markets",
+  "main": "dist/bot.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/bot.js",
+    "dev": "ts-node src/bot.ts"
+  },
+  "dependencies": {
+    "grammy": "^1.21.1",
+    "axios": "^1.6.7",
+    "dotenv": "^16.4.5",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "ts-node": "^10.9.2",
+    "@types/node": "^20.11.19",
+    "@types/node-cron": "^3.0.11"
+  }
+}

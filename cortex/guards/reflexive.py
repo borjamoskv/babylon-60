@@ -10,6 +10,7 @@ import os
 
 logger = logging.getLogger("cortex.guards.reflexive")
 
+
 class ReflexiveGuard:
     """
     Implements autonomous reflexivity (Ω4).
@@ -48,23 +49,21 @@ class ReflexiveGuard:
         if total_lines == 0:
             return 1.0
 
-        logic_lines = [l for l in lines if l.strip() and not l.strip().startswith(("#", '"""', "'''"))]
+        logic_lines = [
+            l for l in lines if l.strip() and not l.strip().startswith(("#", '"""', "'''"))
+        ]
         density = len(logic_lines) / total_lines
         return density
 
     def audit_system(self) -> dict[str, Any]:
         """Runs a full reflexive audit of the CORTEX core."""
-        report = {
-            "ghosts": self.scan_for_ghosts(),
-            "metrics": {},
-            "status": "STABLE"
-        }
+        report = {"ghosts": self.scan_for_ghosts(), "metrics": {}, "status": "STABLE"}
 
         # Scan core files
         core_files = [
             "cortex/engine_optimized.py",
             "cortex/guards/x_guards.py",
-            "cortex/swarm/manager.py"
+            "cortex/swarm/manager.py",
         ]
 
         for f in core_files:
@@ -75,6 +74,7 @@ class ReflexiveGuard:
                     report["status"] = "DEGRADING"
 
         return report
+
 
 if __name__ == "__main__":
     guard = ReflexiveGuard()

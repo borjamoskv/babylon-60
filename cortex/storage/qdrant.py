@@ -17,6 +17,7 @@ This scales perfectly to 10k+ tenants.
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any, Final, Protocol, runtime_checkable
 
 from cortex.storage.env import get_qdrant_api_key, get_qdrant_url
@@ -27,9 +28,11 @@ logger = logging.getLogger("cortex.storage.qdrant")
 
 # Vector dimension (all-MiniLM-L6-v2)
 VECTOR_DIM: Final[int] = 384
+VOID_DIM: Final[int] = 8192  # Default arbitrary tensor projection vector size for QJL
 
 # Single collection name for payload-based partitioning
 MAIN_COLLECTION: Final[str] = "cortex_nodes"
+VOID_COLLECTION: Final[str] = "cortex_void_states"
 
 
 # ─── Protocol ───────────────────────────────────────────────────────
@@ -95,6 +98,9 @@ class QdrantVectorBackend:
         self._dim = dim
         self._client: Any = None
         self._collection_ready: bool = False
+        self._void_ready: bool = False
+        self._mmap_enabled: bool = os.environ.get("CORTEX_MMAP_VOID", "true").lower() == "true"
+        self._mmap_backend: Any | None = None
 
     async def connect(self) -> None:
         """Initialize the Qdrant client."""
@@ -114,6 +120,13 @@ class QdrantVectorBackend:
             api_key=self._api_key,
         )
         logger.info("Qdrant: Client initialized.")
+
+        if self._mmap_enabled:
+            from cortex.storage.mmap_tensor import MmapVoidStateBackend
+            mmap_dir = os.environ.get("CORTEX_DB_PATH", os.path.join(os.getcwd(), ".cortex_data"))
+            self._mmap_backend = MmapVoidStateBackend(storage_dir=mmap_dir)
+            await self._mmap_backend.connect()
+            logger.info("Qdrant: MMAP Void-State backend initialized (O(1) bypass active).")
 
     def _ensure_client(self) -> None:
         if self._client is None:
@@ -150,6 +163,35 @@ class QdrantVectorBackend:
             raise
 
         self._collection_ready = True
+
+    async def _ensure_void_collection(self) -> None:
+        """[Swarm-100] Create void-state collection for direct 3-bit QJL tensor representations."""
+        if self._void_ready:
+            return
+
+        from qdrant_client.models import Datatype, Distance, PayloadSchemaType, VectorParams
+
+        try:
+            exists = await self._client.collection_exists(VOID_COLLECTION)
+            if not exists:
+                await self._client.create_collection(
+                    collection_name=VOID_COLLECTION,
+                    vectors_config=VectorParams(
+                        size=VOID_DIM,
+                        distance=Distance.DOT,
+                        datatype=Datatype.UINT8,
+                    ),
+                )
+                await self._client.create_payload_index(
+                    collection_name=VOID_COLLECTION,
+                    field_name="tenant_id",
+                    field_schema=PayloadSchemaType.KEYWORD,
+                )
+                logger.info("Qdrant: Created Void-State collection '%s'", VOID_COLLECTION)
+            self._void_ready = True
+        except (RuntimeError, OSError, ValueError) as exc:
+            logger.error("Qdrant: Failed to ensure collection '%s': %s", VOID_COLLECTION, exc)
+            raise
 
     async def upsert(
         self,
@@ -188,6 +230,34 @@ class QdrantVectorBackend:
             logger.debug("Qdrant: Upserted fact_id=%d in '%s'", fact_id, MAIN_COLLECTION)
         except (RuntimeError, OSError, ValueError) as exc:
             logger.error("Qdrant: Upsert failed for fact_id=%d: %s", fact_id, exc)
+            raise
+
+    async def upsert_void(
+        self,
+        node_id: int,
+        tensor_uint8: list[int],
+        tenant_id: str = "default",
+        payload: dict[str, Any] | None = None,
+    ) -> None:
+        """[Swarm-100] Direct injection bypasses OS kernel buffer cache through MMAP."""
+        if self._mmap_enabled and self._mmap_backend:
+            await self._mmap_backend.upsert_void(node_id, tensor_uint8, tenant_id, payload)
+            return
+
+        self._ensure_client()
+        await self._ensure_void_collection()
+
+        from qdrant_client.models import PointStruct
+
+        p = payload.copy() if payload else {}
+        p["tenant_id"] = tenant_id
+
+        point = PointStruct(id=node_id, vector=tensor_uint8, payload=p)
+        try:
+            await self._client.upsert(collection_name=VOID_COLLECTION, points=[point])
+            logger.debug("Qdrant: Void-State upserted node_id=%d in '%s'", node_id, VOID_COLLECTION)
+        except (RuntimeError, OSError, ValueError) as exc:
+            logger.error("Qdrant: Void-State upsert failed for node_id=%d: %s", node_id, exc)
             raise
 
     async def search(
@@ -241,6 +311,48 @@ class QdrantVectorBackend:
             logger.error("Qdrant: Search failed in '%s': %s", MAIN_COLLECTION, exc)
             return []
 
+    async def search_void(
+        self,
+        query_tensor: list[int],
+        top_k: int = 5,
+        tenant_id: str = "default",
+        project: str | None = None,
+    ) -> list[tuple[int, float]]:
+        """[Swarm-100] KNN Hamming/Dot search across 3-bit QJL representations,
+        bypassing text LLM embeddings.
+        """
+        if self._mmap_enabled and self._mmap_backend:
+            return await self._mmap_backend.search_void(query_tensor, top_k, tenant_id, project)
+
+        self._ensure_client()
+        if not self._void_ready:
+            try:
+                exists = await self._client.collection_exists(VOID_COLLECTION)
+                if not exists:
+                    return []
+                self._void_ready = True
+            except (RuntimeError, OSError, ValueError):
+                return []
+
+        from qdrant_client.models import FieldCondition, Filter, MatchValue
+
+        filters = [FieldCondition(key="tenant_id", match=MatchValue(value=tenant_id))]
+        if project:
+            filters.append(FieldCondition(key="project", match=MatchValue(value=project)))
+
+        try:
+            results = await self._client.search(
+                collection_name=VOID_COLLECTION,
+                query_vector=query_tensor,
+                limit=top_k,
+                query_filter=Filter(must=filters),
+                with_payload=False,
+            )
+            return [(int(hit.id), float(hit.score)) for hit in results]
+        except (RuntimeError, OSError, ValueError) as exc:
+            logger.error("Qdrant: Void-State search failed in '%s': %s", VOID_COLLECTION, exc)
+            return []
+
     async def delete(self, fact_id: int, tenant_id: str = "default") -> None:
         """Delete a vector point by fact_id, restricted to tenant_id payload filter."""
         self._ensure_client()
@@ -282,6 +394,10 @@ class QdrantVectorBackend:
 
     async def close(self) -> None:
         """Close the Qdrant client."""
+        if self._mmap_backend:
+            await self._mmap_backend.close()
+            self._mmap_backend = None
+
         if self._client:
             try:
                 await self._client.close()

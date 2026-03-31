@@ -10,6 +10,7 @@ vía el `AsyncSignalBus`, o ejecutando ataques coordinados masivos (Swarm Strike
 
 Axioma Táctico: Individual agents fail. Syndicates compound.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -29,6 +30,7 @@ class SwarmSociety:
     """
     Una corporación soberana o facción formada por múltiples agentes.
     """
+
     name: str
     members: set[str] = field(default_factory=set)
     exergy_pool: float = 0.0  # Pooled resources/budget
@@ -55,6 +57,7 @@ class SocietyManager:
     Rige las interacciones entre diversas Sociedades Soberanas en CORTEX.
     Permite el alineamiento ("Alliance") o el asedio ("Siege") de Facciones.
     """
+
     def __init__(self, swarm_manager: SwarmManager | None = None):
         self.orchestrator = swarm_manager or SwarmManager()
         self.societies: dict[str, SwarmSociety] = {}
@@ -87,24 +90,31 @@ class SocietyManager:
         total_deployment_cost = len(soc.members) * cost_per_agent
 
         if not soc.is_solvent(total_deployment_cost):
-            logger.warning("[Society %s] Bankruptcy threshold. Cannot afford collective strike.", soc.name)
+            logger.warning(
+                "[Society %s] Bankruptcy threshold. Cannot afford collective strike.", soc.name
+            )
             return []
 
-        logger.info("[Society %s] Declaring strike on '%s'. Committing %d agents.", soc.name, target, len(soc.members))
+        logger.info(
+            "[Society %s] Declaring strike on '%s'. Committing %d agents.",
+            soc.name,
+            target,
+            len(soc.members),
+        )
         soc.exact_tribute(total_deployment_cost)
 
         # Parallel Multi-Agent execution via Sharding
         # Deploy specific society members instead of an arbitrary squad count
         responses = await self.orchestrator.shard_task(
             agent_ids=list(soc.members),
-            task=f"Society Directive [{soc.doctrine}]: Strike target {target} with payload {payload_task}"
+            task=f"Society Directive [{soc.doctrine}]: Strike target {target} with payload {payload_task}",
         )
 
         # Broadcast the impact via Signal Bush
         strike_signal = SwarmSignal(
             sender=f"society_{soc.name}",
             topic="SOCIETY_STRIKE_RESULT",
-            payload={"target": target, "yield": len(responses)}
+            payload={"target": target, "yield": len(responses)},
         )
         await self.orchestrator.bus.publish(strike_signal)
 
@@ -127,7 +137,10 @@ async def __test_societies():
     cartel.exergy_pool = 150.0  # USD / Tokens
 
     # 4. Announce a collective strike on Gumroad
-    await mgr.collective_strike(cartel.society_id, target="Gumroad Ecosystem", payload_task="Synthesize API Endpoints")
+    await mgr.collective_strike(
+        cartel.society_id, target="Gumroad Ecosystem", payload_task="Synthesize API Endpoints"
+    )
+
 
 if __name__ == "__main__":
     asyncio.run(__test_societies())

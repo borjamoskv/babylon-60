@@ -138,7 +138,9 @@ class ExergyGuardAdapter:
         # that downstream aggregation already reads from.
         exergy_score = result.diagnostic.exergy_score
         meta["exergy_delta"] = float(exergy_score)
-        meta["exergy_justification"] = "; ".join(result.diagnostic.reasons) or result.diagnostic.state.value
+        meta["exergy_justification"] = (
+            "; ".join(result.diagnostic.reasons) or result.diagnostic.state.value
+        )
         if result.metadata_patch:
             meta.update(result.metadata_patch)
 

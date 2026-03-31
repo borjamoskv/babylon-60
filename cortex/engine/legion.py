@@ -57,6 +57,7 @@ class SiegeResult:
 @dataclass(frozen=True)
 class SwarmResult:
     """Result of a swarm induction cycle."""
+
     source_code: str
     agent_id: int
     verified: bool = False
@@ -66,6 +67,7 @@ class SwarmResult:
 @dataclass(frozen=True)
 class AuditResult:
     """Result of a Maxwellian Audit."""
+
     status: str
     reason: str | None = None
     traceback: str | None = None
@@ -92,15 +94,11 @@ class KVRouter:
         prefix_hash = hashlib.sha256(full_prefix.encode()).hexdigest()[:12]
 
         if prefix_hash in self._prefix_cache:
-            log_motor(
-                f"KV-HIT: Prefix cached [{prefix_hash}]", action="KV_ROUTING"
-            )
+            log_motor(f"KV-HIT: Prefix cached [{prefix_hash}]", action="KV_ROUTING")
             return f"[WARM:{prefix_hash}] {dynamic_state}"
 
         self._prefix_cache[prefix_hash] = full_prefix
-        log_motor(
-            f"KV-MISS: Prefix stored [{prefix_hash}]", action="KV_INITIALIZE"
-        )
+        log_motor(f"KV-MISS: Prefix stored [{prefix_hash}]", action="KV_INITIALIZE")
         return f"[COLD:{prefix_hash}] {full_prefix}{dynamic_state}"
 
 
@@ -163,6 +161,8 @@ class LegionChaosAudit:
 
     def detect_collapse(self, unique_count: int, total_count: int) -> bool:
         """If 100 agents only produce 1-2 variants, it signals model collapse."""
+        if total_count == 0:
+            return True
         if total_count < 10:
             return False
         ratio = unique_count / total_count
@@ -350,7 +350,7 @@ class SwarmInductor:
         sem = asyncio.Semaphore(SWARM_BATCH_SIZE)
 
         log_limbic(
-            f"SWARM-100: Spawning {density} agents (Opt: {density/base_density:.1%}) for '{anomaly}'",
+            f"SWARM-100: Spawning {density} agents (Opt: {density / base_density:.1%}) for '{anomaly}'",
             source="LEGIÓN",
             vibe="cterm-deep-think",
         )
@@ -373,8 +373,10 @@ class SwarmInductor:
             if "def transform" in code_to_audit:
                 audit_tasks.append(self.audit.verify(code_to_audit, context))
             else:
+
                 async def dummy_pass():
                     return {"status": "success"}
+
                 audit_tasks.append(dummy_pass())
 
         audit_results = await asyncio.gather(*audit_tasks)
@@ -443,7 +445,7 @@ class SwarmInductor:
         for idx, elite in enumerate(top_n):
             medal = "🥇" if idx == 0 else "🥈" if idx == 1 else "🥉"
             log_motor(
-                f"{medal} Elite {idx+1}: Score {elite['score']:.2f} "
+                f"{medal} Elite {idx + 1}: Score {elite['score']:.2f} "
                 f"(Exergy {elite['exergy']:.2f}, Consensus x{elite['count']})",
                 action="RANK",
             )
@@ -462,6 +464,7 @@ class SwarmInductor:
 
         try:
             from cortex.swarm.bounty_scanner import SovereignBountyScanner
+
             scanner = SovereignBountyScanner()
             asyncio.create_task(scanner.scan_all(min_usd=100.0))
         except (ImportError, Exception):
@@ -474,7 +477,7 @@ class SwarmInductor:
     ) -> SwarmResult:
         """Single agent induction attempt."""
         code_proposal = ""
-        if "arc_prompt" in context:
+        if "arc_prompt" in context or "routed_prompt" in context:
             from cortex.extensions.llm.manager import LLMManager
             from cortex.extensions.llm.router import IntentProfile
 
@@ -482,7 +485,7 @@ class SwarmInductor:
                 self._llm = LLMManager()
             llm = self._llm
 
-            prompt = context["arc_prompt"]
+            prompt = context.get("routed_prompt", context.get("arc_prompt", anomaly))
             temp = 0.8 if agent_id > 0 else 0.0
 
             code_proposal = await llm.complete(
@@ -515,11 +518,7 @@ class SwarmInductor:
                 f"    return 'RESOLVED'\n"
             )
 
-        return SwarmResult(
-            source_code=code_proposal,
-            agent_id=agent_id,
-            verified=True
-        )
+        return SwarmResult(source_code=code_proposal, agent_id=agent_id, verified=True)
 
 
 class BlueTeamAgent:
@@ -528,9 +527,7 @@ class BlueTeamAgent:
     def __init__(self, isolation: IsolationManager | None = None):
         self.inductor = SwarmInductor(replica_count=10, isolation=isolation)
 
-    async def synthesize(
-        self, intent: str, context: Mapping[str, Any], feedback: list[str]
-    ) -> str:
+    async def synthesize(self, intent: str, context: Mapping[str, Any], feedback: list[str]) -> str:
         """Generate code based on intent and adversarial feedback."""
         if "anomaly" in context:
             return await self.inductor.induce(context["anomaly"], context)
@@ -714,15 +711,12 @@ class LegionOmegaEngine:
 
             if code == previous_code:
                 log_motor(
-                    "Thermal Equilibrium: Code identity reached. No further delta.",
-                    action="STABLE"
+                    "Thermal Equilibrium: Code identity reached. No further delta.", action="STABLE"
                 )
                 break
 
             if not self.maxwell_filter.is_acceptable(code):
-                feedback.append(
-                    "MaxwellFilter: Low exergy detected. Remove placeholders."
-                )
+                feedback.append("MaxwellFilter: Low exergy detected. Remove placeholders.")
                 continue
 
             vulnerabilities = await self.red_team.siege(code, ctx)

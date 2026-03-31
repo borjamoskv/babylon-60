@@ -34,7 +34,9 @@ class SunoActuator:
         await page.goto(self.base_url)
         return page
 
-    async def generate_track(self, lyrics: str, style: str, title: str, clip_id: str | None = None) -> dict | None:
+    async def generate_track(
+        self, lyrics: str, style: str, title: str, clip_id: str | None = None
+    ) -> dict | None:
         """
         Orquesta la generación de una pista en Suno usando Playwright.
         Si se provee clip_id, ejecuta la operación Extend sobre el clip persistido.
@@ -47,7 +49,11 @@ class SunoActuator:
                 browser = await p.chromium.connect_over_cdp(f"http://localhost:{self.port}")
 
                 # Force the URL if clip_id is detected
-                page = await browser.contexts[0].new_page() if clip_id else await self._find_or_open_suno_tab(browser)
+                page = (
+                    await browser.contexts[0].new_page()
+                    if clip_id
+                    else await self._find_or_open_suno_tab(browser)
+                )
                 if clip_id:
                     logger.info("[*] Navigating to Extend Node: %s", url)
                     await page.goto(url)
@@ -104,7 +110,7 @@ class SunoActuator:
                     "style": style,
                     "lyrics_length": len(lyrics),
                     "status": "forged",
-                    "cortex_taint": "HEADLESS-CDP"
+                    "cortex_taint": "HEADLESS-CDP",
                 }
 
                 logger.info("[+] Generación completada con éxito interceptado.")

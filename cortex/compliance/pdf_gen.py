@@ -10,13 +10,13 @@ class SovereignAuditPDF(FPDF):
         super().__init__(*args, **kwargs)
         self.project_name = project_name
         self.accent_color = (43, 59, 229)  # #2B3BE5 BlueYlb
-        self.bg_color = (10, 10, 10)       # #0A0A0A
+        self.bg_color = (10, 10, 10)  # #0A0A0A
         self.text_color = (255, 255, 255)  # #FFFFFF
 
     def header(self):
         # Background
         self.set_fill_color(*self.bg_color)
-        self.rect(0, 0, 210, 297, 'F')
+        self.rect(0, 0, 210, 297, "F")
 
         # Logo
         logo_path = os.path.join(os.path.dirname(__file__), "assets", "logo.png")
@@ -32,7 +32,12 @@ class SovereignAuditPDF(FPDF):
         self.set_xy(50, 25)
         self.set_font("courier", "I", 8)
         self.set_text_color(150, 150, 150)
-        self.cell(0, 5, f"Issued: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | EU AI Act Art. 12 Compliant", ln=True)
+        self.cell(
+            0,
+            5,
+            f"Issued: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | EU AI Act Art. 12 Compliant",
+            ln=True,
+        )
 
         # Divider line
         self.set_draw_color(*self.accent_color)
@@ -43,7 +48,9 @@ class SovereignAuditPDF(FPDF):
         self.set_y(-15)
         self.set_font("courier", "I", 8)
         self.set_text_color(100, 100, 100)
-        self.cell(0, 10, f"Page {self.page_no()} | CORTEX LEDGER AUDIT | IRREVERSIBLE_CHAIN_ID", align='C')
+        self.cell(
+            0, 10, f"Page {self.page_no()} | CORTEX LEDGER AUDIT | IRREVERSIBLE_CHAIN_ID", align="C"
+        )
 
     def add_section(self, title: str):
         self.set_font("helvetica", "B", 12)
@@ -68,8 +75,15 @@ class SovereignAuditPDF(FPDF):
             self.cell(0, 6, f"> {item.get('id', 'N/A')}", ln=True, fill=True)
             self.set_font("courier", "", 8)
             self.set_text_color(200, 200, 200)
-            self.multi_cell(0, 5, f"Fingerprint: {item.get('hash', '---')}\nTimestamp: {item.get('ts', '---')}\nStatus: {item.get('status', '---')}", border=0, fill=True)
+            self.multi_cell(
+                0,
+                5,
+                f"Fingerprint: {item.get('hash', '---')}\nTimestamp: {item.get('ts', '---')}\nStatus: {item.get('status', '---')}",
+                border=0,
+                fill=True,
+            )
             self.ln(2)
+
 
 def generate_report(project_name: str, records: list[dict[str, Any]], output_path: str):
     pdf = SovereignAuditPDF(project_name=project_name)

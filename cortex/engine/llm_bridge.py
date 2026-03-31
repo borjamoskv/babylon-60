@@ -48,7 +48,9 @@ class LLMBridge:
     def __init__(self, router: CortexLLMRouter):
         self.router = router
 
-    async def induce_program(self, description: str, examples: list[dict[str, Any]]) -> Result[str, str]:
+    async def induce_program(
+        self, description: str, examples: list[dict[str, Any]]
+    ) -> Result[str, str]:
         """
         Queries a frontier model to induce a PeARL program from examples.
         """

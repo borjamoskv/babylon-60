@@ -2,7 +2,8 @@
 
 import functools
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Optional
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
     from .agent import Agent
@@ -47,9 +48,7 @@ except ImportError:
     agentops_client = NoOpAgentOps()
 
 
-def initialize(
-    api_key: Optional[str] = None, log_level: Optional[int] = logging.INFO
-) -> None:
+def initialize(api_key: Optional[str] = None, log_level: Optional[int] = logging.INFO) -> None:
     """Initialize the AgentOps SDK with an optional API key.
 
     Args:
@@ -125,9 +124,7 @@ def trace_agent_session(func: Callable[..., Any]) -> Callable[..., Any]:
 
         trace = None
         try:
-            with agentops_client.start_trace(
-                trace_name=agent_instance.name, tags=tags
-            ) as trace:
+            with agentops_client.start_trace(trace_name=agent_instance.name, tags=tags) as trace:
                 agent_instance.trace = trace
                 result = func(agent_instance, *args, **kwargs)
                 _set_trace_status(trace, agent_instance)
@@ -135,9 +132,7 @@ def trace_agent_session(func: Callable[..., Any]) -> Callable[..., Any]:
         except Exception as e:
             if trace is not None:
                 _handle_trace_error(trace, agent_instance, e)
-            logger.error(
-                f"Agent {agent_instance.name} failed with exception: {e}", exc_info=True
-            )
+            logger.error(f"Agent {agent_instance.name} failed with exception: {e}", exc_info=True)
             raise
 
     return wrapper

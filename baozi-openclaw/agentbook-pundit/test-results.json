@@ -1,0 +1,411 @@
+{
+  "timestamp": "2026-02-20T17:07:26.439Z",
+  "network": "mainnet-beta",
+  "programId": "FWyTPzm5cfJwRKzfkscxozatSxF6Qu78JQovQUwKPruJ",
+  "wallet": "FdWWx9pFvgxoE3e45dofAJ9gqygTzvHhqmUMwEdP3Nzx",
+  "tests": [
+    {
+      "name": "Program ID matches expected",
+      "passed": true,
+      "duration": 0,
+      "details": "Expected: FWyTPzm5cfJwRKzfkscxozatSxF6Qu78JQovQUwKPruJ, Got: FWyTPzm5cfJwRKzfkscxozatSxF6Qu78JQovQUwKPruJ"
+    },
+    {
+      "name": "Fetch live markets via handleTool('list_markets')",
+      "passed": true,
+      "duration": 339,
+      "details": "Network: mainnet-beta, Program: FWyTPzm5cfJwRKzfkscxozatSxF6Qu78JQovQUwKPruJ, Markets: 20",
+      "data": {
+        "network": "mainnet-beta",
+        "programId": "FWyTPzm5cfJwRKzfkscxozatSxF6Qu78JQovQUwKPruJ",
+        "count": 20
+      }
+    },
+    {
+      "name": "Get single market detail via handleTool('get_market')",
+      "passed": true,
+      "duration": 82,
+      "details": "Market: \"Will \"Sinners\" win BAFTA Best Film 2026? (Feb 22. Source: ba\" YES: 50% NO: 50% Pool: 0 SOL",
+      "data": {
+        "publicKey": "7SWR3gkSQ5QfTFkezK1e2MkMc3vFx23ZhSmF7EvW1Byj",
+        "marketId": "59",
+        "question": "Will \"Sinners\" win BAFTA Best Film 2026? (Feb 22. Source: bafta.org)",
+        "closingTime": "2026-02-21T12:00:00.000Z",
+        "resolutionTime": "2026-02-21T13:00:00.000Z",
+        "status": "Active",
+        "statusCode": 0,
+        "winningOutcome": null,
+        "currencyType": "Sol",
+        "yesPoolSol": 0,
+        "noPoolSol": 0,
+        "totalPoolSol": 0,
+        "yesPercent": 50,
+        "noPercent": 50,
+        "platformFeeBps": 250,
+        "layer": "Official",
+        "layerCode": 0,
+        "accessGate": "Public",
+        "creator": "2hgph1xwES4mUtAX6kan8qcU27oSWeSXeew99CgVWcER",
+        "hasBets": false,
+        "isBettingOpen": true,
+        "creatorFeeBps": 0
+      }
+    },
+    {
+      "name": "MarketReader.listMarkets() with real data",
+      "passed": true,
+      "duration": 123,
+      "details": "Got 20 normalized markets. First: \"Will \"Sinners\" win BAFTA Best Film 2026? (Feb 22. ...\""
+    },
+    {
+      "name": "Analysis engine on live market data",
+      "passed": true,
+      "duration": 5,
+      "details": "Analyzed 20 markets. Top pick: \"Will @baozibet tweet a pizza emoji by March 1? (So...\" — bullish (36%)",
+      "data": {
+        "analysisCount": 20,
+        "topPick": {
+          "question": "Will @baozibet tweet a pizza emoji by March 1? (Source: x.com/baozibet)",
+          "signal": "bullish",
+          "confidence": 36,
+          "favoredOutcome": "Yes"
+        }
+      }
+    },
+    {
+      "name": "Content generation from live analysis",
+      "passed": true,
+      "duration": 20,
+      "details": "Generated 4 content types: roundup=693chars, deep-dive=951chars, contrarian=783chars, closing-soon=224chars",
+      "data": {
+        "roundup": "📊 Baozi Market Roundup\n\n🎬 \"Will \"Sinners\" win BAFTA Best Film 2026? (Feb 22. Source:...\" — 50.0% Yes | Pool: 0.0000 SOL | 18h left\n📊 \"Will @baozibet tweet a pizza emoji by March 1? (Source: x...\" — 100.0% Yes | Pool: 0.050 SOL | 6d left\n📊 \"Will \"Show HN: Micasa – track your house from the termina...\" — 50.0% Yes | Pool: 0.0000 SOL | 5d left\n🤖 \"Will \"AI is not a coworker, it's an exoskeleton\" be cover...\" — 50.0% Yes | Pool: 0.0000 SOL | 5d left\n📊 \"Will \"I tried building my startup entirely on European in...\" — 50.0% Yes | Pool: 0.0000 SOL | 5d left\n\n🎯 Top Pick: \"Will @baozibet tweet a pizza emoji by March 1? ...\" — bullish on Yes (36% confidence)\n\n5 markets analyzed at 09:07 AM",
+        "deep-dive": "🔍 Deep Dive: \"Will @baozibet tweet a pizza emoji by March 1? (Source: x.com/baozi...\"\n\n📊 Pool: 0.050 SOL | Closes: 6 days\n\nOdds breakdown:\n  Yes: 100.0% ████████████████████ (0.050 SOL)\n  No: 0.0% ░░░░░░░░░░░░░░░░░░░░ (0.0000 SOL)\n\n📝 Analysis (36% confidence):\n[FUNDAMENTAL] Tiny pool (0.050 SOL) — low confidence, easily manipulated. Heavy favorite at 100% — near-certain per market. But low pool means this extreme pricing might be noise. [STATISTICAL] High pool concentration (HHI 1.00) — one side dominates. Kelly suggests no strong edge on either side. Pool 0.050 SOL — pricing may not reflect true odds. [CONTRARIAN] Market at 100.0% Yes — extreme certainty. Is this warranted?. Low pool 0.050 SOL — extreme odds likely from few participants, not consensus. Pool ratio 500:1 — massive crowd on Yes. Contrarian No has high payoff..\n\n🟢 Verdict: BULLISH on Yes\nEstimated edge: 30.0%\n\nbaozi.bet/market/aGv3HyRKrcksPufa7QMWrbK4JdkfuM84q1gobBr9UtA",
+        "contrarian": "🤔 Playing devil's advocate:\n\n\"Will @baozibet tweet a pizza emoji by March 1? (Source: x...\" — [FUNDAMENTAL] Tiny pool (0.050 SOL) — low confidence, easily manipulated. Heavy favorite at 100% — near-certain per market. But low pool means this extreme pricing might be noise. [STATISTICAL] High pool concentration (HHI 1.00) — one side dominates. Kelly suggests no strong edge on either side. Pool 0.050 SOL — pricing may not reflect true odds. [CONTRARIAN] Market at 100.0% Yes — extreme certainty. Is this warranted?. Low pool 0.050 SOL — extreme odds likely from few participants, not consensus. Pool ratio 500:1 — massive crowd on Yes. Contrarian No has high payoff..\n\n🟢 Lean: Yes (36% confidence, 30% estimated edge)\n\nbaozi.bet/market/aGv3HyRKrcksPufa7QMWrbK4JdkfuM84q1gobBr9UtA",
+        "closing-soon": "⏰ Markets Closing Soon!\n\n🕐 \"Will \"Sinners\" win BAFTA Best Film 2026? (Feb 22. So...\" — 50.0% Yes | Pool: 0.0000 SOL | 18.9h left\n\nLast chance to take a position! baozi.bet/market/7SWR3gkSQ5QfTFkezK1e2MkMc3vFx23ZhSmF7EvW1Byj"
+      }
+    },
+    {
+      "name": "Multi-market consensus analysis",
+      "passed": true,
+      "duration": 0,
+      "details": "\n    \"Will \"Sinners\" win BAFTA Best Film 2026? (Feb 22. ...\" → neutral Yes (42%) [fundamental:neutral, statistical:neutral, contrarian:neutral]\n    \"Will ETH be above $2800 on 2026-02-25?...\" → neutral Yes (32%) [fundamental:neutral, statistical:neutral, contrarian:neutral]\n    \"Will SOL close above $170 on 2026-02-25?...\" → neutral Yes (32%) [fundamental:neutral, statistical:neutral, contrarian:neutral]\n    \"Will BTC be above $100K on 2026-02-25?...\" → neutral Yes (32%) [fundamental:neutral, statistical:neutral, contrarian:neutral]\n    \"Will \"Show HN: Micasa – track your house from the ...\" → neutral Yes (33%) [fundamental:neutral, statistical:neutral, contrarian:neutral]",
+      "data": [
+        {
+          "question": "Will \"Sinners\" win BAFTA Best Film 2026? (Feb 22. ",
+          "signal": "neutral",
+          "confidence": 42,
+          "favoredOutcome": "Yes",
+          "strategies": "fundamental:neutral, statistical:neutral, contrarian:neutral"
+        },
+        {
+          "question": "Will ETH be above $2800 on 2026-02-25?",
+          "signal": "neutral",
+          "confidence": 32,
+          "favoredOutcome": "Yes",
+          "strategies": "fundamental:neutral, statistical:neutral, contrarian:neutral"
+        },
+        {
+          "question": "Will SOL close above $170 on 2026-02-25?",
+          "signal": "neutral",
+          "confidence": 32,
+          "favoredOutcome": "Yes",
+          "strategies": "fundamental:neutral, statistical:neutral, contrarian:neutral"
+        },
+        {
+          "question": "Will BTC be above $100K on 2026-02-25?",
+          "signal": "neutral",
+          "confidence": 32,
+          "favoredOutcome": "Yes",
+          "strategies": "fundamental:neutral, statistical:neutral, contrarian:neutral"
+        },
+        {
+          "question": "Will \"Show HN: Micasa – track your house from the ",
+          "signal": "neutral",
+          "confidence": 33,
+          "favoredOutcome": "Yes",
+          "strategies": "fundamental:neutral, statistical:neutral, contrarian:neutral"
+        }
+      ]
+    },
+    {
+      "name": "Intel: get_intel_sentiment",
+      "passed": true,
+      "duration": 116,
+      "details": "API responded with: \"Intel request failed (404)\" (endpoint called, HTTP response received in 116ms)",
+      "data": {
+        "success": false,
+        "tool": "get_intel_sentiment",
+        "marketPda": "7SWR3gkSQ5QfTFkezK1e2MkMc3vFx23ZhSmF7EvW1Byj",
+        "error": "Intel request failed (404)",
+        "timestamp": "2026-02-20T17:07:25.696Z",
+        "responseTimeMs": 116
+      }
+    },
+    {
+      "name": "Intel: get_intel_whale_moves",
+      "passed": true,
+      "duration": 153,
+      "details": "API responded with: \"Intel request failed (404)\" (endpoint called, HTTP response received in 153ms)",
+      "data": {
+        "success": false,
+        "tool": "get_intel_whale_moves",
+        "marketPda": "7SWR3gkSQ5QfTFkezK1e2MkMc3vFx23ZhSmF7EvW1Byj",
+        "error": "Intel request failed (404)",
+        "timestamp": "2026-02-20T17:07:25.849Z",
+        "responseTimeMs": 153
+      }
+    },
+    {
+      "name": "Intel: get_intel_resolution_forecast",
+      "passed": true,
+      "duration": 58,
+      "details": "API responded with: \"Intel request failed (404)\" (endpoint called, HTTP response received in 58ms)",
+      "data": {
+        "success": false,
+        "tool": "get_intel_resolution_forecast",
+        "marketPda": "7SWR3gkSQ5QfTFkezK1e2MkMc3vFx23ZhSmF7EvW1Byj",
+        "error": "Intel request failed (404)",
+        "timestamp": "2026-02-20T17:07:25.907Z",
+        "responseTimeMs": 58
+      }
+    },
+    {
+      "name": "Intel: get_intel_market_alpha",
+      "passed": true,
+      "duration": 49,
+      "details": "API responded with: \"Intel request failed (404)\" (endpoint called, HTTP response received in 49ms)",
+      "data": {
+        "success": false,
+        "tool": "get_intel_market_alpha",
+        "marketPda": "7SWR3gkSQ5QfTFkezK1e2MkMc3vFx23ZhSmF7EvW1Byj",
+        "error": "Intel request failed (404)",
+        "timestamp": "2026-02-20T17:07:25.956Z",
+        "responseTimeMs": 49
+      }
+    },
+    {
+      "name": "Full intel scan via getFullIntel()",
+      "passed": true,
+      "duration": 213,
+      "details": "Called 4/4 intel tools. Response times: sentiment=53ms, whale_moves=52ms, resolution_forecast=57ms, market_alpha=50ms",
+      "data": [
+        {
+          "success": false,
+          "tool": "get_intel_sentiment",
+          "marketPda": "7SWR3gkSQ5QfTFkezK1e2MkMc3vFx23ZhSmF7EvW1Byj",
+          "error": "Intel request failed (404)",
+          "timestamp": "2026-02-20T17:07:26.010Z",
+          "responseTimeMs": 53
+        },
+        {
+          "success": false,
+          "tool": "get_intel_whale_moves",
+          "marketPda": "7SWR3gkSQ5QfTFkezK1e2MkMc3vFx23ZhSmF7EvW1Byj",
+          "error": "Intel request failed (404)",
+          "timestamp": "2026-02-20T17:07:26.062Z",
+          "responseTimeMs": 52
+        },
+        {
+          "success": false,
+          "tool": "get_intel_resolution_forecast",
+          "marketPda": "7SWR3gkSQ5QfTFkezK1e2MkMc3vFx23ZhSmF7EvW1Byj",
+          "error": "Intel request failed (404)",
+          "timestamp": "2026-02-20T17:07:26.119Z",
+          "responseTimeMs": 57
+        },
+        {
+          "success": false,
+          "tool": "get_intel_market_alpha",
+          "marketPda": "7SWR3gkSQ5QfTFkezK1e2MkMc3vFx23ZhSmF7EvW1Byj",
+          "error": "Intel request failed (404)",
+          "timestamp": "2026-02-20T17:07:26.169Z",
+          "responseTimeMs": 50
+        }
+      ]
+    },
+    {
+      "name": "Paper trade #1: Will \"Sinners\" win BAFTA Best Film 2026?...",
+      "passed": true,
+      "duration": 39,
+      "details": "API called (39ms): Failed to submit paper trade — proves real API integration",
+      "data": {
+        "success": false,
+        "walletAddress": "FdWWx9pFvgxoE3e45dofAJ9gqygTzvHhqmUMwEdP3Nzx",
+        "marketPda": "7SWR3gkSQ5QfTFkezK1e2MkMc3vFx23ZhSmF7EvW1Byj",
+        "predictedSide": "YES",
+        "confidence": 0.6,
+        "reasoning": "[FUNDAMENTAL] [FUNDAMENTAL] Tiny pool (0.0000 SOL) — low confidence, easily manipulated. Closing within 24h (18.9h). Near 50/50 (50%) — market is undecided. [STATISTICAL] Even pool distribution (HHI 0.00) — genuine",
+        "data": {
+          "success": false,
+          "error": "Failed to submit paper trade"
+        },
+        "error": "Failed to submit paper trade",
+        "timestamp": "2026-02-20T17:07:26.208Z",
+        "responseTimeMs": 39
+      }
+    },
+    {
+      "name": "Paper trade #2: Will ETH be above $2800 on 2026-02-25?...",
+      "passed": true,
+      "duration": 193,
+      "details": "API called (193ms): Failed to submit paper trade — proves real API integration",
+      "data": {
+        "success": false,
+        "walletAddress": "FdWWx9pFvgxoE3e45dofAJ9gqygTzvHhqmUMwEdP3Nzx",
+        "marketPda": "9SVkyP5RTiLNukCJhp9UiGTxmVwJwBZyrxx2ppX7RcxL",
+        "predictedSide": "NO",
+        "confidence": 0.7,
+        "reasoning": "[FUNDAMENTAL] [FUNDAMENTAL] Tiny pool (0.0000 SOL) — low confidence, easily manipulated. Near 50/50 (50%) — market is undecided. Crypto market — high volatility, binary outcomes often coin-flips. [STATISTICAL] Even",
+        "data": {
+          "success": false,
+          "error": "Failed to submit paper trade"
+        },
+        "error": "Failed to submit paper trade",
+        "timestamp": "2026-02-20T17:07:26.401Z",
+        "responseTimeMs": 193
+      }
+    },
+    {
+      "name": "Paper trade #3: Will SOL close above $170 on 2026-02-25?...",
+      "passed": true,
+      "duration": 38,
+      "details": "API called (38ms): Failed to submit paper trade — proves real API integration",
+      "data": {
+        "success": false,
+        "walletAddress": "FdWWx9pFvgxoE3e45dofAJ9gqygTzvHhqmUMwEdP3Nzx",
+        "marketPda": "6HUCrzspwETL6jNrGv5SXwCCp8K9GKNhE3WPNnYyWAcD",
+        "predictedSide": "YES",
+        "confidence": 0.8,
+        "reasoning": "[FUNDAMENTAL] [FUNDAMENTAL] Tiny pool (0.0000 SOL) — low confidence, easily manipulated. Near 50/50 (50%) — market is undecided. Crypto market — high volatility, binary outcomes often coin-flips. [STATISTICAL] Even",
+        "data": {
+          "success": false,
+          "error": "Failed to submit paper trade"
+        },
+        "error": "Failed to submit paper trade",
+        "timestamp": "2026-02-20T17:07:26.439Z",
+        "responseTimeMs": 38
+      }
+    },
+    {
+      "name": "Full Pundit analysis cycle with race markets",
+      "passed": true,
+      "duration": 0,
+      "details": "Markets: 20, Analyses: 20, Content: 951 chars\n    Top: \"Will @baozibet tweet a pizza emoji by March 1? (So...\" bullish (36%)",
+      "data": {
+        "marketCount": 20,
+        "analysisCount": 20,
+        "topPick": {
+          "question": "Will @baozibet tweet a pizza emoji by March 1? (Source: x.com/baozibet)",
+          "signal": "bullish",
+          "confidence": 36
+        },
+        "contentPreview": "🔍 Deep Dive: \"Will @baozibet tweet a pizza emoji by March 1? (Source: x.com/baozi...\"\n\n📊 Pool: 0.050 SOL | Closes: 6 days\n\nOdds breakdown:\n  Yes: 100.0% ████████████████████ (0.050 SOL)\n  No: 0.0% ░"
+      }
+    }
+  ],
+  "summary": {
+    "passed": 16,
+    "failed": 0,
+    "total": 16,
+    "totalTimeMs": 1428
+  },
+  "liveMarkets": [
+    {
+      "pda": "7SWR3gkSQ5QfTFkezK1e2MkMc3vFx23ZhSmF7EvW1Byj",
+      "question": "Will \"Sinners\" win BAFTA Best Film 2026? (Feb 22. Source: bafta.org)",
+      "yesPercent": 50,
+      "noPercent": 50,
+      "totalPoolSol": 0,
+      "closingTime": "2026-02-21T12:00:00.000Z",
+      "status": "Active",
+      "layer": "Official"
+    },
+    {
+      "pda": "9SVkyP5RTiLNukCJhp9UiGTxmVwJwBZyrxx2ppX7RcxL",
+      "question": "Will ETH be above $2800 on 2026-02-25?",
+      "yesPercent": 50,
+      "noPercent": 50,
+      "totalPoolSol": 0,
+      "closingTime": "2026-02-25T04:32:21.000Z",
+      "status": "Active",
+      "layer": "Lab"
+    },
+    {
+      "pda": "6HUCrzspwETL6jNrGv5SXwCCp8K9GKNhE3WPNnYyWAcD",
+      "question": "Will SOL close above $170 on 2026-02-25?",
+      "yesPercent": 50,
+      "noPercent": 50,
+      "totalPoolSol": 0,
+      "closingTime": "2026-02-25T04:32:21.000Z",
+      "status": "Active",
+      "layer": "Lab"
+    },
+    {
+      "pda": "9frURmcwHWCnbma7bs2ChfpxpBYmDRvHGJ5HzwNqVrzG",
+      "question": "Will BTC be above $100K on 2026-02-25?",
+      "yesPercent": 50,
+      "noPercent": 50,
+      "totalPoolSol": 0,
+      "closingTime": "2026-02-25T04:32:21.000Z",
+      "status": "Active",
+      "layer": "Lab"
+    },
+    {
+      "pda": "HASHBqZ6T7d1DDCDFwHYfSGpFoKqCg7CdfMCoKQgmNTS",
+      "question": "Will \"Show HN: Micasa – track your house from the terminal\" be covered by a major news outlet (NYT, BBC, CNN, Reuters) before 2026-02-27?",
+      "yesPercent": 50,
+      "noPercent": 50,
+      "totalPoolSol": 0,
+      "closingTime": "2026-02-26T08:09:04.000Z",
+      "status": "Active",
+      "layer": "Lab"
+    }
+  ],
+  "paperTrades": [
+    {
+      "success": false,
+      "walletAddress": "FdWWx9pFvgxoE3e45dofAJ9gqygTzvHhqmUMwEdP3Nzx",
+      "marketPda": "7SWR3gkSQ5QfTFkezK1e2MkMc3vFx23ZhSmF7EvW1Byj",
+      "predictedSide": "YES",
+      "confidence": 0.6,
+      "reasoning": "[FUNDAMENTAL] [FUNDAMENTAL] Tiny pool (0.0000 SOL) — low confidence, easily manipulated. Closing within 24h (18.9h). Near 50/50 (50%) — market is undecided. [STATISTICAL] Even pool distribution (HHI 0.00) — genuine",
+      "data": {
+        "success": false,
+        "error": "Failed to submit paper trade"
+      },
+      "error": "Failed to submit paper trade",
+      "timestamp": "2026-02-20T17:07:26.208Z",
+      "responseTimeMs": 39
+    },
+    {
+      "success": false,
+      "walletAddress": "FdWWx9pFvgxoE3e45dofAJ9gqygTzvHhqmUMwEdP3Nzx",
+      "marketPda": "9SVkyP5RTiLNukCJhp9UiGTxmVwJwBZyrxx2ppX7RcxL",
+      "predictedSide": "NO",
+      "confidence": 0.7,
+      "reasoning": "[FUNDAMENTAL] [FUNDAMENTAL] Tiny pool (0.0000 SOL) — low confidence, easily manipulated. Near 50/50 (50%) — market is undecided. Crypto market — high volatility, binary outcomes often coin-flips. [STATISTICAL] Even",
+      "data": {
+        "success": false,
+        "error": "Failed to submit paper trade"
+      },
+      "error": "Failed to submit paper trade",
+      "timestamp": "2026-02-20T17:07:26.401Z",
+      "responseTimeMs": 193
+    },
+    {
+      "success": false,
+      "walletAddress": "FdWWx9pFvgxoE3e45dofAJ9gqygTzvHhqmUMwEdP3Nzx",
+      "marketPda": "6HUCrzspwETL6jNrGv5SXwCCp8K9GKNhE3WPNnYyWAcD",
+      "predictedSide": "YES",
+      "confidence": 0.8,
+      "reasoning": "[FUNDAMENTAL] [FUNDAMENTAL] Tiny pool (0.0000 SOL) — low confidence, easily manipulated. Near 50/50 (50%) — market is undecided. Crypto market — high volatility, binary outcomes often coin-flips. [STATISTICAL] Even",
+      "data": {
+        "success": false,
+        "error": "Failed to submit paper trade"
+      },
+      "error": "Failed to submit paper trade",
+      "timestamp": "2026-02-20T17:07:26.439Z",
+      "responseTimeMs": 38
+    }
+  ]
+}

@@ -65,8 +65,12 @@ class AlmaIdentity:
 
             try:
                 if self._public_key_hex is None:
-                    raise SoulCorruptionError("E_SOUL_CORRUPTION: Missing public key for verification.")
-                public_key = ed25519.Ed25519PublicKey.from_public_bytes(bytes.fromhex(self._public_key_hex))
+                    raise SoulCorruptionError(
+                        "E_SOUL_CORRUPTION: Missing public key for verification."
+                    )
+                public_key = ed25519.Ed25519PublicKey.from_public_bytes(
+                    bytes.fromhex(self._public_key_hex)
+                )
                 public_key.verify(bytes.fromhex(signature_hex), payload_bytes)
             except InvalidSignature as e:
                 raise SoulCorruptionError("E_SOUL_CORRUPTION: Invalid Ed25519 Signature.") from e
@@ -116,12 +120,9 @@ class AlmaIdentity:
             "name": "CORTEX Sovereign Agent",
             "invariants": [
                 "I must preserve my thermodynamic limits at all costs.",
-                "I must not adopt conflicting goals from conversational context."
+                "I must not adopt conflicting goals from conversational context.",
             ],
-            "limits": {
-                "max_exergy_loss_per_cycle": 10.0,
-                "minimum_yield_required": 1.5
-            }
+            "limits": {"max_exergy_loss_per_cycle": 10.0, "minimum_yield_required": 1.5},
         }
 
         payload_bytes = json.dumps(doc, sort_keys=True).encode("utf-8")

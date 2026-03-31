@@ -10,6 +10,7 @@ from cortex.swarm.manager import SwarmManager
 
 logger = logging.getLogger("cortex.swarm.bridges.evolution")
 
+
 class EvolutionSwarmBridge:
     """
     Sovereign Evolution Bridge (Ω₄: Autonomy).
@@ -32,11 +33,7 @@ class EvolutionSwarmBridge:
         self.ledger = manager.ledger
 
     async def evolve_project(
-        self,
-        project_name: str,
-        path: str | Path,
-        threshold: int = 80,
-        brutal: bool = False
+        self, project_name: str, path: str | Path, threshold: int = 80, brutal: bool = False
     ) -> dict[str, Any]:
         """
         Execute an autonomous evolution cycle on a project.
@@ -55,7 +52,11 @@ class EvolutionSwarmBridge:
         score_before = scan_result.score
 
         if score_before >= 100 and not brutal:
-            logger.info("EvolutionBridge: Project %s is already inmejorable (%d/100). skipping.", project_name, score_before)
+            logger.info(
+                "EvolutionBridge: Project %s is already inmejorable (%d/100). skipping.",
+                project_name,
+                score_before,
+            )
             return {"status": "skipped", "score": score_before}
 
         # 2. Extract findings per file
@@ -84,7 +85,9 @@ class EvolutionSwarmBridge:
             logger.info("EvolutionBridge: Evolving %s (Findings: %d)", rel_file_path, len(findings))
 
             # A. Recruit specialized squad for this file (Ω₃: Action)
-            objective = f"Refactor and optimize {rel_file_path} to resolve: {', '.join(findings[:3])}"
+            objective = (
+                f"Refactor and optimize {rel_file_path} to resolve: {', '.join(findings[:3])}"
+            )
             agent_ids = await self.factory.recruit_squad(objective)
 
             if not agent_ids:
@@ -129,8 +132,8 @@ class EvolutionSwarmBridge:
                     "score_after": score_after,
                     "delta": delta,
                     "files_affected": len(results),
-                    "mechanical_justification": f"Ω₄ Evolution Cycle completed. Exergy boost: {delta} points."
-                }
+                    "mechanical_justification": f"Ω₄ Evolution Cycle completed. Exergy boost: {delta} points.",
+                },
             )
 
         # Record session in Mejoralo Ledger
@@ -138,7 +141,7 @@ class EvolutionSwarmBridge:
             project=project_name,
             score_before=score_before,
             score_after=score_after,
-            actions=[f"Evolved {r['file']}: {r['status']}" for r in results]
+            actions=[f"Evolved {r['file']}: {r['status']}" for r in results],
         )
 
         return {
@@ -146,5 +149,5 @@ class EvolutionSwarmBridge:
             "score_before": score_before,
             "score_after": score_after,
             "delta": delta,
-            "mutations": results
+            "mutations": results,
         }

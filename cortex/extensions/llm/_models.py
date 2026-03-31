@@ -147,8 +147,7 @@ class CortexPrompt(BaseModel):
     apply_stealth_mask: bool = Field(
         default=False,
         description=(
-            "Evasión Termodinámica: Activa la máscara 'no-ia-omega' "
-            "para de-AI-ficar el output."
+            "Evasión Termodinámica: Activa la máscara 'no-ia-omega' para de-AI-ficar el output."
         ),
     )
 

@@ -39,6 +39,7 @@ class ShannonCompactor:
         High structural entropy suggests over-complexity (Ω₂).
         """
         import ast
+
         try:
             tree = ast.parse(source_code)
             nodes = [type(node).__name__ for node in ast.walk(tree)]
@@ -67,5 +68,5 @@ class ShannonCompactor:
             "status": "success",
             "duration_ms": duration * 1000,
             "exergy_delta": -0.15,
-            "exergy_yield": 0.85
+            "exergy_yield": 0.85,
         }

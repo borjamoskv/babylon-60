@@ -33,13 +33,11 @@ class ArcActuator:
         # 1. Ingest training pairs
         ingested_train = []
         for pair in training_pairs:
-            gestalt = detect_global_gestalt(pair['input'])
-            nodes = extract_objects(pair['input'], gestalt['background'])
-            ingested_train.append({
-                'input_nodes': nodes,
-                'input_gestalt': gestalt,
-                'output_grid': pair['output']
-            })
+            gestalt = detect_global_gestalt(pair["input"])
+            nodes = extract_objects(pair["input"], gestalt["background"])
+            ingested_train.append(
+                {"input_nodes": nodes, "input_gestalt": gestalt, "output_grid": pair["output"]}
+            )
 
         # 2. Generate Program Synthesis Prompt
         prompt = self._build_prompt(ingested_train)
@@ -57,7 +55,7 @@ class ArcActuator:
 
         # 5. Apply to test input
         test_gestalt = detect_global_gestalt(test_input)
-        test_nodes = extract_objects(test_input, test_gestalt['background'])
+        test_nodes = extract_objects(test_input, test_gestalt["background"])
         result_grid = self._execute_program(program_code, test_nodes, test_gestalt)
 
         return result_grid
@@ -81,37 +79,37 @@ def solve(nodes, gestalt):
 
     def _verify_program(self, code: str, train_data: list[dict]) -> bool:
         for item in train_data:
-            predicted = self._execute_program(code, item['input_nodes'], item['input_gestalt'])
-            if predicted != item['output_grid']:
+            predicted = self._execute_program(code, item["input_nodes"], item["input_gestalt"])
+            if predicted != item["output_grid"]:
                 return False
         return True
 
     def _execute_program(self, code: str, nodes: list, gestalt: dict) -> list[list[int]]:
         """Safely executes the synthesized program within the DSL namespace."""
         namespace = {
-            'move_node': move_node,
-            'recolor_node': recolor_node,
-            'rotate_node_90': rotate_node_90,
-            'flip_node_h': flip_node_h,
-            'flip_node_v': flip_node_v,
-            'select_by_color': select_by_color,
-            'select_by_size': select_by_size,
-            'get_largest': get_largest,
-            'reconstruct_grid': reconstruct_grid
+            "move_node": move_node,
+            "recolor_node": recolor_node,
+            "rotate_node_90": rotate_node_90,
+            "flip_node_h": flip_node_h,
+            "flip_node_v": flip_node_v,
+            "select_by_color": select_by_color,
+            "select_by_size": select_by_size,
+            "get_largest": get_largest,
+            "reconstruct_grid": reconstruct_grid,
         }
         try:
             # Clean up the code block (remove markdown artifacts)
             clean_code = code.strip().replace("```python", "").replace("```", "")
             exec(clean_code, {}, namespace)
-            if 'solve' in namespace:
-                result = namespace['solve'](nodes, gestalt)
-                if isinstance(result, list) and len(result) > 0 and hasattr(result[0], 'pixels'):
+            if "solve" in namespace:
+                result = namespace["solve"](nodes, gestalt)
+                if isinstance(result, list) and len(result) > 0 and hasattr(result[0], "pixels"):
                     return reconstruct_grid(
-                        result, gestalt['rows'], gestalt['cols'], gestalt['background']
+                        result, gestalt["rows"], gestalt["cols"], gestalt["background"]
                     )
                 return result
         except Exception as e:
             logger.error("Execution failed: %s", e)
 
         # Fallback to reconstructing input grid
-        return reconstruct_grid(nodes, gestalt['rows'], gestalt['cols'], gestalt['background'])
+        return reconstruct_grid(nodes, gestalt["rows"], gestalt["cols"], gestalt["background"])

@@ -56,7 +56,8 @@ def get_dashboard_html(
     boot_payload = json.dumps(initial_kpis or []).replace("</", "<\\/")
     export_token = json.dumps(xlsx_export_token or "")
     return (
-        r"""
+        (
+            r"""
     <!DOCTYPE html>
     <html>
     <head>
@@ -810,7 +811,10 @@ def get_dashboard_html(
     </body>
     </html>
     """
-    ).replace("__INITIAL_KPIS__", boot_payload).replace("__XLSX_EXPORT_TOKEN__", export_token)
+        )
+        .replace("__INITIAL_KPIS__", boot_payload)
+        .replace("__XLSX_EXPORT_TOKEN__", export_token)
+    )
 
 
 def _coerce_history_window(window: int) -> int:
@@ -1012,9 +1016,7 @@ def _xlsx_cell_xml(row_index: int, column_index: int, value: Any, *, header: boo
         return f'<c r="{reference}"{style}><v>{value}</v></c>'
     text = xml_escape("" if value is None else str(value))
     return (
-        f'<c r="{reference}" t="inlineStr"{style}>'
-        f'<is><t xml:space="preserve">{text}</t></is>'
-        f"</c>"
+        f'<c r="{reference}" t="inlineStr"{style}><is><t xml:space="preserve">{text}</t></is></c>'
     )
 
 
@@ -1029,9 +1031,7 @@ def _build_sheet_xml(rows: list[list[Any]]) -> str:
     return (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
         '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-        "<sheetData>"
-        + "".join(sheet_rows)
-        + "</sheetData></worksheet>"
+        "<sheetData>" + "".join(sheet_rows) + "</sheetData></worksheet>"
     )
 
 
@@ -1301,7 +1301,10 @@ async def download_dashboard_kpi_xlsx(
     )
     workbook = _build_xlsx_workbook(
         [
-            ("Executive View", _build_dashboard_executive_rows(payloads, history_window=history_window)),
+            (
+                "Executive View",
+                _build_dashboard_executive_rows(payloads, history_window=history_window),
+            ),
             ("KPI Summary", _build_dashboard_summary_rows(payloads, history_window=history_window)),
             ("KPI History", _build_dashboard_history_rows(payloads, history_window=history_window)),
         ]
@@ -1327,7 +1330,9 @@ async def capture_dashboard_skill_snapshot(
 
     registry = SkillRegistry()
     registry.scan()
-    skill = next((item for item in _resolve_metrics_skills(registry) if item.name == skill_name), None)
+    skill = next(
+        (item for item in _resolve_metrics_skills(registry) if item.name == skill_name), None
+    )
     if skill is None:
         raise HTTPException(status_code=404, detail=f"Unknown KPI skill: {skill_name}")
 

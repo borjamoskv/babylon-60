@@ -3,16 +3,16 @@ ARC-AGI Environment Wrapper for AlphaZero Self-Play.
 """
 
 from dataclasses import dataclass
-from typing import Any
 
-from cortex.agents.arc_agi_3.ingestion import GestaltNode, reconstruct_grid
 from cortex.agents.arc_agi_3.dsl import (
+    flip_node_h,
+    flip_node_v,
     move_node,
     recolor_node,
     rotate_node_90,
-    flip_node_h,
-    flip_node_v,
 )
+from cortex.agents.arc_agi_3.ingestion import GestaltNode, reconstruct_grid
+
 
 @dataclass(frozen=True)
 class ARCAction:
@@ -49,25 +49,25 @@ class ARCEnv:
         """Generate legal actions from the current state."""
         if state.step_count >= self.MAX_STEPS:
             return []
-            
+
         actions = []
         for node in state.nodes:
             # Recolor
             for c in range(10):
                 if c != node.color:
                     actions.append(ARCAction(op="RECOLOR", node_id=node.id, color=c))
-            
+
             # Move (1 step cardinal)
             actions.append(ARCAction(op="MOVE", node_id=node.id, dr=-1, dc=0))
             actions.append(ARCAction(op="MOVE", node_id=node.id, dr=1, dc=0))
             actions.append(ARCAction(op="MOVE", node_id=node.id, dr=0, dc=-1))
             actions.append(ARCAction(op="MOVE", node_id=node.id, dr=0, dc=1))
-            
+
             # Transforms
             actions.append(ARCAction(op="ROTATE", node_id=node.id))
             actions.append(ARCAction(op="FLIP_H", node_id=node.id))
             actions.append(ARCAction(op="FLIP_V", node_id=node.id))
-            
+
         return actions
 
     def step(self, state: ARCState, action: ARCAction) -> ARCState:
@@ -87,14 +87,14 @@ class ARCEnv:
                     new_nodes.append(flip_node_v(node))
             else:
                 new_nodes.append(node)
-                
+
         return ARCState(
             nodes=tuple(new_nodes),
             rows=state.rows,
             cols=state.cols,
             background=state.background,
             target_grid=state.target_grid,
-            step_count=state.step_count + 1
+            step_count=state.step_count + 1,
         )
 
     def get_terminal_value(self, state: ARCState) -> float | None:
@@ -104,15 +104,15 @@ class ARCEnv:
         """
         if state.target_grid is None:
             return None
-            
+
         current_grid = reconstruct_grid(list(state.nodes), state.rows, state.cols, state.background)
         current_tuple = self._grid_to_tuple(current_grid)
-        
+
         if current_tuple == state.target_grid:
             return 1.0  # Success
-            
+
         if state.step_count >= self.MAX_STEPS:
             # We penalize failure to encourage finding the shortest path or aborting
             return -1.0
-            
+
         return None

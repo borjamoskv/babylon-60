@@ -99,9 +99,7 @@ class EpistemicBreakerDaemon:
         except Exception as e:
             logger.error("Failed to record breaker trip: %s", e)
 
-        logger.info(
-            "🧠 [SLEEP CYCLE] Running compaction / memory prune (Ω₁₃)."
-        )
+        logger.info("🧠 [SLEEP CYCLE] Running compaction / memory prune (Ω₁₃).")
 
         # Wire to the real compaction path; fall back gracefully if unavailable.
         compacted = False
@@ -119,14 +117,11 @@ class EpistemicBreakerDaemon:
                     compacted = True
                     break
                 except Exception as exc:  # noqa: BLE001
-                    logger.warning(
-                        "engine.%s() raised: %s — trying next option.", method_name, exc
-                    )
+                    logger.warning("engine.%s() raised: %s — trying next option.", method_name, exc)
 
         if not compacted:
             logger.warning(
-                "🧠 [SLEEP CYCLE] No compaction method on engine. "
-                "Falling back to 5s cooldown."
+                "🧠 [SLEEP CYCLE] No compaction method on engine. Falling back to 5s cooldown."
             )
             await asyncio.sleep(5)
 

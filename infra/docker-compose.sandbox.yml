@@ -1,0 +1,30 @@
+# CORTEX G2 — Sandbox Infrastructure
+# Usage: docker compose -f infra/docker-compose.sandbox.yml up -d
+#
+# Creates isolated networks and pre-builds the sandbox image.
+# The DockerSandbox engine spawns ephemeral --rm containers on demand;
+# this compose file only provides the network topology and image build.
+
+services:
+  # One-shot build target — no long-running service.
+  sandbox-image:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.sandbox
+    image: cortex-sandbox:latest
+    entrypoint: ["echo", "Image built successfully"]
+    profiles: ["build"]
+
+networks:
+  # Internal-only bridge for ELEVATED (Tier 2) commands.
+  # No external internet access — containers can only talk
+  # to other containers on this bridge.
+  cortex-elevated:
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+    labels:
+      cortex.tier: "elevated"
+      cortex.description: "Isolated bridge for Tier-2 sandbox execution"

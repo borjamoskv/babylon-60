@@ -373,7 +373,7 @@ async def root_node(request: Request) -> dict:
             " ██║     ██║   ██║██████╔╝   ██║   █████╗   ╚███╔╝  ",
             " ██║     ██║   ██║██╔══██╗   ██║   ██╔══╝   ██╔██╗  ",
             " ╚██████╗╚██████╔╝██║  ██║   ██║   ███████╗██╔╝ ██╗ ",
-            "  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝ "
+            "  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝ ",
         ],
         "state": "SOVEREIGN",
     }
@@ -388,9 +388,8 @@ async def health_check(request: Request) -> dict:
         engine = getattr(request.app.state, "engine", None)
         if engine and hasattr(engine, "manager") and hasattr(engine.manager, "_gradient"):
             from cortex.engine.gradient import GradientType
-            existential_dread = engine.manager._gradient.get_level(
-                GradientType.PRESSURE
-            )
+
+            existential_dread = engine.manager._gradient.get_level(GradientType.PRESSURE)
             ascension_velocity = engine.manager._gradient.get_level(
                 GradientType.EXPANSION_COEFFICIENT
             )

@@ -98,12 +98,8 @@ class VectorLAgent(BaseAgent):
         self._email = EmailDispatcher()
         self._linkedin = LinkedInDispatcher()
 
-        self._min_exergy_gap = float(
-            os.environ.get("VECTOR_L_MIN_EXERGY_GAP", "0.55")
-        )
-        self._scan_interval = int(
-            os.environ.get("VECTOR_L_SCAN_INTERVAL", "3600")
-        )
+        self._min_exergy_gap = float(os.environ.get("VECTOR_L_MIN_EXERGY_GAP", "0.55"))
+        self._scan_interval = int(os.environ.get("VECTOR_L_SCAN_INTERVAL", "3600"))
 
     # ── Tick ─────────────────────────────────────────────────────────────────
 
@@ -118,7 +114,11 @@ class VectorLAgent(BaseAgent):
             await asyncio.sleep(min(remaining, 60.0))
             return
 
-        logger.info("[VectorL] Starting scan cycle (query=%r, limit=%d)", self._scan_query, self._probe_limit)
+        logger.info(
+            "[VectorL] Starting scan cycle (query=%r, limit=%d)",
+            self._scan_query,
+            self._probe_limit,
+        )
         self._phase = VLPhase.SCANNING
         self._pitches_this_cycle = 0
 

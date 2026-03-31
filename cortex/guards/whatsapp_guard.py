@@ -10,6 +10,7 @@ from typing import Any
 
 logger = logging.getLogger("cortex.guards.whatsapp")
 
+
 class WhatsAppGuard:
     """
     Enforces deterministic boundaries on WhatsApp communications.
@@ -32,8 +33,12 @@ class WhatsAppGuard:
         Validates an outbound WhatsApp message.
         """
         if not (self.MIN_MESSAGE_LENGTH <= len(text) <= self.MAX_MESSAGE_LENGTH):
-            logger.error("[WHATSAPP_GUARD] Message length %d outside limits [%d, %d]",
-                         len(text), self.MIN_MESSAGE_LENGTH, self.MAX_MESSAGE_LENGTH)
+            logger.error(
+                "[WHATSAPP_GUARD] Message length %d outside limits [%d, %d]",
+                len(text),
+                self.MIN_MESSAGE_LENGTH,
+                self.MAX_MESSAGE_LENGTH,
+            )
             return False
 
         if not recipient or len(recipient) < 2:

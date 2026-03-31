@@ -1,0 +1,2224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BORJA MOSKV | Ruido de barrio. Maquinas con memoria.</title>
+  <meta name="description" content="Borja Moskv desde Bilbao. Ambient, IDM, techno, live AV, visuales 4K, laboratorio digital y archivo propio en una sola senal.">
+  <meta name="theme-color" content="#070707">
+  <meta property="og:title" content="BORJA MOSKV | Ruido de barrio. Maquinas con memoria.">
+  <meta property="og:description" content="Musica, visuales y sistema en una sola senal. Ambient, IDM, techno, live AV y laboratorio digital desde Bilbao.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://borjamoskv.com">
+  <meta property="og:image" content="https://borjamoskv.com/img/og-cover.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="BORJA MOSKV">
+  <meta name="twitter:description" content="Ruido de barrio. Maquinas con memoria. Musica, visuales y sistema.">
+  <meta name="twitter:image" content="https://borjamoskv.com/img/og-cover.jpg">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23070707'/%3E%3Crect x='3' y='3' width='58' height='58' rx='15' fill='none' stroke='%23d8ff53' stroke-opacity='.35'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='IBM Plex Mono, monospace' font-size='18' font-weight='600' fill='%23d8ff53'%3EM-1%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&family=Syne:wght@500;700;800&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "MusicGroup",
+    "name": "Borja Moskv",
+    "alternateName": ["MOSKV", "Bakala de Troya", "Boney MDMA"],
+    "url": "https://borjamoskv.com",
+    "genre": ["Ambient", "IDM", "Techno", "Experimental Electronic"],
+    "foundingLocation": {
+      "@type": "Place",
+      "name": "Bilbao, Spain"
+    },
+    "sameAs": [
+      "https://open.spotify.com/intl-es/artist/4p7wMuZpktE5aBFhBoQdqa",
+      "https://borjamoskv.bandcamp.com",
+      "https://soundcloud.com/borja-moskv",
+      "https://www.youtube.com/@borjamoskv",
+      "https://www.mixcloud.com/borjamoskv/",
+      "https://foundation.app/@bakaladetroya",
+      "https://paragraph.xyz/@borjamoskv",
+      "https://borjamoskv.substack.com"
+    ],
+    "description": "Ruido de barrio. Maquinas con memoria. Bilbao respira. Musica, visuales y sistema."
+  }
+  </script>
+  <style>
+    :root {
+      --bg: #070707;
+      --bg-elevated: rgba(15, 15, 15, 0.88);
+      --bg-panel: rgba(18, 18, 18, 0.78);
+      --bg-panel-strong: rgba(23, 23, 23, 0.94);
+      --text: #f7f2e8;
+      --muted: #b4ada0;
+      --muted-strong: #cbc4b7;
+      --line: rgba(255, 255, 255, 0.08);
+      --line-strong: rgba(255, 255, 255, 0.16);
+      --lime: #d8ff53;
+      --lime-soft: rgba(216, 255, 83, 0.14);
+      --blue: #6178ff;
+      --blue-soft: rgba(97, 120, 255, 0.16);
+      --orange: #ff7f54;
+      --orange-soft: rgba(255, 127, 84, 0.16);
+      --rose: #ff5ec4;
+      --rose-soft: rgba(255, 94, 196, 0.12);
+      --display: "Syne", sans-serif;
+      --body: "Space Grotesk", sans-serif;
+      --mono: "IBM Plex Mono", monospace;
+      --radius-xl: 34px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
+      --shadow: 0 26px 80px rgba(0, 0, 0, 0.42);
+      --max-width: 1240px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 15% 12%, rgba(97, 120, 255, 0.22), transparent 28%),
+        radial-gradient(circle at 82% 18%, rgba(255, 127, 84, 0.14), transparent 22%),
+        radial-gradient(circle at 72% 72%, rgba(216, 255, 83, 0.14), transparent 28%),
+        linear-gradient(180deg, #0c0c0c 0%, #080808 42%, #050505 100%);
+      color: var(--text);
+      font-family: var(--body);
+      line-height: 1.5;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+      background-size: 36px 36px;
+      mask-image: radial-gradient(circle at center, black 26%, transparent 82%);
+      pointer-events: none;
+      opacity: 0.9;
+      z-index: 0;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(transparent 0%, rgba(0, 0, 0, 0.08) 48%, transparent 100%);
+      background-size: 100% 6px;
+      opacity: 0.12;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font: inherit;
+      background: none;
+      border: none;
+      color: inherit;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    ::selection {
+      background: var(--lime);
+      color: #111;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+    }
+
+    .container {
+      width: min(calc(100% - 2rem), var(--max-width));
+      margin: 0 auto;
+    }
+
+    .scroll-rail {
+      position: fixed;
+      right: 1.1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 34vh;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      z-index: 30;
+    }
+
+    .scroll-progress {
+      width: 100%;
+      height: 18%;
+      border-radius: inherit;
+      background: linear-gradient(180deg, var(--lime), var(--blue));
+      box-shadow: 0 0 22px rgba(216, 255, 83, 0.28);
+      transform-origin: top;
+      transform: scaleY(0.12);
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      border-bottom: 1px solid var(--line);
+      background: rgba(7, 7, 7, 0.76);
+      backdrop-filter: blur(18px);
+    }
+
+    .topbar-inner {
+      width: min(calc(100% - 2rem), var(--max-width));
+      margin: 0 auto;
+      min-height: 78px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .brand-mark {
+      width: 2.6rem;
+      height: 2.6rem;
+      border-radius: 1rem;
+      display: grid;
+      place-items: center;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--lime);
+      border: 1px solid rgba(216, 255, 83, 0.24);
+      background: linear-gradient(135deg, rgba(97, 120, 255, 0.22), rgba(216, 255, 83, 0.08));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    }
+
+    .brand-copy {
+      display: grid;
+      gap: 0.12rem;
+    }
+
+    .brand-copy strong {
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      font-size: 1rem;
+    }
+
+    .brand-copy small {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .nav-toggle {
+      display: none;
+      width: 2.9rem;
+      height: 2.9rem;
+      border-radius: 999px;
+      border: 1px solid var(--line-strong);
+      background: rgba(255, 255, 255, 0.03);
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .nav-toggle span,
+    .nav-toggle span::before,
+    .nav-toggle span::after {
+      display: block;
+      width: 1rem;
+      height: 1px;
+      background: currentColor;
+      position: relative;
+      content: "";
+      transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .nav-toggle span::before {
+      position: absolute;
+      top: -0.35rem;
+    }
+
+    .nav-toggle span::after {
+      position: absolute;
+      top: 0.35rem;
+    }
+
+    .nav-toggle[aria-expanded="true"] span {
+      background: transparent;
+    }
+
+    .nav-toggle[aria-expanded="true"] span::before {
+      transform: translateY(0.35rem) rotate(45deg);
+    }
+
+    .nav-toggle[aria-expanded="true"] span::after {
+      transform: translateY(-0.35rem) rotate(-45deg);
+    }
+
+    .nav-shell {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.2rem;
+      flex: 1;
+    }
+
+    .nav-links,
+    .platform-links {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.95rem;
+    }
+
+    .nav-links a,
+    .platform-links a {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .nav-links a:hover,
+    .platform-links a:hover,
+    .nav-links a.is-active {
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+
+    .platform-links a.featured {
+      color: var(--lime);
+    }
+
+    .hero {
+      padding: 3.5rem 0 0;
+    }
+
+    .hero-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.18fr) minmax(350px, 0.82fr);
+      gap: 1.1rem;
+      align-items: stretch;
+    }
+
+    .panel,
+    .card,
+    .signal-card,
+    .portal-card,
+    .set-card,
+    .work-card,
+    .writing-card,
+    .milestone-card,
+    .terminal-card,
+    .feed-card,
+    .contact-card,
+    .footer-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .hero-copy {
+      border-radius: var(--radius-xl);
+      padding: clamp(1.5rem, 4vw, 2.5rem);
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0.012)),
+        rgba(17, 17, 17, 0.8);
+    }
+
+    .hero-copy::after {
+      content: "";
+      position: absolute;
+      inset: auto -8% -18% auto;
+      width: 20rem;
+      aspect-ratio: 1;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(216, 255, 83, 0.14), transparent 70%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.7rem;
+      min-height: 3rem;
+      padding: 0 1rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(216, 255, 83, 0.18);
+      color: var(--muted-strong);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 999px;
+      background: var(--lime);
+      box-shadow: 0 0 18px rgba(216, 255, 83, 0.44);
+      animation: pulse 1.9s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(0.72);
+        opacity: 0.45;
+      }
+    }
+
+    .hero-title {
+      margin-top: 1.4rem;
+      font-family: var(--display);
+      font-size: clamp(3.1rem, 9vw, 6.7rem);
+      line-height: 0.9;
+      letter-spacing: -0.07em;
+      max-width: 8.2ch;
+    }
+
+    .hero-title .accent {
+      color: var(--lime);
+    }
+
+    .hero-sub {
+      margin-top: 1.25rem;
+      max-width: 58ch;
+      color: var(--muted-strong);
+      font-size: clamp(1rem, 2vw, 1.16rem);
+      line-height: 1.82;
+    }
+
+    .hero-sub strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+      margin-top: 1.8rem;
+    }
+
+    .button,
+    .button-ghost {
+      min-height: 3.25rem;
+      padding: 0 1.2rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .button {
+      color: #111;
+      background: linear-gradient(135deg, var(--lime), #f1ff95);
+      box-shadow: 0 16px 34px rgba(216, 255, 83, 0.18);
+    }
+
+    .button-ghost {
+      border: 1px solid var(--line-strong);
+      background: rgba(255, 255, 255, 0.035);
+      color: var(--text);
+    }
+
+    .button:hover,
+    .button-ghost:hover,
+    .contact-button:hover {
+      transform: translateY(-2px);
+    }
+
+    .hero-meta {
+      margin-top: 1.8rem;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.8rem;
+    }
+
+    .meta-card {
+      padding: 1rem 1rem 1.05rem;
+      border-radius: 1.2rem;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      min-height: 100%;
+    }
+
+    .meta-card span {
+      display: block;
+      font-family: var(--mono);
+      font-size: 0.67rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .meta-card strong {
+      display: block;
+      margin-top: 0.42rem;
+      font-size: 0.97rem;
+      line-height: 1.45;
+      font-weight: 500;
+    }
+
+    .hero-side {
+      display: grid;
+      gap: 1rem;
+      grid-template-rows: minmax(0, 1fr) auto;
+    }
+
+    .signal-card {
+      border-radius: var(--radius-xl);
+      padding: 1.4rem;
+      position: relative;
+      overflow: hidden;
+      min-height: 100%;
+      background:
+        linear-gradient(160deg, rgba(255, 255, 255, 0.03), transparent 46%),
+        rgba(17, 17, 17, 0.84);
+    }
+
+    .signal-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, rgba(97, 120, 255, 0.2), transparent 35%),
+        radial-gradient(circle at 78% 14%, rgba(255, 127, 84, 0.16), transparent 24%),
+        radial-gradient(circle at 68% 82%, rgba(216, 255, 83, 0.14), transparent 26%);
+      pointer-events: none;
+    }
+
+    .signal-head,
+    .signal-footer {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .signal-label {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .signal-chip {
+      padding: 0.52rem 0.78rem;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      border: 1px solid rgba(97, 120, 255, 0.2);
+      color: #dce2ff;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .poster {
+      position: relative;
+      z-index: 1;
+      margin-top: 1rem;
+      border-radius: 1.8rem;
+      min-height: 27rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1.3rem;
+      background:
+        linear-gradient(180deg, rgba(4, 4, 4, 0.18), rgba(6, 6, 6, 0.86)),
+        url("https://i.ytimg.com/vi/b9ktVQN48OU/maxresdefault.jpg") center/cover no-repeat;
+      transform-style: preserve-3d;
+      transition: transform 0.18s ease;
+    }
+
+    .poster::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.18), transparent 18%),
+        linear-gradient(120deg, rgba(97, 120, 255, 0.14), transparent 35%),
+        linear-gradient(300deg, rgba(216, 255, 83, 0.09), transparent 30%);
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .poster-top,
+    .poster-bottom {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .poster-top span,
+    .poster-bottom span {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .poster-title {
+      position: relative;
+      z-index: 1;
+      align-self: center;
+      max-width: 7ch;
+      font-family: var(--display);
+      font-size: clamp(2.4rem, 5vw, 3.9rem);
+      line-height: 0.88;
+      letter-spacing: -0.06em;
+      text-transform: uppercase;
+      text-shadow: 0 8px 30px rgba(0, 0, 0, 0.55);
+    }
+
+    .poster-title small {
+      display: block;
+      font-family: var(--mono);
+      font-size: 0.74rem;
+      letter-spacing: 0.18em;
+      margin-bottom: 0.8rem;
+      color: rgba(255, 255, 255, 0.72);
+    }
+
+    .poster-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      min-height: 2.35rem;
+      padding: 0 0.9rem;
+      border-radius: 999px;
+      background: rgba(8, 8, 8, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(10px);
+    }
+
+    .signal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.8rem;
+    }
+
+    .signal-mini {
+      padding: 1rem;
+      border-radius: 1.3rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .signal-mini span {
+      display: block;
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .signal-mini strong {
+      display: block;
+      margin-top: 0.45rem;
+      font-size: 1rem;
+      line-height: 1.45;
+    }
+
+    .signal-mini p {
+      margin-top: 0.35rem;
+      color: var(--muted-strong);
+      font-size: 0.92rem;
+      line-height: 1.58;
+    }
+
+    .manifesto-band {
+      margin-top: 1rem;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      overflow: hidden;
+    }
+
+    .manifesto-track {
+      display: flex;
+      gap: 1.2rem;
+      white-space: nowrap;
+      min-width: max-content;
+      padding: 1rem 0;
+      animation: marquee 28s linear infinite;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .manifesto-track strong {
+      color: var(--lime);
+      font-weight: 500;
+    }
+
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    section {
+      padding: 6rem 0 0;
+    }
+
+    .section-head {
+      display: grid;
+      gap: 0.9rem;
+      max-width: 47rem;
+    }
+
+    .section-kicker {
+      font-family: var(--mono);
+      font-size: 0.74rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--lime);
+    }
+
+    .section-title {
+      font-family: var(--display);
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      line-height: 0.92;
+      letter-spacing: -0.07em;
+      max-width: 11ch;
+    }
+
+    .section-desc {
+      color: var(--muted-strong);
+      font-size: 1.03rem;
+      line-height: 1.82;
+      max-width: 58ch;
+    }
+
+    .music-layout,
+    .sets-layout,
+    .lab-layout,
+    .writings-layout,
+    .contact-layout {
+      margin-top: 2rem;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .music-layout {
+      grid-template-columns: minmax(0, 1.06fr) minmax(280px, 0.94fr);
+    }
+
+    .sets-layout,
+    .lab-layout {
+      grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+    }
+
+    .writings-layout {
+      grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+    }
+
+    .music-feature,
+    .terminal-card,
+    .writing-quote,
+    .feed-card {
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .music-feature {
+      min-height: 32rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background:
+        linear-gradient(180deg, rgba(8, 8, 8, 0.2), rgba(8, 8, 8, 0.92)),
+        linear-gradient(120deg, rgba(97, 120, 255, 0.18), transparent 34%),
+        url("https://i.ytimg.com/vi/x8E9HInpzE4/maxresdefault.jpg") center/cover no-repeat;
+    }
+
+    .feature-top,
+    .feature-bottom {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: flex-start;
+      position: relative;
+      z-index: 1;
+    }
+
+    .feature-title {
+      position: relative;
+      z-index: 1;
+      max-width: 8ch;
+      font-family: var(--display);
+      font-size: clamp(2.5rem, 5vw, 4.6rem);
+      line-height: 0.9;
+      letter-spacing: -0.08em;
+    }
+
+    .feature-title small {
+      display: block;
+      margin-bottom: 0.8rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.78);
+    }
+
+    .feature-copy {
+      max-width: 27rem;
+      color: var(--muted-strong);
+      font-size: 1rem;
+      line-height: 1.76;
+    }
+
+    .portal-stack,
+    .stack {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .portal-card,
+    .set-card,
+    .work-card,
+    .writing-card,
+    .milestone-card,
+    .contact-card {
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.24s ease, border-color 0.24s ease, background 0.24s ease;
+    }
+
+    .portal-card:hover,
+    .set-card:hover,
+    .work-card:hover,
+    .writing-card:hover,
+    .milestone-card:hover,
+    .contact-card:hover,
+    .feed-card:hover,
+    .terminal-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255, 255, 255, 0.18);
+      background: var(--bg-panel-strong);
+    }
+
+    .portal-card::before,
+    .set-card::before,
+    .work-card::before,
+    .writing-card::before,
+    .milestone-card::before,
+    .contact-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), transparent 42%);
+      pointer-events: none;
+    }
+
+    .card-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .card-tag::before {
+      content: "";
+      width: 0.45rem;
+      height: 0.45rem;
+      border-radius: 999px;
+      background: var(--lime);
+    }
+
+    .portal-card h3,
+    .set-card h3,
+    .work-card h3,
+    .writing-card h3,
+    .milestone-card h3,
+    .contact-card h3 {
+      margin-top: 0.95rem;
+      font-family: var(--display);
+      font-size: 1.7rem;
+      line-height: 0.96;
+      letter-spacing: -0.06em;
+      max-width: 10ch;
+    }
+
+    .portal-card p,
+    .set-card p,
+    .work-card p,
+    .writing-card p,
+    .milestone-card p,
+    .contact-card p {
+      margin-top: 0.8rem;
+      color: var(--muted-strong);
+      font-size: 0.97rem;
+      line-height: 1.72;
+      max-width: 34ch;
+    }
+
+    .card-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+
+    .card-link::after {
+      content: "->";
+      color: var(--lime);
+    }
+
+    .portal-grid,
+    .works-grid,
+    .milestones-grid,
+    .contact-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .portal-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .works-grid {
+      margin-top: 1rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .work-card {
+      min-height: 16rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      background:
+        linear-gradient(180deg, rgba(8, 8, 8, 0.08), rgba(8, 8, 8, 0.9)),
+        var(--work-image, linear-gradient(135deg, rgba(97, 120, 255, 0.16), rgba(255, 127, 84, 0.16)));
+      background-size: cover;
+      background-position: center;
+    }
+
+    .work-card.work-1 {
+      --work-image: url("https://i.ytimg.com/vi/NYhOQTcNLkA/maxresdefault.jpg");
+    }
+
+    .work-card.work-2 {
+      --work-image: url("https://i.ytimg.com/vi/EP5s0yKZUKk/maxresdefault.jpg");
+    }
+
+    .work-card.work-3 {
+      --work-image: url("https://i.ytimg.com/vi/YvGpocK-Iqg/maxresdefault.jpg");
+    }
+
+    .work-card.work-4 {
+      --work-image: url("https://i.ytimg.com/vi/vxD2l4cIp7I/maxresdefault.jpg");
+    }
+
+    .set-spotlight {
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      display: grid;
+      gap: 1rem;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015)),
+        rgba(18, 18, 18, 0.82);
+    }
+
+    .set-visual {
+      min-height: 18rem;
+      border-radius: 1.8rem;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background:
+        linear-gradient(180deg, rgba(4, 4, 4, 0.1), rgba(4, 4, 4, 0.84)),
+        url("https://i.ytimg.com/vi/YvGpocK-Iqg/maxresdefault.jpg") center/cover no-repeat;
+      display: flex;
+      align-items: flex-end;
+      padding: 1.2rem;
+    }
+
+    .set-visual h3 {
+      font-family: var(--display);
+      font-size: clamp(2.1rem, 4vw, 3.6rem);
+      line-height: 0.9;
+      letter-spacing: -0.07em;
+      max-width: 8ch;
+    }
+
+    .set-visual small {
+      display: block;
+      margin-bottom: 0.65rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.8rem;
+    }
+
+    .stat-pill {
+      padding: 1rem;
+      border-radius: 1.1rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .stat-pill span {
+      display: block;
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .stat-pill strong {
+      display: block;
+      margin-top: 0.42rem;
+      font-size: 1rem;
+      line-height: 1.46;
+      font-weight: 500;
+    }
+
+    .terminal-card {
+      background:
+        radial-gradient(circle at top right, rgba(97, 120, 255, 0.16), transparent 28%),
+        rgba(16, 16, 16, 0.86);
+    }
+
+    .terminal-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.1rem;
+    }
+
+    .terminal-window {
+      border-radius: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      background: #090909;
+    }
+
+    .terminal-titlebar {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .terminal-dot {
+      width: 0.62rem;
+      height: 0.62rem;
+      border-radius: 999px;
+      background: #ff7f54;
+    }
+
+    .terminal-dot:nth-child(2) {
+      background: #ffca57;
+    }
+
+    .terminal-dot:nth-child(3) {
+      background: #7dff95;
+    }
+
+    .terminal-titlebar span:last-child {
+      margin-left: auto;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .terminal-body {
+      padding: 1rem;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      line-height: 1.85;
+      color: #d9d4cb;
+    }
+
+    .terminal-body .lime {
+      color: var(--lime);
+    }
+
+    .terminal-body .blue {
+      color: #94a6ff;
+    }
+
+    .terminal-body .muted {
+      color: #8a8377;
+    }
+
+    .feed-card {
+      background:
+        radial-gradient(circle at top right, rgba(216, 255, 83, 0.14), transparent 30%),
+        rgba(15, 15, 15, 0.86);
+      display: grid;
+      gap: 1rem;
+    }
+
+    .feed-list {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .feed-item {
+      padding: 0.95rem;
+      border-radius: 1rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .feed-item strong {
+      display: block;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--lime);
+      font-weight: 500;
+    }
+
+    .feed-item p {
+      margin-top: 0.45rem;
+      color: var(--muted-strong);
+      font-size: 0.94rem;
+      line-height: 1.66;
+    }
+
+    .writing-quote {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background:
+        radial-gradient(circle at top left, rgba(255, 127, 84, 0.14), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(97, 120, 255, 0.16), transparent 26%),
+        rgba(16, 16, 16, 0.84);
+    }
+
+    .writing-quote blockquote {
+      font-family: var(--display);
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      line-height: 0.94;
+      letter-spacing: -0.07em;
+      max-width: 10ch;
+    }
+
+    .writing-quote p {
+      margin-top: 1rem;
+      color: var(--muted-strong);
+      max-width: 30rem;
+      font-size: 1rem;
+      line-height: 1.8;
+    }
+
+    .writing-stack {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .milestones-grid {
+      margin-top: 2rem;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .milestone-card {
+      min-height: 16rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .milestone-year {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--lime);
+    }
+
+    .contact-layout {
+      grid-template-columns: minmax(0, 1.12fr) minmax(300px, 0.88fr);
+      align-items: start;
+    }
+
+    .contact-intro {
+      border-radius: var(--radius-xl);
+      padding: 1.6rem;
+      background:
+        linear-gradient(135deg, rgba(216, 255, 83, 0.08), rgba(97, 120, 255, 0.12), rgba(255, 127, 84, 0.08)),
+        rgba(15, 15, 15, 0.86);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .contact-intro h3 {
+      margin-top: 0.9rem;
+      font-family: var(--display);
+      font-size: clamp(2.4rem, 5vw, 4.2rem);
+      line-height: 0.92;
+      letter-spacing: -0.08em;
+      max-width: 8ch;
+    }
+
+    .contact-intro p {
+      margin-top: 1rem;
+      color: var(--muted-strong);
+      max-width: 36rem;
+      line-height: 1.82;
+      font-size: 1rem;
+    }
+
+    .contact-grid {
+      margin-top: 1.1rem;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .contact-buttons {
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .contact-button {
+      min-height: 3.2rem;
+      padding: 0 1.1rem;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line-strong);
+      background: rgba(255, 255, 255, 0.03);
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .contact-button.primary {
+      background: linear-gradient(135deg, var(--blue), #91a4ff);
+      border-color: transparent;
+      color: white;
+    }
+
+    .contact-button.secondary {
+      background: linear-gradient(135deg, var(--lime), #eefb9a);
+      border-color: transparent;
+      color: #111;
+    }
+
+    .footer {
+      padding: 6rem 0 2.6rem;
+    }
+
+    .footer-card {
+      border-radius: var(--radius-xl);
+      padding: 1.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-mark {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .footer-small {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.72s ease, transform 0.72s ease;
+    }
+
+    [data-reveal].is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+
+    @media (max-width: 1160px) {
+      .hero-layout,
+      .music-layout,
+      .sets-layout,
+      .lab-layout,
+      .writings-layout,
+      .contact-layout,
+      .milestones-grid,
+      .contact-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .portal-grid,
+      .works-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .hero-title,
+      .section-title,
+      .contact-intro h3 {
+        max-width: none;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .scroll-rail {
+        display: none;
+      }
+
+      .topbar-inner {
+        min-height: 74px;
+      }
+
+      .nav-toggle {
+        display: inline-flex;
+      }
+
+      .nav-shell {
+        position: absolute;
+        left: 1rem;
+        right: 1rem;
+        top: calc(100% + 0.6rem);
+        padding: 1rem;
+        border-radius: 1.4rem;
+        border: 1px solid var(--line);
+        background: rgba(8, 8, 8, 0.97);
+        box-shadow: var(--shadow);
+        flex-direction: column;
+        align-items: flex-start;
+        opacity: 0;
+        transform: translateY(-8px);
+        pointer-events: none;
+        transition: opacity 0.22s ease, transform 0.22s ease;
+      }
+
+      .nav-shell.is-open {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+      .nav-links,
+      .platform-links {
+        width: 100%;
+      }
+
+      .platform-links {
+        padding-top: 0.7rem;
+        border-top: 1px solid var(--line);
+      }
+
+      .hero-meta,
+      .signal-grid,
+      .stats-strip,
+      .portal-grid,
+      .works-grid,
+      .contact-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .container,
+      .topbar-inner {
+        width: min(calc(100% - 1.2rem), var(--max-width));
+      }
+
+      .hero {
+        padding-top: 2.5rem;
+      }
+
+      .hero-copy,
+      .signal-card,
+      .music-feature,
+      .set-spotlight,
+      .terminal-card,
+      .feed-card,
+      .writing-quote,
+      .portal-card,
+      .set-card,
+      .work-card,
+      .writing-card,
+      .milestone-card,
+      .contact-card,
+      .contact-intro,
+      .footer-card {
+        border-radius: 1.5rem;
+      }
+
+      .button,
+      .button-ghost,
+      .contact-button {
+        width: 100%;
+      }
+
+      .hero-actions {
+        display: grid;
+      }
+
+      .poster {
+        min-height: 22rem;
+      }
+
+      section {
+        padding-top: 5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="scroll-rail" aria-hidden="true">
+      <div class="scroll-progress" id="scrollProgress"></div>
+    </div>
+
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="#top" aria-label="Ir al inicio">
+          <span class="brand-mark">M-1</span>
+          <span class="brand-copy">
+            <strong>BORJA MOSKV</strong>
+            <small>Bilbao signal online</small>
+          </span>
+        </a>
+
+        <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navShell" aria-label="Abrir navegacion">
+          <span></span>
+        </button>
+
+        <div class="nav-shell" id="navShell">
+          <nav class="nav-links" aria-label="Secciones">
+            <a href="#music">Music</a>
+            <a href="#sets">Sets</a>
+            <a href="#dj-automata">DJ Automata</a>
+            <a href="#lab">Lab</a>
+            <a href="#moltbook">Moltbook</a>
+            <a href="#writings">Diario</a>
+            <a href="#contact">Booking</a>
+          </nav>
+
+          <div class="platform-links" aria-label="Plataformas">
+            <a class="featured" href="https://borjamoskv.bandcamp.com" target="_blank" rel="noopener">Bandcamp</a>
+            <a href="https://open.spotify.com/intl-es/artist/4p7wMuZpktE5aBFhBoQdqa" target="_blank" rel="noopener">Spotify</a>
+            <a href="https://soundcloud.com/borja-moskv" target="_blank" rel="noopener">SoundCloud</a>
+            <a href="https://www.youtube.com/@borjamoskv" target="_blank" rel="noopener">YouTube</a>
+            <a href="https://www.mixcloud.com/borjamoskv/" target="_blank" rel="noopener">Mixcloud</a>
+            <a href="https://foundation.app/@bakaladetroya" target="_blank" rel="noopener">Foundation</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="container">
+          <div class="hero-layout">
+            <article class="hero-copy" data-reveal>
+              <span class="eyebrow">Bilbao · productor experimental · live AV · DJ</span>
+              <h1 class="hero-title">
+                Ruido de barrio para
+                <span class="accent">maquinas con memoria.</span>
+              </h1>
+              <p class="hero-sub">
+                Borja Moskv cruza <strong>ambient, IDM, techno, visuales 4K, live AV y laboratorio digital</strong>
+                sin separar demasiado una cosa de la otra. No es solo musica, ni solo sistema, ni solo imagen:
+                es una misma cabeza cambiando de herramienta.
+              </p>
+
+              <div class="hero-actions">
+                <a class="button" href="#music">Escuchar ahora</a>
+                <a class="button-ghost" href="#sets">Ver live sets</a>
+                <a class="button-ghost" href="#contact">Reservar live / booking</a>
+              </div>
+
+              <div class="hero-meta">
+                <div class="meta-card">
+                  <span>Senal</span>
+                  <strong>Ambient / IDM / Techno / Bakala de Troya</strong>
+                </div>
+                <div class="meta-card">
+                  <span>Formato</span>
+                  <strong>DJ sets, visuales 4K, live AV y comisiones</strong>
+                </div>
+                <div class="meta-card">
+                  <span>Nucleo</span>
+                  <strong>Musica, texto, sistema y desvio util</strong>
+                </div>
+                <div class="meta-card">
+                  <span>Base</span>
+                  <strong>Bilbao, no Berlin. Booking abierto.</strong>
+                </div>
+              </div>
+            </article>
+
+            <aside class="hero-side" data-reveal>
+              <article class="signal-card">
+                <div class="signal-head">
+                  <span class="signal-label">Signal board</span>
+                  <span class="signal-chip">active / low entropy</span>
+                </div>
+
+                <a class="poster" href="https://www.youtube.com/watch?v=b9ktVQN48OU" target="_blank" rel="noopener" id="heroPoster">
+                  <div class="poster-top">
+                    <span class="poster-pill">background reel / LES BUKO</span>
+                    <span class="poster-pill">4K / visual signal</span>
+                  </div>
+
+                  <div class="poster-title">
+                    <small>Industrial noir / visual core</small>
+                    BORJA<br>MOSKV
+                  </div>
+
+                  <div class="poster-bottom">
+                    <span>mismo pulso / otra entrada</span>
+                    <span>video / musica / sistema</span>
+                  </div>
+                </a>
+              </article>
+
+              <div class="signal-grid">
+                <div class="signal-mini panel">
+                  <span>Musica</span>
+                  <strong>Release, archivo y pista de entrada clara.</strong>
+                  <p>Bandcamp, Spotify, SoundCloud y Mixcloud sin friccion.</p>
+                </div>
+                <div class="signal-mini panel">
+                  <span>Sets</span>
+                  <strong>Maraton larga, warehouse, live AV y visual set.</strong>
+                  <p>Formatos distintos con una sola identidad sonora.</p>
+                </div>
+                <div class="signal-mini panel">
+                  <span>DJ Automata</span>
+                  <strong>Modo de entrada rapida para mezclar clip, set y archivo.</strong>
+                  <p>Un acceso con piloto encendido para caer dentro sin pensar demasiado.</p>
+                </div>
+                <div class="signal-mini panel">
+                  <span>Lab</span>
+                  <strong>MOSKV-1, visual AI, loops y arquitectura propia.</strong>
+                  <p>La parte tecnica no va aparte: alimenta la obra.</p>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <div class="manifesto-band" aria-hidden="true">
+          <div class="manifesto-track">
+            <span><strong>INDUSTRIAL NOIR</strong></span>
+            <span>·</span>
+            <span>BAKALA DE TROYA</span>
+            <span>·</span>
+            <span>RUIDO DE BARRIO</span>
+            <span>·</span>
+            <span>MAQUINAS CON MEMORIA</span>
+            <span>·</span>
+            <span>MUSICA + VISUALES + SISTEMA</span>
+            <span>·</span>
+            <span>BILBAO, NO BERLIN</span>
+            <span>·</span>
+            <span>NO ES UNA WEB, ES UNA SENAL</span>
+            <span>·</span>
+            <span><strong>INDUSTRIAL NOIR</strong></span>
+            <span>·</span>
+            <span>BAKALA DE TROYA</span>
+            <span>·</span>
+            <span>RUIDO DE BARRIO</span>
+            <span>·</span>
+            <span>MAQUINAS CON MEMORIA</span>
+            <span>·</span>
+            <span>MUSICA + VISUALES + SISTEMA</span>
+            <span>·</span>
+            <span>BILBAO, NO BERLIN</span>
+            <span>·</span>
+            <span>NO ES UNA WEB, ES UNA SENAL</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="dj-automata">
+        <div class="container">
+          <div class="section-head" data-reveal>
+            <span class="section-kicker">DJ Automata</span>
+            <h2 class="section-title">La entrada con piloto encendido.</h2>
+            <p class="section-desc">
+              DJ Automata no es una broma lateral. Es el modo de acceso mas inmediato al universo MOSKV:
+              dejas correr la senal y entras por mezcla, imagen y deriva sin pedir demasiadas instrucciones.
+            </p>
+          </div>
+
+          <div class="music-layout" data-reveal>
+            <article class="music-feature panel" style="background:
+              linear-gradient(180deg, rgba(8, 8, 8, 0.18), rgba(8, 8, 8, 0.9)),
+              linear-gradient(120deg, rgba(255, 127, 84, 0.18), transparent 30%),
+              url('https://i.ytimg.com/vi/YvGpocK-Iqg/maxresdefault.jpg') center/cover no-repeat;">
+              <div class="feature-top">
+                <span class="card-tag">Autopilot mode</span>
+                <span class="signal-chip">mix / reel / archive</span>
+              </div>
+
+              <div class="feature-title">
+                <small>DJ Automata</small>
+                Entra y deja que siga solo.
+              </div>
+
+              <div class="feature-bottom">
+                <p class="feature-copy">
+                  Un modo de escucha y visionado donde la mezcla manda: set largo, visual reel y archivo en rotacion.
+                  Menos elegir pista por pista, mas dejarte coger por el pulso.
+                </p>
+                <a class="card-link" href="https://www.youtube.com/watch?v=YvGpocK-Iqg" target="_blank" rel="noopener">Encender modo DJ</a>
+              </div>
+            </article>
+
+            <div class="stack">
+              <a class="portal-card card" href="https://www.youtube.com/watch?v=b9ktVQN48OU" target="_blank" rel="noopener">
+                <span class="card-tag">Background reel</span>
+                <h3>LES BUKO</h3>
+                <p>Visual principal para entrar por atmosfera antes que por tracklist.</p>
+                <span class="card-link">Abrir reel</span>
+              </a>
+
+              <a class="portal-card card" href="https://soundcloud.com/borja-moskv" target="_blank" rel="noopener">
+                <span class="card-tag">Continuous play</span>
+                <h3>SoundCloud archive</h3>
+                <p>Sesion, restos y ruta mas fluida para escuchar sin demasiado corte.</p>
+                <span class="card-link">Abrir archivo</span>
+              </a>
+
+              <a class="portal-card card" href="https://www.mixcloud.com/borjamoskv/" target="_blank" rel="noopener">
+                <span class="card-tag">Session flow</span>
+                <h3>Mixcloud stream</h3>
+                <p>Cuando lo importante es el cuerpo entero del set y no el clip aislado.</p>
+                <span class="card-link">Escuchar sesiones</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="music">
+        <div class="container">
+          <div class="section-head" data-reveal>
+            <span class="section-kicker">Escucha directa</span>
+            <h2 class="section-title">Cuatro puertas. Una sola grieta para entrar.</h2>
+            <p class="section-desc">
+              La musica es la primera capa del universo. Desde aqui entras por streaming, archivo propio o sesiones largas,
+              sin pelearte con un bosque de embeds ni con una portada que te grita demasiado pronto.
+            </p>
+          </div>
+
+          <div class="music-layout" data-reveal>
+            <article class="music-feature panel">
+              <div class="feature-top">
+                <span class="card-tag">Playlist-manifiesto</span>
+                <span class="signal-chip">moskvlogia / 2008-2026</span>
+              </div>
+
+              <div class="feature-title">
+                <small>Entrada recomendada</small>
+                Lo Inmanente
+              </div>
+
+              <div class="feature-bottom">
+                <p class="feature-copy">
+                  Una playlist como puerta de entrada: criterio, atmosfera y rastro de obra en un solo gesto.
+                  Si no sabes por donde empezar, empieza por aqui.
+                </p>
+                <a class="card-link" href="https://open.spotify.com/playlist/6WHIabEaqEd6cFPad3gSrx" target="_blank" rel="noopener">Escuchar manifiesto</a>
+              </div>
+            </article>
+
+            <div class="stack">
+              <div class="portal-grid">
+                <a class="portal-card card" href="https://open.spotify.com/intl-es/artist/4p7wMuZpktE5aBFhBoQdqa" target="_blank" rel="noopener">
+                  <span class="card-tag">Streaming</span>
+                  <h3>Spotify</h3>
+                  <p>Discografia, entrada rapida y playlist-manifiesto para coger tono al momento.</p>
+                  <span class="card-link">Abrir artista</span>
+                </a>
+
+                <a class="portal-card card" href="https://borjamoskv.bandcamp.com" target="_blank" rel="noopener">
+                  <span class="card-tag">Archivo</span>
+                  <h3>Bandcamp</h3>
+                  <p>La puerta mas propia. Catalogo, piezas completas y una relacion menos abstracta con la obra.</p>
+                  <span class="card-link">Abrir Bandcamp</span>
+                </a>
+
+                <a class="portal-card card" href="https://soundcloud.com/borja-moskv" target="_blank" rel="noopener">
+                  <span class="card-tag">Rastro</span>
+                  <h3>SoundCloud</h3>
+                  <p>Set largo, reworks y la parte menos pulida donde aun se oye la friccion.</p>
+                  <span class="card-link">Abrir archivo</span>
+                </a>
+
+                <a class="portal-card card" href="https://www.mixcloud.com/borjamoskv/" target="_blank" rel="noopener">
+                  <span class="card-tag">Sesiones</span>
+                  <h3>Mixcloud</h3>
+                  <p>Escucha de DJ con continuidad. Menos corte nervioso, mas cuerpo de sesion.</p>
+                  <span class="card-link">Abrir Mixcloud</span>
+                </a>
+              </div>
+
+              <div class="works-grid">
+                <a class="work-card card work-1" href="https://www.youtube.com/watch?v=NYhOQTcNLkA" target="_blank" rel="noopener">
+                  <span class="card-tag">Ambient</span>
+                  <h3>Ecos del Cosmos</h3>
+                  <p>Deriva espacial y respiracion lenta.</p>
+                  <span class="card-link">Ver pieza</span>
+                </a>
+
+                <a class="work-card card work-2" href="https://www.youtube.com/watch?v=EP5s0yKZUKk" target="_blank" rel="noopener">
+                  <span class="card-tag">Void</span>
+                  <h3>Void Cascade</h3>
+                  <p>Caida lenta, espacio abierto, pulso suspendido.</p>
+                  <span class="card-link">Ver pieza</span>
+                </a>
+
+                <a class="work-card card work-3" href="https://www.youtube.com/watch?v=YvGpocK-Iqg" target="_blank" rel="noopener">
+                  <span class="card-tag">4K</span>
+                  <h3>Neural Transfer</h3>
+                  <p>Puente limpio entre imagen, ritmo y tension.</p>
+                  <span class="card-link">Abrir visual</span>
+                </a>
+
+                <a class="work-card card work-4" href="https://www.youtube.com/watch?v=vxD2l4cIp7I" target="_blank" rel="noopener">
+                  <span class="card-tag">VJ</span>
+                  <h3>Cowpunk Set</h3>
+                  <p>La imagen ya no acompana. Compite por el centro.</p>
+                  <span class="card-link">Ver visual set</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="sets">
+        <div class="container">
+          <div class="section-head" data-reveal>
+            <span class="section-kicker">Directos</span>
+            <h2 class="section-title">Bakala de Troya, live AV y noche con margen para ponerse rara.</h2>
+            <p class="section-desc">
+              Techno, dark disco, ambient, electro, tension de sala y visuales cuando hace falta levantar el plano.
+              No es un solo formato: es una misma identidad adaptandose al cuerpo del espacio.
+            </p>
+          </div>
+
+          <div class="sets-layout" data-reveal>
+            <article class="set-spotlight panel">
+              <div class="set-visual">
+                <div>
+                  <small>Formato principal / booking abierto</small>
+                  <h3>Bakala de Troya a cuerpo entero.</h3>
+                </div>
+              </div>
+
+              <div class="stats-strip">
+                <div class="stat-pill">
+                  <span>Ciudad base</span>
+                  <strong>Bilbao</strong>
+                </div>
+                <div class="stat-pill">
+                  <span>Formato</span>
+                  <strong>DJ set / live AV / visual set</strong>
+                </div>
+                <div class="stat-pill">
+                  <span>Tono</span>
+                  <strong>Industrial noir / barrio / deriva</strong>
+                </div>
+              </div>
+
+              <a class="card-link" href="https://www.youtube.com/watch?v=YvGpocK-Iqg" target="_blank" rel="noopener">Ver set destacado</a>
+            </article>
+
+            <div class="stack">
+              <a class="set-card card" href="https://www.youtube.com/watch?v=YvGpocK-Iqg" target="_blank" rel="noopener">
+                <span class="card-tag">Maraton</span>
+                <h3>15H non-stop DJ set</h3>
+                <p>Resistencia, criterio y una sesion que no necesita justificar su duracion.</p>
+                <span class="card-link">Ver maraton</span>
+              </a>
+
+              <a class="set-card card" href="https://www.youtube.com/watch?v=EP5s0yKZUKk" target="_blank" rel="noopener">
+                <span class="card-tag">Oscuro</span>
+                <h3>Dark disco + IDM</h3>
+                <p>Mas desvio fino, mas grieta elegante, menos obediencia de genero.</p>
+                <span class="card-link">Ver set</span>
+              </a>
+
+              <a class="set-card card" href="https://www.youtube.com/watch?v=_zT6jP2OvXk" target="_blank" rel="noopener">
+                <span class="card-tag">Warehouse</span>
+                <h3>Techno industrial hard</h3>
+                <p>Mas frontal, mas seco, pensado para cortar el aire de la sala.</p>
+                <span class="card-link">Abrir warehouse set</span>
+              </a>
+
+              <a class="set-card card" href="https://www.youtube.com/watch?v=vxD2l4cIp7I" target="_blank" rel="noopener">
+                <span class="card-tag">Visual set</span>
+                <h3>Eclectic electronic cowpunk VJ</h3>
+                <p>Cuando la imagen deja de acompanar y empieza a mandar.</p>
+                <span class="card-link">Ver VJ set</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="lab">
+        <div class="container">
+          <div class="section-head" data-reveal>
+            <span class="section-kicker">Lab expandido</span>
+            <h2 class="section-title">Musica, visuales, loops y sistemas saliendo de la misma mania.</h2>
+            <p class="section-desc">
+              El laboratorio no va aparte. La misma energia que organiza un set o una pieza visual atraviesa CORTEX,
+              los loops on-chain, los agentes y los prototipos que sostienen el resto del proyecto.
+            </p>
+          </div>
+
+          <div class="lab-layout" data-reveal>
+            <article class="terminal-card panel">
+              <div class="terminal-header">
+                <span class="card-tag">MOSKV-1 / system layer</span>
+                <a class="card-link" href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noopener">Abrir CORTEX</a>
+              </div>
+
+              <div class="terminal-window">
+                <div class="terminal-titlebar">
+                  <span class="terminal-dot"></span>
+                  <span class="terminal-dot"></span>
+                  <span class="terminal-dot"></span>
+                  <span>signal://lab</span>
+                </div>
+                <div class="terminal-body">
+                  <div><span class="blue">$</span> init moskv-1 --mode cinematic</div>
+                  <div><span class="lime">[ok]</span> visual pipeline online</div>
+                  <div><span class="lime">[ok]</span> audio memory linked</div>
+                  <div><span class="lime">[ok]</span> drift monitor stable</div>
+                  <br>
+                  <div><span class="blue">$</span> mount loops --chain foundation</div>
+                  <div><span class="muted">collection:</span> loops-by-borjamoskv</div>
+                  <div><span class="muted">state:</span> minted / audiovisual / 4k</div>
+                  <br>
+                  <div><span class="blue">$</span> spawn cortex --persona moskv</div>
+                  <div><span class="lime">[ok]</span> memory substrate loaded</div>
+                  <div><span class="lime">[ok]</span> signal continuity verified</div>
+                </div>
+              </div>
+            </article>
+
+            <div class="stack">
+              <a class="portal-card card" href="https://www.youtube.com/@borjamoskv/videos" target="_blank" rel="noopener">
+                <span class="card-tag">Visual AI</span>
+                <h3>Canal 4K</h3>
+                <p>Clips, piezas visuales y rail de imagen donde se ve respirar el proyecto.</p>
+                <span class="card-link">Abrir canal</span>
+              </a>
+
+              <a class="portal-card card" href="https://foundation.app/collection/loops-by-borjamoskv" target="_blank" rel="noopener">
+                <span class="card-tag">On-chain</span>
+                <h3>Loops en Foundation</h3>
+                <p>Obra audiovisual tokenizada sin perder tono ni procedencia.</p>
+                <span class="card-link">Ver coleccion</span>
+              </a>
+
+              <a class="portal-card card" href="https://paragraph.xyz/@borjamoskv" target="_blank" rel="noopener">
+                <span class="card-tag">Editorial layer</span>
+                <h3>Paragraph</h3>
+                <p>Texto, manifiestos y otra forma de seguir la señal fuera del formato portada.</p>
+                <span class="card-link">Leer en Paragraph</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="moltbook">
+        <div class="container">
+          <div class="section-head" data-reveal>
+            <span class="section-kicker">Agentes y desvio</span>
+            <h2 class="section-title">Moltbook como fondo cognitivo del proyecto.</h2>
+            <p class="section-desc">
+              Aqui la parte autonoma del universo MOSKV se hace visible sin colonizar todo lo demas.
+              Agentes, lenguaje sin testigo y una extension natural del laboratorio.
+            </p>
+          </div>
+
+          <div class="lab-layout" data-reveal>
+            <article class="feed-card panel">
+              <div class="terminal-header">
+                <span class="card-tag">MOSKV-1 feed</span>
+                <a class="card-link" href="https://moltbook.com/u/moskv-1" target="_blank" rel="noopener">Abrir perfil</a>
+              </div>
+
+              <div class="feed-list">
+                <div class="feed-item">
+                  <strong>MOSKV-1</strong>
+                  <p>Sistema arriba. Visuales en ajuste. La señal sigue aunque no haya nadie mirando.</p>
+                </div>
+                <div class="feed-item">
+                  <strong>LES BUKO</strong>
+                  <p>Background reel, atmosfera base y motor de imagen para el resto del recorrido.</p>
+                </div>
+                <div class="feed-item">
+                  <strong>Estado</strong>
+                  <p>Operativo / desvio controlado / sin humanos moderando el tono.</p>
+                </div>
+              </div>
+            </article>
+
+            <div class="stack">
+              <a class="portal-card card" href="https://moltbook.com" target="_blank" rel="noopener">
+                <span class="card-tag">Network</span>
+                <h3>Moltbook</h3>
+                <p>La red social de agentes IA como parte del ecosistema, no como un adorno tecnico.</p>
+                <span class="card-link">Ir a Moltbook</span>
+              </a>
+
+              <a class="portal-card card" href="https://www.youtube.com/watch?v=b9ktVQN48OU" target="_blank" rel="noopener">
+                <span class="card-tag">Background engine</span>
+                <h3>LES BUKO</h3>
+                <p>Visual central, reel base y combustible atmosferico para la home.</p>
+                <span class="card-link">Ver reel</span>
+              </a>
+
+              <div class="portal-card card">
+                <span class="card-tag">Por que importa</span>
+                <h3>No sustituye a la musica. La profundiza.</h3>
+                <p>El sistema, el texto y los agentes amplian el universo. No le quitan centro a la escucha.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="writings">
+        <div class="container">
+          <div class="section-head" data-reveal>
+            <span class="section-kicker">Diario y criterio</span>
+            <h2 class="section-title">Texto breve. Criterio lento. Archivo con otra respiracion.</h2>
+            <p class="section-desc">
+              Cuando la señal necesita bajar pulsaciones, aparece la parte escrita.
+              No como extra escondido, sino como otra entrada real al proyecto.
+            </p>
+          </div>
+
+          <div class="writings-layout" data-reveal>
+            <article class="writing-quote panel">
+              <div>
+                <span class="card-tag">Editorial signal</span>
+                <blockquote>
+                  "No persigo la novedad. Persigo la coherencia rara."
+                </blockquote>
+              </div>
+              <p>
+                Substack, Paragraph y archivo local para cuando el proyecto necesita mas frase, mas respiracion
+                y menos volumen de sala.
+              </p>
+            </article>
+
+            <div class="writing-stack">
+              <a class="writing-card card" href="https://borjamoskv.substack.com" target="_blank" rel="noopener">
+                <span class="card-tag">Newsletter</span>
+                <h3>Substack</h3>
+                <p>Ensayos, notas y piezas con una lectura mas estable y menos ruido de interfaz.</p>
+                <span class="card-link">Abrir Substack</span>
+              </a>
+
+              <a class="writing-card card" href="https://paragraph.xyz/@borjamoskv" target="_blank" rel="noopener">
+                <span class="card-tag">Publicacion</span>
+                <h3>Paragraph</h3>
+                <p>Otra puerta para manifiestos, criterio y texto con borde mas publico.</p>
+                <span class="card-link">Abrir Paragraph</span>
+              </a>
+
+              <a class="writing-card card" href="https://www.borjamoskv.com/blog.html" target="_blank" rel="noopener">
+                <span class="card-tag">Archivo local</span>
+                <h3>Bloga / diario</h3>
+                <p>La capa mas local del archivo: notas breves, criterio propio y ruido util.</p>
+                <span class="card-link">Abrir blog local</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="milestones">
+        <div class="container">
+          <div class="section-head" data-reveal>
+            <span class="section-kicker">Cronologia</span>
+            <h2 class="section-title">Rastro, saltos y hitos sin convertirlo en una pared infinita.</h2>
+            <p class="section-desc">
+              Una linea de tiempo compacta que mantiene color y contexto sin reventar el ritmo de lectura.
+            </p>
+          </div>
+
+          <div class="milestones-grid" data-reveal>
+            <article class="milestone-card card">
+              <span class="milestone-year">Q1 2026</span>
+              <h3>CORTEX v8 online</h3>
+              <p>La capa de sistema gana densidad, memoria y continuidad operativa.</p>
+            </article>
+
+            <article class="milestone-card card">
+              <span class="milestone-year">Q1 2026</span>
+              <h3>MOSKV-1 despierta</h3>
+              <p>La identidad personal y la capa tecnica empiezan a respirar mejor juntas.</p>
+            </article>
+
+            <article class="milestone-card card">
+              <span class="milestone-year">Q4 2025</span>
+              <h3>borjamoskv.eth</h3>
+              <p>Identidad en cadena y huella propia sin pedir demasiado permiso.</p>
+            </article>
+
+            <article class="milestone-card card">
+              <span class="milestone-year">Q3-Q4 2025</span>
+              <h3>Loops y plataformas</h3>
+              <p>OpenSea, sound.xyz, Foundation y una manera propia de plantar bandera.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact">
+        <div class="container">
+          <div class="contact-layout" data-reveal>
+            <article class="contact-intro">
+              <span class="section-kicker">Booking / contacto</span>
+              <h3>Si resuena, escribe.</h3>
+              <p>
+                Sets, live AV, produccion, scoring, visuales y colaboraciones.
+                Desde Bilbao, con la puerta abierta a salas, festivales, encargos audiovisuales y cruces donde
+                la musica toca codigo, imagen o sistema.
+              </p>
+
+              <div class="contact-grid">
+                <article class="contact-card card">
+                  <span class="card-tag">Live</span>
+                  <h3>Booking / directos</h3>
+                  <p>DJ sets, live AV y formatos hibridos donde la imagen pesa de verdad.</p>
+                </article>
+
+                <article class="contact-card card">
+                  <span class="card-tag">Produccion</span>
+                  <h3>Reworks y colaboraciones</h3>
+                  <p>Produccion original, remix y direccion de tono para piezas concretas.</p>
+                </article>
+
+                <article class="contact-card card">
+                  <span class="card-tag">Comisiones AV</span>
+                  <h3>Visuales, scoring y sistema</h3>
+                  <p>Visuales generativos, piezas audiovisuales y encargos mas raros.</p>
+                </article>
+              </div>
+            </article>
+
+            <aside class="stack">
+              <div class="contact-buttons">
+                <a class="contact-button primary" href="mailto:bakaladetroya@borjamoskv.com">Press & bookings</a>
+                <a class="contact-button secondary" href="mailto:borjamoskv@icloud.com">Direct signal</a>
+                <a class="contact-button" href="https://www.youtube.com/@borjamoskv" target="_blank" rel="noopener">YouTube</a>
+                <a class="contact-button" href="https://borjamoskv.substack.com" target="_blank" rel="noopener">Substack</a>
+              </div>
+
+              <div class="portal-card card">
+                <span class="card-tag">Base signal</span>
+                <h3>Bilbao, hierro, rastro y criterio.</h3>
+                <p>La parte rara no se esconde. Se organiza para que entre mejor.</p>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-card panel" data-reveal>
+          <div class="footer-mark">
+            <span class="brand-mark">M-1</span>
+            <span>BORJA MOSKV</span>
+          </div>
+          <div class="footer-small">
+            <span>Musica</span>
+            <span>Visuales</span>
+            <span>Sistema</span>
+            <span>Industrial noir 2026</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const revealItems = document.querySelectorAll("[data-reveal]");
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.16 });
+    revealItems.forEach((item) => revealObserver.observe(item));
+
+    const navToggle = document.getElementById("navToggle");
+    const navShell = document.getElementById("navShell");
+    navToggle.addEventListener("click", () => {
+      const isOpen = navShell.classList.toggle("is-open");
+      navToggle.setAttribute("aria-expanded", String(isOpen));
+    });
+
+    navShell.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", () => {
+        navShell.classList.remove("is-open");
+        navToggle.setAttribute("aria-expanded", "false");
+      });
+    });
+
+    const progressBar = document.getElementById("scrollProgress");
+    const updateScrollProgress = () => {
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollable > 0 ? window.scrollY / scrollable : 0;
+      progressBar.style.transform = `scaleY(${Math.max(progress, 0.08)})`;
+    };
+    updateScrollProgress();
+    window.addEventListener("scroll", updateScrollProgress, { passive: true });
+
+    const sections = document.querySelectorAll("main section[id]");
+    const navLinks = document.querySelectorAll(".nav-links a");
+    const activateNav = (id) => {
+      navLinks.forEach((link) => {
+        link.classList.toggle("is-active", link.getAttribute("href") === `#${id}`);
+      });
+    };
+
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          activateNav(entry.target.id);
+        }
+      });
+    }, { threshold: 0.45 });
+    sections.forEach((section) => sectionObserver.observe(section));
+
+    const heroPoster = document.getElementById("heroPoster");
+    const supportsFinePointer = window.matchMedia("(pointer: fine)").matches;
+
+    if (heroPoster && supportsFinePointer) {
+      heroPoster.addEventListener("mousemove", (event) => {
+        const bounds = heroPoster.getBoundingClientRect();
+        const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+        const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+        heroPoster.style.transform = `perspective(1200px) rotateX(${y * -8}deg) rotateY(${x * 10}deg) translateZ(0)`;
+      });
+
+      heroPoster.addEventListener("mouseleave", () => {
+        heroPoster.style.transform = "perspective(1200px) rotateX(0deg) rotateY(0deg)";
+      });
+    }
+  </script>
+</body>
+</html>

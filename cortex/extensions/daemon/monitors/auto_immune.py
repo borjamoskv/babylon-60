@@ -14,7 +14,6 @@ from cortex.extensions.daemon.models import AGENT_DIR, DEFAULT_STALE_HOURS
 from cortex.extensions.daemon.monitors.base import BaseMonitor
 
 try:
-
     _AETHER_AVAILABLE = True
 except ImportError:
     _AETHER_AVAILABLE = False

@@ -3,6 +3,7 @@ import textwrap
 import time
 from typing import Any
 
+from agents.templates.llm_agents import LLM
 from arcengine import FrameData, GameAction, GameState
 from PIL import Image
 from smolagents import (
@@ -13,8 +14,6 @@ from smolagents import (
     ToolCallingAgent,
     tool,
 )
-
-from agents.templates.llm_agents import LLM
 
 from ..agent import Agent
 
@@ -103,9 +102,7 @@ class SmolCodingAgent(LLM, Agent):
             else:
                 return self.build_func_resp_prompt(self.frames[-1])
         else:
-            raise Exception(
-                f"Action {action.name}{action_description} failed to execute properly."
-            )
+            raise Exception(f"Action {action.name}{action_description} failed to execute properly.")
 
     def create_smolagents_tool(self, game_action: GameAction) -> Tool:
         """Converts GameAction dynamically into a smolagents tool.
@@ -120,9 +117,7 @@ class SmolCodingAgent(LLM, Agent):
 
         # This should be dynamic for each game, hardcoded for for the template
         llm_functions = self.build_functions()
-        action_info = next(
-            (f for f in llm_functions if f["name"] == game_action.name), None
-        )
+        action_info = next((f for f in llm_functions if f["name"] == game_action.name), None)
 
         if not action_info:
             raise ValueError(f"No function info found for {game_action.name}")
@@ -191,7 +186,7 @@ class SmolCodingAgent(LLM, Agent):
     def build_initial_prompt(self, latest_frame: FrameData) -> str:
         """Customize this method to provide instructions to the LLM."""
         return textwrap.dedent(
-            """
+            f"""
 # CONTEXT:
 You are an agent playing an unknown dynamic game. Your objective is to
 WIN and avoid GAME_OVER while minimizing actions.
@@ -202,42 +197,33 @@ INT<0,15> values.
 
 
 # Initial Game State:
-Current State: {state}
-Current Score: {score}
+Current State: {latest_frame.state.name}
+Current Score: {latest_frame.score}
 
 # Initial Frame:
-{frame}
+{self.pretty_print_3d(latest_frame.frame)}
 
 # INSTRUCTIONS:
 First explore the game by taking actions and then determine the best strategy to WIN the game.
 Use the available tools to take actions in the game. The game is already reset, so you can start taking other actions.
-        """.format(
-                state=latest_frame.state.name,
-                score=latest_frame.score,
-                frame=self.pretty_print_3d(latest_frame.frame),
-            )
+        """
         )
 
     def build_func_resp_prompt(self, latest_frame: FrameData) -> str:
         return textwrap.dedent(
-            """
+            f"""
 # Game State:
-{state}
+{latest_frame.state.name}
 
 # Score:
-{score}
+{latest_frame.score}
 
 # Action Count:
-{action_count}
+{len(self.frames)}
 
 # Current Frame:
-{frame}
-        """.format(
-                state=latest_frame.state.name,
-                score=latest_frame.score,
-                action_count=len(self.frames),
-                frame=self.pretty_print_3d(latest_frame.frame),
-            )
+{self.pretty_print_3d(latest_frame.frame)}
+        """
         )
 
 
@@ -296,9 +282,7 @@ class SmolVisionAgent(LLM, Agent):
                 print(f"Failed to create tool for {action.name}: {e}")
         return tools
 
-    def _execute_action(
-        self, action: GameAction, action_description: str = ""
-    ) -> AgentImage:
+    def _execute_action(self, action: GameAction, action_description: str = "") -> AgentImage:
         """Helper method to execute an action and handle common logic.
 
         Args:
@@ -323,9 +307,7 @@ class SmolVisionAgent(LLM, Agent):
                 # The LLM will get the new frame from this response.
                 return AgentImage(image)
         else:
-            raise Exception(
-                f"Action {action.name}{action_description} failed to execute properly."
-            )
+            raise Exception(f"Action {action.name}{action_description} failed to execute properly.")
 
     def create_smolagents_tool(self, game_action: GameAction) -> Tool:
         """Universal function to convert any GameAction into a smolagents tool.
@@ -339,9 +321,7 @@ class SmolVisionAgent(LLM, Agent):
 
         # This should be dynamic for each game, hardcoded for for the template
         llm_functions = self.build_functions()
-        action_info = next(
-            (f for f in llm_functions if f["name"] == game_action.name), None
-        )
+        action_info = next((f for f in llm_functions if f["name"] == game_action.name), None)
         if not action_info:
             raise ValueError(f"No function info found for {game_action.name}")
         description = action_info["description"]
@@ -440,9 +420,7 @@ class SmolVisionAgent(LLM, Agent):
         for i, grid_layer in enumerate(grid):
             # Check if grid_layer is valid
             if len(grid_layer) != height or len(grid_layer[0]) != width:
-                logger.warning(
-                    f"Skipping inconsistent grid layer {i} in grid_to_image."
-                )
+                logger.warning(f"Skipping inconsistent grid layer {i} in grid_to_image.")
                 continue
 
             offset_x = i * (width + separator_width)
@@ -456,21 +434,18 @@ class SmolVisionAgent(LLM, Agent):
     def build_initial_prompt(self, latest_frame: FrameData) -> str:
         """Customize this method to provide instructions to the LLM."""
         return textwrap.dedent(
-            """
+            f"""
 # CONTEXT:
 You are an agent playing an unknown dynamic game by looking at images of the game. Your objective is to WIN and avoid GAME_OVER while never giving up.
 You will be given an image of the current game state. You must call a tool to perform an action that updates the game state. The tool will return a description of the new game state.
 
 # Initial Game State:
-Current State: {state}
-Current Score: {score}
+Current State: {latest_frame.state.name}
+Current Score: {latest_frame.score}
 
 # INSTRUCTIONS:
 You can see the game state in the image. Analyze the image and the game state, then decide on the best action to take. The game is already reset, so you can start taking other actions.
 # TURN:
 Call exactly one action.
-        """.format(
-                state=latest_frame.state.name,
-                score=latest_frame.score,
-            )
+        """
         )

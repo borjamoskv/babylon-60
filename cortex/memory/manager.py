@@ -27,7 +27,10 @@ from cortex.telemetry.metrics import metrics
 try:
     from cortex.routes.notch_ws import notify_notch_pruning
 except ImportError:
-    async def notify_notch_pruning(*args, **kwargs): pass
+
+    async def notify_notch_pruning(*args, **kwargs):
+        pass
+
 
 try:
     from cortex.extensions.policy.memory_os import MemoryOS
@@ -279,7 +282,9 @@ class CortexMemoryManager:
 
         return event
 
-    def record_behavioral_telemetry(self, tool_fail: bool = False, stale_read: bool = False) -> None:
+    def record_behavioral_telemetry(
+        self, tool_fail: bool = False, stale_read: bool = False
+    ) -> None:
         """Update behavioral telemetry counters for the membrane (Ω₁)."""
         if tool_fail:
             self._tool_fails += 1
@@ -381,14 +386,11 @@ class CortexMemoryManager:
         # Gather behavioral counters (if available)
         counters = {
             "consecutive_tool_fails": getattr(self, "_tool_fails", 0),
-            "file_reads_without_delta": getattr(self, "_stale_reads", 0)
+            "file_reads_without_delta": getattr(self, "_stale_reads", 0),
         }
 
         result = self._membrane.evaluate(
-            content=content,
-            fact_type=fact_type,
-            counters=counters,
-            metadata=metadata
+            content=content, fact_type=fact_type, counters=counters, metadata=metadata
         )
 
         if result.action == Action.REJECT:
@@ -413,7 +415,9 @@ class CortexMemoryManager:
             conn=conn,
         )
         if not should_process:
-            logger.info("CortexMemoryManager: Fact filtered by Thalamus. Action: %s", thalamus_action)
+            logger.info(
+                "CortexMemoryManager: Fact filtered by Thalamus. Action: %s", thalamus_action
+            )
             await notify_notch_pruning()
             return f"filtered:{thalamus_action}"
 

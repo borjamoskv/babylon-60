@@ -11,6 +11,7 @@ from cortex.memory.contradiction import ContradictionScanner
 
 logger = logging.getLogger("cortex.specialists.memento")
 
+
 def _default_manifest() -> AgentManifest:
     return AgentManifest(
         agent_id="memento_specialist",
@@ -22,6 +23,7 @@ def _default_manifest() -> AgentManifest:
         max_consecutive_errors=3,
     )
 
+
 class MementoAgent:
     """
     Sovereign 'Memento' Specialist for Subgoal and Semantic Memory Management.
@@ -30,7 +32,13 @@ class MementoAgent:
     using a state-machine driven lifecycle with contradiction gating.
     """
 
-    def __init__(self, manifest: AgentManifest | None = None, session_id: str = "default", exergy_threshold: float = 0.5, engine: Any | None = None):
+    def __init__(
+        self,
+        manifest: AgentManifest | None = None,
+        session_id: str = "default",
+        exergy_threshold: float = 0.5,
+        engine: Any | None = None,
+    ):
         self.manifest = manifest or _default_manifest()
         self.session_id = session_id
         self.hi_agent = HiAgent(session_id=session_id)
@@ -77,7 +85,7 @@ class MementoAgent:
             stage=MementoStage.BUFFERING,
             summary=f"Trace: {summary_txt}...",
             evidence=f"Observation: {obs_txt}...",
-            exergy_delta=exergy_score * 0.01  # Scaled exergy for trace
+            exergy_delta=exergy_score * 0.01,  # Scaled exergy for trace
         )
 
     async def tick(self):
@@ -113,7 +121,7 @@ class MementoAgent:
                 stage=MementoStage.REJECTED,
                 summary="Crystallization Rejected",
                 evidence=f"Detected {len(conflicts)} contradictions with existing memory.",
-                extra={"conflicts": conflicts}
+                extra={"conflicts": conflicts},
             )
             self._stage = MementoStage.BUFFERING
             return
@@ -124,11 +132,9 @@ class MementoAgent:
         stored_count = int(res) if res else 0
 
         # CALCULATE EXERGY (Ω₉)
-        exergy_val = await self.exergy_guard.calculate_proposal_exergy({
-            "facts": crystal,
-            "session_id": self.session_id,
-            "stored_count": stored_count
-        })
+        exergy_val = await self.exergy_guard.calculate_proposal_exergy(
+            {"facts": crystal, "session_id": self.session_id, "stored_count": stored_count}
+        )
 
         # Record final persistence
         await self.ledger.record_transition(
@@ -137,8 +143,8 @@ class MementoAgent:
             stage=MementoStage.PERSISTED,
             summary=f"Stored {stored_count} facts",
             exergy_delta=exergy_val,
-            hours_saved=float(stored_count) * 0.5, # CHRONOS-1: 30 mins saved per crystallized fact
-            evidence=f"Successfully persisted to L3 Ledger. Exergy: {exergy_val:.4f}"
+            hours_saved=float(stored_count) * 0.5,  # CHRONOS-1: 30 mins saved per crystallized fact
+            evidence=f"Successfully persisted to L3 Ledger. Exergy: {exergy_val:.4f}",
         )
 
         self._last_tick_ts = now
@@ -154,7 +160,7 @@ class MementoAgent:
             trace_id="gc_cycle",
             stage=MementoStage.GC,
             summary="Thermodynamic Maintenance",
-            evidence="Pruned historical exergy debt from memory OS."
+            evidence="Pruned historical exergy debt from memory OS.",
         )
 
     async def recall(self, query: str, limit: int = 5) -> list[dict]:
@@ -175,10 +181,7 @@ class MementoAgent:
             trace_id="compaction_cycle",
             stage=MementoStage.ANALYZING,
             summary="Shannon Compaction",
-            evidence=(
-                f"Pruned {pruned} low-exergy traces, "
-                f"merged {merged} duplicates."
-            ),
+            evidence=(f"Pruned {pruned} low-exergy traces, merged {merged} duplicates."),
         )
 
     @property

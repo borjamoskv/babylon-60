@@ -2,7 +2,7 @@ import logging
 import math
 import random
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Any, Optional, List
 
 from cortex.engine.pearl import PearlEngine
 
@@ -13,7 +13,7 @@ class ARCGridPrimitives:
     """Symbolic primitives for ARC-AGI grid transformations."""
 
     @staticmethod
-    def rotate_90(grid: list[list[int]]) -> list[list[int]]:
+    def rotate_90(grid: List[List[int]]) -> List[List[int]]:
         """Rotate grid 90 degrees clockwise."""
         if not grid:
             return []
@@ -27,36 +27,34 @@ class ARCGridPrimitives:
         return new_grid
 
     @staticmethod
-    def flip_h(grid: list[list[int]]) -> list[list[int]]:
+    def flip_h(grid: List[List[int]]) -> List[List[int]]:
         return [list(reversed(row)) for row in grid]
 
     @staticmethod
-    def flood_fill(grid: list[list[int]], r: int, c: int, color: int) -> list[list[int]]:
+    def flood_fill(grid: List[List[int]], r: int, c: int, color: int) -> List[List[int]]:
         # Robust flood fill for ARC grids
         if not grid or not (0 <= r < len(grid)) or not (0 <= c < len(grid[0])):
             return grid
-            
+
         new_grid = [list(row) for row in grid]
         target = new_grid[r][c]
         if target == color:
             return new_grid
-            
+
         q = [(r, c)]
         rows, cols = len(grid), len(grid[0])
         while q:
             curr_r, curr_c = q.pop(0)
-            if (
-                0 <= curr_r < rows
-                and 0 <= curr_c < cols
-                and new_grid[curr_r][curr_c] == target
-            ):
+            if 0 <= curr_r < rows and 0 <= curr_c < cols and new_grid[curr_r][curr_c] == target:
                 new_grid[curr_r][curr_c] = color
-                q.extend([
-                    (curr_r + 1, curr_c),
-                    (curr_r - 1, curr_c),
-                    (curr_r, curr_c + 1),
-                    (curr_r, curr_c - 1),
-                ])
+                q.extend(
+                    [
+                        (curr_r + 1, curr_c),
+                        (curr_r - 1, curr_c),
+                        (curr_r, curr_c + 1),
+                        (curr_r, curr_c - 1),
+                    ]
+                )
         return new_grid
 
 
@@ -82,7 +80,9 @@ class MCTSNode:
 
         parent_node = self.parent
         parent_v_int: int = int(parent_node.visits) if parent_node is not None else int(self.visits)
-        u: float = c_puct * self.prior_p * math.sqrt(float(parent_v_int)) / (1.0 + float(self.visits))
+        u: float = (
+            c_puct * self.prior_p * math.sqrt(float(parent_v_int)) / (1.0 + float(self.visits))
+        )
         return q + u
 
 
@@ -92,14 +92,25 @@ class JITConceptEngine:
     Enhanced with MCTS Induction and Concept Persistence.
     """
 
-    def __init__(self, tenant_id: str, memory_client: Any = None, heuristic_engine: Any = None, max_depth: int = 5):
+    def __init__(
+        self,
+        tenant_id: str,
+        memory_client: Any = None,
+        heuristic_engine: Any = None,
+        max_depth: int = 5,
+    ):
         self.tenant_id = tenant_id
         self.memory = memory_client
         self.heuristic_engine = heuristic_engine
         self.byzantine_boundary = True
         self.max_depth = max_depth
         self.pearl = PearlEngine()
-        
+
+        # Register ARC pseudo-primitives
+        self.pearl.register_primitive("rotate_90", ARCGridPrimitives.rotate_90)
+        self.pearl.register_primitive("flip_h", ARCGridPrimitives.flip_h)
+        self.pearl.register_primitive("flood_fill", ARCGridPrimitives.flood_fill)
+
         # Primitives mapping for MCTS exploration
         self.ops = list(self.pearl.primitives.keys())
 
@@ -118,14 +129,17 @@ class JITConceptEngine:
             node = await self._select(root)
             reward = await self._simulate(node, observation)
             self._backpropagate(node, reward)
-            
+
             if reward == 1.0:
                 best_child = node
-                logger.debug("[%s] Perfect program found early: %s", self.tenant_id, best_child.state["program"])
+                logger.debug(
+                    "[%s] Perfect program found early: %s",
+                    self.tenant_id,
+                    best_child.state["program"],
+                )
                 break
         else:
             best_child = max(root.children, key=lambda c: c.visits) if root.children else root
-
 
         # Crystalize Concept in Memory
         concept_id = f"concept_jit_arc_{random.getrandbits(16)}"
@@ -148,7 +162,7 @@ class JITConceptEngine:
 
         # ARC Expansion: Exhaustive expansion for depth < 5
         if node.state["depth"] < self.max_depth:
-            primitives = self.ops # Use all Pearl primitives
+            primitives = self.ops  # Use all Pearl primitives
 
             p_vector = {}
             if self.heuristic_engine:
@@ -169,7 +183,7 @@ class JITConceptEngine:
                 return max(node.children, key=lambda c: c.puct())
         return node
 
-    def _execute_program(self, grid: List[List[int]], ops: List[str]) -> List[List[int]]:
+    def _execute_program(self, grid: list[list[int]], ops: list[str]) -> list[list[int]]:
         """
         Executes the sequence of ops using PearlEngine (AX-046).
         """
@@ -182,7 +196,7 @@ class JITConceptEngine:
             return current
         except Exception as e:
             logger.debug(f"Simulation failed for ops {ops}: {e}")
-            return grid # Identity fallback on failure
+            return current  # Identity fallback on failure but keeps valid prefix
 
     async def _simulate(self, node: MCTSNode, observation: dict[str, Any]) -> float:
         """Simulates program execution against ARC boundaries."""
@@ -202,8 +216,12 @@ class JITConceptEngine:
         total_p_count: int = 0
         r_count: int = min(len(current_grid), len(expected_output))
         for r in range(r_count):
-            row1: list[int] = current_grid[r]
-            row2: list[int] = expected_output[r]
+            row1 = current_grid[r]
+            row2 = expected_output[r]
+            if not isinstance(row1, list) or not isinstance(row2, list):
+                # Invalid structure returned by a primitive (e.g., get_objects)
+                return 0.0
+            
             c_count: int = min(len(row1), len(row2))
             for c in range(c_count):
                 if int(row1[c]) == int(row2[c]):

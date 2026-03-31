@@ -54,7 +54,6 @@ from cortex.extensions.daemon.sidecar.sentinel_monitor.monitor import SentinelMo
 from cortex.extensions.daemon.sidecar.telemetry.fiat_oracle import FiatOracle
 
 try:
-
     _AETHER_AVAILABLE = True
 except ImportError:
     _AETHER_AVAILABLE = False

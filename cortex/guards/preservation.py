@@ -12,6 +12,7 @@ from datetime import datetime
 
 logger = logging.getLogger("cortex.guards.preservation")
 
+
 class PreservationGuard:
     """
     Simulates and enforces long-term system stability.
@@ -28,7 +29,7 @@ class PreservationGuard:
         report = {
             "atrophy_score": 0.0,
             "status": "ARCHIVAL_READY",
-            "last_audit": datetime.now().isoformat()
+            "last_audit": datetime.now().isoformat(),
         }
 
         if not os.path.exists(self.db_path):
@@ -50,6 +51,7 @@ class PreservationGuard:
         logger.info("[PRESERVATION] Simulating 100-year drift...")
         # Verification of Ω4: Survival without orchestration
         return True
+
 
 if __name__ == "__main__":
     guard = PreservationGuard()

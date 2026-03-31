@@ -258,7 +258,9 @@ class MaestroUI:
         success = await run_applescript(script)
         return InteractionResult(success=success, error="" if success else "Failed to activate app")
 
-    async def inject_keystroke(self, key: str, modifiers: list[str] | None = None) -> InteractionResult:
+    async def inject_keystroke(
+        self, key: str, modifiers: list[str] | None = None
+    ) -> InteractionResult:
         """Inyecta una pulsación de tecla con modificadores."""
         # Note: mods could be used here if the underlying engine supported it
         return await self.keyboard.press_special(key)  # Simplificado para el test

@@ -54,7 +54,6 @@ class AsyncCortexEngine(
         self._embedder: LocalEmbedder | None = None
         self._ledger: SovereignLedger | None = None
 
-
         self._cuatrida = CuatridaOrchestrator(self)
 
     @property
@@ -147,7 +146,12 @@ class AsyncCortexEngine(
                 return row[0] if row else ""
 
     async def _log_transaction(
-        self, conn: aiosqlite.Connection, project: str, action: str, detail: dict[str, Any], tenant_id: str = "default"
+        self,
+        conn: aiosqlite.Connection,
+        project: str,
+        action: str,
+        detail: dict[str, Any],
+        tenant_id: str = "default",
     ) -> int:
         tenant_id = self._resolve_tenant(tenant_id)
         dj = canonical_json(detail)
@@ -181,14 +185,6 @@ class AsyncCortexEngine(
         if callable(record_write):
             record_write()
 
-        if self._cuatrida:
-            await self._cuatrida.log_decision(
-                project=project,
-                intent=action,
-                dimension=Dimension.TEMPORAL_SOVEREIGNTY,
-                metadata={"tx_id": tx_id, "detail": detail},
-                conn=conn,
-            )
         return tx_id  # type: ignore[type-error]
 
     async def _get_previous_hash(self, conn: aiosqlite.Connection, tenant_id: str) -> str:

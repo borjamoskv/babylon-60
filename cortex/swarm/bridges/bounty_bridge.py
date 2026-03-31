@@ -49,7 +49,9 @@ class BountySwarmBridge:
         results = []
         for lead in ranked:
             # 2. Squad Recruitment (Ω₁₃)
-            logger.info("BountyBridge: Recruiting squad for bounty #%d: %s", lead.number, lead.title)
+            logger.info(
+                "BountyBridge: Recruiting squad for bounty #%d: %s", lead.number, lead.title
+            )
             agent_ids = await self.factory.recruit_squad("frontline", size=squad_size)
 
             # 3. Task Distribution
@@ -74,18 +76,16 @@ class BountySwarmBridge:
                             f"(Expected Value). Baseline Reward: {lead.reward_usd} USD. "
                             "Task sharded with consensus verification. "
                             "Execution entropy reduced via autonomic sharding."
-                        )
-                    }
+                        ),
+                    },
                 )
 
-            results.append({
-                "bounty": lead.number,
-                "agents": agent_ids,
-                "responses": [r["status"] for r in responses]
-            })
+            results.append(
+                {
+                    "bounty": lead.number,
+                    "agents": agent_ids,
+                    "responses": [r["status"] for r in responses],
+                }
+            )
 
-        return {
-            "status": "kinetic_active",
-            "leads_processed": len(ranked),
-            "results": results
-        }
+        return {"status": "kinetic_active", "leads_processed": len(ranked), "results": results}

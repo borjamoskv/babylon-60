@@ -15,6 +15,7 @@ logger = logging.getLogger("cortex.memory.causality")
 
 class CausalEdgeProvider(Protocol):
     """Protocol for components that provide causal graph edges (e.g., STDP, Ledger)."""
+
     def get_edge_weight(self, source_id: str, target_id: str) -> float: ...
 
 
@@ -92,8 +93,6 @@ class CausalityReranker:
         boosted.sort(key=lambda x: x.get("score", 0.0), reverse=True)
 
         logger.debug(
-            "CausalityReranker: Reranked %d items for objective=%s",
-            len(boosted),
-            obj_id_str
+            "CausalityReranker: Reranked %d items for objective=%s", len(boosted), obj_id_str
         )
         return boosted

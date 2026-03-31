@@ -49,10 +49,22 @@ def aether_mcp(host: str, port: int, transport: str) -> None:
 @click.option(
     "--transport", default="sse", type=click.Choice(["sse", "stdio"]), help="Transport protocol"
 )
-def trust_mcp(host: str, port: int, transport: str) -> None:
-    """Boot the standard CORTEX Trust MCP Server."""
+@click.option(
+    "--tool-profile",
+    default="core",
+    type=click.Choice(["core", "trust", "ops", "media", "research"]),
+    show_default=True,
+    help="Tool family profile to expose on this MCP instance.",
+)
+def trust_mcp(host: str, port: int, transport: str, tool_profile: str) -> None:
+    """Boot the standard CORTEX MCP Server with a specific tool profile."""
     from cortex.mcp.server import run_server
     from cortex.mcp.utils import MCPServerConfig
 
-    cfg = MCPServerConfig(host=host, port=port, transport=transport)  # type: ignore
+    cfg = MCPServerConfig(
+        host=host,
+        port=port,
+        transport=transport,
+        tool_profile=tool_profile,
+    )  # type: ignore
     run_server(cfg)

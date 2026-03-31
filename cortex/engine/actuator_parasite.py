@@ -14,11 +14,13 @@ from pydantic import BaseModel
 
 logger = logging.getLogger("cortex.engine.vector_n_parasite")
 
+
 class ShortTarget(BaseModel):
     url: str
     target_views: int
     duration_seconds: int
     comment_friction: bool = True
+
 
 class MemeticParasiteActuator:
     """
@@ -29,7 +31,9 @@ class MemeticParasiteActuator:
 
     # Parámetros Invariantes
     HEADLESS_MODE_ENFORCED = True
-    MAX_CONCURRENT_SWARM = 15  # Límite térmico local para no levantar banderas de OS fingerprinting.
+    MAX_CONCURRENT_SWARM = (
+        15  # Límite térmico local para no levantar banderas de OS fingerprinting.
+    )
 
     def __init__(self, proxy_pool: list[str]):
         self.proxies = proxy_pool
@@ -48,7 +52,7 @@ class MemeticParasiteActuator:
             "dia 1 y ya se ve la desesperacion xd",
             "este formato murio en 2023, espabila",
             "no le hagais caso el algoritmo ya no funciona asi",
-            "Literal yo intentando subir shorts todos los días y no pasando de 0 views 💀"
+            "Literal yo intentando subir shorts todos los días y no pasando de 0 views 💀",
         ]
         return random.choice(comments)
 
@@ -63,7 +67,9 @@ class MemeticParasiteActuator:
         """
         # (En la realidad usaríamos async_playwright)
         session_id = f"ghost_{random.randint(1000, 9999)}"
-        logger.debug(f"[VECTOR_N] [{session_id}] Desplegando enrutamiento proxy: {proxy.split('@')[-1]}")
+        logger.debug(
+            f"[VECTOR_N] [{session_id}] Desplegando enrutamiento proxy: {proxy.split('@')[-1]}"
+        )
 
         try:
             # 1. Approach estocástico (Simulación de Discovery)
@@ -74,16 +80,22 @@ class MemeticParasiteActuator:
             loop_factor = random.uniform(1.1, 1.4)
             retention_time = target.duration_seconds * loop_factor
 
-            logger.debug(f"[VECTOR_N] [{session_id}] Retención Algorítmica inyectada: {retention_time:.1f}s (Loop: {loop_factor:.2f}x).")
-            await asyncio.sleep(1.0) # Espera simbólica de carga
+            logger.debug(
+                f"[VECTOR_N] [{session_id}] Retención Algorítmica inyectada: {retention_time:.1f}s (Loop: {loop_factor:.2f}x)."
+            )
+            await asyncio.sleep(1.0)  # Espera simbólica de carga
 
             # 3. Fricción Memética (Optional)
-            if target.comment_friction and random.random() < 0.15: # 15% ratio
+            if target.comment_friction and random.random() < 0.15:  # 15% ratio
                 comment = await self._forge_no_ia_comment("RETO 20 DIAS")
-                logger.info(f"[VECTOR_N] [{session_id}] Engaño de Scroll y Comentario hostil inyectado: '{comment}'")
+                logger.info(
+                    f"[VECTOR_N] [{session_id}] Engaño de Scroll y Comentario hostil inyectado: '{comment}'"
+                )
 
             # 4. Share Metric (Copia al portapapeles del SO emulado)
-            if random.random() < 0.25: # 25% Share ratio (Altamente sospechoso pero efectivo si se difumina)
+            if (
+                random.random() < 0.25
+            ):  # 25% Share ratio (Altamente sospechoso pero efectivo si se difumina)
                 logger.debug(f"[VECTOR_N] [{session_id}] Falsificación de Link Share ejecutada.")
 
             # 5. Cierre Criptográfico de Sesión
@@ -104,10 +116,14 @@ class MemeticParasiteActuator:
 
         async with self._lock:
             start = time.monotonic()
-            target = ShortTarget(url=url, target_views=self.MAX_CONCURRENT_SWARM, duration_seconds=15)
+            target = ShortTarget(
+                url=url, target_views=self.MAX_CONCURRENT_SWARM, duration_seconds=15
+            )
 
             logger.info(f"[VECTOR_N] Autorizando Sybil Array sobre {target.url}")
-            logger.info(f"[VECTOR_N] Objetivo: Distorsión de Completion Rate mediante Swarm de {target.target_views} nodos.")
+            logger.info(
+                f"[VECTOR_N] Objetivo: Distorsión de Completion Rate mediante Swarm de {target.target_views} nodos."
+            )
 
             tasks = []
             for i in range(target.target_views):
@@ -122,13 +138,16 @@ class MemeticParasiteActuator:
             # Auditoría en Ledger
             try:
                 from cortex.engine.ledger import append_event
+
                 append_event(
                     "MEMETIC_PARASITE_STRIKE",
                     payload={"url": target.url, "ghosts_deployed": success_count},
-                    source="VECTOR_N"
+                    source="VECTOR_N",
                 )
             except ImportError:
                 pass
 
-            logger.info(f"[VECTOR_N] Strike Memético finalizado. {success_count}/{target.target_views} fantasmas inyectaron retención >120% en {elapsed:.2f}s.")
+            logger.info(
+                f"[VECTOR_N] Strike Memético finalizado. {success_count}/{target.target_views} fantasmas inyectaron retención >120% en {elapsed:.2f}s."
+            )
             return True

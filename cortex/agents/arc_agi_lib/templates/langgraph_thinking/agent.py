@@ -87,9 +87,7 @@ class LangGraphThinking(Agent):
             ]
         )
 
-    def choose_action(
-        self, frames: list[FrameData], latest_frame: FrameData
-    ) -> GameAction:
+    def choose_action(self, frames: list[FrameData], latest_frame: FrameData) -> GameAction:
         """Choose action using LangGraph workflow."""
 
         # Prepare state for the graph

@@ -26,6 +26,23 @@ def _bootstrap_legacy_db(db_path: Path) -> None:
         INSERT INTO schema_version (version, description)
         VALUES (25, 'Legacy baseline without canonical facts columns');
 
+        CREATE TABLE IF NOT EXISTS cortex_meta (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL,
+            updated_at TEXT DEFAULT (datetime('now'))
+        );
+
+        CREATE TABLE IF NOT EXISTS transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id TEXT NOT NULL DEFAULT 'default',
+            project TEXT NOT NULL,
+            action TEXT NOT NULL,
+            detail TEXT NOT NULL,
+            prev_hash TEXT NOT NULL,
+            hash TEXT NOT NULL,
+            timestamp TEXT NOT NULL
+        );
+
         CREATE TABLE facts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             tenant_id TEXT NOT NULL DEFAULT 'default',

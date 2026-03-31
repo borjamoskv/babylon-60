@@ -97,9 +97,9 @@ async def terminal_snapshot(request: Request) -> dict:
 
                 conn = sqlite3.connect(db_path_str)
                 try:
-                    tx_count = conn.execute(
-                        "SELECT COUNT(*) FROM ledger_transactions"
-                    ).fetchone()[0]
+                    tx_count = conn.execute("SELECT COUNT(*) FROM ledger_transactions").fetchone()[
+                        0
+                    ]
                     last_tx = conn.execute(
                         "SELECT MAX(created_at) FROM ledger_transactions"
                     ).fetchone()[0]

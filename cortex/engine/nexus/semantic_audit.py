@@ -5,24 +5,25 @@ Uses sqlite-vec (via simulated layer for prototype) to find anomalies.
 """
 
 import json
-import hashlib
-from typing import List, Dict, Any
+from typing import Any
+
 
 class SemanticAuditManager:
     """
     Analyzes ledger transactions for semantic patterns.
     Enables forensic audit ("Show me all actions that look like data scraping").
     """
-    def __init__(self):
-        self.vector_index = {} # Simulated vector storage
 
-    def index_transaction(self, tx_hash: str, detail: Dict[str, Any]):
+    def __init__(self):
+        self.vector_index = {}  # Simulated vector storage
+
+    def index_transaction(self, tx_hash: str, detail: dict[str, Any]):
         # Simulated embedding: simplification for prototype
         # In production, this calls sentence-transformers + ONNX
         content = json.dumps(detail)
         self.vector_index[tx_hash] = content
 
-    def search_anomalies(self, query: str) -> List[str]:
+    def search_anomalies(self, query: str) -> list[str]:
         """
         Finds transactions that match the query semantically.
         Currently using keyword matching for the prototype.

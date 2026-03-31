@@ -1,9 +1,10 @@
-
 """MCP Server Implementation.
 
 Core logic for the CORTEX MCP Trust Server.
 Provides memory, search, and EU AI Act compliance tools.
 """
+
+from __future__ import annotations
 
 import json
 import logging
@@ -25,17 +26,17 @@ from cortex.mcp.genesis_tools import register_genesis_tools
 from cortex.mcp.guard import MCPGuard
 from cortex.mcp.health_tools import register_health_tools
 from cortex.mcp.mega_tools import register_mega_tools
-from cortex.mcp.music_tools import register_music_tools
-from cortex.mcp.suno_tools import register_suno_tools
+from cortex.mcp.scraper_tools import register_scraper_tools
 from cortex.mcp.trust_tools import register_trust_tools
-from cortex.mcp.utils import (
-    AsyncConnectionPool,
-    MCPMetrics,
-    MCPServerConfig,
-    SimpleAsyncCache,
-)
+from cortex.mcp.utils import AsyncConnectionPool, MCPMetrics, MCPServerConfig, SimpleAsyncCache
 
-__all__ = ["create_mcp_server", "run_server"]
+__all__ = [
+    "MCP_PROFILE_TOOL_NAMES",
+    "VALID_MCP_TOOL_PROFILES",
+    "create_mcp_server",
+    "get_profile_tool_names",
+    "run_server",
+]
 
 logger = logging.getLogger("cortex.mcp.server")
 
@@ -48,6 +49,63 @@ try:
 except ImportError:
     FastMCP = None  # type: ignore
     logger.debug("MCP SDK not installed. Install with: pip install 'cortex-persist[mcp]'")
+
+VALID_MCP_TOOL_PROFILES = ("core", "trust", "ops", "media", "research")
+
+MCP_PROFILE_TOOL_NAMES: dict[str, tuple[str, ...]] = {
+    "core": (
+        "cortex_store",
+        "cortex_search",
+        "cortex_status",
+        "cortex_ledger_verify",
+        "cortex_trace_episode",
+        "cortex_trace_chain",
+        "cortex_shannon_report",
+        "cortex_handoff",
+        "cortex_embed",
+        "cortex_embed_status",
+    ),
+    "trust": (
+        "cortex_audit_trail",
+        "cortex_verify_fact",
+        "cortex_compliance_report",
+        "cortex_decision_lineage",
+        "cortex_health_check",
+        "cortex_health_report",
+    ),
+    "ops": (
+        "cortex_reality_weaver",
+        "cortex_entropy_cracker",
+        "cortex_temporal_nexus",
+        "cortex_genesis_create",
+        "cortex_genesis_preview",
+        "cortex_genesis_templates",
+        "cortex_genesis_specs",
+        "cortex_scrape",
+        "cortex_scrape_batch",
+        "cortex_scrape_map",
+    ),
+    "media": (
+        "music_create_album",
+        "music_generate_track",
+        "music_evaluate_gri",
+        "suno_generate_headless",
+    ),
+    "research": ("cortex_hilbert_omega",),
+}
+
+
+def _normalize_tool_profile(tool_profile: str) -> str:
+    profile = (tool_profile or "core").strip().lower()
+    if profile not in VALID_MCP_TOOL_PROFILES:
+        valid = ", ".join(VALID_MCP_TOOL_PROFILES)
+        raise ValueError(f"Unknown MCP tool profile '{tool_profile}'. Expected one of: {valid}")
+    return profile
+
+
+def get_profile_tool_names(tool_profile: str) -> tuple[str, ...]:
+    """Return the deterministic tool-name snapshot for a profile."""
+    return MCP_PROFILE_TOOL_NAMES[_normalize_tool_profile(tool_profile)]
 
 
 # ─── Server Context ──────────────────────────────────────────────────
@@ -80,7 +138,7 @@ class _MCPContext:
 # ─── Tool Registrators ───────────────────────────────────────────────
 
 
-def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+def _register_store_tool(mcp: FastMCP, ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
     """Register the ``cortex_store`` tool on *mcp*."""
 
     @mcp.tool()
@@ -153,7 +211,7 @@ def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ign
         return f"✓ Stored fact #{fact_id} in project '{project}'"
 
 
-def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+def _register_search_tool(mcp: FastMCP, ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
     """Register the ``cortex_search`` tool on *mcp*."""
 
     @mcp.tool()
@@ -228,7 +286,7 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
         return output
 
 
-def _register_status_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+def _register_status_tool(mcp: FastMCP, ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
     """Register the ``cortex_status`` tool on *mcp*."""
 
     @mcp.tool()
@@ -253,7 +311,7 @@ def _register_status_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
         )
 
 
-def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+def _register_ledger_tool(mcp: FastMCP, ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
     """Register the ``cortex_ledger_verify`` tool on *mcp*."""
 
     @mcp.tool()
@@ -277,10 +335,62 @@ def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
         )
 
 
+def _register_core_profile(mcp: FastMCP, ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+    """Register the baseline coding profile."""
+    _register_store_tool(mcp, ctx)
+    _register_search_tool(mcp, ctx)
+    _register_status_tool(mcp, ctx)
+    _register_ledger_tool(mcp, ctx)
+    _register_trace_episode_tool(mcp, ctx)
+    _register_trace_chain_tool(mcp, ctx)
+    _register_shannon_report_tool(mcp, ctx)
+    _register_handoff_tool(mcp, ctx)
+    _register_embed_tool(mcp, ctx)
+    _register_embed_status_tool(mcp, ctx)
+
+
+def _register_trust_profile(mcp: FastMCP, ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+    """Register trust and health tools."""
+    register_trust_tools(mcp, ctx)
+    register_health_tools(mcp, ctx)
+
+
+def _register_ops_profile(mcp: FastMCP, ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+    """Register operations and generation tools."""
+    register_mega_tools(mcp, ctx)
+    register_genesis_tools(mcp, ctx)
+    register_scraper_tools(mcp)
+
+
+def _register_media_profile(mcp: FastMCP, ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+    """Register media-generation tools."""
+    from cortex.mcp.music_tools import register_music_tools
+    from cortex.mcp.suno_tools import register_suno_tools
+
+    register_music_tools(mcp)
+    register_suno_tools(mcp, ctx)
+
+
+def _register_research_profile(mcp: FastMCP, ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+    """Register research-oriented theorem tooling."""
+    from cortex.mcp.hilbert_tools import register_hilbert_tools
+
+    register_hilbert_tools(mcp, ctx)
+
+
+_PROFILE_REGISTRARS = {
+    "core": _register_core_profile,
+    "trust": _register_trust_profile,
+    "ops": _register_ops_profile,
+    "media": _register_media_profile,
+    "research": _register_research_profile,
+}
+
+
 # ─── Factory ─────────────────────────────────────────────────────────
 
 
-def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # type: ignore[reportInvalidTypeForm]
+def create_mcp_server(config: MCPServerConfig | None = None) -> FastMCP:  # type: ignore[reportInvalidTypeForm]
     """Create and configure an optimized CORTEX MCP server instance.
 
     Each tool is registered via a dedicated helper, keeping this
@@ -296,49 +406,13 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
         port=cfg.port,
     )
     ctx = _MCPContext(cfg)
-
-    # Core memory tools
-    _register_store_tool(mcp, ctx)
-    _register_search_tool(mcp, ctx)
-    _register_status_tool(mcp, ctx)
-    _register_ledger_tool(mcp, ctx)
-
-    # Causal Episodic Trace (Epoch 8)
-    _register_trace_episode_tool(mcp, ctx)
-
-    # Causal Chain Traversal
-    _register_trace_chain_tool(mcp, ctx)
-
-    # Shannon Entropy & Session Handoff (Epoch 13)
-    _register_shannon_report_tool(mcp, ctx)
-    _register_handoff_tool(mcp, ctx)
-
-    # Embedding Tools (Gemini Embedding 2)
-    _register_embed_tool(mcp, ctx)
-    _register_embed_status_tool(mcp, ctx)
-
-    # Trust & Compliance tools (EU AI Act Art. 12)
-    register_trust_tools(mcp, ctx)
-
-    # Mega Poderosas (Aether, Void, Chronos paradigms)
-    register_mega_tools(mcp, ctx)
-
-    # Hilbert-Omega Theorem Prover (Millennium Problems + Conjectures)
-    from cortex.mcp.hilbert_tools import register_hilbert_tools
-
-    register_hilbert_tools(mcp, ctx)
-
-    # Genesis Engine — create systems from specs
-    register_genesis_tools(mcp, ctx)
-
-    # Health Index — system monitoring
-    register_health_tools(mcp, ctx)
-
-    # Music Engine — Master Orchestrator
-    register_music_tools(mcp)
-
-    # Sovereign Suno Headless Extractor (suno-omega)
-    register_suno_tools(mcp, ctx)
+    tool_profile = _normalize_tool_profile(cfg.tool_profile)
+    logger.info(
+        "Creating CORTEX MCP server with tool profile '%s' (%d tools)",
+        tool_profile,
+        len(get_profile_tool_names(tool_profile)),
+    )
+    _PROFILE_REGISTRARS[tool_profile](mcp, ctx)
 
     return mcp
 

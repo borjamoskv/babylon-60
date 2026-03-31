@@ -71,9 +71,7 @@ def act(state: AgentState) -> AgentState:
             Observation(id=item.key, observation=item.value)
             for item in store.search(("observations"), limit=100)
         ]
-        system_message = SystemMessage(
-            content=build_system_prompt(observations, state["thoughts"])
-        )
+        system_message = SystemMessage(content=build_system_prompt(observations, state["thoughts"]))
 
         response = llm.bind_tools(
             all_tools,
@@ -190,7 +188,9 @@ def analyze_frame_delta(state: AgentState) -> AgentState:
     if movements:
         deltas_str += "\n\nChanged pixels:\n" + ",".join(movements)
     else:
-        deltas_str += "\n\nCharacter did not move. Maybe an action was taken towards an unmovable area?"
+        deltas_str += (
+            "\n\nCharacter did not move. Maybe an action was taken towards an unmovable area?"
+        )
 
     current_image = render_frame(latest_frame.frame, "Current frame")
     previous_image = render_frame(previous_frame.frame, "Previous frame")

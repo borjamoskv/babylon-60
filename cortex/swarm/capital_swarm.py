@@ -12,6 +12,7 @@ Usage:
     python -m cortex.swarm.capital_swarm [--vectors A,B,C,J] [--dry-run]
     cortex swarm-strike [vectors]   (via CLI)
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -208,6 +209,7 @@ VECTORS: dict[str, dict[str, Any]] = {
 # EXERGY ACCOUNTING
 # ──────────────────────────────────────────────────────────────────────────────
 
+
 @dataclass
 class VectorResult:
     vector_id: str
@@ -256,6 +258,7 @@ class SwarmReport:
 # CAPITAL SWARM ENGINE
 # ──────────────────────────────────────────────────────────────────────────────
 
+
 class CapitalSwarmEngine:
     """
     Sovereign Capital Extraction Engine.
@@ -265,6 +268,7 @@ class CapitalSwarmEngine:
     - Parallel dispatch across P0/P1/P2 squads
     - Rich live dashboard for real-time exergy tracking
     - CORTEX ledger crystallization of all yield events
+    - AX-1000 SwarmManager OMEGA routing for sovereign extraction
     """
 
     def __init__(
@@ -272,10 +276,12 @@ class CapitalSwarmEngine:
         active_vectors: list[str] | None = None,
         dry_run: bool = False,
         engine: Any = None,
+        swarm_manager: Any = None,
     ) -> None:
         self.active_vectors = active_vectors or list(VECTORS.keys())
         self.dry_run = dry_run
         self.engine = engine
+        self.swarm_manager = swarm_manager
         self.specialists = forge_sovereign_swarm()
         self.report = SwarmReport(
             session_id=f"swarm-{int(time.time())}",
@@ -291,7 +297,10 @@ class CapitalSwarmEngine:
         passes = ev >= cost * 5
         logger.info(
             "[EV_GATE] Vector %s: EV=%.2f cost=%.2f → %s",
-            vector_id, ev, cost, "PASS" if passes else "REJECT"
+            vector_id,
+            ev,
+            cost,
+            "PASS" if passes else "REJECT",
         )
         return passes
 
@@ -411,7 +420,10 @@ class CapitalSwarmEngine:
         net_style = "bold green" if total_net > 0 else "bold red"
         table.add_section()
         table.add_row(
-            "Σ", "[bold]TOTAL[/bold]", "", "",
+            "Σ",
+            "[bold]TOTAL[/bold]",
+            "",
+            "",
             f"[bold]${total_gross:.2f}[/bold]",
             f"[bold]${total_cost:.2f}[/bold]",
             Text(f"${total_net:+.2f}", style=net_style),
@@ -456,8 +468,7 @@ class CapitalSwarmEngine:
                 results.append(result)
                 # Replace the pending entry with the fresh result
                 in_progress = [
-                    r if r.vector_id != result.vector_id else result
-                    for r in in_progress
+                    r if r.vector_id != result.vector_id else result for r in in_progress
                 ]
                 live.update(self._build_dashboard(in_progress))
 
@@ -479,7 +490,7 @@ class CapitalSwarmEngine:
                         "cost_usd": r.compute_cost_usd,
                         "net_exergy": r.net_yield_usd,
                         "duration_s": r.duration_s,
-                    }
+                    },
                 )
 
         self._print_summary()
@@ -491,7 +502,8 @@ class CapitalSwarmEngine:
         net = r.total_net_yield
         net_markup = (
             f"[bold green]${net:+.2f}[/bold green]"
-            if net >= 0 else f"[bold red]${net:+.2f}[/bold red]"
+            if net >= 0
+            else f"[bold red]${net:+.2f}[/bold red]"
         )
 
         summary = (
@@ -517,9 +529,73 @@ class CapitalSwarmEngine:
 # CLI ENTRY POINT
 # ──────────────────────────────────────────────────────────────────────────────
 
+
+async def _bootstrap_and_run(
+    active_vectors: list[str],
+    dry_run: bool,
+    output_json: str | None = None,
+) -> SwarmReport:
+    """
+    AX-1000 Sovereign Bootstrap: Initialize AsyncCortexEngine + SwarmManager,
+    run the Capital Swarm, and tear down cleanly.
+    """
+    from cortex import config
+    from cortex.database.pool import CortexConnectionPool
+    from cortex.engine_async import AsyncCortexEngine
+    from cortex.swarm.manager import SwarmManager
+
+    pool = CortexConnectionPool(config.DB_PATH, read_only=False)
+    await pool.initialize()
+    cortex_engine = AsyncCortexEngine(pool=pool, db_path=config.DB_PATH)
+    swarm_mgr = SwarmManager(ledger=cortex_engine._get_ledger())
+    await swarm_mgr.start_compaction(cortex_engine)
+    logger.info("[CAPITAL SWARM] AX-1000 Sovereign Engine & Compaction Initialized")
+
+    try:
+        engine = CapitalSwarmEngine(
+            active_vectors=active_vectors,
+            dry_run=dry_run,
+            engine=cortex_engine,
+            swarm_manager=swarm_mgr,
+        )
+        report = await engine.run()
+    finally:
+        await swarm_mgr.stop_compaction()
+        await pool.close()
+        logger.info("[CAPITAL SWARM] Sovereign Engine shutdown complete")
+
+    if output_json:
+        import json
+
+        data = {
+            "session_id": report.session_id,
+            "total_gross_usd": report.total_gross_yield,
+            "total_net_usd": report.total_net_yield,
+            "total_exergy": report.total_exergy,
+            "duration_s": report.session_duration_s,
+            "results": [
+                {
+                    "vector": r.vector_id,
+                    "name": r.vector_name,
+                    "status": r.status,
+                    "gross_usd": r.gross_yield_usd,
+                    "net_usd": r.net_yield_usd,
+                    "pr_url": r.pr_url,
+                    "error": r.error,
+                    "duration_s": r.duration_s,
+                }
+                for r in report.results
+            ],
+        }
+        with open(output_json, "w") as f:
+            json.dump(data, f, indent=2)
+        console.print(f"[dim]Report written to {output_json}[/dim]")
+
+    return report
+
+
 def main() -> None:
     import argparse
-    import json
 
     parser = argparse.ArgumentParser(
         description="Ouroboros Capital Swarm — Sovereign extraction engine"
@@ -547,7 +623,9 @@ def main() -> None:
     active_vectors = [v.strip().upper() for v in args.vectors.split(",")]
     invalid = [v for v in active_vectors if v not in VECTORS]
     if invalid:
-        console.print(f"[red]Unknown vectors: {invalid}. Valid: {list(VECTORS.keys())}[/red]")
+        console.print(
+            f"[red]Unknown vectors: {invalid}. Valid: {list(VECTORS.keys())}[/red]"
+        )
         return
 
     console.print(
@@ -559,37 +637,12 @@ def main() -> None:
         )
     )
 
-    engine = CapitalSwarmEngine(
-        active_vectors=active_vectors,
-        dry_run=args.dry_run,
-    )
-
-    report = asyncio.run(engine.run())
-
-    if args.output_json:
-        data = {
-            "session_id": report.session_id,
-            "total_gross_usd": report.total_gross_yield,
-            "total_net_usd": report.total_net_yield,
-            "total_exergy": report.total_exergy,
-            "duration_s": report.session_duration_s,
-            "results": [
-                {
-                    "vector": r.vector_id,
-                    "name": r.vector_name,
-                    "status": r.status,
-                    "gross_usd": r.gross_yield_usd,
-                    "net_usd": r.net_yield_usd,
-                    "pr_url": r.pr_url,
-                    "error": r.error,
-                    "duration_s": r.duration_s,
-                }
-                for r in report.results
-            ],
-        }
-        with open(args.output_json, "w") as f:
-            json.dump(data, f, indent=2)
-        console.print(f"[dim]Report written to {args.output_json}[/dim]")
+    try:
+        asyncio.run(
+            _bootstrap_and_run(active_vectors, args.dry_run, args.output_json)
+        )
+    except KeyboardInterrupt:
+        console.print("[bold red]Ouroboros Capital Swarm interrupted.[/bold red]")
 
 
 if __name__ == "__main__":

@@ -12,6 +12,7 @@ import subprocess
 
 logger = logging.getLogger("cortex.guards.taint")
 
+
 class TaintGuard:
     """
     Ensures that every modification in a staged file contains a valid
@@ -33,7 +34,7 @@ class TaintGuard:
                 cwd=self.repo_path,
                 capture_output=True,
                 text=True,
-                check=True
+                check=True,
             )
             return [f for f in result.stdout.splitlines() if f]
         except subprocess.CalledProcessError:
@@ -62,7 +63,9 @@ class TaintGuard:
                 return False, f"Missing CORTEX-TAINT header in {file_path}"
 
             agent_id, content_hash, timestamp = match.groups()
-            logger.info("[TAINT] Verified: agent=%s, hash=%s, ts=%s", agent_id, content_hash, timestamp)
+            logger.info(
+                "[TAINT] Verified: agent=%s, hash=%s, ts=%s", agent_id, content_hash, timestamp
+            )
             return True, f"Verified taint for {agent_id}"
 
         except Exception as e:
@@ -90,6 +93,7 @@ class TaintGuard:
             return False
 
         return True
+
 
 if __name__ == "__main__":
     guard = TaintGuard()

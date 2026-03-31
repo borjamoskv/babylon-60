@@ -18,14 +18,18 @@ from cryptography.fernet import Fernet  # type: ignore
 
 logger = logging.getLogger("cortex.engine.lora_forger")
 
+
 class CryptographicTensorVault:
     """Aisla y cifra los pesos generados off-cycle. Tolerancia cero al robo de exergía."""
+
     @staticmethod
     def _get_key() -> bytes:
         # Extraído del ring vault del OS o env pasivo
         key = os.environ.get("CORTEX_ENCRYPTION_KEY", None)
         if not key:
-            raise RuntimeError("CORTEX_ENCRYPTION_KEY unset. Operación termodinámica insegura abortada.")
+            raise RuntimeError(
+                "CORTEX_ENCRYPTION_KEY unset. Operación termodinámica insegura abortada."
+            )
         return key.encode()
 
     @staticmethod
@@ -34,8 +38,10 @@ class CryptographicTensorVault:
         raw_tensors = adapter_filepath.read_bytes()
         adapter_filepath.write_bytes(f.encrypt(raw_tensors))
 
+
 class MerkleManifest:
     """DAG Causal. Sella todos los hashes originales que componen este LoRA."""
+
     @staticmethod
     def construct_manifest(
         adapter_id: str,
@@ -43,7 +49,7 @@ class MerkleManifest:
         source_hashes: list[str],
         base_model: str,
         elapsed: float,
-        signature: str
+        signature: str,
     ) -> dict[str, Any]:
         return {
             "adapter_id": adapter_id,
@@ -54,8 +60,9 @@ class MerkleManifest:
             "forge_time_seconds": round(elapsed, 4),
             "cryptographic_hash": signature,
             "encryption": "aes-gcm-256",
-            "schema_version": "v2.0_SOVEREIGN"
+            "schema_version": "v2.0_SOVEREIGN",
         }
+
 
 class JITLoraForger:
     """
@@ -78,15 +85,16 @@ class JITLoraForger:
         """Bloqueo OOM de hardware bare-metal (macOS)."""
         try:
             process = await asyncio.create_subprocess_shell(
-                "vm_stat | grep free",
-                stdout=asyncio.subprocess.PIPE
+                "vm_stat | grep free", stdout=asyncio.subprocess.PIPE
             )
             stdout, _ = await process.communicate()
             if stdout:
-                free_pages = int(stdout.decode().split(":")[1].strip().strip('.'))
+                free_pages = int(stdout.decode().split(":")[1].strip().strip("."))
                 free_mb = (free_pages * 4096) / (1024 * 1024)
                 if free_mb < self.MEMORY_STRESS_THRESHOLD_MB:
-                    logger.warning(f"[LORA_FORGE] RAM Unificada Crítica ({free_mb:.2f}MB). Evitando Kernel Panic. Abortando.")
+                    logger.warning(
+                        f"[LORA_FORGE] RAM Unificada Crítica ({free_mb:.2f}MB). Evitando Kernel Panic. Abortando."
+                    )
                     return False
         except Exception:
             return True
@@ -94,6 +102,7 @@ class JITLoraForger:
 
     async def _query_high_exergy_facts(self, domain: str | None = None) -> list[dict[str, Any]]:
         """Extrae el Grafo Causal C5 con su huella criptográfica (hash_id)."""
+
         def _execute_query():
             # Extraemos root_cause o content_hash para armar el Merkle DAG dependencies
             query = """
@@ -125,7 +134,9 @@ class JITLoraForger:
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, _execute_query)
 
-    async def _compile_instruction_subset(self, batch: list[dict[str, Any]], export_path: Path) -> list[str]:
+    async def _compile_instruction_subset(
+        self, batch: list[dict[str, Any]], export_path: Path
+    ) -> list[str]:
         """Exporta JSONL Cero-Entropía y devuelve la lista de DAG hashes asimilados."""
         if not batch:
             return []
@@ -140,7 +151,9 @@ class JITLoraForger:
                 if not ctx or not res:
                     continue
 
-                line = json.dumps({"text": f"<s>[INST] {str(ctx).strip()} [/INST] {str(res).strip()} </s>"})
+                line = json.dumps(
+                    {"text": f"<s>[INST] {str(ctx).strip()} [/INST] {str(res).strip()} </s>"}
+                )
                 buffer += line + "\n"
                 source_hashes.append(h_id)
 
@@ -181,21 +194,28 @@ class JITLoraForger:
 
             # 3. Silicon Target Actuator (MLX) - Exportando safetensors a posteriori
             args = [
-                "python", "-m", "mlx_lm.lora",
-                "--model", model_urn,
+                "python",
+                "-m",
+                "mlx_lm.lora",
+                "--model",
+                model_urn,
                 "--train",
-                "--data", str(dataset_dir),
-                "--iters", "300",
-                "--batch-size", "2",
-                "--learning-rate", self.DEFAULT_LEARNING_RATE,
-                "--adapter-path", str(adapter_path),
-                "--max-tokens", "2048"
+                "--data",
+                str(dataset_dir),
+                "--iters",
+                "300",
+                "--batch-size",
+                "2",
+                "--learning-rate",
+                self.DEFAULT_LEARNING_RATE,
+                "--adapter-path",
+                str(adapter_path),
+                "--max-tokens",
+                "2048",
             ]
 
             process = await asyncio.create_subprocess_exec(
-                *args,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                *args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
             )
             stdout, stderr = await process.communicate()
             elapsed_time = time.monotonic() - start_time
@@ -209,7 +229,9 @@ class JITLoraForger:
             if safetensors_file.exists():
                 try:
                     CryptographicTensorVault.encrypt_adapter_file(safetensors_file)
-                    logger.info("[LORA_FORGE] Weights AES-GCM-256 encriptados con éxito. Exergía asegurada.")
+                    logger.info(
+                        "[LORA_FORGE] Weights AES-GCM-256 encriptados con éxito. Exergía asegurada."
+                    )
                 except RuntimeError as e:
                     logger.error(str(e))
                     return False
@@ -222,7 +244,7 @@ class JITLoraForger:
                 source_hashes=source_hashes,
                 base_model=model_urn,
                 elapsed=elapsed_time,
-                signature=hash_sig
+                signature=hash_sig,
             )
 
             manifest_path = adapter_path / "cortex_manifest.json"
@@ -230,12 +252,15 @@ class JITLoraForger:
 
             try:
                 from cortex.engine.ledger import append_event
+
                 # Ledger DAG persist
                 append_event("LORA_FUSION_CRYPTOGRAPHIC", payload=manifest, source="LORA_FORGER")
             except ImportError:
                 pass
 
-            logger.info(f"[LORA_FORGE] Singularidad Alcanzada. Adaptador {adapter_id} fundido, cifrado y firmado causalmente en {elapsed_time:.2f}s.")
+            logger.info(
+                f"[LORA_FORGE] Singularidad Alcanzada. Adaptador {adapter_id} fundido, cifrado y firmado causalmente en {elapsed_time:.2f}s."
+            )
             return True
 
     async def revoke_tainted_lora(self, adapter_name: str) -> bool:
@@ -256,7 +281,12 @@ class JITLoraForger:
 
             try:
                 from cortex.engine.ledger import append_event
-                append_event("LORA_TENSOR_EXILE", payload={"corrupted": adapter_name}, source="LORA_FORGER_TAINT")
+
+                append_event(
+                    "LORA_TENSOR_EXILE",
+                    payload={"corrupted": adapter_name},
+                    source="LORA_FORGER_TAINT",
+                )
             except ImportError:
                 pass
 

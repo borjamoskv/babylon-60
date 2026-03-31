@@ -4,12 +4,14 @@ from pathlib import Path
 
 logger = logging.getLogger("cortex.maintenance.prune")
 
+
 class RetroactiveLedgerPruner:
     """
     V5: Entropy Asymmetry Fix
     Scans the skills/ directory and prunes agents/skills
     that haven't been invoked in >90 days, moving them to cold_forge.
     """
+
     def __init__(self, workspace_path: str):
         self.skills_dir = Path(workspace_path) / ".gemini/antigravity/skills"
         self.cold_forge_dir = Path(workspace_path) / "cold_forge"

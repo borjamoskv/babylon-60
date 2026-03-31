@@ -38,6 +38,23 @@ class MasterOrchestrator:
 
         self.global_context: dict[str, Any] = {}
 
+    async def log_decision(
+        self,
+        project: str,
+        intent: str,
+        dimension: Any,
+        metadata: dict[str, Any],
+        conn: Any = None,
+    ) -> None:
+        """Log a sovereign decision to the MasterLedger (Audit Trail)."""
+        logger.debug("MasterOrchestrator: Decision logged -> %s:%s", project, intent)
+        if self.ledger:
+            await self.ledger.record_transaction(
+                project=project,
+                action=intent,
+                detail=metadata,
+            )
+
     async def execute_global(self, complex_task: str) -> dict[str, Any]:
         """
         Divide and Conquer:
@@ -114,7 +131,7 @@ class MasterOrchestrator:
 
         # 2. Execution (Parallel across all available agents)
         all_agents = squads["P0"] + squads["P1"] + squads["P2"]
-        manager = self.enclaves[SwarmEnclave.EXECUTION] # Primary execution surface
+        manager = self.enclaves[SwarmEnclave.EXECUTION]  # Primary execution surface
 
         logger.info("Orchestrator: Dispatched goal to 100 agents.")
         responses = await manager.shard_task(all_agents, global_goal)
@@ -145,8 +162,8 @@ class MasterOrchestrator:
                         f"Synthesized output from 100 parallel actuators. "
                         f"Net exergy yield: {total_exergy}. "
                         f"Verified via SwarmManager reputation updates."
-                    )
-                }
+                    ),
+                },
             )
 
         return synthesis

@@ -254,9 +254,7 @@ class EvolutionOpsMixin:
 
     async def _process_sovereign(
         self, sovereign: SovereignAgent, metrics: dict[AgentDomain, DomainMetrics]
-    ) -> tuple[
-        list[EvolutionMutation], list[EvolutionMutation], int, SymbolicActionState | None
-    ]:
+    ) -> tuple[list[EvolutionMutation], list[EvolutionMutation], int, SymbolicActionState | None]:
         """Ω₀: Isolated processing for a single sovereign domain. Concurrency-safe."""
         sovereign._cycle_count += 1
         domain_grace = 0.0

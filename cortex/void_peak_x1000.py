@@ -1,6 +1,3 @@
-import time
-import random
-
 def bench_void_peak():
     print("--- [CORTEX VOID-PEAK v7.0 BENCHMARK] ---")
     print("Baseline: x100 Singularity (v6.0)")
@@ -9,7 +6,7 @@ def bench_void_peak():
 
     # Void-Peak: The logic is the hardware.
     # Latency is simulated as the irreducible minimum (1 cycle ~ 1ns)
-    latency_ns = 1 
+    latency_ns = 1
     exergy_delta = 1000.00
 
     print(f"Latency: {latency_ns}ns [CRYSTALLIZED]")

@@ -16,6 +16,12 @@ import hashlib
 import json
 from typing import Any
 
+try:
+    from cortex_rust import compute_tx_hash_fast, compute_fact_hash_fast
+    _RUST_AVAILABLE = True
+except ImportError:
+    _RUST_AVAILABLE = False
+
 __all__ = [
     "canonical_json",
     "compute_tx_hash",
@@ -81,6 +87,9 @@ def compute_tx_hash(
     Returns:
         SHA-256 hex digest of the canonical input.
     """
+    if _RUST_AVAILABLE:
+        return compute_tx_hash_fast(prev_hash, project, action, detail_json, timestamp)
+        
     h_input = f"{prev_hash}\x00{project}\x00{action}\x00{detail_json}\x00{timestamp}"
     return hashlib.sha256(h_input.encode("utf-8")).hexdigest()
 
@@ -103,4 +112,6 @@ def compute_tx_hash_v1(
 
 def compute_fact_hash(content: str) -> str:
     """Compute deterministic SHA-256 hash for fact content."""
+    if _RUST_AVAILABLE:
+        return compute_fact_hash_fast(content)
     return hashlib.sha256(content.encode("utf-8")).hexdigest()

@@ -54,23 +54,27 @@ class SovereignRefiner:
                 if isinstance(node, ast.FunctionDef):
                     node_count = sum(1 for _ in ast.walk(node))
                     if node_count > 50:
-                        findings.append({
-                            "type": "BloatedFunction",
-                            "file": path,
-                            "name": node.name,
-                            "nodes": node_count,
-                            "entropy": entropy,
-                            "suggestion": f"Refactor '{node.name}' to reduce entropy ({entropy:.2f})."
-                        })
+                        findings.append(
+                            {
+                                "type": "BloatedFunction",
+                                "file": path,
+                                "name": node.name,
+                                "nodes": node_count,
+                                "entropy": entropy,
+                                "suggestion": f"Refactor '{node.name}' to reduce entropy ({entropy:.2f}).",
+                            }
+                        )
 
             # Check if overall entropy is too high (> 5.5 is highly complex for simple python)
             if entropy > 5.5 and len(content) > 1000:
-                findings.append({
-                    "type": "HighStructuralEntropy",
-                    "file": path,
-                    "entropy": entropy,
-                    "suggestion": "Distill architecture to reduce Shannon density."
-                })
+                findings.append(
+                    {
+                        "type": "HighStructuralEntropy",
+                        "file": path,
+                        "entropy": entropy,
+                        "suggestion": "Distill architecture to reduce Shannon density.",
+                    }
+                )
 
         except (SyntaxError, UnicodeDecodeError):
             pass
@@ -85,6 +89,8 @@ class SovereignRefiner:
         for ghost in ghosts:
             logger.warning(
                 "[Ω_REFINEMENT] %s detected in %s: %s",
-                ghost["type"], ghost["file"], ghost["suggestion"]
+                ghost["type"],
+                ghost["file"],
+                ghost["suggestion"],
             )
         return len(ghosts)

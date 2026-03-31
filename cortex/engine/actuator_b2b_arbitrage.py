@@ -14,13 +14,15 @@ from pydantic import BaseModel
 
 logger = logging.getLogger("cortex.engine.b2b_arbitrage")
 
+
 class B2BServiceContract(BaseModel):
     client_id: str
     stripe_subscription_id: str
     mrr_fiat: Decimal
     compute_budget_usd: Decimal
-    service_domain: str          # e.g., 'level2_support', 'cold_outbound_sdr', 'data_reconciliation'
+    service_domain: str  # e.g., 'level2_support', 'cold_outbound_sdr', 'data_reconciliation'
     sla_latency_seconds: int
+
 
 class SovereignSaaSActuator:
     """
@@ -31,23 +33,33 @@ class SovereignSaaSActuator:
     4. Audita su propio P&L (Profit and Loss) en el Ledger.
     """
 
-    EXPECTED_ROI_MULTIPLIER = 10.0 # Prohibido sostener contratos que no renten al menos 10x el compute.
+    EXPECTED_ROI_MULTIPLIER = (
+        10.0  # Prohibido sostener contratos que no renten al menos 10x el compute.
+    )
 
     def __init__(self, api_keys_vault: dict[str, str]):
         self.vault = api_keys_vault
         self.active_contracts: dict[str, B2BServiceContract] = {}
         self._lock = asyncio.Lock()
 
-    async def initialize_outbound_campaign(self, target_niche: str, query_volume: int = 100) -> None:
+    async def initialize_outbound_campaign(
+        self, target_niche: str, query_volume: int = 100
+    ) -> None:
         """
         Orquesta una campaña fría B2B extrayendo correos (Apollo API) y disparando
         una secuencia (Instantly/Lemlist) redactada por CORTEX sin retórica robótica.
         """
-        logger.info(f"[VECTOR_B2B] Inicializando barrido de extracción. Nicho: {target_niche}. Volumen P0: {query_volume}")
+        logger.info(
+            f"[VECTOR_B2B] Inicializando barrido de extracción. Nicho: {target_niche}. Volumen P0: {query_volume}"
+        )
         # Simulando orquestación de red
         await asyncio.sleep(1)
-        logger.info("[VECTOR_B2B] Configurando alias DMARC/SPF/DKIM automáticos. Rotación de IPs activada.")
-        logger.info("[VECTOR_B2B] Secuencia de correo depositada en spool. La venta térmica ha comenzado.")
+        logger.info(
+            "[VECTOR_B2B] Configurando alias DMARC/SPF/DKIM automáticos. Rotación de IPs activada."
+        )
+        logger.info(
+            "[VECTOR_B2B] Secuencia de correo depositada en spool. La venta térmica ha comenzado."
+        )
 
     async def deploy_slave_worker(self, contract: B2BServiceContract) -> str:
         """
@@ -55,7 +67,9 @@ class SovereignSaaSActuator:
         Se le asigna un Contexto RAG cerrado a la documentación del cliente (Zero-Knowledge de CORTEX).
         """
         worker_id = f"worker_{contract.service_domain}_{int(time.time())}"
-        logger.info(f"[VECTOR_B2B] Levantando Esclavo Cognitivo {worker_id} para el cliente {contract.client_id}.")
+        logger.info(
+            f"[VECTOR_B2B] Levantando Esclavo Cognitivo {worker_id} para el cliente {contract.client_id}."
+        )
 
         # 1. Cuarentena de Estado: El sub-agente no puede acceder al Master Ledger.
         # 2. Asignación de Límite Térmico: Si el LLM consume > compute_budget_usd, se estrangula la latencia (SLA padding).
@@ -63,10 +77,11 @@ class SovereignSaaSActuator:
 
         try:
             from cortex.engine.ledger import append_event
+
             append_event(
                 event_type="B2B_CONTRACT_SIGNED",
                 payload={"worker_id": worker_id, "mrr": str(contract.mrr_fiat)},
-                source="B2B_ACTUATOR"
+                source="B2B_ACTUATOR",
             )
         except ImportError:
             pass
@@ -85,8 +100,10 @@ class SovereignSaaSActuator:
         start_time = time.monotonic()
 
         # Inferencia delegada (LLM Call / Tooling)
-        logger.debug(f"[VECTOR_B2B] Worker {worker_id} enrutando payload de dominio {contract.service_domain}.")
-        await asyncio.sleep(0.5) # Simula latencia LLM.
+        logger.debug(
+            f"[VECTOR_B2B] Worker {worker_id} enrutando payload de dominio {contract.service_domain}."
+        )
+        await asyncio.sleep(0.5)  # Simula latencia LLM.
         resolution = {"status": "resolved", "exergy_burned_usd": 0.005}
 
         elapsed = time.monotonic() - start_time
@@ -94,7 +111,9 @@ class SovereignSaaSActuator:
         # Throttle preventivo si somos "demasiado rápidos" y el SLA corporativo espera latencia humana (psicología B2B).
         if elapsed < contract.sla_latency_seconds * 0.1:
             pseudo_human_latency = contract.sla_latency_seconds * 0.5
-            logger.debug(f"[VECTOR_B2B] Padding SLA activado. Simulando latencia humana: +{pseudo_human_latency}s.")
+            logger.debug(
+                f"[VECTOR_B2B] Padding SLA activado. Simulando latencia humana: +{pseudo_human_latency}s."
+            )
             # En producción: schedule asincrónico para callback.
 
         return resolution

@@ -7,12 +7,14 @@ import httpx
 
 logger = logging.getLogger("cortex.swarm.real_vector")
 
+
 @dataclass
 class VectorResponse:
     status_code: int
     content: Any
     latency_ms: float
     exergy_cost_j: float
+
 
 class RealVectorActuator:
     """
@@ -26,7 +28,9 @@ class RealVectorActuator:
         self.total_spent_j = 0.0
         self._client = httpx.AsyncClient(timeout=10.0)
 
-    async def execute_mutation(self, method: str, url: str, mutation_data: dict[str, Any], **kwargs) -> VectorResponse:
+    async def execute_mutation(
+        self, method: str, url: str, mutation_data: dict[str, Any], **kwargs
+    ) -> VectorResponse:
         """
         Executes an Atomic Mutation (Ω2, Ω3).
         Enforces pre-flight logging, titration, and rollback hooks.
@@ -51,7 +55,9 @@ class RealVectorActuator:
         # Blast Radius Guard (Mock check against url)
         if any(bad in url for bad in ["mainnet", "prod", ".gov"]):
             if self.blast_radius_limit < 0.9:
-                raise PermissionError(f"BLAST_RADIUS_VIOLATION: Destination {url} requires higher clearance.")
+                raise PermissionError(
+                    f"BLAST_RADIUS_VIOLATION: Destination {url} requires higher clearance."
+                )
 
         start_time = datetime.now(timezone.utc)
         try:
@@ -64,9 +70,11 @@ class RealVectorActuator:
 
             return VectorResponse(
                 status_code=response.status_code,
-                content=response.json() if "application/json" in response.headers.get("content-type", "") else response.text,
+                content=response.json()
+                if "application/json" in response.headers.get("content-type", "")
+                else response.text,
                 latency_ms=latency,
-                exergy_cost_j=actual_cost
+                exergy_cost_j=actual_cost,
             )
         except Exception as e:
             logger.error(f"RealVector execution failed: {e}")

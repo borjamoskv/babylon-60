@@ -45,6 +45,7 @@ dependencies = [
     "openai-agents>=0.1.0",
     "fpdf2>=2.7.0",
     "arc-agi>=0.9.6",
+    "msgpack>=1.0.8",
 ]
 
 [project.urls]

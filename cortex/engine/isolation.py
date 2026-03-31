@@ -253,18 +253,27 @@ class ByzantineSandbox:
 
         return await self.manager.execute(self.workspace_id, command, args, timeout)
 
-    async def execute_python(self, script_name: str, args: list[str] | None = None) -> Any:
-        """Run a python script within the sandbox."""
+    async def execute_python(
+        self, script_name: str, args: list[str] | None = None, timeout: float = 30.0
+    ) -> Any:
+        """Run a python script within the sandbox.
+
+        Raises TimeoutError if the subprocess exceeds ``timeout`` seconds.
+        """
         _args = ["python3", script_name] + (args or [])
         t0 = time.monotonic()
-        res = await self.manager.execute(self.workspace_id, _args[0], _args[1:])
+        res = await self.manager.execute(self.workspace_id, _args[0], _args[1:], timeout=timeout)
         t1 = time.monotonic()
-        if isinstance(res, Ok):
-            res_dict = cast(dict[str, Any], res.value)
-            exec_res = ExecutionResult(**res_dict)
-            exec_res.duration_ms = (t1 - t0) * 1000.0
-            return exec_res
-        return None
+        if isinstance(res, Err):
+            # IsolationManager converts asyncio.TimeoutError → Err("Command timed out…")
+            # We must re-raise here so callers can rely on TimeoutError semantics.
+            if "timed out" in (res.error or "").lower():
+                raise TimeoutError(res.error) from None
+            return None
+        res_dict = cast(dict[str, Any], res.value)
+        exec_res = ExecutionResult(**res_dict)
+        exec_res.duration_ms = (t1 - t0) * 1000.0
+        return exec_res
 
     async def write_file(self, filename: str, content: str) -> bool:
         """Write a file to the sandbox root."""
@@ -296,17 +305,23 @@ class SimpleIsolationEngine:
         self.manager = IsolationManager(max_concurrent=max_concurrent)
         self.timeout = timeout
 
-    async def execute_sandbox(self, code: str, args: list[str] | None = None) -> ExecutionResult | None:
-        """Executes Python code in a tightly controlled workspace."""
+    async def execute_sandbox(
+        self, code: str, args: list[str] | None = None
+    ) -> ExecutionResult | None:
+        """Executes Python code in a tightly controlled workspace.
+
+        ``self.timeout`` is forwarded to the subprocess layer so it is killed
+        at the right time. ``TimeoutError`` is raised when the limit is exceeded.
+        """
         async with self.manager.isolate(label="arc_sandbox") as sandbox:
             await sandbox.write_file("main.py", code)
+            # TimeoutError propagates from execute_python when the Err contains 'timed out'.
+            # The outer wait_for is a defensive backstop for edge-cases (e.g. hanging teardown).
             try:
-                # 30.0 is the timeout inside execute_python, but we wrap it logically with overall self.timeout 
                 res = await asyncio.wait_for(
-                    sandbox.execute_python("main.py", args=args),
-                    timeout=self.timeout + 1.0  # slight buffer
+                    sandbox.execute_python("main.py", args=args, timeout=self.timeout),
+                    timeout=self.timeout + 0.5,
                 )
                 return res
             except asyncio.TimeoutError:
                 raise TimeoutError("Sandboxed execution timed out") from None
-

@@ -9,10 +9,12 @@ from cortex.extensions.x_intelligence.engine import XIntelligenceEngine
 
 LOG = logging.getLogger("cortex.cli.x_cmds")
 
+
 @cli.group("x")
 def x_cmds():
     """Forensic-Grade X Intelligence."""
     pass
+
 
 @x_cmds.command("search")
 @click.argument("query")
@@ -42,11 +44,14 @@ def search_cmd(query: str, limit: int, persist: bool, project: str, proxy: str |
 
             console.print(table)
             if persist:
-                console.print(f"\n[CORTEX] ✅ Saved {len(response.tweets)} tweets to project: {project}")
+                console.print(
+                    f"\n[CORTEX] ✅ Saved {len(response.tweets)} tweets to project: {project}"
+                )
         finally:
             await engine.close()
 
     asyncio.run(run())
+
 
 @x_cmds.command("user")
 @click.argument("screen_name")

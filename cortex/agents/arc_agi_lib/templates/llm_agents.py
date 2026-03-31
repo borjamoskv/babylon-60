@@ -52,9 +52,7 @@ class LLM(Agent):
             ]
         )
 
-    def choose_action(
-        self, frames: list[FrameData], latest_frame: FrameData
-    ) -> GameAction:
+    def choose_action(self, frames: list[FrameData], latest_frame: FrameData) -> GameAction:
         """Choose which action the Agent should take, fill in any arguments, and return it."""
 
         logging.getLogger("openai").setLevel(logging.CRITICAL)
@@ -125,9 +123,7 @@ class LLM(Agent):
             except openai.BadRequestError as e:
                 logger.info(f"Message dump: {self.messages}")
                 raise e
-            self.track_tokens(
-                response.usage.total_tokens, response.choices[0].message.content
-            )
+            self.track_tokens(response.usage.total_tokens, response.choices[0].message.content)
             message3 = {
                 "role": "assistant",
                 "content": response.choices[0].message.content,
@@ -173,9 +169,7 @@ class LLM(Agent):
             # sometimes the model will call multiple tools which isnt allowed
             extra_tools = message5.tool_calls[1:]
             for tc in extra_tools:
-                logger.info(
-                    "Error: assistant called more than one action, only using the first."
-                )
+                logger.info("Error: assistant called more than one action, only using the first.")
                 message_extra = {
                     "role": "tool",
                     "tool_call_id": tc.id,
@@ -339,23 +333,19 @@ class LLM(Agent):
 
     def build_func_resp_prompt(self, latest_frame: FrameData) -> str:
         return textwrap.dedent(
-            """
+            f"""
 # State:
-{state}
+{latest_frame.state.name}
 
 # Score:
-{score}
+{latest_frame.levels_completed}
 
 # Frame:
-{latest_frame}
+{self.pretty_print_3d(latest_frame.frame)}
 
 # TURN:
 Reply with a few sentences of plain-text strategy observation about the frame to inform your next action.
-        """.format(
-                latest_frame=self.pretty_print_3d(latest_frame.frame),
-                score=latest_frame.levels_completed,
-                state=latest_frame.state.name,
-            )
+        """
         )
 
     def build_user_prompt(self, latest_frame: FrameData) -> str:
@@ -392,9 +382,7 @@ Call exactly one action.
                     "llm_tools": self.build_tools()
                     if self.MODEL_REQUIRES_TOOLS
                     else self.build_functions(),
-                    "llm_tool_resp_prompt": self.build_func_resp_prompt(
-                        self.frames[-1]
-                    ),
+                    "llm_tool_resp_prompt": self.build_func_resp_prompt(self.frames[-1]),
                 }
                 self.recorder.record(meta)
         super().cleanup(*args, **kwargs)
@@ -414,9 +402,7 @@ class ReasoningLLM(LLM, Agent):
         self._last_response_content = ""
         self._total_reasoning_tokens = 0
 
-    def choose_action(
-        self, frames: list[FrameData], latest_frame: FrameData
-    ) -> GameAction:
+    def choose_action(self, frames: list[FrameData], latest_frame: FrameData) -> GameAction:
         """Override choose_action to capture and store reasoning metadata."""
 
         action = super().choose_action(frames, latest_frame)
@@ -456,9 +442,7 @@ class ReasoningLLM(LLM, Agent):
         This should be called from the parent class if we have access to the raw response.
         For reasoning models, reasoning tokens are in response.usage.completion_tokens_details.reasoning_tokens
         """
-        if hasattr(response, "usage") and hasattr(
-            response.usage, "completion_tokens_details"
-        ):
+        if hasattr(response, "usage") and hasattr(response.usage, "completion_tokens_details"):
             if hasattr(response.usage.completion_tokens_details, "reasoning_tokens"):
                 self._last_reasoning_tokens = (
                     response.usage.completion_tokens_details.reasoning_tokens
@@ -509,9 +493,7 @@ class GuidedLLM(LLM, Agent):
         self._last_response_content = ""
         self._total_reasoning_tokens = 0
 
-    def choose_action(
-        self, frames: list[FrameData], latest_frame: FrameData
-    ) -> GameAction:
+    def choose_action(self, frames: list[FrameData], latest_frame: FrameData) -> GameAction:
         """Override choose_action to capture and store reasoning metadata."""
 
         action = super().choose_action(frames, latest_frame)
@@ -554,9 +536,7 @@ class GuidedLLM(LLM, Agent):
         This should be called from the parent class if we have access to the raw response.
         For o3 models, reasoning tokens are in response.usage.completion_tokens_details.reasoning_tokens
         """
-        if hasattr(response, "usage") and hasattr(
-            response.usage, "completion_tokens_details"
-        ):
+        if hasattr(response, "usage") and hasattr(response.usage, "completion_tokens_details"):
             if hasattr(response.usage.completion_tokens_details, "reasoning_tokens"):
                 self._last_reasoning_tokens = (
                     response.usage.completion_tokens_details.reasoning_tokens

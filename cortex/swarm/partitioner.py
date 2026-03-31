@@ -4,11 +4,13 @@ from enum import Enum
 
 logger = logging.getLogger("cortex.swarm.partitioner")
 
+
 class SwarmEnclave(Enum):
-    PRIVATE = "private"     # Local processing only
-    VECTOR = "vector"       # Knowledge / Search based
-    EXECUTION = "execution" # Tool using / Action based
-    GOVERNANCE = "governance" # Multi-swarm audit / Policy
+    PRIVATE = "private"  # Local processing only
+    VECTOR = "vector"  # Knowledge / Search based
+    EXECUTION = "execution"  # Tool using / Action based
+    GOVERNANCE = "governance"  # Multi-swarm audit / Policy
+
 
 class SwarmPartitioner:
     """
@@ -64,5 +66,8 @@ class SwarmPartitioner:
             enclave = await SwarmPartitioner.partition_task(seg)
             shards[enclave].append(seg)
 
-        logger.info("SwarmPartitioner: Sharded complex task into %d enclaves.", len([s for s in shards.values() if s]))
+        logger.info(
+            "SwarmPartitioner: Sharded complex task into %d enclaves.",
+            len([s for s in shards.values() if s]),
+        )
         return shards

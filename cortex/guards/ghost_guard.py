@@ -14,6 +14,7 @@ import aiosqlite
 
 logger = logging.getLogger("cortex.guards.sonic_archeology")
 
+
 class GhostGuard:
     """Detects 0-size files and inoperative dummy abstractions."""
 
@@ -58,4 +59,6 @@ class GhostGuard:
         """Admission guard for code facts: prevent saving ghost references."""
         # Check if we are trying to persist a 0-size file reference
         if fact_type == "code_reference" and meta.get("size") == 0:
-            raise ValueError("[Ω₁₃] Sonic Archeology Violation: Ghost file reference (0-size) rejected.")
+            raise ValueError(
+                "[Ω₁₃] Sonic Archeology Violation: Ghost file reference (0-size) rejected."
+            )

@@ -1,0 +1,31 @@
+# CORTEX G2 — Sandbox Execution Image
+# Minimal, non-root, read-only-compatible container for swarm command execution.
+#
+# Build: docker build -f infra/Dockerfile.sandbox -t cortex-sandbox:latest .
+
+FROM python:3.12-slim-bookworm
+
+LABEL maintainer="borjamoskv.com" \
+      description="CORTEX Sandbox — Ephemeral command execution container" \
+      cortex.component="sandbox" \
+      cortex.tier="monitored,elevated"
+
+# Pre-install common swarm dependencies so sandbox commands
+# don't need network access for typical operations.
+RUN pip install --no-cache-dir \
+    httpx==0.28.* \
+    pytest==8.* \
+    rich==13.* \
+    pydantic==2.* \
+    && rm -rf /root/.cache
+
+# Create sandbox workspace with correct perms for nobody user
+RUN mkdir -p /sandbox && chown 65534:65534 /sandbox
+
+# Non-root by default (nobody:nobody)
+USER 65534:65534
+WORKDIR /sandbox
+
+# Default entrypoint: sh -c (overridden by DockerSandbox._build_docker_args)
+ENTRYPOINT ["sh", "-c"]
+CMD ["echo cortex-sandbox-ready"]

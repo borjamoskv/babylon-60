@@ -6,6 +6,7 @@ from cortex.ledger import SovereignLedger
 
 logger = logging.getLogger("cortex.swarm.guards.convergence")
 
+
 class ConvergenceGuards:
     """
     State Drift Detection & Convergence (Ω-Sync).
@@ -43,9 +44,7 @@ class ConvergenceGuards:
             return True
 
         if local_state_hash != self._global_state_hash:
-            logger.warning(
-                "ConvergenceGuards: Drift detected in agent '%s' (Ω-Drift)", agent_id
-            )
+            logger.warning("ConvergenceGuards: Drift detected in agent '%s' (Ω-Drift)", agent_id)
             self._emit_ledger_event(
                 action="drift_detected",
                 detail={

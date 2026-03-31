@@ -17,7 +17,7 @@ class PolicyValueNetwork(Protocol[State, Action]):
     def evaluate(self, state: State) -> tuple[dict[Action, float], float]:
         """
         Evaluate the state.
-        
+
         Returns:
             action_priors: Dictionary mapping legal Actions to probability [0, 1].
             value: Estimated value of the state [-1, 1].
@@ -43,8 +43,8 @@ class LocalHeuristicNetwork(Generic[State, Action]):
         legal_actions = self.env_step_fn.get_legal_actions(state)
         if not legal_actions:
             return {}, -1.0
-            
+
         prob = 1.0 / len(legal_actions)
         priors = {action: prob for action in legal_actions}
-        
+
         return priors, 0.0

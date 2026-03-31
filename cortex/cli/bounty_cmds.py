@@ -5,6 +5,7 @@ CORTEX CLI — Bounty Hunter Commands.
 Thin wrapper over SovereignBountyScanner for CLI-driven bounty discovery.
 Business logic lives in cortex.swarm.bounty_scanner and cortex.services.bounty_service.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -23,9 +24,16 @@ def bounty_cmds():
 
 
 @bounty_cmds.command("scan")
-@click.option("--platform", "-p", type=click.Choice(
-    ["all", "algora", "polar", "immunefi", "github"], case_sensitive=False,
-), default="all", help="Platform to scan.")
+@click.option(
+    "--platform",
+    "-p",
+    type=click.Choice(
+        ["all", "algora", "polar", "immunefi", "github"],
+        case_sensitive=False,
+    ),
+    default="all",
+    help="Platform to scan.",
+)
 @click.option("--min-reward", "-m", type=float, default=100.0, help="Minimum reward in USD.")
 @click.option("--limit", "-l", type=int, default=20, help="Max results per platform.")
 @click.option("--persist", is_flag=True, help="Persist accepted leads to CORTEX Ledger.")
@@ -35,7 +43,10 @@ def scan_cmd(platform: str, min_reward: float, limit: int, persist: bool) -> Non
 
 
 async def _run_scan(
-    platform: str, min_reward: float, limit: int, persist: bool,
+    platform: str,
+    min_reward: float,
+    limit: int,
+    persist: bool,
 ) -> None:
     from cortex.swarm.bounty_scanner import (
         AlgoraScanner,
@@ -77,13 +88,14 @@ async def _run_scan(
 
     for i, opp in enumerate(opportunities[:30], 1):
         ev_gate = "✅" if opp.passes_ev_gate() else "❌"
-        
+
         diff_weight = 2 if opp.complexity <= 3 else (5 if opp.complexity <= 6 else 8)
-        if opp.complexity > 8: diff_weight = 10
+        if opp.complexity > 8:
+            diff_weight = 10
         context_lines = 100 if diff_weight <= 2 else (300 if diff_weight <= 5 else 500)
         entropy_base = diff_weight * 50 + context_lines * 0.1
         ghost_penalty = context_lines * 0.5 if diff_weight >= 5 and opp.reward_usd < 200 else 0
-        meta_penalty = (diff_weight ** 2) * 4 if diff_weight >= 8 else 0
+        meta_penalty = (diff_weight**2) * 4 if diff_weight >= 8 else 0
         entropy = max(entropy_base + ghost_penalty + meta_penalty, 1.0)
         exergy_ratio = opp.reward_usd / entropy
 
@@ -105,6 +117,7 @@ async def _run_scan(
     if persist:
         try:
             from cortex.cli.common import get_engine
+
             engine = get_engine()
             await engine.init_db()
             count = 0
@@ -159,16 +172,17 @@ async def _run_top(count: int) -> None:
     console.print(f"\n[bold]🏆 Top {count} Bounties by Expected Value[/bold]\n")
     for i, opp in enumerate(opportunities[:count], 1):
         gate = "[green]PASS[/green]" if opp.passes_ev_gate() else "[red]FAIL[/red]"
-        
+
         diff_weight = 2 if opp.complexity <= 3 else (5 if opp.complexity <= 6 else 8)
-        if opp.complexity > 8: diff_weight = 10
+        if opp.complexity > 8:
+            diff_weight = 10
         context_lines = 100 if diff_weight <= 2 else (300 if diff_weight <= 5 else 500)
         entropy_base = diff_weight * 50 + context_lines * 0.1
         ghost_penalty = context_lines * 0.5 if diff_weight >= 5 and opp.reward_usd < 200 else 0
-        meta_penalty = (diff_weight ** 2) * 4 if diff_weight >= 8 else 0
+        meta_penalty = (diff_weight**2) * 4 if diff_weight >= 8 else 0
         entropy = max(entropy_base + ghost_penalty + meta_penalty, 1.0)
         exergy_ratio = opp.reward_usd / entropy
-        
+
         console.print(
             f"  {i}. [bold]{opp.title[:60]}[/bold]\n"
             f"     Platform: [cyan]{opp.platform}[/cyan] | "

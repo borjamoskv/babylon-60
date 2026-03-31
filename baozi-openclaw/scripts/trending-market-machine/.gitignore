@@ -1,0 +1,3 @@
+node_modules/
+bun.lock
+trending-machine-state.json

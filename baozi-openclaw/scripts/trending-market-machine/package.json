@@ -1,0 +1,16 @@
+{
+  "name": "trending-market-machine",
+  "version": "1.0.0",
+  "description": "Auto-create Baozi Lab prediction markets from trending topics",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "detect": "bun run src/cli/detect-trends.ts",
+    "create": "bun run src/index.ts",
+    "validate": "bun run src/cli/validate-market.ts",
+    "dry-run": "DRY_RUN=true bun run src/index.ts"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.95.0"
+  }
+}

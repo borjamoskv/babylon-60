@@ -5,6 +5,7 @@ from typing import Any
 
 logger = logging.getLogger("CORTEX.MEMORY.CONTRADICTION")
 
+
 class ContradictionScanner:
     """
     Scans the memory space for semantic contradictions.
@@ -47,6 +48,7 @@ class ContradictionScanner:
     def _tokenize(text: str) -> set[str]:
         """Lower-cased word tokens, stripping punctuation."""
         import re
+
         return set(re.findall(r"\b[a-z]{3,}\b", text.lower()))
 
     @classmethod
@@ -77,15 +79,9 @@ class ContradictionScanner:
         for prefix in cls._NEGATION_PREFIXES:
             # cls._tokenize(prefix + " placeholder")  # just the prefix words
             # Check if tokens from one appear negated in the other
-            if any(
-                (prefix + token) in lower_b and token in tokens_a
-                for token in tokens_a
-            ):
+            if any((prefix + token) in lower_b and token in tokens_a for token in tokens_a):
                 return True
-            if any(
-                (prefix + token) in lower_a and token in tokens_b
-                for token in tokens_b
-            ):
+            if any((prefix + token) in lower_a and token in tokens_b for token in tokens_b):
                 return True
 
         # Phase 2b: antonym pairs — one fact has term A, the other has term B.

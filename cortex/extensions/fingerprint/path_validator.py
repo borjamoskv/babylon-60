@@ -95,7 +95,7 @@ class PathValidator:
             branching_factor=round(branching, 2),
             intent_stability=stability,
             structural_hash=struct_hash,
-            confidence_profile={"avg": 0.8}  # TODO: scan actual facts
+            confidence_profile={"avg": 0.8},  # TODO: scan actual facts
         )
 
     @staticmethod
@@ -119,6 +119,6 @@ class PathValidator:
 
         # 3. Intent stability
         # Lower stability (chaotic reasoning) increases drift score
-        diff += (1.0 - path_fp.intent_stability)
+        diff += 1.0 - path_fp.intent_stability
 
         return min(1.0, diff / 3.0)

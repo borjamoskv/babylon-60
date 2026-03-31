@@ -1,4 +1,3 @@
-
 """
 CORTEX v6 — Compliance Commands
 EU AI Act Article 12 compliance interface.
@@ -19,6 +18,7 @@ def compliance():
     """⚖️ EU AI Act Compliance: Article 12 Tracking & PDF Proofs."""
     pass
 
+
 @compliance.command("export")
 @click.option("--project", "-p", default="default", help="Project to report on.")
 @click.option("--pdf", is_flag=True, help="Export as Industrial Noir PDF.")
@@ -34,14 +34,16 @@ def export_cmd(project: str, pdf: bool, output: str):
     eu = report["eu_ai_act"]
     status_style = "green" if eu["status"] == "COMPLIANT" else "red"
 
-    console.print(Panel(
-        f"[bold]{eu['regulation']}[/bold]\n"
-        f"Article: {eu['article']}\n"
-        f"Status: [{status_style}]{eu['status']}[/]\n"
-        f"Score: {eu['score']}",
-        title="[bold blue]Compliance Summary[/bold blue]",
-        border_style=status_style
-    ))
+    console.print(
+        Panel(
+            f"[bold]{eu['regulation']}[/bold]\n"
+            f"Article: {eu['article']}\n"
+            f"Status: [{status_style}]{eu['status']}[/]\n"
+            f"Score: {eu['score']}",
+            title="[bold blue]Compliance Summary[/bold blue]",
+            border_style=status_style,
+        )
+    )
 
     table = Table(title=f"Article 12 Checks: {project}")
     table.add_column("Requirement", style="cyan")
@@ -58,9 +60,12 @@ def export_cmd(project: str, pdf: bool, output: str):
         with console.status("[bold magenta]Forging Industrial Noir PDF...[/bold magenta]"):
             path = tracker.export_pdf(project=project, output_path=output)
             abs_path = os.path.abspath(path)
-            console.print(f"\n[bold green]✔ PDF Proof generated:[/] [link=file://{abs_path}]{abs_path}[/link]")
+            console.print(
+                f"\n[bold green]✔ PDF Proof generated:[/] [link=file://{abs_path}]{abs_path}[/link]"
+            )
 
     tracker.close()
+
 
 @compliance.command("audit")
 @click.option("--project", "-p", default="default", help="Project to verify.")
@@ -95,13 +100,17 @@ def byzantine_cmd(project: str):
     if "error" in result:
         console.print(f"[bold red]Error:[/] {result['error']}")
     else:
-        console.print(Panel(
-            result["report"],
-            title="[bold magenta]Byzantine Audit Report (GPT-5.4)[/bold magenta]",
-            border_style="magenta"
-        ))
+        console.print(
+            Panel(
+                result["report"],
+                title="[bold magenta]Byzantine Audit Report (GPT-5.4)[/bold magenta]",
+                border_style="magenta",
+            )
+        )
         if result["valid"]:
-            console.print("[bold green]✔ No semantic anomalies detected at this scale.[/bold green]")
+            console.print(
+                "[bold green]✔ No semantic anomalies detected at this scale.[/bold green]"
+            )
         else:
             console.print("[bold red]⚠ Semantic anomalies or drift detected![/bold red]")
 

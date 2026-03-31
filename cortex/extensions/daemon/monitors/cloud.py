@@ -141,9 +141,7 @@ class CloudSyncMonitor:
                 "(id, project, action, detail, prev_hash, hash, timestamp) "
                 "VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO NOTHING"
             )
-            params_list = [
-                (row[0], row[2], row[3], row[4], row[5], row[6], row[7]) for row in rows
-            ]
+            params_list = [(row[0], row[2], row[3], row[4], row[5], row[6], row[7]) for row in rows]
 
         self._run_async(self._remote.executemany(sql, params_list))
         return len(rows), int(rows[-1][0])

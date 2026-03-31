@@ -83,6 +83,7 @@ def get_higher_confidences(confidence: str) -> list[str]:
     except ValueError:
         return [confidence]
 
+
 def _row_to_result(row: tuple, tenant_id: str = "default", is_fts: bool = False) -> SearchResult:
     """Parse a database row into a SearchResult object with decryption logic.
 

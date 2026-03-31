@@ -1,19 +1,7 @@
-   0.460642042s  INFO prepare_target{force=false package_id=cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust) target="cortex_rust"}: cargo::core::compiler::fingerprint: dependency on `build_script_build` is newer than we are 1774655435.451729756s > 1774633929.204140392s "/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-ffi-0.23.5"
-   0.460838875s  INFO prepare_target{force=false package_id=cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust) target="cortex_rust"}: cargo::core::compiler::fingerprint: dependency on `build_script_build` is newer than we are 1774655434.919573644s > 1774633929.891528727s "/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-0.23.5"
-   0.472341167s  INFO prepare_target{force=false package_id=cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust) target="cortex_rust"}: cargo::core::compiler::fingerprint: fingerprint dirty for cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust)/Check { test: false }/TargetInner { ..: lib_target("cortex_rust", ["cdylib"], "/Users/borjafernandezangulo/30_CORTEX/cortex-rust/src/lib.rs", Edition2021) }
-   0.473124334s  INFO prepare_target{force=false package_id=cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust) target="cortex_rust"}: cargo::core::compiler::fingerprint:     dirty: UnitDependencyInfoChanged { unit: UnitIndex(213) }
-   0.616305834s  INFO prepare_target{force=false package_id=pyo3 v0.23.5 target="pyo3"}: cargo::core::compiler::fingerprint: fingerprint dirty for pyo3 v0.23.5/Check { test: false }/TargetInner { ..: lib_target("pyo3", ["lib"], "/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-0.23.5/src/lib.rs", Edition2021) }
-   0.616324625s  INFO prepare_target{force=false package_id=pyo3 v0.23.5 target="pyo3"}: cargo::core::compiler::fingerprint:     dirty: UnitDependencyInfoChanged { unit: UnitIndex(219) }
-   0.621102625s  INFO prepare_target{force=false package_id=pyo3 v0.23.5 target="build-script-build"}: cargo::core::compiler::fingerprint: fingerprint dirty for pyo3 v0.23.5/RunCustomBuild/TargetInner { ..: custom_build_target("build-script-build", "/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-0.23.5/build.rs", Edition2021) }
-   0.621119000s  INFO prepare_target{force=false package_id=pyo3 v0.23.5 target="build-script-build"}: cargo::core::compiler::fingerprint:     dirty: UnitDependencyInfoChanged { unit: UnitIndex(214) }
-   0.626797792s  INFO prepare_target{force=false package_id=pyo3-ffi v0.23.5 target="build-script-build"}: cargo::core::compiler::fingerprint: fingerprint dirty for pyo3-ffi v0.23.5/RunCustomBuild/TargetInner { ..: custom_build_target("build-script-build", "/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-ffi-0.23.5/build.rs", Edition2021) }
-   0.626811000s  INFO prepare_target{force=false package_id=pyo3-ffi v0.23.5 target="build-script-build"}: cargo::core::compiler::fingerprint:     dirty: UnitDependencyInfoChanged { unit: UnitIndex(220) }
-   0.627564417s  INFO prepare_target{force=false package_id=pyo3-ffi v0.23.5 target="pyo3_ffi"}: cargo::core::compiler::fingerprint: fingerprint dirty for pyo3-ffi v0.23.5/Check { test: false }/TargetInner { ..: lib_target("pyo3_ffi", ["lib"], "/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-ffi-0.23.5/src/lib.rs", Edition2021) }
-   0.627573542s  INFO prepare_target{force=false package_id=pyo3-ffi v0.23.5 target="pyo3_ffi"}: cargo::core::compiler::fingerprint:     dirty: UnitDependencyInfoChanged { unit: UnitIndex(221) }
-   0.639470667s  INFO prepare_target{force=false package_id=cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust) target="cortex_rust"}: cargo::core::compiler::fingerprint: fingerprint dirty for cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust)/Check { test: true }/TargetInner { ..: lib_target("cortex_rust", ["cdylib"], "/Users/borjafernandezangulo/30_CORTEX/cortex-rust/src/lib.rs", Edition2021) }
-   0.639490167s  INFO prepare_target{force=false package_id=cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust) target="cortex_rust"}: cargo::core::compiler::fingerprint:     dirty: UnitDependencyInfoChanged { unit: UnitIndex(213) }
-   0.643213584s  INFO prepare_target{force=false package_id=cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust) target="cortex-rust"}: cargo::core::compiler::fingerprint: fingerprint error for cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust)/Check { test: false }/TargetInner { name: "cortex-rust", doc: true, ..: with_path("/Users/borjafernandezangulo/30_CORTEX/cortex-rust/src/main.rs", Edition2021) }
-   0.643237250s  INFO prepare_target{force=false package_id=cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust) target="cortex-rust"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/borjafernandezangulo/30_CORTEX/cortex-rust/target/debug/.fingerprint/cortex-rust-c10cb66f17f3b1b6/bin-cortex-rust`
+   0.537749125s  INFO prepare_target{force=false package_id=cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust) target="cortex_rust"}: cargo::core::compiler::fingerprint: dependency on `build_script_build` is newer than we are 1774898309.606767568s > 1774633929.204140392s "/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-ffi-0.23.5"
+   0.537982166s  INFO prepare_target{force=false package_id=cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust) target="cortex_rust"}: cargo::core::compiler::fingerprint: dependency on `build_script_build` is newer than we are 1774898309.346148561s > 1774633929.891528727s "/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-0.23.5"
+   0.544178041s  INFO prepare_target{force=false package_id=cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust) target="cortex_rust"}: cargo::core::compiler::fingerprint: fingerprint error for cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust)/Check { test: false }/TargetInner { ..: lib_target("cortex_rust", ["cdylib"], "/Users/borjafernandezangulo/30_CORTEX/cortex-rust/src/lib.rs", Edition2021) }
+   0.544247000s  INFO prepare_target{force=false package_id=cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust) target="cortex_rust"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/borjafernandezangulo/30_CORTEX/cortex-rust/target/debug/.fingerprint/cortex-rust-676cd43afde63231/lib-cortex_rust`
 
 Caused by:
     No such file or directory (os error 2)
@@ -36,8 +24,64 @@ Stack backtrace:
   14: std::rt::lang_start::<()>::{closure#0}
   15: std::rt::lang_start_internal
   16: _main
-   0.668127042s  INFO prepare_target{force=false package_id=cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust) target="cortex-rust"}: cargo::core::compiler::fingerprint: fingerprint error for cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust)/Check { test: true }/TargetInner { name: "cortex-rust", doc: true, ..: with_path("/Users/borjafernandezangulo/30_CORTEX/cortex-rust/src/main.rs", Edition2021) }
-   0.668194000s  INFO prepare_target{force=false package_id=cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust) target="cortex-rust"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/borjafernandezangulo/30_CORTEX/cortex-rust/target/debug/.fingerprint/cortex-rust-8d931a972e289f1b/test-bin-cortex-rust`
+   0.616430666s  INFO prepare_target{force=false package_id=pyo3 v0.23.5 target="pyo3"}: cargo::core::compiler::fingerprint: fingerprint dirty for pyo3 v0.23.5/Check { test: false }/TargetInner { ..: lib_target("pyo3", ["lib"], "/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-0.23.5/src/lib.rs", Edition2021) }
+   0.616444041s  INFO prepare_target{force=false package_id=pyo3 v0.23.5 target="pyo3"}: cargo::core::compiler::fingerprint:     dirty: UnitDependencyInfoChanged { unit: UnitIndex(219) }
+   0.617648708s  INFO prepare_target{force=false package_id=pyo3 v0.23.5 target="build-script-build"}: cargo::core::compiler::fingerprint: fingerprint dirty for pyo3 v0.23.5/RunCustomBuild/TargetInner { ..: custom_build_target("build-script-build", "/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-0.23.5/build.rs", Edition2021) }
+   0.617656666s  INFO prepare_target{force=false package_id=pyo3 v0.23.5 target="build-script-build"}: cargo::core::compiler::fingerprint:     dirty: UnitDependencyInfoChanged { unit: UnitIndex(214) }
+   0.618459958s  INFO prepare_target{force=false package_id=pyo3-ffi v0.23.5 target="build-script-build"}: cargo::core::compiler::fingerprint: fingerprint dirty for pyo3-ffi v0.23.5/RunCustomBuild/TargetInner { ..: custom_build_target("build-script-build", "/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-ffi-0.23.5/build.rs", Edition2021) }
+   0.618464916s  INFO prepare_target{force=false package_id=pyo3-ffi v0.23.5 target="build-script-build"}: cargo::core::compiler::fingerprint:     dirty: UnitDependencyInfoChanged { unit: UnitIndex(220) }
+   0.618783458s  INFO prepare_target{force=false package_id=pyo3-ffi v0.23.5 target="pyo3_ffi"}: cargo::core::compiler::fingerprint: fingerprint dirty for pyo3-ffi v0.23.5/Check { test: false }/TargetInner { ..: lib_target("pyo3_ffi", ["lib"], "/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-ffi-0.23.5/src/lib.rs", Edition2021) }
+   0.618790916s  INFO prepare_target{force=false package_id=pyo3-ffi v0.23.5 target="pyo3_ffi"}: cargo::core::compiler::fingerprint:     dirty: UnitDependencyInfoChanged { unit: UnitIndex(221) }
+   0.624968208s  INFO prepare_target{force=false package_id=cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust) target="cortex_rust"}: cargo::core::compiler::fingerprint: fingerprint error for cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust)/Check { test: true }/TargetInner { ..: lib_target("cortex_rust", ["cdylib"], "/Users/borjafernandezangulo/30_CORTEX/cortex-rust/src/lib.rs", Edition2021) }
+   0.624983500s  INFO prepare_target{force=false package_id=cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust) target="cortex_rust"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/borjafernandezangulo/30_CORTEX/cortex-rust/target/debug/.fingerprint/cortex-rust-692112f4de6bf612/test-lib-cortex_rust`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: std::backtrace::Backtrace::create
+   1: cargo_util::paths::read_bytes
+   2: cargo_util::paths::read
+   3: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   4: cargo::core::compiler::fingerprint::prepare_target
+   5: cargo::core::compiler::compile
+   6: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   7: cargo::ops::cargo_compile::compile_ws
+   8: cargo::ops::cargo_compile::compile_with_exec
+   9: cargo::ops::cargo_compile::compile
+  10: cargo::commands::check::exec
+  11: <cargo::cli::Exec>::exec
+  12: cargo::main
+  13: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  14: std::rt::lang_start::<()>::{closure#0}
+  15: std::rt::lang_start_internal
+  16: _main
+   0.626369833s  INFO prepare_target{force=false package_id=cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust) target="cortex-rust"}: cargo::core::compiler::fingerprint: fingerprint error for cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust)/Check { test: false }/TargetInner { name: "cortex-rust", doc: true, ..: with_path("/Users/borjafernandezangulo/30_CORTEX/cortex-rust/src/main.rs", Edition2021) }
+   0.626382750s  INFO prepare_target{force=false package_id=cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust) target="cortex-rust"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/borjafernandezangulo/30_CORTEX/cortex-rust/target/debug/.fingerprint/cortex-rust-a2b6b261d257bbd8/bin-cortex-rust`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: std::backtrace::Backtrace::create
+   1: cargo_util::paths::read_bytes
+   2: cargo_util::paths::read
+   3: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   4: cargo::core::compiler::fingerprint::prepare_target
+   5: cargo::core::compiler::compile
+   6: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   7: cargo::ops::cargo_compile::compile_ws
+   8: cargo::ops::cargo_compile::compile_with_exec
+   9: cargo::ops::cargo_compile::compile
+  10: cargo::commands::check::exec
+  11: <cargo::cli::Exec>::exec
+  12: cargo::main
+  13: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  14: std::rt::lang_start::<()>::{closure#0}
+  15: std::rt::lang_start_internal
+  16: _main
+   0.633690750s  INFO prepare_target{force=false package_id=cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust) target="cortex-rust"}: cargo::core::compiler::fingerprint: fingerprint error for cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust)/Check { test: true }/TargetInner { name: "cortex-rust", doc: true, ..: with_path("/Users/borjafernandezangulo/30_CORTEX/cortex-rust/src/main.rs", Edition2021) }
+   0.633704000s  INFO prepare_target{force=false package_id=cortex-rust v0.1.0 (/Users/borjafernandezangulo/30_CORTEX/cortex-rust) target="cortex-rust"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/borjafernandezangulo/30_CORTEX/cortex-rust/target/debug/.fingerprint/cortex-rust-b88edcc51de34cd5/test-bin-cortex-rust`
 
 Caused by:
     No such file or directory (os error 2)

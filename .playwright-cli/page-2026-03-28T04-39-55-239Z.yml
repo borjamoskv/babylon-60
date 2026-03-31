@@ -1,0 +1,599 @@
+- generic [ref=e1]:
+  - link [ref=e2] [cursor=pointer]: Saltar al contenido principal
+  - link [ref=e3] [cursor=pointer]:
+    - /url: https://support.google.com/websearch/answer/181196?hl=es
+    - text: Ayuda sobre la accesibilidad
+  - link [ref=e4] [cursor=pointer]: Comentarios sobre la accesibilidad
+  - dialog "Antes de ir a la Búsqueda de Google" [active]:
+    - generic [ref=e11]:
+      - generic [ref=e13]:
+        - img "Google" [ref=e14]
+        - generic [ref=e15]:
+          - 'button "Idioma: ‪Español (España)‬" [ref=e17] [cursor=pointer]':
+            - generic [ref=e18]:
+              - img
+              - generic [ref=e19]: es
+          - link "Iniciar sesión" [ref=e20] [cursor=pointer]
+      - generic [ref=e21]:
+        - heading "Antes de ir a Google" [level=1] [ref=e22]
+        - generic [ref=e23]:
+          - generic [ref=e24]:
+            - text: Usamos
+            - link "cookies" [ref=e25] [cursor=pointer]:
+              - /url: https://policies.google.com/technologies/cookies?utm_source=ucbs&hl=es
+            - text: "y datos para:"
+            - list [ref=e26]:
+              - listitem [ref=e27]: Proporcionar y mantener nuestros servicios
+              - listitem [ref=e28]: Hacer un seguimiento de las interrupciones y prevenir el spam, el fraude y los abusos
+              - listitem [ref=e29]: Medir la interacción de la audiencia y estadísticas de los sitios para entender cómo se utilizan nuestros servicios y mejorar su calidad
+          - generic [ref=e30]:
+            - text: "Si eliges Aceptar todo, también usaremos cookies y datos para:"
+            - list [ref=e31]:
+              - listitem [ref=e32]: Desarrollar y mejorar nuevos servicios
+              - listitem [ref=e33]: Proporcionar anuncios y medir su eficacia
+              - listitem [ref=e34]: Mostrar contenido personalizado en función de tus ajustes
+              - listitem [ref=e35]: Mostrar anuncios personalizados en función de tus ajustes
+            - generic [ref=e36]: Si eliges Rechazar todo, no usaremos cookies para estos fines adicionales.
+          - generic [ref=e37]: El contenido no personalizado está influido por factores como lo que estés viendo en ese momento, la actividad de tu sesión de búsqueda activa y tu ubicación. Los anuncios no personalizados están influidos por lo que estés viendo en ese momento y tu ubicación general. El contenido y los anuncios personalizados también pueden incluir resultados y recomendaciones más relevantes, así como anuncios basados en la actividad que se haya realizado previamente con este navegador, como búsquedas en Google anteriores. En caso necesario, también usamos cookies y datos para adaptar la experiencia de modo que sea apropiada para determinada edad.
+          - generic [ref=e38]: Selecciona Más opciones para ver información adicional, como detalles sobre la gestión de la configuración de privacidad. También puedes visitar g.co/privacytools en cualquier momento.
+      - generic [ref=e39]:
+        - generic [ref=e40]:
+          - button "Rechazar todo" [ref=e41] [cursor=pointer]
+          - button "Aceptar todo" [ref=e42] [cursor=pointer]
+        - link "Más opciones de ajustes de personalización y cookies" [ref=e44] [cursor=pointer]:
+          - generic "Más opciones de ajustes de personalización y cookies" [ref=e45]: Más opciones
+      - generic [ref=e46]:
+        - link "Privacidad" [ref=e47] [cursor=pointer]:
+          - /url: https://policies.google.com/privacy?hl=es&fg=1&utm_source=ucbs
+        - generic [ref=e48]: ·
+        - link "Términos" [ref=e49] [cursor=pointer]:
+          - /url: https://policies.google.com/terms?hl=es&fg=1&utm_source=ucbs
+  - generic [ref=e54]:
+    - search [ref=e55]:
+      - generic [ref=e57]:
+        - link [ref=e59] [cursor=pointer]:
+          - /url: https://www.google.com/webhp?hl=es&sa=X&ved=0ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQPAhp
+          - img [ref=e60]
+        - generic [ref=e67]:
+          - generic [ref=e68]:
+            - combobox [ref=e71]: gue gue
+            - generic [ref=e72]:
+              - button [ref=e74] [cursor=pointer]:
+                - img [ref=e76]
+              - generic [ref=e79]:
+                - button [ref=e80] [cursor=pointer]:
+                  - img [ref=e81]
+                - button [ref=e83] [cursor=pointer]:
+                  - img [ref=e84]
+          - button [ref=e86] [cursor=pointer]:
+            - img [ref=e89]
+    - generic [ref=e91]:
+      - button [ref=e93] [cursor=pointer]
+      - generic [ref=e94]:
+        - button [ref=e96] [cursor=pointer]:
+          - img [ref=e97]
+        - link [ref=e101] [cursor=pointer]:
+          - /url: https://accounts.google.com/ServiceLogin?hl=es&passive=true&continue=https://www.google.com/search%3Fq%3Dgue%26oq%3Dgue%26gs_lcrp%3DEgZjaHJvbWUyBggAEEUYOdIBBzMyN2owajSoAgCwAgA%26sourceid%3Dchrome%26ie%3DUTF-8%26sei%3DmlvHaa6VI5GukdUP2cHfgAg&ec=futura_srp_og_si_72236_p
+          - text: Iniciar sesión
+  - generic [ref=e103]:
+    - navigation [ref=e109]:
+      - list [ref=e114]:
+        - listitem [ref=e115]:
+          - link [ref=e118] [cursor=pointer]:
+            - /url: /search?q=gue&sca_esv=6a9588068c64b80b&udm=50&fbs=ADc_l-bpk8W4E-qsVlOvbGJcDwpn60DczFdcvPnuv8WQohHLTaMb_WtLz8zQ41bNqiqMK_0GCDA2eBSrpJajLJh54y7K0YYb-XJPUDKs047rJT3uQUsSynzVM1ncWDLp4L1G3jN1BITOyOQb09y1RAqqlB8xt2Fnl6sWXO7L-zoWaIUFyO-Sg44hXA1oUZ1PFq-dAi2Ldbcc9EpxOoya0KzYXquO0pUWkA&aep=1&ntc=1&sa=X&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQ2J8OegQIERAE
+            - generic [ref=e121]: Modo IA
+        - listitem [ref=e122]:
+          - link [disabled] [ref=e123]:
+            - generic [ref=e125]: Todo
+        - listitem [ref=e126]:
+          - link [ref=e127] [cursor=pointer]:
+            - /url: /search?sca_esv=6a9588068c64b80b&udm=2&fbs=ADc_l-bpk8W4E-qsVlOvbGJcDwpn60DczFdcvPnuv8WQohHLTaMb_WtLz8zQ41bNqiqMK_0GCDA2eBSrpJajLJh54y7K0YYb-XJPUDKs047rJT3uQUsSynzVM1ncWDLp4L1G3jN1BITOyOQb09y1RAqqlB8xt2Fnl6sWXO7L-zoWaIUFyO-Sg44hXA1oUZ1PFq-dAi2Ldbcc9EpxOoya0KzYXquO0pUWkA&q=gue&sa=X&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQtKgLegQIFhAB
+            - generic [ref=e129]: Imágenes
+        - listitem [ref=e130]:
+          - link [ref=e131] [cursor=pointer]:
+            - /url: /search?sca_esv=6a9588068c64b80b&udm=7&fbs=ADc_l-bpk8W4E-qsVlOvbGJcDwpn60DczFdcvPnuv8WQohHLTaMb_WtLz8zQ41bNqiqMK_0GCDA2eBSrpJajLJh54y7K0YYb-XJPUDKs047rJT3uQUsSynzVM1ncWDLp4L1G3jN1BITOyOQb09y1RAqqlB8xt2Fnl6sWXO7L-zoWaIUFyO-Sg44hXA1oUZ1PFq-dAi2Ldbcc9EpxOoya0KzYXquO0pUWkA&q=gue&sa=X&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQtKgLegQIExAB
+            - generic [ref=e133]: Vídeos
+        - listitem [ref=e134]:
+          - link [ref=e135] [cursor=pointer]:
+            - /url: /search?sca_esv=6a9588068c64b80b&udm=39&fbs=ADc_l-bpk8W4E-qsVlOvbGJcDwpn60DczFdcvPnuv8WQohHLTaMb_WtLz8zQ41bNqiqMK_0GCDA2eBSrpJajLJh54y7K0YYb-XJPUDKs047rJT3uQUsSynzVM1ncWDLp4L1G3jN1BITOyOQb09y1RAqqlB8xt2Fnl6sWXO7L-zoWaIUFyO-Sg44hXA1oUZ1PFq-dAi2Ldbcc9EpxOoya0KzYXquO0pUWkA&q=gue&sa=X&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQs6gLegQIFRAB
+            - generic [ref=e137]: Vídeos cortos
+        - listitem [ref=e138]:
+          - link [ref=e139] [cursor=pointer]:
+            - /url: /search?sca_esv=6a9588068c64b80b&udm=3&fbs=ADc_l-bpk8W4E-qsVlOvbGJcDwpn60DczFdcvPnuv8WQohHLTaMb_WtLz8zQ41bNqiqMK_0GCDA2eBSrpJajLJh54y7K0YYb-XJPUDKs047rJT3uQUsSynzVM1ncWDLp4L1G3jN1BITOyOQb09y1RAqqlB8xt2Fnl6sWXO7L-zoWaIUFyO-Sg44hXA1oUZ1PFq-dAi2Ldbcc9EpxOoya0KzYXquO0pUWkA&q=gue&sa=X&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQs6gLegQIFxAB
+            - generic [ref=e141]: Productos
+        - listitem [ref=e142]:
+          - link [ref=e143] [cursor=pointer]:
+            - /url: /search?sca_esv=6a9588068c64b80b&q=gue&tbm=nws&source=lnms&fbs=ADc_l-bpk8W4E-qsVlOvbGJcDwpn60DczFdcvPnuv8WQohHLTaMb_WtLz8zQ41bNqiqMK_0GCDA2eBSrpJajLJh54y7K0YYb-XJPUDKs047rJT3uQUsSynzVM1ncWDLp4L1G3jN1BITOyOQb09y1RAqqlB8xt2Fnl6sWXO7L-zoWaIUFyO-Sg44hXA1oUZ1PFq-dAi2Ldbcc9EpxOoya0KzYXquO0pUWkA&sa=X&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQ0pQJegQIFBAB
+            - generic [ref=e145]: Noticias
+        - listitem [ref=e146]:
+          - button [ref=e147] [cursor=pointer]:
+            - generic [ref=e149]:
+              - generic [ref=e150]: Más
+              - img [ref=e152]
+    - navigation [ref=e155]:
+      - navigation [ref=e158]:
+        - list [ref=e165]:
+          - listitem [ref=e166]:
+            - link [ref=e167] [cursor=pointer]:
+              - /url: /search?sca_esv=6a9588068c64b80b&q=Gu%C3%A9+rapper&uds=ALYpb_ncDc7jTlmw6Mmq7NjuX5c-Cxl8wSVsU50s2hgiURL6IiNvy9i3p-4QsViPwzLdKL-0NfDMKpAbAtCG0ocVEfoUi2PVN4zw9je_6LUHPUrIQxM8mvb4g4_WytEm5coISL-cnuWQ0AmRveeJTv7w92sSAK4agNRt19mPAkxAej1zPYMNHLhKYSjS4I28IQyiQu9X89MW&sa=X&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQxKsJKAB6BAgYEAE&ictx=0
+              - generic [ref=e169]: Rapper
+          - listitem [ref=e170]:
+            - link [ref=e171] [cursor=pointer]:
+              - /url: /search?sca_esv=6a9588068c64b80b&q=Gue+Palabras&uds=ALYpb_ncDc7jTlmw6Mmq7NjuX5c-ibi_YxfvgNKakgd6aFgw6lh-J-2KLlSD82jYvCAExRq4lZGFkOeud47OjAWwFgaqB-V4oqR_N0ptSvHj14raM8OIEGqPg4dtCipYTy9HIxbhAT5PfZIod27X5j0ImusTqzPX80o3SWdD3R5QaiYG363yUSj5Qm4CkEjCsOjOsX8LE9h0&sa=X&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQxKsJKAF6BAgdEAE&ictx=0
+              - generic [ref=e173]: Palabras
+          - listitem [ref=e174]:
+            - link [ref=e175] [cursor=pointer]:
+              - /url: /search?sca_esv=6a9588068c64b80b&q=Gue+decoplanner&uds=ALYpb_ncDc7jTlmw6Mmq7NjuX5c-6H1wDVOGpVW-eVgYAxkQfNCNHg7ipbrJ4d6NJ5JaPBH_2wvoUpq1Y1qf2Ycx-6mqZVJ1isZIkT6uXDm_0UlUDy-pTp-hhGRngYUFfYy0N9NLvwH5dNy6otM5X9TQ80q_5SkY4_rr__OdL5C7pPA_pqHfDzIf85IUUMvUHc1rQJxKs2Uk&sa=X&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQxKsJKAJ6BAgcEAE&ictx=0
+              - generic [ref=e177]: Decoplanner
+          - listitem [ref=e178]:
+            - link [ref=e179] [cursor=pointer]:
+              - /url: /search?sca_esv=6a9588068c64b80b&q=Gue+tv&uds=ALYpb_ncDc7jTlmw6Mmq7NjuX5c-tkkJiZqJAbxvy_jWTSL6VodC1nMepePJ29SG4Z_ibSw09UGxb2jpW6bznmCr9hWyg8JWTkSb1gmBqFXcRP3sjkOIu9GDvXXCrVtm8msSn9TQfTMGX3Oaetq4YgY2hf1Mck5UiDXyzVAOWLnQsaa8qG-5UcnJho9KCvaknpaOGpm-v4Sl&sa=X&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQxKsJKAN6BAgbEAE&ictx=0
+              - generic [ref=e181]: Tv
+          - listitem [ref=e182]:
+            - link [ref=e183] [cursor=pointer]:
+              - /url: /search?sca_esv=6a9588068c64b80b&q=Gue+scuba&uds=ALYpb_ncDc7jTlmw6Mmq7NjuX5c-J7wO1oJ65_6U8j7XKbEXE50cG9O3RLeUIYvo7MzuXOv5lRH08noh_iegotjc52AoXm8-sJiygDrQe1b5w77mkxfWhYfZQl8xWCfOOYAZ1nfB9SXmTICcxAsJk9-lJ6BSpFaOOxS4UTz-aEUW9HfvANNYXRtw44XPJmqk78cW_FSPZlWz&sa=X&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQxKsJKAR6BAgZEAE&ictx=0
+              - generic [ref=e185]: Scuba
+    - heading [level=1] [ref=e186]: Resultados de la búsqueda
+    - generic [ref=e191]:
+      - generic [ref=e208]:
+        - generic [ref=e210]:
+          - generic [ref=e212]:
+            - generic [ref=e213]:
+              - img [ref=e214]
+              - heading [level=2] [ref=e216]: Vista creada con IA
+            - button [ref=e220]:
+              - img [ref=e222]
+          - generic [ref=e239]:
+            - generic [ref=e241]:
+              - generic [ref=e242]:
+                - generic [ref=e243]: "\"Gue\""
+                - mark [ref=e244]: es una sílaba en español formada por la consonante 'g', la vocal 'u' (muda) y la vocal 'e'
+                - text: ", produciendo un sonido suave (/ge/) como en"
+                - emphasis [ref=e245]: guerra
+                - text: o
+                - emphasis [ref=e246]: manguera
+                - text: . La 'u' no se pronuncia a menos que lleve diéresis (güe). También se refiere a Global Underwater Explorers (GUE), una organización internacional de buceo técnico.
+                - button [disabled] [ref=e249]:
+                  - generic [ref=e250]:
+                    - img [ref=e251]
+                    - generic [ref=e252]:
+                      - generic [ref=e253]: GUE diving
+                      - generic [ref=e254]: "+4"
+              - strong [ref=e256]: "Aspectos clave de \"gue\":"
+              - list [ref=e257]:
+                - listitem [ref=e258]:
+                  - generic [ref=e259]:
+                    - strong [ref=e260]: "Ortografía y Sonido:"
+                    - text: Se usa la 'u' intermedia para mantener el sonido suave de la 'g' antes de la 'e'.
+                - listitem [ref=e261]:
+                  - generic [ref=e262]:
+                    - strong [ref=e263]: "Ejemplos:"
+                    - text: Guerra, merengue, juguete, guerrero, hoguera.
+                - listitem [ref=e264]:
+                  - generic [ref=e265]:
+                    - strong [ref=e266]: "Diferencia con Diéresis:"
+                    - text: Si la 'u' lleva diéresis (
+                    - strong [ref=e267]: güe
+                    - text: ), sí se pronuncia, como en
+                    - emphasis [ref=e268]: cigüeña
+            - list [ref=e274]:
+              - listitem [ref=e275]:
+                - generic [ref=e276]:
+                  - link [ref=e277] [cursor=pointer]:
+                    - /url: https://www.youtube.com/watch?v=_nZwMniESu4&t=1
+                  - generic [ref=e278]:
+                    - generic [ref=e279]:
+                      - generic [ref=e280]: "Las Sílabas Gue, Gui Con el dígrafo gu- Para Niños Syllables #12 ..."
+                      - generic [ref=e281]: Las sílabas gue y gui se forman con el dígrafo gu. Para leer estas sílabas, es necesario entender una regla básica de escritura. L...
+                      - generic [ref=e282]:
+                        - img [ref=e286]
+                        - generic [ref=e291]:
+                          - generic [ref=e292]: YouTube
+                          - generic [ref=e293]: ·
+                          - generic [ref=e294]: Educación Con Amor
+                        - button [ref=e296] [cursor=pointer]:
+                          - img [ref=e297]
+                    - button [ref=e301] [cursor=pointer]:
+                      - generic [ref=e303]:
+                        - img [ref=e304]
+                        - generic [ref=e306]: 3m
+                      - img [ref=e311]
+              - listitem [ref=e314]:
+                - generic [ref=e315]:
+                  - link [ref=e316] [cursor=pointer]:
+                    - /url: https://www.youtube.com/watch?v=USMxzdanbho&t=214
+                  - generic [ref=e317]:
+                    - generic [ref=e318]:
+                      - generic [ref=e319]: Silabas gue gui para niños
+                      - generic [ref=e320]: Cuando la letra G va acompañada de la letra U y luego la I, se pronuncia "gui", sin que la U se lea. De manera similar, la combina...
+                      - generic [ref=e321]:
+                        - img [ref=e325]
+                        - generic [ref=e330]:
+                          - generic [ref=e331]: YouTube
+                          - generic [ref=e332]: ·
+                          - generic [ref=e333]: aprendealeer
+                        - button [ref=e335] [cursor=pointer]:
+                          - img [ref=e336]
+                    - generic [ref=e340]:
+                      - img [ref=e341]
+                      - generic [ref=e343]: 4m
+              - listitem [ref=e347]:
+                - generic [ref=e348]:
+                  - link [ref=e349] [cursor=pointer]:
+                    - /url: https://translate.google.com/translate?u=https://en.wikipedia.org/wiki/Global_Underwater_Explorers&hl=es&sl=en&tl=es&client=sge#:~:text=Global%20Underwater%20Explorers%20(GUE)%20es%20una%20organizaci%C3%B3n,sede%20en%20High%20Springs%2C%20Florida%2C%20Estados%20Unidos.
+                  - generic [ref=e351]:
+                    - generic [ref=e352]: Exploradores submarinos globales - Wikipedia
+                    - generic [ref=e353]:
+                      - img [ref=e355]
+                      - text: Traducido — Global Underwater Explorers (GUE) es una organización de buceo que ofrece formación en buceo recreativo, técnico y en cuevas . Es ...
+                    - generic [ref=e357]:
+                      - generic [ref=e362]: Wikipedia
+                      - button [ref=e364] [cursor=pointer]:
+                        - img [ref=e365]
+        - button [ref=e372]:
+          - generic [ref=e374] [cursor=pointer]:
+            - generic [ref=e375]: Mostrar más
+            - img [ref=e377]
+      - main [ref=e380]:
+        - generic [ref=e384]:
+          - generic [ref=e387]:
+            - heading [level=2] [ref=e388]: Resultado web con enlaces de sitio
+            - generic [ref=e389]:
+              - generic [ref=e393]:
+                - generic [ref=e395]:
+                  - link [ref=e397] [cursor=pointer]:
+                    - /url: https://www.gue.com/es
+                    - heading [level=3] [ref=e398]: GUE | Education, Conservation, Exploration
+                    - generic [ref=e403]:
+                      - generic [ref=e405]: GUE diving
+                      - generic [ref=e407]: https://www.gue.com › ...
+                  - button [ref=e408] [cursor=pointer]:
+                    - img [ref=e411]
+                - generic [ref=e415]:
+                  - emphasis [ref=e416]: GUE
+                  - text: da formación a no buceadores, buceadores recreativos, buceadores técnicos y de cuevas y también a instructores de otras agencias, todo en un esfuerzo de ...
+              - group [ref=e417]:
+                - rowgroup [ref=e418]:
+                  - row [ref=e419]:
+                    - cell [ref=e420]:
+                      - generic [ref=e425]:
+                        - heading [level=3] [ref=e426]:
+                          - link [ref=e427] [cursor=pointer]:
+                            - /url: https://www.gue.com/es/gue-affiliated-dive-centers
+                            - text: Gue affiliated dive centers
+                        - generic [ref=e430]: Este estado define los centros de buceo que promueven la ...
+                  - row [ref=e431]:
+                    - cell [ref=e432]:
+                      - generic [ref=e437]:
+                        - heading [level=3] [ref=e438]:
+                          - link [ref=e439] [cursor=pointer]:
+                            - /url: https://www.gue.com/es/el-buceo-gue
+                            - text: El Buceo GUE
+                        - generic [ref=e442]: Global Underwater Explorers (GUE) se creó porque un ...
+                  - row [ref=e444]:
+                    - cell [ref=e445]:
+                      - link [ref=e447] [cursor=pointer]:
+                        - /url: /search?q=gue+site:gue.com&sca_esv=6a9588068c64b80b&sa=X&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQrAN6BAggEAE
+                        - text: Más resultados de gue.com »
+          - generic [ref=e451]:
+            - generic [ref=e452]:
+              - heading [level=2] [ref=e453]: Más preguntas
+              - button [ref=e454] [cursor=pointer]:
+                - img [ref=e457]
+            - generic [ref=e459]:
+              - button [ref=e465] [cursor=pointer]:
+                - generic [ref=e467]: ¿Qué palabras con la gue?
+                - img [ref=e470]
+              - button [ref=e479] [cursor=pointer]:
+                - generic [ref=e481]: ¿Qué significa GUE?
+                - img [ref=e484]
+              - button [ref=e493] [cursor=pointer]:
+                - generic [ref=e495]: ¿Qué es gue en buceo?
+                - img [ref=e498]
+              - button [ref=e507] [cursor=pointer]:
+                - generic [ref=e509]: ¿Qué son las sílabas "gue-" y "gui-"?
+                - img [ref=e512]
+          - generic [ref=e517]:
+            - heading [level=2] [ref=e518]: Resultados web
+            - generic [ref=e519]:
+              - generic [ref=e522]:
+                - link [ref=e524] [cursor=pointer]:
+                  - /url: https://es.wikipedia.org/wiki/Gu%C3%A8
+                  - heading [level=3] [ref=e525]: Guè - Wikipedia, la enciclopedia libre
+                  - generic [ref=e530]:
+                    - generic [ref=e532]: Wikipedia
+                    - generic [ref=e534]: https://es.wikipedia.org › wiki › Guè
+                - button [ref=e535] [cursor=pointer]:
+                  - img [ref=e538]
+              - generic [ref=e542]:
+                - emphasis [ref=e543]: Guè
+                - text: ", anteriormente conocido como"
+                - emphasis [ref=e544]: Gué
+                - text: Pequeno, seudónimo de Cosimo Fini (Milán, 25 de diciembre de 1980), es un rapero italiano.
+          - generic [ref=e548]:
+            - generic [ref=e550]:
+              - heading [level=2] [ref=e551]: Vídeos
+              - button [ref=e552] [cursor=pointer]:
+                - img [ref=e555]
+            - generic [ref=e558]:
+              - generic [ref=e564]:
+                - generic [ref=e565]:
+                  - link [ref=e567] [cursor=pointer]:
+                    - /url: https://www.youtube.com/watch?v=NWUloHr2sCU
+                    - heading [level=3] [ref=e568]:
+                      - generic [ref=e571]: "SYLLABLES GE GI GUE GUI IN 4K! #monosyllable ..."
+                      - generic [ref=e573]:
+                        - generic [ref=e574]:
+                          - text: YouTube
+                          - generic [ref=e575]: · lunacreciente
+                        - generic [ref=e576]: 4 jul 2025
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - text: YouTube
+                            - generic: · lunacreciente
+                      - button [ref=e577] [cursor=pointer]:
+                        - img [ref=e580]
+                - link [ref=e582] [cursor=pointer]:
+                  - /url: https://www.youtube.com/watch?v=NWUloHr2sCU
+                  - generic [ref=e583]:
+                    - img [ref=e588]
+                    - generic [ref=e592]: 11:06
+              - generic [ref=e597]:
+                - generic [ref=e598]:
+                  - link [ref=e600] [cursor=pointer]:
+                    - /url: https://www.youtube.com/watch?v=FS6fl58rTus
+                    - heading [level=3] [ref=e601]:
+                      - generic [ref=e604]: "\"Las silabas ¡¡ gue gui !! PARA NIÑOS"
+                      - generic [ref=e606]:
+                        - generic [ref=e607]:
+                          - text: YouTube
+                          - generic [ref=e608]: · APRENDIENDO CON PEN
+                        - generic [ref=e609]: 5 ago 2024
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - text: YouTube
+                            - generic: · APRENDIENDO CON PEN
+                      - button [ref=e610] [cursor=pointer]:
+                        - img [ref=e613]
+                - link [ref=e615] [cursor=pointer]:
+                  - /url: https://www.youtube.com/watch?v=FS6fl58rTus
+                  - generic [ref=e616]:
+                    - img [ref=e619]
+                    - generic [ref=e623]: 6:36
+              - generic [ref=e629]:
+                - generic [ref=e630]:
+                  - link [ref=e632] [cursor=pointer]:
+                    - /url: https://www.youtube.com/watch?v=DPQ4ncHSggk
+                    - heading [level=3] [ref=e633]:
+                      - generic [ref=e636]: GA GUE GUI GO GU APRENDE A LEER de forma divertida ...
+                      - generic [ref=e638]:
+                        - generic [ref=e639]:
+                          - text: YouTube
+                          - generic [ref=e640]: · LA PROFE BEA 🌈
+                        - generic [ref=e641]: 9 sept 2025
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - text: YouTube
+                            - generic: · LA PROFE BEA 🌈
+                      - button [ref=e642] [cursor=pointer]:
+                        - img [ref=e645]
+                - link [ref=e647] [cursor=pointer]:
+                  - /url: https://www.youtube.com/watch?v=DPQ4ncHSggk
+                  - generic [ref=e648]:
+                    - img [ref=e653]
+                    - generic [ref=e657]: 10:27
+            - link [ref=e660] [cursor=pointer]:
+              - /url: /search?sca_esv=6a9588068c64b80b&udm=7&q=gue&sa=X&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQ8ccDKAJ6BAg7EAQ
+              - separator [ref=e661]
+              - generic [ref=e662]:
+                - generic [ref=e663]: Ver más
+                - img [ref=e665]
+          - generic [ref=e669]:
+            - heading [level=2] [ref=e670]: Web results
+            - generic [ref=e671]:
+              - generic [ref=e674]:
+                - link [ref=e676] [cursor=pointer]:
+                  - /url: https://www.gue.com/
+                  - heading [level=3] [ref=e677]: GUE | Education, Conservation, Exploration
+                  - generic [ref=e682]:
+                    - generic [ref=e684]: GUE diving
+                    - generic [ref=e686]: https://www.gue.com
+                - generic [ref=e687]:
+                  - generic [ref=e688]: ·
+                  - link [ref=e689] [cursor=pointer]:
+                    - /url: https://translate.google.com/translate?u=https://www.gue.com/&hl=es&sl=en&tl=es&client=search
+                    - text: Traducir esta página
+                - button [ref=e690] [cursor=pointer]:
+                  - img [ref=e693]
+              - generic [ref=e697]:
+                - text: We are
+                - emphasis [ref=e698]: a leader in scuba education
+                - text: ", having developed numerous industry-first training protocols and utilizing an elite cast of diving educators."
+          - generic [ref=e702]:
+            - heading [level=2] [ref=e706]: Imágenes
+            - generic [ref=e710]:
+              - generic [ref=e714] [cursor=pointer]:
+                - button [ref=e716]:
+                  - img [ref=e718]
+                - generic [ref=e720]:
+                  - generic [ref=e722]: "Las Sílabas Gue, Gui Con el dígrafo gu- Para Niños Syllables #12 Consonat #9"
+                  - generic [ref=e723]:
+                    - generic [ref=e730]: YouTube
+                    - button [ref=e733]:
+                      - img [ref=e736]
+              - generic [ref=e741] [cursor=pointer]:
+                - button [ref=e743]:
+                  - img [ref=e745]
+                - generic [ref=e747]:
+                  - generic [ref=e749]: "#26 COMO ENSEÑAR A LEER Y ESCRIBIR LAS SÍLABAS GUE GUI"
+                  - generic [ref=e750]:
+                    - generic [ref=e757]: YouTube
+                    - button [ref=e760]:
+                      - img [ref=e763]
+              - generic [ref=e768] [cursor=pointer]:
+                - button [ref=e770]:
+                  - img [ref=e772]
+                - generic [ref=e774]:
+                  - generic [ref=e776]: "Cartilla para leer: GUE / GUI (recursos fotocopiables)"
+                  - generic [ref=e777]:
+                    - generic [ref=e784]: Pinterest
+                    - button [ref=e787]:
+                      - img [ref=e790]
+            - button [ref=e793] [cursor=pointer]:
+              - separator [ref=e794]
+              - generic [ref=e795]:
+                - generic [ref=e796]: Mostrar más imágenes
+                - img [ref=e798]
+          - generic [ref=e802]:
+            - heading [level=2] [ref=e803]: Resultados web
+            - generic [ref=e804]:
+              - generic [ref=e807]:
+                - link [ref=e809] [cursor=pointer]:
+                  - /url: https://www.ejemplos.co/50-ejemplos-de-palabras-con-gue-y-gui/
+                  - heading [level=3] [ref=e810]: 50 Ejemplos de Palabras con güe y güi (diéresis)
+                  - generic [ref=e815]:
+                    - generic [ref=e817]: Ejemplos
+                    - generic [ref=e819]: https://www.ejemplos.co › 50-ejemplos-de-palabras-con...
+                - button [ref=e820] [cursor=pointer]:
+                  - img [ref=e823]
+              - generic [ref=e827]:
+                - text: "Por ejemplo: guerra, guiso, abriguen. Cuando una palabra presenta las secuencias"
+                - emphasis [ref=e828]: güe
+                - text: o güi con diéresis en la U, esto significa que dicha vocal tiene sonoridad, ...
+          - generic [ref=e832]:
+            - generic [ref=e835]:
+              - link [ref=e837] [cursor=pointer]:
+                - /url: https://open.spotify.com/intl-es/artist/7F2utINZ6tSokSiZTQBE27
+                - heading [level=3] [ref=e838]: Guè
+                - generic [ref=e843]:
+                  - generic [ref=e845]: Spotify
+                  - generic [ref=e847]: https://open.spotify.com › intl-es › artist
+              - button [ref=e848] [cursor=pointer]:
+                - img [ref=e851]
+            - generic [ref=e855]:
+              - text: Sencillos y EP · M
+              - emphasis [ref=e856]: ILLIMETRI
+              - text: (feat. Guè & IvanBi) · Google Translate · SQUALO 2 (feat. Guè & Nerissima Serpe) · NON MI VERGOGNO (feat. Guè, Ceejay & Mated).
+          - generic [ref=e860]:
+            - generic [ref=e863]:
+              - link [ref=e865] [cursor=pointer]:
+                - /url: https://www.instagram.com/therealgue/
+                - heading [level=3] [ref=e866]: Guè (@therealgue) • Instagram photos and videos
+                - generic [ref=e871]:
+                  - generic [ref=e873]: Instagram · therealgue
+                  - generic [ref=e875]: Más de 2,7 M seguidores
+              - button [ref=e876] [cursor=pointer]:
+                - img [ref=e879]
+            - generic [ref=e882]: "Ricapitoliamo: un disco solista di enorme successo, un conseguente tour sold out, un joint album inaspettato, la nascita della propria etichetta, Oyster Music."
+          - generic [ref=e886]:
+            - generic [ref=e889]:
+              - link [ref=e891] [cursor=pointer]:
+                - /url: https://islashormigas.com/curso/fundamentals/
+                - heading [level=3] [ref=e892]: GUE FUNDAMENTALS - Islas Hormigas
+                - generic [ref=e897]:
+                  - generic [ref=e899]: islashormigas.com
+                  - generic [ref=e901]: https://islashormigas.com › curso › fundamentals
+              - button [ref=e902] [cursor=pointer]:
+                - img [ref=e905]
+            - generic [ref=e909]:
+              - text: En el curso
+              - emphasis [ref=e910]: GUE Fundamentals
+              - text: trabajaremos la configuración y uso del equipo GUE, equilibrio, trimado y flotabilidad, técnicas de propulsión incluyendo aleteo ...
+        - generic [ref=e912]:
+          - generic [ref=e917]:
+            - heading [level=2] [ref=e919]: Otras personas también buscan
+            - generic [ref=e921]:
+              - generic [ref=e922]:
+                - link [ref=e926] [cursor=pointer]:
+                  - /url: /search?sca_esv=6a9588068c64b80b&q=Gu%C3%A9+Pequeno&sa=X&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQ1QJ6BAhBEAE
+                  - generic [ref=e927]:
+                    - generic [ref=e932]: Gué Pequeno
+                    - img [ref=e936]
+                - link [ref=e941] [cursor=pointer]:
+                  - /url: /search?sca_esv=6a9588068c64b80b&q=Gu%C3%A9+rapper&sa=X&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQ1QJ6BAhFEAE
+                  - generic [ref=e942]:
+                    - generic [ref=e947]: Gué rapper
+                    - img [ref=e951]
+                - link [ref=e956] [cursor=pointer]:
+                  - /url: /search?sca_esv=6a9588068c64b80b&q=Gue+Palabras&sa=X&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQ1QJ6BAhGEAE
+                  - generic [ref=e957]:
+                    - generic [ref=e962]: Gue Palabras
+                    - img [ref=e966]
+                - link [ref=e971] [cursor=pointer]:
+                  - /url: /search?sca_esv=6a9588068c64b80b&q=Gue+decoplanner&sa=X&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQ1QJ6BAhJEAE
+                  - generic [ref=e972]:
+                    - generic [ref=e977]: Gue decoplanner
+                    - img [ref=e981]
+              - generic [ref=e983]:
+                - link [ref=e987] [cursor=pointer]:
+                  - /url: /search?sca_esv=6a9588068c64b80b&q=Gue+tv&sa=X&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQ1QJ6BAhIEAE
+                  - generic [ref=e988]:
+                    - generic [ref=e993]: Gue tv
+                    - img [ref=e997]
+                - link [ref=e1002] [cursor=pointer]:
+                  - /url: /search?sca_esv=6a9588068c64b80b&q=Gue+scuba&sa=X&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQ1QJ6BAhHEAE
+                  - generic [ref=e1003]:
+                    - generic [ref=e1008]: Gue scuba
+                    - img [ref=e1012]
+                - link [ref=e1017] [cursor=pointer]:
+                  - /url: /search?sca_esv=6a9588068c64b80b&q=In+depth+gue&sa=X&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQ1QJ6BAhEEAE
+                  - generic [ref=e1018]:
+                    - generic [ref=e1023]: In depth gue
+                    - img [ref=e1027]
+                - link [ref=e1032] [cursor=pointer]:
+                  - /url: /search?sca_esv=6a9588068c64b80b&q=GUE+diving&sa=X&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQ1QJ6BAhDEAE
+                  - generic [ref=e1033]:
+                    - generic [ref=e1038]: GUE diving
+                    - img [ref=e1042]
+          - generic [ref=e1044]:
+            - heading [level=2] [ref=e1045]: Avisos sobre resultados filtrados
+            - generic [ref=e1048]:
+              - text: Es posible que algunos resultados se hayan eliminado de acuerdo con la ley de protección de datos europea.
+              - link [ref=e1049] [cursor=pointer]:
+                - /url: https://www.google.com/policies/faq
+                - text: Más información
+          - navigation [ref=e1050]:
+            - heading [level=1] [ref=e1051]: Navegación de páginas
+            - text: "1"
+            - link [ref=e1054] [cursor=pointer]:
+              - /url: /search?q=gue&sca_esv=6a9588068c64b80b&ei=mlvHacm3LYHqkdUP44-bkAs&start=10&sa=N&sstk=Af77f_fGmP2OU8rArq6HG3Qn3npm5CXNnraM8i80MqlLZdD-1Go4rYrlOjhHFVwW3JniBREmV1ZO9SVmIMKZn1ACYwvkUZhJqumz0A&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQ8tMDegQIPxAG
+              - text: "2"
+            - link [ref=e1056] [cursor=pointer]:
+              - /url: /search?q=gue&sca_esv=6a9588068c64b80b&ei=mlvHacm3LYHqkdUP44-bkAs&start=20&sa=N&sstk=Af77f_fGmP2OU8rArq6HG3Qn3npm5CXNnraM8i80MqlLZdD-1Go4rYrlOjhHFVwW3JniBREmV1ZO9SVmIMKZn1ACYwvkUZhJqumz0A&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQ8tMDegQIPxAI
+              - text: "3"
+            - link [ref=e1058] [cursor=pointer]:
+              - /url: /search?q=gue&sca_esv=6a9588068c64b80b&ei=mlvHacm3LYHqkdUP44-bkAs&start=30&sa=N&sstk=Af77f_fGmP2OU8rArq6HG3Qn3npm5CXNnraM8i80MqlLZdD-1Go4rYrlOjhHFVwW3JniBREmV1ZO9SVmIMKZn1ACYwvkUZhJqumz0A&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQ8tMDegQIPxAK
+              - text: "4"
+            - link [ref=e1060] [cursor=pointer]:
+              - /url: /search?q=gue&sca_esv=6a9588068c64b80b&ei=mlvHacm3LYHqkdUP44-bkAs&start=40&sa=N&sstk=Af77f_fGmP2OU8rArq6HG3Qn3npm5CXNnraM8i80MqlLZdD-1Go4rYrlOjhHFVwW3JniBREmV1ZO9SVmIMKZn1ACYwvkUZhJqumz0A&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQ8tMDegQIPxAM
+              - text: "5"
+            - link [ref=e1062] [cursor=pointer]:
+              - /url: /search?q=gue&sca_esv=6a9588068c64b80b&ei=mlvHacm3LYHqkdUP44-bkAs&start=50&sa=N&sstk=Af77f_fGmP2OU8rArq6HG3Qn3npm5CXNnraM8i80MqlLZdD-1Go4rYrlOjhHFVwW3JniBREmV1ZO9SVmIMKZn1ACYwvkUZhJqumz0A&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQ8tMDegQIPxAO
+              - text: "6"
+            - link [ref=e1064] [cursor=pointer]:
+              - /url: /search?q=gue&sca_esv=6a9588068c64b80b&ei=mlvHacm3LYHqkdUP44-bkAs&start=60&sa=N&sstk=Af77f_fGmP2OU8rArq6HG3Qn3npm5CXNnraM8i80MqlLZdD-1Go4rYrlOjhHFVwW3JniBREmV1ZO9SVmIMKZn1ACYwvkUZhJqumz0A&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQ8tMDegQIPxAQ
+              - text: "7"
+            - link [ref=e1066] [cursor=pointer]:
+              - /url: /search?q=gue&sca_esv=6a9588068c64b80b&ei=mlvHacm3LYHqkdUP44-bkAs&start=70&sa=N&sstk=Af77f_fGmP2OU8rArq6HG3Qn3npm5CXNnraM8i80MqlLZdD-1Go4rYrlOjhHFVwW3JniBREmV1ZO9SVmIMKZn1ACYwvkUZhJqumz0A&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQ8tMDegQIPxAS
+              - text: "8"
+            - link [ref=e1068] [cursor=pointer]:
+              - /url: /search?q=gue&sca_esv=6a9588068c64b80b&ei=mlvHacm3LYHqkdUP44-bkAs&start=80&sa=N&sstk=Af77f_fGmP2OU8rArq6HG3Qn3npm5CXNnraM8i80MqlLZdD-1Go4rYrlOjhHFVwW3JniBREmV1ZO9SVmIMKZn1ACYwvkUZhJqumz0A&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQ8tMDegQIPxAU
+              - text: "9"
+            - link [ref=e1070] [cursor=pointer]:
+              - /url: /search?q=gue&sca_esv=6a9588068c64b80b&ei=mlvHacm3LYHqkdUP44-bkAs&start=90&sa=N&sstk=Af77f_fGmP2OU8rArq6HG3Qn3npm5CXNnraM8i80MqlLZdD-1Go4rYrlOjhHFVwW3JniBREmV1ZO9SVmIMKZn1ACYwvkUZhJqumz0A&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQ8tMDegQIPxAW
+              - text: "10"
+            - heading [level=2] [ref=e1072]:
+              - link [ref=e1073] [cursor=pointer]:
+                - /url: /search?q=gue&sca_esv=6a9588068c64b80b&ei=mlvHacm3LYHqkdUP44-bkAs&start=10&sa=N&sstk=Af77f_fGmP2OU8rArq6HG3Qn3npm5CXNnraM8i80MqlLZdD-1Go4rYrlOjhHFVwW3JniBREmV1ZO9SVmIMKZn1ACYwvkUZhJqumz0A&ved=2ahUKEwjJ7Jes48GTAxUBdaQEHePHBrIQ8NMDegQIPxAY
+                - generic [ref=e1075]: Siguiente
+    - contentinfo [ref=e1076]:
+      - heading [level=1] [ref=e1077]: Enlaces a pie de página

@@ -6,10 +6,12 @@ from cortex.compaction.mem0_pipeline import Mem0Pipeline
 
 try:
     import structlog
+
     _HAS_STRUCTLOG = True
     logger = structlog.get_logger(__name__)
 except ModuleNotFoundError:
     import logging
+
     _HAS_STRUCTLOG = False
     logger = logging.getLogger(__name__)
 

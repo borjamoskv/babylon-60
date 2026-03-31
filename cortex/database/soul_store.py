@@ -19,6 +19,7 @@ logger = logging.getLogger("cortex.soul_store")
 # Reserved entity ID for the Sovereign Self (The Soul)
 SELF_ENTITY_ID = 0
 
+
 class SoulStore:
     """Repository for Sovereign Self (Soul) events in entity_events."""
 
@@ -71,6 +72,7 @@ class SoulStore:
     ) -> dict[str, Any]:
         """Perform a cryptographic audit of the Soul's hash chain."""
         return await MUTATION_ENGINE.verify_chain(conn, SELF_ENTITY_ID)
+
 
 # Singleton instance
 SOUL_STORE = SoulStore()

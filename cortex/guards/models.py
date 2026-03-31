@@ -1,3 +1,5 @@
+"""CORTEX Guard Models — Dependency violations, oracle binaries, and sovereignty markers."""
+
 import logging
 from dataclasses import dataclass
 
@@ -59,4 +61,7 @@ class DependencyViolation:
 
     def __str__(self) -> str:
         fallback_str = " (with fallback)" if self.has_fallback else ""
-        return f"[{self.severity}] {self.file}:{self.line} — Found {self.call_type} to '{self.binary}'{fallback_str}"
+        return (
+            f"[{self.severity}] {self.file}:{self.line}"
+            f" — Found {self.call_type} to '{self.binary}'{fallback_str}"
+        )

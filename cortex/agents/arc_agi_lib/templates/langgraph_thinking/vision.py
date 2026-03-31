@@ -126,9 +126,7 @@ def render_frame(
     # Draw column numbers
     y_center_col_labels = SCALE_FACTOR / 2.0
     for col_idx in range(orig_width):
-        x_center_col_labels = (
-            col_idx * SCALE_FACTOR + (SCALE_FACTOR / 2.0)
-        ) + SCALE_FACTOR
+        x_center_col_labels = (col_idx * SCALE_FACTOR + (SCALE_FACTOR / 2.0)) + SCALE_FACTOR
         draw.text(
             (x_center_col_labels, y_center_col_labels),
             str(col_idx),
@@ -140,9 +138,7 @@ def render_frame(
     # Draw row numbers
     x_center_row_labels = SCALE_FACTOR / 2.0
     for row_idx in range(orig_height):
-        y_center_row_labels = (
-            row_idx * SCALE_FACTOR + (SCALE_FACTOR / 2.0)
-        ) + SCALE_FACTOR
+        y_center_row_labels = (row_idx * SCALE_FACTOR + (SCALE_FACTOR / 2.0)) + SCALE_FACTOR
         draw.text(
             (x_center_row_labels, y_center_row_labels),
             str(row_idx),
@@ -187,11 +183,7 @@ def render_frame(
                         "Door",
                     )
                     break
-                if (
-                    np_array[y, x] == 9
-                    and np_array[y - 1, x] == 3
-                    and not found_rotator
-                ):
+                if np_array[y, x] == 9 and np_array[y - 1, x] == 3 and not found_rotator:
                     found_rotator = True
                     add_highlight(
                         draw,

@@ -8,6 +8,7 @@ from cortex.extensions.llm.router import IntentProfile
 
 logger = logging.getLogger("cortex.engine.llm_heuristic")
 
+
 class LLMHeuristicEngine(HeuristicEngine):
     """
     LLM-driven Heuristic Engine for ARC-AGI PUCT MCTS.
@@ -44,14 +45,14 @@ class LLMHeuristicEngine(HeuristicEngine):
             f"Also provide a value estimate 'v' for the current state (-1.0 to 1.0).\n"
             f"'v' should be near 1.0 if the current program path is likely to lead to the target.\n"
             f"\nRespond STRICTLY with JSON:\n"
-            f"{{\n  \"p\": {{ \"primitive_name\": float_probability, ... }},\n  \"v\": float_value\n}}"
+            f'{{\n  "p": {{ "primitive_name": float_probability, ... }},\n  "v": float_value\n}}'
         )
         try:
             response_text = await self.manager.complete(
                 prompt=prompt,
                 system="You are an ARC-AGI heuristic engine specialized in PeARL-like symbolic primitives.",
                 intent=IntentProfile.CODE,
-                temperature=0.1
+                temperature=0.1,
             )
 
             if not response_text:
@@ -63,9 +64,9 @@ class LLMHeuristicEngine(HeuristicEngine):
                 clean_json = clean_json.split("```")[1]
                 if clean_json.startswith("json"):
                     clean_json = clean_json[4:]
-            
+
             data = json.loads(clean_json.strip())
-            
+
             p_raw = data.get("p", {})
             v = float(data.get("v", 0.0))
 
@@ -74,19 +75,19 @@ class LLMHeuristicEngine(HeuristicEngine):
             for k_raw, v_raw in p_raw.items():
                 if k_raw in available_actions:
                     p[str(k_raw)] = float(v_raw)
-            
+
             sum_p: float = sum(p.values())
             if sum_p == 0:
                 p = {action: 1.0 / float(len(available_actions)) for action in available_actions}
             else:
                 p = {k: v / sum_p for k, v in p.items()}
-            
+
             # Ensure all available actions have at least epsilon probability
             epsilon: float = 0.01
             for action in available_actions:
                 if action not in p or p[action] < epsilon:
                     p[action] = epsilon
-            
+
             # Final re-normalization
             final_sum: float = sum(p.values())
             p = {k: v / final_sum for k, v in p.items()}

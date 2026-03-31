@@ -6,12 +6,16 @@ import time
 from typing import Any, cast
 
 
-def calculate_semantic_recall_at_k(engine: Any, top_k: int = 5, sample_size: int = 10) -> dict[str, Any]:
+def calculate_semantic_recall_at_k(
+    engine: Any, top_k: int = 5, sample_size: int = 10
+) -> dict[str, Any]:
     """Calculates Semantic Recall@K Precision on existing memory facts using synchronous engine."""
     with engine.get_conn_sync() as conn:
         cur = conn.cursor()
         try:
-            cur.execute("SELECT id, content FROM facts_meta ORDER BY RANDOM() LIMIT ?", (sample_size,))
+            cur.execute(
+                "SELECT id, content FROM facts_meta ORDER BY RANDOM() LIMIT ?", (sample_size,)
+            )
             facts = cur.fetchall()
         except Exception as e:
             if "no such table: facts_meta" in str(e):

@@ -30,6 +30,10 @@ python -m cortex.mcp.server
 
 The server starts a stdio-based MCP transport, which is the standard for IDE integrations.
 
+By default the native server now boots in the `core` tool profile. Use
+`CORTEX_MCP_PROFILE` to opt into additional families without exposing the
+entire tool surface at once.
+
 ---
 
 ## Configuration
@@ -43,7 +47,8 @@ The server starts a stdio-based MCP transport, which is the standard for IDE int
       "command": "python",
       "args": ["-m", "cortex.mcp"],
       "env": {
-        "CORTEX_DB": "~/.cortex/cortex.db"
+        "CORTEX_DB": "~/.cortex/cortex.db",
+        "CORTEX_MCP_PROFILE": "core"
       }
     }
   }
@@ -57,7 +62,10 @@ The server starts a stdio-based MCP transport, which is the standard for IDE int
   "mcpServers": {
     "cortex": {
       "command": "python",
-      "args": ["-m", "cortex.mcp"]
+      "args": ["-m", "cortex.mcp"],
+      "env": {
+        "CORTEX_MCP_PROFILE": "trust"
+      }
     }
   }
 }
@@ -69,9 +77,19 @@ The server starts a stdio-based MCP transport, which is the standard for IDE int
 {
   "mcp": {
     "servers": {
-      "cortex": {
+      "cortex-core": {
         "command": "python",
-        "args": ["-m", "cortex.mcp"]
+        "args": ["-m", "cortex.mcp"],
+        "env": {
+          "CORTEX_MCP_PROFILE": "core"
+        }
+      },
+      "cortex-trust": {
+        "command": "python",
+        "args": ["-m", "cortex.mcp"],
+        "env": {
+          "CORTEX_MCP_PROFILE": "trust"
+        }
       }
     }
   }
@@ -80,25 +98,85 @@ The server starts a stdio-based MCP transport, which is the standard for IDE int
 
 ---
 
-## Available Tools
+## Tool Profiles
 
-### Core Memory Tools
+The native MCP server is now budgeted by profile instead of exposing every
+tool family by default.
+
+| Profile | Tools |
+|:---|:---|
+| `core` | Store, search, status, ledger verification, causal trace, Shannon report, handoff, embeddings |
+| `trust` | Audit trail, fact verification, compliance report, decision lineage, health checks |
+| `ops` | Reality weaver, entropy cracker, temporal nexus, Genesis tools, scraper tools |
+| `media` | Music engine and Suno headless generation |
+| `research` | Hilbert-Omega theorem tooling |
+
+Recommended usage:
+
+- Use `core` for everyday coding sessions.
+- Add `trust` when you need audit/compliance or health.
+- Add `ops`, `media`, or `research` only for focused sessions.
+
+The default active client stack should stay below a hard budget target of
+`85` tools to preserve headroom under clients that cap total tools at `100`.
+
+See [MCP Operator Workflow](mcp_operator_workflow.md) for the baseline and
+overlay strategy.
+
+---
+
+## Core Tools
+
+### `core`
 
 | Tool | Description |
 |:---|:---|
 | `cortex_store` | Store a fact with automatic hash chaining and embedding |
 | `cortex_search` | Hybrid semantic search across all facts |
 | `cortex_status` | System health, statistics, and database info |
+| `cortex_ledger_verify` | Full ledger integrity check — walks the entire hash chain |
+| `cortex_trace_episode` | Trace causal episodes through persisted facts |
+| `cortex_trace_chain` | Traverse up/down causal chains from a fact |
+| `cortex_shannon_report` | Analyze structural entropy in persisted memory |
+| `cortex_handoff` | Generate a session handoff summary |
+| `cortex_embed` | Generate an embedding vector using the active provider |
+| `cortex_embed_status` | Show embedding provider status |
 
-### Trust & Compliance Tools
+### `trust`
 
 | Tool | Description |
 |:---|:---|
-| `cortex_ledger_verify` | Full ledger integrity check — walks the entire hash chain |
-| `cortex_verify_fact` | Cryptographic verification certificate for a single fact |
 | `cortex_audit_trail` | Generate a timestamped, hash-verified audit log |
+| `cortex_verify_fact` | Cryptographic verification certificate for a single fact |
 | `cortex_compliance_report` | EU AI Act Article 12 compliance snapshot with score |
 | `cortex_decision_lineage` | Trace how an agent arrived at any conclusion |
+| `cortex_health_check` | Quick health score and grade |
+| `cortex_health_report` | Full health report with recommendations |
+
+### `ops`
+
+| Tool | Description |
+|:---|:---|
+| `cortex_reality_weaver` | Build an architecture recommendation from project facts |
+| `cortex_entropy_cracker` | Run filesystem entropy analysis on allowed paths |
+| `cortex_temporal_nexus` | Summarize recent decision/ghost/signal activity |
+| `cortex_genesis_*` | Generate or preview systems from declarative specs |
+| `cortex_scrape*` | Scrape URLs and site maps through the sovereign scraper |
+
+### `media`
+
+| Tool | Description |
+|:---|:---|
+| `music_create_album` | Create a GRAMMY-Ω album concept |
+| `music_generate_track` | Generate a track through the selected music adapter |
+| `music_evaluate_gri` | Evaluate the Grammy Readiness Index of a track |
+| `suno_generate_headless` | Generate a Suno track via headless extraction |
+
+### `research`
+
+| Tool | Description |
+|:---|:---|
+| `cortex_hilbert_omega` | Run Hilbert-Ω conjecture, millennium, or proof workflows |
 
 ---
 

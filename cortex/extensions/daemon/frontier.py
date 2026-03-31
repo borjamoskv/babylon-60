@@ -82,30 +82,34 @@ class FrontierDaemon:
         # 2. Bounty Discovery & Autonomous Recruitment Trigger
         bounty_service = BountyService(
             ledger=self.engine.ledger if self.engine else None,
-            reward_threshold=250.0  # Ω₂: High-exergy filter
+            reward_threshold=250.0,  # Ω₂: High-exergy filter
         )
 
         for owner, repo in discovery_targets:
             leads = await bounty_service.scan_repository(owner, repo)
             ranked = await bounty_service.rank_leads(leads)
             for lead in ranked:
-                logger.info("[FRONTIER] High-exergy bounty found: %s (%s)", lead.title, lead.reward_usd)
+                logger.info(
+                    "[FRONTIER] High-exergy bounty found: %s (%s)", lead.title, lead.reward_usd
+                )
 
                 # Ω₄: Trigger dynamic recruitment via SwarmFactory
-                if self.engine and hasattr(self.engine, 'factory'):
+                if self.engine and hasattr(self.engine, "factory"):
                     logger.info("[FRONTIER] Initializing 'Next Cycle' for %s", lead.title)
                     # Generate a swarm cycle specifically for this bounty
                     self.engine.factory.generate_cycle(
                         quadrant="P1",
                         size=3,
-                        context={"bounty": lead.title, "reward": lead.reward_usd}
+                        context={"bounty": lead.title, "reward": lead.reward_usd},
                     )
                     # Note: Full execution would happen in a background worker or here
                     # For now, we log the cycle initiation
                     msg = f"Forged Swarm Cycle for bounty '{lead.title}' (${lead.reward_usd})."
                     self._log_evolution("swarm", msg)
 
-                self._log_evolution("bounty", f"Discovered bounty: {lead.title} (${lead.reward_usd})")
+                self._log_evolution(
+                    "bounty", f"Discovered bounty: {lead.title} (${lead.reward_usd})"
+                )
 
     def _log_evolution(self, type: str, content: str):
         """Registers the evolution event in CORTEX."""

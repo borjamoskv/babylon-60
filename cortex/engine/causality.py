@@ -194,6 +194,7 @@ class AsyncCausalGraph:
         edge_inserts = []
 
         from cortex.crypto import get_default_encrypter
+
         enc = get_default_encrypter()
 
         async with self.conn.execute(

@@ -153,23 +153,38 @@ def swarm_deploy(mode, target, db):
 @swarm.command("config")
 @click.argument("directive")
 @click.option(
-    "--root", "-r", type=click.Path(exists=True),
-    default=".", help="Root directory to scan",
+    "--root",
+    "-r",
+    type=click.Path(exists=True),
+    default=".",
+    help="Root directory to scan",
 )
 @click.option(
-    "--shard-size", "-s", type=int, default=10,
+    "--shard-size",
+    "-s",
+    type=int,
+    default=10,
     help="Files per shard (default: 10)",
 )
 @click.option(
-    "--concurrency", "-c", type=int, default=15,
+    "--concurrency",
+    "-c",
+    type=int,
+    default=15,
     help="Max concurrent shards (default: 15)",
 )
 @click.option(
-    "--extensions", "-e", type=str, default=".py",
+    "--extensions",
+    "-e",
+    type=str,
+    default=".py",
     help="Comma-separated file extensions (default: .py)",
 )
 @click.option(
-    "--output-json", "-o", type=str, default=None,
+    "--output-json",
+    "-o",
+    type=str,
+    default=None,
     help="Write report JSON to path",
 )
 def swarm_config(directive, root, shard_size, concurrency, extensions, output_json):
@@ -179,9 +194,7 @@ def swarm_config(directive, root, shard_size, concurrency, extensions, output_js
     from cortex.swarm.parallel_config_swarm import ParallelConfigSwarm
 
     raw = extensions.split(",")
-    exts = tuple(
-        e.strip() if e.startswith(".") else f".{e.strip()}" for e in raw
-    )
+    exts = tuple(e.strip() if e.startswith(".") else f".{e.strip()}" for e in raw)
 
     console.print(
         Panel(
@@ -196,7 +209,8 @@ def swarm_config(directive, root, shard_size, concurrency, extensions, output_js
     )
 
     pcs = ParallelConfigSwarm(
-        max_concurrency=concurrency, shard_size=shard_size,
+        max_concurrency=concurrency,
+        shard_size=shard_size,
     )
     report = asyncio.run(pcs.configure(root, directive, extensions=exts))
 

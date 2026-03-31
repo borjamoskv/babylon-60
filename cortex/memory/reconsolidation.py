@@ -220,9 +220,7 @@ class ReconsolidationTracker:
 
     # ─── Access ───────────────────────────────────────────────────
 
-    def on_access(
-        self, engram_id: str, previous_version: str | None = None
-    ) -> LabilizationRecord:
+    def on_access(self, engram_id: str, previous_version: str | None = None) -> LabilizationRecord:
         """Mark an engram as labile after access.
 
         Args:

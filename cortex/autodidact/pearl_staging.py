@@ -12,10 +12,10 @@ every financial write.
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
-from cortex.autodidact.dual_ledger import DualLedger, TxType
+from cortex.autodidact.dual_ledger import DualLedger
 from cortex.engine.pearl import PearlEngine
 from cortex.utils.errors import PearlError
 

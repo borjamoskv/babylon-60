@@ -1,0 +1,9 @@
+/Users/borjafernandezangulo/30_CORTEX/cortex-rust/target/debug/deps/doctest_file-cca560cb46daa3cb.d: /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/doctest-file-1.1.1/src/lib.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/doctest-file-1.1.1/src/args.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/doctest-file-1.1.1/src/logic.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/doctest-file-1.1.1/src/tokenmanip.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/doctest-file-1.1.1/src/../README.md
+
+/Users/borjafernandezangulo/30_CORTEX/cortex-rust/target/debug/deps/libdoctest_file-cca560cb46daa3cb.dylib: /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/doctest-file-1.1.1/src/lib.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/doctest-file-1.1.1/src/args.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/doctest-file-1.1.1/src/logic.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/doctest-file-1.1.1/src/tokenmanip.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/doctest-file-1.1.1/src/../README.md
+
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/doctest-file-1.1.1/src/lib.rs:
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/doctest-file-1.1.1/src/args.rs:
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/doctest-file-1.1.1/src/logic.rs:
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/doctest-file-1.1.1/src/tokenmanip.rs:
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/doctest-file-1.1.1/src/../README.md:

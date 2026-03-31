@@ -235,12 +235,16 @@ class ComplianceTracker:
         facts = report.get("facts", [])
         pdf_records = []
         for f in facts:
-            pdf_records.append({
-                "id": str(f["id"]),
-                "hash": "---", # We'd need to fetch actual transaction hashes here if we strictly want LX
-                "ts": f["created_at"],
-                "status": "VERIFIED" if report["eu_ai_act"]["status"] == "COMPLIANT" else "WARNING"
-            })
+            pdf_records.append(
+                {
+                    "id": str(f["id"]),
+                    "hash": "---",  # We'd need to fetch actual transaction hashes here if we strictly want LX
+                    "ts": f["created_at"],
+                    "status": "VERIFIED"
+                    if report["eu_ai_act"]["status"] == "COMPLIANT"
+                    else "WARNING",
+                }
+            )
 
         proj_name = project or self._default_project
         return generate_report(proj_name, pdf_records, output_path)
@@ -263,8 +267,8 @@ class ComplianceTracker:
         """Retrieve full records for semantic audit."""
         conn = await self._engine.get_conn()
         cursor = await conn.execute(
-            "SELECT id, fact_type, source, confidence, content, meta "
-            "FROM facts WHERE project = ?", (project,)
+            "SELECT id, fact_type, source, confidence, content, meta FROM facts WHERE project = ?",
+            (project,),
         )
         return [
             {
@@ -272,8 +276,10 @@ class ComplianceTracker:
                 "fact_type": r[1],
                 "source": r[2],
                 "confidence": r[3],
-                "content": r[4], # Decrypted via engine session if needed, assuming plaintext for now or handled by engine
-                "meta": r[5]
+                "content": r[
+                    4
+                ],  # Decrypted via engine session if needed, assuming plaintext for now or handled by engine
+                "meta": r[5],
             }
             for r in await cursor.fetchall()
         ]

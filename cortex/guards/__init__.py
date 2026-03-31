@@ -1,4 +1,5 @@
-# cortex.guards — Byzantine Frontier Guards
-from cortex.guards.admission import byzantine_frontier_guard
+from cortex.guards.capabilities import AgentCredentials, Capability, RiskTier
+from cortex.guards.capability_guard import CapabilityGuard
+from cortex.guards.health_guard import HealthGuard
 
-__all__ = ["byzantine_frontier_guard"]
+__all__ = ["HealthGuard", "Capability", "RiskTier", "CapabilityGuard", "AgentCredentials"]

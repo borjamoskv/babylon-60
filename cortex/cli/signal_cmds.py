@@ -67,7 +67,11 @@ def emit_cmd(
     bus, conn = _get_signal_bus(db)
     try:
         signal_id = bus.emit(
-            event_type, payload, source=source, project=project, tenant_id=tenant,
+            event_type,
+            payload,
+            source=source,
+            project=project,
+            tenant_id=tenant,
         )
         console.print(
             f"[green]⚡[/] Signal emitted: [bold cyan]{event_type}[/] "
@@ -185,9 +189,7 @@ def history_cmd(
             payload_str = json.dumps(sig.payload)
             if len(payload_str) > 32:
                 payload_str = payload_str[:32] + "..."
-            consumed = (
-                f"[green]✓ {len(sig.consumed_by)}[/]" if sig.consumed_by else "[dim]—[/]"
-            )
+            consumed = f"[green]✓ {len(sig.consumed_by)}[/]" if sig.consumed_by else "[dim]—[/]"
             table.add_row(
                 str(sig.id),
                 sig.event_type,
@@ -240,8 +242,7 @@ def gc_cmd(days: int, tenant: str, db: str) -> None:
     try:
         pruned = bus.gc(max_age_days=days, tenant_id=tenant)
         console.print(
-            f"[green]🗑️[/] Pruned [bold]{pruned}[/] consumed signal(s) "
-            f"older than {days} days."
+            f"[green]🗑️[/] Pruned [bold]{pruned}[/] consumed signal(s) older than {days} days."
         )
     finally:
         conn.close()

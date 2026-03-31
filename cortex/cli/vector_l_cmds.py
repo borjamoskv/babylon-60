@@ -31,13 +31,26 @@ def vector_l_cmds():
 
 
 @vector_l_cmds.command("scan")
-@click.option("--sources", default="linkedin,indeed", show_default=True,
-              help="Comma-separated probe sources: linkedin,glassdoor,github,indeed")
-@click.option("--query", default="data entry OR office manager OR administrative",
-              show_default=True, help="Search query for job signal probes")
+@click.option(
+    "--sources",
+    default="linkedin,indeed",
+    show_default=True,
+    help="Comma-separated probe sources: linkedin,glassdoor,github,indeed",
+)
+@click.option(
+    "--query",
+    default="data entry OR office manager OR administrative",
+    show_default=True,
+    help="Search query for job signal probes",
+)
 @click.option("--limit", default=30, show_default=True, help="Max prospects per probe")
-@click.option("--min-gap", default=0.55, show_default=True, type=float,
-              help="Minimum exergy gap to include in output")
+@click.option(
+    "--min-gap",
+    default=0.55,
+    show_default=True,
+    type=float,
+    help="Minimum exergy gap to include in output",
+)
 @click.option("--dry-run", is_flag=True, help="Score only — do not send pitches")
 def scan(sources: str, query: str, limit: int, min_gap: float, dry_run: bool):
     """Scan public sources for PYMEs with operational bottlenecks."""
@@ -65,12 +78,15 @@ def scan(sources: str, query: str, limit: int, min_gap: float, dry_run: bool):
         console.print("[red]No valid sources. Use: linkedin,glassdoor,github,indeed[/red]")
         sys.exit(1)
 
-    console.print(f"[bold cyan]🔍 Vector L — Scanning ({', '.join(active_sources)}) ...[/bold cyan]")
+    console.print(
+        f"[bold cyan]🔍 Vector L — Scanning ({', '.join(active_sources)}) ...[/bold cyan]"
+    )
     if dry_run:
         console.print("[yellow]⚠️  DRY RUN — no pitches will be sent[/yellow]")
 
     async def _run():
         import asyncio
+
         tasks = [p.scan(query=query, limit=limit) for p in probes]
         results = await asyncio.gather(*tasks, return_exceptions=True)
         signals = []
@@ -80,6 +96,7 @@ def scan(sources: str, query: str, limit: int, min_gap: float, dry_run: bool):
 
         # Group by company → score
         from collections import defaultdict
+
         company_map = defaultdict(list)
         for sig in signals:
             company_map[sig.company].append(sig)
@@ -95,7 +112,9 @@ def scan(sources: str, query: str, limit: int, min_gap: float, dry_run: bool):
             src_list = list({s.source for s in sigs})
             scored_rows.append((company, gap, tier, evidence, src_list))
             if not dry_run:
-                pid = await ledger.discover(company=company, sources=src_list, signals_summary=evidence)
+                pid = await ledger.discover(
+                    company=company, sources=src_list, signals_summary=evidence
+                )
                 await ledger.score(prospect_id=pid, company=company, exergy_gap=gap, tier=tier)
 
         return sorted(scored_rows, key=lambda x: x[1], reverse=True)
@@ -103,7 +122,9 @@ def scan(sources: str, query: str, limit: int, min_gap: float, dry_run: bool):
     rows = asyncio.run(_run())
 
     if not rows:
-        console.print("[dim]No companies above threshold. Try lowering --min-gap or expanding --query.[/dim]")
+        console.print(
+            "[dim]No companies above threshold. Try lowering --min-gap or expanding --query.[/dim]"
+        )
         return
 
     table = Table(title=f"Vector L — {len(rows)} prospects found", box=box.SIMPLE_HEAVY)
@@ -131,8 +152,13 @@ def scan(sources: str, query: str, limit: int, min_gap: float, dry_run: bool):
 
 @vector_l_cmds.command("pitch")
 @click.option("--company", required=True, help="Company name to pitch")
-@click.option("--tier", type=click.Choice(["500", "1000", "2000"]), default="500",
-              show_default=True, help="Monthly pricing tier in USD")
+@click.option(
+    "--tier",
+    type=click.Choice(["500", "1000", "2000"]),
+    default="500",
+    show_default=True,
+    help="Monthly pricing tier in USD",
+)
 @click.option("--to-email", default="", help="Recipient email address")
 @click.option("--evidence", default="", help="Bottleneck evidence for personalization")
 @click.option("--source", default="linkedin", help="Signal source context")
@@ -149,7 +175,9 @@ def pitch_cmd(company: str, tier: str, to_email: str, evidence: str, source: str
         email_svc = EmailDispatcher()
         ledger = VectorLLedger()
 
-        console.print(f"[bold cyan]✍️  Composing pitch for {company} (${tier_int}/mo)...[/bold cyan]")
+        console.print(
+            f"[bold cyan]✍️  Composing pitch for {company} (${tier_int}/mo)...[/bold cyan]"
+        )
         composed = await composer.compose(
             company=company,
             signals_summary=evidence or f"Multiple {source} signals",
@@ -159,9 +187,9 @@ def pitch_cmd(company: str, tier: str, to_email: str, evidence: str, source: str
 
         console.print(f"\n[bold]Subject:[/bold] {composed['subject']}")
         console.print(f"[bold]Variant:[/bold] {composed['variant']}")
-        console.print(f"\n[dim]{'─'*60}[/dim]")
+        console.print(f"\n[dim]{'─' * 60}[/dim]")
         console.print(composed["body"])
-        console.print(f"[dim]{'─'*60}[/dim]\n")
+        console.print(f"[dim]{'─' * 60}[/dim]\n")
 
         if dry_run:
             console.print("[yellow]⚠️  DRY RUN — email not sent[/yellow]")
@@ -232,8 +260,10 @@ def status_cmd():
 
     smtp_ok = bool(os.environ.get("VECTOR_L_SMTP_USER") and os.environ.get("VECTOR_L_SMTP_PASS"))
     li_ok = bool(os.environ.get("VECTOR_L_LINKEDIN_SESSION"))
-    console.print(f"\nChannels: Email={'[green]✓[/green]' if smtp_ok else '[red]✗[/red]'}  "
-                  f"LinkedIn={'[green]✓[/green]' if li_ok else '[dim]optional[/dim]'}")
+    console.print(
+        f"\nChannels: Email={'[green]✓[/green]' if smtp_ok else '[red]✗[/red]'}  "
+        f"LinkedIn={'[green]✓[/green]' if li_ok else '[dim]optional[/dim]'}"
+    )
 
 
 # ── revenue ───────────────────────────────────────────────────────────────────
@@ -248,7 +278,9 @@ def revenue_cmd():
     converted = ledger.list_prospects(stage=ProspectStage.CONVERTED)
 
     if not converted:
-        console.print("[dim]No conversions yet. Run `cortex vector-l scan` and `pitch` first.[/dim]")
+        console.print(
+            "[dim]No conversions yet. Run `cortex vector-l scan` and `pitch` first.[/dim]"
+        )
         return
 
     table = Table(title="Vector L — Revenue", box=box.SIMPLE_HEAVY)
@@ -270,18 +302,24 @@ def revenue_cmd():
         total_hours += hours
 
     console.print(table)
-    console.print(f"\n💰 [bold green]MRR: ${total_mrr:,}/mo[/bold green]  |  "
-                  f"⏱  Hours delivered: {total_hours:.0f}h/mo")
+    console.print(
+        f"\n💰 [bold green]MRR: ${total_mrr:,}/mo[/bold green]  |  "
+        f"⏱  Hours delivered: {total_hours:.0f}h/mo"
+    )
 
 
 # ── list ──────────────────────────────────────────────────────────────────────
 
 
 @vector_l_cmds.command("list")
-@click.option("--stage", default=None,
-              type=click.Choice(["DISCOVERED", "SCORED", "PITCHED", "RESPONDED",
-                                 "CONVERTED", "CHURNED", "FILTERED"]),
-              help="Filter by pipeline stage")
+@click.option(
+    "--stage",
+    default=None,
+    type=click.Choice(
+        ["DISCOVERED", "SCORED", "PITCHED", "RESPONDED", "CONVERTED", "CHURNED", "FILTERED"]
+    ),
+    help="Filter by pipeline stage",
+)
 @click.option("--limit", default=20, show_default=True, help="Max rows to display")
 def list_cmd(stage: str | None, limit: int):
     """List prospects in the Vector L pipeline."""
@@ -323,8 +361,12 @@ def list_cmd(stage: str | None, limit: int):
 @vector_l_cmds.command("convert")
 @click.option("--prospect-id", required=True, help="Prospect ID from `vector-l list`")
 @click.option("--company", required=True, help="Company name")
-@click.option("--tier", required=True, type=click.Choice(["500", "1000", "2000"]),
-              help="Monthly subscription tier in USD")
+@click.option(
+    "--tier",
+    required=True,
+    type=click.Choice(["500", "1000", "2000"]),
+    help="Monthly subscription tier in USD",
+)
 @click.option("--subscription-id", default="", help="Stripe/payment subscription ID")
 def convert_cmd(prospect_id: str, company: str, tier: str, subscription_id: str):
     """Record a successful conversion (prospect → paying customer)."""

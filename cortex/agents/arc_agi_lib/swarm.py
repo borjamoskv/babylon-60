@@ -4,7 +4,7 @@ import json
 import logging
 import os
 from threading import Thread
-from typing import TYPE_CHECKING, Optional, Type
+from typing import TYPE_CHECKING, Optional
 
 from arc_agi import Arcade, OperationMode
 from arc_agi.scorecard import EnvironmentScorecard
@@ -22,7 +22,7 @@ class Swarm:
     ROOT_URL: str
     COUNT: int
     agent_name: str
-    agent_class: Type[Agent]
+    agent_class: type[Agent]
     threads: list[Thread]
     agents: list[Agent]
     record_games: list[str]

@@ -258,9 +258,7 @@ class VectorLLedger:
         """Return in-memory prospects (filtered by stage if provided)."""
         all_facts = list(self._store.values())
         if stage is not None:
-            all_facts = [
-                f for f in all_facts if f.get("metadata", {}).get("stage") == stage.value
-            ]
+            all_facts = [f for f in all_facts if f.get("metadata", {}).get("stage") == stage.value]
         return sorted(all_facts, key=lambda f: f.get("timestamp", 0), reverse=True)
 
     def mrr_total(self) -> int:

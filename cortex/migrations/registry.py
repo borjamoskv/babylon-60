@@ -1,3 +1,4 @@
+from cortex.migrations.mig_auth import _migration_028_auth_schema
 from cortex.migrations.mig_base import (
     _migration_001_add_updated_at,
     _migration_002_add_indexes,
@@ -30,7 +31,6 @@ from cortex.migrations.mig_signals import _migration_019_signal_bus
 from cortex.migrations.mig_solid_state import _migration_021_solid_state
 from cortex.migrations.mig_tenant import _migration_015_tenant_unification
 from cortex.migrations.mig_tombstone import _migration_020_tombstone
-from cortex.migrations.mig_auth import _migration_028_auth_schema
 
 __all__ = ["MIGRATIONS"]
 

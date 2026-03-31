@@ -16,7 +16,6 @@ from typing import Any
 
 from cortex.autodidact.kv_cache import KVPrefixCache
 from cortex.ledger.sovereign_ledger import SovereignLedger
-from cortex.utils.canonical import canonical_json
 
 __all__ = ["DualLedger", "TxType"]
 
@@ -26,7 +25,7 @@ logger = logging.getLogger("cortex.autodidact.dual_ledger")
 class TxType(Enum):
     """Transaction stream discriminator."""
 
-    CAPITAL = "capital"      # MEV, bounties, arbitrage, funding
+    CAPITAL = "capital"  # MEV, bounties, arbitrage, funding
     KNOWLEDGE = "knowledge"  # Proofs, theorems, PeARL programs, concepts
 
 
@@ -96,7 +95,10 @@ class DualLedger:
 
         logger.info(
             "DUAL-TX [%s] %s/%s → %s",
-            tx_type.value, project, action, tx_hash[:16],
+            tx_type.value,
+            project,
+            action,
+            tx_hash[:16],
         )
         return tx_hash
 

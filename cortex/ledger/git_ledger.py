@@ -15,7 +15,7 @@ import logging
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from cortex.guards.admission import byzantine_frontier_guard
 
@@ -49,7 +49,7 @@ class GitSovereignLedger:
     @byzantine_frontier_guard(strict=False)
     async def commit_state(
         self,
-        state_mutation: Dict[str, Any],
+        state_mutation: dict[str, Any],
         file_name: str = "state.json",
         commit_message: str = "CORTEX: state mutation",
     ) -> TaintedState:
@@ -82,7 +82,7 @@ class GitSovereignLedger:
 
     async def record_mutation(
         self,
-        state_mutation: Dict[str, Any],
+        state_mutation: dict[str, Any],
         file_name: str = "state.json",
         commit_message: str = "CORTEX: mutation",
     ) -> str:
@@ -100,7 +100,7 @@ class GitSovereignLedger:
     # ── Internals ─────────────────────────────────────────────────
 
     @staticmethod
-    def _canonical_json(payload: Dict[str, Any]) -> str:
+    def _canonical_json(payload: dict[str, Any]) -> str:
         return json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str)
 
     @staticmethod

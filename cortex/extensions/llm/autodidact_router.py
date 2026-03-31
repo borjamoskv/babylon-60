@@ -69,7 +69,9 @@ class AutodidactRouter(CortexLLMRouter):
 
         logger.info(
             "🫁 [AUTODIDACT] Complexity: %s | H=%.2f | K=%.2f",
-            tier.value, metrics["h"], metrics["k"]
+            tier.value,
+            metrics["h"],
+            metrics["k"],
         )
 
         # 2. Ajustar IntentProfile dinámicamente si no está forzado a algo específico

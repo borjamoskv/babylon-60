@@ -1,5 +1,6 @@
 import logging
 import sqlite3
+
 from cortex.auth.schema import AUTH_SCHEMA
 
 logger = logging.getLogger("cortex")
@@ -7,13 +8,11 @@ logger = logging.getLogger("cortex")
 
 def _migration_028_auth_schema(conn: sqlite3.Connection):
     """Ensure the api_keys table is fully created with all modern columns.
-    
+
     If the table exists but is missing newer columns (like tenant_id, role),
     we alter the table to add them before creating indexes, avoiding OperationalError.
     """
-    cursor = conn.execute(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name='api_keys'"
-    )
+    cursor = conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='api_keys'")
     exists = cursor.fetchone() is not None
 
     if not exists:
@@ -28,7 +27,7 @@ def _migration_028_auth_schema(conn: sqlite3.Connection):
         expected_cols = {
             "tenant_id": "TEXT NOT NULL DEFAULT 'default'",
             "role": "TEXT NOT NULL DEFAULT 'user'",
-            "permissions": "TEXT NOT NULL DEFAULT '[\"read\",\"write\"]'",
+            "permissions": 'TEXT NOT NULL DEFAULT \'["read","write"]\'',
             "is_active": "INTEGER NOT NULL DEFAULT 1",
             "rate_limit": "INTEGER NOT NULL DEFAULT 100",
         }

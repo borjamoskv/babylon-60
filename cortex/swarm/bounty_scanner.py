@@ -10,6 +10,7 @@ objects ranked by thermodynamic EV = (reward - compute_cost) × confidence.
 All scanners are async, fault-tolerant, and fall back to cached/mock data
 when APIs are unavailable (circuit-breaker pattern from Ω₃ cycle law).
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -17,7 +18,7 @@ import logging
 import os
 import subprocess
 from dataclasses import dataclass, field
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import httpx
@@ -26,6 +27,7 @@ logger = logging.getLogger("cortex.swarm.bounty_scanner")
 
 try:
     import httpx
+
     _HTTPX_AVAILABLE = True
 except ImportError:
     _HTTPX_AVAILABLE = False
@@ -34,15 +36,16 @@ except ImportError:
 
 # ─── Data Models ─────────────────────────────────────────────────────────────
 
+
 @dataclass
 class BountyOpportunity:
     id: str
     title: str
     repo: str
-    platform: str          # algora | polar | immunefi | github
+    platform: str  # algora | polar | immunefi | github
     reward_usd: float
-    confidence: float      # 0.0–1.0
-    complexity: int        # 1–10
+    confidence: float  # 0.0–1.0
+    complexity: int  # 1–10
     url: str
     labels: list[str] = field(default_factory=list)
     description: str = ""
@@ -64,6 +67,7 @@ class BountyOpportunity:
 
 
 # ─── Algora GraphQL Scanner ──────────────────────────────────────────────────
+
 
 class AlgoraScanner:
     """
@@ -96,7 +100,7 @@ class AlgoraScanner:
         except (httpx.RequestError, httpx.HTTPStatusError) as e:
             logger.error("[ALGORA] Scan failed: %s — using fallback", e)
             return self._fallback_opportunities()
-        return [] # Final safety return
+        return []  # Final safety return
 
     def _parse_algora(self, data: Any, min_usd: float) -> list[BountyOpportunity]:
         """Parse Algora API response into BountyOpportunity list."""
@@ -111,7 +115,9 @@ class AlgoraScanner:
                 opp = BountyOpportunity(
                     id=str(item.get("id", item.get("issue_id", "algora-unknown"))),
                     title=item.get("title", item.get("issue", {}).get("title", "Untitled")),
-                    repo=item.get("repo", item.get("repository", {}).get("full_name", "unknown/repo")),
+                    repo=item.get(
+                        "repo", item.get("repository", {}).get("full_name", "unknown/repo")
+                    ),
                     platform="algora",
                     reward_usd=reward,
                     confidence=0.75,  # Algora has historically high completion rate
@@ -183,6 +189,7 @@ class AlgoraScanner:
 
 # ─── Polar Scanner ───────────────────────────────────────────────────────────
 
+
 class PolarScanner:
     """
     Scans Polar.sh for funded issues via their public REST API.
@@ -219,7 +226,7 @@ class PolarScanner:
         except (httpx.RequestError, httpx.HTTPStatusError) as e:
             logger.error("[POLAR] Scan failed: %s — using fallback", e)
             return self._fallback_opportunities()
-        return [] # Final safety return
+        return []  # Final safety return
 
     def _parse_polar(self, data: Any, min_usd: float) -> list[BountyOpportunity]:
         """Parse Polar API response."""
@@ -229,9 +236,9 @@ class PolarScanner:
         for item in items:
             try:
                 funding = item.get("funding", {})
-                amount = float(
-                    funding.get("pledges_sum", {}).get("amount", 0)
-                ) / 100  # Polar uses cents
+                amount = (
+                    float(funding.get("pledges_sum", {}).get("amount", 0)) / 100
+                )  # Polar uses cents
                 if amount < min_usd:
                     continue
 
@@ -291,6 +298,7 @@ class PolarScanner:
 
 # ─── Immunefi Scanner ────────────────────────────────────────────────────────
 
+
 class ImmuneFiScanner:
     """
     Scans Immunefi for active smart contract bug bounties.
@@ -348,6 +356,7 @@ class ImmuneFiScanner:
 
 # ─── GitHub Native Scanner ───────────────────────────────────────────────────
 
+
 class GitHubBountyScanner:
     """
     Scans GitHub for issues with bounty labels via REST API.
@@ -380,9 +389,7 @@ class GitHubBountyScanner:
             for label in self.BOUNTY_LABELS[:3]:  # Top 3 labels to stay within rate limits
                 query = f'label:"{label}" state:open is:issue'
                 for page in range(1, self.MAX_PAGES + 1):
-                    page_tasks.append(
-                        self._fetch_page(client, query, page, headers)
-                    )
+                    page_tasks.append(self._fetch_page(client, query, page, headers))
 
             pages = await asyncio.gather(*page_tasks, return_exceptions=True)
 
@@ -429,8 +436,13 @@ class GitHubBountyScanner:
         try:
             resp = await client.get(
                 self.SEARCH_URL,
-                params={"q": query, "sort": "reactions", "order": "desc",
-                        "per_page": self.PER_PAGE, "page": page},
+                params={
+                    "q": query,
+                    "sort": "reactions",
+                    "order": "desc",
+                    "per_page": self.PER_PAGE,
+                    "page": page,
+                },
                 headers=headers,
             )
             if resp.status_code == 200:
@@ -450,6 +462,7 @@ class GitHubBountyScanner:
     def _extract_bounty_amount(self, item: dict) -> float:
         """Parse bounty amount from issue title/body using pattern matching."""
         import re
+
         text = f"{item.get('title', '')} {item.get('body', '')[:300]}"
         patterns = [
             r"💎\s*\$?([\d,]+(?:\.\d{2})?)",
@@ -476,6 +489,7 @@ class GitHubBountyScanner:
 
 # ─── Top Repository Scanner (x10 Scaling) ───────────────────────────────────
 
+
 class TopRepoScanner:
     """
     Scans Top 2000 GitHub repositories across 10 major languages.
@@ -485,8 +499,16 @@ class TopRepoScanner:
     SEARCH_URL = "https://api.github.com/search/repositories"
     # 10 languages × 200 repos = 2000 candidate pool
     LANGUAGES = [
-        "python", "typescript", "rust", "go", "cpp",
-        "java", "swift", "kotlin", "solidity", "zig",
+        "python",
+        "typescript",
+        "rust",
+        "go",
+        "cpp",
+        "java",
+        "swift",
+        "kotlin",
+        "solidity",
+        "zig",
     ]
     LIMIT_PER_LANG = 200
 
@@ -506,8 +528,7 @@ class TopRepoScanner:
 
         async with httpx.AsyncClient(timeout=20.0) as client:
             tasks = [
-                self._fetch_language_repos(client, lang, limit, headers)
-                for lang in self.LANGUAGES
+                self._fetch_language_repos(client, lang, limit, headers) for lang in self.LANGUAGES
             ]
             results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -521,8 +542,11 @@ class TopRepoScanner:
         # Deduplicate while preserving order
         seen: set[str] = set()
         unique = [r for r in repos if not (r in seen or seen.add(r))]  # type: ignore[func-returns-value]
-        logger.info("[TOP_REPOS] Discovered %d unique repositories across %d languages",
-                    len(unique), len(self.LANGUAGES))
+        logger.info(
+            "[TOP_REPOS] Discovered %d unique repositories across %d languages",
+            len(unique),
+            len(self.LANGUAGES),
+        )
         return unique
 
     async def _fetch_language_repos(
@@ -564,6 +588,7 @@ class TopRepoScanner:
 
 # ─── Spectral Auditor (Proactive Discovery) ──────────────────────────────────
 
+
 class SpectralAuditor:
     """
     Proactive discovery via static analysis of high-value repositories.
@@ -575,7 +600,9 @@ class SpectralAuditor:
     SEMGREP_RULES = "p/owasp-top-ten"
     RUFF_SELECT = "E,F,B,S,ANN"  # Errors, Flakes, Bugbear, Security, Annotations
 
-    async def audit_repo(self, repo_name: str, local_path: str | None = None) -> list[BountyOpportunity]:
+    async def audit_repo(
+        self, repo_name: str, local_path: str | None = None
+    ) -> list[BountyOpportunity]:
         """
         Run Ruff and Semgrep on a locally cloned repository.
         If `local_path` is None, this falls back to logging intent only.
@@ -606,9 +633,16 @@ class SpectralAuditor:
         """Run Ruff static analysis and convert high-severity findings to opportunities."""
         try:
             proc = await asyncio.create_subprocess_exec(
-                "ruff", "check", path, "--select", self.RUFF_SELECT,
-                "--output-format", "json", "--quiet",
-                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                "ruff",
+                "check",
+                path,
+                "--select",
+                self.RUFF_SELECT,
+                "--output-format",
+                "json",
+                "--quiet",
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
             )
             stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=60.0)
         except (FileNotFoundError, asyncio.TimeoutError, OSError) as e:
@@ -616,23 +650,26 @@ class SpectralAuditor:
             return []
 
         import json
+
         opportunities = []
         try:
             items = json.loads(stdout or "[]")
             # Group by file, surface highest-severity files as bounty candidates
             high_sev = [i for i in items if i.get("code", "").startswith(("S", "B"))]
             if len(high_sev) > 5:  # Threshold: >5 security/bugbear issues = worth reporting
-                opportunities.append(BountyOpportunity(
-                    id=f"spectral-ruff-{repo_name.replace('/', '-')}",
-                    title=f"[Spectral] {len(high_sev)} quality/security issues in {repo_name}",
-                    repo=repo_name,
-                    platform="spectral",
-                    reward_usd=200.0,  # Conservative estimate for unsolicited PR
-                    confidence=0.40,
-                    complexity=4,
-                    url=f"https://github.com/{repo_name}/issues",
-                    labels=["spectral", "ruff", "quality"],
-                ))
+                opportunities.append(
+                    BountyOpportunity(
+                        id=f"spectral-ruff-{repo_name.replace('/', '-')}",
+                        title=f"[Spectral] {len(high_sev)} quality/security issues in {repo_name}",
+                        repo=repo_name,
+                        platform="spectral",
+                        reward_usd=200.0,  # Conservative estimate for unsolicited PR
+                        confidence=0.40,
+                        complexity=4,
+                        url=f"https://github.com/{repo_name}/issues",
+                        labels=["spectral", "ruff", "quality"],
+                    )
+                )
         except (json.JSONDecodeError, KeyError):
             pass
         return opportunities
@@ -641,9 +678,15 @@ class SpectralAuditor:
         """Run Semgrep SAST and convert critical findings to high-EV opportunities."""
         try:
             proc = await asyncio.create_subprocess_exec(
-                "semgrep", "--config", self.SEMGREP_RULES, path,
-                "--json", "--quiet", "--no-git-ignore",
-                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                "semgrep",
+                "--config",
+                self.SEMGREP_RULES,
+                path,
+                "--json",
+                "--quiet",
+                "--no-git-ignore",
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
             )
             stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=120.0)
         except (FileNotFoundError, asyncio.TimeoutError, OSError) as e:
@@ -651,33 +694,38 @@ class SpectralAuditor:
             return []
 
         import json
+
         opportunities = []
         try:
             data = json.loads(stdout or '{"results": []}')
             critical = [
-                r for r in data.get("results", [])
+                r
+                for r in data.get("results", [])
                 if r.get("extra", {}).get("severity") in ("ERROR", "WARNING")
             ]
             if critical:
                 # Scale reward by severity count
                 estimated = min(500.0 + len(critical) * 50.0, 5000.0)
-                opportunities.append(BountyOpportunity(
-                    id=f"spectral-semgrep-{repo_name.replace('/', '-')}",
-                    title=f"[Spectral] {len(critical)} SAST findings in {repo_name}",
-                    repo=repo_name,
-                    platform="spectral",
-                    reward_usd=estimated,
-                    confidence=0.30,  # Semgrep has false-positive rate
-                    complexity=6,
-                    url=f"https://github.com/{repo_name}/security",
-                    labels=["spectral", "semgrep", "security"],
-                ))
+                opportunities.append(
+                    BountyOpportunity(
+                        id=f"spectral-semgrep-{repo_name.replace('/', '-')}",
+                        title=f"[Spectral] {len(critical)} SAST findings in {repo_name}",
+                        repo=repo_name,
+                        platform="spectral",
+                        reward_usd=estimated,
+                        confidence=0.30,  # Semgrep has false-positive rate
+                        complexity=6,
+                        url=f"https://github.com/{repo_name}/security",
+                        labels=["spectral", "semgrep", "security"],
+                    )
+                )
         except (json.JSONDecodeError, KeyError):
             pass
         return opportunities
 
 
 # ─── Unified Scanner ─────────────────────────────────────────────────────────
+
 
 class SovereignBountyScanner:
     """
@@ -706,8 +754,10 @@ class SovereignBountyScanner:
             # Scale up: Fetch top repositories to audit
             top_repos = await self.top_repos.get_top_repos(limit_per_lang=20)
             self.github.REPOS = list(set(self.github.REPOS + top_repos))
-            logger.info("[SCANNER] Extended search enabled. Auditing %d repositories", 
-                        len(self.github.REPOS))
+            logger.info(
+                "[SCANNER] Extended search enabled. Auditing %d repositories",
+                len(self.github.REPOS),
+            )
 
         tasks = [
             self.algora.scan(min_usd=min_usd),

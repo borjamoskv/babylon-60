@@ -90,13 +90,15 @@ def list_ledger_cmd(project: str, limit: int, days: int, db: str):
                 console.print("[yellow]No entries found for the selected period.[/]")
                 return
 
-            console.print(Panel(
-                f"[bold blue]Ledger Summary[/]\n"
-                f"Project: {project or 'ALL'}\n"
-                f"Last {days} days: {report.total_seconds / 3600:.1f}h total\n"
-                f"Entries: {report.entries} | Heartbeats: {report.heartbeats}",
-                title="CORTEX"
-            ))
+            console.print(
+                Panel(
+                    f"[bold blue]Ledger Summary[/]\n"
+                    f"Project: {project or 'ALL'}\n"
+                    f"Last {days} days: {report.total_seconds / 3600:.1f}h total\n"
+                    f"Entries: {report.entries} | Heartbeats: {report.heartbeats}",
+                    title="CORTEX",
+                )
+            )
         finally:
             await engine.close()
 

@@ -1,3 +1,4 @@
+# CORTEX-TAINT: codex:ab12cd34:1774662874
 from cortex.agents.manifest import AgentManifest
 
 

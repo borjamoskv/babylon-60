@@ -1,4 +1,3 @@
-
 """
 CORTEX CLI — Niche Arbitrage Commands
 """

@@ -37,9 +37,7 @@ class ShannonCompactor:
                     return {"archived": 0, "status": "no_debt_detected"}
 
                 # 2. Archive to cold storage (delete to reduce exergy loss)
-                await db.execute(
-                    "DELETE FROM transactions WHERE timestamp < ?", (threshold,)
-                )
+                await db.execute("DELETE FROM transactions WHERE timestamp < ?", (threshold,))
 
                 # 3. VACUUM to reclaim disk space (Thermodynamic optimization)
                 # Note: VACUUM cannot run within a transaction, so we do it after commit.
@@ -75,7 +73,9 @@ class ShannonCompactor:
                         await db.execute("ROLLBACK")
                         return {"status": "noop", "message": "agent_messages table not found"}
 
-                count_query = "SELECT COUNT(*) FROM agent_messages WHERE consumed = 1 OR created_at < ?"
+                count_query = (
+                    "SELECT COUNT(*) FROM agent_messages WHERE consumed = 1 OR created_at < ?"
+                )
                 cursor = await db.execute(count_query, (threshold_ts,))
                 count = (await cursor.fetchone())[0]  # type: ignore
 

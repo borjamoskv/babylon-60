@@ -30,9 +30,7 @@ class TranslateRequest(BaseModel):
     target_languages: list[str] = Field(
         ..., description="List of target language codes (e.g., ['es', 'fr', 'zh'])."
     )
-    context: str | None = Field(
-        None, description="Optional context about the application or tone."
-    )
+    context: str | None = Field(None, description="Optional context about the application or tone.")
 
 
 class TranslateResponse(BaseModel):
@@ -110,11 +108,7 @@ def _extract_usage(response) -> dict[str, int]:
 def _execute_translation(request: TranslateRequest, client: Any) -> TranslateResponse:
     """Core translation execute logic isolated from router wrapper."""
     system_instruction = _build_system_instruction()
-    context_prefix = (
-        f"Context for tone/domain: {request.context}\n\n"
-        if request.context
-        else ""
-    )
+    context_prefix = f"Context for tone/domain: {request.context}\n\n" if request.context else ""
     prompt = (
         f"{context_prefix}"
         f"Target languages: {request.target_languages}\n\n"

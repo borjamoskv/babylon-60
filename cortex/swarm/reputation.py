@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 logger = logging.getLogger("cortex.swarm.reputation")
 
+
 @dataclass
 class AgentExergyProfile:
     agent_id: str
@@ -28,6 +29,7 @@ class AgentReputationSystem:
     Sovereign Reputation Guard (Ω-Exergy).
     Tracks efficiency and reliability across the swarm.
     """
+
     def __init__(self):
         self.profiles: dict[str, AgentExergyProfile] = {}
 

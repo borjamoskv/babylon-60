@@ -4,8 +4,8 @@ import logging
 from collections.abc import Sequence
 from datetime import datetime
 
-from cortex.extensions.wealth.scanner import FundingRateScanner
 from cortex.extensions.wealth.mev_validator import MEVValidator
+from cortex.extensions.wealth.scanner import FundingRateScanner
 from cortex.infrastructure.anvil_node import AnvilStagingNode
 from cortex.ledger.sovereign_ledger import SovereignLedger
 from cortex.services.bounty_service import BountyLead, BountyService
@@ -22,7 +22,9 @@ class OuroborosEngine:
     Orchestrates discovery and kinetic capture across multiple vectors.
     """
 
-    def __init__(self, ledger: SovereignLedger, swarm_manager: SwarmManager, min_exergy: float = 50.0):
+    def __init__(
+        self, ledger: SovereignLedger, swarm_manager: SwarmManager, min_exergy: float = 50.0
+    ):
         self.ledger = ledger
         self.swarm_manager = swarm_manager
         self.factory = SwarmFactory(manager=self.swarm_manager)
@@ -100,10 +102,15 @@ class OuroborosEngine:
 
         # 4. Kinetic Execution Phase (Ω₃)
         if dry_run:
-            logger.info("[DRY-RUN] Cycle Exergy: $%.2f (Min: $%.2f)", potential_exergy, self.min_exergy)
+            logger.info(
+                "[DRY-RUN] Cycle Exergy: $%.2f (Min: $%.2f)", potential_exergy, self.min_exergy
+            )
         elif potential_exergy < self.min_exergy:
-            logger.info("[Ω₂-PRUNE] Exergy $%.2f below threshold $%.2f. Aborting execution.",
-                        potential_exergy, self.min_exergy)
+            logger.info(
+                "[Ω₂-PRUNE] Exergy $%.2f below threshold $%.2f. Aborting execution.",
+                potential_exergy,
+                self.min_exergy,
+            )
         else:
             if ranked_bounties:
                 top = ranked_bounties[0]
@@ -122,9 +129,12 @@ async def main():
     parser.add_argument("--min-exergy", type=float, default=50.0, help="Minimum exergy threshold")
     args = parser.parse_args()
 
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+    )
 
     from cortex.engine import CortexEngine
+
     engine = CortexEngine()
     ledger = engine.ledger or SovereignLedger(engine)
     manager = engine.manager or SwarmManager(engine)

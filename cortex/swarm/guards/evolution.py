@@ -17,7 +17,7 @@ class EvolutionGuard:
             r"todo[:\s]+.*",
             r"pass\s*#\s*decorative",
             r"print\(.*\)\s*#\s*debug",
-            r"def\s+\w+\(.*\):\s*pass\s*\Z"
+            r"def\s+\w+\(.*\):\s*pass\s*\Z",
         ]
         self.compiled_ghosts = [re.compile(p, re.IGNORECASE) for p in self.ghost_patterns]
 
@@ -43,7 +43,7 @@ class EvolutionGuard:
         ghosts_found = []
         for i, line in enumerate(content.splitlines()):
             if any(p.search(line) for p in self.compiled_ghosts):
-                ghosts_found.append(f"L{i+1}: {line.strip()}")
+                ghosts_found.append(f"L{i + 1}: {line.strip()}")
         return ghosts_found
 
     def validate_mutation(self, proposed_code: str) -> bool:
@@ -54,6 +54,9 @@ class EvolutionGuard:
         """Abort if the mutation increases entropy beyond the safe threshold."""
         current_entropy = self.measure_entropy(proposed_code)
         if current_entropy > self.entropy_threshold:
-            logger.warning("EvolutionGuard: Critical entropy detected (%.2f). Aborting mutation.", current_entropy)
+            logger.warning(
+                "EvolutionGuard: Critical entropy detected (%.2f). Aborting mutation.",
+                current_entropy,
+            )
             return True
         return False

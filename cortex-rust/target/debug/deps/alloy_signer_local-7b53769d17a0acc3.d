@@ -1,0 +1,8 @@
+/Users/borjafernandezangulo/30_CORTEX/cortex-rust/target/debug/deps/alloy_signer_local-7b53769d17a0acc3.d: /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-0.7.3/src/lib.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-0.7.3/src/error.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-0.7.3/src/private_key.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-0.7.3/src/../README.md
+
+/Users/borjafernandezangulo/30_CORTEX/cortex-rust/target/debug/deps/liballoy_signer_local-7b53769d17a0acc3.rmeta: /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-0.7.3/src/lib.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-0.7.3/src/error.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-0.7.3/src/private_key.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-0.7.3/src/../README.md
+
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-0.7.3/src/lib.rs:
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-0.7.3/src/error.rs:
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-0.7.3/src/private_key.rs:
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-0.7.3/src/../README.md:

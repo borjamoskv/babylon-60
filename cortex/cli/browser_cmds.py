@@ -37,8 +37,7 @@ def surf(url: str, objective: str, headless: bool, provider: str, model: str):
 
     llm = LLMProvider(**kwargs)
 
-    agent = SovereignBrowserAgent(objective=objective, llm_provider=llm)
-    # We optionally could override headless state if we modify engine
+    agent = SovereignBrowserAgent(objective=objective, llm_provider=llm, headless=headless)
 
     try:
         asyncio.run(agent.run(url))

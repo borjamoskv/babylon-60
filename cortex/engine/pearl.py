@@ -39,13 +39,15 @@ class PearlEngine:
 
         # Vector 1 Extension: Rust Performance Injection (AX-051)
         if cortex_rust:
-            self.primitives.update({
-                "move": cortex_rust.move_grid,
-                "rotate": cortex_rust.rotate_grid,
-                "reflect": cortex_rust.reflect_grid,
-                "scale": cortex_rust.scale_grid,
-                "get_objects": cortex_rust.get_objects,
-            })
+            self.primitives.update(
+                {
+                    "move": cortex_rust.move_grid,
+                    "rotate": cortex_rust.rotate_grid,
+                    "reflect": cortex_rust.reflect_grid,
+                    "scale": cortex_rust.scale_grid,
+                    "get_objects": cortex_rust.get_objects,
+                }
+            )
 
     def register_primitive(self, name: str, func: Callable[..., Any]):
         """Registers a new JIT-formed primitive (AX-046)."""
@@ -117,7 +119,7 @@ class PearlEngine:
         elif isinstance(node, ast.BinOp):
             left = self._eval(node.left, context)
             right = self._eval(node.right, context)
-            op_map: dict[type[ast.AST], Any] = { # type: ignore
+            op_map: dict[type[ast.AST], Any] = {  # type: ignore
                 ast.Add: operator.add,
                 ast.Sub: operator.sub,
                 ast.Mult: operator.mul,

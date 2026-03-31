@@ -1,0 +1,103 @@
+sources:
+  cortex-db:
+    kind: sqlite
+    database: ${CORTEX_DB}
+
+tools:
+  trace-impact:
+    kind: sqlite-sql
+    source: cortex-db
+    description: >
+      Recursive graph analysis to trace the impact of a decision or fact.
+      Explores the parent-child hierarchy (parent_decision_id) to reveal
+      the chain of causality. Supports consensus filtering to prune
+      low-relevance branches in massive architectures.
+    parameters:
+      - name: root_id
+        type: integer
+        description: "The ID of the fact/decision to start the trace from."
+      - name: max_depth
+        type: integer
+        description: "Maximum recursion depth (default 5, scale dynamically for large graphs)."
+      - name: min_consensus
+        type: float
+        description: "Minimum consensus score (0.0 to 1.0) to explore a branch. Prunes low-relevance paths."
+      - name: tag
+        type: string
+        description: "Filter branches by a specific tag. If provided, paths without this tag are pruned."
+    statement: |
+      WITH RECURSIVE impact_graph(id, project, content, fact_type, consensus_score, tags, parent_id, depth) AS (
+        SELECT id, project, content, fact_type, consensus_score, tags, parent_decision_id, 0
+        FROM facts WHERE id = ?
+        UNION ALL
+        SELECT f.id, f.project, f.content, f.fact_type, f.consensus_score, f.tags, f.parent_decision_id, ig.depth + 1
+        FROM facts f
+        JOIN impact_graph ig ON f.parent_decision_id = ig.id
+        WHERE ig.depth < CASE WHEN ? IS NULL OR ? <= 0 THEN 5 ELSE ? END
+          AND (f.consensus_score IS NULL OR f.consensus_score >= CASE WHEN ? IS NULL THEN 0.0 ELSE ? END)
+          AND (? IS NULL OR ? = '' OR f.tags LIKE '%' || ? || '%')
+      )
+      SELECT id, project, content, fact_type, consensus_score, tags, parent_id, depth
+      FROM impact_graph
+      ORDER BY depth ASC, consensus_score DESC;
+
+  cluster-signals:
+    kind: sqlite-sql
+    source: cortex-db
+    description: >
+      Identify temporal signal clusters to detect correlated events.
+      Uses a sliding window (CTE) to find groups of signals firing
+      within a 60-second window.
+    parameters:
+      - name: project
+        type: string
+        description: "Filter by project. Leave empty for all."
+      - name: limit
+        type: integer
+        description: "Max number of clusters to return (default 10)."
+    statement: |
+      WITH signal_times AS (
+        SELECT id, event_type, project, created_at,
+               strftime('%s', created_at) as unix_time
+        FROM signals
+        WHERE (? IS NULL OR ? = '' OR project = ?)
+      ),
+      clusters AS (
+        SELECT s1.id as root_id, s1.event_type as root_type,
+               COUNT(s2.id) as cluster_size,
+               GROUP_CONCAT(s2.event_type) as associated_types
+        FROM signal_times s1
+        JOIN signal_times s2 ON s2.unix_time BETWEEN s1.unix_time - 30 AND s1.unix_time + 30
+        GROUP BY s1.id
+        HAVING cluster_size > 1
+      )
+      SELECT * FROM clusters
+      ORDER BY cluster_size DESC
+      LIMIT CASE WHEN ? IS NULL OR ? = 0 THEN 10 ELSE ? END;
+
+  ghost-mapping:
+    kind: sqlite-sql
+    source: cortex-db
+    description: >
+      Join ghosts with facts to map knowledge gaps to existing context.
+      Helps visualize which areas of the project are "haunted" by
+      unresolved hypotheses.
+    parameters:
+      - name: project
+        type: string
+        description: "Filter by project. Leave empty for all."
+      - name: tag
+        type: string
+        description: "Filter related facts by a specific tag."
+    statement: |
+      SELECT g.id as ghost_id, g.reference, g.status,
+             f.id as related_fact_id, f.content as fact_content,
+             f.fact_type, f.confidence as fact_confidence, f.tags
+      FROM ghosts g
+      LEFT JOIN facts f ON (
+        (g.project = f.project OR (? IS NULL OR ? = '' OR g.project = ?))
+        AND (f.content LIKE '%' || g.reference || '%' OR g.context LIKE '%' || f.content || '%')
+        AND (? IS NULL OR ? = '' OR f.tags LIKE '%' || ? || '%')
+      )
+      WHERE g.status = 'open'
+      LIMIT 50;
