@@ -145,10 +145,11 @@ async def cast_vote_v2(
                 status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
             )
 
-        score = await engine.vote(
+        score = await engine.consensus.vote_v2(
             fact_id=fact_id,
-            agent=req.agent_id,
+            agent_id=req.agent_id,
             value=req.vote,
+            reason=req.reason,
         )
 
         # Re-fetch for updated confidence
