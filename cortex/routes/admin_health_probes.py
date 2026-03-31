@@ -10,7 +10,7 @@ from typing import Any
 
 
 def build_health_probes(
-    conn: Any, request: Any, schema_version: int
+    conn: Any, request: Any, schema_version: str
 ) -> dict[str, Callable[[], tuple[str, bool, dict[str, Any]]]]:
     """Build a map of health probes for the admin deep check."""
 

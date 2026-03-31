@@ -67,12 +67,13 @@ class AgentMixin(EngineMixinBase):
 
         return agent_id
 
-    async def get_agent(self, agent_id: str) -> dict[str, Any] | None:
+    async def get_agent(self, agent_id: str, tenant_id: str = "default") -> dict[str, Any] | None:
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             conn.row_factory = aiosqlite.Row
             async with conn.execute(
-                "SELECT id, name, agent_type, reputation_score, created_at FROM agents WHERE id = ?",
-                (agent_id,),
+                "SELECT id, name, agent_type, reputation_score, created_at "
+                "FROM agents WHERE id = ? AND tenant_id = ?",
+                (agent_id, tenant_id),
             ) as cursor:
                 row = await cursor.fetchone()
                 return dict(row) if row else None

@@ -117,7 +117,7 @@ def _validate_export_path(path: Optional[str], project: str, lang: str) -> Path:
 
 def _get_raw_conn(engine: CortexEngine) -> object:
     """Isolate private access to engine's raw connection."""
-    return engine._get_conn()  # noqa: SLF001
+    return engine._get_sync_conn()
 
 
 async def _verify_admin_auth(
