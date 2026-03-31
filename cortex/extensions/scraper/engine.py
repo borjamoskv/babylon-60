@@ -25,6 +25,7 @@ from cortex.extensions.scraper.models import (
     ScrapeRequest,
     ScrapeResult,
 )
+from cortex.extensions.security.guards import validate_url
 
 LOG = logging.getLogger("cortex.extensions.scraper.engine")
 
@@ -38,6 +39,7 @@ class ScraperEngine:
     - Rate limiting (configurable, default 1 req/sec)
     - Robots.txt compliance
     - Batch processing with checkpoint/resume
+    - SSRF prevention via guards.validate_url
     """
 
     def __init__(self):
@@ -54,6 +56,17 @@ class ScraperEngine:
         Returns:
             ScrapeResult with extracted content or error details.
         """
+        # SSRF prevention: validate URL before any network request
+        try:
+            validate_url(request.url)
+        except ValueError as e:
+            return ScrapeResult.from_error(
+                url=request.url,
+                error=f"SSRF blocked: {e}",
+                strategy=request.strategy,
+                elapsed_ms=0,
+            )
+
         # Robots.txt compliance
         if request.respect_robots:
             allowed = await check_robots_txt(request.url)
@@ -77,7 +90,7 @@ class ScraperEngine:
             result.elapsed_ms = elapsed_ms
             # Deduplication check
             if result.content_hash in self._seen_hashes:
-                LOG.info("♻️ [DEDUP] Content already seen: %s", request.url)
+                LOG.info("[DEDUP] Content already seen: %s", request.url)
                 result.metadata["deduplicated"] = True
             else:
                 self._seen_hashes.add(result.content_hash)
@@ -117,7 +130,7 @@ class ScraperEngine:
         self._jobs[job.job_id] = job
 
         LOG.info(
-            "📦 [BATCH] Starting job %s — %d URLs, concurrency=%d",
+            "[BATCH] Starting job %s - %d URLs, concurrency=%d",
             job.job_id,
             len(urls),
             concurrency,
@@ -156,7 +169,7 @@ class ScraperEngine:
         job.completed_at = time.time()
 
         LOG.info(
-            "✅ [BATCH] Job %s complete — %d/%d successful, %d errors",
+            "[BATCH] Job %s complete - %d/%d successful, %d errors",
             job.job_id,
             job.successful_count,
             len(urls),
@@ -175,7 +188,14 @@ class ScraperEngine:
         Returns:
             List of discovered URLs.
         """
-        LOG.info("🗺️ [MAP] Mapping site: %s (depth=%d)", url, max_depth)
+        # SSRF prevention on initial URL
+        try:
+            validate_url(url)
+        except ValueError as e:
+            LOG.warning("[MAP] SSRF blocked for seed URL: %s", e)
+            return []
+
+        LOG.info("[MAP] Mapping site: %s (depth=%d)", url, max_depth)
 
         discovered: set[str] = set()
         to_visit: list[tuple[str, int]] = [(url, 0)]
@@ -190,6 +210,13 @@ class ScraperEngine:
             if current_url in visited or depth > max_depth:
                 continue
             visited.add(current_url)
+
+            # SSRF prevention on each discovered URL
+            try:
+                validate_url(current_url)
+            except ValueError:
+                continue
+
             discovered.add(current_url)
 
             # Rate limit
@@ -210,22 +237,26 @@ class ScraperEngine:
                     for link in links:
                         absolute = urljoin(current_url, link)
                         parsed = urlparse(absolute)
-                        # Same domain only
+                        # Same domain only + SSRF check
                         if parsed.netloc == base_domain and absolute not in visited:
-                            to_visit.append((absolute, depth + 1))
-                            discovered.add(absolute)
+                            try:
+                                validate_url(absolute)
+                                to_visit.append((absolute, depth + 1))
+                                discovered.add(absolute)
+                            except ValueError:
+                                pass
 
             except (OSError, ValueError):
                 continue
 
-        LOG.info("🗺️ [MAP] Discovered %d URLs from %s", len(discovered), url)
+        LOG.info("[MAP] Discovered %d URLs from %s", len(discovered), url)
         return sorted(discovered)
 
     def get_job(self, job_id: str) -> Optional[ScrapeJob]:
         """Get a batch job by ID."""
         return self._jobs.get(job_id)
 
-    # ── Internal ──────────────────────────────────────────────────────
+    # -- Internal --
 
     async def _execute_strategy(self, request: ScrapeRequest) -> ScrapeResult:
         """Execute extraction with the configured strategy."""
@@ -278,7 +309,7 @@ class ScraperEngine:
                 title, content = await extractor.extract(url, timeout)
                 elapsed = (time.monotonic() - start) * 1000
                 LOG.info(
-                    "✅ [CASCADE] %s succeeded for %s (%.0fms)",
+                    "[CASCADE] %s succeeded for %s (%.0fms)",
                     key.upper(),
                     url,
                     elapsed,
@@ -294,7 +325,7 @@ class ScraperEngine:
             except ExtractionError as e:
                 elapsed = (time.monotonic() - start) * 1000
                 LOG.warning(
-                    "⚠️ [CASCADE] %s failed for %s (%.0fms): %s",
+                    "[CASCADE] %s failed for %s (%.0fms): %s",
                     key.upper(),
                     url,
                     elapsed,

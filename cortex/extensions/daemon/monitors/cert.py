@@ -36,7 +36,10 @@ class CertMonitor:
     def _check_one(self, hostname: str) -> Optional[CertAlert]:
         """Check a single hostname's SSL certificate."""
         try:
-            ctx = ssl.create_default_context()
+            ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+            ctx.minimum_version = ssl.TLSVersion.TLSv1_2
+            ctx.maximum_version = ssl.TLSVersion.TLSv1_3
+            ctx.load_default_certs()
             with socket.create_connection((hostname, 443), timeout=DEFAULT_TIMEOUT) as sock:
                 with ctx.wrap_socket(sock, server_hostname=hostname) as ssock:
                     cert = ssock.getpeercert()
