@@ -352,9 +352,9 @@ class SovereignVectorStoreL2:
             if emb_list and isinstance(emb_list[0], float):
                 emb_list = optimize_vector_qjl(emb_list, bits=3.5)
             
-            if sqlite_vec is not None and hasattr(sqlite_vec, "serialize_int8"):
-                return sqlite_vec.serialize_int8(emb_list), ex
-            return np.array(emb_list, dtype=np.int8).tobytes(), ex
+            # Ouroboros V3: Fix sqlite-vec int8 serialization bug
+            # Explicitly prepend VECTOR_TYPE_INT8 (0x01) and flags (0x00)
+            return b"\x01\x00" + np.array(emb_list, dtype=np.int8).tobytes(), ex
 
         # Ouroboros V3: Offload CPU-heavy quantization and Python GIL Exergy text parsing
         embedding_bytes, exergy_val = await asyncio.to_thread(_offloaded_computations)

@@ -11,7 +11,6 @@ Strategy 2: Eliminates semantic duplication at the source.
 from __future__ import annotations
 
 import logging
-
 from typing import TYPE_CHECKING, Any
 
 from cortex.memory.engrams import CortexSemanticEngram

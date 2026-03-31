@@ -20,11 +20,11 @@ if str(ROOT_DIR) not in sys.path:
 
 from cortex.engine import CortexEngine
 from cortex.engine.squadrons import (
-    SilverPhalanx,
     GoldPhalanx,
     LeadPhalanx,
-    VoidPhalanx,
+    SilverPhalanx,
     SovereignPhalanx,
+    VoidPhalanx,
 )
 
 logging.basicConfig(
