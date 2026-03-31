@@ -106,7 +106,8 @@ async def langbase_pipe_run(
             engine=engine,
             pipe_name=req.pipe_name,
             query=req.query,
-            project=req.project or auth.tenant_id,
+            tenant_id=auth.tenant_id,
+            project=req.project,
             top_k=req.top_k,
             thread_id=req.thread_id,
         )
@@ -131,13 +132,6 @@ async def langbase_sync(
     Exports facts from a project as markdown documents
     into a Langbase Memory set for cloud RAG.
     """
-    # Tenant isolation: only sync own projects
-    if req.project != auth.tenant_id:
-        raise HTTPException(
-            status_code=403,
-            detail="Can only sync facts from your own tenant project",
-        )
-
     client = _get_client()
     try:
         result = await sync_to_langbase(
@@ -145,6 +139,7 @@ async def langbase_sync(
             engine=engine,
             project=req.project,
             memory_name=req.memory_name,
+            tenant_id=auth.tenant_id,
             limit=req.limit,
         )
         return result

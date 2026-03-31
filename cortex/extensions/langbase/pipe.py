@@ -62,6 +62,7 @@ async def run_with_cortex_context(
     pipe_name: str,
     query: str,
     *,
+    tenant_id: str = "default",
     project: Optional[str] = None,
     top_k: int = 10,
     thread_id: Optional[str] = None,
@@ -80,6 +81,7 @@ async def run_with_cortex_context(
         engine: CORTEX async engine
         pipe_name: Name of the Langbase Pipe to run
         query: User's question / prompt
+        tenant_id: Tenant scope for the CORTEX search
         project: Filter CORTEX search by project (optional)
         top_k: Number of facts to retrieve for context
         thread_id: Langbase thread ID for conversation continuity
@@ -91,6 +93,7 @@ async def run_with_cortex_context(
     # 1. Search CORTEX memory
     search_results = await engine.search(
         query=query,
+        tenant_id=tenant_id,
         top_k=top_k,
         project=project,
     )

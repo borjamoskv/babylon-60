@@ -71,6 +71,7 @@ async def sync_to_langbase(
     project: str,
     memory_name: Optional[str] = None,
     *,
+    tenant_id: str = "default",
     limit: int = 500,
 ) -> dict:
     """Export CORTEX facts to Langbase Memory.
@@ -83,6 +84,7 @@ async def sync_to_langbase(
         engine: CORTEX async engine
         project: CORTEX project to export
         memory_name: Override memory name (default: cortex-{project})
+        tenant_id: Tenant scope for the CORTEX recall
         limit: Max facts to export
 
     Returns:
@@ -103,7 +105,7 @@ async def sync_to_langbase(
             logger.warning("Memory creation note: %s", e)
 
     # 2. Recall facts from CORTEX
-    facts = await engine.recall(project=project, limit=limit)
+    facts = await engine.recall(project=project, limit=limit, tenant_id=tenant_id)
     if not facts:
         return {"synced": 0, "errors": 0, "memory": mem_name, "message": "No facts to sync"}
 
