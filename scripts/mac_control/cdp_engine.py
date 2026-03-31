@@ -1,10 +1,10 @@
-import asyncio
+import base64
 import json
 import logging
-import base64
+from typing import Any, Optional
+
 import httpx
 import websockets
-from typing import Any, Optional
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("mac-control-omega")

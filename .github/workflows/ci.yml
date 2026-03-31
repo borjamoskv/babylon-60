@@ -38,7 +38,7 @@ jobs:
       - name: Install security tools
         run: pip install pip-audit bandit
       - name: Audit dependencies for known CVEs
-        run: pip-audit --skip cortex-persist --skip cortex_persist --desc on --ignore-vuln GHSA-qmgc-5h2g-mvrw --ignore-vuln GHSA-j842-xgm4-wf88 --ignore-vuln GHSA-w6vg-jg77-2qg6 --ignore-vuln GHSA-f83h-ghpp-7wcc --ignore-vuln GHSA-jr27-m4p2-rc6r
+        run: pip-audit . --desc on --ignore-vuln GHSA-qmgc-5h2g-mvrw --ignore-vuln GHSA-j842-xgm4-wf88 --ignore-vuln GHSA-w6vg-jg77-2qg6 --ignore-vuln GHSA-f83h-ghpp-7wcc --ignore-vuln GHSA-jr27-m4p2-rc6r
       - name: Ruff SAST scan (S-select)
         run: ruff check cortex/ --select S --output-format json -o bandit-report.json
       - name: Upload Bandit report

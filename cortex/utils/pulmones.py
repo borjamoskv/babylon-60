@@ -93,7 +93,18 @@ def sovereign_circuit_breaker(timeout: float = 10.0, max_retries: int = 2, thres
     3. Si falla tras `max_retries`, cae graciosamente a la cola SQLite (PulmonesQueue).
     """
     cb = CircuitBreaker(failure_threshold=threshold)
-    queue = PulmonesQueue()
+    queue: PulmonesQueue | None = None
+
+    def _get_queue() -> PulmonesQueue | None:
+        nonlocal queue
+        if queue is not None:
+            return queue
+        try:
+            queue = PulmonesQueue()
+        except OSError as exc:
+            logger.warning("🫁 [PULMONES] Queue unavailable, dropping fallback enqueue: %s", exc)
+            queue = None
+        return queue
 
     def decorator(func: Callable[..., Awaitable[Any]]):
         @wraps(func)
@@ -103,7 +114,9 @@ def sovereign_circuit_breaker(timeout: float = 10.0, max_retries: int = 2, thres
                 logger.warning(
                     "🛡️ [PULMONES] Circuito Abierto. Bloqueando llamada a %s", func.__name__
                 )
-                queue.enqueue(target_name, args, kwargs)
+                q = _get_queue()
+                if q is not None:
+                    q.enqueue(target_name, args, kwargs)
                 return {"status": "queued", "reason": "circuit_open"}
 
             for attempt in range(max_retries + 1):
@@ -122,7 +135,9 @@ def sovereign_circuit_breaker(timeout: float = 10.0, max_retries: int = 2, thres
                     )
                     if attempt == max_retries:
                         cb.record_failure()
-                        queue.enqueue(target_name, args, kwargs)
+                        q = _get_queue()
+                        if q is not None:
+                            q.enqueue(target_name, args, kwargs)
                         return {"status": "queued", "reason": "max_retries_exceeded"}
                     await asyncio.sleep(2**attempt)  # Exponential backoff
 

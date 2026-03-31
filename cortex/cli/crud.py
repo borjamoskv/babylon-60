@@ -174,7 +174,7 @@ def inspect(fact_id, db) -> None:
             # Content decryption handled by engine.retrieve
             fact = await engine.retrieve(fact_id)
             if not fact:
-                return None, None
+                return None, [], "NOT_FOUND", None
 
             # Load tags from bridge table
             conn = await engine.get_conn()

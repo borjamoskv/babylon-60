@@ -43,8 +43,8 @@ def vote(fact_id, value, agent, db) -> None:
                     err_validation("value", "El voto debe ser 1 (verificar) o -1 (disputar)")
                     return
 
-                # Peso 10.0 para votos humanos
-                entry = await ledger.append_vote(fact_id, agent, value, 10.0)
+                # Peso 10.0 para votos humanos, tenant_id default
+                entry = await ledger.append_vote(fact_id, agent, str(value), "default", 10.0)
                 await conn.commit()
 
                 console.print(

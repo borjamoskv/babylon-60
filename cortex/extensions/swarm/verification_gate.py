@@ -1,10 +1,9 @@
 """The Elder's Gate (Ω₁) — Deterministic Verification for Swarm Agents."""
 
 import logging
-from enum import Enum
-from pathlib import Path
-from typing import Any, Optional
 from dataclasses import dataclass
+from enum import Enum
+from typing import Optional
 
 logger = logging.getLogger("cortex.swarm.verification")
 

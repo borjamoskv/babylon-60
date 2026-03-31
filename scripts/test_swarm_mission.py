@@ -1,10 +1,9 @@
 import asyncio
 import logging
-import sys
 import sqlite3
-from cortex.extensions.swarm.manager import CapatazOrchestrator, get_swarm_manager
+
 from cortex.extensions.signals.bus import SignalBus
-import aiosqlite
+from cortex.extensions.swarm.manager import CapatazOrchestrator
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("swarm-test")

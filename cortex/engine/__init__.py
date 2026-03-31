@@ -274,6 +274,10 @@ class CortexEngine(
         )
         return await self._get_or_create_conn()
 
+    async def _get_conn(self) -> aiosqlite.Connection:
+        """Internal helper for connection acquisition (deprecated alias)."""
+        return await self._get_or_create_conn()
+
     async def _get_or_create_conn(self) -> aiosqlite.Connection:
         """Internal helper for connection acquisition."""
         async with self._conn_lock:

@@ -19,6 +19,7 @@ from cortex.extensions.llm._audit import spectral_audit
 from cortex.extensions.llm._backoff import handle_429_backoff
 from cortex.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
 from cortex.extensions.llm._presets import load_presets
+from cortex.extensions.llm._result_cache import ResultCache
 from cortex.extensions.llm._stealth import (
     apply_causal_jitter,
     prepare_stealth_headers,
@@ -32,6 +33,7 @@ logger = logging.getLogger("cortex.extensions.llm")
 
 _CONTENT_TYPE_JSON: Final[str] = "application/json"
 _QUOTA_MANAGER: SovereignQuotaManager | None = None
+_RESULT_CACHE: ResultCache | None = None
 
 
 def _get_quota_manager() -> SovereignQuotaManager:
@@ -40,6 +42,14 @@ def _get_quota_manager() -> SovereignQuotaManager:
     if _QUOTA_MANAGER is None:
         _QUOTA_MANAGER = SovereignQuotaManager()
     return _QUOTA_MANAGER
+
+
+def _get_result_cache() -> ResultCache:
+    """Lazily create the shared result cache."""
+    global _RESULT_CACHE
+    if _RESULT_CACHE is None:
+        _RESULT_CACHE = ResultCache()
+    return _RESULT_CACHE
 
 
 class LLMProvider(BaseProvider):
@@ -162,15 +172,29 @@ class LLMProvider(BaseProvider):
         intent: IntentProfile = IntentProfile.GENERAL,
     ) -> str:
         """Send a chat completion request. Returns the response text."""
+        model_name = self._resolve_model(intent)
+        payload = {
+            "model": model_name,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": prompt},
+            ],
+            "temperature": temperature,
+        }
+
+        # Persistent Cache Check (Ω₂)
+        cache = _get_result_cache()
+        if cached := cache.get(payload):
+            return cached
+
         await _get_quota_manager().acquire(tokens=1)
         url, headers = self._prepare_request()
-        model_name = self._resolve_model(intent)
 
         current_system = system
         response_text = ""
 
         # Phase 1: Shadow Re-phrasing (Ω₂₃)
-        for attempt in range(3):
+        for attempt in range(5):
             payload = {
                 "model": model_name,
                 "messages": [
@@ -189,9 +213,10 @@ class LLMProvider(BaseProvider):
 
             # Spectral Audit check
             if spectral_audit(response_text):
+                cache.set(payload, response_text, provider=self._provider, model=model_name)
                 return response_text
 
-            if attempt < 2:
+            if attempt < 4:
                 logger.warning(
                     "Ω₂₃: Audit [FAIL] -> Attempting Shadow Re-phrasing (Try %d)", attempt + 2
                 )
@@ -203,6 +228,7 @@ class LLMProvider(BaseProvider):
                 )
                 await apply_causal_jitter(tokens_estimate=50)
 
+        cache.set(payload, response_text, provider=self._provider, model=model_name)
         return response_text
 
     async def _execute_completion(
@@ -338,33 +364,41 @@ class LLMProvider(BaseProvider):
 
     async def invoke(self, prompt: CortexPrompt) -> str:
         """Traduce el CortexPrompt al formato nativo del LLM y ejecuta la inferencia."""
+        model_name = self._resolve_model(prompt.intent)
+        messages = prompt.to_openai_messages()
+
+        # Stealth Mode Logic
+        if getattr(prompt, "stealth", False):
+            noise_id = apply_causal_jitter(tokens_estimate=0)  # Logic for noise integration
+            messages[0]["content"] += f"\n\n<!-- ctx:{noise_id} -->"
+            messages[0]["content"] = (" " * random.randint(0, 2)) + messages[0]["content"]
+
+        payload: dict[str, Any] = {
+            "model": model_name,
+            "messages": messages,
+            "temperature": prompt.temperature,
+        }
+
+        # Persistent Cache Check (Ω₂)
+        cache = _get_result_cache()
+        if cached := cache.get(payload):
+            return cached
+
         await _get_quota_manager().acquire(tokens=1)
         url, headers = self._prepare_request()
 
         # Stealth Mode
         headers = prepare_stealth_headers(headers)
 
-        model_name = self._resolve_model(prompt.intent)
-        messages = prompt.to_openai_messages()
-
-        # Causal Jitter / UUID injection
-        if messages and messages[0]["role"] == "system":
-            noise_id = hashlib.sha256(f"{time.time()}{random.random()}".encode()).hexdigest()[:8]
-            messages[0]["content"] += f"\n\n<!-- ctx:{noise_id} -->"
-            messages[0]["content"] = (" " * random.randint(0, 2)) + messages[0]["content"]
-
-        payload = {
-            "model": model_name,
-            "messages": messages,
-            "temperature": prompt.temperature,
-        }
         if model_name.startswith(("o1", "o3")):
             payload["max_completion_tokens"] = prompt.max_tokens
             payload.pop("temperature", None)
         else:
             payload["max_tokens"] = prompt.max_tokens
 
-        return await self._execute_completion(url, headers, payload, wrap_errors=True)
+        result = await self._execute_completion(url, headers, payload, wrap_errors=True)
+        cache.set(payload, result, provider=self._provider, model=model_name)
+        return result
 
     @property
     def model_name(self) -> str:
