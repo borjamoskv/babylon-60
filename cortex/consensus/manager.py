@@ -35,6 +35,16 @@ class ConsensusManager:
         self.engine = engine
         self._signal_bus = signal_bus or getattr(engine, "_signal_bus", None)
 
+    async def _get_fact_tenant(self, fact_id: int, conn) -> str:
+        cursor = await conn.execute(
+            "SELECT tenant_id FROM facts WHERE id = ?",
+            (fact_id,),
+        )
+        row = await cursor.fetchone()
+        if not row:
+            raise ValueError(f"Fact {fact_id} not found")
+        return row[0] or "default"
+
     async def vote(
         self,
         fact_id: int,
@@ -119,9 +129,10 @@ class ConsensusManager:
             raise ValueError(f"vote value must be -1, 0, or 1, got {value}")
 
         conn = await self.engine.get_conn()
+        tenant_id = await self._get_fact_tenant(fact_id, conn)
         cursor = await conn.execute(
-            "SELECT reputation_score FROM agents WHERE id = ? AND is_active = 1",
-            (agent_id,),
+            "SELECT reputation_score FROM agents WHERE id = ? AND tenant_id = ? AND is_active = 1",
+            (agent_id, tenant_id),
         )
         agent = await cursor.fetchone()
         if not agent:
@@ -251,12 +262,7 @@ class ConsensusManager:
         else:
             conf = None
 
-        cursor = await conn.execute(
-            "SELECT tenant_id FROM facts WHERE id = ?",
-            (fact_id,),
-        )
-        row = await cursor.fetchone()
-        tenant_id = row[0] if row else "default"
+        tenant_id = await self._get_fact_tenant(fact_id, conn)
 
         payload: dict = {"consensus_score": score}
         if conf:
@@ -277,6 +283,7 @@ class ConsensusManager:
         Ratifica el consenso final y castiga/premia la entropía de los votantes.
         Implementa el decaimiento de reputación por Deriva de Alineación (Ω2 + Ω5).
         """
+        tenant_id = await self._get_fact_tenant(fact_id, conn)
         # Convertimos score continuo de [0.5, 1.5] a valor discreto
         if final_consensus >= 1.5:
             c_val = 1
@@ -306,9 +313,9 @@ class ConsensusManager:
                         WHEN (alignment_hits - alignment_misses) < 0 THEN base_reputation * 0.5
                         ELSE base_reputation 
                     END
-                WHERE id = ? AND is_active = 1
+                WHERE id = ? AND tenant_id = ? AND is_active = 1
             """,
-                (alignment_score, alignment_score, agent_id),
+                (alignment_score, alignment_score, agent_id, tenant_id),
             )
 
             # Pulse the reality degradation check

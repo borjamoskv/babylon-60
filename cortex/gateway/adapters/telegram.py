@@ -212,9 +212,9 @@ async def telegram_webhook(
     import cortex.api.state as api_state
 
     expected_secret = os.environ.get("CORTEX_TELEGRAM_WEBHOOK_SECRET", "")
-    if expected_secret and not hmac.compare_digest(
-        x_telegram_bot_api_secret_token, expected_secret
-    ):
+    if not expected_secret:
+        raise HTTPException(status_code=503, detail="Telegram webhook secret not configured")
+    if not hmac.compare_digest(x_telegram_bot_api_secret_token, expected_secret):
         raise HTTPException(status_code=403, detail="Invalid webhook secret")
 
     body: dict[str, Any] = await request.json()
@@ -222,6 +222,10 @@ async def telegram_webhook(
     text = message.get("text", "")
     chat_id = str(message.get("chat", {}).get("id", ""))
     from_user = str(message.get("from", {}).get("id", ""))
+    allowed_chat_id = os.environ.get("CORTEX_TELEGRAM_CHAT_ID", "")
+
+    if allowed_chat_id and chat_id and not hmac.compare_digest(chat_id, allowed_chat_id):
+        raise HTTPException(status_code=403, detail="Chat not allowed")
 
     if not text or not chat_id:
         return JSONResponse({"ok": True})

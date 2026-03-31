@@ -7,14 +7,27 @@ Creates tenant, provisions free-tier API key, returns quickstart info.
 from __future__ import annotations
 
 import logging
+import os
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, EmailStr, Field
 
 __all__ = ["SignupRequest", "SignupResponse", "signup"]
 
 router = APIRouter(prefix="/v1", tags=["onboarding"])
 logger = logging.getLogger(__name__)
+_LOOPBACK_HOSTS = frozenset({"127.0.0.1", "::1", "localhost", "testclient"})
+
+
+def _is_loopback_request(request: Request) -> bool:
+    client = getattr(request, "client", None)
+    host = getattr(client, "host", "") if client else ""
+    return host in _LOOPBACK_HOSTS
+
+
+def _public_signup_enabled() -> bool:
+    value = os.getenv("CORTEX_ENABLE_PUBLIC_SIGNUP", "")
+    return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
 class SignupRequest(BaseModel):
@@ -36,12 +49,15 @@ class SignupResponse(BaseModel):
 
 
 @router.post("/signup", response_model=SignupResponse)
-async def signup(req: SignupRequest) -> SignupResponse:
+async def signup(req: SignupRequest, request: Request) -> SignupResponse:
     """Create a free-tier account. Returns API key immediately.
 
     No email verification required for MVP — key is active on creation.
     """
     import cortex.api.state as api_state
+
+    if not _is_loopback_request(request) and not _public_signup_enabled():
+        raise HTTPException(status_code=403, detail="Public signup is disabled on this deployment")
 
     if not api_state.auth_manager:
         raise HTTPException(status_code=503, detail="Auth service unavailable")

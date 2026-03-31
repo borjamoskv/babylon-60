@@ -11,7 +11,7 @@ Endpoints::
     GET  /gateway/v1/status   — system status
     POST /gateway/v1/emit     — fire a notification event
 
-Auth: reuses existing CORTEX API key mechanism (X-API-Key header).
+Auth: reuses existing CORTEX API key mechanism (Authorization: Bearer <api-key>).
 """
 
 from __future__ import annotations
@@ -22,6 +22,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
+from cortex.auth import AuthResult, require_permission
 from cortex.gateway import GatewayIntent, GatewayRequest, GatewayRouter
 
 logger = logging.getLogger("cortex.gateway.rest")
@@ -80,6 +81,7 @@ def _get_router(request: Request) -> GatewayRouter:
 @router.post("/store")
 async def gateway_store(
     body: StoreBody,
+    auth: AuthResult = Depends(require_permission("write")),
     gateway: GatewayRouter = Depends(_get_router),
 ) -> dict:
     """Store a fact through the Gateway."""
@@ -92,7 +94,9 @@ async def gateway_store(
             "tags": body.tags,
             "source": body.source,
         },
+        tenant_id=auth.tenant_id,
         source="rest",
+        caller_id=auth.key_name or auth.tenant_id,
     )
     resp = await gateway.handle(req)
     if not resp.ok:
@@ -103,6 +107,7 @@ async def gateway_store(
 @router.post("/search")
 async def gateway_search(
     body: SearchBody,
+    auth: AuthResult = Depends(require_permission("read")),
     gateway: GatewayRouter = Depends(_get_router),
 ) -> dict:
     """Semantic search through the Gateway."""
@@ -110,7 +115,9 @@ async def gateway_search(
         intent=GatewayIntent.SEARCH,
         project=body.project,
         payload={"query": body.query, "top_k": body.top_k},
+        tenant_id=auth.tenant_id,
         source="rest",
+        caller_id=auth.key_name or auth.tenant_id,
     )
     resp = await gateway.handle(req)
     if not resp.ok:
@@ -121,6 +128,7 @@ async def gateway_search(
 @router.post("/recall")
 async def gateway_recall(
     body: RecallBody,
+    auth: AuthResult = Depends(require_permission("read")),
     gateway: GatewayRouter = Depends(_get_router),
 ) -> dict:
     """Recall project facts through the Gateway."""
@@ -128,7 +136,9 @@ async def gateway_recall(
         intent=GatewayIntent.RECALL,
         project=body.project,
         payload={},
+        tenant_id=auth.tenant_id,
         source="rest",
+        caller_id=auth.key_name or auth.tenant_id,
     )
     resp = await gateway.handle(req)
     if not resp.ok:
@@ -138,10 +148,17 @@ async def gateway_recall(
 
 @router.get("/status")
 async def gateway_status(
+    auth: AuthResult = Depends(require_permission("read")),
     gateway: GatewayRouter = Depends(_get_router),
 ) -> dict:
     """System status through the Gateway."""
-    req = GatewayRequest(intent=GatewayIntent.STATUS, payload={}, source="rest")
+    req = GatewayRequest(
+        intent=GatewayIntent.STATUS,
+        payload={},
+        tenant_id=auth.tenant_id,
+        source="rest",
+        caller_id=auth.key_name or auth.tenant_id,
+    )
     resp = await gateway.handle(req)
     if not resp.ok:
         raise HTTPException(status_code=500, detail=resp.error)
@@ -151,6 +168,7 @@ async def gateway_status(
 @router.post("/emit")
 async def gateway_emit(
     body: EmitBody,
+    auth: AuthResult = Depends(require_permission("write")),
     gateway: GatewayRouter = Depends(_get_router),
 ) -> dict:
     """Fire a notification event through the Gateway."""
@@ -163,7 +181,9 @@ async def gateway_emit(
             "body": body.body,
             "metadata": body.metadata,
         },
+        tenant_id=auth.tenant_id,
         source="rest",
+        caller_id=auth.key_name or auth.tenant_id,
     )
     resp = await gateway.handle(req)
     if not resp.ok:

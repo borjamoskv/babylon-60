@@ -15,15 +15,13 @@ Environment variables:
     STRIPE_PRICE_TABLE — JSON mapping plan names to Stripe Price IDs
 """
 
-import hashlib
 import logging
-import os
-import time
 
-from fastapi import APIRouter, Header, HTTPException, Request
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from pydantic import BaseModel
 
 from cortex import config
+from cortex.auth import AuthResult, require_permission
 
 __all__ = [
     "CheckoutRequest",
@@ -90,22 +88,15 @@ def _get_stripe():
     return stripe
 
 
-def _generate_api_key(email: str, plan: str) -> str:
-    """Generate a unique API key with ctx_ prefix."""
-    seed = f"{email}:{plan}:{time.time()}:{os.urandom(16).hex()}"
-    return "ctx_" + hashlib.sha256(seed.encode()).hexdigest()[:48]
-
-
 async def _provision_api_key(email: str, plan: str) -> Optional[str]:
     """Create an API key in CORTEX AuthManager. Returns raw key or None."""
-    raw_key = _generate_api_key(email, plan)
     plan_cfg = PLAN_CONFIG.get(plan, PLAN_CONFIG["pro"])
 
     try:
         import cortex.api.state as api_state
 
         if api_state.auth_manager:
-            await api_state.auth_manager.create_key(
+            raw_key, _api_key = await api_state.auth_manager.create_key(
                 name=f"stripe-{email}",
                 tenant_id=email,
                 permissions=plan_cfg["permissions"],
@@ -247,15 +238,26 @@ async def stripe_webhook(
 
 
 @router.post("/portal", include_in_schema=False)
-async def create_portal_session(body: PortalRequest) -> dict:
+async def create_portal_session(
+    body: PortalRequest,
+    auth: AuthResult = Depends(require_permission("read")),
+) -> dict:
     """Create a Stripe Customer Portal session for billing management."""
     stripe = _get_stripe()
 
     try:
+        customer = stripe.Customer.retrieve(body.customer_id)  # type: ignore[reportAttributeAccessIssue]
+        customer_email = (customer.get("email") or "").strip().casefold()
+        tenant_email = (auth.tenant_id or "").strip().casefold()
+        if customer_email != tenant_email:
+            raise HTTPException(status_code=403, detail="Customer does not belong to this tenant")
+
         session = stripe.billing_portal.Session.create(  # type: ignore[reportAttributeAccessIssue]
             customer=body.customer_id,
             return_url=body.return_url,
         )
+    except HTTPException:
+        raise
     except stripe.StripeError as exc:  # type: ignore[reportAttributeAccessIssue]
         logger.error("Stripe portal error: %s", exc)
         raise HTTPException(status_code=502, detail="Stripe API error") from exc

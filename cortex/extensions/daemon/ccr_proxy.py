@@ -17,15 +17,6 @@ from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
 app = FastAPI(title="Claude Code Router (CCR)")
 
-# Permissive CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 logger = logging.getLogger("ccr_proxy")
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -37,6 +28,28 @@ LOCAL_MODEL = os.getenv("CCR_LOCAL_MODEL", "qwen2.5-coder:32b")
 # Lazy Singletons for Isothermal Membrane
 _encode_engine: Optional[AsyncEncoder] = None
 _vector_db: Optional[SovereignVectorStoreL2] = None
+
+
+def _parse_cors_origins() -> list[str]:
+    """Parse allowed origins for CCR, defaulting to loopback only."""
+    raw = os.getenv("CCR_ALLOWED_ORIGINS", "http://localhost,http://127.0.0.1")
+    origins = [origin.strip() for origin in raw.split(",") if origin.strip()]
+    return origins or ["http://localhost", "http://127.0.0.1"]
+
+
+def _cors_options() -> dict[str, object]:
+    """Return safe CORS options for the CCR proxy."""
+    origins = _parse_cors_origins()
+    allow_credentials = origins != ["*"]
+    return {
+        "allow_origins": origins,
+        "allow_credentials": allow_credentials,
+        "allow_methods": ["POST", "GET", "OPTIONS"],
+        "allow_headers": ["Authorization", "Content-Type"],
+    }
+
+
+app.add_middleware(CORSMiddleware, **_cors_options())
 
 
 async def _check_isothermal_redundancy(text: str) -> tuple[bool, float, str]:

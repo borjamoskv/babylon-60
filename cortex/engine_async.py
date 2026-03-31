@@ -116,8 +116,8 @@ class AsyncCortexEngine(
             self._embedder = LocalEmbedder()
         return self._embedder
 
-    async def get_conn(self) -> aiosqlite.Connection:
-        return await self._pool.acquire().__aenter__()
+    async def get_conn(self) -> Any:
+        return await self._pool.get_conn()
 
     def _get_ledger(self) -> ImmutableLedger:
         if self._ledger is None:

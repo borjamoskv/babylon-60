@@ -10,6 +10,7 @@ Sovereign 130/100 — Pydantic responses, structured logging, TOCTOU-safe paths.
 from __future__ import annotations
 
 import logging
+import os
 import re
 import time
 from pathlib import Path
@@ -71,6 +72,7 @@ _LEDGER_LAG_THRESHOLD = 1000
 
 _DANGEROUS_PATH_CHARS = frozenset("\0\r\n\t")
 _TENANT_PATTERN = re.compile(r"^[a-z0-9_\-]+$", re.I)
+_LOOPBACK_HOSTS = frozenset({"127.0.0.1", "::1", "localhost", "testclient"})
 
 
 def _get_lang(request: Request) -> str:
@@ -81,6 +83,19 @@ def _get_lang(request: Request) -> str:
 def _get_auth_manager() -> ApiKeyManager:
     """Resolve the active auth manager singleton."""
     return api_state.auth_manager or get_auth_manager()
+
+
+def _is_loopback_request(request: Request) -> bool:
+    """Return True when the client host is local to the machine."""
+    client = getattr(request, "client", None)
+    host = getattr(client, "host", "") if client else ""
+    return host in _LOOPBACK_HOSTS
+
+
+def _remote_bootstrap_enabled() -> bool:
+    """Allow remote bootstrap only when explicitly enabled."""
+    value = os.getenv("CORTEX_ALLOW_REMOTE_BOOTSTRAP", "")
+    return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
 def _validate_export_path(path: Optional[str], project: str, lang: str) -> Path:
@@ -356,6 +371,11 @@ async def create_api_key(
 
     if existing_keys:
         await _verify_admin_auth(authorization, manager, lang)
+    elif not _is_loopback_request(request) and not _remote_bootstrap_enabled():
+        raise HTTPException(
+            status_code=403,
+            detail="Bootstrap key creation is restricted to loopback requests.",
+        )
 
     raw_key, api_key = await manager.create_key(
         name=name,

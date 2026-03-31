@@ -161,6 +161,7 @@ async def lifespan(app: FastAPI):
 
     # Global backward compatibility
     api_state.engine = engine
+    api_state.async_engine = async_engine
     api_state.auth_manager = auth_manager
     api_state.tracker = tracker
 
@@ -180,6 +181,7 @@ async def lifespan(app: FastAPI):
         timing_conn.close()
         cortex.auth.manager._auth_manager = None  # type: ignore[reportAttributeAccessIssue]
         api_state.engine = None
+        api_state.async_engine = None
         api_state.auth_manager = None
         api_state.tracker = None
         api_state.notification_bus = None  # type: ignore[reportAttributeAccessIssue]

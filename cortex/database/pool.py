@@ -24,6 +24,49 @@ __all__ = ["CortexConnectionPool"]
 logger = logging.getLogger("cortex.pool")
 
 
+class PooledConnectionLease:
+    """Lease wrapper that returns pooled connections on close."""
+
+    def __init__(self, pool: "CortexConnectionPool", conn: aiosqlite.Connection):
+        self._pool = pool
+        self._conn = conn
+        self._released = False
+
+    def __getattr__(self, name: str):
+        return getattr(self._conn, name)
+
+    async def __aenter__(self) -> aiosqlite.Connection:
+        return self._conn
+
+    async def __aexit__(self, exc_type, exc, tb) -> None:
+        await self.close()
+
+    async def close(self) -> None:
+        """Rollback open work and return the connection to the pool."""
+        if self._released:
+            return
+        self._released = True
+        try:
+            if getattr(self._conn, "in_transaction", False):
+                await self._conn.rollback()
+        except (sqlite3.Error, OSError):
+            await self._pool._discard_conn(self._conn)
+            return
+        await self._pool._return_conn(self._conn)
+
+    def __del__(self) -> None:
+        if self._released:
+            return
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            return
+        if loop.is_closed():
+            return
+        self._released = True
+        loop.create_task(self._pool._return_conn_after_gc(self._conn))
+
+
 class CortexConnectionPool:
     """
     Production-grade connection pool for CORTEX.
@@ -108,32 +151,30 @@ class CortexConnectionPool:
     @asynccontextmanager
     async def acquire(self) -> AsyncGenerator[aiosqlite.Connection, None]:
         """Acquire a connection from the pool."""
+        lease = await self.get_conn()
+        try:
+            yield lease._conn
+        finally:
+            await lease.close()
+
+    async def get_conn(self) -> PooledConnectionLease:
+        """Acquire a lease that must be closed to return the connection."""
         if not self._initialized:
             await self.initialize()
 
-        # Enforce max concurrency
         await self._semaphore.acquire()
         conn: Optional[aiosqlite.Connection] = None
 
         try:
-            # 1. Get or create connection
             conn = await self._get_or_create_conn()
-
-            # 2. Health check and potential replacement
             conn = await self._ensure_healthy_conn(conn)
-
-            yield conn
-
+            return PooledConnectionLease(self, conn)
         except (sqlite3.Error, OSError):
             if conn:
-                await self._close_conn(conn)
-                conn = None
+                await self._discard_conn(conn)
+            else:
+                self._semaphore.release()
             raise
-
-        finally:
-            self._semaphore.release()
-            if conn:
-                await self._pool.put(conn)
 
     async def _get_or_create_conn(self) -> aiosqlite.Connection:
         """Get a connection from the pool or create a new one."""
@@ -151,7 +192,7 @@ class CortexConnectionPool:
             return conn
 
         logger.warning("Connection unhealthy, replacing.")
-        await self._close_conn(conn)
+        await self._discard_conn(conn)
         new_conn = await self._create_connection()
         async with self._lock:
             self._active_count += 1
@@ -178,6 +219,25 @@ class CortexConnectionPool:
             logger.warning("Error closing connection: %s", e)
         async with self._lock:
             self._active_count = max(0, self._active_count - 1)
+
+    async def _discard_conn(self, conn: aiosqlite.Connection) -> None:
+        """Discard a broken leased connection and free a pool slot."""
+        await self._close_conn(conn)
+        self._semaphore.release()
+
+    async def _return_conn(self, conn: aiosqlite.Connection) -> None:
+        """Return a healthy leased connection to the pool."""
+        await self._pool.put(conn)
+        self._semaphore.release()
+
+    async def _return_conn_after_gc(self, conn: aiosqlite.Connection) -> None:
+        """Best-effort asynchronous cleanup for abandoned leases."""
+        try:
+            if getattr(conn, "in_transaction", False):
+                await conn.rollback()
+            await self._return_conn(conn)
+        except (sqlite3.Error, OSError):
+            await self._discard_conn(conn)
 
     async def close(self) -> None:
         """Close all connections in the pool."""

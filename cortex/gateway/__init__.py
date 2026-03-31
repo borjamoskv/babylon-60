@@ -272,7 +272,7 @@ class GatewayRouter:
         if not project:
             raise ValueError("project is required for recall intent")
 
-        results = await self._engine.recall(project)
+        results = await self._engine.recall(project, tenant_id=req.tenant_id)
         return [
             {"fact_id": getattr(r, "fact_id", None), "content": getattr(r, "content", str(r))}
             for r in results
