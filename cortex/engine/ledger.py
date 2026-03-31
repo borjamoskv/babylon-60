@@ -15,10 +15,7 @@ import logging
 import time
 from collections import deque
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Optional
-
-if TYPE_CHECKING:
-    from cortex.database.pool import CortexConnectionPool
+from typing import Any, Optional
 
 from cortex import config
 from cortex.consensus.merkle import MerkleTree
@@ -41,8 +38,9 @@ class ImmutableLedger:
     WRITE_RATE_WINDOW = 60  # seconds
     HIGH_WRITE_THRESHOLD = 10  # writes/sec triggers adaptive reduction
 
-    def __init__(self, pool: CortexConnectionPool):
-        self.pool = pool
+    def __init__(self, pool: Any):
+        # The ledger is reused across raw connections and multiple async pool implementations.
+        self.pool: Any = pool
         self._write_timestamps: deque[float] = deque(maxlen=5000)
 
     import contextlib

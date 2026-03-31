@@ -1,10 +1,10 @@
-from typing import Optional
-
 """MCP Server Implementation.
 
 Core logic for the CORTEX MCP Trust Server.
 Provides memory, search, and EU AI Act compliance tools.
 """
+
+from typing import Any, Optional
 
 import json
 import logging
@@ -40,13 +40,13 @@ __all__ = ["create_mcp_server", "run_server"]
 logger = logging.getLogger("cortex.mcp.server")
 
 _MCP_AVAILABLE = False
+_FAST_MCP_CLS: type[Any] | None = None
 try:
-    from mcp.server.fastmcp import FastMCP as _FastMCP
+    from mcp.server.fastmcp import FastMCP as _ImportedFastMCP
 
     _MCP_AVAILABLE = True
-    FastMCP = _FastMCP
+    _FAST_MCP_CLS = _ImportedFastMCP
 except ImportError:
-    FastMCP = None  # type: ignore
     logger.debug("MCP SDK not installed. Install with: pip install 'cortex-persist[mcp]'")
 
 
@@ -80,7 +80,7 @@ class _MCPContext:
 # ─── Tool Registrators ───────────────────────────────────────────────
 
 
-def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+def _register_store_tool(mcp: Any, ctx: _MCPContext) -> None:
     """Register the ``cortex_store`` tool on *mcp*."""
 
     @mcp.tool()
@@ -139,12 +139,13 @@ def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ign
             engine._conn = conn
 
             fact_id = await engine.store(
-                project,
-                content,
-                fact_type,
-                parsed_tags,
-                "stated",
-                source or None,
+                project=project,
+                content=content,
+                tenant_id="default",
+                fact_type=fact_type,
+                tags=parsed_tags,
+                confidence="stated",
+                source=source or None,
                 parent_decision_id=parent_id,
             )
 
@@ -153,7 +154,7 @@ def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ign
         return f"✓ Stored fact #{fact_id} in project '{project}'"
 
 
-def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+def _register_search_tool(mcp: Any, ctx: _MCPContext) -> None:
     """Register the ``cortex_search`` tool on *mcp*."""
 
     @mcp.tool()
@@ -207,9 +208,10 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
             engine._conn = conn
 
             results = await engine.search(
-                query,
-                project or None,  # type: ignore[reportArgumentType]
-                min(max(top_k, 1), 20),  # type: ignore[reportArgumentType]
+                query=query,
+                tenant_id="default",
+                top_k=min(max(top_k, 1), 20),
+                project=project or None,
             )
 
         if not results:
@@ -228,7 +230,7 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
         return output
 
 
-def _register_status_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+def _register_status_tool(mcp: Any, ctx: _MCPContext) -> None:
     """Register the ``cortex_status`` tool on *mcp*."""
 
     @mcp.tool()
@@ -253,7 +255,7 @@ def _register_status_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
         )
 
 
-def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+def _register_ledger_tool(mcp: Any, ctx: _MCPContext) -> None:
     """Register the ``cortex_ledger_verify`` tool on *mcp*."""
 
     @mcp.tool()
@@ -280,7 +282,7 @@ def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
 # ─── Factory ─────────────────────────────────────────────────────────
 
 
-def create_mcp_server(config: Optional[MCPServerConfig] = None) -> "FastMCP":  # type: ignore[reportInvalidTypeForm]
+def create_mcp_server(config: Optional[MCPServerConfig] = None) -> Any:
     """Create and configure an optimized CORTEX MCP server instance.
 
     Each tool is registered via a dedicated helper, keeping this
@@ -290,7 +292,10 @@ def create_mcp_server(config: Optional[MCPServerConfig] = None) -> "FastMCP":  #
         raise ImportError("MCP SDK not installed. Install with: pip install 'cortex-persist[mcp]'")
 
     cfg = config or MCPServerConfig()
-    mcp = FastMCP(  # type: ignore[reportOptionalCall]
+    if _FAST_MCP_CLS is None:
+        raise ImportError("MCP SDK not installed. Install with: pip install 'cortex-persist[mcp]'")
+
+    mcp = _FAST_MCP_CLS(
         "CORTEX Trust Engine",
         host=cfg.host,
         port=cfg.port,
@@ -344,7 +349,7 @@ def create_mcp_server(config: Optional[MCPServerConfig] = None) -> "FastMCP":  #
 
 # Default configuration
 _default_config = MCPServerConfig()
-mcp = create_mcp_server(_default_config)
+mcp: Any = create_mcp_server(_default_config)
 
 
 def run_server(config: Optional[MCPServerConfig] = None) -> None:

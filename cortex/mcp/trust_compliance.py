@@ -7,8 +7,9 @@ Extracted from trust_tools.py to keep file size under 300 LOC.
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterable, Sequence
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from cortex.engine.ledger import ImmutableLedger
 
@@ -22,21 +23,27 @@ __all__ = ["register_compliance_tools"]
 logger = logging.getLogger("cortex.mcp.trust")
 
 
+def _scalar_cell(row: Sequence[Any] | None, index: int = 0) -> Any:
+    return row[index] if row and len(row) > index else None
+
+
+def _extract_agents_from_rows(agent_rows: Iterable[Sequence[Any]]) -> set[str]:
+    agents: set[str] = set()
+    for row in agent_rows:
+        raw_tags = _scalar_cell(row)
+        if not isinstance(raw_tags, str):
+            continue
+        for raw_tag in raw_tags.split(","):
+            tag = raw_tag.strip()
+            if tag.startswith("agent:"):
+                agents.add(tag)
+    return agents
+
+
 def register_compliance_tools(mcp: FastMCP, ctx: _MCPContext) -> None:
     """Register compliance report and decision lineage tools."""
     _register_compliance_report(mcp, ctx)
     _register_decision_lineage(mcp, ctx)
-
-
-def _extract_agents_from_rows(agent_rows: list) -> set[str]:
-    agents: set[str] = set()
-    for row in agent_rows:
-        if row[0]:
-            for raw_tag in row[0].split(","):
-                tag = raw_tag.strip()
-                if tag.startswith("agent:"):
-                    agents.add(tag)
-    return agents
 
 
 def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
@@ -59,35 +66,35 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
         async with ctx.pool.acquire() as conn:
             # Total facts
             cursor = await conn.execute("SELECT COUNT(*) FROM facts WHERE deprecated_at IS NULL")
-            total_facts = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
+            total_facts = int(_scalar_cell(await cursor.fetchone()) or 0)
 
             # Decisions count
             cursor = await conn.execute(
                 "SELECT COUNT(*) FROM facts WHERE fact_type = 'decision' AND deprecated_at IS NULL"
             )
-            decisions = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
+            decisions = int(_scalar_cell(await cursor.fetchone()) or 0)
 
             # Total transactions
             cursor = await conn.execute("SELECT COUNT(*) FROM transactions")
-            total_tx = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
+            total_tx = int(_scalar_cell(await cursor.fetchone()) or 0)
 
             # Merkle checkpoints
             cursor = await conn.execute("SELECT COUNT(*) FROM merkle_roots")
-            checkpoints = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
+            checkpoints = int(_scalar_cell(await cursor.fetchone()) or 0)
 
             # Projects
             cursor = await conn.execute(
                 "SELECT COUNT(DISTINCT project) FROM facts WHERE deprecated_at IS NULL"
             )
-            projects = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
+            projects = int(_scalar_cell(await cursor.fetchone()) or 0)
 
             # Agents (from tags)
             cursor = await conn.execute(
                 "SELECT DISTINCT tags FROM facts "
                 "WHERE tags LIKE '%agent:%' AND deprecated_at IS NULL"
             )
-            agent_rows = await cursor.fetchall()
-            agents = _extract_agents_from_rows(agent_rows)  # type: ignore[reportArgumentType]
+            agent_rows = list(await cursor.fetchall())
+            agents = _extract_agents_from_rows(agent_rows)
 
             # Oldest and newest fact
             cursor = await conn.execute(
@@ -114,7 +121,7 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
             f"  Logged Decisions:      {decisions}",
             f"  Active Projects:       {projects}",
             f"  Tracked Agents:        {len(agents)}",
-            f"  Coverage Period:       {time_range[0] or 'N/A'} → {time_range[1] or 'N/A'}",  # type: ignore[reportOptionalSubscript]
+            f"  Coverage Period:       {_scalar_cell(time_range) or 'N/A'} → {_scalar_cell(time_range, 1) or 'N/A'}",
             "",
             "── 2. Cryptographic Integrity ──",
             f"  Transaction Ledger:    {total_tx} entries",
@@ -166,7 +173,9 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
 def _register_decision_lineage(mcp: FastMCP, ctx: _MCPContext) -> None:
     """Register the ``cortex_decision_lineage`` tool."""
 
-    async def _find_target_fact(conn, fact_id: int, query: str, project: str):
+    async def _find_target_fact(
+        conn: Any, fact_id: int, query: str, project: str
+    ) -> tuple[Sequence[Any] | None, str | None]:
         """Resolve the target fact by ID or search query."""
         if fact_id > 0:
             cursor = await conn.execute(
@@ -179,7 +188,7 @@ def _register_decision_lineage(mcp: FastMCP, ctx: _MCPContext) -> None:
 
         if query:
             conditions = ["deprecated_at IS NULL", "content LIKE ?"]
-            params: list = [f"%{query}%"]
+            params: list[Any] = [f"%{query}%"]
             if project:
                 conditions.append("project = ?")
                 params.append(project)
@@ -219,7 +228,12 @@ def _register_decision_lineage(mcp: FastMCP, ctx: _MCPContext) -> None:
             if error:
                 return error
 
-            tid, tproj, tcontent, ttype, tcreated, _ttags = target  # type: ignore[reportGeneralTypeIssues]
+            assert target is not None
+            tid = int(target[0])
+            tproj = str(target[1] or "")
+            tcontent = str(target[2] or "")
+            ttype = str(target[3] or "")
+            tcreated = str(target[4] or "")
 
             # Find related decisions in the same project
             cursor = await conn.execute(
@@ -231,7 +245,7 @@ def _register_decision_lineage(mcp: FastMCP, ctx: _MCPContext) -> None:
                 "ORDER BY id DESC LIMIT 20",
                 (tproj, tcreated, tid),
             )
-            predecessors = await cursor.fetchall()
+            predecessors = list(await cursor.fetchall())
 
             # Find subsequent decisions
             cursor = await conn.execute(
@@ -242,7 +256,7 @@ def _register_decision_lineage(mcp: FastMCP, ctx: _MCPContext) -> None:
                 "ORDER BY id ASC LIMIT 10",
                 (tproj, tcreated),
             )
-            successors = await cursor.fetchall()
+            successors = list(await cursor.fetchall())
 
         lines = [
             "═══ DECISION LINEAGE ═══",
@@ -253,8 +267,8 @@ def _register_decision_lineage(mcp: FastMCP, ctx: _MCPContext) -> None:
         ]
 
         if predecessors:
-            lines.append(f"── Preceding Context ({len(predecessors)} entries) ──")  # type: ignore[reportArgumentType]
-            for p in reversed(predecessors[-10:]):  # type: ignore[reportIndexIssue]
+            lines.append(f"── Preceding Context ({len(predecessors)} entries) ──")
+            for p in reversed(predecessors[-10:]):
                 pid, pcontent, ptype, pcreated, _ptags = p
                 lines.append(f"  [{pcreated}] #{pid} ({ptype}): {pcontent[:120]}")
             lines.append("")
@@ -264,8 +278,8 @@ def _register_decision_lineage(mcp: FastMCP, ctx: _MCPContext) -> None:
         lines.append("")
 
         if successors:
-            lines.append(f"── Subsequent Impact ({len(successors)} entries) ──")  # type: ignore[reportArgumentType]
-            for s in successors[:5]:  # type: ignore[reportIndexIssue]
+            lines.append(f"── Subsequent Impact ({len(successors)} entries) ──")
+            for s in successors[:5]:
                 sid, scontent, stype, screated, _stags = s
                 lines.append(f"  [{screated}] #{sid} ({stype}): {scontent[:120]}")
 
