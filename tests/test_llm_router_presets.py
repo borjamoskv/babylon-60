@@ -22,8 +22,9 @@ import pytest
 from cortex.extensions.llm._models import BaseProvider, IntentProfile
 from cortex.extensions.llm._presets import (
     _PRESETS_CACHE,
-    get_providers_by_cost,
-    get_providers_by_tier,
+    providers_for_intent,
+    frontier_providers,
+    cheapest_providers,
     load_presets,
 )
 
@@ -104,21 +105,21 @@ class TestModelPolicy:
 
 
 class TestQueryAPIs:
-    """get_providers_by_tier and get_providers_by_cost."""
+    """providers_for_intent and helpers."""
 
     def test_frontier_providers(self):
-        frontier = get_providers_by_tier("frontier")
+        frontier = [p[0] for p in frontier_providers("general")]
         assert "gemini" in frontier
         assert "openai" in frontier
         assert "anthropic" in frontier
 
     def test_free_providers(self):
-        free = get_providers_by_cost("free")
+        # max_cost="free" ensures we get only free cost class
+        free = [p[0] for p in providers_for_intent("general", min_tier="local", max_cost="free")]
         assert len(free) >= 5
 
     def test_empty_for_unknown(self):
-        assert get_providers_by_tier("nonexistent") == []
-        assert get_providers_by_cost("nonexistent") == []
+        assert providers_for_intent("nonexistent_intent", min_tier="frontier", max_cost="free") == []
 
 
 # ─── BaseProvider Defaults ────────────────────────────────────────────
