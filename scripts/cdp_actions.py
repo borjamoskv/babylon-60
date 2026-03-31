@@ -3,32 +3,21 @@ import asyncio
 import argparse
 import sys
 import json
+import logging
 from mac_control.cdp_engine import MacControlOmega
 
-async def main():
-    parser = argparse.ArgumentParser(description="CDP Actions for Sovereign UI Automation.")
-    subparsers = parser.add_subparsers(dest="action", required=True)
-    
-    # Click
-    click_parser = subparsers.add_parser("click", help="Click an element.")
-    click_parser.add_argument("target", help="URL substring to match")
-    click_parser.add_argument("--selector", required=True, help="CSS selector to click")
-    
-    # Type
-    type_parser = subparsers.add_parser("type", help="Type text into an element.")
-    type_parser.add_argument("target", help="URL substring to match")
-    type_parser.add_argument("--selector", required=True, help="CSS selector to type into")
-    type_parser.add_argument("--text", required=True, help="Text to insert")
-    
-    # Evaluate
-    eval_parser = subparsers.add_parser("evaluate", help="Execute JS")
-    eval_parser.add_argument("target", help="URL substring to match")
-    eval_parser.add_argument("--js", required=True, help="JS string to execute")
+logging.basicConfig(level=logging.ERROR)
 
-    # Screenshot
-    shot_parser = subparsers.add_parser("screenshot", help="Take a screenshot")
-    shot_parser.add_argument("target", help="URL substring to match")
-    shot_parser.add_argument("--file", required=True, help="Filename to save PNG")
+async def main():
+    parser = argparse.ArgumentParser(description="CDP Action Orchestrator for Mac Control.")
+    parser.add_argument("target", help="URL substring to match the Chrome tab.")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--click", type=str, help="CSS selector to click.")
+    group.add_argument("--type", type=str, nargs=2, metavar=('SELECTOR', 'TEXT'), help="CSS selector and text to type.")
+    group.add_argument("--evaluate", type=str, help="JS code to evaluate.")
+    group.add_argument("--screenshot", type=str, help="Take a screenshot and save to path.")
+    
+    parser.add_argument("--wait", type=int, default=0, help="Wait N seconds before action.")
     
     args = parser.parse_args()
     
@@ -37,17 +26,24 @@ async def main():
         sys.exit(1)
         
     try:
-        if args.action == "click":
-            await ctl.click(args.selector)
-            print(f"Clicked {args.selector}")
-        elif args.action == "type":
-            await ctl.type_text(args.selector, args.text)
-            print(f"Typed into {args.selector}")
-        elif args.action == "evaluate":
-            res = await ctl.evaluate(args.js)
-            print(json.dumps({"result": res}))
-        elif args.action == "screenshot":
-            await ctl.screenshot(args.file)
+        if args.wait > 0:
+            await asyncio.sleep(args.wait)
+            
+        if args.click:
+            await ctl.click(args.click)
+            print(f"Clicked: {args.click}")
+        elif args.type:
+            await ctl.type_text(args.type[0], args.type[1])
+            print(f"Typed '{args.type[1]}' into {args.type[0]}")
+        elif args.evaluate:
+            res = await ctl.evaluate(args.evaluate)
+            print(f"Result: {res}")
+        elif args.screenshot:
+            await ctl.screenshot(args.screenshot)
+            
+    except Exception as e:
+        print(f"Action failed: {e}")
+        sys.exit(1)
     finally:
         await ctl.close()
 
