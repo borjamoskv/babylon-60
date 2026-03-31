@@ -3,6 +3,8 @@
 This section is auto-generated from the CORTEX Python source code using `mkdocstrings`.
 
 For HTTP routes and request/response shapes, see the [REST API Reference](api.md).
+For the public contract boundaries, see [SDK Surface](SDK-SURFACE.md), [Trust Semantics](TRUST-SEMANTICS.md),
+[Event Model](EVENT-MODEL.md), and [Error Code Registry](ERROR-CODE-REGISTRY.md).
 
 ---
 

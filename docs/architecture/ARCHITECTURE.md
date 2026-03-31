@@ -725,7 +725,7 @@ Full neural intent analysis engine (11.2KB) — classifies and processes incomin
 | 7 | Deploy Compaction Sidecar as standalone Docker service |
 | 8 | Enable RBAC with role→permission policy enforcement |
 
-See [`docs/V6_TRANSITION_GUIDE.md`](docs/V6_TRANSITION_GUIDE.md) for full walkthrough.
+See [`docs/V6_TRANSITION_GUIDE.md`](../V6_TRANSITION_GUIDE.md) for full walkthrough.
 
 ---
 

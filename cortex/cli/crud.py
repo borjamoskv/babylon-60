@@ -43,11 +43,11 @@ def delete(fact_id, reason, db) -> None:
         if success:
             wb = _run_async(export_to_json(engine))
             console.print(
-                f"[green]✓[/] Fact #{fact_id} deprecado. "
+                f"[green]✓[/] Fact #{fact_id} deprecated (deprecado). "
                 f"Write-back: {wb.files_written} archivos actualizados."
             )
         else:
-            console.print(f"[red]✗ No se pudo deprecar fact #{fact_id}[/]")
+            console.print(f"[red]✗ No se pudo deprecar/deprecate fact #{fact_id}[/]")
     finally:
         _run_async(engine.close())
 

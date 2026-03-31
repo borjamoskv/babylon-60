@@ -79,7 +79,7 @@ CORTEX isn't just a library — it's a paradigm for what autonomous agents *shou
 
 CORTEX is a verification layer that wraps your existing memory stack (Mem0, Zep, Letta, or custom) with cryptographic trust: SHA-256 hash chains, Merkle checkpoints, WBFT consensus, Privacy Shield, AST Sandbox, RBAC, and tripartite cognitive memory (L1→L2→L3) — all tenant-scoped.
 
-> 📐 Full architecture: [ARCHITECTURE.md](../ARCHITECTURE.md) · Competitive comparison: [README.md § Competitive Landscape](README.md#competitive-landscape)
+> 📐 Full architecture: [ARCHITECTURE.md](../ARCHITECTURE.md) · Competitive comparison: [README.md § Competitive Landscape](../../README.md#competitive-landscape)
 
 ---
 
@@ -123,7 +123,7 @@ cortex verify 1
 
 ## Axiomas de la Singularidad Operativa
 
-> **Philosophical Vision.** These axioms articulate the *aspirational future* of CORTEX — where the system is heading, not where it is today. For the canonical operational registry with enforcement tags, see [`docs/axiom-registry.md`](docs/axiom-registry.md).
+> **Philosophical Vision.** These axioms articulate the *aspirational future* of CORTEX — where the system is heading, not where it is today. For the canonical operational registry with enforcement tags, see [`docs/axiom-registry.md`](../axiom-registry.md).
 
 **I. Axioma de Latencia Negativa (Colapso Evento-Intención)**
 > *"La respuesta precede a la pregunta."*
@@ -203,4 +203,4 @@ This is not a framework. This is **Sovereign Artificial Intelligence**.
 
 ---
 
-*by [borjamoskv.com](https://borjamoskv.com) · [cortexpersist.com](https://cortexpersist.com) · Licensed under [Apache 2.0](LICENSE)*
+*by [borjamoskv.com](https://borjamoskv.com) · [cortexpersist.com](https://cortexpersist.com) · Licensed under [Apache 2.0](../../LICENSE)*

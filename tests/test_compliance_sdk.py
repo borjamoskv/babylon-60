@@ -10,7 +10,12 @@ from pathlib import Path
 
 import pytest
 
-pytestmark = pytest.mark.slow
+pytestmark = [
+    pytest.mark.slow,
+    pytest.mark.filterwarnings(
+        "ignore:get_conn\\(\\) is deprecated\\. Use session\\(\\) context manager\\.:DeprecationWarning"
+    ),
+]
 
 
 @pytest.fixture
