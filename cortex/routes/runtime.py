@@ -3,8 +3,9 @@
 Provides /v1/runtime/health, /v1/runtime/boot_recovery
 """
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 
+from cortex.auth import AuthResult, require_permission
 from cortex.types.models import HealthReport, RecoveryReport
 
 router = APIRouter(prefix="/v1/runtime", tags=["runtime"])
@@ -13,11 +14,14 @@ router = APIRouter(prefix="/v1/runtime", tags=["runtime"])
 @router.get("/health")
 async def get_health(request: Request) -> dict:
     """Retrieve runtime health report."""
-    return HealthReport(status="healthy", components={}, degraded_features=[], warnings=[])  # type: ignore[type-error]
+    return HealthReport(status="ok", components={}, degraded_features=[], warnings=[])
 
 
 @router.get("/boot_recovery", response_model=RecoveryReport)
-async def get_boot_recovery(request: Request) -> RecoveryReport:
+async def get_boot_recovery(
+    request: Request,
+    auth: AuthResult = Depends(require_permission("read")),
+) -> RecoveryReport:
     """Get the memory recovery report generated during boot."""
     engine = getattr(request.app.state, "engine", None)
     if not engine:

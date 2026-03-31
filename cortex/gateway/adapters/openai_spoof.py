@@ -11,10 +11,11 @@ import logging
 import time
 from typing import Optional
 
-from fastapi import APIRouter, Header, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
+from cortex.auth import AuthResult, require_permission
 from cortex.extensions.llm.sovereign import SovereignLLM
 from cortex.gateway.spoof import SpoofManager
 
@@ -49,7 +50,7 @@ class OpenAICompletionRequest(BaseModel):
 async def openai_chat_completions(
     request: Request,
     body: OpenAICompletionRequest,
-    authorization: Optional[str] = Header(None),
+    auth: AuthResult = Depends(require_permission("read")),
 ):
     """Spoof OpenAI endpoint by routing to CORTEX internal LLM."""
 
