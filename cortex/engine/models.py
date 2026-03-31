@@ -27,6 +27,7 @@ class Fact:
     valid_until: Optional[str] = None
     source: Optional[str] = None
     confidence: str = "C3"
+    parent_decision_id: Optional[int] = None
 
     def is_active(self) -> bool:
         """Evaluate logical validity using valid_until and physical state."""
@@ -41,6 +42,7 @@ class Fact:
             "type": self.fact_type,
             "tags": self.tags,
             "meta": self.meta,
+            "parent_decision_id": self.parent_decision_id,
             "active": self.is_active(),
             "created_at": self.created_at,
             "updated_at": self.updated_at,
@@ -52,13 +54,13 @@ def row_to_fact(row: tuple) -> Fact:
 
     enc = get_default_encrypter()
 
-    # New schema expects 16 columns
+    # Canonical fact rows carry 17 columns, with parent_decision_id appended last.
     # row[0]=id, row[1]=tenant_id, row[2]=project, row[3]=content, row[4]=fact_type,
     # row[5]=tags, row[6]=meta, row[7]=hash, row[8]=valid_from, row[9]=valid_until,
     # row[10]=source, row[11]=confidence, row[12]=created_at, row[13]=updated_at,
-    # row[14]=is_tombstoned, row[15]=is_quarantined
+    # row[14]=is_tombstoned, row[15]=is_quarantined, row[16]=parent_decision_id
     r = list(row)
-    while len(r) < 16:
+    while len(r) < 17:
         r.append(None)
 
     tenant_id = r[1] or "default"
@@ -78,6 +80,15 @@ def row_to_fact(row: tuple) -> Fact:
     except ValueError:
         meta = {"error": "decryption_failed", "fact_id": r[0]}
 
+    parent_decision_id = r[16]
+    if parent_decision_id is None and meta:
+        parent_decision_id = meta.get("parent_decision_id")
+    if isinstance(parent_decision_id, str):
+        try:
+            parent_decision_id = int(parent_decision_id)
+        except ValueError:
+            parent_decision_id = None
+
     return Fact(
         id=r[0],
         tenant_id=tenant_id,
@@ -95,4 +106,5 @@ def row_to_fact(row: tuple) -> Fact:
         updated_at=r[13],
         is_tombstoned=bool(r[14]),
         is_quarantined=bool(r[15]),
+        parent_decision_id=parent_decision_id,
     )

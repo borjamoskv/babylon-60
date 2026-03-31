@@ -20,12 +20,17 @@ from cortex.utils.canonical import compute_fact_hash
 logger = logging.getLogger("cortex")
 
 
-async def _facts_meta_column(conn: aiosqlite.Connection) -> str:
-    """Return the available facts metadata column, preferring the modern name."""
+async def _facts_columns(conn: aiosqlite.Connection) -> set[str]:
+    """Return the current facts table columns."""
     async with conn.execute("PRAGMA table_info(facts)") as cursor:
         rows = await cursor.fetchall()
 
-    columns = {row[1] for row in rows}
+    return {row[1] for row in rows}
+
+
+async def _facts_meta_column(conn: aiosqlite.Connection) -> str:
+    """Return the available facts metadata column, preferring the modern name."""
+    columns = await _facts_columns(conn)
     if "metadata" in columns:
         return "metadata"
     if "meta" in columns:
@@ -105,7 +110,7 @@ async def insert_fact_record(
         meta["confidence"] = confidence
     if source:
         meta["source"] = source
-    if parent_decision_id:
+    if parent_decision_id is not None:
         meta["parent_decision_id"] = parent_decision_id
     if tx_id:
         meta["tx_id"] = tx_id
@@ -115,33 +120,46 @@ async def insert_fact_record(
         meta["signer_pubkey"] = pub_b64
 
     encrypted_meta = enc.encrypt_json(meta, tenant_id=tenant_id)
-    meta_column = await _facts_meta_column(conn)
-    insert_sql = (
-        "INSERT INTO facts (tenant_id, project, content, fact_type, tags, metadata, "
-        "hash, created_at, updated_at, valid_from, confidence, source) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        if meta_column == "metadata"
-        else "INSERT INTO facts (tenant_id, project, content, fact_type, tags, meta, "
-        "hash, created_at, updated_at, valid_from, confidence, source) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-    )
+    facts_columns = await _facts_columns(conn)
+    meta_column = "metadata" if "metadata" in facts_columns else "meta"
+    insert_columns = [
+        "tenant_id",
+        "project",
+        "content",
+        "fact_type",
+        "tags",
+        meta_column,
+        "hash",
+        "created_at",
+        "updated_at",
+        "valid_from",
+        "confidence",
+        "source",
+    ]
+    insert_values: list[Any] = [
+        tenant_id,
+        project,
+        encrypted_content,
+        fact_type,
+        tags_json,
+        encrypted_meta,
+        f_hash,
+        ts,
+        ts,
+        ts,
+        confidence,
+        source,
+    ]
+    if "parent_decision_id" in facts_columns:
+        insert_columns.append("parent_decision_id")
+        insert_values.append(parent_decision_id)
+
+    placeholders = ", ".join("?" for _ in insert_columns)
+    insert_sql = f"INSERT INTO facts ({', '.join(insert_columns)}) VALUES ({placeholders})"
 
     cursor = await conn.execute(
         insert_sql,
-        (
-            tenant_id,
-            project,
-            encrypted_content,
-            fact_type,
-            tags_json,
-            encrypted_meta,
-            f_hash,
-            ts,
-            ts,
-            ts,
-            confidence,
-            source,
-        ),
+        insert_values,
     )
     fact_id = cursor.lastrowid
     assert fact_id is not None

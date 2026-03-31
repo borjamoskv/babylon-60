@@ -4,11 +4,10 @@ Core logic for the CORTEX MCP Trust Server.
 Provides memory, search, and EU AI Act compliance tools.
 """
 
-from typing import Any, Optional
-
 import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
+from typing import Any, Optional
 
 from cortex.engine import CortexEngine
 from cortex.engine.ledger import ImmutableLedger

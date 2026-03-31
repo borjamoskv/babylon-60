@@ -15,11 +15,12 @@ __all__ = ["EngineMixinBase"]
 
 logger = logging.getLogger("cortex.engine")
 
-# Canonical Fact query structure — all 16 columns matching row_to_fact contract
+# Canonical Fact query structure — 17 columns matching row_to_fact/_row_to_fact.
 FACT_COLUMNS = (
     "f.id, f.tenant_id, f.project, f.content, f.fact_type, f.tags, f.metadata, "
     "f.hash, f.valid_from, f.valid_until, f.source, f.confidence, "
-    "f.created_at, f.updated_at, f.is_tombstoned, f.is_quarantined"
+    "f.created_at, f.updated_at, f.is_tombstoned, f.is_quarantined, "
+    "NULL AS parent_decision_id"
 )
 FACT_JOIN = "FROM facts f"
 
@@ -61,7 +62,7 @@ class EngineMixinBase:
         """Convert a database row to a decrypted fact dictionary.
 
         Builds the dict directly from the row tuple — no intermediate Fact
-        allocation. Columns must match FACT_COLUMNS order (16 columns).
+        allocation. Columns must match FACT_COLUMNS order (17 columns).
         """
         import json
 
@@ -69,7 +70,7 @@ class EngineMixinBase:
 
         enc = get_default_encrypter()
         r = list(row)
-        while len(r) < 16:
+        while len(r) < 17:
             r.append(None)
 
         db_tenant_id = r[1] or "default"
@@ -92,6 +93,15 @@ class EngineMixinBase:
         except ValueError:
             meta = {"error": "decryption_failed", "fact_id": r[0]}
 
+        parent_decision_id = r[16]
+        if parent_decision_id is None and meta:
+            parent_decision_id = meta.get("parent_decision_id")
+        if isinstance(parent_decision_id, str):
+            try:
+                parent_decision_id = int(parent_decision_id)
+            except ValueError:
+                parent_decision_id = None
+
         return {
             "id": r[0],
             "tenant_id": db_tenant_id,
@@ -109,7 +119,7 @@ class EngineMixinBase:
             "created_at": r[12],
             "updated_at": r[13],
             "tx_id": meta.get("tx_id") if meta else None,
-            "parent_decision_id": meta.get("parent_decision_id") if meta else None,
+            "parent_decision_id": parent_decision_id,
             "hash": r[7],
         }
 
