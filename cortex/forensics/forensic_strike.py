@@ -60,10 +60,10 @@ class ForensicStrikeCommander:
 
                     # Kinetic Speed: Tight loop if exergy is high, yield if saturated
                     if exergy > 0.8:
-                        # Sub-10μs Busy-Wait (Sovereign Native)
-                        pass
-                    else:
+                        # Yield to asyncio to prevent Event Loop freezing
                         await asyncio.sleep(0)
+                    else:
+                        await asyncio.sleep(0.01)
 
                     if self._check_vulnerability_signature(target):
                         await self._report_vulnerability(target, strike_id)
