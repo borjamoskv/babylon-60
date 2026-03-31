@@ -1,5 +1,6 @@
 """Utilities for MEJORAlo engine."""
 
+import os
 import subprocess
 from pathlib import Path
 from typing import Any, Optional
@@ -14,10 +15,28 @@ __all__ = [
     "run_quiet",
 ]
 
+# Allowed base directories for path operations.
+_ALLOWED_ROOTS: list[str] = [
+    os.path.expanduser("~"),
+    "/tmp",
+]
+
+
+def _validate_path(path: str | Path) -> Path:
+    """Validate that *path* resolves inside an allowed root.
+
+    Raises ValueError when the resolved path escapes the sandbox.
+    """
+    resolved = Path(path).resolve()
+    for root in _ALLOWED_ROOTS:
+        if str(resolved).startswith(str(Path(root).resolve())):
+            return resolved
+    raise ValueError(f"Path '{resolved}' is outside allowed roots")
+
 
 def detect_stack(path: str | Path) -> str:
     """Detect project stack from marker files."""
-    p = Path(path)
+    p = _validate_path(path)
     for stack, marker in STACK_MARKERS.items():
         if (p / marker).exists():
             return stack

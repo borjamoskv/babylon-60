@@ -15,7 +15,6 @@ __all__ = ["DEFAULT_SWARM_PATH", "MissionOrchestrator"]
 
 logger = logging.getLogger("cortex.extensions.launchpad")
 
-# Default path to the swarm engine relative to home
 DEFAULT_SWARM_PATH = "~/game/.agent/skills/autonomous-browser-swarm/scripts/swarm-v6-engine.js"
 
 
@@ -127,7 +126,7 @@ class MissionOrchestrator:
 
         except (sqlite3.Error, OSError, RuntimeError) as e:
             logger.error("Failed to launch mission: %s", e)
-            return {"intent_id": fact_id, "status": "error", "error": str(e)}
+            return {"intent_id": fact_id, "status": "error", "error": "Internal mission execution error"}
 
     def list_missions(self, project: Optional[str] = None) -> list[dict[str, Any]]:
         """Retrieve recent mission attempts from the ledger."""

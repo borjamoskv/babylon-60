@@ -4,6 +4,8 @@ from typing import Optional
 CORTEX v5.0 — Mission Orchestration Router.
 """
 
+import logging
+
 from fastapi import APIRouter, Depends, Query
 
 from cortex.api.deps import get_engine
@@ -13,6 +15,8 @@ from cortex.extensions.launchpad.main import MissionOrchestrator
 from cortex.types.models import MissionLaunchRequest, MissionResponse
 
 __all__ = ["launch_mission", "list_missions"]
+
+logger = logging.getLogger("cortex.routes.missions")
 
 router = APIRouter(prefix="/v1/missions", tags=["missions"])
 
@@ -31,6 +35,10 @@ async def launch_mission(
         formation=request.formation,
         agents=request.agents,
     )
+    # Sanitize: never expose raw error details to the client
+    if result.get("status") == "error" and "error" in result:
+        logger.error("Mission launch failed: %s", result.get("error"))
+        result["error"] = "An internal error occurred during mission launch."
     return result
 
 

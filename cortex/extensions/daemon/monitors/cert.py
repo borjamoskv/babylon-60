@@ -37,6 +37,7 @@ class CertMonitor:
         """Check a single hostname's SSL certificate."""
         try:
             ctx = ssl.create_default_context()
+            ctx.minimum_version = ssl.TLSVersion.TLSv1_2
             with socket.create_connection((hostname, 443), timeout=DEFAULT_TIMEOUT) as sock:
                 with ctx.wrap_socket(sock, server_hostname=hostname) as ssock:
                     cert = ssock.getpeercert()
