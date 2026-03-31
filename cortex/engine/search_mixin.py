@@ -4,10 +4,9 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from cortex.engine.mixins.base import EngineMixinBase
-from cortex.graph import extract_entities, get_context_subgraph
 from cortex.search import hybrid_search, text_search
 
 if TYPE_CHECKING:
@@ -27,12 +26,12 @@ class SearchMixin(EngineMixinBase):
         query: str,
         tenant_id: str = "default",
         top_k: int = 5,
-        project: Optional[str] = None,
-        as_of: Optional[str] = None,
+        project: str | None = None,
+        as_of: str | None = None,
         graph_depth: int = 0,
         include_graph: bool = False,
-        confidence: Optional[str] = None,
-        causal_gap: Optional[CausalGap] = None,
+        confidence: str | None = None,
+        causal_gap: CausalGap | None = None,
         **kwargs,
     ) -> list[Any]:
         """Perform hybrid search (Vector + Text) with optional Graph-RAG context."""
@@ -96,6 +95,12 @@ class SearchMixin(EngineMixinBase):
         self, conn, results: list[Any], query: str, graph_depth: int, tenant_id: str = "default"
     ) -> None:
         """Helper to enrich search results with graph context."""
+        try:
+            from cortex.graph import extract_entities, get_context_subgraph
+        except Exception as exc:  # noqa: BLE001
+            logger.debug("Graph context enrichment unavailable: %s", exc)
+            return
+
         entities = extract_entities(query)
         seeds = [e["name"] for e in entities]
 

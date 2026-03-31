@@ -42,7 +42,7 @@ class HedgedRequestStrategy:
         cls,
         providers: list[BaseProvider],
         prompt: CortexPrompt,
-    ) -> tuple[Optional[HedgedResult], list[str]]:
+    ) -> tuple[HedgedResult | None, list[str]]:
         """Race N providers simultaneously. Returns (winner | None, errors).
 
         DNS-over-HTTPS pattern: query sent to all providers concurrently,

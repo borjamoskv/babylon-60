@@ -8,19 +8,37 @@ ValueError → propagates for critical security blocks.
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 __all__ = ["run_security_guards"]
 
+import os
+
 logger = logging.getLogger("cortex")
+
+
+def _is_strict() -> bool:
+    """Check if we are in CORTEX_STRICT_GUARDS mode."""
+    return os.environ.get("CORTEX_STRICT_GUARDS") == "1"
+
+
+def _handle_missing_guard(guard_name: str) -> None:
+    """Handle a missing guard based on strictness."""
+    if _is_strict():
+        logger.error("🛑 [FAIL-CLOSED] Mandatory security guard missing: %s", guard_name)
+        raise RuntimeError(
+            f"FAIL-CLOSED: System configured with CORTEX_STRICT_GUARDS=1 but "
+            f"{guard_name} is missing or could not be loaded."
+        )
+    logger.debug("Guard %s missing — degrading gracefully (Axiom Ω₁)", guard_name)
 
 
 def _guard_injection(
     content: str,
     project: str,
-    source: Optional[str],
-    meta: Optional[dict[str, Any]],
-) -> Optional[dict[str, Any]]:
+    source: str | None,
+    meta: dict[str, Any] | None,
+) -> dict[str, Any] | None:
     """Scan content for injection attacks.
 
     Passes ``source`` to the guard so trusted agents bypass L1/L5.
@@ -45,16 +63,16 @@ def _guard_injection(
             if report.highest_severity == "critical":
                 raise ValueError(f"INJECTION BLOCKED: {report.matches[0].description}")
     except ImportError:
-        pass  # Guard not installed — degrade gracefully
+        _handle_missing_guard("InjectionGuard")
     return meta
 
 
 def _guard_anomaly(
     content: str,
     project: str,
-    source: Optional[str],
-    meta: Optional[dict[str, Any]],
-) -> Optional[dict[str, Any]]:
+    source: str | None,
+    meta: dict[str, Any] | None,
+) -> dict[str, Any] | None:
     """Check for statistical anomalies in store patterns."""
     try:
         from cortex.extensions.security.anomaly_detector import DETECTOR, SecurityEvent
@@ -91,14 +109,14 @@ def _guard_anomaly(
 
                 SIGNAL.emit_sync("anomaly", {"type": "anomaly", "severity": "high"})
     except ImportError:
-        pass  # Detector not installed — degrade gracefully
+        _handle_missing_guard("AnomalyDetector")
     return meta
 
 
 def _guard_honeypot(
     content: str,
-    meta: Optional[dict[str, Any]],
-) -> Optional[dict[str, Any]]:
+    meta: dict[str, Any] | None,
+) -> dict[str, Any] | None:
     """Check if content attempts to access a honeypot resource."""
     try:
         from cortex.extensions.security.honeypot import HONEY_POT
@@ -115,16 +133,16 @@ def _guard_honeypot(
             }
             raise ValueError(f"SECURITY BREACH: Unauthorized resource [{decoy.id}]")
     except ImportError:
-        pass  # Honeypot not installed — degrade gracefully
+        _handle_missing_guard("Honeypot")
     return meta
 
 
 def run_security_guards(
     content: str,
     project: str,
-    source: Optional[str],
-    meta: Optional[dict[str, Any]],
-) -> Optional[dict[str, Any]]:
+    source: str | None,
+    meta: dict[str, Any] | None,
+) -> dict[str, Any] | None:
     """Run all Anti-Hacker Shield guards (injection, anomaly, honeypot).
 
     Each guard is optional (ImportError → degrade gracefully).

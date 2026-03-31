@@ -248,8 +248,8 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
         attempt: int,
         attempts: int,
         mode: str = "deep_reasoning",
-        temperature: Optional[float] = None,
-    ) -> tuple[Optional[ModelResponse], Optional[str]]:
+        temperature: float | None = None,
+    ) -> tuple[ModelResponse | None, str | None]:
         """Ejecuta un único intento de consulta, manejando fallos y timeouts."""
         try:
             provider = self._pool.get(provider_name, model)
@@ -324,7 +324,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
         prompt: str,
         system: str,
         mode: str = "deep_reasoning",
-        temperature: Optional[float] = None,
+        temperature: float | None = None,
     ) -> ModelResponse:
         """Consulta un modelo individual con timeout y retry."""
         start = time.monotonic()

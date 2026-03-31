@@ -6,7 +6,7 @@ import hashlib
 import json
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
     from cortex.extensions.songlines.sensor import GhostTrace
@@ -14,9 +14,6 @@ if TYPE_CHECKING:
 import aiosqlite
 
 from cortex.engine.mixins.base import EngineMixinBase
-from cortex.extensions.songlines.economy import ThermalEconomy
-from cortex.extensions.songlines.emitter import ResonanceEmitter
-from cortex.extensions.songlines.sensor import TopographicSensor
 
 __all__ = ["GhostMixin"]
 
@@ -36,9 +33,20 @@ class GhostMixin(EngineMixinBase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._emitter = ResonanceEmitter()
-        self._sensor = TopographicSensor()
-        self._economy = ThermalEconomy(sensor=self._sensor)
+        self._emitter: Any | None = None
+        self._sensor: Any | None = None
+        self._economy: Any | None = None
+
+    def _ensure_songlines(self) -> tuple[Any, Any, Any]:
+        if self._emitter is None or self._sensor is None or self._economy is None:
+            from cortex.extensions.songlines.economy import ThermalEconomy
+            from cortex.extensions.songlines.emitter import ResonanceEmitter
+            from cortex.extensions.songlines.sensor import TopographicSensor
+
+            self._emitter = ResonanceEmitter()
+            self._sensor = TopographicSensor()
+            self._economy = ThermalEconomy(sensor=self._sensor)
+        return self._emitter, self._sensor, self._economy
 
     async def register_ghost(
         self,
@@ -61,6 +69,7 @@ class GhostMixin(EngineMixinBase):
         import asyncio
 
         def _do_register() -> str:
+            emitter, _sensor, economy = self._ensure_songlines()
             nonlocal target_file
             if not target_file:
                 target_file = (root_dir or Path.cwd()) / ".cortex_field"
@@ -71,13 +80,11 @@ class GhostMixin(EngineMixinBase):
 
             # 1. Enforce Thermal Economy. Bound to local scope to prevent O(N) scanning hang.
             eval_root = root_dir or target_file.parent
-            self._economy.validate_emission(eval_root)
+            economy.validate_emission(eval_root)
 
             # 3. Embed the resonance
             content_for_id = f"{reference}: {context}"
-            self._emitter.embed_ghost(
-                target_file=target_file, intent=content_for_id, project=project
-            )
+            emitter.embed_ghost(target_file=target_file, intent=content_for_id, project=project)
 
             # Return the same hash-based ghost ID used by the emitter
             return hashlib.sha256(content_for_id.encode()).hexdigest()[:16]
@@ -89,7 +96,7 @@ class GhostMixin(EngineMixinBase):
         import asyncio
 
         target_root = root_dir or Path.cwd()
-        sensor = self._sensor
+        _emitter, sensor, _economy = self._ensure_songlines()
 
         def _list() -> list[GhostTrace]:
             return sensor.scan_field(target_root)
@@ -109,14 +116,15 @@ class GhostMixin(EngineMixinBase):
         root = root_dir or Path.cwd()
 
         def _do_resolve() -> bool:
-            active = self._sensor.scan_field(root)
+            _emitter, sensor, _economy = self._ensure_songlines()
+            active = sensor.scan_field(root)
 
             found = False
             for ghost in active:
                 if ghost["id"] == ghost_id:
                     source = Path(ghost["source_file"])
                     attr_name = f"user.cortex.ghost.{ghost_id}"
-                    self._sensor._delete_xattr(source, attr_name)
+                    sensor._delete_xattr(source, attr_name)
                     # Also check manifest fallback if needed
                     self._resolve_manifest_fallback(source, attr_name)
                     found = True

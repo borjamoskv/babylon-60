@@ -4,13 +4,17 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 import aiosqlite
 import sqlite_vec
+
+if TYPE_CHECKING:
+    pass
 
 from cortex.config import DEFAULT_DB_PATH
 from cortex.database.schema import get_init_meta
@@ -23,6 +27,8 @@ from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
 from cortex.engine.transaction_mixin import TransactionMixin
+from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
+from cortex.mac_maestro.executor import MaestroExecutor
 
 try:
     from cortex.extensions.health.health_mixin import HealthMixin  # type: ignore
@@ -39,17 +45,12 @@ except ImportError:
 from cortex.migrations.core import run_migrations_async
 from cortex.telemetry.metrics import metrics
 
-logger = logging.getLogger("cortex")
+logger = logging.getLogger("cortex.engine.guards")
 
 
 from cortex.consensus.manager import ConsensusManager  # noqa: E402
 from cortex.embeddings.manager import EmbeddingManager  # noqa: E402
-from cortex.engine.compound_yield import CompoundReport, CompoundYieldTracker  # noqa: E402
 from cortex.engine.lock import SovereignLock  # noqa: E402
-from cortex.facts.manager import FactManager  # noqa: E402
-
-if TYPE_CHECKING:
-    from cortex.extensions.interfaces.engine import EngineProtocol
 
 # Limit the maximum number of tags per fact.
 MAX_TAGS_PER_FACT = 20
@@ -77,22 +78,45 @@ class CortexEngine(
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._enforce_fs_permissions()
         self._auto_embed = auto_embed
-        self._conn: Optional[aiosqlite.Connection] = None
+        self._conn: aiosqlite.Connection | None = None
         self._vec_available = False
         self._conn_lock = asyncio.Lock()
         self._ledger = None  # Wave 5: ImmutableLedger (lazy init)
-        self._embedder: Optional[LocalEmbedder] = None
+        self._embedder: LocalEmbedder | None = None
         self._memory_manager = None  # Frontera 2: Tripartite Memory (lazy init)
         self._persistence = PersistenceSupervisor(self)
+        self._system_state = "ACTIVE"
 
         # Composition layers
+        from cortex.facts.manager import FactManager
+
         self.facts = FactManager(self)
         self.embeddings = EmbeddingManager(self)
         self.consensus = ConsensusManager(self)
         self.lock_sovereign = SovereignLock(self)
 
+        # Wave 6: Sovereign Ledger Integration
+        self.ledger_store = LedgerStore(self._db_path)
+        self.enrichment_queue = EnrichmentQueue(self.ledger_store)
+        self.ledger_writer = LedgerWriter(self.ledger_store, self.enrichment_queue)
+        self.mac_maestro = MaestroExecutor(self.ledger_writer)
+        from cortex.engine.auth import ByzantineAuthLayer
+
+        self.auth = ByzantineAuthLayer()
+
         # Decoupled guard pipeline (Ω₃: minimal coupling)
         self._guard_pipeline = self._register_default_guards()
+
+    # ─── System State ─────────────────────────────────────────────────────────
+
+    @property
+    def system_state(self) -> str:
+        return self._system_state
+
+    def set_system_state(self, state: str) -> None:
+        """Lock or unlock the sovereign engine (e.g., from EpistemicCircuitBreaker)"""
+        self._system_state = state
+        logger.warning("🛡️ [SOVEREIGN-STATE] CORTEX Engine state changed to: %s", state)
 
     # ─── Guard Pipeline Registration ──────────────────────────────
 
@@ -107,27 +131,34 @@ class CortexEngine(
 
         pipeline = GuardPipeline()
         db_path = str(self._db_path)
+        import os  # Local import to resolve persistent pylint/ruff shadowing issues
 
         # Pre-store guards (AX-033 Hooks 1-3)
         try:
             from cortex.engine.guard_adapters import HealthGuardAdapter
 
             pipeline.add_guard(HealthGuardAdapter(db_path))
-        except (ImportError, Exception):  # noqa: BLE001
+        except (ImportError, Exception) as e:  # noqa: BLE001
+            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
+                raise RuntimeError(f"FAIL-CLOSED: HealthGuardAdapter failed: {e}") from e
             pass
 
         try:
             from cortex.engine.guard_adapters import ContradictionGuardAdapter
 
             pipeline.add_guard(ContradictionGuardAdapter(db_path))
-        except (ImportError, Exception):  # noqa: BLE001
+        except (ImportError, Exception) as e:  # noqa: BLE001
+            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
+                raise RuntimeError(f"FAIL-CLOSED: ContradictionGuardAdapter failed: {e}") from e
             pass
 
         try:
             from cortex.engine.guard_adapters import VerifierGuardAdapter
 
             pipeline.add_guard(VerifierGuardAdapter())
-        except (ImportError, Exception):  # noqa: BLE001
+        except (ImportError, Exception) as e:  # noqa: BLE001
+            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
+                raise RuntimeError(f"FAIL-CLOSED: VerifierGuardAdapter failed: {e}") from e
             pass
 
         # Post-store hooks (AX-033 Hook 4 + signals + epistemic)
@@ -135,21 +166,27 @@ class CortexEngine(
             from cortex.engine.guard_adapters import LedgerCheckpointHook
 
             pipeline.add_post_hook(LedgerCheckpointHook(self))
-        except (ImportError, Exception):  # noqa: BLE001
+        except (ImportError, Exception) as e:  # noqa: BLE001
+            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
+                raise RuntimeError(f"FAIL-CLOSED: LedgerCheckpointHook failed: {e}") from e
             pass
 
         try:
             from cortex.engine.guard_adapters import SignalEmitHook
 
             pipeline.add_post_hook(SignalEmitHook())
-        except (ImportError, Exception):  # noqa: BLE001
+        except (ImportError, Exception) as e:  # noqa: BLE001
+            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
+                raise RuntimeError(f"FAIL-CLOSED: SignalEmitHook failed: {e}") from e
             pass
 
         try:
             from cortex.engine.guard_adapters import EpistemicBreakerHook
 
             pipeline.add_post_hook(EpistemicBreakerHook())
-        except (ImportError, Exception):  # noqa: BLE001
+        except (ImportError, Exception) as e:  # noqa: BLE001
+            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
+                raise RuntimeError(f"FAIL-CLOSED: EpistemicBreakerHook failed: {e}") from e
             pass
 
         logger.debug(
@@ -165,7 +202,6 @@ class CortexEngine(
         """Enforce restrictive permissions on CORTEX data directory and DB file.
         Directory: 700 (owner-only rwx). DB file: 600 (owner-only rw).
         """
-        import os
 
         parent = self._db_path.parent
         try:
@@ -214,7 +250,7 @@ class CortexEngine(
     @asynccontextmanager
     async def session(self) -> AsyncIterator[aiosqlite.Connection]:
         """Proporciona una sesión transaccional (conexión) válida."""
-        conn = await self.get_conn()
+        conn = await self._get_or_create_conn()
         yield conn
 
     def _get_embedder(self) -> LocalEmbedder:
@@ -226,7 +262,20 @@ class CortexEngine(
     # ─── Connection ───────────────────────────────────────────────
 
     async def get_conn(self) -> aiosqlite.Connection:
-        """Returns the async database connection."""
+        """Returns the async database connection.
+        DEPRECATED: Use 'async with engine.session() as conn:' instead.
+        """
+        import warnings
+
+        warnings.warn(
+            "get_conn() is deprecated. Use session() context manager.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return await self._get_or_create_conn()
+
+    async def _get_or_create_conn(self) -> aiosqlite.Connection:
+        """Internal helper for connection acquisition."""
         async with self._conn_lock:
             if self._conn is not None:
                 return self._conn
@@ -251,13 +300,11 @@ class CortexEngine(
 
             return self._conn
 
-    def _get_conn(self) -> aiosqlite.Connection:
-        if self._conn is None:
-            raise RuntimeError("Connection not initialized. Call get_conn() first.")
-        return self._conn
-
     def get_connection(self) -> aiosqlite.Connection:
-        return self.get_conn()  # type: ignore[reportReturnType]
+        """Synchronous wrapper for internal connection access."""
+        if self._conn is None:
+            raise RuntimeError("Connection not initialized. Call session() first.")
+        return self._conn
 
     def _get_sync_conn(self):
         """Devuelve una conexión síncrona para procesos bloqueantes."""
@@ -329,27 +376,25 @@ class CortexEngine(
         limit: int = 3,
     ) -> list:
         """Recall causal episodes matching a query.
-
         Returns full causal DAGs, not isolated facts.
-        Enables the LLM to understand *why* something happened.
         """
         from cortex.memory.episodic import CausalTracer
 
-        conn = await self.get_conn()
-        tracer = CausalTracer(conn)
-        return await tracer.recall_episode(query, project, limit)
+        async with self.session() as conn:
+            tracer = CausalTracer(conn)
+            return await tracer.recall_episode(query, project, limit)
 
     async def trace_episode(
         self,
         fact_id: int,
-        max_depth: Optional[int] = None,
+        max_depth: int | None = None,
     ):
         """Trace the full causal DAG from a given fact ID."""
         from cortex.memory.episodic import CausalTracer
 
-        conn = await self.get_conn()
-        tracer = CausalTracer(conn)
-        return await tracer.trace_episode(fact_id, max_depth)
+        async with self.session() as conn:
+            tracer = CausalTracer(conn)
+            return await tracer.trace_episode(fact_id, max_depth)
 
     def recall_episode_sync(self, *args, **kwargs):
         return self._run_sync(self.recall_episode(*args, **kwargs))
@@ -395,24 +440,23 @@ class CortexEngine(
         )
         return await super().recall(*args, **kwargs)
 
-    async def get_fact(self, *args, **kwargs):
-        res = await super().get_fact(*args, **kwargs)
+    async def get_fact(self, fact_id: int, tenant_id: str = "default"):
+        res = await super().get_fact(fact_id, tenant_id=tenant_id)
         if not res:
             return None
         from cortex.engine.models import Fact
-
         return Fact(**{k: v for k, v in res.items() if k in Fact.__dataclass_fields__})
 
     async def retrieve(self, fact_id: int):
         """Retrieve an active fact. Raises FactNotFound if missing or deprecated."""
         from cortex.utils.errors import FactNotFound
 
-        conn = await self.get_conn()
-        async with conn.execute(
-            f"SELECT {FACT_COLUMNS} {FACT_JOIN} WHERE f.id = ?", (fact_id,)
-        ) as cursor:
-            row = await cursor.fetchone()
-        fact = row_to_fact(row) if row else None  # type: ignore[reportArgumentType]
+        async with self.session() as conn:
+            async with conn.execute(
+                f"SELECT {FACT_COLUMNS} {FACT_JOIN} WHERE f.id = ?", (fact_id,)
+            ) as cursor:
+                row = await cursor.fetchone()
+        fact = row_to_fact(tuple(row)) if row else None
         if not fact or fact.valid_until:
             raise FactNotFound(f"Fact {fact_id} not found or deprecated")
         return fact
@@ -424,43 +468,55 @@ class CortexEngine(
         """Retrieve all active facts across all projects, wrapped in models."""
         results = await super().get_all_active_facts(*args, **kwargs)
         from cortex.engine.models import Fact
+        return [
+            Fact(**{k: v for k, v in r.items() if k in Fact.__dataclass_fields__})
+            for r in results
+        ]
 
-        return [Fact(**{k: v for k, v in r.items() if k != "type"}) for r in results]
+    async def history(self, *args, **kwargs):
+        """Retrieve historical facts wrapped in models."""
+        results = await super().history(*args, **kwargs)
+        from cortex.engine.models import Fact
+        return [
+            Fact(**{k: v for k, v in r.items() if k in Fact.__dataclass_fields__})
+            for r in results
+        ]
 
-    async def shannon_report(self, project: Optional[str] = None) -> dict:
+    async def get_causal_chain(self, *args, **kwargs):
+        """Retrieve causal chain facts wrapped in models."""
+        results = await super().get_causal_chain(*args, **kwargs)
+        from cortex.engine.models import Fact
+        return [
+            Fact(**{k: v for k, v in r.items() if k in Fact.__dataclass_fields__})
+            for r in results
+        ]
+
+    async def shannon_report(self, project: str | None = None) -> dict:
         """Shannon entropy analysis of stored memory."""
         from cortex.extensions.shannon.report import EntropyReport
-
         return await EntropyReport.analyze(self, project)
 
     async def fingerprint(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
         top_domains: int = 15,
     ):
         """Cognitive Fingerprint — extract behavioral patterns from the Ledger.
-
         Returns a CognitiveFingerprint with:
         - PatternVector: 7 behavioral dimensions (risk, caution, synthesis…)
         - DomainPreferences: top active (project × fact_type) signatures
         - Archetype: sovereign_architect / obsessive_executor / etc.
         - to_agent_prompt(): ready for LLM system prompt injection
-
-        Args:
-            project: Optional project filter.
-            top_domains: Max domain preferences to extract.
         """
         from cortex.extensions.fingerprint.extractor import FingerprintExtractor
-
         return await FingerprintExtractor.extract(self, project, top_domains)
 
     def fingerprint_sync(self, *args, **kwargs):
         return self._run_sync(self.fingerprint(*args, **kwargs))
 
-    async def immortality_index(self, project: Optional[str] = None) -> dict:
+    async def immortality_index(self, project: str | None = None) -> dict:
         """Immortality Index (ι) — cognitive crystallization metric."""
         from cortex.extensions.shannon.immortality import ImmortalityIndex
-
         return await ImmortalityIndex.compute(self, project)
 
     def immortality_index_sync(self, *args, **kwargs):
@@ -468,16 +524,11 @@ class CortexEngine(
 
     async def prioritize(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
         tenant_id: str = "default",
     ) -> list:
-        """Bellman Policy Engine — prioritized action queue.
-
-        Returns a list of ActionItems scored by value function V(s) = R(s,a) + γ·V(s').
-        Higher value = more urgent/impactful action.
-        """
+        """Bellman Policy Engine — prioritized action queue."""
         from cortex.extensions.policy import PolicyEngine
-
         policy = PolicyEngine(self)
         return await policy.evaluate(project=project, tenant_id=tenant_id)
 
@@ -488,35 +539,32 @@ class CortexEngine(
         from cortex.database.schema import get_all_schema
         from cortex.engine.ledger import ImmutableLedger
 
-        conn = await self.get_conn()
+        async with self.session() as conn:
+            for stmt in get_all_schema():
+                if "USING vec0" in stmt and not self._vec_available:
+                    continue
+                await conn.executescript(stmt)
+            await conn.commit()
 
-        for stmt in get_all_schema():
-            if "USING vec0" in stmt and not self._vec_available:
-                continue
-            await conn.executescript(stmt)
-        await conn.commit()
+            await run_migrations_async(conn)
 
-        await run_migrations_async(conn)
+            for k, v in get_init_meta():
+                await conn.execute(
+                    "INSERT OR IGNORE INTO cortex_meta (key, value) VALUES (?, ?)",
+                    (k, v),
+                )
+            await conn.commit()
 
-        for k, v in get_init_meta():
-            await conn.execute(
-                "INSERT OR IGNORE INTO cortex_meta (key, value) VALUES (?, ?)",
-                (k, v),
-            )
-        await conn.commit()
-
-        self._ledger = ImmutableLedger(conn)  # type: ignore[reportArgumentType]
-        await self._init_memory_subsystem(self._db_path, conn)
-        await self._persistence.start()
-        metrics.set_engine(self)
-        logger.info("CORTEX database initialized (async) at %s", self._db_path)
+            self._ledger = ImmutableLedger(conn)  # type: ignore[reportArgumentType]
+            await self._init_memory_subsystem(self._db_path, conn)
+            await self._persistence.start()
+            metrics.set_engine(self)
+            logger.info("CORTEX database initialized (async) at %s", self._db_path)
 
     # ─── Helpers ──────────────────────────────────────────────────
 
     def export_snapshot(self, out_path: str | Path) -> str:
-        # Note: export_snapshot itself might be sync/blocking, consider if it needs move or refactor
         from cortex.extensions.sync.snapshot import export_snapshot
-
         return export_snapshot(self, out_path)  # type: ignore[reportArgumentType,reportReturnType]
 
     def _row_to_fact(  # type: ignore[override]
@@ -547,6 +595,13 @@ class CortexEngine(
         if self._conn:
             await self._conn.close()
             self._conn = None
+
+        # Clean up Wave 6 references
+        self.mac_maestro = None  # type: ignore
+        self.ledger_writer = None  # type: ignore
+        self.enrichment_queue = None  # type: ignore
+        self.ledger_store = None  # type: ignore
+
         self._ledger = None
 
     async def __aenter__(self):
@@ -554,3 +609,7 @@ class CortexEngine(
 
     async def __aexit__(self, *args):
         await self.close()
+
+
+# Ω₀ Type Alias for backward compatibility (AX-020 Refactor)
+AsyncCortexEngine = CortexEngine

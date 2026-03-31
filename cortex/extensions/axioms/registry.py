@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Canonical Axiom Registry — 22 axioms, zero ambiguity.
+"""Canonical Axiom Registry — 33 axioms, zero ambiguity.
 
 Every axiom in the MOSKV-1 ecosystem has exactly ONE definition here.
 All other documents (operating-axioms.md, GEMINI.md, docs/internal/*)
@@ -189,7 +189,7 @@ _OPERATIONAL: list[Axiom] = [
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 🟡 ASPIRATIONAL — Vision without CI enforcement (yet). (9 axioms)
+# 🟡 ASPIRATIONAL — Vision without CI enforcement (yet). (14 axioms)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 _ASPIRATIONAL: list[Axiom] = [
@@ -326,17 +326,10 @@ _ASPIRATIONAL: list[Axiom] = [
             "Un LLM no es un motor de verdad; es un compresor generativo de "
             "regularidades bajo incertidumbre. Su loss function minimiza "
             "sorpresa estadística (cross-entropy), no divergencia con el "
-            "estado real del mundo. La admisibilidad se confunde con "
-            "conocimiento y la fluidez con correspondencia empírica. "
-            "La verdad no emerge del modelo; se impone mediante topología: "
-            "colapso forzado (micro-ciclos O-H-A-M), guards como fronteras "
-            "de fallo (no creadores de verdad), zero-trust cognitivo, y "
-            "detección de cierre cognitivo fraudulento (premature epistemic "
-            "closure)."
+            "estado real del mundo. La verdad no emerge del modelo; se impone mediante topología."
         ),
         category=AxiomCategory.ASPIRATIONAL,
-        enforcement="Axioma de Colapso Entrópico. Guards entrópicos. "
-        "Zero-trust cognitivo. Detección de premature epistemic closure.",
+        enforcement="Axioma de Colapso Entrópico. Guards entrópicos.",
     ),
 ]
 
@@ -345,11 +338,41 @@ _ASPIRATIONAL: list[Axiom] = [
 # THE REGISTRY
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+class AxiomRegistry:
+    """Sovereign Axiom Registry.
+
+    Provides a class-based interface for axiom lookup and CI gate verification.
+    """
+
+    def __init__(self):
+        self._axioms: dict[str, Axiom] = {
+            ax.id: ax for ax in [*_CONSTITUTIONAL, *_OPERATIONAL, *_ASPIRATIONAL]
+        }
+        self._guarded: dict[str, Axiom] = {
+            ax.id: ax for ax in self._axioms.values() if ax.ci_gate is not None
+        }
+
+    async def load(self) -> None:
+        """Mock load for interface compatibility."""
+        pass
+
+    def get(self, axiom_id: str) -> Optional[Axiom]:
+        """Retrieve an axiom by its canonical ID (e.g., 'AX-010')."""
+        return self._axioms.get(axiom_id)
+
+    def by_category(self, category: AxiomCategory) -> list[Axiom]:
+        """Return all axioms in a given category."""
+        return [ax for ax in self._axioms.values() if ax.category == category]
+
+    def enforced(self) -> list[Axiom]:
+        """Return only axioms with a CI gate that blocks merges."""
+        return list(self._guarded.values())
+
+
+# Legacy exports for backwards compatibility
 AXIOM_REGISTRY: dict[str, Axiom] = {
     ax.id: ax for ax in [*_CONSTITUTIONAL, *_OPERATIONAL, *_ASPIRATIONAL]
 }
-
-# ── Lookup helpers ─────────────────────────────────────────────────────────────
 
 
 def by_category(category: AxiomCategory) -> list[Axiom]:

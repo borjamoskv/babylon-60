@@ -55,6 +55,10 @@ def attach_federated_dbs(
         if not db_path.exists():
             logger.debug("Skipping %s — %s not found", alias, db_path)
             continue
+        valid_aliases = [v[1] for v in _FEDERATION_MAP.values()]
+        if alias not in valid_aliases:
+            continue
+
         try:
             conn.execute(
                 f"ATTACH DATABASE ? AS {alias}",
@@ -76,7 +80,10 @@ def detach_federated_dbs(
     aliases: list[str],
 ) -> None:
     """DETACH previously attached databases."""
+    valid_aliases = [v[1] for v in _FEDERATION_MAP.values()]
     for alias in aliases:
+        if alias not in valid_aliases:
+            continue
         try:
             conn.execute(f"DETACH DATABASE {alias}")
         except sqlite3.OperationalError:
@@ -100,6 +107,10 @@ def _search_attached_db(
 
     enc = get_default_encrypter()
     v6_prefix = CortexEncrypter.PREFIX
+
+    valid_aliases = [v[1] for v in _FEDERATION_MAP.values()]
+    if alias not in valid_aliases:
+        return []
 
     # Fetch active facts (capped at 500 to limit memory)
     sql = (
@@ -126,16 +137,15 @@ def _search_attached_db(
     results: list[SearchResult] = []
 
     for row in rows:
-        content_raw = row[1] or ""
-        if str(content_raw).startswith(v6_prefix):
+        if str(row[1]).startswith(v6_prefix):
             try:
-                content = enc.decrypt_str(content_raw, tenant_id="default")
+                content = enc.decrypt_str(row[1], tenant_id="default")
             except (ValueError, TypeError, OSError):
                 continue
         else:
-            content = str(content_raw)
+            content = str(row[1])
 
-        if query_lower not in content.lower():  # type: ignore[reportOptionalMemberAccess]
+        if query_lower not in content.lower():
             continue
 
         try:

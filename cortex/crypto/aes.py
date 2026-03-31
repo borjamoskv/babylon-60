@@ -10,6 +10,7 @@ import json
 import logging
 import os
 import threading
+from typing import Any
 from typing import Any, Optional
 
 from cryptography.exceptions import InvalidKey, InvalidTag

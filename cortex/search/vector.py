@@ -151,8 +151,8 @@ def semantic_search_sync(
     query_embedding: list[float],
     top_k: int = 5,
     tenant_id: str = "default",
-    project: Optional[str] = None,
-    confidence: Optional[str] = None,
+    project: str | None = None,
+    confidence: str | None = None,
 ) -> list[SearchResult]:
     """Vector KNN search (sync)."""
     embedding_json = json.dumps(query_embedding)

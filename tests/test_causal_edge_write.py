@@ -30,7 +30,7 @@ async def _setup_db(conn: aiosqlite.Connection) -> None:
             valid_from TEXT,
             valid_until TEXT,
             source TEXT,
-            meta TEXT,
+            metadata TEXT,
             hash TEXT,
             signature TEXT,
             signer_pubkey TEXT,
@@ -39,6 +39,14 @@ async def _setup_db(conn: aiosqlite.Connection) -> None:
             quarantine_reason TEXT,
             is_tombstoned INTEGER DEFAULT 0,
             parent_decision_id INTEGER,
+            parent_id INTEGER,
+            relation_type TEXT,
+            quadrant TEXT,
+            storage_tier TEXT,
+            exergy_score REAL,
+            category TEXT,
+            yield_score REAL,
+            semantic_status TEXT,
             created_at TEXT,
             updated_at TEXT,
             consensus_score REAL DEFAULT 1.0,
@@ -67,6 +75,12 @@ async def _setup_db(conn: aiosqlite.Connection) -> None:
             project TEXT,
             tags TEXT,
             fact_type TEXT
+        );
+        CREATE TABLE IF NOT EXISTS fact_tags (
+            fact_id INTEGER,
+            tag TEXT,
+            tenant_id TEXT DEFAULT 'default',
+            UNIQUE(fact_id, tag, tenant_id)
         );
         CREATE TABLE IF NOT EXISTS entities (
             id INTEGER PRIMARY KEY AUTOINCREMENT,

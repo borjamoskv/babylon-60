@@ -19,12 +19,23 @@ __all__ = ["FactManager"]
 
 logger = logging.getLogger("cortex.facts")
 
+try:
+    from cortex.immunity.haiku import HaikuGuard
+except Exception:  # noqa: BLE001
+    HaikuGuard = None
+
 
 class FactManager:
     """Manages the full lifecycle and retrieval of facts."""
 
     def __init__(self, engine: EngineProtocol):
         self.engine = engine
+
+    @staticmethod
+    def _coerce_fact(raw: Fact | dict[str, Any]) -> Fact:
+        if isinstance(raw, Fact):
+            return raw
+        return Fact(**{k: v for k, v in raw.items() if k in _FACT_FIELDS})
 
     # Minimum content length to prevent garbage facts.
     MIN_CONTENT_LENGTH = 10
@@ -49,7 +60,12 @@ class FactManager:
         tenant_id = self.engine._resolve_tenant(tenant_id)
         conn = conn or await self.engine.get_conn()
 
+        # Optional guard: do not block engine startup if the immunity stack is mid-repair.
+        if HaikuGuard is not None:
+            HaikuGuard.enforce(content, {"fact_type": fact_type, "tags": tags or []})
+
         # Sovereign Pre-filtering Gate: Active Forgetting (#350/100)
+
         if (
             hasattr(self.engine, "memory")
             and self.engine.memory
@@ -91,10 +107,9 @@ class FactManager:
                             )
                             await conn.commit()  # type: ignore[reportOptionalMemberAccess]
                             return results[0].fact_id  # type: ignore[reportAttributeAccessIssue]
+        except ValidationError as e:
+            raise ValueError(f"Ingestion Validation Failed: {e}") from e
         except (OSError, RuntimeError, ValueError) as e:
-            # The ValidationError import was moved to the top of the file.
-            if isinstance(e, ValidationError):
-                raise ValueError(f"Ingestion Validation Failed: {e}") from e
             logger.warning("V8 Ingestion check failed: %s", e)
 
         from cortex.engine.store_mixin import StoreMixin
@@ -125,8 +140,7 @@ class FactManager:
         raw = await self.engine.get_fact(fact_id)
         if not raw:
             return None
-        # Convert dict to Fact model
-        return Fact(**raw)
+        return self._coerce_fact(raw)
 
     async def _fetch(self, query: str, params: list | tuple = ()) -> list[Fact]:
         """Lower-level fetch from engine database."""
@@ -144,7 +158,7 @@ class FactManager:
         results = await self.engine.get_all_active_facts(
             tenant_id=tenant_id, project=project, fact_types=fact_types
         )
-        return [Fact(**{k: v for k, v in r.items() if k in _FACT_FIELDS}) for r in results]
+        return [self._coerce_fact(r) for r in results]
 
     async def recall(
         self, project: str, tenant_id: str = "default", limit: Optional[int] = None, offset: int = 0
@@ -153,21 +167,21 @@ class FactManager:
         results = await self.engine.recall(
             project=project, tenant_id=tenant_id, limit=limit, offset=offset
         )
-        return [Fact(**{k: v for k, v in r.items() if k in _FACT_FIELDS}) for r in results]
+        return [self._coerce_fact(r) for r in results]
 
     async def history(
         self, project: str, tenant_id: str = "default", as_of: Optional[str] = None
     ) -> list[Fact]:
         """Temporal history delegated to QueryMixin."""
         results = await self.engine.history(project=project, tenant_id=tenant_id, as_of=as_of)
-        return [Fact(**{k: v for k, v in r.items() if k != "type"}) for r in results]
+        return [self._coerce_fact(r) for r in results]
 
     async def time_travel(
         self, tx_id: int, tenant_id: str = "default", project: Optional[str] = None
     ) -> list[Fact]:
         """Project state reconstruction delegated to QueryMixin."""
         results = await self.engine.time_travel(tx_id=tx_id, tenant_id=tenant_id)
-        return [Fact(**{k: v for k, v in r.items() if k != "type"}) for r in results]
+        return [self._coerce_fact(r) for r in results]
 
     reconstruct_state = time_travel
 

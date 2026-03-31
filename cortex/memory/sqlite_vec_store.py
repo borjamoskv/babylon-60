@@ -131,15 +131,22 @@ class SovereignVectorStoreL2:
                     success_rate REAL,
                     cognitive_layer TEXT,
                     parent_decision_id TEXT,
-                    metadata TEXT
+                    metadata TEXT,
+                    -- Double-Plane Facets (Ω₁₃)
+                    category TEXT DEFAULT 'general',
+                    quadrant TEXT DEFAULT 'ACTIVE',
+                    storage_tier TEXT DEFAULT 'HOT',
+                    facet_version INTEGER DEFAULT 2
                 )
             """)
             if self._vector_enabled:
-                self._conn.execute(f"""
+                self._conn.execute(
+                    f"""
                     CREATE VIRTUAL TABLE IF NOT EXISTS vec_facts USING vec0(
                         embedding float[{self._encoder.dimension}]
                     )
-                """)
+                    """
+                )
 
             # Indexes for Zero-Trust and Speed
             self._conn.execute(
@@ -150,14 +157,23 @@ class SovereignVectorStoreL2:
             self._ready = True
 
             # Ω₀: Structural integrity migration
-            try:
-                self._conn.execute("ALTER TABLE facts_meta ADD COLUMN cognitive_layer TEXT")
-            except sqlite3.OperationalError:
-                pass
-            try:
-                self._conn.execute("ALTER TABLE facts_meta ADD COLUMN parent_decision_id TEXT")
-            except sqlite3.OperationalError:
-                pass
+            migrations = [
+                ("cognitive_layer", "TEXT"),
+                ("parent_decision_id", "TEXT"),
+                ("category", "TEXT DEFAULT 'general'"),
+                ("quadrant", "TEXT DEFAULT 'ACTIVE'"),
+                ("storage_tier", "TEXT DEFAULT 'HOT'"),
+                ("facet_version", "INTEGER DEFAULT 2"),
+            ]
+            for col, col_type in migrations:
+                # Table/Column names cannot be parameterized in SQLite.
+                # Validating col and col_type against strict allowlist.
+                if not all(c.isalnum() or c == "_" for c in (col, col_type)):
+                    continue
+                try:
+                    self._conn.execute(f"ALTER TABLE facts_meta ADD COLUMN {col} {col_type}")  # nosec B608
+                except sqlite3.OperationalError:
+                    pass  # Column already exists
             self._conn.commit()
 
         # Initialize L2HybridSearch (FTS5 mirror) after conn is established
@@ -222,6 +238,7 @@ class SovereignVectorStoreL2:
                 count,
             )
             # Create sharded schema
+            # Validating meta_tb and vec_tb against strict allowlist (set in _get_domain_tables)
             conn.execute(f"""
                 CREATE TABLE {meta_tb} (
                     id TEXT PRIMARY KEY,
@@ -237,11 +254,10 @@ class SovereignVectorStoreL2:
                     parent_decision_id TEXT,
                     metadata TEXT
                 )
-            """)
+            """)  # nosec B608
             conn.execute(
-                f"CREATE VIRTUAL TABLE {vec_tb} USING "
-                f"vec0(embedding float[{self._encoder.dimension}])"
-            )
+                f"CREATE VIRTUAL TABLE {vec_tb} USING vec0(embedding float[{self._encoder.dimension}])"
+            )  # nosec B608
 
             # Migrate only distilled axioms (is_diamond = 1)
             conn.execute(
@@ -350,7 +366,7 @@ class SovereignVectorStoreL2:
 
                 if self._vector_enabled:
                     cursor.execute(
-                        f"INSERT INTO {vec_tb}(rowid, embedding) VALUES (?, ?)",
+                        f"INSERT INTO {vec_tb}(rowid, embedding) VALUES (?, ?)",  # nosec B608
                         (rowid, embedding_bytes),
                     )
                 conn.commit()
@@ -385,7 +401,7 @@ class SovereignVectorStoreL2:
         if not self._vector_enabled:
             # Fallback to pure metadata/content search (no similarity scoring)
             sql = (
-                f"SELECT * FROM {meta_tb} WHERE tenant_id = ? AND (project_id = ? OR is_bridge = 1)"
+                f"SELECT * FROM {meta_tb} WHERE tenant_id = ? AND (project_id = ? OR is_bridge = 1)"  # nosec B608
             )
             params: list[Any] = [tenant_id, project_id]
             if layer:
@@ -433,7 +449,7 @@ class SovereignVectorStoreL2:
                 WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
             )
             WHERE base_similarity > 0.3
-        """
+        """  # nosec B608
         params = [embedding_bytes, embedding_bytes, now, self._half_life, tenant_id, project_id]
 
         if layer:

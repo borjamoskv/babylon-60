@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Optional
 
 logger = logging.getLogger("cortex.guards.exergy")
 
@@ -35,72 +34,13 @@ _DECORATIVE_MARKERS = frozenset(
 
 _STOP_WORDS = frozenset(
     {
-        "a",
-        "an",
-        "the",
-        "is",
-        "are",
-        "was",
-        "were",
-        "be",
-        "been",
-        "being",
-        "have",
-        "has",
-        "had",
-        "do",
-        "does",
-        "did",
-        "will",
-        "would",
-        "could",
-        "should",
-        "may",
-        "might",
-        "shall",
-        "can",
-        "de",
-        "del",
-        "la",
-        "el",
-        "los",
-        "las",
-        "en",
-        "un",
-        "una",
-        "y",
-        "o",
-        "que",
-        "con",
-        "por",
-        "para",
-        "se",
-        "es",
-        "no",
-        "al",
-        "su",
-        "más",
-        "como",
-        "pero",
-        "sin",
-        "sobre",
-        "to",
-        "of",
-        "in",
-        "for",
-        "on",
-        "with",
-        "at",
-        "by",
-        "from",
-        "and",
-        "or",
-        "not",
-        "but",
-        "this",
-        "that",
-        "it",
-        "its",
+        "a", "an", "the", "is", "are", "was", "were", "be", "been", "being",
+        "have", "has", "had", "do", "does", "did", "will", "would", "could",
+        "should", "may", "might", "shall", "can", "de", "del", "la", "el",
+        "los", "las", "en", "un", "una", "y", "o", "que", "con", "por",
+        "para", "se", "es", "no", "al", "su", "más", "como", "pero",
+        "sin", "sobre", "to", "of", "in", "for", "on", "with", "at",
+        "by", "from", "and", "or", "not", "but", "this", "that", "it", "its",
     }
 )
 
@@ -170,7 +110,7 @@ class ExergyGuard:
         content: str,
         project: str,
         fact_type: str,
-        source: Optional[str] = None,
+        source: str | None = None,
     ) -> float:
         """
         Calculates exergy score and enforces the cutoff threshold.

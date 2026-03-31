@@ -9,7 +9,11 @@ import aiosqlite
 
 from cortex.database.core import connect as db_connect
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
-from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
+try:
+    from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
+except ImportError:
+    AsyncSignalBus = None  # type: ignore[assignment]
+    SignalBus = None  # type: ignore[assignment]
 
 logger = logging.getLogger("cortex.nemesis")
 
@@ -70,7 +74,6 @@ class NemesisProtocol:
             pass
         return dynamic_rules
 
-    @classmethod
     def analyze(cls, content: str, db_path: Optional[str] = None) -> Optional[str]:
         """Analyze content and return rejection reason if it violates protocols."""
         content_lower = content.lower()
@@ -110,7 +113,7 @@ class NemesisProtocol:
                     reason=f"Nemesis Antibody ({count}x): {reason}",
                 )
 
-                if conn:
+                if conn and AsyncSignalBus is not None:
                     bus = AsyncSignalBus(conn)
                     await bus.emit(
                         "nemesis:rejection",
@@ -126,7 +129,6 @@ class NemesisProtocol:
                 return f"[NEMESIS: REJECTED {count}x] Antibody: {reason}"
         return None
 
-    @classmethod
     def _check_dynamic_antibodies(cls, content_lower: str, db_path: Optional[str]) -> Optional[str]:
         """Helper to scan for dynamically generated antibodies."""
         for pattern, reason in cls._load_dynamic_antibodies():
@@ -143,7 +145,7 @@ class NemesisProtocol:
                 )
 
                 # Ω₅: Emit signal if db_path is available
-                if db_path:
+                if db_path and SignalBus is not None:
                     cls._emit_rejection_signal(db_path, pattern, reason, count)
 
                 if count > 5:
@@ -168,7 +170,6 @@ class NemesisProtocol:
         except Exception as e:  # noqa: BLE001 — signal emission failure should not crash analysis
             logger.debug("Failed to emit nemesis signal: %s", e)
 
-    @classmethod
     def assimilate(cls, vector: str, reason: str, db_path: Optional[str] = None) -> bool:
         """
         Ω₅: Dynamic Immunity. Converts an attack vector into a permanent antibody.
@@ -186,7 +187,7 @@ class NemesisProtocol:
         ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.6, reason="Immuno-assimilation")
         ENDOCRINE.pulse(HormoneType.NEURAL_GROWTH, 0.2, reason="Structural Adaptation")
 
-        if db_path:
+        if db_path and SignalBus is not None:
             try:
                 with db_connect(db_path) as conn:
                     bus = SignalBus(conn)

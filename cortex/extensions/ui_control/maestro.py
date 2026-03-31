@@ -219,6 +219,75 @@ class MaestroUI:
         """Cierra la ventana principal de una app (Cmd+W)."""
         return await self.window.close_window(target)
 
+    async def activate_app(self, target: AppTarget) -> InteractionResult:
+        """Activa una aplicación en primer plano."""
+        script = f'tell application "{target.name}" to activate'
+        try:
+            await run_applescript(script)
+            return InteractionResult(success=True)
+        except Exception as e:
+            return InteractionResult(success=False, error=str(e))
+
+    async def inject_keystroke(
+        self,
+        target: AppTarget,
+        key: str,
+        modifiers: list[str] | None = None,
+    ) -> InteractionResult:
+        """Activa la app y envía un keystroke de AppleScript."""
+        modifiers = modifiers or []
+        if not await is_app_running(target.name):
+            return InteractionResult(success=False, error=f"{target.name} is not running")
+
+        modifier_clause = ""
+        if modifiers:
+            modifier_clause = f" using {{{', '.join(modifiers)}}}"
+
+        script = f"""
+        tell application "{target.name}" to activate
+        delay 0.3
+        tell application "System Events"
+            keystroke "{key}"{modifier_clause}
+        end tell
+        """
+
+        try:
+            await run_applescript(script)
+            return InteractionResult(success=True)
+        except Exception as e:
+            return InteractionResult(success=False, error=str(e))
+
+    async def click_menu_item(
+        self,
+        target: AppTarget,
+        menu_path: list[str],
+    ) -> InteractionResult:
+        """Activa la app y pulsa un ítem de menú anidado."""
+        if len(menu_path) < 2:
+            return InteractionResult(
+                success=False,
+                error="Menu path must have at least 2 items: menu and item",
+            )
+
+        menu_name = menu_path[0]
+        item_name = menu_path[-1]
+
+        script = f"""
+        tell application "{target.name}" to activate
+        delay 0.3
+        tell application "System Events"
+            tell process "{target.name}"
+                click menu item "{item_name}" of menu "{menu_name}" of menu bar 1
+            end tell
+        end tell
+        """
+
+        try:
+            await run_applescript(script)
+            return InteractionResult(success=True)
+        except Exception as e:
+            return InteractionResult(success=False, error=str(e))
+
     # ─── AppleScript Directos ───────────────────────────────────
 
     async def run_script(self, script: str) -> Optional[str]:

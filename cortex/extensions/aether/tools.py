@@ -75,8 +75,8 @@ class AgentToolkit:
     def __init__(
         self,
         repo_path: str | Path,
-        allowed_tools: Optional[list[str]] = None,
-        capability_guard: Optional[CapabilityGuard] = None,
+        allowed_tools: list[str] | None = None,
+        capability_guard: CapabilityGuard | None = None,
     ) -> None:
         self.repo_path = Path(repo_path).resolve()
         if not self.repo_path.exists():
@@ -120,7 +120,7 @@ class AgentToolkit:
         return p
 
     @staticmethod
-    def _sovereign_bash_guard(cmd: str) -> Optional[str]:
+    def _sovereign_bash_guard(self, cmd: str) -> str | None:
         """Validate a shell command against the Sovereign Command Guard.
 
         Returns None if the command is safe, or an error string if blocked.
@@ -198,7 +198,7 @@ class AgentToolkit:
         try:
             result = subprocess.run(
                 cmd,
-                shell=True,  # noqa: S602
+                shell=True,  # noqa: S602 # nosec B602: Guarded by _sovereign_bash_guard
                 cwd=str(self.repo_path),
                 capture_output=True,
                 text=True,

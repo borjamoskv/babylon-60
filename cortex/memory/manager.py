@@ -12,26 +12,27 @@ from typing import Any
 from cortex.compaction.mem0_pipeline import Mem0Pipeline
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.engrams import CortexSemanticEngram
-from cortex.memory.hdc import HDCEncoder, HDCVectorStoreL2
 from cortex.memory.ledger import EventLedgerL3
 from cortex.memory.memory_compression import compress_and_store
-from cortex.memory.memory_retrieval import retrieve_episodic_context
 from cortex.memory.models import MemoryEvent
-from cortex.memory.resonance import AdaptiveResonanceGate
 from cortex.memory.schemas import SchemaEngine
 from cortex.memory.thalamus import ThalamusGate
 from cortex.memory.working import WorkingMemoryL1
 
 try:
+    from cortex.memory.hdc import HDCEncoder, HDCVectorStoreL2
+except Exception:  # noqa: BLE001
+    HDCEncoder = Any  # type: ignore[assignment,misc]
+    HDCVectorStoreL2 = Any  # type: ignore[assignment,misc]
+
+try:
     from cortex.extensions.policy.memory_os import MemoryOS
-except ImportError:
+except Exception:
     MemoryOS = None  # type: ignore
-
-
 
 try:
     from cortex.extensions.security.tenant import get_tenant_id
-except ImportError:
+except Exception:
 
     def get_tenant_id() -> str:
         return "default"
@@ -39,14 +40,14 @@ except ImportError:
 
 try:
     from cortex.extensions.sovereign.endocrine import DigitalEndocrine
-except ImportError:
+except Exception:
     DigitalEndocrine = None  # type: ignore
 
 from cortex.telemetry.metrics import metrics
 
 try:
     from cortex.extensions.thinking.fusion import ContextFusion
-except ImportError:
+except Exception:
     ContextFusion = None  # type: ignore
 
 try:
@@ -54,7 +55,7 @@ try:
     from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
     VectorStoreL2 = SovereignVectorStoreL2
-except ImportError:
+except Exception:
     VectorStoreL2 = None  # type: ignore[assignment,misc]
     DynamicSemanticSpace = None  # type: ignore[assignment,misc]
 
@@ -129,43 +130,85 @@ class CortexMemoryManager:
         )
         self._bg_workers: list[asyncio.Task[Any]] = []
         self.thalamus = ThalamusGate(self)
-        self._dynamic_space = DynamicSemanticSpace(self._l2, manager=self) if self._l2 else None  # type: ignore[reportOptionalCall]
-
-        try:
-            from cortex.memory.hologram import HolographicMemory
-
-            self._hologram = HolographicMemory(self._l2) if self._l2 else None
-        except ImportError:
-            self._hologram = None
+        self._dynamic_space = self._init_dynamic_space()
+        self._hologram = self._init_hologram()
 
         self._endocrine = DigitalEndocrine() if DigitalEndocrine else None
         self._schema_engine = SchemaEngine()
-
-        from cortex.memory.metamemory import MetamemoryMonitor
-
-        self.metamemory = MetamemoryMonitor()
+        self.metamemory = self._init_metamemory()
 
         # Memory OS subsystems (RFC-CORTEX-MEMORY-OS / Axiom Ω₁₃)
         self._mem0_pipeline = Mem0Pipeline()
         self._memory_os = MemoryOS() if MemoryOS else None
 
         # ART-v2 Resonance Engine [v6.2]
-        _sensor = None
-        try:
-            from cortex.extensions.songlines.sensor import TopographicSensor
-
-            _sensor = TopographicSensor()
-        except ImportError:
-            pass
-
-        self._resonance_gate = AdaptiveResonanceGate(
-            vector_store=self._l2, songline_sensor=_sensor, endocrine=self._endocrine
-        )
+        self._resonance_gate = self._init_resonance_gate()
 
         if self._dynamic_space:
             self._dynamic_space.start()
         self._fusion = ContextFusion(judge_provider=router) if ContextFusion else None
         self._start_bg_workers()
+
+    def _init_dynamic_space(self) -> Any | None:
+        """Initialize semantic RAM if the optional module is healthy."""
+        if not self._l2 or DynamicSemanticSpace is None:
+            return None
+        try:
+            return DynamicSemanticSpace(self._l2, manager=self)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Dynamic semantic space unavailable: %s", exc)
+            return None
+
+    def _init_hologram(self) -> Any | None:
+        """Initialize the RAM hologram without blocking manager startup."""
+        if not self._l2:
+            return None
+        try:
+            from cortex.memory.hologram import HolographicMemory
+
+            return HolographicMemory(self._l2)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Holographic memory unavailable: %s", exc)
+            return None
+
+    def _init_metamemory(self) -> Any | None:
+        """Initialize metamemory telemetry if the module is available."""
+        try:
+            from cortex.memory.metamemory import MetamemoryMonitor
+
+            return MetamemoryMonitor()
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Metamemory monitor unavailable: %s", exc)
+            return None
+
+    def _init_resonance_gate(self) -> Any | None:
+        """Initialize the critical resonance validator lazily.
+
+        Startup may degrade if optional enrichers are unavailable, but writes
+        must still fail closed when the gate itself cannot be constructed.
+        """
+        if not self._l2:
+            return None
+
+        sensor = None
+        try:
+            from cortex.extensions.songlines.sensor import TopographicSensor
+
+            sensor = TopographicSensor()
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Topographic sensor unavailable for resonance gate: %s", exc)
+
+        try:
+            from cortex.memory.resonance import AdaptiveResonanceGate
+
+            return AdaptiveResonanceGate(
+                vector_store=self._l2,
+                songline_sensor=sensor,
+                endocrine=self._endocrine,
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Resonance gate unavailable during startup: %s", exc)
+            return None
 
     def _start_bg_workers(self) -> None:
         """Initialize persistent background workers for L2 compression."""
@@ -348,9 +391,12 @@ class CortexMemoryManager:
         )
         if not should_process:
             logger.info("CortexMemoryManager: Fact filtered by Thalamus. Action: %s", action)
-            from cortex.routes.notch_ws import notify_notch_pruning
+            try:
+                from cortex.routes.notch_ws import notify_notch_pruning
 
-            await notify_notch_pruning()
+                await notify_notch_pruning()
+            except ImportError:
+                logger.debug("notch_ws unavailable (FastAPI not installed), skipping notification")
             return f"filtered:{action}"
 
         dedup_id = self._check_deduplication(tenant_id, project_id, content)
@@ -381,6 +427,9 @@ class CortexMemoryManager:
             cognitive_layer=adjusted_layer,  # type: ignore[reportArgumentType]
             parent_decision_id=int(parent_decision_id) if parent_decision_id is not None else None,
         )
+
+        if self._resonance_gate is None:
+            raise RuntimeError("Resonance gate unavailable; refusing to persist without validation")
 
         status, engram = await self._resonance_gate.gate(
             candidate=candidate, precision_mode=(fact_type in ("decision", "rule"))
@@ -428,6 +477,8 @@ class CortexMemoryManager:
         working_set = self._l1.get_context(tenant_id=tenant_id)
 
         _start_recall = time.perf_counter()
+        from cortex.memory.memory_retrieval import retrieve_episodic_context
+
         episodic_facts = await retrieve_episodic_context(
             self, tenant_id, project_id, query, max_episodes, layer=layer
         )

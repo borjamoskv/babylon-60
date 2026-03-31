@@ -15,11 +15,12 @@ import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
 __all__ = [
+    "ReasoningMode",
     "IntentProfile",
     "CascadeTier",
     "CascadeEvent",
@@ -27,6 +28,22 @@ __all__ = [
     "CortexPrompt",
     "BaseProvider",
 ]
+
+# ─── Cognitive Reasoning Modes (Axiom Ω₁₆) ──────────────────────────────
+
+
+class ReasoningMode(str, Enum):
+    """Execution modes that dictate provider selection, hedging, and capability requirements."""
+
+    DEEP_THINK = "deep"
+    """Requires mathematical/logical verification. Prioritizes 'reasoner' or 'thinking' models."""
+
+    DEEP_RESEARCH = "deep_research"
+    """Requires active tool use, structured searching, and synthesis across domains."""
+
+    ULTRA_THINK = "ultra"
+    """P0 Singularity Mode. Demands maximum context, strict zero-hallucination guards,
+    and compound problem solving. Overrides all cost gates."""
 
 
 # ─── Intent Classification ─────────────────────────────────────────────────
@@ -144,6 +161,14 @@ class CortexPrompt(BaseModel):
             "Tipo de intención del prompt. Determina qué fallbacks son "
             "elegibles para el cascade determinista. GENERAL usa todos."
         ),
+    )
+    reasoning_mode: Optional[ReasoningMode] = Field(
+        default=None,
+        description="Explicit cognitive mode requiring specific architectural capabilities.",
+    )
+    swarm_mode: bool = Field(
+        default=False,
+        description="Ω₂₁: Parallel Swarm Racing. Race multiple providers for O(1) latency.",
     )
 
     def to_openai_messages(self) -> list[dict[str, str]]:

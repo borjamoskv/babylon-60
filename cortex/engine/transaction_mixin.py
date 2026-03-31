@@ -28,13 +28,21 @@ class TransactionMixin(EngineMixinBase):
     """
 
     async def _log_transaction(
-        self, conn: aiosqlite.Connection, project: str, action: str, detail: dict[str, Any]
+        self,
+        conn: aiosqlite.Connection,
+        project: str,
+        action: str,
+        detail: dict[str, Any],
+        tenant_id: str = "default",
     ) -> int:
         from cortex.utils.canonical import canonical_json, compute_tx_hash
 
         dj = canonical_json(detail)
         ts = now_iso()
-        cursor = await conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1")
+        cursor = await conn.execute(
+            "SELECT hash FROM transactions WHERE tenant_id = ? ORDER BY id DESC LIMIT 1",
+            (tenant_id,),
+        )
         prev = await cursor.fetchone()
         await cursor.close()
         ph = prev[0] if prev else "GENESIS"
@@ -42,10 +50,10 @@ class TransactionMixin(EngineMixinBase):
 
         c = await conn.execute(
             "INSERT INTO transactions "
-            "(project, action, detail, prev_hash, hash, timestamp) "
-            "VALUES (?, ?, ?, COALESCE((SELECT hash FROM transactions "
-            "ORDER BY id DESC LIMIT 1), 'GENESIS'), ?, ?)",
-            (project, action, dj, th, ts),
+            "(tenant_id, project, action, detail, prev_hash, hash, timestamp) "
+            "VALUES (?, ?, ?, ?, COALESCE((SELECT hash FROM transactions "
+            "WHERE tenant_id = ? ORDER BY id DESC LIMIT 1), 'GENESIS'), ?, ?)",
+            (tenant_id, project, action, dj, tenant_id, th, ts),
         )
         tx_id = c.lastrowid
 

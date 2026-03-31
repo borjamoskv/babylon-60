@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import re
 from pathlib import Path
-from typing import Any, Final, Optional
+from typing import Any, Final
 
 logger = logging.getLogger("cortex.extensions.llm.presets")
 
+# Default location for presets
 _ASSET_PATH: Final[str] = str(
     Path(__file__).parent.parent.parent.parent / "config" / "llm_presets.json"
 )
@@ -22,111 +24,102 @@ _PROHIBITED_TIERS: Final[re.Pattern[str]] = re.compile(
 )
 
 # Valid tier values (ordered by capability)
-_VALID_TIERS: Final[frozenset[str]] = frozenset(
-    {
-        "frontier",
-        "high",
-        "local",
-    }
-)
+_VALID_TIERS: Final[frozenset[str]] = frozenset({"frontier", "high", "local"})
 
-# Valid cost classes
-_VALID_COST_CLASSES: Final[frozenset[str]] = frozenset(
-    {
-        "free",
-        "low",
-        "medium",
-        "high",
-        "variable",
-    }
-)
+# Cost ordering: lower index = cheaper
+_COST_RANK: Final[dict[str, int]] = {
+    "free": 0,
+    "low": 1,
+    "medium": 2,
+    "variable": 3,
+    "high": 4,
+}
 
-
-def _validate_model_policy(
-    presets: dict[str, dict[str, Any]],
-) -> None:
-    """Enforce Model Policy — warn on prohibited model tiers.
-
-    Axiom Ω₃ (Byzantine Default): models must be frontier or 'high' tier.
-    Validates both the `tier` field and model name patterns.
-    """
-    for provider, config in presets.items():
-        # Tier field validation
-        tier = config.get("tier")
-        if tier and tier not in _VALID_TIERS:
-            logger.warning(
-                "⚠️ [MODEL POLICY] %s has invalid tier '%s'. Valid: %s",
-                provider,
-                tier,
-                sorted(_VALID_TIERS),
-            )
-        elif not tier:
-            logger.debug(
-                "[MODEL POLICY] %s missing 'tier' field.",
-                provider,
-            )
-
-        # Cost class validation
-        cost = config.get("cost_class")
-        if cost and cost not in _VALID_COST_CLASSES:
-            logger.warning(
-                "⚠️ [MODEL POLICY] %s has invalid cost_class '%s'.",
-                provider,
-                cost,
-            )
-
-        # Regex defense: catch prohibited model name patterns
-        default = config.get("default_model", "")
-        if _PROHIBITED_TIERS.search(default):
-            logger.warning(
-                "⚠️ [MODEL POLICY] %s default_model '%s' uses "
-                "prohibited tier. Update llm_presets.json.",
-                provider,
-                default,
-            )
-
-        intent_map = config.get("intent_model_map", {})
-        for intent, model in intent_map.items():
-            if _PROHIBITED_TIERS.search(model):
-                logger.warning(
-                    "⚠️ [MODEL POLICY] %s intent '%s' → '%s' uses prohibited tier.",
-                    provider,
-                    intent,
-                    model,
-                )
+# Tier ordering: higher index = stronger
+_TIER_RANK: Final[dict[str, int]] = {
+    "local": 0,
+    "high": 1,
+    "frontier": 2,
+}
 
 
 def load_presets() -> dict[str, dict[str, Any]]:
-    """Lazy-load provider presets from assets with error recovery."""
+    """Load LLM presets from config/llm_presets.json."""
     global _PRESETS_CACHE
     if _PRESETS_CACHE:
         return _PRESETS_CACHE
 
     path = Path(_ASSET_PATH)
     if not path.exists():
-        logger.warning(
-            "LLM presets asset not found at %s. Using empty defaults.",
-            path,
-        )
+        logger.warning("LLM presets file not found at %s. Using empty defaults.", path)
         return {}
 
     try:
-        data = json.loads(path.read_text())
-        if not isinstance(data, dict):
-            logger.error(
-                "Invalid presets format in %s. Expected dict.",
-                path,
-            )
-            return {}
-        _validate_model_policy(data)
-        _PRESETS_CACHE = data
-        return _PRESETS_CACHE
+        with open(path, "r", encoding="utf-8") as f:
+            presets = json.load(f)
+            _validate_model_policy(presets)
+            _PRESETS_CACHE = presets
+            return presets
     except (json.JSONDecodeError, OSError) as e:
         logger.error("Failed to load LLM presets: %s", e)
         return {}
 
 
-def get_preset_info(provider: str) -> Optional[dict[str, Any]]:
+def _validate_model_policy(presets: dict[str, dict[str, Any]]) -> None:
+    """Enforce Rule 1.3: Strictly mandate frontier or high-tier models."""
+    for name, config in presets.items():
+        tier = config.get("tier", "unknown")
+        if tier not in _VALID_TIERS:
+            logger.debug("Provider %s has non-standard tier: %s", name, tier)
+
+        default_model = config.get("default_model", "")
+        if _PROHIBITED_TIERS.search(default_model):
+            logger.warning(
+                "Rule 1.3 Violation Warning: Provider %s uses prohibited model pattern: %s",
+                name,
+                default_model,
+            )
+
+
+def provider_inventory(active_provider: str | None = None) -> list[dict[str, Any]]:
+    """Return a list of all registered LLM providers and their operational status."""
+    presets = load_presets()
+    inventory = []
+
+    for name, config in presets.items():
+        env_key = config.get("env_key") or config.get("api_key_env")
+        api_key_present = bool(os.environ.get(env_key)) if env_key else True
+        api_key_required = bool(env_key)
+
+        is_local = name in ["ollama", "lmstudio", "llamacpp", "vllm", "jan"]
+        status = "ready"
+        ready = True
+        reason = ""
+
+        if api_key_required and not api_key_present and not is_local:
+            status = "missing_api_key"
+            ready = False
+            reason = f"Missing env var: {env_key}"
+
+        inventory.append({
+            "name": name,
+            "provider": name,
+            "tier": config.get("tier", "high"),
+            "is_local": is_local,
+            "cost_class": config.get("cost_class", "medium"),
+            "context_window": config.get("context_window", 0),
+            "default_model": config.get("default_model", ""),
+            "active": name == active_provider,
+            "ready": ready,
+            "status": status,
+            "reason": reason,
+            "api_key_required": api_key_required,
+            "api_key_present": api_key_present,
+        })
+    return inventory
+
+
+def get_preset_info(provider: str) -> dict[str, Any] | None:
     """Return preset config for a provider, or None if not found."""
     return load_presets().get(provider)
 
@@ -136,32 +129,8 @@ def list_providers() -> list[str]:
     return list(load_presets().keys()) + ["custom"]
 
 
-# ─── Tier & Cost-Aware Routing (Ω₂ Entropic Selection) ──────────
-
-
-# Cost ordering: lower index = cheaper
-_COST_RANK: dict[str, int] = {
-    "free": 0,
-    "low": 1,
-    "medium": 2,
-    "variable": 3,
-    "high": 4,
-}
-
-# Tier ordering: higher index = stronger
-_TIER_RANK: dict[str, int] = {
-    "local": 0,
-    "high": 1,
-    "frontier": 2,
-}
-
-
-def resolve_model(provider: str, intent: str) -> Optional[str]:
-    """Resolve the best model for a provider and intent.
-
-    Returns the intent-specific model if mapped, otherwise the default model.
-    Returns None if the provider doesn't exist.
-    """
+def resolve_model(provider: str, intent: str) -> str | None:
+    """Resolve the best model for a provider and intent."""
     info = get_preset_info(provider)
     if not info:
         return None
@@ -170,24 +139,31 @@ def resolve_model(provider: str, intent: str) -> Optional[str]:
     return intent_map.get(intent, info.get("default_model"))
 
 
+def resolve_context_window(provider: str, model_name: str) -> int:
+    """Resolve the context window for a specific model under a provider."""
+    info = get_preset_info(provider)
+    if not info:
+        return 0
+
+    models_meta = info.get("models", {})
+    if isinstance(models_meta, dict) and model_name in models_meta:
+        meta = models_meta[model_name]
+        if isinstance(meta, dict) and "context_window" in meta:
+            return int(meta["context_window"])
+        if isinstance(meta, (int, float)):
+            return int(meta)
+    
+    return int(info.get("context_window", 0))
+
+
 def providers_for_intent(
     intent: str,
     *,
     min_tier: str = "high",
-    max_cost: Optional[str] = None,
+    max_cost: str | None = None,
     sort_by: str = "cost",
 ) -> list[tuple[str, str]]:
-    """Return providers that support an intent, sorted by cost or tier.
-
-    Args:
-        intent: The intent to match (e.g., "architect", "code", "reasoning").
-        min_tier: Minimum tier to include ("local", "high", "frontier").
-        max_cost: Maximum cost class to include (None = no limit).
-        sort_by: Sort key — "cost" (cheapest first) or "tier" (strongest first).
-
-    Returns:
-        List of (provider_name, model_name) tuples, sorted accordingly.
-    """
+    """Return providers that support an intent, sorted by cost or tier."""
     presets = load_presets()
     min_tier_rank = _TIER_RANK.get(min_tier, 0)
     max_cost_rank = _COST_RANK.get(max_cost, 999) if max_cost else 999
@@ -202,13 +178,12 @@ def providers_for_intent(
         if cost_rank > max_cost_rank:
             continue
 
-        # Check if intent is in specialization or intent_model_map
-        specializations = config.get("specialization", [])
         intent_map = config.get("intent_model_map", {})
+        specializations = config.get("specialization", [])
 
         if intent in intent_map:
             model = intent_map[intent]
-        elif intent in specializations:
+        elif intent in specializations or not intent_map:
             model = config.get("default_model", "")
         else:
             continue
@@ -216,28 +191,25 @@ def providers_for_intent(
         results.append((name, model, cost_rank, tier_rank))
 
     if sort_by == "cost":
-        results.sort(key=lambda x: (x[2], -x[3]))  # cheapest first, then strongest
+        results.sort(key=lambda x: (x[2], -x[3]))
     else:
-        results.sort(key=lambda x: (-x[3], x[2]))  # strongest first, then cheapest
+        results.sort(key=lambda x: (-x[3], x[2]))
 
     return [(name, model) for name, model, _, _ in results]
 
 
 def frontier_providers(intent: str = "general") -> list[tuple[str, str]]:
-    """Return only frontier-tier providers for an intent, cheapest first."""
+    """Return only frontier-tier providers for an intent."""
     return providers_for_intent(intent, min_tier="frontier", sort_by="cost")
 
 
 def cheapest_providers(intent: str = "general") -> list[tuple[str, str]]:
-    """Return providers sorted by cost (cheapest first) for an intent."""
+    """Return providers sorted by cost (cheapest first)."""
     return providers_for_intent(intent, sort_by="cost")
 
 
 def routing_matrix() -> dict[str, dict[str, str]]:
-    """Return the full intent→provider→model routing matrix.
-
-    Useful for debugging and visualization.
-    """
+    """Return the full intent→provider→model routing matrix."""
     presets = load_presets()
     intents = {"code", "reasoning", "creative", "architect", "general"}
     matrix: dict[str, dict[str, str]] = {}
@@ -253,17 +225,3 @@ def routing_matrix() -> dict[str, dict[str, str]]:
                 matrix[name] = row
 
     return matrix
-
-
-def get_providers_by_tier(
-    tier: str,
-) -> list[str]:
-    """Return provider names matching a tier (frontier/high/local)."""
-    return [name for name, cfg in load_presets().items() if cfg.get("tier") == tier]
-
-
-def get_providers_by_cost(
-    cost_class: str,
-) -> list[str]:
-    """Return provider names matching a cost class."""
-    return [name for name, cfg in load_presets().items() if cfg.get("cost_class") == cost_class]

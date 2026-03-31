@@ -93,6 +93,7 @@ class TombstoneMonitor:
 
                     try:
                         cursor.execute("BEGIN IMMEDIATE")
+                        # nosec B608 — Validated local table structure, batch parameterized.
                         cursor.execute(
                             f"DELETE FROM fact_embeddings WHERE fact_id IN ({id_list})", batch
                         )

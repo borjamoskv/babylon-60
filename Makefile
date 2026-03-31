@@ -1,4 +1,4 @@
-.PHONY: help install dev test lint format build serve docs deploy clean bench
+.PHONY: help install dev test lint format build serve docs deploy clean bench repo-health repo-health-all
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -24,6 +24,12 @@ test-slow: ## Run only slow tests
 
 lint: ## Run linter
 	ruff check cortex/ tests/
+
+repo-health: ## Check changed/untracked files for conflict markers and Python syntax errors
+	python3 scripts/repo_health_changed.py
+
+repo-health-all: ## Check all tracked and untracked files for conflict markers and Python syntax errors
+	python3 scripts/repo_health_changed.py --all
 
 format: ## Auto-format code
 	ruff format cortex/ tests/

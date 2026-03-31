@@ -3,8 +3,6 @@
 Extracted from database/schema.py to satisfy the Landauer LOC barrier.
 Contains: Consensus/RWC (votes, agents, trust), Monitoring (signals, entity_events),
 Analytics (evolution_state, episodes, episodes_fts, context_snapshots, episodes_indexes).
-
-Import from schema.py via `from cortex.database.schema_extensions import *`.
 """
 
 from __future__ import annotations
@@ -14,6 +12,7 @@ CREATE_VOTES = """
 CREATE TABLE IF NOT EXISTS consensus_votes (
     id      INTEGER PRIMARY KEY AUTOINCREMENT,
     fact_id INTEGER NOT NULL REFERENCES facts(id),
+    tenant_id TEXT NOT NULL DEFAULT 'default',
     agent   TEXT NOT NULL,
     vote    INTEGER NOT NULL, -- 1 (verify), -1 (dispute)
     timestamp TEXT NOT NULL DEFAULT (datetime('now')),
@@ -47,6 +46,7 @@ CREATE TABLE IF NOT EXISTS consensus_votes_v2 (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     fact_id         INTEGER NOT NULL REFERENCES facts(id),
     agent_id        TEXT NOT NULL REFERENCES agents(id),
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     vote            INTEGER NOT NULL,
     vote_weight     REAL NOT NULL,
     agent_rep_at_vote   REAL NOT NULL,
@@ -64,6 +64,7 @@ CREATE TABLE IF NOT EXISTS trust_edges (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     source_agent    TEXT NOT NULL REFERENCES agents(id),
     target_agent    TEXT NOT NULL REFERENCES agents(id),
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     trust_weight    REAL NOT NULL,
     created_at      TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at      TEXT NOT NULL DEFAULT (datetime('now')),
@@ -75,6 +76,7 @@ CREATE_OUTCOMES = """
 CREATE TABLE IF NOT EXISTS consensus_outcomes (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     fact_id         INTEGER NOT NULL REFERENCES facts(id),
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     final_state     TEXT NOT NULL,
     final_score     REAL NOT NULL,
     resolved_at     TEXT NOT NULL DEFAULT (datetime('now')),
@@ -144,6 +146,7 @@ CREATE VIRTUAL TABLE IF NOT EXISTS episodes_fts USING fts5(
     content,
     event_type,
     project,
+    tenant_id UNINDEXED,
     content='episodes',
     content_rowid='id'
 );
@@ -169,6 +172,7 @@ CREATE INDEX IF NOT EXISTS idx_evo_domain ON evolution_state(agent_domain);
 CREATE_SIGNALS = """
 CREATE TABLE IF NOT EXISTS signals (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id   TEXT NOT NULL DEFAULT 'default',
     event_type  TEXT NOT NULL,
     payload     TEXT NOT NULL DEFAULT '{}',
     source      TEXT NOT NULL,
@@ -212,6 +216,7 @@ CREATE INDEX IF NOT EXISTS idx_ee_timestamp ON entity_events(timestamp);
 CREATE_LOCK_INTENTS = """
 CREATE TABLE IF NOT EXISTS lock_intents (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     resource        TEXT NOT NULL,
     agent_id        TEXT NOT NULL,
     action          TEXT NOT NULL, -- 'request', 'release'
@@ -224,6 +229,7 @@ CREATE TABLE IF NOT EXISTS lock_intents (
 CREATE_LOCK_STATE = """
 CREATE TABLE IF NOT EXISTS lock_state (
     resource        TEXT PRIMARY KEY,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     holder_agent    TEXT,
     acquired_at     TEXT,
     expires_at      TEXT,
@@ -252,10 +258,31 @@ CREATE INDEX IF NOT EXISTS idx_llm_telemetry_tier ON llm_telemetry(tier);
 CREATE INDEX IF NOT EXISTS idx_llm_telemetry_timestamp ON llm_telemetry(timestamp);
 """
 
-
 CREATE_LOCK_INDEXES = """
 CREATE INDEX IF NOT EXISTS idx_lock_intents_resource ON lock_intents(resource);
 CREATE INDEX IF NOT EXISTS idx_lock_intents_agent ON lock_intents(agent_id);
+"""
+
+# ─── Enrichment Queue (P0 Decoupling) ───────────────────────────────
+CREATE_ENRICHMENT_JOBS = """
+CREATE TABLE IF NOT EXISTS enrichment_jobs (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    fact_id         INTEGER NOT NULL REFERENCES facts(id),
+    job_type        TEXT NOT NULL DEFAULT 'embedding',
+    status          TEXT NOT NULL DEFAULT 'queued',
+    priority        INTEGER DEFAULT 0,
+    attempts        INTEGER DEFAULT 0,
+    last_error      TEXT,
+    next_attempt_at TEXT,
+    payload         TEXT,
+    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);
+"""
+
+CREATE_ENRICHMENT_JOBS_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_enrichment_jobs_status ON enrichment_jobs(status, priority DESC);
+CREATE INDEX IF NOT EXISTS idx_enrichment_jobs_fact ON enrichment_jobs(fact_id);
 """
 
 # ─── Full-Text Search (Decoupled in v5) ─────────────────────────────
@@ -264,7 +291,8 @@ CREATE VIRTUAL TABLE IF NOT EXISTS facts_fts USING fts5(
     content,
     project,
     tags,
-    fact_type
+    fact_type,
+    tenant_id UNINDEXED
 );
 """
 
@@ -272,16 +300,16 @@ CREATE_FACTS_FTS_TRIGGERS = """
 CREATE TRIGGER IF NOT EXISTS trg_facts_fts_insert
 AFTER INSERT ON facts
 BEGIN
-  INSERT INTO facts_fts(rowid, content, project, tags, fact_type)
-  VALUES (NEW.id, NEW.content, NEW.project, NEW.tags, NEW.fact_type);
+  INSERT INTO facts_fts(rowid, content, project, tags, fact_type, tenant_id)
+  VALUES (NEW.id, NEW.content, NEW.project, NEW.tags, NEW.fact_type, NEW.tenant_id);
 END;
 
 CREATE TRIGGER IF NOT EXISTS trg_facts_fts_update
-AFTER UPDATE OF content, project, tags, fact_type ON facts
+AFTER UPDATE OF content, project, tags, fact_type, tenant_id ON facts
 BEGIN
   DELETE FROM facts_fts WHERE rowid = OLD.id;
-  INSERT INTO facts_fts(rowid, content, project, tags, fact_type)
-  VALUES (NEW.id, NEW.content, NEW.project, NEW.tags, NEW.fact_type);
+  INSERT INTO facts_fts(rowid, content, project, tags, fact_type, tenant_id)
+  VALUES (NEW.id, NEW.content, NEW.project, NEW.tags, NEW.fact_type, NEW.tenant_id);
 END;
 
 CREATE TRIGGER IF NOT EXISTS trg_facts_fts_delete
@@ -307,6 +335,7 @@ CREATE TABLE IF NOT EXISTS merkle_roots (
 CREATE_PROCEDURAL_ENGRAMS = """
 CREATE TABLE IF NOT EXISTS procedural_engrams (
     skill_name      TEXT PRIMARY KEY,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     invocations     INTEGER NOT NULL DEFAULT 0,
     success_rate    REAL NOT NULL DEFAULT 1.0,
     avg_latency_ms  REAL NOT NULL DEFAULT 0.0,
@@ -349,7 +378,6 @@ CREATE TABLE IF NOT EXISTS causal_edges (
 );
 """
 
-
 # Convenience export — all extension statements in insertion order
 EXTENSION_SCHEMA = [
     CREATE_VOTES,
@@ -376,6 +404,8 @@ EXTENSION_SCHEMA = [
     CREATE_LLM_TELEMETRY,
     CREATE_LLM_TELEMETRY_INDEX,
     CREATE_CAUSAL_EDGES,
+    CREATE_ENRICHMENT_JOBS,
+    CREATE_ENRICHMENT_JOBS_INDEXES,
     CREATE_PROCEDURAL_ENGRAMS,
     CREATE_FACTS_FTS,
     CREATE_FACTS_FTS_TRIGGERS,
