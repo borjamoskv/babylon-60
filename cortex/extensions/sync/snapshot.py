@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger("cortex.extensions.sync")
 
 
-def _safe_parse_tags(raw: Optional[str]) -> list[str]:
+def _safe_parse_tags(raw: str | None) -> list[str]:
     """Parse tags from DB, handling both JSON arrays and legacy comma-separated strings."""
     if not raw:
         return []
@@ -32,10 +32,10 @@ def _safe_parse_tags(raw: Optional[str]) -> list[str]:
 
 async def export_snapshot(
     engine: CortexEngine,
-    out_path: Optional[Path] = None,
-    project_filter: Optional[str] = None,
-    min_confidence: Optional[float] = None,
-    fact_types: Optional[list[str]] = None,
+    out_path: Path | None = None,
+    project_filter: str | None = None,
+    min_confidence: float | None = None,
+    fact_types: list[str] | None = None,
 ) -> Path:
     """Exporta un snapshot legible de toda la memoria activa de CORTEX.
 

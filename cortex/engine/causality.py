@@ -1,7 +1,10 @@
+"""Causal graph and taint propagation utilities for CORTEX."""
+
 from __future__ import annotations
 
 import json
 import logging
+from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
@@ -9,9 +12,28 @@ from typing import Any, Optional
 
 import aiosqlite
 
+from cortex.database.core import connect
 from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
 
 logger = logging.getLogger("cortex.engine.causality")
+
+__all__ = [
+    "AsyncCausalGraph",
+    "AsyncCausalOracle",
+    "CausalGraph",
+    "CausalOracle",
+    "Confidence",
+    "EDGE_DERIVED_FROM",
+    "EDGE_TAINTED_BY",
+    "EDGE_TRIGGERED_BY",
+    "EDGE_UPDATED_FROM",
+    "EpistemicStatus",
+    "LedgerEvent",
+    "TaintReport",
+    "TaintStatus",
+    "_downgrade_confidence",
+    "link_causality",
+]
 
 
 class EpistemicStatus(str, Enum):
@@ -21,26 +43,47 @@ class EpistemicStatus(str, Enum):
     OBSOLETE = "obsolete"
 
 
+class TaintStatus(str, Enum):
+    """Tri-state causal taint (Ω₁₃)."""
+
+    CLEAN = "clean"
+    SUSPECT = "suspect"
+    TAINTED = "tainted"
+
+
+class Confidence(str, Enum):
+    """Ordinal confidence levels C1 (lowest) -> C5 (highest)."""
+
+    C1 = "C1"
+    C2 = "C2"
+    C3 = "C3"
+    C4 = "C4"
+    C5 = "C5"
+
+
 EDGE_DERIVED_FROM = "derived_from"
 EDGE_TRIGGERED_BY = "triggered_by"
 EDGE_UPDATED_FROM = "updated_from"
 EDGE_TAINTED_BY = "tainted_by"
 
-# Ordered from highest to lowest confidence — Ω₁₃ §4.
-CONFIDENCE_LEVELS: list[str] = ["C5", "C4", "C3", "C2", "C1"]
+CONFIDENCE_ORDER: list[Confidence] = [
+    Confidence.C1,
+    Confidence.C2,
+    Confidence.C3,
+    Confidence.C4,
+    Confidence.C5,
+]
+CONFIDENCE_LEVELS: list[str] = [c.value for c in reversed(CONFIDENCE_ORDER)]
 
 
 def _downgrade_confidence(current: str, hops: int) -> str:
-    """Downgrade confidence by *hops* levels (floor = C1).
-
-    Unknown confidence values collapse directly to C1.
-    """
+    """Downgrade confidence by *hops* levels (floor = C1)."""
     try:
-        idx = CONFIDENCE_LEVELS.index(current)
+        idx = CONFIDENCE_ORDER.index(Confidence(current))
     except ValueError:
-        return "C1"
-    new_idx = min(idx + hops, len(CONFIDENCE_LEVELS) - 1)
-    return CONFIDENCE_LEVELS[new_idx]
+        return Confidence.C1.value
+    new_idx = max(0, idx - hops)
+    return CONFIDENCE_ORDER[new_idx].value
 
 
 @dataclass(frozen=True)
@@ -64,26 +107,20 @@ class LedgerEvent:
 
 
 class CausalGraph:
-    def __init__(self):
+    def __init__(self) -> None:
         self._events: dict[str, LedgerEvent] = {}
         self._children: dict[str, list[str]] = {}
 
     def get_event(self, event_id: str) -> LedgerEvent:
-        """Retrieves a specific event by ID."""
         return self._events[event_id]
 
     def add_event(self, event: LedgerEvent) -> None:
-        """Adds an event to the graph and updates child/parent adjacencies."""
         self._events[event.event_id] = event
-        if event.event_id not in self._children:
-            self._children[event.event_id] = []
+        self._children.setdefault(event.event_id, [])
         for parent_id in event.parent_ids:
-            if parent_id not in self._children:
-                self._children[parent_id] = []
-            self._children[parent_id].append(event.event_id)
+            self._children.setdefault(parent_id, []).append(event.event_id)
 
     def get_descendants(self, node_id: str) -> list[str]:
-        """Returns the immediate children of a given node."""
         return self._children.get(node_id, [])
 
     def __getitem__(self, node_id: str) -> LedgerEvent:
@@ -91,11 +128,11 @@ class CausalGraph:
 
 
 def propagate_refutation(graph: CausalGraph, refuted_event_id: str, decay: float = 0.35) -> None:
-    queue = [(refuted_event_id, 0)]
-    visited = set()
+    queue = deque([(refuted_event_id, 0)])
+    visited: set[str] = set()
 
     while queue:
-        node_id, depth = queue.pop(0)
+        node_id, depth = queue.popleft()
         if node_id in visited:
             continue
         visited.add(node_id)
@@ -118,123 +155,256 @@ def propagate_refutation(graph: CausalGraph, refuted_event_id: str, decay: float
 
 
 class AsyncCausalGraph:
-    def __init__(self, conn: aiosqlite.Connection):
+    def __init__(self, conn: aiosqlite.Connection) -> None:
         self.conn = conn
 
-    async def ensure_table(self):
-        """Ensure the causal_edges table exists."""
-        sql = """
-        CREATE TABLE IF NOT EXISTS causal_edges (
-            id              INTEGER PRIMARY KEY AUTOINCREMENT,
-            fact_id         INTEGER NOT NULL,
-            parent_id       INTEGER,
-            signal_id       INTEGER,
-            edge_type       TEXT NOT NULL DEFAULT 'triggered_by',
-            project         TEXT,
-            tenant_id       TEXT NOT NULL DEFAULT 'default',
-            created_at      TEXT NOT NULL DEFAULT (datetime('now')),
-            FOREIGN KEY (fact_id) REFERENCES facts(id)
-        );
-        """
-        await self.conn.execute(sql)
+    async def ensure_table(self) -> None:
+        await self.conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS causal_edges (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                fact_id INTEGER NOT NULL,
+                parent_id INTEGER,
+                signal_id INTEGER,
+                edge_type TEXT NOT NULL DEFAULT 'triggered_by',
+                project TEXT,
+                tenant_id TEXT NOT NULL DEFAULT 'default',
+                created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                FOREIGN KEY (fact_id) REFERENCES facts(id)
+            )
+            """
+        )
+        await self.conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_causal_fact ON causal_edges(fact_id)"
+        )
+        await self.conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_causal_parent ON causal_edges(parent_id)"
+        )
+        await self.conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_causal_tenant ON causal_edges(tenant_id)"
+        )
+        await self.conn.commit()
 
-    async def propagate_taint(
+    async def record_edge(
         self,
         fact_id: int,
+        parent_id: Optional[int] = None,
+        signal_id: Optional[int] = None,
+        edge_type: str = "triggered_by",
+        project: Optional[str] = None,
         tenant_id: str = "default",
-    ) -> TaintReport:
-        """Propagate taint to all descendants in the causal DAG.
+    ) -> None:
+        await self.conn.execute(
+            """
+            INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, project, tenant_id)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (fact_id, parent_id, signal_id, edge_type, project, tenant_id),
+        )
 
-        Each descendant's confidence is downgraded by its hop
-        distance from the source (Ω₁₃ taint propagation).
-        Returns a frozen `TaintReport`.
-        """
-        project = "unknown"
-        try:
-            async with self.conn.execute(
-                "SELECT project FROM facts WHERE id = ?",
-                (fact_id,),
-            ) as cur:
-                row = await cur.fetchone()
-                if row and row[0]:
-                    project = row[0]
-        except Exception:  # noqa: BLE001
-            pass
+    async def _fact_columns(self) -> set[str]:
+        cursor = await self.conn.execute("PRAGMA table_info(facts)")
+        return {row[1] for row in await cursor.fetchall()}
 
-        changes: list[dict[str, Any]] = []
-        queue: list[tuple[int, int]] = [(fact_id, 0)]
-        visited: set[int] = {fact_id}
+    async def _metadata_column(self) -> Optional[str]:
+        cols = await self._fact_columns()
+        if "metadata" in cols:
+            return "metadata"
+        if "meta" in cols:
+            return "meta"
+        return None
+
+    async def propagate_taint(self, fact_id: int, tenant_id: str = "default") -> TaintReport:
         now = datetime.now(timezone.utc).isoformat()
+        meta_col = await self._metadata_column()
+        fact_cols = await self._fact_columns()
+        has_tenant = "tenant_id" in fact_cols
+
+        desc_sql = """
+        WITH RECURSIVE descendants AS (
+            SELECT ? AS id
+            UNION
+            SELECT ce.fact_id
+            FROM causal_edges ce
+            JOIN descendants d ON ce.parent_id = d.id
+            WHERE ce.tenant_id = ? AND ce.edge_type != ?
+        )
+        SELECT id FROM descendants
+        """
+        descendant_ids: set[int] = set()
+        async with self.conn.execute(desc_sql, (fact_id, tenant_id, EDGE_TAINTED_BY)) as cursor:
+            async for row in cursor:
+                descendant_ids.add(int(row[0]))
+
+        if fact_id not in descendant_ids:
+            descendant_ids.add(fact_id)
+
+        if not descendant_ids:
+            return TaintReport(source_fact_id=fact_id, affected_count=0, confidence_changes=[])
+
+        node_ids = list(descendant_ids)
+        edges: dict[int, list[int]] = {}
+        all_node_ids = set(descendant_ids)
+        chunk_size = 900
+        for start in range(0, len(node_ids), chunk_size):
+            chunk = node_ids[start : start + chunk_size]
+            placeholders = ",".join(["?"] * len(chunk))
+            edge_sql = f"""
+            SELECT fact_id, parent_id FROM causal_edges
+            WHERE fact_id IN ({placeholders}) AND edge_type != ? AND tenant_id = ?
+            """
+            async with self.conn.execute(edge_sql, (*chunk, EDGE_TAINTED_BY, tenant_id)) as cursor:
+                async for child_id, parent_id in cursor:
+                    if parent_id is None:
+                        continue
+                    edges.setdefault(int(child_id), []).append(int(parent_id))
+                    all_node_ids.add(int(parent_id))
+
+        nodes_data: dict[int, dict[str, Any]] = {}
+        all_nodes_list = list(all_node_ids)
+        for start in range(0, len(all_nodes_list), chunk_size):
+            chunk = all_nodes_list[start : start + chunk_size]
+            placeholders = ",".join(["?"] * len(chunk))
+            if meta_col:
+                fact_sql = f"SELECT id, confidence, {meta_col} FROM facts WHERE id IN ({placeholders})"
+            else:
+                fact_sql = f"SELECT id, confidence FROM facts WHERE id IN ({placeholders})"
+            params: tuple[Any, ...]
+            if has_tenant:
+                fact_sql += " AND tenant_id = ?"
+                params = (*chunk, tenant_id)
+            else:
+                params = tuple(chunk)
+            async with self.conn.execute(fact_sql, params) as cursor:
+                async for row in cursor:
+                    fid = int(row[0])
+                    conf = row[1] or "C5"
+                    if meta_col:
+                        raw_meta = row[2] if len(row) > 2 else "{}"
+                    else:
+                        raw_meta = "{}"
+                    try:
+                        meta = json.loads(raw_meta or "{}")
+                        is_json = True
+                    except (TypeError, json.JSONDecodeError):
+                        meta = {}
+                        is_json = False
+                    nodes_data[fid] = {
+                        "confidence": conf,
+                        "metadata": meta,
+                        "is_json": is_json,
+                    }
+
+        node_states: dict[int, TaintStatus] = {fact_id: TaintStatus.TAINTED}
+        children_map: dict[int, list[int]] = {}
+        for child, parents in edges.items():
+            for parent in parents:
+                children_map.setdefault(parent, []).append(child)
+
+        queue = deque([fact_id])
+        visited: set[int] = {fact_id}
+        changes: list[dict[str, Any]] = []
+        fact_updates: list[tuple[Any, ...]] = []
 
         while queue:
-            current_id, depth = queue.pop(0)
+            current_id = queue.popleft()
+            data = nodes_data.get(current_id)
+            if not data:
+                continue
 
-            if depth > 0:
-                # Read current confidence
-                old_conf = "C5"
-                old_meta: dict[str, Any] = {}
-                async with self.conn.execute(
-                    "SELECT confidence, metadata FROM facts WHERE id = ?",
-                    (current_id,),
-                ) as cur:
-                    row = await cur.fetchone()
-                    if row:
-                        old_conf = row[0] or "C5"
+            old_conf = data["confidence"]
+            if current_id == fact_id:
+                new_conf = Confidence.C1.value
+                node_states[current_id] = TaintStatus.TAINTED
+            else:
+                parents = edges.get(current_id, [])
+                p_states: list[TaintStatus] = []
+                for pid in parents:
+                    if pid in node_states:
+                        p_states.append(node_states[pid])
+                    else:
+                        p_meta = nodes_data.get(pid, {}).get("metadata", {})
+                        p_status = p_meta.get("taint_status", TaintStatus.CLEAN.value)
                         try:
-                            old_meta = json.loads(row[1] or "{}")
-                        except (json.JSONDecodeError, TypeError):
-                            old_meta = {}
+                            p_states.append(TaintStatus(p_status))
+                        except ValueError:
+                            p_states.append(TaintStatus.CLEAN)
 
-                new_conf = _downgrade_confidence(old_conf, depth)
-                old_meta["tainted_by"] = fact_id
-                old_meta["taint_timestamp"] = now
+                tainted_count = p_states.count(TaintStatus.TAINTED)
+                suspect_count = p_states.count(TaintStatus.SUSPECT)
+                total_parents = len(parents)
 
-                await self.conn.execute(
-                    "UPDATE facts SET confidence = ?, metadata = ? WHERE id = ?",
-                    (new_conf, json.dumps(old_meta), current_id),
-                )
+                if total_parents > 0 and (tainted_count / total_parents) >= 0.5:
+                    node_states[current_id] = TaintStatus.TAINTED
+                    hops = 2
+                elif tainted_count > 0 or suspect_count > 0:
+                    node_states[current_id] = TaintStatus.SUSPECT
+                    hops = 1
+                else:
+                    node_states[current_id] = TaintStatus.CLEAN
+                    hops = 0
 
-                # Record taint edge
-                try:
-                    await self.conn.execute(
-                        "INSERT INTO causal_edges "
-                        "(fact_id, parent_id, edge_type, "
-                        "project, tenant_id) "
-                        "VALUES (?, ?, ?, ?, ?)",
-                        (
-                            current_id,
-                            fact_id,
-                            EDGE_TAINTED_BY,
-                            project,
-                            tenant_id,
-                        ),
-                    )
-                except aiosqlite.Error as e:
-                    logger.debug(
-                        "Failed to record taint link: %s",
-                        e,
-                    )
+                if hops > 0:
+                    new_conf = Confidence.C1.value
+                else:
+                    new_conf = old_conf
 
+            data["confidence"] = new_conf
+            if data["is_json"]:
+                data["metadata"]["taint_status"] = node_states[current_id].value
+                data["metadata"]["tainted_by"] = fact_id
+                data["metadata"]["taint_timestamp"] = now
+            if meta_col:
+                payload = json.dumps(data["metadata"]) if data["is_json"] else rowless_json(data["metadata"])
+                if has_tenant:
+                    fact_updates.append((new_conf, payload, current_id, tenant_id))
+                else:
+                    fact_updates.append((new_conf, payload, current_id))
+            else:
+                if has_tenant:
+                    fact_updates.append((new_conf, current_id, tenant_id))
+                else:
+                    fact_updates.append((new_conf, current_id))
+
+            if new_conf != old_conf or current_id == fact_id:
                 changes.append(
                     {
                         "fact_id": current_id,
                         "old_confidence": old_conf,
                         "new_confidence": new_conf,
-                        "hops": depth,
-                    },
+                        "status": node_states[current_id].value,
+                    }
                 )
 
-            # Traverse structural edges only
-            async with self.conn.execute(
-                "SELECT fact_id FROM causal_edges WHERE parent_id = ? AND edge_type != ?",
-                (current_id, EDGE_TAINTED_BY),
-            ) as cursor:
-                async for row in cursor:
-                    child_id: int = row[0]
-                    if child_id not in visited:
-                        visited.add(child_id)
-                        queue.append((child_id, depth + 1))
+            for child_id in children_map.get(current_id, []):
+                if child_id not in visited:
+                    visited.add(child_id)
+                    queue.append(child_id)
 
+        if meta_col:
+            if has_tenant:
+                await self.conn.executemany(
+                    f"UPDATE facts SET confidence = ?, {meta_col} = ? WHERE id = ? AND tenant_id = ?",
+                    fact_updates,
+                )
+            else:
+                await self.conn.executemany(
+                    f"UPDATE facts SET confidence = ?, {meta_col} = ? WHERE id = ?",
+                    fact_updates,
+                )
+        else:
+            if has_tenant:
+                await self.conn.executemany(
+                    "UPDATE facts SET confidence = ? WHERE id = ? AND tenant_id = ?",
+                    fact_updates,
+                )
+            else:
+                await self.conn.executemany(
+                    "UPDATE facts SET confidence = ? WHERE id = ?",
+                    fact_updates,
+                )
+
+        await self.conn.commit()
         return TaintReport(
             source_fact_id=fact_id,
             affected_count=len(changes),
@@ -242,24 +412,20 @@ class AsyncCausalGraph:
         )
 
     async def calculate_blast_radius(self, fact_id: int, tenant_id: str) -> int:
-        """Calculate the number of dependent facts in the causal DAG."""
-        count: int = 0
-        queue: list[int] = [fact_id]
-        visited: set[int] = {fact_id}
-
-        while queue:
-            current_id = queue.pop(0)
-            async with self.conn.execute(
-                "SELECT fact_id FROM causal_edges WHERE parent_id = ? AND tenant_id = ?",
-                (current_id, tenant_id),
-            ) as cursor:
-                async for row in cursor:
-                    child_id = row[0]
-                    if child_id not in visited:
-                        visited.add(child_id)
-                        queue.append(child_id)
-                        count += 1
-        return count
+        sql = """
+        WITH RECURSIVE descendants AS (
+            SELECT fact_id FROM causal_edges
+            WHERE parent_id = ? AND tenant_id = ?
+            UNION
+            SELECT ce.fact_id FROM causal_edges ce
+            JOIN descendants d ON ce.parent_id = d.fact_id
+            WHERE ce.tenant_id = ?
+        )
+        SELECT COUNT(DISTINCT fact_id) FROM descendants
+        """
+        async with self.conn.execute(sql, (fact_id, tenant_id, tenant_id)) as cursor:
+            row = await cursor.fetchone()
+        return int(row[0]) if row and row[0] is not None else 0
 
 
 class AsyncCausalOracle:
@@ -267,16 +433,17 @@ class AsyncCausalOracle:
 
     @staticmethod
     async def find_parent_signal(
-        conn: aiosqlite.Connection, project: Optional[str] = None
+        conn: aiosqlite.Connection,
+        tenant_id: str = "default",
+        project: Optional[str] = None,
     ) -> Optional[int]:
-        """Finds the most recent unconsumed causal signal."""
         try:
             bus = AsyncSignalBus(conn)
-            recent = await bus.history(project=project, limit=5)
+            recent = await bus.history(tenant_id=tenant_id, project=project, limit=5)
             for sig in recent:
                 if sig.event_type in ("plan:done", "task:start", "apotheosis:heal"):
                     return sig.id
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug("Async causal lookup failed: %s", e)
         return None
 
@@ -285,26 +452,34 @@ class CausalOracle:
     """Interprets the Signal Bus to find the parent of a fact (sync)."""
 
     @staticmethod
-    def find_parent_signal(db_path: str, project: Optional[str] = None) -> Optional[int]:
-        """Finds the most recent unconsumed causal signal."""
-        import sqlite3
-
+    def find_parent_signal(
+        db_path: str,
+        tenant_id: str = "default",
+        project: Optional[str] = None,
+    ) -> Optional[int]:
         try:
-            with sqlite3.connect(db_path) as conn:
+            with connect(db_path) as conn:
                 bus = SignalBus(conn)
-                recent = bus.history(project=project, limit=5)
+                recent = bus.history(tenant_id=tenant_id, project=project, limit=5)
                 for sig in recent:
                     if sig.event_type in ("plan:done", "task:start", "apotheosis:heal"):
                         return sig.id
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug("Sync causal lookup failed: %s", e)
         return None
 
 
-def link_causality(meta: Optional[dict[str, Any]], signal_id: Optional[int]) -> dict[str, Any]:
-    """Attaches causal metadata to a fact's meta dictionary."""
+def link_causality(
+    meta: Optional[dict[str, Any]],
+    signal_id: Optional[int],
+) -> dict[str, Any]:
+    """Attach causal metadata to a fact's meta dictionary."""
     m = meta or {}
     if signal_id:
         m["causal_parent"] = signal_id
         m["axiomatic_integrity"] = "Ω₁"
     return m
+
+
+def rowless_json(data: dict[str, Any]) -> str:
+    return json.dumps(data)

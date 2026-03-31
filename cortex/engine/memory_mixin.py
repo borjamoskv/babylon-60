@@ -35,9 +35,15 @@ class MemoryMixin(EngineMixinBase):
         When auto_embed=False (e.g. tests), L2 initialization is skipped entirely
         to avoid loading the ML model (~30s penalty per test).
         """
-        from cortex.extensions.signals.bus import SignalBus
-        from cortex.memory.ledger import EventLedgerL3
-        from cortex.memory.working import WorkingMemoryL1
+        try:
+            from cortex.memory.ledger import EventLedgerL3
+            from cortex.memory.working import WorkingMemoryL1
+        except Exception as e:  # noqa: BLE001
+            self._memory_manager = None
+            self._memory_l1 = None
+            self._memory_l3 = None
+            logger.warning("Memory L1/L3 unavailable (degrading to no memory subsystem): %s", e)
+            return
 
         l1 = WorkingMemoryL1()
         l3 = EventLedgerL3(conn)
@@ -46,12 +52,14 @@ class MemoryMixin(EngineMixinBase):
         # Dedicated sync connection for the SignalBus (L1 Consciousness)
         bus = None
         try:
+            from cortex.extensions.signals.bus import SignalBus
+
             # We use the engine's _get_sync_conn if available, or create one.
             # MemoryMixin is part of CortexEngine, so we can use self._get_sync_conn()
             sync_conn = self._get_sync_conn()
             bus = SignalBus(sync_conn)
             bus.ensure_table()
-        except (sqlite3.Error, OSError, RuntimeError, AttributeError) as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("SignalBus initialization failed: %s", e)
 
         # v7 (G10): HDC is opt-in by default.
@@ -81,7 +89,7 @@ class MemoryMixin(EngineMixinBase):
             l2 = SovereignVectorStoreL2(encoder=encoder, db_path=vector_path / "vectors.db")
 
             logger.info("Memory L2 (SovereignVectorStoreL2) initialized at %s", vector_path)
-        except (ImportError, OSError, RuntimeError) as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Memory L2 unavailable (degrading to L1+L3 only): %s", e)
 
         # 2. Vector Alpha (HDC/v7): Now primary.
@@ -98,21 +106,27 @@ class MemoryMixin(EngineMixinBase):
                     encoder=hdc_encoder, item_memory=item_mem, db_path=hdc_path / "hdc.db"
                 )
                 logger.info("Vector Alpha (HDC) initialized at %s", hdc_path)
-            except (ImportError, OSError, RuntimeError) as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning("Vector Alpha (HDC) initialization failed: %s", e)
 
         if l2 and encoder:
-            from cortex.memory.manager import CortexMemoryManager
+            try:
+                from cortex.memory.manager import CortexMemoryManager
 
-            self._memory_manager = CortexMemoryManager(
-                l1=l1,
-                l2=l2,
-                l3=l3,
-                encoder=encoder,
-                hdc_l2=hdc_l2,
-                hdc_encoder=hdc_encoder,
-                bus=bus,
-            )
+                self._memory_manager = CortexMemoryManager(
+                    l1=l1,
+                    l2=l2,
+                    l3=l3,
+                    encoder=encoder,
+                    hdc_l2=hdc_l2,
+                    hdc_encoder=hdc_encoder,
+                    bus=bus,
+                )
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Memory manager unavailable (degrading to L1+L3 only): %s", e)
+                self._memory_manager = None
+                self._memory_l1 = l1
+                self._memory_l3 = l3
         else:
             # Minimal manager: store a reference to L1+L3 for basic ops
             self._memory_manager = None

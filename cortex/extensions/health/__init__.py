@@ -22,12 +22,20 @@ from cortex.extensions.health.models import (
     Grade,
     HealthReport,
     HealthScore,
+    HealthSLA,
+    HealthSLAViolation,
     HealthThresholds,
     MetricSnapshot,
 )
-from cortex.extensions.health.prometheus import export_prometheus
 from cortex.extensions.health.scorer import HealthScorer
 from cortex.extensions.health.trend import TrendDetector
+
+try:
+    from cortex.extensions.health.prometheus import export_prometheus
+    HAS_PROMETHEUS = True
+except ImportError:
+    HAS_PROMETHEUS = False
+    export_prometheus = None  # type: ignore
 
 __all__ = [
     "CollectorRegistry",
@@ -37,6 +45,8 @@ __all__ = [
     "HealthReport",
     "HealthScore",
     "HealthScorer",
+    "HealthSLA",
+    "HealthSLAViolation",
     "HealthThresholds",
     "MetricCollectorProtocol",
     "MetricSnapshot",

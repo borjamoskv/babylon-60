@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import hmac
 import logging
-from typing import Annotated, Any, Optional
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
@@ -50,7 +50,7 @@ _COMMAND_TO_INTENT: dict[str, GatewayIntent] = {
 }
 
 
-def _parse_telegram_message(text: str) -> Optional[GatewayRequest]:
+def _parse_telegram_message(text: str) -> GatewayRequest | None:
     """Parse a Telegram message text into a GatewayRequest."""
     text = (text or "").strip()
     if not text.startswith("/"):
@@ -66,7 +66,7 @@ def _parse_telegram_message(text: str) -> Optional[GatewayRequest]:
     return _dispatch_intent(intent, rest)
 
 
-def _dispatch_intent(intent: GatewayIntent, rest: str) -> Optional[GatewayRequest]:
+def _dispatch_intent(intent: GatewayIntent, rest: str) -> GatewayRequest | None:
     """Dispatch parsing to specific intent handlers."""
     handlers = {
         GatewayIntent.STORE: _handle_store,
@@ -248,13 +248,16 @@ async def telegram_webhook(
 
     # Send reply back to Telegram
     import httpx
+    from cortex.guards.url_guard import SafeTransport
 
     token = os.environ.get("CORTEX_TELEGRAM_TOKEN", "")
     if token:
         try:
+            tg_url = f"https://api.telegram.org/bot{token}/sendMessage"
+            SafeTransport.validate(tg_url)
             async with httpx.AsyncClient(timeout=10) as client:
                 await client.post(
-                    f"https://api.telegram.org/bot{token}/sendMessage",
+                    tg_url,
                     json={
                         "chat_id": chat_id,
                         "text": reply_text,

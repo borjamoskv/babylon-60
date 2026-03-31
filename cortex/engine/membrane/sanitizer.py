@@ -5,6 +5,7 @@ import re
 from typing import Any
 
 from .models import MembraneLog, MembraneLogLevel, PureEngram
+from .sri_hash import auto_heal_html
 
 
 class SovereignSanitizer:
@@ -14,17 +15,16 @@ class SovereignSanitizer:
     Purifies raw inputs before they reach the CORTEX persist layer.
     """
 
-    # Simple regexes to ensure high performance (< 20ms write latency objective)
-    # WARNING: These are basic implementations and might need refinement for production
-    EMAIL_REGEX = re.compile(r"([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)")
-    PHONE_REGEX = re.compile(r"(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}")
+    # ReDoS-safe implementations (Eliminating catastrophic backtracking)
+    EMAIL_REGEX = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}")
+    PHONE_REGEX = re.compile(r"\b(?:\+?\d{1,3}[-. ]?)?\(?\d{3}\)?[-. ]?\d{3}[-. ]?\d{4}\b")
 
-    # Matches local paths (macOS/Unix & Windows)
-    LOCAL_PATH_REGEX = re.compile(r"(/(Users|home|var|tmp|etc)/[^\s]+)|([A-Z]:\\[^\s]+)")
+    # Matches local paths (macOS/Unix & Windows) securely
+    LOCAL_PATH_REGEX = re.compile(r"(?:/(?:Users|home|var|tmp|etc)/[^\s]+)|(?:[A-Za-z]:\\[^\s]+)")
 
-    # Matches typical traceback noise
+    # Matches typical traceback noise without catastrophic lookaheads
     TRACEBACK_REGEX = re.compile(
-        r"Traceback\s*\(most\s*recent\s*call\s*last\):[\s\S]*?(?=\n[A-Za-z]+Error:|\Z)",
+        r"Traceback\s*\(most\s*recent\s*call\s*last\):(?:[^\n]*\n){0,50}",
         re.IGNORECASE,
     )
 
@@ -64,18 +64,24 @@ class SovereignSanitizer:
         if content != original_content:
             log.tracebacks_pruned = True
 
+        # SRI Healing (Alert #63 auto-remediation)
+        if isinstance(content, str) and (
+            "<script" in content.lower() or "<link" in content.lower()
+        ):
+            content = auto_heal_html(content)
         raw_engram["content"] = content
 
         # 3. Validation & Purity Seal
         try:
             # We construct the PureEngram. The Config(extra='forbid') will reject invalid fields.
             pure_engram = PureEngram(original_raw_hash=raw_hash, log=log, **raw_engram)
-        except Exception as e:
-            # INV-01 (Type Supremacy): Any incoming payload failing validation will be automatically rejected.
+        except Exception:
+            # INV-01 (Type Supremacy): Any incoming payload failing
+            # validation will be automatically rejected.
             # We no longer convert this to an "error" engram; we block the write entirely.
             log.level = MembraneLogLevel.CRITICAL
-            log.details = f"Byzantine input rejected (INV-01 Type Supremacy violation): {str(e)}"
-            raise ValueError(log.details) from e
+            log.details = "Byzantine input rejected (INV-01 Type Supremacy violation)"
+            raise ValueError(log.details) from None
 
         # Finalize log
         pure_str = pure_engram.model_dump_json()

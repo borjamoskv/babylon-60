@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Optional
 
-from cortex.embeddings import LocalEmbedder
+from cortex.embeddings.local import LocalEmbedder
 
 __all__ = ["EmbeddingManager"]
 
@@ -49,7 +49,10 @@ class EmbeddingManager:
 
         if self.mode == "api":
             from cortex import config
-            from cortex.embeddings.api_embedder import APIEmbedder
+            try:
+                from cortex.embeddings.api_embedder import APIEmbedder
+            except Exception as exc:  # noqa: BLE001
+                raise RuntimeError(f"API embeddings unavailable: {exc}") from exc
 
             self._embedder = APIEmbedder(
                 provider=config.EMBEDDINGS_PROVIDER,
@@ -69,11 +72,29 @@ class EmbeddingManager:
 
     def embed(self, text: str | list[str]) -> list[float] | list[list[float]]:
         """Generate embedding for a single text or batch."""
+        if self.mode == "api":
+            raise RuntimeError("Synchronous embed() is unavailable in API mode; use aembed().")
         return self._get_embedder().embed(text)
 
     def embed_batch(self, texts: list[str], batch_size: int = 32) -> list[list[float]]:
         """Generate embeddings for multiple texts."""
+        if self.mode == "api":
+            raise RuntimeError("Synchronous embed_batch() is unavailable in API mode; use aembed_batch().")
         return self._get_embedder().embed_batch(texts, batch_size=batch_size)
+
+    async def aembed(self, text: str | list[str]) -> list[float] | list[list[float]]:
+        """Async embedding API that supports both local and cloud backends."""
+        embedder = self._get_embedder()
+        if self.mode == "api":
+            return await embedder.embed(text)
+        return embedder.embed(text)
+
+    async def aembed_batch(self, texts: list[str], batch_size: int = 32) -> list[list[float]]:
+        """Async batch embedding API that supports both local and cloud backends."""
+        embedder = self._get_embedder()
+        if self.mode == "api":
+            return await embedder.embed_batch(texts, batch_size=batch_size)
+        return embedder.embed_batch(texts, batch_size=batch_size)
 
     async def embed_multimodal(
         self,
@@ -134,3 +155,52 @@ class EmbeddingManager:
         """Return True if current embedder supports multimodal input."""
         embedder = self._get_embedder()
         return getattr(embedder, "supports_multimodal", False)
+    async def enrich_fact(
+        self,
+        fact_id: int,
+        content: str,
+        project: str,
+        tenant_id: str = "default",
+    ) -> None:
+        """Sovereign Enrichment (Ω₁₃): Vector embedding + Metadata Refinement.
+
+        This method is called by the EnrichmentWorker to finalize a fact's
+        entry into the Double-Plane architecture.
+        """
+        from cortex.engine.embedding_engine import embed_fact_async
+        from cortex.engine.metadata_engine import MetadataEngine
+
+        async with self.engine.session() as conn:
+            # 1. Dense & Specular Embeddings
+            await embed_fact_async(
+                conn,
+                fact_id,
+                project,
+                content,
+                self._get_embedder(),
+                self.engine._memory_manager,
+                tenant_id,
+            )
+
+            # 2. Async Semantic Enrichment (V2 Refinement)
+            metadata = await MetadataEngine.enrich_async(fact_id, content, self.engine)
+
+            # 3. Update Multi-Plane Metadata
+            query = """
+                UPDATE facts_meta
+                SET category = COALESCE(?, category),
+                    yield_score = COALESCE(?, yield_score),
+                    exergy_score = COALESCE(?, exergy_score)
+                WHERE fact_id = ?
+            """
+            await conn.execute(
+                query,
+                (
+                    metadata.get("category"),
+                    metadata.get("yield_score"),
+                    metadata.get("exergy_score"),
+                    fact_id,
+                ),
+            )
+            await conn.commit()
+            logger.info("Fact #%d enriched: vector + metadata refined (V2)", fact_id)

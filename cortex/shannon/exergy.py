@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from enum import Enum
 
@@ -18,6 +20,8 @@ class ExergyInput:
     action_risk: ActionRisk
     had_backup: bool
     touched_persistent_state: bool
+    utility_delta: float = 0.0
+    causal_gap: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -27,6 +31,7 @@ class ExergyResult:
     reversibility_penalty: float
     waste_ratio: float
     below_threshold: bool
+    exergy_score: float = 0.0
 
 
 class ThermodynamicWasteError(RuntimeError):
@@ -59,17 +64,19 @@ def calculate_exergy(inp: ExergyInput, threshold_min_work: float) -> ExergyResul
     if inp.touched_persistent_state:
         reversibility_penalty += 0.05
 
-    score = signal_gain - reversibility_penalty
-    waste_ratio = (
-        0.0 if signal_gain == 0 else max(0.0, reversibility_penalty / max(signal_gain, 1e-9))
+    exergy_score = (
+        (signal_gain * (1.0 + inp.utility_delta)) + (inp.causal_gap * 0.1) - reversibility_penalty
     )
 
+    waste_ratio = 0.0 if signal_gain == 0 else max(0.0, reversibility_penalty / max(signal_gain, 1e-9))
+
     return ExergyResult(
-        score=score,
+        score=exergy_score,
         signal_gain=signal_gain,
         reversibility_penalty=reversibility_penalty,
         waste_ratio=waste_ratio,
-        below_threshold=score < threshold_min_work,
+        below_threshold=exergy_score < threshold_min_work,
+        exergy_score=exergy_score,
     )
 
 

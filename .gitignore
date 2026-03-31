@@ -24,6 +24,8 @@ node_modules/
 venv/
 env/
 .venv_transcript/
+.astro/
+.playwright-cli/
 
 # ── Python build artifacts ────────────────────────
 __pycache__/
@@ -63,6 +65,9 @@ pyright_*.txt
 test_*.txt
 prepush_out*.txt
 seals_report.json
+bandit_report.json
+audit_report.txt
+audit_results.json
 
 # ── OS ────────────────────────────────────────────
 .DS_Store
@@ -77,6 +82,7 @@ Thumbs.db
 
 # ── Agent internals ──────────────────────────────
 .agent/
+.agents/
 .agent_backup_workflows/
 .cortex/
 .cortex_field

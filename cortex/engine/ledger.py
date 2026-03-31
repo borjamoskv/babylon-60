@@ -90,8 +90,7 @@ class ImmutableLedger:
                 "SELECT hash FROM transactions WHERE id >= ? AND id <= ? ORDER BY id",
                 (start_id, end_id),
             )
-            rows = await cursor.fetchall()
-            hashes = [row[0] for row in rows]
+            hashes = [row[0] for row in await cursor.fetchall()]
             if not hashes:
                 return None
             tree = MerkleTree(hashes)
@@ -314,5 +313,5 @@ class ImmutableLedger:
                 "valid": not violations,
                 "violations": violations,
                 "tx_checked": tx_count,
-                "roots_checked": len(roots),  # type: ignore[reportArgumentType]
+                "roots_checked": len(roots),
             }

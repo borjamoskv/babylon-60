@@ -10,7 +10,7 @@ import asyncio
 import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Any, Optional
+from typing import Any
 
 from cortex.engine.models import Fact
 
@@ -37,7 +37,7 @@ class AnomalyHunterEngine:
         self.window = timedelta(hours=lookback_hours)
         self.anomalies: list[Anomaly] = []
 
-    def _get_fact_timestamp(self, fact_id: int) -> Optional[datetime]:
+    def _get_fact_timestamp(self, fact_id: int) -> datetime | None:
         """Helper para extraer timestamp de forma síncrona si es necesario
         (En la versión final usaremos el engine async directamente).
         """
@@ -64,13 +64,9 @@ class AnomalyHunterEngine:
 
     async def _trace_causal_chain(self, fact: Fact) -> list[Fact]:
         """Extrae la cadena causal usando la abstracción de hierarchy."""
-        # Delegamos en el método del engine
-        raw_chain = await self.cortex.get_causal_chain(fact.id)
-        # Convertir diccionarios a objetos Fact para uniformidad
-        # get_causal_chain devuelve dicts, simulamos tener Facts
-        from cortex.engine.models import Fact
-
-        return [Fact(**d) for d in raw_chain] if raw_chain else []
+        # Delegamos en el método del engine (que ya devuelve list[Fact])
+        chain = await self.cortex.get_causal_chain(fact.id)
+        return chain if chain else []
 
     async def run_full_scan(self) -> dict:
         """Entry point NightShift: escaneo completo en paralelo."""
@@ -78,14 +74,14 @@ class AnomalyHunterEngine:
         # Fetching facts from the last 24h
         time_filter = threshold.isoformat()
 
-        # Limitamos la query para Nightshift (asumiendo que hay un recall con as_of o limitamos manualmente)
+        # Limitamos la query para Nightshift (asumiendo que hay un recall con as_of)
         # Aquí usamos history para tener todos los estados y luego filtramos
 
-        recent_raw_facts = await self.cortex.history(
-            project="anomaly-hunter"
-        )  # TODO we should scan all projects
+        # Recall relevant facts from history across tracked projects
+        recent_raw_facts = await self.cortex.history(project="anomaly-hunter")
+        # recent_raw_facts is now list[Fact] thanks to the update in CortexEngine
         recent_facts = [
-            Fact(**f) for f in recent_raw_facts if f.get("created_at", "") > time_filter
+            f for f in recent_raw_facts if (f.created_at or "") > time_filter
         ]
 
         if not recent_facts:
@@ -122,8 +118,12 @@ class AnomalyHunterEngine:
                 if not cause_time_str:
                     continue
 
-                cause_ts = datetime.fromisoformat(cause_time_str.replace("Z", "+00:00"))
-                effect_ts = datetime.fromisoformat(fact.created_at.replace("Z", "+00:00"))
+                cause_ts = datetime.fromisoformat(
+                    cause_time_str.replace("Z", "+00:00")
+                )
+                effect_ts = datetime.fromisoformat(
+                    fact.created_at.replace("Z", "+00:00")
+                )
 
                 if cause_ts > effect_ts:
                     inversions.append(
@@ -131,8 +131,14 @@ class AnomalyHunterEngine:
                             type="TEMPORAL_INVERSION",
                             severity="HIGH",
                             facts_involved=[fact.id, cause_id],
-                            description=f"Efecto (fact #{fact.id}) precede a su causa. Delta: {(cause_ts - effect_ts).seconds}s",
-                            suggested_action="Verificar timestamps de ambos hechos. Posible error de registro.",
+                            description=(
+                                f"Efecto (fact #{fact.id}) precede a su causa. "
+                                f"Delta: {(cause_ts - effect_ts).seconds}s"
+                            ),
+                            suggested_action=(
+                                "Verificar timestamps de ambos hechos. "
+                                "Posible error de registro."
+                            ),
                         )
                     )
         return inversions
@@ -151,8 +157,13 @@ class AnomalyHunterEngine:
                             type="SPATIAL_CONTRADICTION",
                             severity="HIGH",
                             facts_involved=[fact_a.id, fact_b.id],
-                            description=f"Contradicción entre fact #{fact_a.id} y #{fact_b.id} sobre la misma entidad.",
-                            suggested_action="Reconciliar con fuente primaria. Uno de los dos hechos es erróneo.",
+                            description=(
+                                f"Contradicción entre fact #{fact_a.id} y #{fact_b.id} "
+                                "sobre la misma entidad."
+                            ),
+                            suggested_action=(
+                                "Reconciliar con fuente primaria. Uno de los dos hechos es erróneo."
+                            ),
                         )
                     )
         return contradictions
@@ -181,7 +192,10 @@ class AnomalyHunterEngine:
                         type="CONFIDENCE_COLLAPSE",
                         severity="MEDIUM",
                         facts_involved=[f.id for f in chain],
-                        description=f"Cadena de {len(chain)} hechos sin anclaje C4/C5. Toda la cadena es especulativa.",
+                        description=(
+                            f"Cadena de {len(chain)} hechos sin anclaje C4/C5. "
+                            "Toda la cadena es especulativa."
+                        ),
                         suggested_action="Buscar fuente primaria (C4/C5) o degradar toda la cadena a C2.",
                     )
                 )
@@ -218,6 +232,8 @@ class AnomalyHunterEngine:
             "total_anomalies": len(self.anomalies),
             "by_type": by_type,
             "high_severity": sum(1 for a in self.anomalies if a.severity == "HIGH"),
-            "verification_tasks_created": sum(1 for a in self.anomalies if a.severity == "HIGH"),
+            "verification_tasks_created": sum(
+                1 for a in self.anomalies if a.severity == "HIGH"
+            ),
             "memory_health_score": max(0, 100 - len(self.anomalies) * 5),
         }

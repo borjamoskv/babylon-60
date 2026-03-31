@@ -15,11 +15,13 @@ __all__ = ["EngineMixinBase"]
 
 logger = logging.getLogger("cortex.engine")
 
-# Canonical Fact query structure — all 16 columns matching row_to_fact contract
+# Canonical Fact query structure — includes rich fact fields used by retrieve()/CLI.
 FACT_COLUMNS = (
     "f.id, f.tenant_id, f.project, f.content, f.fact_type, f.tags, f.metadata, "
     "f.hash, f.valid_from, f.valid_until, f.source, f.confidence, "
-    "f.created_at, f.updated_at, f.is_tombstoned, f.is_quarantined"
+    "f.created_at, f.updated_at, f.is_tombstoned, f.is_quarantined, "
+    "f.quadrant, f.storage_tier, f.exergy_score, f.category, "
+    "f.parent_id, f.relation_type, f.yield_score"
 )
 FACT_JOIN = "FROM facts f"
 
@@ -44,7 +46,10 @@ class EngineMixinBase:
         raise NotImplementedError
 
     def get_conn(self) -> Any:
-        """Provide an asynchronous database connection."""
+        """Provide an asynchronous database connection.
+
+        Kept for backward compatibility while callers migrate to `session()`.
+        """
         raise NotImplementedError
 
     async def _log_transaction(
@@ -60,58 +65,20 @@ class EngineMixinBase:
     def _row_to_fact(self, row: dict | aiosqlite.Row, tenant_id: str) -> dict[str, Any]:
         """Convert a database row to a decrypted fact dictionary.
 
-        Builds the dict directly from the row tuple — no intermediate Fact
-        allocation. Columns must match FACT_COLUMNS order (16 columns).
+        Normalizes query rows through the canonical Fact model so callers
+        see the same shape as ``retrieve()``.
         """
-        import json
+        from cortex.engine.models import row_to_fact
 
-        from cortex.crypto import get_default_encrypter
-
-        enc = get_default_encrypter()
-        r = list(row)
-        while len(r) < 16:
-            r.append(None)
-
-        db_tenant_id = r[1] or "default"
-
-        # Decrypt content
-        try:
-            content = enc.decrypt_str(r[3], tenant_id=db_tenant_id) if r[3] else ""
-        except ValueError:
-            content = f"[ENCRYPTED — decryption failed] (fact #{r[0]})"
-
-        # Parse tags
-        try:
-            tags = json.loads(r[5]) if r[5] else []
-        except (json.JSONDecodeError, TypeError):
-            tags = []
-
-        # Decrypt meta
-        try:
-            meta = enc.decrypt_json(r[6], tenant_id=db_tenant_id) if r[6] else {}
-        except ValueError:
-            meta = {"error": "decryption_failed", "fact_id": r[0]}
-
-        return {
-            "id": r[0],
-            "tenant_id": db_tenant_id,
-            "project": r[2],
-            "content": content,
-            "fact_type": r[4],
-            "type": r[4],  # API compat alias
-            "tags": tags,
-            "confidence": r[11] or (meta.get("confidence", "C5") if meta else "C5"),
-            "valid_from": r[8] or (meta.get("valid_from") if meta else r[12]),
-            "valid_until": "9999-12-31T23:59:59Z" if bool(r[14]) else r[9],
-            "source": r[10] or (meta.get("source", "system") if meta else "system"),
-            "meta": meta,
-            "consensus_score": meta.get("consensus_score", 1.0) if meta else 1.0,
-            "created_at": r[12],
-            "updated_at": r[13],
-            "tx_id": meta.get("tx_id") if meta else None,
-            "parent_decision_id": meta.get("parent_decision_id") if meta else None,
-            "hash": r[7],
-        }
+        fact = row_to_fact(tuple(row))
+        data = fact.to_dict()
+        meta = fact.meta or {}
+        data["consensus_score"] = fact.consensus_score
+        data["tx_id"] = fact.tx_id if fact.tx_id is not None else meta.get("tx_id")
+        data["parent_decision_id"] = (
+            fact.parent_decision_id or meta.get("parent_decision_id") or fact.parent_id
+        )
+        return data
 
     def _resolve_tenant(self, tenant_id: str) -> str:
         """Resolve and validate the tenant ID from context if 'default' is provided."""

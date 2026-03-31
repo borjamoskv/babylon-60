@@ -19,6 +19,8 @@ from typing import Optional
 
 from .models import CausalEpisode, SourceMetadata
 
+from .models import CausalEpisode, SourceMetadata
+
 logger = logging.getLogger("cortex.memory.episodic")
 
 

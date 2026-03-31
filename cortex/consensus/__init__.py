@@ -1,22 +1,24 @@
+"""CORTEX v5.0 — Consensus.
+
+Neural Swarm Consensus and Reputation-Weighted validation.
 """
-CORTEX v5.0 — Consensus Layer.
 
-Provides immutable vote ledger, Merkle tree verification, and consensus protocols.
-"""
+from __future__ import annotations
 
-from .merkle import MerkleTree, compute_merkle_root, verify_merkle_proof
-from .rwa_bft import AgentVote, ConsensusResult, RWABFTConsensus, VoteOutcome
-from .vote_ledger import ImmutableVoteLedger, VoteEntry
+from cortex.consensus.manager import ConsensusManager
 
-__all__ = [
-    "MerkleTree",
-    "compute_merkle_root",
-    "verify_merkle_proof",
-    "ImmutableVoteLedger",
-    "VoteEntry",
-    # RWA-BFT
-    "RWABFTConsensus",
-    "AgentVote",
-    "VoteOutcome",
-    "ConsensusResult",
-]
+__all__ = ["ConsensusManager"]
+
+try:
+    from cortex.consensus.reputation import ReputationManager
+except ImportError:
+    ReputationManager = None  # type: ignore[assignment]
+else:
+    __all__.append("ReputationManager")
+
+try:
+    from cortex.consensus.trust import TrustGraph
+except ImportError:
+    TrustGraph = None  # type: ignore[assignment]
+else:
+    __all__.append("TrustGraph")

@@ -9,6 +9,7 @@ import os
 from dataclasses import dataclass
 
 import httpx
+from cortex.guards.url_guard import SafeTransport
 
 logger = logging.getLogger("cortex.gateway.adapters.suno_adapter")
 
@@ -65,6 +66,7 @@ class SunoApiOrgAdapter(SunoAdapterBase):
     def __init__(self, api_key: str):
         self.api_key = api_key
         self.base_url = "https://sunoapi.org/api/v1"
+        SafeTransport.validate(self.base_url)
         self.headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",

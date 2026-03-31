@@ -12,8 +12,6 @@ from typing import Any, Optional
 
 import aiosqlite
 
-# Hoisted from insert_fact_record hot path (was lazy import per-call)
-from cortex.graph import process_fact_graph
 from cortex.memory.temporal import now_iso
 from cortex.utils.canonical import compute_fact_hash
 
@@ -101,39 +99,120 @@ async def insert_fact_record(
     if pub_b64:
         meta["signer_pubkey"] = pub_b64
 
-    encrypted_meta = enc.encrypt_json(meta, tenant_id=tenant_id)
+    # ── Double-Plane Ingestion (V2) ──
+    from cortex.engine.metadata_engine import MetadataEngine
+    from cortex.engine.models import Fact
 
-    cursor = await conn.execute(
-        "INSERT INTO facts (tenant_id, project, content, fact_type, tags, metadata, "
-        "hash, created_at, updated_at, valid_from, confidence, source) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    # 1. Deterministic Classification (Heuristic-First)
+    # We construct a temporary Fact object for classification
+    temp_fact = Fact(
+        id=0,  # Placeholder
+        tenant_id=tenant_id,
+        project=project,
+        content=content,
+        fact_type=fact_type,
+        tags=tags or [],
+        parent_id=parent_decision_id,
+        relation_type=meta.get("relation_type") if meta else None,
+    )
+    metadata_v2 = MetadataEngine.classify_deterministic(temp_fact)
+
+    category = metadata_v2["category"]
+    quadrant = metadata_v2["quadrant"]
+    storage_tier = metadata_v2["storage_tier"]
+    exergy_score = metadata_v2["exergy_score"]
+    yield_score = metadata_v2["yield_score"]
+    relation_type = metadata_v2["relation_type"]
+
+    # 2. SQL Persistence (facts table)
+    async with conn.execute(
+        """
+        INSERT INTO facts (
+            tenant_id, project, content, fact_type, metadata, hash, 
+            source, confidence, parent_id, relation_type,
+            quadrant, storage_tier, exergy_score, category, yield_score,
+            semantic_status, tags
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
         (
             tenant_id,
             project,
             encrypted_content,
             fact_type,
-            tags_json,
-            encrypted_meta,
+            json.dumps(meta),
             f_hash,
-            ts,
-            ts,
-            ts,
-            confidence,
             source,
+            confidence,
+            parent_decision_id,
+            relation_type,
+            quadrant,
+            storage_tier,
+            exergy_score,
+            category,
+            yield_score,
+            "pending",
+            tags_json,
         ),
-    )
-    fact_id = cursor.lastrowid
+    ) as cursor:
+        fact_id = cursor.lastrowid
     assert fact_id is not None
 
-    # FTS Update
+    # ── P0 Decoupling: Enqueue Enrichment Job ──
     try:
         await conn.execute(
-            "INSERT INTO facts_fts(rowid, content, project, tags, fact_type) "
-            "VALUES (?, ?, ?, ?, ?)",
+            """
+            INSERT INTO enrichment_jobs (fact_id, job_type, status, priority)
+            VALUES (?, 'embedding', 'pending', ?)
+            """,
+            (fact_id, 1 if fact_type == "decision" else 0),
+        )
+    except (sqlite3.OperationalError, aiosqlite.Error) as e:
+        # If the table doesn't exist yet (e.g. migration hasn't run), create it
+        if "no such table: enrichment_jobs" in str(e).lower():
+            await conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS enrichment_jobs (
+                    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                    fact_id         INTEGER NOT NULL REFERENCES facts(id),
+                    job_type        TEXT NOT NULL DEFAULT 'embedding',
+                    status          TEXT NOT NULL DEFAULT 'pending',
+                    priority        INTEGER DEFAULT 0,
+                    attempts        INTEGER DEFAULT 0,
+                    last_error      TEXT,
+                    payload         TEXT,
+                    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+                    updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
+                )
+                """
+            )
+            await conn.execute(
+                "INSERT INTO enrichment_jobs (fact_id, job_type, status, priority) VALUES (?, 'embedding', 'pending', ?)",
+                (fact_id, 1 if fact_type == "decision" else 0),
+            )
+        else:
+            logger.warning("Failed to enqueue enrichment job for fact %d: %s", fact_id, e)
+
+    # 3. Tag Persistence (fact_tags bridge table)
+    if tags:
+        tag_records = [(fact_id, tag, tenant_id) for tag in tags]
+        await conn.executemany(
+            "INSERT OR IGNORE INTO fact_tags (fact_id, tag, tenant_id) VALUES (?, ?, ?)",
+            tag_records,
+        )
+
+    # 4. FTS Update (facts_fts virtual table)
+    try:
+        # We mirror a subset to FTS for fast keyword search
+        await conn.execute(
+            "INSERT INTO facts_fts (rowid, content, project, tags, fact_type) VALUES (?, ?, ?, ?, ?)",
             (fact_id, content, project, tags_json, fact_type),
         )
     except (sqlite3.Error, aiosqlite.Error) as e:
-        logger.warning("Failed to update FTS for fact %d: %s", fact_id, e)
+        if "unique" in str(e).lower() or "constraint failed" in str(e).lower():
+            logger.debug("FTS entry already exists for fact %d (likely via trigger)", fact_id)
+        else:
+            logger.warning("FTS insert failed for fact %d: %s", fact_id, e)
 
     # Causal Infrastructure (ANAMNESIS-Ω)
     try:
@@ -170,12 +249,14 @@ async def insert_fact_record(
         logger.debug("Causal edge recording skipped for fact %d: %s", fact_id, e)
 
     # Graph Extraction
-
     try:
-        # type: ignore[reportArgumentType]
+        from cortex.graph import process_fact_graph
+
         await process_fact_graph(conn, fact_id, content, project, ts, tenant_id)
     except (sqlite3.Error, aiosqlite.Error, ValueError) as e:
         logger.warning("Graph extraction failed for fact %d (tenant=%s): %s", fact_id, tenant_id, e)
+    except Exception as e:  # noqa: BLE001
+        logger.debug("Graph extraction unavailable for fact %d: %s", fact_id, e)
 
     return fact_id  # type: ignore[reportReturnType]
 

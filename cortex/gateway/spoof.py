@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from pathlib import Path
 from typing import Any
 
@@ -41,6 +42,25 @@ class SpoofManager:
                 pass
             return {"mappings": {}, "default_intent": "general"}
 
+    # O(1) Zero-Latency Keyword Heuristics for Model Routing
+    _REASONING_RE = re.compile(
+        r"\b(math|logic|reason|plan\b|step-by-step|think|calculate)\b", re.IGNORECASE
+    )
+    _CODE_RE = re.compile(
+        r"\b(code|function|refactor|debug|python|rust|golang|typescript|"
+        r"javascript|bug|script|compile)\b",
+        re.IGNORECASE,
+    )
+    _CREATIVE_RE = re.compile(
+        r"\b(story|write|creative|brainstorm|poem|ideate|narrative|blog)\b", re.IGNORECASE
+    )
+    _ARCHITECT_RE = re.compile(
+        r"\b(architecture|red team|vulnerability|system design|threat|adversarial|security)\b",
+        re.IGNORECASE,
+    )
+    _BELIEF_RE = re.compile(r"\b(contradict|invariant|hallucinat|audit|verify)\b", re.IGNORECASE)
+    _EPISODIC_RE = re.compile(r"\b(summarize|document|transcript|extract|ingest)\b", re.IGNORECASE)
+
     def resolve_intent(self, requested_model: str, messages: list[dict[str, str]]) -> IntentProfile:
         """Map the requested model and content to a CORTEX IntentProfile."""
         mappings = self._rules.get("mappings", {})
@@ -50,10 +70,25 @@ class SpoofManager:
             if key in requested_model.lower():
                 return IntentProfile(config.get("intent", "general"))
 
-        # 2. Content-based heuristic
-        last_user_msg = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")
-        if "code" in last_user_msg.lower() or "function" in last_user_msg.lower():
+        # 2. Content-based heuristic (O(1) semantic matching)
+        sys_msg = next((m["content"] for m in messages if m["role"] == "system"), "")[:1000]
+        last_user_msg = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")[
+            :2000
+        ]
+        combined_text = f"{sys_msg} {last_user_msg}"
+
+        if SpoofManager._CODE_RE.search(combined_text):
             return IntentProfile.CODE
+        if SpoofManager._REASONING_RE.search(combined_text):
+            return IntentProfile.REASONING
+        if SpoofManager._ARCHITECT_RE.search(combined_text):
+            return IntentProfile.ARCHITECT
+        if SpoofManager._BELIEF_RE.search(combined_text):
+            return IntentProfile.BELIEF_AUDIT
+        if SpoofManager._EPISODIC_RE.search(combined_text) or len(last_user_msg) > 1500:
+            return IntentProfile.EPISODIC_PROCESSING
+        if SpoofManager._CREATIVE_RE.search(combined_text):
+            return IntentProfile.CREATIVE
 
         return IntentProfile(self._rules.get("default_intent", "general"))
 

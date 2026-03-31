@@ -43,9 +43,21 @@ GLOBAL_CLI_TIMEOUT: float = 120.0  # Chronos Sniper: No CLI command hangs indefi
 
 def get_engine(db: str = DEFAULT_DB) -> CortexEngine:
     """Create an engine instance (lazy import)."""
-    from cortex.engine import CortexEngine
+    try:
+        from cortex.engine import CortexEngine
 
-    return CortexEngine(db_path=db)
+        return CortexEngine(db_path=db)
+    except Exception as err:
+        detail = f"{type(err).__name__}: {err}"
+        filename = getattr(err, "filename", None)
+        if filename:
+            detail = f"{detail} [{filename}]"
+        raise click.ClickException(
+            "CORTEX engine could not start. "
+            "The repo still has unresolved import/syntax issues in core modules. "
+            f"Root cause: {detail}. "
+            "Use `python scripts/repo_health_changed.py --all` or fix the reported module first."
+        ) from err
 
 
 def get_tracker(engine: CortexEngine) -> TimingTracker:
