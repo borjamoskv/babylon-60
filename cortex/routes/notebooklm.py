@@ -21,7 +21,7 @@ router = APIRouter(tags=["notebooklm"])
 
 @router.get("/v1/notebooklm/status")
 async def notebooklm_status(
-    auth: AuthResult = Depends(require_permission("read")),
+    auth: AuthResult = Depends(require_permission("admin")),
 ) -> dict:
     """Get NotebookLM sync status — staleness, file inventory, cloud detection."""
     import os
@@ -86,7 +86,7 @@ async def notebooklm_status(
 async def notebooklm_digest(
     project: Optional[str] = Query(None, description="Optional project filter"),
     output: str = Query("cortex_notebooklm_digest.md", description="Output file path"),
-    auth: AuthResult = Depends(require_permission("write")),
+    auth: AuthResult = Depends(require_permission("admin")),
 ) -> dict:
     """Generate Master Digest with Shadow Key anchors."""
     from fastapi import HTTPException
@@ -115,7 +115,7 @@ async def notebooklm_digest(
 @router.post("/v1/notebooklm/fragment")
 async def notebooklm_fragment(
     output_dir: str = Query("notebooklm_domains", description="Output directory"),
-    auth: AuthResult = Depends(require_permission("write")),
+    auth: AuthResult = Depends(require_permission("admin")),
 ) -> dict:
     """Fragment CORTEX facts into semantic domain files."""
     from fastapi import HTTPException
@@ -138,7 +138,7 @@ async def notebooklm_fragment(
 async def notebooklm_sync(
     drive_path: Optional[str] = Query(None, description="Explicit cloud folder path"),
     mode: str = Query("both", description="What to sync: digest, domains, or both"),
-    auth: AuthResult = Depends(require_permission("write")),
+    auth: AuthResult = Depends(require_permission("admin")),
 ) -> dict:
     """Sync exported files to cloud storage for NotebookLM pickup."""
     import os

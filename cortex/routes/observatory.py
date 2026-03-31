@@ -26,7 +26,7 @@ router = APIRouter(tags=["observatory"])
 
 @router.get("/v1/observatory")
 def observatory_status(
-    auth: AuthResult = Depends(require_permission("read")),
+    auth: AuthResult = Depends(require_permission("admin")),
 ) -> dict[str, Any]:
     """Consolidated system observatory — one endpoint, full picture."""
     result: dict[str, Any] = {}
