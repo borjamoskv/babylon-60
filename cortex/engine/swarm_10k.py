@@ -112,10 +112,31 @@ class LegionSupervisor:
         self.tenant_id = tenant_id
         self.centurions: dict[str, CenturionSuperv] = {}
         self._available_centurions: collections.deque[CenturionSuperv] = collections.deque()
-        self._thermal_event = asyncio.Event()
-        self._thermal_event.set()
         self.metrics = NodeMetrics(exergy=1.0, uncertainty=0.0, active_children=0)
         self._overclocked = False
+        
+        # Ouroboros O(1) Metric Trackers
+        self.total_centurions = 0
+        self.total_agents = 0
+        
+        # Absolute Thermodynamic Diffusion parameters
+        self.queue = asyncio.Queue()
+        self._is_running = True
+        self._workers = [asyncio.create_task(self._thermal_worker()) for _ in range(50)]
+
+    async def _thermal_worker(self) -> None:
+        """Background Loop (Drain Queue). Only pulls when thermal stability permits."""
+        while self._is_running:
+            task = await self.queue.get()
+            try:
+                await self.wait_for_thermal_stability()
+                await self.dispatch(task)
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error("Thermal worker err: %s", e)
+            finally:
+                self.queue.task_done()
 
     async def ensure_centurion(self) -> CenturionSuperv:
         """Find an available Centurion or spawn a new one in O(1)."""
@@ -129,6 +150,7 @@ class LegionSupervisor:
         self.centurions[new_id] = new_cen
         self._available_centurions.append(new_cen)
         self.metrics.active_children = len(self.centurions)
+        self.total_centurions += 1
 
         start = time.perf_counter()
         await self.bus.emit(
@@ -149,30 +171,27 @@ class LegionSupervisor:
         if self._overclocked:
             return
 
-        if not self.centurions:
-            return
+        while True:
+            if not self.centurions:
+                return
 
-        # Calcular si la legión base tiene capacidad exergética promedio
-        exergies = [c.metrics.exergy for c in self.centurions.values()]
-        exergy = sum(exergies) / len(exergies)
+            # Calcular si la legión base tiene capacidad exergética promedio (O(C))
+            # O(1) approximation could be cached, but len is 1-100 operations max.
+            exergies = [c.metrics.exergy for c in self.centurions.values()]
+            exergy = sum(exergies) / len(exergies)
 
-        if ExergyOptimizer.is_thermally_stable(exergy):
-            self._thermal_event.set()
-            return
+            if ExergyOptimizer.is_thermally_stable(exergy):
+                return
 
-        # Bloquear Event Loop en lugar del antiguo while True: active polling (Azkartu O(1) Wait)
-        self._thermal_event.clear()
-        try:
-            await asyncio.wait_for(self._thermal_event.wait(), timeout=5.0)
-        except asyncio.TimeoutError:
-            logger.warning("Thermal timeout (5s) exceeded. Forcing dispatch.")
-            self._thermal_event.set()
+            # Sleep minimal to cool down (Autonomous Thermal Diffusion)
+            await asyncio.sleep(check_interval)
 
     async def dispatch(self, task: dict) -> None:
         """Dispatch a task down the hierarchy."""
         cen = await self.ensure_centurion()
         agent_id = f"ag-{cen.id}-{len(cen.agents)}"
         await cen.deploy_agent(agent_id)
+        self.total_agents += 1
         
         # Azkartu Optimization: Retire full centurion in O(1)
         if len(cen.agents) >= cen.CAPACITY:
@@ -296,52 +315,29 @@ class SwarmCommander:
         return self.legions[domain]
 
     async def execute_global_dispatch(self, tasks: list[dict], parallel: bool = True) -> None:
-        """Route massive workload across the Sharded hierarchy."""
-        if parallel:
-            # V7 Optimization: Bucketed Dispatch for Thermal Stability (KDF 0.05)
-            await self.execute_bucketed_dispatch(tasks, bucket_size=100)
-            return
-
+        """Route massive workload across the Sharded hierarchy in O(1) using Thermodynamic Pull Model."""
+        active_legions = set()
+        
+        # Absolute O(1) Dispatch (Push to Mempool)
         for t in tasks:
             domain = t.get("domain", "default")
             legion = await self.get_or_create_legion(domain)
-            await legion.dispatch(t)
-
-    async def execute_parallel_dispatch(self, tasks: list[dict], concurrency: int = 100) -> None:
-        """High-performance parallelized signal routing (Einstein-Rosen Bridge)."""
-        semaphore = asyncio.Semaphore(concurrency)
-
-        async def _dispatch_task(task: dict):
-            async with semaphore:
-                domain = task.get("domain", "default")
-                legion = await self.get_or_create_legion(domain)
-                await legion.dispatch(task)
-
-        await asyncio.gather(*[_dispatch_task(t) for t in tasks])
-
-    async def execute_bucketed_dispatch(self, tasks: list[dict], bucket_size: int = 100) -> None:
-        """Thermal-aware dispatch groups to prevent I/O saturation."""
-        # Split 10k tasks into buckets of 100
-        for i in range(0, len(tasks), bucket_size):
-            bucket = tasks[i : i + bucket_size]
-
-            # Find domain for current batch (simplification: use first task domain)
-            domain = bucket[0].get("domain", "default")
-            legion = await self.get_or_create_legion(domain)
-
-            # Kinetic Feedback Throttling: Wait for Legion to cool down
-            await legion.wait_for_thermal_stability()
-
-            # Parallelize EACH bucket across its own shard set (Concurrency throttled to 50)
-            await self.execute_parallel_dispatch(bucket, concurrency=50)
+            if parallel:
+                legion.queue.put_nowait(t)
+                active_legions.add(legion)
+            else:
+                await legion.dispatch(t)
+                
+        # Wait for workers to consume the Mempool (Diffusion Process)
+        if parallel:
+            for legion in active_legions:
+                await legion.queue.join()
 
     async def get_density_report(self) -> dict:
         total_legions = len(self.legions)
-        total_centurions = sum(len(legion.centurions) for legion in self.legions.values())
-        total_agents = sum(
-            sum(len(c.agents) for c in legion.centurions.values())
-            for legion in self.legions.values()
-        )
+        total_centurions = sum(legion.total_centurions for legion in self.legions.values())
+        total_agents = sum(legion.total_agents for legion in self.legions.values())
+        
         return {
             "legions": total_legions,
             "centurions": total_centurions,
@@ -362,7 +358,21 @@ class SwarmCommander:
             # Shannon compaction (only for persistent bus)
             await self.bus.gc(max_age_days=0, tenant_id=self.tenant_id)
 
-        # Lifecycle cleanup
+        # Lifecycle cleanup (Ouroboros Hierarchy Teardown)
+        for legion in self.legions.values():
+            legion._is_running = False
+            for worker in legion._workers:
+                worker.cancel()
+            
+            # Wait for strict cancellation enforcement
+            await asyncio.gather(*legion._workers, return_exceptions=True)
+            
+            for cen in legion.centurions.values():
+                if hasattr(cen.bus, "close"):
+                    cen.bus.close()
+                if hasattr(cen.bus, "unlink"):
+                    cen.bus.unlink()
+
         if hasattr(self.bus, "close"):
             if self.use_shm:
                 self.bus.close()

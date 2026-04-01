@@ -3,10 +3,13 @@ import shutil
 import time
 from pathlib import Path
 
+import pytest
+
 from cortex.engine.swarm_10k import SwarmCommander
 
 
-async def run_10k_stress():
+@pytest.mark.asyncio
+async def test_run_10k_stress():
     """Execute 10k agents stress test with parallel dispatch."""
     print("🚀 INITIALIZING LEGION-10k STRESS TEST (Zero-Noise Mandate)")
 
@@ -51,4 +54,4 @@ async def run_10k_stress():
 
 
 if __name__ == "__main__":
-    asyncio.run(run_10k_stress())
+    asyncio.run(test_run_10k_stress())

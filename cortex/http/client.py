@@ -131,10 +131,15 @@ class SovereignHTTPClient:
         try:
             import httpx
 
+            from cortex.guards.url_guard import SafeTransport
+
+            kwargs = self._kwargs.copy()
+            kwargs = SafeTransport.inject_httpx(kwargs)
+
             self._client = httpx.AsyncClient(
                 timeout=self._timeout,
                 follow_redirects=True,
-                **self._kwargs,
+                **kwargs,
             )
             self._backend = "httpx"
         except ImportError:
