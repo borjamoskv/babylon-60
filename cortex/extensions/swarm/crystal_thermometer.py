@@ -46,6 +46,52 @@ class CrystalVitals:
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
+@dataclass
+class ThermodynamicYield:
+    tokens_saved: int
+    cpu_cycles_saved: int
+    llm_inference_cost: int
+    net_score: float
+    is_profitable: bool
+    abort_reason: str = ""
+
+
+def evaluate_net_yield(
+    tokens_saved: int,
+    cpu_cycles_saved: int,
+    llm_inference_cost: int,
+) -> ThermodynamicYield:
+    """Calcula el saldo exergético (Yield Neto) para mutaciones MCTS.
+
+    Axioma Ω3: gasto > reducción de entropía → rama aniquilada.
+    """
+    score = (tokens_saved + (cpu_cycles_saved * 0.0001)) - llm_inference_cost
+    is_profitable = score > 0
+    reason = (
+        ""
+        if is_profitable
+        else f"Saldo negativo ({score:.2f}). Cost > Savings."
+    )
+
+    if not is_profitable:
+        logger.warning(
+            "🧊 [THERMOMETER] Yield Negativo: %s", reason,
+        )
+    else:
+        logger.info(
+            "🔥 [THERMOMETER] Mutación rentable: %s score", score,
+        )
+
+    return ThermodynamicYield(
+        tokens_saved=tokens_saved,
+        cpu_cycles_saved=cpu_cycles_saved,
+        llm_inference_cost=llm_inference_cost,
+        net_score=score,
+        is_profitable=is_profitable,
+        abort_reason=reason,
+    )
+
+
 def calculate_temperature(recall_count: int, age_days: float) -> float:
     if age_days >= 0.01:
         return recall_count / max(age_days, 1.0)

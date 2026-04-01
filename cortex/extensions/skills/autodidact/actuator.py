@@ -5,6 +5,7 @@ from typing import Any
 
 from cortex.extensions.skills.autodidact.fetchers import execute_cognitive_acquisition
 from cortex.extensions.skills.autodidact.synthesis import execute_cognitive_synthesis
+from cortex.extensions.swarm.crystal_thermometer import evaluate_net_yield
 
 # Integración Babestu (Security)
 try:
@@ -106,3 +107,51 @@ async def daemon_ingesta_soberana(
 async def autodidact_pipeline(target: str, intent: str = "Aprender", force: bool = False) -> dict:
     """Interface O(1) para compatibilidad de herramientas."""
     return await daemon_ingesta_soberana(target, intent, force)
+
+
+async def daemon_jit_synthesis(
+    code_str: str,
+    entrypoint: str,
+    expected_tokens_saved: int,
+    expected_cpu_savings: int,
+    llm_cost: int,
+) -> dict:
+    """Protocolo AUTODIDACT-Ω JIT: Memory-Only AST synthesis."""
+    logger.info("⚔️ [SORTU] Iniciando validación JIT efímera...")
+
+    # 1. Epistemic Breaker: Yield Termodinámico Neto
+    yield_metric = evaluate_net_yield(
+        expected_tokens_saved, expected_cpu_savings, llm_cost,
+    )
+    if not yield_metric.is_profitable:
+        logger.error(
+            "🛑 [EPISTEMIC BREAKER] Yield negativo. Rama aniquilada.",
+        )
+        return {"estado": "FALLO", "error": yield_metric.abort_reason}
+
+    # 2. MCTS-Git Sandbox: Compilación AST
+    try:
+        from scripts.sortu.sortu_jit_executor import (
+            execute_adhoc_synthesis,
+        )
+    except ImportError:
+        return {
+            "estado": "FALLO",
+            "error": "Sortu JIT Executor no disponible.",
+        }
+
+    result = execute_adhoc_synthesis(code_str, entrypoint)
+
+    if result.get("status") == "SUCCESS":
+        logger.info("💎 [SOVEREIGN] JIT compilado. Limit: O(1).")
+        return {
+            "estado": "ASIMILADO",
+            "resultado": result.get("result"),
+            "meta": yield_metric.__dict__,
+        }
+
+    logger.warning("☣️ [EPISTEMIC BREAKER] Ad-Hoc fallida. Purgada.")
+    return {
+        "estado": "FALLO",
+        "error": result.get("error") or result.get("status"),
+    }
