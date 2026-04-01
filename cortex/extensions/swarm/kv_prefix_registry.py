@@ -19,6 +19,8 @@ class PrefixSlot:
     tenant_id: str
     prefix_hash: str          # sha256 del system_prompt
     prefix_tokens: int        # longitud del prefix
+    provider_name: str        # Proveedor físico donde reside el prefix (EJ: 'gemini', 'anthropic')
+    model_name: str           # Modelo físico (EJ: 'gemini-1.5-pro')
     created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     hits: int = 0             # agentes que reutilizaron este slot
 
@@ -32,9 +34,9 @@ class PrefixSlot:
 
 class KVPrefixRegistry:
     """
-    Application-level prefix sharing registry.
-    Capa de aplicación sobre prefix caching del servidor LLM.
-    Training-free. O(1) lookup.
+    Application-level registry for tracking and safely sharing 
+    KV cache slots across multiple orchestrator missions running 
+    in the same process, enforcing tenant isolation (AX-042).
     """
 
     def __init__(self) -> None:
@@ -46,6 +48,8 @@ class KVPrefixRegistry:
         mission_id: str,
         tenant_id: str,
         system_prompt: str,
+        provider_name: str,
+        model_name: str,
     ) -> PrefixSlot:
         """Registra un nuevo prefix slot para una misión."""
         prefix_hash = hashlib.sha256(system_prompt.encode()).hexdigest()
@@ -54,6 +58,8 @@ class KVPrefixRegistry:
             tenant_id=tenant_id,
             prefix_hash=prefix_hash,
             prefix_tokens=len(system_prompt.split()),  # approx estimation
+            provider_name=provider_name,
+            model_name=model_name,
         )
         self._slots[slot.cache_key] = slot
         return slot
@@ -70,6 +76,15 @@ class KVPrefixRegistry:
             self._savings_tokens += slot.prefix_tokens
         return slot
 
+    def check_cache_affinity(self, system_prompt: str) -> list[str]:
+        """Returns provider names that have an active cache for this exact prompt hash."""
+        prefix_hash = hashlib.sha256(system_prompt.encode()).hexdigest()
+        providers = set()
+        for slot in self._slots.values():
+            if slot.prefix_hash == prefix_hash:
+                providers.add(slot.provider_name)
+        return list(providers)
+
     def exergy_report(self) -> dict[str, Any]:
         """Informe de exergía recuperada (AX-042)."""
         return {
@@ -78,3 +93,12 @@ class KVPrefixRegistry:
             "tokens_saved": self._savings_tokens,
             "estimated_flops_saved": self._savings_tokens * 4 * 32 * 4096 ** 2,
         }
+
+_registry_key = "__cortex_kv_registry__"
+
+def get_kv_registry() -> KVPrefixRegistry:
+    """True singleton provider for KVPrefixRegistry."""
+    import sys
+    if not hasattr(sys, _registry_key):
+        setattr(sys, _registry_key, KVPrefixRegistry())
+    return getattr(sys, _registry_key)

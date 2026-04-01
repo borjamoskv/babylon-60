@@ -25,7 +25,7 @@ from cortex.extensions.llm._stealth import (
     prepare_stealth_headers,
     sanitize_response,
 )
-from cortex.extensions.llm.gemini_cache import GeminiCacheGateway
+from cortex.extensions.llm.gemini_cache import get_gemini_gateway
 from cortex.extensions.llm.quota import SovereignQuotaManager
 
 __all__ = ["LLMProvider"]
@@ -191,7 +191,7 @@ class LLMProvider(BaseProvider):
         cache_config = get_prefix_cache_config(self._provider)
         if cache_config.get("enabled") and prefix_cache_key and self._provider == "gemini":
             if not self._gemini_gateway:
-                self._gemini_gateway = GeminiCacheGateway(api_key=self._api_key or "")
+                self._gemini_gateway = get_gemini_gateway(self._api_key or "")
             remote_cache = await self._gemini_gateway.get_or_create_cache(
                 cache_key=prefix_cache_key,
                 system_prompt=system,
@@ -441,10 +441,16 @@ class LLMProvider(BaseProvider):
         messages = prompt.to_openai_messages()
 
         # Stealth / Causal logic (Ω₂₃)
-        if getattr(prompt, "stealth", False) and messages and messages[0]["role"] == "system":
+        if getattr(prompt, "stealth", False) and messages:
             noise_id = hashlib.sha256(f"{time.time()}{random.random()}".encode()).hexdigest()[:8]
-            messages[0]["content"] += f"\n\n<!-- ctx:{noise_id} -->"
-            messages[0]["content"] = (" " * random.randint(0, 2)) + messages[0]["content"]
+            
+            # Find last user message, preserving system prompt (KV cache) purity
+            for msg in reversed(messages):
+                if msg["role"] == "user":
+                    msg["content"] += f"\n\n<!-- ctx:{noise_id} -->"
+                    msg["content"] = (" " * random.randint(0, 2)) + msg["content"]
+                    break
+                    
             await apply_causal_jitter(tokens_estimate=50)
 
         payload: dict[str, Any] = {
@@ -462,7 +468,7 @@ class LLMProvider(BaseProvider):
 
         if cache_config.get("enabled") and prefix_cache_key and self._provider == "gemini":
             if not self._gemini_gateway:
-                self._gemini_gateway = GeminiCacheGateway(api_key=self._api_key or "")
+                self._gemini_gateway = get_gemini_gateway(self._api_key or "")
             remote_cache = await self._gemini_gateway.get_or_create_cache(
                 cache_key=prefix_cache_key,
                 system_prompt=system_extraction,
