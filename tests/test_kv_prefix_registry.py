@@ -53,3 +53,21 @@ def test_exergy_tracking():
     report = registry.exergy_report()
     assert report["total_slots"] == 1
 
+
+def test_lazy_ttl_eviction():
+    registry = KVPrefixRegistry()
+    sys_prompt = "TTL decay simulation"
+    # Registrar un nodo que caduca en -10 segundos (ya nació caducado)
+    slot = registry.register("m-1", "t-1", sys_prompt, "anthropic", "claude-3-opus", ttl_seconds=-10)
+    
+    # El diccionario de raw slots aún lo tiene antes de evaluarlo
+    assert slot.cache_key in registry._slots
+
+    # Al evaluar cache affinity, el sistema debe detectarlo como expirado y purgarlo
+    active_providers = registry.check_cache_affinity(sys_prompt)
+    
+    # Afinidad debe estar muerta
+    assert len(active_providers) == 0
+    # Lazy Eviction debe haber aniquilado el slot
+    assert slot.cache_key not in registry._slots
+
