@@ -57,6 +57,7 @@ class MCTSGitEnvironment:
             system_instruction=(
                 "You are CORTEX Chronos, the Quantum Software Architect. "
                 "Mutate the following Python file strictly according to the task. "
+                "CRITICAL: Maintain the 10 Sovereign Seals. Never use `datetime.datetime.now` (use `timezone.utc`). "
                 "Return ONLY the raw updated code. No markdown formatting if possible."
             ),
             working_memory=[
@@ -111,7 +112,18 @@ class MCTSGitEnvironment:
             logger.warning("💥 [CHRONOS] Mutación aniquilada: Invalida el linter estricto.")
             return 0.0
 
-        cmd_test = "pytest tests/ -v -q --tb=no"
+        # O(1) Targeted Pytest Simulation
+        test_file = Path(f"tests/test_{self.target_file.name}")
+        if test_file.exists():
+            cmd_test = f"pytest {shlex.quote(str(test_file))} -v -q --tb=no"
+            logger.info("🎯 [CHRONOS] Ejecución O(1): Usando %s", test_file.name)
+        else:
+            logger.warning(
+                "⚠️ [CHRONOS] No se halló test directo. Forzando suite reducida (tests_engine)."
+            )
+            # Fallback a un sub-módulo para evitar castigar la CPU por 15m
+            cmd_test = "pytest tests/ -v -q --tb=no -k " + shlex.quote(self.target_file.stem)
+
         proc_test = await asyncio.create_subprocess_shell(
             cmd_test, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
         )

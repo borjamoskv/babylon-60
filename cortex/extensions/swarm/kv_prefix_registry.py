@@ -14,10 +14,32 @@ from typing import Any
 import time
 
 
+import json
+
 @lru_cache(maxsize=1024)
-def hash_prompt(system_prompt: str) -> str:
-    """O(1) SHA-256 para prompts recurrentes (Azkartu Optimization)."""
-    return hashlib.sha256(system_prompt.encode()).hexdigest()
+def _hash_string_sha3_256(content: str) -> str:
+    """Cache-backed sha3_256 for identical scalar strings."""
+    return hashlib.sha3_256(content.encode('utf-8')).hexdigest()
+
+def hash_prompt(system_prompt: str, episodic_context: list[dict] | None = None) -> str:
+    """O(1) SHA3-256 Hybrid Hashing para prompts y payloads multimodales.
+    
+    Implementación asimétrica: el `system_prompt` (largo) se memoiza,
+    y el `episodic_context` se acumula incrementalmente, evitando rehashing
+    completo si cambia solo un frame.
+    """
+    base_hash = _hash_string_sha3_256(system_prompt)
+    
+    if not episodic_context:
+        return base_hash
+        
+    # Asymmetric incremental hashing
+    h = hashlib.sha3_256(base_hash.encode('utf-8'))
+    for item in episodic_context:
+        item_str = json.dumps(item, sort_keys=True)
+        h.update(item_str.encode('utf-8'))
+        
+    return h.hexdigest()
 
 
 @dataclass
@@ -53,6 +75,7 @@ class KVPrefixRegistry:
         self._slots: dict[str, PrefixSlot] = {}  # cache_key → slot
         self._prefix_providers: dict[str, set[str]] = {}  # prefix_hash → set of provider_names
         self._savings_tokens: int = 0
+        self._prefill_locks: dict[str, asyncio.Event] = {}  # prefix_hash -> Event
 
     def register(
         self,
@@ -62,9 +85,10 @@ class KVPrefixRegistry:
         provider_name: str,
         model_name: str,
         ttl_seconds: int = 3600,
+        episodic_context: list[dict] | None = None,
     ) -> PrefixSlot:
         """Registra un nuevo prefix slot para una misión."""
-        prefix_hash = hash_prompt(system_prompt)
+        prefix_hash = hash_prompt(system_prompt, episodic_context)
         slot = PrefixSlot(
             mission_id=mission_id,
             tenant_id=tenant_id,
@@ -84,9 +108,15 @@ class KVPrefixRegistry:
         
         return slot
 
-    def get_slot(self, mission_id: str, tenant_id: str, system_prompt: str) -> PrefixSlot | None:
+    def get_slot(
+        self, 
+        mission_id: str, 
+        tenant_id: str, 
+        system_prompt: str,
+        episodic_context: list[dict] | None = None
+    ) -> PrefixSlot | None:
         """Recupera slot existente (cache hit) o None (cache miss)."""
-        prefix_hash = hash_prompt(system_prompt)
+        prefix_hash = hash_prompt(system_prompt, episodic_context)
         key = hashlib.sha256(
             f"{tenant_id}:{mission_id}:{prefix_hash}".encode()
         ).hexdigest()
@@ -96,11 +126,11 @@ class KVPrefixRegistry:
             self._savings_tokens += slot.prefix_tokens
         return slot
 
-    def check_cache_affinity(self, system_prompt: str) -> list[str]:
+    def check_cache_affinity(self, system_prompt: str, episodic_context: list[dict] | None = None) -> list[str]:
         """Returns provider names that have an active cache for this exact prompt hash.
         O(1) Check using dict comprehension and lazy eviction of expired TTL slots.
         """
-        prefix_hash = hash_prompt(system_prompt)
+        prefix_hash = hash_prompt(system_prompt, episodic_context)
         keys = self._prefix_providers.get(prefix_hash, set())
         providers = set()
         now = time.time()
@@ -120,6 +150,31 @@ class KVPrefixRegistry:
                 self._slots.pop(k, None)
 
         return list(providers)
+
+    async def wait_or_acquire_prefill(self, system_prompt: str, episodic_context: list[dict] | None = None) -> bool:
+        """
+        STAMPEDE MITIGATION: Devuelve True si el agente es el LÍDER y debe recalcular.
+        Devuelve False si el agente es FOLLOWER y ha esperado a que el líder termine.
+        """
+        import asyncio
+        prefix_hash = hash_prompt(system_prompt, episodic_context)
+        
+        if prefix_hash in self._prefill_locks:
+            # Somos Follower
+            event = self._prefill_locks[prefix_hash]
+            await event.wait()
+            return False
+            
+        # Somos Líder
+        self._prefill_locks[prefix_hash] = asyncio.Event()
+        return True
+        
+    def release_prefill_lock(self, system_prompt: str, episodic_context: list[dict] | None = None) -> None:
+        """Libera a los Follower estancados una vez el Líder inyecta el prefijo en la nube."""
+        prefix_hash = hash_prompt(system_prompt, episodic_context)
+        event = self._prefill_locks.pop(prefix_hash, None)
+        if event:
+            event.set()
 
     def exergy_report(self) -> dict[str, Any]:
         """Informe de exergía recuperada (AX-042)."""

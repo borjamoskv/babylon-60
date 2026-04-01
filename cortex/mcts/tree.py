@@ -77,19 +77,19 @@ class MCTSEngine:
 
             # 1. Selection & Expansion
             node = root
-            # Mock simplistic expansion logic for P0
             if not node.children:
+                # Expansión Divergente Real (Estrategias Estructurales CORTEX v6.0)
                 node.add_child(
                     f"{base_branch}-{i}-A",
-                    "Refactor for pure thermodynamic efficiency and low memory overhead.",
+                    f"STRATEGY ALPHA (Thermodynamic): {mutation_str}. Enforce extreme O(1) efficiency. Minimize CPU cycles and abstract overhead.",
                 )
                 node.add_child(
                     f"{base_branch}-{i}-B",
-                    "Rewrite using modern Python 3.10+ async features strictly.",
+                    f"STRATEGY BETA (Strict Typed Guard): {mutation_str}. Maximize strict PEP-695 generics. Add invariant boundary checks.",
                 )
                 node.add_child(
                     f"{base_branch}-{i}-C",
-                    "Minimize line count without losing intent. O(1) mindset.",
+                    f"STRATEGY GAMMA (Minimalist LOC): {mutation_str}. Syntactic reduction. Combine logic into zero-noise comprehensive structures without losing intent.",
                 )
 
             # Pick best UCT child

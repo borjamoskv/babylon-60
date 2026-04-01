@@ -40,9 +40,9 @@ def evolve(file: str, simulations: int, prompt: str) -> None:
             )
         )
 
-        # Instanciar el enrutador soberano (P0 usa OpenAI GPT-5.4 o DeepSeek-v3 local)
+        # Instanciar el enrutador soberano (P0 usa Gemini Native Proxy caching)
         router = CortexLLMRouter(
-            primary=LLMProvider(provider="ollama"),  # AlphaZero Local Synthesis
+            primary=LLMProvider(provider="gemini"),  # Omega-7 Frontier Execution
             db_path=DEFAULT_DB_PATH,
         )
 

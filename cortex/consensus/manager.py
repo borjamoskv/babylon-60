@@ -35,6 +35,9 @@ class ConsensusManager:
     def __init__(self, engine, signal_bus=None):
         self.engine = engine
         self._signal_bus = signal_bus or getattr(engine, "_signal_bus", None)
+        # Quorum Pools en memoria (Ciclo 2: Motores Bizantinos)
+        self._vote_pools: dict[int, list[dict]] = {}
+        self._pool_locks: dict[int, asyncio.Lock] = {}
 
     async def vote(
         self,
@@ -133,6 +136,109 @@ class ConsensusManager:
                     "reason": reason,
                 },
             )
+            score = await self._recalculate_consensus_v2(fact_id, conn)
+            await conn.commit()
+            return score
+
+    async def promise_vote(
+        self,
+        fact_id: int,
+        agent_id: str,
+        value: int,
+        reason: Optional[str] = None,
+    ) -> None:
+        """
+        [Ciclo 2] Añade un voto a la Cámara Temporal (Quorum Pool) sin tocar la base de datos.
+        Evita machacar las conexiones de SQLite en resoluciones masivas del Swarm 10k.
+        """
+        import asyncio
+        if value not in (-1, 0, 1):
+            raise ValueError(f"vote value must be -1, 0, or 1, got {value}")
+
+        if fact_id not in self._pool_locks:
+            self._pool_locks[fact_id] = asyncio.Lock()
+            self._vote_pools[fact_id] = []
+
+        async with self._pool_locks[fact_id]:
+            self._vote_pools[fact_id].append({
+                "agent_id": agent_id,
+                "value": value,
+                "reason": reason,
+            })
+
+    async def resolve_quorum(self, fact_id: int) -> float:
+        """
+        [Ciclo 2] Toma todos los votos asincrónicos en memoria de la Cámara Temporal,
+        los inyecta en lotes con O(1) write overhead, y resuelve el Consenso LogOP.
+        """
+        if fact_id not in self._pool_locks:
+            return 1.0  # No hay promesas de voto en esta cámara
+
+        import asyncio
+        async with self._pool_locks[fact_id]:
+            promises = self._vote_pools.pop(fact_id, [])
+        
+        # Elimina el cerrojo para evitar Memory Leak
+        self._pool_locks.pop(fact_id, None)
+
+        if not promises:
+            return 1.0
+
+        async with self.engine.session() as conn:
+            # Recuperar reputaciones O(1) Batch
+            agent_ids = [p["agent_id"] for p in promises]
+            placeholders = ",".join(["?"] * len(agent_ids))
+            
+            cursor = await conn.execute(
+                f"SELECT id, reputation_score FROM agents WHERE id IN ({placeholders}) AND is_active = 1",
+                tuple(agent_ids)
+            )
+            reputations = {row[0]: row[1] for row in await cursor.fetchall()}
+
+            for promise in promises:
+                agent_id = promise["agent_id"]
+                value = promise["value"]
+                reason = promise["reason"]
+
+                if agent_id not in reputations:
+                    # 💓 Pulse Reality Check: agent missing
+                    if self._signal_bus:
+                        self._signal_bus.emit(
+                            "error:consensus:agent_not_found",
+                            payload={"agent_id": agent_id, "fact_id": fact_id},
+                            source="consensus_manager",
+                        )
+                    continue
+
+                rep = reputations[agent_id]
+
+                if value == 0:
+                    await conn.execute(
+                        "DELETE FROM consensus_votes_v2 WHERE fact_id = ? AND agent_id = ?",
+                        (fact_id, agent_id),
+                    )
+                else:
+                    await conn.execute(
+                        "INSERT OR REPLACE INTO consensus_votes_v2 "
+                        "(fact_id, agent_id, vote, vote_weight, agent_rep_at_vote, vote_reason) "
+                        "VALUES (?, ?, ?, ?, ?, ?)",
+                        (fact_id, agent_id, value, rep, rep, reason),
+                    )
+                
+                await self.engine._log_transaction(
+                    conn,
+                    "consensus",
+                    "promise_resolve",
+                    {
+                        "fact_id": fact_id,
+                        "agent_id": agent_id,
+                        "vote": value,
+                        "rep": rep,
+                        "reason": reason,
+                    },
+                )
+            
+            # Recalcular unificado para el facto tras inyectar todos los votos
             score = await self._recalculate_consensus_v2(fact_id, conn)
             await conn.commit()
             return score

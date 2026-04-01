@@ -190,12 +190,13 @@ def providers_for_intent(
     min_tier: str = "high",
     max_cost: str | None = None,
     sort_by: str = "cost",
+    prefer_cache: bool = False,
 ) -> list[tuple[str, str]]:
-    """Return providers that support an intent, sorted by cost or tier."""
+    """Return providers for an intent, sorted by cost/tier, prioritizing KV cache."""
     presets = load_presets()
     min_tier_rank = _TIER_RANK.get(min_tier, 0)
     max_cost_rank = _COST_RANK.get(max_cost, 999) if max_cost else 999
-    results: list[tuple[str, str, int, int]] = []
+    results: list[tuple[str, str, int, int, int]] = []
 
     for name, config in presets.items():
         tier_rank = _TIER_RANK.get(config.get("tier", "high"), 1)
@@ -216,14 +217,21 @@ def providers_for_intent(
         else:
             continue
 
-        results.append((name, model, cost_rank, tier_rank))
+        cache_enabled = int(config.get("prefix_cache_enabled", False))
+        results.append((name, model, cost_rank, tier_rank, cache_enabled))
 
     if sort_by == "cost":
-        results.sort(key=lambda x: (x[2], -x[3]))
+        if prefer_cache:
+            results.sort(key=lambda x: (-x[4], x[2], -x[3]))
+        else:
+            results.sort(key=lambda x: (x[2], -x[3]))
     else:
-        results.sort(key=lambda x: (-x[3], x[2]))
+        if prefer_cache:
+            results.sort(key=lambda x: (-x[4], -x[3], x[2]))
+        else:
+            results.sort(key=lambda x: (-x[3], x[2]))
 
-    return [(name, model) for name, model, _, _ in results]
+    return [(name, model) for name, model, _, _, _ in results]
 
 
 def frontier_providers(intent: str = "general") -> list[tuple[str, str]]:

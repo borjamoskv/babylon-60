@@ -293,44 +293,71 @@ class CortexLLMRouter:
 
         Enforces policy Ω₁₆ & Ω₂: targeted routing for belief-chain audits and cache affinity.
         """
-        if not provider_hint and prompt.system_instruction:
-            # Exergy Token Guard (Ω₂): Bypass ruteo afín para prompts pequeños O(1) puros
-            if len(prompt.system_instruction.split()) > 750:
-                # Implement Cache-Aware Routing (Zero-Recompute Policy)
-                try:
-                    from cortex.extensions.swarm.kv_prefix_registry import get_kv_registry
-                    registry = get_kv_registry()
-                    # TODO(hybrid-hash): Evaluar inyección del episodic_context en un futuro
-                    hot_providers = registry.check_cache_affinity(prompt.system_instruction)
-                    if hot_providers:
-                        valid_providers = {self._primary.provider_name} | {
-                            p.provider_name for p in self._fallbacks
-                        }
-                        for hp in hot_providers:
-                            if hp in valid_providers:
-                                provider_hint = hp
-                                logger.info(
-                                    "🔥 [CACHE-ROUTING] Affinity detected correctly in %s. Routing directly to maximize exergy (O(1)).",
-                                    hp,
-                                )
-                                break
-                except ImportError:
-                    pass
+        is_leader = False
+        registry_for_lock = None
 
-        if not provider_hint or self._primary.provider_name == provider_hint:
+        try:
+            if not provider_hint and prompt.system_instruction:
+                # Exergy Token Guard (Ω₂): Bypass ruteo afín para prompts pequeños O(1) puros
+                if len(prompt.system_instruction.split()) > 750 or prompt.episodic_context:
+                    # Implement Cache-Aware Routing (Zero-Recompute Policy)
+                    try:
+                        from cortex.extensions.swarm.kv_prefix_registry import get_kv_registry
+                        registry = get_kv_registry()
+                        # [Hybrid Hash] Resolved: Evaluar inyección del episodic_context (Multimodal payloads)
+                        hot_providers = registry.check_cache_affinity(prompt.system_instruction, episodic_context=prompt.episodic_context)
+                        if hot_providers:
+                            valid_providers = {self._primary.provider_name} | {
+                                p.provider_name for p in self._fallbacks
+                            }
+                            for hp in hot_providers:
+                                if hp in valid_providers:
+                                    provider_hint = hp
+                                    logger.info(
+                                        "🔥 [CACHE-ROUTING] Affinity detected correctly in %s. Routing directly to maximize exergy (O(1)).",
+                                        hp,
+                                    )
+                                    break
+                        else:
+                            # Cold Cache detected: Initiate Stampede Mitigation (Prefill Lock)
+                            is_leader = await registry.wait_or_acquire_prefill(prompt.system_instruction, episodic_context=prompt.episodic_context)
+                            if is_leader:
+                                registry_for_lock = registry
+                            else:
+                                # Re-evaluar afinidad post-espera (El líder subió el contexto exitosamente)
+                                hot_providers_after = registry.check_cache_affinity(prompt.system_instruction, episodic_context=prompt.episodic_context)
+                                valid_providers = {self._primary.provider_name} | {
+                                    p.provider_name for p in self._fallbacks
+                                }
+                                for hp in hot_providers_after:
+                                    if hp in valid_providers:
+                                        provider_hint = hp
+                                        logger.info(
+                                            "❄️ [STAMPEDE-SURVIVOR] Follower woken up. Affinity detected in %s. O(1) Cache Hit.", 
+                                            hp
+                                        )
+                                        break
+                    except ImportError:
+                        pass
+
+            if not provider_hint or self._primary.provider_name == provider_hint:
+                return await self.execute_resilient(prompt)
+
+            # Provider Hint: temporarily swap priority for this request
+            for p in self._fallbacks:
+                if p.provider_name == provider_hint:
+                    # Use a temporary router view or just try this provider first
+                    logger.debug("🎯 [ROUTING] Overriding primary with hint: %s", provider_hint)
+                    res = await self._try_provider(p, prompt)
+                    if res.is_ok():
+                        return res
+                    break  # Fall back to standard resilience if hint provider fails
+
             return await self.execute_resilient(prompt)
-
-        # Provider Hint: temporarily swap priority for this request
-        for p in self._fallbacks:
-            if p.provider_name == provider_hint:
-                # Use a temporary router view or just try this provider first
-                logger.debug("🎯 [ROUTING] Overriding primary with hint: %s", provider_hint)
-                res = await self._try_provider(p, prompt)
-                if res.is_ok():
-                    return res
-                break  # Fall back to standard resilience if hint provider fails
-
-        return await self.execute_resilient(prompt)
+        
+        finally:
+            if is_leader and registry_for_lock and prompt.system_instruction:
+                registry_for_lock.release_prefill_lock(prompt.system_instruction, episodic_context=prompt.episodic_context)
 
     async def execute_swarm(self, prompt: CortexPrompt) -> Result[str, str] | None:
         """Ω₂₁: Parallel Swarm Racing."""
