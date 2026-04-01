@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from functools import lru_cache
 from typing import Any
+import time
 
 
 @lru_cache(maxsize=1024)
@@ -28,7 +29,9 @@ class PrefixSlot:
     prefix_tokens: int        # longitud del prefix
     provider_name: str        # Proveedor físico donde reside el prefix (EJ: 'gemini', 'anthropic')
     model_name: str           # Modelo físico (EJ: 'gemini-1.5-pro')
+    ttl_seconds: int = 3600
     created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    expires_at: float = field(default_factory=lambda: time.time() + 3600.0)
     hits: int = 0             # agentes que reutilizaron este slot
 
     @property
@@ -58,6 +61,7 @@ class KVPrefixRegistry:
         system_prompt: str,
         provider_name: str,
         model_name: str,
+        ttl_seconds: int = 3600,
     ) -> PrefixSlot:
         """Registra un nuevo prefix slot para una misión."""
         prefix_hash = hash_prompt(system_prompt)
@@ -68,13 +72,15 @@ class KVPrefixRegistry:
             prefix_tokens=len(system_prompt.split()),  # approx estimation
             provider_name=provider_name,
             model_name=model_name,
+            ttl_seconds=ttl_seconds,
+            expires_at=time.time() + ttl_seconds,
         )
         self._slots[slot.cache_key] = slot
         
         # O(1) lookup index
         if prefix_hash not in self._prefix_providers:
             self._prefix_providers[prefix_hash] = set()
-        self._prefix_providers[prefix_hash].add(provider_name)
+        self._prefix_providers[prefix_hash].add(slot.cache_key)
         
         return slot
 
@@ -92,10 +98,28 @@ class KVPrefixRegistry:
 
     def check_cache_affinity(self, system_prompt: str) -> list[str]:
         """Returns provider names that have an active cache for this exact prompt hash.
-        O(1) Check using dict comprehension.
+        O(1) Check using dict comprehension and lazy eviction of expired TTL slots.
         """
         prefix_hash = hash_prompt(system_prompt)
-        return list(self._prefix_providers.get(prefix_hash, set()))
+        keys = self._prefix_providers.get(prefix_hash, set())
+        providers = set()
+        now = time.time()
+        expired_keys = set()
+
+        for k in keys:
+            slot = self._slots.get(k)
+            if slot and now < slot.expires_at:
+                providers.add(slot.provider_name)
+            else:
+                expired_keys.add(k)
+        
+        # Lazy eviction (O(1) cost per expired node)
+        if expired_keys:
+            self._prefix_providers[prefix_hash].difference_update(expired_keys)
+            for k in expired_keys:
+                self._slots.pop(k, None)
+
+        return list(providers)
 
     def exergy_report(self) -> dict[str, Any]:
         """Informe de exergía recuperada (AX-042)."""

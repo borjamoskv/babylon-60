@@ -6,6 +6,7 @@ based on hash(sender/receiver) mod NUM_SHARDS.
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 import logging
@@ -144,10 +145,14 @@ class ShardedAsyncSignalBus:
         else:
             conns = list(self._shards.values())
 
-        all_signals = []
-        for conn in conns:
+        async def fetch_rows(conn):
             cursor = await conn.execute(query, params)
-            rows = await cursor.fetchall()
+            return await cursor.fetchall()
+
+        all_results = await asyncio.gather(*(fetch_rows(c) for c in conns))
+        
+        all_signals = []
+        for rows in all_results:
             all_signals.extend([signal_from_row(tuple(row)) for row in rows])
 
         all_signals.sort(key=lambda x: x.created_at, reverse=True)
@@ -180,27 +185,42 @@ class ShardedAsyncSignalBus:
             [self._get_shard_index(routing_key)] if routing_key else range(self.num_shards)
         )
 
-        polled_signals = []
-
-        for idx in shard_indices:
-            if len(polled_signals) >= limit:
-                break
-
+        async def fetch_candidates(idx: int):
             conn = self._shards[idx]
             cursor = await conn.execute(query, params)
             rows = await cursor.fetchall()
+            return idx, rows
 
-            batch = [signal_from_row(tuple(r)) for r in rows][: limit - len(polled_signals)]
+        # O(1) Cluster polling
+        results = await asyncio.gather(*(fetch_candidates(idx) for idx in shard_indices))
 
-            for sig in batch:
-                new_consumed = sig.consumed_by + [consumer]
-                await conn.execute(
-                    "UPDATE signals SET consumed_by = ? WHERE id = ? AND tenant_id = ?",
-                    (json.dumps(new_consumed), sig.id, tenant_id),
-                )
-            if batch:
-                await conn.commit()
-                polled_signals.extend(batch)
+        all_candidate_signals = []
+        for idx, rows in results:
+            for r in rows:
+                all_candidate_signals.append((idx, signal_from_row(tuple(r))))
+
+        # Sort globally to prevent starvation on higher shard indices (True Queue FIFO behavior)
+        all_candidate_signals.sort(key=lambda pair: pair[1].created_at)
+        selected_pairs = all_candidate_signals[:limit]
+
+        polled_signals = []
+        updates_by_shard = {}
+
+        for idx, sig in selected_pairs:
+            new_consumed = sig.consumed_by + [consumer]
+            updates_by_shard.setdefault(idx, []).append((json.dumps(new_consumed), sig.id, tenant_id))
+            polled_signals.append(sig)
+
+        async def update_shard(idx: int, updates: list):
+            conn = self._shards[idx]
+            await conn.executemany(
+                "UPDATE signals SET consumed_by = ? WHERE id = ? AND tenant_id = ?",
+                updates,
+            )
+            await conn.commit()
+
+        if updates_by_shard:
+            await asyncio.gather(*(update_shard(idx, updates) for idx, updates in updates_by_shard.items()))
 
         return polled_signals
 
@@ -218,10 +238,13 @@ class ShardedAsyncSignalBus:
             query += " AND tenant_id = ?"
             params.append(tenant_id)
 
-        for conn in self._shards.values():
+        async def remove_from_shard(conn):
             cursor = await conn.execute(query, params)
             await conn.commit()
-            total_pruned += cursor.rowcount
+            return cursor.rowcount
+
+        results = await asyncio.gather(*(remove_from_shard(c) for c in self._shards.values()))
+        total_pruned = sum(results)
 
         if total_pruned:
             logger.info(

@@ -117,6 +117,8 @@ async def require_consensus(
 
     results = await engine.search(query=claim, top_k=1)
     if not results:
+        # Azkartu: Cachear misses para evitar repetir requests semánticos
+        AUTH_CACHE.set(claim, tenant_id, -1.0)
         return False
 
     res = results[0]
