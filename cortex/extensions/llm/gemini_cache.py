@@ -89,3 +89,11 @@ class GeminiCacheGateway:
                 logger.warning("Gemini cache HTTP execution error: %s", e)
                 
         return None
+
+_GEMINI_GATEWAYS: dict[str, GeminiCacheGateway] = {}
+
+def get_gemini_gateway(api_key: str) -> GeminiCacheGateway:
+    """True singleton provider for GeminiCacheGateway per API Key."""
+    if api_key not in _GEMINI_GATEWAYS:
+        _GEMINI_GATEWAYS[api_key] = GeminiCacheGateway(api_key)
+    return _GEMINI_GATEWAYS[api_key]

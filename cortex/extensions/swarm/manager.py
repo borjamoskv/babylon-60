@@ -23,6 +23,7 @@ from cortex.extensions.swarm.worktree_isolation import isolated_worktree
 
 logger = logging.getLogger("cortex.extensions.swarm.manager")
 
+_SESSION_TYPE_CACHE: dict[int, bool] = {}
 
 class WorktreeState:
     """Metadata for an active or pending worktree."""
@@ -173,8 +174,8 @@ class CapatazOrchestrator:
         self.tasks: dict[str, SwarmTask] = {}
         self.budget = get_budget_manager()
 
-        from cortex.extensions.swarm.kv_prefix_registry import KVPrefixRegistry
-        self._kv_registry = KVPrefixRegistry()
+        from cortex.extensions.swarm.kv_prefix_registry import get_kv_registry
+        self._kv_registry = get_kv_registry()
 
         logger.info("Capataz: Orchestrating mission %s", self.mission_id)
 
@@ -201,14 +202,17 @@ class CapatazOrchestrator:
                 role=role,
                 payload=payload or {"discovery": result},
             )
-            import inspect
-            _sess_func = getattr(engine.session, "__wrapped__", engine.session)
-            is_async = (
-                inspect.iscoroutinefunction(_sess_func)
-                or inspect.isasyncgenfunction(_sess_func)
-            )
-
-            if is_async:
+            
+            engine_id = id(engine)
+            if engine_id not in _SESSION_TYPE_CACHE:
+                import inspect
+                _sess_func = getattr(engine.session, "__wrapped__", engine.session)
+                _SESSION_TYPE_CACHE[engine_id] = (
+                    inspect.iscoroutinefunction(_sess_func) 
+                    or inspect.isasyncgenfunction(_sess_func)
+                )
+            
+            if _SESSION_TYPE_CACHE[engine_id]:
                 async with engine.session() as conn:
                     bus = AsyncSignalBus(conn)
                     await bus.emit(
@@ -355,8 +359,52 @@ class CapatazOrchestrator:
                 await lock_manager.release(lock_resource, agent_name)
             self._print_summary()
 
+    async def preheat_prefix(self, system_prompt: str, tenant_id: str) -> None:
+        """AX-042: Ping provider to cache prefix before the swarm hits it concurrently."""
+        try:
+            from cortex.extensions.llm.provider import LLMProvider
+            
+            logger.info("[%s] Capataz: Pre-heating KV Cache for swarm...", self.mission_id)
+            
+            # Register the prefix so we get the deterministic cache_key
+            slot = self._kv_registry.register(
+                mission_id=self.mission_id,
+                tenant_id=tenant_id,
+                system_prompt=system_prompt,
+                provider_name="unknown",
+                model_name="unknown",
+            )
+            
+            # Fire a dummy query to force prefill / cachedContent creation remotely
+            provider = LLMProvider()
+            await provider.complete(
+                prompt="[CORTEX KV Preheat]", 
+                system=system_prompt, 
+                max_tokens=1,
+                prefix_cache_key=slot.cache_key
+            )
+            logger.info("[%s] Capataz: KV Cache Preheat successful.", self.mission_id)
+        except Exception as e:
+            logger.warning("[%s] Capataz: KV Cache Preheat failed: %s", self.mission_id, e)
+
     async def run_parallel(self, task_definitions: list[dict[str, Any]]) -> list[Any]:
         """Deploy multiple agents in parallel."""
+        # Ouroboros KV Cache Prefetch (AX-042)
+        from collections import Counter
+        
+        system_prompts = []
+        for td in task_definitions:
+            kwargs = td.get("kwargs", {})
+            if "system" in kwargs and kwargs["system"]:
+                system_prompts.append(kwargs["system"])
+                
+        if len(system_prompts) > 1:
+            counter = Counter(system_prompts)
+            most_common = counter.most_common(1)[0]
+            if most_common[1] > 1:
+                tenant_id = os.environ.get("CORTEX_TENANT_ID", "local-tenant")
+                await self.preheat_prefix(most_common[0], tenant_id)
+
         loop_tasks = [
             self.run_task(
                 name=td["name"],
