@@ -66,10 +66,17 @@ class DistributedEventBus:
                     exc_info=True,
                 )
 
-        if topic not in self._subscribers:
+        subscribers = self._subscribers.get(topic, []).copy()
+        subscribers.extend(self._subscribers.get("*", []))
+
+        if not subscribers:
             return
 
-        tasks = [asyncio.create_task(callback(payload)) for callback in self._subscribers[topic]]
+        # Inject topic for wildcard observers
+        if "_topic" not in payload:
+            payload["_topic"] = topic
+
+        tasks = [asyncio.create_task(callback(payload)) for callback in subscribers]
 
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)

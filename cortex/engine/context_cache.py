@@ -440,3 +440,20 @@ class ContextCacheManager:
                 key=lambda x: x[1].last_accessed,
             )
             del self._cache[oldest[0]]
+
+    def get_provider_caching_kwargs(self, provider: str, ttl_seconds: int = 3600) -> dict[str, Any]:
+        """Get the prefix caching payload/kwargs adapted for specific LLM providers.
+        
+        Abstracts the underlying API differences for zero-exergy prefix preloading
+        and ensures compliance with the CORTEX caching protocols (Cycle 4).
+        """
+        if provider.lower() == "anthropic":
+            # Anthropic Claude 3.5+ Prompt Caching natively uses cache_control
+            return {"cache_control": {"type": "ephemeral"}}
+        elif provider.lower() == "gemini":
+            # Native Gemini utilizes explicit cachedContent URIs
+            return {"ttl_seconds": ttl_seconds, "dynamic_cache": True}
+        elif provider.lower() in ("vllm", "tgi"):
+            # Local endpoints handle prefix caching implicitly
+            return {"use_prefix_cache": True}
+        return {}

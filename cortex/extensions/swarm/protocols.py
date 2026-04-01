@@ -33,6 +33,7 @@ class SwarmSignalSchema:
     intent: SwarmIntent
     payload: dict[str, Any]
     role: AgentRole = AgentRole.WORKER
+    is_sovereign: bool = True  # AX-046 Universal Autopoiesis mandate
     confidence: float = 1.0
     exergy_spent: float = 0.0
     timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())

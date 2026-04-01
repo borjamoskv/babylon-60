@@ -60,6 +60,11 @@ except Exception:
     VectorStoreL2 = None  # type: ignore[assignment,misc]
     DynamicSemanticSpace = None  # type: ignore[assignment,misc]
 
+try:
+    from cortex.memory.graph_store import GraphStore
+except Exception:
+    GraphStore = None  # type: ignore[misc]
+
 __all__ = ["CortexMemoryManager"]
 
 logger = logging.getLogger("cortex.memory.manager")
@@ -101,6 +106,7 @@ class CortexMemoryManager:
         "metamemory",
         "_mem0_pipeline",
         "_memory_os",
+        "graph_store",
     )
 
     DEFAULT_MAX_BG_TASKS: int = 100
@@ -141,6 +147,9 @@ class CortexMemoryManager:
         # Memory OS subsystems (RFC-CORTEX-MEMORY-OS / Axiom Ω₁₃)
         self._mem0_pipeline = Mem0Pipeline()
         self._memory_os = MemoryOS() if MemoryOS else None
+
+        # Ontological Memory (Graph RAG) [v6.3 - Cycle 1]
+        self.graph_store = GraphStore(db_path="cortex_graph_rag.db") if GraphStore else None
 
         # ART-v2 Resonance Engine [v6.2]
         self._resonance_gate = self._init_resonance_gate()

@@ -19,7 +19,7 @@ COPY pyproject.toml README.md ./
 COPY cortex/ ./cortex/
 
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -e ".[api]" && \
+    pip install --no-cache-dir ".[api]" && \
     pip install --no-cache-dir sentence-transformers onnxruntime
 
 # Pre-download the embedding model
@@ -49,6 +49,8 @@ USER cortex
 
 ENV PATH="/app/.venv/bin:$PATH"
 ENV CORTEX_DB=/data/cortex.db
+ENV CORTEX_VECTOR_STORE_PATH=/data/vectors
+ENV CORTEX_SHARD_DIR=/data/shards
 ENV ANONYMIZED_TELEMETRY=False
 
 VOLUME /data

@@ -7,14 +7,13 @@ AGENTS.md Tenant Isolation: cache_key siempre incluye tenant_id.
 from __future__ import annotations
 
 import hashlib
+import json
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from functools import lru_cache
 from typing import Any
-import time
 
-
-import json
 
 @lru_cache(maxsize=1024)
 def _hash_string_sha3_256(content: str) -> str:

@@ -206,6 +206,7 @@ class ProceduralMemory:
         success: bool,
         latency_ms: float,
         permanent: bool = False,
+        q_value: float | None = None,
     ) -> None:
         """Record the outcome of a skill execution.
 
@@ -228,7 +229,11 @@ class ProceduralMemory:
             self._save_to_db(new_engram)
             return
 
-        outcome = 1.0 if success else 0.0
+        if q_value is not None:
+            # Map reinforcement [-1.0, 1.0] to dopaminergic outcome [0.0, 1.0]
+            outcome = max(0.0, min(1.0, (q_value + 1.0) / 2.0))
+        else:
+            outcome = 1.0 if success else 0.0
         new_success_rate = _ALPHA_SUCCESS * outcome + (1.0 - _ALPHA_SUCCESS) * existing.success_rate
         new_avg_latency = (
             _ALPHA_LATENCY * latency_ms + (1.0 - _ALPHA_LATENCY) * existing.avg_latency_ms

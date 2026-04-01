@@ -146,3 +146,51 @@ async def test_taint_propagation_crypto_safety(engine):
         row = await cursor.fetchone()
         assert row[0] == "C1"  # Confidence SHOULD be downgraded
         assert row[1] == encrypted_blob  # Metadata SHOULD remain intact
+
+
+@pytest.mark.asyncio
+async def test_quorum_pools_resolution(engine):
+    """[Ciclo 2] Verify that manager.promise_vote batches correctly before resolving in O(1)."""
+    manager = ConsensusManager(engine)
+
+    # 1. Setup fact and agents
+    async with engine.session() as conn:
+        await conn.execute(
+            "INSERT INTO facts (id, content, project) VALUES (99, 'Test Quorum Fact', 'test_proj')"
+        )
+        for i in range(100):
+            await conn.execute(
+                "INSERT INTO agents (id, public_key, name, is_active, reputation_score) VALUES (?, ?, ?, ?, ?)",
+                (f"agent_{i}", f"pub_{i}", f"Agent {i}", 1, 0.5),
+            )
+        await conn.commit()
+
+    # 2. Add promises concurrently using promise_vote
+    # 80 True, 20 False
+    tasks = []
+    for i in range(100):
+        val = 1 if i < 80 else -1
+        tasks.append(manager.promise_vote(fact_id=99, agent_id=f"agent_{i}", value=val, reason="swarm_pulse"))
+    
+    await asyncio.gather(*tasks)
+
+    # 3. Check that no DB hits occurred yet
+    async with engine.session() as conn:
+        cursor = await conn.execute("SELECT COUNT(*) FROM consensus_votes_v2 WHERE fact_id = 99")
+        row = await cursor.fetchone()
+        assert row[0] == 0
+
+    # 4. Resolve quorum (the O(1) commit logic)
+    score = await manager.resolve_quorum(99)
+
+    # 5. Check outcome
+    assert score > 1.0  # 80/20 with equal reliability should resolve positively
+    
+    async with engine.session() as conn:
+        cursor = await conn.execute("SELECT COUNT(*) FROM consensus_votes_v2 WHERE fact_id = 99")
+        row = await cursor.fetchone()
+        assert row[0] == 100
+    
+    # Check that lock was removed and memory is clean
+    assert 99 not in manager._pool_locks
+    assert 99 not in manager._vote_pools

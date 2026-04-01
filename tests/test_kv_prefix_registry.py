@@ -71,3 +71,34 @@ def test_lazy_ttl_eviction():
     # Lazy Eviction debe haber aniquilado el slot
     assert slot.cache_key not in registry._slots
 
+
+import asyncio
+import pytest
+
+@pytest.mark.asyncio
+async def test_stampede_mitigation():
+    """Simula 100 agentes arrancando simultáneamente. 
+    Asegura que solo 1 lidera la petición de calentamiento y 99 se congelan hasta que termina.
+    """
+    registry = KVPrefixRegistry()
+    prompt = "massive parallel mission"
+    leader_count = 0
+    follower_count = 0
+    
+    async def agent_task():
+        nonlocal leader_count, follower_count
+        is_leader = await registry.wait_or_acquire_prefill(prompt)
+        if is_leader:
+            leader_count += 1
+            # Simulate network latency of cache generation
+            await asyncio.sleep(0.1)
+            registry.release_prefill_lock(prompt)
+        else:
+            follower_count += 1
+
+    await asyncio.gather(*(agent_task() for _ in range(100)))
+    
+    assert leader_count == 1
+    assert follower_count == 99
+    assert len(registry._prefill_locks) == 0
+

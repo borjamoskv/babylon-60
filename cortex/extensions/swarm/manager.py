@@ -173,6 +173,7 @@ class SwarmTask:
     name: str = "Anonymous Task"
     agent_name: str = "UniversalAgent"
     role: AgentRole = AgentRole.WORKER
+    is_sovereign: bool = True  # AX-046 JIT Autopoiesis
     status: TaskStatus = TaskStatus.PENDING
     result: Any = None
     error: str | None = None

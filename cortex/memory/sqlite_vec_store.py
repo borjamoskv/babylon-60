@@ -189,7 +189,8 @@ class SovereignVectorStoreL2:
             ]
 
             cursor = self._conn.execute(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'facts_meta%'"
+                "SELECT name FROM sqlite_master "
+                "WHERE type='table' AND name LIKE 'facts_meta%' AND sql NOT LIKE '%VIRTUAL%'"
             )
             tables = [row[0] for row in cursor.fetchall()]
 

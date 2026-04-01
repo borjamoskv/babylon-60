@@ -35,6 +35,7 @@ class AgentEntry:
     restart_count: int = 0
     max_restarts: int = DEFAULT_MAX_RESTARTS
     registered_at: float = field(default_factory=time.time)
+    ephemeral: bool = False
 
 
 class Supervisor:
@@ -96,6 +97,21 @@ class Supervisor:
 
         entry.task = await entry.agent.start()
         logger.info("Supervisor: Started '%s'", agent_id)
+
+    async def spawn_ephemeral_agent(self, agent: BaseAgent) -> None:
+        """Register and start an agent marked for auto-cleanup (Spontaneous Manifestation)."""
+        if agent.agent_id in self._agents:
+            logger.warning("Supervisor: Ephemeral agent '%s' already exists", agent.agent_id)
+            return
+
+        self._agents[agent.agent_id] = AgentEntry(
+            agent=agent,
+            max_restarts=0,  # Ephemeral agents do not get restarted if they fail or finish.
+            ephemeral=True
+        )
+        logger.info("Supervisor: Spawned ephemeral agent '%s'", agent.agent_id)
+        # Directly await start to ensure initialization
+        await self.start_agent(agent.agent_id)
 
     async def stop_agent(self, agent_id: str) -> None:
         """Gracefully stop a specific agent."""
@@ -241,14 +257,19 @@ class Supervisor:
             if (
                 status == AgentStatus.RUNNING
                 and not task_alive
-                and entry.restart_count < entry.max_restarts
             ):
-                logger.warning(
-                    "Supervisor: '%s' task died unexpectedly — restarting",
-                    agent_id,
-                )
-                await self.restart_agent(agent_id)
-                agent_report["action"] = "restarted"
+                if entry.ephemeral:
+                    # Ephemeral agents are meant to live once and vanish
+                    logger.info("Supervisor: Ephemeral agent '%s' completed its lifecycle - dissolving", agent_id)
+                    entry.agent.state.status = AgentStatus.STOPPED
+                    agent_report["action"] = "dissolved"
+                elif entry.restart_count < entry.max_restarts:
+                    logger.warning(
+                        "Supervisor: '%s' task died unexpectedly — restarting",
+                        agent_id,
+                    )
+                    await self.restart_agent(agent_id)
+                    agent_report["action"] = "restarted"
 
             # Detect stale heartbeats
             if task_alive and heartbeat and (now - heartbeat) > self._heartbeat_timeout_s:
@@ -261,6 +282,14 @@ class Supervisor:
                 agent_report["action"] = "restarted_stale_heartbeat"
 
             report[agent_id] = agent_report
+
+        # Clean dissolved agents
+        to_remove = [
+            aid for aid, entry in self._agents.items()
+            if entry.ephemeral and entry.task is not None and entry.task.done()
+        ]
+        for aid in to_remove:
+            self.unregister(aid)
 
         return report
 

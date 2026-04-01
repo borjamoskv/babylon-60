@@ -34,5 +34,8 @@ Topological synchronization across 100 autonomous agents cannot wait for a centr
 ### 5. Thermodynamic Expulsion (Suntsitu)
 A system that only grows will eventually collapse under its own weight. Episodic spam is biologically unsustainable. Every night, the `NightShift` crystallization process compresses gigabytes of episodic noise into dense, absolute Axioms. The rest is irreversibly destroyed. **Entropy is purged.**
 
+### 6. JIT Autopoiesis & Code Sovereignty (AX-046)
+Agents are no longer static inference engines executing pre-written logic grids. Every agent is a **Sovereign** with the explicit mandate and capability to write, test, and materialize its own ad-hoc code. Autonomously generated code shares the precise ontological weight of human-authored logic, provided it survives the Write-Path SAGA validation. This is true Direct-Silicon JIT autopoiesis.
+
 ## The Promise
 The era of probabilistic memory is over. Welcome to the era of deterministic, mathematically verifiable autonomous cognition. Or as we call it: **Sovereignty.**

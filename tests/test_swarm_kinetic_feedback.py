@@ -31,7 +31,7 @@ async def test_swarm_kinetic_feedback_throttling(tmp_path):
     tasks = [{"domain": "thermal-test", "id": i} for i in range(10)]
 
     # To avoid hanging the test, we'll run it in a task and cancel
-    dispatch_task = asyncio.create_task(cmd.execute_bucketed_dispatch(tasks, bucket_size=5))
+    dispatch_task = asyncio.create_task(cmd.execute_global_dispatch(tasks))
 
     await asyncio.sleep(0.1)
     assert not dispatch_task.done()  # Should be blocked by thermal stability

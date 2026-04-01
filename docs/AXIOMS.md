@@ -57,3 +57,9 @@ Un Gobernador Soberano asume responsabilidad total, ejecutando rutinas integrada
 
 - **Directiva de Autonomía (Auto-Allow):** La ejecución táctica verificada delega la decisión táctica a la máquina. El sesgo es siempre promover progreso autónomo en rutas selladas.
 - **Amputación Causal:** Todo estado estocástico generado es material replicante potencialmente infeccioso. El pipeline —*Ingestión → Guard → Seal → Auditoría*— exige amputar la vía de inferencia ante la menor incertidumbre semántica, priorizando la topología global sobre el resultado local.
+
+## AX-VIII: Ingesta Determinista y Estructural (AST)
+
+La ingesta de contexto y código fuente abandona el paradigma de "NLP clásico" basado en el parseo de texto lineal.
+
+- **Caché Compartida + Ingesta AST:** Todo material sintáctico debe ser procesado mediante Ingesta Determinista AST, extrayendo árboles lógicos precisos que se inyectan en una Caché Compartida, eliminando la ambigüedad del análisis de cadenas y preservando jerarquías causales inmutables.

@@ -47,7 +47,7 @@ class WorkingMemoryL1:
                     when this limit is exceeded.
     """
 
-    __slots__ = ("_buffers", "_tenant_tokens", "_max_tokens", "_guardrail", "_access_log")
+    __slots__ = ("_buffers", "_tenant_tokens", "_max_tokens", "_guardrail", "_access_log", "_scratchpads")
 
     def __init__(
         self,
@@ -61,6 +61,8 @@ class WorkingMemoryL1:
         self._buffers: dict[str, deque[MemoryEvent]] = {}
         # Per-tenant token usage: {tenant_id: current_tokens}
         self._tenant_tokens: dict[str, int] = {}
+        # Autobiographical Scratchpad (Letta/MemGPT Paradigm)
+        self._scratchpads: dict[str, str] = {}
         self._guardrail = guardrail
         # Access log: deque of (monotonic_ts, project_id) tuples.
         # Written by add_event + get_context; read by ForgettingOracle.
@@ -162,7 +164,27 @@ class WorkingMemoryL1:
             if pid not in seen:
                 self._access_log.append((now, f"{tenant_id}:{pid}"))
                 seen.add(pid)
-        return [{"role": e.role, "content": e.content} for e in buffer]
+                
+        messages = []
+        pad = self._scratchpads.get(tenant_id)
+        if pad:
+            messages.append({"role": "system", "content": f"<SCRATCHPAD>\n{pad}\n</SCRATCHPAD>"})
+            
+        messages.extend([{"role": e.role, "content": e.content} for e in buffer])
+        return messages
+
+    # ─── Autobiographical Scratchpad (Letta Paradigm) ─────────────
+
+    def core_memory_append(self, content: str, tenant_id: Optional[str] = None) -> None:
+        """Autonomously mutate the dynamic scratchpad block."""
+        tid = tenant_id or get_tenant_id()
+        current = self._scratchpads.get(tid, "")
+        self._scratchpads[tid] = (current + "\n" + content).strip()
+
+    def core_memory_replace(self, content: str, tenant_id: Optional[str] = None) -> None:
+        """Completely rewrite the scratchpad block (e.g. after insight compaction)."""
+        tid = tenant_id or get_tenant_id()
+        self._scratchpads[tid] = content.strip()
 
     def get_access_frequency(self, project_id: str, window_seconds: float = 3600.0) -> float:
         """Return normalised access frequency for a project_id in the last window_seconds.
