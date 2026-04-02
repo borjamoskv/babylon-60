@@ -14,8 +14,8 @@ async def test_sharded_signal_bus_initialization(tmp_path: Path):
     bus = ShardedAsyncSignalBus(base_dir=tmp_path)
     await bus.initialize()
 
-    assert len(bus._shards) == 16
-    for i in range(16):
+    assert len(bus._shards) == bus.num_shards
+    for i in range(bus.num_shards):
         db_file = tmp_path / f"swarm_shard_{i:03d}.db"
         assert db_file.exists(), f"Shard {i} must exist"
 
@@ -30,7 +30,8 @@ async def test_swarm_commander_hierarchy(tmp_path: Path):
 
     # Send 500 tasks to domain 'finance'
     tasks = [{"domain": "finance", "id": i} for i in range(500)]
-    await commander.execute_global_dispatch(tasks)
+    async with commander.strike_mode("finance"):
+        await commander.execute_global_dispatch(tasks)
 
     report = await commander.get_density_report()
     assert report["legions"] == 1
