@@ -60,6 +60,7 @@ class CortexLLMRouter:
         self._telemetry = CascadeTelemetry(db_path=str(db_path) if db_path else None)
         # Thermal Heat-Sink: coalesce identical inflight prompts (Ω₂)
         self._inflight: dict[str, asyncio.Future[Result[str, str]]] = {}
+        self._evicted: set[str] = set()
 
     @property
     def primary(self) -> BaseProvider:
@@ -252,9 +253,13 @@ class CortexLLMRouter:
         )
 
         # Thermal Heat-Sink: coalesce identical concurrent requests (Ω₂)
-        prompt_key = hashlib.sha256(
-            f"{prompt.system_instruction}:{prompt.working_memory}:{prompt.intent}".encode()
-        ).hexdigest()
+        # Fast tuple hashing instead of slow f"{dict}" serialization
+        wm_hash = hash(tuple((m.get("role"), m.get("content")) for m in prompt.working_memory))
+        prompt_key = str(hash((
+            hash(prompt.system_instruction) if prompt.system_instruction else 0,
+            wm_hash,
+            prompt.intent
+        )))
 
         if prompt_key in self._inflight:
             logger.debug(
@@ -284,10 +289,31 @@ class CortexLLMRouter:
     async def route(
         self, prompt: CortexPrompt, provider_hint: Optional[str] = None
     ) -> Result[str, str]:
-        """Dispatch a prompt with optional provider override (hint).
+        """Dispatch a prompt with optional provider override (hint) and Dynamic Cache Routing.
 
-        Enforces policy Ω₁₆: targeted routing for belief-chain audits.
+        Enforces policy Ω₁₆ & Ω₂: targeted routing for belief-chain audits and cache affinity.
         """
+        if not provider_hint and prompt.system_instruction:
+            # Implement Cache-Aware Routing (Zero-Recompute Policy)
+            try:
+                from cortex.extensions.swarm.kv_prefix_registry import get_kv_registry
+                registry = get_kv_registry()
+                hot_providers = registry.check_cache_affinity(prompt.system_instruction)
+                if hot_providers:
+                    valid_providers = {self._primary.provider_name} | {
+                        p.provider_name for p in self._fallbacks
+                    }
+                    for hp in hot_providers:
+                        if hp in valid_providers:
+                            provider_hint = hp
+                            logger.info(
+                                "🔥 [CACHE-ROUTING] Affinity detected correctly in %s. Routing directly to maximize exergy (O(1)).",
+                                hp,
+                            )
+                            break
+            except ImportError:
+                pass
+
         if not provider_hint or self._primary.provider_name == provider_hint:
             return await self.execute_resilient(prompt)
 
@@ -377,6 +403,9 @@ class CortexLLMRouter:
             if getattr(self._primary, "tier", None) != "frontier":
                 primary_valid = False
 
+        if self._primary.provider_name in self._evicted:
+            primary_valid = False
+
         errors = []
         if primary_valid:
             res_primary = await self._try_provider(self._primary, prompt)
@@ -396,15 +425,24 @@ class CortexLLMRouter:
                 return res_primary
             errors.append(f"Primary ({self._primary.provider_name}): {res_primary.error}")  # type: ignore[reportAttributeAccessIssue]
         else:
-            errors.append(
-                f"Primary ({self._primary.provider_name}): "
-                "Skipped (ULTRA_THINK requires frontier tier)"
-            )
+            if self._primary.provider_name in self._evicted:
+                errors.append(
+                    f"Primary ({self._primary.provider_name}): Skipped (Evicted via 401)"
+                )
+            else:
+                errors.append(
+                    f"Primary ({self._primary.provider_name}): "
+                    "Skipped (ULTRA_THINK requires frontier tier)"
+                )
 
         # Phase 2: Fallback cascade
         fallbacks = self._ordered_fallbacks(prompt)
 
         for i, provider in enumerate(fallbacks, start=2):
+            if provider.provider_name in self._evicted:
+                errors.append(f"{provider.provider_name}: Skip (Evicted via 401)")
+                continue
+
             if self._cascade.is_nxdomain_cached(provider.provider_name):
                 errors.append(f"{provider.provider_name}: Skip (NXDOMAIN cached)")
                 continue
@@ -457,8 +495,20 @@ class CortexLLMRouter:
                     "🚀 [HYPERSONIC JUMP] Provider %s hit 429. Skipping immediately...",
                     provider.provider_name,
                 )
+            elif exc.response.status_code == 401:
+                logger.error(
+                    "🚫 [EVICTION] Provider %s hit 401 Unauthorized. Evicting...",
+                    provider.provider_name,
+                )
+                self._evicted.add(provider.provider_name)
             return Err(str(exc))
         except Exception as exc:  # noqa: BLE001
+            if "HTTP 401" in str(exc) or "401" in str(exc) or "invalid_api_key" in str(exc):
+                logger.error(
+                    "🚫 [EVICTION] Provider %s hit 401 Unauthorized. Evicting...",
+                    provider.provider_name,
+                )
+                self._evicted.add(provider.provider_name)
             return Err(str(exc))
 
     def cascade_stats(self) -> dict[str, Any]:

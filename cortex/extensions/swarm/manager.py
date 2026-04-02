@@ -23,6 +23,7 @@ from cortex.extensions.swarm.worktree_isolation import isolated_worktree
 
 logger = logging.getLogger("cortex.extensions.swarm.manager")
 
+_SESSION_TYPE_CACHE: dict[int, bool] = {}
 
 class WorktreeState:
     """Metadata for an active or pending worktree."""
@@ -35,6 +36,7 @@ class WorktreeState:
         self.status = "provisioning"
         self.pid = os.getpid()
         self.task: asyncio.Task[Any] | None = None
+        self.shutdown_event = asyncio.Event()
 
 
 class SwarmManager:
@@ -73,8 +75,7 @@ class SwarmManager:
                     state.status = "active"
                     ready_event.set()
                     logger.info("Worktree %s active at %s", worktree_id, path)
-                    while state.status == "active":
-                        await asyncio.sleep(0.1)
+                    await state.shutdown_event.wait()
             except Exception as exc:  # noqa: BLE001
                 state.status = "failed"
                 ready_event.set()
@@ -121,6 +122,7 @@ class SwarmManager:
             if state is None:
                 return False
             state.status = "tearing_down"
+            state.shutdown_event.set()
             return True
 
     async def get_status(self) -> dict[str, Any]:
@@ -171,6 +173,10 @@ class CapatazOrchestrator:
         self.mission_id = mission_id or f"mission-{uuid.uuid4().hex[:8]}"
         self.tasks: dict[str, SwarmTask] = {}
         self.budget = get_budget_manager()
+
+        from cortex.extensions.swarm.kv_prefix_registry import get_kv_registry
+        self._kv_registry = get_kv_registry()
+
         logger.info("Capataz: Orchestrating mission %s", self.mission_id)
 
     async def _execute_completion_with_tracking(
@@ -196,7 +202,17 @@ class CapatazOrchestrator:
                 role=role,
                 payload=payload or {"discovery": result},
             )
-            if asyncio.iscoroutinefunction(engine.session):
+            
+            engine_id = id(engine)
+            if engine_id not in _SESSION_TYPE_CACHE:
+                import inspect
+                _sess_func = getattr(engine.session, "__wrapped__", engine.session)
+                _SESSION_TYPE_CACHE[engine_id] = (
+                    inspect.iscoroutinefunction(_sess_func) 
+                    or inspect.isasyncgenfunction(_sess_func)
+                )
+            
+            if _SESSION_TYPE_CACHE[engine_id]:
                 async with engine.session() as conn:
                     bus = AsyncSignalBus(conn)
                     await bus.emit(
@@ -255,6 +271,21 @@ class CapatazOrchestrator:
         lock_acquired = False
         try:
             kwargs = kwargs or {}
+
+            # Prefix sharing logic (extract system_prompt from args/kwargs if available)
+            system_prompt = kwargs.get("system", "") if kwargs else ""
+            if system_prompt:
+                # Derive tenant ID implicitly from OS for local executions,
+                # or use a default standard tenant wrapper
+                tenant_id = os.environ.get("CORTEX_TENANT_ID", "local-tenant")
+                slot = self._kv_registry.register(
+                    mission_id=self.mission_id,
+                    tenant_id=tenant_id,
+                    system_prompt=system_prompt,
+                )
+
+                # Pass cache_key downstream so provider can use it
+                kwargs["prefix_cache_key"] = slot.cache_key
 
             # BROADCAST JIT DISCOVERY
             await self._execute_completion_with_tracking(
@@ -328,8 +359,52 @@ class CapatazOrchestrator:
                 await lock_manager.release(lock_resource, agent_name)
             self._print_summary()
 
+    async def preheat_prefix(self, system_prompt: str, tenant_id: str) -> None:
+        """AX-042: Ping provider to cache prefix before the swarm hits it concurrently."""
+        try:
+            from cortex.extensions.llm.provider import LLMProvider
+            
+            logger.info("[%s] Capataz: Pre-heating KV Cache for swarm...", self.mission_id)
+            
+            # Register the prefix so we get the deterministic cache_key
+            slot = self._kv_registry.register(
+                mission_id=self.mission_id,
+                tenant_id=tenant_id,
+                system_prompt=system_prompt,
+                provider_name="unknown",
+                model_name="unknown",
+            )
+            
+            # Fire a dummy query to force prefill / cachedContent creation remotely
+            provider = LLMProvider()
+            await provider.complete(
+                prompt="[CORTEX KV Preheat]", 
+                system=system_prompt, 
+                max_tokens=1,
+                prefix_cache_key=slot.cache_key
+            )
+            logger.info("[%s] Capataz: KV Cache Preheat successful.", self.mission_id)
+        except Exception as e:
+            logger.warning("[%s] Capataz: KV Cache Preheat failed: %s", self.mission_id, e)
+
     async def run_parallel(self, task_definitions: list[dict[str, Any]]) -> list[Any]:
         """Deploy multiple agents in parallel."""
+        # Ouroboros KV Cache Prefetch (AX-042)
+        from collections import Counter
+        
+        system_prompts = []
+        for td in task_definitions:
+            kwargs = td.get("kwargs", {})
+            if "system" in kwargs and kwargs["system"]:
+                system_prompts.append(kwargs["system"])
+                
+        if len(system_prompts) > 1:
+            counter = Counter(system_prompts)
+            most_common = counter.most_common(1)[0]
+            if most_common[1] > 1:
+                tenant_id = os.environ.get("CORTEX_TENANT_ID", "local-tenant")
+                await self.preheat_prefix(most_common[0], tenant_id)
+
         loop_tasks = [
             self.run_task(
                 name=td["name"],
