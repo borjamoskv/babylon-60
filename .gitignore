@@ -245,3 +245,6 @@ nexus-dashboard/.next/
 
 engine-rs/target/
 tests/failed_test.txt
+
+engine-rs/target/
+tests/failed_test.txt
