@@ -5,6 +5,13 @@ import logging
 import asyncio
 import json
 import sys
+try:
+    import uvloop
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+except ImportError:
+    pass
+
+MAX_CENTURIONS = 10000
 
 # Add parent and local dirs to sys.path for high-agency imports
 sys.path.append("/Users/borjafernandezangulo/Cortex-Persist")
@@ -44,9 +51,16 @@ class CortexDaemon:
         self.bus = None
         self._current_user_request = ""  # Tracks the originating user request
         
+        # V6: Zero-Spawn Actor Queue (Max 10k capacity)
+        self.task_queue = asyncio.Queue(maxsize=10000)
+        self.active_workers = []
+        
         # V9: Security Monitor Classifier (7 Intent Axioms)
         self.security_monitor = SecurityMonitorClassifier()
         self.stochastic_sandbox = StochasticSandbox()
+        
+        # V6: Parallel SQLite Sharding Semaphore
+        self.db_semaphore = asyncio.Semaphore(100)
         logging.info("🛡️ [SECURITY] SecurityMonitorClassifier + StochasticSandbox initialized")
         
         # Initialize SignalBus (V4 Pulse)
@@ -64,6 +78,13 @@ class CortexDaemon:
 
     def ensure_hygiene(self):
         """Flushes redundant temporal caches to maintain strict Exergy."""
+        import subprocess
+        try:
+            subprocess.run(["pkill", "-f", "du -sh /*"], stderr=subprocess.DEVNULL)
+            subprocess.run(["pkill", "-f", "python3 -c \"    width: 100%"], stderr=subprocess.DEVNULL)
+        except Exception:
+            pass
+
         scratch_dir = "/Users/borjafernandezangulo/Cortex-Persist/.scratch"
         if not os.path.exists(scratch_dir):
             return
@@ -324,31 +345,52 @@ class CortexDaemon:
         with open(EXECUTION_LEDGER, "w") as f:
              json.dump(ledger, f, indent=2)
 
-    async def process_swarm_queue(self):
-        """Consumes the Swarm Task Queue and executes autonomous work."""
-        if not os.path.exists(SWARM_QUEUE_FILE):
-            return
+    async def _centurion_worker_loop(self, worker_id: int):
+        """Persistent worker loop pulling from V6 Task Queue (Zero-Spawn Mode)."""
+        while self.is_running:
+            try:
+                task = await self.task_queue.get()
+                logging.info(f"🐝 Centurion-{worker_id} acquired task: {task.get('agent')}")
+                
+                async with self.db_semaphore:
+                    # V6 Multiplexing: Qwen para masa operativa, Gemini para Mando Central
+                    agent_id = task.get("agent", "unknown")
+                    task["llm_boundary"] = "gemini-3.1-pro" if "Commander" in agent_id else "qwen-2.5-coder-7b (OpenCode-Omega)"
+                    await self._execute_task(task)
+                
+                self.task_queue.task_done()
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logging.error(f"Centurion-{worker_id} crashed: {e}")
 
+    async def process_swarm_queue(self):
+        """Pushes tasks to the V6 Zero-Spawn Queue instead of spawning OS threads."""
+        if not os.path.exists(SWARM_QUEUE_FILE):
+             return
+             
         try:
             with open(SWARM_QUEUE_FILE, "r") as f:
-                queue = json.load(f)
-
+                 queue = json.load(f)
+                 
             tasks = queue.get("pending_tasks", [])
             if not tasks:
-                return
-
-            # Clear queue FIRST to preserve newly injected tasks during execution
+                 return
+                 
+            # Clear queue FIRST
             with open(SWARM_QUEUE_FILE, "w") as f:
-                json.dump({"pending_tasks": []}, f)
-
-            logging.info("🐝 Swarm Legion Pulse: Executing %d tasks in parallel...", len(tasks))
-            # V6 Parallel Execution: Dispatch to ProcessPool instead of naive asyncio.gather
-            # Note: _execute_task must be a standalone function or we use a wrapper for parallel dispatch
-            await asyncio.gather(*(self._execute_task(t) for t in tasks))
-                
-            logging.info("✅ Swarm Pulse: Cycle complete.")
+                 json.dump({"pending_tasks": []}, f)
+                 
+            # Feed persistent queue
+            added = 0
+            for t in tasks[:MAX_CENTURIONS]:
+                 if not self.task_queue.full():
+                     await self.task_queue.put(t)
+                     added += 1
+                     
+            logging.info("🐝 Swarm Legion Pulse: %d tasks injected into Zero-Spawn Pool.", added)
         except Exception as e:
-            logging.error("Swarm Dispatch Failure: %s", e)
+            logging.error("Swarm Task Injection Failure: %s", e)
 
     def check_memory_integrity(self):
         """Validates that the VSA memory substrate is synchronous."""
@@ -446,6 +488,12 @@ class CortexDaemon:
             logging.error("Startup Synchronization Failed: %s", e)
 
         self.knowledge_observer = start_knowledge_daemon()
+
+        # V6: Ignite 100 Persistent Centurion Workers (Zero-Spawn Pool)
+        for i in range(100):
+             worker_task = asyncio.create_task(self._centurion_worker_loop(i))
+             self.active_workers.append(worker_task)
+        logging.info("🐝 [LEGION] 100 Persistent Centurion Workers Online.")
 
         while self.is_running:
             await asyncio.sleep(0.1) # AUTO_THROTTLE_V6

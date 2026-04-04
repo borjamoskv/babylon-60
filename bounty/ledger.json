@@ -1,0 +1,29 @@
+{
+  "ledger_version": "1.0.0",
+  "provenance": "CORTEX-SWARM-PRIME",
+  "strikes": [
+    {
+      "id": "LIDO_STRIKE_V4",
+      "target": "Lido Core // WithdrawalQueue",
+      "vulnerability": "H-01: Liquid Glass (Oracle-Sync Arbitrage)",
+      "yield_estimated": { "min": 150000, "max": 300000, "currency": "USD" },
+      "timestamp": "2026-04-02T14:02:36Z",
+      "status": "PERSISTED",
+      "verifier": "BORJA_MOSKV"
+    },
+    {
+      "id": "LZ_STRIKE_V5",
+      "target": "LayerZero Stellar // EndpointV2",
+      "vulnerability": "H-01: Fee Refund Hijacking | L-01: OOO Execution",
+      "yield_estimated": { "min": 25000, "max": 60000, "currency": "USD" },
+      "timestamp": "2026-04-02T14:55:24Z",
+      "status": "PERSISTED",
+      "verifier": "BORJA_MOSKV"
+    }
+  ],
+  "total_exergy_extracted": {
+    "min": 175000,
+    "max": 360000,
+    "currency": "USD"
+  }
+}

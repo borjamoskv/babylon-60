@@ -1,0 +1,58 @@
+name: "⭐ Star Tracker"
+
+on:
+  schedule:
+    # Run daily at 00:00 UTC
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  track-stars:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get star count
+        id: stars
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          STARS=$(gh api repos/${{ github.repository }} --jq '.stargazers_count')
+          FORKS=$(gh api repos/${{ github.repository }} --jq '.forks_count')
+          WATCHERS=$(gh api repos/${{ github.repository }} --jq '.subscribers_count')
+          DATE=$(date -u +%Y-%m-%d)
+          echo "stars=$STARS" >> $GITHUB_OUTPUT
+          echo "forks=$FORKS" >> $GITHUB_OUTPUT
+          echo "watchers=$WATCHERS" >> $GITHUB_OUTPUT
+          echo "date=$DATE" >> $GITHUB_OUTPUT
+
+      - name: Update star history
+        run: |
+          mkdir -p data
+          FILE="data/star-history.csv"
+          
+          # Create header if file doesn't exist
+          if [ ! -f "$FILE" ]; then
+            echo "date,stars,forks,watchers" > "$FILE"
+          fi
+          
+          # Append today's data (skip if already recorded today)
+          DATE="${{ steps.stars.outputs.date }}"
+          if ! grep -q "^$DATE," "$FILE" 2>/dev/null; then
+            echo "$DATE,${{ steps.stars.outputs.stars }},${{ steps.stars.outputs.forks }},${{ steps.stars.outputs.watchers }}" >> "$FILE"
+          fi
+
+      - name: Update README badge data
+        run: |
+          echo '{"stars": ${{ steps.stars.outputs.stars }}, "forks": ${{ steps.stars.outputs.forks }}, "watchers": ${{ steps.stars.outputs.watchers }}, "updated": "${{ steps.stars.outputs.date }}"}' > data/repo-stats.json
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/star-history.csv data/repo-stats.json
+          git diff --staged --quiet || git commit -m "chore: update star history (${{ steps.stars.outputs.date }})"
+          git push

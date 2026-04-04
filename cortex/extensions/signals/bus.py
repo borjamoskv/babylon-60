@@ -7,14 +7,20 @@ import logging
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+import collections
 
 import aiosqlite
-
 from cortex.extensions.signals.models import Signal, signal_from_row
 
 __all__ = ["SignalBus", "AsyncSignalBus"]
 
 logger = logging.getLogger("cortex.extensions.signals.bus")
+
+# --- V7 DEEP-SCALE IN-MEMORY CACHE ---
+# Zero-Copy Pub/Sub ring buffer para 10,000 agentes
+_SWARM_RAM_BROKER = collections.deque(maxlen=100_000)
+_GLOBAL_ID_SEQ = 0
+# ------------------------------------
 
 _CREATE_TABLE = """\
 CREATE TABLE IF NOT EXISTS signals (
@@ -106,11 +112,34 @@ class AsyncSignalBus:
         project: Optional[str] = None,
         tenant_id: str = "default",
     ) -> int:
+        global _GLOBAL_ID_SEQ
+        _GLOBAL_ID_SEQ += 1
+        sig_id = _GLOBAL_ID_SEQ
+
+        # In-Memory Fast Path
+        signal = Signal(
+            id=sig_id,
+            event_type=event_type,
+            payload=payload or {},
+            source=source,
+            project=project,
+            tenant_id=tenant_id,
+            created_at=datetime.now(timezone.utc).isoformat(),
+            consumed_by=[],
+        )
+        _SWARM_RAM_BROKER.append(signal)
+        self.session_emitted += 1
+
+        # Fire-and-Forget a SQLite (Cold Storage)
         try:
             await self.ensure_table()
-            cursor = await self._conn.execute(
-                """INSERT INTO signals (event_type, payload, source, project, tenant_id)
-                   VALUES (?, ?, ?, ?, ?)""",
+            sql = (
+                "INSERT INTO signals "
+                "(event_type, payload, source, project, tenant_id) "
+                "VALUES (?, ?, ?, ?, ?)"
+            )
+            await self._conn.execute(
+                sql,
                 (
                     event_type,
                     json.dumps(payload or {}, default=str),
@@ -120,11 +149,11 @@ class AsyncSignalBus:
                 ),
             )
             await self._conn.commit()
-            self.session_emitted += 1
-            return cursor.lastrowid or 0
-        except Exception:
+        except Exception as e:
             self.session_errors += 1
-            raise
+            logger.debug(f"Cold-Storage SQLite error (Signal RAM kept): {e}")
+
+        return sig_id
 
     async def history(
         self,
@@ -184,26 +213,26 @@ class AsyncSignalBus:
         consumer: str = "default",
         limit: int = 50,
     ) -> list[Signal]:
-        await self.ensure_table()
-        signals = await self._query(
-            tenant_id=tenant_id,
-            event_type=event_type,
-            source=source,
-            project=project,
-            unconsumed_by=consumer,
-            limit=limit,
-        )
+        # Latency-Zero RAM Polling
+        matches = []
+        for sig in reversed(_SWARM_RAM_BROKER):  # LIFO fast scan
+            if len(matches) >= limit:
+                break
+            if sig.tenant_id != tenant_id:
+                continue
+            if event_type and sig.event_type != event_type:
+                continue
+            if source and sig.source != source:
+                continue
+            if project and sig.project != project:
+                continue
+            if consumer in sig.consumed_by:
+                continue
 
-        for sig in signals:
-            new_consumed = sig.consumed_by + [consumer]
-            await self._conn.execute(
-                "UPDATE signals SET consumed_by = ? WHERE id = ? AND tenant_id = ?",
-                (json.dumps(new_consumed), sig.id, tenant_id),
-            )
-        if signals:
-            await self._conn.commit()
+            sig.consumed_by.append(consumer)
+            matches.append(sig)
 
-        return signals
+        return matches
 
     async def peek(
         self,

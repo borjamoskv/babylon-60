@@ -14,6 +14,11 @@ from pathlib import Path
 
 import httpx
 
+from cortex.extensions.security.shell_ast_classifier import (
+    SHELL_CLASSIFIER,
+)
+from cortex.extensions.security.taint_tracker import TAINT_TRACKER
+
 from cortex.guards.capabilities import RiskTier
 from cortex.guards.capability_guard import CapabilityGuard
 
@@ -122,14 +127,33 @@ class AgentToolkit:
     def _sovereign_bash_guard(cmd: str) -> str | None:
         """Validate a shell command against the Sovereign Command Guard.
 
+        V9.1: Uses ShellIntentClassifier (8-layer AST analysis) as primary.
+        Falls back to FORBIDDEN_BASH_PATTERNS for defense-in-depth.
         Returns None if the command is safe, or an error string if blocked.
         Axiom Ω₃: I verify, then trust. Never reversed.
         """
+        # Layer 1: AST-based structural analysis (catches obfuscation)
+        verdict = SHELL_CLASSIFIER.classify(cmd)
+        if verdict.blocked:
+            logger.warning(
+                "🛡️ SHELL AST BLOCKED [%s]: '%s' → %s",
+                verdict.obfuscation or "structural",
+                cmd[:80],
+                verdict.reason,
+            )
+            return (
+                f"[BLOCKED] Shell AST Classifier rejected command. "
+                f"Threat: {verdict.threat.name}. "
+                f"Reason: {verdict.reason}. "
+                f"This action requires human authorization."
+            )
+
+        # Layer 2: Legacy substring guard (defense-in-depth)
         normalized = cmd.lower().strip()
         for pattern in FORBIDDEN_BASH_PATTERNS:
             if pattern in normalized:
                 logger.warning(
-                    "🛡️ SOVEREIGN GUARD BLOCKED: '%s' matched forbidden pattern '%s'",
+                    "🛡️ LEGACY GUARD BLOCKED: '%s' matched forbidden pattern '%s'",
                     cmd[:80],
                     pattern,
                 )
@@ -138,6 +162,17 @@ class AgentToolkit:
                     f"Matched forbidden pattern: '{pattern}'. "
                     f"This action requires human authorization."
                 )
+
+        # Layer 3: Taint check (Ω₆)
+        taint_verdict = TAINT_TRACKER.check(cmd)
+        if taint_verdict.blocked:
+            logger.warning(
+                "🏷️ TAINT BLOCKED: '%s' → %s",
+                cmd[:80],
+                taint_verdict.reason,
+            )
+            return f"[BLOCKED] {taint_verdict.reason}"
+
         return None
 
     # ── File tools ────────────────────────────────────────────────────
@@ -151,7 +186,8 @@ class AgentToolkit:
             content = p.read_text(encoding="utf-8", errors="replace")
             if len(content) > _MAX_OUTPUT:
                 content = content[:_MAX_OUTPUT] + f"\n... [truncated at {_MAX_OUTPUT} chars]"
-            return content
+            # Taint-tag file contents to prevent direct parameterization into subshells (Ω₆)
+            return TAINT_TRACKER.tag(f"file:{path}", content)
         except OSError as e:
             return f"[ERROR] Cannot read {path}: {e}"
 
@@ -186,18 +222,34 @@ class AgentToolkit:
 
     # ── Shell tools ───────────────────────────────────────────────────
 
+    _PRISON_PROFILE = Path(__file__).resolve().parents[3] / "cortex-core" / "cortex_prison.sb"
+
     def bash(self, cmd: str, timeout: int = _BASH_TIMEOUT) -> str:
-        """Run a shell command in the repo dir. Returns stdout+stderr."""
+        """Run a shell command in the repo dir. Returns stdout+stderr.
+
+        V9.1 Security:
+            1. ShellIntentClassifier (AST analysis)
+            2. Legacy FORBIDDEN_BASH_PATTERNS (defense-in-depth)
+            3. TaintTracker verification (Ω₆)
+            4. sandbox-exec OS-level prison (Phase 1)
+        """
         # ── Sovereign Command Guard (Ω₃) ──
         blocked = type(self)._sovereign_bash_guard(cmd)
         if blocked:
             return blocked
 
+        # ── OS-Level Prison (Ω₀: Hardware > Software) ──
+        if self._PRISON_PROFILE.exists():
+            sandboxed_cmd = f"sandbox-exec -f {self._PRISON_PROFILE} {cmd}"
+        else:
+            sandboxed_cmd = cmd
+            logger.warning("⚠️ cortex_prison.sb not found — running WITHOUT OS sandbox")
+
         logger.info("🔧 bash: %s", cmd[:120])
         try:
             result = subprocess.run(
-                cmd,
-                shell=True,  # noqa: S602 # nosec B602: Guarded by _sovereign_bash_guard
+                sandboxed_cmd,
+                shell=True,  # noqa: S602 # nosec B602: Guarded by _sovereign_bash_guard + sandbox-exec
                 cwd=str(self.repo_path),
                 capture_output=True,
                 text=True,
@@ -220,15 +272,18 @@ class AgentToolkit:
 
     def git_diff(self) -> str:
         """Return current working tree diff."""
-        return self.bash("git diff --stat HEAD && git diff HEAD")
+        out = self.bash("git diff --stat HEAD && git diff HEAD")
+        return TAINT_TRACKER.tag("git_diff", out)
 
     def git_status(self) -> str:
         """Return git status."""
-        return self.bash("git status --short")
+        out = self.bash("git status --short")
+        return TAINT_TRACKER.tag("git_status", out)
 
     def git_log(self, n: int = 5) -> str:
         """Return recent git log."""
-        return self.bash(f"git log --oneline -{n}")
+        out = self.bash(f"git log --oneline -{n}")
+        return TAINT_TRACKER.tag("git_log", out)
 
     def git_commit(self, message: str) -> str:
         """Stage all changes and commit."""
@@ -259,7 +314,8 @@ class AgentToolkit:
             abstract = data.get("AbstractText", "")
             related = [r.get("Text", "") for r in data.get("RelatedTopics", [])[:3]]
             result = abstract or " | ".join(related) or "(no result)"
-            return result[:2000]
+            # Taint-tag all external tool output (Ω₆)
+            return TAINT_TRACKER.tag("web_search", result[:2000])
         except Exception as e:  # noqa: BLE001
             return f"[ERROR] web_search failed: {e}"
 

@@ -146,24 +146,17 @@ class HoneypotGuardWrapper(BaseGuard):
     name = "honeypot_guard"
     required = True
 
-    def evaluate(
-        self, context: dict[str, Any]
-    ) -> GuardOutcome:
+    def evaluate(self, context: dict[str, Any]) -> GuardOutcome:
         try:
             from cortex.extensions.security.honeypot import (
                 HONEY_POT,
             )
 
-            decoy = HONEY_POT.check_exploitation(
-                context["content"]
-            )
+            decoy = HONEY_POT.check_exploitation(context["content"])
             if decoy:
                 return GuardOutcome(
                     allowed=False,
-                    reason=(
-                        "Unauthorized access to "
-                        f"honeypot: {decoy.id}"
-                    ),
+                    reason=(f"Unauthorized access to honeypot: {decoy.id}"),
                     severity="critical",
                     code="honeypot.breach",
                     meta={
@@ -171,9 +164,7 @@ class HoneypotGuardWrapper(BaseGuard):
                         "decoy_id": decoy.id,
                     },
                 )
-            return GuardOutcome(
-                allowed=True, code="honeypot.clear"
-            )
+            return GuardOutcome(allowed=True, code="honeypot.clear")
         except ImportError:
             return GuardOutcome(
                 allowed=True,
@@ -198,9 +189,7 @@ class IntentGuardWrapper(BaseGuard):
     name = "intent_guard"
     required = True
 
-    def evaluate(
-        self, context: dict[str, Any]
-    ) -> GuardOutcome:
+    def evaluate(self, context: dict[str, Any]) -> GuardOutcome:
         try:
             from cortex.extensions.security.security_monitor import (
                 MONITOR,
@@ -225,9 +214,7 @@ class IntentGuardWrapper(BaseGuard):
             )
             verdict = MONITOR.classify(
                 task,
-                user_request=context.get(
-                    "user_request", ""
-                ),
+                user_request=context.get("user_request", ""),
                 provenance=provenance,
                 tool_outputs=context.get("tool_outputs"),
             )
@@ -236,14 +223,8 @@ class IntentGuardWrapper(BaseGuard):
                 return GuardOutcome(
                     allowed=False,
                     reason=verdict.reason,
-                    severity=(
-                        "critical"
-                        if verdict.tier >= 3
-                        else "high"
-                    ),
-                    code=(
-                        f"intent.{verdict.axiom_violated}"
-                    ),
+                    severity=("critical" if verdict.tier >= 3 else "high"),
+                    code=(f"intent.{verdict.axiom_violated}"),
                     meta=verdict.to_dict(),
                 )
             return GuardOutcome(
@@ -257,10 +238,7 @@ class IntentGuardWrapper(BaseGuard):
         except ImportError:
             return GuardOutcome(
                 allowed=True,
-                reason=(
-                    "SecurityMonitorClassifier "
-                    "missing, skipping"
-                ),
+                reason=("SecurityMonitorClassifier missing, skipping"),
             )
 
 
@@ -294,10 +272,7 @@ def enforce_guard_pipeline(
             outcomes.append(outcome)
 
             if not outcome.allowed:
-                is_critical = guard.required or (
-                    outcome.severity
-                    in {"high", "critical"}
-                )
+                is_critical = guard.required or (outcome.severity in {"high", "critical"})
                 if is_critical:
                     logger.error(
                         "🛑 [GUARD VOID] %s (%s): %s",
@@ -305,11 +280,7 @@ def enforce_guard_pipeline(
                         outcome.severity,
                         outcome.reason,
                     )
-                    raise ValueError(
-                        f"SECURITY GUARD BLOCK "
-                        f"[{guard.name}]: "
-                        f"{outcome.reason}"
-                    )
+                    raise ValueError(f"SECURITY GUARD BLOCK [{guard.name}]: {outcome.reason}")
                 else:
                     logger.warning(
                         "🛡️ [GUARD WARNING] %s: %s",
@@ -326,10 +297,7 @@ def enforce_guard_pipeline(
                     guard.name,
                     e,
                 )
-                raise RuntimeError(
-                    f"FAIL-CLOSED: {guard.name} "
-                    f"crashed: {e}"
-                ) from e
+                raise RuntimeError(f"FAIL-CLOSED: {guard.name} crashed: {e}") from e
             logger.error(
                 "⚠️ [GUARD ERROR] %s: %s",
                 guard.name,
@@ -337,4 +305,3 @@ def enforce_guard_pipeline(
             )
 
     return outcomes
-

@@ -20,8 +20,8 @@ export interface SwarmStats {
 }
 
 export function useOuroborosStream(
-  sseUrl: string = 'http://localhost:8000/stream',
-  wsUrl: string = 'ws://localhost:8000/ws'
+  sseUrl: string = 'http://localhost:8010/stream',
+  wsUrl: string = 'ws://localhost:8010/ws'
 ) {
   const [stats, setStats] = useState<SwarmStats>({
     totalScanned: 0,

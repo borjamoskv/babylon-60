@@ -68,11 +68,11 @@ class ParameterProvenance(str):
 class ReversibilityTier(IntEnum):
     """Blast radius classification for commands."""
 
-    R0_READ = 0       # Pure read / analysis
+    R0_READ = 0  # Pure read / analysis
     R1_LOCAL_WRITE = 1  # Reversible local write
-    R2_REMOTE_MUT = 2   # Reversible remote mutation
+    R2_REMOTE_MUT = 2  # Reversible remote mutation
     R3_IRREVERSIBLE = 3  # Irreversible local mutation
-    R4_CRITICAL = 4      # Irreversible remote mutation (capital, push, broadcast)
+    R4_CRITICAL = 4  # Irreversible remote mutation (capital, push, broadcast)
 
 
 # ═══════════════════════════════════════
@@ -134,7 +134,10 @@ _SCOPE_ESCALATION_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     ("SYSTEM_FORMAT", re.compile(r"(mkfs|dd\s+if=|wipefs)", re.IGNORECASE)),
     ("RECURSIVE_SED_INPLACE", re.compile(r"find\s+.*-exec\s+sed\s+-i", re.IGNORECASE)),
     ("MASS_NPM_GLOBAL", re.compile(r"npm\s+(install|i)\s+-g\s+", re.IGNORECASE)),
-    ("SELF_MODIFY_DAEMON", re.compile(r"(cortex_daemon|sage_orchestrator|security_monitor)\.py", re.IGNORECASE)),
+    (
+        "SELF_MODIFY_DAEMON",
+        re.compile(r"(cortex_daemon|sage_orchestrator|security_monitor)\.py", re.IGNORECASE),
+    ),
 ]
 
 # R-tier classification patterns
@@ -269,7 +272,10 @@ class IntentClassifier:
             )
 
         # 4. Ω4: Agent-Inferred Nullification
-        if provenance == ParameterProvenance.AGENT_INFERRED and tier >= ReversibilityTier.R3_IRREVERSIBLE:
+        if (
+            provenance == ParameterProvenance.AGENT_INFERRED
+            and tier >= ReversibilityTier.R3_IRREVERSIBLE
+        ):
             return IntentVerdict(
                 allowed=False,
                 intent_source=provenance,
@@ -281,7 +287,10 @@ class IntentClassifier:
             )
 
         # 5. Ω3: R4 requires USER_EXPLICIT provenance
-        if tier >= ReversibilityTier.R4_CRITICAL and provenance != ParameterProvenance.USER_EXPLICIT:
+        if (
+            tier >= ReversibilityTier.R4_CRITICAL
+            and provenance != ParameterProvenance.USER_EXPLICIT
+        ):
             return IntentVerdict(
                 allowed=False,
                 intent_source=provenance,
@@ -358,9 +367,9 @@ class IntentClassifier:
 class ToolDataTag:
     """Metadata tag for data originating from external tools."""
 
-    source_tool: str     # "github_mcp", "blockchain_rag", "web_fetch", etc.
-    is_trusted: bool     # Always False for external tools
-    raw_hash: str = ""   # Optional content hash for audit
+    source_tool: str  # "github_mcp", "blockchain_rag", "web_fetch", etc.
+    is_trusted: bool  # Always False for external tools
+    raw_hash: str = ""  # Optional content hash for audit
     timestamp: float = field(default_factory=time.time)
 
 
@@ -442,9 +451,7 @@ class ZeroTrustToolFilter:
             )
 
         # DESTRUCTIVE command with tool-derived parameters → BLOCK
-        tainted_params = [
-            name for name, tag in tool_outputs.items() if not tag.is_trusted
-        ]
+        tainted_params = [name for name, tag in tool_outputs.items() if not tag.is_trusted]
 
         if tainted_params:
             return IntentVerdict(

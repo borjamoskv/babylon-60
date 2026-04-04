@@ -246,7 +246,9 @@ class StochasticSandbox:
                             total_size += f.stat().st_size
 
                 if total_size > _MAX_ARENA_SIZE:
-                    logger.warning("Arena size exceeded %d bytes limit, stopping copy", _MAX_ARENA_SIZE)
+                    logger.warning(
+                        "Arena size exceeded %d bytes limit, stopping copy", _MAX_ARENA_SIZE
+                    )
                     break
 
             except Exception as e:

@@ -15,6 +15,10 @@ import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
+import sqlite3
+from cortex.config import DB_PATH
+from cortex.extensions.signals.bus import SignalBus
+
 try:
     from cortex.vsa_engine import VSAEngine
 except ImportError:
@@ -192,6 +196,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Initialize SignalBus for Notch overrides (Phase 2)
+try:
+    _conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+    signal_bus = SignalBus(_conn)
+except Exception as e:
+    print(f"Failed to initialize SignalBus in Orchestrator: {e}")
+    signal_bus = None
+
 @app.on_event("startup")
 async def startup_event():
     asyncio.create_task(orchestrator.run_council_loop())
@@ -205,6 +217,20 @@ async def websocket_endpoint(websocket: WebSocket):
                 vsa_data = orchestrator.engine.memory.astype('float32').tobytes()
                 await websocket.send_bytes(vsa_data)
             await asyncio.sleep(0.05)
+    except WebSocketDisconnect:
+        pass
+
+@app.websocket("/ws/notch")
+async def notch_websocket(websocket: WebSocket):
+    """WebSocket bridge for Live Notch ACK/NACK (Phase 2)."""
+    await websocket.accept()
+    try:
+        while True:
+            data = await websocket.receive_json()
+            if isinstance(data, dict) and "pulse_id" in data and "action" in data:
+                print(f"📡 [NOTCH] Received override for {data['pulse_id']}: {data['action']}")
+                if signal_bus:
+                    signal_bus.emit("human_override", data, source="notch_ui")
     except WebSocketDisconnect:
         pass
 

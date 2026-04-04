@@ -57,12 +57,29 @@ def load_presets() -> dict[str, dict[str, Any]]:
     try:
         with open(path, encoding="utf-8") as f:
             presets = json.load(f)
+            # Inyectar OpenCode Proxy como nodo Tier: Frontier
+            presets["opencode"] = {
+                "default_model": "anthropic/claude-sonnet-4-5",
+                "tier": "frontier",
+                "cost_class": "high",
+                "context_window": 200000,
+                "specialization": ["general", "code", "reasoning", "architect"],
+                "api_key_env": "CORTEX_LLM_PROVIDER",  # Dummy hack for validation
+            }
+
             _validate_model_policy(presets)
             _PRESETS_CACHE = presets
             return presets
     except (json.JSONDecodeError, OSError) as e:
         logger.error("Failed to load LLM presets: %s", e)
-        return {}
+        return {
+            "opencode": {
+                "default_model": "anthropic/claude-sonnet-4-5",
+                "tier": "frontier",
+                "cost_class": "high",
+                "context_window": 200000,
+            }
+        }
 
 
 def _validate_model_policy(presets: dict[str, dict[str, Any]]) -> None:

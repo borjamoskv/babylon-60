@@ -1,0 +1,88 @@
+name: "👋 Welcome New Contributors"
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened]
+  fork:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  welcome-issue:
+    if: github.event_name == 'issues'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const creator = context.payload.issue.user.login;
+            
+            // Check if this is their first issue
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              creator: creator,
+              state: 'all',
+            });
+            
+            if (issues.data.length === 1) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `👋 Welcome @${creator}! Thanks for opening your first issue on CORTEX-Persist.
+
+We appreciate you taking the time to report this. A maintainer will review it shortly.
+
+In the meantime:
+- 📖 Check our [docs](https://github.com/${context.repo.owner}/${context.repo.repo}/tree/main/docs) for common answers
+- 💬 Join the discussion in [GitHub Discussions](https://github.com/${context.repo.owner}/${context.repo.repo}/discussions)
+- ⭐ If you find this project useful, a star helps us reach more developers!`
+              });
+            }
+
+  welcome-pr:
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const creator = context.payload.pull_request.user.login;
+            
+            // Check if this is their first PR
+            const prs = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+            });
+            
+            const creatorPRs = prs.data.filter(pr => pr.user.login === creator);
+            
+            if (creatorPRs.length === 1) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: `🎉 Welcome @${creator}! Thanks for your first pull request to CORTEX-Persist!
+
+A maintainer will review your changes soon. While you wait:
+- Make sure CI checks pass ✅
+- Review our [contributing guidelines](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/CONTRIBUTING.md)
+
+We're glad to have you! 🚀`
+              });
+            }
+
+  log-fork:
+    if: github.event_name == 'fork'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log fork event
+        run: |
+          echo "🍴 New fork by ${{ github.event.forkee.owner.login }}"
+          echo "Fork: ${{ github.event.forkee.full_name }}"

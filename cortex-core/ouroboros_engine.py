@@ -4,10 +4,11 @@ import logging
 import re
 import sqlite3
 import time
+import json
 
 # CORTEX V5 Pulse Integration
-from cortex.extensions.signals.bus import SignalBus
 from cortex.config import DB_PATH
+from cortex.extensions.signals.bus import SignalBus
 
 SCRATCH_BASE = "/Users/borjafernandezangulo/Cortex-Persist/.scratch/ouroboros"
 FORGE_PATH = "forge" # Verified in path
@@ -16,21 +17,26 @@ logger = logging.getLogger("cortex.ouroboros")
 class OuroborosEngine:
     """Foundry-backed Security Audit Engine (V5)."""
 
-    def __init__(self, target_url: str = None):
+    def __init__(self, target_url: str = None, worker_id: str = "main"):
         self.target_url = target_url
+        self.worker_id = worker_id
         self.scratch_dir = None
         self.findings = []
         
-        # Initialize SignalBus
+        # Initialize SignalBus (V4 Pulse)
         try:
             conn = sqlite3.connect(DB_PATH, check_same_thread=False)
             self.bus = SignalBus(conn)
-        except Exception:
+        except Exception as e:
+            logger.error("Ouroboros: SignalBus detached: %s", e)
             self.bus = None
 
     async def _emit_event(self, event_type: str, payload: dict):
         if self.bus:
-            self.bus.emit(event_type, payload, source="ouroboros")
+            try:
+                self.bus.emit(event_type, payload, source="ouroboros")
+            except Exception as e:
+                logger.error("Signal Emission Failed: %s", e)
 
     async def provision(self):
         """Prepare the audit environment."""
@@ -38,7 +44,8 @@ class OuroborosEngine:
             os.makedirs(SCRATCH_BASE, exist_ok=True)
             
         repo_name = self.target_url.split("/")[-1].replace(".git", "") if self.target_url else "temp_audit"
-        self.scratch_dir = os.path.join(SCRATCH_BASE, f"{repo_name}_{int(time.time())}")
+        # Ouroboros V6: Adding PID and timestamp for absolute workspace isolation
+        self.scratch_dir = os.path.join(SCRATCH_BASE, f"{self.worker_id}_{repo_name}_{os.getpid()}_{int(time.time())}")
         os.makedirs(self.scratch_dir, exist_ok=True)
         
         logger.info("Provisioned Ouroboros workspace: %s", self.scratch_dir)
@@ -126,7 +133,7 @@ contract {contract_name}OuroborosTest is Test {{
             
             logger.info("🚀 Auditing %s...", c["name"])
             await self._emit_event("swarm_task", {
-                "agent": "Ouroboros-1",
+                "agent": f"Ouroboros-{self.worker_id}",
                 "command": f"forge test --match-contract {c['name']}",
                 "status": "fuzzing"
             })
@@ -195,6 +202,12 @@ contract {contract_name}OuroborosTest is Test {{
 
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--target", help="Git URL to audit")
+    parser.add_argument("--worker-id", default="main", help="ID for parallel trace")
+    args = parser.parse_args()
+    
     logging.basicConfig(level=logging.INFO)
-    engine = OuroborosEngine()
+    engine = OuroborosEngine(target_url=args.target, worker_id=args.worker_id)
     asyncio.run(engine.run_audit())

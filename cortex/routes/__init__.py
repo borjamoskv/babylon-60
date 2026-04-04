@@ -33,6 +33,7 @@ from . import topology_ws as topology_ws_router
 from . import translate as translate_router
 from . import trust as trust_router
 from . import usage as usage_router
+from . import demo as demo_router
 
 __all__ = ["api_router"]
 
@@ -65,6 +66,7 @@ api_router.include_router(runtime_router.router)
 api_router.include_router(onboarding_router.router)
 api_router.include_router(health_index_router.router)
 api_router.include_router(trust_router.router)
+api_router.include_router(demo_router.router)
 
 # Gateway endpoints (SovereignLLM Entry Points)
 # api_router.include_router(gateway_rest_router)

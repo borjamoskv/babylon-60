@@ -49,8 +49,9 @@ class SovereignSurgeon:
             # --- Python Optimization Path ---
             if vuln_type == "HOT_LOOP_REFACTOR":
                 logging.info("🩹 Optimizing Hot Loop (Adding Throttle)...")
-                # Add asyncio.sleep(0.1) before any loop close
-                new_content = content.replace("while self.is_running:", "while self.is_running:\n            await asyncio.sleep(0.1) # AUTO_THROTTLE_V6", 1)
+                # Add asyncio.sleep(0.1) before any loop close only if not present
+                if "# AUTO_THROTTLE_V6" not in content:
+                    new_content = content.replace("while self.is_running:", "while self.is_running:\n            await asyncio.sleep(0.1) # AUTO_THROTTLE_V6", 1)
             
             elif vuln_type == "ASYNC_PROMOTION":
                 logging.info("🩹 Promoting Synchronous calls to Async...")

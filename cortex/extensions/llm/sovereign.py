@@ -298,6 +298,10 @@ class SovereignLLM:
                     from cortex.extensions.llm.vllm_edge import NativeVLLMProvider
 
                     self._providers_cache[provider_name] = NativeVLLMProvider()  # type: ignore[reportArgumentType]
+                elif provider_name == "opencode":
+                    from cortex.extensions.llm.opencode_provider import OpenCodeProvider
+
+                    self._providers_cache[provider_name] = OpenCodeProvider()
                 else:
                     self._providers_cache[provider_name] = LLMProvider(provider=provider_name)
             provider = self._providers_cache[provider_name]

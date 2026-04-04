@@ -53,9 +53,17 @@ class LLMManager:
             return None
 
         try:
-            from cortex.extensions.llm.provider import LLMProvider
+            if self._provider_name == "opencode":
+                from cortex.extensions.llm.opencode_provider import (
+                    OpenCodeProvider,
+                )
 
-            self._provider = LLMProvider(provider=self._provider_name)
+                self._provider = OpenCodeProvider()
+            else:
+                from cortex.extensions.llm.provider import LLMProvider
+
+                self._provider = LLMProvider(provider=self._provider_name)
+
             logger.info("LLM provider loaded: %s", self._provider)
         except (OSError, RuntimeError, ValueError) as e:
             logger.error(

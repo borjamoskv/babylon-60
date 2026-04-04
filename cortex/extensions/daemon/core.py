@@ -482,8 +482,9 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
                     event_bus=self._event_bus,
                     port=int(file_config.get("api_port", 8741)),
                 )
-                logger.info("🌐 Human Callback API ENABLED (port %s)",
-                            file_config.get("api_port", 8741))
+                logger.info(
+                    "🌐 Human Callback API ENABLED (port %s)", file_config.get("api_port", 8741)
+                )
             except Exception as e:  # noqa: BLE001
                 logger.warning("Failed to init HumanCallbackAPI: %s", e)
 
@@ -615,28 +616,20 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
         tasks: list[asyncio.Task] = []
 
         # Core check loop (replaces the main while loop)
-        tasks.append(asyncio.create_task(
-            self._sovereign_check_loop(interval), name="CheckLoop"
-        ))
+        tasks.append(asyncio.create_task(self._sovereign_check_loop(interval), name="CheckLoop"))
 
         # Scheduler
         if self.scheduler is not None:
             self._register_default_schedules()
-            tasks.append(asyncio.create_task(
-                self.scheduler.run(), name="Scheduler"
-            ))
+            tasks.append(asyncio.create_task(self.scheduler.run(), name="Scheduler"))
 
         # WatchdogHub
         if self.watchdog_hub is not None:
-            tasks.append(asyncio.create_task(
-                self.watchdog_hub.start(), name="WatchdogHub"
-            ))
+            tasks.append(asyncio.create_task(self.watchdog_hub.start(), name="WatchdogHub"))
 
         # Human Callback API
         if self.callback_api is not None:
-            tasks.append(asyncio.create_task(
-                self.callback_api.serve(), name="CallbackAPI"
-            ))
+            tasks.append(asyncio.create_task(self.callback_api.serve(), name="CallbackAPI"))
 
         # Legacy thread-based subsystems that need their own asyncio.run()
         # These are spawned as threads because they have blocking I/O
@@ -752,6 +745,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
 
     def _run_legacy(self, interval: int = DEFAULT_INTERVAL) -> None:
         """Legacy threading-based execution (fallback)."""
+
         def _handle_signal(signum: int, frame: object) -> None:
             sig_name = signal.Signals(signum).name
             logger.info("Received %s, shutting down gracefully...", sig_name)
