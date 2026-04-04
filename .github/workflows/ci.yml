@@ -38,11 +38,11 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install dependencies
-        run: pip install -e ".[dev]"
+        run: pip install ".[dev]"
       - name: Install security tools
         run: pip install pip-audit bandit
       - name: Audit dependencies for known CVEs
-        run: pip-audit --strict --desc on --skip-editable
+        run: pip-audit --strict --desc on
       - name: Bandit SAST scan
         run: bandit -r cortex/ -c pyproject.toml --severity-level medium -f json -o bandit-report.json || true
       - name: Upload Bandit report
