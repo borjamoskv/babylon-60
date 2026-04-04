@@ -2,53 +2,145 @@
 (deny default)
 
 ; ============================================================
-; CORTEX Prison v2.0 — Hardened Sandbox Profile
-; V9 Security Hardening: Anthropic Assimilation Protocol
+; CORTEX Prison v3.0 — Sovereign OS-Level Containment
+; ULTRATHINK Phase 1: Zero-Entropy Kernel Enforcement
+;
+; Architecture: deny-all → whitelist essentials
+; Any syscall not explicitly permitted will cause EPERM,
+; regardless of what Python/Bash code attempts.
+;
+; The kernel is the last line of defense. If the LLM hallucinates
+; `rm -rf ~`, macOS kills the process before the order reaches disk.
 ; ============================================================
 
 ; --- PROCESS EXECUTION ---
+; Allow fork/exec for subprocess chains (e.g., forge → solc, git → ssh)
 (allow process-exec)
 (allow process-fork)
 
-; Block dangerous binaries outside sandbox arenas
+; Hard-deny dangerous system binaries — even if process-exec is allowed,
+; these specific paths are blocked at the kernel level.
 (deny process-exec
-    (regex #"/usr/bin/mkfs")
-    (regex #"/bin/dd")
+    (regex #"/usr/sbin/mkfs")
+    (regex #"/bin/dd$")
+    (regex #"/usr/bin/dd$")
+    (regex #"/sbin/shutdown")
+    (regex #"/sbin/reboot")
+    (regex #"/sbin/halt")
+    (regex #"/usr/bin/sudo")
+    (regex #"/usr/bin/su$")
+    (regex #"/usr/sbin/diskutil")
+    (regex #"/usr/bin/osascript")
+    (regex #"/usr/bin/open$")
+    (regex #"/usr/bin/ssh-keygen")
+    (regex #"/usr/bin/security$")        ; Keychain access
+    (regex #"/usr/bin/dscl$")            ; Directory Services (user mgmt)
+    (regex #"/usr/sbin/dseditgroup$")    ; Group membership
 )
 
 ; --- SYSTEM FUNDAMENTALS ---
+; Required for basic process operation (memory allocation, etc.)
 (allow sysctl-read)
 (allow mach-lookup)
 
+; --- SIGNAL CONTROL ---
+; Allow self-signaling (timeouts), deny signaling other processes
+(allow signal (target self))
+
 ; --- FILE SYSTEM ACCESS ---
-; Blanket reads for codebase analysis
+; READS: Blanket allow for codebase analysis (non-destructive)
 (allow file-read*)
 
-; Permitted Write Arenas ONLY
+; WRITES: Strictly confined to sandbox arenas
 (allow file-write*
     (subpath "/tmp")
     (subpath "/private/tmp")
     (subpath "/private/var/folders")
     (subpath "/Users/borjafernandezangulo/Cortex-Persist/.scratch")
     (subpath "/Users/borjafernandezangulo/30_CORTEX/.scratch")
+    ; Foundry cache (required for forge build/test)
+    (subpath "/Users/borjafernandezangulo/.foundry")
+    ; npm/node cache (required for npm install in arenas)
+    (subpath "/Users/borjafernandezangulo/.npm")
 )
 
-; DENY writes to daemon source (prevent self-modification)
+; DENY writes to critical infrastructure — overrides the /tmp allow
+; for any path traversal attempt that resolves inside these dirs.
 (deny file-write*
+    ; Daemon source code (prevent self-modification attacks)
     (subpath "/Users/borjafernandezangulo/Cortex-Persist/cortex-core")
     (subpath "/Users/borjafernandezangulo/Cortex-Persist/cortex/extensions/security")
+    ; Home directory root files (.zshrc, .ssh, .gitconfig)
+    (regex #"^/Users/borjafernandezangulo/\.[^/]+$")
+    ; SSH keys
+    (subpath "/Users/borjafernandezangulo/.ssh")
+    ; macOS system directories
+    (subpath "/System")
+    (subpath "/Library")
+    (subpath "/usr")
+    (subpath "/bin")
+    (subpath "/sbin")
+    (subpath "/etc")
+    (subpath "/var")
+    ; Desktop / Documents / Downloads (user data)
+    (subpath "/Users/borjafernandezangulo/Desktop")
+    (subpath "/Users/borjafernandezangulo/Documents")
+    (subpath "/Users/borjafernandezangulo/Downloads")
+    (subpath "/Users/borjafernandezangulo/Pictures")
+    (subpath "/Users/borjafernandezangulo/Movies")
+    (subpath "/Users/borjafernandezangulo/Music")
+    ; iCloud Drive
+    (subpath "/Users/borjafernandezangulo/Library/Mobile Documents")
+    ; CORTEX databases (prevent corruption)
+    (subpath "/Users/borjafernandezangulo/.cortex")
+    ; Antigravity knowledge (prevent skill poisoning)
+    (subpath "/Users/borjafernandezangulo/.gemini")
 )
 
 ; --- NETWORK ---
-; V9: Restrict outbound to allowlisted domains only
+; Deny all network by default. Whitelist specific domains.
+; DNS resolution must be explicitly allowed for domain names to work.
 (allow network-inbound (local ip))
+
+; Allow DNS resolution (required for domain → IP mapping)
 (allow network-outbound
-    (remote ip "github.com:*")
-    (remote ip "api.github.com:*")
-    (remote ip "registry.npmjs.org:*")
-    (remote ip "etherscan.io:*")
-    (remote ip "api.etherscan.io:*")
-    (remote ip "raw.githubusercontent.com:*")
-    (remote ip "objects.githubusercontent.com:*")
+    (remote udp (to name-any) (remote port 53))   ; DNS over UDP
+    (remote tcp (to name-any) (remote port 53))   ; DNS over TCP
+)
+
+; Allow HTTPS to whitelisted services only
+(allow network-outbound
+    ; GitHub ecosystem
+    (remote tcp (regex #"github\.com") (remote port 443))
+    (remote tcp (regex #"api\.github\.com") (remote port 443))
+    (remote tcp (regex #"raw\.githubusercontent\.com") (remote port 443))
+    (remote tcp (regex #"objects\.githubusercontent\.com") (remote port 443))
+    ; npm registry
+    (remote tcp (regex #"registry\.npmjs\.org") (remote port 443))
+    ; Ethereum block explorers
+    (remote tcp (regex #"etherscan\.io") (remote port 443))
+    (remote tcp (regex #"api\.etherscan\.io") (remote port 443))
+    (remote tcp (regex #"basescan\.org") (remote port 443))
+    ; Foundry/Forge RPC (Alchemy, Infura)
+    (remote tcp (regex #"eth-mainnet\.alchemyapi\.io") (remote port 443))
+    (remote tcp (regex #"mainnet\.infura\.io") (remote port 443))
+    ; Localhost (internal CORTEX services, MCP servers)
     (local ip)
 )
+
+; Block all SSH outbound (prevent unauthorized remote access)
+(deny network-outbound
+    (remote tcp (remote port 22))
+)
+
+; Block all non-443/53 outbound TCP (catch-all for exotic exfiltration)
+; This is the final firewall: anything not DNS or HTTPS is killed.
+(deny network-outbound
+    (remote tcp (not (remote port 443)) (not (remote port 53)) (not (local ip)))
+)
+
+; ============================================================
+; SEAL: cortex_prison v3.0.0 — ULTRATHINK Phase 1
+; Enforced by: macOS sandbox-exec (Seatbelt/TrustedBSD)
+; Axiom: Ω₀ (Singularity) — Hardware > Software
+; ============================================================

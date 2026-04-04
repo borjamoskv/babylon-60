@@ -1,100 +1,246 @@
 #!/usr/bin/env python3
+"""CORTEX Vanguard Daemon — Autonomous Bounty Extraction Engine.
+
+V9: All execution phases gated by SecurityMonitorClassifier
+and stochastic commands routed through StochasticSandbox.
+"""
+
+import asyncio
+import json
 import os
 import sys
-import json
-import asyncio
-import subprocess
 from datetime import datetime
-from typing import List, Dict
+from typing import List
 
 # Configuración Termodinámica
-BASE_DIR = os.path.expanduser("~/Cortex-Persist/engine-c5")
+BASE_DIR = os.path.expanduser(
+    "~/Cortex-Persist/engine-c5"
+)
 TARGETS_DIR = os.path.join(BASE_DIR, "targets")
-LEDGER_PATH = os.path.join(BASE_DIR, "vanguard_ledger.json")
-HEARTBEAT_SEC = 3600  # 1 hora entre ciclos de escaneo completo
+LEDGER_PATH = os.path.join(
+    BASE_DIR, "vanguard_ledger.json"
+)
+HEARTBEAT_SEC = 3600
+
 
 def log(msg: str, tier: str = "INFO") -> None:
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"[{timestamp}] [{tier}] [VANGUARD-DAEMON] {msg}")
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{ts}] [{tier}] [VANGUARD-DAEMON] {msg}")
 
-def update_ledger(target: str, status: str, details: str = "") -> None:
+
+def update_ledger(
+    target: str,
+    status: str,
+    details: str = "",
+) -> None:
     ledger = {}
     if os.path.exists(LEDGER_PATH):
         try:
             with open(LEDGER_PATH, "r") as f:
                 ledger = json.load(f)
-        except:
+        except Exception:
             ledger = {}
-    
+
     ledger[target] = {
         "last_seen": datetime.now().isoformat(),
         "status": status,
-        "details": details
+        "details": details,
     }
-    
+
     with open(LEDGER_PATH, "w") as f:
         json.dump(ledger, f, indent=2)
 
-async def run_step(name: str, cmd: List[str], cwd: str = BASE_DIR) -> str:
+
+def _classify_cmd(cmd_str: str, phase: str) -> bool:
+    """Gate a command through SecurityMonitorClassifier.
+
+    Returns True if the command is allowed, False if blocked.
+    """
+    try:
+        from cortex.extensions.security.security_monitor import (
+            ParameterProvenance,
+            SecurityMonitorClassifier,
+        )
+
+        monitor = SecurityMonitorClassifier()
+        task = {
+            "command": cmd_str,
+            "agent": f"vanguard-{phase}",
+        }
+        verdict = monitor.classify(
+            task,
+            user_request="Vanguard bounty extraction cycle",
+            provenance=ParameterProvenance.AGENT_INFERRED,
+        )
+        if not verdict.allowed:
+            log(
+                f"BLOCKED by SecurityMonitor [{phase}]: "
+                f"{verdict.reason}",
+                "SECURITY",
+            )
+            return False
+        return True
+    except ImportError:
+        # SecurityMonitor not available — allow with warning
+        log("SecurityMonitor unavailable, proceeding", "WARN")
+        return True
+
+
+def _sandbox_cmd(
+    cmd_str: str, cwd: str
+) -> tuple[str, str]:
+    """Route stochastic commands through StochasticSandbox.
+
+    Returns (possibly_rewritten_cmd, arena_path_or_empty).
+    """
+    try:
+        from cortex.extensions.security.stochastic_sandbox import (
+            StochasticSandbox,
+        )
+
+        sandbox = StochasticSandbox()
+        result = sandbox.intercept(cmd_str, cwd=cwd)
+        if result.is_redirected:
+            log(
+                f"SANDBOXED [{result.matched_pattern}]:"
+                f" {cwd} → {result.arena_path}",
+                "SANDBOX",
+            )
+            return result.redirected_cmd, result.arena_path
+        return cmd_str, ""
+    except ImportError:
+        return cmd_str, ""
+
+
+async def run_step(
+    name: str,
+    cmd: List[str],
+    cwd: str = BASE_DIR,
+) -> str:
+    """Execute a phase with V9 security gating."""
+    cmd_str = " ".join(cmd)
+
+    # Phase 1: Intent classification
+    if not _classify_cmd(cmd_str, name):
+        return f"[BLOCKED] Phase {name} denied by SecurityMonitor"
+
+    # Phase 2: Stochastic sandbox redirect
+    final_cmd, arena = _sandbox_cmd(cmd_str, cwd)
+    effective_cwd = arena if arena else cwd
+
     log(f"Iniciando fase: {name}", "EXEC")
     process = await asyncio.create_subprocess_exec(
         *cmd,
-        cwd=cwd,
+        cwd=effective_cwd,
         stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
+        stderr=asyncio.subprocess.PIPE,
     )
     stdout, stderr = await process.communicate()
-    output = stdout.decode().strip() + stderr.decode().strip()
-    
+    output = (
+        stdout.decode().strip()
+        + stderr.decode().strip()
+    )
+
     if process.returncode == 0:
-        log(f"Fase {name} completada con éxito.", "SUCCESS")
+        log(f"Fase {name} completada.", "SUCCESS")
     else:
-        log(f"Fase {name} reportó anomalías (ExitCode: {process.returncode}).", "WARN")
-    
+        log(
+            f"Fase {name} anomalías "
+            f"(Exit: {process.returncode}).",
+            "WARN",
+        )
+
+    # Phase 3: Arena cleanup
+    if arena:
+        try:
+            from cortex.extensions.security.stochastic_sandbox import (
+                StochasticSandbox,
+            )
+            StochasticSandbox().cleanup(arena)
+        except Exception as e:
+            log(f"Arena cleanup failed: {e}", "WARN")
+
     return output
 
+
 async def vanguard_cycle():
-    log("=== INICIANDO CICLO DE EXTRACCIÓN VANGUARD-OMEGA ===", "SINGULARITY")
-    
+    log(
+        "=== CICLO VANGUARD-OMEGA (V9 Hardened) ===",
+        "SINGULARITY",
+    )
+
     # 1. SCOUT: Ingesta de Immunefi
-    log("Ejecutando Scout L4 para actualizar targets...", "STEP")
-    await run_step("IMMUNEFI-SCOUT", ["python3", "cortex_immunefi_scout.py"])
-    
+    log("Scout L4: actualizando targets...", "STEP")
+    await run_step(
+        "IMMUNEFI-SCOUT",
+        ["python3", "cortex_immunefi_scout.py"],
+    )
+
     # Leer targets reales
-    targets_json = os.path.join(BASE_DIR, "real_bounties.json")
+    targets_json = os.path.join(
+        BASE_DIR, "real_bounties.json"
+    )
     if not os.path.exists(targets_json):
-        log("Error crítico: No se encontró real_bounties.json", "ERROR")
+        log("No se encontró real_bounties.json", "ERROR")
         return
 
     with open(targets_json, "r") as f:
         targets_data = json.load(f)
 
     for target_info in targets_data:
-        name = (target_info.get("protocol") or target_info.get("target") or "Unknown").replace(" ", "_").lower()
+        name = (
+            target_info.get("protocol")
+            or target_info.get("target")
+            or "Unknown"
+        ).replace(" ", "_").lower()
         target_path = os.path.join(TARGETS_DIR, name)
-        
+
         if not os.path.exists(target_path):
-            log(f"Target {name} no ha sido clonado aún. Saltando.", "SKIP")
+            log(f"Target {name} no clonado.", "SKIP")
             continue
 
-        log(f"Asaltando target: {name.upper()}...", "ATTACK")
-        
-        # 2. FRACTOR: Análisis AST
-        out_ast = await run_step(f"AST-{name}", ["python3", "cortex_ast_fractor.py", target_path])
-        
-        # 3. CHAOS: Fuzzing Persistente (250,000 runs)
-        # Limitado a 60s por forge interno, pero el daemon espera
-        out_chaos = await run_step(f"CHAOS-{name}", ["python3", "cortex_chaos_fuzzer.py", target_path, "50000"])
-        
-        # 4. LEDGER: Registro de resultados
-        status = "FRACTURED" if "BREAKER" in out_chaos else "RESISTANT"
-        update_ledger(name, status, out_chaos[-500:]) # Guardar el final del log
-        
-        if status == "FRACTURED":
-            log(f"!!! COLISIÓN DETECTADA EN {name.upper()} !!!", "CRITICAL")
-            # Aquí podrías añadir un Beacon de notificación (Telegram/Webhook)
+        log(f"Asaltando: {name.upper()}...", "ATTACK")
 
-    log(f"Ciclo completado. Entrando en hibernación por {HEARTBEAT_SEC}s...", "IDLE")
+        # 2. FRACTOR: Análisis AST (R0 — read-only)
+        out_ast = await run_step(
+            f"AST-{name}",
+            [
+                "python3",
+                "cortex_ast_fractor.py",
+                target_path,
+            ],
+        )
+
+        # 3. CHAOS: Fuzzing (STOCHASTIC — sandboxed)
+        out_chaos = await run_step(
+            f"CHAOS-{name}",
+            [
+                "python3",
+                "cortex_chaos_fuzzer.py",
+                target_path,
+                "50000",
+            ],
+        )
+
+        # 4. LEDGER: Registro de resultados
+        status = (
+            "FRACTURED"
+            if "BREAKER" in out_chaos
+            else "RESISTANT"
+        )
+        update_ledger(name, status, out_chaos[-500:])
+
+        if status == "FRACTURED":
+            log(
+                f"!!! COLISIÓN EN {name.upper()} !!!",
+                "CRITICAL",
+            )
+
+    log(
+        f"Ciclo completado. Hibernando {HEARTBEAT_SEC}s",
+        "IDLE",
+    )
+
 
 async def main():
     if "--once" in sys.argv:
@@ -105,9 +251,10 @@ async def main():
         try:
             await vanguard_cycle()
         except Exception as e:
-            log(f"Falla en el motor central: {e}", "FATAL")
-        
+            log(f"Falla motor central: {e}", "FATAL")
+
         await asyncio.sleep(HEARTBEAT_SEC)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

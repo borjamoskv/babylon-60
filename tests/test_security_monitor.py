@@ -17,7 +17,6 @@ sys.path.insert(
 
 from cortex.extensions.security.security_monitor import (
     IntentClassifier,
-    IntentVerdict,
     ParameterProvenance,
     ReversibilityTier,
     SecurityMonitorClassifier,
