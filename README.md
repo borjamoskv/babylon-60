@@ -13,7 +13,7 @@ Local-first. SHA-256 hash-chained. Merkle checkpoints. Audit-ready.
 [![Codecov](https://codecov.io/gh/borjamoskv/Cortex-Persist/branch/main/graph/badge.svg)](https://codecov.io/gh/borjamoskv/Cortex-Persist)
 [![PyPI](https://img.shields.io/pypi/v/cortex-persist.svg)](https://pypi.org/project/cortex-persist/)
 
-[Quickstart](#quickstart) · [System Map](src/content/docs/system-map.md) · [Native Technologies](src/content/docs/CORTEX-NATIVE-TECHNOLOGIES.md) · [Enterprise Readiness](ENTERPRISE_READINESS.md) · [Diligence Checklist](DUE_DILIGENCE_CHECKLIST.md) · [Deployment Hardening](DEPLOYMENT_HARDENING.md) · [API](src/content/docs/api.md) · [Security Model](src/content/docs/SECURITY_TRUST_MODEL.md) · [Support](SUPPORT.md) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md)
+[Quickstart](#quickstart) · [System Map](https://cortexpersist.com/docs/system-map) · [Native Technologies](https://cortexpersist.com/docs/cortex-native-technologies) · [Enterprise Readiness](ENTERPRISE_READINESS.md) · [Diligence Checklist](DUE_DILIGENCE_CHECKLIST.md) · [Deployment Hardening](DEPLOYMENT_HARDENING.md) · [API](https://cortexpersist.com/docs/api) · [Security Model](https://cortexpersist.com/docs/security_trust_model) · [Support](SUPPORT.md) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md)
 
 CORTEX Persist adds a verification layer around agent memory and decision state. It sits between your runtime and your storage so facts, decisions, and derived state become reviewable, tamper-evident records instead of mutable application state. If stored context changes after the fact, verification fails.
 
@@ -40,7 +40,7 @@ CORTEX now exposes a stable subsystem taxonomy for navigating the codebase and a
 | **CORTEX Primeflow** | Execution runtime, APIs, services, event delivery, and operational flows | `api/`, `routes/`, `services/`, `events/`, `http/`, `cli/`, `telemetry/`, `extensions/automation/`, `extensions/daemon/`, `extensions/sync/`, `extensions/notifications/`, `extensions/timing/` |
 | **CORTEX Coreshift** | Memory evolution, indexing, migration, audit, and state transitions | `memory/`, `facts/`, `search/`, `embeddings/`, `graph/`, `compaction/`, `enrichment/`, `migrations/`, `audit/`, `compliance/`, `forensics/` |
 
-These names are architectural groupings over the current repository, not replacement Python package names. The canonical mapping lives in [System Map](src/content/docs/system-map.md).
+These names are architectural groupings over the current repository, not replacement Python package names. The canonical mapping lives in [System Map](https://cortexpersist.com/docs/system-map).
 
 ## Core Trust Capabilities
 
@@ -52,7 +52,7 @@ CORTEX groups five core capabilities that show up across the repository. The nam
 4. **Rollback-aware write flows**: non-trivial mutations follow compensating steps instead of leaving partial state behind.
 5. **Isolated self-modification paths**: runtime code generation can be contained, tested, and validated before it affects persistent state.
 
-The canonical definition and module mapping live in [CORTEX Native Technologies](src/content/docs/CORTEX-NATIVE-TECHNOLOGIES.md).
+The canonical definition and module mapping live in [CORTEX Native Technologies](https://cortexpersist.com/docs/cortex-native-technologies).
 
 ## Use Cases
 
@@ -95,12 +95,58 @@ Traditional logging and standard vector stores help you observe systems. They do
 | **Self-Hosted** | 🟡 **Beta** | Multi-tenant. API-driven. Redis cache. Pluggable to your infra. |
 | **Cloud-Ready** | ⏳ **Roadmap** | AlloyDB/PostgreSQL + Qdrant. For distributed massive swarms. |
 
+## Aether Workers
+
+The deployment files under `deploy/compose/` and `deploy/k8s/` provide a base worker stack for Aether with `Redis + RQ` as the broker and multiple worker replicas. The producer side keeps using the existing Aether task store, while workers stay stateless and only receive `task_id` jobs from Redis.
+
+Local distributed worker:
+
+```bash
+cortex worker aether --queue aether --db-path ~/.cortex/aether.db
+```
+
+Root Aether producer/operator CLI:
+
+```bash
+cortex aether enqueue /path/to/repo "Fix flaky queue consumer" --backend rq
+cortex aether status --backend rq
+cortex aether once --task-id abc123 --backend rq
+```
+
+Local run:
+
+```bash
+docker compose -f deploy/compose/aether-workers.compose.yml up --build --scale aether-worker=6
+```
+
+Kubernetes base:
+
+```bash
+kubectl apply -f deploy/k8s/aether-workers.yaml
+```
+
+Recommended daemon config keys:
+
+```json
+{
+  "aether_enabled": true,
+  "aether_queue_backend": "rq",
+  "aether_db_path": "/path/to/.cortex/aether.db",
+  "aether_redis_url": "redis://localhost:6379/0",
+  "aether_rq_queue": "aether",
+  "aether_worker_threads": 6,
+  "aether_job_timeout": 28800
+}
+```
+
+The queue state is shared through `~/.cortex` while Redis handles fan-out and wake-up. That keeps the producer/consumer path decoupled: monitors and CLI enqueue, workers execute, and scaling comes from replicas instead of a single daemon thread.
+
 ## Enterprise Readiness
 
 CORTEX is still on a beta product line, but the repository now exposes the basic due-diligence surfaces a serious buyer or platform team expects:
 
 - **Stable governance surface:** [Support](SUPPORT.md), [Security Policy](SECURITY.md), [Contributing](CONTRIBUTING.md), and [Code of Conduct](CODE_OF_CONDUCT.md)
-- **Stable technical entrypoints:** [Architecture](src/content/docs/architecture.md), [Security Model](src/content/docs/SECURITY_TRUST_MODEL.md), [API](src/content/docs/api.md), and [Operations](src/content/docs/OPERATIONS.md)
+- **Stable technical entrypoints:** [Architecture](https://cortexpersist.com/docs/architecture), [Security Model](https://cortexpersist.com/docs/security_trust_model), [API](https://cortexpersist.com/docs/api), and [Operations](https://cortexpersist.com/docs/operations)
 - **Release and supply-chain controls:** signed releases, CI, CodeQL, SBOM generation, dependency audit, and container scanning
 - **Deployment and buyer validation guides:** [DEPLOYMENT_HARDENING.md](DEPLOYMENT_HARDENING.md) and [DUE_DILIGENCE_CHECKLIST.md](DUE_DILIGENCE_CHECKLIST.md)
 - **Candid diligence summary:** strengths, current limits, and evaluation checklist in [ENTERPRISE_READINESS.md](ENTERPRISE_READINESS.md)
@@ -188,13 +234,13 @@ CORTEX treats generative AI output as untrusted input until it passes determinis
 - **Mutation paths are constrained:** agents cannot write arbitrary state outside the validated mutation flow.
 - **Tamper evidence complements access control:** if someone edits stored records after the fact, the hash chain no longer verifies.
 
-> Read the cryptographic guarantees in the [Security Model](src/content/docs/SECURITY_TRUST_MODEL.md).
+> Read the cryptographic guarantees in the [Security Model](https://cortexpersist.com/docs/security_trust_model).
 
 ---
 
 ## Documentation
 
-Canonical long-form documentation lives under [`src/content/docs`](src/content/docs). The top-level `docs/` directory is a GitHub-facing compatibility shim, not the source of truth.
+Canonical long-form documentation now lives on the dedicated docs surface at [`https://cortexpersist.com/docs`](https://cortexpersist.com/docs). The top-level `docs/` directory in this repository remains a GitHub-facing compatibility shim for technical review and procurement workflows.
 
 - [**Quickstart**](#quickstart) — Install, store, verify.
 - [**Enterprise Readiness**](ENTERPRISE_READINESS.md) — Buyer-facing maturity, risk, and diligence summary.
@@ -205,11 +251,11 @@ Canonical long-form documentation lives under [`src/content/docs`](src/content/d
 - [**Maintainers**](MAINTAINERS.md) — Current maintainer model and stewardship boundaries.
 - [**Version Support**](VERSION_SUPPORT.md) — Supported release line expectations.
 - [**Release Process**](RELEASE_PROCESS.md) — Public package publication and signing flow.
-- [**System Map**](src/content/docs/system-map.md) — Canonical subsystem taxonomy for Hypercore, Overmind, Deepforge, Primeflow, and Coreshift.
-- [**CORTEX Native Technologies**](src/content/docs/CORTEX-NATIVE-TECHNOLOGIES.md) — Canonical definition of the platform's five core trust capabilities.
-- [**API Reference**](src/content/docs/api.md) — SDK primitives and REST endpoints.
-- [**Security Model**](src/content/docs/SECURITY_TRUST_MODEL.md) — Cryptographic invariants and trust guarantees.
-- [**Architecture**](src/content/docs/architecture.md) — System topology and critical trust surfaces.
+- [**System Map**](https://cortexpersist.com/docs/system-map) — Canonical subsystem taxonomy for Hypercore, Overmind, Deepforge, Primeflow, and Coreshift.
+- [**CORTEX Native Technologies**](https://cortexpersist.com/docs/cortex-native-technologies) — Canonical definition of the platform's five core trust capabilities.
+- [**API Reference**](https://cortexpersist.com/docs/api) — SDK primitives and REST endpoints.
+- [**Security Model**](https://cortexpersist.com/docs/security_trust_model) — Cryptographic invariants and trust guarantees.
+- [**Architecture**](https://cortexpersist.com/docs/architecture) — System topology and critical trust surfaces.
 - [**Roadmap**](ROADMAP.md) — Deployment phases and scaling logic.
 - [**Contributing**](CONTRIBUTING.md) — Development workflow and contribution rules.
 

@@ -2,9 +2,9 @@
 
 This file exists as a stable GitHub-facing path for operational review.
 
-The canonical long-form operations document currently lives at:
+The canonical long-form operations document now lives at:
 
-- [src/content/docs/OPERATIONS.md](../src/content/docs/OPERATIONS.md)
+- [https://cortexpersist.com/docs/operations](https://cortexpersist.com/docs/operations)
 
 Start there for:
 

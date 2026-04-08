@@ -25,10 +25,10 @@ The current public posture is best described as:
 - **Deployment hardening:** [DEPLOYMENT_HARDENING.md](DEPLOYMENT_HARDENING.md)
 - **Reproducible diligence flow:** [DUE_DILIGENCE_CHECKLIST.md](DUE_DILIGENCE_CHECKLIST.md)
 - **Repository governance:** [REPO_GOVERNANCE.md](REPO_GOVERNANCE.md)
-- **Architecture:** [src/content/docs/architecture.md](src/content/docs/architecture.md)
-- **Security and trust model:** [src/content/docs/SECURITY_TRUST_MODEL.md](src/content/docs/SECURITY_TRUST_MODEL.md)
-- **API surface:** [src/content/docs/api.md](src/content/docs/api.md)
-- **Operations guidance:** [src/content/docs/OPERATIONS.md](src/content/docs/OPERATIONS.md)
+- **Architecture:** [https://cortexpersist.com/docs/architecture](https://cortexpersist.com/docs/architecture)
+- **Security and trust model:** [https://cortexpersist.com/docs/security_trust_model](https://cortexpersist.com/docs/security_trust_model)
+- **API surface:** [https://cortexpersist.com/docs/api](https://cortexpersist.com/docs/api)
+- **Operations guidance:** [https://cortexpersist.com/docs/operations](https://cortexpersist.com/docs/operations)
 - **Contribution and engineering expectations:** [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Strengths
@@ -43,7 +43,7 @@ The current public posture is best described as:
 
 - **Beta line:** the package is still on a `0.3.x` beta release line, so enterprise claims should be framed as directional rather than contractual.
 - **Broad repo surface:** the codebase spans many concepts and experiments; a buyer should identify the subset that is actually part of the sellable core.
-- **Canonical docs source of truth:** long-form documentation now lives under `src/content/docs`; top-level `docs/` files are compatibility shims only.
+- **Canonical docs source of truth:** long-form documentation now lives on the dedicated docs surface at `https://cortexpersist.com/docs`; top-level `docs/` files in this repo are compatibility shims only.
 - **Commercial readiness is not the same as technical strength:** support expectations, SLAs, managed-service obligations, and legal/compliance claims still require explicit negotiation and validation.
 - **Compliance language should be reviewed by counsel:** references to regulated use cases are useful positioning, but legal review is still necessary before binding claims.
 
@@ -53,14 +53,14 @@ The current public posture is best described as:
 
 - Run CI on a clean clone and inspect workflow coverage in `.github/workflows/`.
 - Review critical paths under `cortex/engine`, `cortex/memory`, `cortex/guards`, and `cortex/ledger`.
-- Verify installation and smoke-test flows from [README.md](README.md) and [src/content/docs/api.md](src/content/docs/api.md).
+- Verify installation and smoke-test flows from [README.md](README.md) and [https://cortexpersist.com/docs/api](https://cortexpersist.com/docs/api).
 - Confirm the package metadata in [pyproject.toml](pyproject.toml) matches the intended release and support posture.
 - Run the reproducible buyer workflow in [DUE_DILIGENCE_CHECKLIST.md](DUE_DILIGENCE_CHECKLIST.md).
 
 ### Security
 
 - Review the public policy in [SECURITY.md](SECURITY.md).
-- Inspect trust-boundary documentation in [src/content/docs/SECURITY_TRUST_MODEL.md](src/content/docs/SECURITY_TRUST_MODEL.md).
+- Inspect trust-boundary documentation in [https://cortexpersist.com/docs/security_trust_model](https://cortexpersist.com/docs/security_trust_model).
 - Verify the release workflow, provenance, and artifact signing in [.github/workflows/release.yml](.github/workflows/release.yml).
 - Verify CodeQL, dependency audit, SBOM, and container scanning workflows in [.github/workflows/ci.yml](.github/workflows/ci.yml) and [.github/workflows/codeql.yml](.github/workflows/codeql.yml).
 

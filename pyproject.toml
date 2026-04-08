@@ -50,7 +50,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://cortexpersist.com"
-Documentation = "https://github.com/borjamoskv/Cortex-Persist/tree/main/src/content/docs"
+Documentation = "https://cortexpersist.com/docs"
 Repository = "https://github.com/borjamoskv/Cortex-Persist"
 Issues = "https://github.com/borjamoskv/Cortex-Persist/issues"
 Changelog = "https://github.com/borjamoskv/Cortex-Persist/releases"
@@ -86,6 +86,7 @@ billing = [
 cloud = [
     "asyncpg>=0.29",
     "redis>=5.0",
+    "rq>=1.16",
     "qdrant-client>=1.9",
 ]
 trends = [

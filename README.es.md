@@ -97,7 +97,7 @@ asyncio.run(main())
 
 - [**Arquitectura**](docs/architecture.md) — Sellos Merkle y encadenamiento de hash.
 - [**Seguridad y Confianza**](docs/SECURITY_TRUST_MODEL.md) — Invariantes criptográficas.
-- [**Tecnologías Nativas de CORTEX**](src/content/docs/CORTEX-NATIVE-TECHNOLOGIES.md) — Definición canónica de las cinco tecnologías exclusivas del sistema.
+- [**Tecnologías Nativas de CORTEX**](https://cortexpersist.com/docs/cortex-native-technologies) — Definición canónica de las cinco tecnologías exclusivas del sistema.
 - [**Referencia de API**](docs/api.md) — Documentación completa de SDK y CLI.
 - [**Enterprise Readiness**](ENTERPRISE_READINESS.md) — Estado actual, límites y plan de evaluación.
 - [**Due Diligence Checklist**](DUE_DILIGENCE_CHECKLIST.md) — Checklist reproducible para compradores y equipos técnicos.
@@ -114,7 +114,7 @@ CORTEX no solo tiene módulos; también compone cinco tecnologías propias sobre
 4. **Sagas de Integridad Autónoma**: hace que cada mutación no trivial sea abortable, compensable y reversible.
 5. **Autopoiesis Verificada de Agentes**: permite que los agentes sinteticen lógica nueva bajo aislamiento y validación.
 
-La definición técnica y el mapeo a módulos reales viven en [Tecnologías Nativas de CORTEX](src/content/docs/CORTEX-NATIVE-TECHNOLOGIES.md).
+La definición técnica y el mapeo a módulos reales viven en [Tecnologías Nativas de CORTEX](https://cortexpersist.com/docs/cortex-native-technologies).
 
 ---
 

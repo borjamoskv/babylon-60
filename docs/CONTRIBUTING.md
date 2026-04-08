@@ -2,9 +2,9 @@
 
 This file exists as a stable GitHub-facing path for contribution workflow review.
 
-The canonical long-form contributor guide currently lives at:
+The canonical long-form contributor guide now lives at:
 
-- [src/content/docs/CONTRIBUTING.md](../src/content/docs/CONTRIBUTING.md)
+- [https://cortexpersist.com/docs/contributing](https://cortexpersist.com/docs/contributing)
 
 Pair it with:
 

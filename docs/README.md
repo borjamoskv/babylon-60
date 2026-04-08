@@ -2,7 +2,7 @@
 
 This `docs/` directory is a GitHub-facing compatibility shim for technical review, procurement workflows, and due-diligence checklists.
 
-The canonical source of truth is [`src/content/docs`](../src/content/docs). Do not start long-form documentation edits in `docs/`; these files exist to preserve stable repo-root entrypoints for evaluators and older links.
+The canonical source of truth now lives on the dedicated docs surface at [`https://cortexpersist.com/docs`](https://cortexpersist.com/docs). Do not start long-form documentation edits in `docs/`; these files exist to preserve stable repo-root entrypoints for evaluators and older links.
 
 ## Core Entry Points
 

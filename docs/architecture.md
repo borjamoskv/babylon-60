@@ -2,9 +2,9 @@
 
 This file exists as a stable GitHub-facing path for architecture review.
 
-The canonical long-form architecture document currently lives at:
+The canonical long-form architecture document now lives at:
 
-- [src/content/docs/architecture.md](../src/content/docs/architecture.md)
+- [https://cortexpersist.com/docs/architecture](https://cortexpersist.com/docs/architecture)
 
 Start there for:
 

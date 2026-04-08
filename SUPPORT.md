@@ -55,8 +55,8 @@ If you are evaluating CORTEX for regulated or high-stakes use, review these docu
 - [VERSION_SUPPORT.md](VERSION_SUPPORT.md)
 - [RELEASE_PROCESS.md](RELEASE_PROCESS.md)
 - [MAINTAINERS.md](MAINTAINERS.md)
-- [src/content/docs/SECURITY_TRUST_MODEL.md](src/content/docs/SECURITY_TRUST_MODEL.md)
-- [src/content/docs/architecture.md](src/content/docs/architecture.md)
-- [src/content/docs/OPERATIONS.md](src/content/docs/OPERATIONS.md)
+- [https://cortexpersist.com/docs/security_trust_model](https://cortexpersist.com/docs/security_trust_model)
+- [https://cortexpersist.com/docs/architecture](https://cortexpersist.com/docs/architecture)
+- [https://cortexpersist.com/docs/operations](https://cortexpersist.com/docs/operations)
 
 Align commercial expectations explicitly before treating this repository as a managed platform commitment.

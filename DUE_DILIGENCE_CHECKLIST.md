@@ -146,8 +146,8 @@ Read these directories with extra scrutiny:
 
 Cross-check them against:
 
-- [src/content/docs/SECURITY_TRUST_MODEL.md](src/content/docs/SECURITY_TRUST_MODEL.md)
-- [src/content/docs/architecture.md](src/content/docs/architecture.md)
+- [https://cortexpersist.com/docs/security_trust_model](https://cortexpersist.com/docs/security_trust_model)
+- [https://cortexpersist.com/docs/architecture](https://cortexpersist.com/docs/architecture)
 - [DEPLOYMENT_HARDENING.md](DEPLOYMENT_HARDENING.md)
 
 ## 8. Capture Evaluation Notes

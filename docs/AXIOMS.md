@@ -2,9 +2,9 @@
 
 This file exists as a stable GitHub-facing path for the project's foundational axioms.
 
-The canonical long-form document currently lives at:
+The canonical long-form document now lives at:
 
-- [src/content/docs/AXIOMS.md](../src/content/docs/AXIOMS.md)
+- [https://cortexpersist.com/docs/axioms](https://cortexpersist.com/docs/axioms)
 
 Start there for:
 

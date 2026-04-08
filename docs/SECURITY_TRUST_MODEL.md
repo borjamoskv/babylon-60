@@ -2,9 +2,9 @@
 
 This file exists as a stable GitHub-facing path for the CORTEX trust model.
 
-The canonical long-form document currently lives at:
+The canonical long-form document now lives at:
 
-- [src/content/docs/SECURITY_TRUST_MODEL.md](../src/content/docs/SECURITY_TRUST_MODEL.md)
+- [https://cortexpersist.com/docs/security_trust_model](https://cortexpersist.com/docs/security_trust_model)
 
 Start there for:
 

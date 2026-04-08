@@ -2,9 +2,9 @@
 
 This file exists as a stable GitHub-facing path for API review.
 
-The canonical long-form document currently lives at:
+The canonical long-form document now lives at:
 
-- [src/content/docs/api.md](../src/content/docs/api.md)
+- [https://cortexpersist.com/docs/api](https://cortexpersist.com/docs/api)
 
 Start there for:
 
