@@ -10,16 +10,14 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import re
-import time
 from typing import Any
 
 from cortex.extensions.llm._models import CortexPrompt
 from cortex.extensions.llm.provider import LLMProvider
 from cortex.extensions.llm.router import CortexLLMRouter, IntentProfile
 from cortex.memory.encoder import AsyncEncoder
-from cortex.memory.models import CortexFactModel
+from cortex.memory.manager import CortexMemoryManager
 from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 from cortex.utils.pulmones import sovereign_circuit_breaker
 from cortex.utils.turboquant import optimize_vector_qjl
@@ -56,9 +54,37 @@ _SYNTHESIS_PROVIDERS: tuple[str, ...] = (
     "together",
     "openrouter",
 )
-
 encode_engine = AsyncEncoder()
 vector_db = SovereignVectorStoreL2(encoder=encode_engine)
+
+# Lazy singleton for memory manager
+_memory_manager: CortexMemoryManager | None = None
+
+def get_memory_manager() -> CortexMemoryManager:
+    """Lazy-init the sovereign memory manager (Ω9)."""
+    global _memory_manager
+    if _memory_manager is not None:
+        return _memory_manager
+
+    # Avoid module-level expensive imports or side-effects
+    from cortex.memory.ledger import EventLedgerL3
+    from cortex.memory.working import WorkingMemoryL1
+    
+    # Check if a global manager is available from context
+    # In a real engine run, this would be injected.
+    # For now, we create a 'Skill-Native' one.
+    l1 = WorkingMemoryL1()
+    # Ω9: We use a Null or ephemeral ledger if no DB connection is provided
+    # However, to be 'Estanca', we should ideally have a real dev ledger.
+    l3 = EventLedgerL3(None)  # type: ignore
+    
+    _memory_manager = CortexMemoryManager(
+        l1=l1, 
+        l2=vector_db, 
+        l3=l3, 
+        encoder=encode_engine
+    )
+    return _memory_manager
 
 # Lazy singleton — built on first use
 _synthesis_router: CortexLLMRouter | None = None
@@ -275,29 +301,31 @@ async def execute_cognitive_synthesis(
         base_embedding = await encode_engine.encode(memo_content)
 
     # Inyección Axioma Ω₂ + TurboQuant (arXiv:2504.19874)
-    final_embedding = optimize_vector_qjl(base_embedding, bits=3.5)
+    optimize_vector_qjl(base_embedding, bits=3.5)
 
-    memo_id = f"MEMO_{os.urandom(4).hex().upper()}"
-    fact = CortexFactModel(
-        id=memo_id,
-        tenant_id="sovereign",
-        project_id="autodidact_knowledge",
+    # ── MEMORY STORAGE VIA UNIFIED MANAGER (Ω9) ──
+    manager = get_memory_manager()
+    memo_id_result = await manager.store(
         content=memo_content,
-        embedding=final_embedding,
-        timestamp=time.time(),
-        is_diamond=True,
-        confidence="C5",
-        cognitive_layer="semantic",
+        project_id="autodidact_knowledge",
+        tenant_id="sovereign",
+        layer="semantic",
         metadata={
             "source": source,
             "tier": "sovereign_distilled",
             "entities": entities,
+            "subject": entities[0] if entities else "unknown",
             "resonancia": resonancia,
             "quantization": "turboquant_3.5b_qjl",
             "compression_ratio": "absolute_neutrality_zero_indexing",
         },
+        parent_decision_id=None,
+        is_diamond=True
     )
 
-    await vector_db.memorize(fact)
-    logger.info("✨ Singularidad Cognitiva grabada: %s", memo_id)
-    return memo_id
+    if "conflict" in memo_id_result.lower():
+        logger.error("🛑 [EPISTEMIC SHOCK] Conflict detected during storage: %s", memo_id_result)
+        return f"REJECTED_EPISTEMIC_CONTRADICTION: {memo_id_result}"
+
+    logger.info("✨ Singularidad Cognitiva grabada: %s", memo_id_result)
+    return memo_id_result

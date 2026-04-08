@@ -21,6 +21,9 @@ class VerificationResult:
     violations: list[dict[str, Any]] = field(default_factory=list)
     proof_certificate: Optional[str] = None
     counterexample: Optional[dict[str, Any]] = None
+    exit_code: int = 0
+    runtime_status: str = "SUCCESS"  # SUCCESS, FAILURE, QUARANTINED
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class SovereignVerifier:
@@ -78,3 +81,30 @@ class SovereignVerifier:
         # For this version, if no AST heuristics triggered, we consider it safe.
 
         return VerificationResult(is_valid=True, proof_certificate="Z3_UNSAT_BY_AST_PROXIMAL")
+
+    def verify_runtime(self, command_id: str, status: dict[str, Any]) -> VerificationResult:
+        """Analyze the runtime outcome of a command against C5-REAL standards."""
+        exit_code = status.get("exit_code", 0)
+        stdout = status.get("stdout", "")
+        stderr = status.get("stderr", "")
+        
+        logger.info("Verifying runtime for command %s (exit_code: %s)...", command_id, exit_code)
+        
+        # Rule Ω6: Non-zero exit code on P0 paths forces quarantine
+        if exit_code != 0:
+            logger.warning("☣️  Runtime FAILURE detected (exit: %s). Quarantining logic.", exit_code)
+            return VerificationResult(
+                is_valid=False,
+                exit_code=exit_code,
+                runtime_status="QUARANTINED",
+                violations=[{"id": "V-ERR-01", "name": "Runtime Error", "message": stderr or "Unknown execution failure"}],
+                metadata={"command_id": command_id, "stdout": stdout, "stderr": stderr}
+            )
+            
+        return VerificationResult(
+            is_valid=True,
+            exit_code=0,
+            runtime_status="SUCCESS",
+            proof_certificate=f"RUNTIME_VERIFIED:{command_id}",
+            metadata={"stdout": stdout}
+        )

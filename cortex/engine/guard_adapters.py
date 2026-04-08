@@ -100,17 +100,27 @@ class VerifierGuardAdapter:
         *,
         tenant_id: str = "default",
     ) -> None:
-        if fact_type != "code":
-            return
         from cortex.verification.verifier import SovereignVerifier
+        verifier = SovereignVerifier()
 
-        result = SovereignVerifier().check(content, context={"project": project})
-        if not result.is_valid:
-            violation_names = [v.get("name", "unknown") for v in result.violations]
-            raise ValueError(
-                f"[AX-II] Formal verification failed: {violation_names}. "
-                f"Counterexample: {result.counterexample}"
-            )
+        # 1. Static Verification for 'code' paths
+        if fact_type == "code":
+            result = verifier.check(content, context={"project": project})
+            if not result.is_valid:
+                violation_names = [v.get("name", "unknown") for v in result.violations]
+                raise ValueError(
+                    f"[AX-II] Formal verification failed: {violation_names}. "
+                    f"Counterexample: {result.counterexample}"
+                )
+
+        # 2. Dynamic Runtime Verification for executed sequences (Ω6 Law)
+        if "exit_code" in meta or fact_type == "execution":
+            result = verifier.verify_runtime(meta.get("command_id", "unknown"), meta)
+            if not result.is_valid:
+                raise ValueError(
+                    f"[AX-II] Runtime verification failed (exit code {result.exit_code}, QUARANTINED): "
+                    f"{result.violations}"
+                )
 
 
 class ExergyGuardAdapter:

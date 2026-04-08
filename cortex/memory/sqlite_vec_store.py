@@ -143,7 +143,9 @@ class SovereignVectorStoreL2:
                     quadrant TEXT DEFAULT 'ACTIVE',
                     storage_tier TEXT DEFAULT 'HOT',
                     facet_version INTEGER DEFAULT 2,
-                    exergy_score REAL DEFAULT 1.0
+                    exergy_score REAL DEFAULT 1.0,
+                    subject_hash TEXT DEFAULT '',
+                    is_conflict INTEGER DEFAULT 0
                 )
             """)
             if self._vector_enabled:
@@ -187,6 +189,8 @@ class SovereignVectorStoreL2:
                 ("storage_tier", "TEXT DEFAULT 'HOT'"),
                 ("facet_version", "INTEGER DEFAULT 2"),
                 ("exergy_score", "REAL DEFAULT 1.0"),
+                ("subject_hash", "TEXT DEFAULT ''"),
+                ("is_conflict", "INTEGER DEFAULT 0"),
             ]
 
             cursor = self._conn.execute(
@@ -407,8 +411,8 @@ class SovereignVectorStoreL2:
                         id, tenant_id, project_id, content, timestamp,
                         is_diamond, is_bridge, confidence, success_rate,
                         cognitive_layer, parent_decision_id, metadata, exergy_score,
-                        category, quadrant, storage_tier, facet_version
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        category, quadrant, storage_tier, facet_version, subject_hash, is_conflict
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         fact.id,
@@ -428,6 +432,8 @@ class SovereignVectorStoreL2:
                         fact.quadrant,
                         fact.storage_tier,
                         fact.facet_version,
+                        fact.subject_hash,
+                        int(fact.is_conflict),
                     ),
                 )
                 rowid = cursor.lastrowid

@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import logging
 import time
 import uuid
+from collections.abc import Iterable
 from datetime import datetime, timezone
 from typing import Any
 
@@ -81,6 +83,31 @@ def _resolve_manager_tenant(tenant_id: str | None, operation: str) -> str:
     return resolved
 
 
+import shutil
+import subprocess
+
+
+class NativeArbiter:
+    """Axiom Ω0: Direct-Silicon Bypass for Epistemic Integrity."""
+    def __init__(self, binary_path: str = "/Users/borjafernandezangulo/10_PROJECTS/Cortex-Persist/engine/cortex-core/target/release/cortex-db"):
+        self.binary_path = binary_path
+        self._available = shutil.which(self.binary_path) is not None
+
+    def check(self, subject_hash: str) -> str | None:
+        if not self._available:
+            return None
+        try:
+            res = subprocess.run(
+                [self.binary_path, "check", subject_hash],
+                capture_output=True, text=True, timeout=0.1
+            )
+            out = res.stdout.strip()
+            if out.startswith("CONFLICT:"):
+                return out.replace("CONFLICT:", "")
+            return None
+        except Exception:
+            return None
+
 class CortexMemoryManager:
     """Orchestrator for the Tripartite Cognitive Memory Architecture.
 
@@ -100,6 +127,8 @@ class CortexMemoryManager:
         "_l1",
         "_l2",
         "_l3",
+        "_continual_learning",
+        "_continual_training_backend",
         "_hdc",
         "_hdc_encoder",
         "_router",
@@ -118,6 +147,8 @@ class CortexMemoryManager:
         "_mem0_pipeline",
         "_memory_os",
         "graph_store",
+        "_global_writer",
+        "_arbiter",
     )
 
     DEFAULT_MAX_BG_TASKS: int = 100
@@ -128,21 +159,27 @@ class CortexMemoryManager:
         l2: VectorStoreL2,  # type: ignore[reportInvalidTypeForm]
         l3: EventLedgerL3,
         encoder: AsyncEncoder,
+        continual_learning: Any | None = None,
+        continual_training_backend: Any | None = None,
         hdc_l2: Any | None = None,
         hdc_encoder: Any | None = None,
         router: Any | None = None,
         bus: Any | None = None,
         max_bg_tasks: int = DEFAULT_MAX_BG_TASKS,
+        global_writer: Any | None = None,
     ) -> None:
         self._l1 = l1
         self._l2 = l2
         self._l3 = l3
         self._encoder = encoder
+        self._continual_learning = continual_learning
+        self._continual_training_backend = continual_training_backend
         self._hdc = hdc_l2
         self._hdc_encoder = hdc_encoder
         self._router = router
         self._bus = bus
         self._max_bg_tasks = max_bg_tasks
+        self._global_writer = global_writer
         self._bg_queue: asyncio.Queue[tuple[list, str, str, str]] = asyncio.Queue(
             maxsize=max_bg_tasks
         )
@@ -168,7 +205,41 @@ class CortexMemoryManager:
         if self._dynamic_space:
             self._dynamic_space.start()
         self._fusion = ContextFusion(judge_provider=router) if ContextFusion else None
+        self._arbiter = NativeArbiter()
         self._start_bg_workers()
+
+    async def _should_elevate(self, tenant_id: str, metadata: dict) -> bool:
+        """Phase II: Elevation Policy. 
+        Only high-severity or system-level conflicts cross the bridge.
+        """
+        if tenant_id == "system":
+            return True
+        severity = metadata.get("severity", "LOW")
+        return severity in ("HIGH", "CRITICAL", "EMERGENCY")
+
+    async def _propagate_conflict(self, event: Any, tenant_id: str, project_id: str):
+        """Bridge L3 -> Global Ledger based on policy."""
+        if not self._global_writer:
+            return
+            
+        if await self._should_elevate(tenant_id, event.metadata):
+            logger.info("🌉 [BRIDGE] Elevating conflict event %s to global ledger.", event.event_id)
+            from cortex.ledger.models import ActionResult, ActionTarget, LedgerEvent
+            
+            global_event = LedgerEvent.new(
+                tool="memory:manager",
+                actor="system:epistemic_guard",
+                action="CONFLICT_DETECTION",
+                target=ActionTarget(identifier=event.metadata["subject_hash"], role="subject"),
+                result=ActionResult(ok=False, latency_ms=0, error="EPISTEMIC_CONFLICT"),
+                metadata={
+                    "memory_event_id": event.event_id,
+                    "tenant_id": tenant_id,
+                    "project_id": project_id,
+                    "subject_hash": event.metadata["subject_hash"]
+                }
+            )
+            self._global_writer.append(global_event)
 
     def _init_dynamic_space(self) -> Any | None:
         """Initialize semantic RAM if the optional module is healthy."""
@@ -233,6 +304,9 @@ class CortexMemoryManager:
 
     def _start_bg_workers(self) -> None:
         """Initialize persistent background workers for L2 compression."""
+        if self._bg_workers:
+            return
+            
         # 3 workers default, bounding the active compression coroutines to 3.
         num_workers = min(3, max(1, self._max_bg_tasks // 10))
         for i in range(num_workers):
@@ -306,39 +380,78 @@ class CortexMemoryManager:
                     self._max_bg_tasks,
                 )
 
+        if self._continual_learning is not None:
+            user_id = _meta.get("user_id", "unknown")
+            if not isinstance(user_id, str) or not user_id.strip():
+                user_id = "unknown"
+            try:
+                await asyncio.to_thread(
+                    self._continual_learning.on_interaction,
+                    tenant_id=tenant_id,
+                    user_id=user_id.strip(),
+                    text=content,
+                    trace_id=event.event_id,
+                    metadata={
+                        **_meta,
+                        "role": role,
+                    },
+                )
+            except (OSError, RuntimeError, TypeError, ValueError) as exc:
+                logger.warning("Continual learning sidecar skipped interaction %s: %s", event.event_id, exc)
+
         return event
 
     async def _check_deduplication(
-        self, tenant_id: str, project_id: str, content: str
-    ) -> str | None:
-        """Return deduplicated ID if fact exists, else None (async)."""
+        self, tenant_id: str, project_id: str, content: str, subject_hash: str
+    ) -> dict[str, str | None]:
+        """Check for exact match or epistemological conflicts.
+
+        Returns:
+            dict: { "status": "new"|"redundant"|"conflict", "id": str|None }
+        """
         if not content or not content.strip():
-            logger.warning("CortexMemoryManager: Rejected empty fact pipeline.")
-            return "empty"
+            return {"status": "empty", "id": None}
 
-        if self._l2 and hasattr(self._l2, "_get_conn"):
+        # --- Axiom Ω0: Native Hardware Bypass ---
+        if native_conflict := self._arbiter.check(subject_hash):
+            logger.info("⚡ [SILICON-HIT] native conflict detection for %s", subject_hash)
+            return {"status": "conflict", "id": "native:conflict", "content": native_conflict}
 
-            def _sync_dedup():
-                try:
-                    conn = self._l2._get_conn()
-                    cursor = conn.cursor()
+        if not self._l2 or not hasattr(self._l2, "_get_conn"):
+            return {"status": "new", "id": None}
+
+        def _sync_check():
+            try:
+                conn = self._l2._get_conn()
+                cursor = conn.cursor()
+                # Axiom Ω8: Resolve correct domain table
+                meta_tb, *_ = self._l2._get_domain_tables(conn, tenant_id, project_id)
+                
+                # 1. Exact Match (Redundancy)
+                cursor.execute(
+                    f"SELECT id FROM {meta_tb} WHERE tenant_id = ? AND "
+                    "project_id = ? AND content = ?",
+                    (tenant_id, project_id, content),
+                )
+                row = cursor.fetchone()
+                if row:
+                    return {"status": "redundant", "id": str(row["id"])}
+
+                # 2. Conflict Match (Same subject, different content)
+                if subject_hash:
                     cursor.execute(
-                        "SELECT id FROM facts_meta WHERE tenant_id = ? AND "
-                        "project_id = ? AND content = ?",
-                        (tenant_id, project_id, content),
+                        f"SELECT id FROM {meta_tb} WHERE tenant_id = ? AND "
+                        "project_id = ? AND subject_hash = ? LIMIT 1",
+                        (tenant_id, project_id, subject_hash),
                     )
                     row = cursor.fetchone()
                     if row:
-                        return str(row["id"])
-                except (OSError, RuntimeError, ValueError) as e:
-                    logger.warning("CortexMemoryManager: Deduplication check failed: %s", e)
-                return None
+                        return {"status": "conflict", "id": str(row["id"])}
+            except Exception as e:
+                logger.warning("CortexMemoryManager: Integrity check failed: %s", e)
+            return {"status": "new", "id": None}
 
-            dedup_id = await asyncio.to_thread(_sync_dedup)
-            if dedup_id:
-                logger.info("CortexMemoryManager: Fact deduplicated (exact match).")
-                return dedup_id
-        return None
+        return await asyncio.to_thread(_sync_check)
 
     def _determine_layer(self, project_id: str, layer: str) -> str:
         """Determine cognitive layer based on project ID semantic rules."""
@@ -379,6 +492,11 @@ class CortexMemoryManager:
         )
         return fact_id
 
+    def _extract_subject(self, content: str, metadata: dict | None) -> str:
+        if metadata and "subject" in metadata:
+            return str(metadata["subject"])
+        return content.strip().lower() # Default to content hash if no subject provided
+
     async def store(
         self,
         tenant_id: str | None = None,
@@ -389,6 +507,7 @@ class CortexMemoryManager:
         layer: str = "semantic",
         parent_decision_id: str | int | None = None,
         use_bus: bool = False,
+        is_diamond: bool = False,
     ) -> str:
         """Directly persist a high-value fact to L2 memory layers.
 
@@ -429,9 +548,38 @@ class CortexMemoryManager:
                 logger.debug("notch_ws unavailable (FastAPI not installed), skipping notification")
             return f"filtered:{action}"
 
-        dedup_id = await self._check_deduplication(tenant_id, project_id, content)
-        if dedup_id:
-            return f"filtered:{dedup_id}" if dedup_id == "empty" else f"deduplicated:{dedup_id}"
+        # ── Epistemological Integrity Gate (Ω9) ─────────────
+        subject = self._extract_subject(content, metadata)
+        subject_hash = hashlib.sha256(subject.encode()).hexdigest()
+
+        check = await self._check_deduplication(tenant_id, project_id, content, subject_hash)
+        
+        if check["status"] == "redundant":
+            return f"deduplicated:{check['id']}"
+        
+        is_conflict = (check["status"] == "conflict")
+        if is_conflict:
+            logger.error("☣️ [CONFLICTO] Epistemología divergente detectada para hash %s", subject_hash)
+            
+            # Axiom Ω9: Immutable record of truth collision in L3
+            from cortex.memory.models import MemoryEvent
+            conflict_event = MemoryEvent(
+                role="system",
+                content=f"EPISTEMIC_CONFLICT: {content}",
+                session_id=project_id, # Link to project lineage
+                tenant_id=tenant_id,
+                token_count=0,
+                metadata={
+                    "type": "epistemic_conflict",
+                    "subject_hash": subject_hash,
+                    "existing_id": check["id"],
+                    "attempted_content": content,
+                    **(metadata or {})
+                }
+            )
+            await self._l3.append_event(conflict_event)
+            await self._propagate_conflict(conflict_event, tenant_id, project_id)
+            return f"filtered:conflict:{check['id']}"
 
         _meta = metadata or {}
         if "confidence_score" not in _meta:
@@ -456,6 +604,9 @@ class CortexMemoryManager:
             metadata=_meta,
             cognitive_layer=adjusted_layer,  # type: ignore[reportArgumentType]
             parent_decision_id=int(parent_decision_id) if parent_decision_id is not None else None,
+            subject_hash=subject_hash,
+            is_conflict=is_conflict,
+            is_diamond=is_diamond
         )
 
         if self._resonance_gate is None:
@@ -477,6 +628,22 @@ class CortexMemoryManager:
         if self._hdc:
             await self._hdc.memorize(engram, fact_type=fact_type)
 
+        # Axiom Ω9: Immutable record of successful assimilation in L3
+        from cortex.memory.models import MemoryEvent
+        success_event = MemoryEvent(
+            role="system",
+            content=f"ASSIMILATED: {engram.content}",
+            session_id=engram.project_id,
+            tenant_id=engram.tenant_id,
+            token_count=0,
+            metadata={
+                "type": "assimilation",
+                "fact_id": engram.id,
+                "subject_hash": engram.subject_hash
+            }
+        )
+        await self._l3.append_event(success_event)
+
         return engram.id
 
     async def reconcile_experience(self, signal: Any) -> str:
@@ -493,6 +660,88 @@ class CortexMemoryManager:
             metadata=payload.get("metadata", {}),
             layer=payload.get("layer", "semantic"),
             use_bus=False,
+        )
+
+    async def plan_continual_update(
+        self,
+        *,
+        tenant_id: str | None,
+        domain: str,
+        policy_violation: bool = False,
+    ) -> Any | None:
+        """Return a continual-learning update plan when the sidecar is enabled."""
+        tenant_id = _resolve_manager_tenant(tenant_id, "plan_continual_update")
+        if self._continual_learning is None:
+            return None
+        return await asyncio.to_thread(
+            self._continual_learning.plan_micro_update,
+            tenant_id=tenant_id,
+            domain=domain,
+            policy_violation=policy_violation,
+        )
+
+    async def continual_learning_status(
+        self,
+        *,
+        tenant_id: str | None,
+        domain: str | None = None,
+    ) -> dict[str, Any]:
+        """Return a tenant-scoped status view of the continual-learning sidecar."""
+        tenant_id = _resolve_manager_tenant(tenant_id, "continual_learning_status")
+        if domain is not None and not domain.strip():
+            raise ValueError("continual_learning_status requires non-blank domain")
+        if self._continual_learning is None:
+            return {
+                "enabled": False,
+                "tenant_id": tenant_id,
+                "domain": domain.strip() if domain is not None else None,
+                "backend_configured": self._continual_training_backend is not None,
+            }
+        status = await asyncio.to_thread(
+            self._continual_learning.status,
+            tenant_id=tenant_id,
+            domain=domain,
+        )
+        status["backend_configured"] = self._continual_training_backend is not None
+        return status
+
+    async def execute_continual_update(
+        self,
+        *,
+        tenant_id: str | None,
+        domain: str,
+        policy_violation: bool = False,
+        critical_domains: Iterable[str] = (),
+    ) -> Any | None:
+        """Execute a continual-learning micro-update when a backend is configured."""
+        tenant_id = _resolve_manager_tenant(tenant_id, "execute_continual_update")
+        if self._continual_learning is None or self._continual_training_backend is None:
+            return None
+        return await asyncio.to_thread(
+            self._continual_learning.execute_micro_update,
+            tenant_id=tenant_id,
+            domain=domain,
+            backend=self._continual_training_backend,
+            policy_violation=policy_violation,
+            critical_domains=tuple(critical_domains),
+        )
+
+    async def forget_continual_memory(
+        self,
+        *,
+        tenant_id: str | None,
+        user_id: str,
+        query: str,
+    ) -> dict[str, Any] | None:
+        """Propagate a selective forgetting request to the continual-learning sidecar."""
+        tenant_id = _resolve_manager_tenant(tenant_id, "forget_continual_memory")
+        if self._continual_learning is None:
+            return None
+        return await asyncio.to_thread(
+            self._continual_learning.forget,
+            tenant_id=tenant_id,
+            user_id=user_id,
+            query=query,
         )
 
     async def assemble_context(

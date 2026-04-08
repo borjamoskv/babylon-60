@@ -81,6 +81,7 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset(
         "cortex/cli/doctor_cmds.py",
         "cortex/engine/capabilities.py",
         "cortex/extensions/health/trend.py",
+        "cortex/memory/l2_hybrid_search.py",  # Hybrid setup needs clean sync connect to avoid extension conflict
     }
 )
 

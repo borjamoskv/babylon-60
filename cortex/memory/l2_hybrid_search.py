@@ -154,24 +154,31 @@ class L2HybridSearch:
     def ensure_fts_table(self) -> None:
         """Create FTS5 mirror table for facts_meta if not present.
 
-        Creates:
-            - `facts_meta_fts`: FTS5 virtual table mirroring `content` + `id`
-            - Triggers to keep mirror in sync with facts_meta inserts/deletes/updates
+        Uses a *separate* clean connection to the same DB file (without
+        sqlite_vec loaded) to avoid the FTS5/vec0 extension constructor
+        conflict that occurs on the same connection handle.
 
         Safe to call multiple times (idempotent).
         """
-        conn = self._store._get_conn()
+        db_path = str(self._store._db_path)
+        # Open a plain connection — NO sqlite_vec, no enable_load_extension
         try:
-            conn.execute(f"""
+            clean_conn = sqlite3.connect(db_path, check_same_thread=False, timeout=5.0)
+            clean_conn.execute("PRAGMA journal_mode=WAL;")
+        except sqlite3.Error as e:
+            logger.error("L2HybridSearch: Could not open clean connection for FTS5 setup: %s", e)
+            raise
+
+        try:
+            clean_conn.execute(f"""
                 CREATE VIRTUAL TABLE IF NOT EXISTS {FTS_TABLE} USING fts5(
                     content,
-                    id UNINDEXED,
-                    tokenize='unicode61 remove_diacritics 2'
+                    id UNINDEXED
                 )
             """)
 
             # Insert trigger — populate FTS on new facts_meta rows
-            conn.execute(f"""
+            clean_conn.execute(f"""
                 CREATE TRIGGER IF NOT EXISTS facts_meta_fts_insert
                 AFTER INSERT ON {META_TABLE}
                 BEGIN
@@ -181,7 +188,7 @@ class L2HybridSearch:
             """)
 
             # Delete trigger — remove FTS entries when facts_meta row deleted
-            conn.execute(f"""
+            clean_conn.execute(f"""
                 CREATE TRIGGER IF NOT EXISTS facts_meta_fts_delete
                 AFTER DELETE ON {META_TABLE}
                 BEGIN
@@ -190,7 +197,7 @@ class L2HybridSearch:
             """)
 
             # Update trigger — refresh FTS when content changes
-            conn.execute(f"""
+            clean_conn.execute(f"""
                 CREATE TRIGGER IF NOT EXISTS facts_meta_fts_update
                 AFTER UPDATE OF content ON {META_TABLE}
                 BEGIN
@@ -201,19 +208,21 @@ class L2HybridSearch:
             """)
 
             # Backfill: populate FTS for any pre-existing rows
-            conn.execute(f"""
+            clean_conn.execute(f"""
                 INSERT OR IGNORE INTO {FTS_TABLE}(rowid, content, id)
                 SELECT rowid, content, id FROM {META_TABLE}
                 WHERE content IS NOT NULL
             """)
 
-            conn.commit()
+            clean_conn.commit()
             logger.info("L2HybridSearch: FTS5 mirror table '%s' ensured.", FTS_TABLE)
 
         except sqlite3.Error as e:
-            conn.rollback()
+            clean_conn.rollback()
             logger.error("L2HybridSearch: FTS5 table setup failed: %s", e)
             raise
+        finally:
+            clean_conn.close()
 
     # ─── Branch: Vector KNN ───────────────────────────────────────────────────
 
