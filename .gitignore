@@ -91,6 +91,11 @@ Thumbs.db
 
 # ── Generated / Scratch ──────────────────────────
 .scratch/
+bounty/
+bounty_hunt/
+cortex-sdk/
+cortex_mev_base/
+docs_backup/
 tmp/
 ouroboros-matrix/node_modules/
 engine-c5/fuzzer-cache/

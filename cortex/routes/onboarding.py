@@ -81,7 +81,7 @@ async def signup(req: SignupRequest) -> SignupResponse:
         tenant_id=req.email,
         plan="free",
         calls_limit=plan_info["calls_limit"],
-        quickstart_url="https://github.com/borjamoskv/Cortex-Persist/blob/main/docs/quickstart.md",
+        quickstart_url="https://cortexpersist.com/docs/quickstart",
         message=f"Welcome, {req.name}! Your free-tier API key is ready. "
         "Store it securely — it won't be shown again.",
     )

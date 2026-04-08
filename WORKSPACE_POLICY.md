@@ -1,20 +1,58 @@
-# CORTEX WORKSPACE AXIOMS (Topología de Ejecución)
+# CORTEX Workspace Policy
 
-> "Un sistema colapsa por la fuga silenciosa de contexto entre sus nodos. El aislamiento del workspace no es una sugerencia organizativa; es contención entrópica."
+> El core de CORTEX no puede volver a operar como cajon de sastre. Este archivo fija el source of truth y separa core, docs, marketing, backups y rescues.
 
-## 1. Vector Causal Primario (Default)
-Toda tarea referida a CORTEX se ejecuta sobre el nodo primario, salvo desviación explícita.
-`Target`: `/Users/borjafernandezangulo/30_CORTEX`
+## 1. Canon Primario
 
-## 2. Bifurcaciones Deterministas (Event Horizons)
-El desvío del Vector Primario obedece estrictamente a estas condiciones innegociables:
-- **Condición**: Intervención explícita sobre `codex_router`.
-  `Target`: `/Users/borjafernandezangulo/Desktop/LinkAgents/codex_router`
-- **Condición**: Orquestación supra-modular (integración entre múltiples subsistemas).
-  `Target`: `/Users/borjafernandezangulo/Desktop/LinkAgents`
-- **Condición**: Intervención explícita sobre la rama estabilizada del oráculo (`main`).
-  `Target`: `/Users/borjafernandezangulo/Desktop/LinkAgents/Cortex-Persist`
+Toda tarea de desarrollo de CORTEX se ejecuta por defecto en:
 
-## 3. Barrera de Entropía (P0 - Hard Violation)
-Queda estrictamente prohibida la fragmentación de una misma modificación causal entre la variante activa (`30_CORTEX`) y la variante en red (`LinkAgents`).
-La ejecución fragmentada sin sincronización de Ledger genera *ruido termal* y divergencia irreversible. Una tarea completa todo su ciclo de vida dentro del mismo vector físico asignado.
+`/Users/borjafernandezangulo/30_CORTEX`
+
+Este directorio es el unico source of truth del producto.
+
+## 2. Repos Satelite Permitidos
+
+Estos repos existen, pero no son canon del core:
+
+- `Docs`: `/Users/borjafernandezangulo/30_CORTEX_DOCS`
+- `Marketing / landing`: `/Users/borjafernandezangulo/cortexpersist-landing`
+- `Profile`: `/Users/borjafernandezangulo/borjamoskv`
+- `Proyecto separado`: `/Users/borjafernandezangulo/antigravity`
+
+Cuando una tarea pertenezca claramente a uno de esos dominios, se trabaja alli. No se replica la misma modificacion causal entre el core y un repo satelite.
+
+## 3. Zonas No Canonicas
+
+Estas rutas no deben usarse como base de desarrollo normal:
+
+- `Backup`: `/Users/borjafernandezangulo/30_CORTEX_BACKUP`
+- `Worktree experimental`: `/Users/borjafernandezangulo/30_CORTEX-head`
+- `Rescues`: `/Users/borjafernandezangulo/10_PROJECTS/cortex-rescues`
+- `Quarantine`: `/Users/borjafernandezangulo/90_REPO_RESCUE`
+- `Runtime state`: `/Users/borjafernandezangulo/.cortex`
+- `Home root`: `/Users/borjafernandezangulo`
+
+La antigua ruta `LinkAgents/Cortex-Persist` queda invalidada y no debe volver a usarse como checkout operativo.
+
+## 4. Fronteras de Repositorio
+
+El repo canon `30_CORTEX` no debe volver a contener:
+
+- repos Git anidados
+- worktrees ajenos al propio repo
+- backups documentales mezclados con source of truth
+- research/bounties fuera del scope del core
+- shells de marketing o snapshots web
+- SDKs paralelos que dupliquen `sdks/`
+
+Toda nueva superficie de ese tipo debe vivir en un repo hermano bajo `10_PROJECTS`, en `30_CORTEX_DOCS`, en `cortexpersist-landing` o en `90_REPO_RESCUE`, segun corresponda.
+
+## 5. Regla Operativa
+
+Una tarea completa vive en un solo vector fisico:
+
+- elegir el repo correcto al inicio
+- no repartir la misma tarea entre clones del mismo producto
+- no usar backups, rescues o mirrors como canon de facto
+
+Si una ruta no esta claramente clasificada, se detiene la tarea y se decide primero su ownership.

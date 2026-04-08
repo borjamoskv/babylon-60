@@ -17,9 +17,9 @@
 [![Coverage](https://codecov.io/gh/borjamoskv/Cortex-Persist/branch/main/graph/badge.svg)](https://codecov.io/gh/borjamoskv/Cortex-Persist)
 ![Signed](https://img.shields.io/badge/releases-sigstore%20signed-2FAF64.svg)
 ![Security](https://img.shields.io/badge/scan-trivy%20%2B%20pip--audit-blue.svg)
-[![Docs](https://img.shields.io/badge/docs-github-brightgreen)](https://github.com/borjamoskv/Cortex-Persist/tree/main/docs)
+[![Docs](https://img.shields.io/badge/docs-cortexpersist.com%2Fdocs-brightgreen)](https://cortexpersist.com/docs)
 [![Website](https://img.shields.io/badge/web-cortexpersist.com-blue)](https://cortexpersist.com)
-[![Cross-Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue)](docs/cross_platform_guide.md)
+[![Cross-Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue)](https://cortexpersist.com/docs/cross_platform_guide)
 
 ---
 
@@ -201,7 +201,7 @@ block-beta
   INTERFACES --> GATEWAY --> STORAGE --> TRUST
 ```
 
-> 完整架构详见 [ARCHITECTURE.md](docs/ARCHITECTURE.md)。
+> 完整架构详见 [architecture](https://cortexpersist.com/docs/architecture)。
 
 ---
 
@@ -226,7 +226,7 @@ CORTEX 无需 Docker 即可在任何环境原生运行：
 - **Linux**（systemd 和 notify-send）
 - **Windows**（任务计划程序和 PowerShell）
 
-详见[跨平台指南](docs/cross_platform_guide.md)。
+详见[跨平台指南](https://cortexpersist.com/docs/cross_platform_guide)。
 
 ---
 

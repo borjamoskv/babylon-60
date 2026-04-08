@@ -413,6 +413,19 @@ async def check_gate_21_preservation(
     # 1. Pre-push hook — skip in CI (hook is a local dev-machine invariant)
     _in_ci = os.environ.get("CI", "").lower() in ("true", "1", "yes")
     hook = ROOT_DIR / ".git" / "hooks" / "pre-push"
+    try:
+        hook_result = subprocess.run(
+            ["git", "rev-parse", "--git-path", "hooks/pre-push"],
+            cwd=str(ROOT_DIR),
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        if hook_result.returncode == 0:
+            resolved_hook = Path(hook_result.stdout.strip())
+            hook = resolved_hook if resolved_hook.is_absolute() else ROOT_DIR / resolved_hook
+    except (OSError, subprocess.SubprocessError):
+        pass
     if _in_ci:
         printer.warn("CI env detected — pre-push hook check skipped (local invariant).")
         checks.append("pre-push hook (CI skip)")

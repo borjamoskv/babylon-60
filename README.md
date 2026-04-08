@@ -24,7 +24,7 @@
 </p>
 
 <p align="center">
-  <a href="#quickstart">Quickstart</a> · <a href="docs/api.md">API</a> · <a href="docs/SECURITY_TRUST_MODEL.md">Security Model</a> · <a href="ROADMAP.md">Roadmap</a> · <a href="CONTRIBUTING.md">Contributing</a>
+  <a href="#quickstart">Quickstart</a> · <a href="https://cortexpersist.com/docs/api">API</a> · <a href="https://cortexpersist.com/docs/security_trust_model">Security Model</a> · <a href="ROADMAP.md">Roadmap</a> · <a href="CONTRIBUTING.md">Contributing</a>
 </p>
 
 ---
@@ -40,7 +40,7 @@ CORTEX is trust infrastructure for AI agents. It sits between your runtime and y
 | **Compliance Proof** | Requires manual reconstruction | **O(1) Portable JSON Audit Packs** |
 | **Agent Liability** | Ambiguous context reconstruction | **Mathematically defensible lineage** |
 
-> Logs tell you what happened. CORTEX proves exactly what the agent knew, when it knew it, and mathematically guarantees the record hasn't been altered since. [**Review a real verification proof.**](docs/examples/audit_pack_evidence_demo.json)
+> Logs tell you what happened. CORTEX proves exactly what the agent knew, when it knew it, and mathematically guarantees the record hasn't been altered since.
 
 ## Use Cases
 
@@ -167,15 +167,15 @@ CORTEX is governed by a strict zero-trust philosophy regarding generative AI out
 - **SQL Sandboxing:** Agents cannot run arbitrary queries; mutations must pass through rigid schema validation and formal AST checkpoints.
 - **Tamper Evidence over Access Control:** Instead of just hoping admins don't edit rows, we hash-chain the ledger so any manual modification invalidates the mathematical proof of the memory thread.
 
-> Read the exhaustive cryptographic guarantees in our [Security & Trust Model](docs/SECURITY_TRUST_MODEL.md).
+> Read the exhaustive cryptographic guarantees in our [Security & Trust Model](https://cortexpersist.com/docs/security_trust_model).
 
 ---
 
 ## Documentation
 
-- [**Security & Trust Model**](docs/SECURITY_TRUST_MODEL.md) — Cryptographic invariants & guarantees.
+- [**Security & Trust Model**](https://cortexpersist.com/docs/security_trust_model) — Cryptographic invariants & guarantees.
 - [**Roadmap**](ROADMAP.md) — Deployment phases and scaling logic.
-- [**API Reference**](docs/api.md) — SDK primitives and REST endpoints.
+- [**API Reference**](https://cortexpersist.com/docs/api) — SDK primitives and REST endpoints.
 
 ---
 

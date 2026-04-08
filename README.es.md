@@ -80,9 +80,9 @@ asyncio.run(main())
 
 ### Documentación
 
-- [**Arquitectura**](docs/ARCHITECTURE.md) — Sellos Merkle y encadenamiento de hash.
-- [**Seguridad y Confianza**](docs/SECURITY_TRUST_MODEL.md) — Invariantes criptográficas.
-- [**Referencia de API**](docs/api.md) — Documentación completa de SDK y CLI.
+- [**Arquitectura**](https://cortexpersist.com/docs/architecture) — Sellos Merkle y encadenamiento de hash.
+- [**Seguridad y Confianza**](https://cortexpersist.com/docs/security_trust_model) — Invariantes criptográficas.
+- [**Referencia de API**](https://cortexpersist.com/docs/api) — Documentación completa de SDK y CLI.
 
 ---
 
