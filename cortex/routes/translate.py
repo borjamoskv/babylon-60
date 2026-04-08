@@ -7,12 +7,6 @@ from pydantic import BaseModel, Field
 
 from cortex.auth import AuthResult, require_permission
 
-try:
-    from google import genai  # type: ignore[attr-defined]
-    from google.genai import types
-except ImportError:
-    genai = None
-
 __all__ = ["router", "TranslateRequest", "TranslateResponse", "translate_texts"]
 
 router = APIRouter(prefix="/v1/translate", tags=["translate"])
@@ -44,7 +38,9 @@ class TranslateResponse(BaseModel):
 
 def _get_genai_client() -> Any:
     """Initialize and return the Gemini 2.0 client securely."""
-    if genai is None:
+    try:
+        from google import genai  # type: ignore[attr-defined]
+    except ImportError:
         raise HTTPException(status_code=500, detail="google-genai package is not installed.")
 
     try:
@@ -104,6 +100,11 @@ def _extract_usage(response) -> dict[str, int]:
 
 def _execute_translation(request: TranslateRequest, client: Any) -> TranslateResponse:
     """Core translation execute logic isolated from router wrapper."""
+    try:
+        from google.genai import types
+    except ImportError as exc:
+        raise HTTPException(status_code=500, detail="google-genai package is not installed.") from exc
+
     system_instruction = _build_system_instruction(request.context)
     prompt = f"Target languages: {request.target_languages}\n\nTexts to translate:\n{json.dumps(request.texts, ensure_ascii=False, indent=2)}"
 

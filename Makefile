@@ -1,4 +1,4 @@
-.PHONY: help install dev test lint format build serve docs deploy clean bench repo-health repo-health-all smoke-api
+.PHONY: help install dev test lint format build serve docs deploy clean bench repo-health repo-health-all smoke-api validate-phase3
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -33,6 +33,9 @@ repo-health-all: ## Check all tracked and untracked files for conflict markers a
 
 smoke-api: ## Smoke-check API import, engine init, and CLI help
 	python3 scripts/smoke_test_api.py
+
+validate-phase3: ## Fast phase-3 validation (ruff + py_compile + targeted pytest)
+	python3 scripts/validate_phase3.py
 
 format: ## Auto-format code
 	ruff format cortex/ tests/

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import sqlite3
 from typing import Any
@@ -27,6 +28,45 @@ class TransactionMixin(EngineMixinBase):
     state mutations (store, deprecate, quarantine, unquarantine).
     """
 
+    async def _get_or_create_ledger(self):
+        """Resolve the backing ledger from the live pool/connection."""
+        if getattr(self, "_ledger", None) is not None:
+            return self._ledger
+
+        from cortex.ledger import ImmutableLedger
+
+        backend = getattr(self, "_pool", None) or getattr(self, "_conn", None)
+        if backend is None:
+            async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+                backend = conn
+
+        self._ledger = ImmutableLedger(backend)
+        return self._ledger
+
+    def _schedule_checkpoint(self) -> None:
+        """Checkpoint out of band so writes don't block on Merkle batching."""
+        if getattr(self, "_ledger_checkpoint_task", None) is not None:
+            if not self._ledger_checkpoint_task.done():
+                return
+
+        self._ledger_checkpoint_task = asyncio.create_task(self._run_checkpoint())
+
+    async def _run_checkpoint(self) -> None:
+        """Best-effort checkpoint worker."""
+        try:
+            if getattr(self, "_ledger", None):
+                await self._ledger.create_checkpoint_async()
+        except (sqlite3.Error, OSError, RuntimeError, AttributeError) as e:
+            logger.warning("Auto-checkpoint failed: %s", e)
+            from cortex.telemetry.metrics import metrics
+
+            metrics.inc(
+                "cortex_ledger_checkpoint_failures_total",
+                meta={"error": str(e)},
+            )
+        finally:
+            self._ledger_checkpoint_task = None
+
     async def _log_transaction(
         self,
         conn: aiosqlite.Connection,
@@ -51,40 +91,20 @@ class TransactionMixin(EngineMixinBase):
         c = await conn.execute(
             "INSERT INTO transactions "
             "(tenant_id, project, action, detail, prev_hash, hash, timestamp) "
-            "VALUES (?, ?, ?, ?, COALESCE((SELECT hash FROM transactions "
-            "WHERE tenant_id = ? ORDER BY id DESC LIMIT 1), 'GENESIS'), ?, ?)",
-            (tenant_id, project, action, dj, tenant_id, th, ts),
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (tenant_id, project, action, dj, ph, th, ts),
         )
         tx_id = c.lastrowid
 
-        # Re-verify and update hash if prev_hash was different from our lookup
-        async with conn.execute("SELECT prev_hash FROM transactions WHERE id = ?", (tx_id,)) as cur:
-            row = await cur.fetchone()
-            actual_ph = row[0] if row else ph
-            if actual_ph != ph:
-                th = compute_tx_hash(actual_ph, project, action, dj, ts)
-                await conn.execute("UPDATE transactions SET hash = ? WHERE id = ?", (th, tx_id))
-
         if getattr(self, "_ledger", None):
-            try:
-                self._ledger.record_write()
-                await self._ledger.create_checkpoint_async()
-            except (sqlite3.Error, OSError, RuntimeError, AttributeError) as e:
-                logger.warning("Auto-checkpoint failed: %s", e)
-                from cortex.telemetry.metrics import metrics
-
-                metrics.inc(
-                    "cortex_ledger_checkpoint_failures_total",
-                    meta={"error": str(e)},
-                )
+            self._ledger.record_write()
+            batch_size = max(int(self._ledger.adaptive_batch_size), 1)
+            if tx_id is not None and int(tx_id) % batch_size == 0:
+                self._schedule_checkpoint()
 
         return int(tx_id) if tx_id is not None else 0
 
     async def verify_ledger(self) -> dict[str, Any]:
         """Verify the integrity of the sovereign ledger (Operation Void)."""
-        if not getattr(self, "_ledger", None):
-            from cortex.ledger import ImmutableLedger
-
-            # Pass the pool directly instead of a raw connection
-            self._ledger = ImmutableLedger(self.pool)
-        return await self._ledger.audit_integrity_async()
+        ledger = await self._get_or_create_ledger()
+        return await ledger.audit_integrity_async()

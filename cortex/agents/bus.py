@@ -65,10 +65,11 @@ class SqliteMessageBus:
     async def send(self, message: AgentMessage) -> None:
         """Enqueue a message for a specific recipient."""
         conn = await self._get_conn()
+        created_at = message.created_at.timestamp()
         async with self._lock:
             await conn.execute(
                 "INSERT INTO agent_messages (recipient, payload, created_at) VALUES (?, ?, ?)",
-                (message.recipient, message.to_json(), message.created_at),
+                (message.recipient, message.to_json(), created_at),
             )
             await conn.commit()
         logger.debug(
@@ -141,10 +142,11 @@ class SqliteMessageBus:
             correlation_id=message.correlation_id,
         )
         conn = await self._get_conn()
+        created_at = broadcast_msg.created_at.timestamp()
         async with self._lock:
             await conn.execute(
                 "INSERT INTO agent_messages (recipient, payload, created_at) VALUES (?, ?, ?)",
-                ("*", broadcast_msg.to_json(), broadcast_msg.created_at),
+                ("*", broadcast_msg.to_json(), created_at),
             )
             await conn.commit()
 

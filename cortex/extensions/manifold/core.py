@@ -8,7 +8,6 @@ from __future__ import annotations
 import asyncio
 import logging
 from pathlib import Path
-from typing import Optional
 
 from cortex.extensions.aether.models import AgentTask, TaskStatus
 from cortex.extensions.aether.tools import AgentToolkit
@@ -27,18 +26,12 @@ logger = logging.getLogger("cortex.extensions.manifold.core")
 class TesseractManifold:
     """The 4D Cognitive Manifold engine."""
 
-    def __init__(self, llm_provider: str = "qwen", agent_id: Optional[str] = None) -> None:
-        from cortex.extensions.agents.registry import AgentRegistry
+    def __init__(self, llm_provider: str = "qwen", agent_id: str | None = None) -> None:
+        from cortex.extensions.agents.registry import resolve_agent_runtime_config
         from cortex.extensions.llm.provider import LLMProvider
 
         self._llm = LLMProvider(provider=llm_provider)
-
-        system_prompt = None
-        if agent_id:
-            registry = AgentRegistry()
-            registry.load_all()
-            if agent_def := registry.get(agent_id):
-                system_prompt = agent_def.system_prompt
+        system_prompt = resolve_agent_runtime_config(agent_id).system_prompt
 
         self.d1 = PerceptionDimension()
         self.d2 = DecisionDimension(self._llm, system_prompt)

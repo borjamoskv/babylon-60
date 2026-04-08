@@ -18,6 +18,7 @@ import pytest
 
 from cortex.agents.base import BaseAgent
 from cortex.agents.bus import SqliteMessageBus
+from cortex.agents.contracts import TaskErrorPayload, TaskRequestPayload
 from cortex.agents.manifest import AgentManifest
 from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
 from cortex.agents.state import AgentStatus, WorkingMemory
@@ -57,8 +58,9 @@ class EchoAgent(BaseAgent):
     async def handle_message(self, message: AgentMessage) -> None:
         self.received.append(message)
         if message.kind == MessageKind.TASK_REQUEST:
-            await self.send_result(
+            await self.send_task_result(
                 message.sender,
+                "echo",
                 {"echo": message.payload},
                 correlation_id=message.correlation_id,
             )
@@ -120,6 +122,25 @@ class TestAgentMessage:
         assert restored.kind == MessageKind.TASK_REQUEST
         assert restored.payload["action"] == "verify"
         assert restored.correlation_id == "corr-1"
+
+    def test_payload_model_normalizes_to_dict(self):
+        msg = new_message(
+            sender="agent-a",
+            recipient="agent-b",
+            kind=MessageKind.TASK_REQUEST,
+            payload=TaskRequestPayload(
+                task_id="task-1",
+                objective="store",
+                input={"tenant_id": "alpha"},
+            ),
+            correlation_id="corr-2",
+        )
+
+        raw = msg.to_json()
+        restored = AgentMessage.from_json(raw)
+
+        assert restored.payload["task_id"] == "task-1"
+        assert restored.payload["objective"] == "store"
 
     def test_message_kind_values(self):
         assert MessageKind.TASK_REQUEST.value == "task.request"
@@ -193,6 +214,26 @@ class TestSqliteMessageBus:
         assert msg1.payload["for"] == 1
         assert msg2 is not None
         assert msg2.payload["for"] == 2
+
+    @pytest.mark.asyncio
+    async def test_created_at_is_persisted_as_epoch_float(self, bus):
+        msg = new_message(
+            sender="a",
+            recipient="b",
+            kind=MessageKind.TASK_REQUEST,
+            payload={"x": 1},
+        )
+        await bus.send(msg)
+
+        conn = await bus._get_conn()
+        async with conn.execute(
+            "SELECT created_at FROM agent_messages WHERE recipient = ? ORDER BY id DESC LIMIT 1",
+            ("b",),
+        ) as cursor:
+            row = await cursor.fetchone()
+
+        assert row is not None
+        assert isinstance(row[0], float)
 
 
 # ── State Tests ──────────────────────────────────────────────────
@@ -288,6 +329,12 @@ class TestBaseAgent:
         assert len(agent.received) == 1
         assert agent.state.total_messages_processed == 1
 
+        reply = await bus.receive("tester", timeout=0.1)
+        assert reply is not None
+        assert reply.payload["ok"] is True
+        assert reply.payload["op"] == "echo"
+        assert reply.payload["result"]["echo"]["q"] == 1
+
     @pytest.mark.asyncio
     async def test_quarantine_on_errors(self, bus):
         manifest = _make_manifest("fail-1", max_errors=2)
@@ -327,6 +374,27 @@ class TestBaseAgent:
         # Forbidden
         with pytest.raises(PermissionError):
             await agent.use_tool("forbidden_tool")
+
+    @pytest.mark.asyncio
+    async def test_send_task_error_helper(self, bus):
+        agent = EchoAgent(_make_manifest("echo-err"), bus)
+
+        await agent.send_task_error(
+            "tester",
+            "boom",
+            op="status",
+            supported=["status"],
+            correlation_id="corr-error",
+        )
+
+        reply = await bus.receive("tester", timeout=0.1)
+        assert reply is not None
+        assert reply.kind == MessageKind.TASK_RESULT
+        assert reply.payload == TaskErrorPayload(
+            error="boom",
+            op="status",
+            supported=["status"],
+        ).model_dump(exclude_none=True)
 
 
 # ── Supervisor Tests ─────────────────────────────────────────────

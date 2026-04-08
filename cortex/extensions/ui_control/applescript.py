@@ -37,13 +37,23 @@ async def run_applescript(
     """
     logger.debug("Ejecutando AppleScript:\n%s", script)
 
-    process = await asyncio.create_subprocess_exec(
-        "osascript",
-        "-e",
-        script,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
+    try:
+        process = await asyncio.create_subprocess_exec(
+            "osascript",
+            "-e",
+            script,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+    except OSError as exc:
+        if not require_success:
+            logger.warning("AppleScript unavailable: %s", exc)
+            return None
+        raise AppleScriptExecutionError(
+            "No se pudo iniciar osascript",
+            -1,
+            str(exc),
+        ) from exc
 
     try:
         stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout)

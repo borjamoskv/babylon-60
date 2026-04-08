@@ -11,8 +11,13 @@ from pathlib import Path
 from typing import Any
 
 from cortex.cli.notebooklm_data import _detect_cloud_sync
+from cortex.core.paths import CORTEX_DB, CORTEX_DIR
 
 logger = logging.getLogger("cortex.extensions.adk.goog_tools")
+
+
+def _get_cortex_db_path() -> Path:
+    return CORTEX_DB
 
 
 def goog_quota() -> dict[str, Any]:
@@ -91,7 +96,7 @@ def goog_backup_cortex() -> dict[str, Any]:
     backup_dir = target_dir / "backups"
     backup_dir.mkdir(exist_ok=True)
 
-    db_path = Path("~/.cortex/cortex.db").expanduser()
+    db_path = _get_cortex_db_path()
     if not db_path.exists():
         return {"status": "error", "message": f"Source DB not found at {db_path}"}
 
@@ -104,7 +109,7 @@ def goog_backup_cortex() -> dict[str, Any]:
         shutil.copy2(db_path, dest_path)
 
         # Also backup context snapshot if it exists
-        snapshot_path = Path("~/.cortex/context-snapshot.md").expanduser()
+        snapshot_path = CORTEX_DIR / "context-snapshot.md"
         if snapshot_path.exists():
             shutil.copy2(snapshot_path, backup_dir / f"context-snapshot_{ts}.md")
 

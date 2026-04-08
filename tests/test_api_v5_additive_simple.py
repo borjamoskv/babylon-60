@@ -1,6 +1,7 @@
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+from fastapi.routing import APIRoute
 from fastapi.testclient import TestClient
 
 from cortex.api.core import app
@@ -16,6 +17,17 @@ mock_auth.permissions = ["read", "write", "admin"]
 
 async def override_auth():
     return mock_auth
+
+
+def test_core_app_mounts_facts_routes_without_lifespan() -> None:
+    fact_paths = {
+        route.path
+        for route in app.routes
+        if isinstance(route, APIRoute) and route.path.startswith("/v1/facts")
+    }
+
+    assert "/v1/facts/verify" in fact_paths
+    assert "/v1/facts/{fact_id}/history" in fact_paths
 
 
 @pytest.fixture
@@ -45,22 +57,8 @@ def mock_engine():
     report.confidence_changes = [{"fact_id": 100, "old": "C5", "new": "C3"}]
     engine.propagate_taint.return_value = report
 
-    # Mock trust registry
-    registry = MagicMock()
-    profile = MagicMock()
-    profile.agent_id = "test_agent"
-    profile.successes = 10
-    profile.failures = 1
-    profile.taint_events = 0
-    profile.last_success_ts = None
-    profile.last_incident_ts = None
-    registry.get_profile.return_value = profile
-    registry.compute_trust_score.return_value = 0.9
-    engine.get_trust_registry.return_value = registry
-
     # Mock ledger verify and stats
-    engine.verify_ledger.return_value = {"valid": True}
-    engine.stats.return_value = {"causal_facts": 10, "active_facts": 10}
+    engine.verify_ledger.return_value = {"valid": True, "tx_count": 11, "roots_checked": 3}
 
     return engine
 
@@ -98,13 +96,20 @@ def test_taint_propagation_endpoint(client):
     assert resp.json()["source_id"] == 99
 
 
-def test_trust_endpoints(client):
-    # Test agent profile
+def test_trust_endpoints_are_not_mounted_in_core_app(client):
     resp = client.get("/v1/trust/profiles/test_agent")
-    assert resp.status_code == 200
-    assert resp.json()["agent_id"] == "test_agent"
+    assert resp.status_code == 404
 
-    # Test compliance report
     resp = client.get("/v1/trust/compliance")
+    assert resp.status_code == 404
+
+
+def test_facts_verify_uses_tx_count(client):
+    resp = client.get("/v1/facts/verify")
     assert resp.status_code == 200
-    assert resp.json()["article_12_status"] == "LOGGED_AND_VERIFIED"
+    assert resp.json()["transactions_checked"] == 11
+
+
+def test_ledger_status_is_not_mounted_in_core_app(client):
+    resp = client.get("/v1/ledger/status")
+    assert resp.status_code == 404

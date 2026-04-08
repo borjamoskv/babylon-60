@@ -23,6 +23,8 @@ logger = logging.getLogger("cortex.extensions.aether.tools")
 
 _MAX_OUTPUT = 8000  # chars truncated to avoid flooding context
 _BASH_TIMEOUT = 60  # seconds
+_BASH_EXECUTABLE = "/bin/bash"
+_SCRUBBED_ENV_KEYS: frozenset[str] = frozenset({"BASH_ENV", "ENV", "PYTHONPATH"})
 
 # ── Sovereign Command Guard (Ω₃: Byzantine Default) ──────────────────────
 # Destructive patterns that autonomous agents must NEVER execute.
@@ -187,7 +189,7 @@ class AgentToolkit:
     # ── Shell tools ───────────────────────────────────────────────────
 
     def bash(self, cmd: str, timeout: int = _BASH_TIMEOUT) -> str:
-        """Run a shell command in the repo dir. Returns stdout+stderr."""
+        """Run a Bash command in the repo dir. Returns stdout+stderr."""
         # ── Sovereign Command Guard (Ω₃) ──
         blocked = type(self)._sovereign_bash_guard(cmd)
         if blocked:
@@ -195,14 +197,15 @@ class AgentToolkit:
 
         logger.info("🔧 bash: %s", cmd[:120])
         try:
+            env = {k: v for k, v in os.environ.items() if k not in _SCRUBBED_ENV_KEYS}
+            env["GIT_TERMINAL_PROMPT"] = "0"
             result = subprocess.run(
-                cmd,
-                shell=True,  # noqa: S602 # nosec B602: Guarded by _sovereign_bash_guard
+                [_BASH_EXECUTABLE, "-lc", cmd],
                 cwd=str(self.repo_path),
                 capture_output=True,
                 text=True,
                 timeout=timeout,
-                env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
+                env=env,
             )
             output = (result.stdout + result.stderr).strip()
             if result.returncode != 0:
@@ -213,7 +216,7 @@ class AgentToolkit:
             return output or "(no output)"
         except subprocess.TimeoutExpired:
             return f"[ERROR] Command timed out after {timeout}s"
-        except Exception as e:  # noqa: BLE001
+        except (OSError, ValueError) as e:
             return f"[ERROR] bash failed: {e}"
 
     # ── Git tools ─────────────────────────────────────────────────────

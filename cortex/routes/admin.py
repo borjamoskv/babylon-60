@@ -7,6 +7,8 @@ and session handoff orchestration. Enforces strict RBAC and input validation.
 Sovereign 130/100 — Pydantic responses, structured logging, TOCTOU-safe paths.
 """
 
+from __future__ import annotations
+
 import logging
 import re
 import time
@@ -21,11 +23,8 @@ from starlette.requests import Request
 
 import cortex.api.state as api_state
 from cortex import __version__
-from cortex.api.deps import get_engine
+from cortex.api.deps import get_engine, get_public_memory_service
 from cortex.auth import AuthResult, get_auth_manager, require_permission
-from cortex.database.schema import SCHEMA_VERSION
-from cortex.engine import CortexEngine
-from cortex.routes.admin_health_probes import build_health_probes as _build_health_probes
 from cortex.routes.middleware import AuditLogger, RateLimiter, SelfHealingHook
 from cortex.types.models import (
     ApiKeyListItem,
@@ -36,10 +35,11 @@ from cortex.types.models import (
     StatusResponse,
 )
 from cortex.utils.export import export_facts
-from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 
 if TYPE_CHECKING:
     from cortex.auth.manager import AuthManager as ApiKeyManager
+    from cortex.engine import CortexEngine
+    from cortex.services.public_memory import PublicMemoryService
 
 __all__ = [
     "create_api_key",
@@ -74,10 +74,19 @@ _TENANT_PATTERN = re.compile(r"^[a-z0-9_\-]+$", re.I)
 
 def _get_lang(request: Request) -> str:
     """Extract Accept-Language from request with fallback."""
+    from cortex.utils.i18n import DEFAULT_LANGUAGE
+
     return request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
 
 
-def _get_auth_manager() -> "ApiKeyManager":
+def _translate(key: str, lang: str) -> str:
+    """Translate a key on demand to keep module import light."""
+    from cortex.utils.i18n import get_trans
+
+    return get_trans(key, lang)
+
+
+def _get_auth_manager() -> ApiKeyManager:
     """Resolve the active auth manager singleton."""
     return api_state.auth_manager or get_auth_manager()
 
@@ -93,7 +102,7 @@ def _validate_export_path(path: Optional[str], project: str, lang: str) -> Path:
     if any(c in path for c in _DANGEROUS_PATH_CHARS) or ".." in path:
         raise HTTPException(
             status_code=400,
-            detail=get_trans("error_invalid_path_chars", lang),
+            detail=_translate("error_invalid_path_chars", lang),
         )
 
     try:
@@ -103,12 +112,12 @@ def _validate_export_path(path: Optional[str], project: str, lang: str) -> Path:
         if not target_path.is_relative_to(base_dir):
             raise HTTPException(
                 status_code=400,
-                detail=get_trans("error_path_workspace", lang),
+                detail=_translate("error_path_workspace", lang),
             )
         return target_path
     except (ValueError, RuntimeError, OSError):
         raise HTTPException(
-            status_code=400, detail=get_trans("error_invalid_input", lang)
+            status_code=400, detail=_translate("error_invalid_input", lang)
         ) from None
 
 
@@ -132,7 +141,7 @@ async def _verify_admin_auth(
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(
             status_code=401,
-            detail=get_trans("error_auth_required", lang),
+            detail=_translate("error_auth_required", lang),
         )
 
     token = authorization.split(" ", 1)[1]
@@ -141,11 +150,11 @@ async def _verify_admin_auth(
     if not result.authenticated:
         raise HTTPException(
             status_code=401,
-            detail=get_trans("error_invalid_revoked_key", lang),
+            detail=_translate("error_invalid_revoked_key", lang),
         )
 
     if "admin" not in result.permissions:
-        detail = get_trans(
+        detail = _translate(
             "error_missing_permission",
             lang,
         ).format(permission="admin")
@@ -171,17 +180,13 @@ async def export_project(
     lang = _get_lang(request)
 
     if fmt != "json":
-        raise HTTPException(status_code=400, detail=get_trans("error_json_only", lang))
+        raise HTTPException(status_code=400, detail=_translate("error_json_only", lang))
 
     target_file = _validate_export_path(path, project, lang)
 
     try:
-        facts = await run_in_threadpool(  # type: ignore[reportCallIssue]
-            engine.search,
-            project=project,
-            limit=_MAX_EXPORT_FACTS,
-        )
-        content = export_facts(facts, fmt="json")  # type: ignore[reportArgumentType]
+        facts = await engine.get_all_active_facts(project=project, tenant_id=auth.tenant_id)
+        content = export_facts(facts[:_MAX_EXPORT_FACTS], fmt="json")
 
         def _write_export() -> Path:
             target_file.parent.mkdir(parents=True, exist_ok=True)
@@ -197,7 +202,7 @@ async def export_project(
         return ExportResponse(
             project=project,
             artifact=str(out_path),
-            message=get_trans("info_export_success", lang),
+            message=_translate("info_export_success", lang),
         )
     except (OSError, ValueError) as exc:
         logger.error(
@@ -211,7 +216,7 @@ async def export_project(
         )
         raise HTTPException(
             status_code=500,
-            detail=get_trans("error_export_failed", lang),
+            detail=_translate("error_export_failed", lang),
         ) from None
 
 
@@ -236,6 +241,9 @@ async def deep_health_check(
     start = time.monotonic()
 
     conn = _get_raw_conn(engine)
+    from cortex.database.schema import SCHEMA_VERSION
+    from cortex.routes.admin_health_probes import build_health_probes as _build_health_probes
+
     probes = _build_health_probes(conn, request, SCHEMA_VERSION)
 
     def _run_probes() -> tuple[dict[str, HealthCheckDetail], bool]:
@@ -304,27 +312,18 @@ async def deep_health_check(
 async def get_system_status(
     request: Request,
     auth: AuthResult = Depends(require_permission("read")),
-    engine: CortexEngine = Depends(get_engine),
+    service: PublicMemoryService = Depends(get_public_memory_service),
 ) -> StatusResponse:
     """Expose engine diagnostics and memory health metrics."""
     lang = _get_lang(request)
     try:
-        stats = await engine.stats()
-        return StatusResponse(
-            version=__version__,
-            total_facts=stats["total_facts"],
-            active_facts=stats["active_facts"],
-            deprecated=stats["deprecated_facts"],
-            projects=stats["project_count"],
-            embeddings=stats["embeddings"],
-            transactions=stats["transactions"],
-            db_size_mb=stats["db_size_mb"],
-        )
+        _ = auth
+        return await service.status()
     except (RuntimeError, ValueError, KeyError, OSError) as exc:
         logger.error("Status check failure: %s", exc)
         SelfHealingHook.trigger(exc, {"endpoint": "get_system_status"})
         raise HTTPException(
-            status_code=500, detail=get_trans("error_status_unavailable", lang)
+            status_code=500, detail=_translate("error_status_unavailable", lang)
         ) from None
 
 
@@ -352,7 +351,7 @@ async def create_api_key(
     lang = _get_lang(request)
 
     if not _TENANT_PATTERN.match(tenant_id):
-        raise HTTPException(status_code=400, detail=get_trans("error_invalid_input", lang))
+        raise HTTPException(status_code=400, detail=_translate("error_invalid_input", lang))
 
     manager = _get_auth_manager()
     existing_keys = await manager.list_keys()
@@ -378,7 +377,7 @@ async def create_api_key(
         name=api_key.name,
         prefix=api_key.key_prefix,
         tenant_id=api_key.tenant_id,
-        message=get_trans("info_key_warning", lang),
+        message=_translate("info_key_warning", lang),
     )
 
 
@@ -435,4 +434,4 @@ async def generate_handoff_context(
     except (RuntimeError, ValueError, KeyError, OSError) as exc:
         logger.error("Handoff failure: %s", exc)
         SelfHealingHook.trigger(exc, {"endpoint": "generate_handoff_context"})
-        raise HTTPException(status_code=500, detail=get_trans("error_unexpected", lang)) from None
+        raise HTTPException(status_code=500, detail=_translate("error_unexpected", lang)) from None

@@ -5,6 +5,7 @@ No I/O, no network, no database. Pure unit tests.
 
 from __future__ import annotations
 
+from cortex.extensions.daemon.models import AetherAlert as DaemonAetherAlert
 from cortex.extensions.aether.models import (
     AetherAlert,
     AetherTestResult,
@@ -226,3 +227,6 @@ class TestAetherAlert:
         )
         assert alert.task_id == "abc"
         assert alert.status == "done"
+
+    def test_daemon_models_reexports_canonical_aether_alert(self):
+        assert DaemonAetherAlert is AetherAlert

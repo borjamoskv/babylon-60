@@ -3,6 +3,7 @@
 
 import json
 import logging
+import os
 import tempfile
 import time
 from pathlib import Path
@@ -19,6 +20,8 @@ class HotMemory:
         self.counters = {}
 
     def store(self, key, value):
+        if self.capacity <= 0:
+            return
         if len(self.cache) >= self.capacity:
             oldest = min(self.counters, key=self.counters.get)  # type: ignore[type-error]
             del self.cache[oldest]
@@ -113,10 +116,12 @@ class DaemonState:
             # Atomic write: temp file + rename
             fd, tmp_path = tempfile.mkstemp(dir=str(CORTEX_ROOT), suffix=".tmp")
             try:
-                with open(fd, "w") as f:
+                with os.fdopen(fd, "w", encoding="utf-8") as f:
                     json.dump(self.daemons, f, indent=4)
+                    f.flush()
+                    os.fsync(f.fileno())
                 Path(tmp_path).replace(path)
-            except BaseException:
+            except (OSError, TypeError, ValueError):
                 Path(tmp_path).unlink(missing_ok=True)
                 raise
         except (OSError, TypeError, ValueError) as e:

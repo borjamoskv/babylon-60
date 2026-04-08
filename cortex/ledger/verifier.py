@@ -31,7 +31,6 @@ class LedgerVerifier:
             for row in cursor:
                 checked += 1
                 event_id = row["event_id"]
-                payload = json.loads(row["payload_json"])
                 p_hash = row["prev_hash"]
                 c_hash = row["hash"]
                 s_status = row["semantic_status"]
@@ -40,6 +39,27 @@ class LedgerVerifier:
                     stats[s_status] += 1
                 if s_status == "failed":
                     violations.append(f"Semantic enrichment failed for event {event_id}")
+
+                try:
+                    payload = json.loads(row["payload_json"])
+                except (TypeError, ValueError, json.JSONDecodeError) as e:
+                    violations.append(f"Error parsing event {event_id}: {e}")
+                    current_prev = c_hash
+                    continue
+
+                payload_prev = payload.get("prev_hash")
+                if payload_prev is not None and payload_prev != p_hash:
+                    violations.append(
+                        f"Payload prev_hash mismatch at {event_id}: "
+                        f"payload {payload_prev}, row {p_hash}"
+                    )
+
+                payload_hash = payload.get("hash")
+                if payload_hash is not None and payload_hash != c_hash:
+                    violations.append(
+                        f"Payload hash mismatch at {event_id}: "
+                        f"payload {payload_hash}, row {c_hash}"
+                    )
 
                 if p_hash != current_prev:
                     violations.append(
@@ -55,7 +75,7 @@ class LedgerVerifier:
                         violations.append(
                             f"Hash mismatch at {event_id}: stored {c_hash}, recomputed {recomputed}"
                         )
-                except Exception as e:
+                except (KeyError, TypeError, ValueError) as e:
                     violations.append(f"Error parsing event {event_id}: {e}")
 
                 current_prev = c_hash

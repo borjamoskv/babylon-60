@@ -62,49 +62,48 @@ def storage_init_pg(dsn: str | None, dry_run: bool, skip_extensions: bool) -> No
     async def _run() -> None:
         from cortex.storage.postgres import PostgresBackend
 
-        with console.status("[bold #CCFF00]Connecting to PostgreSQL...[/]"):
-            backend = PostgresBackend(
-                dsn=dsn,
-                min_size=1,
-                max_size=5,
-                auto_init_schema=False,  # Manual control here
-            )
-            await backend.connect()
-
-        # Health check
-        healthy = await backend.health_check()
-        if not healthy:
-            console.print("[bold red]✗ Health check failed. Cannot proceed.[/]")
-            await backend.close()
-            return
-
-        console.print("[bold #CCFF00]✓ PostgreSQL connection healthy.[/]")
-
-        if dry_run:
-            console.print("[dim]--dry-run: Schema NOT applied.[/]")
-            await backend.close()
-            return
-
-        # Skip extensions if requested
-        if skip_extensions:
-            from cortex.storage.pg_schema import PG_ALL_SCHEMA
-
-            with console.status(
-                f"[bold blue]Applying {len(PG_ALL_SCHEMA)} schema statements (no extensions)...[/]"
-            ):
-                for schema_sql in PG_ALL_SCHEMA:
-                    await backend.executescript(schema_sql)
-        else:
-            with console.status("[bold blue]Applying full schema + extensions...[/]"):
-                await backend.initialize_schema()
-
-        # Verify core table
-        rows = await backend.execute(
-            "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename = 'facts'"
+        backend = PostgresBackend(
+            dsn=dsn,
+            min_size=1,
+            max_size=5,
+            auto_init_schema=False,  # Manual control here
         )
-        table_ok = len(rows) == 1
+        try:
+            with console.status("[bold #CCFF00]Connecting to PostgreSQL...[/]"):
+                await backend.connect()
 
-        await backend.close()
+            # Health check
+            healthy = await backend.health_check()
+            if not healthy:
+                console.print("[bold red]✗ Health check failed. Cannot proceed.[/]")
+                return
+
+            console.print("[bold #CCFF00]✓ PostgreSQL connection healthy.[/]")
+
+            if dry_run:
+                console.print("[dim]--dry-run: Schema NOT applied.[/]")
+                return
+
+            # Skip extensions if requested
+            if skip_extensions:
+                from cortex.storage.pg_schema import PG_ALL_SCHEMA
+
+                with console.status(
+                    f"[bold blue]Applying {len(PG_ALL_SCHEMA)} schema statements (no extensions)...[/]"
+                ):
+                    for schema_sql in PG_ALL_SCHEMA:
+                        await backend.executescript(schema_sql)
+            else:
+                with console.status("[bold blue]Applying full schema + extensions...[/]"):
+                    await backend.initialize_schema()
+
+            # Verify core table
+            rows = await backend.execute(
+                "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename = 'facts'"
+            )
+            table_ok = len(rows) == 1
+        finally:
+            await backend.close()
 
         # Report
         grid = Table.grid(padding=(0, 2))

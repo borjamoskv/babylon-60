@@ -36,12 +36,14 @@ async def semantic_search(
     tenant_id: str = "default",
     project: Optional[str] = None,
     as_of: Optional[str] = None,
+    fact_type: Optional[str] = None,
+    tags: Optional[list[str]] = None,
     confidence: Optional[str] = None,
 ) -> list[SearchResult]:
     """Perform semantic vector search using sqlite-vec."""
     embedding_json = json.dumps(query_embedding)
     sql, params = _build_semantic_query(
-        tenant_id, embedding_json, top_k, project, as_of, confidence
+        tenant_id, embedding_json, top_k, project, as_of, fact_type, tags, confidence
     )
 
     try:
@@ -64,6 +66,8 @@ def _build_semantic_query(
     top_k: int,
     project: Optional[str],
     as_of: Optional[str],
+    fact_type: Optional[str],
+    tags: Optional[list[str]],
     confidence: Optional[str],
 ) -> tuple[str, list]:
     """Internal helper to build semantic search SQL."""
@@ -91,6 +95,15 @@ def _build_semantic_query(
         params.extend(t_params)
     else:
         sql += _FILTER_ACTIVE
+
+    if fact_type:
+        sql += " AND f.fact_type = ?"
+        params.append(fact_type)
+
+    if tags:
+        for tag in tags:
+            sql += " AND json_extract(f.tags, '$') LIKE ?"
+            params.append(f"%{tag}%")
 
     if confidence:
         sql += " AND f.confidence >= ?"

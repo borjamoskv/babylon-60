@@ -180,14 +180,20 @@ def compliance_report(db: str) -> None:
 
         score = sum([c1, c2, c3, c4, c5])
         if score == 5:
-            verdict = "[bold green]COMPLIANT[/bold green]"
+            verdict = "[bold green]STRONG TECHNICAL ALIGNMENT[/bold green]"
+            detail = "Article 12-style record-keeping controls are present. This is not a legal certification."
         elif score >= 3:
-            verdict = "[bold yellow]PARTIAL[/bold yellow]"
+            verdict = "[bold yellow]PARTIAL TECHNICAL ALIGNMENT[/bold yellow]"
+            detail = "Some record-keeping controls are present, but audit reliance would still need review."
         else:
-            verdict = "[bold red]NON-COMPLIANT[/bold red]"
+            verdict = "[bold red]INSUFFICIENT TECHNICAL ALIGNMENT[/bold red]"
+            detail = "Critical record-keeping gaps were detected."
 
         console.print(
-            Panel(f"{verdict}\n\nCompliance Score: [bold]{score}/5[/bold]", title="Verdict")
+            Panel(
+                f"{verdict}\n\n{detail}\n\nCompliance Score: [bold]{score}/5[/bold]",
+                title="Assessment",
+            )
         )
     except Exception as e:  # noqa: BLE001 — CLI boundary catch
         handle_cli_error(e, db_path=db, context="generating compliance report")

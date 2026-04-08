@@ -21,6 +21,7 @@ from cortex.extensions.genesis.assembler import SystemAssembler
 from cortex.extensions.genesis.models import ComponentSpec, GenesisResult, SystemSpec
 from cortex.extensions.genesis.templates import TemplateRegistry
 from cortex.extensions.genesis.validator import GenesisValidator
+from cortex.extensions.sync.common import SYSTEM_BRIDGE_KIND
 
 __all__ = ["GenesisEngine"]
 
@@ -414,6 +415,8 @@ class GenesisEngine:
             tags=["genesis", "system_bridge", result.spec.system_type],
             confidence="C5",
             meta={
+                "bridge_kind": SYSTEM_BRIDGE_KIND,
+                "bridge_provider": "genesis",
                 "system_name": result.spec.name,
                 "system_type": result.spec.system_type,
                 "files_created": len(result.files_created),

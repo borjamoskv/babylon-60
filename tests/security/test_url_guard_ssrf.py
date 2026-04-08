@@ -1,3 +1,5 @@
+import socket
+
 import pytest
 
 from cortex.guards.url_guard import SafeTransport
@@ -19,8 +21,20 @@ def test_url_guard_blocks_metadata_ip():
             SafeTransport.validate(url)
 
 
-def test_url_guard_allows_safe_url():
+def test_url_guard_allows_safe_url(monkeypatch):
     """Verify that public legitimate URLs are allowed."""
+    resolved_hosts = {
+        "google.com": "8.8.8.8",
+        "github.com": "140.82.112.3",
+        "example.com": "93.184.216.34",
+    }
+
+    def _fake_getaddrinfo(host, port, type=0):
+        assert host in resolved_hosts
+        return [(socket.AF_INET, type or socket.SOCK_STREAM, 6, "", (resolved_hosts[host], 0))]
+
+    monkeypatch.setattr("cortex.guards.url_guard.socket.getaddrinfo", _fake_getaddrinfo)
+
     safe_urls = [
         "https://google.com",
         "https://github.com/borjamoskv/Cortex-Persist",
@@ -37,3 +51,16 @@ def test_url_guard_blocks_encoded_null():
     url = "http://169.254.169.254\0.example.com"
     with pytest.raises(ValueError, match="Sovereign URLGuard blocked"):
         SafeTransport.validate(url)
+
+
+def test_url_guard_blocks_hostname_resolving_to_private_ip(monkeypatch):
+    """Verify DNS-rebinding style hostnames resolving private are blocked."""
+
+    def _fake_getaddrinfo(host, port, type=0):
+        assert host == "internal.example.com"
+        return [(2, type, 6, "", ("10.0.0.7", 0))]
+
+    monkeypatch.setattr("cortex.guards.url_guard.socket.getaddrinfo", _fake_getaddrinfo)
+
+    with pytest.raises(ValueError, match="Sovereign URLGuard blocked"):
+        SafeTransport.validate("https://internal.example.com/api")

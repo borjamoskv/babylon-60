@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from cortex.engine import CortexEngine as AsyncCortexEngine
+from cortex.core.paths import find_skill_path, resolve_skill_script
 from cortex.extensions.cuatrida.models import CuatridaMetrics, DecisionNode, Dimension
 from cortex.extensions.mejoralo.engine import MejoraloEngine
 
@@ -136,9 +137,11 @@ class CuatridaOrchestrator:
         Dimension A: Zero-Friction Sync.
         Interfaces with ghost-control to ensure the system is in a pre-cognitive state.
         """
-        from cortex.core.paths import SKILLS_DIR
-
-        ghost_path = SKILLS_DIR / "ghost-control" / "ghost.py"
+        ghost_path = find_skill_path(
+            "ghost-control",
+            "ghost.py",
+            "scripts/ghost.py",
+        ) or resolve_skill_script("ghost-control", "ghost.py")
         latency = 0.0
         status = "unknown"
 

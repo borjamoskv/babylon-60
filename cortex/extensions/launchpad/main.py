@@ -4,12 +4,15 @@ CORTEX v5.0 — Launchpad Orchestration.
 Bridge between the Python ledger and the Node.js Swarm engine.
 """
 
+from __future__ import annotations
+
 import logging
 import sqlite3
 from pathlib import Path
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
-from cortex.engine import CortexEngine
+if TYPE_CHECKING:
+    from cortex.engine import CortexEngine
 
 __all__ = ["DEFAULT_SWARM_PATH", "MissionOrchestrator"]
 

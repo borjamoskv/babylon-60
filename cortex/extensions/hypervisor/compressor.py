@@ -68,10 +68,10 @@ class ComplexityCompressor:
         chain_valid: bool,
     ) -> HealthReport:
         """Compress system stats + ledger status into a HealthReport."""
-        if active_count == 0:
-            status = "degraded"
-        elif not chain_valid:
+        if not chain_valid:
             status = "critical"
+        elif active_count == 0:
+            status = "degraded"
         else:
             status = "healthy"
 

@@ -13,7 +13,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 
 from cortex.auth import AuthResult, require_permission
 
@@ -26,6 +26,7 @@ router = APIRouter(tags=["observatory"])
 
 @router.get("/v1/observatory")
 def observatory_status(
+    recent_decisions_limit: int = Query(10, ge=1, le=100),
     auth: AuthResult = Depends(require_permission("read")),
 ) -> dict[str, Any]:
     """Consolidated system observatory — one endpoint, full picture."""
@@ -44,7 +45,7 @@ def observatory_status(
     result["evolution"] = _get_evolution_status()
 
     # 5. Recent decisions
-    result["recent_decisions"] = _get_recent_decisions()
+    result["recent_decisions"] = _get_recent_decisions(recent_decisions_limit)
 
     return result
 
@@ -103,8 +104,8 @@ def _get_evolution_status() -> dict[str, Any]:
         return {"status": "not_running", "detail": str(e)}
 
 
-def _get_recent_decisions() -> list[dict[str, Any]]:
-    """Fetch the 10 most recent CORTEX decisions."""
+def _get_recent_decisions(limit: int) -> list[dict[str, Any]]:
+    """Fetch the most recent CORTEX decisions."""
     try:
         from cortex.cli.common import get_engine
         from cortex.config import DEFAULT_DB_PATH
@@ -117,7 +118,8 @@ def _get_recent_decisions() -> list[dict[str, Any]]:
                     "SELECT id, project, content, created_at "
                     "FROM facts "
                     "WHERE fact_type = 'decision' AND valid_until IS NULL "
-                    "ORDER BY id DESC LIMIT 10"
+                    "ORDER BY id DESC LIMIT ?",
+                    (limit,),
                 ).fetchall()
                 return [
                     {

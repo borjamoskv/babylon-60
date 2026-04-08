@@ -4,11 +4,12 @@ import os
 import sqlite3
 from datetime import datetime, timedelta, timezone
 
+from cortex.core.paths import CORTEX_DB, CORTEX_DIR
+
 logger = logging.getLogger("cortex.extensions.ttt.ghost_harvester")
 
-# CORTEX DB Hardcoded Path for local daemon
-DB_PATH = os.path.expanduser("~/.cortex/cortex.db")
-OUTPUT_PATH = os.path.expanduser("~/.cortex/weights/dataset")
+DB_PATH = str(CORTEX_DB)
+OUTPUT_PATH = str(CORTEX_DIR / "weights" / "dataset")
 
 # The Ouroboros TTT (Test-Time Training) Dataset Builder
 # Derivation: Axiom Ω₅ (Antifragile by Default)
@@ -55,7 +56,7 @@ def format_for_lora(rows):
     # Try to load existing key via standard environment variable or default logic.
     if "CORTEX_MASTER_KEY" not in os.environ:
         # Fallback to key file if exist
-        key_path = os.path.expanduser("~/.cortex/cortex.key")
+        key_path = str(CORTEX_DIR / "cortex.key")
         if os.path.exists(key_path):
             with open(key_path) as f:
                 os.environ["CORTEX_MASTER_KEY"] = f.read().strip()

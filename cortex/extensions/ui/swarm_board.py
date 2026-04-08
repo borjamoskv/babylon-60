@@ -1,7 +1,7 @@
 """CORTEX v6.0 — Swarm Kanban Board (TUI).
 
 A rich-based live dashboard to monitor Sovereign Swarm agents in real-time.
-Listens to the CORTEX SignalBus for state changes.
+Listens to the CORTEX durable signal bus for state changes.
 """
 
 from __future__ import annotations
@@ -19,7 +19,8 @@ from rich.live import Live
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.extensions.signals.bus import SignalBus
+from cortex.core.paths import CORTEX_DB
+from cortex.extensions.signals.bus import DurableSignalBus
 
 console = Console()
 
@@ -44,10 +45,10 @@ STATE_COLORS = {
 class SwarmBoard:
     """TUI Kanban Board for observing the Swarm."""
 
-    def __init__(self, db_path: str):
+    def __init__(self, db_path: str = str(CORTEX_DB)):
         self.db_path = db_path
         self._conn = sqlite3.connect(db_path)
-        self.bus = SignalBus(self._conn)
+        self.bus = DurableSignalBus(self._conn)
 
         # Agent state tracking: source -> state dict
         self.agents: dict[str, dict[str, Any]] = defaultdict(
@@ -167,5 +168,5 @@ class SwarmBoard:
 
 
 if __name__ == "__main__":
-    board = SwarmBoard("~/.cortex/cortex.db")
+    board = SwarmBoard()
     board.start()

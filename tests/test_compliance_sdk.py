@@ -101,6 +101,28 @@ class TestLogDecision:
         row = await cursor.fetchone()
         assert row[0] == "custom-project"
 
+    async def test_sequential_decisions_reference_previous_fact(self, tracker):
+        first_id = tracker.log_decision(
+            content="Decision zero for sequencing.",
+            agent_id="agent:test",
+        )
+        second_id = tracker.log_decision(
+            content="Decision one for sequencing.",
+            agent_id="agent:test",
+        )
+
+        conn = await tracker._engine.get_conn()
+        cursor = await conn.execute("SELECT content FROM facts WHERE id = ?", (second_id,))
+        row = await cursor.fetchone()
+        assert row is not None
+
+        from cortex.crypto import get_default_encrypter
+
+        enc = get_default_encrypter()
+        content = enc.decrypt_str(row[0], tenant_id="default")
+        assert content is not None
+        assert f"Compatible with #{first_id}" in content
+
 
 # ─── verify_chain ─────────────────────────────────────────────────────
 

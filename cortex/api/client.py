@@ -102,7 +102,7 @@ class CortexClient:
             "tags": tags or [],
         }
         if metadata:
-            data["metadata"] = metadata
+            data["meta"] = metadata
         result = self._request("POST", "/v1/facts", json=data)
         return result["fact_id"]
 
@@ -133,8 +133,8 @@ class CortexClient:
 
     def recall(self, project: str, include_deprecated: bool = False) -> list[Fact]:
         """Get all facts for a project."""
-        params = {"include_deprecated": str(include_deprecated).lower()}
-        results = self._request("GET", f"/v1/projects/{project}/facts", params=params)
+        _ = include_deprecated
+        results = self._request("GET", f"/v1/projects/{project}/facts")
         return [
             Fact(
                 id=f["id"],

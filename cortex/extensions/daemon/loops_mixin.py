@@ -116,6 +116,14 @@ class LoopsMixin:
         except Exception as e:  # noqa: BLE001 — top-level loop crash barrier
             logger.error("Zero-Prompting loop error: %s", e)
 
+    def _run_autopoiesis_loop(self) -> None:
+        """Runs the bounded Autopoiesis Daemon event loop."""
+        logger.info("♾️ Autopoiesis thread started")
+        try:
+            asyncio.run(self.autopoiesis_daemon.run_loop())
+        except Exception as e:  # noqa: BLE001 — top-level loop crash barrier
+            logger.error("Autopoiesis loop error: %s", e)
+
     def _run_epistemic_breaker_loop(self) -> None:
         """Runs the Epistemic Circuit Breaker Daemon event loop."""
         logger.info("🛡️ Epistemic Breaker thread started")

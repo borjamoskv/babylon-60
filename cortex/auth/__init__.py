@@ -6,49 +6,61 @@ FastAPI dependency modules at import time.
 
 from __future__ import annotations
 
-__all__: list[str] = []
+from importlib import import_module
+from typing import TYPE_CHECKING
 
-try:
+__all__ = [
+    "APIKey",
+    "AUTH_SCHEMA",
+    "AuthManager",
+    "AuthResult",
+    "SQL_INSERT_KEY",
+    "get_auth_manager",
+    "require_auth",
+    "require_consensus",
+    "require_permission",
+    "require_verified_permission",
+    "reset_auth_manager",
+]
+
+if TYPE_CHECKING:
     from cortex.auth.manager import AuthManager, get_auth_manager, reset_auth_manager
-except Exception:  # noqa: BLE001
-    AuthManager = None  # type: ignore[assignment]
-    get_auth_manager = None  # type: ignore[assignment]
-    reset_auth_manager = None  # type: ignore[assignment]
-else:
-    __all__ += ["AuthManager", "get_auth_manager", "reset_auth_manager"]
-
-try:
     from cortex.auth.models import APIKey, AuthResult
-except Exception:  # noqa: BLE001
-    APIKey = None  # type: ignore[assignment]
-    AuthResult = None  # type: ignore[assignment]
-else:
-    __all__ += ["APIKey", "AuthResult"]
-
-try:
     from cortex.auth.schema import AUTH_SCHEMA, SQL_INSERT_KEY
-except Exception:  # noqa: BLE001
-    AUTH_SCHEMA = None  # type: ignore[assignment]
-    SQL_INSERT_KEY = None  # type: ignore[assignment]
-else:
-    __all__ += ["AUTH_SCHEMA", "SQL_INSERT_KEY"]
-
-try:
     from cortex.auth.deps import (
         require_auth,
         require_consensus,
         require_permission,
         require_verified_permission,
     )
-except Exception:  # noqa: BLE001
-    require_auth = None  # type: ignore[assignment]
-    require_consensus = None  # type: ignore[assignment]
-    require_permission = None  # type: ignore[assignment]
-    require_verified_permission = None  # type: ignore[assignment]
-else:
-    __all__ += [
-        "require_auth",
-        "require_consensus",
-        "require_permission",
-        "require_verified_permission",
-    ]
+
+
+_LAZY_ATTRS: dict[str, tuple[str, str]] = {
+    "AuthManager": ("cortex.auth.manager", "AuthManager"),
+    "get_auth_manager": ("cortex.auth.manager", "get_auth_manager"),
+    "reset_auth_manager": ("cortex.auth.manager", "reset_auth_manager"),
+    "APIKey": ("cortex.auth.models", "APIKey"),
+    "AuthResult": ("cortex.auth.models", "AuthResult"),
+    "AUTH_SCHEMA": ("cortex.auth.schema", "AUTH_SCHEMA"),
+    "SQL_INSERT_KEY": ("cortex.auth.schema", "SQL_INSERT_KEY"),
+    "require_auth": ("cortex.auth.deps", "require_auth"),
+    "require_consensus": ("cortex.auth.deps", "require_consensus"),
+    "require_permission": ("cortex.auth.deps", "require_permission"),
+    "require_verified_permission": ("cortex.auth.deps", "require_verified_permission"),
+}
+
+
+def __getattr__(name: str) -> object:
+    """Lazily load public auth symbols on first access."""
+    target = _LAZY_ATTRS.get(name)
+    if target is None:
+        raise AttributeError(f"module 'cortex.auth' has no attribute {name!r}")
+
+    module_name, attr_name = target
+    try:
+        module = import_module(module_name)
+        value = getattr(module, attr_name)
+    except ImportError:
+        value = None
+    globals()[name] = value
+    return value

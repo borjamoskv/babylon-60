@@ -1,54 +1,85 @@
 # CORTEX Persist
 
-**Tamper-evident memory and decision lineage for AI agents.**
+> Verifiable memory and decision records for AI agents.
 
-CORTEX-Persist is a local-first memory and trust layer for AI systems that need persistent context, cryptographic lineage, and audit-ready history.
+**Track what an agent saw, decided, and changed - with tamper-evident history.**
 
+Local-first. SHA-256 hash-chained. Merkle checkpoints. Audit-ready.
+
+[![GitHub Stars](https://img.shields.io/github/stars/borjamoskv/Cortex-Persist?label=GitHub%20Stars)](https://github.com/borjamoskv/Cortex-Persist/stargazers)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![CI](https://github.com/borjamoskv/Cortex-Persist/actions/workflows/ci.yml/badge.svg)](https://github.com/borjamoskv/Cortex-Persist/actions)
 [![Codecov](https://codecov.io/gh/borjamoskv/Cortex-Persist/branch/main/graph/badge.svg)](https://codecov.io/gh/borjamoskv/Cortex-Persist)
 [![PyPI](https://img.shields.io/pypi/v/cortex-persist.svg)](https://pypi.org/project/cortex-persist/)
 
-CORTEX is trust infrastructure for AI agents. It sits between your runtime and your memory layer, making facts, decisions, and derived state tamper-evident. If stored context changes after the fact, verification fails. If you need to explain what an agent knew, when it knew it, and what it did next, CORTEX gives you a cryptographic trail instead of an anecdote.
+[Quickstart](#quickstart) · [System Map](src/content/docs/system-map.md) · [Native Technologies](src/content/docs/CORTEX-NATIVE-TECHNOLOGIES.md) · [Enterprise Readiness](ENTERPRISE_READINESS.md) · [Diligence Checklist](DUE_DILIGENCE_CHECKLIST.md) · [Deployment Hardening](DEPLOYMENT_HARDENING.md) · [API](src/content/docs/api.md) · [Security Model](src/content/docs/SECURITY_TRUST_MODEL.md) · [Support](SUPPORT.md) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md)
 
-## Why not logs / observability?
+CORTEX Persist adds a verification layer around agent memory and decision state. It sits between your runtime and your storage so facts, decisions, and derived state become reviewable, tamper-evident records instead of mutable application state. If stored context changes after the fact, verification fails.
 
-| Feature | Logs & Observability | CORTEX Persist (Trust Layer) |
+## Why CORTEX
+
+| Feature | Logs & Observability | CORTEX Persist (Verification Layer) |
 | :--- | :--- | :--- |
-| **Trust Model** | "Trust the process" | **"Verify the evidence"** |
+| **Trust Model** | "Trust the process" | **"Verify the record"** |
 | **Tamper Detection** | Weak (DB mutation is silent) | **Cryptographic** (SHA-256 + Merkle) |
-| **Compliance Proof** | Requires manual reconstruction | **O(1) Portable JSON Audit Packs** |
-| **Agent Liability** | Ambiguous context reconstruction | **Mathematically defensible lineage** |
+| **Compliance Proof** | Requires manual reconstruction | **Portable JSON Audit Packs** |
+| **Decision Review** | Ambiguous context reconstruction | **Verifiable decision history** |
 
-> Logs tell you what happened. CORTEX proves exactly what the agent knew, when it knew it, and mathematically guarantees the record hasn't been altered since. [**Review a real verification proof.**](docs/examples/audit_pack_evidence_demo.json)
+> Logs tell you what happened. CORTEX helps you verify what context an agent used, what it decided, and whether that record has changed since. [**Review a real verification proof.**](examples/audit_proof_artifact.json)
+
+## System Map
+
+CORTEX now exposes a stable subsystem taxonomy for navigating the codebase and architecture without forcing an immediate package rename:
+
+| Subsystem | Role | Existing Package Surfaces |
+| :--- | :--- | :--- |
+| **CORTEX Hypercore** | Trust kernel, guards, ledger, and persistence boundary | `engine/`, `ledger/`, `guards/`, `verification/`, `crypto/`, `database/`, `storage/`, `security/`, `auth/` |
+| **CORTEX Overmind** | Orchestration, swarm control, coordination, and agent runtime | `agents/`, `consensus/`, `gateway/`, `mcp/`, `worker/`, `extensions/swarm/`, `extensions/sovereign/`, `extensions/federation/`, `extensions/hypervisor/`, `extensions/manifold/` |
+| **CORTEX Deepforge** | Synthesis, reasoning, perception, and code-generation surfaces | `composer/`, `mcts/`, `shannon/`, `extensions/llm/`, `extensions/thinking/`, `extensions/evolution/`, `extensions/training/`, `extensions/skills/`, `extensions/perception/` |
+| **CORTEX Primeflow** | Execution runtime, APIs, services, event delivery, and operational flows | `api/`, `routes/`, `services/`, `events/`, `http/`, `cli/`, `telemetry/`, `extensions/automation/`, `extensions/daemon/`, `extensions/sync/`, `extensions/notifications/`, `extensions/timing/` |
+| **CORTEX Coreshift** | Memory evolution, indexing, migration, audit, and state transitions | `memory/`, `facts/`, `search/`, `embeddings/`, `graph/`, `compaction/`, `enrichment/`, `migrations/`, `audit/`, `compliance/`, `forensics/` |
+
+These names are architectural groupings over the current repository, not replacement Python package names. The canonical mapping lives in [System Map](src/content/docs/system-map.md).
+
+## Core Trust Capabilities
+
+CORTEX groups five core capabilities that show up across the repository. The names below map to the canonical architecture, but the practical value is straightforward:
+
+1. **Deterministic admission checks**: generated claims are validated before they become durable state.
+2. **Hash continuity and checkpoint verification**: ledger entries can be checked across events, batches, and rollback boundaries.
+3. **Explicit handling of uncertain or tainted memory**: uncertain, stale, or contradictory state stays visible instead of being silently blended in.
+4. **Rollback-aware write flows**: non-trivial mutations follow compensating steps instead of leaving partial state behind.
+5. **Isolated self-modification paths**: runtime code generation can be contained, tested, and validated before it affects persistent state.
+
+The canonical definition and module mapping live in [CORTEX Native Technologies](src/content/docs/CORTEX-NATIVE-TECHNOLOGIES.md).
 
 ## Use Cases
 
-1. **Autonomous Agents:** Prove exactly what context an agent had when making a critical, irreversible decision (e.g. executing a trade, sending a legal email).
+1. **Autonomous Agents:** Record what context was present when an agent made a critical decision (for example, executing a trade or sending a legal email).
 2. **Multi-Agent Systems:** Trace state propagation across agents and workflows.
 3. **Compliance-Heavy Environments:** Produce audit trails for finance, security, and regulated operations.
 4. **Post-incident forensics:** detect silent mutation, tampering, or replayed state.
-5. **Trust-sensitive AI products:** ship memory with evidence, not vibes.
+5. **Trust-sensitive AI products:** ship verifiable memory and decisions instead of relying on mutable logs.
 
-## Why CORTEX? (Not just another Vector DB or Logger)
+## Why not just logs or a vector DB?
 
-Traditional logging and standard vector stores fail the epistemic containment test. If an agent hallucinates, or if a database is mutated passively, you lose structural trust in the machine. CORTEX makes mutation mathematically defensible.
+Traditional logging and standard vector stores help you observe systems. They do not give you a verifiable record of memory and decisions. CORTEX adds that layer without forcing you to replace your stack.
 
 | Feature                    | Standard Logs (Datadog/ELK) | Standard Vector DB (Pinecone/Qdrant) | **CORTEX Persist**                        |
 |:---------------------------|:----------------------------|:-------------------------------------|:------------------------------------------|
-| **Primary Goal**           | Observability & Debugging   | Semantic Search & RAG                | **Tamper-Evident Cognitive Lineage**      |
+| **Primary Goal**           | Observability & Debugging   | Semantic Search & RAG                | **Verifiable memory and decision records** |
 | **Write Integrity**        | Overwritable / Editable     | Silent CRUD operations               | **Append-Only + Cryptographic Hash**      |
-| **Fact Mutability**        | Easy (API/Admin access)     | Easy (API/Admin access)              | **Impossible** (Breaks hash chain)        |
-| **Evidence Export**        | Text dumps                  | JSON extracts                        | **Zero-Trust Sealed Audit Packs**         |
+| **Fact Mutability**        | Easy (API/Admin access)     | Easy (API/Admin access)              | **Tamper-evident, append-oriented records** |
+| **Evidence Export**        | Text dumps                  | JSON extracts                        | **Portable audit packs**                  |
 
-> **See a real artifact**: [View Exported Audit Pack](examples/audit_proof_artifact.json)
+> **See a real artifact**: [View exported audit pack](examples/audit_proof_artifact.json)
 
 ### What CORTEX does NOT replace (Non-Goals)
 
 - **CORTEX is not a Semantic Search primary DB:** Continue using Qdrant, Pinecone, or Milvus for purely ephemeral RAG chunks. CORTEX stores the *decisions* and core *facts*.
 - **CORTEX is not an Observability Platform:** Continue using Datadog or ELK for server metrics, APM, and basic string logs. 
-- **CORTEX does not stop hallucinations:** A cryptographically logged lie from an LLM is still a lie. It is merely an *auditable* lie, flagged if it contradicts prior sealed facts.
+- **CORTEX does not stop hallucinations:** A verifiable record can still contain a wrong model conclusion. CORTEX makes that state auditable; it does not make it true.
 
 ## Deployment Matrix
 
@@ -60,9 +91,21 @@ Traditional logging and standard vector stores fail the epistemic containment te
 
 | Environment | Status | Storage / Scaling |
 | :--- | :--- | :--- |
-| **Local-Only** | ✅ **Production-Ready** | SQLite + WAL + built-in Vector Search. Perfect for single daemons. |
+| **Local-Only** | ✅ **Most Mature** | SQLite + WAL + built-in Vector Search. Best fit today for single-node, operator-managed deployments. |
 | **Self-Hosted** | 🟡 **Beta** | Multi-tenant. API-driven. Redis cache. Pluggable to your infra. |
 | **Cloud-Ready** | ⏳ **Roadmap** | AlloyDB/PostgreSQL + Qdrant. For distributed massive swarms. |
+
+## Enterprise Readiness
+
+CORTEX is still on a beta product line, but the repository now exposes the basic due-diligence surfaces a serious buyer or platform team expects:
+
+- **Stable governance surface:** [Support](SUPPORT.md), [Security Policy](SECURITY.md), [Contributing](CONTRIBUTING.md), and [Code of Conduct](CODE_OF_CONDUCT.md)
+- **Stable technical entrypoints:** [Architecture](src/content/docs/architecture.md), [Security Model](src/content/docs/SECURITY_TRUST_MODEL.md), [API](src/content/docs/api.md), and [Operations](src/content/docs/OPERATIONS.md)
+- **Release and supply-chain controls:** signed releases, CI, CodeQL, SBOM generation, dependency audit, and container scanning
+- **Deployment and buyer validation guides:** [DEPLOYMENT_HARDENING.md](DEPLOYMENT_HARDENING.md) and [DUE_DILIGENCE_CHECKLIST.md](DUE_DILIGENCE_CHECKLIST.md)
+- **Candid diligence summary:** strengths, current limits, and evaluation checklist in [ENTERPRISE_READINESS.md](ENTERPRISE_READINESS.md)
+
+If you are evaluating CORTEX for acquisition, procurement, or internal platform adoption, start with [ENTERPRISE_READINESS.md](ENTERPRISE_READINESS.md) and [DUE_DILIGENCE_CHECKLIST.md](DUE_DILIGENCE_CHECKLIST.md).
 
 ## 90-second demo
 
@@ -71,22 +114,19 @@ Traditional logging and standard vector stores fail the epistemic containment te
 $ cortex init
 
 # 2. Store a memory
-$ cortex memory store --agent "risk-bot" --content "Transaction flagged: IP mismatch"
-[+] Fact stored. Ledger hash: 8f4a2b9e...
+$ cortex store risk-bot "Transaction flagged: IP mismatch" --type decision --source agent:risk-bot
+[✓] Stored fact #<FACT_ID> in risk-bot
 
 # 3. Verify integrity
-$ cortex verify record 8f4a2b9e
-[✔] VERIFIED: Hash chain intact. Merkle root sealed.
+$ cortex verify <FACT_ID>
+[✔] VERIFIED: Hash chain intact.
 
-# 4. Tamper attempt (direct DB mutation)
-$ sqlite3 cortex.db "UPDATE facts SET content='Transaction approved' WHERE id='8f4a2b9e'"
+# 4. Verify the ledger
+$ cortex trust-ledger verify
+[✔] Ledger is VALID
 
-# 5. Ledger verification
-$ cortex verify ledger
-[✘] TAMPER DETECTED: Hash mismatch at block 8f4a2b9e
-
-# 6. Export evidence
-$ cortex compliance-report generate --format pdf
+# 5. Generate a compliance snapshot
+$ cortex compliance-report
 ```
 
 ## Quickstart
@@ -99,10 +139,10 @@ pip install cortex-persist
 cortex init
 
 # 2. Store a memory (SHA-256 hashed and chained to prior facts)
-cortex memory store --agent "risk-bot" --content "Transaction flagged: IP mismatch"
+cortex store risk-bot "Transaction flagged: IP mismatch" --type decision --source agent:risk-bot
 
-# 3. Verify integrity (detects any manual database tampering)
-cortex verify ledger
+# 3. Verify the trust ledger
+cortex trust-ledger verify
 ```
 
 ## Integration
@@ -143,20 +183,35 @@ asyncio.run(main())
 
 ## Threat Model Summary (Trust Boundaries)
 
-CORTEX is governed by a strict zero-trust philosophy regarding generative AI output.
-- **Generative Output is Conjecture:** We treat all LLM output as thermodynamically unstable (`Void-State`). It only becomes durable memory *after* crossing the deterministic verification membrane.
-- **SQL Sandboxing:** Agents cannot run arbitrary queries; mutations must pass through rigid schema validation and formal AST checkpoints.
-- **Tamper Evidence over Access Control:** Instead of just hoping admins don't edit rows, we hash-chain the ledger so any manual modification invalidates the mathematical proof of the memory thread.
+CORTEX treats generative AI output as untrusted input until it passes deterministic checks.
+- **Generated output is validated before persistence:** model output only becomes durable memory after guards, schema checks, and write-path validation.
+- **Mutation paths are constrained:** agents cannot write arbitrary state outside the validated mutation flow.
+- **Tamper evidence complements access control:** if someone edits stored records after the fact, the hash chain no longer verifies.
 
-> Read the exhaustive cryptographic guarantees in our [Security & Trust Model](docs/SECURITY_TRUST_MODEL.md).
+> Read the cryptographic guarantees in the [Security Model](src/content/docs/SECURITY_TRUST_MODEL.md).
 
 ---
 
 ## Documentation
 
-- [**Security & Trust Model**](docs/SECURITY_TRUST_MODEL.md) — Cryptographic invariants & guarantees.
+Canonical long-form documentation lives under [`src/content/docs`](src/content/docs). The top-level `docs/` directory is a GitHub-facing compatibility shim, not the source of truth.
+
+- [**Quickstart**](#quickstart) — Install, store, verify.
+- [**Enterprise Readiness**](ENTERPRISE_READINESS.md) — Buyer-facing maturity, risk, and diligence summary.
+- [**Due Diligence Checklist**](DUE_DILIGENCE_CHECKLIST.md) — Reproducible technical and security evaluation steps.
+- [**Deployment Hardening**](DEPLOYMENT_HARDENING.md) — Production-oriented guardrails for self-hosted deployments.
+- [**Support Policy**](SUPPORT.md) — Support channels, response targets, and release support window.
+- [**Repository Governance**](REPO_GOVERNANCE.md) — Ownership, review expectations, and change safety rules.
+- [**Maintainers**](MAINTAINERS.md) — Current maintainer model and stewardship boundaries.
+- [**Version Support**](VERSION_SUPPORT.md) — Supported release line expectations.
+- [**Release Process**](RELEASE_PROCESS.md) — Public package publication and signing flow.
+- [**System Map**](src/content/docs/system-map.md) — Canonical subsystem taxonomy for Hypercore, Overmind, Deepforge, Primeflow, and Coreshift.
+- [**CORTEX Native Technologies**](src/content/docs/CORTEX-NATIVE-TECHNOLOGIES.md) — Canonical definition of the platform's five core trust capabilities.
+- [**API Reference**](src/content/docs/api.md) — SDK primitives and REST endpoints.
+- [**Security Model**](src/content/docs/SECURITY_TRUST_MODEL.md) — Cryptographic invariants and trust guarantees.
+- [**Architecture**](src/content/docs/architecture.md) — System topology and critical trust surfaces.
 - [**Roadmap**](ROADMAP.md) — Deployment phases and scaling logic.
-- [**API Reference**](docs/api.md) — SDK primitives and REST endpoints.
+- [**Contributing**](CONTRIBUTING.md) — Development workflow and contribution rules.
 
 ---
 

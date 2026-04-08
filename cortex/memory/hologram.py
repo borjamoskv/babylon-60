@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from cortex.crypto import load_json_dict
 from cortex.memory.models import CortexFactModel
 
 if TYPE_CHECKING:
@@ -105,7 +106,7 @@ class HolographicMemory:
                     "success_rate": row["success_rate"],
                     "cognitive_layer": row["cognitive_layer"] or "semantic",
                     "parent_decision_id": row["parent_decision_id"],
-                    "metadata": json.loads(row["metadata"]) if row["metadata"] else {},
+                    "metadata": load_json_dict(row["metadata"], tenant_id=tenant),
                 }
                 self._metadata.append(meta_record)
 

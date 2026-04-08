@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
+import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine as AsyncCortexEngine
+
+logger = logging.getLogger(__name__)
 
 
 class FSEntropyOracle:
@@ -22,19 +26,53 @@ class FSEntropyOracle:
         self.entropy_threshold_mb = entropy_threshold_mb
         self._running = False
         self._baseline_mass = -1.0
+        self._stop_event = asyncio.Event()
 
     async def start(self) -> None:
         self._running = True
+        self._stop_event.clear()
         while self._running:
             try:
                 await self._measure_entropy()
-            except Exception:
-                pass
-            await asyncio.sleep(self.poll_interval)
+            except (OSError, RuntimeError, TypeError, ValueError) as exc:
+                logger.warning("FSEntropyOracle cycle failed: %s", exc)
+
+            if not self._running:
+                break
+
+            try:
+                await asyncio.wait_for(self._stop_event.wait(), timeout=self.poll_interval)
+            except TimeoutError:
+                continue
 
     async def stop(self) -> None:
         self._running = False
+        self._stop_event.set()
         await asyncio.sleep(0)
+
+    async def _store_entropy_fact(self, content: str, meta: dict[str, float | str]) -> bool:
+        store = getattr(self.engine, "store", None)
+        if store is not None and inspect.iscoroutinefunction(store):
+            await store(
+                project="SYSTEM",
+                content=content,
+                fact_type="ghost",
+                meta=meta,
+            )
+            return True
+
+        store_sync = getattr(self.engine, "store_sync", None)
+        if callable(store_sync):
+            store_sync(
+                project="SYSTEM",
+                content=content,
+                fact_type="ghost",
+                meta=meta,
+            )
+            return True
+
+        logger.warning("FSEntropyOracle skipped persistence: engine lacks store/store_sync")
+        return False
 
     async def _measure_entropy(self) -> None:
         if not self.target_dir.exists():
@@ -57,30 +95,15 @@ class FSEntropyOracle:
                 f"ENTROPÍA EN EXPANSIÓN. Acumulación de masa muerta o "
                 f"datos no procesados: +{delta:.2f} MB."
             )
-            if hasattr(self.engine, "store") and asyncio.iscoroutinefunction(self.engine.store):
-                await self.engine.store(
-                    project="SYSTEM",
-                    content=content,
-                    fact_type="ghost",
-                    meta={
-                        "oracle": "fs_entropy_v1",
-                        "baseline_mb": self._baseline_mass,
-                        "current_mb": current_mass,
-                        "delta_mb": delta,
-                        "target_dir": str(self.target_dir),
-                    },
-                )
-            else:
-                self.engine.store_sync(  # type: ignore[type-error]
-                    project="SYSTEM",
-                    content=content,
-                    fact_type="ghost",
-                    meta={
-                        "oracle": "fs_entropy_v1",
-                        "baseline_mb": self._baseline_mass,
-                        "current_mb": current_mass,
-                        "delta_mb": delta,
-                        "target_dir": str(self.target_dir),
-                    },
-                )
-            self._baseline_mass = current_mass
+            stored = await self._store_entropy_fact(
+                content,
+                {
+                    "oracle": "fs_entropy_v1",
+                    "baseline_mb": self._baseline_mass,
+                    "current_mb": current_mass,
+                    "delta_mb": delta,
+                    "target_dir": str(self.target_dir),
+                },
+            )
+            if stored:
+                self._baseline_mass = current_mass

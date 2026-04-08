@@ -51,15 +51,15 @@ class MemoryMixin(EngineMixinBase):
         # Dedicated sync connection for the SignalBus (L1 Consciousness)
         bus = None
         try:
-            from cortex.extensions.signals.bus import SignalBus
+            from cortex.extensions.signals.bus import DurableSignalBus
 
             # We use the engine's _get_sync_conn if available, or create one.
             # MemoryMixin is part of CortexEngine, so we can use self._get_sync_conn()
             sync_conn = self._get_sync_conn()
-            bus = SignalBus(sync_conn)
+            bus = DurableSignalBus(sync_conn)
             bus.ensure_table()
         except Exception as e:  # noqa: BLE001
-            logger.warning("SignalBus initialization failed: %s", e)
+            logger.warning("DurableSignalBus initialization failed: %s", e)
 
         # v7 (G10): HDC is opt-in by default.
         import os

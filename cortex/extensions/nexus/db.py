@@ -10,6 +10,7 @@ from typing import Any
 
 from cortex.database.core import connect as db_connect
 from cortex.extensions.nexus.types import DomainOrigin, IntentType, WorldMutation
+from cortex.memory.temporal import EpochTimestampInput, normalize_timestamp_epoch
 
 
 class NexusDB:
@@ -68,6 +69,9 @@ class NexusDB:
         """Insert a mutation. Returns False if deduplicated (already exists)."""
         conn = self._get_conn()
         try:
+            timestamp = normalize_timestamp_epoch(mutation.timestamp)
+            if timestamp is None:
+                raise ValueError("mutation.timestamp cannot be None")
             conn.execute(
                 """INSERT INTO nexus_mutations
                    (idempotency_key, origin, intent, project, payload_json,
@@ -81,7 +85,7 @@ class NexusDB:
                     json.dumps(mutation.payload, default=str),
                     mutation.confidence,
                     mutation.priority.value,
-                    mutation.timestamp,
+                    timestamp,
                 ),
             )
             conn.commit()
@@ -97,7 +101,7 @@ class NexusDB:
         origin: DomainOrigin | None = None,
         intent: IntentType | None = None,
         project: str | None = None,
-        since: float | None = None,
+        since: EpochTimestampInput = None,
         limit: int = 50,
     ) -> list[dict[str, Any]]:
         """Query the World Model. All filters are optional."""
@@ -114,9 +118,9 @@ class NexusDB:
         if project:
             clauses.append("project = ?")
             params.append(project)
-        if since:
+        if since is not None:
             clauses.append("timestamp >= ?")
-            params.append(since)
+            params.append(normalize_timestamp_epoch(since))
 
         where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
         params.append(limit)
@@ -134,9 +138,11 @@ class NexusDB:
         conn.close()
         return n
 
-    def purge_old(self, older_than: float | None = None) -> int:
+    def purge_old(self, older_than: EpochTimestampInput = None) -> int:
         """Remove mutations older than a timestamp. Returns count deleted."""
-        cutoff = older_than or (time.time() - 86400 * 7)  # Default: 7 days
+        cutoff = normalize_timestamp_epoch(older_than)
+        if cutoff is None:
+            cutoff = time.time() - 86400 * 7  # Default: 7 days
         conn = self._get_conn()
         cursor = conn.execute("DELETE FROM nexus_mutations WHERE timestamp < ?", (cutoff,))
         conn.commit()

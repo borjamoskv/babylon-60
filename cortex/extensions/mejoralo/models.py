@@ -14,6 +14,15 @@ __all__ = [
 ]
 
 
+def _severity_count_property(severity: str) -> property:
+    """Create a read-only property that counts findings by severity."""
+
+    def getter(self: AntipatternReport) -> int:
+        return self._count_severity(severity)
+
+    return property(getter)
+
+
 @dataclass
 class DimensionResult:
     """Result for a single X-Ray dimension."""
@@ -86,13 +95,12 @@ class AntipatternReport:
     def total(self) -> int:
         return len(self.findings)
 
-    @property
-    def critical_count(self) -> int:
-        return sum(1 for f in self.findings if f.severity == "critical")
+    def _count_severity(self, severity: str) -> int:
+        """Count findings for a specific severity bucket."""
+        return sum(1 for finding in self.findings if finding.severity == severity)
 
-    @property
-    def high_count(self) -> int:
-        return sum(1 for f in self.findings if f.severity == "high")
+    critical_count = _severity_count_property("critical")
+    high_count = _severity_count_property("high")
 
     def by_severity(self) -> dict[str, list[AntipatternFinding]]:
         result: dict[str, list[AntipatternFinding]] = {}

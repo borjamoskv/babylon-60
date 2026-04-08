@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from cortex.database.core import connect as db_connect
-from cortex.extensions.signals.bus import SignalBus
+from cortex.extensions.signals.bus import DurableSignalBus
 from cortex.memory.temporal import now_iso
 
 logger = logging.getLogger("cortex.chronos.compound")
@@ -294,7 +294,7 @@ class CompoundYieldTracker:
                 fact_id: int = cursor.lastrowid  # type: ignore[assignment]
 
                 # Emit signal to bus
-                bus = SignalBus(conn)
+                bus = DurableSignalBus(conn)
                 bus.emit(
                     "chronos:compound_audit",
                     payload=report.to_dict(),

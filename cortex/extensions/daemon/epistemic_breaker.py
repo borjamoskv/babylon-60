@@ -1,6 +1,10 @@
 import asyncio
 import logging
+import sqlite3
 from datetime import datetime, timezone
+from typing import Any
+
+import aiosqlite
 
 logger = logging.getLogger(__name__)
 
@@ -18,10 +22,10 @@ class EpistemicBreakerDaemon:
 
     def __init__(
         self,
-        engine,
+        engine: Any,
         check_interval_seconds: int = 300,
         max_entropy_threshold: float = 0.70,
-    ):
+    ) -> None:
         self.engine = engine
         self.check_interval_seconds = check_interval_seconds
         self.max_entropy_threshold = max_entropy_threshold
@@ -34,6 +38,155 @@ class EpistemicBreakerDaemon:
 
         # System State
         self.circuit_open = False  # False = System is awake and acting. True = Sleep/Compressing.
+
+    @staticmethod
+    async def _facts_column_names(conn: aiosqlite.Connection) -> set[str]:
+        async with conn.execute("PRAGMA table_info(facts)") as cursor:
+            rows = await cursor.fetchall()
+        return {str(row[1]) for row in rows}
+
+    @staticmethod
+    async def _query_count(
+        conn: aiosqlite.Connection,
+        sql: str,
+        params: tuple[Any, ...],
+    ) -> int:
+        async with conn.execute(sql, params) as cursor:
+            row = await cursor.fetchone()
+        return int(row[0]) if row and row[0] is not None else 0
+
+    @classmethod
+    async def _collect_stats_from_conn(
+        cls,
+        conn: aiosqlite.Connection,
+        tenant_id: str,
+        project: str,
+    ) -> dict[str, Any]:
+        tenant_id = tenant_id.strip() or "default"
+        project = project.strip()
+
+        facts_columns = await cls._facts_column_names(conn)
+        if not facts_columns:
+            return {
+                "total_facts": 0,
+                "active_facts": 0,
+                "deprecated_facts": 0,
+                "orphan_facts": 0,
+                "types": {},
+            }
+
+        scope_sql = "tenant_id = ?"
+        params: list[Any] = [tenant_id]
+        if project:
+            scope_sql += " AND project = ?"
+            params.append(project)
+
+        tombstone_clause = (
+            "is_tombstoned = 0"
+            if "is_tombstoned" in facts_columns
+            else "valid_until IS NULL"
+        )
+        active_scope_sql = f"{scope_sql} AND {tombstone_clause}"
+
+        total = await cls._query_count(
+            conn,
+            f"SELECT COUNT(*) FROM facts WHERE {scope_sql}",
+            tuple(params),
+        )
+        active = await cls._query_count(
+            conn,
+            f"SELECT COUNT(*) FROM facts WHERE {active_scope_sql}",
+            tuple(params),
+        )
+        error_count = await cls._query_count(
+            conn,
+            f"SELECT COUNT(*) FROM facts WHERE {active_scope_sql} AND fact_type = 'error'",
+            tuple(params),
+        )
+
+        parent_column = ""
+        if "parent_decision_id" in facts_columns:
+            parent_column = "parent_decision_id"
+        elif "parent_id" in facts_columns:
+            parent_column = "parent_id"
+
+        causal_facts = 0
+        if parent_column:
+            causal_facts = await cls._query_count(
+                conn,
+                f"SELECT COUNT(*) FROM facts WHERE {active_scope_sql} AND {parent_column} IS NOT NULL",
+                tuple(params),
+            )
+
+        return {
+            "total_facts": total,
+            "active_facts": active,
+            "deprecated_facts": max(total - active, 0),
+            "orphan_facts": max(active - causal_facts, 0),
+            "types": {"error": error_count},
+        }
+
+    @classmethod
+    async def evaluate(
+        cls,
+        conn: aiosqlite.Connection,
+        tenant_id: str,
+        project: str = "",
+        *,
+        max_entropy_threshold: float = 0.70,
+    ) -> dict[str, Any]:
+        """Run a one-shot entropy evaluation against the current facts table."""
+        try:
+            stats = await cls._collect_stats_from_conn(conn, tenant_id, project)
+        except (sqlite3.Error, OSError, ValueError) as exc:
+            logger.debug("EpistemicBreaker.evaluate skipped: %s", exc)
+            return {
+                "tenant_id": tenant_id.strip() or "default",
+                "project": project.strip(),
+                "entropy": 0.0,
+                "tripped": False,
+                "stats": {
+                    "total_facts": 0,
+                    "active_facts": 0,
+                    "deprecated_facts": 0,
+                    "orphan_facts": 0,
+                    "types": {},
+                },
+            }
+
+        active = max(stats.get("active_facts", 0), 1)
+        total = max(stats.get("total_facts", 0), 1)
+        orphan_ratio = min(stats.get("orphan_facts", 0) / active, 1.0)
+        error_density = min(stats.get("types", {}).get("error", 0) / active, 1.0)
+        deprecation_ratio = min(stats.get("deprecated_facts", 0) / total, 1.0)
+        entropy = round(
+            min(
+                orphan_ratio * 0.30
+                + error_density * 0.25
+                + deprecation_ratio * 0.20,
+                1.0,
+            ),
+            4,
+        )
+        tripped = entropy >= max_entropy_threshold
+
+        if tripped:
+            logger.warning(
+                "[EPISTEMIC BREAKER] Post-store entropy threshold crossed: %.3f >= %.3f "
+                "(tenant=%s, project=%s)",
+                entropy,
+                max_entropy_threshold,
+                tenant_id.strip() or "default",
+                project.strip() or "*",
+            )
+
+        return {
+            "tenant_id": tenant_id.strip() or "default",
+            "project": project.strip(),
+            "entropy": entropy,
+            "tripped": tripped,
+            "stats": stats,
+        }
 
     async def _measure_entropy(self) -> float:
         """Deterministic cognitive entropy (0.0–1.0) from engine stats.
@@ -76,7 +229,7 @@ class EpistemicBreakerDaemon:
         )
         return round(min(entropy, 1.0), 4)
 
-    async def _trigger_sleep_cycle(self):
+    async def _trigger_sleep_cycle(self) -> None:
         """
         The Circuit Breaker trips. The system must sleep to survive.
         (Axiom Ω₂: Entropic Asymmetry - Reduce entropy).
@@ -126,7 +279,7 @@ class EpistemicBreakerDaemon:
         except Exception as e:  # noqa: BLE001 — wakeup persist must not crash daemon
             logger.error("Failed to record breaker wakeup: %s", e)
 
-    async def run(self):
+    async def run(self) -> None:
         """Main evaluation loop."""
         logger.info(
             "🛡️ Epistemic Breaker Daemon Initialized. Scanning every %ss. Max Entropy limit: %s",
@@ -158,7 +311,7 @@ class EpistemicBreakerDaemon:
             if self.is_running:
                 await asyncio.sleep(self.check_interval_seconds)
 
-    def stop(self):
+    def stop(self) -> None:
         """Signals the daemon to shut down cleanly."""
         logger.info("Stopping Epistemic Breaker Daemon...")
         self.is_running = False

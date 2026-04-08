@@ -11,6 +11,8 @@ import sqlite3
 from datetime import datetime, timezone
 from typing import Any
 
+from cortex.memory.temporal import TimestampInput, normalize_timestamp
+
 __all__ = ["UsageRecord", "UsageTracker"]
 
 logger = logging.getLogger(__name__)
@@ -66,14 +68,14 @@ class UsageRecord:
         method: str = "GET",
         status_code: int = 200,
         tokens_used: int = 0,
-        timestamp: str | None = None,
+        timestamp: TimestampInput = None,
     ):
         self.tenant_id = tenant_id
         self.endpoint = endpoint
         self.method = method
         self.status_code = status_code
         self.tokens_used = tokens_used
-        self.timestamp = timestamp or datetime.now(timezone.utc).isoformat()
+        self.timestamp = normalize_timestamp(timestamp) or datetime.now(timezone.utc).isoformat()
 
 
 class UsageTracker:

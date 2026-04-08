@@ -19,7 +19,7 @@
 ![Security](https://img.shields.io/badge/scan-trivy%20%2B%20pip--audit-blue.svg)
 [![Docs](https://img.shields.io/badge/docs-github-brightgreen)](https://github.com/borjamoskv/Cortex-Persist/tree/main/docs)
 [![Website](https://img.shields.io/badge/web-cortexpersist.com-blue)](https://cortexpersist.com)
-[![Cross-Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue)](docs/cross_platform_guide.md)
+[![Cross-Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue)](src/content/docs/cross_platform_guide.md)
 
 ---
 
@@ -35,6 +35,23 @@ CORTEX 不替代你的记忆层 — 它**认证**它。
 
 *它对于 AI 记忆，就如同 SSL/TLS 对于 Web 通信：
 密码学验证、审计追踪和可验证的证据链。*
+
+---
+
+## 企业评估入口
+
+如果你在做收购、采购或内部平台评估，请先阅读这些买方导向材料：
+
+- [Enterprise Readiness](ENTERPRISE_READINESS.md)
+- [Due Diligence Checklist](DUE_DILIGENCE_CHECKLIST.md)
+- [Deployment Hardening](DEPLOYMENT_HARDENING.md)
+- [Support](SUPPORT.md)
+- [Repo Governance](REPO_GOVERNANCE.md)
+- [Maintainers](MAINTAINERS.md)
+- [Version Support](VERSION_SUPPORT.md)
+- [Release Process](RELEASE_PROCESS.md)
+
+这些文档比营销性描述更接近当前真实可交付面。
 
 ---
 
@@ -72,15 +89,22 @@ CORTEX 不替代你的记忆层 — 它**认证**它。
 ## 快速演示
 
 ```bash
-# 存储一个带密码学证明的决策
-$ cortex store --type decision --project fin-agent "Approved loan #4292"
-[+] Fact stored. Ledger hash: 8f4a2b9e...
+# 1. 初始化本地账本
+$ cortex init
 
-# 验证记录未被篡改
-$ cortex verify 8f4a2b9e
-[✔] VERIFIED: Hash chain intact. Merkle root sealed.
+# 2. 存储一条决策型事实
+$ cortex store fin-agent "Approved loan #4292" --type decision --source agent:fin-agent
+[✓] Stored fact #<FACT_ID> in fin-agent
 
-# 生成审计报告
+# 3. 使用上一步返回的事实 ID 验证记录
+$ cortex verify <FACT_ID>
+[✔] VERIFIED: Hash chain intact.
+
+# 4. 验证总账连续性
+$ cortex trust-ledger verify
+[✔] Ledger is VALID
+
+# 5. 生成技术证据快照
 $ cortex compliance-report
 ```
 
@@ -175,33 +199,33 @@ block-beta
   columns 1
 
   block:INTERFACES["接口层"]
-    CLI["CLI (38 命令)"]
-    API["REST API (55+ 端点)"]
+    CLI["CLI"]
+    API["REST API"]
     MCP["MCP Server"]
   end
 
   block:GATEWAY["信任网关"]
-    RBAC["RBAC (4 角色)"]
+    Access["访问控制与策略"]
     Guards["准入守卫"]
-    Auth["API Keys + JWT"]
+    Auth["认证与审计入口"]
   end
 
   block:STORAGE["存储层"]
-    L1["工作记忆 (Redis / in-process)"]
-    L2["向量搜索 (Qdrant / sqlite-vec)"]
-    L3["账本 (AlloyDB / SQLite, 哈希链)"]
+    L1["本地存储与事实库"]
+    L2["检索与索引"]
+    L3["账本与完整性证明"]
   end
 
   block:TRUST["验证层"]
     Ledger["SHA-256 账本"]
     Merkle["Merkle 树"]
-    Consensus["多代理验证 (BFT)"]
+    Verification["验证与审计"]
   end
 
   INTERFACES --> GATEWAY --> STORAGE --> TRUST
 ```
 
-> 完整架构详见 [ARCHITECTURE.md](docs/ARCHITECTURE.md)。
+> 完整架构详见 [architecture.md](docs/architecture.md)。
 
 ---
 
@@ -212,9 +236,9 @@ CORTEX 可接入你现有的技术栈：
 - **IDE**：Claude Code, Cursor, OpenClaw, Windsurf, Antigravity（通过 MCP）
 - **代理框架**：LangChain, CrewAI, AutoGen, Google ADK
 - **记忆层**：作为验证层叠加在 Mem0, Zep, Letta 之上
-- **数据库**：SQLite（本地）, AlloyDB, PostgreSQL, Turso（边缘）
-- **向量存储**：sqlite-vec（本地）, Qdrant（自托管或云端）
-- **部署**：Docker, Kubernetes, 裸机, `pip install`
+- **数据库**：SQLite（当前最成熟）；更广泛的数据库路径请参阅部署与 readiness 文档
+- **向量检索**：本地优先；更广泛的远程检索拓扑属于定向或路线图能力
+- **部署**：`pip install` 与仓库附带 Docker 路径当前最现实；更大规模云/集群形态请视为后续阶段
 
 ---
 
@@ -226,7 +250,7 @@ CORTEX 无需 Docker 即可在任何环境原生运行：
 - **Linux**（systemd 和 notify-send）
 - **Windows**（任务计划程序和 PowerShell）
 
-详见[跨平台指南](docs/cross_platform_guide.md)。
+详见[跨平台指南](src/content/docs/cross_platform_guide.md)。
 
 ---
 
@@ -244,6 +268,8 @@ CORTEX 提供：
 
 这些能力支持欧盟 AI 法案（第 12 条）等框架中描述的
 可追溯性和记录保存要求。
+
+它们不应被理解为自动法律合规结论；最终判断仍取决于部署方式、治理措施与正式审查。
 
 ---
 

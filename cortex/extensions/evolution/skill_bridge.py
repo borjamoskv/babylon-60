@@ -12,11 +12,10 @@ import logging
 from pathlib import Path
 from typing import Any, Optional
 
+from cortex.core.paths import canonical_skill_name, resolve_skill_dir, resolve_skill_name
 from cortex.extensions.evolution.agents import AgentDomain
 
 logger = logging.getLogger(__name__)
-
-_SKILLS_DIR = Path("~/.gemini/antigravity/skills").expanduser()
 
 # Canonical domain → skill mapping
 DOMAIN_SKILL_MAP: dict[AgentDomain, str] = {
@@ -28,8 +27,9 @@ DOMAIN_SKILL_MAP: dict[AgentDomain, str] = {
     AgentDomain.PERCEPTION: "evolv-1",
     AgentDomain.MEMORY: "cortex",
     AgentDomain.EXPERIENCE: "impactv-1",
-    AgentDomain.COMMUNICATION: "singularity-nexus",
+    AgentDomain.COMMUNICATION: "comms-hub-omega",
     AgentDomain.VERIFICATION: "mejoralo",
+    AgentDomain.SYNERGY: "singularity-nexus",
 }
 
 # Reverse mapping: skill → domain
@@ -43,13 +43,13 @@ def get_skill_for_domain(domain: AgentDomain) -> str:
 
 def get_domain_for_skill(skill_name: str) -> Optional[AgentDomain]:
     """Return the agent domain for a MOSKV-1 skill, or None if unknown."""
-    return SKILL_DOMAIN_MAP.get(skill_name)
+    return SKILL_DOMAIN_MAP.get(canonical_skill_name(skill_name))
 
 
 def get_skill_path(domain: AgentDomain) -> Path:
     """Return the absolute path to the SKILL.md for a domain's skill."""
     skill_name = get_skill_for_domain(domain)
-    return _SKILLS_DIR / skill_name / "SKILL.md"
+    return resolve_skill_dir(skill_name) / "SKILL.md"
 
 
 def check_skill_health(domain: AgentDomain) -> bool:
@@ -58,7 +58,7 @@ def check_skill_health(domain: AgentDomain) -> bool:
 
 
 def get_all_skill_health() -> dict[AgentDomain, bool]:
-    """Check health for all 10 domains. Returns dict[domain → installed]."""
+    """Check health for all domains. Returns dict[domain → installed]."""
     return {domain: check_skill_health(domain) for domain in AgentDomain}
 
 
@@ -71,6 +71,11 @@ def get_skill_summary() -> dict[str, Any]:
         "installed_skills": installed,
         "missing_skills": [d.name for d, ok in health.items() if not ok],
         "mapping": {
-            d.name: {"skill": s, "installed": health[d]} for d, s in DOMAIN_SKILL_MAP.items()
+            d.name: {
+                "skill": s,
+                "resolved_skill": resolve_skill_name(s),
+                "installed": health[d],
+            }
+            for d, s in DOMAIN_SKILL_MAP.items()
         },
     }

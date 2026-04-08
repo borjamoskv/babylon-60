@@ -14,6 +14,8 @@ from typing import Any
 
 import httpx
 
+from cortex.extensions.sync.common import SYSTEM_BRIDGE_KIND
+
 logger = logging.getLogger("cortex.extensions.agents.apis_omega")
 
 SIGNUP_URLS = {
@@ -189,6 +191,8 @@ class ApisOmegaAgent:
             confidence="C5",
             source="agent:apis-omega",
             meta={
+                "bridge_kind": SYSTEM_BRIDGE_KIND,
+                "bridge_provider": "apis_omega",
                 "sub_type": "connectivity_audit",
                 "coverage": coverage,
                 "validated": validate,

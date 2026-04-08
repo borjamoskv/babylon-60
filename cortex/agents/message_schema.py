@@ -1,11 +1,24 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any
+from typing import Any, TypeAlias
 from uuid import uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+from cortex.agents.contracts import (
+    TaskCompletedPayload,
+    TaskErrorPayload,
+    TaskFailedPayload,
+    TaskRequestPayload,
+    TaskResultPayload,
+    ToolCallPayload,
+    ToolResultPayload,
+    VerificationRequestPayload,
+    VerificationResultPayload,
+)
 
 
 class MessageState(str, Enum):
@@ -42,6 +55,29 @@ class MessageKind(str, Enum):
     SHUTDOWN = "shutdown"
 
 
+MessagePayloadModel: TypeAlias = (
+    TaskRequestPayload
+    | TaskResultPayload[Any]
+    | TaskErrorPayload
+    | ToolCallPayload
+    | ToolResultPayload
+    | VerificationRequestPayload
+    | VerificationResultPayload
+    | TaskCompletedPayload
+    | TaskFailedPayload
+)
+
+MessagePayloadInput: TypeAlias = MessagePayloadModel | Mapping[str, Any]
+
+
+def _normalize_payload(payload: MessagePayloadInput | None) -> dict[str, Any]:
+    if payload is None:
+        return {}
+    if isinstance(payload, BaseModel):
+        return payload.model_dump(exclude_none=True)
+    return dict(payload)
+
+
 class AgentMessage(BaseModel):
     message_id: str = Field(default_factory=lambda: str(uuid4()))
     correlation_id: str
@@ -56,6 +92,11 @@ class AgentMessage(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     trace_context: dict[str, Any] = Field(default_factory=dict)
 
+    @field_validator("payload", mode="before")
+    @classmethod
+    def _payload_must_normalize_to_dict(cls, value: MessagePayloadInput | None) -> dict[str, Any]:
+        return _normalize_payload(value)
+
     def to_json(self) -> str:
         return self.model_dump_json()
 
@@ -68,7 +109,7 @@ def new_message(
     sender: str,
     recipient: str,
     kind: MessageKind,
-    payload: dict[str, Any],
+    payload: MessagePayloadInput,
     *,
     correlation_id: str = "auto",
     causation_id: str | None = None,
@@ -82,7 +123,7 @@ def new_message(
         sender=sender,
         recipient=recipient,
         kind=kind,
-        payload=payload,
+        payload=_normalize_payload(payload),
         correlation_id=correlation_id,
         causation_id=causation_id,
         ttl_seconds=ttl_seconds,

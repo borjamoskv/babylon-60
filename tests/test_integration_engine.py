@@ -194,3 +194,36 @@ async def test_quorum_pools_resolution(engine):
     # Check that lock was removed and memory is clean
     assert 99 not in manager._pool_locks
     assert 99 not in manager._vote_pools
+
+
+@pytest.mark.asyncio
+async def test_consensus_get_votes_is_tenant_scoped(engine):
+    async with engine.session() as conn:
+        await conn.execute(
+            "INSERT INTO facts (id, content, project, tenant_id) VALUES (200, 'Tenant fact', 'proj', 'tenant_A')"
+        )
+        await conn.execute(
+            "INSERT INTO agents (id, public_key, name, is_active, reputation_score, tenant_id) VALUES (?, ?, ?, ?, ?, ?)",
+            ("agent_A", "pub_A", "Agent A", 1, 0.5, "tenant_A"),
+        )
+        await conn.execute(
+            "INSERT INTO agents (id, public_key, name, is_active, reputation_score, tenant_id) VALUES (?, ?, ?, ?, ?, ?)",
+            ("agent_B", "pub_B", "Agent B", 1, 0.5, "tenant_B"),
+        )
+        await conn.execute(
+            "INSERT INTO consensus_votes_v2 (fact_id, agent_id, tenant_id, vote, vote_weight, agent_rep_at_vote) VALUES (?, ?, ?, ?, ?, ?)",
+            (200, "agent_A", "tenant_A", 1, 1.0, 0.5),
+        )
+        await conn.execute(
+            "INSERT INTO consensus_votes_v2 (fact_id, agent_id, tenant_id, vote, vote_weight, agent_rep_at_vote) VALUES (?, ?, ?, ?, ?, ?)",
+            (200, "agent_B", "tenant_B", -1, 1.0, 0.5),
+        )
+        await conn.commit()
+
+    votes_a = await engine.get_votes(200, tenant_id="tenant_A")
+    votes_b = await engine.get_votes(200, tenant_id="tenant_B")
+
+    assert len(votes_a) == 1
+    assert votes_a[0]["agent"] == "agent_A"
+    assert len(votes_b) == 1
+    assert votes_b[0]["agent"] == "agent_B"

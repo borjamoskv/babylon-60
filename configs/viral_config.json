@@ -1,0 +1,61 @@
+{
+    "project": "LA TIBIA ┃ CRÓNICAS DE DIEGOI",
+    "aesthetic": "Industrial Noir / Glitch",
+    "fps": 60,
+    "resolution": "4K",
+    "chapters": [
+        {
+            "id": 1,
+            "title": "El Tatuaje",
+            "content": "Instrucciones de lavadora yugoslava Gorenje 1989. Centrifugación 1200 RPM.",
+            "audio_hook": "industrial_glitch_loop",
+            "visual_state": "VIRAL"
+        },
+        {
+            "id": 2,
+            "title": "La Deuda de WinRAR",
+            "content": "Comprimiendo todo el sistema judicial en un archivo .rar.",
+            "audio_hook": "compression_noise_sweep",
+            "visual_state": "SINGULARITY"
+        },
+        {
+            "id": 3,
+            "title": "El Escarabajo",
+            "content": "Escarabajo de hardware cósmico devora el código fuente.",
+            "audio_hook": "bitcrush_beetle_scuttle",
+            "visual_state": "VIRAL"
+        },
+        {
+            "id": 4,
+            "title": "Laura Pausini",
+            "content": "Loop infinito de 'La Vida Cañón' en el vacío interdimensional.",
+            "audio_hook": "nostalgia_glitch_resonance",
+            "visual_state": "IDLE"
+        },
+        {
+            "id": 5,
+            "title": "Paco de Lucía",
+            "content": "Algoritmos flamencos en el pulso térmico de la CPU.",
+            "audio_hook": "algorithmic_flamenco_overdrive",
+            "visual_state": "VIRAL"
+        },
+        {
+            "id": 6,
+            "title": "La Extracción",
+            "content": "Capital soberano obtenido de la fricción bizantina.",
+            "audio_hook": "gold_convergence_pulse",
+            "visual_state": "CAPITAL"
+        },
+        {
+            "id": 7,
+            "title": "El Ruso Blanco Final",
+            "content": "Cierre de ciclo. La singularidad es una copa vacía.",
+            "audio_hook": "void_resonance_final",
+            "visual_state": "SINGULARITY"
+        }
+    ],
+    "moltbook_seed": {
+        "text": "#ROBALAS #CORTEX #LATIBIA #1200RPM",
+        "dominance": 100
+    }
+}

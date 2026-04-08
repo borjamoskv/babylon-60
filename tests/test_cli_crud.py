@@ -4,6 +4,8 @@ Tests for CLI CRUD commands — delete, list, edit.
 
 from __future__ import annotations
 
+import sqlite3
+
 import pytest
 from click.testing import CliRunner
 
@@ -41,8 +43,28 @@ def db_path(tmp_path):
         fact_type="ghost",
         source="cli",
     )
+    engine.store_sync(
+        "tenant-b-project",
+        "Fourth test fact for tenant isolation",
+        tenant_id="tenant-b",
+        fact_type="knowledge",
+        source="cli",
+    )
     engine.close_sync()
     return str(path)
+
+
+def _fact_id_for(db_path: str, project: str, tenant_id: str) -> int:
+    conn = sqlite3.connect(db_path)
+    try:
+        row = conn.execute(
+            "SELECT id FROM facts WHERE project = ? AND tenant_id = ? ORDER BY id LIMIT 1",
+            (project, tenant_id),
+        ).fetchone()
+    finally:
+        conn.close()
+    assert row is not None
+    return int(row[0])
 
 
 class TestListCommand:
@@ -76,6 +98,17 @@ class TestListCommand:
         result = runner.invoke(cli, ["list", "--db", db_path, "-n", "1"])
         assert result.exit_code == 0
 
+    def test_list_filters_by_tenant(self, runner, db_path):
+        result = runner.invoke(cli, ["list", "--db", db_path, "--tenant-id", "default"])
+        assert result.exit_code == 0
+        assert "tenant-b-project" not in result.output
+
+    def test_list_can_target_non_default_tenant(self, runner, db_path):
+        result = runner.invoke(cli, ["list", "--db", db_path, "--tenant-id", "tenant-b"])
+        assert result.exit_code == 0
+        assert "tenant-b" in result.output
+        assert "tenant isolation" in result.output.lower()
+
 
 class TestDeleteCommand:
     """Tests for 'cortex delete'."""
@@ -102,6 +135,25 @@ class TestDeleteCommand:
         monkeypatch.setattr("cortex.extensions.sync.SYNC_STATE_FILE", tmp_path / "sync_state.json")
 
         result = runner.invoke(cli, ["delete", "1", "-r", "testing", "--db", db_path])
+        assert result.exit_code == 0
+        assert "deprecado" in result.output.lower() or "deprecated" in result.output.lower()
+
+    def test_delete_requires_matching_tenant(self, runner, db_path):
+        tenant_b_fact_id = _fact_id_for(db_path, "tenant-b-project", "tenant-b")
+        result = runner.invoke(cli, ["delete", str(tenant_b_fact_id), "--db", db_path])
+        assert result.exit_code == 0
+        assert "🔍" in result.output
+
+    def test_delete_can_target_non_default_tenant(self, runner, db_path, monkeypatch, tmp_path):
+        monkeypatch.setattr("cortex.extensions.sync.MEMORY_DIR", tmp_path / "memory")
+        monkeypatch.setattr("cortex.extensions.sync.CORTEX_DIR", tmp_path)
+        monkeypatch.setattr("cortex.extensions.sync.SYNC_STATE_FILE", tmp_path / "sync_state.json")
+
+        tenant_b_fact_id = _fact_id_for(db_path, "tenant-b-project", "tenant-b")
+        result = runner.invoke(
+            cli,
+            ["delete", str(tenant_b_fact_id), "--tenant-id", "tenant-b", "--db", db_path],
+        )
         assert result.exit_code == 0
         assert "deprecado" in result.output.lower() or "deprecated" in result.output.lower()
 
@@ -142,3 +194,33 @@ class TestEditCommand:
         # Verify project still listed (content is encrypted)
         list_result = runner.invoke(cli, ["list", "--db", db_path, "-p", "test-project"])
         assert "test-project" in list_result.output or list_result.exit_code == 0
+
+    def test_edit_requires_matching_tenant(self, runner, db_path):
+        tenant_b_fact_id = _fact_id_for(db_path, "tenant-b-project", "tenant-b")
+        result = runner.invoke(
+            cli,
+            ["edit", str(tenant_b_fact_id), "Tenant-b update", "--db", db_path],
+        )
+        assert result.exit_code == 0
+        assert "🔍" in result.output
+
+    def test_edit_can_target_non_default_tenant(self, runner, db_path, monkeypatch, tmp_path):
+        monkeypatch.setattr("cortex.extensions.sync.MEMORY_DIR", tmp_path / "memory")
+        monkeypatch.setattr("cortex.extensions.sync.CORTEX_DIR", tmp_path)
+        monkeypatch.setattr("cortex.extensions.sync.SYNC_STATE_FILE", tmp_path / "sync_state.json")
+
+        tenant_b_fact_id = _fact_id_for(db_path, "tenant-b-project", "tenant-b")
+        result = runner.invoke(
+            cli,
+            [
+                "edit",
+                str(tenant_b_fact_id),
+                "Tenant-b update",
+                "--tenant-id",
+                "tenant-b",
+                "--db",
+                db_path,
+            ],
+        )
+        assert result.exit_code == 0
+        assert "editado" in result.output or "edited" in result.output.lower()

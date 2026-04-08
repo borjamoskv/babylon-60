@@ -29,7 +29,6 @@ def prepare_stealth_headers(extra_headers: dict[str, str]) -> dict[str, str]:
             "User-Agent": profile["User-Agent"],
             "Accept": profile["Accept"],
             "Accept-Language": random.choice(_LANGS),
-            "Accept-Encoding": "gzip, deflate, br",
             "Sec-Ch-Ua": profile["Sec-Ch-Ua"],
             "Sec-Ch-Ua-Mobile": "?0",
             "Sec-Ch-Ua-Platform": profile["Sec-Ch-Ua-Platform"],
@@ -55,13 +54,14 @@ def sanitize_response(text: str) -> str:
     if not LLM_STEALTH_MODE or not text:
         return text
 
-    scrubbed = text
+    # Normalize encoding before regex ops (avoids surrogate/codec errors on LLM responses)
+    scrubbed = text.encode("utf-16", "surrogatepass").decode("utf-16", "replace")
     for pattern in _GHOST_SIGNATURES:
         scrubbed = re.sub(pattern, "", scrubbed).strip()
 
     # Remove common "apologetic" prefixes
-    _APOL = r"^(?i)(i apologize|i'm sorry|as an ai language model|as an ai).*?(\.|\!|\:)\s*"
-    scrubbed = re.sub(_APOL, "", scrubbed)
+    _APOL = r"(i apologize|i'm sorry|as an ai language model|as an ai).*?(\.|!|:)\s*"
+    scrubbed = re.sub(_APOL, "", scrubbed, flags=re.IGNORECASE)
     return scrubbed.strip()
 
 

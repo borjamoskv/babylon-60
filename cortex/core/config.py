@@ -120,6 +120,12 @@ class CortexConfig:
     # Swarm-Prime (LEGION-10k)
     MAX_SWARM_NODES: int = 10000
     SWARM_SHARD_COUNT: int = 100
+    SWARM_CAPATAZ_MAX_CONCURRENCY: int = 16
+    SWARM_DISPATCH_BATCH_SIZE: int = 512
+    SWARM_LEGION_WORKERS: int = 50
+    SWARM_LEGION_QUEUE_MAXSIZE: int = 1024
+    SWARM_THERMAL_MAX_WAIT_S: float = 0.2
+    SWARM_THERMAL_CHECK_INTERVAL_S: float = 0.01
 
     @property
     def PROD(self) -> bool:
@@ -136,7 +142,7 @@ class CortexConfig:
         """Build configuration from environment variables."""
         storage_mode = os.environ.get("CORTEX_STORAGE", "local")
         return cls(
-            DB_PATH=os.environ.get("CORTEX_DB", str(DEFAULT_DB_PATH)),
+            DB_PATH=_get_db_path_from_env(),
             PG_URL=os.environ.get("CORTEX_PG_URL", ""),
             RUNBOOT_MODE=os.environ.get("CORTEX_RUNBOOT", "local"),
             ALLOWED_ORIGINS=os.environ.get(
@@ -186,7 +192,32 @@ class CortexConfig:
             TELEGRAM_TOKEN=os.environ.get("CORTEX_TELEGRAM_TOKEN", ""),
             TELEGRAM_CHAT_ID=os.environ.get("CORTEX_TELEGRAM_CHAT_ID", ""),
             NOTIFICATIONS_MIN_SEVERITY=os.environ.get("CORTEX_NOTIFY_MIN_SEVERITY", "warning"),
+            SWARM_CAPATAZ_MAX_CONCURRENCY=int(
+                os.environ.get("CORTEX_SWARM_CAPATAZ_MAX_CONCURRENCY", "16")
+            ),
+            SWARM_DISPATCH_BATCH_SIZE=int(
+                os.environ.get("CORTEX_SWARM_DISPATCH_BATCH_SIZE", "512")
+            ),
+            SWARM_LEGION_WORKERS=int(os.environ.get("CORTEX_SWARM_LEGION_WORKERS", "50")),
+            SWARM_LEGION_QUEUE_MAXSIZE=int(
+                os.environ.get("CORTEX_SWARM_LEGION_QUEUE_MAXSIZE", "1024")
+            ),
+            SWARM_THERMAL_MAX_WAIT_S=float(
+                os.environ.get("CORTEX_SWARM_THERMAL_MAX_WAIT_S", "0.2")
+            ),
+            SWARM_THERMAL_CHECK_INTERVAL_S=float(
+                os.environ.get("CORTEX_SWARM_THERMAL_CHECK_INTERVAL_S", "0.01")
+            ),
         )
+
+
+def _get_db_path_from_env() -> str:
+    """Resolve the runtime DB path from supported env var aliases.
+
+    `CORTEX_DB_PATH` is the documented/public name used across CLI, docs and
+    adjacent tooling. `CORTEX_DB` remains supported for backwards compatibility.
+    """
+    return os.environ.get("CORTEX_DB_PATH") or os.environ.get("CORTEX_DB") or str(DEFAULT_DB_PATH)
 
 
 # ─── Module-level singleton ──────────────────────────────────────────

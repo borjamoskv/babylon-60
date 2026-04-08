@@ -157,13 +157,19 @@ class HealthLoop:
     ) -> None:
         """Persist health snapshot as a CORTEX fact."""
         try:
+            meta = {
+                "bridge_kind": "system",
+                "bridge_provider": "daemon",
+                "source_subtype": "health_snapshot",
+                **data,
+            }
             engine.store_sync(  # type: ignore[attr-defined]
                 "cortex",
                 content=(f"Health snapshot: {data['score']}/100 ({data['grade']})"),
                 fact_type="bridge",
                 source="daemon:health",
                 tags=["health", "snapshot", data["grade"]],
-                meta=data,
+                meta=meta,
                 confidence="C5",
             )
         except Exception as e:  # noqa: BLE001

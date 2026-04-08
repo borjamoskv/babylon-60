@@ -3,7 +3,10 @@ Entropic Wake Daemon (VOID DAEMON)
 The proactive heartbeat that crosses the Rubicon: from determinism to autonomous mutation.
 """
 
+from __future__ import annotations
+
 import asyncio
+import inspect
 import logging
 import sqlite3
 import subprocess
@@ -29,6 +32,7 @@ class EntropicWakeDaemon:
         self.interval_seconds = check_interval_hours * 3600
         self.threshold = zenon_threshold
         self._shutdown = False
+        self._stop_event = asyncio.Event()
 
     def check_entropy(self) -> float:
         """
@@ -66,9 +70,7 @@ class EntropicWakeDaemon:
             entropy_score += epistemic_ghosts * 0.05
 
             # 3. DB Type Ghosts
-            cursor.execute(
-                "SELECT COUNT(*) FROM facts WHERE type = 'ghost' AND status != 'resolved'"
-            )
+            cursor.execute("SELECT COUNT(*) FROM facts WHERE fact_type = 'ghost' AND is_tombstoned = 0")
             db_ghosts = cursor.fetchone()[0]
             entropy_score += db_ghosts * 0.15
 
@@ -78,7 +80,7 @@ class EntropicWakeDaemon:
         logger.debug("Current Zenón Entropy τ_z: %s", entropy_score)
         return entropy_score
 
-    def ignite_purification_agent(self, target: str = "modulo_entropico"):
+    async def ignite_purification_agent(self, target: str = "modulo_entropico") -> None:
         """
         Spawn the headless agent.
         Todo ocurre sin un solo Input Field.
@@ -97,11 +99,11 @@ class EntropicWakeDaemon:
                 start_new_session=True,
             )
             # Log the action in memory
-            self._log_action_to_cortex(target)
+            await self._log_action_to_cortex(target)
         except (subprocess.SubprocessError, OSError) as e:
             logger.error("Failed to ignite purification agent: %s", e)
 
-    def _log_action_to_cortex(self, target: str):
+    async def _log_action_to_cortex(self, target: str) -> None:
         """Register the autonomous action into CORTEX-DB."""
         if not self.engine:
             return
@@ -111,33 +113,61 @@ class EntropicWakeDaemon:
             "Pasó los tests de inmunidad. Deuda saldada. PR en espera de merge."
         )
         try:
-            conn = self.engine.pool.get_connection()
-            conn.execute(
-                "INSERT INTO facts (id, type, topic, content, timestamp) "
-                "VALUES (lower(hex(randomblob(16))), 'decision', 'Autopoiesis', ?, ?)",
-                (msg, datetime.now(timezone.utc).timestamp()),
-            )
-            conn.commit()
+            store = getattr(self.engine, "store", None)
+            if store is not None and inspect.iscoroutinefunction(store):
+                await store(
+                    project="cortex",
+                    content=msg,
+                    fact_type="decision",
+                    source="daemon:entropic-wake",
+                    tags=["autopoiesis", "entropic-wake"],
+                    confidence="C5",
+                    meta={"daemon": "entropic_wake", "target": target},
+                )
+            else:
+                store_sync = getattr(self.engine, "store_sync", None)
+                if callable(store_sync):
+                    store_sync(
+                        "cortex",
+                        content=msg,
+                        fact_type="decision",
+                        source="daemon:entropic-wake",
+                        tags=["autopoiesis", "entropic-wake"],
+                        confidence="C5",
+                        meta={"daemon": "entropic_wake", "target": target},
+                    )
+                else:
+                    logger.warning(
+                        "Entropic Wake skipped action log: engine lacks store/store_sync"
+                    )
+                    return
             logger.info("Logged autopoiesis cycle to CORTEX.")
-        except sqlite3.Error as e:
-            logger.error("Failed to log to cortex DB: %s", e)
+        except (OSError, RuntimeError, TypeError, ValueError) as exc:
+            logger.error("Failed to log to cortex DB: %s", exc)
 
-    async def run_loop(self):
+    async def run_loop(self) -> None:
         """The main continuous loop for the Void Daemon."""
         logger.info("Initializing Entropic Wake Loop (VOID DAEMON)...")
+        self._stop_event.clear()
         while not self._shutdown:
             try:
                 tau_z = self.check_entropy()
                 if tau_z > self.threshold:
                     # In a true system, we dynamically select the target based on entropy clusters
                     highest_entropy_target = "cortex_router"  # Placeholder
-                    self.ignite_purification_agent(highest_entropy_target)
+                    await self.ignite_purification_agent(highest_entropy_target)
             except Exception as e:  # noqa: BLE001 — Main daemon loop must survive unexpected errors
                 logger.error("Entropic Wake encountered an error: %s", e)
 
-            # Sleep until next pulse
-            await asyncio.sleep(self.interval_seconds)
+            if self._shutdown:
+                break
 
-    def stop(self):
+            try:
+                await asyncio.wait_for(self._stop_event.wait(), timeout=self.interval_seconds)
+            except TimeoutError:
+                continue
+
+    def stop(self) -> None:
         logger.info("Stopping Entropic Wake Daemon.")
         self._shutdown = True
+        self._stop_event.set()

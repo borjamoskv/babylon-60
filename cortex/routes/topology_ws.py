@@ -8,8 +8,6 @@ import logging
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from cortex.engine.metacognition import DoubtCircuit
-
 router = APIRouter(tags=["topology"])
 logger = logging.getLogger("cortex.api.topology")
 
@@ -19,7 +17,14 @@ class TopologyManager:
 
     def __init__(self):
         self.active_connections: list[WebSocket] = []
-        self.doubt_circuit = DoubtCircuit()
+        self.doubt_circuit = None
+
+    def _get_doubt_circuit(self):
+        if self.doubt_circuit is None:
+            from cortex.engine.metacognition import DoubtCircuit
+
+            self.doubt_circuit = DoubtCircuit()
+        return self.doubt_circuit
 
     async def connect(self, websocket: WebSocket):
         """Accepts a new WebSocket connection."""
@@ -51,7 +56,7 @@ class TopologyManager:
         Evaluates the node through the Doubt Circuit before broadcast.
         """
         # Neighbors would typically be nodes from the graph store
-        alerts = self.doubt_circuit.evaluate_node(node_data, neighbors or [])
+        alerts = self._get_doubt_circuit().evaluate_node(node_data, neighbors or [])
 
         # Broadcast the node
         await self.broadcast_event("NEW_NODE", node_data)

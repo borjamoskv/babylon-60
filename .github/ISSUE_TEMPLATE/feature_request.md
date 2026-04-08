@@ -21,3 +21,7 @@ Any alternative solutions you've considered.
 ## Context
 
 Any other context (use cases, screenshots, etc).
+
+## Enterprise relevance
+
+If this request matters for procurement, compliance, multi-tenant deployment, or platform adoption, explain why.

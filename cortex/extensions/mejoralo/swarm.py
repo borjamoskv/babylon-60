@@ -180,13 +180,8 @@ class MejoraloSwarm:
                 continue
             if start <= target_line <= end:
                 # Pick the innermost (smallest) enclosing node
-                if best is None:
+                if MejoraloSwarm._is_better_enclosing_node(best, node):
                     best = node
-                else:
-                    best_start = best.lineno
-                    best_end = getattr(best, "end_lineno", best_start)
-                    if (end - start) < (best_end - best_start):
-                        best = node
 
         if best is None:
             return None
@@ -197,6 +192,21 @@ class MejoraloSwarm:
         node_lines = lines[start_idx:end_idx]
         node_source = textwrap.dedent("".join(node_lines))
         return best, node_source
+
+    @staticmethod
+    def _is_better_enclosing_node(
+        current: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef | None,
+        candidate: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef,
+    ) -> bool:
+        """Prefer the innermost enclosing node for surgical refactors."""
+        if current is None:
+            return True
+
+        current_start = current.lineno
+        current_end = getattr(current, "end_lineno", current_start)
+        candidate_start = candidate.lineno
+        candidate_end = getattr(candidate, "end_lineno", candidate_start)
+        return (candidate_end - candidate_start) < (current_end - current_start)
 
     @staticmethod
     def _surgical_patch_file(

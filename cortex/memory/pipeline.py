@@ -139,6 +139,7 @@ class NeuromorphicPipeline:
         content: str,
         fact_type: str = "",
         fact_id: str = "",
+        meta: Optional[dict[str, Any]] = None,
         related_fact_ids: Optional[list[str]] = None,
     ) -> StoreResult:
         t0 = time.monotonic()
@@ -147,7 +148,11 @@ class NeuromorphicPipeline:
         filtered = self._schema_engine.apply_encoding_schema(schema, content) if schema else content
         schema_name = schema.name if schema else None
 
-        valence = classify_valence(content, fact_type)
+        bridge_kind = ""
+        if isinstance(meta, dict):
+            bridge_kind = str(meta.get("bridge_kind") or "")
+
+        valence = classify_valence(content, fact_type, bridge_kind=bridge_kind)
 
         edges_updated = 0
         if fact_id:

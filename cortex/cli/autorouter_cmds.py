@@ -20,11 +20,10 @@ import click
 from rich.console import Console
 
 from cortex.cli.errors import err_execution_failed, err_platform_unsupported, err_skill_not_found
-from cortex.core.paths import CORTEX_DIR
+from cortex.core.paths import CORTEX_DIR, find_skill_path, resolve_skill_script
 
 __all__ = [
     "CORTEX_DIR",
-    "DAEMON_SCRIPT",
     "LOG_FILENAME",
     "LOG_PATH",
     "PLIST_NAME",
@@ -32,6 +31,7 @@ __all__ = [
     "autorouter_cmds",
     "config",
     "disable_boot",
+    "daemon_script",
     "enable_boot",
     "history",
     "logs",
@@ -43,15 +43,13 @@ __all__ = [
 
 console = Console()
 
-DAEMON_SCRIPT = (
-    Path.home()
-    / ".gemini"
-    / "antigravity"
-    / "skills"
-    / "autorouter-1"
-    / "scripts"
-    / "autorouter_daemon.py"
-)
+
+def daemon_script() -> Path:
+    return find_skill_path(
+        "autorouter-1",
+        "scripts/autorouter_daemon.py",
+        "autorouter_daemon.py",
+    ) or resolve_skill_script("autorouter-1", "scripts", "autorouter_daemon.py")
 
 # Constants for file paths
 LOG_FILENAME = "router_daemon.log"
@@ -65,14 +63,15 @@ def _run_daemon(args: list[str]) -> int | None:
         Exit code from the daemon process, or None if the daemon script
         was not found (error already reported via err_skill_not_found).
     """
-    if not DAEMON_SCRIPT.exists():
-        err_skill_not_found("AUTOROUTER-1", str(DAEMON_SCRIPT))
+    script_path = daemon_script()
+    if not script_path.exists():
+        err_skill_not_found("AUTOROUTER-1", str(script_path))
         return None
     try:
-        result = subprocess.run(["python3", str(DAEMON_SCRIPT)] + args, check=False)
+        result = subprocess.run(["python3", str(script_path)] + args, check=False)
         return result.returncode
     except (OSError, ValueError, KeyError) as e:
-        err_execution_failed(f"python3 {DAEMON_SCRIPT}", str(e))
+        err_execution_failed(f"python3 {script_path}", str(e))
         return None
 
 
@@ -90,11 +89,14 @@ def autorouter_cmds():
 def start(background):
     """Arrancar el daemon de ruteo cognitivo."""
     if background:
+        script_path = daemon_script()
+        if not script_path.exists():
+            err_skill_not_found("AUTOROUTER-1", str(script_path))
         console.print("[bold cyan]🚀 Arrancando AUTOROUTER-1 en background...[/]")
         CORTEX_DIR.mkdir(parents=True, exist_ok=True)
         log_handle = LOG_PATH.open("a")  # Popen takes ownership; closed on process exit
         subprocess.Popen(
-            ["python3", str(DAEMON_SCRIPT)],
+            ["python3", str(script_path)],
             stdout=log_handle,
             stderr=subprocess.STDOUT,
             start_new_session=True,
@@ -156,7 +158,10 @@ def enable_boot():
         err_platform_unsupported("launchd")
 
     python_path = sys.executable
-    script_path = str(DAEMON_SCRIPT)
+    script_path_obj = daemon_script()
+    if not script_path_obj.exists():
+        err_skill_not_found("AUTOROUTER-1", str(script_path_obj))
+    script_path = str(script_path_obj)
     log_path = str(LOG_PATH)
     user_id = subprocess.check_output(["id", "-u"], text=True).strip()
 

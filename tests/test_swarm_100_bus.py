@@ -8,7 +8,13 @@ import time
 
 import pytest
 
-from cortex.engine.legion import AsyncSignalBus, Squadron, SwarmAgent, SwarmSignal
+from cortex.engine.legion import (
+    AsyncSignalBus,
+    InMemorySwarmSignalBus,
+    Squadron,
+    SwarmAgent,
+    SwarmSignal,
+)
 
 
 class MockAgent(SwarmAgent):
@@ -55,6 +61,14 @@ async def test_async_signal_bus_emits() -> None:
     assert len(all_signals) == 2
     assert all_signals[0].status == "SUCCESS"
     assert all_signals[1].status == "VOID"  # System should rewrite this
+
+
+def test_in_memory_swarm_signal_bus_is_canonical_async_alias() -> None:
+    bus = InMemorySwarmSignalBus()
+    compat_bus = AsyncSignalBus()
+
+    assert isinstance(bus, InMemorySwarmSignalBus)
+    assert isinstance(compat_bus, InMemorySwarmSignalBus)
 
 
 @pytest.mark.asyncio

@@ -3,9 +3,14 @@
   "type": "module",
   "version": "0.3.2b1",
   "scripts": {
-    "dev": "astro dev",
-    "start": "astro dev",
-    "build": "astro build",
+    "dev": "PUBLIC_SITE_VARIANT=marketing astro dev",
+    "dev:com": "PUBLIC_SITE_VARIANT=marketing astro dev",
+    "dev:docs": "PUBLIC_SITE_VARIANT=docs astro dev",
+    "start": "PUBLIC_SITE_VARIANT=marketing astro dev",
+    "build": "node ./scripts/build-site.mjs",
+    "build:site": "node ./scripts/build-site.mjs",
+    "build:com": "SITE_URL=https://cortexpersist.com PUBLIC_SITE_VARIANT=marketing astro build",
+    "build:docs": "SITE_URL=https://cortexpersist.com PUBLIC_SITE_VARIANT=docs PUBLIC_MARKETING_ORIGIN=https://cortexpersist.com astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -21,6 +26,6 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^3.0.1",
-    "tailwindcss": "^4.0.0"
+    "tailwindcss": "^3.4.1"
   }
 }

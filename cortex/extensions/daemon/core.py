@@ -93,6 +93,13 @@ except ImportError:
     _ZERO_PROMPTING_AVAILABLE = False
 
 try:
+    from cortex.extensions.daemon.autopoiesis import AutopoiesisDaemon
+
+    _AUTOPOIESIS_AVAILABLE = True
+except ImportError:
+    _AUTOPOIESIS_AVAILABLE = False
+
+try:
     from cortex.extensions.daemon.sidecar.telemetry.iot_oracle import IoTOracle
 
     _IOT_ORACLE_AVAILABLE = True
@@ -330,6 +337,31 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
             except Exception as e:  # noqa: BLE001
                 logger.warning("Failed to init Zero-Prompting Daemon: %s", e)
 
+        self.autopoiesis_daemon = None
+        if _AUTOPOIESIS_AVAILABLE:
+            try:
+                self.autopoiesis_daemon = AutopoiesisDaemon(
+                    engine=self._shared_engine,
+                    workspace_root=Path(file_config.get("watch_path", str(CORTEX_DIR))),
+                    cycle_interval_hours=float(
+                        file_config.get("autopoiesis_interval_hours", 24.0)
+                    ),
+                    idle_poll_seconds=float(file_config.get("autopoiesis_idle_poll_seconds", 60.0)),
+                    target_score=int(file_config.get("autopoiesis_target_score", 95)),
+                    enable_healing=bool(file_config.get("autopoiesis_enable_healing", True)),
+                    enable_manifestation=bool(
+                        file_config.get("autopoiesis_enable_manifestation", False)
+                    ),
+                    minimum_registered_tools=int(
+                        file_config.get("autopoiesis_minimum_registered_tools", 0)
+                    ),
+                    project=str(file_config.get("autopoiesis_project", "cortex")),
+                    focus=str(file_config.get("autopoiesis_focus", "entropy")),
+                )
+                logger.info("♾️ Autopoiesis Daemon (Bounded Self-Improvement) ENABLED")
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to init Autopoiesis Daemon: %s", e)
+
         self.epistemic_breaker_daemon = None
         if _EPISTEMIC_BREAKER_AVAILABLE:
             try:
@@ -508,6 +540,8 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
             self._spawn_thread(self._run_frontier_loop, "FrontierDaemon")
         if getattr(self, "zero_prompting_daemon", None):
             self._spawn_thread(self._run_zero_prompting_loop, "ZeroPromptingDaemon")
+        if getattr(self, "autopoiesis_daemon", None):
+            self._spawn_thread(self._run_autopoiesis_loop, "AutopoiesisDaemon")
         if getattr(self, "epistemic_breaker_daemon", None):
             self._spawn_thread(self._run_epistemic_breaker_loop, "EpistemicBreakerDaemon")
 
@@ -533,6 +567,8 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
                 self.frontier_daemon.stop()
             if getattr(self, "zero_prompting_daemon", None):
                 self.zero_prompting_daemon.stop()  # type: ignore[union-attr]
+            if getattr(self, "autopoiesis_daemon", None):
+                self.autopoiesis_daemon.stop()  # type: ignore[union-attr]
             if getattr(self, "epistemic_breaker_daemon", None):
                 self.epistemic_breaker_daemon.stop()  # type: ignore[union-attr]
 

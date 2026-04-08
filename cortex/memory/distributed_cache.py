@@ -209,8 +209,19 @@ class DistributedSovereignCache:
             return None
         try:
             shadow_key = f"{_SHADOW_KEY_PREFIX}{key}"
+            trigger_key = f"{_TRIGGER_KEY_PREFIX}{key}"
             raw = await async_interceptor(self.chaos_gate, self._r.get, shadow_key)
-            return json.loads(raw) if raw else None
+            if not raw:
+                return None
+
+            # The trigger key is the authoritative TTL boundary.
+            # If it is already gone, the shadow may still exist only for handoff recovery.
+            trigger_alive = await async_interceptor(self.chaos_gate, self._r.get, trigger_key)
+            if not trigger_alive:
+                logger.debug("⚡ [REDIS STALE SHADOW] get(%s): trigger expired", key)
+                return None
+
+            return json.loads(raw)
         except (ValueError, TypeError, OSError) as exc:
             logger.warning("⚡ [REDIS MISS] get(%s): %s", key, exc)
             self._is_available = False
@@ -304,6 +315,9 @@ class DistributedSovereignCache:
 
     async def _start_stream_consumer(self) -> None:
         """Worker: Stream -> PostgreSQL Callback."""
+        if self._audit_callback is None:
+            logger.warning("🐲 [HYDRA-LOG] No audit callback configured; consumer not started.")
+            return
         await asyncio.sleep(0)
         self._consumer_task = asyncio.ensure_future(self._consumer_loop())
         logger.info("🐲 [HYDRA-LOG] Reliable stream consumer group active.")
@@ -343,9 +357,17 @@ class DistributedSovereignCache:
 
                 # Push to Hydra Stream (Persistent)
                 # Atomically advances chain and logs to stream.
-                await self._reliable_advance_chain(agent_key, payload, "EVICTION")
+                audit_entry = await self._reliable_advance_chain(agent_key, payload, "EVICTION")
 
-                # Cleanup shadow
+                # Only drop the recoverable shadow after durable advancement succeeded.
+                if "error" in audit_entry:
+                    logger.warning(
+                        "🚨 [HANDOFF PRESERVE SHADOW] keeping %s after failed advance: %s",
+                        agent_key,
+                        audit_entry["error"],
+                    )
+                    continue
+
                 await async_interceptor(self.chaos_gate, self._r.delete, shadow_key)
 
         except asyncio.CancelledError:

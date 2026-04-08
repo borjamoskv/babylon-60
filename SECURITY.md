@@ -2,10 +2,10 @@
 
 ## Supported Versions
 
-| Version    | Supported          |
-|:-----------|:------------------:|
-| >= 0.3.0   | ✅ Active          |
-| < 0.3.0    | ❌ No longer       |
+| Release line | Status | Notes |
+| :--- | :---: | :--- |
+| `0.3.x` beta | ✅ Active | Security triage and critical fixes are handled on a best-effort basis |
+| `< 0.3.0` | ❌ Unsupported | Upgrade required before support review |
 
 ## Reporting a Vulnerability
 
@@ -15,6 +15,14 @@ Email: **<security@cortexpersist.com>**
 
 You will receive an acknowledgment within 48 hours and a detailed response within 5 business days.
 
+## Security Response Targets
+
+- Acknowledge new reports within 48 hours
+- Triage reported severity within 5 business days
+- Coordinate disclosure privately until a fix or mitigation is available
+
+These are response targets, not contractual SLAs.
+
 ## Security Features
 
 CORTEX is built security-first:
@@ -23,7 +31,7 @@ CORTEX is built security-first:
 - **Merkle tree checkpoints** — batch integrity verification
 - **Privacy Shield** — 11-pattern secret detection at ingress
 - **AST Sandbox** — safe LLM code execution without `eval()`
-- **RBAC** — 4-role access control (admin, editor, viewer, auditor)
+- **RBAC** — 4-role access control (`SYSTEM`, `ADMIN`, `AGENT`, `VIEWER`)
 - **Security Headers Middleware** — CSP, HSTS, X-Frame-Options
 - **Input Sanitization** — all user inputs validated and escaped
 
@@ -68,6 +76,14 @@ CORTEX assumes:
 - Multi-tenant deployments enforce strict tenant isolation via `tenant_id` scoping
 - **Untrusted plugins** execute in containerized sandboxes with no host network access
 - **Supply chain attacks** are mitigated by Sigstore signing + pip-audit + Trivy
+
+## Shared Responsibility Note
+
+Repository-level security controls do not eliminate operator responsibility. Real deployments still need correct TLS termination, reverse proxying, network exposure control, CORS restriction, backup handling, and secret rotation.
+
+Encrypted persisted data also depends on key continuity. In environments without stable OS keyring access, operators need stable `CORTEX_MASTER_KEY` or `CORTEX_VAULT_KEY` management; otherwise encrypted facts may become unreadable after redeploy or restore.
+
+For deployment-side controls, see [DEPLOYMENT_HARDENING.md](./DEPLOYMENT_HARDENING.md).
 
 ### Attack Vectors & Mitigations
 

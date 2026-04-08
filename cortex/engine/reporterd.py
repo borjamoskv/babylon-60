@@ -15,6 +15,7 @@ from aiohttp import web
 from aiohttp.web_request import Request
 from aiohttp.web_response import StreamResponse
 
+from cortex.core.paths import CORTEX_DB
 from cortex.engine.reporter import SovereignReporter
 
 logger = logging.getLogger("cortex.reporterd")
@@ -119,7 +120,7 @@ class ManifoldDaemon:
 
 async def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
-    db_path = os.path.expanduser("~/.cortex/cortex.db")
+    db_path = str(CORTEX_DB)
     daemon = ManifoldDaemon(db_path)
     await daemon.start()
 

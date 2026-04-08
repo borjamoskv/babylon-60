@@ -40,6 +40,83 @@ class AetherContext:
             self._initialized = True
 
 
+async def _cortex_search_memory(
+    ctx: AetherContext,
+    query: str,
+    project: str = "",
+    top_k: int = 20,
+    tenant_id: str = "default",
+) -> str:
+    """Search CORTEX local memory using vector embeddings."""
+    await ctx.ensure_ready()
+
+    cache_key = f"aether:{tenant_id}:{query}:{project}:{top_k}"
+    cached_result = ctx.search_cache.get(cache_key)
+    if cached_result:
+        return cached_result
+
+    async with ctx.pool.acquire() as conn:
+        engine = CortexEngine(ctx.db_path, auto_embed=False)
+        engine._conn = conn
+
+        results = await engine.search(
+            query=query,
+            tenant_id=tenant_id,
+            project=project or None,
+            top_k=min(max(top_k, 5), 50),
+        )
+
+    if not results:
+        return "No memory records found."
+
+    ctx.metrics.record_request()
+
+    output = [f"Found {len(results)} context chunks:"]
+    for r in results:
+        output.append(
+            f"[FACT #{getattr(r, 'fact_id', '?')} | PROJECT: {r.project} | "
+            f"TYPE: {r.fact_type} | SCORE: {r.score:.3f}]\n{r.content}\n---"
+        )
+
+    final_str = "\n".join(output)
+    ctx.search_cache.set(cache_key, final_str)
+    return final_str
+
+
+async def _cortex_store_decision(
+    ctx: AetherContext,
+    project: str,
+    decision: str,
+    tenant_id: str = "default",
+) -> str:
+    """Persist a decision in the requested tenant after Axiom 3 verification."""
+    await ctx.ensure_ready()
+
+    if not _axiom_3_verify("Database Write (Decision)", f"[{project}] {decision}"):
+        return "❌ Operation aborted: Axiom 3 user physical authorization DENIED."
+
+    async with ctx.pool.acquire() as conn:
+        engine = CortexEngine(ctx.db_path, auto_embed=False)
+        engine._conn = conn
+
+        fact_id = await engine.store(
+            project=project,
+            content=decision,
+            tenant_id=tenant_id,
+            fact_type="decision",
+            tags=["mcp-aether"],
+            confidence="stated",
+            source="agent:gemini:aether",
+        )
+
+    ctx.search_cache.clear()
+    ctx.metrics.record_request()
+    return (
+        f"✅ Verified and Stored decision #{fact_id} in project '{project}' "
+        f"[tenant={tenant_id}]"
+    )
+
+
 def _axiom_3_verify(action_type: str, details: str) -> bool:
     """Enforce Axiom 3 (Byzantine Default): Verify before trust.
 
@@ -57,12 +134,16 @@ def _axiom_3_verify(action_type: str, details: str) -> bool:
     script = f'''
     try
         set theDialogText to "{prompt}"
-        display dialog theDialogText buttons {{"Deny", "Authorize"}} default button "Deny" with title "CORTEX Axiom 3 — Byzantine Verify" with icon caution
+        display dialog theDialogText buttons {{"Deny", "Authorize"}} default button "Deny" with titl🔍 Preguntas po
+que podria hacer cortex con uno de sto shttps://vast.ai/
+e "CORTEX Axiom 3 — Byzantine Verify" with icon caution
         if button returned of result is "Authorize" then
             return "true"
         else
             return "false"
-        end if
+        end i🔍 Preguntas po
+que podria hacer cortex con uno de sto shttps://vast.ai/
+f
     on error
         return "false"
     end try
@@ -95,41 +176,20 @@ def create_aether_server(
     ctx = AetherContext(db_path)
 
     @mcp.tool()
-    async def cortex_search_memory(query: str, project: str = "", top_k: int = 20) -> str:
+    async def cortex_search_memory(
+        query: str,
+        project: str = "",
+        top_k: int = 20,
+        tenant_id: str = "default",
+    ) -> str:
         """Search CORTEX local memory using vector embeddings."""
-        await ctx.ensure_ready()
-
-        cache_key = f"aether:{query}:{project}:{top_k}"
-        cached_result = ctx.search_cache.get(cache_key)
-        if cached_result:
-            return cached_result
-
-        async with ctx.pool.acquire() as conn:
-            engine = CortexEngine(ctx.db_path, auto_embed=False)
-            engine._conn = conn
-
-            results = await engine.search(
-                query=query,
-                tenant_id="default",
-                project=project or None,
-                top_k=min(max(top_k, 5), 50),
-            )
-
-        if not results:
-            return "No memory records found."
-
-        ctx.metrics.record_request()
-
-        output = [f"Found {len(results)} context chunks:"]
-        for r in results:
-            output.append(
-                f"[FACT #{getattr(r, 'fact_id', '?')} | PROJECT: {r.project} | "
-                f"TYPE: {r.fact_type} | SCORE: {r.score:.3f}]\n{r.content}\n---"
-            )
-
-        final_str = "\n".join(output)
-        ctx.search_cache.set(cache_key, final_str)
-        return final_str
+        return await _cortex_search_memory(
+            ctx,
+            query=query,
+            project=project,
+            top_k=top_k,
+            tenant_id=tenant_id,
+        )
 
     @mcp.tool()
     async def cortex_read_file(filepath: str, max_lines: int = 5000) -> str:
@@ -164,33 +224,21 @@ def create_aether_server(
             return f"❌ Error reading file: {e}"
 
     @mcp.tool()
-    async def cortex_store_decision(project: str, decision: str) -> str:
+    async def cortex_store_decision(
+        project: str,
+        decision: str,
+        tenant_id: str = "default",
+    ) -> str:
         """Persist an architectural decision or ghost directly to the local CORTEX DB.
 
         Requires physical user verification (Axiom 3).
         """
-        await ctx.ensure_ready()
-
-        # Axiom 3 verification loop
-        if not _axiom_3_verify("Database Write (Decision)", f"[{project}] {decision}"):
-            return "❌ Operation aborted: Axiom 3 user physical authorization DENIED."
-
-        async with ctx.pool.acquire() as conn:
-            engine = CortexEngine(ctx.db_path, auto_embed=False)
-            engine._conn = conn
-
-            fact_id = await engine.store(
-                project=project,
-                content=decision,
-                fact_type="decision",
-                tags=["mcp-aether"],
-                confidence="stated",
-                source="agent:gemini:aether",
-            )
-
-        ctx.search_cache.clear()
-        ctx.metrics.record_request()
-        return f"✅ Verified and Stored decision #{fact_id} in project '{project}'"
+        return await _cortex_store_decision(
+            ctx,
+            project=project,
+            decision=decision,
+            tenant_id=tenant_id,
+        )
 
     @mcp.tool()
     async def cortex_get_swarm_report(tenant_id: str = "default") -> str:

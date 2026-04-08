@@ -87,7 +87,7 @@ class ASTOracle:
 
     def __init__(
         self, engine: AsyncCortexEngine, watch_dir: str | Path, poll_interval: float = 2.0
-    ):
+    ) -> None:
         self.engine = engine
         self.watch_dir = Path(watch_dir)
         self.poll_interval = poll_interval
@@ -96,10 +96,12 @@ class ASTOracle:
         self._mtimes: dict[str, float] = {}
         self._event_queue: asyncio.Queue[Path] | None = None
         self._observer: Observer | None = None
+        self._stop_event = asyncio.Event()
 
     async def start(self) -> None:
         """Invokes the Oracle's eye with kernel-level filesystem hooks."""
         self._running = True
+        self._stop_event.clear()
         logger.info("👁️ AST ORACLE ONLINE. Sovereign Surveillance on: %s", self.watch_dir)
 
         # Pre-warm cache from existing files (one-time O(N) bootstrap)
@@ -120,14 +122,20 @@ class ASTOracle:
                 await self._process_events()
             except (OSError, asyncio.CancelledError, RuntimeError) as e:
                 logger.error("AST ORACLE BLINDED (Transient): %s", e)
-            await asyncio.sleep(self.poll_interval)
+            if not self._running:
+                break
+            try:
+                await asyncio.wait_for(self._stop_event.wait(), timeout=self.poll_interval)
+            except TimeoutError:
+                continue
 
     async def stop(self) -> None:
         """Closes the Oracle's eye and detaches filesystem hooks."""
         self._running = False
+        self._stop_event.set()
         if self._observer:
             self._observer.stop()
-            self._observer.join()
+            await asyncio.to_thread(self._observer.join)
             self._observer = None
         logger.info("AST ORACLE OFFLINE.")
 

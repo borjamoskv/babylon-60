@@ -6,7 +6,10 @@ of the store → deduplicate → deprecate → update pipeline.
 
 from __future__ import annotations
 
+import asyncio
+import hashlib
 from pathlib import Path
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -58,6 +61,44 @@ class TestStore:
         assert isinstance(fact_id, int)
         assert fact_id > 0
 
+    async def test_store_auto_attests_high_rigor_fact_without_explicit_signature(self, engine):
+        fact_id = await engine.store(
+            project="test",
+            content="Decision facts should be auto-attested before guard execution.",
+            fact_type="decision",
+            source="api",
+        )
+
+        async with engine.session() as conn:
+            cursor = await conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id,))
+            row = await cursor.fetchone()
+
+        from cortex.crypto import get_default_encrypter
+
+        meta = get_default_encrypter().decrypt_json(row[0], tenant_id="default")
+        assert meta["zk_proof_mode"] == "engine-auto-attested"
+        assert meta["zk_proof_attestor"] == "api"
+        assert "agent_public_key" in meta
+        assert "zk_proof_signature" in meta
+
+    async def test_store_fails_closed_when_guard_pipeline_broken(self, engine):
+        class BrokenPipeline:
+            async def run_guards(self, *args, **kwargs):
+                raise RuntimeError("guard subsystem unavailable")
+
+        engine._guard_pipeline = BrokenPipeline()
+
+        with pytest.raises(RuntimeError, match="GuardPipeline pre-store failed"):
+            await engine.store(
+                project="test",
+                content="This should never persist.",
+                fact_type="knowledge",
+                source="agent:test_suite",
+            )
+
+        facts = await engine.get_all_active_facts(tenant_id="default", project="test")
+        assert facts == []
+
     async def test_store_deduplication_returns_same_id(self, engine):
         """Exact structural hash dedup should return the same fact_id."""
         content = "Deduplication test content unique enough to avoid cross-test collision."
@@ -101,6 +142,204 @@ class TestStore:
                 source="agent:test_suite",
             )
 
+    async def test_store_accepts_runtime_fact_proposal_with_matching_taint(self, engine):
+        from cortex.crypto import get_default_encrypter
+        from cortex.guards.taint import TaintEngine
+        from cortex.utils.canonical import canonical_json
+
+        runtime_payload = {"event": "after_step", "status": "ok"}
+        canonical_payload = canonical_json(runtime_payload)
+        payload_hash = hashlib.sha3_256(canonical_payload.encode("utf-8")).hexdigest()
+        taint = TaintEngine.generate_taint("agent-1", "sess-1", canonical_payload)
+
+        fact_id = await engine.store(
+            project="test",
+            content="[AGENT PROPOSAL] runtime fact proposal from agent-1",
+            fact_type="idea",
+            source="agent:agent-1",
+            meta={
+                "runtime_artifact_kind": "fact_proposal",
+                "runtime_payload_hash": payload_hash,
+                "runtime_artifact": runtime_payload,
+                "taint": taint,
+            },
+        )
+
+        async with engine.session() as conn:
+            cursor = await conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id,))
+            row = await cursor.fetchone()
+
+        assert row is not None
+        assert row[0].startswith(get_default_encrypter().PREFIX)
+        meta = get_default_encrypter().decrypt_json(row[0], tenant_id="default")
+        assert meta["runtime_payload_hash"] == payload_hash
+        assert meta["taint"] == taint
+
+    async def test_store_rejects_runtime_fact_proposal_with_mismatched_taint(self, engine):
+        from cortex.guards.taint import TaintEngine
+        from cortex.utils.canonical import canonical_json
+
+        runtime_payload = {"event": "after_step", "status": "ok"}
+        canonical_payload = canonical_json(runtime_payload)
+        taint = TaintEngine.generate_taint("agent-1", "sess-1", canonical_payload)
+
+        with pytest.raises(ValueError, match="CORTEX-TAINT digest mismatch"):
+            await engine.store(
+                project="test",
+                content="[AGENT PROPOSAL] runtime fact proposal from agent-1",
+                fact_type="idea",
+                source="agent:agent-1",
+                meta={
+                    "runtime_artifact_kind": "fact_proposal",
+                    "runtime_payload_hash": "wrong-payload-hash",
+                    "runtime_artifact": runtime_payload,
+                    "taint": taint,
+                },
+            )
+
+    async def test_store_rejects_missing_required_taint(self, engine):
+        with pytest.raises(ValueError, match="CORTEX-TAINT required for this write"):
+            await engine.store(
+                project="test",
+                content="This write explicitly requires taint proof.",
+                fact_type="knowledge",
+                source="agent:test_suite",
+                meta={"requires_taint_proof": True},
+            )
+
+    async def test_store_encrypts_metadata_at_rest(self, engine):
+        from cortex.crypto import get_default_encrypter
+
+        fact_id = await engine.store(
+            project="test",
+            content="Metadata should be encrypted at rest by the write path.",
+            fact_type="knowledge",
+            source="agent:test_suite",
+            meta={"secret_key": "vault-123", "classification": "restricted"},
+        )
+
+        async with engine.session() as conn:
+            cursor = await conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id,))
+            row = await cursor.fetchone()
+
+        assert row is not None
+        assert isinstance(row[0], str)
+        assert row[0].startswith(get_default_encrypter().PREFIX)
+
+        meta = get_default_encrypter().decrypt_json(row[0], tenant_id="default")
+        assert meta is not None
+        assert meta["secret_key"] == "vault-123"
+        assert meta["classification"] == "restricted"
+
+
+class TestTaintContract:
+    async def test_store_rejects_runtime_fact_proposal_without_taint(self, engine):
+        with pytest.raises(ValueError, match="CORTEX-TAINT required"):
+            await engine.store(
+                project="test",
+                content="[AGENT PROPOSAL] agent_step proposal proposal-1 from agent-1",
+                fact_type="idea",
+                source="agent:agent-1",
+                meta={
+                    "runtime_artifact_kind": "fact_proposal",
+                    "runtime_payload_hash": "abc123",
+                },
+            )
+
+    async def test_store_rejects_runtime_tool_evidence_without_taint(self, engine):
+        with pytest.raises(ValueError, match="CORTEX-TAINT required"):
+            await engine.store(
+                project="test",
+                content="[TOOL EVIDENCE] search status=ok call=call-1",
+                fact_type="knowledge",
+                source="tool:search",
+                meta={
+                    "runtime_artifact_kind": "tool_evidence",
+                    "runtime_input_hash": "input-hash-1",
+                },
+            )
+
+    async def test_store_rejects_runtime_fact_proposal_with_invalid_taint(self, engine):
+        from cortex.guards.taint import TaintEngine
+
+        canonical_payload = '{"event":"after_step","status":"ok"}'
+        bad_payload = '{"event":"after_step","status":"drifted"}'
+        taint = TaintEngine.generate_taint("agent-1", "sess-1", bad_payload)
+
+        with pytest.raises(ValueError, match="CORTEX-TAINT digest mismatch"):
+            await engine.store(
+                project="test",
+                content="[AGENT PROPOSAL] agent_step proposal proposal-2 from agent-1",
+                fact_type="idea",
+                source="agent:agent-1",
+                meta={
+                    "runtime_artifact_kind": "fact_proposal",
+                    "runtime_payload_hash": hashlib.sha3_256(
+                        canonical_payload.encode("utf-8")
+                    ).hexdigest(),
+                    "taint": taint,
+                },
+            )
+
+    async def test_store_accepts_runtime_fact_proposal_with_valid_taint(self, engine):
+        from cortex.guards.taint import TaintEngine
+
+        canonical_payload = '{"event":"after_step","status":"ok"}'
+        taint = TaintEngine.generate_taint("agent-1", "sess-1", canonical_payload)
+
+        fact_id = await engine.store(
+            project="test",
+            content="[AGENT PROPOSAL] agent_step proposal proposal-3 from agent-1",
+            fact_type="idea",
+            source="agent:agent-1",
+            meta={
+                "runtime_artifact_kind": "fact_proposal",
+                "runtime_payload_hash": hashlib.sha3_256(
+                    canonical_payload.encode("utf-8")
+                ).hexdigest(),
+                "taint": taint,
+            },
+        )
+
+        assert fact_id > 0
+
+    async def test_store_rejects_runtime_rejection_without_taint(self, engine):
+        with pytest.raises(ValueError, match="CORTEX-TAINT required"):
+            await engine.store(
+                project="test",
+                content="[RUNTIME REJECTION] runtime:runtime_retry tool timed out",
+                fact_type="decision",
+                source="agent:agent-1",
+                meta={
+                    "runtime_artifact_kind": "rejection",
+                    "runtime_artifact_hash": "rejection-hash-1",
+                },
+            )
+
+    async def test_store_accepts_runtime_decision_edge_with_valid_artifact_hash_taint(self, engine):
+        from cortex.guards.taint import TaintEngine
+
+        canonical_artifact = (
+            '{"decision_id":"decision-1","edge_id":"edge-1","edge_type":"used_as_evidence",'
+            '"fact_id":"fact-1","metadata":{},"project":"proj-a","tenant_id":"tenant-a"}'
+        )
+        artifact_hash = hashlib.sha3_256(canonical_artifact.encode("utf-8")).hexdigest()
+        taint = TaintEngine.generate_taint("agent-1", "sess-1", canonical_artifact)
+
+        fact_id = await engine.store(
+            project="test",
+            content="[DECISION EDGE] decision=decision-1 fact=fact-1 type=used_as_evidence",
+            fact_type="decision",
+            source="agent:runtime-sink",
+            meta={
+                "runtime_artifact_kind": "decision_edge",
+                "runtime_artifact_hash": artifact_hash,
+                "taint": taint,
+            },
+        )
+
+        assert fact_id > 0
+
 
 # ─── Store Many ───────────────────────────────────────────────────────
 
@@ -123,6 +362,55 @@ class TestStoreMany:
     async def test_store_many_empty_raises(self, engine):
         with pytest.raises(ValueError, match="empty"):
             await engine.store_many([])
+
+    async def test_store_many_schedules_graph_after_commit(self, engine, monkeypatch):
+        graph_mock = AsyncMock(return_value=(0, 0))
+        monkeypatch.setattr("cortex.graph.process_fact_graph", graph_mock)
+
+        facts = [
+            {
+                "project": "batch-graph",
+                "content": f"Batch graph fact {i} includes Madrid and OpenAI.",
+                "fact_type": "knowledge",
+                "source": "agent:test_suite",
+            }
+            for i in range(2)
+        ]
+
+        ids = await engine.store_many(facts)
+        assert len(ids) == 2
+
+        await asyncio.sleep(0.05)
+
+        assert graph_mock.await_count == 2
+
+    async def test_store_many_rolls_back_after_duplicate_fast_path_then_failure(self, engine):
+        facts = [
+            {
+                "project": "batch-atomic",
+                "content": "Atomic batch fact that is long enough to be valid.",
+                "fact_type": "knowledge",
+                "source": "agent:test_suite",
+            },
+            {
+                "project": "batch-atomic",
+                "content": "Atomic batch fact that is long enough to be valid.",
+                "fact_type": "knowledge",
+                "source": "agent:test_suite",
+            },
+            {
+                "project": "batch-atomic",
+                "content": "",
+                "fact_type": "knowledge",
+                "source": "agent:test_suite",
+            },
+        ]
+
+        with pytest.raises(Exception):
+            await engine.store_many(facts)
+
+        stored = await engine.get_all_active_facts(tenant_id="default", project="batch-atomic")
+        assert stored == []
 
 
 # ─── Deprecate ────────────────────────────────────────────────────────

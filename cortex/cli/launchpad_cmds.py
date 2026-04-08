@@ -11,9 +11,14 @@ from rich.table import Table
 
 from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
 from cortex.cli.errors import err_empty_results, err_validation, handle_cli_error
-from cortex.extensions.launchpad.main import MissionOrchestrator
 
 __all__ = ["launchpad", "mission_launch", "mission_list"]
+
+
+def _get_launchpad_runtime():
+    from cortex.extensions.launchpad.main import MissionOrchestrator
+
+    return MissionOrchestrator
 
 
 @cli.group()
@@ -42,6 +47,7 @@ def mission_launch(project, goal, mission_file, formation, agents, db):
         return
 
     engine = get_engine(db)
+    MissionOrchestrator = _get_launchpad_runtime()
     orchestrator = MissionOrchestrator(engine)
     try:
         display_goal = goal if goal else f"File: {Path(mission_file).name}"
@@ -89,6 +95,7 @@ def mission_launch(project, goal, mission_file, formation, agents, db):
 def mission_list(project, db):
     """List recent swarm missions from the ledger."""
     engine = get_engine(db)
+    MissionOrchestrator = _get_launchpad_runtime()
     orchestrator = MissionOrchestrator(engine)
     try:
         missions = orchestrator.list_missions(project=project)

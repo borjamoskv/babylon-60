@@ -20,13 +20,15 @@ from cortex.extensions.signals.bus import _CREATE_INDEXES, _CREATE_TABLE, _build
 from cortex.extensions.signals.models import Signal, signal_from_row
 from cortex.guards.url_guard import SafeTransport
 
+__all__ = ["ShardedDurableSignalBus", "ShardedAsyncSignalBus"]
+
 logger = logging.getLogger("cortex.extensions.signals.sharded_bus")
 
 NUM_SHARDS = getattr(config, "SWARM_SHARD_COUNT", 16)
 
 
-class ShardedAsyncSignalBus:
-    """O(1) Sharded Message Bus avoiding SQLite lock contention."""
+class ShardedDurableSignalBus:
+    """Durable sharded signal bus avoiding SQLite lock contention."""
 
     __slots__ = (
         "_base_dir",
@@ -38,13 +40,23 @@ class ShardedAsyncSignalBus:
     )
 
     def __init__(self, base_dir: Path | str, num_shards: int = NUM_SHARDS) -> None:
-        self._base_dir = Path(base_dir)
+        self._base_dir = self._resolve_base_dir(base_dir)
         self._base_dir.mkdir(parents=True, exist_ok=True)
         self._shards: dict[int, aiosqlite.Connection] = {}
         self._ready = False
         self.session_emitted = 0
         self.session_errors = 0
         self.num_shards = num_shards
+
+    @staticmethod
+    def _resolve_base_dir(base_dir: Path | str) -> Path:
+        """Normalize file-like inputs into a directory usable for shard DBs."""
+        candidate = Path(base_dir)
+        if candidate.exists() and candidate.is_file():
+            return candidate.parent / f"{candidate.name}.shards"
+        if candidate.suffix:
+            return candidate.parent / f"{candidate.name}.shards"
+        return candidate
 
     def _get_shard_index(self, routing_key: str) -> int:
         h = hashlib.sha256(routing_key.encode("utf-8")).hexdigest()
@@ -149,10 +161,18 @@ class ShardedAsyncSignalBus:
             cursor = await conn.execute(query, params)
             return await cursor.fetchall()
 
-        all_results = await asyncio.gather(*(fetch_rows(c) for c in conns))
-        
+        async def safe_fetch(conn):
+            return await asyncio.wait_for(fetch_rows(conn), timeout=5.0)
+
+        all_results = await asyncio.gather(
+            *(safe_fetch(c) for c in conns), return_exceptions=True
+        )
+
         all_signals = []
         for rows in all_results:
+            if isinstance(rows, Exception):
+                logger.warning("Timeout or error in history shard fetch: %s", rows)
+                continue
             all_signals.extend([signal_from_row(tuple(row)) for row in rows])
 
         all_signals.sort(key=lambda x: x.created_at, reverse=True)
@@ -191,8 +211,14 @@ class ShardedAsyncSignalBus:
             rows = await cursor.fetchall()
             return idx, rows
 
+        async def safe_fetch_candidates(idx: int):
+            return await asyncio.wait_for(fetch_candidates(idx), timeout=5.0)
+
         # O(1) Cluster polling
-        results = await asyncio.gather(*(fetch_candidates(idx) for idx in shard_indices))
+        raw_results = await asyncio.gather(
+            *(safe_fetch_candidates(idx) for idx in shard_indices), return_exceptions=True
+        )
+        results = [r for r in raw_results if not isinstance(r, Exception)]
 
         all_candidate_signals = []
         for idx, rows in results:
@@ -219,8 +245,17 @@ class ShardedAsyncSignalBus:
             )
             await conn.commit()
 
+        async def safe_update_shard(idx: int, updates: list):
+            return await asyncio.wait_for(update_shard(idx, updates), timeout=5.0)
+
         if updates_by_shard:
-            await asyncio.gather(*(update_shard(idx, updates) for idx, updates in updates_by_shard.items()))
+            await asyncio.gather(
+                *(
+                    safe_update_shard(idx, updates)
+                    for idx, updates in updates_by_shard.items()
+                ),
+                return_exceptions=True,
+            )
 
         return polled_signals
 
@@ -243,7 +278,14 @@ class ShardedAsyncSignalBus:
             await conn.commit()
             return cursor.rowcount
 
-        results = await asyncio.gather(*(remove_from_shard(c) for c in self._shards.values()))
+        async def safe_remove_from_shard(conn):
+            return await asyncio.wait_for(remove_from_shard(conn), timeout=5.0)
+
+        raw_results = await asyncio.gather(
+            *(safe_remove_from_shard(c) for c in self._shards.values()),
+            return_exceptions=True,
+        )
+        results = [r for r in raw_results if not isinstance(r, Exception)]
         total_pruned = sum(results)
 
         if total_pruned:
@@ -254,3 +296,7 @@ class ShardedAsyncSignalBus:
             )
 
         return total_pruned
+
+
+# Backward-compatible alias for the legacy sharded durable bus name.
+ShardedAsyncSignalBus = ShardedDurableSignalBus

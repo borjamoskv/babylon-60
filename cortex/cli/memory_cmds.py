@@ -19,6 +19,7 @@ from cortex.cli.common import (
 )
 from cortex.cli.errors import err_empty_results
 from cortex.cli.slow_tip import with_slow_tips
+from cortex.extensions.sync.common import RELATION_BRIDGE_KIND
 
 
 @click.group("memory")
@@ -103,6 +104,10 @@ def store(
                 f"{metrics.asymmetry_factor:.1f}x asymmetry. "
                 f"{metrics.tip}"
             )
+
+        if fact_type == "bridge":
+            meta.setdefault("bridge_kind", RELATION_BRIDGE_KIND)
+            meta.setdefault("bridge_provider", source)
 
         tag_list = [t.strip() for t in tags.split(",")] if tags else None
         fact_id = _run_async(

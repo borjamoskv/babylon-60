@@ -10,7 +10,9 @@ from pathlib import Path
 
 import httpx
 import pytest
+from click.testing import CliRunner
 
+import cortex.cli.github_cmds as github_cli
 from cortex.extensions.sync.github_bridge import GitHubCortexBridge, _github_key
 
 pytestmark = pytest.mark.slow
@@ -220,3 +222,140 @@ class TestAuthFailureGraceful:
         assert "401" in result.errors[0]
 
         await bridge.close()
+
+
+class TestTenantAwareDedup:
+    async def test_load_existing_keys_threads_tenant(self, engine, monkeypatch):
+        calls: dict[str, object] = {}
+
+        class _FakeCursor:
+            async def fetchall(self):
+                return [(123, b"encrypted-meta")]
+
+        class _FakeConn:
+            async def execute(self, sql, params):
+                calls["sql"] = sql
+                calls["params"] = params
+                return _FakeCursor()
+
+        class _FakeSession:
+            async def __aenter__(self):
+                return _FakeConn()
+
+            async def __aexit__(self, exc_type, exc, tb):
+                return None
+
+        class _FakeEncrypter:
+            def __init__(self):
+                self.decrypt_calls: list[tuple[bytes, str]] = []
+
+            def decrypt_json(self, payload, tenant_id="default"):
+                self.decrypt_calls.append((payload, tenant_id))
+                return {"github_key": "abc123"}
+
+        fake_encrypter = _FakeEncrypter()
+
+        bridge = GitHubCortexBridge(
+            engine,
+            token="fake-token",
+            owner="borjamoskv",
+            tenant_id="tenant-a",
+        )
+        monkeypatch.setattr(engine, "session", lambda: _FakeSession())
+        monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: fake_encrypter)
+
+        index = await bridge._load_existing_keys()
+
+        assert index == {"abc123": 123}
+        assert calls["params"] == ("bridge:github", "tenant-a")
+        assert fake_encrypter.decrypt_calls == [(b"encrypted-meta", "tenant-a")]
+        await bridge.close()
+
+
+class TestTenantAwareCrystallization:
+    async def test_crystallize_decision_threads_tenant_into_deprecate_and_store(self):
+        class _FakeEngine:
+            def __init__(self) -> None:
+                self.deprecate_calls: list[dict[str, object]] = []
+                self.store_calls: list[dict[str, object]] = []
+
+            async def deprecate(self, fact_id: int, **kwargs):
+                self.deprecate_calls.append({"fact_id": fact_id, **kwargs})
+                return True
+
+            async def store(self, **kwargs):
+                self.store_calls.append(kwargs)
+                return 456
+
+        engine = _FakeEngine()
+        bridge = GitHubCortexBridge(
+            engine,
+            token="fake-token",
+            owner="borjamoskv",
+            tenant_id="tenant-a",
+        )
+
+        item = _make_issue(21, title="Closed item", state="closed")
+        fact_id = await bridge._crystallize_decision(item, "borjamoskv/testrepo", 123)
+
+        assert fact_id == 456
+        assert engine.deprecate_calls == [
+            {
+                "fact_id": 123,
+                "reason": "crystallized:closed:borjamoskv/testrepo#21",
+                "tenant_id": "tenant-a",
+            }
+        ]
+        assert engine.store_calls[0]["tenant_id"] == "tenant-a"
+        assert engine.store_calls[0]["fact_type"] == "decision"
+        await bridge.close()
+
+
+class TestGithubStatusTenantScope:
+    def test_status_filters_by_tenant(self, monkeypatch):
+        calls: list[tuple[str, tuple[str, ...]]] = []
+
+        class _FakeCursor:
+            def __init__(self, value):
+                self._value = value
+
+            async def fetchone(self):
+                return (self._value,)
+
+        class _FakeConn:
+            async def execute(self, sql, params):
+                calls.append((sql, params))
+                if "COUNT(*)" in sql and "fact_type = 'bridge'" in sql:
+                    return _FakeCursor(7)
+                if "COUNT(*)" in sql and "fact_type = 'decision'" in sql:
+                    return _FakeCursor(3)
+                return _FakeCursor("2026-04-04T12:00:00Z")
+
+        class _FakeEngine:
+            async def init_db(self):
+                return None
+
+            def session(self):
+                class _Session:
+                    async def __aenter__(self_inner):
+                        return _FakeConn()
+
+                    async def __aexit__(self_inner, exc_type, exc, tb):
+                        return None
+
+                return _Session()
+
+            async def close(self):
+                return None
+
+        monkeypatch.setattr(github_cli, "get_engine", lambda db: _FakeEngine())
+
+        result = CliRunner().invoke(
+            github_cli.github_cmds,
+            ["status", "--tenant-id", "tenant-a", "--db", "/tmp/db.sqlite"],
+        )
+
+        assert result.exit_code == 0, result.output
+        assert "tenant-a" in result.output
+        assert any(params == ("tenant-a",) for _, params in calls)
+        assert len(calls) == 3

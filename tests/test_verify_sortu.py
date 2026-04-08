@@ -8,8 +8,12 @@ from pathlib import Path
 
 import pytest
 
+LOCAL_SORTU_SCRIPTS = Path(__file__).resolve().parents[1] / "scripts" / "sortu"
+if LOCAL_SORTU_SCRIPTS.exists() and str(LOCAL_SORTU_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(LOCAL_SORTU_SCRIPTS))
+
 _scripts = Path.home() / ".gemini" / "antigravity" / "skills" / "Sortu" / "scripts"
-if str(_scripts) not in sys.path:
+if not LOCAL_SORTU_SCRIPTS.exists() and str(_scripts) not in sys.path:
     sys.path.insert(0, str(_scripts))
 
 from verify_sortu import VerificationError, verify_tripartite

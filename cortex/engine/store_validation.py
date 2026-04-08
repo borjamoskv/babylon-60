@@ -7,6 +7,58 @@ from typing import Any
 
 logger = logging.getLogger("cortex.engine.validation")
 
+_TAINT_REQUIRED_RUNTIME_ARTIFACTS = frozenset(
+    {"fact_proposal", "tool_evidence", "rejection", "decision_edge", "causal_edge"}
+)
+_TAINT_HASH_FIELDS = (
+    "runtime_payload_hash",
+    "runtime_input_hash",
+    "runtime_artifact_hash",
+    "payload_hash",
+    "input_hash",
+)
+
+
+def _extract_taint_digest(taint: str) -> str | None:
+    from cortex.guards.taint import TaintEngine
+
+    return TaintEngine.extract_digest(taint)
+
+
+def _enforce_taint_contract(content: str, meta: dict[str, Any] | None) -> None:
+    """Validate CORTEX-TAINT for runtime artifacts before any persistence step."""
+    if not meta:
+        return
+
+    artifact_kind = meta.get("runtime_artifact_kind")
+    taint = meta.get("taint")
+    taint_required = bool(meta.get("requires_taint_proof")) or (
+        artifact_kind in _TAINT_REQUIRED_RUNTIME_ARTIFACTS
+    )
+
+    if taint_required and not taint:
+        if artifact_kind:
+            raise ValueError(f"CORTEX-TAINT required for runtime artifact '{artifact_kind}'")
+        raise ValueError("CORTEX-TAINT required for this write")
+    if not taint:
+        return
+
+    digest = _extract_taint_digest(str(taint))
+    if digest is None:
+        raise ValueError("Invalid CORTEX-TAINT format")
+
+    for field in _TAINT_HASH_FIELDS:
+        expected_digest = meta.get(field)
+        if isinstance(expected_digest, str) and expected_digest:
+            if digest != expected_digest:
+                raise ValueError(f"CORTEX-TAINT digest mismatch for field '{field}'")
+            return
+
+    from cortex.guards.taint import TaintEngine
+
+    if not TaintEngine.verify_taint(content, str(taint)):
+        raise ValueError("CORTEX-TAINT does not match persisted content")
+
 
 async def _check_byzantine_auth(
     mixin_instance: Any, meta: dict | None, source: str | None, tenant_id: str
@@ -64,9 +116,12 @@ async def _apply_semantic_dedup(
                 await mixin_instance.deprecate(fid, f"Thermal decay ({hits}x)", conn, tenant_id)
                 cls._thermal_decay_cache[fid] = 0
             else:
-                await conn.execute(
-                    "UPDATE facts SET last_accessed = CURRENT_TIMESTAMP WHERE id=?", (fid,)
-                )
+                try:
+                    await conn.execute(
+                        "UPDATE facts SET last_accessed = CURRENT_TIMESTAMP WHERE id=?", (fid,)
+                    )
+                except Exception as e:
+                    logger.debug("Skipping last_accessed update for fact %s: %s", fid, e)
             return fid
     except Exception as e:
         logger.debug("Semantic dedup skipped: %s", e)
@@ -103,6 +158,7 @@ async def run_store_validation_logic(
     skip_thermo = os.getenv("CORTEX_SKIP_EXERGY_VALIDATION") == "1"
 
     _enforce_thermodynamics(cls, fact_type, skip_thermo)
+    _enforce_taint_contract(content, meta)
 
     # Exergy calculation
     _has_entropy = meta and ("_prior_entropy" in meta or "_posterior_entropy" in meta)
@@ -153,7 +209,7 @@ async def run_store_validation_logic(
         meta["_membrane_log"] = membrane_log.dict()
 
     from cortex.engine.fact_store_core import resolve_causality_async
-    meta = await resolve_causality_async(conn, project, meta)
+    meta = await resolve_causality_async(conn, project, meta, tenant_id=tenant_id)
 
     nemesis_rejection = None
     if fact_type not in ("error", "ghost"):

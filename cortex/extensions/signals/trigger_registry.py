@@ -1,6 +1,6 @@
 """CORTEX — Default Trigger Registry.
 
-Factory functions that register the 8 default CORTEX trigger conditions
+Factory functions that register the default CORTEX trigger conditions
 into a TriggerEngine instance. These map the Event Horizon Triggers
 from GEMINI.md §5 to automated CORTEX responses.
 
@@ -16,6 +16,7 @@ Usage::
 from __future__ import annotations
 
 import logging
+import os
 
 from cortex.extensions.signals.trigger_engine import (
     ActionType,
@@ -28,6 +29,24 @@ from cortex.extensions.signals.trigger_engine import (
 __all__ = ["register_defaults"]
 
 logger = logging.getLogger("cortex.extensions.signals.trigger_registry")
+
+
+def _env_int(name: str, default: int, minimum: int = 1) -> int:
+    raw = os.environ.get(name, "")
+    try:
+        value = int(raw)
+    except ValueError:
+        return default
+    return value if value >= minimum else default
+
+
+def _env_float(name: str, default: float, minimum: float = 0.0) -> float:
+    raw = os.environ.get(name, "")
+    try:
+        value = float(raw)
+    except ValueError:
+        return default
+    return value if value >= minimum else default
 
 
 def register_defaults(engine: TriggerEngine) -> None:
@@ -228,6 +247,70 @@ def _register_p1_triggers(engine: TriggerEngine) -> None:
         )
     )
 
+    # Native control safety gate blocked
+    engine.register(
+        TriggerCondition(
+            id="mac_maestro_safety_gate_blocked",
+            name="Mac Maestro Safety Gate Blocked",
+            priority=EventHorizonPriority.P1_STRUCTURAL,
+            event_types=["mac_maestro:safety_gate_blocked"],
+            accumulator_threshold=1,
+            cooldown_s=60.0,
+            actions=[
+                TriggerAction(
+                    action_type=ActionType.STORE_FACT,
+                    config={
+                        "content": "Mac Maestro safety gate blocked a native action",
+                        "fact_type": "ghost",
+                        "confidence": "C5-Static",
+                        "meta": {"sub_type": "policy_guard"},
+                    },
+                ),
+                TriggerAction(
+                    action_type=ActionType.NOTIFY,
+                    config={
+                        "title": "🛡️ Mac Maestro Safety Gate Blocked",
+                        "body": "A macOS native action was blocked before execution.",
+                        "severity": "warning",
+                    },
+                ),
+            ],
+            source_module="cortex.mac_maestro.executor",
+        )
+    )
+
+    # Native control verification failure
+    engine.register(
+        TriggerCondition(
+            id="mac_maestro_verification_failed",
+            name="Mac Maestro Verification Failed",
+            priority=EventHorizonPriority.P1_STRUCTURAL,
+            event_types=["mac_maestro:verification_failed"],
+            accumulator_threshold=1,
+            cooldown_s=60.0,
+            actions=[
+                TriggerAction(
+                    action_type=ActionType.STORE_FACT,
+                    config={
+                        "content": "Mac Maestro action completed but verification rejected the state change",
+                        "fact_type": "ghost",
+                        "confidence": "C4",
+                        "meta": {"sub_type": "verification_ghost"},
+                    },
+                ),
+                TriggerAction(
+                    action_type=ActionType.NOTIFY,
+                    config={
+                        "title": "⚠️ Mac Maestro Verification Failed",
+                        "body": "A native action executed but the verification oracle rejected the result.",
+                        "severity": "warning",
+                    },
+                ),
+            ],
+            source_module="cortex.mac_maestro.executor",
+        )
+    )
+
 
 # ═════════════════════════════════════════════════════════════════════════
 #  P2 — Kinetic (Accumulator ≥ N)
@@ -244,9 +327,9 @@ def _register_p2_triggers(engine: TriggerEngine) -> None:
             name="Compaction Auto-Trigger",
             priority=EventHorizonPriority.P2_KINETIC,
             event_types=["fact:stored"],
-            accumulator_threshold=50,
-            accumulator_window_s=3600.0,
-            cooldown_s=300.0,
+            accumulator_threshold=_env_int("CORTEX_COMPACT_THRESHOLD", 50),
+            accumulator_window_s=_env_float("CORTEX_TRIGGER_COMPACT_WINDOW_S", 3600.0),
+            cooldown_s=_env_float("CORTEX_TRIGGER_COMPACT_COOLDOWN_S", 300.0),
             actions=[
                 TriggerAction(
                     action_type=ActionType.EMIT_SIGNAL,
@@ -268,9 +351,9 @@ def _register_p2_triggers(engine: TriggerEngine) -> None:
             name="Ghost Accumulation Alert",
             priority=EventHorizonPriority.P2_KINETIC,
             event_types=["ghost:discovered", "ghost:detected"],
-            accumulator_threshold=3,
-            accumulator_window_s=600.0,
-            cooldown_s=300.0,
+            accumulator_threshold=_env_int("CORTEX_TRIGGER_GHOST_THRESHOLD", 3),
+            accumulator_window_s=_env_float("CORTEX_TRIGGER_GHOST_WINDOW_S", 600.0),
+            cooldown_s=_env_float("CORTEX_TRIGGER_GHOST_COOLDOWN_S", 300.0),
             actions=[
                 TriggerAction(
                     action_type=ActionType.STORE_FACT,
@@ -291,5 +374,62 @@ def _register_p2_triggers(engine: TriggerEngine) -> None:
                 ),
             ],
             source_module="cortex.extensions.swarm.error_ghost_pipeline",
+        )
+    )
+
+    # Native control repeated failures — kinetic degradation, not one-off UI entropy
+    engine.register(
+        TriggerCondition(
+            id="mac_maestro_failure_accumulation",
+            name="Mac Maestro Failure Accumulation",
+            priority=EventHorizonPriority.P2_KINETIC,
+            event_types=["mac_maestro:action_failed"],
+            accumulator_threshold=3,
+            accumulator_window_s=600.0,
+            cooldown_s=300.0,
+            actions=[
+                TriggerAction(
+                    action_type=ActionType.STORE_FACT,
+                    config={
+                        "content": "Mac Maestro failure threshold reached — kinetic control loop degrading",
+                        "fact_type": "bridge",
+                        "confidence": "C4",
+                        "meta": {"sub_type": "kinetic_bridge"},
+                    },
+                ),
+                TriggerAction(
+                    action_type=ActionType.NOTIFY,
+                    config={
+                        "title": "🎛️ Mac Maestro Failure Accumulation",
+                        "body": "3+ native control actions failed in a 10 minute window.",
+                        "severity": "warning",
+                    },
+                ),
+            ],
+            source_module="cortex.mac_maestro.executor",
+        )
+    )
+
+    # Native control slowdown — detect kinetic heat before the loop collapses
+    engine.register(
+        TriggerCondition(
+            id="mac_maestro_slow_action_accumulation",
+            name="Mac Maestro Slow Action Accumulation",
+            priority=EventHorizonPriority.P2_KINETIC,
+            event_types=["mac_maestro:action_slow"],
+            accumulator_threshold=3,
+            accumulator_window_s=600.0,
+            cooldown_s=300.0,
+            actions=[
+                TriggerAction(
+                    action_type=ActionType.NOTIFY,
+                    config={
+                        "title": "⏱️ Mac Maestro Slowdown",
+                        "body": "Native control actions are repeatedly exceeding the latency budget.",
+                        "severity": "warning",
+                    },
+                ),
+            ],
+            source_module="cortex.mac_maestro.executor",
         )
     )

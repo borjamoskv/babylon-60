@@ -84,6 +84,8 @@ class TestDomainClassification:
         assert _PROJECT_DOMAIN["MOSKV-1"] == "cortex.agents"
         assert _PROJECT_DOMAIN["naroa"] == "cortex-products"
         assert _PROJECT_DOMAIN["SAP"] == "cortex-operations"
+        assert _PROJECT_DOMAIN["MAC-CONTROL-TOTAL"] == "cortex-operations"
+        assert _PROJECT_DOMAIN["CORTEX-Swarm-Prime"] == "cortex.agents"
 
     def test_all_domain_map_entries_indexed(self) -> None:
         for domain, projects in DOMAIN_MAP.items():

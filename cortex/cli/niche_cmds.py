@@ -7,8 +7,6 @@ import asyncio
 import click
 
 from cortex.cli.common import console
-from cortex.extensions.skills.niche_arbitrage.models import NicheTarget
-from cortex.extensions.skills.niche_arbitrage.pipeline import NicheArbitrageEngine
 
 
 @click.group(name="niche", help="Niche Arbitrage — Market Intelligence Pipeline")
@@ -24,6 +22,11 @@ def niche_cmds():
 @click.option("--output", "-o", default=None, help="Save report to file (Markdown)")
 def extract_cmd(url: str, name: str, tags: str, output: str | None):
     """Executes the Niche Arbitrage ETL pipeline."""
+    from cortex.extensions.skills.niche_arbitrage import (
+        NicheArbitrageEngine,
+        NicheTarget,
+    )
+
     tag_list = [t.strip() for t in tags.split(",") if t.strip()]
     target = NicheTarget(url=url, name=name, tags=tag_list)
 

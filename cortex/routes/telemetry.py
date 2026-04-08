@@ -5,12 +5,15 @@ Exposes realtime stream of code mutations detected by AST Oracle.
 
 import asyncio
 import logging
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 
 from cortex.api.deps import get_async_engine
-from cortex.engine import CortexEngine as AsyncCortexEngine
+from cortex.crypto import get_default_encrypter, load_json_dict
+
+if TYPE_CHECKING:
+    from cortex.engine import CortexEngine as AsyncCortexEngine
 
 logger = logging.getLogger("cortex.api.telemetry")
 router = APIRouter(prefix="/telemetry", tags=["telemetry"])
@@ -21,22 +24,34 @@ async def query_new_facts(
 ) -> tuple[int, list[dict[str, Any]]]:
     """Queries for new facts of specific type since last_id."""
     async with engine.session() as conn:
-        sql = """
-            SELECT id, content, meta 
-            FROM facts 
-            WHERE fact_type = ? AND id > ? 
-            ORDER BY id ASC
-        """
+        async with conn.execute("PRAGMA table_info(facts)") as cursor:
+            columns = {str(row[1]) for row in await cursor.fetchall()}
+
+        meta_col = "metadata" if "metadata" in columns else "meta" if "meta" in columns else None
+        select_meta = meta_col if meta_col is not None else "NULL"
+        select_tenant = "tenant_id" if "tenant_id" in columns else "'default'"
+        sql = (
+            f"SELECT id, content, {select_meta}, {select_tenant} "
+            "FROM facts "
+            "WHERE fact_type = ? AND id > ? "
+            "ORDER BY id ASC"
+        )
         cursor = await conn.execute(sql, (fact_type, last_id))
         rows = await cursor.fetchall()
 
         results = []
         max_id = last_id
+        encrypter = get_default_encrypter()
         for row in rows:
-            fact_id, content, meta_raw = row
-            import json
-
-            meta = json.loads(meta_raw) if meta_raw else {}
+            fact_id, content_raw, meta_raw, tenant_id = row
+            tenant = tenant_id or "default"
+            content = content_raw
+            if content_raw and str(content_raw).startswith(encrypter.PREFIX):
+                try:
+                    content = encrypter.decrypt_str(content_raw, tenant_id=tenant)
+                except (RuntimeError, ValueError, TypeError, OSError):
+                    content = content_raw
+            meta = load_json_dict(meta_raw, tenant_id=tenant)
             results.append({"fact_id": fact_id, "content": content, "meta": meta})
             if fact_id > max_id:
                 max_id = fact_id

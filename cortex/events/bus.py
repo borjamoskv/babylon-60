@@ -79,7 +79,15 @@ class DistributedEventBus:
         tasks = [asyncio.create_task(callback(payload)) for callback in subscribers]
 
         if tasks:
-            await asyncio.gather(*tasks, return_exceptions=True)
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            for callback, result in zip(subscribers, results, strict=False):
+                if isinstance(result, Exception):
+                    logger.warning(
+                        "Subscriber %r failed for topic %s: %s",
+                        callback,
+                        topic,
+                        result,
+                    )
 
     async def broadcast_memory(
         self,

@@ -6,6 +6,7 @@ El Colapso del aprendizaje continuo a una directiva libre de orquestación.
 from __future__ import annotations
 
 import asyncio
+import inspect
 import logging
 import time
 from pathlib import Path
@@ -29,11 +30,12 @@ class ZeroPromptingDaemon:
         engine: CortexEngine,
         workspace_root: str | Path,
         cycle_interval_hours: float = 24.0,
-    ):
+    ) -> None:
         self.engine = engine
         self.root = Path(workspace_root)
         self.interval = cycle_interval_hours * 3600
         self._shutdown = False
+        self._stop_event = asyncio.Event()
         self.last_cycle = 0
 
     async def _observe(self) -> dict[str, Any]:
@@ -105,19 +107,39 @@ class ZeroPromptingDaemon:
         """Persists the successful mutation as a C5 Truth in the CORTEX Ledger."""
         logger.info("[ZERO-PROMPT] [CRYSTALLIZE] Evolution accepted: %s", improvement)
         try:
-            conn = self.engine.pool.get_connection()  # type: ignore[type-error]
-            conn.execute(
-                "INSERT INTO facts (id, type, topic, content, timestamp, confidence) "
-                "VALUES (lower(hex(randomblob(16))), 'decision', 'ZeroPrompt', ?, ?, 'C5')",
-                (
-                    f"Evolved: {hypothesis}. Action: {action}. Improvement: {improvement}",
-                    time.time(),
-                ),
-            )
-            conn.commit()
+            content = f"Evolved: {hypothesis}. Action: {action}. Improvement: {improvement}"
+            meta = {"daemon": "zero_prompting", "action": action, "improvement": improvement}
+            store = getattr(self.engine, "store", None)
+            if store is not None and inspect.iscoroutinefunction(store):
+                await store(
+                    project="cortex",
+                    content=content,
+                    fact_type="decision",
+                    source="daemon:zero-prompting",
+                    tags=["zero-prompting", "evolution"],
+                    meta=meta,
+                    confidence="C5",
+                )
+            else:
+                store_sync = getattr(self.engine, "store_sync", None)
+                if callable(store_sync):
+                    store_sync(
+                        "cortex",
+                        content=content,
+                        fact_type="decision",
+                        source="daemon:zero-prompting",
+                        tags=["zero-prompting", "evolution"],
+                        meta=meta,
+                        confidence="C5",
+                    )
+                else:
+                    logger.warning(
+                        "[ZERO-PROMPTING] Skipped crystallization: engine lacks store/store_sync"
+                    )
+                    return
             logger.info("  ↳ Written to Ledger: Immutable C5.")
-        except Exception as e:
-            logger.error("[ZERO-PROMPTING] Ledger crystallization failed: %s", e)
+        except (OSError, RuntimeError, TypeError, ValueError) as exc:
+            logger.error("[ZERO-PROMPTING] Ledger crystallization failed: %s", exc)
 
     async def _revert(self, action: dict) -> None:
         """Reverts the changes if the mutation failed the criteria."""
@@ -150,13 +172,22 @@ class ZeroPromptingDaemon:
     async def run_loop(self) -> None:
         """The core Zero-Prompting pulse."""
         logger.info("🧠 Zero-Prompting Evolution Daemon ONLINE.")
+        self._stop_event.clear()
         while not self._shutdown:
             now = time.time()
             if now - self.last_cycle > self.interval:
                 await self.evolution_cycle(focus="entropy")
                 self.last_cycle = now
-            await asyncio.sleep(60)
+
+            if self._shutdown:
+                break
+
+            try:
+                await asyncio.wait_for(self._stop_event.wait(), timeout=60)
+            except TimeoutError:
+                continue
 
     def stop(self) -> None:
         logger.info("Stopping Zero-Prompting Evolution Daemon.")
         self._shutdown = True
+        self._stop_event.set()

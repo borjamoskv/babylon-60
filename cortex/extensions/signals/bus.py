@@ -12,7 +12,12 @@ import aiosqlite
 
 from cortex.extensions.signals.models import Signal, signal_from_row
 
-__all__ = ["SignalBus", "AsyncSignalBus"]
+__all__ = [
+    "DurableSignalBus",
+    "AsyncDurableSignalBus",
+    "SignalBus",
+    "AsyncSignalBus",
+]
 
 logger = logging.getLogger("cortex.extensions.signals.bus")
 
@@ -70,7 +75,9 @@ def _build_query(
     return query, params
 
 
-class AsyncSignalBus:
+class AsyncDurableSignalBus:
+    """Durable async signal bus backed by SQLite."""
+
     __slots__ = ("_conn", "_ready", "session_emitted", "session_errors")
 
     def __init__(self, conn: aiosqlite.Connection) -> None:
@@ -286,7 +293,9 @@ class AsyncSignalBus:
         return pruned
 
 
-class SignalBus:
+class DurableSignalBus:
+    """Durable sync signal bus backed by SQLite."""
+
     __slots__ = ("_conn", "_ready", "session_emitted", "session_errors")
 
     def __init__(self, conn: sqlite3.Connection) -> None:
@@ -509,3 +518,8 @@ class SignalBus:
         )
         cursor = self._conn.execute(query, params)
         return [signal_from_row(tuple(row)) for row in cursor.fetchall()]
+
+
+# Backward-compatible aliases for the legacy durable bus names.
+AsyncSignalBus = AsyncDurableSignalBus
+SignalBus = DurableSignalBus

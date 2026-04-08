@@ -1,0 +1,863 @@
+---
+import {
+  buildLongestPages,
+  filterPages,
+  formatNumber,
+} from '../lib/revideoKnowledge.js';
+
+const {
+  manifest = null,
+  pages = [],
+  bucketStats = [],
+} = Astro.props;
+
+const hasData = pages.length > 0;
+const visibleLimit = 18;
+const starterQueries = [
+  'signals',
+  'render endpoint',
+  'tweening',
+  'audio',
+  'layout',
+  'production',
+];
+const initialResults = hasData
+  ? filterPages(pages, { query: '', bucket: 'all', sort: 'length' }).slice(0, visibleLimit)
+  : [];
+const initialDetail = initialResults[0] ?? null;
+const longestPages = hasData ? buildLongestPages(pages, 8) : [];
+const successCount = manifest?.scrape_status_counts?.success ?? 0;
+const metrics = [
+  { label: 'Pages', value: formatNumber(manifest?.total_urls ?? pages.length) },
+  { label: 'Bundles', value: formatNumber(manifest?.bundle_count ?? 0) },
+  { label: 'Scrape OK', value: formatNumber(successCount) },
+  { label: 'Mode', value: manifest?.ingest_mode ?? 'offline' },
+];
+const bucketOptions = [{ bucket: 'all', count: pages.length }, ...bucketStats];
+---
+
+<section class="revideo-console" data-revideo-console>
+  <div class="revideo-console__hero rv">
+    <div class="revideo-console__hero-copy">
+      <div class="eyebrow">Revideo Memory Surface</div>
+      <h2>Use the ingest as a live browser, not a dead dump.</h2>
+      <p>
+        Search by term, bucket, page weight, and excerpt. The result list and preview panel are both local,
+        static, and driven by the offline corpus already captured inside CORTEX.
+      </p>
+    </div>
+    <div class="revideo-console__metrics">
+      {metrics.map((metric) => (
+        <article class="revideo-metric">
+          <span>{metric.label}</span>
+          <strong>{metric.value}</strong>
+        </article>
+      ))}
+    </div>
+  </div>
+
+  {
+    hasData ? (
+      <>
+        <div class="revideo-console__controls rv">
+          <label class="revideo-search">
+            <span>Query</span>
+            <input
+              type="search"
+              name="query"
+              placeholder="signals, render endpoint, timeline, production..."
+              autocomplete="off"
+              data-revideo-query
+            />
+          </label>
+
+          <label class="revideo-sort">
+            <span>Sort</span>
+            <select data-revideo-sort>
+              <option value="relevance">Relevance</option>
+              <option value="length">Longest pages</option>
+              <option value="title">Title A-Z</option>
+            </select>
+          </label>
+
+          <div class="revideo-console__count">
+            <span>Visible</span>
+            <strong data-revideo-count>{formatNumber(initialResults.length)} / {formatNumber(pages.length)}</strong>
+          </div>
+        </div>
+
+        <div class="revideo-console__starter-bar rv">
+          <div class="revideo-console__label">Quick jumps</div>
+          <div class="revideo-console__starter-chips">
+            {starterQueries.map((query) => (
+              <button type="button" class="revideo-starter" data-revideo-starter={query}>
+                {query}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div class="revideo-console__bucket-bar rv" role="tablist" aria-label="Revideo buckets">
+          {bucketOptions.map((item, index) => (
+            <button
+              class:list={['revideo-bucket', index === 0 && 'is-active']}
+              type="button"
+              data-revideo-bucket={item.bucket}
+              aria-pressed={index === 0 ? 'true' : 'false'}
+            >
+              <span>{item.bucket}</span>
+              <strong>{formatNumber(item.count)}</strong>
+            </button>
+          ))}
+        </div>
+
+        <div class="revideo-console__grid">
+          <div class="revideo-console__results rv">
+            <div class="revideo-console__panel-head">
+              <div>
+                <span class="revideo-console__label">Explorer</span>
+                <h3>Live page navigator</h3>
+              </div>
+              <p>Press <kbd>/</kbd> to focus search. Click any result to lock it into the preview rail.</p>
+            </div>
+
+            <div class="revideo-results" data-revideo-results>
+              {initialResults.map((page, index) => (
+                <button
+                  type="button"
+                  class:list={['revideo-result', index === 0 && 'is-active']}
+                  data-revideo-result={page.url}
+                >
+                  <div class="revideo-result__meta">
+                    <span>{page.bucket}</span>
+                    <span>{formatNumber(page.contentLength)} chars</span>
+                    <span>{formatNumber(page.bundleRefs.length)} bundles</span>
+                  </div>
+                  <h4>{page.title}</h4>
+                  <p>{page.excerpt || page.pathLabel}</p>
+                  <div class="revideo-result__footer">
+                    <small>{page.pathLabel}</small>
+                    <strong>Inspect</strong>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <aside class="revideo-console__side rv">
+            <section class="revideo-side-panel revideo-side-panel--detail" data-revideo-detail>
+              {
+                initialDetail ? (
+                  <>
+                    <div class="revideo-console__panel-head">
+                      <div>
+                        <span class="revideo-console__label">Preview</span>
+                        <h3 data-revideo-detail-title>{initialDetail.title}</h3>
+                      </div>
+                    </div>
+                    <div class="revideo-detail__meta">
+                      <span data-revideo-detail-bucket>{initialDetail.bucket}</span>
+                      <span data-revideo-detail-length>{formatNumber(initialDetail.contentLength)} chars</span>
+                      <span data-revideo-detail-bundles>{formatNumber(initialDetail.bundleRefs.length)} bundles</span>
+                    </div>
+                    <p class="revideo-detail__path" data-revideo-detail-path>{initialDetail.pathLabel}</p>
+                    <p class="revideo-detail__excerpt" data-revideo-detail-excerpt>{initialDetail.excerpt}</p>
+                    <div class="revideo-detail__actions">
+                      <a data-revideo-detail-link href={initialDetail.url} target="_blank" rel="noreferrer">Open source page</a>
+                      <button type="button" data-revideo-copy-link>Copy URL</button>
+                    </div>
+                    <div class="revideo-detail__footer">
+                      <small data-revideo-detail-strategy>{initialDetail.strategy}</small>
+                      <small data-revideo-detail-elapsed>{Math.round(initialDetail.elapsedMs)} ms scrape</small>
+                    </div>
+                  </>
+                ) : null
+              }
+            </section>
+
+            <section class="revideo-side-panel">
+              <div class="revideo-console__panel-head">
+                <div>
+                  <span class="revideo-console__label">Topology</span>
+                  <h3>Bucket load</h3>
+                </div>
+              </div>
+              <div class="revideo-bucket-table">
+                {bucketStats.slice(0, 8).map((bucket) => (
+                  <button
+                    type="button"
+                    class="revideo-bucket-row"
+                    data-revideo-jump-bucket={bucket.bucket}
+                  >
+                    <div>
+                      <strong>{bucket.bucket}</strong>
+                      <span>{formatNumber(bucket.averageChars)} avg chars</span>
+                    </div>
+                    <em>{formatNumber(bucket.count)}</em>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section class="revideo-side-panel">
+              <div class="revideo-console__panel-head">
+                <div>
+                  <span class="revideo-console__label">Pressure points</span>
+                  <h3>Longest pages</h3>
+                </div>
+              </div>
+              <div class="revideo-longest-list">
+                {longestPages.map((page) => (
+                  <button
+                    type="button"
+                    class="revideo-longest-item"
+                    data-revideo-jump-page={page.url}
+                  >
+                    <strong>{page.title}</strong>
+                    <span>{page.bucket}</span>
+                    <em>{formatNumber(page.contentLength)} chars</em>
+                  </button>
+                ))}
+              </div>
+            </section>
+          </aside>
+        </div>
+
+        <script type="application/json" data-revideo-pages set:html={JSON.stringify(pages)}></script>
+      </>
+    ) : (
+      <div class="revideo-console__empty rv">
+        <div class="eyebrow">Missing Artifacts</div>
+        <h3>The app route is wired, but the Revideo ingest artifacts are not present.</h3>
+        <p>
+          Generate the local catalogs first, then reload this page. The UI expects the final ingest artifacts
+          under <code>tmp/revideo_ingest_20260407_resume_v3</code>.
+        </p>
+      </div>
+    )
+  }
+</section>
+
+<script type="module">
+  import { filterPages, formatNumber } from '../lib/revideoKnowledge.js';
+
+  const root = document.querySelector('[data-revideo-console]');
+
+  if (root) {
+    const pagesNode = root.querySelector('[data-revideo-pages]');
+    const pages = pagesNode ? JSON.parse(pagesNode.textContent || '[]') : [];
+    const resultsNode = root.querySelector('[data-revideo-results]');
+    const countNode = root.querySelector('[data-revideo-count]');
+    const queryInput = root.querySelector('[data-revideo-query]');
+    const sortSelect = root.querySelector('[data-revideo-sort]');
+    const bucketButtons = Array.from(root.querySelectorAll('[data-revideo-bucket]'));
+    const starterButtons = Array.from(root.querySelectorAll('[data-revideo-starter]'));
+    const bucketJumpButtons = Array.from(root.querySelectorAll('[data-revideo-jump-bucket]'));
+    const pageJumpButtons = Array.from(root.querySelectorAll('[data-revideo-jump-page]'));
+    const detailNode = root.querySelector('[data-revideo-detail]');
+    const detailTitle = root.querySelector('[data-revideo-detail-title]');
+    const detailBucket = root.querySelector('[data-revideo-detail-bucket]');
+    const detailLength = root.querySelector('[data-revideo-detail-length]');
+    const detailBundles = root.querySelector('[data-revideo-detail-bundles]');
+    const detailPath = root.querySelector('[data-revideo-detail-path]');
+    const detailExcerpt = root.querySelector('[data-revideo-detail-excerpt]');
+    const detailLink = root.querySelector('[data-revideo-detail-link]');
+    const detailStrategy = root.querySelector('[data-revideo-detail-strategy]');
+    const detailElapsed = root.querySelector('[data-revideo-detail-elapsed]');
+    const copyLinkButton = root.querySelector('[data-revideo-copy-link]');
+    const visibleLimit = 18;
+    let activeBucket = 'all';
+    let selectedUrl = pages[0]?.url || '';
+
+    const escapeHtml = (value) =>
+      value
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+
+    const getMatches = () =>
+      filterPages(pages, {
+        query: queryInput?.value || '',
+        bucket: activeBucket,
+        sort: sortSelect?.value || 'relevance',
+      });
+
+    const updateDetail = (page) => {
+      if (!page || !detailNode) {
+        return;
+      }
+
+      selectedUrl = page.url;
+      if (detailTitle) detailTitle.textContent = page.title;
+      if (detailBucket) detailBucket.textContent = page.bucket;
+      if (detailLength) detailLength.textContent = `${formatNumber(page.contentLength)} chars`;
+      if (detailBundles) detailBundles.textContent = `${formatNumber(page.bundleRefs.length)} bundles`;
+      if (detailPath) detailPath.textContent = page.pathLabel;
+      if (detailExcerpt) detailExcerpt.textContent = page.excerpt || page.pathLabel;
+      if (detailLink) detailLink.href = page.url;
+      if (detailStrategy) detailStrategy.textContent = page.strategy;
+      if (detailElapsed) detailElapsed.textContent = `${Math.round(page.elapsedMs)} ms scrape`;
+    };
+
+    const renderResults = () => {
+      if (!resultsNode || !countNode || !queryInput || !sortSelect) {
+        return;
+      }
+
+      const matches = getMatches();
+      const visible = matches.slice(0, visibleLimit);
+      const selectedStillVisible = visible.some((page) => page.url === selectedUrl);
+      if (!selectedStillVisible) {
+        selectedUrl = visible[0]?.url || '';
+      }
+
+      countNode.textContent = `${formatNumber(Math.min(matches.length, visibleLimit))} / ${formatNumber(matches.length)}`;
+
+      if (!visible.length) {
+        resultsNode.innerHTML =
+          '<article class="revideo-result revideo-result--empty"><h4>No pages matched this query.</h4><p>Try a broader term or switch bucket.</p></article>';
+        return;
+      }
+
+      resultsNode.innerHTML = visible
+        .map(
+          (page) => `
+            <button
+              type="button"
+              class="revideo-result ${page.url === selectedUrl ? 'is-active' : ''}"
+              data-revideo-result="${escapeHtml(page.url)}"
+            >
+              <div class="revideo-result__meta">
+                <span>${escapeHtml(page.bucket)}</span>
+                <span>${formatNumber(page.contentLength)} chars</span>
+                <span>${formatNumber(page.bundleRefs.length)} bundles</span>
+              </div>
+              <h4>${escapeHtml(page.title)}</h4>
+              <p>${escapeHtml(page.excerpt || page.pathLabel)}</p>
+              <div class="revideo-result__footer">
+                <small>${escapeHtml(page.pathLabel)}</small>
+                <strong>Inspect</strong>
+              </div>
+            </button>
+          `,
+        )
+        .join('');
+
+      updateDetail(visible.find((page) => page.url === selectedUrl) || visible[0]);
+    };
+
+    const setBucket = (bucketValue) => {
+      activeBucket = bucketValue;
+      bucketButtons.forEach((button) => {
+        const isActive = button.dataset.revideoBucket === bucketValue;
+        button.classList.toggle('is-active', isActive);
+        button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      });
+      renderResults();
+    };
+
+    root.addEventListener('click', (event) => {
+      const target = event.target.closest('[data-revideo-result]');
+      if (!target) {
+        return;
+      }
+
+      const page = pages.find((candidate) => candidate.url === target.dataset.revideoResult);
+      if (page) {
+        updateDetail(page);
+        renderResults();
+      }
+    });
+
+    starterButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        if (!queryInput) {
+          return;
+        }
+        queryInput.value = button.dataset.revideoStarter || '';
+        renderResults();
+      });
+    });
+
+    bucketJumpButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        setBucket(button.dataset.revideoJumpBucket || 'all');
+      });
+    });
+
+    pageJumpButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const url = button.dataset.revideoJumpPage;
+        const page = pages.find((candidate) => candidate.url === url);
+        if (!page || !queryInput) {
+          return;
+        }
+        queryInput.value = page.title;
+        setBucket(page.bucket);
+        updateDetail(page);
+      });
+    });
+
+    queryInput?.addEventListener('input', renderResults);
+    sortSelect?.addEventListener('change', renderResults);
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === '/' && document.activeElement !== queryInput) {
+        event.preventDefault();
+        queryInput?.focus();
+      }
+    });
+
+    copyLinkButton?.addEventListener('click', async () => {
+      const current = pages.find((page) => page.url === selectedUrl);
+      if (!current || !navigator.clipboard) {
+        return;
+      }
+      await navigator.clipboard.writeText(current.url);
+      copyLinkButton.textContent = 'Copied';
+      window.setTimeout(() => {
+        copyLinkButton.textContent = 'Copy URL';
+      }, 1400);
+    });
+
+    renderResults();
+  }
+</script>
+
+<style>
+  .revideo-console {
+    display: grid;
+    gap: 22px;
+  }
+
+  .revideo-console__hero,
+  .revideo-console__controls,
+  .revideo-console__results,
+  .revideo-side-panel,
+  .revideo-console__starter-bar,
+  .revideo-console__empty {
+    position: relative;
+    overflow: hidden;
+    border-radius: 28px;
+    border: 1px solid rgba(136, 231, 255, 0.18);
+    background:
+      radial-gradient(circle at top left, rgba(255, 145, 87, 0.12), transparent 18rem),
+      radial-gradient(circle at top right, rgba(95, 242, 255, 0.12), transparent 20rem),
+      linear-gradient(180deg, rgba(11, 18, 26, 0.95), rgba(8, 14, 19, 0.96));
+    box-shadow:
+      0 18px 70px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .revideo-console__hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+    gap: 22px;
+    padding: 30px;
+  }
+
+  .revideo-console__hero-copy h2 {
+    margin-top: 14px;
+    font-size: clamp(2.2rem, 5vw, 4.4rem);
+    line-height: 0.95;
+    letter-spacing: -0.06em;
+    text-transform: uppercase;
+    background: linear-gradient(180deg, #ffffff 0%, #85ffec 35%, #ffd196 78%, #ffffff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .revideo-console__hero-copy p {
+    max-width: 58ch;
+    margin-top: 18px;
+    color: color-mix(in srgb, var(--text) 84%, #8db8c4);
+  }
+
+  .revideo-console__metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .revideo-metric {
+    padding: 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 209, 150, 0.16);
+    background: rgba(8, 14, 18, 0.78);
+  }
+
+  .revideo-metric span {
+    display: block;
+    color: #ffd196;
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .revideo-metric strong {
+    display: block;
+    margin-top: 10px;
+    font-size: 1.35rem;
+    letter-spacing: -0.04em;
+  }
+
+  .revideo-console__controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 220px 200px;
+    gap: 14px;
+    padding: 18px;
+    align-items: end;
+  }
+
+  .revideo-console__starter-bar {
+    display: grid;
+    gap: 12px;
+    padding: 18px;
+  }
+
+  .revideo-console__starter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .revideo-starter {
+    min-height: 40px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 209, 150, 0.18);
+    background: rgba(4, 10, 13, 0.78);
+    color: #fff1d9;
+    cursor: pointer;
+  }
+
+  .revideo-search,
+  .revideo-sort {
+    display: grid;
+    gap: 8px;
+  }
+
+  .revideo-search span,
+  .revideo-sort span,
+  .revideo-console__count span,
+  .revideo-console__label {
+    color: #85ffec;
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .revideo-search input,
+  .revideo-sort select {
+    min-height: 52px;
+    border-radius: 16px;
+    border: 1px solid rgba(136, 231, 255, 0.16);
+    background: rgba(4, 10, 13, 0.82);
+    color: var(--text);
+    padding: 0 16px;
+  }
+
+  .revideo-console__count {
+    display: grid;
+    gap: 8px;
+    align-self: stretch;
+    padding: 10px 16px;
+    border-radius: 18px;
+    background: rgba(4, 10, 13, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .revideo-console__count strong {
+    font-size: 1.15rem;
+    letter-spacing: -0.03em;
+  }
+
+  .revideo-console__bucket-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .revideo-bucket {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(136, 231, 255, 0.18);
+    background: rgba(7, 15, 18, 0.82);
+    color: color-mix(in srgb, var(--text) 88%, #7ca2ad);
+    cursor: pointer;
+  }
+
+  .revideo-bucket strong {
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    color: #ffd196;
+  }
+
+  .revideo-bucket.is-active {
+    border-color: rgba(255, 209, 150, 0.42);
+    background: linear-gradient(135deg, rgba(255, 209, 150, 0.14), rgba(95, 242, 255, 0.12));
+    color: var(--text);
+  }
+
+  .revideo-console__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(340px, 0.95fr);
+    gap: 18px;
+  }
+
+  .revideo-console__results,
+  .revideo-side-panel,
+  .revideo-console__empty {
+    padding: 22px;
+  }
+
+  .revideo-console__side {
+    display: grid;
+    gap: 18px;
+  }
+
+  .revideo-console__panel-head {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .revideo-console__panel-head h3 {
+    font-size: 1.5rem;
+    letter-spacing: -0.04em;
+  }
+
+  .revideo-console__panel-head p {
+    color: color-mix(in srgb, var(--text) 80%, #86a8b0);
+  }
+
+  .revideo-results,
+  .revideo-longest-list,
+  .revideo-bucket-table {
+    display: grid;
+    gap: 12px;
+  }
+
+  .revideo-result,
+  .revideo-longest-item,
+  .revideo-bucket-row {
+    width: 100%;
+    text-align: left;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(4, 9, 12, 0.82);
+  }
+
+  .revideo-result,
+  .revideo-bucket-row,
+  .revideo-longest-item {
+    cursor: pointer;
+  }
+
+  .revideo-result {
+    padding: 16px;
+  }
+
+  .revideo-result.is-active {
+    border-color: rgba(255, 209, 150, 0.36);
+    box-shadow: 0 0 0 1px rgba(255, 209, 150, 0.14);
+    transform: translateY(-1px);
+  }
+
+  .revideo-result__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    color: #85ffec;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .revideo-result h4 {
+    margin-top: 12px;
+    font-size: 1.15rem;
+    letter-spacing: -0.04em;
+  }
+
+  .revideo-result p {
+    margin-top: 8px;
+    color: color-mix(in srgb, var(--text) 78%, #7fa0a8);
+  }
+
+  .revideo-result__footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin-top: 14px;
+  }
+
+  .revideo-result__footer small,
+  .revideo-detail__footer small {
+    color: #85ffec;
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.7rem;
+  }
+
+  .revideo-result__footer strong {
+    color: #ffd196;
+  }
+
+  .revideo-side-panel--detail {
+    min-height: 320px;
+  }
+
+  .revideo-detail__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    color: #85ffec;
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .revideo-detail__path {
+    margin-top: 12px;
+    color: #ffd196;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    word-break: break-word;
+  }
+
+  .revideo-detail__excerpt {
+    margin-top: 16px;
+    color: color-mix(in srgb, var(--text) 84%, #88aab4);
+    line-height: 1.65;
+  }
+
+  .revideo-detail__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .revideo-detail__actions a,
+  .revideo-detail__actions button {
+    min-height: 42px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 209, 150, 0.18);
+    background: rgba(4, 10, 13, 0.82);
+    color: #fff1d9;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .revideo-detail__footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .revideo-longest-item {
+    display: grid;
+    gap: 4px;
+    padding: 14px 16px;
+  }
+
+  .revideo-longest-item span {
+    color: #85ffec;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .revideo-longest-item em {
+    color: var(--muted);
+    font-style: normal;
+  }
+
+  .revideo-bucket-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 16px;
+  }
+
+  .revideo-bucket-row span {
+    display: block;
+    margin-top: 4px;
+    color: color-mix(in srgb, var(--text) 74%, #7f9aa1);
+    font-size: 0.92rem;
+  }
+
+  .revideo-bucket-row em {
+    color: #ffd196;
+    font-family: var(--mono);
+    font-style: normal;
+  }
+
+  .revideo-result--empty {
+    text-align: center;
+    padding: 28px 20px;
+  }
+
+  .revideo-console__empty h3 {
+    margin-top: 14px;
+    font-size: 1.6rem;
+    letter-spacing: -0.04em;
+  }
+
+  .revideo-console__empty p {
+    margin-top: 10px;
+    color: color-mix(in srgb, var(--text) 80%, #89a8b0);
+  }
+
+  @media (max-width: 1080px) {
+    .revideo-console__hero,
+    .revideo-console__grid,
+    .revideo-console__controls {
+      grid-template-columns: 1fr;
+    }
+
+    .revideo-console__metrics {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .revideo-console__hero,
+    .revideo-console__results,
+    .revideo-side-panel,
+    .revideo-console__empty,
+    .revideo-console__controls,
+    .revideo-console__starter-bar {
+      padding: 18px;
+    }
+
+    .revideo-console__metrics {
+      grid-template-columns: 1fr;
+    }
+
+    .revideo-result__footer,
+    .revideo-detail__footer {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>

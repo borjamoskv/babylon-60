@@ -37,8 +37,11 @@ async def test_swarm_kinetic_feedback_throttling(tmp_path):
     assert not dispatch_task.done()  # Should be blocked by thermal stability
 
     dispatch_task.cancel()
-    cmd.bus.close()  # SovereignSharedBus is synchronous
-    cmd.bus.unlink()
+    try:
+        await dispatch_task
+    except asyncio.CancelledError:
+        pass
+    await cmd.consolidate_and_annihilate()
 
 
 @pytest.mark.asyncio
@@ -58,7 +61,7 @@ async def test_adaptive_slashing_scaling(tmp_path):
 
     # Mock time.perf_counter to simulate a 48ms breach (3x baseline 16ms)
     # We need two values: start and end
-    with patch("time.perf_counter", side_effect=[100.0, 100.048]):
+    with patch("time.perf_counter", side_effect=[100.0, 100.048, 100.050, 100.050, 100.050]):
         # Trigger the breach logic
         await cen._emit_with_latency(
             event_type="test_trigger", payload={}, source="node-1", routing_key="node-1"

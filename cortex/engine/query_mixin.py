@@ -133,12 +133,14 @@ class QueryMixin(EngineMixinBase):
                 params.append(fact_type)
 
             # Unified Scoring: Bayesian reputation + Temporal decay
-            # Guard json_extract against encrypted meta (v6_aesgcm: prefix)
             q += """
                 ORDER BY (
-                    CASE WHEN f.metadata LIKE 'v6_aesgcm:%' THEN 1.0
-                         ELSE coalesce(json_extract(f.metadata, '$.consensus_score'), 1.0)
-                    END * 0.8
+                    coalesce(
+                        f.consensus_score,
+                        CASE WHEN f.metadata LIKE 'v6_aesgcm:%' THEN 1.0
+                             ELSE coalesce(json_extract(f.metadata, '$.consensus_score'), 1.0)
+                        END
+                    ) * 0.8
                     + (1.0 / (1.0 + (
                         julianday('now') - julianday(f.created_at)
                     ))) * 0.2
@@ -182,7 +184,7 @@ class QueryMixin(EngineMixinBase):
                 )
                 q = (
                     f"{base} AND {clause} ORDER BY "
-                    "coalesce(json_extract(f.metadata, '$.valid_from'), f.created_at) DESC"
+                    "coalesce(f.valid_from, f.created_at) DESC"
                 )
                 async with conn.execute(
                     q,
@@ -192,7 +194,7 @@ class QueryMixin(EngineMixinBase):
             else:
                 q = (
                     f"{base} ORDER BY "
-                    "coalesce(json_extract(f.metadata, '$.valid_from'), f.created_at) DESC"
+                    "coalesce(f.valid_from, f.created_at) DESC"
                 )
                 async with conn.execute(q, (tenant_id, project)) as cursor:
                     rows = await cursor.fetchall()
@@ -232,8 +234,10 @@ class QueryMixin(EngineMixinBase):
                 "AND f.is_tombstoned = 0 "
                 "AND f.created_at <= ? "
                 "AND (f.is_tombstoned = 0 OR "
-                "json_extract(f.metadata, '$.tombstoned_at') > ? OR "
-                "json_extract(f.metadata, '$.valid_until') > ?) "
+                "coalesce(f.tombstoned_at, CASE WHEN f.metadata LIKE 'v6_aesgcm:%' THEN NULL "
+                "ELSE json_extract(f.metadata, '$.tombstoned_at') END) > ? OR "
+                "coalesce(f.valid_until, CASE WHEN f.metadata LIKE 'v6_aesgcm:%' THEN NULL "
+                "ELSE json_extract(f.metadata, '$.valid_until') END) > ?) "
                 "ORDER BY f.id ASC"
             )
             async with conn.execute(
@@ -328,7 +332,7 @@ class QueryMixin(EngineMixinBase):
             try:
                 async with conn.execute(
                     "SELECT COUNT(*) FROM facts "
-                    "WHERE json_extract(metadata, '$.parent_decision_id') IS NOT NULL "
+                    "WHERE parent_decision_id IS NOT NULL "
                     "AND is_tombstoned = 0 AND tenant_id = ?",
                     (tenant_id,),
                 ) as cursor:
@@ -443,9 +447,9 @@ class QueryMixin(EngineMixinBase):
                     SELECT id, 0 FROM facts
                     WHERE id = ? AND tenant_id = ?
                     UNION ALL
-                    SELECT json_extract(f.metadata, '$.parent_decision_id'), c.depth + 1
+                    SELECT f.parent_decision_id, c.depth + 1
                     FROM facts f JOIN chain c ON f.id = c.id
-                    WHERE json_extract(f.metadata, '$.parent_decision_id') IS NOT NULL
+                    WHERE f.parent_decision_id IS NOT NULL
                         AND c.depth < ?
                 )
                 SELECT id, depth FROM chain ORDER BY depth
@@ -458,7 +462,7 @@ class QueryMixin(EngineMixinBase):
                     UNION ALL
                     SELECT f.id, c.depth + 1
                     FROM facts f JOIN chain c
-                        ON json_extract(f.metadata, '$.parent_decision_id') = c.id
+                        ON f.parent_decision_id = c.id
                     WHERE c.depth < ?
                 )
                 SELECT id, depth FROM chain ORDER BY depth

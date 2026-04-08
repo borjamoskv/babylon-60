@@ -35,6 +35,9 @@ on:
 permissions:
   contents: read
 
+env:
+  PYTHONWARNINGS: "error::DeprecationWarning,error::pytest.PytestUnhandledThreadExceptionWarning"
+
 jobs:
   # ─── Gate: logic tests (no Ollama) ────────────────────────────────────────
   gate-logic:
@@ -55,6 +58,8 @@ jobs:
         run: |
           pytest tests/test_temperature_determinism.py \
             -v --tb=short \
+            -W error::DeprecationWarning \
+            -W error::pytest.PytestUnhandledThreadExceptionWarning \
             -k "not TestCLI"
         env:
           CORTEX_TEST_MODE: "true"

@@ -305,9 +305,16 @@ def _analyze_files(
     security_findings: list[str] = []
     complexity_findings: list[str] = []
 
-    with ProcessPoolExecutor() as executor:
-        # Parallel analysis of files
-        results = executor.map(_analyze_single_file, source_files, [root] * len(source_files))
+    try:
+        with ProcessPoolExecutor() as executor:
+            # Parallel analysis of files
+            results = list(executor.map(_analyze_single_file, source_files, [root] * len(source_files)))
+    except (PermissionError, OSError, RuntimeError) as exc:
+        logger.warning(
+            "MEJORAlo scan falling back to in-process analysis: %s",
+            exc,
+        )
+        results = [_analyze_single_file(path, root) for path in source_files]
 
     for loc, large, psi, sec, comp in results:
         total_loc += loc

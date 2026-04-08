@@ -9,6 +9,7 @@ from cortex.engine.swarm_10k import SwarmCommander
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(300)
 async def test_run_10k_stress():
     """Execute 10k agents stress test with parallel dispatch."""
     print("🚀 INITIALIZING LEGION-10k STRESS TEST (Zero-Noise Mandate)")
@@ -19,7 +20,7 @@ async def test_run_10k_stress():
         shutil.rmtree(test_bus_dir)
     test_bus_dir.mkdir()
 
-    commander = SwarmCommander(bus_path=test_bus_dir)
+    commander = SwarmCommander(bus_path=test_bus_dir, use_shm=False)
     await commander.initialize()
 
     print(f"📡 Bus initialized with {commander.bus.num_shards} shards.")

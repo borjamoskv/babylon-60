@@ -22,11 +22,11 @@ __all__: list[str] = []
 
 
 def _get_signal_bus(db: str):
-    """Create a SignalBus instance from a database path."""
-    from cortex.extensions.signals.bus import SignalBus
+    """Create a DurableSignalBus instance from a database path."""
+    from cortex.extensions.signals.bus import DurableSignalBus
 
     conn = db_connect(db)
-    return SignalBus(conn), conn
+    return DurableSignalBus(conn), conn
 
 
 @cli.group("signal")

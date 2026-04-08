@@ -209,9 +209,9 @@ class ChronosROI:
                 fact_id: int = cursor.lastrowid  # type: ignore[assignment]
 
                 # 2. Emit signal to bus
-                from cortex.extensions.signals.bus import SignalBus
+                from cortex.extensions.signals.bus import DurableSignalBus
 
-                bus = SignalBus(conn)
+                bus = DurableSignalBus(conn)
                 bus.emit(
                     "chronos:audit",
                     payload=report.to_dict(),

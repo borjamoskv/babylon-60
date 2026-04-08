@@ -7,10 +7,11 @@ import click
 from rich.console import Console
 
 from cortex.cli.errors import err_execution_failed, err_skill_not_found
+from cortex.core.paths import find_skill_path, resolve_skill_script
 
 __all__ = [
-    "NEXUS_SKILL_PATH",
     "bridge",
+    "nexus_skill_path",
     "ghosts",
     "nexus_cmds",
     "pulse",
@@ -20,24 +21,22 @@ __all__ = [
 
 console = Console()
 
-# Path to the Sovereign Singularity Nexus engine
-NEXUS_SKILL_PATH = (
-    Path.home()
-    / ".gemini"
-    / "antigravity"
-    / "skills"
-    / "singularity-nexus"
-    / "scripts"
-    / "singularity_engine.py"
-)
+
+def nexus_skill_path() -> Path:
+    return find_skill_path(
+        "singularity-nexus",
+        "scripts/singularity_engine.py",
+        "singularity_engine.py",
+    ) or resolve_skill_script("singularity-nexus", "scripts", "singularity_engine.py")
 
 
 def run_nexus_skill(args: list[str]):
     """Execute the singularity-nexus skill script natively streaming output."""
-    if not NEXUS_SKILL_PATH.exists():
-        err_skill_not_found("Singularity Nexus", str(NEXUS_SKILL_PATH))
+    skill_path = nexus_skill_path()
+    if not skill_path.exists():
+        err_skill_not_found("Singularity Nexus", str(skill_path))
 
-    cmd = ["python3", str(NEXUS_SKILL_PATH)] + args
+    cmd = ["python3", str(skill_path)] + args
 
     try:
         # We don't capture output because we want Rich to render directly to the terminal

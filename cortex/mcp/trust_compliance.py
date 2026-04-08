@@ -153,11 +153,17 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
         )
 
         if score == 5:
-            lines.append("  🟢 COMPLIANT — All Article 12 requirements met.")
+            lines.append(
+                "  🟢 STRONG TECHNICAL ALIGNMENT — Article 12-style controls present; legal review still required."
+            )
         elif score >= 3:
-            lines.append("  🟡 PARTIAL — Some requirements need attention.")
+            lines.append(
+                "  🟡 PARTIAL TECHNICAL ALIGNMENT — Some record-keeping controls need attention."
+            )
         else:
-            lines.append("  🔴 NON-COMPLIANT — Critical gaps in record-keeping.")
+            lines.append(
+                "  🔴 INSUFFICIENT TECHNICAL ALIGNMENT — Critical gaps in record-keeping."
+            )
 
         lines.append(f"\n  Compliance Score: {score}/5")
 

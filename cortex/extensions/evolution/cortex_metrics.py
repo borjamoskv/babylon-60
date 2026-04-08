@@ -52,12 +52,13 @@ from typing import Any
 
 import aiosqlite
 
+from cortex.core.paths import CORTEX_DB
 from cortex.database.core import connect_async_ctx
 from cortex.extensions.evolution.agents import AgentDomain
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_DB = Path("~/.cortex/cortex.db").expanduser()
+_DEFAULT_DB = CORTEX_DB
 
 # ── Afferent Routing Table ─────────────────────────────────────
 # Maps each AgentDomain to its primary CORTEX project(s).

@@ -2,7 +2,7 @@
 
 **Trust infrastructure for autonomous AI: cryptographic verification, audit trails, epistemic containment, and agent memory.**
 
-> **Package:** `cortex-persist v0.3.1-b1` | **Engine:** `v8` | **License:** `Apache-2.0` | **Python:** `>=3.10`
+> **Package:** `cortex-persist v0.3.0b2` | **Engine:** `v8` | **License:** `Apache-2.0` | **Python:** `>=3.10`
 
 **Quick Navigation:** [SYSTEM DIRECTIVES](#11-agent-manifest--sovereign-roles--code-autopoiesis) · Agent Manifest §1.1 · Axioms §2 · Invariants §3 · Write-Path §4 · Read-Path §4.1 · Architecture §5 · Dev Protocol §6 · Failure Signatures §8
 
@@ -26,7 +26,7 @@
 | :---: | :--- | :--- |
 | **[P0]** | **Treat Generative Output as Conjecture** — route ALL state mutations through deterministic guards before persistence | Always |
 | **[P0]** | **Never Bypass Guards** — do not write code that circumvents the Write-Path Contract or downgrades validation errors | Always |
-| **[P0]** | **Verify Hash Continuity** — do not mutate `ledger.py` or any state-persisting path without ensuring cryptographic auditability | Any ledger/engine change |
+| **[P0]** | **Verify Hash Continuity** — do not mutate `ledger/` or any state-persisting path without ensuring cryptographic auditability | Any ledger/engine change |
 | **[P2]** | **Enforce Axioms** — apply AX-041 to AX-046 (see §2) in all architectural decisions | Architecture work |
 
 ### Decision Gate §0 — Agent Routing Tree (execute before any action)
@@ -107,7 +107,7 @@ Role defines authority scope within the Sovereign Swarm.
 - **NO** `time.sleep()` in async code — use `asyncio.sleep()`.
 - **NO** bare `print()` in core paths — use standard `logging` or Rich.
 - **NO** business logic in `cli/*_cmds.py`.
-- **NO** modifications to `ledger.py` without understanding hash continuity and test coverage.
+- **NO** modifications to `ledger/` without understanding hash continuity and test coverage.
 - **NO** schema changes without a migration review.
 - **NO** storing secrets in plaintext metadata.
 - **NO** bypassing guards on write paths.
@@ -169,7 +169,7 @@ Read operations are NOT free. They MUST follow these rules:
 
 1. **Query Authorization:** All read requests MUST be scoped to the caller's `tenant_id`. Cross-tenant reads are a P0 violation.
 2. **Taint Propagation:** Facts retrieved from a tainted source MUST carry the taint flag in the response. Callers MUST NOT strip taint metadata.
-3. **Consistency Level:** Default read consistency is `READ_COMMITTED`. Reads on `ledger.py` MUST use `SERIALIZABLE` isolation.
+3. **Consistency Level:** Default read consistency is `READ_COMMITTED`. Reads on `ledger/` MUST use `SERIALIZABLE` isolation.
 4. **Cache Coherence:** Cached reads MUST be invalidated on any write to the same `tenant_id` scope. Stale cache serving tainted-as-clean data is a Write-Path Contract violation.
 5. **No Inference from Reads:** Read results MUST NOT be used to infer or reconstruct facts that were not explicitly persisted. Speculation from read data = epistemic containment breach.
 
@@ -195,16 +195,16 @@ Read operations are NOT free. They MUST follow these rules:
 | Path | Risk | Operational Notes |
 | :--- | :---: | :--- |
 | `engine/` | **CRITICAL** | Core CRUD, Kinetic Engines (Annihilator/Crystallizer). |
-| `ledger.py` | **CRITICAL** | Hash-chain integrity and trust continuity. |
+| `ledger/` | **CRITICAL** | Hash-chain integrity and trust continuity. |
 | `migrations/` | **CRITICAL** | Irreversible production impact. |
 | `memory/` | **CRITICAL** | Large public API surface. Highly sensitive to state corruption. |
 | `guards/` | **HIGH** | Admission, contradiction, and dependency surfaces. |
 | `verification/` | **HIGH** | Formal or deterministic validation surfaces. |
-| `ops/` | **HIGH** | Git-Ledger entanglement & KV-Aware routing. |
+| `extensions/sync/` + `extensions/swarm/` | **HIGH** | Git-Ledger entanglement & KV-Aware routing. |
 | `routes/` | **HIGH** | External API contract. Must remain typed and stable. |
 | `cli/` | *Medium* | Thin wrappers only. No business logic. |
-| `daemon/` | *Medium* | Core Daemons: Chaos (Immunity), Maxwell (Exergy). |
-| `llm/` | *Medium* | Provider routing, caching, hedging, validation. |
+| `extensions/daemon/` | *Medium* | Core Daemons: Chaos (Immunity), Maxwell (Exergy). |
+| `extensions/llm/` | *Medium* | Provider routing, caching, hedging, validation. |
 
 ---
 

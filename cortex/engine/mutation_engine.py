@@ -36,6 +36,7 @@ logger = logging.getLogger("cortex.mutation_engine")
 
 # Current payload schema version written by MOSKV-1.
 _PAYLOAD_SCHEMA_VERSION = "1"
+_FACT_COLUMNS_CACHE: dict[int, set[str]] = {}
 
 
 class FactMutationEngine:
@@ -118,7 +119,7 @@ class FactMutationEngine:
         )
 
         # ── 3. Project mutation into facts (materialized view) ───────
-        await self._project(conn, fact_id, event_type, payload)
+        await self._project(conn, fact_id, tenant_id, event_type, payload)
 
         if commit:
             await conn.commit()
@@ -147,12 +148,32 @@ class FactMutationEngine:
             row = await cursor.fetchone()
         return row[0] if row else "GENESIS"
 
+    async def _get_fact_tenant_id(self, conn: aiosqlite.Connection, fact_id: int) -> str:
+        """Resolve the tenant_id for a fact from the materialized view."""
+        async with conn.execute("SELECT tenant_id FROM facts WHERE id = ?", (fact_id,)) as cursor:
+            row = await cursor.fetchone()
+        return row[0] if row and row[0] else "default"
+
+    async def _facts_columns(self, conn: aiosqlite.Connection) -> set[str]:
+        """Return the facts schema columns for the current connection."""
+        cache_key = id(conn)
+        cached = _FACT_COLUMNS_CACHE.get(cache_key)
+        if cached is not None:
+            return cached
+
+        async with conn.execute("PRAGMA table_info(facts)") as cursor:
+            rows = await cursor.fetchall()
+        columns = {str(row[1]) for row in rows}
+        _FACT_COLUMNS_CACHE[cache_key] = columns
+        return columns
+
     # ── Projection Layer (MOSKV-1 specific) ──────────────────────────
 
     async def _project(
         self,
         conn: aiosqlite.Connection,
         fact_id: int,
+        tenant_id: str,
         event_type: str,
         payload: dict[str, Any],
     ) -> None:
@@ -174,7 +195,10 @@ class FactMutationEngine:
 
         projector = _PROJECTORS.get(event_type)
         if projector:
-            await projector(conn, fact_id, payload)
+            if event_type in {"tombstone", "quarantine"}:
+                await projector(conn, fact_id, payload, tenant_id=tenant_id)
+            else:
+                await projector(conn, fact_id, payload)
         else:
             # Unknown event type — log but don't fail.
             # The event is still recorded immutably in entity_events.
@@ -195,12 +219,16 @@ class FactMutationEngine:
         """Protocol Ω₃-E: Reduce certainty over time to prevent stagnation."""
         decay_factor = payload.get("decay_factor", 0.95)
         ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
+        facts_columns = await self._facts_columns(conn)
+        has_consensus_column = "consensus_score" in facts_columns
 
         # 1. Fetch current scores
-        async with conn.execute(
-            "SELECT json_extract(metadata, '$.consensus_score'), confidence FROM facts WHERE id = ?",
-            (fact_id,),
-        ) as cursor:
+        score_query = (
+            "SELECT consensus_score, confidence FROM facts WHERE id = ?"
+            if has_consensus_column
+            else "SELECT json_extract(metadata, '$.consensus_score'), confidence FROM facts WHERE id = ?"
+        )
+        async with conn.execute(score_query, (fact_id,)) as cursor:
             row = await cursor.fetchone()
             if not row:
                 return
@@ -215,6 +243,13 @@ class FactMutationEngine:
             new_confidence = "tentative"
         elif new_score < 0.6 and confidence != "disputed":
             new_confidence = "disputed"
+
+        if has_consensus_column:
+            await conn.execute(
+                "UPDATE facts SET confidence = ?, updated_at = ?, consensus_score = ? WHERE id = ?",
+                (new_confidence, ts, new_score, fact_id),
+            )
+            return
 
         query = (
             "UPDATE facts SET confidence = ?, updated_at = ?, "
@@ -252,6 +287,7 @@ class FactMutationEngine:
         conn: aiosqlite.Connection,
         fact_id: int,
         payload: dict,
+        tenant_id: str | None = None,
     ) -> None:
         reason = payload.get("reason", "tombstoned")
         ts = payload.get("timestamp", datetime.now(timezone.utc).isoformat())
@@ -267,8 +303,9 @@ class FactMutationEngine:
         await conn.execute(query, (ts, ts, ts, reason, fact_id))
 
         # Ω₁₃: Propagate TAINTED status to descendants
+        resolved_tenant_id = tenant_id or await self._get_fact_tenant_id(conn, fact_id)
         graph = AsyncCausalGraph(conn)
-        report = await graph.propagate_taint(fact_id)
+        report = await graph.propagate_taint(fact_id, tenant_id=resolved_tenant_id)
         logger.info(
             "Ω₁₃ Taint (Tombstone) propagated from fact %d: %d nodes affected",
             fact_id,
@@ -280,6 +317,7 @@ class FactMutationEngine:
         conn: aiosqlite.Connection,
         fact_id: int,
         payload: dict,
+        tenant_id: str | None = None,
     ) -> None:
         ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
         reason = payload.get("reason", "quarantined")
@@ -291,8 +329,9 @@ class FactMutationEngine:
         )
 
         # Ω₁₃: Propagate taint status to descendants
+        resolved_tenant_id = tenant_id or await self._get_fact_tenant_id(conn, fact_id)
         graph = AsyncCausalGraph(conn)
-        report = await graph.propagate_taint(fact_id)
+        report = await graph.propagate_taint(fact_id, tenant_id=resolved_tenant_id)
         logger.info(
             "Ω₁₃ Taint (Quarantine) propagated from fact %d: %d nodes affected",
             fact_id,
@@ -320,8 +359,25 @@ class FactMutationEngine:
     ) -> None:
         score = payload.get("consensus_score")
         confidence = payload.get("confidence")
+        facts_columns = await self._facts_columns(conn)
+        has_consensus_column = "consensus_score" in facts_columns
 
-        if score is not None and confidence is not None:
+        if has_consensus_column and score is not None and confidence is not None:
+            await conn.execute(
+                "UPDATE facts SET confidence = ?, consensus_score = ? WHERE id = ?",
+                (confidence, score, fact_id),
+            )
+        elif has_consensus_column and score is not None:
+            await conn.execute(
+                "UPDATE facts SET consensus_score = ? WHERE id = ?",
+                (score, fact_id),
+            )
+        elif confidence is not None and score is None:
+            await conn.execute(
+                "UPDATE facts SET confidence = ? WHERE id = ?",
+                (confidence, fact_id),
+            )
+        elif score is not None and confidence is not None:
             await conn.execute(
                 "UPDATE facts SET confidence = ?, "
                 "metadata = CASE "
@@ -430,6 +486,7 @@ class FactMutationEngine:
         params: list[Any] = [entity_id]
         if as_of:
             query += "AND timestamp <= ? "
+            params.append(as_of)
         query += "ORDER BY id ASC"
 
         state: dict[str, Any] = {}

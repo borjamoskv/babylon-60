@@ -46,9 +46,15 @@ Formato: Markdown estricto bajo el encabezado ## 🦅 VEREDICTO & EFECTOS (OLIVE
 class FrontierAuditor:
     """Ejecuta una auditoría letal y exhaustiva de la frontera de CORTEX (Axioma Ω3 & Ω5)."""
 
-    def __init__(self, engine: CortexEngine, model_override: str | None = None) -> None:
+    def __init__(
+        self,
+        engine: CortexEngine,
+        model_override: str | None = None,
+        tenant_id: str = "default",
+    ) -> None:
         self.engine = engine
         self._custom_model = model_override
+        self.tenant_id = tenant_id
         # Preferred models, ideally Google Gemini 1.5 Pro for massive context, or top-tier Qwen/Anthropic.
         self._preferred_providers = (
             [self._custom_model] if self._custom_model else ["gemini", "anthropic", "qwen"]
@@ -57,7 +63,11 @@ class FrontierAuditor:
     def _gather_project_context(self, project_name: str) -> str:
         """Extrae el estado arquitectónico y los facts actuales del proyecto."""
         logger.info("Gathering absolute context for project: %s", project_name)
-        facts = self.engine.search_sync(query=f"project:{project_name}", top_k=100)
+        facts = self.engine.search_sync(
+            query=f"project:{project_name}",
+            tenant_id=self.tenant_id,
+            top_k=100,
+        )
 
         if not facts:
             return f"[WARN]: No existen facts en CORTEX para el proyecto {project_name}."
@@ -129,7 +139,7 @@ class FrontierAuditor:
 
         # Persist to database
         self.engine.store_sync(
-            tenant_id="default",
+            tenant_id=self.tenant_id,
             project=project_name,
             fact_type="audit_report",
             content=final_report,
@@ -185,7 +195,7 @@ class FrontierAuditor:
         if res.ok:
             # Persist to database as a diagnostic tip
             self.engine.store_sync(
-                tenant_id="default",
+                tenant_id=self.tenant_id,
                 project="CORTEX",
                 fact_type="diagnostic",
                 content=res.content,

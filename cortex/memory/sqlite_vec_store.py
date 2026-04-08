@@ -23,6 +23,7 @@ try:
 except ImportError:
     sqlite_vec = None
 
+from cortex.crypto import load_json_dict
 from cortex.guards.exergy_guard import calculate_exergy
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.models import CortexFactModel
@@ -465,6 +466,10 @@ class SovereignVectorStoreL2:
         async with self._lock:
             await asyncio.to_thread(_sync_insert)
 
+    async def upsert(self, fact: CortexFactModel) -> None:
+        """Compatibility shim for memory paths that treat L2 stores as upsert-capable."""
+        await self.memorize(fact)
+
     async def recall_secure(
         self,
         tenant_id: str,
@@ -516,7 +521,7 @@ class SovereignVectorStoreL2:
                         confidence=row["confidence"],
                         cognitive_layer=row["cognitive_layer"],
                         parent_decision_id=row["parent_decision_id"],
-                        metadata=json.loads(row["metadata"]) if row["metadata"] else {},
+                        metadata=load_json_dict(row["metadata"], tenant_id=row["tenant_id"]),
                     )
                     object.__setattr__(fact, "_recall_score", 0.0)
                     final_facts.append(fact)
@@ -638,7 +643,7 @@ class SovereignVectorStoreL2:
                     confidence=row["confidence"],
                     cognitive_layer=row["cognitive_layer"],
                     parent_decision_id=row["parent_decision_id"],
-                    metadata=json.loads(row["metadata"]) if row["metadata"] else {},
+                    metadata=load_json_dict(row["metadata"], tenant_id=row["tenant_id"]),
                 )
                 object.__setattr__(fact, "_recall_score", row["final_score"])
                 final_facts.append(fact)

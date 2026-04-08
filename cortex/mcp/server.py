@@ -22,6 +22,7 @@ from cortex.mcp.core_tools import (
     _register_trace_chain_tool,
     _register_trace_episode_tool,
 )
+from cortex.mcp.fl_studio_tools import register_fl_studio_tools
 from cortex.mcp.genesis_tools import register_genesis_tools
 from cortex.mcp.guard import MCPGuard
 from cortex.mcp.health_tools import register_health_tools
@@ -34,6 +35,7 @@ from cortex.mcp.utils import (
     MCPServerConfig,
     SimpleAsyncCache,
 )
+from cortex.services.public_memory import PublicMemoryService
 
 __all__ = ["create_mcp_server", "run_server"]
 
@@ -78,6 +80,13 @@ class _MCPContext:
 
 
 # ─── Tool Registrators ───────────────────────────────────────────────
+
+
+def _public_memory_service_for_connection(ctx: _MCPContext, conn: object) -> PublicMemoryService:
+    """Bind a public-memory service to the current MCP DB connection."""
+    engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
+    engine._conn = conn
+    return PublicMemoryService(engine)
 
 
 def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
@@ -135,22 +144,20 @@ def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ign
         parent_id = parent_decision_id if parent_decision_id > 0 else None
 
         async with ctx.pool.acquire() as conn:
-            engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
-            engine._conn = conn
-
-            fact_id = await engine.store(
-                project,
-                content,
-                fact_type,
-                parsed_tags,
-                "stated",
-                source or None,
+            service = _public_memory_service_for_connection(ctx, conn)
+            stored = await service.store(
+                project=project,
+                content=content,
+                fact_type=fact_type,
+                tags=parsed_tags,
+                confidence="stated",
+                source=source or None,
                 parent_decision_id=parent_id,
             )
 
         ctx.metrics.record_request()
         ctx.search_cache.clear()
-        return f"✓ Stored fact #{fact_id} in project '{project}'"
+        return f"✓ Stored fact #{stored.fact_id} in project '{stored.project}'"
 
 
 def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
@@ -203,13 +210,11 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
             return cached_result
 
         async with ctx.pool.acquire() as conn:
-            engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
-            engine._conn = conn
-
-            results = await engine.search(
-                query,
-                project or None,  # type: ignore[reportArgumentType]
-                min(max(top_k, 1), 20),  # type: ignore[reportArgumentType]
+            service = _public_memory_service_for_connection(ctx, conn)
+            results = await service.search(
+                query=query,
+                top_k=min(max(top_k, 1), 20),
+                project=project or None,
             )
 
         if not results:
@@ -237,18 +242,18 @@ def _register_status_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
         await ctx.ensure_ready()
 
         async with ctx.pool.acquire() as conn:
-            engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
-            engine._conn = conn
-            stats = await engine.stats()
+            service = _public_memory_service_for_connection(ctx, conn)
+            stats = await service.status()
 
         m_summary = ctx.metrics.get_summary()
         return (
             f"CORTEX Status (Optimized v2):\n"
-            f"  Facts: {stats.get('total_facts', 0)} total, "
-            f"{stats.get('active_facts', 0)} active\n"
-            f"  Projects: {stats.get('project_count', 0)}\n"
-            f"  Fact Types: {json.dumps(stats.get('types', {}))}\n"
-            f"  DB Size: {stats.get('db_size_mb', 0):.1f} MB\n"
+            f"  Facts: {stats.total_facts} total, "
+            f"{stats.active_facts} active\n"
+            f"  Projects: {stats.projects}\n"
+            f"  Embeddings: {stats.embeddings}\n"
+            f"  Transactions: {stats.transactions}\n"
+            f"  DB Size: {stats.db_size_mb:.1f} MB\n"
             f"  MCP Metrics: {json.dumps(m_summary, indent=2)}"
         )
 
@@ -268,8 +273,8 @@ def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
         if report["valid"]:
             return (
                 f"✅ Ledger Integrity: OK\n"
-                f"Transactions verified: {report['tx_checked']}\n"
-                f"Roots checked: {report['roots_checked']}"
+                f"Transactions verified: {report.get('tx_checked', report.get('tx_count', 0))}\n"
+                f"Roots checked: {report.get('roots_checked', 0)}"
             )
         return (
             f"❌ Ledger Integrity: VIOLATION\n"
@@ -337,6 +342,9 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
     # Music Engine — Master Orchestrator
     register_music_tools(mcp)
 
+    # FL Studio bridge — optional local DAW control surface
+    register_fl_studio_tools(mcp)
+
     return mcp
 
 
@@ -344,16 +352,15 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
 
 # Default configuration
 _default_config = MCPServerConfig()
-mcp = create_mcp_server(_default_config)
+mcp: "FastMCP | None" = None  # type: ignore[reportInvalidTypeForm]
 
 
 def run_server(config: Optional[MCPServerConfig] = None) -> None:
     """Start the CORTEX MCP server."""
     global mcp
-    if config:
-        mcp = create_mcp_server(config)
-
     cfg = config or _default_config
+    if mcp is None or config is not None:
+        mcp = create_mcp_server(cfg)
 
     if cfg.transport == "sse":
         logger.info("Starting CORTEX MCP server v2 (SSE) on %s:%d", cfg.host, cfg.port)

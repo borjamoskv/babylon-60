@@ -13,12 +13,12 @@ from typing import TYPE_CHECKING
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
 
 if TYPE_CHECKING:
-    from cortex.extensions.signals.bus import SignalBus
+    from cortex.extensions.signals.bus import DurableSignalBus
 
 logger = logging.getLogger(__name__)
 
 
-async def manifest_singularity(signal_bus: SignalBus | None = None) -> None:
+async def manifest_singularity(signal_bus: DurableSignalBus | None = None) -> None:
     """
     Ω₇ Manifestation: The atomic collapse of multiple project threads.
     Triggers Nexus sync, Ledger checkpoint, and Sovereign Dashboard refresh.
@@ -69,7 +69,7 @@ async def manifest_singularity(signal_bus: SignalBus | None = None) -> None:
         ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.5)
 
 
-async def transfigure_ui(html_file: Path, signal_bus: SignalBus | None = None) -> bool:
+async def transfigure_ui(html_file: Path, signal_bus: DurableSignalBus | None = None) -> bool:
     """Ω₆: Sovereign UI Refactor (Transfiguration)."""
     from cortex.cli.bicameral import bicameral
 

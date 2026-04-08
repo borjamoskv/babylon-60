@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = [
     "SwarmSignal",
+    "InMemorySwarmSignalBus",
     "AsyncSignalBus",
     "SwarmAgent",
     "Squadron",
@@ -53,8 +54,8 @@ class SwarmSignal:
     metrics: dict[str, Any]
 
 
-class AsyncSignalBus:
-    """Collision-free message bus for inter-agent communication."""
+class InMemorySwarmSignalBus:
+    """Volatile in-memory signal bus for swarm-only agent coordination."""
 
     def __init__(self) -> None:
         self._signals: list[SwarmSignal] = []
@@ -72,10 +73,14 @@ class AsyncSignalBus:
             return list(self._signals)
 
 
+class AsyncSignalBus(InMemorySwarmSignalBus):
+    """Backward-compatible alias for the legacy legion bus name."""
+
+
 class SwarmAgent(ABC):
     """Base class for a virtual agent operating inside the swarm."""
 
-    def __init__(self, agent_id: str, bus: AsyncSignalBus, engine: Any = None):
+    def __init__(self, agent_id: str, bus: InMemorySwarmSignalBus, engine: Any = None):
         self.agent_id = agent_id
         self.bus = bus
         self.engine = engine
@@ -116,7 +121,7 @@ class Squadron(ABC):
 
     def __init__(self, engine: Any = None):
         self.engine = engine
-        self.bus = AsyncSignalBus()
+        self.bus = InMemorySwarmSignalBus()
         self.agents: list[SwarmAgent] = []
 
     @abstractmethod

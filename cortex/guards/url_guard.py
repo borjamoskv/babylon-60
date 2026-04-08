@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import ipaddress
 import logging
+import socket
 from urllib.parse import urlparse
 
 logger = logging.getLogger("cortex.guards.url_guard")
@@ -32,6 +33,36 @@ _PRIVATE_NETWORKS = [
 ]
 
 _ALLOWED_SCHEMES = {"http", "https"}
+
+
+def _is_private_host(host: str) -> bool:
+    """Return True when a host literal or resolved address lands in a blocked range."""
+    try:
+        ip = ipaddress.ip_address(host)
+        return any(ip in network for network in _PRIVATE_NETWORKS)
+    except ValueError:
+        pass
+
+    lowered = host.lower()
+    if lowered in {"localhost", "127.0.0.1", "::1", "metadata.google.internal"}:
+        return True
+
+    try:
+        infos = socket.getaddrinfo(host, None, type=socket.SOCK_STREAM)
+    except OSError as exc:
+        logger.warning("URLGuard: DNS resolution failed for %s: %s", host, exc)
+        return True
+
+    for _family, _type, _proto, _canonname, sockaddr in infos:
+        candidate = sockaddr[0]
+        try:
+            ip = ipaddress.ip_address(candidate)
+        except ValueError:
+            continue
+        if any(ip in network for network in _PRIVATE_NETWORKS):
+            logger.error("URLGuard: Blocked hostname %s resolving to private IP %s", host, candidate)
+            return True
+    return False
 
 
 def is_safe_url(url: str, allow_private: bool = False) -> bool:
@@ -63,18 +94,9 @@ def is_safe_url(url: str, allow_private: bool = False) -> bool:
 
         # 3. Private Network Protection (SSRF Mitigation)
         if not allow_private:
-            try:
-                # Try parsing as IP first
-                ip = ipaddress.ip_address(host)
-                for network in _PRIVATE_NETWORKS:
-                    if ip in network:
-                        logger.error("URLGuard: Blocked private IP access: %s", host)
-                        return False
-            except ValueError:
-                # Not an IP, it's a hostname.
-                if host.lower() in {"localhost", "127.0.0.1", "::1", "metadata.google.internal"}:
-                    logger.error("URLGuard: Blocked loopback/metadata hostname access: %s", host)
-                    return False
+            if _is_private_host(host):
+                logger.error("URLGuard: Blocked private or loopback host: %s", host)
+                return False
 
         return True
     except Exception as e:

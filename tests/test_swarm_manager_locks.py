@@ -2,6 +2,7 @@ import asyncio
 
 import pytest
 
+from cortex import config
 from cortex.engine import CortexEngine
 from cortex.engine.lock import SovereignLock
 from cortex.extensions.swarm.manager import CapatazOrchestrator
@@ -14,6 +15,7 @@ async def engine(tmp_path):
     eng = CortexEngine(db_path=str(db_path))
     await eng.init_db()  # Initialize schema properly
     yield eng
+    await eng.close()
 
 
 @pytest.mark.asyncio
@@ -62,3 +64,45 @@ async def test_capataz_concurrent_execution_with_locks(engine: CortexEngine):
 
     expected_total = len(agents) * increments_per_worker
     assert shared_state["counter"] == expected_total
+
+
+@pytest.mark.asyncio
+async def test_capataz_respects_max_concurrency(engine: CortexEngine):
+    """Large swarms should be drained with a bounded fan-out."""
+
+    capataz = CapatazOrchestrator()
+    started: list[str] = []
+    release_second = asyncio.Event()
+
+    async def gated_task(agent_id: str) -> str:
+        started.append(agent_id)
+        if agent_id == "worker_0":
+            await asyncio.sleep(0.05)
+            release_second.set()
+        else:
+            await release_second.wait()
+        return agent_id
+
+    task_definitions = [
+        {
+            "name": f"task_{idx}",
+            "agent_name": f"worker_{idx}",
+            "func": gated_task,
+            "args": (f"worker_{idx}",),
+        }
+        for idx in range(3)
+    ]
+
+    results = await capataz.run_parallel(task_definitions, max_concurrency=1)
+
+    assert results == ["worker_0", "worker_1", "worker_2"]
+    assert started == ["worker_0", "worker_1", "worker_2"]
+
+
+def test_capataz_uses_configured_default_concurrency(monkeypatch: pytest.MonkeyPatch):
+    """Capataz should pick up the runtime concurrency default from config."""
+    monkeypatch.setattr(config, "SWARM_CAPATAZ_MAX_CONCURRENCY", 9)
+
+    capataz = CapatazOrchestrator()
+
+    assert capataz.default_max_concurrency == 9

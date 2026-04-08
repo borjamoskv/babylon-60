@@ -1,3 +1,4 @@
+import json
 import os
 
 import pytest
@@ -82,3 +83,32 @@ def test_ledger_chain_break(test_db):
     res = verifier.verify_chain()
     assert not res["valid"]
     assert any("Chain break" in v for v in res["violations"])
+
+
+def test_payload_prev_hash_mismatch(test_db):
+    import json
+
+    store = LedgerStore(test_db)
+    queue = EnrichmentQueue(store)
+    writer = LedgerWriter(store, queue)
+    verifier = LedgerVerifier(store)
+
+    t = ActionTarget(app="Test")
+    r = ActionResult(ok=True, latency_ms=10)
+    for i in range(2):
+        ev = LedgerEvent.new(tool="cli", actor="test", action=f"a{i}", target=t, result=r)
+        writer.append(ev)
+
+    with store.tx() as conn:
+        cursor = conn.execute("SELECT event_id, payload_json, prev_hash FROM ledger_events LIMIT 1 OFFSET 1")
+        row = cursor.fetchone()
+        payload = json.loads(row["payload_json"])
+        payload["prev_hash"] = "MISMATCHED_PREV"
+        conn.execute(
+            "UPDATE ledger_events SET payload_json = ? WHERE event_id = ?",
+            (json.dumps(payload), row["event_id"]),
+        )
+
+    res = verifier.verify_chain()
+    assert not res["valid"]
+    assert any("Payload prev_hash mismatch" in v for v in res["violations"])

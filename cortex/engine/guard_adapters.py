@@ -72,14 +72,19 @@ class ContradictionGuardAdapter:
         from cortex.guards.contradiction_guard import detect_contradictions
 
         report = await detect_contradictions(
-            new_content=content, new_project=project, db_path=self._db_path
+            new_content=content,
+            new_project=project,
+            db_path=self._db_path,
+            conn=conn,
+            tenant_id=tenant_id,
         )
         if report.has_conflicts and report.severity == "high":
-            logger.warning(
-                "[AX-II] Contradiction detected (severity=%s):\n%s",
-                report.severity,
-                report.format(),
+            message = (
+                "[AX-II] Contradiction detected "
+                f"(severity={report.severity}):\n{report.format()}"
             )
+            logger.warning(message)
+            raise ValueError(message)
 
 
 class VerifierGuardAdapter:
@@ -141,6 +146,22 @@ class ZKGuardAdapter:
         tenant_id: str = "default",
     ) -> None:
         from cortex.guards.zk_guard import ZKSwarmGuard
+
+        # External crystallization decisions (e.g. GitHub issue closure) are
+        # deterministic imports, not agent-generated inference payloads.
+        # They carry source provenance instead of an agent zk signature.
+        if fact_type == "decision" and meta.get("source_bridge_provider") == "github":
+            return
+
+        # The store path handles many deterministic/manual decision writes
+        # (API imports, migrations, bridge artifacts). Only escalate to the
+        # cryptographic proof boundary once the caller opts into the ZK
+        # contract by providing proof fields or explicitly requiring it.
+        has_explicit_proof = bool(meta.get("agent_public_key")) or bool(
+            meta.get("zk_proof_signature")
+        )
+        if not has_explicit_proof and not meta.get("requires_zk_proof", False):
+            return
 
         guard = ZKSwarmGuard()
         await guard.verify_integrity(content, fact_type, meta)

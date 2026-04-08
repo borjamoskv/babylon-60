@@ -1,0 +1,19 @@
+{
+  "sites": [
+    "https://example.com/health"
+  ],
+  "watch_path": "/path/to/workspace",
+  "db_path": "/path/to/.cortex/cortex.db",
+  "heartbeat_interval": 30.0,
+  "frontier_metabolism_interval_hours": 12.0,
+  "frontier_ingestion_interval_hours": 24.0,
+  "zero_prompting_interval_hours": 24.0,
+  "autopoiesis_interval_hours": 24.0,
+  "autopoiesis_idle_poll_seconds": 60.0,
+  "autopoiesis_target_score": 95,
+  "autopoiesis_enable_healing": true,
+  "autopoiesis_enable_manifestation": false,
+  "autopoiesis_minimum_registered_tools": 0,
+  "autopoiesis_project": "cortex",
+  "autopoiesis_focus": "entropy"
+}

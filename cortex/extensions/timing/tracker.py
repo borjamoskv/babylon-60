@@ -15,7 +15,7 @@ from cortex.extensions.timing.models import (
     TimeSummary,
     classify_entity,
 )
-from cortex.memory.temporal import now_iso
+from cortex.memory.temporal import TimestampInput, normalize_timestamp, now_iso
 
 __all__ = ["TimingTracker"]
 
@@ -45,11 +45,11 @@ class TimingTracker:
         category: Optional[str] = None,
         branch: Optional[str] = None,
         language: Optional[str] = None,
-        timestamp: Optional[str] = None,
+        timestamp: TimestampInput = None,
         meta: Optional[dict] = None,
     ) -> int:
         """Record a single activity heartbeat. Returns Heartbeat ID."""
-        ts = timestamp or now_iso()
+        ts = normalize_timestamp(timestamp) or now_iso()
         cat = category or classify_entity(entity)
         meta_json = json.dumps(meta or {})
         cursor = self._conn.execute(

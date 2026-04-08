@@ -22,14 +22,20 @@ def audit_cmds():
 @click.option(
     "--model", "-m", help="Override default SovereignLLM with a specific preferred provider."
 )
-def frontier_cmd(project: str, model: str | None):
+@click.option(
+    "--tenant-id",
+    default="default",
+    show_default=True,
+    help="Tenant scope for search and persistence.",
+)
+def frontier_cmd(project: str, model: str | None, tenant_id: str):
     """Execute a lethal cognitive audit using the TOM, OLIVER & BENJI triad."""
     console.print(
         f"[bold magenta]🐺 Awakening Frontier Auditor for project: {project}...[/bold magenta]"
     )
 
     engine = get_engine()
-    auditor = FrontierAuditor(engine=engine, model_override=model)
+    auditor = FrontierAuditor(engine=engine, model_override=model, tenant_id=tenant_id)
 
     # Run standard Sovereign context
     with console.status("[cyan]Triad is dissecting local definitions...[/cyan]"):

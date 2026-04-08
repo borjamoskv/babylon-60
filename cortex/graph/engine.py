@@ -5,9 +5,11 @@ Extraction, relationship detection, and backend orchestration.
 
 import logging
 import sqlite3
+from datetime import date, datetime
 
 from cortex.graph.backends import GraphBackend, SQLiteBackend
 from cortex.graph.patterns import COMMON_WORDS, ENTITY_PATTERNS, RELATION_SIGNALS
+from cortex.memory.temporal import normalize_timestamp
 
 __all__ = [
     "detect_relationships",
@@ -136,25 +138,40 @@ async def _upsert_relation(
 
 
 async def process_fact_graph(
-    conn, fact_id: int, content: str, project: str, timestamp: str, tenant_id: str = "default"
+    conn,
+    fact_id: int,
+    content: str,
+    project: str,
+    timestamp: str | date | datetime,
+    tenant_id: str = "default",
 ) -> tuple[int, int]:
     """Process a fact for graph extraction (async)."""
     entities = extract_entities(content)
     if not entities:
         return 0, 0
     relationships = detect_relationships(content, entities)
+    normalized_timestamp = normalize_timestamp(timestamp)
+    assert normalized_timestamp is not None
 
     try:
         entity_ids: dict[str, int] = {}
         for ent in entities:
-            entity_ids[ent["name"]] = await _upsert_entity(conn, ent, project, timestamp, tenant_id)
+            entity_ids[ent["name"]] = await _upsert_entity(
+                conn, ent, project, normalized_timestamp, tenant_id
+            )
 
         for rel in relationships:
             sid = entity_ids.get(rel["source_name"])
             tid = entity_ids.get(rel["target_name"])
             if sid and tid:
                 await _upsert_relation(
-                    conn, sid, tid, rel["relation_type"], timestamp, fact_id, tenant_id
+                    conn,
+                    sid,
+                    tid,
+                    rel["relation_type"],
+                    normalized_timestamp,
+                    fact_id,
+                    tenant_id,
                 )
 
         return len(entities), len(relationships)
@@ -164,20 +181,27 @@ async def process_fact_graph(
 
 
 def process_fact_graph_sync(
-    conn, fact_id: int, content: str, project: str, timestamp: str, tenant_id: str = "default"
+    conn,
+    fact_id: int,
+    content: str,
+    project: str,
+    timestamp: str | date | datetime,
+    tenant_id: str = "default",
 ) -> tuple[int, int]:
     """Process a fact for graph extraction (sync)."""
     entities = extract_entities(content)
     if not entities:
         return 0, 0
     relationships = detect_relationships(content, entities)
+    normalized_timestamp = normalize_timestamp(timestamp)
+    assert normalized_timestamp is not None
 
     try:
         backend = get_backend(conn)
         entity_ids: dict[str, int] = {}
         for ent in entities:
             eid = backend.upsert_entity_sync(  # type: ignore[reportAttributeAccessIssue]
-                ent["name"], ent["entity_type"], project, timestamp, tenant_id
+                ent["name"], ent["entity_type"], project, normalized_timestamp, tenant_id
             )
             entity_ids[ent["name"]] = eid
 
@@ -186,7 +210,12 @@ def process_fact_graph_sync(
             target_id = entity_ids.get(rel["target_name"])
             if source_id and target_id:
                 backend.upsert_relationship_sync(  # type: ignore[reportAttributeAccessIssue]
-                    source_id, target_id, rel["relation_type"], fact_id, timestamp, tenant_id
+                    source_id,
+                    target_id,
+                    rel["relation_type"],
+                    fact_id,
+                    normalized_timestamp,
+                    tenant_id,
                 )
         return len(entities), len(relationships)
     except (sqlite3.Error, OSError, ValueError) as e:

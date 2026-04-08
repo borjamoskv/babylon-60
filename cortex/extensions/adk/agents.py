@@ -12,28 +12,47 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Optional
+import re
+from importlib.util import find_spec
+from typing import TYPE_CHECKING, Any, Optional
 
 __all__ = [
     "create_google_one_agent",
     "create_cortex_swarm",
+    "create_analyst_agent",
+    "create_domain_agent",
     "create_guardian_agent",
     "create_memory_agent",
     "is_adk_available",
+    "resolve_domain_agents",
 ]
 
 logger = logging.getLogger("cortex.extensions.adk.agents")
 
 _ADK_INSTALL_MSG = "Google ADK not installed. Install with: pip install google-adk"
 
-_ADK_AVAILABLE = False
-try:
-    from google.adk.agents.llm_agent import Agent  # pyright: ignore[reportMissingImports]
+if TYPE_CHECKING:
+    from google.adk.agents.llm_agent import Agent
+else:
+    Agent = Any  # type: ignore[misc,assignment]
 
-    _ADK_AVAILABLE = True
-except ImportError:
-    Agent = None  # type: ignore
-    logger.debug(_ADK_INSTALL_MSG)
+_ADK_AVAILABLE = find_spec("google.adk") is not None
+
+
+def _require_agent_class() -> type[Agent]:
+    """Import the ADK agent lazily to avoid import-time warnings/side effects."""
+    if not _ADK_AVAILABLE:
+        raise ImportError(_ADK_INSTALL_MSG)
+
+    try:
+        from google.adk.agents.llm_agent import (
+            Agent as adk_agent,  # pyright: ignore[reportMissingImports]
+        )
+    except ImportError as exc:
+        logger.debug(_ADK_INSTALL_MSG)
+        raise ImportError(_ADK_INSTALL_MSG) from exc
+
+    return adk_agent
 
 
 def is_adk_available() -> bool:
@@ -44,6 +63,112 @@ def is_adk_available() -> bool:
 # ─── Agent Definitions ────────────────────────────────────────────────
 
 _DEFAULT_MODEL = os.environ.get("CORTEX_ADK_MODEL", "gemini-2.0-flash")
+
+_DEFAULT_DOMAIN_FAMILIES = [
+    "facts",
+    "ledger",
+    "ingestion",
+    "search",
+    "routing",
+    "consensus",
+    "policy",
+    "security",
+    "compliance",
+    "observability",
+    "telemetry",
+    "daemon",
+    "sync",
+    "api",
+    "cli",
+    "gateway",
+    "docs",
+    "testing",
+    "deployment",
+    "storage",
+    "memory",
+    "engine",
+    "runtime",
+]
+
+_DEFAULT_DOMAIN_ROLES = [
+    "orchestrator",
+    "ingestor",
+    "retriever",
+    "writer",
+    "auditor",
+    "guardian",
+    "planner",
+    "worker",
+    "cache",
+    "watcher",
+]
+
+
+def _build_default_domain_agents() -> list[str]:
+    """Synthesize the default 230-agent specialist pack.
+
+    The default swarm is generated from repository-relevant families and a
+    fixed set of operational roles so the size is easy to reason about and the
+    order remains deterministic.
+    """
+    return [
+        f"{family}_{role}"
+        for family in _DEFAULT_DOMAIN_FAMILIES
+        for role in _DEFAULT_DOMAIN_ROLES
+    ]
+
+
+_DEFAULT_DOMAIN_AGENTS = _build_default_domain_agents()
+
+
+def _slugify_domain(domain: str) -> str:
+    """Normalize a user-provided domain name into an ADK-safe slug."""
+    slug = re.sub(r"[^a-z0-9]+", "_", domain.strip().lower()).strip("_")
+    if not slug:
+        raise ValueError("Domain agent name cannot be empty")
+    return slug
+
+
+def resolve_domain_agents(domain_agents: Optional[list[str]] = None) -> list[str]:
+    """Resolve specialist domain agents from explicit input or environment.
+
+    Domains are normalized to lowercase snake_case and deduplicated while
+    preserving order. If ``domain_agents`` is ``None``, the value is loaded
+    from ``CORTEX_ADK_DOMAIN_AGENTS`` as a comma-separated list. When the
+    environment variable is unset, a default 230-agent specialist pack is used
+    so the sovereign swarm scales out without extra configuration.
+    """
+    raw_domains = domain_agents
+    if raw_domains is None:
+        env_value = os.environ.get("CORTEX_ADK_DOMAIN_AGENTS")
+        if env_value is None:
+            raw_domains = list(_DEFAULT_DOMAIN_AGENTS)
+        else:
+            raw_domains = [part.strip() for part in env_value.split(",") if part.strip()]
+
+    resolved: list[str] = []
+    seen: set[str] = set()
+    for domain in raw_domains:
+        slug = _slugify_domain(domain)
+        if slug not in seen:
+            seen.add(slug)
+            resolved.append(slug)
+    return resolved
+
+
+def _format_domain_label(domain_slug: str) -> str:
+    return domain_slug.replace("_", " ").title()
+
+
+def _summarize_specialists(names: list[str]) -> str:
+    if not names:
+        return "no additional specialist agents"
+
+    if len(names) <= 6:
+        return ", ".join(names)
+
+    remaining = len(names) - 6
+    return ", ".join(names[:6]) + f", and {remaining} more"
 
 
 def create_memory_agent(
@@ -68,14 +193,15 @@ def create_memory_agent(
     """
     if not _ADK_AVAILABLE:
         raise ImportError(_ADK_INSTALL_MSG)
+    agent_cls = _require_agent_class()
 
-    from cortex.extensions.adk.tools import ALL_TOOLS
+    from cortex.adk.tools import ALL_TOOLS
 
     tools = list(ALL_TOOLS)
     if extra_tools:
         tools.extend(extra_tools)
 
-    return Agent(  # type: ignore[reportOptionalCall]
+    return agent_cls(
         model=model or _DEFAULT_MODEL,
         name="cortex_memory_agent",
         description=(
@@ -124,14 +250,15 @@ def create_analyst_agent(
     """
     if not _ADK_AVAILABLE:
         raise ImportError(_ADK_INSTALL_MSG)
+    agent_cls = _require_agent_class()
 
-    from cortex.extensions.adk.tools import adk_search, adk_status
+    from cortex.adk.tools import adk_search, adk_status
 
     tools: list = [adk_search, adk_status]
     if toolbox_tools:
         tools.extend(toolbox_tools)
 
-    return Agent(  # type: ignore[reportOptionalCall]
+    return agent_cls(
         model=model or _DEFAULT_MODEL,
         name="cortex_analyst_agent",
         description=(
@@ -168,10 +295,11 @@ def create_guardian_agent(
     """
     if not _ADK_AVAILABLE:
         raise ImportError(_ADK_INSTALL_MSG)
+    agent_cls = _require_agent_class()
 
-    from cortex.extensions.adk.tools import adk_ledger_verify, adk_status
+    from cortex.adk.tools import adk_ledger_verify, adk_status
 
-    return Agent(  # type: ignore[reportOptionalCall]
+    return agent_cls(
         model=model or _DEFAULT_MODEL,
         name="cortex_guardian_agent",
         description=(
@@ -210,10 +338,11 @@ def create_google_one_agent(
     """
     if not _ADK_AVAILABLE:
         raise ImportError(_ADK_INSTALL_MSG)
+    agent_cls = _require_agent_class()
 
     from cortex.extensions.adk.goog_tools import GOOGLE_ONE_TOOLS
 
-    return Agent(  # type: ignore[reportOptionalCall]
+    return agent_cls(
         model=model or _DEFAULT_MODEL,
         name="cortex_google_one_agent",
         description=(
@@ -236,12 +365,61 @@ def create_google_one_agent(
     )
 
 
+def create_domain_agent(
+    domain: str,
+    model: Optional[str] = None,
+    toolbox_tools: Optional[list] = None,
+) -> Agent:  # type: ignore[reportInvalidTypeForm]
+    """Create a specialist domain agent that can scale the swarm by topic.
+
+    Domain agents are lightweight, configurable specialists that inherit the
+    same search and health tools as the analyst agent, but with domain-specific
+    instructions and a stable name derived from the supplied domain.
+    """
+    if not _ADK_AVAILABLE:
+        raise ImportError(_ADK_INSTALL_MSG)
+    agent_cls = _require_agent_class()
+
+    from cortex.adk.tools import adk_search, adk_status
+
+    domain_slug = _slugify_domain(domain)
+    domain_label = _format_domain_label(domain_slug)
+
+    tools: list = [adk_search, adk_status]
+    if toolbox_tools:
+        tools.extend(toolbox_tools)
+
+    return agent_cls(
+        model=model or _DEFAULT_MODEL,
+        name=f"cortex_domain_{domain_slug}_agent",
+        description=(
+            f"Specialist CORTEX agent for the {domain_label} domain. "
+            "Used to scale the swarm horizontally with domain-specific routing "
+            "and evidence-backed responses."
+        ),
+        instruction=(
+            f"You are the CORTEX {domain_label} Specialist.\n\n"
+            "Your job is to handle requests for your domain when the root "
+            "orchestrator routes them to you. Use memory search and health "
+            "checks first, then apply any extra tools that match the task.\n\n"
+            "Rules:\n"
+            "- Stay narrowly focused on your domain.\n"
+            "- Cite the evidence you used.\n"
+            "- Escalate ledger, security, or cross-domain uncertainty to the "
+            "root Sovereign or Guardian agents."
+        ),
+        tools=tools,
+    )
+
+
 # ─── Multi-Agent Orchestrator ─────────────────────────────────────────
 
 
 def create_cortex_swarm(
     model: Optional[str] = None,
     toolbox_tools: Optional[list] = None,
+    domain_agents: Optional[list[str]] = None,
+    extra_sub_agents: Optional[list[Any]] = None,
 ) -> Agent:  # type: ignore[reportInvalidTypeForm]
     """Create the full CORTEX agent swarm — multi-agent system.
 
@@ -249,28 +427,51 @@ def create_cortex_swarm(
     - Memory Agent for store/search ops
     - Analyst Agent for cross-source analysis
     - Guardian Agent for security audits
+    - Google One Agent for cloud integration
+    - Optional domain specialists from config or explicit input
+    - Default 230-specialist pack when no explicit domain list is provided
 
     Args:
         model: LLM model for all agents.
         toolbox_tools: External DB tools for the analyst agent.
+        domain_agents: Optional list of extra specialist domain names.
+        extra_sub_agents: Optional list of already constructed Agent objects.
 
     Returns:
         Root Agent with sub-agent delegation.
     """
     if not _ADK_AVAILABLE:
         raise ImportError(_ADK_INSTALL_MSG)
+    agent_cls = _require_agent_class()
 
     memory = create_memory_agent(model=model)
     analyst = create_analyst_agent(model=model, toolbox_tools=toolbox_tools)
     guardian = create_guardian_agent(model=model)
     google_one = create_google_one_agent(model=model)
+    resolved_domains = resolve_domain_agents(domain_agents)
+    domain_specialists = [
+        create_domain_agent(domain=domain, model=model, toolbox_tools=toolbox_tools)
+        for domain in resolved_domains
+    ]
+    sub_agents: list[Any] = [memory, analyst, guardian, google_one]
+    sub_agents.extend(domain_specialists)
+    if extra_sub_agents:
+        sub_agents.extend(agent for agent in extra_sub_agents if agent is not None)
 
-    return Agent(  # type: ignore[reportOptionalCall]
+    specialist_names = [
+        getattr(agent, "name", "custom_agent")
+        for agent in (*domain_specialists, *(extra_sub_agents or []))
+        if agent is not None
+    ]
+    specialist_summary = _summarize_specialists(specialist_names)
+
+    return agent_cls(
         model=model or _DEFAULT_MODEL,
         name="cortex_sovereign",
         description=(
             "CORTEX Sovereign — the root orchestrator that coordinates memory, "
-            "analysis, security, and cloud agents for comprehensive AI memory management."
+            "analysis, security, cloud, and specialist domain agents for "
+            "comprehensive AI memory management."
         ),
         instruction=(
             "You are the CORTEX Sovereign — the root orchestrator of a "
@@ -279,10 +480,12 @@ def create_cortex_swarm(
             "- **cortex_memory_agent**: For storing and searching facts\n"
             "- **cortex_analyst_agent**: For cross-source analysis\n"
             "- **cortex_guardian_agent**: For security and integrity audits\n"
-            "- **cortex_google_one_agent**: For storage quota, sync, and cloud backups\n\n"
+            "- **cortex_google_one_agent**: For storage quota, sync, and cloud backups\n"
+            f"- **Configured specialists**: {specialist_summary}\n\n"
             "Route requests to the appropriate agent based on the user's intent. "
-            "For complex queries, coordinate multiple agents. "
+            "For complex queries, coordinate multiple agents and route to any "
+            "configured specialist agents when their domain matches the request. "
             "Always report results clearly and respond in the user's language."
         ),
-        sub_agents=[memory, analyst, guardian, google_one],
+        sub_agents=sub_agents,
     )

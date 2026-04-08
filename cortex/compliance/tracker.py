@@ -63,6 +63,24 @@ class ComplianceTracker:
             self._engine.init_db_sync()
             self._initialized = True
 
+    async def _latest_decision_id(self, project: str) -> int | None:
+        """Return the most recent active decision ID for a project."""
+        async with self._engine.session() as conn:
+            cursor = await conn.execute(
+                """
+                SELECT id
+                FROM facts
+                WHERE project = ?
+                  AND fact_type = 'decision'
+                  AND valid_until IS NULL
+                ORDER BY id DESC
+                LIMIT 1
+                """,
+                (project,),
+            )
+            row = await cursor.fetchone()
+        return int(row[0]) if row else None
+
     # ─── 1. log_decision ──────────────────────────────────────────
 
     def log_decision(
@@ -98,6 +116,12 @@ class ComplianceTracker:
 
         proj = project or self._default_project
         now = datetime.now(timezone.utc).isoformat()
+        previous_decision_id = self._engine._run_sync(self._latest_decision_id(proj))
+
+        if previous_decision_id is not None:
+            content_lower = content.lower()
+            if "compatible with #" not in content_lower and "supersedes #" not in content_lower:
+                content = f"{content} Compatible with #{previous_decision_id}."
 
         eu_meta: dict[str, Any] = {
             "eu_ai_act": {

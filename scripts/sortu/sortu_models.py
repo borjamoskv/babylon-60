@@ -47,6 +47,7 @@ class AbortReason(str, Enum):
     REDUNDANT_COMPUTATION = "REDUNDANT_COMPUTATION"
     CONTRACT_VERIFICATION_FAILED = "CONTRACT_VERIFICATION_FAILED"
     INVALID_CAUSAL_PARENT = "INVALID_CAUSAL_PARENT"
+    MISSING_TRIPARTITE = "MISSING_TRIPARTITE"
 
 
 class ForgeAbortError(RuntimeError):
@@ -63,6 +64,15 @@ class YieldEvent:
     hours_saved: float
     days_since: int
     verified: bool = False
+
+
+@dataclass(frozen=True)
+class SortuBiopsy:
+    total_invocations: int
+    compound_yield: float
+    entropy_cost: float
+    net_exergy: float
+    verdict: str
 
 
 @dataclass(frozen=True)
@@ -101,6 +111,8 @@ class SkillRecord:
     abort_reason: AbortReason | None = None
     verification_status: str | None = None
     yield_events: list[YieldEvent] = field(default_factory=list)
+    biopsy: SortuBiopsy | None = None
+    graph_entities_created: int = 0
 
     @classmethod
     def new(

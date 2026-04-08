@@ -120,7 +120,7 @@ class AsyncCortexClient:
             "source": source,
         }
         if metadata:
-            data["metadata"] = metadata
+            data["meta"] = metadata
         result = await self._request("POST", "/v1/facts", json=data)
         return result["fact_id"]
 
@@ -129,8 +129,22 @@ class AsyncCortexClient:
         facts: list[dict[str, Any]],
     ) -> list[int]:
         """Batch store facts. Returns list of fact IDs."""
-        result = await self._request("POST", "/v1/facts/batch", json={"facts": facts})
-        return result["fact_ids"]
+        payload = {
+            "facts": [
+                {
+                    "project": fact["project"],
+                    "content": fact["content"],
+                    "fact_type": fact.get("fact_type", fact.get("type", "knowledge")),
+                    "tags": fact.get("tags", []),
+                    "source": fact.get("source"),
+                    "meta": fact.get("meta", fact.get("metadata")),
+                    "parent_decision_id": fact.get("parent_decision_id"),
+                }
+                for fact in facts
+            ]
+        }
+        result = await self._request("POST", "/v1/facts/batch", json=payload)
+        return result.get("fact_ids", result.get("ids", []))
 
     async def search(
         self,
@@ -171,9 +185,8 @@ class AsyncCortexClient:
         offset: int = 0,
     ) -> list[Fact]:
         """Get facts for a project with optional pagination."""
-        params: dict[str, Any] = {
-            "include_deprecated": str(include_deprecated).lower(),
-        }
+        _ = include_deprecated
+        params: dict[str, Any] = {}
         if limit is not None:
             params["limit"] = limit
             params["offset"] = offset
@@ -200,24 +213,6 @@ class AsyncCortexClient:
         """Deprecate a fact (soft delete)."""
         await self._request("DELETE", f"/v1/facts/{fact_id}")
         return True
-
-    async def update(
-        self,
-        fact_id: int,
-        content: str | None = None,
-        tags: list[str] | None = None,
-        meta: dict[str, Any] | None = None,
-    ) -> int:
-        """Update a fact. Returns new fact ID."""
-        data: dict[str, Any] = {}
-        if content is not None:
-            data["content"] = content
-        if tags is not None:
-            data["tags"] = tags
-        if meta is not None:
-            data["meta"] = meta
-        result = await self._request("PATCH", f"/v1/facts/{fact_id}", json=data)
-        return result["fact_id"]
 
     async def export(
         self,

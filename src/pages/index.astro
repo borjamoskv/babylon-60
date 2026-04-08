@@ -1,21 +1,3588 @@
 ---
+import AppIterationDemo from '../components/AppIterationDemo.astro';
 import Layout from '../layouts/Layout.astro';
-import Welcome from '../components/Welcome.astro';
 
-// CORTEX Unified Substrate — v0.3.2b1 Landing Page Shell
+const siteVariant = import.meta.env.PUBLIC_SITE_VARIANT === 'docs' ? 'docs' : 'marketing';
+const isDocsVariant = siteVariant === 'docs';
+const docsOrigin = import.meta.env.PUBLIC_DOCS_ORIGIN || '/docs';
+const marketingOrigin = import.meta.env.PUBLIC_MARKETING_ORIGIN || '';
+
+const docsHref = (path = '') => `${docsOrigin}${path}`;
+const marketingHref = (path = '/') => `${marketingOrigin}${path}`;
+
+const pageTitle = isDocsVariant
+  ? 'CORTEX Docs — Build Verifiable Agent Memory'
+  : 'CORTEX Persist — Evidence Layer for Agent Memory';
+
+const pageDescription = isDocsVariant
+  ? 'Documentation surface for CORTEX Persist under cortexpersist.com/docs.'
+  : 'Verifiable memory for AI agents: deterministic guards, tamper-evident lineage, and audit-ready exports for real production systems.';
+
+const navLinks = isDocsVariant
+  ? [
+      { label: 'Quickstart', href: docsHref('/quickstart') },
+      { label: 'Architecture', href: docsHref('/architecture') },
+      { label: 'API', href: docsHref('/api') },
+      { label: 'GitHub', href: 'https://github.com/borjamoskv/Cortex-Persist', external: true },
+    ]
+  : [
+      { label: 'Enter', href: '#routes' },
+      { label: 'Map', href: '#trust-surface' },
+      { label: 'Signal', href: '/spectral-audio' },
+      { label: 'Revideo', href: '/revideo' },
+      { label: 'GitHub', href: 'https://github.com/borjamoskv/Cortex-Persist', external: true },
+    ];
+
+const proofCards = [
+  {
+    label: 'Seal',
+    text: 'Typed memory. No loose writes.',
+  },
+  {
+    label: 'Trace',
+    text: 'Continuity you can verify later.',
+  },
+  {
+    label: 'Transmit',
+    text: 'Export proof, not vibes.',
+  },
+];
+
+const trustLoop = [
+  'Guard every write',
+  'Seal lineage in the ledger',
+  'Verify continuity before trust',
+  'Export evidence for humans',
+];
+
+const kineticTape = [
+  'Fractal membrane',
+  'DJ Automata',
+  'Evidence engine',
+  'Recursive routes',
+  'Kinetic drift',
+  'Void chamber',
+];
+
+const personaRoutes = [
+  {
+    kicker: 'Builders',
+    title: 'Run the first verified write',
+    text: 'Install the package, store one fact, and verify the chain locally before you wire in the rest of your stack.',
+    href: docsHref('/quickstart'),
+    cta: 'Open quickstart',
+    meta: 'CLI + first proof path',
+  },
+  {
+    kicker: 'Security',
+    title: 'Audit the trust model fast',
+    text: 'Go straight to the threat posture, failure surfaces, and security controls without skimming generic product copy.',
+    href: docsHref('/security'),
+    cta: 'Read security',
+    meta: 'Risk posture + control surface',
+  },
+  {
+    kicker: 'Platform',
+    title: 'Map the architecture before rollout',
+    text: 'See where CORTEX sits in your system, how it wraps existing memory, and how to integrate without a rewrite.',
+    href: docsHref('/architecture'),
+    cta: 'Open architecture',
+    meta: 'Topology + integration path',
+  },
+  {
+    kicker: 'Revideo',
+    title: 'Search the ingested docs atlas',
+    text: 'Open the local Revideo surface inside the app and browse the captured corpus by bucket, page weight, and direct source links.',
+    href: '/revideo',
+    cta: 'Open Revideo Atlas',
+    meta: '286 pages / 490 bundles',
+  },
+];
+
+const trustSurfaceCards = [
+  {
+    kicker: 'Admission',
+    title: 'Deterministic guards first',
+    text: 'Generative output stays conjectural until policy, schema, and logic checks accept it.',
+  },
+  {
+    kicker: 'Lineage',
+    title: 'Hash-chained memory writes',
+    text: 'Each accepted mutation becomes part of a continuity record you can verify later instead of merely trusting.',
+  },
+  {
+    kicker: 'Verification',
+    title: 'Integrity checks before reliance',
+    text: 'Operators can confirm state continuity before audits, postmortems, or downstream automation depends on it.',
+  },
+  {
+    kicker: 'Evidence',
+    title: 'Exports for humans, not just machines',
+    text: 'Security, compliance, and platform teams get reviewable artifacts instead of hand-wavy provenance claims.',
+  },
+];
+
+const comparisonRows = [
+  ['Primary goal', 'Observe systems', 'Retrieve similar text', 'Prove decision lineage'],
+  ['Write integrity', 'Editable', 'Silent CRUD', 'Tamper-evident chain'],
+  ['Evidence export', 'Manual reconstruction', 'Raw extract', 'Audit-ready artifact'],
+  ['Trust model', 'Trust the operator', 'Trust the store', 'Verify the record'],
+];
+
+const useCases = [
+  {
+    kicker: 'Compliance',
+    title: 'Article 12 audit trails',
+    text: 'Show what the agent knew, when it knew it, and how that context changed over time.',
+  },
+  {
+    kicker: 'Security',
+    title: 'Incident forensics',
+    text: 'Detect post-hoc mutation and reconstruct the exact chain of custody behind a bad decision.',
+  },
+  {
+    kicker: 'Platform',
+    title: 'Long-running automation',
+    text: 'Keep memory stable across sessions, handoffs, and repeated workflows without losing provenance.',
+  },
+];
+
+const spectralLabRows = [
+  ['Visual input', 'Editable spectrogram canvas'],
+  ['Diffusion stage', 'Procedural blur, drift, and jitter'],
+  ['Audio engine', 'DJ Automata live engine with stereo additive synthesis'],
+  ['Live mode', 'Continuous browser broadcast with self-mutating scenes'],
+  ['Export', 'Immediate WAV download of the current scene'],
+];
+
+const technicalSignals = [
+  'SQLite + sqlite-vec',
+  'Merkle checkpoints',
+  'Typed memory',
+  'CLI / SDK / API / MCP',
+];
+
+const macControlRows = [
+  ['Execution surface', 'Browser DOM and web app state', 'Terminal, local apps, browsers, and files'],
+  ['Session model', 'Browser-managed sessions', 'Local sessions and installed applications'],
+  ['Latency profile', 'Browser automation overhead', 'Local process and OS automation overhead'],
+  ['Integration methods', 'Playwright / Puppeteer', 'Shell, AppleScript, and native macOS automation paths'],
+];
+
+const macControlCards = [
+  {
+    kicker: 'Browser Automation',
+    title: 'Unified browser automation',
+    text: 'Use local installed browsers such as Chrome, Safari, and Arc through native macOS integrations and existing local sessions where supported.',
+  },
+  {
+    kicker: 'Filesystem',
+    title: 'Direct local file access',
+    text: 'Read logs, source code, and configuration files on the machine. Supported write paths can be routed through validation, audit, and verification flows.',
+  },
+  {
+    kicker: 'Telemetry',
+    title: 'Kinetic host telemetry',
+    text: 'Read CPU load, thermal pressure, process entropy, latency drift, and failure streaks before deciding whether the UI is broken or the machine is simply hot.',
+  },
+];
+
+const macControlGuardrails = [
+  'Lower-risk commands may run automatically when policy allows it.',
+  'Higher-risk or destructive actions can require explicit operator confirmation.',
+  'Selected operations can run in isolated local environments before affecting persistent state.',
+  'Hot sessions can pace themselves, cool down, or stop when kinetic pressure rises.',
+  'Supported write paths can emit audit records and verification metadata.',
+];
+
+const kineticLoopCards = [
+  {
+    kicker: 'Latency',
+    title: 'Read drift, not just averages',
+    text: 'Use EWMA latency, p95 spikes, and retry streaks to separate sustained friction from a one-off bad frame.',
+  },
+  {
+    kicker: 'Pressure',
+    title: 'Throttle before the session breaks',
+    text: 'Adaptive pacing lets the controller cool hot sessions instead of brute-forcing clicks into a degraded UI.',
+  },
+  {
+    kicker: 'Readiness',
+    title: 'Act, then settle under one deadline',
+    text: 'Composed action flows can wait for lifecycle and DOM confirmation under a shared timeout budget instead of multiplying delay silently.',
+  },
+];
+
+const swarm100Rows = [
+  ['Scout layer', '30 agents', 'Read hesitation, dead clicks, route confusion, and segment-level friction before anyone touches copy.'],
+  ['Mutation layer', '30 agents', 'Draft bounded copy, layout, CTA, and routing diffs instead of broad redesign fantasies.'],
+  ['Verification layer', '20 agents', 'Hammer preview environments, compare deltas, enforce guardrails, and reject local wins with global regressions.'],
+  ['Promotion layer', '20 agents', 'Ledger the winning mutation, attach evidence, and keep post-release watch on the shipped state.'],
+];
+
+const swarm100Cards = [
+  {
+    kicker: 'Topology',
+    title: '10 squadrons of 10',
+    text: 'Not 100 agents shouting at once. Ten focused squadrons running in burst, then converging through explicit gates.',
+  },
+  {
+    kicker: 'Surface',
+    title: 'borjamoskv.com as proving ground',
+    text: 'The site becomes a live laboratory for routing, copy, and trust surfaces where every mutation stays bounded and reviewable.',
+  },
+  {
+    kicker: 'Admission',
+    title: 'No blind self-rewrites',
+    text: 'A swarm can propose aggressively, but promotion still depends on preview evidence, policy checks, and rollback readiness.',
+  },
+  {
+    kicker: 'Output',
+    title: 'Evidence, not swarm theatre',
+    text: 'The point is not to boast about agent count. The point is to produce better pages with explainable why, when, and under which guardrail.',
+  },
+];
+
+const swarm100Stats = [
+  ['100 agents', 'Burst gate'],
+  ['10 squadrons', 'Phase split'],
+  ['1 live gate', 'Preview first'],
+  ['0 blind writes', 'Reviewable'],
+];
+
+const swarmSquadPhases = [
+  ['Scout', 'Session telemetry, route confusion, rage clicks, hesitation maps'],
+  ['Scout', 'Segment intent, CTA visibility, first-proof reachability'],
+  ['Scout', 'Trust-surface comprehension, bounce clusters, dead zones'],
+  ['Mutate', 'Hero copy, CTA language, route ordering, onboarding diffs'],
+  ['Mutate', 'Section structure, proof placement, trust framing'],
+  ['Mutate', 'Mac control, kinetic telemetry, product narrative alignment'],
+  ['Verify', 'Preview traffic, threshold gates, guardrail enforcement'],
+  ['Verify', 'Regression hunts across docs routing and whole-page balance'],
+  ['Promote', 'Ledger, rollback packet, audit metadata, post-release watch'],
+  ['Promote', 'Narrative coherence, style fidelity, doctrine enforcement'],
+];
+
+const swarmSquadrons = swarmSquadPhases.map(([phase, mission], index) => ({
+  id: `SQ-${String(index + 1).padStart(2, '0')}`,
+  phase,
+  mission,
+}));
+
+const swarmCells = Array.from({ length: 100 }, (_, index) => {
+  const squadIndex = Math.floor(index / 10);
+  const [phase] = swarmSquadPhases[squadIndex];
+  return {
+    id: index + 1,
+    squad: squadIndex + 1,
+    phase,
+  };
+});
+
+const paletteAgents = [
+  ['Agent 01', 'Signal Lime', '#c5ff6f'],
+  ['Agent 02', 'Acid Mint', '#84f6c5'],
+  ['Agent 03', 'Voltage Cyan', '#4bf3ff'],
+  ['Agent 04', 'Bilbao Fog', '#d7efe3'],
+  ['Agent 05', 'Audit Ivory', '#eef5e5'],
+  ['Agent 06', 'Night Moss', '#112019'],
+  ['Agent 07', 'Operator Jade', '#2bd68d'],
+  ['Agent 08', 'Terminal Amber', '#ffd26c'],
+  ['Agent 09', 'Incident Coral', '#ff7a66'],
+  ['Agent 10', 'Proxy Rose', '#ff4f7f'],
+  ['Agent 11', 'Relay Orange', '#ff9b54'],
+  ['Agent 12', 'Trust Gold', '#f2c94c'],
+  ['Agent 13', 'Cold Steel', '#9fb4c8'],
+  ['Agent 14', 'Ledger Blue', '#6ea8ff'],
+  ['Agent 15', 'Graph Aqua', '#6ef0d2'],
+  ['Agent 16', 'Shadow Pine', '#0b1511'],
+  ['Agent 17', 'Smoke Sage', '#6d867b'],
+  ['Agent 18', 'Runtime Plum', '#c18cff'],
+  ['Agent 19', 'Diff Grey', '#9aa29f'],
+  ['Agent 20', 'Proof White', '#f8fff2'],
+].map(([id, name, color]) => ({ id, name, color }));
+
+const guayCodeCards = [
+  {
+    kicker: 'Readable',
+    title: 'Code should survive an incident review',
+    text: 'If a diff only feels clear when you are calm and alone, it is not clear enough for production.',
+  },
+  {
+    kicker: 'Measured',
+    title: 'Taste earns its place through behavior',
+    text: 'Good design is not cosmetic sugar. It reduces hesitation, sharpens intent, and makes the right next action obvious.',
+  },
+  {
+    kicker: 'Honest',
+    title: 'Software should say what it can prove',
+    text: 'No fake certainty. No magical black boxes. The surface should be bold in style and precise in claims.',
+  },
+];
+
+const guayPrinciples = [
+  'Readable in the diff',
+  'Honest in the postmortem',
+  'Fast enough to stay fun',
+  'Measured enough to earn trust',
+];
+
+const docsCards = [
+  {
+    title: 'Quickstart',
+    href: docsHref('/quickstart'),
+    text: 'Install, initialize, write one fact, and verify the ledger in minutes.',
+  },
+  {
+    title: 'Architecture',
+    href: docsHref('/architecture'),
+    text: 'Understand the trust boundary, mutation path, and how CORTEX layers over existing systems.',
+  },
+  {
+    title: 'Security',
+    href: docsHref('/security'),
+    text: 'Review threat model notes, trust posture, and cryptographic invariants before rollout.',
+  },
+  {
+    title: 'API & CLI',
+    href: docsHref('/api'),
+    text: 'Jump straight into endpoint contracts and the operational surfaces exposed to users.',
+  },
+];
 ---
 
-<Layout title="CORTEX Persist — Tamper-Evident Agent Memory">
-	<main>
-		<Welcome />
-	</main>
-</Layout>
+<Layout title={pageTitle} description={pageDescription}>
+  <header class="site-header">
+    <div class="site-header__inner w">
+      <a class="brand" href={isDocsVariant ? docsHref('') : '#top'}>
+        <span class="brand__mark">CP</span>
+        <span>
+          <strong>CORTEX</strong>
+          <small>{isDocsVariant ? 'documentation' : 'website'}</small>
+        </span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        {navLinks.map((link) => (
+          <a
+            class="site-nav__link"
+            href={link.href}
+            target={link.external ? '_blank' : undefined}
+            rel={link.external ? 'noreferrer' : undefined}
+          >
+            {link.label}
+          </a>
+        ))}
+      </nav>
+      {
+        isDocsVariant ? (
+          <a class="btn btn--p" href={marketingHref()}>
+            Product home
+          </a>
+        ) : (
+          <a class="btn btn--p" href={docsHref('/quickstart')}>
+            Read docs
+          </a>
+        )
+      }
+    </div>
+  </header>
 
-<style>
-	main {
-		width: 100%;
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-	}
-</style>
+  <main id="top">
+    {
+      isDocsVariant ? (
+        <>
+          <section class="hero hero--docs w">
+            <div class="hero__copy">
+              <div class="eyebrow rv">Documentation Home</div>
+              <h1 class="hero__title rv">Build verifiable agent memory without reverse-engineering the repo.</h1>
+              <p class="hero__sub rv">
+                This surface is served from <code>cortexpersist.com/docs</code>. Start with quickstart,
+                then move through architecture, API, security, and compliance without changing domains.
+              </p>
+              <div class="hero__actions rv">
+                <a class="btn btn--p" href={docsHref('/quickstart')}>Open quickstart</a>
+                <a class="btn btn--g" href={docsHref('/architecture')}>Read architecture</a>
+              </div>
+              <p class="hero__note rv">
+                Canonical setup: <strong>product</strong> on <code>cortexpersist.com</code> and
+                <strong> documentation</strong> under <code>/docs</code>.
+              </p>
+            </div>
+            <aside class="hero__rail rv">
+              {docsCards.map((card) => (
+                <a class="rail-card" href={card.href}>
+                  <span class="rail-card__kicker">Entry point</span>
+                  <h2>{card.title}</h2>
+                  <p>{card.text}</p>
+                </a>
+              ))}
+            </aside>
+          </section>
+
+          <section class="section w">
+            <div class="section-head rv">
+              <div class="eyebrow">Docs Map</div>
+              <h2>Everything you need to evaluate the trust layer fast.</h2>
+            </div>
+            <div class="docs-grid">
+              <article class="feature-card rv">
+                <span>01</span>
+                <h3>Install and run</h3>
+                <p>Quickstart, installation, CLI, and API docs let you move from zero to first proof in one pass.</p>
+              </article>
+              <article class="feature-card rv">
+                <span>02</span>
+                <h3>Understand the model</h3>
+                <p>Architecture, axioms, and trust semantics explain where CORTEX sits and what it does not replace.</p>
+              </article>
+              <article class="feature-card rv">
+                <span>03</span>
+                <h3>Review the risk posture</h3>
+                <p>Security, compliance, and failure documents make the operational tradeoffs explicit before rollout.</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="section w">
+            <div class="split">
+              <div class="split__copy rv">
+                <div class="eyebrow">Five-Minute Setup</div>
+                <h2>From install to verified write.</h2>
+                <p>
+                  The documentation home should let an engineer prove the core loop immediately:
+                  install, write one fact, verify continuity, and keep moving.
+                </p>
+                <div class="hero__actions">
+                  <a class="btn btn--p" href={docsHref('/quickstart')}>Start with quickstart</a>
+                  <a class="btn btn--g" href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noreferrer">Open GitHub</a>
+                </div>
+              </div>
+              <div class="terminal-shell rv">
+                <div class="terminal-shell__label">CLI</div>
+                <pre><code>pip install cortex-persist
+cortex init
+
+cortex store risk-bot \
+  "Transaction flagged: IP mismatch" \
+  --type decision \
+  --source agent:risk-bot
+
+cortex trust-ledger verify</code></pre>
+              </div>
+            </div>
+          </section>
+        </>
+      ) : (
+        <>
+          <section class="hero w" data-kinetic-shell>
+            <div class="hero__copy" data-kinetic-plane="copy">
+              <div class="eyebrow rv">BORJAMOSKV // VOID PORTAL</div>
+              <div class="hero__stamp rv">NAROA MEMBRANE / FRACTAL GATE / LIVE SIGNAL</div>
+              <h1 class="hero__title rv">Access the void of code.</h1>
+              <p class="hero__sub rv">Recursive artist systems. Live signal. Evidence after impact.</p>
+              <div class="hero__actions rv">
+                <a class="btn btn--p" href="#routes">Cross the membrane</a>
+                <a class="btn btn--g" href="/spectral-audio">Tune DJ Automata</a>
+              </div>
+              <div class="hero__metrics rv" data-kinetic-plane="metrics">
+                <div>
+                  <strong>Live</strong>
+                </div>
+                <div>
+                  <strong>Recursive</strong>
+                </div>
+                <div>
+                  <strong>Verifiable</strong>
+                </div>
+              </div>
+              <div class="hero__signalband rv" aria-label="Verification surfaces" data-kinetic-plane="band">
+                <div class="signal-band">
+                  <div class="signal-band__track">
+                    {[...kineticTape, ...kineticTape].map((item) => (
+                      <span class="signal-band__item">{item}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <aside class="hero__panel rv" data-kinetic-plane="panel">
+              <div class="panel-proof">
+                <div class="panel-proof__header">
+                  <span>Portal phases</span>
+                  <span>live boot</span>
+                </div>
+                <ol>
+                  <li><strong>Enter</strong></li>
+                  <li><strong>Tune</strong></li>
+                  <li><strong>Verify</strong></li>
+                  <li><strong>Descend</strong></li>
+                </ol>
+              </div>
+              <div class="terminal-shell terminal-shell--compact">
+                <div class="terminal-shell__label">Signal</div>
+                <pre><code>portal.boot
+signal.sync --channel naroa
+web.recurse --depth 3
+STATUS: MEMBRANE_OPEN</code></pre>
+              </div>
+            </aside>
+          </section>
+
+          <section class="void-deck w">
+            <div class="void-deck__intro rv">
+              <div>
+                <div class="eyebrow">Fractal Entry</div>
+                <h2>Web inside web inside web.</h2>
+              </div>
+            <div class="void-deck__actions">
+              <a class="btn btn--p" href="/revideo">Open Revideo Atlas</a>
+              <a class="btn btn--p" href="/spectral-audio">Enter DJ Automata</a>
+              <a class="btn btn--g" href={docsHref('/quickstart')}>Open quickstart</a>
+              <a class="btn btn--g" href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noreferrer">GitHub</a>
+            </div>
+            </div>
+
+            <div class="void-fractal rv">
+              <article class="fractal-browser">
+                <div class="fractal-browser__bar">
+                  <div class="fractal-browser__dots" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <div class="fractal-browser__tabs" aria-hidden="true">
+                    <span>portal</span>
+                    <span>index</span>
+                    <span>void</span>
+                  </div>
+                  <strong>borja://web/inside/web</strong>
+                  <small data-fractal-status>ACTIVE WINDOW // ROUTES</small>
+                </div>
+                <div class="fractal-browser__viewport">
+                  <div class="fractal-browser__hero">
+                    <div class="fractal-browser__label">Fractal Web</div>
+                    <h3>ACCESS THE WEB INSIDE THE WEB</h3>
+                    <p data-fractal-scope>SYNCED CHAMBER // ROUTES</p>
+                  </div>
+                  <div class="fractal-browser__grid">
+                    <a href="#routes" data-fractal-link="routes"><span>R-01 / ENTRY</span><strong>Routes Chamber</strong></a>
+                    <a href="#trust-surface" data-fractal-link="trust-surface"><span>T-03 / DOCTRINE</span><strong>Trust Surface</strong></a>
+                    <a href="#quickstart" data-fractal-link="quickstart"><span>Q-04 / BOOT</span><strong>Quickstart</strong></a>
+                    <a href="/revideo"><span>R-07 / ATLAS</span><strong>Revideo Atlas</strong></a>
+                    <a href="#swarm-100" data-fractal-link="swarm-100"><span>S-06 / LEGION</span><strong>Swarm 100</strong></a>
+                    <a href="/spectral-audio"><span>D-00 / SIGNAL</span><strong>DJ Automata</strong></a>
+                    <a href="#mac-control" data-fractal-link="mac-control"><span>M-08 / KINETIC</span><strong>Mac Control</strong></a>
+                  </div>
+                  <div class="fractal-browser__nested">
+                    <div class="fractal-browser__bar fractal-browser__bar--mini">
+                      <div class="fractal-browser__dots fractal-browser__dots--mini" aria-hidden="true">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                      </div>
+                      <strong>borja://web/inside/web/inside/web</strong>
+                    </div>
+                    <div class="fractal-browser__viewport fractal-browser__viewport--mini">
+                      <div class="fractal-browser__hero fractal-browser__hero--mini">
+                        <div class="fractal-browser__label">Void Gate</div>
+                        <h3>DEEPER MEMBRANE</h3>
+                      </div>
+                      <div class="fractal-browser__grid fractal-browser__grid--mini">
+                        <a href="#guay-of-code" data-fractal-link="guay-of-code"><span>G-09</span><strong>Guay</strong></a>
+                        <a href="#use-cases" data-fractal-link="use-cases"><span>U-10</span><strong>Aftermath</strong></a>
+                        <a href="#product" data-fractal-link="product"><span>P-02</span><strong>Need</strong></a>
+                        <a href="#app-iteration" data-fractal-link="app-iteration"><span>I-05</span><strong>Friction</strong></a>
+                      </div>
+                      <div class="fractal-browser__ghosts" aria-hidden="true">
+                        <div class="fractal-browser__ghost fractal-browser__ghost--1">
+                          <span>borja://depth/03</span>
+                        </div>
+                        <div class="fractal-browser__ghost fractal-browser__ghost--2">
+                          <span>borja://depth/04</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <div class="void-deck__proof rv">
+              {proofCards.map((card) => (
+                <article class="void-proof-card">
+                  <span>{card.label}</span>
+                  <strong>{card.text}</strong>
+                </article>
+              ))}
+            </div>
+
+            <details id="routes" class="void-panel rv" open>
+              <summary>
+                <span>01</span>
+                <strong>Routes</strong>
+                <small>Entry</small>
+              </summary>
+              <div class="void-panel__body">
+                <div class="route-grid">
+                  {personaRoutes.map((route) => (
+                    <a class="route-card" href={route.href}>
+                      <span class="route-card__kicker">{route.kicker}</span>
+                      <h3>{route.title}</h3>
+                      <p>{route.text}</p>
+                      <div class="route-card__foot">
+                        <strong>{route.cta}</strong>
+                        <span>{route.meta}</span>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </details>
+
+            <details id="product" class="void-panel rv">
+              <summary>
+                <span>02</span>
+                <strong>Product</strong>
+                <small>Need</small>
+              </summary>
+              <div class="void-panel__body">
+                <div class="comparison-card">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Question</th>
+                        <th>Logs</th>
+                        <th>Vector DB</th>
+                        <th>CORTEX</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {comparisonRows.map((row) => (
+                        <tr>
+                          <td data-label="Question">{row[0]}</td>
+                          <td data-label="Logs">{row[1]}</td>
+                          <td data-label="Vector DB">{row[2]}</td>
+                          <td data-label="CORTEX">{row[3]}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </details>
+
+            <details id="trust-surface" class="void-panel rv">
+              <summary>
+                <span>03</span>
+                <strong>Trust Surface</strong>
+                <small>Doctrine</small>
+              </summary>
+              <div class="void-panel__body">
+                <div class="trust-flow">
+                  {trustLoop.map((step, index) => (
+                    <div class="trust-flow__node">
+                      <span>{`0${index + 1}`}</span>
+                      <p>{step}</p>
+                    </div>
+                  ))}
+                </div>
+                <div class="trust-surface__grid void-panel__grid">
+                  {trustSurfaceCards.map((card) => (
+                    <article class="trust-card">
+                      <span>{card.kicker}</span>
+                      <h3>{card.title}</h3>
+                      <p>{card.text}</p>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </details>
+
+            <details id="quickstart" class="void-panel rv">
+              <summary>
+                <span>04</span>
+                <strong>Quickstart</strong>
+                <small>Boot</small>
+              </summary>
+              <div class="void-panel__body">
+                <div class="quickstart-grid">
+                  <div class="terminal-shell">
+                    <div class="terminal-shell__label">Developer entry point</div>
+                    <pre><code>pip install cortex-persist
+cortex init
+
+cortex store risk-bot \
+  "Transaction flagged: IP mismatch" \
+  --type decision \
+  --source agent:risk-bot
+
+cortex trust-ledger verify</code></pre>
+                  </div>
+                  <div class="signal-stack">
+                    {technicalSignals.map((signal) => (
+                      <article class="signal-card">
+                        <span class="signal-card__dot"></span>
+                        <p>{signal}</p>
+                      </article>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <details id="app-iteration" class="void-panel rv">
+              <summary>
+                <span>05</span>
+                <strong>Iteration</strong>
+                <small>Friction</small>
+              </summary>
+              <div class="void-panel__body void-panel__body--flush">
+                <AppIterationDemo />
+              </div>
+            </details>
+
+            <details id="swarm-100" class="void-panel rv">
+              <summary>
+                <span>06</span>
+                <strong>Swarm 100</strong>
+                <small>Legion</small>
+              </summary>
+              <div class="void-panel__body">
+                <div class="swarm100-stats">
+                  {swarm100Stats.map((stat) => (
+                    <article class="swarm100-stat">
+                      <strong>{stat[0]}</strong>
+                      <span>{stat[1]}</span>
+                    </article>
+                  ))}
+                </div>
+                <div class="comparison-card">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Layer</th>
+                        <th>Agents</th>
+                        <th>Mission</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {swarm100Rows.map((row) => (
+                        <tr>
+                          <td data-label="Layer">{row[0]}</td>
+                          <td data-label="Agents">{row[1]}</td>
+                          <td data-label="Mission">{row[2]}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </details>
+
+            <details id="palette-20" class="void-panel rv">
+              <summary>
+                <span>07</span>
+                <strong>Palette 20</strong>
+                <small>Color</small>
+              </summary>
+              <div class="void-panel__body">
+                <div class="comparison-card palette20-panel">
+                  <div class="palette20-grid">
+                    {paletteAgents.map((agent) => (
+                      <article class="palette20-agent" style={`--palette-agent:${agent.color};`}>
+                        <span>{agent.id}</span>
+                        <strong>{agent.name}</strong>
+                      </article>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <details id="mac-control" class="void-panel rv">
+              <summary>
+                <span>08</span>
+                <strong>Mac Control</strong>
+                <small>Kinetic</small>
+              </summary>
+              <div class="void-panel__body">
+                <div class="comparison-card">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Feature</th>
+                        <th>Web-only agents</th>
+                        <th>CORTEX + MAC-CONTROL</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {macControlRows.map((row) => (
+                        <tr>
+                          <td data-label="Feature">{row[0]}</td>
+                          <td data-label="Web-only">{row[1]}</td>
+                          <td data-label="Mac Control">{row[2]}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </details>
+
+            <details id="guay-of-code" class="void-panel rv">
+              <summary>
+                <span>09</span>
+                <strong>Guay Of Code</strong>
+                <small>Taste</small>
+              </summary>
+              <div class="void-panel__body">
+                <div class="guay-stack">
+                  <div class="guay-intro">
+                    <div class="eyebrow">The Guay Of Code</div>
+                    <h3>Code can be rigorous, legible, and still have swagger.</h3>
+                    <p>
+                      “Guay” is not decorative fluff. It means the surface feels intentional, the logic stays readable
+                      under pressure, and the product has enough taste to make the right action feel obvious.
+                    </p>
+                    <div class="guay-principles" role="list" aria-label="Guay principles">
+                      {guayPrinciples.map((principle) => (
+                        <article class="guay-principle" role="listitem">
+                          <strong>{principle}</strong>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div class="comparison-card guay-panel">
+                    <div class="comparison-card__label">borjamoskv.com doctrine</div>
+                    <blockquote class="guay-quote">
+                      Good code is not sterile. It should carry rhythm, clarity, and enough personality that you can
+                      tell a human cared about the shape of it.
+                    </blockquote>
+                    <p class="guay-panel__text">
+                      The standard here is simple: bold interfaces, constrained mutations, explicit guardrails,
+                      and enough telemetry to know whether the experience actually got better.
+                    </p>
+                  </div>
+                </div>
+                <div class="docs-grid void-panel__grid">
+                  {guayCodeCards.map((card) => (
+                    <article class="feature-card">
+                      <span>{card.kicker}</span>
+                      <h3>{card.title}</h3>
+                      <p>{card.text}</p>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </details>
+
+            <details id="use-cases" class="void-panel rv">
+              <summary>
+                <span>10</span>
+                <strong>Use Cases</strong>
+                <small>Aftermath</small>
+              </summary>
+              <div class="void-panel__body">
+                <div class="docs-grid">
+                  {useCases.map((useCase) => (
+                    <article class="feature-card">
+                      <span>{useCase.kicker}</span>
+                      <h3>{useCase.title}</h3>
+                      <p>{useCase.text}</p>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </details>
+          </section>
+
+          <div class="legacy-stack" aria-hidden="true">
+          <section id="legacy-proof" class="proof-strip w">
+            {proofCards.map((card) => (
+              <article class="proof-card rv">
+                <h2>{card.label}</h2>
+                <p>{card.text}</p>
+              </article>
+            ))}
+          </section>
+
+          <section id="legacy-routes" class="section w">
+            <div class="section-head rv">
+              <div class="eyebrow">Choose the route</div>
+              <h2>Different evaluators need different first proof.</h2>
+              <p>
+                Builders want an executable quickstart. Security teams want controls. Platform teams want
+                topology and rollout clarity. Route them directly instead of forcing everyone through the same path.
+              </p>
+            </div>
+            <div class="route-grid">
+              {personaRoutes.map((route) => (
+                <a class="route-card rv" href={route.href}>
+                  <span class="route-card__kicker">{route.kicker}</span>
+                  <h3>{route.title}</h3>
+                  <p>{route.text}</p>
+                  <div class="route-card__foot">
+                    <strong>{route.cta}</strong>
+                    <span>{route.meta}</span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
+
+          <section id="legacy-product" class="section w">
+            <div class="split split--wide">
+              <div class="split__copy rv">
+                <div class="eyebrow">Why CORTEX</div>
+                <h2>Most AI systems can generate output. Few can justify their history.</h2>
+                <p>
+                  Logs tell you activity happened. Vector stores tell you something similar existed.
+                  Neither gives you a sealed chain of custody for the state an agent relied on.
+                </p>
+                <ul class="bullet-list">
+                  <li>Wrap your existing runtime and memory layer instead of replacing them.</li>
+                  <li>Turn writes into evidence with cryptographic continuity and verifiable lineage.</li>
+                  <li>Export audit packs for security review, compliance workflows, and postmortems.</li>
+                </ul>
+              </div>
+              <div class="comparison-card rv">
+                <div class="comparison-card__label">Why not just logs or a vector DB?</div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Question</th>
+                      <th>Logs</th>
+                      <th>Vector DB</th>
+                      <th>CORTEX</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {comparisonRows.map((row) => (
+                      <tr>
+                        <td>{row[0]}</td>
+                        <td>{row[1]}</td>
+                        <td>{row[2]}</td>
+                        <td>{row[3]}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section id="legacy-trust-surface" class="section w">
+            <div class="split split--wide trust-surface">
+              <div class="split__copy rv">
+                <div class="eyebrow">Trust Surface</div>
+                <h2>Memory becomes evidence only when each mutation crosses a visible boundary.</h2>
+                <p>
+                  The product value is not “memory” in the abstract. It is the path from proposal to accepted
+                  state: guard it, seal it, verify it, and export it in a form humans can inspect.
+                </p>
+                <div class="trust-flow">
+                  {trustLoop.map((step, index) => (
+                    <div class="trust-flow__node rv">
+                      <span>{`0${index + 1}`}</span>
+                      <p>{step}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div class="trust-surface__grid">
+                {trustSurfaceCards.map((card) => (
+                  <article class="trust-card rv">
+                    <span>{card.kicker}</span>
+                    <h3>{card.title}</h3>
+                    <p>{card.text}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section id="legacy-quickstart" class="section w">
+            <div class="section-head rv">
+              <div class="eyebrow">Quickstart</div>
+              <h2>Go from first write to first proof without a rewrite.</h2>
+              <p>
+                Install the package, write one decision, and verify the chain locally before you touch the rest of your stack.
+              </p>
+            </div>
+            <div class="quickstart-grid">
+              <div class="terminal-shell rv">
+                <div class="terminal-shell__label">Developer entry point</div>
+                <pre><code>pip install cortex-persist
+cortex init
+
+cortex store risk-bot \
+  "Transaction flagged: IP mismatch" \
+  --type decision \
+  --source agent:risk-bot
+
+cortex trust-ledger verify</code></pre>
+              </div>
+              <div class="signal-stack rv">
+                {technicalSignals.map((signal) => (
+                  <article class="signal-card">
+                    <span class="signal-card__dot"></span>
+                    <p>{signal}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section id="legacy-swarm-100" class="section w">
+            <div class="section-head rv">
+              <div class="eyebrow">Legion-100</div>
+              <h2>Run borjamoskv.com through a 100-agent swarm without turning the site into chaos.</h2>
+              <p>
+                The website is the proving ground: 100 agents instrument friction, draft bounded mutations,
+                verify them in preview, and only then promote the winners with evidence attached. Massive parallelism.
+                Tight admission. No blind self-modification.
+              </p>
+            </div>
+            <div class="swarm100-stats rv">
+              {swarm100Stats.map((stat) => (
+                <article class="swarm100-stat">
+                  <strong>{stat[0]}</strong>
+                  <span>{stat[1]}</span>
+                </article>
+              ))}
+            </div>
+            <div class="split split--wide">
+              <div class="split__copy rv">
+                <div class="eyebrow">Operational Doctrine</div>
+                <h2>A swarm this large only works if the write path stays narrow.</h2>
+                <p>
+                  The gain from 100 agents is discovery speed. The risk is entropy. So the operating rule is simple:
+                  let the swarm explore in parallel, force promotion through one explicit trust boundary, and keep the
+                  final mutation small enough to review in one diff.
+                </p>
+                <ul class="bullet-list">
+                  <li>Parallel observation, sequential admission.</li>
+                  <li>Preview-first verification before any live mutation.</li>
+                  <li>Route winners by measured uplift, not internal consensus alone.</li>
+                  <li>Keep every shipped change tied to one surface, one hypothesis, and one ledgered outcome.</li>
+                </ul>
+              </div>
+              <div class="comparison-card rv">
+                <div class="comparison-card__label">Legion-100 operating model</div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Layer</th>
+                      <th>Agents</th>
+                      <th>Mission</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {swarm100Rows.map((row) => (
+                      <tr>
+                        <td>{row[0]}</td>
+                        <td>{row[1]}</td>
+                        <td>{row[2]}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="swarm100-shell section-grid--top">
+              <article class="swarm100-board rv" data-swarm-board>
+                <div class="comparison-card__label">100-agent burst map</div>
+                <div class="swarm100-board__grid" aria-label="100-agent swarm map">
+                  {swarmCells.map((cell) => (
+                    <span
+                      class={`swarm100-cell swarm100-cell--${cell.phase.toLowerCase()}`}
+                      title={`Agent ${cell.id} · ${cell.phase} · Squadron ${cell.squad}`}
+                      style={`--swarm-delay:${((((cell.id - 1) % 10) * 0.09) + (Math.floor((cell.id - 1) / 10) * 0.015)).toFixed(2)}s;`}
+                    >
+                      {cell.id}
+                    </span>
+                  ))}
+                </div>
+                <div class="swarm100-legend">
+                  <span><i class="swarm100-dot swarm100-dot--scout"></i>Scout</span>
+                  <span><i class="swarm100-dot swarm100-dot--mutate"></i>Mutate</span>
+                  <span><i class="swarm100-dot swarm100-dot--verify"></i>Verify</span>
+                  <span><i class="swarm100-dot swarm100-dot--promote"></i>Promote</span>
+                </div>
+              </article>
+              <article class="swarm100-squadrons rv">
+                <div class="comparison-card__label">Squadron doctrine</div>
+                <div class="swarm100-squadrons__grid">
+                  {swarmSquadrons.map((squad) => (
+                    <article class="swarm100-squad">
+                      <div class="swarm100-squad__head">
+                        <strong>{squad.id}</strong>
+                        <span>{squad.phase}</span>
+                      </div>
+                      <p>{squad.mission}</p>
+                    </article>
+                  ))}
+                </div>
+              </article>
+            </div>
+            <div class="docs-grid section-grid--top">
+              {swarm100Cards.map((card) => (
+                <article class="feature-card rv">
+                  <span>{card.kicker}</span>
+                  <h3>{card.title}</h3>
+                  <p>{card.text}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section id="legacy-palette-20" class="section w">
+            <div class="section-head rv">
+              <div class="eyebrow">Palette-20</div>
+              <h2>20 agents changing the palette without breaking the identity.</h2>
+              <p>
+                This is the visual counterpart to the swarm: twenty specialist agents tuning hue, contrast,
+                heat, and emphasis so the site feels sharper, more intentional, and more alive without turning
+                into a rainbow accident.
+              </p>
+            </div>
+            <div class="split split--wide">
+              <div class="comparison-card rv palette20-panel">
+                <div class="comparison-card__label">Palette swarm</div>
+                <div class="palette20-grid">
+                  {paletteAgents.map((agent) => (
+                    <article class="palette20-agent" style={`--palette-agent:${agent.color};`}>
+                      <span>{agent.id}</span>
+                      <strong>{agent.name}</strong>
+                      <small>{agent.color}</small>
+                    </article>
+                  ))}
+                </div>
+              </div>
+              <div class="split__copy rv">
+                <div class="eyebrow">Color Doctrine</div>
+                <h2>The palette should behave like a system, not a mood board.</h2>
+                <p>
+                  The green-black base still carries the identity, but the swarm injects temperature where the page
+                  needs urgency, cools surfaces that need precision, and keeps proof, danger, and action states visibly distinct.
+                </p>
+                <ul class="bullet-list">
+                  <li>Lime and mint keep the core trust signature intact.</li>
+                  <li>Cyan and blue mark system intelligence, telemetry, and structure.</li>
+                  <li>Amber, coral, and rose add friction, warning, and kinetic heat where the page needs pulse.</li>
+                  <li>The dark pine base keeps the whole thing grounded so the site stays sovereign, not flashy.</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <section class="section w">
+            <div class="split split--wide">
+              <div class="split__copy rv">
+                <div class="eyebrow">Immersive Route</div>
+                <h2>DJ Automata turns the site into a live ambient instrument.</h2>
+                <p>
+                  The spectral route is no longer just a lab demo.
+                  It now behaves like a live room inside the site: paint the field, let DJ Automata
+                  keep mutating it, and hold an always-on ambient broadcast without leaving the browser.
+                </p>
+                <div class="hero__actions">
+                  <a class="btn btn--p" href="/spectral-audio">Enter DJ Automata</a>
+                  <a class="btn btn--g" href="/spectral-audio#how-it-works">See pipeline</a>
+                </div>
+              </div>
+              <div class="comparison-card rv">
+                <div class="comparison-card__label">DJ Automata pipeline</div>
+                <table>
+                  <tbody>
+                    {spectralLabRows.map((row) => (
+                      <tr>
+                        <td>{row[0]}</td>
+                        <td>{row[1]}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section class="section w">
+            <div class="section-head rv">
+              <div class="eyebrow">Product Demo</div>
+              <h2>From event to evidence inside an immersive stage.</h2>
+            </div>
+            <div class="video-shell rv" data-video-stage>
+              <div class="video-shell__head">
+                <div>
+                  <div class="video-shell__kicker">Immersive playback</div>
+                  <p>Double click the frame or use fullscreen to push the demo into a clean stage.</p>
+                </div>
+                <div class="video-shell__signal" aria-hidden="true">
+                  <span class="video-shell__live"><i></i>Live signal</span>
+                  <div class="video-shell__meter">
+                    {Array.from({ length: 12 }).map((_, index) => (
+                      <span style={`--meter-delay:${(index * 0.08).toFixed(2)}s; --meter-scale:${(0.58 + ((index % 5) * 0.12)).toFixed(2)};`}></span>
+                    ))}
+                  </div>
+                </div>
+                <button type="button" class="btn btn--g video-shell__action" data-video-fullscreen>
+                  Fullscreen
+                </button>
+              </div>
+              <video controls playsinline class="demo-video" data-immersive-video>
+                <source src="/assets/demo.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </section>
+
+          <section id="legacy-use-cases" class="section w">
+            <div class="section-head rv">
+              <div class="eyebrow">Use Cases</div>
+              <h2>Start where evidence matters before output alone is not enough.</h2>
+            </div>
+            <div class="docs-grid">
+              {useCases.map((useCase) => (
+                <article class="feature-card rv">
+                  <span>{useCase.kicker}</span>
+                  <h3>{useCase.title}</h3>
+                  <p>{useCase.text}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section id="legacy-mac-control" class="section w">
+            <div class="section-head rv">
+              <div class="eyebrow">macOS Native Control</div>
+              <h2>MAC-CONTROL turns local execution into a kinetic control plane.</h2>
+              <p>
+                Browser-only agents are trapped inside DOM boundaries. MAC-CONTROL adds local macOS execution
+                paths plus kinetic telemetry, so the agent can tell the difference between product friction,
+                machine friction, and an action that simply should not proceed.
+              </p>
+            </div>
+            <div class="split split--wide">
+              <div class="split__copy rv">
+                <div class="eyebrow">Security Controls</div>
+                <h2>Native control without fake confidence.</h2>
+                <p>
+                  Native execution should widen capability, not bypass review. Higher-risk actions stay behind
+                  policy, confirmation, isolation controls, and kinetic checks before they touch persistent state.
+                </p>
+                <ul class="bullet-list">
+                  {macControlGuardrails.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </div>
+              <div class="comparison-card rv">
+                <div class="comparison-card__label">Web-only vs. native macOS control</div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Feature</th>
+                      <th>Web-only agents</th>
+                      <th>CORTEX + MAC-CONTROL</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {macControlRows.map((row) => (
+                      <tr>
+                        <td>{row[0]}</td>
+                        <td>{row[1]}</td>
+                        <td>{row[2]}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="docs-grid section-grid--top">
+              {macControlCards.map((card) => (
+                <article class="feature-card rv">
+                  <span>{card.kicker}</span>
+                  <h3>{card.title}</h3>
+                  <p>{card.text}</p>
+                </article>
+              ))}
+            </div>
+            <div class="docs-grid section-grid--top">
+              {kineticLoopCards.map((card) => (
+                <article class="feature-card rv">
+                  <span>{card.kicker}</span>
+                  <h3>{card.title}</h3>
+                  <p>{card.text}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section id="legacy-guay-of-code" class="section w">
+            <div class="split split--wide">
+              <div class="split__copy rv">
+                <div class="eyebrow">The Guay Of Code</div>
+                <h2>Code can be rigorous, legible, and still have swagger.</h2>
+                <p>
+                  "Guay" is not decorative fluff. It means the surface feels intentional, the logic stays readable
+                  under pressure, and the product has enough taste to make the right action feel obvious.
+                </p>
+                <ul class="bullet-list">
+                  <li>Readable in the diff.</li>
+                  <li>Honest in the postmortem.</li>
+                  <li>Fast enough to stay fun.</li>
+                  <li>Measured enough to earn trust.</li>
+                </ul>
+              </div>
+              <div class="comparison-card rv guay-panel">
+                <div class="comparison-card__label">borjamoskv.com doctrine</div>
+                <blockquote class="guay-quote">
+                  Good code is not sterile. It should carry rhythm, clarity, and enough personality that you can
+                  tell a human cared about the shape of it.
+                </blockquote>
+                <p class="guay-panel__text">
+                  The standard here is simple: bold interfaces, constrained mutations, explicit guardrails,
+                  and enough telemetry to know whether the experience actually got better.
+                </p>
+              </div>
+            </div>
+            <div class="docs-grid section-grid--top">
+              {guayCodeCards.map((card) => (
+                <article class="feature-card rv">
+                  <span>{card.kicker}</span>
+                  <h3>{card.title}</h3>
+                  <p>{card.text}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+          </div>
+        </>
+      )
+    }
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__inner w">
+      <div>
+        <p class="site-footer__brand">CORTEX Persist</p>
+        <p class="site-footer__copy">Memory for AI agents that need evidence, not vibes.</p>
+      </div>
+      <div class="site-footer__links">
+        {
+          isDocsVariant ? (
+            <>
+              <a href={docsHref('/quickstart')}>Quickstart</a>
+              <a href={docsHref('/architecture')}>Architecture</a>
+              <a href={marketingHref()}>Product home</a>
+            </>
+          ) : (
+            <>
+              <a href="#quickstart">Quickstart</a>
+              <a href={docsHref('/security')}>Security</a>
+              <a href={docsHref('/architecture')}>Docs</a>
+              <a href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noreferrer">GitHub</a>
+            </>
+          )
+        }
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!prefersReducedMotion) {
+      document.querySelectorAll('[data-kinetic-shell]').forEach((shell) => {
+        const reset = () => {
+          shell.style.setProperty('--kx', '0');
+          shell.style.setProperty('--ky', '0');
+        };
+
+        reset();
+
+        shell.addEventListener('pointermove', (event) => {
+          const rect = shell.getBoundingClientRect();
+          const px = (event.clientX - rect.left) / rect.width - 0.5;
+          const py = (event.clientY - rect.top) / rect.height - 0.5;
+
+          shell.style.setProperty('--kx', px.toFixed(3));
+          shell.style.setProperty('--ky', py.toFixed(3));
+        });
+
+        shell.addEventListener('pointerleave', reset);
+      });
+    }
+
+    const voidPanels = Array.from(document.querySelectorAll('.void-panel'));
+    const fractalStatusNodes = Array.from(document.querySelectorAll('[data-fractal-status]'));
+    const fractalScopeNodes = Array.from(document.querySelectorAll('[data-fractal-scope]'));
+    const fractalLinks = Array.from(document.querySelectorAll('[data-fractal-link]'));
+
+    const closeSiblingPanels = (activePanel) => {
+      voidPanels.forEach((panel) => {
+        if (panel !== activePanel) {
+          panel.open = false;
+        }
+      });
+    };
+
+    const syncFractalState = (targetId) => {
+      const fallbackPanel = voidPanels.find((panel) => panel.open) ?? document.getElementById('routes');
+      const activeId =
+        targetId && document.getElementById(targetId)?.classList.contains('void-panel')
+          ? targetId
+          : fallbackPanel instanceof HTMLDetailsElement
+            ? fallbackPanel.id
+            : 'routes';
+      const label = activeId.replace(/-/g, ' ').toUpperCase();
+
+      fractalStatusNodes.forEach((node) => {
+        node.textContent = `ACTIVE WINDOW // ${label}`;
+      });
+
+      fractalScopeNodes.forEach((node) => {
+        node.textContent = `SYNCED CHAMBER // ${label}`;
+      });
+
+      fractalLinks.forEach((link) => {
+        link.classList.toggle('is-active', link.dataset.fractalLink === activeId);
+      });
+    };
+
+    const openVoidPanelFromHash = () => {
+      const hash = window.location.hash.slice(1);
+
+      if (!hash) {
+        syncFractalState();
+        return;
+      }
+
+      const panel = document.getElementById(hash);
+
+      if (!(panel instanceof HTMLDetailsElement) || !panel.classList.contains('void-panel')) {
+        syncFractalState();
+        return;
+      }
+
+      closeSiblingPanels(panel);
+      panel.open = true;
+      syncFractalState(hash);
+    };
+
+    voidPanels.forEach((panel) => {
+      panel.addEventListener('toggle', () => {
+        if (panel.open) {
+          closeSiblingPanels(panel);
+          syncFractalState(panel.id);
+        } else {
+          syncFractalState();
+        }
+      });
+    });
+
+    window.addEventListener('hashchange', openVoidPanelFromHash);
+    openVoidPanelFromHash();
+  </script>
+
+  <style>
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      backdrop-filter: blur(18px);
+      background: rgba(5, 12, 9, 0.9);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .site-header__inner,
+    .site-footer__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      min-height: 78px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      color: var(--text);
+      font-size: 0.96rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand strong,
+    .site-footer__brand {
+      font-size: 1.02rem;
+      letter-spacing: -0.04em;
+    }
+
+    .brand small {
+      display: block;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    .brand__mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(197, 255, 111, 0.2), rgba(132, 246, 197, 0.18));
+      border: 1px solid var(--line-strong);
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--accent);
+    }
+
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      flex-wrap: wrap;
+    }
+
+    .site-nav__link {
+      color: color-mix(in srgb, var(--text) 82%, var(--muted));
+      font-size: 0.95rem;
+      transition: color 180ms ease;
+    }
+
+    .site-nav__link:hover {
+      color: var(--text);
+    }
+
+    .hero {
+      position: relative;
+      isolation: isolate;
+      --kx: 0;
+      --ky: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+      gap: 32px;
+      padding: 96px 24px 48px;
+      align-items: start;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 2% 8% auto 4%;
+      height: 58%;
+      border-radius: 42px;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(132, 246, 197, 0.12), transparent 32%),
+        radial-gradient(circle at 80% 10%, rgba(197, 255, 111, 0.1), transparent 34%),
+        linear-gradient(120deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0));
+      filter: blur(14px);
+      transform: translate3d(calc(var(--kx) * 20px), calc(var(--ky) * 20px), 0);
+      animation: heroHalo 14s ease-in-out infinite alternate;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      width: min(42vw, 560px);
+      aspect-ratio: 1;
+      right: 6%;
+      top: 8%;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, rgba(255, 255, 255, 0.56) 0%, rgba(95, 242, 255, 0.16) 16%, rgba(255, 137, 176, 0.12) 28%, rgba(9, 17, 13, 0) 62%),
+        repeating-radial-gradient(circle, rgba(255, 255, 255, 0.06) 0 2px, rgba(255, 255, 255, 0) 2px 10px);
+      filter: blur(2px);
+      opacity: 0.54;
+      mix-blend-mode: screen;
+      animation: heroPortal 16s ease-in-out infinite alternate;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .hero--docs {
+      grid-template-columns: minmax(0, 0.95fr) minmax(320px, 1.05fr);
+    }
+
+    .hero__copy[data-kinetic-plane='copy'] {
+      transform: translate3d(calc(var(--kx) * -10px), calc(var(--ky) * -12px), 0);
+      transition: transform 220ms ease;
+    }
+
+    .hero__metrics[data-kinetic-plane='metrics'] {
+      transform: translate3d(calc(var(--kx) * -14px), calc(var(--ky) * -14px), 0);
+      transition: transform 260ms ease;
+    }
+
+    .hero__signalband[data-kinetic-plane='band'] {
+      transform: translate3d(calc(var(--kx) * -18px), calc(var(--ky) * -8px), 0);
+      transition: transform 300ms ease;
+    }
+
+    .hero__panel[data-kinetic-plane='panel'] {
+      transform: translate3d(calc(var(--kx) * 18px), calc(var(--ky) * 20px), 0);
+      transition: transform 260ms ease;
+    }
+
+    .hero__title {
+      margin-top: 18px;
+      max-width: 12ch;
+      font-size: clamp(3rem, 8vw, 6rem);
+      line-height: 0.95;
+      letter-spacing: -0.07em;
+    }
+
+    .hero__sub,
+    .section-head p,
+    .split__copy p,
+    .hero__note {
+      max-width: 64ch;
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+
+    .hero__stamp {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(95, 242, 255, 0.28);
+      background: rgba(5, 12, 10, 0.78);
+      color: #d9fbff;
+      font-family: var(--mono);
+      font-size: 0.74rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 0 20px rgba(95, 242, 255, 0.1);
+    }
+
+    .hero:not(.hero--docs) .hero__sub,
+    .hero:not(.hero--docs) .hero__audience,
+    .hero:not(.hero--docs) .hero__trustline,
+    .hero:not(.hero--docs) .hero__metrics span {
+      display: none;
+    }
+
+    .hero__sub code,
+    .hero__note code {
+      padding: 0.1rem 0.38rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--line);
+    }
+
+    .hero__actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 28px;
+    }
+
+    .hero__audience,
+    .hero__trustline {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 22px;
+    }
+
+    .audience-chip,
+    .hero__trustline span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    .hero__trustline span {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .hero__metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 30px;
+    }
+
+    .hero__signalband {
+      margin-top: 22px;
+    }
+
+    .signal-band {
+      position: relative;
+      overflow: hidden;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(90deg, rgba(197, 255, 111, 0.05), rgba(132, 246, 197, 0.02), rgba(197, 255, 111, 0.05)),
+        rgba(6, 12, 10, 0.9);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    }
+
+    .signal-band::before,
+    .signal-band::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 52px;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .signal-band::before {
+      left: 0;
+      background: linear-gradient(90deg, rgba(8, 17, 13, 0.95), rgba(8, 17, 13, 0));
+    }
+
+    .signal-band::after {
+      right: 0;
+      background: linear-gradient(270deg, rgba(8, 17, 13, 0.95), rgba(8, 17, 13, 0));
+    }
+
+    .signal-band__track {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: max-content;
+      padding: 10px 14px;
+      animation: signalBand 32s cubic-bezier(0.68, 0, 0.32, 1) infinite;
+    }
+
+    .signal-band__item {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+      min-height: 34px;
+      border-radius: 999px;
+      border: 1px solid rgba(197, 255, 111, 0.16);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .signal-band__item::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px rgba(197, 255, 111, 0.45);
+      animation: signalPulse 1.6s ease-in-out infinite;
+    }
+
+    .void-deck {
+      display: grid;
+      gap: 16px;
+      padding: 0 0 72px;
+    }
+
+    .void-deck__intro,
+    .void-panel,
+    .void-proof-card {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      backdrop-filter: blur(16px);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 24px 80px rgba(0, 0, 0, 0.42),
+        0 0 46px rgba(95, 242, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .void-deck__intro::before,
+    .void-panel::before,
+    .void-proof-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.02) 42%, rgba(255, 255, 255, 0.12) 50%, transparent 58%),
+        repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px);
+      mix-blend-mode: screen;
+      opacity: 0.5;
+      pointer-events: none;
+      animation: retroSweep 12s linear infinite;
+    }
+
+    .void-deck__intro {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 24px 26px;
+      border-radius: 30px;
+      background:
+        radial-gradient(circle at top left, rgba(75, 243, 255, 0.12), transparent 18rem),
+        radial-gradient(circle at top right, rgba(255, 91, 134, 0.14), transparent 18rem),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)),
+        var(--panel);
+    }
+
+    .void-deck__intro h2 {
+      margin-top: 14px;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      line-height: 0.94;
+      text-transform: uppercase;
+      letter-spacing: -0.05em;
+      background: linear-gradient(180deg, #ffffff 0%, #d5ff8b 34%, #5ff2ff 68%, #ff89b0 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .void-deck__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .void-fractal {
+      position: relative;
+    }
+
+    .fractal-browser {
+      border: 1px solid var(--line-strong);
+      border-radius: 32px;
+      background:
+        radial-gradient(circle at top left, rgba(75, 243, 255, 0.18), transparent 20rem),
+        radial-gradient(circle at top right, rgba(255, 79, 127, 0.16), transparent 18rem),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)),
+        rgba(8, 17, 13, 0.9);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 32px 90px rgba(0, 0, 0, 0.5),
+        0 0 62px rgba(95, 242, 255, 0.14);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .fractal-browser::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.03) 42%, rgba(255, 255, 255, 0.15) 50%, transparent 58%),
+        repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px);
+      opacity: 0.55;
+      mix-blend-mode: screen;
+      pointer-events: none;
+      animation: retroSweep 10s linear infinite;
+    }
+
+    .fractal-browser__bar {
+      display: grid;
+      grid-template-columns: auto auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0)),
+        rgba(255, 255, 255, 0.03);
+      position: relative;
+      z-index: 1;
+    }
+
+    .fractal-browser__dots {
+      display: inline-flex;
+      gap: 7px;
+    }
+
+    .fractal-browser__dots span {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      box-shadow: 0 0 16px rgba(255, 255, 255, 0.22);
+    }
+
+    .fractal-browser__dots span:nth-child(1) {
+      background: #ff7a66;
+    }
+
+    .fractal-browser__dots span:nth-child(2) {
+      background: #ffd26c;
+    }
+
+    .fractal-browser__dots span:nth-child(3) {
+      background: #84f6c5;
+    }
+
+    .fractal-browser__tabs {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .fractal-browser__tabs span {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .fractal-browser__bar strong,
+    .fractal-browser__bar small {
+      font-family: var(--mono);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .fractal-browser__bar strong {
+      color: var(--text);
+      font-size: 0.74rem;
+    }
+
+    .fractal-browser__bar small {
+      color: var(--accent);
+      font-size: 0.66rem;
+      text-align: right;
+    }
+
+    .fractal-browser__viewport {
+      display: grid;
+      gap: 18px;
+      padding: 22px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .fractal-browser__hero,
+    .fractal-browser__viewport--mini {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 26px;
+      background:
+        radial-gradient(circle at top right, rgba(255, 79, 127, 0.12), transparent 16rem),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)),
+        rgba(255, 255, 255, 0.03);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .fractal-browser__hero {
+      display: grid;
+      gap: 10px;
+      padding: 22px 24px;
+    }
+
+    .fractal-browser__label {
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .fractal-browser__hero h3 {
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      line-height: 0.94;
+      letter-spacing: -0.05em;
+      text-transform: uppercase;
+      background: linear-gradient(180deg, #ffffff 0%, #d5ff8b 36%, #5ff2ff 70%, #ff89b0 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .fractal-browser__hero p {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .fractal-browser__grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .fractal-browser__grid a {
+      display: grid;
+      gap: 8px;
+      min-height: 102px;
+      padding: 14px;
+      border-radius: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)),
+        rgba(255, 255, 255, 0.03);
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .fractal-browser__grid a:hover,
+    .fractal-browser__grid a.is-active {
+      transform: translateY(-3px);
+      border-color: var(--line-strong);
+      box-shadow:
+        0 0 0 1px rgba(197, 255, 111, 0.12),
+        0 0 26px rgba(95, 242, 255, 0.1);
+    }
+
+    .fractal-browser__grid a span,
+    .fractal-browser__ghost span {
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.64rem;
+      letter-spacing: 0.17em;
+      text-transform: uppercase;
+    }
+
+    .fractal-browser__grid a strong {
+      color: var(--text);
+      font-size: 0.98rem;
+      line-height: 1.02;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+    }
+
+    .fractal-browser__nested {
+      margin-left: auto;
+      width: min(100%, 36rem);
+      display: grid;
+      gap: 0;
+      transform: rotate(-2.4deg);
+      transform-origin: top right;
+    }
+
+    .fractal-browser__bar--mini {
+      grid-template-columns: auto minmax(0, 1fr);
+      padding: 12px 14px;
+    }
+
+    .fractal-browser__dots--mini span {
+      width: 9px;
+      height: 9px;
+    }
+
+    .fractal-browser__viewport--mini {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
+
+    .fractal-browser__hero--mini {
+      padding: 18px 18px 14px;
+    }
+
+    .fractal-browser__hero--mini h3 {
+      font-size: 1.05rem;
+    }
+
+    .fractal-browser__grid--mini {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .fractal-browser__grid--mini a {
+      min-height: 78px;
+    }
+
+    .fractal-browser__ghosts {
+      position: relative;
+      min-height: 90px;
+      margin-top: 4px;
+    }
+
+    .fractal-browser__ghost {
+      position: absolute;
+      left: 10%;
+      right: 10%;
+      height: 62px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)),
+        rgba(255, 255, 255, 0.02);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .fractal-browser__ghost--1 {
+      top: 0;
+      transform: scale(0.92) translateY(0);
+      opacity: 0.55;
+    }
+
+    .fractal-browser__ghost--2 {
+      top: 18px;
+      transform: scale(0.82) translateY(0);
+      opacity: 0.3;
+    }
+
+    .fractal-browser__ghost span {
+      display: block;
+      padding: 18px;
+      color: rgba(197, 255, 111, 0.66);
+    }
+
+    .void-deck__proof {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .void-proof-card {
+      display: grid;
+      gap: 8px;
+      min-height: 118px;
+      padding: 18px 20px;
+      border-radius: 24px;
+    }
+
+    .void-proof-card span {
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .void-proof-card strong {
+      color: var(--text);
+      font-size: 1rem;
+      line-height: 1.3;
+      letter-spacing: -0.03em;
+    }
+
+    .void-panel {
+      border-radius: 26px;
+      transition: border-color 220ms ease, box-shadow 220ms ease, transform 220ms ease;
+    }
+
+    .void-panel summary {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 18px 22px;
+      cursor: pointer;
+      list-style: none;
+      transition: transform 220ms ease, filter 220ms ease;
+    }
+
+    .void-panel summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .void-panel summary span {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      border: 1px solid var(--line-strong);
+      background: rgba(197, 255, 111, 0.12);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.8rem;
+    }
+
+    .void-panel summary strong {
+      color: var(--text);
+      font-size: 1.1rem;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+    }
+
+    .void-panel summary small {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      text-align: right;
+    }
+
+    .void-panel[open] {
+      border-color: var(--line-strong);
+      box-shadow:
+        0 0 0 1px rgba(197, 255, 111, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 24px 80px rgba(0, 0, 0, 0.42),
+        0 0 54px rgba(95, 242, 255, 0.12);
+    }
+
+    .void-panel[open] summary {
+      transform: scale(0.995);
+      filter: saturate(1.08);
+    }
+
+    .void-panel__body {
+      display: grid;
+      gap: 18px;
+      padding: 0 22px 22px;
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    .void-panel[open] .void-panel__body {
+      animation: voidChamberReveal 280ms cubic-bezier(0.18, 0.8, 0.22, 1) both;
+    }
+
+    .void-panel__body--flush {
+      padding: 0;
+    }
+
+    .void-panel__body--flush > .app-iteration {
+      padding: 0;
+    }
+
+    .void-panel__body--flush > .app-iteration > .section-head {
+      display: none;
+    }
+
+    .void-panel__grid {
+      margin-top: 4px;
+    }
+
+    .legacy-stack {
+      display: none;
+    }
+
+    .swarm100-stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .swarm100-stat {
+      display: grid;
+      gap: 6px;
+      padding: 16px 18px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .swarm100-stat strong,
+    .swarm100-stat span {
+      font-family: var(--mono);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    .swarm100-stat strong {
+      color: var(--text);
+      font-size: 0.8rem;
+    }
+
+    .swarm100-stat span {
+      color: var(--accent);
+      font-size: 0.62rem;
+    }
+
+    .swarm100-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+      gap: 18px;
+    }
+
+    .swarm100-board,
+    .swarm100-squadrons {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: 22px;
+      background:
+        radial-gradient(circle at top left, rgba(75, 243, 255, 0.1), transparent 18rem),
+        radial-gradient(circle at top right, rgba(255, 79, 127, 0.1), transparent 18rem),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)),
+        var(--panel);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 24px 80px rgba(0, 0, 0, 0.42),
+        0 0 46px rgba(95, 242, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .swarm100-board::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.02) 42%, rgba(255, 255, 255, 0.12) 50%, transparent 58%),
+        linear-gradient(180deg, transparent, rgba(95, 242, 255, 0.14), transparent);
+      mix-blend-mode: screen;
+      pointer-events: none;
+      animation: swarmScan 10s linear infinite;
+    }
+
+    .swarm100-board__grid {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .swarm100-cell {
+      display: grid;
+      place-items: center;
+      min-height: 42px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+      animation: swarmCellPulse 2.8s ease-in-out infinite;
+      animation-delay: var(--swarm-delay);
+    }
+
+    .swarm100-cell--scout {
+      color: #d5ff8b;
+      background: rgba(197, 255, 111, 0.12);
+      box-shadow: 0 0 24px rgba(197, 255, 111, 0.14);
+    }
+
+    .swarm100-cell--mutate {
+      color: #aaf7ff;
+      background: rgba(75, 243, 255, 0.12);
+      box-shadow: 0 0 24px rgba(75, 243, 255, 0.14);
+    }
+
+    .swarm100-cell--verify {
+      color: #ffd992;
+      background: rgba(255, 210, 108, 0.12);
+      box-shadow: 0 0 24px rgba(255, 210, 108, 0.14);
+    }
+
+    .swarm100-cell--promote {
+      color: #ffafc5;
+      background: rgba(255, 79, 127, 0.12);
+      box-shadow: 0 0 24px rgba(255, 79, 127, 0.14);
+    }
+
+    .swarm100-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 16px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .swarm100-legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .swarm100-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      box-shadow: 0 0 14px currentColor;
+    }
+
+    .swarm100-dot--scout {
+      color: #c5ff6f;
+      background: currentColor;
+    }
+
+    .swarm100-dot--mutate {
+      color: #4bf3ff;
+      background: currentColor;
+    }
+
+    .swarm100-dot--verify {
+      color: #ffd26c;
+      background: currentColor;
+    }
+
+    .swarm100-dot--promote {
+      color: #ff4f7f;
+      background: currentColor;
+    }
+
+    .swarm100-squadrons__grid {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .swarm100-squad {
+      display: grid;
+      gap: 8px;
+      padding: 16px 18px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .swarm100-squad__head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .swarm100-squad__head strong,
+    .swarm100-squad__head span {
+      font-family: var(--mono);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .swarm100-squad__head strong {
+      color: var(--text);
+      font-size: 0.78rem;
+    }
+
+    .swarm100-squad__head span {
+      color: var(--accent);
+      font-size: 0.64rem;
+    }
+
+    .swarm100-squad p {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+
+    .hero__metrics div,
+    .panel-proof,
+    .rail-card,
+    .feature-card,
+    .comparison-card,
+    .terminal-shell,
+    .signal-card,
+    .proof-card,
+    .video-shell {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      backdrop-filter: blur(16px);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 24px 80px rgba(0, 0, 0, 0.42),
+        0 0 46px rgba(95, 242, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero__metrics div {
+      padding: 18px;
+      border-radius: 22px;
+    }
+
+    .hero__metrics strong {
+      display: block;
+      font-size: 1rem;
+    }
+
+    .hero__metrics span {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .hero__panel,
+    .hero__rail {
+      display: grid;
+      gap: 18px;
+    }
+
+    .panel-proof,
+    .rail-card {
+      padding: 22px;
+      border-radius: 28px;
+    }
+
+    .panel-proof__header,
+    .rail-card__kicker,
+    .comparison-card__label,
+    .terminal-shell__label,
+    .signal-card__dot {
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--accent);
+    }
+
+    .panel-proof__header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .panel-proof ol {
+      list-style: none;
+      display: grid;
+      gap: 14px;
+      counter-reset: proof-steps;
+    }
+
+    .panel-proof li {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px 14px;
+      align-items: start;
+    }
+
+    .panel-proof li::before {
+      counter-increment: proof-steps;
+      content: '0' counter(proof-steps);
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      margin-top: 2px;
+      border-radius: 50%;
+      background: rgba(197, 255, 111, 0.12);
+      border: 1px solid var(--line-strong);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+    }
+
+    .panel-proof li strong {
+      display: block;
+      font-size: 1rem;
+    }
+
+    .panel-proof li span {
+      color: var(--muted);
+      font-size: 0.96rem;
+    }
+
+    .proof-strip,
+    .docs-grid,
+    .quickstart-grid,
+    .route-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .proof-strip {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      padding: 0 24px 24px;
+    }
+
+    .proof-card,
+    .feature-card {
+      padding: 24px;
+      border-radius: 24px;
+    }
+
+    .route-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .route-card,
+    .trust-card {
+      display: grid;
+      gap: 14px;
+      padding: 26px;
+      border-radius: 28px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)),
+        var(--panel);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 24px 80px rgba(0, 0, 0, 0.42),
+        0 0 46px rgba(95, 242, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+    }
+
+    .panel-proof::before,
+    .rail-card::before,
+    .feature-card::before,
+    .comparison-card::before,
+    .terminal-shell::before,
+    .signal-card::before,
+    .proof-card::before,
+    .video-shell::before,
+    .route-card::before,
+    .trust-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.02) 42%, rgba(255, 255, 255, 0.12) 50%, transparent 58%),
+        repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px);
+      mix-blend-mode: screen;
+      opacity: 0.5;
+      pointer-events: none;
+      animation: retroSweep 12s linear infinite;
+    }
+
+    .route-card:hover,
+    .trust-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--line-strong);
+      background:
+        linear-gradient(180deg, rgba(197, 255, 111, 0.08), rgba(255, 255, 255, 0)),
+        var(--panel);
+    }
+
+    .route-card__kicker,
+    .trust-card span {
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .route-card h3,
+    .trust-card h3 {
+      font-size: 1.35rem;
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+    }
+
+    .route-card p,
+    .trust-card p {
+      color: var(--muted);
+      display: none;
+    }
+
+    .route-card__foot {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 8px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .route-card__foot strong {
+      color: var(--text);
+      font-size: 0.96rem;
+    }
+
+    .route-card__foot span {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .proof-card h2,
+    .section-head h2,
+    .split__copy h2,
+    .feature-card h3 {
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      background: linear-gradient(180deg, #ffffff 0%, #d5ff8b 34%, #5ff2ff 68%, #ff89b0 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow:
+        0 0 28px rgba(95, 242, 255, 0.12),
+        0 0 24px rgba(255, 137, 176, 0.12);
+    }
+
+    .proof-card h2,
+    .feature-card h3 {
+      font-size: 1.25rem;
+      margin-bottom: 12px;
+    }
+
+    .proof-card p,
+    .feature-card p {
+      color: var(--muted);
+      display: none;
+    }
+
+    .feature-card span {
+      display: inline-block;
+      margin-bottom: 14px;
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.74rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .section {
+      padding: 64px 24px;
+    }
+
+    .section-grid--top {
+      margin-top: 24px;
+    }
+
+    .section-head {
+      max-width: 46rem;
+      margin-bottom: 24px;
+    }
+
+    .section-head h2,
+    .split__copy h2 {
+      margin-top: 16px;
+      font-size: clamp(2rem, 4vw, 3.35rem);
+      line-height: 1;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .split--wide {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    }
+
+    .bullet-list {
+      margin-top: 20px;
+      list-style: none;
+      display: none;
+      gap: 12px;
+    }
+
+    .bullet-list li {
+      padding-left: 18px;
+      position: relative;
+      color: var(--muted);
+    }
+
+    .bullet-list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.72em;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 18px rgba(197, 255, 111, 0.4);
+    }
+
+    .comparison-card {
+      padding: 22px;
+      border-radius: 30px;
+      overflow: auto;
+    }
+
+    .guay-panel {
+      display: grid;
+      gap: 18px;
+      align-content: start;
+      background:
+        radial-gradient(circle at top right, rgba(197, 255, 111, 0.08), transparent 18rem),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)),
+        var(--panel);
+    }
+
+    .guay-stack {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+      gap: 18px;
+    }
+
+    .guay-intro {
+      display: grid;
+      gap: 16px;
+      padding: 24px 26px;
+      border-radius: 28px;
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at top left, rgba(95, 242, 255, 0.08), transparent 18rem),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0)),
+        rgba(255, 255, 255, 0.02);
+    }
+
+    .guay-intro h3 {
+      font-size: clamp(1.6rem, 3vw, 2.3rem);
+      line-height: 1.02;
+      letter-spacing: -0.05em;
+      color: var(--text);
+    }
+
+    .guay-intro p {
+      max-width: 62ch;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .guay-principles {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .guay-principle {
+      min-height: 82px;
+      display: flex;
+      align-items: end;
+      padding: 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .guay-principle strong {
+      color: var(--text);
+      font-size: 1rem;
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+    }
+
+    .guay-quote {
+      padding: 20px 22px;
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      font-size: 1.16rem;
+      line-height: 1.5;
+      letter-spacing: -0.02em;
+    }
+
+    .guay-panel__text {
+      color: var(--muted);
+      font-size: 1rem;
+      display: block;
+    }
+
+    .palette20-panel {
+      background:
+        radial-gradient(circle at top left, rgba(75, 243, 255, 0.12), transparent 18rem),
+        radial-gradient(circle at top right, rgba(255, 79, 127, 0.12), transparent 16rem),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)),
+        var(--panel);
+    }
+
+    .palette20-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .palette20-agent {
+      display: grid;
+      gap: 6px;
+      min-height: 108px;
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid color-mix(in srgb, var(--palette-agent) 36%, rgba(255, 255, 255, 0.12));
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--palette-agent) 18%, rgba(255, 255, 255, 0)) 0%, rgba(255, 255, 255, 0.02) 100%),
+        rgba(8, 17, 13, 0.72);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+    }
+
+    .palette20-agent span,
+    .palette20-agent small {
+      font-family: var(--mono);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .palette20-agent span {
+      color: var(--palette-agent);
+      font-size: 0.7rem;
+    }
+
+    .palette20-agent strong {
+      color: var(--text);
+      font-size: 0.96rem;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+    }
+
+    .palette20-agent small {
+      color: var(--muted);
+      font-size: 0.68rem;
+    }
+
+    .trust-surface {
+      align-items: stretch;
+    }
+
+    .trust-flow,
+    .trust-surface__grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .trust-flow {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 26px;
+    }
+
+    .trust-flow__node {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 18px 20px;
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .trust-flow__node span {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 auto;
+      border-radius: 12px;
+      background: rgba(197, 255, 111, 0.12);
+      border: 1px solid var(--line-strong);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.8rem;
+    }
+
+    .trust-flow__node p {
+      color: var(--text);
+      font-size: 0.96rem;
+    }
+
+    .trust-surface__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 560px;
+      margin-top: 14px;
+    }
+
+    th,
+    td {
+      padding: 14px 12px;
+      border-top: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--text);
+      font-size: 0.88rem;
+    }
+
+    td {
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .quickstart-grid {
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+    }
+
+    .terminal-shell {
+      padding: 18px;
+      border-radius: 30px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)),
+        #09110d;
+    }
+
+    .terminal-shell pre {
+      overflow-x: auto;
+      font-size: 0.92rem;
+      color: #dff8c7;
+      line-height: 1.8;
+    }
+
+    .terminal-shell__label {
+      margin-bottom: 14px;
+    }
+
+    .terminal-shell--compact pre {
+      font-size: 0.84rem;
+    }
+
+    .signal-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .signal-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 20px;
+      border-radius: 22px;
+    }
+
+    .signal-card__dot {
+      display: grid;
+      place-items: center;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 18px rgba(197, 255, 111, 0.5);
+    }
+
+    .signal-card p {
+      color: var(--text);
+      font-size: 0.98rem;
+    }
+
+    .docs-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .hero--docs .docs-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rail-card h2 {
+      margin-top: 12px;
+      font-size: 1.3rem;
+      letter-spacing: -0.04em;
+    }
+
+    .rail-card p {
+      margin-top: 10px;
+      color: var(--muted);
+      display: none;
+    }
+
+    .video-shell {
+      border-radius: 30px;
+      overflow: hidden;
+      padding: 14px;
+      background:
+        radial-gradient(circle at top left, rgba(75, 243, 255, 0.12), transparent 18rem),
+        radial-gradient(circle at top right, rgba(255, 91, 134, 0.14), transparent 18rem),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)),
+        var(--panel);
+    }
+
+    .video-shell::after {
+      content: '';
+      position: absolute;
+      inset: auto -20% -35% 10%;
+      height: 240px;
+      background: radial-gradient(circle, rgba(75, 243, 255, 0.22), transparent 62%);
+      filter: blur(24px);
+      pointer-events: none;
+      animation: videoAura 8s ease-in-out infinite alternate;
+    }
+
+    .video-shell__head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 10px 10px 16px;
+    }
+
+    .video-shell__signal {
+      display: grid;
+      gap: 10px;
+      min-width: 180px;
+    }
+
+    .video-shell__live {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .video-shell__live i {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #ff4f7f;
+      box-shadow: 0 0 16px rgba(255, 79, 127, 0.45);
+      animation: signalPulse 1.4s ease-in-out infinite;
+    }
+
+    .video-shell__meter {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 6px;
+      height: 34px;
+      align-items: end;
+    }
+
+    .video-shell__meter span {
+      display: block;
+      height: calc(100% * var(--meter-scale));
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(95, 242, 255, 0.95), rgba(255, 79, 127, 0.42));
+      box-shadow: 0 0 18px rgba(95, 242, 255, 0.18);
+      transform-origin: center bottom;
+      animation: meterBounce 1.3s ease-in-out infinite;
+      animation-delay: var(--meter-delay);
+    }
+
+    .video-shell__kicker {
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.74rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .video-shell__head p {
+      display: none;
+    }
+
+    .video-shell__action {
+      flex: 0 0 auto;
+    }
+
+    .demo-video {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 22px;
+      background: #000;
+      cursor: zoom-in;
+    }
+
+    .site-footer {
+      padding: 16px 0 28px;
+    }
+
+    .site-footer__copy {
+      color: var(--muted);
+    }
+
+    .site-footer__links {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      color: var(--muted);
+    }
+
+    .site-footer__links a:hover {
+      color: var(--text);
+    }
+
+    @keyframes heroHalo {
+      0% {
+        opacity: 0;
+        transform: translate3d(calc(var(--kx) * 12px), calc(var(--ky) * 12px), 0) scale(0.88);
+      }
+      18% {
+        opacity: 0.92;
+        transform: translate3d(calc(var(--kx) * 24px), calc(var(--ky) * 22px), 0) scale(1.05);
+      }
+      42% {
+        opacity: 0.68;
+        transform: translate3d(calc(var(--kx) * 18px), calc(var(--ky) * 18px), 0) scale(0.98);
+      }
+      100% {
+        opacity: 0.82;
+        transform: translate3d(calc(var(--kx) * 28px), calc(var(--ky) * 24px), 0) scale(1.02);
+      }
+    }
+
+    @keyframes heroPortal {
+      0% {
+        transform: translate3d(0, -14px, 0) scale(0.82);
+        opacity: 0;
+      }
+      20% {
+        transform: translate3d(0, 8px, 0) scale(1.06);
+        opacity: 0.9;
+      }
+      46% {
+        transform: translate3d(0, 0, 0) scale(0.96);
+        opacity: 0.72;
+      }
+      100% {
+        transform: translate3d(0, 18px, 0) scale(1.02);
+        opacity: 0.86;
+      }
+    }
+
+    @keyframes signalBand {
+      0%,
+      8% {
+        transform: translateX(0);
+      }
+      34%,
+      42% {
+        transform: translateX(-18%);
+      }
+      74%,
+      82%,
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+
+    @keyframes signalPulse {
+      0%,
+      100% {
+        transform: scale(0.88);
+        opacity: 0.7;
+      }
+      50% {
+        transform: scale(1.15);
+        opacity: 1;
+      }
+    }
+
+    @keyframes retroSweep {
+      0% {
+        transform: translateX(-32%);
+      }
+      100% {
+        transform: translateX(132%);
+      }
+    }
+
+    @keyframes swarmScan {
+      0% {
+        transform: translate3d(-14%, -8%, 0);
+        opacity: 0.35;
+      }
+      50% {
+        opacity: 0.8;
+      }
+      100% {
+        transform: translate3d(14%, 10%, 0);
+        opacity: 0.35;
+      }
+    }
+
+    @keyframes swarmCellPulse {
+      0%,
+      100% {
+        transform: scale(0.94);
+        opacity: 0.72;
+      }
+      50% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes meterBounce {
+      0%,
+      100% {
+        transform: scaleY(0.72);
+        opacity: 0.78;
+      }
+      50% {
+        transform: scaleY(1.08);
+        opacity: 1;
+      }
+    }
+
+    @keyframes videoAura {
+      0% {
+        opacity: 0.35;
+        transform: translate3d(-2%, 0, 0) scale(0.96);
+      }
+      100% {
+        opacity: 0.9;
+        transform: translate3d(3%, -4%, 0) scale(1.08);
+      }
+    }
+
+    @keyframes voidChamberReveal {
+      0% {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1080px) {
+      .hero,
+      .hero--docs,
+      .split,
+      .split--wide,
+      .void-deck__proof,
+      .quickstart-grid,
+      .proof-strip,
+      .docs-grid,
+      .guay-stack,
+      .route-grid,
+      .trust-flow,
+      .trust-surface__grid {
+        grid-template-columns: 1fr;
+      }
+
+      .fractal-browser__bar {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+      }
+
+      .fractal-browser__tabs {
+        display: none;
+      }
+
+      .fractal-browser__grid,
+      .fractal-browser__grid--mini,
+      .swarm100-stats,
+      .palette20-grid,
+      .guay-principles {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .swarm100-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .fractal-browser__nested {
+        width: 100%;
+        margin-left: 0;
+        transform: none;
+      }
+
+      .hero {
+        padding-top: 72px;
+      }
+
+      .hero__title {
+        max-width: none;
+      }
+
+      .hero__metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .void-deck__intro {
+        flex-direction: column;
+        align-items: start;
+      }
+
+      .void-panel summary {
+        grid-template-columns: auto 1fr;
+      }
+
+      .void-panel summary small {
+        grid-column: 2;
+        text-align: left;
+      }
+
+      .signal-band__track {
+        animation-duration: 30s;
+      }
+
+      .video-shell__head {
+        flex-direction: column;
+        align-items: start;
+      }
+
+      .video-shell__signal {
+        width: 100%;
+      }
+
+      .site-header__inner,
+      .site-footer__inner {
+        align-items: flex-start;
+        flex-direction: column;
+        padding-top: 16px;
+        padding-bottom: 16px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .site-nav {
+        gap: 14px;
+      }
+
+      .site-nav__link {
+        font-size: 0.9rem;
+      }
+
+      .route-card__foot {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .guay-principles {
+        grid-template-columns: 1fr;
+      }
+
+      .hero,
+      .section,
+      .void-deck,
+      .proof-strip {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .fractal-browser {
+        border-radius: 26px;
+      }
+
+      .fractal-browser__bar {
+        grid-template-columns: auto minmax(0, 1fr);
+        padding: 14px;
+      }
+
+      .fractal-browser__bar small {
+        grid-column: 1 / -1;
+        text-align: left;
+      }
+
+      .fractal-browser__viewport {
+        padding: 16px;
+      }
+
+      .fractal-browser__hero {
+        padding: 18px;
+      }
+
+      .fractal-browser__grid,
+      .fractal-browser__grid--mini,
+      .swarm100-stats,
+      .palette20-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .swarm100-board__grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+      }
+
+      .fractal-browser__nested {
+        gap: 0;
+      }
+
+      .fractal-browser__ghosts {
+        display: none;
+      }
+
+      .void-panel summary {
+        padding: 16px 18px;
+      }
+
+      .void-panel summary small {
+        display: none;
+      }
+
+      table {
+        min-width: 0;
+        margin-top: 4px;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tbody,
+      tr {
+        display: grid;
+      }
+
+      tr {
+        gap: 10px;
+        padding: 14px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      td {
+        display: grid;
+        padding: 0;
+        border-top: 0;
+        gap: 4px;
+      }
+
+      td::before {
+        content: attr(data-label);
+        color: var(--accent);
+        font-family: var(--mono);
+        font-size: 0.64rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      .w {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero::before,
+      .hero::after,
+      .signal-band__track,
+      .signal-band__item::before,
+      .swarm100-board::before,
+      .swarm100-cell,
+      .video-shell::after,
+      .video-shell__live i,
+      .video-shell__meter span,
+      .void-deck__intro::before,
+      .void-panel::before,
+      .void-proof-card::before,
+      .panel-proof::before,
+      .rail-card::before,
+      .feature-card::before,
+      .comparison-card::before,
+      .terminal-shell::before,
+      .signal-card::before,
+      .proof-card::before,
+      .video-shell::before,
+      .route-card::before,
+      .trust-card::before {
+        animation: none;
+      }
+
+      .hero__copy[data-kinetic-plane='copy'],
+      .hero__metrics[data-kinetic-plane='metrics'],
+      .hero__signalband[data-kinetic-plane='band'],
+      .hero__panel[data-kinetic-plane='panel'] {
+        transform: none;
+      }
+    }
+  </style>
+</Layout>

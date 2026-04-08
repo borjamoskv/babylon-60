@@ -75,6 +75,9 @@ class NetworkVoidOracle:
                     content=content,
                     fact_type="bridge",
                     meta={
+                        "bridge_kind": "system",
+                        "bridge_provider": "sidecar",
+                        "source_subtype": "network_void",
                         "oracle": "network_void_v1",
                         "state": "connected",
                         "void_duration_sec": void_duration,
@@ -86,6 +89,9 @@ class NetworkVoidOracle:
                     content=content,
                     fact_type="bridge",
                     meta={
+                        "bridge_kind": "system",
+                        "bridge_provider": "sidecar",
+                        "source_subtype": "network_void",
                         "oracle": "network_void_v1",
                         "state": "connected",
                         "void_duration_sec": void_duration,

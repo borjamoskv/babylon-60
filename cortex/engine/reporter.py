@@ -18,6 +18,8 @@ from typing import Any
 
 import aiosqlite
 
+from cortex.crypto import load_json_dict
+from cortex.core.paths import CORTEX_DB
 from cortex.database.core import connect_async_ctx
 
 logger = logging.getLogger("cortex.reporter")
@@ -46,16 +48,15 @@ class SovereignReporter:
     async def _fetch_roi_history(self, conn: aiosqlite.Connection) -> list[dict[str, Any]]:
         """Fetch the latest ROI records from the facts table."""
         cursor = await conn.execute(
-            "SELECT content, metadata FROM facts WHERE fact_type='knowledge' "
+            "SELECT tenant_id, metadata FROM facts WHERE fact_type='knowledge' "
             "AND source='chronos-roi' ORDER BY id DESC LIMIT 5"
         )
         roi_history = []
         rows = await cursor.fetchall()
         for row in rows:
-            try:
-                roi_history.append(json.loads(row[1]))
-            except (json.JSONDecodeError, TypeError):
-                continue
+            meta = load_json_dict(row[1], tenant_id=row[0] or "default")
+            if meta:
+                roi_history.append(meta)
         return roi_history
 
     async def collect_metrics(self) -> ManifoldStatus:
@@ -180,7 +181,7 @@ class SovereignReporter:
 
 
 if __name__ == "__main__":
-    db = os.path.expanduser("~/.cortex/cortex.db")
+    db = str(CORTEX_DB)
     if not os.path.exists(db):
         sys.stderr.write(f"Error: Database not found at {db}\n")
         sys.exit(1)

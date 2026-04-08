@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-from dataclasses import dataclass
 from typing import Any
+from pydantic import BaseModel, Field, ConfigDict
 
 import aiosqlite
 
@@ -37,8 +37,7 @@ MAX_DERIVATIONS_PER_CYCLE = 50
 DERIVED_CONFIDENCE = "C3"
 
 
-@dataclass(frozen=True)
-class InferenceRule:
+class InferenceRule(BaseModel):
     """A rule that can derive new facts from existing ones.
 
     Attributes:
@@ -47,30 +46,33 @@ class InferenceRule:
         condition_sql: SQL WHERE clause that identifies matching fact pairs.
             Must reference `f1` and `f2` as the two fact aliases.
         conclusion_template: Python format string for the derived content.
+            Must evaluate to valid JSON under Zero-Rhetoric mandate.
             Available variables: {f1_content}, {f2_content}, {f1_id}, {f2_id},
             {f1_project}, {f2_project}.
-        min_source_confidence: Minimum confidence of source facts (index in C5..C1).
+        min_source_confidence: Minimum confidence of source facts.
         derived_type: fact_type for the derived fact.
     """
+
+    model_config = ConfigDict(frozen=True)
 
     name: str
     description: str
     condition_sql: str
     conclusion_template: str
-    min_source_confidence: str = "C4"
-    derived_type: str = "knowledge"
+    min_source_confidence: str = Field(default="C4")
+    derived_type: str = Field(default="knowledge")
 
 
-@dataclass
-class Derivation:
-    """A single derived fact with its provenance."""
+class Derivation(BaseModel):
+    """A single derived fact with its provenance. Zero-Rhetoric strict schema."""
+    model_config = ConfigDict(frozen=True)
 
-    content: str
+    content: str = Field(..., description="Strict JSON structural content. No conversational padding.")
     project: str
     source_fact_ids: list[int]
     rule_name: str
-    confidence: str = DERIVED_CONFIDENCE
-    fact_type: str = "knowledge"
+    confidence: str = Field(default=DERIVED_CONFIDENCE)
+    fact_type: str = Field(default="knowledge")
 
 
 # ── Built-in Rules ────────────────────────────────────────────────────
@@ -88,8 +90,9 @@ RULE_SUPERSESSION = InferenceRule(
         "AND f1.valid_until IS NULL"
     ),
     conclusion_template=(
-        "[SUPERSESSION] Fact #{f2_id} may be superseded by #{f1_id} "
-        "in project {f1_project}. Review for deprecation."
+        '{{"event": "SUPERSESSION", "old_fact_id": {f2_id}, '
+        '"new_fact_id": {f1_id}, "project": "{f1_project}", '
+        '"action": "review_for_deprecation"}}'
     ),
     derived_type="analysis",
 )
@@ -104,8 +107,9 @@ RULE_ORPHAN_DETECTION = InferenceRule(
         "AND julianday('now') - julianday(f1.created_at) > 30"
     ),
     conclusion_template=(
-        "[ORPHAN] Fact #{f1_id} in project {f1_project} has no causal edges "
-        "and is >30 days old. Candidate for review or archival."
+        '{{"event": "ORPHAN_DETECTED", "fact_id": {f1_id}, '
+        '"project": "{f1_project}", '
+        '"status": "candidate_for_archival", "age_days_gt": 30}}'
     ),
     derived_type="analysis",
 )
@@ -121,8 +125,8 @@ RULE_DUPLICATE_CONTENT = InferenceRule(
         "AND f1.content = f2.content"
     ),
     conclusion_template=(
-        "[DUPLICATE] Facts #{f1_id} and #{f2_id} have identical content "
-        "in project {f1_project}. Consider consolidation."
+        '{{"event": "DUPLICATE_CONTENT", "fact_ids": [{f1_id}, {f2_id}], '
+        '"project": "{f1_project}", "action": "consolidate"}}'
     ),
     derived_type="analysis",
 )

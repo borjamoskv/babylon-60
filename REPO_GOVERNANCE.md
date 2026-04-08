@@ -1,38 +1,65 @@
-# REPO_GOVERNANCE.md — CORTEX-Persist
+# Repository Governance
 
-> "Trust is not assumed; it is computed, persisted, and verified."
+This document explains how CORTEX Persist is governed at the repository level: who owns critical surfaces, how changes are reviewed, and which operating rules matter most for maintainability and trust.
 
-## 1. Overview
+## Governance Goals
 
-CORTEX-Persist es un sustrato de memoria inmutable y auditivo para sistemas multi-agente soberanos. La gobernanza de este repositorio asegura que todas las mutaciones al estado del conocimiento sigan protocolos deterministas y resistentes a la manipulación.
+Repository governance exists to protect four things:
 
-## 2. The 10 Seals Protocol (AX-033)
+- **Trust continuity:** cryptographic and audit surfaces must remain reviewable and hard to accidentally weaken
+- **Operational clarity:** contributors should know where to file issues, how releases happen, and which documents are authoritative
+- **Change safety:** high-risk areas should receive proportionate review and rollback planning
+- **Buyer confidence:** outside evaluators should be able to distinguish mature process from raw technical ambition
 
-Todo commit y toda operación de escritura en producción debe superar el pipeline de seguridad "10 Seals":
+## Source Documents
 
-1.  **Ghost Radar**: Sin marcadores de conflicto ni código muerto.
-2.  **Test Suite**: Cobertura mínima del 80% (Core).
-3.  **Git State**: Alineación estricta con el DAG de la rama `main`.
-4.  **Quality Gate**: Linting limpio (Ruff/E,F,W,I,UP,B,ASYNC).
-5.  **Neural Connectivity**: Verificación de tokens y backends de inferencia.
-6.  **Fail-Closed Guards**: Los guards de contradicción y salud bloquean el write-path ante anomalías.
-7.  **Tamper Evidence**: Integridad hash-chain verificable en `entity_events`.
-8.  **Tenant Isolation**: Aislamiento estricto de datos por `tenant_id`.
-9.  **Exergy Verification**: Los hechos persistidos deben tener un yield score positivo.
-10. **Sovereign Audit**: Seguimiento completo de la toma de decisiones vía `transactions`.
+The governance model for this repository is distributed across these files:
 
-## 3. Contribution Guidelines
+- [AGENTS.md](AGENTS.md) for operating constraints on autonomous contributors
+- [CONTRIBUTING.md](CONTRIBUTING.md) for contributor workflow
+- [SECURITY.md](SECURITY.md) for vulnerability intake and security posture
+- [SUPPORT.md](SUPPORT.md) for support expectations
+- [VERSION_SUPPORT.md](VERSION_SUPPORT.md) for release-line support expectations
+- [RELEASE_PROCESS.md](RELEASE_PROCESS.md) for packaging and release flow
+- [.github/CODEOWNERS](.github/CODEOWNERS) for review ownership
 
-- **Zero-Rhetoric Mandate (Rule MOSKV)**: El código debe ser industrial, sin prosa decorativa.
-- **Async-First**: Todas las operaciones IO deben ser no bloqueantes.
-- **Type Safety**: Las funciones públicas deben usar type hints (`pyright` basic mode).
-- **Causal Lineage**: Las mutaciones de hechos deben incluir el `signer` y el `parent_decision_id` cuando sea posible.
+## Ownership Model
 
-## 4. Maintenance & Releases
+Today the repository is maintained under a primary-maintainer model. That means decision velocity is high, but key-person concentration is also high and should be acknowledged plainly in any diligence process.
 
-- **Versioning**: vX.Y.Zb (Beta) — Las versiones se etiquetan mediante git tags.
-- **Mantenimiento**: Los dæmons de "Decalcify" y "Epistemic Breaker" se ejecutan en segundo plano para evitar el estancamiento cognitivo.
+For current ownership and stewardship expectations, see [MAINTAINERS.md](MAINTAINERS.md).
 
----
+## Review Expectations
 
-📝 **Governance Custodian**: borjamoskv · **Framework**: C5-Dynamic · **License**: Apache-2.0
+Changes are expected to scale in scrutiny with their blast radius.
+
+- **Documentation and marketing copy:** lightweight review is acceptable
+- **Public API and CLI behavior:** require behavior review and documentation alignment
+- **Security, trust, ledger, guard, memory, or migration changes:** require explicit trust-impact review and rollback thinking
+- **Release and packaging changes:** require supply-chain awareness and versioning discipline
+
+The pull request template in [.github/pull_request_template.md](.github/pull_request_template.md) is part of the governance system, not a suggestion.
+
+## Trust-Critical Rules
+
+Every governance rule ultimately exists to protect the write path and trust boundary.
+
+1. Do not weaken guards, tenant isolation, or ledger continuity without documenting why.
+2. Do not silently relax validation in ways that turn hard failures into permissive writes.
+3. Do not treat generated output as trusted state.
+4. Do not ship trust-surface changes without a rollback path.
+5. Do not represent roadmap or beta capabilities as contractual enterprise commitments.
+
+## Release And Support Posture
+
+CORTEX Persist is currently maintained on a beta release line. Support and release expectations are documented separately so buyers and contributors do not have to infer them from commit history.
+
+- [VERSION_SUPPORT.md](VERSION_SUPPORT.md)
+- [RELEASE_PROCESS.md](RELEASE_PROCESS.md)
+- [SUPPORT.md](SUPPORT.md)
+
+## Governance Custodian
+
+- **Primary maintainer:** borjamoskv
+- **License:** Apache-2.0
+- **Repository model:** open-source, maintainer-led, trust-first

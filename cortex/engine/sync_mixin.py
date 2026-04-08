@@ -42,6 +42,15 @@ class SyncMixin:
     def search_sync(self, *args, **kwargs):
         return self._run_sync(self.search(*args, **kwargs))
 
+    def stats_sync(self, *args, **kwargs):
+        return self._run_sync(self.stats(*args, **kwargs))
+
+    def verify_ledger_sync(self, *args, **kwargs):
+        return self._run_sync(self.verify_ledger(*args, **kwargs))
+
+    def deprecate_sync(self, *args, **kwargs):
+        return self._run_sync(self.deprecate(*args, **kwargs))
+
     def hybrid_search_sync(self, *args, **kwargs):
         return self._run_sync(self.search(*args, **kwargs))
 

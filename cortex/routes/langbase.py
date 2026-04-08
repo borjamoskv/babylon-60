@@ -15,18 +15,14 @@ REST endpoints for Langbase integration:
 from __future__ import annotations
 
 import logging
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from cortex.api.deps import get_async_engine
-from cortex.auth import AuthResult, require_permission
+from cortex.auth import require_permission
 from cortex.config import LANGBASE_API_KEY, LANGBASE_BASE_URL
-from cortex.engine import CortexEngine as AsyncCortexEngine
-from cortex.extensions.langbase.client import LangbaseClient, LangbaseError
-from cortex.extensions.langbase.pipe import run_with_cortex_context
-from cortex.extensions.langbase.sync import sync_to_langbase
 
 __all__ = [
     "MemorySearchRequest",
@@ -41,6 +37,11 @@ __all__ = [
 logger = logging.getLogger("cortex.routes.langbase")
 
 router = APIRouter(prefix="/v1/langbase", tags=["langbase"])
+
+if TYPE_CHECKING:
+    from cortex.auth import AuthResult
+    from cortex.engine import CortexEngine as AsyncCortexEngine
+    from cortex.extensions.langbase.client import LangbaseClient
 
 
 # ─── Request / Response Models ───────────────────────────────────────
@@ -77,6 +78,8 @@ class MemorySearchRequest(BaseModel):
 
 def _get_client() -> LangbaseClient:
     """Get a Langbase client, fail if not configured."""
+    from cortex.extensions.langbase.client import LangbaseClient
+
     if not LANGBASE_API_KEY:
         raise HTTPException(
             status_code=503,
@@ -101,6 +104,9 @@ async def langbase_pipe_run(
     """
     client = _get_client()
     try:
+        from cortex.extensions.langbase.client import LangbaseError
+        from cortex.extensions.langbase.pipe import run_with_cortex_context
+
         result = await run_with_cortex_context(
             client=client,
             engine=engine,
@@ -140,6 +146,9 @@ async def langbase_sync(
 
     client = _get_client()
     try:
+        from cortex.extensions.langbase.client import LangbaseError
+        from cortex.extensions.langbase.sync import sync_to_langbase
+
         result = await sync_to_langbase(
             client=client,
             engine=engine,
@@ -169,6 +178,8 @@ async def langbase_memory_search(
     """
     client = _get_client()
     try:
+        from cortex.extensions.langbase.client import LangbaseError
+
         results = await client.retrieve_memory(
             name=req.memory_name,
             query=req.query,

@@ -294,12 +294,28 @@ class TriggerEngine:
                     cooldown_remaining_s=remaining,
                 )
 
-            # FIRE — reset accumulator and record fire time
-            acc.timestamps.clear()
+            # Reserve the trigger fire window so concurrent evaluations do not double-dispatch.
+            previous_last_fired = acc.last_fired
             acc.last_fired = now
 
         # Dispatch actions (outside lock)
         dispatched = await self._dispatch_actions(trigger, signal)
+
+        if trigger.actions and dispatched == 0:
+            with self._lock:
+                self._accumulators[trigger.id].last_fired = previous_last_fired
+            return TriggerResult(
+                trigger_id=trigger.id,
+                trigger_name=trigger.name,
+                priority=trigger.priority,
+                fired=False,
+                actions_dispatched=0,
+                accumulator_count=current_count,
+            )
+
+        with self._lock:
+            self._accumulators[trigger.id].timestamps.clear()
+            self._accumulators[trigger.id].last_fired = now
 
         logger.info(
             "🔥 TRIGGER FIRED [%s] %s (priority=%s, dispatched=%d)",
@@ -348,6 +364,12 @@ class TriggerEngine:
             "signal_event_type": signal.event_type,
             "signal_source": signal.source,
             "signal_id": signal.id,
+            "signal_project": signal.project,
+            "signal_tenant_id": (
+                signal.payload.get("tenant_id", "default")
+                if isinstance(signal.payload, dict)
+                else "default"
+            ),
         }
 
         if action.action_type == ActionType.EMIT_SIGNAL:
@@ -356,6 +378,7 @@ class TriggerEngine:
                 payload={**cfg.get("payload", {}), **ctx},
                 source=cfg.get("source", f"trigger:{trigger.id}"),
                 project=cfg.get("project", signal.project),
+                tenant_id=cfg.get("tenant_id", ctx["signal_tenant_id"]),
             )
 
         elif action.action_type == ActionType.STORE_FACT:
@@ -365,6 +388,7 @@ class TriggerEngine:
                 confidence=cfg.get("confidence", "C4"),
                 source=cfg.get("source", f"trigger:{trigger.id}"),
                 project=cfg.get("project", signal.project or "SYSTEM"),
+                tenant_id=cfg.get("tenant_id", ctx["signal_tenant_id"]),
                 meta={**cfg.get("meta", {}), **ctx},
             )
 

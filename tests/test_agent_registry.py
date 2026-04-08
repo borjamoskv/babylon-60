@@ -5,8 +5,10 @@ import pytest
 from cortex.extensions.agents.registry import (
     AgentDefinition,
     AgentRegistry,
+    AgentRuntimeConfig,
     GuardrailsConfig,
     MemoryConfig,
+    resolve_agent_runtime_config,
 )
 
 
@@ -100,3 +102,31 @@ def test_agent_registry_singleton(temp_definitions_dir):
     assert alpha.name == "ALPHA-1"
 
     assert r1.get("missing") is None
+
+
+def test_resolve_agent_runtime_config_existing_agent(temp_definitions_dir):
+    """Runtime config should expose prompt and tools for known agents."""
+    registry = AgentRegistry()
+    registry.clear()
+    registry.load_all(temp_definitions_dir)
+
+    runtime = resolve_agent_runtime_config("test_alpha")
+
+    assert runtime == AgentRuntimeConfig(
+        system_prompt="You are Alpha.",
+        tools=["search", "filesystem"],
+    )
+
+
+def test_resolve_agent_runtime_config_missing_agent(temp_definitions_dir):
+    """Unknown agents should resolve to an empty runtime config."""
+    registry = AgentRegistry()
+    registry.clear()
+    registry.load_all(temp_definitions_dir)
+
+    assert resolve_agent_runtime_config("missing") == AgentRuntimeConfig()
+
+
+def test_resolve_agent_runtime_config_none_agent():
+    """A missing agent id should return defaults without extra state."""
+    assert resolve_agent_runtime_config(None) == AgentRuntimeConfig()

@@ -14,11 +14,12 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from pathlib import Path
 
+from cortex import config
 from cortex.engine.exergy_optimizer import ExergyOptimizer
 from cortex.engine.shared_bus import SovereignSharedBus
 from cortex.engine.slashing import SlashingPenalty
 from cortex.engine.ultrathink_physics import UltrathinkPhysicsEngine
-from cortex.extensions.signals.sharded_bus import ShardedAsyncSignalBus
+from cortex.extensions.signals.sharded_bus import ShardedDurableSignalBus
 
 logger = logging.getLogger("cortex.engine.swarm_10k")
 
@@ -30,6 +31,26 @@ class NodeMetrics:
     active_children: int
 
 
+class EphemeralCenturionBus:
+    """Lightweight fallback bus for L2 nodes when shared memory is unavailable."""
+
+    def __init__(self) -> None:
+        self._metrics = {"exergy": 1.0, "latency": 0.0, "uncertainty": 0.0}
+
+    async def emit(self, **_: object) -> int:
+        return 1
+
+    def update_metrics(self, exergy: float, latency: float, uncertainty: float = 0.0) -> None:
+        self._metrics = {
+            "exergy": exergy,
+            "latency": latency,
+            "uncertainty": uncertainty,
+        }
+
+    def close(self) -> None:
+        return None
+
+
 class CenturionSuperv:
     """L2 Tactical Node: Handles up to 100 actual agents."""
 
@@ -38,16 +59,33 @@ class CenturionSuperv:
     def __init__(self, centurion_id: str, bus_name: str, tenant_id: str = "default"):
         self.id = centurion_id
         # L2 Tactical Shard: Isolated memory segment for this Centurion
-        self.bus = SovereignSharedBus(name=bus_name, create=True)
+        try:
+            self.bus = SovereignSharedBus(name=bus_name, create=True)
+        except (PermissionError, OSError) as exc:
+            logger.warning(
+                "Centurion shared memory unavailable, falling back to ephemeral bus: %s",
+                exc,
+            )
+            self.bus = EphemeralCenturionBus()
         self.tenant_id = tenant_id
         self.agents: list[str] = []
         self.last_latency_ms = 0.0
         self.metrics = NodeMetrics(exergy=1.0, uncertainty=0.0, active_children=0)
 
+    def reserve_agent_slot(self, agent_id: str) -> bool:
+        """Reserve an agent slot synchronously to avoid dispatch races."""
+        if len(self.agents) >= self.CAPACITY:
+            return False
+
+        self.agents.append(agent_id)
+        self.metrics.active_children = len(self.agents)
+        return True
+
     async def _emit_with_latency(self, **kwargs) -> int:
         start = time.perf_counter()
         res = await self.bus.emit(**kwargs)
         self.last_latency_ms = (time.perf_counter() - start) * 1000
+        self._last_emit_time = time.perf_counter()
 
         # O(1) Bit-Parallel Telemetry update (Ω₀)
         if hasattr(self.bus, "update_metrics"):
@@ -78,11 +116,8 @@ class CenturionSuperv:
         return res
 
     async def deploy_agent(self, agent_id: str) -> bool:
-        if len(self.agents) >= self.CAPACITY:
+        if not self.reserve_agent_slot(agent_id):
             return False
-
-        self.agents.append(agent_id)
-        self.metrics.active_children = len(self.agents)
 
         await self._emit_with_latency(
             event_type="agent:spawn",
@@ -95,18 +130,22 @@ class CenturionSuperv:
 
     async def get_exergy(self) -> float:
         """Crystalline O(1) exergy calculation and header sync."""
+        elapsed_s = time.perf_counter() - getattr(self, "_last_emit_time", time.perf_counter())
+        decayed_latency = max(0.0, self.last_latency_ms - (elapsed_s * 32.0))
+        
         self.metrics.exergy = ExergyOptimizer.calculate_node_exergy(
-            self.metrics, self.last_latency_ms, self.CAPACITY
+            self.metrics, decayed_latency, self.CAPACITY
         )
         # Mirror to SHM for L1/L0 visibility
-        self.bus.update_metrics(self.metrics.exergy, self.last_latency_ms, self.metrics.uncertainty)
+        if hasattr(self.bus, "update_metrics"):
+            self.bus.update_metrics(self.metrics.exergy, decayed_latency, self.metrics.uncertainty)
         return self.metrics.exergy
 
 
 class LegionSupervisor:
     """L1 Domain Node: Manages multiple Centurions within an isolated context."""
 
-    def __init__(self, legion_id: str, bus: ShardedAsyncSignalBus, tenant_id: str = "default"):
+    def __init__(self, legion_id: str, bus: ShardedDurableSignalBus, tenant_id: str = "default"):
         self.id = legion_id
         self.bus = bus
         self.tenant_id = tenant_id
@@ -118,17 +157,26 @@ class LegionSupervisor:
         # Ouroboros O(1) Metric Trackers
         self.total_centurions = 0
         self.total_agents = 0
-        
+
         # Absolute Thermodynamic Diffusion parameters
-        self.queue = asyncio.Queue()
+        queue_maxsize = max(0, config.SWARM_LEGION_QUEUE_MAXSIZE)
+        worker_count = max(1, config.SWARM_LEGION_WORKERS)
+        self.queue = asyncio.Queue(maxsize=queue_maxsize)
         self._is_running = True
-        self._workers = [asyncio.create_task(self._thermal_worker()) for _ in range(50)]
+        self._workers = [asyncio.create_task(self._thermal_worker()) for _ in range(worker_count)]
+        self._dispatch_lock = asyncio.Lock()
 
     async def _thermal_worker(self) -> None:
         """Background Loop (Drain Queue). Only pulls when thermal stability permits."""
         while self._is_running:
-            task = await self.queue.get()
             try:
+                task = await self.queue.get()
+            except asyncio.CancelledError:
+                break
+
+            try:
+                if task is None:
+                    break
                 await self.wait_for_thermal_stability()
                 await self.dispatch(task)
             except asyncio.CancelledError:
@@ -166,10 +214,14 @@ class LegionSupervisor:
 
         return new_cen
 
-    async def wait_for_thermal_stability(self, check_interval: float = 0.01) -> None:
+    async def wait_for_thermal_stability(self) -> None:
         """Closed-Loop Kinetic Control: Event-based (No polling) to recover exergy."""
         if self._overclocked:
             return
+
+        check_interval = max(0.001, float(config.SWARM_THERMAL_CHECK_INTERVAL_S))
+        max_wait_s = max(0.0, float(config.SWARM_THERMAL_MAX_WAIT_S))
+        deadline = time.perf_counter() + max_wait_s
 
         while True:
             if not self.centurions:
@@ -177,10 +229,18 @@ class LegionSupervisor:
 
             # Calcular si la legión base tiene capacidad exergética promedio (O(C))
             # O(1) approximation could be cached, but len is 1-100 operations max.
-            exergies = [c.metrics.exergy for c in self.centurions.values()]
+            exergies = [await c.get_exergy() for c in self.centurions.values()]
             exergy = sum(exergies) / len(exergies)
 
             if ExergyOptimizer.is_thermally_stable(exergy):
+                return
+
+            if time.perf_counter() >= deadline:
+                logger.debug(
+                    "Thermal wait budget exhausted on %s; continuing with exergy %.2f",
+                    self.id,
+                    exergy,
+                )
                 return
 
             # Sleep minimal to cool down (Autonomous Thermal Diffusion)
@@ -188,15 +248,32 @@ class LegionSupervisor:
 
     async def dispatch(self, task: dict) -> None:
         """Dispatch a task down the hierarchy."""
-        cen = await self.ensure_centurion()
-        agent_id = f"ag-{cen.id}-{len(cen.agents)}"
-        await cen.deploy_agent(agent_id)
-        self.total_agents += 1
-        
-        # Azkartu Optimization: Retire full centurion in O(1)
-        if len(cen.agents) >= cen.CAPACITY:
-            if self._available_centurions and self._available_centurions[0] == cen:
-                self._available_centurions.popleft()
+        async with self._dispatch_lock:
+            cen = await self.ensure_centurion()
+            agent_id = f"ag-{cen.id}-{len(cen.agents)}"
+
+            if not cen.reserve_agent_slot(agent_id):
+                if self._available_centurions and self._available_centurions[0] == cen:
+                    self._available_centurions.popleft()
+                cen = await self.ensure_centurion()
+                agent_id = f"ag-{cen.id}-{len(cen.agents)}"
+                if not cen.reserve_agent_slot(agent_id):
+                    raise RuntimeError(f"Failed to reserve agent slot in legion {self.id}")
+
+            self.total_agents += 1
+
+            # Azkartu Optimization: Retire full centurion in O(1)
+            if len(cen.agents) >= cen.CAPACITY:
+                if self._available_centurions and self._available_centurions[0] == cen:
+                    self._available_centurions.popleft()
+
+        await cen._emit_with_latency(
+            event_type="agent:spawn",
+            payload={"agent_id": agent_id, "parent_node": cen.id},
+            source=cen.id,
+            tenant_id=self.tenant_id,
+            routing_key=agent_id,
+        )
 
         await self.bus.emit(
             event_type="task:dispatch",
@@ -213,7 +290,7 @@ class ForensicLegion(LegionSupervisor):
     Forces zero-latency dispatch and bypasses standard exergy gates.
     """
 
-    def __init__(self, legion_id: str, bus: ShardedAsyncSignalBus, tenant_id: str = "default"):
+    def __init__(self, legion_id: str, bus: ShardedDurableSignalBus, tenant_id: str = "default"):
         super().__init__(legion_id, bus, tenant_id)
         self._overclocked = True  # High-agency forensic agents are always hot
 
@@ -229,9 +306,17 @@ class SwarmCommander:
     ):
         self.use_shm = use_shm
         if use_shm:
-            self.bus = SovereignSharedBus(create=True)
+            try:
+                self.bus = SovereignSharedBus(create=True)
+            except (PermissionError, OSError) as exc:
+                logger.warning(
+                    "Shared memory bus unavailable, falling back to sharded bus: %s",
+                    exc,
+                )
+                self.use_shm = False
+                self.bus = ShardedDurableSignalBus(base_dir=bus_path)
         else:
-            self.bus = ShardedAsyncSignalBus(base_dir=bus_path)
+            self.bus = ShardedDurableSignalBus(base_dir=bus_path)
 
         self.tenant_id = tenant_id
         self.legions: dict[str, LegionSupervisor] = {}
@@ -316,22 +401,37 @@ class SwarmCommander:
 
     async def execute_global_dispatch(self, tasks: list[dict], parallel: bool = True) -> None:
         """Route massive workload across the Sharded hierarchy in O(1) using Thermodynamic Pull Model."""
+        await self.execute_global_dispatch_batched(tasks, parallel=parallel)
+
+    async def execute_global_dispatch_batched(
+        self,
+        tasks: list[dict],
+        parallel: bool = True,
+        batch_size: int | None = None,
+    ) -> None:
+        """Route workload in bounded batches to avoid unbounded queue pressure."""
         active_legions = set()
-        
-        # Absolute O(1) Dispatch (Push to Mempool)
-        for t in tasks:
-            domain = t.get("domain", "default")
-            legion = await self.get_or_create_legion(domain)
-            if parallel:
-                legion.queue.put_nowait(t)
-                active_legions.add(legion)
-            else:
-                await legion.dispatch(t)
-                
-        # Wait for workers to consume the Mempool (Diffusion Process)
+        effective_batch_size = (
+            config.SWARM_DISPATCH_BATCH_SIZE if batch_size is None else batch_size
+        )
+        if effective_batch_size <= 0:
+            raise ValueError("batch_size must be greater than zero")
+
+        # Absolute O(1) Dispatch (Push to Mempool) with bounded batches
+        for start in range(0, len(tasks), effective_batch_size):
+            batch = tasks[start : start + effective_batch_size]
+            for t in batch:
+                domain = t.get("domain", "default")
+                legion = await self.get_or_create_legion(domain)
+                if parallel:
+                    await legion.queue.put(t)
+                    active_legions.add(legion)
+                else:
+                    await legion.dispatch(t)
+
+        # Drain once at the end; queue.put() already applies backpressure.
         if parallel:
-            for legion in active_legions:
-                await legion.queue.join()
+            await asyncio.gather(*(legion.queue.join() for legion in active_legions))
 
     async def get_density_report(self) -> dict:
         total_legions = len(self.legions)
@@ -361,15 +461,18 @@ class SwarmCommander:
         # Lifecycle cleanup (Ouroboros Hierarchy Teardown)
         for legion in self.legions.values():
             legion._is_running = False
-            for worker in legion._workers:
-                worker.cancel()
-            
-            # Wait for strict cancellation enforcement
+            # Inject poison-pill sentinels so workers exit cleanly
+            for _ in legion._workers:
+                legion.queue.put_nowait(None)
+
+            # Wait for strict termination
             await asyncio.gather(*legion._workers, return_exceptions=True)
             
             for cen in legion.centurions.values():
                 if hasattr(cen.bus, "close"):
-                    cen.bus.close()
+                    close_result = cen.bus.close()
+                    if asyncio.iscoroutine(close_result):
+                        await close_result
                 if hasattr(cen.bus, "unlink"):
                     cen.bus.unlink()
 

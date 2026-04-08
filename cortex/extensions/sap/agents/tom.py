@@ -13,7 +13,7 @@ from typing import Any
 
 import aiosqlite
 
-from cortex.extensions.signals.bus import AsyncSignalBus
+from cortex.extensions.signals.bus import AsyncDurableSignalBus
 
 logger = logging.getLogger("cortex.extensions.sap.tom")
 
@@ -23,7 +23,7 @@ class TomAgent:
 
     def __init__(self, conn: aiosqlite.Connection) -> None:
         self.conn = conn
-        self.bus = AsyncSignalBus(conn)
+        self.bus = AsyncDurableSignalBus(conn)
 
     async def audit_transactions(self, transactions: list[dict[str, Any]]) -> int:
         """Scan transactions and emit signals for findings.

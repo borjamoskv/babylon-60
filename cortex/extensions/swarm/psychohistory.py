@@ -193,6 +193,8 @@ class PsychohistoryOrchestrator:
             confidence="C5",
             source="swarm:psychohistory",
             meta={
+                "bridge_kind": "system",
+                "bridge_provider": "swarm",
                 "sub_type": "contingency_crystal",
                 "scenario": scenario,
                 "simulated_years": years,

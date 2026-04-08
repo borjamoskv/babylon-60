@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import sqlite3
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
@@ -26,6 +27,8 @@ logger = logging.getLogger("cortex.extensions.sync.github")
 _GH_API = "https://api.github.com"
 _PROJECT = "github-sync"
 _SOURCE = "bridge:github"
+_BRIDGE_KIND_EXTERNAL = "external"
+_BRIDGE_PROVIDER_GITHUB = "github"
 
 
 @dataclass
@@ -57,6 +60,8 @@ class GitHubCortexBridge:
         GitHub Personal Access Token with `repo` scope.
     owner : str
         GitHub user/org to scan (default: ``borjamoskv``).
+    tenant_id : str
+        Tenant scope for deduplication, deprecation, and persistence.
     """
 
     def __init__(
@@ -64,9 +69,11 @@ class GitHubCortexBridge:
         engine: CortexEngine,
         token: str,
         owner: str = "borjamoskv",
+        tenant_id: str = "default",
     ) -> None:
         self._engine = engine
         self._owner = owner
+        self._tenant_id = tenant_id
         self._client = httpx.AsyncClient(
             headers={
                 "Authorization": f"Bearer {token}",
@@ -224,6 +231,8 @@ class GitHubCortexBridge:
         )
 
         meta = {
+            "bridge_kind": _BRIDGE_KIND_EXTERNAL,
+            "bridge_provider": _BRIDGE_PROVIDER_GITHUB,
             "github_key": key,
             "github_url": item["html_url"],
             "github_number": item["number"],
@@ -236,6 +245,7 @@ class GitHubCortexBridge:
         }
 
         fact_id = await self._engine.store(
+            tenant_id=self._tenant_id,
             project=_PROJECT,
             content=content,
             fact_type="bridge",
@@ -261,6 +271,7 @@ class GitHubCortexBridge:
         await self._engine.deprecate(
             existing_fact_id,
             reason=f"crystallized:closed:{repo}#{item['number']}",
+            tenant_id=self._tenant_id,
         )
 
         # Store as decision
@@ -272,12 +283,15 @@ class GitHubCortexBridge:
             "github_repo": repo,
             "github_state": "closed",
             "github_type": "pr" if "pull_request" in item else "issue",
+            "source_bridge_kind": _BRIDGE_KIND_EXTERNAL,
+            "source_bridge_provider": _BRIDGE_PROVIDER_GITHUB,
             "previous_bridge_id": existing_fact_id,
             "closed_at": closed_at,
             "crystallized_at": now_iso(),
         }
 
         fact_id = await self._engine.store(
+            tenant_id=self._tenant_id,
             project=_PROJECT,
             content=content,
             fact_type="decision",
@@ -308,8 +322,8 @@ class GitHubCortexBridge:
                 cursor = await conn.execute(
                     "SELECT id, metadata FROM facts "
                     "WHERE fact_type = 'bridge' AND valid_until IS NULL "
-                    "AND source = ?",
-                    (_SOURCE,),
+                    "AND source = ? AND tenant_id = ?",
+                    (_SOURCE, self._tenant_id),
                 )
                 rows = await cursor.fetchall()
 
@@ -320,12 +334,12 @@ class GitHubCortexBridge:
             for row in rows:
                 fact_id = row[0]
                 try:
-                    meta_dict = enc.decrypt_json(row[1], tenant_id="default")
+                    meta_dict = enc.decrypt_json(row[1], tenant_id=self._tenant_id)
                     if isinstance(meta_dict, dict) and "github_key" in meta_dict:
                         index[meta_dict["github_key"]] = fact_id
                 except (ValueError, TypeError, OSError):
                     continue  # Skip corrupted or non-GitHub entries
-        except Exception as exc:  # noqa: BLE001
+        except (sqlite3.Error, OSError, RuntimeError, ImportError) as exc:
             logger.warning("Failed to load existing GitHub keys: %s", exc)
 
         logger.debug("Loaded %d existing GitHub bridge keys", len(index))

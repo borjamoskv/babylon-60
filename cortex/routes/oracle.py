@@ -13,16 +13,15 @@ Requires an API key provided by Stripe (pro or team plan).
 
 import logging
 from typing import Annotated
+from typing import Any
+from typing import TYPE_CHECKING
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, HttpUrl
 
 from cortex.api.deps import get_async_engine
-from cortex.auth import AuthResult, require_permission
-from cortex.engine import CortexEngine as AsyncCortexEngine
-from cortex.extensions.llm.manager import LLMManager
-from cortex.extensions.llm.router import IntentProfile
+from cortex.auth import require_permission
 
 __all__ = [
     "OracleRequest",
@@ -34,8 +33,24 @@ logger = logging.getLogger("cortex.routes.oracle")
 
 router = APIRouter(tags=["oracle"])
 
+if TYPE_CHECKING:
+    from cortex.auth import AuthResult
+    from cortex.engine import CortexEngine as AsyncCortexEngine
+    from cortex.extensions.llm.manager import LLMManager
+
+
 # ─── Singleton LLM Manager ──────────────────────────────────────────
-_llm_manager = LLMManager()
+_llm_manager: Any | None = None
+
+
+def _get_llm_manager() -> Any:
+    """Instantiate the LLM manager only when Oracle is exercised."""
+    global _llm_manager
+    if _llm_manager is None:
+        from cortex.extensions.llm.manager import LLMManager
+
+        _llm_manager = LLMManager()
+    return _llm_manager
 
 
 # ─── Request / Response Models ───────────────────────────────────────
@@ -97,7 +112,8 @@ async def audit_target(
     The Oracle: Run a Sovereign Agent audit.
     Requires a valid CORTEX API Key (provisioned via Stripe subscription).
     """
-    if not _llm_manager.available:
+    manager = _get_llm_manager()
+    if not manager.available:
         return JSONResponse(
             status_code=503,
             content={"detail": "The Oracle is currently disconnected from the LLM core."},
@@ -120,7 +136,9 @@ async def audit_target(
     )
 
     try:
-        report = await _llm_manager.complete(
+        from cortex.extensions.llm.router import IntentProfile
+
+        report = await manager.complete(
             prompt=prompt,
             system=ORACLE_SYSTEM_PROMPT,
             temperature=0.2,

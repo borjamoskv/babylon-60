@@ -37,6 +37,7 @@ from typing import Any
 
 import aiosqlite
 
+from cortex.core.paths import CORTEX_DB
 from cortex.database.core import connect_async_ctx
 from cortex.extensions.evolution.agents import SovereignAgent
 from cortex.extensions.evolution.persistence import (
@@ -47,7 +48,7 @@ from cortex.extensions.evolution.persistence import (
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_DB = Path("~/.cortex/cortex.db").expanduser()
+_DEFAULT_DB = CORTEX_DB
 
 # DDL for the evolution_state table (complementary learning systems store)
 CREATE_EVOLUTION_STATE = """

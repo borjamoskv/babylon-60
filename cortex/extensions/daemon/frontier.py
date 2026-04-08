@@ -3,9 +3,11 @@ Frontier Daemon (R&D & Metabolism)
 The engine that ensures CORTEX is always at the bleeding edge.
 """
 
+from __future__ import annotations
+
 import asyncio
+import inspect
 import logging
-import sqlite3
 import time
 from pathlib import Path
 from typing import Any
@@ -27,12 +29,13 @@ class FrontierDaemon:
         metabolism_interval_hours: int = 12,
         ingestion_interval_hours: int = 24,
         allow_commits: bool = True,
-    ):
+    ) -> None:
         self.engine = engine
         self.metabolism_interval = metabolism_interval_hours * 3600
         self.ingestion_interval = ingestion_interval_hours * 3600
         self.allow_commits = allow_commits
         self._shutdown = False
+        self._stop_event = asyncio.Event()
         self.last_metabolism = 0
         self.last_ingestion = 0
 
@@ -55,7 +58,7 @@ class FrontierDaemon:
 
                 if status == "SUCCESS":
                     msg = f"Auto-refactored {test_file.name} with Ouroboros-Omega."
-                    self._log_evolution("metabolism", msg)
+                    await self._log_evolution("metabolism", msg)
         except Exception as e:  # noqa: BLE001 — Isolate metabolism cycle failures from daemon boundary
             logger.error("[FRONTIER] Metabolism cycle failed: %s", e)
 
@@ -70,27 +73,57 @@ class FrontierDaemon:
         for source in sources:
             logger.info("[FRONTIER] Analyzing source: %s", source)
             msg = f"Analyzed {source} for potential skill emancipation."
-            self._log_evolution("ingestion", msg)
+            await self._log_evolution("ingestion", msg)
 
-    def _log_evolution(self, type: str, content: str):
-        """Registers the evolution event in CORTEX."""
+    async def _persist_evolution_fact(self, fact_type: str, content: str) -> bool:
         if not self.engine:
-            return
-        try:
-            conn = self.engine.pool.get_connection()
-            conn.execute(
-                "INSERT INTO facts (id, type, topic, content, timestamp, confidence) "
-                "VALUES (lower(hex(randomblob(16))), 'decision', 'Evolution', ?, ?, 'C5')",
-                (f"[{type.upper()}] {content}", time.time()),
-            )
-            conn.commit()
-            logger.info("[FRONTIER] Evolution event logged to CORTEX: %s", type)
-        except sqlite3.Error as e:
-            logger.error("[FRONTIER] Failed to log evolution: %s", e)
+            return False
 
-    async def run_loop(self):
+        store = getattr(self.engine, "store", None)
+        if store is not None and inspect.iscoroutinefunction(store):
+            await store(
+                project="cortex",
+                content=content,
+                fact_type=fact_type,
+                source="daemon:frontier",
+                tags=["frontier", fact_type],
+                confidence="C5",
+                meta={"daemon": "frontier"},
+            )
+            return True
+
+        store_sync = getattr(self.engine, "store_sync", None)
+        if callable(store_sync):
+            store_sync(
+                "cortex",
+                content=content,
+                fact_type=fact_type,
+                source="daemon:frontier",
+                tags=["frontier", fact_type],
+                confidence="C5",
+                meta={"daemon": "frontier"},
+            )
+            return True
+
+        logger.warning("[FRONTIER] Skipped evolution log: engine lacks store/store_sync")
+        return False
+
+    async def _log_evolution(self, type: str, content: str) -> None:
+        """Registers the evolution event in CORTEX."""
+        try:
+            stored = await self._persist_evolution_fact(
+                "decision",
+                f"[{type.upper()}] {content}",
+            )
+            if stored:
+                logger.info("[FRONTIER] Evolution event logged to CORTEX: %s", type)
+        except (OSError, RuntimeError, TypeError, ValueError) as exc:
+            logger.error("[FRONTIER] Failed to log evolution: %s", exc)
+
+    async def run_loop(self) -> None:
         """Main Frontier loop."""
         logger.info("Initializing Frontier Daemon (Evolution Engine)...")
+        self._stop_event.clear()
         while not self._shutdown:
             now = time.time()
 
@@ -104,8 +137,15 @@ class FrontierDaemon:
                 await self._run_ingestion()
                 self.last_ingestion = now
 
-            await asyncio.sleep(60)  # Poll every minute for scheduled tasks
+            if self._shutdown:
+                break
 
-    def stop(self):
+            try:
+                await asyncio.wait_for(self._stop_event.wait(), timeout=60)
+            except TimeoutError:
+                continue
+
+    def stop(self) -> None:
         logger.info("Stopping Frontier Daemon.")
         self._shutdown = True
+        self._stop_event.set()

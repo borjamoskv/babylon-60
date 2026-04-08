@@ -2,12 +2,17 @@
 CORTEX v5.0 — Dashboard Router.
 """
 
+from typing import TYPE_CHECKING
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import HTMLResponse
 
-from cortex.auth import AuthResult, require_permission
+from cortex.auth import require_permission
 
 __all__ = ["router", "get_dashboard_html"]
+
+if TYPE_CHECKING:
+    from cortex.auth import AuthResult
 
 
 def get_dashboard_html() -> str:
@@ -48,6 +53,4 @@ async def dashboard(
     auth: AuthResult = Depends(require_permission("read")),
 ) -> str:
     """Serve the embedded memory dashboard."""
-    from cortex.routes.dashboard import get_dashboard_html
-
     return get_dashboard_html()

@@ -12,14 +12,19 @@ import asyncio
 import click
 
 from cortex.cli.common import console, get_engine
-from cortex.extensions.ui_control.maestro import MaestroUI
-from cortex.extensions.ui_control.models import AppTarget
 
 
 @click.group(name="maestro")
 def maestro():
     """MAC-Ω: Automatización soberana de escritorio (AppleScript/Native)."""
     pass
+
+
+def _get_maestro_runtime():
+    from cortex.extensions.ui_control.maestro import MaestroUI
+    from cortex.extensions.ui_control.models import AppTarget
+
+    return MaestroUI, AppTarget
 
 
 # ─── Inspección ─────────────────────────────────────────────────
@@ -30,6 +35,7 @@ def maestro():
 @click.option("--depth", default=5, help="Profundidad máxima del árbol AX")
 def inspect_cmd(app_name: str, depth: int):
     """Inspecciona el árbol de accesibilidad de una app."""
+    MaestroUI, _ = _get_maestro_runtime()
     engine = get_engine()
     m = MaestroUI(engine=engine)
 
@@ -60,6 +66,7 @@ def inspect_cmd(app_name: str, depth: int):
 @click.option("--by", default="title", type=click.Choice(["title", "role", "id"]))
 def find_cmd(app_name: str, query: str, by: str):
     """Buscar elementos AX por título, rol o identificador."""
+    MaestroUI, _ = _get_maestro_runtime()
     engine = get_engine()
     m = MaestroUI(engine=engine)
 
@@ -97,6 +104,7 @@ def hotkey_cmd(key: str, modifiers: tuple[str, ...], app: str | None):
     """
 
     async def _run():
+        MaestroUI, AppTarget = _get_maestro_runtime()
         m = MaestroUI(engine=get_engine())
         target = AppTarget(name=app) if app else None
         res = await m.hotkey(key, *modifiers, target=target)
@@ -116,6 +124,7 @@ def type_cmd(text: str, app: str | None):
     """Escribe texto en la app activa (clipboard para cadenas largas)."""
 
     async def _run():
+        MaestroUI, AppTarget = _get_maestro_runtime()
         m = MaestroUI(engine=get_engine())
         target = AppTarget(name=app) if app else None
         console.print(f"Escribiendo {len(text)} caracteres...")
@@ -137,6 +146,7 @@ def type_cmd(text: str, app: str | None):
 @click.option("--button", default="left", help="left / right")
 def click_at_cmd(x: int, y: int, button: str):
     """Click en coordenadas de pantalla."""
+    MaestroUI, _ = _get_maestro_runtime()
     m = MaestroUI(engine=get_engine())
     res = m.click(x, y, button)
     if res.success:
@@ -150,6 +160,7 @@ def click_at_cmd(x: int, y: int, button: str):
 @click.argument("y", type=int)
 def double_click_cmd(x: int, y: int):
     """Doble click en coordenadas de pantalla."""
+    MaestroUI, _ = _get_maestro_runtime()
     m = MaestroUI(engine=get_engine())
     res = m.double_click(x, y)
     if res.success:
@@ -166,6 +177,7 @@ def double_click_cmd(x: int, y: int):
 @click.option("--duration", default=0.5, help="Duración del arrastre en segundos")
 def drag_cmd(from_x: int, from_y: int, to_x: int, to_y: int, duration: float):
     """Drag-and-drop de un punto a otro."""
+    MaestroUI, _ = _get_maestro_runtime()
     m = MaestroUI(engine=get_engine())
     res = m.drag(from_x, from_y, to_x, to_y, duration=duration)
     if res.success:
@@ -178,6 +190,7 @@ def drag_cmd(from_x: int, from_y: int, to_x: int, to_y: int, duration: float):
 @click.argument("clicks", type=int)
 def scroll_cmd(clicks: int):
     """Scroll de rueda. Positivo=arriba, negativo=abajo."""
+    MaestroUI, _ = _get_maestro_runtime()
     m = MaestroUI(engine=get_engine())
     res = m.scroll(clicks)
     if res.success:
@@ -195,6 +208,7 @@ def list_windows_cmd(app_name: str):
     """Lista todas las ventanas de una aplicación."""
 
     async def _run():
+        MaestroUI, _ = _get_maestro_runtime()
         m = MaestroUI(engine=get_engine())
         windows = await m.list_windows(app_name)
         if not windows:
@@ -220,6 +234,7 @@ def move_cmd(app_name: str, x: int, y: int):
     """Mueve la ventana principal de una app."""
 
     async def _run():
+        MaestroUI, AppTarget = _get_maestro_runtime()
         m = MaestroUI(engine=get_engine())
         target = AppTarget(name=app_name)
         res = await m.move_window(target, x, y)
@@ -239,6 +254,7 @@ def resize_cmd(app_name: str, width: int, height: int):
     """Redimensiona la ventana principal de una app."""
 
     async def _run():
+        MaestroUI, AppTarget = _get_maestro_runtime()
         m = MaestroUI(engine=get_engine())
         target = AppTarget(name=app_name)
         res = await m.resize_window(target, width, height)
@@ -256,6 +272,7 @@ def minimize_cmd(app_name: str):
     """Minimiza la ventana principal de una app."""
 
     async def _run():
+        MaestroUI, AppTarget = _get_maestro_runtime()
         m = MaestroUI(engine=get_engine())
         res = await m.minimize_window(AppTarget(name=app_name))
         if res.success:
@@ -272,6 +289,7 @@ def fullscreen_cmd(app_name: str):
     """Alterna pantalla completa para una app."""
 
     async def _run():
+        MaestroUI, AppTarget = _get_maestro_runtime()
         m = MaestroUI(engine=get_engine())
         res = await m.fullscreen_window(AppTarget(name=app_name))
         if res.success:
@@ -291,6 +309,7 @@ def capture_cmd(output: str | None):
     """Captura de pantalla del display principal."""
 
     async def _run():
+        MaestroUI, _ = _get_maestro_runtime()
         m = MaestroUI(engine=get_engine())
         path = await m.screenshot(output)
         if path:

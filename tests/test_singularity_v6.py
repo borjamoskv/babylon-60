@@ -2,13 +2,13 @@ import pytest
 
 from cortex.engine.swarm_10k import CenturionSuperv
 from cortex.extensions.llm._cascade import CascadeManager, IntentProfile
-from cortex.extensions.signals.sharded_bus import ShardedAsyncSignalBus
+from cortex.extensions.signals.sharded_bus import ShardedDurableSignalBus
 
 
 @pytest.mark.asyncio
 async def test_exergy_calculation_o1(tmp_path):
     """Verify the Nine Laws — Exergy decay on latency/density."""
-    bus = ShardedAsyncSignalBus(base_dir=tmp_path)
+    bus = ShardedDurableSignalBus(base_dir=tmp_path)
     node = CenturionSuperv("node-1", "test_shard_bus_1")
 
     # Initial state: 1.0 exergy

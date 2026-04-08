@@ -7,6 +7,7 @@ from typing import Any
 
 from cortex.database.core import connect as db_connect
 from cortex.extensions.llm._models import CascadeEvent, CascadeTier
+from cortex.memory.temporal import normalize_timestamp_epoch
 
 logger = logging.getLogger("cortex.extensions.llm.telemetry")
 
@@ -47,6 +48,9 @@ class CascadeTelemetry:
     def _persist_to_db(self, event: CascadeEvent) -> None:
         """Sovereign Persistence (Ω₃): Drive telemetry to the physical ledger."""
         try:
+            timestamp = normalize_timestamp_epoch(event.timestamp)
+            if timestamp is None:
+                raise ValueError("event.timestamp cannot be None")
             conn = db_connect(self._db_path)  # type: ignore[type-error]
             try:
                 conn.execute(
@@ -61,13 +65,13 @@ class CascadeTelemetry:
                         event.depth,
                         event.latency_ms,
                         json.dumps(event.errors),
-                        event.timestamp,
+                        timestamp,
                     ),
                 )
                 conn.commit()
             finally:
                 conn.close()
-        except (sqlite3.Error, OSError) as e:
+        except (sqlite3.Error, OSError, ValueError) as e:
             logger.warning("Ω₄ Persistence Stall: Could not write LLM telemetry: %s", e)
 
     def stats(self) -> dict[str, Any]:

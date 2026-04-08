@@ -1,0 +1,1239 @@
+---
+const iterationStages = [
+  { id: 'observe', label: 'Observe' },
+  { id: 'propose', label: 'Propose' },
+  { id: 'verify', label: 'Verify' },
+  { id: 'promote', label: 'Promote' },
+];
+
+const iterationAgents = [
+  {
+    id: 'kinetica',
+    name: 'Kinetica',
+    role: 'Kinetic agent',
+    text: 'Reads hesitation, dead clicks, rage clicks, friction bursts, and velocity collapse before anyone drafts a patch.',
+    stages: ['observe'],
+  },
+  {
+    id: 'cartographer',
+    name: 'Cartographer',
+    role: 'Journey agent',
+    text: 'Maps segment intent and pinpoints where the handoff between surfaces actually breaks.',
+    stages: ['observe', 'propose'],
+  },
+  {
+    id: 'patchsmith',
+    name: 'Patchsmith',
+    role: 'Mutation agent',
+    text: 'Drafts bounded copy, layout, and routing diffs instead of broad redesign guesses.',
+    stages: ['propose'],
+  },
+  {
+    id: 'sentinel',
+    name: 'Sentinel',
+    role: 'Policy agent',
+    text: 'Checks guardrails, risk thresholds, and rollback conditions before any preview can proceed.',
+    stages: ['propose', 'verify'],
+  },
+  {
+    id: 'gauntlet',
+    name: 'Gauntlet',
+    role: 'Experiment agent',
+    text: 'Runs preview traffic, compares deltas, and rejects patches that win locally but fail globally.',
+    stages: ['verify'],
+  },
+  {
+    id: 'ledgerkeeper',
+    name: 'Ledgerkeeper',
+    role: 'Evidence agent',
+    text: 'Records why the mutation shipped, which metric cleared the gate, and who approved promotion.',
+    stages: ['promote'],
+  },
+];
+
+const iterationScenarios = [
+  {
+    id: 'quickstart-lift',
+    label: 'Lift quickstart starts',
+    summary:
+      'First-time builders understand the promise, but too many sessions leave before they see an executable proof.',
+    surface: 'Marketing hero -> quickstart loop',
+    guardrail: 'Docs click-through must stay above 18%',
+    signal: '63% of new sessions exit before the CLI block enters the viewport.',
+    beforeLabel: 'Quickstart starts',
+    beforeValue: '3.8%',
+    afterLabel: 'Verified preview',
+    afterValue: '6.1%',
+    delta: '+60%',
+    patchLines: [
+      '~ Pull proof-oriented content closer to the hero',
+      '- CTA: Get started',
+      '+ CTA: Run a verified write',
+      '+ Add a one-line trust loop below the primary actions',
+    ],
+    logs: [
+      {
+        stage: 'Observe',
+        text: 'Behavior clusters around the demo video while first-time builders still have not seen a command.',
+      },
+      {
+        stage: 'Propose',
+        text: 'Draft a bounded hero patch that makes the first proof path obvious without rewriting the page.',
+      },
+      {
+        stage: 'Verify',
+        text: 'Preview traffic improves quickstart starts and keeps docs handoff inside the guardrail.',
+      },
+      {
+        stage: 'Promote',
+        text: 'Ship behind a feature flag and attach the diff, metric window, and reviewer to the mutation record.',
+      },
+    ],
+    stageCopy: {
+      observe: {
+        title: 'Telemetry catches friction before anyone edits production.',
+        text: 'The loop starts with concrete session evidence, not intuition. The system narrows the problem to one surface and one broken handoff.',
+      },
+      propose: {
+        title: 'The agent drafts a patch instead of silently shipping one.',
+        text: 'It proposes a small, reviewable change set with explicit guardrails and a hypothesis tied to one metric.',
+      },
+      verify: {
+        title: 'Preview traffic becomes the admission gate.',
+        text: 'The candidate runs in isolation first. It only advances if the target metric lifts without creating a second problem elsewhere.',
+      },
+      promote: {
+        title: 'Promotion carries evidence, not just a green button.',
+        text: 'When the patch wins, the mutation ships with provenance: what changed, why it changed, and which signal cleared the gate.',
+      },
+    },
+    artifacts: {
+      observe: {
+        owner: 'Kinetica + Cartographer',
+        title: 'Motion report',
+        body: 'The first proof path is too far from the first burst of intent. Visitors are curious, but the page does not convert that momentum into an executable next step fast enough.',
+        points: [
+          'segment = new builders',
+          'proof visibility = 37%',
+          'friction cluster = demo video / hero gap',
+        ],
+      },
+      propose: {
+        owner: 'Patchsmith + Sentinel',
+        title: 'Bounded mutation plan',
+        body: 'Draft a hero-level patch only. Tighten the CTA, surface proof sooner, and preserve docs routing guardrails.',
+        points: [
+          'scope = hero + proof strip only',
+          'risk budget = no nav rewrites',
+          'guardrail = docs CTR >= 18%',
+        ],
+      },
+      verify: {
+        owner: 'Gauntlet + Sentinel',
+        title: 'Preview verdict',
+        body: 'Variant B clears the target metric and stays within the safe operating envelope for downstream docs engagement.',
+        points: [
+          'quickstart starts = 6.1%',
+          'docs CTR = 18.7%',
+          'rollback trigger = not armed',
+        ],
+      },
+      promote: {
+        owner: 'Ledgerkeeper',
+        title: 'Promotion receipt',
+        body: 'Ship the patch with a record of the diff, evaluation window, and the gate that justified rollout.',
+        points: [
+          'rollout = staged feature flag',
+          'evidence pack = attached',
+          'mutation provenance = sealed',
+        ],
+      },
+    },
+  },
+  {
+    id: 'buyer-routing',
+    label: 'Route security buyers faster',
+    summary:
+      'Security-minded visitors want audit proof quickly. Too many of them scan the page, then bounce before reaching the strongest evidence surfaces.',
+    surface: 'Proof section -> security docs',
+    guardrail: 'Overall homepage bounce must not rise above 42%',
+    signal: 'Enterprise traffic dwells on comparison copy but under-clicks architecture and security entry points.',
+    beforeLabel: 'Security-doc visits',
+    beforeValue: '2.4%',
+    afterLabel: 'Verified preview',
+    afterValue: '4.0%',
+    delta: '+67%',
+    patchLines: [
+      '+ Add a security persona rail beside the proof strip',
+      '~ Rename generic Proof CTA to Audit trail',
+      '+ Inline link to security model and audit pack anatomy',
+      '- Keep enterprise value buried below the fold',
+    ],
+    logs: [
+      {
+        stage: 'Observe',
+        text: 'High-intent visitors spend time on trust language but miss the exact surfaces that close procurement risk.',
+      },
+      {
+        stage: 'Propose',
+        text: 'Draft a persona-specific route that sends security evaluators straight to evidence instead of generic product copy.',
+      },
+      {
+        stage: 'Verify',
+        text: 'Preview traffic lifts security-doc visits without increasing whole-page bounce or collapsing quickstart interest.',
+      },
+      {
+        stage: 'Promote',
+        text: 'Promote the route with a ledger entry that ties the copy diff to the segment-level conversion delta.',
+      },
+    ],
+    stageCopy: {
+      observe: {
+        title: 'The loop distinguishes curiosity from buyer intent.',
+        text: 'Not every visitor wants the same path. This scenario isolates a trust-sensitive segment and measures where evidence handoff breaks.',
+      },
+      propose: {
+        title: 'The patch is specific to the segment, not global guesswork.',
+        text: 'Instead of redesigning the whole page, the agent drafts a precise route for security evaluators and leaves the rest of the surface alone.',
+      },
+      verify: {
+        title: 'Guardrails stop local wins from becoming site-wide regressions.',
+        text: 'The preview must improve the targeted path without harming bounce or suppressing other high-value actions.',
+      },
+      promote: {
+        title: 'The shipped change remains explainable after the fact.',
+        text: 'Weeks later, you can still answer which segment moved, what text changed, and which threshold justified promotion.',
+      },
+    },
+    artifacts: {
+      observe: {
+        owner: 'Kinetica + Cartographer',
+        title: 'Buyer-intent map',
+        body: 'Security evaluators are signaling high trust sensitivity, but the page routes them through generic product language before exposing the strongest proof surfaces.',
+        points: [
+          'segment = enterprise / security',
+          'dwell = comparison copy high',
+          'security-doc discovery = low',
+        ],
+      },
+      propose: {
+        owner: 'Patchsmith + Sentinel',
+        title: 'Persona route draft',
+        body: 'Insert a security-focused route near the proof section and rename the generic CTA so buyers can self-select into the right evidence path.',
+        points: [
+          'scope = proof rail + CTA copy',
+          'risk budget = no homepage reorder',
+          'guardrail = bounce <= 42%',
+        ],
+      },
+      verify: {
+        owner: 'Gauntlet + Sentinel',
+        title: 'Segment preview result',
+        body: 'The targeted route increases visits to security evidence surfaces without degrading the broader homepage journey.',
+        points: [
+          'security-doc visits = 4.0%',
+          'bounce = 39.4%',
+          'quickstart degradation = none detected',
+        ],
+      },
+      promote: {
+        owner: 'Ledgerkeeper',
+        title: 'Promotion receipt',
+        body: 'Promote the route with segment-level evidence attached so later reviews can reconstruct exactly why it shipped.',
+        points: [
+          'segment uplift = +67%',
+          'evidence pack = security path',
+          'approval = traceable',
+        ],
+      },
+    },
+  },
+  {
+    id: 'docs-handoff',
+    label: 'Tighten docs handoff',
+    summary:
+      'Visitors reach documentation, but many land too deep or too generic. The handoff should route them to the shortest path from interest to proof.',
+    surface: 'Marketing CTA -> docs destination',
+    guardrail: 'Average time to first verified command must stay under 2 minutes',
+    signal: 'A wide spread of doc landings creates friction between interest and the first verified write.',
+    beforeLabel: 'Docs success rate',
+    beforeValue: '28%',
+    afterLabel: 'Verified preview',
+    afterValue: '41%',
+    delta: '+46%',
+    patchLines: [
+      '+ Map each primary CTA to a docs intent: quickstart, architecture, or security',
+      '~ Replace generic Read docs button copy with intent-specific destinations',
+      '+ Show the first terminal command before the domain switch',
+      '- Send all visitors to the same generic documentation root',
+    ],
+    logs: [
+      {
+        stage: 'Observe',
+        text: 'The current handoff treats every visitor the same even when their intent is visibly different.',
+      },
+      {
+        stage: 'Propose',
+        text: 'Draft an intent router so builders, auditors, and platform teams land on the shortest next step for them.',
+      },
+      {
+        stage: 'Verify',
+        text: 'Preview traffic raises successful docs journeys while keeping time-to-first-proof inside the operating limit.',
+      },
+      {
+        stage: 'Promote',
+        text: 'Ship the routing logic with an audit record that links the entry CTA, destination, and measured outcome.',
+      },
+    ],
+    stageCopy: {
+      observe: {
+        title: 'The best fix is often a better route, not more content.',
+        text: 'This loop treats handoff quality as a product surface. It watches where intent gets diluted between marketing and docs.',
+      },
+      propose: {
+        title: 'The candidate patch changes destinations, not just words.',
+        text: 'Good iteration is structural. The agent re-routes users to shorter proof paths instead of adding another explanation block.',
+      },
+      verify: {
+        title: 'The threshold is operational, not cosmetic.',
+        text: 'A docs handoff only wins if it improves successful proof journeys and does not make the first executable step slower.',
+      },
+      promote: {
+        title: 'What ships is a controlled mutation with lineage.',
+        text: 'The final state includes route provenance, measured uplift, and the exact policy that allowed the promotion.',
+      },
+    },
+    artifacts: {
+      observe: {
+        owner: 'Kinetica + Cartographer',
+        title: 'Handoff fracture report',
+        body: 'Users are reaching docs, but the landing destination is too generic. Intent gets diluted during the domain switch and the first proof moment arrives too late.',
+        points: [
+          'segment = mixed builder / auditor',
+          'doc entry variance = high',
+          'time-to-proof = unstable',
+        ],
+      },
+      propose: {
+        owner: 'Patchsmith + Sentinel',
+        title: 'Intent router draft',
+        body: 'Map each CTA to the shortest next proof path instead of sending every visitor to the same documentation root.',
+        points: [
+          'scope = CTA destinations',
+          'risk budget = no docs IA rewrite',
+          'guardrail = time-to-proof < 2 min',
+        ],
+      },
+      verify: {
+        owner: 'Gauntlet + Sentinel',
+        title: 'Routing preview result',
+        body: 'Intent-specific destinations improve successful docs journeys and keep the first executable step inside the time budget.',
+        points: [
+          'docs success = 41%',
+          'time-to-proof = 1m 34s',
+          'rollback trigger = not armed',
+        ],
+      },
+      promote: {
+        owner: 'Ledgerkeeper',
+        title: 'Promotion receipt',
+        body: 'Promote the router with destination lineage and the measured uplift so the handoff remains explainable later.',
+        points: [
+          'route lineage = preserved',
+          'uplift = +46%',
+          'promotion note = sealed',
+        ],
+      },
+    },
+  },
+];
+
+const initialScenario = iterationScenarios[0];
+const initialStage = iterationStages[0];
+const initialStageCopy = initialScenario.stageCopy[initialStage.id];
+const initialStageAgents = iterationAgents.filter((agent) => agent.stages.includes(initialStage.id));
+const initialStageAgentNames = initialStageAgents.map((agent) => agent.name).join(' + ');
+const initialArtifact = initialScenario.artifacts[initialStage.id];
+---
+
+<section id="legacy-app-iteration" class="section w app-iteration">
+  <div class="section-head rv">
+    <div class="eyebrow">App Iteration</div>
+    <h2>Let the site read its own friction before it rewrites itself.</h2>
+    <p>
+      A Legion-style loop for self-improving websites:
+      100 agents can fan out in parallel, but the live mutation still has to pass one bounded preview-and-promotion path.
+    </p>
+  </div>
+
+  <div class="app-iteration__grid">
+    <aside class="app-iteration__sidebar rv" aria-label="Iteration scenarios">
+      <div class="app-iteration__sidebar-head">
+        <span class="app-iteration__kicker">Simulated runs</span>
+        <p>Pick a surface and watch the swarm route 100 agents through one bounded mutation.</p>
+      </div>
+
+      <div class="app-iteration__tabs">
+        {iterationScenarios.map((scenario, index) => (
+          <button
+            type="button"
+            class={`app-iteration__tab ${index === 0 ? 'is-active' : ''}`}
+            data-scenario-id={scenario.id}
+            aria-pressed={index === 0 ? 'true' : 'false'}
+          >
+            <span class="app-iteration__tab-title">{scenario.label}</span>
+            <span class="app-iteration__tab-text">{scenario.surface}</span>
+            <span class="app-iteration__tab-delta">{scenario.delta}</span>
+          </button>
+        ))}
+      </div>
+    </aside>
+
+    <div class="app-iteration__shell rv" data-iteration-demo>
+      <div class="app-iteration__shell-top">
+        <div>
+          <div class="app-iteration__eyebrow">CORTEX mutation loop</div>
+          <h3 data-iteration-heading>{initialScenario.label}</h3>
+          <p data-iteration-summary>{initialScenario.summary}</p>
+        </div>
+        <button type="button" class="btn btn--p app-iteration__run" data-run-iteration>
+          Run loop
+        </button>
+      </div>
+
+      <div class="app-iteration__stages" role="tablist" aria-label="Iteration stages">
+        {iterationStages.map((stage, index) => (
+          <button
+            type="button"
+            class={`app-iteration__stage ${index === 0 ? 'is-active' : ''}`}
+            data-stage-id={stage.id}
+            data-stage-index={index}
+            aria-current={index === 0 ? 'step' : 'false'}
+          >
+            <span>{`0${index + 1}`}</span>
+            {stage.label}
+          </button>
+        ))}
+      </div>
+
+      <div class="app-iteration__agents">
+        <div class="app-iteration__agents-head">
+          <span class="app-iteration__kicker">100-agent swarm</span>
+          <p data-iteration-agent-summary>{initialStageAgentNames} lead the active squadrons in this stage.</p>
+        </div>
+        <div class="app-iteration__agent-grid">
+          {iterationAgents.map((agent) => (
+            <article
+              class={`app-iteration__agent ${agent.stages.includes(initialStage.id) ? 'is-active' : ''}`}
+              data-agent-card
+              data-agent-name={agent.name}
+              data-agent-stages={agent.stages.join(',')}
+            >
+              <div class="app-iteration__agent-head">
+                <h4>{agent.name}</h4>
+                <span>{agent.role}</span>
+              </div>
+              <p>{agent.text}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      <div class="app-iteration__body">
+        <article class="app-iteration__card app-iteration__card--story">
+          <div class="app-iteration__card-head">
+            <span class="app-iteration__kicker" data-iteration-stage-label>{initialStage.label}</span>
+            <span class="app-iteration__status" data-iteration-status>Stage 1/4</span>
+          </div>
+          <h4 data-iteration-stage-title>{initialStageCopy.title}</h4>
+          <p data-iteration-stage-text>{initialStageCopy.text}</p>
+          <div class="app-iteration__chips">
+            <span data-iteration-surface>{initialScenario.surface}</span>
+            <span data-iteration-guardrail>{initialScenario.guardrail}</span>
+          </div>
+        </article>
+
+        <article class="app-iteration__card app-iteration__card--diff">
+          <div class="app-iteration__card-head">
+            <span class="app-iteration__kicker">Patch proposal</span>
+            <span class="app-iteration__status" data-iteration-patch-state>Locked until proposal</span>
+          </div>
+          <ul class="app-iteration__diff" data-iteration-diff>
+            {initialScenario.patchLines.map((line) => (
+              <li class="is-dim">{line}</li>
+            ))}
+          </ul>
+        </article>
+      </div>
+
+      <article class="app-iteration__card app-iteration__card--artifact">
+        <div class="app-iteration__card-head">
+          <span class="app-iteration__kicker">Current agent output</span>
+          <span class="app-iteration__status" data-iteration-artifact-owner>{initialArtifact.owner}</span>
+        </div>
+        <h4 data-iteration-artifact-title>{initialArtifact.title}</h4>
+        <p data-iteration-artifact-body>{initialArtifact.body}</p>
+        <ul class="app-iteration__artifact-list" data-iteration-artifact-list>
+          {initialArtifact.points.map((point) => (
+            <li>{point}</li>
+          ))}
+        </ul>
+      </article>
+
+      <div class="app-iteration__metrics">
+        <article class="app-iteration__metric">
+          <span class="app-iteration__metric-label">Observed signal</span>
+          <strong data-iteration-signal>{initialScenario.signal}</strong>
+        </article>
+        <article class="app-iteration__metric">
+          <span class="app-iteration__metric-label" data-iteration-before-label>{initialScenario.beforeLabel}</span>
+          <strong data-iteration-before-value>{initialScenario.beforeValue}</strong>
+        </article>
+        <article class="app-iteration__metric app-iteration__metric--accent">
+          <span class="app-iteration__metric-label" data-iteration-after-label>{initialScenario.afterLabel}</span>
+          <strong data-iteration-after-value>Pending verification</strong>
+          <small data-iteration-delta>Awaiting preview run</small>
+        </article>
+      </div>
+
+      <div class="app-iteration__ledger">
+        <div class="app-iteration__card-head">
+          <span class="app-iteration__kicker">Ledgered checkpoints</span>
+          <span class="app-iteration__status" data-iteration-ledger-state>Evidence log warming up</span>
+        </div>
+        <ol class="app-iteration__log" data-iteration-log>
+          {initialScenario.logs.map((entry, index) => (
+            <li class={index === 0 ? 'is-visible' : 'is-dim'}>
+              <strong>{entry.stage}</strong>
+              <span>{entry.text}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  .app-iteration {
+    padding-top: 64px;
+    padding-bottom: 64px;
+  }
+
+  .app-iteration .section-head {
+    max-width: 52rem;
+    margin-bottom: 24px;
+  }
+
+  .app-iteration .section-head h2 {
+    margin-top: 16px;
+    font-size: clamp(2rem, 4vw, 3.35rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .app-iteration .section-head p {
+    margin-top: 20px;
+    color: var(--muted);
+    font-size: 1.08rem;
+  }
+
+  .app-iteration__grid {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.36fr) minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+  }
+
+  .app-iteration__sidebar,
+  .app-iteration__shell,
+  .app-iteration__tab,
+  .app-iteration__card,
+  .app-iteration__metric,
+  .app-iteration__ledger {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    backdrop-filter: blur(16px);
+    box-shadow: var(--shadow);
+  }
+
+  .app-iteration__sidebar,
+  .app-iteration__shell,
+  .app-iteration__ledger {
+    border-radius: 30px;
+  }
+
+  .app-iteration__sidebar {
+    padding: 22px;
+    position: sticky;
+    top: 104px;
+  }
+
+  .app-iteration__sidebar-head p,
+  .app-iteration__shell-top p {
+    margin-top: 10px;
+    color: var(--muted);
+  }
+
+  .app-iteration__kicker,
+  .app-iteration__eyebrow,
+  .app-iteration__metric-label,
+  .app-iteration__status {
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+  }
+
+  .app-iteration__kicker,
+  .app-iteration__eyebrow {
+    color: var(--accent);
+  }
+
+  .app-iteration__tabs {
+    display: grid;
+    gap: 12px;
+    margin-top: 18px;
+  }
+
+  .app-iteration__tab {
+    width: 100%;
+    text-align: left;
+    padding: 16px;
+    border-radius: 22px;
+    cursor: pointer;
+    transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+  }
+
+  .app-iteration__tab:hover,
+  .app-iteration__tab.is-active {
+    transform: translateY(-1px);
+    border-color: var(--line-strong);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .app-iteration__tab-title,
+  .app-iteration__tab-text,
+  .app-iteration__tab-delta {
+    display: block;
+  }
+
+  .app-iteration__tab-title {
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  .app-iteration__tab-text {
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+
+  .app-iteration__tab-delta {
+    margin-top: 12px;
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 0.82rem;
+  }
+
+  .app-iteration__shell {
+    padding: 24px;
+    background:
+      radial-gradient(circle at top right, rgba(132, 246, 197, 0.14), transparent 24rem),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)),
+      #09110d;
+  }
+
+  .app-iteration__shell-top {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .app-iteration__shell-top h3 {
+    margin-top: 14px;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    line-height: 0.98;
+    letter-spacing: -0.05em;
+  }
+
+  .app-iteration__run {
+    flex-shrink: 0;
+  }
+
+  .app-iteration__agents {
+    margin-top: 18px;
+  }
+
+  .app-iteration__agents-head p {
+    margin-top: 10px;
+    color: var(--muted);
+  }
+
+  .app-iteration__agent-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 14px;
+  }
+
+  .app-iteration__agent {
+    padding: 16px;
+    border-radius: 22px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.02);
+    transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, opacity 180ms ease;
+    opacity: 0.58;
+  }
+
+  .app-iteration__agent.is-active {
+    border-color: var(--line-strong);
+    background: rgba(132, 246, 197, 0.1);
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+
+  .app-iteration__agent-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .app-iteration__agent-head h4 {
+    font-size: 1.02rem;
+    letter-spacing: -0.03em;
+  }
+
+  .app-iteration__agent-head span {
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+  }
+
+  .app-iteration__agent p {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 0.94rem;
+  }
+
+  .app-iteration__stages {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 22px;
+  }
+
+  .app-iteration__stage {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 52px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--muted);
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition: transform 180ms ease, border-color 180ms ease, color 180ms ease, background 180ms ease;
+  }
+
+  .app-iteration__stage span {
+    display: inline-grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.04);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+  }
+
+  .app-iteration__stage:hover,
+  .app-iteration__stage.is-active,
+  .app-iteration__stage.is-complete {
+    border-color: var(--line-strong);
+    color: var(--text);
+  }
+
+  .app-iteration__stage.is-active {
+    background: rgba(132, 246, 197, 0.12);
+  }
+
+  .app-iteration__stage.is-complete span,
+  .app-iteration__stage.is-active span {
+    background: rgba(197, 255, 111, 0.16);
+    color: var(--accent);
+  }
+
+  .app-iteration__body {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(280px, 1.1fr);
+    gap: 18px;
+    margin-top: 18px;
+  }
+
+  .app-iteration__card,
+  .app-iteration__metric,
+  .app-iteration__ledger {
+    padding: 20px;
+  }
+
+  .app-iteration__card {
+    border-radius: 26px;
+  }
+
+  .app-iteration__card--artifact {
+    margin-top: 18px;
+  }
+
+  .app-iteration__card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .app-iteration__status {
+    color: var(--muted);
+  }
+
+  .app-iteration__card h4 {
+    margin-top: 16px;
+    font-size: 1.4rem;
+    letter-spacing: -0.04em;
+  }
+
+  .app-iteration__card p {
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 1rem;
+  }
+
+  .app-iteration__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .app-iteration__chips span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text);
+    font-size: 0.88rem;
+  }
+
+  .app-iteration__diff {
+    list-style: none;
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .app-iteration__diff li {
+    padding: 12px 14px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    transition: opacity 180ms ease, transform 180ms ease, border-color 180ms ease;
+  }
+
+  .app-iteration__diff li.is-dim {
+    opacity: 0.45;
+    transform: translateX(0);
+  }
+
+  .app-iteration__diff li.is-live {
+    opacity: 1;
+    border-color: var(--line-strong);
+    transform: translateX(2px);
+  }
+
+  .app-iteration__diff li.is-add {
+    color: #ddffba;
+  }
+
+  .app-iteration__diff li.is-remove {
+    color: #ffc2b2;
+  }
+
+  .app-iteration__diff li.is-change {
+    color: #ffd98b;
+  }
+
+  .app-iteration__artifact-list {
+    list-style: none;
+    display: grid;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .app-iteration__artifact-list li {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.84rem;
+  }
+
+  .app-iteration__metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+  }
+
+  .app-iteration__metric {
+    border-radius: 22px;
+  }
+
+  .app-iteration__metric strong,
+  .app-iteration__metric small {
+    display: block;
+  }
+
+  .app-iteration__metric strong {
+    margin-top: 14px;
+    color: var(--text);
+    font-size: 1.02rem;
+    letter-spacing: -0.03em;
+  }
+
+  .app-iteration__metric small {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .app-iteration__metric--accent {
+    background:
+      linear-gradient(180deg, rgba(197, 255, 111, 0.08), rgba(255, 255, 255, 0)),
+      var(--panel);
+  }
+
+  .app-iteration__ledger {
+    margin-top: 18px;
+  }
+
+  .app-iteration__log {
+    list-style: none;
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .app-iteration__log li {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+    padding: 12px 0;
+    border-top: 1px solid var(--line);
+    transition: opacity 180ms ease, transform 180ms ease;
+  }
+
+  .app-iteration__log li:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .app-iteration__log li.is-dim {
+    opacity: 0.35;
+  }
+
+  .app-iteration__log li.is-visible {
+    opacity: 1;
+    transform: translateX(2px);
+  }
+
+  .app-iteration__log strong {
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+  }
+
+  .app-iteration__log span {
+    color: var(--muted);
+    font-size: 0.96rem;
+  }
+
+  @media (max-width: 1080px) {
+    .app-iteration__grid,
+    .app-iteration__body,
+    .app-iteration__agent-grid,
+    .app-iteration__metrics,
+    .app-iteration__stages {
+      grid-template-columns: 1fr;
+    }
+
+    .app-iteration__sidebar {
+      position: static;
+    }
+
+    .app-iteration__shell-top {
+      flex-direction: column;
+    }
+
+    .app-iteration__run {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .app-iteration__shell,
+    .app-iteration__sidebar,
+    .app-iteration__card,
+    .app-iteration__metric,
+    .app-iteration__ledger {
+      border-radius: 24px;
+    }
+
+    .app-iteration__log li {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+  }
+</style>
+
+<script define:vars={{ iterationScenarios, iterationStages, iterationAgents }}>
+  const root = document.querySelector('[data-iteration-demo]');
+
+  if (root) {
+    const scenarioButtons = Array.from(document.querySelectorAll('[data-scenario-id]'));
+    const stageButtons = Array.from(root.querySelectorAll('[data-stage-id]'));
+    const agentCards = Array.from(root.querySelectorAll('[data-agent-card]'));
+    const runButton = root.querySelector('[data-run-iteration]');
+    const heading = root.querySelector('[data-iteration-heading]');
+    const summary = root.querySelector('[data-iteration-summary]');
+    const agentSummary = root.querySelector('[data-iteration-agent-summary]');
+    const stageLabel = root.querySelector('[data-iteration-stage-label]');
+    const stageTitle = root.querySelector('[data-iteration-stage-title]');
+    const stageText = root.querySelector('[data-iteration-stage-text]');
+    const stageStatus = root.querySelector('[data-iteration-status]');
+    const surface = root.querySelector('[data-iteration-surface]');
+    const guardrail = root.querySelector('[data-iteration-guardrail]');
+    const artifactOwner = root.querySelector('[data-iteration-artifact-owner]');
+    const artifactTitle = root.querySelector('[data-iteration-artifact-title]');
+    const artifactBody = root.querySelector('[data-iteration-artifact-body]');
+    const artifactList = root.querySelector('[data-iteration-artifact-list]');
+    const signal = root.querySelector('[data-iteration-signal]');
+    const beforeLabel = root.querySelector('[data-iteration-before-label]');
+    const beforeValue = root.querySelector('[data-iteration-before-value]');
+    const afterLabel = root.querySelector('[data-iteration-after-label]');
+    const afterValue = root.querySelector('[data-iteration-after-value]');
+    const delta = root.querySelector('[data-iteration-delta]');
+    const diff = root.querySelector('[data-iteration-diff]');
+    const patchState = root.querySelector('[data-iteration-patch-state]');
+    const ledgerState = root.querySelector('[data-iteration-ledger-state]');
+    const log = root.querySelector('[data-iteration-log]');
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let scenarioIndex = 0;
+    let stageIndex = 0;
+    let timerId;
+
+    const patchStates = [
+      'Locked until proposal',
+      'Draft ready for review',
+      'Running preview checks',
+      'Eligible for promotion',
+    ];
+
+    const ledgerStates = [
+      'Evidence log warming up',
+      'Proposal emitted with guardrails',
+      'Preview evidence attached',
+      'Promotion record ready',
+    ];
+
+    function clearTimer() {
+      if (timerId) {
+        window.clearTimeout(timerId);
+        timerId = undefined;
+      }
+    }
+
+    function patchClassForLine(line, isLive) {
+      const trimmed = line.trim();
+      const stateClass = isLive ? 'is-live' : 'is-dim';
+
+      if (trimmed.startsWith('+')) {
+        return `${stateClass} is-add`;
+      }
+
+      if (trimmed.startsWith('-')) {
+        return `${stateClass} is-remove`;
+      }
+
+      if (trimmed.startsWith('~')) {
+        return `${stateClass} is-change`;
+      }
+
+      return stateClass;
+    }
+
+    function renderDiffLines(lines) {
+      const isLive = stageIndex >= 1;
+      diff.innerHTML = lines
+        .map((line) => `<li class="${patchClassForLine(line, isLive)}">${line}</li>`)
+        .join('');
+    }
+
+    function renderLogEntries(entries) {
+      log.innerHTML = entries
+        .map((entry, index) => {
+          const stateClass = index <= stageIndex ? 'is-visible' : 'is-dim';
+          return `<li class="${stateClass}"><strong>${entry.stage}</strong><span>${entry.text}</span></li>`;
+        })
+        .join('');
+    }
+
+    function renderArtifact(artifact) {
+      artifactOwner.textContent = artifact.owner;
+      artifactTitle.textContent = artifact.title;
+      artifactBody.textContent = artifact.body;
+      artifactList.innerHTML = artifact.points.map((point) => `<li>${point}</li>`).join('');
+    }
+
+    function updateButtonState() {
+      scenarioButtons.forEach((button, index) => {
+        const isActive = index === scenarioIndex;
+        button.classList.toggle('is-active', isActive);
+        button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      });
+
+      stageButtons.forEach((button, index) => {
+        const isActive = index === stageIndex;
+        const isComplete = index < stageIndex;
+
+        button.classList.toggle('is-active', isActive);
+        button.classList.toggle('is-complete', isComplete);
+        button.setAttribute('aria-current', isActive ? 'step' : 'false');
+      });
+    }
+
+    function updateAgentState(stageId) {
+      const activeAgents = iterationAgents.filter((agent) => agent.stages.includes(stageId));
+      const activeNames = activeAgents.map((agent) => agent.name).join(' + ');
+
+      agentSummary.textContent = `${activeNames} lead this stage.`;
+
+      agentCards.forEach((card) => {
+        const stages = (card.dataset.agentStages || '').split(',').filter(Boolean);
+        const isActive = stages.includes(stageId);
+        card.classList.toggle('is-active', isActive);
+      });
+    }
+
+    function render() {
+      const scenario = iterationScenarios[scenarioIndex];
+      const stage = iterationStages[stageIndex];
+      const stageCopy = scenario.stageCopy[stage.id];
+      const artifact = scenario.artifacts[stage.id];
+      const verified = stageIndex >= 2;
+
+      heading.textContent = scenario.label;
+      summary.textContent = scenario.summary;
+      stageLabel.textContent = stage.label;
+      stageTitle.textContent = stageCopy.title;
+      stageText.textContent = stageCopy.text;
+      stageStatus.textContent = `Stage ${stageIndex + 1}/${iterationStages.length}`;
+      surface.textContent = scenario.surface;
+      guardrail.textContent = scenario.guardrail;
+      signal.textContent = scenario.signal;
+      beforeLabel.textContent = scenario.beforeLabel;
+      beforeValue.textContent = scenario.beforeValue;
+      afterLabel.textContent = scenario.afterLabel;
+      afterValue.textContent = verified ? scenario.afterValue : 'Pending verification';
+      delta.textContent = verified ? scenario.delta : 'Awaiting preview run';
+      patchState.textContent = patchStates[stageIndex];
+      ledgerState.textContent = ledgerStates[stageIndex];
+
+      renderDiffLines(scenario.patchLines);
+      renderArtifact(artifact);
+      renderLogEntries(scenario.logs);
+      updateAgentState(stage.id);
+      updateButtonState();
+    }
+
+    function stopRun(resetLabel = true) {
+      clearTimer();
+      root.dataset.running = 'false';
+      if (resetLabel) {
+        runButton.textContent = 'Run loop';
+      }
+    }
+
+    function stepForward() {
+      if (stageIndex >= iterationStages.length - 1) {
+        stopRun();
+        return;
+      }
+
+      timerId = window.setTimeout(() => {
+        stageIndex += 1;
+        render();
+        stepForward();
+      }, 900);
+    }
+
+    scenarioButtons.forEach((button, index) => {
+      button.addEventListener('click', () => {
+        stopRun();
+        scenarioIndex = index;
+        stageIndex = 0;
+        render();
+      });
+    });
+
+    stageButtons.forEach((button, index) => {
+      button.addEventListener('click', () => {
+        stopRun();
+        stageIndex = index;
+        render();
+      });
+    });
+
+    runButton.addEventListener('click', () => {
+      stopRun(false);
+      stageIndex = 0;
+      render();
+      runButton.textContent = 'Running...';
+      root.dataset.running = 'true';
+
+      if (prefersReducedMotion) {
+        stageIndex = iterationStages.length - 1;
+        render();
+        stopRun();
+        return;
+      }
+
+      stepForward();
+    });
+
+    render();
+  }
+</script>

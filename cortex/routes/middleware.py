@@ -25,15 +25,26 @@ logger = logging.getLogger("cortex.admin.middleware")
 # ─── Audit Log Configuration ──────────────────────────────────────────
 from cortex.core.paths import AUDIT_LOG_PATH as _AUDIT_LOG_PATH  # noqa: E402
 
-if not logger.handlers:
+_AUDIT_HANDLER_READY = False
+
+
+def _ensure_audit_handler() -> None:
+    """Attach the file-backed audit handler lazily on first use."""
+    global _AUDIT_HANDLER_READY
+
+    if _AUDIT_HANDLER_READY:
+        return
+
     try:
         _AUDIT_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
-        _handler = logging.FileHandler(_AUDIT_LOG_PATH, encoding="utf-8")
-        _handler.setFormatter(logging.Formatter("%(asctime)s | %(levelname)s | %(message)s"))
-        logger.addHandler(_handler)
+        handler = logging.FileHandler(_AUDIT_LOG_PATH, encoding="utf-8")
+        handler.setFormatter(logging.Formatter("%(asctime)s | %(levelname)s | %(message)s"))
+        logger.addHandler(handler)
     except OSError as e:
         # Fallback to standard logging if file is inaccessible
         logger.error("Failed to initialize audit log file: %s", e)
+    finally:
+        _AUDIT_HANDLER_READY = True
 
 
 # ─── Rate Limiter (Token Bucket, per-IP) ─────────────────────────────
@@ -103,6 +114,7 @@ class AuditLogger:
     """
 
     async def __call__(self, request: Request) -> None:
+        _ensure_audit_handler()
         ip = request.headers.get(
             "X-Forwarded-For", request.client.host if request.client else "unknown"
         )
@@ -134,6 +146,7 @@ class SelfHealingHook:
         increments a failure counter so monitoring can alert.  Full healing
         requires a CLI invocation (``cortex mejoralo --heal``).
         """
+        _ensure_audit_handler()
         ctx = context or {}
         endpoint = ctx.get("endpoint", "unknown")
         logger.error(

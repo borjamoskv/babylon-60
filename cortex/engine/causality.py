@@ -14,7 +14,7 @@ import aiosqlite
 
 from cortex.crypto import get_default_encrypter
 from cortex.database.core import connect
-from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
+from cortex.extensions.signals.bus import AsyncDurableSignalBus, DurableSignalBus
 
 logger = logging.getLogger("cortex.engine.causality")
 
@@ -184,6 +184,10 @@ class AsyncCausalGraph:
         await self.conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_causal_tenant ON causal_edges(tenant_id)"
         )
+        await self.conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_causal_parent_edge_tenant "
+            "ON causal_edges(parent_id, edge_type, tenant_id)"
+        )
         await self.conn.commit()
 
     async def record_edge(
@@ -345,8 +349,8 @@ class AsyncCausalGraph:
             try:
                 meta = enc.decrypt_json(raw_meta, tenant_id=tenant_id) or {}
                 return meta, True, True
-            except Exception:
-                logger.warning("Failed to decrypt metadata")
+            except (ValueError, TypeError, json.JSONDecodeError) as e:
+                logger.warning("Failed to decrypt metadata: %s", e)
                 return {}, False, False
 
         try:
@@ -556,7 +560,7 @@ class AsyncCausalOracle:
         project: Optional[str] = None,
     ) -> Optional[int]:
         try:
-            bus = AsyncSignalBus(conn)
+            bus = AsyncDurableSignalBus(conn)
             recent = await bus.history(tenant_id=tenant_id, project=project, limit=5)
             for sig in recent:
                 if sig.event_type in ("plan:done", "task:start", "apotheosis:heal"):
@@ -577,7 +581,7 @@ class CausalOracle:
     ) -> Optional[int]:
         try:
             with connect(db_path) as conn:
-                bus = SignalBus(conn)
+                bus = DurableSignalBus(conn)
                 recent = bus.history(tenant_id=tenant_id, project=project, limit=5)
                 for sig in recent:
                     if sig.event_type in ("plan:done", "task:start", "apotheosis:heal"):

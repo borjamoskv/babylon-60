@@ -3,8 +3,6 @@ import asyncio
 import click
 from rich.console import Console
 
-from cortex.extensions.browser.agent import SovereignBrowserAgent
-
 console = Console()
 
 
@@ -24,6 +22,8 @@ def browser():
 @click.option("--model", default=None, help="Model override")
 def surf(url: str, objective: str, headless: bool, provider: str, model: str):
     """Deploy BROWSER-Ω to a URL with a specific objective."""
+    from cortex.extensions.browser.agent import SovereignBrowserAgent
+
     console.print(f"[bold cyan]Deploying BROWSER-Ω[/bold cyan]: {objective}")
 
     # Initialize LLMProvider optionally with user overrides

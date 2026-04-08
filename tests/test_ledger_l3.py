@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import aiosqlite
 import pytest
+from datetime import datetime, timezone
 
 from cortex.memory.ledger import EventLedgerL3
 from cortex.memory.models import MemoryEvent
@@ -94,6 +95,32 @@ class TestAppendEvent:
         assert e2.signature != e1.signature
 
     @pytest.mark.asyncio
+    async def test_chain_continuation_uses_last_inserted_event_not_lexicographic_id(self, ledger):
+        e1 = MemoryEvent(
+            event_id="zzz",
+            timestamp=datetime(2026, 1, 1, tzinfo=timezone.utc),
+            role="user",
+            content="first event",
+            token_count=1,
+            session_id="sess_1",
+            tenant_id="test_tenant",
+        )
+        e2 = MemoryEvent(
+            event_id="aaa",
+            timestamp=datetime(2026, 1, 2, tzinfo=timezone.utc),
+            role="user",
+            content="second event",
+            token_count=1,
+            session_id="sess_1",
+            tenant_id="test_tenant",
+        )
+
+        await ledger.append_event(e1)
+        await ledger.append_event(e2)
+
+        assert e2.prev_hash == e1.signature
+
+    @pytest.mark.asyncio
     async def test_duplicate_event_id_ignored(self, ledger):
         e1 = _make_event()
         await ledger.append_event(e1)
@@ -101,6 +128,22 @@ class TestAppendEvent:
         await ledger.append_event(e1)
         count = await ledger.count("test_tenant")
         assert count == 1
+
+    @pytest.mark.asyncio
+    async def test_duplicate_event_id_does_not_advance_hash_cache(self, ledger):
+        e1 = _make_event(content="first")
+        await ledger.append_event(e1)
+
+        conflict = _make_event(content="conflict")
+        object.__setattr__(conflict, "event_id", e1.event_id)
+        object.__setattr__(conflict, "signature", "")
+        object.__setattr__(conflict, "prev_hash", "")
+        await ledger.append_event(conflict)
+
+        e2 = _make_event(content="second")
+        await ledger.append_event(e2)
+
+        assert e2.prev_hash == e1.signature
 
 
 # ─── get_session_events ──────────────────────────────────────────────────
@@ -122,6 +165,11 @@ class TestGetSessionEvents:
     async def test_empty_session(self, ledger):
         events = await ledger.get_session_events("nonexistent", tenant_id="test_tenant")
         assert events == []
+
+    @pytest.mark.asyncio
+    async def test_requires_explicit_tenant(self, ledger):
+        with pytest.raises(ValueError, match="tenant_id"):
+            await ledger.get_session_events("sess_1")
 
     @pytest.mark.asyncio
     async def test_limit_respected(self, ledger):

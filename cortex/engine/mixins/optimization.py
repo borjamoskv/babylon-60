@@ -133,11 +133,25 @@ class OptimizationMixin:
     def __init__(self):
         self._write_buffer: asyncio.Queue = asyncio.Queue()
         self._cache = SovereignTLRUCache(capacity=2000, ttl=600, on_evict=self._on_cache_evict)
-        if OptimizationMixin._executor is None:
-            # Saturate all available CPU cores for maximum exergy (Ω₂)
-            OptimizationMixin._executor = ProcessPoolExecutor(max_workers=os.cpu_count())
+        self._ensure_executor()
         self._buffer_task: Optional[asyncio.Task] = None
+        self._flush_tasks: set[asyncio.Task[Any]] = set()
+        self._eviction_tasks: set[asyncio.Task[Any]] = set()
         self._is_flushing = False
+
+    @classmethod
+    def _ensure_executor(cls) -> ProcessPoolExecutor | None:
+        """Create the shared CPU executor when the platform supports it."""
+        if cls._executor is not None:
+            return cls._executor
+
+        try:
+            # Saturate all available CPU cores for maximum exergy (Ω₂)
+            cls._executor = ProcessPoolExecutor(max_workers=os.cpu_count())
+        except (NotImplementedError, OSError, PermissionError) as exc:
+            logger.warning("ProcessPoolExecutor unavailable, using default executor: %s", exc)
+            cls._executor = None
+        return cls._executor
 
     def _on_cache_evict(self, key: str, value: Any, audit: dict[str, Any]):
         """Callback to anchor eviction proofs to the immutable ledger."""
@@ -147,7 +161,9 @@ class OptimizationMixin:
             "type": "CACHE_EVICTION_PROOF",
             "commitment": "decisional_ghost",
         }
-        asyncio.create_task(self._anchor_eviction(detail))
+        task = asyncio.create_task(self._anchor_eviction(detail))
+        self._eviction_tasks.add(task)
+        task.add_done_callback(self._eviction_tasks.discard)
 
     async def _anchor_eviction(self, detail: dict):
         """Persistent anchor for the Decisional Proof."""
@@ -165,12 +181,36 @@ class OptimizationMixin:
 
     async def stop_optimizer(self):
         """Shutdown the optimizer and flush the buffer."""
-        if self._buffer_task:
+        buffer_task = getattr(self, "_buffer_task", None)
+        if buffer_task:
             self._is_flushing = True
-            await self._write_buffer.put(None)
-            await self._buffer_task
+            write_buffer = getattr(self, "_write_buffer", None)
+            if write_buffer is not None:
+                await write_buffer.put(None)
+            await buffer_task
             self._buffer_task = None
+        await self._drain_background_tasks(getattr(self, "_flush_tasks", set()), "flush")
+        await self._drain_background_tasks(getattr(self, "_eviction_tasks", set()), "eviction")
         # Note: Shared executor is not shutdown per-agent to avoid breaking others.
+
+    async def _drain_background_tasks(
+        self,
+        tasks: set[asyncio.Task[Any]],
+        label: str,
+    ) -> None:
+        if not tasks:
+            return
+
+        pending = set(tasks)
+        try:
+            await asyncio.wait_for(asyncio.gather(*pending, return_exceptions=True), timeout=5.0)
+        except asyncio.TimeoutError:
+            logger.warning("Timed out draining optimizer %s tasks", label)
+            for task in pending:
+                task.cancel()
+            await asyncio.gather(*pending, return_exceptions=True)
+        finally:
+            tasks.clear()
 
     async def _buffer_worker(self):
         batch = []
@@ -194,7 +234,10 @@ class OptimizationMixin:
             except asyncio.QueueEmpty:
                 break
         if batch:
-            asyncio.create_task(self._flush_batch(batch))
+            flush_batch = list(batch)
+            task = asyncio.create_task(self._flush_batch(flush_batch))
+            self._flush_tasks.add(task)
+            task.add_done_callback(self._flush_tasks.discard)
             batch.clear()
 
     async def _flush_batch(self, batch: list):
@@ -250,7 +293,7 @@ class OptimizationMixin:
 
         loop = asyncio.get_running_loop()
         th = await loop.run_in_executor(
-            OptimizationMixin._executor, compute_tx_hash, last_hash, project, action, dj, ts
+            self._ensure_executor(), compute_tx_hash, last_hash, project, action, dj, ts
         )
 
         sql = (

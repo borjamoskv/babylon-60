@@ -1,18 +1,14 @@
-# Security Policy
+# GitHub Security Policy
 
-Moskv-1 and the CORTEX ecosystem follow a Sovereign Architecture principle. We take the security of the God-State Engine and its subagents seriously.
+This repository uses the root [SECURITY.md](../SECURITY.md) as the canonical public security policy.
 
-## Supported Versions
+## Reporting A Vulnerability
 
-| Version | Supported          |
-| ------- | ------------------ |
-| v5.x    | :white_check_mark: |
-| < v5.0  | :x:                |
+- Email **security@cortexpersist.com**
+- Do not open public GitHub issues for vulnerabilities
+- Review the root [SECURITY.md](../SECURITY.md) for supported release lines and response targets
+- Current public target: acknowledge within 48 hours and triage within 5 business days
 
-## Reporting a Vulnerability
+## Scope
 
-If you discover a security vulnerability within the CORTEX ecosystem, please send an email to **security@moskv.com**. All security vulnerabilities will be promptly addressed.
-
-**Please DO NOT report security vulnerabilities via public GitHub issues.**
-
-We follow a 150/100 principle for responses: We will confirm receipt of the vulnerability within 24 hours, and aim to provide a remediation plan or patch within 72 hours.
+This file exists so the GitHub Security tab points evaluators to the same policy used by the repository root.

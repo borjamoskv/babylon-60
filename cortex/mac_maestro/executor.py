@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import logging
+import sqlite3
 import time
+from typing import Any
 
 from cortex.ledger.models import IntentPayload
 from cortex.ledger.writer import LedgerWriter
+from cortex.mac_maestro.access import MaestroAccessProfile, collect_access_profile
 from cortex.mac_maestro.events import build_mac_maestro_event
 from cortex.mac_maestro.intent import MacAction, MacIntent
 from cortex.mac_maestro.oracle import VerificationOracle
@@ -16,9 +19,20 @@ try:
     SDK_AVAILABLE = True
 except ImportError:
     SDK_AVAILABLE = False
+    ActionFailed = RuntimeError
+
+    class UIAction:  # type: ignore[no-redef]
+        def __init__(self, **kwargs: Any) -> None:
+            for key, value in kwargs.items():
+                setattr(self, key, value)
+
+    class MacMaestroWorkflow:  # type: ignore[no-redef]
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
+            raise RuntimeError("MacMaestro SDK is not installed or available.")
 
 
 logger = logging.getLogger("cortex.mac_maestro.executor")
+SLOW_ACTION_LATENCY_MS = 1500
 
 
 class MaestroExecutor:
@@ -26,6 +40,73 @@ class MaestroExecutor:
 
     def __init__(self, ledger_writer: LedgerWriter) -> None:
         self.ledger_writer = ledger_writer
+
+    def _emit_signal(
+        self,
+        event_type: str,
+        payload: dict[str, Any],
+        *,
+        source: str = "mac_maestro",
+        project: str = "mac_maestro",
+    ) -> None:
+        try:
+            from cortex.extensions.signals.bus import DurableSignalBus
+
+            conn = sqlite3.connect(self.ledger_writer.store.db_path)
+            try:
+                bus = DurableSignalBus(conn)
+                bus.emit(
+                    event_type=event_type,
+                    payload=payload,
+                    source=source,
+                    project=project,
+                )
+            finally:
+                conn.close()
+        except (ImportError, OSError, RuntimeError, ValueError, sqlite3.Error) as exc:
+            logger.debug("Mac Maestro signal emission skipped for %s: %s", event_type, exc)
+
+    def _emit_execution_signals(
+        self,
+        *,
+        action: MacAction,
+        latency_ms: int,
+        ok: bool,
+        error_msg: str | None,
+        verification_ok: bool | None,
+        verification_error: str | None,
+        correlation_id: str | None,
+        trace_id: str | None,
+    ) -> None:
+        payload = {
+            "action": action.action,
+            "app": action.app,
+            "role": action.role,
+            "title": action.title,
+            "identifier": action.identifier,
+            "latency_ms": latency_ms,
+            "ok": ok,
+            "error": error_msg,
+            "verified": verification_ok,
+            "verification_error": verification_error,
+            "correlation_id": correlation_id,
+            "trace_id": trace_id,
+        }
+
+        if error_msg and error_msg.startswith("SAFETY_GATE_BLOCK:"):
+            self._emit_signal("mac_maestro:safety_gate_blocked", payload)
+            return
+
+        if not ok:
+            self._emit_signal("mac_maestro:action_failed", payload)
+            return
+
+        if verification_ok is False:
+            self._emit_signal("mac_maestro:verification_failed", payload)
+            return
+
+        if latency_ms >= SLOW_ACTION_LATENCY_MS:
+            self._emit_signal("mac_maestro:action_slow", payload)
 
     def _convert_action(self, action: MacAction) -> UIAction:
         """Translates a Cortex MacAction into an SDK UIAction."""
@@ -56,6 +137,50 @@ class MaestroExecutor:
             # Payload isn't mapped directly in UIAction without custom extension,
             # assuming it gets handled by workflow logic if passed directly
             # or injected into target_query
+        )
+
+    @staticmethod
+    def _required_surface_for_vector(vector: str) -> str | None:
+        mapping = {
+            "A": "automation",
+            "B": "axui_element",
+            "C": "synthetic_input",
+            "D": "synthetic_input",
+        }
+        return mapping.get(vector)
+
+    def access_profile(
+        self,
+        *,
+        action: MacAction | None = None,
+        sdk_action: UIAction | None = None,
+    ) -> MaestroAccessProfile:
+        vector = sdk_action.vector if sdk_action is not None else None
+        return collect_access_profile(
+            prompt_accessibility=vector in {"B", "C", "D"},
+            automation_target=action.app if action is not None else "System Events",
+            request_automation=vector == "A",
+        )
+
+    def _ensure_action_access(self, action: MacAction, sdk_action: UIAction) -> None:
+        surface = self._required_surface_for_vector(sdk_action.vector)
+        if surface is None:
+            return
+
+        profile = self.access_profile(action=action, sdk_action=sdk_action)
+        missing = profile.missing_for_surface(surface)
+        if not missing:
+            return
+
+        capabilities = ", ".join(status.name for status in missing)
+        guidance = " | ".join(
+            f"{status.name}: {status.settings_path}"
+            for status in missing
+            if status.settings_path
+        )
+        raise PermissionError(
+            f"Missing macOS capabilities for vector {sdk_action.vector}: {capabilities}. "
+            f"{guidance}"
         )
 
     def execute_intent(
@@ -90,6 +215,7 @@ class MaestroExecutor:
             try:
                 # SDK Call
                 logger.info("Executing Mac action: %s on %s", action.action, action.app)
+                self._ensure_action_access(action, sdk_action)
                 ok = workflow.execute_action(sdk_action, apply_safety_gate=apply_safety_gate)
             except ActionFailed as e:
                 error_msg = str(e)
@@ -126,6 +252,16 @@ class MaestroExecutor:
             # Persist and cryptographic chain
             event_id = self.ledger_writer.append(event)
             event_ids.append(event_id)
+            self._emit_execution_signals(
+                action=action,
+                latency_ms=latency_ms,
+                ok=ok,
+                error_msg=error_msg,
+                verification_ok=verification_ok,
+                verification_error=verification_error,
+                correlation_id=intent.correlation_id,
+                trace_id=intent.trace_id or workflow.run_id,
+            )
 
             # Fail fast if sequence breaks
             if not ok or verification_ok is False:

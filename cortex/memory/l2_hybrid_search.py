@@ -46,6 +46,8 @@ if TYPE_CHECKING:
 
 import numpy as np
 
+from cortex.crypto import load_json_dict
+
 __all__ = ["L2HybridSearch", "L2SearchResult"]
 
 logger = logging.getLogger("cortex.memory.l2_hybrid_search")
@@ -351,17 +353,11 @@ class L2HybridSearch:
             logger.error("L2HybridSearch: Hydration query failed: %s", e)
             return []
 
-        import json
-
         results: list[L2SearchResult] = []
         for rank_index, row in enumerate(rows):
             fact_id = row[0]
             _, rrf_score, source_signals = id_index.get(fact_id, (fact_id, 0.0, []))
-
-            try:
-                meta = json.loads(row[9]) if row[9] else {}
-            except (json.JSONDecodeError, TypeError):
-                meta = {}
+            meta = load_json_dict(row[9], tenant_id=row[1] or "default")
 
             results.append(
                 L2SearchResult(

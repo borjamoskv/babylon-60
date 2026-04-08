@@ -30,11 +30,12 @@ the persistent Signal Bus (L1 consciousness layer).  The emission is:
 Compact auto-trigger threshold
 -------------------------------
 When the count of *unconsumed* ``fact:stored`` signals for a given
-project exceeds ``COMPACT_TRIGGER_THRESHOLD``, a single ``compact:needed``
-signal is also emitted so that a listening daemon (``cortex compact``) or
-a future L2 reactor can auto-execute compaction without human intervention.
-This is the *neural seed* of L2 reactivity: the first emit() is invisible,
-the second is a consequence — the system develops reflexes.
+project/tenant exceeds ``COMPACT_TRIGGER_THRESHOLD``, a single pending
+``compact:needed`` signal is also emitted so that a listening daemon
+(``cortex compact``) or a future L2 reactor can auto-execute compaction
+without human intervention. This is the *neural seed* of L2 reactivity:
+the first emit() is invisible, the second is a consequence — the system
+develops reflexes.
 """
 
 from __future__ import annotations
@@ -89,11 +90,11 @@ def emit_fact_stored(
                      (passed in to avoid a double read inside this hook).
     """
     try:
-        from cortex.extensions.signals.bus import SignalBus
+        from cortex.extensions.signals.bus import DurableSignalBus
 
         conn = db_connect(db_path, timeout=3)
 
-        bus = SignalBus(conn)
+        bus = DurableSignalBus(conn)
         bus.ensure_table()
 
         payload: dict = {
@@ -111,6 +112,7 @@ def emit_fact_stored(
             payload,
             source=source or "engine:store",
             project=project,
+            tenant_id=tenant_id,
         )
 
         # ── Reactive Auto-Trigger: compact:needed ─────────────────────────
@@ -123,17 +125,30 @@ def emit_fact_stored(
                 "SELECT COUNT(*) FROM signals "
                 "WHERE event_type = 'fact:stored' "
                 "AND project = ? "
+                "AND tenant_id = ? "
                 "AND consumed_by = '[]'",
-                (project,),
+                (project, tenant_id),
             )
             row = cursor.fetchone()
             unconsumed = row[0] if row else 0
 
-            if unconsumed >= threshold:
+            cursor = conn.execute(
+                "SELECT COUNT(*) FROM signals "
+                "WHERE event_type = 'compact:needed' "
+                "AND project = ? "
+                "AND tenant_id = ? "
+                "AND consumed_by = '[]'",
+                (project, tenant_id),
+            )
+            pending_compactions_row = cursor.fetchone()
+            pending_compactions = pending_compactions_row[0] if pending_compactions_row else 0
+
+            if unconsumed >= threshold and pending_compactions == 0:
                 bus.emit(
                     "compact:needed",
                     {
                         "project": project,
+                        "tenant_id": tenant_id,
                         "unconsumed_fact_signals": unconsumed,
                         "threshold": threshold,
                         "reason": (
@@ -143,10 +158,12 @@ def emit_fact_stored(
                     },
                     source="fact-hook",
                     project=project,
+                    tenant_id=tenant_id,
                 )
                 logger.info(
-                    "compact:needed emitted for project=%s (unconsumed=%d)",
+                    "compact:needed emitted for project=%s tenant=%s (unconsumed=%d)",
                     project,
+                    tenant_id,
                     unconsumed,
                 )
         except Exception as e:  # noqa: BLE001

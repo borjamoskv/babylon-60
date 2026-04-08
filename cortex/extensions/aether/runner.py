@@ -35,20 +35,14 @@ class AetherAgent:
     """
 
     def __init__(self, llm_provider: str = "qwen", agent_id: str | None = None) -> None:
-        from cortex.extensions.agents.registry import AgentRegistry
+        from cortex.extensions.agents.registry import resolve_agent_runtime_config
         from cortex.extensions.llm.provider import LLMProvider
 
         self._llm = LLMProvider(provider=llm_provider)
 
-        system_prompt = None
-        self._allowed_tools: list[str] | None = None
-        if agent_id:
-            registry = AgentRegistry()
-            # Ensure registries are loaded (safe to call multiple times)
-            registry.load_all()
-            if agent_def := registry.get(agent_id):
-                system_prompt = agent_def.system_prompt
-                self._allowed_tools = agent_def.tools
+        runtime_config = resolve_agent_runtime_config(agent_id)
+        system_prompt = runtime_config.system_prompt
+        self._allowed_tools = runtime_config.tools or None
 
         self._planner = PlannerAgent(self._llm, system_prompt)
         self._executor = ExecutorAgent(self._llm, system_prompt)

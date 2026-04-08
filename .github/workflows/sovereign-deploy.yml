@@ -20,6 +20,7 @@ env:
   TF_VERSION: "1.7.5"
   PYTHON_VERSION: "3.12"
   NODE_VERSION: "20"
+  PYTHONWARNINGS: "error::DeprecationWarning,error::pytest.PytestUnhandledThreadExceptionWarning"
 
 jobs:
   # ── Phase 1: Quality Gate ─────────────────────────────────
@@ -50,7 +51,10 @@ jobs:
         run: safety check --json --output safety-report.json || true
 
       - name: Unit tests
-        run: pytest tests/ -q --tb=short --junitxml=test-results.xml
+        run: >
+          pytest tests/ -q --tb=short --junitxml=test-results.xml
+          -W error::DeprecationWarning
+          -W error::pytest.PytestUnhandledThreadExceptionWarning
 
       - name: MEJORAlo Score Check
         run: |

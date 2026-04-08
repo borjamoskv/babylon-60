@@ -29,7 +29,7 @@ class AuthResult:
     """Result of an authentication attempt."""
 
     authenticated: bool
-    tenant_id: str = "default"
+    tenant_id: str = ""
     role: str = "user"
     permissions: list[str | Permission] = field(default_factory=list)
     key_name: str = ""

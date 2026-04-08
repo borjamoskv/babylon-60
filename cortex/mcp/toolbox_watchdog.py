@@ -22,9 +22,12 @@ import logging
 import os
 import shutil
 import signal
+import sqlite3
 import subprocess
 from pathlib import Path
 from typing import Any
+
+from cortex.core.paths import CORTEX_DB
 
 logger = logging.getLogger("cortex.mcp.toolbox_watchdog")
 
@@ -37,7 +40,9 @@ _INITIAL_BACKOFF_S = 2
 _STARTUP_GRACE_S = 3
 
 _TOOLS_YAML = Path(__file__).parent / "toolbox" / "tools.yaml"
-_DEFAULT_DB = Path.home() / ".cortex" / "cortex.db"
+_DEFAULT_DB = CORTEX_DB
+_DEFAULT_LOG_DIR = Path.home() / ".cortex" / "logs"
+_DEFAULT_SNAPSHOT = Path.home() / ".cortex" / "toolbox" / "cortex-toolbox.db"
 
 
 # ── Watchdog ──────────────────────────────────────────────────────
@@ -60,6 +65,8 @@ class ToolboxWatchdog:
         "_restart_count",
         "_shutdown",
         "_log_fd",
+        "_log_dir",
+        "_snapshot_path",
     )
 
     def __init__(
@@ -67,17 +74,21 @@ class ToolboxWatchdog:
         port: int = _DEFAULT_PORT,
         tools_yaml: Path | None = None,
         db_path: Path | None = None,
+        snapshot_path: Path | None = None,
+        log_dir: Path | None = None,
     ) -> None:
         self._port = port
         self._tools_yaml = tools_yaml or _TOOLS_YAML
         self._db_path = db_path or Path(
-            os.environ.get("CORTEX_DB", str(_DEFAULT_DB)),
+            os.environ.get("CORTEX_DB_PATH") or os.environ.get("CORTEX_DB") or str(_DEFAULT_DB),
         )
+        self._snapshot_path = snapshot_path or _DEFAULT_SNAPSHOT
         self._process: subprocess.Popen[bytes] | None = None
         self._backoff = _INITIAL_BACKOFF_S
         self._restart_count = 0
         self._shutdown = False
         self._log_fd: Any | None = None
+        self._log_dir = log_dir or _DEFAULT_LOG_DIR
 
     # ── Public API ────────────────────────────────────────────────
 
@@ -100,9 +111,10 @@ class ToolboxWatchdog:
             return
 
         logger.info(
-            "🔭 [WATCHDOG] Starting Toolbox supervisor (port=%d, db=%s)",
+            "🔭 [WATCHDOG] Starting Toolbox supervisor (port=%d, db=%s, snapshot=%s)",
             self._port,
             self._db_path,
+            self._snapshot_path,
         )
 
         while not self._shutdown:
@@ -185,8 +197,11 @@ class ToolboxWatchdog:
 
     def _spawn(self, binary: str) -> None:
         """Launch the genai-toolbox subprocess."""
+        self._refresh_snapshot()
+
         env = os.environ.copy()
-        env["CORTEX_DB"] = str(self._db_path)
+        env["CORTEX_DB"] = str(self._snapshot_path)
+        env["CORTEX_DB_PATH"] = str(self._snapshot_path)
 
         cmd = [
             binary,
@@ -196,9 +211,8 @@ class ToolboxWatchdog:
             str(self._port),
         ]
 
-        log_dir = Path.home() / ".cortex" / "logs"
-        log_dir.mkdir(parents=True, exist_ok=True)
-        log_file = log_dir / "toolbox.log"
+        self._log_dir.mkdir(parents=True, exist_ok=True)
+        log_file = self._log_dir / "toolbox.log"
         self._rotate_logs(log_file)
 
         self._log_fd = open(log_file, "a")
@@ -211,10 +225,30 @@ class ToolboxWatchdog:
         )
 
         logger.info(
-            "🚀 [WATCHDOG] Spawned PID %d: %s",
+            "🚀 [WATCHDOG] Spawned PID %d: %s (snapshot=%s)",
             self._process.pid,
             " ".join(cmd),
+            self._snapshot_path,
         )
+
+    def _refresh_snapshot(self) -> None:
+        """Materialize a read-only snapshot for Toolbox startup.
+
+        Toolbox only needs read access, so we keep it off the live writer DB
+        and refresh a shadow copy via SQLite's backup API.
+        """
+        self._snapshot_path.parent.mkdir(parents=True, exist_ok=True)
+
+        source_uri = f"file:{self._db_path.as_posix()}?mode=ro"
+        source = sqlite3.connect(source_uri, uri=True, timeout=5.0)
+        target = sqlite3.connect(str(self._snapshot_path), timeout=5.0)
+
+        try:
+            source.backup(target)
+            target.commit()
+        finally:
+            target.close()
+            source.close()
 
     async def _health_loop(self) -> None:
         """Monitor process health with periodic probes."""
@@ -245,6 +279,14 @@ class ToolboxWatchdog:
                     rc,
                 )
                 return
+
+            try:
+                self._refresh_snapshot()
+            except sqlite3.Error as exc:
+                logger.warning(
+                    "⚠️ [WATCHDOG] Snapshot refresh failed: %s",
+                    exc,
+                )
 
             # HTTP health probe
             from cortex.mcp.toolbox_bridge import (

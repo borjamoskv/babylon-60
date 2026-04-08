@@ -12,7 +12,7 @@ import logging
 
 import aiosqlite
 
-from cortex.extensions.signals.bus import AsyncSignalBus
+from cortex.extensions.signals.bus import AsyncDurableSignalBus
 
 logger = logging.getLogger("cortex.extensions.sap.oliver")
 
@@ -22,7 +22,7 @@ class OliverAgent:
 
     def __init__(self, conn: aiosqlite.Connection) -> None:
         self.conn = conn
-        self.bus = AsyncSignalBus(conn)
+        self.bus = AsyncDurableSignalBus(conn)
 
     async def listen_and_react(self, limit: int = 50) -> int:
         """Poll signals emitted by TOM and convert to material effects.

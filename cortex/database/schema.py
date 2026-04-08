@@ -202,6 +202,7 @@ CREATE TABLE IF NOT EXISTS transactions (
 
 CREATE_TRANSACTIONS_INDEX = """
 CREATE INDEX IF NOT EXISTS idx_tx_tenant ON transactions(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_tx_tenant_id_desc ON transactions(tenant_id, id DESC);
 CREATE INDEX IF NOT EXISTS idx_tx_project ON transactions(project);
 CREATE INDEX IF NOT EXISTS idx_tx_action ON transactions(action);
 

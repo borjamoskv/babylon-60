@@ -1,6 +1,6 @@
 # CONTRIBUTING.md — CORTEX Persist
 
-Package: cortex-persist v0.3.0
+Package: cortex-persist v0.3.0b2
 Engine: v8.0
 License: Apache-2.0
 Python: >=3.10
@@ -14,6 +14,8 @@ Before touching critical trust surfaces, also read:
 - [AGENTS.md](./AGENTS.md) — operational contract and invariants
 - [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md) — deep change protocols
 - [docs/SECURITY_TRUST_MODEL.md](./docs/SECURITY_TRUST_MODEL.md) — trust boundaries and verification model
+- [docs/architecture.md](./docs/architecture.md) — architecture and critical surfaces
+- [SUPPORT.md](./SUPPORT.md) — support posture and response targets
 
 ## Development Setup
 
@@ -58,6 +60,7 @@ Before opening a PR:
 - run Pyright
 - confirm CI passes
 - update docs if public behavior changed
+- explain rollback impact if you touch trust-critical surfaces
 
 For schema, ledger, async, API, or trust-surface changes, follow the deep protocols in [`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md).
 
@@ -87,5 +90,7 @@ Update documentation when you change:
 - [`AGENTS.md`](./AGENTS.md)
 - [`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md)
 - [`docs/SECURITY_TRUST_MODEL.md`](./docs/SECURITY_TRUST_MODEL.md)
-- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)
+- [`docs/architecture.md`](./docs/architecture.md)
+- [`SUPPORT.md`](./SUPPORT.md)
+- [`ENTERPRISE_READINESS.md`](./ENTERPRISE_READINESS.md)
 - [`SECURITY.md`](./SECURITY.md)

@@ -16,6 +16,7 @@ from cortex.core.paths import (
 from cortex.core.paths import (
     DAEMON_STATUS_FILE as STATUS_FILE,
 )
+from cortex.extensions.aether.models import AetherAlert
 
 __all__ = [
     "AGENT_DIR",
@@ -242,16 +243,6 @@ class TrendsAlert:
     category: str
     trend_type: str
     timestamp: str
-
-
-@dataclass
-class AetherAlert:
-    """Alert triggered when Aether completes or fails an autonomous task."""
-
-    task_id: str
-    title: str
-    status: str
-    message: str
 
 
 @dataclass

@@ -3,7 +3,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
-from cortex.engine.legion import AsyncSignalBus, SwarmAgent, SwarmSignal
+from cortex.engine.legion import InMemorySwarmSignalBus, SwarmAgent, SwarmSignal
 from cortex.engine.mixins.deterministic_induction_mixin import DeterministicInductionMixin
 
 logger = logging.getLogger("cortex.nemesis_agent")
@@ -59,7 +59,7 @@ class NemesisAgentAdapter(SwarmAgent):
     Wraps the NemesisL4Agent logic into a SwarmAgent for Squadron deployment.
     """
 
-    def __init__(self, agent_id: str, bus: AsyncSignalBus, engine: Any = None):
+    def __init__(self, agent_id: str, bus: InMemorySwarmSignalBus, engine: Any = None):
         super().__init__(agent_id, bus, engine)
         self.specialist = NemesisL4Agent()
 

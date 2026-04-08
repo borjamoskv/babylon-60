@@ -157,6 +157,7 @@ class AgencyHypervisor:
         """The real reflect() — gather stats + verify chain + compress."""
         isolator = self._isolators[tenant]
         tid = isolator.tenant_id
+        reflect_ok = True
 
         # Gather internal stats
         try:
@@ -172,9 +173,16 @@ class AgencyHypervisor:
             active_count = stats.get("active_facts", active_count)
 
             last_activity = facts[0].created_at if facts else None  # type: ignore[type-error]
-        except Exception:  # noqa: BLE001
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(
+                "Hypervisor reflect failed to gather stats for tenant=%s project=%s: %s",
+                tid,
+                project,
+                exc,
+            )
             active_count = 0
             last_activity = None
+            reflect_ok = False
 
         # Verify ledger integrity
         chain_valid = True
@@ -184,12 +192,18 @@ class AgencyHypervisor:
                 chain_valid = (
                     result.get("valid", True) if isinstance(result, dict) else bool(result)
                 )
-        except Exception:  # noqa: BLE001
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(
+                "Hypervisor reflect failed to verify ledger for tenant=%s project=%s: %s",
+                tid,
+                project,
+                exc,
+            )
             chain_valid = False
 
         # Compress to HealthReport
         return self._compressor.to_health_report(
             active_count=active_count,
             last_activity_iso=last_activity,
-            chain_valid=chain_valid,
+            chain_valid=chain_valid and reflect_ok,
         )

@@ -22,8 +22,13 @@ cortex store ...
 
 What you expected to happen.
 
+## Impact
+
+Describe user impact, data risk, or trust-surface risk if known.
+
 ## Environment
 
 - OS: [e.g., macOS 15.3]
 - Python: [e.g., 3.13.1]
 - CORTEX: [e.g., 0.1.0]
+- Install mode: [e.g., `pip install cortex-persist[api]`]

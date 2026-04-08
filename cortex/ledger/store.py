@@ -109,8 +109,10 @@ class LedgerStore:
                 CREATE INDEX IF NOT EXISTS idx_ledger_events_hash ON ledger_events(hash);
                 CREATE INDEX IF NOT EXISTS idx_ledger_events_semantic_status
                     ON ledger_events(semantic_status);
+                CREATE INDEX IF NOT EXISTS idx_enrichment_jobs_status_next_attempt_compat
+                    ON enrichment_jobs(status, COALESCE(next_attempt_ts, next_attempt_at), created_at);
                 CREATE INDEX IF NOT EXISTS idx_ledger_enrichment_jobs_status_next_attempt_compat
-                    ON ledger_enrichment_jobs(status, COALESCE(next_attempt_ts, next_attempt_at));
+                    ON ledger_enrichment_jobs(status, COALESCE(next_attempt_ts, next_attempt_at), created_at);
 
                 CREATE TRIGGER IF NOT EXISTS enrichment_jobs_ledger_insert
                 AFTER INSERT ON enrichment_jobs

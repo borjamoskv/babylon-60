@@ -25,7 +25,9 @@ class TestAutonomousSwarm(unittest.IsolatedAsyncioTestCase):
         # We need to mock _apply_causal_jitter to avoid sleeping
         provider._apply_causal_jitter = AsyncMock()
 
-        response = await provider.complete("system-prompt", "user-msg")
+        response = await asyncio.wait_for(
+            provider.complete("system-prompt", "user-msg"), timeout=5.0
+        )
 
         self.assertEqual(response, "Sovereign execution confirmed.")
         self.assertEqual(provider._execute_completion.call_count, 2)
@@ -57,7 +59,7 @@ class TestAutonomousSwarm(unittest.IsolatedAsyncioTestCase):
             [],
         )
 
-        result = await router.execute_swarm(prompt)
+        result = await asyncio.wait_for(router.execute_swarm(prompt), timeout=5.0)
 
         self.assertTrue(result.is_ok())
         self.assertEqual(result.unwrap(), "Fastest wins")

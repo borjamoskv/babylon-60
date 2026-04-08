@@ -21,7 +21,7 @@ logger = logging.getLogger("cortex.facts")
 
 try:
     from cortex.security.haiku import HaikuGuard
-except Exception:  # noqa: BLE001
+except ImportError:
     HaikuGuard = None
 
 
@@ -145,7 +145,8 @@ class FactManager:
                 await conn.execute(
                     "UPDATE facts SET updated_at = ? WHERE id = ?", (now_iso(), fact_id)
                 )
-                await conn.commit()
+                if commit:
+                    await conn.commit()
                 return fact_id
 
             # V8 Semantic Deduplication
@@ -169,7 +170,8 @@ class FactManager:
                                 "UPDATE facts SET updated_at = ? WHERE id = ?",
                                 (now_iso(), results[0].fact_id),
                             )
-                            await conn.commit()  # type: ignore[reportOptionalMemberAccess]
+                            if commit:
+                                await conn.commit()  # type: ignore[reportOptionalMemberAccess]
                             return results[0].fact_id  # type: ignore[reportAttributeAccessIssue]
         except ValidationError as e:
             raise ValueError(f"Ingestion Validation Failed: {e}") from e

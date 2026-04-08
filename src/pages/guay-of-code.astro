@@ -1,0 +1,422 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const marketingOrigin = import.meta.env.PUBLIC_MARKETING_ORIGIN || '';
+const homeHref = marketingOrigin || '/';
+
+const doctrineSignals = [
+  { label: 'Readable', value: 'Diff-first', detail: 'clarity under pressure, not just in a calm review' },
+  { label: 'Measured', value: 'Behavior > vibes', detail: 'taste must improve the next action, not just the screenshot' },
+  { label: 'Honest', value: 'Claims with proof', detail: 'the surface should say what the system can actually defend' },
+  { label: 'Kinetic', value: 'Fast enough', detail: 'if the loop drags, good taste never survives contact with reality' },
+];
+
+const principles = [
+  {
+    title: 'Readability is an operational feature',
+    text: 'Code should stay parseable when a human is tired, under incident pressure, and reading a diff at speed.',
+  },
+  {
+    title: 'Taste is a routing layer',
+    text: 'Visual and structural decisions should reduce hesitation and make the right move feel obvious.',
+  },
+  {
+    title: 'Restraint beats ornamental cleverness',
+    text: 'The point is not to show off. The point is to compress intent without making the system cryptic.',
+  },
+  {
+    title: 'Style must survive verification',
+    text: 'Aesthetic ambition is welcome, but it has to coexist with guardrails, telemetry, and proof.',
+  },
+];
+
+const examples = [
+  {
+    kicker: 'Before',
+    title: 'Technically functional, emotionally dead',
+    code: `const onSubmit = async () => {\n  setLoading(true);\n  try {\n    await save(data);\n    navigate('/done');\n  } finally {\n    setLoading(false);\n  }\n};`,
+    text: 'It works, but it tells you almost nothing about intent, failure posture, or what the product thinks matters.',
+  },
+  {
+    kicker: 'After',
+    title: 'Intent-forward and easier to trust',
+    code: `const commitDraft = async () => {\n  startTransition(() => setStage('saving'));\n\n  try {\n    await saveDraft(formState);\n    navigate('/done');\n  } catch (error) {\n    setStage('blocked');\n    setIssue(copyError(error));\n  }\n};`,
+    text: 'Names, states, and failure handling now describe the product model instead of leaving the reader to infer it.',
+  },
+];
+
+const rubric = [
+  'Can a reviewer understand the move without reverse-engineering your head?',
+  'Does the interface signal priority, risk, and action clearly?',
+  'Would this still feel sharp after six months of maintenance?',
+  'Did the style survive contact with constraints, tests, and edge cases?',
+];
+---
+
+<Layout
+  title="Guay Of Code — Borja Doctrine"
+  description="A doctrine page for code taste: rigorous, legible, bold, and operationally honest."
+>
+  <header class="guay-page-header">
+    <div class="guay-page-header__inner w">
+      <a class="guay-brand" href={homeHref}>
+        <span>CP</span>
+        <strong>Guay Of Code</strong>
+      </a>
+      <nav class="guay-page-nav" aria-label="Guay navigation">
+        <a href={homeHref}>Home</a>
+        <a href="#principles">Principles</a>
+        <a href="#examples">Examples</a>
+        <a href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noreferrer">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="guay-hero w">
+      <div class="guay-hero__copy rv">
+        <div class="eyebrow">Taste as operating discipline</div>
+        <h1>Code can be rigorous, legible, and still have swagger.</h1>
+        <p>
+          "Guay" is not decorative fluff. It means the surface feels intentional, the
+          logic stays readable under pressure, and the product has enough taste to make
+          the right next action feel obvious.
+        </p>
+        <div class="guay-hero__actions">
+          <a class="btn btn--p" href="#principles">Read the doctrine</a>
+          <a class="btn btn--g" href="#examples">See concrete examples</a>
+        </div>
+      </div>
+
+      <aside class="guay-hero__panel rv">
+        <div class="guay-hero__panel-label">borjamoskv.com doctrine</div>
+        <blockquote>
+          Good code is not sterile. It should carry rhythm, clarity, and enough
+          personality that you can tell a human cared about the shape of it.
+        </blockquote>
+        <p>
+          The standard is simple: bold interfaces, constrained mutations, explicit
+          guardrails, and enough telemetry to know whether the experience actually got better.
+        </p>
+      </aside>
+    </section>
+
+    <section class="section w">
+      <div class="guay-signal-grid">
+        {doctrineSignals.map((signal) => (
+          <article class="guay-signal rv">
+            <span>{signal.label}</span>
+            <strong>{signal.value}</strong>
+            <p>{signal.detail}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section id="principles" class="section w">
+      <div class="section-head rv">
+        <div class="eyebrow">Principles</div>
+        <h2>Taste earns its place through behavior.</h2>
+        <p>
+          Good design is not cosmetic sugar. It reduces hesitation, sharpens intent,
+          and makes the right next action obvious without lying about what the system can prove.
+        </p>
+      </div>
+      <div class="guay-principle-grid">
+        {principles.map((principle) => (
+          <article class="guay-principle-card rv">
+            <h3>{principle.title}</h3>
+            <p>{principle.text}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section id="examples" class="section w">
+      <div class="section-head rv">
+        <div class="eyebrow">Examples</div>
+        <h2>Readable in the diff. Honest in the postmortem.</h2>
+      </div>
+      <div class="guay-example-grid">
+        {examples.map((example) => (
+          <article class="guay-example rv">
+            <span>{example.kicker}</span>
+            <h3>{example.title}</h3>
+            <pre><code>{example.code}</code></pre>
+            <p>{example.text}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="section w">
+      <div class="guay-rubric rv">
+        <div>
+          <div class="eyebrow">Review rubric</div>
+          <h2>The four-question test.</h2>
+        </div>
+        <ul>
+          {rubric.map((item) => (
+            <li>{item}</li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <style>
+    .guay-page-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(7, 15, 11, 0.72);
+    }
+
+    .guay-page-header__inner {
+      min-height: 74px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .guay-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      color: var(--text);
+      letter-spacing: -0.03em;
+    }
+
+    .guay-brand span {
+      width: 40px;
+      height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(197, 255, 111, 0.24), rgba(132, 246, 197, 0.18));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-family: var(--mono);
+      color: #efffbf;
+    }
+
+    .guay-page-nav {
+      display: flex;
+      gap: 18px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .guay-page-nav a:hover {
+      color: var(--text);
+    }
+
+    .guay-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+      gap: 22px;
+      padding-top: 42px;
+      align-items: start;
+    }
+
+    .guay-hero__copy,
+    .guay-hero__panel,
+    .guay-signal,
+    .guay-principle-card,
+    .guay-example,
+    .guay-rubric {
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 30px;
+      background:
+        linear-gradient(180deg, rgba(132, 246, 197, 0.08), rgba(255, 255, 255, 0)),
+        rgba(8, 16, 12, 0.82);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .guay-hero__copy {
+      padding: 34px;
+    }
+
+    .guay-hero__copy h1 {
+      margin-top: 18px;
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+    }
+
+    .guay-hero__copy p,
+    .guay-hero__panel p,
+    .guay-principle-card p,
+    .guay-example p {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 1.02rem;
+    }
+
+    .guay-hero__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .guay-hero__panel {
+      display: grid;
+      gap: 18px;
+      padding: 24px;
+      align-content: start;
+    }
+
+    .guay-hero__panel-label,
+    .guay-signal span,
+    .guay-example span {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #efffbf;
+    }
+
+    .guay-hero__panel blockquote {
+      padding: 20px 22px;
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      font-size: 1.16rem;
+      line-height: 1.5;
+      letter-spacing: -0.02em;
+    }
+
+    .section {
+      padding: 34px 0;
+    }
+
+    .guay-signal-grid,
+    .guay-principle-grid,
+    .guay-example-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .guay-signal-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .guay-principle-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .guay-example-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .guay-signal,
+    .guay-principle-card,
+    .guay-example {
+      padding: 24px;
+    }
+
+    .guay-signal strong {
+      display: block;
+      margin-top: 10px;
+      font-size: 2rem;
+      letter-spacing: -0.05em;
+    }
+
+    .guay-signal p {
+      margin-top: 10px;
+      color: var(--muted);
+    }
+
+    .guay-principle-card h3,
+    .guay-example h3,
+    .guay-rubric h2 {
+      margin-top: 12px;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      line-height: 1.04;
+      letter-spacing: -0.05em;
+    }
+
+    .guay-example pre {
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.03);
+      overflow: auto;
+    }
+
+    .guay-rubric {
+      display: grid;
+      grid-template-columns: minmax(0, 0.8fr) 1fr;
+      gap: 24px;
+      padding: 28px;
+    }
+
+    .guay-rubric ul {
+      display: grid;
+      gap: 12px;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    .section-head {
+      max-width: 58rem;
+      margin-bottom: 24px;
+    }
+
+    .section-head h2 {
+      margin-top: 16px;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 1.02;
+      letter-spacing: -0.05em;
+    }
+
+    .section-head p {
+      margin-top: 14px;
+      color: var(--muted);
+      max-width: 64ch;
+    }
+
+    @media (max-width: 1080px) {
+      .guay-hero,
+      .guay-rubric,
+      .guay-signal-grid,
+      .guay-principle-grid,
+      .guay-example-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .guay-page-header__inner {
+        padding-top: 14px;
+        padding-bottom: 14px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .guay-page-nav {
+        flex-wrap: wrap;
+      }
+
+      .guay-hero__copy,
+      .guay-hero__panel,
+      .guay-signal,
+      .guay-principle-card,
+      .guay-example,
+      .guay-rubric {
+        border-radius: 24px;
+      }
+
+      .guay-hero__copy {
+        padding: 24px;
+      }
+    }
+  </style>
+</Layout>

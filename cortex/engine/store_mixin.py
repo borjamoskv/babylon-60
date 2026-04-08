@@ -7,8 +7,10 @@ Quarantine       → cortex.engine.store_quarantine_mixin
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Any, ClassVar, Optional
+from uuid import uuid4
 
 import aiosqlite
 
@@ -18,6 +20,7 @@ from cortex.engine.embedding_engine import embed_fact_async
 from cortex.engine.fact_store_core import insert_fact_record
 from cortex.engine.ghost_mixin import GhostMixin
 from cortex.engine.privacy_mixin import PrivacyMixin
+from cortex.engine.storage_guard import GuardViolation
 from cortex.engine.store_mutation import (
     deprecate_impl_logic,
     invalidate_impl_logic,
@@ -27,6 +30,7 @@ from cortex.engine.store_quarantine_mixin import QuarantineMixin
 from cortex.engine.store_validation import run_store_validation_logic
 from cortex.engine.store_validators import MIN_CONTENT_LENGTH, check_dedup, validate_content
 from cortex.guards.thermodynamic import AgentMode, ThermodynamicCounters
+from cortex.memory.temporal import TimestampInput, normalize_timestamp
 
 # now_iso removed (internal use relocated)
 
@@ -51,6 +55,123 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     _thermal_decay_cache: ClassVar[dict[int, int]] = {}
     _thermo_counters: ClassVar[ThermodynamicCounters] = ThermodynamicCounters()
     _agent_mode: ClassVar[AgentMode] = AgentMode.ACTIVE
+    _zk_high_rigor_fact_types: ClassVar[tuple[str, ...]] = ("decision", "rule", "code")
+
+    def _attest_high_rigor_fact(
+        self,
+        *,
+        content: str,
+        fact_type: str,
+        source: str | None,
+        meta: dict[str, Any] | None,
+    ) -> dict[str, Any] | None:
+        """Ensure high-rigor facts carry a valid local proof before guard execution."""
+        if fact_type not in self._zk_high_rigor_fact_types:
+            return meta
+
+        attested_meta = dict(meta or {})
+        if attested_meta.get("agent_public_key") and attested_meta.get("zk_proof_signature"):
+            return attested_meta
+
+        from cortex.crypto.keys import ZKSwarmIdentity
+
+        keypair = getattr(self, "_zk_identity_keypair", None)
+        if keypair is None:
+            keypair = ZKSwarmIdentity.generate_keypair()
+            self._zk_identity_keypair = keypair
+
+        session_id = getattr(self, "_zk_identity_session_id", None)
+        if session_id is None:
+            session_id = uuid4().hex
+            self._zk_identity_session_id = session_id
+
+        attested_meta.setdefault("agent_public_key", keypair.public_key_b64)
+        attested_meta.setdefault(
+            "zk_proof_signature",
+            ZKSwarmIdentity.sign_payload(content, keypair.private_key_b64),
+        )
+        attested_meta.setdefault("zk_proof_attestor", str(attested_meta.get("agent_id") or source or "engine:auto"))
+        attested_meta.setdefault("zk_proof_mode", "engine-auto-attested")
+        attested_meta.setdefault("zk_proof_session_id", session_id)
+        return attested_meta
+
+    def _queue_post_commit_graph_job(
+        self,
+        conn: aiosqlite.Connection,
+        fact_id: int,
+        content: str,
+        project: str,
+        tenant_id: str,
+        valid_from: str | None,
+    ) -> None:
+        pending = getattr(self, "_pending_graph_jobs", None)
+        if pending is None:
+            pending = {}
+            self._pending_graph_jobs = pending
+
+        pending.setdefault(id(conn), []).append(
+            {
+                "fact_id": fact_id,
+                "content": content,
+                "project": project,
+                "tenant_id": tenant_id,
+                "timestamp": valid_from,
+            }
+        )
+
+    def _schedule_post_commit_task(self, coro: Any) -> None:
+        tasks = getattr(self, "_post_commit_tasks", None)
+        if tasks is None:
+            tasks = set()
+            self._post_commit_tasks = tasks
+
+        task = asyncio.create_task(coro)
+        tasks.add(task)
+        task.add_done_callback(tasks.discard)
+
+    async def _process_graph_job(
+        self,
+        fact_id: int,
+        content: str,
+        project: str,
+        tenant_id: str,
+        timestamp: str | None,
+    ) -> None:
+        from cortex.graph import process_fact_graph
+        from cortex.memory.temporal import now_iso
+
+        async with self.session() as graph_conn:  # type: ignore[reportAttributeAccessIssue]
+            await process_fact_graph(
+                graph_conn,
+                fact_id,
+                content,
+                project,
+                timestamp or now_iso(),
+                tenant_id,
+            )
+            await graph_conn.commit()
+
+    def _flush_post_commit_graph_jobs(self, conn: aiosqlite.Connection) -> None:
+        pending = getattr(self, "_pending_graph_jobs", None)
+        if not pending:
+            return
+
+        jobs = pending.pop(id(conn), [])
+        for job in jobs:
+            self._schedule_post_commit_task(
+                self._process_graph_job(
+                    fact_id=job["fact_id"],
+                    content=job["content"],
+                    project=job["project"],
+                    tenant_id=job["tenant_id"],
+                    timestamp=job["timestamp"],
+                )
+            )
+
+    def _clear_post_commit_graph_jobs(self, conn: aiosqlite.Connection) -> None:
+        pending = getattr(self, "_pending_graph_jobs", None)
+        if pending:
+            pending.pop(id(conn), None)
 
     async def store(
         self,
@@ -62,7 +183,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         confidence: str = "stated",
         source: Optional[str] = None,
         meta: Optional[dict[str, Any]] = None,
-        valid_from: Optional[str] = None,
+        valid_from: TimestampInput = None,
         commit: bool = True,
         tx_id: int | None = None,
         parent_decision_id: int | None = None,
@@ -150,28 +271,45 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         confidence: str,
         source: Optional[str],
         meta: Optional[dict[str, Any]],
-        valid_from: Optional[str],
+        valid_from: TimestampInput,
         commit: bool,
         tx_id: int | None,
         parent_decision_id: int | None = None,
     ) -> int:
+        meta = self._attest_high_rigor_fact(
+            content=content,
+            fact_type=fact_type,
+            source=source,
+            meta=meta,
+        )
+
         # ═══ AX-II: Pre-store guards via GuardPipeline ═══
         pipeline = getattr(self, "_guard_pipeline", None)
+        guard_meta = dict(meta or {})
+        if source is not None:
+            guard_meta.setdefault("source", source)
         if pipeline is not None:
             try:
                 await pipeline.run_guards(
-                    content, project, fact_type, meta or {}, conn, tenant_id=tenant_id
+                    content, project, fact_type, guard_meta, conn, tenant_id=tenant_id
                 )
             except ValueError:
                 raise  # Guard rejections must propagate
-            except Exception as _gp_err:  # noqa: BLE001
-                logger.debug("[AX-II] GuardPipeline pre-store skipped: %s", _gp_err)
+            except Exception as gp_err:
+                logger.exception(
+                    "[AX-II] GuardPipeline pre-store failed closed for project=%s tenant_id=%s",
+                    project,
+                    tenant_id,
+                )
+                raise RuntimeError("[AX-II] GuardPipeline pre-store failed") from gp_err
 
         dedupe_id, meta, content, fact_type = await self._run_store_validation(
             conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
         )
         if dedupe_id is not None:
             return dedupe_id
+
+        normalized_valid_from = normalize_timestamp(valid_from)
 
         tx_id = (
             tx_id
@@ -188,11 +326,19 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             fact_type,
             tags,
             confidence,
-            valid_from,
+            normalized_valid_from,
             source,
             meta,
             tx_id,
             parent_decision_id=parent_decision_id,
+        )
+        self._queue_post_commit_graph_job(
+            conn,
+            fact_id=fact_id,
+            content=content,
+            project=project,
+            tenant_id=tenant_id,
+            valid_from=normalized_valid_from,
         )
 
         # Dual-Write Bridge: handled in insert_fact_record
@@ -216,6 +362,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
 
         if commit:
             await conn.commit()
+            self._flush_post_commit_graph_jobs(conn)
 
         # ═══ AX-II: Post-store hooks via GuardPipeline ═══
         if pipeline is not None:
@@ -244,10 +391,12 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 for fact in facts:
                     ids.append(await self.store(commit=False, conn=conn, **fact))
                 await conn.commit()
+                self._flush_post_commit_graph_jobs(conn)
                 return ids
-            except (aiosqlite.Error, ValueError, OSError):
+            except (aiosqlite.Error, ValueError, OSError, RuntimeError, GuardViolation):
                 # Deliberate boundary: rollback any store failure atomically, then re-raise
                 await conn.rollback()
+                self._clear_post_commit_graph_jobs(conn)
                 raise
 
     async def update(

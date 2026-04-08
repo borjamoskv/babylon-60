@@ -7,6 +7,7 @@ Usage:
     python -m cortex.adk                        # Interactive CLI
     python -m cortex.adk --web                  # Web dev UI
     python -m cortex.adk --agent analyst        # Specific agent
+    python -m cortex.adk --domain-agent finance --domain-agent routing
     python -m cortex.adk --toolbox-url http://127.0.0.1:5000  # With Toolbox
 """
 
@@ -32,12 +33,23 @@ def _parse_args() -> argparse.Namespace:
         "--agent",
         choices=["memory", "analyst", "guardian", "google-one", "sovereign"],
         default="sovereign",
-        help="Which agent to run (default: sovereign — full swarm)",
+        help="Which agent to run (default: sovereign — 230-agent full swarm)",
     )
     parser.add_argument(
         "--model",
         default=None,
         help="LLM model override (default: gemini-2.0-flash)",
+    )
+    parser.add_argument(
+        "--domain-agent",
+        dest="domain_agents",
+        action="append",
+        default=None,
+        metavar="DOMAIN",
+        help=(
+            "Add a specialist domain agent for the sovereign swarm. "
+            "Repeat the flag or separate values with commas."
+        ),
     )
     parser.add_argument(
         "--web",
@@ -61,6 +73,26 @@ def _parse_args() -> argparse.Namespace:
         help="Named toolset to load from Toolbox (default: all tools)",
     )
     return parser.parse_args()
+
+
+def _parse_domain_agents(domain_agents: Optional[list[str]]) -> Optional[list[str]]:
+    """Flatten repeatable CLI domain-agent flags into a clean list.
+
+    ``None`` preserves the existing environment fallback inside
+    ``create_cortex_swarm``. Explicit flags are expanded from comma-separated
+    strings and stripped of whitespace so the swarm builder receives a simple
+    list of domain names.
+    """
+    if domain_agents is None:
+        return None
+
+    parsed: list[str] = []
+    for value in domain_agents:
+        for domain in value.split(","):
+            cleaned = domain.strip()
+            if cleaned:
+                parsed.append(cleaned)
+    return parsed
 
 
 # ─── Toolbox Connection ──────────────────────────────────────────────
@@ -118,6 +150,7 @@ def run_cli(
     model: Optional[str] = None,
     toolbox_url: Optional[str] = None,
     toolbox_toolset: str = "",
+    domain_agents: Optional[list[str]] = None,
 ) -> None:
     """Run a CORTEX agent in interactive CLI mode."""
     try:
@@ -145,7 +178,11 @@ def run_cli(
         "analyst": lambda: create_analyst_agent(model=model, toolbox_tools=toolbox_tools or None),
         "guardian": lambda: create_guardian_agent(model=model),
         "google-one": lambda: create_google_one_agent(model=model),
-        "sovereign": lambda: create_cortex_swarm(model=model, toolbox_tools=toolbox_tools or None),
+        "sovereign": lambda: create_cortex_swarm(
+            model=model,
+            toolbox_tools=toolbox_tools or None,
+            domain_agents=domain_agents,
+        ),
     }
 
     agent = agent_map[agent_name]()
@@ -217,6 +254,7 @@ def run_web(port: int = 8000) -> None:
 def main() -> None:
     """Entry point for the ADK runner."""
     args = _parse_args()
+    domain_agents = _parse_domain_agents(args.domain_agents)
 
     if args.web:
         run_web(port=args.port)
@@ -224,6 +262,7 @@ def main() -> None:
         run_cli(
             agent_name=args.agent,
             model=args.model,
+            domain_agents=domain_agents,
             toolbox_url=args.toolbox_url,
             toolbox_toolset=args.toolbox_toolset,
         )

@@ -30,20 +30,33 @@ class TaintEngine:
         return f"{TaintEngine.prefix}:{agent_id}:{session_id}:{timestamp}:{digest}"
 
     @staticmethod
+    def hash_content(content: str) -> str:
+        """Expose the canonical digest used by CORTEX-TAINT."""
+        return TaintEngine._hash_content(content)
+
+    @staticmethod
+    def extract_digest(taint_str: str | None) -> str | None:
+        """Return the digest suffix from a taint token, if present."""
+        if not taint_str or not taint_str.startswith(f"{TaintEngine.prefix}:"):
+            return None
+
+        try:
+            digest_in_taint = taint_str.rsplit(":", 1)[-1]
+        except IndexError:
+            return None
+
+        return digest_in_taint or None
+
+    @staticmethod
+    def verify_digest(expected_digest: str, taint_str: str | None) -> bool:
+        """Compare a taint token against a known canonical digest."""
+        return TaintEngine.extract_digest(taint_str) == expected_digest
+
+    @staticmethod
     def verify_taint(content: str, taint_str: str) -> bool:
         """
         Verifica que el payload (content) coincide exactamente con la firma SHA3-256
         embebida en el Taint dictado por el sistema.
         """
-        if not taint_str or not taint_str.startswith(f"{TaintEngine.prefix}:"):
-            return False
-
-        # El último segmento separado por ':' es siempre el digest SHA3-256
-        # Ejemplo: taint:agent1:sess1:2026-04-01T12:00:00+00:00:a1b2c3d4...
-        try:
-            digest_in_taint = taint_str.rsplit(":", 1)[-1]
-        except IndexError:
-            return False
-
         expected_digest = TaintEngine._hash_content(content)
-        return digest_in_taint == expected_digest
+        return TaintEngine.verify_digest(expected_digest, taint_str)

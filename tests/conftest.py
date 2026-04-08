@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+import typing
 from pathlib import Path
 
 import pytest
@@ -50,3 +51,12 @@ def inject_test_master_key(monkeypatch):
     monkeypatch.setenv("CORTEX_TESTING", "1")
     # Base64 for 32 bytes of '0'
     monkeypatch.setenv("CORTEX_MASTER_KEY", "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=")
+
+
+@pytest.fixture(autouse=True)
+async def cleanup_swarm_teardown() -> typing.AsyncGenerator[None, None]:
+    """Ensure determinism and zero dangling tasks after each test."""
+    yield
+    from cortex.extensions.swarm.manager import get_swarm_manager
+    manager = get_swarm_manager()
+    await manager.shutdown_all()

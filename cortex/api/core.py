@@ -26,14 +26,8 @@ from cortex.api.middleware import (
     SecurityHeadersMiddleware,
     TracingMiddleware,
 )
-from cortex.auth import AuthManager
-from cortex.engine import CortexEngine
 from cortex.extensions.metering.middleware import MeteringMiddleware
-from cortex.extensions.swarm.manager import get_swarm_manager
-from cortex.extensions.timing import TimingTracker
-from cortex.routes import api_router
 from cortex.telemetry.metrics import MetricsMiddleware, metrics
-from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 
 __all__ = [
     "ContentSizeLimitMiddleware",
@@ -54,16 +48,32 @@ logger = logging.getLogger("uvicorn.error")
 # ─── Initialization ───────────────────────────────────────────────────
 
 
+def _ensure_api_router_loaded(app: FastAPI) -> None:
+    """Mount the aggregate API router exactly once."""
+    if getattr(app.state, "_api_router_loaded", False):
+        return
+
+    from cortex.routes import build_api_router
+
+    app.include_router(build_api_router())
+    app.state._api_router_loaded = True
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialize async connection pool, engine, auth, and timing on startup."""
     from cortex.database.pool import CortexConnectionPool
+    from cortex.extensions.swarm.manager import get_swarm_manager
+    from cortex.extensions.timing import TimingTracker
     from cortex.engine import CortexEngine as AsyncCortexEngine
+    from cortex.auth import AuthManager
 
     db_path = config.DB_PATH
     logger.info("Lifespan: Initializing CORTEX with DB_PATH: %s", db_path)
 
     # 1. Schema & Migrations
+    from cortex.engine import CortexEngine
+
     engine = CortexEngine(db_path)
     await engine.init_db()
     auth_manager = AuthManager()  # Use dynamic backend selection based on config
@@ -79,9 +89,9 @@ async def lifespan(app: FastAPI):
     app.state.swarm_manager = get_swarm_manager()
 
     # 3. Global Auth Registration
-    import cortex.auth
+    import cortex.auth.manager as auth_manager_module
 
-    cortex.auth.manager._auth_manager = auth_manager  # type: ignore[reportAttributeAccessIssue]
+    auth_manager_module._auth_manager = auth_manager  # type: ignore[reportAttributeAccessIssue]
 
     # 4. Temporal Tracking
     from cortex.database.core import connect as db_connect
@@ -95,6 +105,8 @@ async def lifespan(app: FastAPI):
     app.state.engine = engine
     app.state.auth_manager = auth_manager
     app.state.tracker = tracker
+
+    _ensure_api_router_loaded(app)
 
     # Global backward compatibility
     api_state.engine = engine
@@ -115,7 +127,7 @@ async def lifespan(app: FastAPI):
         await engine.close()
         await auth_manager.close()
         timing_conn.close()
-        cortex.auth.manager._auth_manager = None  # type: ignore[reportAttributeAccessIssue]
+        auth_manager_module._auth_manager = None  # type: ignore[reportAttributeAccessIssue]
         api_state.engine = None
         api_state.auth_manager = None
         api_state.tracker = None
@@ -131,7 +143,8 @@ app = FastAPI(
     docs_url="/docs" if not config.PROD else None,
     redoc_url="/redoc" if not config.PROD else None,
 )
-app.state.swarm_manager = get_swarm_manager()
+
+_ensure_api_router_loaded(app)
 
 
 # ─── Internal Middleware ──────────────────────────────────────────────
@@ -169,6 +182,8 @@ async def value_error_handler(request: Request, exc: ValueError) -> JSONResponse
 
 @app.exception_handler(sqlite3.Error)
 async def sqlite_error_handler(request: Request, exc: sqlite3.Error) -> JSONResponse:
+    from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
+
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
     logger.error("Sovereign DB Error: %s", exc)
 
@@ -185,6 +200,8 @@ async def sqlite_error_handler(request: Request, exc: sqlite3.Error) -> JSONResp
 
 @app.exception_handler(Exception)
 async def universal_error_handler(request: Request, exc: Exception) -> JSONResponse:
+    from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
+
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
     logger.error(
         "Sovereign Critical Error | Path: %s | Method: %s | Exc: %s",
@@ -201,6 +218,8 @@ async def universal_error_handler(request: Request, exc: Exception) -> JSONRespo
 
 @app.get("/", tags=["health"])
 async def root_node(request: Request) -> dict:
+    from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
+
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
     return {
         "service": "cortex",
@@ -230,6 +249,8 @@ async def memory_redirect(path: str, request: Request):
 
 @app.get("/health", tags=["health"])
 async def health_check(request: Request) -> dict:
+    from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
+
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
     cortisol = 0.0
     growth = 0.0
@@ -287,9 +308,6 @@ async def get_metrics():
 
 
 # ─── Router Inclusion ────────────────────────────────────────────────
-
-
-app.include_router(api_router)
 
 # Extensions and third-party integrations
 

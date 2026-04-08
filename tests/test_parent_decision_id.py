@@ -10,6 +10,7 @@ Covers:
 from __future__ import annotations
 
 import base64
+import json
 import os
 
 os.environ.setdefault("CORTEX_TESTING", "1")
@@ -86,6 +87,35 @@ async def db():
     """)
     yield conn
     await conn.close()
+
+
+class _SessionCtx:
+    def __init__(self, conn: aiosqlite.Connection):
+        self._conn = conn
+
+    async def __aenter__(self) -> aiosqlite.Connection:
+        return self._conn
+
+    async def __aexit__(self, exc_type, exc, tb) -> bool:
+        return False
+
+
+class _QueryHarness(QueryMixin):
+    def __init__(self, conn: aiosqlite.Connection):
+        self._conn = conn
+
+    def _resolve_tenant(self, tenant_id: str) -> str:
+        return tenant_id
+
+    def session(self) -> _SessionCtx:
+        return _SessionCtx(self._conn)
+
+    def _row_to_fact(self, row, tenant_id: str = "default") -> dict[str, object]:
+        return {
+            "id": row["id"],
+            "tenant_id": tenant_id,
+            "parent_decision_id": row["parent_decision_id"],
+        }
 
 
 # ─── Phase 1: Data Model & Access Layer ──────────────────────────────
@@ -213,6 +243,78 @@ class TestFKValidation:
             (d2,),
         )
         assert (await cursor.fetchone())[0] == d1
+
+    @pytest.mark.asyncio
+    async def test_cross_tenant_parent_cleared(self, db, monkeypatch):
+        monkeypatch.setattr(
+            "cortex.engine.fact_store_core.compute_fact_hash",
+            lambda x: "deadbeef",
+        )
+
+        class FakeEnc:
+            def encrypt_str(self, s: str, **kw: object) -> str:
+                return s
+
+            def encrypt_json(self, d: object, **kw: object) -> str:
+                return json.dumps(d)
+
+        monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: FakeEnc())
+
+        class FakeSigner:
+            can_sign = False
+
+        monkeypatch.setattr(
+            "cortex.extensions.security.signatures.get_default_signer",
+            lambda: FakeSigner(),
+        )
+
+        await db.execute(
+            "INSERT INTO facts (id, tenant_id, project, content, fact_type, is_tombstoned) "
+            "VALUES (10, 'tenant-alpha', 'proj', 'parent', 'decision', 0)"
+        )
+        await db.execute(
+            """
+            CREATE TABLE causal_edges (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                fact_id INTEGER NOT NULL,
+                parent_id INTEGER,
+                signal_id INTEGER,
+                edge_type TEXT NOT NULL DEFAULT 'triggered_by',
+                project TEXT,
+                tenant_id TEXT NOT NULL DEFAULT 'default',
+                created_at TEXT NOT NULL DEFAULT (datetime('now'))
+            )
+            """
+        )
+        await db.commit()
+
+        fid = await insert_fact_record(
+            db,
+            "tenant-beta",
+            "proj",
+            "child",
+            "knowledge",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
+            parent_decision_id=10,
+        )
+        await db.commit()
+
+        cursor = await db.execute(
+            "SELECT parent_decision_id, tenant_id FROM facts WHERE id = ?",
+            (fid,),
+        )
+        row = await cursor.fetchone()
+        assert row[0] is None
+        assert row[1] == "tenant-beta"
+
+        cursor = await db.execute("SELECT COUNT(*) FROM causal_edges WHERE fact_id = ?", (fid,))
+        edge_count = await cursor.fetchone()
+        assert edge_count[0] == 0
 
 
 class TestAutoResolve:
@@ -601,3 +703,40 @@ class TestCausalChainTraversal:
         ids = [r[0] for r in rows]
         assert d2 in ids
         assert d1 in ids
+
+    @pytest.mark.asyncio
+    async def test_query_mixin_causal_chain_uses_parent_column_with_encrypted_metadata(self, db):
+        harness = _QueryHarness(db)
+
+        d1 = await insert_fact_record(
+            db,
+            "default",
+            "proj",
+            "root",
+            "decision",
+            [],
+            "C5",
+            None,
+            "test",
+            {"note": "root"},
+            None,
+        )
+        await db.commit()
+        d2 = await insert_fact_record(
+            db,
+            "default",
+            "proj",
+            "child",
+            "decision",
+            [],
+            "C5",
+            None,
+            "test",
+            {"note": "child"},
+            None,
+        )
+        await db.commit()
+
+        chain = await harness.get_causal_chain(d2, direction="up", tenant_id="default")
+
+        assert [row["id"] for row in chain] == [d2, d1]

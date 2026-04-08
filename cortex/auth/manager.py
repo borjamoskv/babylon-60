@@ -8,8 +8,9 @@ import json
 import logging
 import secrets
 import threading
+from collections.abc import Awaitable
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Optional, TypeVar
 
 from cortex.auth.backends import BaseAuthBackend
 from cortex.auth.models import APIKey, AuthResult
@@ -17,6 +18,7 @@ from cortex.auth.models import APIKey, AuthResult
 __all__ = ["AuthManager", "get_auth_manager", "reset_auth_manager"]
 
 logger = logging.getLogger(__name__)
+_T = TypeVar("_T")
 
 
 class AuthManager:
@@ -51,7 +53,6 @@ class AuthManager:
                 logger.info("AuthManager: Using Local Sovereign (SQLite) backend")
                 backend = SQLiteAuthBackend(DB_PATH)
         self.backend = backend
-        self._background_tasks: set[asyncio.Task[Any]] = set()
 
     async def initialize(self) -> None:
         """Initialize the backend schema (async)."""
@@ -59,25 +60,121 @@ class AuthManager:
 
     def initialize_sync(self) -> None:
         """Initialize the backend schema (sync)."""
-        coro = self.initialize()
-        try:
-            loop = asyncio.get_running_loop()
-            import threading
+        if hasattr(self.backend, "initialize_sync"):
+            self.backend.initialize_sync()  # type: ignore[reportAttributeAccessIssue]
+            return
 
-            event = threading.Event()
-
-            async def _wrapper() -> None:
-                await coro
-                event.set()
-
-            asyncio.run_coroutine_threadsafe(_wrapper(), loop)
-            event.wait()
-        except RuntimeError:
-            asyncio.run(coro)
+        self._run_coro_sync(self.initialize())
 
     @staticmethod
     def _hash_key(key: str) -> str:
         return hashlib.sha256(key.encode()).hexdigest()
+
+    @staticmethod
+    def _normalize_permissions(permissions: object) -> list[str]:
+        if isinstance(permissions, str):
+            loaded = json.loads(permissions)
+            permissions = loaded
+        if not isinstance(permissions, list):
+            raise ValueError("Invalid permissions payload: expected list")
+        if not all(isinstance(item, str) for item in permissions):
+            raise ValueError("Invalid permissions payload: expected list[str]")
+        return permissions
+
+    @staticmethod
+    def _api_key_from_row(row: dict[str, object]) -> APIKey:
+        return APIKey(
+            id=row["id"],
+            name=str(row["name"]),
+            key_prefix=str(row["key_prefix"]),
+            tenant_id=str(row["tenant_id"]),
+            role=str(row["role"]) if "role" in row else "user",
+            permissions=AuthManager._normalize_permissions(row["permissions"]),
+            created_at=str(row["created_at"]),
+            last_used=str(row["last_used"]) if row.get("last_used") is not None else None,
+            is_active=bool(row["is_active"]),
+            rate_limit=int(row["rate_limit"]),
+        )
+
+    @staticmethod
+    def _auth_result_from_row(row: dict[str, object]) -> AuthResult:
+        return AuthResult(
+            authenticated=True,
+            tenant_id=str(row["tenant_id"]),
+            role=str(row["role"]) if "role" in row else "user",
+            permissions=AuthManager._normalize_permissions(row["permissions"]),
+            key_name=str(row["name"]),
+        )
+
+    def _generate_key_material(self) -> tuple[str, str, str]:
+        raw_key = f"ctx_{secrets.token_hex(self.KEY_LENGTH)}"
+        return raw_key, self._hash_key(raw_key), raw_key[:12]
+
+    def _resolve_auth_hash(self, raw_key: str) -> tuple[bool, str]:
+        is_valid_format = bool(raw_key and raw_key.startswith("ctx_"))
+        dummy_hash = self._hash_key("ctx_invalid_dummy_key_to_waste_time")
+        key_hash = self._hash_key(raw_key) if is_valid_format else dummy_hash
+        return is_valid_format, key_hash
+
+    @staticmethod
+    def _log_key_created(role: str, name: str, tenant_id: str) -> None:
+        logger.info(
+            "Created %s API key '%s' for tenant '%s'",
+            role,
+            name,
+            tenant_id,
+        )
+
+    @staticmethod
+    def _build_created_key(
+        key_id: int | str,
+        *,
+        name: str,
+        key_prefix: str,
+        tenant_id: str,
+        role: str,
+        permissions: list[str],
+        rate_limit: int,
+    ) -> APIKey:
+        return APIKey(
+            id=key_id,
+            name=name,
+            key_prefix=key_prefix,
+            tenant_id=tenant_id,
+            role=role,
+            permissions=permissions,
+            created_at=datetime.now(timezone.utc).isoformat(),
+            last_used=None,
+            is_active=True,
+            rate_limit=rate_limit,
+        )
+
+    @staticmethod
+    def _run_coro_sync(coro: Awaitable[_T]) -> _T:
+        """Run an awaitable from sync code, even if a loop is already active."""
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.run(coro)
+
+        result: list[_T] = []
+        err: list[BaseException] = []
+        event = threading.Event()
+
+        def _runner() -> None:
+            try:
+                result.append(asyncio.run(coro))
+            except BaseException as exc:  # noqa: BLE001 - relay to caller thread
+                err.append(exc)
+            finally:
+                event.set()
+
+        threading.Thread(target=_runner, daemon=True).start()
+        event.wait()
+
+        if err:
+            raise err[0]
+        return result[0]
 
     async def close(self) -> None:
         """Close the backend connections."""
@@ -96,9 +193,7 @@ class AuthManager:
         if permissions is None:
             permissions = ["read", "write"]
 
-        raw_key = f"ctx_{secrets.token_hex(self.KEY_LENGTH)}"
-        key_hash = self._hash_key(raw_key)
-        key_prefix = raw_key[:12]
+        raw_key, key_hash, key_prefix = self._generate_key_material()
 
         key_id = await self.backend.store_key(
             name=name,
@@ -110,24 +205,16 @@ class AuthManager:
             rate_limit=rate_limit,
         )
 
-        new_api_key = APIKey(
-            id=key_id,
+        new_api_key = self._build_created_key(
+            key_id=key_id,
             name=name,
             key_prefix=key_prefix,
             tenant_id=tenant_id,
             role=role,
             permissions=permissions,
-            created_at=datetime.now(timezone.utc).isoformat(),
-            last_used=None,
-            is_active=True,
             rate_limit=rate_limit,
         )
-        logger.info(
-            "Created %s API key '%s' for tenant '%s'",
-            role,
-            name,
-            tenant_id,
-        )
+        self._log_key_created(role, name, tenant_id)
         return raw_key, new_api_key
 
     def create_key_sync(
@@ -142,39 +229,41 @@ class AuthManager:
 
         Handles both 'no event loop' and 'inside existing loop' cases.
         """
-        coro = self.create_key(
-            name,
-            tenant_id=tenant_id,
-            role=role,
-            permissions=permissions,
-            rate_limit=rate_limit,
+        if permissions is None:
+            permissions = ["read", "write"]
+
+        if hasattr(self.backend, "store_key_sync"):
+            raw_key, key_hash, key_prefix = self._generate_key_material()
+            key_id = self.backend.store_key_sync(  # type: ignore[reportAttributeAccessIssue]
+                name=name,
+                key_hash=key_hash,
+                key_prefix=key_prefix,
+                tenant_id=tenant_id,
+                role=role,
+                permissions=permissions,
+                rate_limit=rate_limit,
+            )
+            new_api_key = self._build_created_key(
+                key_id=key_id,
+                name=name,
+                key_prefix=key_prefix,
+                tenant_id=tenant_id,
+                role=role,
+                permissions=permissions,
+                rate_limit=rate_limit,
+            )
+            self._log_key_created(role, name, tenant_id)
+            return raw_key, new_api_key
+
+        return self._run_coro_sync(
+            self.create_key(
+                name,
+                tenant_id=tenant_id,
+                role=role,
+                permissions=permissions,
+                rate_limit=rate_limit,
+            )
         )
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            return asyncio.run(coro)
-
-        # Inside existing loop — block via thread-safe event
-        import threading
-
-        res: list[tuple[str, APIKey]] = []
-        err: list[BaseException] = []
-        event = threading.Event()
-
-        async def _wrapper() -> None:
-            try:
-                res.append(await coro)
-            except Exception as e:  # noqa: BLE001 — relay to calling thread
-                err.append(e)
-            finally:
-                event.set()
-
-        asyncio.run_coroutine_threadsafe(_wrapper(), loop)
-        event.wait()
-
-        if err:
-            raise err[0]
-        return res[0]
 
     def authenticate(self, raw_key: str) -> AuthResult:
         """Synchronous wrapper for authentication.
@@ -182,37 +271,28 @@ class AuthManager:
         Authenticate a key synchronously (for legacy test fixtures/CLI).
         In v6 Sovereign Cloud, use authenticate_async whenever possible.
         """
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            return asyncio.run(self.authenticate_async(raw_key))
+        if hasattr(self.backend, "get_key_by_hash_sync"):
+            is_valid_format, key_hash = self._resolve_auth_hash(raw_key)
 
-        import threading
+            if not is_valid_format:
+                return AuthResult(authenticated=False, error="Invalid key format")
 
-        res: list[AuthResult] = []
-        err: list[BaseException] = []
-        event = threading.Event()
+            row = self.backend.get_key_by_hash_sync(  # type: ignore[reportAttributeAccessIssue]
+                key_hash
+            )
+            if not row:
+                return AuthResult(authenticated=False, error="Invalid or revoked key")
 
-        async def _wrapper() -> None:
-            try:
-                res.append(await self.authenticate_async(raw_key))
-            except Exception as e:  # noqa: BLE001 — relay to calling thread
-                err.append(e)
-            finally:
-                event.set()
+            if hasattr(self.backend, "update_last_used_sync"):
+                self.backend.update_last_used_sync(row["id"])  # type: ignore[reportAttributeAccessIssue]
 
-        asyncio.run_coroutine_threadsafe(_wrapper(), loop)
-        event.wait()
+            return self._auth_result_from_row(row)
 
-        if err:
-            raise err[0]
-        return res[0]
+        return self._run_coro_sync(self.authenticate_async(raw_key))
 
     async def authenticate_async(self, raw_key: str) -> AuthResult:
         """Fully async authentication."""
-        is_valid_format = bool(raw_key and raw_key.startswith("ctx_"))
-        dummy_hash = self._hash_key("ctx_invalid_dummy_key_to_waste_time")
-        key_hash = self._hash_key(raw_key) if is_valid_format else dummy_hash
+        is_valid_format, key_hash = self._resolve_auth_hash(raw_key)
 
         if not is_valid_format:
             return AuthResult(authenticated=False, error="Invalid key format")
@@ -221,43 +301,14 @@ class AuthManager:
         if not row:
             return AuthResult(authenticated=False, error="Invalid or revoked key")
 
-        # Background update of last_used
-        task = asyncio.create_task(self.backend.update_last_used(row["id"]))
-        self._background_tasks.add(task)
-        task.add_done_callback(self._background_tasks.discard)
+        await self.backend.update_last_used(row["id"])
 
-        permissions = row["permissions"]
-        if isinstance(permissions, str):
-            permissions = json.loads(permissions)
-
-        return AuthResult(
-            authenticated=True,
-            tenant_id=row["tenant_id"],
-            role=row["role"] if "role" in row else "user",
-            permissions=permissions,
-            key_name=row["name"],
-        )
+        return self._auth_result_from_row(row)
 
     async def list_keys(self, tenant_id: Optional[str] = None) -> list[APIKey]:
         """List all API keys."""
         rows = await self.backend.list_keys(tenant_id)
-        return [
-            APIKey(
-                id=r["id"],
-                name=r["name"],
-                key_prefix=r["key_prefix"],
-                tenant_id=r["tenant_id"],
-                role=r["role"] if "role" in r else "user",
-                permissions=json.loads(r["permissions"])
-                if isinstance(r["permissions"], str)
-                else r["permissions"],
-                created_at=r["created_at"],
-                last_used=r["last_used"],
-                is_active=bool(r["is_active"]),
-                rate_limit=r["rate_limit"],
-            )
-            for r in rows
-        ]
+        return [self._api_key_from_row(r) for r in rows]
 
     async def revoke_key(self, key_id: int | str) -> bool:
         """Revoke an API key."""

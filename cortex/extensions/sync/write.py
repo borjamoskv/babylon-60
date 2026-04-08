@@ -10,11 +10,15 @@ from typing import TYPE_CHECKING
 
 from cortex.crypto.aes import get_default_encrypter
 from cortex.extensions.sync.common import (
+    EXTERNAL_BRIDGE_KIND,
+    RELATION_BRIDGE_KIND,
     WritebackResult,
     atomic_write,
     db_content_hash,
+    is_relation_bridge_kind,
     load_sync_state,
     runtime_memory_dir,
+    normalize_bridge_kind,
     save_sync_state,
 )
 from cortex.memory.temporal import now_iso
@@ -63,6 +67,51 @@ def _decrypt_json_list(val: str | None) -> list:
         return res if isinstance(res, list) else []
     except (json.JSONDecodeError, ValueError):
         return []
+
+
+def _bridge_kind(meta: dict, source: str | None) -> str | None:
+    """Normalize bridge kind and infer non-relation bridge families when needed."""
+    kind = meta.get("bridge_kind")
+    if is_relation_bridge_kind(kind):
+        if source == "bridge:github" or "github_key" in meta:
+            return EXTERNAL_BRIDGE_KIND
+        return RELATION_BRIDGE_KIND
+    return normalize_bridge_kind(kind, default=str(kind).strip().lower()) if kind is not None else None
+
+
+def _bridge_entry_from_row(row: tuple[str, str | None, str | None, str | None, str | None]) -> dict | None:
+    """Reconstruct a bridges.jsonl entry only for relation bridges."""
+    meta = _decrypt_json(row[3])
+    if _bridge_kind(meta, row[4]) != RELATION_BRIDGE_KIND:
+        return None
+
+    tags = _decrypt_json_list(row[1])
+    return {
+        "date": row[2] or meta.get("date", ""),
+        "from": meta.get("from", tags[0] if len(tags) > 0 else ""),
+        "to": meta.get("to", tags[1] if len(tags) > 1 else ""),
+        "pattern": meta.get("pattern", tags[2] if len(tags) > 2 else ""),
+        "note": meta.get("note", ""),
+        "bridge_kind": RELATION_BRIDGE_KIND,
+    }
+
+
+async def _relation_bridge_hash(engine: CortexEngine) -> str:
+    """Hash only relation bridges so non-round-trippable bridge types do not churn."""
+    async with engine.session() as conn:
+        cursor = await conn.execute(
+            "SELECT id, content, tags, valid_from, metadata, source FROM facts "
+            "WHERE fact_type = 'bridge' AND valid_until IS NULL ORDER BY id"
+        )
+        rows = await cursor.fetchall()
+
+    hasher = hashlib.sha256()
+    for row in rows:
+        entry = _bridge_entry_from_row(row[1:])
+        if entry is None:
+            continue
+        hasher.update(f"{row[0]}|{json.dumps(entry, sort_keys=True, ensure_ascii=False)}\n".encode())
+    return hasher.hexdigest()
 
 
 async def _writeback_if_changed(
@@ -116,7 +165,15 @@ async def export_to_json(engine: CortexEngine) -> WritebackResult:
     )
 
     await _writeback_if_changed(engine, "error", _writeback_mistakes, result, wb_hashes)
-    await _writeback_if_changed(engine, "bridge", _writeback_bridges, result, wb_hashes)
+    bridge_hash = await _relation_bridge_hash(engine)
+    await _writeback_if_changed(
+        engine,
+        "bridge",
+        _writeback_bridges,
+        result,
+        wb_hashes,
+        hash_value=bridge_hash,
+    )
 
     # Guardar hashes para la próxima ejecución
     state["writeback_hashes"] = wb_hashes
@@ -262,23 +319,16 @@ async def _writeback_bridges(engine: CortexEngine, result: WritebackResult) -> N
     """Reconstruye bridges.jsonl desde facts tipo 'bridge'."""
     async with engine.session() as conn:
         cursor = await conn.execute(
-            "SELECT content, tags, valid_from, metadata FROM facts "
+            "SELECT content, tags, valid_from, metadata, source FROM facts "
             "WHERE fact_type = 'bridge' AND valid_until IS NULL ORDER BY id"
         )
         rows = await cursor.fetchall()
 
     lines = []
     for row in rows:
-        meta = _decrypt_json(row[3])
-        tags = _decrypt_json_list(row[1])
-        # Reconstruir formato original de bridges.jsonl
-        entry = {
-            "date": row[2] or meta.get("date", ""),
-            "from": meta.get("from", tags[0] if len(tags) > 0 else ""),
-            "to": meta.get("to", tags[1] if len(tags) > 1 else ""),
-            "pattern": meta.get("pattern", tags[2] if len(tags) > 2 else ""),
-            "note": meta.get("note", ""),
-        }
+        entry = _bridge_entry_from_row(row)
+        if entry is None:
+            continue
         lines.append(json.dumps(entry, ensure_ascii=False))
 
     content = "\n".join(lines) + "\n" if lines else ""

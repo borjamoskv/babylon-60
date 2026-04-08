@@ -11,7 +11,7 @@ from typing import Any
 import aiosqlite
 
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
-from cortex.extensions.signals.bus import SignalBus
+from cortex.extensions.signals.bus import DurableSignalBus
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ async def trigger_autonomic_reflex(
     workspace: Path,
     cortex_engine: Any,
     active_tasks: set[asyncio.Task],
-    signal_bus: SignalBus | None = None,
+    signal_bus: DurableSignalBus | None = None,
 ) -> None:
     """Sovereign Reflex: High adrenaline triggers a diagnostic healing sweep."""
     if not cortex_engine:
@@ -41,7 +41,7 @@ async def trigger_autonomic_reflex(
             # We use a dedicated thread/connection for the reflex scan if needed
             # but usually we can reuse the engine context or a fresh connection
             with connect(str(db_path)) as conn:
-                bus = SignalBus(conn)
+                bus = DurableSignalBus(conn)
                 recent = bus.peek(event_type="nemesis:rejection", limit=5)
 
                 if recent:

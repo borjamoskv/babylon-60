@@ -313,6 +313,49 @@ async def test_taint_report_structure() -> None:
         report.source_fact_id = 99  # type: ignore[misc]
 
 
+@pytest.mark.asyncio
+async def test_encrypted_metadata_parse_failures_surface(monkeypatch) -> None:
+    import aiosqlite
+
+    conn = await aiosqlite.connect(":memory:")
+    graph_mod = __import__("cortex.engine.causality", fromlist=["AsyncCausalGraph"])
+    graph = graph_mod.AsyncCausalGraph(conn)
+    await graph.ensure_table()
+    await conn.execute(
+        """
+        CREATE TABLE facts (
+            id INTEGER PRIMARY KEY,
+            tenant_id TEXT DEFAULT 'default',
+            project TEXT DEFAULT 'test',
+            content TEXT,
+            confidence TEXT,
+            metadata TEXT DEFAULT '{}'
+        )
+        """
+    )
+    await conn.execute(
+        "INSERT INTO facts (id, content, confidence, metadata) VALUES (?, ?, ?, ?)",
+        (1, "fact-1", "C5", "v6_aesgcm:bogus"),
+    )
+    await conn.commit()
+
+    class BrokenEncrypter:
+        PREFIX = "v6_aesgcm:"
+
+        def decrypt_json(self, encrypted_data: str, tenant_id: str = "default") -> dict:
+            raise RuntimeError("unexpected decrypt failure")
+
+        def encrypt_json(self, data, tenant_id: str = "default") -> str:
+            return "v6_aesgcm:stub"
+
+    monkeypatch.setattr("cortex.engine.causality.get_default_encrypter", lambda: BrokenEncrypter())
+
+    with pytest.raises(RuntimeError, match="unexpected decrypt failure"):
+        await graph.propagate_taint(1)
+
+    await conn.close()
+
+
 class TestConfidenceLevels:
     def test_ordered(self) -> None:
         assert CONFIDENCE_LEVELS == ["C5", "C4", "C3", "C2", "C1"]

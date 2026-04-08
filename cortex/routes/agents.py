@@ -1,16 +1,16 @@
-"""
-CORTEX v5.0 - Agents Router (Reputation Management).
-"""
+"""CORTEX v5.0 - Agents Router (Reputation Management)."""
+
+from __future__ import annotations
 
 import logging
 import sqlite3
+from typing import TYPE_CHECKING
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from starlette.requests import Request
 
 from cortex.api.deps import get_async_engine
-from cortex.auth import AuthResult, require_permission
-from cortex.engine import CortexEngine as AsyncCortexEngine
+from cortex.auth import require_permission
 from cortex.types.models import AgentRegisterRequest, AgentResponse
 from cortex.utils.i18n import get_trans
 
@@ -18,6 +18,10 @@ __all__ = ["register_agent", "get_agent", "list_agents"]
 
 router = APIRouter(tags=["agents"])
 logger = logging.getLogger("uvicorn.error")
+
+if TYPE_CHECKING:
+    from cortex.auth import AuthResult
+    from cortex.engine import CortexEngine as AsyncCortexEngine
 
 
 @router.post("/v1/agents", response_model=AgentResponse)
@@ -84,11 +88,13 @@ async def get_agent(
 
 @router.get("/v1/agents", response_model=list[AgentResponse])
 async def list_agents(
+    limit: int = Query(50, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
     auth: AuthResult = Depends(require_permission("read")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> list[AgentResponse]:
     """List all agents for the current tenant."""
-    agents = await engine.list_agents(auth.tenant_id)
+    agents = await engine.list_agents(auth.tenant_id, limit=limit, offset=offset)
     return [
         AgentResponse(
             agent_id=a["id"],

@@ -2,6 +2,7 @@
 
 import os
 import tempfile
+from datetime import date, datetime, timezone
 
 import pytest
 
@@ -106,6 +107,33 @@ class TestUsageTracker:
         # Ordered by calls DESC
         assert breakdown[0]["calls"] == 3
         assert breakdown[1]["calls"] == 2
+
+    def test_usage_record_normalizes_datetime_timestamp(self, tracker):
+        ts = datetime(2026, 4, 7, 12, 34, 56, tzinfo=timezone.utc)
+
+        tracker.record(UsageRecord(tenant_id="tenant-ts", endpoint="/v1/memories", timestamp=ts))
+
+        row = tracker._get_conn().execute(
+            "SELECT timestamp, month_bucket FROM api_usage WHERE tenant_id = ?",
+            ("tenant-ts",),
+        ).fetchone()
+        assert row["timestamp"] == "2026-04-07T12:34:56+00:00"
+        assert row["month_bucket"] == "2026-04"
+
+    def test_usage_record_normalizes_date_timestamp(self, tracker):
+        tracker.record(
+            UsageRecord(
+                tenant_id="tenant-date",
+                endpoint="/v1/memories",
+                timestamp=date(2026, 4, 7),
+            )
+        )
+
+        row = tracker._get_conn().execute(
+            "SELECT timestamp FROM api_usage WHERE tenant_id = ?",
+            ("tenant-date",),
+        ).fetchone()
+        assert row["timestamp"] == "2026-04-07T00:00:00+00:00"
 
 
 # ─── QuotaEnforcer Tests ────────────────────────────────────────────

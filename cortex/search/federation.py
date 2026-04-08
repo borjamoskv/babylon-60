@@ -143,6 +143,7 @@ def _search_attached_db(
     conn: sqlite3.Connection,
     alias: str,
     query: str,
+    tenant_id: str = "default",
     project: Optional[str] = None,
     limit: int = 20,
 ) -> list[SearchResult]:
@@ -188,7 +189,7 @@ def _search_attached_db(
     for row in rows:
         if str(row[1]).startswith(v6_prefix):
             try:
-                content = enc.decrypt_str(row[1], tenant_id="default")
+                content = enc.decrypt_str(row[1], tenant_id=tenant_id)
             except (ValueError, TypeError, OSError):
                 continue
         else:
@@ -234,6 +235,7 @@ async def _search_attached_db_async(
     conn: aiosqlite.Connection,
     alias: str,
     query: str,
+    tenant_id: str = "default",
     project: Optional[str] = None,
     limit: int = 20,
 ) -> list[SearchResult]:
@@ -274,7 +276,7 @@ async def _search_attached_db_async(
         content_val = row[1]
         if str(content_val).startswith(v6_prefix):
             try:
-                content = enc.decrypt_str(content_val, tenant_id="default")
+                content = enc.decrypt_str(content_val, tenant_id=tenant_id)
             except (ValueError, TypeError, OSError):
                 continue
         else:
@@ -316,6 +318,7 @@ async def federated_search(
     conn: aiosqlite.Connection,
     query: str,
     scope: str = "core",
+    tenant_id: str = "default",
     project: Optional[str] = None,
     limit: int = 20,
 ) -> list[SearchResult]:
@@ -331,6 +334,7 @@ async def federated_search(
         core_results = await text_search(
             conn,
             query,
+            tenant_id=tenant_id,
             project=project,
             limit=limit,
         )
@@ -355,6 +359,7 @@ async def federated_search(
                     conn,
                     alias,
                     query,
+                    tenant_id=tenant_id,
                     project=project,
                     limit=limit,
                 )
@@ -370,6 +375,7 @@ def federated_search_sync(
     conn: sqlite3.Connection,
     query: str,
     scope: str = "core",
+    tenant_id: str = "default",
     project: Optional[str] = None,
     limit: int = 20,
 ) -> list[SearchResult]:
@@ -398,6 +404,7 @@ def federated_search_sync(
         core_results = text_search_sync(
             conn,
             query,
+            tenant_id=tenant_id,
             project=project,
             limit=limit,
         )
@@ -423,6 +430,7 @@ def federated_search_sync(
                     conn,
                     alias,
                     query,
+                    tenant_id=tenant_id,
                     project=project,
                     limit=limit,
                 )

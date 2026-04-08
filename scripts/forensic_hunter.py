@@ -6,13 +6,28 @@ Identifies agentic deviation and applies reputation penalties (The Gavel).
 
 import asyncio
 import logging
+import os
+from pathlib import Path
+
 from cortex.engine import AsyncCortexEngine
 from cortex.engine.slashing import SlashingPenalty
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("forensic_hunter")
 
-async def hunt(db_path: str):
+
+def _resolve_db_path() -> Path:
+    override = os.environ.get("CORTEX_DB_PATH") or os.environ.get("CORTEX_DB")
+    if override:
+        return Path(override).expanduser()
+
+    return Path.home() / ".cortex" / "cortex.db"
+
+
+DEFAULT_DB_PATH = str(_resolve_db_path())
+
+
+async def hunt(db_path: str = DEFAULT_DB_PATH):
     engine = AsyncCortexEngine(db_path)
     await engine.init_db()
     
@@ -45,5 +60,6 @@ async def hunt(db_path: str):
 
 if __name__ == "__main__":
     import sys
-    db = sys.argv[1] if len(sys.argv) > 1 else "cortex.db"
+
+    db = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_DB_PATH
     asyncio.run(hunt(db))

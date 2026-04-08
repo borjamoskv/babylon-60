@@ -241,6 +241,8 @@ def _persist_to_cortex(result) -> None:
                 confidence="C4",
                 source="agent:scraper-omega",
                 meta={
+                    "bridge_kind": "external",
+                    "bridge_provider": "web_scraper",
                     "url": result.url,
                     "hash": result.content_hash,
                     "strategy": result.strategy_used.value,

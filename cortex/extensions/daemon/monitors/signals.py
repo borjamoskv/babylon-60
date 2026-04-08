@@ -11,6 +11,7 @@ Converts reactor events into Daemon Alerts.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import sqlite3
 from typing import Any
@@ -35,20 +36,20 @@ class SignalMonitor:
             return
 
         try:
-            from cortex.extensions.signals.bus import SignalBus
+            from cortex.extensions.signals.bus import DurableSignalBus
             from cortex.extensions.signals.reactor import SignalReactor
 
             # Standard sqlite3 connection for the bus
             self._bus_conn = db_connect(self.db_path)
             self._bus_conn.execute("PRAGMA journal_mode=WAL")
 
-            bus = SignalBus(self._bus_conn)
+            bus = DurableSignalBus(self._bus_conn)
             self._reactor = SignalReactor(bus, engine=self._engine)
             logger.info("SignalMonitor initialized L2 Reactor.")
         except (sqlite3.Error, ImportError) as e:
             logger.error("Failed to initialize SignalReactor: %s", e)
 
-    def check(self) -> list[SignalAlert]:
+    async def check_async(self) -> list[SignalAlert]:
         """Poll signals and process reflexes."""
         self._ensure_reactor()
         if not self._reactor:
@@ -70,9 +71,9 @@ class SignalMonitor:
             # Let's peek at what we are about to process to generate alerts.
             signals_to_process = self._reactor.bus.peek(consumer="reactor", limit=20)
 
-            count = self._reactor.process_once()
+            count = await self._reactor.process_once()
 
-            if count > 0:  # type: ignore[reportOperatorIssue]
+            if count > 0:
                 for sig in signals_to_process[:count]:
                     alerts.append(
                         SignalAlert(
@@ -82,10 +83,19 @@ class SignalMonitor:
                             message=f"Reflex executed for {sig.event_type}",
                         )
                     )
-        except Exception as e:  # noqa: BLE001
+        except (AttributeError, RuntimeError, OSError, ValueError, sqlite3.Error) as e:
             logger.error("SignalMonitor check failed: %s", e)
 
         return alerts
+
+    def check(self) -> list[SignalAlert]:
+        """Synchronous wrapper for check_async."""
+        try:
+            return asyncio.run(self.check_async())
+        except RuntimeError as e:
+            if "running event loop" not in str(e):
+                raise
+            return self.check_async()  # type: ignore[return-value]
 
     def shutdown(self):
         if self._bus_conn:

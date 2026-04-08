@@ -1,0 +1,778 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const navLinks = [
+  { label: 'Inicio', href: '/' },
+  { label: 'Arquitectura', href: '#arquitectura' },
+  { label: 'Capas', href: '#capas' },
+  { label: 'Escuadrones', href: '#escuadrones' },
+  { label: 'GitHub', href: 'https://github.com/borjamoskv/Cortex-Persist', external: true },
+];
+
+const controlMetrics = [
+  { label: 'Agentes vivos', value: '100', detail: 'scouts, forgers, verifiers, dispatchers' },
+  { label: 'Tiempo a primera acción', value: '3.4s', detail: 'prefijos, rutas y caché local' },
+  { label: 'Carriles térmicos', value: '4', detail: 'scan, build, verify, ship' },
+  { label: 'Continuidad', value: 'C5', detail: 'ledger + taint + rollback' },
+];
+
+const layers = [
+  {
+    title: 'Exploración distribuida',
+    text: 'Los scouts separan el espacio del problema y reducen incertidumbre antes de gastar cómputo pesado.',
+  },
+  {
+    title: 'Síntesis paralela',
+    text: 'Los builders generan componentes, rutas y parches en paralelo sin compartir write-set.',
+  },
+  {
+    title: 'Verificación soberana',
+    text: 'Los verifiers bloquean drift, chequean taint y convierten la salida en una mutación auditable.',
+  },
+];
+
+const pipeline = [
+  {
+    step: '01',
+    title: 'Ingesta',
+    text: 'Una orden entra, se normaliza y se divide en frentes simultáneos con causalidad explícita.',
+  },
+  {
+    step: '02',
+    title: 'Despacho',
+    text: 'El enjambre reparte 100 agentes en misiones pequeñas: navegación, lectura, generación y prueba.',
+  },
+  {
+    step: '03',
+    title: 'Membrana',
+    text: 'Toda propuesta vuelve por guardrails, verificación y ledger antes de tocar estado persistente.',
+  },
+  {
+    step: '04',
+    title: 'Crystallize',
+    text: 'Solo lo que pasó pruebas queda vivo: código, snapshot y evidencia de por qué sobrevivió.',
+  },
+];
+
+const squadrons = [
+  {
+    name: 'Scout Grid',
+    count: 24,
+    tone: 'lime',
+    mission: 'Mapear dependencias, riesgos, archivos y rutas críticas en tiempo constante percibido.',
+  },
+  {
+    name: 'Forge Line',
+    count: 28,
+    tone: 'mint',
+    mission: 'Construir componentes, páginas, automatizaciones y prototipos con ownership explícito.',
+  },
+  {
+    name: 'Verify Ring',
+    count: 24,
+    tone: 'amber',
+    mission: 'Ejecutar tests, smoke checks, invariants y rechazar salidas blandas antes del merge.',
+  },
+  {
+    name: 'Transit Core',
+    count: 24,
+    tone: 'ice',
+    mission: 'Orquestar handoffs, memoria, tickets, contexto y cierre operativo sin perder continuidad.',
+  },
+];
+
+const rolePalette = [
+  { name: 'SC', className: 'agent--lime' },
+  { name: 'FG', className: 'agent--mint' },
+  { name: 'VF', className: 'agent--amber' },
+  { name: 'TR', className: 'agent--ice' },
+];
+
+const agentMatrix = Array.from({ length: 100 }, (_, index) => {
+  const role = rolePalette[index % rolePalette.length];
+  return {
+    id: `A${String(index + 1).padStart(2, '0')}`,
+    role: role.name,
+    className: role.className,
+  };
+});
+---
+
+<Layout
+  title="Enjambre de 100 agentes — Borja Swarm Control"
+  description="Página conceptual para un enjambre de 100 agentes con la estética web de Borja/CORTEX."
+>
+  <header class="swarm-header">
+    <div class="swarm-header__inner w">
+      <a class="swarm-brand" href="/">
+        <span class="swarm-brand__mark">B</span>
+        <span>
+          <strong>Borja Swarm Control</strong>
+          <small>100-agent web system</small>
+        </span>
+      </a>
+      <nav class="swarm-nav" aria-label="Principal">
+        {navLinks.map((link) => (
+          <a
+            href={link.href}
+            target={link.external ? '_blank' : undefined}
+            rel={link.external ? 'noreferrer' : undefined}
+          >
+            {link.label}
+          </a>
+        ))}
+      </nav>
+      <a class="btn btn--p" href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noreferrer">
+        Launch repo
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <section class="swarm-hero w">
+      <div class="swarm-hero__copy">
+        <div class="eyebrow rv">Sistema soberano de orquestación</div>
+        <h1 class="rv">Enjambre de 100 agentes con la web de Borja como torre de control.</h1>
+        <p class="rv">
+          Una capa visual para coordinar cien agentes especializados sobre el stack CORTEX:
+          exploración, síntesis, verificación, memoria y despliegue, todo bajo ledger,
+          guardrails y una estética industrial viva.
+        </p>
+        <div class="swarm-hero__actions rv">
+          <a class="btn btn--p" href="#arquitectura">Ver arquitectura</a>
+          <a class="btn btn--g" href="#escuadrones">Abrir escuadrones</a>
+        </div>
+        <div class="swarm-metrics rv">
+          {controlMetrics.map((metric) => (
+            <article class="metric-card">
+              <span>{metric.label}</span>
+              <strong>{metric.value}</strong>
+              <p>{metric.detail}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      <aside class="control-panel rv" aria-label="Panel del enjambre">
+        <div class="control-panel__top">
+          <div>
+            <span class="control-panel__kicker">Swarm board</span>
+            <h2>100 procesos, una sola narrativa operacional.</h2>
+          </div>
+          <div class="status-chip">ledger intact</div>
+        </div>
+
+        <div class="matrix-shell">
+          <div class="matrix-shell__header">
+            <span>Nodos activos</span>
+            <span>10 x 10 lattice</span>
+          </div>
+          <div class="agent-matrix">
+            {agentMatrix.map((agent) => (
+              <article class={`agent-cell ${agent.className}`}>
+                <span>{agent.id}</span>
+                <strong>{agent.role}</strong>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <div class="panel-ledger">
+          <div class="panel-ledger__header">
+            <span>Run profile</span>
+            <span>March 2026</span>
+          </div>
+          <pre><code>/swarm launch "borja-web"
+agents: 100
+mode: sovereign
+memory: ledger + vsa-sdm
+verify: required
+status: stable</code></pre>
+        </div>
+      </aside>
+    </section>
+
+    <section id="capas" class="section w">
+      <div class="section-head rv">
+        <div class="eyebrow">Capas operativas</div>
+        <h2>Una web de control pensada para throughput, no para postureo.</h2>
+      </div>
+      <div class="layer-grid">
+        {layers.map((layer) => (
+          <article class="layer-card rv">
+            <h3>{layer.title}</h3>
+            <p>{layer.text}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section id="arquitectura" class="section w">
+      <div class="architecture-shell">
+        <div class="architecture-copy rv">
+          <div class="eyebrow">Arquitectura</div>
+          <h2>El flujo no es chat. Es coordinación termodinámica.</h2>
+          <p>
+            La interfaz vive como superficie de mando. Por debajo, el trabajo real se
+            reparte en ramas paralelas y vuelve a una membrana de verificación antes de
+            convertirse en código, contenido o acción persistente.
+          </p>
+          <div class="pipeline-list">
+            {pipeline.map((item) => (
+              <article class="pipeline-item">
+                <span>{item.step}</span>
+                <div>
+                  <h3>{item.title}</h3>
+                  <p>{item.text}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <div class="architecture-console rv">
+          <div class="architecture-console__label">Runtime lanes</div>
+          <div class="lane-list">
+            <article>
+              <span class="lane lane--scan"></span>
+              <div>
+                <strong>Lane A / Scan</strong>
+                <p>Recoge archivos, tickets, señales y contexto fresco.</p>
+              </div>
+            </article>
+            <article>
+              <span class="lane lane--build"></span>
+              <div>
+                <strong>Lane B / Build</strong>
+                <p>Produce parches, páginas, APIs y activos visuales en paralelo.</p>
+              </div>
+            </article>
+            <article>
+              <span class="lane lane--verify"></span>
+              <div>
+                <strong>Lane C / Verify</strong>
+                <p>Ejecuta tests, reglas P0, smoke checks y revisión de integridad.</p>
+              </div>
+            </article>
+            <article>
+              <span class="lane lane--ship"></span>
+              <div>
+                <strong>Lane D / Ship</strong>
+                <p>Promueve solo lo que ya sobrevivió a causalidad, taint y rollback.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="escuadrones" class="section w">
+      <div class="section-head rv">
+        <div class="eyebrow">Escuadrones</div>
+        <h2>Cada bloque del enjambre tiene una misión clara y un write-set acotado.</h2>
+      </div>
+      <div class="squad-grid">
+        {squadrons.map((squad) => (
+          <article class={`squad-card squad-card--${squad.tone} rv`}>
+            <div class="squad-card__head">
+              <span>{squad.name}</span>
+              <strong>{squad.count}</strong>
+            </div>
+            <p>{squad.mission}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="section w">
+      <div class="cta-band rv">
+        <div>
+          <div class="eyebrow">Borja mode</div>
+          <h2>La web ya no es solo marketing: es consola de mando del enjambre.</h2>
+        </div>
+        <div class="cta-band__actions">
+          <a class="btn btn--p" href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noreferrer">
+            Ver GitHub
+          </a>
+          <a class="btn btn--g" href="/docs/system-map">Abrir system map</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <style>
+    .swarm-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(18px);
+      background: rgba(7, 16, 13, 0.72);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .swarm-header__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-height: 82px;
+    }
+
+    .swarm-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .swarm-brand__mark {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(197, 255, 111, 0.24), rgba(132, 246, 197, 0.18));
+      border: 1px solid var(--line-strong);
+      font-weight: 700;
+    }
+
+    .swarm-brand strong,
+    .swarm-brand small {
+      display: block;
+      line-height: 1.1;
+    }
+
+    .swarm-brand small {
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .swarm-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 18px;
+      font-size: 0.94rem;
+      color: var(--muted);
+    }
+
+    .swarm-nav a:hover {
+      color: var(--text);
+    }
+
+    .swarm-hero {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 32px;
+      padding-top: 54px;
+      padding-bottom: 34px;
+      align-items: start;
+    }
+
+    .swarm-hero__copy h1 {
+      max-width: 12ch;
+      margin-top: 16px;
+      font-size: clamp(3.2rem, 7vw, 6.3rem);
+      line-height: 0.92;
+      letter-spacing: -0.06em;
+    }
+
+    .swarm-hero__copy p {
+      max-width: 60ch;
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+
+    .swarm-hero__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .swarm-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 30px;
+    }
+
+    .metric-card,
+    .layer-card,
+    .squad-card,
+    .control-panel,
+    .architecture-console,
+    .architecture-copy,
+    .cta-band {
+      border: 1px solid var(--line);
+      background: rgba(13, 26, 20, 0.68);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .metric-card {
+      padding: 18px;
+      border-radius: 22px;
+    }
+
+    .metric-card span {
+      display: block;
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .metric-card strong {
+      display: block;
+      margin-top: 10px;
+      font-size: 2rem;
+      letter-spacing: -0.05em;
+    }
+
+    .metric-card p {
+      margin-top: 10px;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    .control-panel {
+      position: relative;
+      overflow: hidden;
+      padding: 22px;
+      border-radius: 32px;
+    }
+
+    .control-panel::after {
+      content: '';
+      position: absolute;
+      inset: auto -10% -35% 45%;
+      height: 240px;
+      background: radial-gradient(circle, rgba(132, 246, 197, 0.18), transparent 68%);
+      pointer-events: none;
+    }
+
+    .control-panel__top,
+    .matrix-shell__header,
+    .panel-ledger__header,
+    .squad-card__head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .control-panel__kicker {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent-strong);
+    }
+
+    .control-panel h2 {
+      margin-top: 8px;
+      max-width: 15ch;
+      font-size: 1.8rem;
+      line-height: 1.02;
+    }
+
+    .status-chip {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(197, 255, 111, 0.12);
+      border: 1px solid rgba(197, 255, 111, 0.3);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    .matrix-shell,
+    .panel-ledger {
+      position: relative;
+      z-index: 1;
+      margin-top: 20px;
+      padding: 18px;
+      border-radius: 24px;
+      background: rgba(7, 16, 13, 0.74);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .matrix-shell__header,
+    .panel-ledger__header {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+    }
+
+    .agent-matrix {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .agent-cell {
+      min-height: 56px;
+      padding: 8px 6px;
+      border-radius: 16px;
+      border: 1px solid transparent;
+      display: grid;
+      place-items: center;
+      gap: 2px;
+      text-align: center;
+      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+      animation: agentPulse 4s ease-in-out infinite;
+    }
+
+    .agent-cell:hover {
+      transform: translateY(-2px);
+    }
+
+    .agent-cell span {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: rgba(255, 255, 255, 0.74);
+    }
+
+    .agent-cell strong {
+      font-size: 0.86rem;
+      letter-spacing: -0.05em;
+    }
+
+    .agent--lime {
+      background: rgba(197, 255, 111, 0.1);
+      border-color: rgba(197, 255, 111, 0.2);
+    }
+
+    .agent--mint {
+      background: rgba(132, 246, 197, 0.1);
+      border-color: rgba(132, 246, 197, 0.2);
+    }
+
+    .agent--amber {
+      background: rgba(255, 208, 117, 0.1);
+      border-color: rgba(255, 208, 117, 0.2);
+    }
+
+    .agent--ice {
+      background: rgba(143, 214, 255, 0.1);
+      border-color: rgba(143, 214, 255, 0.2);
+    }
+
+    .section {
+      padding: 38px 0;
+    }
+
+    .section-head {
+      max-width: 54rem;
+      margin-bottom: 24px;
+    }
+
+    .section-head h2 {
+      margin-top: 16px;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 1.02;
+      letter-spacing: -0.05em;
+    }
+
+    .layer-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .squad-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .layer-card,
+    .squad-card {
+      border-radius: 28px;
+      padding: 24px;
+    }
+
+    .layer-card p,
+    .squad-card p,
+    .architecture-copy p,
+    .pipeline-item p,
+    .lane-list p {
+      color: var(--muted);
+    }
+
+    .architecture-shell {
+      display: grid;
+      grid-template-columns: 1fr 0.86fr;
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .architecture-copy,
+    .architecture-console {
+      border-radius: 32px;
+      padding: 28px;
+    }
+
+    .pipeline-list {
+      display: grid;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .pipeline-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      padding: 16px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .pipeline-item span {
+      font-family: var(--mono);
+      color: var(--accent);
+      font-size: 0.84rem;
+      letter-spacing: 0.16em;
+    }
+
+    .architecture-console__label {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent-strong);
+    }
+
+    .lane-list {
+      display: grid;
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .lane-list article {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      padding: 16px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .lane {
+      width: 14px;
+      border-radius: 999px;
+      min-height: 54px;
+    }
+
+    .lane--scan { background: linear-gradient(180deg, #c5ff6f, rgba(197, 255, 111, 0.1)); }
+    .lane--build { background: linear-gradient(180deg, #84f6c5, rgba(132, 246, 197, 0.1)); }
+    .lane--verify { background: linear-gradient(180deg, #ffd075, rgba(255, 208, 117, 0.1)); }
+    .lane--ship { background: linear-gradient(180deg, #8fd6ff, rgba(143, 214, 255, 0.1)); }
+
+    .squad-card__head span {
+      font-family: var(--mono);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .squad-card__head strong {
+      font-size: 3rem;
+      line-height: 1;
+      letter-spacing: -0.06em;
+    }
+
+    .squad-card--lime strong { color: #d3ff84; }
+    .squad-card--mint strong { color: #91ffdc; }
+    .squad-card--amber strong { color: #ffd58f; }
+    .squad-card--ice strong { color: #9ae0ff; }
+
+    .cta-band {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 28px 30px;
+      border-radius: 32px;
+    }
+
+    .cta-band h2 {
+      margin-top: 14px;
+      max-width: 20ch;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      line-height: 1.02;
+      letter-spacing: -0.05em;
+    }
+
+    .cta-band__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    @keyframes agentPulse {
+      0%, 100% {
+        transform: translateY(0);
+        box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+      }
+      50% {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+      }
+    }
+
+    @media (max-width: 1080px) {
+      .swarm-hero,
+      .architecture-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .layer-grid,
+      .squad-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .swarm-header__inner {
+        flex-wrap: wrap;
+        padding-top: 14px;
+        padding-bottom: 14px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .swarm-nav {
+        width: 100%;
+        justify-content: space-between;
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+
+      .swarm-metrics,
+      .layer-grid,
+      .squad-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .agent-matrix {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+      }
+
+      .cta-band {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .swarm-hero {
+        padding-top: 34px;
+      }
+    }
+  </style>
+</Layout>

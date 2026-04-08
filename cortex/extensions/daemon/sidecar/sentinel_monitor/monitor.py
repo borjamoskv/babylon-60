@@ -4,6 +4,7 @@ import asyncio
 import logging
 import os
 import sys
+from decimal import ROUND_DOWN, Decimal, InvalidOperation
 from typing import Any
 
 import aiohttp
@@ -21,6 +22,16 @@ class SentinelMonitor:
         self.check_interval = check_interval
         self.last_block_scanned = 0
         self.is_running = False
+        self._stop_event = asyncio.Event()
+
+    @staticmethod
+    def _format_asset_value(raw_value: str | int | float, decimals: int) -> str:
+        try:
+            quantum = Decimal("0.0001")
+            normalized = Decimal(str(raw_value)) / (Decimal(10) ** decimals)
+            return str(normalized.quantize(quantum, rounding=ROUND_DOWN))
+        except (ArithmeticError, InvalidOperation, ValueError):
+            return "0.0000"
 
     async def _notify_os(self, title: str, message: str) -> None:
         """Trigger an OS notification (macOS, Linux, Windows) to break focus modes."""
@@ -132,12 +143,10 @@ class SentinelMonitor:
                 if "tokenSymbol" in tx:
                     asset = tx["tokenSymbol"]
                     decimals = int(tx.get("tokenDecimal", 18))
-                    raw_val = float(tx.get("value", 0))
-                    value = f"{raw_val / (10**decimals):.4f}"
+                    value = self._format_asset_value(tx.get("value", 0), decimals)
                 else:
                     asset = "ETH"
-                    raw_val = float(tx.get("value", 0))
-                    value = f"{raw_val / (10**18):.4f}"
+                    value = self._format_asset_value(tx.get("value", 0), 18)
 
                 msg = f"Movement Detected! {value} {asset} sent to {to_addr}"
                 logger.critical("SENTINEL ALERT: %s (Tx: %s)", msg, tx_hash)
@@ -150,6 +159,7 @@ class SentinelMonitor:
     async def run_loop(self) -> None:
         """Main async loop."""
         self.is_running = True
+        self._stop_event.clear()
         logger.info("Sentinel Monitor started for %s", TARGET_ADDRESS)
 
         # If we start from 0, we might get thousands of historical txs.
@@ -182,4 +192,15 @@ class SentinelMonitor:
                 except Exception as e:  # noqa: BLE001
                     logger.error("Error in Sentinel loop: %s", e)
 
-                await asyncio.sleep(self.check_interval)
+                if not self.is_running:
+                    break
+
+                try:
+                    await asyncio.wait_for(self._stop_event.wait(), timeout=self.check_interval)
+                except TimeoutError:
+                    continue
+
+    async def stop(self) -> None:
+        self.is_running = False
+        self._stop_event.set()
+        await asyncio.sleep(0)

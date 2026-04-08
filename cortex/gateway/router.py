@@ -211,8 +211,13 @@ class GatewayRouter:
                     extra_meta={"request_id": request.request_id, "source": request.source},
                 )
                 await boundary._persist(exc)
-            except Exception:  # noqa: BLE001 — boundary persistence must never break gateway
-                pass
+            except Exception as boundary_exc:  # noqa: BLE001 — boundary persistence must never break gateway
+                logger.warning(
+                    "Gateway [%s] failed to persist error boundary for %s: %s",
+                    request.request_id,
+                    intent_str,
+                    boundary_exc,
+                )
             return GatewayResponse(
                 ok=False,
                 error=str(exc),
@@ -233,12 +238,13 @@ class GatewayRouter:
             raise ValueError("payload.content is required for store intent")
 
         fact_id = await self._engine.store(
-            req.project or "default",
-            content,
-            fact_type,
-            tags,
-            "stated",
-            source,
+            project=req.project or "default",
+            content=content,
+            tenant_id=req.tenant_id,
+            fact_type=fact_type,
+            tags=tags,
+            confidence="stated",
+            source=source,
         )
         return {"fact_id": fact_id, "project": req.project}
 
@@ -250,9 +256,10 @@ class GatewayRouter:
             raise ValueError("payload.query is required for search intent")
 
         results = await self._engine.search(
-            query,
-            req.project or None,
-            min(max(top_k, 1), 20),
+            query=query,
+            tenant_id=req.tenant_id,
+            top_k=min(max(top_k, 1), 20),
+            project=req.project or None,
         )
         return [
             {
@@ -270,7 +277,7 @@ class GatewayRouter:
         if not project:
             raise ValueError("project is required for recall intent")
 
-        results = await self._engine.recall(project)
+        results = await self._engine.recall(project, tenant_id=req.tenant_id)
         return [
             {"fact_id": getattr(r, "fact_id", None), "content": getattr(r, "content", str(r))}
             for r in results

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -110,6 +111,20 @@ async def test_process_interaction_no_overflow(manager, mock_l1, mock_l3):
     # 4. No overflow means nothing in the background queue
     assert manager._bg_queue.empty()
     assert event.role == "user"
+
+
+@pytest.mark.asyncio
+async def test_process_interaction_rejects_blank_tenant(manager, mock_l3):
+    with pytest.raises(ValueError, match="tenant_id"):
+        await manager.process_interaction(
+            role="user",
+            content="Test processing",
+            session_id="session_1",
+            token_count=10,
+            tenant_id="   ",
+        )
+
+    mock_l3.append_event.assert_not_called()
 
 
 @pytest.mark.asyncio
@@ -237,6 +252,17 @@ async def test_store_rejection_low_exergy(manager, mock_mem0_pipeline):
 
 
 @pytest.mark.asyncio
+async def test_store_rejects_blank_tenant(manager, mock_mem0_pipeline):
+    manager._mem0_pipeline = mock_mem0_pipeline
+
+    with pytest.raises(ValueError, match="tenant_id"):
+        await manager.store(
+            tenant_id="  ",
+            content="Blank tenant should fail closed",
+        )
+
+
+@pytest.mark.asyncio
 async def test_store_rejection_thalamus(manager, mock_mem0_pipeline):
     """Test store abortion if ThalamusGate rejects."""
     manager._mem0_pipeline = mock_mem0_pipeline  # Pass exergy
@@ -305,6 +331,54 @@ async def test_assemble_context(manager, mock_l1):
         # Episodic context
         assert len(ctx["episodic_context"]) == 1
         assert ctx["episodic_context"][0]["content"] == "episodic 1"
+
+
+def test_get_context_vector_rejects_blank_tenant(manager) -> None:
+    with pytest.raises(ValueError, match="tenant_id"):
+        manager.get_context_vector(tenant_id="  ")
+
+
+@pytest.mark.asyncio
+async def test_reconcile_experience_requires_explicit_tenant(manager) -> None:
+    signal = SimpleNamespace(
+        payload={
+            "project_id": "proj",
+            "content": "bus event",
+            "fact_type": "knowledge",
+        }
+    )
+
+    with pytest.raises(ValueError, match="tenant_id"):
+        await manager.reconcile_experience(signal)
+
+
+@pytest.mark.asyncio
+async def test_reconcile_experience_forwards_explicit_tenant(manager) -> None:
+    signal = SimpleNamespace(
+        payload={
+            "tenant_id": "tenant-bus",
+            "project_id": "proj",
+            "content": "bus event",
+            "fact_type": "decision",
+            "metadata": {"source": "bus"},
+            "layer": "semantic",
+        }
+    )
+
+    with patch.object(type(manager), "store", new_callable=AsyncMock) as mock_store:
+        mock_store.return_value = "engram_789"
+        result = await manager.reconcile_experience(signal)
+
+    assert result == "engram_789"
+    mock_store.assert_awaited_once_with(
+        tenant_id="tenant-bus",
+        project_id="proj",
+        content="bus event",
+        fact_type="decision",
+        metadata={"source": "bus"},
+        layer="semantic",
+        use_bus=False,
+    )
 
 
 @pytest.mark.asyncio

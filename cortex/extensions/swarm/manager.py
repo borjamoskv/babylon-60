@@ -14,7 +14,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.signals.bus import AsyncSignalBus
+from cortex import config
+from cortex.extensions.signals.bus import AsyncDurableSignalBus, DurableSignalBus
 from cortex.extensions.swarm.auto_fix import AutoFixPipeline
 from cortex.extensions.swarm.budget import get_budget_manager
 from cortex.extensions.swarm.protocols import AgentRole, SwarmIntent, SwarmSignalSchema
@@ -140,14 +141,21 @@ class SwarmManager:
 
     async def shutdown_all(self) -> None:
         """Forcefully shutdown all active worktrees (critical for test suite teardown)."""
+        tasks_to_await = []
         async with self._lock:
             for worktree_id, state in list(self.worktrees.items()):
-                if state.status in ("active", "provisioning"):
+                if state.status in ("active", "provisioning", "tearing_down"):
                     state.status = "tearing_down"
                     state.shutdown_event.set()
+                    if state.task is not None:
+                        tasks_to_await.append(state.task)
                     logger.debug("Forcefully shutting down worktree %s", worktree_id)
-            # Give tasks a moment to resolve
-            await asyncio.sleep(0.01)
+
+        if tasks_to_await:
+            await asyncio.gather(*tasks_to_await, return_exceptions=True)
+
+        async with self._lock:
+            self.worktrees.clear()
 
 
 _manager_key = "__cortex_swarm_manager__"
@@ -172,7 +180,7 @@ class SwarmTask:
     id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
     name: str = "Anonymous Task"
     agent_name: str = "UniversalAgent"
-    role: AgentRole = AgentRole.WORKER
+    role: AgentRole = AgentRole.SOVEREIGN_EXECUTOR
     is_sovereign: bool = True  # AX-046 JIT Autopoiesis
     status: TaskStatus = TaskStatus.PENDING
     result: Any = None
@@ -186,6 +194,7 @@ class CapatazOrchestrator:
         self.mission_id = mission_id or f"mission-{uuid.uuid4().hex[:8]}"
         self.tasks: dict[str, SwarmTask] = {}
         self.budget = get_budget_manager()
+        self.default_max_concurrency = max(1, config.SWARM_CAPATAZ_MAX_CONCURRENCY)
 
         from cortex.extensions.swarm.kv_prefix_registry import get_kv_registry
 
@@ -201,7 +210,7 @@ class CapatazOrchestrator:
         mission_id: str | None = None,
         engine: Any | None = None,
         agent_name: str = "UniversalAgent",
-        role: AgentRole = AgentRole.WORKER,
+        role: AgentRole = AgentRole.SOVEREIGN_EXECUTOR,
         intent: SwarmIntent = SwarmIntent.DISCOVERY,
     ) -> str:
         """Execute completion and broadcast discovery via SignalBus (Ω₁₄)."""
@@ -228,7 +237,7 @@ class CapatazOrchestrator:
 
             if _SESSION_TYPE_CACHE[engine_id]:
                 async with engine.session() as conn:
-                    bus = AsyncSignalBus(conn)
+                    bus = AsyncDurableSignalBus(conn)
                     await bus.emit(
                         event_type="swarm_discovery",
                         payload=asdict(schema),
@@ -236,9 +245,7 @@ class CapatazOrchestrator:
                     )
             else:
                 with engine.session() as conn:
-                    from cortex.extensions.signals.bus import SignalBus
-
-                    bus = SignalBus(conn)
+                    bus = DurableSignalBus(conn)
                     bus.emit(
                         event_type="swarm_discovery",
                         payload=asdict(schema),
@@ -251,7 +258,7 @@ class CapatazOrchestrator:
         name: str,
         agent_name: str,
         coro_func: Callable[..., Any],
-        role: AgentRole = AgentRole.WORKER,
+        role: AgentRole = AgentRole.SOVEREIGN_EXECUTOR,
         changed_files: list[str] | None = None,
         args: list[Any] | tuple[Any, ...] = (),
         kwargs: dict[str, Any] | None = None,
@@ -401,10 +408,26 @@ class CapatazOrchestrator:
         except Exception as e:
             logger.warning("[%s] Capataz: KV Cache Preheat failed: %s", self.mission_id, e)
 
-    async def run_parallel(self, task_definitions: list[dict[str, Any]]) -> list[Any]:
-        """Deploy multiple agents in parallel."""
+    async def run_parallel(
+        self,
+        task_definitions: list[dict[str, Any]],
+        max_concurrency: int | None = None,
+    ) -> list[Any]:
+        """Deploy multiple agents in parallel with bounded concurrency.
+
+        The default fan-out is capped so large swarms do not flood the event
+        loop or overwhelm shared providers. Callers may override the limit by
+        passing ``max_concurrency`` in a task definition or by using the
+        top-level ``max_concurrency`` argument.
+        """
         # Ouroboros KV Cache Prefetch (AX-042)
         from collections import Counter
+
+        effective_max_concurrency = max_concurrency or self.default_max_concurrency
+        if task_definitions:
+            first_limit = task_definitions[0].get("max_concurrency")
+            if isinstance(first_limit, int) and first_limit > 0:
+                effective_max_concurrency = first_limit
 
         system_prompts = []
         for td in task_definitions:
@@ -419,23 +442,26 @@ class CapatazOrchestrator:
                 tenant_id = os.environ.get("CORTEX_TENANT_ID", "local-tenant")
                 await self.preheat_prefix(most_common[0], tenant_id)
 
-        loop_tasks = [
-            self.run_task(
-                name=td["name"],
-                agent_name=td["agent_name"],
-                coro_func=td["func"],
-                role=td.get("role", AgentRole.WORKER),
-                changed_files=td.get("changed_files"),
-                args=td.get("args", ()),
-                kwargs=td.get("kwargs", {}),
-                lock_resource=td.get("lock_resource"),
-                lock_manager=td.get("lock_manager"),
-                lock_timeout_s=td.get("lock_timeout_s", 10.0),
-                lock_ttl_s=td.get("lock_ttl_s", 30.0),
-                engine=td.get("engine"),
-            )
-            for td in task_definitions
-        ]
+        semaphore = asyncio.Semaphore(effective_max_concurrency)
+
+        async def _run_limited(task_def: dict[str, Any]) -> Any:
+            async with semaphore:
+                return await self.run_task(
+                    name=task_def["name"],
+                    agent_name=task_def["agent_name"],
+                    coro_func=task_def["func"],
+                    role=task_def.get("role", AgentRole.SOVEREIGN_EXECUTOR),
+                    changed_files=task_def.get("changed_files"),
+                    args=task_def.get("args", ()),
+                    kwargs=task_def.get("kwargs", {}),
+                    lock_resource=task_def.get("lock_resource"),
+                    lock_manager=task_def.get("lock_manager"),
+                    lock_timeout_s=task_def.get("lock_timeout_s", 10.0),
+                    lock_ttl_s=task_def.get("lock_ttl_s", 30.0),
+                    engine=task_def.get("engine"),
+                )
+
+        loop_tasks = [asyncio.create_task(_run_limited(td)) for td in task_definitions]
         return await asyncio.gather(*loop_tasks, return_exceptions=True)
 
     def _print_summary(self) -> None:

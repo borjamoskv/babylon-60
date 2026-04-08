@@ -2,18 +2,23 @@ from __future__ import annotations
 
 import inspect
 import logging
+import sqlite3
+from typing import TYPE_CHECKING
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from cortex.api.deps import get_async_engine
-from cortex.auth import AuthResult, require_permission
-from cortex.engine import CortexEngine as AsyncCortexEngine
+from cortex.auth import require_permission
 from cortex.engine.storage_guard import GuardViolation, StorageGuard
 from cortex.types.models import StoreRequest
 
 router = APIRouter(tags=["trust"])
 logger = logging.getLogger("uvicorn.error")
+
+if TYPE_CHECKING:
+    from cortex.auth import AuthResult
+    from cortex.engine import CortexEngine as AsyncCortexEngine
 
 
 class TrustProfileResponse(BaseModel):
@@ -59,7 +64,7 @@ async def dry_run_guard(
         raise HTTPException(
             status_code=400, detail={"valid": False, "rule": e.rule, "error": e.detail}
         ) from e
-    except Exception as e:
+    except (RuntimeError, ValueError, TypeError) as e:
         logger.error("Guard dry-run failed: %s", e)
         raise HTTPException(status_code=500, detail="Internal guard error") from e
 
@@ -111,6 +116,6 @@ async def get_compliance_status(
             compliance_level="Sovereign-Alpha",
             article_12_status="LOGGED_AND_VERIFIED",
         )
-    except Exception as e:
+    except (sqlite3.Error, OSError, RuntimeError, ValueError) as e:
         logger.error("Compliance report generation failed: %s", e)
         raise HTTPException(status_code=500, detail="Failed to generate compliance report") from e

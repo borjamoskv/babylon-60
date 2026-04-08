@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: mailto:security@cortexpersist.com
+    about: Report vulnerabilities privately. Do not open a public issue for security reports.
+  - name: Support policy
+    url: https://github.com/borjamoskv/Cortex-Persist/blob/main/SUPPORT.md
+    about: Review support scope, response targets, and current support posture.
+  - name: Enterprise readiness
+    url: https://github.com/borjamoskv/Cortex-Persist/blob/main/ENTERPRISE_READINESS.md
+    about: Start here for procurement, technical diligence, and acquisition-style review.

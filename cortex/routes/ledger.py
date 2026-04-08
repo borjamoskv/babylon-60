@@ -1,16 +1,17 @@
-"""
-CORTEX v5.0 - Ledger Router.
+"""CORTEX v5.0 - Ledger Router.
 Cryptographic integrity verification and checkpointing.
 """
 
+from __future__ import annotations
+
 import logging
 import sqlite3
+from typing import TYPE_CHECKING
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 
 from cortex.api.deps import get_async_engine
-from cortex.auth import AuthResult, require_permission
-from cortex.engine import CortexEngine as AsyncCortexEngine
+from cortex.auth import require_permission
 from cortex.types.models import CheckpointResponse, LedgerReportResponse
 from cortex.utils.i18n import get_trans
 
@@ -34,6 +35,10 @@ class MerkleIntegrityError(LedgerError):
 logger = logging.getLogger("cortex.api.ledger")
 router = APIRouter(prefix="/v1/ledger", tags=["ledger"])
 
+if TYPE_CHECKING:
+    from cortex.auth import AuthResult
+    from cortex.engine import CortexEngine as AsyncCortexEngine
+
 
 @router.get("/status", response_model=LedgerReportResponse)
 async def get_ledger_status(
@@ -50,8 +55,8 @@ async def get_ledger_status(
         vote_report = await engine.verify_vote_ledger()
 
         # Merge reports
-        combined_valid = tx_report["valid"] and vote_report["valid"]
-        combined_violations = tx_report["violations"] + vote_report["violations"]
+        combined_valid = tx_report.get("valid", False) and vote_report.get("valid", False)
+        combined_violations = tx_report.get("violations", []) + vote_report.get("violations", [])
 
         if not combined_valid:
             logger.error("Ledger violation detected! %s issues found.", len(combined_violations))
@@ -59,7 +64,7 @@ async def get_ledger_status(
         return LedgerReportResponse(
             valid=combined_valid,
             violations=combined_violations,
-            tx_checked=tx_report.get("tx_checked", 0),
+            tx_checked=tx_report.get("tx_checked", tx_report.get("tx_count", 0)),
             roots_checked=tx_report.get("roots_checked", 0),
             votes_checked=vote_report.get("votes_checked", 0),
             vote_checkpoints_checked=vote_report.get("checkpoints_checked", 0),
@@ -85,7 +90,8 @@ async def create_checkpoint(
 
         if cp_id:
             return CheckpointResponse(
-                checkpoint_id=cp_id, message=f"Merkle checkpoint #{cp_id} created successfully"
+                checkpoint_id=cp_id,
+                message="Merkle checkpoint created successfully",
             )
         else:
             return CheckpointResponse(

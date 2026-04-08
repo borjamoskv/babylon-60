@@ -154,6 +154,14 @@ class AgentDefinition:
         )
 
 
+@dataclass
+class AgentRuntimeConfig:
+    """Runtime-facing subset of an agent definition."""
+
+    system_prompt: str | None = None
+    tools: list[str] = field(default_factory=list)
+
+
 class AgentRegistry:
     """Singleton registry for all CORTEX YAML agent definitions.
 
@@ -225,3 +233,18 @@ def list_agents() -> list[str]:
 def get_agent(agent_id: str) -> AgentDefinition | None:
     """Retrieve an agent definition by ID."""
     return AgentRegistry().get(agent_id)
+
+
+def resolve_agent_runtime_config(agent_id: str | None) -> AgentRuntimeConfig:
+    """Resolve prompt and tool metadata for a runtime agent instance."""
+    if not agent_id:
+        return AgentRuntimeConfig()
+
+    agent_def = AgentRegistry().get(agent_id)
+    if agent_def is None:
+        return AgentRuntimeConfig()
+
+    return AgentRuntimeConfig(
+        system_prompt=agent_def.system_prompt or None,
+        tools=list(agent_def.tools),
+    )

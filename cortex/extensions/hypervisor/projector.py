@@ -77,8 +77,8 @@ class EventProjector:
         """
         try:
             await self._signal_endocrine("awareness", 0.1)
-        except Exception:  # noqa: BLE001
-            pass
+        except Exception as exc:  # noqa: BLE001
+            logger.debug("Projector on_recall endocrine signal failed for %s: %s", project, exc)
 
     # ── Private side-effect implementations ───────────────────────
 

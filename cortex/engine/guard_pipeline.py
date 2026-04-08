@@ -3,7 +3,8 @@
 Replaces the hardcoded try/except ImportError blocks in store_mixin._store_impl
 with a registered list of protocol-conforming guards, mutators, and hooks.
 
-Guards that fail to import at registration time are silently skipped.
+Guards that fail to import at registration time may be skipped, but
+runtime failures during execution must propagate to the caller.
 """
 
 from __future__ import annotations
@@ -102,7 +103,7 @@ class GuardPipeline:
                     source=source,
                     db_path=db_path,
                 )
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 logger.debug(
                     "[GuardPipeline] Post-hook %s failed: %s",
                     type(hook).__name__,

@@ -276,6 +276,9 @@ CREATE TABLE IF NOT EXISTS enrichment_jobs (
 
 CREATE_ENRICHMENT_JOBS_INDEXES = """
 CREATE INDEX IF NOT EXISTS idx_enrichment_jobs_status ON enrichment_jobs(status, priority DESC);
+CREATE INDEX IF NOT EXISTS idx_enrichment_jobs_status_created ON enrichment_jobs(status, created_at);
+CREATE INDEX IF NOT EXISTS idx_enrichment_jobs_status_retry_created
+    ON enrichment_jobs(status, next_attempt_at, created_at);
 CREATE INDEX IF NOT EXISTS idx_enrichment_jobs_fact ON enrichment_jobs(fact_id);
 """
 
@@ -371,6 +374,11 @@ CREATE TABLE IF NOT EXISTS causal_edges (
     created_at      TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (fact_id) REFERENCES facts(id)
 );
+CREATE INDEX IF NOT EXISTS idx_causal_fact ON causal_edges(fact_id);
+CREATE INDEX IF NOT EXISTS idx_causal_parent ON causal_edges(parent_id);
+CREATE INDEX IF NOT EXISTS idx_causal_tenant ON causal_edges(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_causal_parent_edge_tenant
+    ON causal_edges(parent_id, edge_type, tenant_id);
 """
 
 
@@ -441,7 +449,6 @@ EXTENSION_SCHEMA = [
     CREATE_ENRICHMENT_JOBS_INDEXES,
     CREATE_PROCEDURAL_ENGRAMS,
     CREATE_FACTS_FTS,
-    CREATE_FACTS_FTS_TRIGGERS,
     CREATE_MERKLE_ROOTS,
     CREATE_INTEGRITY_CHECKS,
     CREATE_AUDIT_EXPORTS,

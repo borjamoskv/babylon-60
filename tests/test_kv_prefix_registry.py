@@ -1,5 +1,9 @@
 """Tests for KV Prefix Registry ensuring Tenant Isolation."""
 
+import asyncio
+
+import pytest
+
 from cortex.extensions.swarm.kv_prefix_registry import KVPrefixRegistry
 
 
@@ -71,10 +75,6 @@ def test_lazy_ttl_eviction():
     # Lazy Eviction debe haber aniquilado el slot
     assert slot.cache_key not in registry._slots
 
-
-import asyncio
-import pytest
-
 @pytest.mark.asyncio
 async def test_stampede_mitigation():
     """Simula 100 agentes arrancando simultáneamente. 
@@ -101,4 +101,3 @@ async def test_stampede_mitigation():
     assert leader_count == 1
     assert follower_count == 99
     assert len(registry._prefill_locks) == 0
-

@@ -44,6 +44,64 @@ except ImportError:
 
 logger = logging.getLogger("cortex.neural")
 
+DEFAULT_NEURAL_RULES: list[dict[str, str]] = [
+    {
+        "app_re": r"(Cursor|VSCode|Code|iTerm|Terminal|Ghostty)",
+        "clip_re": (
+            r"(Traceback \(most recent call last\):"
+            r"|Error:|Exception:|FATAL:|panic:)"
+        ),
+        "intent": "debugging_error",
+        "confidence": "C4",
+        "trigger_desc": "Error trace in clipboard while in dev environment",
+    },
+    {
+        "app_re": r"(Chrome|Arc|Safari|Firefox|Brave)",
+        "clip_re": r"^(https?://|www\.)\S+$",
+        "intent": "researching",
+        "confidence": "C3",
+        "trigger_desc": "URL copied while in browser",
+    },
+    {
+        "app_re": r"(Cursor|VSCode|Code)",
+        "clip_re": r"(TO" + r"DO|FI" + r"XME|HA" + r"CK):",
+        "intent": "technical_debt_focus",
+        "confidence": "C3",
+        "trigger_desc": "Code debt marker in clipboard while in editor",
+    },
+    {
+        "app_re": r"(Linear|Jira|Trello|Notion)",
+        "clip_re": r"^(bug|feature|task|epic|ticket)\b",
+        "intent": "planning",
+        "confidence": "C3",
+        "trigger_desc": "Issue tracking text in planner app",
+    },
+    {
+        "app_re": r"(Chrome|Arc|Safari|Firefox|Brave|Cursor|VSCode|Code|iTerm|Terminal|Ghostty)",
+        "clip_re": (
+            r"(?is)(document\.querySelector(?:All)?\(|querySelector(?:All)?\(|"
+            r"Page\.(?:navigate|reload)|Runtime\.evaluate|"
+            r"navigate_and_wait|click_and_wait|type_text_and_wait|"
+            r"\b(?:click|type|fill|submit|navigate|extract|screenshot)\b.+"
+            r"(?:#|\.|\[data-|button|input|textarea|form))"
+        ),
+        "intent": "mac_control_browser_flow",
+        "confidence": "C4",
+        "trigger_desc": "Browser automation or CDP control pattern detected in clipboard",
+    },
+    {
+        "app_re": r"(Chrome|Arc|Safari|Firefox|Brave|Cursor|VSCode|Code)",
+        "clip_re": (
+            r"(?is)(wait_for_(?:selector|text|navigation)|\b(?:assert|expect|verify|"
+            r"settle|networkIdle|loadEventFired|Page\.lifecycleEvent|toast|modal|"
+            r"saved|ready)\b)"
+        ),
+        "intent": "mac_control_verification_loop",
+        "confidence": "C3",
+        "trigger_desc": "Browser readiness or verification loop detected in clipboard",
+    },
+]
+
 
 def calculate_entropy(text: str) -> float:
     if not text:
@@ -221,45 +279,33 @@ class NeuralIntentEngine:
         self._rules: list[tuple[re.Pattern, re.Pattern, str, str, str]] = []
         self._load_rules()
 
+    @staticmethod
+    def _rule_key(rule: dict[str, str]) -> tuple[str, str, str, str]:
+        return (
+            str(rule.get("intent", "")),
+            str(rule.get("trigger_desc", "")),
+            str(rule.get("app_re", "")),
+            str(rule.get("clip_re", "")),
+        )
+
+    @classmethod
+    def _merge_default_rules(cls, rules: list[dict[str, str]]) -> list[dict[str, str]]:
+        merged = [dict(rule) for rule in rules if isinstance(rule, dict)]
+        existing = {cls._rule_key(rule) for rule in merged}
+        for rule in DEFAULT_NEURAL_RULES:
+            key = cls._rule_key(rule)
+            if key in existing:
+                continue
+            merged.append(dict(rule))
+            existing.add(key)
+        return merged
+
     def _load_rules(self) -> None:
         if not self._rules_path.exists():
-            default_rules = [
-                {
-                    "app_re": r"(Cursor|VSCode|Code|iTerm|Terminal|Ghostty)",
-                    "clip_re": (
-                        r"(Traceback \(most recent call last\):"
-                        r"|Error:|Exception:|FATAL:|panic:)"
-                    ),
-                    "intent": "debugging_error",
-                    "confidence": "C4",
-                    "trigger_desc": "Error trace in clipboard while in dev environment",
-                },
-                {
-                    "app_re": r"(Chrome|Arc|Safari|Firefox|Brave)",
-                    "clip_re": r"^(https?://|www\.)\S+$",
-                    "intent": "researching",
-                    "confidence": "C3",
-                    "trigger_desc": "URL copied while in browser",
-                },
-                {
-                    "app_re": r"(Cursor|VSCode|Code)",
-                    "clip_re": r"(TO" + r"DO|FI" + r"XME|HA" + r"CK):",
-                    "intent": "technical_debt_focus",
-                    "confidence": "C3",
-                    "trigger_desc": "Code debt marker in clipboard while in editor",
-                },
-                {
-                    "app_re": r"(Linear|Jira|Trello|Notion)",
-                    "clip_re": r"^(bug|feature|task|epic|ticket)\b",
-                    "intent": "planning",
-                    "confidence": "C3",
-                    "trigger_desc": "Issue tracking text in planner app",
-                },
-            ]
             try:
                 self._rules_path.parent.mkdir(parents=True, exist_ok=True)
                 with open(self._rules_path, "w", encoding="utf-8") as f:
-                    json.dump(default_rules, f, indent=4)
+                    json.dump(DEFAULT_NEURAL_RULES, f, indent=4)
             except (ValueError, OSError, RuntimeError) as e:
                 logger.error("Failed to create neural defaults: %s", e)
 
@@ -267,13 +313,20 @@ class NeuralIntentEngine:
             with open(self._rules_path, encoding="utf-8") as f:
                 data = json.load(f)
 
+            if not isinstance(data, list):
+                raise ValueError("Neural rules file must contain a list of rule objects.")
+
+            data = self._merge_default_rules(data)
             loaded = []
             for r in data:
+                if not isinstance(r, dict):
+                    logger.debug("Skipping malformed neural rule: %r", r)
+                    continue
                 app_re = re.compile(r["app_re"], re.IGNORECASE)
                 clip_re = re.compile(r["clip_re"], re.IGNORECASE)
                 loaded.append((app_re, clip_re, r["intent"], r["confidence"], r["trigger_desc"]))
             self._rules = loaded
-        except (ValueError, OSError, RuntimeError) as e:
+        except (KeyError, TypeError, ValueError, OSError, RuntimeError, re.error) as e:
             logger.error("Failed to load neural rules: %s", e)
             self._rules = []
 
@@ -331,10 +384,11 @@ class NeuralIntentEngine:
     ) -> Optional[NeuralHypothesis]:
         """Check if a single rule matches the current context."""
         app_re, clip_re, intent, conf, trigger = rule
+        clipboard = raw_clipboard.strip()
 
         if not app_re.search(context.active_window):
             return None
-        if not raw_clipboard or not clip_re.search(raw_clipboard):
+        if not clipboard or not clip_re.search(clipboard):
             return None
 
         hyp = NeuralHypothesis(

@@ -110,6 +110,30 @@ class TestProcessStore:
         )
         assert result.valence is not None
 
+    def test_bridge_valence_respects_bridge_kind(self):
+        from cortex.memory.valence import EmotionalTag
+
+        pipe = _build_pipeline()
+
+        relation = pipe.process_store(
+            content="Bridge between alpha and beta",
+            fact_type="bridge",
+            meta={"bridge_kind": "relation"},
+        )
+        external = pipe.process_store(
+            content="Bridge between alpha and beta",
+            fact_type="bridge",
+            meta={"bridge_kind": "external"},
+        )
+        system = pipe.process_store(
+            content="Bridge between alpha and beta",
+            fact_type="bridge",
+            meta={"bridge_kind": "system"},
+        )
+
+        assert relation.valence.tag == EmotionalTag.CRITICAL
+        assert relation.valence.valence > external.valence.valence > system.valence.valence
+
     def test_stdp_recorded_with_fact_id(self):
         pipe = _build_pipeline()
         result = pipe.process_store(content="test", fact_type="knowledge", fact_id="fact_1")

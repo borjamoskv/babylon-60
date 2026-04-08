@@ -3,3 +3,15 @@
 /cortex/ @borjamoskv
 /scripts/ @borjamoskv
 /.github/ @borjamoskv
+/docs/ @borjamoskv
+/README.md @borjamoskv
+/SECURITY.md @borjamoskv
+/SUPPORT.md @borjamoskv
+/DUE_DILIGENCE_CHECKLIST.md @borjamoskv
+/DEPLOYMENT_HARDENING.md @borjamoskv
+/ENTERPRISE_READINESS.md @borjamoskv
+/REPO_GOVERNANCE.md @borjamoskv
+/MAINTAINERS.md @borjamoskv
+/VERSION_SUPPORT.md @borjamoskv
+/RELEASE_PROCESS.md @borjamoskv
+/pyproject.toml @borjamoskv

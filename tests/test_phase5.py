@@ -70,3 +70,14 @@ async def test_bash_fail_format():
     result = toolkit.bash("ls /non-existent-directory-12345")
     assert "[FAIL]" in result
     assert "exit code" in result
+
+
+def test_bash_uses_real_bash_syntax(tmp_path):
+    """Verify that AgentToolkit.bash supports bash-only syntax."""
+
+    from cortex.extensions.aether.tools import AgentToolkit
+
+    toolkit = AgentToolkit(tmp_path)
+    result = toolkit.bash("[[ 1 -eq 1 ]] && echo ok")
+
+    assert result == "ok"

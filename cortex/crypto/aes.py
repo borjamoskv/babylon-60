@@ -154,3 +154,41 @@ def reset_default_encrypter() -> None:
     """
     global _default_encrypter_instance
     _default_encrypter_instance = None
+
+
+def load_json_value(raw: Any, tenant_id: str = "default") -> Any | None:
+    """Load a JSON blob that may be plaintext or AES-GCM encrypted."""
+    if raw is None:
+        return None
+    if isinstance(raw, (dict, list)):
+        return raw
+
+    text = raw.decode("utf-8") if isinstance(raw, bytes) else str(raw)
+    if not text.strip():
+        return None
+
+    if text.startswith(CortexEncrypter.PREFIX):
+        try:
+            text = get_default_encrypter().decrypt_str(text, tenant_id=tenant_id) or ""
+        except (RuntimeError, ValueError, TypeError, OSError):
+            return None
+
+    if not text:
+        return None
+
+    try:
+        return json.loads(text)
+    except (json.JSONDecodeError, TypeError, ValueError):
+        return None
+
+
+def load_json_dict(raw: Any, tenant_id: str = "default") -> dict[str, Any]:
+    """Load a metadata blob into a dictionary with encrypted-blob support."""
+    loaded = load_json_value(raw, tenant_id=tenant_id)
+    return loaded if isinstance(loaded, dict) else {}
+
+
+def load_json_list(raw: Any, tenant_id: str = "default") -> list[Any]:
+    """Load a JSON blob into a list with encrypted-blob support."""
+    loaded = load_json_value(raw, tenant_id=tenant_id)
+    return loaded if isinstance(loaded, list) else []

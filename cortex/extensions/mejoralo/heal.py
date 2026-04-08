@@ -207,6 +207,155 @@ def _apply_aesthetic_formatting(abs_path: Path, console: Any) -> None:
     )
 
 
+def _build_delta_test_command(top_file_rel: str, path: str | Path, console: Any) -> list[str]:
+    """Build the narrowest pytest command available for a healed file."""
+    pytest_cmd = [sys.executable, "-m", "pytest"]
+    rel_parts = Path(top_file_rel).parts
+
+    if len(rel_parts) <= 1 or rel_parts[0] != "cortex":
+        return pytest_cmd
+
+    inferred_test = Path(path) / "tests" / f"test_{Path(top_file_rel).stem}.py"
+    if inferred_test.exists():
+        console.print(f"  [cyan]🎯 Delta-Testing: {inferred_test.name}[/]")
+        pytest_cmd.append(str(inferred_test))
+    else:
+        console.print("  [dim]⚠️ No direct test found, running full suite...[/]")
+    return pytest_cmd
+
+
+def _record_delta_failure(
+    top_file_rel: str,
+    console: Any,
+    engine: MejoraloEngine | None,
+    project: str | None,
+    error_trace: str,
+    level: int,
+) -> None:
+    """Persist regression evidence and taint when repeated L3 failure occurs."""
+    console.print(f"  [bold red]💥 Regresión en {top_file_rel}! Rollback.[/]")
+    if not (engine and project):
+        return
+
+    engine.record_scar(project, top_file_rel, error_trace)
+    if level < 3:
+        return
+
+    console.print(
+        f"  [bold red]☠️ L3 CIRCUIT BREAKER: {top_file_rel} "
+        "marcado como TAINTED. Requiere ariadne-arch-omega.[/]"
+    )
+    mark_file_tainted(top_file_rel, project, engine)
+
+
+def _record_delta_timeout(
+    top_file_rel: str,
+    console: Any,
+    engine: MejoraloEngine | None,
+    project: str | None,
+    exc: subprocess.TimeoutExpired,
+) -> None:
+    """Persist timeout evidence for a failed delta test run."""
+    console.print(
+        f"  [bold red]⏳ Timeout en {top_file_rel} tras {PYTEST_TIMEOUT_SECONDS}s! Rollback.[/]"
+    )
+    if engine and project:
+        err_trace = (
+            f"TimeoutExpired: pytest superó los {PYTEST_TIMEOUT_SECONDS} "
+            f"segundos. stdout: {exc.stdout}"
+        )
+        engine.record_scar(project, top_file_rel, err_trace)
+
+
+def _select_healing_targets(
+    current_result: ScanResult,
+    path: str | Path,
+    level: int,
+) -> list[tuple[str, list[str]]]:
+    """Pick the highest-value files to heal in the current iteration."""
+    file_issues = _extract_issues_from_findings(current_result)
+    if not file_issues:
+        return []
+
+    sorted_files = sort_by_topological_order(file_issues, path)
+    return sorted_files[: _get_files_per_iteration(level)]
+
+
+def _run_generation_batch(
+    project: str,
+    path: str | Path,
+    level: int,
+    iteration: int,
+    targets: list[tuple[str, list[str]]],
+    engine: MejoraloEngine | None,
+) -> list[str | None]:
+    """Generate healing proposals for the selected targets."""
+
+    async def _run_generations() -> list[str | None]:
+        results: list[str | None] = []
+        for file_rel, issues in targets:
+            result = await _heal_file_async(
+                Path(path).resolve() / file_rel,
+                issues,
+                level=level,
+                iteration=iteration,
+                engine=engine,
+                project=project,
+            )
+            results.append(result)
+        return results
+
+    try:
+        loop = asyncio.get_running_loop()
+        if loop.is_running():
+            import concurrent.futures
+
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                return executor.submit(lambda: asyncio.run(_run_generations())).result()
+        return asyncio.run(_run_generations())
+    except RuntimeError:
+        return asyncio.run(_run_generations())
+
+
+def _apply_generation_results(
+    targets: list[tuple[str, list[str]]],
+    generation_results: list[str | None],
+    path: str | Path,
+    level: int,
+    iteration: int,
+    console: Any,
+    current_score: int,
+    healed_files: set[str],
+    engine: MejoraloEngine | None,
+    project: str | None,
+) -> bool:
+    """Apply verified healing proposals and track which files were healed."""
+    iteration_success = False
+    for (top_file_rel, _), new_code in zip(targets, generation_results, strict=True):
+        if is_file_tainted(top_file_rel, project, engine):
+            console.print(
+                f"  [bold red]☠️ {top_file_rel} está TAINTED. "
+                "Requiere ariadne-arch-omega. Saltando.[/]"
+            )
+            continue
+        if not new_code:
+            continue
+        if _apply_and_verify(
+            top_file_rel,
+            new_code,
+            path,
+            level,
+            iteration,
+            console,
+            current_score,
+            engine=engine,
+            project=project,
+        ):
+            iteration_success = True
+            healed_files.add(top_file_rel)
+    return iteration_success
+
+
 def _run_delta_testing(
     top_file_rel: str,
     path: str | Path,
@@ -217,16 +366,7 @@ def _run_delta_testing(
     project: str | None,
     level: int = 1,
 ) -> bool:
-    pytest_cmd = [sys.executable, "-m", "pytest"]
-    rel_parts = Path(top_file_rel).parts
-
-    if len(rel_parts) > 1 and rel_parts[0] == "cortex":
-        inferred_test = Path(path) / "tests" / f"test_{Path(top_file_rel).stem}.py"
-        if inferred_test.exists():
-            console.print(f"  [cyan]🎯 Delta-Testing: {inferred_test.name}[/]")
-            pytest_cmd.append(str(inferred_test))
-        else:
-            console.print("  [dim]⚠️ No direct test found, running full suite...[/]")
+    pytest_cmd = _build_delta_test_command(top_file_rel, path, console)
 
     try:
         res = subprocess.run(
@@ -237,30 +377,19 @@ def _run_delta_testing(
             timeout=PYTEST_TIMEOUT_SECONDS,
         )
         if res.returncode != 0:
-            console.print(f"  [bold red]💥 Regresión en {top_file_rel}! Rollback.[/]")
-            if engine and project:
-                error_trace = (res.stdout + "\n" + res.stderr).strip()
-                engine.record_scar(project, top_file_rel, error_trace)
-                # ⛔ Taint Circuit Breaker: if L3 and still failing, mark as tainted
-                if level >= 3:
-                    console.print(
-                        f"  [bold red]☠️ L3 CIRCUIT BREAKER: {top_file_rel} "
-                        "marcado como TAINTED. Requiere ariadne-arch-omega.[/]"
-                    )
-                    mark_file_tainted(top_file_rel, project, engine)
+            _record_delta_failure(
+                top_file_rel,
+                console,
+                engine,
+                project,
+                (res.stdout + "\n" + res.stderr).strip(),
+                level,
+            )
             abs_path.write_text(original_code)
             return False
         return True
     except subprocess.TimeoutExpired as e:
-        console.print(
-            f"  [bold red]⏳ Timeout en {top_file_rel} tras {PYTEST_TIMEOUT_SECONDS}s! Rollback.[/]"
-        )
-        if engine and project:
-            err_trace = (
-                f"TimeoutExpired: pytest superó los {PYTEST_TIMEOUT_SECONDS} "
-                f"segundos. stdout: {e.stdout}"
-            )
-            engine.record_scar(project, top_file_rel, err_trace)
+        _record_delta_timeout(top_file_rel, console, engine, project, e)
         abs_path.write_text(original_code)
         return False
 
@@ -398,74 +527,23 @@ def _run_healing_iteration(
     """Execute a single multi-file healing pass with re-scan."""
     from cortex.extensions.mejoralo.scan import scan
 
-    file_issues = _extract_issues_from_findings(current_result)
-    if not file_issues:
+    targets = _select_healing_targets(current_result, path, level)
+    if not targets:
         return False, current_result
 
-    # 🔗 Topological Sort: Prioritize leaf nodes (dependencies) to avoid cascading failures
-    sorted_files = sort_by_topological_order(file_issues, path)
-
-    # Within the topological layer, prioritize unhealed files with most issues
-    # Note: _sort_by_topological_order currently returns a simple list,
-    # but we can refine it if we want parallel layers.
-    targets = sorted_files[: _get_files_per_iteration(level)]
-
-    # 🚀 Sequential Generation (avoid rate-limits)
-    async def _run_generations():
-        results = []
-        for f, iss in targets:
-            result = await _heal_file_async(
-                Path(path).resolve() / f,
-                iss,
-                level=level,
-                iteration=iteration,
-                engine=engine,
-                project=project,
-            )
-            results.append(result)
-        return results
-
-    try:
-        loop = asyncio.get_running_loop()
-        if loop.is_running():
-            # If we are in an async context, we can't block.
-            # This is a sync-to-async boundary. For now, we use a thread-safe
-            # approach or nest sparingly.
-            # In a sovereign environment, we prefer to run on a separate thread
-            # to block properly if sync.
-            import concurrent.futures
-
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                generation_results = executor.submit(
-                    lambda: asyncio.run(_run_generations())
-                ).result()
-        else:
-            generation_results = asyncio.run(_run_generations())
-    except RuntimeError:
-        generation_results = asyncio.run(_run_generations())
-
-    iteration_success = False
-    for (top_file_rel, _), new_code in zip(targets, generation_results, strict=True):
-        # ⛔ Skip permanently tainted files before attempting to apply
-        if is_file_tainted(top_file_rel, project, engine):
-            console.print(
-                f"  [bold red]☠️ {top_file_rel} está TAINTED. "
-                "Requiere ariadne-arch-omega. Saltando.[/]"
-            )
-            continue
-        if new_code and _apply_and_verify(
-            top_file_rel,
-            new_code,
-            path,
-            level,
-            iteration,
-            console,
-            current_result.score,
-            engine=engine,
-            project=project,
-        ):
-            iteration_success = True
-            healed_files.add(top_file_rel)
+    generation_results = _run_generation_batch(project, path, level, iteration, targets, engine)
+    iteration_success = _apply_generation_results(
+        targets,
+        generation_results,
+        path,
+        level,
+        iteration,
+        console,
+        current_result.score,
+        healed_files,
+        engine,
+        project,
+    )
 
     # Re-scan to see new score
     console.print("  [cyan]🔄 Re-escaneando para verificar impacto...[/]")

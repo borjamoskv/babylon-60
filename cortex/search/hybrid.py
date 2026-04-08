@@ -75,6 +75,8 @@ async def hybrid_search(
     tenant_id: str = "default",
     project: str | None = None,
     as_of: str | None = None,
+    fact_type: str | None = None,
+    tags: list[str] | None = None,
     vector_weight: float = 0.6,
     text_weight: float = 0.4,
     confidence: str | None = None,
@@ -97,6 +99,8 @@ async def hybrid_search(
         tenant_id=tenant_id,
         project=project,
         as_of=as_of,
+        fact_type=fact_type,
+        tags=tags,
         confidence=confidence,
     )
     txt_task = text_search(
@@ -104,6 +108,8 @@ async def hybrid_search(
         query,
         tenant_id=tenant_id,
         project=project,
+        fact_type=fact_type,
+        tags=tags,
         limit=fetch_limit,
         as_of=as_of,
         confidence=confidence,

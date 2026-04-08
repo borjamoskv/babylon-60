@@ -12,6 +12,7 @@ from __future__ import annotations
 import logging
 import os
 import tempfile
+from contextlib import suppress
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -26,13 +27,19 @@ __all__ = ["register_mega_tools"]
 logger = logging.getLogger("cortex.mcp.mega")
 
 # Safe base directories for entropy scanning
-# Include resolved tempdir for macOS (/var/folders/... symlinked from /tmp)
-_SAFE_BASES = (
+# Include resolved tempdir for macOS (/var/folders/... symlinked from /tmp) when available.
+_STATIC_SAFE_BASES = (
     str(Path.home()),
     "/tmp",
     "/private/tmp",
-    str(Path(tempfile.gettempdir()).resolve()),
 )
+
+
+def _safe_bases() -> tuple[str, ...]:
+    bases = list(_STATIC_SAFE_BASES)
+    with suppress(FileNotFoundError, OSError, RuntimeError):
+        bases.append(str(Path(tempfile.gettempdir()).resolve()))
+    return tuple(bases)
 
 
 def register_mega_tools(mcp: FastMCP, ctx: _MCPContext) -> None:
@@ -193,7 +200,7 @@ def _register_reality_weaver(mcp: FastMCP, ctx: _MCPContext) -> None:
 def _resolve_safe_path(path: str) -> str | None:
     """Resolve path safely, rejecting traversal outside safe bases."""
     resolved = str(Path(path).expanduser().resolve())
-    if any(resolved.startswith(base) for base in _SAFE_BASES):
+    if any(resolved.startswith(base) for base in _safe_bases()):
         return resolved
     return None
 
@@ -459,7 +466,7 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
         # Recommendations
         recs: list[str] = []
         if ghost_density > 15:
-            recs.append("- 👻 Ghost density critical. Run `/ghost-control` to triage.")
+            recs.append("- 👻 Ghost density critical. Run `cortex ghost status` to triage.")
         if recent_errors > 5:
             recs.append("- 🔴 High error rate. Investigate with `cortex search type:error`.")
         if drift < -30:

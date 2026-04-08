@@ -1,19 +1,20 @@
-"""
-CORTEX v5.0 — Context Engine API Route.
+"""CORTEX v5.0 — Context Engine API Route.
 
 Endpoints for ambient context inference, raw signals, and snapshot history.
 """
+
+from __future__ import annotations
 
 import logging
 import math
 import time
 from collections import deque
+from typing import TYPE_CHECKING
 
 from fastapi import APIRouter, Depends, Query, Request
 
 from cortex.api.deps import get_async_engine
-from cortex.auth import AuthResult, require_permission
-from cortex.engine import CortexEngine as AsyncCortexEngine
+from cortex.auth import require_permission
 from cortex.extensions.context.collector import ContextCollector
 from cortex.extensions.context.inference import ContextInference
 from cortex.types.models import (
@@ -26,6 +27,10 @@ __all__ = ["infer_context", "list_signals", "context_history"]
 
 router = APIRouter(prefix="/v1/context", tags=["context"])
 logger = logging.getLogger("uvicorn.error")
+
+if TYPE_CHECKING:
+    from cortex.auth import AuthResult
+    from cortex.engine import CortexEngine as AsyncCortexEngine
 
 # Global tracking for CORTEX v8 Axis 1 (Evaluation Layer)
 _context_latencies: deque[float] = deque(maxlen=100)
@@ -44,6 +49,9 @@ def get_p95_context_latency() -> float | None:
 async def infer_context(
     request: Request,
     persist: bool = Query(True, description="Persist snapshot to DB"),
+    signal_limit: int | None = Query(None, ge=1, le=200, description="Max input signals to collect"),
+    top_signals_limit: int = Query(10, ge=1, le=50, description="Max top signals to return"),
+    projects_limit: int = Query(10, ge=1, le=50, description="Max ranked projects to return"),
     auth: AuthResult = Depends(require_permission("read")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> ContextSnapshotResponse:
@@ -55,7 +63,7 @@ async def infer_context(
     async with engine.session() as conn:
         collector = ContextCollector(
             conn=conn,
-            max_signals=config.CONTEXT_MAX_SIGNALS,
+            max_signals=min(signal_limit or config.CONTEXT_MAX_SIGNALS, config.CONTEXT_MAX_SIGNALS),
             workspace_dir=config.CONTEXT_WORKSPACE_DIR,
             git_enabled=config.CONTEXT_GIT_ENABLED,
         )
@@ -75,9 +83,12 @@ async def infer_context(
         confidence=result.confidence,
         signals_used=result.signals_used,
         summary=result.summary,
-        top_signals=[ContextSignalModel(**s.to_dict()) for s in result.top_signals],
+        top_signals=[
+            ContextSignalModel(**s.to_dict()) for s in result.top_signals[:top_signals_limit]
+        ],
         projects_ranked=[
-            ProjectScoreModel(project=p, score=round(s, 4)) for p, s in result.projects_ranked
+            ProjectScoreModel(project=p, score=round(s, 4))
+            for p, s in result.projects_ranked[:projects_limit]
         ],
     )
 
@@ -85,6 +96,7 @@ async def infer_context(
 @router.get("/signals", response_model=list[ContextSignalModel])
 async def list_signals(
     request: Request,
+    limit: int | None = Query(None, ge=1, le=200, description="Max signals to return"),
     auth: AuthResult = Depends(require_permission("read")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> list[ContextSignalModel]:
@@ -94,7 +106,7 @@ async def list_signals(
     async with engine.session() as conn:
         collector = ContextCollector(
             conn=conn,
-            max_signals=config.CONTEXT_MAX_SIGNALS,
+            max_signals=min(limit or config.CONTEXT_MAX_SIGNALS, config.CONTEXT_MAX_SIGNALS),
             workspace_dir=config.CONTEXT_WORKSPACE_DIR,
             git_enabled=config.CONTEXT_GIT_ENABLED,
         )

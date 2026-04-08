@@ -23,14 +23,6 @@ import aiosqlite
 
 from cortex.memory.models import MemoryEvent
 
-try:
-    from cortex.extensions.security.tenant import get_tenant_id
-except Exception:
-
-    def get_tenant_id() -> str:
-        return "default"
-
-
 __all__ = ["EventLedgerL3"]
 
 logger = logging.getLogger("cortex.memory.ledger")
@@ -56,6 +48,12 @@ CREATE INDEX IF NOT EXISTS idx_memory_events_session
 
 CREATE INDEX IF NOT EXISTS idx_memory_events_tenant_event_desc
     ON memory_events(tenant_id, event_id DESC);
+
+CREATE INDEX IF NOT EXISTS idx_memory_events_tenant_ts_event
+    ON memory_events(tenant_id, timestamp ASC, event_id ASC);
+
+CREATE INDEX IF NOT EXISTS idx_memory_events_session_tenant_ts_event
+    ON memory_events(session_id, tenant_id, timestamp ASC, event_id ASC);
 """
 
 
@@ -90,7 +88,7 @@ class EventLedgerL3:
         cursor = await self._conn.execute(
             """SELECT signature FROM memory_events
                WHERE tenant_id = ?
-               ORDER BY event_id DESC
+               ORDER BY rowid DESC
                LIMIT 1""",
             (tenant_id,),
         )
@@ -122,7 +120,7 @@ class EventLedgerL3:
             object.__setattr__(event, "prev_hash", prev_hash)
             object.__setattr__(event, "signature", signature)
 
-        await self._conn.execute(
+        cursor = await self._conn.execute(
             """INSERT OR IGNORE INTO memory_events
                (event_id, timestamp, role, content, token_count,
                 session_id, tenant_id, prev_hash, signature, metadata)
@@ -141,7 +139,8 @@ class EventLedgerL3:
             ),
         )
         await self._conn.commit()
-        self._last_hash_cache[event.tenant_id] = event.signature
+        if cursor.rowcount:
+            self._last_hash_cache[event.tenant_id] = event.signature
 
     async def get_session_events(
         self,
@@ -150,16 +149,17 @@ class EventLedgerL3:
         limit: int = 100,
     ) -> list[MemoryEvent]:
         """Retrieve events for a session in chronological order, scoped by tenant."""
-        tenant_id = tenant_id or get_tenant_id()
+        if not tenant_id or not tenant_id.strip():
+            raise ValueError("tenant_id is required for session-scoped ledger reads")
         await self.ensure_table()
         cursor = await self._conn.execute(
             """SELECT event_id, timestamp, role, content, token_count,
                       session_id, tenant_id, prev_hash, signature, metadata
                FROM memory_events
                WHERE session_id = ? AND tenant_id = ?
-               ORDER BY event_id ASC
+               ORDER BY timestamp ASC, event_id ASC
                LIMIT ?""",
-            (session_id, tenant_id, limit),
+            (session_id.strip(), tenant_id.strip(), limit),
         )
         rows = await cursor.fetchall()
         return [_row_to_event(row) for row in rows]  # type: ignore[reportArgumentType]
@@ -172,7 +172,7 @@ class EventLedgerL3:
                       session_id, tenant_id, prev_hash, signature, metadata
                FROM memory_events
                WHERE tenant_id = ?
-               ORDER BY event_id ASC
+               ORDER BY timestamp ASC, event_id ASC
                LIMIT ?""",
             (tenant_id, limit),
         )
@@ -207,7 +207,7 @@ class EventLedgerL3:
             """SELECT event_id, timestamp, role, content, tenant_id, prev_hash, signature
                FROM memory_events
                WHERE tenant_id = ?
-               ORDER BY event_id ASC""",
+               ORDER BY rowid ASC""",
             (tenant_id,),
         )
 

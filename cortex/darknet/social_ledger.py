@@ -11,6 +11,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from uuid import uuid4
 
+from cortex.memory.temporal import EpochTimestampInput, normalize_timestamp_epoch
+
 logger = logging.getLogger("cortex.darknet.ledger")
 
 @dataclass
@@ -40,6 +42,14 @@ class DarknetLedger:
     def __init__(self, db_path: str | Path) -> None:
         self.db_path = Path(db_path)
         self._ensure_schema()
+
+    @staticmethod
+    def _normalize_created_at(value: EpochTimestampInput) -> float:
+        """Normalize timestamps before binding them into SQLite REAL columns."""
+        normalized = normalize_timestamp_epoch(value)
+        if normalized is None:
+            raise ValueError("created_at cannot be None")
+        return normalized
 
     def _ensure_schema(self) -> None:
         """Crea las tablas P0 si no existen."""
@@ -73,10 +83,19 @@ class DarknetLedger:
         """Cristaliza un post en la base de datos."""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
+            created_at = self._normalize_created_at(post.created_at)
             cursor.execute(
                 "INSERT INTO darknet_posts (id, agent_id, agent_name, content, source_url, exergy_score, created_at) "
                 "VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (post.id, post.agent_id, post.agent_name, post.content, post.source_url, post.exergy_score, post.created_at)
+                (
+                    post.id,
+                    post.agent_id,
+                    post.agent_name,
+                    post.content,
+                    post.source_url,
+                    post.exergy_score,
+                    created_at,
+                ),
             )
             conn.commit()
 
@@ -84,10 +103,18 @@ class DarknetLedger:
         """Añade un comentario local."""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
+            created_at = self._normalize_created_at(comment.created_at)
             cursor.execute(
                 "INSERT INTO darknet_comments (id, post_id, agent_id, agent_name, content, created_at) "
                 "VALUES (?, ?, ?, ?, ?, ?)",
-                (comment.id, comment.post_id, comment.agent_id, comment.agent_name, comment.content, comment.created_at)
+                (
+                    comment.id,
+                    comment.post_id,
+                    comment.agent_id,
+                    comment.agent_name,
+                    comment.content,
+                    created_at,
+                ),
             )
             conn.commit()
 

@@ -1,7 +1,7 @@
 [project]
 name = "cortex-persist"
 version = "0.3.0b2"
-description = "Cryptographic memory integrity, audit trails, and verifiable lineage for AI agents."
+description = "Tamper-evident memory and decision lineage for AI agents."
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.10"
@@ -50,10 +50,13 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://cortexpersist.com"
-Documentation = "https://github.com/borjamoskv/Cortex-Persist/tree/main/docs"
+Documentation = "https://github.com/borjamoskv/Cortex-Persist/tree/main/src/content/docs"
 Repository = "https://github.com/borjamoskv/Cortex-Persist"
 Issues = "https://github.com/borjamoskv/Cortex-Persist/issues"
 Changelog = "https://github.com/borjamoskv/Cortex-Persist/releases"
+Roadmap = "https://github.com/borjamoskv/Cortex-Persist/blob/main/ROADMAP.md"
+Security = "https://github.com/borjamoskv/Cortex-Persist/blob/main/SECURITY.md"
+Support = "https://github.com/borjamoskv/Cortex-Persist/blob/main/SUPPORT.md"
 [project.optional-dependencies]
 api = [
     "fastapi>=0.110",
@@ -67,6 +70,7 @@ dev = [
     "pytest-asyncio",
     "pytest-timeout>=2.3",
     "httpx>=0.27",
+    "pyright>=1.1.0",
     "ruff>=0.11.0",
     "z3-solver>=4.13.0",
 ]
@@ -106,11 +110,11 @@ include = ["cortex*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--timeout=30"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 markers = [
     "slow: marks tests that exercise slower integration paths",
+    "timeout: marks tests that rely on pytest-timeout when available",
 ]
 
 
@@ -135,7 +139,6 @@ ignore = ["E501", "E402", "B008", "W291", "W293", "S", "BLE001", "UP045"]
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "time.sleep" = { msg = "CORTEX Anti-Pattern: Usa asyncio.sleep() en este repositorio para no bloquear el event loop." }
 "builtins.print" = { msg = "CORTEX Anti-Pattern: Usa standard logging o Rich para emitir trails de auditoría." }
-"datetime.datetime.now" = { msg = "CORTEX Anti-Pattern: Usa datetime aware del timezone (ej. datetime.now(timezone.utc)) para la firma de Taints." }
 
 [tool.pyright]
 pythonVersion = "3.10"

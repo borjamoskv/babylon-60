@@ -2,6 +2,7 @@ import json
 import sqlite3
 import subprocess
 import sys
+from pathlib import Path
 
 import click
 from rich.console import Console
@@ -10,12 +11,12 @@ from rich.table import Table
 
 from cortex.cli.common import cli
 from cortex.cli.errors import err_execution_failed, err_skill_not_found
-from cortex.core.paths import SKILLS_DIR
+from cortex.core.paths import find_skill_path, resolve_skill_script
 
 __all__ = [
-    "GHOST_SKILL_PATH",
     "actions",
     "eyes",
+    "ghost_skill_path",
     "ghost_cmds",
     "hand",
     "handle_ghost_response",
@@ -28,15 +29,20 @@ __all__ = [
 
 console = Console()
 
-GHOST_SKILL_PATH = SKILLS_DIR / "ghost-control" / "ghost.py"
+
+def ghost_skill_path() -> Path:
+    return find_skill_path("ghost-control", "ghost.py", "scripts/ghost.py") or resolve_skill_script(
+        "ghost-control", "ghost.py"
+    )
 
 
 def run_ghost_skill(args: list[str]) -> tuple[int, str, str]:
     """Execute the ghost-control skill script and return code, stdout, stderr."""
-    if not GHOST_SKILL_PATH.exists():
-        err_skill_not_found("GHOST-1", str(GHOST_SKILL_PATH))
+    skill_path = ghost_skill_path()
+    if not skill_path.exists():
+        err_skill_not_found("GHOST-1", str(skill_path))
 
-    cmd = ["python3", str(GHOST_SKILL_PATH)] + args
+    cmd = ["python3", str(skill_path)] + args
 
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, check=False)

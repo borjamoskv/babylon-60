@@ -101,7 +101,10 @@ class Supervisor:
     async def spawn_ephemeral_agent(self, agent: BaseAgent) -> None:
         """Register and start an agent marked for auto-cleanup (Spontaneous Manifestation)."""
         if agent.agent_id in self._agents:
-            logger.warning("Supervisor: Ephemeral agent '%s' already exists", agent.agent_id)
+            logger.warning(
+                "Supervisor: Ephemeral agent '%s' already exists",
+                agent.agent_id,
+            )
             return
 
         self._agents[agent.agent_id] = AgentEntry(
@@ -260,7 +263,10 @@ class Supervisor:
             ):
                 if entry.ephemeral:
                     # Ephemeral agents are meant to live once and vanish
-                    logger.info("Supervisor: Ephemeral agent '%s' completed its lifecycle - dissolving", agent_id)
+                    logger.info(
+                        "Supervisor: Ephemeral agent '%s' completed its lifecycle - dissolving",
+                        agent_id,
+                    )
                     entry.agent.state.status = AgentStatus.STOPPED
                     agent_report["action"] = "dissolved"
                 elif entry.restart_count < entry.max_restarts:

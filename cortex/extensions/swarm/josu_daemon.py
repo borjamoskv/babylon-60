@@ -175,9 +175,9 @@ class JosuProactiveDaemon:
             try:
                 # Signal planning
                 async with self.db.session() as conn:
-                    from cortex.extensions.signals.bus import AsyncSignalBus
+                    from cortex.extensions.signals.bus import AsyncDurableSignalBus
 
-                    bus = AsyncSignalBus(conn)
+                    bus = AsyncDurableSignalBus(conn)
                     await bus.emit(
                         "swarm:plan", {"task": f"Analyzing {target.id[:8]}"}, source=source_id
                     )
@@ -193,7 +193,7 @@ class JosuProactiveDaemon:
                         result.duration_ms,
                     )
                     async with self.db.session() as conn:
-                        bus = AsyncSignalBus(conn)
+                        bus = AsyncDurableSignalBus(conn)
                         await bus.emit("swarm:complete", {"result": "Resolved"}, source=source_id)
 
                     await self._create_review_request(target, result)
@@ -207,7 +207,7 @@ class JosuProactiveDaemon:
                     )
 
                     async with self.db.session() as conn:
-                        bus = AsyncSignalBus(conn)
+                        bus = AsyncDurableSignalBus(conn)
                         if target.attempts + 1 >= target.max_attempts:
                             await bus.emit(
                                 "swarm:halt",
@@ -248,9 +248,9 @@ class JosuProactiveDaemon:
                 logger.info("🌿 [JOSU] Worktree lab created at %s", wt_path)
 
                 async with self.db.session() as conn:
-                    from cortex.extensions.signals.bus import AsyncSignalBus
+                    from cortex.extensions.signals.bus import AsyncDurableSignalBus
 
-                    bus = AsyncSignalBus(conn)
+                    bus = AsyncDurableSignalBus(conn)
                     await bus.emit(
                         "swarm:worktree_enter", {"branch": branch_name}, source=source_id
                     )
@@ -274,7 +274,7 @@ class JosuProactiveDaemon:
                 toolkit = AgentToolkit(wt_path)
 
                 async with self.db.session() as conn:
-                    bus = AsyncSignalBus(conn)
+                    bus = AsyncDurableSignalBus(conn)
                     await bus.emit(
                         "swarm:verify", {"action": "Running baseline tests"}, source=source_id
                     )

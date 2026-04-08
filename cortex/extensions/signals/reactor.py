@@ -22,12 +22,48 @@ import logging
 import time
 from typing import Any
 
-from cortex.extensions.signals.bus import SignalBus
+from cortex.extensions.signals.bus import DurableSignalBus
+from cortex.extensions.signals.trigger_engine import TriggerActionHandler
 from cortex.utils.respiration import breathe, oxygenate
 
-__all__ = ["SignalReactor"]
+__all__ = ["ReactorTriggerActionHandler", "SignalReactor"]
 
 logger = logging.getLogger("cortex.extensions.signals.reactor")
+
+
+class ReactorTriggerActionHandler(TriggerActionHandler):
+    """Bridge TriggerEngine actions into the live reactor subsystems."""
+
+    def __init__(self, bus: DurableSignalBus, engine: Any = None) -> None:
+        self._bus = bus
+        self._engine = engine
+
+    async def emit_signal(self, event_type: str, payload: dict, **kw: Any) -> None:
+        tenant_id = kw.get("tenant_id", "default")
+        emitted_payload = dict(payload)
+        emitted_payload.setdefault("tenant_id", tenant_id)
+        self._bus.emit(
+            event_type,
+            emitted_payload,
+            source=kw.get("source", "trigger_engine"),
+            project=kw.get("project"),
+            tenant_id=tenant_id,
+        )
+
+    async def store_fact(self, content: str, **kw: Any) -> None:
+        if self._engine is None or not hasattr(self._engine, "store"):
+            logger.debug("Trigger store_fact skipped: engine.store unavailable")
+            return
+
+        await self._engine.store(
+            project=kw.get("project") or kw.get("signal_project") or "SYSTEM",
+            content=content,
+            tenant_id=kw.get("tenant_id", kw.get("signal_tenant_id", "default")),
+            fact_type=kw.get("fact_type", "ghost"),
+            confidence=kw.get("confidence", "C4"),
+            source=kw.get("source", "trigger_engine"),
+            meta=kw.get("meta"),
+        )
 
 
 class SignalReactor:
@@ -38,7 +74,7 @@ class SignalReactor:
     first; unmatched events fall through to hardcoded reflexes.
     """
 
-    def __init__(self, bus: SignalBus, engine: Any = None):
+    def __init__(self, bus: DurableSignalBus, engine: Any = None):
         self.bus = bus
         self.engine = engine
         self._last_snapshot_time: float = 0
@@ -84,7 +120,7 @@ class SignalReactor:
         te = self._get_trigger_engine()
         if te is not None:
             try:
-                te.evaluate(signal)
+                await te.evaluate(signal)
             except Exception:  # noqa: BLE001
                 logger.debug(
                     "TriggerEngine evaluation failed for %s",
@@ -118,12 +154,12 @@ class SignalReactor:
                 register_defaults,
             )
 
-            te = TriggerEngine()
+            te = TriggerEngine(handler=ReactorTriggerActionHandler(self.bus, engine=self.engine))
             register_defaults(te)
             self._trigger_engine = te
             logger.info(
                 "TriggerEngine initialized with %d conditions",
-                len(te._conditions),  # pyright: ignore
+                len(te.list_triggers()),
             )
             return te
         except Exception:  # noqa: BLE001

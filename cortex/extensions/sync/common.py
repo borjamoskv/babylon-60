@@ -15,7 +15,10 @@ from typing import TYPE_CHECKING, Any
 __all__ = [
     "AGENT_DIR",
     "CORTEX_DIR",
+    "EXTERNAL_BRIDGE_KIND",
     "MEMORY_DIR",
+    "RELATION_BRIDGE_KIND",
+    "SYSTEM_BRIDGE_KIND",
     "SYNC_STATE_FILE",
     "SyncResult",
     "WritebackResult",
@@ -24,7 +27,9 @@ __all__ = [
     "db_content_hash",
     "file_hash",
     "get_existing_contents",
+    "is_relation_bridge_kind",
     "load_sync_state",
+    "normalize_bridge_kind",
     "save_sync_state",
 ]
 
@@ -32,6 +37,11 @@ if TYPE_CHECKING:
     from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.extensions.sync")
+
+EXTERNAL_BRIDGE_KIND = "external"
+RELATION_BRIDGE_KIND = "relation"
+SYSTEM_BRIDGE_KIND = "system"
+_RELATION_BRIDGE_ALIASES = frozenset({"", "bridge", "relation", "relation_bridge"})
 
 from cortex.core.paths import (  # noqa: E402
     AGENT_DIR,
@@ -55,6 +65,26 @@ def runtime_memory_dir() -> Path:
 
 def runtime_sync_state_file() -> Path:
     return _runtime_path("SYNC_STATE_FILE", SYNC_STATE_FILE)
+
+
+def normalize_bridge_kind(kind: Any, *, default: str = RELATION_BRIDGE_KIND) -> str:
+    """Normalize bridge kind values while preserving backward compatibility.
+
+    Legacy bridge facts imported from bridges.jsonl have no bridge_kind at all.
+    Those must continue to behave as relation bridges.
+    """
+    if kind is None:
+        return default
+
+    normalized = str(kind).strip().lower().replace("-", "_").replace(" ", "_")
+    if normalized in _RELATION_BRIDGE_ALIASES:
+        return RELATION_BRIDGE_KIND
+    return normalized or default
+
+
+def is_relation_bridge_kind(kind: Any) -> bool:
+    """Return True when a bridge kind should round-trip via bridges.jsonl."""
+    return normalize_bridge_kind(kind) == RELATION_BRIDGE_KIND
 
 
 @dataclass

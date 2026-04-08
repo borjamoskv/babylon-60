@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import math
 import uuid
 from typing import Optional
+
+import aiosqlite
 
 from cortex.engine.slashing import SlashingEngine
 from cortex.telemetry.metrics import metrics
@@ -38,6 +41,14 @@ class ConsensusManager:
         # Quorum Pools en memoria (Ciclo 2: Motores Bizantinos)
         self._vote_pools: dict[int, list[dict]] = {}
         self._pool_locks: dict[int, asyncio.Lock] = {}
+        self._vote_write_locks: dict[int, asyncio.Lock] = {}
+
+    def _get_vote_write_lock(self, fact_id: int) -> asyncio.Lock:
+        lock = self._vote_write_locks.get(fact_id)
+        if lock is None:
+            lock = asyncio.Lock()
+            self._vote_write_locks[fact_id] = lock
+        return lock
 
     async def vote(
         self,
@@ -79,66 +90,83 @@ class ConsensusManager:
         if value not in (-1, 0, 1):
             raise ValueError(f"vote value must be -1, 0, or 1, got {value}")
 
-        async with self.engine.session() as conn:
-            cursor = await conn.execute(
-                "SELECT reputation_score FROM agents WHERE id = ? AND is_active = 1",
-                (agent_id,),
-            )
-            agent = await cursor.fetchone()
-            if not agent:
-                # 💓 Pulse Reality Check: agent missing
-                if self._signal_bus:
-                    self._signal_bus.emit(
-                        "error:consensus:agent_not_found",
-                        payload={"agent_id": agent_id, "fact_id": fact_id},
-                        source="consensus_manager",
+        async with self._get_vote_write_lock(fact_id):
+            async with self.engine.session() as conn:
+                async with conn.execute(
+                    "SELECT tenant_id FROM facts WHERE id = ?",
+                    (fact_id,),
+                ) as cursor:
+                    fact_row = await cursor.fetchone()
+                if not fact_row:
+                    raise ValueError(f"Fact {fact_id} not found")
+                tenant_id = fact_row[0]
+
+                cursor = await conn.execute(
+                    "SELECT reputation_score FROM agents WHERE id = ? AND tenant_id = ? AND is_active = 1",
+                    (agent_id, tenant_id),
+                )
+                agent = await cursor.fetchone()
+                if not agent:
+                    # 💓 Pulse Reality Check: agent missing
+                    if self._signal_bus:
+                        self._signal_bus.emit(
+                            "error:consensus:agent_not_found",
+                            payload={
+                                "agent_id": agent_id,
+                                "fact_id": fact_id,
+                                "tenant_id": tenant_id,
+                            },
+                            source="consensus_manager",
+                        )
+
+                    # Legacy Shadow (Analyzing a corpse)
+                    metrics.inc(
+                        "cortex_consensus_failures_total",
+                        labels={"reason": "agent_not_found"},
+                        meta={"agent_id": agent_id, "fact_id": fact_id, "tenant_id": tenant_id},
+                    )
+                    # Notify Pulse Registry of the shadow detection
+                    PULSE.inc(
+                        "cortex_consensus_failures_shadow_total",
+                        labels={"reason": "agent_not_found"},
                     )
 
-                # Legacy Shadow (Analyzing a corpse)
-                metrics.inc(
-                    "cortex_consensus_failures_total",
-                    labels={"reason": "agent_not_found"},
-                    meta={"agent_id": agent_id, "fact_id": fact_id},
-                )
-                # Notify Pulse Registry of the shadow detection
-                PULSE.inc(
-                    "cortex_consensus_failures_shadow_total", labels={"reason": "agent_not_found"}
-                )
+                    raise ValueError(f"Agent {agent_id} not found")
 
-                raise ValueError(f"Agent {agent_id} not found")
+                rep = agent[0]
 
-            rep = agent[0]
+                if value == 0:
+                    await conn.execute(
+                        "DELETE FROM consensus_votes_v2 "
+                        "WHERE fact_id = ? AND agent_id = ? AND tenant_id = ?",
+                        (fact_id, agent_id, tenant_id),
+                    )
+                    action = "unvote_v2"
+                else:
+                    await conn.execute(
+                        "INSERT OR REPLACE INTO consensus_votes_v2 "
+                        "(fact_id, agent_id, tenant_id, vote, vote_weight, agent_rep_at_vote, vote_reason) "
+                        "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                        (fact_id, agent_id, tenant_id, value, rep, rep, reason),
+                    )
+                    action = "vote_v2"
 
-            if value == 0:
-                await conn.execute(
-                    "DELETE FROM consensus_votes_v2 WHERE fact_id = ? AND agent_id = ?",
-                    (fact_id, agent_id),
+                await self.engine._log_transaction(
+                    conn,
+                    "consensus",
+                    action,
+                    {
+                        "fact_id": fact_id,
+                        "agent_id": agent_id,
+                        "vote": value,
+                        "rep": rep,
+                        "reason": reason,
+                        "tenant_id": tenant_id,
+                    },
                 )
-                action = "unvote_v2"
-            else:
-                await conn.execute(
-                    "INSERT OR REPLACE INTO consensus_votes_v2 "
-                    "(fact_id, agent_id, vote, vote_weight, agent_rep_at_vote, vote_reason) "
-                    "VALUES (?, ?, ?, ?, ?, ?)",
-                    (fact_id, agent_id, value, rep, rep, reason),
-                )
-                action = "vote_v2"
-
-            await self.engine._log_transaction(
-                conn,
-                "consensus",
-                action,
-                {
-                    "fact_id": fact_id,
-                    "agent_id": agent_id,
-                    "vote": value,
-                    "rep": rep,
-                    "reason": reason,
-                },
-            )
-            score = await self._recalculate_consensus_v2(fact_id, conn)
-            await conn.commit()
-            return score
+                score = await self._recalculate_consensus_v2(fact_id, conn, tenant_id)
+                await conn.commit()
+                return score
 
     async def promise_vote(
         self,
@@ -151,7 +179,6 @@ class ConsensusManager:
         [Ciclo 2] Añade un voto a la Cámara Temporal (Quorum Pool) sin tocar la base de datos.
         Evita machacar las conexiones de SQLite en resoluciones masivas del Swarm 10k.
         """
-        import asyncio
         if value not in (-1, 0, 1):
             raise ValueError(f"vote value must be -1, 0, or 1, got {value}")
 
@@ -174,7 +201,6 @@ class ConsensusManager:
         if fact_id not in self._pool_locks:
             return 1.0  # No hay promesas de voto en esta cámara
 
-        import asyncio
         async with self._pool_locks[fact_id]:
             promises = self._vote_pools.pop(fact_id, [])
         
@@ -185,13 +211,23 @@ class ConsensusManager:
             return 1.0
 
         async with self.engine.session() as conn:
+            async with conn.execute(
+                "SELECT tenant_id FROM facts WHERE id = ?",
+                (fact_id,),
+            ) as cursor:
+                fact_row = await cursor.fetchone()
+            if not fact_row:
+                return 1.0
+            tenant_id = fact_row[0]
+
             # Recuperar reputaciones O(1) Batch
             agent_ids = [p["agent_id"] for p in promises]
             placeholders = ",".join(["?"] * len(agent_ids))
-            
+
             cursor = await conn.execute(
-                f"SELECT id, reputation_score FROM agents WHERE id IN ({placeholders}) AND is_active = 1",
-                tuple(agent_ids)
+                f"SELECT id, reputation_score FROM agents "
+                f"WHERE id IN ({placeholders}) AND tenant_id = ? AND is_active = 1",
+                (*agent_ids, tenant_id),
             )
             reputations = {row[0]: row[1] for row in await cursor.fetchall()}
 
@@ -214,17 +250,18 @@ class ConsensusManager:
 
                 if value == 0:
                     await conn.execute(
-                        "DELETE FROM consensus_votes_v2 WHERE fact_id = ? AND agent_id = ?",
-                        (fact_id, agent_id),
+                        "DELETE FROM consensus_votes_v2 "
+                        "WHERE fact_id = ? AND agent_id = ? AND tenant_id = ?",
+                        (fact_id, agent_id, tenant_id),
                     )
                 else:
                     await conn.execute(
                         "INSERT OR REPLACE INTO consensus_votes_v2 "
-                        "(fact_id, agent_id, vote, vote_weight, agent_rep_at_vote, vote_reason) "
-                        "VALUES (?, ?, ?, ?, ?, ?)",
-                        (fact_id, agent_id, value, rep, rep, reason),
+                        "(fact_id, agent_id, tenant_id, vote, vote_weight, agent_rep_at_vote, vote_reason) "
+                        "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                        (fact_id, agent_id, tenant_id, value, rep, rep, reason),
                     )
-                
+
                 await self.engine._log_transaction(
                     conn,
                     "consensus",
@@ -235,25 +272,27 @@ class ConsensusManager:
                         "vote": value,
                         "rep": rep,
                         "reason": reason,
+                        "tenant_id": tenant_id,
                     },
+                    tenant_id=tenant_id,
                 )
-            
+
             # Recalcular unificado para el facto tras inyectar todos los votos
-            score = await self._recalculate_consensus_v2(fact_id, conn)
+            score = await self._recalculate_consensus_v2(fact_id, conn, tenant_id)
             await conn.commit()
             return score
 
-    async def _recalculate_consensus_v2(self, fact_id: int, conn) -> float:
+    async def _recalculate_consensus_v2(self, fact_id: int, conn, tenant_id: str) -> float:
         cursor = await conn.execute(
             "SELECT v.vote, v.vote_weight, a.reputation_score "
             "FROM consensus_votes_v2 v "
-            "JOIN agents a ON v.agent_id = a.id "
-            "WHERE v.fact_id = ? AND a.is_active = 1",
-            (fact_id,),
+            "JOIN agents a ON v.agent_id = a.id AND v.tenant_id = a.tenant_id "
+            "WHERE v.fact_id = ? AND v.tenant_id = ? AND a.is_active = 1",
+            (fact_id, tenant_id),
         )
         votes = await cursor.fetchall()
         if not votes:
-            return await self._recalculate_consensus(fact_id, conn)
+            return 1.0
 
         # Logarithmic Opinion Pool (LogOP) consensus calculation
         score_sum = 0.0
@@ -273,14 +312,16 @@ class ConsensusManager:
         # Scale back to [0.0, 2.0] so >=1.5 is verified
         score = prob_true * 2.0
 
-        await self._update_fact_score(fact_id, score, conn)
+        await self._update_fact_score(fact_id, score, conn, tenant_id)
 
         # 🛡️ Aplicar Penalización de Entropía (Alignment Drift)
-        await self._update_agent_entropy(fact_id, score, conn)
+        await self._update_agent_entropy(fact_id, score, conn, tenant_id)
 
         return score
 
-    async def _recalculate_consensus(self, fact_id: int, conn) -> float:
+    async def _recalculate_consensus(
+        self, fact_id: int, conn, tenant_id: str = "default"
+    ) -> float:
         cursor = await conn.execute(
             "SELECT vote FROM consensus_votes WHERE fact_id = ?",
             (fact_id,),
@@ -288,7 +329,7 @@ class ConsensusManager:
         votes = await cursor.fetchall()
         if not votes:
             score = 1.0
-            await self._update_fact_score(fact_id, score, conn)
+            await self._update_fact_score(fact_id, score, conn, tenant_id)
             return score
 
         score_sum = 0.0
@@ -302,10 +343,10 @@ class ConsensusManager:
         prob_true = _sigmoid(score_sum)
         score = prob_true * 2.0
 
-        await self._update_fact_score(fact_id, score, conn)
+        await self._update_fact_score(fact_id, score, conn, tenant_id)
         return score
 
-    async def _update_fact_score(self, fact_id: int, score: float, conn) -> None:
+    async def _update_fact_score(self, fact_id: int, score: float, conn, tenant_id: str) -> None:
         from cortex.engine.mutation_engine import MUTATION_ENGINE
 
         if score >= 1.5:
@@ -316,11 +357,11 @@ class ConsensusManager:
             conf = None
 
         cursor = await conn.execute(
-            "SELECT tenant_id FROM facts WHERE id = ?",
-            (fact_id,),
+            "SELECT tenant_id FROM facts WHERE id = ? AND tenant_id = ?",
+            (fact_id, tenant_id),
         )
         row = await cursor.fetchone()
-        tenant_id = row[0] if row else "default"
+        resolved_tenant_id = row[0] if row else tenant_id
 
         payload: dict = {"consensus_score": score}
         if conf:
@@ -329,14 +370,16 @@ class ConsensusManager:
         await MUTATION_ENGINE.apply(
             conn,
             fact_id=fact_id,
-            tenant_id=tenant_id,
+            tenant_id=resolved_tenant_id,
             event_type="score_update",
             payload=payload,
             signer="consensus_manager",
             commit=False,
         )
 
-    async def _update_agent_entropy(self, fact_id: int, final_consensus: float, conn) -> None:
+    async def _update_agent_entropy(
+        self, fact_id: int, final_consensus: float, conn, tenant_id: str
+    ) -> None:
         """
         Ratifica el consenso final y castiga/premia la entropía de los votantes.
         Implementa el decaimiento de reputación por Deriva de Alineación (Ω2 + Ω5).
@@ -351,7 +394,8 @@ class ConsensusManager:
 
         # 1. Recuperar los votos para este Fact
         cursor = await conn.execute(
-            "SELECT agent_id, vote FROM consensus_votes_v2 WHERE fact_id = ?", (fact_id,)
+            "SELECT agent_id, vote FROM consensus_votes_v2 WHERE fact_id = ? AND tenant_id = ?",
+            (fact_id, tenant_id),
         )
         voters = await cursor.fetchall()
 
@@ -371,9 +415,16 @@ class ConsensusManager:
                         WHEN ? > 0 THEN reputation_score + (1.0 - reputation_score) * 0.05
                         ELSE reputation_score
                     END
-                WHERE id = ? AND is_active = 1
-            """,
-                (alignment_score, alignment_score, alignment_score, alignment_score, agent_id),
+                WHERE id = ? AND tenant_id = ? AND is_active = 1
+                """,
+                (
+                    alignment_score,
+                    alignment_score,
+                    alignment_score,
+                    alignment_score,
+                    agent_id,
+                    tenant_id,
+                ),
             )
 
             # Pulse the reality degradation check
@@ -385,7 +436,7 @@ class ConsensusManager:
                 if self._signal_bus:
                     self._signal_bus.emit(
                         "agent:alignment:drift",
-                        payload={"agent_id": agent_id, "fact_id": fact_id},
+                        payload={"agent_id": agent_id, "fact_id": fact_id, "tenant_id": tenant_id},
                         source="consensus_manager",
                     )
 
@@ -402,3 +453,30 @@ class ConsensusManager:
             new_rep = await SlashingEngine.slash(conn, agent_id, penalty_type, reason, tenant_id)
             await conn.commit()
             return new_rep
+
+    async def get_votes(self, fact_id: int, tenant_id: str = "default") -> list[dict]:
+        """Get all votes for a fact from the canonical v2 table."""
+        async with self.engine.session() as conn:
+            conn.row_factory = aiosqlite.Row
+            query = (
+                "SELECT v.vote, v.agent_id as agent, v.created_at, a.reputation_score "
+                "FROM consensus_votes_v2 v "
+                "JOIN agents a ON v.agent_id = a.id AND v.tenant_id = a.tenant_id "
+                "WHERE v.fact_id = ? AND v.tenant_id = ?"
+            )
+            async with conn.execute(query, (fact_id, tenant_id)) as cursor:
+                return [dict(r) for r in await cursor.fetchall()]
+
+    async def verify_vote_ledger(self, tenant_id: str = "default") -> dict[str, Any]:
+        """Verify the vote ledger and Merkle checkpoints for a tenant."""
+        async with self.engine.session() as conn:
+            ledger = ImmutableVoteLedger(conn)
+            chain_report = await ledger.verify_chain_integrity(tenant_id=tenant_id)
+            checkpoints = await ledger.verify_merkle_roots(tenant_id=tenant_id)
+            checkpoint_violations = [r for r in checkpoints if not r.get("valid", False)]
+            return {
+                "valid": chain_report["valid"] and not checkpoint_violations,
+                "votes_checked": chain_report["votes_checked"],
+                "checkpoints_checked": len(checkpoints),
+                "violations": chain_report["violations"] + checkpoint_violations,
+            }

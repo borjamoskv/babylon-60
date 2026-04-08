@@ -19,7 +19,7 @@ from typing import Any
 import yaml
 
 # ─── Constantes ──────────────────────────────────────────────────────────────
-from cortex.core.paths import SKILLS_DIR as SKILLS_BASE_DIR
+from cortex.core.paths import SKILLS_DIR as SKILLS_BASE_DIR, iter_skill_name_candidates
 
 SKILL_FILENAME = "SKILL.md"
 FRONTMATTER_PATTERN = re.compile(r"^---\s*\n(.*?)\n---", re.DOTALL)
@@ -240,8 +240,12 @@ class SkillRegistry:
 
     def get(self, name: str) -> SkillManifest | None:
         """Obtiene un manifest por nombre (case-insensitive, slug-normalized)."""
-        slug = name.lower().replace(" ", "-").replace("_", "-")
-        return self._registry.get(slug)
+        for candidate in iter_skill_name_candidates(name):
+            slug = candidate.lower().replace(" ", "-").replace("_", "-")
+            manifest = self._registry.get(slug)
+            if manifest is not None:
+                return manifest
+        return None
 
     def all(self) -> list[SkillManifest]:
         """Todos los manifests registrados, ordenados por nombre."""

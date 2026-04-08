@@ -13,6 +13,7 @@ import sqlite3
 from pathlib import Path
 
 from cortex.engine import CortexEngine
+from cortex.extensions.sync.common import RELATION_BRIDGE_KIND
 
 __all__ = ["migrate_v31_to_v40"]
 
@@ -265,6 +266,9 @@ def _migrate_bridges(engine: CortexEngine, path: Path, stats: dict) -> None:
     for line in content.strip().splitlines():
         try:
             bridge = json.loads(line)
+            meta = dict(bridge)
+            meta.setdefault("bridge_kind", RELATION_BRIDGE_KIND)
+            meta.setdefault("bridge_provider", "memory")
 
             content = (
                 f"BRIDGE: {bridge.get('from', '?')} → {bridge.get('to', '?')} | "
@@ -280,7 +284,7 @@ def _migrate_bridges(engine: CortexEngine, path: Path, stats: dict) -> None:
                 confidence="verified",
                 source="migration-v3.1",
                 valid_from=bridge.get("date", None),
-                meta=bridge,
+                meta=meta,
             )
             stats["bridges_imported"] += 1
         except (json.JSONDecodeError, sqlite3.Error) as e:

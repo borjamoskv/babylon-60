@@ -20,6 +20,7 @@ class AgentStatus(str, Enum):
     PAUSED = "paused"
     FAILED = "failed"
     QUARANTINED = "quarantined"
+    STOPPED = "stopped"
 
 
 @dataclass()

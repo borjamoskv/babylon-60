@@ -94,6 +94,9 @@ DOMAIN_MAP: dict[str, list[str]] = {
         "pydantic-ai",
         "kimi-swarm-1",
         "KIMI",
+        "Cognitive-Crystallizer-Omega",
+        "CORTEX-Orchestra-Omega",
+        "CORTEX-Swarm-Prime",
     ],
     "cortex-products": [
         "naroa",
@@ -139,6 +142,8 @@ DOMAIN_MAP: dict[str, list[str]] = {
         "ghost_control",
         "GHOST-1",
         "GHOST-CONTROL",
+        "MAC-CONTROL-TOTAL",
+        "mac-control-omega",
         "autorouter",
         "autorouter-1",
         "SAP",

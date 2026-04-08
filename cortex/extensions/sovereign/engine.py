@@ -91,7 +91,7 @@ async def _phase_fabrication(ctx: SovereignContext) -> PipelineResult:
             duration_ms=(time.time() - t0) * 1000,
             details={"status": "Aether-1 materialized artifacts successfully"},
         )
-    except (RuntimeError, ValueError, OSError) as e:
+    except (RuntimeError, ValueError, OSError, ImportError, AttributeError) as e:
         logger.error("Fabrication phase failed: %s", e)
         return PipelineResult(
             phase=Phase.FABRICATION,
@@ -111,7 +111,7 @@ async def _phase_orchestration(ctx: SovereignContext) -> PipelineResult:
             success=True,
             duration_ms=(time.time() - t0) * 1000,
         )
-    except (RuntimeError, ValueError, OSError) as e:
+    except (RuntimeError, ValueError, OSError, ImportError, AttributeError) as e:
         return PipelineResult(
             phase=Phase.ORCHESTRATION,
             success=False,
@@ -195,7 +195,7 @@ async def _phase_experience(ctx: SovereignContext) -> PipelineResult:
             success=True,
             duration_ms=(time.time() - t0) * 1000,
         )
-    except (RuntimeError, ValueError, OSError) as e:
+    except (RuntimeError, ValueError, OSError, ImportError, AttributeError) as e:
         return PipelineResult(
             phase=Phase.EXPERIENCE,
             success=False,
@@ -331,7 +331,7 @@ async def run_pipeline(
                 result = PipelineResult(
                     phase=phase, success=True, duration_ms=(time.time() - t0) * 1000
                 )
-            except (RuntimeError, ValueError, OSError) as e:
+            except (RuntimeError, ValueError, OSError, ImportError, AttributeError) as e:
                 logger.debug("Skill fallback failed for %s: %s", skill_name, e)
                 # Skill fallback failed, yield
                 await asyncio.sleep(0)

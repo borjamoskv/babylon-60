@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import logging
+import re
 
 from cortex.extensions.daemon.models import NeuralIntentAlert
 
 logger = logging.getLogger("moskv-daemon")
+_CONFIDENCE_RE = re.compile(r"(\d+)")
 
 
 class NeuralIntentMonitor:
@@ -14,6 +16,11 @@ class NeuralIntentMonitor:
 
     def __init__(self) -> None:
         self._engine = None
+
+    @staticmethod
+    def _confidence_score(confidence: str) -> int:
+        match = _CONFIDENCE_RE.search(confidence)
+        return int(match.group(1)) if match else 0
 
     def check(self) -> list[NeuralIntentAlert]:
         alerts: list[NeuralIntentAlert] = []
@@ -27,11 +34,10 @@ class NeuralIntentMonitor:
             if not self._engine:
                 self._engine = NeuralIntentEngine()
 
-            context = self._engine.read_context()
-            raw_clip = context  # simplified — original may have deeper extraction
-            hyp = self._engine.infer_intent(raw_clip)  # type: ignore[reportArgumentType]
+            context, raw_clip = self._engine.read_context()
+            hyp = self._engine.infer_intent(context, raw_clip)
 
-            if hyp and hyp.confidence > 0:  # type: ignore[reportOperatorIssue]
+            if hyp and self._confidence_score(hyp.confidence) > 0:
                 alerts.append(
                     NeuralIntentAlert(
                         intent=hyp.intent,
@@ -40,7 +46,7 @@ class NeuralIntentMonitor:
                         summary=hyp.summary,
                     )
                 )
-        except (ValueError, OSError, RuntimeError) as e:
+        except (ImportError, TypeError, ValueError, OSError, RuntimeError) as e:
             logger.error("NeuralIntentMonitor failed: %s", e)
 
         return alerts

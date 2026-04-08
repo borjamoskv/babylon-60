@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
+import logging
 import os
 import platform
 import time
@@ -8,6 +10,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine as AsyncCortexEngine
+
+logger = logging.getLogger(__name__)
 
 
 class ThermodynamicsOracle:
@@ -29,6 +33,7 @@ class ThermodynamicsOracle:
         self.thermal_threshold = thermal_threshold
         self._running = False
         self._cores = os.cpu_count() or 1
+        self._stop_event = asyncio.Event()
 
         # Load psutil if available to measure true thermodynamic footprint
         self._psutil = None
@@ -41,6 +46,7 @@ class ThermodynamicsOracle:
 
     async def start(self) -> None:
         self._running = True
+        self._stop_event.clear()
         while self._running:
             try:
                 # Measure Event Loop Lag (Temporal Friction)
@@ -53,14 +59,45 @@ class ThermodynamicsOracle:
             except asyncio.CancelledError:
                 self._running = False
                 break
-            except Exception as e:
-                # Log thermal noise error but don't choke the event loop
-                print(f"[THERMODYNAMIC NOISE] {e}")
-            await asyncio.sleep(self.poll_interval)
+            except (OSError, RuntimeError, TypeError, ValueError) as exc:
+                logger.warning("ThermodynamicsOracle cycle failed: %s", exc)
+
+            if not self._running:
+                break
+
+            try:
+                await asyncio.wait_for(self._stop_event.wait(), timeout=self.poll_interval)
+            except TimeoutError:
+                continue
 
     async def stop(self) -> None:
         self._running = False
+        self._stop_event.set()
         await asyncio.sleep(0)
+
+    async def _store_thermal_noise(self, content: str, meta: dict[str, object]) -> bool:
+        store = getattr(self.engine, "store", None)
+        if store is not None and inspect.iscoroutinefunction(store):
+            await store(
+                project="SYSTEM",
+                content=content,
+                fact_type="thermal_noise",
+                meta=meta,
+            )
+            return True
+
+        store_sync = getattr(self.engine, "store_sync", None)
+        if callable(store_sync):
+            store_sync(
+                project="SYSTEM",
+                content=content,
+                fact_type="thermal_noise",
+                meta=meta,
+            )
+            return True
+
+        logger.warning("ThermodynamicsOracle skipped persistence: engine lacks store/store_sync")
+        return False
 
     async def _sample_thermodynamics(self, lag_ms: float) -> None:
         if platform.system() == "Windows":
@@ -78,8 +115,8 @@ class ThermodynamicsOracle:
                 disk_io = self._psutil.disk_io_counters()
                 if disk_io and hasattr(disk_io, "busy_time"):
                     disk_busy_ms = disk_io.busy_time or 0.0  # type: ignore[reportAttributeAccessIssue]
-            except Exception:
-                pass
+            except (AttributeError, OSError, RuntimeError, TypeError, ValueError):
+                disk_busy_ms = 0.0
 
         # Density factor of the Coroutine Swarm
         active_tasks = len(asyncio.all_tasks())
@@ -147,20 +184,7 @@ class ThermodynamicsOracle:
                 "severity": severity,
             }
 
-            if hasattr(self.engine, "store") and asyncio.iscoroutinefunction(self.engine.store):
-                await self.engine.store(
-                    project="SYSTEM",
-                    content=content,
-                    fact_type="thermal_noise",
-                    meta=meta,
-                )
-            else:
-                self.engine.store_sync(  # type: ignore[type-error]
-                    project="SYSTEM",
-                    content=content,
-                    fact_type="thermal_noise",
-                    meta=meta,
-                )
+            await self._store_thermal_noise(content, meta)
 
     def _execute_annihilation_protocol(self) -> int:
         """

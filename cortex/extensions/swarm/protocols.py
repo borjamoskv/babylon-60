@@ -21,9 +21,9 @@ class SwarmIntent(str, Enum):
 
 
 class AgentRole(str, Enum):
-    CAPATAZ = "capataz"
-    WORKER = "worker"
-    ELDER = "elder"
+    SOVEREIGN_GUARDIAN = "sovereign-guardian"
+    SOVEREIGN_EXECUTOR = "sovereign-executor"
+    SOVEREIGN_VALIDATOR = "sovereign-validator"
 
 
 @dataclass
@@ -32,8 +32,7 @@ class SwarmSignalSchema:
     agent_id: str
     intent: SwarmIntent
     payload: dict[str, Any]
-    role: AgentRole = AgentRole.WORKER
-    is_sovereign: bool = True  # AX-046 Universal Autopoiesis mandate
+    role: AgentRole = AgentRole.SOVEREIGN_EXECUTOR
     confidence: float = 1.0
     exergy_spent: float = 0.0
     timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())

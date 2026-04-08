@@ -1,10 +1,25 @@
 import asyncio
 import logging
+import os
+from pathlib import Path
+
 from cortex.engine.forensic_commander import ForensicCommander
 
 logger = logging.getLogger("sky_stalker")
 
-async def hunt_sky(db_path: str = "cortex.db"):
+
+def _resolve_db_path() -> Path:
+    override = os.environ.get("CORTEX_DB_PATH") or os.environ.get("CORTEX_DB")
+    if override:
+        return Path(override).expanduser()
+
+    return Path.home() / ".cortex" / "cortex.db"
+
+
+DEFAULT_DB_PATH = str(_resolve_db_path())
+
+
+async def hunt_sky(db_path: str = DEFAULT_DB_PATH):
     """Execute the Sky Legion audit mission (4,000 agents)."""
     commander = ForensicCommander(bus_path=db_path)
     await commander.initialize_strike()
@@ -38,5 +53,6 @@ async def hunt_sky(db_path: str = "cortex.db"):
 
 if __name__ == "__main__":
     import sys
-    db = sys.argv[1] if len(sys.argv) > 1 else "cortex.db"
+
+    db = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_DB_PATH
     asyncio.run(hunt_sky(db))

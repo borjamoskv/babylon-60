@@ -1,4 +1,4 @@
-"""CORTEX ADK Tools — Bridge between ADK agents and CortexEngine.
+"""Canonical CORTEX ADK tools.
 
 Wraps CortexEngine operations as plain Python functions that ADK agents
 can call as tools. Optimized for low-latency autonomous operations.
@@ -11,9 +11,9 @@ import logging
 import sqlite3
 from collections.abc import Generator
 from contextlib import contextmanager
-from pathlib import Path
-from typing import Any, Final
+from typing import Any
 
+from cortex.core.paths import CORTEX_DB
 from cortex.engine import CortexEngine
 
 __all__ = [
@@ -25,16 +25,16 @@ __all__ = [
     "adk_store",
 ]
 
-logger = logging.getLogger("cortex.extensions.adk.tools")
+logger = logging.getLogger("cortex.adk.tools")
 
-_DEFAULT_DB: Final = str(Path("~/.cortex/cortex.db").expanduser())
+_DEFAULT_DB = str(CORTEX_DB)
 
 
 def _get_db_path() -> str:
     """Resolve the active CORTEX database path."""
     import os
 
-    return os.environ.get("CORTEX_DB_PATH", _DEFAULT_DB)
+    return os.environ.get("CORTEX_DB_PATH") or os.environ.get("CORTEX_DB") or _DEFAULT_DB
 
 
 @contextmanager
@@ -43,13 +43,13 @@ def _sovereign_engine() -> Generator[CortexEngine, None, None]:
     path = _get_db_path()
     engine = CortexEngine(path, auto_embed=False)
     try:
-        engine.init_db()  # type: ignore[reportUnusedCoroutine]
+        engine.init_db_sync()
         yield engine
     except (sqlite3.Error, OSError, RuntimeError) as exc:
         logger.error("Sovereign Tool Failure: %s", exc)
         raise
     finally:
-        engine.close()  # type: ignore[reportUnusedCoroutine]
+        engine.close_sync()
 
 
 # ─── Store ────────────────────────────────────────────────────────────
@@ -82,7 +82,7 @@ def adk_store(
 
     try:
         with _sovereign_engine() as engine:
-            fact_id = engine.store(
+            fact_id = engine.store_sync(
                 project=project,
                 content=content,
                 fact_type=fact_type,
@@ -116,7 +116,7 @@ def adk_search(
     """
     try:
         with _sovereign_engine() as engine:
-            results = engine.search(
+            results = engine.search_sync(
                 query=query,
                 project=project or None,
                 top_k=min(max(top_k, 1), 20),
@@ -153,7 +153,7 @@ def adk_status() -> dict[str, Any]:
     """
     try:
         with _sovereign_engine() as engine:
-            stats = engine.stats_sync()  # type: ignore[reportAttributeAccessIssue]
+            stats = engine.stats_sync()
             return {"status": "success", **stats}
     except (sqlite3.Error, ValueError, RuntimeError, OSError) as exc:
         return {"status": "error", "message": f"Status retrieval failed: {exc}"}
@@ -171,16 +171,13 @@ def adk_ledger_verify() -> dict[str, Any]:
     Returns:
         A dict with verification results.
     """
-    from cortex.ledger import ImmutableLedger
-
     try:
         with _sovereign_engine() as engine:
-            ledger = ImmutableLedger(engine._conn)  # type: ignore[reportArgumentType]
-            report = ledger.verify_integrity()  # type: ignore[reportAttributeAccessIssue]
+            report = engine.verify_ledger_sync()
             return {
                 "status": "success",
                 "valid": report.get("valid", False),
-                "transactions_checked": report.get("tx_checked", 0),
+                "transactions_checked": report.get("tx_checked", report.get("tx_count", 0)),
                 "roots_checked": report.get("roots_checked", 0),
                 "violations": report.get("violations", []),
             }
@@ -210,7 +207,7 @@ def adk_deprecate(
     """
     try:
         with _sovereign_engine() as engine:
-            engine.deprecate(fact_id, reason=reason or None)  # type: ignore[reportUnusedCoroutine]
+            engine.deprecate_sync(fact_id, reason=reason or None)
             return {"status": "success", "fact_id": fact_id, "deprecated": True}
     except (sqlite3.Error, ValueError, RuntimeError, OSError) as exc:
         return {"status": "error", "message": f"Deprecation failed: {exc}"}

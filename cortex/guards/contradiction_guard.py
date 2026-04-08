@@ -195,6 +195,10 @@ _SUPERSESSION_MARKERS = re.compile(
     r"supersed|replac|obsolet|invalidat|deprecat|eliminad|reemplaz|upgrade|migrat|refactor",
     re.IGNORECASE,
 )
+_EXPLICIT_RELATION_PATTERN = re.compile(
+    r"\b(?:compatible with|supersedes)\s*#(\d+)\b",
+    re.IGNORECASE,
+)
 
 _VERSION_PATTERN = re.compile(r"\b[vV](\d+(?:\.\d+)*)\b")
 
@@ -230,6 +234,11 @@ def _extract_versions(content: str) -> list[str]:
     return _VERSION_PATTERN.findall(content)
 
 
+def _extract_explicit_relation_ids(content: str) -> set[int]:
+    """Return fact IDs explicitly referenced as compatible or superseded."""
+    return {int(match) for match in _EXPLICIT_RELATION_PATTERN.findall(content)}
+
+
 def _is_noise(content: str) -> bool:
     """Filter out noise decisions like MAILTV archives."""
     return any(content.startswith(prefix) for prefix in _NOISE_PREFIXES)
@@ -241,7 +250,7 @@ def _decrypt_content(content: str, decrypt_fn: Callable | None) -> str | None:
         return content
     try:
         return decrypt_fn(content)
-    except (ValueError, TypeError, OSError):
+    except (ValueError, TypeError, OSError, RuntimeError):
         return None
 
 
@@ -305,6 +314,8 @@ def _score_candidate(
     content = _decrypt_content(row["content"], decrypt_fn)
     if not content or _is_noise(content):
         return None
+    if row["id"] in _extract_explicit_relation_ids(new_content):
+        return None
 
     existing_tokens = _tokenize(content)
     score = _jaccard(new_tokens, existing_tokens)
@@ -348,34 +359,44 @@ async def _fetch_decision_rows(
     new_tokens: set[str],
     new_project: str,
     *,
+    tenant_id: str | None = None,
     use_fts: bool = True,
 ) -> list[aiosqlite.Row]:
     """Fetch candidate rows via FTS5 or full scan."""
     if not use_fts:
-        cursor = await conn.execute(
-            """
+        sql = """
             SELECT id, project, content, created_at
             FROM facts
             WHERE fact_type = 'decision'
+        """
+        params: list[str] = []
+        if tenant_id:
+            sql += " AND tenant_id = ?"
+            params.append(tenant_id)
+        sql += """
             ORDER BY CASE WHEN project = ? THEN 0 ELSE 1 END, id DESC
             LIMIT 400
-            """,
-            (new_project,),
-        )
+        """
+        params.append(new_project)
+        cursor = await conn.execute(sql, tuple(params))
     else:
         fts_terms = " OR ".join(list(new_tokens)[:8])
-        cursor = await conn.execute(
-            """
+        sql = """
             SELECT f.id, f.project, f.content, f.created_at
             FROM facts f
             JOIN facts_fts fts ON fts.rowid = f.id
             WHERE fts.facts_fts MATCH ?
               AND f.fact_type = 'decision'
+        """
+        params = [fts_terms]
+        if tenant_id:
+            sql += " AND f.tenant_id = ?"
+            params.append(tenant_id)
+        sql += """
             ORDER BY rank
             LIMIT 200
-            """,
-            (fts_terms,),
-        )
+        """
+        cursor = await conn.execute(sql, tuple(params))
     return await cursor.fetchall()  # type: ignore[type-error]
 
 
@@ -385,6 +406,8 @@ async def detect_contradictions(
     new_project: str,
     *,
     db_path: str | Path = DEFAULT_DB_PATH,
+    conn: aiosqlite.Connection | None = None,
+    tenant_id: str | None = None,
     decrypt_fn: Callable | None = None,
     max_candidates: int = MAX_CANDIDATES,
     min_score: float = MIN_OVERLAP_SCORE,
@@ -401,15 +424,35 @@ async def detect_contradictions(
 
     report = ConflictReport(new_content, new_project)
 
-    async with connect_async_ctx(str(db_path)) as conn:
-        conn.row_factory = aiosqlite.Row
+    if decrypt_fn is None and tenant_id is not None:
+        try:
+            from cortex.crypto import get_default_encrypter
+
+            encrypter = get_default_encrypter()
+
+            def _tenant_decrypt(payload: str) -> str | None:
+                return encrypter.decrypt_str(payload, tenant_id=tenant_id)
+
+            decrypt_fn = _tenant_decrypt
+        except (ImportError, RuntimeError):
+            decrypt_fn = None
+
+    async def _scan(scan_conn: aiosqlite.Connection) -> None:
+        previous_row_factory = scan_conn.row_factory
+        scan_conn.row_factory = aiosqlite.Row
         try:
             rows = await _fetch_decision_rows(
-                conn,
+                scan_conn,
                 new_tokens,
                 new_project,
+                tenant_id=tenant_id,
                 use_fts=not decrypt_fn,
             )
+            explicit_relation_ids = _extract_explicit_relation_ids(new_content)
+            if explicit_relation_ids:
+                referenced_rows = [row for row in rows if row["id"] in explicit_relation_ids]
+                if referenced_rows:
+                    rows = referenced_rows
             candidates = [
                 c
                 for row in rows
@@ -428,6 +471,15 @@ async def detect_contradictions(
             report.candidates = candidates[:max_candidates]
         except aiosqlite.OperationalError:
             logger.warning("Contradiction scan failed (DB error)", exc_info=True)
+        finally:
+            scan_conn.row_factory = previous_row_factory
+
+    if conn is not None:
+        await _scan(conn)
+        return report
+
+    async with connect_async_ctx(str(db_path), read_only=True) as scan_conn:
+        await _scan(scan_conn)
 
     return report
 

@@ -40,7 +40,7 @@ class GitWatcherHandler(FileSystemEventHandler):
                     if ghosts:
                         count = 0
                         for g in ghosts:
-                            if str(modified_path) in g["source_file"]:
+                            if str(modified_path) in str(g.get("source_file", "")):
                                 count += 1
                         if count > 0:
                             await self.speak_func(
@@ -78,4 +78,5 @@ async def git_watcher_loop(state, cortex_root, osc_client, speak_func, loop):
         observer.stop()
         raise
     finally:
-        observer.join()
+        state.daemons["git_watcher"]["status"] = "offline"
+        await asyncio.to_thread(observer.join)

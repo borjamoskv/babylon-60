@@ -15,6 +15,7 @@
 | **Forge** | `forge_*.py` | Build & generation pipelines |
 | **Verify** | `verify_*.py` | Architecture verification |
 | **Orchestrators** | `god_mode_orchestrator.py`, `mejoralo_infinito.py`, `orchestrator.py`, `rotate_aether.py` | Meta-execution |
+| **Agent Demo** | `run_github_agent_demo.py` | End-to-end harness for the `GitHubAgent` builtin |
 | **MCP / API** | `run_mcp_server.py`, `smoke_test_api.py` | Server launching |
 | **NotebookLM** | `fragment_notebooklm.py`, `synthesize_notebooklm.py` | NotebookLM integration |
 | **Shell** | `cortex-boot.sh`, `cortex_persist.sh`, `diagnose.sh`, etc. | System operations |

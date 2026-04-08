@@ -5,18 +5,24 @@ CORTEX v6.0 - Event Bus Adapter (SSE).
 from __future__ import annotations
 
 import asyncio
+import logging
 from collections.abc import AsyncGenerator
+from typing import TYPE_CHECKING
 
 from fastapi import APIRouter, Depends, Query, Request
 from sse_starlette.sse import EventSourceResponse
 
 from cortex.api.deps import get_async_engine
-from cortex.auth import AuthResult, require_permission
-from cortex.engine import CortexEngine as AsyncCortexEngine
+from cortex.auth import require_permission
 
 __all__ = ["events_router"]
 
 events_router = APIRouter(tags=["events"])
+logger = logging.getLogger("uvicorn.error")
+
+if TYPE_CHECKING:
+    from cortex.auth import AuthResult
+    from cortex.engine import CortexEngine as AsyncCortexEngine
 
 
 async def event_generator(
@@ -39,7 +45,11 @@ async def event_generator(
                 break
 
             try:
-                signals = await bus.poll(consumer=consumer_id, limit=50)
+                signals = await bus.poll(
+                    tenant_id=tenant_id,
+                    consumer=consumer_id,
+                    limit=50,
+                )
                 for sig in signals:
                     if event_types and sig.event_type not in event_types:
                         continue
@@ -51,8 +61,10 @@ async def event_generator(
                         if hasattr(sig, "model_dump_json")
                         else sig.json(),
                     }
-            except Exception:  # noqa: BLE001
-                pass
+            except Exception as exc:
+                logger.exception("SSE event stream failed for tenant %s", tenant_id)
+                yield {"event": "error", "data": f"event stream failed: {exc}"}
+                break
 
             await asyncio.sleep(1.0)
     except asyncio.CancelledError:

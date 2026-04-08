@@ -8,7 +8,6 @@ reasons why a fact matched a query.
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import sqlite3
 import time
@@ -22,6 +21,7 @@ try:
 except ImportError:
     sqlite_vec = None
 
+from cortex.crypto import get_default_encrypter, load_json_dict
 from cortex.memory.hdc.algebra import unbind
 from cortex.memory.hdc.codec import HDCEncoder
 from cortex.memory.hdc.item_memory import ItemMemory
@@ -166,7 +166,13 @@ class HDCVectorStoreL2:
                     int(fact.is_bridge),
                     fact.confidence,
                     fact.success_rate,
-                    json.dumps(fact.metadata),
+                    (
+                        get_default_encrypter().encrypt_json(
+                            fact.metadata, tenant_id=fact.tenant_id
+                        )
+                        if fact.metadata
+                        else "{}"
+                    ),
                     f_type,
                 ),
             )
@@ -189,6 +195,10 @@ class HDCVectorStoreL2:
 
             # Save codebook after potential new tokens are added
             self._item_memory.save_codebook()
+
+    async def upsert(self, fact: CortexFactModel) -> None:
+        """Compatibility shim for memory paths that treat L2 stores as upsert-capable."""
+        await self.memorize(fact)
 
     async def recall_secure(
         self,
@@ -325,7 +335,7 @@ class HDCVectorStoreL2:
             is_bridge=bool(row["is_bridge"]),
             confidence=row["confidence"],
             success_rate=row["success_rate"],
-            metadata=json.loads(row["metadata"]) if row["metadata"] else {},
+            metadata=load_json_dict(row["metadata"], tenant_id=row["tenant_id"]),
             specular_embedding=specular_emb,
         )
 
@@ -351,14 +361,20 @@ class HDCVectorStoreL2:
         cursor = conn.cursor()
         cursor.execute(
             """
-            SELECT id FROM hdc_facts_meta
+            SELECT id, tenant_id, metadata FROM hdc_facts_meta
             WHERE tenant_id = ? AND (project_id = ? OR is_bridge = 1)
-            AND fact_type = 'error' AND metadata LIKE '%"is_toxic": true%'
-            ORDER BY rowid DESC LIMIT ?
+            AND fact_type = 'error'
+            ORDER BY rowid DESC
             """,
-            (tenant_id, project_id, limit),
+            (tenant_id, project_id),
         )
-        ids = [row["id"] for row in cursor.fetchall()]
+        ids: list[str] = []
+        for row in cursor.fetchall():
+            metadata = load_json_dict(row["metadata"], tenant_id=row["tenant_id"])
+            if metadata.get("is_toxic") is True:
+                ids.append(row["id"])
+                if len(ids) >= limit:
+                    break
         return ids
 
     def extract_traces(self, fact: CortexFactModel) -> dict[str, Any]:

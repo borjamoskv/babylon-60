@@ -60,13 +60,22 @@ _MAGIC_WHITELIST = {0, 1, 2, -1, 100, 0.5}
 logger = logging.getLogger("cortex.extensions.mejoralo.antipatterns")
 
 
+class _FindingVisitor(ast.NodeVisitor):
+    """Shared visitor base carrying relative path and output collection."""
+
+    def __init__(self, rel: str, findings: list[AntipatternFinding]) -> None:
+        self.rel = rel
+        self.findings = findings
+
+
 # ── Scanner 3: Magic Literals ────────────────────────────────────────
 
 
-class _MagicLiteralVisitor(ast.NodeVisitor):
+class _MagicLiteralVisitor(_FindingVisitor):
     """Detect unnamed numeric constants and magic strings."""
 
     def __init__(self, rel: str, findings: list[AntipatternFinding]) -> None:
+        super().__init__(rel, findings)
         self.rel = rel
         self.findings = findings
         self._in_assignment = False
@@ -131,12 +140,8 @@ class _MagicLiteralVisitor(ast.NodeVisitor):
 # ── Scanner 5: Implicit Assumptions ──────────────────────────────────
 
 
-class _ImplicitAssumptionVisitor(ast.NodeVisitor):
+class _ImplicitAssumptionVisitor(_FindingVisitor):
     """Detect patterns where assumptions are implicit instead of explicit."""
-
-    def __init__(self, rel: str, findings: list[AntipatternFinding]) -> None:
-        self.rel = rel
-        self.findings = findings
 
     def visit_Subscript(self, node: ast.Subscript) -> None:
         """Detect dict/list access without guard: d["key"], l[0]."""
@@ -224,12 +229,8 @@ class _ImplicitAssumptionVisitor(ast.NodeVisitor):
 # ── Scanner 6: Dead Code ─────────────────────────────────────────────
 
 
-class _DeadCodeVisitor(ast.NodeVisitor):
+class _DeadCodeVisitor(_FindingVisitor):
     """Detect unreachable code after return/raise/break/continue."""
-
-    def __init__(self, rel: str, findings: list[AntipatternFinding]) -> None:
-        self.rel = rel
-        self.findings = findings
 
     def _check_body(self, body: list[ast.stmt]) -> None:
         for i, stmt in enumerate(body):

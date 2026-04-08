@@ -8,6 +8,7 @@ Visualizes reputation slashing, consensus alignment, and exergy extraction.
 """
 
 import asyncio
+import os
 import sqlite3
 from datetime import datetime
 from pathlib import Path
@@ -18,11 +19,19 @@ from rich.live import Live
 from rich.panel import Panel
 from rich.table import Table
 
-# ── SOVEREIGN PATH ANCHOR ──
-ROOT_DIR = Path(__file__).resolve().parents[1]
-DB_PATH = ROOT_DIR / "cortex.db"
+
+def _resolve_db_path() -> Path:
+    override = os.environ.get("CORTEX_DB_PATH") or os.environ.get("CORTEX_DB")
+    if override:
+        return Path(override).expanduser()
+
+    return Path.home() / ".cortex" / "cortex.db"
+
+
+DB_PATH = _resolve_db_path()
 
 console = Console()
+
 
 def get_swarm_status():
     """Fetches agent status from the local ledger."""
@@ -42,6 +51,7 @@ def get_swarm_status():
         return agents, fact_count
     except Exception:
         return [], 0
+
 
 def make_grid(agents):
     """Generates the 10x10 visual grid."""
@@ -67,6 +77,7 @@ def make_grid(agents):
         grid_table.add_row(*row_cells)
     return grid_table
 
+
 def make_layout() -> Layout:
     layout = Layout()
     layout.split_column(
@@ -79,6 +90,7 @@ def make_layout() -> Layout:
         Layout(name="stats", ratio=1),
     )
     return layout
+
 
 async def main():
     layout = make_layout()

@@ -9,6 +9,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 
+from cortex.core.paths import CORTEX_DB
 # CORTEX L2 Membrane
 from cortex.engine import CortexEngine
 from cortex.extensions.immune.membrane import ImmuneMembrane, Verdict
@@ -181,7 +182,7 @@ async def messages_endpoint(request: Request):
 
     # ─── 1.5 CORTEX IMMUNE MEMBRANE (L3) ───
     if not hasattr(app.state, "immune_membrane"):
-        db_path = os.getenv("CORTEX_DB_PATH", os.path.expanduser("~/.cortex/cortex.db"))
+        db_path = os.getenv("CORTEX_DB_PATH") or os.getenv("CORTEX_DB") or str(CORTEX_DB)
         engine = CortexEngine(db_path, auto_embed=False)
         app.state.immune_membrane = ImmuneMembrane(engine=engine)
 

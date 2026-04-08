@@ -22,8 +22,6 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
-
 logger = logging.getLogger("uvicorn.error")
 
 request_id_var: contextvars.ContextVar[str] = contextvars.ContextVar("request_id", default="")
@@ -188,6 +186,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             timestamps.popleft()
 
         if len(timestamps) >= self.limit:
+            from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
+
             lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
             logger.warning("Rate limit exceeded for %s", bucket_id)
             return JSONResponse(

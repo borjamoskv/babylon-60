@@ -28,6 +28,24 @@ async def engine(temp_db):
 
 
 @pytest.mark.asyncio
+async def test_store_bootstraps_schema_without_explicit_init(temp_db):
+    """A fresh engine should create its schema on the first write-path use."""
+    engine = CortexEngine(db_path=temp_db, auto_embed=False)
+    try:
+        fact_id = await engine.store(
+            content="The sovereign ledger stores facts immutably.",
+            fact_type="knowledge",
+            project="bootstrap",
+            source="api",
+        )
+        fact = await engine.get_fact(fact_id)
+        assert fact is not None
+        assert fact.content == "The sovereign ledger stores facts immutably."
+    finally:
+        await engine.close()
+
+
+@pytest.mark.asyncio
 async def test_tenant_isolation_store_and_recall(engine):
     """Verify that facts stored under one tenant cannot be recalled by another."""
 

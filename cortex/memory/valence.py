@@ -20,6 +20,13 @@ import logging
 
 from pydantic import BaseModel, Field
 
+from cortex.extensions.sync.common import (
+    EXTERNAL_BRIDGE_KIND,
+    RELATION_BRIDGE_KIND,
+    SYSTEM_BRIDGE_KIND,
+    normalize_bridge_kind,
+)
+
 logger = logging.getLogger("cortex.memory.valence")
 
 
@@ -70,7 +77,11 @@ class ValenceRecord(BaseModel):
         return min(2.0, base * (0.5 + 0.5 * self.arousal))
 
 
-def classify_valence(content: str, fact_type: str = "") -> ValenceRecord:
+def classify_valence(
+    content: str,
+    fact_type: str = "",
+    bridge_kind: str = "",
+) -> ValenceRecord:
     """Auto-classify emotional valence from content heuristics.
 
     This is a fast heuristic classifier. For production,
@@ -95,8 +106,27 @@ def classify_valence(content: str, fact_type: str = "") -> ValenceRecord:
             arousal=0.7,
         )
 
-    # Bridge indicators → high positive (cross-project learning)
+    # Bridge indicators are taxonomy-aware:
+    # - relation bridges carry reusable cross-project knowledge
+    # - external/system bridges are still relevant, but less emotionally "critical"
     if fact_type == "bridge":
+        normalized_kind = (
+            normalize_bridge_kind(bridge_kind, default=RELATION_BRIDGE_KIND)
+            if bridge_kind
+            else RELATION_BRIDGE_KIND
+        )
+        if normalized_kind == EXTERNAL_BRIDGE_KIND:
+            return ValenceRecord(
+                valence=0.4,
+                tag=EmotionalTag.POSITIVE,
+                arousal=0.6,
+            )
+        if normalized_kind == SYSTEM_BRIDGE_KIND:
+            return ValenceRecord(
+                valence=0.1,
+                tag=EmotionalTag.NEUTRAL,
+                arousal=0.4,
+            )
         return ValenceRecord(
             valence=0.9,
             tag=EmotionalTag.CRITICAL,

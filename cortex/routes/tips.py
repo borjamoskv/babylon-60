@@ -11,15 +11,17 @@ Endpoints:
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 
 from cortex.api.deps import get_engine
 from cortex.auth import AuthResult, require_permission
-from cortex.cli.tips import Tip, TipCategory, TipsEngine
-from cortex.engine import CortexEngine
+
+if TYPE_CHECKING:
+    from cortex.cli.tips import Tip, TipCategory, TipsEngine
+    from cortex.engine import CortexEngine
 
 __all__ = [
     "LANG_DESC",
@@ -88,11 +90,13 @@ class CategoriesResponse(BaseModel):
 
 # ─── Singleton Engine ────────────────────────────────────────────────
 
-_tips_engine: Optional[TipsEngine] = None
+_tips_engine: Any | None = None
 
 
-def _get_tips_engine(engine: CortexEngine) -> TipsEngine:
+def _get_tips_engine(engine: "CortexEngine") -> Any:
     """Lazy-init the tips engine with the API's CORTEX engine."""
+    from cortex.cli.tips import TipsEngine
+
     global _tips_engine  # noqa: PLW0603
     if _tips_engine is None:
         _tips_engine = TipsEngine(engine, include_dynamic=True)
@@ -106,16 +110,16 @@ def _get_tips_engine(engine: CortexEngine) -> TipsEngine:
 async def get_tips(
     count: int = Query(1, ge=1, le=20, description="Number of tips to return"),
     lang: str = Query("en", description=LANG_DESC),
-    engine: CortexEngine = Depends(get_engine),
+    engine: "CortexEngine" = Depends(get_engine),
     auth: AuthResult = Depends(require_permission("read")),
 ) -> TipsListResponse:
     """Get random contextual tips."""
     tips_engine = _get_tips_engine(engine)
-    results = [tips_engine.random(lang=lang) for _ in range(count)]
+    results = [await tips_engine.random(lang=lang) for _ in range(count)]
     return TipsListResponse(
-        tips=[TipResponse.from_tip(t) for t in results],  # type: ignore[reportArgumentType]
+        tips=[TipResponse.from_tip(t) for t in results],
         count=len(results),
-        total_available=tips_engine.count,  # type: ignore[reportArgumentType]
+        total_available=len(await tips_engine.all_tips(lang=lang)),
         lang=lang,
     )
 
@@ -123,22 +127,24 @@ async def get_tips(
 @router.get("/categories", response_model=CategoriesResponse)
 async def list_categories(
     lang: str = Query("en", description=LANG_DESC),
-    engine: CortexEngine = Depends(get_engine),
+    engine: "CortexEngine" = Depends(get_engine),
     auth: AuthResult = Depends(require_permission("read")),
 ) -> CategoriesResponse:
     """List all tip categories with counts."""
+    from cortex.cli.tips import TipCategory
+
     tips_engine = _get_tips_engine(engine)
-    all_tips = tips_engine.all_tips(lang=lang)
+    all_tips = await tips_engine.all_tips(lang=lang)
 
     categories = {}
     for cat in TipCategory:
-        cat_count = sum(1 for t in all_tips if t.category == cat)  # type: ignore[reportGeneralTypeIssues]
+        cat_count = sum(1 for t in all_tips if t.category == cat)
         if cat_count > 0:
             categories[cat.value] = cat_count
 
     return CategoriesResponse(
         categories=categories,
-        total=len(all_tips),  # type: ignore[reportArgumentType]
+        total=len(all_tips),
         lang=lang,
     )
 
@@ -148,15 +154,15 @@ async def get_tips_by_category(
     category: str,
     lang: str = Query("en", description=LANG_DESC),
     limit: int = Query(5, ge=1, le=50),
-    engine: CortexEngine = Depends(get_engine),
+    engine: "CortexEngine" = Depends(get_engine),
     auth: AuthResult = Depends(require_permission("read")),
 ) -> TipsListResponse:
     """Get tips filtered by category."""
     tips_engine = _get_tips_engine(engine)
-    results = tips_engine.for_category(category, lang=lang, limit=limit)
+    results = await tips_engine.for_category(category, lang=lang, limit=limit)
     return TipsListResponse(
-        tips=[TipResponse.from_tip(t) for t in results],  # type: ignore[reportGeneralTypeIssues]
-        count=len(results),  # type: ignore[reportArgumentType]
+        tips=[TipResponse.from_tip(t) for t in results],
+        count=len(results),
         category=category,
         lang=lang,
     )
@@ -167,15 +173,15 @@ async def get_tips_by_project(
     project: str,
     lang: str = Query("en", description=LANG_DESC),
     limit: int = Query(3, ge=1, le=20),
-    engine: CortexEngine = Depends(get_engine),
+    engine: "CortexEngine" = Depends(get_engine),
     auth: AuthResult = Depends(require_permission("read")),
 ) -> TipsListResponse:
     """Get tips scoped to a specific project."""
     tips_engine = _get_tips_engine(engine)
-    results = tips_engine.for_project(project, lang=lang, limit=limit)
+    results = await tips_engine.for_project(project, lang=lang, limit=limit)
     return TipsListResponse(
-        tips=[TipResponse.from_tip(t) for t in results],  # type: ignore[reportGeneralTypeIssues]
-        count=len(results),  # type: ignore[reportArgumentType]
+        tips=[TipResponse.from_tip(t) for t in results],
+        count=len(results),
         project=project,
         lang=lang,
     )

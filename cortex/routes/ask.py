@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any
+from typing import TYPE_CHECKING
 
 # This file is part of CORTEX.
 # Licensed under the Apache License, Version 2.0.
@@ -21,12 +22,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 from cortex.api.deps import get_async_engine
-from cortex.auth import AuthResult, require_permission
-from cortex.engine import CortexEngine as AsyncCortexEngine
-from cortex.extensions.llm._presets import list_providers, provider_inventory
-from cortex.extensions.llm.manager import LLMManager
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.extensions.llm.router import IntentProfile
+from cortex.auth import require_permission
 
 __all__ = [
     "AskRequest",
@@ -42,8 +38,24 @@ logger = logging.getLogger("cortex.routes.ask")
 
 router = APIRouter(tags=["ask"])
 
+if TYPE_CHECKING:
+    from cortex.auth import AuthResult
+    from cortex.engine import CortexEngine as AsyncCortexEngine
+    from cortex.extensions.llm.manager import LLMManager
+
+
 # ─── Singleton LLM Manager ──────────────────────────────────────────
-_llm_manager = LLMManager()
+_llm_manager: Any | None = None
+
+
+def _get_llm_manager() -> Any:
+    """Instantiate the LLM manager only when the ask router is exercised."""
+    global _llm_manager
+    if _llm_manager is None:
+        from cortex.extensions.llm.manager import LLMManager
+
+        _llm_manager = LLMManager()
+    return _llm_manager
 
 
 def _resolve_llm_identity() -> tuple[Any | None, str, str | None]:
@@ -52,7 +64,7 @@ def _resolve_llm_identity() -> tuple[Any | None, str, str | None]:
     Tests occasionally swap in light-weight doubles that expose only a subset of
     the manager/provider interface, so this helper avoids hard assumptions.
     """
-    manager = _llm_manager
+    manager = _get_llm_manager()
     provider = getattr(manager, "provider", None)
     if provider is None and (hasattr(manager, "model_name") or hasattr(manager, "model")):
         provider = manager
@@ -149,13 +161,14 @@ async def ask_cortex(
 
     Returns 503 if no LLM provider is configured.
     """
-    if not _llm_manager.available:
+    manager = _get_llm_manager()
+    if not manager.available:
         return JSONResponse(
             status_code=503,
             content={
                 "detail": "No LLM provider configured. "
                 "Set CORTEX_LLM_PROVIDER env variable. "
-                f"Supported: {LLMProvider.list_providers()}",  # type: ignore[type-error]
+                f"Supported: {supported_provider_names()}",  # type: ignore[type-error]
             },
         )
 
@@ -193,7 +206,9 @@ async def ask_cortex(
 
     # 4. Call LLM
     try:
-        answer = await _llm_manager.complete(
+        from cortex.extensions.llm.router import IntentProfile
+
+        answer = await manager.complete(
             prompt=prompt,
             system=system,
             temperature=req.temperature,
@@ -224,7 +239,7 @@ async def ask_cortex(
         for r in results
     ]
 
-    provider, provider_name, model_name = _resolve_llm_identity()
+    _provider, provider_name, model_name = _resolve_llm_identity()
     return AskResponse(
         answer=answer,
         sources=sources,
@@ -244,7 +259,8 @@ async def ask_stream(
 
     Yields SSE 'data: ' events containing text chunks.
     """
-    if not _llm_manager.available:
+    manager = _get_llm_manager()
+    if not manager.available:
         return JSONResponse(
             status_code=503,
             content={"detail": "No LLM provider configured."},
@@ -289,7 +305,9 @@ async def ask_stream(
 
         # Then stream the text
         try:
-            async for chunk in _llm_manager.stream(
+            from cortex.extensions.llm.router import IntentProfile
+
+            async for chunk in manager.stream(
                 prompt=prompt,
                 system=system,
                 temperature=req.temperature,
@@ -311,11 +329,21 @@ async def llm_status(
     auth: AuthResult = Depends(require_permission("read")),
 ):
     """Check LLM provider status and list supported providers. [STATUS]"""
-    provider, active_provider, model_name = _resolve_llm_identity()
+    from cortex.extensions.llm._presets import list_providers, provider_inventory
+
+    _provider, active_provider, model_name = _resolve_llm_identity()
+    manager = _get_llm_manager()
     return LLMStatusResponse(
-        available=_llm_manager.available,
+        available=manager.available,
         provider=active_provider or "none",
         model=model_name,
         supported_providers=list_providers(),
         providers=provider_inventory(active_provider=active_provider),
     )
+
+
+def supported_provider_names() -> list[str]:
+    """Return the configured provider names without importing LLM provider modules at import time."""
+    from cortex.extensions.llm.provider import LLMProvider
+
+    return LLMProvider.list_providers()

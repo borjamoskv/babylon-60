@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Any, Literal, TypedDict
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator
 
 __all__ = [
     "AcceptanceResult",
@@ -132,15 +132,24 @@ class EventEnvelope(BaseModel):
 
 
 class StoreRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     project: str = Field(..., max_length=100, description="Project/namespace for the fact")
     content: str = Field(..., max_length=50000, description="The fact content")
     fact_type: str = Field(
-        "knowledge", max_length=20, description="Type: knowledge, decision, mistake, bridge, ghost"
+        "knowledge",
+        max_length=20,
+        description="Type: knowledge, decision, mistake, bridge, ghost",
+        validation_alias=AliasChoices("fact_type", "type"),
     )
     tags: list[str] = Field(default_factory=list, description="Optional tags")
     source: str = Field("", max_length=200, description="Origin of the fact (e.g. agent:vex)")
     confidence: str | None = Field(None, description="Optional confidence level (C1-C5)")
-    meta: dict | None = Field(None, description="Optional JSON metadata")
+    meta: dict | None = Field(
+        None,
+        description="Optional JSON metadata",
+        validation_alias=AliasChoices("meta", "metadata"),
+    )
 
     @field_validator("project", "content")
     @classmethod
@@ -188,6 +197,7 @@ class SearchResult(BaseModel):
     created_at: str
     updated_at: str
     meta: dict | None = None
+    tx_id: int | str | None = None
     hash: str | None = None
     context: dict | None = Field(
         None, description="Graph-RAG context (subgraph or related entities)"
@@ -399,7 +409,7 @@ class LedgerReportResponse(BaseModel):
 
 
 class CheckpointResponse(BaseModel):
-    checkpoint_id: int | None
+    checkpoint_id: str | None
     message: str
     status: str = "success"
 

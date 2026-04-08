@@ -43,7 +43,7 @@ class FrontierModelGuard:
         try:
             with open(self.presets_path) as f:
                 presets = json.load(f)
-        except Exception as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.error("FrontierModelGuard: Failed to load presets: %s", e)
             return
 

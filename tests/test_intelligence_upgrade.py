@@ -14,6 +14,9 @@ from __future__ import annotations
 import math
 from datetime import datetime, timedelta, timezone
 
+import aiosqlite
+import pytest
+
 # ─── 1. Inference Engine ───
 
 
@@ -102,6 +105,121 @@ class TestEmbeddingCosine:
         b = [4.0, 3.0]
         expected = (12.0 + 12.0) / (5.0 * 5.0)  # 24/25 = 0.96
         assert abs(_embedding_cosine_similarity(a, b) - expected) < 1e-6
+
+
+@pytest.mark.asyncio
+async def test_detect_contradictions_filters_by_tenant_on_supplied_conn():
+    from cortex.guards.contradiction_guard import detect_contradictions
+
+    conn = await aiosqlite.connect(":memory:")
+    try:
+        await conn.executescript(
+            """
+            CREATE TABLE facts (
+                id INTEGER PRIMARY KEY,
+                tenant_id TEXT NOT NULL DEFAULT 'default',
+                project TEXT NOT NULL,
+                content TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                fact_type TEXT NOT NULL
+            );
+            """
+        )
+        await conn.executemany(
+            """
+            INSERT INTO facts (id, tenant_id, project, content, created_at, fact_type)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            [
+                (
+                    1,
+                    "tenant-alpha",
+                    "alpha",
+                    "Never use provider X for payments in alpha.",
+                    "2026-04-07T00:00:00Z",
+                    "decision",
+                ),
+                (
+                    2,
+                    "tenant-beta",
+                    "alpha",
+                    "Never use provider X for payments in alpha.",
+                    "2026-04-07T00:00:00Z",
+                    "decision",
+                ),
+            ],
+        )
+        await conn.commit()
+
+        report = await detect_contradictions(
+            new_content="Never use provider X for payments in alpha.",
+            new_project="alpha",
+            conn=conn,
+            tenant_id="tenant-alpha",
+            decrypt_fn=lambda payload: payload,
+        )
+
+        assert report.has_conflicts
+        assert [candidate.fact_id for candidate in report.candidates] == [1]
+    finally:
+        await conn.close()
+
+
+@pytest.mark.asyncio
+async def test_detect_contradictions_honors_explicit_relation_scope():
+    from cortex.guards.contradiction_guard import detect_contradictions
+
+    conn = await aiosqlite.connect(":memory:")
+    try:
+        await conn.executescript(
+            """
+            CREATE TABLE facts (
+                id INTEGER PRIMARY KEY,
+                tenant_id TEXT NOT NULL DEFAULT 'default',
+                project TEXT NOT NULL,
+                content TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                fact_type TEXT NOT NULL
+            );
+            """
+        )
+        await conn.executemany(
+            """
+            INSERT INTO facts (id, tenant_id, project, content, created_at, fact_type)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            [
+                (
+                    1,
+                    "tenant-alpha",
+                    "alpha",
+                    "Decision 0 for chain verification test.",
+                    "2026-04-07T00:00:00Z",
+                    "decision",
+                ),
+                (
+                    2,
+                    "tenant-alpha",
+                    "alpha",
+                    "Decision 1 for chain verification test. Compatible with #1.",
+                    "2026-04-07T00:00:01Z",
+                    "decision",
+                ),
+            ],
+        )
+        await conn.commit()
+
+        report = await detect_contradictions(
+            new_content="Decision 2 for chain verification test. Compatible with #2.",
+            new_project="alpha",
+            conn=conn,
+            tenant_id="tenant-alpha",
+            decrypt_fn=lambda payload: payload,
+        )
+
+        assert not report.has_conflicts
+    finally:
+        await conn.close()
 
 
 # ─── 3. Shannon Entropy Module ───

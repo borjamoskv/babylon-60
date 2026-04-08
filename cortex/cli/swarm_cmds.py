@@ -9,6 +9,7 @@ import click
 from rich.panel import Panel
 
 from cortex.cli.common import cli, console
+from cortex.core.paths import CORTEX_DB
 
 
 @cli.group()
@@ -99,7 +100,7 @@ def swarm_refactor(file, level, issue, dry_run):
 @swarm.command("deploy")
 @click.option("--mode", "-m", default="infinite", help="Scaling mode (infinite, legion, squadron)")
 @click.option("--target", "-t", required=True, help="Mission target or goal")
-@click.option("--db", default="~/.cortex/cortex.db", help="Database path")
+@click.option("--db", default=str(CORTEX_DB), help="Database path")
 def swarm_deploy(mode, target, db):
     """Deploy a Sovereign Swarm for fractal scaling (SCALING-Ω)."""
 
@@ -150,7 +151,7 @@ def swarm_deploy(mode, target, db):
 
 
 @swarm.command("board")
-@click.option("--db", default="~/.cortex/cortex.db", help="Database path")
+@click.option("--db", default=str(CORTEX_DB), help="Database path")
 def swarm_board_cmd(db):
     """Launch the real-time Swarm Kanban TUI."""
     from cortex.extensions.ui.swarm_board import SwarmBoard

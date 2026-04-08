@@ -8,12 +8,14 @@ import sqlite3
 from typing import TYPE_CHECKING
 
 from cortex.extensions.sync.common import (
-    MEMORY_DIR,
+    RELATION_BRIDGE_KIND,
     SyncResult,
     calculate_fact_diff,
     file_hash,
     get_existing_contents,
     load_sync_state,
+    is_relation_bridge_kind,
+    runtime_memory_dir,
     save_sync_state,
 )
 from cortex.extensions.sync.system import sync_system
@@ -52,18 +54,19 @@ async def sync_memory(engine: CortexEngine) -> SyncResult:
     """Sincroniza ~/.agent/memory/ → CORTEX DB."""
     result = SyncResult(synced_at=now_iso())
     state = load_sync_state()
+    memory_dir = runtime_memory_dir()
 
-    if not MEMORY_DIR.exists():
-        result.errors.append(f"Directorio de memoria no encontrado: {MEMORY_DIR}")
+    if not memory_dir.exists():
+        result.errors.append(f"Directorio de memoria no encontrado: {memory_dir}")
         return result
 
-    await _sync_file(engine, MEMORY_DIR / "ghosts.json", "ghosts_hash", state, _sync_ghosts, result)
-    await _sync_file(engine, MEMORY_DIR / "system.json", "system_hash", state, sync_system, result)
+    await _sync_file(engine, memory_dir / "ghosts.json", "ghosts_hash", state, _sync_ghosts, result)
+    await _sync_file(engine, memory_dir / "system.json", "system_hash", state, sync_system, result)
     await _sync_file(
-        engine, MEMORY_DIR / "mistakes.jsonl", "mistakes_hash", state, _sync_mistakes, result
+        engine, memory_dir / "mistakes.jsonl", "mistakes_hash", state, _sync_mistakes, result
     )
     await _sync_file(
-        engine, MEMORY_DIR / "bridges.jsonl", "bridges_hash", state, _sync_bridges, result
+        engine, memory_dir / "bridges.jsonl", "bridges_hash", state, _sync_bridges, result
     )
 
     # Guardar estado para la próxima ejecución
@@ -166,11 +169,20 @@ async def _sync_mistakes(engine: CortexEngine, path: Path, result: SyncResult) -
 async def _sync_bridges(engine: CortexEngine, path: Path, result: SyncResult) -> None:
     """Sincroniza bridges.jsonl — conexiones entre proyectos."""
     existing = await get_existing_contents(engine, "__bridges__", fact_type="bridge")
-    lines = [
-        json.loads(line)
-        for line in path.read_text(encoding="utf-8").strip().splitlines()
-        if line.strip()
-    ]
+    lines = []
+    for line in path.read_text(encoding="utf-8").strip().splitlines():
+        if not line.strip():
+            continue
+        bridge = json.loads(line)
+        if "bridge_kind" not in bridge:
+            bridge["bridge_kind"] = RELATION_BRIDGE_KIND
+        elif not is_relation_bridge_kind(bridge.get("bridge_kind")):
+            logger.warning(
+                "Skipping non-relation bridge entry in bridges.jsonl: %s",
+                bridge.get("bridge_kind"),
+            )
+            continue
+        lines.append(bridge)
 
     def generate_content(b):
         return (
@@ -182,6 +194,9 @@ async def _sync_bridges(engine: CortexEngine, path: Path, result: SyncResult) ->
     new_bridges = calculate_fact_diff(existing, lines, generate_content)
     for content, b in new_bridges:
         try:
+            meta = dict(b)
+            meta["bridge_kind"] = RELATION_BRIDGE_KIND
+            meta.setdefault("bridge_provider", "memory")
             await engine.store(
                 project="__bridges__",
                 content=content,
@@ -190,7 +205,7 @@ async def _sync_bridges(engine: CortexEngine, path: Path, result: SyncResult) ->
                 confidence="verified",
                 source="sync-agent-memory",
                 valid_from=b.get("date"),
-                meta=b,
+                meta=meta,
             )
             result.bridges_synced += 1
             existing.add(content)

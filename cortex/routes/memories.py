@@ -1,30 +1,20 @@
-"""CORTEX v6.0 — Memories Router (Public API Surface).
+"""Compatibility router for the legacy `/v1/memories` API surface.
 
-Developer-friendly endpoints for the Memory-as-a-Service product.
-Clean, intuitive naming that delegates to the existing CortexEngine.
-
-Public API:
-    POST   /v1/memories          → Store a memory
-    GET    /v1/memories          → List memories (paginated)
-    POST   /v1/memories/search   → Semantic search
-    POST   /v1/memories/batch    → Batch store (up to plan limit)
-    GET    /v1/memories/{id}     → Get single memory
-    DELETE /v1/memories/{id}     → Delete memory
-    GET    /v1/memories/verify   → Verify integrity (ledger check)
+This module preserves the public "memories" vocabulary while delegating
+behavior to the canonical facts/search handlers.
 """
 
 from __future__ import annotations
 
-import logging
 import sqlite3
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 
-from cortex.api.deps import get_async_engine
-from cortex.auth import AuthResult, require_permission
-from cortex.engine import CortexEngine as AsyncCortexEngine
+from cortex.api.deps import get_public_memory_service
+from cortex.auth import require_permission
+from cortex.engine.storage_guard import GuardViolation
 
 __all__ = [
     "batch_store",
@@ -37,7 +27,10 @@ __all__ = [
 ]
 
 router = APIRouter(prefix="/v1/memories", tags=["memories"])
-logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from cortex.auth import AuthResult
+    from cortex.services.public_memory import PublicMemoryService
 
 
 # ─── Request / Response Models ───────────────────────────────────────
@@ -91,6 +84,28 @@ class BatchStoreRequest(BaseModel):
     memories: list[StoreMemoryRequest] = Field(..., min_length=1, max_length=100)
 
 
+def _to_memory_response(value: BaseModel | dict[str, Any]) -> MemoryResponse:
+    data = value.model_dump() if isinstance(value, BaseModel) else value
+    memory_id = data.get("id", data.get("fact_id"))
+    if memory_id is None:
+        raise HTTPException(status_code=500, detail="Memory response missing id")
+
+    return MemoryResponse(
+        id=int(memory_id),
+        project=str(data.get("project", "")),
+        content=str(data.get("content", "")),
+        type=str(data.get("fact_type", data.get("type", "knowledge"))),
+        tags=list(data.get("tags") or []),
+        confidence=data.get("confidence", "C3"),
+        source=data.get("source"),
+        parent_decision_id=data.get("parent_decision_id"),
+        created_at=str(data.get("created_at") or ""),
+        updated_at=str(data.get("updated_at") or data.get("created_at") or ""),
+        hash=data.get("hash"),
+        score=data.get("score"),
+    )
+
+
 # ─── Endpoints ───────────────────────────────────────────────────────
 
 
@@ -98,11 +113,11 @@ class BatchStoreRequest(BaseModel):
 async def store_memory(
     req: StoreMemoryRequest,
     auth: AuthResult = Depends(require_permission("write")),
-    engine: AsyncCortexEngine = Depends(get_async_engine),
+    service: PublicMemoryService = Depends(get_public_memory_service),
 ) -> dict:
-    """Store a memory. Returns the memory ID and cryptographic hash."""
+    """Store a memory via the canonical facts write path."""
     try:
-        fact_id = await engine.store(
+        stored = await service.store(
             project=req.project,
             content=req.content,
             tenant_id=auth.tenant_id,
@@ -112,14 +127,11 @@ async def store_memory(
             meta=req.metadata or {},
             parent_decision_id=req.parent_decision_id,
         )
-        return {
-            "id": fact_id,
-            "project": req.project,
-            "status": "stored",
-        }
+    except (ValueError, GuardViolation) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from None
     except (sqlite3.Error, OSError, RuntimeError):
-        logger.exception("Failed to store memory for tenant %s", auth.tenant_id)
         raise HTTPException(status_code=500, detail="Failed to store memory") from None
+    return {"id": stored.fact_id, "project": stored.project, "status": "stored"}
 
 
 @router.get("", response_model=list[MemoryResponse])
@@ -127,88 +139,70 @@ async def list_memories(
     request: Request,
     project: str = Query(..., min_length=1, description="Project to list memories from"),
     limit: int = Query(50, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
     auth: AuthResult = Depends(require_permission("read")),
-    engine: AsyncCortexEngine = Depends(get_async_engine),
+    service: PublicMemoryService = Depends(get_public_memory_service),
 ) -> list[MemoryResponse]:
-    """List memories for a project (paginated)."""
-    facts = await engine.recall(project=project, tenant_id=auth.tenant_id, limit=limit)
-    return [
-        MemoryResponse(
-            id=f["id"],
-            project=f["project"],
-            content=f["content"],
-            type=f["fact_type"],
-            tags=f["tags"],
-            confidence=f.get("confidence", "C3"),
-            created_at=f["created_at"],
-            updated_at=f["updated_at"],
-            hash=f.get("hash"),
-        )
-        for f in facts
-    ]
+    """List memories via the canonical facts recall path."""
+    _ = request
+    facts = await service.recall_project(
+        project=project,
+        limit=limit,
+        offset=offset,
+        tenant_id=auth.tenant_id,
+    )
+    return [_to_memory_response(fact) for fact in facts]
 
 
 @router.post("/search", response_model=list[MemoryResponse])
 async def search_memories(
     req: SearchMemoryRequest,
     auth: AuthResult = Depends(require_permission("read")),
-    engine: AsyncCortexEngine = Depends(get_async_engine),
+    service: PublicMemoryService = Depends(get_public_memory_service),
 ) -> list[MemoryResponse]:
-    """Semantic search across all memories (scoped to tenant)."""
-    results = await engine.search(
+    """Semantic search across memories via the canonical search handler."""
+    results = await service.search(
         query=req.query,
         top_k=req.k,
         project=req.project,
         tenant_id=auth.tenant_id,
         as_of=req.as_of,
+        tags=req.tags,
+        preserve_null_filters=True,
     )
-    return [
-        MemoryResponse(
-            id=r.fact_id,
-            project=r.project,
-            content=r.content,
-            type=r.fact_type,
-            tags=r.tags,
-            created_at=r.created_at,
-            updated_at=r.updated_at,
-            hash=r.hash,
-            score=r.score,
-        )
-        for r in results
-    ]
+    return [_to_memory_response(result) for result in results]
 
 
 @router.post("/batch", response_model=dict)
 async def batch_store(
     req: BatchStoreRequest,
     auth: AuthResult = Depends(require_permission("write")),
-    engine: AsyncCortexEngine = Depends(get_async_engine),
+    service: PublicMemoryService = Depends(get_public_memory_service),
 ) -> dict:
-    """Batch store up to 100 memories in a single request."""
-    ids: list[int] = []
-    errors: list[dict] = []
-
-    for i, mem in enumerate(req.memories):
-        try:
-            fact_id = await engine.store(
-                project=mem.project,
-                content=mem.content,
-                tenant_id=auth.tenant_id,
-                fact_type=mem.type,
-                tags=mem.tags,
-                source=mem.source,
-                meta=mem.metadata or {},
-                parent_decision_id=mem.parent_decision_id,
-            )
-            ids.append(fact_id)
-        except (sqlite3.Error, ValueError, OSError):
-            logger.exception("Failed to batch store memory at index %d", i)
-            errors.append({"index": i, "error": "Failed to store memory"})
-
+    """Batch store memories via the canonical facts batch handler."""
+    payload = [
+        {
+            "project": memory.project,
+            "content": memory.content,
+            "tenant_id": auth.tenant_id,
+            "fact_type": memory.type,
+            "tags": memory.tags,
+            "source": memory.source,
+            "meta": memory.metadata or {},
+            "parent_decision_id": memory.parent_decision_id,
+        }
+        for memory in req.memories
+    ]
+    try:
+        ids = await service.batch_store(payload)
+    except (ValueError, GuardViolation) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from None
+    except (sqlite3.Error, OSError, RuntimeError):
+        raise HTTPException(status_code=500, detail="Failed to batch store memories") from None
     return {
         "stored": len(ids),
         "ids": ids,
-        "errors": errors,
+        "errors": [],
         "total_requested": len(req.memories),
     }
 
@@ -217,60 +211,43 @@ async def batch_store(
 async def verify_memories(
     request: Request,
     auth: AuthResult = Depends(require_permission("read")),
-    engine: AsyncCortexEngine = Depends(get_async_engine),
+    service: PublicMemoryService = Depends(get_public_memory_service),
 ) -> dict:
-    """Verify cryptographic integrity of the memory ledger."""
-    try:
-        report = await engine.verify_ledger()
-        return {
-            "valid": report["valid"],
-            "violations": len(report.get("violations", [])),
-            "transactions_checked": report.get("tx_checked", 0),
-        }
-    except (sqlite3.Error, OSError, RuntimeError):
-        logger.exception("Ledger verification failed")
-        raise HTTPException(status_code=500, detail="Integrity verification failed") from None
+    """Verify integrity via the canonical ledger verification handler."""
+    _ = request
+    _ = auth
+    return await service.verify_ledger()
 
 
 @router.get("/{memory_id}", response_model=MemoryResponse)
 async def get_memory(
     memory_id: int,
     auth: AuthResult = Depends(require_permission("read")),
-    engine: AsyncCortexEngine = Depends(get_async_engine),
+    service: PublicMemoryService = Depends(get_public_memory_service),
 ) -> MemoryResponse:
-    """Get a single memory by ID."""
-    fact = await engine.get_fact(memory_id, tenant_id=auth.tenant_id)
+    """Get a single memory via the canonical fact-by-id handler."""
+    fact = await service.get_fact(memory_id, tenant_id=auth.tenant_id)
     if not fact:
         raise HTTPException(status_code=404, detail=f"Memory #{memory_id} not found")
-
-    return MemoryResponse(
-        id=fact["id"],
-        project=fact["project"],
-        content=fact["content"],
-        type=fact["fact_type"],
-        tags=fact["tags"],
-        confidence=fact.get("confidence", "C3"),
-        created_at=fact["created_at"],
-        updated_at=fact["updated_at"],
-        hash=fact.get("hash"),
-    )
+    return _to_memory_response(fact)
 
 
 @router.delete("/{memory_id}", response_model=dict)
 async def delete_memory(
     memory_id: int,
+    request: Request,
     auth: AuthResult = Depends(require_permission("write")),
-    engine: AsyncCortexEngine = Depends(get_async_engine),
+    service: PublicMemoryService = Depends(get_public_memory_service),
 ) -> dict:
-    """Delete (soft-deprecate) a memory."""
-    fact = await engine.get_fact(memory_id, tenant_id=auth.tenant_id)
+    """Delete (soft-deprecate) a memory via the canonical facts handler."""
+    _ = request
+    fact = await service.get_fact_record(memory_id, tenant_id=auth.tenant_id)
     if not fact:
         raise HTTPException(status_code=404, detail=f"Memory #{memory_id} not found")
 
-    success = await engine.deprecate(memory_id, reason="api_deleted")
+    success = await service.deprecate(memory_id, reason="api_deleted")
     if not success:
         raise HTTPException(status_code=500, detail="Failed to delete memory")
-
     return {"id": memory_id, "status": "deleted"}
 
 
@@ -280,19 +257,12 @@ async def get_causal_chain(
     direction: str = Query("down", description="'up' or 'down'"),
     max_depth: int = Query(10, ge=1, le=100),
     auth: AuthResult = Depends(require_permission("read")),
-    engine: AsyncCortexEngine = Depends(get_async_engine),
+    service: PublicMemoryService = Depends(get_public_memory_service),
 ) -> list[dict]:
-    """Get the causal chain for a memory (up=ancestors, down=descendants)."""
-    try:
-        chain = await engine.get_causal_chain(
-            fact_id=memory_id,
-            direction=direction,
-            max_depth=max_depth,
-        )
-        return chain
-    except (sqlite3.Error, OSError, RuntimeError):
-        logger.exception("Causal chain query failed for #%d", memory_id)
-        raise HTTPException(
-            status_code=500,
-            detail="Causal chain query failed",
-        ) from None
+    """Get the causal chain for a memory via the canonical facts handler."""
+    return await service.causal_chain(
+        fact_id=memory_id,
+        direction=direction,
+        max_depth=max_depth,
+        tenant_id=auth.tenant_id,
+    )

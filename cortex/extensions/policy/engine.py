@@ -20,6 +20,12 @@ from cortex.extensions.policy.models import (
     ActionItem,
     PolicyConfig,
 )
+from cortex.extensions.sync.common import (
+    EXTERNAL_BRIDGE_KIND,
+    RELATION_BRIDGE_KIND,
+    SYSTEM_BRIDGE_KIND,
+    normalize_bridge_kind,
+)
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
@@ -251,8 +257,15 @@ class PolicyEngine:
 
         # Bridge downstream: bridges unlock pattern reuse across projects.
         if fact_type == "bridge":
-            # Count how many projects could benefit.
-            future += len(other_projects) * 0.3
+            bridge_kind = self._bridge_kind(fact)
+            if bridge_kind == RELATION_BRIDGE_KIND:
+                future += len(other_projects) * 0.3
+            elif bridge_kind == EXTERNAL_BRIDGE_KIND:
+                future += len(other_projects) * 0.05
+            elif bridge_kind == SYSTEM_BRIDGE_KIND:
+                future += 0.0
+            else:
+                future += len(other_projects) * 0.1
 
         # Normalize to [0, 1] range.
         # Use sigmoid-like compression for high values.
@@ -260,6 +273,24 @@ class PolicyEngine:
             future = 1.0 - math.exp(-future / 3.0)
 
         return future
+
+    @staticmethod
+    def _bridge_kind(fact: Fact) -> str:
+        meta = fact.meta if isinstance(fact.meta, dict) else {}
+        kind = meta.get("bridge_kind")
+        if kind is None:
+            if fact.source == "bridge:github" or meta.get("bridge_provider") == "github" or "github_key" in meta:
+                return EXTERNAL_BRIDGE_KIND
+            return RELATION_BRIDGE_KIND
+
+        normalized = normalize_bridge_kind(kind, default=str(kind).strip().lower())
+        if normalized == RELATION_BRIDGE_KIND and (
+            fact.source == "bridge:github"
+            or meta.get("bridge_provider") == "github"
+            or "github_key" in meta
+        ):
+            return EXTERNAL_BRIDGE_KIND
+        return normalized
 
     # ── Helpers ──────────────────────────────────────────────────────
 

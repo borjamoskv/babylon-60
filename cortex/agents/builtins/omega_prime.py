@@ -185,20 +185,16 @@ class OmegaPrimeAgent(BaseAgent):
         *,
         reason: str,
     ) -> None:
-        await self.bus.send(
-            AgentMessage(
-                correlation_id=original.correlation_id,
-                causation_id=original.message_id,
-                sender=self.agent_id,
-                recipient=self._handoff_agent_id,
-                kind=MessageKind.HANDOFF_REQUEST,
-                payload={
-                    "task_id": task.task_id,
-                    "reason": reason,
-                    "objective": task.objective,
-                    "input": task.input,
-                },
-            )
+        await self.request_handoff(
+            self._handoff_agent_id,
+            {
+                "task_id": task.task_id,
+                "reason": reason,
+                "objective": task.objective,
+                "input": task.input,
+            },
+            correlation_id=original.correlation_id,
+            causation_id=original.message_id,
         )
 
     async def _complete_task(

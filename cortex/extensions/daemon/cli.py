@@ -14,6 +14,7 @@ Commands:
 
 from __future__ import annotations
 
+import json
 import logging
 import sys
 from pathlib import Path
@@ -25,6 +26,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from cortex import __version__
+from cortex.extensions.daemon.models import CONFIG_FILE
 from cortex.extensions.daemon import (
     BUNDLE_ID,
     DEFAULT_COOLDOWN,
@@ -51,6 +53,77 @@ __all__ = [
 console = Console()
 
 PLIST_SOURCE = Path(__file__).parent.parent / "launchd" / f"{BUNDLE_ID}.plist"
+AUTOPOIESIS_CONFIG_KEYS: list[tuple[str, str, str]] = [
+    ("autopoiesis_interval_hours", "24.0", "Minimum time between bounded autopoiesis cycles"),
+    ("autopoiesis_idle_poll_seconds", "60.0", "Idle wait timeout for the cycle loop"),
+    ("autopoiesis_target_score", "95", "Mejoralo score threshold that triggers healing"),
+    ("autopoiesis_enable_healing", "true", "Allow bounded repair cycles"),
+    ("autopoiesis_enable_manifestation", "false", "Allow tool manifestation planning"),
+    ("autopoiesis_minimum_registered_tools", "0", "Tool-count threshold for manifestation"),
+    ("autopoiesis_project", "cortex", "Project namespace for accepted cycle writes"),
+    ("autopoiesis_focus", "entropy", "Planning focus passed into each cycle"),
+]
+_BOOL_KEYS = {
+    "aether_enabled",
+    "autopoiesis_enable_healing",
+    "autopoiesis_enable_manifestation",
+    "frontier_allow_commits",
+    "iot_simulated",
+}
+_STRING_KEYS = {
+    "aether_github_token",
+    "aether_llm_provider",
+    "autopoiesis_focus",
+    "autopoiesis_project",
+    "db_path",
+    "security_log_path",
+    "watch_path",
+}
+_STRING_LIST_KEYS = {"aether_github_repos", "sites"}
+_DICT_KEYS = {"auto_mejoralo_projects"}
+_INTEGER_RULES: dict[str, tuple[int | None, int | None]] = {
+    "aether_max_concurrent": (1, None),
+    "autopoiesis_minimum_registered_tools": (0, None),
+    "autopoiesis_target_score": (0, 100),
+    "cert_warn_days": (0, None),
+    "cloud_sync_interval": (1, None),
+    "disk_warn_mb": (1, None),
+    "epistemic_breaker_interval_seconds": (1, None),
+    "epistemic_eval_interval": (1, None),
+    "epistemic_repair_threshold": (0, None),
+    "sentinel_interval": (1, None),
+}
+_NUMBER_RULES: dict[str, tuple[float | None, float | None]] = {
+    "aether_poll_interval": (0.0, None),
+    "auto_mejoralo_interval": (1.0, None),
+    "autopoiesis_idle_poll_seconds": (1.0, None),
+    "autopoiesis_interval_hours": (0.0, None),
+    "compaction_interval": (1.0, None),
+    "cooldown": (0.0, None),
+    "entropic_wake_interval_hours": (0.0, None),
+    "epistemic_breaker_max_entropy": (0.0, 1.0),
+    "epistemic_decay_threshold": (None, None),
+    "epistemic_stale_ratio": (0.0, 1.0),
+    "fiat_interval": (0.0, None),
+    "frontier_ingestion_interval_hours": (0.0, None),
+    "frontier_metabolism_interval_hours": (0.0, None),
+    "heartbeat_interval": (0.0, None),
+    "iot_interval": (0.0, None),
+    "memory_stale_hours": (0.0, None),
+    "perception_interval": (0.0, None),
+    "security_threshold": (0.0, 1.0),
+    "stale_hours": (0.0, None),
+    "zenon_threshold": (0.0, None),
+    "zero_prompting_interval_hours": (0.0, None),
+}
+_ALLOWED_DAEMON_CONFIG_KEYS = (
+    set(_BOOL_KEYS)
+    | set(_STRING_KEYS)
+    | set(_STRING_LIST_KEYS)
+    | set(_DICT_KEYS)
+    | set(_INTEGER_RULES)
+    | set(_NUMBER_RULES)
+)
 
 
 def _get_plist_dest() -> Path:
@@ -63,6 +136,114 @@ def _get_systemd_unit() -> Path:
     svc_dir = get_service_dir()
     assert svc_dir is not None  # noqa: S101
     return svc_dir / f"{BUNDLE_ID}.service"
+
+
+def _daemon_example_path() -> Path:
+    """Return the repository-shipped example daemon config path."""
+    return Path(__file__).resolve().parents[3] / "configs" / "daemon_config.example.json"
+
+
+def _is_number(value: object) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def _validate_number(
+    key: str,
+    value: object,
+    *,
+    min_value: float | None = None,
+    max_value: float | None = None,
+    integer: bool = False,
+) -> str | None:
+    if integer:
+        if not isinstance(value, int) or isinstance(value, bool):
+            return f"Key '{key}' must be an integer."
+        number = float(value)
+    else:
+        if not _is_number(value):
+            return f"Key '{key}' must be a number."
+        number = float(value)
+
+    if min_value is not None and number < min_value:
+        return f"Key '{key}' must be >= {min_value}."
+    if max_value is not None and number > max_value:
+        return f"Key '{key}' must be <= {max_value}."
+    return None
+
+
+def _validate_daemon_config_payload(payload: object) -> list[str]:
+    if not isinstance(payload, dict):
+        return ["Daemon config must be a JSON object at the top level."]
+
+    errors: list[str] = []
+    unknown_keys = sorted(set(payload) - _ALLOWED_DAEMON_CONFIG_KEYS)
+    errors.extend(f"Unknown key '{key}'." for key in unknown_keys)
+
+    for key in sorted(payload):
+        value = payload[key]
+
+        if key in _BOOL_KEYS:
+            if not isinstance(value, bool):
+                errors.append(f"Key '{key}' must be a boolean.")
+            continue
+
+        if key in _STRING_KEYS:
+            if not isinstance(value, str) or not value.strip():
+                errors.append(f"Key '{key}' must be a non-empty string.")
+            continue
+
+        if key in _STRING_LIST_KEYS:
+            if not isinstance(value, list) or any(not isinstance(item, str) for item in value):
+                errors.append(f"Key '{key}' must be a list of strings.")
+            continue
+
+        if key in _DICT_KEYS:
+            if not isinstance(value, dict):
+                errors.append(f"Key '{key}' must be a JSON object.")
+            continue
+
+        if key in _INTEGER_RULES:
+            min_value, max_value = _INTEGER_RULES[key]
+            error = _validate_number(
+                key,
+                value,
+                min_value=float(min_value) if min_value is not None else None,
+                max_value=float(max_value) if max_value is not None else None,
+                integer=True,
+            )
+            if error is not None:
+                errors.append(error)
+            continue
+
+        if key in _NUMBER_RULES:
+            min_value, max_value = _NUMBER_RULES[key]
+            error = _validate_number(key, value, min_value=min_value, max_value=max_value)
+            if error is not None:
+                errors.append(error)
+
+    return errors
+
+
+def _read_daemon_config(path: Path) -> tuple[dict, list[str], str | None]:
+    if not path.exists():
+        return {}, [], None
+
+    try:
+        payload = json.loads(path.read_text())
+    except (json.JSONDecodeError, OSError) as exc:
+        return {}, [], str(exc)
+
+    errors = _validate_daemon_config_payload(payload)
+    return (payload if isinstance(payload, dict) else {}), errors, None
+
+
+def _ensure_valid_daemon_config() -> None:
+    _, errors, parse_error = _read_daemon_config(CONFIG_FILE)
+    if parse_error is not None:
+        raise click.ClickException(f"Invalid daemon config JSON: {parse_error}")
+    if errors:
+        joined = "; ".join(errors)
+        raise click.ClickException(f"Invalid daemon config: {joined}")
 
 
 def setup_logging(verbose: bool = False) -> None:
@@ -132,6 +313,7 @@ def cli(
 
 def _build_daemon(ctx: click.Context) -> MoskvDaemon:
     """Construct MoskvDaemon from Click context."""
+    _ensure_valid_daemon_config()
     return MoskvDaemon(
         sites=ctx.obj["sites"],
         stale_hours=ctx.obj["stale_hours"],
@@ -277,6 +459,96 @@ def status(as_json: bool) -> None:
         table.add_row("  ❌ Error", str(e))
 
     console.print(table)
+
+
+@cli.command()
+@click.option("--json", "as_json", is_flag=True, help="Output machine-readable config metadata")
+@click.option("--example", "show_example", is_flag=True, help="Print the example daemon config")
+@click.option("--validate", "validate", is_flag=True, help="Validate the active daemon config")
+def config(as_json: bool, show_example: bool, validate: bool) -> None:
+    """Show daemon config path, current values, and supported autopoiesis keys."""
+    example_path = _daemon_example_path()
+    example_exists = example_path.exists()
+
+    if show_example:
+        if not example_exists:
+            console.print("[red]Example daemon config not found.[/]")
+            sys.exit(1)
+        click.echo(example_path.read_text(), nl=False)
+        return
+
+    current, validation_errors, parse_error = _read_daemon_config(CONFIG_FILE)
+    is_valid = parse_error is None and not validation_errors
+
+    payload = {
+        "config_path": str(CONFIG_FILE),
+        "config_exists": CONFIG_FILE.exists(),
+        "example_path": str(example_path),
+        "example_exists": example_exists,
+        "autopoiesis_keys": [
+            {"key": key, "default": default, "description": description}
+            for key, default, description in AUTOPOIESIS_CONFIG_KEYS
+        ],
+        "current_config": current,
+        "validation": {
+            "valid": is_valid,
+            "errors": validation_errors,
+        },
+    }
+    if parse_error is not None:
+        payload["parse_error"] = parse_error
+
+    if as_json:
+        click.echo(json.dumps(payload, indent=2, ensure_ascii=False))
+        if validate and not is_valid:
+            sys.exit(1)
+        return
+
+    summary = Table(title="MOSKV-1 — Daemon Config", show_header=True, header_style="bold")
+    summary.add_column("Field", style="cyan")
+    summary.add_column("Value")
+    summary.add_row("Config path", str(CONFIG_FILE))
+    summary.add_row("Config exists", "yes" if CONFIG_FILE.exists() else "no")
+    summary.add_row("Example path", str(example_path))
+    summary.add_row("Example exists", "yes" if example_exists else "no")
+    summary.add_row("Config valid", "yes" if is_valid else "no")
+    if parse_error is not None:
+        summary.add_row("Parse error", parse_error)
+    console.print(summary)
+
+    keys_table = Table(title="Autopoiesis Keys", show_header=True, header_style="bold")
+    keys_table.add_column("Key", style="cyan")
+    keys_table.add_column("Default")
+    keys_table.add_column("Purpose")
+    for key, default, description in AUTOPOIESIS_CONFIG_KEYS:
+        keys_table.add_row(key, default, description)
+    console.print(keys_table)
+
+    if current:
+        current_table = Table(title="Current Config", show_header=True, header_style="bold")
+        current_table.add_column("Key", style="cyan")
+        current_table.add_column("Value")
+        for key in sorted(current):
+            current_table.add_row(key, str(current[key]))
+        console.print(current_table)
+    else:
+        console.print(
+            Panel(
+                "No daemon config loaded. Create ~/.cortex/daemon_config.json or run "
+                "`moskv-daemon config --example` to print the repository example.",
+                border_style="yellow",
+            )
+        )
+
+    if validation_errors:
+        errors_table = Table(title="Validation Errors", show_header=True, header_style="bold red")
+        errors_table.add_column("Error")
+        for error in validation_errors:
+            errors_table.add_row(error)
+        console.print(errors_table)
+
+    if validate and not is_valid:
+        sys.exit(1)
 
 
 @cli.command()

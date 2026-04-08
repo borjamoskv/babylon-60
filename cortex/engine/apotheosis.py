@@ -42,7 +42,7 @@ from cortex.engine.manifestation import transfigure_ui
 from cortex.engine.reflex import trigger_autonomic_reflex
 from cortex.engine.rem_cycle import REMCoordinator
 from cortex.extensions.immune.membrane import ImmuneMembrane, Verdict
-from cortex.extensions.signals.bus import SignalBus
+from cortex.extensions.signals.bus import DurableSignalBus
 from cortex.services.notebooklm import NotebookLMService
 from cortex.services.trust import TrustService
 
@@ -118,7 +118,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
                 try:
                     sync_conn = getattr(db, "_conn", db)
                     if isinstance(sync_conn, sqlite3.Connection):
-                        self._signal_bus = SignalBus(sync_conn)
+                        self._signal_bus = DurableSignalBus(sync_conn)
                         self._signal_bus.ensure_table()
                 except (sqlite3.OperationalError, OSError, AttributeError) as err:
                     logger.debug("[APOTHEOSIS] SignalBus init skipped: %s", err)

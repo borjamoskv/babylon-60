@@ -99,6 +99,11 @@ class MerkleTree:
         """Return the root hash of the tree."""
         return self.tree[-1][0] if self.tree and self.tree[-1] else ""
 
+    @property
+    def root_hash(self) -> str:
+        """Backward-compatible alias for the tree root."""
+        return self.root
+
     def get_proof(self, index: int) -> list[tuple[str, str]]:
         """
         Get a Merkle proof for the leaf at 'index'.

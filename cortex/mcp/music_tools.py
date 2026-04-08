@@ -1,13 +1,33 @@
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
-from mcp.server.fastmcp import FastMCP
-
-from cortex.extensions.music_engine.orchestrator import GRAMMYOrchestrator, TrackContext
+if TYPE_CHECKING:
+    from mcp.server.fastmcp import FastMCP
 
 logger = logging.getLogger("cortex.mcp.music")
 
 
-def register_music_tools(mcp: FastMCP):
+def _load_music_runtime():
+    """Load the music runtime only when a music tool is invoked."""
+    try:
+        from cortex.extensions.music_engine.orchestrator import (
+            GRAMMYOrchestrator,
+            TrackContext,
+        )
+    except ImportError as exc:
+        missing = getattr(exc, "name", None) or "optional music dependency"
+        logger.warning("Music MCP tools unavailable: %s", exc)
+        raise RuntimeError(
+            "Music engine unavailable. Install optional audio dependencies "
+            f"(missing {missing})."
+        ) from exc
+
+    return GRAMMYOrchestrator, TrackContext
+
+
+def register_music_tools(mcp: FastMCP) -> None:  # type: ignore[reportInvalidTypeForm]
     """Registers GRAMMY-Ω Music Engine tools."""
 
     @mcp.tool()
@@ -19,6 +39,11 @@ def register_music_tools(mcp: FastMCP):
             title: The title of the album.
             concept: The artistic concept or mood (e.g., 'Berlin Techno 2026').
         """
+        try:
+            GRAMMYOrchestrator, _ = _load_music_runtime()
+        except RuntimeError as exc:
+            return str(exc)
+
         orchestrator = GRAMMYOrchestrator()
         album = await orchestrator.create_album(title, concept)  # type: ignore[type-error]
         return f"Album '{title}' created with ID: {album.id}. Concept: {concept}"
@@ -37,6 +62,11 @@ def register_music_tools(mcp: FastMCP):
         """
         # Note: In a real implementation, we would retrieve the orchestrator
         # state from a persistent store or engine session.
+        try:
+            GRAMMYOrchestrator, TrackContext = _load_music_runtime()
+        except RuntimeError as exc:
+            return f"Error generating track: {exc}"
+
         orchestrator = GRAMMYOrchestrator()
 
         # Mocking album context if not found in session for this stateless tool example
@@ -62,6 +92,11 @@ def register_music_tools(mcp: FastMCP):
         """
         Evaluate the Grammy Readiness Index (GRI) of a track.
         """
+        try:
+            GRAMMYOrchestrator, TrackContext = _load_music_runtime()
+        except RuntimeError as exc:
+            return f"Evaluation failed: {exc}"
+
         orchestrator = GRAMMYOrchestrator()
         track = TrackContext(id=track_id, title="Evaluation")
         # In a real scenario, we'd load the audio and stems here.

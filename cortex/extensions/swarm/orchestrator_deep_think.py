@@ -194,6 +194,8 @@ class DeepThinkOrchestrator:
             confidence="C5",
             source="maradona:deep-think",
             meta={
+                "bridge_kind": "system",
+                "bridge_provider": "swarm",
                 "sub_type": "deep_think_collapse",
                 "signature": hv_signature,
                 "dimension": DEFAULT_DIM,

@@ -22,7 +22,6 @@ from rich.prompt import Prompt
 from rich.syntax import Syntax
 
 from cortex.cli.common import cli, console
-from cortex.extensions.llm.sovereign import SovereignLLM
 
 __all__ = ["architect"]
 
@@ -90,6 +89,8 @@ def architect_instruct(filepath: str) -> None:
     )
 
     async def _run() -> None:
+        from cortex.extensions.llm.sovereign import SovereignLLM
+
         async with SovereignLLM(temperature=0.2) as llm:
             with console.status("[bold cyan]Applying MOSKV Rule topology...[/]"):
                 result = await llm.generate(
@@ -131,6 +132,8 @@ def architect_reverse(text: str | None) -> None:
     console.print(Panel("Analyzing structural rules...", title="[bold #CCFF00]Reverse Engineer[/]"))
 
     async def _run() -> None:
+        from cortex.extensions.llm.sovereign import SovereignLLM
+
         async with SovereignLLM(temperature=0.1) as llm:
             with console.status("[bold cyan]Extracting stylistic vectors...[/]"):
                 result = await llm.generate(

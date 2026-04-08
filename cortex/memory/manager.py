@@ -22,18 +22,18 @@ from cortex.memory.working import WorkingMemoryL1
 
 try:
     from cortex.memory.hdc import HDCEncoder, HDCVectorStoreL2
-except Exception:  # noqa: BLE001
+except ImportError:
     HDCEncoder = Any  # type: ignore[assignment,misc]
     HDCVectorStoreL2 = Any  # type: ignore[assignment,misc]
 
 try:
     from cortex.extensions.policy.memory_os import MemoryOS
-except Exception:
+except ImportError:
     MemoryOS = None  # type: ignore
 
 try:
     from cortex.extensions.security.tenant import get_tenant_id
-except Exception:
+except ImportError:
 
     def get_tenant_id() -> str:
         return "default"
@@ -41,14 +41,14 @@ except Exception:
 
 try:
     from cortex.extensions.sovereign.endocrine import DigitalEndocrine
-except Exception:
+except ImportError:
     DigitalEndocrine = None  # type: ignore
 
 from cortex.telemetry.metrics import metrics
 
 try:
     from cortex.extensions.thinking.fusion import ContextFusion
-except Exception:
+except ImportError:
     ContextFusion = None  # type: ignore
 
 try:
@@ -56,18 +56,29 @@ try:
     from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
     VectorStoreL2 = SovereignVectorStoreL2
-except Exception:
+except ImportError:
     VectorStoreL2 = None  # type: ignore[assignment,misc]
     DynamicSemanticSpace = None  # type: ignore[assignment,misc]
 
 try:
     from cortex.memory.graph_store import GraphStore
-except Exception:
+except ImportError:
     GraphStore = None  # type: ignore[misc]
 
 __all__ = ["CortexMemoryManager"]
 
 logger = logging.getLogger("cortex.memory.manager")
+
+
+def _resolve_manager_tenant(tenant_id: str | None, operation: str) -> str:
+    """Resolve tenant context while rejecting blank explicit tenant identifiers."""
+    if tenant_id is None:
+        return get_tenant_id()
+
+    resolved = tenant_id.strip()
+    if not resolved:
+        raise ValueError(f"{operation} requires non-blank tenant_id")
+    return resolved
 
 
 class CortexMemoryManager:
@@ -263,7 +274,7 @@ class CortexMemoryManager:
         2. Push to L1 (working memory)
         3. If overflow → compress and embed to L2 in background
         """
-        tenant_id = tenant_id or get_tenant_id()
+        tenant_id = _resolve_manager_tenant(tenant_id, "process_interaction")
         _meta = metadata or {}
         _meta["tenant_id"] = tenant_id
         _meta["project_id"] = project_id
@@ -386,7 +397,7 @@ class CortexMemoryManager:
 
         Pipeline: Mem0 exergy gate → Thalamus → dedup → encode → resonance → L2
         """
-        tenant_id = tenant_id or get_tenant_id()
+        tenant_id = _resolve_manager_tenant(tenant_id, "store")
         conn = self._l2._get_conn() if hasattr(self._l2, "_get_conn") else None
 
         # ── Mem0 Exergy Pre-Filter (RFC-CORTEX-MEMORY-OS) ──────────
@@ -471,9 +482,11 @@ class CortexMemoryManager:
     async def reconcile_experience(self, signal: Any) -> str:
         """Process an experience signal from the bus and commit it to L2."""
         payload = signal.payload
-        tenant_id = payload.get("tenant_id") or get_tenant_id()
+        tenant_id = payload.get("tenant_id")
+        if not isinstance(tenant_id, str) or not tenant_id.strip():
+            raise ValueError("experience signal requires explicit tenant_id")
         return await self.store(
-            tenant_id=tenant_id,
+            tenant_id=tenant_id.strip(),
             project_id=payload.get("project_id", "unknown"),
             content=payload.get("content", ""),
             fact_type=payload.get("fact_type", "general"),
@@ -492,7 +505,7 @@ class CortexMemoryManager:
         layer: str | None = None,
     ) -> dict[str, Any]:
         """Build an optimized context for LLM injection."""
-        tenant_id = tenant_id or get_tenant_id()
+        tenant_id = _resolve_manager_tenant(tenant_id, "assemble_context")
         working_set = self._l1.get_context(tenant_id=tenant_id)
 
         _start_recall = time.perf_counter()
@@ -522,7 +535,7 @@ class CortexMemoryManager:
 
     def get_context_vector(self, tenant_id: str | None = None) -> Any | None:
         """Return the current context as a bundled hypervector (Vector Alpha)."""
-        tenant_id = tenant_id or get_tenant_id()
+        tenant_id = _resolve_manager_tenant(tenant_id, "get_context_vector")
         if not self._hdc_encoder:
             return None
         events = self._l1.get_context(tenant_id=tenant_id)

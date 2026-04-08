@@ -1,6 +1,10 @@
 """SQLite Graph Store Mixin."""
 
+from datetime import date, datetime
+
 import aiosqlite
+
+from cortex.memory.temporal import normalize_timestamp
 
 __all__ = ["SQLiteStoreMixin"]
 
@@ -12,14 +16,21 @@ class SQLiteStoreMixin:
         self.conn = conn
         self._is_async = isinstance(conn, aiosqlite.Connection)
 
+    @staticmethod
+    def _normalize_timestamp(value: str | date | datetime) -> str:
+        normalized = normalize_timestamp(value)
+        assert normalized is not None
+        return normalized
+
     async def upsert_entity(
         self,
         name: str,
         entity_type: str,
         project: str,
-        timestamp: str,
+        timestamp: str | date | datetime,
         tenant_id: str = "default",
     ) -> int:
+        timestamp = self._normalize_timestamp(timestamp)
         query_select = (
             "SELECT id, mention_count FROM entities WHERE name = ? AND project = ? "
             "AND tenant_id = ?"
@@ -58,9 +69,10 @@ class SQLiteStoreMixin:
         name: str,
         entity_type: str,
         project: str,
-        timestamp: str,
+        timestamp: str | date | datetime,
         tenant_id: str = "default",
     ) -> int:
+        timestamp = self._normalize_timestamp(timestamp)
         cursor = self.conn.execute(
             "SELECT id, mention_count FROM entities WHERE name = ? AND project = ? "
             "AND tenant_id = ?",
@@ -89,9 +101,10 @@ class SQLiteStoreMixin:
         target_id: int,
         relation_type: str,
         fact_id: int,
-        timestamp: str,
+        timestamp: str | date | datetime,
         tenant_id: str = "default",
     ) -> int:
+        timestamp = self._normalize_timestamp(timestamp)
         query_select = (
             "SELECT id, weight FROM entity_relations WHERE source_entity_id = ? "
             "AND target_entity_id = ? AND tenant_id = ?"
@@ -132,9 +145,10 @@ class SQLiteStoreMixin:
         target_id: int,
         relation_type: str,
         fact_id: int,
-        timestamp: str,
+        timestamp: str | date | datetime,
         tenant_id: str = "default",
     ) -> int:
+        timestamp = self._normalize_timestamp(timestamp)
         cursor = self.conn.execute(
             "SELECT id, weight FROM entity_relations WHERE source_entity_id = ? "
             "AND target_entity_id = ? AND tenant_id = ?",
@@ -163,9 +177,10 @@ class SQLiteStoreMixin:
         reference: str,
         context: str,
         project: str,
-        timestamp: str,
+        timestamp: str | date | datetime,
         tenant_id: str = "default",
     ) -> int:
+        timestamp = self._normalize_timestamp(timestamp)
         q_sel = (
             "SELECT id FROM ghosts WHERE reference = ? AND project = ? AND "
             "tenant_id = ? AND status = 'open'"
@@ -197,9 +212,10 @@ class SQLiteStoreMixin:
         ghost_id: int,
         target_id: int,
         confidence: float,
-        timestamp: str,
+        timestamp: str | date | datetime,
         tenant_id: str = "default",
     ) -> bool:
+        timestamp = self._normalize_timestamp(timestamp)
         q = (
             "UPDATE ghosts SET status = 'resolved', resolved_at = ?, target_id = ?, "
             "confidence = ? WHERE id = ? AND tenant_id = ?"

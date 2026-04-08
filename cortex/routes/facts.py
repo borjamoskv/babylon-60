@@ -1,17 +1,25 @@
+"""CORTEX v5.1 - Facts Router.
+Consolidated Memory-as-a-Service capabilities.
+"""
+
+from __future__ import annotations
+
 import logging
 import sqlite3
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 from starlette.requests import Request
 
-from cortex.api.deps import get_async_engine
-from cortex.auth import AuthResult, require_permission
-from cortex.engine import CortexEngine as AsyncCortexEngine
+from cortex.api.deps import get_async_engine, get_public_memory_service
+from cortex.auth import require_permission
 from cortex.engine.storage_guard import GuardViolation
+from cortex.services.public_memory import PublicMemoryService, fact_like_to_dict
 from cortex.types.models import (
     FactResponse,
+    SearchRequest,
+    SearchResult,
     StoreRequest,
     StoreResponse,
     VoteRequest,
@@ -20,98 +28,128 @@ from cortex.types.models import (
 )
 from cortex.utils.i18n import get_trans
 
-"""
-CORTEX v5.1 - Facts Router.
-Consolidated Memory-as-a-Service capabilities.
-"""
+if TYPE_CHECKING:
+    from cortex.auth import AuthResult
+    from cortex.engine import CortexEngine as AsyncCortexEngine
+    from cortex.services.public_memory import PublicMemoryService
 
 
-class StoreMemoryRequest(BaseModel):
+class BatchStoreFactRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     project: str = Field(..., min_length=1, max_length=128)
     content: str = Field(..., min_length=1, max_length=32_768)
-    type: str = Field("knowledge")
+    fact_type: str = Field("knowledge", validation_alias=AliasChoices("fact_type", "type"))
     tags: list[str] = Field(default_factory=list)
     source: str | None = None
-    metadata: dict[str, Any] | None = None
+    meta: dict[str, Any] | None = Field(
+        None, validation_alias=AliasChoices("meta", "metadata")
+    )
     parent_decision_id: int | None = None
 
 
 class BatchStoreRequest(BaseModel):
-    memories: list[StoreMemoryRequest] = Field(..., min_length=1, max_length=100)
+    model_config = ConfigDict(populate_by_name=True)
 
-
-class SearchMemoryRequest(BaseModel):
-    query: str = Field(..., min_length=1, max_length=1024)
-    k: int = Field(5, ge=1, le=50)
-    project: str | None = None
-    tags: list[str] | None = None
-    as_of: str | None = None
+    facts: list[BatchStoreFactRequest] = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        validation_alias=AliasChoices("facts", "memories"),
+    )
 
 
 router = APIRouter(tags=["facts"])
 logger = logging.getLogger("uvicorn.error")
 
 
-@router.post("/v1/facts", response_model=StoreResponse)
-async def store_fact(
-    req: StoreRequest,
-    auth: AuthResult = Depends(require_permission("write")),
-    engine: AsyncCortexEngine = Depends(get_async_engine),
+async def _store_fact_impl(
+    *,
+    project: str,
+    content: str,
+    tenant_id: str,
+    service: PublicMemoryService,
+    fact_type: str = "knowledge",
+    tags: list[str] | None = None,
+    source: str | None = None,
+    meta: dict[str, Any] | None = None,
+    parent_decision_id: int | None = None,
 ) -> StoreResponse:
-    """Store a fact (scoped to authenticated tenant)."""
     try:
-        fact_id = await engine.store(
-            project=req.project,
-            content=req.content,
-            tenant_id=auth.tenant_id,
-            fact_type=req.fact_type,
-            tags=req.tags,
-            source=req.source,
-            meta=req.meta,
+        return await service.store(
+            project=project,
+            content=content,
+            fact_type=fact_type,
+            tags=tags,
+            source=source,
+            meta=meta,
+            parent_decision_id=parent_decision_id,
+            tenant_id=tenant_id,
         )
-        return StoreResponse(fact_id=fact_id, project=req.project, message="Fact stored")
     except (ValueError, GuardViolation) as e:
         raise HTTPException(status_code=400, detail=str(e)) from None
     except HTTPException:
         raise
-    except Exception as e:
+    except (sqlite3.Error, OSError, RuntimeError) as e:
         logger.error("Failed to store fact: %s", e)
         raise HTTPException(
             status_code=500, detail="Internal server error while storing fact"
         ) from None
 
 
+@router.post("/v1/facts", response_model=StoreResponse)
+async def store_fact(
+    req: StoreRequest,
+    auth: AuthResult = Depends(require_permission("write")),
+    service: PublicMemoryService = Depends(get_public_memory_service),
+) -> StoreResponse:
+    """Store a fact (scoped to authenticated tenant)."""
+    return await _store_fact_impl(
+        project=req.project,
+        content=req.content,
+        tenant_id=auth.tenant_id,
+        service=service,
+        fact_type=req.fact_type,
+        tags=req.tags,
+        source=req.source,
+        meta=req.meta,
+    )
+
+
 @router.post("/v1/facts/batch", response_model=dict)
 async def batch_store(
     req: BatchStoreRequest,
     auth: AuthResult = Depends(require_permission("write")),
-    engine: AsyncCortexEngine = Depends(get_async_engine),
+    service: PublicMemoryService = Depends(get_public_memory_service),
 ) -> dict:
     """Batch store up to 100 facts in a single request."""
-    ids: list[int] = []
-    errors: list[dict] = []
-    for i, mem in enumerate(req.memories):
-        try:
-            fact_id = await engine.store(
-                project=mem.project,
-                content=mem.content,
-                tenant_id=auth.tenant_id,
-                fact_type=mem.type,
-                tags=mem.tags,
-                source=mem.source,
-                meta=mem.metadata or {},
-                parent_decision_id=mem.parent_decision_id,
-            )
-            ids.append(fact_id)
-        except (sqlite3.Error, ValueError, OSError):
-            logger.exception("Failed to batch store fact at index %d", i)
-            errors.append({"index": i, "error": "Failed to store fact"})
+    payload = [
+        {
+            "project": fact.project,
+            "content": fact.content,
+            "tenant_id": auth.tenant_id,
+            "fact_type": fact.fact_type,
+            "tags": fact.tags,
+            "source": fact.source,
+            "meta": fact.meta or {},
+            "parent_decision_id": fact.parent_decision_id,
+        }
+        for fact in req.facts
+    ]
+
+    try:
+        fact_ids = await service.batch_store(payload)
+    except (ValueError, GuardViolation) as e:
+        raise HTTPException(status_code=400, detail=str(e)) from None
+    except (sqlite3.Error, OSError, RuntimeError):
+        logger.exception("Failed to batch store facts for tenant %s", auth.tenant_id)
+        raise HTTPException(status_code=500, detail="Failed to batch store facts") from None
 
     return {
-        "stored": len(ids),
-        "ids": ids,
-        "errors": errors,
-        "total_requested": len(req.memories),
+        "stored": len(fact_ids),
+        "fact_ids": fact_ids,
+        "errors": [],
+        "total_requested": len(req.facts),
     }
 
 
@@ -120,129 +158,69 @@ async def recall_facts(
     project: str,
     request: Request,
     limit: int | None = Query(None, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
     auth: AuthResult = Depends(require_permission("read")),
-    engine: AsyncCortexEngine = Depends(get_async_engine),
+    service: PublicMemoryService = Depends(get_public_memory_service),
 ) -> list[FactResponse]:
     """Recall facts for a specific project with tenant isolation."""
     _ = request
-    facts = await engine.recall(project=project, tenant_id=auth.tenant_id, limit=limit)
-
-    return [
-        FactResponse(
-            id=f["id"],
-            project=f["project"],
-            content=f["content"],
-            fact_type=f["fact_type"],
-            tags=f["tags"],
-            confidence=f["confidence"],
-            valid_from=f["valid_from"],
-            valid_until=f["valid_until"],
-            source=f["source"],  # type: ignore[reportCallIssue]
-            meta=f["meta"],  # type: ignore[reportCallIssue]
-            created_at=f["created_at"],
-            updated_at=f["updated_at"],
-            tx_id=f["tx_id"],
-            hash=f["hash"],
-            consensus_score=f.get("consensus_score", 1.0),
-        )
-        for f in facts
-    ]
+    return await service.recall_project(
+        project=project,
+        tenant_id=auth.tenant_id,
+        limit=limit,
+        offset=offset,
+    )
 
 
 @router.get("/v1/facts", response_model=list[FactResponse])
 async def list_all_facts(
     limit: int = Query(50, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
     auth: AuthResult = Depends(require_permission("read")),
-    engine: AsyncCortexEngine = Depends(get_async_engine),
+    service: PublicMemoryService = Depends(get_public_memory_service),
 ) -> list[FactResponse]:
     # Retrieve all active facts across projects (scoped to tenant).
-    facts = await engine.recall(project="", tenant_id=auth.tenant_id, limit=limit)
-
-    return [
-        FactResponse(
-            id=f["id"],
-            project=f["project"],
-            content=f["content"],
-            fact_type=f["fact_type"],
-            tags=f["tags"],
-            confidence=f.get("confidence") or "C3",
-            valid_from=f.get("valid_from"),
-            valid_until=f.get("valid_until"),
-            source=f.get("source"),
-            meta=f.get("meta"),
-            created_at=str(f.get("created_at", "")),
-            updated_at=str(f.get("updated_at", "")) or str(f.get("created_at", "")),
-            tx_id=f.get("tx_id"),
-            hash=f.get("hash"),
-            consensus_score=float(f.get("consensus_score", 1.0)),
-        )
-        for f in facts
-    ]
+    return await service.list_active_facts(
+        tenant_id=auth.tenant_id,
+        limit=limit,
+        offset=offset,
+    )
 
 
-@router.post("/v1/facts/search", response_model=list[FactResponse])
+@router.post("/v1/facts/search", response_model=list[SearchResult], include_in_schema=False)
 async def search_facts(
-    req: SearchMemoryRequest,
+    req: SearchRequest,
     auth: AuthResult = Depends(require_permission("read")),
-    engine: AsyncCortexEngine = Depends(get_async_engine),
-) -> list[FactResponse]:
+    service: PublicMemoryService = Depends(get_public_memory_service),
+) -> list[SearchResult]:
     """Semantic search across all facts (scoped to tenant)."""
-    results = await engine.search(
+    return await service.search(
         query=req.query,
         top_k=req.k,
         project=req.project,
         tenant_id=auth.tenant_id,
         as_of=req.as_of,
+        fact_type=req.fact_type,
+        tags=req.tags,
+        graph_depth=req.graph_depth,
+        include_graph=req.include_graph,
+        preserve_null_filters=True,
     )
-    return [
-        FactResponse(
-            id=r.fact_id,
-            project=r.project,
-            content=r.content,
-            fact_type=r.fact_type,
-            tags=r.tags,
-            confidence=r.confidence,
-            created_at=r.created_at,
-            updated_at=r.updated_at,
-            hash=r.hash,
-            consensus_score=r.score,
-            tx_id=r.tx_id,
-        )
-        for r in results
-    ]
 
 
 @router.get("/v1/facts/{fact_id}/history", response_model=list[FactResponse])
 async def get_fact_history(
     fact_id: int,
     auth: AuthResult = Depends(require_permission("read")),
-    engine: AsyncCortexEngine = Depends(get_async_engine),
+    service: PublicMemoryService = Depends(get_public_memory_service),
 ) -> list[FactResponse]:
     """Retrieve version history for a specific fact."""
-    # Note: engine.history(project) returns audit trail for a PROJECT.
-    # We need a per-FACT history. Since CORTEX versions via new facts linked to parents,
-    # this is essentially a causal 'up' trace for that specific fact + any updates.
-    # If using the 'updated_from' edge type.
     try:
-        chain = await engine.get_causal_chain(
-            fact_id=fact_id, direction="up", max_depth=50, tenant_id=auth.tenant_id
+        return await service.fact_history(
+            fact_id,
+            tenant_id=auth.tenant_id,
         )
-        return [
-            FactResponse(
-                id=f["id"],
-                project=f["project"],
-                content=f["content"],
-                fact_type=f["fact_type"],
-                tags=f.get("tags", []),
-                confidence=f.get("confidence", "C3"),
-                created_at=f["created_at"],
-                updated_at=f.get("updated_at") or f["created_at"],
-                hash=f.get("hash"),
-                tx_id=f.get("tx_id"),
-            )
-            for f in chain
-        ]
-    except Exception as e:
+    except (sqlite3.Error, OSError, RuntimeError) as e:
         logger.error("Failed to fetch fact history: %s", e)
         raise HTTPException(status_code=500, detail="Failed to fetch history") from e
 
@@ -261,7 +239,7 @@ async def propagate_taint(
             "affected_count": report.affected_count,
             "changes": report.confidence_changes,
         }
-    except Exception as e:
+    except (sqlite3.Error, OSError, RuntimeError) as e:
         logger.error("Taint propagation failed: %s", e)
         raise HTTPException(status_code=500, detail="Taint propagation failed") from None
 
@@ -269,16 +247,12 @@ async def propagate_taint(
 @router.get("/v1/facts/verify", response_model=dict)
 async def verify_ledger(
     auth: AuthResult = Depends(require_permission("read")),
-    engine: AsyncCortexEngine = Depends(get_async_engine),
+    service: PublicMemoryService = Depends(get_public_memory_service),
 ) -> dict:
     """Verify cryptographic integrity of the memory ledger."""
     try:
-        report = await engine.verify_ledger()
-        return {
-            "valid": report["valid"],
-            "violations": len(report.get("violations", [])),
-            "transactions_checked": report.get("tx_checked", 0),
-        }
+        report = await service.verify_ledger()
+        return report
     except (sqlite3.Error, OSError, RuntimeError):
         logger.exception("Ledger verification failed")
         raise HTTPException(status_code=500, detail="Integrity verification failed") from None
@@ -295,8 +269,8 @@ async def cast_vote(
     """Cast a consensus vote (verify/dispute) on a fact."""
     lang = request.headers.get("Accept-Language", "en")
     try:
-        fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
-        if not fact:
+        fact_raw = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
+        if not fact_raw:
             raise HTTPException(
                 status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
             )
@@ -305,14 +279,15 @@ async def cast_vote(
         score = await engine.vote_v2(fact_id, agent_id, req.value)
 
         # Confidence is updated automatically by manager
-        updated_fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
+        updated_fact_raw = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
+        updated_fact = fact_like_to_dict(updated_fact_raw) if updated_fact_raw else None
 
         return VoteResponse(
             fact_id=fact_id,
             agent=agent_id,
             vote=req.value,
             new_consensus_score=score,
-            confidence=updated_fact["confidence"] if updated_fact else "unknown",
+            confidence=updated_fact.get("confidence") if updated_fact else "unknown",
         )
     except HTTPException:
         raise
@@ -336,27 +311,28 @@ async def cast_vote_v2(
     """Cast a reputation-weighted consensus vote (RWC)."""
     lang = request.headers.get("Accept-Language", "en")
     try:
-        fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
-        if not fact:
+        fact_raw = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
+        if not fact_raw:
             raise HTTPException(
                 status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
             )
 
         score = await engine.vote_v2(
             fact_id=fact_id,
-            agent=req.agent_id,
+            agent_id=req.agent_id,
             value=req.vote,
         )
 
         # Re-fetch for updated confidence
-        updated_fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
+        updated_fact_raw = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
+        updated_fact = fact_like_to_dict(updated_fact_raw) if updated_fact_raw else None
 
         return VoteResponse(
             fact_id=fact_id,
             agent=req.agent_id,
             vote=req.vote,
             new_consensus_score=score,
-            confidence=updated_fact["confidence"] if updated_fact else "unknown",
+            confidence=updated_fact.get("confidence") if updated_fact else "unknown",
         )
     except HTTPException:
         raise
@@ -384,7 +360,7 @@ async def list_votes(
             status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
         )
 
-    votes = await engine.get_votes(fact_id)
+    votes = await engine.get_votes(fact_id, tenant_id=auth.tenant_id)
 
     return [
         {"agent": v["agent"], "vote": v["vote"], "timestamp": v.get("created_at")} for v in votes
@@ -400,11 +376,12 @@ async def deprecate_fact(
 ) -> dict:
     """Soft-deprecate a fact (mark as invalid)."""
     lang = request.headers.get("Accept-Language", "en")
-    fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
-    if not fact:
+    fact_raw = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
+    if not fact_raw:
         raise HTTPException(
             status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
         )
+    fact = fact_like_to_dict(fact_raw)
 
     if fact.get("tenant_id", fact.get("project")) != auth.tenant_id and "tenant_id" in fact:
         raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
@@ -420,30 +397,13 @@ async def deprecate_fact(
 async def get_fact_by_id(
     fact_id: int,
     auth: AuthResult = Depends(require_permission("read")),
-    engine: AsyncCortexEngine = Depends(get_async_engine),
+    service: PublicMemoryService = Depends(get_public_memory_service),
 ) -> FactResponse:
     """Get a single fact by ID."""
-    fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
+    fact = await service.get_fact(fact_id, tenant_id=auth.tenant_id)
     if not fact:
         raise HTTPException(status_code=404, detail=f"Fact #{fact_id} not found")
-
-    return FactResponse(
-        id=fact["id"],
-        project=fact["project"],
-        content=fact["content"],
-        fact_type=fact["fact_type"],
-        tags=fact["tags"],
-        confidence=fact.get("confidence", "C3"),
-        valid_from=fact.get("valid_from"),
-        valid_until=fact.get("valid_until"),
-        source=fact.get("source"),
-        meta=fact.get("meta"),
-        created_at=str(fact.get("created_at", "")),
-        updated_at=str(fact.get("updated_at", "")),
-        tx_id=fact.get("tx_id"),
-        hash=fact.get("hash"),
-        consensus_score=float(fact.get("consensus_score", 1.0)),
-    )
+    return fact
 
 
 @router.get("/v1/facts/{fact_id}/chain", response_model=list[dict])
@@ -452,16 +412,16 @@ async def get_causal_chain(
     direction: str = Query("down", description="'up' or 'down'"),
     max_depth: int = Query(10, ge=1, le=100),
     auth: AuthResult = Depends(require_permission("read")),
-    engine: AsyncCortexEngine = Depends(get_async_engine),
+    service: PublicMemoryService = Depends(get_public_memory_service),
 ) -> list[dict]:
     """Get the causal chain for a fact (up=ancestors, down=descendants)."""
     try:
-        chain = await engine.get_causal_chain(
+        return await service.causal_chain(
             fact_id=fact_id,
             direction=direction,
             max_depth=max_depth,
+            tenant_id=auth.tenant_id,
         )
-        return chain
     except (sqlite3.Error, OSError, RuntimeError):
         logger.exception("Causal chain query failed for #%d", fact_id)
         raise HTTPException(

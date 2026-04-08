@@ -50,6 +50,7 @@ def test_merkle_checkpoint_creation(test_db):
             "SELECT * FROM ledger_checkpoints WHERE checkpoint_id = ?", (root_id_1,)
         )
         row = cursor.fetchone()
+        assert isinstance(row["root_hash"], str)
         assert row["event_count"] == 10
         assert row["start_event_id"] is not None
         assert row["end_event_id"] is not None
@@ -68,3 +69,34 @@ def test_merkle_checkpoint_creation(test_db):
     # 5. Checkpoint again (no more)
     root_id_3 = verifier.create_checkpoint(batch_size=5)
     assert root_id_3 is None
+
+
+def test_verify_chain_reports_malformed_payload(test_db):
+    store = LedgerStore(test_db)
+    queue = EnrichmentQueue(store)
+    writer = LedgerWriter(store, queue)
+    verifier = LedgerVerifier(store)
+
+    t = ActionTarget(app="Test")
+    r = ActionResult(ok=True, latency_ms=10)
+
+    ev = LedgerEvent.new(
+        tool="cli",
+        actor="test-actor",
+        action="action-1",
+        target=t,
+        result=r,
+        metadata={"project": "test-proj"},
+    )
+    writer.append(ev)
+
+    with store.tx() as conn:
+        conn.execute(
+            "UPDATE ledger_events SET payload_json = ? WHERE event_id = ?",
+            ("{not-json", ev.event_id),
+        )
+
+    report = verifier.verify_chain()
+    assert report["valid"] is False
+    assert report["checked_events"] == 1
+    assert any("Error parsing event" in v for v in report["violations"])

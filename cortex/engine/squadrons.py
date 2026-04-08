@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from cortex.engine.legion import AsyncSignalBus, Squadron, SwarmAgent, SwarmSignal
+from cortex.engine.legion import InMemorySwarmSignalBus, Squadron, SwarmAgent, SwarmSignal
 from cortex.engine.legion_vectors import RED_TEAM_SWARM
 from cortex.engine.nemesis_agent import NemesisAgentAdapter
 
@@ -22,7 +22,7 @@ class MultiSpecialistAgent(SwarmAgent):
     def __init__(
         self,
         agent_id: str,
-        bus: AsyncSignalBus,
+        bus: InMemorySwarmSignalBus,
         specialists: list[str],
         engine: Any = None,
     ):

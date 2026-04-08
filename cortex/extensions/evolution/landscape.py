@@ -19,6 +19,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
+from cortex.core.paths import SKILLS_DIR
+
 if TYPE_CHECKING:
     from cortex.extensions.evolution.agents import SovereignAgent
 
@@ -32,7 +34,7 @@ _PROJECT_ROOTS = [
     Path("~/mixcraft").expanduser(),
 ]
 
-_SKILLS_DIR = Path("~/.gemini/antigravity/skills").expanduser()
+_SKILLS_DIR = SKILLS_DIR
 
 # Weights
 _BASE_CEILING = 100.0

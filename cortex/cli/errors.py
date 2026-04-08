@@ -276,7 +276,7 @@ def _classify_sqlite_error(
             code=ErrorCode.UNEXPECTED,
             message=f"Error de base de datos{ctx_prefix}",
             detail=error_str,
-            hint="Prueba con `cortex init` o revisa la integridad con `cortex verify 1`.",
+            hint="Prueba con `cortex init` o revisa la integridad con `cortex verify <FACT_ID>`.",
             http_status=500,
         )
 

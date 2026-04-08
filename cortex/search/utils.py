@@ -64,7 +64,11 @@ def _sanitize_fts_query(query: str) -> str:
     return " ".join(safe_tokens) if safe_tokens else '""'
 
 
-def _row_to_result(row: Any, is_fts: bool = False) -> SearchResult:
+def _row_to_result(
+    row: Any,
+    is_fts: bool = False,
+    tenant_id: str = "default",
+) -> SearchResult:
     """Parse a database row into a SearchResult object with decryption logic.
 
     # Column order from _fts5_search / _like_search:
@@ -79,8 +83,6 @@ def _row_to_result(row: Any, is_fts: bool = False) -> SearchResult:
     enc = get_default_encrypter()
 
     fact_id = row[0]
-    tenant_id = "default"
-
     # Decrypt Content
     content = _decrypt_row_content(row[1], tenant_id, enc)
 
@@ -161,12 +163,20 @@ def _parse_row_meta(meta_raw: Any, tenant_id: str, enc: Any) -> dict[str, Any]:
         return {}
 
 
-def _rows_to_results(rows: list, is_fts: bool = False) -> list[SearchResult]:
+def _rows_to_results(
+    rows: list,
+    is_fts: bool = False,
+    tenant_id: str = "default",
+) -> list[SearchResult]:
     """Convert raw DB rows to SearchResult objects."""
-    return [_row_to_result(row, is_fts) for row in rows]
+    return [_row_to_result(row, is_fts, tenant_id=tenant_id) for row in rows]
 
 
-def _parse_row_sync(row: Any, has_rank: bool) -> SearchResult:
+def _parse_row_sync(
+    row: Any,
+    has_rank: bool,
+    tenant_id: str = "default",
+) -> SearchResult:
     """Parse a database row into a SearchResult (sync).
 
     Sync Column order (minimal):
@@ -189,7 +199,7 @@ def _parse_row_sync(row: Any, has_rank: bool) -> SearchResult:
     from cortex.crypto import get_default_encrypter
 
     enc = get_default_encrypter()
-    content = _decrypt_row_content(row[1], "default", enc)  # type: ignore[reportGeneralTypeIssues]
+    content = _decrypt_row_content(row[1], tenant_id, enc)  # type: ignore[reportGeneralTypeIssues]
 
     return SearchResult(
         fact_id=row[0],  # type: ignore[reportGeneralTypeIssues]

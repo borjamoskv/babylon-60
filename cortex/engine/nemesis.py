@@ -11,10 +11,10 @@ from cortex.database.core import connect as db_connect
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
 
 try:
-    from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
+    from cortex.extensions.signals.bus import AsyncDurableSignalBus, DurableSignalBus
 except ImportError:
-    AsyncSignalBus = None  # type: ignore[assignment]
-    SignalBus = None  # type: ignore[assignment]
+    AsyncDurableSignalBus = None  # type: ignore[assignment]
+    DurableSignalBus = None  # type: ignore[assignment]
 
 logger = logging.getLogger("cortex.nemesis")
 
@@ -114,8 +114,8 @@ class NemesisProtocol:
                     reason=f"Nemesis Antibody ({count}x): {reason}",
                 )
 
-                if conn and AsyncSignalBus is not None:
-                    bus = AsyncSignalBus(conn)
+                if conn and AsyncDurableSignalBus is not None:
+                    bus = AsyncDurableSignalBus(conn)
                     await bus.emit(
                         "nemesis:rejection",
                         payload={"reason": reason, "vector": pattern, "count": count},
@@ -146,7 +146,7 @@ class NemesisProtocol:
                 )
 
                 # Ω₅: Emit signal if db_path is available
-                if db_path and SignalBus is not None:
+                if db_path and DurableSignalBus is not None:
                     cls._emit_rejection_signal(db_path, pattern, reason, count)
 
                 if count > 5:
@@ -161,7 +161,7 @@ class NemesisProtocol:
         """Emits a signal to the CORTEX bus about the rejection."""
         try:
             with db_connect(db_path) as conn:
-                bus = SignalBus(conn)  # pyright: ignore
+                bus = DurableSignalBus(conn)  # pyright: ignore
                 bus.emit(
                     "nemesis:rejection",
                     payload={"reason": reason, "vector": pattern, "count": count},
@@ -188,10 +188,10 @@ class NemesisProtocol:
         ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.6, reason="Immuno-assimilation")
         ENDOCRINE.pulse(HormoneType.NEURAL_GROWTH, 0.2, reason="Structural Adaptation")
 
-        if db_path and SignalBus is not None:
+        if db_path and DurableSignalBus is not None:
             try:
                 with db_connect(db_path) as conn:
-                    bus = SignalBus(conn)
+                    bus = DurableSignalBus(conn)
                     bus.emit(
                         "nemesis:assimilation",
                         payload={"vector": vector, "reason": reason},

@@ -16,7 +16,7 @@ Coverage:
 
 from __future__ import annotations
 
-import time
+import asyncio
 from datetime import datetime
 from typing import Any
 from unittest.mock import AsyncMock
@@ -274,7 +274,7 @@ class TestAccumulator:
         )
         await engine.evaluate(_fake_signal())
         await engine.evaluate(_fake_signal())
-        time.sleep(0.15)
+        await asyncio.sleep(0.15)
         results = await engine.evaluate(_fake_signal())
         # Only 1 in window, threshold=3 not met
         assert not any(r.fired for r in results)
@@ -309,7 +309,7 @@ class TestCooldown:
             )
         )
         await engine.evaluate(_fake_signal())
-        time.sleep(0.15)
+        await asyncio.sleep(0.15)
         results = await engine.evaluate(_fake_signal())
         assert any(r.fired for r in results)
 
@@ -381,6 +381,27 @@ class TestActionDispatch:
         await engine.evaluate(_fake_signal())
         handler.store_fact.assert_called_once()
 
+    async def test_failed_dispatch_does_not_mark_trigger_as_fired(self) -> None:
+        handler = TriggerActionHandler()
+        handler.emit_signal = AsyncMock(side_effect=RuntimeError("down"))
+        engine = TriggerEngine(handler=handler)
+        engine.register(
+            _make_condition(
+                actions=[
+                    TriggerAction(
+                        action_type=ActionType.EMIT_SIGNAL,
+                        config={"event_type": "test:output"},
+                    )
+                ],
+            )
+        )
+
+        results = await engine.evaluate(_fake_signal())
+
+        assert len(results) == 1
+        assert results[0].fired is False
+        assert results[0].actions_dispatched == 0
+
 
 # ---------------------------------------------------------------------------
 # Registry integration
@@ -395,7 +416,7 @@ class TestRegistry:
 
         engine = TriggerEngine()
         register_defaults(engine)
-        assert len(engine._triggers) == 8
+        assert len(engine._triggers) == 12
 
     def test_default_ids_are_unique(self) -> None:
         from cortex.extensions.signals.trigger_registry import (
@@ -406,6 +427,19 @@ class TestRegistry:
         register_defaults(engine)
         ids = list(engine._triggers.keys())
         assert len(ids) == len(set(ids))
+
+    def test_register_defaults_includes_mac_maestro_triggers(self) -> None:
+        from cortex.extensions.signals.trigger_registry import (
+            register_defaults,
+        )
+
+        engine = TriggerEngine()
+        register_defaults(engine)
+
+        assert "mac_maestro_safety_gate_blocked" in engine._triggers
+        assert "mac_maestro_verification_failed" in engine._triggers
+        assert "mac_maestro_failure_accumulation" in engine._triggers
+        assert "mac_maestro_slow_action_accumulation" in engine._triggers
 
 
 # ---------------------------------------------------------------------------
