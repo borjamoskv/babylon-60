@@ -138,11 +138,7 @@ def probe_accessibility_access(prompt: bool = False) -> MacCapabilityStatus:
         )
 
     try:
-        from ApplicationServices import (
-            AXIsProcessTrusted,
-            AXIsProcessTrustedWithOptions,
-            kAXTrustedCheckOptionPrompt,
-        )
+        import ApplicationServices as app_services  # type: ignore[import-not-found, reportMissingImports]
     except ImportError:
         return _unavailable_status(
             "accessibility",
@@ -151,12 +147,25 @@ def probe_accessibility_access(prompt: bool = False) -> MacCapabilityStatus:
             detail="ApplicationServices accessibility bindings are unavailable.",
         )
 
-    if prompt:
-        granted = bool(
-            AXIsProcessTrustedWithOptions({kAXTrustedCheckOptionPrompt: True})
+    ax_is_process_trusted = getattr(app_services, "AXIsProcessTrusted", None)
+    ax_is_process_trusted_with_options = getattr(
+        app_services,
+        "AXIsProcessTrustedWithOptions",
+        None,
+    )
+    ax_prompt_key = getattr(app_services, "kAXTrustedCheckOptionPrompt", None)
+    if ax_is_process_trusted is None or ax_is_process_trusted_with_options is None:
+        return _unavailable_status(
+            "accessibility",
+            settings_path=ACCESSIBILITY_SETTINGS,
+            api="AXIsProcessTrusted",
+            detail="ApplicationServices accessibility symbols are unavailable.",
         )
+
+    if prompt:
+        granted = bool(ax_is_process_trusted_with_options({ax_prompt_key: True}))
     else:
-        granted = bool(AXIsProcessTrusted())
+        granted = bool(ax_is_process_trusted())
 
     return _state_status(
         "accessibility",
@@ -181,11 +190,7 @@ def probe_axui_element_access() -> MacCapabilityStatus:
         )
 
     try:
-        from ApplicationServices import (
-            AXUIElementCopyAttributeValue,
-            AXUIElementCreateApplication,
-            AXUIElementPerformAction,
-        )
+        import ApplicationServices as app_services  # type: ignore[import-not-found, reportMissingImports]
     except ImportError:
         return _unavailable_status(
             "axui_element",
@@ -193,6 +198,10 @@ def probe_axui_element_access() -> MacCapabilityStatus:
             api="AXUIElement",
             detail="ApplicationServices AXUIElement bindings are unavailable.",
         )
+
+    ax_copy_attribute_value = getattr(app_services, "AXUIElementCopyAttributeValue", None)
+    ax_create_application = getattr(app_services, "AXUIElementCreateApplication", None)
+    ax_perform_action = getattr(app_services, "AXUIElementPerformAction", None)
 
     accessibility = probe_accessibility_access(prompt=False)
     granted = accessibility.granted if accessibility.available else None
@@ -204,7 +213,7 @@ def probe_axui_element_access() -> MacCapabilityStatus:
         api="AXUIElement",
         detail=(
             "AXUIElement can inspect and act on other apps' accessibility trees."
-            f" Symbols present: {all([AXUIElementCreateApplication, AXUIElementCopyAttributeValue, AXUIElementPerformAction])}."
+            f" Symbols present: {all([ax_create_application, ax_copy_attribute_value, ax_perform_action])}."
         ),
     )
 
@@ -297,10 +306,7 @@ def probe_screen_recording_access(prompt: bool = False) -> MacCapabilityStatus:
         )
 
     try:
-        from Quartz import (
-            CGPreflightScreenCaptureAccess,
-            CGRequestScreenCaptureAccess,
-        )
+        import Quartz as quartz  # type: ignore[import-not-found, reportMissingImports]
     except ImportError:
         return _unavailable_status(
             "screen_recording",
@@ -309,10 +315,20 @@ def probe_screen_recording_access(prompt: bool = False) -> MacCapabilityStatus:
             detail="Quartz screen capture bindings are unavailable.",
         )
 
-    granted = bool(CGPreflightScreenCaptureAccess())
+    preflight_screen_capture = getattr(quartz, "CGPreflightScreenCaptureAccess", None)
+    request_screen_capture = getattr(quartz, "CGRequestScreenCaptureAccess", None)
+    if preflight_screen_capture is None or request_screen_capture is None:
+        return _unavailable_status(
+            "screen_recording",
+            settings_path=SCREEN_RECORDING_SETTINGS,
+            api="CGPreflightScreenCaptureAccess",
+            detail="Quartz screen capture symbols are unavailable.",
+        )
+
+    granted = bool(preflight_screen_capture())
     prompted = False
     if prompt and not granted:
-        granted = bool(CGRequestScreenCaptureAccess())
+        granted = bool(request_screen_capture())
         prompted = True
 
     return _state_status(
@@ -339,10 +355,7 @@ def probe_input_monitoring_access(prompt: bool = False) -> MacCapabilityStatus:
         )
 
     try:
-        from Quartz import (
-            CGPreflightListenEventAccess,
-            CGRequestListenEventAccess,
-        )
+        import Quartz as quartz  # type: ignore[import-not-found, reportMissingImports]
     except ImportError:
         return _unavailable_status(
             "input_monitoring",
@@ -351,10 +364,20 @@ def probe_input_monitoring_access(prompt: bool = False) -> MacCapabilityStatus:
             detail="Quartz event-listening bindings are unavailable.",
         )
 
-    granted = bool(CGPreflightListenEventAccess())
+    preflight_listen_access = getattr(quartz, "CGPreflightListenEventAccess", None)
+    request_listen_access = getattr(quartz, "CGRequestListenEventAccess", None)
+    if preflight_listen_access is None or request_listen_access is None:
+        return _unavailable_status(
+            "input_monitoring",
+            settings_path=INPUT_MONITORING_SETTINGS,
+            api="CGPreflightListenEventAccess",
+            detail="Quartz event-listening symbols are unavailable.",
+        )
+
+    granted = bool(preflight_listen_access())
     prompted = False
     if prompt and not granted:
-        granted = bool(CGRequestListenEventAccess())
+        granted = bool(request_listen_access())
         prompted = True
 
     return _state_status(

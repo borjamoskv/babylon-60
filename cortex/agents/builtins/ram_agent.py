@@ -16,7 +16,6 @@ from __future__ import annotations
 import gc
 import logging
 import os
-import sys
 import time
 import tracemalloc
 from dataclasses import dataclass, field
@@ -123,7 +122,7 @@ def _read_ram_snapshot() -> RamSnapshot:
         # Fallback: read /proc/meminfo on Linux
         try:
             lines = open("/proc/meminfo").readlines()
-            info = {l.split(":")[0]: int(l.split()[1]) for l in lines if ":" in l}
+            info = {line.split(":")[0]: int(line.split()[1]) for line in lines if ":" in line}
             total_kb = info.get("MemTotal", 0)
             avail_kb = info.get("MemAvailable", 0)
             snap.sys_total_mb = total_kb / 1024

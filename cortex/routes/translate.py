@@ -41,7 +41,10 @@ def _get_genai_client() -> Any:
     try:
         from google import genai  # type: ignore[attr-defined]
     except ImportError:
-        raise HTTPException(status_code=500, detail="google-genai package is not installed.")
+        raise HTTPException(
+            status_code=500,
+            detail="google-genai package is not installed.",
+        ) from None
 
     try:
         return genai.Client()

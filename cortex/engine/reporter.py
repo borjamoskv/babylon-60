@@ -18,8 +18,8 @@ from typing import Any
 
 import aiosqlite
 
-from cortex.crypto import load_json_dict
 from cortex.core.paths import CORTEX_DB
+from cortex.crypto import load_json_dict
 from cortex.database.core import connect_async_ctx
 
 logger = logging.getLogger("cortex.reporter")

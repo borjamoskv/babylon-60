@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from cortex.core.paths import CORTEX_DB
+
 # CORTEX L2 Membrane
 from cortex.engine import CortexEngine
 from cortex.extensions.immune.membrane import ImmuneMembrane, Verdict

@@ -9,7 +9,6 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from cortex.agents.builtins._explicit_ops import ExplicitOpsHandler
 
-
 _URL_OPS: frozenset[str] = frozenset(
     {"dev", "permalink", "search", "diff_url", "review", "blame", "history", "status"}
 )
@@ -208,6 +207,7 @@ def _extract_remote(payload: dict[str, Any]) -> str:
     return _required_text(str(payload.get("remote", "origin")), "remote")
 
 from cortex.services.github_shortcuts import parse_line_spec
+
 
 class GitHubOps(ExplicitOpsHandler):
     supported_ops: frozenset[str] = _SUPPORTED_OPS

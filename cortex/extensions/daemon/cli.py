@@ -26,7 +26,6 @@ from rich.panel import Panel
 from rich.table import Table
 
 from cortex import __version__
-from cortex.extensions.daemon.models import CONFIG_FILE
 from cortex.extensions.daemon import (
     BUNDLE_ID,
     DEFAULT_COOLDOWN,
@@ -35,6 +34,7 @@ from cortex.extensions.daemon import (
     DEFAULT_STALE_HOURS,
     MoskvDaemon,
 )
+from cortex.extensions.daemon.models import CONFIG_FILE
 from cortex.extensions.platform.sys import get_service_dir, is_linux, is_macos, is_windows
 
 __all__ = [

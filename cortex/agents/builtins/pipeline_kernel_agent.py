@@ -23,9 +23,10 @@ import logging
 import shlex
 import subprocess
 import time
+from collections.abc import AsyncGenerator
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, AsyncGenerator
+from typing import Any
 
 from cortex.agents.base import BaseAgent
 from cortex.agents.bus import MessageBus
@@ -124,10 +125,10 @@ async def _run_unix_pipe(
         stdout, stderr = await asyncio.wait_for(
             proc.communicate(), timeout=spec.timeout_s
         )
-    except asyncio.TimeoutError:
+    except asyncio.TimeoutError as exc:
         proc.kill()
         telemetry.finalize(exit_code=-1, error=f"Timeout after {spec.timeout_s}s")
-        raise RuntimeError(f"Pipeline {spec.pipeline_id} timed out")
+        raise RuntimeError(f"Pipeline {spec.pipeline_id} timed out") from exc
 
     if stderr:
         logger.warning("pipe stderr [%s]: %s", spec.pipeline_id, stderr.decode(errors="replace"))
@@ -212,7 +213,7 @@ async def audit_pipeline(pipeline_id: str) -> dict[str, Any]:
         stderr=asyncio.subprocess.PIPE,
     )
     stdout, _ = await proc.communicate()
-    procs = [l for l in stdout.decode().splitlines() if "no match" not in l]
+    procs = [line for line in stdout.decode().splitlines() if "no match" not in line]
 
     # Check open FDs (macOS / linux neutral)
     fd_proc = await asyncio.create_subprocess_shell(

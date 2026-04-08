@@ -5,8 +5,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
-from cortex.engine import CortexEngine as AsyncCortexEngine
 from cortex.core.paths import find_skill_path, resolve_skill_script
+from cortex.engine import CortexEngine as AsyncCortexEngine
 from cortex.extensions.cuatrida.models import CuatridaMetrics, DecisionNode, Dimension
 from cortex.extensions.mejoralo.engine import MejoraloEngine
 

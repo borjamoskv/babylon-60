@@ -13,14 +13,15 @@ import asyncio
 import inspect
 import logging
 import time
+from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
-    from cortex.extensions.sovereign.autopoiesis import Autopoiesis
     from cortex.extensions.mejoralo.engine import MejoraloEngine
+    from cortex.extensions.sovereign.autopoiesis import Autopoiesis
 
 logger = logging.getLogger("cortex.extensions.daemon.autopoiesis")
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Sovereign Telemetry Routes (AST Oracle WebSocket API)
 Exposes realtime stream of code mutations detected by AST Oracle.
@@ -5,7 +7,7 @@ Exposes realtime stream of code mutations detected by AST Oracle.
 
 import asyncio
 import logging
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 

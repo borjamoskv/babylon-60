@@ -17,8 +17,8 @@ from cortex.extensions.sync.common import (
     db_content_hash,
     is_relation_bridge_kind,
     load_sync_state,
-    runtime_memory_dir,
     normalize_bridge_kind,
+    runtime_memory_dir,
     save_sync_state,
 )
 from cortex.memory.temporal import now_iso

@@ -6,10 +6,14 @@ Thin CLI wrapper; all logic lives in cortex.extensions.health.
 
 from __future__ import annotations
 
+from threading import Event
+
 import click
 
 from cortex.cli.common import DEFAULT_DB, cli, console  # type: ignore[reportAttributeAccessIssue]
 from cortex.cli.health_dashboard import dashboard
+
+_HEALTH_PAUSE = Event()
 
 
 def _resolve_db(db_path: str | None) -> str:
@@ -145,8 +149,6 @@ def trend(db_path: str | None, live: bool, samples: int, interval: float) -> Non
 
     if live:
         # Live sampling mode
-        import time
-
         from rich.progress import track
 
         from cortex.extensions.health import HealthCollector, HealthScorer
@@ -162,7 +164,7 @@ def trend(db_path: str | None, live: bool, samples: int, interval: float) -> Non
             scores.append(hs.score)
             detector.push(hs.score)
             if i < samples - 1:
-                time.sleep(interval)
+                _HEALTH_PAUSE.wait(interval)
     else:
         # DB history mode (instant)
         detector = TrendDetector(window_size=20)

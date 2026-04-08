@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import random
 import time
+from threading import Event
 
 from rich.console import Console
 from rich.layout import Layout
@@ -17,6 +18,7 @@ from rich.table import Table
 from rich.text import Text
 
 console = Console()
+_REACTOR_PAUSE = Event()
 
 # Industrial Noir Palette
 CYBER_LIME = "#CCFF00"
@@ -118,7 +120,7 @@ def run_reactor():
             state.update()
             layout["reactor"].update(generate_reactor_view(state))
             layout["entropy_feed"].update(generate_feed_view(state))
-            time.sleep(0.2)
+            _REACTOR_PAUSE.wait(0.2)
 
 
 if __name__ == "__main__":

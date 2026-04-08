@@ -19,7 +19,8 @@ from typing import Any
 import yaml
 
 # ─── Constantes ──────────────────────────────────────────────────────────────
-from cortex.core.paths import SKILLS_DIR as SKILLS_BASE_DIR, iter_skill_name_candidates
+from cortex.core.paths import SKILLS_DIR as SKILLS_BASE_DIR
+from cortex.core.paths import iter_skill_name_candidates
 
 SKILL_FILENAME = "SKILL.md"
 FRONTMATTER_PATTERN = re.compile(r"^---\s*\n(.*?)\n---", re.DOTALL)

@@ -240,8 +240,8 @@ class ToolboxWatchdog:
         self._snapshot_path.parent.mkdir(parents=True, exist_ok=True)
 
         source_uri = f"file:{self._db_path.as_posix()}?mode=ro"
-        source = sqlite3.connect(source_uri, uri=True, timeout=5.0)
-        target = sqlite3.connect(str(self._snapshot_path), timeout=5.0)
+        source = connect(source_uri, uri=True, timeout=5, read_only=True)
+        target = connect(str(self._snapshot_path), timeout=5)
 
         try:
             source.backup(target)
@@ -320,3 +320,4 @@ class ToolboxWatchdog:
             except OSError:
                 pass
             self._log_fd = None
+from cortex.database.core import connect

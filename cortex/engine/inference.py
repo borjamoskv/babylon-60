@@ -12,9 +12,9 @@ from __future__ import annotations
 import logging
 import sqlite3
 from typing import Any
-from pydantic import BaseModel, Field, ConfigDict
 
 import aiosqlite
+from pydantic import BaseModel, ConfigDict, Field
 
 from cortex.engine.causality import (
     EDGE_DERIVED_FROM,

@@ -13,8 +13,9 @@ Commands:
 
 from __future__ import annotations
 
-import asyncio
 import time
+from threading import Event
+from typing import Any
 
 import click
 from rich.console import Console
@@ -25,6 +26,7 @@ from rich.table import Table
 from cortex.cli.common import cli
 
 console = Console()
+_WATCH_PAUSE = Event()
 
 
 @click.group("ram")
@@ -57,9 +59,7 @@ def snapshot(as_json: bool) -> None:
 @ram_cmds.command("gc")
 def force_gc() -> None:
     """Force full garbage collection cycle."""
-    from cortex.agents.builtins.ram_agent import (
-        _read_ram_snapshot, _force_gc
-    )
+    from cortex.agents.builtins.ram_agent import _force_gc, _read_ram_snapshot
     before = _read_ram_snapshot()
     t0 = time.monotonic()
     collected = _force_gc()
@@ -88,6 +88,7 @@ def force_gc() -> None:
 def leaks(top: int, enable_trace: bool) -> None:
     """Show top memory allocators via tracemalloc."""
     import tracemalloc
+
     from cortex.agents.builtins.ram_agent import _top_allocators
 
     if enable_trace and not tracemalloc.is_tracing():
@@ -140,7 +141,7 @@ def watch(interval: float, cycles: int) -> None:
     with Live(_render(snap), refresh_per_second=4, console=console) as live:
         try:
             while True:
-                time.sleep(interval)
+                _WATCH_PAUSE.wait(interval)
                 snap = _read_ram_snapshot()
                 live.update(_render(snap))
                 cycle += 1
@@ -158,7 +159,7 @@ def _status_color(status: str) -> str:
     return {"OK": "green", "WARN": "yellow", "CRITICAL": "red"}.get(status, "white")
 
 
-def _show_snapshot(snap: object) -> None:
+def _show_snapshot(snap: Any) -> None:
     d = snap.as_dict()
     color = _status_color(d["status"])
     content = (
@@ -180,7 +181,7 @@ def _show_snapshot(snap: object) -> None:
     console.print(Panel(content, title="RAM Snapshot", border_style=color, expand=False))
 
 
-def _build_live_panel(snap: object) -> Panel:
+def _build_live_panel(snap: Any) -> Panel:
     d = snap.as_dict()
     color = _status_color(d["status"])
     bar_used = int(d["sys_pct"] / 5)

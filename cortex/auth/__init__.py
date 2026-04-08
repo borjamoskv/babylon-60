@@ -24,15 +24,15 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
-    from cortex.auth.manager import AuthManager, get_auth_manager, reset_auth_manager
-    from cortex.auth.models import APIKey, AuthResult
-    from cortex.auth.schema import AUTH_SCHEMA, SQL_INSERT_KEY
     from cortex.auth.deps import (
         require_auth,
         require_consensus,
         require_permission,
         require_verified_permission,
     )
+    from cortex.auth.manager import AuthManager, get_auth_manager, reset_auth_manager
+    from cortex.auth.models import APIKey, AuthResult
+    from cortex.auth.schema import AUTH_SCHEMA, SQL_INSERT_KEY
 
 
 _LAZY_ATTRS: dict[str, tuple[str, str]] = {

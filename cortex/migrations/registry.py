@@ -21,9 +21,9 @@ from cortex.migrations.mig_ledger import (
     _migration_012_ghosts_table,
     _migration_014_vote_ledger_refinement,
 )
+from cortex.migrations.mig_scaling_indexes import _migration_024_scaling_indexes
 from cortex.migrations.mig_security_hardening import _migration_018_security_hardening
 from cortex.migrations.mig_signals import _migration_019_signal_bus
-from cortex.migrations.mig_scaling_indexes import _migration_024_scaling_indexes
 
 # migration 23 (mig_simplify_facts) removed — incompatible with live schema (Ω₃)
 from cortex.migrations.mig_solid_state import _migration_021_solid_state

@@ -62,11 +62,11 @@ def _ensure_api_router_loaded(app: FastAPI) -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialize async connection pool, engine, auth, and timing on startup."""
+    from cortex.auth import AuthManager
     from cortex.database.pool import CortexConnectionPool
+    from cortex.engine import CortexEngine as AsyncCortexEngine
     from cortex.extensions.swarm.manager import get_swarm_manager
     from cortex.extensions.timing import TimingTracker
-    from cortex.engine import CortexEngine as AsyncCortexEngine
-    from cortex.auth import AuthManager
 
     db_path = config.DB_PATH
     logger.info("Lifespan: Initializing CORTEX with DB_PATH: %s", db_path)

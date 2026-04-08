@@ -12,9 +12,7 @@ Requires an API key provided by Stripe (pro or team plan).
 """
 
 import logging
-from typing import Annotated
-from typing import Any
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
@@ -36,7 +34,6 @@ router = APIRouter(tags=["oracle"])
 if TYPE_CHECKING:
     from cortex.auth import AuthResult
     from cortex.engine import CortexEngine as AsyncCortexEngine
-    from cortex.extensions.llm.manager import LLMManager
 
 
 # ─── Singleton LLM Manager ──────────────────────────────────────────

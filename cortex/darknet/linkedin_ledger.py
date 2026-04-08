@@ -8,10 +8,11 @@ Record + dry_run=0 + success=1 = live on LinkedIn.
 from __future__ import annotations
 
 import logging
-import sqlite3
 import time
 from dataclasses import dataclass
 from pathlib import Path
+
+from cortex.database.core import connect
 
 logger = logging.getLogger("cortex.darknet.linkedin_ledger")
 
@@ -39,7 +40,7 @@ class LinkedInLedger:
         self._ensure_schema()
 
     def _ensure_schema(self) -> None:
-        with sqlite3.connect(self.db_path) as conn:
+        with connect(str(self.db_path)) as conn:
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS linkedin_publishes (
                     id           TEXT PRIMARY KEY,   -- content_hash
@@ -59,7 +60,7 @@ class LinkedInLedger:
 
     def already_published(self, content_hash: str) -> bool:
         """True if a REAL (non dry-run) success record exists for this hash."""
-        with sqlite3.connect(self.db_path) as conn:
+        with connect(str(self.db_path)) as conn:
             row = conn.execute(
                 "SELECT 1 FROM linkedin_publishes WHERE id = ? AND dry_run = 0 AND success = 1",
                 (content_hash,),
@@ -80,7 +81,7 @@ class LinkedInLedger:
         error: str = "",
     ) -> None:
         """Upsert a publish attempt into the ledger."""
-        with sqlite3.connect(self.db_path) as conn:
+        with connect(str(self.db_path)) as conn:
             conn.execute(
                 """
                 INSERT INTO linkedin_publishes
@@ -113,7 +114,7 @@ class LinkedInLedger:
 
     def fetch_history(self, limit: int = 20) -> list[PublishRecord]:
         """Return most recent publish records."""
-        with sqlite3.connect(self.db_path) as conn:
+        with connect(str(self.db_path)) as conn:
             rows = conn.execute(
                 """
                 SELECT id, source_file, article_url, title, git_sha,

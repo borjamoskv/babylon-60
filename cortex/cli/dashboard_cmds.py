@@ -13,8 +13,8 @@ from __future__ import annotations
 
 import asyncio
 import sqlite3
-import time
 from datetime import datetime, timezone
+from threading import Event
 
 import click
 from rich.layout import Layout
@@ -34,6 +34,7 @@ _EMERALD = "#06d6a0"
 _ABYSS = "#1A1A1A"
 _RED = "#FF3366"
 _DIM = "dim"
+_DASHBOARD_PAUSE = Event()
 
 
 # ─── Data Collectors ────────────────────────────────────────────────
@@ -362,7 +363,7 @@ def dashboard(db: str, interval: float, once: bool) -> None:
                 while True:
                     data = _run_async(_collect_all(engine))
                     live.update(_build_dashboard(data))
-                    time.sleep(interval)
+                    _DASHBOARD_PAUSE.wait(interval)
             except KeyboardInterrupt:
                 pass
 

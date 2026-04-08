@@ -6,10 +6,11 @@ import asyncio
 import logging
 import math
 import uuid
-from typing import Optional
+from typing import Any, Optional
 
 import aiosqlite
 
+from cortex.consensus.vote_ledger import ImmutableVoteLedger
 from cortex.engine.slashing import SlashingEngine
 from cortex.telemetry.metrics import metrics
 from cortex.telemetry.pulse import PULSE

@@ -5,6 +5,7 @@ import logging
 import random
 import time
 from datetime import datetime, timezone
+from threading import Event
 from typing import Any
 
 import pandas as pd
@@ -15,6 +16,7 @@ from cortex.extensions.daemon.models import TrendsAlert
 from cortex.extensions.daemon.sidecar.trends_oracle.config import TrendsConfig
 
 logger = logging.getLogger("moskv-daemon")
+_TRENDS_PAUSE = Event()
 
 
 class TrendsOracle:
@@ -118,7 +120,7 @@ class TrendsOracle:
             except Exception as e:  # noqa: BLE001
                 logger.error("❌ [TRENDS_ORACLE] (Thread) Error: %s", e)
 
-            time.sleep(15.0)
+            _TRENDS_PAUSE.wait(15.0)
 
     def stop(self) -> None:
         """Gracefully stop the oracle loop."""
@@ -289,7 +291,7 @@ def _execute_with_backoff(func, max_retries: int = 3, base_backoff: float = 1.5)
             if "429" in str(e):
                 delay = (base_backoff**attempt) + random.uniform(0.5, 2.5)
                 logger.warning("⏳ [TRENDS_ORACLE] Rate limit (429). Retrying in %.1fs...", delay)
-                time.sleep(delay)
+                _TRENDS_PAUSE.wait(delay)
                 last_error = e
             else:
                 # Re-raise other HTTP errors

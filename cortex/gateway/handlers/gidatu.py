@@ -37,8 +37,12 @@ class GidatuHandler:
         self._ensure_path()
         try:
             from ghost_chain import Ghost  # type: ignore[import-not-found, reportMissingImports]
-            from ghost_platform import platform_info  # type: ignore[import-not-found, reportMissingImports]
-            from ghost_vlm import find_text_on_screen  # type: ignore[import-not-found, reportMissingImports]
+            from ghost_platform import (
+                platform_info,  # type: ignore[import-not-found, reportMissingImports]
+            )
+            from ghost_vlm import (
+                find_text_on_screen,  # type: ignore[import-not-found, reportMissingImports]
+            )
         except ImportError as e:
             raise ImportError(f"Gidatu runtime imports not available at {self._skill_path}") from e
 
@@ -48,7 +52,9 @@ class GidatuHandler:
             SafeZone = None
 
         try:
-            from ghost_resilience import wait_until  # type: ignore[import-not-found, reportMissingImports]
+            from ghost_resilience import (
+                wait_until,  # type: ignore[import-not-found, reportMissingImports]
+            )
         except ImportError:
             wait_until = None
 

@@ -20,7 +20,7 @@ from cortex.api.deps import get_engine
 from cortex.auth import AuthResult, require_permission
 
 if TYPE_CHECKING:
-    from cortex.cli.tips import Tip, TipCategory, TipsEngine
+    from cortex.cli.tips import Tip
     from cortex.engine import CortexEngine
 
 __all__ = [
@@ -93,7 +93,7 @@ class CategoriesResponse(BaseModel):
 _tips_engine: Any | None = None
 
 
-def _get_tips_engine(engine: "CortexEngine") -> Any:
+def _get_tips_engine(engine: CortexEngine) -> Any:
     """Lazy-init the tips engine with the API's CORTEX engine."""
     from cortex.cli.tips import TipsEngine
 
@@ -110,7 +110,7 @@ def _get_tips_engine(engine: "CortexEngine") -> Any:
 async def get_tips(
     count: int = Query(1, ge=1, le=20, description="Number of tips to return"),
     lang: str = Query("en", description=LANG_DESC),
-    engine: "CortexEngine" = Depends(get_engine),
+    engine: CortexEngine = Depends(get_engine),
     auth: AuthResult = Depends(require_permission("read")),
 ) -> TipsListResponse:
     """Get random contextual tips."""
@@ -127,7 +127,7 @@ async def get_tips(
 @router.get("/categories", response_model=CategoriesResponse)
 async def list_categories(
     lang: str = Query("en", description=LANG_DESC),
-    engine: "CortexEngine" = Depends(get_engine),
+    engine: CortexEngine = Depends(get_engine),
     auth: AuthResult = Depends(require_permission("read")),
 ) -> CategoriesResponse:
     """List all tip categories with counts."""
@@ -154,7 +154,7 @@ async def get_tips_by_category(
     category: str,
     lang: str = Query("en", description=LANG_DESC),
     limit: int = Query(5, ge=1, le=50),
-    engine: "CortexEngine" = Depends(get_engine),
+    engine: CortexEngine = Depends(get_engine),
     auth: AuthResult = Depends(require_permission("read")),
 ) -> TipsListResponse:
     """Get tips filtered by category."""
@@ -173,7 +173,7 @@ async def get_tips_by_project(
     project: str,
     lang: str = Query("en", description=LANG_DESC),
     limit: int = Query(3, ge=1, le=20),
-    engine: "CortexEngine" = Depends(get_engine),
+    engine: CortexEngine = Depends(get_engine),
     auth: AuthResult = Depends(require_permission("read")),
 ) -> TipsListResponse:
     """Get tips scoped to a specific project."""

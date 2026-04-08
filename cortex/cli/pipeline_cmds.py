@@ -14,15 +14,12 @@ Commands:
 from __future__ import annotations
 
 import asyncio
-import json
 import time
-from pathlib import Path
 from typing import Any
 
 import click
 from rich.console import Console
 from rich.panel import Panel
-from rich.table import Table
 
 from cortex.cli.common import cli
 
@@ -73,10 +70,10 @@ def build(
     """Forge a new execution pipeline."""
     from cortex.agents.builtins.pipeline_kernel_agent import (
         PipelineSpec,
-        PipelineType,
         PipelineTelemetry,
-        _run_unix_pipe,
+        PipelineType,
         _run_ci_cd_workflow,
+        _run_unix_pipe,
     )
 
     spec = PipelineSpec(
@@ -152,8 +149,12 @@ def unclog(pipeline_id: str) -> None:
 def run(cmd: str, pipeline_id: str, timeout: float) -> None:
     """Run a unix pipe directly from CLI (C5-REAL, output to stdout)."""
     import asyncio
+
     from cortex.agents.builtins.pipeline_kernel_agent import (
-        PipelineSpec, PipelineType, PipelineTelemetry, _run_unix_pipe,
+        PipelineSpec,
+        PipelineTelemetry,
+        PipelineType,
+        _run_unix_pipe,
     )
 
     spec = PipelineSpec(

@@ -12,7 +12,6 @@ from cortex.extensions.swarm.kv_prefix_registry import (
     PrefixSlot,
 )
 
-
 _SUPPORTED_OPS: frozenset[str] = frozenset(
     {
         "register",
@@ -106,7 +105,7 @@ class PrefixSlotResponse(BaseModel):
     hits: int
 
     @classmethod
-    def from_slot(cls, slot: PrefixSlot) -> "PrefixSlotResponse":
+    def from_slot(cls, slot: PrefixSlot) -> PrefixSlotResponse:
         return cls(
             cache_key=slot.cache_key,
             mission_id=slot.mission_id,

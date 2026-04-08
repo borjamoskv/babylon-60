@@ -5,6 +5,7 @@ import sqlite3
 import time
 from typing import Any
 
+from cortex.database.core import connect
 from cortex.ledger.models import IntentPayload
 from cortex.ledger.writer import LedgerWriter
 from cortex.mac_maestro.access import MaestroAccessProfile, collect_access_profile
@@ -22,12 +23,20 @@ except ImportError:
     ActionFailed = RuntimeError
 
     class UIAction:  # type: ignore[no-redef]
+        vector: str
+
         def __init__(self, **kwargs: Any) -> None:
             for key, value in kwargs.items():
                 setattr(self, key, value)
 
     class MacMaestroWorkflow:  # type: ignore[no-redef]
+        run_id: str
+
         def __init__(self, *args: Any, **kwargs: Any) -> None:
+            self.run_id = ""
+            raise RuntimeError("MacMaestro SDK is not installed or available.")
+
+        def execute_action(self, action: UIAction, apply_safety_gate: bool = True) -> bool:
             raise RuntimeError("MacMaestro SDK is not installed or available.")
 
 
@@ -52,7 +61,7 @@ class MaestroExecutor:
         try:
             from cortex.extensions.signals.bus import DurableSignalBus
 
-            conn = sqlite3.connect(self.ledger_writer.store.db_path)
+            conn = connect(self.ledger_writer.store.db_path)
             try:
                 bus = DurableSignalBus(conn)
                 bus.emit(

@@ -9,8 +9,8 @@ import hashlib
 import json
 import logging
 import random
-import time
 from pathlib import Path
+from threading import Event
 from typing import Any, Final
 
 from cortex.utils.errors import CortexError
@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 # --- Sovereign Constants ---
 MAX_RETRIES: Final[int] = 3
 BASE_BACKOFF: Final[float] = 1.1
+_FIAT_ORACLE_PAUSE = Event()
 
 
 class FiatOracle:
@@ -59,7 +60,7 @@ class FiatOracle:
                 self._check_signals_sync()
             except (OSError, ValueError, CortexError) as e:
                 logger.error("❌ [FIAT_ORACLE] (Thread) Error: %s", e)
-            time.sleep(self.interval)
+            _FIAT_ORACLE_PAUSE.wait(self.interval)
 
     def _verify_signature(self, data: dict, signature: str) -> bool:
         """
@@ -251,7 +252,7 @@ class FiatOracle:
                     MAX_RETRIES,
                     delay,
                 )
-                time.sleep(delay)
+                _FIAT_ORACLE_PAUSE.wait(delay)
 
         logger.critical(
             "💀 [FIAT_ORACLE] Falla catastrófica almacenando TX %s tras %s intentos.",

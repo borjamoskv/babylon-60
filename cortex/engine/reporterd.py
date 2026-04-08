@@ -8,7 +8,6 @@ Latencia cero.
 import asyncio
 import json
 import logging
-import os
 import weakref
 
 from aiohttp import web

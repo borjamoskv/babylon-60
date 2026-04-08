@@ -154,7 +154,8 @@ def adk_status() -> dict[str, Any]:
     try:
         with _sovereign_engine() as engine:
             stats = engine.stats_sync()
-            return {"status": "success", **stats}
+            stats_dict = stats if isinstance(stats, dict) else {}
+            return {"status": "success", **stats_dict}
     except (sqlite3.Error, ValueError, RuntimeError, OSError) as exc:
         return {"status": "error", "message": f"Status retrieval failed: {exc}"}
 
@@ -174,12 +175,16 @@ def adk_ledger_verify() -> dict[str, Any]:
     try:
         with _sovereign_engine() as engine:
             report = engine.verify_ledger_sync()
+            report_dict = report if isinstance(report, dict) else {}
             return {
                 "status": "success",
-                "valid": report.get("valid", False),
-                "transactions_checked": report.get("tx_checked", report.get("tx_count", 0)),
-                "roots_checked": report.get("roots_checked", 0),
-                "violations": report.get("violations", []),
+                "valid": report_dict.get("valid", False),
+                "transactions_checked": report_dict.get(
+                    "tx_checked",
+                    report_dict.get("tx_count", 0),
+                ),
+                "roots_checked": report_dict.get("roots_checked", 0),
+                "violations": report_dict.get("violations", []),
             }
     except (sqlite3.Error, ValueError, RuntimeError, OSError) as exc:
         return {"status": "error", "message": f"Ledger verification failed: {exc}"}

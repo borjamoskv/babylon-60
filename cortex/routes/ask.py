@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 # This file is part of CORTEX.
 # Licensed under the Apache License, Version 2.0.
@@ -41,7 +40,6 @@ router = APIRouter(tags=["ask"])
 if TYPE_CHECKING:
     from cortex.auth import AuthResult
     from cortex.engine import CortexEngine as AsyncCortexEngine
-    from cortex.extensions.llm.manager import LLMManager
 
 
 # ─── Singleton LLM Manager ──────────────────────────────────────────

@@ -169,6 +169,9 @@ class SQLiteAuthBackend(BaseAuthBackend):
         try:
             cursor = conn.execute(SQL_INSERT_KEY, args)
             conn.commit()
+            if cursor.lastrowid is None:
+                msg = "SQLite did not return a rowid for the inserted API key"
+                raise RuntimeError(msg)
             return int(cursor.lastrowid)
         finally:
             conn.close()

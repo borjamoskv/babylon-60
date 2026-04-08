@@ -13,8 +13,8 @@ from cortex.extensions.sync.common import (
     calculate_fact_diff,
     file_hash,
     get_existing_contents,
-    load_sync_state,
     is_relation_bridge_kind,
+    load_sync_state,
     runtime_memory_dir,
     save_sync_state,
 )

@@ -8,7 +8,7 @@ import json
 import logging
 import secrets
 import threading
-from collections.abc import Awaitable
+from collections.abc import Coroutine
 from datetime import datetime, timezone
 from typing import Optional, TypeVar
 
@@ -83,8 +83,18 @@ class AuthManager:
 
     @staticmethod
     def _api_key_from_row(row: dict[str, object]) -> APIKey:
+        key_id = row["id"]
+        if not isinstance(key_id, (int, str)):
+            raise ValueError("Invalid API key row: id must be int or str")
+        rate_limit = row["rate_limit"]
+        if isinstance(rate_limit, int):
+            normalized_rate_limit = rate_limit
+        elif isinstance(rate_limit, str):
+            normalized_rate_limit = int(rate_limit)
+        else:
+            raise ValueError("Invalid API key row: rate_limit must be int or str")
         return APIKey(
-            id=row["id"],
+            id=key_id,
             name=str(row["name"]),
             key_prefix=str(row["key_prefix"]),
             tenant_id=str(row["tenant_id"]),
@@ -93,7 +103,7 @@ class AuthManager:
             created_at=str(row["created_at"]),
             last_used=str(row["last_used"]) if row.get("last_used") is not None else None,
             is_active=bool(row["is_active"]),
-            rate_limit=int(row["rate_limit"]),
+            rate_limit=normalized_rate_limit,
         )
 
     @staticmethod
@@ -150,7 +160,7 @@ class AuthManager:
         )
 
     @staticmethod
-    def _run_coro_sync(coro: Awaitable[_T]) -> _T:
+    def _run_coro_sync(coro: Coroutine[object, object, _T]) -> _T:
         """Run an awaitable from sync code, even if a loop is already active."""
         try:
             asyncio.get_running_loop()
