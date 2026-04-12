@@ -15,6 +15,7 @@ import json
 import logging
 import re
 from collections import Counter, defaultdict
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any, Final, Optional
 
 from cortex.extensions.episodic.base import (
@@ -327,7 +328,7 @@ class EpisodicMemory:
 
 
 def _extract_patterns(
-    rows: list[tuple],
+    rows: Sequence[Sequence[Any]],
     min_occurrences: int,
     limit: int,
 ) -> list[Pattern]:

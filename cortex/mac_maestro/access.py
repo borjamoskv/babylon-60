@@ -10,7 +10,9 @@ AccessState = Literal["granted", "denied", "unknown", "unavailable", "unsupporte
 
 ACCESSIBILITY_SETTINGS = "System Settings -> Privacy & Security -> Accessibility"
 AUTOMATION_SETTINGS = "System Settings -> Privacy & Security -> Automation"
-SCREEN_RECORDING_SETTINGS = "System Settings -> Privacy & Security -> Screen & System Audio Recording"
+SCREEN_RECORDING_SETTINGS = (
+    "System Settings -> Privacy & Security -> Screen & System Audio Recording"
+)
 INPUT_MONITORING_SETTINGS = "System Settings -> Privacy & Security -> Input Monitoring"
 
 

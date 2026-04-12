@@ -130,9 +130,7 @@ class PulseRegistry:
         return event_type.split(":", 1)[0]
 
     def _record_event(self, event_type: str, source: str, now: float) -> None:
-        self._recent_events.append(
-            PulseEvent(event_type=event_type, source=source, timestamp=now)
-        )
+        self._recent_events.append(PulseEvent(event_type=event_type, source=source, timestamp=now))
         self._prune_events(now)
         self._refresh_kinetic_gauges(now)
 
@@ -207,7 +205,9 @@ class PulseRegistry:
                 "active_metrics": len(self._metrics),
                 "shadow_ghosts": list(self._ghost_metrics),
                 "pulse_rate": sum(
-                    1 for m in self._metrics.values() if now - m.last_update < _DEFAULT_PULSE_WINDOW_S
+                    1
+                    for m in self._metrics.values()
+                    if now - m.last_update < _DEFAULT_PULSE_WINDOW_S
                 ),
                 **kinetic,
             }

@@ -183,13 +183,10 @@ class MaestroExecutor:
 
         capabilities = ", ".join(status.name for status in missing)
         guidance = " | ".join(
-            f"{status.name}: {status.settings_path}"
-            for status in missing
-            if status.settings_path
+            f"{status.name}: {status.settings_path}" for status in missing if status.settings_path
         )
         raise PermissionError(
-            f"Missing macOS capabilities for vector {sdk_action.vector}: {capabilities}. "
-            f"{guidance}"
+            f"Missing macOS capabilities for vector {sdk_action.vector}: {capabilities}. {guidance}"
         )
 
     def execute_intent(

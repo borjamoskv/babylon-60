@@ -99,6 +99,8 @@ class AutopoiesisEngine:
     def _build_mejoralo(self) -> Any:
         if self._mejoralo_factory is not None:
             return self._mejoralo_factory(self.engine)
+        if self.engine is None:
+            raise RuntimeError("AutopoiesisEngine requires an engine or mejoralo_factory")
 
         from cortex.extensions.mejoralo.engine import MejoraloEngine
 

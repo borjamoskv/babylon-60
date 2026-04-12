@@ -25,7 +25,9 @@ def _status(name: str, granted: bool | None) -> MacCapabilityStatus:
     )
 
 
-def test_probe_accessibility_access_is_unsupported_off_macos(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_probe_accessibility_access_is_unsupported_off_macos(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setattr(access, "_is_macos", lambda: False)
 
     status = access.probe_accessibility_access()

@@ -138,9 +138,7 @@ class GraphStore:
                         "node_id": r["node_id"],
                         "path": r["path"],
                         "node_type": r["node_type"],
-                        "attributes": (
-                            json.loads(r["attributes"]) if r["attributes"] else {}
-                        ),
+                        "attributes": (json.loads(r["attributes"]) if r["attributes"] else {}),
                     }
                     for r in rows
                 ]

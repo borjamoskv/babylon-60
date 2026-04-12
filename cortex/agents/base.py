@@ -60,24 +60,30 @@ class BaseAgent:
 
     def _azkartu_lyapunov_guard(self) -> None:
         """Azkartu Lyapunov-Control Protocol (v7.0 Sovereign Singularity).
-        
+
         Enforces dV/dt < 0 condition (Thermodynamic Stability).
         If the internal state entropy increases (errors compounding), aborts.
         Provides C5-REAL simulation defense against stochastic hallucination.
         """
         # Calculate current Lyapunov function V(x) based on system entropy
         current_v = (self.state.consecutive_errors * 50) + (self.state.error_count * 10)
-        
+
         if not hasattr(self, "_lyapunov_v"):
             self._lyapunov_v = current_v
             return
-            
+
         dv_dt = current_v - self._lyapunov_v
         self._lyapunov_v = current_v
-        
+
         if dv_dt > 0:
-            logger.error("[%s] [AZKARTU-ABORT] Lyapunov Instability detected (dV/dt = %d > 0).", self.agent_id, dv_dt)
-            raise RuntimeError(f"Azkartu Guard Triggered: System entropy increasing (dV/dt={dv_dt})")
+            logger.error(
+                "[%s] [AZKARTU-ABORT] Lyapunov Instability detected (dV/dt = %d > 0).",
+                self.agent_id,
+                dv_dt,
+            )
+            raise RuntimeError(
+                f"Azkartu Guard Triggered: System entropy increasing (dV/dt={dv_dt})"
+            )
 
     # ── Abstract methods (subclasses implement) ──────────────────
 

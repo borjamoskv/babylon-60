@@ -138,10 +138,11 @@ def normalize_organization_urn(value: str | None) -> str:
 @dataclass
 class ArticlePost:
     """Structured post payload for a linked-article share."""
+
     title: str
     description: str
     article_url: str
-    commentary: str          # The text body of the LinkedIn post
+    commentary: str  # The text body of the LinkedIn post
     thumbnail_url: str = ""  # Optional: pre-uploaded image URN or external URL
     source_file: str = ""
     git_sha: str = ""
@@ -181,7 +182,8 @@ class ArticlePost:
 
 # ── OAuth Helpers ──────────────────────────────────────────────────────────────
 
-def build_auth_url(config: LinkedInConfig, scope: str = LINKEDIN_POSTS_SCOPE) -> str:
+
+def build_auth_url(config: LinkedInConfig, scope: str = LINKEDIN_POSTS_SCOPE) -> tuple[str, str]:
     """Build the browser authorization URL for the member to visit."""
     state = hashlib.sha256(os.urandom(16)).hexdigest()[:12]
     params = {
@@ -348,6 +350,7 @@ def check_organization_post_permission(
 
 # ── Publisher ──────────────────────────────────────────────────────────────────
 
+
 class LinkedInPublisher:
     """Sovereign LinkedIn post publisher. Dry-run by default."""
 
@@ -364,8 +367,7 @@ class LinkedInPublisher:
         """
         if not self.config.is_token_valid():
             raise RuntimeError(
-                "LinkedIn access token missing or expired.\n"
-                "Run: cortex linkedin auth"
+                "LinkedIn access token missing or expired.\nRun: cortex linkedin auth"
             )
 
         actor_urn = self.config.resolved_actor_urn()
@@ -430,6 +432,7 @@ class LinkedInPublisher:
 
 # ── Markdown Parser ────────────────────────────────────────────────────────────
 
+
 def parse_markdown_article(md_path: Path, article_url: str) -> ArticlePost:
     """
     Parse a markdown file into an ArticlePost.
@@ -446,7 +449,7 @@ def parse_markdown_article(md_path: Path, article_url: str) -> ArticlePost:
     body = text
     if fm_match:
         fm_text = fm_match.group(1)
-        body = text[fm_match.end():]
+        body = text[fm_match.end() :]
         for line in fm_text.splitlines():
             if ":" in line:
                 k, _, v = line.partition(":")
@@ -460,8 +463,7 @@ def parse_markdown_article(md_path: Path, article_url: str) -> ArticlePost:
     )
 
     commentary = (
-        frontmatter.get("linkedin_commentary", "")
-        or frontmatter.get("linkedin_text", "")
+        frontmatter.get("linkedin_commentary", "") or frontmatter.get("linkedin_text", "")
     ).strip()
     if not commentary:
         # LinkedIn commentary = plain text, max ~3000 chars
@@ -472,6 +474,7 @@ def parse_markdown_article(md_path: Path, article_url: str) -> ArticlePost:
     # Git SHA for dedup
     try:
         import subprocess
+
         git_sha = subprocess.check_output(
             ["git", "log", "-1", "--format=%H", "--", str(md_path)],
             cwd=md_path.parent,

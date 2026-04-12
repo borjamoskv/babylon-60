@@ -1,6 +1,6 @@
 # Repository Boundary Reconciliation Matrix
 
-This snapshot records how the `codex/repo-boundary-cleanup` branch reconciled the tracked CORTEX repository with the boundary rules defined in [`../WORKSPACE_POLICY.md`](../WORKSPACE_POLICY.md).
+This snapshot records how the `codex/repo-boundary-cleanup` branch reconciled the tracked CORTEX repository with the boundary rules defined in [`WORKSPACE_POLICY.md` on GitHub](https://github.com/borjamoskv/Cortex-Persist/blob/main/WORKSPACE_POLICY.md).
 
 It is not a product architecture document. It is a repository-boundary ledger: what used to be mixed into the core, where that surface belongs now, and which operating rule should prevent the contamination from returning.
 
@@ -22,7 +22,7 @@ It is not a product architecture document. It is a repository-boundary ledger: w
 | :--- | :--- | :--- | :--- | :--- |
 | Core runtime and product code | Mixed together with docs-site, marketing, bounty, and nested subproject material | Retained as the canonical tracked surface | `30_CORTEX` | Core work starts here by default. |
 | Repo-root governance and buyer-facing entrypoints | Present, but diluted by duplicate doc trees and web-build surfaces | Retained as thin repo-root entrypoints | `30_CORTEX` | Keep repo-root docs concise, stable, and link out when depth is needed. |
-| `docs/*.md` compatibility shims | Coexisted with a full in-repo docs site and backups | Retained as compatibility shims only | Dedicated docs surface at `https://cortexpersist.com/docs` and `/Users/borjafernandezangulo/30_CORTEX_DOCS` | Do not restart long-form docs work inside `docs/`. |
+| `docs/*.md` product reference set | Coexisted with a full in-repo docs site and backups | Retained as concise repo-versioned product docs | `30_CORTEX/docs` as source, optionally mirrored to a published docs surface | Keep docs concise and product-facing; do not reintroduce the old docs-site build sprawl into core. |
 | Full docs-site content and historical backups | `src/content/docs/**`, `mkdocs.yml`, and `docs_backup/**` lived inside the core repo | Removed from tracked core | Dedicated docs repo or published docs surface | Historical material is archive content, not core product state. |
 | Marketing and landing assets | Astro/Vercel app, web pages, media, site build scripts, and deploy configs lived in the core repo | Removed from tracked core | `/Users/borjafernandezangulo/cortexpersist-landing` | Web and landing work must happen in the landing repo, not in core. |
 | Security research and bug-bounty artifacts | `bounty/` and `bounty_hunt/` lived beside product code | Removed from tracked core | Dedicated sibling repo under `10_PROJECTS` or quarantine under `90_REPO_RESCUE` | Research outside the shipped core cannot live in the canonical repo. |

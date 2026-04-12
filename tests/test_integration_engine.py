@@ -170,8 +170,10 @@ async def test_quorum_pools_resolution(engine):
     tasks = []
     for i in range(100):
         val = 1 if i < 80 else -1
-        tasks.append(manager.promise_vote(fact_id=99, agent_id=f"agent_{i}", value=val, reason="swarm_pulse"))
-    
+        tasks.append(
+            manager.promise_vote(fact_id=99, agent_id=f"agent_{i}", value=val, reason="swarm_pulse")
+        )
+
     await asyncio.gather(*tasks)
 
     # 3. Check that no DB hits occurred yet
@@ -185,12 +187,12 @@ async def test_quorum_pools_resolution(engine):
 
     # 5. Check outcome
     assert score > 1.0  # 80/20 with equal reliability should resolve positively
-    
+
     async with engine.session() as conn:
         cursor = await conn.execute("SELECT COUNT(*) FROM consensus_votes_v2 WHERE fact_id = 99")
         row = await cursor.fetchone()
         assert row[0] == 100
-    
+
     # Check that lock was removed and memory is clean
     assert 99 not in manager._pool_locks
     assert 99 not in manager._vote_pools

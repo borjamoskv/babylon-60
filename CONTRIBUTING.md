@@ -64,6 +64,31 @@ Before opening a PR:
 
 For schema, ledger, async, API, or trust-surface changes, follow the deep protocols in [`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md).
 
+## Publishing To PyPI
+
+`cortex-persist` publishes through [`.github/workflows/release.yml`](./.github/workflows/release.yml) using PyPI Trusted Publishing.
+
+Before the first release, configure the external pieces once:
+
+- create the `cortex-persist` project on PyPI, or create a pending publisher for it
+- authorize this GitHub repository and the `Release` workflow as a trusted publisher in PyPI
+- ensure the GitHub environment named `pypi` exists and is available to the release workflow
+
+For every release:
+
+```bash
+python -m pip install --upgrade build twine
+python scripts/release_preflight.py --tag v0.3.0b2
+git tag v0.3.0b2
+git push origin v0.3.0b2
+```
+
+Release invariants:
+
+- the Git tag must be exactly `v<project.version>` from [`pyproject.toml`](./pyproject.toml)
+- if PyPI trusted publishing is not configured, the workflow will build successfully but publication will fail
+- if the version already exists on PyPI, publication will fail and you must bump `project.version` before retrying
+
 ## Basic Contribution Rules
 
 - Preserve tenant-aware behavior in public data paths.

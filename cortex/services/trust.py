@@ -106,7 +106,9 @@ class TrustService:
         try:
             from cortex.crypto import get_default_encrypter
 
-            plaintext = get_default_encrypter().decrypt_str(content, tenant_id=tenant_id or "default")
+            plaintext = get_default_encrypter().decrypt_str(
+                content, tenant_id=tenant_id or "default"
+            )
         except (RuntimeError, ValueError, TypeError, OSError) as exc:
             return "", f"DECRYPTION_FAILED — {exc}"
 
@@ -226,7 +228,9 @@ class TrustService:
 
         for row in rows:
             fid = row["id"]
-            content, decrypt_violation = self._resolve_fact_plaintext(row["content"], row["tenant_id"])
+            content, decrypt_violation = self._resolve_fact_plaintext(
+                row["content"], row["tenant_id"]
+            )
             stored_hash: str = row["hash"] or ""
             common = {
                 "fact_id": fid,
@@ -387,7 +391,9 @@ class TrustService:
 
         for row in rows:
             probes += 1
-            content, decrypt_violation = self._resolve_fact_plaintext(row["content"], row["tenant_id"])
+            content, decrypt_violation = self._resolve_fact_plaintext(
+                row["content"], row["tenant_id"]
+            )
             stored_hash: str = row["hash"] or ""
 
             if not stored_hash:

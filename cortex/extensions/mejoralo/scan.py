@@ -308,7 +308,9 @@ def _analyze_files(
     try:
         with ProcessPoolExecutor() as executor:
             # Parallel analysis of files
-            results = list(executor.map(_analyze_single_file, source_files, [root] * len(source_files)))
+            results = list(
+                executor.map(_analyze_single_file, source_files, [root] * len(source_files))
+            )
     except (PermissionError, OSError, RuntimeError) as exc:
         logger.warning(
             "MEJORAlo scan falling back to in-process analysis: %s",

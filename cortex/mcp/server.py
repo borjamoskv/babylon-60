@@ -10,6 +10,8 @@ import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
 
+import aiosqlite
+
 from cortex.engine import CortexEngine
 from cortex.extensions.immune.filters.base import Verdict
 from cortex.extensions.immune.membrane import ImmuneMembrane
@@ -82,7 +84,9 @@ class _MCPContext:
 # ─── Tool Registrators ───────────────────────────────────────────────
 
 
-def _public_memory_service_for_connection(ctx: _MCPContext, conn: object) -> PublicMemoryService:
+def _public_memory_service_for_connection(
+    ctx: _MCPContext, conn: aiosqlite.Connection
+) -> PublicMemoryService:
     """Bind a public-memory service to the current MCP DB connection."""
     engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
     engine._conn = conn
@@ -362,9 +366,11 @@ def run_server(config: Optional[MCPServerConfig] = None) -> None:
     if mcp is None or config is not None:
         mcp = create_mcp_server(cfg)
 
+    assert mcp is not None
+    server = mcp
     if cfg.transport == "sse":
         logger.info("Starting CORTEX MCP server v2 (SSE) on %s:%d", cfg.host, cfg.port)
-        mcp.run(transport="sse")
+        server.run(transport="sse")
     else:
         logger.info("Starting CORTEX MCP server v2 (stdio)")
-        mcp.run()
+        server.run()

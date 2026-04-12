@@ -279,7 +279,11 @@ class PolicyEngine:
         meta = fact.meta if isinstance(fact.meta, dict) else {}
         kind = meta.get("bridge_kind")
         if kind is None:
-            if fact.source == "bridge:github" or meta.get("bridge_provider") == "github" or "github_key" in meta:
+            if (
+                fact.source == "bridge:github"
+                or meta.get("bridge_provider") == "github"
+                or "github_key" in meta
+            ):
                 return EXTERNAL_BRIDGE_KIND
             return RELATION_BRIDGE_KIND
 

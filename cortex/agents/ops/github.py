@@ -18,6 +18,7 @@ _OP_ALIASES: dict[str, str] = {
     "diff-url": "diff_url",
 }
 
+
 def _required_text(value: str, field_name: str) -> str:
     text = value.strip()
     if not text:
@@ -206,6 +207,7 @@ def _optional_str(value: str | None) -> str | None:
 def _extract_remote(payload: dict[str, Any]) -> str:
     return _required_text(str(payload.get("remote", "origin")), "remote")
 
+
 from cortex.services.github_shortcuts import parse_line_spec
 
 
@@ -298,9 +300,7 @@ class GitHubOps(ExplicitOpsHandler):
 
         if op == "history":
             request = HistoryRequest.model_validate(payload)
-            return GitHubUrlResponse(
-                url=service.history_url(request.path, ref=request.ref)
-            )
+            return GitHubUrlResponse(url=service.history_url(request.path, ref=request.ref))
 
         raise ValueError(f"unhandled url op: {op!r}")
 

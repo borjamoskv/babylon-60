@@ -80,8 +80,7 @@ class ContradictionGuardAdapter:
         )
         if report.has_conflicts and report.severity == "high":
             message = (
-                "[AX-II] Contradiction detected "
-                f"(severity={report.severity}):\n{report.format()}"
+                f"[AX-II] Contradiction detected (severity={report.severity}):\n{report.format()}"
             )
             logger.warning(message)
             raise ValueError(message)
@@ -101,6 +100,7 @@ class VerifierGuardAdapter:
         tenant_id: str = "default",
     ) -> None:
         from cortex.verification.verifier import SovereignVerifier
+
         verifier = SovereignVerifier()
 
         # 1. Static Verification for 'code' paths

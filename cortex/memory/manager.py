@@ -5,14 +5,17 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import logging
+import subprocess
 import time
 import uuid
 from collections.abc import Iterable
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 # Memory OS (RFC-CORTEX-MEMORY-OS)
 from cortex.compaction.mem0_pipeline import Mem0Pipeline
+from cortex.core.paths import resolve_native_binary
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.engrams import CortexSemanticEngram
 from cortex.memory.ledger import EventLedgerL3
@@ -83,30 +86,43 @@ def _resolve_manager_tenant(tenant_id: str | None, operation: str) -> str:
     return resolved
 
 
-import shutil
-import subprocess
-
-
 class NativeArbiter:
     """Axiom Ω0: Direct-Silicon Bypass for Epistemic Integrity."""
-    def __init__(self, binary_path: str = "/Users/borjafernandezangulo/10_PROJECTS/Cortex-Persist/engine/cortex-core/target/release/cortex-db"):
-        self.binary_path = binary_path
-        self._available = shutil.which(self.binary_path) is not None
+
+    def __init__(self, binary_path: str | None = None) -> None:
+        resolved = (
+            Path(binary_path).expanduser()
+            if binary_path is not None
+            else resolve_native_binary("cortex-db", "CORTEX_NATIVE_DB_BIN", "CORTEX_DB_BIN")
+        )
+        self.binary_path = str(resolved) if resolved is not None else None
+        self._available = resolved is not None
 
     def check(self, subject_hash: str) -> str | None:
         if not self._available:
             return None
+        binary_path = self.binary_path
+        if binary_path is None:
+            return None
         try:
             res = subprocess.run(
-                [self.binary_path, "check", subject_hash],
-                capture_output=True, text=True, timeout=0.1
+                [binary_path, "check", subject_hash],
+                capture_output=True,
+                text=True,
+                timeout=0.1,
+                check=False,
             )
             out = res.stdout.strip()
             if out.startswith("CONFLICT:"):
                 return out.replace("CONFLICT:", "")
             return None
-        except Exception:
+        except (FileNotFoundError, OSError, subprocess.SubprocessError, UnicodeError):
             return None
+
+    async def check_async(self, subject_hash: str) -> str | None:
+        """Run the native conflict check without blocking the event loop."""
+        return await asyncio.to_thread(self.check, subject_hash)
+
 
 class CortexMemoryManager:
     """Orchestrator for the Tripartite Cognitive Memory Architecture.
@@ -209,7 +225,7 @@ class CortexMemoryManager:
         self._start_bg_workers()
 
     async def _should_elevate(self, tenant_id: str, metadata: dict) -> bool:
-        """Phase II: Elevation Policy. 
+        """Phase II: Elevation Policy.
         Only high-severity or system-level conflicts cross the bridge.
         """
         if tenant_id == "system":
@@ -221,11 +237,11 @@ class CortexMemoryManager:
         """Bridge L3 -> Global Ledger based on policy."""
         if not self._global_writer:
             return
-            
+
         if await self._should_elevate(tenant_id, event.metadata):
             logger.info("🌉 [BRIDGE] Elevating conflict event %s to global ledger.", event.event_id)
             from cortex.ledger.models import ActionResult, ActionTarget, LedgerEvent
-            
+
             global_event = LedgerEvent.new(
                 tool="memory:manager",
                 actor="system:epistemic_guard",
@@ -236,8 +252,8 @@ class CortexMemoryManager:
                     "memory_event_id": event.event_id,
                     "tenant_id": tenant_id,
                     "project_id": project_id,
-                    "subject_hash": event.metadata["subject_hash"]
-                }
+                    "subject_hash": event.metadata["subject_hash"],
+                },
             )
             self._global_writer.append(global_event)
 
@@ -306,7 +322,7 @@ class CortexMemoryManager:
         """Initialize persistent background workers for L2 compression."""
         if self._bg_workers:
             return
-            
+
         # 3 workers default, bounding the active compression coroutines to 3.
         num_workers = min(3, max(1, self._max_bg_tasks // 10))
         for i in range(num_workers):
@@ -397,7 +413,9 @@ class CortexMemoryManager:
                     },
                 )
             except (OSError, RuntimeError, TypeError, ValueError) as exc:
-                logger.warning("Continual learning sidecar skipped interaction %s: %s", event.event_id, exc)
+                logger.warning(
+                    "Continual learning sidecar skipped interaction %s: %s", event.event_id, exc
+                )
 
         return event
 
@@ -413,20 +431,20 @@ class CortexMemoryManager:
             return {"status": "empty", "id": None}
 
         # --- Axiom Ω0: Native Hardware Bypass ---
-        if native_conflict := self._arbiter.check(subject_hash):
+        if native_conflict := await self._arbiter.check_async(subject_hash):
             logger.info("⚡ [SILICON-HIT] native conflict detection for %s", subject_hash)
             return {"status": "conflict", "id": "native:conflict", "content": native_conflict}
 
         if not self._l2 or not hasattr(self._l2, "_get_conn"):
             return {"status": "new", "id": None}
 
-        def _sync_check():
+        def _sync_check() -> dict[str, str | None]:
             try:
                 conn = self._l2._get_conn()
                 cursor = conn.cursor()
                 # Axiom Ω8: Resolve correct domain table
                 meta_tb, *_ = self._l2._get_domain_tables(conn, tenant_id, project_id)
-                
+
                 # 1. Exact Match (Redundancy)
                 cursor.execute(
                     f"SELECT id FROM {meta_tb} WHERE tenant_id = ? AND "
@@ -495,7 +513,7 @@ class CortexMemoryManager:
     def _extract_subject(self, content: str, metadata: dict | None) -> str:
         if metadata and "subject" in metadata:
             return str(metadata["subject"])
-        return content.strip().lower() # Default to content hash if no subject provided
+        return content.strip().lower()  # Default to content hash if no subject provided
 
     async def store(
         self,
@@ -553,20 +571,23 @@ class CortexMemoryManager:
         subject_hash = hashlib.sha256(subject.encode()).hexdigest()
 
         check = await self._check_deduplication(tenant_id, project_id, content, subject_hash)
-        
+
         if check["status"] == "redundant":
             return f"deduplicated:{check['id']}"
-        
-        is_conflict = (check["status"] == "conflict")
+
+        is_conflict = check["status"] == "conflict"
         if is_conflict:
-            logger.error("☣️ [CONFLICTO] Epistemología divergente detectada para hash %s", subject_hash)
-            
+            logger.error(
+                "☣️ [CONFLICTO] Epistemología divergente detectada para hash %s", subject_hash
+            )
+
             # Axiom Ω9: Immutable record of truth collision in L3
             from cortex.memory.models import MemoryEvent
+
             conflict_event = MemoryEvent(
                 role="system",
                 content=f"EPISTEMIC_CONFLICT: {content}",
-                session_id=project_id, # Link to project lineage
+                session_id=project_id,  # Link to project lineage
                 tenant_id=tenant_id,
                 token_count=0,
                 metadata={
@@ -574,8 +595,8 @@ class CortexMemoryManager:
                     "subject_hash": subject_hash,
                     "existing_id": check["id"],
                     "attempted_content": content,
-                    **(metadata or {})
-                }
+                    **(metadata or {}),
+                },
             )
             await self._l3.append_event(conflict_event)
             await self._propagate_conflict(conflict_event, tenant_id, project_id)
@@ -606,7 +627,7 @@ class CortexMemoryManager:
             parent_decision_id=int(parent_decision_id) if parent_decision_id is not None else None,
             subject_hash=subject_hash,
             is_conflict=is_conflict,
-            is_diamond=is_diamond
+            is_diamond=is_diamond,
         )
 
         if self._resonance_gate is None:
@@ -630,6 +651,7 @@ class CortexMemoryManager:
 
         # Axiom Ω9: Immutable record of successful assimilation in L3
         from cortex.memory.models import MemoryEvent
+
         success_event = MemoryEvent(
             role="system",
             content=f"ASSIMILATED: {engram.content}",
@@ -639,8 +661,8 @@ class CortexMemoryManager:
             metadata={
                 "type": "assimilation",
                 "fact_id": engram.id,
-                "subject_hash": engram.subject_hash
-            }
+                "subject_hash": engram.subject_hash,
+            },
         )
         await self._l3.append_event(success_event)
 

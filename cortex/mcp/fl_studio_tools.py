@@ -57,6 +57,7 @@ class FLStudioBridgeProtocol(Protocol):
         params: Mapping[str, Any] | None = None,
     ) -> Mapping[str, Any]:
         """Execute a bridge action and return the parsed JSON response."""
+        ...
 
 
 @dataclass(frozen=True)
@@ -183,9 +184,7 @@ def _normalize_bpm(bpm: str) -> str:
     return rendered
 
 
-def register_fl_studio_tools(
-    mcp: FastMCP, bridge: FLStudioBridgeProtocol | None = None
-) -> None:  # type: ignore[reportInvalidTypeForm]
+def register_fl_studio_tools(mcp: FastMCP, bridge: FLStudioBridgeProtocol | None = None) -> None:  # type: ignore[reportInvalidTypeForm]
     """Register a safe FL Studio control surface on the MCP server."""
     client = bridge or FLStudioBridgeClient.from_env()
 

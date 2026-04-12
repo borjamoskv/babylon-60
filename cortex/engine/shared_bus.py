@@ -76,16 +76,22 @@ class SovereignSharedBus:
         slot: int,
         uncertainty: float = 0.0,
     ):
-        if not self._shm:
+        shm = self._shm
+        if shm is None:
             return
+        buf = shm.buf
+        assert buf is not None
         # Layout: head(I), tail(I), exergy(f), latency(f), cap(I), slot(I), uncertainty(f), version(I)
         header = struct.pack("IIffIIfI", head, tail, exergy, latency, cap, slot, uncertainty, 850)
-        self._shm.buf[0:32] = header
+        buf[0:32] = header
 
     def _read_header(self):
-        if not self._shm:
+        shm = self._shm
+        if shm is None:
             return (0, 0, 1.0, 0.0, self.capacity, self.slot_size, 0.0, 850)
-        return struct.unpack("IIffIIfI", self._shm.buf[0:32])
+        buf = shm.buf
+        assert buf is not None
+        return struct.unpack("IIffIIfI", buf[0:32])
 
     def update_metrics(self, exergy: float, latency: float, uncertainty: float = 0.0):
         """Ω₀ Bit-Parallel Telemetry: Atomic metric update in SHM header."""
@@ -111,8 +117,11 @@ class SovereignSharedBus:
         **kwargs,
     ) -> bool:
         """Lock-Free SWMR Emit (AX-V). High-performance signal injection."""
-        if not self._shm:
+        shm = self._shm
+        if shm is None:
             return False
+        buf = shm.buf
+        assert buf is not None
 
         # Map source string to ID if needed (for Sovereign compatibility)
         sid = source_id
@@ -135,8 +144,8 @@ class SovereignSharedBus:
 
         # 1. Write Data (Non-visible until head advances)
         record_header = struct.pack("dHH", ts, 0, sid)
-        self._shm.buf[offset : offset + 12] = record_header
-        self._shm.buf[offset + 12 : offset + 12 + len(data)] = data
+        buf[offset : offset + 12] = record_header
+        buf[offset + 12 : offset + 12 + len(data)] = data
 
         # 2. Advance Head (Atomic store in header)
         new_head = (head + 1) % cap
@@ -151,15 +160,14 @@ class SovereignSharedBus:
         """Poll for new signals since last_index.
         Fast-Path: O(1) check of head before linear scan.
         """
-        if not self._shm:
+        shm = self._shm
+        if shm is None:
             return []
+        buf = shm.buf
+        assert buf is not None
 
-        head, tail, cap, slot = (
-            self._read_header()[0],
-            self._read_header()[1],
-            self._read_header()[4],
-            self._read_header()[5],
-        )
+        header = self._read_header()
+        head, tail, cap, slot = header[0], header[1], header[4], header[5]
 
         # Fast-Path: If last_index is head, no work to do
         if last_index == head:
@@ -173,16 +181,16 @@ class SovereignSharedBus:
             offset = HEADER_SIZE + (current * slot)
 
             # Read header
-            ts, _, src_id = struct.unpack("dHH", self._shm.buf[offset : offset + 12])
+            ts, _, src_id = struct.unpack("dHH", buf[offset : offset + 12])
 
             # Read payload until null or max slot size
-            raw_data = self._shm.buf[offset + 12 : offset + slot]
+            raw_data = buf[offset + 12 : offset + slot]
             # Find first null byte or end
             try:
                 end = raw_data.tobytes().find(b"\x00")
                 if end == -1:
                     end = len(raw_data)
-                payload = json.loads(raw_data[:end].decode("utf-8"))
+                payload = json.loads(raw_data[:end].tobytes().decode("utf-8"))
             except Exception:
                 payload = {"error": "malformed_payload"}
 
@@ -195,14 +203,16 @@ class SovereignSharedBus:
         return results
 
     def close(self):
-        if self._shm:
-            self._shm.close()
+        shm = self._shm
+        if shm is not None:
+            shm.close()
 
     def unlink(self):
         """Destroy the shared memory segment."""
-        if self._shm:
+        shm = self._shm
+        if shm is not None:
             try:
-                self._shm.unlink()
+                shm.unlink()
             except Exception:
                 pass
             self._shm = None

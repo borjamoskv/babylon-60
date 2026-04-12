@@ -161,9 +161,7 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
                 "  🟡 PARTIAL TECHNICAL ALIGNMENT — Some record-keeping controls need attention."
             )
         else:
-            lines.append(
-                "  🔴 INSUFFICIENT TECHNICAL ALIGNMENT — Critical gaps in record-keeping."
-            )
+            lines.append("  🔴 INSUFFICIENT TECHNICAL ALIGNMENT — Critical gaps in record-keeping.")
 
         lines.append(f"\n  Compliance Score: {score}/5")
 

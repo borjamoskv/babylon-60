@@ -1,0 +1,81 @@
+"""Continual-learning sidecar for frozen-base adapter updates."""
+
+from cortex.extensions.continual_learning.algorithms import (
+    agem_project,
+    compute_cfs,
+    compute_priority,
+    risk_score,
+    schedule_learning_rate,
+)
+from cortex.extensions.continual_learning.backends import (
+    MLXLoRABackend,
+    SubprocessScoreProvider,
+    build_backend_from_env,
+)
+from cortex.extensions.continual_learning.models import (
+    AdapterDecision,
+    AdapterLifecycleAction,
+    AdapterSnapshot,
+    AdapterState,
+    DriftSignal,
+    EvaluationSummary,
+    ExperienceRecord,
+    LearningThresholds,
+    LoRAConfig,
+    MicroUpdateBackend,
+    MicroUpdateBackendResult,
+    MicroUpdateExecution,
+    MicroUpdatePlan,
+    MixedBatch,
+)
+from cortex.extensions.continual_learning.persistence import (
+    SQLiteContinualLearningStore,
+    SQLitePrototypeStore,
+    SQLiteRetrainQueue,
+    SQLiteSemanticMemoryStore,
+)
+from cortex.extensions.continual_learning.sidecar import (
+    AdapterRegistry,
+    DriftTracker,
+    InMemoryPrototypeStore,
+    InMemorySemanticMemoryStore,
+    LifelongLearningSidecar,
+    ListRetrainQueue,
+    PrioritizedEpisodicBuffer,
+)
+
+__all__ = [
+    "AdapterDecision",
+    "AdapterLifecycleAction",
+    "AdapterRegistry",
+    "AdapterSnapshot",
+    "AdapterState",
+    "DriftSignal",
+    "DriftTracker",
+    "EvaluationSummary",
+    "ExperienceRecord",
+    "InMemoryPrototypeStore",
+    "InMemorySemanticMemoryStore",
+    "LearningThresholds",
+    "LifelongLearningSidecar",
+    "ListRetrainQueue",
+    "LoRAConfig",
+    "MLXLoRABackend",
+    "MicroUpdateBackend",
+    "MicroUpdateBackendResult",
+    "MicroUpdateExecution",
+    "MicroUpdatePlan",
+    "MixedBatch",
+    "PrioritizedEpisodicBuffer",
+    "SQLiteContinualLearningStore",
+    "SQLitePrototypeStore",
+    "SQLiteRetrainQueue",
+    "SQLiteSemanticMemoryStore",
+    "SubprocessScoreProvider",
+    "agem_project",
+    "build_backend_from_env",
+    "compute_cfs",
+    "compute_priority",
+    "risk_score",
+    "schedule_learning_rate",
+]

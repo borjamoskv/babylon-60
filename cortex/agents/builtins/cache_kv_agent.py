@@ -219,7 +219,9 @@ class _CacheKVOps(ExplicitOpsHandler):
 
         if op == "status":
             _StatusRequest.model_validate(payload)
-            report = _CacheReportResponse.model_validate(self._registry.exergy_report()).model_dump()
+            report = _CacheReportResponse.model_validate(
+                self._registry.exergy_report()
+            ).model_dump()
             return _CacheStatusResponse(
                 agent=agent_id,
                 supported_ops=sorted(self.supported_ops),

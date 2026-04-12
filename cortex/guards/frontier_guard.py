@@ -2,6 +2,7 @@ import json
 import logging
 from pathlib import Path
 
+from cortex.extensions.llm._presets import default_presets_path
 from cortex.guards.models import ALLOWED_TIERS
 from cortex.utils.errors import SovereignViolation
 
@@ -16,9 +17,7 @@ class FrontierModelGuard:
 
     def __init__(self, presets_path: str | Path | None = None):
         if presets_path is None:
-            # Default location relative to project root or cortex package
-            # Based on previous research: config/llm_presets.json
-            self.presets_path = Path("config/llm_presets.json")
+            self.presets_path = default_presets_path()
         else:
             self.presets_path = Path(presets_path)
 

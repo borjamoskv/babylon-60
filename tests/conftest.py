@@ -8,11 +8,15 @@ from pathlib import Path
 
 import pytest
 
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
 # ── Sortu scripts resolution ──────────────────────────────────────────────────
 # The sortu_* modules live in scripts/sortu/. Individual test files also try to
 # inject the local ~/.gemini path (for developer convenience), but CI doesn't
 # have that tree.  This conftest ensures the tracked path is always present.
-_SORTU_SCRIPTS = Path(__file__).resolve().parents[1] / "scripts" / "sortu"
+_SORTU_SCRIPTS = _REPO_ROOT / "scripts" / "sortu"
 if _SORTU_SCRIPTS.exists() and str(_SORTU_SCRIPTS) not in sys.path:
     sys.path.insert(0, str(_SORTU_SCRIPTS))
 
@@ -58,5 +62,6 @@ async def cleanup_swarm_teardown() -> typing.AsyncGenerator[None, None]:
     """Ensure determinism and zero dangling tasks after each test."""
     yield
     from cortex.extensions.swarm.manager import get_swarm_manager
+
     manager = get_swarm_manager()
     await manager.shutdown_all()

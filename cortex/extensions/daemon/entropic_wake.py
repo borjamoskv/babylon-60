@@ -70,7 +70,9 @@ class EntropicWakeDaemon:
             entropy_score += epistemic_ghosts * 0.05
 
             # 3. DB Type Ghosts
-            cursor.execute("SELECT COUNT(*) FROM facts WHERE fact_type = 'ghost' AND is_tombstoned = 0")
+            cursor.execute(
+                "SELECT COUNT(*) FROM facts WHERE fact_type = 'ghost' AND is_tombstoned = 0"
+            )
             db_ghosts = cursor.fetchone()[0]
             entropy_score += db_ghosts * 0.15
 

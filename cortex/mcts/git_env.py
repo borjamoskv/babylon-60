@@ -13,6 +13,7 @@ import time
 from pathlib import Path
 
 from cortex.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
+from cortex.utils.result import Err
 
 logger = logging.getLogger("cortex.mcts.git_env")
 
@@ -44,9 +45,10 @@ class MCTSGitEnvironment:
         await proc.communicate()
         if proc.returncode != 0:
             # Fallback for existing branch
-            await asyncio.create_subprocess_shell(
+            fallback_proc = await asyncio.create_subprocess_shell(
                 f"git checkout {shlex.quote(new_name)}"
-            ).communicate()
+            )
+            await fallback_proc.communicate()
         return new_name
 
     async def mutate(self, prompt_instruction: str) -> bool:
@@ -72,7 +74,7 @@ class MCTSGitEnvironment:
         )
 
         res = await self.router.execute_resilient(prompt)
-        if res.is_err():
+        if isinstance(res, Err):
             logger.error("Error en mutación LLM: %s", res.error)
             return False
 
@@ -144,6 +146,9 @@ class MCTSGitEnvironment:
     async def secure_checkout(self, branch: str) -> None:
         """Vuelve a una rama segura restaurando cualquier cambio."""
         logger.debug("Restaurando entropía: checkout a %s", branch)
-        await asyncio.create_subprocess_shell("git reset --hard HEAD").communicate()
-        await asyncio.create_subprocess_shell("git clean -fd").communicate()
-        await asyncio.create_subprocess_shell(f"git checkout {shlex.quote(branch)}").communicate()
+        reset_proc = await asyncio.create_subprocess_shell("git reset --hard HEAD")
+        await reset_proc.communicate()
+        clean_proc = await asyncio.create_subprocess_shell("git clean -fd")
+        await clean_proc.communicate()
+        checkout_proc = await asyncio.create_subprocess_shell(f"git checkout {shlex.quote(branch)}")
+        await checkout_proc.communicate()

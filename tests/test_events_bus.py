@@ -47,4 +47,6 @@ async def test_event_bus_signal_persistence_failure_does_not_block_subscribers(c
         await bus.publish("topic.test", {"hello": "world"})
 
     assert len(seen) == 1
-    assert any("Signal Bus persistence failed for topic topic.test" in msg for msg in caplog.messages)
+    assert any(
+        "Signal Bus persistence failed for topic topic.test" in msg for msg in caplog.messages
+    )

@@ -3,7 +3,7 @@ import logging
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 from cortex.core.paths import find_skill_path, resolve_skill_script
 from cortex.engine import CortexEngine as AsyncCortexEngine
@@ -65,7 +65,7 @@ class CuatridaOrchestrator:
             actual_tx_id = cursor.lastrowid
         else:
             # Standalone fallback
-            tx_res = await self.engine.write(
+            tx_res = await cast(Any, self.engine).write(
                 "INSERT INTO transactions (project, action, detail, prev_hash, hash, timestamp) "
                 "VALUES (?, ?, ?, 'GENESIS', 'sha256:standalone_placeholder', ?)",
                 (project, f"cuatrida:{dimension.value}", json.dumps(metadata), timestamp),

@@ -113,10 +113,14 @@ class TestUsageTracker:
 
         tracker.record(UsageRecord(tenant_id="tenant-ts", endpoint="/v1/memories", timestamp=ts))
 
-        row = tracker._get_conn().execute(
-            "SELECT timestamp, month_bucket FROM api_usage WHERE tenant_id = ?",
-            ("tenant-ts",),
-        ).fetchone()
+        row = (
+            tracker._get_conn()
+            .execute(
+                "SELECT timestamp, month_bucket FROM api_usage WHERE tenant_id = ?",
+                ("tenant-ts",),
+            )
+            .fetchone()
+        )
         assert row["timestamp"] == "2026-04-07T12:34:56+00:00"
         assert row["month_bucket"] == "2026-04"
 
@@ -129,10 +133,14 @@ class TestUsageTracker:
             )
         )
 
-        row = tracker._get_conn().execute(
-            "SELECT timestamp FROM api_usage WHERE tenant_id = ?",
-            ("tenant-date",),
-        ).fetchone()
+        row = (
+            tracker._get_conn()
+            .execute(
+                "SELECT timestamp FROM api_usage WHERE tenant_id = ?",
+                ("tenant-date",),
+            )
+            .fetchone()
+        )
         assert row["timestamp"] == "2026-04-07T00:00:00+00:00"
 
 

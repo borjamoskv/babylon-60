@@ -217,7 +217,7 @@ async def test_store_direct_pipeline(manager, mock_mem0_pipeline):
         patch.object(
             type(manager),
             "_check_deduplication",
-            return_value=None,
+            return_value={"status": "new", "id": None},
         ),
         patch.object(
             type(manager._schema_engine),
@@ -235,6 +235,22 @@ async def test_store_direct_pipeline(manager, mock_mem0_pipeline):
     assert result_id == "engram_123"
     mock_mem0_pipeline.evaluate_exergy.assert_called_once()
     manager.thalamus.filter.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_check_deduplication_uses_async_native_arbiter(manager):
+    manager._arbiter.check_async = AsyncMock(return_value="native collision")
+
+    result = await manager._check_deduplication(
+        tenant_id="tenant_x",
+        project_id="proj",
+        content="Important fact",
+        subject_hash="abc123",
+    )
+
+    manager._arbiter.check_async.assert_awaited_once_with("abc123")
+    assert result["status"] == "conflict"
+    assert result["id"] == "native:conflict"
 
 
 @pytest.mark.asyncio
@@ -302,7 +318,7 @@ async def test_store_resonance_deduplication(manager, mock_mem0_pipeline):
     with patch.object(
         type(manager),
         "_check_deduplication",
-        return_value=None,
+        return_value={"status": "new", "id": None},
     ):
         result_id = await manager.store(
             tenant_id="t1",
@@ -403,3 +419,224 @@ async def test_wait_for_background_timeout(manager):
 
     # Queue should have been auto-drained due to timeout logic (since CORTEX_TESTING is set)
     assert manager._bg_queue.empty()
+
+
+@pytest.mark.asyncio
+async def test_process_interaction_forwards_to_continual_learning(
+    mock_l1, mock_l2, mock_l3, mock_encoder
+):
+    continual_learning = MagicMock()
+    continual_learning.on_interaction = MagicMock(return_value={"accepted": True})
+    mgr = CortexMemoryManager(
+        l1=mock_l1,
+        l2=mock_l2,
+        l3=mock_l3,
+        encoder=mock_encoder,
+        continual_learning=continual_learning,
+        max_bg_tasks=1,
+    )
+
+    event = await mgr.process_interaction(
+        role="user",
+        content="Train from this interaction",
+        session_id="session_cl",
+        token_count=12,
+        tenant_id="tenant_cl",
+        project_id="project_cl",
+        metadata={"user_id": "user_cl", "channel": "chat"},
+    )
+
+    continual_learning.on_interaction.assert_called_once_with(
+        tenant_id="tenant_cl",
+        user_id="user_cl",
+        text="Train from this interaction",
+        trace_id=event.event_id,
+        metadata={
+            "user_id": "user_cl",
+            "channel": "chat",
+            "tenant_id": "tenant_cl",
+            "project_id": "project_cl",
+            "role": "user",
+        },
+    )
+    mgr._cancel_background_tasks()
+
+
+@pytest.mark.asyncio
+async def test_process_interaction_sidecar_failure_does_not_break_pipeline(
+    mock_l1, mock_l2, mock_l3, mock_encoder
+):
+    continual_learning = MagicMock()
+    continual_learning.on_interaction = MagicMock(side_effect=ValueError("bad metadata"))
+    mgr = CortexMemoryManager(
+        l1=mock_l1,
+        l2=mock_l2,
+        l3=mock_l3,
+        encoder=mock_encoder,
+        continual_learning=continual_learning,
+        max_bg_tasks=1,
+    )
+
+    event = await mgr.process_interaction(
+        role="user",
+        content="Still persist the event",
+        session_id="session_cl",
+        token_count=8,
+        tenant_id="tenant_cl",
+    )
+
+    assert event.content == "Still persist the event"
+    mock_l3.append_event.assert_called_once()
+    mgr._cancel_background_tasks()
+
+
+@pytest.mark.asyncio
+async def test_plan_continual_update_returns_none_when_sidecar_disabled(manager) -> None:
+    result = await manager.plan_continual_update(tenant_id="tenant_1", domain="support")
+    assert result is None
+
+
+@pytest.mark.asyncio
+async def test_continual_learning_status_returns_disabled_when_sidecar_missing(manager) -> None:
+    result = await manager.continual_learning_status(tenant_id="tenant_1", domain="support")
+
+    assert result == {
+        "enabled": False,
+        "tenant_id": "tenant_1",
+        "domain": "support",
+        "backend_configured": False,
+    }
+
+
+@pytest.mark.asyncio
+async def test_plan_continual_update_forwards_to_sidecar(mock_l1, mock_l2, mock_l3, mock_encoder):
+    continual_learning = MagicMock()
+    continual_learning.plan_micro_update = MagicMock(return_value={"adapter_id": "lora:test"})
+    mgr = CortexMemoryManager(
+        l1=mock_l1,
+        l2=mock_l2,
+        l3=mock_l3,
+        encoder=mock_encoder,
+        continual_learning=continual_learning,
+        max_bg_tasks=1,
+    )
+
+    result = await mgr.plan_continual_update(
+        tenant_id="tenant_cl",
+        domain="support",
+        policy_violation=True,
+    )
+
+    assert result == {"adapter_id": "lora:test"}
+    continual_learning.plan_micro_update.assert_called_once_with(
+        tenant_id="tenant_cl",
+        domain="support",
+        policy_violation=True,
+    )
+    mgr._cancel_background_tasks()
+
+
+@pytest.mark.asyncio
+async def test_continual_learning_status_forwards_to_sidecar(
+    mock_l1, mock_l2, mock_l3, mock_encoder
+):
+    continual_learning = MagicMock()
+    continual_learning.status = MagicMock(
+        return_value={"enabled": True, "tenant_id": "tenant_cl", "domain": "support"}
+    )
+    backend = MagicMock()
+    mgr = CortexMemoryManager(
+        l1=mock_l1,
+        l2=mock_l2,
+        l3=mock_l3,
+        encoder=mock_encoder,
+        continual_learning=continual_learning,
+        continual_training_backend=backend,
+        max_bg_tasks=1,
+    )
+
+    result = await mgr.continual_learning_status(
+        tenant_id="tenant_cl",
+        domain="support",
+    )
+
+    assert result == {
+        "enabled": True,
+        "tenant_id": "tenant_cl",
+        "domain": "support",
+        "backend_configured": True,
+    }
+    continual_learning.status.assert_called_once_with(
+        tenant_id="tenant_cl",
+        domain="support",
+    )
+    mgr._cancel_background_tasks()
+
+
+@pytest.mark.asyncio
+async def test_execute_continual_update_returns_none_without_backend(manager) -> None:
+    result = await manager.execute_continual_update(tenant_id="tenant_1", domain="support")
+    assert result is None
+
+
+@pytest.mark.asyncio
+async def test_execute_continual_update_forwards_to_sidecar(
+    mock_l1, mock_l2, mock_l3, mock_encoder
+):
+    continual_learning = MagicMock()
+    continual_learning.execute_micro_update = MagicMock(return_value={"committed": True})
+    backend = MagicMock()
+    mgr = CortexMemoryManager(
+        l1=mock_l1,
+        l2=mock_l2,
+        l3=mock_l3,
+        encoder=mock_encoder,
+        continual_learning=continual_learning,
+        continual_training_backend=backend,
+        max_bg_tasks=1,
+    )
+
+    result = await mgr.execute_continual_update(
+        tenant_id="tenant_cl",
+        domain="support",
+        policy_violation=True,
+        critical_domains=("support", "security"),
+    )
+
+    assert result == {"committed": True}
+    continual_learning.execute_micro_update.assert_called_once_with(
+        tenant_id="tenant_cl",
+        domain="support",
+        backend=backend,
+        policy_violation=True,
+        critical_domains=("support", "security"),
+    )
+    mgr._cancel_background_tasks()
+
+
+@pytest.mark.asyncio
+async def test_forget_continual_memory_forwards_to_sidecar(mock_l1, mock_l2, mock_l3, mock_encoder):
+    continual_learning = MagicMock()
+    continual_learning.forget = MagicMock(return_value={"deleted_exp_ids": ["exp-1"]})
+    mgr = CortexMemoryManager(
+        l1=mock_l1,
+        l2=mock_l2,
+        l3=mock_l3,
+        encoder=mock_encoder,
+        continual_learning=continual_learning,
+        max_bg_tasks=1,
+    )
+
+    result = await mgr.forget_continual_memory(
+        tenant_id="tenant_cl",
+        user_id="user_cl",
+        query="secret",
+    )
+
+    assert result == {"deleted_exp_ids": ["exp-1"]}
+    continual_learning.forget.assert_called_once_with(
+        tenant_id="tenant_cl",
+        user_id="user_cl",
+        query="secret",
+    )
+    mgr._cancel_background_tasks()

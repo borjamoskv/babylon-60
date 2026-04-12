@@ -106,7 +106,9 @@ def _execute_translation(request: TranslateRequest, client: Any) -> TranslateRes
     try:
         from google.genai import types
     except ImportError as exc:
-        raise HTTPException(status_code=500, detail="google-genai package is not installed.") from exc
+        raise HTTPException(
+            status_code=500, detail="google-genai package is not installed."
+        ) from exc
 
     system_instruction = _build_system_instruction(request.context)
     prompt = f"Target languages: {request.target_languages}\n\nTexts to translate:\n{json.dumps(request.texts, ensure_ascii=False, indent=2)}"

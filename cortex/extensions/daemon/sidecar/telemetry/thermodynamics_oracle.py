@@ -50,9 +50,15 @@ class ThermodynamicsOracle:
         while self._running:
             try:
                 # Measure Event Loop Lag (Temporal Friction)
+                probe_interval = min(0.1, max(0.01, self.poll_interval))
                 start_time = time.perf_counter()
-                await asyncio.sleep(0.1)
-                lag_ms = (time.perf_counter() - start_time - 0.1) * 1000.0
+                try:
+                    await asyncio.wait_for(self._stop_event.wait(), timeout=probe_interval)
+                    self._running = False
+                    break
+                except TimeoutError:
+                    pass
+                lag_ms = (time.perf_counter() - start_time - probe_interval) * 1000.0
                 lag_ms = max(0.0, lag_ms)
 
                 await self._sample_thermodynamics(lag_ms)
@@ -194,23 +200,54 @@ class ThermodynamicsOracle:
         purged = 0
         current = asyncio.current_task()
         for task in asyncio.all_tasks():
-            if task is current:
+            if task is current or not self._is_purgeable_task(task):
                 continue
-
-            task_name = task.get_name().lower()
-            try:
-                coro_name = task.get_coro().__name__.lower()  # type: ignore
-            except AttributeError:
-                coro_name = ""
-
-            # Safeguards to prevent system bricking
-            is_critical = any(kw in task_name for kw in ("p0", "engine", "core", "server")) or any(
-                kw in coro_name for kw in ("start", "serve", "watch", "loop")
-            )
-
-            if not is_critical:
-                task.cancel()
-                purged += 1
+            task.cancel()
+            purged += 1
 
         # Cooldown forced yield to allow tasks to process their CancelledError
         return purged
+
+    def _is_purgeable_task(self, task: asyncio.Task[object]) -> bool:
+        """Restrict annihilation to internal non-critical background tasks only."""
+        task_name = task.get_name().lower()
+        coro_name = ""
+        coro_filename = ""
+
+        try:
+            coro = task.get_coro()
+            coro_name = getattr(coro, "__qualname__", getattr(coro, "__name__", "")).lower()
+            coro_code = getattr(coro, "cr_code", None)
+            if coro_code is not None:
+                coro_filename = str(coro_code.co_filename)
+        except (AttributeError, RuntimeError, TypeError, ValueError):
+            return False
+
+        # Never cancel external caller/test harness tasks. The purge is limited to
+        # internal background work spawned from the cortex package itself.
+        if "cortex" not in coro_filename.split(os.sep):
+            return False
+
+        is_critical = any(kw in task_name for kw in ("p0", "engine", "core", "server")) or any(
+            kw in coro_name for kw in ("start", "serve", "watch", "loop")
+        )
+        if is_critical:
+            return False
+
+        background_markers = (
+            "agent",
+            "daemon",
+            "ghost",
+            "hedge",
+            "heartbeat",
+            "monitor",
+            "oracle",
+            "persist",
+            "pulse",
+            "supervisor",
+            "watchdog",
+            "worker",
+        )
+        return any(marker in task_name for marker in background_markers) or any(
+            marker in coro_name for marker in background_markers
+        )

@@ -77,9 +77,7 @@ async def generate_linkedin_commentary(
             if not commentary:
                 raise ValueError("Empty response from LLM")
 
-            logger.info(
-                "LinkedIn AI: OK provider=%s chars=%d", p_name, len(commentary)
-            )
+            logger.info("LinkedIn AI: OK provider=%s chars=%d", p_name, len(commentary))
             return commentary, p_name
 
         except Exception as e:
@@ -87,9 +85,7 @@ async def generate_linkedin_commentary(
             last_error = e
             continue
 
-    raise RuntimeError(
-        f"All LLM providers failed. Last error: {last_error}"
-    )
+    raise RuntimeError(f"All LLM providers failed. Last error: {last_error}")
 
 
 def generate_linkedin_commentary_sync(
@@ -128,8 +124,13 @@ def _clean_output(raw: str) -> str:
 
     # Drop common preamble lines
     preamble_prefixes = (
-        "here is", "here's", "sure", "of course",
-        "linkedin post:", "post:", "---",
+        "here is",
+        "here's",
+        "sure",
+        "of course",
+        "linkedin post:",
+        "post:",
+        "---",
     )
     lines = text.splitlines()
     while lines and lines[0].lower().startswith(preamble_prefixes):
@@ -149,7 +150,7 @@ def _clean_output(raw: str) -> str:
             truncated.rfind(".\n"),
         )
         if last_period > _LINKEDIN_MAX_CHARS * 0.7:
-            text = truncated[:last_period + 1]
+            text = truncated[: last_period + 1]
         else:
             text = truncated.rstrip() + "…"
 

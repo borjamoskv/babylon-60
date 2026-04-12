@@ -9,15 +9,16 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class RLVREvaluator:
     """
     Evaluates actions thermodynamically.
     Instead of binary pass/fail, it assigns a Q-value [-1.0 to 1.0].
     """
-    
+
     def __init__(self, target_latency_ms: float = 500.0):
         self.target_latency_ms = target_latency_ms
-        
+
     def evaluate(self, exit_code: int, latency_ms: float, payload_size: int = 0) -> float:
         """
         Calculates the thermodynamic Q-value reward.
@@ -27,9 +28,9 @@ class RLVREvaluator:
         """
         if exit_code != 0:
             return -1.0
-            
+
         reward = 0.5
-        
+
         # Latency optimization (faster = higher reward)
         latency_ratio = self.target_latency_ms / max(latency_ms, 1.0)
         if latency_ratio > 1.0:
@@ -38,6 +39,6 @@ class RLVREvaluator:
         else:
             # Slower than target
             reward -= min(0.4, (1.0 - latency_ratio) * 0.2)
-            
+
         # Hard bounds
         return max(-1.0, min(1.0, reward))

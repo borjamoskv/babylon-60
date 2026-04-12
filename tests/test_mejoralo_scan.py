@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 from cortex.extensions.mejoralo.scan import scan
 
 

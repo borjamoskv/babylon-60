@@ -14,7 +14,7 @@ import logging
 import math
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from cortex.extensions.mejoralo.constants import (
     DAEMON_DEFAULT_TARGET_SCORE,
@@ -137,7 +137,9 @@ class MejoraloOmegaAgent:
 
     async def _execute_cycle(self) -> None:
         """Single improvement cycle: scan → prioritize → heal → verify → absorb."""
-        from cortex.cli import console  # pyright: ignore
+        from cortex.cli import console as _console  # pyright: ignore
+
+        console = cast(Any, _console)
 
         console.rule(f"[cyan]MEJORALO-Ω Cycle {self._cycle_count}")
 

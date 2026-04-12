@@ -104,3 +104,27 @@ def test_cli_package_exports_console_and_engine_lazily() -> None:
     assert console.__class__.__name__ == "Console"
     assert callable(get_engine)
     assert "cortex.cli.common" in sys.modules
+
+
+def test_cli_package_reset_recovers_preloaded_command_modules() -> None:
+    import cortex.cli.agent_cmds  # noqa: F401
+
+    package_name = "cortex.cli"
+    package = _reset_package(
+        package_name,
+        ("cli", "console", "get_engine"),
+        (
+            "cortex.cli.main",
+            "cortex.cli.common",
+        ),
+    )
+
+    # Recreate the lazy common module first, leaving *_cmds modules cached.
+    _ = package.console
+    _ = package.get_engine
+
+    cli = package.cli
+
+    assert "agent" in cli.commands
+    assert "demiurge" in cli.commands
+    assert "grammy" in cli.commands

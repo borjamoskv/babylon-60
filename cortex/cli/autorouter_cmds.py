@@ -51,6 +51,7 @@ def daemon_script() -> Path:
         "autorouter_daemon.py",
     ) or resolve_skill_script("autorouter-1", "scripts", "autorouter_daemon.py")
 
+
 # Constants for file paths
 LOG_FILENAME = "router_daemon.log"
 LOG_PATH = CORTEX_DIR / LOG_FILENAME

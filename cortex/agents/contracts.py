@@ -336,9 +336,9 @@ class CausalEdgePayload(BaseModel):
     fact_id: str
     parent_id: str | None = None
     signal_id: str | None = None
-    edge_type: Literal["derived_from", "tainted_by", "triggered_by", "supersedes", "contradicts"] = (
-        "derived_from"
-    )
+    edge_type: Literal[
+        "derived_from", "tainted_by", "triggered_by", "supersedes", "contradicts"
+    ] = "derived_from"
     tenant_id: str
     project: str = "default"
     taint: str

@@ -182,20 +182,14 @@ class QueryMixin(EngineMixinBase):
                     as_of,
                     table_alias="f",
                 )
-                q = (
-                    f"{base} AND {clause} ORDER BY "
-                    "coalesce(f.valid_from, f.created_at) DESC"
-                )
+                q = f"{base} AND {clause} ORDER BY coalesce(f.valid_from, f.created_at) DESC"
                 async with conn.execute(
                     q,
                     (tenant_id, project, *tparams),
                 ) as cursor:
                     rows = await cursor.fetchall()
             else:
-                q = (
-                    f"{base} ORDER BY "
-                    "coalesce(f.valid_from, f.created_at) DESC"
-                )
+                q = f"{base} ORDER BY coalesce(f.valid_from, f.created_at) DESC"
                 async with conn.execute(q, (tenant_id, project)) as cursor:
                     rows = await cursor.fetchall()
             return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]

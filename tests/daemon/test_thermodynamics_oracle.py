@@ -54,6 +54,32 @@ async def test_stop_interrupts_long_poll_interval() -> None:
 
 
 @pytest.mark.asyncio
+async def test_annihilation_protocol_does_not_cancel_external_tasks(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    oracle = ThermodynamicsOracle(engine=SimpleNamespace(), thermal_threshold=0.1)
+    oracle._psutil = None
+    oracle._cores = 1
+
+    monkeypatch.setattr("platform.system", lambda: "Linux")
+    monkeypatch.setattr("os.getloadavg", lambda: (10.0, 1.0, 1.0))
+
+    release = asyncio.Event()
+
+    async def external_waiter() -> None:
+        await release.wait()
+
+    external_task = asyncio.create_task(external_waiter())
+    try:
+        await oracle._sample_thermodynamics(lag_ms=1500.0)
+        assert not external_task.cancelled()
+        assert not external_task.done()
+    finally:
+        release.set()
+        await asyncio.wait_for(external_task, timeout=0.3)
+
+
+@pytest.mark.asyncio
 async def test_start_logs_cycle_failures_and_recovers(
     monkeypatch: pytest.MonkeyPatch,
     caplog: pytest.LogCaptureFixture,

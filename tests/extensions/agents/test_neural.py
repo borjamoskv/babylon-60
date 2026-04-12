@@ -5,9 +5,7 @@ import json
 from cortex.extensions.agents import neural
 
 
-def test_engine_merges_mac_control_defaults_into_existing_rule_file(
-    tmp_path, monkeypatch
-) -> None:
+def test_engine_merges_mac_control_defaults_into_existing_rule_file(tmp_path, monkeypatch) -> None:
     rules_path = tmp_path / "neural_rules.json"
     rules_path.write_text(
         json.dumps(

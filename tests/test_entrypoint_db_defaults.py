@@ -32,7 +32,9 @@ def test_swarm_cli_defaults_follow_cortex_db_path(monkeypatch, tmp_path) -> None
 
     reloaded = importlib.reload(swarm_cmds)
     deploy_db = next(param.default for param in reloaded.swarm_deploy.params if param.name == "db")
-    board_db = next(param.default for param in reloaded.swarm_board_cmd.params if param.name == "db")
+    board_db = next(
+        param.default for param in reloaded.swarm_board_cmd.params if param.name == "db"
+    )
 
     assert deploy_db == str(preferred)
     assert board_db == str(preferred)
@@ -68,14 +70,13 @@ def test_swarm_dashboard_prefers_cortex_db_path(monkeypatch, tmp_path) -> None:
 
 def test_toolbox_launcher_exports_db_path_aliases() -> None:
     script = (
-        Path(__file__).resolve().parent.parent
-        / "cortex"
-        / "mcp"
-        / "toolbox"
-        / "run_toolbox.sh"
+        Path(__file__).resolve().parent.parent / "cortex" / "mcp" / "toolbox" / "run_toolbox.sh"
     ).read_text()
 
-    assert 'export CORTEX_DB_PATH="${CORTEX_DB_PATH:-${CORTEX_DB:-${HOME}/.cortex/cortex.db}}"' in script
+    assert (
+        'export CORTEX_DB_PATH="${CORTEX_DB_PATH:-${CORTEX_DB:-${HOME}/.cortex/cortex.db}}"'
+        in script
+    )
     assert 'export CORTEX_DB="${CORTEX_DB:-${CORTEX_DB_PATH}}"' in script
 
 

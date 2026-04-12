@@ -17,10 +17,12 @@ from __future__ import annotations
 import json
 import logging
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 import aiosqlite
 
+from cortex.core.paths import CORTEX_DB
 from cortex.memory.models import MemoryEvent
 
 __all__ = ["EventLedgerL3"]
@@ -64,10 +66,15 @@ class EventLedgerL3:
     connection) ensuring non-blocking, crash-safe persistence.
     """
 
-    __slots__ = ("_conn", "_ready", "_last_hash_cache")
+    __slots__ = ("_conn", "_db_path", "_ready", "_last_hash_cache")
 
-    def __init__(self, conn: aiosqlite.Connection) -> None:
+    def __init__(
+        self,
+        conn: aiosqlite.Connection | None = None,
+        db_path: str | Path | None = None,
+    ) -> None:
         self._conn = conn
+        self._db_path = Path(db_path).expanduser() if db_path is not None else CORTEX_DB
         self._ready = False
         self._last_hash_cache: dict[str, str] = {}  # tenant_id -> last_hash
 
@@ -75,17 +82,36 @@ class EventLedgerL3:
         """Create the events table if it doesn't exist (idempotent)."""
         if self._ready:
             return
+        if self._conn is None:
+            self._db_path.parent.mkdir(parents=True, exist_ok=True)
+            self._conn = await aiosqlite.connect(str(self._db_path))
         await self._conn.executescript(_CREATE_TABLE_SQL)
         await self._conn.executescript(_CREATE_INDEX_SQL)
         await self._conn.commit()
         self._ready = True
+
+    async def close(self) -> None:
+        """Close an internally managed connection if one exists."""
+        if self._conn is None:
+            return
+        await self._conn.close()
+        self._conn = None
+        self._ready = False
+        self._last_hash_cache.clear()
+
+    def _require_conn(self) -> aiosqlite.Connection:
+        """Return the initialized connection after ``ensure_table`` has run."""
+        if self._conn is None:
+            raise RuntimeError("EventLedgerL3 connection is not initialized")
+        return self._conn
 
     async def _get_last_hash(self, tenant_id: str) -> str:
         """Fetch the signature of the last event for a tenant to continue the chain."""
         if tenant_id in self._last_hash_cache:
             return self._last_hash_cache[tenant_id]
 
-        cursor = await self._conn.execute(
+        conn = self._require_conn()
+        cursor = await conn.execute(
             """SELECT signature FROM memory_events
                WHERE tenant_id = ?
                ORDER BY rowid DESC
@@ -102,6 +128,7 @@ class EventLedgerL3:
         import hashlib
 
         await self.ensure_table()
+        conn = self._require_conn()
 
         # [GOVERNANCE] Calculate the cryptographic chain if signature is missing
         if not event.signature:
@@ -120,7 +147,7 @@ class EventLedgerL3:
             object.__setattr__(event, "prev_hash", prev_hash)
             object.__setattr__(event, "signature", signature)
 
-        cursor = await self._conn.execute(
+        cursor = await conn.execute(
             """INSERT OR IGNORE INTO memory_events
                (event_id, timestamp, role, content, token_count,
                 session_id, tenant_id, prev_hash, signature, metadata)
@@ -138,7 +165,7 @@ class EventLedgerL3:
                 json.dumps(event.metadata),
             ),
         )
-        await self._conn.commit()
+        await conn.commit()
         if cursor.rowcount:
             self._last_hash_cache[event.tenant_id] = event.signature
 
@@ -152,7 +179,8 @@ class EventLedgerL3:
         if not tenant_id or not tenant_id.strip():
             raise ValueError("tenant_id is required for session-scoped ledger reads")
         await self.ensure_table()
-        cursor = await self._conn.execute(
+        conn = self._require_conn()
+        cursor = await conn.execute(
             """SELECT event_id, timestamp, role, content, token_count,
                       session_id, tenant_id, prev_hash, signature, metadata
                FROM memory_events
@@ -167,7 +195,8 @@ class EventLedgerL3:
     async def replay(self, tenant_id: str, limit: int = 1000) -> list[MemoryEvent]:
         """Replay events for a specific tenant in chronological order for state reconstruction."""
         await self.ensure_table()
-        cursor = await self._conn.execute(
+        conn = self._require_conn()
+        cursor = await conn.execute(
             """SELECT event_id, timestamp, role, content, token_count,
                       session_id, tenant_id, prev_hash, signature, metadata
                FROM memory_events
@@ -182,13 +211,14 @@ class EventLedgerL3:
     async def count(self, tenant_id: str, session_id: str | None = None) -> int:
         """Count events for a tenant, optionally filtered by session."""
         await self.ensure_table()
+        conn = self._require_conn()
         if session_id:
-            cursor = await self._conn.execute(
+            cursor = await conn.execute(
                 "SELECT COUNT(*) FROM memory_events WHERE tenant_id = ? AND session_id = ?",
                 (tenant_id, session_id),
             )
         else:
-            cursor = await self._conn.execute(
+            cursor = await conn.execute(
                 "SELECT COUNT(*) FROM memory_events WHERE tenant_id = ?",
                 (tenant_id,),
             )
@@ -203,7 +233,8 @@ class EventLedgerL3:
         import hashlib
 
         await self.ensure_table()
-        cursor = await self._conn.execute(
+        conn = self._require_conn()
+        cursor = await conn.execute(
             """SELECT event_id, timestamp, role, content, tenant_id, prev_hash, signature
                FROM memory_events
                WHERE tenant_id = ?

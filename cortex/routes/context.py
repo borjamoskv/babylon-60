@@ -49,7 +49,9 @@ def get_p95_context_latency() -> float | None:
 async def infer_context(
     request: Request,
     persist: bool = Query(True, description="Persist snapshot to DB"),
-    signal_limit: int | None = Query(None, ge=1, le=200, description="Max input signals to collect"),
+    signal_limit: int | None = Query(
+        None, ge=1, le=200, description="Max input signals to collect"
+    ),
     top_signals_limit: int = Query(10, ge=1, le=50, description="Max top signals to return"),
     projects_limit: int = Query(10, ge=1, le=50, description="Max ranked projects to return"),
     auth: AuthResult = Depends(require_permission("read")),

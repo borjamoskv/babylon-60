@@ -122,9 +122,7 @@ async def _run_unix_pipe(
         limit=1024 * 1024,  # 1 MB backpressure cap
     )
     try:
-        stdout, stderr = await asyncio.wait_for(
-            proc.communicate(), timeout=spec.timeout_s
-        )
+        stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=spec.timeout_s)
     except asyncio.TimeoutError as exc:
         proc.kill()
         telemetry.finalize(exit_code=-1, error=f"Timeout after {spec.timeout_s}s")
@@ -402,15 +400,13 @@ class PipelineKernelAgent(BaseAgent):
         await self.bus.send(msg)
 
     async def _emit_health_summary(self) -> None:
-        for target in (self.manifest.escalation_targets or []):
+        for target in self.manifest.escalation_targets or []:
             msg = new_message(
                 sender=self.manifest.agent_id,
                 recipient=target,
                 kind=MessageKind.TASK_RESULT,
                 payload={
-                    "active_pipelines": [
-                        t.as_dict() for t in self._active_pipelines.values()
-                    ]
+                    "active_pipelines": [t.as_dict() for t in self._active_pipelines.values()]
                 },
             )
             await self.bus.send(msg)

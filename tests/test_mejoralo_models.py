@@ -39,4 +39,3 @@ def test_antipattern_report_counts_and_groups_by_severity() -> None:
     grouped = report.by_severity()
     assert len(grouped["critical"]) == 1
     assert len(grouped["high"]) == 2
-

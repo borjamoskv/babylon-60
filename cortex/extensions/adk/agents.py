@@ -112,9 +112,7 @@ def _build_default_domain_agents() -> list[str]:
     order remains deterministic.
     """
     return [
-        f"{family}_{role}"
-        for family in _DEFAULT_DOMAIN_FAMILIES
-        for role in _DEFAULT_DOMAIN_ROLES
+        f"{family}_{role}" for family in _DEFAULT_DOMAIN_FAMILIES for role in _DEFAULT_DOMAIN_ROLES
     ]
 
 

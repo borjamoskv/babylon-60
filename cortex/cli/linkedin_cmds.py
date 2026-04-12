@@ -13,6 +13,7 @@ import webbrowser
 from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
+from typing import TypedDict, cast
 
 import click
 from rich.console import Console
@@ -25,6 +26,12 @@ from cortex.config import DEFAULT_DB_PATH
 console = Console()
 
 
+class OrganizationPermissionCheck(TypedDict):
+    ok: bool | None
+    reasons: list[str]
+    error: str | None
+
+
 @click.group(name="linkedin")
 def linkedin_cmds() -> None:
     """LinkedIn Posts API — markdown → preview → approve → publish."""
@@ -32,6 +39,7 @@ def linkedin_cmds() -> None:
 
 
 # ─── AUTH ─────────────────────────────────────────────────────────────────────
+
 
 @linkedin_cmds.command()
 @click.option(
@@ -109,7 +117,7 @@ def auth(
         raise click.Abort() from None
 
     resolved_org_urn = ""
-    permission_check: dict[str, object] | None = None
+    permission_check: OrganizationPermissionCheck | None = None
     if org:
         requested_org_urn = organization_urn or config.organization_urn
         try:
@@ -126,11 +134,14 @@ def auth(
                 raise click.Abort() from None
 
         if resolved_org_urn:
-            permission_check = check_organization_post_permission(
-                token,
-                config.api_version,
-                member_urn,
-                resolved_org_urn,
+            permission_check = cast(
+                OrganizationPermissionCheck,
+                check_organization_post_permission(
+                    token,
+                    config.api_version,
+                    member_urn,
+                    resolved_org_urn,
+                ),
             )
 
     console.print("\n[bold green]✅ Authorization successful![/bold green]\n")
@@ -163,11 +174,8 @@ def auth(
                 "[bold]ORGANIC_SHARE_CREATE approved[/bold]"
             )
         elif permission_check["ok"] is False:
-            reasons = ", ".join(permission_check["reasons"]) or "unknown reason"
-            console.print(
-                "\n[red]Organization permission check denied:[/red] "
-                f"{reasons}"
-            )
+            reasons = ", ".join(cast(list[str], permission_check["reasons"])) or "unknown reason"
+            console.print(f"\n[red]Organization permission check denied:[/red] {reasons}")
         else:
             console.print(
                 "\n[yellow]Organization permission check skipped:[/yellow] "
@@ -176,6 +184,7 @@ def auth(
 
 
 # ─── PUBLISH ──────────────────────────────────────────────────────────────────
+
 
 @linkedin_cmds.command()
 @click.option(
@@ -372,11 +381,11 @@ def publish(
             config.member_urn,
             config.organization_urn,
         )
+        permission_check = cast(OrganizationPermissionCheck, permission_check)
         if permission_check["ok"] is False:
-            reasons = ", ".join(permission_check["reasons"]) or "unknown reason"
+            reasons = ", ".join(cast(list[str], permission_check["reasons"])) or "unknown reason"
             console.print(
-                "[red]❌ Organization permission denied for ORGANIC_SHARE_CREATE:[/red] "
-                f"{reasons}"
+                f"[red]❌ Organization permission denied for ORGANIC_SHARE_CREATE:[/red] {reasons}"
             )
             raise click.Abort()
         if permission_check["ok"] is None:
@@ -431,6 +440,7 @@ def publish(
 
 # ─── HISTORY ──────────────────────────────────────────────────────────────────
 
+
 @linkedin_cmds.command()
 @click.option("--limit", "-n", default=10, help="Number of records to show.")
 def history(limit: int) -> None:
@@ -468,11 +478,11 @@ def history(limit: int) -> None:
 
 # ─── Register ─────────────────────────────────────────────────────────────────
 
+
 def _show_preview(post, content_hash: str, dry_run: bool, actor_urn: str) -> None:
     """Rich preview panel of the post before sending."""
     mode_label = (
-        "[yellow]DRY-RUN PREVIEW[/yellow]" if dry_run
-        else "[bold red]LIVE PUBLISH[/bold red]"
+        "[yellow]DRY-RUN PREVIEW[/yellow]" if dry_run else "[bold red]LIVE PUBLISH[/bold red]"
     )
     actor_label = actor_urn or "unresolved (preview only)"
     content = (

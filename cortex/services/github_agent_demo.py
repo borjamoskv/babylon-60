@@ -28,6 +28,7 @@ def build_github_agent_payload(
         payload[key] = value
     return payload
 
+
 async def run_github_agent_demo(
     payload: dict[str, Any],
     *,

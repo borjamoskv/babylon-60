@@ -57,8 +57,7 @@ class LedgerVerifier:
                 payload_hash = payload.get("hash")
                 if payload_hash is not None and payload_hash != c_hash:
                     violations.append(
-                        f"Payload hash mismatch at {event_id}: "
-                        f"payload {payload_hash}, row {c_hash}"
+                        f"Payload hash mismatch at {event_id}: payload {payload_hash}, row {c_hash}"
                     )
 
                 if p_hash != current_prev:

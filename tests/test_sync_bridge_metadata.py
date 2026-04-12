@@ -154,9 +154,11 @@ async def test_migration_bridge_sets_bridge_provider(engine, tmp_path: Path) -> 
 
 
 @pytest.mark.slow
-async def test_writeback_bridges_skips_external_and_legacy_github(engine, tmp_path: Path, monkeypatch) -> None:
-    from cortex.extensions.sync.common import WritebackResult
+async def test_writeback_bridges_skips_external_and_legacy_github(
+    engine, tmp_path: Path, monkeypatch
+) -> None:
     from cortex.extensions.sync import write as sync_write
+    from cortex.extensions.sync.common import WritebackResult
 
     monkeypatch.setattr(sync_write, "runtime_memory_dir", lambda: tmp_path)
 
@@ -216,9 +218,11 @@ async def test_writeback_bridges_skips_external_and_legacy_github(engine, tmp_pa
 
 
 @pytest.mark.slow
-async def test_writeback_bridges_skips_system_bridge_kind(engine, tmp_path: Path, monkeypatch) -> None:
-    from cortex.extensions.sync.common import WritebackResult
+async def test_writeback_bridges_skips_system_bridge_kind(
+    engine, tmp_path: Path, monkeypatch
+) -> None:
     from cortex.extensions.sync import write as sync_write
+    from cortex.extensions.sync.common import WritebackResult
 
     monkeypatch.setattr(sync_write, "runtime_memory_dir", lambda: tmp_path)
 

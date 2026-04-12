@@ -441,4 +441,3 @@ class SovereignAppForge:
             "Available Host APIs:\n"
             f"{self.runtime_contract_source()}"
         )
-

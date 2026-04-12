@@ -101,7 +101,9 @@ class GidatuHandler:
             # Native SafeZone enforcement (Ω₃)
             if "safe_zone" in params:
                 if SafeZone is None:
-                    raise ImportError(f"Gidatu safe-zone runtime not available at {self._skill_path}")
+                    raise ImportError(
+                        f"Gidatu safe-zone runtime not available at {self._skill_path}"
+                    )
                 sz = params["safe_zone"]
                 g.guard_zone(SafeZone(sz["x"], sz["y"], sz["w"], sz["h"]))
 

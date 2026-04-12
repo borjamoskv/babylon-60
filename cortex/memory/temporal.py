@@ -135,7 +135,9 @@ def build_temporal_filter_params(
             f"coalesce({prefix}valid_from, {_metadata_fallback(prefix, 'valid_from')}, "
             f"{prefix}created_at)"
         )
-        valid_until_expr = f"coalesce({prefix}valid_until, {_metadata_fallback(prefix, 'valid_until')})"
+        valid_until_expr = (
+            f"coalesce({prefix}valid_until, {_metadata_fallback(prefix, 'valid_until')})"
+        )
         tombstoned_at_expr = (
             f"coalesce({prefix}tombstoned_at, {_metadata_fallback(prefix, 'tombstoned_at')})"
         )

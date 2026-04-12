@@ -111,10 +111,7 @@ async def _cortex_store_decision(
 
     ctx.search_cache.clear()
     ctx.metrics.record_request()
-    return (
-        f"✅ Verified and Stored decision #{fact_id} in project '{project}' "
-        f"[tenant={tenant_id}]"
-    )
+    return f"✅ Verified and Stored decision #{fact_id} in project '{project}' [tenant={tenant_id}]"
 
 
 def _axiom_3_verify(action_type: str, details: str) -> bool:

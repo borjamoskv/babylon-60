@@ -26,7 +26,9 @@ def _status(name: str, granted: bool | None) -> MacCapabilityStatus:
     )
 
 
-def _profile(*, automation: bool | None = True, accessibility: bool | None = True) -> MaestroAccessProfile:
+def _profile(
+    *, automation: bool | None = True, accessibility: bool | None = True
+) -> MaestroAccessProfile:
     return MaestroAccessProfile(
         accessibility=_status("accessibility", accessibility),
         automation=_status("automation", automation),

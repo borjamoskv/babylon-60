@@ -123,10 +123,10 @@ class EngineRuntimeSink:
         artifact = rejection.model_dump(mode="json")
         tenant_id = rejection.tenant_id or "default"
         project = rejection.project or "default"
-        source = (
-            f"agent:{rejection.agent_id}" if rejection.agent_id else "agent:runtime-sink"
+        source = f"agent:{rejection.agent_id}" if rejection.agent_id else "agent:runtime-sink"
+        unique_key = (
+            rejection.proposal_id or rejection.fact_id or rejection.correlation_id or rejection.code
         )
-        unique_key = rejection.proposal_id or rejection.fact_id or rejection.correlation_id or rejection.code
         await self._engine.store(
             project=project,
             tenant_id=tenant_id,
@@ -164,7 +164,9 @@ class EngineRuntimeSink:
         return {
             "runtime_artifact_kind": artifact_kind,
             "runtime_schema": schema_name,
-            "runtime_artifact_hash": hashlib.sha3_256(canonical_artifact.encode("utf-8")).hexdigest(),
+            "runtime_artifact_hash": hashlib.sha3_256(
+                canonical_artifact.encode("utf-8")
+            ).hexdigest(),
             "runtime_idempotency_key": self._idempotency_key(
                 tenant_id=tenant_id,
                 project=project,
@@ -188,9 +190,7 @@ class EngineRuntimeSink:
         unique_key: str,
         canonical_artifact: str,
     ) -> str:
-        payload = "\x00".join(
-            [tenant_id, project, artifact_kind, unique_key, canonical_artifact]
-        )
+        payload = "\x00".join([tenant_id, project, artifact_kind, unique_key, canonical_artifact])
         return hashlib.sha3_256(payload.encode("utf-8")).hexdigest()
 
     def _proposal_content(self, proposal: FactProposal[dict]) -> str:
@@ -201,14 +201,12 @@ class EngineRuntimeSink:
 
     def _tool_evidence_content(self, evidence: ToolEvidencePayload) -> str:
         return (
-            f"[TOOL EVIDENCE] {evidence.tool_name} status={evidence.status} "
-            f"call={evidence.call_id}"
+            f"[TOOL EVIDENCE] {evidence.tool_name} status={evidence.status} call={evidence.call_id}"
         )
 
     def _decision_edge_content(self, edge: DecisionEdgePayload) -> str:
         return (
-            f"[DECISION EDGE] decision={edge.decision_id} fact={edge.fact_id} "
-            f"type={edge.edge_type}"
+            f"[DECISION EDGE] decision={edge.decision_id} fact={edge.fact_id} type={edge.edge_type}"
         )
 
     def _causal_edge_content(self, edge: CausalEdgePayload) -> str:
@@ -216,10 +214,7 @@ class EngineRuntimeSink:
         return f"[CAUSAL EDGE] fact={edge.fact_id} anchor={anchor} type={edge.edge_type}"
 
     def _rejection_content(self, rejection: RejectionEnvelope) -> str:
-        return (
-            f"[RUNTIME REJECTION] {rejection.failed_stage}:{rejection.code} "
-            f"{rejection.reason}"
-        )
+        return f"[RUNTIME REJECTION] {rejection.failed_stage}:{rejection.code} {rejection.reason}"
 
     def _tags(self, *parts: str) -> list[str]:
         tags: list[str] = []

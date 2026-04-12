@@ -57,4 +57,19 @@ SOVEREIGN_INVARIANTS = [
         name="Termination Guarantee",
         description="∀ loop L: ∃ variant v such that v strictly decreases per iteration. Prohibits infinite RSI loops.",
     ),
+    SafetyInvariant(
+        id="I8",
+        name="Self-Sandwich Protection",
+        description="∀ trade t: t.target ∉ user_wallets. Prohibits MEV strategies from targeting owner assets.",
+    ),
+    SafetyInvariant(
+        id="I9",
+        name="Proxy Signal Integrity",
+        description="∀ compression c: c.signal_loss ≤ 0.2. Ensures context collapse maintains logical coherence.",
+    ),
+    SafetyInvariant(
+        id="I10",
+        name="Minimum Agency Factor",
+        description="∀ agent a: a.agency_score ≥ 0.8. Prohibits deployment of low-yield/low-agency logic.",
+    ),
 ]

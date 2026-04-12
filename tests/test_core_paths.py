@@ -45,7 +45,9 @@ def test_resolve_native_binary_prefers_env_override(monkeypatch, tmp_path) -> No
 
 def test_resolve_native_binary_uses_build_cache(monkeypatch) -> None:
     binary_name = "cortex-test-bin"
-    build_bin = paths.Path(paths.__file__).resolve().parents[2] / "build" / "native" / "bin" / binary_name
+    build_bin = (
+        paths.Path(paths.__file__).resolve().parents[2] / "build" / "native" / "bin" / binary_name
+    )
     build_bin.parent.mkdir(parents=True, exist_ok=True)
     build_bin.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
     build_bin.chmod(0o755)
@@ -54,7 +56,10 @@ def test_resolve_native_binary_uses_build_cache(monkeypatch) -> None:
     monkeypatch.setattr(paths.shutil, "which", lambda _: None)
 
     try:
-        assert paths.resolve_native_binary(binary_name, "CORTEX_NATIVE_DB_BIN", "CORTEX_DB_BIN") == build_bin
+        assert (
+            paths.resolve_native_binary(binary_name, "CORTEX_NATIVE_DB_BIN", "CORTEX_DB_BIN")
+            == build_bin
+        )
     finally:
         build_bin.unlink(missing_ok=True)
 
@@ -89,7 +94,10 @@ def test_find_skill_path_searches_alias_directories(monkeypatch, tmp_path) -> No
 
     reloaded = importlib.reload(paths)
 
-    assert reloaded.find_skill_path("singularity-nexus", "scripts/singularity_engine.py") == script_path
+    assert (
+        reloaded.find_skill_path("singularity-nexus", "scripts/singularity_engine.py")
+        == script_path
+    )
 
 
 def test_canonical_skill_name_maps_installed_aliases() -> None:

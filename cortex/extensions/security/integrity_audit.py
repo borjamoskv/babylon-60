@@ -103,7 +103,9 @@ class IntegrityAuditor:
         self._db_path = db_path or str(config.DB_PATH)
 
     @staticmethod
-    def _resolve_plaintext(raw_content: str | None, tenant_id: str | None) -> tuple[str, str | None]:
+    def _resolve_plaintext(
+        raw_content: str | None, tenant_id: str | None
+    ) -> tuple[str, str | None]:
         """Normalize stored fact content back to plaintext for integrity checks."""
         content = raw_content or ""
         if not content:
@@ -112,7 +114,9 @@ class IntegrityAuditor:
         try:
             from cortex.crypto import get_default_encrypter
 
-            plaintext = get_default_encrypter().decrypt_str(content, tenant_id=tenant_id or "default")
+            plaintext = get_default_encrypter().decrypt_str(
+                content, tenant_id=tenant_id or "default"
+            )
         except (RuntimeError, ValueError, TypeError, OSError) as exc:
             return "", f"decryption_failed:{exc}"
 

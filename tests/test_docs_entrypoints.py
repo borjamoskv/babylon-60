@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -43,7 +42,9 @@ def test_docs_homepage_and_nav_highlight_current_entrypoints() -> None:
     assert "Run canonical demo" in docs_index
     assert "Review supported core" in docs_index
     assert "Today: source install, local-first runtime, and self-hosted API beta." in docs_index
-    assert docs_index.index("<strong>Canonical Demo</strong>") < docs_index.index("<strong>API</strong>")
+    assert docs_index.index("<strong>Canonical Demo</strong>") < docs_index.index(
+        "<strong>API</strong>"
+    )
     assert "optional beta self-hosted REST surface" in docs_index
     assert "Canonical Demo: canonical-demo.md" in mkdocs
     assert "Supported Core: supported-core.md" in mkdocs

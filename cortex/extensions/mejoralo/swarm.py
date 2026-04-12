@@ -13,7 +13,7 @@ import textwrap
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from cortex.cli import console  # pyright: ignore
+from cortex.cli import console as _console  # pyright: ignore
 from cortex.extensions.mejoralo.constants import (
     DEVILS_ADVOCATE_THRESHOLD,
     SWARM_BASE_TEMPERATURE,
@@ -31,6 +31,7 @@ from cortex.extensions.thinking.orchestra import ThoughtOrchestra
 from cortex.extensions.thinking.presets import OrchestraConfig, ThinkingMode
 
 logger = logging.getLogger("cortex.extensions.mejoralo.swarm")
+console: Any = _console
 
 # Sovereign Specialists (Level 130/100) — Aligned with kimi-swarm-1
 SPECIALISTS_PROMPTS = {

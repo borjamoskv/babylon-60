@@ -1,32 +1,35 @@
+from __future__ import annotations
+
+from collections.abc import AsyncIterator
 from unittest.mock import AsyncMock
 
 import pytest
+from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 
-from cortex.api.core import app
 from cortex.api.deps import get_async_engine
-from cortex.auth import AuthResult, require_permission
 from cortex.auth.deps import require_auth
+from cortex.auth.models import AuthResult
 from cortex.extensions.swarm.psychohistory import AGENT_BIASES
+from cortex.routes import swarm as swarm_router
 from cortex.utils.result import Ok
 
-# Mock Auth
-mock_auth = AuthResult("test_key", "test_hash")
-mock_auth.authenticated = True
-mock_auth.permissions = ["read", "write", "admin"]
+TEST_AUTH = AuthResult(
+    authenticated=True,
+    tenant_id="test-tenant",
+    permissions=["read", "write", "admin"],
+    key_name="test_key",
+)
 
 
-async def override_auth():
-    return mock_auth
+async def override_auth() -> AuthResult:
+    return TEST_AUTH
 
 
 @pytest.fixture
-def mock_engine():
+def mock_engine() -> AsyncMock:
     engine = AsyncMock()
-    # Mock LLM router
     router = AsyncMock()
-    # Return Ok("Simulated cascade effect") for individual agents
-    # Return Ok("O(1) Contingency Crystal") for synthesis
     router.execute_resilient.side_effect = lambda prompt: Ok(
         "O(1) Contingency Crystal"
         if "Hari Seldon" in prompt.system_instruction
@@ -38,21 +41,21 @@ def mock_engine():
 
 
 @pytest.fixture
-async def client(mock_engine):
+async def client(mock_engine: AsyncMock) -> AsyncIterator[AsyncClient]:
+    app = FastAPI()
+    app.include_router(swarm_router.router)
     app.dependency_overrides[get_async_engine] = lambda: mock_engine
     app.dependency_overrides[require_auth] = override_auth
-
-    for perm in ["read", "write", "admin"]:
-        app.dependency_overrides[require_permission(perm)] = override_auth
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
 
-    app.dependency_overrides.clear()
-
 
 @pytest.mark.asyncio
-async def test_psychohistory_simulation_api(client, mock_engine):
+async def test_psychohistory_simulation_api(
+    client: AsyncClient,
+    mock_engine: AsyncMock,
+) -> None:
     payload = {
         "scenario_name": "Apagón Satelital Test",
         "simulated_years": 10,
@@ -65,12 +68,10 @@ async def test_psychohistory_simulation_api(client, mock_engine):
     data = resp.json()
     assert data["scenario"] == "Apagón Satelital Test"
     assert data["simulated_years"] == 10
-    assert data["active_agents"] == len(AGENT_BIASES)  # Should be 50
+    assert data["active_agents"] == len(AGENT_BIASES)
     assert data["contingency_crystal"] == "O(1) Contingency Crystal"
-    # Given all mocked responses succeed, resonance should be quite high (0.85-0.95 range due to logic)
     assert data["resonance"] > 0
 
-    # Verify that the engine.store was called to persist the crystal
     mock_engine.store.assert_called_once()
     store_kwargs = mock_engine.store.call_args.kwargs
     assert store_kwargs["project"] == "TEST_PROJECT"

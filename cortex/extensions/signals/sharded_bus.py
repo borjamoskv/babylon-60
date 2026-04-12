@@ -10,8 +10,10 @@ import asyncio
 import hashlib
 import json
 import logging
+from collections.abc import Iterable
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from typing import Any
 
 import aiosqlite
 
@@ -164,13 +166,13 @@ class ShardedDurableSignalBus:
         async def safe_fetch(conn):
             return await asyncio.wait_for(fetch_rows(conn), timeout=5.0)
 
-        all_results = await asyncio.gather(
-            *(safe_fetch(c) for c in conns), return_exceptions=True
+        all_results: list[list[Any] | BaseException] = list(
+            await asyncio.gather(*(safe_fetch(c) for c in conns), return_exceptions=True)
         )
 
-        all_signals = []
+        all_signals: list[Signal] = []
         for rows in all_results:
-            if isinstance(rows, Exception):
+            if isinstance(rows, BaseException):
                 logger.warning("Timeout or error in history shard fetch: %s", rows)
                 continue
             all_signals.extend([signal_from_row(tuple(row)) for row in rows])
@@ -215,12 +217,18 @@ class ShardedDurableSignalBus:
             return await asyncio.wait_for(fetch_candidates(idx), timeout=5.0)
 
         # O(1) Cluster polling
-        raw_results = await asyncio.gather(
-            *(safe_fetch_candidates(idx) for idx in shard_indices), return_exceptions=True
+        raw_results = list(
+            await asyncio.gather(
+                *(safe_fetch_candidates(idx) for idx in shard_indices), return_exceptions=True
+            )
         )
-        results = [r for r in raw_results if not isinstance(r, Exception)]
+        results: list[tuple[int, Iterable[Any]]] = []
+        for r in raw_results:
+            if isinstance(r, BaseException):
+                continue
+            results.append(r)
 
-        all_candidate_signals = []
+        all_candidate_signals: list[tuple[int, Signal]] = []
         for idx, rows in results:
             for r in rows:
                 all_candidate_signals.append((idx, signal_from_row(tuple(r))))
@@ -234,7 +242,9 @@ class ShardedDurableSignalBus:
 
         for idx, sig in selected_pairs:
             new_consumed = sig.consumed_by + [consumer]
-            updates_by_shard.setdefault(idx, []).append((json.dumps(new_consumed), sig.id, tenant_id))
+            updates_by_shard.setdefault(idx, []).append(
+                (json.dumps(new_consumed), sig.id, tenant_id)
+            )
             polled_signals.append(sig)
 
         async def update_shard(idx: int, updates: list):
@@ -250,10 +260,7 @@ class ShardedDurableSignalBus:
 
         if updates_by_shard:
             await asyncio.gather(
-                *(
-                    safe_update_shard(idx, updates)
-                    for idx, updates in updates_by_shard.items()
-                ),
+                *(safe_update_shard(idx, updates) for idx, updates in updates_by_shard.items()),
                 return_exceptions=True,
             )
 
@@ -281,11 +288,17 @@ class ShardedDurableSignalBus:
         async def safe_remove_from_shard(conn):
             return await asyncio.wait_for(remove_from_shard(conn), timeout=5.0)
 
-        raw_results = await asyncio.gather(
-            *(safe_remove_from_shard(c) for c in self._shards.values()),
-            return_exceptions=True,
+        raw_results: list[int | BaseException] = list(
+            await asyncio.gather(
+                *(safe_remove_from_shard(c) for c in self._shards.values()),
+                return_exceptions=True,
+            )
         )
-        results = [r for r in raw_results if not isinstance(r, Exception)]
+        results: list[int] = []
+        for r in raw_results:
+            if isinstance(r, BaseException):
+                continue
+            results.append(r)
         total_pruned = sum(results)
 
         if total_pruned:

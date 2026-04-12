@@ -60,7 +60,9 @@ async def test_evaluate_returns_clean_result_when_facts_table_is_missing() -> No
 
 
 @pytest.mark.asyncio
-async def test_evaluate_logs_when_entropy_threshold_is_crossed(caplog: pytest.LogCaptureFixture) -> None:
+async def test_evaluate_logs_when_entropy_threshold_is_crossed(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     conn = await aiosqlite.connect(":memory:")
     try:
         await _build_facts_table(conn)

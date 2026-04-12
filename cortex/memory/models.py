@@ -255,6 +255,8 @@ class CortexFactModel(BaseModel):
     )
     storage_tier: str = Field(default="HOT", description="Performance tier [HOT, WARM, COLD].")
     facet_version: int = Field(default=2, description="Internal facet schema version.")
+    subject_hash: str = Field(default="", description="Semantic hash for conflict detection.")
+    is_conflict: bool = Field(default=False, description="Flag for contradictory facts.")
 
     # Specular Memory
     specular_embedding: list[int] | None = Field(

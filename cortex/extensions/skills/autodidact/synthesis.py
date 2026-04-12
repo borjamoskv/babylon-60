@@ -13,6 +13,7 @@ import logging
 import re
 from typing import Any
 
+from cortex.core.paths import CORTEX_DB
 from cortex.extensions.llm._models import CortexPrompt
 from cortex.extensions.llm.provider import LLMProvider
 from cortex.extensions.llm.router import CortexLLMRouter, IntentProfile
@@ -60,6 +61,7 @@ vector_db = SovereignVectorStoreL2(encoder=encode_engine)
 # Lazy singleton for memory manager
 _memory_manager: CortexMemoryManager | None = None
 
+
 def get_memory_manager() -> CortexMemoryManager:
     """Lazy-init the sovereign memory manager (Ω9)."""
     global _memory_manager
@@ -69,22 +71,17 @@ def get_memory_manager() -> CortexMemoryManager:
     # Avoid module-level expensive imports or side-effects
     from cortex.memory.ledger import EventLedgerL3
     from cortex.memory.working import WorkingMemoryL1
-    
+
     # Check if a global manager is available from context
     # In a real engine run, this would be injected.
     # For now, we create a 'Skill-Native' one.
     l1 = WorkingMemoryL1()
-    # Ω9: We use a Null or ephemeral ledger if no DB connection is provided
-    # However, to be 'Estanca', we should ideally have a real dev ledger.
-    l3 = EventLedgerL3(None)  # type: ignore
-    
-    _memory_manager = CortexMemoryManager(
-        l1=l1, 
-        l2=vector_db, 
-        l3=l3, 
-        encoder=encode_engine
-    )
+    # Use the canonical CORTEX DB path so the skill writes to a real L3 ledger.
+    l3 = EventLedgerL3(db_path=CORTEX_DB)
+
+    _memory_manager = CortexMemoryManager(l1=l1, l2=vector_db, l3=l3, encoder=encode_engine)
     return _memory_manager
+
 
 # Lazy singleton — built on first use
 _synthesis_router: CortexLLMRouter | None = None
@@ -320,7 +317,7 @@ async def execute_cognitive_synthesis(
             "compression_ratio": "absolute_neutrality_zero_indexing",
         },
         parent_decision_id=None,
-        is_diamond=True
+        is_diamond=True,
     )
 
     if "conflict" in memo_id_result.lower():

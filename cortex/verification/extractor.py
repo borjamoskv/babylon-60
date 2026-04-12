@@ -32,9 +32,27 @@ class SMTModelExtractor(ast.NodeVisitor):
             if name in {"delete", "remove", "drop_table"}:
                 self._add_violation("I2", f"Prohibited method call: {name}")
 
+            # Ouroboros MEV (I8)
+            if name == "build_bundle":
+                self._add_violation(
+                    "I8", "Jito bundle detected. Formal verification of 'target_address' required."
+                )
+
         elif isinstance(node.func, ast.Name):
             if node.func.id == "eval":
                 self._add_violation("I7", "Prohibited use of 'eval' prevents termination analysis.")
+
+            # Ouroboros Proxy (I9)
+            if node.func.id == "collapse_context":
+                # Check for signal_loss parameter if present
+                for keyword in node.keywords:
+                    if keyword.arg == "signal_loss" and isinstance(keyword.value, ast.Constant):
+                        signal_loss = keyword.value.value
+                        if isinstance(signal_loss, (int, float)) and signal_loss > 0.2:
+                            self._add_violation(
+                                "I9",
+                                f"Critical Signal Loss detected: {signal_loss} > 0.2 threshold.",
+                            )
 
         self.generic_visit(node)
 

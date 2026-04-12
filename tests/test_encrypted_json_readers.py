@@ -142,14 +142,12 @@ async def test_hdc_store_encrypts_metadata_and_preserves_toxic_lookup(
         )
         """
     )
-    conn.execute(
-        "CREATE TABLE hdc_vec_facts (rowid INTEGER PRIMARY KEY, embedding BLOB)"
-    )
-    conn.execute(
-        "CREATE TABLE hdc_specular_vec_facts (rowid INTEGER PRIMARY KEY, embedding BLOB)"
-    )
+    conn.execute("CREATE TABLE hdc_vec_facts (rowid INTEGER PRIMARY KEY, embedding BLOB)")
+    conn.execute("CREATE TABLE hdc_specular_vec_facts (rowid INTEGER PRIMARY KEY, embedding BLOB)")
 
-    object.__setattr__(store, "_encoder", MagicMock(dimension=4, encode_fact=lambda **_: [1, -1, 1, -1]))
+    object.__setattr__(
+        store, "_encoder", MagicMock(dimension=4, encode_fact=lambda **_: [1, -1, 1, -1])
+    )
     object.__setattr__(store, "_item_memory", MagicMock(save_codebook=lambda: None))
     object.__setattr__(store, "_db_path", ":memory:")
     object.__setattr__(store, "_conn", conn)
@@ -169,7 +167,9 @@ async def test_hdc_store_encrypts_metadata_and_preserves_toxic_lookup(
     )
     await HDCVectorStoreL2.memorize(store, fact, fact_type="error")
 
-    row = conn.execute("SELECT metadata FROM hdc_facts_meta WHERE id = ?", ("hdc-toxic-1",)).fetchone()
+    row = conn.execute(
+        "SELECT metadata FROM hdc_facts_meta WHERE id = ?", ("hdc-toxic-1",)
+    ).fetchone()
     assert row is not None
     assert row["metadata"].startswith(CortexEncrypter.PREFIX)
     assert load_json_dict(row["metadata"], tenant_id="tenant-a") == {

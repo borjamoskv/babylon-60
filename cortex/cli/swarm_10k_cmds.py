@@ -37,7 +37,7 @@ def swarm_10k_deploy(db_path, tasks_count):
     )
 
     async def _run():
-        commander = SwarmCommander(bus_path=p)
+        commander = SwarmCommander(bus_path=p, use_shm=False)
 
         with Progress(
             SpinnerColumn(),
@@ -65,7 +65,7 @@ def swarm_10k_deploy(db_path, tasks_count):
             "\n[bold #00FFCC]✅ 10K TOPOLOGY STABLE[/]\n"
             f"Legions (L1): {report['legions']} | Centurions (L2): {report['centurions']} | Active Agents: {report['agents']}"
         )
-        await commander.bus.close()
+        await commander.close_transport()
 
     asyncio.run(_run())
 
@@ -77,14 +77,10 @@ def swarm_10k_status(db_path):
     p = Path(db_path).expanduser()
 
     async def _run():
-        commander = SwarmCommander(bus_path=p)
+        commander = SwarmCommander(bus_path=p, use_shm=False)
         await commander.initialize()
 
-        total_signals = 0
-        for sys_idx in range(commander.bus.num_shards):
-            conn = commander.bus._shards[sys_idx]
-            row = await (await conn.execute("SELECT COUNT(*) FROM signals")).fetchone()
-            total_signals += row[0] if row else 0
+        total_signals = await commander.get_signal_count()
 
         console.print(
             Panel(
@@ -94,7 +90,7 @@ def swarm_10k_status(db_path):
                 border_style="blue",
             )
         )
-        await commander.bus.close()
+        await commander.close_transport()
 
     asyncio.run(_run())
 
@@ -106,7 +102,7 @@ def swarm_10k_consolidate(db_path):
     p = Path(db_path).expanduser()
 
     async def _run():
-        commander = SwarmCommander(bus_path=p)
+        commander = SwarmCommander(bus_path=p, use_shm=False)
         await commander.initialize()
 
         console.print("[dim]Initiating Ouroboros-Omega Annihilation...[/]")

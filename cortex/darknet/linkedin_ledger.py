@@ -19,15 +19,15 @@ logger = logging.getLogger("cortex.darknet.linkedin_ledger")
 
 @dataclass
 class PublishRecord:
-    id: str                  # content_hash (16-char SHA256 prefix)
+    id: str  # content_hash (16-char SHA256 prefix)
     source_file: str
     article_url: str
     title: str
     git_sha: str
-    post_id: str             # LinkedIn post URN or "DRY-<hash>"
+    post_id: str  # LinkedIn post URN or "DRY-<hash>"
     post_url: str
-    dry_run: int             # 0 or 1
-    success: int             # 0 or 1
+    dry_run: int  # 0 or 1
+    success: int  # 0 or 1
     error: str
     published_at: float
 
@@ -127,10 +127,17 @@ class LinkedInLedger:
             ).fetchall()
         return [
             PublishRecord(
-                id=r[0], source_file=r[1], article_url=r[2],
-                title=r[3], git_sha=r[4], post_id=r[5],
-                post_url=r[6], dry_run=r[7], success=r[8],
-                error=r[9], published_at=r[10],
+                id=r[0],
+                source_file=r[1],
+                article_url=r[2],
+                title=r[3],
+                git_sha=r[4],
+                post_id=r[5],
+                post_url=r[6],
+                dry_run=r[7],
+                success=r[8],
+                error=r[9],
+                published_at=r[10],
             )
             for r in rows
         ]

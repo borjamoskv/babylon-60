@@ -1,7 +1,5 @@
 """Tests for Context Cache Adapter — Phase 5."""
 
-import time
-
 from cortex.engine.context_cache import ContextCacheManager, EvictionPolicy
 
 
@@ -84,18 +82,24 @@ class TestContextCacheManager:
         # TTL=-1 means already expired
         assert mgr.get(entry.cache_id) is None
 
-    def test_lru_eviction(self):
+    def test_lru_eviction(self, monkeypatch):
         mgr = ContextCacheManager(
             max_entries=2,
             eviction_policy=EvictionPolicy.LRU,
         )
+        from itertools import count
+
+        tick = count()
+        monkeypatch.setattr(
+            "cortex.engine.context_cache.time.time",
+            lambda: 1_700_000_000.0 + next(tick) * 0.001,
+        )
+
         e1 = mgr.create(project="t", provider="g", model="m", token_count=100)
-        time.sleep(0.01)
         e2 = mgr.create(project="t", provider="g", model="m", token_count=200)
 
         # Access e1 to make it recently used
         mgr.get(e1.cache_id)
-        time.sleep(0.01)
 
         # This should evict e2 (least recently used)
         e3 = mgr.create(project="t", provider="g", model="m", token_count=300)

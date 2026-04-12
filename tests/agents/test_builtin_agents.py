@@ -124,9 +124,7 @@ class TestMemoryAgent:
         await agent.run()
 
         replies = await _drain(bus, "caller")
-        assert any(
-            r.payload.get("ok") is True and r.payload.get("op") == "store" for r in replies
-        )
+        assert any(r.payload.get("ok") is True and r.payload.get("op") == "store" for r in replies)
         result = next(r.payload["result"] for r in replies if r.payload.get("op") == "store")
         assert result["fact_id"] == "fact-uuid-1"
         assert result["tenant_id"] == "tenant-A"
@@ -160,8 +158,7 @@ class TestMemoryAgent:
 
         replies = await _drain(bus, "caller")
         assert any(
-            r.payload.get("ok") is True and r.payload.get("op") == "context"
-            for r in replies
+            r.payload.get("ok") is True and r.payload.get("op") == "context" for r in replies
         )
         result = next(r.payload["result"] for r in replies if r.payload.get("op") == "context")
         assert result["tenant_id"] == "tenant-A"
@@ -186,8 +183,7 @@ class TestMemoryAgent:
         assert any(r.payload.get("ok") is True for r in task_results)
         assert any(r.payload.get("result", {}).get("status") == "ok" for r in task_results)
         assert any(
-            "store" in r.payload.get("result", {}).get("supported_ops", [])
-            for r in task_results
+            "store" in r.payload.get("result", {}).get("supported_ops", []) for r in task_results
         )
 
     @pytest.mark.asyncio
@@ -204,15 +200,16 @@ class TestMemoryAgent:
     async def test_store_requires_explicit_tenant(self, bus, mock_manager):
         agent = self._agent(bus, mock_manager)
         await bus.send(
-            new_message("caller", "mem-1", MessageKind.TASK_REQUEST, {"op": "store", "content": "x"})
+            new_message(
+                "caller", "mem-1", MessageKind.TASK_REQUEST, {"op": "store", "content": "x"}
+            )
         )
         await bus.send(new_message("caller", "mem-1", MessageKind.SHUTDOWN, {}))
         await agent.run()
 
         replies = await _drain(bus, "caller")
         assert any(
-            r.payload.get("ok") is False
-            and "tenant_id is required" in r.payload.get("error", "")
+            r.payload.get("ok") is False and "tenant_id is required" in r.payload.get("error", "")
             for r in replies
         )
         mock_manager.store.assert_not_called()
@@ -290,7 +287,9 @@ class TestMementoAgent:
         await agent.run()
 
         replies = await _drain(bus, "caller")
-        results = [r.payload.get("result", {}) for r in replies if r.kind == MessageKind.TASK_RESULT]
+        results = [
+            r.payload.get("result", {}) for r in replies if r.kind == MessageKind.TASK_RESULT
+        ]
         assert results[0] == "engram-1"
         assert results[1]["episodes"] == ["e1"]
         mock_manager.store.assert_called_once()
@@ -299,8 +298,12 @@ class TestMementoAgent:
     @pytest.mark.asyncio
     async def test_status_and_unknown_op(self, bus, mock_manager):
         agent = self._agent(bus, mock_manager)
-        await bus.send(new_message("caller", "memento-1", MessageKind.TASK_REQUEST, {"op": "status"}))
-        await bus.send(new_message("caller", "memento-1", MessageKind.TASK_REQUEST, {"op": "amnesia"}))
+        await bus.send(
+            new_message("caller", "memento-1", MessageKind.TASK_REQUEST, {"op": "status"})
+        )
+        await bus.send(
+            new_message("caller", "memento-1", MessageKind.TASK_REQUEST, {"op": "amnesia"})
+        )
         await bus.send(new_message("caller", "memento-1", MessageKind.SHUTDOWN, {}))
         await agent.run()
 
@@ -359,9 +362,13 @@ class TestCacheKVAgent:
         await agent.run()
 
         replies = await _drain(bus, "caller")
-        results = [r.payload.get("result", {}) for r in replies if r.kind == MessageKind.TASK_RESULT]
+        results = [
+            r.payload.get("result", {}) for r in replies if r.kind == MessageKind.TASK_RESULT
+        ]
         assert len(results) == 2
-        assert all(r.payload.get("ok") is True for r in replies if r.kind == MessageKind.TASK_RESULT)
+        assert all(
+            r.payload.get("ok") is True for r in replies if r.kind == MessageKind.TASK_RESULT
+        )
         assert results[0]["tenant_id"] == "tenant-1"
         assert results[1]["cache_key"] == results[0]["cache_key"]
         assert results[1]["hits"] == 1
@@ -384,21 +391,31 @@ class TestCacheKVAgent:
                 {"op": "affinity", "system_prompt": "shared prompt"},
             )
         )
-        await bus.send(new_message("caller", "cache-kv-1", MessageKind.TASK_REQUEST, {"op": "report"}))
+        await bus.send(
+            new_message("caller", "cache-kv-1", MessageKind.TASK_REQUEST, {"op": "report"})
+        )
         await bus.send(new_message("caller", "cache-kv-1", MessageKind.SHUTDOWN, {}))
         await agent.run()
 
         replies = await _drain(bus, "caller")
-        results = [r.payload.get("result", {}) for r in replies if r.kind == MessageKind.TASK_RESULT]
-        assert all(r.payload.get("ok") is True for r in replies if r.kind == MessageKind.TASK_RESULT)
+        results = [
+            r.payload.get("result", {}) for r in replies if r.kind == MessageKind.TASK_RESULT
+        ]
+        assert all(
+            r.payload.get("ok") is True for r in replies if r.kind == MessageKind.TASK_RESULT
+        )
         assert results[0]["providers"] == ["anthropic"]
         assert results[1]["total_slots"] == 1
 
     @pytest.mark.asyncio
     async def test_status_and_unknown_op(self, bus, registry):
         agent = self._agent(bus, registry)
-        await bus.send(new_message("caller", "cache-kv-1", MessageKind.TASK_REQUEST, {"op": "status"}))
-        await bus.send(new_message("caller", "cache-kv-1", MessageKind.TASK_REQUEST, {"op": "nuke"}))
+        await bus.send(
+            new_message("caller", "cache-kv-1", MessageKind.TASK_REQUEST, {"op": "status"})
+        )
+        await bus.send(
+            new_message("caller", "cache-kv-1", MessageKind.TASK_REQUEST, {"op": "nuke"})
+        )
         await bus.send(new_message("caller", "cache-kv-1", MessageKind.SHUTDOWN, {}))
         await agent.run()
 
@@ -454,7 +471,9 @@ class TestTempusFugitAgent:
         await agent.run()
 
         replies = await _drain(bus, "caller")
-        results = [r.payload.get("result", {}) for r in replies if r.kind == MessageKind.TASK_RESULT]
+        results = [
+            r.payload.get("result", {}) for r in replies if r.kind == MessageKind.TASK_RESULT
+        ]
         assert results[0]["heartbeat_id"] >= 1
         assert results[1]["entries_created"] >= 1
         assert len(results[2]) == 1
@@ -471,7 +490,9 @@ class TestTempusFugitAgent:
                 {"op": "normalize", "value": "2026-04-07"},
             )
         )
-        await bus.send(new_message("caller", "tempus-1", MessageKind.TASK_REQUEST, {"op": "status"}))
+        await bus.send(
+            new_message("caller", "tempus-1", MessageKind.TASK_REQUEST, {"op": "status"})
+        )
         await bus.send(new_message("caller", "tempus-1", MessageKind.SHUTDOWN, {}))
         await agent.run()
 
@@ -631,9 +652,7 @@ class TestGitHubAgent:
         await bus.send(new_message("caller", "gh-1", MessageKind.SHUTDOWN, {}))
         await agent.run()
 
-        assert calls == [
-            {"args": ["pr", "view", "123", "--web"], "cwd": "/tmp/acme-cortex"}
-        ]
+        assert calls == [{"args": ["pr", "view", "123", "--web"], "cwd": "/tmp/acme-cortex"}]
 
     @pytest.mark.asyncio
     async def test_invalid_lines_reply_error(self, bus, shortcut_factory):
@@ -655,9 +674,7 @@ class TestGitHubAgent:
     @pytest.mark.asyncio
     async def test_unknown_op(self, bus, shortcut_factory):
         agent = self._agent(bus, shortcut_factory)
-        await bus.send(
-            new_message("caller", "gh-1", MessageKind.TASK_REQUEST, {"op": "nuke-repo"})
-        )
+        await bus.send(new_message("caller", "gh-1", MessageKind.TASK_REQUEST, {"op": "nuke-repo"}))
         await bus.send(new_message("caller", "gh-1", MessageKind.SHUTDOWN, {}))
         await agent.run()
 

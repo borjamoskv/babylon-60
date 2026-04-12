@@ -93,10 +93,17 @@ async def daemon_ingesta_soberana(
             raw_data=texto_raw, source=target_url, force=force_bypass, intent=intent
         )
 
-        if "MEMO" in str(memo_id):
+        memo_str = str(memo_id)
+        if "REJECTED" in memo_str or "conflict" in memo_str:
+            logger.error("🛑 [EPISTEMIC SHOCK] Abortando asimilación: %s", memo_id)
+            return {"estado": "CONTRADICTORIO", "error": memo_str}
+
+        if "MEMO" in memo_str and "deduplicated" not in memo_str:
             logger.info("✨ Singularidad alcanzada. Memo: %s", memo_id)
             return {"estado": "ASIMILADO", "memo_id": memo_id}
-        # Si execute_cognitive_synthesis retornó un ID de memo existente (redundancia)
+
+        # Si execute_cognitive_synthesis retornó un ID de memo existente o status filtrado
+        logger.warning("❄️ [ENTROPIA] Redundancia detectada: %s", memo_id)
         return {"estado": "REDUNDANTE", "memo_id": memo_id}
 
     except Exception as e:  # noqa: BLE001 — synthesis pipeline failure must return error state
@@ -121,7 +128,9 @@ async def daemon_jit_synthesis(
 
     # 1. Epistemic Breaker: Yield Termodinámico Neto
     yield_metric = evaluate_net_yield(
-        expected_tokens_saved, expected_cpu_savings, llm_cost,
+        expected_tokens_saved,
+        expected_cpu_savings,
+        llm_cost,
     )
     if not yield_metric.is_profitable:
         logger.error(

@@ -5,7 +5,7 @@ Sovereign Command-Line Interface for CORTEX.
 
 from __future__ import annotations
 
-__all__ = ["cli", "console", "get_engine"]
+__all__ = ["cli", "console", "get_engine"]  # pyright: ignore[reportUnsupportedDunderAll]
 
 
 def __getattr__(name: str):

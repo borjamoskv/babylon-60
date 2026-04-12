@@ -343,9 +343,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
                 self.autopoiesis_daemon = AutopoiesisDaemon(
                     engine=self._shared_engine,
                     workspace_root=Path(file_config.get("watch_path", str(CORTEX_DIR))),
-                    cycle_interval_hours=float(
-                        file_config.get("autopoiesis_interval_hours", 24.0)
-                    ),
+                    cycle_interval_hours=float(file_config.get("autopoiesis_interval_hours", 24.0)),
                     idle_poll_seconds=float(file_config.get("autopoiesis_idle_poll_seconds", 60.0)),
                     target_score=int(file_config.get("autopoiesis_target_score", 95)),
                     enable_healing=bool(file_config.get("autopoiesis_enable_healing", True)),

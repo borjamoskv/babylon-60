@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, is_dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from cortex import __version__
 from cortex.types.models import FactResponse, SearchResult, StatusResponse, StoreResponse
@@ -26,7 +26,9 @@ def fact_like_to_dict(fact: Any) -> dict[str, Any]:
 
     to_dict = getattr(fact, "to_dict", None)
     if callable(to_dict):
-        return to_dict()
+        payload = to_dict()
+        if isinstance(payload, dict):
+            return payload
 
     return {
         "id": getattr(fact, "id", None),
@@ -97,8 +99,8 @@ def to_search_result(result: Any) -> SearchResult:
 
 def _normalize_public_payload(value: Any) -> Any:
     """Convert service return values into JSON-safe public payloads."""
-    if is_dataclass(value):
-        return asdict(value)
+    if not isinstance(value, type) and is_dataclass(value):
+        return asdict(cast(Any, value))
     model_dump = getattr(value, "model_dump", None)
     if callable(model_dump):
         return model_dump()

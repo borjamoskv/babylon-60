@@ -14,6 +14,7 @@ from typing import Any
 
 import httpx
 
+from cortex.extensions.llm._presets import default_presets_path
 from cortex.extensions.sync.common import SYSTEM_BRIDGE_KIND
 
 logger = logging.getLogger("cortex.extensions.agents.apis_omega")
@@ -37,10 +38,12 @@ class ApisOmegaAgent:
 
     def __init__(
         self,
-        presets_path: str | Path = "/Users/borjafernandezangulo/30_CORTEX/config/llm_presets.json",
+        presets_path: str | Path | None = None,
         db_path: str | Path | None = None,
     ):
-        self.presets_path = Path(presets_path)
+        self.presets_path = (
+            Path(presets_path) if presets_path is not None else default_presets_path()
+        )
         self._engine: Any = None
         self._db_path = db_path
         self._agent_def: Any = None

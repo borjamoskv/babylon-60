@@ -60,7 +60,9 @@ def _is_private_host(host: str) -> bool:
         except ValueError:
             continue
         if any(ip in network for network in _PRIVATE_NETWORKS):
-            logger.error("URLGuard: Blocked hostname %s resolving to private IP %s", host, candidate)
+            logger.error(
+                "URLGuard: Blocked hostname %s resolving to private IP %s", host, candidate
+            )
             return True
     return False
 

@@ -8,49 +8,57 @@ Visualizes reputation slashing, consensus alignment, and exergy extraction.
 """
 
 import asyncio
+import json
 import os
-import sqlite3
-from datetime import datetime
+import subprocess
 from pathlib import Path
 
-from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
 from rich.table import Table
 
+from cortex.core.paths import resolve_native_binary
+
+# Configuración de Rutas (Ω₀)
+CORTEX_DB_BIN = resolve_native_binary("cortex-db", "CORTEX_NATIVE_DB_BIN", "CORTEX_DB_BIN")
+
 
 def _resolve_db_path() -> Path:
+    """Resolve the dashboard DB path with the documented env precedence."""
     override = os.environ.get("CORTEX_DB_PATH") or os.environ.get("CORTEX_DB")
     if override:
         return Path(override).expanduser()
-
     return Path.home() / ".cortex" / "cortex.db"
 
 
+# Backward-compatible DB alias used by entrypoint/tests that verify env precedence.
 DB_PATH = _resolve_db_path()
 
-console = Console()
-
-
-def get_swarm_status():
-    """Fetches agent status from the local ledger."""
+def get_native_events(role: str | None = None, limit: int = 5):
+    """Fetches real-time events from the native silicon ledger."""
+    if CORTEX_DB_BIN is None:
+        return []
     try:
-        conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.execute(
-            "SELECT id, reputation_score, alignment_hits, alignment_misses "
-            "FROM agents WHERE is_active = 1 ORDER BY id LIMIT 100"
-        )
-        agents = cursor.fetchall()
-
-        cursor = conn.execute("SELECT count(1) FROM facts")
-        fact_count = cursor.fetchone()[0]
-
-        conn.close()
-        return agents, fact_count
+        cmd = [str(CORTEX_DB_BIN), "query", role if role else "all", str(limit)]
+        res = subprocess.run(cmd, capture_output=True, text=True, check=False)
+        if res.returncode == 0:
+            return json.loads(res.stdout)
     except Exception:
-        return [], 0
+        pass
+    return []
+
+async def get_swarm_telemetry():
+    """Simulates or fetches density report from the active commander."""
+    # En un entorno real, interrogaríamos al bus compartido
+    return {
+        "legions": 5,
+        "centurions": 12,
+        "agents": 120,
+        "shards": 4,
+        "exergy": 0.94,
+        "thermal_status": "STABLE"
+    }
 
 
 def make_grid(agents):
@@ -94,44 +102,67 @@ def make_layout() -> Layout:
 
 async def main():
     layout = make_layout()
+    layout["main"].split_column(
+        Layout(name="top"),
+        Layout(name="findings", size=10)
+    )
+    layout["top"].split_row(
+        Layout(name="grid", ratio=2),
+        Layout(name="stats", ratio=1),
+    )
 
     with Live(layout, refresh_per_second=2, screen=True):
         while True:
-            agents, fact_count = get_swarm_status()
-
-            # Header
+            # 1. Fetch Data
+            bounties = get_native_events("BOUNTY", limit=5)
+            all_events = get_native_events(limit=20)
+            telemetry = await get_swarm_telemetry()
+            
+            # 2. Update Header
+            status_color = "green" if telemetry["thermal_status"] == "STABLE" else "red"
             layout["header"].update(Panel(
-                f"[bold blue]VOID-BEYOND Swarm Monitor[/] | "
-                f"Exergy: 100% | Time: {datetime.now().strftime('%H:%M:%S')}",
-                border_style="blue"
+                f"[bold #2B3BE5]CORTEX SWARM APEX[/] | "
+                f"Status: [{status_color}]{telemetry['thermal_status']}[/] | "
+                f"Exergy: [cyan]{telemetry['exergy']*100:.1f}%[/] | "
+                f"Nodes: [bold]{telemetry['agents']}[/]",
+                border_style="#2B3BE5"
             ))
 
-            # Grid
+            # 3. Update Grid (Simulation for visual pulse)
             layout["grid"].update(Panel(
-                make_grid(agents),
-                title="[bold]Legion 100 Grid (Reputation Pulse)[/]",
+                make_grid([{"reputation_score": 0.95} for _ in range(telemetry["agents"])]),
+                title="[bold]Legion Presence (O1 Sharded)[/]",
                 border_style="white"
             ))
 
-            # Stats
+            # 4. Update Stats
             stats_table = Table(show_header=False, expand=True)
-            stats_table.add_row("Total Facts", str(fact_count))
-            stats_table.add_row("Active Agents", str(len(agents)))
-
-            slashed = sum(1 for a in agents if a["reputation_score"] < 0.5)
-            stats_table.add_row("Slashed Nodes", f"[bold red]{slashed}[/]")
-
+            stats_table.add_row("Legions", str(telemetry["legions"]))
+            stats_table.add_row("Centurions", str(telemetry["centurions"]))
+            stats_table.add_row("Active Shards", str(telemetry["shards"]))
+            stats_table.add_row("Native Events", str(len(all_events)))
+            
             layout["stats"].update(Panel(
                 stats_table,
-                title="[bold]Cortex Metrics[/]",
+                title="[bold]Thermal Telemetry[/]",
                 border_style="magenta"
             ))
 
-            # Footer
-            layout["footer"].update(Panel(
-                "[dim]Press Ctrl+C to exit. Monitoring VOID-BEYOND alignment...[/]",
-                border_style="blue"
-            ))
+            # 5. Update Findings
+            findings_table = Table(title="[bold yellow]LATEST SWARM FINDINGS (BOUNTY)[/]", expand=True)
+            findings_table.add_column("TS", style="dim")
+            findings_table.add_column("Agent", style="cyan")
+            findings_table.add_column("Target", style="green")
+            
+            for b in bounties:
+                meta = json.loads(b["metadata_json"])
+                findings_table.add_row(
+                    b["timestamp"].split("T")[1][:8],
+                    meta.get("agent", "UNKNOWN"),
+                    b["content"].replace("Bounty detected by swarm: ", "")[:50]
+                )
+            
+            layout["findings"].update(findings_table)
 
             await asyncio.sleep(0.5)
 

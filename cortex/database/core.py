@@ -99,17 +99,20 @@ def _apply_pragmas_sync(
         read_only: If True, set query_only=1 (rejects all writes at SQLite level).
         writer_mode: If True, disable wal_autocheckpoint (manual control).
     """
-    conn.execute("PRAGMA journal_mode=WAL")
-    conn.execute("PRAGMA synchronous=NORMAL")
     conn.execute("PRAGMA foreign_keys=ON")
     conn.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS}")
     conn.execute(f"PRAGMA mmap_size={MMAP_SIZE}")
-    conn.execute(f"PRAGMA page_size={PAGE_SIZE}")
     conn.execute(f"PRAGMA cache_size={CACHE_SIZE_KB}")
     conn.execute("PRAGMA temp_store=MEMORY")
 
     if read_only:
         conn.execute("PRAGMA query_only=1")
+        return
+
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA synchronous=NORMAL")
+    conn.execute(f"PRAGMA page_size={PAGE_SIZE}")
+
     if writer_mode:
         # Disable automatic WAL checkpoints — writer controls flush timing
         conn.execute("PRAGMA wal_autocheckpoint=0")
@@ -281,6 +284,10 @@ async def apply_pragmas_async_readonly(conn: aiosqlite.Connection) -> None:
     Sets query_only=1 so any INSERT/UPDATE/DELETE raises OperationalError
     at the SQLite level — defense in depth for read pools.
     """
-    await apply_pragmas_async(conn)
+    await conn.execute("PRAGMA foreign_keys=ON;")
+    await conn.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS};")
+    await conn.execute(f"PRAGMA mmap_size={MMAP_SIZE};")
+    await conn.execute(f"PRAGMA cache_size={CACHE_SIZE_KB};")
+    await conn.execute("PRAGMA temp_store=MEMORY;")
     await conn.execute("PRAGMA query_only=1;")
     await conn.commit()

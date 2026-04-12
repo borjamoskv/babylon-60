@@ -54,7 +54,9 @@ async def test_tombstone_uses_fact_tenant_for_taint(monkeypatch):
 
     captured: dict[str, str] = {}
 
-    async def fake_propagate(self, fact_id: int, tenant_id: str = "default", floor_to_c1: bool = True):
+    async def fake_propagate(
+        self, fact_id: int, tenant_id: str = "default", floor_to_c1: bool = True
+    ):
         captured["tenant_id"] = tenant_id
 
         class _Report:

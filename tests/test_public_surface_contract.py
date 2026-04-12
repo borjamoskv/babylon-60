@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -56,7 +55,9 @@ def test_readmes_and_examples_use_public_python_import_surface() -> None:
         "sdks/python/README.md",
         "examples/quickstart.py",
     ):
-        assert expected in _read(path), f"{path} should demonstrate the public cortex_persist import"
+        assert expected in _read(path), (
+            f"{path} should demonstrate the public cortex_persist import"
+        )
 
 
 def test_docs_pages_are_no_longer_redirect_only_shims() -> None:
@@ -113,7 +114,7 @@ def test_support_and_governance_point_to_supported_core_boundary() -> None:
 
 def test_pyproject_all_extra_is_not_self_referential() -> None:
     pyproject = _read("pyproject.toml")
-    assert 'cortex-persist[api,dev,adk,toolbox,billing,cloud,trends]' not in pyproject
+    assert "cortex-persist[api,dev,adk,toolbox,billing,cloud,trends]" not in pyproject
 
 
 def test_supported_core_page_keeps_current_public_contract() -> None:
@@ -147,16 +148,16 @@ def test_canonical_demo_keeps_tamper_then_export_flow() -> None:
 
     assert "## Tamper Drill" in content
     for step in (
-        "cortex recall risk-bot --db \"$DB\"",
-        "cortex verify \"$FACT_ID\" --db \"$DB\"",
-        "cortex trust-ledger verify --full --db \"$DB\"",
+        'cortex recall risk-bot --db "$DB"',
+        'cortex verify "$FACT_ID" --db "$DB"',
+        'cortex trust-ledger verify --full --db "$DB"',
         "UPDATE facts SET content = ? WHERE id = ?",
         "INTEGRITY VIOLATION",
         "Ledger is COMPROMISED",
         'cortex export --project risk-bot --format json --out "$OUT" --db "$DB"',
     ):
         assert step in content
-    assert content.index("## Tamper Drill") < content.index('cortex export --project risk-bot')
+    assert content.index("## Tamper Drill") < content.index("cortex export --project risk-bot")
     assert content.index("UPDATE facts SET content = ? WHERE id = ?") < content.index(
         'cortex export --project risk-bot --format json --out "$OUT" --db "$DB"'
     )

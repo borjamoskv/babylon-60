@@ -67,19 +67,17 @@ def evaluate_net_yield(
     """
     score = (tokens_saved + (cpu_cycles_saved * 0.0001)) - llm_inference_cost
     is_profitable = score > 0
-    reason = (
-        ""
-        if is_profitable
-        else f"Saldo negativo ({score:.2f}). Cost > Savings."
-    )
+    reason = "" if is_profitable else f"Saldo negativo ({score:.2f}). Cost > Savings."
 
     if not is_profitable:
         logger.warning(
-            "🧊 [THERMOMETER] Yield Negativo: %s", reason,
+            "🧊 [THERMOMETER] Yield Negativo: %s",
+            reason,
         )
     else:
         logger.info(
-            "🔥 [THERMOMETER] Mutación rentable: %s score", score,
+            "🔥 [THERMOMETER] Mutación rentable: %s score",
+            score,
         )
 
     return ThermodynamicYield(

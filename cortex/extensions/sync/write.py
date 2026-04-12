@@ -6,7 +6,7 @@ import hashlib
 import json
 import logging
 import sqlite3
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from cortex.crypto.aes import get_default_encrypter
 from cortex.extensions.sync.common import (
@@ -76,10 +76,14 @@ def _bridge_kind(meta: dict, source: str | None) -> str | None:
         if source == "bridge:github" or "github_key" in meta:
             return EXTERNAL_BRIDGE_KIND
         return RELATION_BRIDGE_KIND
-    return normalize_bridge_kind(kind, default=str(kind).strip().lower()) if kind is not None else None
+    return (
+        normalize_bridge_kind(kind, default=str(kind).strip().lower()) if kind is not None else None
+    )
 
 
-def _bridge_entry_from_row(row: tuple[str, str | None, str | None, str | None, str | None]) -> dict | None:
+def _bridge_entry_from_row(
+    row: tuple[str, str | None, str | None, str | None, str | None] | Any,
+) -> dict | None:
     """Reconstruct a bridges.jsonl entry only for relation bridges."""
     meta = _decrypt_json(row[3])
     if _bridge_kind(meta, row[4]) != RELATION_BRIDGE_KIND:
@@ -110,7 +114,9 @@ async def _relation_bridge_hash(engine: CortexEngine) -> str:
         entry = _bridge_entry_from_row(row[1:])
         if entry is None:
             continue
-        hasher.update(f"{row[0]}|{json.dumps(entry, sort_keys=True, ensure_ascii=False)}\n".encode())
+        hasher.update(
+            f"{row[0]}|{json.dumps(entry, sort_keys=True, ensure_ascii=False)}\n".encode()
+        )
     return hasher.hexdigest()
 
 

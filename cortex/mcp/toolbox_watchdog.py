@@ -320,4 +320,6 @@ class ToolboxWatchdog:
             except OSError:
                 pass
             self._log_fd = None
+
+
 from cortex.database.core import connect

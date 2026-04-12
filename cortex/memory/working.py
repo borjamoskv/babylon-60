@@ -47,7 +47,14 @@ class WorkingMemoryL1:
                     when this limit is exceeded.
     """
 
-    __slots__ = ("_buffers", "_tenant_tokens", "_max_tokens", "_guardrail", "_access_log", "_scratchpads")
+    __slots__ = (
+        "_buffers",
+        "_tenant_tokens",
+        "_max_tokens",
+        "_guardrail",
+        "_access_log",
+        "_scratchpads",
+    )
 
     def __init__(
         self,
@@ -164,12 +171,12 @@ class WorkingMemoryL1:
             if pid not in seen:
                 self._access_log.append((now, f"{tenant_id}:{pid}"))
                 seen.add(pid)
-                
+
         messages = []
         pad = self._scratchpads.get(tenant_id)
         if pad:
             messages.append({"role": "system", "content": f"<SCRATCHPAD>\n{pad}\n</SCRATCHPAD>"})
-            
+
         messages.extend([{"role": e.role, "content": e.content} for e in buffer])
         return messages
 

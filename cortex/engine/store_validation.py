@@ -161,8 +161,8 @@ async def run_store_validation_logic(
     _enforce_taint_contract(content, meta)
 
     # Exergy calculation
-    _has_entropy = meta and ("_prior_entropy" in meta or "_posterior_entropy" in meta)
-    if not skip_thermo and _has_entropy:
+    _has_entropy = meta is not None and ("_prior_entropy" in meta or "_posterior_entropy" in meta)
+    if not skip_thermo and meta is not None and _has_entropy:
         ex_input = ExergyInput(
             prior_uncertainty=meta.get("_prior_entropy", 1.0),
             posterior_uncertainty=meta.get("_posterior_entropy", 0.5),

@@ -7,6 +7,7 @@ from datetime import date, datetime, timezone
 import aiosqlite
 import pytest
 
+from cortex.engine import fact_store_core
 from cortex.engine.fact_store_core import insert_fact_record
 from cortex.graph.backends.sqlite import SQLiteBackend
 from cortex.graph.engine import process_fact_graph
@@ -124,10 +125,7 @@ def _setup_graph_schema_sync(conn: sqlite3.Connection) -> None:
 
 
 def _install_crypto_stubs(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(
-        "cortex.engine.fact_store_core.compute_fact_hash",
-        lambda _: "deadbeef",
-    )
+    monkeypatch.setattr(fact_store_core, "compute_fact_hash", lambda _: "deadbeef")
 
     class _FakeEnc:
         def encrypt_str(self, s: str, **kw: object) -> str:

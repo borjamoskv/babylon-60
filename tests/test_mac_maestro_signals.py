@@ -40,12 +40,8 @@ def test_executor_emits_safety_gate_signal(tmp_path, monkeypatch: pytest.MonkeyP
         def execute_action(self, sdk_action, apply_safety_gate: bool = True) -> bool:
             return True
 
-    monkeypatch.setattr(
-        "cortex.mac_maestro.executor.MacMaestroWorkflow", _Workflow, raising=False
-    )
-    monkeypatch.setattr(
-        executor, "_convert_action", lambda action: SimpleNamespace(vector="B")
-    )
+    monkeypatch.setattr("cortex.mac_maestro.executor.MacMaestroWorkflow", _Workflow, raising=False)
+    monkeypatch.setattr(executor, "_convert_action", lambda action: SimpleNamespace(vector="B"))
     monkeypatch.setattr(
         executor,
         "_ensure_action_access",
@@ -55,7 +51,9 @@ def test_executor_emits_safety_gate_signal(tmp_path, monkeypatch: pytest.MonkeyP
     intent = MacIntent(
         goal="Click save",
         correlation_id="corr-1",
-        actions=[MacAction(action="click", app="com.apple.TextEdit", role="AXButton", title="Save")],
+        actions=[
+            MacAction(action="click", app="com.apple.TextEdit", role="AXButton", title="Save")
+        ],
     )
 
     executor.execute_intent(intent)
@@ -81,18 +79,16 @@ def test_executor_emits_verification_failed_signal(
         def execute_action(self, sdk_action, apply_safety_gate: bool = True) -> bool:
             return True
 
-    monkeypatch.setattr(
-        "cortex.mac_maestro.executor.MacMaestroWorkflow", _Workflow, raising=False
-    )
-    monkeypatch.setattr(
-        executor, "_convert_action", lambda action: SimpleNamespace(vector="B")
-    )
+    monkeypatch.setattr("cortex.mac_maestro.executor.MacMaestroWorkflow", _Workflow, raising=False)
+    monkeypatch.setattr(executor, "_convert_action", lambda action: SimpleNamespace(vector="B"))
     monkeypatch.setattr(executor, "_ensure_action_access", lambda action, sdk_action: None)
 
     intent = MacIntent(
         goal="Click save",
         trace_id="trace-1",
-        actions=[MacAction(action="click", app="com.apple.TextEdit", role="AXButton", title="Save")],
+        actions=[
+            MacAction(action="click", app="com.apple.TextEdit", role="AXButton", title="Save")
+        ],
     )
     oracle = SimpleNamespace(verify=lambda: SimpleNamespace(verified=False, reason="Toast missing"))
 
@@ -118,18 +114,16 @@ def test_executor_emits_slow_action_signal(tmp_path, monkeypatch: pytest.MonkeyP
             return True
 
     perf_counter = iter([10.0, 11.8])
-    monkeypatch.setattr(
-        "cortex.mac_maestro.executor.MacMaestroWorkflow", _Workflow, raising=False
-    )
-    monkeypatch.setattr(
-        executor, "_convert_action", lambda action: SimpleNamespace(vector="B")
-    )
+    monkeypatch.setattr("cortex.mac_maestro.executor.MacMaestroWorkflow", _Workflow, raising=False)
+    monkeypatch.setattr(executor, "_convert_action", lambda action: SimpleNamespace(vector="B"))
     monkeypatch.setattr(executor, "_ensure_action_access", lambda action, sdk_action: None)
     monkeypatch.setattr("cortex.mac_maestro.executor.time.perf_counter", lambda: next(perf_counter))
 
     intent = MacIntent(
         goal="Open menu",
-        actions=[MacAction(action="click", app="com.apple.TextEdit", role="AXButton", title="Open")],
+        actions=[
+            MacAction(action="click", app="com.apple.TextEdit", role="AXButton", title="Open")
+        ],
     )
 
     executor.execute_intent(intent)

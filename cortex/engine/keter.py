@@ -5,8 +5,13 @@ secuencia, modelos. Invoca, ejecuta, entrega.
 """
 
 import asyncio
+import copy
+import hashlib
+import json
 import logging
 import os
+import secrets
+import sqlite3
 import typing
 from abc import ABC, abstractmethod
 from typing import Any, Final, TypedDict
@@ -18,6 +23,7 @@ logger = logging.getLogger(__name__)
 # --- Sovereign Constants ---
 MAX_RETRIES: Final[int] = 3
 BASE_BACKOFF: Final[float] = 1.1  # Golden ratio-ish base
+NON_SERIALIZABLE_KEYS: Final[set[str]] = {"memory_manager", "kwargs"}
 
 
 class KeterPayload(TypedDict, total=False):
@@ -171,6 +177,35 @@ class FormalVerificationGate(SovereignPhase):
         return payload
 
 
+class RuntimeValidationGate(SovereignPhase):
+    """
+    Fase 3.6: RUNTIME VALIDATION GATE (C5-REAL).
+    Verifica el comportamiento dinámico (exit_code, stderr) tras la ejecución.
+    """
+
+    async def execute(self, payload: KeterPayload) -> KeterPayload:
+        from cortex.verification.verifier import SovereignVerifier
+
+        logger.info("🧪 [KETER] Validando Runtime y Cuarentena (C5-REAL)...")
+
+        runtime_status = payload.get("kwargs", {}).get("runtime_status")
+        if not runtime_status:
+            logger.debug("🧪 [KETER] No runtime_status in payload. Proceeding with caution.")
+            return payload
+
+        verifier = SovereignVerifier()
+        result = verifier.verify_runtime("KETER-RUN", runtime_status)
+
+        if not result.is_valid:
+            logger.warning("☣️  [KETER] RUNTIME QUARANTINE: %s", result.violations)
+            # Axiom Ω9: This failure is already recorded in L3 via Verifier/Manager interaction
+            # if we integrate them. For now, we block the cascade.
+            raise CortexError(f"Runtime validation failed: {result.runtime_status}")
+
+        payload["status"] = "RUNTIME_VERIFIED"
+        return payload
+
+
 class MejoraloCrush(SovereignPhase):
     """
     Fase 4: EXORCISMO Y PULIDO (MEJORAlo --brutal).
@@ -204,9 +239,6 @@ class KeterReservoir:
         self._conn.commit()
 
     def get(self, mission_id: str) -> KeterPayload | None:
-        import json
-        import sqlite3
-
         try:
             row = self._conn.execute(
                 "SELECT payload_json FROM keter_reservoir WHERE mission_id = ?", (mission_id,)
@@ -217,14 +249,16 @@ class KeterReservoir:
             logger.warning("KeterReservoir get failed: %s", e)
         return None
 
-    def set(self, mission_id: str, payload: KeterPayload):
-        import json
-        import sqlite3
+    def _sanitize_payload(self, payload: KeterPayload) -> dict[str, Any]:
+        """Ω₂ Enforcement: Remove non-serializable objects before persistence."""
+        return {k: v for k, v in payload.items() if k not in NON_SERIALIZABLE_KEYS}
 
+    def set(self, mission_id: str, payload: KeterPayload):
         try:
+            sanitized = self._sanitize_payload(payload)
             self._conn.execute(
                 "INSERT OR REPLACE INTO keter_reservoir (mission_id, payload_json) VALUES (?, ?)",
-                (mission_id, json.dumps(payload)),
+                (mission_id, json.dumps(sanitized)),
             )
             self._conn.commit()
         except (sqlite3.Error, TypeError) as e:
@@ -246,6 +280,7 @@ class KeterEngine:
             ArchScaffolder(),
             LegionSwarm(),
             FormalVerificationGate(),
+            RuntimeValidationGate(),
             MejoraloCrush(),
         ]
         # Axiom Ω₂: Cross-invocation Thermal Bypass Repository (Persistent)
@@ -273,15 +308,15 @@ class KeterEngine:
     async def _execute_with_backoff(
         self, phase: SovereignPhase, payload: KeterPayload
     ) -> KeterPayload:
-        """Executes a phase with exponential backoff retry logic."""
+        """Executes a phase with exponential backoff and transactional state isolation."""
         last_error = None
         for attempt in range(MAX_RETRIES):
+            # Ω₃ Enforcement: Clone payload to ensure retry starts from clean state
+            isolation_payload = copy.deepcopy(payload)
             try:
-                return await phase.execute(payload)
+                return await phase.execute(isolation_payload)
             except (CortexError, RuntimeError, OSError, ValueError, TypeError) as e:
                 last_error = e
-                import secrets
-
                 rng = secrets.SystemRandom()
                 # La ventana de caos crece fractalmente con la Proporción Áurea (Phi)
                 base_delay = BASE_BACKOFF**attempt
@@ -304,8 +339,6 @@ class KeterEngine:
     def _check_thermal_bypass(
         self, intent: str, formation: str, thermal_audit: bool
     ) -> tuple[str, KeterPayload | None]:
-        import hashlib
-
         mission_id = hashlib.sha256(f"{intent}:{formation}".encode()).hexdigest()
         cached_payload = self._reservoir.get(mission_id)
         if cached_payload and cached_payload.get("status") == "SINGULARITY_REACHED":
@@ -316,8 +349,6 @@ class KeterEngine:
 
     async def _apply_adaptive_jitter(self, formation: str, thermal_audit: bool) -> None:
         if formation not in ("BLITZ", "GHOST", "ORACLE"):
-            import secrets
-
             rng = secrets.SystemRandom()
             asymmetric_jitter = rng.uniform(0.1, 1.618) ** 2
             if thermal_audit:

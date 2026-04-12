@@ -86,7 +86,6 @@ def test_ledger_chain_break(test_db):
 
 
 def test_payload_prev_hash_mismatch(test_db):
-    import json
 
     store = LedgerStore(test_db)
     queue = EnrichmentQueue(store)
@@ -100,7 +99,9 @@ def test_payload_prev_hash_mismatch(test_db):
         writer.append(ev)
 
     with store.tx() as conn:
-        cursor = conn.execute("SELECT event_id, payload_json, prev_hash FROM ledger_events LIMIT 1 OFFSET 1")
+        cursor = conn.execute(
+            "SELECT event_id, payload_json, prev_hash FROM ledger_events LIMIT 1 OFFSET 1"
+        )
         row = cursor.fetchone()
         payload = json.loads(row["payload_json"])
         payload["prev_hash"] = "MISMATCHED_PREV"

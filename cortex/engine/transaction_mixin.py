@@ -45,9 +45,9 @@ class TransactionMixin(EngineMixinBase):
 
     def _schedule_checkpoint(self) -> None:
         """Checkpoint out of band so writes don't block on Merkle batching."""
-        if getattr(self, "_ledger_checkpoint_task", None) is not None:
-            if not self._ledger_checkpoint_task.done():
-                return
+        task = getattr(self, "_ledger_checkpoint_task", None)
+        if task is not None and not task.done():
+            return
 
         self._ledger_checkpoint_task = asyncio.create_task(self._run_checkpoint())
 

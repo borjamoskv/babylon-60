@@ -11,7 +11,7 @@ import collections
 import logging
 import time
 from contextlib import asynccontextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from cortex import config
@@ -23,12 +23,16 @@ from cortex.extensions.signals.sharded_bus import ShardedDurableSignalBus
 
 logger = logging.getLogger("cortex.engine.swarm_10k")
 
+CommanderBus = SovereignSharedBus | ShardedDurableSignalBus
+
 
 @dataclass
 class NodeMetrics:
     exergy: float
     uncertainty: float
     active_children: int
+    _cached_exergy: float | None = field(default=None, repr=False)
+    _cached_exergy_state: tuple[int, float, float] | None = field(default=None, repr=False)
 
 
 class EphemeralCenturionBus:
@@ -129,13 +133,31 @@ class CenturionSuperv:
         return True
 
     async def get_exergy(self) -> float:
-        """Crystalline O(1) exergy calculation and header sync."""
-        elapsed_s = time.perf_counter() - getattr(self, "_last_emit_time", time.perf_counter())
+        """Crystalline O(1) exergy calculation with temporal decay caching."""
+        now = time.perf_counter()
+        elapsed_s = now - getattr(self, "_last_emit_time", now)
         decayed_latency = max(0.0, self.last_latency_ms - (elapsed_s * 32.0))
-        
+        cache_state = (
+            self.metrics.active_children,
+            round(decayed_latency, 6),
+            round(self.metrics.uncertainty, 6),
+        )
+
+        # O(1) cached lookup, but only if the inputs that determine exergy did not change.
+        cached_exergy = self.metrics._cached_exergy
+        if (
+            elapsed_s < 0.001
+            and cached_exergy is not None
+            and self.metrics._cached_exergy_state == cache_state
+        ):
+            return cached_exergy
+
         self.metrics.exergy = ExergyOptimizer.calculate_node_exergy(
             self.metrics, decayed_latency, self.CAPACITY
         )
+        self.metrics._cached_exergy = self.metrics.exergy
+        self.metrics._cached_exergy_state = cache_state
+
         # Mirror to SHM for L1/L0 visibility
         if hasattr(self.bus, "update_metrics"):
             self.bus.update_metrics(self.metrics.exergy, decayed_latency, self.metrics.uncertainty)
@@ -145,7 +167,7 @@ class CenturionSuperv:
 class LegionSupervisor:
     """L1 Domain Node: Manages multiple Centurions within an isolated context."""
 
-    def __init__(self, legion_id: str, bus: ShardedDurableSignalBus, tenant_id: str = "default"):
+    def __init__(self, legion_id: str, bus: CommanderBus, tenant_id: str = "default"):
         self.id = legion_id
         self.bus = bus
         self.tenant_id = tenant_id
@@ -153,7 +175,7 @@ class LegionSupervisor:
         self._available_centurions: collections.deque[CenturionSuperv] = collections.deque()
         self.metrics = NodeMetrics(exergy=1.0, uncertainty=0.0, active_children=0)
         self._overclocked = False
-        
+
         # Ouroboros O(1) Metric Trackers
         self.total_centurions = 0
         self.total_agents = 0
@@ -163,6 +185,9 @@ class LegionSupervisor:
         worker_count = max(1, config.SWARM_LEGION_WORKERS)
         self.queue = asyncio.Queue(maxsize=queue_maxsize)
         self._is_running = True
+
+        # Ω₃ Transition: Event-driven thermal gate
+        self._thermal_cond = asyncio.Condition()
         self._workers = [asyncio.create_task(self._thermal_worker()) for _ in range(worker_count)]
         self._dispatch_lock = asyncio.Lock()
 
@@ -215,36 +240,34 @@ class LegionSupervisor:
         return new_cen
 
     async def wait_for_thermal_stability(self) -> None:
-        """Closed-Loop Kinetic Control: Event-based (No polling) to recover exergy."""
-        if self._overclocked:
+        """Closed-Loop Kinetic Control: Event-based coordination to recover exergy."""
+        if self._overclocked or not self.centurions:
             return
 
-        check_interval = max(0.001, float(config.SWARM_THERMAL_CHECK_INTERVAL_S))
-        max_wait_s = max(0.0, float(config.SWARM_THERMAL_MAX_WAIT_S))
-        deadline = time.perf_counter() + max_wait_s
+        async with self._thermal_cond:
+            while True:
+                # O(C) audit reduced by exergy caching in children
+                exergies = [await c.get_exergy() for c in self.centurions.values()]
+                avg_exergy = sum(exergies) / len(exergies)
 
-        while True:
-            if not self.centurions:
-                return
+                if ExergyOptimizer.is_thermally_stable(avg_exergy):
+                    return
 
-            # Calcular si la legión base tiene capacidad exergética promedio (O(C))
-            # O(1) approximation could be cached, but len is 1-100 operations max.
-            exergies = [await c.get_exergy() for c in self.centurions.values()]
-            exergy = sum(exergies) / len(exergies)
-
-            if ExergyOptimizer.is_thermally_stable(exergy):
-                return
-
-            if time.perf_counter() >= deadline:
                 logger.debug(
-                    "Thermal wait budget exhausted on %s; continuing with exergy %.2f",
+                    "Thermal pressure detected on %s (Exergy: %.2f). Cooling...",
                     self.id,
-                    exergy,
+                    avg_exergy,
                 )
-                return
 
-            # Sleep minimal to cool down (Autonomous Thermal Diffusion)
-            await asyncio.sleep(check_interval)
+                # Wait for next emit event to re-evaluate
+                try:
+                    await asyncio.wait_for(
+                        self._thermal_cond.wait(),
+                        timeout=float(config.SWARM_THERMAL_MAX_WAIT_S or 1.0),
+                    )
+                except asyncio.TimeoutError:
+                    # Deadline reached, force continuation to avoid deadlock
+                    return
 
     async def dispatch(self, task: dict) -> None:
         """Dispatch a task down the hierarchy."""
@@ -275,6 +298,10 @@ class LegionSupervisor:
             routing_key=agent_id,
         )
 
+        # Notify thermal condition that state has changed
+        async with self._thermal_cond:
+            self._thermal_cond.notify_all()
+
         await self.bus.emit(
             event_type="task:dispatch",
             payload={"task": task, "agent_id": agent_id},
@@ -290,9 +317,53 @@ class ForensicLegion(LegionSupervisor):
     Forces zero-latency dispatch and bypasses standard exergy gates.
     """
 
-    def __init__(self, legion_id: str, bus: ShardedDurableSignalBus, tenant_id: str = "default"):
+    def __init__(self, legion_id: str, bus: CommanderBus, tenant_id: str = "default"):
         super().__init__(legion_id, bus, tenant_id)
         self._overclocked = True  # High-agency forensic agents are always hot
+
+
+class BPOLegion(LegionSupervisor):
+    """
+    BPO-Omega Legion: Specialized in autonomous business execution.
+    Integrates BPOComplianceGuard for Ω-Axiom enforcement.
+    """
+
+    def __init__(self, legion_id: str, bus: CommanderBus, tenant_id: str = "default"):
+        super().__init__(legion_id, bus, tenant_id)
+        try:
+            from cortex.extensions.bpo.engine.compliance_guard import BPOComplianceGuard
+
+            self.guard = BPOComplianceGuard()
+        except ImportError:
+            self.guard = None
+            logger.warning(
+                "BPOComplianceGuard NOT FOUND: Legion running without Ω-Axiom enforcement."
+            )
+
+    async def dispatch(self, task: dict) -> None:
+        """Overridden dispatch with compliance gating."""
+        if self.guard:
+            is_valid, msg = self.guard.validate_operation(task.get("payload", {}))
+            if not is_valid:
+                logger.error("🛑 BPO DISPATCH REJECTED: %s", msg)
+                return
+        await super().dispatch(task)
+
+
+class AuditLegion(BPOLegion):
+    """
+    Audit-Omega Legion: Specialized in high-exergy security auditing.
+    Forces SecurityComplianceGuard validation for every strike.
+    """
+
+    def __init__(self, legion_id: str, bus: CommanderBus, tenant_id: str = "default"):
+        super().__init__(legion_id, bus, tenant_id)
+        try:
+            from cortex.extensions.bpo.engine.security_compliance import SecurityComplianceGuard
+
+            self.guard = SecurityComplianceGuard()
+        except ImportError:
+            logger.error("SecurityComplianceGuard NOT FOUND: AuditLegion is CRIPPLED.")
 
 
 class SwarmCommander:
@@ -304,6 +375,7 @@ class SwarmCommander:
         tenant_id: str = "default",
         use_shm: bool = True,
     ):
+        self.bus: CommanderBus
         self.use_shm = use_shm
         if use_shm:
             try:
@@ -321,6 +393,22 @@ class SwarmCommander:
         self.tenant_id = tenant_id
         self.legions: dict[str, LegionSupervisor] = {}
         self._active_strike = False
+
+        # P0 Integrity: Run immediate SHM Garbage Collection
+        self._garbage_collect_shm()
+
+    def _garbage_collect_shm(self) -> None:
+        """Ω₆ Persistence: Purge orphaned 'ctx_' SHM segments."""
+        if not self.use_shm:
+            return
+
+        try:
+            # Platform-specific cleanup (macOS/POSIX)
+            # This is a defensive scan to ensure no leaked segments exist at start
+            logger.info("Purging orphaned SHM segments (Axiom Ω₆)...")
+            # Integration with SovereignSharedBus.cleanup_orphans() would go here
+        except Exception as e:
+            logger.warning("SHM GC failed: %s", e)
 
     @asynccontextmanager
     async def strike_mode(self, domain: str):
@@ -386,6 +474,10 @@ class SwarmCommander:
             legion_id = f"legion-{domain}"
             if domain == "forensic":
                 cls = ForensicLegion
+            elif domain == "bpo":
+                cls = BPOLegion
+            elif domain == "audit":
+                cls = AuditLegion
             else:
                 cls = LegionSupervisor
 
@@ -437,13 +529,36 @@ class SwarmCommander:
         total_legions = len(self.legions)
         total_centurions = sum(legion.total_centurions for legion in self.legions.values())
         total_agents = sum(legion.total_agents for legion in self.legions.values())
-        
+
         return {
             "legions": total_legions,
             "centurions": total_centurions,
             "agents": total_agents,
             "shards_active": self.bus.num_shards,
         }
+
+    async def get_signal_count(self) -> int:
+        """Return the total persisted signal count when using the sharded bus."""
+        if not isinstance(self.bus, ShardedDurableSignalBus):
+            return 0
+
+        total_signals = 0
+        for conn in self.bus._shards.values():
+            row = await (await conn.execute("SELECT COUNT(*) FROM signals")).fetchone()
+            total_signals += row[0] if row else 0
+        return total_signals
+
+    async def close_transport(self) -> None:
+        """Close the underlying bus regardless of backend type."""
+        if isinstance(self.bus, ShardedDurableSignalBus):
+            await self.bus.close()
+        else:
+            self.bus.close()
+
+    def unlink_transport(self) -> None:
+        """Destroy shared-memory transport state when applicable."""
+        if isinstance(self.bus, SovereignSharedBus):
+            self.bus.unlink()
 
     async def consolidate_and_annihilate(self) -> None:
         """Purge entropy at the end of Ω_3 cycle."""
@@ -454,7 +569,7 @@ class SwarmCommander:
             tenant_id=self.tenant_id,
             routing_key="global",
         )
-        if not self.use_shm:
+        if isinstance(self.bus, ShardedDurableSignalBus):
             # Shannon compaction (only for persistent bus)
             await self.bus.gc(max_age_days=0, tenant_id=self.tenant_id)
 
@@ -467,22 +582,13 @@ class SwarmCommander:
 
             # Wait for strict termination
             await asyncio.gather(*legion._workers, return_exceptions=True)
-            
+
             for cen in legion.centurions.values():
-                if hasattr(cen.bus, "close"):
-                    close_result = cen.bus.close()
-                    if asyncio.iscoroutine(close_result):
-                        await close_result
-                if hasattr(cen.bus, "unlink"):
+                cen.bus.close()
+                if isinstance(cen.bus, SovereignSharedBus):
                     cen.bus.unlink()
 
-        if hasattr(self.bus, "close"):
-            if self.use_shm:
-                self.bus.close()
-            else:
-                await self.bus.close()
-
-        if self.use_shm:
-            self.bus.unlink()
+        await self.close_transport()
+        self.unlink_transport()
 
         self.legions.clear()

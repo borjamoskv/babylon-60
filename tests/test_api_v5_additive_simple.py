@@ -1,25 +1,38 @@
+from __future__ import annotations
+
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from fastapi.testclient import TestClient
 
-from cortex.api.core import app
 from cortex.api.deps import get_async_engine
-from cortex.auth.deps import require_auth, require_permission
+from cortex.auth.deps import require_auth
+from cortex.auth.models import AuthResult
+from cortex.routes import build_api_router
 
-# Mock AuthResult for dependency override
-mock_auth = MagicMock()
-mock_auth.tenant_id = "default"
-mock_auth.authenticated = True
-mock_auth.permissions = ["read", "write", "admin"]
+TEST_AUTH = AuthResult(
+    authenticated=True,
+    tenant_id="default",
+    permissions=["read", "write", "admin"],
+    key_name="test_agent",
+)
 
 
-async def override_auth():
-    return mock_auth
+async def override_auth() -> AuthResult:
+    return TEST_AUTH
 
 
-def test_core_app_mounts_facts_routes_without_lifespan() -> None:
+def _fresh_api_app() -> FastAPI:
+    """Build a fresh API app instance without the global lifespan-managed state."""
+    app = FastAPI()
+    app.include_router(build_api_router())
+    return app
+
+
+def test_api_router_mounts_facts_routes_without_lifespan() -> None:
+    app = _fresh_api_app()
     fact_paths = {
         route.path
         for route in app.routes
@@ -31,9 +44,8 @@ def test_core_app_mounts_facts_routes_without_lifespan() -> None:
 
 
 @pytest.fixture
-def mock_engine():
+def mock_engine() -> AsyncMock:
     engine = AsyncMock()
-    # Mock history/causal chain
     engine.get_causal_chain.return_value = [
         {
             "id": 1,
@@ -50,53 +62,39 @@ def mock_engine():
             "created_at": "2024-01-02",
         },
     ]
-    # Mock taint report
+
     report = MagicMock()
     report.source_fact_id = 99
     report.affected_count = 2
     report.confidence_changes = [{"fact_id": 100, "old": "C5", "new": "C3"}]
     engine.propagate_taint.return_value = report
-
-    # Mock ledger verify and stats
     engine.verify_ledger.return_value = {"valid": True, "tx_count": 11, "roots_checked": 3}
-
     return engine
 
 
 @pytest.fixture
-def client(mock_engine):
+def client(mock_engine: AsyncMock) -> TestClient:
+    app = _fresh_api_app()
     app.dependency_overrides[get_async_engine] = lambda: mock_engine
-
-    # Define a helper that returns our mock_auth for ANY permission level
-    def get_override(perm):
-        return override_auth
-
-    # Override the specific dependency factories
     app.dependency_overrides[require_auth] = override_auth
-    # require_permission is a factory, we need to override the SPECIFIC instances used in routes
-    # But since we can't easily guess all instances, we override the common ones.
-    # The actual routes use Depends(require_permission("read")), etc.
-    # FastAPI keys these by the function object and its arguments.
-    for perm in ["read", "write", "admin"]:
-        app.dependency_overrides[require_permission(perm)] = override_auth
 
-    yield TestClient(app)
-    app.dependency_overrides.clear()
+    with TestClient(app) as client:
+        yield client
 
 
-def test_fact_history_endpoint(client):
+def test_fact_history_endpoint(client: TestClient) -> None:
     resp = client.get("/v1/facts/1/history")
     assert resp.status_code == 200
     assert len(resp.json()) == 2
 
 
-def test_taint_propagation_endpoint(client):
+def test_taint_propagation_endpoint(client: TestClient) -> None:
     resp = client.post("/v1/facts/99/taint")
     assert resp.status_code == 200
     assert resp.json()["source_id"] == 99
 
 
-def test_trust_endpoints_are_not_mounted_in_core_app(client):
+def test_trust_endpoints_are_not_mounted_in_fresh_api_app(client: TestClient) -> None:
     resp = client.get("/v1/trust/profiles/test_agent")
     assert resp.status_code == 404
 
@@ -104,12 +102,12 @@ def test_trust_endpoints_are_not_mounted_in_core_app(client):
     assert resp.status_code == 404
 
 
-def test_facts_verify_uses_tx_count(client):
+def test_facts_verify_uses_tx_count(client: TestClient) -> None:
     resp = client.get("/v1/facts/verify")
     assert resp.status_code == 200
     assert resp.json()["transactions_checked"] == 11
 
 
-def test_ledger_status_is_not_mounted_in_core_app(client):
+def test_ledger_status_is_not_mounted_in_fresh_api_app(client: TestClient) -> None:
     resp = client.get("/v1/ledger/status")
     assert resp.status_code == 404

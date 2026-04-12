@@ -17,8 +17,7 @@ from cortex.darknet.linkedin_publisher import (
 def test_normalize_organization_urn_supports_numeric_ids_and_brand_urns() -> None:
     assert normalize_organization_urn("12345") == "urn:li:organization:12345"
     assert (
-        normalize_organization_urn("urn:li:organizationBrand:98765")
-        == "urn:li:organization:98765"
+        normalize_organization_urn("urn:li:organizationBrand:98765") == "urn:li:organization:98765"
     )
 
 

@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 import cortex.extensions.sync as sync_pkg
+from cortex.crypto.aes import load_json_dict
 from cortex.extensions.sync.read import sync_memory
 from cortex.extensions.sync.write import export_to_json
 
@@ -59,7 +60,7 @@ async def test_sync_memory_normalizes_legacy_bridge_kind(engine, sync_paths: Pat
         row = await cursor.fetchone()
 
     assert row is not None
-    meta = json.loads(row[0])
+    meta = load_json_dict(row[0], tenant_id="default")
     assert meta["bridge_kind"] == "relation"
     assert meta["bridge_provider"] == "memory"
 

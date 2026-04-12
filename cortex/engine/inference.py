@@ -65,9 +65,12 @@ class InferenceRule(BaseModel):
 
 class Derivation(BaseModel):
     """A single derived fact with its provenance. Zero-Rhetoric strict schema."""
+
     model_config = ConfigDict(frozen=True)
 
-    content: str = Field(..., description="Strict JSON structural content. No conversational padding.")
+    content: str = Field(
+        ..., description="Strict JSON structural content. No conversational padding."
+    )
     project: str
     source_fact_ids: list[int]
     rule_name: str

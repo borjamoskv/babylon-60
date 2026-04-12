@@ -110,7 +110,7 @@ class Supervisor:
         self._agents[agent.agent_id] = AgentEntry(
             agent=agent,
             max_restarts=0,  # Ephemeral agents do not get restarted if they fail or finish.
-            ephemeral=True
+            ephemeral=True,
         )
         logger.info("Supervisor: Spawned ephemeral agent '%s'", agent.agent_id)
         # Directly await start to ensure initialization
@@ -257,10 +257,7 @@ class Supervisor:
             }
 
             # Detect dead agents that should be running
-            if (
-                status == AgentStatus.RUNNING
-                and not task_alive
-            ):
+            if status == AgentStatus.RUNNING and not task_alive:
                 if entry.ephemeral:
                     # Ephemeral agents are meant to live once and vanish
                     logger.info(
@@ -291,7 +288,8 @@ class Supervisor:
 
         # Clean dissolved agents
         to_remove = [
-            aid for aid, entry in self._agents.items()
+            aid
+            for aid, entry in self._agents.items()
             if entry.ephemeral and entry.task is not None and entry.task.done()
         ]
         for aid in to_remove:

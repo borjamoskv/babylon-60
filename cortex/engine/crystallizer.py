@@ -55,12 +55,16 @@ class AutoCrystallizer:
         prompt = CRYSTALLIZATION_PROMPT.format(content=content)
 
         # Invoke the LLM with the crystallization instructions
-        refined = await self._llm.generate(
-            prompt,
-            model_tag=model_tag,
+        refined = await self._llm.complete(
+            prompt=prompt,
+            system="",
             temperature=0.0,  # Deterministic synthesis
             max_tokens=len(content) // 2 + 100,  # Enforce compression
         )
+
+        if not refined:
+            logger.warning("⚠️ Crystallization unavailable. Using raw content.")
+            return content
 
         refined = refined.strip()
 

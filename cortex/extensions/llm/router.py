@@ -254,11 +254,15 @@ class CortexLLMRouter:
         # Thermal Heat-Sink: coalesce identical concurrent requests (Ω₂)
         # Fast tuple hashing instead of slow f"{dict}" serialization
         wm_hash = hash(tuple((m.get("role"), m.get("content")) for m in prompt.working_memory))
-        prompt_key = str(hash((
-            hash(prompt.system_instruction) if prompt.system_instruction else 0,
-            wm_hash,
-            prompt.intent
-        )))
+        prompt_key = str(
+            hash(
+                (
+                    hash(prompt.system_instruction) if prompt.system_instruction else 0,
+                    wm_hash,
+                    prompt.intent,
+                )
+            )
+        )
 
         if prompt_key in self._inflight:
             logger.debug(
@@ -302,9 +306,12 @@ class CortexLLMRouter:
                     # Implement Cache-Aware Routing (Zero-Recompute Policy)
                     try:
                         from cortex.extensions.swarm.kv_prefix_registry import get_kv_registry
+
                         registry = get_kv_registry()
                         # [Hybrid Hash] Resolved: Evaluar inyección del episodic_context (Multimodal payloads)
-                        hot_providers = registry.check_cache_affinity(prompt.system_instruction, episodic_context=prompt.episodic_context)
+                        hot_providers = registry.check_cache_affinity(
+                            prompt.system_instruction, episodic_context=prompt.episodic_context
+                        )
                         if hot_providers:
                             valid_providers = {self._primary.provider_name} | {
                                 p.provider_name for p in self._fallbacks
@@ -319,12 +326,17 @@ class CortexLLMRouter:
                                     break
                         else:
                             # Cold Cache detected: Initiate Stampede Mitigation (Prefill Lock)
-                            is_leader = await registry.wait_or_acquire_prefill(prompt.system_instruction, episodic_context=prompt.episodic_context)
+                            is_leader = await registry.wait_or_acquire_prefill(
+                                prompt.system_instruction, episodic_context=prompt.episodic_context
+                            )
                             if is_leader:
                                 registry_for_lock = registry
                             else:
                                 # Re-evaluar afinidad post-espera (El líder subió el contexto exitosamente)
-                                hot_providers_after = registry.check_cache_affinity(prompt.system_instruction, episodic_context=prompt.episodic_context)
+                                hot_providers_after = registry.check_cache_affinity(
+                                    prompt.system_instruction,
+                                    episodic_context=prompt.episodic_context,
+                                )
                                 valid_providers = {self._primary.provider_name} | {
                                     p.provider_name for p in self._fallbacks
                                 }
@@ -332,8 +344,8 @@ class CortexLLMRouter:
                                     if hp in valid_providers:
                                         provider_hint = hp
                                         logger.info(
-                                            "❄️ [STAMPEDE-SURVIVOR] Follower woken up. Affinity detected in %s. O(1) Cache Hit.", 
-                                            hp
+                                            "❄️ [STAMPEDE-SURVIVOR] Follower woken up. Affinity detected in %s. O(1) Cache Hit.",
+                                            hp,
                                         )
                                         break
                     except ImportError:
@@ -353,10 +365,12 @@ class CortexLLMRouter:
                     break  # Fall back to standard resilience if hint provider fails
 
             return await self.execute_resilient(prompt)
-        
+
         finally:
             if is_leader and registry_for_lock and prompt.system_instruction:
-                registry_for_lock.release_prefill_lock(prompt.system_instruction, episodic_context=prompt.episodic_context)
+                registry_for_lock.release_prefill_lock(
+                    prompt.system_instruction, episodic_context=prompt.episodic_context
+                )
 
     async def execute_swarm(self, prompt: CortexPrompt) -> Result[str, str] | None:
         """Ω₂₁: Parallel Swarm Racing."""
@@ -455,9 +469,7 @@ class CortexLLMRouter:
             errors.append(f"Primary ({self._primary.provider_name}): {res_primary.error}")  # type: ignore[reportAttributeAccessIssue]
         else:
             if self._primary.provider_name in self._evicted:
-                errors.append(
-                    f"Primary ({self._primary.provider_name}): Skipped (Evicted via 401)"
-                )
+                errors.append(f"Primary ({self._primary.provider_name}): Skipped (Evicted via 401)")
             else:
                 errors.append(
                     f"Primary ({self._primary.provider_name}): "

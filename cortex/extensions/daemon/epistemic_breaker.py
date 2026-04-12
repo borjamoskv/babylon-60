@@ -82,9 +82,7 @@ class EpistemicBreakerDaemon:
             params.append(project)
 
         tombstone_clause = (
-            "is_tombstoned = 0"
-            if "is_tombstoned" in facts_columns
-            else "valid_until IS NULL"
+            "is_tombstoned = 0" if "is_tombstoned" in facts_columns else "valid_until IS NULL"
         )
         active_scope_sql = f"{scope_sql} AND {tombstone_clause}"
 
@@ -161,9 +159,7 @@ class EpistemicBreakerDaemon:
         deprecation_ratio = min(stats.get("deprecated_facts", 0) / total, 1.0)
         entropy = round(
             min(
-                orphan_ratio * 0.30
-                + error_density * 0.25
-                + deprecation_ratio * 0.20,
+                orphan_ratio * 0.30 + error_density * 0.25 + deprecation_ratio * 0.20,
                 1.0,
             ),
             4,

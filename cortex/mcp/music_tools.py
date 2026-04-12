@@ -20,8 +20,7 @@ def _load_music_runtime():
         missing = getattr(exc, "name", None) or "optional music dependency"
         logger.warning("Music MCP tools unavailable: %s", exc)
         raise RuntimeError(
-            "Music engine unavailable. Install optional audio dependencies "
-            f"(missing {missing})."
+            f"Music engine unavailable. Install optional audio dependencies (missing {missing})."
         ) from exc
 
     return GRAMMYOrchestrator, TrackContext

@@ -289,7 +289,9 @@ def agent_github_repl(timeout: float) -> None:
         async with GitHubAgentSession(caller_id="agent-github-repl") as session:
             while True:
                 try:
-                    line = await asyncio.to_thread(console.input, "[bold green]github> [/bold green]")
+                    line = await asyncio.to_thread(
+                        console.input, "[bold green]github> [/bold green]"
+                    )
                 except (EOFError, KeyboardInterrupt):
                     console.print()
                     break

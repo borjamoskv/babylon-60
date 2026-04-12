@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from cortex import config
+from cortex.engine import swarm_10k
 from cortex.engine.swarm_10k import SwarmCommander
 from cortex.extensions.signals.sharded_bus import ShardedAsyncSignalBus, ShardedDurableSignalBus
 
@@ -62,7 +63,7 @@ async def test_swarm_commander_fallback_uses_directory_for_file_bus_path(
         def __init__(self, *args, **kwargs) -> None:
             raise PermissionError("shared memory unavailable")
 
-    monkeypatch.setattr("cortex.engine.swarm_10k.SovereignSharedBus", BrokenSharedBus)
+    monkeypatch.setattr(swarm_10k, "SovereignSharedBus", BrokenSharedBus)
 
     commander = SwarmCommander(bus_path=db_file, use_shm=True)
     await commander.initialize()

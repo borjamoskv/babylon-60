@@ -188,11 +188,13 @@ class ConsensusManager:
             self._vote_pools[fact_id] = []
 
         async with self._pool_locks[fact_id]:
-            self._vote_pools[fact_id].append({
-                "agent_id": agent_id,
-                "value": value,
-                "reason": reason,
-            })
+            self._vote_pools[fact_id].append(
+                {
+                    "agent_id": agent_id,
+                    "value": value,
+                    "reason": reason,
+                }
+            )
 
     async def resolve_quorum(self, fact_id: int) -> float:
         """
@@ -204,7 +206,7 @@ class ConsensusManager:
 
         async with self._pool_locks[fact_id]:
             promises = self._vote_pools.pop(fact_id, [])
-        
+
         # Elimina el cerrojo para evitar Memory Leak
         self._pool_locks.pop(fact_id, None)
 
@@ -320,9 +322,7 @@ class ConsensusManager:
 
         return score
 
-    async def _recalculate_consensus(
-        self, fact_id: int, conn, tenant_id: str = "default"
-    ) -> float:
+    async def _recalculate_consensus(self, fact_id: int, conn, tenant_id: str = "default") -> float:
         cursor = await conn.execute(
             "SELECT vote FROM consensus_votes WHERE fact_id = ?",
             (fact_id,),

@@ -6,7 +6,6 @@ import sys
 import tempfile
 from pathlib import Path
 
-
 SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "release_preflight.py"
 
 

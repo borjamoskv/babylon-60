@@ -299,10 +299,14 @@ class CapatazOrchestrator:
                 # Derive tenant ID implicitly from OS for local executions,
                 # or use a default standard tenant wrapper
                 tenant_id = os.environ.get("CORTEX_TENANT_ID", "local-tenant")
+                provider_name = str(kwargs.get("provider_name") or "unknown")
+                model_name = str(kwargs.get("model_name") or kwargs.get("model") or "unknown")
                 slot = self._kv_registry.register(
                     mission_id=self.mission_id,
                     tenant_id=tenant_id,
                     system_prompt=system_prompt,
+                    provider_name=provider_name,
+                    model_name=model_name,
                 )
 
                 # Pass cache_key downstream so provider can use it
@@ -356,7 +360,7 @@ class CapatazOrchestrator:
                         payload={"rejection": v_res.reason, "elder": v_res.elder_id},
                         engine=engine,
                         agent_name="Elder-0",
-                        role=AgentRole.ELDER,
+                        role=AgentRole.SOVEREIGN_VALIDATOR,
                         intent=SwarmIntent.VERIFICATION,
                     )
                     raise RuntimeError(f"Elder rejection: {v_res.reason}")

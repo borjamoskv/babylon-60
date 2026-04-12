@@ -1,7 +1,9 @@
 import json
+from pathlib import Path
 
 import pytest
 
+from cortex.extensions.llm._presets import default_presets_path
 from cortex.guards.frontier_guard import FrontierModelGuard
 from cortex.utils.errors import SovereignViolation
 
@@ -41,3 +43,10 @@ def test_frontier_guard_unknown_provider(temp_presets):
     guard = FrontierModelGuard(presets_path=temp_presets)
     with pytest.raises(SovereignViolation, match="Unknown provider 'unknown'"):
         guard.validate_config("unknown")
+
+
+def test_frontier_guard_default_presets_path_is_canonical():
+    guard = FrontierModelGuard()
+
+    assert guard.presets_path == default_presets_path()
+    assert guard.presets_path == Path("config/llm_presets.json").resolve()

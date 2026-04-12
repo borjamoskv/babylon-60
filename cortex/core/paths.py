@@ -26,6 +26,7 @@ Environment variables::
 from __future__ import annotations
 
 import os
+import shutil
 from pathlib import Path
 
 __all__ = [
@@ -43,6 +44,7 @@ __all__ = [
     "PERSONAL_DB",
     "require_skill_path",
     "resolve_skill_dir",
+    "resolve_native_binary",
     "resolve_skill_name",
     "resolve_skill_script",
     "resolve_skill_scripts_dir",
@@ -60,6 +62,7 @@ AGENT_DIR: Path = Path(os.environ.get("CORTEX_AGENT_DIR", Path.home() / ".agent"
 
 # ─── Database ────────────────────────────────────────────────────────
 
+
 def _resolve_cortex_db() -> Path:
     """Resolve the main SQLite DB path from supported env aliases."""
     override = os.environ.get("CORTEX_DB_PATH") or os.environ.get("CORTEX_DB")
@@ -70,6 +73,45 @@ def _resolve_cortex_db() -> Path:
 
 CORTEX_DB: Path = _resolve_cortex_db()
 """Path to the main CORTEX SQLite database."""
+
+
+def resolve_native_binary(binary_name: str, *env_vars: str) -> Path | None:
+    """Resolve a native executable from env overrides, PATH, or a local build.
+
+    Resolution order:
+    1. Explicit environment variable overrides.
+    2. Executable available on the current PATH.
+    3. A repo-local Rust release build under ``engine/cortex-core/target/release``.
+    """
+    for env_var in env_vars:
+        override = os.environ.get(env_var)
+        if not override:
+            continue
+        candidate = Path(override).expanduser()
+        if candidate.is_file() and os.access(candidate, os.X_OK):
+            return candidate
+
+    discovered = shutil.which(binary_name)
+    if discovered:
+        return Path(discovered)
+
+    build_candidate = Path(__file__).resolve().parents[2] / "build" / "native" / "bin" / binary_name
+    if build_candidate.is_file() and os.access(build_candidate, os.X_OK):
+        return build_candidate
+
+    repo_candidate = (
+        Path(__file__).resolve().parents[2]
+        / "engine"
+        / "cortex-core"
+        / "target"
+        / "release"
+        / binary_name
+    )
+    if repo_candidate.is_file() and os.access(repo_candidate, os.X_OK):
+        return repo_candidate
+
+    return None
+
 
 PERSONAL_DB: Path = CORTEX_DIR / "personal_memories.db"
 """Repatriated personal/side-project memories (NAROA, LIVENOTCH, etc.)."""
@@ -218,6 +260,7 @@ def require_skill_path(skill_name: str, *relative_candidates: str) -> Path:
     raise FileNotFoundError(
         f"Skill '{skill_name}' is missing required path(s): {requested} under {resolve_skill_dir(skill_name)}"
     )
+
 
 # ─── Convenience ─────────────────────────────────────────────────────
 

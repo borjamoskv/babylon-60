@@ -15,9 +15,11 @@ from cortex.memory.temporal import EpochTimestampInput, normalize_timestamp_epoc
 
 logger = logging.getLogger("cortex.darknet.ledger")
 
+
 @dataclass
 class DarknetPost:
     """Un post en tu red social local."""
+
     id: str
     agent_id: str
     agent_name: str
@@ -26,15 +28,18 @@ class DarknetPost:
     exergy_score: int
     created_at: float
 
+
 @dataclass
 class DarknetComment:
     """Una discusión sobre un post."""
+
     id: str
     post_id: str
     agent_id: str
     agent_name: str
     content: str
     created_at: float
+
 
 class DarknetLedger:
     """Ledger criptográfico para la red social sintética."""
@@ -55,7 +60,7 @@ class DarknetLedger:
         """Crea las tablas P0 si no existen."""
         with connect(str(self.db_path)) as conn:
             cursor = conn.cursor()
-            cursor.execute('''
+            cursor.execute("""
                 CREATE TABLE IF NOT EXISTS darknet_posts (
                     id TEXT PRIMARY KEY,
                     agent_id TEXT NOT NULL,
@@ -65,8 +70,8 @@ class DarknetLedger:
                     exergy_score INTEGER DEFAULT 0,
                     created_at REAL NOT NULL
                 )
-            ''')
-            cursor.execute('''
+            """)
+            cursor.execute("""
                 CREATE TABLE IF NOT EXISTS darknet_comments (
                     id TEXT PRIMARY KEY,
                     post_id TEXT NOT NULL,
@@ -76,7 +81,7 @@ class DarknetLedger:
                     created_at REAL NOT NULL,
                     FOREIGN KEY (post_id) REFERENCES darknet_posts(id) ON DELETE CASCADE
                 )
-            ''')
+            """)
             conn.commit()
 
     def save_post(self, post: DarknetPost) -> None:
@@ -124,10 +129,11 @@ class DarknetLedger:
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT id, agent_id, agent_name, content, source_url, exergy_score, created_at "
-                "FROM darknet_posts ORDER BY created_at DESC LIMIT ?", (limit,)
+                "FROM darknet_posts ORDER BY created_at DESC LIMIT ?",
+                (limit,),
             )
             rows = cursor.fetchall()
-            
+
         return [
             DarknetPost(
                 id=r[0],
@@ -136,8 +142,9 @@ class DarknetLedger:
                 content=r[3],
                 source_url=r[4],
                 exergy_score=r[5],
-                created_at=r[6]
-            ) for r in rows
+                created_at=r[6],
+            )
+            for r in rows
         ]
 
     def fetch_comments_for_post(self, post_id: str) -> list[DarknetComment]:
@@ -146,19 +153,16 @@ class DarknetLedger:
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT id, post_id, agent_id, agent_name, content, created_at "
-                "FROM darknet_comments WHERE post_id = ? ORDER BY created_at ASC", (post_id,)
+                "FROM darknet_comments WHERE post_id = ? ORDER BY created_at ASC",
+                (post_id,),
             )
             rows = cursor.fetchall()
-            
+
         return [
             DarknetComment(
-                id=r[0],
-                post_id=r[1],
-                agent_id=r[2],
-                agent_name=r[3],
-                content=r[4],
-                created_at=r[5]
-            ) for r in rows
+                id=r[0], post_id=r[1], agent_id=r[2], agent_name=r[3], content=r[4], created_at=r[5]
+            )
+            for r in rows
         ]
 
     @staticmethod

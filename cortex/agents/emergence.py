@@ -99,7 +99,9 @@ class EmergenceEngine:
                 if trigger.condition(event):
                     await self._attempt_spawn(trigger, event)
             except Exception as exc:  # noqa: BLE001
-                logger.error("EmergenceEngine: Error evaluating trigger '%s': %s", trigger.name, exc)
+                logger.error(
+                    "EmergenceEngine: Error evaluating trigger '%s': %s", trigger.name, exc
+                )
 
     async def _attempt_spawn(self, trigger: ResonanceTrigger, context: dict[str, Any]) -> None:
         async with self._lock:
@@ -138,7 +140,7 @@ class EmergenceEngine:
                 )
 
                 await self.supervisor.spawn_ephemeral_agent(agent)
-                
+
                 # Emit manifestation event
                 await self.event_bus.publish(
                     topic="system.emergence.spawn",
@@ -151,4 +153,6 @@ class EmergenceEngine:
                 )
 
             except Exception as exc:  # noqa: BLE001
-                logger.error("EmergenceEngine: Failed to spawn agent for '%s': %s", trigger.name, exc)
+                logger.error(
+                    "EmergenceEngine: Failed to spawn agent for '%s': %s", trigger.name, exc
+                )

@@ -20,9 +20,7 @@ __all__ = [
 
 _LINE_SPEC_RE = re.compile(r"^(?P<start>\d+)(?:\s*[-:]\s*(?P<end>\d+))?$")
 _SSH_REMOTE_RE = re.compile(r"^(?:ssh://)?git@(?P<host>[^/:]+)[:/](?P<slug>.+?)(?:\.git)?$")
-_HTTPS_REMOTE_RE = re.compile(
-    r"^https?://(?:(?:[^@/]+)@)?(?P<host>[^/]+)/(?P<slug>.+?)(?:\.git)?$"
-)
+_HTTPS_REMOTE_RE = re.compile(r"^https?://(?:(?:[^@/]+)@)?(?P<host>[^/]+)/(?P<slug>.+?)(?:\.git)?$")
 
 
 class GitHubShortcutError(RuntimeError):
@@ -57,11 +55,10 @@ class GitHubRepoContext:
 
     def dev_base_url(self) -> str:
         if self.host != "github.com":
-            raise GitHubShortcutError("`github.dev` only supports repositories hosted on github.com.")
-        return (
-            "https://github.dev/"
-            f"{quote(self.owner, safe='')}/{quote(self.repo, safe='')}"
-        )
+            raise GitHubShortcutError(
+                "`github.dev` only supports repositories hosted on github.com."
+            )
+        return f"https://github.dev/{quote(self.owner, safe='')}/{quote(self.repo, safe='')}"
 
 
 def parse_line_spec(line_spec: str | None) -> tuple[int | None, int | None]:
@@ -81,7 +78,9 @@ def parse_line_spec(line_spec: str | None) -> tuple[int | None, int | None]:
     if start <= 0 or end <= 0:
         raise GitHubShortcutError("Line numbers must be positive integers.")
     if end < start:
-        raise GitHubShortcutError("The ending line must be greater than or equal to the starting line.")
+        raise GitHubShortcutError(
+            "The ending line must be greater than or equal to the starting line."
+        )
     return start, end
 
 
@@ -179,9 +178,7 @@ class GitHubShortcutService:
         if path is None:
             return base
         repo_path = self.resolve_repo_path(path)
-        return (
-            f"{base}/blob/{_quote_ref(self.context.current_ref)}/{_quote_path(repo_path)}"
-        )
+        return f"{base}/blob/{_quote_ref(self.context.current_ref)}/{_quote_path(repo_path)}"
 
     def permalink_url(
         self,
@@ -207,16 +204,14 @@ class GitHubShortcutService:
         repo_path = self.resolve_repo_path(path)
         chosen_ref = ref or self.context.current_ref
         return (
-            f"{self.context.web_base_url}/blame/{_quote_ref(chosen_ref)}/"
-            f"{_quote_path(repo_path)}"
+            f"{self.context.web_base_url}/blame/{_quote_ref(chosen_ref)}/{_quote_path(repo_path)}"
         )
 
     def history_url(self, path: str | Path, *, ref: str | None = None) -> str:
         repo_path = self.resolve_repo_path(path)
         chosen_ref = ref or self.context.current_ref
         return (
-            f"{self.context.web_base_url}/commits/{_quote_ref(chosen_ref)}/"
-            f"{_quote_path(repo_path)}"
+            f"{self.context.web_base_url}/commits/{_quote_ref(chosen_ref)}/{_quote_path(repo_path)}"
         )
 
     def search_url(
@@ -241,7 +236,9 @@ class GitHubShortcutService:
         if symbol:
             terms.append(f"symbol:{symbol}")
         if not terms:
-            raise GitHubShortcutError("Provide a query or at least one qualifier to build the search URL.")
+            raise GitHubShortcutError(
+                "Provide a query or at least one qualifier to build the search URL."
+            )
 
         q = " ".join(terms)
         return f"https://{self.context.host}/search?q={quote_plus(q)}&type=code"
@@ -290,7 +287,11 @@ def run_gh(args: list[str], *, cwd: str | Path | None = None) -> None:
             cwd=str(cwd) if cwd is not None else None,
         )
     except FileNotFoundError as err:
-        raise GitHubShortcutError("`gh` is required for this shortcut but is not installed.") from err
+        raise GitHubShortcutError(
+            "`gh` is required for this shortcut but is not installed."
+        ) from err
 
     if completed.returncode != 0:
-        raise GitHubShortcutError(f"`gh {' '.join(args)}` exited with status {completed.returncode}.")
+        raise GitHubShortcutError(
+            f"`gh {' '.join(args)}` exited with status {completed.returncode}."
+        )

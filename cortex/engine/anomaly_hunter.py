@@ -111,11 +111,11 @@ class AnomalyHunterEngine:
             if isinstance(fact.meta, dict) and fact.meta.get("caused_by"):
                 cause_id = fact.meta["caused_by"]
                 cause_ts = await self._get_fact_timestamp(cause_id)
-                if not cause_ts:
+                effect_created_at = fact.created_at
+                if not cause_ts or effect_created_at is None:
                     continue
 
-                # type: ignore
-                effect_ts = datetime.fromisoformat(fact.created_at.replace("Z", "+00:00"))
+                effect_ts = datetime.fromisoformat(effect_created_at.replace("Z", "+00:00"))
 
                 if cause_ts > effect_ts:
                     inversions.append(

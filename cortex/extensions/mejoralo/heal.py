@@ -14,7 +14,7 @@ import logging
 import subprocess
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, cast
 
 if TYPE_CHECKING:
     from cortex.extensions.mejoralo.engine import MejoraloEngine
@@ -332,7 +332,7 @@ def _apply_generation_results(
     """Apply verified healing proposals and track which files were healed."""
     iteration_success = False
     for (top_file_rel, _), new_code in zip(targets, generation_results, strict=True):
-        if is_file_tainted(top_file_rel, project, engine):
+        if project is not None and is_file_tainted(top_file_rel, project, engine):
             console.print(
                 f"  [bold red]☠️ {top_file_rel} está TAINTED. "
                 "Requiere ariadne-arch-omega. Saltando.[/]"
@@ -473,7 +473,9 @@ def heal_project(
     engine: MejoraloEngine | None = None,  # type: ignore[reportGeneralTypeIssues]
 ) -> bool:
     """Orchestrate autonomous healing: detect, rewrite, test, commit — RELENTLESSLY."""
-    from cortex.cli import console  # pyright: ignore
+    from cortex.cli import console as _console  # pyright: ignore
+
+    console = cast(Any, _console)
 
     current_result = scan_result
     iteration = 0

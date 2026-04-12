@@ -5,7 +5,9 @@ from types import SimpleNamespace
 from cortex.telemetry.pulse import PulseRegistry
 
 
-def _signal(event_type: str, *, source: str = "unit", payload: dict | None = None) -> SimpleNamespace:
+def _signal(
+    event_type: str, *, source: str = "unit", payload: dict | None = None
+) -> SimpleNamespace:
     return SimpleNamespace(
         event_type=event_type,
         source=source,

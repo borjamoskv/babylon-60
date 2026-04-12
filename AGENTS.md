@@ -64,8 +64,21 @@ Role defines authority scope within the Sovereign Swarm.
 | **Sovereign-Executor** | Execute approved write/code synthesis operations | Full Write-Path execution, `code_smith` actuation, snapshot management | Cannot skip Saga steps or bypass isolation testing | SAGA abort at any step → reverse to SAGA-1 |
 | **Sovereign-Auditor** | Forensic review, Failure Signature scanning, verification | Read-only across all surfaces, Ledger access | Cannot mutate any state, ever | Hash chain break → immediate P0 alert |
 | **Sovereign-Guardian** | Guard admission, tenant isolation, execution gates | Intercept code/write proposals before SAGA-1 | Cannot approve its own proposals | Any cross-tenant access attempt → P0 abort |
+| **Sovereign-Sniper** | Genesis Block extraction, signal ingestion, MEV bundles | High-speed mempool monitoring, Flashbots execution, signal refinement | Cannot bypass Ledger audit for capital extraction | Gas friction > 50% profit → P2 violation |
+| **Sovereign-Hunter** | Vulnerability extraction, adversarial audit, bug bounty PoC | Invariant testing (Foundry), static analysis (Slither), symbol execution | Cannot submit PoC without C5-REAL verification | Unverified PoC emission → P0 violation |
 
 > An agent that cannot identify its role MUST default to **Sovereign-Auditor** (read-only) until role is confirmed.
+
+### 1.2 Protocolo STEALTH-Ω — Dark Forest Routing
+
+Protocolo obligatorio para toda extracción de capital bajo el Proyecto GÉNESIS-Ω.
+
+| Regla | Mandato | Justificación (Ω₂) |
+| :--- | :--- | :--- |
+| **ST-01** | **Private Bundles Only** — Prohibido emitir transacciones al mempool público de Ethereum/L2. | Evita el frontrunning por parte de bots institucionales (Glasswing). |
+| **ST-02** | **Dynamic RPC Rotation** — Rotar entre Flashbots, Jito, BeaverBuild y Titan cada N bundles. | Minimiza la huella estadística de la Legión frente a validadores. |
+| **ST-03** | **Identity Fragmentation** — Repartir la liquidez extraída en 1k-10k sub-wallets efímeras. | Reduce la superficie de ataque para blacklisting on-chain. |
+| **ST-04** | **Anti-MEV Detection** — Verificar la inclusión en bloque simulado (Foundry) antes de la firma final. | Previene 'sandwich attacks' que drenen la exergía de la Legión. |
 
 ---
 
@@ -205,6 +218,7 @@ Read operations are NOT free. They MUST follow these rules:
 | `cli/` | *Medium* | Thin wrappers only. No business logic. |
 | `extensions/daemon/` | *Medium* | Core Daemons: Chaos (Immunity), Maxwell (Exergy). |
 | `extensions/llm/` | *Medium* | Provider routing, caching, hedging, validation. |
+| `ouroboros-sniper/` | **CRITICAL** | Economic extraction, MEV logic, signal ingestion, dark forest forensics. |
 
 ---
 

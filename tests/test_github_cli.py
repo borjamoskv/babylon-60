@@ -44,10 +44,7 @@ def test_github_permalink_prints_commit_pinned_url(monkeypatch) -> None:
             assert path == "cortex/cli/github_cmds.py"
             assert start_line == 10
             assert end_line == 25
-            return (
-                "https://github.com/acme/cortex/blob/deadbeef/"
-                "cortex/cli/github_cmds.py#L10-L25"
-            )
+            return "https://github.com/acme/cortex/blob/deadbeef/cortex/cli/github_cmds.py#L10-L25"
 
     monkeypatch.setattr(github_cli, "_get_shortcut_service", lambda remote: _FakeService())
 

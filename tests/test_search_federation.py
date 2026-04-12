@@ -32,7 +32,9 @@ class _FakeEncrypter:
         return f"decrypted:{payload}"
 
 
-def test_search_attached_db_uses_requested_tenant_for_decryption(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_search_attached_db_uses_requested_tenant_for_decryption(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     fake_encrypter = _FakeEncrypter()
     monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: fake_encrypter)
 
@@ -158,7 +160,9 @@ async def test_federated_search_async_forwards_tenant_id(monkeypatch: pytest.Mon
     async def fake_detach(conn, aliases):
         calls["detach"] = list(aliases)
 
-    async def fake_search_attached_db(conn, alias, query, tenant_id="default", project=None, limit=20):
+    async def fake_search_attached_db(
+        conn, alias, query, tenant_id="default", project=None, limit=20
+    ):
         calls["attached"] = (alias, query, tenant_id, project, limit)
         return []
 

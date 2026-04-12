@@ -9,10 +9,14 @@ from typing import Any, Final
 
 logger = logging.getLogger("cortex.extensions.llm.presets")
 
+
+def default_presets_path() -> Path:
+    """Return the canonical repository path for ``llm_presets.json``."""
+    return Path(__file__).resolve().parents[3] / "config" / "llm_presets.json"
+
+
 # Default location for presets
-_ASSET_PATH: Final[str] = str(
-    Path(__file__).parent.parent.parent.parent / "config" / "llm_presets.json"
-)
+_ASSET_PATH: Final[str] = str(default_presets_path())
 
 # Global cache for presets to avoid redundant I/O
 _PRESETS_CACHE: dict[str, dict[str, Any]] = {}

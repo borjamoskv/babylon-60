@@ -9,8 +9,7 @@ Local-first. SHA-256 hash-chained. Merkle checkpoints. Audit-ready.
 [![GitHub Stars](https://img.shields.io/github/stars/borjamoskv/Cortex-Persist?label=GitHub%20Stars)](https://github.com/borjamoskv/Cortex-Persist/stargazers)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![CI](https://github.com/borjamoskv/Cortex-Persist/actions/workflows/ci.yml/badge.svg)](https://github.com/borjamoskv/Cortex-Persist/actions)
-[![Codecov](https://codecov.io/gh/borjamoskv/Cortex-Persist/branch/main/graph/badge.svg)](https://codecov.io/gh/borjamoskv/Cortex-Persist)
+[![CI](https://github.com/borjamoskv/Cortex-Persist/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/borjamoskv/Cortex-Persist/actions/workflows/ci.yml?query=branch%3Amain)
 [Quickstart](#quickstart) · [Canonical Demo](docs/canonical-demo.md) · [Supported Core](docs/supported-core.md) · [System Map](docs/system-map.md) · [Native Technologies](docs/cortex-native-technologies.md) · [Enterprise Readiness](ENTERPRISE_READINESS.md) · [Diligence Checklist](DUE_DILIGENCE_CHECKLIST.md) · [Deployment Hardening](DEPLOYMENT_HARDENING.md) · [API](docs/api.md) · [Security Model](docs/SECURITY_TRUST_MODEL.md) · [Support](SUPPORT.md) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md)
 
 CORTEX Persist adds a verification layer around agent memory and decision state. It sits between your runtime and your storage so facts, decisions, and derived state become reviewable, tamper-evident records instead of mutable application state. If stored context changes after the fact, verification fails.

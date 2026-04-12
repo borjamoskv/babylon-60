@@ -79,10 +79,14 @@ class TempusFugitAgent(BaseAgent):
             return {"heartbeat_id": heartbeat_id}
 
         if op == "flush":
-            return {"entries_created": self._tracker.flush(_optional_int(payload.get("gap_seconds")))}
+            return {
+                "entries_created": self._tracker.flush(_optional_int(payload.get("gap_seconds")))
+            }
 
         if op == "today":
-            return _summary_to_dict(self._tracker.today(project=_optional_str(payload.get("project"))))
+            return _summary_to_dict(
+                self._tracker.today(project=_optional_str(payload.get("project")))
+            )
 
         if op == "report":
             return _summary_to_dict(

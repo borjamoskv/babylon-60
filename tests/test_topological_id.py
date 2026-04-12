@@ -16,11 +16,15 @@ def test_flake_sequence_increment():
     assert len(ids) == 1000
 
 
-def test_flake_lexicographical_sorting():
+def test_flake_lexicographical_sorting(monkeypatch):
     gen = SovereignFlake(node_id=1)
+    timestamps = iter([1_767_225_600.000, 1_767_225_600.001])
+    monkeypatch.setattr(
+        "cortex.extensions.axioms.topological_id.time.time",
+        lambda: next(timestamps),
+    )
 
     id1 = gen.next_lexicographic_id()
-    time.sleep(0.002)  # force sleep across real ms
     id2 = gen.next_lexicographic_id()
 
     assert isinstance(id1, str)

@@ -87,9 +87,9 @@ class SovereignVerifier:
         exit_code = status.get("exit_code", 0)
         stdout = status.get("stdout", "")
         stderr = status.get("stderr", "")
-        
+
         logger.info("Verifying runtime for command %s (exit_code: %s)...", command_id, exit_code)
-        
+
         # Rule Ω6: Non-zero exit code on P0 paths forces quarantine
         if exit_code != 0:
             logger.warning("☣️  Runtime FAILURE detected (exit: %s). Quarantining logic.", exit_code)
@@ -97,14 +97,20 @@ class SovereignVerifier:
                 is_valid=False,
                 exit_code=exit_code,
                 runtime_status="QUARANTINED",
-                violations=[{"id": "V-ERR-01", "name": "Runtime Error", "message": stderr or "Unknown execution failure"}],
-                metadata={"command_id": command_id, "stdout": stdout, "stderr": stderr}
+                violations=[
+                    {
+                        "id": "V-ERR-01",
+                        "name": "Runtime Error",
+                        "message": stderr or "Unknown execution failure",
+                    }
+                ],
+                metadata={"command_id": command_id, "stdout": stdout, "stderr": stderr},
             )
-            
+
         return VerificationResult(
             is_valid=True,
             exit_code=0,
             runtime_status="SUCCESS",
             proof_certificate=f"RUNTIME_VERIFIED:{command_id}",
-            metadata={"stdout": stdout}
+            metadata={"stdout": stdout},
         )

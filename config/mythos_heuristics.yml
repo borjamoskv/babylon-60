@@ -1,0 +1,167 @@
+# PROYECTO GÉNESIS-Ω | MYTHOS HEURISTICS v1.0
+# Ley Ω₁: Frontera determinista. Patrones verificados por AST estático.
+# Ley Ω₉: C5-REAL — Cada heurística referencia un CVE o vector real.
+
+# ═══════════════════════════════════════════════════════════════════════
+# CAPA 1: REENTRANCIA (Solidity 0.8.x — Post-SafeMath)
+# ═══════════════════════════════════════════════════════════════════════
+reentrancy_patterns:
+  # CEI violations — Checks-Effects-Interactions
+  - id: "MH-001"
+    name: "Cross-Function Reentrancy via State Lag"
+    severity: CRITICAL
+    description: >
+      El contrato actualiza el estado DESPUÉS de una llamada externa
+      en una función, pero otra función lee ese estado antes de la
+      actualización. Bypasea el modifier nonReentrant si aplica solo
+      a la función de entrada.
+    solidity_pattern: |
+      function withdraw() external {
+          uint bal = balances[msg.sender];
+          (bool ok,) = msg.sender.call{value: bal}("");
+          balances[msg.sender] = 0; // ← Estado actualizado DESPUÉS
+      }
+      function getBalance() public view returns (uint) {
+          return balances[msg.sender]; // ← Lee estado stale
+      }
+    targets:
+      - "Uniswap V4 Hooks (beforeSwap/afterSwap state desync)"
+      - "LayerZero V2 MessageLib (lzReceive re-entry)"
+    bounty_range: "$500K - $2.25M"
+
+  - id: "MH-002"
+    name: "Read-Only Reentrancy via View Function Oracle"
+    severity: HIGH
+    description: >
+      Oráculos de precio que leen balances de pools AMM durante 
+      una transacción activa obtienen valores manipulados.
+      Afecta a lending protocols que usan spot price.
+    solidity_pattern: |
+      // Oracle vulnerable:
+      function getPrice() external view returns (uint) {
+          return pool.reserve0() / pool.reserve1(); // ← stale mid-tx
+      }
+    targets:
+      - "Aave V3 (Oracle adapters usando Balancer/Curve pools)"
+      - "MakerDAO DSS (Median oracle lag)"
+    bounty_range: "$1M - $10M"
+
+# ═══════════════════════════════════════════════════════════════════════
+# CAPA 2: LÓGICA DE ACCESO Y AUTORIZACIÓN
+# ═══════════════════════════════════════════════════════════════════════
+access_control_patterns:
+  - id: "MH-010"
+    name: "Unprotected Initialize / Proxy Takeover"
+    severity: CRITICAL
+    description: >
+      Contratos proxy (UUPS/Transparent) con función initialize()
+      no protegida o re-inicializable. Permite al atacante
+      asumir ownership del proxy.
+    solidity_pattern: |
+      function initialize(address _owner) external {
+          owner = _owner; // ← Sin modifier initializer
+      }
+    targets:
+      - "LayerZero V2 EndpointV2 (Ultra Light Node proxy)"
+    bounty_range: "$5M - $15M"
+
+  - id: "MH-011"
+    name: "msg.sender Confusion in Hook Callbacks"
+    severity: HIGH
+    description: >
+      En Uniswap V4, los hooks son llamados por el PoolManager.
+      Si el hook asume que msg.sender es el usuario original,
+      un atacante puede manipular el flujo inyectando un hook
+      malicioso que reenvía la llamada.
+    solidity_pattern: |
+      function beforeSwap(
+          address sender, // ← Este es el PoolManager, NO el usuario
+          PoolKey calldata key,
+          IPoolManager.SwapParams calldata params,
+          bytes calldata hookData
+      ) external override returns (bytes4) {
+          require(msg.sender == address(poolManager));
+          // ⚠️ 'sender' param podría ser spoofed via nested hook
+      }
+    targets:
+      - "Uniswap V4 PoolManager (Hook chaining)"
+    bounty_range: "$1M - $2.25M"
+
+# ═══════════════════════════════════════════════════════════════════════
+# CAPA 3: CROSS-CHAIN (LayerZero V2 Specific)
+# ═══════════════════════════════════════════════════════════════════════
+cross_chain_patterns:
+  - id: "MH-020"
+    name: "Message Replay Across Chains"
+    severity: CRITICAL
+    description: >
+      Si el nonce de mensaje cross-chain no incluye el chainId
+      del origen + destino, un mensaje verificado en Chain A
+      puede ser replayeado en Chain B.
+    targets:
+      - "LayerZero V2 (Ultra Light Node packet verification)"
+    bounty_range: "$5M - $15M"
+
+  - id: "MH-021"
+    name: "DVN (Decentralized Verifier Network) Collusion"
+    severity: HIGH
+    description: >
+      LayerZero V2 permite configurar sets de DVNs para verificar
+      mensajes. Si el threshold de quorum es 1-of-N y un solo
+      DVN es comprometido, se pueden forjar mensajes arbitrarios.
+    targets:
+      - "LayerZero V2 (SendLib302/ReceiveLib302)"
+    bounty_range: "$5M - $15M"
+
+# ═══════════════════════════════════════════════════════════════════════
+# CAPA 4: MANIPULACIÓN DE ESTADO EN HOOKS (Uniswap V4)
+# ═══════════════════════════════════════════════════════════════════════
+hook_manipulation_patterns:
+  - id: "MH-030"
+    name: "Dynamic Fee Manipulation via Hook"
+    severity: HIGH
+    description: >
+      Un hook que implementa beforeSwap puede devolver un fee
+      dinámico que drena a los LPs. Si el hook es trusted por
+      el PoolManager pero controlado por un actor malicioso,
+      puede establecer fees del 100%.
+    solidity_pattern: |
+      function beforeSwap(...) returns (bytes4, BeforeSwapDelta, uint24) {
+          return (this.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, 
+                  1000000 | OVERRIDE_FEE_FLAG); // 100% fee
+      }
+    targets:
+      - "Uniswap V4 Hooks (DYNAMIC_FEE pools)"
+    bounty_range: "$500K - $2.25M"
+
+  - id: "MH-031"
+    name: "Flash Accounting Underflow in PoolManager"
+    severity: CRITICAL
+    description: >
+      El PoolManager de V4 usa un sistema de 'flash accounting'
+      donde los deltas deben netearse a cero al final de la tx.
+      Si un hook puede manipular el delta tracking para crear
+      un underflow, puede drenar fondos del singleton.
+    targets:
+      - "Uniswap V4 PoolManager (currency deltas)"
+    bounty_range: "$1M - $2.25M"
+
+# ═══════════════════════════════════════════════════════════════════════
+# PROTOCOLO DE EJECUCIÓN
+# ═══════════════════════════════════════════════════════════════════════
+execution_protocol:
+  fuzzing_tool: "forge test --fuzz-runs 100000 --fuzz-seed 42"
+  invariant_mode: "forge test --match-contract InvariantTest"
+  coverage_check: "forge coverage --report lcov"
+  poc_template: "test/PoC_TEMPLATE.t.sol"
+  submission_target: "https://immunefi.com/bug-bounty/"
+  
+  priority_order:
+    - "MH-020"  # LayerZero message replay — $15M max
+    - "MH-010"  # Proxy takeover — $15M max
+    - "MH-002"  # Read-only reentrancy — $10M max
+    - "MH-031"  # Flash accounting — $2.25M max
+    - "MH-030"  # Dynamic fee drain — $2.25M max
+    - "MH-011"  # Hook sender confusion — $2.25M max
+    - "MH-001"  # Cross-function reentrancy — $2.25M max
+    - "MH-021"  # DVN collusion — $15M max (requires infra)

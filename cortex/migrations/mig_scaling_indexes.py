@@ -26,4 +26,6 @@ def _migration_024_scaling_indexes(conn: sqlite3.Connection) -> None:
             ON causal_edges(parent_id, edge_type, tenant_id);
         """
     )
-    logger.info("Migration 024: Added scaling indexes for transactions, enrichment_jobs, causal_edges")
+    logger.info(
+        "Migration 024: Added scaling indexes for transactions, enrichment_jobs, causal_edges"
+    )

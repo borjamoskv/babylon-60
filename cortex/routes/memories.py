@@ -18,9 +18,13 @@ from cortex.engine.storage_guard import GuardViolation
 
 __all__ = [
     "batch_store",
+    "execute_continual_memory",
+    "continual_memory_status",
     "delete_memory",
+    "forget_continual_memory",
     "get_memory",
     "list_memories",
+    "plan_continual_memory",
     "search_memories",
     "store_memory",
     "verify_memories",
@@ -82,6 +86,28 @@ class BatchStoreRequest(BaseModel):
     """Batch store request."""
 
     memories: list[StoreMemoryRequest] = Field(..., min_length=1, max_length=100)
+
+
+class ContinualPlanRequest(BaseModel):
+    """Request to plan an adapter-only continual-learning update."""
+
+    domain: str = Field(..., min_length=1, max_length=128)
+    policy_violation: bool = False
+
+
+class ContinualForgetRequest(BaseModel):
+    """Request selective forgetting from the continual-learning sidecar."""
+
+    user_id: str = Field(..., min_length=1, max_length=256)
+    query: str = Field(..., min_length=1, max_length=2048)
+
+
+class ContinualExecuteRequest(BaseModel):
+    """Request to execute a continual-learning micro-update through a configured backend."""
+
+    domain: str = Field(..., min_length=1, max_length=128)
+    policy_violation: bool = False
+    critical_domains: list[str] = Field(default_factory=list, max_length=32)
 
 
 def _to_memory_response(value: BaseModel | dict[str, Any]) -> MemoryResponse:
@@ -217,6 +243,101 @@ async def verify_memories(
     _ = request
     _ = auth
     return await service.verify_ledger()
+
+
+@router.get("/continual/status", response_model=dict)
+async def continual_memory_status(
+    domain: Optional[str] = Query(
+        None, min_length=1, description="Optional continual-learning domain"
+    ),
+    auth: AuthResult = Depends(require_permission("read")),
+    service: PublicMemoryService = Depends(get_public_memory_service),
+) -> dict:
+    """Return tenant-scoped continual-learning status for the legacy memories surface."""
+    try:
+        return await service.continual_learning_status(
+            tenant_id=auth.tenant_id,
+            domain=domain,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from None
+
+
+@router.post("/continual/plan", response_model=dict)
+async def plan_continual_memory(
+    req: ContinualPlanRequest,
+    auth: AuthResult = Depends(require_permission("write")),
+    service: PublicMemoryService = Depends(get_public_memory_service),
+) -> dict:
+    """Plan a tenant-scoped continual-learning micro-update."""
+    try:
+        plan = await service.plan_continual_update(
+            tenant_id=auth.tenant_id,
+            domain=req.domain,
+            policy_violation=req.policy_violation,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from None
+    except (OSError, RuntimeError, TypeError):
+        raise HTTPException(
+            status_code=500, detail="Failed to plan continual learning update"
+        ) from None
+
+    if plan is None:
+        raise HTTPException(status_code=409, detail="Continual learning sidecar is disabled")
+    return plan
+
+
+@router.post("/continual/forget", response_model=dict)
+async def forget_continual_memory(
+    req: ContinualForgetRequest,
+    auth: AuthResult = Depends(require_permission("write")),
+    service: PublicMemoryService = Depends(get_public_memory_service),
+) -> dict:
+    """Delete replay traces and queue clean replay for continual-learning state."""
+    try:
+        result = await service.forget_continual_memory(
+            tenant_id=auth.tenant_id,
+            user_id=req.user_id,
+            query=req.query,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from None
+    except (OSError, RuntimeError, TypeError):
+        raise HTTPException(status_code=500, detail="Failed to forget continual memory") from None
+
+    if result is None:
+        raise HTTPException(status_code=409, detail="Continual learning sidecar is disabled")
+    return result
+
+
+@router.post("/continual/execute", response_model=dict)
+async def execute_continual_memory(
+    req: ContinualExecuteRequest,
+    auth: AuthResult = Depends(require_permission("write")),
+    service: PublicMemoryService = Depends(get_public_memory_service),
+) -> dict:
+    """Execute a continual-learning update when a backend is configured."""
+    try:
+        result = await service.execute_continual_update(
+            tenant_id=auth.tenant_id,
+            domain=req.domain,
+            policy_violation=req.policy_violation,
+            critical_domains=req.critical_domains,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from None
+    except (OSError, RuntimeError, TypeError):
+        raise HTTPException(
+            status_code=500, detail="Failed to execute continual learning update"
+        ) from None
+
+    if result is None:
+        raise HTTPException(
+            status_code=409,
+            detail="Continual learning sidecar or training backend is disabled",
+        )
+    return result
 
 
 @router.get("/{memory_id}", response_model=MemoryResponse)

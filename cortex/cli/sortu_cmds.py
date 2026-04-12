@@ -85,10 +85,7 @@ async def _run_forge(target: Path, intent: str, threshold: float, db: str) -> No
 
     # Show biopsy if available
     if record.biopsy:
-        table = Table(
-            title=f"⚡ SORTU Biopsy ({record.skill_name})",
-            header_style="bold cyan"
-        )
+        table = Table(title=f"⚡ SORTU Biopsy ({record.skill_name})", header_style="bold cyan")
         table.add_column("Metric", style="white")
         table.add_column("Value", justify="right", style="green")
 

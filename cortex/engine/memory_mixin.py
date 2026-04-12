@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import inspect
 import logging
+import os
 from pathlib import Path
 
 import aiosqlite
 
+from cortex.core.paths import CORTEX_DIR
 from cortex.engine.mixins.base import EngineMixinBase
 
 __all__ = ["MemoryMixin"]
@@ -62,9 +65,8 @@ class MemoryMixin(EngineMixinBase):
             logger.warning("DurableSignalBus initialization failed: %s", e)
 
         # v7 (G10): HDC is opt-in by default.
-        import os
-
         use_hdc = os.environ.get("CORTEX_HDC") == "1"
+        enable_continual_learning = os.environ.get("CORTEX_CONTINUAL_LEARNING") == "1"
 
         # CORTOCIRCUITO: si auto_embed=False, no intentar L2 ni cargar embedder
         # Esto evita instanciar LocalEmbedder (carga modelo ML) innecesariamente.
@@ -112,11 +114,69 @@ class MemoryMixin(EngineMixinBase):
             try:
                 from cortex.memory.manager import CortexMemoryManager
 
+                continual_learning = None
+                continual_training_backend = None
+                if enable_continual_learning:
+                    try:
+                        from cortex.extensions.continual_learning import (
+                            AdapterRegistry,
+                            LifelongLearningSidecar,
+                            PrioritizedEpisodicBuffer,
+                            SQLiteContinualLearningStore,
+                            SQLitePrototypeStore,
+                            SQLiteRetrainQueue,
+                            SQLiteSemanticMemoryStore,
+                            build_backend_from_env,
+                        )
+
+                        continual_db_path = Path(
+                            os.environ.get(
+                                "CORTEX_CONTINUAL_LEARNING_DB_PATH",
+                                str(CORTEX_DIR / "continual_learning.db"),
+                            )
+                        ).expanduser()
+                        continual_embedder = self._get_embedder()
+                        if inspect.iscoroutinefunction(getattr(continual_embedder, "embed", None)):
+                            raise RuntimeError(
+                                "continual learning sidecar requires a synchronous embed() implementation"
+                            )
+                        continual_store = SQLiteContinualLearningStore(continual_db_path)
+                        continual_learning = LifelongLearningSidecar(
+                            embedder=continual_embedder,
+                            prototype_store=SQLitePrototypeStore(continual_store),
+                            semantic_store=SQLiteSemanticMemoryStore(continual_store),
+                            retrain_queue=SQLiteRetrainQueue(continual_store),
+                            registry=AdapterRegistry(persistence=continual_store),
+                            buffer=PrioritizedEpisodicBuffer(
+                                max_items=50_000,
+                                ttl_seconds=72 * 3600,
+                                dedup_tau=0.92,
+                                persistence=continual_store,
+                            ),
+                        )
+                        try:
+                            continual_training_backend = build_backend_from_env(
+                                cortex_dir=CORTEX_DIR,
+                            )
+                            if continual_training_backend is not None:
+                                logger.info(
+                                    "Continual learning execution backend enabled: %s",
+                                    type(continual_training_backend).__name__,
+                                )
+                        except (OSError, RuntimeError, TypeError, ValueError) as e:
+                            logger.warning("Continual learning backend unavailable: %s", e)
+                        logger.info("Continual learning sidecar enabled for memory manager")
+                    except (ImportError, OSError, RuntimeError, TypeError, ValueError) as e:
+                        logger.warning("Continual learning sidecar unavailable: %s", e)
+                        continual_training_backend = None
+
                 self._memory_manager = CortexMemoryManager(
                     l1=l1,
                     l2=l2,
                     l3=l3,
                     encoder=encoder,
+                    continual_learning=continual_learning,
+                    continual_training_backend=continual_training_backend,
                     hdc_l2=hdc_l2,
                     hdc_encoder=hdc_encoder,
                     bus=bus,

@@ -38,9 +38,7 @@ async def test_process_next_job_accepts_pending_status(tmp_path, monkeypatch) ->
         await conn.execute(
             "INSERT INTO facts (id, content, project, tenant_id) VALUES (1, 'hello', 'proj', 'tenant')"
         )
-        await conn.execute(
-            "INSERT INTO enrichment_jobs (fact_id, status) VALUES (1, 'pending')"
-        )
+        await conn.execute("INSERT INTO enrichment_jobs (fact_id, status) VALUES (1, 'pending')")
         await conn.commit()
 
     class _Engine:

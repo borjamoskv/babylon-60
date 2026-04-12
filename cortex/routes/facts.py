@@ -42,9 +42,7 @@ class BatchStoreFactRequest(BaseModel):
     fact_type: str = Field("knowledge", validation_alias=AliasChoices("fact_type", "type"))
     tags: list[str] = Field(default_factory=list)
     source: str | None = None
-    meta: dict[str, Any] | None = Field(
-        None, validation_alias=AliasChoices("meta", "metadata")
-    )
+    meta: dict[str, Any] | None = Field(None, validation_alias=AliasChoices("meta", "metadata"))
     parent_decision_id: int | None = None
 
 

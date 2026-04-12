@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import importlib.util
 import logging
+import os
 import sys
 import uuid
 from collections.abc import Iterator
@@ -66,7 +67,9 @@ class SovereignBridge:
                 module = self._load_module_from_path(skill_name, skill_dir, candidate)
             except (ImportError, OSError, SyntaxError, ValueError) as e:
                 last_error = e
-                logger.debug("Failed to load candidate %s for skill %s: %s", candidate, skill_name, e)
+                logger.debug(
+                    "Failed to load candidate %s for skill %s: %s", candidate, skill_name, e
+                )
                 continue
 
             if first_loaded is None:
@@ -161,8 +164,18 @@ class SovereignBridge:
 
     @staticmethod
     def _module_origin(module: Any) -> Path | None:
-        origin = getattr(module, "__file__", None)
+        module_dict = getattr(module, "__dict__", None)
+        if not isinstance(module_dict, dict):
+            return None
+
+        origin = module_dict.get("__file__")
         if not origin:
+            spec = module_dict.get("__spec__")
+            origin = getattr(spec, "origin", None)
+
+        if origin in {None, "built-in", "frozen"}:
+            return None
+        if not isinstance(origin, (str, os.PathLike)):
             return None
         try:
             return Path(origin).resolve()

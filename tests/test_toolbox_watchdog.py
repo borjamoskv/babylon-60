@@ -3,6 +3,7 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
+from cortex.database.core import connect
 from cortex.mcp.toolbox_watchdog import ToolboxWatchdog
 
 
@@ -30,6 +31,19 @@ def test_refresh_snapshot_copies_live_db(tmp_path: Path) -> None:
     watchdog._refresh_snapshot()
 
     conn = sqlite3.connect(snapshot_db)
+    try:
+        row = conn.execute("SELECT content FROM facts").fetchone()
+    finally:
+        conn.close()
+
+    assert row == ("shadow-copy-ok",)
+
+
+def test_read_only_connect_skips_mutating_pragmas(tmp_path: Path) -> None:
+    live_db = tmp_path / "cortex.db"
+    _create_db(live_db)
+
+    conn = connect(f"file:{live_db.as_posix()}?mode=ro", uri=True, read_only=True)
     try:
         row = conn.execute("SELECT content FROM facts").fetchone()
     finally:

@@ -108,12 +108,12 @@ class AestheticAuditor:
         try:
             # We enforce routing to a strong multimodal tier
             res = await self.router.execute_resilient(prompt)
-            if res.is_ok():
-                evaluation = res.unwrap().strip()
-                if evaluation.startswith("PASS"):
-                    return Ok("Aesthetic Check Passed.")
-                else:
-                    return Err(evaluation)
-            return Err(f"QA Router Error: {res.error}")
+            if isinstance(res, Err):
+                return Err(f"QA Router Error: {res.error}")
+
+            evaluation = res.unwrap().strip()
+            if evaluation.startswith("PASS"):
+                return Ok("Aesthetic Check Passed.")
+            return Err(evaluation)
         except Exception as e:
             return Err(f"Vision API Error: {e}")

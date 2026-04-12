@@ -47,7 +47,23 @@ async def fetch_jina_markdown(url: str) -> str:
     async with httpx.AsyncClient() as client:
         response = await client.get(target)
         response.raise_for_status()
-        return response.text
+        text = response.text
+        # Anti-Hallucination Gate: Check for common "Success Errors"
+        error_patterns = [
+            "rate limit reached",
+            "access denied",
+            "blocked by cloudflare",
+            "404 not found",
+            "error 403",
+            "captcha",
+            "could not fetch",
+        ]
+        text_lower = text.lower()
+        if any(p in text_lower for p in error_patterns) and len(text) < 500:
+            logger.warning("☣️ [JINA] Detectado falso éxito (error en payload).")
+            raise RuntimeError(f"Adquisición fallida: {text[:50]}...")
+
+        return text
 
 
 # ==============================================================================

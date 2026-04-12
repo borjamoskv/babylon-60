@@ -37,7 +37,9 @@ async def test_run_loop_stop_interrupts_sleep() -> None:
 
 
 @pytest.mark.asyncio
-async def test_log_evolution_warns_without_store_capability(caplog: pytest.LogCaptureFixture) -> None:
+async def test_log_evolution_warns_without_store_capability(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     daemon = FrontierDaemon(engine=SimpleNamespace())
 
     with caplog.at_level("WARNING"):

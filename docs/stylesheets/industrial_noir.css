@@ -1,0 +1,370 @@
+/* ===========================================
+   CORTEX Persist — Industrial Noir Docs Theme
+   =========================================== */
+
+:root {
+  --md-primary-fg-color: #050505;
+  --md-primary-fg-color--light: #0a0a0d;
+  --md-primary-fg-color--dark: #000000;
+  --md-accent-fg-color: #ccff00;
+  --md-accent-fg-color--transparent: rgba(204, 255, 0, 0.1);
+  --ctx-abyssal-900: #050505;
+  --ctx-abyssal-800: #0a0a0a;
+  --ctx-abyssal-700: #111111;
+  --ctx-abyssal-600: #1a1a1a;
+  --ctx-cyber-lime: #ccff00;
+  --ctx-cyber-violet: #6600ff;
+  --ctx-industrial-gold: #d4af37;
+  --ctx-yinmn-blue: #2e5090;
+  --ctx-text-primary: #fafafa;
+  --ctx-text-secondary: rgba(250, 250, 250, 0.68);
+  --ctx-text-tertiary: rgba(250, 250, 250, 0.4);
+}
+
+[data-md-color-scheme="slate"] {
+  --md-default-bg-color: var(--ctx-abyssal-900);
+  --md-default-fg-color: var(--ctx-text-primary);
+  --md-default-fg-color--light: var(--ctx-text-secondary);
+  --md-default-fg-color--lighter: var(--ctx-text-tertiary);
+  --md-code-bg-color: var(--ctx-abyssal-800);
+  --md-code-fg-color: var(--ctx-text-primary);
+  --md-code-hl-color: rgba(204, 255, 0, 0.1);
+  --md-typeset-a-color: var(--ctx-cyber-lime);
+  --md-footer-bg-color: var(--ctx-abyssal-800);
+  --md-footer-bg-color--dark: var(--ctx-abyssal-900);
+}
+
+.md-header {
+  background-color: rgba(5, 5, 5, 0.85) !important;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 1px 40px rgba(0, 0, 0, 0.6);
+}
+
+.md-header__title {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.md-nav__link--active,
+.md-nav__item--active > .md-nav__link,
+.md-tabs__link--active {
+  color: var(--ctx-cyber-lime) !important;
+}
+
+.md-tabs__link--active {
+  border-bottom: 2px solid var(--ctx-cyber-lime);
+}
+
+.md-typeset h1 {
+  color: var(--ctx-text-primary);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.md-typeset h2 {
+  color: var(--ctx-text-primary);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 0.5em;
+}
+
+.md-typeset h3,
+.md-typeset h4,
+.md-typeset h5,
+.md-typeset h6 {
+  color: var(--ctx-text-primary);
+  font-weight: 700;
+}
+
+.md-typeset a {
+  color: var(--ctx-cyber-lime);
+  text-decoration: none;
+}
+
+.md-typeset a:hover {
+  text-shadow: 0 0 12px rgba(204, 255, 0, 0.3);
+}
+
+.md-typeset pre > code {
+  background: var(--ctx-abyssal-800) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 0;
+}
+
+.md-typeset code {
+  background: rgba(204, 255, 0, 0.06);
+  border: 1px solid rgba(204, 255, 0, 0.08);
+  border-radius: 2px;
+  color: var(--ctx-cyber-lime);
+  padding: 0.1em 0.4em;
+}
+
+.md-button--primary {
+  background-color: var(--ctx-cyber-lime);
+  border-color: var(--ctx-cyber-lime);
+  border-radius: 0;
+  box-shadow: 0 0 20px rgba(204, 255, 0, 0.15);
+  color: #000;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.md-button--primary:hover {
+  box-shadow: 0 0 30px rgba(204, 255, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.md-typeset table:not([class]) {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0;
+}
+
+.md-typeset table:not([class]) th {
+  background-color: rgba(204, 255, 0, 0.04);
+  border-bottom: 2px solid rgba(204, 255, 0, 0.15);
+  color: var(--ctx-text-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.md-typeset table:not([class]) tr:hover td {
+  background-color: rgba(255, 255, 255, 0.01);
+}
+
+.md-content__inner {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.md-footer {
+  background-color: var(--ctx-abyssal-800) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.md-footer-meta {
+  background-color: var(--ctx-abyssal-900) !important;
+}
+
+.ctx-home {
+  background-image:
+    radial-gradient(circle at top left, rgba(204, 255, 0, 0.08), transparent 28rem),
+    radial-gradient(circle at 80% 10%, rgba(46, 80, 144, 0.18), transparent 26rem),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 32rem);
+  padding-bottom: 4rem;
+}
+
+.ctx-home hr {
+  display: none;
+}
+
+.ctx-hero {
+  overflow: hidden;
+  padding: 3rem 0 2rem;
+  position: relative;
+}
+
+.ctx-hero::before {
+  background:
+    linear-gradient(135deg, rgba(204, 255, 0, 0.08), transparent 35%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 60%);
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.ctx-kicker,
+.ctx-eyebrow {
+  color: var(--ctx-cyber-lime);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  margin: 0 0 1rem;
+  text-transform: uppercase;
+}
+
+.md-typeset .ctx-home h1 {
+  font-size: clamp(2.8rem, 7vw, 5.25rem);
+  margin: 0 0 1rem;
+  max-width: 12ch;
+}
+
+.ctx-lead {
+  color: var(--ctx-text-primary);
+  font-size: clamp(1.2rem, 2.1vw, 1.7rem);
+  font-weight: 500;
+  line-height: 1.35;
+  margin: 0 0 1rem;
+  max-width: 44rem;
+}
+
+.ctx-sublead,
+.ctx-section-heading,
+.ctx-two-column p,
+.ctx-closing p {
+  color: var(--ctx-text-secondary);
+  font-size: 1.02rem;
+  line-height: 1.8;
+  max-width: 48rem;
+}
+
+.ctx-chip-row,
+.ctx-bullet-list,
+.ctx-doc-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+}
+
+.ctx-chip {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--ctx-text-primary);
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  padding: 0.6rem 0.9rem;
+}
+
+.ctx-proofbar,
+.ctx-section-note,
+.ctx-footer-note {
+  color: var(--ctx-text-tertiary);
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+.ctx-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 3rem;
+  padding-top: 2.5rem;
+}
+
+.md-typeset .ctx-home h2 {
+  border-bottom: 0;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0;
+}
+
+.ctx-question-grid,
+.ctx-compare-grid,
+.ctx-rigor-grid,
+.ctx-use-case-grid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.ctx-question-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ctx-question-card,
+.ctx-feature-card,
+.ctx-compare-card,
+.ctx-use-case-card,
+.ctx-rigor-card,
+.ctx-doc-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 1.2rem;
+}
+
+.ctx-question-card p,
+.ctx-feature-card span,
+.ctx-compare-card span,
+.ctx-rigor-card p,
+.ctx-doc-card span {
+  color: var(--ctx-text-secondary);
+  margin: 0;
+}
+
+.ctx-two-column {
+  align-items: start;
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+}
+
+.ctx-feature-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.ctx-feature-card {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.ctx-bullet-list {
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+}
+
+.ctx-bullet-list li {
+  border-left: 2px solid rgba(204, 255, 0, 0.4);
+  color: var(--ctx-text-primary);
+  padding-left: 0.8rem;
+}
+
+.ctx-compare-grid,
+.ctx-rigor-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ctx-compare-card--accent {
+  border-color: rgba(204, 255, 0, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(204, 255, 0, 0.08);
+}
+
+.ctx-use-case-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ctx-use-case-card {
+  color: var(--ctx-text-primary);
+  font-weight: 600;
+}
+
+.ctx-doc-links {
+  margin-top: 1.4rem;
+}
+
+.ctx-doc-card {
+  display: grid;
+  flex: 1 1 15rem;
+  gap: 0.35rem;
+  min-width: 15rem;
+  text-decoration: none;
+}
+
+.ctx-doc-card strong {
+  color: var(--ctx-text-primary);
+}
+
+.ctx-closing {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 3rem;
+  padding-top: 2.5rem;
+}
+
+@media screen and (max-width: 76.2344em) {
+  .md-typeset .ctx-home h1 {
+    max-width: 100%;
+  }
+
+  .ctx-two-column,
+  .ctx-question-grid,
+  .ctx-compare-grid,
+  .ctx-rigor-grid,
+  .ctx-use-case-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -9,6 +9,7 @@ from __future__ import annotations
 import importlib
 import logging
 import pkgutil
+import sys
 from pathlib import Path
 
 from cortex.cli.common import cli
@@ -42,7 +43,13 @@ def _load_command_modules() -> tuple[list[str], dict[str, str]]:
     for module_name in _discover_command_modules():
         full_name = f"cortex.cli.{module_name}"
         try:
-            importlib.import_module(full_name)
+            preloaded = full_name in sys.modules
+            module = importlib.import_module(full_name)
+            # Reload cached command modules so decorators bind against the
+            # current ``cortex.cli.common.cli`` instance after lazy-package
+            # tests or any other module reset sequence.
+            if preloaded:
+                importlib.reload(module)
             loaded.append(module_name)
         except Exception as err:
             failed[module_name] = f"{type(err).__name__}: {err}"

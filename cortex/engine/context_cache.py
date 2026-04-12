@@ -443,7 +443,7 @@ class ContextCacheManager:
 
     def get_provider_caching_kwargs(self, provider: str, ttl_seconds: int = 3600) -> dict[str, Any]:
         """Get the prefix caching payload/kwargs adapted for specific LLM providers.
-        
+
         Abstracts the underlying API differences for zero-exergy prefix preloading
         and ensures compliance with the CORTEX caching protocols (Cycle 4).
         """

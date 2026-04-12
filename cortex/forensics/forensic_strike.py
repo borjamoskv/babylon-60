@@ -35,6 +35,7 @@ class ForensicStrikeCommander:
     async def deploy_strike(self, target: StrikeTarget) -> str:
         """Deploy a 1,000-agent Forensic Strike against a specific contract."""
         strike_id = f"strike-{target.protocol}-{int(time.time())}"
+        dispatch_ready = asyncio.Event()
 
         async def _strike_loop():
             # Phase 1: Overclocking (Ω₂)
@@ -49,6 +50,7 @@ class ForensicStrikeCommander:
 
                 # Dispatching across the Forensic Legion (Bypassing thermal gates)
                 await self.swarm.execute_global_dispatch(tasks, parallel=True)
+                dispatch_ready.set()
 
                 # Phase 2: Zero-Latency Sentinel (AX-I)
                 start_strike = time.perf_counter()
@@ -76,6 +78,21 @@ class ForensicStrikeCommander:
 
         task = asyncio.create_task(_strike_loop())
         self.active_strikes[strike_id] = task
+        dispatch_wait = asyncio.create_task(dispatch_ready.wait())
+        done, pending = await asyncio.wait(
+            {task, dispatch_wait},
+            return_when=asyncio.FIRST_COMPLETED,
+        )
+
+        for pending_task in pending:
+            pending_task.cancel()
+        for pending_task in pending:
+            try:
+                await pending_task
+            except asyncio.CancelledError:
+                pass
+        if task in done and not dispatch_ready.is_set():
+            await task
         return strike_id
 
     def _check_vulnerability_signature(self, target: StrikeTarget) -> bool:

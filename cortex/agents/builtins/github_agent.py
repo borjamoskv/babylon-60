@@ -281,7 +281,9 @@ class _GitHubOps(ExplicitOpsHandler):
 
         if op == "blame":
             request = _BlameRequest.model_validate(payload)
-            return _GitHubUrlResponse(url=service.blame_url(request.path, ref=request.ref)).model_dump()
+            return _GitHubUrlResponse(
+                url=service.blame_url(request.path, ref=request.ref)
+            ).model_dump()
 
         if op == "history":
             request = _HistoryRequest.model_validate(payload)

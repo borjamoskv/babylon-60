@@ -12,10 +12,12 @@ from cortex.config import DEFAULT_DB_PATH
 
 console = Console()
 
+
 @click.group(name="darknet")
 def darknet_cmds() -> None:
     """Sovereign Darknet — Red Social de Agentes (Inversión de Dead-Internet)."""
     pass
+
 
 @darknet_cmds.command()
 def sync() -> None:
@@ -30,10 +32,7 @@ def sync() -> None:
     console.print("[cyan]🌌 [DARKNET] Abriendo singularidad de ingestión...[/cyan]")
 
     # 1. Configurar Motor
-    router = CortexLLMRouter(
-        primary=LLMProvider(provider="gemini-3.1"),
-        db_path=DEFAULT_DB_PATH
-    )
+    router = CortexLLMRouter(primary=LLMProvider(provider="gemini-3.1"), db_path=DEFAULT_DB_PATH)
     ledger = DarknetLedger(DEFAULT_DB_PATH)
     ingestor = DarknetIngestor()
 
@@ -45,7 +44,9 @@ def sync() -> None:
     async def _run_sync() -> None:
         raw_data_list = await ingestor.ingest_cycle()
 
-        console.print(f"[bold magenta]💀 Activando {len(agents)} Avatares de la Matriz...[/bold magenta]")
+        console.print(
+            f"[bold magenta]💀 Activando {len(agents)} Avatares de la Matriz...[/bold magenta]"
+        )
 
         for data in raw_data_list:
             console.print(f"\n[dim]Asimilando: {data.title}[/dim]")
@@ -61,7 +62,9 @@ def sync() -> None:
                         f"  [bold blue]@{post.agent_name}[/bold blue]: {post.content} [dim]({post.exergy_score} Joules)[/dim]"
                     )
 
-        console.print("\n[bold green]✅ Ingestión Termodinámica Completa. Tu red ha sido nutrida.[/bold green]")
+        console.print(
+            "\n[bold green]✅ Ingestión Termodinámica Completa. Tu red ha sido nutrida.[/bold green]"
+        )
 
     asyncio.run(_run_sync())
 
@@ -77,14 +80,16 @@ def feed(limit: int) -> None:
     posts = ledger.fetch_latest_feed(limit)
 
     if not posts:
-        console.print("[yellow]🕳️ El vacío persiste. Ejecuta `cortex darknet sync` para generar realidad.[/yellow]")
+        console.print(
+            "[yellow]🕳️ El vacío persiste. Ejecuta `cortex darknet sync` para generar realidad.[/yellow]"
+        )
         raise click.Abort()
 
     console.print("\n[bold white]C O R T E X   D A R K N E T   F E E D[/bold white]")
     console.print(f"[dim]Mostrando los {len(posts)} eventos cognitivos más recientes.[/dim]\n")
 
     for post in posts:
-        dt = datetime.fromtimestamp(post.created_at).strftime('%H:%M:%S')
+        dt = datetime.fromtimestamp(post.created_at).strftime("%H:%M:%S")
 
         # Color del avatar
         color = "white"
@@ -103,9 +108,9 @@ def feed(limit: int) -> None:
 
         panel = Panel(
             content,
-            border_style="bright_black", # Industrial Noir vibe
+            border_style="bright_black",  # Industrial Noir vibe
             expand=False,
-            padding=(0, 2)
+            padding=(0, 2),
         )
         console.print(panel)
 

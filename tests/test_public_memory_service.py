@@ -273,9 +273,7 @@ async def test_public_memory_service_exposes_continual_learning_manager() -> Non
         "plan": {"tenant_id": "tenant-a", "domain": "support"},
     }
     assert forget == {"deleted_exp_ids": ["exp-1"], "query": "secret"}
-    assert engine.memory.status_calls == [
-        {"tenant_id": "tenant-a", "domain": "support"}
-    ]
+    assert engine.memory.status_calls == [{"tenant_id": "tenant-a", "domain": "support"}]
     assert engine.memory.plan_calls == [
         {"tenant_id": "tenant-a", "domain": "support", "policy_violation": True}
     ]

@@ -195,9 +195,7 @@ async def test_request_handoff_uses_shared_hook_surface() -> None:
     sent = bus.sent[-1]
     assert sent.kind == MessageKind.HANDOFF_REQUEST
     assert sent.recipient == "handoff-agent"
-    assert middleware.handoffs == [
-        ("handoff-agent", {"task_id": "t-1", "reason": "needs_review"})
-    ]
+    assert middleware.handoffs == [("handoff-agent", {"task_id": "t-1", "reason": "needs_review"})]
 
 
 @pytest.mark.asyncio

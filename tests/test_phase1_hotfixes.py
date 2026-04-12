@@ -97,7 +97,9 @@ def test_export_project_uses_active_facts_and_authenticated_tenant(tmp_path: Pat
 
     app = FastAPI()
     app.include_router(admin_router.router)
-    auth_dep = _permission_dependency_for(admin_router.router, "/v1/projects/{project}/export", "GET")
+    auth_dep = _permission_dependency_for(
+        admin_router.router, "/v1/projects/{project}/export", "GET"
+    )
     app.dependency_overrides[auth_dep] = lambda: AuthResult(
         authenticated=True,
         tenant_id="tenant-export",
@@ -172,7 +174,12 @@ class _FakeTipsEngine:
 def _tips_app(fake_tips_engine: _FakeTipsEngine, monkeypatch) -> FastAPI:
     app = FastAPI()
     app.include_router(tips_router.router)
-    for path in ("/tips", "/tips/categories", "/tips/category/{category}", "/tips/project/{project}"):
+    for path in (
+        "/tips",
+        "/tips/categories",
+        "/tips/category/{category}",
+        "/tips/project/{project}",
+    ):
         auth_dep = _permission_dependency_for(tips_router.router, path, "GET")
         app.dependency_overrides[auth_dep] = lambda: AuthResult(
             authenticated=True,

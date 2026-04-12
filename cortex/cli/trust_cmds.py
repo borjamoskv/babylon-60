@@ -1,6 +1,7 @@
 """CORTEX CLI — Trust & Compliance Commands."""
 
 import asyncio
+from typing import Any, cast
 
 import click
 from rich.console import Console
@@ -324,13 +325,13 @@ def siege(db: str) -> None:
     async def _run_siege():
         pool = CortexConnectionPool(db, min_connections=2, max_connections=10, read_only=False)
         await pool.initialize()
-        engine = AsyncCortexEngine(pool, db)
+        engine = AsyncCortexEngine(db_path=db, pool=pool)
         try:
             import os
 
             key = os.environ.get("CORTEX_VAULT_KEY")
             if key:
-                engine.vault = Vault(key.encode("utf-8"))
+                cast(Any, engine).vault = Vault(key.encode("utf-8"))
         except (ValueError, KeyError, OSError, RuntimeError, AttributeError):  # noqa: BLE001 — vault key is optional, must not block siege
             pass
 

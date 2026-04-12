@@ -45,9 +45,11 @@ cli.add_command(ram_cmds)
 def snapshot(as_json: bool) -> None:
     """Read current RAM state (C5-REAL)."""
     from cortex.agents.builtins.ram_agent import _read_ram_snapshot
+
     snap = _read_ram_snapshot()
     if as_json:
         import json
+
         console.print_json(json.dumps(snap.as_dict()))
         return
     _show_snapshot(snap)
@@ -60,6 +62,7 @@ def snapshot(as_json: bool) -> None:
 def force_gc() -> None:
     """Force full garbage collection cycle."""
     from cortex.agents.builtins.ram_agent import _force_gc, _read_ram_snapshot
+
     before = _read_ram_snapshot()
     t0 = time.monotonic()
     collected = _force_gc()

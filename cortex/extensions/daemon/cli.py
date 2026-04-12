@@ -162,7 +162,9 @@ def _validate_number(
     else:
         if not _is_number(value):
             return f"Key '{key}' must be a number."
-        number = float(value)
+        numeric_value = value
+        assert isinstance(numeric_value, (int, float)) and not isinstance(numeric_value, bool)
+        number = float(numeric_value)
 
     if min_value is not None and number < min_value:
         return f"Key '{key}' must be >= {min_value}."

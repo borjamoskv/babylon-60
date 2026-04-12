@@ -1,10 +1,8 @@
 import pytest
-import os
-import asyncio
-from pathlib import Path
 
 from cortex.engine.guard_adapters import VerifierGuardAdapter
 from cortex.verification.verifier import SovereignVerifier
+
 
 class TestNineLawsComplianceMatrix:
     """
@@ -20,22 +18,22 @@ class TestNineLawsComplianceMatrix:
         Proof: The VerifierGuardAdapter intercepts code and execution facts.
         """
         adapter = VerifierGuardAdapter()
-        
+
         # Simulated LLM hallucinated logic with a bad exit code
         meta_c4_sim = {
             "exit_code": 1,
             "command_id": "test-sim-01",
             "stderr": "Command not found",
-            "source": "LLM-Agent"
+            "source": "LLM-Agent",
         }
-        
+
         with pytest.raises(ValueError, match="Runtime verification failed"):
             await adapter.check(
                 content="Execute dark magic",
                 project="test",
                 fact_type="execution",
                 meta=meta_c4_sim,
-                conn=None
+                conn=None,
             )
 
     @pytest.mark.asyncio
@@ -46,7 +44,7 @@ class TestNineLawsComplianceMatrix:
         """
         verifier = SovereignVerifier()
         result = verifier.verify_runtime("cmd-123", {"exit_code": 127, "stderr": "SIGSEGV"})
-        
+
         assert not result.is_valid
         assert result.runtime_status == "QUARANTINED"
         assert result.exit_code == 127
@@ -60,7 +58,7 @@ class TestNineLawsComplianceMatrix:
         """
         verifier = SovereignVerifier()
         result_c5 = verifier.verify_runtime("cmd-real", {"exit_code": 0, "stdout": "Tx confirmed."})
-        
+
         assert result_c5.is_valid
         assert result_c5.runtime_status == "SUCCESS"
         assert "RUNTIME_VERIFIED:cmd-real" in result_c5.proof_certificate

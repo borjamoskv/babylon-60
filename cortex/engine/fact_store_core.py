@@ -61,6 +61,8 @@ async def _prepare_fact_content(
     f_hash = compute_fact_hash(content)
     enc = get_default_encrypter()
     encrypted_content = enc.encrypt_str(content, tenant_id=tenant_id)
+    if encrypted_content is None:
+        raise ValueError("Content encryption returned no ciphertext")
 
     sig_b64, pub_b64 = None, None
     try:
@@ -337,7 +339,11 @@ async def _post_insert_actions(
     if await _table_exists(conn, "facts_fts"):
         try:
             fts_columns = await _get_table_columns(conn, "facts_fts")
-            payload: list[tuple[str, Any]] = [("rowid", fact_id), ("content", content), ("project", project)]
+            payload: list[tuple[str, Any]] = [
+                ("rowid", fact_id),
+                ("content", content),
+                ("project", project),
+            ]
             if "tags" in fts_columns:
                 payload.append(("tags", tags_json))
             if "fact_type" in fts_columns:
@@ -360,7 +366,10 @@ async def _post_insert_actions(
 
 
 async def resolve_causality_async(
-    conn: aiosqlite.Connection, project: str, meta: Optional[dict[str, Any]], tenant_id: str = "default"
+    conn: aiosqlite.Connection,
+    project: str,
+    meta: Optional[dict[str, Any]],
+    tenant_id: str = "default",
 ) -> dict[str, Any]:
     """Resolve causal linking for a fact asynchronously.
 

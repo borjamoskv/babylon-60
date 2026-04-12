@@ -163,6 +163,7 @@ def test_observatory_forwards_recent_decisions_limit(monkeypatch) -> None:
     monkeypatch.setattr(observatory_router, "_get_dependency_health", lambda: {"status": "ok"})
     monkeypatch.setattr(observatory_router, "_get_effectiveness", lambda: {"cortex": {}})
     monkeypatch.setattr(observatory_router, "_get_evolution_status", lambda: {"status": "idle"})
+
     def _fake_recent(limit: int):
         called["limit"] = limit
         return []

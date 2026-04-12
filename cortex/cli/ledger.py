@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import TypedDict, cast
+
 import click
 from rich.console import Console
 
@@ -14,6 +16,13 @@ from cortex.services.trust import TrustService
 console = Console()
 
 _FULL_VERIFY_REPORT_CAP = 10
+
+
+class LedgerVerifyResult(TypedDict):
+    valid: bool
+    violations: list[str]
+    checked_events: int
+    enrichment_stats: dict[str, int]
 
 
 @click.group(name="ledger")
@@ -58,7 +67,7 @@ def verify_ledger(db: str, full: bool):
     fact_integrity: dict[str, object] | None = None
 
     with console.status("[bold cyan]Verifying ledger integrity..."):
-        result = verifier.verify_chain()
+        result = cast(LedgerVerifyResult, verifier.verify_chain())
         if full:
             fact_integrity = _verify_fact_integrity(db)
 
@@ -84,7 +93,7 @@ def verify_ledger(db: str, full: bool):
     else:
         violations = list(result["violations"])
         if fact_integrity is not None:
-            violations.extend(fact_integrity["violations"])
+            violations.extend(cast(list[str], fact_integrity["violations"]))
         console.print(f"[bold red]Ledger is COMPROMISED[/bold red]: {len(violations)} violations")
         for v in violations[:10]:
             console.print(f"  - {v}")
