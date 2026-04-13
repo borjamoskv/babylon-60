@@ -86,7 +86,7 @@ def _execute_sync(source_code: str, global_ctx: dict[str, Any]) -> dict[str, Any
     exec_globals = {"__builtins__": safe_builtins}
     exec_globals.update(global_ctx)
 
-    exec(compiled_code, exec_globals, local_env)
+    exec(compiled_code, exec_globals, local_env)  # noqa: S102 - guarded sandbox execution
     return local_env
 
 
@@ -142,10 +142,12 @@ async def run_jit_sandbox(
     elapsed = (time.perf_counter() - start_time) * 1000
 
     if dict(result_dict).get("status") == "success":
-        logger.info(
-            "⚡ [SORTU-JIT] Sovereign AST execution complete. Yield Time: %.2fms", elapsed
-        )
-        return {"status": "success", "result": {"locals": result_dict["locals"]}, "time_ms": elapsed}
+        logger.info("⚡ [SORTU-JIT] Sovereign AST execution complete. Yield Time: %.2fms", elapsed)
+        return {
+            "status": "success",
+            "result": {"locals": result_dict["locals"]},
+            "time_ms": elapsed,
+        }
 
     err = dict(result_dict).get("error", "Unknown Epistemic Failure")
     logger.error("⚡ [SORTU-JIT] Epistemic failure: %s", err)

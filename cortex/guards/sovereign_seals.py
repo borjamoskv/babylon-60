@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import os
 import re
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -218,9 +219,12 @@ def _resolve_git_hook_path(hook_name: str) -> Path:
     path so non-worktree behavior remains unchanged.
     """
     fallback = ROOT_DIR / ".git" / "hooks" / hook_name
+    git_executable = shutil.which("git")
+    if git_executable is None:
+        return fallback
     try:
-        result = subprocess.run(
-            ["git", "-C", str(ROOT_DIR), "rev-parse", "--git-path", f"hooks/{hook_name}"],
+        result = subprocess.run(  # noqa: S603
+            [git_executable, "-C", str(ROOT_DIR), "rev-parse", "--git-path", f"hooks/{hook_name}"],  # noqa: S603
             capture_output=True,
             text=True,
             timeout=5,
@@ -472,22 +476,27 @@ async def check_gate_21_preservation(
         passed = False
 
     # 3. HEAD has parent (not orphan)
-    try:
-        result = subprocess.run(
-            ["git", "rev-parse", "HEAD~1"],
-            cwd=str(ROOT_DIR),
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-        if result.returncode == 0:
-            checks.append("HEAD lineage ✓")
-        else:
-            printer.warn("HEAD has no parent (initial or orphan commit).")
-            checks.append("HEAD lineage (orphan)")
-    except (subprocess.TimeoutExpired, FileNotFoundError):
+    git_executable = shutil.which("git")
+    if git_executable is None:
         printer.warn("git not available for lineage check.")
         checks.append("HEAD lineage (unchecked)")
+    else:
+        try:
+            result = subprocess.run(  # noqa: S603
+                [git_executable, "rev-parse", "HEAD~1"],  # noqa: S603
+                cwd=str(ROOT_DIR),
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            if result.returncode == 0:
+                checks.append("HEAD lineage ✓")
+            else:
+                printer.warn("HEAD has no parent (initial or orphan commit).")
+                checks.append("HEAD lineage (orphan)")
+        except subprocess.TimeoutExpired:
+            printer.warn("git not available for lineage check.")
+            checks.append("HEAD lineage (unchecked)")
 
     if passed:
         printer.success(f"Self-Preservation intact ({', '.join(checks)}).")

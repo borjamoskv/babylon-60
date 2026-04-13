@@ -18,7 +18,7 @@ async def event_generator(request: Request) -> AsyncGenerator[str, None]:
     pool = getattr(request.app.state, "pool", None)
     if not pool:
         logger.error("SSE: No database pool found in app state.")
-        yield "data: {\"error\": \"Database pool not available\"}\n\n"
+        yield 'data: {"error": "Database pool not available"}\n\n'
         return
 
     # Use the pool to get a connection and initialize the bus
@@ -56,7 +56,7 @@ async def event_generator(request: Request) -> AsyncGenerator[str, None]:
             logger.info("SSE: Stream cancelled for %s", consumer_id)
         except Exception as e:
             logger.error("SSE: Stream error: %s", e)
-            yield f"data: {{\"error\": \"{str(e)}\"}}\n\n"
+            yield f'data: {{"error": "{str(e)}"}}\n\n'
 
 
 @router.get("/stream")

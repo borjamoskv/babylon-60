@@ -79,7 +79,8 @@ class SovereignSharedBus:
         if shm is None:
             return
         buf = shm.buf
-        assert buf is not None
+        if buf is None:
+            raise RuntimeError("shared memory buffer unavailable")
         # Layout: head(I), tail(I), exergy(f), latency(f), cap(I), slot(I), uncertainty(f), version(I)
         header = struct.pack("IIffIIfI", head, tail, exergy, latency, cap, slot, uncertainty, 850)
         buf[0:32] = header
@@ -89,7 +90,8 @@ class SovereignSharedBus:
         if shm is None:
             return (0, 0, 1.0, 0.0, self.capacity, self.slot_size, 0.0, 850)
         buf = shm.buf
-        assert buf is not None
+        if buf is None:
+            raise RuntimeError("shared memory buffer unavailable")
         return struct.unpack("IIffIIfI", buf[0:32])
 
     def update_metrics(self, exergy: float, latency: float, uncertainty: float = 0.0):
@@ -120,7 +122,8 @@ class SovereignSharedBus:
         if shm is None:
             return False
         buf = shm.buf
-        assert buf is not None
+        if buf is None:
+            return False
 
         # Map source string to ID if needed (for Sovereign compatibility)
         sid = source_id
@@ -163,7 +166,8 @@ class SovereignSharedBus:
         if shm is None:
             return []
         buf = shm.buf
-        assert buf is not None
+        if buf is None:
+            return []
 
         header = self._read_header()
         head, tail, cap, slot = header[0], header[1], header[4], header[5]
@@ -212,6 +216,8 @@ class SovereignSharedBus:
         if shm is not None:
             try:
                 shm.unlink()
-            except Exception:
-                pass
+            except FileNotFoundError:
+                logger.debug("Shared memory segment %s already unlinked", self.name)
+            except OSError as exc:
+                logger.debug("Shared memory unlink failed for %s: %s", self.name, exc)
             self._shm = None

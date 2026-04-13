@@ -120,9 +120,7 @@ def init_external_oracles(
         db_path=file_config.get("db_path", str(CORTEX_DB)),
         engine=daemon._shared_engine,
     )
-    daemon.tombstone_monitor = TombstoneMonitor(
-        db_path=file_config.get("db_path", str(CORTEX_DB))
-    )
+    daemon.tombstone_monitor = TombstoneMonitor(db_path=file_config.get("db_path", str(CORTEX_DB)))
 
     try:
         from cortex.database.pool import CortexConnectionPool

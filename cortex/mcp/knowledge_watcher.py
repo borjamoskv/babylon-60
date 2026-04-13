@@ -50,9 +50,7 @@ class KnowledgeItemHandler(FileSystemEventHandler):
                 # Store up to 8k tokens for semantic grounding
                 reduced_content = content[:8000]
                 self.collection.upsert(
-                    documents=[reduced_content],
-                    metadatas=[{"source": ki_name}],
-                    ids=[ki_name]
+                    documents=[reduced_content], metadatas=[{"source": ki_name}], ids=[ki_name]
                 )
                 logger.info("👁️ [KNOWLEDGE] Synced Tensor for KI [%s]", ki_name)
         except Exception as e:
@@ -77,8 +75,7 @@ def start_knowledge_daemon():
     try:
         client = chromadb.PersistentClient(path=CHROMA_DB_PATH)
         collection = client.get_or_create_collection(
-            "cortex_knowledge_base",
-            metadata={"hnsw:space": "cosine"}
+            "cortex_knowledge_base", metadata={"hnsw:space": "cosine"}
         )
 
         event_handler = KnowledgeItemHandler(client, collection)

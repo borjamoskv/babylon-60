@@ -210,7 +210,8 @@ async def list_all_facts(
                 source=fact_data.get("source"),
                 meta=fact_data.get("meta"),
                 created_at=str(fact_data.get("created_at", "")),
-                updated_at=str(fact_data.get("updated_at", "")) or str(fact_data.get("created_at", "")),
+                updated_at=str(fact_data.get("updated_at", ""))
+                or str(fact_data.get("created_at", "")),
                 tx_id=fact_data.get("tx_id"),
                 hash=fact_data.get("hash"),
                 consensus_score=float(fact_data.get("consensus_score", 1.0)),
@@ -297,9 +298,7 @@ async def propagate_taint(
 ) -> dict:
     """Trigger Ω₁₃ taint propagation from a compromised/invalidated fact."""
     try:
-        report = await cast(_TaintEngine, engine).propagate_taint(
-            fact_id, tenant_id=auth.tenant_id
-        )
+        report = await cast(_TaintEngine, engine).propagate_taint(fact_id, tenant_id=auth.tenant_id)
         return {
             "source_id": report.source_fact_id,
             "affected_count": report.affected_count,
@@ -452,7 +451,10 @@ async def deprecate_fact(
             status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
         )
     fact_data = _fact_data(fact)
-    if fact_data.get("tenant_id", fact_data.get("project")) != auth.tenant_id and "tenant_id" in fact_data:
+    if (
+        fact_data.get("tenant_id", fact_data.get("project")) != auth.tenant_id
+        and "tenant_id" in fact_data
+    ):
         raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
 
     success = await engine.deprecate(fact_id, reason="api deprecated")

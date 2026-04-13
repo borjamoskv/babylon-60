@@ -243,7 +243,9 @@ class FiatOracle:
                 return
             except (OSError, ValueError, RuntimeError) as e:
                 last_error = e
-                delay = (BASE_BACKOFF**attempt) + (random.uniform(0.1, 2.0) ** (attempt + 1))
+                delay = (BASE_BACKOFF**attempt) + (
+                    random.uniform(0.1, 2.0) ** (attempt + 1)  # noqa: S311 - retry jitter only
+                )
                 logger.error(
                     "⚙️ [FIAT_ORACLE] DB lock o error: %s. Reintento %s/%s en %.2fs",
                     e,

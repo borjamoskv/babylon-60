@@ -28,9 +28,7 @@ async def autodidact_ingest(
         return {"action": "PURGE", "reason": "JIT_BREAKER", "details": str(e)}
 
     if sandbox_res["status"] == "failed":
-        logger.warning(
-            "🔥 [AUTODIDACT-Ω] PURGED. Epistemic Failure: %s", sandbox_res["error"]
-        )
+        logger.warning("🔥 [AUTODIDACT-Ω] PURGED. Epistemic Failure: %s", sandbox_res["error"])
         return {"action": "PURGE", "reason": "LOGIC_ERROR", "details": sandbox_res["error"]}
 
     # 2. Yield & Thermometer estimation

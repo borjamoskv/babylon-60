@@ -435,7 +435,9 @@ class SovereignVectorStoreL2:
                 if self._vector_enabled:
                     # Store 1-bit Vector (Legion Recall)
                     if vec_void_tb:
-                        insert_void_sql = f"INSERT INTO {vec_void_tb}(rowid, embedding) VALUES (?, ?)"  # noqa: S608
+                        insert_void_sql = (
+                            f"INSERT INTO {vec_void_tb}(rowid, embedding) VALUES (?, ?)"  # noqa: S608
+                        )
                         cursor.execute(
                             insert_void_sql,
                             (rowid, binary_bytes),

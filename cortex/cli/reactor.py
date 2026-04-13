@@ -54,10 +54,13 @@ class ReactorState:
         ]
 
     def update(self):
-        self.resonance = max(0.01, min(1.0, self.resonance + random.uniform(-0.1, 0.15)))
-        if random.random() > 0.8:
+        self.resonance = max(
+            0.01,
+            min(1.0, self.resonance + random.uniform(-0.1, 0.15)),  # noqa: S311
+        )
+        if random.random() > 0.8:  # noqa: S311 - UI animation entropy only
             self.entropy_count += 1
-            snippet = random.choice(self.healed_snippets)
+            snippet = random.choice(self.healed_snippets)  # noqa: S311 - UI animation entropy only
             self.logs.append(
                 f"[{time.strftime('%H:%M:%S')}] {CYBER_LIME}HEALED:{ELECTRIC_VIOLET} {snippet}"
             )
