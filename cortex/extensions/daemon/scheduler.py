@@ -24,12 +24,14 @@ import asyncio
 import logging
 import sqlite3
 import time
-import uuid
+from collections.abc import Callable, Coroutine
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Coroutine
+from typing import Any
+
+from cortex.database.core import connect as db_connect
 
 logger = logging.getLogger("cortex.daemon.scheduler")
 
@@ -121,9 +123,11 @@ class SovereignScheduler:
 
     @contextmanager
     def _conn(self):
-        conn = sqlite3.connect(str(self._db_path), check_same_thread=False)
-        conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA journal_mode=WAL")
+        conn = db_connect(
+            str(self._db_path),
+            check_same_thread=False,
+            row_factory=sqlite3.Row,
+        )
         try:
             yield conn
             conn.commit()
@@ -264,8 +268,6 @@ class SovereignScheduler:
         """Evaluate all schedules and fire due tasks."""
         now = datetime.now(timezone.utc)
         now_iso = now.isoformat()
-        now_ts = time.monotonic()
-
         with self._conn() as conn:
             due = conn.execute(
                 """

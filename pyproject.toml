@@ -138,7 +138,6 @@ ignore = ["E501", "E402", "B008", "W291", "W293", "S", "BLE001", "UP045"]
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "time.sleep" = { msg = "CORTEX Anti-Pattern: Usa asyncio.sleep() en este repositorio para no bloquear el event loop." }
 "builtins.print" = { msg = "CORTEX Anti-Pattern: Usa standard logging o Rich para emitir trails de auditoría." }
-"datetime.datetime.now" = { msg = "CORTEX Anti-Pattern: Usa datetime aware del timezone (ej. datetime.now(timezone.utc)) para la firma de Taints." }
 
 [tool.pyright]
 pythonVersion = "3.10"

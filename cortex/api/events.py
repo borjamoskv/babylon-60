@@ -1,12 +1,11 @@
 import asyncio
 import json
 import logging
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 
 from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
 
-import cortex.api.state as api_state
 from cortex.extensions.signals.bus import AsyncSignalBus
 
 router = APIRouter(prefix="/v1/events", tags=["events"])
@@ -26,19 +25,19 @@ async def event_generator(request: Request) -> AsyncGenerator[str, None]:
     async with pool.acquire() as conn:
         bus = AsyncSignalBus(conn)
         consumer_id = f"sse_{id(request)}"
-        
+
         logger.info("SSE: Client connected: %s", consumer_id)
-        
+
         try:
             while True:
                 # Check for disconnection
                 if await request.is_disconnected():
                     logger.info("SSE: Client disconnected: %s", consumer_id)
                     break
-                
+
                 # Poll for new signals
                 signals = await bus.poll(consumer=consumer_id, limit=10)
-                
+
                 for sig in signals:
                     # Construct SSE message
                     event_data = {
@@ -46,13 +45,13 @@ async def event_generator(request: Request) -> AsyncGenerator[str, None]:
                         "event_type": sig.event_type,
                         "payload": sig.payload,
                         "source": sig.source,
-                        "created_at": sig.created_at
+                        "created_at": sig.created_at,
                     }
                     yield f"event: {sig.event_type}\ndata: {json.dumps(event_data)}\n\n"
-                
+
                 # 1-second pulse interval for O(1) efficiency
                 await asyncio.sleep(1)
-                
+
         except asyncio.CancelledError:
             logger.info("SSE: Stream cancelled for %s", consumer_id)
         except Exception as e:
@@ -65,5 +64,5 @@ async def stream_events(request: Request):
     """Server-Sent Events endpoint for real-time CORTEX telemetry."""
     return StreamingResponse(
         event_generator(request),
-        media_type="text/event-stream"
+        media_type="text/event-stream",
     )

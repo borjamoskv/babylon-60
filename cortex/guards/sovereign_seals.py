@@ -209,6 +209,38 @@ _IMPORT_TO_PKG = {
 }
 
 
+def _resolve_git_hook_path(hook_name: str) -> Path:
+    """Resolve a git hook path in a worktree-safe way.
+
+    `git rev-parse --git-path` resolves against the repository's actual gitdir,
+    which is the common hook location for linked worktrees. If git is not
+    available or the lookup fails, fall back to the historical worktree-root
+    path so non-worktree behavior remains unchanged.
+    """
+    fallback = ROOT_DIR / ".git" / "hooks" / hook_name
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(ROOT_DIR), "rev-parse", "--git-path", f"hooks/{hook_name}"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return fallback
+
+    if result.returncode != 0:
+        return fallback
+
+    resolved = result.stdout.strip()
+    if not resolved:
+        return fallback
+
+    hook_path = Path(resolved)
+    if not hook_path.is_absolute():
+        hook_path = (ROOT_DIR / hook_path).resolve()
+    return hook_path
+
+
 def _parse_pyproject_deps() -> set[str]:
     """Extract all declared dependency package names from pyproject.toml."""
     pyproject = ROOT_DIR / "pyproject.toml"
@@ -412,7 +444,7 @@ async def check_gate_21_preservation(
 
     # 1. Pre-push hook — skip in CI (hook is a local dev-machine invariant)
     _in_ci = os.environ.get("CI", "").lower() in ("true", "1", "yes")
-    hook = ROOT_DIR / ".git" / "hooks" / "pre-push"
+    hook = _resolve_git_hook_path("pre-push")
     if _in_ci:
         printer.warn("CI env detected — pre-push hook check skipped (local invariant).")
         checks.append("pre-push hook (CI skip)")
