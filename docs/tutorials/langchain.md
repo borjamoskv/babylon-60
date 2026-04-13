@@ -17,10 +17,10 @@ pip install cortex-persist langchain-openai
 ```
 
 ```python
-from cortex.engine import CortexEngine
+from cortex import CortexEngine
 
 engine = CortexEngine(db_path="~/.cortex/cortex.db")
-engine.init_db()
+engine.init_db_sync()
 ```
 
 ## Store Agent Observations
@@ -28,9 +28,9 @@ engine.init_db()
 After each agent step, store what it learned:
 
 ```python
-def store_observation(project: str, observation: str, tags: list[str] | None = None):
+async def store_observation(project: str, observation: str, tags: list[str] | None = None):
     """Store an agent observation in CORTEX."""
-    engine.store(
+    await engine.store(
         project=project,
         content=observation,
         fact_type="knowledge",
@@ -44,9 +44,9 @@ def store_observation(project: str, observation: str, tags: list[str] | None = N
 Before each agent invocation, recall relevant context:
 
 ```python
-def build_context(project: str, query: str, top_k: int = 5) -> str:
+async def build_context(project: str, query: str, top_k: int = 5) -> str:
     """Search CORTEX for relevant past knowledge."""
-    results = engine.search(query, project=project, top_k=top_k)
+    results = await engine.search(query=query, project=project, top_k=top_k)
 
     if not results:
         return "No relevant past observations found."
@@ -66,9 +66,9 @@ from langchain.schema import SystemMessage, HumanMessage
 
 llm = ChatOpenAI(model="gpt-4o")
 
-def agent_step(project: str, user_input: str) -> str:
+async def agent_step(project: str, user_input: str) -> str:
     # 1. Search memory for context
-    context = build_context(project, user_input)
+    context = await build_context(project, user_input)
 
     # 2. Build prompt with memory
     messages = [
@@ -80,7 +80,7 @@ def agent_step(project: str, user_input: str) -> str:
     response = llm.invoke(messages)
 
     # 4. Store the interaction as memory
-    store_observation(
+    await store_observation(
         project=project,
         observation=f"User asked: {user_input}. Agent answered: {response.content[:200]}",
         tags=["interaction"],
@@ -94,7 +94,7 @@ def agent_step(project: str, user_input: str) -> str:
 For distributed agents, use the REST API:
 
 ```python
-from cortex.client import CortexClient
+from cortex.api.client import CortexClient
 
 client = CortexClient(base_url="http://localhost:8742", api_key="your-key")
 
@@ -102,7 +102,7 @@ client = CortexClient(base_url="http://localhost:8742", api_key="your-key")
 client.store(project="my-agent", content="Learned that X does Y")
 
 # Search
-results = client.search("how does X work?", top_k=3)
+results = client.search("how does X work?", k=3)
 ```
 
 ## Next Steps

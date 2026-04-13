@@ -11,8 +11,10 @@ import logging
 import sqlite3
 from typing import Any
 
+import aiosqlite
+
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN, EngineMixinBase
-from cortex.memory.temporal import build_temporal_filter_params, time_travel_filter
+from cortex.memory.temporal import build_temporal_filter_params
 from cortex.search import SearchResult
 
 __all__ = ["QueryMixin"]
@@ -218,27 +220,27 @@ class QueryMixin(EngineMixinBase):
                 return await self.recall(project, tenant_id=tenant_id)
 
             async with conn.execute(
-                "SELECT created_at FROM transactions WHERE id = ? AND tenant_id = ?",
+                "SELECT 1 FROM transactions WHERE id = ? AND tenant_id = ?",
                 (tx_id, tenant_id),
             ) as cursor:
                 tx = await cursor.fetchone()
                 if not tx:
                     raise ValueError(f"Transaction {tx_id} not found for tenant {tenant_id}")
 
-            tx_time = tx[0]
+            clause, tparams = await self._build_transaction_state_filter(
+                conn,
+                tx_id,
+                table_alias="f",
+            )
             q = (
                 f"SELECT {FACT_COLUMNS} {FACT_JOIN} "  # nosec B608
                 "WHERE f.tenant_id = ? AND f.project = ? "
-                "AND f.is_tombstoned = 0 "
-                "AND f.created_at <= ? "
-                "AND (f.is_tombstoned = 0 OR "
-                "json_extract(f.metadata, '$.tombstoned_at') > ? OR "
-                "json_extract(f.metadata, '$.valid_until') > ?) "
+                f"AND {clause} "
                 "ORDER BY f.id ASC"
             )
             async with conn.execute(
                 q,
-                [tenant_id, project, tx_time, tx_time, tx_time],
+                [tenant_id, project, *tparams],
             ) as cursor:
                 rows = await cursor.fetchall()
             return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
@@ -266,19 +268,68 @@ class QueryMixin(EngineMixinBase):
                 async with conn.execute(q, [tenant_id]) as cursor:
                     rows = await cursor.fetchall()
             else:
-                clause, tparams = time_travel_filter(
+                async with conn.execute(
+                    "SELECT 1 FROM transactions WHERE id = ? AND tenant_id = ?",
+                    (tx_id, tenant_id),
+                ) as cursor:
+                    tx = await cursor.fetchone()
+                    if not tx:
+                        raise ValueError(f"Transaction {tx_id} not found for tenant {tenant_id}")
+
+                clause, tparams = await self._build_transaction_state_filter(
+                    conn,
                     tx_id,
                     table_alias="f",
                 )
                 q = (
                     f"SELECT {FACT_COLUMNS} {FACT_JOIN} "
                     f"WHERE f.tenant_id = ? "
-                    f"AND f.is_tombstoned = 0 AND {clause} "
+                    f"AND {clause} "
                     "ORDER BY f.id ASC"
                 )  # nosec B608 — parameterized via temporal builder
                 async with conn.execute(q, [tenant_id, *tparams]) as cursor:
                     rows = await cursor.fetchall()
             return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
+
+    async def _build_transaction_state_filter(
+        self,
+        conn: aiosqlite.Connection,
+        tx_id: int,
+        *,
+        table_alias: str = "f",
+    ) -> tuple[str, list[Any]]:
+        """Build a schema-aware state filter anchored to a ledger transaction."""
+        if not isinstance(tx_id, int) or tx_id <= 0:
+            raise ValueError(f"Invalid tx_id: {tx_id!r}")
+
+        prefix = f"{table_alias}."
+        tx_time_column = await self._resolve_transaction_time_column(conn)
+        fact_tx_expr = (
+            f"COALESCE({prefix}tx_id, CAST(json_extract({prefix}metadata, '$.tx_id') AS INTEGER))"
+        )
+        tx_time_expr = f"(SELECT {tx_time_column} FROM transactions WHERE id = ?)"
+        clause = (
+            "("
+            f"{fact_tx_expr} <= ? "
+            f"OR ({fact_tx_expr} IS NULL AND {prefix}created_at <= {tx_time_expr})"
+            ") AND ("
+            f"{prefix}is_tombstoned = 0 OR "
+            f"json_extract({prefix}metadata, '$.valid_until') > {tx_time_expr} OR "
+            f"json_extract({prefix}metadata, '$.tombstoned_at') > {tx_time_expr})"
+        )
+        return clause, [tx_id, tx_id, tx_id, tx_id]
+
+    async def _resolve_transaction_time_column(self, conn: aiosqlite.Connection) -> str:
+        """Return the canonical transaction timestamp column across schema variants."""
+        async with conn.execute("PRAGMA table_info(transactions)") as cursor:
+            rows = await cursor.fetchall()
+
+        columns = {row[1] for row in rows}
+        if "timestamp" in columns:
+            return "timestamp"
+        if "created_at" in columns:
+            return "created_at"
+        raise ValueError("transactions table does not expose a timestamp column")
 
     async def stats(self, tenant_id: str = "default") -> dict:
         tenant_id = self._resolve_tenant(tenant_id)

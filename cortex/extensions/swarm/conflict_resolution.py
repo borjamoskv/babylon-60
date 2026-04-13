@@ -283,19 +283,19 @@ class ConflictResolver:
             if chosen_id in option_votes:
                 option_votes[chosen_id] += 1
 
-        if not option_votes:
-            # Edge case: no valid votes
+        total_votes = sum(option_votes.values())
+        if total_votes == 0:
+            # No valid factual evidence should not silently mint a winner.
             return ResolutionResult(
-                winner_id=options[0].id,
-                method=ResolutionMethod.TRIANGULATION,
+                winner_id="",
+                method=ResolutionMethod.HUMAN_ESCALATION,
                 consensus_level=0.0,
-                reasoning="No valid factual sources; defaulting to first option.",
+                reasoning="No valid factual sources voted for any option; escalation required.",
             )
 
         # Winner = most independent confirmations
         winner_id = max(option_votes, key=lambda k: option_votes[k])
-        total_votes = sum(option_votes.values())
-        consensus = option_votes[winner_id] / total_votes if total_votes > 0 else 0.0
+        consensus = option_votes[winner_id] / total_votes
 
         return ResolutionResult(
             winner_id=winner_id,

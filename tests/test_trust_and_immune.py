@@ -143,6 +143,9 @@ class TestPosteriorMath:
     def test_map_c3_mean(self):
         assert _map_to_confidence(0.50) == "C3"
 
+    def test_map_negative_mean_falls_back_to_c1(self):
+        assert _map_to_confidence(-0.01) == "C1"
+
 
 class TestBayesianTrustUpdater:
     def _make_engine(self, conf="C3", score=1.0):

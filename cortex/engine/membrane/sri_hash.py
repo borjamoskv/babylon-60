@@ -1,16 +1,19 @@
 import base64
 import hashlib
 import re
+import urllib.error
+import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 
 
-# Cache previously fetched SRI hashes to avoid entropy
-@lru_cache(maxsize=128)
-def generate_sri_hash(url: str, algo: str = "sha384") -> str:
-    """Fetch external resource and generate SRI integrity hash. (Protected by SRI-HASH-OMEGA Whitelist)"""
-    trusted_domains = {
+class SRIHashError(RuntimeError):
+    """Raised when an external resource cannot be validated with SRI."""
+
+
+TRUSTED_SRI_DOMAINS = frozenset(
+    {
         "cdn.jsdelivr.net",
         "cdnjs.cloudflare.com",
         "unpkg.com",
@@ -18,33 +21,36 @@ def generate_sri_hash(url: str, algo: str = "sha384") -> str:
         "ajax.googleapis.com",
         "code.jquery.com",
     }
+)
 
+
+# Cache previously fetched SRI hashes to avoid entropy
+@lru_cache(maxsize=128)
+def generate_sri_hash(url: str, algo: str = "sha384") -> str:
+    """Fetch external resource and generate SRI integrity hash. (Protected by SRI-HASH-OMEGA Whitelist)"""
+    parsed = urllib.parse.urlparse(url)
+
+    # Alert #63 (SSRF & Untrusted Inclusion): Reject non-whitelisted domains
+    if parsed.hostname not in TRUSTED_SRI_DOMAINS:
+        raise SRIHashError(f"Untrusted external resource domain: {parsed.hostname or url}")
+
+    req = urllib.request.Request(url, headers={"User-Agent": "CORTEX-Persist/SRI-Engine"})
     try:
-        from urllib.parse import urlparse
-
-        parsed = urlparse(url)
-
-        # Alert #63 (SSRF & Untrusted Inclusion): Reject non-whitelisted domains
-        if parsed.hostname not in trusted_domains:
-            return ""
-
-        req = urllib.request.Request(url, headers={"User-Agent": "CORTEX-Persist/SRI-Engine"})
         with urllib.request.urlopen(req, timeout=5) as response:
             data = response.read()
+    except (urllib.error.URLError, TimeoutError, OSError, ValueError) as exc:
+        raise SRIHashError(f"Failed to fetch SRI for {url}") from exc
 
-            if algo == "sha256":
-                digest = hashlib.sha256(data).digest()
-            elif algo == "sha512":
-                digest = hashlib.sha512(data).digest()
-            else:
-                algo = "sha384"
-                digest = hashlib.sha384(data).digest()
+    if algo == "sha256":
+        digest = hashlib.sha256(data).digest()
+    elif algo == "sha512":
+        digest = hashlib.sha512(data).digest()
+    else:
+        algo = "sha384"
+        digest = hashlib.sha384(data).digest()
 
-            b64_hash = base64.b64encode(digest).decode("utf-8")
-            return f"{algo}-{b64_hash}"
-    except Exception:
-        # If fetch fails, we return an empty string. The sanitizer can decide whether to block or allow
-        return ""
+    b64_hash = base64.b64encode(digest).decode("utf-8")
+    return f"{algo}-{b64_hash}"
 
 
 def auto_heal_html(html_payload: str) -> str:
@@ -70,11 +76,6 @@ def auto_heal_html(html_payload: str) -> str:
             return full_tag
 
         sri = generate_sri_hash(url)
-        if not sri:
-            # If we couldn't fetch the remote asset, we do not inject the integrity.
-            # Or perhaps we should raise an error? For now, we leave as is.
-            return full_tag
-
         # Inject integrity + crossorigin
         new_tag = full_tag.replace(">", f' integrity="{sri}" crossorigin="anonymous">')
         return new_tag

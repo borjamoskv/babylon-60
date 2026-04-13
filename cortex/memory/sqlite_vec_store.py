@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import re
 import sqlite3
 import time
 from pathlib import Path
@@ -25,7 +26,7 @@ except ImportError:
 
 from cortex.guards.exergy_guard import calculate_exergy
 from cortex.memory.encoder import AsyncEncoder
-from cortex.memory.models import CortexFactModel
+from cortex.memory.models import CortexFactModel, require_cortex_fact
 from cortex.utils import void_vec
 from cortex.utils.turboquant import encode_query_qjl
 
@@ -36,6 +37,8 @@ __all__ = ["SovereignVectorStoreL2"]
 _L2_HYBRID_SEARCH_AVAILABLE: Optional[bool] = None  # None = not yet checked
 
 logger = logging.getLogger("cortex.memory.sqlite_vec_store")
+
+_FACTS_META_SCHEMA_RE = re.compile(r"^facts_meta(?:_[A-Za-z0-9]+_[A-Za-z0-9]+)?$")
 
 
 def cortex_decay(is_diamond: int, timestamp: float, current_time: float, half_life: float) -> float:
@@ -191,7 +194,7 @@ class SovereignVectorStoreL2:
             cursor = self._conn.execute(
                 "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'facts_meta%'"
             )
-            tables = [row[0] for row in cursor.fetchall()]
+            tables = [row[0] for row in cursor.fetchall() if _FACTS_META_SCHEMA_RE.fullmatch(row[0])]
 
             for tb in tables:
                 info_cursor = self._conn.execute(f"PRAGMA table_info({tb})")  # nosec B608
@@ -362,6 +365,7 @@ class SovereignVectorStoreL2:
         is available. The sanitized content is stored and vectorized;
         encrypted PII fragments are persisted in the metadata field.
         """
+        fact = require_cortex_fact(fact)
         conn = self._get_conn()
 
         # ─── PII Sanitization Gate (Moved outside the DB Lock) ────────

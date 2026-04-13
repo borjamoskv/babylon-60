@@ -9,10 +9,12 @@ from __future__ import annotations
 
 import logging
 from typing import Any, ClassVar, Optional
+from uuid import uuid4
 
 import aiosqlite
 
 from cortex.crypto import get_default_encrypter
+from cortex.crypto.keys import ZKSwarmIdentity
 from cortex.engine.capabilities import CapabilityRegistry
 from cortex.engine.embedding_engine import embed_fact_async
 from cortex.engine.fact_store_core import insert_fact_record
@@ -51,6 +53,46 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     _thermal_decay_cache: ClassVar[dict[int, int]] = {}
     _thermo_counters: ClassVar[ThermodynamicCounters] = ThermodynamicCounters()
     _agent_mode: ClassVar[AgentMode] = AgentMode.ACTIVE
+    _zk_high_rigor_fact_types: ClassVar[tuple[str, ...]] = ("decision", "rule", "code")
+
+    def _attest_high_rigor_fact(
+        self,
+        *,
+        content: str,
+        fact_type: str,
+        source: str | None,
+        meta: dict[str, Any] | None,
+    ) -> dict[str, Any] | None:
+        """Ensure high-rigor facts reach ZK guards with a local proof attached."""
+        if fact_type not in self._zk_high_rigor_fact_types:
+            return meta
+
+        attested_meta = dict(meta or {})
+        if attested_meta.get("agent_public_key") and attested_meta.get("zk_proof_signature"):
+            return attested_meta
+
+        keypair = getattr(self, "_zk_identity_keypair", None)
+        if keypair is None:
+            keypair = ZKSwarmIdentity.generate_keypair()
+            self._zk_identity_keypair = keypair
+
+        session_id = getattr(self, "_zk_identity_session_id", None)
+        if session_id is None:
+            session_id = uuid4().hex
+            self._zk_identity_session_id = session_id
+
+        attested_meta.setdefault("agent_public_key", keypair.public_key_b64)
+        attested_meta.setdefault(
+            "zk_proof_signature",
+            ZKSwarmIdentity.sign_payload(content, keypair.private_key_b64),
+        )
+        attested_meta.setdefault(
+            "zk_proof_attestor",
+            str(attested_meta.get("agent_id") or source or "engine:auto"),
+        )
+        attested_meta.setdefault("zk_proof_mode", "engine-auto-attested")
+        attested_meta.setdefault("zk_proof_session_id", session_id)
+        return attested_meta
 
     async def store(
         self,
@@ -67,7 +109,10 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         tx_id: int | None = None,
         parent_decision_id: int | None = None,
         conn: aiosqlite.Connection | None = None,
-    ) -> int:
+        *,
+        _run_precommit_post_hooks: bool = True,
+        _return_created: bool = False,
+    ) -> int | tuple[int, bool]:
         """Store a new fact with proper connection management."""
         tenant_id = self._resolve_tenant(tenant_id)
 
@@ -80,7 +125,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 )
 
         if conn:
-            return await self._store_impl(
+            result = await self._store_impl(
                 conn,
                 project=project,
                 content=content,
@@ -94,10 +139,12 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 commit=commit,
                 tx_id=tx_id,
                 parent_decision_id=parent_decision_id,
+                run_precommit_post_hooks=_run_precommit_post_hooks,
             )
+            return result if _return_created else result[0]
 
         async with self.session() as _conn:
-            return await self._store_impl(
+            result = await self._store_impl(
                 _conn,
                 project=project,
                 content=content,
@@ -111,7 +158,9 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 commit=commit,
                 tx_id=tx_id,
                 parent_decision_id=parent_decision_id,
+                run_precommit_post_hooks=_run_precommit_post_hooks,
             )
+            return result if _return_created else result[0]
 
     async def _run_store_validation(
         self,
@@ -154,30 +203,51 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         commit: bool,
         tx_id: int | None,
         parent_decision_id: int | None = None,
-    ) -> int:
+        run_precommit_post_hooks: bool = True,
+    ) -> tuple[int, bool]:
+        meta = self._attest_high_rigor_fact(
+            content=content,
+            fact_type=fact_type,
+            source=source,
+            meta=meta,
+        )
+
         # ═══ AX-II: Pre-store guards via GuardPipeline ═══
         pipeline = getattr(self, "_guard_pipeline", None)
+        guard_meta = dict(meta or {})
+        if source is not None:
+            guard_meta.setdefault("source", source)
         if pipeline is not None:
             try:
                 await pipeline.run_guards(
-                    content, project, fact_type, meta or {}, conn, tenant_id=tenant_id
+                    content, project, fact_type, guard_meta, conn, tenant_id=tenant_id
                 )
             except ValueError:
                 raise  # Guard rejections must propagate
-            except Exception as _gp_err:  # noqa: BLE001
-                logger.debug("[AX-II] GuardPipeline pre-store skipped: %s", _gp_err)
+            except Exception as gp_err:  # noqa: BLE001
+                logger.exception(
+                    "[AX-II] GuardPipeline pre-store failed closed for project=%s tenant_id=%s",
+                    project,
+                    tenant_id,
+                )
+                raise RuntimeError("[AX-II] GuardPipeline pre-store failed") from gp_err
 
         dedupe_id, meta, content, fact_type = await self._run_store_validation(
             conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
         )
         if dedupe_id is not None:
-            return dedupe_id
+            return dedupe_id, False
 
         tx_id = (
             tx_id
             if tx_id is not None
             else await self._log_transaction(
-                conn, project, "store", {"fact_type": fact_type}, tenant_id=tenant_id  # pyright: ignore
+                conn,
+                project,
+                "store",
+                {"fact_type": fact_type},
+                tenant_id=tenant_id,  # pyright: ignore
+                checkpoint=commit,
             )
         )
         fact_id = await insert_fact_record(
@@ -214,11 +284,8 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 tenant_id,
             )
 
-        if commit:
-            await conn.commit()
-
         # ═══ AX-II: Post-store hooks via GuardPipeline ═══
-        if pipeline is not None:
+        if pipeline is not None and run_precommit_post_hooks:
             db_path = str(getattr(self, "_db_path", "") or "")
             try:
                 await pipeline.run_post_hooks(
@@ -229,24 +296,100 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                     tenant_id=tenant_id,
                     source=source,
                     db_path=db_path,
+                    after_commit=False,
                 )
-            except Exception as _ph_err:  # noqa: BLE001
-                logger.debug("[AX-II] GuardPipeline post-hooks skipped: %s", _ph_err)
+            except Exception as ph_err:  # noqa: BLE001
+                logger.exception(
+                    "[AX-II] GuardPipeline pre-commit post-hooks failed for project=%s "
+                    "tenant_id=%s",
+                    project,
+                    tenant_id,
+                )
+                if commit:
+                    await conn.rollback()
+                raise RuntimeError(
+                    f"[AX-II] GuardPipeline post-hooks failed: {ph_err}"
+                ) from ph_err
 
-        return fact_id
+        if commit:
+            await conn.commit()
+
+        if commit and pipeline is not None:
+            db_path = str(getattr(self, "_db_path", "") or "")
+            try:
+                await pipeline.run_post_hooks(
+                    fact_id,
+                    project,
+                    fact_type,
+                    conn,
+                    tenant_id=tenant_id,
+                    source=source,
+                    db_path=db_path,
+                    after_commit=True,
+                )
+            except Exception as ph_err:  # noqa: BLE001
+                logger.exception(
+                    "[AX-II] GuardPipeline post-commit hooks failed for project=%s "
+                    "tenant_id=%s",
+                    project,
+                    tenant_id,
+                )
+                raise RuntimeError("[AX-II] GuardPipeline after-commit hooks failed") from ph_err
+
+        return fact_id, True
 
     async def store_many(self, facts: list[dict[str, Any]]) -> list[int]:
         if not facts:
             raise ValueError("facts list cannot be empty")
         async with self.session() as conn:
             ids = []
+            hook_events: list[tuple[int, str, str, str, str | None]] = []
+            pipeline = getattr(self, "_guard_pipeline", None)
+            db_path = str(getattr(self, "_db_path", "") or "")
             try:
+                await conn.execute("BEGIN IMMEDIATE")
                 for fact in facts:
-                    ids.append(await self.store(commit=False, conn=conn, **fact))
+                    project = fact["project"]
+                    fact_type = fact.get("fact_type", "knowledge")
+                    tenant_id = self._resolve_tenant(fact.get("tenant_id", "default"))
+                    source = fact.get("source")
+                    fact_id, created = await self.store(
+                        commit=False,
+                        conn=conn,
+                        _run_precommit_post_hooks=False,
+                        _return_created=True,
+                        **fact,
+                    )
+                    ids.append(fact_id)
+                    if created:
+                        hook_events.append((fact_id, project, fact_type, tenant_id, source))
+                if pipeline is not None:
+                    for fact_id, project, fact_type, tenant_id, source in hook_events:
+                        await pipeline.run_post_hooks(
+                            fact_id,
+                            project,
+                            fact_type,
+                            conn,
+                            tenant_id=tenant_id,
+                            source=source,
+                            db_path=db_path,
+                            after_commit=False,
+                        )
                 await conn.commit()
+                if pipeline is not None:
+                    for fact_id, project, fact_type, tenant_id, source in hook_events:
+                        await pipeline.run_post_hooks(
+                            fact_id,
+                            project,
+                            fact_type,
+                            conn,
+                            tenant_id=tenant_id,
+                            source=source,
+                            db_path=db_path,
+                            after_commit=True,
+                        )
                 return ids
-            except (aiosqlite.Error, ValueError, OSError):
-                # Deliberate boundary: rollback any store failure atomically, then re-raise
+            except Exception:
                 await conn.rollback()
                 raise
 

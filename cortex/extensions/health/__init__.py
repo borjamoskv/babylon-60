@@ -27,6 +27,12 @@ from cortex.extensions.health.models import (
     HealthThresholds,
     MetricSnapshot,
 )
+from cortex.extensions.health.reporting import (
+    build_health_report,
+    build_runtime_health_payload,
+    classify_component_status,
+    collect_health_score,
+)
 from cortex.extensions.health.scorer import HealthScorer
 from cortex.extensions.health.trend import TrendDetector
 
@@ -52,6 +58,10 @@ __all__ = [
     "MetricCollectorProtocol",
     "MetricSnapshot",
     "TrendDetector",
+    "build_health_report",
+    "build_runtime_health_payload",
+    "classify_component_status",
+    "collect_health_score",
     "create_default_registry",
     "export_prometheus",
     "verify_health_system",

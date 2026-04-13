@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
+import time
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -36,6 +37,21 @@ CREATE INDEX IF NOT EXISTS idx_signals_created ON signals(created_at);
 CREATE INDEX IF NOT EXISTS idx_signals_project ON signals(project);
 CREATE INDEX IF NOT EXISTS idx_signals_tenant ON signals(tenant_id);
 """
+
+
+def _iter_schema_statements(script: str) -> list[str]:
+    """Split a schema script into individual SQL statements."""
+    return [statement.strip() for statement in script.split(";") if statement.strip()]
+
+
+def _owns_async_transaction(conn: aiosqlite.Connection) -> bool:
+    """Whether this call should commit its own async transaction."""
+    return not bool(getattr(conn, "in_transaction", False))
+
+
+def _owns_sync_transaction(conn: sqlite3.Connection) -> bool:
+    """Whether this call should commit its own sync transaction."""
+    return not bool(getattr(conn, "in_transaction", False))
 
 
 def _build_query(
@@ -82,7 +98,12 @@ class AsyncSignalBus:
     async def ensure_table(self) -> None:
         if self._ready:
             return
-        await self._conn.executescript(_CREATE_TABLE + _CREATE_INDEXES)
+        owns_transaction = _owns_async_transaction(self._conn)
+        if owns_transaction:
+            await self._conn.executescript(_CREATE_TABLE + _CREATE_INDEXES)
+        else:
+            for statement in _iter_schema_statements(_CREATE_TABLE + _CREATE_INDEXES):
+                await self._conn.execute(statement)
 
         cursor = await self._conn.execute("PRAGMA table_info(signals)")
         columns = [row[1] for row in await cursor.fetchall()]
@@ -94,7 +115,8 @@ class AsyncSignalBus:
                 "CREATE INDEX IF NOT EXISTS idx_signals_tenant ON signals(tenant_id)"
             )
 
-        await self._conn.commit()
+        if owns_transaction:
+            await self._conn.commit()
         self._ready = True
 
     async def emit(
@@ -108,6 +130,7 @@ class AsyncSignalBus:
     ) -> int:
         try:
             await self.ensure_table()
+            owns_transaction = _owns_async_transaction(self._conn)
             cursor = await self._conn.execute(
                 """INSERT INTO signals (event_type, payload, source, project, tenant_id)
                    VALUES (?, ?, ?, ?, ?)""",
@@ -119,7 +142,8 @@ class AsyncSignalBus:
                     tenant_id,
                 ),
             )
-            await self._conn.commit()
+            if owns_transaction:
+                await self._conn.commit()
             self.session_emitted += 1
             return cursor.lastrowid or 0
         except Exception:
@@ -185,6 +209,7 @@ class AsyncSignalBus:
         limit: int = 50,
     ) -> list[Signal]:
         await self.ensure_table()
+        owns_transaction = _owns_async_transaction(self._conn)
         signals = await self._query(
             tenant_id=tenant_id,
             event_type=event_type,
@@ -200,7 +225,7 @@ class AsyncSignalBus:
                 "UPDATE signals SET consumed_by = ? WHERE id = ? AND tenant_id = ?",
                 (json.dumps(new_consumed), sig.id, tenant_id),
             )
-        if signals:
+        if signals and owns_transaction:
             await self._conn.commit()
 
         return signals
@@ -265,7 +290,10 @@ class AsyncSignalBus:
 
     async def gc(self, max_age_days: int = 30, tenant_id: Optional[str] = None) -> int:
         await self.ensure_table()
-        cutoff = (datetime.now(timezone.utc) - timedelta(days=max_age_days)).isoformat()
+        owns_transaction = _owns_async_transaction(self._conn)
+        cutoff = (
+            datetime.fromtimestamp(time.time(), timezone.utc) - timedelta(days=max_age_days)
+        ).isoformat()
 
         sql = "DELETE FROM signals WHERE consumed_by != '[]' AND created_at < ?"
         params: list = [cutoff]
@@ -274,7 +302,8 @@ class AsyncSignalBus:
             params.append(tenant_id)
 
         cursor = await self._conn.execute(sql, tuple(params))
-        await self._conn.commit()
+        if owns_transaction:
+            await self._conn.commit()
         pruned = cursor.rowcount
         if pruned:
             logger.info(
@@ -298,7 +327,12 @@ class SignalBus:
     def ensure_table(self) -> None:
         if self._ready:
             return
-        self._conn.executescript(_CREATE_TABLE + _CREATE_INDEXES)
+        owns_transaction = _owns_sync_transaction(self._conn)
+        if owns_transaction:
+            self._conn.executescript(_CREATE_TABLE + _CREATE_INDEXES)
+        else:
+            for statement in _iter_schema_statements(_CREATE_TABLE + _CREATE_INDEXES):
+                self._conn.execute(statement)
 
         cursor = self._conn.execute("PRAGMA table_info(signals)")
         columns = [row[1] for row in cursor.fetchall()]
@@ -310,7 +344,8 @@ class SignalBus:
                 "CREATE INDEX IF NOT EXISTS idx_signals_tenant ON signals(tenant_id)"
             )
 
-        self._conn.commit()
+        if owns_transaction:
+            self._conn.commit()
         self._ready = True
 
     def emit(
@@ -324,6 +359,7 @@ class SignalBus:
     ) -> int:
         try:
             self.ensure_table()
+            owns_transaction = _owns_sync_transaction(self._conn)
             cursor = self._conn.execute(
                 """INSERT INTO signals (event_type, payload, source, project, tenant_id)
                    VALUES (?, ?, ?, ?, ?)""",
@@ -335,7 +371,8 @@ class SignalBus:
                     tenant_id,
                 ),
             )
-            self._conn.commit()
+            if owns_transaction:
+                self._conn.commit()
             signal_id = cursor.lastrowid
             logger.info(
                 "Signal emitted: %s (#%d) from %s (tenant: %s)",
@@ -361,6 +398,7 @@ class SignalBus:
         limit: int = 50,
     ) -> list[Signal]:
         self.ensure_table()
+        owns_transaction = _owns_sync_transaction(self._conn)
         signals = self._query(
             tenant_id=tenant_id,
             event_type=event_type,
@@ -376,7 +414,7 @@ class SignalBus:
                 "UPDATE signals SET consumed_by = ? WHERE id = ? AND tenant_id = ?",
                 (json.dumps(new_consumed), sig.id, tenant_id),
             )
-        if signals:
+        if signals and owns_transaction:
             self._conn.commit()
             logger.info(
                 "Polled %d signal(s) as consumer '%s' (tenant: %s)",
@@ -469,7 +507,10 @@ class SignalBus:
 
     def gc(self, max_age_days: int = 30, tenant_id: Optional[str] = None) -> int:
         self.ensure_table()
-        cutoff = (datetime.now(timezone.utc) - timedelta(days=max_age_days)).isoformat()
+        owns_transaction = _owns_sync_transaction(self._conn)
+        cutoff = (
+            datetime.fromtimestamp(time.time(), timezone.utc) - timedelta(days=max_age_days)
+        ).isoformat()
 
         sql = "DELETE FROM signals WHERE consumed_by != '[]' AND created_at < ?"
         params: list = [cutoff]
@@ -478,7 +519,8 @@ class SignalBus:
             params.append(tenant_id)
 
         cursor = self._conn.execute(sql, tuple(params))
-        self._conn.commit()
+        if owns_transaction:
+            self._conn.commit()
         pruned = cursor.rowcount
         if pruned:
             logger.info(

@@ -25,7 +25,7 @@ except ImportError:
 from cortex.memory.hdc.algebra import unbind
 from cortex.memory.hdc.codec import HDCEncoder
 from cortex.memory.hdc.item_memory import ItemMemory
-from cortex.memory.models import CortexFactModel
+from cortex.memory.models import CortexFactModel, require_cortex_fact
 from cortex.memory.sqlite_vec_store import cortex_decay
 
 __all__ = ["HDCVectorStoreL2"]
@@ -133,6 +133,7 @@ class HDCVectorStoreL2:
 
     async def memorize(self, fact: CortexFactModel, fact_type: Optional[str] = None) -> None:
         """Encode and store a multi-tenant CortexFactModel as a Hypervector."""
+        fact = require_cortex_fact(fact)
         conn = self._get_conn()
 
         async with self._lock:

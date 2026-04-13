@@ -3,8 +3,9 @@
 This section is auto-generated from the CORTEX Python source code using `mkdocstrings`.
 
 For HTTP routes and request/response shapes, see the [REST API Reference](api.md).
-For the public contract boundaries, see [SDK Surface](SDK-SURFACE.md), [Trust Semantics](TRUST-SEMANTICS.md),
-[Event Model](EVENT-MODEL.md), and [Error Code Registry](ERROR-CODE-REGISTRY.md).
+For the public Python surfaces, see [SDKs](sdks.md), [SDK Surface](SDK-SURFACE.md),
+[Trust Semantics](TRUST-SEMANTICS.md), [Event Model](EVENT-MODEL.md), and
+[Error Code Registry](ERROR-CODE-REGISTRY.md).
 
 ---
 
@@ -17,11 +18,12 @@ The `CortexEngine` is the primary entry point for all CORTEX operations. It aggr
       show_source: false
       members_order: source
 
-## Async Engine
+## Async Engine Alias
 
-Async-native engine for use in FastAPI, MCP, and other async contexts.
+`AsyncCortexEngine` is exported from `cortex.engine` as an alias of the async-native
+`CortexEngine` implementation used by the API and MCP layers.
 
-::: cortex.engine_async.AsyncCortexEngine
+::: cortex.engine.AsyncCortexEngine
     options:
       show_source: false
 

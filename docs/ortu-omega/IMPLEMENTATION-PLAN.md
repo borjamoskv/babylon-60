@@ -4,6 +4,8 @@
 > **Input**: [PILLAR-MAP.md](PILLAR-MAP.md) · [API-SURFACE.md](API-SURFACE.md)  
 > **Generated**: 2026-03-14
 
+> **Historical note (2026-04-14):** this plan targets the ORTU-Ω SDK proposal. In the current repository, `cortex-sdk/` is retained as a legacy workspace; any revived standalone SDK effort should be redirected to `sdks/python/`.
+
 ---
 
 ## 1. Executive Summary

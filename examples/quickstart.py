@@ -6,7 +6,7 @@ Usage:
     python quickstart.py
 """
 
-from cortex import CortexClient
+from cortex.api.client import CortexClient
 
 client = CortexClient(base_url="http://localhost:8000")
 
@@ -19,9 +19,9 @@ client.store(
 print("✅ Fact stored")
 
 # 2. Search by semantic similarity
-results = client.search("What is CORTEX?", top_k=3)
+results = client.search("What is CORTEX?", k=3)
 for r in results:
-    print(f"  [#{r.fact_id}] (score: {r.score:.3f}) {r.content[:80]}")
+    print(f"  [#{r.id}] (score: {r.score:.3f}) {r.content[:80]}")
 
 # 3. Ask with RAG (requires LLM provider configured)
 try:
@@ -30,7 +30,7 @@ try:
     resp = httpx.post(
         "http://localhost:8000/v1/ask",
         json={"query": "What is CORTEX?", "k": 5},
-        headers={"X-API-Key": "your_key"},
+        headers={"Authorization": "Bearer your_key"},
     )
     print(f"\n🧠 Answer: {resp.json()['answer']}")
 except Exception as e:

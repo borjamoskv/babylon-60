@@ -4,7 +4,7 @@ CORTEX v5.0 — Async Python SDK Client.
 Fully asynchronous client for the CORTEX REST API using httpx.AsyncClient.
 
 Usage:
-    from cortex.async_client import AsyncCortexClient
+    from cortex.api.async_client import AsyncCortexClient
 
     async with AsyncCortexClient("http://localhost:8484", api_key="ctx_...") as client:
         await client.store("my-project", "Important fact")
@@ -120,7 +120,7 @@ class AsyncCortexClient:
             "source": source,
         }
         if metadata:
-            data["metadata"] = metadata
+            data["meta"] = metadata
         result = await self._request("POST", "/v1/facts", json=data)
         return result["fact_id"]
 
@@ -129,8 +129,27 @@ class AsyncCortexClient:
         facts: list[dict[str, Any]],
     ) -> list[int]:
         """Batch store facts. Returns list of fact IDs."""
-        result = await self._request("POST", "/v1/facts/batch", json={"facts": facts})
-        return result["fact_ids"]
+        payload = {
+            "memories": [
+                {
+                    "project": fact["project"],
+                    "content": fact["content"],
+                    "type": fact.get("type", fact.get("fact_type", "knowledge")),
+                    "tags": fact.get("tags", []),
+                    "source": fact.get("source"),
+                    "metadata": fact.get("metadata", fact.get("meta")),
+                    "parent_decision_id": fact.get("parent_decision_id"),
+                }
+                for fact in facts
+            ]
+        }
+        result = await self._request("POST", "/v1/facts/batch", json=payload)
+        ids = result.get("ids")
+        if ids is None:
+            ids = result.get("fact_ids")
+        if ids is None:
+            raise CortexError(500, "Batch store response missing ids")
+        return ids
 
     async def search(
         self,
@@ -208,16 +227,12 @@ class AsyncCortexClient:
         tags: list[str] | None = None,
         meta: dict[str, Any] | None = None,
     ) -> int:
-        """Update a fact. Returns new fact ID."""
-        data: dict[str, Any] = {}
-        if content is not None:
-            data["content"] = content
-        if tags is not None:
-            data["tags"] = tags
-        if meta is not None:
-            data["meta"] = meta
-        result = await self._request("PATCH", f"/v1/facts/{fact_id}", json=data)
-        return result["fact_id"]
+        """Fail closed: the public REST API does not expose fact updates."""
+        _ = (fact_id, content, tags, meta)
+        raise CortexError(
+            501,
+            "Fact update is not exposed on the REST API; use deprecate()+store() or engine.update().",
+        )
 
     async def export(
         self,

@@ -11,7 +11,7 @@ class LedgerWriter:
         self.queue = queue
 
     def append(self, event: LedgerEvent) -> str:
-        with self.store.tx() as conn:
+        with self.store.tx(mode="IMMEDIATE") as conn:
             # 1. Get last hash
             cursor = conn.execute("SELECT hash FROM ledger_events ORDER BY rowid DESC LIMIT 1")
             row = cursor.fetchone()
@@ -45,5 +45,5 @@ class LedgerWriter:
                 ),
             )
 
-        self.queue.enqueue(event.event_id)
+            self.queue._enqueue_with_conn(conn, event.event_id)
         return event.event_id

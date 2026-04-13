@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
+import logging
 import os
 import platform
 import time
@@ -8,6 +10,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine as AsyncCortexEngine
+
+logger = logging.getLogger(__name__)
 
 
 class ThermodynamicsOracle:
@@ -43,30 +47,37 @@ class ThermodynamicsOracle:
         self._running = True
         while self._running:
             try:
-                # Measure Event Loop Lag (Temporal Friction)
-                start_time = time.perf_counter()
-                await asyncio.sleep(0.1)
-                lag_ms = (time.perf_counter() - start_time - 0.1) * 1000.0
-                lag_ms = max(0.0, lag_ms)
-
+                lag_ms = await self._measure_event_loop_lag()
                 await self._sample_thermodynamics(lag_ms)
             except asyncio.CancelledError:
                 self._running = False
                 break
-            except Exception as e:
-                # Log thermal noise error but don't choke the event loop
-                print(f"[THERMODYNAMIC NOISE] {e}")
+            except (AttributeError, OSError, RuntimeError, ValueError) as exc:
+                logger.warning("ThermodynamicsOracle sample degraded: %s", exc)
+            except Exception:  # noqa: BLE001 - daemon boundary must keep the loop alive
+                logger.exception("ThermodynamicsOracle unexpected failure")
             await asyncio.sleep(self.poll_interval)
 
     async def stop(self) -> None:
         self._running = False
         await asyncio.sleep(0)
 
+    async def _measure_event_loop_lag(self, probe_window_s: float = 0.1) -> float:
+        """Measure event-loop lag in milliseconds without blocking the loop."""
+        started_at = time.perf_counter()
+        await asyncio.sleep(probe_window_s)
+        lag_ms = (time.perf_counter() - started_at - probe_window_s) * 1000.0
+        return max(0.0, lag_ms)
+
     async def _sample_thermodynamics(self, lag_ms: float) -> None:
         if platform.system() == "Windows":
             return
 
-        load1, load5, _ = os.getloadavg()
+        try:
+            load1, load5, _ = os.getloadavg()
+        except OSError:
+            logger.debug("Skipping thermodynamics sample: load average unavailable.")
+            return
         utilization = load1 / self._cores
 
         memory_percent = 50.0  # Base assumption
@@ -78,8 +89,8 @@ class ThermodynamicsOracle:
                 disk_io = self._psutil.disk_io_counters()
                 if disk_io and hasattr(disk_io, "busy_time"):
                     disk_busy_ms = disk_io.busy_time or 0.0  # type: ignore[reportAttributeAccessIssue]
-            except Exception:
-                pass
+            except (AttributeError, OSError, RuntimeError):
+                logger.debug("Disk I/O counters unavailable for thermodynamics sample.", exc_info=True)
 
         # Density factor of the Coroutine Swarm
         active_tasks = len(asyncio.all_tasks())
@@ -110,9 +121,12 @@ class ThermodynamicsOracle:
 
         # Trigger on pure overload, massive exergy loss, or dangerous event loop lock
         if utilization > self.thermal_threshold or exergy_loss > 90.0 or lag_ms > 500.0:
+            # Host RAM pressure can push exergy_loss up on different machines.
+            # Reserve CRITICAL for explicit collapse signals, not for ordinary
+            # threshold breaches on an otherwise responsive loop.
             severity = (
                 "CRITICAL"
-                if utilization > 1.5 or exergy_loss > 120.0 or lag_ms > 1000.0
+                if utilization > 1.5 or purged_tasks > 0 or lag_ms > 1000.0 or exergy_loss > 250.0
                 else "HIGH"
             )
 
@@ -147,20 +161,36 @@ class ThermodynamicsOracle:
                 "severity": severity,
             }
 
-            if hasattr(self.engine, "store") and asyncio.iscoroutinefunction(self.engine.store):
-                await self.engine.store(
-                    project="SYSTEM",
-                    content=content,
-                    fact_type="thermal_noise",
-                    meta=meta,
-                )
-            else:
-                self.engine.store_sync(  # type: ignore[type-error]
-                    project="SYSTEM",
-                    content=content,
-                    fact_type="thermal_noise",
-                    meta=meta,
-                )
+            await self._store_thermal_noise(content=content, meta=meta)
+
+    async def _store_thermal_noise(self, content: str, meta: dict[str, object]) -> None:
+        """Persist a thermal event through either async or sync engine surfaces."""
+        payload = {
+            "project": "SYSTEM",
+            "content": content,
+            "fact_type": "thermal_noise",
+            "meta": meta,
+        }
+
+        store = getattr(self.engine, "store", None)
+        if callable(store):
+            result = store(**payload)
+            if inspect.isawaitable(result):
+                await result
+            return
+
+        store_sync = getattr(self.engine, "store_sync", None)
+        if callable(store_sync):
+            store_sync(**payload)
+            return
+
+        raise AttributeError("ThermodynamicsOracle requires engine.store(...) or engine.store_sync(...)")
+
+    @staticmethod
+    def _is_critical_task(task_name: str, coro_name: str) -> bool:
+        return any(kw in task_name for kw in ("p0", "engine", "core", "server")) or any(
+            kw in coro_name for kw in ("start", "serve", "watch", "loop")
+        )
 
     def _execute_annihilation_protocol(self) -> int:
         """
@@ -170,19 +200,14 @@ class ThermodynamicsOracle:
         purged = 0
         current = asyncio.current_task()
         for task in asyncio.all_tasks():
-            if task is current:
+            if task is current or task.done():
                 continue
 
             task_name = task.get_name().lower()
-            try:
-                coro_name = task.get_coro().__name__.lower()  # type: ignore
-            except AttributeError:
-                coro_name = ""
+            coro_name = getattr(task.get_coro(), "__name__", "").lower()  # type: ignore[reportAttributeAccessIssue]
 
             # Safeguards to prevent system bricking
-            is_critical = any(kw in task_name for kw in ("p0", "engine", "core", "server")) or any(
-                kw in coro_name for kw in ("start", "serve", "watch", "loop")
-            )
+            is_critical = self._is_critical_task(task_name, coro_name)
 
             if not is_critical:
                 task.cancel()

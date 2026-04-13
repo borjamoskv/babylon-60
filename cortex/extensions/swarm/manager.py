@@ -9,7 +9,6 @@ import sys
 import uuid
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -20,6 +19,7 @@ from cortex.extensions.swarm.budget import get_budget_manager
 from cortex.extensions.swarm.protocols import AgentRole, SwarmIntent, SwarmSignalSchema
 from cortex.extensions.swarm.verification_gate import RiskLevel, VerificationGate
 from cortex.extensions.swarm.worktree_isolation import isolated_worktree
+from cortex.utils.canonical import now_iso
 
 logger = logging.getLogger("cortex.extensions.swarm.manager")
 
@@ -32,7 +32,7 @@ class WorktreeState:
         self.id = worktree_id
         self.branch_name = branch_name
         self.path = path
-        self.created_at = datetime.now(timezone.utc).isoformat()
+        self.created_at = now_iso()
         self.status = "provisioning"
         self.pid = os.getpid()
         self.task: asyncio.Task[Any] | None = None
@@ -125,6 +125,29 @@ class SwarmManager:
             state.shutdown_event.set()
             return True
 
+    async def shutdown_all(self) -> None:
+        """Compatibility hook for test teardown and deterministic cleanup."""
+        async with self._lock:
+            states = list(self.worktrees.values())
+            for state in states:
+                if state.status not in {"failed", "destroyed"}:
+                    state.status = "tearing_down"
+                state.shutdown_event.set()
+            tasks = [state.task for state in states if state.task is not None]
+
+        if tasks:
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            for result in results:
+                if isinstance(result, Exception):
+                    logger.warning("SwarmManager shutdown_all observed task failure: %s", result)
+
+        async with self._lock:
+            self.worktrees = {
+                worktree_id: state
+                for worktree_id, state in self.worktrees.items()
+                if state.status not in {"destroyed", "failed"}
+            }
+
     async def get_status(self) -> dict[str, Any]:
         """Aggregate swarm health and load."""
         async with self._lock:
@@ -134,7 +157,7 @@ class SwarmManager:
                 ),
                 "total_worktrees": len(self.worktrees),
                 "agent_pids": list({w.pid for w in self.worktrees.values()}),
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": now_iso(),
             }
 
 

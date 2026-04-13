@@ -7,7 +7,7 @@ Any directory not listed under **In Repo** belongs outside this repository by de
 
 **What lives here:**
 - `cortex/` — core engine, persistence, verification, coordination, runtime
-- `cortex-sdk/` — typed Python client SDK
+- `cortex-sdk/` — legacy typed Python client workspace retained for compatibility context
 - `cortex-hypervisor/` — scheduling and daemon coordination
 - `tests/` — automated test suite
 - `docs/` — architecture, security, axioms, contributing, operations
@@ -44,7 +44,7 @@ Any directory not listed under **In Repo** belongs outside this repository by de
 | `cortex_eguzkia/` | MOSKV-universe expansion | `cortex-labs` repo |
 | `cortex_iturria/` | MOSKV-universe expansion | `cortex-labs` repo |
 | `cortex-hypervisor/` | Scheduling daemon — dedup with `cortex/daemon` | Merge into `cortex/` or `cortex-labs` |
-| `cortex-sdk/` | Client SDK — dedup with `cortex/` public surface | Merge into `sdk/python/` or standalone repo |
+| `cortex-sdk/` | Legacy client workspace — dedup with `cortex/` public surface | Merge into `sdks/python/` or standalone repo |
 
 ## Enforcement
 

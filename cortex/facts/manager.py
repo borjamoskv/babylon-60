@@ -54,8 +54,10 @@ class FactManager:
         commit: bool = True,
         tx_id: Optional[int] = None,
         conn: Optional[Any] = None,
+        _run_precommit_post_hooks: bool = True,
+        _return_created: bool = False,
         **kwargs,
-    ) -> int:
+    ) -> int | tuple[int, bool]:
         """Sovereign Store: Delegates to engine with pre-validation."""
         tenant_id = self.engine._resolve_tenant(tenant_id)
         if conn:
@@ -72,6 +74,8 @@ class FactManager:
                 valid_from,
                 commit,
                 tx_id,
+                _run_precommit_post_hooks,
+                _return_created,
                 **kwargs,
             )
 
@@ -89,6 +93,8 @@ class FactManager:
                 valid_from,
                 commit,
                 tx_id,
+                _run_precommit_post_hooks,
+                _return_created,
                 **kwargs,
             )
 
@@ -106,8 +112,10 @@ class FactManager:
         valid_from,
         commit,
         tx_id,
+        _run_precommit_post_hooks,
+        _return_created,
         **kwargs,
-    ) -> int:
+    ) -> int | tuple[int, bool]:
 
         # Optional guard: do not block engine startup if the immunity stack is mid-repair.
         if HaikuGuard is not None:
@@ -145,8 +153,9 @@ class FactManager:
                 await conn.execute(
                     "UPDATE facts SET updated_at = ? WHERE id = ?", (now_iso(), fact_id)
                 )
-                await conn.commit()
-                return fact_id
+                if commit:
+                    await conn.commit()
+                return (fact_id, False) if _return_created else fact_id
 
             # V8 Semantic Deduplication
             if hasattr(self.engine, "embeddings") and self.engine.embeddings:
@@ -169,8 +178,10 @@ class FactManager:
                                 "UPDATE facts SET updated_at = ? WHERE id = ?",
                                 (now_iso(), results[0].fact_id),
                             )
-                            await conn.commit()  # type: ignore[reportOptionalMemberAccess]
-                            return results[0].fact_id  # type: ignore[reportAttributeAccessIssue]
+                            if commit:
+                                await conn.commit()  # type: ignore[reportOptionalMemberAccess]
+                            fact_id = results[0].fact_id  # type: ignore[reportAttributeAccessIssue]
+                            return (fact_id, False) if _return_created else fact_id
         except ValidationError as e:
             raise ValueError(f"Ingestion Validation Failed: {e}") from e
         except (OSError, RuntimeError, ValueError) as e:
@@ -178,7 +189,7 @@ class FactManager:
 
         from cortex.engine.store_mixin import StoreMixin
 
-        return await StoreMixin._store_impl(
+        result = await StoreMixin._store_impl(
             cast("StoreMixin", self.engine),
             conn,  # type: ignore[reportArgumentType]
             project,
@@ -192,7 +203,10 @@ class FactManager:
             valid_from,
             commit,
             tx_id,
+            parent_decision_id=kwargs.get("parent_decision_id"),
+            run_precommit_post_hooks=_run_precommit_post_hooks,
         )
+        return result if _return_created else result[0]
 
     async def store_many(self, facts: list[dict]) -> list[int]:
         if not facts:

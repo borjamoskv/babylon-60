@@ -17,6 +17,18 @@ def _resolve_db(db_path: str | None) -> str:
     return db_path or str(DEFAULT_DB)
 
 
+def _load_persisted_health_score(db_path: str):
+    """Run the canonical health score path, including history persistence."""
+    import asyncio
+
+    from cortex.extensions.health import HealthMixin
+
+    class _Engine(HealthMixin):
+        _db_path = db_path
+
+    return asyncio.run(_Engine().health_score())
+
+
 def render_sparkline(data: list[float]) -> str:
     """Generate a terminal sparkline from a list of floats."""
     ticks = " ▂▃▄▅▆▇█"
@@ -36,23 +48,46 @@ def health_group() -> None:
 
 @health_group.command("check")
 @click.option("--db", "db_path", default=None, help="DB path override.")
-def check(db_path: str | None) -> None:
+@click.option("--json", "as_json", is_flag=True, default=False, help="Machine-readable output.")
+@click.option("--strict", is_flag=True, default=False, help="Exit 1 when health is not healthy.")
+def check(db_path: str | None, as_json: bool, strict: bool) -> None:
     """Quick boolean health check (healthy/degraded)."""
-    from cortex.extensions.health import HealthCollector, HealthScorer
+    import json
 
     path = _resolve_db(db_path)
-    collector = HealthCollector(db_path=path)
-    metrics = collector.collect_all()
-    hs = HealthScorer.score(metrics)
-    summary = HealthScorer.summarize(hs)
+    hs = _load_persisted_health_score(path)
 
-    console.print(f"\n{summary}\n")
+    payload = {
+        "healthy": hs.healthy,
+        "score": round(hs.score, 2),
+        "grade": hs.grade.letter,
+        "summary": f"{hs.grade.emoji} CORTEX Health: {hs.score:.1f}/100 (Grade {hs.grade.letter})",
+        "metrics": [
+            {
+                "name": m.name,
+                "value": round(m.value, 4),
+                "weight": m.weight,
+                "status": ("blocked" if m.value < 0.3 else "degraded" if m.value < 0.5 else "ok"),
+            }
+            for m in hs.metrics
+        ],
+    }
+
+    if as_json:
+        console.print(json.dumps(payload, indent=2))
+        if strict and not hs.healthy:
+            raise click.exceptions.Exit(1)
+        return
+
+    console.print(f"\n{payload['summary']}\n")
 
     for m in hs.metrics:
         bar_len = int(m.value * 20)
         bar = "█" * bar_len + "░" * (20 - bar_len)
         console.print(f"  {m.name:12s} [{bar}] {m.value:.0%} (w={m.weight})")
     console.print()
+    if strict and not hs.healthy:
+        raise click.exceptions.Exit(1)
 
 
 @health_group.command("report")
@@ -123,12 +158,8 @@ def report(db_path: str | None, as_json: bool) -> None:
 @click.option("--db", "db_path", default=None)
 def score(db_path: str | None) -> None:
     """Print only the numeric health score (0-100)."""
-    from cortex.extensions.health import HealthCollector, HealthScorer
-
     path = _resolve_db(db_path)
-    collector = HealthCollector(db_path=path)
-    metrics = collector.collect_all()
-    hs = HealthScorer.score(metrics)
+    hs = _load_persisted_health_score(path)
     console.print(f"{hs.score:.1f}")
 
 
@@ -145,7 +176,7 @@ def trend(db_path: str | None, live: bool, samples: int, interval: float) -> Non
 
     if live:
         # Live sampling mode
-        import time
+        import asyncio
 
         from rich.progress import track
 
@@ -162,7 +193,7 @@ def trend(db_path: str | None, live: bool, samples: int, interval: float) -> Non
             scores.append(hs.score)
             detector.push(hs.score)
             if i < samples - 1:
-                time.sleep(interval)
+                asyncio.run(asyncio.sleep(interval))
     else:
         # DB history mode (instant)
         detector = TrendDetector(window_size=20)
@@ -236,8 +267,16 @@ def history(db_path: str | None, limit: int) -> None:
 @click.option("--dry-run", is_flag=True, default=False, help="Show what would be fixed.")
 def fix(db_path: str | None, dry_run: bool) -> None:
     """Auto-remediation for degraded metrics."""
+    import importlib
+
     from cortex.extensions.health import HealthCollector, HealthScorer
-    from cortex.extensions.health.fix import FixRegistry
+
+    try:
+        fix_registry = importlib.import_module("cortex.extensions.health.fix_registry")
+    except ImportError:
+        console.print("\n[yellow]Health fixes are not available in this build.[/]\n")
+        return
+    FixRegistry = fix_registry.FixRegistry
 
     path = _resolve_db(db_path)
     collector = HealthCollector(db_path=path)
@@ -264,7 +303,7 @@ def fix(db_path: str | None, dry_run: bool) -> None:
             console.print(f"[green]{result}[/]")
 
     if dry_run:
-        console.print("\n[dim]Use --no-dry-run to execute fixes.[/]\n")
+        console.print("\n[dim]Run again without --dry-run to execute fixes.[/]\n")
     console.print()
 
 

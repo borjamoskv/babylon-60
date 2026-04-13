@@ -235,6 +235,8 @@ class OptimizationMixin:
         project: str,
         action: str,
         detail: dict[str, Any],
+        *,
+        checkpoint: bool = True,
     ) -> int:
         """Unified transaction logging with caching and batching."""
         dj = canonical_json(detail)

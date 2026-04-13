@@ -15,7 +15,8 @@ License: Apache-2.0 · Python: >=3.10
 GEMINI_API_KEY           # Google Gemini API key (LLM operations)
 CORTEX_DB                # Override DB location (default: ~/.cortex/cortex.db)
 CORTEX_LOG_LEVEL         # DEBUG | INFO | WARNING | ERROR
-CORTEX_ENCRYPTION_KEY    # AES-256 master key (auto-generated if missing)
+CORTEX_MASTER_KEY        # Base64-encoded AES-256 master key
+CORTEX_VAULT_KEY         # Alternate env source for the same master key
 HF_TOKEN                 # Hugging Face token (private embedding models)
 STRIPE_SECRET_KEY        # Stripe billing (optional: [billing])
 REDIS_URL                # Redis connection (optional: [cloud])
@@ -88,16 +89,16 @@ The daemon runs 13 monitors including health checks, compaction scheduling, sync
 
 ```bash
 # Store a fact
-cortex store --type decision --source agent:gemini PROJECT "content"
+cortex store PROJECT "content" --type decision --source agent:gemini
 
 # Search facts
-cortex search "query" --limit 10
+cortex search "query" -k 10
 
-# Verify ledger integrity
-cortex verify
+# Verify full ledger integrity
+cortex ledger verify
 
 # Export context snapshot
-cortex export
+cortex export --format snapshot
 ```
 
 ---
@@ -135,11 +136,11 @@ For AlloyDB/cloud deployments, use standard PostgreSQL backup procedures.
 ## Integrity Verification
 
 ```bash
-# Verify ledger hash chain
-cortex verify
+# Verify a single fact receipt
+cortex verify 42
 
-# Full integrity audit
-cortex audit
+# Verify the full ledger hash chain
+cortex ledger verify
 ```
 
 ---
@@ -161,10 +162,10 @@ cortex audit
 
 | Symptom | Likely Cause | Fix |
 | --- | --- | --- |
-| `LedgerIntegrityError` | Hash chain broken | Run `cortex verify` to identify break point |
-| Slow search | Missing embeddings | Run `cortex reindex` |
+| `LedgerIntegrityError` | Hash chain broken | Run `cortex verify <fact_id>` for the specific receipt and `cortex ledger verify` for the full chain |
+| Slow search | Missing embeddings | Re-run writes with embeddings enabled, or set `CORTEX_NO_EMBED=1` for deterministic fallback embeddings |
 | Import errors | Missing optional deps | Install with `pip install -e ".[all]"` |
 | Daemon crash loop | Stale PID file | Remove `~/.cortex/daemon.pid` |
-| Encryption errors | Missing or rotated key | Check `CORTEX_ENCRYPTION_KEY` or keyring |
+| Encryption errors | Missing or rotated key | Check `CORTEX_MASTER_KEY`, `CORTEX_VAULT_KEY`, or keyring |
 
 ---

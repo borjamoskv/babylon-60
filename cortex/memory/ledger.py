@@ -14,6 +14,7 @@ Uses the hardened `cortex.db.connect_async()` factory for zero-lock I/O.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 from datetime import datetime, timezone
@@ -66,12 +67,14 @@ class EventLedgerL3:
     connection) ensuring non-blocking, crash-safe persistence.
     """
 
-    __slots__ = ("_conn", "_ready", "_last_hash_cache")
+    __slots__ = ("_conn", "_ready", "_last_hash_cache", "_tenant_locks", "_tenant_locks_guard")
 
     def __init__(self, conn: aiosqlite.Connection) -> None:
         self._conn = conn
         self._ready = False
         self._last_hash_cache: dict[str, str] = {}  # tenant_id -> last_hash
+        self._tenant_locks: dict[str, asyncio.Lock] = {}
+        self._tenant_locks_guard = asyncio.Lock()
 
     async def ensure_table(self) -> None:
         """Create the events table if it doesn't exist (idempotent)."""
@@ -99,49 +102,61 @@ class EventLedgerL3:
         self._last_hash_cache[tenant_id] = last_hash
         return last_hash
 
+    async def _get_tenant_lock(self, tenant_id: str) -> asyncio.Lock:
+        """Return the per-tenant append lock, creating it lazily."""
+        lock = self._tenant_locks.get(tenant_id)
+        if lock is not None:
+            return lock
+
+        async with self._tenant_locks_guard:
+            return self._tenant_locks.setdefault(tenant_id, asyncio.Lock())
+
     async def append_event(self, event: MemoryEvent) -> None:
         """Persist an event immutably. Fire-and-commit with SHA-3-256 integrity."""
         import hashlib
 
         await self.ensure_table()
+        tenant_lock = await self._get_tenant_lock(event.tenant_id)
 
-        # [GOVERNANCE] Calculate the cryptographic chain if signature is missing
-        if not event.signature:
-            prev_hash = await self._get_last_hash(event.tenant_id)
-            # Immutability payload: event identity + content + provenance
-            # [GOVERNANCE] Content is now hashed into the signature payload.
-            content_hash = hashlib.sha3_256(event.content.encode()).hexdigest()
-            payload = (
-                f"{event.event_id}:{event.timestamp.isoformat()}:"
-                f"{event.tenant_id}:{event.role}:{content_hash}:{prev_hash}"
+        async with tenant_lock:
+            # [GOVERNANCE] Calculate the cryptographic chain if signature is missing
+            if not event.signature:
+                prev_hash = await self._get_last_hash(event.tenant_id)
+                # Immutability payload: event identity + content + provenance
+                # [GOVERNANCE] Content is now hashed into the signature payload.
+                content_hash = hashlib.sha3_256(event.content.encode()).hexdigest()
+                payload = (
+                    f"{event.event_id}:{event.timestamp.isoformat()}:"
+                    f"{event.tenant_id}:{event.role}:{content_hash}:{prev_hash}"
+                )
+                signature = hashlib.sha3_256(payload.encode()).hexdigest()
+
+                # Update event model in-place (since it's a Pydantic model)
+                # Using object.__setattr__ if the model is frozen (which it is)
+                object.__setattr__(event, "prev_hash", prev_hash)
+                object.__setattr__(event, "signature", signature)
+
+            cursor = await self._conn.execute(
+                """INSERT OR IGNORE INTO memory_events
+                   (event_id, timestamp, role, content, token_count,
+                    session_id, tenant_id, prev_hash, signature, metadata)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    event.event_id,
+                    event.timestamp.isoformat(),
+                    event.role,
+                    event.content,
+                    event.token_count,
+                    event.session_id,
+                    event.tenant_id,
+                    event.prev_hash,
+                    event.signature,
+                    json.dumps(event.metadata),
+                ),
             )
-            signature = hashlib.sha3_256(payload.encode()).hexdigest()
-
-            # Update event model in-place (since it's a Pydantic model)
-            # Using object.__setattr__ if the model is frozen (which it is)
-            object.__setattr__(event, "prev_hash", prev_hash)
-            object.__setattr__(event, "signature", signature)
-
-        await self._conn.execute(
-            """INSERT OR IGNORE INTO memory_events
-               (event_id, timestamp, role, content, token_count,
-                session_id, tenant_id, prev_hash, signature, metadata)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (
-                event.event_id,
-                event.timestamp.isoformat(),
-                event.role,
-                event.content,
-                event.token_count,
-                event.session_id,
-                event.tenant_id,
-                event.prev_hash,
-                event.signature,
-                json.dumps(event.metadata),
-            ),
-        )
-        await self._conn.commit()
-        self._last_hash_cache[event.tenant_id] = event.signature
+            await self._conn.commit()
+            if cursor.rowcount == 1:
+                self._last_hash_cache[event.tenant_id] = event.signature
 
     async def get_session_events(
         self,

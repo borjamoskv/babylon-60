@@ -1,14 +1,12 @@
 from __future__ import annotations
 
+import sqlite3
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from typing import Any
 
+from cortex.ledger.models import utc_now_iso
 from cortex.ledger.store import LedgerStore
-
-
-def utc_now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
 
 
 class EnrichmentQueue:
@@ -16,17 +14,22 @@ class EnrichmentQueue:
         self.store = store
 
     def enqueue(self, event_id: str) -> str:
-        job_id = str(uuid.uuid4())
         with self.store.tx() as conn:
-            conn.execute(
-                """
-                INSERT INTO enrichment_jobs (
-                    job_id, event_id, status, attempts, next_attempt_ts, next_attempt_at
-                )
-                VALUES (?, ?, 'queued', 0, ?, ?)
-                """,
-                (job_id, event_id, utc_now_iso(), utc_now_iso()),
+            return self._enqueue_with_conn(conn, event_id)
+
+    def _enqueue_with_conn(self, conn: sqlite3.Connection, event_id: str) -> str:
+        """Insert a queue job using the caller's active transaction."""
+        job_id = str(uuid.uuid4())
+        now = utc_now_iso()
+        conn.execute(
+            """
+            INSERT INTO enrichment_jobs (
+                job_id, event_id, status, attempts, next_attempt_ts, next_attempt_at
             )
+            VALUES (?, ?, 'queued', 0, ?, ?)
+            """,
+            (job_id, event_id, now, now),
+        )
         return job_id
 
     def claim_one(self) -> dict[str, Any] | None:
@@ -85,7 +88,9 @@ class EnrichmentQueue:
 
     def mark_failed(self, job_id: str, event_id: str, error: str, attempts: int) -> None:
         delay_minutes = min(60, 2 ** min(attempts, 5))
-        next_attempt = (datetime.now(timezone.utc) + timedelta(minutes=delay_minutes)).isoformat()
+        next_attempt = (
+            datetime.fromisoformat(utc_now_iso()) + timedelta(minutes=delay_minutes)
+        ).isoformat()
         terminal = attempts >= 8
 
         with self.store.tx() as conn:

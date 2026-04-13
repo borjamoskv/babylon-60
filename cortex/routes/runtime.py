@@ -5,15 +5,18 @@ Provides /v1/runtime/health, /v1/runtime/boot_recovery
 
 from fastapi import APIRouter, HTTPException, Request
 
-from cortex.types.models import HealthReport, RecoveryReport
+from cortex.extensions.health.reporting import build_runtime_health_payload
+from cortex.types.models import RecoveryReport, RuntimeHealthResponse
 
 router = APIRouter(prefix="/v1/runtime", tags=["runtime"])
 
 
-@router.get("/health")
-async def get_health(request: Request) -> dict:
+@router.get("/health", response_model=RuntimeHealthResponse)
+async def get_health(request: Request) -> RuntimeHealthResponse:
     """Retrieve runtime health report."""
-    return HealthReport(status="healthy", components={}, degraded_features=[], warnings=[])  # type: ignore[type-error]
+    engine = getattr(request.app.state, "engine", None)
+    db_path = str(getattr(engine, "_db_path", "")) if engine else ""
+    return RuntimeHealthResponse.model_validate(build_runtime_health_payload(db_path))
 
 
 @router.get("/boot_recovery", response_model=RecoveryReport)

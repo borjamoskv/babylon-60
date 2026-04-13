@@ -19,6 +19,7 @@ from cortex.cli.common import (
 )
 from cortex.cli.errors import err_empty_results
 from cortex.cli.slow_tip import with_slow_tips
+from cortex.engine.storage_guard import ALLOWED_CONFIDENCE, ALLOWED_FACT_TYPES
 
 
 @click.group("memory")
@@ -32,27 +33,14 @@ def memory_cmds() -> None:
 @click.option(
     "--type",
     "fact_type",
-    type=click.Choice(
-        [
-            "knowledge",
-            "decision",
-            "ghost",
-            "preference",
-            "identity",
-            "issue",
-            "error",
-            "bridge",
-            "world-model",
-            "counterfactual",
-        ]
-    ),
+    type=click.Choice(ALLOWED_FACT_TYPES),
     default="knowledge",
     help="Fact type",
 )
 @click.option("--tags", default=None, help="Comma-separated tags")
 @click.option(
     "--confidence",
-    type=click.Choice(["C1", "C2", "C3", "C4", "C5", "stated", "inferred"]),
+    type=click.Choice(ALLOWED_CONFIDENCE),
     default="stated",
     help="Confidence level",
 )
@@ -532,12 +520,20 @@ def stats(db, as_json) -> None:
 
 
 # --- Root Aliases (Backward Compatibility) ---
+def _invoke_memory_alias(ctx: click.Context, command_name: str, args: tuple[str, ...]) -> object:
+    """Re-parse alias args with the target command's own Click contract."""
+    command = memory_cmds.get_command(ctx, command_name)
+    if command is None:
+        raise click.UsageError(f"Unknown memory command alias: {command_name}")
+    return command.main(args=list(args), prog_name=ctx.command_path, standalone_mode=False)
+
+
 @cli.command("store", context_settings=dict(ignore_unknown_options=True, help_option_names=[]))
 @click.argument("args", nargs=-1, type=click.UNPROCESSED)
 @click.pass_context
 def store_alias(ctx, args):
     """[Alias] Store a fact."""
-    ctx.invoke(store, *args)
+    _invoke_memory_alias(ctx, "store", args)
 
 
 @cli.command("search", context_settings=dict(ignore_unknown_options=True, help_option_names=[]))
@@ -545,7 +541,7 @@ def store_alias(ctx, args):
 @click.pass_context
 def search_alias(ctx, args):
     """[Alias] Semantic search."""
-    ctx.invoke(search, *args)
+    _invoke_memory_alias(ctx, "search", args)
 
 
 @cli.command("recall", context_settings=dict(ignore_unknown_options=True, help_option_names=[]))
@@ -553,7 +549,7 @@ def search_alias(ctx, args):
 @click.pass_context
 def recall_alias(ctx, args):
     """[Alias] Load full context."""
-    ctx.invoke(recall, *args)
+    _invoke_memory_alias(ctx, "recall", args)
 
 
 cli.add_command(memory_cmds)

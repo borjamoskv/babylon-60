@@ -14,6 +14,7 @@ import aiosqlite
 import sqlite_vec
 
 from cortex.config import DEFAULT_DB_PATH
+from cortex.embeddings import LocalEmbedder
 
 # Lazy imports for runtime managers
 if TYPE_CHECKING:
@@ -307,7 +308,7 @@ class CortexEngine(
         try:
             from cortex.engine.guard_adapters import ZKGuardAdapter
 
-            pipeline.add_guard(ZKGuardAdapter())
+            pipeline.add_guard(ZKGuardAdapter(self))
         except (ImportError, Exception) as e:  # noqa: BLE001
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: ZKGuardAdapter failed: {e}") from e
@@ -461,6 +462,7 @@ class CortexEngine(
         query: str,
         project: str = "",
         limit: int = 3,
+        tenant_id: str = "default",
     ) -> list:
         """Recall causal episodes matching a query.
         Returns full causal DAGs, not isolated facts.
@@ -469,19 +471,20 @@ class CortexEngine(
 
         async with self.session() as conn:
             tracer = CausalTracer(conn)
-            return await tracer.recall_episode(query, project, limit)
+            return await tracer.recall_episode(query, project, limit, tenant_id=tenant_id)
 
     async def trace_episode(
         self,
         fact_id: int,
         max_depth: int | None = None,
+        tenant_id: str = "default",
     ):
         """Trace the full causal DAG from a given fact ID."""
         from cortex.memory.episodic import CausalTracer
 
         async with self.session() as conn:
             tracer = CausalTracer(conn)
-            return await tracer.trace_episode(fact_id, max_depth)
+            return await tracer.trace_episode(fact_id, max_depth, tenant_id=tenant_id)
 
     # ─── Backward Compatibility Aliases & Delegation ──────────────
 

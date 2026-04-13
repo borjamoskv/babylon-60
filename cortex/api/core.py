@@ -31,11 +31,11 @@ from cortex.engine import CortexEngine
 from cortex.extensions.metering.middleware import MeteringMiddleware
 from cortex.extensions.swarm.manager import get_swarm_manager
 from cortex.extensions.timing import TimingTracker
+from cortex.mcp.knowledge_watcher import start_knowledge_daemon
 from cortex.routes import api_router
+from cortex.swarm import start_swarm_daemon
 from cortex.telemetry.metrics import MetricsMiddleware, metrics
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
-from cortex.mcp.knowledge_watcher import start_knowledge_daemon
-from cortex.swarm import start_swarm_daemon
 
 __all__ = [
     "ContentSizeLimitMiddleware",
@@ -259,17 +259,15 @@ async def health_check(request: Request) -> dict:
     health_score = 0.0
     health_grade = "F"
     try:
-        from cortex.extensions.health import HealthCollector, HealthScorer
+        from cortex.extensions.health import collect_health_score
 
         db_path = ""
         engine = getattr(request.app.state, "engine", None)
         if engine:
             db_path = str(getattr(engine, "_db_path", ""))
-        collector = HealthCollector(db_path=db_path)
-        metrics_snap = collector.collect_all()
-        hs = HealthScorer.score(metrics_snap)
+        hs = collect_health_score(db_path)
         health_score = round(hs.score, 2)
-        health_grade = hs.grade
+        health_grade = hs.grade.letter
     except (ValueError, KeyError, OSError, RuntimeError, AttributeError):  # noqa: BLE001
         pass
 
@@ -301,6 +299,7 @@ app.include_router(api_router)
 
 # V4 SSE Event Bus (Aether Matrix)
 from cortex.api import events as events_router
+
 app.include_router(events_router.router)
 
 # Extensions and third-party integrations

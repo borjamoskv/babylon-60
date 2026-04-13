@@ -42,7 +42,7 @@ cortex store PROJECT CONTENT [OPTIONS]
 | `CONTENT` | *required* | Fact content |
 | `--type` | `knowledge` | `knowledge`, `decision`, `error`, `ghost`, `config`, `bridge`, `axiom`, `rule` |
 | `--tags` | — | Comma-separated tags |
-| `--confidence` | `stated` | `stated`, `inferred`, `observed`, `verified`, `disputed` |
+| `--confidence` | `stated` | `C1`, `C2`, `C3`, `C4`, `C5`, `stated`, `inferred`, `verified` |
 | `--source` | auto-detected | Source agent or process |
 | `--ai-time` | — | Estimated AI time saved (Chronos integration) |
 | `--complexity` | — | Task complexity rating (1-10) |

@@ -43,15 +43,15 @@ async def orchestrate_decision(context: str, agent_name: str):
     
     # After standard LLM logic concludes...
     # Store the irreversible outcome in the CORTEX Ledger
-    receipt = await engine.store_fact(
+    fact_id = await engine.store(
         content=f"Decision reached: {context}",
         fact_type="task_outcome",
         project="swarm-alpha",
         tenant_id="client-007"
     )
     
-    # You now have the cryptographic receipt for downstream compliance
-    print(f"Secured with hash: {receipt.hash}")
+    fact = await engine.get_fact(fact_id)
+    print(f"Stored fact #{fact_id} with hash {fact.hash if fact else 'unknown'}")
 ```
 
 ### Flow via Model Context Protocol (MCP)

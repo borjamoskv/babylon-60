@@ -10,7 +10,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Request
 
 from cortex.extensions.health import HealthCollector, HealthScorer
-from cortex.extensions.health.models import HealthReport, HealthThresholds
+from cortex.extensions.health.reporting import build_health_report
 
 router = APIRouter(prefix="/v1/health", tags=["health-index"])
 
@@ -44,33 +44,7 @@ async def health_index_score(request: Request) -> dict:
 async def health_index_report(request: Request) -> dict:
     """Full health report with recommendations and warnings."""
     db_path = _get_db_path(request)
-    collector = HealthCollector(db_path=db_path)
-    metrics = collector.collect_all()
-    hs = HealthScorer.score(metrics)
-    t = HealthThresholds()
-
-    recommendations: list[str] = []
-    warnings: list[str] = []
-
-    for m in hs.metrics:
-        if m.value < t.critical:
-            warnings.append(f"{m.name}: CRITICAL ({m.value:.0%})")
-        elif m.value < t.degraded:
-            warnings.append(f"{m.name}: degraded ({m.value:.0%})")
-        elif m.value < t.improve:
-            recommendations.append(f"{m.name}: could improve ({m.value:.0%})")
-
-    if hs.score < 40:
-        warnings.append(f"Overall health DEGRADED ({hs.grade.letter})")
-    elif hs.score < 70:
-        recommendations.append("Run cortex compact to reduce entropy")
-
-    report = HealthReport(
-        score=hs,
-        recommendations=recommendations,
-        warnings=warnings,
-        db_path=str(db_path),
-    )
+    report = build_health_report(db_path)
     return report.to_dict()
 
 

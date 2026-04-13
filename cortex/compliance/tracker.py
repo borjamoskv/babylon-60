@@ -12,11 +12,13 @@ Usage:
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+import re
+import sqlite3
 from pathlib import Path
 from typing import Any
 
 from cortex.config import DEFAULT_DB_PATH
+from cortex.utils.canonical import now_iso
 
 __all__ = ["ComplianceTracker"]
 
@@ -30,6 +32,7 @@ _ARTICLE_12_CHECKS = {
     "art_12_3_tamper_proof": "SHA-256 hash chain with Merkle tree checkpoints",
     "art_12_4_periodic_verification": "Integrity verification with recorded results",
 }
+_DECISION_LINK_RE = re.compile(r"\b(?:Compatible with|Supersedes)\s+#\d+\b", re.IGNORECASE)
 
 
 class ComplianceTracker:
@@ -44,7 +47,7 @@ class ComplianceTracker:
         project: Default project namespace for all operations.
     """
 
-    __slots__ = ("_engine", "_default_project", "_initialized")
+    __slots__ = ("_engine", "_default_project", "_initialized", "_last_decision_ids")
 
     def __init__(
         self,
@@ -56,12 +59,53 @@ class ComplianceTracker:
         self._engine = CortexEngine(db_path=str(db_path), auto_embed=False)
         self._default_project = project
         self._initialized = False
+        self._last_decision_ids: dict[str, int] = {}
 
     def _ensure_init(self) -> None:
         """Lazy-init the database on first use."""
         if not self._initialized:
             self._engine.init_db_sync()
             self._initialized = True
+
+    def _get_previous_decision_id(self, project: str) -> int | None:
+        """Return the latest stored decision id for the given project, if any."""
+        cached = self._last_decision_ids.get(project)
+        if cached is not None:
+            return cached
+
+        conn = self._engine._get_sync_conn()
+        try:
+            row = conn.execute(
+                """
+                SELECT id
+                FROM facts
+                WHERE project = ? AND fact_type = 'decision'
+                ORDER BY id DESC
+                LIMIT 1
+                """,
+                (project,),
+            ).fetchone()
+        except sqlite3.Error as exc:
+            logger.debug("Could not fetch previous compliance decision for %s: %s", project, exc)
+            return None
+        finally:
+            conn.close()
+
+        if row is None:
+            return None
+
+        decision_id = int(row[0])
+        self._last_decision_ids[project] = decision_id
+        return decision_id
+
+    @staticmethod
+    def _coerce_fact_id(store_result: object) -> int:
+        """Normalize additive store contracts to a plain fact id."""
+        if isinstance(store_result, int):
+            return store_result
+        if isinstance(store_result, tuple) and store_result and isinstance(store_result[0], int):
+            return store_result[0]
+        raise TypeError(f"Unexpected store_sync() result: {store_result!r}")
 
     # ─── 1. log_decision ──────────────────────────────────────────
 
@@ -97,7 +141,12 @@ class ComplianceTracker:
         self._ensure_init()
 
         proj = project or self._default_project
-        now = datetime.now(timezone.utc).isoformat()
+        now = now_iso()
+        previous_fact_id = self._get_previous_decision_id(proj)
+        normalized_content = content.rstrip()
+
+        if previous_fact_id is not None and not _DECISION_LINK_RE.search(normalized_content):
+            normalized_content = f"{normalized_content} Compatible with #{previous_fact_id}."
 
         eu_meta: dict[str, Any] = {
             "eu_ai_act": {
@@ -109,16 +158,21 @@ class ComplianceTracker:
         }
         if meta:
             eu_meta.update(meta)
+        if previous_fact_id is not None:
+            eu_meta.setdefault("previous_fact_id", previous_fact_id)
 
-        return self._engine.store_sync(  # type: ignore[type-error]
+        store_result = self._engine.store_sync(  # type: ignore[type-error]
             project=proj,
-            content=content,
+            content=normalized_content,
             fact_type="decision",
             source=agent_id,
             confidence=confidence,
             meta=eu_meta,
             tags=tags or ["eu-ai-act", "compliance"],
         )
+        fact_id = self._coerce_fact_id(store_result)
+        self._last_decision_ids[proj] = fact_id
+        return fact_id
 
     # ─── 2. verify_chain ──────────────────────────────────────────
 
@@ -196,7 +250,7 @@ class ComplianceTracker:
             },
             "integrity": integrity,
             "facts_summary": facts_summary,
-            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "generated_at": now_iso(),
             "project": proj,
         }
 

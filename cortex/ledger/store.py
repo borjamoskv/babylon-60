@@ -4,6 +4,7 @@ import sqlite3
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Literal
 
 
 class LedgerStoreError(RuntimeError):
@@ -18,16 +19,24 @@ class LedgerStore:
     def _connect(self) -> sqlite3.Connection:
         from cortex.database.core import connect
 
-        return connect(self.db_path, row_factory=sqlite3.Row)
+        return connect(self.db_path, row_factory=sqlite3.Row, isolation_level=None)
 
     @contextmanager
-    def tx(self) -> Iterator[sqlite3.Connection]:
+    def tx(self, mode: Literal["DEFERRED", "IMMEDIATE"] = "DEFERRED") -> Iterator[sqlite3.Connection]:
         conn = self._connect()
         try:
+            # Defensive normalization: some callers/tests may hand us a connection
+            # whose driver state drifted out of explicit-transaction mode.
+            conn.isolation_level = None
+            if conn.in_transaction:
+                conn.rollback()
+            conn.execute(f"BEGIN {mode}")
             yield conn
-            conn.commit()
+            if conn.in_transaction:
+                conn.commit()
         except Exception as exc:
-            conn.rollback()
+            if conn.in_transaction:
+                conn.rollback()
             raise LedgerStoreError(str(exc)) from exc
         finally:
             conn.close()
@@ -186,6 +195,30 @@ class LedgerStore:
                 AFTER DELETE ON enrichment_jobs
                 BEGIN
                     DELETE FROM ledger_enrichment_jobs WHERE job_id = OLD.job_id;
+                END;
+
+                CREATE TRIGGER IF NOT EXISTS ledger_events_require_hashes_before_insert
+                BEFORE INSERT ON ledger_events
+                FOR EACH ROW
+                WHEN NEW.action = 'append'
+                  AND (
+                      NEW.prev_hash IS NULL OR NEW.prev_hash = ''
+                      OR NEW.hash IS NULL OR NEW.hash = ''
+                  )
+                BEGIN
+                    SELECT RAISE(ABORT, 'prev_hash/hash required');
+                END;
+
+                CREATE TRIGGER IF NOT EXISTS ledger_events_require_hashes_before_update
+                BEFORE UPDATE ON ledger_events
+                FOR EACH ROW
+                WHEN NEW.action = 'append'
+                  AND (
+                      NEW.prev_hash IS NULL OR NEW.prev_hash = ''
+                      OR NEW.hash IS NULL OR NEW.hash = ''
+                  )
+                BEGIN
+                    SELECT RAISE(ABORT, 'prev_hash/hash required');
                 END;
                 """
             )

@@ -71,14 +71,14 @@ make test
 
 ## Engine Architecture
 
-CORTEX has **two engine implementations**:
+CORTEX exposes a single async-native engine implementation with sync wrappers for local tooling.
 
 ### 1. `CortexEngine` (Composite Orchestrator)
 
 Located in `cortex/engine/__init__.py`. The main entry point used by both CLI and API:
 
 - Composes `FactManager`, `EmbeddingManager`, and `ConsensusManager`
-- Provides both sync and async methods via `SyncCompatMixin`
+- Provides both sync and async methods via `SyncMixin`
 - Manages database connections and ledger
 - Delegates CRUD to mixins: `StoreMixin`, `QueryMixin`, `ConsensusMixin`
 
@@ -95,15 +95,15 @@ fact_id = engine.store_sync("project-x", "Python is great", fact_type="knowledge
 results = engine.search_sync("programming languages")
 ```
 
-### 2. `AsyncCortexEngine` (API Engine)
+### 2. `AsyncCortexEngine` (Alias for API Usage)
 
-Located in `cortex/engine_async.py`. Used by FastAPI routes for maximum concurrency:
-
-- Takes a `CortexConnectionPool` for connection management
-- All methods are `async`
-- Handles transaction logging and hash chain maintenance
+`AsyncCortexEngine` is exported from `cortex.engine` as an alias of the same class used by
+FastAPI routes and MCP handlers. Use the alias when you want the intent to read clearly as
+"API/runtime async engine", but it is not a separate implementation anymore.
 
 ```python
+from cortex.engine import AsyncCortexEngine
+
 pool = await CortexConnectionPool.create(db_path, pool_size=5)
 engine = AsyncCortexEngine(pool, db_path)
 

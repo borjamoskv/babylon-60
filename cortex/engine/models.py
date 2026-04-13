@@ -150,6 +150,7 @@ def _extract_rich_layout(row: list, res: dict) -> None:
             "parent_id": row[20],
             "relation_type": row[21],
             "yield_score": _to_float(row[22], 1.0),
+            "tx_id": row[23],
         }
     )
 
@@ -244,6 +245,7 @@ def _extract_row_values(row: list) -> dict:
         "exergy_score": 1.0,
         "category": "general",
         "yield_score": 1.0,
+        "tx_id": None,
         "parent_id": None,
         "relation_type": None,
         "semantic_status": None,
@@ -329,7 +331,7 @@ def row_to_fact(row: tuple) -> Fact:
         relation_type=v["relation_type"] or meta.get("relation_type"),
         yield_score=_to_float(meta.get("yield_score"), v["yield_score"]),
         consensus_score=_to_float(meta.get("consensus_score"), 1.0),
-        tx_id=meta.get("tx_id") if isinstance(meta.get("tx_id"), int) else None,
+        tx_id=v["tx_id"] if isinstance(v["tx_id"], int) else meta.get("tx_id"),
         semantic_status=meta.get("semantic_status", v["semantic_status"]),
         semantic_error=meta.get("semantic_error", v["semantic_error"]),
     )

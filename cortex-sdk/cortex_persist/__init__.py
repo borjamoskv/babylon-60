@@ -1,4 +1,4 @@
-"""cortex-persist — Python SDK for the CORTEX Persistence API."""
+"""Legacy Python client workspace for the CORTEX Persist API."""
 
 from cortex_persist.async_client import AsyncCortexClient
 from cortex_persist.client import CortexClient

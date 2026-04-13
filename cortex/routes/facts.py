@@ -10,6 +10,7 @@ from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine as AsyncCortexEngine
 from cortex.engine.storage_guard import GuardViolation
+from cortex.services.fact_voting import FactVoteNotFoundError, record_fact_vote
 from cortex.types.models import (
     FactResponse,
     StoreRequest,
@@ -295,25 +296,18 @@ async def cast_vote(
     """Cast a consensus vote (verify/dispute) on a fact."""
     lang = request.headers.get("Accept-Language", "en")
     try:
-        fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
-        if not fact:
-            raise HTTPException(
-                status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
-            )
-
-        agent_id = auth.key_name or "api_agent"
-        score = await engine.vote_v2(fact_id, agent_id, req.value)
-
-        # Confidence is updated automatically by manager
-        updated_fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
-
-        return VoteResponse(
+        return await record_fact_vote(
+            engine=engine,
             fact_id=fact_id,
-            agent=agent_id,
+            tenant_id=auth.tenant_id,
+            agent_id=auth.key_name or "api_agent",
             vote=req.value,
-            new_consensus_score=score,
-            confidence=updated_fact["confidence"] if updated_fact else "unknown",
         )
+    except FactVoteNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail=get_trans("error_fact_not_found", lang).format(id=fact_id),
+        ) from None
     except HTTPException:
         raise
     except ValueError as e:
@@ -336,28 +330,18 @@ async def cast_vote_v2(
     """Cast a reputation-weighted consensus vote (RWC)."""
     lang = request.headers.get("Accept-Language", "en")
     try:
-        fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
-        if not fact:
-            raise HTTPException(
-                status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
-            )
-
-        score = await engine.vote_v2(
+        return await record_fact_vote(
+            engine=engine,
             fact_id=fact_id,
-            agent=req.agent_id,
-            value=req.vote,
-        )
-
-        # Re-fetch for updated confidence
-        updated_fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
-
-        return VoteResponse(
-            fact_id=fact_id,
-            agent=req.agent_id,
+            tenant_id=auth.tenant_id,
+            agent_id=req.agent_id,
             vote=req.vote,
-            new_consensus_score=score,
-            confidence=updated_fact["confidence"] if updated_fact else "unknown",
         )
+    except FactVoteNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail=get_trans("error_fact_not_found", lang).format(id=fact_id),
+        ) from None
     except HTTPException:
         raise
     except ValueError as e:

@@ -29,7 +29,7 @@ graph TB
 
     subgraph Engine["Core Engine"]
         CortexEngine["CortexEngine<br/>(Composite Orchestrator)"]
-        AsyncEngine["AsyncCortexEngine<br/>(Native Async + Pool)"]
+        AsyncEngine["AsyncCortexEngine<br/>(Alias for async runtime use)"]
         FactManager["FactManager"]
         EmbeddingManager["EmbeddingManager"]
         ConsensusManager["ConsensusManager"]
@@ -163,13 +163,12 @@ Para más detalles, consulta: [**OMEGA_MANIFOLD.md**](https://github.com/borjamo
 
 | Module | Purpose |
 |:---|:---|
-| `engine/__init__.py` | `CortexEngine` — Composite orchestrator (sync + async) |
-| `engine_async.py` | `AsyncCortexEngine` — Native async for REST API |
+| `engine/__init__.py` | `CortexEngine` + `AsyncCortexEngine` alias — composite orchestrator used by CLI, API, and MCP |
 | `engine/store_mixin.py` | `store()`, `store_many()`, `deprecate()`, `update()` |
 | `engine/query_mixin.py` | `search()`, `recall()`, `history()` |
-| `engine/consensus_mixin.py` | `vote()`, `get_votes()` |
-| `engine/sync_compat.py` | Synchronous fallbacks for CLI |
-| `ledger.py` | Hash chain + Merkle tree management (`SovereignLedger`) |
+| `engine/consensus.py` | Consensus vote orchestration and immutable vote ledger integration |
+| `engine/sync_mixin.py` | Synchronous wrappers for local CLI/scripts |
+| `ledger/ledger_core.py` | Hash chain + Merkle tree management (`SovereignLedger`) |
 | `engine/snapshots.py` | Database snapshot creation/restoration |
 | `engine/models.py` | `Fact` data model and row mapping |
 

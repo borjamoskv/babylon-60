@@ -12,7 +12,11 @@ Tests:
 from __future__ import annotations
 
 import math
+import time
 from datetime import datetime, timedelta, timezone
+
+import aiosqlite
+import pytest
 
 # ─── 1. Inference Engine ───
 
@@ -187,7 +191,7 @@ class TestTemporalDecay:
     def test_recent_facts_score_higher(self):
         from cortex.search.hybrid import _apply_temporal_decay
 
-        now = datetime.now(timezone.utc)
+        now = datetime.fromtimestamp(time.time(), timezone.utc)
         recent = self._make_result(1, 0.5, now.isoformat())
         old = self._make_result(2, 0.5, (now - timedelta(days=365)).isoformat())
         results = _apply_temporal_decay([old, recent], recency_weight=0.3)
@@ -197,7 +201,7 @@ class TestTemporalDecay:
     def test_zero_weight_no_change(self):
         from cortex.search.hybrid import _apply_temporal_decay
 
-        now = datetime.now(timezone.utc)
+        now = datetime.fromtimestamp(time.time(), timezone.utc)
         r = self._make_result(1, 0.5, now.isoformat())
         results = _apply_temporal_decay([r], recency_weight=0.0)
         assert abs(results[0].score - 0.5) < 0.01
@@ -250,3 +254,51 @@ class TestEmbeddingBoostConstant:
 
         assert 0 < EMBEDDING_BOOST_WEIGHT <= 1.0
         assert EMBEDDING_BOOST_WEIGHT == 0.3
+
+
+class TestContradictionScanFailures:
+    async def test_detect_contradictions_fails_closed_on_db_error(self, monkeypatch):
+        from cortex.guards import contradiction_guard as module
+
+        class FailingConn:
+            row_factory = None
+
+            async def execute(self, *args, **kwargs):
+                raise aiosqlite.OperationalError("db unavailable")
+
+        class FailingCtx:
+            async def __aenter__(self):
+                return FailingConn()
+
+            async def __aexit__(self, exc_type, exc, tb):
+                return False
+
+        monkeypatch.setattr(module, "connect_async_ctx", lambda _path: FailingCtx())
+
+        with pytest.raises(module.ContradictionScanError, match="Contradiction scan failed closed"):
+            await module.detect_contradictions(
+                new_content="Decision records must fail explicitly when the scan backend is unavailable.",
+                new_project="test",
+                db_path="ignored.db",
+            )
+
+    async def test_scan_all_contradictions_fails_closed_on_db_error(self, monkeypatch):
+        from cortex.guards import contradiction_guard as module
+
+        class FailingConn:
+            row_factory = None
+
+            async def execute(self, *args, **kwargs):
+                raise aiosqlite.OperationalError("db unavailable")
+
+        class FailingCtx:
+            async def __aenter__(self):
+                return FailingConn()
+
+            async def __aexit__(self, exc_type, exc, tb):
+                return False
+
+        monkeypatch.setattr(module, "connect_async_ctx", lambda _path: FailingCtx())
+
+        with pytest.raises(module.ContradictionScanError, match="Batch contradiction scan failed closed"):
+            await module.scan_all_contradictions(db_path="ignored.db")

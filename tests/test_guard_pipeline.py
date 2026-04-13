@@ -6,6 +6,9 @@ of the full CortexEngine, proving that guards can be tested in isolation.
 
 from __future__ import annotations
 
+import logging
+import sys
+from types import ModuleType
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -170,6 +173,133 @@ class TestPostHooks:
 
         await pipeline.run_post_hooks(123, "project", "knowledge", mock_conn)
         assert results == ["ok", "bad", "final"]
+
+
+class TestAdapters:
+    async def test_contradiction_guard_warns_on_non_high_conflict(self, monkeypatch, caplog):
+        from cortex.engine.guard_adapters import ContradictionGuardAdapter
+
+        captured: dict[str, object] = {}
+
+        class ConflictReport:
+            has_conflicts = True
+            severity = "medium"
+
+            def format(self) -> str:
+                return "near miss"
+
+        module = ModuleType("cortex.guards.contradiction_guard")
+
+        async def detect_contradictions(**kwargs):
+            captured.update(kwargs)
+            return ConflictReport()
+
+        module.detect_contradictions = detect_contradictions
+        monkeypatch.setitem(sys.modules, "cortex.guards.contradiction_guard", module)
+
+        adapter = ContradictionGuardAdapter("test.db")
+        with caplog.at_level(logging.WARNING, logger="cortex.engine"):
+            await adapter.check(
+                "content",
+                "project",
+                "decision",
+                {},
+                MagicMock(),
+                tenant_id="tenant-warn",
+            )
+
+        assert "Contradiction detected (severity=medium)" in caplog.text
+        assert captured["db_path"] == "test.db"
+        assert captured["tenant_id"] == "tenant-warn"
+        assert "conn" not in captured
+
+    async def test_verifier_guard_rejects_invalid_code(self, monkeypatch):
+        from cortex.engine.guard_adapters import VerifierGuardAdapter
+
+        class FakeResult:
+            is_valid = False
+            violations = [{"name": "memory-safety"}]
+            counterexample = "panic"
+
+        class FakeVerifier:
+            def check(self, content, context):
+                return FakeResult()
+
+        module = ModuleType("cortex.verification.verifier")
+        module.SovereignVerifier = FakeVerifier
+        monkeypatch.setitem(sys.modules, "cortex.verification.verifier", module)
+
+        adapter = VerifierGuardAdapter()
+        with pytest.raises(ValueError, match="Formal verification failed"):
+            await adapter.check(
+                "unsafe code",
+                "project",
+                "code",
+                {},
+                MagicMock(),
+            )
+
+    async def test_exergy_guard_forwards_source(self, monkeypatch):
+        from cortex.engine.guard_adapters import ExergyGuardAdapter
+
+        captured: dict[str, str | None] = {}
+
+        class FakeExergyGuard:
+            def check_thermodynamic_yield(self, content, project, fact_type, *, source=None):
+                captured.update(
+                    {
+                        "content": content,
+                        "project": project,
+                        "fact_type": fact_type,
+                        "source": source,
+                    }
+                )
+
+        module = ModuleType("cortex.guards.exergy_guard")
+        module.ExergyGuard = FakeExergyGuard
+        monkeypatch.setitem(sys.modules, "cortex.guards.exergy_guard", module)
+
+        await ExergyGuardAdapter().check(
+            "thermo-safe content",
+            "project",
+            "knowledge",
+            {"source": "agent:thermo"},
+            MagicMock(),
+        )
+
+        assert captured == {
+            "content": "thermo-safe content",
+            "project": "project",
+            "fact_type": "knowledge",
+            "source": "agent:thermo",
+        }
+
+    async def test_epistemic_breaker_hook_invokes_evaluator(self, monkeypatch):
+        from cortex.engine.guard_adapters import EpistemicBreakerHook
+
+        calls: list[tuple[object, str, str]] = []
+
+        async def fake_evaluate(conn, tenant_id, project):
+            calls.append((conn, tenant_id, project))
+
+        class FakeEpistemicBreakerDaemon:
+            evaluate = staticmethod(fake_evaluate)
+
+        module = ModuleType("cortex.extensions.daemon.epistemic_breaker")
+        module.EpistemicBreakerDaemon = FakeEpistemicBreakerDaemon
+        monkeypatch.setitem(sys.modules, "cortex.extensions.daemon.epistemic_breaker", module)
+
+        hook = EpistemicBreakerHook()
+        conn = MagicMock()
+        await hook.on_stored(
+            123,
+            "project-epistemic",
+            "knowledge",
+            conn,
+            tenant_id="tenant-epistemic",
+        )
+
+        assert calls == [(conn, "tenant-epistemic", "project-epistemic")]
 
 
 # ─── Count Properties ───────────────────────────────────────────────

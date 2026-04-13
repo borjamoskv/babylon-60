@@ -138,14 +138,19 @@ from cortex import CortexEngine
 async def main() -> None:
     engine = CortexEngine()
 
-    receipt = await engine.store_fact(
+    fact_id = await engine.store(
         content="User approved transaction $5,000",
         fact_type="decision",
         project="fin-fraud-bot",
         tenant_id="customer-123",
     )
 
-    assert await engine.verify(receipt.hash) is True
+    fact = await engine.get_fact(fact_id)
+    audit = await engine.verify_ledger()
+
+    assert fact is not None
+    assert audit["valid"] is True
+    print(f"Stored fact #{fact_id} with hash {fact.hash}")
 
 asyncio.run(main())
 ```

@@ -21,7 +21,13 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
-__all__ = ["StorageGuard", "GuardViolation", "StoreProposal"]
+__all__ = [
+    "ALLOWED_CONFIDENCE",
+    "ALLOWED_FACT_TYPES",
+    "StorageGuard",
+    "GuardViolation",
+    "StoreProposal",
+]
 
 logger = logging.getLogger("cortex.guard.storage")
 
@@ -37,40 +43,39 @@ class GuardViolation(Exception):
 
 # ─── Allowed Values ────────────────────────────────────────────────
 
-_ALLOWED_FACT_TYPES: frozenset[str] = frozenset(
-    {
-        "knowledge",
-        "decision",
-        "error",
-        "ghost",
-        "bridge",
-        "preference",
-        "identity",
-        "issue",
-        "world-model",
-        "counterfactual",
-        "rule",
-        "axiom",
-        "schema",
-        "idea",
-        "evolution",
-        "test",
-        "system_health",
-    }
+ALLOWED_FACT_TYPES: tuple[str, ...] = (
+    "knowledge",
+    "decision",
+    "error",
+    "ghost",
+    "config",
+    "bridge",
+    "preference",
+    "identity",
+    "issue",
+    "world-model",
+    "counterfactual",
+    "rule",
+    "axiom",
+    "schema",
+    "idea",
+    "evolution",
+    "test",
+    "system_health",
 )
+_ALLOWED_FACT_TYPES: frozenset[str] = frozenset(ALLOWED_FACT_TYPES)
 
-_ALLOWED_CONFIDENCE: frozenset[str] = frozenset(
-    {
-        "C1",
-        "C2",
-        "C3",
-        "C4",
-        "C5",
-        "stated",
-        "inferred",
-        "verified",
-    }
+ALLOWED_CONFIDENCE: tuple[str, ...] = (
+    "C1",
+    "C2",
+    "C3",
+    "C4",
+    "C5",
+    "stated",
+    "inferred",
+    "verified",
 )
+_ALLOWED_CONFIDENCE: frozenset[str] = frozenset(ALLOWED_CONFIDENCE)
 
 _MAX_PROJECT_LENGTH = 256
 _MAX_CONTENT_LENGTH = 500_000

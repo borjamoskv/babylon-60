@@ -34,6 +34,8 @@ class TransactionMixin(EngineMixinBase):
         action: str,
         detail: dict[str, Any],
         tenant_id: str = "default",
+        *,
+        checkpoint: bool = True,
     ) -> int:
         from cortex.utils.canonical import canonical_json, compute_tx_hash
 
@@ -65,7 +67,7 @@ class TransactionMixin(EngineMixinBase):
                 th = compute_tx_hash(actual_ph, project, action, dj, ts)
                 await conn.execute("UPDATE transactions SET hash = ? WHERE id = ?", (th, tx_id))
 
-        if getattr(self, "_ledger", None):
+        if checkpoint and getattr(self, "_ledger", None):
             try:
                 self._ledger.record_write()
                 await self._ledger.create_checkpoint_async()

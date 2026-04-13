@@ -6,6 +6,8 @@ Covers: append, replay, count, session retrieval, chain verification.
 
 from __future__ import annotations
 
+import asyncio
+
 import aiosqlite
 import pytest
 
@@ -101,6 +103,33 @@ class TestAppendEvent:
         await ledger.append_event(e1)
         count = await ledger.count("test_tenant")
         assert count == 1
+
+    @pytest.mark.asyncio
+    async def test_duplicate_event_id_does_not_advance_hash_cache(self, ledger):
+        e1 = _make_event(content="first")
+        await ledger.append_event(e1)
+
+        conflict = _make_event(content="conflict")
+        object.__setattr__(conflict, "event_id", e1.event_id)
+        object.__setattr__(conflict, "signature", "")
+        object.__setattr__(conflict, "prev_hash", "")
+        await ledger.append_event(conflict)
+
+        e2 = _make_event(content="second")
+        await ledger.append_event(e2)
+
+        assert e2.prev_hash == e1.signature
+
+    @pytest.mark.asyncio
+    async def test_concurrent_appends_same_tenant_preserve_chain(self, ledger):
+        async def append_one(i: int) -> None:
+            await ledger.append_event(_make_event(content=f"event {i}"))
+
+        await asyncio.gather(*(append_one(i) for i in range(200)))
+
+        result = await ledger.verify_chain("test_tenant")
+        assert result["status"] == "VALID"
+        assert result["events_audited"] == 200
 
 
 # ─── get_session_events ──────────────────────────────────────────────────

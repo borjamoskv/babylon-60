@@ -89,9 +89,18 @@ class GuardPipeline:
         tenant_id: str = "default",
         source: str | None = None,
         db_path: str | None = None,
+        after_commit: bool | None = None,
     ) -> None:
-        """Run all post-store hooks. Failures are logged but never raised."""
+        """Run post-store hooks for the requested commit phase.
+
+        Critical hooks fail closed. Non-critical hooks are surfaced via logs
+        but do not break the write path.
+        """
         for hook in self._post_hooks:
+            requires_committed_write = getattr(hook, "requires_committed_write", False) is True
+            if after_commit is not None and requires_committed_write != after_commit:
+                continue
+
             try:
                 await hook.on_stored(
                     fact_id,
@@ -103,11 +112,11 @@ class GuardPipeline:
                     db_path=db_path,
                 )
             except Exception as e:  # noqa: BLE001
-                logger.debug(
-                    "[GuardPipeline] Post-hook %s failed: %s",
-                    type(hook).__name__,
-                    e,
-                )
+                hook_name = type(hook).__name__
+                if getattr(hook, "critical", False) is True:
+                    logger.exception("[GuardPipeline] Critical post-hook %s failed", hook_name)
+                    raise RuntimeError(f"Critical post-store hook failed: {hook_name}") from e
+                logger.warning("[GuardPipeline] Post-hook %s failed", hook_name, exc_info=True)
 
     @property
     def guard_count(self) -> int:

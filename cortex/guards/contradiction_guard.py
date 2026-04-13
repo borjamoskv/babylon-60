@@ -34,6 +34,10 @@ MAX_CANDIDATES = 10
 MIN_OVERLAP_SCORE = 0.10  # Jaccard threshold for keyword overlap
 
 
+class ContradictionScanError(RuntimeError):
+    """Raised when contradiction scanning cannot complete deterministically."""
+
+
 # ── Data classes ────────────────────────────────────────────────────
 @dataclass(frozen=True)
 class ConflictCandidate:
@@ -349,34 +353,55 @@ async def _fetch_decision_rows(
     new_project: str,
     *,
     use_fts: bool = True,
+    tenant_id: str = "default",
 ) -> list[aiosqlite.Row]:
     """Fetch candidate rows via FTS5 or full scan."""
+    has_tenant_column = await _facts_has_tenant_column(conn)
+    if tenant_id != "default" and not has_tenant_column:
+        return []
+
     if not use_fts:
-        cursor = await conn.execute(
-            """
+        query = """
             SELECT id, project, content, created_at
             FROM facts
             WHERE fact_type = 'decision'
+        """
+        params: list[str] = []
+        if has_tenant_column:
+            query += " AND COALESCE(tenant_id, 'default') = ?"
+            params.append(tenant_id)
+        query += """
             ORDER BY CASE WHEN project = ? THEN 0 ELSE 1 END, id DESC
             LIMIT 400
-            """,
-            (new_project,),
-        )
+            """
+        params.append(new_project)
+        cursor = await conn.execute(query, tuple(params))
     else:
         fts_terms = " OR ".join(list(new_tokens)[:8])
-        cursor = await conn.execute(
-            """
+        query = """
             SELECT f.id, f.project, f.content, f.created_at
             FROM facts f
             JOIN facts_fts fts ON fts.rowid = f.id
             WHERE fts.facts_fts MATCH ?
               AND f.fact_type = 'decision'
+        """
+        params = [fts_terms]
+        if has_tenant_column:
+            query += " AND COALESCE(f.tenant_id, 'default') = ?"
+            params.append(tenant_id)
+        query += """
             ORDER BY rank
             LIMIT 200
-            """,
-            (fts_terms,),
-        )
+            """
+        cursor = await conn.execute(query, tuple(params))
     return await cursor.fetchall()  # type: ignore[type-error]
+
+
+async def _facts_has_tenant_column(conn: aiosqlite.Connection) -> bool:
+    """Return whether the live facts schema exposes tenant scoping."""
+    cursor = await conn.execute("PRAGMA table_info(facts)")
+    rows = await cursor.fetchall()
+    return any(row[1] == "tenant_id" for row in rows)
 
 
 # ── Main detector ───────────────────────────────────────────────────
@@ -385,6 +410,7 @@ async def detect_contradictions(
     new_project: str,
     *,
     db_path: str | Path = DEFAULT_DB_PATH,
+    tenant_id: str = "default",
     decrypt_fn: Callable | None = None,
     max_candidates: int = MAX_CANDIDATES,
     min_score: float = MIN_OVERLAP_SCORE,
@@ -409,6 +435,7 @@ async def detect_contradictions(
                 new_tokens,
                 new_project,
                 use_fts=not decrypt_fn,
+                tenant_id=tenant_id,
             )
             candidates = [
                 c
@@ -426,8 +453,9 @@ async def detect_contradictions(
             ]
             candidates.sort(key=lambda x: -x.overlap_score)
             report.candidates = candidates[:max_candidates]
-        except aiosqlite.OperationalError:
-            logger.warning("Contradiction scan failed (DB error)", exc_info=True)
+        except aiosqlite.OperationalError as exc:
+            logger.exception("Contradiction scan failed")
+            raise ContradictionScanError("Contradiction scan failed closed") from exc
 
     return report
 
@@ -472,9 +500,9 @@ async def scan_all_contradictions(
             pairs.sort(key=lambda x: -x[0])
             return [(a, b) for _, a, b in pairs[:limit]]
 
-        except aiosqlite.OperationalError:
-            logger.warning("Batch contradiction scan failed", exc_info=True)
-            return []
+        except aiosqlite.OperationalError as exc:
+            logger.exception("Batch contradiction scan failed")
+            raise ContradictionScanError("Batch contradiction scan failed closed") from exc
 
 
 def _process_token_bucket(

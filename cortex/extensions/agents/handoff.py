@@ -77,6 +77,7 @@ async def generate_handoff(
                 "project": r[1],
                 "content": (enc.decrypt_str(r[2], tenant_id=r[4]) if r[2] else ""),
                 "created_at": r[3],
+                "tenant_id": r[4],
                 "parent_decision_id": r[5],
             }
             for r in decision_rows
@@ -129,7 +130,10 @@ async def generate_handoff(
             seen_roots: set[int] = set()
             for d in hot_decisions:
                 try:
-                    episode = await tracer.trace_episode(d["id"])
+                    episode = await tracer.trace_episode(
+                        d["id"],
+                        tenant_id=d.get("tenant_id", "default"),
+                    )
                     if episode.root_fact_id not in seen_roots:
                         seen_roots.add(episode.root_fact_id)
                         causal_episodes_data.append(

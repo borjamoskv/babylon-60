@@ -7,7 +7,7 @@ Usage:
     python -m cortex.adk                        # Interactive CLI
     python -m cortex.adk --web                  # Web dev UI
     python -m cortex.adk --agent analyst        # Specific agent
-    python -m cortex.adk --toolbox-url http://127.0.0.1:5000  # With Toolbox
+    python -m cortex.adk --toolbox-url http://127.0.0.1:5050  # With Toolbox
 """
 
 from __future__ import annotations
@@ -75,7 +75,7 @@ async def _connect_toolbox(
     Returns an empty list if the Toolbox is not configured or unavailable.
     This is intentionally non-fatal — the agents work fine without it.
     """
-    from cortex.mcp.toolbox_bridge import ToolboxBridge, ToolboxConfig
+    from cortex.mcp.toolbox_bridge import DEFAULT_SERVER_URL, ToolboxBridge, ToolboxConfig
 
     config = ToolboxConfig.from_env()
     if server_url:
@@ -85,8 +85,11 @@ async def _connect_toolbox(
     if toolset:
         config.toolset = toolset
 
-    # Skip if no explicit URL and env default is empty/localhost without a running server
-    if not server_url and config.server_url == "http://127.0.0.1:5000":
+    # Skip the local default unless the user explicitly opted into it.
+    default_local_urls = {DEFAULT_SERVER_URL, "http://localhost:5050"}
+    if not server_url and config.server_url.rstrip("/") in {
+        url.rstrip("/") for url in default_local_urls
+    }:
         # Only connect if TOOLBOX_URL was explicitly set
         import os
 

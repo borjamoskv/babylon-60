@@ -10,6 +10,10 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Literal, TypedDict
 
+RuntimeHealthStatus = Literal["ok", "degraded", "blocked"]
+RuntimeHealthTrend = Literal["improving", "stable", "degrading", "unknown"]
+RuntimeHealthGrade = Literal["S", "A", "B", "C", "D", "F"]
+
 # ─── Trust Semantics Enums ─────────────────────────────────────────────
 
 
@@ -172,13 +176,31 @@ class CapabilityReport:
     last_verified: str
 
 
-class HealthReport(TypedDict):
+class RuntimeComponentDetail(TypedDict):
+    """Detailed runtime status for one health component."""
+
+    status: RuntimeHealthStatus
+    value: float
+    latency_ms: float
+    description: str
+    remediation: str
+
+
+class HealthReport(TypedDict, total=False):
     """Overall system health and capability report."""
 
-    status: Literal["ok", "degraded", "blocked"]
-    components: dict[str, str]
+    status: RuntimeHealthStatus
+    components: dict[str, RuntimeHealthStatus]
     degraded_features: list[str]
     warnings: list[str]
+    score: float
+    grade: RuntimeHealthGrade
+    summary: str
+    trend: RuntimeHealthTrend
+    recommendations: list[str]
+    sub_indices: dict[str, float]
+    component_details: dict[str, RuntimeComponentDetail]
+    checked_at: str
 
 
 @dataclass

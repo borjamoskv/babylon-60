@@ -19,7 +19,7 @@ from cortex.cli.trust_helpers import (
     _verify_chain,
 )
 
-__all__ = ["verify_fact", "compliance_report", "audit", "audit_cognitive"]
+__all__ = ["verify_fact", "compliance_report", "audit", "audit_trail", "audit_cognitive"]
 
 console = Console()
 
@@ -278,6 +278,15 @@ def audit(calcification: bool, frontend: bool, project: str, limit: int, db: str
         audit_calcification_report(limit)
     else:
         _audit_trail(project, limit, db)
+
+
+@cli.command("audit-trail")
+@click.option("--project", "-p", default="", help="Filter trail by project")
+@click.option("--limit", "-n", default=10, help="Max entries to show")
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def audit_trail(project: str, limit: int, db: str) -> None:
+    """Display the immutable audit trail."""
+    _audit_trail(project, limit, db)
 
 
 @cli.command("siege")

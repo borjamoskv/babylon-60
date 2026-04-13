@@ -172,8 +172,6 @@ class LoopsMixin:
 
     def _run_health_loop(self) -> None:
         """Periodic health monitoring via Health Index."""
-        logger.info("🏥 Health Monitor thread started (5min interval)")
-
         from cortex.extensions.daemon.health_loop import HealthLoop
 
         db_path = ""
@@ -185,9 +183,10 @@ class LoopsMixin:
             notify_fn=(self._send_notification if hasattr(self, "_send_notification") else None),
         )
 
-        base_interval = 300.0
+        base_interval = max(float(getattr(health, "_interval", 300.0)), 1.0)
         max_interval = 3600.0
         current_interval = base_interval
+        logger.info("🏥 Health Monitor thread started (%.0fs interval)", base_interval)
 
         while not self._shutdown:
             try:
@@ -199,6 +198,11 @@ class LoopsMixin:
                         "Health check failed. Backing off to %.1fs",
                         current_interval,
                     )
+                    if hasattr(self, "_send_notification") and self._should_alert("health-loop:tick"):
+                        self._send_notification(
+                            "CORTEX Health Monitor",
+                            f"Health tick failed. Backoff now at {current_interval:.0f}s.",
+                        )
                 else:
                     # Success resets backoff
                     if current_interval > base_interval:
@@ -213,5 +217,10 @@ class LoopsMixin:
                 logger.error(
                     "Health loop critical error: %s. Backing off to %.1fs", e, current_interval
                 )
+                if hasattr(self, "_send_notification") and self._should_alert("health-loop:crash"):
+                    self._send_notification(
+                        "CORTEX Health Monitor",
+                        f"Critical health loop error: {e}",
+                    )
 
             self._stop_event.wait(timeout=current_interval)

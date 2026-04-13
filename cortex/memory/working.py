@@ -69,11 +69,11 @@ class WorkingMemoryL1:
 
     # ─── Core Operations ──────────────────────────────────────────
 
-    def _calculate_priority(self, event: MemoryEvent) -> float:
+    def _calculate_priority(self, event: MemoryEvent, *, now_ts: float | None = None) -> float:
         """Lightweight heuristic to determine event retention priority."""
         score = 1.0
         # 1. Recency (base priority)
-        age_seconds = time.time() - event.timestamp.timestamp()
+        age_seconds = (now_ts if now_ts is not None else time.time()) - event.timestamp.timestamp()
         score += max(0.0, 1.0 - (age_seconds / 3600))  # higher if < 1 hour old
 
         # 2. Emotion/Valence
@@ -87,6 +87,36 @@ class WorkingMemoryL1:
             score += 1.0
 
         return score
+
+    def _select_overflow(
+        self, buffer: deque[MemoryEvent], tokens_to_free: int
+    ) -> tuple[list[MemoryEvent], int]:
+        """Select the minimum-priority events needed to satisfy overflow."""
+        if tokens_to_free <= 0 or not buffer:
+            return [], 0
+
+        snapshot = list(buffer)
+        now_ts = time.time()
+        ranked_events = sorted(
+            (self._calculate_priority(event, now_ts=now_ts), index, event)
+            for index, event in enumerate(snapshot)
+        )
+
+        overflow: list[MemoryEvent] = []
+        freed_tokens = 0
+        evicted_indices: set[int] = set()
+        for _, index, event in ranked_events:
+            overflow.append(event)
+            freed_tokens += event.token_count
+            evicted_indices.add(index)
+            if freed_tokens >= tokens_to_free:
+                break
+
+        buffer.clear()
+        buffer.extend(
+            event for index, event in enumerate(snapshot) if index not in evicted_indices
+        )
+        return overflow, freed_tokens
 
     def add_event(self, event: MemoryEvent) -> list[MemoryEvent]:
         """Add an event, returning any overflow for L2 compression.
@@ -121,28 +151,16 @@ class WorkingMemoryL1:
         buffer.append(event)
         self._tenant_tokens[tenant_id] += event.token_count
 
-        overflow: list[MemoryEvent] = []
-        while self._tenant_tokens[tenant_id] > self._max_tokens and buffer:
-            # Shift from pure FIFO to priority-weighted eviction
-            lowest_priority = float("inf")
-            evict_idx = 0
-            for i, evt in enumerate(buffer):
-                p = self._calculate_priority(evt)
-                if p < lowest_priority:
-                    lowest_priority = p
-                    evict_idx = i
-
-            evicted = buffer[evict_idx]
-            buffer.remove(evicted)
-            self._tenant_tokens[tenant_id] -= evicted.token_count
-            overflow.append(evicted)
-
+        tokens_to_free = self._tenant_tokens[tenant_id] - self._max_tokens
+        overflow, freed_tokens = self._select_overflow(buffer, tokens_to_free)
         if overflow:
+            self._tenant_tokens[tenant_id] -= freed_tokens
+
             logger.debug(
                 "L1 overflow [Tenant: %s]: evicted %d events (%d tokens freed)",
                 tenant_id,
                 len(overflow),
-                sum(e.token_count for e in overflow),
+                freed_tokens,
             )
 
         return overflow

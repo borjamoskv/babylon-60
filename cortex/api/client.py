@@ -4,7 +4,7 @@ CORTEX v5.0 — Python SDK Client.
 Simple, ergonomic client for the CORTEX REST API.
 
 Usage:
-    from cortex.client import CortexClient
+    from cortex.api.client import CortexClient
 
     client = CortexClient("http://localhost:8484", api_key="ctx_...")
     client.store("my-project", "Important fact about the system")
@@ -102,7 +102,7 @@ class CortexClient:
             "tags": tags or [],
         }
         if metadata:
-            data["metadata"] = metadata
+            data["meta"] = metadata
         result = self._request("POST", "/v1/facts", json=data)
         return result["fact_id"]
 

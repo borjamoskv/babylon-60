@@ -8,15 +8,12 @@ Sovereign 130/100 — Pydantic responses, structured logging, TOCTOU-safe paths.
 """
 
 import logging
-import re
 import time
-from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
-from starlette.concurrency import run_in_threadpool
 from starlette.requests import Request
 
 import cortex.api.state as api_state
@@ -27,19 +24,33 @@ from cortex.database.schema import SCHEMA_VERSION
 from cortex.engine import CortexEngine
 from cortex.routes.admin_health_probes import build_health_probes as _build_health_probes
 from cortex.routes.middleware import AuditLogger, RateLimiter, SelfHealingHook
+from cortex.services.admin_api_keys import (
+    AdminAuthInvalidError,
+    AdminAuthRequiredError,
+    AdminPermissionDeniedError,
+    InvalidTenantIdError,
+    provision_api_key,
+)
+from cortex.services.admin_health import build_deep_health_response, execute_health_probes
+from cortex.services.project_export import (
+    ExportPathOutsideWorkspaceError,
+    InvalidExportPathCharsError,
+    InvalidExportPathError,
+    ProjectExportExecutionError,
+    UnsupportedExportFormatError,
+    export_project_artifact,
+)
 from cortex.types.models import (
     ApiKeyListItem,
     ApiKeyResponse,
     DeepHealthResponse,
     ExportResponse,
-    HealthCheckDetail,
     StatusResponse,
 )
-from cortex.utils.export import export_facts
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 
 if TYPE_CHECKING:
-    from cortex.auth.manager import AuthManager as ApiKeyManager
+    from cortex.auth.manager import AuthManager
 
 __all__ = [
     "create_api_key",
@@ -62,14 +73,7 @@ logger = logging.getLogger("cortex.admin")
 
 # Maximum facts to export in a single operation
 _MAX_EXPORT_FACTS = 100_000
-# Ledger lag threshold before marking as unhealthy
-_LEDGER_LAG_THRESHOLD = 1000
-
-
 # ─── Shared Helpers ──────────────────────────────────────────────────
-
-_DANGEROUS_PATH_CHARS = frozenset("\0\r\n\t")
-_TENANT_PATTERN = re.compile(r"^[a-z0-9_\-]+$", re.I)
 
 
 def _get_lang(request: Request) -> str:
@@ -77,39 +81,9 @@ def _get_lang(request: Request) -> str:
     return request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
 
 
-def _get_auth_manager() -> "ApiKeyManager":
+def _get_auth_manager() -> "AuthManager":
     """Resolve the active auth manager singleton."""
     return api_state.auth_manager or get_auth_manager()
-
-
-def _validate_export_path(path: Optional[str], project: str, lang: str) -> Path:
-    """Validate and resolve export path with traversal protection.
-
-    Uses strict Path resolution to prevent TOCTOU and symlink attacks.
-    """
-    if not path:
-        return Path.cwd() / f"{project}_export.json"
-
-    if any(c in path for c in _DANGEROUS_PATH_CHARS) or ".." in path:
-        raise HTTPException(
-            status_code=400,
-            detail=get_trans("error_invalid_path_chars", lang),
-        )
-
-    try:
-        base_dir = Path.cwd().resolve(strict=True)
-        target_path = Path(path).resolve()
-        # Use os.path.commonpath for symlink-safe comparison
-        if not target_path.is_relative_to(base_dir):
-            raise HTTPException(
-                status_code=400,
-                detail=get_trans("error_path_workspace", lang),
-            )
-        return target_path
-    except (ValueError, RuntimeError, OSError):
-        raise HTTPException(
-            status_code=400, detail=get_trans("error_invalid_input", lang)
-        ) from None
 
 
 # Health probes → cortex.routes.admin_health_probes
@@ -118,38 +92,6 @@ def _validate_export_path(path: Optional[str], project: str, lang: str) -> Path:
 def _get_raw_conn(engine: CortexEngine) -> object:
     """Isolate private access to engine's raw connection."""
     return engine._get_sync_conn()
-
-
-async def _verify_admin_auth(
-    authorization: Optional[str],
-    manager: object,
-    lang: str,
-) -> None:
-    """Validate that the caller has 'admin' permission.
-
-    Raises HTTPException (401/403) on failure.
-    """
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(
-            status_code=401,
-            detail=get_trans("error_auth_required", lang),
-        )
-
-    token = authorization.split(" ", 1)[1]
-    result = await manager.authenticate_async(token)  # type: ignore[union-attr]
-
-    if not result.authenticated:
-        raise HTTPException(
-            status_code=401,
-            detail=get_trans("error_invalid_revoked_key", lang),
-        )
-
-    if "admin" not in result.permissions:
-        detail = get_trans(
-            "error_missing_permission",
-            lang,
-        ).format(permission="admin")
-        raise HTTPException(status_code=403, detail=detail)
 
 
 # ─── Project Management ──────────────────────────────────────────────
@@ -169,50 +111,56 @@ async def export_project(
     Enforces path incarceration to prevent directory traversal.
     """
     lang = _get_lang(request)
-
-    if fmt != "json":
-        raise HTTPException(status_code=400, detail=get_trans("error_json_only", lang))
-
-    target_file = _validate_export_path(path, project, lang)
-
     try:
-        facts = await run_in_threadpool(  # type: ignore[reportCallIssue]
-            engine.search,
+        export_result = await export_project_artifact(
+            engine=engine,
             project=project,
-            limit=_MAX_EXPORT_FACTS,
+            path=path,
+            fmt=fmt,
+            max_facts=_MAX_EXPORT_FACTS,
         )
-        content = export_facts(facts, fmt="json")  # type: ignore[reportArgumentType]
-
-        def _write_export() -> Path:
-            target_file.parent.mkdir(parents=True, exist_ok=True)
-            target_file.write_text(content, encoding="utf-8")
-            return target_file
-
-        out_path = await run_in_threadpool(_write_export)
-        logger.info(
-            "Export completed: project=%s path=%s",
-            project,
-            out_path,
-        )
-        return ExportResponse(
-            project=project,
-            artifact=str(out_path),
-            message=get_trans("info_export_success", lang),
-        )
-    except (OSError, ValueError) as exc:
+    except UnsupportedExportFormatError:
+        raise HTTPException(status_code=400, detail=get_trans("error_json_only", lang)) from None
+    except InvalidExportPathCharsError:
+        raise HTTPException(
+            status_code=400,
+            detail=get_trans("error_invalid_path_chars", lang),
+        ) from None
+    except ExportPathOutsideWorkspaceError:
+        raise HTTPException(
+            status_code=400,
+            detail=get_trans("error_path_workspace", lang),
+        ) from None
+    except InvalidExportPathError:
+        raise HTTPException(
+            status_code=400,
+            detail=get_trans("error_invalid_input", lang),
+        ) from None
+    except ProjectExportExecutionError as exc:
         logger.error(
             "Export failure: project=%s error=%s",
             project,
-            exc,
+            exc.__cause__ or exc,
         )
         SelfHealingHook.trigger(
-            exc,
+            exc.__cause__ or exc,
             {"endpoint": "export_project", "project": project},
         )
         raise HTTPException(
             status_code=500,
             detail=get_trans("error_export_failed", lang),
         ) from None
+
+    logger.info(
+        "Export completed: project=%s path=%s",
+        project,
+        export_result.artifact,
+    )
+    return ExportResponse(
+        project=project,
+        artifact=str(export_result.artifact),
+        message=get_trans("info_export_success", lang),
+    )
 
 
 # ─── Health & Diagnostics ────────────────────────────────────────────
@@ -238,36 +186,8 @@ async def deep_health_check(
     conn = _get_raw_conn(engine)
     probes = _build_health_probes(conn, request, SCHEMA_VERSION)
 
-    def _run_probes() -> tuple[dict[str, HealthCheckDetail], bool]:
-        """Execute all probes off the event loop."""
-        _checks: dict[str, HealthCheckDetail] = {}
-        _healthy = True
-        for name, probe in probes.items():
-            try:
-                status, ok, details = probe()  # type: ignore[misc]
-            except AttributeError:
-                status, ok, details = (
-                    "unavailable",
-                    True,
-                    {"detail": f"{name} not configured"},
-                )
-            except (OSError, RuntimeError, ValueError) as e:
-                status, ok, details = (
-                    "error",
-                    False,
-                    {"detail": str(e)},
-                )
-            _healthy = _healthy and ok
-            _checks[name] = HealthCheckDetail(
-                status=status,
-                **details,  # type: ignore[reportArgumentType]
-            )
-        return _checks, _healthy
-
     try:
-        checks, overall_healthy = await run_in_threadpool(
-            _run_probes,
-        )
+        checks, overall_healthy = await execute_health_probes(probes)
     except (OSError, RuntimeError) as exc:
         logger.error("Deep health check failure: %s", exc)
         SelfHealingHook.trigger(
@@ -282,14 +202,13 @@ async def deep_health_check(
     from cortex.routes.context import get_p95_context_latency
 
     elapsed_ms = round((time.monotonic() - start) * 1000, 1)
-    result = DeepHealthResponse(
-        status="healthy" if overall_healthy else "degraded",
+    result = build_deep_health_response(
+        overall_healthy=overall_healthy,
         version=__version__,
         schema_version=SCHEMA_VERSION,
         checks=checks,
         latency_ms=elapsed_ms,
         p95_latency_ms=get_p95_context_latency(),
-        stale_ratio=None,
     )
 
     if not overall_healthy:
@@ -350,21 +269,34 @@ async def create_api_key(
     Subsequent keys require 'admin' permission.
     """
     lang = _get_lang(request)
-
-    if not _TENANT_PATTERN.match(tenant_id):
-        raise HTTPException(status_code=400, detail=get_trans("error_invalid_input", lang))
-
     manager = _get_auth_manager()
-    existing_keys = await manager.list_keys()
+    try:
+        provisioned = await provision_api_key(
+            manager,
+            name=name,
+            tenant_id=tenant_id,
+            authorization=authorization,
+        )
+    except InvalidTenantIdError:
+        raise HTTPException(status_code=400, detail=get_trans("error_invalid_input", lang)) from None
+    except AdminAuthRequiredError:
+        raise HTTPException(
+            status_code=401,
+            detail=get_trans("error_auth_required", lang),
+        ) from None
+    except AdminAuthInvalidError:
+        raise HTTPException(
+            status_code=401,
+            detail=get_trans("error_invalid_revoked_key", lang),
+        ) from None
+    except AdminPermissionDeniedError:
+        detail = get_trans(
+            "error_missing_permission",
+            lang,
+        ).format(permission="admin")
+        raise HTTPException(status_code=403, detail=detail) from None
 
-    if existing_keys:
-        await _verify_admin_auth(authorization, manager, lang)
-
-    raw_key, api_key = await manager.create_key(
-        name=name,
-        tenant_id=tenant_id,
-        permissions=["read", "write", "admin"],
-    )
+    api_key = provisioned.api_key
 
     logger.info(
         "API key created: name=%s tenant=%s prefix=%s",
@@ -374,7 +306,7 @@ async def create_api_key(
     )
 
     return ApiKeyResponse(
-        key=raw_key,
+        key=provisioned.raw_key,
         name=api_key.name,
         prefix=api_key.key_prefix,
         tenant_id=api_key.tenant_id,

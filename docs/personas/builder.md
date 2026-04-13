@@ -28,14 +28,15 @@ async def agent_loop():
     
     # 1. Your LLM decides to delete a user's file.
     # 2. You store that decision cryptographically.
-    receipt = await engine.store_fact(
+    fact_id = await engine.store(
         content="Action executed: Deleted system32 due to suspected malware.",
         fact_type="irreversible_action",
         project="desktop-cleaner-bot",
         tenant_id="user_host_1"
     )
     
-    print(f"Secured under Hash: {receipt.hash}")
+    fact = await engine.get_fact(fact_id)
+    print(f"Secured under Hash: {fact.hash if fact else 'unknown'}")
 
 asyncio.run(agent_loop())
 ```

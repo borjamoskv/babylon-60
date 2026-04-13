@@ -8,12 +8,17 @@ Implements background heuristics for:
 """
 
 import logging
+import sqlite3
 import time
 from typing import Any
 
 from cortex.telemetry.metrics import metrics
 
 logger = logging.getLogger("cortex.telemetry.quality")
+
+
+class QualityScanError(RuntimeError):
+    """Raised when a quality scan cannot complete deterministically."""
 
 
 class MemoryQualityEvaluator:
@@ -43,14 +48,14 @@ class MemoryQualityEvaluator:
     ) -> None:
         """Determine what percentage of facts haven't been recalled in X days."""
         if not hasattr(self._l2, "_get_conn"):
-            logger.warning("QualityEvaluator: Stale Memory check requires sovereign store.")
-            return
+            msg = "QualityEvaluator: Stale Memory check requires sovereign store."
+            logger.error(msg)
+            raise QualityScanError(msg)
 
         stale_cutoff = time.time() - (stale_days * 86400)
-        conn = self._l2._get_conn()
-        cursor = conn.cursor()
-
         try:
+            conn = self._l2._get_conn()
+            cursor = conn.cursor()
             # Corrected: Targeting the physical 'facts' table and correct columns
             cursor.execute(
                 "SELECT COUNT(*) as tot, SUM(CASE WHEN created_at < ? THEN 1 ELSE 0 END) as stl "
@@ -75,8 +80,9 @@ class MemoryQualityEvaluator:
 
             # Add to stale cleared if we decide to prune here (for now just reporting)
             logger.debug("Stale memory ratio for [%s/%s]: %s", tenant_id, project_id, ratio)
-        except Exception as e:  # noqa: BLE001 — quality evaluator must isolate failures
-            logger.error("Failed to calculate stale memory ratio: %s", e)
+        except (sqlite3.Error, AttributeError, KeyError, TypeError, ValueError) as exc:
+            logger.exception("Failed to calculate stale memory ratio")
+            raise QualityScanError("Failed to calculate stale memory ratio") from exc
 
     async def _detect_contradictions(self, tenant_id: str, project_id: str) -> None:
         """Scan recent facts for direct contradictions with existing core beliefs."""

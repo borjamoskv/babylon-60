@@ -47,6 +47,12 @@ class HealthGuardAdapter:
     ) -> None:
         from cortex.guards.health_guard import HealthGuard
 
+        # Batch writes may already hold an open SQLite transaction on this
+        # connection. Re-running the sidecar health collector through db_path
+        # would contend with the current writer and can self-deadlock.
+        if getattr(conn, "in_transaction", False):
+            return
+
         guard = HealthGuard(db_path=self._db_path)
         await guard.check_write_safety()
 
@@ -72,14 +78,26 @@ class ContradictionGuardAdapter:
         from cortex.guards.contradiction_guard import detect_contradictions
 
         report = await detect_contradictions(
-            new_content=content, new_project=project, db_path=self._db_path
+            new_content=content,
+            new_project=project,
+            db_path=self._db_path,
+            tenant_id=tenant_id,
         )
-        if report.has_conflicts and report.severity == "high":
-            logger.warning(
-                "[AX-II] Contradiction detected (severity=%s):\n%s",
-                report.severity,
-                report.format(),
+
+        if not report.has_conflicts:
+            return
+
+        message = (
+            f"[AX-II] Contradiction detected (severity={report.severity}):\n"
+            f"{report.format()}"
+        )
+        if report.severity == "high":
+            raise ValueError(
+                "Write rejected due to contradiction with existing canonical fact.\n"
+                f"{message}"
             )
+
+        logger.warning(message)
 
 
 class VerifierGuardAdapter:
@@ -130,6 +148,9 @@ class ExergyGuardAdapter:
 class ZKGuardAdapter:
     """AX-II Hook -> StoreGuard protocol (ZK-Swarm cryptographic check)."""
 
+    def __init__(self, engine: Any | None = None) -> None:
+        self._engine = engine
+
     async def check(
         self,
         content: str,
@@ -142,6 +163,20 @@ class ZKGuardAdapter:
     ) -> None:
         from cortex.guards.zk_guard import ZKSwarmGuard
 
+        proof_attestor = getattr(self._engine, "_attest_high_rigor_fact", None)
+        if callable(proof_attestor) and (
+            not meta.get("agent_public_key") or not meta.get("zk_proof_signature")
+        ):
+            enriched_meta = proof_attestor(
+                content=content,
+                fact_type=fact_type,
+                source=meta.get("source"),
+                meta=meta,
+            )
+            if enriched_meta is not None:
+                meta.clear()
+                meta.update(enriched_meta)
+
         guard = ZKSwarmGuard()
         await guard.verify_integrity(content, fact_type, meta)
 
@@ -151,6 +186,9 @@ class ZKGuardAdapter:
 
 class LedgerCheckpointHook:
     """AX-II Hook 4 → PostStoreHook protocol."""
+
+    critical = True
+    requires_committed_write = False
 
     def __init__(self, engine: Any) -> None:
         self._engine = engine
@@ -167,13 +205,20 @@ class LedgerCheckpointHook:
         db_path: str | None = None,
     ) -> None:
         ledger = getattr(self._engine, "_ledger", None)
-        if ledger is not None and hasattr(ledger, "record_write"):
-            ledger.record_write()
-            await ledger.create_checkpoint_async()
+        if ledger is not None and hasattr(ledger, "create_checkpoint_async"):
+            if hasattr(ledger, "record_write"):
+                ledger.record_write()
+            try:
+                await ledger.create_checkpoint_async(tenant_id=tenant_id)
+            except TypeError:
+                await ledger.create_checkpoint_async()
 
 
 class SignalEmitHook:
     """Signal emission → PostStoreHook protocol."""
+
+    critical = False
+    requires_committed_write = True
 
     async def on_stored(
         self,
@@ -202,6 +247,17 @@ class SignalEmitHook:
 class EpistemicBreakerHook:
     """Epistemic Circuit Breaker → PostStoreHook protocol."""
 
+    critical = False
+    requires_committed_write = False
+
+    def __init__(self) -> None:
+        from cortex.extensions.daemon.epistemic_breaker import EpistemicBreakerDaemon
+
+        evaluator = getattr(EpistemicBreakerDaemon, "evaluate", None)
+        if evaluator is None:
+            raise RuntimeError("EpistemicBreakerDaemon.evaluate is unavailable")
+        self._evaluator = evaluator
+
     async def on_stored(
         self,
         fact_id: int,
@@ -213,9 +269,7 @@ class EpistemicBreakerHook:
         source: str | None = None,
         db_path: str | None = None,
     ) -> None:
-        from cortex.extensions.daemon.epistemic_breaker import EpistemicBreakerDaemon
-
-        await EpistemicBreakerDaemon.evaluate(  # type: ignore[reportAttributeAccessIssue]
+        await self._evaluator(  # type: ignore[misc]
             conn,
             tenant_id,
             project,

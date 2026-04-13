@@ -30,7 +30,7 @@
 
 | Package | Location | Files | Status | Notes |
 |:--------|:---------|------:|:------:|:------|
-| `cortex-sdk` | `cortex-sdk/cortex_persist/` | 5 | ✅ REAL | `client.py` (sync, 4.6KB), `async_client.py` (5.6KB), `models.py`, `exceptions.py` |
+| `cortex-sdk` | `cortex-sdk/cortex_persist/` | 5 | ✅ REAL (legacy) | Retained client workspace; not the primary supported Python package. Rebuild standalone SDK work in `sdks/python/`. |
 | `open-cortex` | `open-cortex/open_cortex/` | 8 | ✅ REAL | Standalone FastAPI app: `router.py`, `persistence.py` (16KB), `models.py`, `metrics.py`, Docker-ready |
 
 ---

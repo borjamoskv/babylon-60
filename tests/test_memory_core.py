@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -27,6 +28,7 @@ def _make_event(
     tenant_id: str = "test_tenant",
     session_id: str = "sess_1",
     metadata: dict[str, Any] | None = None,
+    timestamp: datetime | None = None,
 ) -> MemoryEvent:
     """Factory for MemoryEvent with sane defaults."""
     return MemoryEvent(
@@ -36,6 +38,7 @@ def _make_event(
         session_id=session_id,
         tenant_id=tenant_id,
         metadata=metadata or {},
+        timestamp=timestamp or datetime.fromtimestamp(time.time(), UTC),
     )
 
 
@@ -91,6 +94,55 @@ class TestWorkingMemoryL1:
         assert len(overflow2) == 1
         # The evicted event should be the one with lower priority
         assert overflow2[0].content in ("old event", "new event")
+
+    def test_add_overflow_keeps_stable_priority_order(self):
+        """Multi-eviction overflow preserves stable priority ordering and buffer order."""
+        l1 = WorkingMemoryL1(max_tokens=80)
+        old_ts = datetime.fromtimestamp(time.time(), UTC) - timedelta(hours=3)
+
+        keep_system = _make_event(
+            role="system",
+            content="keep-system",
+            token_count=15,
+            timestamp=old_ts,
+        )
+        evict_first = _make_event(
+            role="assistant",
+            content="evict-1",
+            token_count=25,
+            timestamp=old_ts,
+        )
+        evict_second = _make_event(
+            role="assistant",
+            content="evict-2",
+            token_count=25,
+            timestamp=old_ts,
+        )
+        keep_user = _make_event(
+            role="user",
+            content="keep-user",
+            token_count=15,
+            timestamp=old_ts,
+            metadata={"valence": 1.0},
+        )
+        incoming = _make_event(
+            role="user",
+            content="incoming",
+            token_count=50,
+        )
+
+        for event in (keep_system, evict_first, evict_second, keep_user):
+            assert l1.add_event(event) == []
+
+        overflow = l1.add_event(incoming)
+
+        assert [event.content for event in overflow] == ["evict-1", "evict-2"]
+        assert [entry["content"] for entry in l1.get_context("test_tenant")] == [
+            "keep-system",
+            "keep-user",
+            "incoming",
+        ]
+        assert l1.snapshot("test_tenant")["tokens"] == 80
 
     def test_get_context_returns_prompt_dicts(self):
         l1 = WorkingMemoryL1(max_tokens=1000)

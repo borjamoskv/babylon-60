@@ -4,6 +4,8 @@
 > **Input**: [PILLAR-MAP.md](PILLAR-MAP.md) · [REPOSITORY-CENSUS.md](REPOSITORY-CENSUS.md)  
 > **Generated**: 2026-03-14
 
+> **Historical note (2026-04-14):** this document describes a proposed target SDK surface from the ORTU-Ω design phase. The current repository treats `cortex-sdk/` as a legacy workspace, not as the primary supported Python package.
+
 ---
 
 ## 1. Design Rules
@@ -181,27 +183,24 @@ TAINT_BLOCKED          = "taint.write_blocked"
 
 | Operation | Method | Path | Input | Output | Tier |
 |:----------|:------:|:-----|:------|:-------|:-----|
-| **Store** | `POST` | `/v1/facts` | `{project, content, fact_type?, tags?, source?, confidence?, parent_id?, metadata?}` | `Fact` | Open |
-| **Batch Store** | `POST` | `/v1/facts/batch` | `{facts: [{...}], max: 100}` | `{stored: int, errors: TrustError[]}` | Open |
+| **Store** | `POST` | `/v1/facts` | `{project, content, fact_type?, tags?, source?, meta?}` | `StoreResponse` | Open |
+| **Batch Store** | `POST` | `/v1/facts/batch` | `{memories: [{...}], max: 100}` | `{stored, ids, errors, total_requested}` | Open |
 | **Get** | `GET` | `/v1/facts/{id}` | — | `Fact` | Open |
-| **List** | `GET` | `/v1/facts` | `?project=&limit=&offset=&type=&confidence=` | `Fact[]` | Open |
+| **List** | `GET` | `/v1/facts` | `?limit=` | `Fact[]` | Open |
 | **Search** | `POST` | `/v1/facts/search` | `{query, project?, k?, tags?, strategy?}` | `SearchResult[]` | Open |
-| **Recall** | `POST` | `/v1/facts/recall` | `{query, project?, limit?, min_confidence?}` | `SearchResult[]` | Open |
+| **Recall** | `GET` | `/v1/projects/{project}/facts` | `?limit=` | `Fact[]` | Open |
 | **History** | `GET` | `/v1/facts/{id}/history` | — | `Fact[]` (versions) | Open |
-| **Time Travel** | `GET` | `/v1/facts` | `?project=&as_of=ISO8601` | `Fact[]` | Open |
-| **Deprecate** | `POST` | `/v1/facts/{id}/deprecate` | `{reason?}` | `Fact` | Open |
-| **Compact** | `POST` | `/v1/projects/{project}/compact` | `{strategy?}` | `{removed: int, merged: int}` | Premium |
+| **Deprecate** | `DELETE` | `/v1/facts/{id}` | — | `{message, success}` | Open |
 
-> **P1 resolution**: `search` = hybrid vector+text. `recall` = Bayesian scored with decay. Both exposed as separate operations with a `strategy` parameter on `search` for consumers who want unified behavior.
+> `search` remains the query surface. Project-scoped recall is exposed separately through `GET /v1/projects/{project}/facts`.
 
 ### 3.2 Traceability (Pillar 2)
 
 | Operation | Method | Path | Input | Output | Tier |
 |:----------|:------:|:-----|:------|:-------|:-----|
-| **Verify Ledger** | `GET` | `/v1/trust/verify` | — | `VerificationResult` | Open |
-| **Trace** | `GET` | `/v1/facts/{id}/trace` | `?max_depth=5` | `CausalTrace` | Premium |
-| **Taint Status** | `GET` | `/v1/facts/{id}/taint` | — | `TaintReport` | Premium |
-| **Propagate Taint** | `POST` | `/v1/facts/{id}/taint` | `{reason}` | `TaintReport` | Premium |
+| **Verify Ledger** | `GET` | `/v1/ledger/verify` | — | `VerificationResult` | Open |
+| **Causal Chain** | `GET` | `/v1/facts/{id}/chain` | `?direction=&max_depth=` | `Fact[]` | Premium |
+| **Propagate Taint** | `POST` | `/v1/facts/{id}/taint` | — | `TaintReport` | Premium |
 
 ### 3.3 Coordination (Pillar 3)
 
@@ -210,7 +209,6 @@ TAINT_BLOCKED          = "taint.write_blocked"
 | **Register Agent** | `POST` | `/v1/agents` | `{name, agent_type?, public_key?}` | `Agent` | Open |
 | **Get Agent** | `GET` | `/v1/agents/{id}` | — | `Agent` | Open |
 | **Vote** | `POST` | `/v1/facts/{id}/vote` | `{agent_id, value, reason?}` | `VoteResult` | Premium |
-| **Consensus Status** | `GET` | `/v1/facts/{id}/consensus` | — | `ConsensusStatus` | Premium |
 
 ### 3.4 Verification (Pillar 5)
 
@@ -232,46 +230,22 @@ TAINT_BLOCKED          = "taint.write_blocked"
 
 | Tier | Operations | Notes |
 |:-----|----------:|:------|
-| **Open** | 14 | Store, batch, get, list, search, recall, history, time_travel, deprecate, register_agent, get_agent, verify, guard_check, status, health |
-| **Premium** | 7 | Compact, trace, taint_status, propagate_taint, vote, consensus_status, compliance_report |
-| **Total** | 21 | |
+| **Open** | 14 | Store, batch, get, list, search, recall, history, deprecate, register_agent, get_agent, verify, guard_check, status, health |
+| **Premium** | 4 | causal_chain, propagate_taint, vote, compliance_report |
+| **Total** | 18 | |
 
 ---
 
 ## 5. SDK Mapping
 
-Translation from API operations to SDK methods:
+Current SDK surface is documented in [`docs/sdks.md`](../sdks.md).
 
-```python
-# ─── cortex_persist.CortexMemory (sync) ──────────────────
-class CortexMemory:
-    # Memory
-    def store(project, content, **kwargs) -> Fact
-    def batch_store(facts: list[dict]) -> BatchResult
-    def get(fact_id: int) -> Fact
-    def list(project, limit=50) -> list[Fact]
-    def search(query, project?, k=5) -> list[SearchResult]
-    def recall(query, project?, limit=10) -> list[SearchResult]
-    def history(fact_id: int) -> list[Fact]
-    def deprecate(fact_id: int, reason?) -> Fact
+The mounted HTTP clients in this workspace expose these public methods today:
 
-    # Trust
-    def verify() -> VerificationResult
-    def trace(fact_id: int, max_depth=5) -> CausalTrace
-    def taint_status(fact_id: int) -> TaintReport
-    def guard_check(content, project) -> GuardResult
-
-    # Coordination
-    def register_agent(name, agent_type?) -> Agent
-    def vote(fact_id, agent_id, value) -> VoteResult
-    def consensus(fact_id) -> ConsensusStatus
-
-    # Compliance
-    def compliance_report(project?) -> AuditReport
-
-    # System
-    def status() -> dict
-```
+| Client | Methods |
+|:-------|:--------|
+| `CortexClient` | `store`, `search`, `recall`, `deprecate`, `status`, `create_key`, `list_keys` |
+| `AsyncCortexClient` | `store`, `store_many`, `search`, `recall`, `deprecate`, `export`, `status`, `create_key`, `list_keys` |
 
 ---
 
@@ -282,13 +256,12 @@ class CortexMemory:
 | `cortex_store` | `POST /v1/facts` | ✅ Exists |
 | `cortex_search` | `POST /v1/facts/search` | ✅ Exists |
 | `cortex_status` | `GET /v1/status` | ✅ Exists |
-| `cortex_ledger_verify` | `GET /v1/trust/verify` | ✅ Exists |
-| `cortex_trace_episode` | `GET /v1/facts/{id}/trace` | ✅ Exists |
-| `cortex_trace_chain` | `GET /v1/facts/{id}/trace` | ✅ Exists |
+| `cortex_ledger_verify` | `GET /v1/ledger/verify` | ✅ Exists |
+| `cortex_trace_episode` | — | ⚠️ Internal (no public REST mapping) |
+| `cortex_trace_chain` | `GET /v1/facts/{id}/chain` | ✅ Exists |
 | `cortex_shannon_report` | — | ⚠️ Internal (no API mapping) |
 | `cortex_handoff` | — | ⚠️ Internal (session-specific) |
 | `cortex_embed` | — | ⚠️ Internal (infra-specific) |
-| — | `POST /v1/facts/recall` | 🆕 New |
 | — | `POST /v1/facts/{id}/vote` | 🆕 New |
 | — | `GET /v1/trust/compliance` | 🆕 New |
 | — | `POST /v1/trust/guard` | 🆕 New |
@@ -298,43 +271,21 @@ class CortexMemory:
 
 ## 7. Migration from Current SDK
 
-```diff
- # Before (cortex-sdk v0.x)
--from cortex_persist import CortexMemory
--from cortex_persist.models import Memory
-+from cortex_persist import CortexMemory
-+from cortex_persist.models import Fact, SearchResult
-
- memory = CortexMemory(api_key="ctx_...")
-
- # Store — same signature, richer return
--fact_id: int = memory.store("my-agent", "User prefers dark mode")
-+fact: Fact = memory.store("my-agent", "User prefers dark mode")
-
- # Search — returns SearchResult with score metadata
--memories: list[Memory] = memory.search("preferences")
-+results: list[SearchResult] = memory.search("preferences")
-
- # NEW: Recall (Bayesian scored) vs Search (hybrid vector)
-+results = memory.recall("what changed yesterday?")
-
- # NEW: Trust operations
-+integrity = memory.verify()
-+trace = memory.trace(fact.id)
-+report = memory.compliance_report("my-agent")
-```
+Legacy migration notes were retired from this document because they had drifted
+from the current mounted clients and routes. Use [`docs/sdks.md`](../sdks.md)
+plus [`docs/api.md`](../api.md) as the living contract.
 
 ---
 
 ## 8. Phase 2 Verdict
 
-**21 operations defined across 5 domains.** 14 open-tier, 7 premium-tier.
+**18 mounted operations documented across 5 domains.** 14 open-tier, 4 premium-tier.
 
 The API surface resolves all 4 P1 gaps from Phase 1:
 
 | P1 Gap | Resolution |
 |:-------|:----------|
-| No unified recall API | Separate `search` (hybrid) + `recall` (Bayesian) with explicit semantics |
+| No unified recall API | Separate `search` plus project-scoped `GET /v1/projects/{project}/facts` |
 | No external event bus | Deferred to Phase 4 (Workstream C) — SSE endpoint on `/v1/events` |
 | No rejection API | `TrustError` model with codes, categories, and remediation hints |
 | Dedup predicate drift | Fixed in contract: `is_tombstoned` is the canonical predicate |

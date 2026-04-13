@@ -19,7 +19,7 @@ Usage:
 
 import os
 from collections.abc import Callable, Coroutine
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 
 import httpx
 
@@ -272,13 +272,14 @@ class AsyncRuntimeClient(BaseAsyncClientDomain):
     async def health(self) -> HealthReport:
         """Get authoritative system health asynchronously."""
         data = await self._request("GET", "/v1/runtime/health")
-
-        return HealthReport(
-            status=data["status"],
-            components=data.get("components", {}),
-            degraded_features=data.get("degraded_features", []),
-            warnings=data.get("warnings", []),
-        )
+        report = {
+            "status": data["status"],
+            "components": data.get("components", {}),
+            "degraded_features": data.get("degraded_features", []),
+            "warnings": data.get("warnings", []),
+        }
+        report.update(data)
+        return cast(HealthReport, report)
 
 
 # ─── Main Async Client ─────────────────────────────────────────────────

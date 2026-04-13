@@ -148,7 +148,7 @@ def _get_audit_trail(conn, project: str, limit: int):
         ORDER BY f.id DESC
         LIMIT ?
     """
-    rows = conn.execute(query, params).fetchall()
+    rows = conn.execute(query, [*params, limit]).fetchall()
 
     if not rows:
         err_empty_results("audit entries")

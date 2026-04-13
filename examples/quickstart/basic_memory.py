@@ -22,51 +22,55 @@ async def main() -> None:
     db_path = Path(tempfile.mkdtemp()) / "quickstart.db"
 
     # Import CortexEngine — the single entry point for all operations
-    from cortex.engine import CortexEngine
+    from cortex import CortexEngine
 
-    engine = CortexEngine(db_path=str(db_path))
+    engine = CortexEngine(db_path=str(db_path), auto_embed=False)
+    await engine.init_db()
 
     print("🧠 CORTEX Quickstart — Basic Memory\n")
 
     # --- Step 1: Store facts ---
     print("1️⃣  Storing decisions...")
-    fact1 = await engine.store_fact(
+    fact1_id = await engine.store(
         content="Chose OAuth2 PKCE for authentication",
         fact_type="decision",
         project="quickstart",
         source="human:developer",
     )
-    print(f"   ✅ Fact #{fact1['id']} stored (hash: {fact1['hash'][:12]}...)")
+    fact1 = await engine.get_fact(fact1_id)
+    print(f"   ✅ Fact #{fact1_id} stored (hash: {(fact1.hash or '')[:12]}...)")
 
-    fact2 = await engine.store_fact(
+    fact2_id = await engine.store(
         content="Selected PostgreSQL over MongoDB for audit compliance",
         fact_type="decision",
         project="quickstart",
         source="human:architect",
     )
-    print(f"   ✅ Fact #{fact2['id']} stored (hash: {fact2['hash'][:12]}...)")
+    fact2 = await engine.get_fact(fact2_id)
+    print(f"   ✅ Fact #{fact2_id} stored (hash: {(fact2.hash or '')[:12]}...)")
 
-    # --- Step 2: Verify a single fact ---
-    print("\n2️⃣  Verifying fact integrity...")
-    result = await engine.verify_fact(fact1["id"])
+    # --- Step 2: Verify ledger integrity ---
+    print("\n2️⃣  Verifying ledger integrity...")
+    result = await engine.verify_ledger()
     status = "✅ VERIFIED" if result["valid"] else "❌ BROKEN"
-    print(f"   {status} — Hash chain: {result.get('chain_status', 'ok')}")
+    print(f"   {status} — Transactions checked: {result.get('tx_checked', 0)}")
 
     # --- Step 3: Search facts ---
     print("\n3️⃣  Searching memory...")
-    facts = await engine.search_facts("authentication", project="quickstart")
+    facts = await engine.search(query="authentication", project="quickstart", top_k=5)
     print(f"   Found {len(facts)} matching fact(s)")
     for f in facts:
-        print(f"   → [{f['type']}] {f['content'][:60]}")
+        print(f"   → [{f.fact_type}] {f.content[:60]}")
 
-    # --- Step 4: Generate compliance report ---
-    print("\n4️⃣  Compliance check...")
-    report = await engine.compliance_report(project="quickstart")
-    print(f"   Score: {report.get('score', 'N/A')}/5")
-    print(f"   Status: {report.get('status', 'unknown')}")
+    # --- Step 4: Inspect stats ---
+    print("\n4️⃣  Stats snapshot...")
+    stats = await engine.stats()
+    print(f"   Total facts: {stats.get('total_facts', 0)}")
+    print(f"   Active facts: {stats.get('active_facts', 0)}")
 
     print("\n✨ Done! CORTEX verified all decisions with cryptographic integrity.")
     print(f"   Database: {db_path}")
+    await engine.close()
 
 
 if __name__ == "__main__":

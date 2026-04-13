@@ -6,7 +6,7 @@ CORTEX provides official SDKs for Python and JavaScript/TypeScript.
 
 ## Python SDK
 
-The Python SDK is the primary interface, distributed as `cortex-persist` on PyPI.
+The primary supported Python interface is the local engine, distributed as `cortex-persist` on PyPI.
 
 ### Install
 
@@ -56,7 +56,7 @@ async with CortexEngine() as engine:
 engine = CortexEngine()
 
 # Store with tenant isolation
-await engine.store_fact(
+await engine.store(
     content="Approved loan #443",
     fact_type="decision",
     project="fintech-agent",
@@ -64,38 +64,45 @@ await engine.store_fact(
 )
 ```
 
+### REST API Clients
+
+For remote HTTP access, use the REST clients that ship inside the package:
+
+```python
+from cortex.api.client import CortexClient
+from cortex.api.async_client import AsyncCortexClient
+
+client = CortexClient(base_url="http://localhost:8484", api_key="ctx_your_api_key")
+fact_id = client.store("demo", "Hello from the REST client")
+
+async with AsyncCortexClient(base_url="http://localhost:8484") as async_client:
+    results = await async_client.search("hello", k=3)
+```
+
 ### Consensus
 
 ```python
-# Register an agent
-# Agents are auto-registered on first vote
-
-# Cast a vote
-await engine.vote(
+agent_id = await engine.consensus.register_agent("agent:claude")
+score = await engine.consensus.vote_v2(
     fact_id=42,
-    agent_id="agent:claude",
-    vote=1,  # 1 = verify, -1 = dispute
+    agent_id=agent_id,
+    value=1,  # 1 = verify, -1 = dispute
 )
 ```
 
-### Available Methods
+### Common Engine Methods
 
-| Method (Sync) | Method (Async) | Description |
+The engine exposes a mixed surface: core persistence has sync wrappers, while broader lifecycle and analysis APIs are async-first.
+
+| Sync Wrapper | Async Method | Description |
 |:---|:---|:---|
+| `init_db_sync()` | `init_db()` | Initialize database schema |
 | `store_sync()` | `store()` | Store a fact |
-| `store_many_sync()` | `store_many()` | Batch store |
 | `search_sync()` | `search()` | Semantic search |
-| `recall_sync()` | `recall()` | Get all project facts |
-| `history_sync()` | `history()` | Temporal query |
-| `deprecate_sync()` | `deprecate()` | Soft-delete a fact |
-| `update_sync()` | `update()` | Update a fact |
-| `vote_sync()` | `vote()` | Cast consensus vote |
-| `retrieve()` | `retrieve()` | Get single fact by ID |
-| `time_travel()` | `time_travel()` | Reconstruct state at timestamp |
-| `find_path()` | `find_path()` | Knowledge graph path finding |
-| `stats()` | `stats()` | System statistics |
-| `init_db_sync()` | `init_db()` | Initialize database |
-| `export_snapshot()` | `export_snapshot()` | Export markdown snapshot |
+| `recall_sync()` | `recall()` | Recall facts for a project |
+| `close_sync()` | `close()` | Close connections and resources |
+
+Async-only methods used commonly in applications include `store_many()`, `history()`, `retrieve()`, `get_fact()`, `stats()`, `deprecate()`, `update()`, and `vote()`.
 
 ---
 

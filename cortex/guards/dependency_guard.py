@@ -20,21 +20,28 @@ from rich.console import Console
 from cortex.guards import analysis
 from cortex.guards.models import DependencyViolation
 
-__all__ = ["DependencyViolation", "scan_file", "scan_directory"]
+__all__ = ["DependencyScanError", "DependencyViolation", "scan_file", "scan_directory"]
 
 logger = logging.getLogger("cortex.guards.dependency_guard")
+
+
+class DependencyScanError(RuntimeError):
+    """Raised when dependency scanning cannot complete deterministically."""
 
 
 def scan_file(filepath: str | Path) -> list[DependencyViolation]:
     """Scan a single Python file for Axiom 4 violations."""
     filepath = Path(filepath)
-    if not filepath.exists() or filepath.suffix != ".py":
+    if not filepath.exists():
+        raise DependencyScanError(f"DependencyGuard: file not found: {filepath}")
+    if filepath.suffix != ".py":
         return []
 
     try:
         source = filepath.read_text(encoding="utf-8")
-    except (OSError, UnicodeDecodeError):
-        return []
+    except (OSError, UnicodeDecodeError) as exc:
+        logger.exception("DependencyGuard: failed to read %s", filepath)
+        raise DependencyScanError(f"DependencyGuard: failed to read {filepath}") from exc
 
     # Quick exit: no exec-capable imports → no risk
     if not analysis.has_exec_import(source):
@@ -42,8 +49,9 @@ def scan_file(filepath: str | Path) -> list[DependencyViolation]:
 
     try:
         tree = ast.parse(source, filename=str(filepath))
-    except SyntaxError:
-        return []
+    except SyntaxError as exc:
+        logger.exception("DependencyGuard: failed to parse %s", filepath)
+        raise DependencyScanError(f"DependencyGuard: failed to parse {filepath}") from exc
 
     has_fallback = analysis.has_sovereign_fallback(source)
 

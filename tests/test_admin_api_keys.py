@@ -60,6 +60,29 @@ def test_create_api_key_bootstrap_is_single_use(admin_client) -> None:
     assert second.status_code == 401
 
 
+def test_create_api_key_accepts_admin_bearer_after_bootstrap(admin_client) -> None:
+    _, client = admin_client
+
+    bootstrap = client.post(
+        "/v1/admin/keys",
+        params={"name": "bootstrap-admin", "tenant_id": "tenant-alpha"},
+    )
+    assert bootstrap.status_code == 200
+
+    response = client.post(
+        "/v1/admin/keys",
+        params={"name": "worker-admin", "tenant_id": "tenant-alpha"},
+        headers={"Authorization": f"Bearer {bootstrap.json()['key']}"},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["name"] == "worker-admin"
+    assert body["tenant_id"] == "tenant-alpha"
+    assert body["prefix"].startswith("ctx_")
+    assert body["key"].startswith("ctx_")
+
+
 def test_create_api_key_rejects_invalid_tenant_id(admin_client) -> None:
     manager, client = admin_client
 

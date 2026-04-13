@@ -64,4 +64,5 @@ def create_checkpoint(db: str, batch: int):
 
 
 ledger_cmds_click = ledger_cmds
+cli.add_command(ledger_cmds, name="ledger")
 cli.add_command(ledger_cmds, name="trust-ledger")

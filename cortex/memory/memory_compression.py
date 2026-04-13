@@ -8,13 +8,11 @@ Handles the 'Sleep-time Compute' pattern: overflowed L1 events are compressed
 from __future__ import annotations
 
 import logging
-import time
-import uuid
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cortex.memory.manager import CortexMemoryManager
-    from cortex.memory.models import MemoryEvent
+    from cortex.memory.models import CortexFactModel, EpisodicSnapshot, MemoryEntry, MemoryEvent
 
 __all__ = [
     "compress_and_store",
@@ -23,6 +21,8 @@ __all__ = [
 ]
 
 logger = logging.getLogger("cortex.memory.compression")
+
+_EPISODIC_ARTIFACT_KIND = "episodic_snapshot"
 
 
 def raw_concat(events: list[MemoryEvent]) -> str:
@@ -66,6 +66,91 @@ async def summarize_events(
     return raw_text
 
 
+def _build_snapshot(
+    *,
+    summary: str,
+    events: list[MemoryEvent],
+    session_id: str,
+    tenant_id: str,
+    vector_embedding: list[float] | None,
+) -> EpisodicSnapshot:
+    from cortex.memory.models import EpisodicSnapshot
+
+    return EpisodicSnapshot(
+        summary=summary,
+        vector_embedding=vector_embedding or [],
+        linked_events=[event.event_id for event in events],
+        session_id=session_id,
+        tenant_id=tenant_id,
+    )
+
+
+def _snapshot_metadata(
+    snapshot: EpisodicSnapshot,
+    *,
+    project_id: str,
+    compression_mode: str,
+) -> dict[str, Any]:
+    return {
+        "type": _EPISODIC_ARTIFACT_KIND,
+        "memory_artifact_kind": _EPISODIC_ARTIFACT_KIND,
+        "project_id": project_id,
+        "session_id": snapshot.session_id,
+        "tenant_id": snapshot.tenant_id,
+        "event_count": len(snapshot.linked_events),
+        "linked_events": list(snapshot.linked_events),
+        "compression": compression_mode,
+    }
+
+
+def _snapshot_to_fact(
+    snapshot: EpisodicSnapshot,
+    *,
+    project_id: str,
+    compression_mode: str,
+) -> CortexFactModel:
+    from cortex.memory.models import CortexFactModel
+
+    if not snapshot.vector_embedding:
+        raise ValueError("EpisodicSnapshot requires vector_embedding for fact persistence")
+
+    return CortexFactModel(
+        id=snapshot.snapshot_id,
+        tenant_id=snapshot.tenant_id,
+        project_id=project_id,
+        content=snapshot.summary,
+        embedding=snapshot.vector_embedding,
+        timestamp=snapshot.created_at.timestamp(),
+        cognitive_layer="episodic",
+        category="episodic",
+        metadata=_snapshot_metadata(
+            snapshot,
+            project_id=project_id,
+            compression_mode=compression_mode,
+        ),
+    )
+
+
+def _snapshot_to_legacy_entry(
+    snapshot: EpisodicSnapshot,
+    *,
+    project_id: str,
+    compression_mode: str,
+) -> MemoryEntry:
+    from cortex.memory.models import MemoryEntry
+
+    return MemoryEntry(
+        content=snapshot.summary,
+        project=project_id,
+        source="episodic",
+        metadata=_snapshot_metadata(
+            snapshot,
+            project_id=project_id,
+            compression_mode=compression_mode,
+        ),
+    )
+
+
 async def compress_and_store(
     manager: CortexMemoryManager,
     events: list[MemoryEvent],
@@ -78,44 +163,35 @@ async def compress_and_store(
     Called as a background asyncio.Task — must NEVER raise.
     """
     try:
-        from cortex.memory.models import CortexFactModel, MemoryEntry
-
         summary = await summarize_events(manager, events)
         is_sovereign = manager._l2.__class__.__name__ == "SovereignVectorStoreL2"
+        compression_mode = "llm" if manager._router else "raw"
+        vector_embedding = await manager._encoder.encode(summary) if is_sovereign else None
+        if is_sovereign and not vector_embedding:
+            # Retry with the raw episode payload before giving up on fact persistence.
+            vector_embedding = await manager._encoder.encode(raw_concat(events))
+        snapshot = _build_snapshot(
+            summary=summary,
+            events=events,
+            session_id=session_id,
+            tenant_id=tenant_id,
+            vector_embedding=vector_embedding,
+        )
 
         if is_sovereign:
-            vector = await manager._encoder.encode(summary)
-
-            _meta: dict[str, Any] = {
-                "session_id": session_id,
-                "event_count": len(events),
-                "linked_events": [e.event_id for e in events],
-                "compression": "llm" if manager._router else "raw",
-            }
-            fact = CortexFactModel(
-                id=uuid.uuid4().hex,
-                tenant_id=tenant_id,
+            fact = _snapshot_to_fact(
+                snapshot,
                 project_id=project_id,
-                content=summary,
-                embedding=vector,
-                timestamp=time.time(),
-                cognitive_layer="episodic",
-                metadata=_meta,
+                compression_mode=compression_mode,
             )
             await manager._l2.memorize(fact)
             if manager._hdc:
                 await manager._hdc.memorize(fact)
         else:
-            entry = MemoryEntry(
-                content=summary,
-                project=project_id,
-                source="episodic",
-                metadata={
-                    "session_id": session_id,
-                    "tenant_id": tenant_id,
-                    "event_count": len(events),
-                    "linked_events": [e.event_id for e in events],
-                },
+            entry = _snapshot_to_legacy_entry(
+                snapshot,
+                project_id=project_id,
+                compression_mode=compression_mode,
             )
             await manager._l2.memorize(entry)
 
@@ -123,7 +199,7 @@ async def compress_and_store(
             "Compressed %d events into L2 episode (session=%s, mode=%s, type=%s, hdc=%s)",
             len(events),
             session_id,
-            "llm" if manager._router else "raw",
+            compression_mode,
             "sovereign" if is_sovereign else "legacy",
             "active" if manager._hdc else "inactive",
         )

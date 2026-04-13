@@ -7,7 +7,7 @@ Never deletes — only deprecates. Enables time-travel queries.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from cortex.utils.canonical import now_iso as canonical_now_iso
 
 __all__ = [
     "build_temporal_filter_params",
@@ -19,7 +19,7 @@ __all__ = [
 
 def now_iso() -> str:
     """Return current UTC timestamp in ISO 8601 format."""
-    return datetime.now(timezone.utc).isoformat()
+    return canonical_now_iso()
 
 
 def is_valid_at(valid_from: str, valid_until: str | None, at: str | None = None) -> bool:
@@ -110,11 +110,15 @@ def time_travel_filter(
         prefix = ""
 
     return (
-        f"json_extract({prefix}metadata, '$.tx_id') <= ? AND ("  # nosec B608
+        "("
+        f"coalesce({prefix}tx_id, json_extract({prefix}metadata, '$.tx_id')) <= ? "
+        f"OR (coalesce({prefix}tx_id, json_extract({prefix}metadata, '$.tx_id')) IS NULL "
+        f"AND {prefix}created_at <= (SELECT timestamp FROM transactions WHERE id = ?))"
+        ") AND ("  # nosec B608
         f"{prefix}is_tombstoned = 0 OR "
         f"json_extract({prefix}metadata, '$.valid_until') > "
         "(SELECT timestamp FROM transactions WHERE id = ?) OR "
         f"json_extract({prefix}metadata, '$.tombstoned_at') > "
         "(SELECT timestamp FROM transactions WHERE id = ?))",
-        [tx_id, tx_id, tx_id],
+        [tx_id, tx_id, tx_id, tx_id],
     )

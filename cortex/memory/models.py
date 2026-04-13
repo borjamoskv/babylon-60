@@ -68,6 +68,7 @@ __all__ = [
     "EpisodicSnapshot",
     "MemoryEntry",
     "MemoryEvent",
+    "require_cortex_fact",
 ]
 
 
@@ -297,3 +298,13 @@ class CortexFactModel(BaseModel):
         populate_by_name=True,
         arbitrary_types_allowed=True,
     )
+
+
+def require_cortex_fact(value: object) -> CortexFactModel:
+    """Fail closed when a non-semantic artifact reaches the L2 fact store."""
+    if not isinstance(value, CortexFactModel):
+        raise TypeError(
+            "Semantic memory store only accepts CortexFactModel instances; "
+            f"got {type(value).__name__}"
+        )
+    return value

@@ -20,7 +20,7 @@ Usage:
 
 import os
 from collections.abc import Callable
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 
 import httpx
 
@@ -274,13 +274,14 @@ class RuntimeClient(BaseClientDomain):
     def health(self) -> HealthReport:
         """Get authoritative system health, ignoring cached states."""
         data = self._request("GET", "/v1/runtime/health")
-
-        return HealthReport(
-            status=data["status"],
-            components=data.get("components", {}),
-            degraded_features=data.get("degraded_features", []),
-            warnings=data.get("warnings", []),
-        )
+        report = {
+            "status": data["status"],
+            "components": data.get("components", {}),
+            "degraded_features": data.get("degraded_features", []),
+            "warnings": data.get("warnings", []),
+        }
+        report.update(data)
+        return cast(HealthReport, report)
 
 
 # ─── Main Client ───────────────────────────────────────────────────────

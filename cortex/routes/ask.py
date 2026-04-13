@@ -27,6 +27,7 @@ from cortex.extensions.llm._presets import list_providers, provider_inventory
 from cortex.extensions.llm.manager import LLMManager
 from cortex.extensions.llm.provider import LLMProvider
 from cortex.extensions.llm.router import IntentProfile
+from cortex.services.ask_preparation import prepare_ask_request
 
 __all__ = [
     "AskRequest",
@@ -159,43 +160,19 @@ async def ask_cortex(
             },
         )
 
-    # 1. Search CORTEX memory
-    results = await engine.search(
+    prepared = await prepare_ask_request(
+        engine=engine,
         query=req.query,
+        tenant_id=auth.tenant_id,
         top_k=req.k,
         project=req.project,
-        tenant_id=auth.tenant_id,
+        system_prompt=req.system_prompt,
+        default_system_prompt=CORTEX_SYSTEM_PROMPT,
     )
-
-    # 2. Build context from retrieved facts (Optimized)
-    context = (
-        "\n\n".join(
-            f"[Fact #{r.fact_id}] (project: {r.project}, score: {r.score:.3f})\n{r.content}"
-            for r in results
-        )
-        if results
-        else "(No facts found matching the query.)"
-    )
-
-    # 3. Construct prompt
-    # Note: req.system_prompt allows for dynamic persona shifts;
-    # use with caution in multi-tenant envs.
-    system = req.system_prompt or CORTEX_SYSTEM_PROMPT
-    prompt = (
-        "## Retrieved Facts from CORTEX Memory\n\n"
-        f"{context}\n\n"
-        "## Question\n\n"
-        f"{req.query}\n\n"
-        "## Instructions\n\n"
-        "Answer the question above using ONLY the facts provided. "
-        "Cite [Fact #ID] when referencing specific facts."
-    )
-
-    # 4. Call LLM
     try:
         answer = await _llm_manager.complete(
-            prompt=prompt,
-            system=system,
+            prompt=prepared.prompt,
+            system=prepared.system,
             temperature=req.temperature,
             max_tokens=req.max_tokens,
             intent=IntentProfile.REASONING,
@@ -213,7 +190,6 @@ async def ask_cortex(
             content={"detail": "LLM provider returned no response."},
         )
 
-    # 5. Build response
     sources = [
         AskSource(
             fact_id=r.fact_id,
@@ -221,7 +197,7 @@ async def ask_cortex(
             score=r.score,
             project=r.project,
         )
-        for r in results
+        for r in prepared.results
     ]
 
     provider, provider_name, model_name = _resolve_llm_identity()
@@ -230,7 +206,7 @@ async def ask_cortex(
         sources=sources,
         model=model_name or "unknown",
         provider=provider_name,
-        facts_found=len(results),
+        facts_found=len(prepared.results),
     )
 
 
@@ -250,48 +226,29 @@ async def ask_stream(
             content={"detail": "No LLM provider configured."},
         )
 
-    # 1. Search CORTEX memory
-    results = await engine.search(
+    prepared = await prepare_ask_request(
+        engine=engine,
         query=req.query,
+        tenant_id=auth.tenant_id,
         top_k=req.k,
         project=req.project,
-        tenant_id=auth.tenant_id,
-    )
-
-    # 2. Build context
-    context = (
-        "\n\n".join(
-            f"[Fact #{r.fact_id}] (project: {r.project}, score: {r.score:.3f})\n{r.content}"
-            for r in results
-        )
-        if results
-        else "(No facts found matching the query.)"
-    )
-
-    # 3. Construct prompt
-    system = req.system_prompt or CORTEX_SYSTEM_PROMPT
-    prompt = (
-        "## Retrieved Facts from CORTEX Memory\n\n"
-        f"{context}\n\n"
-        "## Question\n\n"
-        f"{req.query}\n\n"
-        "## Instructions\n\n"
-        "Answer the question above using ONLY the facts provided. "
-        "Cite [Fact #ID] when referencing specific facts."
+        system_prompt=req.system_prompt,
+        default_system_prompt=CORTEX_SYSTEM_PROMPT,
     )
 
     async def event_generator():
         # First send the sources as a metadata event (optional but useful)
         sources_data = [
-            {"id": r.fact_id, "score": float(r.score), "project": r.project} for r in results
+            {"id": r.fact_id, "score": float(r.score), "project": r.project}
+            for r in prepared.results
         ]
         yield f"data: {json.dumps({'type': 'sources', 'data': sources_data})}\n\n"
 
         # Then stream the text
         try:
             async for chunk in _llm_manager.stream(
-                prompt=prompt,
-                system=system,
+                prompt=prepared.prompt,
+                system=prepared.system,
                 temperature=req.temperature,
                 max_tokens=req.max_tokens,
                 intent=IntentProfile.REASONING,

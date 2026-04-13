@@ -5,7 +5,7 @@ import re
 from typing import Any
 
 from .models import MembraneLog, MembraneLogLevel, PureEngram
-from .sri_hash import auto_heal_html
+from .sri_hash import SRIHashError, auto_heal_html
 
 
 class SovereignSanitizer:
@@ -68,7 +68,12 @@ class SovereignSanitizer:
         if isinstance(content, str) and (
             "<script" in content.lower() or "<link" in content.lower()
         ):
-            content = auto_heal_html(content)
+            try:
+                content = auto_heal_html(content)
+            except SRIHashError as exc:
+                log.level = MembraneLogLevel.CRITICAL
+                log.details = f"External resource rejected by SRI membrane: {exc}"
+                raise ValueError(log.details) from exc
         raw_engram["content"] = content
 
         # 3. Validation & Purity Seal

@@ -18,8 +18,8 @@ from pydantic import BaseModel, Field
 
 from cortex.api.deps import get_engine
 from cortex.auth import AuthResult, require_permission
-from cortex.cli.tips import Tip, TipCategory, TipsEngine
 from cortex.engine import CortexEngine
+from cortex.services.tips_engine import Tip, TipCategory, TipsEngine
 
 __all__ = [
     "LANG_DESC",

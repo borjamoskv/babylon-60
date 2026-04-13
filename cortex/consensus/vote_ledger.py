@@ -26,8 +26,44 @@ class ImmutableVoteLedger:
     def __init__(self, db_connection: Any):
         self.conn = db_connection
 
+    async def _ensure_schema(self) -> None:
+        """Create vote-ledger tables on first use for fresh databases."""
+        await self.conn.executescript(
+            """
+            CREATE TABLE IF NOT EXISTS vote_ledger (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id       TEXT NOT NULL DEFAULT 'default',
+                fact_id         INTEGER NOT NULL REFERENCES facts(id),
+                agent_id        TEXT NOT NULL,
+                vote            INTEGER NOT NULL,
+                vote_weight     REAL NOT NULL,
+                prev_hash       TEXT NOT NULL DEFAULT '',
+                hash            TEXT NOT NULL,
+                timestamp       TEXT NOT NULL DEFAULT (datetime('now')),
+                signature       TEXT,
+                UNIQUE(hash)
+            );
+            CREATE INDEX IF NOT EXISTS idx_vote_ledger_fact ON vote_ledger(fact_id);
+            CREATE INDEX IF NOT EXISTS idx_vote_ledger_agent ON vote_ledger(agent_id);
+            CREATE INDEX IF NOT EXISTS idx_vote_ledger_timestamp ON vote_ledger(timestamp);
+
+            CREATE TABLE IF NOT EXISTS vote_merkle_roots (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id       TEXT NOT NULL DEFAULT 'default',
+                root_hash       TEXT NOT NULL,
+                vote_start_id   INTEGER NOT NULL,
+                vote_end_id     INTEGER NOT NULL,
+                vote_count      INTEGER NOT NULL,
+                timestamp       TEXT NOT NULL DEFAULT (datetime('now')),
+                UNIQUE(root_hash)
+            );
+            """
+        )
+        await self.conn.commit()
+
     async def get_last_hash(self, tenant_id: str) -> Optional[str]:
         """Obtiene el hash de la última entrada para un tenant específico."""
+        await self._ensure_schema()
         cursor = await self.conn.execute(
             "SELECT hash FROM vote_ledger WHERE tenant_id = ? ORDER BY id DESC LIMIT 1",
             (tenant_id,),
@@ -46,12 +82,13 @@ class ImmutableVoteLedger:
         timestamp: str,
     ) -> str:
         """Calcula el hash SHA-256 de una entrada, incluyendo el tenant_id."""
+        normalized_vote = int(vote)
         payload = {
             "tenant_id": tenant_id,
             "prev_hash": prev_hash,
             "fact_id": fact_id,
             "agent_id": agent_id,
-            "vote": vote,
+            "vote": normalized_vote,
             "vote_weight": vote_weight,
             "timestamp": timestamp,
         }
@@ -70,59 +107,61 @@ class ImmutableVoteLedger:
         """
         Añade un voto al ledger, calculando el nuevo hash encadenado.
         """
-        async with self.conn.transaction():
-            prev_hash = await self.get_last_hash(tenant_id)
-            timestamp = datetime.now(timezone.utc).isoformat()
+        await self._ensure_schema()
+        prev_hash = await self.get_last_hash(tenant_id) or ""
+        timestamp = datetime.now(timezone.utc).isoformat()
+        normalized_vote = int(vote)
 
-            entry_hash = self._compute_hash(
+        entry_hash = self._compute_hash(
+            tenant_id,
+            prev_hash,
+            fact_id,
+            agent_id,
+            normalized_vote,
+            vote_weight,
+            timestamp,
+        )
+
+        await self.conn.execute(
+            """
+            INSERT INTO vote_ledger
+            (tenant_id, fact_id, agent_id, vote, vote_weight, prev_hash,
+             hash, timestamp, signature)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
                 tenant_id,
-                prev_hash,
                 fact_id,
                 agent_id,
-                vote,
+                normalized_vote,
                 vote_weight,
+                prev_hash,
+                entry_hash,
                 timestamp,
-            )
-
-            await self.conn.execute(
-                """
-                INSERT INTO vote_ledger
-                (tenant_id, fact_id, agent_id, vote, vote_weight, prev_hash,
-                 hash, timestamp, signature)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    tenant_id,
-                    fact_id,
-                    agent_id,
-                    vote,
-                    vote_weight,
-                    prev_hash,
-                    entry_hash,
-                    timestamp,
-                    signature,
-                ),
-            )
-            await self.conn.commit()
-            logger.info(
-                "Vote appended to ledger: %s... (fact #%d)",
-                entry_hash[:8],
-                fact_id,
-            )
-            return entry_hash
+                signature,
+            ),
+        )
+        await self.conn.commit()
+        logger.info(
+            "Vote appended to ledger: %s... (fact #%d)",
+            entry_hash[:8],
+            fact_id,
+        )
+        return entry_hash
 
     async def verify_chain(self, tenant_id: str) -> bool:
         """
         Verifica la integridad de la cadena para un tenant.
         Retorna True si todos los hashes coinciden.
         """
+        await self._ensure_schema()
         cursor = await self.conn.execute(
             "SELECT * FROM vote_ledger WHERE tenant_id = ? ORDER BY id ASC",
             (tenant_id,),
         )
         rows = await cursor.fetchall()
 
-        current_prev_hash = None
+        current_prev_hash = ""
         for row in rows:
             # row indices based on schema:
             # 0:id, 1:tenant_id, 2:fact_id, 3:agent_id, 4:vote, 5:vote_weight,
@@ -151,6 +190,7 @@ class ImmutableVoteLedger:
 
     async def get_merkle_root(self, tenant_id: str) -> Optional[str]:
         """Obtiene la última raíz de Merkle capturada para el tenant."""
+        await self._ensure_schema()
         cursor = await self.conn.execute(
             "SELECT root_hash FROM vote_merkle_roots WHERE tenant_id = ? ORDER BY id DESC LIMIT 1",
             (tenant_id,),
@@ -163,21 +203,30 @@ class ImmutableVoteLedger:
         Calcula y persiste una raíz de Merkle de todos los votos actuales del tenant.
         Esto permite verificaciones rápidas de 'estado global' del ledger.
         """
+        await self._ensure_schema()
         cursor = await self.conn.execute(
-            "SELECT hash FROM vote_ledger WHERE tenant_id = ? ORDER BY id ASC",
+            "SELECT id, hash FROM vote_ledger WHERE tenant_id = ? ORDER BY id ASC",
             (tenant_id,),
         )
-        hashes = [row[0] for row in await cursor.fetchall()]
+        rows = await cursor.fetchall()
+        hashes = [row[1] for row in rows]
 
         if not hashes:
             return ""
 
         root = self._build_merkle_tree(hashes)
         timestamp = datetime.now(timezone.utc).isoformat()
+        vote_count = len(rows)
+        vote_start_id = rows[0][0]
+        vote_end_id = rows[-1][0]
 
         await self.conn.execute(
-            "INSERT INTO vote_merkle_roots (tenant_id, root_hash, timestamp) VALUES (?, ?, ?)",
-            (tenant_id, root, timestamp),
+            """
+            INSERT INTO vote_merkle_roots
+            (tenant_id, root_hash, vote_start_id, vote_end_id, vote_count, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (tenant_id, root, vote_start_id, vote_end_id, vote_count, timestamp),
         )
         await self.conn.commit()
         return root
@@ -188,6 +237,7 @@ class ImmutableVoteLedger:
 
     async def verify_chain_integrity(self, tenant_id: str = "default") -> dict:
         """Verifica la cadena de hashes y retorna un informe detallado (CLI)."""
+        await self._ensure_schema()
         cursor = await self.conn.execute(
             "SELECT * FROM vote_ledger WHERE tenant_id = ? ORDER BY id ASC",
             (tenant_id,),
@@ -195,7 +245,7 @@ class ImmutableVoteLedger:
         rows = await cursor.fetchall()
 
         violations = []
-        current_prev_hash = None
+        current_prev_hash = ""
         votes_checked = 0
 
         for row in rows:
@@ -226,6 +276,7 @@ class ImmutableVoteLedger:
 
     async def verify_merkle_roots(self, tenant_id: str = "default") -> list[dict]:
         """Verifica todas las raíces de Merkle registradas (CLI)."""
+        await self._ensure_schema()
         cursor = await self.conn.execute(
             "SELECT id, root_hash, timestamp FROM vote_merkle_roots WHERE tenant_id = ? ORDER BY id ASC",
             (tenant_id,),

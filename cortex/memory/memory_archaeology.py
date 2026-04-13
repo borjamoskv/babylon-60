@@ -29,8 +29,18 @@ class MemoryArchaeologist:
         self.engine = engine
         self.llm = SovereignLLM() if SovereignLLM else None
 
+    def _resolve_tenant(self, tenant_id: str | None) -> str:
+        resolver = getattr(self.engine, "_resolve_tenant", None)
+        if callable(resolver):
+            return resolver(tenant_id or "default")
+        return tenant_id or "default"
+
     async def run_archaeology(
-        self, project: str, similarity_threshold: float = 0.88, simulate: bool = False
+        self,
+        project: str,
+        similarity_threshold: float = 0.88,
+        simulate: bool = False,
+        tenant_id: str = "default",
     ) -> dict[str, int]:
         """Runs the semantic clustering and deduction.
 
@@ -38,12 +48,13 @@ class MemoryArchaeologist:
         """
         # Initialize memory subsystem (L2) explicitly before accessing
         await self.engine.get_conn()
+        tenant_id = self._resolve_tenant(tenant_id)
 
-        l3_map = self._fetch_active_facts(project)
+        l3_map = self._fetch_active_facts(project, tenant_id)
         if not l3_map:
             return {"condensed": 0, "tombstoned": 0}
 
-        facts, vecs_matrix = self._extract_vectors(project, l3_map)
+        facts, vecs_matrix = self._extract_vectors(project, tenant_id, l3_map)
         if vecs_matrix is None:
             return {"condensed": 0, "tombstoned": 0}
 
@@ -52,32 +63,33 @@ class MemoryArchaeologist:
             return {"condensed": 0, "tombstoned": 0}
 
         condensed, tombstoned = await self._synthesize_and_update(
-            project, clusters, facts, simulate
+            project, tenant_id, clusters, facts, simulate
         )
         return {"condensed": condensed, "tombstoned": tombstoned}
 
-    def _fetch_active_facts(self, project: str) -> dict[str, dict[str, Any]]:
+    def _fetch_active_facts(self, project: str, tenant_id: str) -> dict[str, dict[str, Any]]:
         conn = self.engine._get_sync_conn()
         cursor = conn.cursor()
         cursor.execute(
             """
             SELECT id, content, parent_decision_id
             FROM facts
-            WHERE project = ? AND is_tombstoned = 0 AND fact_type != 'ghost'
+            WHERE tenant_id = ? AND project = ? AND is_tombstoned = 0 AND fact_type != 'ghost'
             """,
-            (project,),
+            (tenant_id, project),
         )
         # Using dict(r) to convert sqlite3.Row to dict
         return {str(r["id"]): dict(r) for r in cursor.fetchall()}
 
     def _extract_vectors(
-        self, project: str, l3_map: dict[str, dict[str, Any]]
+        self, project: str, tenant_id: str, l3_map: dict[str, dict[str, Any]]
     ) -> tuple[list[dict[str, Any]], np.ndarray | None]:
         l2_conn = self.engine.memory._l2._get_conn()
         c2 = l2_conn.cursor()
         c2.execute(
-            "SELECT m.id, v.embedding FROM facts_meta m JOIN vec_facts v ON m.rowid = v.rowid WHERE m.project_id = ?",
-            (project,),
+            "SELECT m.id, v.embedding FROM facts_meta m JOIN vec_facts v ON m.rowid = v.rowid "
+            "WHERE m.tenant_id = ? AND m.project_id = ?",
+            (tenant_id, project),
         )
 
         facts = []
@@ -133,7 +145,12 @@ class MemoryArchaeologist:
         return clusters
 
     async def _synthesize_and_update(
-        self, project: str, clusters: list[list[int]], facts: list[dict[str, Any]], simulate: bool
+        self,
+        project: str,
+        tenant_id: str,
+        clusters: list[list[int]],
+        facts: list[dict[str, Any]],
+        simulate: bool,
     ) -> tuple[int, int]:
         condensed_count = 0
         tombstoned_count = 0
@@ -164,7 +181,13 @@ class MemoryArchaeologist:
             if not simulate:
                 try:
                     await self._apply_db_updates(
-                        project, condensed_content, old_ids, primary_parent_id, conn, l2_conn
+                        project,
+                        tenant_id,
+                        condensed_content,
+                        old_ids,
+                        primary_parent_id,
+                        conn,
+                        l2_conn,
                     )
                 except sqlite3.Error as e:
                     logger.error("Archaeology DB update failed: %s", e)
@@ -178,6 +201,7 @@ class MemoryArchaeologist:
     async def _apply_db_updates(
         self,
         project: str,
+        tenant_id: str,
         condensed_content: str,
         old_ids: list[str],
         primary_parent_id: str | None,
@@ -188,6 +212,7 @@ class MemoryArchaeologist:
         new_fact_id = await self.engine.store(
             project=project,
             content=condensed_content,
+            tenant_id=tenant_id,
             fact_type="knowledge",
             confidence="C5",
             source="cortex_archaeologist",
@@ -199,34 +224,40 @@ class MemoryArchaeologist:
 
         # Tombstone old ones
         c3.execute(
-            f"UPDATE facts SET is_tombstoned = 1, valid_until = ? WHERE id IN ({placeholders})",
-            [time.strftime("%Y-%m-%dT%H:%M:%S%z")] + old_ids,
+            "UPDATE facts SET is_tombstoned = 1, valid_until = ? "
+            f"WHERE tenant_id = ? AND id IN ({placeholders})",
+            [time.strftime("%Y-%m-%dT%H:%M:%S%z"), tenant_id] + old_ids,
         )
 
         if primary_parent_id:
             c3.execute(
-                "UPDATE facts SET parent_decision_id = ? WHERE id = ?",
-                (primary_parent_id, new_fact_id),
+                "UPDATE facts SET parent_decision_id = ? WHERE tenant_id = ? AND id = ?",
+                (primary_parent_id, tenant_id, new_fact_id),
             )
             cl2 = l2_conn.cursor()
             cl2.execute(
-                "UPDATE facts_meta SET parent_decision_id = ? WHERE id = ?",
-                (primary_parent_id, new_fact_id),
+                "UPDATE facts_meta SET parent_decision_id = ? WHERE tenant_id = ? AND id = ?",
+                (primary_parent_id, tenant_id, new_fact_id),
             )
 
         # Delete tombstoned old ones from L2 to free up vector space
         cl2 = l2_conn.cursor()
         str_old_ids = [str(x) for x in old_ids]
-        cl2.execute(f"DELETE FROM facts_meta WHERE id IN ({placeholders})", str_old_ids)
+        cl2.execute(
+            f"DELETE FROM facts_meta WHERE tenant_id = ? AND id IN ({placeholders})",
+            [tenant_id] + str_old_ids,
+        )
         cl2.execute("DELETE FROM vec_facts WHERE rowid NOT IN (SELECT rowid FROM facts_meta)")
         c3.execute(
-            f"UPDATE facts SET parent_decision_id = ? WHERE parent_decision_id IN ({placeholders})",
-            [new_fact_id] + old_ids,
+            "UPDATE facts SET parent_decision_id = ? "
+            f"WHERE tenant_id = ? AND parent_decision_id IN ({placeholders})",
+            [new_fact_id, tenant_id] + old_ids,
         )
         cl2 = l2_conn.cursor()
         cl2.execute(
-            f"UPDATE facts_meta SET parent_decision_id = ? WHERE parent_decision_id IN ({placeholders})",
-            [new_fact_id] + old_ids,
+            "UPDATE facts_meta SET parent_decision_id = ? "
+            f"WHERE tenant_id = ? AND parent_decision_id IN ({placeholders})",
+            [new_fact_id, tenant_id] + old_ids,
         )
 
         conn.commit()

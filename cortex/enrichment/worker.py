@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import logging
 from datetime import datetime, timedelta
@@ -46,6 +47,10 @@ class EnrichmentWorker:
                 await asyncio.wait_for(self._task, timeout=5.0)
             except asyncio.TimeoutError:
                 self._task.cancel()
+                with contextlib.suppress(asyncio.CancelledError):
+                    await self._task
+            finally:
+                self._task = None
         logger.info("EnrichmentWorker stopped.")
 
     async def _run_loop(self):
@@ -132,6 +137,15 @@ class EnrichmentWorker:
             self.queue.mark_done(job_id, event_id)  # type: ignore[reportOptionalMemberAccess]
             logger.info("Enrichment completed for event %s", event_id)
 
+        except asyncio.CancelledError:
+            logger.warning("Enrichment job %s cancelled; returning event %s to retry", job_id, event_id)
+            self.queue.mark_failed(  # type: ignore[reportOptionalMemberAccess]
+                job_id,
+                event_id,
+                "worker cancelled during enrichment",
+                attempts,
+            )
+            raise
         except Exception as e:
             logger.error("Failed to process job %s: %s", job_id, e)
             self.queue.mark_failed(job_id, event_id, str(e), attempts)  # type: ignore[reportOptionalMemberAccess]

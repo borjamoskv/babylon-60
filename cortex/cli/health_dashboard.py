@@ -17,14 +17,13 @@ from cortex.cli.common import DEFAULT_DB, console  # type: ignore[reportAttribut
 @click.option("--db", "db_path", default=None, help="DB path override.")
 def dashboard(db_path: str | None) -> None:
     """Rich interactive live dashboard for CORTEX Health."""
-    from cortex.extensions.health.collector import HealthCollector
+    from cortex.extensions.health import build_runtime_health_payload
     from cortex.extensions.health.models import Grade
-    from cortex.extensions.health.scorer import HealthScorer
 
     path = db_path or str(DEFAULT_DB)
-    collector = HealthCollector(db_path=path)
-    metrics = collector.collect_all()
-    hs = HealthScorer.score(metrics)
+    payload = build_runtime_health_payload(path)
+    grade = Grade.from_letter(payload["grade"])
+    component_details = payload.get("component_details", {})
 
     # ─── Grade Panel ──────────────────────────────────────
     grade_colors = {
@@ -35,12 +34,16 @@ def dashboard(db_path: str | None) -> None:
         Grade.DEGRADED: "red",
         Grade.FAILED: "bright_red",
     }
-    color = grade_colors.get(hs.grade, "white")
+    color = grade_colors.get(grade, "white")
 
     console.print()
     console.print(
         Panel(
-            f"[bold {color}]{hs.grade.emoji} {hs.score:.1f}/100  Grade {hs.grade.letter}[/]",
+            (
+                f"[bold {color}]{grade.emoji} {payload['score']:.1f}/100  "
+                f"Grade {payload['grade']}[/]\n"
+                f"[dim]status={payload['status']} · trend={payload['trend']}[/]"
+            ),
             title="[bold]CORTEX HEALTH INDEX[/]",
             subtitle=f"[dim]{path}[/]",
             border_style=color,
@@ -53,44 +56,48 @@ def dashboard(db_path: str | None) -> None:
         title="Metric Breakdown",
         show_header=True,
         header_style="bold cyan",
-        width=72,
+        width=84,
     )
     table.add_column("Metric", style="bold", width=10)
+    table.add_column("Status", width=10)
     table.add_column("Bar", width=22)
     table.add_column("Value", justify="right", width=7)
-    table.add_column("Weight", justify="right", style="dim", width=6)
     table.add_column("ms", justify="right", style="dim", width=6)
-    table.add_column("Detail", width=15)
+    table.add_column("Detail", width=24)
 
-    for m in metrics:
-        filled = int(m.value * 20)
+    severity_rank = {"blocked": 0, "degraded": 1, "ok": 2}
+    for name, detail in sorted(
+        component_details.items(),
+        key=lambda item: (severity_rank.get(str(item[1]["status"]), 99), item[0]),
+    ):
+        value = float(detail["value"]) / 100.0
+        filled = int(value * 20)
         bar = "█" * filled + "░" * (20 - filled)
 
-        if m.value >= 0.8:
-            val_color = "green"
-        elif m.value >= 0.5:
-            val_color = "yellow"
-        else:
+        if detail["status"] == "blocked":
             val_color = "red"
-
-        latency = getattr(m, "latency_ms", 0.0)
-        desc = getattr(m, "description", "") or ""
+        elif detail["status"] == "degraded":
+            val_color = "yellow"
+        elif value >= 0.8:
+            val_color = "green"
+        else:
+            val_color = "cyan"
 
         table.add_row(
-            m.name.upper(),
+            name.upper(),
+            f"[{val_color}]{detail['status']}[/]",
             f"[{val_color}]{bar}[/]",
-            f"[{val_color}]{m.value:.0%}[/]",
-            f"{m.weight:.1f}",
-            f"{latency:.0f}",
-            desc[:30] if desc else "",
+            f"[{val_color}]{value:.0%}[/]",
+            f"{float(detail['latency_ms']):.0f}",
+            str(detail["description"])[:30] if detail["description"] else "",
         )
 
     console.print(table)
 
     # ─── Sub-Indices ──────────────────────────────────────
-    if hs.sub_indices:
+    if payload.get("sub_indices"):
         lines = []
-        for idx_name, val in hs.sub_indices.items():
+        for idx_name, val in payload["sub_indices"].items():
             filled = int(val / 100 * 20)
             bar = "█" * filled + "░" * (20 - filled)
             if val >= 80:
@@ -110,23 +117,13 @@ def dashboard(db_path: str | None) -> None:
         )
 
     # ─── Warnings & Recommendations ──────────────────────
-    warns: list[str] = []
-    recs: list[str] = []
-    actions: list[str] = []
-
-    for m in metrics:
-        if m.value < 0.5:
-            warns.append(f"⚠️  {m.name}: critical ({m.value:.0%})")
-            rem = getattr(m, "remediation", "") or ""
-            if rem:
-                actions.append(f"🔧 {m.name}: {rem}")
-        elif m.value < 0.8:
-            recs.append(f"💡 {m.name}: could improve ({m.value:.0%})")
-
-    if hs.score < 40:
-        warns.append(f"⚠️  Overall: DEGRADED ({hs.grade.letter})")
-    elif hs.score < 70:
-        recs.append("💡 Run `cortex compact` to reduce entropy")
+    warns = [f"⚠️  {warning}" for warning in payload.get("warnings", [])]
+    recs = [f"💡 {rec}" for rec in payload.get("recommendations", [])]
+    actions = [
+        f"🔧 {name}: {detail['remediation']}"
+        for name, detail in component_details.items()
+        if detail["status"] != "ok" and detail["remediation"]
+    ]
 
     if warns:
         console.print(

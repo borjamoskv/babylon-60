@@ -43,6 +43,9 @@ __all__ = [
     "QueryInput",
     "QueryResultData",
     "RejectionResult",
+    "RuntimeComponentDetail",
+    "RuntimeComponentDetailModel",
+    "RuntimeHealthResponse",
     "SearchRequest",
     "SearchResult",
     "ShipSealModel",
@@ -55,6 +58,11 @@ __all__ = [
     "VoteResponse",
     "VoteV2Request",
 ]
+
+
+RuntimeHealthStatus = Literal["ok", "degraded", "blocked"]
+RuntimeHealthTrend = Literal["improving", "stable", "degrading", "unknown"]
+RuntimeHealthGrade = Literal["S", "A", "B", "C", "D", "F"]
 
 
 # ─── SDK Surface v0.2 Protocol Types ─────────────────────────────────
@@ -274,11 +282,54 @@ class ExportResponse(BaseModel):
     message: str
 
 
-class HealthReport(TypedDict):
-    status: Literal["ok", "degraded", "blocked"]
-    components: dict[str, str]
+class RuntimeComponentDetail(TypedDict):
+    status: RuntimeHealthStatus
+    value: float
+    latency_ms: float
+    description: str
+    remediation: str
+
+
+class HealthReport(TypedDict, total=False):
+    status: RuntimeHealthStatus
+    components: dict[str, RuntimeHealthStatus]
     degraded_features: list[str]
     warnings: list[str]
+    score: float
+    grade: RuntimeHealthGrade
+    summary: str
+    trend: RuntimeHealthTrend
+    recommendations: list[str]
+    sub_indices: dict[str, float]
+    component_details: dict[str, RuntimeComponentDetail]
+    checked_at: str
+
+
+class RuntimeComponentDetailModel(BaseModel):
+    """Validated runtime status for one health component."""
+
+    status: RuntimeHealthStatus
+    value: float = Field(description="Component health percentage in the 0-100 range.")
+    latency_ms: float
+    description: str = ""
+    remediation: str = ""
+
+
+class RuntimeHealthResponse(BaseModel):
+    """Canonical runtime health payload exposed over HTTP."""
+
+    status: RuntimeHealthStatus
+    components: dict[str, RuntimeHealthStatus] = Field(default_factory=dict)
+    degraded_features: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    score: float
+    grade: RuntimeHealthGrade
+    summary: str
+    trend: RuntimeHealthTrend
+    recommendations: list[str] = Field(default_factory=list)
+    sub_indices: dict[str, float] = Field(default_factory=dict)
+    component_details: dict[str, RuntimeComponentDetailModel] = Field(default_factory=dict)
+    checked_at: str
 
 
 class RecoveryReport(BaseModel):

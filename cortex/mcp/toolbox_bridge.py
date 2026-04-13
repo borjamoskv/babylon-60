@@ -133,7 +133,7 @@ class ToolboxBridge:
                 len(self._tools),
             )
             return True
-        except (ConnectionError, RuntimeError) as exc:
+        except (ConnectionError, OSError, RuntimeError, TimeoutError) as exc:
             logger.error("Toolbox Sync: [FAILED] %s | Error: %s", self.config.server_url, exc)
             self._client = None
             self._tools = []

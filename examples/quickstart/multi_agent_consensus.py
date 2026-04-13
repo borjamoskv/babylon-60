@@ -18,64 +18,49 @@ from pathlib import Path
 async def main() -> None:
     db_path = Path(tempfile.mkdtemp()) / "consensus.db"
 
-    from cortex.engine import CortexEngine
+    from cortex import CortexEngine
 
-    engine = CortexEngine(db_path=str(db_path))
+    engine = CortexEngine(db_path=str(db_path), auto_embed=False)
+    await engine.init_db()
 
     print("🤝 CORTEX Quickstart — Multi-Agent Consensus\n")
 
-    # --- Step 1: Multiple agents store observations ---
-    print("1️⃣  Agents submitting observations...\n")
+    # --- Step 1: Store the fact under review ---
+    print("1️⃣  Storing the decision under review...\n")
+    fact_id = await engine.store(
+        content="Market conditions favor conservative allocation",
+        fact_type="decision",
+        project="consensus-demo",
+        source="swarm:proposer",
+    )
+    print(f"   📝 Fact #{fact_id} stored")
 
-    agents = [
-        ("agent:analyst-1", "Market conditions favor conservative allocation"),
-        ("agent:analyst-2", "Market conditions favor conservative allocation"),
-        ("agent:analyst-3", "Market conditions favor aggressive growth"),
-    ]
+    # --- Step 2: Register agents and cast votes ---
+    print("\n2️⃣  Registering agents and casting votes...")
+    a1 = await engine.consensus.register_agent("analyst-1")
+    a2 = await engine.consensus.register_agent("analyst-2")
+    a3 = await engine.consensus.register_agent("analyst-3")
 
-    facts = []
-    for source, content in agents:
-        fact = await engine.store_fact(
-            content=content,
-            fact_type="decision",
-            project="consensus-demo",
-            source=source,
-        )
-        facts.append(fact)
-        print(f'   📝 {source}: "{content[:50]}..."')
+    score_1 = await engine.consensus.vote_v2(fact_id, a1, 1, reason="Risk posture is conservative")
+    score_2 = await engine.consensus.vote_v2(fact_id, a2, 1, reason="Matches treasury policy")
+    score_3 = await engine.consensus.vote_v2(fact_id, a3, -1, reason="Growth mandate disagreement")
 
-    # --- Step 2: Show consensus ---
-    print("\n2️⃣  Checking consensus across agents...")
-    all_facts = await engine.search_facts("market conditions", project="consensus-demo")
+    print(f"   analyst-1 -> verify   | score now {score_1:.3f}")
+    print(f"   analyst-2 -> verify   | score now {score_2:.3f}")
+    print(f"   analyst-3 -> dispute  | score now {score_3:.3f}")
 
-    # Count agreement
-    votes: dict[str, int] = {}
-    for f in all_facts:
-        key = f["content"]
-        votes[key] = votes.get(key, 0) + 1
-
-    print(f"\n   📊 Results ({len(all_facts)} votes):")
-    for content, count in sorted(votes.items(), key=lambda x: -x[1]):
-        pct = count / len(all_facts) * 100
-        bar = "█" * int(pct / 5)
-        print(f'      {bar} {pct:.0f}% — "{content[:50]}"')
-
-    # BFT threshold: need > 2/3 agreement
-    max_votes = max(votes.values())
-    threshold = len(all_facts) * 2 / 3
-    if max_votes > threshold:
-        print(f"\n   ✅ CONSENSUS REACHED (>{threshold:.0f} of {len(all_facts)} agents agree)")
-    else:
-        print(f"\n   ⚠️  NO CONSENSUS (need >{threshold:.0f} of {len(all_facts)}, got {max_votes})")
-
-    # --- Step 3: Verify integrity ---
-    print("\n3️⃣  Verifying all decisions have cryptographic integrity...")
-    for fact in facts:
-        result = await engine.verify_fact(fact["id"])
-        status = "✅" if result["valid"] else "❌"
-        print(f"   {status} Fact #{fact['id']} — chain intact")
+    # --- Step 3: Inspect the resulting consensus state ---
+    print("\n3️⃣  Inspecting consensus state...")
+    fact = await engine.get_fact(fact_id)
+    votes = await engine.get_votes(fact_id)
+    vote_ledger = await engine.verify_vote_ledger()
+    print(f"   Votes recorded: {len(votes)}")
+    print(f"   Consensus score: {fact.consensus_score if fact else 'unknown'}")
+    print(f"   Confidence: {fact.confidence if fact else 'unknown'}")
+    print(f"   Vote ledger valid: {vote_ledger.get('valid', False)}")
 
     print("\n✨ Multi-agent consensus demonstration complete.")
+    await engine.close()
 
 
 if __name__ == "__main__":

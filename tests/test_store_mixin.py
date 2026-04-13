@@ -6,8 +6,11 @@ of the store → deduplicate → deprecate → update pipeline.
 
 from __future__ import annotations
 
+import sqlite3
+import urllib.error
 from pathlib import Path
 
+import aiosqlite
 import pytest
 
 # Mark all tests in this module as slow (CortexEngine.init_db() takes ~10s per fixture)
@@ -58,6 +61,55 @@ class TestStore:
         assert isinstance(fact_id, int)
         assert fact_id > 0
 
+    async def test_store_auto_attests_high_rigor_fact_without_explicit_signature(self, engine):
+        fact_id = await engine.store(
+            project="test",
+            content="Decision facts should be auto-attested before guard execution.",
+            fact_type="decision",
+            source="api",
+        )
+
+        async with engine.session() as conn:
+            cursor = await conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id,))
+            row = await cursor.fetchone()
+
+        from cortex.crypto import get_default_encrypter
+
+        meta = get_default_encrypter().decrypt_json(row[0], tenant_id="default")
+        assert meta["zk_proof_mode"] == "engine-auto-attested"
+        assert meta["zk_proof_attestor"] == "api"
+        assert "agent_public_key" in meta
+        assert "zk_proof_signature" in meta
+
+    async def test_fact_manager_store_contract_keeps_int_api_unless_opted_in(self, engine):
+        plain_id = await engine.facts.store(
+            project="test",
+            content="FactManager direct store should still expose a plain fact identifier.",
+            fact_type="knowledge",
+            source="agent:test_suite",
+        )
+
+        created_id, created = await engine.facts.store(
+            project="test",
+            content="FactManager can opt into created state when the batch bridge needs it.",
+            fact_type="knowledge",
+            source="agent:test_suite",
+            _return_created=True,
+        )
+        dedup_id, dedup_created = await engine.facts.store(
+            project="test",
+            content="FactManager can opt into created state when the batch bridge needs it.",
+            fact_type="knowledge",
+            source="agent:test_suite",
+            _return_created=True,
+        )
+
+        assert isinstance(plain_id, int)
+        assert isinstance(created_id, int)
+        assert created is True
+        assert dedup_id == created_id
+        assert dedup_created is False
+
     async def test_store_deduplication_returns_same_id(self, engine):
         """Exact structural hash dedup should return the same fact_id."""
         content = "Deduplication test content unique enough to avoid cross-test collision."
@@ -74,6 +126,103 @@ class TestStore:
             source="agent:test_suite",
         )
         assert id1 == id2
+
+    async def test_store_fails_closed_when_guard_pipeline_broken(self, engine):
+        class BrokenPipeline:
+            async def run_guards(self, *args, **kwargs):
+                raise RuntimeError("guard subsystem unavailable")
+
+        engine._guard_pipeline = BrokenPipeline()
+
+        with pytest.raises(RuntimeError, match="GuardPipeline pre-store failed"):
+            await engine.store(
+                project="test",
+                content="This should never persist.",
+                fact_type="knowledge",
+                source="agent:test_suite",
+            )
+
+        facts = await engine.get_all_active_facts(tenant_id="default", project="test")
+        assert facts == []
+
+    async def test_store_rolls_back_when_precommit_post_hook_fails(self, engine):
+        class BrokenPipeline:
+            async def run_guards(self, *args, **kwargs):
+                return None
+
+            async def run_post_hooks(self, *args, **kwargs):
+                if kwargs.get("after_commit") is False:
+                    raise RuntimeError("ledger checkpoint unavailable")
+                return None
+
+        engine._guard_pipeline = BrokenPipeline()
+
+        with pytest.raises(RuntimeError, match="GuardPipeline post-hooks failed"):
+            await engine.store(
+                project="test",
+                content="This write must not survive a failed pre-commit hook.",
+                fact_type="knowledge",
+                source="agent:test_suite",
+            )
+
+        facts = await engine.get_all_active_facts(tenant_id="default", project="test")
+        assert facts == []
+
+        with sqlite3.connect(engine._db_path) as fresh_conn:
+            persisted = fresh_conn.execute(
+                "SELECT COUNT(*) FROM facts WHERE tenant_id = ? AND project = ?",
+                ("default", "test"),
+            ).fetchone()[0]
+        assert persisted == 0
+
+    async def test_store_fails_closed_when_contradiction_scan_db_error(self, engine, monkeypatch):
+        from cortex.guards import contradiction_guard as module
+
+        class FailingConn:
+            row_factory = None
+
+            async def execute(self, *args, **kwargs):
+                raise aiosqlite.OperationalError("db unavailable")
+
+        class FailingCtx:
+            async def __aenter__(self):
+                return FailingConn()
+
+            async def __aexit__(self, exc_type, exc, tb):
+                return False
+
+        monkeypatch.setattr(module, "connect_async_ctx", lambda _path: FailingCtx())
+
+        with pytest.raises(RuntimeError, match="GuardPipeline pre-store failed"):
+            await engine.store(
+                project="test",
+                content="Decision facts must not persist when contradiction scanning cannot complete.",
+                fact_type="decision",
+                source="agent:test_suite",
+            )
+
+        facts = await engine.get_all_active_facts(tenant_id="default", project="test")
+        assert facts == []
+
+    async def test_store_rejects_external_script_when_sri_fetch_fails(self, engine, monkeypatch):
+        from cortex.engine.membrane import sri_hash
+
+        def fail_urlopen(*args, **kwargs):
+            raise urllib.error.URLError("network down")
+
+        sri_hash.generate_sri_hash.cache_clear()
+        monkeypatch.setattr(sri_hash.urllib.request, "urlopen", fail_urlopen)
+
+        with pytest.raises(ValueError, match="External resource rejected by SRI membrane"):
+            await engine.store(
+                project="test",
+                content='<script src="https://cdn.jsdelivr.net/npm/lib.js"></script>',
+                fact_type="knowledge",
+                source="agent:test_suite",
+            )
+
+        facts = await engine.get_all_active_facts(tenant_id="default", project="test")
+        assert facts == []
 
     async def test_store_different_content_different_ids(self, engine):
         id1 = await engine.store(
@@ -123,6 +272,125 @@ class TestStoreMany:
     async def test_store_many_empty_raises(self, engine):
         with pytest.raises(ValueError, match="empty"):
             await engine.store_many([])
+
+    async def test_store_many_runs_precommit_and_after_commit_hooks_for_each_created_fact(
+        self, engine
+    ):
+        class TrackingPipeline:
+            def __init__(self) -> None:
+                self.events: list[tuple[bool | None, str, int]] = []
+
+            async def run_guards(self, *args, **kwargs):
+                return None
+
+            async def run_post_hooks(self, fact_id, project, fact_type, conn, **kwargs):
+                self.events.append((kwargs.get("after_commit"), kwargs["tenant_id"], fact_id))
+
+        tracking = TrackingPipeline()
+        engine._guard_pipeline = tracking
+
+        facts = [
+            {
+                "project": "batch-hooks",
+                "content": "Batch hook fact alpha long enough to persist safely.",
+                "fact_type": "knowledge",
+                "source": "agent:test_suite",
+                "tenant_id": "tenant-batch",
+            },
+            {
+                "project": "batch-hooks",
+                "content": "Batch hook fact beta long enough to persist safely.",
+                "fact_type": "knowledge",
+                "source": "agent:test_suite",
+                "tenant_id": "tenant-batch",
+            },
+        ]
+
+        ids = await engine.store_many(facts)
+
+        assert [phase for phase, _, _ in tracking.events] == [False, False, True, True]
+        assert [tenant_id for _, tenant_id, _ in tracking.events] == ["tenant-batch"] * 4
+        assert [fact_id for phase, _, fact_id in tracking.events if phase is False] == ids
+        assert [fact_id for phase, _, fact_id in tracking.events if phase is True] == ids
+
+    async def test_store_many_skips_hooks_for_deduped_facts(self, engine):
+        class TrackingPipeline:
+            def __init__(self) -> None:
+                self.events: list[tuple[bool | None, int]] = []
+
+            async def run_guards(self, *args, **kwargs):
+                return None
+
+            async def run_post_hooks(self, fact_id, project, fact_type, conn, **kwargs):
+                self.events.append((kwargs.get("after_commit"), fact_id))
+
+        tracking = TrackingPipeline()
+        engine._guard_pipeline = tracking
+
+        ids = await engine.store_many(
+            [
+                {
+                    "project": "batch-dedup-hooks",
+                    "content": "Batch dedup fact alpha long enough to persist safely.",
+                    "fact_type": "knowledge",
+                    "source": "agent:test_suite",
+                },
+                {
+                    "project": "batch-dedup-hooks",
+                    "content": "Batch dedup fact alpha long enough to persist safely.",
+                    "fact_type": "knowledge",
+                    "source": "agent:test_suite",
+                },
+            ]
+        )
+
+        assert ids[0] == ids[1]
+        assert tracking.events == [(False, ids[0]), (True, ids[0])]
+
+    async def test_store_many_rolls_back_when_precommit_hook_fails(self, engine):
+        class BrokenPipeline:
+            async def run_guards(self, *args, **kwargs):
+                return None
+
+            async def run_post_hooks(self, *args, **kwargs):
+                if kwargs.get("after_commit") is False:
+                    raise RuntimeError("ledger checkpoint unavailable")
+                return None
+
+        engine._guard_pipeline = BrokenPipeline()
+
+        with pytest.raises(RuntimeError, match="ledger checkpoint unavailable"):
+            await engine.store_many(
+                [
+                    {
+                        "project": "batch-hook-rollback",
+                        "content": "This batch write must roll back on a pre-commit hook failure.",
+                        "fact_type": "knowledge",
+                        "source": "agent:test_suite",
+                        "tenant_id": "tenant-batch",
+                    },
+                    {
+                        "project": "batch-hook-rollback",
+                        "content": "Second batch write should not survive a failed pre-commit hook.",
+                        "fact_type": "knowledge",
+                        "source": "agent:test_suite",
+                        "tenant_id": "tenant-batch",
+                    },
+                ]
+            )
+
+        stored = await engine.get_all_active_facts(
+            tenant_id="tenant-batch",
+            project="batch-hook-rollback",
+        )
+        assert stored == []
+
+        with sqlite3.connect(engine._db_path) as fresh_conn:
+            persisted = fresh_conn.execute(
+                "SELECT COUNT(*) FROM facts WHERE tenant_id = ? AND project = ?",
+                ("tenant-batch", "batch-hook-rollback"),
+            ).fetchone()[0]
+        assert persisted == 0
 
 
 # ─── Deprecate ────────────────────────────────────────────────────────

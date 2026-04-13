@@ -6,7 +6,6 @@ import json
 import logging
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Optional
 
@@ -15,6 +14,7 @@ import aiosqlite
 from cortex.crypto import get_default_encrypter
 from cortex.database.core import connect
 from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
+from cortex.utils.canonical import now_iso
 
 logger = logging.getLogger("cortex.engine.causality")
 
@@ -222,7 +222,7 @@ class AsyncCausalGraph:
         floor_to_c1: bool = True,
     ) -> TaintReport:
         """Propagates causal taint (Ω₁₃) from a source fact to all descendants."""
-        now = datetime.now(timezone.utc).isoformat()
+        now = now_iso()
         meta_col = await self._metadata_column()
         fact_cols = await self._fact_columns()
         has_tenant = "tenant_id" in fact_cols
@@ -555,6 +555,8 @@ class AsyncCausalOracle:
         tenant_id: str = "default",
         project: Optional[str] = None,
     ) -> Optional[int]:
+        if getattr(conn, "in_transaction", False):
+            return None
         try:
             bus = AsyncSignalBus(conn)
             recent = await bus.history(tenant_id=tenant_id, project=project, limit=5)
