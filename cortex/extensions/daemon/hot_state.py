@@ -147,9 +147,7 @@ class HotStateDB:
         if ttl_s is not None:
             from datetime import timedelta
 
-            ttl_expires = (
-                datetime.now(timezone.utc) + timedelta(seconds=ttl_s)
-            ).isoformat()
+            ttl_expires = (datetime.now(timezone.utc) + timedelta(seconds=ttl_s)).isoformat()
 
         serialized = json.dumps(value, default=str)
         with self._conn() as conn:
@@ -236,9 +234,7 @@ class HotStateDB:
                 """,
                 (metric, delta, now),
             )
-            row = conn.execute(
-                "SELECT value FROM hot_metrics WHERE key = ?", (metric,)
-            ).fetchone()
+            row = conn.execute("SELECT value FROM hot_metrics WHERE key = ?", (metric,)).fetchone()
         return row["value"] if row else delta
 
     def set_metric(self, metric: str, value: float) -> None:
@@ -283,9 +279,7 @@ class HotStateDB:
             kv_rows = conn.execute(
                 "SELECT key, value, ttl_expires, updated_at FROM hot_kv"
             ).fetchall()
-            metric_rows = conn.execute(
-                "SELECT key, value FROM hot_metrics"
-            ).fetchall()
+            metric_rows = conn.execute("SELECT key, value FROM hot_metrics").fetchall()
 
         return {
             "kv": {r["key"]: json.loads(r["value"]) for r in kv_rows},

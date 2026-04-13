@@ -24,12 +24,12 @@ import asyncio
 import logging
 import sqlite3
 import time
-import uuid
+from collections.abc import Callable, Coroutine
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Coroutine
+from typing import Any
 
 logger = logging.getLogger("cortex.daemon.scheduler")
 
@@ -264,7 +264,7 @@ class SovereignScheduler:
         """Evaluate all schedules and fire due tasks."""
         now = datetime.now(timezone.utc)
         now_iso = now.isoformat()
-        now_ts = time.monotonic()
+        time.monotonic()
 
         with self._conn() as conn:
             due = conn.execute(
@@ -404,15 +404,11 @@ class SovereignScheduler:
         try:
             from croniter import croniter
 
-            return croniter(cron_expr, datetime.now(timezone.utc)).get_next(
-                datetime
-            ).isoformat()
+            return croniter(cron_expr, datetime.now(timezone.utc)).get_next(datetime).isoformat()
         except ImportError:
             from datetime import timedelta
 
-            return (
-                datetime.now(timezone.utc) + timedelta(hours=1)
-            ).isoformat()
+            return (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
 
     @staticmethod
     def _row_to_entry(row) -> ScheduleEntry:
