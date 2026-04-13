@@ -11,7 +11,7 @@ import time
 import numpy as np
 
 try:
-    import numba
+
     from numba import njit, prange
 
     HAS_NUMBA = True
