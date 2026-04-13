@@ -55,3 +55,11 @@ def __getattr__(name: str):
 
 
 __all__ = ["CortexEngine", "api", "routes", "__version__"]  # pyright: ignore[reportUnsupportedDunderAll]
+
+# Bounty bridge (optional — only if aiosqlite is available)
+try:
+    from cortex.bounty import BountyLedgerBridge, seal_finding, get_sealed_findings
+
+    __all__ += ["BountyLedgerBridge", "seal_finding", "get_sealed_findings"]
+except ImportError:
+    pass
