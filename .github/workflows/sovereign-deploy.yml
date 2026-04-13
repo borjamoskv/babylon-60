@@ -53,7 +53,7 @@ jobs:
           while IFS= read -r file; do
             [ -z "${file}" ] && continue
             case "${file}" in
-              .github/workflows/*|README.md|RELEASE_PROCESS.md|CHANGELOG.md|Dockerfile|pyproject.toml|MANIFEST.in|scripts/release_preflight.py|scripts/repo_health_changed.py)
+              .github/workflows/*|README.md|RELEASE_PROCESS.md|CHANGELOG.md|Dockerfile|pyproject.toml|cortex/__init__.py|MANIFEST.in|scripts/release_preflight.py|scripts/repo_health_changed.py)
                 ;;
               *)
                 release_only=false
@@ -160,7 +160,7 @@ jobs:
           while IFS= read -r file; do
             [ -z "${file}" ] && continue
             case "${file}" in
-              .github/workflows/*|README.md|RELEASE_PROCESS.md|CHANGELOG.md|Dockerfile|pyproject.toml|MANIFEST.in|scripts/release_preflight.py|scripts/repo_health_changed.py)
+              .github/workflows/*|README.md|RELEASE_PROCESS.md|CHANGELOG.md|Dockerfile|pyproject.toml|cortex/__init__.py|MANIFEST.in|scripts/release_preflight.py|scripts/repo_health_changed.py)
                 ;;
               *)
                 release_only=false

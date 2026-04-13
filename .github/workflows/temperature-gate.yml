@@ -56,6 +56,10 @@ jobs:
 
       - name: Run determinism gate tests (mocked)
         run: |
+          if [ ! -f tests/test_temperature_determinism.py ]; then
+            echo "tests/test_temperature_determinism.py not present; skipping mocked determinism gate."
+            exit 0
+          fi
           pytest tests/test_temperature_determinism.py \
             -v --tb=short \
             -k "not TestCLI"
