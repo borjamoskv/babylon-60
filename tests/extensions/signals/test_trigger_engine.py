@@ -16,7 +16,7 @@ Coverage:
 
 from __future__ import annotations
 
-import time
+import asyncio
 from datetime import datetime
 from typing import Any
 from unittest.mock import AsyncMock
@@ -274,7 +274,7 @@ class TestAccumulator:
         )
         await engine.evaluate(_fake_signal())
         await engine.evaluate(_fake_signal())
-        time.sleep(0.15)
+        await asyncio.sleep(0.15)
         results = await engine.evaluate(_fake_signal())
         # Only 1 in window, threshold=3 not met
         assert not any(r.fired for r in results)
@@ -309,7 +309,7 @@ class TestCooldown:
             )
         )
         await engine.evaluate(_fake_signal())
-        time.sleep(0.15)
+        await asyncio.sleep(0.15)
         results = await engine.evaluate(_fake_signal())
         assert any(r.fired for r in results)
 
