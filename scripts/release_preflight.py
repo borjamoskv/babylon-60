@@ -15,7 +15,6 @@ import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 
-
 DEFAULT_PACKAGE = "cortex-persist"
 FORBIDDEN_SEGMENTS = (
     "cortex-sdk/",
