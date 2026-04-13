@@ -37,7 +37,7 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
 
         # Ensure schema initialization
         conn = sqlite3.connect(DB_PATH)
-        bus = SignalBus(conn)
+        SignalBus(conn)
 
         # Check if signals exist for 'ouroboros'
         cursor = conn.cursor()
