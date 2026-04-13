@@ -1,9 +1,11 @@
 import asyncio
 import hashlib
+from collections import deque
 from enum import Enum
 from typing import Any
 
 VSA_DIMENSION = 10000
+EPISODIC_TRACE_LIMIT = 256
 
 try:
     import structlog
@@ -31,7 +33,8 @@ class MemoryOS:
 
     def __init__(self):
         self._working_memory: dict[str, Any] = {}
-        self._episodic_traces: list[dict[str, Any]] = []
+        # Ring buffer preserves recent traces without unbounded RAM growth.
+        self._episodic_traces: deque[dict[str, Any]] = deque(maxlen=EPISODIC_TRACE_LIMIT)
         # Fixed-size physical tensor array
         self._episodic_vsa_tensor: list[float] = [0.0] * VSA_DIMENSION
         # Semantic memory connects to ledger

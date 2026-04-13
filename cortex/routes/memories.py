@@ -18,7 +18,7 @@ from __future__ import annotations
 import logging
 import sqlite3
 from collections.abc import Mapping
-from typing import Any, Optional, cast
+from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
@@ -55,7 +55,10 @@ def _fact_data(fact: object) -> dict[str, Any]:
         if isinstance(data, Mapping):
             return dict(data)
 
-    return cast(dict[str, Any], {})
+    raise HTTPException(
+        status_code=500,
+        detail=f"Unsupported fact payload type: {type(fact).__name__}",
+    )
 
 
 class StoreMemoryRequest(BaseModel):

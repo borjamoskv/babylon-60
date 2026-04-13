@@ -82,7 +82,10 @@ def _fact_data(fact: object) -> dict[str, Any]:
         if isinstance(data, Mapping):
             return dict(data)
 
-    return cast(dict[str, Any], {})
+    raise HTTPException(
+        status_code=500,
+        detail=f"Unsupported fact payload type: {type(fact).__name__}",
+    )
 
 
 @router.post("/v1/facts", response_model=StoreResponse)
@@ -285,6 +288,8 @@ async def get_fact_history(
                 )
             )
         return response
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error("Failed to fetch fact history: %s", e)
         raise HTTPException(status_code=500, detail="Failed to fetch history") from e
