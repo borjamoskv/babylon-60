@@ -11,6 +11,7 @@ import logging
 import struct
 import time
 from multiprocessing.shared_memory import SharedMemory
+from typing import Any
 
 logger = logging.getLogger("cortex.engine.shared_bus")
 
@@ -37,6 +38,7 @@ class SovereignSharedBus:
         self.capacity = capacity
         self.slot_size = slot_size
         self._shm: SharedMemory | None = None
+        self._local_buf: bytearray | None = None
         # SWMR Pattern: Single-Writer (Centurion) eliminates lock contention (Ω₀)
 
         total_size = HEADER_SIZE + (capacity * slot_size)
@@ -51,6 +53,8 @@ class SovereignSharedBus:
             except FileExistsError:
                 self._shm = SharedMemory(name=name)
                 logger.debug("🔗 [SHARED-BUS] Attached to existing segment '%s'", name)
+            except (OSError, PermissionError) as exc:
+                self._activate_local_fallback(total_size, exc)
         else:
             try:
                 self._shm = SharedMemory(name=name)
@@ -61,9 +65,34 @@ class SovereignSharedBus:
                     self._write_header(0, 0, 1.0, 0.0, capacity, slot_size, 0.0)
                 else:
                     raise
+            except (OSError, PermissionError) as exc:
+                self._activate_local_fallback(total_size, exc)
 
     async def initialize(self) -> None:
         """Sovereign initialization: satisfy the SwarmCommander contract."""
+
+    def _activate_local_fallback(self, total_size: int, exc: BaseException) -> None:
+        """Use an in-process ring buffer when POSIX shared memory is unavailable."""
+        self._local_buf = bytearray(total_size)
+        self._write_header(0, 0, 1.0, 0.0, self.capacity, self.slot_size, 0.0)
+        logger.warning(
+            "⚠️ [SHARED-BUS] Falling back to local buffer for '%s': %s",
+            self.name,
+            exc,
+        )
+
+    def _buffer(self) -> Any:
+        shm = self._shm
+        if shm is not None:
+            buf = shm.buf
+            if buf is None:
+                raise RuntimeError("shared memory buffer unavailable")
+            return buf
+
+        if self._local_buf is not None:
+            return memoryview(self._local_buf)
+
+        return None
 
     def _write_header(
         self,
@@ -75,23 +104,17 @@ class SovereignSharedBus:
         slot: int,
         uncertainty: float = 0.0,
     ):
-        shm = self._shm
-        if shm is None:
-            return
-        buf = shm.buf
+        buf = self._buffer()
         if buf is None:
-            raise RuntimeError("shared memory buffer unavailable")
+            return
         # Layout: head(I), tail(I), exergy(f), latency(f), cap(I), slot(I), uncertainty(f), version(I)
         header = struct.pack("IIffIIfI", head, tail, exergy, latency, cap, slot, uncertainty, 850)
         buf[0:32] = header
 
     def _read_header(self):
-        shm = self._shm
-        if shm is None:
-            return (0, 0, 1.0, 0.0, self.capacity, self.slot_size, 0.0, 850)
-        buf = shm.buf
+        buf = self._buffer()
         if buf is None:
-            raise RuntimeError("shared memory buffer unavailable")
+            return (0, 0, 1.0, 0.0, self.capacity, self.slot_size, 0.0, 850)
         return struct.unpack("IIffIIfI", buf[0:32])
 
     def update_metrics(self, exergy: float, latency: float, uncertainty: float = 0.0):
@@ -118,10 +141,7 @@ class SovereignSharedBus:
         **kwargs,
     ) -> bool:
         """Lock-Free SWMR Emit (AX-V). High-performance signal injection."""
-        shm = self._shm
-        if shm is None:
-            return False
-        buf = shm.buf
+        buf = self._buffer()
         if buf is None:
             return False
 
@@ -162,10 +182,7 @@ class SovereignSharedBus:
         """Poll for new signals since last_index.
         Fast-Path: O(1) check of head before linear scan.
         """
-        shm = self._shm
-        if shm is None:
-            return []
-        buf = shm.buf
+        buf = self._buffer()
         if buf is None:
             return []
 
@@ -209,6 +226,7 @@ class SovereignSharedBus:
         shm = self._shm
         if shm is not None:
             shm.close()
+        self._local_buf = None
 
     def unlink(self):
         """Destroy the shared memory segment."""
