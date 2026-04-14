@@ -115,30 +115,27 @@ Async-only methods used commonly in applications include `store_many()`, `histor
 ```bash
 cd sdks/js
 npm install
+npm run build
 ```
 
 ### Usage
 
 ```typescript
-import { CortexClient } from '@cortex-persist/sdk';
+import { Cortex } from '@cortex-persist/sdk';
 
-const cortex = new CortexClient({
-  baseUrl: 'http://localhost:8484',
+const cortex = new Cortex({
+  url: 'http://localhost:8484',
   apiKey: 'ctx_your_api_key',
 });
 
 // Store a fact
-const result = await cortex.store({
+const factId = await cortex.store('User prefers dark mode', {
   project: 'my-app',
-  content: 'User prefers dark mode',
   factType: 'knowledge',
 });
 
 // Search
-const facts = await cortex.search({
-  query: 'user preferences',
-  topK: 5,
-});
+const facts = await cortex.search('user preferences', { topK: 5, project: 'my-app' });
 
 // Recall
 const allFacts = await cortex.recall('my-app');

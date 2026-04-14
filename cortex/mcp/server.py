@@ -1,5 +1,3 @@
-from typing import Optional
-
 """MCP Server Implementation.
 
 Core logic for the CORTEX MCP Trust Server.
@@ -9,6 +7,7 @@ Provides memory, search, and EU AI Act compliance tools.
 import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
+from typing import Optional
 
 from cortex.engine import CortexEngine
 from cortex.extensions.immune.filters.base import Verdict
@@ -27,9 +26,7 @@ from cortex.mcp.guard import MCPGuard
 from cortex.mcp.health_tools import register_health_tools
 from cortex.mcp.knowledge_watcher import start_knowledge_daemon
 from cortex.mcp.mega_tools import register_mega_tools
-from cortex.mcp.music_tools import register_music_tools
 from cortex.mcp.singularity_tools import register_singularity_tools
-from cortex.swarm import start_swarm_daemon
 from cortex.mcp.trust_tools import register_trust_tools
 from cortex.mcp.utils import (
     AsyncConnectionPool,
@@ -37,6 +34,7 @@ from cortex.mcp.utils import (
     MCPServerConfig,
     SimpleAsyncCache,
 )
+from cortex.swarm import start_swarm_daemon
 
 __all__ = ["create_mcp_server", "run_server"]
 
@@ -337,8 +335,13 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
     # Health Index — system monitoring
     register_health_tools(mcp, ctx)
 
-    # Music Engine — Master Orchestrator
-    register_music_tools(mcp)
+    # Music Engine — optional surface; skip if its DSP deps are unavailable.
+    try:
+        from cortex.mcp.music_tools import register_music_tools
+    except ImportError as exc:
+        logger.info("Skipping MCP music tools: %s", exc)
+    else:
+        register_music_tools(mcp)
 
     # V3 Singularity Tools (Skills, Memory, Swarm Queue)
     register_singularity_tools(mcp)
@@ -362,10 +365,10 @@ def run_server(config: Optional[MCPServerConfig] = None) -> None:
     cfg = config or _default_config
 
     # V3 Singularity: Launch Live Knowledge Sync Daemon
-    watcher = start_knowledge_daemon()
+    start_knowledge_daemon()
     
     # V4 Singularity: Launch Swarm Autopoiesis Engine
-    swarm_daemon = start_swarm_daemon()
+    start_swarm_daemon()
 
     if cfg.transport == "sse":
         logger.info("Starting CORTEX MCP server v2 (SSE) on %s:%d", cfg.host, cfg.port)

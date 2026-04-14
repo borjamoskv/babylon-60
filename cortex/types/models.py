@@ -25,6 +25,15 @@ __all__ = [
     "GateActionResponse",
     "GateApprovalRequest",
     "GateStatusResponse",
+    "HealthHistoryEntry",
+    "HealthHistoryResponse",
+    "HealthIndexCheckResponse",
+    "HealthIndexMetric",
+    "HealthIndexMetricsResponse",
+    "HealthIndexReportResponse",
+    "HealthIndexScoreResponse",
+    "HealthScoreMetricResponse",
+    "HealthScoreResponse",
     "HealthCheckDetail",
     "HealthReport",
     "HeartbeatRequest",
@@ -330,6 +339,87 @@ class RuntimeHealthResponse(BaseModel):
     sub_indices: dict[str, float] = Field(default_factory=dict)
     component_details: dict[str, RuntimeComponentDetailModel] = Field(default_factory=dict)
     checked_at: str
+
+
+class HealthScoreMetricResponse(BaseModel):
+    """Serialized health metric within a score/report payload."""
+
+    name: str
+    value: float
+    weight: float
+    unit: str = "score"
+
+
+class HealthScoreResponse(BaseModel):
+    """Serialized score section for health-index endpoints."""
+
+    score: float
+    grade: RuntimeHealthGrade
+    healthy: bool
+    timestamp: str
+    metrics: list[HealthScoreMetricResponse] = Field(default_factory=list)
+    sub_indices: dict[str, float] = Field(default_factory=dict)
+
+
+class HealthIndexCheckResponse(BaseModel):
+    """Machine-readable quick health check."""
+
+    healthy: bool
+    score: float
+    grade: RuntimeHealthGrade
+    summary: str
+
+
+class HealthIndexScoreResponse(BaseModel):
+    """Numeric health score summary."""
+
+    score: float
+    grade: RuntimeHealthGrade
+
+
+class HealthIndexMetric(BaseModel):
+    """Raw collector snapshot exposed by the health metrics route."""
+
+    name: str
+    value: float
+    weight: float
+    unit: str = "score"
+    latency_ms: float = 0.0
+    description: str = ""
+    remediation: str = ""
+    collected_at: str
+
+
+class HealthIndexMetricsResponse(BaseModel):
+    """Metrics collection payload for dashboards and scrapers."""
+
+    metrics: list[HealthIndexMetric] = Field(default_factory=list)
+
+
+class HealthHistoryEntry(BaseModel):
+    """Persisted health history row."""
+
+    timestamp: str
+    score: float
+    grade: str = ""
+
+
+class HealthHistoryResponse(BaseModel):
+    """Health history query response."""
+
+    history: list[HealthHistoryEntry] = Field(default_factory=list)
+    count: int
+
+
+class HealthIndexReportResponse(BaseModel):
+    """Canonical JSON form of the full health report."""
+
+    score: HealthScoreResponse
+    recommendations: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    trend: RuntimeHealthTrend
+    is_critical: bool
+    db_path: str = ""
 
 
 class RecoveryReport(BaseModel):

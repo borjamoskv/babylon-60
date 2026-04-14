@@ -67,36 +67,36 @@ Fact #42: "Use PostgreSQL for the user service"
 ## Python API
 
 ```python
+import asyncio
+
 from cortex import CortexEngine
 
-engine = CortexEngine()
 
-# Store
-fact_id = engine.store(
-    content="Use PostgreSQL for the user service",
-    fact_type="decision",
-    project="swarm-demo"
-)
+async def main() -> None:
+    engine = CortexEngine()
+    try:
+        fact_id = await engine.store(
+            content="Use PostgreSQL for the user service",
+            fact_type="decision",
+            project="swarm-demo",
+        )
 
-# Vote
-engine.vote(
-    fact_id=fact_id,
-    agent_id="architect",
-    approve=True,
-    weight=0.9
-)
+        architect_id = await engine.consensus.register_agent(name="architect")
+        data_engineer_id = await engine.consensus.register_agent(name="data-engineer")
 
-engine.vote(
-    fact_id=fact_id,
-    agent_id="data-engineer",
-    approve=True,
-    weight=0.7
-)
+        await engine.vote_v2(fact_id=fact_id, agent_id=architect_id, value=1)
+        await engine.vote_v2(fact_id=fact_id, agent_id=data_engineer_id, value=1)
 
-# Check consensus
-result = engine.verify_ledger(fact_id)
-print(f"Confidence: {result.confidence}")
-print(f"Verified: {result.verified}")
+        votes = await engine.get_votes(fact_id)
+        audit = await engine.verify_vote_ledger()
+
+        print(f"Votes: {len(votes)}")
+        print(f"Vote ledger valid: {audit.get('valid', False)}")
+    finally:
+        await engine.close()
+
+
+asyncio.run(main())
 ```
 
 ## Consensus Levels

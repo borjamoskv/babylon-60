@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -57,7 +58,7 @@ class FSEntropyOracle:
                 f"ENTROPÍA EN EXPANSIÓN. Acumulación de masa muerta o "
                 f"datos no procesados: +{delta:.2f} MB."
             )
-            if hasattr(self.engine, "store") and asyncio.iscoroutinefunction(self.engine.store):
+            if hasattr(self.engine, "store") and inspect.iscoroutinefunction(self.engine.store):
                 await self.engine.store(
                     project="SYSTEM",
                     content=content,

@@ -96,6 +96,28 @@ class TestAppendEvent:
         assert e2.signature != e1.signature
 
     @pytest.mark.asyncio
+    async def test_preinjected_chain_values_are_overwritten(self, ledger):
+        event = _make_event(content="forged chain input")
+        object.__setattr__(event, "prev_hash", "FORGED_PREV")
+        object.__setattr__(event, "signature", "FORGED_SIG")
+
+        await ledger.append_event(event)
+
+        cursor = await ledger._conn.execute(
+            "SELECT prev_hash, signature FROM memory_events WHERE event_id = ?",
+            (event.event_id,),
+        )
+        row = await cursor.fetchone()
+        await cursor.close()
+
+        assert row[0] == "GENESIS"
+        assert row[1] == event.signature
+        assert row[1] != "FORGED_SIG"
+
+        result = await ledger.verify_chain("test_tenant")
+        assert result["status"] == "VALID"
+
+    @pytest.mark.asyncio
     async def test_duplicate_event_id_ignored(self, ledger):
         e1 = _make_event()
         await ledger.append_event(e1)

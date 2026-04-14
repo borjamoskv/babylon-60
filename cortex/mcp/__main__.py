@@ -1,6 +1,6 @@
 """Entry point for CORTEX MCP Server."""
 
-from cortex.mcp.server import run_server
+from cortex.mcp.cli import main
 
 if __name__ == "__main__":
-    run_server()
+    main()

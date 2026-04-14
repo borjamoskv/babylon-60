@@ -5,7 +5,7 @@ Exposes `cortex.db` as read-only MCP tools for any MCP-compatible client.
 ## Architecture
 
 ```
-Agent → MCP Protocol → Toolbox (port 5000) → cortex.db (reads)
+Agent → MCP Protocol → Toolbox (port 5050) → cortex.db (reads)
 Agent → MCP Protocol → CORTEX MCP Server   → cortex.db (writes)
 ```
 
@@ -49,7 +49,7 @@ TOOLBOX_PORT=8080 bash cortex/mcp/toolbox/run_toolbox.sh
 ### Gemini CLI
 
 ```bash
-gemini --tool "http://localhost:5000"
+gemini --tool "http://localhost:5050"
 ```
 
 ### VS Code (via MCP extension)
@@ -60,7 +60,7 @@ Add to `.vscode/settings.json`:
 {
   "mcp.servers": {
     "cortex-toolbox": {
-      "url": "http://localhost:5000"
+      "url": "http://localhost:5050"
     }
   }
 }

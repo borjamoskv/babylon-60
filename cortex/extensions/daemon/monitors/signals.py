@@ -11,6 +11,7 @@ Converts reactor events into Daemon Alerts.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import sqlite3
 from typing import Any
@@ -24,9 +25,10 @@ logger = logging.getLogger("moskv-daemon")
 class SignalMonitor:
     """Watchdog for the Signal Bus — the L2 Reactor heart."""
 
-    def __init__(self, db_path: str, engine: Any = None):
+    def __init__(self, db_path: str, engine: Any = None, tenant_id: str = "default"):
         self.db_path = db_path
         self._engine = engine
+        self.tenant_id = tenant_id
         self._reactor = None
         self._bus_conn = None
 
@@ -43,7 +45,7 @@ class SignalMonitor:
             self._bus_conn.execute("PRAGMA journal_mode=WAL")
 
             bus = SignalBus(self._bus_conn)
-            self._reactor = SignalReactor(bus, engine=self._engine)
+            self._reactor = SignalReactor(bus, engine=self._engine, tenant_id=self.tenant_id)
             logger.info("SignalMonitor initialized L2 Reactor.")
         except (sqlite3.Error, ImportError) as e:
             logger.error("Failed to initialize SignalReactor: %s", e)
@@ -68,15 +70,20 @@ class SignalMonitor:
             # If we want them in the daemon status, we should return them here.
 
             # Let's peek at what we are about to process to generate alerts.
-            signals_to_process = self._reactor.bus.peek(consumer="reactor", limit=20)
+            signals_to_process = self._reactor.bus.peek(
+                consumer="reactor",
+                limit=20,
+                tenant_id=self.tenant_id,
+            )
 
-            count = self._reactor.process_once()
+            count = asyncio.run(self._reactor.process_once(tenant_id=self.tenant_id))
 
-            if count > 0:  # type: ignore[reportOperatorIssue]
+            if count > 0:
                 for sig in signals_to_process[:count]:
                     alerts.append(
                         SignalAlert(
                             event_type=sig.event_type,
+                            tenant_id=sig.tenant_id,
                             project=sig.project,
                             payload=sig.payload,
                             message=f"Reflex executed for {sig.event_type}",

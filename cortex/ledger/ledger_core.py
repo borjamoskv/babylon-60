@@ -32,6 +32,11 @@ from cortex.utils.canonical import (
 logger = logging.getLogger("cortex.ledger")
 
 
+def _owns_async_transaction(conn: Any) -> bool:
+    """Whether this call should commit/rollback the async connection."""
+    return not bool(getattr(conn, "in_transaction", False))
+
+
 @dataclass(frozen=True)
 class MerkleNode:
     """A node within the Merkle Tree (V8 Immutable)."""
@@ -376,31 +381,38 @@ class SovereignLedger:
 
         async with self._lock:
             async with self._get_conn_proxy() as conn:  # type: ignore[reportAttributeAccessIssue]
-                cursor = await conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots")
-                row = await cursor.fetchone()
-                last_covered = row[0] or 0 if row else 0
+                owns_transaction = _owns_async_transaction(conn)
+                try:
+                    cursor = await conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots")
+                    row = await cursor.fetchone()
+                    last_covered = row[0] or 0 if row else 0
 
-                cursor = await conn.execute(
-                    "SELECT id, hash FROM transactions WHERE id > ? ORDER BY id LIMIT ?",
-                    (last_covered, batch_size),
-                )
-                rows = await cursor.fetchall()
+                    cursor = await conn.execute(
+                        "SELECT id, hash FROM transactions WHERE id > ? ORDER BY id LIMIT ?",
+                        (last_covered, batch_size),
+                    )
+                    rows = await cursor.fetchall()
 
-                if not rows or len(rows) < batch_size:
-                    return None
+                    if not rows or len(rows) < batch_size:
+                        return None
 
-                hashes = [r[1] for r in rows]
-                tree = MerkleTree(hashes)
-                root = tree.root_hash
-                start_id, end_id = rows[0][0], rows[-1][0]
+                    hashes = [r[1] for r in rows]
+                    tree = MerkleTree(hashes)
+                    root = tree.root_hash
+                    start_id, end_id = rows[0][0], rows[-1][0]
 
-                await conn.execute(
-                    "INSERT INTO merkle_roots (root_hash, tx_start_id, tx_end_id, tx_count) "
-                    "VALUES (?, ?, ?, ?)",
-                    (root, start_id, end_id, len(rows)),
-                )
-                await conn.commit()
-                return root
+                    await conn.execute(
+                        "INSERT INTO merkle_roots (root_hash, tx_start_id, tx_end_id, tx_count) "
+                        "VALUES (?, ?, ?, ?)",
+                        (root, start_id, end_id, len(rows)),
+                    )
+                    if owns_transaction:
+                        await conn.commit()
+                    return root
+                except Exception:
+                    if owns_transaction and getattr(conn, "in_transaction", False):
+                        await conn.rollback()
+                    raise
 
     @asynccontextmanager
     async def _get_conn_proxy(self):
@@ -419,55 +431,71 @@ class SovereignLedger:
         tx_count = 0
 
         async with self._get_conn_proxy() as conn:
+            owns_transaction = _owns_async_transaction(conn)
             started_at = now_iso()
-            cursor = await conn.execute(
-                "SELECT id, project, action, detail, prev_hash, hash, timestamp "
-                "FROM transactions ORDER BY id"
-            )
-
-            expected_prev = "GENESIS"
-            while True:
-                row = await cursor.fetchone()
-                if not row:
-                    break
-                tid, proj, act, det, prev, h, ts = row
-                tx_count += 1
-
-                if prev != expected_prev:
-                    violations.append({"id": tid, "type": "CHAIN_BREAK", "expected": expected_prev})
-
-                # Verify with v2, fallback to v1
-                computed = compute_tx_hash(prev, proj, act, det, ts)
-                if computed != h:
-                    computed_v1 = compute_tx_hash_v1(prev, proj, act, det, ts)
-                    if computed_v1 != h:
-                        violations.append({"id": tid, "type": "TAMPER_DETECTED", "stored": h})
-
-                expected_prev = h
-                if tx_count % 100 == 0:
-                    await asyncio.sleep(0)  # Yield
-
-            # Verify Merkle Roots
-            cursor = await conn.execute(
-                "SELECT root_hash, tx_start_id, tx_end_id FROM merkle_roots"
-            )
-            roots = await cursor.fetchall()
-            for stored_root, start, end in roots:
-                c = await conn.execute(
-                    "SELECT hash FROM transactions WHERE id >= ? AND id <= ? ORDER BY id",
-                    (start, end),
+            try:
+                cursor = await conn.execute(
+                    "SELECT id, tenant_id, project, action, detail, prev_hash, hash, timestamp "
+                    "FROM transactions ORDER BY id"
                 )
-                hashes = [r[0] for r in await c.fetchall()]
-                computed_root = MerkleTree(hashes).root_hash
-                if computed_root != stored_root:
-                    violations.append({"range": f"{start}-{end}", "type": "MERKLE_MISMATCH"})
 
-            status = "ok" if not violations else "violation"
-            await conn.execute(
-                "INSERT INTO integrity_checks (check_type, status, details, started_at, completed_at) "
-                "VALUES (?, ?, ?, ?, ?)",
-                ("full", status, json.dumps(violations), started_at, now_iso()),
-            )
-            await conn.commit()
+                expected_prev_by_tenant: dict[str, str] = {}
+                while True:
+                    row = await cursor.fetchone()
+                    if not row:
+                        break
+                    tid, tenant_id, proj, act, det, prev, h, ts = row
+                    tx_count += 1
+                    expected_prev = expected_prev_by_tenant.get(tenant_id, "GENESIS")
+
+                    if prev != expected_prev:
+                        violations.append(
+                            {
+                                "id": tid,
+                                "tenant_id": tenant_id,
+                                "type": "CHAIN_BREAK",
+                                "expected": expected_prev,
+                            }
+                        )
+
+                    # Verify with v2, fallback to v1
+                    computed = compute_tx_hash(prev, proj, act, det, ts)
+                    if computed != h:
+                        computed_v1 = compute_tx_hash_v1(prev, proj, act, det, ts)
+                        if computed_v1 != h:
+                            violations.append({"id": tid, "type": "TAMPER_DETECTED", "stored": h})
+
+                    expected_prev_by_tenant[tenant_id] = h
+                    if tx_count % 100 == 0:
+                        await asyncio.sleep(0)  # Yield
+
+                # Verify Merkle Roots
+                cursor = await conn.execute(
+                    "SELECT root_hash, tx_start_id, tx_end_id FROM merkle_roots"
+                )
+                roots = await cursor.fetchall()
+                for stored_root, start, end in roots:
+                    c = await conn.execute(
+                        "SELECT hash FROM transactions WHERE id >= ? AND id <= ? ORDER BY id",
+                        (start, end),
+                    )
+                    hashes = [r[0] for r in await c.fetchall()]
+                    computed_root = MerkleTree(hashes).root_hash
+                    if computed_root != stored_root:
+                        violations.append({"range": f"{start}-{end}", "type": "MERKLE_MISMATCH"})
+
+                if owns_transaction:
+                    status = "ok" if not violations else "violation"
+                    await conn.execute(
+                        "INSERT INTO integrity_checks "
+                        "(check_type, status, details, started_at, completed_at) "
+                        "VALUES (?, ?, ?, ?, ?)",
+                        ("full", status, json.dumps(violations), started_at, now_iso()),
+                    )
+                    await conn.commit()
+            except Exception:
+                if owns_transaction and getattr(conn, "in_transaction", False):
+                    await conn.rollback()
+                raise
 
         return {"valid": not violations, "violations": violations, "tx_count": tx_count}

@@ -17,6 +17,7 @@ class Signal:
     payload: dict
     source: str
     project: Optional[str]
+    tenant_id: str
     created_at: datetime
     consumed_by: list[str]
 
@@ -42,9 +43,9 @@ class SignalFilter:
 
 def signal_from_row(row: tuple) -> Signal:
     """Convert a database row to a Signal model."""
-    raw_ts = row[5]
+    raw_ts = row[6]
     ts = datetime.fromisoformat(raw_ts) if isinstance(raw_ts, str) else raw_ts
-    raw_consumed = row[6]
+    raw_consumed = row[7]
     consumed = json.loads(raw_consumed) if raw_consumed else []
     return Signal(
         id=row[0],
@@ -52,6 +53,7 @@ def signal_from_row(row: tuple) -> Signal:
         payload=json.loads(row[2]) if isinstance(row[2], str) else row[2],
         source=row[3],
         project=row[4],
+        tenant_id=row[5],
         created_at=ts,
         consumed_by=consumed,
     )

@@ -164,9 +164,9 @@ CORTEX exposes governed memory and verification primitives as MCP-consumable too
 cortex_store
 cortex_search
 cortex_status
-cortex_compact
-cortex_verify
-cortex_immune
+cortex_reality_weaver
+cortex_entropy_cracker
+cortex_temporal_nexus
 cortex_ledger_verify
 ```
 

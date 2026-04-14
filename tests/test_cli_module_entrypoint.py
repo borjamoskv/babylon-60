@@ -6,7 +6,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -83,3 +82,40 @@ def test_python_module_store_accepts_verified_confidence(tmp_path: Path) -> None
     )
     assert store_result.returncode == 0, store_result.stderr or store_result.stdout
     assert "Stored fact" in store_result.stdout
+
+
+def test_python_module_timeline_checkout_reconstructs_by_transaction_id(tmp_path: Path) -> None:
+    db_path = tmp_path / "cortex.db"
+
+    init_result = _run_module_cli(db_path, "init")
+    assert init_result.returncode == 0, init_result.stderr or init_result.stdout
+
+    store_result = _run_module_cli(
+        db_path,
+        "store",
+        "timeline-proj",
+        "Timeline checkout must reconstruct the fact anchored to its transaction id",
+        "--source",
+        "agent:test-suite",
+    )
+    assert store_result.returncode == 0, store_result.stderr or store_result.stdout
+
+    with sqlite3.connect(db_path) as conn:
+        row = conn.execute(
+            "SELECT tx_id FROM facts WHERE project = ? ORDER BY id DESC LIMIT 1",
+            ("timeline-proj",),
+        ).fetchone()
+    assert row is not None
+    tx_id = str(row[0])
+
+    checkout_result = _run_module_cli(
+        db_path,
+        "timeline",
+        "checkout",
+        tx_id,
+        "--project",
+        "timeline-proj",
+    )
+    assert checkout_result.returncode == 0, checkout_result.stderr or checkout_result.stdout
+    assert f"State at TX #{tx_id}" in checkout_result.stdout
+    assert "timeline-proj" in checkout_result.stdout

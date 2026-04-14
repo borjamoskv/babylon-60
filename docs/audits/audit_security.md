@@ -4,6 +4,8 @@ Now I have a comprehensive view of the CORTEX API. Let me compile the security r
 
 # 🔒 CORTEX API Security Review Report
 
+> **Historical note (2026-04-14):** this review targets the v5/v6-era API surface and should be read as an archival security snapshot, not as the current canonical route or client contract.
+
 **Date:** 2026-02-24  
 **Scope:** FastAPI + SQLite + AES-256-GCM authentication system  
 **Version:** v5.0-v6.0 (MOSKV-1 v5 / Sovereign Cloud)

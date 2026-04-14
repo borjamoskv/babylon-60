@@ -407,6 +407,9 @@ class TestDeprecate:
         result = await engine.deprecate(fact_id, reason="test")
         assert result is True
 
+        active = await engine.get_all_active_facts(tenant_id="default", project="test")
+        assert [fact.id for fact in active] == []
+
     async def test_deprecate_nonexistent_false(self, engine):
         result = await engine.deprecate(999999, reason="missing")
         assert result is False
@@ -437,6 +440,39 @@ class TestUpdate:
     async def test_update_nonexistent_raises(self, engine):
         with pytest.raises(ValueError, match="not found"):
             await engine.update(999999, content="ghost update")
+
+    async def test_update_rolls_back_if_replacement_store_fails(self, engine):
+        original_id = await engine.store(
+            project="test",
+            content="Original content that must survive a failed update.",
+            fact_type="knowledge",
+            source="agent:test_suite",
+        )
+
+        class BrokenPipeline:
+            async def run_guards(self, *args, **kwargs):
+                raise RuntimeError("guard subsystem unavailable")
+
+        engine._guard_pipeline = BrokenPipeline()
+
+        with pytest.raises(RuntimeError, match="GuardPipeline pre-store failed"):
+            await engine.update(
+                original_id,
+                content="Updated content that should never persist.",
+            )
+
+        with sqlite3.connect(engine._db_path) as fresh_conn:
+            row = fresh_conn.execute(
+                "SELECT valid_until, is_tombstoned FROM facts WHERE id = ?",
+                (original_id,),
+            ).fetchone()
+            count = fresh_conn.execute(
+                "SELECT COUNT(*) FROM facts WHERE project = ?",
+                ("test",),
+            ).fetchone()[0]
+
+        assert row == (None, 0)
+        assert count == 1
 
 
 # ─── Taint Integration ──────────────────────────────────────────────────

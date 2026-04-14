@@ -80,8 +80,6 @@ async def _connect_toolbox(
     config = ToolboxConfig.from_env()
     if server_url:
         config.server_url = server_url
-        if server_url not in config.allowed_server_urls:
-            config.allowed_server_urls.append(server_url)
     if toolset:
         config.toolset = toolset
 
@@ -129,7 +127,7 @@ def run_cli(
             InMemorySessionService,  # pyright: ignore[reportMissingImports]
         )
     except ImportError:
-        logger.error("Google ADK not installed. Install with: pip install google-adk")
+        logger.error("Google ADK not installed. Install with: pip install 'cortex-persist[adk]'")
         sys.exit(1)
 
     from cortex.extensions.adk.agents import (
@@ -210,7 +208,7 @@ def run_web(port: int = 8000) -> None:
         sys.argv = ["adk", "web", "--port", str(port)]
         cli_tools_click.main()
     except ImportError:
-        logger.error("Google ADK not installed. Install with: pip install google-adk")
+        logger.error("Google ADK not installed. Install with: pip install 'cortex-persist[adk]'")
         sys.exit(1)
 
 

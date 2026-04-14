@@ -13,7 +13,7 @@ pip install cortex-persist
 For the API server and MCP:
 
 ```bash
-pip install cortex-persist[api]
+pip install "cortex-persist[api,mcp]"
 ```
 
 ---

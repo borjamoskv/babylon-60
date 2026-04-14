@@ -87,11 +87,6 @@ class LedgerStore:
                     FOREIGN KEY(event_id) REFERENCES ledger_events(event_id) ON DELETE CASCADE
                 );
 
-                CREATE INDEX IF NOT EXISTS idx_ledger_events_ts ON ledger_events(ts);
-                CREATE INDEX IF NOT EXISTS idx_ledger_events_hash ON ledger_events(hash);
-                CREATE INDEX IF NOT EXISTS idx_ledger_events_semantic_status
-                    ON ledger_events(semantic_status);
-
                 CREATE TABLE IF NOT EXISTS ledger_enrichment_jobs (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     job_id TEXT UNIQUE,
@@ -110,6 +105,7 @@ class LedgerStore:
                 );
                 """
             )
+            self._ensure_ledger_event_columns(conn)
             self._ensure_compat_columns(conn, "enrichment_jobs")
             self._ensure_compat_columns(conn, "ledger_enrichment_jobs")
             conn.executescript(
@@ -223,9 +219,24 @@ class LedgerStore:
                 """
             )
 
+    def _ensure_ledger_event_columns(self, conn: sqlite3.Connection) -> None:
+        """Backfill legacy ledger continuity columns on databases created from old migrations."""
+        existing = {row[1] for row in conn.execute("PRAGMA table_info(ledger_events)").fetchall()}
+        for column in ("prev_hash", "hash"):
+            if column not in existing:
+                conn.execute(f"ALTER TABLE ledger_events ADD COLUMN {column} TEXT")
+
     def _ensure_compat_columns(self, conn: sqlite3.Connection, table_name: str) -> None:
         """Backfill compatibility columns for legacy ledger job tables."""
         existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table_name})").fetchall()}
         for column in ("next_attempt_ts", "next_attempt_at"):
             if column not in existing:
                 conn.execute(f"ALTER TABLE {table_name} ADD COLUMN {column} TEXT")
+        conn.execute(
+            f"""
+            UPDATE {table_name}
+            SET next_attempt_ts = COALESCE(next_attempt_ts, next_attempt_at),
+                next_attempt_at = COALESCE(next_attempt_at, next_attempt_ts)
+            WHERE next_attempt_ts IS NULL OR next_attempt_at IS NULL
+            """
+        )

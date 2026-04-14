@@ -11,7 +11,7 @@ import pytest
 
 from cortex.crypto.aes import CortexEncrypter
 from cortex.database.schema import CREATE_FACTS
-from cortex.database.schema_extensions import CREATE_FACTS_FTS
+from cortex.database.schema_extensions import CREATE_FACTS_FTS, CREATE_FACTS_FTS_TRIGGERS
 from cortex.engine.fact_store_core import insert_fact_record
 from cortex.search.hybrid import hybrid_search
 
@@ -59,6 +59,7 @@ async def _setup_db(conn: aiosqlite.Connection) -> None:
         if s:
             await conn.execute(s + ";")
     await conn.executescript(CREATE_FACTS_FTS)
+    await conn.executescript(CREATE_FACTS_FTS_TRIGGERS)
     await conn.commit()
 
 
@@ -97,6 +98,12 @@ async def test_fts_indexes_plaintext_not_ciphertext(encrypter, monkeypatch):
         stored_content = row[0]
         assert stored_content.startswith(encrypter.PREFIX)
         assert secret_content not in stored_content
+
+    async with conn.execute("SELECT content FROM facts_fts WHERE rowid = ?", (fact_id,)) as cursor:
+        row = await cursor.fetchone()
+        assert row is not None
+        assert row[0] == secret_content
+        assert not row[0].startswith(encrypter.PREFIX)
 
     # 4. Verify FTS Search works with plaintext keywords
     # This proves facts_fts has the decrypted content.

@@ -4,6 +4,8 @@
 > **Updated:** 2026-02-24 · **Author:** MOSKV-1 v5 (Antigravity)
 > **Status:** Active development — Biological core integration
 > **Codebase:** 306 Python modules · ~46,200 LOC · Apache 2.0
+>
+> **Historical note (2026-04-14):** this file is a v7 architecture snapshot. It is useful as historical context, but it does not define the current public runtime contract. For the current engine surface, prefer `docs/architecture.md`, `docs/reference.md`, and `docs/sdks.md`.
 
 ---
 
@@ -45,7 +47,7 @@
 ├──────────────────────────────────────────────────────────────────────────────────┤
 │                              TRUST & INTEGRITY LAYER                             │
 │                                                                                  │
-│   SHA-256 Hash-Chained Transaction Ledger (engine/ledger.py)                     │
+│   Historical SHA-256 Ledger Note (engine/ledger.py) — current runtime uses SHA3-256 │
 │   Merkle Tree Checkpoints (consensus/merkle.py)                                  │
 │   Vote Ledger (consensus/vote_ledger.py + byzantine.py)                          │
 │   Canonical JSON Normalization (canonical.py)                                    │
@@ -139,7 +141,7 @@ Three hierarchical memory layers operate as a unified cognitive stack, orchestra
 │  Optional dep: qdrant_client (guarded import)│
 ├──────────────────────────────────────────────┤
 │  L3 — Event Ledger (EventLedgerL3)           │
-│  SHA-256 hash-chained immutable events       │
+│  SHA3-256 hash-chained immutable events      │
 │  AlloyDB/PostgreSQL (v6) / SQLite WAL (v5)   │
 │  Merkle checkpoints for batch verification   │
 └──────────────────────────────────────────────┘

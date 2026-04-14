@@ -10,7 +10,7 @@ CORTEX provides **90+ commands** organized by function. Run `cortex --help` for 
 |:---|:---|
 | `--version` | Show version and exit |
 | `--help` | Show help and exit |
-| `--db PATH` | Override database path (default: `~/.cortex/cortex.db`) |
+| `--db PATH` | Available on many subcommands such as `init`, `status`, `recall`, `history`, and trust commands |
 
 ---
 
@@ -28,12 +28,12 @@ Safe to call multiple times — idempotent.
 
 ---
 
-### `cortex store`
+### `cortex memory store`
 
 Store a fact with automatic hash-chain ledger entry and embedding.
 
 ```bash
-cortex store PROJECT CONTENT [OPTIONS]
+cortex memory store PROJECT CONTENT [OPTIONS]
 ```
 
 | Option | Default | Description |
@@ -45,23 +45,23 @@ cortex store PROJECT CONTENT [OPTIONS]
 | `--confidence` | `stated` | `C1`, `C2`, `C3`, `C4`, `C5`, `stated`, `inferred`, `verified` |
 | `--source` | auto-detected | Source agent or process |
 | `--ai-time` | — | Estimated AI time saved (Chronos integration) |
-| `--complexity` | — | Task complexity rating (1-10) |
+| `--complexity` | — | Task complexity (`low`, `medium`, `high`, `god`, `impossible`) |
 
 **Example:**
 
 ```bash
-cortex store my-api "Rate limit is 100 req/min per API key" \
+cortex memory store my-api "Rate limit is 100 req/min per API key" \
   --type config --tags "api,limits" --source "agent:claude"
 ```
 
 ---
 
-### `cortex search`
+### `cortex memory search`
 
 Semantic search across all facts using vector embeddings.
 
 ```bash
-cortex search QUERY [OPTIONS]
+cortex memory search QUERY [OPTIONS]
 ```
 
 | Option | Default | Description |
@@ -74,12 +74,12 @@ Uses `all-MiniLM-L6-v2` embeddings via ONNX Runtime for sub-5ms vector search.
 
 ---
 
-### `cortex recall`
+### `cortex memory recall`
 
 Load full context for a project.
 
 ```bash
-cortex recall PROJECT [--db PATH]
+cortex memory recall PROJECT [--db PATH]
 ```
 
 Returns all active facts grouped by type (knowledge, decisions, errors, etc.).
@@ -101,7 +101,7 @@ cortex history PROJECT [--at TIMESTAMP] [--db PATH]
 Show CORTEX health and statistics.
 
 ```bash
-cortex status [--json-output]
+cortex status [--json]
 ```
 
 Displays: total facts, active facts, embeddings, transactions, DB size, projects.
@@ -152,13 +152,12 @@ Output includes: hash chain status, Merkle root, consensus score, timestamp.
 
 ---
 
-### `cortex ledger`
+### `cortex vote-ledger`
 
 Ledger operations.
 
 ```bash
-cortex ledger verify    # Full hash chain integrity check
-cortex ledger stats     # Ledger statistics
+cortex vote-ledger verify    # Full hash chain integrity check
 ```
 
 ---
@@ -168,7 +167,7 @@ cortex ledger stats     # Ledger statistics
 Generate EU AI Act Article 12 compliance snapshot.
 
 ```bash
-cortex compliance-report [--format json|text]
+cortex compliance-report
 ```
 
 Outputs: compliance score (0-5), requirement mapping, evidence references.
@@ -190,8 +189,10 @@ cortex audit-trail [--project PROJECT] [--limit N]
 Cast a consensus vote on a fact.
 
 ```bash
-cortex vote FACT_ID --agent AGENT_ID --vote [verify|dispute]
+cortex vote FACT_ID VALUE --agent AGENT_ID
 ```
+
+Use `VALUE=1` to verify and `VALUE=-1` to dispute.
 
 ---
 
@@ -266,7 +267,9 @@ cortex heartbeat PROJECT [ENTITY] [--category CATEGORY] [--branch BRANCH]
 Visual temporal memory browsing.
 
 ```bash
-cortex timeline PROJECT [--days N]
+cortex timeline log                  # View transaction ledger
+cortex timeline checkout TX_ID       # Reconstruct state at a transaction
+cortex timeline snapshot create NAME # Create a physical snapshot
 ```
 
 ---
@@ -278,19 +281,19 @@ cortex timeline PROJECT [--days N]
 Run auto-compaction strategies on project memory.
 
 ```bash
-cortex compact [--project PROJECT] [--strategy dedup|merge|prune|all]
+cortex compact PROJECT [--strategy dedup|merge|prune|all] [--dry-run]
 ```
 
 ---
 
-### `cortex episodic`
+### `cortex episode`
 
 Episodic memory operations.
 
 ```bash
-cortex episodic observe    # Capture session snapshot
-cortex episodic recall     # Restore from episode
-cortex episodic replay     # Replay decision chain
+cortex episode observe                      # Capture session snapshot
+cortex episode recall --project PROJECT     # Recover relevant episodes
+cortex episode patterns --project PROJECT   # Detect recurring patterns
 ```
 
 ---
@@ -300,8 +303,9 @@ cortex episodic replay     # Replay decision chain
 Context window management for agents.
 
 ```bash
-cortex context rebuild PROJECT    # Rebuild context from memory
-cortex context export PROJECT     # Export for agent consumption
+cortex context infer [--persist]  # Infer current working context
+cortex context signals            # Inspect ambient signals
+cortex context history            # Review recent inferred contexts
 ```
 
 ---
@@ -314,7 +318,7 @@ Structured agent-to-agent context transfer.
 
 ```bash
 cortex handoff generate    # Generate handoff document
-cortex handoff receive     # Receive and import handoff
+cortex handoff load        # Load the saved handoff
 ```
 
 ---
@@ -324,8 +328,8 @@ cortex handoff receive     # Receive and import handoff
 Ghost (incomplete work) management.
 
 ```bash
-cortex ghost list          # List all ghosts
-cortex ghost resolve ID    # Mark resolved
+cortex ghost field --dir . # Scan active ghosts in a directory
+cortex ghost status        # Check GHOST-1 dependencies
 ```
 
 ---
@@ -335,26 +339,22 @@ cortex ghost resolve ID    # Mark resolved
 Multi-agent swarm coordination.
 
 ```bash
-cortex swarm dispatch      # Dispatch a consensus mission
-cortex swarm status        # Check mission status
+cortex swarm audit PATH    # Audit a file or directory with the swarm
+cortex swarm refactor FILE # Refactor a file with the specialist swarm
+cortex swarm up            # Start Omega Prime orchestration
 ```
 
 ---
 
 ## Infrastructure Commands
 
-### `cortex daemon`
+### `cortex mejoralo daemon`
 
-Background daemon management.
+Infinite sovereign improvement loop.
 
 ```bash
-cortex daemon start        # Start the watchdog daemon
-cortex daemon stop         # Stop the daemon
-cortex daemon install      # Install as system service
-cortex daemon status       # Check daemon health
+cortex mejoralo daemon     # Start the continuous MEJORAlo daemon
 ```
-
-The daemon runs 13 specialized monitors: site health, SSL certs, disk space, ghost detection, security scanning, and more.
 
 ---
 
@@ -376,8 +376,9 @@ cortex autorouter history  # View switch history
 Code quality engine (X-Ray 13D scanner).
 
 ```bash
-cortex mejoralo scan PATH  # Analyze code quality
-cortex mejoralo fix PATH   # Auto-fix issues
+cortex mejoralo scan PROJECT PATH                 # Analyze code quality
+cortex mejoralo scan PROJECT PATH --auto-heal    # Attempt autonomous repair
+cortex mejoralo awwwards-fix PROJECT PATH        # UI rewrite for Awwwards-grade polish
 ```
 
 ---
@@ -387,8 +388,8 @@ cortex mejoralo fix PATH   # Auto-fix issues
 Entropy monitoring for codebase health.
 
 ```bash
-cortex entropy scan        # Measure codebase entropy
-cortex entropy dashboard   # Visual entropy report
+cortex entropy report                # Immunity and entropy status report
+cortex entropy shannon --project P   # Shannon entropy analysis
 ```
 
 ---
@@ -418,7 +419,7 @@ cortex tips [--category CATEGORY]
 Meta-cognitive session analysis.
 
 ```bash
-cortex reflect              # Analyze current session patterns
+cortex reflect PROJECT "SUMMARY"     # Store a post-mortem reflection
 ```
 
 ---

@@ -74,7 +74,10 @@ def timeline_checkout(tx_id, project, db):
         engine = get_engine(db)
         try:
             with console.status(f"[bold blue]Reconstructing state at TX #{tx_id}...[/]"):
-                facts = await engine.reconstruct_state(tx_id, project=project)  # type: ignore[reportCallIssue]
+                facts = await engine.reconstruct_state(
+                    project=project or "",
+                    tx_id=tx_id,
+                )
             if not facts:
                 err_empty_results(f"active facts at TX #{tx_id}")
                 return

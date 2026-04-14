@@ -7,6 +7,7 @@ import aiosqlite
 import pytest
 
 from cortex.engine.transaction_mixin import TransactionMixin
+from cortex.ledger import ImmutableLedger
 from cortex.utils.canonical import compute_tx_hash
 
 
@@ -47,7 +48,7 @@ class _AwaitableCursor:
 @pytest.fixture
 async def tx_conn():
     conn = await aiosqlite.connect(":memory:")
-    await conn.execute(
+    await conn.executescript(
         """
         CREATE TABLE transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,7 +59,24 @@ async def tx_conn():
             prev_hash TEXT NOT NULL,
             hash TEXT NOT NULL,
             timestamp TEXT NOT NULL
-        )
+        );
+        CREATE TABLE merkle_roots (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            root_hash TEXT NOT NULL,
+            tx_start_id INTEGER NOT NULL,
+            tx_end_id INTEGER NOT NULL,
+            tx_count INTEGER NOT NULL,
+            signature TEXT,
+            created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+        );
+        CREATE TABLE integrity_checks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            check_type TEXT NOT NULL,
+            status TEXT NOT NULL,
+            details TEXT,
+            started_at TEXT NOT NULL,
+            completed_at TEXT NOT NULL
+        );
         """
     )
     await conn.commit()
@@ -217,3 +235,159 @@ async def test_verify_ledger_initializes_immutable_ledger_from_pool(
     assert result == {"valid": True, "source": "lazy"}
     assert created_with == [pool]
     assert isinstance(engine._ledger, FakeImmutableLedger)
+
+
+@pytest.mark.asyncio
+async def test_create_checkpoint_async_does_not_commit_outer_transaction(
+    tx_conn: aiosqlite.Connection,
+) -> None:
+    ledger = ImmutableLedger(tx_conn)
+    ledger._config.CHECKPOINT_MAX = 1
+    ledger._config.CHECKPOINT_MIN = 1
+
+    await tx_conn.execute("BEGIN IMMEDIATE")
+    await tx_conn.execute(
+        """
+        INSERT INTO transactions (tenant_id, project, action, detail, prev_hash, hash, timestamp)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            "tenant-a",
+            "trust-core",
+            "store",
+            "{}",
+            "GENESIS",
+            "checkpoint-hash",
+            "2026-04-14T00:00:00Z",
+        ),
+    )
+
+    root = await ledger.create_checkpoint_async()
+
+    assert root == "checkpoint-hash"
+    assert tx_conn.in_transaction is True
+
+    await tx_conn.rollback()
+
+    cursor = await tx_conn.execute("SELECT COUNT(*) FROM transactions")
+    tx_row = await cursor.fetchone()
+    await cursor.close()
+    cursor = await tx_conn.execute("SELECT COUNT(*) FROM merkle_roots")
+    root_row = await cursor.fetchone()
+    await cursor.close()
+
+    assert tx_row[0] == 0
+    assert root_row[0] == 0
+
+
+@pytest.mark.asyncio
+async def test_audit_integrity_async_does_not_persist_or_commit_outer_transaction(
+    tx_conn: aiosqlite.Connection,
+) -> None:
+    ledger = ImmutableLedger(tx_conn)
+
+    await tx_conn.execute("BEGIN IMMEDIATE")
+    await tx_conn.execute(
+        """
+        INSERT INTO transactions (tenant_id, project, action, detail, prev_hash, hash, timestamp)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            "tenant-a",
+            "trust-core",
+            "store",
+            "{}",
+            "GENESIS",
+            "audit-hash",
+            "2026-04-14T00:00:00Z",
+        ),
+    )
+
+    report = await ledger.audit_integrity_async()
+
+    assert report["tx_count"] == 1
+    assert tx_conn.in_transaction is True
+
+    await tx_conn.rollback()
+
+    cursor = await tx_conn.execute("SELECT COUNT(*) FROM transactions")
+    tx_row = await cursor.fetchone()
+    await cursor.close()
+    cursor = await tx_conn.execute("SELECT COUNT(*) FROM integrity_checks")
+    check_row = await cursor.fetchone()
+    await cursor.close()
+
+    assert tx_row[0] == 0
+    assert check_row[0] == 0
+
+
+@pytest.mark.asyncio
+async def test_audit_integrity_async_tracks_hash_continuity_per_tenant(
+    tx_conn: aiosqlite.Connection,
+) -> None:
+    ledger = ImmutableLedger(tx_conn)
+
+    tx_rows = [
+        (
+            "tenant-a",
+            "trust-core",
+            "store",
+            "{}",
+            "GENESIS",
+            compute_tx_hash(
+                "GENESIS",
+                "trust-core",
+                "store",
+                "{}",
+                "2026-04-14T00:00:00Z",
+            ),
+            "2026-04-14T00:00:00Z",
+        ),
+        (
+            "tenant-b",
+            "trust-core",
+            "store",
+            "{}",
+            "GENESIS",
+            compute_tx_hash(
+                "GENESIS",
+                "trust-core",
+                "store",
+                "{}",
+                "2026-04-14T00:01:00Z",
+            ),
+            "2026-04-14T00:01:00Z",
+        ),
+    ]
+    tx_rows.append(
+        (
+            "tenant-a",
+            "trust-core",
+            "update",
+            "{}",
+            tx_rows[0][5],
+            compute_tx_hash(
+                tx_rows[0][5],
+                "trust-core",
+                "update",
+                "{}",
+                "2026-04-14T00:02:00Z",
+            ),
+            "2026-04-14T00:02:00Z",
+        )
+    )
+
+    await tx_conn.executemany(
+        """
+        INSERT INTO transactions (tenant_id, project, action, detail, prev_hash, hash, timestamp)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        tx_rows,
+    )
+    await tx_conn.commit()
+
+    report = await ledger.audit_integrity_async()
+
+    assert report["valid"] is True
+    assert report["violations"] == []
+    assert report["tx_count"] == 3

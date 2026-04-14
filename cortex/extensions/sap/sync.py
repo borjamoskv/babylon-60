@@ -6,7 +6,7 @@ Supports configurable conflict resolution strategies.
 
 from __future__ import annotations
 
-import asyncio
+import inspect
 import json
 import logging
 from dataclasses import dataclass, field
@@ -233,7 +233,7 @@ class SAPSync:
         """Retrieve existing SAP facts from CORTEX."""
         try:
             # Try async engine first
-            if hasattr(self.engine, "recall") and asyncio.iscoroutinefunction(
+            if hasattr(self.engine, "recall") and inspect.iscoroutinefunction(
                 getattr(self.engine, "recall", None)
             ):
                 return await self.engine.recall(project=project, fact_type="sap_entity")
@@ -245,7 +245,7 @@ class SAPSync:
 
     async def _store_fact(self, fact_data: dict[str, Any]) -> int:
         """Store a fact using the available engine interface."""
-        if hasattr(self.engine, "store") and asyncio.iscoroutinefunction(
+        if hasattr(self.engine, "store") and inspect.iscoroutinefunction(
             getattr(self.engine, "store", None)
         ):
             return await self.engine.store(

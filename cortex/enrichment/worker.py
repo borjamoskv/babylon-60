@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import inspect
 import json
 import logging
 from datetime import datetime, timedelta
 from typing import Any
 
+from cortex.ledger.models import utc_now_iso
 from cortex.ledger.queue import EnrichmentQueue
 from cortex.ledger.store import LedgerStore
 
@@ -80,7 +82,7 @@ class EnrichmentWorker:
         if not self._compat_db_mode:
             return self.queue.claim_one()  # type: ignore[reportOptionalMemberAccess]
 
-        now = datetime.now().isoformat()
+        now = utc_now_iso()
         async with self.engine.session() as conn:
             cursor = await conn.execute(
                 """
@@ -180,7 +182,7 @@ class EnrichmentWorker:
                     SET status = 'completed', updated_at = ?
                     WHERE id = ?
                     """,
-                    (datetime.now().isoformat(), job_id),
+                    (utc_now_iso(), job_id),
                 )
                 await conn.commit()
         except Exception as e:
@@ -197,8 +199,8 @@ class EnrichmentWorker:
                     """,
                     (
                         str(e),
-                        (datetime.now() + timedelta(minutes=5)).isoformat(),
-                        datetime.now().isoformat(),
+                        (datetime.fromisoformat(utc_now_iso()) + timedelta(minutes=5)).isoformat(),
+                        utc_now_iso(),
                         job_id,
                     ),
                 )
@@ -223,9 +225,11 @@ class EnrichmentWorker:
                 return
 
             # Call the sovereign enrichment method in EmbeddingManager
-            await self.engine.embeddings.enrich_fact(
+            result = self.engine.embeddings.enrich_fact(
                 fact_id=int(fact_id), content=content, project=project, tenant_id=tenant_id
             )
+            if inspect.isawaitable(result):
+                await result
         except Exception as e:
             logger.warning("Semantic enrichment for fact %s failure: %s", fact_id, e)
             raise

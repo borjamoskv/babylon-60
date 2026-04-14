@@ -17,12 +17,12 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any
 
 import aiosqlite
 
-from cortex.memory.models import MemoryEvent
+from cortex.memory.models import MemoryEvent, now_iso
 
 try:
     from cortex.extensions.security.tenant import get_tenant_id
@@ -119,22 +119,17 @@ class EventLedgerL3:
         tenant_lock = await self._get_tenant_lock(event.tenant_id)
 
         async with tenant_lock:
-            # [GOVERNANCE] Calculate the cryptographic chain if signature is missing
-            if not event.signature:
-                prev_hash = await self._get_last_hash(event.tenant_id)
-                # Immutability payload: event identity + content + provenance
-                # [GOVERNANCE] Content is now hashed into the signature payload.
-                content_hash = hashlib.sha3_256(event.content.encode()).hexdigest()
-                payload = (
-                    f"{event.event_id}:{event.timestamp.isoformat()}:"
-                    f"{event.tenant_id}:{event.role}:{content_hash}:{prev_hash}"
-                )
-                signature = hashlib.sha3_256(payload.encode()).hexdigest()
+            prev_hash = await self._get_last_hash(event.tenant_id)
+            content_hash = hashlib.sha3_256(event.content.encode()).hexdigest()
+            payload = (
+                f"{event.event_id}:{event.timestamp.isoformat()}:"
+                f"{event.tenant_id}:{event.role}:{content_hash}:{prev_hash}"
+            )
+            signature = hashlib.sha3_256(payload.encode()).hexdigest()
 
-                # Update event model in-place (since it's a Pydantic model)
-                # Using object.__setattr__ if the model is frozen (which it is)
-                object.__setattr__(event, "prev_hash", prev_hash)
-                object.__setattr__(event, "signature", signature)
+            # Never trust caller-supplied chain fields on the write boundary.
+            object.__setattr__(event, "prev_hash", prev_hash)
+            object.__setattr__(event, "signature", signature)
 
             cursor = await self._conn.execute(
                 """INSERT OR IGNORE INTO memory_events
@@ -267,7 +262,7 @@ class EventLedgerL3:
             "events_audited": count,
             "integrity_score": integrity,
             "findings": audit_log or ["Memory event chain shows 100% integrity."],
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": now_iso(),
         }
 
 

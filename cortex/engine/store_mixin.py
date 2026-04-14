@@ -404,65 +404,71 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         tenant_id = self._resolve_tenant(tenant_id)
 
         async with self.session() as conn:
-            query = (
-                "SELECT tenant_id, project, content, fact_type, "
-                "confidence, source, metadata "
-                "FROM facts WHERE id = ? AND tenant_id = ? AND is_tombstoned = 0"
-            )
-            async with conn.execute(query, (fact_id, tenant_id)) as cursor:
-                row = await cursor.fetchone()
-            if not row:
-                raise ValueError(f"Fact {fact_id} not found or belongs to another tenant")
+            try:
+                query = (
+                    "SELECT tenant_id, project, content, fact_type, "
+                    "confidence, source, metadata "
+                    "FROM facts WHERE id = ? AND tenant_id = ? AND is_tombstoned = 0"
+                )
+                async with conn.execute(query, (fact_id, tenant_id)) as cursor:
+                    row = await cursor.fetchone()
+                if not row:
+                    raise ValueError(f"Fact {fact_id} not found or belongs to another tenant")
 
-            (
-                db_tenant_id,
-                project,
-                raw_old_content,
-                fact_type,
-                confidence,
-                source,
-                raw_old_meta_json,
-            ) = row
+                (
+                    db_tenant_id,
+                    project,
+                    raw_old_content,
+                    fact_type,
+                    confidence,
+                    source,
+                    raw_old_meta_json,
+                ) = row
 
-            # Fetch tags from bridge table
-            async with conn.execute(
-                "SELECT tag FROM fact_tags WHERE fact_id = ? AND tenant_id = ?",
-                (fact_id, db_tenant_id),
-            ) as cursor:
-                tag_rows = await cursor.fetchall()
-                old_tags = [r[0] for r in tag_rows]
+                # Fetch tags from bridge table
+                async with conn.execute(
+                    "SELECT tag FROM fact_tags WHERE fact_id = ? AND tenant_id = ?",
+                    (fact_id, db_tenant_id),
+                ) as cursor:
+                    tag_rows = await cursor.fetchall()
+                    old_tags = [r[0] for r in tag_rows]
 
-            enc = get_default_encrypter()
-            old_content = (
-                enc.decrypt_str(raw_old_content, tenant_id=db_tenant_id) if raw_old_content else ""
-            )
-            new_meta: dict[str, Any] = (
-                enc.decrypt_json(raw_old_meta_json, tenant_id=db_tenant_id)
-                if raw_old_meta_json
-                else {}
-            ) or {}
-            if meta:
-                new_meta.update(meta)
-            new_meta["previous_fact_id"] = fact_id
+                enc = get_default_encrypter()
+                old_content = (
+                    enc.decrypt_str(raw_old_content, tenant_id=db_tenant_id)
+                    if raw_old_content
+                    else ""
+                )
+                new_meta: dict[str, Any] = (
+                    enc.decrypt_json(raw_old_meta_json, tenant_id=db_tenant_id)
+                    if raw_old_meta_json
+                    else {}
+                ) or {}
+                if meta:
+                    new_meta.update(meta)
+                new_meta["previous_fact_id"] = fact_id
 
-            # Deprecate first to avoid unique constraint violations on identical hashes
-            await self.deprecate(fact_id, reason="updated", conn=conn, tenant_id=db_tenant_id)
+                # Deprecate first to avoid unique constraint violations on identical hashes
+                await self.deprecate(fact_id, reason="updated", conn=conn, tenant_id=db_tenant_id)
 
-            new_id = await self.store(
-                project=project,
-                content=content if content is not None else str(old_content or ""),
-                tenant_id=db_tenant_id,
-                fact_type=fact_type,
-                tags=tags if tags is not None else old_tags,
-                confidence=confidence,
-                source=source or "engine:update",
-                meta=new_meta,
-                conn=conn,
-                commit=False,
-            )
+                new_id = await self.store(
+                    project=project,
+                    content=content if content is not None else str(old_content or ""),
+                    tenant_id=db_tenant_id,
+                    fact_type=fact_type,
+                    tags=tags if tags is not None else old_tags,
+                    confidence=confidence,
+                    source=source or "engine:update",
+                    meta=new_meta,
+                    conn=conn,
+                    commit=False,
+                )
 
-            await conn.commit()
-            return new_id
+                await conn.commit()
+                return new_id
+            except Exception:
+                await conn.rollback()
+                raise
 
     async def deprecate(
         self,

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 import socket
 import time
 from typing import TYPE_CHECKING
@@ -49,7 +50,7 @@ class NetworkVoidOracle:
             content = (
                 "DESCONEXIÓN DEL ENJAMBRE. Entrando en el Vacío (Void State). Aislamiento total."
             )
-            if hasattr(self.engine, "store") and asyncio.iscoroutinefunction(self.engine.store):
+            if hasattr(self.engine, "store") and inspect.iscoroutinefunction(self.engine.store):
                 await self.engine.store(
                     project="SYSTEM",
                     content=content,
@@ -69,7 +70,7 @@ class NetworkVoidOracle:
             self._in_void = False
             content = f"RECONEXIÓN. Retorno desde el Vacío tras {void_duration:.1f} segundos."
 
-            if hasattr(self.engine, "store") and asyncio.iscoroutinefunction(self.engine.store):
+            if hasattr(self.engine, "store") and inspect.iscoroutinefunction(self.engine.store):
                 await self.engine.store(
                     project="SYSTEM",
                     content=content,

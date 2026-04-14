@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import math
 import uuid
-from typing import Optional
+from typing import Any, Optional
 
 from cortex.engine.slashing import SlashingEngine
 from cortex.telemetry.metrics import metrics
@@ -35,6 +36,8 @@ class ConsensusManager:
     def __init__(self, engine, signal_bus=None):
         self.engine = engine
         self._signal_bus = signal_bus or getattr(engine, "_signal_bus", None)
+        self._quorum_promises: dict[tuple[str, int], dict[str, dict[str, Any]]] = {}
+        self._quorum_lock = asyncio.Lock()
 
     async def vote(
         self,
@@ -47,6 +50,31 @@ class ConsensusManager:
         # Purge: Redirect to v2 logic
         target_agent = agent_id or agent
         return await self.vote_v2(fact_id, target_agent, value)
+
+    async def promise_vote(
+        self,
+        fact_id: int,
+        agent_id: str,
+        value: int,
+        reason: Optional[str] = None,
+        tenant_id: Optional[str] = None,
+        **_: Any,
+    ) -> float:
+        """Stage a vote until quorum resolution.
+
+        This preserves the public quorum API without changing the existing
+        vote_v2() path, which continues to commit immediately.
+        """
+        if value not in (-1, 0, 1):
+            raise ValueError(f"vote value must be -1, 0, or 1, got {value}")
+
+        resolved_tenant = tenant_id or await self._resolve_fact_tenant(fact_id)
+        async with self._quorum_lock:
+            bucket = self._quorum_promises.setdefault((resolved_tenant, fact_id), {})
+            bucket[agent_id] = {"value": value, "reason": reason}
+
+        async with self.engine.session() as conn:
+            return await self._recalculate_consensus_v2(fact_id, conn, allow_legacy_fallback=False)
 
     async def register_agent(
         self,
@@ -77,6 +105,7 @@ class ConsensusManager:
             raise ValueError(f"vote value must be -1, 0, or 1, got {value}")
 
         async with self.engine.session() as conn:
+            await self._discard_pending_promise(conn, fact_id, agent_id)
             cursor = await conn.execute(
                 "SELECT reputation_score FROM agents WHERE id = ? AND is_active = 1",
                 (agent_id,),
@@ -137,7 +166,55 @@ class ConsensusManager:
             await conn.commit()
             return score
 
-    async def _recalculate_consensus_v2(self, fact_id: int, conn) -> float:
+    async def resolve_quorum(
+        self,
+        fact_id: int,
+        tenant_id: Optional[str] = None,
+        minimum_votes: int = 2,
+        **_: Any,
+    ) -> float:
+        """Resolve staged promises once quorum is available.
+
+        If quorum is not met, this returns the current consensus score without
+        mutating persisted votes.
+        """
+        if minimum_votes < 1:
+            raise ValueError("minimum_votes must be >= 1")
+
+        resolved_tenant = tenant_id or await self._resolve_fact_tenant(fact_id)
+        quorum_key = (resolved_tenant, fact_id)
+
+        async with self._quorum_lock:
+            staged = self._quorum_promises.get(quorum_key, {})
+            if len(staged) < minimum_votes:
+                staged = {}
+            else:
+                staged = dict(staged)
+                self._quorum_promises.pop(quorum_key, None)
+
+        if not staged:
+            async with self.engine.session() as conn:
+                return await self._recalculate_consensus_v2(fact_id, conn, allow_legacy_fallback=False)
+
+        # Deterministic order keeps resolution stable across concurrent callers.
+        for agent_id in sorted(staged):
+            vote = staged[agent_id]
+            await self.vote_v2(
+                fact_id=fact_id,
+                agent_id=agent_id,
+                value=vote["value"],
+                reason=vote["reason"],
+            )
+
+        async with self.engine.session() as conn:
+            return await self._recalculate_consensus_v2(fact_id, conn, allow_legacy_fallback=False)
+
+    async def _recalculate_consensus_v2(
+        self,
+        fact_id: int,
+        conn,
+        allow_legacy_fallback: bool = True,
+    ) -> float:
         cursor = await conn.execute(
             "SELECT v.vote, v.vote_weight, a.reputation_score "
             "FROM consensus_votes_v2 v "
@@ -147,6 +224,10 @@ class ConsensusManager:
         )
         votes = await cursor.fetchall()
         if not votes:
+            if not allow_legacy_fallback:
+                score = 1.0
+                await self._update_fact_score(fact_id, score, conn)
+                return score
             return await self._recalculate_consensus(fact_id, conn)
 
         # Logarithmic Opinion Pool (LogOP) consensus calculation
@@ -173,6 +254,29 @@ class ConsensusManager:
         await self._update_agent_entropy(fact_id, score, conn)
 
         return score
+
+    async def _resolve_fact_tenant(self, fact_id: int) -> str:
+        async with self.engine.session() as conn:
+            cursor = await conn.execute("SELECT tenant_id FROM facts WHERE id = ?", (fact_id,))
+            row = await cursor.fetchone()
+            return row[0] if row else "default"
+
+    async def _discard_pending_promise(
+        self,
+        conn,
+        fact_id: int,
+        agent_id: str,
+    ) -> None:
+        cursor = await conn.execute("SELECT tenant_id FROM facts WHERE id = ?", (fact_id,))
+        row = await cursor.fetchone()
+        tenant_id = row[0] if row else "default"
+        async with self._quorum_lock:
+            bucket = self._quorum_promises.get((tenant_id, fact_id))
+            if not bucket:
+                return
+            bucket.pop(agent_id, None)
+            if not bucket:
+                self._quorum_promises.pop((tenant_id, fact_id), None)
 
     async def _recalculate_consensus(self, fact_id: int, conn) -> float:
         cursor = await conn.execute(

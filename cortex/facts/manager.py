@@ -8,6 +8,7 @@ from pydantic import ValidationError
 
 from cortex.engine.models import Fact, row_to_fact
 from cortex.engine.store_validators import validate_content
+from cortex.security.haiku import HaikuGuard
 from cortex.utils.canonical import now_iso
 
 if TYPE_CHECKING:
@@ -18,11 +19,6 @@ _FACT_FIELDS = {f.name for f in dataclasses.fields(Fact)}
 __all__ = ["FactManager"]
 
 logger = logging.getLogger("cortex.facts")
-
-try:
-    from cortex.security.haiku import HaikuGuard
-except Exception:  # noqa: BLE001
-    HaikuGuard = None
 
 
 class FactManager:
@@ -117,7 +113,6 @@ class FactManager:
         **kwargs,
     ) -> int | tuple[int, bool]:
 
-        # Optional guard: do not block engine startup if the immunity stack is mid-repair.
         if HaikuGuard is not None:
             HaikuGuard.enforce(content, {"fact_type": fact_type, "tags": tags or []})
 
@@ -184,8 +179,11 @@ class FactManager:
                             return (fact_id, False) if _return_created else fact_id
         except ValidationError as e:
             raise ValueError(f"Ingestion Validation Failed: {e}") from e
-        except (OSError, RuntimeError, ValueError) as e:
-            logger.warning("V8 Ingestion check failed: %s", e)
+        except ValueError:
+            raise
+        except (OSError, RuntimeError) as e:
+            logger.exception("V8 Ingestion check failed closed for project=%s tenant_id=%s", project, tenant_id)
+            raise RuntimeError("[AX-II] FactManager ingestion checks failed") from e
 
         from cortex.engine.store_mixin import StoreMixin
 

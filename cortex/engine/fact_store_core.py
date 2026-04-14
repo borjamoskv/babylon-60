@@ -56,11 +56,32 @@ async def _resolve_causal_parent(
 ) -> Optional[int]:
     """Validate or auto-resolve the parent decision link."""
     if parent_decision_id is not None:
+        facts_columns = await _get_table_columns(conn, "facts")
+        where_parts = ["id = ?"]
+        params: list[Any] = [parent_decision_id]
+
+        if "tenant_id" in facts_columns:
+            where_parts.append("tenant_id = ?")
+            params.append(tenant_id)
+        if "project" in facts_columns:
+            where_parts.append("project = ?")
+            params.append(project)
+        if "fact_type" in facts_columns:
+            where_parts.append("fact_type = 'decision'")
+        if "is_tombstoned" in facts_columns:
+            where_parts.append("is_tombstoned = 0")
+
         async with conn.execute(
-            "SELECT id FROM facts WHERE id = ?", (parent_decision_id,)
+            f"SELECT id FROM facts WHERE {' AND '.join(where_parts)}",
+            params,
         ) as cursor:
             if await cursor.fetchone() is None:
-                logger.warning("parent_decision_id=%d non-existent — cleared", parent_decision_id)
+                logger.warning(
+                    "parent_decision_id=%d invalid for tenant=%s project=%s — cleared",
+                    parent_decision_id,
+                    tenant_id,
+                    project,
+                )
                 return None
         return parent_decision_id
 

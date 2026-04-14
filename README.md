@@ -90,22 +90,22 @@ Traditional logging and standard vector stores fail the epistemic containment te
 $ cortex init
 
 # 2. Store a memory
-$ cortex memory store --agent "risk-bot" --content "Transaction flagged: IP mismatch"
+$ cortex memory store risk-bot "Transaction flagged: IP mismatch" --type decision
 [+] Fact stored. Ledger hash: 8f4a2b9e...
 
 # 3. Verify integrity
-$ cortex verify record 8f4a2b9e
+$ cortex verify 1
 [✔] VERIFIED: Hash chain intact. Merkle root sealed.
 
 # 4. Tamper attempt (direct DB mutation)
-$ sqlite3 cortex.db "UPDATE facts SET content='Transaction approved' WHERE id='8f4a2b9e'"
+$ sqlite3 cortex.db "UPDATE facts SET content='Transaction approved' WHERE id='1'"
 
 # 5. Ledger verification
-$ cortex verify ledger
+$ cortex ledger verify
 [✘] TAMPER DETECTED: Hash mismatch at block 8f4a2b9e
 
 # 6. Export evidence
-$ cortex compliance-report generate --format pdf
+$ cortex compliance-report
 ```
 
 ## Quickstart
@@ -121,10 +121,10 @@ pip install -e .
 cortex init
 
 # 2. Store a memory (SHA-256 hashed and chained to prior facts)
-cortex memory store --agent "risk-bot" --content "Transaction flagged: IP mismatch"
+cortex memory store risk-bot "Transaction flagged: IP mismatch" --type decision
 
 # 3. Verify integrity (detects any manual database tampering)
-cortex verify ledger
+cortex ledger verify
 ```
 
 ## Integration

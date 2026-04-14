@@ -101,6 +101,34 @@ class TestLogDecision:
         row = await cursor.fetchone()
         assert row[0] == "custom-project"
 
+    async def test_links_previous_fact_not_only_previous_decision(self, tracker):
+        note_id = await tracker._engine.store(
+            project="test-agent",
+            content="Intermediate compliance note.",
+            fact_type="knowledge",
+            source="agent:note",
+            confidence="stated",
+        )
+
+        fact_id = tracker.log_decision(
+            content="Decision that should chain to the immediately preceding fact.",
+            agent_id="agent:loan-processor",
+        )
+
+        conn = await tracker._engine.get_conn()
+        cursor = await conn.execute("SELECT metadata, content FROM facts WHERE id = ?", (fact_id,))
+        row = await cursor.fetchone()
+        assert row is not None
+
+        from cortex.crypto import get_default_encrypter
+
+        enc = get_default_encrypter()
+        meta = enc.decrypt_json(row[0], tenant_id="default")
+        assert meta["previous_fact_id"] == note_id
+        content = enc.decrypt_str(row[1], tenant_id="default")
+        assert content is not None
+        assert f"Compatible with #{note_id}" in content
+
 
 # ─── verify_chain ─────────────────────────────────────────────────────
 

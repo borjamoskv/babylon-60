@@ -750,6 +750,7 @@ all = [
     { name = "fastapi" },
     { name = "google-adk" },
     { name = "httpx" },
+    { name = "mcp" },
     { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "pandas", version = "3.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "pytest" },
@@ -789,6 +790,9 @@ dev = [
     { name = "ruff" },
     { name = "z3-solver" },
 ]
+mcp = [
+    { name = "mcp" },
+]
 toolbox = [
     { name = "toolbox-core" },
 ]
@@ -808,7 +812,7 @@ requires-dist = [
     { name = "beautifulsoup4" },
     { name = "chromadb", specifier = ">=1.5.5" },
     { name = "click", specifier = ">=8.0" },
-    { name = "cortex-persist", extras = ["api", "dev", "adk", "toolbox", "billing", "cloud", "trends"], marker = "extra == 'all'" },
+    { name = "cortex-persist", extras = ["api", "mcp", "dev", "adk", "toolbox", "billing", "cloud", "trends"], marker = "extra == 'all'" },
     { name = "cryptography", specifier = ">=46.0.5" },
     { name = "email-validator", specifier = ">=2.1.0" },
     { name = "fastapi", marker = "extra == 'api'", specifier = ">=0.110" },
@@ -816,6 +820,7 @@ requires-dist = [
     { name = "httpx", marker = "extra == 'api'", specifier = ">=0.27" },
     { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.27" },
     { name = "keyring", specifier = ">=25.7.0" },
+    { name = "mcp", marker = "extra == 'mcp'", specifier = ">=1.0.0" },
     { name = "numba", specifier = ">=0.65.0" },
     { name = "onnxruntime", specifier = ">=1.17" },
     { name = "pandas", marker = "extra == 'trends'", specifier = ">=2.0" },
@@ -841,7 +846,7 @@ requires-dist = [
     { name = "watchdog", specifier = ">=6.0.0" },
     { name = "z3-solver", marker = "extra == 'dev'", specifier = ">=4.13.0" },
 ]
-provides-extras = ["api", "dev", "adk", "toolbox", "billing", "cloud", "trends", "all"]
+provides-extras = ["api", "mcp", "dev", "adk", "toolbox", "billing", "cloud", "trends", "all"]
 
 [[package]]
 name = "coverage"

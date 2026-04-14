@@ -5,6 +5,9 @@
 **Analyst:** CORTEX Sovereign Engine  
 **Classification:** Internal Strategic Document
 
+> [!IMPORTANT]
+> Historical v5 snapshot. This document may describe pre-v8 module topology and legacy APIs that are no longer the current runtime contract. Use `docs/architecture.md`, `docs/reference.md`, and `docs/sdks.md` for the live public surface.
+
 ---
 
 ## Executive Summary

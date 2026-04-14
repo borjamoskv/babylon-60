@@ -93,3 +93,27 @@ def test_build_health_report_uses_history_without_persisting_extra_samples(tmp_p
 
     assert report.trend == "degrading"
     assert len(history) == 2
+
+
+def test_runtime_health_payload_degrades_on_negative_trend_without_bad_components(
+    tmp_path: Path,
+) -> None:
+    db_path = str(tmp_path / "health-trend.db")
+    trend = TrendDetector()
+    trend.persist_to_db(db_path, 100.0, "S", timestamp=1000.0)
+    trend.persist_to_db(db_path, 95.0, "A", timestamp=2000.0)
+
+    payload = build_runtime_health_payload(
+        db_path,
+        registry=_registry(
+            _Collector("db", 0.9, weight=1.5),
+            _Collector("ledger", 0.9, weight=1.2),
+            _Collector("entropy", 0.9),
+            _Collector("facts", 0.9, weight=0.8),
+        ),
+    )
+
+    assert payload["status"] == "degraded"
+    assert payload["degraded_features"] == []
+    assert payload["trend"] == "degrading"
+    assert any("DEGRADING" in warning for warning in payload["warnings"])

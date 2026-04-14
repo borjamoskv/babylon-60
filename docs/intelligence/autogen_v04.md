@@ -1,6 +1,8 @@
 # INFORME DE INTELIGENCIA: AutoGen v0.4 (Microsoft)
 ## Clasificación: [SOVEREIGN-RED] - Arquitectura de Enjambre Progresiva
 
+> **Historical note (2026-04-14):** this intelligence note preserves design-era terminology. References such as `CortexMemory` should be interpreted as historical concepts, not as the current public Python API.
+
 ### 1. Resumen Ejecutivo
 AutoGen (~160K LOC en core+agentchat) ha trascendido de un sistema de prompts a un **Runtime de Agentes (Actor System)** robusto. Su arquitectura actual se basa en el desacoplamiento total mediante un "AgentRuntime" y la comunicación asíncrona por paso de mensajes.
 

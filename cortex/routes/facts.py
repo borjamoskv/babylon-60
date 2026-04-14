@@ -10,6 +10,7 @@ from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine as AsyncCortexEngine
 from cortex.engine.storage_guard import GuardViolation
+from cortex.services.fact_batch_store import batch_store_facts
 from cortex.services.fact_voting import FactVoteNotFoundError, record_fact_vote
 from cortex.types.models import (
     FactResponse,
@@ -89,31 +90,12 @@ async def batch_store(
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> dict:
     """Batch store up to 100 facts in a single request."""
-    ids: list[int] = []
-    errors: list[dict] = []
-    for i, mem in enumerate(req.memories):
-        try:
-            fact_id = await engine.store(
-                project=mem.project,
-                content=mem.content,
-                tenant_id=auth.tenant_id,
-                fact_type=mem.type,
-                tags=mem.tags,
-                source=mem.source,
-                meta=mem.metadata or {},
-                parent_decision_id=mem.parent_decision_id,
-            )
-            ids.append(fact_id)
-        except (sqlite3.Error, ValueError, OSError):
-            logger.exception("Failed to batch store fact at index %d", i)
-            errors.append({"index": i, "error": "Failed to store fact"})
-
-    return {
-        "stored": len(ids),
-        "ids": ids,
-        "errors": errors,
-        "total_requested": len(req.memories),
-    }
+    result = await batch_store_facts(
+        engine,
+        memories=req.model_dump()["memories"],
+        tenant_id=auth.tenant_id,
+    )
+    return result.to_dict()
 
 
 @router.get("/v1/projects/{project}/facts", response_model=list[FactResponse])

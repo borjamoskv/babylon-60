@@ -2,6 +2,8 @@
 
 > **Documento Arquitectónico Canónico**  
 > *Sovereign Hypervisor Architecture - Rust-First*
+>
+> **Historical note (2026-04-14):** this whitepaper describes a conceptual Rust-first hypervisor architecture and a design-era API, not the current Python package's public runtime contract. Treat the “Core API” below as architectural intent, not as callable methods in the current repo.
 
 ## 1. Introducción: El Paradigma de la Continuidad Cognitiva
 La excesiva dependencia de persistencia de datos pasiva exacerba la "entropía del conocimiento". Las bases vectoriales que operan con RAG puro fallan epistémicamente al recuperar fragmentos semánticamente similares pero lógicamente invalidados.
@@ -17,7 +19,7 @@ La unidad atómica es el **Belief Object**.
 *   **Dependencias Lógicas**: Vectores `entails` ($\vdash$) y `discards` ($\ll$) para mantener la consistencia del grafo. Si una premisa colapsa, todas sus dependencias caducan mecánicamente en $O(1)$.
 
 ## 3. El Core API
-La gobernanza del Hipervisor se expone mediante 5 operaciones atómicas de alta densidad:
+La gobernanza del Hipervisor se formula aquí mediante 5 operaciones atómicas de alta densidad a nivel conceptual:
 1.  `ingest_episode(event_obj)`: Segregación binaria del ruido episódico de la atención inmediata del agente. 
 2.  `revise_belief(belief_id, evidence_ref)`: Dispara el Sistema de Mantenimiento de Verdad (ATMS). Ejecuta el cierre transitivo de dependencias.
 3.  `resolve_context(query_params)`: Evalúa la ecuación tensorial de inyección de contexto en microsegundos y emite un Paquete de Contexto optimizado (KV-Cache-Refs).

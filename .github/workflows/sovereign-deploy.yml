@@ -89,16 +89,38 @@ jobs:
           python scripts/release_preflight.py
           python -m twine check dist/*
 
+      - name: Lint (Ruff, PR diff scope)
+        if: steps.scope.outputs.release_only != 'true' && github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(printf '%s\n' "${{ steps.scope.outputs.python_files }}" | sed '/^$/d')
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No Python files changed."
+            exit 0
+          fi
+          ruff check "${files[@]}" --output-format=github
       - name: Lint (Ruff)
-        if: steps.scope.outputs.release_only != 'true'
+        if: steps.scope.outputs.release_only != 'true' && github.event_name != 'pull_request'
         run: ruff check cortex/ --output-format=github
 
       - name: Type check (mypy — supplementary, Pyright is canonical)
         if: steps.scope.outputs.release_only != 'true'
         run: mypy cortex/ --ignore-missing-imports || true
 
+      - name: Security scan (Bandit, PR diff scope)
+        if: steps.scope.outputs.release_only != 'true' && github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(printf '%s\n' "${{ steps.scope.outputs.python_files }}" | sed '/^$/d')
+          if [ "${#files[@]}" -gt 0 ]; then
+            bandit -f json -o bandit-report.json "${files[@]}" || true
+          else
+            printf '{}\n' > bandit-report.json
+          fi
       - name: Security scan (Bandit)
-        if: steps.scope.outputs.release_only != 'true'
+        if: steps.scope.outputs.release_only != 'true' && github.event_name != 'pull_request'
         run: bandit -r cortex/ -f json -o bandit-report.json || true
 
       - name: Dependency audit (Safety)

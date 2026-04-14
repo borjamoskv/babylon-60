@@ -28,26 +28,35 @@ def _run_async(coro: Coroutine[Any, Any, _T]) -> _T:
 @cli.command()
 @click.argument("fact_id", type=int)
 @click.option("--reason", "-r", default=None, help="Razón de la eliminación")
+@click.option("--tenant-id", default="default", show_default=True, help="Tenant scope")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def delete(fact_id, reason, db) -> None:
+def delete(fact_id, reason, tenant_id, db) -> None:
     """Soft-delete: depreca un fact y auto-sincroniza JSON."""
     engine = get_engine(db)
     try:
         try:
-            fact = _run_async(engine.retrieve(fact_id))
+            fact = _run_async(engine.get_fact(fact_id, tenant_id=tenant_id))
         except (KeyError, ValueError, sqlite3.Error, FactNotFound):
             err_fact_not_found(fact_id)
             return
 
-        from cortex.engine.models import Fact
+        if fact is None:
+            err_fact_not_found(fact_id)
+            return
 
-        assert isinstance(fact, Fact)
+        tenant_id = getattr(fact, "tenant_id", None) or tenant_id
 
         console.print(
             f"[dim]Deprecando:[/] [bold]#{fact_id}[/] "
             f"[cyan]{fact.project}[/] ({fact.fact_type}) — {fact.content[:80]}..."
         )
-        success = _run_async(engine.deprecate(fact_id, reason or "deleted-via-cli"))
+        success = _run_async(
+            engine.deprecate(
+                fact_id,
+                reason or "deleted-via-cli",
+                tenant_id=tenant_id,
+            )
+        )
         if success:
             wb = _run_async(export_to_json(engine))
             console.print(
@@ -64,8 +73,9 @@ def delete(fact_id, reason, db) -> None:
 @click.option("--project", "-p", default=None, help="Filtrar por proyecto")
 @click.option("--type", "fact_type", default=None, help="Filtrar por tipo")
 @click.option("--limit", "-n", default=20, help="Máximo de resultados")
+@click.option("--tenant-id", default="default", show_default=True, help="Tenant scope")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def list_facts(project, fact_type, limit, db) -> None:
+def list_facts(project, fact_type, limit, tenant_id, db) -> None:
     """Listar facts activos (tabulado)."""
     engine = get_engine(db)
     try:
@@ -74,21 +84,21 @@ def list_facts(project, fact_type, limit, db) -> None:
             async with engine.session() as conn:
                 query = """
                     SELECT id, project, content, fact_type, tags, created_at
-                    FROM facts WHERE valid_until IS NULL
+                    FROM facts WHERE valid_until IS NULL AND tenant_id = ?
                 """
-            params = []
-            if project:
-                query += " AND project = ?"
-                params.append(project)
-            if fact_type:
-                query += " AND fact_type = ?"
-                params.append(fact_type)
-            query += " ORDER BY project, fact_type, id"
-            if limit:
-                query += " LIMIT ?"
-                params.append(limit)
-            cursor = await conn.execute(query, params)
-            return list(await cursor.fetchall())
+                params = [tenant_id]
+                if project:
+                    query += " AND project = ?"
+                    params.append(project)
+                if fact_type:
+                    query += " AND fact_type = ?"
+                    params.append(fact_type)
+                query += " ORDER BY project, fact_type, id"
+                if limit:
+                    query += " LIMIT ?"
+                    params.append(limit)
+                cursor = await conn.execute(query, params)
+                return list(await cursor.fetchall())
 
         rows = _run_async(__get_rows())
 
@@ -120,7 +130,7 @@ def list_facts(project, fact_type, limit, db) -> None:
             # Decrypt content (may be AES-encrypted in DB)
             raw_content = row[2]
             try:
-                content = enc.decrypt_str(raw_content, tenant_id="default")
+                content = enc.decrypt_str(raw_content, tenant_id=tenant_id)
             except (ValueError, TypeError, OSError, InvalidTag):
                 content = raw_content  # Fallback to raw if decryption fails
             content_str = str(content) if content else ""
@@ -136,26 +146,30 @@ def list_facts(project, fact_type, limit, db) -> None:
 @cli.command()
 @click.argument("fact_id", type=int)
 @click.argument("new_content")
+@click.option("--tenant-id", default="default", show_default=True, help="Tenant scope")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def edit(fact_id, new_content, db) -> None:
+def edit(fact_id, new_content, tenant_id, db) -> None:
     """Editar un fact: depreca el viejo y crea uno nuevo con el contenido actualizado."""
     engine = get_engine(db)
     try:
         try:
-            fact = _run_async(engine.retrieve(fact_id))
+            fact = _run_async(engine.get_fact(fact_id, tenant_id=tenant_id))
         except (KeyError, ValueError, sqlite3.Error, FactNotFound):
             err_fact_not_found(fact_id)
             return
 
-        from cortex.engine.models import Fact
+        if fact is None:
+            err_fact_not_found(fact_id)
+            return
 
-        assert isinstance(fact, Fact)
+        tenant_id = getattr(fact, "tenant_id", None) or tenant_id
 
-        _run_async(engine.deprecate(fact_id, "edited → new version"))
+        _run_async(engine.deprecate(fact_id, "edited → new version", tenant_id=tenant_id))
         new_id = _run_async(
             engine.store(
                 project=fact.project,
                 content=new_content,
+                tenant_id=tenant_id,
                 fact_type=fact.fact_type,
                 tags=fact.tags,
                 confidence=fact.confidence,

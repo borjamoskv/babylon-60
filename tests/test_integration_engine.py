@@ -59,6 +59,45 @@ async def test_connection_pool_stability(engine):
 
 
 @pytest.mark.asyncio
+async def test_promise_vote_and_resolve_quorum(engine):
+    """Verify staged quorum votes resolve through the vote_v2 compatibility path."""
+    async with engine.session() as conn:
+        await conn.execute(
+            "INSERT INTO facts (id, content, project) VALUES (2, 'Quorum Fact', 'test_proj')"
+        )
+        for i in range(2):
+            await conn.execute(
+                "INSERT INTO agents (id, public_key, name, is_active, reputation_score) VALUES (?, ?, ?, ?, ?)",
+                (f"quorum_agent_{i}", f"pub_q_{i}", f"Quorum Agent {i}", 1, 0.5),
+            )
+        await conn.commit()
+
+    manager = ConsensusManager(engine)
+
+    await manager.promise_vote(fact_id=2, agent_id="quorum_agent_0", value=1)
+    await manager.promise_vote(fact_id=2, agent_id="quorum_agent_1", value=1)
+
+    async with engine.session() as conn:
+        cursor = await conn.execute(
+            "SELECT COUNT(*) FROM consensus_votes_v2 WHERE fact_id = ?",
+            (2,),
+        )
+        row = await cursor.fetchone()
+        assert row[0] == 0
+
+    score = await manager.resolve_quorum(fact_id=2)
+    assert score >= 1.5
+
+    async with engine.session() as conn:
+        cursor = await conn.execute(
+            "SELECT COUNT(*) FROM consensus_votes_v2 WHERE fact_id = ?",
+            (2,),
+        )
+        row = await cursor.fetchone()
+        assert row[0] == 2
+
+
+@pytest.mark.asyncio
 async def test_multi_tenant_isolation(engine):
     """Verify that tenant_id is enforced and isolated."""
     # Note: This test assumes schema for consensus_votes was updated with tenant_id

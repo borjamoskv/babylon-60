@@ -241,6 +241,111 @@ def test_ledger_store_backfills_legacy_attempt_columns(tmp_path: Path) -> None:
     assert {"next_attempt_ts", "next_attempt_at"} <= ledger_cols
 
 
+def test_ledger_store_repairs_legacy_ledger_events_schema(tmp_path: Path) -> None:
+    from cortex.ledger.store import LedgerStore
+
+    db_path = tmp_path / "legacy-ledger-events.db"
+    migration_sql = (
+        Path("/Users/borjafernandezangulo/30_CORTEX/cortex/migrations/001_ledger_events.sql")
+        .read_text()
+    )
+
+    conn = sqlite3.connect(db_path)
+    conn.executescript(migration_sql)
+    conn.commit()
+    before = {row[1] for row in conn.execute("PRAGMA table_info(ledger_events)")}
+    conn.close()
+
+    LedgerStore(db_path)
+
+    conn = sqlite3.connect(db_path)
+    after = {row[1] for row in conn.execute("PRAGMA table_info(ledger_events)")}
+    conn.close()
+
+    assert before <= after
+    assert {"prev_hash", "hash"} <= after
+
+
+def test_ledger_store_backfills_legacy_next_attempt_columns(tmp_path: Path) -> None:
+    from cortex.ledger.store import LedgerStore
+
+    db_path = tmp_path / "legacy-enrichment-columns.db"
+    conn = sqlite3.connect(db_path)
+    conn.executescript(
+        """
+        CREATE TABLE ledger_events (
+            event_id TEXT PRIMARY KEY,
+            ts TEXT NOT NULL,
+            tool TEXT NOT NULL,
+            actor TEXT NOT NULL,
+            action TEXT NOT NULL,
+            payload_json TEXT NOT NULL,
+            semantic_status TEXT NOT NULL DEFAULT 'pending'
+        );
+
+        CREATE TABLE enrichment_jobs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            job_id TEXT UNIQUE,
+            event_id TEXT,
+            fact_id INTEGER,
+            job_type TEXT,
+            status TEXT NOT NULL DEFAULT 'queued',
+            attempts INTEGER NOT NULL DEFAULT 0,
+            priority INTEGER DEFAULT 0,
+            next_attempt_at TEXT,
+            last_error TEXT,
+            created_at TEXT NOT NULL DEFAULT '2026-04-14T00:00:00Z',
+            updated_at TEXT NOT NULL DEFAULT '2026-04-14T00:00:00Z'
+        );
+
+        CREATE TABLE ledger_enrichment_jobs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            job_id TEXT UNIQUE,
+            event_id TEXT,
+            fact_id INTEGER,
+            job_type TEXT,
+            status TEXT NOT NULL DEFAULT 'queued',
+            attempts INTEGER NOT NULL DEFAULT 0,
+            priority INTEGER DEFAULT 0,
+            next_attempt_at TEXT,
+            last_error TEXT,
+            created_at TEXT NOT NULL DEFAULT '2026-04-14T00:00:00Z',
+            updated_at TEXT NOT NULL DEFAULT '2026-04-14T00:00:00Z'
+        );
+
+        INSERT INTO enrichment_jobs (
+            job_id, event_id, status, attempts, priority, next_attempt_at, last_error, created_at, updated_at
+        ) VALUES (
+            'job-legacy', 'evt-legacy', 'retry', 1, 0, '2026-04-14T00:00:00+00:00', NULL,
+            '2026-04-14T00:00:00Z', '2026-04-14T00:00:00Z'
+        );
+
+        INSERT INTO ledger_enrichment_jobs (
+            job_id, event_id, status, attempts, priority, next_attempt_at, last_error, created_at, updated_at
+        ) VALUES (
+            'job-legacy', 'evt-legacy', 'retry', 1, 0, '2026-04-14T00:00:00+00:00', NULL,
+            '2026-04-14T00:00:00Z', '2026-04-14T00:00:00Z'
+        );
+        """
+    )
+    conn.commit()
+    conn.close()
+
+    LedgerStore(db_path)
+
+    conn = sqlite3.connect(db_path)
+    job_row = conn.execute(
+        "SELECT next_attempt_ts, next_attempt_at FROM enrichment_jobs WHERE job_id = 'job-legacy'"
+    ).fetchone()
+    ledger_job_row = conn.execute(
+        "SELECT next_attempt_ts, next_attempt_at FROM ledger_enrichment_jobs WHERE job_id = 'job-legacy'"
+    ).fetchone()
+    conn.close()
+
+    assert job_row[0] == job_row[1]
+    assert ledger_job_row[0] == ledger_job_row[1]
+
+
 def test_ledger_verifier_flags_failed_semantic_enrichment(tmp_path: Path) -> None:
     store, writer, verifier = _make_ledger_components(tmp_path / "verifier-failed.db")
     event_id = writer.append(_make_ledger_event(action="semantic-failure"))
@@ -424,6 +529,8 @@ def test_enrichment_queue_mark_done_indexes_event_and_clears_error(tmp_path: Pat
 def test_enrichment_queue_mark_failed_retries_with_truncated_error(tmp_path: Path) -> None:
     from datetime import datetime
 
+    from cortex.ledger.models import utc_now_iso
+
     store, queue, writer, _ = _make_ledger_stack(tmp_path / "queue-retry.db")
     event_id = writer.append(_make_ledger_event(action="retry"))
     error = "x" * 2100
@@ -454,7 +561,9 @@ def test_enrichment_queue_mark_failed_retries_with_truncated_error(tmp_path: Pat
     assert job_row["attempts"] == 2
     assert len(job_row["last_error"]) == 2000
     assert job_row["next_attempt_ts"] == job_row["next_attempt_at"]
-    assert datetime.fromisoformat(job_row["next_attempt_ts"]) > datetime.now().astimezone()
+    assert datetime.fromisoformat(job_row["next_attempt_ts"]) > datetime.fromisoformat(
+        utc_now_iso()
+    )
     assert event_row["semantic_status"] == "pending"
     assert event_row["semantic_error"] == error[:2000]
 
@@ -488,6 +597,88 @@ def test_enrichment_queue_mark_failed_becomes_terminal_after_max_attempts(
     assert job_row["last_error"] == "permanent failure"
     assert event_row["semantic_status"] == "failed"
     assert event_row["semantic_error"] == "permanent failure"
+
+
+def test_working_memory_falls_back_to_default_tenant_when_security_extension_is_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import builtins
+
+    original_import = builtins.__import__
+
+    def broken_import(name: str, *args: object, **kwargs: object):
+        if name == "cortex.extensions.security.tenant":
+            raise ImportError("tenant extension unavailable")
+        return original_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", broken_import)
+    sys.modules.pop("cortex.memory.working", None)
+    working_module = importlib.import_module("cortex.memory.working")
+    WorkingMemoryL1 = working_module.WorkingMemoryL1
+
+    l1 = WorkingMemoryL1(max_tokens=10)
+    l1.add_event(_make_event(tenant_id="default", session_id="wm-default", content="hello"))
+
+    assert working_module.get_tenant_id() == "default"
+    assert l1.get_context() == [{"role": "user", "content": "hello"}]
+    assert l1.current_tokens == 1
+
+
+def test_working_memory_access_frequency_is_zero_with_empty_log() -> None:
+    from cortex.memory.working import WorkingMemoryL1
+
+    l1 = WorkingMemoryL1(max_tokens=10)
+
+    assert l1.get_access_frequency("tenant-empty:proj") == 0.0
+
+
+def test_working_memory_snapshot_returns_empty_payload_for_unknown_tenant() -> None:
+    from cortex.memory.working import WorkingMemoryL1
+
+    l1 = WorkingMemoryL1(max_tokens=10)
+
+    assert l1.snapshot("missing-tenant") == {
+        "tenant_id": "missing-tenant",
+        "tokens": 0,
+        "events": [],
+    }
+
+
+def test_working_memory_restore_rejects_empty_resolved_tenant() -> None:
+    import cortex.memory.working as working_module
+
+    WorkingMemoryL1 = working_module.WorkingMemoryL1
+
+    l1 = WorkingMemoryL1(max_tokens=10)
+    original_get_tenant_id = working_module.get_tenant_id
+    working_module.get_tenant_id = lambda: ""
+
+    try:
+        with pytest.raises(ValueError, match="resolved tenant_id is None or empty"):
+            l1.restore({"tenant_id": "", "events": []}, tenant_id="")
+    finally:
+        working_module.get_tenant_id = original_get_tenant_id
+
+
+def test_working_memory_restore_accepts_prebuilt_event_instances() -> None:
+    from cortex.memory.working import WorkingMemoryL1
+
+    event = _make_event(tenant_id="tenant-prebuilt", session_id="wm-restore", content="rehydrated")
+    l1 = WorkingMemoryL1(max_tokens=10)
+
+    l1.restore({"events": [event], "tokens": event.token_count}, tenant_id="tenant-prebuilt")
+
+    assert l1.get_context("tenant-prebuilt") == [{"role": "user", "content": "rehydrated"}]
+    assert l1.snapshot("tenant-prebuilt")["tokens"] == event.token_count
+
+
+def test_working_memory_utilization_defensively_handles_zero_budget() -> None:
+    from cortex.memory.working import WorkingMemoryL1
+
+    l1 = WorkingMemoryL1(max_tokens=1)
+    l1._max_tokens = 0
+
+    assert l1.utilization("any-tenant") == 0.0
 
 
 @pytest.mark.asyncio
@@ -669,7 +860,6 @@ async def test_apply_semantic_dedup_deprecates_after_repeated_thermal_decay() ->
 async def test_run_store_validation_applies_exergy_bridge_and_membrane_metadata(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from cortex.guards.thermodynamic import AgentMode
     import cortex.engine.bridge_guard as bridge_guard
     import cortex.engine.fact_store_core as fact_store_core
     import cortex.engine.guard_integration_patch as guard_integration_patch
@@ -679,6 +869,7 @@ async def test_run_store_validation_applies_exergy_bridge_and_membrane_metadata(
     import cortex.engine.store_validators as store_validators
     import cortex.guards.thermodynamic as thermodynamic
     import cortex.shannon.exergy as exergy
+    from cortex.guards.thermodynamic import AgentMode
 
     class DummyPure:
         def __init__(self, content: str, metadata: dict[str, object]) -> None:

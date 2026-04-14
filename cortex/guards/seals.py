@@ -12,12 +12,14 @@ Usage:
     SKIP_GATES=3,6 python -m cortex.guards.seals
     ONLY_GATES=1,2 python -m cortex.guards.seals
     FORCE_GATES=4 python -m cortex.guards.seals
+    CORTEX_SEAL_SCOPE=changed python -m cortex.guards.seals
 """
 
 from __future__ import annotations
 
 import asyncio
 import os
+import subprocess
 import sys
 import time
 from collections.abc import Callable, Coroutine
@@ -40,6 +42,8 @@ from cortex.guards.sovereign_seals import (  # noqa: E402
 printer = SealPrinter()
 
 _VENV_BIN = Path(sys.executable).parent
+_SCOPE_REPO = "repo"
+_SCOPE_CHANGED = "changed"
 
 
 def _resolve_cmd(tool: str) -> str:
@@ -78,12 +82,137 @@ async def arun_cmd(cmd: list[str], timeout: float = 60.0) -> tuple[int, str]:
         return 127, f"Command not found: {resolved[0]}"
 
 
+def _seal_scope() -> str:
+    """Return the active file scope for source-driven seals."""
+    scope = os.environ.get("CORTEX_SEAL_SCOPE", _SCOPE_REPO).strip().lower()
+    return _SCOPE_CHANGED if scope == _SCOPE_CHANGED else _SCOPE_REPO
+
+
+def _paths_from_output(output: str) -> list[Path]:
+    return [Path(line) for line in output.splitlines() if line.strip()]
+
+
+def _unique_paths(*groups: list[Path]) -> list[Path]:
+    seen: set[Path] = set()
+    ordered: list[Path] = []
+    for group in groups:
+        for path in group:
+            if path not in seen:
+                seen.add(path)
+                ordered.append(path)
+    return ordered
+
+
+def _run_git(args: list[str], root_dir: Path = ROOT_DIR) -> str:
+    result = subprocess.run(
+        ["git", *args],
+        cwd=str(root_dir),
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip()
+
+
+def _changed_paths_from_git(root_dir: Path = ROOT_DIR) -> list[Path]:
+    base_ref = os.environ.get("GITHUB_BASE_REF")
+    if base_ref:
+        output = _run_git(
+            ["diff", "--name-only", "--diff-filter=ACMR", f"origin/{base_ref}...HEAD"],
+            root_dir=root_dir,
+        )
+        return _unique_paths(_paths_from_output(output))
+
+    before = os.environ.get("GITHUB_EVENT_BEFORE")
+    if before and before != "0000000000000000000000000000000000000000":
+        output = _run_git(
+            ["diff", "--name-only", "--diff-filter=ACMR", before, "HEAD"],
+            root_dir=root_dir,
+        )
+        return _unique_paths(_paths_from_output(output))
+
+    unstaged = _paths_from_output(
+        _run_git(["diff", "--name-only", "--diff-filter=ACMR"], root_dir=root_dir)
+    )
+    staged = _paths_from_output(
+        _run_git(["diff", "--cached", "--name-only", "--diff-filter=ACMR"], root_dir=root_dir)
+    )
+    untracked = _paths_from_output(
+        _run_git(["ls-files", "--others", "--exclude-standard"], root_dir=root_dir)
+    )
+    return _unique_paths(unstaged, staged, untracked)
+
+
+def _is_scoped_cortex_python(path: Path, *, root_dir: Path = ROOT_DIR) -> bool:
+    try:
+        rel_path = path.relative_to(root_dir)
+    except ValueError:
+        return False
+
+    rel_text = str(rel_path)
+    return (
+        rel_text.startswith("cortex/")
+        and rel_path.suffix == ".py"
+        and "test" not in rel_text
+        and ".pyc" not in rel_text
+        and path.exists()
+        and path.is_file()
+    )
+
+
+def _scope_python_files(
+    *,
+    root_dir: Path = ROOT_DIR,
+    scope: str | None = None,
+    changed_manifest: Path | None = None,
+    changed_paths: list[Path] | None = None,
+) -> list[Path]:
+    """Resolve the Python files that source-driven seals should inspect."""
+    active_scope = scope or _seal_scope()
+    if active_scope != _SCOPE_CHANGED:
+        cortex_dir = root_dir / "cortex"
+        return [
+            path for path in cortex_dir.rglob("*.py") if _is_scoped_cortex_python(path, root_dir=root_dir)
+        ]
+
+    manifest = changed_manifest or (root_dir / ".changed_files")
+    if manifest.exists():
+        candidates = _unique_paths(
+            [
+                root_dir / line.strip()
+                for line in manifest.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
+        )
+    elif changed_paths is not None:
+        candidates = changed_paths
+    else:
+        try:
+            candidates = [root_dir / path for path in _changed_paths_from_git(root_dir=root_dir)]
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            printer.warn(
+                "CORTEX_SEAL_SCOPE=changed could not resolve a diff; falling back to full repo scope."
+            )
+            return _scope_python_files(root_dir=root_dir, scope=_SCOPE_REPO)
+
+    return [path for path in candidates if _is_scoped_cortex_python(path, root_dir=root_dir)]
+
+
+def _scope_command_targets(default_root: str) -> list[str]:
+    """Return CLI targets for the active seal scope."""
+    if _seal_scope() != _SCOPE_CHANGED:
+        return [default_root]
+    return [str(path.relative_to(ROOT_DIR)) for path in GlobalSourceCache.target_files]
+
+
 class GlobalSourceCache:
     """O(1) Memory Cache for Python Source Files to Annihilate Repeated O(N) Disk I/O."""
 
     _instance = None
     _loaded = False
+    _loaded_scope = _SCOPE_REPO
     files: dict[Path, str] = {}
+    target_files: tuple[Path, ...] = ()
 
     def __new__(cls) -> GlobalSourceCache:
         if cls._instance is None:
@@ -91,19 +220,22 @@ class GlobalSourceCache:
         return cls._instance
 
     @classmethod
+    def reset(cls) -> None:
+        cls._loaded = False
+        cls._loaded_scope = _SCOPE_REPO
+        cls.files = {}
+        cls.target_files = ()
+
+    @classmethod
     async def load(cls) -> None:
         """Loads all Python files into memory concurrently. Called exactly once."""
-        if cls._loaded:
+        scope = _seal_scope()
+        if cls._loaded and cls._loaded_scope == scope:
             return
 
-        cortex_dir = ROOT_DIR / "cortex"
-
-        def _get_files() -> list[Path]:
-            return [
-                f for f in cortex_dir.rglob("*.py") if "test" not in str(f) and ".pyc" not in str(f)
-            ]
-
-        target_files = await asyncio.to_thread(_get_files)
+        cls.files = {}
+        target_files = await asyncio.to_thread(_scope_python_files, root_dir=ROOT_DIR, scope=scope)
+        cls.target_files = tuple(target_files)
 
         async def _read_file(p: Path) -> tuple[Path, str | None]:
             try:
@@ -118,6 +250,7 @@ class GlobalSourceCache:
                 cls.files[p] = content
 
         cls._loaded = True
+        cls._loaded_scope = scope
 
 
 # ── Gate Result Type ──
@@ -133,15 +266,19 @@ async def check_seal_1_code_quality() -> GateResult:
     passed = True
 
     # ── Ruff Lint ──
-    code, out = await arun_cmd(["ruff", "check", "cortex/", "--output-format", "concise"])
-    if code == 0:
-        printer.success("Ruff checks passed.")
-    elif code == 127:
-        printer.warn("Ruff not found — skipping (install with: pip install ruff)")
+    lint_targets = _scope_command_targets("cortex/")
+    if not lint_targets:
+        printer.success("No scoped Python files to lint.")
     else:
-        printer.fail("Ruff linting failed.")
-        printer.print(out[:2000], style="dim")
-        passed = False
+        code, out = await arun_cmd(["ruff", "check", *lint_targets, "--output-format", "concise"])
+        if code == 0:
+            printer.success("Ruff checks passed.")
+        elif code == 127:
+            printer.warn("Ruff not found — skipping (install with: pip install ruff)")
+        else:
+            printer.fail("Ruff linting failed.")
+            printer.print(out[:2000], style="dim")
+            passed = False
 
     # ── LOC Guard ──
     blocked = 0
@@ -168,7 +305,12 @@ async def check_seal_1_code_quality() -> GateResult:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_2_type_safety() -> GateResult:
     printer.seal(2, "AX-I Determinismo Estocástico", "Type Check (Pyright)")
-    code, out = await arun_cmd(["pyright", "cortex/", "--outputjson"])
+    type_targets = _scope_command_targets("cortex/")
+    if not type_targets:
+        printer.success("No scoped Python files to type-check.")
+        return True, "verified"
+
+    code, out = await arun_cmd(["pyright", *type_targets, "--outputjson"])
     if code == 127:
         printer.warn("No type checker found (pyright/mypy) — skipping")
         return True, "verified"
@@ -213,21 +355,38 @@ async def check_seal_3_security() -> GateResult:
     passed = True
 
     # ── Bandit Scan ──
-    code, out = await arun_cmd(
-        ["bandit", "-r", "cortex/", "-q", "--severity-level", "high", "--confidence-level", "high"]
-    )
-    if code == 0:
-        printer.success("Bandit security scan passed.")
-    elif code == 127:
-        printer.warn("Bandit not found — skipping")
+    security_targets = _scope_command_targets("cortex/")
+    if not security_targets:
+        printer.success("No scoped Python files to security-scan.")
     else:
-        printer.fail("Security vulnerabilities detected.")
-        printer.print(out[:2000], style="dim")
-        passed = False
+        bandit_cmd = ["bandit", "-q", "--severity-level", "high", "--confidence-level", "high"]
+        if _seal_scope() == _SCOPE_CHANGED:
+            bandit_cmd.extend(security_targets)
+        else:
+            bandit_cmd.extend(["-r", *security_targets])
+        code, out = await arun_cmd(bandit_cmd)
+        if code == 0:
+            printer.success("Bandit security scan passed.")
+        elif code == 127:
+            printer.warn("Bandit not found — skipping")
+        else:
+            printer.fail("Security vulnerabilities detected.")
+            printer.print(out[:2000], style="dim")
+            passed = False
 
     # ── Cobbler's Compliance (old Seal 11) ──
     _NOQA_MARKERS = ("# noqa: BLE001", "# noqa:BLE001", "# deliberate boundary")
     _EXCLUDE = frozenset(["legion_vectors.py", "legion.py"])
+
+    engine_parts = ("cortex", "engine")
+    engine_files = {
+        p: content
+        for p, content in GlobalSourceCache.files.items()
+        if all(part in p.parts for part in engine_parts) and p.name not in _EXCLUDE
+    }
+    if not engine_files:
+        printer.success("EntropyDemon/Intruder skipped — no scoped engine files.")
+        return passed, "verified"
 
     try:
         from cortex.engine.legion_vectors import EntropyDemon, Intruder
@@ -239,13 +398,6 @@ async def check_seal_3_security() -> GateResult:
     intruder = Intruder()
     demon_violations: list[str] = []
     intruder_violations: list[str] = []
-
-    engine_parts = ("cortex", "engine")
-    engine_files = {
-        p: content
-        for p, content in GlobalSourceCache.files.items()
-        if all(part in p.parts for part in engine_parts) and p.name not in _EXCLUDE
-    }
 
     async def _audit(py_file: Path, source: str) -> None:
         cleaned = "\n".join(
@@ -461,8 +613,13 @@ async def check_seal_6_async_perf() -> GateResult:
         ROOT_DIR / "cortex/llm/provider.py",
         ROOT_DIR / "cortex/guards/seals.py",
     ]
+    if _seal_scope() == _SCOPE_CHANGED:
+        scoped_files = set(GlobalSourceCache.files)
+        critical = [path for path in critical if path in scoped_files]
     temp_violations = await _check_temperature_determinism(critical)
-    if temp_violations:
+    if not critical:
+        printer.success("Temperature Determinism intact (no scoped critical files).")
+    elif temp_violations:
         printer.fail(f"Temperature drift in {temp_violations}")
         passed = False
     else:
@@ -545,7 +702,7 @@ async def check_seal_9_compliance() -> GateResult:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_10_preservation() -> GateResult:
     printer.seal(10, "Ω₅ Antifragile", "Self-Preservation")
-    return await check_gate_21_preservation(cached_files=GlobalSourceCache.files)
+    return await check_gate_21_preservation()
 
 
 # ── Gate Registry ──

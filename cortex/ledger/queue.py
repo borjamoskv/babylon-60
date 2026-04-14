@@ -49,7 +49,10 @@ class EnrichmentQueue:
                     SELECT job_id
                     FROM enrichment_jobs
                     WHERE status IN ('queued', 'retry')
-                      AND (next_attempt_ts IS NULL OR next_attempt_ts <= ?)
+                      AND (
+                          COALESCE(next_attempt_ts, next_attempt_at) IS NULL
+                          OR COALESCE(next_attempt_ts, next_attempt_at) <= ?
+                      )
                     ORDER BY created_at ASC
                     LIMIT 1
                 )

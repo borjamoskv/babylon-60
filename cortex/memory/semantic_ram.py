@@ -22,6 +22,7 @@ import numpy as np
 class SemanticFactPayload(TypedDict):
     """Payload representing a fact transiting through working towards semantic memory."""
 
+    tenant_id: str
     project: str
     content: str
     fact_type: str
@@ -82,15 +83,19 @@ class SemanticMutator:
 
     async def stop(self) -> None:
         """Gracefully stop the daemon."""
-        if self._worker_task and not self._worker_task.done():
-            self._worker_task.cancel()
-            try:
-                await self._worker_task
-            except asyncio.CancelledError:
-                raise
-            except Exception as e:  # noqa: BLE001
-                logger.error("SemanticMutator shutdown error: %s", e)
-            self._pool.shutdown(wait=True)
+        worker_task = self._worker_task
+        self._worker_task = None
+        try:
+            if worker_task and not worker_task.done():
+                worker_task.cancel()
+                try:
+                    await worker_task
+                except asyncio.CancelledError:
+                    pass
+                except Exception as e:  # noqa: BLE001
+                    logger.error("SemanticMutator shutdown error: %s", e)
+        finally:
+            await asyncio.to_thread(self._pool.shutdown, True)
             logger.info("SemanticMutator: Topological gravitational field collapsed (Stopped).")
 
     def emit_pulse(
@@ -308,16 +313,20 @@ class DynamicSemanticSpace:
 
     async def stop(self) -> None:
         """Gracefully stops all autonomic processes."""
-        await self.semantic_mutator.stop()
         if self._heartbeat_task and not self._heartbeat_task.done():
             self._heartbeat_task.cancel()
             try:
                 await self._heartbeat_task
             except asyncio.CancelledError:
-                raise
+                pass
             except Exception as e:  # noqa: BLE001
                 logger.error("DynamicSemanticSpace shutdown error: %s", e)
-            logger.info("DynamicSemanticSpace: Autonomic heartbeat collapsed (Stopped).")
+        self._heartbeat_task = None
+
+        await self.force_autonomic_flush(reason="Shutdown", wait=True)
+        await self._await_active_flushes()
+        await self.semantic_mutator.stop()
+        logger.info("DynamicSemanticSpace: Autonomic heartbeat collapsed (Stopped).")
 
     async def _heartbeat_loop(self) -> None:
         """Periodically flushes the autonomic buffer to the ledger (Autonomous Heartbeat)."""
@@ -330,7 +339,7 @@ class DynamicSemanticSpace:
             except Exception as e:  # noqa: BLE001
                 logger.error("DynamicSemanticSpace: Heartbeat failure: %s", e)
 
-    async def force_autonomic_flush(self, reason: str = "Unknown") -> None:
+    async def force_autonomic_flush(self, reason: str = "Unknown", *, wait: bool = False) -> None:
         """Forces a buffer flush and integration into the persistent ledger."""
         await asyncio.sleep(0)  # Yield to event loop to keep the function fully async
         data = self.autonomic_buffer.flush()
@@ -340,11 +349,12 @@ class DynamicSemanticSpace:
             )
             # 150/100 Standard: Predictive persistence (systole)
             if self.manager:
+                new_tasks: list[asyncio.Task[Any]] = []
                 for fact in data:
                     # Async background storage tracked in _active_flushes to prevent premature GC
                     _t = asyncio.create_task(
                         self.manager.store(
-                            tenant_id="default_tenant",  # Should be passed in real scenarios
+                            tenant_id=fact["tenant_id"],
                             project_id=fact["project"],
                             content=fact["content"],
                             fact_type=fact["fact_type"],
@@ -353,6 +363,28 @@ class DynamicSemanticSpace:
                     )
                     self._active_flushes.add(_t)
                     _t.add_done_callback(self._active_flushes.discard)
+                    new_tasks.append(_t)
+
+                if wait and new_tasks:
+                    results = await asyncio.gather(*new_tasks, return_exceptions=True)
+                    for result in results:
+                        if isinstance(result, Exception) and not isinstance(
+                            result, asyncio.CancelledError
+                        ):
+                            logger.error(
+                                "DynamicSemanticSpace: Shutdown flush failed: %s", result
+                            )
+
+    async def _await_active_flushes(self) -> None:
+        """Drain background persistence tasks before shutdown completes."""
+        pending = tuple(self._active_flushes)
+        if not pending:
+            return
+
+        results = await asyncio.gather(*pending, return_exceptions=True)
+        for result in results:
+            if isinstance(result, Exception) and not isinstance(result, asyncio.CancelledError):
+                logger.error("DynamicSemanticSpace: Active flush failed: %s", result)
 
     async def recall_and_pulse(
         self,
@@ -380,11 +412,16 @@ class DynamicSemanticSpace:
         return facts
 
     async def store_with_heartbeat(
-        self, project: str, content: str, fact_type: str = "knowledge"
+        self,
+        project: str,
+        content: str,
+        fact_type: str = "knowledge",
+        tenant_id: str = "default",
     ) -> bool:
         """Stores a fact and triggers autonomous flush if semantic pressure is high (150/100)."""
         await asyncio.sleep(0)  # Yield to event loop
         fact_data: SemanticFactPayload = {
+            "tenant_id": tenant_id,
             "project": project,
             "content": content,
             "fact_type": fact_type,

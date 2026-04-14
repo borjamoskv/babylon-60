@@ -29,6 +29,25 @@ class DependencyScanError(RuntimeError):
     """Raised when dependency scanning cannot complete deterministically."""
 
 
+def _build_violation(
+    filepath: Path,
+    line: int,
+    binary: str,
+    call_type: str,
+    *,
+    has_fallback: bool,
+) -> DependencyViolation:
+    """Build a normalized violation object from a raw detection hit."""
+    is_heuristic = call_type == "string_literal"
+    return DependencyViolation(
+        file=str(filepath),
+        line=line,
+        binary=binary,
+        call_type=call_type,
+        has_fallback=True if is_heuristic else has_fallback,
+    )
+
+
 def scan_file(filepath: str | Path) -> list[DependencyViolation]:
     """Scan a single Python file for Axiom 4 violations."""
     filepath = Path(filepath)
@@ -64,27 +83,22 @@ def scan_file(filepath: str | Path) -> list[DependencyViolation]:
     hits = analysis.find_violations(tree)
     hits.extend(analysis.find_oracle_string_literals(tree, exec_calls))
 
-    # Deduplicate by (line, binary)
-    seen: set[tuple[int, str]] = set()
-    violations: list[DependencyViolation] = []
+    # Deduplicate by (line, binary) while preserving the highest severity.
+    merged: dict[tuple[int, str], DependencyViolation] = {}
     for line, binary, call_type in hits:
         key = (line, binary)
-        if key in seen:
-            continue
-        seen.add(key)
-
-        is_heuristic = call_type == "string_literal"
-        violations.append(
-            DependencyViolation(
-                file=str(filepath),
-                line=line,
-                binary=binary,
-                call_type=call_type,
-                has_fallback=True if is_heuristic else has_fallback,
-            )
+        candidate = _build_violation(
+            filepath,
+            line,
+            binary,
+            call_type,
+            has_fallback=has_fallback,
         )
+        current = merged.get(key)
+        if current is None or (current.has_fallback and not candidate.has_fallback):
+            merged[key] = candidate
 
-    return violations
+    return list(merged.values())
 
 
 def scan_directory(
@@ -146,6 +160,12 @@ def main() -> None:
         console.print(
             "\n[bold red]⚠️  CRITICAL violations detected.[/]\n"
             "Use [bold cyan]SovereignLLM[/] (cortex/llm/sovereign.py) to replace subprocess oracle calls."
+        )
+        sys.exit(1)
+    if warnings > 0:
+        console.print(
+            "\n[bold yellow]⚠️  WARNING violations detected.[/]\n"
+            "Warnings still indicate oracle-coupled paths and should block clean verification."
         )
         sys.exit(1)
 

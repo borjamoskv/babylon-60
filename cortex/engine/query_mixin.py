@@ -48,7 +48,8 @@ class QueryMixin(EngineMixinBase):
                 f"SELECT {FACT_COLUMNS} {FACT_JOIN} "
                 "WHERE f.tenant_id = ? AND "
                 "f.is_quarantined = 0 "
-                "AND f.is_tombstoned = 0"
+                "AND f.is_tombstoned = 0 "
+                "AND f.valid_until IS NULL"
             )
             params: list = [tenant_id]
 
@@ -126,7 +127,8 @@ class QueryMixin(EngineMixinBase):
                 f"{FACT_JOIN} "
                 "WHERE f.tenant_id = ? AND f.project = ? "
                 "AND f.is_quarantined = 0 "
-                "AND f.is_tombstoned = 0"
+                "AND f.is_tombstoned = 0 "
+                "AND f.valid_until IS NULL"
             )
             params: list = [tenant_id, project]
 
@@ -263,6 +265,7 @@ class QueryMixin(EngineMixinBase):
                     f"SELECT {FACT_COLUMNS} {FACT_JOIN} "
                     f"WHERE f.tenant_id = ? "
                     f"AND f.is_tombstoned = 0 "
+                    f"AND f.valid_until IS NULL "
                     "ORDER BY f.id ASC"
                 )
                 async with conn.execute(q, [tenant_id]) as cursor:
@@ -307,15 +310,19 @@ class QueryMixin(EngineMixinBase):
         fact_tx_expr = (
             f"COALESCE({prefix}tx_id, CAST(json_extract({prefix}metadata, '$.tx_id') AS INTEGER))"
         )
+        valid_until_expr = (
+            f"COALESCE(json_extract({prefix}metadata, '$.valid_until'), {prefix}valid_until)"
+        )
+        tombstoned_at_expr = (
+            f"COALESCE(json_extract({prefix}metadata, '$.tombstoned_at'), {prefix}valid_until)"
+        )
         tx_time_expr = f"(SELECT {tx_time_column} FROM transactions WHERE id = ?)"
         clause = (
             "("
             f"{fact_tx_expr} <= ? "
             f"OR ({fact_tx_expr} IS NULL AND {prefix}created_at <= {tx_time_expr})"
-            ") AND ("
-            f"{prefix}is_tombstoned = 0 OR "
-            f"json_extract({prefix}metadata, '$.valid_until') > {tx_time_expr} OR "
-            f"json_extract({prefix}metadata, '$.tombstoned_at') > {tx_time_expr})"
+            f") AND ({valid_until_expr} IS NULL OR {valid_until_expr} > {tx_time_expr}) "
+            f"AND ({prefix}is_tombstoned = 0 OR {tombstoned_at_expr} > {tx_time_expr})"
         )
         return clause, [tx_id, tx_id, tx_id, tx_id]
 
@@ -333,6 +340,11 @@ class QueryMixin(EngineMixinBase):
 
     async def stats(self, tenant_id: str = "default") -> dict:
         tenant_id = self._resolve_tenant(tenant_id)
+        causal_parent_expr = (
+            "COALESCE(parent_id, "
+            "CAST(json_extract(metadata, '$.parent_decision_id') AS INTEGER), "
+            "CAST(json_extract(metadata, '$.parent_id') AS INTEGER))"
+        )
         async with self.session() as conn:
             async with conn.execute(
                 "SELECT COUNT(*) FROM facts WHERE tenant_id = ?", (tenant_id,)
@@ -340,12 +352,15 @@ class QueryMixin(EngineMixinBase):
                 row = await cursor.fetchone()
                 total = row[0] if row else 0
             async with conn.execute(
-                "SELECT COUNT(*) FROM facts WHERE is_tombstoned = 0 AND tenant_id = ?", (tenant_id,)
+                "SELECT COUNT(*) FROM facts "
+                "WHERE is_tombstoned = 0 AND valid_until IS NULL AND tenant_id = ?",
+                (tenant_id,),
             ) as cursor:
                 row = await cursor.fetchone()
                 active = row[0] if row else 0
             async with conn.execute(
-                "SELECT DISTINCT project FROM facts WHERE is_tombstoned = 0 AND tenant_id = ?",
+                "SELECT DISTINCT project FROM facts "
+                "WHERE is_tombstoned = 0 AND valid_until IS NULL AND tenant_id = ?",
                 (tenant_id,),
             ) as cursor:
                 projects = [p[0] for p in await cursor.fetchall()]
@@ -369,7 +384,7 @@ class QueryMixin(EngineMixinBase):
 
             async with conn.execute(
                 "SELECT fact_type, COUNT(*) FROM facts "
-                "WHERE is_tombstoned = 0 AND tenant_id = ? "
+                "WHERE is_tombstoned = 0 AND valid_until IS NULL AND tenant_id = ? "
                 "GROUP BY fact_type",
                 (tenant_id,),
             ) as cursor:
@@ -379,8 +394,8 @@ class QueryMixin(EngineMixinBase):
             try:
                 async with conn.execute(
                     "SELECT COUNT(*) FROM facts "
-                    "WHERE json_extract(metadata, '$.parent_decision_id') IS NOT NULL "
-                    "AND is_tombstoned = 0 AND tenant_id = ?",
+                    f"WHERE {causal_parent_expr} IS NOT NULL "
+                    "AND is_tombstoned = 0 AND valid_until IS NULL AND tenant_id = ?",
                     (tenant_id,),
                 ) as cursor:
                     row = await cursor.fetchone()
@@ -487,29 +502,34 @@ class QueryMixin(EngineMixinBase):
             Facts ordered by depth (0 = starting fact).
         """
         tenant_id = self._resolve_tenant(tenant_id)
+        parent_expr = (
+            "COALESCE(f.parent_id, "
+            "CAST(json_extract(f.metadata, '$.parent_decision_id') AS INTEGER), "
+            "CAST(json_extract(f.metadata, '$.parent_id') AS INTEGER))"
+        )
 
         if direction == "up":
-            sql = """
+            sql = f"""
                 WITH RECURSIVE chain(id, depth) AS (
                     SELECT id, 0 FROM facts
                     WHERE id = ? AND tenant_id = ?
                     UNION ALL
-                    SELECT json_extract(f.metadata, '$.parent_decision_id'), c.depth + 1
+                    SELECT {parent_expr}, c.depth + 1
                     FROM facts f JOIN chain c ON f.id = c.id
-                    WHERE json_extract(f.metadata, '$.parent_decision_id') IS NOT NULL
+                    WHERE {parent_expr} IS NOT NULL
                         AND c.depth < ?
                 )
                 SELECT id, depth FROM chain ORDER BY depth
             """
         else:
-            sql = """
+            sql = f"""
                 WITH RECURSIVE chain(id, depth) AS (
                     SELECT id, 0 FROM facts
                     WHERE id = ? AND tenant_id = ?
                     UNION ALL
                     SELECT f.id, c.depth + 1
                     FROM facts f JOIN chain c
-                        ON json_extract(f.metadata, '$.parent_decision_id') = c.id
+                        ON {parent_expr} = c.id
                     WHERE c.depth < ?
                 )
                 SELECT id, depth FROM chain ORDER BY depth

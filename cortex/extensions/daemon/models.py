@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import dataclasses
 from dataclasses import dataclass, field
+from typing import Any
 
 from cortex.core.paths import (
     AGENT_DIR,
@@ -41,6 +42,7 @@ __all__ = [
     "EntropyAlert",
     "GhostAlert",
     "AetherAlert",
+    "AutoAuditAlert",
     "MejoraloAlert",
     "MemoryAlert",
     "EvaluationAlert",
@@ -52,6 +54,7 @@ __all__ = [
     "SignalAlert",
     "SiteStatus",
     "TombstoneAlert",
+    "ThermodynamicAlert",
     "TrendsAlert",
     "WorkflowAlert",
 ]
@@ -151,6 +154,16 @@ class EvaluationAlert:
 
 
 @dataclass
+class AutoAuditAlert:
+    """Aggregate alert emitted by the auto-audit monitor."""
+
+    issue_type: str
+    severity: str
+    message: str
+    metrics: dict[str, int] = field(default_factory=dict)
+
+
+@dataclass
 class CompactionAlert:
     """Alert triggered when a project undergoes autonomous compaction."""
 
@@ -218,6 +231,18 @@ class SignalAlert:
     """Alert triggered by a Signal Reactor reflex."""
 
     event_type: str
+    message: str
+    project: str | None = None
+    payload: dict[str, Any] = field(default_factory=dict)
+    tenant_id: str = "default"
+
+
+@dataclass
+class ThermodynamicAlert:
+    """Alert emitted after thermodynamic pruning cycles."""
+
+    tenant_id: str
+    pruned_count: int
     message: str
     project: str | None = None
     payload: dict = field(default_factory=dict)

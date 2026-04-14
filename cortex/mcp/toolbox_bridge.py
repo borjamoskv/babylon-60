@@ -12,10 +12,13 @@ Integrated via the `toolbox-core` Python SDK.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 from dataclasses import dataclass, field
 from typing import Any, Optional
+
+from cortex.mcp.guard import MCPGuard
 
 __all__ = [
     "DEFAULT_SERVER_URL",
@@ -23,12 +26,42 @@ __all__ = [
     "ToolboxConfig",
     "cortex_self_bridge",
     "create_toolbox_bridge",
+    "get_toolbox_tools",
     "toolbox_health_check",
 ]
 
 logger = logging.getLogger("cortex.mcp.toolbox_bridge")
 
 DEFAULT_SERVER_URL = "http://127.0.0.1:5050"
+
+
+def _normalize_urls(urls: list[str]) -> list[str]:
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for url in urls:
+        candidate = url.strip().rstrip("/")
+        if not candidate or candidate in seen:
+            continue
+        normalized.append(candidate)
+        seen.add(candidate)
+    return normalized
+
+
+_DEFAULT_ALLOWED_SERVER_URLS = _normalize_urls(MCPGuard._ALLOWED_TOOLBOX_URLS)
+
+
+def _run_async(coro: Any) -> Any:
+    """Run an async helper from sync public APIs."""
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            import concurrent.futures
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                return pool.submit(asyncio.run, coro).result()
+        return loop.run_until_complete(coro)
+    except RuntimeError:
+        return asyncio.run(coro)
 
 _TOOLBOX_AVAILABLE = False
 try:
@@ -51,17 +84,15 @@ class ToolboxConfig:
     toolset: str = ""
     timeout_seconds: float = 30.0
     allowed_server_urls: list[str] = field(
-        default_factory=lambda: [DEFAULT_SERVER_URL, "http://localhost:5050"]
+        default_factory=lambda: list(_DEFAULT_ALLOWED_SERVER_URLS)
     )
 
     @classmethod
     def from_env(cls) -> ToolboxConfig:
         """Create config from environment variables (TOOLBOX_ prefixed)."""
         allowed_raw = os.environ.get("TOOLBOX_ALLOWED_URLS", "")
-        allowed = (
-            [url.strip() for url in allowed_raw.split(",")]
-            if allowed_raw
-            else [DEFAULT_SERVER_URL, "http://localhost:5050"]
+        allowed = _normalize_urls(allowed_raw.split(",")) if allowed_raw else list(
+            _DEFAULT_ALLOWED_SERVER_URLS
         )
 
         return cls(
@@ -112,9 +143,8 @@ class ToolboxBridge:
             logger.warning("Toolbox SDK missing. Connect aborted.")
             return False
 
-        self._validate_server_url()
-
         try:
+            self._validate_server_url()
             self._client = ToolboxClient(self.config.server_url)  # type: ignore[reportOptionalCall]
 
             # Load tools (all or specific set)
@@ -133,7 +163,7 @@ class ToolboxBridge:
                 len(self._tools),
             )
             return True
-        except (ConnectionError, OSError, RuntimeError, TimeoutError) as exc:
+        except (ConnectionError, OSError, RuntimeError, TimeoutError, ValueError) as exc:
             logger.error("Toolbox Sync: [FAILED] %s | Error: %s", self.config.server_url, exc)
             self._client = None
             self._tools = []
@@ -184,6 +214,24 @@ async def create_toolbox_bridge(
     bridge = ToolboxBridge(config)
     await bridge.connect()
     return bridge
+
+
+def get_toolbox_tools(toolset: str = "cortex-readonly") -> list[Any]:
+    """Return local CORTEX toolbox tools for sync consumers.
+
+    Returns an empty list when the local toolbox membrane is unavailable.
+    """
+
+    async def _load_tools() -> list[Any]:
+        bridge = await cortex_self_bridge(toolset=toolset)
+        if bridge is None:
+            return []
+        try:
+            return bridge.tools
+        finally:
+            await bridge.close()
+
+    return _run_async(_load_tools())
 
 
 async def cortex_self_bridge(

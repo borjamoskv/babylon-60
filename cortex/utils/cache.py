@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import inspect
 import logging
 import time
 from collections import OrderedDict
@@ -126,7 +127,7 @@ class SovereignCache(Generic[T]):
             return
 
         try:
-            if asyncio.iscoroutinefunction(self._on_evict):
+            if inspect.iscoroutinefunction(self._on_evict):
                 task = asyncio.create_task(
                     self._on_evict(key, value, self._evidence_hash, self._eviction_count)
                 )

@@ -152,10 +152,10 @@ CORTEX stops being just internal memory and becomes a shared trust layer.
 - `cortex_store` — Persist a fact
 - `cortex_search` — Semantic search over facts
 - `cortex_status` — System health + entropy report
-- `cortex_compact` — Trigger compaction
-- `cortex_verify` — Verify a claim against evidence
-- `cortex_immune` — Run immune scan
 - `cortex_ledger_verify` — Verify hash-chain integrity
+- `cortex_reality_weaver` — Run the high-level synthesis/orchestration mega-tool
+- `cortex_entropy_cracker` — Analyze entropy and structural drift on a target path
+- `cortex_temporal_nexus` — Inspect project-level temporal state and historical context
 
 **What it enables:**
 

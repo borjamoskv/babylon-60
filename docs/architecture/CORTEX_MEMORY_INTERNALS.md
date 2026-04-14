@@ -426,7 +426,7 @@ MIT license. Auditable. Forkable.
 Architecture:
     CORTEX L1-L3 (existing) ←→ HindsightBridge ←→ Hindsight Server/Embedded
 
-    - Retain: Each cortex.store() also pushes to Hindsight for entity extraction
+    - Retain: Each engine.store(...) call also pushes to Hindsight for entity extraction
     - Recall: Hindsight recall fuses with CORTEX RRF for superior retrieval
     - Reflect: Hindsight reflect generates mental models unavailable in CORTEX
 

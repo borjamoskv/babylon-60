@@ -38,22 +38,24 @@ class SignalReactor:
     first; unmatched events fall through to hardcoded reflexes.
     """
 
-    def __init__(self, bus: SignalBus, engine: Any = None):
+    def __init__(self, bus: SignalBus, engine: Any = None, tenant_id: str = "default"):
         self.bus = bus
         self.engine = engine
+        self.tenant_id = tenant_id
         self._last_snapshot_time: float = 0
         self._snapshot_cooldown: int = 60  # seconds
         self._trigger_engine: Any = None  # lazy-init
 
     @oxygenate(min_interval=0.1)
-    async def process_once(self) -> int:
+    async def process_once(self, tenant_id: str | None = None) -> int:
         """Poll the bus and execute one round of reflexes (oxygenated).
 
         Returns:
            The number of signals processed.
         """
         # We poll as 'reactor' consumer
-        signals = self.bus.poll(consumer="reactor", limit=20)
+        active_tenant = tenant_id or self.tenant_id
+        signals = self.bus.poll(consumer="reactor", limit=20, tenant_id=active_tenant)
         if not signals:
             return 0
 
@@ -84,7 +86,7 @@ class SignalReactor:
         te = self._get_trigger_engine()
         if te is not None:
             try:
-                te.evaluate(signal)
+                await te.evaluate(signal)
             except Exception:  # noqa: BLE001
                 logger.debug(
                     "TriggerEngine evaluation failed for %s",
@@ -121,9 +123,10 @@ class SignalReactor:
             te = TriggerEngine()
             register_defaults(te)
             self._trigger_engine = te
+            trigger_count = len(te.list_triggers()) if hasattr(te, "list_triggers") else 0
             logger.info(
                 "TriggerEngine initialized with %d conditions",
-                len(te._conditions),  # pyright: ignore
+                trigger_count,
             )
             return te
         except Exception:  # noqa: BLE001
@@ -181,12 +184,12 @@ class SignalReactor:
         except (ImportError, RuntimeError, OSError) as e:
             logger.exception("Failed to run snapshot reflex: %s", e)
 
-    async def run_loop(self, interval: float = 5.0) -> None:
+    async def run_loop(self, interval: float = 5.0, tenant_id: str | None = None) -> None:
         """Start a non-blocking infinite loop for standalone usage. (PULMONES)"""
         logger.info("Signal Reactor active — monitoring bus pulses (L2) [OXYGENATED]")
         while True:
             try:
-                count = await self.process_once()
+                count = await self.process_once(tenant_id=tenant_id)
                 if count > 0:
                     logger.debug("Reactor: Processed %d signal(s)", count)
             except (RuntimeError, OSError, ValueError) as e:

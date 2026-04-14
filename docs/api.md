@@ -9,7 +9,7 @@ in production mode.
 ## Run Locally
 
 ```bash
-pip install cortex-persist[api]
+pip install "cortex-persist[api]"
 uvicorn cortex.api:app --host 0.0.0.0 --port 8484
 ```
 

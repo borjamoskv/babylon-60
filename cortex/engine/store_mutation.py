@@ -63,7 +63,12 @@ async def deprecate_impl_logic(
 
     # Ω₁₃: Deprecation should degrade descendants just like invalidation.
     graph = AsyncCausalGraph(conn)
-    await graph.propagate_taint(fact_id, tenant_id=tenant_id, floor_to_c1=False)
+    await graph.propagate_taint(
+        fact_id,
+        tenant_id=tenant_id,
+        floor_to_c1=False,
+        commit=False,
+    )
     return True
 
 
@@ -106,7 +111,12 @@ async def invalidate_impl_logic(
 
     # Ω₁₃: Invalidation must cascade taint to descendants.
     graph = AsyncCausalGraph(conn)
-    await graph.propagate_taint(fact_id, tenant_id=tenant_id, floor_to_c1=False)
+    await graph.propagate_taint(
+        fact_id,
+        tenant_id=tenant_id,
+        floor_to_c1=False,
+        commit=False,
+    )
     return True
 
 

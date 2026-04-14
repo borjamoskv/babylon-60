@@ -74,10 +74,14 @@ jobs:
         if: steps.scope.outputs.release_only == 'true'
         run: python scripts/repo_health_changed.py
 
+      - name: "🛡️ Execute 10 Seals (PR diff scope)"
+        if: steps.scope.outputs.release_only != 'true' && github.event_name == 'pull_request'
+        run: CORTEX_SEAL_SCOPE=changed python -m cortex.guards.seals
+
       - name: "🛡️ Execute 10 Seals"
-        if: steps.scope.outputs.release_only != 'true'
+        if: steps.scope.outputs.release_only != 'true' && github.event_name != 'pull_request'
         run: python -m cortex.guards.seals
 
       - name: "🛡️ Execute 10 Seals (release-only)"
         if: steps.scope.outputs.release_only == 'true'
-        run: ONLY_GATES=3,6,8,9 python -m cortex.guards.seals
+        run: CORTEX_SEAL_SCOPE=changed ONLY_GATES=3,6,8,9 python -m cortex.guards.seals

@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from cortex.api.core import app as core_app
+from cortex.extensions.health.models import MetricSnapshot
 from cortex.routes import health as health_routes
 from cortex.routes import runtime as runtime_routes
 
@@ -94,6 +95,49 @@ def test_health_report_route_uses_canonical_report_builder(monkeypatch) -> None:
     assert response.status_code == 200
     assert response.json()["trend"] == "stable"
     assert seen["db_path"] == "/tmp/runtime-health.db"
+
+
+def test_health_history_route_validates_limit_range(monkeypatch) -> None:
+    import cortex.extensions.health.trend as trend_module
+
+    monkeypatch.setattr(trend_module.TrendDetector, "query_history", lambda db_path, limit: [])
+
+    app = FastAPI()
+    app.include_router(health_routes.router)
+    app.state.engine = SimpleNamespace(_db_path="/tmp/runtime-health.db")
+
+    with TestClient(app) as client:
+        assert client.get("/v1/health/history?limit=0").status_code == 422
+        assert client.get("/v1/health/history?limit=201").status_code == 422
+
+
+def test_health_check_route_returns_structured_payload(monkeypatch) -> None:
+    monkeypatch.setattr(
+        health_routes.HealthCollector,
+        "collect_all",
+        lambda self: [MetricSnapshot(name="db", value=0.9, weight=1.5)],
+    )
+
+    app = FastAPI()
+    app.include_router(health_routes.router)
+    app.state.engine = SimpleNamespace(_db_path="/tmp/runtime-health.db")
+
+    with TestClient(app) as client:
+        response = client.get("/v1/health/check")
+
+    assert response.status_code == 200
+    assert response.json()["grade"] in {"S", "A", "B", "C", "D", "F"}
+    assert isinstance(response.json()["healthy"], bool)
+
+
+def test_health_prometheus_route_openapi_declares_text_plain() -> None:
+    app = FastAPI()
+    app.include_router(health_routes.router)
+
+    schema = app.openapi()
+    content = schema["paths"]["/v1/health/prometheus"]["get"]["responses"]["200"]["content"]
+
+    assert "text/plain" in content
 
 
 def test_legacy_health_endpoint_serializes_grade_as_letter(monkeypatch) -> None:

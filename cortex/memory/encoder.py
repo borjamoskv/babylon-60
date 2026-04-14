@@ -9,7 +9,7 @@ The model is loaded lazily on first use and cached for the process lifetime.
 
 from __future__ import annotations
 
-import asyncio
+import inspect
 import logging
 from typing import Optional
 
@@ -33,15 +33,25 @@ class AsyncEncoder:
     def __init__(self, embedder: Optional[LocalEmbedder] = None) -> None:
         self._embedder = embedder or LocalEmbedder()
 
+    @staticmethod
+    async def _run_blocking(fn, *args):
+        """Execute a blocking callable off the event loop without asyncio.to_thread()."""
+        loop = __import__("asyncio").get_running_loop()
+        return await loop.run_in_executor(None, lambda: fn(*args))
+
     async def encode(self, text: str) -> list[float]:
         """Encode a single text to a 384-dim vector (async, thread-isolated)."""
-        return await asyncio.to_thread(self._embedder.embed, text)  # type: ignore[reportReturnType]
+        if inspect.iscoroutinefunction(self._embedder.embed):
+            return await self._embedder.embed(text)  # type: ignore[reportReturnType]
+        return await self._run_blocking(self._embedder.embed, text)  # type: ignore[reportReturnType]
 
     async def encode_batch(self, texts: list[str]) -> list[list[float]]:
         """Encode multiple texts (async, thread-isolated)."""
         if not texts:
             return []
-        return await asyncio.to_thread(self._embedder.embed_batch, texts)
+        if inspect.iscoroutinefunction(self._embedder.embed_batch):
+            return await self._embedder.embed_batch(texts)  # type: ignore[reportReturnType]
+        return await self._run_blocking(self._embedder.embed_batch, texts)
 
     @property
     def dimension(self) -> int:

@@ -140,6 +140,16 @@ class TrustService:
                 violation="NULL_HASH — Fact was never signed. Chain trust invalidated.",
             )
 
+        if common["tx_id"] is None or common["timestamp"] is None:
+            return FactVerification(
+                **common,
+                valid=False,
+                violation=(
+                    "MISSING_TRANSACTION_LINK — Fact has no verifiable transaction record. "
+                    "Chain trust invalidated."
+                ),
+            )
+
         recomputed = hashlib.sha256(content.encode()).hexdigest()
         valid = recomputed == stored_hash
 

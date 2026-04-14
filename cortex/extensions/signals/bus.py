@@ -65,7 +65,7 @@ def _build_query(
     limit: int = 50,
 ) -> tuple[str, list]:
     query = (
-        "SELECT id, event_type, payload, source, project,"
+        "SELECT id, event_type, payload, source, project, tenant_id,"
         " created_at, consumed_by FROM signals WHERE tenant_id = ?"
     )
     params: list = [tenant_id]

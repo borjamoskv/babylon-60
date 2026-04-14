@@ -214,6 +214,84 @@ class TestFKValidation:
         )
         assert (await cursor.fetchone())[0] == d1
 
+    @pytest.mark.asyncio
+    async def test_cross_tenant_parent_is_cleared(self, db):
+        parent_id = await insert_fact_record(
+            db,
+            "tenant-a",
+            "proj",
+            "parent",
+            "decision",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
+        )
+        await db.commit()
+
+        child_id = await insert_fact_record(
+            db,
+            "tenant-b",
+            "proj",
+            "child",
+            "knowledge",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
+            parent_decision_id=parent_id,
+        )
+        await db.commit()
+
+        cursor = await db.execute(
+            "SELECT parent_decision_id FROM facts WHERE id = ?",
+            (child_id,),
+        )
+        assert (await cursor.fetchone())[0] is None
+
+    @pytest.mark.asyncio
+    async def test_cross_project_parent_is_cleared(self, db):
+        parent_id = await insert_fact_record(
+            db,
+            "default",
+            "proj-a",
+            "parent",
+            "decision",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
+        )
+        await db.commit()
+
+        child_id = await insert_fact_record(
+            db,
+            "default",
+            "proj-b",
+            "child",
+            "knowledge",
+            [],
+            "C5",
+            None,
+            "test",
+            {},
+            None,
+            parent_decision_id=parent_id,
+        )
+        await db.commit()
+
+        cursor = await db.execute(
+            "SELECT parent_decision_id FROM facts WHERE id = ?",
+            (child_id,),
+        )
+        assert (await cursor.fetchone())[0] is None
+
 
 class TestAutoResolve:
     """Decisions and errors auto-link to previous decision."""

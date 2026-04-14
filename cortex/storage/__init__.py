@@ -40,9 +40,12 @@ def get_storage_mode() -> StorageMode:
     raw = os.environ.get("CORTEX_STORAGE", "local").lower()
     try:
         return StorageMode(raw)
-    except ValueError:
-        logger.warning("Unknown CORTEX_STORAGE='%s', falling back to local", raw)
-        return StorageMode.LOCAL
+    except ValueError as exc:
+        logger.error("Unknown CORTEX_STORAGE='%s'", raw)
+        raise ValueError(
+            f"Unknown CORTEX_STORAGE='{raw}'. Expected one of: "
+            f"{', '.join(mode.value for mode in StorageMode)}"
+        ) from exc
 
 
 def get_storage_config() -> dict:

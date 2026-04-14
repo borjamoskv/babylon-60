@@ -376,10 +376,22 @@ class CortexEngine(
         # If we have an injected pool (from tests), use its context manager
         if hasattr(self, "_pool") and self._pool is not None:
             async with self._pool.acquire() as conn:
-                yield conn
+                try:
+                    yield conn
+                finally:
+                    await self._rollback_if_needed(conn)
         else:
             conn = await self._get_or_create_conn()
-            yield conn
+            try:
+                yield conn
+            finally:
+                await self._rollback_if_needed(conn)
+
+    async def _rollback_if_needed(self, conn: aiosqlite.Connection) -> None:
+        """Fail closed on cancelled sessions by cleaning up open transactions."""
+        if not getattr(conn, "in_transaction", False):
+            return
+        await asyncio.shield(conn.rollback())
 
     def _get_embedder(self) -> LocalEmbedder:
         """Protocol requirement for SearchMixin."""
@@ -515,7 +527,10 @@ class CortexEngine(
 
     async def query(self, *args, **kwargs):
         self._synthesize_skill("query")
-        return await super().query(*args, **kwargs)
+        query_fn = getattr(super(), "query", None)
+        if query_fn is None:
+            raise AttributeError("CortexEngine query surface is unavailable")
+        return await query_fn(*args, **kwargs)
 
     async def write_optimized(self, *args, **kwargs):
         self._synthesize_skill("optimization")

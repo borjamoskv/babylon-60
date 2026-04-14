@@ -72,10 +72,16 @@ def build_temporal_filter_params(
     if as_of is None:
         return f"{prefix}is_tombstoned = 0", []
     else:
+        valid_until_expr = (
+            f"COALESCE(json_extract({prefix}metadata, '$.valid_until'), {prefix}valid_until)"
+        )
+        tombstoned_at_expr = (
+            f"COALESCE(json_extract({prefix}metadata, '$.tombstoned_at'), {prefix}valid_until)"
+        )
         return (
             f"coalesce(json_extract({prefix}metadata, '$.valid_from'), {prefix}created_at) <= ? AND "
-            f"({prefix}is_tombstoned = 0 OR json_extract({prefix}metadata, '$.valid_until') > ? OR "
-            f"json_extract({prefix}metadata, '$.tombstoned_at') > ?)",
+            f"({valid_until_expr} IS NULL OR {valid_until_expr} > ?) AND "
+            f"({prefix}is_tombstoned = 0 OR {tombstoned_at_expr} > ?)",
             [as_of, as_of, as_of],
         )
 
@@ -109,16 +115,20 @@ def time_travel_filter(
     else:
         prefix = ""
 
+    valid_until_expr = f"COALESCE(json_extract({prefix}metadata, '$.valid_until'), {prefix}valid_until)"
+    tombstoned_at_expr = (
+        f"COALESCE(json_extract({prefix}metadata, '$.tombstoned_at'), {prefix}valid_until)"
+    )
+
     return (
         "("
         f"coalesce({prefix}tx_id, json_extract({prefix}metadata, '$.tx_id')) <= ? "
         f"OR (coalesce({prefix}tx_id, json_extract({prefix}metadata, '$.tx_id')) IS NULL "
         f"AND {prefix}created_at <= (SELECT timestamp FROM transactions WHERE id = ?))"
         ") AND ("  # nosec B608
-        f"{prefix}is_tombstoned = 0 OR "
-        f"json_extract({prefix}metadata, '$.valid_until') > "
-        "(SELECT timestamp FROM transactions WHERE id = ?) OR "
-        f"json_extract({prefix}metadata, '$.tombstoned_at') > "
+        f"{valid_until_expr} IS NULL OR {valid_until_expr} > "
+        "(SELECT timestamp FROM transactions WHERE id = ?)) AND ("
+        f"{prefix}is_tombstoned = 0 OR {tombstoned_at_expr} > "
         "(SELECT timestamp FROM transactions WHERE id = ?))",
         [tx_id, tx_id, tx_id, tx_id],
     )

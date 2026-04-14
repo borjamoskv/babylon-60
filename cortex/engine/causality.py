@@ -220,6 +220,8 @@ class AsyncCausalGraph:
         fact_id: int,
         tenant_id: str = "default",
         floor_to_c1: bool = True,
+        *,
+        commit: bool = True,
     ) -> TaintReport:
         """Propagates causal taint (Ω₁₃) from a source fact to all descendants."""
         now = now_iso()
@@ -249,7 +251,8 @@ class AsyncCausalGraph:
             await self._apply_fact_updates(changes, nodes_data, meta_col, has_tenant, tenant_id)
             await self._record_taint_edges(changes, fact_id, has_tenant, tenant_id)
 
-        await self.conn.commit()
+        if commit:
+            await self.conn.commit()
         return TaintReport(
             source_fact_id=fact_id,
             affected_count=len(changes),

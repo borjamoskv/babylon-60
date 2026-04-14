@@ -8,6 +8,7 @@ Captures physical friction and acts as the bridging protocol between hardware
 from __future__ import annotations
 
 import asyncio
+import inspect
 import logging
 from typing import TYPE_CHECKING, Any
 
@@ -89,7 +90,7 @@ class IoTOracle:
 
         try:
             # We must handle both sync and async engine types depending on how sidecars are initialized
-            if hasattr(self.engine, "store") and asyncio.iscoroutinefunction(self.engine.store):
+            if hasattr(self.engine, "store") and inspect.iscoroutinefunction(self.engine.store):
                 await self.engine.store(
                     project="earthship_mmx",
                     content=content,

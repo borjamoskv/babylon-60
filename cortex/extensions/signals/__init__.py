@@ -13,7 +13,16 @@ Usage:
     signals = bus.poll(event_type="plan:done", consumer="legion-1")
 """
 
-from cortex.extensions.signals.bus import SignalBus
+from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
 from cortex.extensions.signals.models import Signal, SignalFilter
+from cortex.extensions.signals.reactor import SignalReactor
+from cortex.extensions.signals.trigger_registry import register_defaults
 
-__all__ = ["Signal", "SignalBus", "SignalFilter"]
+__all__ = [
+    "AsyncSignalBus",
+    "Signal",
+    "SignalBus",
+    "SignalFilter",
+    "SignalReactor",
+    "register_defaults",
+]

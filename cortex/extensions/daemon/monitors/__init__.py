@@ -6,6 +6,7 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from cortex.extensions.daemon.monitors.auto_audit import AutoAuditMonitor
     from cortex.extensions.daemon.monitors.auto_immune import AutoImmuneMonitor
     from cortex.extensions.daemon.monitors.cert import CertMonitor
     from cortex.extensions.daemon.monitors.cloud import CloudSyncMonitor
@@ -22,6 +23,7 @@ if TYPE_CHECKING:
     from cortex.extensions.daemon.monitors.perception import PerceptionMonitor
     from cortex.extensions.daemon.monitors.security import SecurityMonitor
     from cortex.extensions.daemon.monitors.signals import SignalMonitor
+    from cortex.extensions.daemon.monitors.thermodynamic import ThermodynamicMemoryMonitor
     from cortex.extensions.daemon.monitors.tombstone import TombstoneMonitor
     from cortex.extensions.daemon.monitors.trends import TrendsMonitor
     from cortex.extensions.daemon.monitors.workflow import WorkflowMonitor
@@ -34,6 +36,7 @@ _ALIASES: dict[str, str] = {
 
 __all__ = [
     "AutoImmuneMonitor",
+    "AutoAuditMonitor",
     "AutonomousMejoraloMonitor",
     "CertMonitor",
     "CloudSyncMonitor",
@@ -50,6 +53,7 @@ __all__ = [
     "SignalMonitor",
     "SiteMonitor",
     "TombstoneMonitor",
+    "ThermodynamicMemoryMonitor",
     "TrendsMonitor",
     "UnifiedMejoraloMonitor",
     "WorkflowMonitor",
@@ -57,6 +61,7 @@ __all__ = [
 ]
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
+    "AutoAuditMonitor": ("cortex.extensions.daemon.monitors.auto_audit", "AutoAuditMonitor"),
     "AutoImmuneMonitor": ("cortex.extensions.daemon.monitors.auto_immune", "AutoImmuneMonitor"),
     "CertMonitor": ("cortex.extensions.daemon.monitors.cert", "CertMonitor"),
     "CloudSyncMonitor": ("cortex.extensions.daemon.monitors.cloud", "CloudSyncMonitor"),
@@ -72,6 +77,10 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "SignalMonitor": ("cortex.extensions.daemon.monitors.signals", "SignalMonitor"),
     "SiteMonitor": ("cortex.extensions.daemon.monitors.network", "SiteMonitor"),
     "TombstoneMonitor": ("cortex.extensions.daemon.monitors.tombstone", "TombstoneMonitor"),
+    "ThermodynamicMemoryMonitor": (
+        "cortex.extensions.daemon.monitors.thermodynamic",
+        "ThermodynamicMemoryMonitor",
+    ),
     "TrendsMonitor": ("cortex.extensions.daemon.monitors.trends", "TrendsMonitor"),
     "UnifiedMejoraloMonitor": (
         "cortex.extensions.daemon.monitors.mejoralo",

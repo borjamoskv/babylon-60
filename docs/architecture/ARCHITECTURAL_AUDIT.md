@@ -4,6 +4,9 @@
 **Scope:** `./cortex/` (42,613+ LOC)  
 **Auditor:** Kimi Code CLI  
 
+> [!IMPORTANT]
+> Historical audit snapshot. This report may reference pre-v8 module topology and legacy example APIs; do not treat it as the current public runtime contract. Use `docs/architecture.md`, `docs/reference.md`, and `docs/sdks.md` for the live surface.
+
 ---
 
 ## Executive Summary

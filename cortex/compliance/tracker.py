@@ -32,8 +32,6 @@ _ARTICLE_12_CHECKS = {
     "art_12_3_tamper_proof": "SHA-256 hash chain with Merkle tree checkpoints",
     "art_12_4_periodic_verification": "Integrity verification with recorded results",
 }
-_DECISION_LINK_RE = re.compile(r"\b(?:Compatible with|Supersedes)\s+#\d+\b", re.IGNORECASE)
-
 
 class ComplianceTracker:
     """EU AI Act Article 12 compliance tracker for AI agent decisions.
@@ -47,7 +45,7 @@ class ComplianceTracker:
         project: Default project namespace for all operations.
     """
 
-    __slots__ = ("_engine", "_default_project", "_initialized", "_last_decision_ids")
+    __slots__ = ("_engine", "_default_project", "_initialized")
 
     def __init__(
         self,
@@ -59,27 +57,21 @@ class ComplianceTracker:
         self._engine = CortexEngine(db_path=str(db_path), auto_embed=False)
         self._default_project = project
         self._initialized = False
-        self._last_decision_ids: dict[str, int] = {}
-
     def _ensure_init(self) -> None:
         """Lazy-init the database on first use."""
         if not self._initialized:
             self._engine.init_db_sync()
             self._initialized = True
 
-    def _get_previous_decision_id(self, project: str) -> int | None:
-        """Return the latest stored decision id for the given project, if any."""
-        cached = self._last_decision_ids.get(project)
-        if cached is not None:
-            return cached
-
+    def _get_previous_fact_id(self, project: str) -> int | None:
+        """Return the latest stored fact id for the given project, if any."""
         conn = self._engine._get_sync_conn()
         try:
             row = conn.execute(
                 """
                 SELECT id
                 FROM facts
-                WHERE project = ? AND fact_type = 'decision'
+                WHERE project = ?
                 ORDER BY id DESC
                 LIMIT 1
                 """,
@@ -94,9 +86,16 @@ class ComplianceTracker:
         if row is None:
             return None
 
-        decision_id = int(row[0])
-        self._last_decision_ids[project] = decision_id
-        return decision_id
+        return int(row[0])
+
+    @staticmethod
+    def _has_exact_decision_link(content: str, fact_id: int) -> bool:
+        """Return ``True`` when content already points to the given fact id."""
+        pattern = re.compile(
+            rf"\b(?:Compatible with|Supersedes)\s+#{re.escape(str(fact_id))}\b",
+            re.IGNORECASE,
+        )
+        return bool(pattern.search(content))
 
     @staticmethod
     def _coerce_fact_id(store_result: object) -> int:
@@ -142,10 +141,10 @@ class ComplianceTracker:
 
         proj = project or self._default_project
         now = now_iso()
-        previous_fact_id = self._get_previous_decision_id(proj)
+        previous_fact_id = self._get_previous_fact_id(proj)
         normalized_content = content.rstrip()
 
-        if previous_fact_id is not None and not _DECISION_LINK_RE.search(normalized_content):
+        if previous_fact_id is not None and not self._has_exact_decision_link(normalized_content, previous_fact_id):
             normalized_content = f"{normalized_content} Compatible with #{previous_fact_id}."
 
         eu_meta: dict[str, Any] = {
@@ -171,7 +170,6 @@ class ComplianceTracker:
             tags=tags or ["eu-ai-act", "compliance"],
         )
         fact_id = self._coerce_fact_id(store_result)
-        self._last_decision_ids[proj] = fact_id
         return fact_id
 
     # ─── 2. verify_chain ──────────────────────────────────────────

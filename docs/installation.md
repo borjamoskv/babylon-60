@@ -18,31 +18,37 @@ pip install cortex-persist
 
 === "API Server"
     ```bash
-    pip install cortex-persist[api]
+    pip install "cortex-persist[api]"
     ```
-    Includes FastAPI, Uvicorn, and HTTPX for the REST API, dashboard, and MCP server.
+    Includes FastAPI, Uvicorn, and HTTPX for the REST API and dashboard.
+
+=== "MCP Server"
+    ```bash
+    pip install "cortex-persist[mcp]"
+    ```
+    Adds the MCP server runtime dependencies.
 
 === "Development"
     ```bash
-    pip install cortex-persist[dev]
+    pip install "cortex-persist[dev]"
     ```
     Includes pytest, pytest-cov, pytest-asyncio, and HTTPX for testing.
 
 === "Google ADK"
     ```bash
-    pip install cortex-persist[adk]
+    pip install "cortex-persist[adk]"
     ```
     Adds Google Agent Developer Kit integration.
 
 === "Billing"
     ```bash
-    pip install cortex-persist[billing]
+    pip install "cortex-persist[billing]"
     ```
     Stripe integration for SaaS subscription management.
 
 === "Everything"
     ```bash
-    pip install cortex-persist[all]
+    pip install "cortex-persist[all]"
     ```
     Installs all optional dependencies.
 
@@ -63,7 +69,7 @@ pip install -e ".[all]"
 
 ```bash
 cortex --version
-# cortex-persist, version 0.3.0b2
+# cortex-persist, version 0.3.0b3
 ```
 
 ---

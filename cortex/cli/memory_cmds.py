@@ -228,7 +228,7 @@ def search(query, project, top, scope, db, epistemic) -> None:
         _run_async(engine.close())
 
 
-@cli.command()
+@memory_cmds.command("recall")
 @click.argument("project")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def recall(project, db) -> None:

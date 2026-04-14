@@ -298,10 +298,10 @@ class TipsEngine:
 
         tips: list[Tip] = []
         try:
-            conn = await self._engine.get_conn()
-            for spec in _MINING_SPECS:
-                limit = max(1, self._max_dynamic // spec.limit_divisor)
-                tips.extend(await self._mine_facts(conn, spec, limit))
+            async with self._engine.session() as conn:
+                for spec in _MINING_SPECS:
+                    limit = max(1, self._max_dynamic // spec.limit_divisor)
+                    tips.extend(await self._mine_facts(conn, spec, limit))
         except (sqlite3.Error, AttributeError, RuntimeError) as exc:
             logger.debug("Optional dynamic tips mining skipped: %s", exc)
 

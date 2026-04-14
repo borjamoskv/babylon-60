@@ -2,13 +2,16 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol
+from typing import TYPE_CHECKING, Any, cast
 
 from starlette.concurrency import run_in_threadpool
 
 from cortex.utils.export import export_facts
 
 _DANGEROUS_PATH_CHARS = frozenset("\0\r\n\t")
+
+if TYPE_CHECKING:
+    from cortex.engine.models import Fact
 
 
 class UnsupportedExportFormatError(ValueError):
@@ -29,12 +32,6 @@ class InvalidExportPathError(ValueError):
 
 class ProjectExportExecutionError(RuntimeError):
     """Raised when fact export or artifact writing fails."""
-
-
-class ProjectExportEngine(Protocol):
-    """Minimal sync search contract used by the export workflow."""
-
-    def search(self, *, project: str, limit: int): ...
 
 
 @dataclass(frozen=True)
@@ -65,7 +62,7 @@ def resolve_export_path(path: str | None, project: str) -> Path:
 
 
 async def export_project_artifact(
-    engine: ProjectExportEngine,
+    engine: object,
     *,
     project: str,
     path: str | None,
@@ -79,12 +76,13 @@ async def export_project_artifact(
     target_path = resolve_export_path(path, project)
 
     try:
+        search_fn = cast(Any, engine).search
         facts = await run_in_threadpool(
-            engine.search,
+            search_fn,
             project=project,
             limit=max_facts,
         )
-        content = export_facts(facts, fmt="json")
+        content = export_facts(cast("list[Fact]", facts), fmt="json")
 
         def _write_export() -> Path:
             target_path.parent.mkdir(parents=True, exist_ok=True)

@@ -1,3 +1,5 @@
+import asyncio
+
 import pytest
 
 from cortex.engine.forensic_commander import ForensicCommander
@@ -5,33 +7,36 @@ from cortex.engine.forensic_strike_config import STRIKE_V1
 
 
 @pytest.mark.asyncio
-@pytest.mark.timeout(60)
 async def test_strike_density_assignment():
     """Verify that 1,000 agents are correctly binned into mission Legions."""
-    # Use Shared Memory bus (no file path) for ultra-fast coordination testing
-    commander = ForensicCommander(bus_path="cortex.db")
-    await commander.initialize_strike()
+    async def run_strike_density_assignment() -> None:
+        # Use Shared Memory bus (no file path) for ultra-fast coordination testing.
+        commander = ForensicCommander(bus_path="cortex.db")
+        await commander.initialize_strike()
 
-    # 1. Dispatch the strike (sequential for test stability on Mac)
-    dispatch_count = 0
-    for m in STRIKE_V1.MISSIONS:
-        for _ in range(m.agent_density // 10):
-            # Dispatch individually to avoid asyncio selector saturation
-            await commander.execute_global_dispatch(
-                [{"id": f"{m.name}_{dispatch_count}", "domain": m.target_repo.split("/")[-1]}],
-                parallel=False,
-            )
-            dispatch_count += 1
+        try:
+            # 1. Dispatch the strike (sequential for test stability on Mac).
+            dispatch_count = 0
+            for m in STRIKE_V1.MISSIONS:
+                for _ in range(m.agent_density // 10):
+                    # Dispatch individually to avoid asyncio selector saturation.
+                    await commander.execute_global_dispatch(
+                        [{"id": f"{m.name}_{dispatch_count}", "domain": m.target_repo.split("/")[-1]}],
+                        parallel=False,
+                    )
+                    dispatch_count += 1
 
-    # 2. Check density report
-    report = await commander.get_density_report()
-    assert report["agents"] == 1000
+            # 2. Check density report.
+            report = await commander.get_density_report()
+            assert report["agents"] == 1000
 
-    # 3. Check Mission-Specific Binning
-    # Shards active should be 1 since we're using a single shared segment
-    assert report["shards_active"] >= 0
+            # 3. Check Mission-Specific Binning.
+            # Shards active should be 1 since we're using a single shared segment.
+            assert report["shards_active"] >= 0
+        finally:
+            await commander.consolidate_and_annihilate()
 
-    await commander.consolidate_and_annihilate()
+    await asyncio.wait_for(run_strike_density_assignment(), timeout=60)
 
 
 def test_strike_config_integrity():
