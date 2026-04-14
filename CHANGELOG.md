@@ -9,10 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased] — v0.3.0b6
+## [Unreleased]
 
 ### In Progress
 - No unreleased entries yet.
+
+## [0.3.0b7] — 2026-04-14
+
+### Changed
+- **Lazy package imports**: deferred optional and heavy imports in `cortex.routes` and key extension packages (`browser`, `gate`, `metering`, `signals`) to reduce startup side effects and improve import health.
 
 ## [0.3.0b5] — 2026-04-14
 
