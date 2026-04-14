@@ -44,23 +44,21 @@ Sistema de IA de ALBA (scoring, riesgos, fraude)
         Informe para el regulador (1 comando)
 ```
 
-### Ejemplo real
+### Demo oficial usada en ventas y piloto
 
+La misma demo oficial se usa para explicar el producto y para arrancar el piloto:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+PYTHONPATH=. python examples/demo_canonical.py
 ```
-$ cortex compliance-report
 
-  ╔══════════════════════════════════════════╗
-  ║  CORTEX — EU AI Act Compliance Report   ║
-  ╚══════════════════════════════════════════╝
-
-  Total Decisiones Registradas:    134
-  Cadena de Hashes:                ✅ VÁLIDA
-  Checkpoints Merkle:              12
-  Agentes Rastreados:              5
-  Compliance Score:                5/5
-
-  🟢 COMPLIANT — Todos los requisitos del Art. 12 cumplidos.
-```
+Flujo mostrado:
+1. registrar una decisión de scoring
+2. verificar integridad criptográfica
+3. exportar evidencia JSON para revisión o regulador
 
 ---
 

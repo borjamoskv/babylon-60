@@ -89,32 +89,24 @@ The supported core modules are: **engine**, **ledger**, **crypto**, **memory**, 
 
 See [docs/PRODUCT-CORE.md](docs/PRODUCT-CORE.md) for the full stability tier breakdown (Stable / Beta / Experimental).
 
-## 90-second demo
+## Official product demo
+
+Run the single supported demo from a clean checkout:
 
 ```bash
-# 1. Start the ledger
-$ cortex init
-
-# 2. Store a memory
-$ cortex memory store risk-bot "Transaction flagged: IP mismatch"
-[+] Fact stored. Ledger hash: 8f4a2b9e...
-
-# 3. Verify the stored fact
-$ cortex verify 1
-[✔] VERIFIED: Fact chain intact.
-
-# 4. Tamper attempt (direct DB mutation)
-$ sqlite3 cortex.db "UPDATE facts SET content='Transaction approved' WHERE id='8f4a2b9e'"
-
-# 5. Ledger verification
-$ cortex trust-ledger verify
-[✘] TAMPER DETECTED: Hash mismatch at block 8f4a2b9e
-
-# 6. Generate a compliance snapshot
-$ cortex compliance-report
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+PYTHONPATH=. python examples/demo_canonical.py
 ```
 
-> 🐍 **Python demo:** For a self-contained Python script that walks through the full core flow, see [`examples/demo_canonical.py`](examples/demo_canonical.py).
+What it shows:
+
+1. Register one AI decision.
+2. Verify cryptographic integrity.
+3. Export JSON evidence.
+
+See the full walkthrough in [`docs/official-demo.md`](docs/official-demo.md).
 
 ## Quickstart
 

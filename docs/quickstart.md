@@ -2,7 +2,7 @@
 
 Get CORTEX running in 5 minutes.
 
-> 🐍 **Python demo:** For a self-contained script that walks through the full core flow, run `python examples/demo_canonical.py` after installing.
+> 🚀 **Official demo:** Use the single supported flow in [`official-demo.md`](official-demo.md) and run `PYTHONPATH=. python examples/demo_canonical.py` after installing from source.
 
 ---
 

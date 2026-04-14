@@ -1,88 +1,106 @@
-"""
-CORTEX Persist — Canonical Demo
-================================
-Demonstrates the core product flow in under 3 minutes:
-  1. Initialize the engine
-  2. Store a fact (hash-chained into the ledger)
-  3. Store a second fact to build the chain
-  4. Search memories semantically
-  5. Verify full ledger integrity
-  6. Detect tampering attempt (direct DB mutation)
+"""CORTEX Persist — Official product demo.
+
+Demonstrates the canonical product flow in under 3 minutes:
+  1. Register an AI decision.
+  2. Verify cryptographic integrity.
+  3. Export audit evidence as JSON.
 
 Run:
     pip install -e .
-    python examples/demo_canonical.py
+    PYTHONPATH=. python examples/demo_canonical.py
 """
 
-import asyncio
-import sqlite3
+from __future__ import annotations
 
-from cortex import CortexEngine
-from cortex.config import DEFAULT_DB_PATH
+import base64
+import json
+import os
+import tempfile
+from pathlib import Path
+from typing import Any
+
+from cortex.compliance import ComplianceTracker
+from cortex.crypto.aes import reset_default_encrypter
+
+DEMO_PROJECT = "official-product-demo"
+DEMO_AGENT = "agent:credit-risk"
 
 
-async def main() -> None:
-    engine = CortexEngine()
+def _ensure_demo_master_key() -> None:
+    """Bootstrap a process-local master key for clean demo environments."""
+    if os.environ.get("CORTEX_MASTER_KEY") or os.environ.get("CORTEX_VAULT_KEY"):
+        return
 
-    print("CORTEX Persist — Canonical Demo")
-    print("=" * 40)
+    os.environ.setdefault("CORTEX_TESTING", "1")
+    os.environ["CORTEX_MASTER_KEY"] = base64.b64encode(os.urandom(32)).decode("ascii")
+    reset_default_encrypter()
 
-    # 1. Store a decision fact
-    fact_id = await engine.store(
-        project="demo-agent",
-        content="User approved transaction $5,000 from IP 192.168.1.1",
-        fact_type="decision",
-    )
-    print(f"[+] Fact stored. ID: {fact_id}")
 
-    # 2. Store a second fact to build the hash chain
-    fact_id2 = await engine.store(
-        project="demo-agent",
-        content="Transaction flagged: IP geolocation mismatch detected",
-        fact_type="observation",
-    )
-    print(f"[+] Second fact stored. ID: {fact_id2}")
+def run_demo(output_dir: Path | None = None) -> dict[str, Any]:
+    """Run the official demo and return the generated artifacts."""
+    _ensure_demo_master_key()
 
-    # 3. Semantic search
-    results = await engine.search("transaction approval", top_k=3, project="demo-agent")
-    print(f"[+] Semantic search returned {len(results)} result(s).")
-    for r in results[:2]:
-        content_preview = r.content[:60] if hasattr(r, "content") else str(r)[:60]
-        print(f"    → {content_preview}...")
+    artifact_dir = output_dir or Path(tempfile.mkdtemp(prefix="cortex-demo-"))
+    artifact_dir.mkdir(parents=True, exist_ok=True)
 
-    # 4. Verify full ledger integrity
-    ledger_result = await engine.verify_ledger()
-    ledger_ok = ledger_result.get("valid", False) if isinstance(ledger_result, dict) else bool(ledger_result)
-    status = "INTACT" if ledger_ok else "TAMPERED"
-    icon = "✔" if ledger_ok else "✘"
-    print(f"[{icon}] Full ledger verification: {status}")
+    db_path = artifact_dir / "official-demo.db"
+    audit_path = artifact_dir / "official-demo-audit.json"
 
-    # 5. Simulate a tampering attempt (direct DB mutation, bypassing the engine)
-    db_path = str(engine._db_path)  # type: ignore[attr-defined]  # path is stable public-use internal attr
-    print(f"\n[!] Simulating tampering: mutating DB directly at {db_path}")
-    try:
-        conn = sqlite3.connect(db_path)
-        conn.execute(
-            "UPDATE facts SET content='Transaction approved — audit bypassed' WHERE id=?",
-            (fact_id,),
+    with ComplianceTracker(db_path=str(db_path), project=DEMO_PROJECT) as tracker:
+        fact_id = tracker.log_decision(
+            content="approved loan application 443 after review pass and policy checks.",
+            agent_id=DEMO_AGENT,
+            decision_type="approval",
+            confidence="C4",
+            meta={
+                "customer_id": "cust-443",
+                "risk_score": "0.18",
+                "policy_version": "credit-v3",
+            },
+            tags=["official-demo", "credit-risk"],
         )
-        conn.commit()
-        conn.close()
-        print("[!] Tampering applied. Re-running ledger verification...")
-    except sqlite3.Error as exc:
-        print(f"[!] Tampering simulation skipped: {exc}")
+        integrity = tracker.verify_chain()
+        audit_report = tracker.export_audit(include_facts=True)
 
-    # 6. Re-verify — should detect the tamper if ledger chain covers the mutation
-    ledger_result2 = await engine.verify_ledger()
-    ledger_ok2 = ledger_result2.get("valid", False) if isinstance(ledger_result2, dict) else bool(ledger_result2)
-    status2 = "INTACT" if ledger_ok2 else "TAMPERED"
-    icon2 = "✔" if ledger_ok2 else "✘"
-    print(f"[{icon2}] Post-tamper ledger verification: {status2}")
+    audit_path.write_text(
+        json.dumps(audit_report, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
 
-    print("\n--- Demo complete. Your agent's decisions are now tamper-evident. ---")
-    print(f"Database: {db_path}")
-    print(f"Default path: {DEFAULT_DB_PATH}")
+    return {
+        "artifact_dir": artifact_dir,
+        "db_path": db_path,
+        "audit_path": audit_path,
+        "fact_id": fact_id,
+        "integrity": integrity,
+        "audit_report": audit_report,
+    }
+
+
+def main() -> None:
+    """Print the official demo walkthrough and artifact locations."""
+    result = run_demo()
+    integrity = result["integrity"]
+    audit_report = result["audit_report"]
+
+    print("CORTEX Persist — Official product demo")
+    print("=" * 40)
+    print("1. Register decision")
+    print(f"   Stored fact #{result['fact_id']} for {DEMO_PROJECT} from {DEMO_AGENT}.")
+    print("2. Verify integrity")
+    print(
+        f"   Ledger valid: {integrity.get('valid', False)} "
+        f"({integrity.get('tx_checked', 0)} transaction(s) checked)."
+    )
+    print("3. Export evidence")
+    print(
+        f"   Wrote JSON audit evidence with score "
+        f"{audit_report['eu_ai_act']['score']} to {result['audit_path']}"
+    )
+    print()
+    print(f"Artifacts: {result['artifact_dir']}")
+    print(f"Database: {result['db_path']}")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
