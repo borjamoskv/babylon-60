@@ -81,7 +81,8 @@ class RetryPolicy:
         if attempt + 1 >= self.max_attempts:
             return 0.0
         raw = min(self.base_delay * (self.backoff_factor**attempt), self.max_delay)
-        return random.uniform(0.0, raw) if self.jitter else raw  # noqa: S311 — not crypto
+        # PRNG sufficient for load-distribution jitter; this is not a security-sensitive path.
+        return random.uniform(0.0, raw) if self.jitter else raw  # noqa: S311
 
     def is_retriable(self, exc: BaseException) -> bool:
         """Return True iff *exc* is safe to retry under this policy."""
@@ -280,13 +281,16 @@ class OrchestratorResilience:
         active_policy = policy or self._default_policy
         record = self._get_or_create_record(task_name)
 
-        last_exc: BaseException = RuntimeError("No attempts made")
+        # Invariant: max_attempts >= 1, so the loop always runs at least once and
+        # last_exc is always assigned before being raised.  The initialiser is
+        # purely defensive and should never surface to a caller.
+        last_exc: BaseException = RuntimeError("No attempts made (max_attempts must be >= 1)")
         for attempt in range(active_policy.max_attempts):
             try:
                 result = await coro_func(*args, **kwargs)
                 record.record_success()
                 return result
-            except BaseException as exc:  # noqa: BLE001 — intercept all for retry logic
+            except Exception as exc:
                 if not active_policy.is_retriable(exc):
                     logger.error(
                         "🛑 [resilience] %s attempt %d/%d — non-retriable: %s",
@@ -354,13 +358,21 @@ class OrchestratorResilience:
             retry_policy=retry_policy,
         )
         self._spof_registry.append(report)
-        level = "CRITICAL" if report.is_spof else ("HIGH" if report.risk_score >= 0.5 else "OK")
+        if report.is_spof:
+            log_level = logging.CRITICAL
+            level_label = "CRITICAL"
+        elif report.risk_score >= 0.5:
+            log_level = logging.WARNING
+            level_label = "HIGH"
+        else:
+            log_level = logging.DEBUG
+            level_label = "OK"
         logger.log(
-            logging.CRITICAL if report.is_spof else logging.WARNING if report.risk_score >= 0.5 else logging.DEBUG,
+            log_level,
             "🔍 [resilience] SPOF scan — %s (risk=%.2f) [%s]",
             component,
             report.risk_score,
-            level,
+            level_label,
         )
         return report
 
