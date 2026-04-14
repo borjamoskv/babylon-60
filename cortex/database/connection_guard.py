@@ -81,6 +81,13 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset(
         "cortex/cli/doctor_cmds.py",
         "cortex/engine/capabilities.py",
         "cortex/extensions/health/trend.py",
+        # MCP sync signal-bus emit (fire-and-forget, no async context)
+        "cortex/mcp/singularity_tools.py",
+        # CLI audit helper (sync wrapper around async scan)
+        "cortex/cli/autodidact_cmds.py",
+        # Daemon scheduler / hot-state (own DB, sync WAL, check_same_thread=False)
+        "cortex/extensions/daemon/scheduler.py",
+        "cortex/extensions/daemon/hot_state.py",
     }
 )
 
