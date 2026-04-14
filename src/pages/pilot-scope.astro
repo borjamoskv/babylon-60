@@ -1,0 +1,236 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+
+const supportEmail = 'borja@cortexpersist.com';
+const subject = 'CORTEX Pilot Scope';
+---
+
+<SiteLayout
+	title="Get Pilot Scope | CORTEX Persist"
+	description="Send your workflow, stack, and constraints to scope a CORTEX pilot asynchronously."
+	canonical="https://cortexpersist.com/pilot-scope"
+>
+	<main class="landing-shell intake-shell">
+		<a class="intake-backlink" href="/">← Back to CORTEX Persist</a>
+
+		<section class="section-frame surface intake-hero">
+			<div class="section-heading">
+				<p class="section-kicker">Pilot Scope</p>
+				<h1>Scope one workflow and get a concrete pilot recommendation.</h1>
+				<p>
+					Send the workflow, stack, risk level, and hosting constraints. We reply with a
+					scoped pilot recommendation, commercials, and next steps.
+				</p>
+			</div>
+
+			<div class="chip-row" aria-label="Pilot scope promises">
+				<span class="chip">One workflow</span>
+				<span class="chip">One environment</span>
+				<span class="chip">Reply within 24 hours</span>
+			</div>
+		</section>
+
+		<section class="intake-grid">
+			<section class="surface intake-panel">
+				<div class="surface-head">
+					<span class="surface-label">Scope inputs</span>
+					<span class="surface-state">Pilot</span>
+				</div>
+
+				<form class="intake-form" data-intake-form data-subject={subject} data-email={supportEmail}>
+					<label class="field">
+						<span>Workflow</span>
+						<textarea
+							name="workflow"
+							rows="4"
+							placeholder="Which workflow should the pilot instrument first?"
+						></textarea>
+					</label>
+
+					<label class="field">
+						<span>Current stack</span>
+						<textarea
+							name="stack"
+							rows="4"
+							placeholder="Agent orchestration, memory layer, observability, APIs, repos, or relevant systems."
+						></textarea>
+					</label>
+
+					<div class="field-grid">
+						<label class="field">
+							<span>Sensitive data</span>
+							<select name="sensitive">
+								<option>Yes</option>
+								<option>No</option>
+								<option selected>Not sure yet</option>
+							</select>
+						</label>
+
+						<label class="field">
+							<span>Hosting model</span>
+							<select name="hosting">
+								<option selected>Not sure yet</option>
+								<option>Cloud</option>
+								<option>Self-hosted</option>
+								<option>BYOC</option>
+							</select>
+						</label>
+					</div>
+
+					<div class="field-grid">
+						<label class="field">
+							<span>Target environment</span>
+							<select name="environment">
+								<option>Development</option>
+								<option>Staging</option>
+								<option>Production-like</option>
+								<option selected>Not sure yet</option>
+							</select>
+						</label>
+
+						<label class="field">
+							<span>Owner</span>
+							<select name="owner">
+								<option>Engineering</option>
+								<option>Platform</option>
+								<option>Security</option>
+								<option>Leadership</option>
+								<option selected>Not sure yet</option>
+							</select>
+						</label>
+					</div>
+
+					<label class="field">
+						<span>Success criteria</span>
+						<textarea
+							name="success"
+							rows="4"
+							placeholder="What would make the pilot clearly worth doing?"
+						></textarea>
+					</label>
+
+					<div class="field-grid">
+						<label class="field">
+							<span>Name</span>
+							<input name="name" type="text" placeholder="Your name" />
+						</label>
+						<label class="field">
+							<span>Email or company</span>
+							<input name="contact" type="text" placeholder="Email or company" />
+						</label>
+					</div>
+
+					<div class="intake-actions">
+						<button class="button-primary" type="submit">Open Scoped Email</button>
+						<button class="button-secondary" type="button" data-copy-intake>Copy Scope</button>
+					</div>
+
+					<p class="microcopy">
+						If you prefer, copy the scope and send it manually to
+						<a class="inline-link" href={`mailto:${supportEmail}`}>{supportEmail}</a>.
+					</p>
+					<p class="intake-status" data-intake-status aria-live="polite"></p>
+				</form>
+			</section>
+
+			<aside class="surface-sunken intake-panel">
+				<div class="surface-head">
+					<span class="surface-label">What we send back</span>
+					<span class="surface-state">24h</span>
+				</div>
+
+				<div class="proof-stack">
+					<div class="proof-item">
+						<div>
+							<strong>Scoped recommendation</strong>
+							<span>What workflow to start with and why.</span>
+						</div>
+						<span class="proof-tag live">Scope</span>
+					</div>
+					<div class="proof-item">
+						<div>
+							<strong>Commercials</strong>
+							<span>Pilot pricing, constraints, and expected timeline.</span>
+						</div>
+						<span class="proof-tag audit">EUR</span>
+					</div>
+					<div class="proof-item">
+						<div>
+							<strong>Next step</strong>
+							<span>Approval, kickoff, or request for one missing detail.</span>
+						</div>
+						<span class="proof-tag live">Async</span>
+					</div>
+				</div>
+
+				<div class="intake-preview">
+					<p class="preview-label">Email subject</p>
+					<p class="preview-subject" data-intake-subject>{subject}</p>
+					<p class="preview-label">Email body</p>
+					<pre class="preview-body" data-intake-preview></pre>
+				</div>
+			</aside>
+		</section>
+	</main>
+
+	<script is:inline>
+		const form = document.querySelector('[data-intake-form]');
+		if (form) {
+			const preview = document.querySelector('[data-intake-preview]');
+			const subjectNode = document.querySelector('[data-intake-subject]');
+			const statusNode = document.querySelector('[data-intake-status]');
+			const copyButton = document.querySelector('[data-copy-intake]');
+			const fields = Array.from(form.querySelectorAll('input, textarea, select'));
+			const supportEmail = form.dataset.email || '';
+			const subject = form.dataset.subject || 'CORTEX intake';
+
+			const buildBody = () => {
+				const data = Object.fromEntries(new FormData(form).entries());
+				return [
+					'CORTEX pilot scope request',
+					'',
+					`Workflow: ${data.workflow || '-'}`,
+					`Current stack: ${data.stack || '-'}`,
+					`Sensitive data: ${data.sensitive || '-'}`,
+					`Hosting model: ${data.hosting || '-'}`,
+					`Target environment: ${data.environment || '-'}`,
+					`Owner: ${data.owner || '-'}`,
+					`Success criteria: ${data.success || '-'}`,
+					`Name: ${data.name || '-'}`,
+					`Contact: ${data.contact || '-'}`,
+				].join('\n');
+			};
+
+			const refreshPreview = () => {
+				const body = buildBody();
+				if (preview) preview.textContent = body;
+				if (subjectNode) subjectNode.textContent = subject;
+				return body;
+			};
+
+			fields.forEach((field) => {
+				field.addEventListener('input', refreshPreview);
+				field.addEventListener('change', refreshPreview);
+			});
+
+			form.addEventListener('submit', (event) => {
+				event.preventDefault();
+				const body = refreshPreview();
+				const href = `mailto:${supportEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+				window.location.href = href;
+			});
+
+			copyButton?.addEventListener('click', async () => {
+				const body = refreshPreview();
+				try {
+					await navigator.clipboard.writeText(body);
+					if (statusNode) statusNode.textContent = 'Copied. Paste it into any email client if mailto is not available.';
+				} catch {
+					if (statusNode) statusNode.textContent = 'Copy failed. Select the preview text manually and paste it into your email.';
+				}
+			});
+
+			refreshPreview();
+		}
+	</script>
+</SiteLayout>

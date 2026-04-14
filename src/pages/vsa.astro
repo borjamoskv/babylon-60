@@ -8,17 +8,6 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 	canonical="https://cortexpersist.com/vsa"
 	bodyClass="vsa-body"
 >
-	<Fragment slot="head">
-		<script is:inline type="importmap">
-			{
-				"imports": {
-					"three": "https://unpkg.com/three@0.183.2/build/three.module.js",
-					"three/addons/": "https://unpkg.com/three@0.183.2/examples/jsm/"
-				}
-			}
-		</script>
-	</Fragment>
-
 	<div id="vsa-stage">
 		<div id="vsa-canvas-container"></div>
 
@@ -138,9 +127,9 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 		</div>
 	</div>
 
-	<script type="module" is:inline>
+	<script>
 		import * as THREE from 'three';
-		import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+		import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 		const DIMENSIONS = 400;
 		const STAR_COUNT = 260;
@@ -185,6 +174,7 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 		const dataValues = new Float32Array(DIMENSIONS).fill(0);
 		const targetValues = new Float32Array(DIMENSIONS).fill(0);
 		const basePositions = new Float32Array(DIMENSIONS * 3);
+		const simulationStates = new Float32Array(DIMENSIONS);
 
 		function clamp01(value) {
 			return Math.min(1, Math.max(0, value));
@@ -310,7 +300,8 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 
 				const cursorA = (simulatedCycle * 7) % DIMENSIONS;
 				const cursorB = (simulatedCycle * 13 + 57) % DIMENSIONS;
-				const states = new Float32Array(DIMENSIONS);
+				const states = simulationStates;
+				states.fill(0);
 
 				for (let i = 0; i < DIMENSIONS; i += 1) {
 					const distanceA = Math.abs(i - cursorA);
@@ -949,6 +940,12 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 			.vsa-heading h1 {
 				font-size: 1.08rem;
 				line-height: 1.15;
+			}
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			#health-fill {
+				transition: none;
 			}
 		}
 	</style>
