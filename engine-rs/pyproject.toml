@@ -2,6 +2,10 @@
 requires = ["maturin>=1.0,<2.0"]
 build-backend = "maturin"
 
+# The Python package name uses a hyphen (cortex-rs, per PEP 508) while the
+# Rust package and the importable Python module both use an underscore (cortex_rs).
+# This is intentional: PyPI package names normalise hyphens to underscores, so
+# `pip install cortex-rs` installs the `cortex_rs` importable module.
 [project]
 name = "cortex-rs"
 version = "0.1.0"

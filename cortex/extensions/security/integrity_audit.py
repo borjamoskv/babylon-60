@@ -382,7 +382,7 @@ class IntegrityAuditor:
                 )
             return failures
 
-        for fact, is_valid in zip(valid_facts, results, strict=False):
+        for fact, is_valid in zip(valid_facts, results, strict=True):
             if not is_valid:
                 content = fact["content"] or ""
                 failures.append(

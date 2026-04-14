@@ -13,7 +13,13 @@ path = "src/main.rs"
 
 [features]
 # Enables the PyO3 extension-module linker mode (required for cdylib Python extension).
-# maturin passes this automatically; cargo build (for the binary) omits it.
+# maturin passes this automatically via `--features extension-module`; plain
+# `cargo build` (for the binary) omits it so that the binary link step does not
+# inherit the shared-library linker flags.
+#
+# Note: pyo3 is listed as an optional dependency below so that the binary target
+# can be built in environments without Python headers.  The extension-module
+# feature gates the pyo3/extension-module linker flag independently.
 extension-module = ["pyo3/extension-module"]
 
 [dependencies]
