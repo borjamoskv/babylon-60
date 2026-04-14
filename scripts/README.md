@@ -33,3 +33,58 @@ Scripts with destructive operations require explicit opt-in:
 ## `_archive/`
 
 Contains superseded, one-shot, and experimental scripts preserved for archaeological reference. Safe to delete entirely.
+
+## Automatización de modelos (motor local)
+
+```bash
+npm run model:pick -- "Texto de tarea"
+npm run model:guide
+npm run model:guide -- --json
+npm run model:dispatch -- "Texto de tarea" -- "npm run build"
+
+# Modo orquestado (sin pasar --):
+TASK_COMMAND="npm run build" npm run model:dispatch -- "Necesito compilar y validar el site"
+
+# Modo orquestado automático por flujo:
+TASK_FLOW=build TASK_COMMAND="npm run build" npm run model:dispatch -- --auto "Necesito compilar y validar el site"
+
+# Modo orquestado desde entorno (opcional):
+TASK_FLOW=web TASK_COMMAND="npm run build" npm run task:run -- "Revisa el sitio y aplica el flujo web"
+
+# Modo simulación (sin ejecutar):
+TASK_FLOW=release TASK_COMMAND="npm run build" npm run model:dispatch -- --dry-run --auto "Simula preparación de release"
+```
+
+## Guía rápida: qué modelo usar
+
+| Modelo | Mejor para |
+|---|---|
+| `gpt-5.4` | Arquitectura, producto y decisiones complejas |
+| `gpt-5.4-Mini` | Explicación técnica rápida y consultas de ayuda |
+| `gpt-5.3-codex` | Bugfixes, refactors, integración y despliegue |
+| `gpt-5.3-codex-spark` | Ajustes de UI, texto, estilos o cambios puntuales |
+| `gpt-5.2` | Planes, coordinación y sesiones de trabajo prolongadas |
+
+## Scripts npm listos para flujo
+
+```bash
+npm run task:build -- "Compilar y validar la web"
+npm run task:web -- --json "Genera recomendaciones de modelado para este texto"
+npm run task:test -- "Verificar estado rápido antes de merge"
+npm run task:release -- "Preparar salida de release"
+npm run task:ship -- "Preparar artefacto y cerrar ciclo"
+npm run task:auto -- --json "Necesito compilar, testear y revisar la web antes de deploy"
+```
+
+Cuando `TASK_COMMAND` (o `CODEX_TASK_COMMAND` / `MODEL_ROUTER_COMMAND`) está presente, el dispatcher resuelve el modelo
+y ejecuta ese comando inyectando `CODEX_MODEL`, `MODEL_DISPATCH` y `MODEL_ROUTER_SELECTION` en el entorno.
+Con `--dry-run`, el dispatcher no ejecuta el comando y devuelve el plan resuelto en JSON/plain.
+
+Si defines `TASK_FLOW`, no necesitas pasar `--flow` explícitamente; al mismo tiempo puedes forzarlo con:
+`--auto --flow=<build|release|ship|web|test>`.
+
+Para validar regresiones del motor:
+
+```bash
+npm run test:models
+```

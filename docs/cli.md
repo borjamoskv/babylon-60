@@ -421,6 +421,24 @@ Meta-cognitive session analysis.
 cortex reflect              # Analyze current session patterns
 ```
 
+## Local Model Automation (Scripts)
+
+Use local scripts to route tasks to model candidates and execute predefined flows.
+
+```bash
+npm run model:pick -- "Texto de tarea"
+npm run model:guide -- --json
+npm run model:dispatch -- --json "Necesito compilar y validar el site" -- "npm run build"
+npm run task:build -- --json "Compilar y validar la web"
+npm run task:auto -- --json "Necesito compilar, testear y cerrar validación de la web antes del deploy"
+npm run task:web -- --json "Validación de UI y copy"
+npm run task:test -- --json "Validación previa"
+npm run task:release -- --json "Preparar salida"
+npm run test:models
+```
+
+Use `--dry-run` to preview model resolution and selected command without execution.
+
 ---
 
 ## Makefile Shortcuts

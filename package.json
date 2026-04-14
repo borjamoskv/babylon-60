@@ -7,7 +7,18 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "model:pick": "node scripts/model-router.mjs",
+    "model:guide": "node scripts/model-router.mjs --guide",
+    "model:dispatch": "node scripts/model-dispatcher.mjs",
+    "task:run": "node scripts/model-dispatcher.mjs",
+    "task:build": "node scripts/model-task-runner.mjs build",
+    "task:auto": "node scripts/model-task-runner.mjs auto",
+    "task:web": "node scripts/model-task-runner.mjs web",
+    "task:test": "node scripts/model-task-runner.mjs test",
+    "task:ship": "node scripts/model-task-runner.mjs ship",
+    "task:release": "node scripts/model-task-runner.mjs release",
+    "test:models": "node scripts/test-model-automation.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^4.2.0",
