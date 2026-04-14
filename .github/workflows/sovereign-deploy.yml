@@ -89,6 +89,42 @@ jobs:
           python scripts/release_preflight.py
           python -m twine check dist/*
 
+      - name: Detect changed Python files for quality gate
+        id: quality_targets
+        shell: bash
+        run: |
+          set -euo pipefail
+          base_sha=""
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base_sha="${{ github.event.pull_request.base.sha }}"
+          elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            base_sha="${{ github.event.before }}"
+          fi
+
+          if [ -n "${base_sha}" ]; then
+            mapfile -t files < <(
+              git diff --name-only --diff-filter=ACMRT "${base_sha}" "${{ github.sha }}" |
+              grep -E '^cortex/.*\.py$' |
+              while IFS= read -r path; do
+                [ -f "${path}" ] && printf '%s\n' "${path}"
+              done || true
+            )
+          else
+            mapfile -t files < <(git ls-files | grep -E '^cortex/.*\.py$' || true)
+          fi
+
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "count=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          {
+            echo "count=${#files[@]}"
+            echo "files<<EOF"
+            printf "%s\n" "${files[@]}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Lint (Ruff)
         if: steps.scope.outputs.release_only != 'true'
         run: ruff check cortex/ --output-format=github

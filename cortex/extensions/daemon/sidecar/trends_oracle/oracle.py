@@ -118,7 +118,7 @@ class TrendsOracle:
             except Exception as e:  # noqa: BLE001
                 logger.error("❌ [TRENDS_ORACLE] (Thread) Error: %s", e)
 
-            time.sleep(15.0)
+            time.sleep(15.0)  # noqa: TID251 - synchronous thread loop
 
     def stop(self) -> None:
         """Gracefully stop the oracle loop."""
@@ -287,9 +287,9 @@ def _execute_with_backoff(func, max_retries: int = 3, base_backoff: float = 1.5)
         except RequestException as e:
             # 429 means Too Many Requests
             if "429" in str(e):
-                delay = (base_backoff**attempt) + random.uniform(0.5, 2.5)
+                delay = (base_backoff**attempt) + random.uniform(0.5, 2.5)  # noqa: S311
                 logger.warning("⏳ [TRENDS_ORACLE] Rate limit (429). Retrying in %.1fs...", delay)
-                time.sleep(delay)
+                time.sleep(delay)  # noqa: TID251 - synchronous retry backoff
                 last_error = e
             else:
                 # Re-raise other HTTP errors

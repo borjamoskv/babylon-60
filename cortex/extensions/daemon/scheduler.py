@@ -24,12 +24,14 @@ import asyncio
 import logging
 import sqlite3
 import time
-import uuid
+from collections.abc import Callable, Coroutine
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Coroutine
+from typing import Any
+
+from cortex.database.core import connect as db_connect
 
 logger = logging.getLogger("cortex.daemon.scheduler")
 
@@ -121,9 +123,11 @@ class SovereignScheduler:
 
     @contextmanager
     def _conn(self):
-        conn = sqlite3.connect(str(self._db_path), check_same_thread=False)
-        conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA journal_mode=WAL")
+        conn = db_connect(
+            str(self._db_path),
+            check_same_thread=False,
+            row_factory=sqlite3.Row,
+        )
         try:
             yield conn
             conn.commit()
@@ -264,8 +268,6 @@ class SovereignScheduler:
         """Evaluate all schedules and fire due tasks."""
         now = datetime.now(timezone.utc)
         now_iso = now.isoformat()
-        now_ts = time.monotonic()
-
         with self._conn() as conn:
             due = conn.execute(
                 """
@@ -326,8 +328,8 @@ class SovereignScheduler:
                             "source": "scheduler",
                         },
                     )
-                except Exception:  # noqa: BLE001
-                    pass  # bus errors must not kill scheduler
+                except Exception as exc:  # noqa: BLE001
+                    logger.debug("Scheduler event bus publish failed for %s: %s", entry.name, exc)
 
             # Hot state update
             if self._hot_state is not None:
@@ -340,8 +342,8 @@ class SovereignScheduler:
                             "ok": not error,
                         },
                     )
-                except Exception:  # noqa: BLE001
-                    pass
+                except Exception as exc:  # noqa: BLE001
+                    logger.debug("Scheduler hot-state update failed for %s: %s", entry.name, exc)
 
             level = "✅" if not error else "❌"
             logger.info(
@@ -404,15 +406,11 @@ class SovereignScheduler:
         try:
             from croniter import croniter
 
-            return croniter(cron_expr, datetime.now(timezone.utc)).get_next(
-                datetime
-            ).isoformat()
+            return croniter(cron_expr, datetime.now(timezone.utc)).get_next(datetime).isoformat()
         except ImportError:
             from datetime import timedelta
 
-            return (
-                datetime.now(timezone.utc) + timedelta(hours=1)
-            ).isoformat()
+            return (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
 
     @staticmethod
     def _row_to_entry(row) -> ScheduleEntry:

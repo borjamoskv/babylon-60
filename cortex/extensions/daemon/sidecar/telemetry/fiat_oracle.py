@@ -59,7 +59,7 @@ class FiatOracle:
                 self._check_signals_sync()
             except (OSError, ValueError, CortexError) as e:
                 logger.error("❌ [FIAT_ORACLE] (Thread) Error: %s", e)
-            time.sleep(self.interval)
+            time.sleep(self.interval)  # noqa: TID251 - synchronous thread loop
 
     def _verify_signature(self, data: dict, signature: str) -> bool:
         """
@@ -243,7 +243,9 @@ class FiatOracle:
                 return
             except (OSError, ValueError, RuntimeError) as e:
                 last_error = e
-                delay = (BASE_BACKOFF**attempt) + (random.uniform(0.1, 2.0) ** (attempt + 1))
+                delay = (BASE_BACKOFF**attempt) + (
+                    random.uniform(0.1, 2.0) ** (attempt + 1)  # noqa: S311 - retry jitter only
+                )
                 logger.error(
                     "⚙️ [FIAT_ORACLE] DB lock o error: %s. Reintento %s/%s en %.2fs",
                     e,
@@ -251,7 +253,7 @@ class FiatOracle:
                     MAX_RETRIES,
                     delay,
                 )
-                time.sleep(delay)
+                time.sleep(delay)  # noqa: TID251 - synchronous retry backoff
 
         logger.critical(
             "💀 [FIAT_ORACLE] Falla catastrófica almacenando TX %s tras %s intentos.",

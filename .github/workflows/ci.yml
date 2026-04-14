@@ -265,7 +265,7 @@ jobs:
           python --version
           python -m pytest --version
           pip freeze | sort | grep -E '^(coverage|pytest|pytest-asyncio|pytest-cov|pytest-timeout)=' || true
-          python -m pytest --trace-config -q > test-artifacts/pytest-trace-config.txt 2>&1 || true
+          python -m pytest tests/ --collect-only --trace-config -q > test-artifacts/pytest-trace-config.txt 2>&1 || true
       - name: Collect tests
         if: steps.scope.outputs.release_only != 'true'
         shell: bash
