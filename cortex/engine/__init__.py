@@ -7,7 +7,7 @@ import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 import aiosqlite
 import sqlite_vec
@@ -590,6 +590,47 @@ class CortexEngine(
             row,
             tenant_id=tenant_id,
         )
+    # ─── GDPR Crypto-Shredding ────────────────────────────────────
+    async def shred_fact(
+        self,
+        fact_id: int,
+        tenant_id: str = "default",
+        reason: str = "gdpr_erasure",
+        shredded_by: Optional[str] = None,
+    ) -> dict:
+        """Permanently destroy the encryption key for a specific fact.
+
+        After shredding, the fact's ciphertext in ``facts.content`` becomes
+        permanently irrecoverable.  The immutable hash chain (Merkle tree +
+        transaction ledger) is NOT altered — structural integrity is preserved
+        while the personal data is made mathematically inaccessible.
+
+        This satisfies GDPR Art. 17 (Right to Erasure) for systems using the
+        append-only CORTEX ledger.
+
+        Args:
+            fact_id:    Primary key of the fact to shred.
+            tenant_id:  Tenant scope (RLS enforcement).
+            reason:     Erasure reason for the audit trail.
+            shredded_by: Optional identifier of the requesting entity.
+
+        Returns:
+            dict with keys: ``fact_id``, ``success``, ``was_already_shredded``, ``error``.
+        """
+        from cortex.crypto.shredder import CryptoShredder
+
+        tenant_id = self._resolve_tenant(tenant_id)
+        async with self.session() as conn:
+            shredder = CryptoShredder(conn)
+            await shredder._ensure_schema_async()
+            result = await shredder.shred_fact_async(fact_id, tenant_id, reason, shredded_by)
+        return {
+            "fact_id": result.fact_id,
+            "success": result.success,
+            "was_already_shredded": result.was_already_shredded,
+            "error": result.error,
+        }
+
     # ─── Lifecycle ────────────────────────────────────────────────
     async def start(self):
         """Ignite the sovereign engine and its optimization layers."""

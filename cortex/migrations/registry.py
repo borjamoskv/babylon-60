@@ -11,6 +11,7 @@ from cortex.migrations.mig_consensus import (
     _migration_008_consensus_refinement,
     _migration_009_reputation_consensus,
 )
+from cortex.migrations.mig_crypto_keys import _migration_023_crypto_keys
 from cortex.migrations.mig_fts import _migration_017_fts_decouple
 from cortex.migrations.mig_graph import _migration_006_graph_memory
 from cortex.migrations.mig_ha import _migration_013_cluster_nodes
@@ -55,5 +56,6 @@ MIGRATIONS = [
     (20, "Tombstoning GC columns", _migration_020_tombstone),
     (21, "Solid-State Substrate (entity_events)", _migration_021_solid_state),
     (22, "Stratified Cognition + Causal Anchoring", _migration_022_cognitive_layer),
+    (23, "Per-fact crypto keys for GDPR crypto-shredding", _migration_023_crypto_keys),
     # (23) removed — mig_simplify_facts was never applied and is incompatible with live schema
 ]

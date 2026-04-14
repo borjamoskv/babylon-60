@@ -78,6 +78,7 @@ __all__ = [
     "CREATE_FACTS_FTS",
     "CREATE_MERKLE_ROOTS",
     "CREATE_TENANTS",
+    "CREATE_CRYPTO_KEYS",
     "CREATE_THREAT_INTEL",
     "CREATE_THREAT_INTEL_INDEXES",
     "SCHEMA_VERSION",
@@ -334,6 +335,17 @@ ALTER TABLE facts ADD COLUMN signature TEXT;
 ALTER TABLE facts ADD COLUMN signer_pubkey TEXT;
 """
 
+# ─── Crypto-Shredding Key Store ───────────────────────────────────────
+CREATE_CRYPTO_KEYS = """
+CREATE TABLE IF NOT EXISTS crypto_keys (
+    fact_id    INTEGER PRIMARY KEY,
+    tenant_id  TEXT    NOT NULL DEFAULT 'default',
+    fact_key   BLOB    NOT NULL,
+    created_at TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_crypto_keys_tenant ON crypto_keys(tenant_id);
+"""
+
 # ─── All statements in order ──────────────────────────────────────────
 _CORE_SCHEMA = [
     CREATE_FACTS,
@@ -356,6 +368,7 @@ _CORE_SCHEMA = [
     CREATE_THREAT_INTEL,
     CREATE_THREAT_INTEL_INDEXES,
     CREATE_TENANTS,
+    CREATE_CRYPTO_KEYS,
 ]
 
 # Full ordered schema: core + extensions (consensus, episodes, signals, entity_events...)

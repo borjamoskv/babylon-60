@@ -22,6 +22,9 @@ logger = logging.getLogger("cortex.crypto")
 _NONCE_LENGTH = 12  # 96-bit nonce for GCM
 _KEY_LENGTH = 32  # 256-bit AES key
 
+# Sentinel returned when a fact's encryption key has been shredded (GDPR Art. 17)
+SHREDDED_CONTENT_MARKER = "<SHREDDED_DATA>"
+
 
 class CortexEncrypter:
     """Zero-Knowledge Data Encrypter for DB rows.
@@ -29,6 +32,8 @@ class CortexEncrypter:
     """
 
     PREFIX = "v6_aesgcm:"
+    # Prefix that identifies per-fact (crypto-shredding-capable) ciphertext
+    FACT_ENC_PREFIX = "v7_factenc:"
 
     def __init__(self, master_key: Optional[bytes]) -> None:
         if master_key is not None and len(master_key) != _KEY_LENGTH:
@@ -109,6 +114,70 @@ class CortexEncrypter:
             ) from e
         except (ValueError, TypeError, base64.binascii.Error) as e:  # type: ignore[reportAttributeAccessIssue]
             raise ValueError(f"AES-GCM Decryption Failed (Data tampered?): {e}") from e
+
+    def encrypt_str_for_fact(self, data: Optional[str], tenant_id: str = "default") -> tuple[Optional[str], Optional[bytes]]:
+        """Encrypt *data* with a unique random per-fact AES-256-GCM key.
+
+        Returns ``(ciphertext_with_prefix, raw_fact_key)``.
+        The ``raw_fact_key`` must be persisted in the ``crypto_keys`` table so it
+        can later be retrieved for decryption or permanently deleted for shredding.
+
+        If there is no master key (encrypter inactive), falls back to the
+        tenant-level ``encrypt_str`` so the system stays functional in
+        key-less environments.
+        """
+        if not data:
+            return data, None
+
+        if not self.is_active:
+            # No master key — fall back to plaintext storage (no per-fact key)
+            return data, None
+
+        fact_key = os.urandom(_KEY_LENGTH)
+        aesgcm = AESGCM(fact_key)
+        nonce = os.urandom(_NONCE_LENGTH)
+        ciphertext = aesgcm.encrypt(nonce, data.encode("utf-8"), None)
+
+        combined = nonce + ciphertext
+        encoded = self.FACT_ENC_PREFIX + base64.b64encode(combined).decode("utf-8")
+        return encoded, fact_key
+
+    def decrypt_str_for_fact(
+        self,
+        encrypted_data: Optional[str],
+        fact_key: Optional[bytes],
+    ) -> str:
+        """Decrypt per-fact-encrypted content using the stored ``fact_key``.
+
+        Returns:
+            - The decrypted plaintext if ``fact_key`` is valid.
+            - ``SHREDDED_CONTENT_MARKER`` if ``fact_key`` is ``None``
+              (key was deleted — GDPR erasure in effect).
+            - The original ``encrypted_data`` if it does not carry the
+              ``FACT_ENC_PREFIX`` (legacy/plaintext passthrough).
+        """
+        if not encrypted_data:
+            return encrypted_data or ""
+
+        if not encrypted_data.startswith(self.FACT_ENC_PREFIX):
+            # Not per-fact-encrypted — caller should use decrypt_str instead
+            return encrypted_data
+
+        if fact_key is None:
+            # Key was permanently deleted — data is irrecoverable (GDPR Art. 17)
+            return SHREDDED_CONTENT_MARKER
+
+        try:
+            raw_b64 = encrypted_data[len(self.FACT_ENC_PREFIX):]
+            combined = base64.b64decode(raw_b64)
+            nonce = combined[:_NONCE_LENGTH]
+            ciphertext = combined[_NONCE_LENGTH:]
+            aesgcm = AESGCM(fact_key)
+            plaintext = aesgcm.decrypt(nonce, ciphertext, None)
+            return plaintext.decode("utf-8")
+        except (InvalidKey, InvalidTag, ValueError, TypeError) as e:
+            logger.error("Per-fact decryption failed: %s", e)
+            return SHREDDED_CONTENT_MARKER
 
     def encrypt_json(
         self, data: Optional[dict[str, Any]], tenant_id: str = "default"

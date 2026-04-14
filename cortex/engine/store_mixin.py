@@ -173,11 +173,33 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         if dedupe_id is not None:
             return dedupe_id
 
+        # ── Crypto-Shredding: pre-encrypt so the ciphertext hash is included
+        # in the immutable transaction chain (hash chain over ciphertext, not plaintext).
+        # The pre-computed ciphertext is passed through to avoid double encryption.
+        from cortex.crypto import get_default_encrypter
+        from cortex.utils.canonical import compute_fact_hash as _fact_hash
+
+        _enc = get_default_encrypter()
+        _precomputed_ciphertext, _precomputed_fact_key = _enc.encrypt_str_for_fact(
+            content, tenant_id
+        )
+        # Fallback when no master key is configured
+        if _precomputed_ciphertext is None or _precomputed_fact_key is None:
+            _precomputed_ciphertext = (
+                _enc.encrypt_str(content, tenant_id) if _enc.is_active else content
+            )
+            _precomputed_fact_key = None
+        _ciphertext_hash = _fact_hash(_precomputed_ciphertext) if _precomputed_ciphertext else ""
+
         tx_id = (
             tx_id
             if tx_id is not None
             else await self._log_transaction(
-                conn, project, "store", {"fact_type": fact_type}, tenant_id=tenant_id  # pyright: ignore
+                conn,
+                project,
+                "store",
+                {"fact_type": fact_type, "content_ciphertext_hash": _ciphertext_hash},
+                tenant_id=tenant_id,  # pyright: ignore
             )
         )
         fact_id = await insert_fact_record(
@@ -193,6 +215,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             meta,
             tx_id,
             parent_decision_id=parent_decision_id,
+            precomputed_encryption=(_precomputed_ciphertext, _precomputed_fact_key),
         )
 
         # Dual-Write Bridge: handled in insert_fact_record

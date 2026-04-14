@@ -152,6 +152,9 @@ def _extract_rich_layout(row: list, res: dict) -> None:
             "yield_score": _to_float(row[22], 1.0),
         }
     )
+    # Position 23: per-fact AES key from crypto_keys LEFT JOIN (added in migration 23)
+    if len(row) > 23:
+        res["fact_key"] = row[23]  # bytes | None
 
 
 def _extract_compat_v1(row: list, res: dict, length: int) -> None:
@@ -253,6 +256,8 @@ def _extract_row_values(row: list) -> dict:
         "valid_until": None,
         "created_at": None,
         "updated_at": None,
+        # Per-fact AES-256 key from crypto_keys LEFT JOIN (None = shredded or legacy)
+        "fact_key": None,
     }
 
     if length >= 27:
@@ -278,6 +283,7 @@ def _parse_fact_metadata(v: dict, enc: Any, tenant_id: str) -> dict:
 
 def row_to_fact(row: tuple) -> Fact:
     from cortex.crypto import get_default_encrypter
+    from cortex.crypto.aes import CortexEncrypter
 
     enc = get_default_encrypter()
     r = list(row)
@@ -286,13 +292,17 @@ def row_to_fact(row: tuple) -> Fact:
 
     v = _extract_row_values(r)
     tenant_id = v["tenant_id"]
+    content_raw = v["content_encrypted"]
+    fact_key: bytes | None = v.get("fact_key")  # bytes from crypto_keys JOIN, or None
 
     try:
-        content = (
-            enc.decrypt_str(v["content_encrypted"], tenant_id=tenant_id)
-            if v["content_encrypted"]
-            else ""
-        )
+        if content_raw and content_raw.startswith(CortexEncrypter.FACT_ENC_PREFIX):
+            # Per-fact encryption (v7) — use the key from crypto_keys.
+            # If fact_key is None the key was shredded (GDPR Art. 17).
+            content = enc.decrypt_str_for_fact(content_raw, fact_key)
+        else:
+            # Legacy tenant-level encryption (v6) or plaintext — no per-fact key needed.
+            content = enc.decrypt_str(content_raw, tenant_id=tenant_id) if content_raw else ""
     except Exception:
         content = f"[ENCRYPTED - decryption failed] (fact #{v['id']})"
 

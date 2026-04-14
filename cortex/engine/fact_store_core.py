@@ -26,14 +26,30 @@ async def _get_table_columns(conn: aiosqlite.Connection, table_name: str) -> set
 
 async def _prepare_fact_content(
     content: str, tenant_id: str
-) -> tuple[str, str, Optional[str], Optional[str]]:
-    """Encrypted content and cryptographic signatures."""
+) -> tuple[str, str, Optional[bytes], Optional[str], Optional[str]]:
+    """Encrypted content and cryptographic signatures.
+
+    Returns ``(plaintext_hash, encrypted_content, fact_key, sig_b64, pub_b64)``.
+
+    * ``plaintext_hash`` — SHA-256 of the *plaintext* used for deduplication.
+    * ``encrypted_content`` — AES-256-GCM ciphertext with ``v7_factenc:`` prefix
+      (falls back to tenant-level ``v6_aesgcm:`` when no master key is available).
+    * ``fact_key`` — the random 32-byte AES key for this specific fact, or ``None``
+      when per-fact encryption is unavailable.  Must be stored in ``crypto_keys``.
+    """
     from cortex.crypto import get_default_encrypter
     from cortex.extensions.security.signatures import get_default_signer
 
     f_hash = compute_fact_hash(content)
     enc = get_default_encrypter()
-    encrypted_content = enc.encrypt_str(content, tenant_id=tenant_id)
+
+    # Prefer per-fact encryption (v7) so individual keys can be shredded later.
+    encrypted_content, fact_key = enc.encrypt_str_for_fact(content, tenant_id=tenant_id)
+
+    # Fallback: if per-fact encryption unavailable, use legacy tenant-level encryption
+    if encrypted_content is None or fact_key is None:
+        encrypted_content = enc.encrypt_str(content, tenant_id=tenant_id) if enc.is_active else content
+        fact_key = None
 
     sig_b64, pub_b64 = None, None
     try:
@@ -44,7 +60,7 @@ async def _prepare_fact_content(
     except (ImportError, ValueError, OSError) as e:
         logger.debug("Fact signing skipped: %s", e)
 
-    return f_hash, encrypted_content, sig_b64, pub_b64
+    return f_hash, encrypted_content, fact_key, sig_b64, pub_b64
 
 
 async def _resolve_causal_parent(
@@ -91,12 +107,20 @@ async def insert_fact_record(
     meta: Optional[dict[str, Any]],
     tx_id: Optional[int],
     parent_decision_id: Optional[int] = None,
+    precomputed_encryption: Optional[tuple[str, Optional[bytes]]] = None,
 ) -> int:
     """Perform the actual SQL insert into the facts table."""
     ts = ts or now_iso()
     tags_json = json.dumps(tags or [])
 
-    f_hash, encrypted_content, sig_b64, pub_b64 = await _prepare_fact_content(content, tenant_id)
+    if precomputed_encryption is not None:
+        # Use pre-computed ciphertext and key (avoids double encryption)
+        encrypted_content, fact_key = precomputed_encryption
+        f_hash = compute_fact_hash(content)  # Plaintext hash for dedup
+    else:
+        f_hash, encrypted_content, fact_key, sig_b64, pub_b64 = await _prepare_fact_content(
+            content, tenant_id
+        )
 
     parent_decision_id = await _resolve_causal_parent(
         conn, tenant_id, project, fact_type, parent_decision_id
@@ -130,6 +154,13 @@ async def insert_fact_record(
         fact_id = cursor.lastrowid
     assert fact_id is not None
 
+    # ── Crypto-Shredding: store the per-fact AES key in the key store ──
+    # The key is stored here so it can later be permanently deleted
+    # (shredded) to make the ciphertext irrecoverable without altering
+    # the immutable hash chain (GDPR Art. 17).
+    if fact_key is not None:
+        await _store_fact_key(conn, fact_id, tenant_id, fact_key)
+
     await _post_insert_actions(
         conn,
         fact_id,
@@ -145,6 +176,26 @@ async def insert_fact_record(
     )
 
     return fact_id
+
+
+async def _store_fact_key(
+    conn: aiosqlite.Connection,
+    fact_id: int,
+    tenant_id: str,
+    fact_key: bytes,
+) -> None:
+    """Persist the per-fact AES key into the ``crypto_keys`` key store.
+
+    Uses ``INSERT OR IGNORE`` so that duplicate calls (e.g. in tests or
+    replayed transactions) are safe and idempotent.
+    """
+    try:
+        await conn.execute(
+            "INSERT OR IGNORE INTO crypto_keys (fact_id, tenant_id, fact_key) VALUES (?, ?, ?)",
+            (fact_id, tenant_id, fact_key),
+        )
+    except Exception as e:  # noqa: BLE001 — table may not yet exist on older DBs
+        logger.debug("Could not persist fact_key for fact #%d: %s", fact_id, e)
 
 
 async def _build_fact_payload(

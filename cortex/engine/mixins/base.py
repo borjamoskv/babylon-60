@@ -16,14 +16,21 @@ __all__ = ["EngineMixinBase"]
 logger = logging.getLogger("cortex.engine")
 
 # Canonical Fact query structure — includes rich fact fields used by retrieve()/CLI.
+# The LEFT JOIN with crypto_keys includes the per-fact AES key so that row_to_fact()
+# can decrypt without a second round-trip.  A NULL fact_key means either the key was
+# shredded (GDPR erasure) or the fact was created before per-fact encryption was enabled.
 FACT_COLUMNS = (
     "f.id, f.tenant_id, f.project, f.content, f.fact_type, f.tags, f.metadata, "
     "f.hash, f.valid_from, f.valid_until, f.source, f.confidence, "
     "f.created_at, f.updated_at, f.is_tombstoned, f.is_quarantined, "
     "f.quadrant, f.storage_tier, f.exergy_score, f.category, "
-    "f.parent_id AS parent_decision_id, f.relation_type, f.yield_score"
+    "f.parent_id AS parent_decision_id, f.relation_type, f.yield_score, "
+    "ck.fact_key"
 )
-FACT_JOIN = "FROM facts f"
+FACT_JOIN = (
+    "FROM facts f "
+    "LEFT JOIN crypto_keys ck ON f.id = ck.fact_id AND f.tenant_id = ck.tenant_id"
+)
 
 
 class EngineMixinBase:

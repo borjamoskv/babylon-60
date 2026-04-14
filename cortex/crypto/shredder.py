@@ -186,6 +186,17 @@ class CryptoShredder:
                 (fact_id, tenant_id, reason, shredded_by, ts),
             )
 
+            # ── Crypto-Shredding: permanently destroy the per-fact AES key ──
+            # Deleting this row makes the v7_factenc ciphertext permanently
+            # irrecoverable without altering the immutable hash chain.
+            try:
+                self._conn.execute(
+                    "DELETE FROM crypto_keys WHERE fact_id = ? AND tenant_id = ?",
+                    (fact_id, tenant_id),
+                )
+            except sqlite3.Error as _ke:
+                logger.debug("crypto_keys deletion skipped (table may not exist): %s", _ke)
+
             # Invalidate the fact-specific derived key from the encrypter cache
             self._invalidate_fact_key(fact_id, tenant_id)
 
@@ -245,6 +256,17 @@ class CryptoShredder:
                 "VALUES (?, ?, ?, ?, ?)",
                 (fact_id, tenant_id, reason, shredded_by, ts),
             )
+
+            # ── Crypto-Shredding: permanently destroy the per-fact AES key ──
+            # Deleting this row makes the v7_factenc ciphertext permanently
+            # irrecoverable without altering the immutable hash chain.
+            try:
+                await self._conn.execute(  # type: ignore[reportAttributeAccessIssue]
+                    "DELETE FROM crypto_keys WHERE fact_id = ? AND tenant_id = ?",
+                    (fact_id, tenant_id),
+                )
+            except (sqlite3.Error, OSError) as _ke:
+                logger.debug("crypto_keys deletion skipped (table may not exist): %s", _ke)
 
             self._invalidate_fact_key(fact_id, tenant_id)
 
