@@ -5,7 +5,7 @@
 <h1 align="center">CORTEX Persist</h1>
 
 <p align="center">
-  <strong>Prove what your AI agent knew. Mathematically.</strong>
+  <strong>Cryptographically trace what your AI agent knew.</strong>
 </p>
 
 <p align="center">
@@ -40,7 +40,7 @@ CORTEX is trust infrastructure for AI agents. It sits between your runtime and y
 | **Compliance Proof** | Requires manual reconstruction | **O(1) Portable JSON Audit Packs** |
 | **Agent Liability** | Ambiguous context reconstruction | **Mathematically defensible lineage** |
 
-> Logs tell you what happened. CORTEX proves exactly what the agent knew, when it knew it, and mathematically guarantees the record hasn't been altered since. [**Review a real verification proof.**](docs/examples/audit_pack_evidence_demo.json)
+> Logs tell you what happened. CORTEX adds cryptographic evidence for what the agent knew, when it knew it, and whether later tampering is detectable along the verified chain. [**Review a real verification proof.**](docs/examples/audit_pack_evidence_demo.json)
 
 ## Use Cases
 
@@ -58,7 +58,7 @@ Traditional logging and standard vector stores fail the epistemic containment te
 |:---------------------------|:----------------------------|:-------------------------------------|:------------------------------------------|
 | **Primary Goal**           | Observability & Debugging   | Semantic Search & RAG                | **Tamper-Evident Cognitive Lineage**      |
 | **Write Integrity**        | Overwritable / Editable     | Silent CRUD operations               | **Append-Only + Cryptographic Hash**      |
-| **Fact Mutability**        | Easy (API/Admin access)     | Easy (API/Admin access)              | **Impossible** (Breaks hash chain)        |
+| **Fact Mutability**        | Easy (API/Admin access)     | Easy (API/Admin access)              | **Tamper-evident** (verification reveals mutation) |
 | **Evidence Export**        | Text dumps                  | JSON extracts                        | **Zero-Trust Sealed Audit Packs**         |
 
 > **See a real artifact**: [View Exported Audit Pack](examples/audit_proof_artifact.json)
@@ -79,9 +79,9 @@ Traditional logging and standard vector stores fail the epistemic containment te
 
 | Environment | Status | Storage / Scaling |
 | :--- | :--- | :--- |
-| **Local-Only** | ✅ **Production-Ready** | SQLite + WAL + built-in Vector Search. Perfect for single daemons. |
+| **Local-Only** | ✅ **Stable local-first core** | SQLite + WAL + built-in Vector Search. Best-supported path today. |
 | **Self-Hosted** | 🟡 **Beta** | Multi-tenant. API-driven. Redis cache. Pluggable to your infra. |
-| **Cloud-Ready** | ⏳ **Roadmap** | AlloyDB/PostgreSQL + Qdrant. For distributed massive swarms. |
+| **Cloud-Ready** | ⏳ **Partial / Roadmap** | Postgres/Qdrant/Turso code exists in-tree; managed cloud posture remains incomplete. |
 
 ## Product Core
 
@@ -89,22 +89,32 @@ The supported core modules are: **engine**, **ledger**, **crypto**, **memory**, 
 
 See [docs/PRODUCT-CORE.md](docs/PRODUCT-CORE.md) for the full stability tier breakdown (Stable / Beta / Experimental).
 
-## Official product demo
-
-Run the single supported demo from a clean checkout:
+## 90-second demo
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e .
-PYTHONPATH=. python examples/demo_canonical.py
+# 1. Start the ledger
+$ cortex init
+
+# 2. Store a memory
+$ cortex memory store risk-bot "Transaction flagged: IP mismatch"
+[+] Fact stored. Ledger hash: 8f4a2b9e...
+
+# 3. Verify the stored fact
+$ cortex verify 1
+[✔] VERIFIED: Fact chain intact.
+
+# 4. Tamper attempt (direct DB mutation)
+$ sqlite3 cortex.db "UPDATE facts SET content='Transaction approved' WHERE id='8f4a2b9e'"
+
+# 5. Ledger verification
+$ cortex trust-ledger verify
+[✘] TAMPER DETECTED: Hash mismatch at block 8f4a2b9e
+
+# 6. Generate a compliance snapshot
+$ cortex compliance-report
 ```
 
-What it shows:
-
-1. Register one AI decision.
-2. Verify cryptographic integrity.
-3. Export JSON evidence.
+> 🐍 **Python demo:** For a self-contained Python script that walks through the full core flow, see [`examples/demo_canonical.py`](examples/demo_canonical.py).
 
 See the full walkthrough in [`docs/official-demo.md`](docs/official-demo.md).
 
@@ -117,8 +127,8 @@ Start with the smallest supported flow and get to audit evidence fast.
 ```bash
 pip install cortex-persist
 cortex init
-cortex memory store --agent "risk-bot" --content "Transaction flagged: IP mismatch"
-cortex verify ledger
+cortex memory store risk-bot "Transaction flagged: IP mismatch"
+cortex trust-ledger verify
 ```
 
 ### Path B: Install from Source *(development)*
@@ -129,8 +139,8 @@ cd Cortex-Persist
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e .
 cortex init
-cortex memory store --agent "risk-bot" --content "Transaction flagged: IP mismatch"
-cortex verify ledger
+cortex memory store risk-bot "Transaction flagged: IP mismatch"
+cortex trust-ledger verify
 ```
 
 See [docs/installation.md](docs/installation.md) for full installation options and platform-specific notes.
