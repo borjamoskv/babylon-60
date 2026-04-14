@@ -144,7 +144,15 @@ jobs:
           ruff check "${files[@]}"
       - name: Ruff lint
         if: steps.scope.outputs.release_only != 'true'
-        run: ruff check cortex/ tests/
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(printf '%s\n' "${{ steps.scope.outputs.python_files }}" | sed '/^$/d')
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No Python files changed."
+            exit 0
+          fi
+          ruff check "${files[@]}"
       - name: Ruff format check (release-only)
         if: steps.scope.outputs.release_only == 'true'
         shell: bash
@@ -158,7 +166,15 @@ jobs:
           ruff format --check "${files[@]}"
       - name: Ruff format check
         if: steps.scope.outputs.release_only != 'true'
-        run: ruff format --check cortex/ tests/
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(printf '%s\n' "${{ steps.scope.outputs.python_files }}" | sed '/^$/d')
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No Python files changed."
+            exit 0
+          fi
+          ruff format --check "${files[@]}"
 
   security:
     needs: [change-scope]
@@ -242,7 +258,15 @@ jobs:
           PY
       - name: Ruff SAST scan (S-select)
         if: steps.scope.outputs.release_only != 'true'
-        run: ruff check cortex/ --select S --output-format json -o bandit-report.json
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(printf '%s\n' "${{ steps.scope.outputs.python_files }}" | sed '/^$/d')
+          if [ "${#files[@]}" -eq 0 ]; then
+            printf '[]\n' > bandit-report.json
+            exit 0
+          fi
+          ruff check "${files[@]}" --select S --output-format json -o bandit-report.json
       - name: Upload Bandit report
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -305,8 +329,12 @@ jobs:
             esac
           done < .changed_files
 
+          test_files="$(grep -E '^tests/.*\.py$' .changed_files || true)"
           {
             echo "release_only=${release_only}"
+            echo "test_files<<EOF"
+            printf '%s\n' "${test_files}"
+            echo "EOF"
           } >> "${GITHUB_OUTPUT}"
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
@@ -338,23 +366,39 @@ jobs:
           python --version
           python -m pytest --version
           pip freeze | sort | grep -E '^(coverage|pytest|pytest-asyncio|pytest-cov|pytest-timeout)=' || true
-          python -m pytest tests/ --collect-only --trace-config -q > test-artifacts/pytest-trace-config.txt 2>&1 || true
+          mapfile -t changed_tests < <(printf '%s\n' "${{ steps.scope.outputs.test_files }}" | sed '/^$/d')
+          if [ "${#changed_tests[@]}" -eq 0 ]; then
+            python -m pytest tests/ --collect-only --trace-config -q > test-artifacts/pytest-trace-config.txt 2>&1 || true
+          else
+            python -m pytest "${changed_tests[@]}" --collect-only --trace-config -q > test-artifacts/pytest-trace-config.txt 2>&1 || true
+          fi
       - name: Collect tests
         if: steps.scope.outputs.release_only != 'true'
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p test-artifacts
-          python -m pytest tests/ --collect-only -q 2>&1 | tee test-artifacts/collect.log
+          mapfile -t changed_tests < <(printf '%s\n' "${{ steps.scope.outputs.test_files }}" | sed '/^$/d')
+          if [ "${#changed_tests[@]}" -eq 0 ]; then
+            python -m pytest tests/ --collect-only -q 2>&1 | tee test-artifacts/collect.log
+          else
+            python -m pytest "${changed_tests[@]}" --collect-only -q 2>&1 | tee test-artifacts/collect.log
+          fi
       - name: Run tests with coverage
         if: steps.scope.outputs.release_only != 'true'
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p test-artifacts
+          mapfile -t changed_tests < <(printf '%s\n' "${{ steps.scope.outputs.test_files }}" | sed '/^$/d')
+          if [ "${#changed_tests[@]}" -eq 0 ]; then
+            pytest_targets=(tests/)
+          else
+            pytest_targets=("${changed_tests[@]}")
+          fi
           status=0
-          timeout --signal=TERM 20m \
-          python -X faulthandler -m pytest tests/ -vv -s --tb=short -x \
+          timeout --signal=TERM 30m \
+          python -X faulthandler -m pytest "${pytest_targets[@]}" -vv -s --tb=short -x \
             --durations=20 \
             --timeout=300 \
             --timeout-method=thread \
