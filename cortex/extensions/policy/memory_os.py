@@ -1,9 +1,11 @@
+import asyncio
+import hashlib
+from collections import deque
 from enum import Enum
 from typing import Any
-import hashlib
-import asyncio
 
 VSA_DIMENSION = 10000
+EPISODIC_TRACE_LIMIT = 256
 
 try:
     import structlog
@@ -31,6 +33,8 @@ class MemoryOS:
 
     def __init__(self):
         self._working_memory: dict[str, Any] = {}
+        # Ring buffer preserves recent traces without unbounded RAM growth.
+        self._episodic_traces: deque[dict[str, Any]] = deque(maxlen=EPISODIC_TRACE_LIMIT)
         # Fixed-size physical tensor array
         self._episodic_vsa_tensor: list[float] = [0.0] * VSA_DIMENSION
         # Semantic memory connects to ledger
@@ -62,9 +66,10 @@ class MemoryOS:
             self._working_memory[key] = value
             return True
         elif tier == MemoryTier.EPISODIC:
+            self._episodic_traces.append({"key": key, "value": value})
             # Map & Bind context into fixed-size VSA tensor (O(1) memory footprint)
             ctx_string = f"{key}:{value}"
-            idx = int(hashlib.sha256(ctx_string.encode('utf-8')).hexdigest(), 16) % VSA_DIMENSION
+            idx = int(hashlib.sha256(ctx_string.encode("utf-8")).hexdigest(), 16) % VSA_DIMENSION
             self._episodic_vsa_tensor[idx] += 1.0
             return True
         elif tier == MemoryTier.SEMANTIC:
@@ -92,6 +97,7 @@ class MemoryOS:
         if tier == MemoryTier.WORKING:
             self._working_memory.clear()
         elif tier == MemoryTier.EPISODIC:
+            self._episodic_traces.clear()
             self._episodic_vsa_tensor = [0.0] * VSA_DIMENSION
         elif tier == MemoryTier.SEMANTIC:
             raise PermissionError("Cannot flush immutable semantic ledger.")
