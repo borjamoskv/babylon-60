@@ -101,20 +101,12 @@ class CortexEngine(
         self._ledger_writer: LedgerWriter | None = None
         self._mac_maestro: MaestroExecutor | None = None
         self._auth: ByzantineAuthLayer | None = None  # noqa: F821
-<<<<<<< HEAD
-
-        # Decoupled guard pipeline (Ω₃: minimal coupling)
-        self._guard_pipeline = self._register_default_guards()
-        self._buffer_task = None
-
-=======
-        self._trust_registry: TrustRegistry | None = None
+        self._trust_registry: TrustRegistry | None = None  # noqa: F821
         # Decoupled guard pipeline (Ω₃: minimal coupling)
         self._guard_pipeline = self._register_default_guards()
         self._buffer_task = None
         self._post_commit_tasks: set[asyncio.Task[Any]] = set()
         self._pending_graph_jobs: dict[int, list[dict[str, Any]]] = {}
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
     # ─── System State ─────────────────────────────────────────────────────────
     @property
     def system_state(self) -> str:
@@ -240,42 +232,21 @@ class CortexEngine(
         except (ImportError, Exception) as e:  # noqa: BLE001
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: HealthGuardAdapter failed: {e}") from e
-<<<<<<< HEAD
-            pass
-
-=======
-            logger.debug("HealthGuardAdapter unavailable: %s", e)
-        except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: HealthGuardAdapter failed: {e}") from e
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
         try:
             from cortex.engine.guard_adapters import ContradictionGuardAdapter
             pipeline.add_guard(ContradictionGuardAdapter(db_path))
         except (ImportError, Exception) as e:  # noqa: BLE001
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: ContradictionGuardAdapter failed: {e}") from e
-<<<<<<< HEAD
-            pass
-
-=======
-            logger.debug("ContradictionGuardAdapter unavailable: %s", e)
-        except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: ContradictionGuardAdapter failed: {e}") from e
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
         try:
             from cortex.engine.guard_adapters import VerifierGuardAdapter
             pipeline.add_guard(VerifierGuardAdapter())
         except (ImportError, Exception) as e:  # noqa: BLE001
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: VerifierGuardAdapter failed: {e}") from e
-<<<<<<< HEAD
-            pass
-
-=======
-            logger.debug("VerifierGuardAdapter unavailable: %s", e)
-        except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: VerifierGuardAdapter failed: {e}") from e
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
         # ZK-Swarm Cryptographic Guard (RFC-003 Phase 1)
         try:
             from cortex.engine.guard_adapters import ZKGuardAdapter
@@ -283,14 +254,7 @@ class CortexEngine(
         except (ImportError, Exception) as e:  # noqa: BLE001
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: ZKGuardAdapter failed: {e}") from e
-<<<<<<< HEAD
-            pass
-
-=======
-            logger.debug("ZKGuardAdapter unavailable: %s", e)
-        except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: ZKGuardAdapter failed: {e}") from e
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
         # Post-store hooks (AX-II Hook 4 + signals + epistemic)
         try:
             from cortex.engine.guard_adapters import LedgerCheckpointHook
@@ -298,42 +262,21 @@ class CortexEngine(
         except (ImportError, Exception) as e:  # noqa: BLE001
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: LedgerCheckpointHook failed: {e}") from e
-<<<<<<< HEAD
-            pass
-
-=======
-            logger.debug("LedgerCheckpointHook unavailable: %s", e)
-        except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: LedgerCheckpointHook failed: {e}") from e
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
         try:
             from cortex.engine.guard_adapters import SignalEmitHook
             pipeline.add_post_hook(SignalEmitHook())
         except (ImportError, Exception) as e:  # noqa: BLE001
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: SignalEmitHook failed: {e}") from e
-<<<<<<< HEAD
-            pass
-
-=======
-            logger.debug("SignalEmitHook unavailable: %s", e)
-        except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: SignalEmitHook failed: {e}") from e
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
         try:
             from cortex.engine.guard_adapters import EpistemicBreakerHook
             pipeline.add_post_hook(EpistemicBreakerHook())
         except (ImportError, Exception) as e:  # noqa: BLE001
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: EpistemicBreakerHook failed: {e}") from e
-<<<<<<< HEAD
-            pass
-
-=======
-            logger.debug("EpistemicBreakerHook unavailable: %s", e)
-        except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: EpistemicBreakerHook failed: {e}") from e
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
         logger.debug(
             "GuardPipeline: %d guards, %d hooks registered",
             pipeline.guard_count,
@@ -405,19 +348,12 @@ class CortexEngine(
             except (OSError, AttributeError) as e:
                 logger.debug("sqlite-vec extension not available: %s", e)
                 self._vec_available = False
-<<<<<<< HEAD
-
-=======
             await self._ensure_schema_ready(self._conn)
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
             # Ensure memory subsystem is initialized (L1/L2/L3)
             # This is critical for Active Forgetting (Thalamus Gate)
             if self._memory_manager is None:
                 await self._init_memory_subsystem(self._db_path, self._conn)
             return self._conn
-<<<<<<< HEAD
-
-=======
     async def _ensure_schema_ready(self, conn: aiosqlite.Connection) -> None:
         """Bootstrap the base schema once per engine instance."""
         if self._schema_ready:
@@ -436,7 +372,6 @@ class CortexEngine(
                 from cortex.ledger import ImmutableLedger
                 self._ledger = ImmutableLedger(conn)  # type: ignore[reportArgumentType]
             self._schema_ready = True
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
     def get_connection(self) -> aiosqlite.Connection:
         """Synchronous wrapper for internal connection access."""
         if self._conn is None:
@@ -528,9 +463,6 @@ class CortexEngine(
         return fact
     async def vote_v2(self, *args, **kwargs):
         return await self.consensus.vote_v2(*args, **kwargs)
-<<<<<<< HEAD
-
-=======
     async def get_votes(self, *args, **kwargs):
         return await self.consensus.get_votes(*args, **kwargs)
     async def verify_vote_ledger(self, *args, **kwargs):
@@ -553,7 +485,6 @@ class CortexEngine(
         """Create a transaction-ledger Merkle checkpoint."""
         ledger = await self._get_or_create_ledger()
         return await ledger.create_checkpoint_async()
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
     async def get_all_active_facts(self, *args, **kwargs):
         """Retrieve all active facts across all projects, wrapped in models."""
         results = await super().get_all_active_facts(*args, **kwargs)
@@ -609,27 +540,6 @@ class CortexEngine(
     # ─── Schema ───────────────────────────────────────────────────
     async def init_db(self) -> None:
         """Initialize database schema. Safe to call multiple times."""
-<<<<<<< HEAD
-        from cortex.ledger import ImmutableLedger
-
-        async with self.session() as conn:
-            # Explicitly run migrations BEFORE initialization meta to preserve order logic
-            await run_migrations_async(conn)
-
-            for k, v in get_init_meta():
-                await conn.execute(
-                    "INSERT OR IGNORE INTO cortex_meta (key, value) VALUES (?, ?)",
-                    (k, v),
-                )
-            await conn.commit()
-
-            self._ledger = ImmutableLedger(conn)  # type: ignore[reportArgumentType]
-            await self._init_memory_subsystem(self._db_path, conn)
-            await self._persistence.start()
-            metrics.set_engine(self)
-            logger.info("CORTEX database initialized (async) at %s", self._db_path)
-
-=======
         conn = await self._get_or_create_conn()
         await self._ensure_schema_ready(conn)
         if self._memory_manager is None:
@@ -637,7 +547,6 @@ class CortexEngine(
         await self._persistence.start()
         metrics.set_engine(self)
         logger.info("CORTEX database initialized (async) at %s", self._db_path)
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
     # ─── Helpers ──────────────────────────────────────────────────
     def export_snapshot(self, out_path: str | Path) -> str:
         from cortex.extensions.sync.snapshot import export_snapshot

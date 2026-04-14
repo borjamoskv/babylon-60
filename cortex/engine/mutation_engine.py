@@ -18,12 +18,12 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-import time
 from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
 
+from cortex.crypto import get_default_encrypter
 from cortex.engine.causality import AsyncCausalGraph
 from cortex.extensions.axioms.topological_id import flake_gen
 
@@ -31,10 +31,6 @@ __all__ = ["FactMutationEngine"]
 logger = logging.getLogger("cortex.mutation_engine")
 # Current payload schema version written by MOSKV-1.
 _PAYLOAD_SCHEMA_VERSION = "1"
-<<<<<<< HEAD
-
-
-=======
 _FACT_COLUMNS_CACHE: dict[int, set[str]] = {}
 _ROLLBACK_ERRORS = (
     aiosqlite.Error,
@@ -46,7 +42,6 @@ _ROLLBACK_ERRORS = (
     TypeError,
     ValueError,
 )
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
 class FactMutationEngine:
     """Solid-State Write Gateway for CORTEX facts.
     Usage::
@@ -90,40 +85,13 @@ class FactMutationEngine:
             The UUID of the newly created event.
         """
         event_id = flake_gen.next_lexicographic_id()
-        ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        ts = datetime.now(timezone.utc).isoformat()
         payload_str = json.dumps(payload, sort_keys=True, default=str)
         # ── 1. Hash-chain: link to the last event for this entity ────
         prev_hash = await self._get_last_hash(conn, fact_id)
         chain_input = f"{event_id}:{fact_id}:{tenant_id}:{event_type}:{payload_str}:{prev_hash}"
         signature = hashlib.sha3_256(chain_input.encode()).hexdigest()
         # ── 2. Atomic transaction: INSERT event + UPDATE projection ──
-<<<<<<< HEAD
-        await conn.execute(
-            "INSERT INTO entity_events "
-            "(id, entity_id, tenant_id, event_type, payload, "
-            "timestamp, prev_hash, signature, signer, schema_version) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                event_id,
-                fact_id,
-                tenant_id,
-                event_type,
-                payload_str,
-                ts,
-                prev_hash,
-                signature,
-                signer,
-                _PAYLOAD_SCHEMA_VERSION,
-            ),
-        )
-
-        # ── 3. Project mutation into facts (materialized view) ───────
-        await self._project(conn, fact_id, event_type, payload)
-
-        if commit:
-            await conn.commit()
-
-=======
         try:
             await conn.execute(
                 "INSERT INTO entity_events "
@@ -150,7 +118,6 @@ class FactMutationEngine:
         except _ROLLBACK_ERRORS:
             await conn.rollback()
             raise
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
         logger.debug(
             "Solid-state event %s: entity=%d type=%s signer=%s",
             event_id,
@@ -172,9 +139,6 @@ class FactMutationEngine:
         ) as cursor:
             row = await cursor.fetchone()
         return row[0] if row else "GENESIS"
-<<<<<<< HEAD
-
-=======
     async def _get_fact_tenant_id(self, conn: aiosqlite.Connection, fact_id: int) -> str:
         """Resolve the tenant_id for a fact from the materialized view."""
         async with conn.execute("SELECT tenant_id FROM facts WHERE id = ?", (fact_id,)) as cursor:
@@ -199,12 +163,12 @@ class FactMutationEngine:
         if "meta" in columns:
             return "meta"
         return None
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
     # ── Projection Layer (MOSKV-1 specific) ──────────────────────────
     async def _project(
         self,
         conn: aiosqlite.Connection,
         fact_id: int,
+        tenant_id: str,
         event_type: str,
         payload: dict[str, Any],
     ) -> None:
@@ -216,15 +180,28 @@ class FactMutationEngine:
         _PROJECTORS: dict[str, Any] = {
             "deprecate": self._proj_deprecate,
             "tombstone": self._proj_tombstone,
+            "archaeology_merge": self._proj_archaeology_merge,
             "quarantine": self._proj_quarantine,
             "unquarantine": self._proj_unquarantine,
+            "mutate_to_ghost": self._proj_mutate_to_ghost,
+            "reparent": self._proj_reparent,
             "score_update": self._proj_score_update,
+            "taint_update": self._proj_taint_update,
             "decalcify": self._proj_decalcify,
             "restore": self._proj_restore,
         }
         projector = _PROJECTORS.get(event_type)
         if projector:
-            await projector(conn, fact_id, payload)
+            if event_type in {
+                "tombstone",
+                "archaeology_merge",
+                "quarantine",
+                "taint_update",
+                "reparent",
+            }:
+                await projector(conn, fact_id, payload, tenant_id=tenant_id)
+            else:
+                await projector(conn, fact_id, payload)
         else:
             # Unknown event type — log but don't fail.
             # The event is still recorded immutably in entity_events.
@@ -242,22 +219,16 @@ class FactMutationEngine:
     ) -> None:
         """Protocol Ω₃-E: Reduce certainty over time to prevent stagnation."""
         decay_factor = payload.get("decay_factor", 0.95)
-<<<<<<< HEAD
-        ts = (
-            payload.get("timestamp")
-            or datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
-        )
-
-=======
         ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
         facts_columns = await self._facts_columns(conn)
         has_consensus_column = "consensus_score" in facts_columns
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
         # 1. Fetch current scores
-        async with conn.execute(
-            "SELECT json_extract(metadata, '$.consensus_score'), confidence FROM facts WHERE id = ?",
-            (fact_id,),
-        ) as cursor:
+        score_query = (
+            "SELECT consensus_score, confidence FROM facts WHERE id = ?"
+            if has_consensus_column
+            else "SELECT json_extract(metadata, '$.consensus_score'), confidence FROM facts WHERE id = ?"
+        )
+        async with conn.execute(score_query, (fact_id,)) as cursor:
             row = await cursor.fetchone()
             if not row:
                 return
@@ -270,16 +241,12 @@ class FactMutationEngine:
             new_confidence = "tentative"
         elif new_score < 0.6 and confidence != "disputed":
             new_confidence = "disputed"
-<<<<<<< HEAD
-
-=======
         if has_consensus_column:
             await conn.execute(
                 "UPDATE facts SET confidence = ?, updated_at = ?, consensus_score = ? WHERE id = ?",
                 (new_confidence, ts, new_score, fact_id),
             )
             return
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
         query = (
             "UPDATE facts SET confidence = ?, updated_at = ?, "
             "metadata = CASE "
@@ -295,10 +262,7 @@ class FactMutationEngine:
         fact_id: int,
         payload: dict,
     ) -> None:
-        ts = (
-            payload.get("timestamp")
-            or datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
-        )
+        ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
         reason = payload.get("reason", "deprecated")
         # Ω₂: Robust Metadata Projection.
         # If meta is encrypted (v6_aesgcm:...), json_set will fail.
@@ -312,9 +276,6 @@ class FactMutationEngine:
             "WHERE id = ?",
             (ts, ts, reason, fact_id),
         )
-<<<<<<< HEAD
-
-=======
     async def _proj_mutate_to_ghost(
         self,
         conn: aiosqlite.Connection,
@@ -327,17 +288,15 @@ class FactMutationEngine:
             "UPDATE facts SET fact_type = 'ghost', updated_at = ? WHERE id = ?",
             (ts, fact_id),
         )
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
     async def _proj_tombstone(
         self,
         conn: aiosqlite.Connection,
         fact_id: int,
         payload: dict,
+        tenant_id: str | None = None,
     ) -> None:
         reason = payload.get("reason", "tombstoned")
-        ts = payload.get(
-            "timestamp", datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
-        )
+        ts = payload.get("timestamp", datetime.now(timezone.utc).isoformat())
         query = (
             "UPDATE facts SET valid_until = ?, is_tombstoned = 1, updated_at = ?, "
             "metadata = CASE "
@@ -349,16 +308,14 @@ class FactMutationEngine:
         )
         await conn.execute(query, (ts, ts, ts, reason, fact_id))
         # Ω₁₃: Propagate TAINTED status to descendants
+        resolved_tenant_id = tenant_id or await self._get_fact_tenant_id(conn, fact_id)
         graph = AsyncCausalGraph(conn)
-        report = await graph.propagate_taint(fact_id)
+        report = await graph.propagate_taint(fact_id, tenant_id=resolved_tenant_id)
         logger.info(
             "Ω₁₃ Taint (Tombstone) propagated from fact %d: %d nodes affected",
             fact_id,
             report.affected_count,
         )
-<<<<<<< HEAD
-
-=======
     async def _proj_archaeology_merge(
         self,
         conn: aiosqlite.Connection,
@@ -394,17 +351,14 @@ class FactMutationEngine:
             query += " AND tenant_id = ?"
             params.append(tenant_id or await self._get_fact_tenant_id(conn, fact_id))
         await conn.execute(query, tuple(params))
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
     async def _proj_quarantine(
         self,
         conn: aiosqlite.Connection,
         fact_id: int,
         payload: dict,
+        tenant_id: str | None = None,
     ) -> None:
-        ts = (
-            payload.get("timestamp")
-            or datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
-        )
+        ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
         reason = payload.get("reason", "quarantined")
         await conn.execute(
             "UPDATE facts SET is_quarantined = 1, quarantined_at = ?, "
@@ -413,8 +367,9 @@ class FactMutationEngine:
             (ts, reason, ts, fact_id),
         )
         # Ω₁₃: Propagate taint status to descendants
+        resolved_tenant_id = tenant_id or await self._get_fact_tenant_id(conn, fact_id)
         graph = AsyncCausalGraph(conn)
-        report = await graph.propagate_taint(fact_id)
+        report = await graph.propagate_taint(fact_id, tenant_id=resolved_tenant_id)
         logger.info(
             "Ω₁₃ Taint (Quarantine) propagated from fact %d: %d nodes affected",
             fact_id,
@@ -426,10 +381,7 @@ class FactMutationEngine:
         fact_id: int,
         payload: dict,
     ) -> None:
-        ts = (
-            payload.get("timestamp")
-            or datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
-        )
+        ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
         await conn.execute(
             "UPDATE facts SET is_quarantined = 0, quarantined_at = NULL, "
             "quarantine_reason = NULL, updated_at = ? WHERE id = ?",
@@ -443,10 +395,6 @@ class FactMutationEngine:
     ) -> None:
         score = payload.get("consensus_score")
         confidence = payload.get("confidence")
-<<<<<<< HEAD
-
-        if score is not None and confidence is not None:
-=======
         facts_columns = await self._facts_columns(conn)
         has_consensus_column = "consensus_score" in facts_columns
         if has_consensus_column and score is not None and confidence is not None:
@@ -465,7 +413,6 @@ class FactMutationEngine:
                 (confidence, fact_id),
             )
         elif score is not None and confidence is not None:
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
             await conn.execute(
                 "UPDATE facts SET confidence = ?, "
                 "metadata = CASE "
@@ -490,9 +437,6 @@ class FactMutationEngine:
                 "UPDATE facts SET confidence = ? WHERE id = ?",
                 (confidence, fact_id),
             )
-<<<<<<< HEAD
-
-=======
     async def _proj_taint_update(
         self,
         conn: aiosqlite.Connection,
@@ -626,17 +570,13 @@ class FactMutationEngine:
             query += " AND tenant_id = ?"
             params.append(resolved_tenant_id)
         await conn.execute(query, tuple(params))
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
     async def _proj_restore(
         self,
         conn: aiosqlite.Connection,
         fact_id: int,
         payload: dict,
     ) -> None:
-        ts = (
-            payload.get("timestamp")
-            or datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
-        )
+        ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
         await conn.execute(
             "UPDATE facts SET valid_until = NULL, is_tombstoned = 0, "
             "tombstoned_at = NULL, is_quarantined = 0, quarantined_at = NULL, "
@@ -703,6 +643,7 @@ class FactMutationEngine:
         params: list[Any] = [entity_id]
         if as_of:
             query += "AND timestamp <= ? "
+            params.append(as_of)
         query += "ORDER BY id ASC"
         state: dict[str, Any] = {}
         async with conn.execute(query, params) as cursor:
