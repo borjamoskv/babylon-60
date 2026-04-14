@@ -6,8 +6,10 @@ All file/shell operations are confined to task.repo_path.
 
 from __future__ import annotations
 
+import json
 import logging
 import os
+import sqlite3
 import subprocess
 from collections.abc import Callable
 from pathlib import Path
@@ -99,6 +101,7 @@ class AgentToolkit:
                 },
                 "web": {"web_search", "autodidact_ingest"},
                 "mcp": {"toolbox_membrane"},
+                "ledger": {"ledger_query_fact", "ledger_search"},
             }
             for tool in allowed_tools:
                 if tool in mappings:
@@ -291,6 +294,186 @@ class AgentToolkit:
         except Exception as e:  # noqa: BLE001
             return f"[ERROR] Autodidact failed: {e}"
 
+    # ── Ledger tools ──────────────────────────────────────────────────
+
+    @staticmethod
+    def _ledger_db_path() -> str:
+        """Resolve the active CORTEX ledger database path.
+
+        Precedence: CORTEX_DB_PATH env var → default ~/.cortex/cortex.db.
+        """
+        return os.environ.get(
+            "CORTEX_DB_PATH",
+            str(Path.home() / ".cortex" / "cortex.db"),
+        )
+
+    def ledger_query_fact(self, fact_id: str) -> str:
+        """Query the Sovereign Ledger for a specific event by ID and verify its hash.
+
+        Opens a read-only connection to the ledger DB, fetches the event, recomputes
+        its SHA-256 over the stored payload_json and prev_hash, then compares to the
+        stored hash.  Returns a compact, LLM-friendly verification report.
+
+        Args:
+            fact_id: The ``event_id`` UUID of the ledger event to verify.
+
+        Returns:
+            A single-string verification report suitable for an LLM context window.
+        """
+        db_path = self._ledger_db_path()
+        if not Path(db_path).exists():
+            return f"[LEDGER] DB not found at {db_path}. Run `cortex init` first."
+
+        try:
+            conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+            conn.row_factory = sqlite3.Row
+            try:
+                row = conn.execute(
+                    "SELECT event_id, ts, tool, actor, action, payload_json, "
+                    "prev_hash, hash, semantic_status, created_at "
+                    "FROM ledger_events WHERE event_id = ?",
+                    (fact_id,),
+                ).fetchone()
+            finally:
+                conn.close()
+        except sqlite3.OperationalError as e:
+            return f"[LEDGER] DB read error: {e}"
+
+        if row is None:
+            return f"[LEDGER] Event '{fact_id}' not found."
+
+        stored_hash: str = row["hash"] or ""
+        prev_hash: str = row["prev_hash"] or "GENESIS"
+        payload_json: str = row["payload_json"] or ""
+
+        # Re-derive hash using the same canonical scheme as LedgerVerifier: reconstruct
+        # the LedgerEvent from its stored payload and call compute_hash(prev_hash).
+        hash_ok: bool | None = None  # None = unverifiable (parse error)
+        try:
+            payload = json.loads(payload_json)
+            from cortex.ledger.models import (  # local import: avoid top-level cycle
+                ActionResult,
+                ActionTarget,
+                IntentPayload,
+                LedgerEvent,
+            )
+
+            target = ActionTarget(**payload["target"])
+            result = ActionResult(**payload["result"])
+            intent = IntentPayload(**payload["intent"]) if payload.get("intent") else None
+            event = LedgerEvent(
+                event_id=payload["event_id"],
+                ts=payload["timestamp"],
+                tool=payload["tool"],
+                actor=payload["actor"],
+                action=payload["action"],
+                target=target,
+                result=result,
+                intent=intent,
+                correlation_id=payload.get("correlation_id"),
+                trace_id=payload.get("trace_id"),
+                prev_hash=payload.get("prev_hash"),
+                hash=payload.get("hash"),
+                semantic_status=payload.get("semantic_status", "pending"),
+                metadata=payload.get("metadata", {}),
+            )
+            recomputed = event.compute_hash(prev_hash)
+            hash_ok = recomputed == stored_hash
+        except (ImportError, KeyError, TypeError, ValueError) as e:
+            logger.debug("Hash recomputation unavailable for event %s: %s", fact_id, e)
+            # payload structure is not a full LedgerEvent (e.g. legacy record) — cannot verify
+
+        if hash_ok is None:
+            status_icon = "⚠️ UNVERIFIABLE"
+        elif hash_ok:
+            status_icon = "✅ VERIFIED"
+        else:
+            status_icon = "⚠️ COMPROMISED"
+
+        lines = [
+            f"[LEDGER] {status_icon} — event_id: {row['event_id']}",
+            f"  actor      : {row['actor']}",
+            f"  tool       : {row['tool']}",
+            f"  action     : {row['action']}",
+            f"  ts         : {row['ts']}",
+            f"  status     : {row['semantic_status']}",
+            f"  stored_hash: {stored_hash[:16]}…",
+            f"  hash_match : {hash_ok}",
+        ]
+        if hash_ok is False:
+            lines.append(
+                "  ⛔ WARNING: Stored hash does not match recomputed hash. "
+                "Ledger integrity may be compromised."
+            )
+        if hash_ok is None:
+            lines.append(
+                "  ℹ️  Hash recomputation unavailable — payload may be a legacy record."
+            )
+        return "\n".join(lines)
+
+    def ledger_search(self, query: str, limit: int = 5) -> str:
+        """Search the Sovereign Ledger for events matching a text query.
+
+        Performs a case-insensitive substring search against ``actor``, ``tool``,
+        ``action``, and ``payload_json`` columns of the ``ledger_events`` table,
+        returning the most recent matching events ordered by timestamp descending.
+
+        Only events with semantic_status in ``('indexed', 'pending')`` are included
+        so the agent sees facts that are either fully enriched or awaiting enrichment,
+        filtering out transient ``processing`` and ``failed`` entries.
+
+        Args:
+            query: Free-text search string.
+            limit: Maximum number of results to return (default 5, capped at 20).
+
+        Returns:
+            A formatted multi-line string suitable for an LLM context window.
+        """
+        db_path = self._ledger_db_path()
+        if not Path(db_path).exists():
+            return f"[LEDGER] DB not found at {db_path}. Run `cortex init` first."
+
+        safe_limit = max(1, min(int(limit), 20))
+        pattern = f"%{query}%"
+
+        try:
+            conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+            conn.row_factory = sqlite3.Row
+            try:
+                rows = conn.execute(
+                    """
+                    SELECT event_id, ts, tool, actor, action, hash, semantic_status
+                    FROM ledger_events
+                    WHERE semantic_status IN ('indexed', 'pending')
+                      AND (
+                            actor       LIKE ? COLLATE NOCASE
+                         OR tool        LIKE ? COLLATE NOCASE
+                         OR action      LIKE ? COLLATE NOCASE
+                         OR payload_json LIKE ? COLLATE NOCASE
+                          )
+                    ORDER BY ts DESC
+                    LIMIT ?
+                    """,
+                    (pattern, pattern, pattern, pattern, safe_limit),
+                ).fetchall()
+            finally:
+                conn.close()
+        except sqlite3.OperationalError as e:
+            return f"[LEDGER] DB read error: {e}"
+
+        if not rows:
+            return f"[LEDGER] No events matching '{query}'."
+
+        lines = [f"[LEDGER] {len(rows)} result(s) for '{query}':"]
+        for i, row in enumerate(rows, 1):
+            h = (row["hash"] or "")[:12]
+            lines.append(
+                f"  {i}. [{row['ts'][:19]}] {row['actor']} · {row['action']}"
+                f"  (tool={row['tool']}, status={row['semantic_status']}, hash={h}…)"
+                f"  id={row['event_id']}"
+            )
+        return "\n".join(lines)
+
     # ── Dispatch ──────────────────────────────────────────────────────
 
     def dispatch(self, tool_name: str, args: dict[str, str]) -> str:
@@ -307,6 +490,8 @@ class AgentToolkit:
                 tier = RiskTier.TIER_3_LOCAL_MUTATION
             elif tool_name in {"bash", "git_push"}:
                 tier = RiskTier.TIER_4_REMOTE_MUTATION
+            elif tool_name in {"ledger_query_fact", "ledger_search"}:
+                tier = RiskTier.TIER_1_LOCAL_SAFE
             else:
                 tier = RiskTier.TIER_3_LOCAL_MUTATION
 
@@ -337,6 +522,11 @@ class AgentToolkit:
             "web_search": lambda a: self.web_search(a.get("query", "")),
             "autodidact_ingest": lambda a: self.autodidact_ingest(
                 a.get("target_url", ""), a.get("intent", "Aprender")
+            ),
+            "ledger_query_fact": lambda a: self.ledger_query_fact(a.get("fact_id", "")),
+            "ledger_search": lambda a: self.ledger_search(
+                a.get("query", ""),
+                int(a["limit"]) if a.get("limit", "").lstrip("-").isdigit() else 5,
             ),
         }
         fn = handlers.get(tool_name)
