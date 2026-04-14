@@ -8,6 +8,7 @@ into unified "crystallized" patterns. Transfers causal links (parent_decision_id
 from __future__ import annotations
 
 import logging
+import _sqlite3
 import sqlite3
 from datetime import datetime, timezone
 from typing import Any, cast
@@ -21,6 +22,7 @@ except ImportError:
     SovereignLLM = None  # type: ignore[assignment, misc]
 
 logger = logging.getLogger("cortex.memory.archaeology")
+SQLITE_ERRORS = (sqlite3.Error, aiosqlite.Error, _sqlite3.Error)
 
 
 class MemoryArchaeologist:
@@ -94,15 +96,15 @@ class MemoryArchaeologist:
     ) -> tuple[list[dict[str, Any]], np.ndarray | None]:
         _, l2_store = self._memory_components()
         l2_conn = l2_store._get_conn()
-        meta_tb, vec_tb, _, _ = self._l2_tables(l2_conn, tenant_id, project)
-        c2 = l2_conn.cursor()
         try:
+            meta_tb, vec_tb, _, _ = self._l2_tables(l2_conn, tenant_id, project)
+            c2 = l2_conn.cursor()
             c2.execute(
                 f"SELECT m.id, v.embedding FROM {meta_tb} m JOIN {vec_tb} v ON m.rowid = v.rowid "
                 "WHERE m.project_id = ? AND m.tenant_id = ?",
                 (project, tenant_id),
             )
-        except sqlite3.Error as exc:
+        except SQLITE_ERRORS as exc:
             logger.warning(
                 "Archaeology skipped for %s/%s: vector tables unavailable: %s",
                 tenant_id,
@@ -202,7 +204,7 @@ class MemoryArchaeologist:
                     await self._apply_db_updates(
                         project, tenant_id, condensed_content, cluster_facts, primary_parent_id, l2_conn
                     )
-                except (sqlite3.Error, aiosqlite.Error) as e:
+                except SQLITE_ERRORS as e:
                     logger.error("Archaeology DB update failed: %s", e)
                     continue
 
