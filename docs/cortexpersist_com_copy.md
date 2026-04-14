@@ -66,31 +66,23 @@ It can preserve operational truth under pressure.
 
 ## 5. Demo section
 
-**From event to evidence in under a minute**
+**Register decision → verify integrity → export evidence**
 
-**1. Store memory**
+Use the same official 2–3 minute demo everywhere:
+
 ```bash
-cortex store "Vendor X failed compliance check" \
-  --type decision \
-  --project procurement \
-  --confidence C4 \
-  --source agent:reviewer
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+PYTHONPATH=. python examples/demo_canonical.py
 ```
 
-**2. Generate lineage**
-Each write can be chained into a tamper-evident ledger with transaction ID, timestamp, hash, and previous hash.
+Demo story:
+- an AI credit-risk agent records one approval decision
+- CORTEX verifies the ledger is intact
+- CORTEX exports a JSON audit artifact for review
 
-**3. Retrieve context**
-```bash
-cortex search "compliance vendor failure"
-```
-
-**4. Verify integrity**
-```bash
-cortex verify-ledger
-```
-
-Result: persistent memory with searchable context and verifiable history.
+Result: a short, repeatable proof of accountable AI memory.
 
 [Run the Demo] [Read the Docs]
 
