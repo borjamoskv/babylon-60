@@ -4,7 +4,7 @@ version = "0.3.0b7"
 description = "Cryptographic memory integrity, audit trails, and verifiable lineage for AI agents."
 readme = "README.md"
 license = "Apache-2.0"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [
     {name = "borjamoskv.com", email = "borja@moskv.com"},
 ]
@@ -17,7 +17,6 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -132,11 +131,12 @@ asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 markers = [
     "slow: marks tests that exercise slower integration paths",
+    "timeout: marks tests that enforce runtime bounds via pytest-timeout",
 ]
 
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py311"
 line-length = 100
 exclude = ["experimental", "notebooks"]
 
@@ -158,7 +158,7 @@ ignore = ["E501", "E402", "B008", "W291", "W293", "S", "BLE001", "UP045"]
 "builtins.print" = { msg = "CORTEX Anti-Pattern: Usa standard logging o Rich para emitir trails de auditoría." }
 
 [tool.pyright]
-pythonVersion = "3.10"
+pythonVersion = "3.11"
 typeCheckingMode = "basic"
 exclude = [
     "**/node_modules",

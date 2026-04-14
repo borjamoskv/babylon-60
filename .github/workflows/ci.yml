@@ -57,11 +57,7 @@ jobs:
 
           for file in "${files[@]}"; do
             case "$file" in
-              .github/workflows/ci.yml|\
-              .github/workflows/quality_gates.yml|\
-              .github/workflows/repo-health-lite.yml|\
-              .github/workflows/sigint-monitor.yml|\
-              .github/workflows/sovereign-deploy.yml|\
+              .github/workflows/*|\
               scripts/repo_health_changed.py|\
               cortex/extensions/moltbook/sigint.py)
                 ;;
@@ -175,6 +171,52 @@ jobs:
             exit 0
           fi
           ruff format --check "${files[@]}"
+
+  typecheck-core:
+    needs: [change-scope]
+    if: needs.change-scope.outputs.automation_only != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+      - name: Determine scope
+        id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags --prune origin "${{ github.base_ref }}"
+            git diff --name-only --diff-filter=ACMR "origin/${{ github.base_ref }}...HEAD" | sort -u > .changed_files
+          elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            git diff --name-only --diff-filter=ACMR "${{ github.event.before }}" HEAD | sort -u > .changed_files
+          else
+            git ls-files | sort -u > .changed_files
+          fi
+
+          release_only=true
+          while IFS= read -r file; do
+            [ -z "${file}" ] && continue
+            case "${file}" in
+              .github/workflows/*|README.md|RELEASE_PROCESS.md|CHANGELOG.md|Dockerfile|pyproject.toml|cortex/__init__.py|MANIFEST.in|scripts/release_preflight.py|scripts/repo_health_changed.py)
+                ;;
+              *)
+                release_only=false
+                break
+                ;;
+            esac
+          done < .changed_files
+
+          echo "release_only=${release_only}" >> "${GITHUB_OUTPUT}"
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        if: steps.scope.outputs.release_only != 'true'
+        run: pip install -e ".[dev,api]" pyright
+      - name: Pyright core contract
+        if: steps.scope.outputs.release_only != 'true'
+        run: pyright cortex/ledger cortex/guards cortex/auth cortex/types cortex/api cortex/routes
 
   security:
     needs: [change-scope]
@@ -446,7 +488,7 @@ jobs:
           fi
 
   build:
-    needs: [change-scope, lint, security, test, test_status]
+    needs: [change-scope, lint, typecheck-core, security, test, test_status]
     if: needs.change-scope.outputs.automation_only != 'true'
     runs-on: ubuntu-latest
     steps:
