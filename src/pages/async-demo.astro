@@ -27,13 +27,14 @@ const defaultFields = {
 				<h1>Send the workflow. Get the demo without a call.</h1>
 				<p>
 					Fill the brief, open a ready-made email draft, or copy the payload and send it
-					manually. We reply with an async demo and recommendation within 24 hours.
+					manually. We typically reply with an async demo and recommendation within one
+					business day.
 				</p>
 			</div>
 
 			<div class="chip-row" aria-label="Async demo principles">
 				<span class="chip">No call required</span>
-				<span class="chip">Reply within 24 hours</span>
+				<span class="chip">Typically within 1 business day</span>
 				<span class="chip">Built for technical buyers</span>
 			</div>
 		</section>
@@ -45,15 +46,27 @@ const defaultFields = {
 					<span class="surface-state">Simple</span>
 				</div>
 
-				<form class="intake-form" data-intake-form data-subject={subject} data-email={supportEmail}>
+				<form class="intake-form" data-intake-form data-subject={subject} data-email={supportEmail} novalidate>
 					<div class="field-grid">
 						<label class="field">
 							<span>Name</span>
-							<input name="name" type="text" value={defaultFields.name} placeholder="Your name" />
+							<input
+								name="name"
+								type="text"
+								value={defaultFields.name}
+								placeholder="Your name"
+								autocomplete="name"
+							/>
 						</label>
 						<label class="field">
 							<span>Company</span>
-							<input name="company" type="text" value={defaultFields.company} placeholder="Company or team" />
+							<input
+								name="company"
+								type="text"
+								value={defaultFields.company}
+								placeholder="Company or team"
+								autocomplete="organization"
+							/>
 						</label>
 					</div>
 
@@ -63,6 +76,8 @@ const defaultFields = {
 							name="workflow"
 							rows="4"
 							placeholder="What workflow would be painful to investigate if the agent failed tomorrow?"
+							required
+							aria-required="true"
 						>{defaultFields.workflow}</textarea>
 					</label>
 
@@ -72,6 +87,8 @@ const defaultFields = {
 							name="stack"
 							rows="4"
 							placeholder="Agent orchestration, memory, logs, APIs, repo, or anything relevant."
+							required
+							aria-required="true"
 						>{defaultFields.stack}</textarea>
 					</label>
 
@@ -102,11 +119,23 @@ const defaultFields = {
 					</div>
 
 					<p class="microcopy">
+						Required: workflow and current stack.
+					</p>
+					<p class="microcopy">
+						This page drafts an email. Nothing is submitted server-side from the browser.
+					</p>
+					<p class="microcopy">
 						No local mail client? Copy the payload and send it manually to
 						<a class="inline-link" href={`mailto:${supportEmail}`}>{supportEmail}</a>.
 					</p>
-					<p class="intake-status" data-intake-status aria-live="polite"></p>
+					<p class="intake-status" data-intake-status role="status" aria-live="polite" aria-atomic="true"></p>
 				</form>
+				<noscript>
+					<p class="microcopy">
+						JavaScript is off. Email your workflow and current stack directly to
+						<a class="inline-link" href={`mailto:${supportEmail}`}>{supportEmail}</a>.
+					</p>
+				</noscript>
 			</section>
 
 			<aside class="surface-sunken intake-panel">
@@ -181,8 +210,16 @@ const defaultFields = {
 
 			form.addEventListener('submit', (event) => {
 				event.preventDefault();
+				if (!form.reportValidity()) {
+					const firstInvalid = form.querySelector(':invalid');
+					if (firstInvalid instanceof HTMLElement) firstInvalid.focus();
+					if (statusNode) statusNode.textContent = 'Fill the required fields before opening the email draft.';
+					return;
+				}
+
 				const body = refreshPreview();
 				const href = `mailto:${supportEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+				if (statusNode) statusNode.textContent = 'Opening email draft...';
 				window.location.href = href;
 			});
 

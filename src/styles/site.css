@@ -673,7 +673,7 @@ img {
 	letter-spacing: 0.2em;
 }
 
-.flow-console .proof-stack {
+.proof-stack {
 	display: grid;
 	gap: 0.85rem;
 }

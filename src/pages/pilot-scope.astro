@@ -19,14 +19,14 @@ const subject = 'CORTEX Pilot Scope';
 				<h1>Scope one workflow and get a concrete pilot recommendation.</h1>
 				<p>
 					Send the workflow, stack, risk level, and hosting constraints. We reply with a
-					scoped pilot recommendation, commercials, and next steps.
+					scoped pilot recommendation, pricing, and next steps.
 				</p>
 			</div>
 
 			<div class="chip-row" aria-label="Pilot scope promises">
 				<span class="chip">One workflow</span>
 				<span class="chip">One environment</span>
-				<span class="chip">Reply within 24 hours</span>
+				<span class="chip">Typically within 1 business day</span>
 			</div>
 		</section>
 
@@ -37,13 +37,15 @@ const subject = 'CORTEX Pilot Scope';
 					<span class="surface-state">Pilot</span>
 				</div>
 
-				<form class="intake-form" data-intake-form data-subject={subject} data-email={supportEmail}>
+				<form class="intake-form" data-intake-form data-subject={subject} data-email={supportEmail} novalidate>
 					<label class="field">
 						<span>Workflow</span>
 						<textarea
 							name="workflow"
 							rows="4"
 							placeholder="Which workflow should the pilot instrument first?"
+							required
+							aria-required="true"
 						></textarea>
 					</label>
 
@@ -53,6 +55,8 @@ const subject = 'CORTEX Pilot Scope';
 							name="stack"
 							rows="4"
 							placeholder="Agent orchestration, memory layer, observability, APIs, repos, or relevant systems."
+							required
+							aria-required="true"
 						></textarea>
 					</label>
 
@@ -106,6 +110,8 @@ const subject = 'CORTEX Pilot Scope';
 							name="success"
 							rows="4"
 							placeholder="What would make the pilot clearly worth doing?"
+							required
+							aria-required="true"
 						></textarea>
 					</label>
 
@@ -121,16 +127,29 @@ const subject = 'CORTEX Pilot Scope';
 					</div>
 
 					<div class="intake-actions">
-						<button class="button-primary" type="submit">Open Scoped Email</button>
-						<button class="button-secondary" type="button" data-copy-intake>Copy Scope</button>
+						<button class="button-primary" type="submit">Open Email Draft</button>
+						<button class="button-secondary" type="button" data-copy-intake>Copy Scope Brief</button>
 					</div>
 
+					<p class="microcopy">
+						Required: workflow, current stack, and success criteria.
+					</p>
+					<p class="microcopy">
+						This page drafts an email. Nothing is submitted server-side from the browser.
+					</p>
 					<p class="microcopy">
 						If you prefer, copy the scope and send it manually to
 						<a class="inline-link" href={`mailto:${supportEmail}`}>{supportEmail}</a>.
 					</p>
-					<p class="intake-status" data-intake-status aria-live="polite"></p>
+					<p class="intake-status" data-intake-status role="status" aria-live="polite" aria-atomic="true"></p>
 				</form>
+				<noscript>
+					<p class="microcopy">
+						JavaScript is off. Email your workflow, current stack, and success criteria
+						directly to
+						<a class="inline-link" href={`mailto:${supportEmail}`}>{supportEmail}</a>.
+					</p>
+				</noscript>
 			</section>
 
 			<aside class="surface-sunken intake-panel">
@@ -149,7 +168,7 @@ const subject = 'CORTEX Pilot Scope';
 					</div>
 					<div class="proof-item">
 						<div>
-							<strong>Commercials</strong>
+							<strong>Pilot estimate</strong>
 							<span>Pilot pricing, constraints, and expected timeline.</span>
 						</div>
 						<span class="proof-tag audit">EUR</span>
@@ -215,8 +234,16 @@ const subject = 'CORTEX Pilot Scope';
 
 			form.addEventListener('submit', (event) => {
 				event.preventDefault();
+				if (!form.reportValidity()) {
+					const firstInvalid = form.querySelector(':invalid');
+					if (firstInvalid instanceof HTMLElement) firstInvalid.focus();
+					if (statusNode) statusNode.textContent = 'Fill the required fields before opening the email draft.';
+					return;
+				}
+
 				const body = refreshPreview();
 				const href = `mailto:${supportEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+				if (statusNode) statusNode.textContent = 'Opening email draft...';
 				window.location.href = href;
 			});
 
