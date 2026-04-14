@@ -1,7 +1,8 @@
 ---
+import IntakeFormScript from '../components/IntakeFormScript.astro';
 import SiteLayout from '../layouts/SiteLayout.astro';
+import { SUPPORT_EMAIL } from '../lib/intake';
 
-const supportEmail = 'borja@cortexpersist.com';
 const subject = 'Request Async Demo for CORTEX Persist';
 const defaultFields = {
 	name: '',
@@ -11,6 +12,14 @@ const defaultFields = {
 	sensitive: 'Not sure yet',
 	timeline: 'Within 30 days',
 };
+const intakeLines = [
+	{ label: 'Name', field: 'name' },
+	{ label: 'Company', field: 'company' },
+	{ label: 'Workflow', field: 'workflow' },
+	{ label: 'Current stack', field: 'stack' },
+	{ label: 'Sensitive data', field: 'sensitive' },
+	{ label: 'Timeline', field: 'timeline' },
+];
 ---
 
 <SiteLayout
@@ -46,7 +55,7 @@ const defaultFields = {
 					<span class="surface-state">Simple</span>
 				</div>
 
-				<form class="intake-form" data-intake-form data-subject={subject} data-email={supportEmail} novalidate>
+				<form class="intake-form" data-intake-form data-subject={subject} data-email={SUPPORT_EMAIL} novalidate>
 					<div class="field-grid">
 						<label class="field">
 							<span>Name</span>
@@ -126,14 +135,14 @@ const defaultFields = {
 					</p>
 					<p class="microcopy">
 						No local mail client? Copy the payload and send it manually to
-						<a class="inline-link" href={`mailto:${supportEmail}`}>{supportEmail}</a>.
+						<a class="inline-link" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
 					</p>
 					<p class="intake-status" data-intake-status role="status" aria-live="polite" aria-atomic="true"></p>
 				</form>
 				<noscript>
 					<p class="microcopy">
 						JavaScript is off. Email your workflow and current stack directly to
-						<a class="inline-link" href={`mailto:${supportEmail}`}>{supportEmail}</a>.
+						<a class="inline-link" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
 					</p>
 				</noscript>
 			</section>
@@ -171,69 +180,5 @@ const defaultFields = {
 		</section>
 	</main>
 
-	<script is:inline>
-		const form = document.querySelector('[data-intake-form]');
-		if (form) {
-			const preview = document.querySelector('[data-intake-preview]');
-			const subjectNode = document.querySelector('[data-intake-subject]');
-			const statusNode = document.querySelector('[data-intake-status]');
-			const copyButton = document.querySelector('[data-copy-intake]');
-			const fields = Array.from(form.querySelectorAll('input, textarea, select'));
-			const supportEmail = form.dataset.email || '';
-			const subject = form.dataset.subject || 'CORTEX intake';
-
-			const buildBody = () => {
-				const data = Object.fromEntries(new FormData(form).entries());
-				return [
-					'CORTEX async demo request',
-					'',
-					`Name: ${data.name || '-'}`,
-					`Company: ${data.company || '-'}`,
-					`Workflow: ${data.workflow || '-'}`,
-					`Current stack: ${data.stack || '-'}`,
-					`Sensitive data: ${data.sensitive || '-'}`,
-					`Timeline: ${data.timeline || '-'}`,
-				].join('\n');
-			};
-
-			const refreshPreview = () => {
-				const body = buildBody();
-				if (preview) preview.textContent = body;
-				if (subjectNode) subjectNode.textContent = subject;
-				return body;
-			};
-
-			fields.forEach((field) => {
-				field.addEventListener('input', refreshPreview);
-				field.addEventListener('change', refreshPreview);
-			});
-
-			form.addEventListener('submit', (event) => {
-				event.preventDefault();
-				if (!form.reportValidity()) {
-					const firstInvalid = form.querySelector(':invalid');
-					if (firstInvalid instanceof HTMLElement) firstInvalid.focus();
-					if (statusNode) statusNode.textContent = 'Fill the required fields before opening the email draft.';
-					return;
-				}
-
-				const body = refreshPreview();
-				const href = `mailto:${supportEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-				if (statusNode) statusNode.textContent = 'Opening email draft...';
-				window.location.href = href;
-			});
-
-			copyButton?.addEventListener('click', async () => {
-				const body = refreshPreview();
-				try {
-					await navigator.clipboard.writeText(body);
-					if (statusNode) statusNode.textContent = 'Copied. Paste it into any email client if mailto is not available.';
-				} catch {
-					if (statusNode) statusNode.textContent = 'Copy failed. Select the preview text manually and paste it into your email.';
-				}
-			});
-
-			refreshPreview();
-		}
-	</script>
+	<IntakeFormScript requestTitle="CORTEX async demo request" lines={intakeLines} />
 </SiteLayout>

@@ -1,8 +1,20 @@
 ---
+import IntakeFormScript from '../components/IntakeFormScript.astro';
 import SiteLayout from '../layouts/SiteLayout.astro';
+import { SUPPORT_EMAIL } from '../lib/intake';
 
-const supportEmail = 'borja@cortexpersist.com';
 const subject = 'CORTEX Pilot Scope';
+const intakeLines = [
+	{ label: 'Workflow', field: 'workflow' },
+	{ label: 'Current stack', field: 'stack' },
+	{ label: 'Sensitive data', field: 'sensitive' },
+	{ label: 'Hosting model', field: 'hosting' },
+	{ label: 'Target environment', field: 'environment' },
+	{ label: 'Owner', field: 'owner' },
+	{ label: 'Success criteria', field: 'success' },
+	{ label: 'Name', field: 'name' },
+	{ label: 'Contact', field: 'contact' },
+];
 ---
 
 <SiteLayout
@@ -37,7 +49,7 @@ const subject = 'CORTEX Pilot Scope';
 					<span class="surface-state">Pilot</span>
 				</div>
 
-				<form class="intake-form" data-intake-form data-subject={subject} data-email={supportEmail} novalidate>
+				<form class="intake-form" data-intake-form data-subject={subject} data-email={SUPPORT_EMAIL} novalidate>
 					<label class="field">
 						<span>Workflow</span>
 						<textarea
@@ -139,7 +151,7 @@ const subject = 'CORTEX Pilot Scope';
 					</p>
 					<p class="microcopy">
 						If you prefer, copy the scope and send it manually to
-						<a class="inline-link" href={`mailto:${supportEmail}`}>{supportEmail}</a>.
+						<a class="inline-link" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
 					</p>
 					<p class="intake-status" data-intake-status role="status" aria-live="polite" aria-atomic="true"></p>
 				</form>
@@ -147,7 +159,7 @@ const subject = 'CORTEX Pilot Scope';
 					<p class="microcopy">
 						JavaScript is off. Email your workflow, current stack, and success criteria
 						directly to
-						<a class="inline-link" href={`mailto:${supportEmail}`}>{supportEmail}</a>.
+						<a class="inline-link" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
 					</p>
 				</noscript>
 			</section>
@@ -192,72 +204,5 @@ const subject = 'CORTEX Pilot Scope';
 		</section>
 	</main>
 
-	<script is:inline>
-		const form = document.querySelector('[data-intake-form]');
-		if (form) {
-			const preview = document.querySelector('[data-intake-preview]');
-			const subjectNode = document.querySelector('[data-intake-subject]');
-			const statusNode = document.querySelector('[data-intake-status]');
-			const copyButton = document.querySelector('[data-copy-intake]');
-			const fields = Array.from(form.querySelectorAll('input, textarea, select'));
-			const supportEmail = form.dataset.email || '';
-			const subject = form.dataset.subject || 'CORTEX intake';
-
-			const buildBody = () => {
-				const data = Object.fromEntries(new FormData(form).entries());
-				return [
-					'CORTEX pilot scope request',
-					'',
-					`Workflow: ${data.workflow || '-'}`,
-					`Current stack: ${data.stack || '-'}`,
-					`Sensitive data: ${data.sensitive || '-'}`,
-					`Hosting model: ${data.hosting || '-'}`,
-					`Target environment: ${data.environment || '-'}`,
-					`Owner: ${data.owner || '-'}`,
-					`Success criteria: ${data.success || '-'}`,
-					`Name: ${data.name || '-'}`,
-					`Contact: ${data.contact || '-'}`,
-				].join('\n');
-			};
-
-			const refreshPreview = () => {
-				const body = buildBody();
-				if (preview) preview.textContent = body;
-				if (subjectNode) subjectNode.textContent = subject;
-				return body;
-			};
-
-			fields.forEach((field) => {
-				field.addEventListener('input', refreshPreview);
-				field.addEventListener('change', refreshPreview);
-			});
-
-			form.addEventListener('submit', (event) => {
-				event.preventDefault();
-				if (!form.reportValidity()) {
-					const firstInvalid = form.querySelector(':invalid');
-					if (firstInvalid instanceof HTMLElement) firstInvalid.focus();
-					if (statusNode) statusNode.textContent = 'Fill the required fields before opening the email draft.';
-					return;
-				}
-
-				const body = refreshPreview();
-				const href = `mailto:${supportEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-				if (statusNode) statusNode.textContent = 'Opening email draft...';
-				window.location.href = href;
-			});
-
-			copyButton?.addEventListener('click', async () => {
-				const body = refreshPreview();
-				try {
-					await navigator.clipboard.writeText(body);
-					if (statusNode) statusNode.textContent = 'Copied. Paste it into any email client if mailto is not available.';
-				} catch {
-					if (statusNode) statusNode.textContent = 'Copy failed. Select the preview text manually and paste it into your email.';
-				}
-			});
-
-			refreshPreview();
-		}
-	</script>
+	<IntakeFormScript requestTitle="CORTEX pilot scope request" lines={intakeLines} />
 </SiteLayout>
