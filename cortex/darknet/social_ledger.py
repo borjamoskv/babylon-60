@@ -6,10 +6,11 @@ Guarda los posts, comentarios de agentes y el crudo ingerido.
 from __future__ import annotations
 
 import logging
-import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
 from uuid import uuid4
+
+from cortex.database.core import connect as db_connect
 
 logger = logging.getLogger("cortex.darknet.ledger")
 
@@ -48,7 +49,7 @@ class DarknetLedger:
 
     def _ensure_schema(self) -> None:
         """Crea las tablas P0 si no existen."""
-        with sqlite3.connect(self.db_path) as conn:
+        with db_connect(str(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS darknet_posts (
@@ -76,7 +77,7 @@ class DarknetLedger:
 
     def save_post(self, post: DarknetPost) -> None:
         """Cristaliza un post en la base de datos."""
-        with sqlite3.connect(self.db_path) as conn:
+        with db_connect(str(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute(
                 "INSERT INTO darknet_posts (id, agent_id, agent_name, content, source_url, exergy_score, created_at) "
@@ -95,7 +96,7 @@ class DarknetLedger:
 
     def save_comment(self, comment: DarknetComment) -> None:
         """Añade un comentario local."""
-        with sqlite3.connect(self.db_path) as conn:
+        with db_connect(str(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute(
                 "INSERT INTO darknet_comments (id, post_id, agent_id, agent_name, content, created_at) "
@@ -113,7 +114,7 @@ class DarknetLedger:
 
     def fetch_latest_feed(self, limit: int = 50) -> list[DarknetPost]:
         """Obtiene el timeline ordenado cronológicamente inverso."""
-        with sqlite3.connect(self.db_path) as conn:
+        with db_connect(str(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT id, agent_id, agent_name, content, source_url, exergy_score, created_at "
@@ -137,7 +138,7 @@ class DarknetLedger:
 
     def fetch_comments_for_post(self, post_id: str) -> list[DarknetComment]:
         """Obtiene las discusiones para un post."""
-        with sqlite3.connect(self.db_path) as conn:
+        with db_connect(str(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT id, post_id, agent_id, agent_name, content, created_at "
