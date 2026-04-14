@@ -40,10 +40,46 @@ def _run_async(coro):
 
 
 @cli.command("verify")
-@click.argument("fact_id", type=int)
+@click.argument("target", metavar="FACT_ID|ledger")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def verify_fact(fact_id: int, db: str) -> None:
-    """Verify cryptographic integrity of a specific fact."""
+@click.option("--full", is_flag=True, help="Perform full cryptographic verify (ledger only)")
+def verify_fact(target: str, db: str, full: bool) -> None:
+    """Verify cryptographic integrity.
+
+    Pass a numeric FACT_ID to verify a single fact, or the literal word
+    'ledger' to verify the full hash chain:
+
+        cortex verify 42
+        cortex verify ledger
+    """
+    if target.lower() == "ledger":
+        from cortex.ledger.store import LedgerStore
+        from cortex.ledger.verifier import LedgerVerifier
+
+        store = LedgerStore(db)
+        verifier = LedgerVerifier(store)
+        with console.status("[bold cyan]Verifying ledger integrity..."):
+            result = verifier.verify_chain()
+        if result["valid"]:
+            console.print(
+                f"[bold green]Ledger is VALID[/bold green] ({result['checked_events']} events checked)"
+            )
+        else:
+            violations = result["violations"]
+            console.print(
+                f"[bold red]Ledger is COMPROMISED[/bold red]: {len(violations)} violations"
+            )
+            for v in violations[:10]:
+                console.print(f"  - {v}")
+        return
+
+    try:
+        fact_id = int(target)
+    except ValueError:
+        raise click.BadParameter(
+            f"Expected a numeric fact ID or 'ledger', got: {target!r}", param_hint="FACT_ID|ledger"
+        ) from None
+
     from cortex.cli.errors import err_fact_not_found, handle_cli_error
     from cortex.database.core import connect as db_connect
 

@@ -27,8 +27,10 @@ def memory_cmds() -> None:
 
 
 @memory_cmds.command("store")
-@click.argument("project")
-@click.argument("content")
+@click.argument("project", required=False, default=None)
+@click.argument("content_arg", metavar="CONTENT", required=False, default=None)
+@click.option("--agent", default=None, help="Agent identifier (sets source; also used as project if PROJECT omitted)")
+@click.option("--content", "content_opt", default=None, help="Fact content (alternative to positional CONTENT argument)")
 @click.option(
     "--type",
     "fact_type",
@@ -74,7 +76,9 @@ def memory_cmds() -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def store(
     project,
-    content,
+    content_arg,
+    agent,
+    content_opt,
     fact_type,
     tags,
     confidence,
@@ -84,9 +88,26 @@ def store(
     parent_id,
     db,
 ) -> None:
-    """Store a fact in CORTEX."""
+    """Store a fact in CORTEX.
+
+    PROJECT and CONTENT may be supplied as positional arguments or via
+    --agent/--content for a friendlier quickstart experience:
+
+        cortex memory store --agent "risk-bot" --content "Transaction flagged"
+        cortex memory store my-project "Transaction flagged"
+    """
+    # Resolve content: --content flag takes precedence, then positional arg
+    content = content_opt or content_arg
+    if not content:
+        raise click.UsageError("CONTENT is required (use positional arg or --content).")
+
+    # Resolve project: positional arg takes precedence; fall back to --agent
+    if not project:
+        project = agent or "default"
+
+    # Resolve source: --source takes precedence, then --agent, then auto-detect
     if not source:
-        source = _detect_agent_source()
+        source = agent or _detect_agent_source()
 
     engine = get_engine(db)
     try:
