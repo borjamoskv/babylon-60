@@ -9,10 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased] — v0.3.0b3
+## [Unreleased] — v0.3.0b4
 
 ### In Progress
 - No unreleased entries yet.
+
+## [0.3.0b4] — 2026-04-14
+
+### Fixed
+- **CLI onboarding cold start**: `cortex init` now forces deterministic fallback embeddings only during initial axiom seeding, avoiding first-run hangs caused by local model bootstrap while preserving the normal embedding path after initialization.
 
 ## [0.3.0b3] — 2026-04-13
 
