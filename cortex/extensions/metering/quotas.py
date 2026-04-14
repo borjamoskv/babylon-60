@@ -10,9 +10,10 @@ import logging
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from cortex.extensions.metering.tracker import UsageTracker
+if TYPE_CHECKING:
+    from cortex.extensions.metering.tracker import UsageTracker
 
 __all__ = ["PLAN_QUOTAS", "QuotaCheckResult", "QuotaEnforcer"]
 
