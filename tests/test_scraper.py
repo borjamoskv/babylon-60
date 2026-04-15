@@ -17,12 +17,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex.extensions.scraper.extractors import (
+from cortex.experimental.extensions.scraper.extractors import (
     ExtractionError,
     HttpExtractor,
     html_to_markdown,
 )
-from cortex.extensions.scraper.models import (
+from cortex.experimental.extensions.scraper.models import (
     ExtractionStrategy,
     JobStatus,
     OutputFormat,
@@ -251,7 +251,7 @@ class TestHttpExtractor:
         mock_client.__aexit__ = AsyncMock(return_value=None)
 
         with patch(
-            "cortex.extensions.scraper.extractors.httpx.AsyncClient", return_value=mock_client
+            "cortex.experimental.extensions.scraper.extractors.httpx.AsyncClient", return_value=mock_client
         ):
             extractor = HttpExtractor()
             title, content = await extractor.extract("https://example.com")
@@ -274,7 +274,7 @@ class TestHttpExtractor:
         mock_client.__aexit__ = AsyncMock(return_value=None)
 
         with patch(
-            "cortex.extensions.scraper.extractors.httpx.AsyncClient", return_value=mock_client
+            "cortex.experimental.extensions.scraper.extractors.httpx.AsyncClient", return_value=mock_client
         ):
             extractor = HttpExtractor()
             with pytest.raises(ExtractionError, match="Non-HTML"):
@@ -303,10 +303,10 @@ class TestRobotsTxt:
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock(return_value=None)
 
-        from cortex.extensions.scraper.extractors import check_robots_txt
+        from cortex.experimental.extensions.scraper.extractors import check_robots_txt
 
         with patch(
-            "cortex.extensions.scraper.extractors.httpx.AsyncClient", return_value=mock_client
+            "cortex.experimental.extensions.scraper.extractors.httpx.AsyncClient", return_value=mock_client
         ):
             result = await check_robots_txt("https://example.com/public/page")
 
@@ -326,10 +326,10 @@ class TestRobotsTxt:
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock(return_value=None)
 
-        from cortex.extensions.scraper.extractors import check_robots_txt
+        from cortex.experimental.extensions.scraper.extractors import check_robots_txt
 
         with patch(
-            "cortex.extensions.scraper.extractors.httpx.AsyncClient", return_value=mock_client
+            "cortex.experimental.extensions.scraper.extractors.httpx.AsyncClient", return_value=mock_client
         ):
             result = await check_robots_txt("https://example.com/admin/secret")
 
@@ -346,10 +346,10 @@ class TestRobotsTxt:
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock(return_value=None)
 
-        from cortex.extensions.scraper.extractors import check_robots_txt
+        from cortex.experimental.extensions.scraper.extractors import check_robots_txt
 
         with patch(
-            "cortex.extensions.scraper.extractors.httpx.AsyncClient", return_value=mock_client
+            "cortex.experimental.extensions.scraper.extractors.httpx.AsyncClient", return_value=mock_client
         ):
             result = await check_robots_txt("https://example.com/anything")
 
@@ -367,7 +367,7 @@ class TestScraperEngine:
     @pytest.mark.asyncio
     async def test_cascade_first_strategy_succeeds(self):
         """If HTTP_FAST works, no fallback needed."""
-        from cortex.extensions.scraper.engine import ScraperEngine
+        from cortex.experimental.extensions.scraper.engine import ScraperEngine
 
         engine = ScraperEngine()
 
@@ -377,9 +377,9 @@ class TestScraperEngine:
         )
 
         with patch.dict(
-            "cortex.extensions.scraper.extractors.EXTRACTORS", {"http_fast": mock_extractor}
+            "cortex.experimental.extensions.scraper.extractors.EXTRACTORS", {"http_fast": mock_extractor}
         ):
-            with patch("cortex.extensions.scraper.extractors.CASCADE_ORDER", ["http_fast"]):
+            with patch("cortex.experimental.extensions.scraper.extractors.CASCADE_ORDER", ["http_fast"]):
                 result = await engine._cascade_extract("https://example.com", 15.0)
 
         assert result.status == "success"
@@ -388,7 +388,7 @@ class TestScraperEngine:
     @pytest.mark.asyncio
     async def test_cascade_fallback(self):
         """If HTTP_FAST fails, cascade to Jina."""
-        from cortex.extensions.scraper.engine import ScraperEngine
+        from cortex.experimental.extensions.scraper.engine import ScraperEngine
 
         engine = ScraperEngine()
 
@@ -403,8 +403,8 @@ class TestScraperEngine:
         extractors = {"http_fast": mock_http, "jina": mock_jina}
         cascade = ["http_fast", "jina"]
 
-        with patch.dict("cortex.extensions.scraper.extractors.EXTRACTORS", extractors, clear=True):
-            with patch("cortex.extensions.scraper.extractors.CASCADE_ORDER", cascade):
+        with patch.dict("cortex.experimental.extensions.scraper.extractors.EXTRACTORS", extractors, clear=True):
+            with patch("cortex.experimental.extensions.scraper.extractors.CASCADE_ORDER", cascade):
                 result = await engine._cascade_extract("https://example.com", 15.0)
 
         assert result.status == "success"
@@ -413,7 +413,7 @@ class TestScraperEngine:
     @pytest.mark.asyncio
     async def test_all_strategies_fail(self):
         """If all strategies fail, return error result."""
-        from cortex.extensions.scraper.engine import ScraperEngine
+        from cortex.experimental.extensions.scraper.engine import ScraperEngine
 
         engine = ScraperEngine()
 
@@ -421,9 +421,9 @@ class TestScraperEngine:
         mock_ext.extract = AsyncMock(side_effect=ExtractionError("Failed"))
 
         with patch.dict(
-            "cortex.extensions.scraper.extractors.EXTRACTORS", {"http_fast": mock_ext}, clear=True
+            "cortex.experimental.extensions.scraper.extractors.EXTRACTORS", {"http_fast": mock_ext}, clear=True
         ):
-            with patch("cortex.extensions.scraper.extractors.CASCADE_ORDER", ["http_fast"]):
+            with patch("cortex.experimental.extensions.scraper.extractors.CASCADE_ORDER", ["http_fast"]):
                 result = await engine._cascade_extract("https://example.com", 15.0)
 
         assert result.status == "error"
@@ -432,7 +432,7 @@ class TestScraperEngine:
     @pytest.mark.asyncio
     async def test_rate_limiting(self):
         """Verify rate limiting enforces minimum interval."""
-        from cortex.extensions.scraper.engine import ScraperEngine
+        from cortex.experimental.extensions.scraper.engine import ScraperEngine
 
         engine = ScraperEngine()
         engine._last_request_time = time.monotonic()
@@ -447,7 +447,7 @@ class TestScraperEngine:
     @pytest.mark.asyncio
     async def test_deduplication_detection(self):
         """Same content hash triggers dedup flag."""
-        from cortex.extensions.scraper.engine import ScraperEngine
+        from cortex.experimental.extensions.scraper.engine import ScraperEngine
 
         engine = ScraperEngine()
         content = "# Identical content for dedup test"
@@ -459,12 +459,12 @@ class TestScraperEngine:
 
         with (
             patch.dict(
-                "cortex.extensions.scraper.extractors.EXTRACTORS",
+                "cortex.experimental.extensions.scraper.extractors.EXTRACTORS",
                 {"http_fast": mock_ext},
                 clear=True,
             ),
-            patch("cortex.extensions.scraper.extractors.CASCADE_ORDER", ["http_fast"]),
-            patch("cortex.extensions.scraper.extractors.check_robots_txt", return_value=True),
+            patch("cortex.experimental.extensions.scraper.extractors.CASCADE_ORDER", ["http_fast"]),
+            patch("cortex.experimental.extensions.scraper.extractors.check_robots_txt", return_value=True),
         ):
             request = ScrapeRequest(url="https://example.com")
             result = await engine.scrape(request)
@@ -483,7 +483,7 @@ class TestBatchScraping:
     @pytest.mark.asyncio
     async def test_batch_scrape_multiple_urls(self):
         """Batch scrape processes multiple URLs and returns job."""
-        from cortex.extensions.scraper.engine import ScraperEngine
+        from cortex.experimental.extensions.scraper.engine import ScraperEngine
 
         engine = ScraperEngine()
 
@@ -494,12 +494,12 @@ class TestBatchScraping:
 
         with (
             patch.dict(
-                "cortex.extensions.scraper.extractors.EXTRACTORS",
+                "cortex.experimental.extensions.scraper.extractors.EXTRACTORS",
                 {"http_fast": mock_ext},
                 clear=True,
             ),
-            patch("cortex.extensions.scraper.extractors.CASCADE_ORDER", ["http_fast"]),
-            patch("cortex.extensions.scraper.extractors.check_robots_txt", return_value=True),
+            patch("cortex.experimental.extensions.scraper.extractors.CASCADE_ORDER", ["http_fast"]),
+            patch("cortex.experimental.extensions.scraper.extractors.check_robots_txt", return_value=True),
         ):
             job = await engine.batch_scrape(
                 urls=["https://a.com", "https://b.com"],

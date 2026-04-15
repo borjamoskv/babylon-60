@@ -6,7 +6,7 @@ from collections.abc import Callable, Coroutine
 from dataclasses import dataclass, field
 from typing import Any, TypeVar
 
-from cortex.extensions.training.ttt_engine import TTTEngine
+from cortex.experimental.extensions.training.ttt_engine import TTTEngine
 
 logger = logging.getLogger("cortex.conscious_recurrence")
 

@@ -25,8 +25,8 @@ import numpy as np
 # Ensure CORTEX is importable
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from cortex.extensions.music_engine.dsp_apotheosis import DSPApotheosis
-from cortex.extensions.music_engine.orchestrator import (
+from cortex.experimental.extensions.music_engine.dsp_apotheosis import DSPApotheosis
+from cortex.experimental.extensions.music_engine.orchestrator import (
     GRAMMYOrchestrator,
     TrackContext,
     TrackState,

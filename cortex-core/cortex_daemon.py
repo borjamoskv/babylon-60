@@ -13,7 +13,7 @@ sys.path.append("/Users/borjafernandezangulo/Cortex-Persist/cortex-core")
 try:
     from cortex.mcp.knowledge_watcher import start_knowledge_daemon
     from skill_compiler import run_compiler
-    from cortex.extensions.signals.bus import SignalBus
+    from cortex.experimental.extensions.signals.bus import SignalBus
 except ImportError as e:
     logging.error("Startup Failure: Dependency missing: %s", e)
 

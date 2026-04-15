@@ -8,7 +8,7 @@ from pathlib import Path
 sys.path.append(os.getcwd())
 
 from cortex.engine import CortexEngine
-from cortex.extensions.timing import TimingTracker
+from cortex.experimental.extensions.timing import TimingTracker
 
 # Configuration
 DB_PATH = Path.home() / ".cortex/cortex.db"

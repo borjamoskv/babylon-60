@@ -28,12 +28,12 @@ from cortex.api.middleware import (
 )
 from cortex.auth import AuthManager
 from cortex.engine import CortexEngine
-from cortex.extensions.metering.middleware import MeteringMiddleware
-from cortex.extensions.swarm.manager import get_swarm_manager
-from cortex.extensions.timing import TimingTracker
+from cortex.experimental.extensions.metering.middleware import MeteringMiddleware
+from cortex.experimental.extensions.swarm.manager import get_swarm_manager
+from cortex.experimental.extensions.timing import TimingTracker
 from cortex.mcp.knowledge_watcher import start_knowledge_daemon
 from cortex.routes import api_router
-from cortex.swarm import start_swarm_daemon
+from cortex.experimental.swarm import start_swarm_daemon
 from cortex.telemetry.metrics import MetricsMiddleware, metrics
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 
@@ -104,7 +104,7 @@ async def lifespan(app: FastAPI):
     api_state.tracker = tracker
 
     # 6. Notification Bus — wire adapters from config
-    from cortex.extensions.notifications.setup import setup_notifications
+    from cortex.experimental.extensions.notifications.setup import setup_notifications
 
     notification_bus = setup_notifications(config)
     api_state.notification_bus = notification_bus  # type: ignore[reportAttributeAccessIssue]
@@ -259,7 +259,7 @@ async def health_check(request: Request) -> dict:
     health_score = 0.0
     health_grade = "F"
     try:
-        from cortex.extensions.health import HealthCollector, HealthScorer
+        from cortex.experimental.extensions.health import HealthCollector, HealthScorer
 
         db_path = ""
         engine = getattr(request.app.state, "engine", None)

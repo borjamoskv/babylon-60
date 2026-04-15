@@ -31,7 +31,7 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 try:
-    from cortex.extensions.immune.chaos import ChaosGate, async_interceptor
+    from cortex.experimental.extensions.immune.chaos import ChaosGate, async_interceptor
 except ImportError:
     ChaosGate = None  # type: ignore[assignment, misc]
 
@@ -40,7 +40,7 @@ except ImportError:
 
 
 try:
-    from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
+    from cortex.experimental.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
 except ImportError:
 
     class DummyErrorGhostPipeline:

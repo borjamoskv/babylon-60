@@ -1,7 +1,7 @@
 import asyncio
 
-from cortex.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile, ReasoningMode
-from cortex.extensions.llm.router import CortexLLMRouter
+from cortex.experimental.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile, ReasoningMode
+from cortex.experimental.extensions.llm.router import CortexLLMRouter
 
 
 class MockProvider(BaseProvider):

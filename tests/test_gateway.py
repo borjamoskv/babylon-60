@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from cortex.gateway import GatewayIntent, GatewayRequest, GatewayRouter
+from cortex.experimental.gateway import GatewayIntent, GatewayRequest, GatewayRouter
 
 
 @pytest.mark.asyncio

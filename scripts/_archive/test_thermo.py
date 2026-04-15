@@ -1,7 +1,7 @@
 import asyncio
 import time
 
-from cortex.extensions.daemon.sidecar.telemetry.thermodynamics_oracle import ThermodynamicsOracle
+from cortex.experimental.extensions.daemon.sidecar.telemetry.thermodynamics_oracle import ThermodynamicsOracle
 
 
 class MockEngine:

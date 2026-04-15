@@ -16,7 +16,7 @@ import aiosqlite
 import numpy as np
 
 try:
-    from cortex.extensions.llm.sovereign import SovereignLLM
+    from cortex.experimental.extensions.llm.sovereign import SovereignLLM
 except ImportError:
     SovereignLLM = None  # type: ignore[assignment, misc]
 

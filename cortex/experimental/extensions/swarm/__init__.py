@@ -1,0 +1,10 @@
+"""CORTEX v5.0 — Swarm.
+
+High-agency orchestration for 10,000+ autonomous agents.
+"""
+
+from __future__ import annotations
+
+from cortex.experimental.extensions.swarm.manager import SwarmManager
+
+__all__ = ["SwarmManager"]

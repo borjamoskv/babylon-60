@@ -13,7 +13,7 @@ from starlette.requests import Request
 from cortex.api.deps import get_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine
-from cortex.graph import get_graph as _get_graph
+from cortex.experimental.graph import get_graph as _get_graph
 from cortex.utils.i18n import get_trans
 
 __all__ = ["get_graph", "get_graph_all"]

@@ -9,8 +9,8 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Request
 
-from cortex.extensions.health import HealthCollector, HealthScorer
-from cortex.extensions.health.models import HealthReport, HealthThresholds
+from cortex.experimental.extensions.health import HealthCollector, HealthScorer
+from cortex.experimental.extensions.health.models import HealthReport, HealthThresholds
 
 router = APIRouter(prefix="/v1/health", tags=["health-index"])
 
@@ -102,7 +102,7 @@ async def health_index_prometheus(request: Request):
     """Prometheus text exposition format."""
     from fastapi.responses import PlainTextResponse
 
-    from cortex.extensions.health.prometheus import export_prometheus
+    from cortex.experimental.extensions.health.prometheus import export_prometheus
 
     db_path = _get_db_path(request)
     collector = HealthCollector(db_path=db_path)
@@ -115,7 +115,7 @@ async def health_index_prometheus(request: Request):
 @router.get("/history")
 async def health_index_history(request: Request, limit: int = 20) -> dict:
     """Persisted health score history."""
-    from cortex.extensions.health.trend import TrendDetector
+    from cortex.experimental.extensions.health.trend import TrendDetector
 
     db_path = _get_db_path(request)
     records = TrendDetector.query_history(db_path, limit=limit)

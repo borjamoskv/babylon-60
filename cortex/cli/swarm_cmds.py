@@ -22,7 +22,7 @@ def swarm():
 @click.option("--level", "-l", type=int, default=1, help="Escalation level (1-3)")
 def swarm_audit(path, level):
     """Deep semantic audit of a file or directory using the swarm."""
-    from cortex.extensions.mejoralo.swarm import MejoraloSwarm
+    from cortex.experimental.extensions.mejoralo.swarm import MejoraloSwarm
 
     p = Path(path)
     files = [p] if p.is_file() else list(p.glob("**/*.py"))
@@ -61,7 +61,7 @@ def swarm_audit(path, level):
 @click.option("--dry-run", is_flag=True, help="Show refactored code without overwriting")
 def swarm_refactor(file, level, issue, dry_run):
     """Refactor a specific file using the full specialist squad."""
-    from cortex.extensions.mejoralo.swarm import MejoraloSwarm
+    from cortex.experimental.extensions.mejoralo.swarm import MejoraloSwarm
 
     p = Path(file)
     swarm_engine = MejoraloSwarm(level=level)
@@ -153,7 +153,7 @@ def swarm_deploy(mode, target, db):
 @click.option("--db", default="~/.cortex/cortex.db", help="Database path")
 def swarm_board_cmd(db):
     """Launch the real-time Swarm Kanban TUI."""
-    from cortex.extensions.ui.swarm_board import SwarmBoard
+    from cortex.experimental.extensions.ui.swarm_board import SwarmBoard
 
     board = SwarmBoard(db)
     board.start()
@@ -249,7 +249,7 @@ def swarm_up(db):
 @click.option("--path", "-p", help="Base path for worktrees")
 def swarm_cleanup(path):
     """Force-remove all ephemeral worktrees and their git metadata."""
-    from cortex.extensions.swarm.worktree_isolation import cleanup_all_worktrees
+    from cortex.experimental.extensions.swarm.worktree_isolation import cleanup_all_worktrees
 
     count = asyncio.run(cleanup_all_worktrees(path))
     if count == 0:

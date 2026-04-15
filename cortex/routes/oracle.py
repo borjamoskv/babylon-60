@@ -21,8 +21,8 @@ from pydantic import BaseModel, HttpUrl
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine as AsyncCortexEngine
-from cortex.extensions.llm.manager import LLMManager
-from cortex.extensions.llm.router import IntentProfile
+from cortex.experimental.extensions.llm.manager import LLMManager
+from cortex.experimental.extensions.llm.router import IntentProfile
 
 __all__ = [
     "OracleRequest",

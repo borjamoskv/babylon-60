@@ -13,7 +13,7 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from cortex.extensions.sync.common import CORTEX_DIR, atomic_write
+from cortex.experimental.extensions.sync.common import CORTEX_DIR, atomic_write
 from cortex.memory.temporal import now_iso
 
 __all__ = [

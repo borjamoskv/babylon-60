@@ -17,15 +17,15 @@ from cortex.database.core import load_sqlite_vec_async
 
 # Lazy imports for runtime managers
 if TYPE_CHECKING:
-    from cortex.consensus.manager import ConsensusManager
+    from cortex.experimental.consensus.manager import ConsensusManager
     from cortex.embeddings import LocalEmbedder
     from cortex.embeddings.manager import EmbeddingManager
     from cortex.engine.auth import ByzantineAuthLayer
     from cortex.engine.lock import SovereignLock
     from cortex.engine.trust_registry import TrustRegistry
-    from cortex.facts.manager import FactManager
+    from cortex.experimental.facts.manager import FactManager
     from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
-    from cortex.mac_maestro.executor import MaestroExecutor
+    from cortex.experimental.mac_maestro.executor import MaestroExecutor
 from cortex.database.schema import get_init_meta
 from cortex.engine.agent_mixin import AgentMixin
 from cortex.engine.durability import PersistenceSupervisor
@@ -41,7 +41,7 @@ from cortex.engine.sync_mixin import SyncMixin
 from cortex.engine.transaction_mixin import TransactionMixin
 
 try:
-    from cortex.extensions.health.health_mixin import HealthMixin  # type: ignore
+    from cortex.experimental.extensions.health.health_mixin import HealthMixin  # type: ignore
 except ImportError:
     class HealthMixin:  # type: ignore
         async def health_check(self, *args, **kwargs):
@@ -146,7 +146,7 @@ class CortexEngine(
     @property
     def facts(self) -> FactManager:  # noqa: F821
         if self._facts is None:
-            from cortex.facts.manager import FactManager
+            from cortex.experimental.facts.manager import FactManager
             self._facts = FactManager(self)  # type: ignore
         return self._facts
     @facts.setter
@@ -164,7 +164,7 @@ class CortexEngine(
     @property
     def consensus(self) -> ConsensusManager:
         if self._consensus is None:
-            from cortex.consensus.manager import ConsensusManager
+            from cortex.experimental.consensus.manager import ConsensusManager
             self._consensus = ConsensusManager(self)
         return self._consensus
     @consensus.setter
@@ -218,7 +218,7 @@ class CortexEngine(
     @property
     def mac_maestro(self) -> MaestroExecutor:
         if self._mac_maestro is None:
-            from cortex.mac_maestro.executor import MaestroExecutor
+            from cortex.experimental.mac_maestro.executor import MaestroExecutor
             self._mac_maestro = MaestroExecutor(self.ledger_writer)
         return self._mac_maestro
     @mac_maestro.setter
@@ -534,7 +534,7 @@ class CortexEngine(
         ]
     async def shannon_report(self, project: str | None = None) -> dict:
         """Shannon entropy analysis of stored memory."""
-        from cortex.extensions.shannon.report import EntropyReport
+        from cortex.experimental.extensions.shannon.report import EntropyReport
         return await EntropyReport.analyze(self, project)
     async def fingerprint(
         self,
@@ -548,11 +548,11 @@ class CortexEngine(
         - Archetype: sovereign_architect / obsessive_executor / etc.
         - to_agent_prompt(): ready for LLM system prompt injection
         """
-        from cortex.extensions.fingerprint.extractor import FingerprintExtractor
+        from cortex.experimental.extensions.fingerprint.extractor import FingerprintExtractor
         return await FingerprintExtractor.extract(self, project, top_domains)
     async def immortality_index(self, project: str | None = None) -> dict:
         """Immortality Index (ι) — cognitive crystallization metric."""
-        from cortex.extensions.shannon.immortality import ImmortalityIndex
+        from cortex.experimental.extensions.shannon.immortality import ImmortalityIndex
         return await ImmortalityIndex.compute(self, project)
     async def prioritize(
         self,
@@ -560,7 +560,7 @@ class CortexEngine(
         tenant_id: str = "default",
     ) -> list:
         """Bellman Policy Engine — prioritized action queue."""
-        from cortex.extensions.policy import PolicyEngine
+        from cortex.experimental.extensions.policy import PolicyEngine
         policy = PolicyEngine(self)
         return await policy.evaluate(project=project, tenant_id=tenant_id)
     # ─── Schema ───────────────────────────────────────────────────
@@ -573,7 +573,7 @@ class CortexEngine(
         logger.info("CORTEX database initialized (async) at %s", self._db_path)
     # ─── Helpers ──────────────────────────────────────────────────
     def export_snapshot(self, out_path: str | Path) -> str:
-        from cortex.extensions.sync.snapshot import export_snapshot
+        from cortex.experimental.extensions.sync.snapshot import export_snapshot
         return export_snapshot(self, out_path)  # type: ignore[reportArgumentType,reportReturnType]
     def _row_to_fact(  # type: ignore[override]
         self,

@@ -26,7 +26,7 @@ try:
 except ImportError:
     sqlite_vec = None
 
-from cortex.guards.exergy_guard import calculate_exergy
+from cortex.experimental.guards.exergy_guard import calculate_exergy
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.models import CortexFactModel
 from cortex.utils import void_vec

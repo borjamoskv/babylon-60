@@ -135,7 +135,7 @@ async def test_parent_decision_id_creates_causal_edge(
         can_sign = False
 
     monkeypatch.setattr(
-        "cortex.extensions.security.signatures.get_default_signer",
+        "cortex.experimental.extensions.security.signatures.get_default_signer",
         lambda: FakeSigner(),
     )
 
@@ -202,7 +202,7 @@ async def test_auto_resolved_parent_creates_edge(
         can_sign = False
 
     monkeypatch.setattr(
-        "cortex.extensions.security.signatures.get_default_signer",
+        "cortex.experimental.extensions.security.signatures.get_default_signer",
         lambda: FakeSigner(),
     )
 
@@ -270,7 +270,7 @@ async def test_no_duplicate_edge_when_causal_parent_exists(
         can_sign = False
 
     monkeypatch.setattr(
-        "cortex.extensions.security.signatures.get_default_signer",
+        "cortex.experimental.extensions.security.signatures.get_default_signer",
         lambda: FakeSigner(),
     )
 

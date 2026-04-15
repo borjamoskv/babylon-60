@@ -1,6 +1,6 @@
 import pytest
 
-from cortex.guards.url_guard import SafeTransport
+from cortex.experimental.guards.url_guard import SafeTransport
 
 
 def test_url_guard_blocks_metadata_ip():

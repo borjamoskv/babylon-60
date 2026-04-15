@@ -32,7 +32,7 @@ async def client():
 
 
 @pytest.mark.asyncio
-@patch("cortex.extensions.swarm.manager.isolated_worktree")
+@patch("cortex.experimental.extensions.swarm.manager.isolated_worktree")
 async def test_swarm_worktree_lifecycle_api(mock_iso, client):
     # Mock context manager
     mock_ctx = AsyncMock()

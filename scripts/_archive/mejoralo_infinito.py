@@ -14,7 +14,7 @@ try:
     from rich.panel import Panel
     from rich.prompt import Prompt
 
-    from cortex.extensions.llm.provider import LLMProvider
+    from cortex.experimental.extensions.llm.provider import LLMProvider
 
     load_dotenv()
 except ImportError as e:

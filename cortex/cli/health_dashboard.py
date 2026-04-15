@@ -17,9 +17,9 @@ from cortex.cli.common import DEFAULT_DB, console  # type: ignore[reportAttribut
 @click.option("--db", "db_path", default=None, help="DB path override.")
 def dashboard(db_path: str | None) -> None:
     """Rich interactive live dashboard for CORTEX Health."""
-    from cortex.extensions.health.collector import HealthCollector
-    from cortex.extensions.health.models import Grade
-    from cortex.extensions.health.scorer import HealthScorer
+    from cortex.experimental.extensions.health.collector import HealthCollector
+    from cortex.experimental.extensions.health.models import Grade
+    from cortex.experimental.extensions.health.scorer import HealthScorer
 
     path = db_path or str(DEFAULT_DB)
     collector = HealthCollector(db_path=path)

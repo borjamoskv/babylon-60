@@ -4,7 +4,7 @@ import pytest
 
 from cortex.engine import CortexEngine
 from cortex.engine.lock import SovereignLock
-from cortex.extensions.swarm.manager import CapatazOrchestrator
+from cortex.experimental.extensions.swarm.manager import CapatazOrchestrator
 
 
 @pytest.fixture

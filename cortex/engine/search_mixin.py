@@ -97,7 +97,7 @@ class SearchMixin(EngineMixinBase):
     ) -> None:
         """Helper to enrich search results with graph context."""
         try:
-            from cortex.graph import extract_entities, get_context_subgraph
+            from cortex.experimental.graph import extract_entities, get_context_subgraph
         except Exception as exc:  # noqa: BLE001
             logger.debug("Graph context enrichment unavailable: %s", exc)
             return

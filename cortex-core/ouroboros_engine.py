@@ -6,7 +6,7 @@ import sqlite3
 import time
 
 # CORTEX V5 Pulse Integration
-from cortex.extensions.signals.bus import SignalBus
+from cortex.experimental.extensions.signals.bus import SignalBus
 from cortex.config import DB_PATH
 
 SCRATCH_BASE = "/Users/borjafernandezangulo/Cortex-Persist/.scratch/ouroboros"

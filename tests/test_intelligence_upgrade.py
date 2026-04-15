@@ -67,37 +67,37 @@ class TestEmbeddingCosine:
     """Test the cosine similarity helper in contradiction_guard.py."""
 
     def test_cosine_identical_vectors(self):
-        from cortex.guards.contradiction_guard import _embedding_cosine_similarity
+        from cortex.experimental.guards.contradiction_guard import _embedding_cosine_similarity
 
         emb = [1.0, 0.0, 0.0]
         assert abs(_embedding_cosine_similarity(emb, emb) - 1.0) < 1e-6
 
     def test_cosine_orthogonal_vectors(self):
-        from cortex.guards.contradiction_guard import _embedding_cosine_similarity
+        from cortex.experimental.guards.contradiction_guard import _embedding_cosine_similarity
 
         a = [1.0, 0.0, 0.0]
         b = [0.0, 1.0, 0.0]
         assert abs(_embedding_cosine_similarity(a, b)) < 1e-6
 
     def test_cosine_none_input(self):
-        from cortex.guards.contradiction_guard import _embedding_cosine_similarity
+        from cortex.experimental.guards.contradiction_guard import _embedding_cosine_similarity
 
         assert _embedding_cosine_similarity(None, [1.0, 0.0]) == 0.0
         assert _embedding_cosine_similarity([1.0, 0.0], None) == 0.0
         assert _embedding_cosine_similarity(None, None) == 0.0
 
     def test_cosine_empty_vectors(self):
-        from cortex.guards.contradiction_guard import _embedding_cosine_similarity
+        from cortex.experimental.guards.contradiction_guard import _embedding_cosine_similarity
 
         assert _embedding_cosine_similarity([], []) == 0.0
 
     def test_cosine_mismatched_dimensions(self):
-        from cortex.guards.contradiction_guard import _embedding_cosine_similarity
+        from cortex.experimental.guards.contradiction_guard import _embedding_cosine_similarity
 
         assert _embedding_cosine_similarity([1.0, 0.0], [1.0, 0.0, 0.0]) == 0.0
 
     def test_cosine_known_value(self):
-        from cortex.guards.contradiction_guard import _embedding_cosine_similarity
+        from cortex.experimental.guards.contradiction_guard import _embedding_cosine_similarity
 
         a = [3.0, 4.0]
         b = [4.0, 3.0]
@@ -112,7 +112,7 @@ class TestShannonEntropy:
     """Test Shannon entropy computation."""
 
     def test_shannon_report_fields(self):
-        from cortex.shannon.entropy import ShannonReport
+        from cortex.experimental.shannon.entropy import ShannonReport
 
         r = ShannonReport(
             total_facts=100,
@@ -129,7 +129,7 @@ class TestShannonEntropy:
         assert len(r.top_redundant_tokens) == 1
 
     def test_diagnose_health_high_redundancy(self):
-        from cortex.shannon.entropy import ShannonReport, diagnose_health
+        from cortex.experimental.shannon.entropy import ShannonReport, diagnose_health
 
         report = ShannonReport(
             total_facts=100,
@@ -145,7 +145,7 @@ class TestShannonEntropy:
         assert any("redundan" in rec.lower() for rec in diagnosis)
 
     def test_diagnose_health_healthy(self):
-        from cortex.shannon.entropy import ShannonReport, diagnose_health
+        from cortex.experimental.shannon.entropy import ShannonReport, diagnose_health
 
         report = ShannonReport(
             total_facts=1000,
@@ -247,7 +247,7 @@ class TestEmbeddingBoostConstant:
     """Verify EMBEDDING_BOOST_WEIGHT is correctly configured."""
 
     def test_boost_weight_range(self):
-        from cortex.guards.contradiction_guard import EMBEDDING_BOOST_WEIGHT
+        from cortex.experimental.guards.contradiction_guard import EMBEDDING_BOOST_WEIGHT
 
         assert 0 < EMBEDDING_BOOST_WEIGHT <= 1.0
         assert EMBEDDING_BOOST_WEIGHT == 0.3

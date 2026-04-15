@@ -227,7 +227,7 @@ def _get_db_path() -> str:
 
 def _run_async(coro: Any) -> Any:
     """Helper to run async coroutines from sync CLI."""
-    from cortex.events.loop import sovereign_run
+    from cortex.experimental.events.loop import sovereign_run
 
     return sovereign_run(coro)
 

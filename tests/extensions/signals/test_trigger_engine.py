@@ -23,8 +23,8 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from cortex.extensions.signals.models import Signal
-from cortex.extensions.signals.trigger_engine import (
+from cortex.experimental.extensions.signals.models import Signal
+from cortex.experimental.extensions.signals.trigger_engine import (
     ActionType,
     EventHorizonPriority,
     TriggerAction,
@@ -389,7 +389,7 @@ class TestActionDispatch:
 
 class TestRegistry:
     def test_register_defaults_populates_engine(self) -> None:
-        from cortex.extensions.signals.trigger_registry import (
+        from cortex.experimental.extensions.signals.trigger_registry import (
             register_defaults,
         )
 
@@ -398,7 +398,7 @@ class TestRegistry:
         assert len(engine._triggers) == 8
 
     def test_default_ids_are_unique(self) -> None:
-        from cortex.extensions.signals.trigger_registry import (
+        from cortex.experimental.extensions.signals.trigger_registry import (
             register_defaults,
         )
 

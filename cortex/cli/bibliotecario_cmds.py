@@ -17,7 +17,7 @@ from rich.console import Console
 from rich.panel import Panel
 
 from cortex.cli.errors import err_execution_failed
-from cortex.extensions.llm.manager import LLMManager
+from cortex.experimental.extensions.llm.manager import LLMManager
 
 console = Console()
 

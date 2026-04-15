@@ -15,9 +15,9 @@ from pathlib import Path
 import aiosqlite
 
 from cortex.config import DB_PATH
-from cortex.extensions.episodic.main import EpisodicMemory
-from cortex.extensions.training.collector import TrajectoryCollector
-from cortex.extensions.training.reward_engine import RewardEngine
+from cortex.experimental.extensions.episodic.main import EpisodicMemory
+from cortex.experimental.extensions.training.collector import TrajectoryCollector
+from cortex.experimental.extensions.training.reward_engine import RewardEngine
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)

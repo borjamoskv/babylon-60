@@ -8,7 +8,7 @@ from typing import Any
 import aiosqlite
 
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN, EngineMixinBase
-from cortex.extensions.security.tenant import get_tenant_id
+from cortex.experimental.extensions.security.tenant import get_tenant_id
 from cortex.memory.temporal import time_travel_filter
 
 logger = logging.getLogger("cortex.engine.history")

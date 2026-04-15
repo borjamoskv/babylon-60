@@ -25,7 +25,7 @@ import aiosqlite
 from cortex.memory.models import MemoryEvent
 
 try:
-    from cortex.extensions.security.tenant import get_tenant_id
+    from cortex.experimental.extensions.security.tenant import get_tenant_id
 except Exception:
 
     def get_tenant_id() -> str:

@@ -1,4 +1,4 @@
-from cortex.guards.thermodynamic import ThermodynamicCounters, should_enter_decorative_mode
+from cortex.experimental.guards.thermodynamic import ThermodynamicCounters, should_enter_decorative_mode
 
 
 def test_decorative_mode_triggers():

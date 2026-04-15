@@ -1,6 +1,6 @@
 import asyncio
 
-from cortex.extensions.llm.router import Router
+from cortex.experimental.extensions.llm.router import Router
 
 
 async def main():

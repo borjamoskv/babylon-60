@@ -12,7 +12,7 @@ import time
 
 from cortex.config import DEFAULT_DB_PATH
 from cortex.engine import CortexEngine
-from cortex.extensions.launchpad import MissionOrchestrator
+from cortex.experimental.extensions.launchpad import MissionOrchestrator
 
 # Configure logging
 logging.basicConfig(

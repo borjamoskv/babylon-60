@@ -4,7 +4,7 @@ import time
 
 from cortex.daemon.centaur.queue import EntropicQueue
 from cortex.daemon.centaur.heartbeat import HeartbeatDaemon
-from cortex.swarm.centauro_engine import CentauroEngine
+from cortex.experimental.swarm.centauro_engine import CentauroEngine
 
 async def test_physical():
     os.environ["CORTEX_NO_LLM"] = "1"

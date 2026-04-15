@@ -5,7 +5,7 @@ def test_ledger_append_survives_without_embeddings(tmp_path):
     from cortex.ledger.queue import EnrichmentQueue
     from cortex.ledger.store import LedgerStore
     from cortex.ledger.writer import LedgerWriter
-    from cortex.mac_maestro.events import build_mac_maestro_event
+    from cortex.experimental.mac_maestro.events import build_mac_maestro_event
 
     db = tmp_path / "ledger.db"
     store = LedgerStore(db)

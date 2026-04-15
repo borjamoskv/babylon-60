@@ -16,7 +16,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex.enrichment.worker import EnrichmentWorker
+from cortex.experimental.enrichment.worker import EnrichmentWorker
 
 # ─── Helpers ──────────────────────────────────────────────────────────
 

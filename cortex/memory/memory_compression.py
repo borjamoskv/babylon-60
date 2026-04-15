@@ -41,7 +41,7 @@ async def summarize_events(
         return raw_text
 
     try:
-        from cortex.extensions.llm.router import CortexPrompt
+        from cortex.experimental.extensions.llm.router import CortexPrompt
         from cortex.utils.result import Ok
 
         prompt = CortexPrompt(

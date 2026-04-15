@@ -68,7 +68,7 @@ class LedgerVerifier:
         }
 
     def create_checkpoint(self, batch_size: int = 10) -> int | None:
-        from cortex.consensus.merkle import MerkleTree
+        from cortex.experimental.consensus.merkle import MerkleTree
 
         with self.store.tx() as conn:
             conn.execute(

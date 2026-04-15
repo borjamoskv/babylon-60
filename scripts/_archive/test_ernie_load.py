@@ -1,6 +1,6 @@
 import os
 
-from cortex.extensions.llm.manager import LLMManager
+from cortex.experimental.extensions.llm.manager import LLMManager
 
 
 def test_ernie_preset():

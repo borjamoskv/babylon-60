@@ -8,7 +8,7 @@ import pytest
 
 from cortex.core.config import CortexConfig
 from cortex.engine import AsyncCortexEngine
-from cortex.enrichment.worker import EnrichmentWorker
+from cortex.experimental.enrichment.worker import EnrichmentWorker
 from cortex.verification.oracle import VerificationOracle
 
 

@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from cortex.database.core import connect as db_connect
-from cortex.extensions.signals.bus import SignalBus
+from cortex.experimental.extensions.signals.bus import SignalBus
 from cortex.memory.temporal import now_iso
 
 logger = logging.getLogger("cortex.chronos.compound")

@@ -29,7 +29,7 @@ async def _prepare_fact_content(
 ) -> tuple[str, str, Optional[str], Optional[str]]:
     """Encrypted content and cryptographic signatures."""
     from cortex.crypto import get_default_encrypter
-    from cortex.extensions.security.signatures import get_default_signer
+    from cortex.experimental.extensions.security.signatures import get_default_signer
 
     f_hash = compute_fact_hash(content)
     enc = get_default_encrypter()
@@ -295,7 +295,7 @@ async def _post_insert_actions(
     await _record_causality(conn, fact_id, project, tenant_id, meta, parent_decision_id)
 
     try:
-        from cortex.graph import process_fact_graph
+        from cortex.experimental.graph import process_fact_graph
 
         await process_fact_graph(conn, fact_id, content, project, ts, tenant_id)
     except Exception:

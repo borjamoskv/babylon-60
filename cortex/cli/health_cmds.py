@@ -38,7 +38,7 @@ def health_group() -> None:
 @click.option("--db", "db_path", default=None, help="DB path override.")
 def check(db_path: str | None) -> None:
     """Quick boolean health check (healthy/degraded)."""
-    from cortex.extensions.health import HealthCollector, HealthScorer
+    from cortex.experimental.extensions.health import HealthCollector, HealthScorer
 
     path = _resolve_db(db_path)
     collector = HealthCollector(db_path=path)
@@ -63,7 +63,7 @@ def report(db_path: str | None, as_json: bool) -> None:
     import asyncio
     import json
 
-    from cortex.extensions.health import HealthMixin
+    from cortex.experimental.extensions.health import HealthMixin
 
     class _Engine(HealthMixin):
         _db_path = _resolve_db(db_path)
@@ -123,7 +123,7 @@ def report(db_path: str | None, as_json: bool) -> None:
 @click.option("--db", "db_path", default=None)
 def score(db_path: str | None) -> None:
     """Print only the numeric health score (0-100)."""
-    from cortex.extensions.health import HealthCollector, HealthScorer
+    from cortex.experimental.extensions.health import HealthCollector, HealthScorer
 
     path = _resolve_db(db_path)
     collector = HealthCollector(db_path=path)
@@ -139,7 +139,7 @@ def score(db_path: str | None) -> None:
 @click.option("--interval", default=1.0, help="Seconds between live samples.")
 def trend(db_path: str | None, live: bool, samples: int, interval: float) -> None:
     """Health trend from DB history (instant) or live sampling."""
-    from cortex.extensions.health.trend import TrendDetector
+    from cortex.experimental.extensions.health.trend import TrendDetector
 
     path = _resolve_db(db_path)
 
@@ -149,7 +149,7 @@ def trend(db_path: str | None, live: bool, samples: int, interval: float) -> Non
 
         from rich.progress import track
 
-        from cortex.extensions.health import HealthCollector, HealthScorer
+        from cortex.experimental.extensions.health import HealthCollector, HealthScorer
 
         collector = HealthCollector(db_path=path)
         detector = TrendDetector(window_size=samples)
@@ -192,7 +192,7 @@ def history(db_path: str | None, limit: int) -> None:
     """Show persisted health score history."""
     from rich.table import Table
 
-    from cortex.extensions.health.trend import TrendDetector
+    from cortex.experimental.extensions.health.trend import TrendDetector
 
     path = _resolve_db(db_path)
     records = TrendDetector.query_history(path, limit=limit)
@@ -236,8 +236,8 @@ def history(db_path: str | None, limit: int) -> None:
 @click.option("--dry-run", is_flag=True, default=False, help="Show what would be fixed.")
 def fix(db_path: str | None, dry_run: bool) -> None:
     """Auto-remediation for degraded metrics."""
-    from cortex.extensions.health import HealthCollector, HealthScorer
-    from cortex.extensions.health.fix import FixRegistry
+    from cortex.experimental.extensions.health import HealthCollector, HealthScorer
+    from cortex.experimental.extensions.health.fix import FixRegistry
 
     path = _resolve_db(db_path)
     collector = HealthCollector(db_path=path)
@@ -275,8 +275,8 @@ def export(db_path: str | None, fmt: str) -> None:
     """Export health metrics (prometheus or json format)."""
     import json as json_mod
 
-    from cortex.extensions.health import HealthCollector, HealthScorer
-    from cortex.extensions.health.prometheus import export_prometheus
+    from cortex.experimental.extensions.health import HealthCollector, HealthScorer
+    from cortex.experimental.extensions.health.prometheus import export_prometheus
 
     path = _resolve_db(db_path)
     collector = HealthCollector(db_path=path)
@@ -298,7 +298,7 @@ def verify():
     """Run structural invariant checks on the health system."""
     import sys
 
-    from cortex.extensions.health.invariants import verify_health_system
+    from cortex.experimental.extensions.health.invariants import verify_health_system
 
     console.print("[bold blue]Running Health System Structural Invariants...[/bold blue]")
     try:

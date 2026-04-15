@@ -25,7 +25,7 @@ async def _check_byzantine_auth(
 
 def _enforce_thermodynamics(cls: Any, fact_type: str, skip_thermo: bool) -> None:
     """Enforce Axiom Ω₁₃ (Landauer Limit) for active vs decorative modes."""
-    from cortex.guards.thermodynamic import AgentMode
+    from cortex.experimental.guards.thermodynamic import AgentMode
 
     if (
         cls._agent_mode == AgentMode.DECORATIVE
@@ -97,8 +97,8 @@ async def run_store_validation_logic(
         from cortex.engine.membrane.sanitizer import SovereignSanitizer
         from cortex.engine.nemesis import NemesisProtocol
         from cortex.engine.storage_guard import StorageGuard
-        from cortex.guards.thermodynamic import AgentMode, should_enter_decorative_mode
-        from cortex.shannon.exergy import ActionRisk, ExergyInput, calculate_exergy, enforce_exergy
+        from cortex.experimental.guards.thermodynamic import AgentMode, should_enter_decorative_mode
+        from cortex.experimental.shannon.exergy import ActionRisk, ExergyInput, calculate_exergy, enforce_exergy
     except Exception as exc:  # noqa: BLE001
         raise RuntimeError(f"FAIL-CLOSED: dependencies unavailable: {exc}") from exc
 

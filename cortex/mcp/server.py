@@ -11,8 +11,8 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 
 from cortex.engine import CortexEngine
-from cortex.extensions.immune.filters.base import Verdict
-from cortex.extensions.immune.membrane import ImmuneMembrane
+from cortex.experimental.extensions.immune.filters.base import Verdict
+from cortex.experimental.extensions.immune.membrane import ImmuneMembrane
 from cortex.ledger import ImmutableLedger
 from cortex.mcp.core_tools import (
     _register_embed_status_tool,
@@ -36,7 +36,7 @@ from cortex.mcp.utils import (
     MCPServerConfig,
     SimpleAsyncCache,
 )
-from cortex.swarm import start_swarm_daemon
+from cortex.experimental.swarm import start_swarm_daemon
 
 __all__ = ["create_mcp_server", "run_server"]
 

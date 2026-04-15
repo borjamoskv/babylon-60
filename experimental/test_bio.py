@@ -12,7 +12,7 @@ logging.basicConfig(
 
 from cortex.engine.decalcifier import SovereignDecalcifier
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
-from cortex.swarm.centauro_engine import CentauroEngine, Formation
+from cortex.experimental.swarm.centauro_engine import CentauroEngine, Formation
 from cortex.daemon.models import CORTEX_DB
 
 async def test_bio_architecture():

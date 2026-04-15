@@ -1,7 +1,7 @@
 import asyncio
 
 from cortex.cli.common import get_engine
-from cortex.extensions.swarm.nightshift_daemon import NightShiftCrystalDaemon
+from cortex.experimental.extensions.swarm.nightshift_daemon import NightShiftCrystalDaemon
 
 
 async def main():

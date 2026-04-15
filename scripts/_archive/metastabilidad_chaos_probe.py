@@ -13,8 +13,8 @@ import logging
 from rich.console import Console
 from rich.table import Table
 
-from cortex.extensions.immune.chaos import ChaosScenario
-from cortex.extensions.red_team.hydra_chaos import HydraChaosEngine, MockRedisClient
+from cortex.experimental.extensions.immune.chaos import ChaosScenario
+from cortex.experimental.extensions.red_team.hydra_chaos import HydraChaosEngine, MockRedisClient
 
 logging.basicConfig(level=logging.ERROR)
 console = Console()

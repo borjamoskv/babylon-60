@@ -65,8 +65,8 @@ def sovereign_cmds() -> None:
 @sovereign_cmds.command("status")
 def sovereign_status_cmd() -> None:
     """Muestra el estado del DigitalEndocrine y el PowerLevel."""
-    from cortex.extensions.sovereign.endocrine import DigitalEndocrine
-    from cortex.extensions.sovereign.observability import Dimension, compute_power
+    from cortex.experimental.extensions.sovereign.endocrine import DigitalEndocrine
+    from cortex.experimental.extensions.sovereign.observability import Dimension, compute_power
 
     endocrine = DigitalEndocrine()
     # Mocking dimension scores for status display
@@ -87,7 +87,7 @@ def sovereign_status_cmd() -> None:
 @click.option("--env", default="production", help="Entorno de ejecución.")
 def sovereign_ignite_cmd(env: str) -> None:
     """Ejecuta el pipeline soberano completo."""
-    from cortex.extensions.sovereign.engine import run_pipeline
+    from cortex.experimental.extensions.sovereign.engine import run_pipeline
 
     console.print(Panel("[bold green]⚡ INICIANDO IGNICIÓN SOBERANA[/]", border_style="green"))
 

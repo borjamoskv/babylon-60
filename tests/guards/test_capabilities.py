@@ -1,7 +1,7 @@
 import pytest
 
-from cortex.guards.capabilities import AgentCredentials, Capability, RiskTier
-from cortex.guards.capability_guard import CapabilityGuard
+from cortex.experimental.guards.capabilities import AgentCredentials, Capability, RiskTier
+from cortex.experimental.guards.capability_guard import CapabilityGuard
 
 
 @pytest.fixture

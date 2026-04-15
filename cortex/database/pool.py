@@ -17,7 +17,7 @@ from typing import Optional
 
 import aiosqlite
 
-from cortex.extensions.immune.chaos import ChaosGate, async_interceptor
+from cortex.experimental.extensions.immune.chaos import ChaosGate, async_interceptor
 
 __all__ = ["CortexConnectionPool"]
 

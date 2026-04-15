@@ -1,0 +1,29 @@
+from __future__ import annotations
+
+import importlib
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from cortex.experimental.graph.backends.base import GraphBackend
+    from cortex.experimental.graph.backends.sqlite import SQLiteBackend
+
+__all__ = ["GraphBackend", "SQLiteBackend"]
+
+_LAZY_IMPORTS: dict[str, tuple[str, str]] = {
+    "GraphBackend": ("cortex.experimental.graph.backends.base", "GraphBackend"),
+    "SQLiteBackend": ("cortex.experimental.graph.backends.sqlite", "SQLiteBackend"),
+}
+
+
+def __getattr__(name: str):
+    if name in _LAZY_IMPORTS:
+        module_path, attr_name = _LAZY_IMPORTS[name]
+        module = importlib.import_module(module_path)
+        value = getattr(module, attr_name)
+        globals()[name] = value
+        return value
+    raise AttributeError(f"module 'cortex.experimental.graph.backends' has no attribute {name!r}")
+
+
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(__all__))

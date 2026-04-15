@@ -26,7 +26,7 @@ from cortex.engine.store_mutation import (
 from cortex.engine.store_quarantine_mixin import QuarantineMixin
 from cortex.engine.store_validation import run_store_validation_logic
 from cortex.engine.store_validators import MIN_CONTENT_LENGTH, check_dedup, validate_content
-from cortex.guards.thermodynamic import AgentMode, ThermodynamicCounters
+from cortex.experimental.guards.thermodynamic import AgentMode, ThermodynamicCounters
 
 # now_iso removed (internal use relocated)
 

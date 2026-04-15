@@ -15,7 +15,7 @@ import aiosqlite
 
 from cortex.crypto import get_default_encrypter
 from cortex.database.core import connect
-from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
+from cortex.experimental.extensions.signals.bus import AsyncSignalBus, SignalBus
 
 logger = logging.getLogger("cortex.engine.causality")
 

@@ -19,7 +19,7 @@ async def enforce_store_guards(
     Raised ValueError if any guard rejects the content.
     """
     try:
-        from cortex.extensions.security.guard_runtime import (
+        from cortex.experimental.extensions.security.guard_runtime import (
             AnomalyGuardWrapper,
             BridgeConflictGuard,
             ContradictionSignalGuard,

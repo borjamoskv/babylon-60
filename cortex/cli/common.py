@@ -15,7 +15,7 @@ from rich.theme import Theme
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
-    from cortex.extensions.timing import TimingTracker
+    from cortex.experimental.extensions.timing import TimingTracker
 
 from cortex import __version__
 from cortex.config import DEFAULT_DB_PATH
@@ -62,21 +62,21 @@ def get_engine(db: str = DEFAULT_DB) -> CortexEngine:
 
 def get_tracker(engine: CortexEngine) -> TimingTracker:
     """Create a timing tracker from an engine (lazy import)."""
-    from cortex.extensions.timing import TimingTracker
+    from cortex.experimental.extensions.timing import TimingTracker
 
     return TimingTracker(engine._get_conn())  # type: ignore[reportArgumentType]
 
 
 def close_engine_sync(engine: CortexEngine) -> None:
     """Close the engine synchronously."""
-    from cortex.events.loop import sovereign_run
+    from cortex.experimental.events.loop import sovereign_run
 
     sovereign_run(engine.close())
 
 
 def _run_async(coro):
     """Helper to run async coroutines from sync CLI (sovereign uvloop)."""
-    from cortex.events.loop import sovereign_run
+    from cortex.experimental.events.loop import sovereign_run
 
     # Chronos Sniper: Apply strict timeout to CLI commands to prevent deadlocks
     return sovereign_run(asyncio.wait_for(coro, timeout=GLOBAL_CLI_TIMEOUT))

@@ -2,9 +2,9 @@ import asyncio
 import logging
 import sqlite3
 
-from cortex.extensions.signals.bus import SignalBus
-from cortex.extensions.swarm.manager import CapatazOrchestrator
-from cortex.extensions.swarm.protocols import AgentRole
+from cortex.experimental.extensions.signals.bus import SignalBus
+from cortex.experimental.extensions.swarm.manager import CapatazOrchestrator
+from cortex.experimental.extensions.swarm.protocols import AgentRole
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("elder-test")

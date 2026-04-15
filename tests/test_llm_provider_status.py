@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 
 from cortex.auth.models import AuthResult
 from cortex.cli import cli
-from cortex.extensions.llm._presets import _PRESETS_CACHE, provider_inventory
+from cortex.experimental.extensions.llm._presets import _PRESETS_CACHE, provider_inventory
 from cortex.routes import ask as ask_router
 
 

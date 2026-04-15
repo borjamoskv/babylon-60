@@ -19,7 +19,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
-    from cortex.extensions.signals.bus import SignalBus
+    from cortex.experimental.extensions.signals.bus import SignalBus
 
 logger = logging.getLogger("cortex.telemetry.pulse")
 

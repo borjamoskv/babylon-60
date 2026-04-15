@@ -25,7 +25,7 @@ import aiosqlite
 
 from cortex.crypto import get_default_encrypter
 from cortex.engine.causality import AsyncCausalGraph
-from cortex.extensions.axioms.topological_id import flake_gen
+from cortex.experimental.extensions.axioms.topological_id import flake_gen
 
 __all__ = ["FactMutationEngine"]
 logger = logging.getLogger("cortex.mutation_engine")

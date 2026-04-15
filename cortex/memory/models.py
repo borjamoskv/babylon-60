@@ -23,7 +23,7 @@ except ImportError:  # pragma: no cover - exercised via subprocess import test
     np = None
 
 try:
-    from cortex.extensions.axioms.topological_id import flake_gen
+    from cortex.experimental.extensions.axioms.topological_id import flake_gen
 
     def next_id() -> str:
         return flake_gen.next_lexicographic_id()

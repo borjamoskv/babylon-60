@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from cortex.guards.frontier_guard import FrontierModelGuard
+from cortex.experimental.guards.frontier_guard import FrontierModelGuard
 from cortex.utils.errors import SovereignViolation
 
 

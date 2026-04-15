@@ -26,12 +26,12 @@ except Exception:  # noqa: BLE001
     HDCVectorStoreL2 = Any  # type: ignore[assignment,misc]
 
 try:
-    from cortex.extensions.policy.memory_os import MemoryOS
+    from cortex.experimental.extensions.policy.memory_os import MemoryOS
 except Exception:
     MemoryOS = None  # type: ignore
 
 try:
-    from cortex.extensions.security.tenant import get_tenant_id
+    from cortex.experimental.extensions.security.tenant import get_tenant_id
 except Exception:
 
     def get_tenant_id() -> str:
@@ -39,14 +39,14 @@ except Exception:
 
 
 try:
-    from cortex.extensions.sovereign.endocrine import DigitalEndocrine
+    from cortex.experimental.extensions.sovereign.endocrine import DigitalEndocrine
 except Exception:
     DigitalEndocrine = None  # type: ignore
 
 from cortex.telemetry.metrics import metrics
 
 try:
-    from cortex.extensions.thinking.fusion import ContextFusion
+    from cortex.experimental.extensions.thinking.fusion import ContextFusion
 except Exception:
     ContextFusion = None  # type: ignore
 
@@ -194,7 +194,7 @@ class CortexMemoryManager:
 
         sensor = None
         try:
-            from cortex.extensions.songlines.sensor import TopographicSensor
+            from cortex.experimental.extensions.songlines.sensor import TopographicSensor
 
             sensor = TopographicSensor()
         except Exception as exc:  # noqa: BLE001

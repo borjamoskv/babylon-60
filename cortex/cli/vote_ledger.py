@@ -13,7 +13,7 @@ from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
 from cortex.cli.errors import err_empty_results, err_validation, handle_cli_error
 
 # Importe actualizado para Wave 5 Fase 2
-from cortex.consensus.vote_ledger import ImmutableVoteLedger
+from cortex.experimental.consensus.vote_ledger import ImmutableVoteLedger
 
 __all__ = [
     "ledger",

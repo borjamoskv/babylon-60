@@ -1,6 +1,6 @@
 import pytest
 
-from cortex.guards.exergy_guard import ExergyGuard, calculate_exergy
+from cortex.experimental.guards.exergy_guard import ExergyGuard, calculate_exergy
 
 
 @pytest.mark.parametrize(

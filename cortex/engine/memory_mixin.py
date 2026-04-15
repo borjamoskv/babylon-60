@@ -53,7 +53,7 @@ class MemoryMixin(EngineMixinBase):
         # Dedicated sync connection for the SignalBus (L1 Consciousness)
         bus = None
         try:
-            from cortex.extensions.signals.bus import SignalBus
+            from cortex.experimental.extensions.signals.bus import SignalBus
 
             # We use the engine's _get_sync_conn if available, or create one.
             # MemoryMixin is part of CortexEngine, so we can use self._get_sync_conn()

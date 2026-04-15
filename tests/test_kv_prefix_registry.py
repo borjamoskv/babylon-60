@@ -1,6 +1,6 @@
 """Tests for KV Prefix Registry ensuring Tenant Isolation."""
 
-from cortex.extensions.swarm.kv_prefix_registry import KVPrefixRegistry
+from cortex.experimental.extensions.swarm.kv_prefix_registry import KVPrefixRegistry
 
 
 def test_tenant_isolation_invariants():

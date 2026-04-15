@@ -43,8 +43,8 @@ def mejoralo():
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def mejoralo_scan(project, path, deep, brutal, auto_heal, relentless, target_score, db):
     """X-Ray 13D — Escaneo multidimensional del proyecto."""
-    from cortex.extensions.mejoralo import MejoraloEngine
-    from cortex.extensions.mejoralo.constants import INMEJORABLE_SCORE
+    from cortex.experimental.extensions.mejoralo import MejoraloEngine
+    from cortex.experimental.extensions.mejoralo.constants import INMEJORABLE_SCORE
 
     engine = get_engine(db)
     try:
@@ -130,7 +130,7 @@ def _display_scan_result(result):
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def mejoralo_record(project, score_before, score_after, actions, db):
     """Ouroboros — Registrar sesión MEJORAlo en el ledger."""
-    from cortex.extensions.mejoralo import MejoraloEngine
+    from cortex.experimental.extensions.mejoralo import MejoraloEngine
 
     engine = get_engine(db)
     try:
@@ -193,7 +193,7 @@ def mejoralo_record(project, score_before, score_after, actions, db):
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def mejoralo_history(project, limit, db):
     """Historial de sesiones MEJORAlo."""
-    from cortex.extensions.mejoralo import MejoraloEngine
+    from cortex.experimental.extensions.mejoralo import MejoraloEngine
 
     engine = get_engine(db)
     try:
@@ -239,7 +239,7 @@ def mejoralo_history(project, limit, db):
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def mejoralo_trend(project, window, db):
     """📈 Effectiveness Trend — ¿CORTEX está mejorando tu código de verdad?"""
-    from cortex.extensions.mejoralo.effectiveness import EffectivenessTracker
+    from cortex.experimental.extensions.mejoralo.effectiveness import EffectivenessTracker
 
     engine = get_engine(db)
     try:
@@ -293,7 +293,7 @@ def mejoralo_trend(project, window, db):
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def mejoralo_ship(project, path, db):
     """Ship Gate — Los 7 Sellos de producción."""
-    from cortex.extensions.mejoralo import MejoraloEngine
+    from cortex.experimental.extensions.mejoralo import MejoraloEngine
 
     engine = get_engine(db)
     try:
@@ -322,7 +322,7 @@ def mejoralo_ship(project, path, db):
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def mejoralo_awwwards_fix(project, path, db):
     """Sovereign 200 — Rewrite animations, CSS, and UI for Awwwards SOTD."""
-    from cortex.extensions.mejoralo import MejoraloEngine
+    from cortex.experimental.extensions.mejoralo import MejoraloEngine
 
     engine = get_engine(db)
     try:
@@ -341,7 +341,7 @@ def mejoralo_awwwards_fix(project, path, db):
 @mejoralo.command("daemon")
 def mejoralo_daemon():
     """♾️  Ouroboros — Inicia el bucle infinito de mejora soberana."""
-    from cortex.extensions.mejoralo.daemon import main  # type: ignore[reportAttributeAccessIssue]
+    from cortex.experimental.extensions.mejoralo.daemon import main  # type: ignore[reportAttributeAccessIssue]
 
     main()
 
@@ -352,7 +352,7 @@ def mejoralo_daemon():
 @click.option("--no-hints", is_flag=True, help="Excluir detección de type hints faltantes")
 def mejoralo_antipatterns(path, magic, no_hints):
     """🔍 Antipattern Scanner — Detecta lo implícito que debería ser explícito."""
-    from cortex.extensions.mejoralo.antipatterns import scan_antipatterns
+    from cortex.experimental.extensions.mejoralo.antipatterns import scan_antipatterns
 
     with console.status("[bold blue]Escaneando antipatrones...[/]"):
         report = scan_antipatterns(

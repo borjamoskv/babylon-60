@@ -69,7 +69,7 @@ def init(db, ouroboros: bool) -> None:
                 )
 
             if ouroboros:
-                from cortex.extensions.gate.ouroboros import get_ouroboros_gate
+                from cortex.experimental.extensions.gate.ouroboros import get_ouroboros_gate
 
                 og = get_ouroboros_gate(engine)
                 entropy = og.measure_entropy()

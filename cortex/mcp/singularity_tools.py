@@ -8,7 +8,7 @@ import time
 
 from cortex.config import DB_PATH
 from cortex.database.core import connect
-from cortex.extensions.signals.bus import SignalBus
+from cortex.experimental.extensions.signals.bus import SignalBus
 
 # Sovereign Memory & Execution Imports
 sys.path.append("/Users/borjafernandezangulo/Cortex-Persist/cortex-core")

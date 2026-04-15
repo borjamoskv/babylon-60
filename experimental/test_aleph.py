@@ -2,8 +2,8 @@ import asyncio
 import os
 import time
 
-from cortex.swarm.centauro_engine import CentauroEngine, Formation
-from cortex.swarm.byzantine import ByzantineConsensus
+from cortex.experimental.swarm.centauro_engine import CentauroEngine, Formation
+from cortex.experimental.swarm.byzantine import ByzantineConsensus
 
 def mock_execute(self, proposals: dict[str, str]) -> str | None:
     # Force a deadlock outcome every time

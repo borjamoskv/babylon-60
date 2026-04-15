@@ -8,7 +8,7 @@ from typing import Any
 
 import aiosqlite
 
-from cortex.consensus.vote_ledger import ImmutableVoteLedger
+from cortex.experimental.consensus.vote_ledger import ImmutableVoteLedger
 from cortex.engine.mixins.base import EngineMixinBase
 from cortex.engine.slashing import SlashingEngine
 

@@ -45,7 +45,7 @@ class HealthGuardAdapter:
         *,
         tenant_id: str = "default",
     ) -> None:
-        from cortex.guards.health_guard import HealthGuard
+        from cortex.experimental.guards.health_guard import HealthGuard
 
         guard = HealthGuard(db_path=self._db_path)
         await guard.check_write_safety()
@@ -69,7 +69,7 @@ class ContradictionGuardAdapter:
     ) -> None:
         if fact_type not in ("decision", "rule", "error"):
             return
-        from cortex.guards.contradiction_guard import detect_contradictions
+        from cortex.experimental.guards.contradiction_guard import detect_contradictions
 
         report = await detect_contradictions(
             new_content=content, new_project=project, db_path=self._db_path
@@ -121,7 +121,7 @@ class ExergyGuardAdapter:
         *,
         tenant_id: str = "default",
     ) -> None:
-        from cortex.guards.exergy_guard import ExergyGuard
+        from cortex.experimental.guards.exergy_guard import ExergyGuard
 
         guard = ExergyGuard()
         guard.check_thermodynamic_yield(content, project, fact_type, source=meta.get("source"))
@@ -140,7 +140,7 @@ class ZKGuardAdapter:
         *,
         tenant_id: str = "default",
     ) -> None:
-        from cortex.guards.zk_guard import ZKSwarmGuard
+        from cortex.experimental.guards.zk_guard import ZKSwarmGuard
 
         guard = ZKSwarmGuard()
         await guard.verify_integrity(content, fact_type, meta)
@@ -186,7 +186,7 @@ class SignalEmitHook:
         source: str | None = None,
         db_path: str | None = None,
     ) -> None:
-        from cortex.extensions.signals.fact_hook import emit_fact_stored
+        from cortex.experimental.extensions.signals.fact_hook import emit_fact_stored
 
         if db_path:
             emit_fact_stored(
@@ -213,7 +213,7 @@ class EpistemicBreakerHook:
         source: str | None = None,
         db_path: str | None = None,
     ) -> None:
-        from cortex.extensions.daemon.epistemic_breaker import EpistemicBreakerDaemon
+        from cortex.experimental.extensions.daemon.epistemic_breaker import EpistemicBreakerDaemon
 
         await EpistemicBreakerDaemon.evaluate(  # type: ignore[reportAttributeAccessIssue]
             conn,

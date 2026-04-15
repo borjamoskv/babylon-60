@@ -1,7 +1,7 @@
 import asyncio
 import os
 
-from cortex.consensus.vote_ledger import ImmutableVoteLedger
+from cortex.experimental.consensus.vote_ledger import ImmutableVoteLedger
 from cortex.engine import CortexEngine
 
 

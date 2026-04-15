@@ -19,8 +19,8 @@ os.environ.setdefault("DASHSCOPE_API_KEY", "test")
 
 import pytest
 
-from cortex.extensions.llm._models import BaseProvider, IntentProfile
-from cortex.extensions.llm._presets import (
+from cortex.experimental.extensions.llm._models import BaseProvider, IntentProfile
+from cortex.experimental.extensions.llm._presets import (
     _PRESETS_CACHE,
     frontier_providers,
     load_presets,
@@ -167,7 +167,7 @@ class TestLLMProviderProperties:
     """LLMProvider reads tier/cost from preset."""
 
     def test_qwen_tier_and_cost(self):
-        from cortex.extensions.llm.provider import LLMProvider
+        from cortex.experimental.extensions.llm.provider import LLMProvider
 
         p = LLMProvider(provider="qwen")
         assert p.tier == "frontier"
@@ -175,7 +175,7 @@ class TestLLMProviderProperties:
 
     def test_gemini_is_frontier(self):
         os.environ.setdefault("GEMINI_API_KEY", "test")
-        from cortex.extensions.llm.provider import LLMProvider
+        from cortex.experimental.extensions.llm.provider import LLMProvider
 
         p = LLMProvider(provider="gemini")
         assert p.tier == "frontier"
@@ -192,7 +192,7 @@ class TestRouterOrdering:
         os.environ.setdefault("GEMINI_API_KEY", "test")
         os.environ.setdefault("GROQ_API_KEY", "test")
         os.environ.setdefault("DEEPSEEK_API_KEY", "test")
-        from cortex.extensions.llm.provider import LLMProvider
+        from cortex.experimental.extensions.llm.provider import LLMProvider
 
         return {
             "qwen": LLMProvider(provider="qwen"),
@@ -202,7 +202,7 @@ class TestRouterOrdering:
         }
 
     def test_cost_ordering(self, _providers):
-        from cortex.extensions.llm.router import CortexLLMRouter
+        from cortex.experimental.extensions.llm.router import CortexLLMRouter
 
         router = CortexLLMRouter(
             primary=_providers["qwen"],
@@ -224,7 +224,7 @@ class TestRouterOrdering:
 
     def test_tier_tiebreaking_within_cost(self, _providers):
         """Same cost → frontier preferred over high."""
-        from cortex.extensions.llm.router import CortexLLMRouter
+        from cortex.experimental.extensions.llm.router import CortexLLMRouter
 
         p1 = _providers["groq"]
         p2 = _providers["deepseek"]
@@ -251,13 +251,13 @@ class TestRouterOrdering:
         assert names.index("deepseek") < names.index("groq")
 
     def test_cost_order_constants(self):
-        from cortex.extensions.llm.router import CortexLLMRouter
+        from cortex.experimental.extensions.llm.router import CortexLLMRouter
 
         o = CortexLLMRouter._COST_ORDER
         assert o["free"] < o["low"] < o["medium"] < o["high"]
 
     def test_tier_order_constants(self):
-        from cortex.extensions.llm.router import CortexLLMRouter
+        from cortex.experimental.extensions.llm.router import CortexLLMRouter
 
         t = CortexLLMRouter._TIER_ORDER
         assert t["frontier"] < t["high"] < t["local"]

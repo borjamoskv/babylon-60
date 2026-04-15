@@ -9,7 +9,7 @@ from rich.console import Console
 from rich.panel import Panel
 
 from cortex.config import DEFAULT_DB_PATH
-from cortex.extensions.timing.chronos import ChronosEngine
+from cortex.experimental.extensions.timing.chronos import ChronosEngine
 
 __all__ = ["chronos_cmds", "analyze", "compound", "projection"]
 

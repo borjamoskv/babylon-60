@@ -1,6 +1,6 @@
 from cortex.daemon.centaur.queue import EntropicQueue
 from cortex.daemon.centaur.heartbeat import HeartbeatDaemon
-from cortex.swarm.centauro_engine import CentauroEngine
+from cortex.experimental.swarm.centauro_engine import CentauroEngine
 from pathlib import Path
 import asyncio
 

@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from cortex.extensions.swarm.budget import get_budget_manager
+from cortex.experimental.extensions.swarm.budget import get_budget_manager
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("exergy-test")

@@ -5,9 +5,9 @@ import sys
 # Ensure cortex is in the path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from cortex.extensions.llm.models import Message
+from cortex.experimental.extensions.llm.models import Message
 
-from cortex.extensions.llm.router import CortexRouter
+from cortex.experimental.extensions.llm.router import CortexRouter
 
 
 async def main():

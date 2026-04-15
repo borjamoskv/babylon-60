@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from cortex.extensions.swarm.swarm_heartbeat import NodeStatus, SwarmHeartbeat
+from cortex.experimental.extensions.swarm.swarm_heartbeat import NodeStatus, SwarmHeartbeat
 
 # ── Basic lifecycle ────────────────────────────────────────────────────
 

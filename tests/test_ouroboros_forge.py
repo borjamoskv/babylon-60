@@ -34,7 +34,7 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         import sqlite3
 
         from cortex.config import DB_PATH
-        from cortex.extensions.signals.bus import SignalBus
+        from cortex.experimental.extensions.signals.bus import SignalBus
 
         # Ensure schema initialization
         conn = sqlite3.connect(DB_PATH)
