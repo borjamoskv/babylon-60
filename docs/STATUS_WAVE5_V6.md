@@ -106,7 +106,7 @@ El código Merkle existe; solo falta la interfaz de usuario.
 ## Ghosts activos (deuda que bloquea producción)
 
 ```
-GHOST-W5-01 [P0] — Integration test: task → execution loop → CORTEX persist → Postgres → hash chain verify
+GHOST-W5-01 [P0] — Integration test: task → execution loop → CORTEX Persist → Postgres → hash chain verify
 GHOST-W5-02 [P1] — CLI `cortex ledger checkpoint|verify|export` (Merkle ya existe, falta interfaz)
 GHOST-W5-03 [P1] — docker-compose.yml para despliegue local multi-servicio
 GHOST-W5-04 [P2] — MCP SSE/WebSocket transport (benchmark objetivo: 1000 req/s)

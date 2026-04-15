@@ -251,4 +251,4 @@ def _persist_to_cortex(result) -> None:
         )
         console.print("[dim green]💎 Persisted to CORTEX Ledger[/dim green]")
     except Exception as e:  # noqa: BLE001
-        console.print(f"[dim red]⚠️ CORTEX persist failed: {e}[/dim red]")
+        console.print(f"[dim red]⚠️ CORTEX Persist failed: {e}[/dim red]")

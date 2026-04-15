@@ -188,7 +188,7 @@ class TesseractManifold:
                 timeout=10,
             )
         except (subprocess.SubprocessError, OSError) as e:
-            logger.debug("CORTEX persist failed: %s", e)
+            logger.debug("CORTEX Persist failed: %s", e)
 
     def _persist_ghost(self, task: AgentTask, reason: str) -> None:
         """Persist incomplete convergence as a ghost."""

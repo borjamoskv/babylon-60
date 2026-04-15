@@ -265,7 +265,7 @@ def growth_alpha(channel: str):
     )
     console.print(f"[dim]Escaneando dolor agudo en {channel}...[/dim]")
     console.print("→ Identificado: 3 oportunidades de pain point asimétrico.")
-    console.print("→ Respuesta pre-generada en buffer para CORTEX persist.")
+    console.print("→ Respuesta pre-generada en buffer para CORTEX Persist.")
     console.print(
         "\n[bold #6600FF]💡 [SOVEREIGN TIP][/bold #6600FF] Respuestas orgánicas 150/100, "
         "el pitch es una consecuencia natural."

@@ -175,7 +175,7 @@ class AetherAgent:
             branch=branch,
         )
 
-        # CORTEX persistence
+        # CORTEX Persistence
         await self._persist_to_cortex(task, result_msg)
 
         # macOS notification
@@ -227,7 +227,7 @@ class AetherAgent:
             # Fire and forget / bounded wait
             await asyncio.wait_for(proc.communicate(), timeout=10.0)
         except (asyncio.TimeoutError, OSError) as e:
-            logger.debug("CORTEX persist failed: %s", e)
+            logger.debug("CORTEX Persist failed: %s", e)
 
     @staticmethod
     async def _persist_error_to_cortex(task: AgentTask, error: str) -> None:

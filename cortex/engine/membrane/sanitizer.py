@@ -12,7 +12,7 @@ class SovereignSanitizer:
     """
     SovereignSanitizer (The Digestive Engine)
     Implements Axiom Ω3 (Byzantine Default): Nothing is trusted by default.
-    Purifies raw inputs before they reach the CORTEX persist layer.
+    Purifies raw inputs before they reach the CORTEX Persist layer.
     """
 
     # ReDoS-safe implementations (Eliminating catastrophic backtracking)

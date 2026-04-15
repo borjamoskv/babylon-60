@@ -209,6 +209,7 @@ CORTEX is governed by a strict zero-trust philosophy regarding generative AI out
 - [**Security & Trust Model**](docs/SECURITY_TRUST_MODEL.md) — Cryptographic invariants & guarantees.
 - [**Roadmap**](ROADMAP.md) — Deployment phases and scaling logic.
 - [**API Reference**](docs/api.md) — SDK primitives and REST endpoints.
+- [**Audit Pack Example**](docs/examples/audit_pack_evidence_demo.json) — Review a real exported audit pack with cryptographic proof chain.
 
 ---
 
