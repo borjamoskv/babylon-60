@@ -8,6 +8,7 @@ import pytest
 
 from cortex.extensions.llm._models import IntentProfile
 from cortex.extensions.llm.router import CortexLLMRouter
+from cortex.extensions.skills.autodidact.rotorquant import RotorQuantAssessment
 from cortex.utils.result import Ok
 
 # ─── Helper: build a fake router ──────────────────────────────────────────────
@@ -150,3 +151,42 @@ class TestDistillSovereignMemo:
         call_args = mock_router.execute_resilient.call_args
         prompt = call_args[0][0]
         assert "ENFOQUE GENERAL" in prompt.system_instruction
+
+
+class TestRotorQuantGate:
+    """Verify execute_cognitive_synthesis enforces RotorQuant before persistence."""
+
+    @pytest.mark.asyncio
+    async def test_execute_synthesis_rejects_when_rotorquant_fails(self):
+        import cortex.extensions.skills.autodidact.synthesis as syn
+
+        mocked_assessment = RotorQuantAssessment(
+            profile="default",
+            score=0.19,
+            accepted=False,
+            reasons=("LOW_GROUNDING", "LOW_ROTORQUANT_SCORE"),
+            metrics={"grounding_ratio": 0.15},
+        )
+
+        with patch.object(
+            syn, "check_semantic_redundancy", new=AsyncMock(return_value=(False, None))
+        ):
+            with patch.object(
+                syn,
+                "distill_sovereign_memo",
+                new=AsyncMock(
+                    return_value={"content_markdown": "hallucinated output", "entities": []}
+                ),
+            ):
+                with patch.object(syn, "evaluate_rotorquant", return_value=mocked_assessment):
+                    result = await syn.execute_cognitive_synthesis(
+                        raw_data=(
+                            "Ground truth payload with deterministic references to ledger and guards."
+                        ),
+                        source="https://example.com",
+                        force=False,
+                        intent="deep_learn",
+                    )
+
+        assert result.startswith("REJECTED_ROTORQUANT:")
+        assert "LOW_GROUNDING" in result
