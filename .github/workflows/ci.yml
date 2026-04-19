@@ -383,8 +383,8 @@ jobs:
 
   quality-gates:
     name: "10 Seals"
-    needs: [change-scope, test, test_status]
-    if: needs.change-scope.outputs.automation_only != 'true' && needs.change-scope.outputs.release_only != 'true'
+    needs: [change-scope, test_status]
+    if: needs.change-scope.outputs.automation_only != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -397,9 +397,14 @@ jobs:
           python-version: "3.13"
           cache: "pip"
       - name: Install CORTEX + dev deps
+        if: needs.change-scope.outputs.release_only != 'true'
         run: |
           pip install -e ".[dev,api]" mypy pyright bandit pytest pytest-asyncio pytest-cov --quiet
+      - name: "🩺 Release-only smoke"
+        if: needs.change-scope.outputs.release_only == 'true'
+        run: python scripts/repo_health_changed.py
       - name: "🛡️ Execute 10 Seals"
+        if: needs.change-scope.outputs.release_only != 'true'
         run: python -m cortex.guards.seals
 
   sigint-entrypoint-smoke:
