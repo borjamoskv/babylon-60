@@ -7,14 +7,14 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.extensions.shannon.exergy import ExergyReport, compute_exergy_report
-from cortex.shannon.exergy import (
+from cortex.experimental.shannon.exergy import (
     ActionRisk,
     ExergyInput,
     ThermodynamicWasteError,
     calculate_exergy,
     enforce_exergy,
 )
+from cortex.extensions.shannon.exergy import ExergyReport, compute_exergy_report
 
 
 class TestComputeExergyReport:

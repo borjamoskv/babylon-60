@@ -52,7 +52,7 @@ cortex --help
 
 ```text
 cortex        → cortex.cli:cli          # Main CLI
-moskv-daemon  → cortex.daemon_cli:main  # Background daemon
+moskv-daemon  → cortex.extensions.daemon.cli:main  # Background daemon
 cortex-adk    → cortex.adk.runner:main  # Google ADK runner
 ```
 

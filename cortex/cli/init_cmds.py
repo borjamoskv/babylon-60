@@ -103,7 +103,7 @@ def init(db, ouroboros: bool) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def migrate(source, db) -> None:
     """Import CORTEX v3.1 data into v4.0."""
-    from cortex.migrate import migrate_v31_to_v40
+    from cortex.migrations.migrate import migrate_v31_to_v40
 
     engine = get_engine(db)
     _run_async(engine.init_db())

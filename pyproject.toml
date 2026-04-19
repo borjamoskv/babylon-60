@@ -114,7 +114,7 @@ all = [
 
 [project.scripts]
 cortex = "cortex.cli:cli"
-moskv-daemon = "cortex.daemon_cli:main"
+moskv-daemon = "cortex.extensions.daemon.cli:main"
 cortex-adk = "cortex.adk.runner:main"
 cortex-mcp = "cortex.mcp.server:run_server"
 

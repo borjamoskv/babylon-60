@@ -2,7 +2,7 @@ from __future__ import annotations
 
 
 def test_oracle_detects_no_state_change():
-    from cortex.mac_maestro.oracle import VerificationOracle
+    from cortex.experimental.mac_maestro.oracle import VerificationOracle
 
     oracle = VerificationOracle(
         rescan_fn=lambda: {"button_visible": True},

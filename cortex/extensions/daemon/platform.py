@@ -84,7 +84,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart={python_path} -m cortex.daemon_cli start
+ExecStart={python_path} -m cortex.extensions.daemon.cli start
 Restart=on-failure
 RestartSec=30
 
@@ -123,9 +123,9 @@ def install_windows() -> None:
     python_path = sys.executable
     task_name = BUNDLE_ID.replace(".", "_")
 
-    # Target command: "python.exe" -m cortex.daemon_cli start
+    # Target command: "python.exe" -m cortex.extensions.daemon.cli start
     # We use double quotes for the python path in case it contains spaces
-    target_cmd = f'"{python_path}" -m cortex.daemon_cli start'
+    target_cmd = f'"{python_path}" -m cortex.extensions.daemon.cli start'
 
     cmd = [
         "schtasks",

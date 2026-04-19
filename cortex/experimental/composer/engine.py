@@ -8,8 +8,8 @@ from __future__ import annotations
 import logging
 import re
 
-from cortex.composer.manifesto import COMPOSER_MANIFESTO
-from cortex.composer.vision_qa import AestheticAuditor
+from cortex.experimental.composer.manifesto import COMPOSER_MANIFESTO
+from cortex.experimental.composer.vision_qa import AestheticAuditor
 from cortex.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
 from cortex.utils.result import Err, Ok, Result
 

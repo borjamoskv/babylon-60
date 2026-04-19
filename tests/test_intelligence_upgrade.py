@@ -112,7 +112,7 @@ class TestShannonEntropy:
     """Test Shannon entropy computation."""
 
     def test_shannon_report_fields(self):
-        from cortex.shannon.entropy import ShannonReport
+        from cortex.experimental.shannon.entropy import ShannonReport
 
         r = ShannonReport(
             total_facts=100,
@@ -129,7 +129,7 @@ class TestShannonEntropy:
         assert len(r.top_redundant_tokens) == 1
 
     def test_diagnose_health_high_redundancy(self):
-        from cortex.shannon.entropy import ShannonReport, diagnose_health
+        from cortex.experimental.shannon.entropy import ShannonReport, diagnose_health
 
         report = ShannonReport(
             total_facts=100,
@@ -145,7 +145,7 @@ class TestShannonEntropy:
         assert any("redundan" in rec.lower() for rec in diagnosis)
 
     def test_diagnose_health_healthy(self):
-        from cortex.shannon.entropy import ShannonReport, diagnose_health
+        from cortex.experimental.shannon.entropy import ShannonReport, diagnose_health
 
         report = ShannonReport(
             total_facts=1000,

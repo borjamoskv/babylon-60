@@ -97,8 +97,13 @@ async def run_store_validation_logic(
         from cortex.engine.membrane.sanitizer import SovereignSanitizer
         from cortex.engine.nemesis import NemesisProtocol
         from cortex.engine.storage_guard import StorageGuard
+        from cortex.experimental.shannon.exergy import (
+            ActionRisk,
+            ExergyInput,
+            calculate_exergy,
+            enforce_exergy,
+        )
         from cortex.guards.thermodynamic import AgentMode, should_enter_decorative_mode
-        from cortex.shannon.exergy import ActionRisk, ExergyInput, calculate_exergy, enforce_exergy
     except Exception as exc:  # noqa: BLE001
         raise RuntimeError(f"FAIL-CLOSED: dependencies unavailable: {exc}") from exc
 

@@ -9,7 +9,7 @@ import logging
 import os
 import time
 
-from cortex.nexus_v8 import (
+from cortex.extensions.nexus import (
     DomainOrigin,
     IntentType,
     NexusWorldModel,

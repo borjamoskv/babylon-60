@@ -20,7 +20,7 @@
         <!-- ⚠️  Adjust this path to your venv Python -->
         <string>./.venv/bin/python</string>
         <string>-m</string>
-        <string>cortex.daemon_cli</string>
+        <string>cortex.extensions.daemon.cli</string>
         <string>check</string>
     </array>
 

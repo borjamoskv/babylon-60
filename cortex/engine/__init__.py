@@ -23,9 +23,9 @@ if TYPE_CHECKING:
     from cortex.engine.auth import ByzantineAuthLayer
     from cortex.engine.lock import SovereignLock
     from cortex.engine.trust_registry import TrustRegistry
+    from cortex.experimental.mac_maestro.executor import MaestroExecutor
     from cortex.facts.manager import FactManager
     from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
-    from cortex.mac_maestro.executor import MaestroExecutor
 from cortex.database.schema import get_init_meta
 from cortex.engine.agent_mixin import AgentMixin
 from cortex.engine.durability import PersistenceSupervisor
@@ -218,7 +218,7 @@ class CortexEngine(
     @property
     def mac_maestro(self) -> MaestroExecutor:
         if self._mac_maestro is None:
-            from cortex.mac_maestro.executor import MaestroExecutor
+            from cortex.experimental.mac_maestro.executor import MaestroExecutor
             self._mac_maestro = MaestroExecutor(self.ledger_writer)
         return self._mac_maestro
     @mac_maestro.setter
