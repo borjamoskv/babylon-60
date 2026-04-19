@@ -58,30 +58,21 @@ class AuthManager:
         """Initialize the backend schema (async)."""
         await self.backend.initialize()
 
-    def initialize_sync(self) -> None:
-        """Initialize the backend schema (sync)."""
-        coro = self.initialize()
-        try:
-            loop = asyncio.get_running_loop()
-            import threading
-
-            event = threading.Event()
-
-            async def _wrapper() -> None:
-                await coro
-                event.set()
-
-            asyncio.run_coroutine_threadsafe(_wrapper(), loop)
-            event.wait()
-        except RuntimeError:
-            asyncio.run(coro)
+# DEPRECATED: Sync methods removed in v6.0 for Sovereign Async Stability.
+# Use initialize(), create_key(), and authenticate_async() instead.
 
     @staticmethod
     def _hash_key(key: str) -> str:
+        """Hash a raw key for storage/lookup."""
         return hashlib.sha256(key.encode()).hexdigest()
 
     async def close(self) -> None:
-        """Close the backend connections."""
+        """Close the backend connections and drain background tasks."""
+        if self._background_tasks:
+            logger.debug("AuthManager: Draining %d background tasks", len(self._background_tasks))
+            await asyncio.gather(*self._background_tasks, return_exceptions=True)
+            self._background_tasks.clear()
+
         if hasattr(self.backend, "close"):
             await self.backend.close()  # type: ignore[reportAttributeAccessIssue]
 
@@ -130,84 +121,6 @@ class AuthManager:
             tenant_id,
         )
         return raw_key, new_api_key
-
-    def create_key_sync(
-        self,
-        name: str,
-        tenant_id: str = "default",
-        role: str = "user",
-        permissions: Optional[list[str]] = None,
-        rate_limit: int = 100,
-    ) -> tuple[str, APIKey]:
-        """Synchronous wrapper for create_key (test fixtures / CLI).
-
-        Handles both 'no event loop' and 'inside existing loop' cases.
-        """
-        coro = self.create_key(
-            name,
-            tenant_id=tenant_id,
-            role=role,
-            permissions=permissions,
-            rate_limit=rate_limit,
-        )
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            return asyncio.run(coro)
-
-        # Inside existing loop — block via thread-safe event
-        import threading
-
-        res: list[tuple[str, APIKey]] = []
-        err: list[BaseException] = []
-        event = threading.Event()
-
-        async def _wrapper() -> None:
-            try:
-                res.append(await coro)
-            except Exception as e:  # noqa: BLE001 — relay to calling thread
-                err.append(e)
-            finally:
-                event.set()
-
-        asyncio.run_coroutine_threadsafe(_wrapper(), loop)
-        event.wait()
-
-        if err:
-            raise err[0]
-        return res[0]
-
-    def authenticate(self, raw_key: str) -> AuthResult:
-        """Synchronous wrapper for authentication.
-
-        Authenticate a key synchronously (for legacy test fixtures/CLI).
-        In v6 Sovereign Cloud, use authenticate_async whenever possible.
-        """
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            return asyncio.run(self.authenticate_async(raw_key))
-
-        import threading
-
-        res: list[AuthResult] = []
-        err: list[BaseException] = []
-        event = threading.Event()
-
-        async def _wrapper() -> None:
-            try:
-                res.append(await self.authenticate_async(raw_key))
-            except Exception as e:  # noqa: BLE001 — relay to calling thread
-                err.append(e)
-            finally:
-                event.set()
-
-        asyncio.run_coroutine_threadsafe(_wrapper(), loop)
-        event.wait()
-
-        if err:
-            raise err[0]
-        return res[0]
 
     async def authenticate_async(self, raw_key: str) -> AuthResult:
         """Fully async authentication."""

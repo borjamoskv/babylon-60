@@ -288,5 +288,15 @@
     "en": "Unexpected error\n\n  {detail}\n\nIf this persists, run:  cortex status  to verify system health.",
     "es": "Error inesperado\n\n  {detail}\n\nSi esto persiste, ejecuta:  cortex status  para verificar el estado del sistema.",
     "eu": "Ustekabeko errorea\n\n  {detail}\n\nHonek irauten badu, exekutatu:  cortex status  sistemaren egoera egiaztatzeko."
+  },
+  "error_bootstrap_required": {
+    "en": "No keys found. Provisioning requires explicit opt-in. Set CORTEX_ALLOW_BOOTSTRAP_KEY=1.",
+    "es": "No se encontraron claves. La provisión requiere consentimiento explícito. Establece CORTEX_ALLOW_BOOTSTRAP_KEY=1.",
+    "eu": "Ez da gakorik aurkitu. Hornidurarako berariazko baimena behar da. Ezarri CORTEX_ALLOW_BOOTSTRAP_KEY=1."
+  },
+  "info_key_warning": {
+    "en": "This key is shown only once. Store it securely.",
+    "es": "Esta clave se muestra solo una vez. Guárdala de forma segura.",
+    "eu": "Gako hau behin bakarrik erakusten da. Gorde segurtasunez."
   }
 }

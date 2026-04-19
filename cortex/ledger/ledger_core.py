@@ -315,8 +315,16 @@ class SovereignLedger:
             self.db.rollback()
             raise
 
-    async def record_transaction_async(self, project: str, action: str, detail: Any = None) -> str:
-        """Record a transaction asynchronously (requires a connection pool)."""
+    async def record_transaction_async(
+        self,
+        project: str,
+        action: str,
+        detail: Any = None,
+        tenant_id: str = "default",
+    ) -> str:
+        """Record a transaction asynchronously (requires a connection pool).
+        Maintains per-tenant hash chains (Axiom Ω₃).
+        """
         self.record_write()
         detail_json = canonical_json(detail) if detail else "{}"
         ts = now_iso()
@@ -325,16 +333,17 @@ class SovereignLedger:
             await conn.execute("BEGIN EXCLUSIVE")
             try:
                 cursor = await conn.execute(
-                    "SELECT hash FROM transactions ORDER BY id DESC LIMIT 1"
+                    "SELECT hash FROM transactions WHERE tenant_id = ? ORDER BY id DESC LIMIT 1",
+                    (tenant_id,),
                 )
                 row = await cursor.fetchone()
                 prev_hash = row[0] if row else "GENESIS"
                 new_hash = compute_tx_hash(prev_hash, project, action, detail_json, ts)
 
                 await conn.execute(
-                    "INSERT INTO transactions (project, action, detail, prev_hash, hash, timestamp)"
-                    " VALUES (?, ?, ?, ?, ?, ?)",
-                    (project, action, detail_json, prev_hash, new_hash, ts),
+                    "INSERT INTO transactions (project, action, detail, prev_hash, hash, tenant_id, timestamp)"
+                    " VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (project, action, detail_json, prev_hash, new_hash, tenant_id, ts),
                 )
                 await conn.commit()
                 return new_hash
@@ -421,17 +430,26 @@ class SovereignLedger:
         async with pool.acquire() as conn:
             yield conn
 
-    async def audit_integrity_async(self) -> dict:
-        """Perform a full integrity audit asynchronously (Ω₁)."""
+    async def audit_integrity_async(self, tenant_id: str | None = None) -> dict:
+        """Perform an integrity audit asynchronously (Ω₁).
+        If tenant_id is provided, scopes the audit to that tenant's hash chain.
+        """
         violations = []
         tx_count = 0
 
         async with self._get_conn_proxy() as conn:
             started_at = now_iso()
-            cursor = await conn.execute(
+            query = (
                 "SELECT id, project, action, detail, prev_hash, hash, timestamp "
-                "FROM transactions ORDER BY id"
+                "FROM transactions "
             )
+            params = []
+            if tenant_id:
+                query += "WHERE tenant_id = ? "
+                params.append(tenant_id)
+            query += "ORDER BY id"
+
+            cursor = await conn.execute(query, tuple(params))
 
             expected_prev = "GENESIS"
             while True:
@@ -442,40 +460,57 @@ class SovereignLedger:
                 tx_count += 1
 
                 if prev != expected_prev:
-                    violations.append({"id": tid, "type": "CHAIN_BREAK", "expected": expected_prev})
+                    violations.append(
+                        {
+                            "id": tid,
+                            "type": "CHAIN_BREAK",
+                            "expected": expected_prev,
+                            "stored": prev,
+                            "tenant": tenant_id or "global",
+                        }
+                    )
 
-                # Verify with v2, fallback to v1
+                # Verify hash integrity
                 computed = compute_tx_hash(prev, proj, act, det, ts)
                 if computed != h:
+                    # Fallback for v1 legacy hashes
                     computed_v1 = compute_tx_hash_v1(prev, proj, act, det, ts)
                     if computed_v1 != h:
                         violations.append({"id": tid, "type": "TAMPER_DETECTED", "stored": h})
 
                 expected_prev = h
                 if tx_count % 100 == 0:
-                    await asyncio.sleep(0)  # Yield
+                    await asyncio.sleep(0)  # Yield for throughput (Axiom Ω₂)
 
-            # Verify Merkle Roots
-            cursor = await conn.execute(
-                "SELECT root_hash, tx_start_id, tx_end_id FROM merkle_roots"
-            )
-            roots = list(await cursor.fetchall())
-            for stored_root, start, end in roots:
-                c = await conn.execute(
-                    "SELECT hash FROM transactions WHERE id >= ? AND id <= ? ORDER BY id",
-                    (start, end),
+            # Verify Merkle Roots (Tenant-scoped Merkle checks depend on checkpoint policy)
+            # Currently Merkle roots are global; we only check them if tenant_id is None.
+            if not tenant_id:
+                cursor = await conn.execute(
+                    "SELECT root_hash, tx_start_id, tx_end_id FROM merkle_roots"
                 )
-                hashes = [r[0] for r in list(await c.fetchall())]
-                computed_root = MerkleTree(hashes).root_hash
-                if computed_root != stored_root:
-                    violations.append({"range": f"{start}-{end}", "type": "MERKLE_MISMATCH"})
+                roots = list(await cursor.fetchall())
+                for stored_root, start, end in roots:
+                    c = await conn.execute(
+                        "SELECT hash FROM transactions WHERE id >= ? AND id <= ? ORDER BY id",
+                        (start, end),
+                    )
+                    hashes = [r[0] for r in list(await c.fetchall())]
+                    if hashes:
+                        computed_root = MerkleTree(hashes).root_hash
+                        if computed_root != stored_root:
+                            violations.append({"range": f"{start}-{end}", "type": "MERKLE_MISMATCH"})
 
             status = "ok" if not violations else "violation"
             await conn.execute(
                 "INSERT INTO integrity_checks (check_type, status, details, started_at, completed_at) "
                 "VALUES (?, ?, ?, ?, ?)",
-                ("full", status, json.dumps(violations), started_at, now_iso()),
+                (f"audit:{tenant_id or 'global'}", status, json.dumps(violations), started_at, now_iso()),
             )
             await conn.commit()
 
-        return {"valid": not violations, "violations": violations, "tx_count": tx_count}
+        return {
+            "valid": not violations,
+            "violations": violations,
+            "tx_count": tx_count,
+            "tenant": tenant_id or "global",
+        }

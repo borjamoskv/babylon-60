@@ -8,6 +8,7 @@ Sovereign 130/100 — Pydantic responses, structured logging, TOCTOU-safe paths.
 """
 
 import logging
+import os
 import re
 import time
 from pathlib import Path
@@ -356,9 +357,17 @@ async def create_api_key(
 
     manager = _get_auth_manager()
     existing_keys = await manager.list_keys()
+    allow_bootstrap = os.getenv("CORTEX_ALLOW_BOOTSTRAP_KEY", "0") == "1"
 
     if existing_keys:
         await _verify_admin_auth(authorization, manager, lang)
+    elif not allow_bootstrap:
+        # STRICT BOOTSTRAP: Preventing unauthorized first-key creation in production.
+        logger.error("Provisioning blocked: 0 keys found and CORTEX_ALLOW_BOOTSTRAP_KEY=0")
+        raise HTTPException(
+            status_code=403,
+            detail=get_trans("error_bootstrap_required", lang),
+        )
 
     raw_key, api_key = await manager.create_key(
         name=name,

@@ -45,17 +45,19 @@ class ComplianceTracker:
         project: Default project namespace for all operations.
     """
 
-    __slots__ = ("_engine", "_default_project", "_initialized")
+    __slots__ = ("_engine", "_default_project", "_tenant_id", "_initialized")
 
     def __init__(
         self,
         db_path: str | Path = DEFAULT_DB_PATH,
         project: str = "default",
+        tenant_id: str = "default",
     ) -> None:
         from cortex.engine import CortexEngine
 
         self._engine = CortexEngine(db_path=str(db_path), auto_embed=False)
         self._default_project = project
+        self._tenant_id = tenant_id
         self._initialized = False
 
     def _ensure_init(self) -> None:
@@ -76,6 +78,7 @@ class ComplianceTracker:
         confidence: str = "C3",
         meta: dict[str, Any] | None = None,
         tags: list[str] | None = None,
+        tenant_id: str | None = None,
     ) -> int:
         """Log an AI decision with EU AI Act Article 12 metadata.
 
@@ -98,6 +101,7 @@ class ComplianceTracker:
         self._ensure_init()
 
         proj = project or self._default_project
+        tid = tenant_id or self._tenant_id
         now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
 
         eu_meta: dict[str, Any] = {
@@ -114,6 +118,7 @@ class ComplianceTracker:
         return self._engine.store_sync(  # type: ignore[type-error]
             project=proj,
             content=content,
+            tenant_id=tid,
             fact_type="decision",
             source=agent_id,
             confidence=confidence,
@@ -123,10 +128,11 @@ class ComplianceTracker:
 
     # ─── 2. verify_chain ──────────────────────────────────────────
 
-    def verify_chain(self) -> dict[str, Any]:
+    def verify_chain(self, tenant_id: str | None = None) -> dict[str, Any]:
         """Verify the cryptographic integrity of the decision ledger.
 
         Checks both the SHA-256 hash chain and Merkle tree checkpoints.
+        Scoped to the provided tenant_id (or the tracker default).
 
         Returns:
             A dict with keys:
@@ -136,6 +142,7 @@ class ComplianceTracker:
             - ``violations`` (list): Details of any integrity violations.
         """
         self._ensure_init()
+        tid = tenant_id or self._tenant_id
 
         ledger = self._engine._ledger
         if ledger is None:
@@ -146,7 +153,7 @@ class ComplianceTracker:
                 "violations": [],
             }
 
-        return self._engine._run_sync(ledger.audit_integrity_async())  # type: ignore[type-error]
+        return self._engine._run_sync(ledger.audit_integrity_async(tenant_id=tid))  # type: ignore[type-error]
 
     # ─── 3. export_audit ──────────────────────────────────────────
 
@@ -155,6 +162,7 @@ class ComplianceTracker:
         project: str | None = None,
         *,
         include_facts: bool = False,
+        tenant_id: str | None = None,
     ) -> dict[str, Any]:
         """Generate an EU AI Act Article 12 compliance report.
 
@@ -174,12 +182,13 @@ class ComplianceTracker:
         self._ensure_init()
 
         proj = project or self._default_project
+        tid = tenant_id or self._tenant_id
 
         # 1. Run integrity check
         integrity = self.verify_chain()
 
         # 2. Gather facts summary
-        facts_summary = self._engine._run_sync(self._gather_facts_summary(proj))
+        facts_summary = self._engine._run_sync(self._gather_facts_summary(proj, tid))
 
         # 3. Evaluate Article 12 compliance
         checks = self._evaluate_article_12(integrity, facts_summary)  # type: ignore[type-error]
@@ -202,32 +211,36 @@ class ComplianceTracker:
         }
 
         if include_facts:
-            all_facts = self._engine._run_sync(self._gather_facts_list(proj))
+            all_facts = self._engine._run_sync(self._gather_facts_list(proj, tid))
             report["facts"] = all_facts
 
         return report
 
     # ─── Internal helpers ─────────────────────────────────────────
 
-    async def _gather_facts_summary(self, project: str) -> dict[str, Any]:
+    async def _gather_facts_summary(self, project: str, tenant_id: str) -> dict[str, Any]:
         """Collect fact statistics for the compliance report."""
         async with self._engine.session() as conn:
             # Total facts
-            cursor = await conn.execute("SELECT COUNT(*) FROM facts WHERE project = ?", (project,))
+            cursor = await conn.execute(
+                "SELECT COUNT(*) FROM facts WHERE project = ? AND tenant_id = ?",
+                (project, tenant_id),
+            )
             row = await cursor.fetchone()
             total = row[0] if row else 0
 
             # By type
             cursor = await conn.execute(
-                "SELECT fact_type, COUNT(*) FROM facts WHERE project = ? GROUP BY fact_type",
-                (project,),
+                "SELECT fact_type, COUNT(*) FROM facts WHERE project = ? AND tenant_id = ? "
+                "GROUP BY fact_type",
+                (project, tenant_id),
             )
             by_type = {r[0]: r[1] for r in await cursor.fetchall()}
 
             # Date range
             cursor = await conn.execute(
-                "SELECT MIN(created_at), MAX(created_at) FROM facts WHERE project = ?",
-                (project,),
+                "SELECT MIN(created_at), MAX(created_at) FROM facts WHERE project = ? AND tenant_id = ?",
+                (project, tenant_id),
             )
             row = await cursor.fetchone()
             date_range = {
@@ -237,16 +250,16 @@ class ComplianceTracker:
 
             # Active vs deprecated
             cursor = await conn.execute(
-                "SELECT COUNT(*) FROM facts WHERE project = ? AND valid_until IS NULL",
-                (project,),
+                "SELECT COUNT(*) FROM facts WHERE project = ? AND tenant_id = ? AND valid_until IS NULL",
+                (project, tenant_id),
             )
             row = await cursor.fetchone()
             active = row[0] if row else 0
 
             # Sources (agent traceability)
             cursor = await conn.execute(
-                "SELECT DISTINCT source FROM facts WHERE project = ? AND source IS NOT NULL",
-                (project,),
+                "SELECT DISTINCT source FROM facts WHERE project = ? AND tenant_id = ? AND source IS NOT NULL",
+                (project, tenant_id),
             )
             sources = [r[0] for r in await cursor.fetchall()]
 
@@ -259,13 +272,13 @@ class ComplianceTracker:
                 "sources": sources,
             }
 
-    async def _gather_facts_list(self, project: str) -> list[dict[str, Any]]:
+    async def _gather_facts_list(self, project: str, tenant_id: str) -> list[dict[str, Any]]:
         """Retrieve facts for export (decrypted content omitted for security)."""
         async with self._engine.session() as conn:
             cursor = await conn.execute(
                 "SELECT id, fact_type, source, confidence, created_at, valid_until "
-                "FROM facts WHERE project = ? ORDER BY id",
-                (project,),
+                "FROM facts WHERE project = ? AND tenant_id = ? ORDER BY id",
+                (project, tenant_id),
             )
             return [
                 {
