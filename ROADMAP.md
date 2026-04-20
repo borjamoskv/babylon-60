@@ -1,12 +1,12 @@
 # ROADMAP
 
 > **Tamper-Evident Decision Lineage for AI Systems**
-> *Updated: Spring 2026 · Status: v0.3.0 in active development*
+> *Updated: Spring 2026 · Status: planning snapshot for the current `0.3.x` release line*
 > *Classification: Planning snapshot. Current release truth lives in `CHANGELOG.md`.*
 
 ---
 
-## ✅ v0.3.0 — Current (Foundation & Integrity)
+## ✅ Current 0.3.x Line (Foundation & Integrity)
 
 **Local-First Sovereign Trust layer.**
 
