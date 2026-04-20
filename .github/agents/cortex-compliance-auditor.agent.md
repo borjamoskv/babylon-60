@@ -73,12 +73,12 @@ Each unit of work MUST produce:
 ## Drop-in Examples (reference scripts)
 
 ### File ingestion
-```python
+```text
 # examples/file_ingest_agent.py
 import os
 import hashlib
-from cortex_governance.governor.governor import Governor
-from cortex_governance.auditor.auditor import Auditor
+# pseudocode: from cortex_governance# Governor class pseudocode (remove import) import Governor
+# pseudocode: from cortex_governance.auditor.auditor import Auditor
 
 MAX_MB = 10
 
@@ -114,11 +114,11 @@ def run_file_ingest(path: str, source: str | None, evidence: bool):
 ```
 
 ### Chat (Slack-like)
-```python
+```text
 # examples/chat_agent.py
 import re
-from cortex_governance.governor.governor import Governor
-from cortex_governance.auditor.auditor import Auditor
+# pseudocode: from cortex_governance# Governor class pseudocode (remove import) import Governor
+# pseudocode: from cortex_governance.auditor.auditor import Auditor
 
 EMAIL_RE = r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+"
 PHONE_RE = r"\b\d{9,15}\b"
@@ -149,11 +149,11 @@ def run_chat_agent(channel: str, text: str, approved: bool):
 ```
 
 ### Data cleaning (sanitization)
-```python
+```text
 # examples/data_cleaning_agent.py
 import copy
-from cortex_governance.governor.governor import Governor
-from cortex_governance.auditor.auditor import Auditor
+# pseudocode: from cortex_governance# Governor class pseudocode (remove import) import Governor
+# pseudocode: from cortex_governance.auditor.auditor import Auditor
 
 def sanitize(record: dict) -> dict:
     out = copy.deepcopy(record)
@@ -188,10 +188,10 @@ def run_data_cleaner(record: dict, evidence: bool):
 ```
 
 ### Deployment (drift detection)
-```python
+```text
 # examples/deploy_agent.py
-from cortex_governance.governor.governor import Governor
-from cortex_governance.auditor.auditor import Auditor
+# pseudocode: from cortex_governance# Governor class pseudocode (remove import) import Governor
+# pseudocode: from cortex_governance.auditor.auditor import Auditor
 
 def compute_drift(current: dict, desired: dict) -> bool:
     return current != desired
