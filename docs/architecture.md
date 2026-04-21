@@ -37,7 +37,7 @@ graph TB
 
     subgraph Engine["Core Engine"]
         CortexEngine["CortexEngine<br/>(Composite Orchestrator)"]
-        AsyncEngine["AsyncCortexEngine<br/>(Native Async + Pool)"]
+        AsyncEngine["CortexEngine<br/>(async methods + pool)"]
         FactManager["FactManager"]
         EmbeddingManager["EmbeddingManager"]
         ConsensusManager["ConsensusManager"]
