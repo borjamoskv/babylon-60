@@ -244,6 +244,13 @@ class AgentRegistry:
         duplicate_count = 0
         seen_agent_ids: set[str] = set()
         for yaml_path in directory.glob("*.yaml"):
+            if yaml_path.is_symlink() and not yaml_path.exists():
+                logger.error(
+                    "☠️ [REGISTRY] Broken symlink skipped: %s -> %s",
+                    yaml_path.name,
+                    yaml_path.resolve(),
+                )
+                continue
             try:
                 agent_def = AgentCatalogEntry.from_yaml_file(yaml_path)
                 normalized_id = agent_def.id.casefold()

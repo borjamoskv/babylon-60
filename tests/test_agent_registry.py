@@ -1,6 +1,7 @@
 """Tests for AgentRegistry (Phase 3)."""
 
 import logging
+import os
 
 import pytest
 
@@ -178,6 +179,26 @@ def test_load_all_continues_after_invalid_agent_entry(tmp_path, caplog):
     assert "Failed to load bad.yaml" in caplog.text
     assert "good" in registry.agents
     assert "bad" not in registry.agents
+
+
+@pytest.mark.skipif(os.name == "nt", reason="Symlink test can be flaky on some Windows setups")
+def test_load_all_skips_broken_symlink(tmp_path, caplog):
+    """Broken YAML symlinks should be skipped with a clear error log."""
+    definitions_dir = tmp_path / "defs_symlink"
+    definitions_dir.mkdir()
+    (definitions_dir / "good.yaml").write_text("name: GOOD")
+    broken = definitions_dir / "broken.yaml"
+    broken.symlink_to("/does/not/exist/aether_heavy.yaml")
+
+    registry = AgentRegistry()
+    registry.clear()
+
+    with caplog.at_level(logging.ERROR):
+        registry.load_all(definitions_dir)
+
+    assert "Broken symlink skipped" in caplog.text
+    assert "good" in registry.agents
+    assert "broken" not in registry.agents
 
 
 def test_invalid_yaml_parsing(temp_definitions_dir):
