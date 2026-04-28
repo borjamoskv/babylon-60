@@ -2,7 +2,7 @@
 
 When operating autonomous AI systems in high-risk or regulated environments, stating "the agent decided to do X" is insufficient. You need an exportable, mathematically defensible proof. CORTEX generates **Audit Packs**—zero-trust, cryptographically sealed JSON files that provide an irrefutable trail of events.
 
-> **View Live Artifact:** [Download `examples/audit_proof_artifact.json`](../examples/audit_proof_artifact.json)
+> **View Live Artifact:** `examples/audit_proof_artifact.json`
 
 ---
 

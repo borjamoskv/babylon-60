@@ -9,8 +9,8 @@ Learn how persistent memory becomes an architectural subsystem instead of a cach
 - [Quickstart](../../quickstart.md)
 - [Memory internals](../../architecture/CORTEX_MEMORY_INTERNALS.md)
 - [LangChain memory tutorial](../../tutorials/langchain.md)
-- [MCP server](../../../cortex/mcp/server.py)
-- [Basic memory example](../../../examples/quickstart/basic_memory.py)
+- MCP server: `cortex/mcp/server.py`
+- Basic memory example: `examples/quickstart/basic_memory.py`
 
 ## What You Learn
 

@@ -6,11 +6,11 @@
 
 ## 仓库锚点
 
-- [Swarm 路由](../../../cortex/routes/swarm.py)
-- [Supervisor agent](../../../cortex/agents/builtins/supervisor_agent.py)
-- [Aether daemon](../../../cortex/extensions/aether/daemon.py)
+- Swarm 路由: `cortex/routes/swarm.py`
+- Supervisor agent: `cortex/agents/builtins/supervisor_agent.py`
+- Aether daemon: `cortex/extensions/aether/daemon.py`
 - [共识教程](../../tutorials/consensus.md)
-- [Swarm dashboard](../../../scripts/swarm_dashboard.py)
+- Swarm dashboard: `scripts/swarm_dashboard.py`
 
 ## 你将学到
 

@@ -6,11 +6,11 @@ Study optimization as a systems problem: complexity ceilings, ship gates, entrop
 
 ## Repo Anchors
 
-- [Entropy gate](../../../scripts/entropy_gate.py)
-- [Ship gate](../../../scripts/ship_gate.py)
-- [Swarm dashboard](../../../scripts/swarm_dashboard.py)
-- [Session guardrails](../../../cortex/memory/guardrails.py)
-- [Supervisor tests](../../../tests/agents/test_builtin_agents.py)
+- Entropy gate: `scripts/entropy_gate.py`
+- Ship gate: `scripts/ship_gate.py`
+- Swarm dashboard: `scripts/swarm_dashboard.py`
+- Session guardrails: `cortex/memory/guardrails.py`
+- Supervisor tests: `tests/agents/test_builtin_agents.py`
 
 ## What You Learn
 

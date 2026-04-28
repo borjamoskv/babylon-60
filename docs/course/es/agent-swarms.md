@@ -6,11 +6,11 @@ Entender cómo un swarm pasa de ser una idea de paralelismo a una arquitectura g
 
 ## Anclas del repo
 
-- [Rutas de swarm](../../../cortex/routes/swarm.py)
-- [Supervisor agent](../../../cortex/agents/builtins/supervisor_agent.py)
-- [Daemon Aether](../../../cortex/extensions/aether/daemon.py)
+- Rutas de swarm: `cortex/routes/swarm.py`
+- Supervisor agent: `cortex/agents/builtins/supervisor_agent.py`
+- Daemon Aether: `cortex/extensions/aether/daemon.py`
 - [Tutorial de consenso](../../tutorials/consensus.md)
-- [Swarm dashboard](../../../scripts/swarm_dashboard.py)
+- Swarm dashboard: `scripts/swarm_dashboard.py`
 
 ## Qué aprendes
 

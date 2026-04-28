@@ -6,11 +6,11 @@
 
 ## 仓库锚点
 
-- [Entropy gate](../../../scripts/entropy_gate.py)
-- [Ship gate](../../../scripts/ship_gate.py)
-- [Swarm dashboard](../../../scripts/swarm_dashboard.py)
-- [会话护栏](../../../cortex/memory/guardrails.py)
-- [Supervisor tests](../../../tests/agents/test_builtin_agents.py)
+- Entropy gate: `scripts/entropy_gate.py`
+- Ship gate: `scripts/ship_gate.py`
+- Swarm dashboard: `scripts/swarm_dashboard.py`
+- 会话护栏: `cortex/memory/guardrails.py`
+- Supervisor tests: `tests/agents/test_builtin_agents.py`
 
 ## 你将学到
 

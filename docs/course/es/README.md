@@ -10,13 +10,13 @@ Tres tracks GitHub-native construidos a partir del repositorio real.
 
 ## Anclas del repo
 
-- [API de swarm](../../../cortex/routes/swarm.py)
-- [Supervisor agent](../../../cortex/agents/builtins/supervisor_agent.py)
-- [Daemon Aether](../../../cortex/extensions/aether/daemon.py)
+- API de swarm: `cortex/routes/swarm.py`
+- Supervisor agent: `cortex/agents/builtins/supervisor_agent.py`
+- Daemon Aether: `cortex/extensions/aether/daemon.py`
 - [Tutorial de consenso](../../tutorials/consensus.md)
-- [Entropy gate](../../../scripts/entropy_gate.py)
-- [Ship gate](../../../scripts/ship_gate.py)
-- [Swarm dashboard](../../../scripts/swarm_dashboard.py)
+- Entropy gate: `scripts/entropy_gate.py`
+- Ship gate: `scripts/ship_gate.py`
+- Swarm dashboard: `scripts/swarm_dashboard.py`
 - [Internals de memoria](../../architecture/CORTEX_MEMORY_INTERNALS.md)
 - [Tutorial LangChain](../../tutorials/langchain.md)
 - [Quickstart](../../quickstart.md)

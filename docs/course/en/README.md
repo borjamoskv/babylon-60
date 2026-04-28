@@ -10,13 +10,13 @@ Three GitHub-native learning tracks built from the real repository.
 
 ## Repo Anchors
 
-- [Swarm API](../../../cortex/routes/swarm.py)
-- [Supervisor agent](../../../cortex/agents/builtins/supervisor_agent.py)
-- [Aether daemon](../../../cortex/extensions/aether/daemon.py)
+- Swarm API path: `cortex/routes/swarm.py`
+- Supervisor agent: `cortex/agents/builtins/supervisor_agent.py`
+- Aether daemon: `cortex/extensions/aether/daemon.py`
 - [Consensus tutorial](../../tutorials/consensus.md)
-- [Entropy gate](../../../scripts/entropy_gate.py)
-- [Ship gate](../../../scripts/ship_gate.py)
-- [Swarm dashboard](../../../scripts/swarm_dashboard.py)
+- Entropy gate: `scripts/entropy_gate.py`
+- Ship gate: `scripts/ship_gate.py`
+- Swarm dashboard: `scripts/swarm_dashboard.py`
 - [Memory internals](../../architecture/CORTEX_MEMORY_INTERNALS.md)
 - [LangChain memory tutorial](../../tutorials/langchain.md)
 - [Quickstart](../../quickstart.md)

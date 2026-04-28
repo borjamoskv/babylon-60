@@ -107,7 +107,7 @@ The following areas exist in the repository but sit outside the core product sto
 - Swarm orchestration and isolated worktree control.
 - Agent registration and ask/stream inference endpoints.
 - Runtime, dashboard, onboarding, telemetry, and operator utilities.
-- Script catalogs under [`scripts/`](../scripts/README.md).
+- Script catalogs under `scripts/`.
 - Historical architecture, research, and proposal documents under `docs/`.
 
 These surfaces can still be valuable, but they should be adopted deliberately and not inferred as
