@@ -6,11 +6,11 @@ Understand how a swarm becomes a governed system instead of a pile of parallel w
 
 ## Repo Anchors
 
-- [Swarm routes](../../../cortex/routes/swarm.py)
-- [Supervisor agent](../../../cortex/agents/builtins/supervisor_agent.py)
-- [Aether daemon](../../../cortex/extensions/aether/daemon.py)
+- Swarm routes: `cortex/routes/swarm.py`
+- Supervisor agent: `cortex/agents/builtins/supervisor_agent.py`
+- Aether daemon: `cortex/extensions/aether/daemon.py`
 - [Consensus tutorial](../../tutorials/consensus.md)
-- [Swarm dashboard](../../../scripts/swarm_dashboard.py)
+- Swarm dashboard: `scripts/swarm_dashboard.py`
 
 ## What You Learn
 

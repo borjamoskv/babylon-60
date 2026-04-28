@@ -6,11 +6,11 @@ Estudiar la optimización como problema de sistema: complejidad, puertas de cali
 
 ## Anclas del repo
 
-- [Entropy gate](../../../scripts/entropy_gate.py)
-- [Ship gate](../../../scripts/ship_gate.py)
-- [Swarm dashboard](../../../scripts/swarm_dashboard.py)
-- [Guardrails de sesión](../../../cortex/memory/guardrails.py)
-- [Tests del supervisor](../../../tests/agents/test_builtin_agents.py)
+- Entropy gate: `scripts/entropy_gate.py`
+- Ship gate: `scripts/ship_gate.py`
+- Swarm dashboard: `scripts/swarm_dashboard.py`
+- Guardrails de sesión: `cortex/memory/guardrails.py`
+- Tests del supervisor: `tests/agents/test_builtin_agents.py`
 
 ## Qué aprendes
 

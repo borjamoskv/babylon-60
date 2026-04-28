@@ -12,7 +12,7 @@ CORTEX provides a **Mathematically Proven Audit Pack** per incident or decision.
 
 Here is the exact artifact that is delivered to your inbox, ready for presentation to EU AI Act compliance boards or external auditors:
 
-> **View Live Artifact:** [Download `examples/audit_proof_artifact.json`](../../examples/audit_proof_artifact.json)
+> **View Live Artifact:** `examples/audit_proof_artifact.json`
 
 ## Why This Satisfies The Law
 

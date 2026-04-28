@@ -10,13 +10,13 @@
 
 ## 仓库锚点
 
-- [Swarm API](../../../cortex/routes/swarm.py)
-- [Supervisor agent](../../../cortex/agents/builtins/supervisor_agent.py)
-- [Aether daemon](../../../cortex/extensions/aether/daemon.py)
+- Swarm API: `cortex/routes/swarm.py`
+- Supervisor agent: `cortex/agents/builtins/supervisor_agent.py`
+- Aether daemon: `cortex/extensions/aether/daemon.py`
 - [共识教程](../../tutorials/consensus.md)
-- [Entropy gate](../../../scripts/entropy_gate.py)
-- [Ship gate](../../../scripts/ship_gate.py)
-- [Swarm dashboard](../../../scripts/swarm_dashboard.py)
+- Entropy gate: `scripts/entropy_gate.py`
+- Ship gate: `scripts/ship_gate.py`
+- Swarm dashboard: `scripts/swarm_dashboard.py`
 - [Memory internals](../../architecture/CORTEX_MEMORY_INTERNALS.md)
 - [LangChain 教程](../../tutorials/langchain.md)
 - [Quickstart](../../quickstart.md)
