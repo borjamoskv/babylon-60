@@ -109,6 +109,41 @@ def test_agent_definition_string_bools_are_honored(tmp_path):
     assert agent.guardrails.max_turns is None
 
 
+def test_agent_definition_invalid_bool_raises_value_error(tmp_path):
+    """Invalid boolean literals must fail fast with a clear validation error."""
+    filepath = tmp_path / "invalid_bool.yaml"
+    filepath.write_text(
+        "name: INVALID_BOOL\n"
+        "memory:\n"
+        "  sparse_encoding: maybe\n"
+    )
+
+    with pytest.raises(ValueError, match="Invalid boolean value"):
+        AgentCatalogEntry.from_yaml_file(filepath)
+
+
+def test_load_all_continues_after_invalid_agent_entry(tmp_path, caplog):
+    """Registry load should continue when one entry fails parsing."""
+    definitions_dir = tmp_path / "defs"
+    definitions_dir.mkdir()
+    (definitions_dir / "good.yaml").write_text("name: GOOD\n")
+    (definitions_dir / "bad.yaml").write_text(
+        "name: BAD\n"
+        "memory:\n"
+        "  sparse_encoding: maybe\n"
+    )
+
+    registry = AgentRegistry()
+    registry.clear()
+
+    with caplog.at_level(logging.ERROR):
+        registry.load_all(definitions_dir)
+
+    assert "Failed to load bad.yaml" in caplog.text
+    assert "good" in registry.agents
+    assert "bad" not in registry.agents
+
+
 def test_invalid_yaml_parsing(temp_definitions_dir):
     """Test parsing invalid YAML raises ValueError."""
     filepath = temp_definitions_dir / "invalid.yaml"

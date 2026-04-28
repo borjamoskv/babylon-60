@@ -29,8 +29,12 @@ def _coerce_bool(value: Any, default: bool, *, field: str) -> bool:
         return default
     if isinstance(value, bool):
         return value
-    if isinstance(value, (int, float)):
-        return bool(value)
+    if isinstance(value, int):
+        if value == 1:
+            return True
+        if value == 0:
+            return False
+        raise ValueError(f"Invalid boolean value for '{field}': {value!r}")
     if isinstance(value, str):
         normalized = value.strip().lower()
         if normalized in _TRUE_BOOL_LITERALS:
@@ -241,7 +245,7 @@ class AgentRegistry:
                 seen_agent_ids.add(normalized_id)
                 loaded_count += 1
                 logger.debug("🧬 [REGISTRY] Loaded agent: %s (%s)", agent_def.name, agent_def.id)
-            except ValueError as e:
+            except (ValueError, TypeError) as e:
                 logger.error("☠️ [REGISTRY] Failed to load %s: %s", yaml_path.name, e)
 
         logger.info("🏛️ [REGISTRY] Loaded %d sovereign agents.", loaded_count)
