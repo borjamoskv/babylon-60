@@ -53,6 +53,20 @@ def _as_str_mapping(value: Any, field: str) -> dict[str, Any]:
     return value
 
 
+def _as_str_list(value: Any, field: str) -> list[str]:
+    if value is None:
+        return []
+    if not isinstance(value, list):
+        raise ValueError(f"Expected YAML sequence for '{field}', got {type(value).__name__}")
+
+    result: list[str] = []
+    for item in value:
+        if not isinstance(item, str):
+            raise TypeError(f"Invalid '{field}' entry in {field}: {type(item).__name__}")
+        result.append(item)
+    return result
+
+
 @dataclass
 class MemoryConfig:
     """Memory parameters for an agent."""
@@ -193,7 +207,7 @@ class AgentCatalogEntry:
             intent=str(data.get("intent", "")),
             memory=MemoryConfig.from_dict(mem_conf) if mem_conf else MemoryConfig(),
             guardrails=GuardrailsConfig.from_dict(gr_conf) if gr_conf else GuardrailsConfig(),
-            tools=list(data.get("tools", [])),
+            tools=_as_str_list(data.get("tools", []), "tools"),
         )
 
 

@@ -109,6 +109,24 @@ def test_agent_definition_string_bools_are_honored(tmp_path):
     assert agent.guardrails.max_turns is None
 
 
+def test_agent_definition_invalid_tools_type(tmp_path):
+    """Tools must be a YAML list of strings."""
+    filepath = tmp_path / "invalid_tools.yaml"
+    filepath.write_text("name: INVALID_TOOLS\n" "tools: not-a-list")
+
+    with pytest.raises(ValueError, match="Expected YAML sequence for 'tools'"):
+        AgentCatalogEntry.from_yaml_file(filepath)
+
+
+def test_agent_definition_invalid_tools_entry_type(tmp_path):
+    """Tool entries must be strings."""
+    filepath = tmp_path / "invalid_tool_entry.yaml"
+    filepath.write_text("name: INVALID_TOOL_ENTRY\n" "tools:\n  - 12\n  - search\n")
+
+    with pytest.raises(TypeError, match="Invalid 'tools' entry"):
+        AgentCatalogEntry.from_yaml_file(filepath)
+
+
 def test_agent_definition_invalid_bool_raises_value_error(tmp_path):
     """Invalid boolean literals must fail fast with a clear validation error."""
     filepath = tmp_path / "invalid_bool.yaml"
