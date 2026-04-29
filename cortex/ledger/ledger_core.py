@@ -288,8 +288,14 @@ class SovereignLedger:
             return getattr(self._config, "CHECKPOINT_MIN", 10)
         return getattr(self._config, "CHECKPOINT_MAX", 100)
 
-    def record_transaction(self, project: str, action: str, detail: Any = None) -> str:
-        """Record a transaction synchronously."""
+    def record_transaction(
+        self,
+        project: str,
+        action: str,
+        detail: Any = None,
+        tenant_id: str = "default",
+    ) -> str:
+        """Record a transaction synchronously with tenant-scoped hash chain."""
         if not isinstance(self.db, sqlite3.Connection):
             raise RuntimeError("record_transaction requires a sync sqlite3.Connection")
 
@@ -299,15 +305,19 @@ class SovereignLedger:
 
         try:
             self.db.execute("BEGIN EXCLUSIVE")
-            cursor = self.db.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1")
+            cursor = self.db.execute(
+                "SELECT hash FROM transactions WHERE tenant_id = ? ORDER BY id DESC LIMIT 1",
+                (tenant_id,),
+            )
             row = cursor.fetchone()
             prev_hash = row[0] if row else "GENESIS"
             new_hash = compute_tx_hash(prev_hash, project, action, detail_json, ts)
 
             self.db.execute(
-                "INSERT INTO transactions (project, action, detail, prev_hash, hash, timestamp)"
-                " VALUES (?, ?, ?, ?, ?, ?)",
-                (project, action, detail_json, prev_hash, new_hash, ts),
+                "INSERT INTO transactions "
+                "(project, action, detail, prev_hash, hash, tenant_id, timestamp)"
+                " VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (project, action, detail_json, prev_hash, new_hash, tenant_id, ts),
             )
             self.db.commit()
             return new_hash

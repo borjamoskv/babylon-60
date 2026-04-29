@@ -71,7 +71,7 @@ def _apply_base_schema(conn: sqlite3.Connection) -> None:
     for stmt in get_all_schema():
         try:
             conn.executescript(stmt)
-        except Exception as e:
+        except sqlite3.OperationalError as e:
             msg = str(e).lower()
             if "vec0" in str(stmt) or "no such module" in msg:
                 logger.debug("Skipping optional sqlite-vec schema statement: %s", e)
@@ -144,7 +144,7 @@ async def _apply_base_schema_async(conn: aiosqlite.Connection) -> None:
     for stmt in get_all_schema():
         try:
             await conn.executescript(stmt)
-        except Exception as e:
+        except sqlite3.OperationalError as e:
             msg = str(e).lower()
             if "vec0" in str(stmt) or "no such module" in msg:
                 logger.debug("Skipping optional sqlite-vec schema statement: %s", e)

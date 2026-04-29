@@ -162,10 +162,11 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 await pipeline.run_guards(
                     content, project, fact_type, meta or {}, conn, tenant_id=tenant_id
                 )
-            except ValueError:
-                raise  # Guard rejections must propagate
-            except Exception as _gp_err:  # noqa: BLE001
-                logger.debug("[AX-II] GuardPipeline pre-store skipped: %s", _gp_err)
+            except (ValueError, RuntimeError):
+                raise  # Guard rejections and runtime errors must propagate
+            except (ImportError, AttributeError) as _gp_err:
+                # Guard module not loaded — safe to skip
+                logger.debug("[AX-II] GuardPipeline pre-store skipped (not loaded): %s", _gp_err)
 
         dedupe_id, meta, content, fact_type = await self._run_store_validation(
             conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
@@ -230,8 +231,10 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                     source=source,
                     db_path=db_path,
                 )
-            except Exception as _ph_err:  # noqa: BLE001
-                logger.debug("[AX-II] GuardPipeline post-hooks skipped: %s", _ph_err)
+            except (ImportError, AttributeError) as _ph_err:
+                logger.debug("[AX-II] GuardPipeline post-hooks skipped (not loaded): %s", _ph_err)
+            except (ValueError, RuntimeError, OSError) as _ph_err:
+                logger.warning("[AX-II] GuardPipeline post-hooks failed: %s", _ph_err)
 
         return fact_id
 
