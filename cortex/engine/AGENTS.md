@@ -1,55 +1,58 @@
-# 🔧 AGENTS.md — `cortex/engine/`
+# AGENTS.md - cortex/engine
 
-> Scoped rules for the Engine domain. **Root `AGENTS.md` always takes precedence.**
-> These rules augment — never contradict — the root contract.
+Root `AGENTS.md` applies first. These rules add engine-specific constraints.
 
----
+## Risk Posture
 
-## ⚠️ CRITICAL: Engine Mutation Safety Gate
+`cortex/engine/` is a critical surface. Small changes can alter guard admission,
+tenant scoping, ledger continuity, persistence transactions, or irreversible
+state transitions.
 
-The `engine/` directory is the **highest-risk surface** in CORTEX. Every mutation here has potential ledger and state integrity consequences.
+Before editing engine code:
 
-**Before touching ANY file in this directory:**
-1. Read the root Write-Path Contract (Saga Pattern) — no exceptions.
-2. Identify which SAGA step your change affects.
-3. Check whether `store_validation.py` or `store_mutation.py` are in the call stack.
-4. Run `pytest tests/ -k "engine" -v` before and after your change.
+- Identify whether the change affects reads, writes, guards, ledger emission,
+  snapshots, deletion, trust scoring, or background execution.
+- Read the tests that cover the changed behavior before patching.
+- Treat generated output as conjecture until it crosses deterministic guards.
 
----
+## Critical Modules
 
-## Kinetic Engine Safety — Annihilator & Crystallizer
+- `fact_store_core.py`: canonical fact persistence boundary.
+- `guard_pipeline.py`, `guard_adapters.py`, `storage_guard.py`: admission and
+  fail-closed behavior.
+- `transaction_mixin.py`: ledger and persistence transaction coupling.
+- `crystallizer.py`: permanent fact synthesis and persistence.
+- `reaper.py`: destructive or tombstone-oriented paths.
+- `snapshots.py`: rollback and recovery support where implemented.
+- `semantic_hash.py`: content hash semantics.
+- `consensus.py`: multi-agent quorum and vote-ledger interaction.
+- `mutation_engine.py`: state mutation and verification surfaces.
+- `trust_registry.py`: identity and trust metadata propagation.
+- `bridge_guard.py`: admission guard for bridge-style writes.
 
-The two most dangerous modules are:
+## Engine Rules
 
-| Module | Risk | Rule |
-| :--- | :---: | :--- |
-| `crystallizer.py` | CRITICAL | Never write without a prior guard call. Writes facts permanently to the ledger. |
-| `reaper.py` | CRITICAL | Deletion is irreversible. Any call path through `reaper.py` MUST emit a Ledger event first. |
-| `store_mutation.py` | CRITICAL | All mutations MUST pass through `store_validation.py` before execution. |
-| `store_validation.py` | HIGH | Treat as the deterministic boundary. Do not add permissive fallbacks. |
-| `slashing.py` | HIGH | Reputation slashing is irreversible per session. Requires double-validation. |
-| `trust_registry.py` | HIGH | Identity mutations here propagate to all tenant-scoped operations. |
-| `bridge_guard.py` | HIGH | Admission guard. Any softening of checks violates the Write-Path Contract (SAGA-1). |
+- Do not write facts without guard admission and tenant validation.
+- Do not bypass `fact_store_core.py` for persistent fact writes.
+- Do not add permissive fallbacks around guard failures.
+- Do not perform irreversible deletion without tenant scope and audit rationale.
+- Do not change hash semantics without ledger/hash regression tests.
+- Do not change quorum or vote-ledger behavior without consensus tests.
+- Do not add blocking calls in async engine paths.
+- Do not hide deterministic failures behind broad exception handling.
 
----
+## Focused Checks
 
-## Engine-Specific Anti-Patterns
-
-- **NO** direct SQLite writes bypassing `store_mutation.py`.
-- **NO** calls to `crystallizer.py` without a prior `bridge_guard.py` admission check.
-- **NO** modifications to `semantic_hash.py` without updating hash continuity tests.
-- **NO** changes to `consensus.py` without verifying multi-agent quorum logic is intact.
-- **NO** `evolution_engine.py` mutations that skip `evolution_metrics.py` instrumentation.
-- **NO** `snapshots.py` writes without capturing `ROLLBACK_STATE` first (SAGA-6 invariant).
-
----
-
-## Engine Test Coverage Requirement
-
-Any engine change MUST maintain or improve coverage for:
+Use the narrowest relevant command first, then broaden if shared behavior moved.
 
 ```bash
-pytest tests/ -k "engine or store or crystallizer or reaper" -v --cov=cortex/engine
+pytest tests/test_guard_pipeline.py \
+       tests/test_daemon_guarded_persistence.py \
+       tests/test_store_mixin.py \
+       tests/test_store_request_taint.py -v
+
+pytest tests/ -k "engine or store or crystal or reaper or consensus" -v
 ```
 
-Minimum coverage gate: **80%** on modified modules.
+For ledger-sensitive engine changes, also run the focused ledger checks listed in
+the root `AGENTS.md`.

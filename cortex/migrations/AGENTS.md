@@ -1,75 +1,54 @@
-# 🗄️ AGENTS.md — `cortex/migrations/`
+# AGENTS.md - cortex/migrations
 
-> Scoped rules for the Migrations domain. **Root `AGENTS.md` always takes precedence.**
-> These rules augment — never contradict — the root contract.
+Root `AGENTS.md` applies first. These rules add migration-specific constraints.
 
----
+## Risk Posture
 
-## ⚠️ CRITICAL: Migrations are Irreversible in Production
+Schema changes can corrupt tenant data, break ledger verification, or make old
+databases unrecoverable. This repo's active migration contract is implemented in
+`cortex/migrations/core.py` and `cortex/migrations/registry.py`; do not document
+or require Alembic unless the repo actually adds Alembic as an active mechanism.
 
-Schema changes carry the highest blast radius of any operation in CORTEX. A broken migration can corrupt the ledger hash chain, invalidate tenant data, or cause silent data loss.
+Before editing migrations:
 
-**STOP. Before writing or applying any migration:**
+- Read `cortex/migrations/core.py` and `cortex/migrations/registry.py`.
+- Identify affected tables, indexes, virtual tables, and tenant columns.
+- Document rollback or downgrade behavior in the migration or PR notes.
+- Confirm failed migrations do not advance `schema_version`.
 
-```text
-1. Run:  alembic history --verbose
-         → Read the full output. Understand the current head before proceeding.
+## Migration Inventory
 
-2. Run:  alembic current
-         → Confirm the database is at the expected revision.
+- `001_ledger_events.sql`: ledger event foundation.
+- `002_enrichment_jobs.sql`: enrichment queue.
+- `016_crypto_shredding.sql`: encryption/key lifecycle support.
+- `017_hlc_crdt.sql`: HLC and CRDT support.
+- `mig_ledger.py`: ledger-related schema.
+- `mig_tenant.py`: tenant isolation schema.
+- `mig_consensus.py`: consensus/vote-ledger schema.
+- `mig_cognitive_layer.py`: vector/cognitive schema, including sqlite-vec risk.
+- `mig_fts.py`: full-text-search schema.
+- `mig_tombstone.py`: deletion/tombstone behavior.
 
-3. Ask:  Can this migration be rolled back? What is the exact downgrade target?
-         → Document the answer in the migration file header.
+## Migration Rules
 
-4. Ask:  Does this change affect vec0 (sqlite-vec) virtual tables?
-         → If YES: test in an environment with sqlite-vec loaded. Many CI environments lack this.
+- Do not mutate historical migration files unless the change is explicitly a
+  compatibility fix and is documented as such.
+- Do not drop or rewrite tenant-scoped data without a preservation or backfill
+  strategy.
+- Do not change ledger tables without hash-chain compatibility tests.
+- Do not change sqlite-vec/FTS behavior without graceful-degradation coverage.
+- Do not store plaintext secrets or sensitive tenant payloads in new columns.
+- Do not advance schema version after a failed migration.
 
-5. Run:  alembic upgrade head --sql  (dry-run, prints SQL only — does not apply)
-         → Review SQL before applying.
-```
-
----
-
-## Migration File Inventory
-
-| File | Applies To | Notes |
-| :--- | :--- | :--- |
-| `001_ledger_events.sql` | Ledger hash chain | Foundation. Never modify without full chain re-verification. |
-| `002_enrichment_jobs.sql` | Enrichment queue | Modifying column types here breaks `enrichment_worker.py`. |
-| `016_crypto_shredding.sql` | Encryption keys | Crypto shredding is permanent. Test tenant key rotation first. |
-| `017_hlc_crdt.sql` | HLC timestamps + CRDT | HLC ordering is global. Changes affect all inter-agent sync operations. |
-| `mig_cognitive_layer.py` | Cognitive maps | Embedded vector schema. Requires `sqlite-vec` loaded. |
-| `mig_consensus.py` | Consensus tables | Quorum logic depends on this schema. Breaks multi-agent sync if wrong. |
-
----
-
-## Migration Acceptance Rules
-
-A migration is **REJECTED** if any of the following are true:
-
-- [ ] No `# DOWNGRADE TARGET: revision_id` comment in the migration header.
-- [ ] Drops a column without a data-preservation strategy documented.
-- [ ] Alters a column type without a cast/coercion path verified.
-- [ ] Touches `ledger_events` without a full hash-chain re-verification test.
-- [ ] Modifies `vec0` virtual tables without an environment test where `sqlite-vec` is absent (graceful degradation check).
-- [ ] Has no corresponding `pytest` fixture that verifies the schema state post-migration.
-
----
-
-## Emergency Rollback Procedure
-
-If a migration causes a production failure:
+## Focused Checks
 
 ```bash
-# 1. Identify current broken head
-alembic current
-
-# 2. Roll back to last known good state
-alembic downgrade <previous_revision_id>
-
-# 3. Lock write paths immediately (prevent further data mutation)
-# Set CORTEX_READONLY_MODE=1 in environment
-
-# 4. Emit incident to Ledger with blast radius assessment
-# 5. Do NOT attempt forward migration without root cause identified
+pytest tests/test_migrations_core.py \
+       tests/test_ledger_schema_compat.py \
+       tests/test_ledger_integrity_verification.py \
+       tests/test_ledger_checkpointing.py \
+       tests/test_ledger_tenant_hash_binding.py -v
 ```
+
+For sqlite-vec or L2 memory schema changes, also run the relevant memory/vector
+tests from `cortex/memory/AGENTS.md`.

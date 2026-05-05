@@ -1,72 +1,56 @@
-# 🧠 AGENTS.md — `cortex/memory/`
+# AGENTS.md - cortex/memory
 
-> Scoped rules for the Memory domain. **Root `AGENTS.md` always takes precedence.**
-> These rules augment — never contradict — the root contract.
+Root `AGENTS.md` applies first. These rules add memory-specific constraints.
 
----
+## Risk Posture
 
-## ⚠️ CRITICAL: Memory Surface Safety Gate
+`cortex/memory/` is a critical surface because it combines public memory APIs,
+tenant isolation, fact aging, vector retrieval, L2/L3 storage, provenance, and
+local memory-ledger continuity.
 
-The `memory/` directory has the **largest public API surface** in CORTEX and is the most sensitive to state corruption, tenant leakage, and fact aging violations.
+Before editing memory code:
 
-**Before touching ANY file in this directory:**
-1. Verify tenant isolation is preserved — every read/write path MUST be tenant-scoped.
-2. Check `guardrails.py` is in the call stack for any fact insertion.
-3. Confirm `ledger.py` (local to memory/) emits an event for any state mutation.
-4. Run `pytest tests/ -k "memory" -v` before and after your change.
+- Identify every persistent read/write path touched by the change.
+- Verify explicit `tenant_id` propagation.
+- Check whether taint, provenance, encryption, or memory-ledger continuity is
+  affected.
+- Read focused tests before patching.
 
----
+## Critical Modules
 
-## Memory Module Risk Map
+- `ledger.py`: L3 memory hash-chain continuity.
+- `guardrails.py`, `thalamus.py`, `manager.py`: memory admission boundaries.
+- `sqlite_vec_store.py`, `l2_hybrid_search.py`: L2 vector persistence and FTS.
+- `episodic.py`, `frequency.py`, `drift.py`: fact aging and temporal behavior.
+- `consolidation.py`, `reconsolidation.py`, `dream.py`: consolidation paths.
+- `crdt.py`: commutativity and idempotency requirements.
+- `pii_sanitizer.py`: sensitive-content handling.
+- `schemas.py`, `models.py`: public data contracts.
 
-| Module | Risk | Rule |
-| :--- | :---: | :--- |
-| `ledger.py` | **CRITICAL** | Hash-chain continuity. Every write must chain to the previous hash. Never break the chain. |
-| `guardrails.py` | **CRITICAL** | Admission gate for memory writes. Do not add permissive bypass conditions. |
-| `episodic.py` | **HIGH** | Episodic memory aging. Time-based operations MUST use deterministic timestamps, not `datetime.now()`. |
-| `engrams.py` | **HIGH** | Long-term memory encoding. Mutations here affect retrieval fidelity across all tenants. |
-| `crdt.py` | **HIGH** | Conflict-free replicated data type. Any change MUST preserve commutativity and idempotency. |
-| `consolidation.py` | **HIGH** | Memory consolidation runs merge operations. Always test with multi-tenant fixtures. |
-| `drift.py` | MEDIUM | Memory drift detection. Read-only analysis path — do not make writes here. |
-| `compression.py` | MEDIUM | Lossy compression of low-salience facts. Compression is irreversible — verify salience gates. |
-| `dream.py` | MEDIUM | Offline consolidation daemon. Cannot run concurrently with `consolidation.py`. |
+## Memory Rules
 
----
+- Persistent reads and writes must accept or resolve an explicit `tenant_id`.
+- SQL queries over tenant data must filter by tenant before returning facts.
+- Do not strip taint or provenance metadata when the response contract can carry
+  it.
+- Do not store sensitive content or metadata in plaintext unless the route is
+  explicitly documented as plaintext opt-in.
+- Aging, consolidation, and deletion paths must be tenant-scoped and auditable.
+- CRDT changes must preserve commutativity, convergence, and idempotency.
+- Vector/ML code may use floats; persisted trust thresholds and tenant decisions
+  must not depend on unreviewed float semantics.
 
-## Tenant Isolation Invariants
-
-Every function in this directory that touches persistent state MUST:
-
-1. Accept and pass `tenant_id` as an explicit parameter — no implicit global state.
-2. Filter all SQL queries by `tenant_id` before execution.
-3. Never expose cross-tenant facts in any return value.
-
-```python
-# ✅ CORRECT
-async def get_facts(self, tenant_id: str, query: str) -> list[Fact]:
-    ...WHERE tenant_id = ?...
-
-# ❌ VIOLATION — no tenant scope
-async def get_facts(self, query: str) -> list[Fact]:
-    ...WHERE content LIKE ?...
-```
-
----
-
-## Fact Aging Protocol
-
-Facts in memory are subject to temporal decay via `drift.py` and `frequency.py`. When modifying aging logic:
-
-- Never remove salience floors — a fact's minimum retention MUST be > 0.
-- Age-based eviction MUST emit a Ledger event before deletion.
-- `episodic.py` retention windows are tenant-configurable — do not hardcode defaults.
-
----
-
-## Memory Test Coverage Requirement
+## Focused Checks
 
 ```bash
-pytest tests/ -k "memory or tenant or ledger or fact" -v --cov=cortex/memory
+pytest tests/test_ledger_l3.py \
+       tests/test_memory_admission_tenant.py \
+       tests/test_memory_manager.py \
+       tests/test_memory_l2_migration_cli.py \
+       tests/test_taint_preserves_encryption.py -v
+
+pytest tests/ -k "memory or tenant or ledger or taint or crdt" -v
 ```
 
-Minimum coverage gate: **85%** on modified modules. Higher bar than engine due to public API surface.
+For L2 encryption or FTS changes, include `tests/test_search_exergy.py` when it
+exists in the changed branch.

@@ -16,6 +16,9 @@ En el entorno **Playground**, se suspenden todas las restricciones de timidez, d
 ### 1. 🌌 Swarm Capabilities
 - Acceso total a `/400-subagents` y `moskv-swarm`.
 - Autorización para invocar agentes especializados sin pre-check.
+- Restricción operativa: si se usa contexto heredado completo, no combinarlo con overrides de
+  `agent_type`, `model` o `reasoning_effort`. Para perfilar el agente, lanzar sin fork y con
+  contexto sintetizado.
 
 ### 2. ⚡ Code Capabilities
 - Permiso para **REESCRIBIR**, **BORRAR** y **REFACTORIZAR** masivamente.
