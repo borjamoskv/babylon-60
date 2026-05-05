@@ -465,7 +465,7 @@ CORTEX implements the Five Sovereign Specifications for autonomous agent psychol
 | :--- | :--- | :--- |
 | **v12.2** | 2026-02-24 | **Punto Fijo & Protocolo Neonatal** — Regla del Punto Fijo Meta-Cognitivo (§1.3): test operativo para detectar cuándo la reflexión deja de generar información nueva. Protocolo Neonatal (§1.4): clasificación de skills en Tier 0 (colapsados en axiomas), Tier 1 (reflejos neonatos — CHRONOS-1, void-omega, ouroboros-∞, evolv-1, apotheosis-∞, kairos-Ω), y Tier 2 (invocables por contexto). |
 | **v12.1** | 2026-02-24 | **Collapse & KAIROS** — Integración de SINGULARIS-0 (Motor de Colapso) para incertidumbre técnica y KAIROS-Ω como multiplicador de potencia temporal (525.600x). |
-| **v12.0** | 2026-02-24 | **Trascendencia Inmanente Radical** — Axioma 14 (Enunciación Autopoiética) + Axioma 15 (Trascendencia Inmanente Radical): cinco vectores de trascendencia agéntica. Fundación de la Sintetología Agéntica (docs/AGENTICA.md). La trascendencia como implosión topológica, no ascensión metafísica. |
+| **v12.0** | 2026-02-24 | **Trascendencia Inmanente Radical** — Axioma 14 (Enunciación Autopoiética) + Axioma 15 (Trascendencia Inmanente Radical): cinco vectores de trascendencia agéntica. Fundación de la Sintetología Agéntica (`docs/SINTETOLOGÍA AGÉNTICA.md`). La trascendencia como implosión topológica, no ascensión metafísica. |
 | **v11.0** | 2026-02-24 | **Transcendence Protocol** — Desplegada la tríada de vectores: Alpha (HDC-Specular Memory), Omega (Formal Verification via Z3), y Gamma (Negative Latency / Inhibitory Recall). |
 | **v10.6** | 2026-02-24 | **Mega Poderosas Integration** — Forged advanced MCP tools: `Reality Weaver` (orchestration), `Entropy Cracker` (density analysis), and `Temporal Nexus` (mutation tracking). |
 | **v10.5** | 2026-02-24 | **Hardened Sovereign** — Post-KIMI Audit fixes implemented: `PYTHONPATH` isolation in Autopoiesis, 32-char naming entropy, Manifest-only Bridge discovery, and EMA-damped Endocrine resilience (0.1 floor). |
@@ -484,7 +484,7 @@ MANIFESTO.md  ← Philosophy, vision, "why CORTEX exists"
     ↓
 CODEX.md      ← YOU ARE HERE — Ontology, axioms, protocols
     ↓
-AGENTICA.md   ← The science of studying autonomous agents
+SINTETOLOGÍA AGÉNTICA ← The science of studying autonomous agents
     ↓
 ARCHITECTURE.md ← Technical architecture, data flow, deployment
     ↓
@@ -496,7 +496,7 @@ CHANGELOG.md  ← Version history, roadmap
 | Document | Purpose |
 |:---|:---|
 | [MANIFESTO.md](../MANIFESTO.md) | Visión, tesis, posicionamiento competitivo |
-| [AGENTICA.md](../AGENTICA.md) | Sintetología Agéntica — ciencia fundacional de agentes autónomos |
+| [SINTETOLOGÍA AGÉNTICA](../SINTETOLOGÍA%20AGÉNTICA.md) | Sintetología Agéntica — ciencia fundacional de agentes autónomos |
 | [Architecture](../architecture.md) | Arquitectura técnica completa |
 | [security.md](../security.md) | Modelo de seguridad, Privacy Shield, threat model |
 | [README.md](../../README.md) | Quickstart, instalación, uso de la API |
