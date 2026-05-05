@@ -8,6 +8,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cortex.ledger.ledger_core import SovereignLedger
     from cortex.ledger.models import LedgerEvent, SemanticStatus
+    from cortex.ledger.public_export import (
+        ExportAuthority,
+        LedgerExportResult,
+        public_key_record,
+        write_public_ledger_export,
+    )
     from cortex.ledger.public_verifier import verify_export
     from cortex.ledger.queue import EnrichmentQueue
     from cortex.ledger.store import LedgerStore
@@ -23,6 +29,10 @@ __all__ = [
     "LedgerWriter",
     "LedgerVerifier",
     "EnrichmentQueue",
+    "ExportAuthority",
+    "LedgerExportResult",
+    "public_key_record",
+    "write_public_ledger_export",
     "verify_export",
 ]
 
@@ -33,6 +43,10 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "LedgerWriter": ("cortex.ledger.writer", "LedgerWriter"),
     "LedgerVerifier": ("cortex.ledger.verifier", "LedgerVerifier"),
     "EnrichmentQueue": ("cortex.ledger.queue", "EnrichmentQueue"),
+    "ExportAuthority": ("cortex.ledger.public_export", "ExportAuthority"),
+    "LedgerExportResult": ("cortex.ledger.public_export", "LedgerExportResult"),
+    "public_key_record": ("cortex.ledger.public_export", "public_key_record"),
+    "write_public_ledger_export": ("cortex.ledger.public_export", "write_public_ledger_export"),
     "verify_export": ("cortex.ledger.public_verifier", "verify_export"),
 }
 
