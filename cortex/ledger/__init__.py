@@ -7,7 +7,21 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from cortex.ledger.ledger_core import SovereignLedger
-    from cortex.ledger.models import LedgerEvent, SemanticStatus
+    from cortex.ledger.models import LedgerEvent, LedgerOriginSignature, SemanticStatus
+    from cortex.ledger.origin import (
+        OriginKeyRecord,
+        OriginKeyRegistry,
+        OriginSignatureError,
+        OriginSignaturePolicy,
+        sign_event_origin,
+        verify_event_origin,
+    )
+    from cortex.ledger.public_export import (
+        ExportAuthority,
+        LedgerExportResult,
+        public_key_record,
+        write_public_ledger_export,
+    )
     from cortex.ledger.public_verifier import verify_export
     from cortex.ledger.queue import EnrichmentQueue
     from cortex.ledger.store import LedgerStore
@@ -16,6 +30,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "LedgerEvent",
+    "LedgerOriginSignature",
     "SemanticStatus",
     "SovereignLedger",
     "ImmutableLedger",
@@ -23,16 +38,37 @@ __all__ = [
     "LedgerWriter",
     "LedgerVerifier",
     "EnrichmentQueue",
+    "ExportAuthority",
+    "LedgerExportResult",
+    "OriginKeyRecord",
+    "OriginKeyRegistry",
+    "OriginSignatureError",
+    "OriginSignaturePolicy",
+    "public_key_record",
+    "sign_event_origin",
+    "write_public_ledger_export",
+    "verify_event_origin",
     "verify_export",
 ]
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "LedgerEvent": ("cortex.ledger.models", "LedgerEvent"),
+    "LedgerOriginSignature": ("cortex.ledger.models", "LedgerOriginSignature"),
     "SemanticStatus": ("cortex.ledger.models", "SemanticStatus"),
     "LedgerStore": ("cortex.ledger.store", "LedgerStore"),
     "LedgerWriter": ("cortex.ledger.writer", "LedgerWriter"),
     "LedgerVerifier": ("cortex.ledger.verifier", "LedgerVerifier"),
     "EnrichmentQueue": ("cortex.ledger.queue", "EnrichmentQueue"),
+    "OriginKeyRecord": ("cortex.ledger.origin", "OriginKeyRecord"),
+    "OriginKeyRegistry": ("cortex.ledger.origin", "OriginKeyRegistry"),
+    "OriginSignatureError": ("cortex.ledger.origin", "OriginSignatureError"),
+    "OriginSignaturePolicy": ("cortex.ledger.origin", "OriginSignaturePolicy"),
+    "sign_event_origin": ("cortex.ledger.origin", "sign_event_origin"),
+    "verify_event_origin": ("cortex.ledger.origin", "verify_event_origin"),
+    "ExportAuthority": ("cortex.ledger.public_export", "ExportAuthority"),
+    "LedgerExportResult": ("cortex.ledger.public_export", "LedgerExportResult"),
+    "public_key_record": ("cortex.ledger.public_export", "public_key_record"),
+    "write_public_ledger_export": ("cortex.ledger.public_export", "write_public_ledger_export"),
     "verify_export": ("cortex.ledger.public_verifier", "verify_export"),
 }
 
