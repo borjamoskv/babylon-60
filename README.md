@@ -66,7 +66,7 @@ Traditional logging and standard vector stores fail the epistemic containment te
 ### What CORTEX does NOT replace (Non-Goals)
 
 - **CORTEX is not a Semantic Search primary DB:** Continue using Qdrant, Pinecone, or Milvus for purely ephemeral RAG chunks. CORTEX stores the *decisions* and core *facts*.
-- **CORTEX is not an Observability Platform:** Continue using Datadog or ELK for server metrics, APM, and basic string logs. 
+- **CORTEX is not an Observability Platform:** Continue using Datadog or ELK for server metrics, APM, and basic string logs.
 - **CORTEX does not stop hallucinations:** A cryptographically logged lie from an LLM is still a lie. It is merely an *auditable* lie, flagged if it contradicts prior sealed facts.
 
 ## Deployment Matrix
