@@ -1,6 +1,9 @@
 # Shield
-- strict origin signatures + permissions (M4)
-- atomic replay/freshness admission (M5)
-- no-PII immutable ledger policy (M6)
-- subject/fact crypto-shredding proof (M7)
-- tenant isolation / admin bootstrap hardening (PR-272)
+
+Scope: runtime hardening (origin authenticity, replay/freshness, immutable ledger privacy, crypto-shredding, tenant isolation).
+
+- M4: strict origin signatures + permissions registry
+- M5: atomic replay/freshness admission (event-id/nonce + idempotency)
+- M6: no-PII immutable ledger policy (allowlists + scrubbing)
+- M7: subject/fact scoped crypto-shredding proof (derivative purge + tombstone continuity)
+- PR-272: tenant isolation / admin bootstrap hardening
