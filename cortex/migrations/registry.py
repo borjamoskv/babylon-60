@@ -21,10 +21,9 @@ from cortex.migrations.mig_ledger import (
     _migration_012_ghosts_table,
     _migration_014_vote_ledger_refinement,
 )
+from cortex.migrations.mig_ledger_replay import _migration_023_ledger_origin_replay
 from cortex.migrations.mig_security_hardening import _migration_018_security_hardening
 from cortex.migrations.mig_signals import _migration_019_signal_bus
-
-# migration 23 (mig_simplify_facts) removed — incompatible with live schema (Ω₃)
 from cortex.migrations.mig_solid_state import _migration_021_solid_state
 from cortex.migrations.mig_tenant import _migration_015_tenant_unification
 from cortex.migrations.mig_tombstone import _migration_020_tombstone
@@ -55,5 +54,6 @@ MIGRATIONS = [
     (20, "Tombstoning GC columns", _migration_020_tombstone),
     (21, "Solid-State Substrate (entity_events)", _migration_021_solid_state),
     (22, "Stratified Cognition + Causal Anchoring", _migration_022_cognitive_layer),
-    # (23) removed — mig_simplify_facts was never applied and is incompatible with live schema
+    (23, "Ledger origin replay protection", _migration_023_ledger_origin_replay),
+    # mig_simplify_facts removed — it was never applied and is incompatible with live schema
 ]

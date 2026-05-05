@@ -20,6 +20,10 @@ class LedgerStore:
 
         return connect(self.db_path, row_factory=sqlite3.Row)
 
+    def connect(self) -> sqlite3.Connection:
+        """Open a managed ledger connection for specialized transactional writers."""
+        return self._connect()
+
     @contextmanager
     def tx(self) -> Iterator[sqlite3.Connection]:
         conn = self._connect()
@@ -61,6 +65,21 @@ class LedgerStore:
                     created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
                 );
 
+                CREATE TABLE IF NOT EXISTS ledger_origin_replay (
+                    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+                    tenant_id        TEXT NOT NULL DEFAULT 'default',
+                    actor_id         TEXT NOT NULL,
+                    key_id           TEXT NOT NULL,
+                    nonce            TEXT NOT NULL,
+                    event_id         TEXT NOT NULL,
+                    signed_at        TEXT NOT NULL,
+                    origin_signature TEXT NOT NULL,
+                    event_hash       TEXT,
+                    created_at       TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+                    UNIQUE(tenant_id, actor_id, key_id, nonce),
+                    UNIQUE(tenant_id, event_id)
+                );
+
                 CREATE TABLE IF NOT EXISTS enrichment_jobs (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     job_id TEXT UNIQUE,
@@ -82,6 +101,12 @@ class LedgerStore:
                 CREATE INDEX IF NOT EXISTS idx_ledger_events_hash ON ledger_events(hash);
                 CREATE INDEX IF NOT EXISTS idx_ledger_events_semantic_status
                     ON ledger_events(semantic_status);
+                CREATE INDEX IF NOT EXISTS idx_ledger_origin_replay_nonce
+                    ON ledger_origin_replay(tenant_id, actor_id, key_id, nonce);
+                CREATE INDEX IF NOT EXISTS idx_ledger_origin_replay_event
+                    ON ledger_origin_replay(tenant_id, event_id);
+                CREATE INDEX IF NOT EXISTS idx_ledger_origin_replay_signed_at
+                    ON ledger_origin_replay(signed_at);
 
                 CREATE TABLE IF NOT EXISTS ledger_enrichment_jobs (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -24,6 +24,11 @@ if TYPE_CHECKING:
     )
     from cortex.ledger.public_verifier import verify_export
     from cortex.ledger.queue import EnrichmentQueue
+    from cortex.ledger.replay import (
+        FreshnessPolicy,
+        ReplayProtectionError,
+        ReplayProtectionPolicy,
+    )
     from cortex.ledger.store import LedgerStore
     from cortex.ledger.verifier import LedgerVerifier
     from cortex.ledger.writer import LedgerWriter
@@ -44,6 +49,9 @@ __all__ = [
     "OriginKeyRegistry",
     "OriginSignatureError",
     "OriginSignaturePolicy",
+    "FreshnessPolicy",
+    "ReplayProtectionError",
+    "ReplayProtectionPolicy",
     "public_key_record",
     "sign_event_origin",
     "write_public_ledger_export",
@@ -65,6 +73,9 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "OriginSignaturePolicy": ("cortex.ledger.origin", "OriginSignaturePolicy"),
     "sign_event_origin": ("cortex.ledger.origin", "sign_event_origin"),
     "verify_event_origin": ("cortex.ledger.origin", "verify_event_origin"),
+    "FreshnessPolicy": ("cortex.ledger.replay", "FreshnessPolicy"),
+    "ReplayProtectionError": ("cortex.ledger.replay", "ReplayProtectionError"),
+    "ReplayProtectionPolicy": ("cortex.ledger.replay", "ReplayProtectionPolicy"),
     "ExportAuthority": ("cortex.ledger.public_export", "ExportAuthority"),
     "LedgerExportResult": ("cortex.ledger.public_export", "LedgerExportResult"),
     "public_key_record": ("cortex.ledger.public_export", "public_key_record"),

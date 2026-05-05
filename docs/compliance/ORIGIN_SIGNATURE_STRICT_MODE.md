@@ -58,7 +58,8 @@ Strict mode rejects:
 ## Current Limitations
 
 M4 does not add durable key-registry storage, replay tables, freshness windows,
-or nonce reservation. Those are M5 responsibilities.
+or nonce reservation. M5 adds replay/freshness controls in
+[`REPLAY_FRESHNESS_STRICT_MODE.md`](REPLAY_FRESHNESS_STRICT_MODE.md).
 
 M4 also does not assert that event content is true. It distinguishes origin
 authenticity from content truth: a valid key can still sign false content, and
