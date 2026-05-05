@@ -88,4 +88,4 @@ active NOTEBOOKLM-Ω bridge configuration:
 
 ---
 
-> *"Defining the architecture is the first act of sovereignty."* — [AGENTICA.md](AGENTICA.md)
+> *"Defining the architecture is the first act of sovereignty."* — [SINTETOLOGÍA AGÉNTICA](SINTETOLOGÍA%20AGÉNTICA.md)
