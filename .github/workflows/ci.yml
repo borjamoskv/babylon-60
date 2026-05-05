@@ -522,6 +522,17 @@ jobs:
         if: steps.scope.outputs.release_only != 'true'
         run: |
           docker run --rm -d --name cortex-test -p 8484:8484 cortex:test
-          sleep 5
-          curl -f http://localhost:8484/health || exit 1
+          for attempt in {1..30}; do
+            if curl -fsS http://localhost:8484/health; then
+              docker stop cortex-test
+              exit 0
+            fi
+            if ! docker ps --format '{{.Names}}' | grep -qx cortex-test; then
+              docker logs cortex-test || true
+              exit 1
+            fi
+            sleep 2
+          done
+          docker logs cortex-test || true
           docker stop cortex-test
+          exit 1
