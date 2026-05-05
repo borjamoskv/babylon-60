@@ -1,0 +1,8 @@
+bench:
+  covers: [279, 287]
+shield:
+  covers: [282, 283, 284, 285, 272]
+governor:
+  covers: [286, 288]
+landing:
+  covers: [281, 274]
