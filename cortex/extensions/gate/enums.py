@@ -2,7 +2,7 @@
 
 from enum import Enum
 
-__all__ = ["ActionLevel", "GatePolicy", "ActionStatus"]
+__all__ = ["ActionLevel", "GatePolicy", "ActionStatus", "OversightState"]
 
 
 class ActionLevel(str, Enum):
@@ -31,3 +31,13 @@ class ActionStatus(str, Enum):
     EXPIRED = "expired"
     EXECUTED = "executed"
     FAILED = "failed"
+
+
+class OversightState(str, Enum):
+    """Human-oversight lifecycle for regulated or high-risk actions."""
+
+    MACHINE_RECOMMENDATION = "machine_recommendation"
+    REVIEW_REQUIRED = "review_required"
+    HUMAN_REVIEWED = "human_reviewed"
+    HUMAN_OVERRIDE = "human_override"
+    FINAL_EFFECT_EXECUTED = "final_effect_executed"

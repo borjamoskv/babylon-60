@@ -11,6 +11,7 @@ from cortex.extensions.gate import (
     GateError,
     GateExpired,
     GateInvalidSignature,
+    GateUnauthorizedReviewer,
     get_gate,
 )
 from cortex.types.models import (
@@ -61,12 +62,48 @@ async def approve_action(
             action_id=action_id,
             signature=request.signature,
             operator_id=request.operator_id or "api",
+            reviewer_role=request.reviewer_role,
+            reason_code=request.reason_code,
+            auth_method=request.auth_method,
+            strong_auth_token=request.strong_auth_token,
         )
         action = gate._get_action(action_id)
         return GateActionResponse(**action.to_dict())
     except GateExpired as e:
         raise HTTPException(status_code=410, detail=str(e)) from None
     except GateInvalidSignature as e:
+        raise HTTPException(status_code=403, detail=str(e)) from None
+    except GateUnauthorizedReviewer as e:
+        raise HTTPException(status_code=403, detail=str(e)) from None
+    except GateError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from None
+
+
+@router.post("/{action_id}/override", response_model=GateActionResponse)
+async def override_action(
+    action_id: str,
+    request: GateApprovalRequest,
+    _=Depends(require_permission("write")),
+):
+    """Apply an audited human override for a high-risk action."""
+    gate = get_gate()
+    try:
+        gate.override(
+            action_id=action_id,
+            signature=request.signature,
+            operator_id=request.operator_id or "api",
+            reviewer_role=request.reviewer_role or "",
+            reason_code=request.reason_code or "",
+            auth_method=request.auth_method,
+            strong_auth_token=request.strong_auth_token,
+        )
+        action = gate._get_action(action_id)
+        return GateActionResponse(**action.to_dict())
+    except GateExpired as e:
+        raise HTTPException(status_code=410, detail=str(e)) from None
+    except GateInvalidSignature as e:
+        raise HTTPException(status_code=403, detail=str(e)) from None
+    except GateUnauthorizedReviewer as e:
         raise HTTPException(status_code=403, detail=str(e)) from None
     except GateError as e:
         raise HTTPException(status_code=404, detail=str(e)) from None

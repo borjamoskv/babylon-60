@@ -5,12 +5,13 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from cortex.extensions.gate.core import SovereignGate, get_gate, reset_gate
-    from cortex.extensions.gate.enums import ActionLevel, ActionStatus, GatePolicy
+    from cortex.extensions.gate.enums import ActionLevel, ActionStatus, GatePolicy, OversightState
     from cortex.extensions.gate.errors import (
         GateError,
         GateExpired,
         GateInvalidSignature,
         GateNotApproved,
+        GateUnauthorizedReviewer,
     )
     from cortex.extensions.gate.models import PendingAction
 
@@ -22,6 +23,8 @@ __all__ = [
     "GateInvalidSignature",
     "GateNotApproved",
     "GatePolicy",
+    "GateUnauthorizedReviewer",
+    "OversightState",
     "PendingAction",
     "SovereignGate",
     "get_gate",
@@ -31,10 +34,12 @@ __all__ = [
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "ActionLevel": ("cortex.extensions.gate.enums", "ActionLevel"),
     "ActionStatus": ("cortex.extensions.gate.enums", "ActionStatus"),
+    "OversightState": ("cortex.extensions.gate.enums", "OversightState"),
     "GateError": ("cortex.extensions.gate.errors", "GateError"),
     "GateExpired": ("cortex.extensions.gate.errors", "GateExpired"),
     "GateInvalidSignature": ("cortex.extensions.gate.errors", "GateInvalidSignature"),
     "GateNotApproved": ("cortex.extensions.gate.errors", "GateNotApproved"),
+    "GateUnauthorizedReviewer": ("cortex.extensions.gate.errors", "GateUnauthorizedReviewer"),
     "GatePolicy": ("cortex.extensions.gate.enums", "GatePolicy"),
     "PendingAction": ("cortex.extensions.gate.models", "PendingAction"),
     "SovereignGate": ("cortex.extensions.gate.core", "SovereignGate"),

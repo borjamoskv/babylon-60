@@ -16,8 +16,14 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-from .errors import GateError, GateExpired, GateInvalidSignature, GateNotApproved
-from .models import ActionLevel, ActionStatus, GatePolicy, PendingAction
+from .errors import (
+    GateError,
+    GateExpired,
+    GateInvalidSignature,
+    GateNotApproved,
+    GateUnauthorizedReviewer,
+)
+from .models import ActionLevel, ActionStatus, GatePolicy, OversightState, PendingAction
 
 __all__ = ["SovereignGate", "get_gate", "reset_gate"]
 
@@ -41,6 +47,9 @@ class SovereignGate:
     """
 
     DEFAULT_TIMEOUT = 300  # 5 minutes
+    DEFAULT_AUTHORIZED_REVIEWER_ROLES = frozenset(
+        {"operator", "risk_officer", "compliance_officer", "human_reviewer", "admin"}
+    )
 
     def __init__(
         self,
@@ -75,6 +84,7 @@ class SovereignGate:
 
         self._pending: dict[str, PendingAction] = {}
         self._audit_log: collections.deque[dict[str, Any]] = collections.deque(maxlen=10_000)
+        self._authorized_reviewer_roles = set(self.DEFAULT_AUTHORIZED_REVIEWER_ROLES)
 
         logger.info(
             "SovereignGate initialized — policy=%s timeout=%ds",
@@ -91,6 +101,10 @@ class SovereignGate:
         command: Optional[list[str]] = None,
         project: Optional[str] = None,
         context: Optional[dict[str, Any]] = None,
+        *,
+        high_risk: bool = False,
+        limitations: Optional[list[str]] = None,
+        provenance: Optional[dict[str, Any]] = None,
     ) -> PendingAction:
         """
         Register an L3/L4 action and generate an HMAC challenge.
@@ -125,6 +139,15 @@ class SovereignGate:
             project=project,
             context=context or {},
             hmac_challenge=challenge,
+            high_risk=high_risk,
+            requires_human_review=high_risk,
+            limitations=limitations or [],
+            provenance=provenance or {},
+            oversight_state=(
+                OversightState.REVIEW_REQUIRED
+                if high_risk
+                else OversightState.MACHINE_RECOMMENDATION
+            ),
         )
 
         self._pending[action_id] = action
@@ -144,6 +167,10 @@ class SovereignGate:
         action_id: str,
         signature: str,
         operator_id: str = "operator",
+        reviewer_role: Optional[str] = None,
+        reason_code: Optional[str] = None,
+        auth_method: str = "hmac",
+        strong_auth_token: Optional[str] = None,
     ) -> bool:
         """
         Approve an action with HMAC signature verification.
@@ -163,6 +190,24 @@ class SovereignGate:
             self._log_audit("INVALID_SIGNATURE", action)
             raise GateInvalidSignature(f"Invalid signature for action {action_id}")
 
+        if action.requires_human_review:
+            self._validate_human_review(
+                action,
+                reviewer_id=operator_id,
+                reviewer_role=reviewer_role,
+                reason_code=reason_code,
+                auth_method=auth_method,
+                strong_auth_token=strong_auth_token,
+            )
+            action.reviewed_at = time.time()
+            action.reviewer_id = operator_id
+            action.reviewer_role = reviewer_role
+            action.reason_code = reason_code
+            action.auth_method = auth_method
+            action.strong_auth_token = strong_auth_token
+            action.oversight_state = OversightState.HUMAN_REVIEWED
+            self._log_audit("ACTION_HUMAN_REVIEWED", action)
+
         action.status = ActionStatus.APPROVED
         action.approved_at = time.time()
         action.operator_id = operator_id
@@ -173,6 +218,51 @@ class SovereignGate:
             action_id,
             operator_id,
         )
+        return True
+
+    def override(
+        self,
+        action_id: str,
+        signature: str,
+        operator_id: str,
+        reviewer_role: str,
+        reason_code: str,
+        auth_method: str = "hmac",
+        strong_auth_token: Optional[str] = None,
+    ) -> bool:
+        """Apply an audited human override for a high-risk action."""
+        action = self._get_action(action_id)
+
+        if action.is_expired(self.timeout):
+            action.status = ActionStatus.EXPIRED
+            self._log_audit("ACTION_EXPIRED", action)
+            raise GateExpired(f"Action {action_id} expired after {self.timeout}s")
+
+        if not hmac.compare_digest(signature, action.hmac_challenge):
+            self._log_audit("INVALID_SIGNATURE", action)
+            raise GateInvalidSignature(f"Invalid signature for action {action_id}")
+
+        self._validate_human_review(
+            action,
+            reviewer_id=operator_id,
+            reviewer_role=reviewer_role,
+            reason_code=reason_code,
+            auth_method=auth_method,
+            strong_auth_token=strong_auth_token,
+        )
+        action.status = ActionStatus.APPROVED
+        action.approved_at = time.time()
+        action.operator_id = operator_id
+        action.reviewed_at = action.reviewed_at or time.time()
+        action.overridden_at = time.time()
+        action.reviewer_id = operator_id
+        action.reviewer_role = reviewer_role
+        action.override_reason_code = reason_code
+        action.reason_code = action.reason_code or reason_code
+        action.auth_method = auth_method
+        action.strong_auth_token = strong_auth_token
+        action.oversight_state = OversightState.HUMAN_OVERRIDE
+        self._log_audit("ACTION_HUMAN_OVERRIDE", action)
         return True
 
     def approve_interactive(self, action_id: str) -> bool:
@@ -257,6 +347,14 @@ class SovereignGate:
         if action.status != ActionStatus.APPROVED:
             raise GateNotApproved(f"Action {action_id} is {action.status.value}, not approved")
 
+        if action.requires_human_review and action.oversight_state not in {
+            OversightState.HUMAN_REVIEWED,
+            OversightState.HUMAN_OVERRIDE,
+        }:
+            raise GateNotApproved(
+                f"Action {action_id} is missing effective human review for final effect"
+            )
+
         if action.is_expired(self.timeout):
             action.status = ActionStatus.EXPIRED
             self._log_audit("ACTION_EXPIRED_PRE_EXEC", action)
@@ -272,6 +370,7 @@ class SovereignGate:
             "stdout_len": len(result.stdout or ""),
             "stderr_len": len(result.stderr or ""),
         }
+        action.oversight_state = OversightState.FINAL_EFFECT_EXECUTED
         self._log_audit("ACTION_EXECUTED", action)
         return result
 
@@ -312,6 +411,31 @@ class SovereignGate:
         if action is None:
             raise GateError(f"Unknown action ID: {action_id}")
         return action
+
+    def _validate_human_review(
+        self,
+        action: PendingAction,
+        *,
+        reviewer_id: str,
+        reviewer_role: Optional[str],
+        reason_code: Optional[str],
+        auth_method: str,
+        strong_auth_token: Optional[str],
+    ) -> None:
+        if not reviewer_id:
+            raise GateUnauthorizedReviewer("reviewer_id is required for human review")
+        if not reviewer_role:
+            raise GateUnauthorizedReviewer("reviewer_role is required for high-risk approval")
+        if reviewer_role not in self._authorized_reviewer_roles:
+            raise GateUnauthorizedReviewer(f"unauthorized reviewer role: {reviewer_role}")
+        if not reason_code:
+            raise GateUnauthorizedReviewer("reason_code is required for high-risk approval")
+        if not auth_method:
+            raise GateUnauthorizedReviewer("auth_method is required for high-risk approval")
+        if auth_method != "hmac" and not strong_auth_token:
+            raise GateUnauthorizedReviewer(
+                "strong_auth_token is required when auth_method is not hmac"
+            )
 
     def _sweep_expired(self) -> int:
         """Mark expired pending actions. Returns count of expired."""

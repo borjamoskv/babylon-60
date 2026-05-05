@@ -7,6 +7,7 @@ __all__ = [
     "GateExpired",
     "GateInvalidSignature",
     "GateNotApproved",
+    "GateUnauthorizedReviewer",
 ]
 
 
@@ -24,3 +25,7 @@ class GateExpired(GateError):
 
 class GateInvalidSignature(GateError):
     """HMAC signature does not match."""
+
+
+class GateUnauthorizedReviewer(GateError):
+    """Reviewer lacks the required role or evidence fields."""

@@ -470,6 +470,12 @@ class MejoraloShipResponse(BaseModel):
 class GateApprovalRequest(BaseModel):
     signature: str = Field(..., description="HMAC-SHA256 signature of the challenge")
     operator_id: str | None = Field(None, description="Operator identifier")
+    reviewer_role: str | None = Field(None, description="Authorized human reviewer role")
+    reason_code: str | None = Field(None, description="Structured human review reason code")
+    auth_method: str = Field("hmac", description="Authentication method used by the reviewer")
+    strong_auth_token: str | None = Field(
+        None, description="Strong-authentication evidence or reference when required"
+    )
 
 
 class GateActionResponse(BaseModel):
@@ -479,9 +485,20 @@ class GateActionResponse(BaseModel):
     command: list[str] | None = None
     project: str | None = None
     status: str
+    oversight_state: str
     created_at: str
     approved_at: str | None = None
+    reviewed_at: str | None = None
+    overridden_at: str | None = None
     operator_id: str | None = None
+    reviewer_id: str | None = None
+    reviewer_role: str | None = None
+    reason_code: str | None = None
+    auth_method: str | None = None
+    high_risk: bool = False
+    requires_human_review: bool = False
+    limitations: list[str] = Field(default_factory=list)
+    provenance: dict[str, Any] = Field(default_factory=dict)
 
 
 class GateStatusResponse(BaseModel):
