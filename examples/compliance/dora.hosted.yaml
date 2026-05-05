@@ -1,0 +1,96 @@
+pack:
+  deployment_id: example-hosted
+  deployment_mode: hosted
+  customer_name: Example Customer
+  validity_days: 90
+
+service:
+  legal_provider_name: CORTEX Persist
+  product_version: 0.3.0b2
+  service_description: Provider-operated CORTEX hosted deployment.
+  modules_enabled:
+    - ledger
+    - memory
+    - guards
+    - export
+  independent_assurance_available: false
+
+data:
+  telemetry_enabled: true
+  external_models_enabled: true
+  personal_data_possible: true
+  confidential_data_possible: true
+  key_custody: provider-dedicated-kms
+  encryption_at_rest: provider-managed
+  encryption_in_transit: required
+  external_model_providers:
+    - name: Example Model Provider
+      service: Hosted inference
+      data_sent:
+        - prompts
+        - metadata
+      countries:
+        - ES
+      retention: 30d
+      opt_out_available: true
+
+support_access:
+  enabled: true
+  countries:
+    - ES
+  authorization_required: true
+  logging_enabled: true
+  revocation_supported: true
+
+locations:
+  - category: hosted_runtime
+    country: ES
+    owner: cortex
+    description: Provider-operated hosted runtime and storage.
+  - category: backups
+    country: ES
+    owner: cortex
+    description: Backup storage for hosted deployments.
+  - category: support_access
+    country: ES
+    owner: cortex
+    description: Support access location subject to customer authorization and logging.
+  - category: external_model_processing
+    country: ES
+    owner: model_provider
+    description: Hosted inference processing when external model features are enabled.
+
+continuity:
+  rto: 4h
+  rpo: 1h
+  backup_responsibility: cortex
+  restore_responsibility: cortex
+  restore_test_available: true
+  exit_plan_available: true
+  key_loss_procedure_available: true
+
+subprocessors:
+  - name: Example Hosted Platform
+    service: Hosting, backups, and monitoring
+    data_categories:
+      - application data
+      - audit logs
+      - telemetry
+    countries:
+      - ES
+    materiality: critical
+    customer_opt_out: "no"
+    applies_to:
+      - hosted
+
+claims:
+  - id: hosted-provider-operated
+    text: This hosted deployment is provider-operated within the contract-defined service boundary.
+    status: contract-dependent
+    owner: cortex
+    evidence_source:
+      - pack.deployment_mode
+      - continuity.rto
+      - continuity.rpo
+    verification_method: Review order form, support plan, and generated evidence pack.
+    limitation: Critical or important function use requires customer risk acceptance.

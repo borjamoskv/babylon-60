@@ -1,0 +1,80 @@
+pack:
+  deployment_id: example-managed-private
+  deployment_mode: managed-private
+  customer_name: Example Customer
+  validity_days: 90
+
+service:
+  legal_provider_name: CORTEX Persist
+  product_version: 0.3.0b2
+  service_description: Dedicated managed CORTEX deployment with contract-defined operations.
+  modules_enabled:
+    - ledger
+    - memory
+    - guards
+    - export
+  independent_assurance_available: false
+
+data:
+  telemetry_enabled: false
+  external_models_enabled: false
+  personal_data_possible: true
+  confidential_data_possible: true
+  key_custody: customer-kms
+  encryption_at_rest: dedicated-kms
+  encryption_in_transit: required
+
+support_access:
+  enabled: true
+  countries:
+    - ES
+  authorization_required: true
+  logging_enabled: true
+  revocation_supported: true
+
+locations:
+  - category: dedicated_hosting
+    country: ES
+    owner: cortex
+    description: Dedicated managed runtime and database storage.
+  - category: backups
+    country: ES
+    owner: cortex
+    description: Backup storage for the dedicated managed deployment.
+  - category: support_access
+    country: ES
+    owner: cortex
+    description: Support access location subject to customer authorization and logging.
+
+continuity:
+  rto: 8h
+  rpo: 4h
+  backup_responsibility: cortex
+  restore_responsibility: cortex
+  restore_test_available: true
+  exit_plan_available: true
+  key_loss_procedure_available: true
+
+subprocessors:
+  - name: Example Managed Hosting
+    service: Dedicated hosting and backups
+    data_categories:
+      - application data
+      - audit logs
+    countries:
+      - ES
+    materiality: high
+    customer_opt_out: "no"
+    applies_to:
+      - managed-private
+
+claims:
+  - id: dedicated-managed-environment
+    text: This managed private deployment uses a dedicated environment documented per customer.
+    status: contract-dependent
+    owner: cortex
+    evidence_source:
+      - pack.deployment_mode
+      - subprocessors
+    verification_method: Review order form and deployment evidence.
+    limitation: Exact operational commitments are contract-defined.

@@ -1,0 +1,62 @@
+pack:
+  deployment_id: example-self-managed
+  deployment_mode: self-managed
+  customer_name: Example Customer
+  validity_days: 90
+
+service:
+  legal_provider_name: CORTEX Persist
+  product_version: 0.3.0b2
+  service_description: Local-first guarded persistence and audit evidence.
+  modules_enabled:
+    - ledger
+    - memory
+    - guards
+    - export
+  independent_assurance_available: false
+
+data:
+  telemetry_enabled: false
+  external_models_enabled: false
+  personal_data_possible: true
+  confidential_data_possible: true
+  key_custody: customer
+  encryption_at_rest: customer-managed
+  encryption_in_transit: required
+
+support_access:
+  enabled: false
+  countries: []
+
+locations:
+  - category: data_plane
+    country: ES
+    owner: customer
+    description: Customer-controlled runtime, database, and ledger storage.
+  - category: support_artifacts
+    country: ES
+    owner: customer
+    description: No CORTEX support access is enabled in this sample profile.
+
+continuity:
+  rto: customer-defined
+  rpo: customer-defined
+  backup_responsibility: customer
+  restore_responsibility: customer
+  restore_test_available: false
+  exit_plan_available: true
+  key_loss_procedure_available: false
+
+subprocessors: []
+
+claims:
+  - id: local-first-default
+    text: Customer data remains in the customer-controlled environment by default in this self-managed deployment.
+    status: config-dependent
+    owner: customer+cortex
+    evidence_source:
+      - pack.deployment_mode
+      - data.telemetry_enabled
+      - data.external_models_enabled
+    verification_method: Inspect deployment config and network egress.
+    limitation: Customer-provided support tickets may contain customer data.
