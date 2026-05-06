@@ -775,6 +775,34 @@ h3 { letter-spacing: -0.03em; }
     font-size: 0.74rem;
 }
 
+.deployment-section { padding-top: 76px; }
+.deployment-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+.deployment-grid article {
+    min-height: 230px;
+    padding: 26px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel);
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 22px 70px rgba(0, 0, 0, 0.22);
+}
+.deployment-grid span {
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.deployment-grid p {
+    color: var(--muted);
+}
+
 .compare-section { padding-top: 72px; }
 .compare-table-wrap {
     overflow-x: auto;
@@ -970,6 +998,7 @@ h3 { letter-spacing: -0.03em; }
     .hero, .split { grid-template-columns: 1fr; }
     .evidence-console { transform: none; }
     .metrics, .workflow-grid, .pricing-grid, .api-stats, .research-flow { grid-template-columns: repeat(2, 1fr); }
+    .deployment-grid { grid-template-columns: 1fr; }
     .features-grid, .use-case-grid { grid-template-columns: repeat(2, 1fr); }
     .api-grid { grid-template-columns: repeat(2, 1fr); }
     .agentica-hero { grid-template-columns: 1fr; }
@@ -993,7 +1022,7 @@ h3 { letter-spacing: -0.03em; }
     h1 { font-size: clamp(3.1rem, 18vw, 5rem); }
     .hero-actions, .final-cta .hero-actions { align-items: stretch; }
     .btn { width: 100%; }
-    .metrics, .workflow-grid, .features-grid, .use-case-grid, .pricing-grid, .faq-grid, .api-grid, .api-stats, .agentica-grid, .research-flow { grid-template-columns: 1fr; }
+    .metrics, .workflow-grid, .features-grid, .use-case-grid, .pricing-grid, .faq-grid, .api-grid, .api-stats, .agentica-grid, .research-flow, .deployment-grid { grid-template-columns: 1fr; }
     .metric-card, .metric-card:first-child, .metric-card:nth-child(2), .metric-card:nth-child(3), .metric-card:last-child { border-radius: var(--radius-sm); }
     .agentica-hero { padding: 20px; }
     .agentica-map { min-height: 310px; }

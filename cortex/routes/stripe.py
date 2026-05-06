@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Literal, Optional
 
 """
 CORTEX v5.0 — Stripe Billing Routes.
@@ -64,6 +64,7 @@ class CheckoutRequest(BaseModel):
     customer_email: str | None = None
     success_url: str = "https://cortexpersist.com"
     cancel_url: str = "https://cortexpersist.com"
+    ui_mode: Literal["hosted", "embedded"] = "hosted"
 
 
 class PortalRequest(BaseModel):
@@ -94,6 +95,12 @@ def _generate_api_key(email: str, plan: str) -> str:
     """Generate a unique API key with ctx_ prefix."""
     seed = f"{email}:{plan}:{time.time()}:{os.urandom(16).hex()}"
     return "ctx_" + hashlib.sha256(seed.encode()).hexdigest()[:48]
+
+
+def _with_checkout_session_id(url: str) -> str:
+    """Append Stripe's checkout session placeholder without dropping existing query params."""
+    separator = "&" if "?" in url else "?"
+    return f"{url}{separator}session_id={{CHECKOUT_SESSION_ID}}"
 
 
 async def _provision_api_key(email: str, plan: str) -> Optional[str]:
@@ -165,11 +172,16 @@ async def create_checkout_session(body: CheckoutRequest) -> dict:
     try:
         session_kwargs = {
             "mode": "subscription",
-            "ui_mode": "embedded",
             "line_items": [{"price": price_id, "quantity": 1}],
-            "return_url": body.success_url + "?session_id={CHECKOUT_SESSION_ID}",
             "metadata": {"plan": body.plan},
         }
+        if body.ui_mode == "embedded":
+            session_kwargs["ui_mode"] = "embedded"
+            session_kwargs["return_url"] = _with_checkout_session_id(body.success_url)
+        else:
+            session_kwargs["success_url"] = _with_checkout_session_id(body.success_url)
+            session_kwargs["cancel_url"] = body.cancel_url
+
         if body.customer_email:
             session_kwargs["customer_email"] = body.customer_email
 
@@ -179,7 +191,11 @@ async def create_checkout_session(body: CheckoutRequest) -> dict:
         logger.error("Stripe checkout error: %s", exc)
         raise HTTPException(status_code=502, detail="Stripe API error") from exc
 
-    return {"client_secret": session.client_secret, "session_id": session.id, "url": session.url}
+    return {
+        "client_secret": getattr(session, "client_secret", None),
+        "session_id": session.id,
+        "url": session.url,
+    }
 
 
 @router.post("/webhook", include_in_schema=False)
