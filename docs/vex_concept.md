@@ -55,8 +55,8 @@ No existing runner satisfies these requirements. CORTEX already does — for mem
 | **Privacy Shield** | `routes/gate.py` + `guards/` | Multi-tier secret detection at ingress |
 | **Self-Healing Daemon** | `extensions/daemon/` | 13 monitors for system integrity |
 | **ApotheosisEngine** | `engine/apotheosis.py` | Entropy scanner + omniscience loop |
-| **Sovereign Execution Loop** | `sovereign_agent_manifesto.md` | Conceptual: `run_sovereign_agent()` |
-| **Bicameral Mind** | `sovereign_agent_manifesto.md` | Right Brain (reasoning) + Left Brain (execution) + Brainstem (safety) |
+| **Verified Execution Loop** | `agent_manifesto.md` | Conceptual: `run_agent_loop()` |
+| **Bicameral Mind** | `agent_manifesto.md` | Right Brain (reasoning) + Left Brain (execution) + Brainstem (safety) |
 | **MCP Server** | `mcp/` | Model Context Protocol integration |
 | **REST API** | `api/` | FastAPI with RBAC, rate limiting |
 | **CLI** | `cli/` | Broad operator surface |
@@ -307,4 +307,4 @@ DERIVATION:
 
 *Prepared for CORTEX Architecture Review | 2026-03-02*  
 *Protocol: ULTRATHINK-INFINITE*  
-*Standard: 130/100*
+*Standard: verified*

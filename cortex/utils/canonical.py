@@ -7,6 +7,7 @@ preimage and collision attacks on the hash chain.
 Hash Scheme Versions:
     v1: colon-delimited   f"{prev}:{project}:{action}:{detail}:{ts}"
     v2: null-byte canon   f"{prev}\\x00{project}\\x00{action}\\x00{canonical_detail}\\x00{ts}"
+    v3: tenant-bound v2   f"{tenant}\\x00{prev}\\x00{project}\\x00{action}\\x00{detail}\\x00{ts}"
 """
 
 from __future__ import annotations
@@ -56,7 +57,7 @@ def canonical_json(obj: Any) -> str:
 
 # ─── Transaction Hash ────────────────────────────────────────────
 
-HASH_VERSION = 2
+HASH_VERSION = 3
 
 
 def compute_tx_hash(
@@ -65,11 +66,15 @@ def compute_tx_hash(
     action: str,
     detail_json: str,
     timestamp: str,
+    *,
+    tenant_id: str | None = None,
 ) -> str:
     """Compute transaction hash using null-byte separated canonical form.
 
     Uses \\x00 (null byte) as field separator to prevent boundary
-    confusion when fields contain colons or other delimiters.
+    confusion when fields contain colons or other delimiters. Passing
+    ``tenant_id`` binds the hash to tenant scope while preserving the legacy
+    v2 contract when omitted.
 
     Args:
         prev_hash: Hash of the previous transaction, or "GENESIS".
@@ -77,11 +82,17 @@ def compute_tx_hash(
         action: Transaction action (store, deprecate, vote, etc.).
         detail_json: Canonical JSON string of transaction detail.
         timestamp: ISO 8601 UTC timestamp.
+        tenant_id: Optional tenant scope for v3 hashes.
 
     Returns:
         SHA-256 hex digest of the canonical input.
     """
-    h_input = f"{prev_hash}\x00{project}\x00{action}\x00{detail_json}\x00{timestamp}"
+    if tenant_id is not None:
+        h_input = (
+            f"{tenant_id}\x00{prev_hash}\x00{project}\x00{action}\x00{detail_json}\x00{timestamp}"
+        )
+    else:
+        h_input = f"{prev_hash}\x00{project}\x00{action}\x00{detail_json}\x00{timestamp}"
     return hashlib.sha256(h_input.encode("utf-8")).hexdigest()
 
 

@@ -1,8 +1,8 @@
 """CORTEX MCP Server for Aether integration.
 
 Sovereign bridge between local CORTEX infrastructure and the Aether autonomous agent.
-(Gemini 3 model). Exposes memory, file reading over massive context windows,
-and Axiom 3 verified execution.
+(Gemini 3 model). Exposes memory search, bounded file reading, and
+Axiom 3 verified decision storage.
 """
 
 from __future__ import annotations
@@ -219,40 +219,6 @@ def create_aether_server(
             f"Exergy/Reputation Mean: {avg_rep:.4f}\n"
             f"Status: VOID-GATE CRYSTALLIZED"
         )
-
-    @mcp.tool()
-    async def cortex_execute_bash(command: str, cwd: str = ".") -> str:
-        """Execute a bash command on the host macOS machine.
-
-        WARNING: Highly destructive. Will trigger an immediate OS-level authorization
-        prompt (Axiom 3 validation). Ensure the command is 100% accurate.
-        """
-        if not _axiom_3_verify("Shell Execution", f"cd {cwd} && {command}"):
-            return "❌ Shell execution aborted: Axiom 3 user physical authorization DENIED."
-
-        logger.warning("Executing authorized bash command: %s", command)
-
-        try:
-            process = await asyncio.create_subprocess_shell(
-                command,
-                cwd=cwd,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-            )
-            stdout, stderr = await process.communicate()
-
-            output = stdout.decode().strip()
-            err_output = stderr.decode().strip()
-
-            res = f"Exit code: {process.returncode}\n"
-            if output:
-                res += f"STDOUT:\n{output}\n"
-            if err_output:
-                res += f"STDERR:\n{err_output}\n"
-
-            return res
-        except Exception as e:  # noqa: BLE001
-            return f"❌ Subprocess error: {e}"
 
     return mcp
 

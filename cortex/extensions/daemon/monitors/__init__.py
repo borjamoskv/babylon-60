@@ -26,6 +26,9 @@ if TYPE_CHECKING:
     from cortex.extensions.daemon.monitors.trends import TrendsMonitor
     from cortex.extensions.daemon.monitors.workflow import WorkflowMonitor
 
+    AutonomousMejoraloMonitor = UnifiedMejoraloMonitor
+    EntropyMonitor = UnifiedMejoraloMonitor
+
 # Aliases for backward compatibility
 _ALIASES: dict[str, str] = {
     "AutonomousMejoraloMonitor": "UnifiedMejoraloMonitor",

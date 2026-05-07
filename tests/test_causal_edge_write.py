@@ -70,12 +70,18 @@ async def _setup_db(conn: aiosqlite.Connection) -> None:
             created_at TEXT NOT NULL DEFAULT (datetime('now')),
             FOREIGN KEY (fact_id) REFERENCES facts(id)
         );
+        CREATE TABLE IF NOT EXISTS signals (
+            id INTEGER PRIMARY KEY,
+            tenant_id TEXT NOT NULL DEFAULT 'default',
+            project TEXT
+        );
         CREATE TABLE IF NOT EXISTS facts_fts (
             rowid INTEGER,
             content TEXT,
             project TEXT,
             tags TEXT,
-            fact_type TEXT
+            fact_type TEXT,
+            tenant_id TEXT DEFAULT 'default'
         );
         CREATE TABLE IF NOT EXISTS fact_tags (
             fact_id INTEGER,
@@ -123,11 +129,13 @@ async def test_parent_decision_id_creates_causal_edge(
     )
 
     class FakeEnc:
+        PREFIX = "v6_aesgcm:"
+
         def encrypt_str(self, s: str, **kw: object) -> str:
-            return s
+            return self.PREFIX + s
 
         def encrypt_json(self, d: object, **kw: object) -> str:
-            return json.dumps(d)
+            return self.PREFIX + json.dumps(d)
 
     monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: FakeEnc())
 
@@ -190,11 +198,13 @@ async def test_auto_resolved_parent_creates_edge(
     )
 
     class FakeEnc:
+        PREFIX = "v6_aesgcm:"
+
         def encrypt_str(self, s: str, **kw: object) -> str:
-            return s
+            return self.PREFIX + s
 
         def encrypt_json(self, d: object, **kw: object) -> str:
-            return json.dumps(d)
+            return self.PREFIX + json.dumps(d)
 
     monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: FakeEnc())
 
@@ -258,11 +268,13 @@ async def test_no_duplicate_edge_when_causal_parent_exists(
     )
 
     class FakeEnc:
+        PREFIX = "v6_aesgcm:"
+
         def encrypt_str(self, s: str, **kw: object) -> str:
-            return s
+            return self.PREFIX + s
 
         def encrypt_json(self, d: object, **kw: object) -> str:
-            return json.dumps(d)
+            return self.PREFIX + json.dumps(d)
 
     monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: FakeEnc())
 
@@ -282,6 +294,9 @@ async def test_no_duplicate_edge_when_causal_parent_exists(
         "INSERT INTO facts (id, project, content, fact_type, "
         "tenant_id, is_tombstoned) "
         "VALUES (200, 'test', 'parent', 'decision', 'default', 0)"
+    )
+    await conn.execute(
+        "INSERT INTO signals (id, tenant_id, project) VALUES (999, 'default', 'test')"
     )
     await conn.commit()
 

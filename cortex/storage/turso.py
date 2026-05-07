@@ -14,6 +14,8 @@ import sqlite3
 import time
 from typing import Any, Final
 
+from cortex.database.sql_guard import reject_protected_fact_table_dml
+
 __all__ = ["TursoBackend"]
 
 logger = logging.getLogger("cortex.storage.turso")
@@ -66,6 +68,7 @@ class TursoBackend:
 
     async def execute(self, sql: str, params: tuple[Any, ...] = ()) -> list[dict[str, Any]]:
         """Execute SQL with performance tracking and error enrichment."""
+        reject_protected_fact_table_dml(sql)
         self._ensure_conn()
         start_ts = time.perf_counter()
         try:
@@ -87,6 +90,7 @@ class TursoBackend:
 
     async def execute_insert(self, sql: str, params: tuple[Any, ...] = ()) -> int:
         """Execute INSERT and return lastrowid with atomic commit."""
+        reject_protected_fact_table_dml(sql)
         self._ensure_conn()
         try:
             # We wrap in a thread because libsql-experimental is largely blocking/threaded
@@ -102,6 +106,7 @@ class TursoBackend:
 
     async def executemany(self, sql: str, params_list: list[tuple[Any, ...]]) -> None:
         """Execute batch parameters within a single transactional block."""
+        reject_protected_fact_table_dml(sql)
         self._ensure_conn()
         if not params_list:
             return
@@ -127,6 +132,7 @@ class TursoBackend:
 
     async def executescript(self, script: str) -> None:
         """Execute multi-statement script safely."""
+        reject_protected_fact_table_dml(script, allow_trigger_bodies=True)
         self._ensure_conn()
         statements = [s.strip() for s in script.split(";") if s.strip()]
         if not statements:

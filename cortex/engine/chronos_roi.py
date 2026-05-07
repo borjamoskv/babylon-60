@@ -173,6 +173,8 @@ class ChronosROI:
         report: ChronosReport,
         db_path: str,
         project: str = "system",
+        tenant_id: str = "default",
+        store_fact: Any | None = None,
     ) -> int | None:
         """Persist a CHRONOS report as a CORTEX fact + emit signal.
 
@@ -180,35 +182,31 @@ class ChronosROI:
         part of the CORTEX knowledge graph, not a dead-end calculation.
         """
         try:
+            fact_kwargs = {
+                "tenant_id": tenant_id,
+                "project": project,
+                "content": report.summary(),
+                "fact_type": "knowledge",
+                "tags": ["chronos", "roi", "metrics"],
+                "confidence": "verified",
+                "source": "chronos-roi",
+                "meta": report.to_dict(),
+            }
+            if store_fact is None:
+                from cortex.engine import CortexEngine
+
+                engine = CortexEngine(db_path=db_path, auto_embed=False)
+                try:
+                    stored_id: Any = engine.store_sync(**fact_kwargs)
+                finally:
+                    engine.close_sync()
+            else:
+                stored_id = store_fact(**fact_kwargs)
+            if stored_id is None:
+                raise RuntimeError("canonical store did not return a fact id")
+            fact_id = int(stored_id)
+
             with db_connect(db_path) as conn:
-                # 1. Store as fact (sync path for simplicity)
-                from cortex.memory.temporal import now_iso
-
-                ts = now_iso()
-                content = report.summary()
-                meta_json = str(report.to_dict()).replace("'", '"')
-
-                cursor = conn.execute(
-                    "INSERT INTO facts (tenant_id, project, content, fact_type, tags, confidence,"
-                    " valid_from, source, meta, created_at, updated_at)"
-                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    (
-                        "default",
-                        project,
-                        content,
-                        "knowledge",
-                        '["chronos", "roi", "metrics"]',
-                        "observed",
-                        ts,
-                        "chronos-roi",
-                        meta_json,
-                        ts,
-                        ts,
-                    ),
-                )
-                fact_id: int = cursor.lastrowid  # type: ignore[assignment]
-
-                # 2. Emit signal to bus
                 from cortex.extensions.signals.bus import SignalBus
 
                 bus = SignalBus(conn)
@@ -217,6 +215,7 @@ class ChronosROI:
                     payload=report.to_dict(),
                     source="chronos-roi",
                     project=project,
+                    tenant_id=tenant_id,
                 )
 
                 logger.info("CHRONOS report persisted as fact #%d: %s", fact_id, report.summary())
@@ -232,13 +231,15 @@ class ChronosROI:
         db_path: str,
         project: str = "system",
         tokens_used: int = 25000,
+        tenant_id: str = "default",
+        store_fact: Any | None = None,
     ) -> ChronosReport:
         """Full audit cycle: scan → calculate → persist → signal.
 
         This is the recommended entry point for the observability loop.
         """
         report = self.audit_project(project_path, tokens_used)
-        self.persist_report(report, db_path, project)
+        self.persist_report(report, db_path, project, tenant_id=tenant_id, store_fact=store_fact)
         return report
 
 

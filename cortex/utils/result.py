@@ -32,7 +32,7 @@ from __future__ import annotations
 import traceback
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, Literal, TypeVar
 
 __all__ = ["Ok", "Err", "Result", "safe", "safe_async"]
 
@@ -47,10 +47,10 @@ class Ok(Generic[T]):
 
     value: T
 
-    def is_ok(self) -> bool:
+    def is_ok(self) -> Literal[True]:
         return True
 
-    def is_err(self) -> bool:
+    def is_err(self) -> Literal[False]:
         return False
 
     def unwrap(self) -> T:
@@ -82,10 +82,10 @@ class Err(Generic[E]):
 
     error: E
 
-    def is_ok(self) -> bool:
+    def is_ok(self) -> Literal[False]:
         return False
 
-    def is_err(self) -> bool:
+    def is_err(self) -> Literal[True]:
         return True
 
     def unwrap(self) -> Any:

@@ -21,16 +21,16 @@ resource "helm_release" "prometheus" {
         adminPassword = "CHANGE_ME"
         ingress = {
           enabled = true
-          hosts   = ["grafana.cortex-sovereign.internal"]
+          hosts   = ["grafana.cortex-persist.internal"]
         }
         dashboardProviders = {
           dashboardproviders_yaml = {
             apiVersion = 1
             providers = [{
-              name      = "sovereign"
-              folder    = "Sovereign"
+              name      = "persist"
+              folder    = "Persist"
               type      = "file"
-              options   = { path = "/var/lib/grafana/dashboards/sovereign" }
+              options   = { path = "/var/lib/grafana/dashboards/persist" }
             }]
           }
         }
@@ -50,7 +50,7 @@ resource "helm_release" "prometheus" {
           }
           additionalScrapeConfigs = [
             {
-              job_name        = "cortex-sovereign"
+              job_name        = "cortex-persist"
               scrape_interval = "15s"
               static_configs  = [{ targets = ["cortex-api.cortex.svc:8484"] }]
             },
@@ -67,17 +67,17 @@ resource "helm_release" "prometheus" {
         config = {
           global = { resolve_timeout = "5m" }
           route = {
-            receiver = "sovereign-alerts"
+            receiver = "persist-alerts"
             group_by = ["alertname", "namespace"]
             routes = [
-              { match = { severity = "critical" }, receiver = "sovereign-critical" }
+              { match = { severity = "critical" }, receiver = "persist-critical" }
             ]
           }
           receivers = [
-            { name = "sovereign-alerts" },
+            { name = "persist-alerts" },
             {
-              name = "sovereign-critical"
-              webhook_configs = [{ url = "https://hooks.cortex-sovereign.internal/alerts" }]
+              name = "persist-critical"
+              webhook_configs = [{ url = "https://hooks.cortex-persist.internal/alerts" }]
             }
           ]
         }

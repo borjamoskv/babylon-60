@@ -8,6 +8,7 @@ Guards that fail to import at registration time are silently skipped.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import logging
 from typing import Any
 
@@ -20,13 +21,19 @@ __all__ = ["GuardPipeline"]
 logger = logging.getLogger("cortex.engine")
 
 
+@dataclass(frozen=True)
+class _PostHookRegistration:
+    hook: PostStoreHook
+    required: bool = False
+
+
 class GuardPipeline:
     """Orchestrates pre-store guards, content mutators, and post-store hooks."""
 
     def __init__(self) -> None:
         self._guards: list[StoreGuard] = []
         self._mutators: list[ContentMutator] = []
-        self._post_hooks: list[PostStoreHook] = []
+        self._post_hooks: list[_PostHookRegistration] = []
 
     # ─── Registration ─────────────────────────────────────────────
 
@@ -36,8 +43,8 @@ class GuardPipeline:
     def add_mutator(self, mutator: ContentMutator) -> None:
         self._mutators.append(mutator)
 
-    def add_post_hook(self, hook: PostStoreHook) -> None:
-        self._post_hooks.append(hook)
+    def add_post_hook(self, hook: PostStoreHook, *, required: bool = False) -> None:
+        self._post_hooks.append(_PostHookRegistration(hook=hook, required=required))
 
     # ─── Execution ────────────────────────────────────────────────
 
@@ -50,10 +57,13 @@ class GuardPipeline:
         conn: aiosqlite.Connection,
         *,
         tenant_id: str = "default",
+        source: str | None = None,
     ) -> None:
         """Run all pre-store guards. First rejection raises ValueError."""
         for guard in self._guards:
-            await guard.check(content, project, fact_type, meta, conn, tenant_id=tenant_id)
+            await guard.check(
+                content, project, fact_type, meta, conn, tenant_id=tenant_id, source=source
+            )
 
     async def run_mutators(
         self,
@@ -89,9 +99,18 @@ class GuardPipeline:
         tenant_id: str = "default",
         source: str | None = None,
         db_path: str | None = None,
+        required: bool | None = None,
     ) -> None:
-        """Run all post-store hooks. Failures are logged but never raised."""
-        for hook in self._post_hooks:
+        """Run post-store hooks.
+
+        Optional hooks are best-effort. Required hooks run to completion as a
+        group and then fail closed if any required hook failed.
+        """
+        failed_required: list[str] = []
+        for registration in self._post_hooks:
+            if required is not None and registration.required != required:
+                continue
+            hook = registration.hook
             try:
                 await hook.on_stored(
                     fact_id,
@@ -103,11 +122,24 @@ class GuardPipeline:
                     db_path=db_path,
                 )
             except Exception as e:  # noqa: BLE001
+                hook_name = type(hook).__name__
+                if registration.required:
+                    failed_required.append(hook_name)
+                    logger.error(
+                        "[GuardPipeline] Required post-hook %s failed closed (%s)",
+                        hook_name,
+                        type(e).__name__,
+                    )
+                    continue
                 logger.debug(
-                    "[GuardPipeline] Post-hook %s failed: %s",
-                    type(hook).__name__,
-                    e,
+                    "[GuardPipeline] Optional post-hook %s skipped after %s",
+                    hook_name,
+                    type(e).__name__,
                 )
+
+        if failed_required:
+            failed = ", ".join(failed_required)
+            raise RuntimeError(f"FAIL-CLOSED: required post-store hook(s) failed: {failed}")
 
     @property
     def guard_count(self) -> int:

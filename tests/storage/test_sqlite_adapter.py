@@ -20,7 +20,15 @@ async def sqlite_adapter(tmp_path):
     """In-memory SQLite connection wrapped in SQLiteAdapter."""
     db = tmp_path / "test.db"
     conn = await aiosqlite.connect(str(db))
-    await conn.executescript("CREATE TABLE facts (id INTEGER PRIMARY KEY, content TEXT);")
+    await conn.executescript(
+        """
+        CREATE TABLE items (id INTEGER PRIMARY KEY, content TEXT);
+        CREATE TABLE facts (id INTEGER PRIMARY KEY, content TEXT);
+        CREATE TABLE facts_fts (rowid INTEGER, content TEXT);
+        CREATE TABLE fact_tags (fact_id INTEGER, tag TEXT);
+        CREATE TABLE causal_edges (fact_id INTEGER, parent_id INTEGER);
+        """
+    )
     await conn.commit()
     adapter = SQLiteAdapter(conn)
     yield adapter
@@ -52,9 +60,9 @@ def test_sqlite_adapter_is_storage_adapter(tmp_path):
 
 @pytest.mark.asyncio
 async def test_execute_returns_cursor(sqlite_adapter):
-    await sqlite_adapter.execute("INSERT INTO facts (content) VALUES (?)", ("hello",))
+    await sqlite_adapter.execute("INSERT INTO items (content) VALUES (?)", ("hello",))
     await sqlite_adapter.commit()
-    cursor = await sqlite_adapter.execute("SELECT * FROM facts")
+    cursor = await sqlite_adapter.execute("SELECT * FROM items")
     rows = await cursor.fetchall()
     assert len(rows) == 1
     # Cursor rows are tuples by default in aiosqlite if not using Row factory
@@ -63,16 +71,16 @@ async def test_execute_returns_cursor(sqlite_adapter):
 
 @pytest.mark.asyncio
 async def test_fetch_all_returns_dicts(sqlite_adapter):
-    await sqlite_adapter.execute("INSERT INTO facts (content) VALUES (?)", ("hello",))
+    await sqlite_adapter.execute("INSERT INTO items (content) VALUES (?)", ("hello",))
     await sqlite_adapter.commit()
-    rows = await sqlite_adapter.fetch_all("SELECT * FROM facts")
+    rows = await sqlite_adapter.fetch_all("SELECT * FROM items")
     assert len(rows) == 1
     assert rows[0]["content"] == "hello"
 
 
 @pytest.mark.asyncio
 async def test_fetch_all_returns_empty_for_no_match(sqlite_adapter):
-    rows = await sqlite_adapter.fetch_all("SELECT * FROM facts WHERE content = ?", ("ghost",))
+    rows = await sqlite_adapter.fetch_all("SELECT * FROM items WHERE content = ?", ("ghost",))
     assert rows == []
 
 
@@ -82,15 +90,15 @@ async def test_fetch_all_returns_empty_for_no_match(sqlite_adapter):
 @pytest.mark.asyncio
 async def test_execute_insert_returns_rowid(sqlite_adapter):
     row_id = await sqlite_adapter.execute_insert(
-        "INSERT INTO facts (content) VALUES (?)", ("inserted",)
+        "INSERT INTO items (content) VALUES (?)", ("inserted",)
     )
     assert row_id == 1
 
 
 @pytest.mark.asyncio
 async def test_execute_insert_sequential_ids(sqlite_adapter):
-    id1 = await sqlite_adapter.execute_insert("INSERT INTO facts (content) VALUES (?)", ("a",))
-    id2 = await sqlite_adapter.execute_insert("INSERT INTO facts (content) VALUES (?)", ("b",))
+    id1 = await sqlite_adapter.execute_insert("INSERT INTO items (content) VALUES (?)", ("a",))
+    id2 = await sqlite_adapter.execute_insert("INSERT INTO items (content) VALUES (?)", ("b",))
     assert id2 > id1
 
 
@@ -100,8 +108,8 @@ async def test_execute_insert_sequential_ids(sqlite_adapter):
 @pytest.mark.asyncio
 async def test_executemany_empty_list_is_noop(sqlite_adapter):
     """Entropy check: empty params list must not raise."""
-    await sqlite_adapter.executemany("INSERT INTO facts (content) VALUES (?)", [])
-    rows = await sqlite_adapter.fetch_all("SELECT COUNT(*) AS n FROM facts")
+    await sqlite_adapter.executemany("INSERT INTO items (content) VALUES (?)", [])
+    rows = await sqlite_adapter.fetch_all("SELECT COUNT(*) AS n FROM items")
     assert rows[0]["n"] == 0
 
 
@@ -109,9 +117,9 @@ async def test_executemany_empty_list_is_noop(sqlite_adapter):
 async def test_executemany_batch_insert(sqlite_adapter):
     """OOM check: 1000-item batch must complete without error."""
     params = [(f"fact_{i}",) for i in range(1000)]
-    await sqlite_adapter.executemany("INSERT INTO facts (content) VALUES (?)", params)
+    await sqlite_adapter.executemany("INSERT INTO items (content) VALUES (?)", params)
     await sqlite_adapter.commit()
-    rows = await sqlite_adapter.fetch_all("SELECT COUNT(*) AS n FROM facts")
+    rows = await sqlite_adapter.fetch_all("SELECT COUNT(*) AS n FROM items")
     assert rows[0]["n"] == 1000
 
 
@@ -121,13 +129,13 @@ async def test_executemany_batch_insert(sqlite_adapter):
 @pytest.mark.asyncio
 async def test_commit_persists_data(sqlite_adapter, tmp_path):
     """Data written + committed must survive a new connection."""
-    await sqlite_adapter.execute_insert("INSERT INTO facts (content) VALUES (?)", ("durable",))
+    await sqlite_adapter.execute_insert("INSERT INTO items (content) VALUES (?)", ("durable",))
     await sqlite_adapter.commit()
     # Re-open the same db
     db = tmp_path / "test.db"
     conn2 = await aiosqlite.connect(str(db))
     adapter2 = SQLiteAdapter(conn2)
-    rows = await adapter2.fetch_all("SELECT content FROM facts")
+    rows = await adapter2.fetch_all("SELECT content FROM items")
     await conn2.close()
     assert any(r["content"] == "durable" for r in rows)
 
@@ -165,3 +173,41 @@ async def test_executescript_creates_table(sqlite_adapter):
         "SELECT name FROM sqlite_master WHERE type='table' AND name='test_script'"
     )
     assert len(rows) == 1
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("sql", "params"),
+    [
+        ("INSERT INTO facts (content) VALUES (?)", ("raw",)),
+        ("UPDATE facts SET content = ? WHERE id = ?", ("raw", 1)),
+        ("DELETE FROM facts WHERE id = ?", (1,)),
+        ("INSERT INTO facts_fts (rowid, content) VALUES (?, ?)", (1, "plain")),
+        ("INSERT INTO fact_tags (fact_id, tag) VALUES (?, ?)", (1, "bypass")),
+        ("DELETE FROM causal_edges WHERE fact_id = ?", (1,)),
+    ],
+)
+async def test_sqlite_adapter_rejects_direct_fact_owned_execute(sqlite_adapter, sql, params):
+    with pytest.raises(ValueError, match="Direct mutations on fact-owned tables are forbidden"):
+        await sqlite_adapter.execute(sql, params)
+
+
+@pytest.mark.asyncio
+async def test_sqlite_adapter_rejects_direct_fact_owned_execute_insert(sqlite_adapter):
+    with pytest.raises(ValueError, match="Direct mutations on fact-owned tables are forbidden"):
+        await sqlite_adapter.execute_insert("INSERT INTO facts (content) VALUES (?)", ("raw",))
+
+
+@pytest.mark.asyncio
+async def test_sqlite_adapter_rejects_direct_fact_owned_executemany(sqlite_adapter):
+    with pytest.raises(ValueError, match="Direct mutations on fact-owned tables are forbidden"):
+        await sqlite_adapter.executemany("INSERT INTO facts (content) VALUES (?)", [])
+
+
+@pytest.mark.asyncio
+async def test_sqlite_adapter_rejects_direct_fact_owned_executescript(sqlite_adapter):
+    with pytest.raises(ValueError, match="Direct mutations on fact-owned tables are forbidden"):
+        await sqlite_adapter.executescript(
+            "CREATE TABLE IF NOT EXISTS audit_tmp (id INTEGER); "
+            "INSERT INTO facts (content) VALUES ('raw');"
+        )

@@ -3,8 +3,7 @@ CORTEX V6 - Sovereign Decalcifier (REM Phase Memory Consolidation).
 
 Executes deep background maintenance on the SQLite persistence layer.
 Only runs when the Endocrine system indicates low Cortisol (safety/rest).
-Purges orphaned memory, deduplicates deeply, and compresses semantic representations
-that haven't been accessed in a long time (LFU/LRU decalcification).
+Optimizes storage without pruning immutable ledger or fact history.
 """
 
 import logging
@@ -33,21 +32,31 @@ class SovereignDecalcifier:
         logger.warning("🧠 [DECALCIFIER] Initiating REM Sleep Cycle (Deep memory sweep)...")
         start_time = time.time()
 
-        metrics = {"purged_orphans": 0, "compressed_engrams": 0, "serotonin_boost": 0.0}
+        metrics = {
+            "purged_orphans": 0,
+            "compressed_engrams": 0,
+            "serotonin_boost": 0.0,
+            "ledger_deletions_blocked": 0,
+        }
 
-        # 1. Sweep stale transactions / ledger entries that are purely logging
-        # We only delete old 'telemetry' or extremely low-impact actions.
-        # Axiom: Core decisions are never deleted.
+        # 1. Ledger entries are immutable, including telemetry. We only count stale
+        # rows here so operators can see what would have been compacted by the
+        # legacy destructive path.
         try:
             # Committing any pending open transactions before we do maintenance
             await conn.commit()
 
-            # Note: We rely on the schema having a timestamp. We'll do a safe threshold.
             cursor = await conn.execute(
-                "DELETE FROM transactions WHERE action = 'telemetry' AND timestamp < datetime('now', '-7 days')"
+                "SELECT COUNT(*) FROM transactions "
+                "WHERE action = 'telemetry' AND timestamp < datetime('now', '-7 days')"
             )
-            metrics["purged_orphans"] = cursor.rowcount
-            await conn.commit()
+            row = await cursor.fetchone()
+            metrics["ledger_deletions_blocked"] = int(row[0] if row else 0)
+            if metrics["ledger_deletions_blocked"]:
+                logger.warning(
+                    "[DECALCIFIER] Blocked pruning of %d immutable telemetry ledger rows.",
+                    metrics["ledger_deletions_blocked"],
+                )
 
             # 2. Check if we have facts with a decay score < 0.1 (calcified)
             # This requires knowing the memory schema. Let's assume standard `facts` table
@@ -81,9 +90,10 @@ class SovereignDecalcifier:
 
         duration = time.time() - start_time
         logger.warning(
-            "🧠 [DECALCIFIER] Cycle complete in %.2fs. Purged: %d. 🧬 SEROTONIN +%.2f",
+            "🧠 [DECALCIFIER] Cycle complete in %.2fs. Purged: %d. Blocked ledger deletes: %d. 🧬 SEROTONIN +%.2f",
             duration,
             metrics["purged_orphans"],
+            metrics["ledger_deletions_blocked"],
             metrics["serotonin_boost"],
         )
 

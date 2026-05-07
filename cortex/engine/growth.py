@@ -6,7 +6,6 @@ Manages fact consolidation and autonomous pattern promotion (Bridges -> Global A
 
 from __future__ import annotations
 
-import json
 import logging
 from typing import Any
 
@@ -26,7 +25,12 @@ _MIN_PROJECT_SUPPORT = 3
 class NeuralGrowthEngine:
     """Orchestrates structural evolution based on hormonal feedback."""
 
-    async def synaptic_pruning(self, conn: aiosqlite.Connection, storer: Any = None) -> int:
+    async def synaptic_pruning(
+        self,
+        conn: aiosqlite.Connection,
+        storer: Any = None,
+        tenant_id: str = "system",
+    ) -> int:
         """Consolidates facts and promotes bridges based on growth levels."""
         growth = ENDOCRINE.get_level(HormoneType.NEURAL_GROWTH)
         if growth < 0.5:
@@ -35,20 +39,25 @@ class NeuralGrowthEngine:
 
         logger.info("🧠 [GROWTH] Synaptic Phase Active (Growth: %.2f)", growth)
 
-        consolidated = await self._consolidate_redundant_facts(conn)
-        promoted = await self._promote_successful_bridges(conn, storer)
+        consolidated = await self._consolidate_redundant_facts(conn, tenant_id)
+        promoted = await self._promote_successful_bridges(conn, storer, tenant_id)
 
         return consolidated + promoted
 
-    async def _consolidate_redundant_facts(self, conn: aiosqlite.Connection) -> int:
+    async def _consolidate_redundant_facts(
+        self,
+        conn: aiosqlite.Connection,
+        tenant_id: str,
+    ) -> int:
         """
         Merges redundant 'tentative' facts with high semantic similarity.
         (Heuristic: same project, same type, overlapping content).
         """
         cursor = await conn.execute(
             "SELECT project, content, COUNT(*) as cnt "
-            "FROM facts WHERE fact_type = 'bridge' AND valid_until IS NULL "
-            "GROUP BY project, content HAVING cnt > 1"
+            "FROM facts WHERE tenant_id = ? AND fact_type = 'bridge' AND valid_until IS NULL "
+            "GROUP BY project, content HAVING cnt > 1",
+            (tenant_id,),
         )
         dupes = await cursor.fetchall()
 
@@ -57,8 +66,8 @@ class NeuralGrowthEngine:
             logger.info("🔗 [GROWTH] Consolidating %d duplicate bridges in %s", cnt, project)
             inner_cursor = await conn.execute(
                 "SELECT id FROM facts WHERE project = ? AND content = ? "
-                "AND fact_type = 'bridge' AND valid_until IS NULL ORDER BY id ASC",
-                (project, content),
+                "AND tenant_id = ? AND fact_type = 'bridge' AND valid_until IS NULL ORDER BY id ASC",
+                (project, content, tenant_id),
             )
             rows = await inner_cursor.fetchall()
             master_id = rows[0][0]  # type: ignore[reportIndexIssue]
@@ -68,7 +77,7 @@ class NeuralGrowthEngine:
                 await MUTATION_ENGINE.apply(
                     conn,
                     fact_id=fid,
-                    tenant_id="system",
+                    tenant_id=tenant_id,
                     event_type="deprecate",
                     payload={"reason": f"consolidated_into_{master_id}"},
                     signer="NeuralGrowthEngine",
@@ -78,7 +87,10 @@ class NeuralGrowthEngine:
         return count
 
     async def _promote_successful_bridges(
-        self, conn: aiosqlite.Connection, storer: Any = None
+        self,
+        conn: aiosqlite.Connection,
+        storer: Any = None,
+        tenant_id: str = "system",
     ) -> int:
         """Promotes successful bridges to global_axioms."""
         growth = ENDOCRINE.get_level(HormoneType.NEURAL_GROWTH)
@@ -87,9 +99,9 @@ class NeuralGrowthEngine:
 
         cursor = await conn.execute(
             "SELECT content, COUNT(DISTINCT project) as project_count "
-            "FROM facts WHERE fact_type = 'bridge' AND valid_until IS NULL "
+            "FROM facts WHERE tenant_id = ? AND fact_type = 'bridge' AND valid_until IS NULL "
             "GROUP BY content HAVING project_count >= ?",
-            (_MIN_PROJECT_SUPPORT,),
+            (tenant_id, _MIN_PROJECT_SUPPORT),
         )
         candidates = await cursor.fetchall()
 
@@ -103,6 +115,7 @@ class NeuralGrowthEngine:
 
             if storer and hasattr(storer, "store"):
                 await storer.store(
+                    tenant_id=tenant_id,
                     content=f"GLOBAL_AXIOM: {content}",
                     fact_type="axiom",
                     project="global",
@@ -113,27 +126,12 @@ class NeuralGrowthEngine:
                     commit=False,
                 )
             else:
-                from cortex.memory.temporal import now_iso
-
-                ts = now_iso()
-                # Ω₈: Morphic Resonance. Promoción a Axioma Global.
-                # Un patrón que se repite en 3 proyectos deja de ser local.
-                # Se sincroniza con la "conciencia colectiva".
-                logger.info("🧬 [GROWTH] Morphic Resonance detected: %s", content[:50])
-                await conn.execute(
-                    "INSERT INTO facts (tenant_id, project, content, fact_type, confidence, created_at, updated_at, metadata) "
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    (
-                        "system",
-                        "global",
-                        f"AXIOM_RESONANCE: {content}",
-                        "axiom",
-                        "verified",
-                        ts,
-                        ts,
-                        json.dumps({"origin": "synaptic_promotion", "axiom": "Ω₈"}),  # type: ignore[reportUndefinedVariable]
-                    ),
+                logger.error(
+                    "[GROWTH] Blocked direct axiom promotion for tenant %s; "
+                    "canonical storer is required.",
+                    tenant_id,
                 )
+                continue
 
             ENDOCRINE.pulse(HormoneType.NEURAL_GROWTH, 0.05)
             count += 1

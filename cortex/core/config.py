@@ -111,6 +111,7 @@ class CortexConfig:
 
     # Deployment
     DEPLOY_MODE: str = "local"
+    ENABLE_EXPERIMENTAL_API: bool = False
 
     # Context Engine
     CONTEXT_MAX_SIGNALS: int = 20
@@ -180,6 +181,8 @@ class CortexConfig:
             STRIPE_WEBHOOK_SECRET=os.environ.get("STRIPE_WEBHOOK_SECRET", ""),
             _STRIPE_PRICE_TABLE_RAW=os.environ.get("STRIPE_PRICE_TABLE", ""),
             DEPLOY_MODE=os.environ.get("CORTEX_DEPLOY", "local"),
+            ENABLE_EXPERIMENTAL_API=os.environ.get("CORTEX_ENABLE_EXPERIMENTAL_API", "0")
+            in {"1", "true", "TRUE", "yes", "YES", "on", "ON"},
             CONTEXT_MAX_SIGNALS=int(os.environ.get("CORTEX_CONTEXT_MAX_SIGNALS", "20")),
             CONTEXT_WORKSPACE_DIR=os.environ.get("CORTEX_CONTEXT_WORKSPACE", str(Path.home())),
             CONTEXT_GIT_ENABLED=os.environ.get("CORTEX_CONTEXT_GIT", "1") == "1",

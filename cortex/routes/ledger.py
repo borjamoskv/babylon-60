@@ -44,10 +44,10 @@ async def get_ledger_status(
     """Check the cryptographic integrity of all ledgers (Tx and Votes)."""
     try:
         # 1. Verify Transaction Ledger
-        tx_report = await engine.verify_ledger()
+        tx_report = await engine.verify_ledger(tenant_id=auth.tenant_id)
 
         # 2. Verify Vote Ledger
-        vote_report = await engine.verify_vote_ledger()
+        vote_report = await engine.verify_vote_ledger(tenant_id=auth.tenant_id)
 
         # Merge reports
         combined_valid = tx_report["valid"] and vote_report["valid"]
@@ -81,7 +81,7 @@ async def create_checkpoint(
 ) -> CheckpointResponse:
     """Manually trigger a Merkle root checkpoint for recent transactions."""
     try:
-        cp_id = await engine.create_checkpoint()
+        cp_id = await engine.create_checkpoint(tenant_id=auth.tenant_id)
 
         if cp_id:
             return CheckpointResponse(

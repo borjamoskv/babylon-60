@@ -3,6 +3,7 @@
 import asyncio
 import logging
 import random
+import threading
 import time
 from datetime import datetime, timezone
 from typing import Any
@@ -16,6 +17,8 @@ from cortex.extensions.daemon.sidecar.trends_oracle.config import TrendsConfig
 
 logger = logging.getLogger("moskv-daemon")
 
+POLL_INTERVAL_SECONDS = 15.0
+
 
 class TrendsOracle:
     """Permanent connection sidecar for Google Trends."""
@@ -24,6 +27,7 @@ class TrendsOracle:
         self.engine = engine
         self.config = config
         self.running = False
+        self._stop_event = threading.Event()
 
         # Initialize pytrends with basic config (hl='en-US' or target region)
         # Using a timeout to prevent hanging
@@ -87,12 +91,13 @@ class TrendsOracle:
                 logger.error("❌ [TRENDS_ORACLE] Loop Error: %s", e)
 
             # Wait before the next check. A fast loop checking intervals.
-            await asyncio.sleep(15.0)
+            await asyncio.sleep(POLL_INTERVAL_SECONDS)
 
     def run_sync_loop(self) -> None:
         """Synchronous loop for threaded environments (MoskvDaemon)."""
         logger.info("📈 [TRENDS_ORACLE] (Thread) started.")
         self.running = True
+        self._stop_event.clear()
 
         last_realtime = 0.0
         last_daily = 0.0
@@ -118,11 +123,13 @@ class TrendsOracle:
             except Exception as e:  # noqa: BLE001
                 logger.error("❌ [TRENDS_ORACLE] (Thread) Error: %s", e)
 
-            time.sleep(15.0)
+            if self._stop_event.wait(POLL_INTERVAL_SECONDS):
+                break
 
     def stop(self) -> None:
         """Gracefully stop the oracle loop."""
         self.running = False
+        self._stop_event.set()
 
     # -------------------------------------------------------------
     # Polling Logic wrappers (with synchronous pytrends backends)
@@ -217,12 +224,14 @@ class TrendsOracle:
             ),
             max_retries=self.config.max_retries,
             base_backoff=self.config.base_backoff,
+            stop_event=self._stop_event,
         )
 
         return _execute_with_backoff(  # type: ignore[type-error]
             self.pytrends.interest_over_time,
             max_retries=self.config.max_retries,
             base_backoff=self.config.base_backoff,
+            stop_event=self._stop_event,
         )
 
     # -------------------------------------------------------------
@@ -278,7 +287,12 @@ class TrendsOracle:
         return alerts
 
 
-def _execute_with_backoff(func, max_retries: int = 3, base_backoff: float = 1.5):
+def _execute_with_backoff(
+    func,
+    max_retries: int = 3,
+    base_backoff: float = 1.5,
+    stop_event: threading.Event | None = None,
+):
     """Executes a pytrends call with exponential backoff on rate limits."""
     last_error = None
     for attempt in range(max_retries):
@@ -289,7 +303,9 @@ def _execute_with_backoff(func, max_retries: int = 3, base_backoff: float = 1.5)
             if "429" in str(e):
                 delay = (base_backoff**attempt) + random.uniform(0.5, 2.5)
                 logger.warning("⏳ [TRENDS_ORACLE] Rate limit (429). Retrying in %.1fs...", delay)
-                time.sleep(delay)
+                waiter = stop_event or threading.Event()
+                if waiter.wait(delay):
+                    raise RuntimeError("Google Trends query stopped during retry backoff") from e
                 last_error = e
             else:
                 # Re-raise other HTTP errors

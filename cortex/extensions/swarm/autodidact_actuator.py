@@ -1,5 +1,4 @@
 import logging
-from typing import Optional, Dict
 
 from cortex.extensions.swarm.sortu_jit_executor import run_jit_sandbox
 
@@ -7,7 +6,7 @@ logger = logging.getLogger("cortex.autodidact.actuator")
 logging.basicConfig(level=logging.INFO)
 
 
-async def autodidact_ingest(source_code: str, expected_yield_gain: float, metadata: Dict) -> dict:
+async def autodidact_ingest(source_code: str, expected_yield_gain: float, metadata: dict) -> dict:
     """
     Sovereign Autodidact-Omega Actuator Pipeline (v4.0)
     1. Parse and JIT execute

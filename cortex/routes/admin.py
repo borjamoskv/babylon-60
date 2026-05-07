@@ -7,6 +7,8 @@ and session handoff orchestration. Enforces strict RBAC and input validation.
 Sovereign 130/100 — Pydantic responses, structured logging, TOCTOU-safe paths.
 """
 
+import hashlib
+import json
 import logging
 import re
 import time
@@ -124,7 +126,7 @@ async def _verify_admin_auth(
     authorization: Optional[str],
     manager: object,
     lang: str,
-) -> None:
+) -> AuthResult:
     """Validate that the caller has 'admin' permission.
 
     Raises HTTPException (401/403) on failure.
@@ -151,6 +153,8 @@ async def _verify_admin_auth(
         ).format(permission="admin")
         raise HTTPException(status_code=403, detail=detail)
 
+    return result
+
 
 # ─── Project Management ──────────────────────────────────────────────
 
@@ -176,19 +180,37 @@ async def export_project(
     target_file = _validate_export_path(path, project, lang)
 
     try:
-        facts = await run_in_threadpool(  # type: ignore[reportCallIssue]
-            engine.search,
+        facts = await engine.facts.recall(  # type: ignore[reportAttributeAccessIssue]
             project=project,
+            tenant_id=auth.tenant_id,
             limit=_MAX_EXPORT_FACTS,
+            offset=0,
         )
         content = export_facts(facts, fmt="json")  # type: ignore[reportArgumentType]
 
-        def _write_export() -> Path:
+        def _write_export() -> tuple[Path, Path, str]:
             target_file.parent.mkdir(parents=True, exist_ok=True)
             target_file.write_text(content, encoding="utf-8")
-            return target_file
+            artifact_bytes = target_file.read_bytes()
+            digest = hashlib.sha256(artifact_bytes).hexdigest()
+            digest_artifact = target_file.with_suffix(target_file.suffix + ".sha256.json")
+            digest_payload = {
+                "artifact": str(target_file),
+                "bytes": len(artifact_bytes),
+                "facts_count": len(facts),
+                "format": "json",
+                "project": project,
+                "schema": "cortex_project_export_digest_v1",
+                "sha256": digest,
+                "tenant_id": auth.tenant_id,
+            }
+            digest_artifact.write_text(
+                json.dumps(digest_payload, indent=2, sort_keys=True),
+                encoding="utf-8",
+            )
+            return target_file, digest_artifact, digest
 
-        out_path = await run_in_threadpool(_write_export)
+        out_path, digest_artifact, digest = await run_in_threadpool(_write_export)
         logger.info(
             "Export completed: project=%s path=%s",
             project,
@@ -197,6 +219,8 @@ async def export_project(
         return ExportResponse(
             project=project,
             artifact=str(out_path),
+            digest_artifact=str(digest_artifact),
+            sha256=digest,
             message=get_trans("info_export_success", lang),
         )
     except (OSError, ValueError) as exc:
@@ -309,7 +333,7 @@ async def get_system_status(
     """Expose engine diagnostics and memory health metrics."""
     lang = _get_lang(request)
     try:
-        stats = await engine.stats()
+        stats = await engine.stats(tenant_id=auth.tenant_id)
         return StatusResponse(
             version=__version__,
             total_facts=stats["total_facts"],
@@ -341,7 +365,7 @@ class _HandoffBody(BaseModel):
 async def create_api_key(
     request: Request,
     name: str = Query(..., min_length=3, max_length=64),
-    tenant_id: str = Query("default"),
+    tenant_id: str = Query(...),
     authorization: Optional[str] = Header(None),
 ) -> ApiKeyResponse:
     """Sovereign Key Provisioning.
@@ -358,7 +382,12 @@ async def create_api_key(
     existing_keys = await manager.list_keys()
 
     if existing_keys:
-        await _verify_admin_auth(authorization, manager, lang)
+        auth = await _verify_admin_auth(authorization, manager, lang)
+        if tenant_id != auth.tenant_id:
+            raise HTTPException(
+                status_code=403,
+                detail=get_trans("error_forbidden", lang),
+            )
 
     raw_key, api_key = await manager.create_key(
         name=name,

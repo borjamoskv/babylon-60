@@ -91,9 +91,10 @@ class FactMutationEngine:
         event_id = flake_gen.next_lexicographic_id()
         ts = datetime.now(timezone.utc).isoformat()
         payload_str = json.dumps(payload, sort_keys=True, default=str)
+        await self._assert_fact_belongs_to_tenant(conn, fact_id, tenant_id)
 
         # ── 1. Hash-chain: link to the last event for this entity ────
-        prev_hash = await self._get_last_hash(conn, fact_id)
+        prev_hash = await self._get_last_hash(conn, fact_id, tenant_id)
         chain_input = f"{event_id}:{fact_id}:{tenant_id}:{event_type}:{payload_str}:{prev_hash}"
         signature = hashlib.sha3_256(chain_input.encode()).hexdigest()
 
@@ -118,7 +119,7 @@ class FactMutationEngine:
         )
 
         # ── 3. Project mutation into facts (materialized view) ───────
-        await self._project(conn, fact_id, event_type, payload)
+        await self._project(conn, fact_id, tenant_id, event_type, payload)
 
         if commit:
             await conn.commit()
@@ -138,14 +139,31 @@ class FactMutationEngine:
         self,
         conn: aiosqlite.Connection,
         entity_id: int,
+        tenant_id: str,
     ) -> str:
         """Fetch the signature of the most recent event for this entity."""
         async with conn.execute(
-            "SELECT signature FROM entity_events WHERE entity_id = ? ORDER BY id DESC LIMIT 1",
-            (entity_id,),
+            "SELECT signature FROM entity_events "
+            "WHERE entity_id = ? AND tenant_id = ? ORDER BY id DESC LIMIT 1",
+            (entity_id, tenant_id),
         ) as cursor:
             row = await cursor.fetchone()
         return row[0] if row else "GENESIS"
+
+    async def _assert_fact_belongs_to_tenant(
+        self,
+        conn: aiosqlite.Connection,
+        fact_id: int,
+        tenant_id: str,
+    ) -> None:
+        """Fail closed before writing an event for a foreign tenant fact."""
+        async with conn.execute(
+            "SELECT 1 FROM facts WHERE id = ? AND tenant_id = ? LIMIT 1",
+            (fact_id, tenant_id),
+        ) as cursor:
+            row = await cursor.fetchone()
+        if not row:
+            raise ValueError(f"Fact {fact_id} is not writable in tenant scope {tenant_id!r}")
 
     # ── Projection Layer (MOSKV-1 specific) ──────────────────────────
 
@@ -153,6 +171,7 @@ class FactMutationEngine:
         self,
         conn: aiosqlite.Connection,
         fact_id: int,
+        tenant_id: str,
         event_type: str,
         payload: dict[str, Any],
     ) -> None:
@@ -174,7 +193,7 @@ class FactMutationEngine:
 
         projector = _PROJECTORS.get(event_type)
         if projector:
-            await projector(conn, fact_id, payload)
+            await projector(conn, fact_id, tenant_id, payload)
         else:
             # Unknown event type — log but don't fail.
             # The event is still recorded immutably in entity_events.
@@ -190,6 +209,7 @@ class FactMutationEngine:
         self,
         conn: aiosqlite.Connection,
         fact_id: int,
+        tenant_id: str,
         payload: dict,
     ) -> None:
         """Protocol Ω₃-E: Reduce certainty over time to prevent stagnation."""
@@ -198,8 +218,9 @@ class FactMutationEngine:
 
         # 1. Fetch current scores
         async with conn.execute(
-            "SELECT json_extract(metadata, '$.consensus_score'), confidence FROM facts WHERE id = ?",
-            (fact_id,),
+            "SELECT json_extract(metadata, '$.consensus_score'), confidence "
+            "FROM facts WHERE id = ? AND tenant_id = ?",
+            (fact_id, tenant_id),
         ) as cursor:
             row = await cursor.fetchone()
             if not row:
@@ -222,14 +243,15 @@ class FactMutationEngine:
             "  WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata "
             "  ELSE json_set(COALESCE(metadata, '{}'), '$.consensus_score', ?) "
             "END "
-            "WHERE id = ?"
+            "WHERE id = ? AND tenant_id = ?"
         )
-        await conn.execute(query, (new_confidence, ts, new_score, fact_id))
+        await conn.execute(query, (new_confidence, ts, new_score, fact_id, tenant_id))
 
     async def _proj_deprecate(
         self,
         conn: aiosqlite.Connection,
         fact_id: int,
+        tenant_id: str,
         payload: dict,
     ) -> None:
         ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
@@ -243,14 +265,15 @@ class FactMutationEngine:
             "  WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata "
             "  ELSE json_set(COALESCE(metadata, '{}'), '$.deprecation_reason', ?) "
             "END "
-            "WHERE id = ?",
-            (ts, ts, reason, fact_id),
+            "WHERE id = ? AND tenant_id = ?",
+            (ts, ts, reason, fact_id, tenant_id),
         )
 
     async def _proj_tombstone(
         self,
         conn: aiosqlite.Connection,
         fact_id: int,
+        tenant_id: str,
         payload: dict,
     ) -> None:
         reason = payload.get("reason", "tombstoned")
@@ -262,13 +285,13 @@ class FactMutationEngine:
             "  ELSE json_set(COALESCE(metadata, '{}'), '$.tombstoned_at', ?, "
             "                '$.tombstone_reason', ?) "
             "END "
-            "WHERE id = ?"
+            "WHERE id = ? AND tenant_id = ?"
         )
-        await conn.execute(query, (ts, ts, ts, reason, fact_id))
+        await conn.execute(query, (ts, ts, ts, reason, fact_id, tenant_id))
 
         # Ω₁₃: Propagate TAINTED status to descendants
         graph = AsyncCausalGraph(conn)
-        report = await graph.propagate_taint(fact_id)
+        report = await graph.propagate_taint(fact_id, tenant_id=tenant_id)
         logger.info(
             "Ω₁₃ Taint (Tombstone) propagated from fact %d: %d nodes affected",
             fact_id,
@@ -279,6 +302,7 @@ class FactMutationEngine:
         self,
         conn: aiosqlite.Connection,
         fact_id: int,
+        tenant_id: str,
         payload: dict,
     ) -> None:
         ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
@@ -286,13 +310,13 @@ class FactMutationEngine:
         await conn.execute(
             "UPDATE facts SET is_quarantined = 1, quarantined_at = ?, "
             "quarantine_reason = ?, updated_at = ? "
-            "WHERE id = ?",
-            (ts, reason, ts, fact_id),
+            "WHERE id = ? AND tenant_id = ?",
+            (ts, reason, ts, fact_id, tenant_id),
         )
 
         # Ω₁₃: Propagate taint status to descendants
         graph = AsyncCausalGraph(conn)
-        report = await graph.propagate_taint(fact_id)
+        report = await graph.propagate_taint(fact_id, tenant_id=tenant_id)
         logger.info(
             "Ω₁₃ Taint (Quarantine) propagated from fact %d: %d nodes affected",
             fact_id,
@@ -303,19 +327,21 @@ class FactMutationEngine:
         self,
         conn: aiosqlite.Connection,
         fact_id: int,
+        tenant_id: str,
         payload: dict,
     ) -> None:
         ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
         await conn.execute(
             "UPDATE facts SET is_quarantined = 0, quarantined_at = NULL, "
-            "quarantine_reason = NULL, updated_at = ? WHERE id = ?",
-            (ts, fact_id),
+            "quarantine_reason = NULL, updated_at = ? WHERE id = ? AND tenant_id = ?",
+            (ts, fact_id, tenant_id),
         )
 
     async def _proj_score_update(
         self,
         conn: aiosqlite.Connection,
         fact_id: int,
+        tenant_id: str,
         payload: dict,
     ) -> None:
         score = payload.get("consensus_score")
@@ -328,8 +354,8 @@ class FactMutationEngine:
                 "  WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata "
                 "  ELSE json_set(COALESCE(metadata, '{}'), '$.consensus_score', ?) "
                 "END "
-                "WHERE id = ?",
-                (confidence, score, fact_id),
+                "WHERE id = ? AND tenant_id = ?",
+                (confidence, score, fact_id, tenant_id),
             )
         elif score is not None:
             await conn.execute(
@@ -338,27 +364,28 @@ class FactMutationEngine:
                 "  WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata "
                 "  ELSE json_set(COALESCE(metadata, '{}'), '$.consensus_score', ?) "
                 "END "
-                "WHERE id = ?",
-                (score, fact_id),
+                "WHERE id = ? AND tenant_id = ?",
+                (score, fact_id, tenant_id),
             )
         elif confidence is not None:
             await conn.execute(
-                "UPDATE facts SET confidence = ? WHERE id = ?",
-                (confidence, fact_id),
+                "UPDATE facts SET confidence = ? WHERE id = ? AND tenant_id = ?",
+                (confidence, fact_id, tenant_id),
             )
 
     async def _proj_restore(
         self,
         conn: aiosqlite.Connection,
         fact_id: int,
+        tenant_id: str,
         payload: dict,
     ) -> None:
         ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
         await conn.execute(
             "UPDATE facts SET valid_until = NULL, is_tombstoned = 0, "
             "tombstoned_at = NULL, is_quarantined = 0, quarantined_at = NULL, "
-            "quarantine_reason = NULL, updated_at = ? WHERE id = ?",
-            (ts, fact_id),
+            "quarantine_reason = NULL, updated_at = ? WHERE id = ? AND tenant_id = ?",
+            (ts, fact_id, tenant_id),
         )
 
     # ── Audit / Verification ─────────────────────────────────────────
@@ -367,20 +394,24 @@ class FactMutationEngine:
         self,
         conn: aiosqlite.Connection,
         entity_id: int,
+        tenant_id: str | None = None,
     ) -> dict[str, Any]:
         """Cryptographic audit of the event chain for a single entity.
 
         Recalculates every signature and verifies back-pointers.
         Returns a structured audit result.
         """
-        async with conn.execute(
-            "SELECT id, entity_id, tenant_id, event_type, payload, "
-            "prev_hash, signature "
-            "FROM entity_events "
-            "WHERE entity_id = ? "
-            "ORDER BY id ASC",
-            (entity_id,),
-        ) as cursor:
+        query = (
+            "SELECT id, entity_id, tenant_id, event_type, payload, prev_hash, signature "
+            "FROM entity_events WHERE entity_id = ? "
+        )
+        params: list[Any] = [entity_id]
+        if tenant_id is not None:
+            query += "AND tenant_id = ? "
+            params.append(tenant_id)
+        query += "ORDER BY id ASC"
+
+        async with conn.execute(query, tuple(params)) as cursor:
             findings: list[str] = []
             last_sig = "GENESIS"
             count = 0
@@ -419,6 +450,7 @@ class FactMutationEngine:
         conn: aiosqlite.Connection,
         entity_id: int,
         as_of: str | None = None,
+        tenant_id: str | None = None,
     ) -> dict[str, Any]:
         """Reconstruct the projected state of an entity from its event log.
 
@@ -428,8 +460,12 @@ class FactMutationEngine:
         """
         query = "SELECT event_type, payload FROM entity_events WHERE entity_id = ? "
         params: list[Any] = [entity_id]
+        if tenant_id is not None:
+            query += "AND tenant_id = ? "
+            params.append(tenant_id)
         if as_of:
             query += "AND timestamp <= ? "
+            params.append(as_of)
         query += "ORDER BY id ASC"
 
         state: dict[str, Any] = {}

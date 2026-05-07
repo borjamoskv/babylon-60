@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from cortex.engine.storage_guard import GuardViolation
 from cortex.extensions.songlines.sensor import TopographicSensor
 
 logger = logging.getLogger("cortex.extensions.daemon.entropic_wake")
@@ -105,21 +106,27 @@ class EntropicWakeDaemon:
         """Register the autonomous action into CORTEX-DB."""
         if not self.engine:
             return
+        if not hasattr(self.engine, "store_sync"):
+            logger.error("[ENTROPIC-WAKE] Action logging blocked: canonical store_sync required.")
+            return
         now_str = datetime.now(timezone.utc).strftime("%H:%M %p")
         msg = (
             f"Anoche a las {now_str} disolví secciones entrópicas estancadas en {target}. "
             "Pasó los tests de inmunidad. Deuda saldada. PR en espera de merge."
         )
         try:
-            conn = self.engine.pool.get_connection()
-            conn.execute(
-                "INSERT INTO facts (id, type, topic, content, timestamp) "
-                "VALUES (lower(hex(randomblob(16))), 'decision', 'Autopoiesis', ?, ?)",
-                (msg, datetime.now(timezone.utc).timestamp()),
+            self.engine.store_sync(
+                tenant_id="default",
+                project="system",
+                content=msg,
+                fact_type="decision",
+                tags=["daemon", "entropic-wake", "autopoiesis"],
+                confidence="C5",
+                source="entropic-wake-daemon",
+                meta={"target": target, "timestamp": datetime.now(timezone.utc).timestamp()},
             )
-            conn.commit()
             logger.info("Logged autopoiesis cycle to CORTEX.")
-        except sqlite3.Error as e:
+        except (RuntimeError, ValueError, TypeError, AttributeError, OSError, GuardViolation) as e:
             logger.error("Failed to log to cortex DB: %s", e)
 
     async def run_loop(self):

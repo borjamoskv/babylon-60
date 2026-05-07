@@ -1,13 +1,13 @@
 # ─────────────────────────────────────────────────────────────
-# Sovereign K8s Deployment — GCP (also usable on AWS/Azure)
+# Production K8s deployment — GCP (also usable on AWS/Azure)
 # ─────────────────────────────────────────────────────────────
 apiVersion: v1
 kind: Namespace
 metadata:
   name: cortex
   labels:
-    app.kubernetes.io/managed-by: sovereign-pipeline
-    security.cortex.io/level: military
+    app.kubernetes.io/managed-by: production-pipeline
+    security.cortex.io/level: restricted
 
 ---
 apiVersion: v1
@@ -16,16 +16,16 @@ metadata:
   name: cortex-app
   namespace: cortex
   annotations:
-    iam.gke.io/gcp-service-account: cortex-sovereign@PROJECT_ID.iam.gserviceaccount.com
+    iam.gke.io/gcp-service-account: cortex-persist@PROJECT_ID.iam.gserviceaccount.com
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cortex-sovereign
+  name: cortex-persist
   namespace: cortex
   labels:
-    app: cortex-sovereign
+    app: cortex-persist
     version: v5
 spec:
   replicas: 3
@@ -36,11 +36,11 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: cortex-sovereign
+      app: cortex-persist
   template:
     metadata:
       labels:
-        app: cortex-sovereign
+        app: cortex-persist
         version: v5
       annotations:
         prometheus.io/scrape: "true"
@@ -56,7 +56,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: cortex
-          image: gcr.io/PROJECT_ID/cortex-sovereign:latest
+          image: gcr.io/PROJECT_ID/cortex-persist:latest
           ports:
             - containerPort: 8484
               protocol: TCP
@@ -66,7 +66,7 @@ spec:
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: "http://otel-collector.observability.svc:4317"
             - name: VAULT_ADDR
-              value: "https://vault.cortex-sovereign.internal:8200"
+              value: "https://vault.cortex-persist.internal:8200"
           resources:
             requests:
               cpu: 500m
@@ -103,7 +103,7 @@ metadata:
   namespace: cortex
 spec:
   selector:
-    app: cortex-sovereign
+    app: cortex-persist
   ports:
     - port: 8484
       targetPort: 8484
@@ -114,25 +114,25 @@ spec:
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: cortex-sovereign-pdb
+  name: cortex-persist-pdb
   namespace: cortex
 spec:
   minAvailable: 2
   selector:
     matchLabels:
-      app: cortex-sovereign
+      app: cortex-persist
 
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: cortex-sovereign-hpa
+  name: cortex-persist-hpa
   namespace: cortex
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: cortex-sovereign
+    name: cortex-persist
   minReplicas: 3
   maxReplicas: 20
   metrics:
@@ -153,12 +153,12 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: cortex-sovereign-netpol
+  name: cortex-persist-netpol
   namespace: cortex
 spec:
   podSelector:
     matchLabels:
-      app: cortex-sovereign
+      app: cortex-persist
   policyTypes:
     - Ingress
     - Egress

@@ -6,7 +6,7 @@ variable "environment" { type = string }
 variable "location" { type = string }
 
 locals {
-  name_prefix = "cortex-sovereign-${var.environment}"
+  name_prefix = "cortex-persist-${var.environment}"
   rg_name     = "${local.name_prefix}-rg"
 }
 
@@ -15,7 +15,7 @@ locals {
 resource "azurerm_resource_group" "main" {
   name     = local.rg_name
   location = var.location
-  tags     = { Standard = "130/100", ManagedBy = "terraform" }
+  tags     = { Standard    = "verified", ManagedBy = "terraform" }
 }
 
 # ── VNet ─────────────────────────────────────────────────────
@@ -36,7 +36,7 @@ resource "azurerm_subnet" "aks" {
 
 # ── AKS ──────────────────────────────────────────────────────
 
-resource "azurerm_kubernetes_cluster" "sovereign" {
+resource "azurerm_kubernetes_cluster" "persist" {
   name                = "${local.name_prefix}-aks"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
@@ -70,15 +70,15 @@ resource "azurerm_kubernetes_cluster" "sovereign" {
   }
 
   oms_agent {
-    log_analytics_workspace_id = azurerm_log_analytics_workspace.sovereign.id
+    log_analytics_workspace_id = azurerm_log_analytics_workspace.persist.id
   }
 
-  tags = { Standard = "130/100" }
+  tags = { Standard    = "verified" }
 }
 
 # ── Log Analytics ────────────────────────────────────────────
 
-resource "azurerm_log_analytics_workspace" "sovereign" {
+resource "azurerm_log_analytics_workspace" "persist" {
   name                = "${local.name_prefix}-logs"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
@@ -90,8 +90,8 @@ resource "azurerm_log_analytics_workspace" "sovereign" {
 
 data "azurerm_client_config" "current" {}
 
-resource "azurerm_key_vault" "sovereign" {
-  name                       = "cortexsov${var.environment}"
+resource "azurerm_key_vault" "persist" {
+  name                       = "cortexpersist${var.environment}"
   location                   = azurerm_resource_group.main.location
   resource_group_name        = azurerm_resource_group.main.name
   tenant_id                  = data.azurerm_client_config.current.tenant_id
@@ -108,9 +108,9 @@ resource "azurerm_key_vault" "sovereign" {
 # ── Outputs ──────────────────────────────────────────────────
 
 output "aks_endpoint" {
-  value = azurerm_kubernetes_cluster.sovereign.fqdn
+  value = azurerm_kubernetes_cluster.persist.fqdn
 }
 
 output "key_vault_uri" {
-  value = azurerm_key_vault.sovereign.vault_uri
+  value = azurerm_key_vault.persist.vault_uri
 }

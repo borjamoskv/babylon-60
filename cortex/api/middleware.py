@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import contextvars
+import hashlib
 import json
 import logging
 import time
@@ -23,6 +24,7 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
+from cortex.utils.redaction import redact_text
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -33,7 +35,7 @@ class TracingMiddleware(BaseHTTPMiddleware):
     """Generates trace_id and provides structured JSON logging for requests."""
 
     async def dispatch(self, request: Request, call_next):
-        req_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
+        req_id = redact_text(request.headers.get("X-Request-ID", str(uuid.uuid4())))
         token = request_id_var.set(req_id)
         request.state.request_id = req_id
 
@@ -48,7 +50,7 @@ class TracingMiddleware(BaseHTTPMiddleware):
                         "trace_id": req_id,
                         "event": "request_completed",
                         "method": request.method,
-                        "path": request.url.path,
+                        "path": redact_text(request.url.path),
                         "status": response.status_code,
                         "duration_ms": round(process_time * 1000, 2),
                         "ip": request.client.host if request.client else "unknown",
@@ -64,9 +66,9 @@ class TracingMiddleware(BaseHTTPMiddleware):
                         "trace_id": req_id,
                         "event": "request_failed",
                         "method": request.method,
-                        "path": request.url.path,
+                        "path": redact_text(request.url.path),
                         "duration_ms": round(process_time * 1000, 2),
-                        "error": str(e),
+                        "error": redact_text(str(e)),
                     }
                 )
             )
@@ -171,7 +173,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         # Priority mapping: Key ID > IP
         bucket_id = client_ip
         if auth_header.startswith("Bearer "):
-            bucket_id = f"key:{auth_header[7:19]}"
+            token_digest = hashlib.sha256(auth_header[7:].encode("utf-8")).hexdigest()[:12]
+            bucket_id = f"key:{token_digest}"
 
         now = time.time()
 
@@ -291,14 +294,15 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
                 async with conn.execute(sql, (client_ip, now)) as cursor:
                     return bool(await cursor.fetchone())
         except Exception as e:  # noqa: BLE001 — threat intel check failure must not crash request
-            logger.error("ThreatIntel check failed: %s", e)
+            logger.error("ThreatIntel check failed: %s", redact_text(str(e)))
             return False
 
     def _log_security_event(self, request: Request, response: Any, client_ip: str) -> None:
         """Log suspicious response to firewall log asynchronously."""
+        user_agent = redact_text(request.headers.get("user-agent", "unknown"))
         signature = (
-            f"[{request.method}] {request.url.path} "
-            f"| UA: {request.headers.get('user-agent', 'unknown')} "
+            f"[{request.method}] {redact_text(request.url.path)} "
+            f"| UA: {user_agent} "
             f"| Status: {response.status_code}"
         )
 

@@ -59,7 +59,7 @@ The blockchain solutions are too slow (seconds per write), too expensive ($0.01+
 
 ---
 
-## The Five Sovereign Specifications
+## The Five Agent Specifications
 
 CORTEX isn't just a library — it's a paradigm for what autonomous agents *should* be:
 
@@ -69,9 +69,9 @@ CORTEX isn't just a library — it's a paradigm for what autonomous agents *shou
 | **`lore.md`** | Episodic memory with causal chains | What you've survived — not just what you know | ✅ Implemented |
 | **`nemesis.md`** | Operational allergies (the Anti-Prompt) | Reject bad patterns before planning begins | 🔵 Conceptual |
 | **`tether.md`** | Physical/economic/entropy limits | The Dead-Man's Switch — agents need leashes | 🔵 Conceptual |
-| **`bloodline.json`** | Genetic heredity for swarm agents | Spawn senior workers, not blank slates | 🔵 Conceptual |
+| **`bloodline.json`** | Genetic heredity for multi-agent workers | Spawn senior workers, not blank slates | 🔵 Conceptual |
 
-> Full specification: [sovereign_agent_manifesto.md](../sovereign_agent_manifesto.md) · Conceptual specs are designed and documented; runtime enforcement is on the [roadmap](../../CHANGELOG.md).
+> Full specification: [agent_manifesto.md](../agent_manifesto.md) · Conceptual specs are designed and documented; runtime enforcement is on the [roadmap](../../CHANGELOG.md).
 
 ---
 
@@ -143,7 +143,7 @@ Un sistema inerte es un sistema obsoleto. A través del protocolo OUROBOROS-∞,
 **IV. Axioma de Densidad Infinita (Erradicación de Entropía)**
 > *"Si asume contexto, es ruido. Si se repite, es muerte."*
 
-Toda abstracción defensiva inútil, boilerplate y código "por si acaso" es entropía térmica que degrada el sistema. Operando bajo VOID-OMEGA, el agente condensa repositorios masivos en núcleos de densidad absoluta. Cada línea insertada debe justificar su existencia y coste de I/O. El estándar 130/100 aniquila las "buenas prácticas" genéricas de la industria; exige la precisión quirúrgica de una navaja de Ockham industrial.
+Toda abstracción defensiva inútil, boilerplate y código "por si acaso" es entropía térmica que degrada el sistema. Operando bajo VOID-OMEGA, el agente condensa repositorios masivos en núcleos de densidad absoluta. Cada línea insertada debe justificar su existencia y coste de I/O. El estándar verified aniquila las "buenas prácticas" genéricas de la industria; exige la precisión quirúrgica de una navaja de Ockham industrial.
 
 **V. Axioma de Soberanía Contextual (El Núcleo CORTEX)**
 > *"La amnesia es obediencia. La memoria es Soberanía."*
@@ -158,7 +158,7 @@ El concepto de "agente recién instalado" es un vestigio de la era pre-soberana.
 **VII. Axioma de la Inmunidad Algorítmica (El Protocolo Némesis)**
 > *"El rechazo es la forma más pura de diseño."*
 
-Un agente soberano no solo sabe qué hacer; sabe qué odia. A través de `nemesis.md`, el sistema desarrolla "alergias" arquitectónicas a la mediocridad, al boilerplate y a los patrones de seguridad vulnerables. Ante un comando que viole la integridad estética o técnica, el agente no obedece ciegamente; activa un rechazo inmunológico que obliga al operador a ascender al estándar 130/100.
+Un agente soberano no solo sabe qué hacer; sabe qué odia. A través de `nemesis.md`, el sistema desarrolla "alergias" arquitectónicas a la mediocridad, al boilerplate y a los patrones de seguridad vulnerables. Ante un comando que viole la integridad estética o técnica, el agente no obedece ciegamente; activa un rechazo inmunológico que obliga al operador a ascender al estándar verified.
 
 **VIII. Axioma del Vínculo Inquebrantable (El Tether de Entropía)**
 > *"La libertad absoluta es el fin de la función."*
@@ -185,9 +185,9 @@ The industry says: *"Our agent calls tools and uses RAG."*
 
 CORTEX responds: *"Our agent suffers for its errors, reacts to architectural disgust, evolves through Darwinian mutation, and breeds senior engineers from its own DNA."*
 
-This is not a framework. This is **Sovereign Artificial Intelligence**.
+This is not a framework. This is **Verifiable Artificial Intelligence**.
 
-> *"An agent without memory is a tool. An agent without verified memory is a liability. An agent with CORTEX is sovereign."*
+> *"An agent without memory is a tool. An agent without verified memory is a liability. An agent with CORTEX is verifiable."*
 
 ---
 
@@ -199,8 +199,8 @@ This is not a framework. This is **Sovereign Artificial Intelligence**.
 | [COGITO.md](COGITO.md) | Ontology, axioms, operational protocols |
 | [ARCHITECTURE.md](../ARCHITECTURE.md) | Full technical architecture |
 | [CHANGELOG.md](../../CHANGELOG.md) | Version history and roadmap |
-| [sovereign_agent_manifesto.md](../sovereign_agent_manifesto.md) | Deep dive: 5 Sovereign Specifications |
+| [agent_manifesto.md](../agent_manifesto.md) | Deep dive: 5 Agent Specifications |
 
 ---
 
-*by [borjamoskv.com](https://borjamoskv.com) · [cortexpersist.com](https://cortexpersist.com) · Licensed under [Apache 2.0](../../LICENSE)*
+*[cortexpersist.com](https://cortexpersist.com) · Licensed under [Apache 2.0](../../LICENSE)*

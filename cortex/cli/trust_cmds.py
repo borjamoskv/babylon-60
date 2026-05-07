@@ -293,7 +293,7 @@ def siege(db: str) -> None:
     async def _run_siege():
         pool = CortexConnectionPool(db, min_connections=2, max_connections=10, read_only=False)
         await pool.initialize()
-        engine = AsyncCortexEngine(pool, db)
+        engine = AsyncCortexEngine(db_path=db, pool=pool)
         try:
             import os
 

@@ -16,8 +16,7 @@ from typing import Any
 
 from cortex.database.core import connect as db_connect
 from cortex.crypto.aes import CortexEncrypter
-from cortex.forensics.evidence_bundle import canonical_json_bytes, sha256_hex
-from cortex.utils.canonical import compute_tx_hash, compute_tx_hash_v1
+from cortex.utils.canonical import canonical_json, compute_tx_hash, compute_tx_hash_v1
 
 logger = logging.getLogger("cortex.services.trust")
 
@@ -62,6 +61,16 @@ class FactVerification:
 _MIN_SIGNED_RATIO: float = 0.95
 _SIEGE_SAMPLE_SIZE: int = 100
 _SIEGE_REPORT_CAP: int = 10
+
+
+def canonical_json_bytes(payload: Any) -> bytes:
+    """Serialize payload with the repository canonical JSON contract."""
+    return canonical_json(payload).encode("utf-8")
+
+
+def sha256_hex(payload: bytes) -> str:
+    """Return SHA-256 hex for binary bundle material."""
+    return hashlib.sha256(payload).hexdigest()
 
 
 def _verified_fact_hash(content: str, tenant_id: str) -> str:

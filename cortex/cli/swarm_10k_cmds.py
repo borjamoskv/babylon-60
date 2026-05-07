@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
+from typing import cast
 
 import click
 from rich.panel import Panel
 
 from cortex.cli.common import cli, console
 from cortex.engine.swarm_10k import SwarmCommander
+from cortex.extensions.signals.sharded_bus import ShardedAsyncSignalBus
 
 
 @cli.group()
@@ -37,35 +39,38 @@ def swarm_10k_deploy(db_path, tasks_count):
     )
 
     async def _run():
-        commander = SwarmCommander(bus_path=p)
+        commander = SwarmCommander(bus_path=p, use_shm=False)
+        try:
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                TimeElapsedColumn(),
+                console=console,
+            ) as progress:
+                t1 = progress.add_task("[bold #1A1A1A]L0: Igniting SwarmCommander...", total=None)
+                await commander.initialize()
+                progress.update(t1, description="[bold green]L0: SwarmCommander Online")
 
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            TimeElapsedColumn(),
-            console=console,
-        ) as progress:
-            t1 = progress.add_task("[bold #1A1A1A]L0: Igniting SwarmCommander...", total=None)
-            await commander.initialize()
-            progress.update(t1, description="[bold green]L0: SwarmCommander Online")
+                t2 = progress.add_task(f"[bold #1A1A1A]Dispatching {tasks_count} tasks...", total=None)
 
-            t2 = progress.add_task(f"[bold #1A1A1A]Dispatching {tasks_count} tasks...", total=None)
+                # Seed massive workload
+                tasks = [{"domain": f"domain_{i % 10}", "id": i} for i in range(tasks_count)]
+                await commander.execute_global_dispatch(tasks)
 
-            # Seed massive workload
-            tasks = [{"domain": f"domain_{i % 10}", "id": i} for i in range(tasks_count)]
-            await commander.execute_global_dispatch(tasks)
+                progress.update(
+                    t2,
+                    description=f"[bold green]Hierarchy Extrusion Complete. {tasks_count} tasks dispatched.",
+                )
 
-            progress.update(
-                t2,
-                description=f"[bold green]Hierarchy Extrusion Complete. {tasks_count} tasks dispatched.",
+            report = await commander.get_density_report()
+            console.print(
+                "\n[bold #00FFCC]✅ 10K TOPOLOGY STABLE[/]\n"
+                f"Legions (L1): {report['legions']} | Centurions (L2): {report['centurions']} | Active Agents: {report['agents']}"
             )
-
-        report = await commander.get_density_report()
-        console.print(
-            "\n[bold #00FFCC]✅ 10K TOPOLOGY STABLE[/]\n"
-            f"Legions (L1): {report['legions']} | Centurions (L2): {report['centurions']} | Active Agents: {report['agents']}"
-        )
-        await commander.bus.close()
+        finally:
+            await commander._close_centurion_buses()
+            bus = cast(ShardedAsyncSignalBus, commander.bus)
+            await bus.close()
 
     asyncio.run(_run())
 
@@ -77,24 +82,27 @@ def swarm_10k_status(db_path):
     p = Path(db_path).expanduser()
 
     async def _run():
-        commander = SwarmCommander(bus_path=p)
+        commander = SwarmCommander(bus_path=p, use_shm=False)
         await commander.initialize()
+        try:
+            total_signals = 0
+            bus = cast(ShardedAsyncSignalBus, commander.bus)
+            for sys_idx in range(bus.num_shards):
+                conn = bus._shards[sys_idx]
+                row = await (await conn.execute("SELECT COUNT(*) FROM signals")).fetchone()
+                total_signals += row[0] if row else 0
 
-        total_signals = 0
-        for sys_idx in range(commander.bus.num_shards):
-            conn = commander.bus._shards[sys_idx]
-            row = await (await conn.execute("SELECT COUNT(*) FROM signals")).fetchone()
-            total_signals += row[0] if row else 0
-
-        console.print(
-            Panel(
-                f"📊 [bold]CORTEX-SWARM-10K STATUS[/]\n"
-                f"Total Signals in Shards Bus: [cyan]{total_signals}[/]\n"
-                f"Shards Health: [green]100% ({commander.bus.num_shards} active)[/]",
-                border_style="blue",
+            console.print(
+                Panel(
+                    f"📊 [bold]CORTEX-SWARM-10K STATUS[/]\n"
+                    f"Total Signals in Shards Bus: [cyan]{total_signals}[/]\n"
+                    f"Shards Health: [green]100% ({bus.num_shards} active)[/]",
+                    border_style="blue",
+                )
             )
-        )
-        await commander.bus.close()
+        finally:
+            bus = cast(ShardedAsyncSignalBus, commander.bus)
+            await bus.close()
 
     asyncio.run(_run())
 
@@ -106,7 +114,7 @@ def swarm_10k_consolidate(db_path):
     p = Path(db_path).expanduser()
 
     async def _run():
-        commander = SwarmCommander(bus_path=p)
+        commander = SwarmCommander(bus_path=p, use_shm=False)
         await commander.initialize()
 
         console.print("[dim]Initiating Ouroboros-Omega Annihilation...[/]")

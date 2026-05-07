@@ -1,4 +1,3 @@
-import json
 import logging
 import subprocess
 from datetime import datetime, timezone
@@ -31,45 +30,35 @@ class CuatridaOrchestrator:
         dimension: Dimension,
         metadata: Optional[dict[str, Any]] = None,
         conn: Any = None,
+        tenant_id: str = "default",
     ) -> DecisionNode:
         """
         Dimension B: Seals a decision into the immutable ledger.
         """
         timestamp = datetime.now(timezone.utc).isoformat()
         metadata = metadata or {}
+        action = f"cuatrida:{dimension.value}"
 
         # Dimension B: Hook into CORTEX ledger.
         # Use provided connection if available to stay in the same transaction.
         if conn:
-            from cortex.memory.temporal import now_iso
-            from cortex.utils.canonical import canonical_json, compute_tx_hash
-
-            dj = canonical_json(metadata)
-            ts = now_iso()
-
-            # Previous hash from chain
-            async with conn.execute(
-                "SELECT hash FROM transactions ORDER BY id DESC LIMIT 1"
-            ) as cursor:
-                prev = await cursor.fetchone()
-                ph = prev[0] if prev else "GENESIS"
-
-            th = compute_tx_hash(ph, project, f"cuatrida:{dimension.value}", dj, ts)
-
-            cursor = await conn.execute(
-                "INSERT INTO transactions (project, action, detail, prev_hash, hash, timestamp) "
-                "VALUES (?, ?, ?, ?, ?, ?)",
-                (project, f"cuatrida:{dimension.value}", dj, ph, th, ts),
+            actual_tx_id = await self.engine._log_transaction(
+                conn,
+                project,
+                action,
+                metadata,
+                tenant_id=tenant_id,
             )
-            actual_tx_id = cursor.lastrowid
         else:
-            # Standalone fallback
-            tx_res = await self.engine.write(
-                "INSERT INTO transactions (project, action, detail, prev_hash, hash, timestamp) "
-                "VALUES (?, ?, ?, 'GENESIS', 'sha256:standalone_placeholder', ?)",
-                (project, f"cuatrida:{dimension.value}", json.dumps(metadata), timestamp),
-            )
-            actual_tx_id = tx_res.unwrap() if tx_res.is_ok() else 0
+            async with self.engine.session() as session:
+                actual_tx_id = await self.engine._log_transaction(
+                    session,
+                    project,
+                    action,
+                    metadata,
+                    tenant_id=tenant_id,
+                )
+                await session.commit()
 
         self._last_tx_id = actual_tx_id
 

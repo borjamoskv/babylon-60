@@ -4,11 +4,24 @@ import starlight from '@astrojs/starlight';
 
 // CORTEX Unified Substrate — v0.3.2b1 Configuration
 export default defineConfig({
+  site: 'https://cortexpersist.com',
   output: 'static',
+
   integrations: [
     react(),
     starlight({
       title: 'CORTEX Docs',
+      defaultLocale: 'root',
+      locales: {
+        root: {
+          label: 'English',
+          lang: 'en',
+        },
+        es: {
+          label: 'Español',
+          lang: 'es',
+        },
+      },
       logo: {
         src: './src/assets/logo-white.svg',
       },

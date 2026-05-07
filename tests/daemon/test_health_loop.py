@@ -69,6 +69,50 @@ class TestHealthLoop:
 
         loop.persist_snapshot(MockEngine(), data)
 
+    def test_persist_snapshot_redacts_sensitive_metadata(self):
+        """persist_snapshot should not write sensitive metadata into facts."""
+        loop = HealthLoop(db_path="/tmp/nonexistent.db")
+
+        class RecordingEngine:
+            def __init__(self):
+                self.kwargs = None
+
+            def store_sync(self, *args, **kwargs):
+                self.kwargs = kwargs
+
+        engine = RecordingEngine()
+        loop.persist_snapshot(
+            engine,
+            {
+                "score": 88.0,
+                "grade": "A",
+                "healthy": True,
+                "token": "ctx_supersecrethealthtoken",
+                "operator_email": "alice@example.com",
+                "path": "/Users/example/private/health.json",
+                "metrics": [
+                    {
+                        "name": "requests",
+                        "value": 42,
+                        "api_key": "ctx_nestedsecrethealthtoken",
+                    }
+                ],
+            },
+        )
+
+        assert engine.kwargs is not None
+        meta = engine.kwargs["meta"]
+        assert meta["score"] == 88.0
+        assert meta["metrics"][0]["value"] == 42
+        assert meta["token"] == "[REDACTED]"
+        assert meta["metrics"][0]["api_key"] == "[REDACTED]"
+
+        serialized = str(meta)
+        assert "ctx_supersecrethealthtoken" not in serialized
+        assert "ctx_nestedsecrethealthtoken" not in serialized
+        assert "alice@example.com" not in serialized
+        assert "/Users/example" not in serialized
+
     def test_interval_default(self):
         """Default interval should be 300 seconds."""
         loop = HealthLoop()

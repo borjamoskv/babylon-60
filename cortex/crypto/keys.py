@@ -25,6 +25,19 @@ class ZKSwarmIdentity:
     """Manages cryptographic signing and verification for the CORTEX ZK-Swarm."""
 
     @staticmethod
+    def _store_event_payload(
+        *,
+        tenant_id: str,
+        project: str,
+        fact_type: str,
+        source: str,
+        content: str,
+    ) -> str:
+        """Canonical payload signed for tenant-bound store events."""
+        parts = (tenant_id, project, fact_type, source, content)
+        return "\x1f".join(part.strip() for part in parts)
+
+    @staticmethod
     def generate_keypair() -> AgentKeyPair:
         """Generates a fresh Ed25519 keypair for an agent session.
 
@@ -86,3 +99,50 @@ class ZKSwarmIdentity:
             return True
         except (InvalidSignature, ValueError, TypeError):
             return False
+
+    @staticmethod
+    def public_key_sha256(public_key_b64: str) -> str:
+        """Return the SHA-256 fingerprint of a base64 Ed25519 public key."""
+        pub_bytes = base64.b64decode(public_key_b64)
+        return hashlib.sha256(pub_bytes).hexdigest()
+
+    @staticmethod
+    def sign_store_event(
+        *,
+        tenant_id: str,
+        project: str,
+        fact_type: str,
+        source: str,
+        content: str,
+        private_key_b64: str,
+    ) -> str:
+        """Sign a store-event payload bound to tenant, project, type, and source."""
+        payload = ZKSwarmIdentity._store_event_payload(
+            tenant_id=tenant_id,
+            project=project,
+            fact_type=fact_type,
+            source=source,
+            content=content,
+        )
+        return ZKSwarmIdentity.sign_payload(payload, private_key_b64)
+
+    @staticmethod
+    def verify_store_event(
+        *,
+        tenant_id: str,
+        project: str,
+        fact_type: str,
+        source: str,
+        content: str,
+        public_key_b64: str,
+        signature_b64: str,
+    ) -> bool:
+        """Verify a tenant-bound store-event signature."""
+        payload = ZKSwarmIdentity._store_event_payload(
+            tenant_id=tenant_id,
+            project=project,
+            fact_type=fact_type,
+            source=source,
+            content=content,
+        )
+        return ZKSwarmIdentity.verify_payload(payload, public_key_b64, signature_b64)

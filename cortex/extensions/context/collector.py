@@ -98,11 +98,15 @@ class ContextCollector:
         max_signals: int = 20,
         workspace_dir: Optional[str] = None,
         git_enabled: bool = True,
+        tenant_id: str = "default",
+        include_external: bool = True,
     ):
         self.conn = conn
         self.max_signals = max_signals
         self.workspace_dir = Path(workspace_dir) if workspace_dir else Path.home()
         self.git_enabled = git_enabled
+        self.tenant_id = tenant_id
+        self.include_external = include_external
 
     async def collect_all(self) -> list[Signal]:
         """Collect signals from all available sources."""
@@ -115,9 +119,10 @@ class ContextCollector:
         signals.extend(await self._collect_heartbeats())
 
         # External signals (best-effort)
-        signals.extend(self._collect_fs_recent())
+        if self.include_external:
+            signals.extend(self._collect_fs_recent())
 
-        if self.git_enabled:
+        if self.include_external and self.git_enabled:
             signals.extend(self._collect_git_log())
 
         # Sort by weight descending + recency, cap at max
@@ -126,17 +131,30 @@ class ContextCollector:
 
     # ─── Database Signals ────────────────────────────────────────────
 
+    async def _has_column(self, table_name: str, column_name: str) -> bool:
+        """Return whether a local table exposes a column."""
+        try:
+            async with self.conn.execute(f"PRAGMA table_info({table_name})") as cursor:
+                rows = await cursor.fetchall()
+        except (sqlite3.Error, OSError, ValueError):
+            return False
+        return any(str(row[1]) == column_name for row in rows)
+
     async def _collect_recent_facts(self, limit: int = 10) -> list[Signal]:
         """Collect the most recently stored/updated facts."""
-        sql = """
+        tenant_scoped = await self._has_column("facts", "tenant_id")
+        tenant_clause = "AND tenant_id = ?" if tenant_scoped else ""
+        sql = f"""
             SELECT id, project, content, fact_type, updated_at
             FROM facts
             WHERE valid_until IS NULL
+            {tenant_clause}
             ORDER BY updated_at DESC
             LIMIT ?
         """
+        params: tuple[object, ...] = (self.tenant_id, limit) if tenant_scoped else (limit,)
         try:
-            async with self.conn.execute(sql, (limit,)) as cursor:
+            async with self.conn.execute(sql, params) as cursor:
                 rows = await cursor.fetchall()
         except (sqlite3.Error, OSError, ValueError):
             logger.debug("Could not collect recent facts", exc_info=True)
@@ -156,15 +174,19 @@ class ContextCollector:
 
     async def _collect_active_ghosts(self, limit: int = 10) -> list[Signal]:
         """Collect unresolved ghosts (pending work items)."""
-        sql = """
+        tenant_scoped = await self._has_column("ghosts", "tenant_id")
+        tenant_clause = "AND tenant_id = ?" if tenant_scoped else ""
+        sql = f"""
             SELECT id, project, reference, context, created_at
             FROM ghosts
             WHERE resolved_at IS NULL
+            {tenant_clause}
             ORDER BY id DESC
             LIMIT ?
         """
+        params: tuple[object, ...] = (self.tenant_id, limit) if tenant_scoped else (limit,)
         try:
-            async with self.conn.execute(sql, (limit,)) as cursor:
+            async with self.conn.execute(sql, params) as cursor:
                 rows = await cursor.fetchall()
         except (sqlite3.Error, OSError, ValueError):
             logger.debug("Could not collect ghosts", exc_info=True)
@@ -184,14 +206,18 @@ class ContextCollector:
 
     async def _collect_recent_transactions(self, limit: int = 10) -> list[Signal]:
         """Collect recent ledger transactions."""
-        sql = """
+        tenant_scoped = await self._has_column("transactions", "tenant_id")
+        where_clause = "WHERE tenant_id = ?" if tenant_scoped else ""
+        sql = f"""
             SELECT id, project, action, detail, timestamp
             FROM transactions
+            {where_clause}
             ORDER BY id DESC
             LIMIT ?
         """
+        params: tuple[object, ...] = (self.tenant_id, limit) if tenant_scoped else (limit,)
         try:
-            async with self.conn.execute(sql, (limit,)) as cursor:
+            async with self.conn.execute(sql, params) as cursor:
                 rows = await cursor.fetchall()
         except (sqlite3.Error, OSError, ValueError):
             logger.debug("Could not collect transactions", exc_info=True)
@@ -214,14 +240,18 @@ class ContextCollector:
 
     async def _collect_heartbeats(self, limit: int = 5) -> list[Signal]:
         """Collect recent heartbeat activity pulses."""
-        sql = """
+        tenant_scoped = await self._has_column("heartbeats", "tenant_id")
+        where_clause = "WHERE tenant_id = ?" if tenant_scoped else ""
+        sql = f"""
             SELECT id, project, entity, category, timestamp
             FROM heartbeats
+            {where_clause}
             ORDER BY id DESC
             LIMIT ?
         """
+        params: tuple[object, ...] = (self.tenant_id, limit) if tenant_scoped else (limit,)
         try:
-            async with self.conn.execute(sql, (limit,)) as cursor:
+            async with self.conn.execute(sql, params) as cursor:
                 rows = await cursor.fetchall()
         except (sqlite3.Error, OSError, ValueError):
             logger.debug("Could not collect heartbeats", exc_info=True)

@@ -1,15 +1,13 @@
-"""
-CORTEX v5.0 — Vector Memory Garbage Collection Pipeline.
+"""CORTEX v5.0 — Vector Memory Garbage Collection Pipeline.
 
-Implements deferred physical deletion for tombstoned facts.
-To safeguard database IOPS during peak daytime traffic, physical deletion
-is deferred to off-peak hours (e.g., early morning).
+Tombstoned facts are immutable domain records. This collector now reports
+physical-deletion candidates but fails closed instead of deleting facts, vectors,
+or consensus records outside a tenant-scoped canonical purge ledger.
 """
 
 from __future__ import annotations
 
 import logging
-import sqlite3
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
@@ -20,7 +18,7 @@ logger = logging.getLogger("cortex.gc")
 
 
 class GarbageCollector:
-    """Garbage collector for physically deleting tombstoned facts off-peak."""
+    """Garbage collector gate for tombstoned facts."""
 
     def __init__(self, engine: AsyncCortexEngine):
         self.engine = engine
@@ -32,8 +30,11 @@ class GarbageCollector:
 
     async def run_gc(self, batch_size: int = 500, force: bool = False) -> dict[str, Any]:
         """
-        Execute GC physically deleting facts marked as tombstoned.
-        Should be scheduled by a daemon during off-peak hours (e.g., 02:00 - 05:00).
+        Detect tombstoned facts and block physical deletion.
+
+        Physical fact deletion requires a tenant-scoped canonical purge ledger;
+        this background job cannot provide that boundary, so it reports candidates
+        without mutating persisted facts or related indexes.
         """
         if not self._is_off_peak() and not force:
             logger.info("Garbage Collector: Skipping execution (peak hours detected).")
@@ -49,6 +50,7 @@ class GarbageCollector:
             "status": "completed",
             "deleted_facts": 0,
             "deleted_embeddings": 0,
+            "blocked_facts": 0,
             "errors": [],
         }
 
@@ -63,18 +65,14 @@ class GarbageCollector:
                 return stats
 
             fact_ids = [row[0] for row in rows]
-
-            try:
-                await self._execute_physical_deletion(conn, fact_ids)
-                stats["deleted_embeddings"] += len(fact_ids)
-                stats["deleted_facts"] += len(fact_ids)
-                await conn.commit()
-
-            except (sqlite3.Error, OSError) as e:
-                logger.error("Failed to execute GC batch: %s", e)
-                stats["errors"].append(str(e))
-                await conn.rollback()
-                stats["status"] = "failed"
+            stats["status"] = "blocked"
+            stats["reason"] = "canonical_purge_required"
+            stats["blocked_facts"] = len(fact_ids)
+            logger.error(
+                "Garbage Collector: blocked physical deletion of %d tombstoned facts; "
+                "canonical tenant-scoped purge ledger required.",
+                len(fact_ids),
+            )
 
         logger.info(
             "Garbage Collector Run Complete: %d facts and %d vectors physically removed.",
@@ -84,34 +82,8 @@ class GarbageCollector:
         return stats
 
     async def _execute_physical_deletion(self, conn: Any, fact_ids: list[Any]) -> None:
-        """Execute physical deletion sequences for a batch of fact IDs."""
-        # 1. Physical vector deletion
-        # In sqlite-vec vec0 tables, WHERE IN () is often not fully supported, so we iterate
-        for fact_id in fact_ids:
-            await conn.execute("DELETE FROM fact_embeddings WHERE fact_id = ?", (fact_id,))
-            await conn.execute("DELETE FROM specular_embeddings WHERE fact_id = ?", (fact_id,))
-
-        # 2. Pruned embeddings archive deletion
-        cursor = await conn.execute(
-            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='pruned_embeddings'"
+        """Fail closed for legacy callers that still reach the destructive hook."""
+        _ = (conn, fact_ids)
+        raise RuntimeError(
+            "Physical fact deletion is blocked; use a canonical tenant-scoped purge ledger."
         )
-        if await cursor.fetchone():
-            await conn.executemany(
-                "DELETE FROM pruned_embeddings WHERE fact_id = ?",
-                [(fid,) for fid in fact_ids],
-            )
-
-        # 3. Consensus structure structural deletion
-        placeholders = ",".join(["?"] * len(fact_ids))
-        await conn.execute(
-            f"DELETE FROM consensus_votes_v2 WHERE fact_id IN ({placeholders})", fact_ids
-        )
-        await conn.execute(
-            f"DELETE FROM consensus_votes WHERE fact_id IN ({placeholders})", fact_ids
-        )
-        await conn.execute(
-            f"DELETE FROM consensus_outcomes WHERE fact_id IN ({placeholders})", fact_ids
-        )
-
-        # 4. Final physical deletion of the fact itself
-        await conn.execute(f"DELETE FROM facts WHERE id IN ({placeholders})", fact_ids)

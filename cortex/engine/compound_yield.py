@@ -263,43 +263,43 @@ class CompoundYieldTracker:
         self,
         report: CompoundReport,
         project: str = "system",
+        tenant_id: str = "default",
+        store_fact: Any | None = None,
     ) -> int | None:
         """Persist a CHRONOS Compound report as a CORTEX fact + emit signal."""
         try:
-            import json
+            fact_kwargs = {
+                "tenant_id": tenant_id,
+                "project": project,
+                "content": report.summary(),
+                "fact_type": "knowledge",
+                "tags": ["chronos", "compound", "metrics"],
+                "confidence": "verified",
+                "source": "chronos-compound",
+                "meta": report.to_dict(),
+            }
+            if store_fact is None:
+                from cortex.engine import CortexEngine
+
+                engine = CortexEngine(db_path=self.db_path, auto_embed=False)
+                try:
+                    stored_id: Any = engine.store_sync(**fact_kwargs)
+                finally:
+                    engine.close_sync()
+            else:
+                stored_id = store_fact(**fact_kwargs)
+            if stored_id is None:
+                raise RuntimeError("canonical store did not return a fact id")
+            fact_id = int(stored_id)
 
             with db_connect(self.db_path) as conn:
-                ts = now_iso()
-                content = report.summary()
-                meta_json = json.dumps(report.to_dict())
-
-                cursor = conn.execute(
-                    "INSERT INTO facts (tenant_id, project, content, fact_type, tags, confidence,"
-                    " valid_from, source, meta, created_at, updated_at)"
-                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    (
-                        "default",
-                        project,
-                        content,
-                        "knowledge",
-                        '["chronos", "compound", "metrics"]',
-                        "observed",
-                        ts,
-                        "chronos-compound",
-                        meta_json,
-                        ts,
-                        ts,
-                    ),
-                )
-                fact_id: int = cursor.lastrowid  # type: ignore[assignment]
-
-                # Emit signal to bus
                 bus = SignalBus(conn)
                 bus.emit(
                     "chronos:compound_audit",
                     payload=report.to_dict(),
                     source="chronos-compound",
                     project=project,
+                    tenant_id=tenant_id,
                 )
 
                 logger.info("CHRONOS Compound report persisted as fact #%d", fact_id)

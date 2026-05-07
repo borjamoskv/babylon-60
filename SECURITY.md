@@ -19,7 +19,7 @@ You will receive an acknowledgment within 48 hours and a detailed response withi
 
 CORTEX is built security-first:
 
-- **SHA-256 sovereign ledger continuity** — tamper-evident fact storage
+- **SHA-256 ledger continuity** — tamper-evident fact storage
 - **Merkle tree checkpoints** — batch integrity verification
 - **Privacy Shield** — 11-pattern secret detection at ingress
 - **AST Sandbox** — safe LLM code execution without `eval()`
@@ -31,7 +31,7 @@ CORTEX is built security-first:
 
 ### Cryptographic Contract
 
-The current shipped package uses **SHA-256** for sovereign ledger continuity and
+The current shipped package uses **SHA-256** for ledger continuity and
 Merkle lineage. Some audit or signature-oriented subsystems also use
 **SHA3-256**, but those should not be read as redefining the canonical ledger
 continuity algorithm unless the implementation is explicitly migrated.
@@ -83,7 +83,7 @@ CORTEX assumes:
 | Tampered release artifact | Sigstore signature verification |
 | Vulnerable dependency | pip-audit in CI, Dependabot alerts |
 | Compromised container image | Trivy scan (CRITICAL/HIGH block) |
-| Memory tampering | SHA-256 sovereign hash chain + Merkle checkpoints |
+| Memory tampering | SHA-256 hash chain + Merkle checkpoints |
 | Unauthorized access | RBAC + API key + JWT authentication |
 | Secret leakage | Privacy Shield (11 regex patterns at ingress) |
 | **Composition leakage** | **Holistic cross-field correlation analysis at ingress** |

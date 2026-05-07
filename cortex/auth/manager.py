@@ -9,7 +9,7 @@ import logging
 import secrets
 import threading
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Optional
 
 from cortex.auth.backends import BaseAuthBackend
 from cortex.auth.models import APIKey, AuthResult
@@ -51,7 +51,6 @@ class AuthManager:
                 logger.info("AuthManager: Using Local Sovereign (SQLite) backend")
                 backend = SQLiteAuthBackend(DB_PATH)
         self.backend = backend
-        self._background_tasks: set[asyncio.Task[Any]] = set()
 
     async def initialize(self) -> None:
         """Initialize the backend schema (async)."""
@@ -221,10 +220,7 @@ class AuthManager:
         if not row:
             return AuthResult(authenticated=False, error="Invalid or revoked key")
 
-        # Background update of last_used
-        task = asyncio.create_task(self.backend.update_last_used(row["id"]))
-        self._background_tasks.add(task)
-        task.add_done_callback(self._background_tasks.discard)
+        await self.backend.update_last_used(row["id"])
 
         permissions = row["permissions"]
         if isinstance(permissions, str):

@@ -72,6 +72,39 @@ def test_create_api_key_rejects_invalid_tenant_id(admin_client) -> None:
     assert asyncio.run(manager.list_keys()) == []
 
 
+def test_create_api_key_bootstrap_requires_explicit_tenant(admin_client) -> None:
+    manager, client = admin_client
+
+    response = client.post(
+        "/v1/admin/keys",
+        params={"name": "bootstrap-admin"},
+    )
+
+    assert response.status_code == 422
+    assert asyncio.run(manager.list_keys()) == []
+
+
+def test_existing_admin_cannot_create_key_for_different_tenant(admin_client) -> None:
+    manager, client = admin_client
+
+    token_alpha, _ = manager.create_key_sync(
+        "alpha-admin",
+        tenant_id="tenant-alpha",
+        permissions=["read", "write", "admin"],
+    )
+
+    response = client.post(
+        "/v1/admin/keys",
+        params={"name": "beta-admin", "tenant_id": "tenant-beta"},
+        headers={"Authorization": f"Bearer {token_alpha}"},
+    )
+
+    assert response.status_code == 403
+    keys = asyncio.run(manager.list_keys())
+    assert len(keys) == 1
+    assert keys[0].tenant_id == "tenant-alpha"
+
+
 def test_list_api_keys_is_scoped_to_authenticated_tenant(admin_client) -> None:
     manager, client = admin_client
 

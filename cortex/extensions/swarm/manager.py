@@ -282,6 +282,8 @@ class CapatazOrchestrator:
                     mission_id=self.mission_id,
                     tenant_id=tenant_id,
                     system_prompt=system_prompt,
+                    provider_name=str(kwargs.get("provider_name") or os.environ.get("CORTEX_LLM_PROVIDER", "unknown")),
+                    model_name=str(kwargs.get("model_name") or kwargs.get("model") or "unknown"),
                 )
 
                 # Pass cache_key downstream so provider can use it

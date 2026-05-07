@@ -12,6 +12,7 @@ import time
 from cortex.darknet.ingestor import RawWorldData
 from cortex.darknet.social_ledger import DarknetPost
 from cortex.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
+from cortex.utils.result import Err
 
 logger = logging.getLogger("cortex.darknet.agents")
 
@@ -45,7 +46,7 @@ class DarknetAgent:
         )
         
         res = await self.router.execute_resilient(prompt)
-        if res.is_err():
+        if isinstance(res, Err):
             logger.error("Error generando post de %s: %s", self.name, res.error)
             return None
             

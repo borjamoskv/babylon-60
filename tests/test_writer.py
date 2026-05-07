@@ -25,6 +25,16 @@ def db_path(tmp_path: Path) -> str:
         "  value INTEGER DEFAULT 0"
         ")"
     )
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS facts ("
+        "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "  project TEXT,"
+        "  content TEXT"
+        ")"
+    )
+    conn.execute("CREATE TABLE IF NOT EXISTS facts_fts (rowid INTEGER, content TEXT)")
+    conn.execute("CREATE TABLE IF NOT EXISTS fact_tags (fact_id INTEGER, tag TEXT)")
+    conn.execute("CREATE TABLE IF NOT EXISTS causal_edges (fact_id INTEGER, parent_id INTEGER)")
     conn.commit()
     conn.close()
     return db
@@ -93,6 +103,32 @@ class TestWriteOperations:
                 "INSERT INTO items (name, value) VALUES (?, ?)", (f"item_{i}", i)
             )
             assert isinstance(result, Ok)
+
+    @pytest.mark.parametrize(
+        ("sql", "params"),
+        [
+            ("INSERT INTO facts (project, content) VALUES (?, ?)", ("ops", "secret")),
+            (
+                "INSERT OR REPLACE INTO main.facts (id, project, content) VALUES (?, ?, ?)",
+                (1, "ops", "secret"),
+            ),
+            ('UPDATE "facts" SET content = ? WHERE id = ?', ("changed", 1)),
+            ("UPDATE facts SET content = ? WHERE id = ?", ("changed", 1)),
+            ("DELETE FROM main.facts WHERE id = ?", (1,)),
+            ("INSERT INTO facts_fts (rowid, content) VALUES (?, ?)", (1, "plain leak")),
+            ("INSERT INTO fact_tags (fact_id, tag) VALUES (?, ?)", (1, "bypass")),
+            ("DELETE FROM causal_edges WHERE fact_id = ?", (1,)),
+        ],
+    )
+    async def test_rejects_direct_facts_mutations(
+        self,
+        writer: SqliteWriteWorker,
+        sql: str,
+        params: tuple[object, ...],
+    ):
+        result = await writer.execute(sql, params)
+        assert isinstance(result, Err)
+        assert "Direct mutations on fact-owned tables are forbidden" in result.error
 
 
 # ─── Batch Operations ────────────────────────────────────────────────

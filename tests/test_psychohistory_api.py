@@ -8,6 +8,7 @@ from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.auth.deps import require_auth
 from cortex.extensions.swarm.psychohistory import AGENT_BIASES
+from cortex.routes import swarm as swarm_router
 from cortex.utils.result import Ok
 
 # Mock Auth
@@ -39,6 +40,9 @@ def mock_engine():
 
 @pytest.fixture
 async def client(mock_engine):
+    if not any(getattr(route, "path", None) == "/v1/swarm/psychohistory" for route in app.routes):
+        app.include_router(swarm_router.router)
+
     app.dependency_overrides[get_async_engine] = lambda: mock_engine
     app.dependency_overrides[require_auth] = override_auth
 

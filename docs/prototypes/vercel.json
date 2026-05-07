@@ -4,27 +4,109 @@
   "framework": null,
   "cleanUrls": true,
   "trailingSlash": true,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), payment=(self \"https://checkout.stripe.com\")" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://i.ytimg.com; connect-src 'self'; frame-src https://checkout.stripe.com https://open.spotify.com https://www.youtube-nocookie.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://checkout.stripe.com; upgrade-insecure-requests" }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [{"type": "host", "value": "cortexpersist.org"}],
+      "destination": "/org/"
+    },
+    {
+      "source": "/index.html",
+      "has": [{"type": "host", "value": "cortexpersist.org"}],
+      "destination": "/org/"
+    },
+    {
+      "source": "/governance/",
+      "has": [{"type": "host", "value": "cortexpersist.org"}],
+      "destination": "/org/"
+    },
+    {
+      "source": "/research/",
+      "has": [{"type": "host", "value": "cortexpersist.org"}],
+      "destination": "/org/"
+    },
+    {
+      "source": "/security-posture/",
+      "has": [{"type": "host", "value": "cortexpersist.org"}],
+      "destination": "/org/"
+    },
+    {
+      "source": "/evidence/",
+      "has": [{"type": "host", "value": "cortexpersist.org"}],
+      "destination": "/org/"
+    },
+    {
+      "source": "/v1/health/",
+      "destination": "/api/v1/health"
+    },
+    {
+      "source": "/v1/readiness/",
+      "destination": "/api/v1/readiness"
+    },
+    {
+      "source": "/v1/proof-marks/",
+      "destination": "/api/v1/proof-marks"
+    },
+    {
+      "source": "/v1/media/marks/",
+      "destination": "/api/v1/media-marks"
+    },
+    {
+      "source": "/v1/billing/checkout/",
+      "destination": "/api/v1/billing-checkout"
+    },
+    {
+      "source": "/v1/borja/marks/",
+      "destination": "/api/v1/media-marks"
+    },
+    {
+      "source": "/v1/stripe/checkout/",
+      "destination": "/api/v1/billing-checkout"
+    },
+    {
+      "source": "/v1/:path*",
+      "destination": "/api/v1/:path*"
+    }
+  ],
   "redirects": [
     {
       "source": "/",
+      "has": [{"type": "host", "value": "cortexpersist.com"}],
       "destination": "/saas_landing.html",
       "permanent": true
     },
     {
       "source": "/index.html",
+      "has": [{"type": "host", "value": "cortexpersist.com"}],
       "destination": "/saas_landing.html",
       "permanent": true
     },
-    {
-      "source": "/(.*)",
-      "has": [{"type": "host", "value": "cortexpersist.org"}],
-      "destination": "https://cortexpersist.com/$1",
-      "permanent": true
-    },
+    { "source": "/docs/", "destination": "/site/", "permanent": false },
+    { "source": "/quickstart/", "destination": "/site/quickstart/", "permanent": false },
+    { "source": "/guides/quickstart/", "destination": "/site/quickstart/", "permanent": false },
+    { "source": "/api/", "destination": "/site/api/", "permanent": false },
+    { "source": "/reference/", "destination": "/site/api/", "permanent": false },
+    { "source": "/security/", "destination": "/site/security/", "permanent": false },
+    { "source": "/architecture/", "destination": "/site/architecture/", "permanent": false },
+    { "source": "/crypto-tax/", "destination": "/site/crypto-tax/", "permanent": false },
+    { "source": "/blog/", "destination": "/site/blog/", "permanent": false },
+    { "source": "/changelog/", "destination": "/site/changelog/", "permanent": false },
     {
       "source": "/(.*)",
       "has": [{"type": "host", "value": "www.cortexpersist.org"}],
-      "destination": "https://cortexpersist.com/$1",
+      "destination": "https://cortexpersist.org/$1",
       "permanent": true
     },
     {

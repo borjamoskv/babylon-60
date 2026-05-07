@@ -6,7 +6,7 @@ variable "environment" { type = string }
 variable "region" { type = string }
 
 locals {
-  name_prefix = "cortex-sovereign-${var.environment}"
+  name_prefix = "cortex-persist-${var.environment}"
   azs         = ["${var.region}a", "${var.region}b", "${var.region}c"]
 }
 
@@ -44,7 +44,7 @@ resource "aws_internet_gateway" "igw" {
   tags   = { Name = "${local.name_prefix}-igw" }
 }
 
-# ── Security Groups (Military-Grade) ────────────────────────
+# ── Security Groups (Restricted) ────────────────────────
 
 resource "aws_security_group" "eks_nodes" {
   name_prefix = "${local.name_prefix}-eks-nodes-"
@@ -105,7 +105,7 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
   role       = aws_iam_role.eks_cluster.name
 }
 
-resource "aws_eks_cluster" "sovereign" {
+resource "aws_eks_cluster" "persist" {
   name     = "${local.name_prefix}-eks"
   role_arn = aws_iam_role.eks_cluster.arn
 
@@ -174,7 +174,7 @@ resource "aws_kms_key" "rds" {
 # ── Outputs ──────────────────────────────────────────────────
 
 output "eks_endpoint" {
-  value = aws_eks_cluster.sovereign.endpoint
+  value = aws_eks_cluster.persist.endpoint
 }
 
 output "vpc_id" {

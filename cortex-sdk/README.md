@@ -13,42 +13,27 @@ pip install cortex-persist
 ## Quickstart
 
 ```python
-from cortex_persist import CortexMemory
+from cortex_persist import CortexClient
 
-# Initialize with your API key
-memory = CortexMemory(api_key="ctx_your_key_here")
+client = CortexClient(base_url="http://localhost:8484", api_key="ctx_your_key_here")
 
-# Store a memory
-memory_id = memory.store(
-    project="my-agent",
-    content="User prefers dark mode and concise responses",
-    tags=["preference", "ui"],
-)
-
-# Semantic search
-results = memory.search("what does the user prefer?")
-for r in results:
-    print(f"[{r.score:.2f}] {r.content}")
-
-# List all memories for a project
-memories = memory.list("my-agent")
-
-# Delete a memory
-memory.delete(memory_id)
-
-# Check usage
-usage = memory.usage()
-print(f"Calls used: {usage['calls_used']}/{usage['calls_limit']}")
+health = client.runtime.health()
+print(health.status)
 ```
+
+The domain client in this package is a draft SDK surface. The current default
+REST API does not yet mount every `/v1/memory/*`, `/v1/trace/*`, or
+`/v1/coordination/*` route used by the draft domains. For the stable HTTP
+surface today, use `cortex.api.client.CortexClient` from the main package.
 
 ## Async Usage
 
 ```python
-from cortex_persist import AsyncCortexMemory
+from cortex_persist import AsyncCortexClient
 
-async with AsyncCortexMemory(api_key="ctx_...") as memory:
-    await memory.store("my-agent", "Important fact")
-    results = await memory.search("important")
+async with AsyncCortexClient(base_url="http://localhost:8484", api_key="ctx_...") as client:
+    health = await client.runtime.health()
+    print(health.status)
 ```
 
 ## Features
@@ -62,18 +47,16 @@ async with AsyncCortexMemory(api_key="ctx_...") as memory:
 
 ## API Reference
 
-### `CortexMemory(api_key, base_url)`
+### `CortexClient(api_key, base_url)`
 
 | Method | Description |
 |---|---|
-| `store(project, content, tags, type, metadata)` | Store a memory → `int` |
-| `search(query, k, project)` | Semantic search → `list[Memory]` |
-| `list(project, limit)` | List memories → `list[Memory]` |
-| `get(memory_id)` | Get single memory → `Memory` |
-| `delete(memory_id)` | Delete memory → `bool` |
-| `batch_store(memories)` | Batch store → `dict` |
-| `verify()` | Check ledger integrity → `dict` |
-| `usage()` | Get API usage → `dict` |
+| `client.memory.query(input_data)` | Draft trust-aware memory query |
+| `client.memory.store(project, content, ...)` | Draft memory write |
+| `client.trace.get_causal_chain(fact_id)` | Draft trace lookup |
+| `client.verify.verify_integrity(fact_id)` | Draft integrity check |
+| `client.coordination.register_agent(...)` | Draft coordination registration |
+| `client.runtime.health()` | Runtime health check |
 
 ## Plans
 

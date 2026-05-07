@@ -26,9 +26,13 @@ Usage:
 
     # Automatic batching via transaction grouping:
     result = await writer.execute(
-        "INSERT INTO facts (project, content) VALUES (?, ?)",
-        ("cortex", "A new fact")
+        "INSERT INTO audit_queue (event_type, payload) VALUES (?, ?)",
+        ("checkpoint", "{}")
     )
+
+Fact writes intentionally do not use this low-level worker directly. Use
+``CortexEngine.store()`` or mutation APIs so guard, taint, tenant, and ledger
+boundaries run before persistence.
 
     # For multi-statement transactions:
     async with writer.transaction() as tx:
@@ -59,12 +63,12 @@ from cortex.database.messages import (
     _TxRollback,
     _WriteOp,
 )
+from cortex.database.sql_guard import reject_protected_fact_table_dml
 from cortex.utils.result import Err, Ok, Result
 
 __all__ = ["SqliteWriteWorker"]
 
 logger = logging.getLogger("cortex.db.writer")
-
 
 # ─── Write Worker ─────────────────────────────────────────────────────
 
@@ -356,6 +360,14 @@ class SqliteWriteWorker:
         """Process a single write operation in the executor."""
         start_wait = op.created_at if hasattr(op, "created_at") else time.time()  # type: ignore[reportAttributeAccessIssue]
         wait_ms = (time.time() - start_wait) * 1000
+        try:
+            reject_protected_fact_table_dml(op.sql)
+        except ValueError as exc:
+            loop.call_soon_threadsafe(
+                op.future.set_result,
+                Err(str(exc)),
+            )
+            return
         try:
             start_exec = time.time()
             cursor = await loop.run_in_executor(None, lambda: conn.execute(op.sql, op.params))

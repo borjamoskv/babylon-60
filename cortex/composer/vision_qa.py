@@ -108,7 +108,7 @@ class AestheticAuditor:
         try:
             # We enforce routing to a strong multimodal tier
             res = await self.router.execute_resilient(prompt)
-            if res.is_ok():
+            if isinstance(res, Ok):
                 evaluation = res.unwrap().strip()
                 if evaluation.startswith("PASS"):
                     return Ok("Aesthetic Check Passed.")

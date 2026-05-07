@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.extensions.moltbook.skills.sovereign_code_scorer.scripts.sovereign_scorer import (
+    from sovereign_scorer import (
         Issue,
     )
 
@@ -23,7 +23,7 @@ def score_semantics(files: list[Path]) -> tuple[float, list]:
     if not files:
         return 0.0, []
 
-    from cortex.extensions.moltbook.skills.sovereign_code_scorer.scripts.sovereign_scorer import (
+    from sovereign_scorer import (
         Issue,
     )
 
@@ -133,7 +133,7 @@ def score_tests(root: Path, files: list[Path]) -> tuple[float, list]:
     if not files:
         return 0.0, []
 
-    from cortex.extensions.moltbook.skills.sovereign_code_scorer.scripts.sovereign_scorer import (
+    from sovereign_scorer import (
         Issue,
     )
 

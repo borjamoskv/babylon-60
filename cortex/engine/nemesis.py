@@ -75,6 +75,7 @@ class NemesisProtocol:
             pass
         return dynamic_rules
 
+    @classmethod
     def analyze(cls, content: str, db_path: Optional[str] = None) -> Optional[str]:
         """Analyze content and return rejection reason if it violates protocols."""
         content_lower = content.lower()
@@ -130,6 +131,7 @@ class NemesisProtocol:
                 return f"[NEMESIS: REJECTED {count}x] Antibody: {reason}"
         return None
 
+    @classmethod
     def _check_dynamic_antibodies(cls, content_lower: str, db_path: Optional[str]) -> Optional[str]:
         """Helper to scan for dynamically generated antibodies."""
         for pattern, reason in cls._load_dynamic_antibodies():
@@ -171,6 +173,7 @@ class NemesisProtocol:
         except Exception as e:  # noqa: BLE001 — signal emission failure should not crash analysis
             logger.debug("Failed to emit nemesis signal: %s", e)
 
+    @classmethod
     def assimilate(cls, vector: str, reason: str, db_path: Optional[str] = None) -> bool:
         """
         Ω₅: Dynamic Immunity. Converts an attack vector into a permanent antibody.

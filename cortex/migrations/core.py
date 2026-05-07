@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+from collections.abc import Callable
 
 import aiosqlite
 
@@ -20,6 +21,8 @@ __all__ = [
 ]
 
 logger = logging.getLogger("cortex")
+
+MigrationFunc = Callable[[sqlite3.Connection], None]
 
 
 def ensure_migration_table(conn: sqlite3.Connection):
@@ -55,8 +58,11 @@ def run_migrations(conn: sqlite3.Connection) -> int:
     applied = 0
     for version, description, func in MIGRATIONS:
         if version > current:
-            if _apply_migration_sync(conn, version, description, func):
-                applied += 1
+            if not _apply_migration_sync(conn, version, description, func):
+                msg = f"Migration {version} failed; aborting remaining migrations"
+                logger.error(msg)
+                raise RuntimeError(msg)
+            applied += 1
 
     if applied:
         logger.info(
@@ -90,9 +96,30 @@ def _apply_base_schema(conn: sqlite3.Connection) -> None:
     logger.info("Base schema applied.")
 
 
-def _apply_migration_sync(conn: sqlite3.Connection, version: int, description: str, func) -> bool:
+def _restore_connection_snapshot(
+    conn: sqlite3.Connection,
+    snapshot: sqlite3.Connection,
+    version: int,
+) -> None:
+    """Restore a pre-migration snapshot after a failed migration."""
+    try:
+        conn.rollback()
+    except sqlite3.Error as exc:
+        logger.debug("Migration %d rollback before restore failed: %s", version, exc)
+    snapshot.backup(conn)
+    conn.commit()
+
+
+def _apply_migration_sync(
+    conn: sqlite3.Connection,
+    version: int,
+    description: str,
+    func: MigrationFunc,
+) -> bool:
     """Apply a single migration synchronously."""
     logger.info("Applying migration %d: %s", version, description)
+    snapshot = sqlite3.connect(":memory:")
+    conn.backup(snapshot)
     try:
         func(conn)
         conn.execute(
@@ -101,10 +128,17 @@ def _apply_migration_sync(conn: sqlite3.Connection, version: int, description: s
         )
         conn.commit()
         return True
-    except (sqlite3.Error, OSError) as e:
-        logger.error("Migration %d failed: %s. Skipping.", version, e)
-        conn.rollback()
+    except Exception as e:
+        logger.error("Migration %d failed: %s", version, e)
+        try:
+            _restore_connection_snapshot(conn, snapshot, version)
+        except sqlite3.Error as restore_error:
+            raise RuntimeError(
+                f"Migration {version} failed and rollback restore failed"
+            ) from restore_error
         return False
+    finally:
+        snapshot.close()
 
 
 async def run_migrations_async(conn: aiosqlite.Connection) -> int:
@@ -131,8 +165,11 @@ async def run_migrations_async(conn: aiosqlite.Connection) -> int:
     applied = 0
     for version, description, func in MIGRATIONS:
         if version > current:
-            if await _apply_migration_async(conn, version, description, func):
-                applied += 1
+            if not await _apply_migration_async(conn, version, description, func):
+                msg = f"Migration {version} failed; aborting remaining migrations"
+                logger.error(msg)
+                raise RuntimeError(msg)
+            applied += 1
     return applied
 
 
@@ -161,20 +198,11 @@ async def _apply_base_schema_async(conn: aiosqlite.Connection) -> None:
 
 
 async def _apply_migration_async(
-    conn: aiosqlite.Connection, version: int, description: str, func
+    conn: aiosqlite.Connection,
+    version: int,
+    description: str,
+    func: MigrationFunc,
 ) -> bool:
     """Apply a single migration asynchronously."""
     logger.info("Applying async migration %d: %s", version, description)
-    try:
-        # Run sync migration func on aiosqlite internal worker thread
-        await conn._execute(func, conn._conn)
-        await conn.execute(
-            "INSERT INTO schema_version (version, description) VALUES (?, ?)",
-            (version, description),
-        )
-        await conn.commit()
-        return True
-    except (sqlite3.Error, OSError) as e:
-        logger.error("Migration %d failed: %s", version, e)
-        await conn.rollback()
-        return False
+    return await conn._execute(_apply_migration_sync, conn._conn, version, description, func)

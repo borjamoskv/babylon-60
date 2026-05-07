@@ -33,6 +33,7 @@ class MemoryOS:
         self._working_memory: dict[str, Any] = {}
         # Fixed-size physical tensor array
         self._episodic_vsa_tensor: list[float] = [0.0] * VSA_DIMENSION
+        self._episodic_traces: list[dict[str, Any]] = []
         # Semantic memory connects to ledger
         self._decay_rate = 0.99
         self._glial_daemon_task = None
@@ -66,6 +67,7 @@ class MemoryOS:
             ctx_string = f"{key}:{value}"
             idx = int(hashlib.sha256(ctx_string.encode('utf-8')).hexdigest(), 16) % VSA_DIMENSION
             self._episodic_vsa_tensor[idx] += 1.0
+            self._episodic_traces.append({"key": key, "value": value})
             return True
         elif tier == MemoryTier.SEMANTIC:
             # Requires Maxwell's Demon (Mem0 pipeline)
@@ -93,5 +95,6 @@ class MemoryOS:
             self._working_memory.clear()
         elif tier == MemoryTier.EPISODIC:
             self._episodic_vsa_tensor = [0.0] * VSA_DIMENSION
+            self._episodic_traces.clear()
         elif tier == MemoryTier.SEMANTIC:
             raise PermissionError("Cannot flush immutable semantic ledger.")

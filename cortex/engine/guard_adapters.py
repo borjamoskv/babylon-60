@@ -44,7 +44,9 @@ class HealthGuardAdapter:
         conn: aiosqlite.Connection,
         *,
         tenant_id: str = "default",
+        source: str | None = None,
     ) -> None:
+        _ = source
         from cortex.guards.health_guard import HealthGuard
 
         guard = HealthGuard(db_path=self._db_path)
@@ -66,7 +68,9 @@ class ContradictionGuardAdapter:
         conn: aiosqlite.Connection,
         *,
         tenant_id: str = "default",
+        source: str | None = None,
     ) -> None:
+        _ = source
         if fact_type not in ("decision", "rule", "error"):
             return
         from cortex.guards.contradiction_guard import detect_contradictions
@@ -75,11 +79,13 @@ class ContradictionGuardAdapter:
             new_content=content, new_project=project, db_path=self._db_path
         )
         if report.has_conflicts and report.severity == "high":
-            logger.warning(
+            formatted = report.format()
+            logger.error(
                 "[AX-II] Contradiction detected (severity=%s):\n%s",
                 report.severity,
-                report.format(),
+                formatted,
             )
+            raise ValueError(f"[AX-II] Contradiction detected: {formatted}")
 
 
 class VerifierGuardAdapter:
@@ -94,7 +100,9 @@ class VerifierGuardAdapter:
         conn: aiosqlite.Connection,
         *,
         tenant_id: str = "default",
+        source: str | None = None,
     ) -> None:
+        _ = source
         if fact_type != "code":
             return
         from cortex.verification.verifier import SovereignVerifier
@@ -120,11 +128,14 @@ class ExergyGuardAdapter:
         conn: aiosqlite.Connection,
         *,
         tenant_id: str = "default",
+        source: str | None = None,
     ) -> None:
         from cortex.guards.exergy_guard import ExergyGuard
 
         guard = ExergyGuard()
-        guard.check_thermodynamic_yield(content, project, fact_type, source=meta.get("source"))
+        guard.check_thermodynamic_yield(
+            content, project, fact_type, source=source or meta.get("source")
+        )
 
 
 class ZKGuardAdapter:
@@ -139,11 +150,23 @@ class ZKGuardAdapter:
         conn: aiosqlite.Connection,
         *,
         tenant_id: str = "default",
+        source: str | None = None,
     ) -> None:
+        import os
+
+        if (
+            not meta.get("agent_public_key")
+            and not meta.get("zk_proof_signature")
+            and os.environ.get("CORTEX_REQUIRE_ZK_PROOFS") != "1"
+        ):
+            return
+
         from cortex.guards.zk_guard import ZKSwarmGuard
 
         guard = ZKSwarmGuard()
-        await guard.verify_integrity(content, fact_type, meta)
+        await guard.verify_integrity(
+            content, fact_type, meta, tenant_id=tenant_id, project=project, source=source
+        )
 
 
 # ─── Post-Store Hooks ─────────────────────────────────────────────
@@ -169,7 +192,7 @@ class LedgerCheckpointHook:
         ledger = getattr(self._engine, "_ledger", None)
         if ledger is not None and hasattr(ledger, "record_write"):
             ledger.record_write()
-            await ledger.create_checkpoint_async()
+            await ledger.create_checkpoint_async(tenant_id=tenant_id)
 
 
 class SignalEmitHook:

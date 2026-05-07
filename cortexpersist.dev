@@ -1,0 +1,246 @@
+# cortexpersist.dev - Developer Surface
+
+`cortexpersist.dev` is the developer-facing entry point for CORTEX Persist.
+It should carry documentation, API references, SDK examples, and links to
+local and staging environments. Keep `cortexpersist.com` focused on product,
+pricing, checkout, and public positioning.
+
+## What Belongs Here
+
+- Documentation for builders evaluating or integrating CORTEX Persist.
+- REST API and OpenAPI references for the default core API surface.
+- Python and TypeScript SDK examples.
+- MCP integration notes for IDEs and agent runtimes.
+- Local, preview, and staging links used to test the developer experience.
+- Clear warnings for experimental or opt-in surfaces.
+
+## Documentation Map
+
+| Need | Source |
+| --- | --- |
+| Recommended adoption boundary | [docs/product-surface.md](docs/product-surface.md) |
+| First local run | [docs/quickstart.md](docs/quickstart.md) |
+| Install options | [docs/installation.md](docs/installation.md) |
+| CLI commands | [docs/cli.md](docs/cli.md) |
+| REST API | [docs/api.md](docs/api.md) |
+| SDKs | [docs/sdks.md](docs/sdks.md) |
+| MCP server | [docs/mcp.md](docs/mcp.md) |
+| Security and trust model | [docs/SECURITY_TRUST_MODEL.md](docs/SECURITY_TRUST_MODEL.md) |
+| Architecture | [docs/architecture.md](docs/architecture.md) |
+| Developer guide | [docs/developer-guide.md](docs/developer-guide.md) |
+| Changelog | [docs/changelog.md](docs/changelog.md) |
+
+## Core API Reference
+
+Run the local FastAPI app:
+
+```bash
+pip install "cortex-persist[api]"
+uvicorn cortex.api:app --host 0.0.0.0 --port 8484
+```
+
+Useful local links:
+
+- [Local API health](http://localhost:8484/health)
+- [Local API status](http://localhost:8484/v1/status)
+- [Local interactive API docs](http://localhost:8484/docs)
+
+Export the OpenAPI document:
+
+```bash
+python -c "from cortex.api.openapi import export_openapi_spec; print(export_openapi_spec())"
+```
+
+Default core endpoints:
+
+| Area | Endpoints |
+| --- | --- |
+| Health | `GET /health`, `GET /v1/status` |
+| Facts | `POST /v1/facts`, `POST /v1/facts/batch`, `GET /v1/facts`, `GET /v1/facts/{fact_id}` |
+| Project recall | `GET /v1/projects/{project}/facts` |
+| Search | `POST /v1/facts/search` |
+| History and lineage | `GET /v1/facts/{fact_id}/history`, `GET /v1/facts/{fact_id}/chain` |
+| Ledger | `GET /v1/ledger/status`, `GET /v1/ledger/verify`, `POST /v1/ledger/checkpoint` |
+| Admin keys | `POST /v1/admin/keys`, `GET /v1/admin/keys` |
+| Trust | `POST /v1/trust/guard`, `GET /v1/trust/profiles/{agent_id}`, `GET /v1/trust/compliance` |
+| Export | `GET /v1/projects/{project}/export` |
+
+Authentication uses Bearer tokens created through the admin key surface:
+
+```bash
+curl -X POST "http://localhost:8484/v1/admin/keys?name=dev-client&tenant_id=default"
+
+curl -H "Authorization: Bearer ctx_your_key" \
+  http://localhost:8484/v1/status
+```
+
+Experimental API routes are opt-in and must be documented as such:
+
+```bash
+CORTEX_ENABLE_EXPERIMENTAL_API=1 uvicorn cortex.api:app --port 8484
+```
+
+## SDK Examples
+
+### Python In-Process Engine
+
+Use this first when the caller runs in the same Python process as CORTEX.
+
+```python
+import asyncio
+from cortex import CortexEngine
+
+
+async def main() -> None:
+    engine = CortexEngine()
+    try:
+        fact_id = await engine.store(
+            project="dev-agent",
+            content="CORTEX Persist stores facts with ledger continuity.",
+            fact_type="knowledge",
+        )
+        results = await engine.search("ledger continuity", project="dev-agent")
+        ledger = await engine.verify_ledger()
+
+        print(f"fact_id={fact_id}")
+        print(f"matches={len(results)}")
+        print(f"ledger_valid={ledger.get('valid')}")
+    finally:
+        await engine.close()
+
+
+asyncio.run(main())
+```
+
+### Python HTTP Client
+
+Use this when the REST API is running separately.
+
+```python
+from cortex.api.client import CortexClient
+
+
+client = CortexClient("http://localhost:8484", api_key="ctx_your_key")
+try:
+    fact_id = client.store(
+        project="dev-agent",
+        content="CORTEX Persist can be accessed over HTTP.",
+        fact_type="knowledge",
+    )
+    results = client.search("HTTP access", project="dev-agent")
+    status = client.status()
+finally:
+    client.close()
+```
+
+### TypeScript SDK
+
+The TypeScript SDK source lives in [sdks/js](sdks/js). It targets Node 18+
+and uses native `fetch`.
+
+```typescript
+import { Cortex } from '@cortex-persist/sdk'
+
+const cortex = new Cortex({
+  url: 'http://localhost:8484',
+  apiKey: 'ctx_your_key',
+})
+
+const factId = await cortex.store(
+  'CORTEX Persist exposes a TypeScript HTTP client.',
+  { project: 'dev-agent', factType: 'knowledge' },
+)
+
+const facts = await cortex.search('TypeScript HTTP client', {
+  project: 'dev-agent',
+  topK: 5,
+})
+
+const ledger = await cortex.verify()
+console.log({ factId, matches: facts.length, ledgerValid: ledger.valid })
+```
+
+### cURL Smoke Test
+
+```bash
+curl -X POST http://localhost:8484/v1/facts \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ctx_your_key" \
+  -d '{
+    "project": "dev-agent",
+    "content": "Hello from cortexpersist.dev",
+    "fact_type": "knowledge"
+  }'
+
+curl -X POST http://localhost:8484/v1/facts/search \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ctx_your_key" \
+  -d '{"query": "cortexpersist.dev", "project": "dev-agent", "k": 5}'
+```
+
+## MCP Integration
+
+Start the default stdio MCP server:
+
+```bash
+pip install "cortex-persist[mcp]"
+python -m cortex.mcp
+```
+
+Recommended core tools:
+
+- `cortex_store`
+- `cortex_search`
+- `cortex_status`
+- `cortex_ledger_verify`
+
+Extended MCP families require:
+
+```bash
+CORTEX_ENABLE_EXPERIMENTAL_MCP=1 python -m cortex.mcp
+```
+
+## Test And Staging Environments
+
+Use these links and commands when checking developer flows.
+
+| Environment | Link or command | Purpose |
+| --- | --- | --- |
+| Local API | [http://localhost:8484/docs](http://localhost:8484/docs) | Interactive API docs in non-production mode |
+| Local API health | [http://localhost:8484/health](http://localhost:8484/health) | Readiness smoke test |
+| Local MkDocs | `mkdocs serve -a 127.0.0.1:8001` | Documentation preview without colliding with API examples |
+| Local prototype | `python -m http.server 8787 --directory docs/prototypes` then [http://localhost:8787/saas_landing.html](http://localhost:8787/saas_landing.html) | Static site preview |
+| Astro dev site | `npm run dev` then [http://localhost:4321](http://localhost:4321) | Frontend preview |
+| Public product | [https://cortexpersist.com](https://cortexpersist.com) | Product, pricing, and checkout surface |
+| Public docs paths | [docs](https://cortexpersist.com/docs/), [API](https://cortexpersist.com/api/), [quickstart](https://cortexpersist.com/quickstart/) | Public documentation redirects from the static prototype deployment |
+| Cloudflare edge proxy | [https://cortex-persist-web.pages.dev/v1/health](https://cortex-persist-web.pages.dev/v1/health) | Staging/API proxy target referenced by `docs/prototypes/vercel.json` |
+| Vercel API preview | `https://<vercel-preview>/v1/health` | Serverless checkout/API preview configured through `CORTEX_API_ORIGIN` |
+
+Do not publish secrets or bypass headers in this file. Protected Vercel previews
+may require `VERCEL_AUTOMATION_BYPASS_SECRET`, but that value belongs in the
+deployment environment only.
+
+## Publication Checklist
+
+Before treating `cortexpersist.dev` as current:
+
+```bash
+mkdocs build --strict
+python -c "from cortex.api.openapi import export_openapi_spec; print(export_openapi_spec())"
+npm --prefix sdks/js run build
+python -m pytest tests/test_compliance_sdk.py -q
+git diff --check
+```
+
+If a command cannot run in the current checkout, record the exact blocker in the
+release notes instead of silently skipping it.
+
+## Boundary Notes
+
+- The in-process Python engine is the recommended first integration surface.
+- The TypeScript SDK is an HTTP client for callers outside the Python process.
+- Public docs should describe the default core API first.
+- Experimental CLI, API, and MCP surfaces must remain behind their explicit
+  `CORTEX_ENABLE_EXPERIMENTAL_*` gates.
+- Production deployments should not expose `/docs`; use exported OpenAPI
+  artifacts for public API reference pages.

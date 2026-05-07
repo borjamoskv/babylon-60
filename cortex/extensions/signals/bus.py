@@ -82,6 +82,16 @@ class AsyncSignalBus:
     async def ensure_table(self) -> None:
         if self._ready:
             return
+        already_in_transaction = bool(getattr(self._conn, "in_transaction", False))
+        if already_in_transaction:
+            cursor = await self._conn.execute(
+                "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'signals'"
+            )
+            if await cursor.fetchone() is None:
+                raise RuntimeError("signals table unavailable during active transaction")
+            self._ready = True
+            return
+
         await self._conn.executescript(_CREATE_TABLE + _CREATE_INDEXES)
 
         cursor = await self._conn.execute("PRAGMA table_info(signals)")
@@ -108,6 +118,7 @@ class AsyncSignalBus:
     ) -> int:
         try:
             await self.ensure_table()
+            already_in_transaction = bool(getattr(self._conn, "in_transaction", False))
             cursor = await self._conn.execute(
                 """INSERT INTO signals (event_type, payload, source, project, tenant_id)
                    VALUES (?, ?, ?, ?, ?)""",
@@ -119,7 +130,8 @@ class AsyncSignalBus:
                     tenant_id,
                 ),
             )
-            await self._conn.commit()
+            if not already_in_transaction:
+                await self._conn.commit()
             self.session_emitted += 1
             return cursor.lastrowid or 0
         except Exception:

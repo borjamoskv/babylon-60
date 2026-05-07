@@ -1023,7 +1023,7 @@
         <div class="proc-step" id="step-2">▸ Evaluating persistence gaps</div>
         <div class="proc-step" id="step-3">▸ Scoring trust infrastructure</div>
         <div class="proc-step" id="step-4">▸ Generating risk vectors</div>
-        <div class="proc-step" id="step-5">▸ Compiling sovereign report</div>
+        <div class="proc-step" id="step-5">▸ Compiling evidence report</div>
       </div>
     </div>
   </div>
@@ -1077,7 +1077,7 @@
         </div>
         <div class="perk">
           <div class="perk-check">✓</div>
-          <span>The "72 Hours to Compliance" Engineering Playbook</span>
+          <span>The 72-hour Evidence Engineering Playbook</span>
         </div>
         <div class="perk">
           <div class="perk-check">✓</div>
@@ -1092,21 +1092,21 @@
           </button>
         </div>
         <div class="privacy-note">
-          🔒 Zero spam. Unsubscribe in 1 click. We respect sovereign privacy.
+          🔒 Zero spam. Unsubscribe in 1 click. We respect privacy.
         </div>
       </div>
       <div class="success-state" id="success-state">
         <div class="success-icon">✓</div>
         <div class="success-title">The 72-Hour Playbook is on its way.</div>
-        <div class="success-sub">Check your inbox in the next few minutes. Your Article 12 compliance PDF and remediation playbook will be there.</div>
+        <div class="success-sub">Check your inbox in the next few minutes. Your Article 12 evidence PDF and remediation playbook will be there.</div>
       </div>
     </div>
   </div>
 
   <!-- FOOTER -->
   <footer class="footer">
-    <p>© 2026 CORTEX AI — Sovereign Memory Infrastructure</p>
-    <p style="margin-top:6px;"><a href="#">Privacy</a> · <a href="#">Terms</a> · Built by borjamoskv</p>
+    <p>© 2026 CORTEX Persist — Trust Infrastructure</p>
+    <p style="margin-top:6px;"><a href="#">Privacy</a> · <a href="#">Terms</a> · Built by CORTEX Persist</p>
   </footer>
 </div>
 
@@ -1123,12 +1123,12 @@ const QUESTIONS = [
     dimension: "Art. 12(1) — Automatic Logging",
     icon: "📋",
     text: "When your AI system takes an action or stores a decision — is it automatically logged?",
-    hint: "Art. 12(1) EU AI Act: 'High-risk AI systems shall technically allow for the automatic recording of events.' Every operation must create an immutable record. Manual logging does not satisfy this clause.",
+    hint: "Art. 12(1) EU AI Act: 'High-risk AI systems shall technically allow for the automatic recording of events.' Every operation must create an immutable record. Manual logging does not support this clause.",
     options: [
-      { label: "No logging — actions happen with no record created", score: 0, hint: "DIRECT VIOLATION — Art. 12(1)" },
-      { label: "We log manually when we remember to", score: 1, hint: "NON-COMPLIANT — manual ≠ automatic" },
+      { label: "No logging — actions happen with no record created", score: 0, hint: "HIGH RISK — Art. 12(1)" },
+      { label: "We log manually when we remember to", score: 1, hint: "GAP — manual ≠ automatic" },
       { label: "Automatic logs exist but have gaps (not every event)", score: 2, hint: "PARTIAL — coverage gaps = liability windows" },
-      { label: "Every AI operation triggers an automatic, timestamped log entry", score: 3, hint: "ART. 12(1) COMPLIANT" }
+      { label: "Every AI operation triggers an automatic, timestamped log entry", score: 3, hint: "Art. 12(1) evidence present" }
     ]
   },
   {
@@ -1138,10 +1138,10 @@ const QUESTIONS = [
     text: "What information is recorded when your AI system accesses or uses its stored knowledge?",
     hint: "Art. 12(2) requires three fields: (1) timestamp of use, (2) reference to which database was queried, (3) what inputs led to a match. A log that only says 'query executed' fails this clause.",
     options: [
-      { label: "No structured log content — just raw text output", score: 0, hint: "DIRECT VIOLATION — Art. 12(2)" },
+      { label: "No structured log content — just raw text output", score: 0, hint: "HIGH RISK — Art. 12(2)" },
       { label: "Timestamps only — no source reference or input data", score: 1, hint: "INSUFFICIENT — 2 of 3 required fields missing" },
       { label: "Timestamps + data source, but inputs are not recorded", score: 2, hint: "PARTIAL — Art. 12(2) input tracing gap" },
-      { label: "Full record: timestamp, source DB reference, input data, match ID", score: 3, hint: "ART. 12(2) COMPLIANT" }
+      { label: "Full record: timestamp, source DB reference, input data, match ID", score: 3, hint: "Art. 12(2) evidence present" }
     ]
   },
   {
@@ -1151,23 +1151,23 @@ const QUESTIONS = [
     text: "If multiple AI agents contributed to a decision — can you identify which one did what?",
     hint: "Art. 12(2)(d): Logs must identify 'persons who participated in the verification.' For multi-agent systems: each agent must be tagged and its contribution traceable in the audit record.",
     options: [
-      { label: "Impossible — we have no agent identity system", score: 0, hint: "DIRECT VIOLATION — Art. 12(2)(d)" },
-      { label: "Agents are named but individual actions aren't linked", score: 1, hint: "NON-COMPLIANT — attribution without traceability" },
+      { label: "Impossible — we have no agent identity system", score: 0, hint: "HIGH RISK — Art. 12(2)(d)" },
+      { label: "Agents are named but individual actions aren't linked", score: 1, hint: "GAP — attribution without traceability" },
       { label: "Agent IDs on logs, but no weighting or verification record", score: 2, hint: "PARTIAL — consensus evidence missing" },
-      { label: "Every agent tagged; votes, weights, and verdicts recorded per decision", score: 3, hint: "ART. 12(2)(d) COMPLIANT" }
+      { label: "Every agent tagged; votes, weights, and verdicts recorded per decision", score: 3, hint: "Art. 12(2)(d) evidence present" }
     ]
   },
   {
     id: 3,
-    dimension: "Art. 12(3) — Tamper-Proof Storage",
+    dimension: "Art. 12(3) — Tamper-Evident Storage",
     icon: "🔒",
     text: "Could someone — including a system admin — silently alter or delete your AI's logs?",
     hint: "Art. 12(3): Logs must be 'tamper-evident' for the system's entire operational lifetime. If a database row can be UPDATE'd without a trace, you fail this clause. Access policy is not tamper-evidence.",
     options: [
-      { label: "Yes — our DB allows direct updates and deletes with no trace", score: 0, hint: "DIRECT VIOLATION — Art. 12(3)" },
-      { label: "We have access controls but no cryptographic integrity proof", score: 1, hint: "NON-COMPLIANT — policy ≠ tamper-evidence" },
+      { label: "Yes — our DB allows direct updates and deletes with no trace", score: 0, hint: "HIGH RISK — Art. 12(3)" },
+      { label: "We have access controls but no cryptographic integrity proof", score: 1, hint: "GAP — policy ≠ tamper-evidence" },
       { label: "Soft-deletes only, but no hash chain linking records", score: 2, hint: "PARTIAL — deletion prevented, mutation not" },
-      { label: "SHA-256 hash chain: each record includes prev_hash. Mutation = detectable break", score: 3, hint: "ART. 12(3) COMPLIANT" }
+      { label: "SHA-256 hash chain: each record includes prev_hash. Mutation = detectable break", score: 3, hint: "Art. 12(3) evidence present" }
     ]
   },
   {
@@ -1177,57 +1177,57 @@ const QUESTIONS = [
     text: "How do you prove — on demand, to a regulator — that your AI logs haven't been corrupted?",
     hint: "Art. 12(4): 'Providers shall implement means for periodic integrity verification.' Backups don't count. You need a cryptographic mechanism (e.g. Merkle checkpoints) that proves integrity without re-reading every record.",
     options: [
-      { label: "We can't — no integrity verification mechanism exists", score: 0, hint: "DIRECT VIOLATION — Art. 12(4)" },
-      { label: "We do manual spot-checks occasionally", score: 1, hint: "NON-COMPLIANT — manual ≠ periodic automated" },
+      { label: "We can't — no integrity verification mechanism exists", score: 0, hint: "HIGH RISK — Art. 12(4)" },
+      { label: "We do manual spot-checks occasionally", score: 1, hint: "GAP — manual ≠ periodic automated" },
       { label: "Individual record checksums but no chain proof for full history", score: 2, hint: "PARTIAL — no checkpoint mechanism" },
-      { label: "Merkle tree checkpoints on schedule; results stored in integrity_checks table", score: 3, hint: "ART. 12(4) COMPLIANT" }
+      { label: "Merkle tree checkpoints on schedule; results stored in integrity_checks table", score: 3, hint: "Art. 12(4) evidence present" }
     ]
   }
 ];
 
 const VERDICTS = [
-  { min: 0,  max: 30,  label: "Direct Regulatory Violation",     color: "#FF3B3B", ring: "#FF3B3B" },
-  { min: 31, max: 55,  label: "Significant Compliance Gaps",     color: "#FF8C00", ring: "#FF8C00" },
-  { min: 56, max: 75,  label: "Partial Compliance",              color: "#D4AF37", ring: "#D4AF37" },
-  { min: 76, max: 89,  label: "Near Article 12 Compliant",       color: "#A8D400", ring: "#A8D400" },
-  { min: 90, max: 100, label: "Article 12 Compliant ✦",          color: "#CCFF00", ring: "#CCFF00" }
+  { min: 0,  max: 30,  label: "Critical Evidence Gap",     color: "#FF3B3B", ring: "#FF3B3B" },
+  { min: 31, max: 55,  label: "Significant Evidence Gaps",     color: "#FF8C00", ring: "#FF8C00" },
+  { min: 56, max: 75,  label: "Partial Evidence",              color: "#D4AF37", ring: "#D4AF37" },
+  { min: 76, max: 89,  label: "Strong Article 12 Evidence",       color: "#A8D400", ring: "#A8D400" },
+  { min: 90, max: 100, label: "Article 12 Evidence Ready",          color: "#CCFF00", ring: "#CCFF00" }
 ];
 
 // Article 12 specific risk text — one per clause per score
 const ART12_RISK_TEXT = [
   { // 12(1) Auto-logging
-    0: "Direct violation of Art. 12(1). No automatic logging = zero traceability. This is the #1 reason regulators issue maximum fines: the complete absence of any technical capability to demonstrate compliance.",
-    1: "Manual logging fails Art. 12(1). The regulation requires automatic, continuous recording — a single unlogged session is a compliance breach, not an operational risk.",
+    0: "Critical evidence gap for Art. 12(1). No automatic logging = no traceability evidence. This is the #1 reason regulators issue formal findings: the material absence of technical evidence to demonstrate compliance.",
+    1: "Manual logging fails Art. 12(1). The regulation requires automatic, continuous recording — a single unlogged session is a evidence gap, not an operational risk.",
     2: "Coverage gaps create Art. 12(1) liability windows. The clause allows no exceptions — every event must be captured automatically, not best-effort.",
-    3: "Art. 12(1) satisfied. Every operation creates an automatic, timestamped record. This is your strongest compliance signal and the foundation for all downstream clauses."
+    3: "Art. 12(1) evidence present. Every operation creates an automatic, timestamped record. This is your strongest evidence signal and the foundation for all downstream clauses."
   },
   { // 12(2) Log content
-    0: "Direct violation of Art. 12(2). Without structured log content (timestamp, source DB, input data), you cannot demonstrate what your AI decided or why — the fundamental purpose of the regulation.",
+    0: "Critical evidence gap for Art. 12(2). Without structured log content (timestamp, source DB, input data), you cannot demonstrate what your AI decided or why — the fundamental purpose of the regulation.",
     1: "Timestamps alone fail Art. 12(2). Three fields required: period of use, reference database, and input data that led to the match. You are missing two of three.",
     2: "Partial compliance with Art. 12(2). Missing input traceability means you cannot answer the regulator's core question: 'what data triggered this decision?'",
-    3: "Art. 12(2) satisfied. Full record: timestamp, source reference, input data, match ID. Regulator-ready on demand, for any event."
+    3: "Art. 12(2) evidence present. Full record: timestamp, source reference, input data, match ID. Review-ready on demand, for any event."
   },
   { // 12(2)(d) Agent traceability
-    0: "Direct violation of Art. 12(2)(d). Multi-agent systems without identity tracking make accountability impossible — a core requirement of human oversight under Art. 14.",
+    0: "Critical evidence gap for Art. 12(2)(d). Multi-agent systems without identity tracking make accountability impossible — a core requirement of human oversight under Art. 14.",
     1: "Named agents without traceable actions fail Art. 12(2)(d). Attribution requires a provable link between agent ID and every specific decision it influenced.",
     2: "Agent IDs on logs are necessary but not sufficient. Art. 12(2)(d) requires verification records — votes, weights, and verdicts stored and linked to each agent ID.",
-    3: "Art. 12(2)(d) satisfied. Every agent contribution tagged, weighted, and recorded. Human oversight is architecturally enforced, not procedurally hoped for."
+    3: "Art. 12(2)(d) evidence present. Every agent contribution tagged, weighted, and recorded. Human oversight is architecturally enforced, not procedurally hoped for."
   },
   { // 12(3) Tamper-proof
-    0: "Direct violation of Art. 12(3). If a database row can be silently modified, your compliance posture rests on access policy — not cryptographic tamper-evidence. Policy is insufficient for this clause.",
+    0: "Critical evidence gap for Art. 12(3). If a database row can be silently modified, your evidence posture rests on access policy — not cryptographic tamper-evidence. Policy is insufficient for this clause.",
     1: "Access controls are necessary but insufficient for Art. 12(3). Tamper-evidence requires cryptographic proof — a hash chain means any mutation is mathematically detectable, not just policy-restricted.",
     2: "Soft-deletes prevent deletion but not mutation. Art. 12(3) requires that modifying any log field produces a detectable signature break — hash chaining provides this, soft-delete alone does not.",
-    3: "Art. 12(3) satisfied. SHA-256 hash chain: each record includes prev_hash. Any mutation breaks the chain immediately. Cryptographic tamper-evidence — not access policy."
+    3: "Art. 12(3) evidence present. SHA-256 hash chain: each record includes prev_hash. Any mutation breaks the chain immediately. Cryptographic tamper evidence — not access policy."
   },
   { // 12(4) Periodic verification
-    0: "Direct violation of Art. 12(4). The regulation requires a technical mechanism for periodic verification — without it, you cannot prove integrity to a regulator on demand.",
+    0: "Critical evidence gap for Art. 12(4). The regulation requires a technical mechanism for periodic verification — without it, you cannot prove integrity to a regulator on demand.",
     1: "Manual spot-checks fail Art. 12(4) on two fronts: not periodic (automated) and not systematic (covering full history). This violates the letter of the clause.",
     2: "Individual checksums verify record-level integrity but cannot prove the entire log sequence is intact. Art. 12(4) requires a chained mechanism (Merkle tree) covering complete history.",
-    3: "Art. 12(4) satisfied. Merkle checkpoints run on schedule; results stored in integrity_checks. Cryptographic integrity certificate for any period, in O(log N) time."
+    3: "Art. 12(4) evidence present. Merkle checkpoints run on schedule; results stored in integrity_checks. Cryptographic integrity certificate for any period, in O(log N) time."
   }
 ];
 
-const ART12_SHORT = ["12(1) Auto-Log", "12(2) Content", "12(2)(d) Agent ID", "12(3) Tamper-Proof", "12(4) Verification"];
+const ART12_SHORT = ["12(1) Auto-Log", "12(2) Content", "12(2)(d) Agent ID", "12(3) Tamper-Evident", "12(4) Verification"];
 const TOTAL_Q = 5;
 
 // STATE
@@ -1458,14 +1458,14 @@ function showResults() {
   // 2. CORTEX Coverage Panel
   const coveragePanel = document.getElementById('coverage-panel');
   const remediation = [
-    { name: "Sovereign Ledger", coverage: "100% Art. 12(1), 12(3)", desc: "Immutable SHA-256 chain for all state-changes." },
-    { name: "WorkingMemoryL1", coverage: "100% Art. 12(2)", desc: "Enforced triple-context recording (time/source/input)." },
-    { name: "Apotheosis Trace", coverage: "100% Art. 12(2)(d)", desc: "Autonomous agent ID tagging per decision." },
-    { name: "MerkleCheck Protocol", coverage: "100% Art. 12(4)", desc: "Verification triggers for O(log N) auditing." }
+    { name: "Hash-chain Ledger", coverage: "Supports Art. 12(1), 12(3)", desc: "Hash-linked SHA-256 chain for all state-changes." },
+    { name: "WorkingMemoryL1", coverage: "Supports Art. 12(2)", desc: "Enforced triple-context recording (time/source/input)." },
+    { name: "Agent Trace", coverage: "Supports Art. 12(2)(d)", desc: "Autonomous agent ID tagging per decision." },
+    { name: "MerkleCheck Protocol", coverage: "Supports Art. 12(4)", desc: "Verification triggers for O(log N) auditing." }
   ];
   
   coveragePanel.innerHTML = `
-    <div style="font-size:11px; font-weight:700; color:var(--lime); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:20px;">CORTEX Sovereign Coverage</div>
+    <div style="font-size:11px; font-weight:700; color:var(--lime); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:20px;">CORTEX Evidence Coverage</div>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
       ${remediation.map(item => `
         <div style="background:var(--surface-1); padding:16px; border:1px solid var(--border); border-radius:12px;">
@@ -1476,8 +1476,8 @@ function showResults() {
       `).join('')}
     </div>
     <div style="background:var(--lime-ghost); padding:16px; border:1px solid var(--lime-dim); border-radius:12px; text-align:center;">
-      <div style="font-size:14px; font-weight:700; color:var(--lime); margin-bottom:4px;">Article 12 Compliance: 100% Out of the Box</div>
-      <div style="font-size:12px; color:var(--text-secondary);">CORTEX middleware wraps your existing AI stack to satisfy Article 12 requirements without code refactoring.</div>
+      <div style="font-size:14px; font-weight:700; color:var(--lime); margin-bottom:4px;">Article 12 Evidence: strong technical coverage</div>
+      <div style="font-size:12px; color:var(--text-secondary);">CORTEX middleware wraps your existing AI stack to support Article 12 evidence requirements without code refactoring.</div>
     </div>
   `;
 }

@@ -441,6 +441,18 @@ END;
 """
 
 CREATE_FACTS_FTS_TRIGGERS = """
+CREATE TRIGGER IF NOT EXISTS facts_ai AFTER INSERT ON facts
+WHEN NEW.content NOT LIKE 'v6_aesgcm:%'
+ AND (
+   NEW.metadata IS NULL
+   OR NOT json_valid(NEW.metadata)
+   OR COALESCE(json_extract(NEW.metadata, '$.privacy_flagged'), 0) = 0
+ )
+BEGIN
+  INSERT INTO facts_fts(rowid, content, project, tags, fact_type, tenant_id)
+  VALUES (new.id, new.content, new.project, new.tags, new.fact_type, new.tenant_id);
+END;
+
 CREATE TRIGGER IF NOT EXISTS facts_ad AFTER DELETE ON facts BEGIN
   DELETE FROM facts_fts WHERE rowid = old.id;
 END;
@@ -448,6 +460,14 @@ END;
 CREATE TRIGGER IF NOT EXISTS facts_au
 AFTER UPDATE OF content, project, tags, fact_type, tenant_id ON facts BEGIN
   DELETE FROM facts_fts WHERE rowid = old.id;
+  INSERT INTO facts_fts(rowid, content, project, tags, fact_type, tenant_id)
+  SELECT new.id, new.content, new.project, new.tags, new.fact_type, new.tenant_id
+  WHERE new.content NOT LIKE 'v6_aesgcm:%'
+    AND (
+      new.metadata IS NULL
+      OR NOT json_valid(new.metadata)
+      OR COALESCE(json_extract(new.metadata, '$.privacy_flagged'), 0) = 0
+    );
 END;
 """
 

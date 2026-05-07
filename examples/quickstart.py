@@ -6,34 +6,34 @@ Usage:
     python quickstart.py
 """
 
-from cortex import CortexClient
+from cortex.api.client import CortexClient
 
-client = CortexClient(base_url="http://localhost:8000")
+client = CortexClient(base_url="http://localhost:8484")
 
 # 1. Store a fact
-client.store(
-    content="CORTEX is a Sovereign Memory Engine for Enterprise AI Swarms.",
+fact_id = client.store(
+    "demo",
+    "CORTEX is a Sovereign Memory Engine for Enterprise AI Swarms.",
     fact_type="knowledge",
-    project="demo",
 )
-print("✅ Fact stored")
+print(f"Fact stored: #{fact_id}")
 
 # 2. Search by semantic similarity
-results = client.search("What is CORTEX?", top_k=3)
+results = client.search("What is CORTEX?", k=3)
 for r in results:
-    print(f"  [#{r.fact_id}] (score: {r.score:.3f}) {r.content[:80]}")
+    print(f"  [#{r.id}] (score: {r.score:.3f}) {r.content[:80]}")
 
-# 3. Ask with RAG (requires LLM provider configured)
+# 3. Ask with RAG (requires CORTEX_ENABLE_EXPERIMENTAL_API=1 and an LLM provider)
 try:
     import httpx
 
     resp = httpx.post(
-        "http://localhost:8000/v1/ask",
+        "http://localhost:8484/v1/ask",
         json={"query": "What is CORTEX?", "k": 5},
-        headers={"X-API-Key": "your_key"},
+        headers={"Authorization": "Bearer your_key"},
     )
-    print(f"\n🧠 Answer: {resp.json()['answer']}")
+    print(f"\nAnswer: {resp.json()['answer']}")
 except Exception as e:
-    print(f"\n⚠️ RAG requires LLM provider: {e}")
+    print(f"\nRAG requires experimental API and LLM provider: {e}")
 
-print("\n🎉 CORTEX is operational!")
+print("\nCORTEX is operational!")

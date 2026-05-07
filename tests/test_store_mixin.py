@@ -143,6 +143,34 @@ class TestStore:
                 source="agent:test_suite",
             )
 
+    async def test_required_post_hook_failure_rolls_back_store(self, engine):
+        from unittest.mock import AsyncMock, MagicMock
+
+        from cortex.engine.guard_pipeline import GuardPipeline
+
+        pipeline = GuardPipeline()
+        hook = MagicMock()
+        hook.on_stored = AsyncMock(side_effect=RuntimeError("checkpoint unavailable"))
+        pipeline.add_post_hook(hook, required=True)
+        engine._guard_pipeline = pipeline
+
+        content = "Fact rejected because a required post-store hook fails."
+        with pytest.raises(RuntimeError, match="required post-store hook"):
+            await engine.store(
+                project="test",
+                content=content,
+                fact_type="knowledge",
+                source="agent:test_suite",
+            )
+
+        async with engine.session() as conn:
+            async with conn.execute(
+                "SELECT COUNT(*) FROM facts WHERE content = ?",
+                (content,),
+            ) as cursor:
+                row = await cursor.fetchone()
+        assert row[0] == 0
+
 
 # ─── Store Many ───────────────────────────────────────────────────────
 
@@ -165,6 +193,60 @@ class TestStoreMany:
     async def test_store_many_empty_raises(self, engine):
         with pytest.raises(ValueError, match="empty"):
             await engine.store_many([])
+
+    async def test_store_many_defers_optional_post_hooks_until_batch_commit(self, engine):
+        from unittest.mock import MagicMock
+
+        from cortex.engine.guard_pipeline import GuardPipeline
+
+        required_calls = 0
+        optional_calls: list[int] = []
+
+        async def required_hook(fact_id, project, fact_type, conn, **kw):
+            nonlocal required_calls
+            required_calls += 1
+            if required_calls == 2:
+                raise RuntimeError("checkpoint unavailable")
+
+        async def optional_hook(fact_id, project, fact_type, conn, **kw):
+            optional_calls.append(fact_id)
+
+        required = MagicMock()
+        optional = MagicMock()
+        required.on_stored = required_hook
+        optional.on_stored = optional_hook
+
+        pipeline = GuardPipeline()
+        pipeline.add_post_hook(required, required=True)
+        pipeline.add_post_hook(optional)
+        engine._guard_pipeline = pipeline
+
+        facts = [
+            {
+                "project": "batch",
+                "content": "First fact in a batch that should roll back.",
+                "fact_type": "knowledge",
+                "source": "agent:test_suite",
+            },
+            {
+                "project": "batch",
+                "content": "Second fact in a batch trips the required hook.",
+                "fact_type": "knowledge",
+                "source": "agent:test_suite",
+            },
+        ]
+
+        with pytest.raises(RuntimeError, match="required post-store hook"):
+            await engine.store_many(facts)
+
+        assert optional_calls == []
+        async with engine.session() as conn:
+            async with conn.execute(
+                "SELECT COUNT(*) FROM facts WHERE project = ?",
+                ("batch",),
+            ) as cursor:
+                row = await cursor.fetchone()
+        assert row[0] == 0
 
 
 # ─── Deprecate ────────────────────────────────────────────────────────

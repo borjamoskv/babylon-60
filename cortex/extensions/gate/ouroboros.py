@@ -84,39 +84,21 @@ class OuroborosGate:
 
         return None
 
-    def trigger_pruning(self, target_project: str):
-        """Executes a mass-extinction of a specific project scope."""
-        logger.warning("🌀 Ouroboros-Ω: Pruning dead weight project [%s]", target_project)
-        # 350/100: Sensory Feedback
-        import asyncio
-
-        from cortex.routes.notch_ws import notify_notch_pruning
-
-        asyncio.create_task(notify_notch_pruning())
-
-        self.conn.execute("DELETE FROM facts WHERE project = ?", (target_project,))
-        self.conn.commit()
-
-        # Log scaling decision
-        self._log_scaling_event(f"Pruned project {target_project} due to zero bridge density.")
+    def trigger_pruning(self, target_project: str) -> None:
+        """Block unsafe physical pruning until a canonical tenant-scoped path is available."""
+        logger.warning(
+            "Ouroboros pruning blocked for project [%s]: canonical tenant-scoped "
+            "tombstone/audit path required.",
+            target_project,
+        )
+        raise RuntimeError(
+            "Unsafe Ouroboros physical pruning is disabled; use a tenant-scoped "
+            "canonical tombstone mutation with ledger audit."
+        )
 
     def _log_scaling_event(self, content: str):
-        """Persists architectural scaling decisions."""
-        self.conn.execute(
-            """
-            INSERT INTO facts (project, content, fact_type, confidence, source, created_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """,
-            (
-                "cortex",
-                content,
-                "decision",
-                "C5",
-                "ag:ouroboros",
-                datetime.now(timezone.utc).isoformat(),
-            ),
-        )
-        self.conn.commit()
+        """Log non-persistent scaling decisions without fabricating audit evidence."""
+        logger.warning("Ouroboros scaling event not persisted: %s", content)
 
 
 def get_ouroboros_gate(engine: Any) -> OuroborosGate:

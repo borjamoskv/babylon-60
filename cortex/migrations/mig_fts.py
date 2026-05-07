@@ -1,9 +1,19 @@
 import logging
 import sqlite3
+from typing import Any
 
 from cortex.crypto import get_default_encrypter
 
 logger = logging.getLogger("cortex")
+
+
+def _allows_plaintext_fts(meta: dict[str, Any] | None) -> bool:
+    """Return whether a fact explicitly allows plaintext FTS backfill."""
+    if not meta:
+        return False
+    if meta.get("privacy_flagged"):
+        return False
+    return meta.get("allow_plaintext_fts") is True
 
 
 def _migration_017_fts_decouple(conn: sqlite3.Connection):
@@ -39,14 +49,18 @@ def _migration_017_fts_decouple(conn: sqlite3.Connection):
 
         # Read all valid facts
         cursor = conn.execute(
-            "SELECT id, content, project, tags, fact_type, tenant_id FROM facts WHERE valid_until IS NULL"
+            "SELECT id, content, project, tags, fact_type, tenant_id, metadata "
+            "FROM facts WHERE valid_until IS NULL"
         )
         rows = cursor.fetchall()
 
         insert_count = 0
         for row in rows:
-            fact_id, content_enc, project, tags_str, fact_type, tenant_id = row
+            fact_id, content_enc, project, tags_str, fact_type, tenant_id, metadata_raw = row
             try:
+                metadata = enc.decrypt_json(metadata_raw, tenant_id=tenant_id)
+                if not _allows_plaintext_fts(metadata):
+                    continue
                 content_dec = enc.decrypt_str(content_enc, tenant_id=tenant_id)
                 conn.execute(
                     "INSERT INTO facts_fts(rowid, content, project, tags, fact_type) VALUES (?, ?, ?, ?, ?)",

@@ -271,6 +271,8 @@ class ExportResponse(BaseModel):
     status: str = "success"
     project: str
     artifact: str
+    digest_artifact: str | None = None
+    sha256: str | None = None
     message: str
 
 
@@ -399,7 +401,7 @@ class LedgerReportResponse(BaseModel):
 
 
 class CheckpointResponse(BaseModel):
-    checkpoint_id: int | None
+    checkpoint_id: int | str | None
     message: str
     status: str = "success"
 

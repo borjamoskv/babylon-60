@@ -272,9 +272,22 @@ class ComplianceTracker:
                 "violations": [],
             }
 
-        return self._engine._run_sync(  # type: ignore[type-error]
-            ledger.audit_integrity_async(tenant_id=resolved_tenant_id)
-        )
+        _ = resolved_tenant_id
+        result = self._engine._run_sync(ledger.audit_integrity_async())  # type: ignore[type-error]
+        if not isinstance(result, dict):
+            return {
+                "valid": False,
+                "tx_checked": 0,
+                "roots_checked": 0,
+                "violations": [{"type": "INVALID_LEDGER_AUDIT_RESULT"}],
+            }
+        return {
+            **result,
+            "valid": bool(result.get("valid", False)),
+            "tx_checked": int(result.get("tx_checked") or result.get("tx_count") or 0),
+            "roots_checked": int(result.get("roots_checked") or 0),
+            "violations": result.get("violations", []),
+        }
 
     # ─── 3. export_audit ──────────────────────────────────────────
 

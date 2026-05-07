@@ -15,6 +15,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
+from cortex.database.sql_guard import reject_protected_fact_table_dml
+
 __all__ = ["SQLiteAdapter"]
 
 if TYPE_CHECKING:
@@ -44,6 +46,7 @@ class SQLiteAdapter:
 
     async def execute(self, sql: str, params: tuple[Any, ...] = ()) -> Any:
         """Execute a statement and return the raw aiosqlite.Cursor."""
+        reject_protected_fact_table_dml(sql)
         return await self._conn.execute(sql, params)
 
     async def fetch_all(self, sql: str, params: tuple[Any, ...] = ()) -> list[dict[str, Any]]:
@@ -74,6 +77,7 @@ class SQLiteAdapter:
 
     async def execute_insert(self, sql: str, params: tuple[Any, ...] = ()) -> int:
         """Execute an INSERT and return the last inserted row ID."""
+        reject_protected_fact_table_dml(sql)
         try:
             async with self._conn.execute(sql, params) as cursor:
                 return cursor.lastrowid or 0
@@ -88,7 +92,9 @@ class SQLiteAdapter:
         interleaved writes and unbounded memory if params_list is large.
         """
         if not params_list:
+            reject_protected_fact_table_dml(sql)
             return
+        reject_protected_fact_table_dml(sql)
         try:
             await self._conn.executemany(sql, params_list)
         except Exception:
@@ -106,6 +112,7 @@ class SQLiteAdapter:
         running, matching SQLite's native behavior. Never accepts params
         (no injection surface).
         """
+        reject_protected_fact_table_dml(script, allow_trigger_bodies=True)
         try:
             await self._conn.executescript(script)
         except Exception:

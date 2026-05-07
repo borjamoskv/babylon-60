@@ -42,6 +42,7 @@ class CloudSyncMonitor:
         schema = """
         CREATE TABLE IF NOT EXISTS transactions (
             id INTEGER PRIMARY KEY,
+            tenant_id TEXT NOT NULL DEFAULT 'default',
             project TEXT NOT NULL,
             action TEXT NOT NULL,
             detail TEXT,
@@ -83,7 +84,7 @@ class CloudSyncMonitor:
             conn = self._engine._get_sync_conn()
 
             cursor = conn.execute(
-                "SELECT id, project, action, detail, prev_hash, hash, timestamp "
+                "SELECT id, tenant_id, project, action, detail, prev_hash, hash, timestamp "
                 "FROM transactions WHERE id > ? ORDER BY id ASC LIMIT ?",
                 (last_id, self._batch_size),
             )
@@ -92,15 +93,17 @@ class CloudSyncMonitor:
             if rows:
                 params_list = []
                 for row in rows:
-                    params_list.append((row[0], row[1], row[2], row[3], row[4], row[5], row[6]))
+                    params_list.append(
+                        (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
+                    )
 
                 import asyncio
 
                 asyncio.run(
                     self._turso.executemany(
                         "INSERT INTO transactions "
-                        "(id, project, action, detail, prev_hash, hash, timestamp) "
-                        "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                        "(id, tenant_id, project, action, detail, prev_hash, hash, timestamp) "
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                         params_list,
                     )
                 )

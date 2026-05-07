@@ -20,7 +20,7 @@ class TransactionMixin(EngineMixinBase):
     """Sovereign Ledger — Immutable Transaction Log with Cryptographic Hash Chain.
 
     Every write operation produces a transaction record chained to its predecessor
-    via ``compute_tx_hash(prev_hash, project, action, detail, timestamp)``.
+    via ``compute_tx_hash(prev_hash, project, action, detail, timestamp, tenant_id=...)``.
     The chain is verified by ``ImmutableLedger.audit_integrity_async()``.
 
     CDC Pattern: ``_log_transaction()`` is the single write-path for all
@@ -46,7 +46,7 @@ class TransactionMixin(EngineMixinBase):
         prev = await cursor.fetchone()
         await cursor.close()
         ph = prev[0] if prev else "GENESIS"
-        th = compute_tx_hash(ph, project, action, dj, ts)
+        th = compute_tx_hash(ph, project, action, dj, ts, tenant_id=tenant_id)
 
         c = await conn.execute(
             "INSERT INTO transactions "
@@ -62,13 +62,13 @@ class TransactionMixin(EngineMixinBase):
             row = await cur.fetchone()
             actual_ph = row[0] if row else ph
             if actual_ph != ph:
-                th = compute_tx_hash(actual_ph, project, action, dj, ts)
+                th = compute_tx_hash(actual_ph, project, action, dj, ts, tenant_id=tenant_id)
                 await conn.execute("UPDATE transactions SET hash = ? WHERE id = ?", (th, tx_id))
 
         if getattr(self, "_ledger", None):
             try:
                 self._ledger.record_write()
-                await self._ledger.create_checkpoint_async()
+                await self._ledger.create_checkpoint_async(tenant_id=tenant_id)
             except (sqlite3.Error, OSError, RuntimeError, AttributeError) as e:
                 logger.warning("Auto-checkpoint failed: %s", e)
                 from cortex.telemetry.metrics import metrics
@@ -80,11 +80,25 @@ class TransactionMixin(EngineMixinBase):
 
         return int(tx_id) if tx_id is not None else 0
 
-    async def verify_ledger(self) -> dict[str, Any]:
+    async def create_checkpoint(self, tenant_id: str | None = None) -> str | None:
+        """Create a tenant-scoped Merkle checkpoint over transaction hashes."""
+        if not getattr(self, "_ledger", None):
+            from cortex.ledger import ImmutableLedger
+
+            pool = getattr(self, "_pool", None)
+            if pool is None:
+                raise RuntimeError("Ledger checkpoint requires an initialized connection pool")
+            self._ledger = ImmutableLedger(pool)
+        return await self._ledger.create_checkpoint_async(tenant_id=tenant_id)
+
+    async def verify_ledger(self, tenant_id: str | None = None) -> dict[str, Any]:
         """Verify the integrity of the sovereign ledger (Operation Void)."""
         if not getattr(self, "_ledger", None):
             from cortex.ledger import ImmutableLedger
 
             # Pass the pool directly instead of a raw connection
-            self._ledger = ImmutableLedger(self.pool)
-        return await self._ledger.audit_integrity_async()
+            pool = getattr(self, "_pool", None)
+            if pool is None:
+                raise RuntimeError("Ledger verification requires an initialized connection pool")
+            self._ledger = ImmutableLedger(pool)
+        return await self._ledger.audit_integrity_async(tenant_id=tenant_id)

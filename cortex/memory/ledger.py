@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import logging
+import hashlib
 from datetime import datetime, timezone
 from typing import Any
 
@@ -38,6 +39,7 @@ logger = logging.getLogger("cortex.memory.ledger")
 _CREATE_TABLE_SQL = """
 CREATE TABLE IF NOT EXISTS memory_events (
     event_id   TEXT PRIMARY KEY,
+    sequence   INTEGER,
     timestamp  TEXT NOT NULL,
     role       TEXT NOT NULL,
     content    TEXT NOT NULL,
@@ -54,8 +56,11 @@ _CREATE_INDEX_SQL = """
 CREATE INDEX IF NOT EXISTS idx_memory_events_session
     ON memory_events(session_id);
 
-CREATE INDEX IF NOT EXISTS idx_memory_events_tenant_event_desc
-    ON memory_events(tenant_id, event_id DESC);
+    CREATE INDEX IF NOT EXISTS idx_memory_events_tenant
+        ON memory_events(tenant_id);
+
+    CREATE INDEX IF NOT EXISTS idx_memory_events_tenant_sequence
+        ON memory_events(tenant_id, sequence);
 """
 
 
@@ -79,8 +84,19 @@ class EventLedgerL3:
             return
         await self._conn.executescript(_CREATE_TABLE_SQL)
         await self._conn.executescript(_CREATE_INDEX_SQL)
+        await self._ensure_sequence_column()
         await self._conn.commit()
         self._ready = True
+
+    async def _ensure_sequence_column(self) -> None:
+        """Backfill a stable append sequence for deterministic replay."""
+        cursor = await self._conn.execute("PRAGMA table_info(memory_events)")
+        columns = {row[1] for row in await cursor.fetchall()}
+        if "sequence" not in columns:
+            await self._conn.execute("ALTER TABLE memory_events ADD COLUMN sequence INTEGER")
+        await self._conn.execute(
+            "UPDATE memory_events SET sequence = rowid WHERE sequence IS NULL"
+        )
 
     async def _get_last_hash(self, tenant_id: str) -> str:
         """Fetch the signature of the last event for a tenant to continue the chain."""
@@ -90,7 +106,7 @@ class EventLedgerL3:
         cursor = await self._conn.execute(
             """SELECT signature FROM memory_events
                WHERE tenant_id = ?
-               ORDER BY event_id DESC
+               ORDER BY sequence DESC, rowid DESC
                LIMIT 1""",
             (tenant_id,),
         )
@@ -99,36 +115,68 @@ class EventLedgerL3:
         self._last_hash_cache[tenant_id] = last_hash
         return last_hash
 
+    async def _event_exists(self, event_id: str) -> bool:
+        """Check whether an event ID is already present in the ledger."""
+        cursor = await self._conn.execute(
+            "SELECT 1 FROM memory_events WHERE event_id = ? LIMIT 1",
+            (event_id,),
+        )
+        return await cursor.fetchone() is not None
+
+    @staticmethod
+    def _compute_event_signature(event: MemoryEvent, prev_hash: str) -> str:
+        """Compute the deterministic chain signature for a memory event."""
+        content_hash = hashlib.sha3_256(event.content.encode()).hexdigest()
+        payload = (
+            f"{event.event_id}:{event.timestamp.isoformat()}:"
+            f"{event.tenant_id}:{event.role}:{content_hash}:{prev_hash}"
+        )
+        return hashlib.sha3_256(payload.encode()).hexdigest()
+
+    async def _next_sequence(self, tenant_id: str) -> int:
+        """Return the next stable append sequence for a tenant."""
+        cursor = await self._conn.execute(
+            "SELECT COALESCE(MAX(sequence), 0) + 1 FROM memory_events WHERE tenant_id = ?",
+            (tenant_id,),
+        )
+        row = await cursor.fetchone()
+        return int(row[0]) if row else 1
+
     async def append_event(self, event: MemoryEvent) -> None:
         """Persist an event immutably. Fire-and-commit with SHA-3-256 integrity."""
-        import hashlib
-
         await self.ensure_table()
+        if await self._event_exists(event.event_id):
+            return
 
-        # [GOVERNANCE] Calculate the cryptographic chain if signature is missing
-        if not event.signature:
-            prev_hash = await self._get_last_hash(event.tenant_id)
-            # Immutability payload: event identity + content + provenance
-            # [GOVERNANCE] Content is now hashed into the signature payload.
-            content_hash = hashlib.sha3_256(event.content.encode()).hexdigest()
-            payload = (
-                f"{event.event_id}:{event.timestamp.isoformat()}:"
-                f"{event.tenant_id}:{event.role}:{content_hash}:{prev_hash}"
-            )
-            signature = hashlib.sha3_256(payload.encode()).hexdigest()
+        expected_prev_hash = await self._get_last_hash(event.tenant_id)
+        if event.signature:
+            if event.prev_hash != expected_prev_hash:
+                raise ValueError(
+                    "Pre-signed memory event prev_hash does not match the current tenant chain head."
+                )
+
+            expected_signature = self._compute_event_signature(event, event.prev_hash)
+            if event.signature != expected_signature:
+                raise ValueError(
+                    "Pre-signed memory event signature does not match the event payload."
+                )
+        else:
+            signature = self._compute_event_signature(event, expected_prev_hash)
 
             # Update event model in-place (since it's a Pydantic model)
             # Using object.__setattr__ if the model is frozen (which it is)
-            object.__setattr__(event, "prev_hash", prev_hash)
+            object.__setattr__(event, "prev_hash", expected_prev_hash)
             object.__setattr__(event, "signature", signature)
 
+        sequence = await self._next_sequence(event.tenant_id)
         await self._conn.execute(
             """INSERT OR IGNORE INTO memory_events
-               (event_id, timestamp, role, content, token_count,
+               (event_id, sequence, timestamp, role, content, token_count,
                 session_id, tenant_id, prev_hash, signature, metadata)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 event.event_id,
+                sequence,
                 event.timestamp.isoformat(),
                 event.role,
                 event.content,
@@ -157,7 +205,7 @@ class EventLedgerL3:
                       session_id, tenant_id, prev_hash, signature, metadata
                FROM memory_events
                WHERE session_id = ? AND tenant_id = ?
-               ORDER BY event_id ASC
+               ORDER BY sequence ASC, rowid ASC
                LIMIT ?""",
             (session_id, tenant_id, limit),
         )
@@ -172,7 +220,7 @@ class EventLedgerL3:
                       session_id, tenant_id, prev_hash, signature, metadata
                FROM memory_events
                WHERE tenant_id = ?
-               ORDER BY event_id ASC
+               ORDER BY sequence ASC, rowid ASC
                LIMIT ?""",
             (tenant_id, limit),
         )
@@ -207,7 +255,7 @@ class EventLedgerL3:
             """SELECT event_id, timestamp, role, content, tenant_id, prev_hash, signature
                FROM memory_events
                WHERE tenant_id = ?
-               ORDER BY event_id ASC""",
+               ORDER BY sequence ASC, rowid ASC""",
             (tenant_id,),
         )
 

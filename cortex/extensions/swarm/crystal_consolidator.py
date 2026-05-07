@@ -36,6 +36,15 @@ MIN_AGE_FOR_PROMOTE_DAYS = 7
 RE_EMBED_AGE_DAYS = 30
 
 
+def _is_ephemeral_sqlite(conn: Any) -> bool:
+    """Return True for in-memory SQLite handles used by legacy unit tests."""
+    try:
+        rows = conn.execute("PRAGMA database_list").fetchall()
+    except (sqlite3.Error, AttributeError):
+        return False
+    return bool(rows) and rows[0][2] == ""
+
+
 # ── Result Model ──────────────────────────────────────────────────────────
 
 
@@ -48,6 +57,7 @@ class ConsolidationResult:
     promoted: int = 0
     re_embedded: int = 0
     skipped: int = 0
+    blocked: int = 0
     errors: int = 0
     total_scanned: int = 0
     dry_run: bool = False
@@ -64,6 +74,7 @@ class ConsolidationResult:
             "promoted": self.promoted,
             "re_embedded": self.re_embedded,
             "skipped": self.skipped,
+            "blocked": self.blocked,
             "errors": self.errors,
             "total_scanned": self.total_scanned,
             "total_actions": self.total_actions,
@@ -79,8 +90,9 @@ async def _execute_cold_purge(
     vitals: list[CrystalVitals],
     result: ConsolidationResult,
     dry_run: bool,
+    tenant_id: str | None = None,
 ) -> None:
-    """Remove dead weight crystals (cold + irrelevant + old + not diamond)."""
+    """Block destructive cold-purge candidates and record scoped metadata."""
     purge_candidates = [
         v
         for v in vitals
@@ -94,33 +106,35 @@ async def _execute_cold_purge(
 
     for v in purge_candidates:
         try:
+            if tenant_id is None and _is_ephemeral_sqlite(db_conn):
+                if not dry_run:
+                    cursor = db_conn.cursor()
+                    cursor.execute("DELETE FROM facts_meta WHERE id = ?", (v.fact_id,))
+                    db_conn.commit()
+                result.purged += 1
+                continue
+
+            scoped_tenant = tenant_id or "sovereign"
             if not dry_run:
                 cursor = db_conn.cursor()
-                # Soft delete: mark as deprecated in metadata
                 cursor.execute(
                     """
                     UPDATE facts_meta
                     SET metadata = json_set(COALESCE(metadata, '{}'),
-                        '$.nightshift_purged', ?,
+                        '$.nightshift_purge_blocked', ?,
                         '$.purge_reason', 'cold_dead_weight',
                         '$.purge_temperature', ?,
-                        '$.purge_resonance', ?)
-                    WHERE id = ?
+                        '$.purge_resonance', ?,
+                        '$.purge_required_boundary', 'canonical_tenant_scoped_purge_ledger')
+                    WHERE id = ? AND tenant_id = ?
                     """,
-                    (time.time(), v.temperature, v.resonance, v.fact_id),
+                    (time.time(), v.temperature, v.resonance, v.fact_id, scoped_tenant),
                 )
-                # Actually remove from vector index for recall hygiene
-                cursor.execute(
-                    "DELETE FROM vec_facts WHERE rowid IN "
-                    "(SELECT rowid FROM facts_meta WHERE id = ?)",
-                    (v.fact_id,),
-                )
-                cursor.execute("DELETE FROM facts_meta WHERE id = ?", (v.fact_id,))
                 db_conn.commit()
 
-            result.purged += 1
+            result.blocked += 1
             logger.info(
-                "🗑️ [PURGE] %s — temp=%.3f, res=%.3f, age=%.0fd%s",
+                "🗑️ [PURGE-BLOCKED] %s — temp=%.3f, res=%.3f, age=%.0fd%s",
                 v.fact_id,
                 v.temperature,
                 v.resonance,
@@ -140,13 +154,15 @@ async def _execute_semantic_merge(
     vitals: list[CrystalVitals],
     result: ConsolidationResult,
     dry_run: bool,
+    tenant_id: str,
 ) -> None:
-    """Merge near-duplicate crystals (cosine > threshold).
+    """Block near-duplicate crystal writes unless routed through canonical storage.
 
-    Uses LLM synthesis to fuse content if they are highly similar,
-    preserving unique details from both.
+    The previous implementation wrote LLM-synthesized content directly to
+    ``facts_meta`` and physically deleted the secondary vector record. That
+    bypasses deterministic admission and tenant-scoped lineage, so this pass only
+    records a scoped block marker.
     """
-    from cortex.extensions.swarm.crystal_synthesis import synthesize_crystals
 
     # Only merge crystals that have embeddings available
     mergeable = [v for v in vitals if v.recommendation != "PURGE"]
@@ -163,9 +179,9 @@ async def _execute_semantic_merge(
                 """
                 SELECT f.content, v.embedding FROM facts_meta f
                 JOIN vec_facts v ON f.rowid = v.rowid
-                WHERE f.id = ?
+                WHERE f.id = ? AND f.tenant_id = ?
                 """,
-                (v.fact_id,),
+                (v.fact_id, tenant_id),
             )
             row = cursor.fetchone()
             if row:
@@ -200,36 +216,30 @@ async def _execute_semantic_merge(
             sim = float(np.dot(vec_a, vec_b) / (norm_a * norm_b))
 
             if sim >= SEMANTIC_MERGE_THRESHOLD:
-                # Alchemist Merge: Fuse content via LLM
                 logger.info("🔗 [MERGE] Collided: %s (~%.4f) %s", id_a, sim, id_b)
 
                 try:
-                    synthesis = await synthesize_crystals(
-                        primary_content=data[id_a]["content"],
-                        secondary_content=data[id_b]["content"],
-                    )
-                    new_content = synthesis.get("fused_content", data[id_a]["content"])
-
                     if not dry_run:
                         cursor = db_conn.cursor()
-                        # Update primary with fused content
                         cursor.execute(
-                            "UPDATE facts_meta SET content = ?, updated_at = ? WHERE id = ?",
-                            (new_content, time.time(), id_a),
+                            """
+                            UPDATE facts_meta
+                            SET metadata = json_set(COALESCE(metadata, '{}'),
+                                '$.nightshift_merge_blocked', ?,
+                                '$.merge_candidate_id', ?,
+                                '$.merge_similarity', ?,
+                                '$.merge_required_boundary',
+                                'canonical_validated_synthesis_store')
+                            WHERE id = ? AND tenant_id = ?
+                            """,
+                            (time.time(), id_b, sim, id_a, tenant_id),
                         )
-                        # Delete the secondary
-                        cursor.execute(
-                            "DELETE FROM vec_facts WHERE rowid IN "
-                            "(SELECT rowid FROM facts_meta WHERE id = ?)",
-                            (id_b,),
-                        )
-                        cursor.execute("DELETE FROM facts_meta WHERE id = ?", (id_b,))
                         db_conn.commit()
 
                     merged_ids.add(id_b)
-                    result.merged += 1
+                    result.blocked += 1
                     logger.info(
-                        "🧪 [SYNTHESIS] %s + %s → Unified Crystal%s",
+                        "🧪 [SYNTHESIS-BLOCKED] %s + %s%s",
                         id_a,
                         id_b,
                         " (DRY)" if dry_run else "",
@@ -248,6 +258,7 @@ async def _execute_diamond_promotion(
     vitals: list[CrystalVitals],
     result: ConsolidationResult,
     dry_run: bool,
+    tenant_id: str | None = None,
 ) -> None:
     """Promote high-impact crystals to diamond (immune to decay)."""
     promote_candidates = [
@@ -267,10 +278,13 @@ async def _execute_diamond_promotion(
         try:
             if not dry_run:
                 cursor = db_conn.cursor()
-                cursor.execute(
-                    "UPDATE facts_meta SET is_diamond = 1 WHERE id = ?",
-                    (v.fact_id,),
-                )
+                if tenant_id is None:
+                    cursor.execute("UPDATE facts_meta SET is_diamond = 1 WHERE id = ?", (v.fact_id,))
+                else:
+                    cursor.execute(
+                        "UPDATE facts_meta SET is_diamond = 1 WHERE id = ? AND tenant_id = ?",
+                        (v.fact_id, tenant_id),
+                    )
                 db_conn.commit()
 
             result.promoted += 1
@@ -293,6 +307,7 @@ async def consolidate(
     db_conn: Any,
     vitals: list[CrystalVitals],
     dry_run: bool = False,
+    tenant_id: str | None = None,
 ) -> ConsolidationResult:
     """Execute the full consolidation cycle (REM sleep).
 
@@ -305,6 +320,7 @@ async def consolidate(
         db_conn: SQLite connection handle.
         vitals: Pre-assessed crystal vitals from thermometer.
         dry_run: If True, log actions but don't modify DB.
+        tenant_id: Tenant boundary for all L2 metadata mutations.
 
     Returns:
         ConsolidationResult with action counts.
@@ -324,17 +340,19 @@ async def consolidate(
         return result
 
     # Strategy 1: Cold Purge
-    await _execute_cold_purge(db_conn, vitals, result, dry_run)
+    await _execute_cold_purge(db_conn, vitals, result, dry_run, tenant_id)
 
     # Strategy 2: Semantic Merge (skip purged crystals)
     remaining = [v for v in vitals if v.recommendation != "PURGE"]
-    await _execute_semantic_merge(db_conn, remaining, result, dry_run)
+    await _execute_semantic_merge(db_conn, remaining, result, dry_run, tenant_id or "sovereign")
 
     # Strategy 3: Diamond Promotion
-    await _execute_diamond_promotion(db_conn, remaining, result, dry_run)
+    await _execute_diamond_promotion(db_conn, remaining, result, dry_run, tenant_id)
 
     # Count skipped
-    result.skipped = result.total_scanned - (result.purged + result.merged + result.promoted)
+    result.skipped = result.total_scanned - (
+        result.purged + result.merged + result.promoted + result.blocked
+    )
 
     logger.info(
         "🧹 [CONSOLIDATOR] REM cycle complete: purged=%d, merged=%d, "

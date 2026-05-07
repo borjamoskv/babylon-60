@@ -7,7 +7,7 @@ variable "project_id" { type = string }
 variable "region" { type = string }
 
 locals {
-  name_prefix = "cortex-sovereign-${var.environment}"
+  name_prefix = "cortex-persist-${var.environment}"
 }
 
 # ── VPC ──────────────────────────────────────────────────────
@@ -57,7 +57,7 @@ resource "google_compute_router_nat" "nat" {
 
 # ── GKE Autopilot ───────────────────────────────────────────
 
-resource "google_container_cluster" "sovereign" {
+resource "google_container_cluster" "persist" {
   name     = "${local.name_prefix}-gke"
   location = var.region
   project  = var.project_id
@@ -101,7 +101,7 @@ resource "google_container_cluster" "sovereign" {
 
 # ── KMS for GKE secrets ─────────────────────────────────────
 
-resource "google_kms_key_ring" "sovereign" {
+resource "google_kms_key_ring" "persist" {
   name     = "${local.name_prefix}-keyring"
   location = var.region
   project  = var.project_id
@@ -109,7 +109,7 @@ resource "google_kms_key_ring" "sovereign" {
 
 resource "google_kms_crypto_key" "gke" {
   name     = "${local.name_prefix}-gke-key"
-  key_ring = google_kms_key_ring.sovereign.id
+  key_ring = google_kms_key_ring.persist.id
 
   rotation_period = "7776000s" # 90 days
 
@@ -161,7 +161,7 @@ resource "google_alloydb_instance" "primary" {
 
 # ── Cloud Armor (WAF) ───────────────────────────────────────
 
-resource "google_compute_security_policy" "sovereign_waf" {
+resource "google_compute_security_policy" "persist_waf" {
   name    = "${local.name_prefix}-waf"
   project = var.project_id
 
@@ -197,7 +197,7 @@ resource "google_compute_security_policy" "sovereign_waf" {
 # ── Outputs ──────────────────────────────────────────────────
 
 output "gke_endpoint" {
-  value = google_container_cluster.sovereign.endpoint
+  value = google_container_cluster.persist.endpoint
 }
 
 output "alloydb_ip" {

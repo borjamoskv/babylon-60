@@ -25,7 +25,7 @@ def ingest(source_file: str) -> None:
     """Ingest a Python file through the JIT Sovereign Sandbox."""
     console.print(f"[bold cyan]🔥 Autodidact-Ω Ingestion Initiated[/bold cyan] » '{source_file}'")
     
-    with open(source_file, "r") as f:
+    with open(source_file) as f:
         source_code = f.read()
 
     async def _run_ingest():
@@ -49,7 +49,7 @@ def ingest(source_file: str) -> None:
 @click.argument("code_snippet")
 def jit_eval(code_snippet: str) -> None:
     """Directly evaluate a snippet of Python in the AST Sandbox."""
-    console.print(f"[bold cyan]⚡ JIT Quick Eval[/bold cyan]")
+    console.print("[bold cyan]⚡ JIT Quick Eval[/bold cyan]")
     
     async def _run_ingest():
         return await autodidact_ingest(code_snippet, expected_yield_gain=1.0, metadata={})
@@ -69,7 +69,7 @@ def audit():
     from cortex.cli.common import get_engine
     from cortex.extensions.swarm.crystal_thermometer import scan_all_crystals
     
-    console.print(f"[bold cyan]🔍 CORTEX: Autodidact-Ω Audit[/bold cyan]")
+    console.print("[bold cyan]🔍 CORTEX: Autodidact-Ω Audit[/bold cyan]")
     engine = get_engine()
     
     async def _audit():
@@ -112,7 +112,7 @@ def crawl(url: str):
             with urllib.request.urlopen(url, timeout=10) as response:
                 text = response.read().decode('utf-8')
         else:
-            with open(url, "r") as f:
+            with open(url) as f:
                 text = f.read()
     except Exception as e:
         console.print(f"[bold red]✗ LIBRARIAN Error:[/bold red] {e}")

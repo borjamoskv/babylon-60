@@ -1,0 +1,50 @@
+coverage:
+  precision: 2
+  round: down
+  range: "10...85"
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 2%
+        if_ci_failed: error
+        informational: true
+      product:
+        target: auto
+        threshold: 2%
+        flags:
+          - product
+        if_ci_failed: error
+        informational: true
+    patch:
+      default:
+        target: 60%
+        threshold: 5%
+        if_ci_failed: error
+        informational: true
+
+flags:
+  product:
+    paths:
+      - cortex/api/
+      - cortex/auth/
+      - cortex/compliance/
+      - cortex/core/
+      - cortex/crypto/
+      - cortex/database/
+      - cortex/engine/
+      - cortex/events/
+      - cortex/gateway/
+      - cortex/guards/
+      - cortex/ledger/
+      - cortex/mcp/
+      - cortex/memory/
+      - cortex/migrations/
+      - cortex/routes/
+      - cortex/search/
+      - cortex/services/
+      - cortex/storage/
+      - cortex/telemetry/
+      - cortex/types/
+      - cortex/utils/
+      - cortex/verification/

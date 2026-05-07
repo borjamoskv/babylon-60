@@ -247,13 +247,14 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
             fact = getattr(self._engine, "get_fact_sync", lambda x: None)(fact_id)
             if not fact or fact.get("fact_type") == "ghost":
                 return False
+            tenant_id = fact.get("tenant_id", "default")
 
             async with self._engine.session() as conn:
                 await conn.execute(
-                    "UPDATE facts SET fact_type = 'ghost', updated_at = ? WHERE id = ?",
-                    (datetime.now(timezone.utc).isoformat(), fact_id),
+                    "UPDATE facts SET fact_type = 'ghost', updated_at = ? "
+                    "WHERE id = ? AND tenant_id = ?",
+                    (datetime.now(timezone.utc).isoformat(), fact_id, tenant_id),
                 )
-                tenant_id = fact.get("tenant_id", "default")
                 await self._engine._log_transaction(
                     conn,
                     fact.get("project", "SYSTEM"),

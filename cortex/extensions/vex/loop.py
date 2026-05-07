@@ -65,11 +65,13 @@ class VEXRunner:
         tool_executor: Optional[ToolExecutor] = None,
         max_step_retries: int = 0,
         tether_checks: bool = True,
+        tenant_id: str = "default",
     ) -> None:
         self._engine = engine
         self._executor = tool_executor or self._default_executor
         self._max_retries = max_step_retries
         self._tether_checks = tether_checks
+        self._tenant_id = tenant_id
 
     async def execute(self, plan: TaskPlan) -> ExecutionReceipt:
         """Execute a TaskPlan and return a verified ExecutionReceipt.
@@ -210,19 +212,12 @@ class VEXRunner:
         """Record the plan as the first transaction in the chain."""
         try:
             conn = await self._engine.get_conn()
-            await conn.execute(
-                """INSERT INTO transactions
-                   (project, action, detail, prev_hash, hash, timestamp, tenant_id)
-                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                (
-                    plan.task_id,
-                    "vex_plan",
-                    str(plan.to_dict())[:4000],
-                    "GENESIS",
-                    plan.plan_hash,
-                    _now_iso(),
-                    "default",
-                ),
+            await self._engine._log_transaction(
+                conn,
+                plan.task_id,
+                "vex_plan",
+                {"plan": plan.to_dict()},
+                tenant_id=self._tenant_id,
             )
             await conn.commit()
         except Exception as exc:  # noqa: BLE001 — VEX transaction logging fallback
@@ -241,14 +236,6 @@ class VEXRunner:
         try:
             conn = await self._engine.get_conn()
 
-            # Get prev hash for this task.
-            cursor = await conn.execute(
-                "SELECT hash FROM transactions WHERE project = ? ORDER BY id DESC LIMIT 1",
-                (task_id,),
-            )
-            row = await cursor.fetchone()
-            prev_hash = row[0] if row else "GENESIS"
-
             detail = {
                 "step_id": step.step_id,
                 "tool": step.tool,
@@ -257,20 +244,19 @@ class VEXRunner:
                 "output_hash": _sha256(output) if output else "",
                 "error": error,
             }
-            detail_str = str(detail)[:4000]
 
             action = f"vex_step:{step.step_id}"
-            ts = _now_iso()
-            tx_hash = _sha256(f"{prev_hash}:{task_id}:{action}:{detail_str}:{ts}")
-
-            await conn.execute(
-                """INSERT INTO transactions
-                   (project, action, detail, prev_hash, hash, timestamp, tenant_id)
-                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                (task_id, action, detail_str, prev_hash, tx_hash, ts, "default"),
+            tx_id = await self._engine._log_transaction(
+                conn,
+                task_id,
+                action,
+                detail,
+                tenant_id=self._tenant_id,
             )
             await conn.commit()
-            return tx_hash
+            cursor = await conn.execute("SELECT hash FROM transactions WHERE id = ?", (tx_id,))
+            row = await cursor.fetchone()
+            return row[0] if row else None
 
         except Exception as exc:  # noqa: BLE001 — VEX step logging fallback
             logger.error("Failed to record step transaction: %s", exc)

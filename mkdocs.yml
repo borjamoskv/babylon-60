@@ -22,7 +22,7 @@ exclude_docs: |
   live_status.html
   llms.txt
   wave_5_proposal.md
-copyright: "© 2026 MOSKV-1 Sovereign Systems · Apache 2.0"
+copyright: "© 2026 CORTEX Persist · Apache 2.0"
 
 theme:
   name: material
@@ -83,7 +83,7 @@ nav:
       - Error Code Registry: ERROR-CODE-REGISTRY.md
       - Operating Axioms: operating-axioms.md
       - Knowledge Architecture: knowledge-architecture.md
-      - Peano Soberano (7 Axioms): peano-soberano.md
+      - Peano Axioms: peano-soberano.md
       - API Classes: reference.md
       - CLI Reference: cli.md
       - REST API: api.md
@@ -101,7 +101,7 @@ nav:
       - Axiom Registry: axiom-registry.md
       - EU AI Act Compliance: compliance.md
       - Security: security.md
-      - Sovereign Infrastructure: sovereign-infrastructure.md
+      - Trust Infrastructure: trust-infrastructure.md
   - Tutorials:
       - Course Suite: course/README.md
       - Memory for LangChain Agents: tutorials/langchain.md
@@ -110,7 +110,7 @@ nav:
       - Site Monitoring Daemon: tutorials/daemon.md
   - Project:
       - AGENTICA: AGENTICA.md
-      - Sovereign Agent Manifesto: sovereign_agent_manifesto.md
+      - Agent Manifesto: agent_manifesto.md
       - FAQ: faq.md
       - Changelog: changelog.md
 

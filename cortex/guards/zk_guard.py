@@ -11,7 +11,7 @@ from typing import Any
 from cortex.crypto.keys import ZKSwarmIdentity
 
 
-class VoidStateSecurityError(Exception):
+class VoidStateSecurityError(ValueError):
     """Raised when an active fact mathematically fails the ZK-Swarm cryptographic proof."""
 
     pass
@@ -28,7 +28,16 @@ class ZKSwarmGuard:
         """
         self._enforce_on_types = enforce_on_types
 
-    async def verify_integrity(self, content: str, fact_type: str, meta: dict[str, Any]) -> None:
+    async def verify_integrity(
+        self,
+        content: str,
+        fact_type: str,
+        meta: dict[str, Any],
+        *,
+        tenant_id: str = "default",
+        project: str | None = None,
+        source: str | None = None,
+    ) -> None:
         """
         Intercepts incoming facts and runs the formal validation logic (RFC-003).
 
@@ -53,10 +62,27 @@ class ZKSwarmGuard:
                 "Agent must sign the inference payload via Ed25519."
             )
 
-        # Byzantine Fault Tolerance: local verification of the execution proof
-        is_valid = ZKSwarmIdentity.verify_payload(
-            content=content, public_key_b64=public_key_b64, signature_b64=signature_b64
-        )
+        scope = str(meta.get("zk_proof_scope") or meta.get("zk_proof_payload") or "")
+        if scope == "store_event_v1":
+            resolved_source = source or meta.get("source")
+            if not project or not resolved_source:
+                raise VoidStateSecurityError(
+                    "[ZK-SWARM] store_event_v1 proof requires project and source context."
+                )
+            is_valid = ZKSwarmIdentity.verify_store_event(
+                tenant_id=tenant_id,
+                project=project,
+                fact_type=fact_type,
+                source=str(resolved_source),
+                content=content,
+                public_key_b64=public_key_b64,
+                signature_b64=signature_b64,
+            )
+        else:
+            # Byzantine Fault Tolerance: local verification of the execution proof
+            is_valid = ZKSwarmIdentity.verify_payload(
+                content=content, public_key_b64=public_key_b64, signature_b64=signature_b64
+            )
 
         if not is_valid:
             raise VoidStateSecurityError(

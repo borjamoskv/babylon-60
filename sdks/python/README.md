@@ -10,45 +10,41 @@ pip install cortex-persist
 
 ## Usage
 
+The working in-repo HTTP client is `cortex.api.client.CortexClient`.
+
 ```python
-from cortex_sdk import Cortex
+from cortex.api.client import CortexClient
 
-ctx = Cortex("http://localhost:8000", api_key="sk-xxx")
+ctx = CortexClient("http://localhost:8484", api_key="ctx_your_key")
 
-# Store
-fact_id = ctx.store("user prefers dark mode", tags=["preferences"])
+try:
+    fact_id = ctx.store(
+        "myproject",
+        "user prefers dark mode",
+        fact_type="knowledge",
+        tags=["preferences"],
+    )
 
-# Search (semantic + Graph RAG)
-results = ctx.search("what does the user prefer?", top_k=3)
-for r in results:
-    print(f"[{r.score:.2f}] {r.content}")
+    results = ctx.search("what does the user prefer?", k=3, project="myproject")
+    for r in results:
+        print(f"[{r.score:.2f}] {r.content}")
 
-# Recall all facts for a project
-facts = ctx.recall("myproject", limit=50)
-
-# Verify ledger integrity
-report = ctx.verify()
-print(f"Ledger valid: {report.valid} ({report.tx_checked} tx checked)")
-
-# Knowledge graph
-graph = ctx.graph("myproject")
-
-# Time-travel query
-results = ctx.search("status", as_of="2026-01-15T00:00:00")
+    facts = ctx.recall("myproject")
+finally:
+    ctx.close()
 ```
 
 ## API Reference
 
 | Method | Description |
 |---|---|
-| `store(content, **opts)` | Store a fact → returns `fact_id` |
-| `search(query, **opts)` | Semantic search → `list[Fact]` |
-| `recall(project, limit)` | Recall all facts → `list[Fact]` |
+| `store(project, content, fact_type, tags, metadata)` | Store a fact → returns `fact_id` |
+| `search(query, k, project)` | Semantic search → `list[Fact]` |
+| `recall(project, include_deprecated)` | Recall all facts → `list[Fact]` |
 | `deprecate(fact_id)` | Soft-delete a fact |
-| `verify()` | Ledger integrity check → `LedgerReport` |
-| `checkpoint()` | Create Merkle checkpoint |
-| `graph(project, limit)` | Knowledge graph data |
-| `vote(fact_id, value)` | Cast consensus vote |
+| `status()` | Engine status |
+| `create_key(name, tenant_id)` | Create an API key |
+| `list_keys()` | List API keys |
 
 ## License
 

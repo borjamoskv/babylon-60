@@ -151,23 +151,21 @@ npm install
 ### Usage
 
 ```typescript
-import { CortexClient } from '@cortex-persist/sdk';
+import { Cortex } from '@cortex-persist/sdk';
 
-const cortex = new CortexClient({
-  baseUrl: 'http://localhost:8484',
+const cortex = new Cortex({
+  url: 'http://localhost:8484',
   apiKey: 'ctx_your_api_key',
 });
 
 // Store a fact
-const result = await cortex.store({
+const factId = await cortex.store('User prefers dark mode', {
   project: 'my-app',
-  content: 'User prefers dark mode',
   factType: 'knowledge',
 });
 
 // Search
-const facts = await cortex.search({
-  query: 'user preferences',
+const facts = await cortex.search('user preferences', {
   topK: 5,
 });
 

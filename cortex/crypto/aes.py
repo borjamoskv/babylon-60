@@ -36,6 +36,7 @@ class CortexEncrypter:
         self._master_key = master_key
         # Cache of derived keys per tenant
         self._tenant_keys: dict[str, bytes] = {}
+        self._shredded_facts: set[str] = set()
 
     @property
     def is_active(self) -> bool:
@@ -79,11 +80,16 @@ class CortexEncrypter:
         return self.PREFIX + base64.b64encode(combined).decode("utf-8")
 
     def decrypt_str(
-        self, encrypted_data: Optional[str], tenant_id: str = "default"
+        self,
+        encrypted_data: Optional[str],
+        tenant_id: str = "default",
+        fact_id: int | None = None,
     ) -> Optional[str]:
         """Decrypt a Base64 string back into plaintext."""
         if not encrypted_data:
             return encrypted_data
+        if fact_id is not None and f"{tenant_id}:fact:{fact_id}" in self._shredded_facts:
+            raise RuntimeError(f"Fact {fact_id} for tenant '{tenant_id}' is crypto-shredded")
 
         # Legacy support: if it's not starting with our prefix, we assume it's plaintext
         # This allows seamless migration for existing dbs

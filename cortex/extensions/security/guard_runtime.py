@@ -39,6 +39,17 @@ class BaseGuard:
         raise NotImplementedError
 
 
+def _missing_required_guard(name: str) -> GuardOutcome:
+    """Block persistence when a mandatory guard dependency cannot load."""
+    return GuardOutcome(
+        allowed=False,
+        reason=f"{name} dependency missing; failing closed",
+        severity="critical",
+        code=f"{name}.guard_missing",
+        meta={"guard_missing": True},
+    )
+
+
 class ContradictionSignalGuard(BaseGuard):
     """Detects structural contradictions in the signal bus."""
 
@@ -102,7 +113,7 @@ class InjectionGuardWrapper(BaseGuard):
                 )
             return GuardOutcome(allowed=True, code="injection.clear")
         except ImportError:
-            return GuardOutcome(allowed=True, reason="InjectionGuard missing, skipping")
+            return _missing_required_guard("injection")
 
 
 class AnomalyGuardWrapper(BaseGuard):
@@ -161,7 +172,7 @@ class HoneypotGuardWrapper(BaseGuard):
                 )
             return GuardOutcome(allowed=True, code="honeypot.clear")
         except ImportError:
-            return GuardOutcome(allowed=True, reason="Honeypot missing, skipping")
+            return _missing_required_guard("honeypot")
 
 
 def enforce_guard_pipeline(guards: list[BaseGuard], context: dict[str, Any]) -> list[GuardOutcome]:

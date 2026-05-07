@@ -42,6 +42,8 @@ from collections import deque
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Optional
 
+from cortex.utils.redaction import redact_text, redact_value
+
 if TYPE_CHECKING:
     from cortex.telemetry.metrics import MetricsRegistry
 
@@ -159,7 +161,7 @@ class SpanContext:
             name=self._name,
             start_ns=time.monotonic_ns(),
             parent_name=parent.name if parent else None,
-            attributes=dict(self._attributes),
+            attributes=redact_value(dict(self._attributes)),
         )
         self._token = _current_span.set(self._span)
         return self._span
@@ -169,7 +171,7 @@ class SpanContext:
             return
         self._span.end_ns = time.monotonic_ns()
         if exc_val is not None:
-            self._span.error = f"{type(exc_val).__name__}: {exc_val}"
+            self._span.error = redact_text(f"{type(exc_val).__name__}: {exc_val}")
         collector.record(self._span)
         if self._token is not None:
             _current_span.reset(self._token)

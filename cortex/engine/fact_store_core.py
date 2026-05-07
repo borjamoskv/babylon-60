@@ -33,6 +33,15 @@ _FTS_PLAINTEXT_OPT_IN_META_FLAGS = frozenset(
         "searchable_plaintext",
     }
 )
+_NON_PERSISTED_METADATA_KEYS = frozenset(
+    {
+        "allow_plaintext_fts",
+        "fts_plaintext",
+        "searchable_plaintext",
+        "privacy_matches",
+        "privacy_score",
+    }
+)
 
 
 def _truthy_meta(value: Any) -> bool:
@@ -54,16 +63,32 @@ def _should_index_plaintext_fts(meta: dict[str, Any]) -> bool:
     return explicitly_allowed and not explicitly_denied
 
 
+def _sanitize_fact_metadata_for_persistence(meta: dict[str, Any]) -> dict[str, Any]:
+    """Drop transient exposure-control and sensitive classifier details before storage."""
+    if not meta:
+        return {}
+    return {key: value for key, value in meta.items() if key not in _NON_PERSISTED_METADATA_KEYS}
+
+
 def _encrypt_fact_metadata(meta: dict[str, Any], tenant_id: str) -> str:
     """Encrypt non-empty fact metadata before at-rest persistence."""
-    if not meta:
+    sanitized_meta = _sanitize_fact_metadata_for_persistence(meta)
+    if not sanitized_meta:
         return "{}"
     from cortex.crypto import get_default_encrypter
+    from cortex.crypto.aes import CortexEncrypter
 
-    encrypted = get_default_encrypter().encrypt_json(meta, tenant_id=tenant_id)
-    if encrypted is None:
-        return "{}"
-    return encrypted
+    encrypter = get_default_encrypter()
+    encrypted = encrypter.encrypt_json(sanitized_meta, tenant_id=tenant_id)
+    if encrypted and str(encrypted).startswith(CortexEncrypter.PREFIX):
+        return encrypted
+
+    # Some legacy/no-op stubs may serialize JSON without actually encrypting it.
+    encrypted = encrypter.encrypt_str(json.dumps(sanitized_meta), tenant_id=tenant_id)
+    if encrypted and str(encrypted).startswith(CortexEncrypter.PREFIX):
+        return encrypted
+
+    raise ValueError("Non-empty fact metadata must be encrypted before persistence")
 
 
 async def _get_table_columns(conn: aiosqlite.Connection, table_name: str) -> set[str]:
@@ -164,7 +189,6 @@ async def insert_fact_record(
     meta = dict(meta or {})
 
     f_hash, encrypted_content, sig_b64, pub_b64 = await _prepare_fact_content(content, tenant_id)
-
     parent_decision_id = await _resolve_causal_parent(
         conn, tenant_id, project, fact_type, parent_decision_id
     )

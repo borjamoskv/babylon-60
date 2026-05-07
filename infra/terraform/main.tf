@@ -1,6 +1,6 @@
 # ─────────────────────────────────────────────────────────────
-# SOVEREIGN MULTI-CLOUD · Terraform Root Module
-# Target: 1300/1000 power · Zero-Trust · HA across 3 clouds
+# Production multi-cloud · Terraform Root Module
+# Target: verified trust posture · Zero-Trust · HA across 3 clouds
 # ─────────────────────────────────────────────────────────────
 
 terraform {
@@ -26,8 +26,8 @@ terraform {
   }
 
   backend "gcs" {
-    bucket = "cortex-sovereign-tfstate"
-    prefix = "sovereign/state"
+    bucket = "cortex-persist-tfstate"
+    prefix = "persist/state"
   }
 }
 
@@ -36,7 +36,7 @@ terraform {
 variable "project_id" {
   description = "GCP project ID"
   type        = string
-  default     = "cortex-sovereign"
+  default     = "cortex-persist"
 }
 
 variable "aws_region" {
@@ -70,7 +70,7 @@ variable "environment" {
 variable "vault_addr" {
   description = "HashiCorp Vault address"
   type        = string
-  default     = "https://vault.cortex-sovereign.internal:8200"
+  default     = "https://vault.cortex-persist.internal:8200"
 }
 
 # ── Providers ────────────────────────────────────────────────
@@ -79,10 +79,10 @@ provider "aws" {
   region = var.aws_region
   default_tags {
     tags = {
-      Project     = "cortex-sovereign"
+      Project     = "cortex-persist"
       Environment = var.environment
       ManagedBy   = "terraform"
-      Standard    = "130/100"
+      Standard    = "verified"
     }
   }
 }

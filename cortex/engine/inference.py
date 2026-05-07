@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Any
 
@@ -35,6 +36,7 @@ MAX_DERIVATIONS_PER_CYCLE = 50
 
 # Derived facts never exceed C3 without external verification (AX-II)
 DERIVED_CONFIDENCE = "C3"
+StoreFactCallback = Callable[..., Awaitable[int]]
 
 
 @dataclass(frozen=True)
@@ -166,9 +168,11 @@ class InferenceEngine:
         self,
         rules: list[InferenceRule] | None = None,
         max_derivations: int = MAX_DERIVATIONS_PER_CYCLE,
+        store_fact: StoreFactCallback | None = None,
     ) -> None:
         self._rules = rules or BUILTIN_RULES
         self._max = max_derivations
+        self._store_fact = store_fact
 
     @property
     def rules(self) -> list[InferenceRule]:
@@ -339,11 +343,13 @@ class InferenceEngine:
         tenant_id: str,
     ) -> None:
         """Persist derivations as facts with causal edges."""
-        from cortex.memory.temporal import now_iso
-
+        if self._store_fact is None:
+            raise RuntimeError(
+                "Inference persistence requires a canonical store_fact callback; "
+                "run with dry_run=True or pass CortexEngine.store."
+            )
         graph = AsyncCausalGraph(conn)
         await graph.ensure_table()
-        ts = now_iso()
 
         for d in derivations:
             # Check if this exact derivation already exists (idempotency)
@@ -357,25 +363,26 @@ class InferenceEngine:
             if existing:
                 continue
 
-            cursor = await conn.execute(
-                "INSERT INTO facts (content, fact_type, project, confidence, "
-                "tenant_id, source, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (
-                    d.content,
-                    d.fact_type,
-                    d.project,
-                    d.confidence,
-                    tenant_id,
-                    f"inference:{d.rule_name}",
-                    ts,
-                ),
+            new_fact_id = await self._store_fact(
+                project=d.project,
+                content=d.content,
+                tenant_id=tenant_id,
+                fact_type=d.fact_type,
+                confidence=d.confidence,
+                source=f"inference:{d.rule_name}",
+                meta={
+                    "lineage_kind": "deterministic_inference",
+                    "rule_name": d.rule_name,
+                    "source_fact_ids": d.source_fact_ids,
+                },
+                commit=False,
+                conn=conn,
             )
-            new_fact_id = cursor.lastrowid
 
             # Record causal edges from source facts
             for source_id in d.source_fact_ids:
                 await graph.record_edge(
-                    new_fact_id,  # type: ignore[arg-type]
+                    new_fact_id,
                     parent_id=source_id,
                     edge_type=EDGE_DERIVED_FROM,
                     project=d.project,
@@ -396,7 +403,8 @@ async def derive_facts(
     tenant_id: str = "default",
     dry_run: bool = False,
     rules: list[InferenceRule] | None = None,
+    store_fact: StoreFactCallback | None = None,
 ) -> list[Derivation]:
     """Convenience function: run inference engine with defaults."""
-    engine = InferenceEngine(rules=rules)
+    engine = InferenceEngine(rules=rules, store_fact=store_fact)
     return await engine.derive(conn, project=project, tenant_id=tenant_id, dry_run=dry_run)

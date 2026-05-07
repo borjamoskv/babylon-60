@@ -18,6 +18,7 @@ from cortex.extensions.health.collector import (
 from cortex.extensions.health.health_mixin import HealthMixin
 from cortex.extensions.health.health_protocol import MetricCollectorProtocol
 from cortex.extensions.health.invariants import verify_health_system
+from cortex.extensions.health.fix_registry import FixAction, FixRegistry
 from cortex.extensions.health.models import (
     Grade,
     HealthReport,
@@ -41,6 +42,8 @@ except ImportError:
 __all__ = [
     "CollectorRegistry",
     "Grade",
+    "FixAction",
+    "FixRegistry",
     "HealthCollector",
     "HealthMixin",
     "HealthReport",

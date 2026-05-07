@@ -67,6 +67,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         tx_id: int | None = None,
         parent_decision_id: int | None = None,
         conn: aiosqlite.Connection | None = None,
+        _deferred_optional_post_hooks: list[tuple[int, str, str, str, str | None]] | None = None,
     ) -> int:
         """Store a new fact with proper connection management."""
         tenant_id = self._resolve_tenant(tenant_id)
@@ -94,6 +95,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 commit=commit,
                 tx_id=tx_id,
                 parent_decision_id=parent_decision_id,
+                _deferred_optional_post_hooks=_deferred_optional_post_hooks,
             )
 
         async with self.session() as _conn:
@@ -111,6 +113,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 commit=commit,
                 tx_id=tx_id,
                 parent_decision_id=parent_decision_id,
+                _deferred_optional_post_hooks=_deferred_optional_post_hooks,
             )
 
     async def _run_store_validation(
@@ -154,18 +157,26 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         commit: bool,
         tx_id: int | None,
         parent_decision_id: int | None = None,
+        _deferred_optional_post_hooks: list[tuple[int, str, str, str, str | None]] | None = None,
     ) -> int:
         # ═══ AX-II: Pre-store guards via GuardPipeline ═══
         pipeline = getattr(self, "_guard_pipeline", None)
         if pipeline is not None:
             try:
                 await pipeline.run_guards(
-                    content, project, fact_type, meta or {}, conn, tenant_id=tenant_id
+                    content,
+                    project,
+                    fact_type,
+                    meta or {},
+                    conn,
+                    tenant_id=tenant_id,
+                    source=source,
                 )
             except ValueError:
                 raise  # Guard rejections must propagate
             except Exception as _gp_err:  # noqa: BLE001
-                logger.debug("[AX-II] GuardPipeline pre-store skipped: %s", _gp_err)
+                logger.error("[AX-II] GuardPipeline pre-store failed closed: %s", _gp_err)
+                raise RuntimeError(f"FAIL-CLOSED: GuardPipeline pre-store failed: {_gp_err}") from _gp_err
 
         dedupe_id, meta, content, fact_type = await self._run_store_validation(
             conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
@@ -214,10 +225,8 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 tenant_id,
             )
 
-        if commit:
-            await conn.commit()
-
-        # ═══ AX-II: Post-store hooks via GuardPipeline ═══
+        # Required post-store hooks are part of admission continuity. They run
+        # before commit so failures can still abort this store operation.
         if pipeline is not None:
             db_path = str(getattr(self, "_db_path", "") or "")
             try:
@@ -229,23 +238,120 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                     tenant_id=tenant_id,
                     source=source,
                     db_path=db_path,
+                    required=True,
                 )
+            except RuntimeError:
+                if commit:
+                    try:
+                        await conn.rollback()
+                    except aiosqlite.Error as rollback_err:
+                        logger.error(
+                            "[AX-II] Rollback failed after required post-hook failure: %s",
+                            type(rollback_err).__name__,
+                        )
+                raise
             except Exception as _ph_err:  # noqa: BLE001
-                logger.debug("[AX-II] GuardPipeline post-hooks skipped: %s", _ph_err)
+                if commit:
+                    try:
+                        await conn.rollback()
+                    except aiosqlite.Error as rollback_err:
+                        logger.error(
+                            "[AX-II] Rollback failed after required post-hook error: %s",
+                            type(rollback_err).__name__,
+                        )
+                logger.error(
+                    "[AX-II] GuardPipeline required post-hooks failed closed: %s",
+                    type(_ph_err).__name__,
+                )
+                raise RuntimeError("FAIL-CLOSED: GuardPipeline required post-hooks failed") from _ph_err
+
+        if commit:
+            await conn.commit()
+
+        # ═══ AX-II: Optional post-store hooks via GuardPipeline ═══
+        if pipeline is not None:
+            if _deferred_optional_post_hooks is not None:
+                _deferred_optional_post_hooks.append(
+                    (fact_id, project, fact_type, tenant_id, source)
+                )
+            else:
+                await self._run_optional_store_post_hooks(
+                    pipeline,
+                    conn,
+                    fact_id,
+                    project,
+                    fact_type,
+                    tenant_id,
+                    source,
+                )
 
         return fact_id
+
+    async def _run_optional_store_post_hooks(
+        self,
+        pipeline: Any,
+        conn: aiosqlite.Connection,
+        fact_id: int,
+        project: str,
+        fact_type: str,
+        tenant_id: str,
+        source: str | None,
+    ) -> None:
+        db_path = str(getattr(self, "_db_path", "") or "")
+        try:
+            await pipeline.run_post_hooks(
+                fact_id,
+                project,
+                fact_type,
+                conn,
+                tenant_id=tenant_id,
+                source=source,
+                db_path=db_path,
+                required=False,
+            )
+        except Exception as _ph_err:  # noqa: BLE001
+            logger.debug(
+                "[AX-II] GuardPipeline optional post-hooks skipped after %s",
+                type(_ph_err).__name__,
+            )
 
     async def store_many(self, facts: list[dict[str, Any]]) -> list[int]:
         if not facts:
             raise ValueError("facts list cannot be empty")
         async with self.session() as conn:
             ids = []
+            deferred_optional_post_hooks: list[tuple[int, str, str, str, str | None]] = []
             try:
                 for fact in facts:
-                    ids.append(await self.store(commit=False, conn=conn, **fact))
+                    ids.append(
+                        await self.store(
+                            commit=False,
+                            conn=conn,
+                            _deferred_optional_post_hooks=deferred_optional_post_hooks,
+                            **fact,
+                        )
+                    )
                 await conn.commit()
+                pipeline = getattr(self, "_guard_pipeline", None)
+                if pipeline is not None:
+                    for (
+                        fact_id,
+                        project,
+                        fact_type,
+                        tenant_id,
+                        source,
+                    ) in deferred_optional_post_hooks:
+                        await self._run_optional_store_post_hooks(
+                            pipeline,
+                            conn,
+                            fact_id,
+                            project,
+                            fact_type,
+                            tenant_id,
+                            source,
+                        )
                 return ids
-            except (aiosqlite.Error, ValueError, OSError):
+            except (aiosqlite.Error, ValueError, OSError, RuntimeError):
                 # Deliberate boundary: rollback any store failure atomically, then re-raise
                 await conn.rollback()
                 raise

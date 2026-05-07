@@ -10,7 +10,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 try:
-    import chromadb
+    import chromadb  # pyright: ignore[reportMissingImports]
 except ImportError:
     chromadb = None
 
@@ -42,7 +42,7 @@ class KnowledgeItemHandler(FileSystemEventHandler):
             ki_name = "unknown_ki"
 
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
             if content.strip():
@@ -59,11 +59,11 @@ class KnowledgeItemHandler(FileSystemEventHandler):
 
     def on_modified(self, event):
         if not event.is_directory:
-            self._sync_file(event.src_path)
+            self._sync_file(os.fsdecode(event.src_path))
 
     def on_created(self, event):
         if not event.is_directory:
-            self._sync_file(event.src_path)
+            self._sync_file(os.fsdecode(event.src_path))
 
 
 def start_knowledge_daemon():

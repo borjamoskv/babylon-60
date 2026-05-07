@@ -1,7 +1,7 @@
 # ─────────────────────────────────────────────────────────────
-# SOVEREIGN CI/CD · Multi-Cloud Deploy + Security Scans
+# Production CI/CD · Multi-cloud deploy + security scans
 # ─────────────────────────────────────────────────────────────
-name: Sovereign Deploy
+name: Production Deploy
 
 on:
   push:
@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: sovereign-${{ github.ref }}
+  group: production-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -24,7 +24,7 @@ env:
 jobs:
   # ── Phase 1: Quality Gate ─────────────────────────────────
   quality-gate:
-    name: "🔒 Quality Gate (130/100)"
+    name: "Quality Gate"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v4
@@ -52,13 +52,13 @@ jobs:
       - name: Unit tests
         run: pytest tests/ -q --tb=short --junitxml=test-results.xml
 
-      - name: MEJORAlo Score Check
+      - name: Quality score check
         run: |
           python -c "
-          from cortex.extensions.mejoralo.scan import scan
+          from cortex.extensions.quality.scan import scan
           result = scan('cortex', 'cortex/')
           score = result.score
-          print(f'MEJORAlo Score: {score}/100')
+          print(f'Quality score: {score}/100')
           if score < 70:
               raise SystemExit(f'BLOCKED: Score {score} < 70 threshold')
           "
@@ -83,12 +83,12 @@ jobs:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v4
 
       - name: Build Docker image
-        run: docker build -t cortex-sovereign:${{ github.sha }} .
+        run: docker build -t cortex-persist:${{ github.sha }} .
 
       - name: Trivy scan (CRITICAL + HIGH)
         uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9a1457 # v0.28.0
         with:
-          image-ref: cortex-sovereign:${{ github.sha }}
+          image-ref: cortex-persist:${{ github.sha }}
           severity: CRITICAL,HIGH
           exit-code: 1
           format: sarif
@@ -99,18 +99,18 @@ jobs:
         run: |
           # GCR
           echo '${{ secrets.GCP_SA_KEY }}' | docker login -u _json_key --password-stdin gcr.io
-          docker tag cortex-sovereign:${{ github.sha }} gcr.io/${{ secrets.GCP_PROJECT }}/cortex-sovereign:${{ github.sha }}
-          docker tag cortex-sovereign:${{ github.sha }} gcr.io/${{ secrets.GCP_PROJECT }}/cortex-sovereign:latest
-          docker push gcr.io/${{ secrets.GCP_PROJECT }}/cortex-sovereign:${{ github.sha }}
-          docker push gcr.io/${{ secrets.GCP_PROJECT }}/cortex-sovereign:latest
+          docker tag cortex-persist:${{ github.sha }} gcr.io/${{ secrets.GCP_PROJECT }}/cortex-persist:${{ github.sha }}
+          docker tag cortex-persist:${{ github.sha }} gcr.io/${{ secrets.GCP_PROJECT }}/cortex-persist:latest
+          docker push gcr.io/${{ secrets.GCP_PROJECT }}/cortex-persist:${{ github.sha }}
+          docker push gcr.io/${{ secrets.GCP_PROJECT }}/cortex-persist:latest
           # ECR
           aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_REGISTRY }}
-          docker tag cortex-sovereign:${{ github.sha }} ${{ secrets.AWS_ECR_REGISTRY }}/cortex-sovereign:${{ github.sha }}
-          docker push ${{ secrets.AWS_ECR_REGISTRY }}/cortex-sovereign:${{ github.sha }}
+          docker tag cortex-persist:${{ github.sha }} ${{ secrets.AWS_ECR_REGISTRY }}/cortex-persist:${{ github.sha }}
+          docker push ${{ secrets.AWS_ECR_REGISTRY }}/cortex-persist:${{ github.sha }}
           # ACR
           docker login ${{ secrets.AZURE_ACR_REGISTRY }} -u ${{ secrets.AZURE_ACR_USER }} -p ${{ secrets.AZURE_ACR_PASSWORD }}
-          docker tag cortex-sovereign:${{ github.sha }} ${{ secrets.AZURE_ACR_REGISTRY }}/cortex-sovereign:${{ github.sha }}
-          docker push ${{ secrets.AZURE_ACR_REGISTRY }}/cortex-sovereign:${{ github.sha }}
+          docker tag cortex-persist:${{ github.sha }} ${{ secrets.AZURE_ACR_REGISTRY }}/cortex-persist:${{ github.sha }}
+          docker push ${{ secrets.AZURE_ACR_REGISTRY }}/cortex-persist:${{ github.sha }}
 
   # ── Phase 3: Infrastructure ───────────────────────────────
   terraform:
@@ -168,8 +168,8 @@ jobs:
       - name: Deploy to GCP
         run: |
           kubectl apply -f infra/k8s/gcp/ --recursive
-          kubectl set image deployment/cortex-sovereign cortex=gcr.io/${{ secrets.GCP_PROJECT }}/cortex-sovereign:${{ github.sha }} -n cortex
-          kubectl rollout status deployment/cortex-sovereign -n cortex --timeout=300s
+          kubectl set image deployment/cortex-persist cortex=gcr.io/${{ secrets.GCP_PROJECT }}/cortex-persist:${{ github.sha }} -n cortex
+          kubectl rollout status deployment/cortex-persist -n cortex --timeout=300s
 
   # ── Phase 5: Smoke Tests ──────────────────────────────────
   smoke:
@@ -192,18 +192,3 @@ jobs:
           if [ "$checked" -eq 0 ]; then
             echo "No external endpoints configured; skipping smoke health checks."
           fi
-      - name: Sovereign power verification
-        run: |
-          if [ -z "${GCP_ENDPOINT:-}" ]; then
-            echo "GCP_ENDPOINT not configured; skipping sovereign power verification."
-            exit 0
-          fi
-          python -c "
-          import json, urllib.request
-          r = urllib.request.urlopen('$GCP_ENDPOINT/api/v1/sovereign/power')
-          data = json.loads(r.read())
-          power = data['power_level']
-          print(f'Power Level: {power}/1000')
-          assert power >= 1300, f'Power {power} < 1300 target'
-          print('🏆 SOVEREIGN THRESHOLD EXCEEDED')
-          "

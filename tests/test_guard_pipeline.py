@@ -6,6 +6,9 @@ of the full CortexEngine, proving that guards can be tested in isolation.
 
 from __future__ import annotations
 
+import sys
+import types
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -171,6 +174,28 @@ class TestPostHooks:
         await pipeline.run_post_hooks(123, "project", "knowledge", mock_conn)
         assert results == ["ok", "bad", "final"]
 
+    async def test_required_hook_failure_raises_after_required_hooks_run(
+        self, pipeline, mock_conn
+    ):
+        """Required post-store hooks fail closed without skipping later required hooks."""
+        results: list[str] = []
+
+        async def bad_hook(fact_id, project, fact_type, conn, **kw):
+            results.append("bad")
+            raise RuntimeError("checkpoint unavailable")
+
+        async def final_hook(fact_id, project, fact_type, conn, **kw):
+            results.append("final")
+
+        h1, h2 = MagicMock(), MagicMock()
+        h1.on_stored, h2.on_stored = bad_hook, final_hook
+        pipeline.add_post_hook(h1, required=True)
+        pipeline.add_post_hook(h2, required=True)
+
+        with pytest.raises(RuntimeError, match="required post-store hook"):
+            await pipeline.run_post_hooks(123, "project", "knowledge", mock_conn, required=True)
+        assert results == ["bad", "final"]
+
 
 # ─── Count Properties ───────────────────────────────────────────────
 
@@ -192,3 +217,115 @@ class TestCounts:
         assert pipeline.guard_count == 2
         assert pipeline.mutator_count == 1
         assert pipeline.hook_count == 3
+
+
+class _StubGuard:
+    def __init__(self, *args, **kwargs) -> None:
+        pass
+
+
+class _StubHook:
+    def __init__(self, *args, **kwargs) -> None:
+        pass
+
+
+def _guard_adapter_module(*, missing: set[str] | None = None) -> SimpleNamespace:
+    missing = missing or set()
+    components = {
+        "HealthGuardAdapter": _StubGuard,
+        "ContradictionGuardAdapter": _StubGuard,
+        "VerifierGuardAdapter": _StubGuard,
+        "ZKGuardAdapter": _StubGuard,
+        "LedgerCheckpointHook": _StubHook,
+        "SignalEmitHook": _StubHook,
+        "EpistemicBreakerHook": _StubHook,
+    }
+    return SimpleNamespace(
+        **{name: component for name, component in components.items() if name not in missing}
+    )
+
+
+class TestDefaultGuardRegistration:
+    def test_missing_mandatory_guard_fails_closed_by_default(self, monkeypatch, tmp_path):
+        import cortex.engine as engine_module
+
+        monkeypatch.delenv("CORTEX_STRICT_GUARDS", raising=False)
+        monkeypatch.setitem(
+            sys.modules,
+            "cortex.engine.guard_adapters",
+            _guard_adapter_module(missing={"HealthGuardAdapter"}),
+        )
+
+        with pytest.raises(RuntimeError, match="mandatory HealthGuardAdapter registration failed"):
+            engine_module.CortexEngine(tmp_path / "mandatory-guard.db")
+
+    def test_missing_mandatory_hook_fails_closed_by_default(self, monkeypatch, tmp_path):
+        import cortex.engine as engine_module
+
+        monkeypatch.delenv("CORTEX_STRICT_GUARDS", raising=False)
+        monkeypatch.setitem(
+            sys.modules,
+            "cortex.engine.guard_adapters",
+            _guard_adapter_module(missing={"LedgerCheckpointHook"}),
+        )
+
+        with pytest.raises(RuntimeError, match="mandatory LedgerCheckpointHook registration failed"):
+            engine_module.CortexEngine(tmp_path / "mandatory-hook.db")
+
+    def test_optional_registration_is_skipped_by_default(self, monkeypatch, tmp_path):
+        import cortex.engine as engine_module
+
+        monkeypatch.delenv("CORTEX_STRICT_GUARDS", raising=False)
+        monkeypatch.setitem(
+            sys.modules,
+            "cortex.engine.guard_adapters",
+            _guard_adapter_module(missing={"ZKGuardAdapter", "SignalEmitHook", "EpistemicBreakerHook"}),
+        )
+
+        engine = engine_module.CortexEngine(tmp_path / "optional-skip.db")
+        assert engine._guard_pipeline.guard_count == 3
+        assert engine._guard_pipeline.hook_count == 1
+
+    def test_strict_mode_upgrades_optional_registration_to_fail_closed(
+        self, monkeypatch, tmp_path
+    ):
+        import cortex.engine as engine_module
+
+        monkeypatch.setenv("CORTEX_STRICT_GUARDS", "1")
+        monkeypatch.setitem(
+            sys.modules,
+            "cortex.engine.guard_adapters",
+            _guard_adapter_module(missing={"ZKGuardAdapter"}),
+        )
+
+        with pytest.raises(RuntimeError, match="mandatory ZKGuardAdapter registration failed"):
+            engine_module.CortexEngine(tmp_path / "strict-optional.db")
+
+
+class TestGuardAdapters:
+    async def test_high_contradiction_rejects_decision(self, monkeypatch):
+        from cortex.engine.guard_adapters import ContradictionGuardAdapter
+
+        class Report:
+            has_conflicts = True
+            severity = "high"
+
+            def format(self) -> str:
+                return "high contradiction"
+
+        async def detect_contradictions(**kwargs):
+            return Report()
+
+        module = types.ModuleType("cortex.guards.contradiction_guard")
+        module.detect_contradictions = detect_contradictions
+        monkeypatch.setitem(sys.modules, "cortex.guards.contradiction_guard", module)
+
+        adapter = ContradictionGuardAdapter(db_path="/tmp/cortex-test.db")
+        with pytest.raises(ValueError, match="Contradiction detected"):
+            await adapter.check(
+                "conflicting decision",
+                "project",
+                "decision",
+                {},
+                MagicMock(),
+            )

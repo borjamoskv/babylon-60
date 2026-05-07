@@ -10,10 +10,12 @@ import time
 from collections.abc import Callable
 from pathlib import Path
 
+from cortex.engine.storage_guard import GuardViolation
 from cortex.extensions.health.collector import HealthCollector
 from cortex.extensions.health.models import Grade
 from cortex.extensions.health.scorer import HealthScorer
 from cortex.extensions.health.trend import TrendDetector
+from cortex.utils.redaction import redact_text, redact_value
 
 logger = logging.getLogger("moskv-daemon.health")
 
@@ -83,7 +85,7 @@ class HealthLoop:
             }
 
         except Exception as e:  # noqa: BLE001
-            logger.warning("Health tick failed: %s", e)
+            logger.warning("Health tick failed: %s", redact_text(str(e)))
             return None
 
     def _on_grade_change(
@@ -137,7 +139,7 @@ class HealthLoop:
             try:
                 self._notify_fn(title, body)
             except Exception as e:  # noqa: BLE001
-                logger.debug("Notification failed: %s", e)
+                logger.debug("Notification failed: %s", redact_text(str(e)))
             return
         try:
             import subprocess
@@ -157,14 +159,29 @@ class HealthLoop:
     ) -> None:
         """Persist health snapshot as a CORTEX fact."""
         try:
+            grade = redact_text(str(data["grade"]))
+            score = redact_text(str(data["score"]))
+            redacted_meta = redact_value(data)
+            if not isinstance(redacted_meta, dict):
+                redacted_meta = {}
+
             engine.store_sync(  # type: ignore[attr-defined]
-                "cortex",
-                content=(f"Health snapshot: {data['score']}/100 ({data['grade']})"),
+                project="cortex",
+                tenant_id="default",
+                content=(f"Health snapshot: {score}/100 ({grade})"),
                 fact_type="bridge",
                 source="daemon:health",
-                tags=["health", "snapshot", data["grade"]],
-                meta=data,
+                tags=["health", "snapshot", grade],
+                meta=redacted_meta,
                 confidence="C5",
             )
-        except Exception as e:  # noqa: BLE001
-            logger.debug("Health persist failed: %s", e)
+        except (
+            RuntimeError,
+            ValueError,
+            TypeError,
+            AttributeError,
+            OSError,
+            KeyError,
+            GuardViolation,
+        ) as e:
+            logger.debug("Health persist failed: %s", redact_text(str(e)))

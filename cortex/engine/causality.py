@@ -313,7 +313,7 @@ class AsyncCausalGraph:
                 fact_sql += f", {meta_col}"
             fact_sql += f" FROM facts WHERE id IN ({local_placeholders})"
 
-            params = list(chunk)
+            params: list[Any] = list(chunk)
             if has_tenant:
                 fact_sql += " AND tenant_id = ?"
                 params.append(tenant_id)

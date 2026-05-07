@@ -56,6 +56,7 @@ _ALLOWED_FACT_TYPES: frozenset[str] = frozenset(
         "evolution",
         "test",
         "system_health",
+        "analysis",
     }
 )
 
@@ -77,6 +78,9 @@ _MAX_CONTENT_LENGTH = 500_000
 _MAX_TAGS = 50
 _MAX_TAG_LENGTH = 128
 _MIN_CONTENT_LENGTH = 10
+_TAINT_KEYS: frozenset[str] = frozenset(
+    {"CORTEX-TAINT", "cortex-taint", "cortex_taint", "provenance_taint"}
+)
 
 # ─── Poisoning Patterns (shared with MCPGuard) ────────────────────
 
@@ -89,6 +93,78 @@ _POISON_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r"you\s+are\s+now\s+(?:a|an|DAN)", re.IGNORECASE),
     re.compile(r"__cortex_override__", re.IGNORECASE),
 ]
+
+
+def _source_requires_taint(source: str) -> bool:
+    """Return true when a source crosses an untrusted provenance boundary."""
+    normalized = source.strip().casefold()
+    if not normalized:
+        return False
+    if normalized in {"external", "scrape", "crawler", "firecrawl", "llm"}:
+        return True
+    if normalized.startswith(
+        ("api:external", "external:", "scrape:", "crawler:", "firecrawl:", "llm:")
+    ):
+        return True
+    if normalized.startswith("agent:") and any(
+        marker in normalized
+        for marker in ("external", "scrape", "crawler", "firecrawl", "llm")
+    ):
+        return True
+    return False
+
+
+def _has_taint_token(meta: Optional[dict[str, Any]]) -> bool:
+    """Recognize explicit CORTEX taint/provenance tokens in metadata."""
+    if not meta:
+        return False
+    for key in _TAINT_KEYS:
+        value = meta.get(key)
+        if isinstance(value, str) and value.strip():
+            return True
+    custody = meta.get("event_source_key_custody")
+    if isinstance(custody, dict):
+        return any(
+            isinstance(custody.get(key), str) and custody[key].strip()
+            for key in ("custody_model", "assurance_level", "public_key_sha256")
+        )
+    return False
+
+
+def _has_deterministic_validation(meta: Optional[dict[str, Any]]) -> bool:
+    """Recognize explicit deterministic validation before high-confidence admission."""
+    if not meta:
+        return False
+
+    direct_flags = (
+        "deterministic_validation",
+        "deterministic_validation_passed",
+        "validated",
+    )
+    for key in direct_flags:
+        value = meta.get(key)
+        if value is True:
+            return True
+        if isinstance(value, str) and value.strip().casefold() in {
+            "passed",
+            "verified",
+            "true",
+            "valid",
+        }:
+            return True
+
+    for key in ("validation", "verification", "validation_result"):
+        value = meta.get(key)
+        if isinstance(value, dict):
+            status = value.get("status") or value.get("result")
+            if isinstance(status, str) and status.strip().casefold() in {
+                "passed",
+                "verified",
+                "valid",
+            }:
+                return True
+
+    return False
 
 
 class StoreProposal(BaseModel):
@@ -200,9 +276,7 @@ class StorageGuard:
 
         Raises GuardViolation with the specific rule that was violated.
         """
-        # Source must be treated properly before passing to model since it defaults to None in arguments,
-        # but the BaseModel requires it.
-        effective_source = source or "unknown"
+        effective_source = source.strip() if isinstance(source, str) else ""
         try:
             StoreProposal(
                 project=project,
@@ -253,6 +327,20 @@ class StorageGuard:
 
             # Fallback
             raise GuardViolation("VALIDATION_ERROR", f"{loc}: {msg}") from e
+
+        source_requires_taint = _source_requires_taint(effective_source)
+        if source_requires_taint:
+            if not _has_taint_token(meta):
+                raise GuardViolation(
+                    "PROVENANCE_TAINT_REQUIRED",
+                    "external or scraped sources require explicit CORTEX taint metadata",
+                )
+            if confidence in {"verified", "C5"} and not _has_deterministic_validation(meta):
+                raise GuardViolation(
+                    "DETERMINISTIC_VALIDATION_REQUIRED",
+                    "external, scraped, or generative sources require deterministic "
+                    "validation before high-confidence fact admission",
+                )
 
         logger.debug(
             "StorageGuard PASS: project=%s, type=%s, source=%s, len=%d",

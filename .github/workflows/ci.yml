@@ -115,6 +115,52 @@ jobs:
             pstree -ap || true
             exit "${status}"
           fi
+      - name: Build product coverage report
+        if: matrix.python-version == '3.13'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import subprocess
+          import sys
+
+          include = [
+              "cortex/api/*",
+              "cortex/auth/*",
+              "cortex/compliance/*",
+              "cortex/core/*",
+              "cortex/crypto/*",
+              "cortex/database/*",
+              "cortex/engine/*",
+              "cortex/events/*",
+              "cortex/gateway/*",
+              "cortex/guards/*",
+              "cortex/ledger/*",
+              "cortex/mcp/*",
+              "cortex/memory/*",
+              "cortex/migrations/*",
+              "cortex/routes/*",
+              "cortex/search/*",
+              "cortex/services/*",
+              "cortex/storage/*",
+              "cortex/telemetry/*",
+              "cortex/types/*",
+              "cortex/utils/*",
+              "cortex/verification/*",
+          ]
+          subprocess.run(
+              [
+                  sys.executable,
+                  "-m",
+                  "coverage",
+                  "xml",
+                  "-o",
+                  "coverage-product.xml",
+                  "--include=" + ",".join(include),
+              ],
+              check=True,
+          )
+          PY
       - name: Upload test diagnostics
         if: always()
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
@@ -124,11 +170,20 @@ jobs:
           path: |
             test-artifacts/
             coverage.xml
+            coverage-product.xml
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.13'
         uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v5
         with:
           files: coverage.xml
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload product coverage to Codecov
+        if: matrix.python-version == '3.13'
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v5
+        with:
+          files: coverage-product.xml
+          flags: product
           fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -142,8 +197,10 @@ jobs:
           python-version: "3.13"
       - name: Build package
         run: |
-          pip install build
+          python -m pip install build twine
           python -m build
+      - name: Check package metadata
+        run: python -m twine check dist/*
       - name: Upload artifact
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
         with:

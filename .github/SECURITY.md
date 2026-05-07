@@ -1,6 +1,6 @@
 # Security Policy
 
-Moskv-1 and the CORTEX ecosystem follow a Sovereign Architecture principle. We take the security of the God-State Engine and its subagents seriously.
+CORTEX Persist follows a local-first trust-substrate security model. We prioritize deterministic validation, tenant isolation, audit continuity, and redaction of sensitive data.
 
 ## Supported Versions
 
@@ -11,8 +11,8 @@ Moskv-1 and the CORTEX ecosystem follow a Sovereign Architecture principle. We t
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability within the CORTEX ecosystem, please send an email to **security@moskv.com**. All security vulnerabilities will be promptly addressed.
+If you discover a security vulnerability within CORTEX Persist, please send an email to **security@cortexpersist.com**. Security reports are reviewed as quickly as possible.
 
 **Please DO NOT report security vulnerabilities via public GitHub issues.**
 
-We follow a 150/100 principle for responses: We will confirm receipt of the vulnerability within 24 hours, and aim to provide a remediation plan or patch within 72 hours.
+We aim to confirm receipt within 24 hours and provide a remediation plan or patch target within 72 hours when the report is reproducible.

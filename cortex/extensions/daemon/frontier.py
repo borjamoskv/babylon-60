@@ -5,10 +5,11 @@ The engine that ensures CORTEX is always at the bleeding edge.
 
 import asyncio
 import logging
-import sqlite3
 import time
 from pathlib import Path
 from typing import Any
+
+from cortex.engine.storage_guard import GuardViolation
 
 logger = logging.getLogger("cortex.extensions.daemon.frontier")
 
@@ -76,16 +77,22 @@ class FrontierDaemon:
         """Registers the evolution event in CORTEX."""
         if not self.engine:
             return
+        if not hasattr(self.engine, "store_sync"):
+            logger.error("[FRONTIER] Evolution logging blocked: canonical store_sync required.")
+            return
         try:
-            conn = self.engine.pool.get_connection()
-            conn.execute(
-                "INSERT INTO facts (id, type, topic, content, timestamp, confidence) "
-                "VALUES (lower(hex(randomblob(16))), 'decision', 'Evolution', ?, ?, 'C5')",
-                (f"[{type.upper()}] {content}", time.time()),
+            self.engine.store_sync(
+                tenant_id="default",
+                project="system",
+                content=f"[{type.upper()}] {content}",
+                fact_type="decision",
+                tags=["daemon", "frontier", "evolution"],
+                confidence="C5",
+                source="frontier-daemon",
+                meta={"event_type": type, "timestamp": time.time()},
             )
-            conn.commit()
             logger.info("[FRONTIER] Evolution event logged to CORTEX: %s", type)
-        except sqlite3.Error as e:
+        except (RuntimeError, ValueError, TypeError, AttributeError, OSError, GuardViolation) as e:
             logger.error("[FRONTIER] Failed to log evolution: %s", e)
 
     async def run_loop(self):

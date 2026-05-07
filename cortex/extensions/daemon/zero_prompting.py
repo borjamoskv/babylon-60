@@ -105,16 +105,21 @@ class ZeroPromptingDaemon:
         """Persists the successful mutation as a C5 Truth in the CORTEX Ledger."""
         logger.info("[ZERO-PROMPT] [CRYSTALLIZE] Evolution accepted: %s", improvement)
         try:
-            conn = self.engine.pool.get_connection()  # type: ignore[type-error]
-            conn.execute(
-                "INSERT INTO facts (id, type, topic, content, timestamp, confidence) "
-                "VALUES (lower(hex(randomblob(16))), 'decision', 'ZeroPrompt', ?, ?, 'C5')",
-                (
-                    f"Evolved: {hypothesis}. Action: {action}. Improvement: {improvement}",
-                    time.time(),
-                ),
+            await self.engine.store(
+                tenant_id="default",
+                project="system",
+                content=f"Evolved: {hypothesis}. Action: {action}. Improvement: {improvement}",
+                fact_type="decision",
+                tags=["daemon", "zero-prompt", "evolution"],
+                confidence="C5",
+                source="zero-prompting-daemon",
+                meta={
+                    "hypothesis": hypothesis,
+                    "action": action,
+                    "improvement": improvement,
+                    "timestamp": time.time(),
+                },
             )
-            conn.commit()
             logger.info("  ↳ Written to Ledger: Immutable C5.")
         except Exception as e:
             logger.error("[ZERO-PROMPTING] Ledger crystallization failed: %s", e)

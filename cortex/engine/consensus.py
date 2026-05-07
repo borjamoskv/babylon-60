@@ -14,6 +14,8 @@ from cortex.engine.slashing import SlashingEngine
 
 logger = logging.getLogger("cortex.engine.consensus")
 
+TX_BEGIN_IMMEDIATE = "BEGIN IMMEDIATE"
+
 
 class ConsensusMixin(EngineMixinBase):
     """Mixin for consensus and voting logic in AsyncCortexEngine."""
@@ -75,8 +77,6 @@ class ConsensusMixin(EngineMixinBase):
             raise ValueError("Vote must be -1, 0, or 1")
 
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
-            from cortex.engine_async import TX_BEGIN_IMMEDIATE
-
             await conn.execute(TX_BEGIN_IMMEDIATE)
             try:
                 # 1. Resolve agent_id and reputation
@@ -170,7 +170,7 @@ class ConsensusMixin(EngineMixinBase):
         """Get all votes for a fact from the canonical v2 table."""
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             conn.row_factory = aiosqlite.Row
-            query = """SELECT v.vote, v.agent_id as agent, v.created_at, a.reputation_score
+            query = """SELECT v.vote, a.name as agent, v.created_at, a.reputation_score
                        FROM consensus_votes_v2 v
                        JOIN agents a ON v.agent_id = a.id
                        WHERE v.fact_id = ? AND v.tenant_id = ?"""

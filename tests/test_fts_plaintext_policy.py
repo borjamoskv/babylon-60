@@ -67,6 +67,7 @@ async def test_fts_indexes_plaintext_only_with_explicit_opt_in(encrypter, monkey
     """Verify that FTS search works only for facts that explicitly opt in."""
     # 1. Setup Mocking
     monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: encrypter)
+    monkeypatch.setattr("cortex.crypto.aes.get_default_encrypter", lambda: encrypter)
     # Stub hash and other components to avoid overhead
     monkeypatch.setattr("cortex.engine.fact_store_core.compute_fact_hash", lambda x: "hash")
 
@@ -100,6 +101,8 @@ async def test_fts_indexes_plaintext_only_with_explicit_opt_in(encrypter, monkey
         assert stored_metadata.startswith(encrypter.PREFIX)
         assert secret_content not in stored_content
         assert "public-search" not in stored_metadata
+        persisted_meta = encrypter.decrypt_json(stored_metadata, tenant_id="default")
+        assert persisted_meta == {"classification": "public-search"}
 
     # 4. Verify FTS Search works with plaintext keywords
     # This proves facts_fts has the decrypted content.
@@ -123,6 +126,7 @@ async def test_fts_indexes_plaintext_only_with_explicit_opt_in(encrypter, monkey
 async def test_fts_skips_default_facts_and_encrypts_metadata(encrypter, monkeypatch):
     """Default facts must not duplicate plaintext into FTS or plaintext metadata."""
     monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: encrypter)
+    monkeypatch.setattr("cortex.crypto.aes.get_default_encrypter", lambda: encrypter)
     monkeypatch.setattr("cortex.engine.fact_store_core.compute_fact_hash", lambda x: "hash")
 
     conn = await aiosqlite.connect(":memory:")
@@ -163,6 +167,7 @@ async def test_fts_skips_default_facts_and_encrypts_metadata(encrypter, monkeypa
 async def test_fts_skips_privacy_flagged_facts(encrypter, monkeypatch):
     """Privacy-flagged facts must not duplicate plaintext into facts_fts."""
     monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: encrypter)
+    monkeypatch.setattr("cortex.crypto.aes.get_default_encrypter", lambda: encrypter)
     monkeypatch.setattr("cortex.engine.fact_store_core.compute_fact_hash", lambda x: "hash")
 
     conn = await aiosqlite.connect(":memory:")
@@ -187,6 +192,11 @@ async def test_fts_skips_privacy_flagged_facts(encrypter, monkeypatch):
         row = await cursor.fetchone()
     assert row[0].startswith(encrypter.PREFIX)
     assert secret_content not in row[0]
+
+    async with conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id,)) as cursor:
+        row = await cursor.fetchone()
+    persisted_meta = encrypter.decrypt_json(row[0], tenant_id="default")
+    assert persisted_meta == {"privacy_flagged": True}
 
     async with conn.execute("SELECT COUNT(*) FROM facts_fts WHERE rowid = ?", (fact_id,)) as cursor:
         row = await cursor.fetchone()

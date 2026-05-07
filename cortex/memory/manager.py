@@ -580,8 +580,10 @@ class CortexMemoryManager:
     def _cancel_background_tasks(self) -> None:
         """Cancel pending tasks and workers aggressively to prevent event loop leaks."""
         logger.warning("Canceling all background workers and Glial Daemon.")
-        if self._memory_os and getattr(self._memory_os, "_glial_daemon_task", None):
-            self._memory_os._glial_daemon_task.cancel()
+        if self._memory_os:
+            glial_task = getattr(self._memory_os, "_glial_daemon_task", None)
+            if glial_task is not None:
+                glial_task.cancel()
 
         for worker in self._bg_workers:
             if not worker.done():

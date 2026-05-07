@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────
-# Security Module · Zero-Trust · Military-Grade
+# Security Module · Zero-Trust · Restricted
 # ─────────────────────────────────────────────────────────────
 
 variable "vault_addr" { type = string }
@@ -16,7 +16,7 @@ resource "vault_mount" "pki" {
 resource "vault_pki_secret_backend_root_cert" "root" {
   backend     = vault_mount.pki.path
   type        = "internal"
-  common_name = "Cortex Sovereign Root CA"
+  common_name = "Cortex Persist Root CA"
   ttl         = "87600h"
   key_bits    = 4096
 }
@@ -24,7 +24,7 @@ resource "vault_pki_secret_backend_root_cert" "root" {
 resource "vault_pki_secret_backend_role" "service" {
   backend          = vault_mount.pki.path
   name             = "cortex-service"
-  allowed_domains  = ["cortex-sovereign.internal"]
+  allowed_domains  = ["cortex-persist.internal"]
   allow_subdomains = true
   max_ttl          = "72h"
   key_bits         = 2048
@@ -46,7 +46,7 @@ resource "vault_kv_secret_v2" "db_credentials" {
   data_json = jsonencode({
     username = "cortex_admin"
     password = "ROTATED_BY_VAULT"
-    host     = "alloydb.cortex-sovereign.internal"
+    host     = "alloydb.cortex-persist.internal"
     port     = 5432
     database = "cortex_production"
   })

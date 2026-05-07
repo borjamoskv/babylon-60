@@ -29,6 +29,7 @@ class StoreGuard(Protocol):
         conn: aiosqlite.Connection,
         *,
         tenant_id: str = "default",
+        source: Optional[str] = None,
     ) -> None:
         """Validate a fact before storage.
 
@@ -69,7 +70,8 @@ class ContentMutator(Protocol):
 class PostStoreHook(Protocol):
     """Post-store side-effect hook.
 
-    Runs after successful fact insertion. Failure is non-fatal (best-effort).
+    Runs after successful fact insertion. Optional hooks are best-effort;
+    required hooks are fail-closed and must complete before the store commits.
     Examples: signal emission, ledger checkpointing, epistemic breaker.
     """
 
@@ -86,6 +88,7 @@ class PostStoreHook(Protocol):
     ) -> None:
         """Execute post-store side effect.
 
-        Must not raise — exceptions are logged and swallowed.
+        Optional hook exceptions are logged and swallowed by the pipeline.
+        Required hook exceptions are converted into fail-closed store errors.
         """
         ...

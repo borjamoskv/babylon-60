@@ -71,7 +71,7 @@ def _worker(source_code: str, global_ctx: dict, result_dict: dict):
         result_dict["status"] = "failed"
         result_dict["error"] = str(e)
 
-async def run_jit_sandbox(source_code: str, timeout_ms: int = 50, global_ctx: dict = None) -> Any:
+async def run_jit_sandbox(source_code: str, timeout_ms: int = 50, global_ctx: dict | None = None) -> Any:
     """
     Executes Python AST in a 50ms bounded memory-only sandbox.
     Uses multiprocessing to guarantee true OS-level termination and bypass GIL deadlocks.
@@ -114,4 +114,3 @@ async def run_jit_sandbox(source_code: str, timeout_ms: int = 50, global_ctx: di
         err = dict(result_dict).get("error", "Unknown Epistemic Failure")
         logger.error(f"⚡ [SORTU-JIT] Epistemic failure: {err}")
         return {"status": "failed", "error": err}
-

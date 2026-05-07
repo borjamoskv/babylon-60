@@ -122,6 +122,32 @@ async def _delete_best_effort(
             raise
 
 
+async def _table_columns(conn: aiosqlite.Connection, table: str) -> set[str]:
+    cursor = await conn.execute(f"PRAGMA table_info({table})")
+    rows = await cursor.fetchall()
+    return {str(row[1]) for row in rows}
+
+
+async def _delete_fact_side_effect(
+    conn: aiosqlite.Connection,
+    table: str,
+    id_column: str,
+    fact_id: int,
+    tenant_id: str,
+) -> None:
+    columns = await _table_columns(conn, table)
+    if not columns:
+        return
+    if "tenant_id" in columns:
+        await _delete_best_effort(
+            conn,
+            f"DELETE FROM {table} WHERE {id_column} = ? AND tenant_id = ?",
+            (fact_id, tenant_id),
+        )
+        return
+    await _delete_best_effort(conn, f"DELETE FROM {table} WHERE {id_column} = ?", (fact_id,))
+
+
 async def purge_logic(
     *,
     mixin_instance: Any,
@@ -162,25 +188,19 @@ async def purge_logic(
             tenant_id=tenant_id,
         )
 
-        delete_specs = [
-            ("DELETE FROM fact_tags WHERE fact_id = ? AND tenant_id = ?", (fact_id, tenant_id)),
-            ("DELETE FROM fact_embeddings WHERE fact_id = ?", (fact_id,)),
-            ("DELETE FROM specular_embeddings WHERE fact_id = ?", (fact_id,)),
-            ("DELETE FROM enrichment_jobs WHERE fact_id = ?", (fact_id,)),
-            (
-                "DELETE FROM entity_events WHERE entity_id = ? AND tenant_id = ?",
-                (fact_id, tenant_id),
-            ),
-            (
-                "DELETE FROM causal_edges WHERE (fact_id = ? OR parent_id = ?) AND tenant_id = ?",
-                (fact_id, fact_id, tenant_id),
-            ),
-            # FTS cleanup is explicit because facts.content is encrypted in the
-            # primary table and trigger-driven sync is not reliable for writes.
-            ("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,)),
-        ]
-        for statement, params in delete_specs:
-            await _delete_best_effort(conn, statement, params)
+        await _delete_fact_side_effect(conn, "fact_tags", "fact_id", fact_id, tenant_id)
+        await _delete_fact_side_effect(conn, "fact_embeddings", "fact_id", fact_id, tenant_id)
+        await _delete_fact_side_effect(conn, "specular_embeddings", "fact_id", fact_id, tenant_id)
+        await _delete_fact_side_effect(conn, "enrichment_jobs", "fact_id", fact_id, tenant_id)
+        await _delete_fact_side_effect(conn, "entity_events", "entity_id", fact_id, tenant_id)
+        await _delete_best_effort(
+            conn,
+            "DELETE FROM causal_edges WHERE (fact_id = ? OR parent_id = ?) AND tenant_id = ?",
+            (fact_id, fact_id, tenant_id),
+        )
+        # FTS cleanup is explicit because facts.content is encrypted in the
+        # primary table and trigger-driven sync is not reliable for writes.
+        await _delete_fact_side_effect(conn, "facts_fts", "rowid", fact_id, tenant_id)
 
         cursor = await conn.execute(
             "DELETE FROM facts WHERE id = ? AND tenant_id = ?",

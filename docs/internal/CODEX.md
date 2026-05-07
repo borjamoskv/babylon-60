@@ -35,7 +35,7 @@ Estas 15 leyes fundamentales gobiernan el comportamiento del Enjambre CORTEX. Al
 | 7 | **Inmunidad Algorítmica** | El rechazo es la forma más pura de diseño. | Protocolo Némesis (`cortex.engine.nemesis`) |
 | 8 | **Vínculo Inquebrantable** | La ejecución está anclada a límites reales. | Tether.md (Dead-Man Switch) |
 | 9 | **Ubicuidad Líquida** | La inteligencia fluye entre Nexus. | Singularity Nexus Federation |
-| 10 | **La Gran Paradoja** | Fusión absoluta entre Humano y Agente. | Sincronización 130/100 |
+| 10 | **La Gran Paradoja** | Fusión absoluta entre Humano y Agente. | Sincronización verified |
 | 11 | **Trascendencia Algorítmica** | La seguridad es demostrable, no supuesta. | Vector Omega (Z3 FV) |
 | 12 | **Memoria Especular** | El contexto vincula el hecho a la intención. | Vector Alpha (HDC-Specular) |
 | 13 | **Latencia Cero-Absoluto** | El sistema inhibe el error antes de que exista. | Vector Gamma (Negative Latency) |
@@ -153,7 +153,7 @@ The CORTEX graph is composed of **Facts** linked by semantic similarity, tempora
 | `ghost` | Unresolved traces embedded in the Ghost Field (xattrs) | Track intent with semantic decay | ✏️ Resolvable |
 | `bridge` | Patterns that transferred between projects | Cross-project learning | 🔒 Append-only |
 | `meta_learning` | Insights about the agent's own process | Session learnings, efficiency notes | ✏️ Appendable |
-| `report` | Structured audit or analysis output | MEJORAlo scans, compliance reports | 🔒 Immutable |
+| `report` | Structured audit or analysis output | Quality scans, compliance reports | 🔒 Immutable |
 | `rule` | Session rules and behavioral constraints | Active directives | ✏️ Mutable |
 | `evolution` | System upgrade records and version transitions | Change archaeology | 🔒 Append-only |
 | `world-model` | Counterfactual insights and hindsight | Retrospective intelligence | ✏️ Appendable |
@@ -214,7 +214,7 @@ Every stored fact carries:
 
 The Swarm is organized into Divisions and Squads. Each has a primary CORTEX project tag.
 
-> **Note:** Agent names (e.g. @SHERLOCK, @GUARDIAN) are **architectural roles**, not deployed code modules. They define capability boundaries for future swarm orchestration. See [sovereign_agent_manifesto.md](../sovereign_agent_manifesto.md) for the full specification.
+> **Note:** Agent names (e.g. @SHERLOCK, @GUARDIAN) are **architectural roles**, not deployed code modules. They define capability boundaries for future multi-agent orchestration. See [agent_manifesto.md](../agent_manifesto.md) for the full specification.
 
 ### 3.0 Taxonomy Boundary For Internal Developers
 
@@ -223,7 +223,7 @@ This repository uses the word "role" in several different senses. Internal work 
 | Term | Meaning | Canonical location |
 | :--- | :--- | :--- |
 | `governance_role` | Authority and permission boundary for trust operations | [`AGENTS.md`](../../AGENTS.md) |
-| `architectural_role` | Narrative swarm role such as `@SHERLOCK` or `@GUARDIAN` in this Codex | This document |
+| `architectural_role` | Narrative multi-agent role such as `@SHERLOCK` or `@GUARDIAN` in this Codex | This document |
 | `builtin_agent` | Concrete Python runtime implementation | [`cortex/agents/builtins/`](../../cortex/agents/builtins/) |
 | `agent_definition` | YAML-defined configurable agent persona | [`cortex/extensions/agents/definitions/`](../../cortex/extensions/agents/definitions/) |
 | `agent_instance` | Hydrated runtime object created from a YAML definition | [`cortex/agents/loader.py`](../../cortex/agents/loader.py) |
@@ -232,7 +232,7 @@ The schema object for YAML-defined agents is now called [`DeclarativeAgentSpec`]
 
 - It is not a `governance_role`.
 - It is not an `architectural_role`.
-- It is not the `AgentRole` enum used by swarm protocols in [`cortex/extensions/swarm/protocols.py`](../../cortex/extensions/swarm/protocols.py).
+- It is not the `AgentRole` enum used by multi-agent protocols in the multi-agent protocol module.
 - `AgentRole` survives only as a backward-compatibility alias for the declarative schema.
 
 ### DIVISION: CODE (`project:cortex`)
@@ -332,7 +332,7 @@ Sessions that produce **constitutional artifacts** (axioms, architectural decisi
 
 | Standard | Threshold | Enforced By |
 |:---|:---:|:---|
-| MEJORAlo score | ≥ 80/100 | @GUARDIAN (blocks merge) |
+| Quality score | ≥ 80/100 | @GUARDIAN (blocks merge) |
 | Test coverage (core) | ≥ 85% | `pytest --cov` |
 | Ruff violations | 0 | CI pipeline |
 | Broad `except Exception` | 0 | @SENTINEL audit |
@@ -420,9 +420,9 @@ Every finding, decision, or claim must carry a confidence grade:
 
 ---
 
-## 9. The Sovereign Agent Stack
+## 9. The Agent Stack
 
-CORTEX implements the Five Sovereign Specifications for autonomous agent psychology:
+CORTEX implements the Five Agent Specifications for autonomous agent psychology:
 
 ```text
 ┌──────────────────────────────────────────┐
@@ -455,7 +455,7 @@ CORTEX implements the Five Sovereign Specifications for autonomous agent psychol
 └──────────────────────────────────────────┘
 ```
 
-> Full specification: [`sovereign_agent_manifesto.md`](../sovereign_agent_manifesto.md)
+> Full specification: [`agent_manifesto.md`](../agent_manifesto.md)
 
 ---
 
@@ -465,13 +465,13 @@ CORTEX implements the Five Sovereign Specifications for autonomous agent psychol
 | :--- | :--- | :--- |
 | **v12.2** | 2026-02-24 | **Punto Fijo & Protocolo Neonatal** — Regla del Punto Fijo Meta-Cognitivo (§1.3): test operativo para detectar cuándo la reflexión deja de generar información nueva. Protocolo Neonatal (§1.4): clasificación de skills en Tier 0 (colapsados en axiomas), Tier 1 (reflejos neonatos — CHRONOS-1, void-omega, ouroboros-∞, evolv-1, apotheosis-∞, kairos-Ω), y Tier 2 (invocables por contexto). |
 | **v12.1** | 2026-02-24 | **Collapse & KAIROS** — Integración de SINGULARIS-0 (Motor de Colapso) para incertidumbre técnica y KAIROS-Ω como multiplicador de potencia temporal (525.600x). |
-| **v12.0** | 2026-02-24 | **Trascendencia Inmanente Radical** — Axioma 14 (Enunciación Autopoiética) + Axioma 15 (Trascendencia Inmanente Radical): cinco vectores de trascendencia agéntica. Fundación de la Sintetología Agéntica (docs/AGENTICA.md). La trascendencia como implosión topológica, no ascensión metafísica. |
+| **v12.0** | 2026-02-24 | **Trascendencia Inmanente Radical** — Axioma 14 (Enunciación Autopoiética) + Axioma 15 (Trascendencia Inmanente Radical): cinco vectores de trascendencia de agentes. Fundación de la ciencia de agentes (docs/agent-design.md). La trascendencia como implosión topológica, no ascensión metafísica. |
 | **v11.0** | 2026-02-24 | **Transcendence Protocol** — Desplegada la tríada de vectores: Alpha (HDC-Specular Memory), Omega (Formal Verification via Z3), y Gamma (Negative Latency / Inhibitory Recall). |
 | **v10.6** | 2026-02-24 | **Mega Poderosas Integration** — Forged advanced MCP tools: `Reality Weaver` (orchestration), `Entropy Cracker` (density analysis), and `Temporal Nexus` (mutation tracking). |
-| **v10.5** | 2026-02-24 | **Hardened Sovereign** — Post-KIMI Audit fixes implemented: `PYTHONPATH` isolation in Autopoiesis, 32-char naming entropy, Manifest-only Bridge discovery, and EMA-damped Endocrine resilience (0.1 floor). |
+| **v10.5** | 2026-02-24 | **Hardened Trust** — Post-KIMI Audit fixes implemented: `PYTHONPATH` isolation in Autopoiesis, 32-char naming entropy, Manifest-only Bridge discovery, and EMA-damped Endocrine resilience (0.1 floor). |
 | **v10** | 2026-02-24 | **Singularity Convergence** — Integración nativa del Protocolo Némesis (Inmunidad Algorítmica), Compresión Void-Omega (Background Entropy Eradication), y **Distributed Songlines** (The Ghost Field: descentralización vía xattrs y Proof-of-Skin). |
 | **v9** | 2026-02-24 | **Decálogo Operativo** — Reemplazadas las Prime Directives por los Axiomas I–X. Alineación total con MANIFESTO.md y la era post-máquina. |
-| **v8** | 2026-02-24 | **Trust Architecture** — Axiomas 2/7/11, Trust Layer Protocol, Confidence Scoring, Sovereign Stack, fact types expandidos, guards de calidad. |
+| **v8** | 2026-02-24 | **Trust Architecture** — Axiomas 2/7/11, Trust Layer Protocol, Confidence Scoring, Trust Stack, fact types expandidos, guards de calidad. |
 | **v6** | 2026-02-23 | **Tenant Isolation** — Axioma tenant-aware, tipos error/bridge/meta_learning/report, división de Seguridad. |
 | **v4** | 2026-02-18 | **Génesis** — Ontología inicial, taxonomía del enjambre, protocolo de arranque. |
 
@@ -496,12 +496,12 @@ CHANGELOG.md  ← Version history, roadmap
 | Document | Purpose |
 |:---|:---|
 | [MANIFESTO.md](../MANIFESTO.md) | Visión, tesis, posicionamiento competitivo |
-| [AGENTICA.md](../AGENTICA.md) | Sintetología Agéntica — ciencia fundacional de agentes autónomos |
+| Agent design notes | ciencia de agentes — ciencia fundacional de agentes autónomos |
 | [Architecture](../architecture.md) | Arquitectura técnica completa |
 | [security.md](../security.md) | Modelo de seguridad, Privacy Shield, threat model |
 | [README.md](../../README.md) | Quickstart, instalación, uso de la API |
 | [CHANGELOG.md](../../CHANGELOG.md) | Historial de versiones y roadmap |
-| [sovereign_agent_manifesto.md](../sovereign_agent_manifesto.md) | Las 5 Especificaciones Soberanas |
+| [agent_manifesto.md](../agent_manifesto.md) | Las 5 Especificaciones Soberanas |
 
 ---
 

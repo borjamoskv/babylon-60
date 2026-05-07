@@ -76,7 +76,8 @@ async def process_next_job(engine: Any) -> bool:
 
             # Success
             await conn.execute(
-                "UPDATE facts SET semantic_status = 'indexed' WHERE id = ?", (fact_id,)
+                "UPDATE facts SET semantic_status = 'indexed' WHERE id = ? AND tenant_id = ?",
+                (fact_id, tenant_id),
             )
             await conn.execute("DELETE FROM enrichment_jobs WHERE id = ?", (job_id,))
             await conn.commit()
@@ -99,8 +100,9 @@ async def process_next_job(engine: Any) -> bool:
                 (attempts, str(e), f"+{delay_sec} seconds", job_id),
             )
             await conn.execute(
-                "UPDATE facts SET semantic_status = 'failed', semantic_error = ? WHERE id = ?",
-                (str(e), fact_id),
+                "UPDATE facts SET semantic_status = 'failed', semantic_error = ? "
+                "WHERE id = ? AND tenant_id = ?",
+                (str(e), fact_id, tenant_id),
             )
             await conn.commit()
             return True

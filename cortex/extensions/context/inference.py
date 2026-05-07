@@ -44,8 +44,9 @@ class ContextInference:
         5. Generate human-readable summary
     """
 
-    def __init__(self, conn: Optional[aiosqlite.Connection] = None):
+    def __init__(self, conn: Optional[aiosqlite.Connection] = None, tenant_id: str = "default"):
         self.conn = conn
+        self.tenant_id = tenant_id
 
     def infer(self, signals: list[Signal]) -> InferenceResult:
         """Run inference on a list of collected signals.
@@ -156,26 +157,47 @@ class ContextInference:
             return
 
         try:
+            has_tenant = await self._has_column("context_snapshots", "tenant_id")
+            columns = [
+                "active_project",
+                "confidence",
+                "signals_used",
+                "summary",
+                "signals_json",
+                "projects_json",
+            ]
+            values: list[object] = [
+                result.active_project,
+                result.confidence,
+                result.signals_used,
+                result.summary,
+                json.dumps([s.to_dict() for s in result.top_signals]),
+                json.dumps([{"project": p, "score": s} for p, s in result.projects_ranked]),
+            ]
+            if has_tenant:
+                columns.insert(0, "tenant_id")
+                values.insert(0, self.tenant_id)
+            columns_sql = ", ".join(columns)
+            placeholders = ", ".join("?" for _ in columns)
             await self.conn.execute(
-                """
-                INSERT INTO context_snapshots
-                    (active_project, confidence, signals_used, summary,
-                     signals_json, projects_json)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    result.active_project,
-                    result.confidence,
-                    result.signals_used,
-                    result.summary,
-                    json.dumps([s.to_dict() for s in result.top_signals]),
-                    json.dumps([{"project": p, "score": s} for p, s in result.projects_ranked]),
-                ),
+                f"INSERT INTO context_snapshots ({columns_sql}) VALUES ({placeholders})",
+                values,
             )
             await self.conn.commit()
             logger.debug("Context snapshot persisted (project=%s)", result.active_project)
         except (sqlite3.Error, OSError):
             logger.warning("Failed to persist context snapshot", exc_info=True)
+
+    async def _has_column(self, table_name: str, column_name: str) -> bool:
+        """Return whether a local table exposes a column."""
+        if self.conn is None:
+            return False
+        try:
+            async with self.conn.execute(f"PRAGMA table_info({table_name})") as cursor:
+                rows = await cursor.fetchall()
+        except (sqlite3.Error, OSError):
+            return False
+        return any(str(row[1]) == column_name for row in rows)
 
     async def get_history(self, limit: int = 10) -> list[dict]:
         """Retrieve past context snapshots."""
@@ -183,15 +205,21 @@ class ContextInference:
             return []
 
         try:
+            has_tenant = await self._has_column("context_snapshots", "tenant_id")
+            where_clause = "WHERE tenant_id = ?" if has_tenant else ""
+            params: tuple[object, ...] = (
+                (self.tenant_id, limit) if has_tenant else (limit,)
+            )
             async with self.conn.execute(
-                """
+                f"""
                 SELECT id, active_project, confidence, signals_used,
                        summary, signals_json, projects_json, created_at
                 FROM context_snapshots
+                {where_clause}
                 ORDER BY id DESC
                 LIMIT ?
                 """,
-                (limit,),
+                params,
             ) as cursor:
                 rows = await cursor.fetchall()
         except (sqlite3.Error, OSError):

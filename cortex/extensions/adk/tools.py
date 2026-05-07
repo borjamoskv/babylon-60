@@ -339,3 +339,9 @@ def adk_deprecate(
 
 ALL_TOOLS = [adk_store, adk_search, adk_status, adk_ledger_verify, adk_deprecate]
 """All available CORTEX tools for ADK agents."""
+
+# Google ADK exposes zero-argument status/verification tools in the legacy
+# surface, while direct Python callers can still pass tenant_id explicitly.
+_ZERO_ARG_DICT_SIGNATURE = inspect.Signature(return_annotation="dict[str, Any]")
+adk_status.__signature__ = _ZERO_ARG_DICT_SIGNATURE  # type: ignore[attr-defined]
+adk_ledger_verify.__signature__ = _ZERO_ARG_DICT_SIGNATURE  # type: ignore[attr-defined]

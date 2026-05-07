@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import importlib
 import logging
 import os
 from collections.abc import AsyncIterator
@@ -28,6 +29,8 @@ if TYPE_CHECKING:
 
 from cortex.database.schema import get_init_meta
 from cortex.engine.durability import PersistenceSupervisor
+from cortex.engine.agent_mixin import AgentMixin
+from cortex.engine.consensus import ConsensusMixin
 from cortex.engine.legacy_mixin import LegacyMixin
 from cortex.engine.memory_mixin import MemoryMixin
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
@@ -58,6 +61,17 @@ logger = logging.getLogger("cortex.engine.guards")
 
 # Limit the maximum number of tags per fact.
 MAX_TAGS_PER_FACT = 20
+MANDATORY_DEFAULT_GUARDS = frozenset(
+    {
+        "HealthGuardAdapter",
+        "VerifierGuardAdapter",
+    }
+)
+MANDATORY_DEFAULT_HOOKS = frozenset(
+    {
+        "LedgerCheckpointHook",
+    }
+)
 
 # We use the unified GuardPipeline for AX-II logic.
 
@@ -68,6 +82,8 @@ class CortexEngine(
     QueryMixin,
     MemoryMixin,
     TransactionMixin,
+    ConsensusMixin,
+    AgentMixin,
     OptimizationMixin,
     HealthMixin,
     SyncMixin,
@@ -102,6 +118,8 @@ class CortexEngine(
         self._ledger = None  # Wave 5: ImmutableLedger (lazy init)
         self._embedder: LocalEmbedder | None = None
         self._memory_manager = None  # Frontera 2: Tripartite Memory (lazy init)
+        self._trust_registry = None
+        self.vault: Any | None = None
         self._persistence = PersistenceSupervisor(self)
         self._system_state = "ACTIVE"
 
@@ -263,83 +281,102 @@ class CortexEngine(
 
     # ─── Guard Pipeline Registration ──────────────────────────────
 
+    def _register_default_component(
+        self,
+        *,
+        module_path: str,
+        component_name: str,
+        required: bool,
+        register: Any,
+    ) -> bool:
+        """Register one default guard or hook, failing closed when required."""
+        try:
+            module = importlib.import_module(module_path)
+            component = getattr(module, component_name)
+            register(component)
+            return True
+        except Exception as exc:  # noqa: BLE001
+            if required:
+                raise RuntimeError(
+                    f"FAIL-CLOSED: mandatory {component_name} registration failed: {exc}"
+                ) from exc
+            logger.warning(
+                "GuardPipeline optional %s registration skipped: %s",
+                component_name,
+                exc,
+            )
+            return False
+
     def _register_default_guards(self):
         """Build the GuardPipeline with all available guard adapters.
 
         Each adapter is imported defensively — if the underlying module
-        is not installed, the adapter is silently skipped. This ensures
-        the engine always starts, regardless of optional dependencies.
+        is not installed, optional adapters are skipped while the minimum
+        trust-critical set fails closed. `CORTEX_STRICT_GUARDS=1` upgrades
+        every default registration to fail closed.
         """
         from cortex.engine.guard_pipeline import GuardPipeline
 
         pipeline = GuardPipeline()
         db_path = str(self._db_path)
+        strict_all = os.environ.get("CORTEX_STRICT_GUARDS") == "1"
 
         # Pre-store guards (AX-II Hooks 1-3)
-        try:
-            from cortex.engine.guard_adapters import HealthGuardAdapter
-
-            pipeline.add_guard(HealthGuardAdapter(db_path))
-        except (ImportError, Exception) as e:  # noqa: BLE001
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
-                raise RuntimeError(f"FAIL-CLOSED: HealthGuardAdapter failed: {e}") from e
-            pass
-
-        try:
-            from cortex.engine.guard_adapters import ContradictionGuardAdapter
-
-            pipeline.add_guard(ContradictionGuardAdapter(db_path))
-        except (ImportError, Exception) as e:  # noqa: BLE001
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
-                raise RuntimeError(f"FAIL-CLOSED: ContradictionGuardAdapter failed: {e}") from e
-            pass
-
-        try:
-            from cortex.engine.guard_adapters import VerifierGuardAdapter
-
-            pipeline.add_guard(VerifierGuardAdapter())
-        except (ImportError, Exception) as e:  # noqa: BLE001
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
-                raise RuntimeError(f"FAIL-CLOSED: VerifierGuardAdapter failed: {e}") from e
-            pass
+        self._register_default_component(
+            module_path="cortex.engine.guard_adapters",
+            component_name="HealthGuardAdapter",
+            required=strict_all or "HealthGuardAdapter" in MANDATORY_DEFAULT_GUARDS,
+            register=lambda component: pipeline.add_guard(component(db_path)),
+        )
+        self._register_default_component(
+            module_path="cortex.engine.guard_adapters",
+            component_name="ContradictionGuardAdapter",
+            required=strict_all or "ContradictionGuardAdapter" in MANDATORY_DEFAULT_GUARDS,
+            register=lambda component: pipeline.add_guard(component(db_path)),
+        )
+        self._register_default_component(
+            module_path="cortex.engine.guard_adapters",
+            component_name="VerifierGuardAdapter",
+            required=strict_all or "VerifierGuardAdapter" in MANDATORY_DEFAULT_GUARDS,
+            register=lambda component: pipeline.add_guard(component()),
+        )
 
         # ZK-Swarm Cryptographic Guard (RFC-003 Phase 1)
-        try:
-            from cortex.engine.guard_adapters import ZKGuardAdapter
-
-            pipeline.add_guard(ZKGuardAdapter())
-        except (ImportError, Exception) as e:  # noqa: BLE001
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
-                raise RuntimeError(f"FAIL-CLOSED: ZKGuardAdapter failed: {e}") from e
-            pass
+        self._register_default_component(
+            module_path="cortex.engine.guard_adapters",
+            component_name="ZKGuardAdapter",
+            required=strict_all or "ZKGuardAdapter" in MANDATORY_DEFAULT_GUARDS,
+            register=lambda component: pipeline.add_guard(component()),
+        )
 
         # Post-store hooks (AX-II Hook 4 + signals + epistemic)
-        try:
-            from cortex.engine.guard_adapters import LedgerCheckpointHook
-
-            pipeline.add_post_hook(LedgerCheckpointHook(self))
-        except (ImportError, Exception) as e:  # noqa: BLE001
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
-                raise RuntimeError(f"FAIL-CLOSED: LedgerCheckpointHook failed: {e}") from e
-            pass
-
-        try:
-            from cortex.engine.guard_adapters import SignalEmitHook
-
-            pipeline.add_post_hook(SignalEmitHook())
-        except (ImportError, Exception) as e:  # noqa: BLE001
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
-                raise RuntimeError(f"FAIL-CLOSED: SignalEmitHook failed: {e}") from e
-            pass
-
-        try:
-            from cortex.engine.guard_adapters import EpistemicBreakerHook
-
-            pipeline.add_post_hook(EpistemicBreakerHook())
-        except (ImportError, Exception) as e:  # noqa: BLE001
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
-                raise RuntimeError(f"FAIL-CLOSED: EpistemicBreakerHook failed: {e}") from e
-            pass
+        self._register_default_component(
+            module_path="cortex.engine.guard_adapters",
+            component_name="LedgerCheckpointHook",
+            required=strict_all or "LedgerCheckpointHook" in MANDATORY_DEFAULT_HOOKS,
+            register=lambda component: pipeline.add_post_hook(
+                component(self),
+                required=strict_all or "LedgerCheckpointHook" in MANDATORY_DEFAULT_HOOKS,
+            ),
+        )
+        self._register_default_component(
+            module_path="cortex.engine.guard_adapters",
+            component_name="SignalEmitHook",
+            required=strict_all or "SignalEmitHook" in MANDATORY_DEFAULT_HOOKS,
+            register=lambda component: pipeline.add_post_hook(
+                component(),
+                required=strict_all or "SignalEmitHook" in MANDATORY_DEFAULT_HOOKS,
+            ),
+        )
+        self._register_default_component(
+            module_path="cortex.engine.guard_adapters",
+            component_name="EpistemicBreakerHook",
+            required=strict_all or "EpistemicBreakerHook" in MANDATORY_DEFAULT_HOOKS,
+            register=lambda component: pipeline.add_post_hook(
+                component(),
+                required=strict_all or "EpistemicBreakerHook" in MANDATORY_DEFAULT_HOOKS,
+            ),
+        )
 
         logger.debug(
             "GuardPipeline: %d guards, %d hooks registered",
@@ -383,8 +420,18 @@ class CortexEngine(
     def _get_embedder(self) -> LocalEmbedder:
         """Protocol requirement for SearchMixin."""
         if self._embedder is None:
-            self._embedder = LocalEmbedder()
+            from cortex import embeddings as embeddings_module
+
+            self._embedder = embeddings_module.LocalEmbedder()
         return self._embedder
+
+    def get_trust_registry(self):
+        """Return the process-local trust registry used by trust routes."""
+        if self._trust_registry is None:
+            from cortex.engine.trust_registry import TrustRegistry
+
+            self._trust_registry = TrustRegistry()
+        return self._trust_registry
 
     # ─── Connection ───────────────────────────────────────────────
 
@@ -570,6 +617,15 @@ class CortexEngine(
         return [
             Fact(**{k: v for k, v in r.items() if k in Fact.__dataclass_fields__}) for r in results
         ]
+
+    async def propagate_taint(self, fact_id: int, tenant_id: str = "default"):
+        """Propagate causal taint through the tenant-scoped causal graph."""
+        from cortex.engine.causality import AsyncCausalGraph
+
+        async with self.session() as conn:
+            graph = AsyncCausalGraph(conn)
+            await graph.ensure_table()
+            return await graph.propagate_taint(fact_id, tenant_id=tenant_id)
 
     async def shannon_report(self, project: str | None = None) -> dict:
         """Shannon entropy analysis of stored memory."""

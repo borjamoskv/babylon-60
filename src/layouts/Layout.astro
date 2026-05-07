@@ -5,6 +5,7 @@ interface Props {
   image?: string;
   canonicalURL?: string;
   type?: string;
+  lang?: string;
 }
 
 const { 
@@ -12,7 +13,8 @@ const {
   description = 'CORTEX adds tamper-evident memory, tenant-scoped audit trails, crypto/NFT fiscal evidence packs, and EU AI Act logging evidence to autonomous AI agents. Local-first and verifiable.',
   image = 'https://cortexpersist.com/og-image.jpg',
   canonicalURL = 'https://cortexpersist.com',
-  type = 'website'
+  type = 'website',
+  lang = 'en'
 } = Astro.props;
 
 const schemaData = {
@@ -37,7 +39,7 @@ const schemaData = {
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
@@ -48,6 +50,9 @@ const schemaData = {
     <meta name="description" content={description} />
     <meta name="keywords" content="AI memory, agent audit trails, EU AI Act Article 12, immutable ledger, local-first AI, multi-agent consensus, crypto fiscal audit, CORTEX Persist" />
     <link rel="canonical" href={canonicalURL} />
+    <link rel="alternate" hreflang="en" href="https://cortexpersist.com/" />
+    <link rel="alternate" hreflang="es" href="https://cortexpersist.com/es/" />
+    <link rel="alternate" hreflang="x-default" href="https://cortexpersist.com/" />
     <meta name="theme-color" content="#080a08">
 
     <!-- Open Graph / Social -->

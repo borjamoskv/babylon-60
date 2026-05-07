@@ -46,7 +46,7 @@ class NativeVLLMProvider(BaseProvider):
         quantization: str | None = None,
     ) -> None:
         try:
-            from vllm import AsyncEngineArgs, AsyncLLMEngine
+            from vllm import AsyncEngineArgs, AsyncLLMEngine  # pyright: ignore[reportMissingImports]
         except ImportError as e:
             logger.critical("vLLM native module missing. Cannot initialize in-process engine.")
             raise RuntimeError("Instala 'vllm' para usar NativeVLLMProvider.") from e
@@ -98,7 +98,7 @@ class NativeVLLMProvider(BaseProvider):
         intent: IntentProfile = IntentProfile.GENERAL,
     ) -> str:
         """Sovereign In-Process Completion."""
-        from vllm import SamplingParams
+        from vllm import SamplingParams  # pyright: ignore[reportMissingImports]
 
         request_id = hashlib.sha256(f"{time.time()}_{prompt[:20]}".encode()).hexdigest()[:16]
 
@@ -182,7 +182,7 @@ class NativeVLLMProvider(BaseProvider):
         intent: IntentProfile = IntentProfile.GENERAL,
     ) -> AsyncGenerator[str, None]:
         """Stream output natively directly from vLLM AsyncEngine."""
-        from vllm import SamplingParams
+        from vllm import SamplingParams  # pyright: ignore[reportMissingImports]
 
         request_id = hashlib.sha256(f"str_{time.time()}_{prompt[:20]}".encode()).hexdigest()[:16]
 

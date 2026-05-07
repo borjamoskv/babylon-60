@@ -114,6 +114,7 @@ inspect_*.py
 verify_*.py
 smoke_test_*.py
 fix_*.py
+!cortex/extensions/health/fix_registry.py
 analyze_*.py
 run_*.py
 store_*.py
@@ -248,3 +249,4 @@ xokas-elevator/
 yt-notebooklm-ext/
 auramem/
 nexus-dashboard/.next/
+.vercel

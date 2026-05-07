@@ -29,7 +29,8 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Coroutine
+from typing import Any
+from collections.abc import Callable, Coroutine
 
 logger = logging.getLogger("cortex.daemon.scheduler")
 
@@ -264,7 +265,6 @@ class SovereignScheduler:
         """Evaluate all schedules and fire due tasks."""
         now = datetime.now(timezone.utc)
         now_iso = now.isoformat()
-        now_ts = time.monotonic()
 
         with self._conn() as conn:
             due = conn.execute(
@@ -402,7 +402,7 @@ class SovereignScheduler:
     def _next_cron_time(cron_expr: str) -> str:
         """Compute next cron fire time. Falls back to 1h if croniter missing."""
         try:
-            from croniter import croniter
+            from croniter import croniter  # pyright: ignore[reportMissingModuleSource]
 
             return croniter(cron_expr, datetime.now(timezone.utc)).get_next(
                 datetime

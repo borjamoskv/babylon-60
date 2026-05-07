@@ -9,7 +9,7 @@ import hashlib
 import json
 import logging
 import random
-import time
+import threading
 from pathlib import Path
 from typing import Any, Final
 
@@ -30,6 +30,7 @@ class FiatOracle:
         self.engine = engine
         self.interval = interval
         self.running = False
+        self._stop_event = threading.Event()
 
         # Operation Citadel: Persistent Queue approach (No Single File Spoilage)
         self.queue_dir = Path("~/.cortex/fiat_queue").expanduser()
@@ -53,13 +54,15 @@ class FiatOracle:
         """For running in MoskvDaemon separate thread."""
         logger.info("💸 [FIAT_ORACLE] (Thread) started.")
         self.running = True
+        self._stop_event.clear()
         while self.running:
             try:
                 # We use sync checks here if called from a thread
                 self._check_signals_sync()
             except (OSError, ValueError, CortexError) as e:
                 logger.error("❌ [FIAT_ORACLE] (Thread) Error: %s", e)
-            time.sleep(self.interval)
+            if self._stop_event.wait(self.interval):
+                break
 
     def _verify_signature(self, data: dict, signature: str) -> bool:
         """
@@ -251,7 +254,8 @@ class FiatOracle:
                     MAX_RETRIES,
                     delay,
                 )
-                time.sleep(delay)
+                if self._stop_event.wait(delay):
+                    raise CortexError("FiatOracle stopped during retry backoff") from e
 
         logger.critical(
             "💀 [FIAT_ORACLE] Falla catastrófica almacenando TX %s tras %s intentos.",
@@ -270,3 +274,4 @@ class FiatOracle:
 
     def stop(self):
         self.running = False
+        self._stop_event.set()

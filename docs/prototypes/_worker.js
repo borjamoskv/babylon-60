@@ -7,11 +7,28 @@
  *
  * Required Cloudflare Pages environment variable:
  * - CORTEX_API_ORIGIN=https://your-cortex-api.vercel.app
+ *
+ * Optional Cloudflare Pages secret:
+ * - VERCEL_AUTOMATION_BYPASS_SECRET=...
  */
 
 export default {
     async fetch(request, env) {
         const url = new URL(request.url);
+        const orgHosts = new Set(["cortexpersist.org", "www.cortexpersist.org"]);
+        const orgSinglePageRoutes = new Set([
+            "/",
+            "/index.html",
+            "/governance/",
+            "/research/",
+            "/security-posture/",
+            "/evidence/",
+        ]);
+
+        if (orgHosts.has(url.hostname.toLowerCase()) && orgSinglePageRoutes.has(url.pathname)) {
+            const orgUrl = new URL("/org/index.html", url);
+            return env.ASSETS.fetch(new Request(orgUrl, request));
+        }
 
         if (url.pathname.startsWith("/v1/")) {
             const apiOrigin = env.CORTEX_API_ORIGIN;
@@ -27,6 +44,12 @@ export default {
             headers.set("X-CORTEX-Edge", "cloudflare-pages");
             headers.set("X-Forwarded-Host", url.host);
             headers.delete("host");
+            headers.delete("x-vercel-protection-bypass");
+            headers.delete("x-vercel-set-bypass-cookie");
+
+            if (env.VERCEL_AUTOMATION_BYPASS_SECRET) {
+                headers.set("x-vercel-protection-bypass", env.VERCEL_AUTOMATION_BYPASS_SECRET);
+            }
 
             const init = {
                 method: request.method,

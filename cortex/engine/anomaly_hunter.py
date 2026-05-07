@@ -114,8 +114,10 @@ class AnomalyHunterEngine:
                 if not cause_ts:
                     continue
 
-                # type: ignore
-                effect_ts = datetime.fromisoformat(fact.created_at.replace("Z", "+00:00"))
+                created_at = fact.created_at
+                if created_at is None:
+                    continue
+                effect_ts = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
 
                 if cause_ts > effect_ts:
                     inversions.append(

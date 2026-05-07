@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import _sqlite3
 import inspect
 import logging
+import sqlite3
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -14,6 +16,8 @@ from cortex.types.models import StoreRequest
 
 router = APIRouter(tags=["trust"])
 logger = logging.getLogger("uvicorn.error")
+_SQLITE_ERRORS = (sqlite3.Error, _sqlite3.Error)
+_BACKEND_ERRORS = (*_SQLITE_ERRORS, OSError, RuntimeError, ValueError)
 
 
 class TrustProfileResponse(BaseModel):
@@ -95,8 +99,8 @@ async def get_compliance_status(
 ) -> ComplianceReport:
     """Generate aggregate compliance report (EU AI Act Art 12)."""
     try:
-        verification = await engine.verify_ledger()
-        stats = await engine.stats()
+        verification = await engine.verify_ledger(tenant_id=auth.tenant_id)
+        stats = await engine.stats(tenant_id=auth.tenant_id)
 
         # Heuristic scoring for Article 12
         audit_coverage = stats.get("causal_facts", 0) / max(stats.get("active_facts", 1), 1)
@@ -111,6 +115,6 @@ async def get_compliance_status(
             compliance_level="Sovereign-Alpha",
             article_12_status="LOGGED_AND_VERIFIED",
         )
-    except Exception as e:
+    except _BACKEND_ERRORS as e:
         logger.error("Compliance report generation failed: %s", e)
         raise HTTPException(status_code=500, detail="Failed to generate compliance report") from e

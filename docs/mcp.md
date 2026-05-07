@@ -49,6 +49,10 @@ cortex mcp trust --transport sse --port 5002
 
 The default documented launch path remains stdio via `python -m cortex.mcp`.
 
+The legacy Aether-specific MCP server is intentionally narrower: it exposes
+memory search, bounded file reads, decision storage, and swarm reporting only.
+It does not expose arbitrary shell execution to MCP clients.
+
 ---
 
 ## Compatible IDEs

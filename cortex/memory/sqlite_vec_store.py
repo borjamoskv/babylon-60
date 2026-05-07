@@ -189,9 +189,13 @@ class SovereignVectorStoreL2:
             ]
 
             cursor = self._conn.execute(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'facts_meta%'"
+                "SELECT name, sql FROM sqlite_master WHERE type='table' AND name LIKE 'facts_meta%'"
             )
-            tables = [row[0] for row in cursor.fetchall()]
+            tables = [
+                row[0]
+                for row in cursor.fetchall()
+                if "_fts" not in row[0] and "VIRTUAL TABLE" not in (row[1] or "").upper()
+            ]
 
             for tb in tables:
                 info_cursor = self._conn.execute(f"PRAGMA table_info({tb})")  # nosec B608

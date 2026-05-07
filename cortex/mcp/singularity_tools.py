@@ -12,12 +12,12 @@ from cortex.extensions.signals.bus import SignalBus
 # Sovereign Memory & Execution Imports
 sys.path.append("/Users/borjafernandezangulo/Cortex-Persist/cortex-core")
 try:
-    import vsa_sdm_bridge as vsa
+    import vsa_sdm_bridge as vsa  # pyright: ignore[reportMissingImports]
 except ImportError:
     vsa = None
 
 try:
-    import chromadb
+    import chromadb  # pyright: ignore[reportMissingImports]
 except ImportError:
     chromadb = None
 
@@ -39,7 +39,7 @@ def _get_compacted_skill(skill_name: str) -> str:
     if not os.path.exists(skill_path):
         return f"Error: Skill '{skill_name}' not found at {skill_path}."
 
-    with open(skill_path, "r", encoding="utf-8") as f:
+    with open(skill_path, encoding="utf-8") as f:
         content = f.read()
 
     lines = [
@@ -135,7 +135,7 @@ def register_singularity_tools(mcp) -> None:
         global _LEDGER_STATE
         if _LEDGER_STATE is None:
             if os.path.exists(STATE_FILE):
-                with open(STATE_FILE, "r") as f:
+                with open(STATE_FILE) as f:
                     try:
                         _LEDGER_STATE = json.load(f)
                     except json.JSONDecodeError:
@@ -191,7 +191,7 @@ def register_singularity_tools(mcp) -> None:
         try:
             queue = {"pending_tasks": []}
             if os.path.exists(SWARM_QUEUE_FILE):
-                with open(SWARM_QUEUE_FILE, "r") as f:
+                with open(SWARM_QUEUE_FILE) as f:
                     queue = json.load(f)
             
             task = {
@@ -243,4 +243,8 @@ def register_singularity_tools(mcp) -> None:
             return f"[ERROR] Audit Dispatch Failure: {str(e)}"
 
 if __name__ == "__main__":
+    from mcp.server.fastmcp import FastMCP
+
+    mcp = FastMCP("CORTEX-SINGULARITY-MCP")
+    register_singularity_tools(mcp)
     mcp.run()

@@ -97,8 +97,8 @@ async def _sync_ghosts(engine: CortexEngine, path: Path, result: SyncResult) -> 
         try:
             await conn.execute(
                 "UPDATE facts SET valid_until = ? "
-                "WHERE fact_type = 'ghost' AND valid_until IS NULL",
-                (result.synced_at,),
+                "WHERE tenant_id = ? AND fact_type = 'ghost' AND valid_until IS NULL",
+                (result.synced_at, "default"),
             )
             await conn.commit()
         except sqlite3.Error as e:

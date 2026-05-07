@@ -1,6 +1,6 @@
 [project]
 name = "cortex-persist"
-version = "0.3.0b2"
+version = "0.3.0b8"
 description = "Cryptographic memory integrity, audit trails, and verifiable lineage for AI agents."
 readme = "README.md"
 license = "Apache-2.0"
@@ -96,6 +96,7 @@ all = [
 
 [project.scripts]
 cortex = "cortex.cli:cli"
+moskvbot = "cortex.cli.moskvbot_cmds:main"
 moskv-daemon = "cortex.daemon_cli:main"
 cortex-adk = "cortex.adk.runner:main"
 cortex-mcp = "cortex.mcp.server:run_server"

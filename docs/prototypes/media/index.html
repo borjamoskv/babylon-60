@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Curation | CORTEX</title>
+    <meta name="description" content="Curaduría musical y audiovisual: playlist, criterio, archivo y enlaces.">
+    <meta name="theme-color" content="#080808">
+    <meta name="media-api-base" content="">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23080808'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Arial' font-size='17' font-weight='700' fill='%23f2efe9'%3EBR%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="media.css">
+</head>
+<body>
+    <div class="grain" aria-hidden="true"></div>
+    <header class="topbar">
+        <a class="brand" href="#top" aria-label="Media curation inicio">
+            <span>BR</span>
+            <strong>Media Curation</strong>
+        </a>
+        <nav aria-label="Navegación">
+            <a href="#playlist">Playlist</a>
+            <a href="#archivo">Archivo</a>
+            <a href="#criterio">Criterio</a>
+            <a href="/" rel="noopener noreferrer">CORTEX</a>
+        </nav>
+    </header>
+
+    <main id="top">
+        <section class="hero">
+            <div class="hero-copy">
+                <p class="kicker">Curaduría musical</p>
+                <h1>Media Curation</h1>
+                <p class="lead">Una mesa de selección para dejar que las piezas raras respiren: escucha, corte, contexto y replay.</p>
+                <div class="actions">
+                    <a class="primary" href="#playlist">Escuchar</a>
+                    <a class="secondary" href="https://open.spotify.com/playlist/6WHIabEaqEd6cFPad3gSrx" target="_blank" rel="noopener noreferrer">Abrir playlist</a>
+                </div>
+            </div>
+            <aside class="signal-panel" aria-label="Estado curatorial">
+                <span>live shelf</span>
+                <strong>taste -> context -> replay</strong>
+                <p>La playlist vive como objeto sonoro, no como bloque promocional.</p>
+            </aside>
+        </section>
+
+        <section class="playlist-section" id="playlist">
+            <div class="section-heading">
+                <p class="kicker">Playlist shelf</p>
+                <h2>La escucha va primero.</h2>
+            </div>
+            <div class="player-shell">
+                <iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/6WHIabEaqEd6cFPad3gSrx?utm_source=generator" width="100%" height="152" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" title="Media playlist"></iframe>
+            </div>
+        </section>
+
+        <section class="archive-section" id="archivo">
+            <div class="section-heading">
+                <p class="kicker">Archivo mutable</p>
+                <h2>Los vídeos cambian en cada visita.</h2>
+                <p class="section-copy">Una selección distinta del archivo aparece al cargar la página. El orden no pretende cerrar canon: abre recorrido.</p>
+            </div>
+            <div class="archive-stage">
+                <div class="video-player" data-video-player>
+                    <button class="video-poster" type="button" data-video-open>
+                        <img data-video-poster src="" alt="" width="960" height="540" loading="lazy" decoding="async">
+                        <span aria-hidden="true"></span>
+                        <strong data-video-title></strong>
+                    </button>
+                </div>
+                <div class="archive-grid" data-archive-grid aria-label="Selección rotativa del archivo"></div>
+            </div>
+        </section>
+
+        <section class="criteria-section" id="criterio">
+            <div class="section-heading">
+                <p class="kicker">Criterio</p>
+                <h2>Curar es cortar con memoria.</h2>
+            </div>
+            <div class="criteria-grid">
+                <article>
+                    <span>01</span>
+                    <h3>Rastro</h3>
+                    <p>Origen, enlace y momento de escucha quedan claros.</p>
+                </article>
+                <article>
+                    <span>02</span>
+                    <h3>Tensión</h3>
+                    <p>Entra lo que desplaza el oído, no lo que rellena.</p>
+                </article>
+                <article>
+                    <span>03</span>
+                    <h3>Replay</h3>
+                    <p>La pieza debe aguantar una segunda vuelta.</p>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <div class="mark-layer" data-mark-layer aria-hidden="true"></div>
+    <output class="mark-counter" data-mark-counter>0 marcas</output>
+
+    <script>
+    (() => {
+        const archiveGrid = document.querySelector('[data-archive-grid]');
+        const videoPlayer = document.querySelector('[data-video-player]');
+        const videoOpen = document.querySelector('[data-video-open]');
+        const videoPoster = document.querySelector('[data-video-poster]');
+        const videoTitle = document.querySelector('[data-video-title]');
+        const markLayer = document.querySelector('[data-mark-layer]');
+        const markCounter = document.querySelector('[data-mark-counter]');
+        const apiBaseMeta = document.querySelector('meta[name="media-api-base"]');
+        const archiveStorageKey = 'media-curation-last-archive-v1';
+        const markStorageKey = 'media-curation-marks-v1';
+        const maxMarks = 220;
+        let activeVideo = null;
+        let lastMarkAt = 0;
+
+        const archiveVideos = [
+            { id: 'b9ktVQN48OU', title: 'Les Buko [4K]', tone: '4K ritual', duration: '6:15' },
+            { id: 'N66gquS-zLw', title: 'COHERENCIA RARA 42', tone: 'bizarrada', duration: '2:22' },
+            { id: 'Izt6bzo0PO8', title: 'El cuy del altiplano', tone: 'altiplano', duration: '2:50' },
+            { id: 'KuBNnC4mYuU', title: 'Jugar la brisca con Amavisca', tone: 'brisca', duration: '4:44' },
+            { id: 'x8E9HInpzE4', title: 'Glitch in the mirror [4K]', tone: 'mirror fracture', duration: '5:35' },
+            { id: 'NYhOQTcNLkA', title: 'Ecos del cosmos [4K]', tone: 'cosmos', duration: '3:50' },
+            { id: 'SvAy_k8TQAg', title: 'Hipotenusas ilegales en el puerto', tone: 'puerto', duration: '5:27' },
+            { id: 'NJqC3Xf6RzE', title: 'PATADAS', tone: 'golpe frontal', duration: '5:10' },
+            { id: 'LDzdKd4WxvI', title: '4 DROGAS', tone: 'pieza larga', duration: '10:37' },
+            { id: 'tMorCDfedf8', title: 'JAR TO THE SYSTEM', tone: 'sistema jarana', duration: '4:38' },
+            { id: '3iQFsgZrDZk', title: 'The Beachland Ballroom Remix', tone: 'warehouse', duration: '4:09' },
+            { id: 'rmzKC8AYkVw', title: '32 Electronic Music Visual Tracks', tone: 'videoteca continua', duration: '2:38:44' },
+            { id: 'T_rU7WfOVTI', title: 'El Ravero VISUAL Dj SET', tone: 'visual set', duration: '2:00:53' }
+        ];
+
+        const shuffle = (items) => {
+            const copy = [...items];
+            for (let index = copy.length - 1; index > 0; index -= 1) {
+                const next = Math.floor(Math.random() * (index + 1));
+                [copy[index], copy[next]] = [copy[next], copy[index]];
+            }
+            return copy;
+        };
+
+        const thumbnail = (id) => 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
+
+        const pickArchiveSelection = () => {
+            let selected = shuffle(archiveVideos).slice(0, 6);
+            const signature = () => selected.map((video) => video.id).join(',');
+            let previous = '';
+            try {
+                previous = localStorage.getItem(archiveStorageKey) || '';
+            } catch (_) {
+                previous = '';
+            }
+            for (let attempt = 0; attempt < 8 && signature() === previous; attempt += 1) {
+                selected = shuffle(archiveVideos).slice(0, 6);
+            }
+            try {
+                localStorage.setItem(archiveStorageKey, signature());
+            } catch (_) {
+                // Archive rotation still works without remembering the prior visit.
+            }
+            return selected;
+        };
+
+        const embedUrl = (id) => {
+            const params = new URLSearchParams({ rel: '0', modestbranding: '1', playsinline: '1' });
+            return 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) + '?' + params.toString();
+        };
+
+        const resolveApiBase = () => {
+            const configured = (globalThis.BORJA_API_BASE_URL || apiBaseMeta?.content || '').trim();
+            return (configured || globalThis.location.origin).replace(/\/$/, '');
+        };
+
+        const canUseCollectiveMarks = () => {
+            if (globalThis.location.protocol === 'file:') return false;
+            return !['localhost', '127.0.0.1', '::1'].includes(globalThis.location.hostname);
+        };
+
+        const markEndpoint = () => new URL('/v1/media/marks', resolveApiBase()).toString();
+
+        const setActiveVideo = (video, autoplay = false) => {
+            activeVideo = video;
+            if (videoPoster) {
+                videoPoster.src = thumbnail(video.id);
+                videoPoster.alt = '';
+            }
+            if (videoTitle) videoTitle.textContent = video.title;
+            document.querySelectorAll('[data-video-id]').forEach((button) => {
+                button.classList.toggle('active', button.dataset.videoId === video.id);
+            });
+            if (autoplay && videoPlayer) {
+                const iframe = document.createElement('iframe');
+                iframe.src = embedUrl(video.id);
+                iframe.title = video.title + ' video';
+                iframe.loading = 'lazy';
+                iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+                iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+                iframe.allowFullscreen = true;
+                videoPlayer.replaceChildren(iframe);
+            }
+        };
+
+        const renderArchive = () => {
+            if (!archiveGrid) return;
+            const selected = pickArchiveSelection();
+            archiveGrid.replaceChildren(...selected.map((video) => {
+                const button = document.createElement('button');
+                button.className = 'archive-card';
+                button.type = 'button';
+                button.dataset.videoId = video.id;
+                button.innerHTML = '<img src="' + thumbnail(video.id) + '" alt="" loading="lazy" decoding="async" width="320" height="180"><span>' + video.tone + '</span><strong>' + video.title + '</strong><em>' + video.duration + '</em>';
+                button.addEventListener('click', () => setActiveVideo(video, true));
+                return button;
+            }));
+            setActiveVideo(selected[0], false);
+        };
+
+        const readMarks = () => {
+            try {
+                const parsed = JSON.parse(localStorage.getItem(markStorageKey) || '[]');
+                return Array.isArray(parsed) ? parsed.filter((mark) => Number.isFinite(mark.x) && Number.isFinite(mark.y)) : [];
+            } catch (_) {
+                return [];
+            }
+        };
+
+        const normalizeMarks = (marks) => {
+            if (!Array.isArray(marks)) return [];
+            return marks.filter((mark) => (
+                mark &&
+                Number.isFinite(mark.x) &&
+                Number.isFinite(mark.y) &&
+                typeof mark.hash === 'string'
+            )).map((mark) => ({
+                x: mark.x,
+                y: mark.y,
+                section: typeof mark.section === 'string' ? mark.section : 'page',
+                t: typeof mark.t === 'string' ? mark.t : '',
+                color: mark.color || mark.hue || '#d6b25e',
+                hash: mark.hash
+            }));
+        };
+
+        const writeMarks = (marks) => {
+            try {
+                localStorage.setItem(markStorageKey, JSON.stringify(marks.slice(-maxMarks)));
+            } catch (_) {
+                // local persistence can be unavailable in private browsing.
+            }
+        };
+
+        const renderMarks = () => {
+            if (!markLayer) return;
+            const pageHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight, 1);
+            const marks = readMarks();
+            markLayer.style.height = pageHeight + 'px';
+            markLayer.replaceChildren(...marks.map((mark) => {
+                const dot = document.createElement('i');
+                dot.className = 'memory-mark';
+                dot.style.left = (mark.x * 100) + '%';
+                dot.style.top = (mark.y * pageHeight) + 'px';
+                dot.style.setProperty('--mark-color', mark.color || mark.hue || '#d6b25e');
+                return dot;
+            }));
+            if (markCounter) markCounter.textContent = marks.length + (marks.length === 1 ? ' marca' : ' marcas');
+        };
+
+        const mergeMarks = (incoming) => {
+            const byHash = new Map();
+            [...readMarks(), ...normalizeMarks(incoming)].forEach((mark) => {
+                byHash.set(mark.hash || mark.t + ':' + mark.x + ':' + mark.y, mark);
+            });
+            writeMarks(Array.from(byHash.values()));
+            renderMarks();
+        };
+
+        const fetchCollectiveMarks = async () => {
+            if (!canUseCollectiveMarks()) return;
+            try {
+                const response = await fetch(markEndpoint(), {
+                    method: 'GET',
+                    credentials: 'omit',
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!response.ok) return;
+                const data = await response.json();
+                mergeMarks(data.marks);
+            } catch (_) {
+                // Local marks keep working when the public API is unavailable.
+            }
+        };
+
+        const nearestSection = (pageY) => {
+            const sections = Array.from(document.querySelectorAll('main section[id]'));
+            return sections.find((section) => {
+                const rect = section.getBoundingClientRect();
+                const top = rect.top + scrollY;
+                return pageY >= top && pageY <= top + rect.height;
+            })?.id || 'page';
+        };
+
+        const persistCollectiveMark = async (localHash, mark) => {
+            if (!canUseCollectiveMarks()) return;
+            try {
+                const response = await fetch(markEndpoint(), {
+                    method: 'POST',
+                    credentials: 'omit',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ x: mark.x, y: mark.y, section: mark.section })
+                });
+                if (!response.ok) return;
+                const stored = normalizeMarks([await response.json()])[0];
+                if (!stored) return;
+                writeMarks(readMarks().map((item) => item.hash === localHash ? stored : item));
+                renderMarks();
+            } catch (_) {
+                // Local marks are the offline fallback.
+            }
+        };
+
+        const leaveMark = (event) => {
+            const now = Date.now();
+            if (now - lastMarkAt < 120) return;
+            lastMarkAt = now;
+            const width = Math.max(document.documentElement.clientWidth, 1);
+            const height = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight, 1);
+            const pageY = event.clientY + scrollY;
+            const palette = ['#d6b25e', '#1db954', '#ff3b30', '#88d9ff', '#f2efe9'];
+            const marks = readMarks();
+            const localHash = 'local-' + now.toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+            const section = nearestSection(pageY);
+            const color = palette[Math.floor(Math.random() * palette.length)];
+            const x = Math.round((event.clientX / width) * 1000) / 1000;
+            const y = Math.round((pageY / height) * 1000) / 1000;
+            const mark = {
+                x,
+                y,
+                section,
+                color,
+                t: new Date(now).toISOString(),
+                hash: localHash
+            };
+            marks.push({
+                ...mark
+            });
+            writeMarks(marks);
+            renderMarks();
+            persistCollectiveMark(localHash, mark);
+        };
+
+        videoOpen?.addEventListener('click', () => {
+            if (activeVideo) setActiveVideo(activeVideo, true);
+        });
+        renderArchive();
+        renderMarks();
+        fetchCollectiveMarks();
+        addEventListener('resize', renderMarks, { passive: true });
+        addEventListener('load', renderMarks, { once: true });
+        document.addEventListener('pointerdown', leaveMark, { capture: true, passive: true });
+    })();
+    </script>
+</body>
+</html>

@@ -2,6 +2,13 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from cortex.extensions.revenue.vectors.arbitrage import ArbitrageVector
+    from cortex.extensions.revenue.vectors.microsaas import MicroSaaSVector
+    from cortex.extensions.revenue.vectors.outreach import OutreachVector
+
 __all__ = [
     "MicroSaaSVector",
     "ArbitrageVector",

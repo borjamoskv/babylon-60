@@ -9,7 +9,7 @@
 
 ## ✅ Foundation Lineage — Delivered In The Current Package Line
 
-**Local-First Sovereign Trust layer.**
+**Local-first trust layer.**
 
 - [x] **Tamper-evident Memory Engine** (SQLite + WAL + 384-dim ONNX Embeddings)
 - [x] **Hash-Chained Ledger** (SHA-256 blocks for facts and decisions)
@@ -33,7 +33,7 @@
 
 ---
 
-## 🔮 v1.0.0 — Vision (Sovereign Cloud)
+## 🔮 v1.0.0 — Vision (Managed Cloud)
 
 **Managed Enterprise Platform.**
 
@@ -55,4 +55,4 @@
 
 ---
 
-*Roadmap subject to Sovereign revision by borjamoskv.*
+*Roadmap subject to project review by the maintainers.*

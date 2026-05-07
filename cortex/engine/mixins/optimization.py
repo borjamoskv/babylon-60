@@ -12,6 +12,7 @@ import time
 from collections import deque
 from concurrent.futures import ProcessPoolExecutor
 from enum import Enum
+from functools import partial
 from typing import Any, ClassVar, Optional, final
 
 import aiosqlite
@@ -235,33 +236,45 @@ class OptimizationMixin:
         project: str,
         action: str,
         detail: dict[str, Any],
+        tenant_id: str = "default",
     ) -> int:
         """Unified transaction logging with caching and batching."""
         dj = canonical_json(detail)
         ts = now_iso()
 
-        last_hash = self._cache.get(f"last_hash_{project}")
+        last_hash = self._cache.get(f"last_hash_{tenant_id}_{project}")
         if not last_hash:
             async with conn.execute(
-                "SELECT hash FROM transactions ORDER BY id DESC LIMIT 1"
+                "SELECT hash FROM transactions WHERE tenant_id = ? ORDER BY id DESC LIMIT 1",
+                (tenant_id,),
             ) as cursor:
                 prev = await cursor.fetchone()
                 last_hash = prev[0] if prev else "GENESIS"
 
         loop = asyncio.get_running_loop()
+        hash_job = partial(
+            compute_tx_hash,
+            last_hash,
+            project,
+            action,
+            dj,
+            ts,
+            tenant_id=tenant_id,
+        )
         th = await loop.run_in_executor(
-            OptimizationMixin._executor, compute_tx_hash, last_hash, project, action, dj, ts
+            OptimizationMixin._executor,
+            hash_job,
         )
 
         sql = (
-            "INSERT INTO transactions (project, action, detail, prev_hash, hash, timestamp) "
-            "VALUES (?, ?, ?, ?, ?, ?)"
+            "INSERT INTO transactions (tenant_id, project, action, detail, prev_hash, hash, timestamp) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)"
         )
-        params = (project, action, dj, last_hash, th, ts)
+        params = (tenant_id, project, action, dj, last_hash, th, ts)
 
         res = await self.write_optimized(sql, params)
         if res.is_ok():
             tx_id = res.unwrap()
-            self._cache.set(f"last_hash_{project}", th)
+            self._cache.set(f"last_hash_{tenant_id}_{project}", th)
             return tx_id
         raise RuntimeError(f"Failed to log transaction: {res.err()}")  # type: ignore

@@ -88,7 +88,7 @@ class ComposerEngine:
             )
 
             res = await self.router.execute_resilient(prompt)
-            if not res.is_ok():
+            if isinstance(res, Err):
                 logger.error("Error en router de síntesis: %s", res.error)
                 last_error = res.error or "Unknown synthesis error"
                 attempt += 1
@@ -119,20 +119,21 @@ class ComposerEngine:
                 logger.info("📸 [COMPOSER] Ejecutando QA Visual...")
                 qa_res = await self.auditor.audit_component(mock_html)
 
-            if qa_res.is_ok():
+            if isinstance(qa_res, Ok):
                 logger.info("💎 [COMPOSER] Estructura Estética VERIFICADA en intento %d.", attempt)
                 return Ok(files)
 
             # QA Visual falló: realimenta el error al LLM
+            qa_error = qa_res.error
             logger.warning("💥 [COMPOSER] QA Visual (Aesthetic) Falló: %s", qa_res.error)
             working_memory.append({"role": "assistant", "content": response})
             working_memory.append(
                 {
                     "role": "user",
-                    "content": f"El QA de CORTEX rechazó tu componente por la siguiente vulnerabilidad estética:\n{qa_res.error}\n\nCorrige el CSS o la estructura para cumplir la ley #0A0A0A.",
+                    "content": f"El QA de CORTEX rechazó tu componente por la siguiente vulnerabilidad estética:\n{qa_error}\n\nCorrige el CSS o la estructura para cumplir la ley #0A0A0A.",
                 }
             )
-            last_error = f"QA Failed: {qa_res.error}"
+            last_error = f"QA Failed: {qa_error}"
             attempt += 1
 
         return Err(f"Síntesis JIT exhausta tras {max_retries} intentos. Último error: {last_error}")

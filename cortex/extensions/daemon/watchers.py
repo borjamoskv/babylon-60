@@ -29,21 +29,26 @@ from pathlib import Path
 from typing import Any
 
 try:
-    from watchdog.events import FileSystemEvent, FileSystemEventHandler
-    from watchdog.observers import Observer
+    from watchdog.events import FileSystemEvent as _ImportedFileSystemEvent
+    from watchdog.events import FileSystemEventHandler as _ImportedFileSystemEventHandler
+    from watchdog.observers import Observer as _ImportedObserver
 
+    _file_system_event_cls: Any = _ImportedFileSystemEvent
+    _file_system_event_handler_cls: Any = _ImportedFileSystemEventHandler
+    _observer_cls: Any = _ImportedObserver
     _WATCHDOG_AVAILABLE = True
 except ImportError:
 
-    class FileSystemEventHandler:  # type: ignore[no-redef]
+    class _FallbackFileSystemEventHandler:
         """Stub for missing watchdog."""
 
-    class FileSystemEvent:  # type: ignore[no-redef]
+    class _FallbackFileSystemEvent:
         """Stub."""
 
         src_path: str = ""
+        is_directory: bool = False
 
-    class Observer:  # type: ignore[no-redef]
+    class _FallbackObserver:
         """Stub."""
 
         def schedule(self, *a, **kw):
@@ -55,10 +60,17 @@ except ImportError:
         def stop(self):
             pass
 
-        def join(self):
+        def join(self, timeout: float | None = None):
             pass
 
+    _file_system_event_cls = _FallbackFileSystemEvent
+    _file_system_event_handler_cls = _FallbackFileSystemEventHandler
+    _observer_cls = _FallbackObserver
     _WATCHDOG_AVAILABLE = False
+
+FileSystemEvent: Any = _file_system_event_cls
+FileSystemEventHandler: Any = _file_system_event_handler_cls
+Observer: Any = _observer_cls
 
 logger = logging.getLogger("cortex.daemon.watchers")
 
@@ -120,19 +132,19 @@ class _UnifiedHandler(FileSystemEventHandler):
         self._last_events[path] = now
         return True
 
-    def on_modified(self, event: FileSystemEvent) -> None:
+    def on_modified(self, event: Any) -> None:
         if event.is_directory:
             return
         if self._should_handle(event.src_path):
             self._emit("fs.modified", event.src_path)
 
-    def on_created(self, event: FileSystemEvent) -> None:
+    def on_created(self, event: Any) -> None:
         if event.is_directory:
             return
         if self._should_handle(event.src_path):
             self._emit("fs.created", event.src_path)
 
-    def on_deleted(self, event: FileSystemEvent) -> None:
+    def on_deleted(self, event: Any) -> None:
         if event.is_directory:
             return
         if self._should_handle(event.src_path):
@@ -212,7 +224,7 @@ class WatchdogHub:
         self._patterns = patterns or DEFAULT_PATTERNS
         self._event_bus = event_bus
         self._hot_state = hot_state
-        self._observer: Observer | None = None
+        self._observer: Any | None = None
         self._handler: _UnifiedHandler | None = None
         self._running = False
 
@@ -234,10 +246,11 @@ class WatchdogHub:
             loop=loop,
         )
 
-        self._observer = Observer()
+        observer = Observer()
+        self._observer = observer
         for path in self._paths:
             if path.exists() and path.is_dir():
-                self._observer.schedule(
+                observer.schedule(
                     self._handler,
                     str(path),
                     recursive=True,
@@ -246,7 +259,7 @@ class WatchdogHub:
             else:
                 logger.warning("Watch path does not exist: %s", path)
 
-        self._observer.start()
+        observer.start()
         self._running = True
         logger.info(
             "WatchdogHub started — %d paths, %d patterns",

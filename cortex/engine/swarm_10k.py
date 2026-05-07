@@ -10,9 +10,12 @@ import asyncio
 import collections
 import logging
 import time
+import inspect
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from pathlib import Path
+from collections.abc import Awaitable
+from typing import Any, cast
 
 from cortex.engine.exergy_optimizer import ExergyOptimizer
 from cortex.engine.shared_bus import SovereignSharedBus
@@ -106,7 +109,7 @@ class CenturionSuperv:
 class LegionSupervisor:
     """L1 Domain Node: Manages multiple Centurions within an isolated context."""
 
-    def __init__(self, legion_id: str, bus: ShardedAsyncSignalBus, tenant_id: str = "default"):
+    def __init__(self, legion_id: str, bus: Any, tenant_id: str = "default"):
         self.id = legion_id
         self.bus = bus
         self.tenant_id = tenant_id
@@ -194,7 +197,7 @@ class ForensicLegion(LegionSupervisor):
     Forces zero-latency dispatch and bypasses standard exergy gates.
     """
 
-    def __init__(self, legion_id: str, bus: ShardedAsyncSignalBus, tenant_id: str = "default"):
+    def __init__(self, legion_id: str, bus: Any, tenant_id: str = "default"):
         super().__init__(legion_id, bus, tenant_id)
         self._overclocked = True  # High-agency forensic agents are always hot
 
@@ -210,7 +213,7 @@ class SwarmCommander:
     ):
         self.use_shm = use_shm
         if use_shm:
-            self.bus = SovereignSharedBus(create=True)
+            self.bus: SovereignSharedBus | ShardedAsyncSignalBus = SovereignSharedBus(create=True)
         else:
             self.bus = ShardedAsyncSignalBus(base_dir=bus_path)
 
@@ -360,16 +363,41 @@ class SwarmCommander:
         )
         if not self.use_shm:
             # Shannon compaction (only for persistent bus)
-            await self.bus.gc(max_age_days=0, tenant_id=self.tenant_id)
+            persistent_bus = cast(ShardedAsyncSignalBus, self.bus)
+            await persistent_bus.gc(max_age_days=0, tenant_id=self.tenant_id)
+
+        # Release per-centurion shared-memory buses before parent bus teardown.
+        await self._close_centurion_buses()
 
         # Lifecycle cleanup
         if hasattr(self.bus, "close"):
             if self.use_shm:
-                self.bus.close()
+                shm_bus = cast(SovereignSharedBus, self.bus)
+                shm_bus.close()
             else:
-                await self.bus.close()
+                persistent_bus = cast(ShardedAsyncSignalBus, self.bus)
+                await persistent_bus.close()
 
         if self.use_shm:
-            self.bus.unlink()
+            shm_bus = cast(SovereignSharedBus, self.bus)
+            shm_bus.unlink()
 
         self.legions.clear()
+
+    async def _close_centurion_buses(self) -> None:
+        """Release per-centurion shared-memory buses before parent bus teardown."""
+        for legion in self.legions.values():
+            for centurion in legion.centurions.values():
+                centurion_bus = centurion.bus
+                try:
+                    centurion_bus_close = centurion_bus.close()
+                    if inspect.isawaitable(centurion_bus_close):
+                        await cast(Awaitable[None], centurion_bus_close)
+                except (OSError, RuntimeError):
+                    logger.exception("FAILED TO CLOSE CENTURION BUS: %s", centurion.id)
+                try:
+                    centurion_bus_unlink = centurion_bus.unlink()
+                    if inspect.isawaitable(centurion_bus_unlink):
+                        await cast(Awaitable[None], centurion_bus_unlink)
+                except (OSError, RuntimeError):
+                    logger.exception("FAILED TO UNLINK CENTURION BUS: %s", centurion.id)

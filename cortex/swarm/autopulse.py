@@ -19,7 +19,7 @@ async def process_queue():
     while True:
         if os.path.exists(SWARM_QUEUE_FILE):
             try:
-                with open(SWARM_QUEUE_FILE, "r") as f:
+                with open(SWARM_QUEUE_FILE) as f:
                     queue = json.load(f)
                 
                 pending = queue.get("pending_tasks", [])
@@ -59,7 +59,7 @@ async def process_queue():
                     # Get last hash from state file if possible
                     prev_hash = "GENESIS_BLOCK"
                     if os.path.exists(STATE_FILE):
-                        with open(STATE_FILE, "r") as f:
+                        with open(STATE_FILE) as f:
                             state = json.load(f)
                             if state.get("ledgers"):
                                 prev_hash = state["ledgers"][-1]["hash"]
@@ -76,7 +76,7 @@ async def process_queue():
                     if not os.path.exists(STATE_FILE):
                         state = {"ledgers": []}
                     else:
-                        with open(STATE_FILE, "r") as f:
+                        with open(STATE_FILE) as f:
                             state = json.load(f)
                     
                     state["ledgers"].append({

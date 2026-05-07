@@ -9,7 +9,7 @@ import math
 import time
 from collections import deque
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
@@ -51,6 +51,8 @@ async def infer_context(
     from cortex import config
 
     start_time = time.monotonic()
+    if persist and "write" not in auth.permissions and "admin" not in auth.permissions:
+        raise HTTPException(status_code=403, detail="Missing required permission: write")
 
     async with engine.session() as conn:
         collector = ContextCollector(
@@ -58,10 +60,12 @@ async def infer_context(
             max_signals=config.CONTEXT_MAX_SIGNALS,
             workspace_dir=config.CONTEXT_WORKSPACE_DIR,
             git_enabled=config.CONTEXT_GIT_ENABLED,
+            tenant_id=auth.tenant_id,
+            include_external=False,
         )
         signals = await collector.collect_all()
 
-        inference = ContextInference(conn=conn if persist else None)
+        inference = ContextInference(conn=conn if persist else None, tenant_id=auth.tenant_id)
         if persist:
             result = await inference.infer_and_persist(signals)
         else:
@@ -97,6 +101,8 @@ async def list_signals(
             max_signals=config.CONTEXT_MAX_SIGNALS,
             workspace_dir=config.CONTEXT_WORKSPACE_DIR,
             git_enabled=config.CONTEXT_GIT_ENABLED,
+            tenant_id=auth.tenant_id,
+            include_external=False,
         )
         signals = await collector.collect_all()
 
@@ -112,5 +118,5 @@ async def context_history(
 ) -> list[dict]:
     """Retrieve past context inference snapshots."""
     async with engine.session() as conn:
-        inference = ContextInference(conn=conn)
+        inference = ContextInference(conn=conn, tenant_id=auth.tenant_id)
         return await inference.get_history(limit=limit)

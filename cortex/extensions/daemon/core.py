@@ -81,7 +81,7 @@ except ImportError:
     _WATCHDOG_HUB_AVAILABLE = False
 
 try:
-    from cortex.extensions.daemon.api import HumanCallbackAPI
+    from cortex.extensions.daemon.api import HumanCallbackAPI  # pyright: ignore[reportMissingImports]
 
     _API_AVAILABLE = True
 except ImportError:
@@ -711,6 +711,8 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
             await self.scheduler.stop()
         if self._event_bus is not None:
             await self._event_bus.shutdown()
+        if self.fiat_oracle:
+            self.fiat_oracle.stop()
         if self.entropic_wake_daemon:
             self.entropic_wake_daemon.stop()
         if self.frontier_daemon:
@@ -796,6 +798,8 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
             pass
         finally:
             logger.info("MOSKV-1 Daemon stopped")
+            if self.fiat_oracle:
+                self.fiat_oracle.stop()
             if self.entropic_wake_daemon:
                 self.entropic_wake_daemon.stop()
             if self.frontier_daemon:

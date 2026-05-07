@@ -1,5 +1,6 @@
 import logging
 import sqlite3
+from collections.abc import Mapping
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -52,6 +53,25 @@ router = APIRouter(tags=["facts"])
 logger = logging.getLogger("uvicorn.error")
 
 
+def _authenticated_agent_id(auth: AuthResult) -> str:
+    """Return a tenant-bound agent identity for API-originated votes."""
+    key_name = auth.key_name or "api_agent"
+    return f"{auth.tenant_id}:{key_name}"
+
+
+def _fact_payload(fact: Any) -> Mapping[str, Any]:
+    if isinstance(fact, Mapping):
+        return fact
+
+    to_dict = getattr(fact, "to_dict", None)
+    if callable(to_dict):
+        payload = to_dict()
+        if isinstance(payload, Mapping):
+            return payload
+
+    raise TypeError("fact chain entries must be mappings or expose to_dict()")
+
+
 @router.post("/v1/facts", response_model=StoreResponse)
 async def store_fact(
     req: StoreRequest,
@@ -72,10 +92,8 @@ async def store_fact(
         return StoreResponse(fact_id=fact_id, project=req.project, message="Fact stored")
     except (ValueError, GuardViolation) as e:
         raise HTTPException(status_code=400, detail=str(e)) from None
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error("Failed to store fact: %s", e)
+    except (sqlite3.Error, OSError, RuntimeError):
+        logger.exception("Failed to store fact")
         raise HTTPException(
             status_code=500, detail="Internal server error while storing fact"
         ) from None
@@ -87,30 +105,32 @@ async def batch_store(
     auth: AuthResult = Depends(require_permission("write")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> dict:
-    """Batch store up to 100 facts in a single request."""
-    ids: list[int] = []
-    errors: list[dict] = []
-    for i, mem in enumerate(req.memories):
-        try:
-            fact_id = await engine.store(
-                project=mem.project,
-                content=mem.content,
-                tenant_id=auth.tenant_id,
-                fact_type=mem.type,
-                tags=mem.tags,
-                source=mem.source,
-                meta=mem.metadata or {},
-                parent_decision_id=mem.parent_decision_id,
-            )
-            ids.append(fact_id)
-        except (sqlite3.Error, ValueError, OSError):
-            logger.exception("Failed to batch store fact at index %d", i)
-            errors.append({"index": i, "error": "Failed to store fact"})
+    """Batch store up to 100 facts atomically in one write transaction."""
+    facts = [
+        {
+            "project": mem.project,
+            "content": mem.content,
+            "tenant_id": auth.tenant_id,
+            "fact_type": mem.type,
+            "tags": mem.tags,
+            "source": mem.source,
+            "meta": mem.metadata or {},
+            "parent_decision_id": mem.parent_decision_id,
+        }
+        for mem in req.memories
+    ]
+    try:
+        ids = await engine.store_many(facts)
+    except (ValueError, GuardViolation) as e:
+        raise HTTPException(status_code=400, detail=str(e)) from None
+    except (sqlite3.Error, OSError, RuntimeError):
+        logger.exception("Failed to atomically batch store facts")
+        raise HTTPException(status_code=500, detail="Failed to store facts") from None
 
     return {
         "stored": len(ids),
         "ids": ids,
-        "errors": errors,
+        "errors": [],
         "total_requested": len(req.memories),
     }
 
@@ -227,24 +247,27 @@ async def get_fact_history(
         chain = await engine.get_causal_chain(
             fact_id=fact_id, direction="up", max_depth=50, tenant_id=auth.tenant_id
         )
-        return [
-            FactResponse(
-                id=f["id"],
-                project=f["project"],
-                content=f["content"],
-                fact_type=f["fact_type"],
-                tags=f.get("tags", []),
-                confidence=f.get("confidence", "C3"),
-                created_at=f["created_at"],
-                updated_at=f.get("updated_at") or f["created_at"],
-                hash=f.get("hash"),
-                tx_id=f.get("tx_id"),
+        history: list[FactResponse] = []
+        for item in chain:
+            f = _fact_payload(item)
+            history.append(
+                FactResponse(
+                    id=f["id"],
+                    project=f["project"],
+                    content=f["content"],
+                    fact_type=f["fact_type"],
+                    tags=f.get("tags", []),
+                    confidence=f.get("confidence", "C3"),
+                    created_at=f["created_at"],
+                    updated_at=f.get("updated_at") or f["created_at"],
+                    hash=f.get("hash"),
+                    tx_id=f.get("tx_id"),
+                )
             )
-            for f in chain
-        ]
-    except Exception as e:
-        logger.error("Failed to fetch fact history: %s", e)
-        raise HTTPException(status_code=500, detail="Failed to fetch history") from e
+        return history
+    except (sqlite3.Error, OSError, RuntimeError):
+        logger.exception("Failed to fetch fact history")
+        raise HTTPException(status_code=500, detail="Failed to fetch history") from None
 
 
 @router.post("/v1/facts/{fact_id}/taint", response_model=dict)
@@ -261,8 +284,10 @@ async def propagate_taint(
             "affected_count": report.affected_count,
             "changes": report.confidence_changes,
         }
-    except Exception as e:
-        logger.error("Taint propagation failed: %s", e)
+    except (ValueError, GuardViolation) as e:
+        raise HTTPException(status_code=400, detail=str(e)) from None
+    except (sqlite3.Error, OSError, RuntimeError):
+        logger.exception("Taint propagation failed")
         raise HTTPException(status_code=500, detail="Taint propagation failed") from None
 
 
@@ -273,7 +298,7 @@ async def verify_ledger(
 ) -> dict:
     """Verify cryptographic integrity of the memory ledger."""
     try:
-        report = await engine.verify_ledger()
+        report = await engine.verify_ledger(tenant_id=auth.tenant_id)
         return {
             "valid": report["valid"],
             "violations": len(report.get("violations", [])),
@@ -302,7 +327,7 @@ async def cast_vote(
             )
 
         agent_id = auth.key_name or "api_agent"
-        score = await engine.vote_v2(fact_id, agent_id, req.value)
+        score = await engine.vote_v2(fact_id, _authenticated_agent_id(auth), req.value)
 
         # Confidence is updated automatically by manager
         updated_fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
@@ -342,9 +367,13 @@ async def cast_vote_v2(
                 status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
             )
 
+        canonical_agent_id = _authenticated_agent_id(auth)
+        if req.agent_id != canonical_agent_id:
+            raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
+
         score = await engine.vote_v2(
             fact_id=fact_id,
-            agent=req.agent_id,
+            agent=canonical_agent_id,
             value=req.vote,
         )
 
@@ -353,7 +382,7 @@ async def cast_vote_v2(
 
         return VoteResponse(
             fact_id=fact_id,
-            agent=req.agent_id,
+            agent=canonical_agent_id,
             vote=req.vote,
             new_consensus_score=score,
             confidence=updated_fact["confidence"] if updated_fact else "unknown",
@@ -384,7 +413,7 @@ async def list_votes(
             status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
         )
 
-    votes = await engine.get_votes(fact_id)
+    votes = await engine.get_votes(fact_id, tenant_id=auth.tenant_id)
 
     return [
         {"agent": v["agent"], "vote": v["vote"], "timestamp": v.get("created_at")} for v in votes
@@ -409,7 +438,11 @@ async def deprecate_fact(
     if fact.get("tenant_id", fact.get("project")) != auth.tenant_id and "tenant_id" in fact:
         raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
 
-    success = await engine.deprecate(fact_id, reason="api deprecated")
+    success = await engine.deprecate(
+        fact_id,
+        reason="api deprecated",
+        tenant_id=auth.tenant_id,
+    )
     if not success:
         raise HTTPException(status_code=500, detail=get_trans("error_deprecation_failed", lang))
 
@@ -460,8 +493,9 @@ async def get_causal_chain(
             fact_id=fact_id,
             direction=direction,
             max_depth=max_depth,
+            tenant_id=auth.tenant_id,
         )
-        return chain
+        return [fact.to_dict() for fact in chain]
     except (sqlite3.Error, OSError, RuntimeError):
         logger.exception("Causal chain query failed for #%d", fact_id)
         raise HTTPException(

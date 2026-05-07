@@ -35,7 +35,6 @@ from cortex.routes import api_router
 from cortex.telemetry.metrics import MetricsMiddleware, metrics
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 from cortex.mcp.knowledge_watcher import start_knowledge_daemon
-from cortex.swarm import start_swarm_daemon
 
 __all__ = [
     "ContentSizeLimitMiddleware",
@@ -52,6 +51,18 @@ __all__ = [
 ]
 
 logger = logging.getLogger("uvicorn.error")
+
+
+def _start_optional_swarm_daemon():
+    """Start the experimental swarm daemon without breaking the core API."""
+    if not config.ENABLE_EXPERIMENTAL_API:
+        return None
+    try:
+        from cortex.swarm import start_swarm_daemon
+    except ImportError as exc:
+        logger.warning("Skipping experimental swarm daemon: %s", exc)
+        return None
+    return start_swarm_daemon()
 
 # ─── Initialization ───────────────────────────────────────────────────
 
@@ -111,7 +122,7 @@ async def lifespan(app: FastAPI):
 
     # 7. V4 Singularity Daemons
     watcher = start_knowledge_daemon()
-    swarm_daemon = start_swarm_daemon()
+    swarm_daemon = _start_optional_swarm_daemon()
     app.state.watcher = watcher
     app.state.swarm_daemon = swarm_daemon
 

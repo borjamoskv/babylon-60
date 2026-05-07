@@ -6,6 +6,8 @@ Covers: append, replay, count, session retrieval, chain verification.
 
 from __future__ import annotations
 
+import hashlib
+
 import aiosqlite
 import pytest
 
@@ -102,6 +104,57 @@ class TestAppendEvent:
         count = await ledger.count("test_tenant")
         assert count == 1
 
+    @pytest.mark.asyncio
+    async def test_presigned_append_rejected_when_prev_hash_is_invalid(self, ledger):
+        first = _make_event(content="first event")
+        await ledger.append_event(first)
+
+        presigned = _make_event(content="pre-signed event")
+        object.__setattr__(presigned, "prev_hash", "WRONG_PREV_HASH")
+        object.__setattr__(
+            presigned,
+            "signature",
+            EventLedgerL3._compute_event_signature(presigned, presigned.prev_hash),
+        )
+
+        with pytest.raises(ValueError, match="prev_hash"):
+            await ledger.append_event(presigned)
+
+        assert await ledger.count("test_tenant") == 1
+
+    @pytest.mark.asyncio
+    async def test_presigned_append_rejected_when_signature_is_invalid(self, ledger):
+        first = _make_event(content="first event")
+        await ledger.append_event(first)
+
+        presigned = _make_event(content="pre-signed event")
+        object.__setattr__(presigned, "prev_hash", first.signature)
+        object.__setattr__(presigned, "signature", hashlib.sha3_256(b"invalid").hexdigest())
+
+        with pytest.raises(ValueError, match="signature"):
+            await ledger.append_event(presigned)
+
+        assert await ledger.count("test_tenant") == 1
+
+    @pytest.mark.asyncio
+    async def test_valid_presigned_append_is_persisted(self, ledger):
+        first = _make_event(content="first event")
+        await ledger.append_event(first)
+
+        presigned = _make_event(content="pre-signed event")
+        object.__setattr__(presigned, "prev_hash", first.signature)
+        object.__setattr__(
+            presigned,
+            "signature",
+            EventLedgerL3._compute_event_signature(presigned, presigned.prev_hash),
+        )
+
+        await ledger.append_event(presigned)
+
+        events = await ledger.replay("test_tenant")
+        assert [event.content for event in events] == ["first event", "pre-signed event"]
+        assert events[-1].signature == presigned.signature
+
 
 # ─── get_session_events ──────────────────────────────────────────────────
 
@@ -157,6 +210,22 @@ class TestReplay:
         assert len(events_a) == 1
         assert len(events_b) == 1
         assert events_a[0].content == "for_a"
+
+    @pytest.mark.asyncio
+    async def test_replay_uses_append_sequence_not_event_id(self, ledger):
+        first = _make_event(content="first")
+        second = _make_event(content="second")
+        first.event_id = "z-last-lexically"
+        second.event_id = "a-first-lexically"
+
+        await ledger.append_event(first)
+        await ledger.append_event(second)
+
+        events = await ledger.replay("test_tenant")
+        result = await ledger.verify_chain("test_tenant")
+
+        assert [event.content for event in events] == ["first", "second"]
+        assert result["status"] == "VALID"
 
 
 # ─── count ───────────────────────────────────────────────────────────────

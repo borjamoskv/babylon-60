@@ -25,6 +25,7 @@ from pydantic import BaseModel, Field
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine as AsyncCortexEngine
+from cortex.engine.storage_guard import GuardViolation
 
 __all__ = [
     "batch_store",
@@ -184,31 +185,32 @@ async def batch_store(
     auth: AuthResult = Depends(require_permission("write")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> dict:
-    """Batch store up to 100 memories in a single request."""
-    ids: list[int] = []
-    errors: list[dict] = []
-
-    for i, mem in enumerate(req.memories):
-        try:
-            fact_id = await engine.store(
-                project=mem.project,
-                content=mem.content,
-                tenant_id=auth.tenant_id,
-                fact_type=mem.type,
-                tags=mem.tags,
-                source=mem.source,
-                meta=mem.metadata or {},
-                parent_decision_id=mem.parent_decision_id,
-            )
-            ids.append(fact_id)
-        except (sqlite3.Error, ValueError, OSError):
-            logger.exception("Failed to batch store memory at index %d", i)
-            errors.append({"index": i, "error": "Failed to store memory"})
+    """Batch store up to 100 memories atomically in one write transaction."""
+    facts = [
+        {
+            "project": mem.project,
+            "content": mem.content,
+            "tenant_id": auth.tenant_id,
+            "fact_type": mem.type,
+            "tags": mem.tags,
+            "source": mem.source,
+            "meta": mem.metadata or {},
+            "parent_decision_id": mem.parent_decision_id,
+        }
+        for mem in req.memories
+    ]
+    try:
+        ids = await engine.store_many(facts)
+    except (ValueError, GuardViolation) as e:
+        raise HTTPException(status_code=400, detail=str(e)) from None
+    except (sqlite3.Error, OSError, RuntimeError):
+        logger.exception("Failed to atomically batch store memories")
+        raise HTTPException(status_code=500, detail="Failed to store memories") from None
 
     return {
         "stored": len(ids),
         "ids": ids,
-        "errors": errors,
+        "errors": [],
         "total_requested": len(req.memories),
     }
 
@@ -220,8 +222,9 @@ async def verify_memories(
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> dict:
     """Verify cryptographic integrity of the memory ledger."""
+    _ = request
     try:
-        report = await engine.verify_ledger()
+        report = await engine.verify_ledger(tenant_id=auth.tenant_id)
         return {
             "valid": report["valid"],
             "violations": len(report.get("violations", [])),
@@ -267,7 +270,7 @@ async def delete_memory(
     if not fact:
         raise HTTPException(status_code=404, detail=f"Memory #{memory_id} not found")
 
-    success = await engine.deprecate(memory_id, reason="api_deleted")
+    success = await engine.deprecate(memory_id, reason="api_deleted", tenant_id=auth.tenant_id)
     if not success:
         raise HTTPException(status_code=500, detail="Failed to delete memory")
 
@@ -288,8 +291,9 @@ async def get_causal_chain(
             fact_id=memory_id,
             direction=direction,
             max_depth=max_depth,
+            tenant_id=auth.tenant_id,
         )
-        return chain
+        return [fact.to_dict() for fact in chain]
     except (sqlite3.Error, OSError, RuntimeError):
         logger.exception("Causal chain query failed for #%d", memory_id)
         raise HTTPException(

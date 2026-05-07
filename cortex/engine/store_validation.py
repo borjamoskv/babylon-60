@@ -65,7 +65,9 @@ async def _apply_semantic_dedup(
                 cls._thermal_decay_cache[fid] = 0
             else:
                 await conn.execute(
-                    "UPDATE facts SET last_accessed = CURRENT_TIMESTAMP WHERE id=?", (fid,)
+                    "UPDATE facts SET last_accessed = CURRENT_TIMESTAMP "
+                    "WHERE id = ? AND tenant_id = ?",
+                    (fid, tenant_id),
                 )
             return fid
     except Exception as e:
@@ -97,15 +99,16 @@ async def run_store_validation_logic(
     except Exception as exc:  # noqa: BLE001
         raise RuntimeError(f"FAIL-CLOSED: dependencies unavailable: {exc}") from exc
 
+    meta = dict(meta or {})
     await _check_byzantine_auth(mixin_instance, meta, source, tenant_id)
-    
+
     cls = mixin_instance.__class__
     skip_thermo = os.getenv("CORTEX_SKIP_EXERGY_VALIDATION") == "1"
 
     _enforce_thermodynamics(cls, fact_type, skip_thermo)
 
     # Exergy calculation
-    _has_entropy = meta and ("_prior_entropy" in meta or "_posterior_entropy" in meta)
+    _has_entropy = "_prior_entropy" in meta or "_posterior_entropy" in meta
     if not skip_thermo and _has_entropy:
         ex_input = ExergyInput(
             prior_uncertainty=meta.get("_prior_entropy", 1.0),
@@ -173,7 +176,7 @@ async def run_store_validation_logic(
     await enforce_store_guards(
         content=content, project=project, tenant_id=tenant_id, 
         fact_type=fact_type, meta=meta, nemesis_rejection=nemesis_rejection, 
-        bridge_result=bridge_result
+        bridge_result=bridge_result, source=source
     )
 
     return None, meta, content, fact_type

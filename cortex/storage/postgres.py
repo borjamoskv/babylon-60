@@ -22,6 +22,8 @@ import os
 import time
 from typing import Any, Final
 
+from cortex.database.sql_guard import reject_protected_fact_table_dml
+
 __all__ = ["PostgresBackend"]
 
 logger = logging.getLogger("cortex.storage.postgres")
@@ -209,6 +211,7 @@ class PostgresBackend:
 
     async def execute(self, sql: str, params: tuple[Any, ...] = ()) -> list[dict[str, Any]]:
         """Execute a single SQL statement and return rows as dicts."""
+        reject_protected_fact_table_dml(sql)
         self._ensure_pool()
         pg_sql, pg_params = self._translate_params(sql, params)
 
@@ -231,6 +234,7 @@ class PostgresBackend:
 
         Appends RETURNING id to the SQL if not already present.
         """
+        reject_protected_fact_table_dml(sql)
         self._ensure_pool()
         pg_sql, pg_params = self._translate_params(sql, params)
 
@@ -251,6 +255,7 @@ class PostgresBackend:
 
     async def executemany(self, sql: str, params_list: list[tuple[Any, ...]]) -> None:
         """Execute a statement with multiple parameter sets within a transaction."""
+        reject_protected_fact_table_dml(sql)
         self._ensure_pool()
         if not params_list:
             return
@@ -273,6 +278,7 @@ class PostgresBackend:
         For PostgreSQL schema initialization, this method wraps all
         statements in a single transaction for atomicity.
         """
+        reject_protected_fact_table_dml(script, allow_trigger_bodies=True)
         self._ensure_pool()
         statements = [s.strip() for s in script.split(";") if s.strip()]
         if not statements:

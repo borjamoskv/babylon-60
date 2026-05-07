@@ -9,6 +9,12 @@ from optional dependencies (z3-solver via verification.verifier).
 from __future__ import annotations
 
 import importlib
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from cortex.extensions.immune.arbiter import FilterResult, ImmuneArbiter, TriageResult, Verdict
+    from cortex.extensions.immune.error_boundary import ErrorBoundary, error_boundary
+    from cortex.extensions.immune.falsification import EvolutionaryFalsifier
 
 __all__ = [
     "ErrorBoundary",

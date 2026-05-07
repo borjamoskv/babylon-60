@@ -1,0 +1,141 @@
+---
+import '../../styles/saas-landing.css';
+
+const pillars = [
+  ['Governance', 'Operating rules, authority boundaries, release criteria, and how community proposals move from claim to reviewed change.', ['Roles and scope', 'Decision records', 'Change criteria']],
+  ['Research', 'Public notes, RFCs, comparisons, and experiments that separate source material, inference, confidence, and open questions.', ['RFCs', 'Architecture studies', 'Agent research']],
+  ['Security posture', 'Threat model, tenant isolation posture, responsible disclosure, guard behavior, and the limits of current assurances.', ['Threat model', 'Disclosure', 'Redaction policy']],
+  ['Evidence', 'Commands, manifests, audit packs, verification reports, and reproducible traces for claims that should survive review.', ['Ledger verify', 'Evidence packs', 'Changelog']],
+];
+
+const materialLinks = [
+  ['Security model', '/site/security/', 'Tenant scope, audit continuity, encryption notes, and operational guardrails.'],
+  ['Research notes', '/site/blog/', 'Essays on verifiable memory, agent trust, crypto/NFT evidence, and Reference agent.'],
+  ['Architecture', '/site/architecture/', 'Reference architecture for a bot with a portable, auditable memory passport.'],
+  ['Changelog', '/site/changelog/', 'Release highlights and roadmap evidence for product maturity.'],
+  ['Source repository', 'https://github.com/borjamoskv/Cortex-Persist', 'Apache 2.0 source, issues, tests, and implementation history.'],
+  ['Product surface', 'https://cortexpersist.com/saas_landing/', 'Commercial landing, pricing, checkout handoff, and implementation support.'],
+];
+
+const evidenceRules = [
+  ['No unverifiable certification claims', 'Security and compliance language must name the evidence available and the assurance still missing.'],
+  ['No secret-bearing artifacts', 'Prompts, tenant payloads, keys, tokens, and private incident data do not belong in public evidence.'],
+  ['Facts before interpretation', 'Research material should keep source observations, inference, confidence, and gaps visibly separate.'],
+  ['Reproducible where possible', 'Evidence claims should point to a command, test, document, commit, or reviewable artifact.'],
+];
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>cortexpersist.org | CORTEX Trust and Community</title>
+    <meta name="description" content="cortexpersist.org is the public trust and community surface for CORTEX governance, research, security posture, and evidence material." />
+    <meta property="og:title" content="cortexpersist.org | CORTEX Trust and Community" />
+    <meta property="og:description" content="Governance, research, security posture, and evidence material for verifiable agent memory." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://cortexpersist.org/" />
+    <meta name="theme-color" content="#071007" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body class="org-page">
+    <div class="background-grid" aria-hidden="true"></div>
+
+    <header class="nav" id="nav">
+      <a class="brand notranslate" href="#top" aria-label="CORTEX trust home" translate="no"><span class="brand-mark">C</span><span translate="no">cortexpersist.org</span></a>
+      <nav class="nav-links" aria-label="Trust navigation">
+        <a href="#governance">Governance</a>
+        <a href="#research">Research</a>
+        <a href="#security">Security</a>
+        <a href="#evidence">Evidence</a>
+        <a href="https://cortexpersist.com/saas_landing/">Product</a>
+      </nav>
+      <a class="nav-cta" href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noopener noreferrer">Source</a>
+    </header>
+
+    <main>
+      <section class="org-hero" id="top">
+        <div class="org-hero-copy">
+          <span class="section-kicker">Trust and community</span>
+          <h1>Public trust record for verifiable agent memory.</h1>
+          <p class="hero-sub">cortexpersist.org is the non-commercial surface for governance, research, security posture, and evidence. It exists so reviewers can inspect the claims behind CORTEX without starting from pricing or checkout.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#evidence">Inspect evidence material</a>
+            <a class="btn btn-secondary" href="#security">Read security posture</a>
+          </div>
+        </div>
+
+        <aside class="org-ledger-panel" aria-label="Public trust material">
+          <div class="org-ledger-top">
+            <span>PUBLIC MATERIAL</span>
+            <strong>trust-index</strong>
+          </div>
+          <div class="org-ledger-row"><span>governance</span><strong>roles, scope, decisions</strong></div>
+          <div class="org-ledger-row"><span>research</span><strong>sources, claims, gaps</strong></div>
+          <div class="org-ledger-row"><span>security</span><strong>posture, limits, disclosure</strong></div>
+          <div class="org-ledger-row"><span>evidence</span><strong>commands, reports, manifests</strong></div>
+        </aside>
+      </section>
+
+      <section class="org-pillar-grid" aria-label="cortexpersist.org content pillars">
+        {pillars.map(([title, text, tags], index) => (
+          <article class="org-card" id={String(title).toLowerCase().split(' ')[0]}>
+            <span>{String(index + 1).padStart(2, '0')}</span>
+            <h2>{title}</h2>
+            <p>{text}</p>
+            <div class="org-tags">{tags.map((tag) => <em>{tag}</em>)}</div>
+          </article>
+        ))}
+      </section>
+
+      <section class="org-evidence-section" id="evidence">
+        <div class="section-heading">
+          <span class="section-kicker">Evidence standard</span>
+          <h2>Claims should point to artifacts, not confidence theater.</h2>
+          <p>Material on this domain should make it clear what is proven, what is inferred, what is pending, and what cannot be published safely.</p>
+        </div>
+        <div class="org-policy-grid">
+          {evidenceRules.map(([title, text]) => <article class="org-policy"><h3>{title}</h3><p>{text}</p></article>)}
+        </div>
+      </section>
+
+      <section class="org-material-section">
+        <div class="section-heading">
+          <span class="section-kicker">Current material</span>
+          <h2>Start with the documents that already carry trust weight.</h2>
+          <p>This hub should collect the public record first, then add dedicated governance and research pages as the community surface matures.</p>
+        </div>
+        <div class="org-link-grid">
+          {materialLinks.map(([title, href, text]) => (
+            <a class="org-link-card" href={href} target={String(href).startsWith('https://') ? '_blank' : undefined} rel={String(href).startsWith('https://') ? 'noopener noreferrer' : undefined}>
+              <span>{title}</span>
+              <p>{text}</p>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <section class="org-boundary" id="security-boundary">
+        <span class="section-kicker">Boundary</span>
+        <h2>Trust page, not a certification badge.</h2>
+        <p>CORTEX can publish evidence, posture, test results, disclosure routes, and reviewable architecture. That does not by itself create SOC 2, ISO, legal compliance, tax advice, or regulator approval. Those claims need separate audits, current legal review, and explicit scope.</p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>
+        <a class="brand notranslate" href="#top" aria-label="CORTEX trust home" translate="no"><span class="brand-mark">C</span><span translate="no">cortexpersist.org</span></a>
+        <p>Governance, research, security posture, and evidence for CORTEX.</p>
+      </div>
+      <nav aria-label="Footer navigation">
+        <a href="https://cortexpersist.com/saas_landing/">Product</a>
+        <a href="/site/">Docs</a>
+        <a href="/site/security/">Security</a>
+        <a href="/site/blog/">Research</a>
+        <a href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </nav>
+    </footer>
+  </body>
+</html>

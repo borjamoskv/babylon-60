@@ -5,7 +5,6 @@ Zero-Copy `mmap` tensor map mapped across 10,000 swarm agents representing High-
 import os
 import time
 import numpy as np
-from typing import Optional, List, Tuple
 from pathlib import Path
 import hashlib
 import threading
@@ -17,7 +16,7 @@ try:
 except ImportError:
     HAS_NUMBA = False
     
-from cortex.vsa_engine import VSAEngine
+from cortex.vsa_engine import VSAEngine  # pyright: ignore[reportMissingImports]
 
 # --- Direct-Silicon JIT Kernels ---
 if HAS_NUMBA:
@@ -77,7 +76,7 @@ class TensorGlialLegion:
         """Asynchronous disk sync to prevent blocking the OMEGA-X orchestrator."""
         threading.Thread(target=self.agents_tensor.flush, daemon=True).start()
 
-    def batch_write_action(self, agent_indices: List[int], action_texts: List[str]):
+    def batch_write_action(self, agent_indices: list[int], action_texts: list[str]):
         """
         Batches N agents encoding real-time actions.
         """
@@ -178,4 +177,3 @@ if __name__ == '__main__':
     print(f"[+] Nodes respawned from corpses: {slashed}")
     print(f"[+] Centurion MapReduce state dim: {centurion_state.shape}")
     print(f"[+] Matrix SHA256 integrity: {legion.global_sha256_audit()}")
-

@@ -144,6 +144,23 @@ class TestSpanContext:
         assert span.ok is False
         assert "ValueError" in span.error
 
+    def test_error_capture_redacts_sensitive_values(self):
+        with pytest.raises(RuntimeError):
+            with SpanContext("sensitive_failure"):
+                raise RuntimeError(
+                    "token=ctx_supersecretspantoken "
+                    "alice@example.com /Users/example/private/span.log"
+                )
+
+        span = collector.spans[0]
+        assert span.ok is False
+        assert "RuntimeError" in span.error
+        assert "ctx_supersecretspantoken" not in span.error
+        assert "alice@example.com" not in span.error
+        assert "/Users/example" not in span.error
+        assert "[REDACTED_TOKEN]" in span.error
+        assert "[REDACTED_PATH]" in span.error
+
     def test_exception_not_suppressed(self):
         with pytest.raises(RuntimeError):
             with SpanContext("propagate"):

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import ast
 import hashlib
+import inspect
 import json
 import sqlite3
 from collections.abc import Callable
@@ -19,6 +21,7 @@ from cortex.routes import daemon as daemon_router
 from cortex.routes import facts as facts_router
 from cortex.routes import graph as graph_router
 from cortex.routes import ledger as ledger_router
+from cortex.routes import memories as memories_router
 from cortex.routes import oracle as oracle_router
 from cortex.routes import trust as trust_router
 
@@ -177,6 +180,20 @@ class _FakeOracleEngine:
         self.store_calls.append(kwargs)
 
 
+class _FakeBatchStoreEngine:
+    def __init__(self) -> None:
+        self.store_calls: list[dict[str, object]] = []
+        self.store_many_calls: list[list[dict[str, object]]] = []
+
+    async def store(self, **kwargs) -> int:
+        self.store_calls.append(kwargs)
+        return len(self.store_calls)
+
+    async def store_many(self, facts: list[dict[str, object]]) -> list[int]:
+        self.store_many_calls.append(facts)
+        return [100 + i for i in range(len(facts))]
+
+
 def test_get_agent_scopes_lookup_to_authenticated_tenant() -> None:
     fake_engine = _FakeAsyncEngine()
 
@@ -309,6 +326,7 @@ class _FakeFactsEngine:
         self.vote_list_calls: list[tuple[int, str]] = []
         self.deprecate_calls: list[dict[str, object]] = []
         self.causal_chain_calls: list[dict[str, object]] = []
+        self.causal_chain_result: list[dict[str, object] | _FakeFact] = []
         self.stats_calls: list[str] = []
         self.checkpoint_calls: list[str] = []
         self.facts = _FakeFactsManager()
@@ -364,7 +382,7 @@ class _FakeFactsEngine:
         direction: str = "down",
         max_depth: int = 10,
         tenant_id: str = "default",
-    ) -> list[dict[str, object]]:
+    ) -> list[dict[str, object] | _FakeFact]:
         self.causal_chain_calls.append(
             {
                 "fact_id": fact_id,
@@ -373,7 +391,7 @@ class _FakeFactsEngine:
                 "tenant_id": tenant_id,
             }
         )
-        return []
+        return self.causal_chain_result
 
     async def vote_v2(
         self,
@@ -419,6 +437,241 @@ def test_facts_verify_scopes_ledger_check_to_authenticated_tenant() -> None:
 
     assert response.status_code == 200
     assert fake_engine.verify_calls == ["tenant-facts"]
+
+
+def test_facts_router_does_not_hide_unexpected_errors_with_broad_handlers() -> None:
+    module_ast = ast.parse(inspect.getsource(facts_router))
+    broad_handlers = [
+        handler.lineno
+        for handler in ast.walk(module_ast)
+        if isinstance(handler, ast.ExceptHandler)
+        and isinstance(handler.type, ast.Name)
+        and handler.type.id == "Exception"
+    ]
+
+    assert broad_handlers == []
+
+
+def test_fact_history_accepts_engine_fact_objects_and_scopes_tenant() -> None:
+    fake_engine = _FakeFactsEngine()
+    fake_engine.causal_chain_result = [
+        _FakeFact(
+            {
+                "id": 7,
+                "project": "alpha",
+                "content": "history entry",
+                "fact_type": "knowledge",
+                "tags": ["audit"],
+                "confidence": "C3",
+                "created_at": "2026-01-01T00:00:00Z",
+                "updated_at": "2026-01-02T00:00:00Z",
+                "hash": "abc123",
+                "tx_id": "tx-7",
+            }
+        )
+    ]
+
+    app = FastAPI()
+    app.include_router(facts_router.router)
+    auth_dep = _dependency_for(
+        "/v1/facts/{fact_id}/history",
+        "GET",
+        _route_by_path(facts_router.router, "/v1/facts/{fact_id}/history", "GET"),
+    )
+    app.dependency_overrides[auth_dep] = lambda: AuthResult(
+        authenticated=True,
+        tenant_id="tenant-facts",
+        permissions=["read"],
+        key_name="agent-one",
+    )
+    app.dependency_overrides[get_async_engine] = lambda: fake_engine
+
+    with TestClient(app) as client:
+        response = client.get("/v1/facts/7/history")
+
+    assert response.status_code == 200
+    assert response.json()[0]["id"] == 7
+    assert fake_engine.causal_chain_calls == [
+        {
+            "fact_id": 7,
+            "direction": "up",
+            "max_depth": 50,
+            "tenant_id": "tenant-facts",
+        }
+    ]
+
+
+def test_facts_batch_uses_atomic_store_many_with_authenticated_tenant() -> None:
+    fake_engine = _FakeBatchStoreEngine()
+
+    app = FastAPI()
+    app.include_router(facts_router.router)
+    auth_dep = _dependency_for(
+        "/v1/facts/batch",
+        "POST",
+        _route_by_path(facts_router.router, "/v1/facts/batch", "POST"),
+    )
+    app.dependency_overrides[auth_dep] = lambda: AuthResult(
+        authenticated=True,
+        tenant_id="tenant-batch",
+        permissions=["write"],
+        key_name="agent-one",
+    )
+    app.dependency_overrides[get_async_engine] = lambda: fake_engine
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/v1/facts/batch",
+            json={
+                "memories": [
+                    {
+                        "project": "alpha",
+                        "content": "first atomic fact",
+                        "type": "decision",
+                        "tags": ["risk"],
+                        "source": "agent:test",
+                        "metadata": {"risk": "high"},
+                        "parent_decision_id": 7,
+                    },
+                    {
+                        "project": "alpha",
+                        "content": "second atomic fact",
+                    },
+                ]
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "stored": 2,
+        "ids": [100, 101],
+        "errors": [],
+        "total_requested": 2,
+    }
+    assert fake_engine.store_calls == []
+    assert fake_engine.store_many_calls == [
+        [
+            {
+                "project": "alpha",
+                "content": "first atomic fact",
+                "tenant_id": "tenant-batch",
+                "fact_type": "decision",
+                "tags": ["risk"],
+                "source": "agent:test",
+                "meta": {"risk": "high"},
+                "parent_decision_id": 7,
+            },
+            {
+                "project": "alpha",
+                "content": "second atomic fact",
+                "tenant_id": "tenant-batch",
+                "fact_type": "knowledge",
+                "tags": [],
+                "source": None,
+                "meta": {},
+                "parent_decision_id": None,
+            },
+        ]
+    ]
+
+
+def test_memories_verify_scopes_ledger_check_to_authenticated_tenant() -> None:
+    fake_engine = _FakeFactsEngine()
+
+    app = FastAPI()
+    app.include_router(memories_router.router)
+    auth_dep = _dependency_for(
+        "/v1/memories/verify",
+        "GET",
+        _route_by_path(memories_router.router, "/v1/memories/verify", "GET"),
+    )
+    app.dependency_overrides[auth_dep] = lambda: AuthResult(
+        authenticated=True,
+        tenant_id="tenant-memories",
+        permissions=["read"],
+        key_name="agent-one",
+    )
+    app.dependency_overrides[get_async_engine] = lambda: fake_engine
+
+    with TestClient(app) as client:
+        response = client.get("/v1/memories/verify")
+
+    assert response.status_code == 200
+    assert fake_engine.verify_calls == ["tenant-memories"]
+
+
+def test_memories_batch_uses_atomic_store_many_with_authenticated_tenant() -> None:
+    fake_engine = _FakeBatchStoreEngine()
+
+    app = FastAPI()
+    app.include_router(memories_router.router)
+    auth_dep = _dependency_for(
+        "/v1/memories/batch",
+        "POST",
+        _route_by_path(memories_router.router, "/v1/memories/batch", "POST"),
+    )
+    app.dependency_overrides[auth_dep] = lambda: AuthResult(
+        authenticated=True,
+        tenant_id="tenant-memories",
+        permissions=["write"],
+        key_name="agent-one",
+    )
+    app.dependency_overrides[get_async_engine] = lambda: fake_engine
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/v1/memories/batch",
+            json={
+                "memories": [
+                    {
+                        "project": "alpha",
+                        "content": "first atomic memory",
+                        "type": "decision",
+                        "tags": ["memory"],
+                        "source": "agent:test",
+                        "metadata": {"risk": "low"},
+                        "parent_decision_id": 11,
+                    },
+                    {
+                        "project": "alpha",
+                        "content": "second atomic memory",
+                    },
+                ]
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "stored": 2,
+        "ids": [100, 101],
+        "errors": [],
+        "total_requested": 2,
+    }
+    assert fake_engine.store_calls == []
+    assert fake_engine.store_many_calls == [
+        [
+            {
+                "project": "alpha",
+                "content": "first atomic memory",
+                "tenant_id": "tenant-memories",
+                "fact_type": "decision",
+                "tags": ["memory"],
+                "source": "agent:test",
+                "meta": {"risk": "low"},
+                "parent_decision_id": 11,
+            },
+            {
+                "project": "alpha",
+                "content": "second atomic memory",
+                "tenant_id": "tenant-memories",
+                "fact_type": "knowledge",
+                "tags": [],
+                "source": None,
+                "meta": {},
+                "parent_decision_id": None,
+            },
+        ]
+    ]
 
 
 def test_list_votes_scopes_lookup_to_authenticated_tenant() -> None:

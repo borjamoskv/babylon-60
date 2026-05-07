@@ -1,4 +1,4 @@
-"""Autonomous Tombstone Monitor (El Barrendero)."""
+"""Autonomous Tombstone Monitor."""
 
 from __future__ import annotations
 
@@ -14,10 +14,11 @@ logger = logging.getLogger("moskv-daemon")
 
 
 class TombstoneMonitor:
-    """Physically deletes logically tombstoned facts during the late-night maintenance window.
+    """Reports logically tombstoned facts during the late-night maintenance window.
 
-    Protects daytime IOPs by restricting heavy DELETE and VACUUM/OPTIMIZE operations
-    to the 03:00 - 05:00 UTC window.
+    Physical fact deletion requires a tenant-scoped canonical purge ledger. This
+    monitor is intentionally read-only and emits an alert when legacy deletion
+    would have run.
     """
 
     def __init__(
@@ -71,54 +72,20 @@ class TombstoneMonitor:
                 if to_delete == 0:
                     return []
 
-                logger.info("TombstoneMonitor: Evicting %d logically deleted facts.", to_delete)
-
-                initial_size = self.db_path.stat().st_size
-
-                # 1. Main Delete — cascade handles vector indexes
-                # depending on schema triggers.
-                # But to be safe, we explicitly clear related vectors if cascade is off.
-                cursor.execute("SELECT id FROM facts WHERE is_tombstoned = 1")
-
-                # Batch deletes to avoid mammoth transactions,
-                # pulling directly from C-layer limits.
-                total_deleted = 0
-                while True:
-                    batch_rows = cursor.fetchmany(1000)
-                    if not batch_rows:
-                        break
-
-                    batch = [r[0] for r in batch_rows]
-                    id_list = ",".join("?" * len(batch))
-
-                    try:
-                        cursor.execute("BEGIN IMMEDIATE")
-                        # nosec B608 — Validated local table structure, batch parameterized.
-                        cursor.execute(
-                            f"DELETE FROM fact_embeddings WHERE fact_id IN ({id_list})", batch
-                        )
-                        cursor.execute(f"DELETE FROM facts_fts WHERE rowid IN ({id_list})", batch)
-                        cursor.execute(f"DELETE FROM facts WHERE id IN ({id_list})", batch)
-                        conn.commit()
-                        total_deleted += len(batch)
-                    except sqlite3.Error as batch_err:
-                        conn.rollback()
-                        logger.warning(
-                            "Batch sweep issue (might be ignored if tables missing): %s", batch_err
-                        )
-
-                # Optimizing standard FTS / standard fragmentation if heavy sweeping occurred
-                if total_deleted > 5000:
-                    conn.execute("PRAGMA optimize")
-
-                final_size = self.db_path.stat().st_size
-                freed_mb = (initial_size - final_size) / (1024 * 1024)
+                logger.error(
+                    "TombstoneMonitor: blocked physical deletion of %d tombstoned facts; "
+                    "canonical tenant-scoped purge ledger required.",
+                    to_delete,
+                )
 
                 return [
                     TombstoneAlert(
-                        deleted_facts=total_deleted,
-                        freed_mb=freed_mb,
-                        message=(f"Barrido Nocturno completado: {total_deleted} facts purgados."),
+                        deleted_facts=0,
+                        freed_mb=0.0,
+                        message=(
+                            "Tombstone sweep blocked: "
+                            f"{to_delete} facts require canonical tenant-scoped purge."
+                        ),
                     )
                 ]
 
