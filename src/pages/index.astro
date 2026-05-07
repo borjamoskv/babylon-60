@@ -440,7 +440,7 @@ const plans = [
         const closeModal = () => { modal.classList.remove('active'); modal.setAttribute('aria-hidden', 'true'); submit.disabled = false; submit.textContent = 'Continue'; };
         const resolvePublicOrigin = () => globalThis.location.protocol === 'file:' ? 'https://cortexpersist.com' : globalThis.location.origin;
         const resolveApiBase = () => globalThis.CORTEX_API_BASE_URL || apiBaseMeta?.content || resolvePublicOrigin();
-        const checkoutEndpoint = () => new URL('/v1/billing/checkout', resolveApiBase()).toString();
+        const checkoutEndpoint = () => new URL('/v1/stripe/checkout', resolveApiBase()).toString();
         const copyInstall = async (button) => { const value = button.dataset.copy || 'pip install cortex-persist'; try { await navigator.clipboard.writeText(value); } catch (_) { const textarea = document.createElement('textarea'); textarea.value = value; textarea.setAttribute('readonly', ''); textarea.style.position = 'absolute'; textarea.style.left = '-9999px'; document.body.appendChild(textarea); textarea.select(); document.execCommand('copy'); textarea.remove(); } button.textContent = 'Copied: ' + value; setTimeout(() => { button.textContent = value; }, 1800); };
         document.querySelectorAll('.open-checkout').forEach((button) => button.addEventListener('click', () => openModal(button.dataset.plan)));
         document.querySelectorAll('.copy-install').forEach((button) => button.addEventListener('click', () => copyInstall(button)));
