@@ -450,7 +450,7 @@ async def create_media_mark(body: ProofMarkRequest) -> dict[str, Any]:
     return mark
 
 
-@app.post("/v1/billing/checkout")
+@app.post("/v1/stripe/checkout")
 async def create_checkout_session(body: CheckoutRequest) -> dict[str, Any]:
     """Create a hosted billing checkout session for a supported plan."""
 
