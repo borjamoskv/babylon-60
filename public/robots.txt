@@ -1,0 +1,26 @@
+User-agent: *
+Allow: /
+
+# GEO Optimization: Explicitly allow AI bots to index the site for Generative Engine Optimization
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Omgilibot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+Sitemap: https://cortexpersist.com/sitemap-index.xml

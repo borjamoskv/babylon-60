@@ -1,0 +1,77 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  canonicalURL?: string;
+  type?: string;
+}
+
+const { 
+  title = 'CORTEX Persist | Auditable Memory for AI Agents',
+  description = 'CORTEX adds tamper-evident memory, tenant-scoped audit trails, crypto/NFT fiscal evidence packs, and EU AI Act logging evidence to autonomous AI agents. Local-first and verifiable.',
+  image = 'https://cortexpersist.com/og-image.jpg',
+  canonicalURL = 'https://cortexpersist.com',
+  type = 'website'
+} = Astro.props;
+
+const schemaData = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "CORTEX Persist",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "description": description,
+  "url": canonicalURL,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "MOSKV-1 Sovereign Systems",
+    "url": "https://cortexpersist.com"
+  }
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content={description} />
+    <meta name="keywords" content="AI memory, agent audit trails, EU AI Act Article 12, immutable ledger, local-first AI, multi-agent consensus, crypto fiscal audit, CORTEX Persist" />
+    <link rel="canonical" href={canonicalURL} />
+    <meta name="theme-color" content="#080a08">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={image} />
+    
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
+
+    <!-- GEO / AI Search Optimization (JSON-LD) -->
+    <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

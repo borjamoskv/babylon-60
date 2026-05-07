@@ -1,96 +1,571 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Welcome from '../components/Welcome.astro';
+import '../styles/saas-landing.css';
 
-// CORTEX Unified Substrate — v0.3.2b1 Landing Page Shell
+const metrics = [
+  ['<5ms', 'local retrieval path'],
+  ['1,162+', 'test functions tracked'],
+  ['55+', 'documented API endpoints'],
+  ['90+', 'operator CLI commands'],
+];
+
+const workflow = [
+  ['01', 'Propose', 'An agent proposes a fact, decision, observation, or runtime state change.'],
+  ['02', 'Validate', 'Guards enforce schema, taint, tenant scope, secret redaction, and deterministic admission rules.'],
+  ['03', 'Persist', 'Accepted state is written transactionally with ledger continuity and explicit failure semantics.'],
+  ['04', 'Verify', 'Teams can inspect, replay, export, and verify the chain when incidents or audits happen.'],
+];
+
+const features = [
+  ['01', 'Immutable ledger', 'Facts are appended to a SHA-256 hash chain, with verification commands for continuity checks.'],
+  ['02', 'Tenant boundaries', 'Public read and write paths are designed around explicit tenant scope to avoid cross-customer memory bleed.'],
+  ['03', 'Guarded admission', 'Validation failures stay failures. Unverified generative output does not become durable fact by accident.'],
+  ['04', 'Hybrid retrieval', 'Semantic and full-text recall can work together while preserving provenance and verification state.'],
+  ['05', 'WBFT consensus', 'Multiple agents can vote on facts with weighted Byzantine fault-tolerant agreement semantics.'],
+  ['06', 'Local-first runtime', 'Start with SQLite on your machine. Add cloud, sync, or enterprise deployment only when the risk model allows it.'],
+];
+
+const apiCards = [
+  ['Memory Core', 'Store, recall, edit, deprecate, and ghost facts', 'Durable facts carry type, project, tenant, timestamps, provenance, and trust metadata.', ['POST /v1/facts', 'cortex store']],
+  ['Hybrid Search', 'Semantic + lexical retrieval', 'Use vector search, FTS5, graph-aware recall, temporal filters, and ranked context assembly for agents.', ['POST /v1/search', 'GET /v1/search']],
+  ['Trust Ledger', 'Verify hash continuity and checkpoints', 'Ledger verification, Merkle roots, snapshots, and exportable evidence turn memory into an auditable state chain.', ['cortex trust-ledger verify', 'cortex export']],
+  ['WBFT Consensus', 'Multi-agent voting and reputation', 'Agents can vote on facts with quorum, weighted reputation, disputed states, and consensus audit trails.', ['cortex vote_v2', 'consensus helpers']],
+  ['Projects + Timeline', 'Point-in-time reconstruction', 'Export project memory, navigate temporal state, reconstruct incidents, and produce auditor-friendly context packs.', ['GET /v1/projects/{project}/export', 'cortex timeline']],
+  ['Auth + Tenancy', 'RBAC, API keys, tenant scope', 'Roles, permissions, API keys, rate limits, and explicit tenant boundaries protect public read/write surfaces.', ['Authorization: Bearer ctx_...', 'tenant_id scoped reads']],
+  ['Daemon + Observability', 'Health, metrics, watchdogs', 'Expose health checks, Prometheus metrics, observatory state, daemon status, and operational signals.', ['GET /health', 'GET /metrics', 'GET /v1/daemon/status']],
+  ['Billing + Integrations', 'Billing, context connectors, MCP, SDKs', 'Use server-side billing routes, async clients, MCP tools, language integrations, and hosted API surfaces where needed.', ['billing checkout', 'context connector search']],
+];
+
+const agentControlCards = [
+  ['01', 'Agent lifecycle', 'Register agents, monitor liveness, restart supervised tasks, and keep working memory attached to agent identity.', ['POST /v1/agents', 'GET /v1/agents']],
+  ['02', 'Multi-agent orchestration', 'Coordinate parallel agents, isolated worktrees, mission queues, budget controls, and high-risk verification gates.', ['GET /v1/agents/status', 'POST /v1/missions']],
+  ['03', 'Quality engine', 'Scan, record improvement sessions, inspect history, and run release gates before autonomous changes become release candidates.', ['quality scan', 'release gate']],
+  ['04', 'Conflict resolution', 'Use weighted votes, Byzantine consensus, elder-council style escalation, and audit trails for disputed agent decisions.', ['consensus_score', 'vote ledger']],
+];
+
+const researchFlow = [
+  ['01', 'Discover', 'Knowledge Radar scans curated targets, unresolved ghosts, semantic gaps, and operational signals.'],
+  ['02', 'Acquire', 'Source collectors and bounded file/API tools collect source material without mixing raw evidence with verified facts.'],
+  ['03', 'Analyze', 'Targeted audits, quality analysis, multi-agent reviews, and static-analysis gates produce dense reports and failure signatures.'],
+  ['04', 'Crystallize', 'Scheduled cycles and ledgered memory convert high-confidence findings into reusable, timestamped knowledge.'],
+];
+
+const fiscalSteps = [
+  ['1. Probatory ingestion', 'Wallets, CSVs, explorers, and marketplaces are ingested as separate sources, preserving hash, timestamp, and origin.'],
+  ['2. Reconciliation', 'Cross-references self-transfers, DEX swaps, bridges, fees, mints, NFT sales, and royalties without mixing custody with transmission.'],
+  ['3. Reviewable criteria', 'Flags each operation as verified fact, reasonable inference, or pending data for a human auditor to review.'],
+  ['4. Final evidence pack', 'Delivers a CSV, PDF, evidence manifest, gap analysis, and price traceability for professional discussion.'],
+];
+
+const compareRows = [
+  ['Cryptographic ledger', 'Not the core contract', 'Not the core contract', 'Not the core contract', 'SHA-256 hash chain'],
+  ['Merkle checkpoints', 'Not native', 'Not native', 'Not native', 'Batch integrity roots'],
+  ['Multi-agent consensus', 'Not primary surface', 'Not primary surface', 'Agent runtime focus', 'WBFT voting + reputation'],
+  ['Privacy posture', 'Cloud/service dependent', 'Cloud/service dependent', 'Self-host option', 'Local-first + ingress guards'],
+  ['AST / static gates', 'Outside memory layer', 'Outside memory layer', 'Outside memory layer', 'Static gates and ship checks'],
+  ['Local-first mode', 'Cloud-first', 'Cloud-first', 'Supported', 'SQLite local mode'],
+  ['MCP / operator surface', 'Integration-dependent', 'Integration-dependent', 'Agent framework surface', 'API + CLI + SDK + MCP'],
+  ['EU AI Act evidence', 'Customer assembled', 'Customer assembled', 'Customer assembled', 'Article 12 evidence support'],
+  ['Core license posture', 'Vendor plan', 'Vendor plan', 'Open-source available', 'Apache 2.0 core'],
+];
+
+const plans = [
+  ['Community', 'For local builders and early product experiments.', '$0', 'forever', ['Full CLI and Python API', 'Single-tenant local mode', 'Ledger verification', 'Hybrid search', 'Apache 2.0 source'], 'pip install cortex-persist', 'copy'],
+  ['Pro', 'For solo operators running serious agents.', '$29', '/month', ['Encrypted multi-device sync', 'Five tenant workspaces', 'Ghost tracking and handoff', 'Priority implementation support', 'Hosted evidence exports'], 'Request Pro access', 'pro'],
+  ['Team', 'For engineering teams with audit pressure.', '$99', '/month', ['Unlimited tenant workspaces', 'WBFT consensus workflows', 'Compliance report templates', 'Graph knowledge fusion', 'Team onboarding session'], 'Request Team access', 'team'],
+  ['Enterprise', 'For regulated deployments and dedicated infrastructure.', 'Custom', '', ['On-premise architecture review', 'Custom guard and tenant policy', 'Audit evidence pack', 'Security review support', 'Dedicated implementation lane'], 'Talk to founder', 'enterprise'],
+];
 ---
 
-<Layout title="CORTEX Persist — Tamper-Evident Agent Memory">
-	<main>
-		<div class="hero">
-			<h1>CORTEX_PERSIST</h1>
-			<p>Sovereign Agentic Context & Decision Lineage</p>
-			
-			<div class="actions">
-				<a href="/vsa" class="btn-sovereign">
-					ENTER_VSA_DASHBOARD
-					<span class="glitch-line"></span>
-				</a>
-			</div>
-		</div>
-		<Welcome />
-	</main>
-</Layout>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CORTEX | Auditable Memory for AI Agents</title>
+    <meta name="description" content="CORTEX adds tamper-evident memory, tenant-scoped audit trails, crypto/NFT fiscal evidence packs, agent orchestration, research intelligence, and EU AI Act logging evidence to autonomous AI systems." />
+    <meta property="og:title" content="CORTEX | Auditable Memory for AI Agents" />
+    <meta property="og:description" content="Tamper-evident logs, deterministic admission, agéntica, and local-first memory for autonomous AI systems." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://cortexpersist.com/saas_landing/" />
+    <meta name="theme-color" content="#080a08" />
+    <meta name="google" content="notranslate" />
+    <meta name="cortex-api-base" content="" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="background-grid" aria-hidden="true"></div>
+    <div class="orb orb-a" aria-hidden="true"></div>
+    <div class="orb orb-b" aria-hidden="true"></div>
 
-<style>
-	main {
-		width: 100%;
-		height: 100vh;
-		display: flex;
-		flex-direction: column;
-		background: #000;
-		color: #fff;
-	}
+    <div class="notice">
+      <span>EU AI Act Article 12 logging obligations start August 2, 2026.</span>
+      <a href="#compliance">Map the evidence gap</a>
+    </div>
 
-	.hero {
-		padding: 4rem;
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		border-bottom: 1px solid #111;
-	}
+    <header class="nav" id="nav">
+      <a class="brand notranslate" href="#hero" aria-label="CORTEX home" translate="no"><span class="brand-mark">C</span><span translate="no">CORTEX</span></a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="#compliance">EU AI Act</a>
+        <a href="#features">Features</a>
+        <a href="#use-cases-live">Use cases</a>
+        <a href="#api-surface">API</a>
+        <a href="#criptofiscal">crypto evidence workflow</a>
+        <a href="#agent-control">Agent control</a>
+        <a href="#research">Research</a>
+        <a href="#reference-agent">Reference agent</a>
+        <a href="/org/">Trust</a>
+        <a href="#pricing">Pricing</a>
+        <a href="/site/">Docs</a>
+      </nav>
+      <a class="nav-cta" href="#pricing">Install free</a>
+    </header>
 
-	h1 {
-		font-family: 'Orbitron', sans-serif;
-		font-size: 4rem;
-		letter-spacing: 0.5rem;
-		margin: 0;
-	}
+    <main>
+      <section class="hero" id="hero">
+        <div class="hero-copy">
+          <div class="eyebrow">Local-first trust substrate for autonomous AI</div>
+          <h1>Auditable memory for agents that cannot afford guesswork.</h1>
+          <p class="hero-sub">CORTEX records AI decisions as tenant-scoped, tamper-evident facts. It gives engineering, security, and compliance teams a verifiable trail without turning agent memory into another hosted SaaS dependency.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#pricing">Start with the CLI</a>
+            <a class="btn btn-secondary" href="/architecture/">Audit the architecture</a>
+          </div>
+          <div class="hero-specialty" aria-label="Crypto/NFT forensic workflow">
+            <span>New specialized workflow</span>
+            <strong>Crypto/NFT Evidence Pack: Verifiable blockchain forensics for tax and audit review.</strong>
+            <p>Reconstructs wallets, transaction hashes, cost basis, sales, swaps, royalties, and custody gaps into an auditable dossier. Separates verifiable facts, inferences, and missing data for human professionals. <a href="/site/fiscal-forense.es/" class="es-link">Leer documentación técnica en español</a></p>
+          </div>
+          <div class="hero-proof" aria-label="CORTEX proof points"><span>Apache 2.0</span><span>SQLite local mode</span><span>Hash-chained ledger</span></div>
+        </div>
+        <aside class="evidence-console" aria-label="CORTEX command line example">
+          <div class="console-topbar"><span></span><span></span><span></span><strong>decision-ledger</strong></div>
+          <div class="console-body">
+            <p><span class="prompt">$</span> cortex store --type decision "Use OAuth2 PKCE for auth"</p>
+            <p class="ok">stored fact #42 | tenant=acme | taint=validated</p>
+            <p class="hash">sha256:a3f8c2...d91b -> prev:7e2b01...4fc3</p>
+            <p><span class="prompt">$</span> cortex trust-ledger verify</p>
+            <p class="ok">ledger intact | merkle checkpoint sealed | report ready</p>
+          </div>
+        </aside>
+      </section>
 
-	p {
-		font-family: 'Inter', sans-serif;
-		color: #666;
-		margin-top: 1rem;
-		letter-spacing: 0.1rem;
-	}
+      <section class="metrics" aria-label="CORTEX metrics">
+        {metrics.map(([value, label]) => <div class="metric-card"><strong>{value}</strong><span>{label}</span></div>)}
+      </section>
 
-	.actions {
-		margin-top: 3rem;
-	}
+      <section class="logo-strip" aria-label="Integrations">
+        <p>Designed to sit underneath the tools teams already use</p>
+        <div><span>Claude Code</span><span>Cursor</span><span>LangChain</span><span>CrewAI</span><span>AutoGen</span><span>Custom agents</span></div>
+      </section>
 
-	.btn-sovereign {
-		position: relative;
-		display: inline-block;
-		padding: 1rem 2rem;
-		background: transparent;
-		border: 1px solid #2B3BE5;
-		color: #2B3BE5;
-		text-decoration: none;
-		font-family: 'Orbitron', sans-serif;
-		font-size: 0.8rem;
-		letter-spacing: 0.2rem;
-		transition: all 0.3s ease;
-		overflow: hidden;
-	}
+      <section class="split compliance" id="compliance">
+        <div>
+          <span class="section-kicker">Regulatory pressure</span>
+          <h2>Article 12 needs evidence, not screenshots.</h2>
+          <p>High-risk AI systems in the EU need automatic logging, traceability, and integrity controls. CORTEX is not legal advice and does not make a system compliant by itself. It gives your team the technical record needed to prove what an agent knew, decided, and wrote.</p>
+          <div class="risk-box"><span>Potential exposure</span><strong>up to EUR 30M or 6% of worldwide annual turnover</strong><small>For qualifying EU AI Act violations, depending on classification and facts.</small></div>
+        </div>
+        <div class="checklist" aria-label="EU AI Act logging evidence map">
+          <article><strong>Automatic logging</strong><p>Every admitted fact receives timestamp, type, tenant scope, provenance, and ledger continuity metadata.</p></article>
+          <article><strong>Tamper evidence</strong><p>Hash chains and Merkle checkpoints make record mutation detectable instead of silently accepted.</p></article>
+          <article><strong>Decision lineage</strong><p>Facts, votes, guards, and verification state can be traced back to the operation that created them.</p></article>
+          <article><strong>Human and agent oversight</strong><p>WBFT voting and disputed-state handling keep single-agent memory writes from becoming unreviewed truth.</p></article>
+        </div>
+      </section>
 
-	.btn-sovereign:hover {
-		background: #2B3BE5;
-		color: #fff;
-		box-shadow: 0 0 20px rgba(43, 59, 229, 0.4);
-	}
+      <section id="workflow">
+        <div class="section-heading"><span class="section-kicker">Operating model</span><h2>From agent output to evidence chain.</h2><p>CORTEX does not replace your model, framework, or vector store. It adds the deterministic trust boundary between raw output and persisted memory.</p></div>
+        <div class="workflow-grid">{workflow.map(([num, title, text]) => <article><span>{num}</span><h3>{title}</h3><p>{text}</p></article>)}</div>
+      </section>
 
-	.glitch-line {
-		position: absolute;
-		top: 0;
-		left: -100%;
-		width: 100%;
-		height: 1px;
-		background: rgba(255,255,255,0.5);
-		transition: all 0.5s ease;
-	}
+      <section id="features">
+        <div class="section-heading"><span class="section-kicker">Core capabilities</span><h2>Memory infrastructure with a trust contract.</h2><p>Most memory products optimize recall. CORTEX optimizes whether a recalled fact should be trusted.</p></div>
+        <div class="features-grid">{features.map(([num, title, text]) => <article class="feature-card"><div class="feature-icon">{num}</div><h3>{title}</h3><p>{text}</p></article>)}</div>
+      </section>
 
-	.btn-sovereign:hover .glitch-line {
-		left: 100%;
-	}
-</style>
+      <section class="fiscal-agent-section" id="criptofiscal">
+        <div class="section-heading">
+          <span class="section-kicker">Crypto/NFT Audit</span>
+          <h2>From raw wallets and NFT marketplaces to a defensible audit trail.</h2>
+          <p>A forensic workflow to reconstruct on-chain and off-chain activity, calculate fiat basis with traceable sources, separate facts from inferences, and deliver a reviewable dossier before consulting with tax advisors.</p>
+          <div class="fiscal-agent-brief" aria-label="Crypto/NFT evidence outputs">
+            <span><strong>Input</strong> wallets, CSVs, explorers, marketplaces</span>
+            <span><strong>Control</strong> facts, inferences, gaps, duplicates</span>
+            <span><strong>Output</strong> PDF, CSV, manifest, and annexes <a href="/site/fiscal-forense.es/" style="text-decoration: underline; color: var(--accent);">[ES]</a></span>
+          </div>
+        </div>
+        <div class="fiscal-agent-layout">
+          <article class="fiscal-agent-card primary">
+            <span>Forensic Ledger</span>
+            <h3>A verifiable timeline, not a fragile spreadsheet.</h3>
+            <p>The agent normalizes heterogeneous sources, preserves cryptographic provenance, and transparently flags what is proven, what needs human criteria, and what is missing.</p>
+            <div class="fiscal-agent-proofline" aria-label="Crypto/NFT dossier summary">
+              <strong>418</strong><span>sample events</span>
+              <strong>3</strong><span>critical gaps</span>
+              <strong>1</strong><span>sealed manifest</span>
+            </div>
+            <div class="fiscal-evidence-strip" aria-label="Crypto/NFT ledger preview">
+              <div><span>tx_hash</span><strong>0x91f...a42</strong><em>verified</em></div>
+              <div><span>type</span><strong>swap + fee</strong><em>classified</em></div>
+              <div><span>fiat basis</span><strong>dated source</strong><em>reviewable</em></div>
+              <div><span>risk</span><strong>self-transfer?</strong><em>pending</em></div>
+            </div>
+            <div class="fiscal-agent-tags" aria-label="crypto/NFT evidence scope"><em>Wallet graph</em><em>Exchange CSV</em><em>DeFi</em><em>NFT royalties</em><em>PDF/CSV</em></div>
+          </article>
+          <div class="fiscal-agent-steps" aria-label="crypto/NFT evidence workflow">
+            {fiscalSteps.map(([title, text]) => <article><strong>{title}</strong><p>{text}</p></article>)}
+          </div>
+        </div>
+        <div class="fiscal-risk-grid" aria-label="Crypto/NFT risk controls">
+          <article><span>01</span><strong>Custody vs. Sale</strong><p>Flags self-transfers between known wallets to avoid treating them as taxable sales without manual review.</p></article>
+          <article><span>02</span><strong>Price & Timestamp</strong><p>Each fiat valuation retains its external source, exact timestamp, and trust state.</p></article>
+          <article><span>03</span><strong>NFTs & Royalties</strong><p>Separates mints, burns, sales, royalties, and marketplace fees to maintain distinct taxable event categories.</p></article>
+        </div>
+        <div class="fiscal-agent-note"><strong>Operational Limit:</strong> CORTEX does not invent ownership, falsify prices, or establish definitive tax criteria. It prepares raw evidence and gaps for human professional review; actual obligations must be validated against official regulations. <a href="/site/fiscal-forense.es/" style="color:var(--accent);text-decoration:underline;">Documentación en español</a></div>
+      </section>
+
+      <section class="interactive-use-section" id="use-cases-live">
+        <div class="section-heading">
+          <span class="section-kicker">Good Use Cases</span>
+          <h2>Live panels to explain when CORTEX makes sense.</h2>
+          <p>Not everything needs a ledger. CORTEX shines when an agent's memory, an audit, or an investigation could turn into real liability.</p>
+        </div>
+
+        <div class="usecase-console" data-usecase-console>
+          <div class="usecase-selector" role="tablist" aria-label="CORTEX good use cases">
+            <button class="usecase-tab active" type="button" role="tab" aria-selected="true" data-usecase="crypto">Crypto/NFT evidence</button>
+            <button class="usecase-tab" type="button" role="tab" aria-selected="false" data-usecase="agent">Agent memory</button>
+            <button class="usecase-tab" type="button" role="tab" aria-selected="false" data-usecase="research">Research</button>
+            <button class="usecase-tab" type="button" role="tab" aria-selected="false" data-usecase="incident">Incident</button>
+          </div>
+
+          <div class="usecase-stage">
+            <article class="usecase-main">
+              <span id="usecase-kicker">Fiscal evidence pack</span>
+              <h3 id="usecase-title">Blockchain and NFT forensics for tax review.</h3>
+              <p id="usecase-copy">Reconstructs wallets, exchanges, swaps, NFT sales, royalties, fees, and custody gaps into a traceable technical dossier for a tax advisor.</p>
+              <div class="usecase-tags" id="usecase-tags">
+                <em>wallet graph</em>
+                <em>tx hash</em>
+                <em>cost basis</em>
+                <em>PDF + CSV</em>
+              </div>
+            </article>
+
+            <aside class="usecase-proof">
+              <div class="proof-header">
+                <span>good-use score</span>
+                <strong id="usecase-score">96</strong>
+              </div>
+              <div class="proof-meter" aria-hidden="true"><i id="usecase-meter" style="width: 96%"></i></div>
+              <ul id="usecase-checks">
+                <li>Multiple sources must be reconciled.</li>
+                <li>Decisions must be explained months later.</li>
+                <li>A third party will review the evidence.</li>
+              </ul>
+            </aside>
+          </div>
+
+          <div class="usecase-flow" aria-label="Selected use case workflow">
+            <div><span>Input</span><strong id="usecase-input">Wallets + exchange CSVs + NFT marketplaces</strong></div>
+            <div><span>CORTEX</span><strong id="usecase-process">Classify, hash, flag gaps, seal evidence</strong></div>
+            <div><span>Output</span><strong id="usecase-output">Advisor-ready PDF, CSV, manifest</strong></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="api-surface" id="api-surface">
+        <div class="section-heading"><span class="section-kicker">Full API surface</span><h2>CORTEX is not just a landing page. It is an operator API.</h2><p>The backend exposes a broad FastAPI, CLI, SDK, MCP, and daemon surface.</p></div>
+        <div class="api-stats"><div><strong>55+</strong><span>documented API endpoints</span></div><div><strong>90+</strong><span>operator CLI commands</span></div><div><strong>13</strong><span>daemon monitors</span></div><div><strong>4</strong><span>API, CLI, SDK, MCP</span></div></div>
+        <div class="api-grid">
+          {apiCards.map(([kicker, title, text, codes]) => <article class="api-card"><span>{kicker}</span><h3>{title}</h3><p>{text}</p>{codes.map((code) => <code>{code}</code>)}</article>)}
+        </div>
+      </section>
+
+      <section class="agent-control-section" id="agent-control">
+        <div class="section-heading"><span class="section-kicker">Agent control layer</span><h2>A control plane for societies of agents.</h2><p>CORTEX includes an agent control stack: registered agents, heartbeat supervision, multi-agent missions, consensus resolution, handoff state, and self-improvement loops.</p></div>
+        <div class="agent-control-hero">
+          <div class="agent-control-map" aria-label="Agent control plane map"><div class="agent-node prime">Supervisor</div><div class="agent-ring"><span>MemoryAgent</span><span>SecurityAgent</span><span>VerificationAgent</span><span>HandoffAgent</span><span>ScheduledWorker</span><span>Coordinator</span></div></div>
+          <div class="agent-control-copy"><h3>From single-agent memory to coordinated agency.</h3><p>Agents can register, emit heartbeats, receive messages, persist working memory, vote on facts, and escalate conflicts. Agent groups can run isolated worktrees, budget execution, verify risky changes, and record mission results back into the ledger.</p><div class="agent-control-pills"><span>Agent registry</span><span>Message bus</span><span>Heartbeat supervision</span><span>Multi-agent missions</span><span>WBFT arbitration</span><span>Handoff state</span></div></div>
+        </div>
+        <div class="agent-control-grid">{agentControlCards.map(([num, title, text, codes]) => <article><span>{num}</span><h3>{title}</h3><p>{text}</p>{codes.map((code) => <code>{code}</code>)}</article>)}</div>
+      </section>
+
+      <section class="research-section" id="research">
+        <div class="section-heading"><span class="section-kicker">Investigación intelligence</span><h2>Deep research that becomes durable knowledge.</h2><p>CORTEX can run research as an evidence pipeline: discover gaps, extract sources, generate audits, synthesize findings, and persist only traceable claims.</p></div>
+        <div class="research-flow">{researchFlow.map(([num, title, text]) => <article><span>{num}</span><h3>{title}</h3><p>{text}</p></article>)}</div>
+        <div class="research-grid">
+          <article class="research-card wide"><span>Deep Research</span><h3>Competitive analysis, architecture audits, security research, and scientific synthesis.</h3><p>Turn reviews and findings into reusable intelligence with source trails, timestamps, and explicit confidence boundaries.</p><div class="research-tags"><em>Competitive analysis</em><em>Architecture review</em><em>Security audit</em><em>Source synthesis</em></div></article>
+          <article class="research-card"><span>Target audits</span><h3>Fast B2B audit reports</h3><p>Run targeted audits against companies, repos, APIs, or architecture surfaces and store the report back into CORTEX.</p><code>audit request</code></article>
+          <article class="research-card"><span>Observatory</span><h3>One endpoint, full picture</h3><p>Aggregate system status, daemon data, trust posture, and evolution and orchestration signals into a single operator view.</p><code>GET /v1/observatory</code></article>
+          <article class="research-card"><span>Knowledge Radar</span><h3>Find what the system does not know</h3><p>Detect unresolved references, semantic gaps, and queued targets so the system can prioritize research automatically.</p><code>knowledge_gap</code></article>
+          <article class="research-card"><span>Scheduled cycles</span><h3>Autonomous knowledge generation</h3><p>Background cycles discover targets, build plans, forge knowledge crystals, and persist cycle reports.</p><code>nightshift_cycle</code></article>
+        </div>
+      </section>
+
+      <section class="reference-agent-section" id="reference-agent">
+        <div class="section-heading">
+          <span class="section-kicker">Flagship use case</span>
+          <h2>Reference agent: agentic memory with a verifiable passport.</h2>
+          <p>The strongest CORTEX story is not another memory API. It is a bot that can remember, prove, research, coordinate agents, and hand off state without turning chat history into the source of truth.</p>
+        </div>
+
+        <div class="reference-agent-layout">
+          <article class="reference-agent-passport">
+            <span class="passport-label">Memory Passport</span>
+            <h3>Portable context with proof.</h3>
+            <p>Reference agent can carry user preferences, project decisions, open tasks, research findings, error history, and agent handoff state as scoped, auditable records.</p>
+            <div class="passport-stack" aria-label="Reference agent memory passport contents">
+              <span>preferences</span>
+              <span>decisions</span>
+              <span>research</span>
+              <span>handoffs</span>
+              <span>ledger proofs</span>
+            </div>
+          </article>
+
+          <div class="reference-agent-flow">
+            <article>
+              <strong>1. Recall</strong>
+              <p>Pull tenant-scoped context before the bot answers.</p>
+            </article>
+            <article>
+              <strong>2. Validate</strong>
+              <p>Separate facts, conjecture, provenance, and stale claims.</p>
+            </article>
+            <article>
+              <strong>3. Coordinate</strong>
+              <p>Route work across agents with consensus and bounded authority.</p>
+            </article>
+            <article>
+              <strong>4. Prove</strong>
+              <p>Export hash-linked evidence instead of unverifiable transcript memory.</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="reference-agent-compare">
+          <div>
+            <h3>Regular memory bot</h3>
+            <p>Remembers useful context, but trust depends on the provider and the transcript.</p>
+          </div>
+          <div>
+            <h3>Reference agent on CORTEX</h3>
+            <p>Remembers with provenance, scoped tenants, verifiable checkpoints, research trails, and agent handoffs that survive across tools.</p>
+          </div>
+        </div>
+
+        <a class="btn btn-secondary reference-agent-link" href="/site/architecture/">Open reference agent architecture</a>
+      </section>
+
+      <section id="compare" class="compare-section">
+        <div class="section-heading"><span class="section-kicker">Positioning</span><h2>CORTEX vs. the rest.</h2><p>CORTEX can coexist with hosted memory tools, vector stores, and agent frameworks. The difference is architectural: CORTEX treats memory as auditable state, not just recall infrastructure.</p></div>
+        <div class="compare-callout"><strong>Architecture comparison.</strong> CORTEX focuses on verifiable memory and evidence continuity. Vendor pricing and product scope can change, so teams should confirm current terms during due diligence.</div>
+        <div class="compare-table-wrap">
+          <table class="compare-table">
+            <thead><tr><th>Capability</th><th>Mem0</th><th>Zep</th><th>Letta</th><th>CORTEX</th></tr></thead>
+            <tbody>{compareRows.map((row) => <tr>{row.map((cell) => <td>{cell}</td>)}</tr>)}</tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="org-section" id="trust">
+        <div class="section-heading">
+          <span class="section-kicker">Domain split</span>
+          <h2>.com sells the product. .org carries the trust record.</h2>
+          <p>cortexpersist.org is reserved for governance, research, security posture, and evidence material so public trust content does not get buried inside pricing or checkout flows.</p>
+        </div>
+        <div class="domain-grid" aria-label="CORTEX domain map">
+          <article>
+            <span>.com</span>
+            <h3>Commercial canonical</h3>
+            <p>Public product surface, pricing, checkout entry, and implementation support.</p>
+          </article>
+          <article>
+            <span>.dev</span>
+            <h3>Developer surface</h3>
+            <p>Docs, API references, SDK examples, integration notes, and staging links.</p>
+          </article>
+          <article class="domain-card-primary">
+            <span>.org</span>
+            <h3>Trust and community</h3>
+            <p>Governance, research, security posture, responsible disclosure, and evidence material.</p>
+            <a class="domain-link" href="/org/">Open trust hub</a>
+          </article>
+        </div>
+      </section>
+
+      <section id="pricing">
+        <div class="section-heading"><span class="section-kicker">Pricing</span><h2>Start locally. Add managed help when needed.</h2><p>The open-source core is free. Paid tiers are for teams that want hosted sync, implementation support, or managed compliance evidence.</p></div>
+        <div class="pricing-grid">
+          {plans.map(([name, desc, price, suffix, items, cta, action], index) => <article class:list={['plan', index === 1 && 'highlighted', action === 'enterprise' && 'enterprise']}>
+            {index === 1 && <div class="plan-badge">Early access</div>}
+            <div class="plan-head"><h3>{name}</h3><p>{desc}</p></div>
+            <div class="price">{price} <span>{suffix}</span></div>
+            <ul>{items.map((item) => <li>{item}</li>)}</ul>
+            {action === 'copy' && <button class="btn btn-secondary copy-install" type="button" data-copy="pip install cortex-persist">{cta}</button>}
+            {action === 'pro' && <button class="btn btn-primary open-checkout" type="button" data-plan="pro">{cta}</button>}
+            {action === 'team' && <button class="btn btn-secondary open-checkout" type="button" data-plan="team">{cta}</button>}
+            {action === 'enterprise' && <a class="btn btn-secondary" href="mailto:borja@cortexpersist.com?subject=CORTEX%20Enterprise%20deployment">{cta}</a>}
+          </article>)}
+        </div>
+      </section>
+
+      <section class="final-cta" id="start"><span class="section-kicker">Thirty seconds to first proof</span><h2>Do not let agent memory become unverifiable production state.</h2><p>Install locally, store one decision, and verify the ledger before you trust the next agent handoff.</p><div class="hero-actions"><a class="btn btn-primary" href="#pricing">Install CORTEX</a><a class="btn btn-secondary" href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noopener noreferrer">View source repository</a></div></section>
+    </main>
+
+    <footer class="footer"><div><a class="brand notranslate" href="#hero" aria-label="CORTEX home" translate="no"><span class="brand-mark">C</span><span translate="no">CORTEX</span></a><p>Trust infrastructure for autonomous AI. Apache 2.0 core.</p></div><nav aria-label="Footer navigation"><a href="/org/">Trust</a><a href="/site/">Docs</a><a href="/site/api/">API</a><a href="/site/security/">Security</a><a href="/site/quickstart/">Quickstart</a><a href="/site/blog/">Blog</a><a href="/org/">Trust center</a></nav></footer>
+
+    <div class="modal" id="checkout-modal" aria-hidden="true"><div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="checkout-title"><button class="modal-close" type="button" id="checkout-close" aria-label="Close checkout">x</button><span class="section-kicker">Secure checkout</span><h2 id="checkout-title">Request access</h2><p id="checkout-copy">Card details are handled by payment-provider checkout. CORTEX does not collect raw card data on this page.</p><form id="checkout-form"><input type="hidden" name="plan" id="checkout-plan" value="pro" /><label for="checkout-email">Work email</label><input id="checkout-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@company.com" required /><button class="btn btn-primary" id="checkout-submit" type="submit">Continue</button></form><p class="modal-footnote">If hosted checkout is not active yet, the button opens a pre-filled founder request instead.</p></div></div>
+
+    <script is:inline>
+      (() => {
+        const nav = document.getElementById('nav');
+        const modal = document.getElementById('checkout-modal');
+        const close = document.getElementById('checkout-close');
+        const form = document.getElementById('checkout-form');
+        const planInput = document.getElementById('checkout-plan');
+        const title = document.getElementById('checkout-title');
+        const copy = document.getElementById('checkout-copy');
+        const submit = document.getElementById('checkout-submit');
+        const email = document.getElementById('checkout-email');
+        const apiBaseMeta = document.querySelector('meta[name="cortex-api-base"]');
+        const planCopy = {
+          pro: { title: 'Request Pro early access', copy: 'Pro adds encrypted sync, five tenant workspaces, and priority implementation support. the payment provider handles payment details if hosted checkout is enabled.' },
+          team: { title: 'Request a Team pilot', copy: 'Team adds unlimited tenant workspaces, consensus workflows, and compliance report templates. the payment provider handles payment details if hosted checkout is enabled.' }
+        };
+        const openModal = (plan) => { const selected = planCopy[plan] || planCopy.pro; planInput.value = plan; title.textContent = selected.title; copy.textContent = selected.copy; modal.classList.add('active'); modal.setAttribute('aria-hidden', 'false'); setTimeout(() => email.focus(), 50); };
+        const closeModal = () => { modal.classList.remove('active'); modal.setAttribute('aria-hidden', 'true'); submit.disabled = false; submit.textContent = 'Continue'; };
+        const resolvePublicOrigin = () => globalThis.location.protocol === 'file:' ? 'https://cortexpersist.com' : globalThis.location.origin;
+        const resolveApiBase = () => globalThis.CORTEX_API_BASE_URL || apiBaseMeta?.content || resolvePublicOrigin();
+        const checkoutEndpoint = () => new URL('/v1/billing/checkout', resolveApiBase()).toString();
+        const copyInstall = async (button) => { const value = button.dataset.copy || 'pip install cortex-persist'; try { await navigator.clipboard.writeText(value); } catch (_) { const textarea = document.createElement('textarea'); textarea.value = value; textarea.setAttribute('readonly', ''); textarea.style.position = 'absolute'; textarea.style.left = '-9999px'; document.body.appendChild(textarea); textarea.select(); document.execCommand('copy'); textarea.remove(); } button.textContent = 'Copied: ' + value; setTimeout(() => { button.textContent = value; }, 1800); };
+        document.querySelectorAll('.open-checkout').forEach((button) => button.addEventListener('click', () => openModal(button.dataset.plan)));
+        document.querySelectorAll('.copy-install').forEach((button) => button.addEventListener('click', () => copyInstall(button)));
+        close.addEventListener('click', closeModal);
+        modal.addEventListener('click', (event) => { if (event.target === modal) closeModal(); });
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && modal.classList.contains('active')) closeModal(); });
+        form.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          if (!email.checkValidity()) { email.reportValidity(); return; }
+          submit.disabled = true;
+          submit.textContent = 'Opening secure checkout...';
+          const plan = planInput.value;
+          const publicOrigin = resolvePublicOrigin();
+          const payload = { plan, customer_email: email.value, success_url: publicOrigin + '/success/', cancel_url: publicOrigin + '/cancel/', ui_mode: 'hosted' };
+          try {
+            const response = await fetch(checkoutEndpoint(), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!response.ok) throw new Error('checkout unavailable');
+            const data = await response.json();
+            if (data.url) { globalThis.location.href = data.url; return; }
+            throw new Error('checkout URL missing');
+          } catch (_) {
+            const subject = encodeURIComponent('CORTEX ' + plan.toUpperCase() + ' access request');
+            const body = encodeURIComponent('Plan: ' + plan + '\nEmail: ' + email.value + '\n\nI want access to CORTEX ' + plan + '.');
+            globalThis.location.href = 'mailto:borja@cortexpersist.com?subject=' + subject + '&body=' + body;
+            closeModal();
+          }
+        });
+        const onScroll = () => nav.classList.toggle('scrolled', globalThis.scrollY > 16);
+        onScroll();
+        globalThis.addEventListener('scroll', onScroll, { passive: true });
+
+        const useCases = {
+          crypto: {
+            kicker: 'Fiscal evidence pack',
+            title: 'Blockchain and NFT forensics for tax review.',
+            copy: 'Reconstructs wallets, exchanges, swaps, NFT sales, royalties, fees, and custody gaps into a traceable technical dossier for a tax advisor.',
+            tags: ['wallet graph', 'tx hash', 'cost basis', 'PDF + CSV'],
+            score: 96,
+            checks: ['Multiple sources must be reconciled.', 'Decisions must be explained months later.', 'A third party will review the evidence.'],
+            input: 'Wallets + exchange CSVs + NFT marketplaces',
+            process: 'Classify, hash, flag gaps, seal evidence',
+            output: 'Advisor-ready PDF, CSV, manifest'
+          },
+          agent: {
+            kicker: 'Agent memory passport',
+            title: 'An agent that remembers without fabricating its past.',
+            copy: 'CORTEX separates useful memory from admitted facts: preferences, decisions, tasks, handoffs, and project context with tenant boundaries.',
+            tags: ['preferences', 'handoff', 'tenant scope', 'ledger'],
+            score: 91,
+            checks: ['The agent operates for weeks or months.', 'Some decisions cannot be lost.', 'Context must transfer across tools.'],
+            input: 'Chats, project decisions, tasks, agent events',
+            process: 'Guard, scope, persist, retrieve, verify',
+            output: 'Portable memory passport for the agent'
+          },
+          research: {
+            kicker: 'Deep research crystallization',
+            title: 'Research that doesn\'t die in a transcript.',
+            copy: 'Converts audits, benchmarks, repo analysis, and competitive research into knowledge crystals with source, date, and traceability.',
+            tags: ['source trail', 'findings', 'crystals', 'exports'],
+            score: 88,
+            checks: ['Sources and conclusions must remain distinct.', 'The report will be reused later.', 'Crucial to separate evidence from hypothesis.'],
+            input: 'Sources, repos, notes, audit prompts',
+            process: 'Acquire, analyze, classify, crystallize',
+            output: 'Reusable evidence-backed research pack'
+          },
+          incident: {
+            kicker: 'Incident reconstruction',
+            title: 'Reconstruct what the system knew when it failed.',
+            copy: 'For bugs, security incidents, or disputed automated decisions, CORTEX helps reconstruct memory, timelines, validations, and persisted state.',
+            tags: ['timeline', 'guards', 'audit log', 'postmortem'],
+            score: 93,
+            checks: ['An automated decision is disputed.', 'You need a verifiable timeline.', 'The response must survive an audit.'],
+            input: 'Events, memory writes, guard failures, ledger entries',
+            process: 'Replay, verify chain, identify divergence',
+            output: 'Postmortem timeline with proof anchors'
+          }
+        };
+
+        const usecaseRoot = document.querySelector('[data-usecase-console]');
+        if (usecaseRoot) {
+          const usecaseEls = {
+            tabs: usecaseRoot.querySelectorAll('.usecase-tab'),
+            main: usecaseRoot.querySelector('.usecase-main'),
+            proof: usecaseRoot.querySelector('.usecase-proof'),
+            flow: usecaseRoot.querySelector('.usecase-flow'),
+            kicker: document.getElementById('usecase-kicker'),
+            title: document.getElementById('usecase-title'),
+            copy: document.getElementById('usecase-copy'),
+            tags: document.getElementById('usecase-tags'),
+            score: document.getElementById('usecase-score'),
+            meter: document.getElementById('usecase-meter'),
+            checks: document.getElementById('usecase-checks'),
+            input: document.getElementById('usecase-input'),
+            process: document.getElementById('usecase-process'),
+            output: document.getElementById('usecase-output')
+          };
+
+          const renderUseCase = (key) => {
+            const item = useCases[key] || useCases.crypto;
+            usecaseEls.tabs.forEach((tab) => {
+              const active = tab.dataset.usecase === key;
+              tab.classList.toggle('active', active);
+              tab.setAttribute('aria-selected', String(active));
+            });
+            [usecaseEls.main, usecaseEls.proof, usecaseEls.flow].forEach((el) => {
+              el.classList.remove('is-swapping');
+              void el.offsetWidth;
+              el.classList.add('is-swapping');
+            });
+            usecaseEls.kicker.textContent = item.kicker;
+            usecaseEls.title.textContent = item.title;
+            usecaseEls.copy.textContent = item.copy;
+            usecaseEls.tags.innerHTML = item.tags.map((tag) => `<em>${tag}</em>`).join('');
+            usecaseEls.score.textContent = item.score;
+            usecaseEls.meter.style.width = `${item.score}%`;
+            usecaseEls.checks.innerHTML = item.checks.map((check) => `<li>${check}</li>`).join('');
+            usecaseEls.input.textContent = item.input;
+            usecaseEls.process.textContent = item.process;
+            usecaseEls.output.textContent = item.output;
+          };
+
+          usecaseEls.tabs.forEach((tab) => {
+            tab.addEventListener('click', () => renderUseCase(tab.dataset.usecase));
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>
