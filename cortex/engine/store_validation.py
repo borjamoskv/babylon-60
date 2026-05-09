@@ -170,6 +170,23 @@ async def run_store_validation_logic(
 
     from cortex.engine.fact_store_core import resolve_causality_async
 
+    # ═══ CORTEX-TAINT ENFORCEMENT (SAGA-1) ═══
+    from cortex.utils.taint import validate_cortex_taint, generate_cortex_taint
+
+    # If no taint is provided, we must generate one for core system components,
+    # OR reject it if we are enforcing strict agent bounds. For now, we ensure
+    # there is a valid taint before passing the Byzantine Boundary.
+    if "cortex_taint" not in meta:
+        # We auto-generate one with 'engine:store' as agent if missing,
+        # but in strict mode, we could raise ValueError.
+        meta["cortex_taint"] = generate_cortex_taint(
+            agent_id=source or "system:engine", session_id=tenant_id, payload=content
+        )
+
+    if not validate_cortex_taint(meta["cortex_taint"]):
+        logger.error("🛑 [SAGA-1 ABORT] Invalid CORTEX-TAINT signature format.")
+        raise ValueError("Write aborted: CORTEX-TAINT signature is missing or malformed.")
+
     meta = await resolve_causality_async(conn, project, meta)
 
     nemesis_rejection = None

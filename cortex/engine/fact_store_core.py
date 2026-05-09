@@ -33,7 +33,7 @@ async def _prepare_fact_content(
 
     f_hash = compute_fact_hash(content)
     enc = get_default_encrypter()
-    encrypted_content = enc.encrypt_str(content, tenant_id=tenant_id)
+    encrypted_content: str = enc.encrypt_str(content, tenant_id=tenant_id) or ""
 
     sig_b64, pub_b64 = None, None
     try:
@@ -95,6 +95,15 @@ async def insert_fact_record(
     """Perform the actual SQL insert into the facts table."""
     ts = ts or now_iso()
     tags_json = json.dumps(tags or [])
+
+    # ═══ CORTEX-TAINT SAGA-1 FINAL VERIFICATION ═══
+    # The record must never be written without a valid taint.
+    if not meta or "cortex_taint" not in meta:
+        raise ValueError("[SAGA-1 ABORT] Fact missing CORTEX-TAINT signature.")
+    from cortex.utils.taint import validate_cortex_taint
+
+    if not validate_cortex_taint(meta["cortex_taint"]):
+        raise ValueError("[SAGA-1 ABORT] Invalid CORTEX-TAINT signature format.")
 
     f_hash, encrypted_content, sig_b64, pub_b64 = await _prepare_fact_content(content, tenant_id)
 
