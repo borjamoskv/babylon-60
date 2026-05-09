@@ -96,16 +96,16 @@ async def _execute_cold_purge(
         if not dry_run:
             cursor = db_conn.cursor()
             ids = [v.fact_id for v in purge_candidates]
-            placeholders = ",".join(["?"] * len(ids))
+            if ids:
+                placeholders = ",".join(["?"] * len(ids))
 
-            # Actually remove from vector index for recall hygiene
-            cursor.execute(
-                f"DELETE FROM vec_facts WHERE rowid IN "
-                f"(SELECT rowid FROM facts_meta WHERE id IN ({placeholders}))",
-                ids,
-            )
-            cursor.execute(f"DELETE FROM facts_meta WHERE id IN ({placeholders})", ids)
-            db_conn.commit()
+                # Actually remove from vector index for recall hygiene
+                sql = f"DELETE FROM vec_facts WHERE rowid IN (SELECT rowid FROM facts_meta WHERE id IN ({placeholders}))"  # noqa: S608
+                cursor.execute(sql, ids)
+                cursor.execute(
+                    f"DELETE FROM facts_meta WHERE id IN ({placeholders})", ids  # noqa: S608
+                )
+                db_conn.commit()
 
         result.purged += len(purge_candidates)
         for v in purge_candidates:
@@ -149,15 +149,16 @@ async def _execute_semantic_merge(
         data: dict[str, dict[str, Any]] = {}
 
         mergeable_ids = [v.fact_id for v in mergeable]
-        placeholders = ",".join(["?"] * len(mergeable_ids))
-        cursor.execute(
-            f"""
-            SELECT f.id, f.content, v.embedding FROM facts_meta f
-            JOIN vec_facts v ON f.rowid = v.rowid
-            WHERE f.id IN ({placeholders})
-            """,
-            mergeable_ids,
-        )
+        if mergeable_ids:
+            placeholders = ",".join(["?"] * len(mergeable_ids))
+            cursor.execute(
+                f"""
+                SELECT f.id, f.content, v.embedding FROM facts_meta f
+                JOIN vec_facts v ON f.rowid = v.rowid
+                WHERE f.id IN ({placeholders})
+                """,  # noqa: S608
+                mergeable_ids,
+            )
         rows = cursor.fetchall()
         for row in rows:
             data[row[0]] = {
@@ -259,12 +260,13 @@ async def _execute_diamond_promotion(
         if not dry_run:
             cursor = db_conn.cursor()
             ids = [v.fact_id for v in promote_candidates]
-            placeholders = ",".join(["?"] * len(ids))
-            cursor.execute(
-                f"UPDATE facts_meta SET is_diamond = 1 WHERE id IN ({placeholders})",
-                ids,
-            )
-            db_conn.commit()
+            if ids:
+                placeholders = ",".join(["?"] * len(ids))
+                cursor.execute(
+                    f"UPDATE facts_meta SET is_diamond = 1 WHERE id IN ({placeholders})",  # noqa: S608
+                    ids,
+                )
+                db_conn.commit()
 
         result.promoted += len(promote_candidates)
         for v in promote_candidates:
