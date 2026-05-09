@@ -177,10 +177,6 @@ class TestTaint(unittest.TestCase):
 
         asyncio.run(run_tests())
 
-
-if __name__ == "__main__":
-    unittest.main()
-
     def test_rsplit_branch(self):
         # Line 30 coverage
         from cortex.utils.taint import validate_cortex_taint
@@ -193,6 +189,7 @@ if __name__ == "__main__":
             _prepare_fact_content,
             _build_fact_payload,
             _post_insert_actions,
+            insert_fact_record,
         )
         from unittest.mock import AsyncMock, patch
 
@@ -202,5 +199,48 @@ if __name__ == "__main__":
             # _prepare_fact_content coverage
             res = await _prepare_fact_content("content", "tenant")
             assert len(res) == 4
+
+            # _build_fact_payload coverage
+            with patch(
+                "cortex.engine.fact_store_core._get_table_columns", new_callable=AsyncMock
+            ) as m_cols:
+                m_cols.return_value = [
+                    "id",
+                    "tenant_id",
+                    "project",
+                    "content",
+                    "fact_type",
+                    "tags",
+                    "hash",
+                    "source",
+                    "confidence",
+                    "parent_id",
+                    "tx_id",
+                    "created_at",
+                ]
+                res2 = await _build_fact_payload(
+                    conn,
+                    "tenant",
+                    "proj",
+                    "encrypted",
+                    "knowledge",
+                    {"relation_type": "some"},
+                    "hash",
+                    "source",
+                    "stated",
+                    1,
+                    2,
+                    "[]",
+                    "timestamp",
+                )
+                assert len(res2) > 0
+
+            # _post_insert_actions coverage
+            # FTS code is inline inside _post_insert_actions. We'll just patch conn.execute.
+            conn.execute = AsyncMock()
+            await _post_insert_actions(
+                conn, 1, "content", "tenant", "proj", ["tag"], "[]", "knowledge", "timestamp", {}, 2
+            )
+            assert conn.execute.called
 
         asyncio.run(run_tests())
