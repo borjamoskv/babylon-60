@@ -74,7 +74,7 @@ class NemesisAgentAdapter(SwarmAgent):
 
         try:
             findings = await self.specialist.attack(target, context)
-        except (ValueError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Nemesis failed to execute Byzantine shock: %s", e)
 
         status = "VOID" if not findings else "SUCCESS"

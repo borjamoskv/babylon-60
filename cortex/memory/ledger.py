@@ -26,7 +26,7 @@ from cortex.memory.models import MemoryEvent
 
 try:
     from cortex.extensions.security.tenant import get_tenant_id
-except ImportError:
+except Exception:
 
     def get_tenant_id() -> str:
         return "default"

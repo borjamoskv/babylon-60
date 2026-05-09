@@ -107,39 +107,11 @@ def sovereign_run(
         pass
 
     # 2. Execute with appropriate runner
-    try:
-        asyncio.get_running_loop()
-        # A loop is already running in the current thread (e.g. Jupyter, or nested call).
-        # We must run the coroutine in a separate thread.
-        import threading
-        
-        result = None
-        exception = None
-        
-        def _worker():
-            nonlocal result, exception
-            try:
-                if has_uvloop:
-                    import uvloop
-                    result = uvloop.run(coro, debug=debug)
-                else:
-                    result = asyncio.run(coro, debug=debug)
-            except BaseException as e:
-                exception = e
+    if has_uvloop:
+        import uvloop  # type: ignore[import-untyped]
 
-        t = threading.Thread(target=_worker)
-        t.start()
-        t.join()
-        if exception:
-            raise exception
-        return result
-    except RuntimeError:
-        # No loop running, safe to use the runner directly
-        if has_uvloop:
-            import uvloop  # type: ignore[import-untyped]
-
-            return uvloop.run(coro, debug=debug)
-        return asyncio.run(coro, debug=debug)
+        return uvloop.run(coro, debug=debug)
+    return asyncio.run(coro, debug=debug)
 
 
 def get_loop_info() -> dict[str, Any]:

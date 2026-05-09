@@ -346,7 +346,7 @@ class AsyncCausalGraph:
             try:
                 meta = enc.decrypt_json(raw_meta, tenant_id=tenant_id) or {}
                 return meta, True, True
-            except (ValueError, RuntimeError, OSError):
+            except Exception:
                 logger.warning("Failed to decrypt metadata")
                 return {}, False, False
 

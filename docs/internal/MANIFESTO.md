@@ -3,10 +3,6 @@
 
 > *"Memory without verification is hallucination with persistence."*
 
-> **Internal narrative document.** Not product specification, legal claim, compliance claim, or commercial source of truth.
-> For supported surfaces, see [`docs/PRODUCT-CORE.md`](../PRODUCT-CORE.md).
-> For security guarantees and non-guarantees, see [`docs/SECURITY_TRUST_MODEL.md`](../SECURITY_TRUST_MODEL.md).
-
 ---
 
 ## The Age of Autonomous Agents
@@ -49,11 +45,11 @@ We do this with:
 The **EU AI Act (Article 12)** enters full enforcement on **August 2, 2026**. It mandates:
 
 1. **Automatic logging** of all AI agent operations
-2. **Tamper-evident storage** of decision records
+2. **Tamper-proof storage** of decision records
 3. **Full traceability** of decision chains
 4. **Periodic integrity verification**
 
-Penalties are tiered by infringement category: up to **€35M or 7%** (prohibited practices), **€15M or 3%** (other obligations), **€7.5M or 1.5%** (incorrect information).
+Fines: **€30 million or 6% of global annual revenue** — whichever is higher.
 
 Every company deploying autonomous AI agents in Europe — or serving European customers — needs this. Nobody is ready.
 

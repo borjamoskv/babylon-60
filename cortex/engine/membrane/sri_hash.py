@@ -42,7 +42,7 @@ def generate_sri_hash(url: str, algo: str = "sha384") -> str:
 
             b64_hash = base64.b64encode(digest).decode("utf-8")
             return f"{algo}-{b64_hash}"
-    except (OSError, ValueError):
+    except Exception:
         # If fetch fails, we return an empty string. The sanitizer can decide whether to block or allow
         return ""
 

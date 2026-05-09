@@ -20,7 +20,7 @@ class SyncMixin:
                 result = asyncio.run(coro)
             except asyncio.CancelledError:
                 raise
-            except (OSError, RuntimeError, ValueError) as e:
+            except Exception as e:
                 exception = e
 
         t = threading.Thread(target=_worker)

@@ -12,16 +12,18 @@ import pytest
 
 pytestmark = [
     pytest.mark.slow,
-    pytest.mark.filterwarnings("ignore:get_conn\\(\\) is deprecated.*:DeprecationWarning"),
+    pytest.mark.filterwarnings(
+        "ignore:get_conn\\(\\) is deprecated\\. Use session\\(\\) context manager\\.:DeprecationWarning"
+    ),
 ]
 
 
 @pytest.fixture
 async def tracker(tmp_path: Path):
-    """Create a EvidenceTracker with a temp database."""
-    from cortex.compliance import EvidenceTracker
+    """Create a ComplianceTracker with a temp database."""
+    from cortex.compliance import ComplianceTracker
 
-    t = EvidenceTracker(db_path=str(tmp_path / "compliance_test.db"), project="test-agent")
+    t = ComplianceTracker(db_path=str(tmp_path / "compliance_test.db"), project="test-agent")
     t._ensure_init()
     yield t
     t.close()
@@ -145,7 +147,7 @@ class TestExportAudit:
         assert "art_12_1_automatic_logging" in checks
         assert "art_12_2_log_content" in checks
         assert "art_12_2d_agent_traceability" in checks
-        assert "art_12_3_tamper_evident" in checks
+        assert "art_12_3_tamper_proof" in checks
         assert "art_12_4_periodic_verification" in checks
 
     async def test_compliance_score(self, tracker):
@@ -155,7 +157,7 @@ class TestExportAudit:
         )
         report = tracker.export_audit()
         assert report["eu_ai_act"]["score"] == "5/5"
-        assert report["eu_ai_act"]["status"] == "SUPPORTIVE_CONTROLS_PRESENT"
+        assert report["eu_ai_act"]["status"] == "COMPLIANT"
 
     async def test_facts_summary_counts(self, tracker):
         for i in range(3):
@@ -189,9 +191,9 @@ class TestExportAudit:
 
 class TestContextManager:
     async def test_context_manager_works(self, tmp_path: Path):
-        from cortex.compliance import EvidenceTracker
+        from cortex.compliance import ComplianceTracker
 
-        with EvidenceTracker(
+        with ComplianceTracker(
             db_path=str(tmp_path / "ctx_test.db"),
             project="ctx-test",
         ) as t:

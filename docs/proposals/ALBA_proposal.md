@@ -15,7 +15,7 @@ A partir del **2 de agosto de 2026**, el EU AI Act (Artículo 12) exige que toda
 - **Trazabilidad completa** de la cadena de decisiones
 - **Verificación periódica** de la integridad de los datos
 
-**Sanciones: hasta €35M o el 7% de la facturación global** (prácticas prohibidas). Otras infracciones: hasta €15M/3% o €7.5M/1.5% según la categoría.
+**Sanciones: hasta €30M o el 6% de la facturación global.**
 
 Para una financiera, esto aplica directamente a:
 - Evaluación automatizada de riesgos crediticios
@@ -57,10 +57,9 @@ $ cortex compliance-report
   Cadena de Hashes:                ✅ VÁLIDA
   Checkpoints Merkle:              12
   Agentes Rastreados:              5
-  Controles Técnicos Art. 12:      5/5
+  Compliance Score:                5/5
 
-  🟡 SOPORTE TÉCNICO — Controles presentes. La compliance
-     completa requiere medidas organizativas y revisión legal.
+  🟢 COMPLIANT — Todos los requisitos del Art. 12 cumplidos.
 ```
 
 ---

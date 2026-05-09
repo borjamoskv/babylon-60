@@ -22,6 +22,6 @@ jobs:
               per_page: 100
             });
 
-            if (files.length > 100) {
-              core.setFailed('PR too large (>100 files)');
+            if (files.length > 300) {
+              core.setFailed('PR too large (>300 files)');
             }

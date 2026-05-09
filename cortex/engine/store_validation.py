@@ -70,10 +70,10 @@ async def _apply_semantic_dedup(
                     await conn.execute(
                         "UPDATE facts SET last_accessed = CURRENT_TIMESTAMP WHERE id=?", (fid,)
                     )
-                except (OSError, RuntimeError) as e:
+                except Exception as e:
                     logger.debug("Skipping last_accessed update for fact %s: %s", fid, e)
             return fid
-    except (ImportError, OSError, RuntimeError, ValueError) as e:
+    except Exception as e:
         logger.debug("Semantic dedup skipped: %s", e)
     return None
 
