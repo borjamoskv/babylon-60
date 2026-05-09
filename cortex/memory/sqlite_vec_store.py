@@ -19,7 +19,10 @@ import time
 from pathlib import Path
 from typing import Any, Optional
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    np = None  # type: ignore
 
 try:
     import sqlite_vec
@@ -388,6 +391,9 @@ class SovereignVectorStoreL2:
                 # Cannot easily dual-quantize from raw bytes without knowing source
                 return emb_list, b"", ex
 
+            if np is None:
+                return b"", b"", ex
+
             arr = np.array(emb_list, dtype=np.float32)
             int8_bytes = arr.tobytes()
             binary_bytes = void_vec.pack_void_bit(arr)
@@ -489,6 +495,8 @@ class SovereignVectorStoreL2:
         query_vector = await self._encoder.encode(query)
 
         def _sync_knn_search() -> list[CortexFactModel]:
+            if np is None:
+                return []
             rotated_query = encode_query_qjl(query_vector)
             embedding_bytes = np.array(rotated_query, dtype=np.float32).tobytes()
             void_query = void_vec.pack_void_bit(rotated_query)
