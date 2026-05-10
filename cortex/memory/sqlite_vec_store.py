@@ -515,6 +515,7 @@ class SovereignVectorStoreL2:
                 rows = cursor.fetchall()
                 final_facts = []
                 for row in rows:
+                    metadata = json.loads(row["metadata"]) if row["metadata"] else {}
                     fact = CortexFactModel(
                         id=row["id"],
                         tenant_id=row["tenant_id"],
@@ -527,10 +528,14 @@ class SovereignVectorStoreL2:
                         confidence=row["confidence"],
                         cognitive_layer=row["cognitive_layer"],
                         parent_decision_id=row["parent_decision_id"],
-                        metadata=json.loads(row["metadata"]) if row["metadata"] else {},
+                        metadata=metadata,
                     )
-                    object.__setattr__(fact, "_recall_score", 0.0)
+                    exergy = calculate_exergy(row["content"])
+                    object.__setattr__(fact, "_recall_score", exergy)
                     final_facts.append(fact)
+
+                # Sort by exergy in fallback mode
+                final_facts.sort(key=lambda x: x._recall_score, reverse=True)
                 return final_facts
 
             use_void = False
