@@ -1,13 +1,7 @@
-"""
-CORTEX v6 — Sovereign Vector Store (SQLite-Vec).
-
-Zero-Trust, Multi-Tenant Semantic Memory backed by sqlite-vec.
-Enforces partition by tenant_id and incorporates OUROBOROS success_rate
-and temporal decay directly in the embedding retrieval.
-"""
+"""CORTEX v6 — Sovereign Vector Store (SQLite-Vec)."""
 
 # ruff: noqa: S608
-# This module uses validated dynamic sqlite identifiers for tenant/project sharded tables.
+# Validated dynamic sqlite identifiers.
 
 from __future__ import annotations
 
