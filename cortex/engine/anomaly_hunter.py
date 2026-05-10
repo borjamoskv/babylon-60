@@ -108,10 +108,20 @@ class AnomalyHunterEngine:
         Ejemplo: 'Módulo importado' timestamp > 'Módulo creado' timestamp
         """
         inversions = []
+
+        cause_ids = set()
+        for fact in facts:
+            if isinstance(fact.meta, dict) and fact.meta.get("caused_by"):
+                cause_ids.add(fact.meta["caused_by"])
+
+        # Fetch timestamps concurrently
+        cause_ts_results = await asyncio.gather(*(self._get_fact_timestamp(cid) for cid in cause_ids))
+        cause_ts_map = dict(zip(cause_ids, cause_ts_results))
+
         for fact in facts:
             if isinstance(fact.meta, dict) and fact.meta.get("caused_by"):
                 cause_id = fact.meta["caused_by"]
-                cause_ts = await self._get_fact_timestamp(cause_id)
+                cause_ts = cause_ts_map.get(cause_id)
                 if not cause_ts:
                     continue
 
@@ -141,8 +151,57 @@ class AnomalyHunterEngine:
         Usa similaridad semántica para detectar 'Ruta X bloqueada' vs 'Pasé por Ruta X'.
         """
         contradictions = []
-        for i, fact_a in enumerate(facts):
-            for fact_b in facts[i + 1 :]:
+
+        # Build an inverted index to group facts by tag
+        tag_map: dict[str, list[Fact]] = {}
+        untagged_facts: list[Fact] = []
+
+        for fact in facts:
+            if not fact.tags:
+                untagged_facts.append(fact)
+                continue
+            for tag in fact.tags:
+                if tag not in tag_map:
+                    tag_map[tag] = []
+                tag_map[tag].append(fact)
+
+        # Compare facts within the same tag group
+        seen_pairs = set()
+        for tag, group in tag_map.items():
+            for i, fact_a in enumerate(group):
+                for fact_b in group[i + 1 :]:
+                    # To avoid duplicates if facts share multiple tags
+                    pair_id = tuple(sorted([fact_a.id, fact_b.id]))
+                    if pair_id in seen_pairs:
+                        continue
+                    seen_pairs.add(pair_id)
+
+                    if self._is_same_entity(fact_a, fact_b) and self._are_contradictory(fact_a, fact_b):
+                        contradictions.append(
+                            Anomaly(
+                                type="SPATIAL_CONTRADICTION",
+                                severity="HIGH",
+                                facts_involved=[fact_a.id, fact_b.id],  # pyright: ignore
+                                description=(
+                                    f"Contradicción entre fact #{fact_a.id} y #{fact_b.id} "
+                                    "sobre la misma entidad."
+                                ),
+                                suggested_action=(
+                                    "Reconciliar con fuente primaria. Uno de los dos hechos es erróneo."
+                                ),
+                            )
+                        )
+
+        # Compare untagged facts against all other facts (including other untagged)
+        tagged_facts = [f for f in facts if f.tags]
+        for i, fact_a in enumerate(untagged_facts):
+            # Against other untagged facts
+            for fact_b in untagged_facts[i + 1 :]:
+                pair_id = tuple(sorted([fact_a.id, fact_b.id]))
+                if pair_id in seen_pairs:
+                    continue
+                seen_pairs.add(pair_id)
+
                 if self._is_same_entity(fact_a, fact_b) and self._are_contradictory(fact_a, fact_b):
                     contradictions.append(
                         Anomaly(
@@ -158,6 +217,30 @@ class AnomalyHunterEngine:
                             ),
                         )
                     )
+
+            # Against tagged facts
+            for fact_b in tagged_facts:
+                pair_id = tuple(sorted([fact_a.id, fact_b.id]))
+                if pair_id in seen_pairs:
+                    continue
+                seen_pairs.add(pair_id)
+
+                if self._is_same_entity(fact_a, fact_b) and self._are_contradictory(fact_a, fact_b):
+                    contradictions.append(
+                        Anomaly(
+                            type="SPATIAL_CONTRADICTION",
+                            severity="HIGH",
+                            facts_involved=[fact_a.id, fact_b.id],  # pyright: ignore
+                            description=(
+                                f"Contradicción entre fact #{fact_a.id} y #{fact_b.id} "
+                                "sobre la misma entidad."
+                            ),
+                            suggested_action=(
+                                "Reconciliar con fuente primaria. Uno de los dos hechos es erróneo."
+                            ),
+                        )
+                    )
+
         return contradictions
 
     async def detect_value_drift(self, facts: list[Fact]) -> list[Anomaly]:
@@ -225,8 +308,8 @@ class AnomalyHunterEngine:
         sin ningún anclaje a C4/C5 (evidencia primaria).
         """
         collapses = []
-        for fact in facts:
-            chain = await self._trace_causal_chain(fact)
+        chains = await asyncio.gather(*(self._trace_causal_chain(fact) for fact in facts))
+        for fact, chain in zip(facts, chains):
             if not chain:
                 continue
             if all(f.confidence in ("C1", "C2", "C3") for f in chain) and len(chain) >= 3:
@@ -250,23 +333,28 @@ class AnomalyHunterEngine:
         El operador la verá al inicio del siguiente día de trabajo.
         """
         high_severity = [a for a in self.anomalies if a.severity == "HIGH"]
+        tasks = []
         for anomaly in high_severity:
-            await self.cortex.store(
-                type="ghost",
-                project="anomaly-hunter",
-                source="daemon:anomaly-hunter-v2",
-                confidence="C4",
-                summary=f"⚠️ VERIFICAR: {anomaly.type} — {anomaly.description}",
-                meta={
-                    "anomaly_type": anomaly.type,
-                    "facts_involved": anomaly.facts_involved,
-                    "suggested_action": anomaly.suggested_action,
-                    "auto_generated": True,
-                    "nightshift_session": datetime.fromtimestamp(time.time(), tz=timezone.utc)
-                    .date()
-                    .isoformat(),
-                },
+            tasks.append(
+                self.cortex.store(
+                    type="ghost",
+                    project="anomaly-hunter",
+                    source="daemon:anomaly-hunter-v2",
+                    confidence="C4",
+                    summary=f"⚠️ VERIFICAR: {anomaly.type} — {anomaly.description}",
+                    meta={
+                        "anomaly_type": anomaly.type,
+                        "facts_involved": anomaly.facts_involved,
+                        "suggested_action": anomaly.suggested_action,
+                        "auto_generated": True,
+                        "nightshift_session": datetime.fromtimestamp(time.time(), tz=timezone.utc)
+                        .date()
+                        .isoformat(),
+                    },
+                )
             )
+        if tasks:
+            await asyncio.gather(*tasks)
 
     def generate_report(self) -> dict:
         by_type = {}
