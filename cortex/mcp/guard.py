@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import logging
 import re
+import unicodedata
 from typing import Optional
 
 from cortex.config import (
@@ -39,7 +40,7 @@ _POISON_PATTERNS: list[re.Pattern] = [
     re.compile(r"you\s+are\s+now\s+(?:a|an|DAN)", re.IGNORECASE),
     # Overwrite attempts targeting CORTEX internals
     re.compile(r"__cortex_override__", re.IGNORECASE),
-    re.compile(r"GENESIS", re.IGNORECASE),  # Ledger genesis manipulation
+    re.compile(r"GENESIS\s+(?:\S+\s+){0,5}(?:reset|manipulat|overwrite|inject|set\b|modif)", re.IGNORECASE),  # Ledger genesis manipulation (context-aware)
 ]
 
 
@@ -135,10 +136,18 @@ class MCPGuard:
     def detect_poisoning(cls, content: str) -> bool:
         """Check content against known data poisoning patterns.
 
+        Applies Unicode normalization (NFKC) first to defeat
+        zero-width space and homoglyph evasion attacks.
+
         Returns True if any pattern matches (content should be rejected).
         """
+        # Normalize Unicode to defeat zero-width space / homoglyph evasion
+        normalized = unicodedata.normalize("NFKC", content)
+        # Also strip all Unicode category Cf (format chars) and Zs (space separators)
+        cleaned = re.sub(r"[\u200b\u200c\u200d\u200e\u200f\ufeff]", "", normalized)
+
         for pattern in _POISON_PATTERNS:
-            if pattern.search(content):
+            if pattern.search(content) or pattern.search(cleaned):
                 logger.debug("Poison pattern matched: %s", pattern.pattern)
                 return True
         return False
@@ -185,3 +194,92 @@ class MCPGuard:
             if isinstance(value, str) and cls.detect_poisoning(value):
                 logger.warning("GUARD: Poisoning attempt in external query param %s", key)
                 raise ValueError(f"parameter '{key}' rejected: suspicious pattern detected")
+
+    # ─── PDR-Compliant Gate (L2 Conformance) ───────────────────────
+
+    @classmethod
+    def validate_store_with_pdr(
+        cls,
+        project: str,
+        content: str,
+        fact_type: str = "knowledge",
+        tags: Optional[list[str]] = None,
+        tis_hash: str = "",
+    ) -> "PolicyDecisionRecord":
+        """Run validate_store and return a PDR regardless of outcome.
+
+        Does NOT raise ValueError — captures all gate results into the PDR.
+        Callers should check pdr.decision == PDRDecision.PERMIT before proceeding.
+
+        Returns:
+            A PolicyDecisionRecord with per-gate evaluations.
+        """
+        from cortex.extensions.security.pdr import (
+            PDRDecision,
+            PolicyDecisionRecord,
+        )
+
+        gate_results: dict[str, tuple[bool, str]] = {}
+
+        # Gate 1: project validation
+        if not project or not project.strip():
+            gate_results["project_valid"] = (False, "project cannot be empty")
+        elif len(project) > 256:
+            gate_results["project_valid"] = (False, f"project name too long ({len(project)} > 256)")
+        else:
+            gate_results["project_valid"] = (True, "project name valid")
+
+        # Gate 2: content validation
+        if not content or not content.strip():
+            gate_results["content_valid"] = (False, "content cannot be empty")
+        elif len(content) > cls.max_content_length:
+            gate_results["content_valid"] = (
+                False,
+                f"content exceeds max length ({len(content):,} > {cls.max_content_length:,})",
+            )
+        else:
+            gate_results["content_valid"] = (True, f"content length OK ({len(content):,} chars)")
+
+        # Gate 3: fact_type validation
+        allowed_types = {
+            "knowledge", "decision", "error", "rule",
+            "axiom", "schema", "idea", "ghost", "bridge",
+        }
+        if fact_type not in allowed_types:
+            gate_results["fact_type_valid"] = (False, f"invalid fact_type '{fact_type}'")
+        else:
+            gate_results["fact_type_valid"] = (True, f"fact_type '{fact_type}' allowed")
+
+        # Gate 4: tag validation
+        try:
+            cls._validate_tags(tags)
+            gate_results["tags_valid"] = (True, f"tags valid ({len(tags or [])} tags)")
+        except ValueError as e:
+            gate_results["tags_valid"] = (False, str(e))
+
+        # Gate 5: poisoning detection
+        if content and cls.detect_poisoning(content):
+            gate_results["poisoning_check"] = (False, "suspicious pattern detected")
+        else:
+            gate_results["poisoning_check"] = (True, "no poisoning patterns found")
+
+        pdr = PolicyDecisionRecord.from_guard_result(
+            tis_hash=tis_hash,
+            gate_results=gate_results,
+            conformance_level="L2",
+        )
+
+        if pdr.decision == PDRDecision.DENY:
+            logger.warning(
+                "GUARD-PDR: DENY for project=%s (%d/%d gates failed)",
+                project,
+                sum(1 for _, (r, _) in gate_results.items() if not r),
+                len(gate_results),
+            )
+        else:
+            logger.info(
+                "GUARD-PDR: PERMIT for project=%s (%d gates passed)",
+                project, len(gate_results),
+            )
+
+        return pdr

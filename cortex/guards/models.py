@@ -1,5 +1,15 @@
 import logging
 from dataclasses import dataclass
+from typing import Any
+
+# Re-export canonical TIS/PDR from extensions.security
+from cortex.extensions.security.tis_schema import (  # noqa: F401
+    TransactionIntentSchema,
+)
+from cortex.extensions.security.pdr import (  # noqa: F401
+    PDRDecision,
+    PolicyDecisionRecord,
+)
 
 logger = logging.getLogger("cortex.guards.models")
 
