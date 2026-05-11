@@ -1,6 +1,7 @@
 import logging
 import sys
 import unittest
+import shutil
 from pathlib import Path
 
 # Add project root to sys.path dynamically
@@ -17,6 +18,7 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         self.engine = OuroborosEngine()
         self.test_repo = "https://github.com/Uniswap/v4-core"
 
+    @unittest.skipIf(shutil.which("forge") is None, "forge not installed")
     async def test_audit_cycle(self):
         """Standard Audit Cycle on mock contract."""
         logger = logging.getLogger("cortex.ouroboros.test")
