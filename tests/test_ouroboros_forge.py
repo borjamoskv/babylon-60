@@ -2,6 +2,9 @@ import logging
 import sys
 import unittest
 import shutil
+import tempfile
+import os
+from unittest.mock import patch
 from pathlib import Path
 
 # Add project root to sys.path dynamically
@@ -15,8 +18,26 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
     """Verifies the Forge-backed Ouroboros audit pipeline (V5)."""
 
     async def asyncSetUp(self):
+        self.temp_db = tempfile.NamedTemporaryFile(delete=False, suffix=".db")
+        self.temp_db.close()
+
+        # Patch the DB_PATH to use the temporary database
+        self.db_patcher1 = patch("cortex.config.DB_PATH", self.temp_db.name)
+        self.db_patcher2 = patch("ouroboros_engine.DB_PATH", self.temp_db.name)
+        self.db_patcher1.start()
+        self.db_patcher2.start()
+
         self.engine = OuroborosEngine()
         self.test_repo = "https://github.com/Uniswap/v4-core"
+
+    async def asyncTearDown(self):
+        self.db_patcher1.stop()
+        self.db_patcher2.stop()
+        if os.path.exists(self.temp_db.name):
+            try:
+                os.remove(self.temp_db.name)
+            except Exception:
+                pass
 
     @unittest.skipIf(shutil.which("forge") is None, "forge not installed")
     async def test_audit_cycle(self):
@@ -41,6 +62,7 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         # Ensure schema initialization
         conn = sqlite3.connect(DB_PATH)
         _bus = SignalBus(conn)
+        _bus.ensure_table()
 
         # Check if signals exist for 'ouroboros'
         cursor = conn.cursor()
