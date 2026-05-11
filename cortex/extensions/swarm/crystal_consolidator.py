@@ -124,11 +124,10 @@ async def _execute_cold_purge(
                 placeholders = ",".join("?" * len(chunk))
 
                 cursor.execute(
-                    f"DELETE FROM vec_facts WHERE rowid IN "
-                    f"(SELECT rowid FROM facts_meta WHERE id IN ({placeholders}))",
+                    f"DELETE FROM vec_facts WHERE rowid IN (SELECT rowid FROM facts_meta WHERE id IN ({placeholders}))",  # noqa: S608
                     chunk,
                 )
-                cursor.execute(f"DELETE FROM facts_meta WHERE id IN ({placeholders})", chunk)
+                cursor.execute(f"DELETE FROM facts_meta WHERE id IN ({placeholders})", chunk)  # noqa: S608
 
             db_conn.commit()
 
@@ -186,7 +185,7 @@ async def _execute_semantic_merge(
                 SELECT f.id, f.content, v.embedding FROM facts_meta f
                 JOIN vec_facts v ON f.rowid = v.rowid
                 WHERE f.id IN ({placeholders})
-                """,
+                """,  # noqa: S608
                 chunk,
             )
 
@@ -302,7 +301,7 @@ async def _execute_diamond_promotion(
                 chunk = fact_ids[i:i + chunk_size]
                 placeholders = ",".join("?" * len(chunk))
                 cursor.execute(
-                    f"UPDATE facts_meta SET is_diamond = 1 WHERE id IN ({placeholders})",
+                    f"UPDATE facts_meta SET is_diamond = 1 WHERE id IN ({placeholders})",  # noqa: S608
                     chunk,
                 )
 
