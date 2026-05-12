@@ -16,8 +16,7 @@ except ImportError:
     np = None  # Handle gracefully if numpy is not installed
 
 import pytest
-if np is None:
-    pytest.skip("Skipping tests because numpy is not installed.", allow_module_level=True)
+pytestmark = pytest.mark.skipif(np is None, reason="numpy not installed")
 import pytest
 
 from cortex.extensions.swarm.crystal_consolidator import (
