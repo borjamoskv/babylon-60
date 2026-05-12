@@ -48,6 +48,7 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
 
         # Mock the process returned by create_subprocess_exec
         from unittest.mock import AsyncMock
+
         mock_process = AsyncMock()
         mock_process.returncode = 1  # Simulate a failure to hit the remediation queue logic
         mock_process.communicate.return_value = (b"mock stdout", b"mock stderr")
@@ -67,11 +68,10 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         """Verify SignalBus emits audit findings correctly."""
         import sqlite3
 
-        from cortex.config import DB_PATH
         from cortex.extensions.signals.bus import SignalBus
 
         # Ensure schema initialization
-        conn = sqlite3.connect(DB_PATH)
+        conn = sqlite3.connect(self.temp_db.name)
         _bus = SignalBus(conn)
         _bus.ensure_table()
 
