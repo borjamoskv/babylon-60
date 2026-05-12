@@ -517,6 +517,7 @@ jobs:
 
           severity: CRITICAL,HIGH
           format: table
+          timeout: '15m'
 
       - name: Smoke test
         if: steps.scope.outputs.release_only != 'true'
