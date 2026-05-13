@@ -108,31 +108,34 @@ class AnomalyHunterEngine:
         Ejemplo: 'Módulo importado' timestamp > 'Módulo creado' timestamp
         """
         inversions = []
-        for fact in facts:
+
+        async def evaluate_fact(fact: Fact):
             if isinstance(fact.meta, dict) and fact.meta.get("caused_by"):
                 cause_id = fact.meta["caused_by"]
                 cause_ts = await self._get_fact_timestamp(cause_id)
                 if not cause_ts:
-                    continue
+                    return None
 
                 # type: ignore
                 effect_ts = datetime.fromisoformat(fact.created_at.replace("Z", "+00:00"))
 
                 if cause_ts > effect_ts:
-                    inversions.append(
-                        Anomaly(
-                            type="TEMPORAL_INVERSION",
-                            severity="HIGH",
-                            facts_involved=[fact.id, cause_id],  # pyright: ignore
-                            description=(
-                                f"Efecto (fact #{fact.id}) precede a su causa. "
-                                f"Delta: {(cause_ts - effect_ts).seconds}s"
-                            ),
-                            suggested_action=(
-                                "Verificar timestamps de ambos hechos. Posible error de registro."
-                            ),
-                        )
+                    return Anomaly(
+                        type="TEMPORAL_INVERSION",
+                        severity="HIGH",
+                        facts_involved=[fact.id, cause_id],  # pyright: ignore
+                        description=(
+                            f"Efecto (fact #{fact.id}) precede a su causa. "
+                            f"Delta: {(cause_ts - effect_ts).seconds}s"
+                        ),
+                        suggested_action=(
+                            "Verificar timestamps de ambos hechos. Posible error de registro."
+                        ),
                     )
+            return None
+
+        results = await asyncio.gather(*(evaluate_fact(fact) for fact in facts))
+        inversions = [r for r in results if r is not None]
         return inversions
 
     async def detect_spatial_contradictions(self, facts: list[Fact]) -> list[Anomaly]:
@@ -141,23 +144,46 @@ class AnomalyHunterEngine:
         Usa similaridad semántica para detectar 'Ruta X bloqueada' vs 'Pasé por Ruta X'.
         """
         contradictions = []
-        for i, fact_a in enumerate(facts):
-            for fact_b in facts[i + 1 :]:
-                if self._is_same_entity(fact_a, fact_b) and self._are_contradictory(fact_a, fact_b):
-                    contradictions.append(
-                        Anomaly(
-                            type="SPATIAL_CONTRADICTION",
-                            severity="HIGH",
-                            facts_involved=[fact_a.id, fact_b.id],  # pyright: ignore
-                            description=(
-                                f"Contradicción entre fact #{fact_a.id} y #{fact_b.id} "
-                                "sobre la misma entidad."
-                            ),
-                            suggested_action=(
-                                "Reconciliar con fuente primaria. Uno de los dos hechos es erróneo."
-                            ),
+
+        # Build an inverted index of entities (tags) to facts to avoid O(N^2) complexity
+        entity_index: dict[str, list[Fact]] = {}
+        for fact in facts:
+            if fact.tags:
+                for tag in fact.tags:
+                    if tag not in entity_index:
+                        entity_index[tag] = []
+                    entity_index[tag].append(fact)
+
+        # Check for contradictions only within facts sharing the same tag
+        processed_pairs = set()
+        for tag, entity_facts in entity_index.items():
+            if len(entity_facts) < 2:
+                continue
+
+            for i, fact_a in enumerate(entity_facts):
+                for fact_b in entity_facts[i + 1 :]:
+                    # Create a unique key for the pair to avoid duplicate contradictions
+                    # if they share multiple tags
+                    pair_key = tuple(sorted([fact_a.id, fact_b.id]))
+                    if pair_key in processed_pairs:
+                        continue
+
+                    if self._are_contradictory(fact_a, fact_b):
+                        processed_pairs.add(pair_key)
+                        contradictions.append(
+                            Anomaly(
+                                type="SPATIAL_CONTRADICTION",
+                                severity="HIGH",
+                                facts_involved=[fact_a.id, fact_b.id],  # pyright: ignore
+                                description=(
+                                    f"Contradicción entre fact #{fact_a.id} y #{fact_b.id} "
+                                    f"sobre la entidad '{tag}'."
+                                ),
+                                suggested_action=(
+                                    "Reconciliar con fuente primaria. Uno de los dos hechos es erróneo."
+                                ),
+                            )
                         )
-                    )
         return contradictions
 
     async def detect_value_drift(self, facts: list[Fact]) -> list[Anomaly]:
@@ -225,23 +251,26 @@ class AnomalyHunterEngine:
         sin ningún anclaje a C4/C5 (evidencia primaria).
         """
         collapses = []
-        for fact in facts:
+
+        async def evaluate_fact_confidence(fact: Fact):
             chain = await self._trace_causal_chain(fact)
             if not chain:
-                continue
+                return None
             if all(f.confidence in ("C1", "C2", "C3") for f in chain) and len(chain) >= 3:
-                collapses.append(
-                    Anomaly(
-                        type="CONFIDENCE_COLLAPSE",
-                        severity="MEDIUM",
-                        facts_involved=[f.id for f in chain],  # pyright: ignore
-                        description=(
-                            f"Cadena de {len(chain)} hechos sin anclaje C4/C5. "
-                            "Toda la cadena es especulativa."
-                        ),
-                        suggested_action="Buscar fuente primaria (C4/C5) o degradar toda la cadena a C2.",
-                    )
+                return Anomaly(
+                    type="CONFIDENCE_COLLAPSE",
+                    severity="MEDIUM",
+                    facts_involved=[f.id for f in chain],  # pyright: ignore
+                    description=(
+                        f"Cadena de {len(chain)} hechos sin anclaje C4/C5. "
+                        "Toda la cadena es especulativa."
+                    ),
+                    suggested_action="Buscar fuente primaria (C4/C5) o degradar toda la cadena a C2.",
                 )
+            return None
+
+        results = await asyncio.gather(*(evaluate_fact_confidence(fact) for fact in facts))
+        collapses = [r for r in results if r is not None]
         return collapses
 
     async def generate_verification_tasks(self):
