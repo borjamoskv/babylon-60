@@ -528,14 +528,13 @@ class TestConsolidatorScale:
 
         # Patch the LLM synthesis to avoid actual calls
         mock_synthesis = AsyncMock(return_value={"fused_content": "Fused Alpha and Beta"})
-        with patch(
-            "cortex.extensions.swarm.crystal_synthesis.synthesize_crystals", mock_synthesis
-        ):
+        with patch("cortex.extensions.swarm.crystal_synthesis.synthesize_crystals", mock_synthesis):
             # Patch semantic threshold low enough to catch exact match, but high enough to exclude C
             with patch(
                 "cortex.extensions.swarm.crystal_consolidator.SEMANTIC_MERGE_THRESHOLD", 0.9
             ):
                 from cortex.extensions.swarm.crystal_consolidator import _execute_semantic_merge
+
 
                 await _execute_semantic_merge(in_memory_db, vitals, result, dry_run=False)
 
@@ -559,3 +558,305 @@ class TestConsolidatorScale:
         # Unique is untouched
         cursor.execute("SELECT content FROM facts_meta WHERE id = 'unique-1'")
         assert cursor.fetchone()[0] == "Gamma"
+
+    @pytest.mark.asyncio
+    async def test_cold_purge_database_error(self, in_memory_db) -> None:
+        """Verify _execute_cold_purge handles exceptions correctly."""
+        from unittest.mock import MagicMock
+
+        mock_cursor = MagicMock()
+        mock_cursor.executemany.side_effect = sqlite3.OperationalError("Mocked error")
+        mock_conn = MagicMock()
+        mock_conn.cursor.return_value = mock_cursor
+
+        vitals = [
+            CrystalVitals(
+                fact_id="dead-err",
+                content_preview="junk",
+                temperature=0.0,
+                resonance=0.05,
+                quadrant="DEAD_WEIGHT",
+                recommendation="PURGE",
+                age_days=30,
+                recall_count=0,
+                is_diamond=False,
+            )
+        ]
+        result = ConsolidationResult()
+        await _execute_cold_purge(mock_conn, vitals, result, dry_run=False)
+        assert result.errors == 1
+
+    @pytest.mark.asyncio
+    async def test_diamond_promotion_database_error(self, in_memory_db) -> None:
+        """Verify _execute_diamond_promotion handles exceptions correctly."""
+        from unittest.mock import MagicMock
+
+        mock_cursor = MagicMock()
+        mock_cursor.execute.side_effect = sqlite3.OperationalError("Mocked error")
+        mock_conn = MagicMock()
+        mock_conn.cursor.return_value = mock_cursor
+
+        vitals = [
+            CrystalVitals(
+                fact_id="hot-err",
+                content_preview="gold",
+                temperature=2.0,
+                resonance=0.7,
+                quadrant="ACTIVE",
+                recommendation="PROMOTE",
+                age_days=10,
+                recall_count=20,
+                is_diamond=False,
+            )
+        ]
+        result = ConsolidationResult()
+        await _execute_diamond_promotion(mock_conn, vitals, result, dry_run=False)
+        assert result.errors == 1
+
+    @pytest.mark.asyncio
+    async def test_semantic_merge_database_error_on_load(self, in_memory_db) -> None:
+        """Verify _execute_semantic_merge handles load db exceptions."""
+        from unittest.mock import MagicMock
+
+        mock_cursor = MagicMock()
+        mock_cursor.execute.side_effect = sqlite3.OperationalError("Mocked error")
+        mock_conn = MagicMock()
+        mock_conn.cursor.return_value = mock_cursor
+
+        vitals = [
+            CrystalVitals("merge-1", "Alpha", 1.0, 0.5, "ACTIVE", "MAINTAIN", 5, 5, False),
+            CrystalVitals("merge-2", "Beta", 1.0, 0.5, "ACTIVE", "MAINTAIN", 5, 5, False),
+        ]
+        result = ConsolidationResult()
+        # Should just return and log error
+        from cortex.extensions.swarm.crystal_consolidator import _execute_semantic_merge
+
+        await _execute_semantic_merge(mock_conn, vitals, result, dry_run=False)
+        assert result.merged == 0
+
+    @pytest.mark.asyncio
+    async def test_semantic_merge_dry_run(self, in_memory_db) -> None:
+        """Verify _execute_semantic_merge respects dry_run."""
+        import copy
+        from unittest.mock import patch, AsyncMock
+
+        emb_a = [0.1, 0.2, 0.3, 0.4]
+        emb_b = copy.copy(emb_a)
+
+        _insert_crystal(in_memory_db, "merge-dry-1", "Alpha", embedding=emb_a)
+        _insert_crystal(in_memory_db, "merge-dry-2", "Beta", embedding=emb_b)
+
+        vitals = [
+            CrystalVitals("merge-dry-1", "Alpha", 1.0, 0.5, "ACTIVE", "MAINTAIN", 5, 5, False),
+            CrystalVitals("merge-dry-2", "Beta", 1.0, 0.5, "ACTIVE", "MAINTAIN", 5, 5, False),
+        ]
+        result = ConsolidationResult()
+
+        mock_synthesis = AsyncMock(return_value={"fused_content": "Fused"})
+        with patch("cortex.extensions.swarm.crystal_synthesis.synthesize_crystals", mock_synthesis):
+            with patch(
+                "cortex.extensions.swarm.crystal_consolidator.SEMANTIC_MERGE_THRESHOLD", 0.9
+            ):
+                from cortex.extensions.swarm.crystal_consolidator import _execute_semantic_merge
+
+                await _execute_semantic_merge(in_memory_db, vitals, result, dry_run=True)
+
+        assert result.merged == 1
+
+        cursor = in_memory_db.cursor()
+        cursor.execute("SELECT COUNT(*) FROM facts_meta WHERE id IN ('merge-dry-1', 'merge-dry-2')")
+        assert cursor.fetchone()[0] == 2  # Unchanged
+
+    @pytest.mark.asyncio
+    async def test_semantic_merge_empty_mergeables(self, in_memory_db) -> None:
+        """Verify _execute_semantic_merge handles empty mergeable lists."""
+        result = ConsolidationResult()
+        from cortex.extensions.swarm.crystal_consolidator import _execute_semantic_merge
+
+        # Empty vitals shouldn't process anything
+        await _execute_semantic_merge(in_memory_db, [], result, dry_run=False)
+        assert result.merged == 0
+
+    @pytest.mark.asyncio
+    async def test_semantic_merge_synthesis_error(self, in_memory_db) -> None:
+        """Verify _execute_semantic_merge continues on LLM exception."""
+        import copy
+        from unittest.mock import patch, AsyncMock
+
+        emb_a = [0.1, 0.2, 0.3, 0.4]
+        emb_b = copy.copy(emb_a)
+
+        _insert_crystal(in_memory_db, "merge-err-1", "Alpha", embedding=emb_a)
+        _insert_crystal(in_memory_db, "merge-err-2", "Beta", embedding=emb_b)
+
+        vitals = [
+            CrystalVitals("merge-err-1", "Alpha", 1.0, 0.5, "ACTIVE", "MAINTAIN", 5, 5, False),
+            CrystalVitals("merge-err-2", "Beta", 1.0, 0.5, "ACTIVE", "MAINTAIN", 5, 5, False),
+        ]
+        result = ConsolidationResult()
+
+        mock_synthesis = AsyncMock(side_effect=RuntimeError("LLM Failure"))
+        with patch("cortex.extensions.swarm.crystal_synthesis.synthesize_crystals", mock_synthesis):
+            with patch(
+                "cortex.extensions.swarm.crystal_consolidator.SEMANTIC_MERGE_THRESHOLD", 0.9
+            ):
+                from cortex.extensions.swarm.crystal_consolidator import _execute_semantic_merge
+
+                await _execute_semantic_merge(in_memory_db, vitals, result, dry_run=False)
+
+        # Nothing merged because LLM failed
+        assert result.merged == 0
+        assert result.errors > 0
+
+    @pytest.mark.asyncio
+    async def test_semantic_merge_matrix_computation_error(self, in_memory_db) -> None:
+        """Verify _execute_semantic_merge handles np exception gracefully."""
+        import copy
+        from unittest.mock import patch
+
+        emb_a = [0.1, 0.2, 0.3, 0.4]
+        emb_b = copy.copy(emb_a)
+
+        _insert_crystal(in_memory_db, "merge-np-1", "Alpha", embedding=emb_a)
+        _insert_crystal(in_memory_db, "merge-np-2", "Beta", embedding=emb_b)
+
+        vitals = [
+            CrystalVitals("merge-np-1", "Alpha", 1.0, 0.5, "ACTIVE", "MAINTAIN", 5, 5, False),
+            CrystalVitals("merge-np-2", "Beta", 1.0, 0.5, "ACTIVE", "MAINTAIN", 5, 5, False),
+        ]
+        result = ConsolidationResult()
+
+        with patch("numpy.vstack", side_effect=ValueError("Numpy exception")):
+            from cortex.extensions.swarm.crystal_consolidator import _execute_semantic_merge
+
+            await _execute_semantic_merge(in_memory_db, vitals, result, dry_run=False)
+
+        assert result.merged == 0
+
+    @pytest.mark.asyncio
+    async def test_semantic_merge_database_error_on_update(self, in_memory_db) -> None:
+        """Verify _execute_semantic_merge handles db errors during batch updates."""
+        import copy
+        from unittest.mock import patch, AsyncMock
+
+        emb_a = [0.1, 0.2, 0.3, 0.4]
+        emb_b = copy.copy(emb_a)
+
+        _insert_crystal(in_memory_db, "merge-db-1", "Alpha", embedding=emb_a)
+        _insert_crystal(in_memory_db, "merge-db-2", "Beta", embedding=emb_b)
+
+        vitals = [
+            CrystalVitals("merge-db-1", "Alpha", 1.0, 0.5, "ACTIVE", "MAINTAIN", 5, 5, False),
+            CrystalVitals("merge-db-2", "Beta", 1.0, 0.5, "ACTIVE", "MAINTAIN", 5, 5, False),
+        ]
+        result = ConsolidationResult()
+
+        mock_synthesis = AsyncMock(return_value={"fused_content": "Fused"})
+        with patch("cortex.extensions.swarm.crystal_synthesis.synthesize_crystals", mock_synthesis):
+            with patch(
+                "cortex.extensions.swarm.crystal_consolidator.SEMANTIC_MERGE_THRESHOLD", 0.9
+            ):
+                from cortex.extensions.swarm.crystal_consolidator import _execute_semantic_merge
+
+                from unittest.mock import MagicMock
+
+                mock_conn = MagicMock()
+                mock_cursor = MagicMock()
+                mock_cursor.executemany.side_effect = sqlite3.OperationalError("Mocked error")
+                mock_conn.cursor.return_value = mock_cursor
+
+                # Mock the select query that occurs before the merge
+                import numpy as np
+
+                mock_cursor.fetchall.return_value = [
+                    ("merge-db-1", "Alpha", np.array(emb_a, dtype=np.float32).tobytes()),
+                    ("merge-db-2", "Beta", np.array(emb_b, dtype=np.float32).tobytes()),
+                ]
+                await _execute_semantic_merge(mock_conn, vitals, result, dry_run=False)
+
+        assert result.merged == 0
+        assert result.errors > 0
+
+    @pytest.mark.asyncio
+    async def test_diamond_promotion_dry_run(self, in_memory_db) -> None:
+        """Verify _execute_diamond_promotion handles dry run properly."""
+        vitals = [
+            CrystalVitals(
+                fact_id="hot-dry",
+                content_preview="gold",
+                temperature=2.0,
+                resonance=0.7,
+                quadrant="ACTIVE",
+                recommendation="PROMOTE",
+                age_days=10,
+                recall_count=20,
+                is_diamond=False,
+            )
+        ]
+        result = ConsolidationResult()
+        from cortex.extensions.swarm.crystal_consolidator import _execute_diamond_promotion
+
+        await _execute_diamond_promotion(in_memory_db, vitals, result, dry_run=True)
+        assert result.promoted == 1
+
+    @pytest.mark.asyncio
+    async def test_semantic_merge_fewer_than_2_crystals(self, in_memory_db) -> None:
+        """Verify _execute_semantic_merge aborts if less than 2 mergeable."""
+        vitals = [
+            CrystalVitals("merge-less-1", "Alpha", 1.0, 0.5, "ACTIVE", "MAINTAIN", 5, 5, False),
+        ]
+        result = ConsolidationResult()
+        from cortex.extensions.swarm.crystal_consolidator import _execute_semantic_merge
+
+        await _execute_semantic_merge(in_memory_db, vitals, result, dry_run=False)
+        assert result.merged == 0
+
+    @pytest.mark.asyncio
+    async def test_semantic_merge_data_less_than_2_after_load(self, in_memory_db) -> None:
+        """Verify _execute_semantic_merge aborts if less than 2 embeddings exist after db load."""
+        from unittest.mock import MagicMock
+
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        import numpy as np
+
+        mock_cursor.fetchall.return_value = [
+            ("merge-db-1", "Alpha", np.array([0.1], dtype=np.float32).tobytes())
+        ]
+        mock_conn.cursor.return_value = mock_cursor
+
+        vitals = [
+            CrystalVitals("merge-less-1", "Alpha", 1.0, 0.5, "ACTIVE", "MAINTAIN", 5, 5, False),
+            CrystalVitals("merge-less-2", "Beta", 1.0, 0.5, "ACTIVE", "MAINTAIN", 5, 5, False),
+        ]
+        result = ConsolidationResult()
+        from cortex.extensions.swarm.crystal_consolidator import _execute_semantic_merge
+
+        await _execute_semantic_merge(mock_conn, vitals, result, dry_run=False)
+        assert result.merged == 0
+
+    @pytest.mark.asyncio
+    async def test_semantic_merge_no_independent_pairs(self, in_memory_db) -> None:
+        """Verify _execute_semantic_merge aborts if there are no semantic overlaps."""
+        import copy
+        from unittest.mock import patch, AsyncMock
+
+        emb_a = [0.1, 0.2, 0.3, 0.4]
+        # Make entirely different to avoid overlap
+        emb_b = [-0.1, -0.2, -0.3, -0.4]
+
+        _insert_crystal(in_memory_db, "merge-none-1", "Alpha", embedding=emb_a)
+        _insert_crystal(in_memory_db, "merge-none-2", "Beta", embedding=emb_b)
+
+        vitals = [
+            CrystalVitals("merge-none-1", "Alpha", 1.0, 0.5, "ACTIVE", "MAINTAIN", 5, 5, False),
+            CrystalVitals("merge-none-2", "Beta", 1.0, 0.5, "ACTIVE", "MAINTAIN", 5, 5, False),
+        ]
+        result = ConsolidationResult()
+
+        from cortex.extensions.swarm.crystal_consolidator import _execute_semantic_merge
+
+        with patch("cortex.extensions.swarm.crystal_consolidator.SEMANTIC_MERGE_THRESHOLD", 0.9):
+            await _execute_semantic_merge(in_memory_db, vitals, result, dry_run=False)
+
+        assert result.merged == 0
