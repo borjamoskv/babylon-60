@@ -11,15 +11,11 @@ async def engine(tmp_path):
 
     db_path = tmp_path / "test_cortex.db"
     engine = CortexEngine(db_path=str(db_path))
-    # Initialize schema with extension loaded
-    async with aiosqlite.connect(str(db_path)) as db:
-        await db.enable_load_extension(True)
-        await db.load_extension(sqlite_vec.loadable_path())
-        await db.enable_load_extension(False)
-        for statement in ALL_SCHEMA:
-            await db.executescript(statement)
-        await db.commit()
-    return engine
+    # In pure test mode we mock or skip the extension initialization if not available
+    # However engine.init_db() does this gracefully, so we let it handle schema.
+    await engine.init_db()
+    yield engine
+    await engine.close()
 
 
 @pytest.mark.asyncio

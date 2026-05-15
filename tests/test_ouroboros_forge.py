@@ -1,6 +1,8 @@
 import logging
 import sys
 import unittest
+from unittest.mock import patch, MagicMock
+import asyncio
 from pathlib import Path
 
 # Add project root to sys.path dynamically
@@ -17,10 +19,21 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         self.engine = OuroborosEngine()
         self.test_repo = "https://github.com/Uniswap/v4-core"
 
-    async def test_audit_cycle(self):
+    @patch("os.system")
+    @patch("asyncio.create_subprocess_exec")
+    async def test_audit_cycle(self, mock_create_subprocess_exec, mock_os_system):
         """Standard Audit Cycle on mock contract."""
         logger = logging.getLogger("cortex.ouroboros.test")
         logger.info("Starting Ouroboros-1 Verification...")
+
+        from unittest.mock import AsyncMock
+
+        # Mock the subprocess logic since we don't have forge installed
+        mock_process = AsyncMock()
+        mock_process.communicate.return_value = (b"Mock output", b"")
+        mock_process.wait.return_value = None
+        mock_process.returncode = 0
+        mock_create_subprocess_exec.return_value = mock_process
 
         # This will clone and audit
         try:
