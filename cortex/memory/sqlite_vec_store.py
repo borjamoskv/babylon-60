@@ -501,14 +501,16 @@ class SovereignVectorStoreL2:
 
             if not self._vector_enabled:
                 sql = (
-                    f"SELECT * FROM {meta_tb} "
+                    f"SELECT *, "
+                    f"(cortex_decay(is_diamond, timestamp, ?, ?) * success_rate * exergy_score) as final_score "
+                    f"FROM {meta_tb} "
                     "WHERE tenant_id = ? AND (project_id = ? OR is_bridge = 1)"
                 )
-                params: list[Any] = [tenant_id, project_id]
+                params: list[Any] = [now, self._half_life, tenant_id, project_id]
                 if layer:
                     sql += " AND cognitive_layer = ?"
                     params.append(layer)
-                sql += " ORDER BY timestamp DESC LIMIT ?"
+                sql += " ORDER BY final_score DESC LIMIT ?"
                 params.append(limit)
 
                 cursor.execute(sql, tuple(params))
@@ -529,7 +531,7 @@ class SovereignVectorStoreL2:
                         parent_decision_id=row["parent_decision_id"],
                         metadata=json.loads(row["metadata"]) if row["metadata"] else {},
                     )
-                    object.__setattr__(fact, "_recall_score", 0.0)
+                    object.__setattr__(fact, "_recall_score", row["final_score"])
                     final_facts.append(fact)
                 return final_facts
 
