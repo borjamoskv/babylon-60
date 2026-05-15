@@ -43,7 +43,7 @@ async def test_fallback_robust_scoring(temp_db_path, mock_encoder):
         project_id="test_proj",
         content="como modelo de lenguaje",
         embedding=embedding_vec,
-        timestamp=now - (14 * 24 * 3600), # 14 days old (2 half-lives)
+        timestamp=now - (14 * 24 * 3600),  # 14 days old (2 half-lives)
         is_diamond=False,
         is_bridge=False,
         confidence="high",
@@ -60,7 +60,7 @@ async def test_fallback_robust_scoring(temp_db_path, mock_encoder):
         project_id="test_proj",
         content="very important core axiom",
         embedding=embedding_vec,
-        timestamp=now - (14 * 24 * 3600), # 14 days old
+        timestamp=now - (14 * 24 * 3600),  # 14 days old
         is_diamond=True,
         is_bridge=False,
         confidence="high",
@@ -75,9 +75,9 @@ async def test_fallback_robust_scoring(temp_db_path, mock_encoder):
         id="fact_fresh_exergy",
         tenant_id="test_tenant",
         project_id="test_proj",
-        content="cortex vector zero-trust multi-tenant semantic search algorithm implementation", # Normal exergy (1.0)
+        content="cortex vector zero-trust multi-tenant semantic search algorithm implementation",  # Normal exergy (1.0)
         embedding=embedding_vec,
-        timestamp=now, # fresh, decay = 1.0
+        timestamp=now,  # fresh, decay = 1.0
         is_diamond=False,
         is_bridge=False,
         confidence="high",
@@ -107,13 +107,13 @@ async def test_fallback_robust_scoring(temp_db_path, mock_encoder):
     # fact2: diamond (decay=1.0) * success(0.8) * exergy (1.0) = 0.8
     # fact1: old (decay=0.25) * success(0.5) * exergy (0.0) = 0.0
 
-    results.sort(key=lambda x: getattr(x, '_recall_score', 0), reverse=True)
+    results.sort(key=lambda x: getattr(x, "_recall_score", 0), reverse=True)
 
     assert results[0].id == "fact_fresh_exergy"
     assert results[1].id == "fact_diamond"
     assert results[2].id == "fact_decayed"
 
-    assert getattr(results[0], '_recall_score', 0) > getattr(results[1], '_recall_score', 0)
-    assert getattr(results[1], '_recall_score', 0) > getattr(results[2], '_recall_score', 0)
+    assert getattr(results[0], "_recall_score", 0) > getattr(results[1], "_recall_score", 0)
+    assert getattr(results[1], "_recall_score", 0) > getattr(results[2], "_recall_score", 0)
 
     await store.close()
