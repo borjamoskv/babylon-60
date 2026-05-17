@@ -271,3 +271,6 @@ xokas-elevator/
 yt-notebooklm-ext/
 auramem/
 nexus-dashboard/.next/
+
+# Rust build artifacts
+engine-rs/target/
