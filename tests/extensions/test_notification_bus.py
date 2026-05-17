@@ -1,4 +1,3 @@
-import asyncio
 import pytest
 from cortex.extensions.notifications.bus import (
     NotificationBus,
@@ -138,14 +137,15 @@ async def test_webhook_adapter_send():
         body="Webhook body",
         source="test",
         project="cortex",
-        tags={"critical": "true"},
+        metadata={"critical": "true"},
     )
 
     with patch(
         "cortex.extensions.notifications.adapters.webhook.httpx.AsyncClient"
     ) as mock_client_cls:
+        from unittest.mock import Mock
         mock_client = AsyncMock()
-        mock_response = AsyncMock()
+        mock_response = Mock()
         mock_client.post.return_value = mock_response
         mock_client_cls.return_value.__aenter__.return_value = mock_client
 
@@ -158,4 +158,4 @@ async def test_webhook_adapter_send():
         assert payload["title"] == "Webhook event"
         assert payload["severity"] == "error"
         assert payload["project"] == "cortex"
-        assert payload["tags"]["critical"] == "true"
+        assert payload["metadata"]["critical"] == "true"
