@@ -254,6 +254,35 @@ class TestConsolidationResult:
 
 
 class TestColdPurge:
+
+    @pytest.mark.asyncio
+    async def test_cold_purge_batching(self, in_memory_db) -> None:
+        vitals = []
+        for i in range(1500):
+            fid = f"dead-batch-{i}"
+            _insert_crystal(in_memory_db, fid, "obsolete info", age_days=30, recall_count=0)
+            vitals.append(
+                CrystalVitals(
+                    fact_id=fid,
+                    content_preview="obsolete info",
+                    temperature=0.0,
+                    resonance=0.05,
+                    quadrant="DEAD_WEIGHT",
+                    recommendation="PURGE",
+                    age_days=30,
+                    recall_count=0,
+                    is_diamond=False,
+                )
+            )
+
+        result = ConsolidationResult()
+        await _execute_cold_purge(in_memory_db, vitals, result, dry_run=False)
+
+        assert result.purged == 1500
+        cursor = in_memory_db.cursor()
+        cursor.execute("SELECT COUNT(*) FROM facts_meta WHERE id LIKE 'dead-batch-%'")
+        assert cursor.fetchone()[0] == 0
+
     @pytest.mark.asyncio
     async def test_purges_dead_weight(self, in_memory_db) -> None:
         _insert_crystal(in_memory_db, "dead-1", "obsolete info", age_days=30, recall_count=0)
@@ -336,6 +365,35 @@ class TestColdPurge:
 
 
 class TestDiamondPromotion:
+
+    @pytest.mark.asyncio
+    async def test_diamond_promotion_batching(self, in_memory_db) -> None:
+        vitals = []
+        for i in range(1500):
+            fid = f"hot-batch-{i}"
+            _insert_crystal(in_memory_db, fid, "active knowledge", age_days=10, recall_count=20)
+            vitals.append(
+                CrystalVitals(
+                    fact_id=fid,
+                    content_preview="active knowledge",
+                    temperature=2.0,
+                    resonance=0.7,
+                    quadrant="ACTIVE",
+                    recommendation="PROMOTE",
+                    age_days=10,
+                    recall_count=20,
+                    is_diamond=False,
+                )
+            )
+
+        result = ConsolidationResult()
+        await _execute_diamond_promotion(in_memory_db, vitals, result, dry_run=False)
+
+        assert result.promoted == 1500
+        cursor = in_memory_db.cursor()
+        cursor.execute("SELECT COUNT(*) FROM facts_meta WHERE is_diamond = 1 AND id LIKE 'hot-batch-%'")
+        assert cursor.fetchone()[0] == 1500
+
     @pytest.mark.asyncio
     async def test_promotes_qualifying_crystal(self, in_memory_db) -> None:
         _insert_crystal(in_memory_db, "hot-1", "active knowledge", age_days=10, recall_count=20)
@@ -364,6 +422,55 @@ class TestDiamondPromotion:
 
 
 # ── Full Consolidation E2E Tests ──────────────────────────────────────────
+
+
+class TestSemanticMergeBatch:
+
+    @pytest.mark.asyncio
+    async def test_semantic_merge_batching(self, in_memory_db) -> None:
+        from unittest.mock import patch
+        vitals = []
+        for i in range(20):
+            fid = f"merge-batch-{i}"
+            # Slightly differ to avoid pure identical hash check, but very similar embedding
+            _insert_crystal(in_memory_db, fid, f"mergeable {i}", age_days=5, recall_count=2)
+            vitals.append(
+                CrystalVitals(
+                    fact_id=fid,
+                    content_preview=f"mergeable {i}",
+                    temperature=1.0,
+                    resonance=0.5,
+                    quadrant="ACTIVE",
+                    recommendation="PROTECT",
+                    age_days=5,
+                    recall_count=2,
+                    is_diamond=False,
+                )
+            )
+
+            # Manually inject same embeddings
+            cursor = in_memory_db.cursor()
+            import numpy as np
+            emb = np.ones(1536, dtype=np.float32)
+            cursor.execute(
+                "UPDATE vec_facts SET embedding = ? WHERE rowid IN (SELECT rowid FROM facts_meta WHERE id = ?)",
+                (emb.tobytes(), fid)
+            )
+            in_memory_db.commit()
+
+        result = ConsolidationResult()
+
+        async def mock_synth(primary_content, secondary_content):
+            return {"fused_content": "mocked fused result"}
+
+        with patch("cortex.extensions.swarm.crystal_synthesis.synthesize_crystals", side_effect=mock_synth):
+            from cortex.extensions.swarm.crystal_consolidator import _execute_semantic_merge
+            await _execute_semantic_merge(in_memory_db, vitals, result, dry_run=False)
+
+        assert result.merged == 19
+        cursor = in_memory_db.cursor()
+        cursor.execute("SELECT COUNT(*) FROM facts_meta WHERE id LIKE 'merge-batch-%'")
+        assert cursor.fetchone()[0] == 1
 
 
 class TestFullConsolidation:

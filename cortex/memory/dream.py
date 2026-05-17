@@ -26,6 +26,7 @@ from __future__ import annotations
 import logging
 import math
 import time
+import numpy as np
 from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any, Final
@@ -284,14 +285,26 @@ class AssociativeDreamEngine:
         if len(cluster_members) <= 1:
             return 0.0
 
-        sims: list[float] = []
-        for ci in range(len(cluster_members)):
-            for cj in range(ci + 1, len(cluster_members)):
-                ea = getattr(engrams[cluster_members[ci]], "embedding", [])
-                eb = getattr(engrams[cluster_members[cj]], "embedding", [])
-                if ea and eb:
-                    sims.append(_cosine_similarity(ea, eb))
-        return sum(sims) / len(sims) if sims else 0.0
+        embeddings = []
+        for ci in cluster_members:
+            ea = getattr(engrams[ci], "embedding", [])
+            if ea:
+                vec = np.array(ea, dtype=np.float32)
+                norm = np.linalg.norm(vec)
+                if norm >= 1e-10:
+                    embeddings.append(vec / norm)
+
+        if len(embeddings) <= 1:
+            return 0.0
+
+        emb_matrix = np.vstack(embeddings)
+        sim_matrix = np.dot(emb_matrix, emb_matrix.T)
+
+        # Extract the upper triangle, excluding the diagonal (k=1)
+        triu_indices = np.triu_indices_from(sim_matrix, k=1)
+        sims = sim_matrix[triu_indices]
+
+        return float(np.mean(sims)) if sims.size > 0 else 0.0
 
     # ─── Phase 2: Redundancy Fusion ───────────────────────────────
 

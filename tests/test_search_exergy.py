@@ -74,6 +74,11 @@ async def test_exergy_prioritization(temp_db_path, mock_encoder):
     object.__setattr__(high_exergy_fact, "embedding_bytes", b"mock")
     await store.memorize(high_exergy_fact)
 
+    import sqlite3
+
+    if not hasattr(sqlite3.Connection, "enable_load_extension"):
+        pytest.skip("sqlite-vec requires load_extension support")
+
     # 3. Recall
     # Since embeddings are identical, standard cosine sim is identical.
     # Exergy should elevate the purely factual record.

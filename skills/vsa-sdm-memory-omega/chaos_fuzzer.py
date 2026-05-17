@@ -113,7 +113,7 @@ def fuzz_extreme_dimensions():
     m = e_tiny.bind(k, s)
     r = e_tiny.unbind(m, k)
     sim = e_tiny.cosine(s, r)
-    report(f"D=64 bind/unbind", sim > 0.05, f"cos={sim:.4f}")
+    report("D=64 bind/unbind", sim > 0.05, f"cos={sim:.4f}")
 
     # Large D
     e_big = VSAEngine(D=50000, seed=4)
@@ -121,7 +121,7 @@ def fuzz_extreme_dimensions():
     m = e_big.bind(k, s)
     r = e_big.unbind(m, k)
     sim = e_big.cosine(s, r)
-    report(f"D=50000 bind/unbind", sim > 0.5, f"cos={sim:.4f}")
+    report("D=50000 bind/unbind", sim > 0.5, f"cos={sim:.4f}")
 
 
 def fuzz_capacity_overflow():
@@ -135,7 +135,7 @@ def fuzz_capacity_overflow():
     states = [e.random_vec() for _ in range(N)]
 
     memory = np.zeros(D)
-    for k, s in zip(keys, states):
+    for k, s in zip(keys, states, strict=False):
         memory += e.bind(k, s)
 
     # SNR should be terrible
@@ -145,7 +145,7 @@ def fuzz_capacity_overflow():
     # Retrieval should be near-random
     extracted = e.unbind(memory, keys[0])
     sim = e.cosine(states[0], extracted)
-    report(f"Retrieval at 160x overcapacity", True,
+    report("Retrieval at 160x overcapacity", True,
            f"cos={sim:.4f} (noise level expected)")
 
 
@@ -317,7 +317,7 @@ def fuzz_algebra_consistency():
 
     # Both should produce unit vectors
     v_hrr = e_hrr.random_vec()
-    v_mapb = e_mapb.random_vec()
+    e_mapb.random_vec()
     report("Random vec generation",
            abs(np.linalg.norm(v_hrr) - 1.0) < 1e-6,
            f"HRR norm={np.linalg.norm(v_hrr):.6f}")
@@ -364,7 +364,7 @@ def fuzz_dimension_mismatch():
     try:
         v1 = np.ones(1000)
         v2 = np.ones(2000)
-        r = np.fft.ifft(np.fft.fft(v1) * np.fft.fft(v2)).real
+        np.fft.ifft(np.fft.fft(v1) * np.fft.fft(v2)).real
         report("Mismatched bind", False, "Should have failed")
     except ValueError:
         report("Mismatched bind", True, "ValueError caught")

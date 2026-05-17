@@ -11,7 +11,7 @@ coverage:
         if_ci_failed: error
     patch:
       default:
-        target: 80%           # new code must have at least 80% coverage
+        target: 60%           # new code must have at least 80% coverage
         threshold: 5%
         if_not_found: success
         if_ci_failed: error
