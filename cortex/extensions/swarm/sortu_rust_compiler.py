@@ -5,7 +5,7 @@ import subprocess
 import ctypes
 import sys
 import logging
-from typing import Any, Tuple
+from typing import Any
 
 logger = logging.getLogger("cortex.autodidact.rust_jit")
 logging.basicConfig(level=logging.INFO)
@@ -35,19 +35,19 @@ class PythonToRustTranspiler(ast.NodeVisitor):
             args.append(f"{arg.arg}: f64")
             self.arg_names.append(arg.arg)
             self.declared_vars.add(arg.arg)
-        
+
         args_str = ", ".join(args)
-        
+
         lines = []
         lines.append("#[no_mangle]")
-        lines.append(f"pub extern \"C\" fn {node.name}({args_str}) -> f64 {{")
+        lines.append(f'pub extern "C" fn {node.name}({args_str}) -> f64 {{')
         self.indent_level += 1
-        
+
         for stmt in node.body:
             stmt_str = self.visit(stmt)
             if stmt_str:
                 lines.append(self.indent() + stmt_str)
-                
+
         self.indent_level -= 1
         lines.append("}")
         return "\n".join(lines)
@@ -55,14 +55,14 @@ class PythonToRustTranspiler(ast.NodeVisitor):
     def visit_Assign(self, node):
         if len(node.targets) != 1:
             raise NotImplementedError("Multiple assignment targets not supported")
-        
+
         target = node.targets[0]
         if not isinstance(target, ast.Name):
             raise NotImplementedError("Only basic variable assignments supported")
-            
+
         var_name = target.id
         val_str = self.visit(node.value)
-        
+
         if var_name not in self.declared_vars:
             self.declared_vars.add(var_name)
             return f"let mut {var_name} = {val_str};"
@@ -72,13 +72,7 @@ class PythonToRustTranspiler(ast.NodeVisitor):
     def visit_BinOp(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right)
-        op_map = {
-            ast.Add: "+",
-            ast.Sub: "-",
-            ast.Mult: "*",
-            ast.Div: "/",
-            ast.Mod: "%"
-        }
+        op_map = {ast.Add: "+", ast.Sub: "-", ast.Mult: "*", ast.Div: "/", ast.Mod: "%"}
         op_type = type(node.op)
         if op_type not in op_map:
             raise NotImplementedError(f"Binary operator {op_type.__name__} not supported")
@@ -99,7 +93,7 @@ class PythonToRustTranspiler(ast.NodeVisitor):
 
     def visit_Constant(self, node):
         val = node.value
-        if isinstance(val, (int, float)):
+        if isinstance(val, int | float):
             return str(float(val))
         elif isinstance(val, bool):
             return "true" if val else "false"
@@ -126,7 +120,7 @@ class PythonToRustTranspiler(ast.NodeVisitor):
                 lines.append(self.indent() + stmt_str)
         self.indent_level -= 1
         lines.append(self.indent() + "}")
-        
+
         if node.orelse:
             lines[-1] = self.indent() + "} else {"
             self.indent_level += 1
@@ -141,18 +135,18 @@ class PythonToRustTranspiler(ast.NodeVisitor):
     def visit_Compare(self, node):
         if len(node.ops) != 1 or len(node.comparators) != 1:
             raise NotImplementedError("Chained comparisons not supported")
-        
+
         left = self.visit(node.left)
         op_type = type(node.ops[0])
         right = self.visit(node.comparators[0])
-        
+
         op_map = {
             ast.Eq: "==",
             ast.NotEq: "!=",
             ast.Lt: "<",
             ast.LtE: "<=",
             ast.Gt: ">",
-            ast.GtE: ">="
+            ast.GtE: ">=",
         }
         if op_type not in op_map:
             raise NotImplementedError(f"Comparison operator {op_type.__name__} not supported")
@@ -161,14 +155,16 @@ class PythonToRustTranspiler(ast.NodeVisitor):
     def visit_For(self, node):
         if not isinstance(node.target, ast.Name):
             raise NotImplementedError("Only simple range loop targets supported")
-        
+
         var_name = node.target.id
-        
-        if (not isinstance(node.iter, ast.Call) or
-                not isinstance(node.iter.func, ast.Name) or
-                node.iter.func.id != "range"):
+
+        if (
+            not isinstance(node.iter, ast.Call)
+            or not isinstance(node.iter.func, ast.Name)
+            or node.iter.func.id != "range"
+        ):
             raise NotImplementedError("Only range() loops are currently compiled to JIT-Rust")
-            
+
         args = node.iter.args
         if len(args) == 1:
             start_str = "0"
@@ -178,19 +174,19 @@ class PythonToRustTranspiler(ast.NodeVisitor):
             end_str = self.visit(args[1])
         else:
             raise NotImplementedError("Step in range() is not supported")
-            
+
         lines = []
         loop_var_raw = f"{var_name}_raw"
         lines.append(f"for {loop_var_raw} in ({start_str} as i64)..({end_str} as i64) {{")
         self.indent_level += 1
         lines.append(self.indent() + f"let mut {var_name} = {loop_var_raw} as f64;")
         self.declared_vars.add(var_name)
-        
+
         for stmt in node.body:
             stmt_str = self.visit(stmt)
             if stmt_str:
                 lines.append(self.indent() + stmt_str)
-                
+
         self.indent_level -= 1
         lines.append(self.indent() + "}")
         return "\n".join(lines)
@@ -208,10 +204,10 @@ def compile_rust_code(rust_code: str) -> str:
     with tempfile.NamedTemporaryFile(suffix=".rs", delete=False, mode="w") as f:
         f.write(rust_code)
         rust_src = f.name
-        
+
     ext = ".dylib" if sys.platform == "darwin" else (".dll" if sys.platform == "win32" else ".so")
     output_lib = rust_src.replace(".rs", ext)
-    
+
     try:
         # Optimization flag -O ensures O(1) direct silicon efficiency
         cmd = ["rustc", "-O", "--crate-type=cdylib", "-o", output_lib, rust_src]
@@ -235,7 +231,7 @@ def execute_rust_jit(lib_path: str, func_name: str, args: list) -> float:
         func = getattr(lib, func_name)
         func.argtypes = [ctypes.c_double] * len(args)
         func.restype = ctypes.c_double
-        
+
         c_args = [ctypes.c_double(float(a)) for a in args]
         res = func(*c_args)
         return float(res)
@@ -243,6 +239,7 @@ def execute_rust_jit(lib_path: str, func_name: str, args: list) -> float:
         # Clean up dynamic library references and file from disk to avoid entropy leaks
         if sys.platform != "win32":
             import _ctypes
+
             _ctypes.dlclose(lib._handle)
         if os.path.exists(lib_path):
             try:
@@ -251,25 +248,25 @@ def execute_rust_jit(lib_path: str, func_name: str, args: list) -> float:
                 pass
 
 
-def compile_and_run_python_ast(source_code: str, global_ctx: dict) -> Tuple[bool, Any]:
+def compile_and_run_python_ast(source_code: str, global_ctx: dict) -> tuple[bool, Any]:
     """
     Tries to transpile, compile, and run the Python AST inside the dynamic Rust JIT.
     Returns (success, result/error_message).
     """
     try:
         tree = ast.parse(source_code)
-        
+
         # Check if we have a single function definition
         func_defs = [n for n in tree.body if isinstance(n, ast.FunctionDef)]
         if len(func_defs) != 1:
             return False, "JIT-Rust requires exactly one function definition as execution path"
-            
+
         target_func = func_defs[0]
         func_name = target_func.name
-        
+
         transpiler = PythonToRustTranspiler()
         rust_code = transpiler.visit(tree)
-        
+
         # Gather inputs from global context
         args_values = []
         for arg in transpiler.arg_names:
@@ -280,14 +277,14 @@ def compile_and_run_python_ast(source_code: str, global_ctx: dict) -> Tuple[bool
                 args_values.append(float(val))
             except (ValueError, TypeError):
                 return False, f"Argument {arg} cannot be coerced to float for JIT-Rust"
-                
+
         # Compile
         lib_path = compile_rust_code(rust_code)
-        
+
         # Execute
         res = execute_rust_jit(lib_path, func_name, args_values)
         return True, res
-        
+
     except NotImplementedError as e:
         return False, f"Fallback trigger: {e}"
     except Exception as e:

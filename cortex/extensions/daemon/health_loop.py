@@ -140,13 +140,9 @@ class HealthLoop:
                 logger.debug("Notification failed: %s", e)
             return
         try:
-            import subprocess
+            from cortex.extensions.daemon.notifier import Notifier
 
-            subprocess.run(
-                ["osascript", "-e", f'display notification "{body}" with title "{title}"'],
-                check=False,
-                capture_output=True,
-            )
+            Notifier.notify(title, body, sound="Submarine")
         except Exception:  # noqa: BLE001
             logger.debug("macOS notifications unavailable")
 

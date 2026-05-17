@@ -9,10 +9,8 @@ Dispatches to the native notification system:
 from __future__ import annotations
 
 import logging
-import subprocess
 
 from cortex.extensions.daemon.models import GhostAlert, MemoryAlert, SiteStatus
-from cortex.extensions.platform.sys import is_linux, is_macos, is_windows
 
 __all__ = ["Notifier"]
 
@@ -20,70 +18,36 @@ logger = logging.getLogger("moskv-daemon")
 
 
 class Notifier:
-    """Platform-aware native notifications."""
+    """Native notifications via centralized NotificationBus."""
 
     @staticmethod
     def notify(title: str, message: str, sound: str = "Submarine") -> bool:
-        """Send a native notification. Returns True on success."""
+        """Send a notification via the NotificationBus. Returns True on success."""
         try:
-            if is_macos():
-                return Notifier._notify_macos(title, message, sound)
-            if is_linux():
-                return Notifier._notify_linux(title, message)
-            if is_windows():
-                return Notifier._notify_windows(title, message)
-            # Fallback: just log
-            logger.info("[Notification] %s: %s", title, message)
+            import asyncio
+            from cortex.extensions.notifications.bus import get_notification_bus
+            from cortex.extensions.notifications.events import CortexEvent, EventSeverity
+
+            bus = get_notification_bus()
+            severity = EventSeverity.ERROR if sound == "Basso" else EventSeverity.INFO
+
+            event = CortexEvent(
+                severity=severity,
+                title=title,
+                body=message,
+                source="moskv-daemon",
+                project="cortex",
+            )
+
+            try:
+                loop = asyncio.get_running_loop()
+                loop.create_task(bus.emit(event))
+            except RuntimeError:
+                asyncio.run(bus.emit(event))
             return True
-        except (subprocess.SubprocessError, OSError) as e:
-            logger.warning("Notification failed: %s", e)
+        except Exception as e:
+            logger.warning("Notification bus dispatch failed: %s", e)
             return False
-
-    @staticmethod
-    def _notify_macos(title: str, message: str, sound: str) -> bool:
-        """macOS: osascript AppleScript notification."""
-        # Escape double quotes in title/message
-        safe_title = title.replace('"', '\\"')
-        safe_msg = message.replace('"', '\\"')
-        script = f'display notification "{safe_msg}" with title "{safe_title}" sound name "{sound}"'
-        subprocess.run(
-            ["osascript", "-e", script],
-            capture_output=True,
-            timeout=5,
-        )
-        return True
-
-    @staticmethod
-    def _notify_linux(title: str, message: str) -> bool:
-        """Linux: notify-send (libnotify)."""
-        subprocess.run(
-            ["notify-send", "--urgency=normal", title, message],
-            capture_output=True,
-            timeout=5,
-        )
-        return True
-
-    @staticmethod
-    def _notify_windows(title: str, message: str) -> bool:
-        """Windows: PowerShell toast notification."""
-        # Escape single quotes for PowerShell
-        safe_title = title.replace("'", "''")
-        safe_msg = message.replace("'", "''")
-        ps_script = (
-            f"[System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | Out-Null; "
-            f"$balloon = New-Object System.Windows.Forms.NotifyIcon; "
-            f"$balloon.Icon = [System.Drawing.SystemIcons]::Information; "
-            f"$balloon.BalloonTipTitle = '{safe_title}'; "
-            f"$balloon.BalloonTipText = '{safe_msg}'; "
-            f"$balloon.Visible = $true; "
-            f"$balloon.ShowBalloonTip(5000)"
-        )
-        subprocess.run(
-            ["powershell", "-Command", ps_script],
-            capture_output=True,
-            timeout=10,
-        )
-        return True
 
     @staticmethod
     def alert_site_down(site: SiteStatus) -> None:

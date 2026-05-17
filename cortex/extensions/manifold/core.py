@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import subprocess
 from pathlib import Path
 from typing import Optional
 
@@ -27,7 +28,7 @@ logger = logging.getLogger("cortex.extensions.manifold.core")
 class TesseractManifold:
     """The 4D Cognitive Manifold engine."""
 
-    def __init__(self, llm_provider: str = "qwen", agent_id: Optional[str] = None) -> None:
+    def __init__(self, llm_provider: str = "qwen", agent_id: str | None = None) -> None:
         from cortex.extensions.agents.registry import AgentRegistry
         from cortex.extensions.llm.provider import LLMProvider
 
@@ -63,7 +64,7 @@ class TesseractManifold:
 
             # Run active dimensions concurrently
             # D1: Perception (Context, History, Predix)
-            async def run_d1() -> Optional[dict]:
+            async def run_d1() -> dict | None:
                 if state.dimensions[DimensionType.D1_PERCEPTION].active:
                     return await self.d1.process(
                         task, toolkit, state.dimensions[DimensionType.D1_PERCEPTION]
@@ -71,7 +72,7 @@ class TesseractManifold:
                 return None
 
             # D2: Decision (Plan, Intent expansion)
-            async def run_d2() -> Optional[object]:
+            async def run_d2() -> object | None:
                 if state.dimensions[DimensionType.D2_DECISION].active:
                     return await self.d2.process(
                         task, toolkit, state.dimensions[DimensionType.D2_DECISION]
@@ -84,7 +85,7 @@ class TesseractManifold:
             state.dimensions[DimensionType.D2_DECISION].output = d2_res
 
             # D3: Creation (Materialization, Scaffold, Code)
-            async def run_d3(plan: Optional[object]) -> Optional[str]:
+            async def run_d3(plan: object | None) -> str | None:
                 if state.dimensions[DimensionType.D3_CREATION].active:
                     return await self.d3.process(
                         task,
@@ -95,7 +96,7 @@ class TesseractManifold:
                 return None
 
             # D4: Validation (Siege, Fitness, Entropy reduction)
-            async def run_d4() -> Optional[dict]:
+            async def run_d4() -> dict | None:
                 if state.dimensions[DimensionType.D4_VALIDATION].active:
                     return await self.d4.process(
                         task, toolkit, state.dimensions[DimensionType.D4_VALIDATION]
@@ -167,8 +168,6 @@ class TesseractManifold:
     def _persist_decision(self, task: AgentTask, result: str) -> None:
         """Persist completion decision to CORTEX."""
         try:
-            import subprocess
-
             msg = f"Tesseract converged task [{task.id}]: {task.title}. Branch: {task.branch}. Result: {result[:200]}"
             subprocess.run(
                 [
@@ -193,8 +192,6 @@ class TesseractManifold:
     def _persist_ghost(self, task: AgentTask, reason: str) -> None:
         """Persist incomplete convergence as a ghost."""
         try:
-            import subprocess
-
             msg = f"Tesseract partial convergence [{task.id}]: {task.title}. Reason: {reason}"
             subprocess.run(
                 [
@@ -218,15 +215,10 @@ class TesseractManifold:
 
     @staticmethod
     def _notify(title: str, body: str) -> None:
-        """macOS notification via osascript."""
+        """macOS notification via centralized bus."""
         try:
-            import subprocess
+            from cortex.extensions.daemon.notifier import Notifier
 
-            script = f'display notification "{body[:200]}" with title "{title}"'
-            subprocess.run(
-                ["osascript", "-e", script],
-                capture_output=True,
-                timeout=5,
-            )
-        except (subprocess.SubprocessError, OSError):
+            Notifier.notify(title, body[:200])
+        except Exception:
             pass

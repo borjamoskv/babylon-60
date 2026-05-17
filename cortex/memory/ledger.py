@@ -342,7 +342,9 @@ class EventLedgerL3:
         try:
             await self._conn.executescript("PRAGMA wal_checkpoint(TRUNCATE); VACUUM;")
         except Exception as e:
-            logger.warning(f"[CORTEX-COMPACTION] Could not execute VACUUM (likely concurrent operations): {e}")
+            logger.warning(
+                f"[CORTEX-COMPACTION] Could not execute VACUUM (likely concurrent operations): {e}"
+            )
 
         # Invalidate cache
         if tenant_id in self._last_hash_cache:

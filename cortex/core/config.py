@@ -107,6 +107,7 @@ class CortexConfig:
     # Notifications
     TELEGRAM_TOKEN: str = ""
     TELEGRAM_CHAT_ID: str = ""
+    WEBHOOK_URL: str = ""
     NOTIFICATIONS_MIN_SEVERITY: str = "warning"
 
     # Deployment
@@ -185,6 +186,7 @@ class CortexConfig:
             CONTEXT_GIT_ENABLED=os.environ.get("CORTEX_CONTEXT_GIT", "1") == "1",
             TELEGRAM_TOKEN=os.environ.get("CORTEX_TELEGRAM_TOKEN", ""),
             TELEGRAM_CHAT_ID=os.environ.get("CORTEX_TELEGRAM_CHAT_ID", ""),
+            WEBHOOK_URL=os.environ.get("CORTEX_WEBHOOK_URL", ""),
             NOTIFICATIONS_MIN_SEVERITY=os.environ.get("CORTEX_NOTIFY_MIN_SEVERITY", "warning"),
         )
 

@@ -255,19 +255,10 @@ class AetherAgent:
 
     @staticmethod
     async def _notify(title: str, body: str) -> None:
-        """macOS notification via osascript asynchronously (Ω₁)."""
+        """macOS notification via centralized bus (Ω₁)."""
         try:
-            safe_title = title.replace('"', '\\"')
-            safe_body = body[:200].replace('"', '\\"')
-            script = f'display notification "{safe_body}" with title "{safe_title}"'
+            from cortex.extensions.daemon.notifier import Notifier
 
-            proc = await asyncio.create_subprocess_exec(
-                "osascript",
-                "-e",
-                script,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-            )
-            await asyncio.wait_for(proc.communicate(), timeout=5.0)
-        except (asyncio.TimeoutError, OSError):
+            Notifier.notify(title, body[:200])
+        except Exception:
             pass
