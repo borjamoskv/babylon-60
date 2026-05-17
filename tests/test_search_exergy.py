@@ -99,6 +99,7 @@ async def test_exergy_prioritization(temp_db_path, mock_encoder):
 
     await store.close()
 
+
 @pytest.mark.asyncio
 async def test_exergy_fallback_mode(temp_db_path, mock_encoder):
     """
