@@ -42,8 +42,8 @@ class WebhookAdapter(BaseAdapter):
         }
         if event.project:
             payload["project"] = event.project
-        if event.tags:
-            payload["tags"] = event.tags
+        if event.metadata:
+            payload["metadata"] = event.metadata
 
         try:
             async with httpx.AsyncClient() as client:
