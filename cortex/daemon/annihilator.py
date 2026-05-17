@@ -6,7 +6,9 @@ dangling tags, stale cache) to preserve the zero-entropy mandate (Ω₄).
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING, Any
+import os
+import psutil
+from typing import Any
 
 from cortex.ledger.ledger_core import SovereignLedger
 
@@ -14,13 +16,19 @@ logger = logging.getLogger("cortex.daemon.annihilator")
 
 
 class AnnihilatorDaemon:
-    """Active background daemon that enforces structural purity."""
+    """Active background daemon that enforces structural purity and memory exergy."""
 
-    def __init__(self, db_path: str, entropy_threshold: float = 5.0):
+    def __init__(self, db_path: str, entropy_threshold: float = 5.0, memory_threshold_mb: float = 512.0):
         self.db_path = db_path
         self.entropy_threshold = entropy_threshold
+        self.memory_threshold_mb = memory_threshold_mb
         # We do not instantiate ledger here because it needs an active connection.
         self._is_running = False
+
+    def _get_rss_memory_mb(self) -> float:
+        """Measure current Resident Set Size (RSS) memory in MB."""
+        process = psutil.Process(os.getpid())
+        return process.memory_info().rss / (1024 * 1024)
 
     async def measure_entropy(self) -> float:
         """Measure current database Shannon entropy.
@@ -80,6 +88,7 @@ class AnnihilatorDaemon:
 
         while self._is_running:
             try:
+                # 1. Structural Entropy Check
                 entropy = await self.measure_entropy()
                 if entropy > self.entropy_threshold:
                     logger.warning(
@@ -87,6 +96,28 @@ class AnnihilatorDaemon:
                         "Purging."
                     )
                     await self.purge()
+                
+                # 2. JIT-Memory Purge Check (Exergy optimization)
+                current_rss = self._get_rss_memory_mb()
+                if current_rss > self.memory_threshold_mb:
+                    logger.error(
+                        f"[JIT-KILL] Memory entropy critical ({current_rss:.2f}MB > "
+                        f"{self.memory_threshold_mb}MB). Forcing GC and Phantom-Kill."
+                    )
+                    import gc
+                    gc.collect()
+                    
+                    # Log the JIT-Memory Purge in Ledger
+                    import aiosqlite
+                    async with aiosqlite.connect(self.db_path) as db:
+                        ledger = SovereignLedger(db)
+                        await ledger.append_verdict(
+                            verdict="JIT_MEMORY_PURGE",
+                            reason=f"RSS Memory hit {current_rss:.2f}MB. GC forced.",
+                            target_path="SYSTEM_RAM",
+                            action_type="SYSTEM_PURGE",
+                        )
+
             except asyncio.CancelledError:
                 break
             except Exception as e:

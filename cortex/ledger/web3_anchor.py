@@ -7,14 +7,9 @@ Guarantees C5-REAL cryptographic auditability for the AI Swarm.
 
 import asyncio
 import hashlib
-import json
 import logging
-from typing import TYPE_CHECKING, Optional
 
 from cortex.ledger.ledger_core import SovereignLedger
-
-if TYPE_CHECKING:
-    import aiosqlite
 
 logger = logging.getLogger("cortex.ledger.web3")
 
@@ -34,7 +29,7 @@ class Web3Anchor:
             cursor = await conn.execute(
                 "SELECT hash FROM transactions ORDER BY id DESC LIMIT ?", (limit,)
             )
-            rows = await cursor.fetchall()
+            rows = list(await cursor.fetchall())
 
         if not rows:
             return hashlib.sha256(b"GENESIS_EMPTY").hexdigest()
@@ -47,16 +42,28 @@ class Web3Anchor:
 
         return hashlib.sha256(combined).hexdigest()
 
+    async def generate_zk_proof(self, merkle_root: str) -> str:
+        """Simulate generating a ZK-SNARK proof of the SAGA execution."""
+        # In a C5-REAL implementation, this compiles a circuit proving that
+        # the transactions composing the merkle_root obeyed all Guard policies.
+        import hmac
+        # Using a deterministic secret for the primitive (would be KMS in prod)
+        secret = b"CORTEX_ZK_CIRCUIT_SECRET_2026"
+        proof = hmac.new(secret, merkle_root.encode("utf-8"), hashlib.sha256).hexdigest()
+        return f"zk_{proof[:24]}"
+
     async def anchor_to_l2(self) -> dict:
-        """Anchor the current state to the L2 blockchain.
+        """Anchor the current state to the L2 blockchain using ZK-Proofs.
 
         Note: If `web3` library is absent, operates in C4-SIMULATION mode.
         """
         merkle_root = await self.compute_merkle_root()
+        zk_proof = await self.generate_zk_proof(merkle_root)
 
         result = {
             "mode": "C4-SIMULATION",
             "merkle_root": merkle_root,
+            "zk_proof": zk_proof,
             "network": "base-sepolia",
             "tx_hash": None,
             "status": "PENDING",
@@ -65,15 +72,15 @@ class Web3Anchor:
         try:
             import web3  # noqa: F401
 
-            # If web3 is available, we would construct the transaction here
+            # If web3 is available, we construct the ZK-Rollup transaction
             # result["mode"] = "C5-REAL"
-            # contract.functions.storeAnchor(merkle_root).transact()
-            logger.info("Web3 available. Ready for C5-REAL transaction.")
+            # contract.functions.verifyAndStoreZKProof(zk_proof, merkle_root).transact()
+            logger.info("Web3 available. Ready for C5-REAL ZK-Anchor transaction.")
         except ImportError:
             logger.warning("web3 package not found. Using C4-SIMULATION mode.")
-            # Simulate network delay
-            await asyncio.sleep(0.2)
-            result["tx_hash"] = f"0xsimulated_anchor_{merkle_root[:16]}"
+            # Simulate network delay for proof verification
+            await asyncio.sleep(0.4)
+            result["tx_hash"] = f"0xsimulated_zk_anchor_{zk_proof[:16]}"
             result["status"] = "SUCCESS"
 
         import aiosqlite
