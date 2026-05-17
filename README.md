@@ -193,6 +193,43 @@ asyncio.run(main())
 
 ---
 
+## Cryptographic Execution Tracing (ArchiTrace & Audit Evidence)
+
+To achieve absolute mathematical accountability, CORTEX supports deterministic flight recording of agent operations via the `ArchiTrace` standard. This outputs a sealed execution proof that guarantees the execution path, code integrity (`logic_hash`), precise inputs/outputs, and intermediate tool call logs remain completely unaltered.
+
+### The ArchiTrace Evidence Format
+
+Every recorded agent cycle outputs a standard JSON payload that is serialized lexicographically and sealed with a SHA-256 hash. This trace hash acts as an immutable anchor that can be verified off-chain or anchored directly to an EVM smart contract (e.g., `ArchiLedger.sol`).
+
+```json
+{
+  "agent_id": "legion-worker-042",
+  "task": "B2B_Lead_Extraction_Apollo_OMEGA",
+  "logic_hash": "2f6c91a3afd20b43524147a824707813a7c6f09278f4a2b9e67d26bb839cbe053",
+  "inputs": {
+    "target_leads": 10,
+    "keywords": "web3, liquid glass, custom l2"
+  },
+  "tool_calls": [
+    {
+      "tool": "apollo_lead_query",
+      "arguments": { "limit": 10, "q": "web3" },
+      "result": "{\"success\":true,\"count\":10}",
+      "timestamp": 1779043781.099
+    }
+  ],
+  "outputs": {
+    "leads_found": 10,
+    "verify_level": "C5-REAL"
+  },
+  "status": "SUCCESS"
+}
+```
+
+This serialized proof yields a deterministic hex signature (e.g., `0x8f4a2b9e...`) that binds the agent's exact decision parameters to its execution environment. If the underlying logic file changes, or if any input/output is altered after the fact, the verification chain breaks immediately.
+
+---
+
 ## Threat Model Summary (Trust Boundaries)
 
 CORTEX is governed by a strict zero-trust philosophy regarding generative AI output.
