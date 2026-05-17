@@ -4,7 +4,7 @@ import aiohttp
 import time
 import json
 import os
-from typing import List, Dict, Any, Optional
+from typing import Any, Optional
 from datetime import datetime
 
 # Termodinámica de red: Evitar fundir el router. Ráfagas de 500 conexiones simultáneas

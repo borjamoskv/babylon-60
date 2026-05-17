@@ -23,14 +23,15 @@ import random
 import sqlite3
 import threading
 import time
+import unicodedata
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Final, NamedTuple, Optional
+from typing import TYPE_CHECKING, Final, NamedTuple
 
 import aiosqlite
 
-__all__ = ["TipCategory", "Tip", "TipsEngine"]
+__all__ = ["TipCategory", "Tip", "TipsEngine", "verify_tip_integrity", "_load_registry_tips"]
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
@@ -83,6 +84,85 @@ class Tip:
 
 _static_lock = threading.Lock()
 _STATIC_TIPS_CACHE: list[Tip] | None = None
+
+_registry_lock = threading.Lock()
+_REGISTRY_TIPS_CACHE: list[Tip] | None = None
+_REGISTRY_ASSET_PATH: Final[Path] = (
+    Path(__file__).parent.parent.parent / "config" / "tip_registry.json"
+)
+
+
+def verify_tip_integrity(content: str, expected_hash: str) -> bool:
+    """Verifies that the content matches its cryptographic SHA-256 signature."""
+    normalized = unicodedata.normalize("NFC", content).strip()
+    calculated = hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+    return calculated == expected_hash
+
+
+def _load_registry_tips() -> list[Tip]:
+    """Loads and cryptographically verifies tips from config/tip_registry.json.
+    Purges any tip that fails signature check. Thread-safe."""
+    global _REGISTRY_TIPS_CACHE  # noqa: PLW0603
+
+    if _REGISTRY_TIPS_CACHE is not None:
+        return _REGISTRY_TIPS_CACHE
+
+    with _registry_lock:
+        if _REGISTRY_TIPS_CACHE is not None:
+            return _REGISTRY_TIPS_CACHE
+
+        registry_path = _REGISTRY_ASSET_PATH
+        if not registry_path.exists():
+            logger.debug("TIPS: tip_registry.json not found at %s", registry_path)
+            _REGISTRY_TIPS_CACHE = []
+            return []
+
+        try:
+            raw_data = json.loads(registry_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError) as exc:
+            logger.critical("TIPS: Failed to load tip registry: %s", exc)
+            _REGISTRY_TIPS_CACHE = []
+            return []
+
+        tips: list[Tip] = []
+        for raw in raw_data:
+            tip_id = raw.get("id")
+            content = raw.get("content")
+            cat_name = raw.get("category", "security").lower()
+            expected_hash = raw.get("hash")
+
+            if not tip_id or not content or not expected_hash:
+                logger.warning("TIPS: Skipping malformed registry tip: %s", raw)
+                continue
+
+            # Cryptographic Guard: Verify Tip Integrity (Fail-Secure)
+            if not verify_tip_integrity(content, expected_hash):
+                logger.critical(
+                    "TIPS: LEY Ω₉ VIOLATION - Cryptographic integrity check "
+                    "FAILED for tip %s! Purging compromised tip.",
+                    tip_id,
+                )
+                continue
+
+            try:
+                category = TipCategory(cat_name)
+            except ValueError:
+                category = TipCategory.SECURITY
+
+            tips.append(
+                Tip(
+                    id=tip_id,
+                    content=content,
+                    category=category,
+                    lang="en",
+                    source="dynamic",
+                    project=raw.get("anchor"),
+                )
+            )
+
+        _REGISTRY_TIPS_CACHE = tips
+        logger.debug("TIPS: Loaded %d cryptographically verified tips from registry", len(tips))
+        return _REGISTRY_TIPS_CACHE
 
 
 def _load_static_tips() -> list[Tip]:
@@ -197,9 +277,11 @@ class TipsEngine:
 
         target_lang = lang or self.lang
         static_tips = _load_static_tips()
-        pool = [t for t in static_tips if t.lang == target_lang]
+        registry_tips = _load_registry_tips()
+
+        pool = [t for t in static_tips + registry_tips if t.lang == target_lang]
         if not pool and target_lang != "en":
-            pool = [t for t in static_tips if t.lang == "en"]
+            pool = [t for t in static_tips + registry_tips if t.lang == "en"]
 
         if not pool:
             raise ValueError(f"No static tips available for lang='{target_lang}'")
@@ -275,23 +357,29 @@ class TipsEngine:
         """Get combined static + dynamic tip pool filtered by language."""
         target_lang = lang or self.lang
         static_tips = _load_static_tips()
+        registry_tips = _load_registry_tips()
 
         # Filter static pool by language
         static_pool = [t for t in static_tips if t.lang == target_lang]
+        registry_pool = [t for t in registry_tips if t.lang == target_lang]
 
         # Fallback to English if no tips in requested language
         if not static_pool and target_lang != "en":
             static_pool = [t for t in static_tips if t.lang == "en"]
+        if not registry_pool and target_lang != "en":
+            registry_pool = [t for t in registry_tips if t.lang == "en"]
+
+        combined_pool = static_pool + registry_pool
 
         if not self._include_dynamic:
-            return static_pool
+            return combined_pool
 
         now = time.monotonic()
         if now - self._cache_ts > self._cache_ttl:
             await self._refresh_dynamic()
             self._cache_ts = now
 
-        return static_pool + self._dynamic_cache
+        return combined_pool + self._dynamic_cache
 
     async def _refresh_dynamic(self) -> None:
         """Mine CORTEX memory for dynamic tips."""
@@ -372,4 +460,7 @@ class TipsEngine:
 
     def invalidate_cache(self) -> None:
         """Force re-mining dynamic tips on next access."""
+        global _REGISTRY_TIPS_CACHE
+        with _registry_lock:
+            _REGISTRY_TIPS_CACHE = None
         self._cache_ts = 0.0

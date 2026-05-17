@@ -5,7 +5,6 @@ import json
 import asyncio
 import subprocess
 from datetime import datetime
-from typing import List, Dict
 
 # Configuración Termodinámica
 BASE_DIR = os.path.expanduser("~/Cortex-Persist/engine-c5")
@@ -25,7 +24,7 @@ def update_ledger(target: str, status: str, details: str = "") -> None:
         try:
             with open(LEDGER_PATH) as f:
                 ledger = json.load(f)
-        except:
+        except Exception:
             ledger = {}
 
     ledger[target] = {"last_seen": datetime.now().isoformat(), "status": status, "details": details}

@@ -4,7 +4,7 @@ import json
 import asyncio
 import urllib.request
 import urllib.error
-from typing import List, Dict, Optional
+from typing import Optional
 from datetime import datetime
 import subprocess
 
@@ -41,7 +41,7 @@ def clone_and_fracture(repo_url: str, target_name: str) -> bool:
         try:
             subprocess.run(["git", "pull"], cwd=target_dir, capture_output=True)
             return True
-        except:
+        except Exception:
             return True
 
     log(f"Extrayendo repositorio {target_name} ({repo_url})...", "CLONE")

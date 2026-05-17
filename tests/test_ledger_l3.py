@@ -214,3 +214,85 @@ class TestVerifyChain:
         assert result["status"] == "CORRUPT"
         assert result["integrity_score"] < 1.0
         assert any("TAMPER" in f for f in result["findings"])
+
+
+class TestLedgerCompactionAndAutoManagement:
+    """Tests for ledger compaction and the auto management daemon."""
+
+    @pytest.mark.asyncio
+    async def test_compact_ledger(self, ledger, tmp_path):
+        tenant = "compaction_tenant"
+        # 1. Append 15 events
+        for i in range(15):
+            event = _make_event(content=f"event {i}", tenant_id=tenant)
+            await ledger.append_event(event)
+
+        # Confirm 15 events
+        count = await ledger.count(tenant)
+        assert count == 15
+
+        # 2. Compact, retaining only 5 events
+        archive_file = tmp_path / "cortex_archive.db"
+        archived_count = await ledger.compact_ledger(
+            tenant_id=tenant, retain_limit=5, archive_path=str(archive_file)
+        )
+
+        assert archived_count == 10
+
+        # Primary ledger should have exactly 5 events left
+        new_count = await ledger.count(tenant)
+        assert new_count == 5
+
+        # 3. Archive ledger should contain the 10 pruned events
+        async with aiosqlite.connect(str(archive_file)) as archive_conn:
+            cursor = await archive_conn.execute("SELECT COUNT(*) FROM memory_events")
+            archive_db_count = (await cursor.fetchone())[0]
+            assert archive_db_count == 10
+
+        # 4. Verify chain integrity on compacted ledger
+        result = await ledger.verify_chain(tenant)
+        assert result["status"] == "VALID"
+        assert result["events_audited"] == 5
+        # It should detect compacted start
+        assert any("COMPACTED_CHAIN_START" in f for f in result["findings"])
+
+    @pytest.mark.asyncio
+    async def test_auto_management_daemon(self, tmp_path):
+        import asyncio
+        from cortex.memory.auto_management import LedgerAutoManagementDaemon
+
+        db_file = tmp_path / "cortex_temp.db"
+        archive_file = tmp_path / "cortex_temp_archive.db"
+
+        async with aiosqlite.connect(str(db_file)) as conn:
+            ledger = EventLedgerL3(conn)
+            await ledger.ensure_table()
+
+            tenant = "daemon_tenant"
+            # Append some events
+            for i in range(12):
+                event = _make_event(content=f"event {i}", tenant_id=tenant)
+                await ledger.append_event(event)
+
+            daemon = LedgerAutoManagementDaemon(
+                ledger=ledger,
+                tenant_id=tenant,
+                max_db_size_mb=0.000001,  # Set ultra low limit to trigger compaction
+                retain_limit=4,
+                archive_path=str(archive_file),
+                check_interval_seconds=1,
+                db_path=str(db_file),
+            )
+
+            # Manually trigger a check to verify compaction
+            current_size = daemon.get_db_size_mb()
+            assert current_size > 0.0
+
+            # Start daemon and wait briefly
+            daemon.start()
+            await asyncio.sleep(1.5)
+            daemon.stop()
+
+            # The ledger should have been compacted to 4 events
+            count = await ledger.count(tenant)
+            assert count == 4

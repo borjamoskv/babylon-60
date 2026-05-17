@@ -1,0 +1,23 @@
+[
+  {
+    "id": "STE-001",
+    "category": "Security",
+    "content": "Al inicializar el tip_registry.json, añade un campo hash (SHA-256) del contenido del tip. Esto permitirá al TipEngine verificar la integridad de la píldora de inteligencia antes de su entrega, previniendo la inyección de desinformación por procesos externos o agentes comprometidos",
+    "anchor": "local",
+    "hash": "8a585d524933c7283182e18eebd6b72b7584e37c5dc3a0181d1907fba3f22f02"
+  },
+  {
+    "id": "STE-002",
+    "category": "Security",
+    "content": "Al realizar verificaciones de hash en sistemas de orquestación, asegúrate de normalizar el encoding del texto (ej. UTF-8 NFC) y eliminar espacios en blanco redundantes antes de calcular el hash. Diferencias invisibles en la codificación pueden romper la verificación y generar falsos negativos en el control de integridad.",
+    "anchor": "local",
+    "hash": "55f09c766e7f0a933c2dfb473c29799529959ca184931ed2e31f78eb9557d81c"
+  },
+  {
+    "id": "STE-003",
+    "category": "Architecture",
+    "content": "Para lograr que revm (ahora PID 1) hable con el CORTEX State Manager que vive en el host macOS, no uses TCP/IP. Inyecta un VSOCK (Virtio Socket) en el archivo de configuración JSON de Firecracker. VSOCK permite que el huésped (revm) y el anfitrión (CORTEX) lean/escriban en el mismo bloque de memoria compartida, logrando transferencias de calldata en microsegundos, emulando la velocidad del bus PCIe.",
+    "anchor": "local",
+    "hash": "255fafda4399bbbba75d0e6e2483d51c5665a843052189f91a995f52a3651537"
+  }
+]

@@ -4,7 +4,7 @@ import urllib.error
 import json
 import time
 import os
-from typing import Any, Dict
+from typing import Any
 from datetime import datetime
 
 
@@ -45,7 +45,7 @@ def execute_radar() -> None:
                 for issue in issues:
                     title = issue.get("title", "")
                     url = issue.get("html_url", "")
-                    labels = [l.get("name") for l in issue.get("labels", [])]
+                    labels = [lbl.get("name") for lbl in issue.get("labels", [])]
                     bounties.append(
                         {
                             "title": title,
