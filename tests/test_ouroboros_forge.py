@@ -19,15 +19,27 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
 
     async def test_audit_cycle(self):
         """Standard Audit Cycle on mock contract."""
+        import asyncio
+        from unittest.mock import patch, MagicMock
+
         logger = logging.getLogger("cortex.ouroboros.test")
         logger.info("Starting Ouroboros-1 Verification...")
 
-        # This will clone and audit
-        try:
-            await self.engine.run_audit()
-            logger.info("Audit Cycle 1/1 verified.")
-        except Exception as e:
-            self.fail(f"Ouroboros Engine Crashed: {str(e)}")
+        # Mock OS and subprocess interactions to avoid dependency on "forge" and network
+        with patch("os.system") as mock_system, \
+             patch("asyncio.create_subprocess_exec") as mock_exec, \
+             patch.object(self.engine, "clone_target", new_callable=unittest.mock.AsyncMock):
+
+            mock_process = MagicMock()
+            mock_process.returncode = 0
+            mock_process.communicate = unittest.mock.AsyncMock(return_value=(b"Success", b""))
+            mock_exec.return_value = mock_process
+
+            try:
+                await self.engine.run_audit()
+                logger.info("Audit Cycle 1/1 verified.")
+            except Exception as e:
+                self.fail(f"Ouroboros Engine Crashed: {str(e)}")
 
     async def test_signal_emission(self):
         """Verify SignalBus emits audit findings correctly."""
