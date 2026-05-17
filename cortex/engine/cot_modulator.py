@@ -11,6 +11,28 @@ class SovereignModulator:
     def __init__(self, ledger_path: str = None):
         # Default to the workspace ledger if not provided
         self.ledger_path = ledger_path or "bounty_output/sovereign_ledger.jsonl"
+        self._jit_cache = None  # O(1) JIT-memory invariant
+
+    def _hydrate_cache(self):
+        """Hydrates the O(1) JIT-memory cache from the ledger file to annihilate CPU entropy."""
+        if self._jit_cache is not None:
+            return
+
+        self._jit_cache = {}
+        if not os.path.exists(self.ledger_path):
+            return
+
+        try:
+            with open(self.ledger_path) as f:
+                for line in f:
+                    if not line.strip():
+                        continue
+                    entry = json.loads(line)
+                    tid = entry.get("target_id")
+                    if tid:
+                        self._jit_cache[tid] = entry
+        except (OSError, json.JSONDecodeError):
+            pass
 
     def should_use_cot(self, target_id: str = None) -> bool:
         """
@@ -24,22 +46,13 @@ class SovereignModulator:
         if not os.path.exists(self.ledger_path):
             return False  # O(1) by default if no history is available
 
-        # Truth-check: Scan ledger for previous friction (Unverified/High-Risk entries)
-        try:
-            with open(self.ledger_path) as f:
-                for line in f:
-                    if not line.strip():
-                        continue
-                    entry = json.loads(line)
-                    if entry.get("target_id") == target_id:
-                        # Logic: If max_bounty is high and verified_count is 0, it's high friction
-                        if (
-                            entry.get("verified_count", 0) == 0
-                            and entry.get("max_bounty_usd", 0) > 100000
-                        ):
-                            return True  # Force CoT: Target is high-value but unverified
-        except (OSError, json.JSONDecodeError):
-            return False
+        self._hydrate_cache()
+
+        # Truth-check: O(1) lookup via JIT-memory cache
+        entry = self._jit_cache.get(target_id)
+        if entry:
+            if entry.get("verified_count", 0) == 0 and entry.get("max_bounty_usd", 0) > 100000:
+                return True  # Force CoT: Target is high-value but unverified
 
         return False
 
