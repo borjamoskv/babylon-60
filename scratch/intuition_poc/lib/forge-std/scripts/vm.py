@@ -490,7 +490,7 @@ class CheatcodesPrinter:
             else:
                 raise AssertionError(f"unknown item {item}")
 
-    def p_prelude(self, contract: Optional[Cheatcodes] = None):
+    def p_prelude(self, contract: Cheatcodes | None = None):
         self._p_str(f"// SPDX-License-Identifier: {self.spdx_identifier}")
         self._p_nl()
 

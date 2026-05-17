@@ -38,9 +38,10 @@ async def main():
                 role="assistant",
                 session_id="test_session",
                 content=f"Large content payload to increase size... {'x' * 5000}",
+                token_count=100,
                 metadata={"index": i}
             )
-            await l3.append(event)
+            await l3.append_event(event)
         
         # Check size before wait
         size_before = db_path.stat().st_size
