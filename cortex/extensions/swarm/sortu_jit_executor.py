@@ -2,7 +2,7 @@ import ast
 import asyncio
 import logging
 import time
-from typing import Any
+from typing import Any, Optional
 
 logger = logging.getLogger("cortex.autodidact.sandbox")
 logging.basicConfig(level=logging.INFO)
@@ -98,14 +98,48 @@ def _worker(source_code: str, global_ctx: dict, result_dict: dict):
         result_dict["error"] = str(e)
 
 
-async def run_jit_sandbox(source_code: str, timeout_ms: int = 50, global_ctx: dict = None) -> Any:
+async def run_jit_sandbox(
+    source_code: str, timeout_ms: int = 50, global_ctx: Optional[dict] = None
+) -> Any:
     """
     Executes Python AST in a 50ms bounded memory-only sandbox.
-    Uses multiprocessing to guarantee true OS-level termination and bypass GIL deadlocks.
+    Uses dynamic Rust JIT compilation for direct-silicon acceleration when possible,
+    falling back to multiprocessing Python sandboxing to protect the main node.
     """
     ctx = global_ctx or {}
     start_time = time.perf_counter()
 
+    # 1. Direct-Silicon JIT-Rust Compilation & Execution Try
+    try:
+        from cortex.extensions.swarm.sortu_rust_compiler import compile_and_run_python_ast
+        success, rust_res = compile_and_run_python_ast(source_code, ctx)
+        if success:
+            elapsed = (time.perf_counter() - start_time) * 1000
+            logger.info(
+                "⚡ [SORTU-JIT] [RUST-SILICON] Compiled & Executed. "
+                "Yield Time: %.2fms. Output: %s",
+                elapsed,
+                rust_res,
+            )
+            return {
+                "status": "success",
+                "result": {"locals": ["result"]},
+                "time_ms": elapsed,
+            }
+        else:
+            logger.info(
+                "⚡ [SORTU-JIT] [FALLBACK-PYTHON] JIT-Rust skipped/failed: %s. "
+                "Reverting to sandbox.",
+                rust_res,
+            )
+    except Exception as e:
+        logger.warning(
+            "⚡ [SORTU-JIT] [RUST-ERROR] Failure compiling/executing Rust JIT: %s. "
+            "Reverting to safe sandbox.",
+            e,
+        )
+
+    # 2. Safe Python VM Sandbox Fallback
     import multiprocessing
 
     manager = multiprocessing.Manager()
@@ -131,7 +165,8 @@ async def run_jit_sandbox(source_code: str, timeout_ms: int = 50, global_ctx: di
 
         elapsed = (time.perf_counter() - start_time) * 1000
         logger.error(
-            "⚡ [SORTU-JIT] Thermodynamic Timeout triggered (%.2fms). Process terminated via SIGKILL.",
+            "⚡ [SORTU-JIT] Thermodynamic Timeout triggered (%.2fms). "
+            "Process terminated via SIGKILL.",
             elapsed,
         )
         raise JITTimeoutException("Execution exceeded thermodynamic bounds (50ms)")
@@ -139,7 +174,10 @@ async def run_jit_sandbox(source_code: str, timeout_ms: int = 50, global_ctx: di
     elapsed = (time.perf_counter() - start_time) * 1000
 
     if dict(result_dict).get("status") == "success":
-        logger.info("⚡ [SORTU-JIT] Sovereign AST execution complete. Yield Time: %.2fms", elapsed)
+        logger.info(
+            "⚡ [SORTU-JIT] Sovereign AST execution complete. Yield Time: %.2fms",
+            elapsed,
+        )
         return {
             "status": "success",
             "result": {"locals": result_dict["locals"]},
