@@ -274,3 +274,7 @@ nexus-dashboard/.next/
 
 # Rust build artifacts
 engine-rs/target/
+
+# Solidity build artifacts
+er-omega-runtime/ethena-strike/out/
+er-omega-runtime/ethena-strike/cache/

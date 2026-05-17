@@ -179,3 +179,4 @@ reportPrivateImportUsage = "none"
 
 # OUROBOROS CHAOS INJECTION
 malicious_package = '9.9.9'
+

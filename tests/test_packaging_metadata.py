@@ -53,7 +53,13 @@ def test_heavy_dependencies_live_in_optional_extras() -> None:
         "markdownify",
         "watchdog",
     }
-    assert _dependency_names(extras["daemon"]) == {"aiofiles", "aiohttp", "arq", "watchdog"}
+    assert _dependency_names(extras["daemon"]) == {
+        "aiofiles",
+        "aiohttp",
+        "arq",
+        "watchdog",
+        "psutil",
+    }
     assert _dependency_names(extras["platform"]) >= {"pyobjc-core", "pyobjc-framework-Cocoa"}
     assert _dependency_names(extras["authoring"]) == {"PyYAML"}
     assert extras["all"] == [
