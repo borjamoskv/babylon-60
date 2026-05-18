@@ -1,0 +1,45 @@
+[package]
+name = "cortex-core"
+version = "0.1.0"
+edition = "2021"
+description = "CORTEX Persist — Immutable Core (Rust substrate for cryptographic trust)"
+license = "Apache-2.0"
+authors = ["borjamoskv"]
+
+[lib]
+name = "cortex_core"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# PyO3 — Python FFI bridge
+pyo3 = { version = "0.24", features = ["extension-module"] }
+
+# Cryptography — Zero-copy, constant-time
+sha2 = "0.10"
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+aes-gcm = "0.10"
+hkdf = "0.12"
+rand = "0.8"
+
+# Serialization — Canonical JSON
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Base64 encoding (for key/signature transport)
+base64 = "0.22"
+
+# Hex encoding (for hash output)
+hex = "0.4"
+
+[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "core_bench"
+harness = false
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
