@@ -1,5 +1,3 @@
-import os
-
 import pytest
 
 from cortex.ledger.models import ActionResult, ActionTarget, LedgerEvent
@@ -10,13 +8,8 @@ from cortex.ledger.writer import LedgerWriter
 
 
 @pytest.fixture
-def test_db():
-    db_path = "test_ledger_checkpointing.db"
-    if os.path.exists(db_path):
-        os.remove(db_path)
-    yield db_path
-    if os.path.exists(db_path):
-        os.remove(db_path)
+def test_db(tmp_path):
+    return tmp_path / "test_ledger_checkpointing.db"
 
 
 def test_merkle_checkpoint_creation(test_db):

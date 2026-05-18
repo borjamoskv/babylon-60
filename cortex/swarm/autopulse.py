@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 import os
+import tempfile
 
 from cortex.config import DB_PATH
 from cortex.extensions.signals.bus import AsyncSignalBus
@@ -9,8 +10,10 @@ from cortex.extensions.signals.bus import AsyncSignalBus
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("cortex.swarm.autopulse")
 
-SWARM_QUEUE_FILE = "/tmp/cortex_swarm_queue.json"
-STATE_FILE = "/tmp/cortex_state.json"
+_CORTEX_TMP = os.path.join(tempfile.gettempdir(), "cortex")
+os.makedirs(_CORTEX_TMP, exist_ok=True)
+SWARM_QUEUE_FILE = os.path.join(_CORTEX_TMP, "cortex_swarm_queue.json")
+STATE_FILE = os.path.join(_CORTEX_TMP, "cortex_state.json")
 
 
 async def process_queue():
@@ -44,7 +47,7 @@ async def process_queue():
 
                     # Initialize massively parallel zero-copy 10k nodes
                     legion = TensorGlialLegion(
-                        num_agents=10000, d_dim=10000, file_path="/tmp/tensor_legion.vsa_mmap"
+                        num_agents=10000, d_dim=10000, file_path=os.path.join(_CORTEX_TMP, "tensor_legion.vsa_mmap")
                     )
 
                     # Apply biological decay (Fading Memory)

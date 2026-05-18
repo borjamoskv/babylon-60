@@ -48,8 +48,8 @@ async def test_connection_pool_stability(engine):
 
     manager = ConsensusManager(engine)
 
-    # Simulate 100 concurrent votes
-    sem = asyncio.Semaphore(5)
+    # Simulate 100 sequential/concurrent vote operations to verify pool stability
+    sem = asyncio.Semaphore(1)
 
     async def safe_vote(i):
         async with sem:

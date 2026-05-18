@@ -198,7 +198,7 @@ class CortexMetrics:
                 COUNT(*) as count
             FROM facts
             GROUP BY domain_name, fact_type
-        """
+        """  # noqa: S608
 
         for row in conn.execute(query).fetchall():
             dname = row["domain_name"]
@@ -257,7 +257,7 @@ class CortexMetrics:
             FROM llm_telemetry
             WHERE timestamp > {hour_ago}
             GROUP BY domain_name
-        """
+        """  # noqa: S608
         for row in conn.execute(query_llm).fetchall():
             dname = row["domain_name"]
             if dname == "OTHER":
