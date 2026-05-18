@@ -663,4 +663,3 @@ class SovereignLedger:
         return await self.record_transaction_async(
             project="cortex-guard", action="GUARD_VERDICT", detail=detail, tenant_id=tenant_id
         )
-
