@@ -200,11 +200,17 @@ async def ask_cortex(
             max_tokens=req.max_tokens,
             intent=IntentProfile.REASONING,
         )
-    except (OSError, RuntimeError) as e:
+    except Exception as e:
+        err_str = str(e).lower()
+        if "503" in err_str or "capacity" in err_str or "exhausted" in err_str:
+            return JSONResponse(
+                status_code=503,
+                content={"detail": "All LLM capacity exhausted. Please try again later."},
+            )
         logger.error("LLM completion failed: %s", e)
         return JSONResponse(
             status_code=502,
-            content={"detail": "LLM provider error. Check server logs."},
+            content={"detail": f"LLM provider error: {e}"},
         )
 
     if answer is None:
@@ -297,9 +303,13 @@ async def ask_stream(
                 intent=IntentProfile.REASONING,
             ):
                 yield f"data: {json.dumps({'type': 'token', 'data': chunk})}\n\n"
-        except (OSError, RuntimeError, ValueError) as e:
+        except Exception as e:
             logger.error("Streaming failed: %s", e)
-            err_msg = "An internal streaming error occurred."
+            err_str = str(e).lower()
+            if "503" in err_str or "capacity" in err_str or "exhausted" in err_str:
+                err_msg = "All LLM capacity exhausted. Please try again later."
+            else:
+                err_msg = f"LLM provider error: {e}"
             yield f"data: {json.dumps({'type': 'error', 'data': err_msg})}\n\n"
 
         yield "data: [DONE]\n\n"

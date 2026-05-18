@@ -183,16 +183,19 @@ class CognitiveHandoff:
             )
 
         # ── Step 3: Escalate to Opus (premium) if needed ─────────────
-        needs_premium = audit.verdict == "UNCERTAIN" or self._involves_axiomatics(belief, ctx)
+        is_axiomatic = self._involves_axiomatics(belief, ctx)
+        needs_premium = audit.verdict == "UNCERTAIN" or is_axiomatic
 
         if needs_premium:
             self._escalation_count += 1
             logger.info(
                 "Escalating to Opus premium audit: verdict=%s, axiomatic=%s",
                 audit.verdict,
-                self._involves_axiomatics(belief, ctx),
+                is_axiomatic,
             )
-            premium = await self._auditor_premium_verify(belief, ctx, audit)
+            premium = await self._auditor_premium_verify(
+                belief, ctx, audit, is_axiomatic=is_axiomatic
+            )
             total_tokens += premium.tokens_used
 
             if premium.has_contradiction:
@@ -326,6 +329,7 @@ class CognitiveHandoff:
         belief: BeliefObject,
         context: list[BeliefObject],
         prior_audit: _AuditResult,
+        is_axiomatic: bool = False,
     ) -> _AuditResult:
         """Step 3: Premium audit via Auditor Premium (Claude Opus 4.6).
 
@@ -361,8 +365,8 @@ class CognitiveHandoff:
             ],
             intent=IntentProfile.BELIEF_AUDIT,
             # Opus does not have a native 'thinking' parameter like DeepSeek/Gemini,
-            # but setting DEEP_THINK here allows the router to allocate maximum resources.
-            reasoning_mode=ReasoningMode.DEEP_THINK,
+            # but setting ULTRA_THINK enforces frontier-tier requirements for P0 audits.
+            reasoning_mode=ReasoningMode.ULTRA_THINK if is_axiomatic else ReasoningMode.DEEP_THINK,
         )
 
         result = await self._router.route(prompt, provider_hint=self._auditor_premium)
