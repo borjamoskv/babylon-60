@@ -92,44 +92,68 @@ async def _execute_cold_purge(
 
     logger.info("🗑️ [CONSOLIDATOR] Cold purge: %d candidates", len(purge_candidates))
 
-    for v in purge_candidates:
+    if not dry_run:
         try:
-            if not dry_run:
-                cursor = db_conn.cursor()
-                # Soft delete: mark as deprecated in metadata
-                cursor.execute(
-                    """
-                    UPDATE facts_meta
-                    SET metadata = json_set(COALESCE(metadata, '{}'),
-                        '$.nightshift_purged', ?,
-                        '$.purge_reason', 'cold_dead_weight',
-                        '$.purge_temperature', ?,
-                        '$.purge_resonance', ?)
-                    WHERE id = ?
-                    """,
-                    (time.time(), v.temperature, v.resonance, v.fact_id),
-                )
-                # Actually remove from vector index for recall hygiene
-                cursor.execute(
-                    "DELETE FROM vec_facts WHERE rowid IN "
-                    "(SELECT rowid FROM facts_meta WHERE id = ?)",
-                    (v.fact_id,),
-                )
-                cursor.execute("DELETE FROM facts_meta WHERE id = ?", (v.fact_id,))
-                db_conn.commit()
+            cursor = db_conn.cursor()
 
+            # Soft delete: mark as deprecated in metadata
+            update_data = [
+                (time.time(), v.temperature, v.resonance, v.fact_id) for v in purge_candidates
+            ]
+            cursor.executemany(
+                """
+                UPDATE facts_meta
+                SET metadata = json_set(COALESCE(metadata, '{}'),
+                    '$.nightshift_purged', ?,
+                    '$.purge_reason', 'cold_dead_weight',
+                    '$.purge_temperature', ?,
+                    '$.purge_resonance', ?)
+                WHERE id = ?
+                """,
+                update_data,
+            )
+
+            # Actually remove from vector index for recall hygiene in chunks
+            candidate_ids = [v.fact_id for v in purge_candidates]
+            chunk_size = 900
+            for i in range(0, len(candidate_ids), chunk_size):
+                chunk = candidate_ids[i : i + chunk_size]
+                placeholders = ",".join("?" for _ in chunk)
+
+                cursor.execute(
+                    f"DELETE FROM vec_facts WHERE rowid IN "
+                    f"(SELECT rowid FROM facts_meta WHERE id IN ({placeholders}))",
+                    chunk,
+                )
+                cursor.execute(
+                    f"DELETE FROM facts_meta WHERE id IN ({placeholders})",
+                    chunk,
+                )
+
+            db_conn.commit()
+
+            for v in purge_candidates:
+                result.purged += 1
+                logger.info(
+                    "🗑️ [PURGE] %s — temp=%.3f, res=%.3f, age=%.0fd",
+                    v.fact_id,
+                    v.temperature,
+                    v.resonance,
+                    v.age_days,
+                )
+        except (sqlite3.Error, ValueError, TypeError) as e:
+            logger.error("🗑️ [PURGE] Batch error during cold purge: %s", e)
+            result.errors += len(purge_candidates)
+    else:
+        for v in purge_candidates:
             result.purged += 1
             logger.info(
-                "🗑️ [PURGE] %s — temp=%.3f, res=%.3f, age=%.0fd%s",
+                "🗑️ [PURGE] %s — temp=%.3f, res=%.3f, age=%.0fd (DRY)",
                 v.fact_id,
                 v.temperature,
                 v.resonance,
                 v.age_days,
-                " (DRY)" if dry_run else "",
             )
-        except (sqlite3.Error, ValueError, TypeError) as e:
-            logger.error("🗑️ [PURGE] Error on %s: %s", v.fact_id, e)
-            result.errors += 1
 
 
 # ── Strategy 2: Semantic Merge ────────────────────────────────────────────
@@ -153,25 +177,32 @@ async def _execute_semantic_merge(
     if len(mergeable) < 2:
         return
 
-    # Load content and embeddings
+    # Load content and embeddings in batches
     try:
+        import asyncio
+
         cursor = db_conn.cursor()
         data: dict[str, dict[str, Any]] = {}
 
-        for v in mergeable:
+        candidate_ids = [v.fact_id for v in mergeable]
+        chunk_size = 900
+
+        for i in range(0, len(candidate_ids), chunk_size):
+            chunk = candidate_ids[i : i + chunk_size]
+            placeholders = ",".join("?" for _ in chunk)
+
             cursor.execute(
-                """
-                SELECT f.content, v.embedding FROM facts_meta f
+                f"""
+                SELECT f.id, f.content, v.embedding FROM facts_meta f
                 JOIN vec_facts v ON f.rowid = v.rowid
-                WHERE f.id = ?
+                WHERE f.id IN ({placeholders})
                 """,
-                (v.fact_id,),
+                chunk,
             )
-            row = cursor.fetchone()
-            if row:
-                data[v.fact_id] = {
-                    "content": row[0],
-                    "embedding": np.frombuffer(row[1], dtype=np.float32),
+            for row in cursor.fetchall():
+                data[row[0]] = {
+                    "content": row[1],
+                    "embedding": np.frombuffer(row[2], dtype=np.float32),
                 }
     except (sqlite3.Error, ValueError, TypeError) as e:
         logger.error("🔗 [MERGE] Failed to load data: %s", e)
@@ -183,6 +214,16 @@ async def _execute_semantic_merge(
     merged_ids: set[str] = set()
     ids = list(data.keys())
 
+    # Vectorized similarity calculation to avoid O(N^2) loops
+    embeddings = np.array([data[i]["embedding"] for i in ids])
+    norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
+    # Avoid division by zero
+    norms[norms < 1e-10] = 1.0
+    normalized_embeddings = embeddings / norms
+
+    similarity_matrix = np.dot(normalized_embeddings, normalized_embeddings.T)
+
+    merge_pairs = []
     for i in range(len(ids)):
         if ids[i] in merged_ids:
             continue
@@ -190,54 +231,84 @@ async def _execute_semantic_merge(
             if ids[j] in merged_ids:
                 continue
 
-            id_a, id_b = ids[i], ids[j]
-            vec_a, vec_b = data[id_a]["embedding"], data[id_b]["embedding"]
-
-            norm_a, norm_b = np.linalg.norm(vec_a), np.linalg.norm(vec_b)
-            if norm_a < 1e-10 or norm_b < 1e-10:
-                continue
-
-            sim = float(np.dot(vec_a, vec_b) / (norm_a * norm_b))
-
+            sim = float(similarity_matrix[i, j])
             if sim >= SEMANTIC_MERGE_THRESHOLD:
-                # Alchemist Merge: Fuse content via LLM
-                logger.info("🔗 [MERGE] Collided: %s (~%.4f) %s", id_a, sim, id_b)
+                merge_pairs.append((ids[i], ids[j], sim))
+                merged_ids.add(ids[i])
+                merged_ids.add(ids[j])
+                break  # Only merge an element once per cycle
 
-                try:
-                    synthesis = await synthesize_crystals(
-                        primary_content=data[id_a]["content"],
-                        secondary_content=data[id_b]["content"],
+    if not merge_pairs:
+        return
+
+    async def process_merge(
+        id_a: str, id_b: str, sim: float
+    ) -> tuple[str, str, str | None, Exception | None]:
+        logger.info("🔗 [MERGE] Collided: %s (~%.4f) %s", id_a, sim, id_b)
+        try:
+            synthesis = await synthesize_crystals(
+                primary_content=data[id_a]["content"],
+                secondary_content=data[id_b]["content"],
+            )
+            new_content = synthesis.get("fused_content", data[id_a]["content"])
+            return id_a, id_b, new_content, None
+        except Exception as e:
+            return id_a, id_b, None, e
+
+    # Concurrently execute LLM synthesis
+    synthesis_results = await asyncio.gather(
+        *[process_merge(id_a, id_b, sim) for id_a, id_b, sim in merge_pairs]
+    )
+
+    if not dry_run:
+        try:
+            updates = []
+            deletes = []
+            for id_a, id_b, new_content, err in synthesis_results:
+                if err is None and new_content is not None:
+                    updates.append((new_content, time.time(), id_a))
+                    deletes.append(id_b)
+
+            if updates:
+                cursor.executemany(
+                    "UPDATE facts_meta SET content = ?, updated_at = ? WHERE id = ?",
+                    updates,
+                )
+
+            if deletes:
+                for i in range(0, len(deletes), chunk_size):
+                    chunk = deletes[i : i + chunk_size]
+                    placeholders = ",".join("?" for _ in chunk)
+
+                    cursor.execute(
+                        f"DELETE FROM vec_facts WHERE rowid IN "
+                        f"(SELECT rowid FROM facts_meta WHERE id IN ({placeholders}))",
+                        chunk,
                     )
-                    new_content = synthesis.get("fused_content", data[id_a]["content"])
-
-                    if not dry_run:
-                        cursor = db_conn.cursor()
-                        # Update primary with fused content
-                        cursor.execute(
-                            "UPDATE facts_meta SET content = ?, updated_at = ? WHERE id = ?",
-                            (new_content, time.time(), id_a),
-                        )
-                        # Delete the secondary
-                        cursor.execute(
-                            "DELETE FROM vec_facts WHERE rowid IN "
-                            "(SELECT rowid FROM facts_meta WHERE id = ?)",
-                            (id_b,),
-                        )
-                        cursor.execute("DELETE FROM facts_meta WHERE id = ?", (id_b,))
-                        db_conn.commit()
-
-                    merged_ids.add(id_b)
-                    result.merged += 1
-                    logger.info(
-                        "🧪 [SYNTHESIS] %s + %s → Unified Crystal%s",
-                        id_a,
-                        id_b,
-                        " (DRY)" if dry_run else "",
+                    cursor.execute(
+                        f"DELETE FROM facts_meta WHERE id IN ({placeholders})",
+                        chunk,
                     )
-                except (sqlite3.Error, ValueError, TypeError, RuntimeError) as e:
-                    logger.error("🔗 [MERGE] Synthesis failed for %s/%s: %s", id_a, id_b, e)
-                    result.errors += 1
-                    continue
+
+            db_conn.commit()
+
+        except (sqlite3.Error, ValueError, TypeError) as e:
+            logger.error("🔗 [MERGE] Batch database update failed: %s", e)
+            result.errors += len(merge_pairs)
+            return
+
+    for id_a, id_b, _new_content, err in synthesis_results:
+        if err is not None:
+            logger.error("🔗 [MERGE] Synthesis failed for %s/%s: %s", id_a, id_b, err)
+            result.errors += 1
+        else:
+            result.merged += 1
+            logger.info(
+                "🧪 [SYNTHESIS] %s + %s → Unified Crystal%s",
+                id_a,
+                id_b,
+                " (DRY)" if dry_run else "",
+            )
 
 
 # ── Strategy 3: Diamond Promotion ─────────────────────────────────────────
@@ -263,27 +334,42 @@ async def _execute_diamond_promotion(
 
     logger.info("💎 [CONSOLIDATOR] Diamond promotion: %d candidates", len(promote_candidates))
 
-    for v in promote_candidates:
+    if not dry_run:
         try:
-            if not dry_run:
-                cursor = db_conn.cursor()
-                cursor.execute(
-                    "UPDATE facts_meta SET is_diamond = 1 WHERE id = ?",
-                    (v.fact_id,),
-                )
-                db_conn.commit()
+            cursor = db_conn.cursor()
+            candidate_ids = [v.fact_id for v in promote_candidates]
+            chunk_size = 900
 
+            for i in range(0, len(candidate_ids), chunk_size):
+                chunk = candidate_ids[i : i + chunk_size]
+                placeholders = ",".join("?" for _ in chunk)
+                cursor.execute(
+                    f"UPDATE facts_meta SET is_diamond = 1 WHERE id IN ({placeholders})",
+                    chunk,
+                )
+
+            db_conn.commit()
+
+            for v in promote_candidates:
+                result.promoted += 1
+                logger.info(
+                    "💎 [PROMOTE] %s → DIAMOND (temp=%.3f, res=%.3f)",
+                    v.fact_id,
+                    v.temperature,
+                    v.resonance,
+                )
+        except (sqlite3.Error, ValueError, TypeError) as e:
+            logger.error("💎 [PROMOTE] Batch error during diamond promotion: %s", e)
+            result.errors += len(promote_candidates)
+    else:
+        for v in promote_candidates:
             result.promoted += 1
             logger.info(
-                "💎 [PROMOTE] %s → DIAMOND (temp=%.3f, res=%.3f)%s",
+                "💎 [PROMOTE] %s → DIAMOND (temp=%.3f, res=%.3f) (DRY)",
                 v.fact_id,
                 v.temperature,
                 v.resonance,
-                " (DRY)" if dry_run else "",
             )
-        except (sqlite3.Error, ValueError, TypeError) as e:
-            logger.error("💎 [PROMOTE] Error on %s: %s", v.fact_id, e)
-            result.errors += 1
 
 
 # ── Public API ────────────────────────────────────────────────────────────
