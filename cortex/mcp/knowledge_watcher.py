@@ -10,6 +10,7 @@ import os
 try:
     from watchdog.events import FileSystemEventHandler
     from watchdog.observers import Observer
+
     WATCHDOG_AVAILABLE = True
 except ImportError:
     FileSystemEventHandler = object  # type: ignore

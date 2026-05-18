@@ -173,6 +173,12 @@ HARDENING_*.md
 cortex_notebooklm_digest.md
 kimi_help.txt
 
+# ── Rust build artifacts ─────────────────────────
+target/
+cortex_mev_base/target/
+engine-rs/target/
+er-omega-runtime/target/
+
 # ── Subprojects (local-only prototypes) ──────────
 agent-science-paper/
 blind-pilot/
