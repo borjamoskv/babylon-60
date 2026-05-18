@@ -86,7 +86,7 @@ class BootPayload:
         return result
 
     def to_markdown(self) -> str:
-        """  # noqa: S608Render as compact markdown for system_prompt injection."""
+        """# noqa: S608Render as compact markdown for system_prompt injection."""
         lines = [
             "# 🧠 CORTEX — Session Boot (Episodic Memory)",
             "",

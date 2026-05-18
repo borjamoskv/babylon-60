@@ -200,8 +200,7 @@ class AsyncCausalGraph:
             """  # noqa: S608
             INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, project, tenant_id)
             VALUES (?, ?, ?, ?, ?, ?)
-            """  # noqa: S608,
-            (fact_id, parent_id, signal_id, edge_type, project, tenant_id),
+            """(fact_id, parent_id, signal_id, edge_type, project, tenant_id),  # noqa: S608,
         )
 
     async def _fact_columns(self) -> set[str]:

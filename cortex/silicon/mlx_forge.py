@@ -30,7 +30,9 @@ def _check_apple_silicon() -> dict:
 
     try:
         r = subprocess.run(
-            ["sysctl", "-n", "machdep.cpu.brand_string"], capture_output=True, text=True  # noqa: S607
+            ["sysctl", "-n", "machdep.cpu.brand_string"],
+            capture_output=True,
+            text=True,  # noqa: S607
         )
         info["chip"] = r.stdout.strip()
         info["is_apple_silicon"] = "Apple" in info["chip"]
