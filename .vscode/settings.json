@@ -1,0 +1,39 @@
+{
+  "cline.apiConfiguration.apiProvider": "openai",
+  "cline.apiConfiguration.openAiBaseUrl": "http://localhost:20128/v1",
+  "cline.apiConfiguration.openAiModelId": "claude-3-5-sonnet-20241022",
+  "cline.apiConfiguration.openAiApiKey": "cortex-9router-local",
+  "files.exclude": {
+    "**/.venv": true,
+    "**/node_modules": true,
+    "**/cortex_rust_src/target": true,
+    "**/__pycache__": true
+  },
+  "search.exclude": {
+    "**/.venv": true,
+    "**/node_modules": true,
+    "**/cortex_rust_src/target": true
+  },
+  "files.watcherExclude": {
+    "**/.venv/**": true,
+    "**/node_modules/**": true,
+    "**/cortex_rust_src/target/**": true
+  },
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    }
+  },
+  "[rust]": {
+    "editor.defaultFormatter": "rust-lang.rust-analyzer",
+    "editor.formatOnSave": true
+  },
+  "rust-analyzer.check.command": "clippy",
+  "rust-analyzer.cargo.buildScripts.enable": true,
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.autoImportCompletions": true,
+  "python.defaultInterpreterPath": ".venv/bin/python"
+}
