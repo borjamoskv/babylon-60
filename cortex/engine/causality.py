@@ -162,7 +162,7 @@ class AsyncCausalGraph:
 
     async def ensure_table(self) -> None:
         await self.conn.execute(
-            """  # noqa: S608
+            """
             CREATE TABLE IF NOT EXISTS causal_edges (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 fact_id INTEGER NOT NULL,
@@ -196,11 +196,13 @@ class AsyncCausalGraph:
         project: str | None = None,
         tenant_id: str = "default",
     ) -> None:
+        # noqa: S608
         await self.conn.execute(
-            """  # noqa: S608
+            """
             INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, project, tenant_id)
             VALUES (?, ?, ?, ?, ?, ?)
-            """(fact_id, parent_id, signal_id, edge_type, project, tenant_id),  # noqa: S608,
+            """,
+            (fact_id, parent_id, signal_id, edge_type, project, tenant_id),
         )
 
     async def _fact_columns(self) -> set[str]:
@@ -517,10 +519,10 @@ class AsyncCausalGraph:
             return
 
         sql = (
-            """  # noqa: S608
+            """
         INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, project, tenant_id)
         VALUES (?, ?, ?, ?, ?, ?)
-        """
+        """  # noqa: S608
             if has_tenant
             else """
         INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, project)
