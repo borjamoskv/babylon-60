@@ -271,7 +271,7 @@ async def _execute_semantic_merge(
 
             if updates:
                 cursor.executemany(
-                    "UPDATE facts_meta SET content = ?, updated_at = ? WHERE id = ?",
+                    "UPDATE facts_meta SET content = ?, timestamp = ? WHERE id = ?",
                     updates,
                 )
 

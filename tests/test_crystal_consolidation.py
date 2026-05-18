@@ -12,11 +12,13 @@ import time
 
 import numpy as np
 import pytest
+from unittest.mock import AsyncMock, patch
 
 from cortex.extensions.swarm.crystal_consolidator import (
     ConsolidationResult,
     _execute_cold_purge,
     _execute_diamond_promotion,
+    _execute_semantic_merge,
     consolidate,
 )
 from cortex.extensions.swarm.crystal_thermometer import (
@@ -435,3 +437,31 @@ class TestFullConsolidation:
         cursor = in_memory_db.cursor()
         cursor.execute("SELECT COUNT(*) FROM facts_meta WHERE id = 'dry-1'")
         assert cursor.fetchone()[0] == 1
+
+# ── Semantic Merge Integration Tests ──────────────────────────────────────
+
+class TestSemanticMerge:
+    @pytest.mark.asyncio
+    @patch("cortex.extensions.swarm.crystal_synthesis.synthesize_crystals", new_callable=AsyncMock)
+    async def test_semantic_merge_identical_crystals(self, mock_synth, in_memory_db) -> None:
+        mock_synth.return_value = {"fused_content": "merged content"}
+
+        _insert_crystal(in_memory_db, "dup-1", "same concept", age_days=30, embedding=[1.0, 0.0, 0.0])
+        _insert_crystal(in_memory_db, "dup-2", "same concept", age_days=30, embedding=[1.0, 0.0, 0.0])
+
+        vitals = [
+            CrystalVitals(fact_id="dup-1", content_preview="same concept", temperature=0.0, resonance=0.05, quadrant="ACTIVE", recommendation="MERGE", age_days=30, recall_count=0, is_diamond=False),
+            CrystalVitals(fact_id="dup-2", content_preview="same concept", temperature=0.0, resonance=0.05, quadrant="ACTIVE", recommendation="MERGE", age_days=30, recall_count=0, is_diamond=False)
+        ]
+
+        result = ConsolidationResult()
+        await _execute_semantic_merge(in_memory_db, vitals, result, dry_run=False)
+
+        assert result.merged == 1
+
+        cursor = in_memory_db.cursor()
+        cursor.execute("SELECT content FROM facts_meta WHERE id = 'dup-1'")
+        assert cursor.fetchone()[0] == "merged content"
+
+        cursor.execute("SELECT COUNT(*) FROM facts_meta WHERE id = 'dup-2'")
+        assert cursor.fetchone()[0] == 0
