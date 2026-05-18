@@ -42,9 +42,28 @@ EXTENSIONS=(
 )
 
 if [ -n "$IDE_CMD" ]; then
+    echo "[CORTEX-BOOTSTRAP] Purgando entropía: desinstalando extensiones no autorizadas..."
+    INSTALLED_EXTS=$($IDE_CMD --list-extensions | tr '[:upper:]' '[:lower:]')
+    
+    for installed in $INSTALLED_EXTS; do
+        is_sovereign=0
+        for ext in "${EXTENSIONS[@]}"; do
+            ext_lower=$(echo "$ext" | tr '[:upper:]' '[:lower:]')
+            if [ "$installed" == "$ext_lower" ]; then
+                is_sovereign=1
+                break
+            fi
+        done
+        
+        if [ $is_sovereign -eq 0 ]; then
+            echo "[-] Eliminando entropía: $installed"
+            $IDE_CMD --uninstall-extension "$installed" >/dev/null 2>&1 || true
+        fi
+    done
+
     echo "[CORTEX-BOOTSTRAP] Instalando 15 extensiones soberanas vía '$IDE_CMD'..."
     for ext in "${EXTENSIONS[@]}"; do
-        $IDE_CMD --install-extension "$ext" --force || echo "[!] Advertencia: Falló instalación de $ext"
+        $IDE_CMD --install-extension "$ext" --force >/dev/null 2>&1 || echo "[!] Advertencia: Falló instalación de $ext"
     done
 fi
 

@@ -163,6 +163,8 @@ ignore = ["E501", "E402", "B008", "W291", "W293", "S", "BLE001", "UP045", "TID25
 [tool.pyright]
 pythonVersion = "3.10"
 typeCheckingMode = "basic"
+venvPath = "."
+venv = ".venv"
 exclude = [
     "**/node_modules",
     "**/__pycache__",
