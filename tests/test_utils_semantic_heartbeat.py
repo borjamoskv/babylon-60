@@ -1,4 +1,5 @@
 """Tests for cortex/utils/semantic_heartbeat.py — 100% coverage."""
+
 from __future__ import annotations
 
 import pytest

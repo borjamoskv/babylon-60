@@ -68,6 +68,7 @@ class SwarmManager:
         """Provision a new isolated worktree."""
         worktree_id = str(uuid.uuid4())[:8]
         import tempfile
+
         state = WorktreeState(worktree_id, branch_name, Path(tempfile.gettempdir()) / "pending")
         ready_event = asyncio.Event()
 

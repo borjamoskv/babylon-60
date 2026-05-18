@@ -1,4 +1,5 @@
 """Tests for cortex/utils/syscall.py — SovereignSys coverage."""
+
 from __future__ import annotations
 
 from pathlib import Path

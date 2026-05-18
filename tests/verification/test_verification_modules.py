@@ -1,4 +1,5 @@
 """Tests for cortex/verification/ — extractor, frontend_oracle, counterexample."""
+
 from __future__ import annotations
 
 import tempfile

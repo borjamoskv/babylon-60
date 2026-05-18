@@ -47,7 +47,9 @@ async def process_queue():
 
                     # Initialize massively parallel zero-copy 10k nodes
                     legion = TensorGlialLegion(
-                        num_agents=10000, d_dim=10000, file_path=os.path.join(_CORTEX_TMP, "tensor_legion.vsa_mmap")
+                        num_agents=10000,
+                        d_dim=10000,
+                        file_path=os.path.join(_CORTEX_TMP, "tensor_legion.vsa_mmap"),
                     )
 
                     # Apply biological decay (Fading Memory)
