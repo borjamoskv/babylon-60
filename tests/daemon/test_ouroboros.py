@@ -41,9 +41,14 @@ class TestOuroborosDaemon:
 
     def test_daemon_init(self):
         """Verify proper initialization of configurations."""
-        daemon = OuroborosDaemon(db_path="/tmp/nonexistent.db", chaos_level=0.8)
+        daemon = OuroborosDaemon(
+            db_path="/tmp/nonexistent.db",
+            chaos_level=0.8,
+            pyproject_path="/tmp/dummy.toml",
+        )
         assert daemon.db_path == "/tmp/nonexistent.db"
         assert daemon.chaos_level == 0.8
+        assert str(daemon.pyproject_path) == "/tmp/dummy.toml"
         assert daemon._is_running is False
 
     def test_daemon_stop(self):
@@ -53,9 +58,11 @@ class TestOuroborosDaemon:
         daemon.stop()
         assert daemon._is_running is False
 
-    async def test_inject_mutation_blocked(self, temp_db: str):
+    async def test_inject_mutation_blocked(self, temp_db: str, tmp_path: Path):
         """Verify that a standard mutation is intercepted by the guard system and cleaned up."""
-        daemon = OuroborosDaemon(db_path=temp_db)
+        dummy_pyproject = tmp_path / "pyproject.toml"
+        dummy_pyproject.write_text("[project]\nname = 'test'\nversion = '1.0.0'\n")
+        daemon = OuroborosDaemon(db_path=temp_db, pyproject_path=dummy_pyproject)
         result = await daemon._inject_mutation()
         assert isinstance(result, dict)
         assert "target" in result
@@ -70,7 +77,11 @@ class TestOuroborosDaemon:
         daemon = OuroborosDaemon(db_path=temp_db, chaos_level=1.0)  # always trigger chaos
 
         mutation_called = False
-        dummy_mutation = {"target": "memory", "vector": "sql_injection", "success": False}
+        dummy_mutation = {
+            "target": "memory",
+            "vector": "sql_injection",
+            "success": False,
+        }
 
         async def mock_inject_mutation():
             nonlocal mutation_called
@@ -97,7 +108,11 @@ class TestOuroborosDaemon:
         daemon = OuroborosDaemon(db_path=temp_db, chaos_level=1.0)
 
         async def mock_inject_mutation():
-            return {"target": "ledger", "vector": "malicious_bypass_vector", "success": True}
+            return {
+                "target": "ledger",
+                "vector": "malicious_bypass_vector",
+                "success": True,
+            }
 
         monkeypatch.setattr(daemon, "_inject_mutation", mock_inject_mutation)
 

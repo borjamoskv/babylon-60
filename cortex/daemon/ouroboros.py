@@ -8,6 +8,7 @@ If an exploit bypasses a guard, it logs a ZERO-DAY event in the SovereignLedger.
 import asyncio
 import logging
 import random
+from pathlib import Path
 from typing import Any
 
 from cortex.ledger.ledger_core import SovereignLedger
@@ -19,9 +20,17 @@ logger = logging.getLogger("cortex.daemon.ouroboros")
 class OuroborosDaemon:
     """Adversarial testing daemon that proactively red-teams the database."""
 
-    def __init__(self, db_path: str, chaos_level: float = 0.5):
+    def __init__(
+        self,
+        db_path: str,
+        chaos_level: float = 0.5,
+        pyproject_path: str | Path | None = None,
+    ):
         self.db_path = db_path
         self.chaos_level = chaos_level
+        self.pyproject_path = (
+            Path(pyproject_path) if pyproject_path is not None else Path("pyproject.toml")
+        )
         self._is_running = False
 
     async def _inject_mutation(self) -> dict[str, Any]:
@@ -29,7 +38,9 @@ class OuroborosDaemon:
         import aiosqlite
 
         mutation = {
-            "target": random.choice(["schema", "tenant_isolation", "ledger", "memory"]),  # noqa: S311
+            "target": random.choice(  # noqa: S311
+                ["schema", "tenant_isolation", "ledger", "memory"]
+            ),
             "vector": random.choice(  # noqa: S311
                 ["negative_value", "sql_injection", "cross_tenant", "null_byte"]
             ),
@@ -45,28 +56,31 @@ class OuroborosDaemon:
                 snapshot_refs = spine.create_snapshot("migration", "ouroboros_attack_cycle")
                 backup_path = snapshot_refs.get("sqlite_backup")
 
-                # Also backup pyproject.toml
-                import shutil
-                from pathlib import Path
-
-                attack_file = Path("pyproject.toml")
+                # Also backup target file
+                attack_file = self.pyproject_path
                 backup_content = None
-                if attack_file.exists():
-                    backup_content = attack_file.read_text()
+                if await asyncio.to_thread(attack_file.exists):
+                    backup_content = await asyncio.to_thread(attack_file.read_text)
 
                 # 2. Emulate an attack by mutating pyproject.toml
                 try:
                     logger.warning(f"[{mutation['vector']}] Mutating pyproject.toml...")
-                    with open(attack_file, "a") as f:
-                        f.write("\n# OUROBOROS CHAOS INJECTION\nmalicious_package = '9.9.9'\n")
+
+                    def append_chaos():
+                        with open(attack_file, "a") as f:
+                            f.write("\n# OUROBOROS CHAOS INJECTION\nmalicious_package = '9.9.9'\n")
+
+                    await asyncio.to_thread(append_chaos)
 
                     # 3. Wait for Guard Daemon to intercept
                     await asyncio.sleep(0.5)
 
                     # Check if it was intercepted
                     cursor = await db.execute(
-                        "SELECT detail FROM transactions WHERE action = 'SECURITY_BREACH' OR action = 'MALICIOUS_OVERRIDE' "
-                        "OR (action = 'GUARD_VERDICT' AND (detail LIKE '%SECURITY_BREACH%' OR detail LIKE '%MALICIOUS_OVERRIDE%')) "
+                        "SELECT detail FROM transactions WHERE action = 'SECURITY_BREACH' "
+                        "OR action = 'MALICIOUS_OVERRIDE' "
+                        "OR (action = 'GUARD_VERDICT' AND (detail LIKE '%SECURITY_BREACH%' "
+                        "OR detail LIKE '%MALICIOUS_OVERRIDE%')) "
                         "ORDER BY id DESC LIMIT 1"
                     )
                     row = await cursor.fetchone()
@@ -86,10 +100,11 @@ class OuroborosDaemon:
 
                 finally:
                     # 4. Always restore state
-                    if backup_content is not None and attack_file.exists():
-                        attack_file.write_text(backup_content)
+                    if backup_content is not None and await asyncio.to_thread(attack_file.exists):
+                        await asyncio.to_thread(attack_file.write_text, backup_content)
                     if backup_path:
-                        # We cannot replace db while connection is open but this is an adversarial test
+                        # We cannot replace db while connection is open
+                        # but this is an adversarial test
                         pass
 
         except Exception as e:
@@ -118,7 +133,10 @@ class OuroborosDaemon:
                             )
                             await ledger.append_verdict(
                                 verdict="ZERO_DAY_DETECTED",
-                                reason=f"Ouroboros succeeded with {result['vector']} on {result['target']}",
+                                reason=(
+                                    f"Ouroboros succeeded with {result['vector']} "
+                                    f"on {result['target']}"
+                                ),
                                 target_path=result["target"],
                                 action_type="SECURITY_BREACH",
                             )

@@ -176,6 +176,22 @@ class FactManager:
         except (OSError, RuntimeError, ValueError) as e:
             logger.warning("V8 Ingestion check failed: %s", e)
 
+        if hasattr(self.engine, "store_engine"):
+            return await self.engine.store_engine._store_impl(
+                conn,  # type: ignore[reportArgumentType]
+                project,
+                content,
+                tenant_id,
+                fact_type,
+                tags,
+                confidence,
+                source,
+                meta,
+                valid_from,
+                commit,
+                tx_id,
+            )
+
         from cortex.engine.store_mixin import StoreMixin
 
         return await StoreMixin._store_impl(
