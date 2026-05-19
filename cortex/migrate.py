@@ -160,7 +160,7 @@ def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
                 stats["errors"].append(f"Session import failed: {e}")
         conn.commit()
     except Exception as e:
-        if 'conn' in locals() and hasattr(conn, "rollback"):
+        if "conn" in locals() and hasattr(conn, "rollback"):
             try:
                 conn.rollback()
             except sqlite3.Error:
@@ -240,13 +240,13 @@ def _migrate_mistakes(engine: CortexEngine, path: Path, stats: dict) -> None:
                 try:
                     mistake = json.loads(line)
                     project = mistake.get("project", "__system__")
-        
+
                     content = (
                         f"ERROR: {mistake.get('error', 'unknown')} | "
                         f"ROOT CAUSE: {mistake.get('root_cause', 'unknown')} | "
                         f"FIX: {mistake.get('fix', 'unknown')}"
                     )
-        
+
                     engine.store_sync(
                         project=project,
                         content=content,
@@ -275,18 +275,22 @@ def _migrate_bridges(engine: CortexEngine, path: Path, stats: dict) -> None:
                     continue
                 try:
                     bridge = json.loads(line)
-        
+
                     content = (
                         f"BRIDGE: {bridge.get('from', '?')} → {bridge.get('to', '?')} | "
                         f"Pattern: {bridge.get('pattern', '?')} | "
                         f"Note: {bridge.get('note', '')}"
                     )
-        
+
                     engine.store_sync(
                         project="__bridges__",
                         content=content,
                         fact_type="bridge",
-                        tags=[bridge.get("from", ""), bridge.get("to", ""), bridge.get("pattern", "")],
+                        tags=[
+                            bridge.get("from", ""),
+                            bridge.get("to", ""),
+                            bridge.get("pattern", ""),
+                        ],
                         confidence="verified",
                         source="migration-v3.1",
                         valid_from=bridge.get("date", None),

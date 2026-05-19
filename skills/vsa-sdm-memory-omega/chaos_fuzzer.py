@@ -365,7 +365,7 @@ def fuzz_dimension_mismatch():
     try:
         v1 = np.ones(1000)
         v2 = np.ones(2000)
-        np.fft.ifft(np.fft.fft(v1) * np.fft.fft(v2)).real
+        _ = np.fft.ifft(np.fft.fft(v1) * np.fft.fft(v2)).real
         report("Mismatched bind", False, "Should have failed")
     except ValueError:
         report("Mismatched bind", True, "ValueError caught")

@@ -1,8 +1,9 @@
 """
 Key Registry for CORTEX-Persist Strict Origin Verification.
 """
+
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Optional
 
 
 @dataclass

@@ -163,11 +163,11 @@ class TensorGlialLegion:
         with open(self.file_path, "rb") as f:
             content = f.read()
             current_hash = hashlib.sha256(content).hexdigest()
-            
+
         if self.last_audit_hash is not None and self.last_audit_hash != current_hash:
             # En un entorno real registraríamos o alertaríamos si la mutación fue inesperada
             pass
-            
+
         self.last_audit_hash = current_hash
         return current_hash
 

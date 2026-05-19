@@ -37,7 +37,7 @@ def benchmark_retrieval():
     t0 = time.perf_counter_ns()
     for _ in range(100):  # 100 queries
         best_sim = -1
-        for k, s in corpus:
+        for k, _s in corpus:
             sim = engine.cosine(query_key, k)
             if sim > best_sim:
                 best_sim = sim

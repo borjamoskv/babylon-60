@@ -125,7 +125,7 @@ def enqueue_swarm_task(agent_name: str, payload: dict):
         with open(SWARM_QUEUE_FILE) as f:
             try:
                 data = json.load(f)
-            except:
+            except Exception:
                 data = {"pending_tasks": []}
 
     data["pending_tasks"].append(

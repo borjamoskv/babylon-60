@@ -171,7 +171,11 @@ class EpistemicGuard:
     @staticmethod
     def _verify_proof(proof: str) -> bool:
         # Implementación de validación de oráculo/blockchain determinista
-        if not proof or len(proof) < 16 or proof.lower() in ("dummy", "test", "simulated", "local_teatro"):
+        if (
+            not proof
+            or len(proof) < 16
+            or proof.lower() in ("dummy", "test", "simulated", "local_teatro")
+        ):
             # Excepción controlada para veredictos internos del sistema
             if proof == "VERDICT_SYSTEM_INTERNAL":
                 return True
