@@ -98,8 +98,9 @@ Reports must split guarantees:
 - `completeness_verified`
 - `truth_verified`
 
-For offline historical exports, `online_freshness_verified` is false. By
-default, `truth_verified` is false.
+For offline historical exports, `online_freshness_verified` is false. Online
+freshness is a live admission guarantee enforced by M5 replay policy, not by the
+offline verifier. By default, `truth_verified` is false.
 
 ## Key Rotation
 
