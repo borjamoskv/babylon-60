@@ -38,6 +38,7 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         except Exception as e:
             self.fail(f"Ouroboros Engine Crashed: {str(e)}")
 
+    @unittest.mock.patch("cortex.config.DB_PATH", ":memory:")
     async def test_signal_emission(self):
         """Verify SignalBus emits audit findings correctly."""
         import sqlite3
@@ -48,6 +49,7 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         # Ensure schema initialization
         conn = sqlite3.connect(DB_PATH)
         _bus = SignalBus(conn)
+        _bus.ensure_table()
 
         # Check if signals exist for 'ouroboros'
         cursor = conn.cursor()
