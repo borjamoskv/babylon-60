@@ -18,6 +18,13 @@ if TYPE_CHECKING:
         verify_event_origin,
     )
     from cortex.ledger.queue import EnrichmentQueue
+    from cortex.ledger.replay import (
+        ReplayAdmissionError,
+        ReplayAdmissionPolicy,
+        ReplayAdmissionResult,
+        replay_request_hash,
+        validate_batch_import_manifest,
+    )
     from cortex.ledger.store import LedgerStore
     from cortex.ledger.verifier import LedgerVerifier
     from cortex.ledger.writer import LedgerWriter
@@ -39,6 +46,11 @@ __all__ = [
     "origin_payload_hash",
     "sign_event_origin",
     "verify_event_origin",
+    "ReplayAdmissionError",
+    "ReplayAdmissionPolicy",
+    "ReplayAdmissionResult",
+    "replay_request_hash",
+    "validate_batch_import_manifest",
 ]
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
@@ -56,6 +68,14 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "origin_payload_hash": ("cortex.ledger.origin", "origin_payload_hash"),
     "sign_event_origin": ("cortex.ledger.origin", "sign_event_origin"),
     "verify_event_origin": ("cortex.ledger.origin", "verify_event_origin"),
+    "ReplayAdmissionError": ("cortex.ledger.replay", "ReplayAdmissionError"),
+    "ReplayAdmissionPolicy": ("cortex.ledger.replay", "ReplayAdmissionPolicy"),
+    "ReplayAdmissionResult": ("cortex.ledger.replay", "ReplayAdmissionResult"),
+    "replay_request_hash": ("cortex.ledger.replay", "replay_request_hash"),
+    "validate_batch_import_manifest": (
+        "cortex.ledger.replay",
+        "validate_batch_import_manifest",
+    ),
 }
 
 

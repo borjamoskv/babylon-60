@@ -18,7 +18,7 @@ when any origin-auth control fails. Rejected events do not create:
 - a consumed nonce or other replay side effect;
 - a downstream semantic enrichment side effect from `LedgerWriter`.
 
-Nonce reservation remains a later replay-admission control. M4 verifies nonce
+Nonce reservation is implemented by M5 replay admission. M4 verifies nonce
 presence in the signed envelope and deliberately performs no durable nonce
 mutation before origin authenticity succeeds.
 
