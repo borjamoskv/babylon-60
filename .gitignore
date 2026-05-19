@@ -80,21 +80,41 @@ file:*
 file:mem_*
 
 # ── Testing & Linting ────────────────────────────
+# Caches & Test Runners
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-reports/
+.hypothesis/
+.tox/
+.nox/
+
+# Coverage
 .coverage
-htmlcov/
+.coverage.*
 coverage.xml
+coverage.json
+htmlcov/
+reports/
+
+# Profiling & Benchmarking
+*.prof
+*.lprof
+.benchmarks/
+
+# Output reports & logs
+pytestdebug.log
 compile_*.txt
 pyright_*.txt
 test_*.txt
 prepush_out*.txt
+
+# Security & Audit Artifacts
 seals_report.json
 bandit_report.json
 audit_report.txt
 audit_results.json
+safety_report.json
+trivy-results.json
 
 # ── OS ────────────────────────────────────────────
 .DS_Store
@@ -277,3 +297,16 @@ xokas-elevator/
 yt-notebooklm-ext/
 auramem/
 nexus-dashboard/.next/
+
+# ── Purged: personal & bounty content ────────────
+bounty/
+bounty_hunt/
+cortex/bounty_hunt/
+scratch/bounty_reports/
+scripts/bounty_hunter.py
+scripts/scratch/test_bounty_operator.py
+engine-c5/cortex_bounty_radar.py
+docs/demo-padres/
+docs/_archived/demo-padres/
+docs/internal/
+docs/_archived/internal/

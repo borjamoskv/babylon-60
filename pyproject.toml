@@ -53,14 +53,11 @@ api = [
 ]
 mcp = [
     "mcp>=1.0",
-    "aiohttp",
-    "beautifulsoup4",
     "markdownify>=0.13",
     "watchdog>=6.0.0",
 ]
 daemon = [
     "aiofiles",
-    "aiohttp",
     "arq",
     "watchdog>=6.0.0",
 ]
@@ -80,9 +77,7 @@ dev = [
     "ruff>=0.11.0",
     "z3-solver>=4.13.0",
 ]
-adk = [
-    "google-adk>=0.5.0",
-]
+adk = []
 toolbox = [
     "toolbox-core>=0.1.0",
 ]
@@ -92,7 +87,6 @@ billing = [
 cloud = [
     "asyncpg>=0.29",
     "redis>=5.0",
-    "qdrant-client>=1.9",
 ]
 trends = [
     "pytrends>=4.9",
@@ -102,9 +96,7 @@ embeddings = [
     "sentence-transformers>=3.0",
     "onnxruntime>=1.17",
 ]
-knowledge = [
-    "chromadb>=1.5.5",
-]
+knowledge = []
 acceleration = [
     "numba>=0.65.0",
 ]

@@ -17,14 +17,6 @@ import urllib.request
 from dataclasses import dataclass, field
 from typing import Any
 
-try:
-    import aiohttp
-
-    _HAS_AIOHTTP = True
-except ImportError:
-    aiohttp = None  # type: ignore[assignment]
-    _HAS_AIOHTTP = False
-
 import httpx
 
 try:
@@ -34,14 +26,6 @@ try:
 except ImportError:
     markdownify = None  # type: ignore[assignment]
     _HAS_MARKDOWNIFY = False
-
-try:
-    from bs4 import BeautifulSoup
-
-    _HAS_BS4 = True
-except ImportError:
-    BeautifulSoup = None  # type: ignore[assignment]
-    _HAS_BS4 = False
 
 try:
     from mcp.server.fastmcp import FastMCP
@@ -98,21 +82,6 @@ async def _fetch_httpx(url: str, timeout: float) -> tuple[str, int]:
         return resp.text, resp.status_code
 
 
-async def _fetch_aiohttp(url: str, timeout: float) -> tuple[str, int]:
-    """Fallback 1: aiohttp — different connection pool and HTTP stack."""
-    if aiohttp is None:
-        raise ImportError("aiohttp not available")
-    client_timeout = aiohttp.ClientTimeout(total=timeout)
-    async with aiohttp.ClientSession(
-        timeout=client_timeout,
-        headers=_HEADERS,
-    ) as session:
-        async with session.get(url, allow_redirects=True) as resp:
-            resp.raise_for_status()
-            text = await resp.text()
-            return text, resp.status
-
-
 async def _fetch_urllib(url: str, timeout: float) -> tuple[str, int]:
     """Fallback 2: stdlib urllib — zero external deps, sync in executor."""
     loop = asyncio.get_running_loop()
@@ -153,7 +122,6 @@ class ResilientFetcher:
     def __init__(self) -> None:
         self._providers: list[_FetchProvider] = [
             _FetchProvider(name="httpx", fetch_fn=_fetch_httpx),
-            _FetchProvider(name="aiohttp", fetch_fn=_fetch_aiohttp),
             _FetchProvider(name="urllib", fetch_fn=_fetch_urllib),
         ]
         self._queue = PulmonesQueue()
@@ -258,33 +226,32 @@ class ResilientFetcher:
 
 def _html_to_markdown(html: str) -> str:
     """Convert HTML to clean markdown, stripping nav/script/style noise."""
-    if not _HAS_BS4 or not _HAS_MARKDOWNIFY:
-        # Fallback: basic tag stripping via regex
-        import re
+    import re
 
-        text = re.sub(
-            r"<(script|style|nav|footer|header|noscript|iframe)[^>]*>.*?</\1>",
-            "",
-            html,
-            flags=re.DOTALL | re.IGNORECASE,
-        )
-        text = re.sub(r"<[^>]+>", " ", text)
-        return re.sub(r"\s+", " ", text).strip()
-
-    assert BeautifulSoup is not None  # guarded by _HAS_BS4 above
-    soup = BeautifulSoup(html, "html.parser")
-
-    # Strip noise elements (Ω₂: reduce entropy)
-    for tag in soup.find_all(["script", "style", "nav", "footer", "header", "noscript", "iframe"]):
-        tag.decompose()
+    # Strip noise elements
+    html_clean = re.sub(
+        r"<(script|style|nav|footer|header|noscript|iframe)[^>]*>.*?</\1>",
+        "",
+        html,
+        flags=re.DOTALL | re.IGNORECASE,
+    )
 
     # Prefer <main> or <article> if present
-    main = soup.find("main") or soup.find("article")
-    target = main if main else soup
+    main_match = re.search(r"<main[^>]*>(.*?)</main>", html_clean, re.DOTALL | re.IGNORECASE)
+    if not main_match:
+        main_match = re.search(
+            r"<article[^>]*>(.*?)</article>", html_clean, re.DOTALL | re.IGNORECASE
+        )
+
+    target_html = main_match.group(1) if main_match else html_clean
+
+    if not _HAS_MARKDOWNIFY:
+        text = re.sub(r"<[^>]+>", " ", target_html)
+        return re.sub(r"\s+", " ", text).strip()
 
     assert markdownify is not None  # guarded by _HAS_MARKDOWNIFY above
     return markdownify.markdownify(
-        str(target),
+        target_html,
         heading_style="ATX",
         strip=["img"],
     ).strip()
@@ -292,18 +259,10 @@ def _html_to_markdown(html: str) -> str:
 
 def _extract_with_selector(html: str, css_selector: str) -> str:
     """Extract content matching a CSS selector, then convert to markdown."""
-    if not _HAS_BS4 or not _HAS_MARKDOWNIFY:
-        return _html_to_markdown(html)
-
-    assert BeautifulSoup is not None  # guarded by _HAS_BS4 above
-    assert markdownify is not None  # guarded by _HAS_MARKDOWNIFY above
-    soup = BeautifulSoup(html, "html.parser")
-    elements = soup.select(css_selector)
-    if not elements:
-        return _html_to_markdown(html)  # Degrade gracefully
-
-    combined = "\n\n".join(str(el) for el in elements)
-    return markdownify.markdownify(combined, heading_style="ATX").strip()
+    logger.warning(
+        "CSS selector extraction requested but bs4 is removed. Degrading to full page extraction."
+    )
+    return _html_to_markdown(html)
 
 
 # ─── Singleton Fetcher ──────────────────────────────────────────────

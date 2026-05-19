@@ -7,13 +7,14 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from cortex.mcp.resilient_gateway import (
-    _HAS_BS4,
     _HAS_MARKDOWNIFY,
     ResilientFetcher,
     _extract_with_selector,
     _html_to_markdown,
 )
 from cortex.utils.pulmones import CircuitBreaker
+
+_HAS_BS4 = False
 
 # ─── Fixtures ────────────────────────────────────────────────────────
 
@@ -81,28 +82,25 @@ class TestPrimarySuccess:
 
 
 class TestFallbackCascade:
-    """When httpx fails with 503, aiohttp takes over."""
+    """When httpx fails with 503, urllib takes over."""
 
     @pytest.mark.asyncio
-    async def test_httpx_503_aiohttp_succeeds(self, fetcher: ResilientFetcher):
+    async def test_httpx_503_urllib_succeeds(self, fetcher: ResilientFetcher):
         mock_httpx = AsyncMock(side_effect=Exception("503 Service Unavailable"))
-        mock_aiohttp = AsyncMock(return_value=(SAMPLE_HTML, 200))
-        mock_urllib = AsyncMock(return_value=("<p>should not call</p>", 200))
+        mock_urllib = AsyncMock(return_value=(SAMPLE_HTML, 200))
 
         _mock_provider_fn(fetcher, "httpx", mock_httpx)
-        _mock_provider_fn(fetcher, "aiohttp", mock_aiohttp)
         _mock_provider_fn(fetcher, "urllib", mock_urllib)
 
         with patch("asyncio.sleep", new_callable=AsyncMock):
             result = await fetcher.fetch("https://example.com")
 
         assert result["status"] == "success"
-        assert result["provider"] == "aiohttp"
+        assert result["provider"] == "urllib"
         assert result["cascade_depth"] == 2
         assert len(result["errors"]) == 1
         assert "503" in result["errors"][0]
-        mock_aiohttp.assert_awaited_once()
-        mock_urllib.assert_not_awaited()
+        mock_urllib.assert_awaited_once()
 
 
 # ─── Test: Full Cascade Exhausted ───────────────────────────────────
@@ -114,7 +112,6 @@ class TestCascadeExhausted:
     @pytest.mark.asyncio
     async def test_all_fail_returns_cascade_exhausted(self, fetcher: ResilientFetcher):
         _mock_provider_fn(fetcher, "httpx", AsyncMock(side_effect=Exception("httpx: refused")))
-        _mock_provider_fn(fetcher, "aiohttp", AsyncMock(side_effect=Exception("aiohttp: DNS fail")))
         _mock_provider_fn(fetcher, "urllib", AsyncMock(side_effect=Exception("urllib: SSL error")))
 
         with patch("asyncio.sleep", new_callable=AsyncMock):
@@ -122,10 +119,9 @@ class TestCascadeExhausted:
 
         assert result["status"] == "cascade_exhausted"
         assert result["content"] is None
-        assert len(result["errors"]) == 3
+        assert len(result["errors"]) == 2
         assert "httpx" in result["errors"][0]
-        assert "aiohttp" in result["errors"][1]
-        assert "urllib" in result["errors"][2]
+        assert "urllib" in result["errors"][1]
 
 
 # ─── Test: Circuit Breaker Skips Failed Provider ────────────────────
@@ -142,10 +138,10 @@ class TestCircuitBreaker:
         assert fetcher._providers[0].circuit_breaker.state == "OPEN"
 
         mock_httpx = AsyncMock(return_value=("<p>must not call</p>", 200))
-        mock_aiohttp = AsyncMock(return_value=(SAMPLE_HTML, 200))
+        mock_urllib = AsyncMock(return_value=(SAMPLE_HTML, 200))
 
         _mock_provider_fn(fetcher, "httpx", mock_httpx)
-        _mock_provider_fn(fetcher, "aiohttp", mock_aiohttp)
+        _mock_provider_fn(fetcher, "urllib", mock_urllib)
 
         with patch("asyncio.sleep", new_callable=AsyncMock):
             result = await fetcher.fetch("https://example.com")
@@ -153,7 +149,7 @@ class TestCircuitBreaker:
         # httpx should NOT have been called (circuit open)
         mock_httpx.assert_not_awaited()
         assert result["status"] == "success"
-        assert result["provider"] == "aiohttp"
+        assert result["provider"] == "urllib"
         assert "circuit open" in result["errors"][0].lower()
 
 
