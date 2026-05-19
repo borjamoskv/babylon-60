@@ -2,10 +2,8 @@
 CORTEX JIT Compiled Skill: Sortu
 Description: JIT skill compiler — Sovereign 500 Cold Forge
 """
-
 import json
 import logging
-
 
 class SortuSkill:
     def __init__(self):
@@ -29,5 +27,5 @@ class SortuSkill:
             "skill": self.name,
             "injected_knowledge_tokens": len(self.instructions.split()),
             "yield_impact": "O(1) Execution",
-            "extracted_payload": payload,
+            "extracted_payload": payload
         }

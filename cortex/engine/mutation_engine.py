@@ -30,9 +30,12 @@ from cortex.extensions.axioms.topological_id import flake_gen
 
 __all__ = ["FactMutationEngine"]
 logger = logging.getLogger("cortex.mutation_engine")
-# Current payload schema version written by MOSKV-1.
 _PAYLOAD_SCHEMA_VERSION = "1"
 _FACT_COLUMNS_CACHE: dict[int, set[str]] = {}
+_METADATA_SQL = {
+    "metadata": ("SELECT metadata FROM facts WHERE id = ?", "metadata = ?"),
+    "meta": ("SELECT meta FROM facts WHERE id = ?", "meta = ?"),
+}
 _ROLLBACK_ERRORS = (
     aiosqlite.Error,
     AssertionError,
@@ -64,7 +67,6 @@ class FactMutationEngine:
     ``entity_events`` and ``facts`` stay perfectly in sync.
     """
 
-    # ── Core API ─────────────────────────────────────────────────────
     async def apply(
         self,
         conn: aiosqlite.Connection,
@@ -172,7 +174,14 @@ class FactMutationEngine:
             return "meta"
         return None
 
-    # ── Projection Layer (MOSKV-1 specific) ──────────────────────────
+    @staticmethod
+    def _metadata_sql(column: str) -> tuple[str, str]:
+        """Return whitelisted metadata SELECT and SET fragments."""
+        try:
+            return _METADATA_SQL[column]
+        except KeyError as exc:
+            raise ValueError(f"Unsupported metadata column: {column}") from exc
+
     async def _project(
         self,
         conn: aiosqlite.Connection,
@@ -470,7 +479,7 @@ class FactMutationEngine:
         metadata_value: str | None = None
         if metadata_column:
             async with conn.execute(
-                f"SELECT {metadata_column} FROM facts WHERE id = ?",
+                self._metadata_sql(metadata_column)[0],
                 (fact_id,),
             ) as cursor:
                 row = await cursor.fetchone()
@@ -515,14 +524,15 @@ class FactMutationEngine:
             set_clauses.append("confidence = ?")
             params.append(confidence)
         if metadata_column and metadata_value is not None:
-            set_clauses.append(f"{metadata_column} = ?")
+            set_clauses.append(self._metadata_sql(metadata_column)[1])
             params.append(metadata_value)
         if "updated_at" in facts_columns:
             set_clauses.append("updated_at = ?")
             params.append(payload.get("taint_timestamp") or datetime.now(timezone.utc).isoformat())
         if not set_clauses:
             return
-        query = f"UPDATE facts SET {', '.join(set_clauses)} WHERE id = ?"
+        # set_clauses are fixed internal strings; values remain parameterized.
+        query = f"UPDATE facts SET {', '.join(set_clauses)} WHERE id = ?"  # noqa: S608
         params.append(fact_id)
         if "tenant_id" in facts_columns:
             query += " AND tenant_id = ?"
@@ -558,7 +568,7 @@ class FactMutationEngine:
             and "parent_id" not in facts_columns
         ):
             async with conn.execute(
-                f"SELECT {metadata_column} FROM facts WHERE id = ?",
+                self._metadata_sql(metadata_column)[0],
                 (fact_id,),
             ) as cursor:
                 row = await cursor.fetchone()
@@ -580,14 +590,15 @@ class FactMutationEngine:
             else:
                 metadata_value = json.dumps({"parent_decision_id": new_parent})
         if metadata_column and metadata_value is not None:
-            set_clauses.append(f"{metadata_column} = ?")
+            set_clauses.append(self._metadata_sql(metadata_column)[1])
             params.append(metadata_value)
         if "updated_at" in facts_columns:
             set_clauses.append("updated_at = ?")
             params.append(payload.get("timestamp") or datetime.now(timezone.utc).isoformat())
         if not set_clauses:
             return
-        query = f"UPDATE facts SET {', '.join(set_clauses)} WHERE id = ?"
+        # set_clauses are fixed internal strings; values remain parameterized.
+        query = f"UPDATE facts SET {', '.join(set_clauses)} WHERE id = ?"  # noqa: S608
         params.append(fact_id)
         if "tenant_id" in facts_columns:
             query += " AND tenant_id = ?"

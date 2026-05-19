@@ -7,6 +7,7 @@ into unified "crystallized" patterns. Transfers causal links (parent_decision_id
 
 from __future__ import annotations
 
+import json
 import logging
 import sqlite3
 from datetime import datetime, timezone
@@ -43,7 +44,7 @@ class MemoryArchaeologist:
         """
         # Initialize memory subsystem (L2) explicitly before accessing
         await self.engine.get_conn()
-        tenant_id = self.engine._resolve_tenant(tenant_id or "default")
+        tenant_id = str(self.engine._resolve_tenant(tenant_id or "default"))
 
         l3_map = self._fetch_active_facts(project, tenant_id)
         if not l3_map:
@@ -216,7 +217,7 @@ class MemoryArchaeologist:
             parent_decision_id=int(primary_parent_id) if primary_parent_id else None,
         )
 
-        placeholders = ",".join("?" for _ in old_ids)
+        old_ids_json = json.dumps(old_ids)
         async with self.engine.session() as conn:
             if any(str(f.get("tenant_id") or "default") != tenant_id for f in cluster_facts):
                 raise ValueError("Archaeology cluster spans multiple tenants")
@@ -237,11 +238,22 @@ class MemoryArchaeologist:
 
             parent_column = await self._parent_column(conn)
             if parent_column:
-                cursor = await conn.execute(
-                    f"SELECT id, tenant_id FROM facts "
-                    f"WHERE {parent_column} IN ({placeholders}) AND tenant_id = ?",
-                    (*old_ids, tenant_id),
-                )
+                if parent_column == "parent_decision_id":
+                    cursor = await conn.execute(
+                        "SELECT id, tenant_id FROM facts "
+                        "WHERE parent_decision_id IN "
+                        "(SELECT CAST(value AS INTEGER) FROM json_each(?)) "
+                        "AND tenant_id = ?",
+                        (old_ids_json, tenant_id),
+                    )
+                else:
+                    cursor = await conn.execute(
+                        "SELECT id, tenant_id FROM facts "
+                        "WHERE parent_id IN "
+                        "(SELECT CAST(value AS INTEGER) FROM json_each(?)) "
+                        "AND tenant_id = ?",
+                        (old_ids_json, tenant_id),
+                    )
                 for child_id, child_tenant_id in await cursor.fetchall():
                     if str(child_id) in old_ids:
                         continue
@@ -259,17 +271,22 @@ class MemoryArchaeologist:
         # Delete tombstoned old ones from L2 to free up vector space
         cl2 = l2_conn.cursor()
         str_old_ids = [str(x) for x in old_ids]
+        str_old_ids_json = json.dumps(str_old_ids)
         if primary_parent_id:
             cl2.execute(
                 "UPDATE facts_meta SET parent_decision_id = ? WHERE id = ?",
                 (primary_parent_id, new_fact_id),
             )
-        cl2.execute(f"DELETE FROM facts_meta WHERE id IN ({placeholders})", str_old_ids)
+        cl2.execute(
+            "DELETE FROM facts_meta WHERE id IN (SELECT CAST(value AS INTEGER) FROM json_each(?))",
+            (str_old_ids_json,),
+        )
         cl2.execute("DELETE FROM vec_facts WHERE rowid NOT IN (SELECT rowid FROM facts_meta)")
         cl2 = l2_conn.cursor()
         cl2.execute(
-            f"UPDATE facts_meta SET parent_decision_id = ? WHERE parent_decision_id IN ({placeholders})",
-            [new_fact_id] + old_ids,
+            "UPDATE facts_meta SET parent_decision_id = ? "
+            "WHERE parent_decision_id IN (SELECT CAST(value AS INTEGER) FROM json_each(?))",
+            (new_fact_id, str_old_ids_json),
         )
         l2_conn.commit()
 

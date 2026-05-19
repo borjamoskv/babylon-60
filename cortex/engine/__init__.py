@@ -8,7 +8,7 @@ import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import aiosqlite
 import sqlite_vec
@@ -36,6 +36,7 @@ from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
 from cortex.engine.mixins.optimization import OptimizationMixin
 from cortex.engine.models import row_to_fact  # noqa: F401 — re-exported
 from cortex.engine.query_mixin import QueryMixin
+from cortex.engine.runtime_managers import RuntimeManagersMixin
 from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
 from cortex.engine.sync_mixin import SyncMixin
@@ -63,6 +64,7 @@ MAX_TAGS_PER_FACT = 20
 
 # We use the unified GuardPipeline for AX-II logic.
 class CortexEngine(
+    RuntimeManagersMixin,
     SearchMixin,
     StoreMixin,
     QueryMixin,
@@ -86,7 +88,7 @@ class CortexEngine(
         # We defer Mixin.__init__ calls to _synthesize_skill for 10k scale.
         self._skills_verified: set[str] = set()
         # Handle argument inversion from tests if necessary (pool, db_path)
-        if hasattr(db_path, "acquire") and not isinstance(db_path, (str, Path)):
+        if hasattr(db_path, "acquire") and not isinstance(db_path, str | Path):
             self._pool = db_path
             self._db_path = Path(str(auto_embed)).expanduser()
             self._auto_embed = True
@@ -154,114 +156,6 @@ class CortexEngine(
             SKILL_MAP[skill_name].__init__(self)
             self._skills_verified.add(skill_name)
             logger.debug("🛡️ [SORTU-JIT] Skill '%s' synthesized.", skill_name)
-
-    @property
-    def facts(self) -> FactManager:  # noqa: F821
-        if self._facts is None:
-            from cortex.facts.manager import FactManager
-
-            self._facts = FactManager(self)  # type: ignore
-        return self._facts
-
-    @facts.setter
-    def facts(self, value: FactManager) -> None:  # noqa: F821
-        self._facts = value
-
-    @property
-    def embeddings(self) -> EmbeddingManager:
-        if self._embeddings is None:
-            from cortex.embeddings.manager import EmbeddingManager
-
-            self._embeddings = EmbeddingManager(self)
-        return self._embeddings
-
-    @embeddings.setter
-    def embeddings(self, value: EmbeddingManager) -> None:
-        self._embeddings = value
-
-    @property
-    def consensus(self) -> ConsensusManager:
-        if self._consensus is None:
-            from cortex.consensus.manager import ConsensusManager
-
-            self._consensus = ConsensusManager(self)
-        return self._consensus
-
-    @consensus.setter
-    def consensus(self, value: ConsensusManager) -> None:
-        self._consensus = value
-
-    @property
-    def lock_sovereign(self) -> SovereignLock:
-        if self._lock_sovereign is None:
-            from cortex.engine.lock import SovereignLock
-
-            self._lock_sovereign = SovereignLock(self)
-        return self._lock_sovereign
-
-    @lock_sovereign.setter
-    def lock_sovereign(self, value: SovereignLock) -> None:
-        self._lock_sovereign = value
-
-    @property
-    def auth(self) -> ByzantineAuthLayer:  # noqa: F821
-        if self._auth is None:
-            from cortex.engine.auth import ByzantineAuthLayer
-
-            self._auth = ByzantineAuthLayer()
-        return self._auth
-
-    @auth.setter
-    def auth(self, value: ByzantineAuthLayer) -> None:  # noqa: F821
-        self._auth = value
-
-    @property
-    def ledger_store(self) -> LedgerStore:
-        if self._ledger_store is None:
-            from cortex.ledger import LedgerStore
-
-            self._ledger_store = LedgerStore(self._db_path)
-        return self._ledger_store
-
-    @ledger_store.setter
-    def ledger_store(self, value: LedgerStore) -> None:
-        self._ledger_store = value
-
-    @property
-    def enrichment_queue(self) -> EnrichmentQueue:
-        if self._enrichment_queue is None:
-            from cortex.ledger import EnrichmentQueue
-
-            self._enrichment_queue = EnrichmentQueue(self.ledger_store)
-        return self._enrichment_queue
-
-    @enrichment_queue.setter
-    def enrichment_queue(self, value: EnrichmentQueue) -> None:
-        self._enrichment_queue = value
-
-    @property
-    def ledger_writer(self) -> LedgerWriter:
-        if self._ledger_writer is None:
-            from cortex.ledger import LedgerWriter
-
-            self._ledger_writer = LedgerWriter(self.ledger_store, self.enrichment_queue)
-        return self._ledger_writer
-
-    @ledger_writer.setter
-    def ledger_writer(self, value: LedgerWriter) -> None:
-        self._ledger_writer = value
-
-    @property
-    def mac_maestro(self) -> MaestroExecutor:
-        if self._mac_maestro is None:
-            from cortex.mac_maestro.executor import MaestroExecutor
-
-            self._mac_maestro = MaestroExecutor(self.ledger_writer)
-        return self._mac_maestro
-
-    @mac_maestro.setter
-    def mac_maestro(self, value: MaestroExecutor) -> None:
-        self._mac_maestro = value
 
     # ─── Guard Pipeline Registration ──────────────────────────────
     def _register_default_guards(self):
@@ -566,13 +460,16 @@ class CortexEngine(
         return fact
 
     async def vote_v2(self, *args, **kwargs):
-        return await self.consensus.vote_v2(*args, **kwargs)
+        consensus = cast(Any, self.consensus)
+        return await consensus.vote_v2(*args, **kwargs)
 
     async def get_votes(self, *args, **kwargs):
-        return await self.consensus.get_votes(*args, **kwargs)
+        consensus = cast(Any, self.consensus)
+        return await consensus.get_votes(*args, **kwargs)
 
     async def verify_vote_ledger(self, *args, **kwargs):
-        return await self.consensus.verify_vote_ledger(*args, **kwargs)
+        consensus = cast(Any, self.consensus)
+        return await consensus.verify_vote_ledger(*args, **kwargs)
 
     async def propagate_taint(self, fact_id: int, tenant_id: str = "default"):
         """Propagate causal taint through the tenant-scoped causality graph."""
@@ -583,14 +480,6 @@ class CortexEngine(
             graph = AsyncCausalGraph(conn)
             await graph.ensure_table()
             return await graph.propagate_taint(fact_id, tenant_id=tenant_id)
-
-    def get_trust_registry(self):
-        """Return the in-memory trust registry used by trust endpoints."""
-        if self._trust_registry is None:
-            from cortex.engine.trust_registry import TrustRegistry
-
-            self._trust_registry = TrustRegistry()
-        return self._trust_registry
 
     async def create_checkpoint(self) -> str | None:
         """Create a transaction-ledger Merkle checkpoint."""

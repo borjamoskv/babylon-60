@@ -2,10 +2,8 @@
 CORTEX JIT Compiled Skill: moskv-editorial-omega
 Description: Sovereign Editorial Pipeline — Text-in, published-site-out. Astro 6 + Sanity + Cloudflare.
 """
-
 import json
 import logging
-
 
 class MoskvEditorialOmegaSkill:
     def __init__(self):
@@ -29,5 +27,5 @@ class MoskvEditorialOmegaSkill:
             "skill": self.name,
             "injected_knowledge_tokens": len(self.instructions.split()),
             "yield_impact": "O(1) Execution",
-            "extracted_payload": payload,
+            "extracted_payload": payload
         }

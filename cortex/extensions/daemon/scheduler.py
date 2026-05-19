@@ -328,7 +328,7 @@ class SovereignScheduler:
                         },
                     )
                 except Exception:  # noqa: BLE001
-                    pass  # bus errors must not kill scheduler
+                    logger.debug("schedule.completed publish failed", exc_info=True)
 
             # Hot state update
             if self._hot_state is not None:
@@ -342,7 +342,7 @@ class SovereignScheduler:
                         },
                     )
                 except Exception:  # noqa: BLE001
-                    pass
+                    logger.debug("schedule hot-state update failed", exc_info=True)
 
             level = "✅" if not error else "❌"
             logger.info(

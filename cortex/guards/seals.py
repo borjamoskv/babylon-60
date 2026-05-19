@@ -19,6 +19,7 @@ from __future__ import annotations
 import asyncio
 import os
 import sys
+import tempfile
 import time
 from collections.abc import Callable, Coroutine
 from pathlib import Path
@@ -50,14 +51,42 @@ def _resolve_cmd(tool: str) -> str:
     return tool
 
 
-async def arun_cmd(cmd: list[str], timeout: float = 60.0) -> tuple[int, str]:
+async def arun_cmd(
+    cmd: list[str],
+    timeout: float = 60.0,
+    *,
+    capture_to_file: bool = False,
+    inject_pythonpath: bool = True,
+) -> tuple[int, str]:
     """Execute a command asynchronously and return (code, output).
     Injects PYTHONPATH=. to ensure local package resolution.
     """
     env = os.environ.copy()
-    env["PYTHONPATH"] = f".:{env.get('PYTHONPATH', '')}"
+    if inject_pythonpath:
+        env["PYTHONPATH"] = f".:{env.get('PYTHONPATH', '')}"
     resolved = [_resolve_cmd(cmd[0])] + cmd[1:]
     try:
+        if capture_to_file:
+            with tempfile.TemporaryFile() as stdout_file:
+                proc = await asyncio.create_subprocess_exec(
+                    *resolved,
+                    stdout=stdout_file,
+                    stderr=asyncio.subprocess.STDOUT,
+                    env=env,
+                )
+                try:
+                    await asyncio.wait_for(proc.wait(), timeout=timeout)
+                    stdout_file.seek(0)
+                    stdout = stdout_file.read()
+                    return proc.returncode or 0, stdout.decode(errors="replace")
+                except asyncio.TimeoutError:
+                    try:
+                        proc.kill()
+                        await asyncio.wait_for(proc.wait(), timeout=5.0)
+                    except (ProcessLookupError, asyncio.TimeoutError):
+                        pass
+                    return 124, f"Command timed out after {timeout}s: {' '.join(cmd)}"
+
         proc = await asyncio.create_subprocess_exec(
             *resolved,
             stdout=asyncio.subprocess.PIPE,
@@ -168,7 +197,11 @@ async def check_seal_1_code_quality() -> GateResult:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_2_type_safety() -> GateResult:
     printer.seal(2, "AX-I Determinismo Estocástico", "Type Check (Pyright)")
-    code, out = await arun_cmd(["pyright", "cortex/", "--outputjson"])
+    code, out = await arun_cmd(
+        ["pyright", "cortex/", "--outputjson"],
+        capture_to_file=True,
+        inject_pythonpath=False,
+    )
     if code == 127:
         printer.warn("No type checker found (pyright/mypy) — skipping")
         return True, "verified"
