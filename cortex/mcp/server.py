@@ -353,7 +353,7 @@ _default_config = MCPServerConfig()
 mcp = create_mcp_server(_default_config)
 
 
-def run_server(config: Optional[MCPServerConfig] = None) -> None:
+def run_server(config: MCPServerConfig | None = None) -> None:
     """Start the CORTEX MCP server."""
     global mcp
     if config:
