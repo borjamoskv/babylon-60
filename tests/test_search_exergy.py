@@ -29,6 +29,9 @@ async def test_exergy_prioritization(temp_db_path, mock_encoder):
     to rank outputs when their semantic embeddings are identical.
     """
     store = SovereignVectorStoreL2(encoder=mock_encoder, db_path=temp_db_path, half_life_days=7)
+    store._get_conn()
+    if not store._vector_enabled:
+        pytest.skip("sqlite-vec not available")
 
     # Prepare identical embeddings so vector similarity is strictly equal
     embedding_vec = [1] * 384
@@ -94,5 +97,54 @@ async def test_exergy_prioritization(temp_db_path, mock_encoder):
     score_high = results[0]._recall_score
     score_low = results[1]._recall_score
     assert score_high > score_low
+
+    await store.close()
+
+
+@pytest.mark.asyncio
+async def test_fallback_mode_score_zero(temp_db_path, mock_encoder):
+    """
+    Verifies that the vector store fallback mode (when sqlite-vec is unavailable)
+    returns results with a score of 0.0.
+    """
+    store = SovereignVectorStoreL2(encoder=mock_encoder, db_path=temp_db_path, half_life_days=7)
+
+    # Initialize DB schema
+    store._get_conn()
+
+    # Force fallback mode
+    store._vector_enabled = False
+
+    embedding_vec = [1] * 384
+
+    fact_content = "fallback testing fact"
+    fallback_fact = CortexFactModel(
+        id="fact_fallback_test",
+        tenant_id="test_tenant",
+        project_id="test_proj",
+        content=fact_content,
+        embedding=embedding_vec,
+        timestamp=time.time(),
+        is_diamond=False,
+        is_bridge=False,
+        confidence="high",
+        cognitive_layer="semantic",
+        parent_decision_id=None,
+        metadata={},
+    )
+    object.__setattr__(fallback_fact, "embedding_bytes", b"mock")
+
+    await store.memorize(fallback_fact)
+
+    results = await store.recall_secure(
+        tenant_id="test_tenant",
+        project_id="test_proj",
+        query="fallback testing",
+        limit=1,
+    )
+
+    assert len(results) == 1
+    assert results[0].id == "fact_fallback_test"
+    assert results[0]._recall_score == 0.0
 
     await store.close()
