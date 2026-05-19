@@ -105,5 +105,6 @@ M3 does not:
 Those controls belong to later milestones, especially M4, M5, and M6.
 
 M4 adds runtime origin-signature admission for `LedgerWriter` strict mode. M5
-remains responsible for durable replay nonce reservation, and M6 remains
-responsible for immutable-ledger no-PII enforcement.
+adds live replay nonce reservation and online freshness admission; historical
+offline verification still reports `online_freshness_verified: false`. M6
+remains responsible for immutable-ledger no-PII enforcement.
