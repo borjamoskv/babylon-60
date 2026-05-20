@@ -326,9 +326,7 @@ class SovereignLLM:
                 )
             errors.append(f"{provider_name}: empty/short response")
 
-        except asyncio.TimeoutError:
-            errors.append(f"{provider_name}: timeout ({self._timeout}s)")
-        except (OSError, ValueError, KeyError) as e:
+        except Exception as e:
             errors.append(f"{provider_name}: {e!r}")
 
         return None
