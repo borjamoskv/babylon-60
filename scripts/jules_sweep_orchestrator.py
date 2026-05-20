@@ -194,6 +194,55 @@ def get_git_source_id() -> str:
         return "github/borjamoskv/Cortex-Persist"
 
 
+# ── Observer Pattern ──────────────────────────────────────────────────────────
+
+
+class TaskObserver:
+    """Observer interface for Jules task execution events."""
+
+    async def on_status_change(
+        self, task_id: str, old_status: str | None, new_status: str, task: dict[str, Any]
+    ) -> None:
+        """Called when swebotTaskStatus changes."""
+        pass
+
+    async def on_review_required(
+        self, task_id: str, task: dict[str, Any], client: httpx.AsyncClient
+    ) -> None:
+        """Called when task is suspended and awaits review."""
+        pass
+
+    async def on_resumed(self, task_id: str, task: dict[str, Any]) -> None:
+        """Called when task resumes from suspension."""
+        pass
+
+
+class SweepTaskObserver(TaskObserver):
+    """Concrete observer for sweep tasks to handle logs and auto-resumption."""
+
+    def __init__(self, jules_client: JulesClient) -> None:
+        self.jules = jules_client
+
+    async def on_status_change(
+        self, task_id: str, old_status: str | None, new_status: str, task: dict[str, Any]
+    ) -> None:
+        print(f"  [Task {task_id}] Status transitioned: {old_status} → {new_status}", flush=True)
+
+    async def on_review_required(
+        self, task_id: str, task: dict[str, Any], client: httpx.AsyncClient
+    ) -> None:
+        print(f"  [Task {task_id}] Suspended (awaiting review). Auto-approving to resume...", flush=True)
+        try:
+            feedback = "Approved. Please proceed with the plan."
+            await self.jules.interact(task_id, feedback, client)
+            print(f"  [Task {task_id}] Resumption command sent.", flush=True)
+        except Exception as e:
+            print(f"  [Task {task_id}] Failed to auto-resume: {e}", flush=True)
+
+    async def on_resumed(self, task_id: str, task: dict[str, Any]) -> None:
+        print(f"  [Task {task_id}] Resumed execution.", flush=True)
+
+
 # ── Jules API client ──────────────────────────────────────────────────────────
 
 
@@ -225,12 +274,39 @@ class JulesClient:
         data = resp.json()
         return data["taskId"]
 
+    async def interact(
+        self,
+        task_id: str,
+        feedback: str,
+        client: httpx.AsyncClient,
+    ) -> dict[str, Any]:
+        """Send feedback to resume a suspended task."""
+        resp = await client.post(
+            f"{JULES_BASE_URL}/tasks/{task_id}:interact",
+            headers=self._headers,
+            json={
+                "userActivity": {
+                    "feedbackGiven": {
+                        "feedback": feedback
+                    }
+                }
+            },
+            timeout=30,
+        )
+        resp.raise_for_status()
+        return resp.json()
+
     async def poll_task(
         self,
         task_id: str,
         client: httpx.AsyncClient,
+        observer: TaskObserver | None = None,
     ) -> dict[str, Any]:
-        """Poll until done/failed. Returns the completed task object."""
+        """Poll until done/failed/cancelled, notifying the observer of state changes."""
+        last_status = None
+        last_is_awaiting = None
+        approved_step_ids = set()
+
         for _ in range(MAX_POLL_ROUNDS):
             resp = await client.get(
                 f"{JULES_BASE_URL}/tasks/{task_id}",
@@ -241,14 +317,45 @@ class JulesClient:
             data = resp.json()
             task = data.get("task", {})
             status = task.get("swebotTaskStatus", "")
+            is_awaiting = task.get("isAwaitingReview", False)
+
+            # Trigger status change event
+            if status != last_status:
+                if observer:
+                    await observer.on_status_change(task_id, last_status, status, task)
+                last_status = status
+
+            # Trigger review required event
+            if is_awaiting:
+                suspension_step_id = None
+                for step in reversed(task.get("activitySteps", [])):
+                    act = step.get("agentActivity", {})
+                    if "taskSuspended" in act or "codeReviewRequested" in act:
+                        suspension_step_id = step.get("id")
+                        break
+
+                if suspension_step_id and suspension_step_id not in approved_step_ids:
+                    if observer:
+                        await observer.on_review_required(task_id, task, client)
+                    approved_step_ids.add(suspension_step_id)
+                elif not suspension_step_id and not last_is_awaiting:
+                    if observer:
+                        await observer.on_review_required(task_id, task, client)
+            
+            # Trigger resumed event
+            if not is_awaiting and last_is_awaiting:
+                if observer:
+                    await observer.on_resumed(task_id, task)
+
+            last_is_awaiting = is_awaiting
+
             if status in (
                 "SWEBOT_TASK_STATUS_COMPLETED",
                 "SWEBOT_TASK_STATUS_FAILED",
                 "SWEBOT_TASK_STATUS_CANCELLED",
             ):
                 return task
-            if task.get("isAwaitingReview") is True:
-                return task
+
             await asyncio.sleep(POLL_INTERVAL_S)
         raise TimeoutError(f"Jules task {task_id} did not complete in time")
 
@@ -270,7 +377,8 @@ async def run_sweep(task: SweepTask, jules: JulesClient) -> SweepTask:
             task.status = "dispatched"
             print(f"  [{task.kind.upper()}] Jules ID: {jules_id}", flush=True)
 
-            result = await jules.poll_task(jules_id, client)
+            observer = SweepTaskObserver(jules)
+            result = await jules.poll_task(jules_id, client, observer)
             task.completed_at = _now()
 
             status = result.get("swebotTaskStatus", "")
@@ -278,54 +386,65 @@ async def run_sweep(task: SweepTask, jules: JulesClient) -> SweepTask:
 
             if status == "SWEBOT_TASK_STATUS_COMPLETED" or is_awaiting:
                 task.status = "completed"
-                # Extract findings
+                # Extract findings using robust parser
                 findings = []
                 found_json_file = False
-                activity_steps = result.get("activitySteps", [])
-                for step in activity_steps:
+                
+                # Check taskCompleted in activitySteps and outputs
+                all_completed_activities = []
+                for step in result.get("activitySteps", []):
                     act = step.get("agentActivity", {})
                     if "taskCompleted" in act:
-                        tc = act["taskCompleted"]
-                        commit = tc.get("commit", {})
-                        patch = commit.get("patch", {})
-                        diffs = patch.get("fileDiffsV2", []) or patch.get("fileDiffs", [])
-                        for d in diffs:
-                            path = d.get("fileAfter", {}).get("path", "")
-                            if path.endswith(".json"):
-                                b64_content = d.get("fileAfter", {}).get("contentAsBytes", "")
-                                if b64_content:
-                                    import base64
+                        all_completed_activities.append(act["taskCompleted"])
+                for out in result.get("outputs", []):
+                    if "taskCompleted" in out:
+                        all_completed_activities.append(out["taskCompleted"])
 
-                                    try:
-                                        content_str = base64.b64decode(b64_content).decode("utf-8")
-                                        parsed = json.loads(content_str)
-                                        if isinstance(parsed, dict):
-                                            found_list = False
-                                            for _k, v in parsed.items():
-                                                if isinstance(v, list):
-                                                    findings.extend(v)
-                                                    found_list = True
-                                                    break
-                                            if not found_list:
-                                                findings.append(parsed)
-                                        elif isinstance(parsed, list):
-                                            findings.extend(parsed)
-                                        found_json_file = True
-                                    except Exception as e:
-                                        print(f"Failed to decode/parse json file {path}: {e}")
+                for tc in all_completed_activities:
+                    commit = tc.get("commit", {})
+                    patch = commit.get("patch", {})
+                    diffs = patch.get("fileDiffsV2", []) or patch.get("fileDiffs", [])
+                    for d in diffs:
+                        path = d.get("fileAfter", {}).get("path", "")
+                        if path.endswith(".json"):
+                            b64_content = d.get("fileAfter", {}).get("contentAsBytes", "")
+                            if b64_content:
+                                import base64
+                                try:
+                                    content_str = base64.b64decode(b64_content).decode("utf-8")
+                                    parsed = json.loads(content_str)
+                                    if isinstance(parsed, dict):
+                                        found_list = False
+                                        for _k, v in parsed.items():
+                                            if isinstance(v, list):
+                                                findings.extend(v)
+                                                found_list = True
+                                                break
+                                        if not found_list:
+                                            findings.append(parsed)
+                                    elif isinstance(parsed, list):
+                                        findings.extend(parsed)
+                                    found_json_file = True
+                                except Exception as e:
+                                    print(f"Failed to decode/parse json file {path}: {e}")
 
+                # Fallback to agent messages / reviews if no JSON file was found
                 if not found_json_file:
                     text_parts = []
-                    for step in activity_steps:
+                    for step in result.get("activitySteps", []):
                         act = step.get("agentActivity", {})
                         if "agentMessaged" in act:
                             text_parts.append(act["agentMessaged"].get("text", ""))
                         elif "codeReviewRequested" in act:
                             text_parts.append(act["codeReviewRequested"].get("criticOutput", ""))
+                    for out in result.get("outputs", []):
+                        if "agentMessaged" in out:
+                            text_parts.append(out["agentMessaged"].get("text", ""))
+                        elif "codeReviewRequested" in out:
+                            text_parts.append(out["codeReviewRequested"].get("criticOutput", ""))
 
                     full_text = "\n\n".join(text_parts)
                     import re
-
                     json_blocks = re.findall(r"```json\s*(.*?)\s*```", full_text, re.DOTALL)
                     for jb in json_blocks:
                         try:
@@ -388,6 +507,38 @@ def _print_findings(task: SweepTask) -> None:
 # ── Ledger persistence ────────────────────────────────────────────────────────
 
 
+def get_hardware_telemetry() -> dict:
+    """Retrieve local hardware telemetry from Mac-Control-OMEGA for compliance."""
+    try:
+        import sys
+        sys.path.append("/Users/borjafernandezangulo/.gemini/antigravity/skills/Mac-Control-OMEGA/scripts")
+        from sovereign_system import HardwareControl
+
+        cpu = HardwareControl.get_cpu_info().get("data", {})
+        mem = HardwareControl.get_memory_info().get("data", {})
+        therm = HardwareControl.get_thermal().get("data", {})
+
+        return {
+            "cpu": {
+                "brand": cpu.get("brand"),
+                "physical_cores": cpu.get("physical_cores"),
+                "logical_cores": cpu.get("logical_cores"),
+                "frequency_hz": cpu.get("frequency_hz"),
+            },
+            "memory": {
+                "total_bytes": mem.get("total_bytes"),
+                "total_gb": mem.get("total_gb"),
+                "pressure": mem.get("pressure"),
+            },
+            "thermal": {
+                "pmset": therm.get("pmset"),
+                "cpu_speed": therm.get("cpu_speed"),
+            },
+        }
+    except Exception as e:
+        return {"error": f"Failed to get hardware telemetry: {e}"}
+
+
 def append_to_ledger(run: SweepRun) -> None:
     """Append the full run record to cortex_audit_ledger.jsonl."""
     record = {
@@ -396,6 +547,7 @@ def append_to_ledger(run: SweepRun) -> None:
         "domain": run.domain,
         "started": run.started,
         "finished": run.finished,
+        "hardware_telemetry": get_hardware_telemetry(),
         "tasks": [asdict(t) for t in run.tasks],
     }
     with LEDGER_PATH.open("a", encoding="utf-8") as fh:
