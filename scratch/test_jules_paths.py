@@ -11,8 +11,8 @@ base = "https://jules.googleapis.com"
 project = "forward-tape-489302-m7"
 
 paths = [
-    f"/v1alpha/sources",
-    f"/v1alpha/sessions",
+    "/v1alpha/sources",
+    "/v1alpha/sessions",
     f"/v1alpha/projects/{project}/sources",
     f"/v1alpha/projects/{project}/sessions",
     f"/v1alpha/projects/{project}/locations/global/sources",

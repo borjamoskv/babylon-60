@@ -3,7 +3,7 @@ import requests
 
 try:
     token = subprocess.check_output(["gcloud", "auth", "print-access-token"], text=True).strip()
-except Exception as e:
+except Exception:
     token = ""
 
 api_key = "AIzaSyCAo_HMT3iW9RuxEHdG5owL5klTMYUMh9M"
