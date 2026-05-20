@@ -12,7 +12,7 @@ for m in pattern.finditer(data):
     try:
         s = m.group(0).decode("ascii")
         matches.append(s)
-    except:
+    except Exception:
         pass
 
 unique_matches = sorted(list(set(matches)))

@@ -10,16 +10,13 @@ except Exception as e:
 base = "https://jules.googleapis.com/v1alpha"
 project = "forward-tape-489302-m7"
 
-headers = {
-    "Authorization": f"Bearer {token}",
-    "x-goog-user-project": project
-}
+headers = {"Authorization": f"Bearer {token}", "x-goog-user-project": project}
 
 sources_to_try = [
     "sources/github/borjamoskv/Cortex-Persist",
     "sources/github/borjamoskv/cortex-persist",
     "sources/github-borjamoskv-Cortex-Persist",
-    "sources/github-borjamoskv-cortex-persist"
+    "sources/github-borjamoskv-cortex-persist",
 ]
 
 for src in sources_to_try:

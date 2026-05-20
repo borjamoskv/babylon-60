@@ -22,7 +22,7 @@ headers_variations = [
     {
         "Authorization": f"Bearer {token}",
         "x-goog-user-project": "forward-tape-489302-m7",
-    }
+    },
 ]
 
 for base in bases:

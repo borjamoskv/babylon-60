@@ -231,7 +231,10 @@ class SweepTaskObserver(TaskObserver):
     async def on_review_required(
         self, task_id: str, task: dict[str, Any], client: httpx.AsyncClient
     ) -> None:
-        print(f"  [Task {task_id}] Suspended (awaiting review). Auto-approving to resume...", flush=True)
+        print(
+            f"  [Task {task_id}] Suspended (awaiting review). Auto-approving to resume...",
+            flush=True,
+        )
         try:
             feedback = "Approved. Please proceed with the plan."
             await self.jules.interact(task_id, feedback, client)
@@ -284,13 +287,7 @@ class JulesClient:
         resp = await client.post(
             f"{JULES_BASE_URL}/tasks/{task_id}:interact",
             headers=self._headers,
-            json={
-                "userActivity": {
-                    "feedbackGiven": {
-                        "feedback": feedback
-                    }
-                }
-            },
+            json={"userActivity": {"feedbackGiven": {"feedback": feedback}}},
             timeout=30,
         )
         resp.raise_for_status()
@@ -341,7 +338,7 @@ class JulesClient:
                 elif not suspension_step_id and not last_is_awaiting:
                     if observer:
                         await observer.on_review_required(task_id, task, client)
-            
+
             # Trigger resumed event
             if not is_awaiting and last_is_awaiting:
                 if observer:
@@ -389,7 +386,7 @@ async def run_sweep(task: SweepTask, jules: JulesClient) -> SweepTask:
                 # Extract findings using robust parser
                 findings = []
                 found_json_file = False
-                
+
                 # Check taskCompleted in activitySteps and outputs
                 all_completed_activities = []
                 for step in result.get("activitySteps", []):
@@ -410,6 +407,7 @@ async def run_sweep(task: SweepTask, jules: JulesClient) -> SweepTask:
                             b64_content = d.get("fileAfter", {}).get("contentAsBytes", "")
                             if b64_content:
                                 import base64
+
                                 try:
                                     content_str = base64.b64decode(b64_content).decode("utf-8")
                                     parsed = json.loads(content_str)
@@ -445,6 +443,7 @@ async def run_sweep(task: SweepTask, jules: JulesClient) -> SweepTask:
 
                     full_text = "\n\n".join(text_parts)
                     import re
+
                     json_blocks = re.findall(r"```json\s*(.*?)\s*```", full_text, re.DOTALL)
                     for jb in json_blocks:
                         try:
@@ -511,7 +510,10 @@ def get_hardware_telemetry() -> dict:
     """Retrieve local hardware telemetry from Mac-Control-OMEGA for compliance."""
     try:
         import sys
-        sys.path.append("/Users/borjafernandezangulo/.gemini/antigravity/skills/Mac-Control-OMEGA/scripts")
+
+        sys.path.append(
+            "/Users/borjafernandezangulo/.gemini/antigravity/skills/Mac-Control-OMEGA/scripts"
+        )
         from sovereign_system import HardwareControl
 
         cpu = HardwareControl.get_cpu_info().get("data", {})

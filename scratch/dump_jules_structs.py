@@ -13,9 +13,12 @@ matches = []
 for s in strings:
     try:
         s_str = s.decode("ascii")
-        if any(x in s_str.lower() for x in ["swebot", "swe_bot", "jules", "source", "session", "activities"]):
+        if any(
+            x in s_str.lower()
+            for x in ["swebot", "swe_bot", "jules", "source", "session", "activities"]
+        ):
             matches.append(s_str)
-    except:
+    except Exception:
         pass
 
 # Print unique matches

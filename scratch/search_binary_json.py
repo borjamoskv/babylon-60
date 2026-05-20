@@ -6,7 +6,13 @@ with open(binary_path, "rb") as f:
     data = f.read()
 
 # Search for common JSON keys or task field structures in the binary
-keywords = [b"sourceContext", b"sourceId", b"environmentVariablesEnabled", b"agentConfig", b"taskOrigin"]
+keywords = [
+    b"sourceContext",
+    b"sourceId",
+    b"environmentVariablesEnabled",
+    b"agentConfig",
+    b"taskOrigin",
+]
 for kw in keywords:
     print(f"Keyword: {kw.decode('ascii')}")
     # Let's find occurrences and extract nearby bytes

@@ -21,10 +21,7 @@ paths = [
     f"/v1alpha/projects/{project}/locations/us-central1/sessions",
 ]
 
-headers = {
-    "Authorization": f"Bearer {token}",
-    "x-goog-user-project": project
-}
+headers = {"Authorization": f"Bearer {token}", "x-goog-user-project": project}
 
 for path in paths:
     url = f"{base}{path}"

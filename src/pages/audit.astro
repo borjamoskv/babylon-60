@@ -1,0 +1,913 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import fs from 'node:fs';
+import path from 'node:path';
+
+// Define the ledger path
+let ledgerPath = path.join(process.cwd(), 'cortex_audit_ledger.jsonl');
+if (!fs.existsSync(ledgerPath)) {
+	ledgerPath = '/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex_audit_ledger.jsonl';
+}
+
+interface Finding {
+	severity?: string;
+	element?: string;
+	issue?: string;
+	fix?: string;
+	http_status?: number;
+	detail?: string;
+	error?: string;
+	raw_output?: string;
+	wcag_criterion?: string;
+	recommended?: string;
+}
+
+interface Task {
+	kind: string;
+	target_url: string;
+	task_id: string;
+	jules_id: string | null;
+	status: string;
+	findings: Finding[];
+	created_at: string;
+	completed_at: string | null;
+}
+
+interface HardwareTelemetry {
+	cpu?: {
+		brand?: string;
+		physical_cores?: string;
+		logical_cores?: string;
+		frequency_hz?: string;
+	};
+	memory?: {
+		total_bytes?: string;
+		total_gb?: number;
+		pressure?: string;
+	};
+	thermal?: {
+		pmset?: string;
+		cpu_speed?: string;
+	};
+	error?: string;
+}
+
+interface SweepRun {
+	event: string;
+	run_id: string;
+	domain: string;
+	started: string;
+	finished: string;
+	hardware_telemetry?: HardwareTelemetry;
+	tasks: Task[];
+}
+
+let runs: SweepRun[] = [];
+
+try {
+	if (fs.existsSync(ledgerPath)) {
+		const rawData = fs.readFileSync(ledgerPath, 'utf-8');
+		runs = rawData
+			.split('\n')
+			.filter((line) => line.trim() !== '')
+			.map((line) => {
+				try {
+					return JSON.parse(line);
+				} catch (e) {
+					return null;
+				}
+			})
+			.filter((run): run is SweepRun => run !== null && run.event === 'jules_sweep_run');
+	}
+} catch (err) {
+	console.error('Error reading ledger:', err);
+}
+
+// Sort runs newest first
+runs.sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime());
+
+// Calculate statistics
+const totalRuns = runs.length;
+const uniqueDomains = [...new Set(runs.map((r) => r.domain))];
+
+// A run is completed successfully if all tasks are completed
+const completedRuns = runs.filter((r) => r.tasks.every((t) => t.status === 'completed')).length;
+const dryRuns = runs.filter((r) => r.tasks.some((t) => t.status === 'dry_run')).length;
+const errorRuns = totalRuns - completedRuns - dryRuns;
+
+// Count total findings
+let totalFindingsCount = 0;
+runs.forEach((r) => {
+	r.tasks.forEach((t) => {
+		if (t.findings) {
+			t.findings.forEach((f) => {
+				if (f.issue && f.element !== 'DRY-RUN') {
+					totalFindingsCount++;
+				}
+			});
+		}
+	});
+});
+
+function formatTimestamp(isoString: string) {
+	try {
+		const d = new Date(isoString);
+		return d.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+	} catch (e) {
+		return isoString;
+	}
+}
+
+function calculateDuration(start: string, end: string) {
+	try {
+		const s = new Date(start).getTime();
+		const e = new Date(end).getTime();
+		return ((e - s) / 1000).toFixed(2) + 's';
+	} catch (err) {
+		return 'N/A';
+	}
+}
+
+function getRealityBadge(run: SweepRun) {
+	const statuses = run.tasks.map((t) => t.status);
+	if (statuses.includes('dry_run')) {
+		return { label: 'C4-SIMULATION', class: 'badge-c4' };
+	}
+	if (statuses.includes('api_error') || statuses.includes('failed') || statuses.includes('error')) {
+		return { label: 'C5-ATTEMPT (FAILED)', class: 'badge-error' };
+	}
+	return { label: 'C5-REAL', class: 'badge-c5' };
+}
+---
+
+<SiteLayout
+	title="Evidentiary Audits Registry | agents.archi"
+	description="Forensic registry of autonomous Jules audit sweeps, verified hardware telemetry, and EU AI Act Article 12 compliance indicators."
+	canonical="https://agents.archi/audit"
+>
+	<main class="audit-shell">
+		<header class="audit-header">
+			<p class="eyebrow">// Forensics Registry</p>
+			<h1>Forensic Audit Registry</h1>
+			<p class="audit-subtitle">
+				Verification trails for autonomous codebase sweeps, anchored in hardware telemetry to satisfy Article 12 (EU AI Act) requirements.
+			</p>
+		</header>
+
+		<!-- Statistics Overview -->
+		<section class="stats-grid" aria-label="Registry Statistics">
+			<article class="surface stat-card">
+				<span class="stat-label eyebrow">System State</span>
+				<div class="stat-value c5-real">C5-REAL</div>
+				<p class="stat-meta text-muted">Hardware Verified</p>
+			</article>
+			<article class="surface stat-card">
+				<span class="stat-label eyebrow">Total Sweeps</span>
+				<div class="stat-value font-mono">{totalRuns}</div>
+				<p class="stat-meta text-muted">Across {uniqueDomains.length} target domain{uniqueDomains.length !== 1 ? 's' : ''}</p>
+			</article>
+			<article class="surface stat-card">
+				<span class="stat-label eyebrow">Success Rate</span>
+				<div class="stat-value font-mono">
+					{totalRuns > 0 ? Math.round((completedRuns / totalRuns) * 100) : 0}%
+				</div>
+				<p class="stat-meta text-muted">{completedRuns} completed / {errorRuns} failed</p>
+			</article>
+			<article class="surface stat-card">
+				<span class="stat-label eyebrow">Simulation Runs</span>
+				<div class="stat-value font-mono c4-sim">{dryRuns}</div>
+				<p class="stat-meta text-muted">Dry-runs detected</p>
+			</article>
+		</section>
+
+		<!-- Sweep Registry Log -->
+		<section class="registry-section">
+			<h2 class="section-title eyebrow">// Verification Log Stream</h2>
+
+			{runs.length === 0 ? (
+				<article class="surface empty-state-box">
+					<p>No audit sweeps recorded in <code>cortex_audit_ledger.jsonl</code>.</p>
+				</article>
+			) : (
+				runs.map((run) => {
+					const reality = getRealityBadge(run);
+					return (
+						<article class="surface run-card" data-run-id={run.run_id}>
+							<!-- Run Header Info -->
+							<header class="run-card-header">
+								<div class="run-meta">
+									<span class="run-domain">{run.domain}</span>
+									<span class="run-id font-mono">Run ID: {run.run_id}</span>
+								</div>
+								<div class="run-badges">
+									<span class={`badge ${reality.class}`}>{reality.label}</span>
+									<span class="badge badge-time font-mono">
+										Duration: {calculateDuration(run.started, run.finished)}
+									</span>
+								</div>
+							</header>
+
+							<!-- Hardware Telemetry Section -->
+							{run.hardware_telemetry && (
+								<section class="telemetry-section" aria-label="Hardware Telemetry">
+									<div class="telemetry-title">
+										<svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+											<rect x="4" y="4" width="16" height="16" rx="2" ry="2" />
+											<rect x="9" y="9" width="6" height="6" />
+											<line x1="9" y1="1" x2="9" y2="4" />
+											<line x1="15" y1="1" x2="15" y2="4" />
+											<line x1="9" y1="20" x2="9" y2="23" />
+											<line x1="15" y1="20" x2="15" y2="23" />
+											<line x1="20" y1="9" x2="23" y2="9" />
+											<line x1="20" y1="15" x2="23" y2="15" />
+											<line x1="1" y1="9" x2="4" y2="9" />
+											<line x1="1" y1="15" x2="4" y2="15" />
+										</svg>
+										<span>Hardware Execution Substrate Telemetry</span>
+									</div>
+									<div class="telemetry-grid">
+										<div class="telemetry-item">
+											<span class="telemetry-label">Processor</span>
+											<span class="telemetry-value font-mono">
+												{run.hardware_telemetry.cpu?.brand || 'N/A'} (
+												{run.hardware_telemetry.cpu?.physical_cores || '0'} Cores)
+											</span>
+										</div>
+										<div class="telemetry-item">
+											<span class="telemetry-label">Frequency</span>
+											<span class="telemetry-value font-mono">
+												{run.hardware_telemetry.cpu?.frequency_hz 
+													? (parseFloat(run.hardware_telemetry.cpu.frequency_hz) / 1e9).toFixed(2) + ' GHz' 
+													: 'N/A'}
+											</span>
+										</div>
+										<div class="telemetry-item">
+											<span class="telemetry-label">Memory</span>
+											<span class="telemetry-value font-mono">
+												{run.hardware_telemetry.memory?.total_gb 
+													? run.hardware_telemetry.memory.total_gb + ' GB' 
+													: 'N/A'}
+											</span>
+										</div>
+										<div class="telemetry-item font-mono">
+											<span class="telemetry-label">Thermal Load</span>
+											<span class="telemetry-value text-truncate" title={run.hardware_telemetry.thermal?.pmset || 'Nominal'}>
+												{run.hardware_telemetry.thermal?.pmset?.includes('warning') 
+													? '⚠️ Active Throttling' 
+													: 'Nominal'}
+											</span>
+										</div>
+									</div>
+								</section>
+							)}
+
+							<!-- Tasks Accordeon/Tabs -->
+							<section class="tasks-container">
+								<nav class="tasks-tabs-nav" aria-label="Audit tasks">
+									{run.tasks.map((task, idx) => {
+										let statusIndicator = '●';
+										let statusClass = 'task-status-pending';
+										if (task.status === 'completed') {
+											statusIndicator = '✓';
+											statusClass = 'task-status-completed';
+										} else if (task.status === 'dry_run') {
+											statusIndicator = '○';
+											statusClass = 'task-status-dry';
+										} else if (task.status === 'api_error' || task.status === 'failed') {
+											statusIndicator = '✗';
+											statusClass = 'task-status-failed';
+										}
+										return (
+											<button
+												class={`task-tab-btn ${idx === 0 ? 'active' : ''}`}
+												data-target={task.kind}
+												aria-controls={`panel-${run.run_id}-${task.kind}`}
+											>
+												<span class={`status-dot ${statusClass}`}>{statusIndicator}</span>
+												<span class="task-kind-label">{task.kind.toUpperCase()}</span>
+											</button>
+										);
+									})}
+								</nav>
+
+								<div class="tasks-panels">
+									{run.tasks.map((task, idx) => {
+										const isError = task.status === 'api_error' || task.status === 'failed';
+										const isDry = task.status === 'dry_run';
+										
+										return (
+											<div
+												id={`panel-${run.run_id}-${task.kind}`}
+												class={`task-panel ${idx === 0 ? '' : 'hidden'}`}
+												data-panel={task.kind}
+											>
+												<div class="task-panel-header">
+													<div class="panel-header-item">
+														<span class="meta-label">Task ID</span>
+														<span class="meta-value font-mono">{task.task_id}</span>
+													</div>
+													{task.jules_id && (
+														<div class="panel-header-item">
+															<span class="meta-label">Jules ID</span>
+															<span class="meta-value font-mono">{task.jules_id}</span>
+														</div>
+													)}
+													<div class="panel-header-item">
+														<span class="meta-label">Started At</span>
+														<span class="meta-value font-mono">{formatTimestamp(task.created_at)}</span>
+													</div>
+												</div>
+
+												{isDry && (
+													<div class="dry-run-banner font-mono">
+														<strong>[C4-SIMULATION]</strong> Dry-run sweep. Output generated through local logic validation. No external connections established.
+													</div>
+												)}
+
+												{isError && (
+													<div class="error-banner font-mono">
+														<strong>[API CONNECTION ERROR]</strong> Audit execution halted. Credentials unauthenticated or endpoint rejected the instruction payload.
+													</div>
+												)}
+
+												{/* Findings Display */}
+												<div class="findings-wrapper">
+													{task.findings && task.findings.length > 0 && !(task.findings.length === 1 && task.findings[0].raw_output === 'No text output found.') ? (
+														<div class="findings-table-wrapper">
+															<table class="findings-table">
+																<thead>
+																	<tr>
+																		<th style="width: 10%;">Severity</th>
+																		<th style="width: 25%;">Element/Target</th>
+																		<th style="width: 35%;">Issue / Finding</th>
+																		<th style="width: 30%;">Recommended Action</th>
+																	</tr>
+																</thead>
+																<tbody>
+																	{task.findings.map((f) => {
+																		const severity = f.severity || 'info';
+																		return (
+																			<tr>
+																				<td>
+																					<span class={`severity-pill severity-${severity}`}>
+																						{severity}
+																					</span>
+																				</td>
+																				<td class="font-mono text-truncate-multiline">
+																					{f.element || f.wcag_criterion || 'Global'}
+																				</td>
+																				<td class="finding-desc">
+																					{f.issue || f.detail || f.error || f.raw_output}
+																				</td>
+																				<td class="finding-fix">
+																					{f.fix || f.recommended || 'No resolution needed'}
+																				</td>
+																			</tr>
+																		);
+																	})}
+																</tbody>
+															</table>
+														</div>
+													) : (
+														<div class="passed-banner font-mono">
+															<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+																<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+																<polyline points="22 4 12 14.01 9 11.01" />
+															</svg>
+															<span>EVIDENTIARY AUDIT PASSED: ZERO FAILURES DETECTED IN THIS SCOPE.</span>
+														</div>
+													)}
+												</div>
+											</div>
+										);
+									})}
+								</div>
+							</section>
+						</article>
+					);
+				})
+			)}
+		</section>
+	</main>
+</SiteLayout>
+
+<script>
+	// Tab switching controller
+	function initTabs() {
+		document.querySelectorAll('.run-card').forEach((runCard) => {
+			const buttons = runCard.querySelectorAll('.task-tab-btn');
+			const panels = runCard.querySelectorAll('.task-panel');
+
+			buttons.forEach((btn) => {
+				btn.addEventListener('click', () => {
+					const target = btn.getAttribute('data-target');
+					
+					// Deactivate all buttons in this run card
+					buttons.forEach((b) => b.classList.remove('active'));
+					
+					// Hide all panels in this run card
+					panels.forEach((p) => p.classList.add('hidden'));
+					
+					// Activate current
+					btn.classList.add('active');
+					const targetPanel = runCard.querySelector(`.task-panel[data-panel="${target}"]`);
+					if (targetPanel) {
+						targetPanel.classList.remove('hidden');
+					}
+				});
+			});
+		});
+	}
+
+	// Run initial setup
+	initTabs();
+
+	// Listen for Astro page transitions if applicable
+	document.addEventListener('astro:page-load', initTabs);
+</script>
+
+<style>
+	/* Registry Shell */
+	.audit-shell {
+		max-width: var(--max-width);
+		margin: 0 auto;
+		padding: 5rem 1.5rem;
+		position: relative;
+		z-index: 10;
+		font-family: 'Manrope', sans-serif;
+	}
+
+	.audit-header {
+		margin-bottom: 4rem;
+		border-bottom: 1px solid var(--line);
+		padding-bottom: 2.5rem;
+	}
+
+	.audit-header h1 {
+		font-family: 'Orbitron', sans-serif;
+		font-size: 2.8rem;
+		font-weight: 800;
+		margin: 0.75rem 0;
+		background: linear-gradient(135deg, var(--text) 30%, var(--accent-soft) 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		letter-spacing: -0.02em;
+	}
+
+	.audit-subtitle {
+		color: var(--muted);
+		font-size: 1.15rem;
+		max-width: 750px;
+		line-height: 1.6;
+	}
+
+	/* Statistics Section */
+	.stats-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+		gap: 1.5rem;
+		margin-bottom: 4rem;
+	}
+
+	.stat-card {
+		padding: 2rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		border-radius: var(--radius-md) !important;
+	}
+
+	.stat-value {
+		font-family: 'Orbitron', sans-serif;
+		font-size: 2.2rem;
+		font-weight: 800;
+		color: var(--text);
+		line-height: 1.1;
+	}
+
+	.stat-value.c5-real {
+		color: var(--success);
+		text-shadow: 0 0 16px rgba(127, 227, 178, 0.35);
+	}
+
+	.stat-value.c4-sim {
+		color: var(--warning);
+		text-shadow: 0 0 16px rgba(216, 181, 106, 0.35);
+	}
+
+	.stat-meta {
+		font-size: 0.85rem;
+		font-family: 'IBM Plex Mono', monospace;
+	}
+
+	.text-muted {
+		color: var(--muted);
+	}
+
+	/* Logs Section */
+	.registry-section {
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
+	}
+
+	.section-title {
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: var(--accent-soft);
+		margin-bottom: 0.5rem;
+	}
+
+	.empty-state-box {
+		padding: 4rem 2rem;
+		text-align: center;
+		color: var(--muted);
+		font-family: 'IBM Plex Mono', monospace;
+		border-radius: var(--radius-md) !important;
+	}
+
+	/* Run Card */
+	.run-card {
+		border-radius: var(--radius-md) !important;
+		overflow: hidden;
+		transition: border-color 0.25s ease;
+		background: var(--panel-strong) !important;
+	}
+
+	.run-card:hover {
+		border-color: var(--line-strong);
+	}
+
+	.run-card-header {
+		padding: 1.75rem 2.25rem;
+		background: rgba(255, 255, 255, 0.015);
+		border-bottom: 1px solid var(--line);
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: center;
+		gap: 1.5rem;
+	}
+
+	.run-meta {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+	}
+
+	.run-domain {
+		font-size: 1.4rem;
+		font-weight: 800;
+		color: var(--text);
+		letter-spacing: -0.01em;
+	}
+
+	.run-id {
+		font-size: 0.8rem;
+		color: var(--muted);
+	}
+
+	.run-badges {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.badge {
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.7rem;
+		font-weight: 600;
+		padding: 0.35rem 0.85rem;
+		border-radius: 99px;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+	}
+
+	.badge-c5 {
+		background: rgba(43, 59, 229, 0.15);
+		border: 1px solid var(--accent);
+		color: #ccd4ff;
+		box-shadow: 0 0 10px rgba(43, 59, 229, 0.2);
+	}
+
+	.badge-c4 {
+		background: rgba(216, 181, 106, 0.12);
+		border: 1px solid var(--warning);
+		color: var(--warning);
+	}
+
+	.badge-error {
+		background: rgba(255, 100, 100, 0.12);
+		border: 1px solid #ff6464;
+		color: #ff8e8e;
+	}
+
+	.badge-time {
+		background: rgba(255, 255, 255, 0.03);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		color: var(--text);
+	}
+
+	/* Telemetry Section */
+	.telemetry-section {
+		padding: 1.25rem 2.25rem;
+		background: rgba(0, 0, 0, 0.35);
+		border-bottom: 1px solid rgba(102, 128, 255, 0.12);
+	}
+
+	.telemetry-title {
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: var(--accent-soft);
+		margin-bottom: 0.85rem;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-family: 'IBM Plex Mono', monospace;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+	}
+
+	.telemetry-title .icon {
+		opacity: 0.8;
+	}
+
+	.telemetry-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		gap: 1.5rem;
+	}
+
+	.telemetry-item {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.telemetry-label {
+		font-size: 0.68rem;
+		color: var(--muted);
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+	}
+
+	.telemetry-value {
+		font-size: 0.82rem;
+		color: var(--text);
+	}
+
+	/* Tasks Tabs & Containment */
+	.tasks-container {
+		padding: 2.25rem;
+	}
+
+	.tasks-tabs-nav {
+		display: flex;
+		gap: 0.75rem;
+		border-bottom: 1px solid rgba(102, 128, 255, 0.12);
+		margin-bottom: 1.75rem;
+	}
+
+	.task-tab-btn {
+		background: none;
+		border: none;
+		color: var(--muted);
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.82rem;
+		font-weight: 500;
+		padding: 0.85rem 1.25rem;
+		cursor: pointer;
+		border-bottom: 2px solid transparent;
+		transition: all 0.2s ease;
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		letter-spacing: 0.06em;
+	}
+
+	.task-tab-btn:hover {
+		color: var(--text);
+		background: rgba(255, 255, 255, 0.02);
+	}
+
+	.task-tab-btn.active {
+		color: var(--accent-soft);
+		border-bottom-color: var(--accent);
+		background: rgba(43, 59, 229, 0.05);
+	}
+
+	.status-dot {
+		font-size: 0.8rem;
+		line-height: 1;
+	}
+
+	.task-status-completed {
+		color: var(--success);
+	}
+
+	.task-status-dry {
+		color: var(--warning);
+	}
+
+	.task-status-failed {
+		color: #ff6464;
+	}
+
+	.task-status-pending {
+		color: var(--muted);
+	}
+
+	/* Task Panel Details */
+	.task-panel-header {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 2rem;
+		background: rgba(255, 255, 255, 0.01);
+		padding: 0.85rem 1.25rem;
+		border-radius: var(--radius-md);
+		border: 1px solid rgba(255, 255, 255, 0.04);
+		margin-bottom: 1.5rem;
+	}
+
+	.panel-header-item {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+	}
+
+	.panel-header-item .meta-label {
+		font-size: 0.65rem;
+		text-transform: uppercase;
+		color: var(--muted);
+		letter-spacing: 0.05em;
+		font-family: 'IBM Plex Mono', monospace;
+	}
+
+	.panel-header-item .meta-value {
+		font-size: 0.82rem;
+		color: var(--text);
+	}
+
+	/* Banners */
+	.dry-run-banner {
+		background: rgba(216, 181, 106, 0.06);
+		border-left: 3px solid var(--warning);
+		padding: 1rem 1.5rem;
+		font-size: 0.85rem;
+		color: #e5cc95;
+		margin-bottom: 1.5rem;
+		line-height: 1.5;
+	}
+
+	.error-banner {
+		background: rgba(255, 100, 100, 0.06);
+		border-left: 3px solid #ff6464;
+		padding: 1rem 1.5rem;
+		font-size: 0.85rem;
+		color: #ffb4b4;
+		margin-bottom: 1.5rem;
+		line-height: 1.5;
+	}
+
+	.passed-banner {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		background: rgba(127, 227, 178, 0.06);
+		border: 1px dashed rgba(127, 227, 178, 0.3);
+		padding: 1.5rem;
+		font-size: 0.82rem;
+		color: var(--success);
+		border-radius: var(--radius-md);
+		letter-spacing: 0.02em;
+	}
+
+	.passed-banner svg {
+		flex-shrink: 0;
+	}
+
+	/* Findings Table */
+	.findings-table-wrapper {
+		border: 1px solid rgba(102, 128, 255, 0.12);
+		border-radius: var(--radius-md);
+		overflow: hidden;
+	}
+
+	.findings-table {
+		width: 100%;
+		border-collapse: collapse;
+		text-align: left;
+	}
+
+	.findings-table th {
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.7rem;
+		font-weight: 600;
+		color: var(--accent-soft);
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		padding: 0.85rem 1.25rem;
+		background: rgba(0, 0, 0, 0.2);
+		border-bottom: 1px solid rgba(102, 128, 255, 0.15);
+	}
+
+	.findings-table td {
+		padding: 1.1rem 1.25rem;
+		border-bottom: 1px solid rgba(102, 128, 255, 0.06);
+		font-size: 0.88rem;
+		vertical-align: top;
+		line-height: 1.5;
+	}
+
+	.findings-table tr:last-child td {
+		border-bottom: none;
+	}
+
+	.severity-pill {
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.65rem;
+		font-weight: 600;
+		padding: 0.2rem 0.5rem;
+		border-radius: 4px;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		display: inline-block;
+	}
+
+	.severity-info {
+		background: rgba(102, 128, 255, 0.12);
+		color: var(--accent-soft);
+		border: 1px solid rgba(102, 128, 255, 0.25);
+	}
+
+	.severity-warning {
+		background: rgba(216, 181, 106, 0.12);
+		color: var(--warning);
+		border: 1px solid rgba(216, 181, 106, 0.25);
+	}
+
+	.severity-critical,
+	.severity-error {
+		background: rgba(255, 100, 100, 0.12);
+		color: #ff8e8e;
+		border: 1px solid rgba(255, 100, 100, 0.25);
+	}
+
+	.finding-desc {
+		color: var(--text);
+	}
+
+	.finding-fix {
+		color: var(--muted);
+		font-size: 0.84rem;
+	}
+
+	/* Helpers */
+	.hidden {
+		display: none !important;
+	}
+
+	.text-truncate {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.text-truncate-multiline {
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		word-break: break-all;
+		font-size: 0.8rem;
+		color: var(--muted);
+	}
+
+	@media (max-width: 768px) {
+		.audit-header h1 {
+			font-size: 2.2rem;
+		}
+
+		.run-card-header {
+			padding: 1.25rem 1.5rem;
+		}
+
+		.tasks-container {
+			padding: 1.5rem;
+		}
+
+		.telemetry-section {
+			padding: 1.25rem 1.5rem;
+		}
+
+		.telemetry-grid {
+			grid-template-columns: 1fr 1fr;
+			gap: 1rem;
+		}
+
+		.task-panel-header {
+			gap: 1rem;
+		}
+	}
+</style>

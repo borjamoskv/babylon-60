@@ -37,7 +37,7 @@ headers_variations = [
     {
         "X-Goog-Api-Key": token,
         "x-goog-user-project": "forward-tape-489302-m7",
-    }
+    },
 ]
 
 for base in base_urls:

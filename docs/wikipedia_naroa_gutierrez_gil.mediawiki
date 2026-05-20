@@ -1,0 +1,68 @@
+{{Ficha de artista
+|nombre = Naroa Gutiérrez Gil
+|imagen = 
+|tamaño_de_imagen = 
+|pie_de_imagen = 
+|nombre_de_nacimiento = Naroa Gutiérrez Gil
+|fecha_de_nacimiento = 
+|lugar_de_nacimiento = [[Bilbao]], [[España]]
+|fecha_de_fallecimiento = 
+|lugar_de_fallecimiento = 
+|nacionalidad = Española
+|área = [[Artes plásticas]], [[pintura]], [[artivismo]]
+|educación = 
+|movimiento = [[Expresionismo]] pop, artivismo, técnica mixta
+|influido_por = 
+|influyó_a = 
+|premios = 
+|firma = 
+|sitio_web = 
+}}
+
+'''Naroa Gutiérrez Gil''' ([[Bilbao]], [[España]]) es una [[artista plástica]] multidisciplinar y [[artivismo|artivista]] española. Su obra destaca por la exploración de la figura humana y la memoria emocional mediante el uso de técnicas mixtas sobre soportes no convencionales, como la [[pizarra]] natural y la madera.
+
+== Trayectoria ==
+Naroa Gutiérrez Gil ha desarrollado un lenguaje visual centrado en el concepto del «error como método», buscando un equilibrio entre la precisión técnica y la imperfección orgánica. Sus obras, a menudo descritas como «espejos del alma», invitan a la introspección y a la re-creación personal a través de la plástica.
+
+A lo largo de su carrera, ha participado en diversos proyectos colectivos y sociales en [[Vizcaya]], formando parte de redes como '''Harilka Elkartea''' en Bilbao y participando en iniciativas de democratización del arte como '''Azoka en Lataska''' en [[Sopela]].
+
+== Estilo y técnica ==
+Su práctica artística se caracteriza por la superposición tricolor y el uso de texturas minerales complejas, empleando frecuentemente [[mica]] mineral y acrílicos. Se especializa en el retrato expresivo, utilizando elementos del [[pop art]] y el [[neo-kintsugi]] para dotar a sus piezas de una narrativa táctil y visual única.
+
+== Exposiciones selectas ==
+La artista ha expuesto de manera regular desde el año 2002 en instituciones públicas y galerías privadas:
+* ''Verhoeven x12'' (Próxima presentación, septiembre de 2025).
+* ''DiviNos VaiVenes'' (Politena Espacio de Arte, Bilbao, 2025).
+* ''Siarte y El Bosque de Oma'' (Siarte Ediciones, 2024).
+* ''Emakumeen arteaN'' (Harilka Elkartea, 2023).
+* ''Repóker de Reinas'' (Siarte Leku, 2022).
+* ''Iconos Pop'' (Centro Cívico Clara Campoamor, [[Baracaldo]], 2020).
+* ''Espejos del Alma'' (Ilustre Colegio de la Abogacía de Bizkaia, 2015).
+* ''Fitting Room'' (Hotel Meliá Bilbao, 2012).
+* ''Espejos del Alma'' (Museo de Bellas Artes de Bilbao, 2002).
+
+== Obras destacadas ==
+* ''Amy Rocks'' (2023): Acrílico y mica mineral sobre pizarra natural.
+* ''Marilyn Rocks (I)'' (2023): Acrílico y mica mineral sobre pizarra natural.
+* ''Mr. Fahrenheit'' (2021): Técnica mixta y tinta sobre madera.
+* ''Espejos del Alma'' (2023): Acrílico y collage sobre lienzo.
+* ''Amor en Conserva'' (2022): Acrílico y técnica mixta sobre lienzo.
+* ''Lágrimas de Oro'' (2021): Acrílico y pan de oro sobre madera.
+* ''Peter Rowan'' (2023): Carboncillo y acrílico sobre papel.
+
+== Referencias ==
+{{listaref|referencias=
+<ref name="ElPais2009">{{cita noticia |apellidos= |nombre= |título=Expodistrito Bilbao - Espejos del Alma |url=https://elpais.com/diario/2009/01/10/paisvasco/1231620008_850215.html |fecha=10 de enero de 2009 |periódico=[[El País]] |fechaacceso= |idioma=español}}</ref>
+<ref name="LaVanguardia2014">{{cita noticia |apellidos= |nombre= |título=Las salas municipales de Barakaldo retoman su programación expositiva |url=https://www.lavanguardia.com/local/pais-vasco/20140909/54414829898/las-salas-municipales-de-barakaldo-retoman-su-programacion-expositiva-en-septiembre-con-ocho.html |fecha=9 de septiembre de 2014 |periódico=[[La Vanguardia]] |fechaacceso= |idioma=español}}</ref>
+<ref name="DEIA2015">{{cita noticia |apellidos= |nombre= |título=Agenda: Espejos del alma - Colegio de Abogados |url=https://www.deia.eus/cultura/2015/07/20/agenda-5113256.html |fecha=20 de julio de 2015 |periódico=[[Deia]] |fechaacceso= |idioma=español}}</ref>
+<ref name="EITB2012">{{cita noticia |apellidos= |nombre= |título=Fitting Room 2012 - Meliá Bilbao |url=https://www.eitb.eus/es/television/detalle/956660/zinemaldia-los-cortos-kimuak-2012-zinemira--eitb-kultura/ |fecha=29 de septiembre de 2012 |periódico=[[EITB]] |fechaacceso= |idioma=español}}</ref>
+<ref name="Siarte2022">{{cita web |url=https://siarte.com/2022-03-25-siarte-exposicion-pintura-collage-arte-naroa-gutierrez.php |título=Repóker de Reinas - Siarte Leku |fecha=25 de marzo de 2022 |sitioweb=Siarte.com |idioma=español}}</ref>
+}}
+
+== Enlaces externos ==
+* [https://www.wikidata.org/wiki/Q137970281 Ficha de Naroa Gutiérrez Gil] en [[Wikidata]].
+
+[[Categoría:Pintores de España del siglo XXI]]
+[[Categoría:Pintores de Bilbao]]
+[[Categoría:Mujeres artistas de España]]
+[[Categoría:Nacidos en Bilbao]]

@@ -10,7 +10,10 @@ api_key = "AIzaSyCAo_HMT3iW9RuxEHdG5owL5klTMYUMh9M"
 
 # Combinations of headers
 auth_headers = [
-    ("Bearer token", {"Authorization": f"Bearer {token}", "x-goog-user-project": "forward-tape-489302-m7"}),
+    (
+        "Bearer token",
+        {"Authorization": f"Bearer {token}", "x-goog-user-project": "forward-tape-489302-m7"},
+    ),
     ("X-Goog-Api-Key", {"X-Goog-Api-Key": api_key}),
     ("Bearer token as x-goog-api-key", {"X-Goog-Api-Key": token}),
 ]
@@ -33,10 +36,7 @@ for base in base_urls:
                 print("Status code:", r.status_code)
                 try:
                     print("JSON:", r.json())
-                except:
+                except Exception:
                     print("Text:", r.text[:200])
             except Exception as e:
                 print("Error:", e)
-
-
-

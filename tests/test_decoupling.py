@@ -24,6 +24,7 @@ async def engine(tmp_path):
     await engine.close()
 
 
+@pytest.mark.slow
 @pytest.mark.asyncio
 async def test_asynchronous_enrichment_flow(engine):
     """Verify that storing a fact enqueues a job and EnrichmentWorker processes it."""

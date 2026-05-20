@@ -302,3 +302,11 @@ When auditing existing code, these observable signals indicate a violation has a
 | Missing `CORTEX-TAINT` on any fact insert | Write-Path Contract | CRITICAL | Audit `engine/` — add taint to all write paths. |
 | Schema change with no alembic revision entry | Migration Safety | CRITICAL | Run `alembic revision --autogenerate`; review diff before apply. |
 | Plaintext secret in any metadata dict or JSON field | Encryption Invariant | **P0** | Rotate secret immediately; encrypt at rest; audit exposure window. |
+
+---
+
+## 9. 📝 Agent Activity Log
+
+| Date | Agent | Action | Result |
+| :--- | :--- | :--- | :--- |
+| 2026-05-20 | Jules | Wikipedia Entry Draft | Generated `docs/wikipedia_naroa_gutierrez_gil.mediawiki` for Naroa Gutiérrez Gil. |

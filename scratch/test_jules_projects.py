@@ -13,10 +13,7 @@ except Exception as e:
 project = "forward-tape-489302-m7"
 locations = ["global", "us-central1"]
 
-headers = {
-    "Authorization": f"Bearer {token}",
-    "x-goog-user-project": project
-}
+headers = {"Authorization": f"Bearer {token}", "x-goog-user-project": project}
 
 for loc in locations:
     print(f"\n================ Location: {loc} ================")

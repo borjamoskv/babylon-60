@@ -13,7 +13,7 @@ project = "forward-tape-489302-m7"
 headers = {
     "Authorization": f"Bearer {token}",
     "x-goog-user-project": project,
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
 }
 
 payload = {
@@ -21,11 +21,9 @@ payload = {
     "prompt": "Identify any SEO problems on https://naroagutierrezgil.com.",
     "sourceContext": {
         "source": "sources/github/borjamoskv/Cortex-Persist",
-        "githubRepoContext": {
-            "startingBranch": "main"
-        }
+        "githubRepoContext": {"startingBranch": "main"},
     },
-    "automationMode": "AUTO_CREATE_PR"
+    "automationMode": "AUTO_CREATE_PR",
 }
 
 url = f"{base}/sessions"
