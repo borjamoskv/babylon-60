@@ -312,6 +312,15 @@ def print_report(run: SweepRun) -> None:
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 async def main() -> None:
+    env_path = Path(__file__).parent.parent / ".env"
+    if env_path.exists():
+        with env_path.open() as f:
+            for line in f:
+                stripped = line.strip()
+                if stripped and not stripped.startswith("#") and "=" in stripped:
+                    key, val = stripped.split("=", 1)
+                    os.environ[key] = val
+
     api_key = os.getenv("JULES_API_KEY", "")
     if not api_key:
         print(
