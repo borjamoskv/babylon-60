@@ -13,6 +13,7 @@ Design principles:
 - entity_events.schema_version tracks payload format evolution per-row, not
   per-table. No global migrations needed for new payload shapes.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -42,6 +43,8 @@ _ROLLBACK_ERRORS = (
     TypeError,
     ValueError,
 )
+
+
 class FactMutationEngine:
     """Solid-State Write Gateway for CORTEX facts.
     Usage::
@@ -60,6 +63,7 @@ class FactMutationEngine:
     If the projection fails, the entire transaction rolls back —
     ``entity_events`` and ``facts`` stay perfectly in sync.
     """
+
     # ── Core API ─────────────────────────────────────────────────────
     async def apply(
         self,
@@ -126,6 +130,7 @@ class FactMutationEngine:
             signer,
         )
         return event_id
+
     # ── Hash-Chain ───────────────────────────────────────────────────
     async def _get_last_hash(
         self,
@@ -139,11 +144,13 @@ class FactMutationEngine:
         ) as cursor:
             row = await cursor.fetchone()
         return row[0] if row else "GENESIS"
+
     async def _get_fact_tenant_id(self, conn: aiosqlite.Connection, fact_id: int) -> str:
         """Resolve the tenant_id for a fact from the materialized view."""
         async with conn.execute("SELECT tenant_id FROM facts WHERE id = ?", (fact_id,)) as cursor:
             row = await cursor.fetchone()
         return row[0] if row and row[0] else "default"
+
     async def _facts_columns(self, conn: aiosqlite.Connection) -> set[str]:
         """Return the facts schema columns for the current connection."""
         cache_key = id(conn)
@@ -155,6 +162,7 @@ class FactMutationEngine:
         columns = {str(row[1]) for row in rows}
         _FACT_COLUMNS_CACHE[cache_key] = columns
         return columns
+
     async def _metadata_column(self, conn: aiosqlite.Connection) -> str | None:
         """Resolve the metadata column name across legacy schemas."""
         columns = await self._facts_columns(conn)
@@ -163,6 +171,7 @@ class FactMutationEngine:
         if "meta" in columns:
             return "meta"
         return None
+
     # ── Projection Layer (MOSKV-1 specific) ──────────────────────────
     async def _project(
         self,
@@ -210,6 +219,7 @@ class FactMutationEngine:
                 event_type,
                 fact_id,
             )
+
     # ── Individual Projectors ────────────────────────────────────────
     async def _proj_decalcify(
         self,
@@ -256,6 +266,7 @@ class FactMutationEngine:
             "WHERE id = ?"
         )
         await conn.execute(query, (new_confidence, ts, new_score, fact_id))
+
     async def _proj_deprecate(
         self,
         conn: aiosqlite.Connection,
@@ -276,6 +287,7 @@ class FactMutationEngine:
             "WHERE id = ?",
             (ts, ts, reason, fact_id),
         )
+
     async def _proj_mutate_to_ghost(
         self,
         conn: aiosqlite.Connection,
@@ -288,6 +300,7 @@ class FactMutationEngine:
             "UPDATE facts SET fact_type = 'ghost', updated_at = ? WHERE id = ?",
             (ts, fact_id),
         )
+
     async def _proj_tombstone(
         self,
         conn: aiosqlite.Connection,
@@ -316,6 +329,7 @@ class FactMutationEngine:
             fact_id,
             report.affected_count,
         )
+
     async def _proj_archaeology_merge(
         self,
         conn: aiosqlite.Connection,
@@ -351,6 +365,7 @@ class FactMutationEngine:
             query += " AND tenant_id = ?"
             params.append(tenant_id or await self._get_fact_tenant_id(conn, fact_id))
         await conn.execute(query, tuple(params))
+
     async def _proj_quarantine(
         self,
         conn: aiosqlite.Connection,
@@ -375,6 +390,7 @@ class FactMutationEngine:
             fact_id,
             report.affected_count,
         )
+
     async def _proj_unquarantine(
         self,
         conn: aiosqlite.Connection,
@@ -387,6 +403,7 @@ class FactMutationEngine:
             "quarantine_reason = NULL, updated_at = ? WHERE id = ?",
             (ts, fact_id),
         )
+
     async def _proj_score_update(
         self,
         conn: aiosqlite.Connection,
@@ -437,6 +454,45 @@ class FactMutationEngine:
                 "UPDATE facts SET confidence = ? WHERE id = ?",
                 (confidence, fact_id),
             )
+
+    def _update_taint_metadata(
+        self, raw_meta: str | None, payload: dict, encrypter: Any, tenant_id: str | None
+    ) -> str | None:
+        if raw_meta:
+            if isinstance(raw_meta, str) and raw_meta.startswith(encrypter.PREFIX):
+                meta = encrypter.decrypt_json(raw_meta, tenant_id=tenant_id) or {}
+                meta.update(
+                    {
+                        "taint_status": payload["taint_status"],
+                        "tainted_by": payload["tainted_by"],
+                        "taint_timestamp": payload["taint_timestamp"],
+                    }
+                )
+                return encrypter.encrypt_json(meta, tenant_id=tenant_id)
+            else:
+                try:
+                    meta = json.loads(raw_meta)
+                except (TypeError, json.JSONDecodeError):
+                    return None
+                else:
+                    meta.update(
+                        {
+                            "taint_status": payload["taint_status"],
+                            "tainted_by": payload["tainted_by"],
+                            "taint_timestamp": payload["taint_timestamp"],
+                        }
+                    )
+                    return json.dumps(meta)
+        elif raw_meta in ("", None):
+            return json.dumps(
+                {
+                    "taint_status": payload["taint_status"],
+                    "tainted_by": payload["tainted_by"],
+                    "taint_timestamp": payload["taint_timestamp"],
+                }
+            )
+        return None
+
     async def _proj_taint_update(
         self,
         conn: aiosqlite.Connection,
@@ -457,40 +513,12 @@ class FactMutationEngine:
             ) as cursor:
                 row = await cursor.fetchone()
             raw_meta = row[0] if row else None
-            if raw_meta:
-                encrypter = get_default_encrypter()
-                if isinstance(raw_meta, str) and raw_meta.startswith(encrypter.PREFIX):
-                    meta = encrypter.decrypt_json(raw_meta, tenant_id=resolved_tenant_id) or {}
-                    meta.update(
-                        {
-                            "taint_status": payload["taint_status"],
-                            "tainted_by": payload["tainted_by"],
-                            "taint_timestamp": payload["taint_timestamp"],
-                        }
-                    )
-                    metadata_value = encrypter.encrypt_json(meta, tenant_id=resolved_tenant_id)
-                else:
-                    try:
-                        meta = json.loads(raw_meta)
-                    except (TypeError, json.JSONDecodeError):
-                        metadata_value = None
-                    else:
-                        meta.update(
-                            {
-                                "taint_status": payload["taint_status"],
-                                "tainted_by": payload["tainted_by"],
-                                "taint_timestamp": payload["taint_timestamp"],
-                            }
-                        )
-                        metadata_value = json.dumps(meta)
-            elif raw_meta in ("", None):
-                metadata_value = json.dumps(
-                    {
-                        "taint_status": payload["taint_status"],
-                        "tainted_by": payload["tainted_by"],
-                        "taint_timestamp": payload["taint_timestamp"],
-                    }
-                )
+
+            encrypter = get_default_encrypter()
+            metadata_value = self._update_taint_metadata(
+                raw_meta, payload, encrypter, resolved_tenant_id
+            )
+
         set_clauses: list[str] = []
         params: list[Any] = []
         if confidence is not None:
@@ -510,6 +538,30 @@ class FactMutationEngine:
             query += " AND tenant_id = ?"
             params.append(resolved_tenant_id)
         await conn.execute(query, tuple(params))
+
+    def _update_parent_metadata(
+        self,
+        raw_meta: str | None,
+        new_parent: int | str | None,
+        encrypter: Any,
+        tenant_id: str | None,
+    ) -> str | None:
+        if raw_meta:
+            if isinstance(raw_meta, str) and raw_meta.startswith(encrypter.PREFIX):
+                meta = encrypter.decrypt_json(raw_meta, tenant_id=tenant_id) or {}
+                meta["parent_decision_id"] = new_parent
+                return encrypter.encrypt_json(meta, tenant_id=tenant_id)
+            else:
+                try:
+                    meta = json.loads(raw_meta)
+                except (TypeError, json.JSONDecodeError):
+                    return None
+                else:
+                    meta["parent_decision_id"] = new_parent
+                    return json.dumps(meta)
+        else:
+            return json.dumps({"parent_decision_id": new_parent})
+
     async def _proj_reparent(
         self,
         conn: aiosqlite.Connection,
@@ -533,29 +585,23 @@ class FactMutationEngine:
             set_clauses.append("parent_id = ?")
             params.append(new_parent)
         metadata_value: str | None = None
-        if metadata_column and "parent_decision_id" not in facts_columns and "parent_id" not in facts_columns:
+        if (
+            metadata_column
+            and "parent_decision_id" not in facts_columns
+            and "parent_id" not in facts_columns
+        ):
             async with conn.execute(
                 f"SELECT {metadata_column} FROM facts WHERE id = ?",
                 (fact_id,),
             ) as cursor:
                 row = await cursor.fetchone()
             raw_meta = row[0] if row else None
-            if raw_meta:
-                encrypter = get_default_encrypter()
-                if isinstance(raw_meta, str) and raw_meta.startswith(encrypter.PREFIX):
-                    meta = encrypter.decrypt_json(raw_meta, tenant_id=resolved_tenant_id) or {}
-                    meta["parent_decision_id"] = new_parent
-                    metadata_value = encrypter.encrypt_json(meta, tenant_id=resolved_tenant_id)
-                else:
-                    try:
-                        meta = json.loads(raw_meta)
-                    except (TypeError, json.JSONDecodeError):
-                        metadata_value = None
-                    else:
-                        meta["parent_decision_id"] = new_parent
-                        metadata_value = json.dumps(meta)
-            else:
-                metadata_value = json.dumps({"parent_decision_id": new_parent})
+
+            encrypter = get_default_encrypter()
+            metadata_value = self._update_parent_metadata(
+                raw_meta, new_parent, encrypter, resolved_tenant_id
+            )
+
         if metadata_column and metadata_value is not None:
             set_clauses.append(f"{metadata_column} = ?")
             params.append(metadata_value)
@@ -570,6 +616,7 @@ class FactMutationEngine:
             query += " AND tenant_id = ?"
             params.append(resolved_tenant_id)
         await conn.execute(query, tuple(params))
+
     async def _proj_restore(
         self,
         conn: aiosqlite.Connection,
@@ -583,6 +630,7 @@ class FactMutationEngine:
             "quarantine_reason = NULL, updated_at = ? WHERE id = ?",
             (ts, fact_id),
         )
+
     # ── Audit / Verification ─────────────────────────────────────────
     async def verify_chain(
         self,
@@ -628,6 +676,7 @@ class FactMutationEngine:
             "integrity_score": (1.0 if not findings else max(0.0, (count - len(findings)) / count)),
             "findings": findings or ["Entity event chain: 100% integrity."],
         }
+
     async def replay_state(
         self,
         conn: aiosqlite.Connection,
@@ -656,5 +705,7 @@ class FactMutationEngine:
                 state["_last_event_type"] = event_type
                 state.update(payload)
         return state
+
+
 # ── Module-level singleton ───────────────────────────────────────────
 MUTATION_ENGINE = FactMutationEngine()

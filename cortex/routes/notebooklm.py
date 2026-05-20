@@ -47,7 +47,7 @@ async def notebooklm_status(
 
     # Domain fragments
     if DOMAINS_DIR.exists():
-        files = list(DOMAINS_DIR.glob("*.md"))
+        files = list(sorted(DOMAINS_DIR.glob("*.md")))
         result["domains"] = {
             "exists": True,
             "file_count": len(files),
@@ -85,7 +85,7 @@ async def notebooklm_status(
 
 @router.post("/v1/notebooklm/digest")
 async def notebooklm_digest(
-    project: Optional[str] = Query(None, description="Optional project filter"),
+    project: str | None = Query(None, description="Optional project filter"),
     output: str = Query("cortex_notebooklm_digest.md", description="Output file path"),
     auth: AuthResult = Depends(require_permission("write")),
 ) -> dict:
@@ -137,7 +137,7 @@ async def notebooklm_fragment(
 
 @router.post("/v1/notebooklm/sync")
 async def notebooklm_sync(
-    drive_path: Optional[str] = Query(None, description="Explicit cloud folder path"),
+    drive_path: str | None = Query(None, description="Explicit cloud folder path"),
     mode: str = Query("both", description="What to sync: digest, domains, or both"),
     auth: AuthResult = Depends(require_permission("write")),
 ) -> dict:
@@ -184,7 +184,7 @@ async def notebooklm_sync(
         synced.append(dest.name)
 
     if mode in ("domains", "both") and DOMAINS_DIR.exists():
-        for f in DOMAINS_DIR.glob("*.md"):
+        for f in sorted(DOMAINS_DIR.glob("*.md")):
             dest = target / f.name
             shutil.copy2(f, dest)
             synced.append(dest.name)
@@ -192,7 +192,7 @@ async def notebooklm_sync(
     cutoff = time.time() - (7 * 86400)
     cleaned = 0
     synced_set = set(synced)
-    for f in target.glob("*.md"):
+    for f in sorted(target.glob("*.md")):
         if os.path.getmtime(f) < cutoff and f.name not in synced_set:
             f.unlink()
             cleaned += 1

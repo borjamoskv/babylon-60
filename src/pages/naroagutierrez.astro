@@ -114,6 +114,9 @@ const pressLinks = [
 			</nav>
 
 			<div class="masthead-actions">
+				<a class="button-tertiary" href="/dashboard" aria-label="Acceder al Panel de Control del Espacio Gemelo">
+					Twin Panel
+				</a>
 				<a class="button-tertiary" href="/vsa">
 					VSA Shell
 				</a>
@@ -211,6 +214,8 @@ const pressLinks = [
 					Selección curada de obras maestras que ilustran la evolución de sus técnicas mixtas, texturas minerales de mica y soporte conceptual de retratos.
 				</p>
 			</div>
+
+			<div id="twin-banner-mount"></div>
 
 			<div class="artworks-grid">
 				{artworks.map((work) => (
@@ -468,6 +473,7 @@ const pressLinks = [
 			<p class="footer-note">CORTEX Persist / Wiki de Naroa Gutiérrez Gil. Trabajo real verificable (C5-REAL).</p>
 			<div class="footer-links">
 				<a href="/">Inicio</a>
+				<a href="/dashboard">Twin Dashboard</a>
 				<a href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noreferrer">GitHub</a>
 				<a href="/vsa">VSA Explorer</a>
 			</div>
@@ -699,6 +705,158 @@ const pressLinks = [
 					fireEgg();
 				}
 			});
+
+			// =========================================================================
+			// TWIN SPACE INTERACTIVE RENDERING (OVERWRITE PORTFOLIO IMAGES & INFO)
+			// =========================================================================
+			const SVG_TEMPLATES: Record<string, (title: string) => string> = {
+				'slate-amy': (title: string) => `
+					<svg viewBox="0 0 400 300" class="art-svg" style="width:100%;height:100%;display:block;" aria-label="Abstract representation of ${title}">
+						<rect width="100%" height="100%" fill="#080808"/>
+						<path d="M 50 80 L 350 50 L 370 240 L 30 260 Z" fill="#1b1c22" stroke="#2b3be5" stroke-width="1.5" opacity="0.85"/>
+						<path d="M 60 90 L 340 60 L 350 230 L 45 245 Z" fill="#14151a" stroke="#00ff41" stroke-width="1" opacity="0.7"/>
+						<circle cx="150" cy="140" r="45" fill="none" stroke="#2b3be5" stroke-dasharray="4 6" stroke-width="2"/>
+						<circle cx="250" cy="160" r="35" fill="none" stroke="#00ff41" stroke-dasharray="3 3" stroke-width="1.5"/>
+						<path d="M 120 150 Q 200 100 280 170" fill="none" stroke="#cc0000" stroke-width="3" stroke-linecap="round"/>
+						<text x="20" y="285" fill="#a6b3d2" font-family="monospace" font-size="10">SLATE SUBSTRATE // MICA OVERLAY</text>
+					</svg>
+				`,
+				'slate-marilyn': (title: string) => `
+					<svg viewBox="0 0 400 300" class="art-svg" style="width:100%;height:100%;display:block;" aria-label="Abstract representation of ${title}">
+						<rect width="100%" height="100%" fill="#080808"/>
+						<path d="M 60 60 L 340 70 L 320 250 L 80 230 Z" fill="#1e1f26" stroke="#2b3be5" stroke-width="1.5" opacity="0.85"/>
+						<path d="M 70 70 L 330 80 L 310 240 L 90 220 Z" fill="#121318" stroke="#00ff41" stroke-width="1" opacity="0.6"/>
+						<rect x="140" y="110" width="120" height="80" fill="none" stroke="#2b3be5" stroke-width="1" stroke-dasharray="5 5"/>
+						<path d="M 170 180 Q 200 130 230 180" fill="none" stroke="#cc0000" stroke-width="2.5"/>
+						<circle cx="200" cy="140" r="25" fill="none" stroke="#00ff41" stroke-width="1.5"/>
+						<text x="20" y="285" fill="#a6b3d2" font-family="monospace" font-size="10">PIZARRA // DUO-TONE TEXTURE</text>
+					</svg>
+				`,
+				'portrait-freddie': (title: string) => `
+					<svg viewBox="0 0 400 300" class="art-svg" style="width:100%;height:100%;display:block;" aria-label="Abstract representation of ${title}">
+						<rect width="100%" height="100%" fill="#080808"/>
+						<path d="M 100 50 L 300 50 L 300 250 L 100 250 Z" fill="#14141c" stroke="#2b3be5" stroke-width="1"/>
+						<circle cx="200" cy="110" r="50" fill="none" stroke="#00ff41" stroke-width="2"/>
+						<path d="M 170 170 H 230" stroke="#cc0000" stroke-width="4"/>
+						<path d="M 200 110 L 200 200" stroke="#2b3be5" stroke-dasharray="2 4" stroke-width="1"/>
+						<text x="20" y="285" fill="#a6b3d2" font-family="monospace" font-size="10">WOOD PANEL // DYNAMIC TRIBUTE</text>
+					</svg>
+				`,
+				'mirror': (title: string) => `
+					<svg viewBox="0 0 400 300" class="art-svg" style="width:100%;height:100%;display:block;" aria-label="Abstract representation of ${title}">
+						<rect width="100%" height="100%" fill="#080808"/>
+						<ellipse cx="200" cy="150" rx="90" ry="70" fill="#101322" stroke="#2b3be5" stroke-width="2"/>
+						<ellipse cx="200" cy="150" rx="80" ry="60" fill="none" stroke="#00ff41" stroke-dasharray="10 4 2 4" stroke-width="1"/>
+						<path d="M 130 150 Q 200 220 270 150" fill="none" stroke="#cc0000" stroke-width="3" stroke-linecap="round"/>
+						<text x="20" y="285" fill="#a6b3d2" font-family="monospace" font-size="10">CANVAS // REFLECTION ENGINE</text>
+					</svg>
+				`,
+				'can': (title: string) => `
+					<svg viewBox="0 0 400 300" class="art-svg" style="width:100%;height:100%;display:block;" aria-label="Abstract representation of ${title}">
+						<rect width="100%" height="100%" fill="#080808"/>
+						<rect x="130" y="70" width="140" height="160" rx="15" fill="#161822" stroke="#2b3be5" stroke-width="2"/>
+						<ellipse cx="200" cy="70" rx="70" ry="12" fill="#202436" stroke="#00ff41" stroke-width="1"/>
+						<path d="M 150 140 H 250" stroke="#cc0000" stroke-width="2.5"/>
+						<path d="M 150 160 H 250" stroke="#00ff41" stroke-width="1.5" stroke-dasharray="3 3"/>
+						<text x="200" y="125" fill="#edf5ff" font-family="'Orbitron', sans-serif" font-size="12" letter-spacing="1" text-anchor="middle">AMOR</text>
+						<text x="20" y="285" fill="#a6b3d2" font-family="monospace" font-size="10">ENLATAS SERIES // POP METAPHOR</text>
+					</svg>
+				`,
+				'gold-tears': (title: string) => `
+					<svg viewBox="0 0 400 300" class="art-svg" style="width:100%;height:100%;display:block;" aria-label="Abstract representation of ${title}">
+						<rect width="100%" height="100%" fill="#080808"/>
+						<polygon points="200,60 270,230 130,230" fill="#1c1810" stroke="#d8b56a" stroke-width="2"/>
+						<path d="M 200 60 V 230" stroke="#00ff41" stroke-width="1" stroke-dasharray="5 5"/>
+						<circle cx="200" cy="130" r="10" fill="#cc0000"/>
+						<path d="M 200 130 Q 180 180 185 220" fill="none" stroke="#d8b56a" stroke-width="3" stroke-linecap="round"/>
+						<path d="M 200 130 Q 220 190 215 220" fill="none" stroke="#d8b56a" stroke-width="3" stroke-linecap="round"/>
+						<text x="20" y="285" fill="#a6b3d2" font-family="monospace" font-size="10">GOLDEN SERIES // METALLIC ACCENT</text>
+					</svg>
+				`,
+				'portrait-peter': (title: string) => `
+					<svg viewBox="0 0 400 300" class="art-svg" style="width:100%;height:100%;display:block;" aria-label="Abstract representation of ${title}">
+						<rect width="100%" height="100%" fill="#080808"/>
+						<path d="M 120 70 Q 200 30 280 70 T 320 220 Q 200 270 80 220 Z" fill="#13141a" stroke="#2b3be5" stroke-width="1" opacity="0.8"/>
+						<path d="M 160 140 C 160 110, 240 110, 240 140" fill="none" stroke="#00ff41" stroke-width="2"/>
+						<circle cx="200" cy="150" r="6" fill="#cc0000"/>
+						<path d="M 150 180 C 180 210, 220 210, 250 180" fill="none" stroke="#edf5ff" stroke-width="1.5" stroke-dasharray="2 2"/>
+						<text x="20" y="285" fill="#a6b3d2" font-family="monospace" font-size="10">RETRATOS // HIGHCONTRAST CHARCOAL</text>
+					</svg>
+				`
+			};
+
+			interface CustomArtwork {
+				id: string;
+				title: string;
+				series: string;
+				year: string;
+				medium: string;
+				commons: string;
+				svgType: string;
+			}
+
+			const stored = localStorage.getItem('naroa_artworks_custom');
+			if (stored) {
+				try {
+					const customArtworks: CustomArtwork[] = JSON.parse(stored);
+					const bannerMount = document.getElementById('twin-banner-mount');
+					const grid = document.querySelector('.artworks-grid');
+					
+					if (bannerMount && grid) {
+						bannerMount.innerHTML = `
+							<div class="twin-alert surface-sunken font-mono" style="border: 1px solid var(--accent-green); padding: 0.8rem 1.2rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; background: rgba(0, 255, 65, 0.04); font-size: 0.8rem; flex-wrap: wrap; gap: 0.8rem;">
+								<span style="color: var(--accent-green); display: flex; align-items: center; gap: 0.5rem;">
+									<span style="width: 8px; height: 8px; background-color: var(--accent-green); border-radius: 50%; display: inline-block; box-shadow: 0 0 8px var(--accent-green);"></span>
+									MODO ESPACIO GEMELO ACTIVO — Vista Previa Local
+								</span>
+								<div style="display: flex; gap: 0.6rem;">
+									<a href="/dashboard" class="button-primary compact" style="padding: 0.35rem 0.75rem; text-decoration: none; font-size: 0.78rem;">Abrir Dashboard</a>
+									<button id="reset-twin-btn" class="button-secondary compact" style="padding: 0.35rem 0.75rem; font-size: 0.78rem; cursor: pointer; background: transparent; border: 1px solid var(--accent-red); color: var(--accent-red);">Restablecer Original</button>
+								</div>
+							</div>
+						`;
+						
+						const resetBtn = document.getElementById('reset-twin-btn');
+						if (resetBtn) {
+							resetBtn.addEventListener('click', () => {
+								localStorage.removeItem('naroa_artworks_custom');
+								window.location.reload();
+							});
+						}
+
+						grid.innerHTML = '';
+						customArtworks.forEach(work => {
+							const article = document.createElement('article');
+							article.className = 'artwork-card-premium surface-sunken';
+							
+							const svgContent = SVG_TEMPLATES[work.svgType] ? SVG_TEMPLATES[work.svgType](work.title) : SVG_TEMPLATES['slate-amy'](work.title);
+							
+							article.innerHTML = `
+								<div class="artwork-preview">
+									${svgContent}
+								</div>
+								<div class="artwork-info">
+									<div class="info-header">
+										<span class="artwork-tag-series">${work.series}</span>
+										<span class="artwork-tag-year">${work.year}</span>
+									</div>
+									<h3>${work.title}</h3>
+									<p class="artwork-medium">${work.medium}</p>
+									<div class="artwork-actions">
+										<span class="commons-tag">Commons: ${work.id}</span>
+										<a href="https://commons.wikimedia.org/wiki/File:${work.commons}" target="_blank" rel="noreferrer" class="button-tertiary compact">
+											Wiki Asset
+										</a>
+									</div>
+								</div>
+							`;
+							grid.appendChild(article);
+						});
+					}
+				} catch (e) {
+					console.error('Error loading custom twin artworks', e);
+				}
+			}
 		})();
 	</script>
 </SiteLayout>
