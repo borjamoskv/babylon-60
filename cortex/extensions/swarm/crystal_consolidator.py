@@ -158,20 +158,22 @@ async def _execute_semantic_merge(
         cursor = db_conn.cursor()
         data: dict[str, dict[str, Any]] = {}
 
-        for v in mergeable:
+        # Batch load to eliminate N+1 query overhead
+        fact_ids = [v.fact_id for v in mergeable]
+        if fact_ids:
+            placeholders = ",".join("?" for _ in fact_ids)
             cursor.execute(
-                """
-                SELECT f.content, v.embedding FROM facts_meta f
+                f"""
+                SELECT f.id, f.content, v.embedding FROM facts_meta f
                 JOIN vec_facts v ON f.rowid = v.rowid
-                WHERE f.id = ?
+                WHERE f.id IN ({placeholders})
                 """,
-                (v.fact_id,),
+                fact_ids,
             )
-            row = cursor.fetchone()
-            if row:
-                data[v.fact_id] = {
-                    "content": row[0],
-                    "embedding": np.frombuffer(row[1], dtype=np.float32),
+            for row in cursor.fetchall():
+                data[row[0]] = {
+                    "content": row[1],
+                    "embedding": np.frombuffer(row[2], dtype=np.float32),
                 }
     except (sqlite3.Error, ValueError, TypeError) as e:
         logger.error("🔗 [MERGE] Failed to load data: %s", e)
