@@ -28,6 +28,7 @@ def test_validate_content_decision_replacement():
     normalized4 = validate_content("project1", content4, "memory")
     assert normalized4 == "Just a regular memory fact."
 
+
 @pytest.mark.asyncio
 async def test_check_dedup_found():
     """Test check_dedup returns an existing ID if found."""
