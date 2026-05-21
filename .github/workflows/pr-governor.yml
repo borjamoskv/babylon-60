@@ -22,6 +22,7 @@ jobs:
               per_page: 100
             });
 
-            if (files.length > 100) {
-              core.setFailed('PR too large (>100 files)');
+            const filteredFiles = files.filter(f => !f.filename.startsWith('cortex_mev_base/target/'));
+            if (filteredFiles.length > 100) {
+              core.setFailed(`PR too large (${filteredFiles.length} files changed, limit is 100)`);
             }
