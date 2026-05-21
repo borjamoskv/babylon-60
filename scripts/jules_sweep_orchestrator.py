@@ -16,13 +16,20 @@ Jules API:         https://jules.google.com/api/v1alpha  (env: JULES_API_KEY)
 from __future__ import annotations
 
 import asyncio
+import base64
 import json
 import os
+import re
+import subprocess
 import sys
 import uuid
 from dataclasses import dataclass, asdict, field
 from datetime import datetime, timezone
 from enum import Enum
+from pathlib import Path
+from typing import Any
+
+import httpx
 
 
 def route_task(intent: str, context_size: int = 0) -> str:
@@ -35,11 +42,6 @@ def route_task(intent: str, context_size: int = 0) -> str:
 
     return "gemini-3.5-flash"
 
-
-from pathlib import Path
-from typing import Any
-
-import httpx
 
 # ── Constants ────────────────────────────────────────────────────────────────
 
@@ -169,10 +171,6 @@ PROMPTS: dict[SweepKind, str] = {
 
 def get_keychain_token() -> str | None:
     try:
-        import subprocess
-        import base64
-        import json
-        from datetime import datetime, timezone
 
         def retrieve_token():
             try:
@@ -215,8 +213,6 @@ def get_keychain_token() -> str | None:
 
 def get_git_source_id() -> str:
     try:
-        import subprocess
-
         url = subprocess.check_output(
             ["git", "config", "--get", "remote.origin.url"], text=True
         ).strip()
@@ -406,8 +402,8 @@ class JulesClient:
 # ── Sweep execution ───────────────────────────────────────────────────────────
 
 
-async def run_sweep(task: SweepTask, jules: JulesClient) -> SweepTask:
-    """Dispatch one sweep task to Jules, poll, parse findings."""
+async def run_sweep(task: SweepTask, jules: JulesClient, client: httpx.AsyncClient) -> SweepTask:
+    """Dispatch one sweep task to Jules, poll, parse findings using shared connection pool."""
     source_id = get_git_source_id()
     title = f"Audit {TARGET_DOMAIN} ({task.kind.value})"
     prompt = PROMPTS[task.kind].format(url=task.target_url)
@@ -417,133 +413,127 @@ async def run_sweep(task: SweepTask, jules: JulesClient) -> SweepTask:
 
     print(f"  [{task.kind.upper()}] Dispatching → Jules [{task.model_id}]...", flush=True)
 
-    async with httpx.AsyncClient() as client:
-        try:
-            jules_id = await jules.create_task(
-                title, prompt, source_id, client, model_id=task.model_id
-            )
-            task.jules_id = jules_id
-            task.status = "dispatched"
-            print(f"  [{task.kind.upper()}] Jules ID: {jules_id}", flush=True)
+    try:
+        jules_id = await jules.create_task(title, prompt, source_id, client, model_id=task.model_id)
+        task.jules_id = jules_id
+        task.status = "dispatched"
+        print(f"  [{task.kind.upper()}] Jules ID: {jules_id}", flush=True)
 
-            observer = SweepTaskObserver(jules)
-            result = await jules.poll_task(jules_id, client, observer)
-            task.completed_at = _now()
+        observer = SweepTaskObserver(jules)
+        result = await jules.poll_task(jules_id, client, observer)
+        task.completed_at = _now()
 
-            status = result.get("swebotTaskStatus", "")
-            is_awaiting = result.get("isAwaitingReview", False)
+        status = result.get("swebotTaskStatus", "")
+        is_awaiting = result.get("isAwaitingReview", False)
 
-            if status == "SWEBOT_TASK_STATUS_COMPLETED" or is_awaiting:
-                task.status = "completed"
-                # Extract findings using robust parser
-                findings = []
-                found_json_file = False
+        if status == "SWEBOT_TASK_STATUS_COMPLETED" or is_awaiting:
+            task.status = "completed"
+            # Extract findings using robust parser
+            findings = []
+            found_json_file = False
 
-                # Check taskCompleted in activitySteps and outputs
-                all_completed_activities = []
+            # Check taskCompleted in activitySteps and outputs
+            all_completed_activities = []
+            for step in result.get("activitySteps", []):
+                act = step.get("agentActivity", {})
+                if "taskCompleted" in act:
+                    all_completed_activities.append(act["taskCompleted"])
+            for out in result.get("outputs", []):
+                if "taskCompleted" in out:
+                    all_completed_activities.append(out["taskCompleted"])
+
+            for tc in all_completed_activities:
+                commit = tc.get("commit", {})
+                patch = commit.get("patch", {})
+                diffs = patch.get("fileDiffsV2", []) or patch.get("fileDiffs", [])
+                for d in diffs:
+                    path = d.get("fileAfter", {}).get("path", "")
+                    if path.endswith(".json"):
+                        b64_content = d.get("fileAfter", {}).get("contentAsBytes", "")
+                        if b64_content:
+                            try:
+                                content_str = base64.b64decode(b64_content).decode("utf-8")
+                                parsed = json.loads(content_str)
+                                if isinstance(parsed, dict):
+                                    found_list = False
+                                    for _k, v in parsed.items():
+                                        if isinstance(v, list):
+                                            findings.extend(v)
+                                            found_list = True
+                                            break
+                                    if not found_list:
+                                        findings.append(parsed)
+                                elif isinstance(parsed, list):
+                                    findings.extend(parsed)
+                                found_json_file = True
+                            except Exception as e:
+                                print(f"Failed to decode/parse json file {path}: {e}")
+
+            # Fallback to agent messages / reviews if no JSON file was found
+            if not found_json_file:
+                text_parts = []
                 for step in result.get("activitySteps", []):
                     act = step.get("agentActivity", {})
-                    if "taskCompleted" in act:
-                        all_completed_activities.append(act["taskCompleted"])
+                    if "agentMessaged" in act:
+                        text_parts.append(act["agentMessaged"].get("text", ""))
+                    elif "codeReviewRequested" in act:
+                        text_parts.append(act["codeReviewRequested"].get("criticOutput", ""))
                 for out in result.get("outputs", []):
-                    if "taskCompleted" in out:
-                        all_completed_activities.append(out["taskCompleted"])
+                    if "agentMessaged" in out:
+                        text_parts.append(out["agentMessaged"].get("text", ""))
+                    elif "codeReviewRequested" in out:
+                        text_parts.append(out["codeReviewRequested"].get("criticOutput", ""))
 
-                for tc in all_completed_activities:
-                    commit = tc.get("commit", {})
-                    patch = commit.get("patch", {})
-                    diffs = patch.get("fileDiffsV2", []) or patch.get("fileDiffs", [])
-                    for d in diffs:
-                        path = d.get("fileAfter", {}).get("path", "")
-                        if path.endswith(".json"):
-                            b64_content = d.get("fileAfter", {}).get("contentAsBytes", "")
-                            if b64_content:
-                                import base64
+                full_text = "\n\n".join(text_parts)
+                json_blocks = re.findall(r"```json\s*(.*?)\s*```", full_text, re.DOTALL)
+                for jb in json_blocks:
+                    try:
+                        parsed = json.loads(jb)
+                        if isinstance(parsed, list):
+                            findings.extend(parsed)
+                        elif isinstance(parsed, dict):
+                            for _k, v in parsed.items():
+                                if isinstance(v, list):
+                                    findings.extend(v)
+                                    break
+                            else:
+                                findings.append(parsed)
+                        found_json_file = True
+                    except Exception:
+                        pass
 
-                                try:
-                                    content_str = base64.b64decode(b64_content).decode("utf-8")
-                                    parsed = json.loads(content_str)
-                                    if isinstance(parsed, dict):
-                                        found_list = False
-                                        for _k, v in parsed.items():
-                                            if isinstance(v, list):
-                                                findings.extend(v)
-                                                found_list = True
-                                                break
-                                        if not found_list:
-                                            findings.append(parsed)
-                                    elif isinstance(parsed, list):
-                                        findings.extend(parsed)
-                                    found_json_file = True
-                                except Exception as e:
-                                    print(f"Failed to decode/parse json file {path}: {e}")
+                if not findings:
+                    findings.append({"raw_output": full_text or "No text output found."})
 
-                # Fallback to agent messages / reviews if no JSON file was found
-                if not found_json_file:
-                    text_parts = []
-                    for step in result.get("activitySteps", []):
-                        act = step.get("agentActivity", {})
-                        if "agentMessaged" in act:
-                            text_parts.append(act["agentMessaged"].get("text", ""))
-                        elif "codeReviewRequested" in act:
-                            text_parts.append(act["codeReviewRequested"].get("criticOutput", ""))
-                    for out in result.get("outputs", []):
-                        if "agentMessaged" in out:
-                            text_parts.append(out["agentMessaged"].get("text", ""))
-                        elif "codeReviewRequested" in out:
-                            text_parts.append(out["codeReviewRequested"].get("criticOutput", ""))
+            task.findings = findings
+        else:
+            task.status = "failed"
+            task.findings = [{"error": result.get("error", "unknown")}]
 
-                    full_text = "\n\n".join(text_parts)
-                    import re
-
-                    json_blocks = re.findall(r"```json\s*(.*?)\s*```", full_text, re.DOTALL)
-                    for jb in json_blocks:
-                        try:
-                            parsed = json.loads(jb)
-                            if isinstance(parsed, list):
-                                findings.extend(parsed)
-                            elif isinstance(parsed, dict):
-                                for _k, v in parsed.items():
-                                    if isinstance(v, list):
-                                        findings.extend(v)
-                                        break
-                                else:
-                                    findings.append(parsed)
-                            found_json_file = True
-                        except Exception:
-                            pass
-
-                    if not findings:
-                        findings.append({"raw_output": full_text or "No text output found."})
-
-                task.findings = findings
-            else:
-                task.status = "failed"
-                task.findings = [{"error": result.get("error", "unknown")}]
-
-        except httpx.HTTPStatusError as exc:
-            task.status = "api_error"
-            task.findings = [
-                {"http_status": exc.response.status_code, "detail": str(exc.response.text)}
-            ]
-        except TimeoutError as exc:
-            task.status = "timeout"
-            task.findings = [{"error": str(exc)}]
-        except Exception as exc:  # noqa: BLE001
-            task.status = "error"
-            task.findings = [{"error": str(exc)}]
+    except httpx.HTTPStatusError as exc:
+        task.status = "api_error"
+        task.findings = [
+            {"http_status": exc.response.status_code, "detail": str(exc.response.text)}
+        ]
+    except TimeoutError as exc:
+        task.status = "timeout"
+        task.findings = [{"error": str(exc)}]
+    except Exception as exc:  # noqa: BLE001
+        task.status = "error"
+        task.findings = [{"error": str(exc)}]
 
     _print_findings(task)
     return task
 
 
 def _print_findings(task: SweepTask) -> None:
-    """Print a compact summary of findings to stdout."""
+    """Print a compact summary of findings to stdout safely."""
     counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
     for f in task.findings:
-        sev = f.get("severity", "").lower()
-        if sev in counts:
-            counts[sev] += 1
+        if isinstance(f, dict):
+            sev = f.get("severity", "").lower()
+            if sev in counts:
+                counts[sev] += 1
 
     total = len(task.findings)
     summary = " · ".join(f"{v} {k}" for k, v in counts.items() if v > 0) or "no structured findings"
@@ -668,11 +658,12 @@ async def main() -> None:
     print(f"\n🚀 Jules Sweep — {TARGET_DOMAIN}")
     print(f"   Run ID: {run.run_id}\n")
 
-    # Dispatch all three sweeps concurrently
-    completed = await asyncio.gather(
-        *[run_sweep(task, jules) for task in run.tasks],
-        return_exceptions=False,
-    )
+    # Dispatch all three sweeps concurrently using a single client session
+    async with httpx.AsyncClient() as client:
+        completed = await asyncio.gather(
+            *[run_sweep(task, jules, client) for task in run.tasks],
+            return_exceptions=False,
+        )
     run.tasks = list(completed)
     run.finished = _now()
 
