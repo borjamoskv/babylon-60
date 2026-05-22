@@ -65,10 +65,12 @@ class CortexPipelineBridge:
         from cortex.context.assembler import ContextAssembler
 
         chroma_collection = self._init_chroma()
+        vsa_adapter = self._init_vsa()
         fact_adapter = FactStoreAdapter(self._engine)
         context_assembler = ContextAssembler(
             fact_store=fact_adapter,
             chroma_collection=chroma_collection,
+            vsa_bridge=vsa_adapter,
         )
 
         # 3. Agent Router
@@ -134,11 +136,31 @@ class CortexPipelineBridge:
             logger.debug("[BRIDGE] SwarmBudgetManager not available")
         return None
 
+    def _init_vsa(self) -> Any | None:
+        """Initialize VSA-SDM adapter if available."""
+        try:
+            from cortex.context.vsa_adapter import VSAContextAdapter
+
+            adapter = VSAContextAdapter(agent_id="cortex-pipeline")
+            if adapter.is_available:
+                logger.info("[BRIDGE] VSA-SDM memory adapter initialized")
+                return adapter
+            logger.debug("[BRIDGE] VSA engine not available — algebraic context disabled")
+        except ImportError:
+            logger.debug("[BRIDGE] VSA adapter not available")
+        except Exception as e:
+            logger.warning("[BRIDGE] VSA init failed: %s", e)
+        return None
+
     async def run(self, request: PipelineRequest) -> PipelineResult:
         """Execute a full E2E pipeline with real infrastructure."""
         await self.initialize()
         assert self._orchestrator is not None
         return await self._orchestrator.run_async(request)
+
+    async def run_async(self, request: PipelineRequest) -> PipelineResult:
+        """Execute pipeline via native async path (alias for run)."""
+        return await self.run(request)
 
     async def run_intent(
         self,
