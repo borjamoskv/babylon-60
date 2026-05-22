@@ -47,12 +47,14 @@ class CortexOrchestrator:
         delivery_manager: Any | None = None,
         budget_manager: Any | None = None,
         ledger: Any | None = None,
+        agent_executor: Any | None = None,
     ):
         self._context = context_assembler
         self._router = agent_router
         self._delivery = delivery_manager
         self._budget = budget_manager
         self._ledger = ledger
+        self._executor = agent_executor
         self._traces: list[StageTrace] = []
 
     def run(self, request: PipelineRequest) -> PipelineResult:
@@ -215,9 +217,7 @@ class CortexOrchestrator:
             tenant_id=request.tenant_id,
         )
 
-    def _plan(
-        self, request: PipelineRequest, context: ContextPacket
-    ) -> dict[str, Any]:
+    def _plan(self, request: PipelineRequest, context: ContextPacket) -> dict[str, Any]:
         """Route request to appropriate agent(s)."""
         if self._router is None:
             # Default: single general-purpose agent
@@ -250,21 +250,62 @@ class CortexOrchestrator:
                     f"(limit: ${request.budget_limit_usd:.4f})"
                 )
 
+        # Real LLM dispatch via AgentExecutor
+        if self._executor is not None:
+            import asyncio
+
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                loop = None
+
+            if loop and loop.is_running():
+                # We're already in an async context — use create_task
+                import concurrent.futures
+
+                with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                    result = loop.run_in_executor(
+                        pool,
+                        lambda: asyncio.run(
+                            self._executor.execute(
+                                intent=request.intent,
+                                context=context,
+                                plan=plan,
+                                budget_remaining=request.budget_limit_usd,
+                            )
+                        ),
+                    )
+                    # This is sync context, so we need run_until_complete
+                    import asyncio as _aio
+
+                    new_loop = _aio.new_event_loop()
+                    try:
+                        return new_loop.run_until_complete(result)
+                    finally:
+                        new_loop.close()
+            else:
+                return asyncio.run(
+                    self._executor.execute(
+                        intent=request.intent,
+                        context=context,
+                        plan=plan,
+                        budget_remaining=request.budget_limit_usd,
+                    )
+                )
+
+        # Fallback: structured stub when no executor is available
         agents = plan.get("agents", ["general"])
         results = []
 
         for agent_id in agents:
             logger.debug("  [EXECUTION] Running agent: %s", agent_id)
-            # In the full implementation, this dispatches to the actual
-            # agent engine. For now, we structure the contract.
             agent_result = {
                 "agent_id": agent_id,
                 "status": "executed",
-                "content": None,  # Populated by real agent
+                "content": None,
             }
             results.append(agent_result)
 
-        # Flatten single-agent results
         if len(results) == 1:
             return results[0]
         return {"multi_agent": True, "results": results}

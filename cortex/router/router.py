@@ -28,10 +28,38 @@ class AgentCapability:
 
 
 _DEFAULTS: list[AgentCapability] = [
-    AgentCapability("security-analyst", [r"vulnerab", r"exploit", r"bounty", r"audit.*contract", r"cve-"], 0, 8192, 0.003, "anthropic"),
-    AgentCapability("code-engineer", [r"implement", r"refactor", r"debug", r"build", r"python", r"rust"], 1, 4096, 0.001, "gemini"),
-    AgentCapability("researcher", [r"research", r"analyze", r"compare", r"state.?of.?the.?art"], 1, 4096, 0.001, "gemini"),
-    AgentCapability("memory-ops", [r"remember", r"recall", r"forget", r"persist", r"knowledge"], 2, 2048, 0.0005, "default"),
+    AgentCapability(
+        "security-analyst",
+        [r"vulnerab", r"exploit", r"bounty", r"audit.*contract", r"cve-"],
+        0,
+        8192,
+        0.003,
+        "anthropic",
+    ),
+    AgentCapability(
+        "code-engineer",
+        [r"implement", r"refactor", r"debug", r"build", r"python", r"rust"],
+        1,
+        4096,
+        0.001,
+        "gemini",
+    ),
+    AgentCapability(
+        "researcher",
+        [r"research", r"analyze", r"compare", r"state.?of.?the.?art"],
+        1,
+        4096,
+        0.001,
+        "gemini",
+    ),
+    AgentCapability(
+        "memory-ops",
+        [r"remember", r"recall", r"forget", r"persist", r"knowledge"],
+        2,
+        2048,
+        0.0005,
+        "default",
+    ),
     AgentCapability("general", [r".*"], 99, 4096, 0.001, "gemini"),
 ]
 
@@ -49,9 +77,17 @@ class AgentRouter:
     def register_agent(self, cap: AgentCapability) -> None:
         self._caps.append(cap)
         self._caps.sort(key=lambda c: c.priority)
-        self._compiled = [(c, [re.compile(p, re.IGNORECASE) for p in c.patterns]) for c in self._caps]
+        self._compiled = [
+            (c, [re.compile(p, re.IGNORECASE) for p in c.patterns]) for c in self._caps
+        ]
 
-    def route(self, intent: str, context: ContextPacket | None = None, budget_remaining: float = 0.10, max_agents: int = 3) -> dict[str, Any]:
+    def route(
+        self,
+        intent: str,
+        context: ContextPacket | None = None,
+        budget_remaining: float = 0.10,
+        max_agents: int = 3,
+    ) -> dict[str, Any]:
         matches: list[AgentCapability] = []
         for cap, patterns in self._compiled:
             if cap.agent_id == "general":
@@ -77,4 +113,9 @@ class AgentRouter:
         agents = [c.agent_id for c in affordable]
         est_cost = sum((c.max_tokens / 1000) * c.cost_per_1k_tokens for c in affordable)
         logger.info("🎯 [ROUTER] '%s' → %s (est=$%.4f)", intent[:60], agents, est_cost)
-        return {"agents": agents, "strategy": "sequential" if len(agents) <= 1 else "cascade", "max_tokens": max((c.max_tokens for c in affordable), default=4096), "estimated_cost": est_cost}
+        return {
+            "agents": agents,
+            "strategy": "sequential" if len(agents) <= 1 else "cascade",
+            "max_tokens": max((c.max_tokens for c in affordable), default=4096),
+            "estimated_cost": est_cost,
+        }

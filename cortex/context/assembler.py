@@ -87,9 +87,7 @@ class ContextAssembler:
         )
         return packet
 
-    def _resolve_hints(
-        self, hints: list[str], packet: ContextPacket, budget: int
-    ) -> int:
+    def _resolve_hints(self, hints: list[str], packet: ContextPacket, budget: int) -> int:
         """Force-include specified Knowledge Items by name."""
         for hint in hints:
             ki_path = os.path.join(KNOWLEDGE_DIR, hint, "artifacts", "overview.md")
@@ -105,12 +103,14 @@ class ContextAssembler:
                         content = content[: budget * 4]
                         token_cost = budget
 
-                    packet.knowledge_items.append({
-                        "source": hint,
-                        "content": content,
-                        "method": "hint",
-                        "tokens": token_cost,
-                    })
+                    packet.knowledge_items.append(
+                        {
+                            "source": hint,
+                            "content": content,
+                            "method": "hint",
+                            "tokens": token_cost,
+                        }
+                    )
                     packet.relevance_scores[hint] = 1.0  # Explicit = max relevance
                     budget -= token_cost
                     logger.debug("  [HINT] Loaded KI '%s' (%d tokens)", hint, token_cost)
@@ -121,9 +121,7 @@ class ContextAssembler:
 
         return budget
 
-    def _search_chroma(
-        self, intent: str, packet: ContextPacket, budget: int
-    ) -> int:
+    def _search_chroma(self, intent: str, packet: ContextPacket, budget: int) -> int:
         """Semantic search via ChromaDB collection."""
         try:
             results = self._chroma.query(
@@ -152,13 +150,15 @@ class ContextAssembler:
 
                         relevance = max(0.0, 1.0 - distance)
 
-                        packet.knowledge_items.append({
-                            "source": source,
-                            "content": doc,
-                            "method": "semantic",
-                            "tokens": token_cost,
-                            "relevance": relevance,
-                        })
+                        packet.knowledge_items.append(
+                            {
+                                "source": source,
+                                "content": doc,
+                                "method": "semantic",
+                                "tokens": token_cost,
+                                "relevance": relevance,
+                            }
+                        )
                         packet.relevance_scores[source] = relevance
                         packet.embeddings_used.append(source)
                         budget -= token_cost
@@ -173,9 +173,7 @@ class ContextAssembler:
 
         return max(0, budget)
 
-    def _search_vsa(
-        self, intent: str, packet: ContextPacket, budget: int
-    ) -> int:
+    def _search_vsa(self, intent: str, packet: ContextPacket, budget: int) -> int:
         """Algebraic recall via VSA-SDM bridge."""
         try:
             results = self._vsa.query(intent, top_k=3)
@@ -187,12 +185,14 @@ class ContextAssembler:
                         content = content[: budget * 4]
                         token_cost = budget
 
-                    packet.knowledge_items.append({
-                        "source": item.get("id", "vsa"),
-                        "content": content,
-                        "method": "vsa",
-                        "tokens": token_cost,
-                    })
+                    packet.knowledge_items.append(
+                        {
+                            "source": item.get("id", "vsa"),
+                            "content": content,
+                            "method": "vsa",
+                            "tokens": token_cost,
+                        }
+                    )
                     budget -= token_cost
 
                     if budget <= 0:
@@ -202,9 +202,7 @@ class ContextAssembler:
 
         return max(0, budget)
 
-    def _query_facts(
-        self, intent: str, packet: ContextPacket, tenant_id: str
-    ) -> None:
+    def _query_facts(self, intent: str, packet: ContextPacket, tenant_id: str) -> None:
         """Query temporal facts from FactStore."""
         try:
             # Search recent facts related to the intent
@@ -215,11 +213,13 @@ class ContextAssembler:
             )
             if facts:
                 for fact in facts:
-                    packet.facts.append({
-                        "id": fact.get("id", ""),
-                        "content": fact.get("content", ""),
-                        "confidence": fact.get("confidence", 0.5),
-                        "created_at": fact.get("created_at", 0),
-                    })
+                    packet.facts.append(
+                        {
+                            "id": fact.get("id", ""),
+                            "content": fact.get("content", ""),
+                            "confidence": fact.get("confidence", 0.5),
+                            "created_at": fact.get("created_at", 0),
+                        }
+                    )
         except Exception as e:
             logger.warning("  [FACTS] Query failed: %s", e)

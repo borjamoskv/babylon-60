@@ -111,7 +111,7 @@ class DeliveryManager:
         if isinstance(output, str):
             return output
         if isinstance(output, dict):
-            lines = [f"# Pipeline Result\n"]
+            lines = ["# Pipeline Result\n"]
             for k, v in output.items():
                 if isinstance(v, list):
                     lines.append(f"## {k}\n")

@@ -19,11 +19,11 @@ from typing import Any
 class DeliveryType(Enum):
     """Where the pipeline result is delivered."""
 
-    MCP = "mcp"          # MCP tool response
-    FILE = "file"        # Write to filesystem
+    MCP = "mcp"  # MCP tool response
+    FILE = "file"  # Write to filesystem
     WEBHOOK = "webhook"  # HTTP POST to external URL
-    STDOUT = "stdout"    # CLI output
-    MEMORY = "memory"    # Persist to CORTEX memory only (no external delivery)
+    STDOUT = "stdout"  # CLI output
+    MEMORY = "memory"  # Persist to CORTEX memory only (no external delivery)
 
 
 class PipelineStage(Enum):
@@ -53,10 +53,10 @@ class DeliveryTarget:
     """Typed delivery destination."""
 
     type: DeliveryType
-    path: str | None = None       # For FILE type
-    url: str | None = None        # For WEBHOOK type
+    path: str | None = None  # For FILE type
+    url: str | None = None  # For WEBHOOK type
     headers: dict[str, str] = field(default_factory=dict)  # For WEBHOOK
-    format: str = "markdown"      # Output format: markdown, json, code
+    format: str = "markdown"  # Output format: markdown, json, code
 
 
 @dataclass
@@ -66,16 +66,16 @@ class PipelineRequest:
     Everything CORTEX needs to execute a mission from intent to delivery.
     """
 
-    intent: str                                   # Natural language or structured command
+    intent: str  # Natural language or structured command
     context_hints: list[str] = field(default_factory=list)  # KI names, fact IDs for pre-fetch
-    budget_limit_usd: float = 0.10                # Ω₃ ceiling
+    budget_limit_usd: float = 0.10  # Ω₃ ceiling
     delivery: DeliveryTarget = field(
         default_factory=lambda: DeliveryTarget(type=DeliveryType.STDOUT)
     )
     mission_id: str = field(default_factory=lambda: f"m-{uuid.uuid4().hex[:12]}")
     tenant_id: str = "default"
-    priority: int = 1                             # 0=critical, 1=normal, 2=low
-    timeout_s: float = 120.0                      # Max wall-clock seconds
+    priority: int = 1  # 0=critical, 1=normal, 2=low
+    timeout_s: float = 120.0  # Max wall-clock seconds
     metadata: dict[str, Any] = field(default_factory=dict)
     created_at: float = field(default_factory=time.time)
 
@@ -103,9 +103,9 @@ class StageTrace:
 class ContextPacket:
     """Assembled context from all knowledge sources."""
 
-    facts: list[dict[str, Any]] = field(default_factory=list)       # From FactStore
+    facts: list[dict[str, Any]] = field(default_factory=list)  # From FactStore
     knowledge_items: list[dict[str, Any]] = field(default_factory=list)  # From KI/ChromaDB
-    embeddings_used: list[str] = field(default_factory=list)        # IDs of vectors consumed
+    embeddings_used: list[str] = field(default_factory=list)  # IDs of vectors consumed
     relevance_scores: dict[str, float] = field(default_factory=dict)
     total_tokens: int = 0
 
@@ -120,13 +120,13 @@ class PipelineResult:
 
     mission_id: str
     status: PipelineStatus
-    output: Any = None                            # Structured result
+    output: Any = None  # Structured result
     error: str | None = None
     cost_usd: float = 0.0
-    ledger_hash: str = ""                         # SHA-256 provenance
+    ledger_hash: str = ""  # SHA-256 provenance
     context_used: list[str] = field(default_factory=list)  # What KIs/facts were consumed
-    agent_chain: list[str] = field(default_factory=list)   # Which agents executed
-    stages: list[StageTrace] = field(default_factory=list) # Full trace
+    agent_chain: list[str] = field(default_factory=list)  # Which agents executed
+    stages: list[StageTrace] = field(default_factory=list)  # Full trace
     created_at: float = field(default_factory=time.time)
     completed_at: float = 0.0
 

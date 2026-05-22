@@ -55,8 +55,20 @@ class TestPipelineContracts:
             mission_id="test-002",
             status=PipelineStatus.SUCCESS,
             stages=[
-                StageTrace(stage=PipelineStage.CONTEXT, started_at=0, ended_at=1, tokens_in=100, tokens_out=50),
-                StageTrace(stage=PipelineStage.EXECUTION, started_at=1, ended_at=2, tokens_in=200, tokens_out=300),
+                StageTrace(
+                    stage=PipelineStage.CONTEXT,
+                    started_at=0,
+                    ended_at=1,
+                    tokens_in=100,
+                    tokens_out=50,
+                ),
+                StageTrace(
+                    stage=PipelineStage.EXECUTION,
+                    started_at=1,
+                    ended_at=2,
+                    tokens_in=200,
+                    tokens_out=300,
+                ),
             ],
         )
         assert result.total_tokens == 650
@@ -187,11 +199,13 @@ class TestAgentRouter:
 
     def test_register_custom_agent(self):
         router = AgentRouter()
-        router.register_agent(AgentCapability(
-            agent_id="audio-engineer",
-            patterns=[r"master", r"audio", r"stems", r"loudness"],
-            priority=0,
-        ))
+        router.register_agent(
+            AgentCapability(
+                agent_id="audio-engineer",
+                patterns=[r"master", r"audio", r"stems", r"loudness"],
+                priority=0,
+            )
+        )
         plan = router.route("master this audio track")
         assert "audio-engineer" in plan["agents"]
 
@@ -214,7 +228,9 @@ class TestDeliveryManager:
 
     def test_file_delivery(self, tmp_path):
         dm = DeliveryManager()
-        target = DeliveryTarget(type=DeliveryType.FILE, path=str(tmp_path / "output.json"), format="json")
+        target = DeliveryTarget(
+            type=DeliveryType.FILE, path=str(tmp_path / "output.json"), format="json"
+        )
         result = dm.deliver({"key": "value"}, target, "m-file-test")
         assert result is True
         assert (tmp_path / "output.json").exists()
@@ -248,3 +264,80 @@ class TestContextAssembler:
         assembler = ContextAssembler()
         ctx = assembler.assemble(intent="test", hints=["nonexistent_ki_12345"])
         assert len(ctx.knowledge_items) == 0  # Should not crash
+
+
+# ── Agent Executor Tests ──
+
+
+class TestAgentExecutor:
+    """Test the real LLM agent executor."""
+
+    def test_executor_stub_mode(self):
+        """When no LLM is available, executor returns structured stub."""
+        import asyncio
+
+        from cortex.pipeline.executor import AgentExecutor
+
+        executor = AgentExecutor()
+        # Force stub path by preventing provider init
+        executor._provider = None
+        executor._router = None
+
+        async def _mock_ensure_none():
+            return None
+
+        executor._ensure_provider = _mock_ensure_none
+        executor._ensure_router = _mock_ensure_none
+
+        result = asyncio.run(executor.execute(intent="test intent"))
+        assert result.get("provider") == "stub"
+        assert "content" in result
+
+    def test_executor_system_prompt_construction(self):
+        """System prompts contain agent-specific instructions."""
+        from cortex.pipeline.executor import AgentExecutor
+
+        executor = AgentExecutor()
+        prompt = executor._build_system_prompt("security-analyst", None)
+        assert "security" in prompt.lower()
+        assert "vulnerability" in prompt.lower()
+
+        prompt = executor._build_system_prompt("code-engineer", None)
+        assert "code" in prompt.lower()
+        assert "typed" in prompt.lower()
+
+    def test_executor_working_memory_from_context(self):
+        """Working memory includes facts when context is provided."""
+        from cortex.pipeline.executor import AgentExecutor
+
+        executor = AgentExecutor()
+        ctx = ContextPacket(
+            facts=[
+                {"content": "fact one", "confidence": "C5"},
+                {"content": "fact two", "confidence": "C4"},
+            ]
+        )
+        messages = executor._build_working_memory("analyze this", ctx)
+        assert len(messages) >= 2  # facts + intent
+        assert messages[-1]["content"] == "analyze this"
+        assert "relevant_facts" in messages[0]["content"]
+
+    def test_executor_working_memory_no_context(self):
+        """Working memory contains only intent when no context."""
+        from cortex.pipeline.executor import AgentExecutor
+
+        executor = AgentExecutor()
+        messages = executor._build_working_memory("simple query", None)
+        assert len(messages) == 1
+        assert messages[0]["content"] == "simple query"
+
+    def test_orchestrator_with_executor_stub(self):
+        """Orchestrator uses executor when provided (stub path)."""
+        from cortex.pipeline.executor import AgentExecutor
+
+        executor = AgentExecutor()
+        orch = CortexOrchestrator(agent_executor=executor)
+        req = PipelineRequest(intent="test with executor")
+        result = orch.run(req)
+        assert result.status == PipelineStatus.SUCCESS
+        assert result.output is not None
