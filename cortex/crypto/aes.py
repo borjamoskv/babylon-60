@@ -30,7 +30,7 @@ class CortexEncrypter:
 
     PREFIX = "v6_aesgcm:"
 
-    def __init__(self, master_key: Optional[bytes]) -> None:
+    def __init__(self, master_key: bytes | None) -> None:
         if master_key is not None and len(master_key) != _KEY_LENGTH:
             raise ValueError(f"AES-256 requires a {_KEY_LENGTH}-byte master key.")
         self._master_key = master_key
@@ -60,7 +60,7 @@ class CortexEncrypter:
         self._tenant_keys[tenant_id] = tenant_key
         return tenant_key
 
-    def encrypt_str(self, data: Optional[str], tenant_id: str = "default") -> Optional[str]:
+    def encrypt_str(self, data: str | None, tenant_id: str = "default") -> str | None:
         """Encrypt a string and return a safe Base64 representation.
         If data is None or empty, return as is.
         """
@@ -79,8 +79,8 @@ class CortexEncrypter:
         return self.PREFIX + base64.b64encode(combined).decode("utf-8")
 
     def decrypt_str(
-        self, encrypted_data: Optional[str], tenant_id: str = "default"
-    ) -> Optional[str]:
+        self, encrypted_data: str | None, tenant_id: str = "default"
+    ) -> str | None:
         """Decrypt a Base64 string back into plaintext."""
         if not encrypted_data:
             return encrypted_data
@@ -111,16 +111,16 @@ class CortexEncrypter:
             raise ValueError(f"AES-GCM Decryption Failed (Data tampered?): {e}") from e
 
     def encrypt_json(
-        self, data: Optional[dict[str, Any]], tenant_id: str = "default"
-    ) -> Optional[str]:
+        self, data: dict[str, Any] | None, tenant_id: str = "default"
+    ) -> str | None:
         """Encrypts a JSON dictionary."""
         if not data:
             return None
         return self.encrypt_str(json.dumps(data), tenant_id=tenant_id)
 
     def decrypt_json(
-        self, encrypted_data: Optional[str], tenant_id: str = "default"
-    ) -> Optional[dict[str, Any]]:
+        self, encrypted_data: str | None, tenant_id: str = "default"
+    ) -> dict[str, Any] | None:
         """Decrypts back into a JSON dictionary."""
         plain = self.decrypt_str(encrypted_data, tenant_id=tenant_id)
         if not plain:

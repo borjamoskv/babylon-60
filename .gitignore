@@ -274,3 +274,9 @@ xokas-elevator/
 yt-notebooklm-ext/
 auramem/
 nexus-dashboard/.next/
+
+# Local-only agent/multimedia directories (exergy triage)
+.snapshots/
+farandula_remix/
+cortex_rs/
+cortex_audit_ledger.jsonl
