@@ -1,6 +1,9 @@
 import logging
 import sys
 import unittest
+
+import unittest.mock
+
 from pathlib import Path
 
 # Add project root to sys.path dynamically
@@ -17,8 +20,17 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         self.engine = OuroborosEngine()
         self.test_repo = "https://github.com/Uniswap/v4-core"
 
-    async def test_audit_cycle(self):
+
+    @unittest.mock.patch("asyncio.create_subprocess_exec")
+    @unittest.mock.patch("os.system")
+    async def test_audit_cycle(self, mock_system, mock_exec):
         """Standard Audit Cycle on mock contract."""
+        mock_proc = unittest.mock.AsyncMock()
+        mock_proc.communicate.return_value = (b'Mock stdout', b'Mock stderr')
+        mock_proc.returncode = 0
+        mock_proc.wait = unittest.mock.AsyncMock()
+        mock_exec.return_value = mock_proc
+
         logger = logging.getLogger("cortex.ouroboros.test")
         logger.info("Starting Ouroboros-1 Verification...")
 
