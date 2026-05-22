@@ -816,7 +816,7 @@ class TestVSAAdapter:
                     }
                 ]
 
-        assembler = ContextAssembler(vsa_bridge=MockVSA())
+        assembler = ContextAssembler(vsa_adapter=MockVSA())
         ctx = assembler.assemble(intent="test vsa")
         # VSA results should appear in knowledge_items
         assert any(ki.get("method") == "vsa" for ki in ctx.knowledge_items), (
