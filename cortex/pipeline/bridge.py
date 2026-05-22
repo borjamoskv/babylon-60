@@ -64,13 +64,11 @@ class CortexPipelineBridge:
         # 2. Context Assembler with real backends
         from cortex.context.assembler import ContextAssembler
 
-        chroma_collection = self._init_chroma()
         vsa_adapter = self._init_vsa()
         fact_adapter = FactStoreAdapter(self._engine)
         context_assembler = ContextAssembler(
             fact_store=fact_adapter,
-            chroma_collection=chroma_collection,
-            vsa_bridge=vsa_adapter,
+            vsa_adapter=vsa_adapter,
         )
 
         # 3. Agent Router
@@ -106,25 +104,6 @@ class CortexPipelineBridge:
 
         self._initialized = True
         logger.info("🔗 [BRIDGE] Pipeline wired to real infrastructure at %s", self._db_path)
-
-    def _init_chroma(self) -> Any | None:
-        """Initialize ChromaDB collection if available."""
-        try:
-            import chromadb
-            import os
-
-            chroma_path = os.path.expanduser("~/.cortex/chroma_db")
-            if os.path.exists(chroma_path):
-                client = chromadb.PersistentClient(path=chroma_path)
-                return client.get_or_create_collection(
-                    "cortex_knowledge_base",
-                    metadata={"hnsw:space": "cosine"},
-                )
-        except ImportError:
-            logger.debug("[BRIDGE] ChromaDB not available — semantic search disabled")
-        except Exception as e:
-            logger.warning("[BRIDGE] ChromaDB init failed: %s", e)
-        return None
 
     def _init_budget(self) -> Any | None:
         """Initialize SwarmBudgetManager if available."""

@@ -48,6 +48,7 @@ class CortexOrchestrator:
         budget_manager: Any | None = None,
         ledger: Any | None = None,
         agent_executor: Any | None = None,
+        engine: Any | None = None,
     ):
         self._context = context_assembler
         self._router = agent_router
@@ -55,6 +56,7 @@ class CortexOrchestrator:
         self._budget = budget_manager
         self._ledger = ledger
         self._executor = agent_executor
+        self.engine = engine
         self._traces: list[StageTrace] = []
         self._cancel_event: Any | None = None
 
@@ -491,13 +493,9 @@ class CortexOrchestrator:
 
             try:
                 asyncio.get_running_loop()
-                # Already inside an async context — dispatch to an isolated
-                # thread with its own event loop to avoid nested-loop deadlock.
-                import concurrent.futures
-
-                with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
-                    future = pool.submit(asyncio.run, coro_factory())
-                    return future.result(timeout=request.timeout_s)
+                # Already inside an async context — return the coroutine directly
+                # so the caller can await it natively within the running event loop.
+                return coro_factory()
             except RuntimeError:
                 # No running loop — safe to use asyncio.run() directly.
                 return asyncio.run(coro_factory())
@@ -525,7 +523,38 @@ class CortexOrchestrator:
         output_bytes = json.dumps(output, sort_keys=True, default=str).encode()
         result_hash = hashlib.sha256(output_bytes).hexdigest()
 
-        if self._ledger:
+        # If we have a sovereign SQLite engine, persist execution log
+        if self.engine is not None:
+            try:
+                import asyncio
+                import aiosqlite
+                from cortex.utils.time_utils import get_utc_timestamp
+
+                async def persist_to_engine():
+                    async with self.engine.session() as conn:
+                        await conn.execute(
+                            "INSERT INTO execution_log (mission_id, result_hash, tenant_id, completed_at, status) VALUES (?, ?, ?, ?, ?)",
+                            (
+                                request.mission_id,
+                                result_hash,
+                                request.tenant_id,
+                                get_utc_timestamp(),
+                                "SUCCESS",
+                            ),
+                        )
+                        await conn.commit()
+
+                # We are in a to_thread worker from _run_stage_async
+                # so we can use asyncio.run to execute the DB write safely if no loop is here
+                try:
+                    asyncio.get_running_loop()
+                    asyncio.create_task(persist_to_engine())
+                except RuntimeError:
+                    asyncio.run(persist_to_engine())
+            except Exception as e:
+                logger.warning("  [PERSIST] Engine SQLite write failed: %s", e)
+
+        elif self._ledger:
             try:
                 self._ledger.append(
                     mission_id=request.mission_id,

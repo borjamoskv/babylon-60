@@ -34,12 +34,10 @@ class ContextAssembler:
     def __init__(
         self,
         fact_store: Any | None = None,
-        chroma_collection: Any | None = None,
-        vsa_bridge: Any | None = None,
+        vsa_adapter: Any | None = None,
     ):
         self._facts = fact_store
-        self._chroma = chroma_collection
-        self._vsa = vsa_bridge
+        self._vsa = vsa_adapter
 
     def assemble(
         self,
@@ -66,11 +64,7 @@ class ContextAssembler:
         if hints:
             token_budget = self._resolve_hints(hints, packet, token_budget)
 
-        # ── Phase 2: Semantic search via ChromaDB ──
-        if self._chroma and token_budget > 500:
-            token_budget = self._search_chroma(intent, packet, token_budget)
-
-        # ── Phase 3: VSA algebraic recall ──
+        # ── Phase 2: VSA algebraic recall ──
         if self._vsa and token_budget > 500:
             token_budget = self._search_vsa(intent, packet, token_budget)
 
@@ -120,58 +114,6 @@ class ContextAssembler:
                 logger.debug("  [HINT] KI '%s' not found at %s", hint, ki_path)
 
         return budget
-
-    def _search_chroma(self, intent: str, packet: ContextPacket, budget: int) -> int:
-        """Semantic search via ChromaDB collection."""
-        try:
-            results = self._chroma.query(
-                query_texts=[intent],
-                n_results=min(5, budget // 500),  # Scale results to budget
-            )
-
-            if results and results.get("documents"):
-                for i, doc_list in enumerate(results["documents"]):
-                    for j, doc in enumerate(doc_list):
-                        if not doc:
-                            continue
-
-                        token_cost = len(doc) // 4
-                        if token_cost > budget:
-                            doc = doc[: budget * 4]
-                            token_cost = budget
-
-                        source = "unknown"
-                        if results.get("metadatas") and results["metadatas"][i]:
-                            source = results["metadatas"][i][j].get("source", "unknown")
-
-                        distance = 0.0
-                        if results.get("distances") and results["distances"][i]:
-                            distance = results["distances"][i][j]
-
-                        relevance = max(0.0, 1.0 - distance)
-
-                        packet.knowledge_items.append(
-                            {
-                                "source": source,
-                                "content": doc,
-                                "method": "semantic",
-                                "tokens": token_cost,
-                                "relevance": relevance,
-                            }
-                        )
-                        packet.relevance_scores[source] = relevance
-                        packet.embeddings_used.append(source)
-                        budget -= token_cost
-
-                        if budget <= 0:
-                            break
-                    if budget <= 0:
-                        break
-
-        except Exception as e:
-            logger.warning("  [CHROMA] Search failed: %s", e)
-
-        return max(0, budget)
 
     def _search_vsa(self, intent: str, packet: ContextPacket, budget: int) -> int:
         """Algebraic recall via VSA-SDM bridge."""
