@@ -404,7 +404,7 @@ jobs:
             --timeout-method=thread \
             --junitxml=test-artifacts/pytest.xml \
             -o faulthandler_timeout=300 \
-            --cov=cortex \
+            --cov=cortex --cov=cortex-core \
             --cov-report=xml \
             --cov-report=term-missing \
             2>&1 | tee test-artifacts/pytest.log || status=${PIPESTATUS[0]}
