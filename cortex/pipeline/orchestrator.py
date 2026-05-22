@@ -249,7 +249,8 @@ class CortexOrchestrator:
             yield self._traces[-1]
 
             execution_plan = await self._run_stage_async(
-                PipelineStage.PLANNING, lambda: self._plan(request, context_packet),
+                PipelineStage.PLANNING,
+                lambda: self._plan(request, context_packet),
             )
             yield self._traces[-1]
 
@@ -283,7 +284,6 @@ class CortexOrchestrator:
             result.completed_at = time.time()
 
         yield result
-
 
     def run(self, request: PipelineRequest) -> PipelineResult:
         """Execute the full E2E pipeline synchronously.

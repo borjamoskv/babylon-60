@@ -25,13 +25,36 @@ class AgentExecutor:
       - Budget constraints → Quota enforcement
     """
 
-    def __init__(self, llm_router: Any | None = None, provider_name: str = "gemini"):
+    def __init__(
+        self,
+        llm_router: Any | None = None,
+        provider_name: str = "gemini",
+        provider: Any | None = None,
+    ):
         self._router = llm_router
         self._provider_name = provider_name
-        self._provider = None
+        self._provider = provider
+        self._initialized = False
+
+    def _ensure_stack(self) -> None:
+        """Call factory on first use to build router and provider."""
+        if self._initialized:
+            return
+
+        if self._provider is None and self._router is None:
+            try:
+                from cortex.pipeline.provider_factory import build_executor_stack
+                router, provider = build_executor_stack()
+                self._router = router
+                self._provider = provider
+            except Exception as e:
+                logger.warning("[EXECUTOR] Failed to build stack via factory: %s", e)
+
+        self._initialized = True
 
     async def _ensure_provider(self) -> Any:
         """Lazily initialize the LLM provider."""
+        self._ensure_stack()
         if self._provider is not None:
             return self._provider
 
@@ -46,6 +69,7 @@ class AgentExecutor:
 
     async def _ensure_router(self) -> Any:
         """Lazily initialize the LLM router with cascade."""
+        self._ensure_stack()
         if self._router is not None:
             return self._router
 

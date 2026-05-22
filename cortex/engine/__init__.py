@@ -85,6 +85,14 @@ class CortexEngine(
         # Axiom Ω₁₆: Sortu-Native JIT Synthesis
         # We defer Mixin.__init__ calls to _synthesize_skill for 10k scale.
         self._skills_verified: set[str] = set()
+        # Guard: detect pool/db_path argument inversion at construction time (BUG-01 fix)
+        # Fail-fast with a descriptive error instead of silent db_path corruption.
+        if not isinstance(db_path, (str, Path)) and not hasattr(db_path, "acquire"):
+            raise TypeError(
+                f"CortexEngine: db_path must be str, Path, or a pool object "
+                f"(with .acquire()), got {type(db_path).__name__!r}. "
+                "Did you swap pool and db_path arguments?"
+            )
         # Handle argument inversion from tests if necessary (pool, db_path)
         if hasattr(db_path, "acquire") and not isinstance(db_path, str | Path):
             self._pool = db_path
