@@ -393,6 +393,31 @@ class CortexOrchestrator:
 
         try:
             result = fn()
+            import asyncio
+
+            if asyncio.iscoroutine(result):
+                try:
+                    asyncio.get_running_loop()
+                    import threading
+
+                    res_val = None
+                    exc_val = None
+
+                    def _worker():
+                        nonlocal res_val, exc_val
+                        try:
+                            res_val = asyncio.run(result)
+                        except Exception as ex:
+                            exc_val = ex
+
+                    t = threading.Thread(target=_worker)
+                    t.start()
+                    t.join()
+                    if exc_val:
+                        raise exc_val
+                    result = res_val
+                except RuntimeError:
+                    result = asyncio.run(result)
         except (BudgetExhaustedError, PipelineCancelledError):
             raise
         except Exception as e:
