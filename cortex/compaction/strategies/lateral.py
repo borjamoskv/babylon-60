@@ -100,12 +100,19 @@ async def _find_and_purge_colliding_c3s(
         )
         colliding_rows = await cursor.fetchall()
 
+        import asyncio
+        tasks = []
         for c_id, sim in colliding_rows:
             if c_id not in purged_ids and c_id != c5_id:
                 purged_ids.append(c_id)
                 if not dry_run:
-                    await engine.deprecate(
-                        c_id, f"compacted:lateral_inhibition→#{c5_id} (sim={sim:.3f})"
+                    tasks.append(
+                        engine.deprecate(
+                            c_id, f"compacted:lateral_inhibition→#{c5_id} (sim={sim:.3f})"
+                        )
                     )
+
+        if tasks:
+            await asyncio.gather(*tasks)
 
     return purged_ids

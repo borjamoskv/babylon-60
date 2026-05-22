@@ -32,10 +32,12 @@ async def execute_dedup(
 
     result.strategies_applied.append("dedup")
 
+    merged_ids: set[int] = set()
+
     for group in dup_groups:
         canonical_id = group[0]
         if not dry_run:
-            await _merge_duplicate_group(engine, project, canonical_id, group)
+            await _merge_duplicate_group(engine, project, canonical_id, group, merged_ids)
             result.deprecated_ids.extend(group[1:])
 
     total_removed = sum(len(g) - 1 for g in dup_groups)
@@ -118,8 +120,10 @@ async def _merge_duplicate_group(
     project: str,
     canonical_id: int,
     group: list[int],
+    merged_ids: set[int],
 ) -> None:
     """Merge a single duplicate group: deprecate duplicates, update canonical."""
+    import asyncio
     facts = await engine.facts.recall(project=project)
 
     if not facts:
@@ -136,9 +140,17 @@ async def _merge_duplicate_group(
 
     all_contents = [fact_map[fid].content for fid in group if fid in fact_map]
 
-    # Deprecate duplicates (not canonical)
+    # Deprecate duplicates (not canonical) concurrently
+    tasks = []
     for dup_id in group[1:]:
-        await engine.deprecate(dup_id, f"compacted:dedup→#{canonical_id}")
+        if dup_id not in merged_ids:
+            merged_ids.add(dup_id)
+            tasks.append(
+                engine.deprecate(dup_id, f"compacted:dedup→#{canonical_id}")
+            )
+
+    if tasks:
+        await asyncio.gather(*tasks)
 
     # Update canonical if content changed after merge (only for errors usually)
     if canonical_fact.fact_type == "error" and len(all_contents) > 1:

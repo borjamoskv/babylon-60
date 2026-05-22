@@ -41,11 +41,13 @@ async def execute_merge_errors(
         hash_groups[content_hash(fact.content)].append(fact)
 
     merged_count = 0
+    merged_ids: set[int] = set()
+
     for group in hash_groups.values():
         if len(group) <= 1:
             continue
         if not dry_run:
-            await _merge_error_group(engine, project, group, result)
+            await _merge_error_group(engine, project, group, result, merged_ids)
         merged_count += len(group)
 
     if merged_count > 0:
@@ -61,8 +63,10 @@ async def _merge_error_group(
     project: str,
     group: list,
     result: "CompactionResult",
+    merged_ids: set[int],
 ) -> None:
     """Merge a single group of identical error facts."""
+    import asyncio
     # Ensure deterministic ordering by ID to keep the oldest as canonical
     group.sort(key=lambda x: x.id)
     canonical = group[0]
@@ -80,6 +84,16 @@ async def _merge_error_group(
     )
     result.new_fact_ids.append(new_id)
 
+    tasks = []
+    deprecated_in_group = []
     for fact in group:
-        await engine.deprecate(fact.id, f"compacted:merge_errors→#{new_id}")
-        result.deprecated_ids.append(fact.id)
+        if fact.id not in merged_ids:
+            merged_ids.add(fact.id)
+            deprecated_in_group.append(fact.id)
+            tasks.append(
+                engine.deprecate(fact.id, f"compacted:merge_errors→#{new_id}")
+            )
+
+    if tasks:
+        await asyncio.gather(*tasks)
+        result.deprecated_ids.extend(deprecated_in_group)

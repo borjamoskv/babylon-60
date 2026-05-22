@@ -32,9 +32,16 @@ async def execute_staleness_prune(
 
     result.strategies_applied.append("staleness_prune")
     if not dry_run:
+        import asyncio
+        tasks = []
+        deprecated_in_batch = []
         for fid in stale_ids:
-            await engine.deprecate(fid, "compacted:stale")
-            result.deprecated_ids.append(fid)
+            tasks.append(engine.deprecate(fid, "compacted:stale"))
+            deprecated_in_batch.append(fid)
+
+        if tasks:
+            await asyncio.gather(*tasks)
+            result.deprecated_ids.extend(deprecated_in_batch)
 
     detail = f"staleness_prune: {len(stale_ids)} stale facts"
     result.details.append(detail)

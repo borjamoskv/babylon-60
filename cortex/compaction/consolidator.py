@@ -156,19 +156,27 @@ class BeliefConsolidator:
     ) -> list[ClusterResult]:
         """Cluster events by semantic similarity.
 
-        Simple single-pass clustering: O(N²) but N is bounded
-        by _MAX_EVENTS_PER_CYCLE (200). GPU-accelerated embedding.
+        Uses vectorized numpy operations to avoid O(N²) Python bottlenecks.
+        N is bounded by _MAX_EVENTS_PER_CYCLE (200). GPU-accelerated embedding.
         """
-        from cortex.engine.semantic_hash import (
-            batch_fingerprint,
-            cosine_similarity,
-        )
+        from cortex.engine.semantic_hash import batch_fingerprint
+        import numpy as np
 
         if len(contents) < _MIN_CLUSTER_SIZE:
             return []
 
         fingerprints = batch_fingerprint(contents, embedder)
         n = len(fingerprints)
+
+        if n == 0:
+            return []
+
+        # Extract embeddings and compute similarity matrix in one shot via numpy
+        embeddings = np.array([fp.embedding for fp in fingerprints], dtype=np.float32)
+        norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
+        norms[norms == 0] = 1.0
+        embeddings_norm = embeddings / norms
+        sim_matrix = np.dot(embeddings_norm, embeddings_norm.T)
 
         # Greedy clustering: assign each event to first matching cluster
         clusters: list[ClusterResult] = []
@@ -189,10 +197,8 @@ class BeliefConsolidator:
             for j in range(i + 1, n):
                 if j in assigned:
                     continue
-                sim = cosine_similarity(
-                    fingerprints[i].embedding,
-                    fingerprints[j].embedding,
-                )
+
+                sim = float(sim_matrix[i, j])
                 if sim >= self._similarity_threshold:
                     cluster.event_ids.append(fact_ids[j])
                     cluster.event_contents.append(contents[j])
@@ -279,6 +285,9 @@ class BeliefConsolidator:
             if dry_run:
                 return result
 
+            import asyncio
+            merged_ids: set[int] = set()
+
             # Compress each cluster into a belief
             for cluster in clusters:
                 try:
@@ -302,14 +311,23 @@ class BeliefConsolidator:
                     result.new_fact_ids.append(fact_id)
                     result.beliefs_created += 1
 
-                    # Deprecate original events
+                    # Deprecate original events concurrently
+                    tasks = []
+                    deprecated_in_cluster = []
                     for event_id in cluster.event_ids:
-                        await engine.deprecate(
-                            fact_id=event_id,
-                            reason=f"Consolidated into belief #{fact_id}",
-                        )
-                        result.deprecated_ids.append(event_id)
-                        result.events_deprecated += 1
+                        if event_id not in merged_ids:
+                            merged_ids.add(event_id)
+                            deprecated_in_cluster.append(event_id)
+                            tasks.append(
+                                engine.deprecate(
+                                    fact_id=event_id,
+                                    reason=f"Consolidated into belief #{fact_id}",
+                                )
+                            )
+                    if tasks:
+                        await asyncio.gather(*tasks)
+                        result.deprecated_ids.extend(deprecated_in_cluster)
+                        result.events_deprecated += len(deprecated_in_cluster)
 
                 except (RuntimeError, ValueError, OSError) as e:
                     logger.error(
