@@ -105,7 +105,9 @@ class VirtualAgent:
                     logger.warning(
                         "VirtualAgent %s: router returned error for task %s: %s — "
                         "falling back to C4-SIM stub.",
-                        self.agent_id, task_idx, result.err,
+                        self.agent_id,
+                        task_idx,
+                        result.err,
                     )
                 # Fallback: unwrap as string if Result type varies
                 return str(result.ok if hasattr(result, "ok") else result)
@@ -113,7 +115,9 @@ class VirtualAgent:
                 logger.warning(
                     "VirtualAgent %s: C5-REAL dispatch failed (%s) — "
                     "degrading to C4-SIM for task %s.",
-                    self.agent_id, exc, task_idx,
+                    self.agent_id,
+                    exc,
+                    task_idx,
                 )
 
         # ── C4-SIM path (testing scaffold / router unavailable) ───────

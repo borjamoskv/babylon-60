@@ -213,7 +213,6 @@ class CortexLLMRouter:
 
         return process_group(fits_context) + process_group(overflows_context)
 
-
     async def execute_hedged(self, prompt: CortexPrompt) -> Result[str, str] | None:
         """Attempt hedged (parallel) execution if peers are available."""
         if not self._hedging_providers:

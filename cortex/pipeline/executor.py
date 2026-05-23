@@ -44,6 +44,7 @@ class AgentExecutor:
         if self._provider is None and self._router is None:
             try:
                 from cortex.pipeline.provider_factory import build_executor_stack
+
                 router, provider = build_executor_stack()
                 self._router = router
                 self._provider = provider
