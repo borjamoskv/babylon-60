@@ -12,6 +12,7 @@ import sqlite3
 from datetime import datetime, timezone
 from typing import Any
 
+import asyncio
 import aiosqlite
 import numpy as np
 
@@ -120,7 +121,6 @@ class MemoryArchaeologist:
     def _build_clusters(
         self, facts: list[dict[str, Any]], vecs_matrix: np.ndarray, threshold: float
     ) -> list[list[int]]:
-        # O(N^2) dot product for cosine similarity
         sim_matrix = np.dot(vecs_matrix, vecs_matrix.T)
         visited = set()
         clusters = []
@@ -130,8 +130,8 @@ class MemoryArchaeologist:
             if i in visited:
                 continue
 
-            # Find neighbors
-            neighbors = [j for j in range(n) if sim_matrix[i, j] >= threshold]
+            # Vectorized neighbor search
+            neighbors = np.where(sim_matrix[i] >= threshold)[0].tolist()
             if len(neighbors) > 1:
                 clusters.append(neighbors)
                 visited.update(neighbors)
@@ -148,16 +148,26 @@ class MemoryArchaeologist:
         facts: list[dict[str, Any]],
         simulate: bool,
     ) -> tuple[int, int]:
+        if not self.llm:
+            logger.warning("Archaeology bypassed: SovereignLLM is not installed.")
+            return 0, 0
+
         condensed_count = 0
         tombstoned_count = 0
         l2_conn = self.engine.memory._l2._get_conn()
+        merged_ids: set[str] = set()
+        semaphore = asyncio.Semaphore(5)
 
-        for cluster_indices in clusters:
-            if not self.llm:
-                logger.warning("Archaeology bypassed: SovereignLLM is not installed.")
-                continue
-
+        async def _process_cluster(cluster_indices: list[int]) -> tuple[int, int]:
             cluster_facts = [facts[idx] for idx in cluster_indices]
+
+            # Check lock list
+            cluster_ids = [str(f["id"]) for f in cluster_facts]
+            if any(cid in merged_ids for cid in cluster_ids):
+                return 0, 0
+
+            merged_ids.update(cluster_ids)
+
             content_list = [f"- {f['content']}" for f in cluster_facts]
             prompt = (
                 "You are an expert memory consolidator for CORTEX. "
@@ -166,24 +176,33 @@ class MemoryArchaeologist:
             ) + "\n".join(content_list)
 
             logger.info("Synthesizing cluster of size %s...", len(cluster_facts))
-            res = await self.llm.agenerate(prompt)  # type: ignore[type-error]
+            async with semaphore:
+                res = await self.llm.agenerate(prompt)  # type: ignore[type-error]
             condensed_content = res.text.strip()
 
             parent_ids = [f["parent_decision_id"] for f in cluster_facts if f["parent_decision_id"]]
             primary_parent_id = parent_ids[0] if parent_ids else None
-            [f["id"] for f in cluster_facts]
 
             if not simulate:
                 try:
                     await self._apply_db_updates(
-                        project, tenant_id, condensed_content, cluster_facts, primary_parent_id, l2_conn
+                        project,
+                        tenant_id,
+                        condensed_content,
+                        cluster_facts,
+                        primary_parent_id,
+                        l2_conn,
                     )
                 except (sqlite3.Error, aiosqlite.Error) as e:
                     logger.error("Archaeology DB update failed: %s", e)
-                    continue
+                    return 0, 0
 
-            condensed_count += 1
-            tombstoned_count += len(cluster_facts)
+            return 1, len(cluster_facts)
+
+        results = await asyncio.gather(*(_process_cluster(idx) for idx in clusters))
+        for condensed, tombstoned in results:
+            condensed_count += condensed
+            tombstoned_count += tombstoned
 
         return condensed_count, tombstoned_count
 

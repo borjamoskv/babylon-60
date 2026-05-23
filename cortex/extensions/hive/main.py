@@ -106,16 +106,13 @@ def get_hive_graph(
             has_vecs = False
 
         if has_vecs:
-            # Slow O(N^2) approach for MVP or use sqlite-vec knn on a subset
-            # Let's just link sequential items for now to ensure visualization works
-            # Real implementation needs optimized KNN query
-
-            # Simple temporal links for MVP 1.0
-            prev_id = None
-            for node in nodes:
-                if prev_id:
-                    links.append(GraphLink(source=prev_id, target=node.id, value=1.0))
-                prev_id = node.id
+            # Simple temporal links for MVP 1.0 utilizing an O(N) structural mapping
+            links.extend(
+                [
+                    GraphLink(source=nodes[i - 1].id, target=nodes[i].id, value=1.0)
+                    for i in range(1, len(nodes))
+                ]
+            )
 
         return GraphData(nodes=nodes, links=links)
 
