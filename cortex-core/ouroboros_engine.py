@@ -4,12 +4,13 @@ import logging
 import re
 import sqlite3
 import time
+import tempfile
 
 # CORTEX V5 Pulse Integration
 from cortex.extensions.signals.bus import SignalBus
 from cortex.config import DB_PATH
 
-SCRATCH_BASE = "/Users/borjafernandezangulo/Cortex-Persist/.scratch/ouroboros"
+SCRATCH_BASE = os.path.join(tempfile.gettempdir(), ".scratch", "ouroboros")
 FORGE_PATH = "forge" # Verified in path
 logger = logging.getLogger("cortex.ouroboros")
 

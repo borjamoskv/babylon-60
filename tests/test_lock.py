@@ -8,6 +8,7 @@ from cortex.engine import CortexEngine
 from cortex.engine.lock import SovereignLock
 
 
+
 @pytest.fixture
 async def engine(tmp_path):
     """Provide a fresh CortexEngine for each test."""
@@ -15,6 +16,7 @@ async def engine(tmp_path):
     eng = CortexEngine(db_path=str(db_path))
     await eng.init_db()  # Initialize schema properly
     yield eng
+    await eng.close()
 
 
 @pytest.mark.asyncio
