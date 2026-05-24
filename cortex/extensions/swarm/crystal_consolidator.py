@@ -180,9 +180,23 @@ async def _execute_semantic_merge(
     if len(data) < 2:
         return
 
-    merged_ids: set[str] = set()
-    ids = list(data.keys())
+    import asyncio
 
+    ids = list(data.keys())
+    embeddings = [data[id_]["embedding"] for id_ in ids]
+
+    # Vectorized similarity calculation (O(1) matrix mult instead of O(N^2) loops)
+    matrix = np.vstack(embeddings)
+    norms = np.linalg.norm(matrix, axis=1, keepdims=True)
+    norms[norms < 1e-10] = 1e-10
+    normalized = matrix / norms
+    similarity_matrix = np.dot(normalized, normalized.T)
+
+    merged_ids: set[str] = set()
+    synthesis_tasks = []
+    task_pairs = []
+
+    # Find collisions
     for i in range(len(ids)):
         if ids[i] in merged_ids:
             continue
@@ -190,54 +204,73 @@ async def _execute_semantic_merge(
             if ids[j] in merged_ids:
                 continue
 
-            id_a, id_b = ids[i], ids[j]
-            vec_a, vec_b = data[id_a]["embedding"], data[id_b]["embedding"]
-
-            norm_a, norm_b = np.linalg.norm(vec_a), np.linalg.norm(vec_b)
-            if norm_a < 1e-10 or norm_b < 1e-10:
-                continue
-
-            sim = float(np.dot(vec_a, vec_b) / (norm_a * norm_b))
-
+            sim = float(similarity_matrix[i, j])
             if sim >= SEMANTIC_MERGE_THRESHOLD:
-                # Alchemist Merge: Fuse content via LLM
+                id_a, id_b = ids[i], ids[j]
                 logger.info("🔗 [MERGE] Collided: %s (~%.4f) %s", id_a, sim, id_b)
 
-                try:
-                    synthesis = await synthesize_crystals(
+                # Lock entities to prevent concurrent or overlapping mutations
+                merged_ids.add(id_b)
+                merged_ids.add(id_a)  # temporary lock until sync is complete
+
+                task_pairs.append((id_a, id_b))
+                synthesis_tasks.append(
+                    synthesize_crystals(
                         primary_content=data[id_a]["content"],
                         secondary_content=data[id_b]["content"],
                     )
-                    new_content = synthesis.get("fused_content", data[id_a]["content"])
+                )
+                break  # Only merge id_a once per batch
 
-                    if not dry_run:
-                        cursor = db_conn.cursor()
-                        # Update primary with fused content
-                        cursor.execute(
-                            "UPDATE facts_meta SET content = ?, updated_at = ? WHERE id = ?",
-                            (new_content, time.time(), id_a),
-                        )
-                        # Delete the secondary
-                        cursor.execute(
-                            "DELETE FROM vec_facts WHERE rowid IN "
-                            "(SELECT rowid FROM facts_meta WHERE id = ?)",
-                            (id_b,),
-                        )
-                        cursor.execute("DELETE FROM facts_meta WHERE id = ?", (id_b,))
-                        db_conn.commit()
+    if not synthesis_tasks:
+        return
 
-                    merged_ids.add(id_b)
-                    result.merged += 1
-                    logger.info(
-                        "🧪 [SYNTHESIS] %s + %s → Unified Crystal%s",
-                        id_a,
-                        id_b,
-                        " (DRY)" if dry_run else "",
-                    )
-                except (sqlite3.Error, ValueError, TypeError, RuntimeError) as e:
-                    logger.error("🔗 [MERGE] Synthesis failed for %s/%s: %s", id_a, id_b, e)
-                    result.errors += 1
-                    continue
+    # Execute all syntheses concurrently (N+1 I/O resolved)
+    synthesis_results = await asyncio.gather(*synthesis_tasks, return_exceptions=True)
+
+    for (id_a, id_b), synthesis in zip(task_pairs, synthesis_results, strict=True):
+        if isinstance(synthesis, Exception):
+            logger.error("🔗 [MERGE] Synthesis failed for %s/%s: %s", id_a, id_b, synthesis)
+            result.errors += 1
+            merged_ids.discard(id_a)
+            merged_ids.discard(id_b)  # free lock on failure
+            continue
+
+        try:
+            new_content = synthesis.get("fused_content", data[id_a]["content"])
+
+            if not dry_run:
+                cursor = db_conn.cursor()
+                # Update primary with fused content
+                cursor.execute(
+                    "UPDATE facts_meta SET content = ?, updated_at = ? WHERE id = ?",
+                    (new_content, time.time(), id_a),
+                )
+                # Delete the secondary
+                cursor.execute(
+                    "DELETE FROM vec_facts WHERE rowid IN "
+                    "(SELECT rowid FROM facts_meta WHERE id = ?)",
+                    (id_b,),
+                )
+                cursor.execute("DELETE FROM facts_meta WHERE id = ?", (id_b,))
+                db_conn.commit()
+
+            # Release lock on id_a so it can merge with others in future cycles
+            merged_ids.discard(id_a)
+
+            result.merged += 1
+            logger.info(
+                "🧪 [SYNTHESIS] %s + %s → Unified Crystal%s",
+                id_a,
+                id_b,
+                " (DRY)" if dry_run else "",
+            )
+        except (sqlite3.Error, ValueError, TypeError, RuntimeError) as e:
+            logger.error("🔗 [MERGE] DB Update failed for %s/%s: %s", id_a, id_b, e)
+            result.errors += 1
+            merged_ids.discard(id_a)
+            merged_ids.discard(id_b)
+            continue
 
 
 # ── Strategy 3: Diamond Promotion ─────────────────────────────────────────
