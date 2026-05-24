@@ -9,7 +9,10 @@ import time
 from cortex.extensions.signals.bus import SignalBus
 from cortex.config import DB_PATH
 
-SCRATCH_BASE = "/Users/borjafernandezangulo/Cortex-Persist/.scratch/ouroboros"
+import os
+
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SCRATCH_BASE = os.path.join(_PROJECT_ROOT, ".scratch", "ouroboros")
 FORGE_PATH = "forge" # Verified in path
 logger = logging.getLogger("cortex.ouroboros")
 

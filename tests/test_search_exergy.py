@@ -30,6 +30,10 @@ async def test_exergy_prioritization(temp_db_path, mock_encoder):
     """
     store = SovereignVectorStoreL2(encoder=mock_encoder, db_path=temp_db_path, half_life_days=7)
 
+    if not store._vector_enabled:
+        await store.close()
+        pytest.skip("sqlite-vec not supported on this host environment.")
+
     # Prepare identical embeddings so vector similarity is strictly equal
     embedding_vec = [1] * 384
 
@@ -94,5 +98,49 @@ async def test_exergy_prioritization(temp_db_path, mock_encoder):
     score_high = results[0]._recall_score
     score_low = results[1]._recall_score
     assert score_high > score_low
+
+    await store.close()
+
+@pytest.mark.asyncio
+async def test_exergy_fallback_mode(temp_db_path, mock_encoder):
+    """
+    Verifies that when _vector_enabled is False, the fallback path gracefully
+    returns facts even if vector ranking is 0.0.
+    """
+    store = SovereignVectorStoreL2(encoder=mock_encoder, db_path=temp_db_path, half_life_days=7)
+
+    # Explicitly force fallback mode
+    store._vector_enabled = False
+
+    embedding_vec = [1] * 384
+
+    fact = CortexFactModel(
+        id="fact_fallback",
+        tenant_id="test_tenant",
+        project_id="test_proj",
+        content="fallback content",
+        embedding=embedding_vec,
+        timestamp=time.time(),
+        is_diamond=False,
+        is_bridge=False,
+        confidence="high",
+        cognitive_layer="semantic",
+        parent_decision_id=None,
+        metadata={},
+    )
+    object.__setattr__(fact, "embedding_bytes", b"mock")
+    await store.memorize(fact)
+
+    results = await store.recall_secure(
+        tenant_id="test_tenant",
+        project_id="test_proj",
+        query="fallback query",
+        limit=2,
+    )
+
+    assert len(results) == 1
+    assert results[0].id == "fact_fallback"
+    # Fallback score is purely semantic / zero-based
+    assert results[0]._recall_score == 0.0
 
     await store.close()
