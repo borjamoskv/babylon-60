@@ -87,7 +87,8 @@ class LLMProvider(BaseProvider):
             supported = sorted(list(presets.keys()) + ["custom"])
             raise ValueError(f"Unknown LLM provider '{provider}'. Supported: {supported}")
 
-        self._client = httpx.AsyncClient(timeout=60.0)
+        timeout_val = float(os.environ.get("CORTEX_LLM_TIMEOUT", "120.0"))
+        self._client = httpx.AsyncClient(timeout=timeout_val)
         self._semaphore = asyncio.Semaphore(100)
         logger.info(
             "LLM [READY] -> Provider: %s | Model: %s | URL: %s",

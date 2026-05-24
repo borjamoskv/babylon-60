@@ -2,6 +2,7 @@ import httpx
 import asyncio
 import os
 
+
 async def bridge():
     url = "http://localhost:8000/fuzz/stream"
     print(f"SUPER YOLO BRIDGE: Conectando a {url}...")
@@ -21,6 +22,7 @@ async def bridge():
                                 f.writelines(lines[-20:])
     except Exception as e:
         print(f"BRIDGE_FAIL: {e}. Usando telemetría sintética (Random Hex).")
+
 
 if __name__ == "__main__":
     asyncio.run(bridge())
