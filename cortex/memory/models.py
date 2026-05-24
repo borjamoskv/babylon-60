@@ -248,6 +248,7 @@ class CortexFactModel(BaseModel):
 
     # Entropy and Health (The OUROBOROS engine will update this)
     success_rate: float = Field(default=1.0, description="Degrades if this fact causes errors.")
+    exergy_score: float = Field(default=1.0, description="Thermodynamic usefulness score.")
     metadata: dict[str, Any] = Field(
         default_factory=dict,
         description="Optional structured metadata (session_id, tool calls, etc).",

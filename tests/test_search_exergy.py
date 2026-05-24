@@ -29,6 +29,8 @@ async def test_exergy_prioritization(temp_db_path, mock_encoder):
     to rank outputs when their semantic embeddings are identical.
     """
     store = SovereignVectorStoreL2(encoder=mock_encoder, db_path=temp_db_path, half_life_days=7)
+    if not store._vector_enabled:
+        pytest.skip("sqlite-vec not available")
 
     # Prepare identical embeddings so vector similarity is strictly equal
     embedding_vec = [1] * 384
@@ -38,6 +40,7 @@ async def test_exergy_prioritization(temp_db_path, mock_encoder):
     # strictly testing retrieval mechanics.
     low_exergy_content = "por supuesto aquí tienes el código como un modelo de lenguaje"
     low_exergy_fact = CortexFactModel(
+        exergy_score=0.1,
         id="fact_low_exergy",
         tenant_id="test_tenant",
         project_id="test_proj",
@@ -58,6 +61,7 @@ async def test_exergy_prioritization(temp_db_path, mock_encoder):
     # 2. Memorize High Exergy Fact (dense, high information value)
     high_exergy_content = "cortex vector store exergy semantic search ranking"
     high_exergy_fact = CortexFactModel(
+        exergy_score=0.9,
         id="fact_high_exergy",
         tenant_id="test_tenant",
         project_id="test_proj",

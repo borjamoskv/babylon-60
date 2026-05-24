@@ -1,6 +1,6 @@
 import aiosqlite
 import pytest
-
+import sqlite3
 from cortex.database.schema import ALL_SCHEMA
 from cortex.engine import CortexEngine
 
@@ -8,6 +8,9 @@ from cortex.engine import CortexEngine
 @pytest.fixture
 async def engine(tmp_path):
     import sqlite_vec
+
+    if not hasattr(sqlite3.Connection, "enable_load_extension"):
+        pytest.skip("sqlite3.Connection object has no attribute 'enable_load_extension'")
 
     db_path = tmp_path / "test_cortex.db"
     engine = CortexEngine(db_path=str(db_path))

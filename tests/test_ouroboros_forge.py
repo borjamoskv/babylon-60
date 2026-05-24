@@ -1,6 +1,7 @@
 import logging
 import sys
 import unittest
+from unittest.mock import patch, AsyncMock
 from pathlib import Path
 
 # Add project root to sys.path dynamically
@@ -9,7 +10,6 @@ sys.path.insert(0, str(_project_root))
 
 from ouroboros_engine import OuroborosEngine
 
-
 class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
     """Verifies the Forge-backed Ouroboros audit pipeline (V5)."""
 
@@ -17,10 +17,17 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         self.engine = OuroborosEngine()
         self.test_repo = "https://github.com/Uniswap/v4-core"
 
-    async def test_audit_cycle(self):
+    @patch("ouroboros_engine.asyncio.create_subprocess_exec")
+    @patch("ouroboros_engine.os.system")
+    async def test_audit_cycle(self, mock_system, mock_exec):
         """Standard Audit Cycle on mock contract."""
         logger = logging.getLogger("cortex.ouroboros.test")
         logger.info("Starting Ouroboros-1 Verification...")
+
+        mock_process = AsyncMock()
+        mock_process.communicate.return_value = (b"[FAIL] Reentrancy in deposit()", b"")
+        mock_process.returncode = 1
+        mock_exec.return_value = mock_process
 
         # This will clone and audit
         try:
@@ -46,7 +53,6 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         count = cursor.fetchone()[0]
         conn.close()
         self.assertGreaterEqual(count, 0, "Signal table check failed.")
-
 
 if __name__ == "__main__":
     unittest.main()
