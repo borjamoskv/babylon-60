@@ -77,12 +77,12 @@ async def test_lineage_verifier_concurrency():
 
     # Normal fetch
     node = await verifier.get_lineage(3)
-    assert node.fact_id == 3
-    assert len(node.parents) == 1
-    assert node.parents[0].fact_id == 2
-    assert len(node.parents[0].parents) == 1
-    assert node.parents[0].parents[0].fact_id == 1
-    assert len(node.parents[0].parents[0].parents) == 0
+    assert node.fact_id == 3  # nosec B101
+    assert len(node.parents) == 1  # nosec B101
+    assert node.parents[0].fact_id == 2  # nosec B101
+    assert len(node.parents[0].parents) == 1  # nosec B101
+    assert node.parents[0].parents[0].fact_id == 1  # nosec B101
+    assert len(node.parents[0].parents[0].parents) == 0  # nosec B101
 
 
 @pytest.mark.asyncio
@@ -92,10 +92,10 @@ async def test_lineage_verifier_cycle():
 
     # Cycle fetch
     node = await verifier.get_lineage(4)
-    assert node.fact_id == 4
-    assert len(node.parents) == 1
-    assert node.parents[0].fact_id == 4
-    assert node.parents[0].error == "Cyclic graph lineage protection triggered."
+    assert node.fact_id == 4  # nosec B101
+    assert len(node.parents) == 1  # nosec B101
+    assert node.parents[0].fact_id == 4  # nosec B101
+    assert node.parents[0].error == "Cyclic graph lineage protection triggered."  # nosec B101
 
 
 def test_archaeologist_build_clusters():
@@ -115,11 +115,11 @@ def test_archaeologist_build_clusters():
     )
 
     clusters = archaeologist._build_clusters(facts, vecs_matrix, threshold=0.9)
-    assert len(clusters) == 2
+    assert len(clusters) == 2  # nosec B101
 
     # Note: the exact structure depends on ordering, but we expect sizes to be 2 and 2
-    assert set(clusters[0]) == {0, 1}
-    assert set(clusters[1]) == {2, 3}
+    assert set(clusters[0]) == {0, 1}  # nosec B101
+    assert set(clusters[1]) == {2, 3}  # nosec B101
 
 
 def test_archaeologist_no_clusters():
@@ -137,4 +137,4 @@ def test_archaeologist_no_clusters():
     )
 
     clusters = archaeologist._build_clusters(facts, vecs_matrix, threshold=0.9)
-    assert len(clusters) == 0
+    assert len(clusters) == 0  # nosec B101
