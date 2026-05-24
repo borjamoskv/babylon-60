@@ -84,7 +84,7 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         self.engine._queue_remediation(target_file, log_file)
 
         self.assertTrue(os.path.exists(queue_path))
-        with open(queue_path, "r") as f:
+        with open(queue_path) as f:
             queue = json.load(f)
 
         self.assertEqual(len(queue["pending_tasks"]), 1)
@@ -96,7 +96,7 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
 
         # Test appending to existing queue
         self.engine._queue_remediation(target_file, log_file)
-        with open(queue_path, "r") as f:
+        with open(queue_path) as f:
             queue = json.load(f)
         self.assertEqual(len(queue["pending_tasks"]), 2)
 
