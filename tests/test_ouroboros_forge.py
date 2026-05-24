@@ -44,7 +44,7 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         from cortex.extensions.signals.bus import SignalBus
 
         # Ensure schema initialization
-        conn = sqlite3.connect(DB_PATH)
+        conn = sqlite3.connect(':memory:')
         _bus = SignalBus(conn)
         _bus.ensure_table()
 
