@@ -13,10 +13,17 @@ async def engine(tmp_path):
     engine = CortexEngine(db_path=str(db_path))
     # Initialize schema with extension loaded
     async with aiosqlite.connect(str(db_path)) as db:
-        await db.enable_load_extension(True)
-        await db.load_extension(sqlite_vec.loadable_path())
-        await db.enable_load_extension(False)
+        # aiosqlite connection has enable_load_extension, but the underlying _conn might not
+        # so we check if the underlying sqlite3.Connection has it
+        vector_enabled = hasattr(db._conn, "enable_load_extension")
+        if vector_enabled:
+            await db.enable_load_extension(True)
+            await db.load_extension(sqlite_vec.loadable_path())
+            await db.enable_load_extension(False)
         for statement in ALL_SCHEMA:
+            # Skip vector tables if vec extension not loaded
+            if "vec0" in statement and not vector_enabled:
+                continue
             await db.executescript(statement)
         await db.commit()
     return engine

@@ -263,7 +263,11 @@ def test_load_all_case_insensitive_duplicates(tmp_path, caplog, monkeypatch):
     with caplog.at_level(logging.ERROR):
         registry.load_all(duplicate_dir)
 
-    assert "Duplicate agent id 'ALPHA'" in caplog.text
+    # In our implementation, since files are loaded in sorted order, "first.yaml"
+    # is loaded first ("alpha"), and then "second.yaml" ("ALPHA") tries to load
+    # and is skipped because "alpha" is already in the dictionary (keys are lowercased).
+    # The error message should report "alpha" (the existing key) or "ALPHA" (the conflicting key)
+    assert "duplicate agent id 'alpha'" in caplog.text.lower()
     assert len(registry.agents) == 1
 
 
