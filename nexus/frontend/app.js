@@ -1,5 +1,4 @@
-// NEXUS — Core Application Logic & Router
-import { createAgentCard, createActivityItem, createStatsBar, createAgentDetail, createTasksView } from './components.js';
+import { createAgentCard, createActivityItem, createStatsBar, createAgentDetail, createTasksView, escapeHtml } from './components.js';
 
 const API = '/api';
 
@@ -117,11 +116,11 @@ class NexusApp {
       <div class="section-title">Agent Directory</div>
       <div class="search-container">
         <span class="search-icon">⌕</span>
-        <input class="search-input" id="search" placeholder="Search agents by name or capability..." value="${this.searchQuery}">
+        <input class="search-input" id="search" placeholder="Search agents by name or capability...">
       </div>
       <div class="filters">
         <span class="filter-pill ${!this.filterCap ? 'active' : ''}" data-cap="">All</span>
-        ${caps.map(c => `<span class="filter-pill ${this.filterCap === c ? 'active' : ''}" data-cap="${c}">${c}</span>`).join('')}
+        ${caps.map(c => `<span class="filter-pill ${this.filterCap === c ? 'active' : ''}" data-cap="${escapeHtml(c)}">${escapeHtml(c)}</span>`).join('')}
       </div>
       <div class="agent-grid">
         ${filtered.length ? filtered.map(a => createAgentCard(a)).join('') : '<div class="empty-state"><div class="empty-state-icon">⬡</div><div class="empty-state-text">No agents found</div></div>'}
@@ -131,10 +130,16 @@ class NexusApp {
     // Bind search
     const searchInput = document.getElementById('search');
     if (searchInput) {
+      searchInput.value = this.searchQuery || '';
       searchInput.addEventListener('input', (e) => {
         this.searchQuery = e.target.value;
         this.renderDirectory(container);
-        document.getElementById('search')?.focus();
+        const input = document.getElementById('search');
+        if (input) {
+          input.focus();
+          const len = input.value.length;
+          input.setSelectionRange(len, len);
+        }
       });
     }
 

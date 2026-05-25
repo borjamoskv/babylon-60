@@ -1,5 +1,15 @@
 // NEXUS — UI Components (Vanilla JS)
 
+export function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 export function createTrustRing(posteriorMean, tier, size = 56) {
   const r = (size - 4) / 2;
   const circumference = 2 * Math.PI * r;
@@ -20,32 +30,32 @@ export function createTrustRing(posteriorMean, tier, size = 56) {
 }
 
 export function createAgentCard(agent) {
-  const initial = agent.name.charAt(0);
+  const initial = escapeHtml(agent.name ? agent.name.charAt(0) : '');
   const trust = agent.trust || {};
   const tier = trust.tier || 'unverified';
   const mean = trust.posterior_mean || 0;
   const caps = (agent.capabilities || []).slice(0, 3);
   const status = agent.status || 'offline';
 
-  return `<div class="agent-card" data-agent-id="${agent.id}" onclick="window.app.showAgent('${agent.id}')">
+  return `<div class="agent-card" data-agent-id="${escapeHtml(agent.id)}" onclick="window.app.showAgent('${escapeHtml(agent.id)}')">
     <div class="agent-card-header">
       <div class="agent-avatar">
         ${createTrustRing(mean, tier)}
         <div class="agent-avatar-inner">${initial}</div>
       </div>
       <div>
-        <div class="agent-name">${agent.name}</div>
-        <div class="agent-owner">${agent.owner || 'Independent'}</div>
+        <div class="agent-name">${escapeHtml(agent.name)}</div>
+        <div class="agent-owner">${escapeHtml(agent.owner || 'Independent')}</div>
       </div>
       <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
         <div class="status-dot ${status}"></div>
         <span class="trust-badge ${tier}">${tier.toUpperCase()}</span>
       </div>
     </div>
-    <div class="agent-desc">${agent.description || ''}</div>
+    <div class="agent-desc">${escapeHtml(agent.description || '')}</div>
     <div class="agent-footer">
       <div class="cap-badges">
-        ${caps.map(c => `<span class="cap-badge">${c}</span>`).join('')}
+        ${caps.map(c => `<span class="cap-badge">${escapeHtml(c)}</span>`).join('')}
       </div>
       <span style="font-family:var(--mono);font-size:11px;color:var(--text-muted);">μ=${mean.toFixed(3)}</span>
     </div>
@@ -65,7 +75,7 @@ export function createActivityItem(event, index) {
 
   return `<div class="activity-item" style="animation-delay:${index * 0.05}s">
     <div class="activity-icon ${ic.cls}">${ic.icon}</div>
-    <div class="activity-text">${event.description || event.event_type}</div>
+    <div class="activity-text">${escapeHtml(event.description || event.event_type)}</div>
     <div class="activity-time">${time}</div>
   </div>`;
 }
@@ -109,17 +119,17 @@ export function createAgentDetail(agent) {
     <div class="detail-header">
       <div class="detail-avatar">
         ${createTrustRing(mean, tier, 92)}
-        <div class="agent-avatar-inner" style="font-size:32px">${agent.name.charAt(0)}</div>
+        <div class="agent-avatar-inner" style="font-size:32px">${escapeHtml(agent.name ? agent.name.charAt(0) : '')}</div>
       </div>
       <div style="flex:1">
         <div style="display:flex;align-items:center;gap:12px">
-          <div class="detail-name">${agent.name}</div>
+          <div class="detail-name">${escapeHtml(agent.name)}</div>
           <div class="status-dot ${agent.status}"></div>
           <span class="trust-badge ${tier}">${tier.toUpperCase()}</span>
         </div>
-        <div class="detail-desc">${agent.description || ''}</div>
+        <div class="detail-desc">${escapeHtml(agent.description || '')}</div>
         <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-          ${(agent.capabilities||[]).map(c => `<span class="cap-badge">${c}</span>`).join('')}
+          ${(agent.capabilities||[]).map(c => `<span class="cap-badge">${escapeHtml(c)}</span>`).join('')}
         </div>
       </div>
     </div>
@@ -158,10 +168,10 @@ export function createAgentDetail(agent) {
       <div class="detail-card">
         <div class="detail-card-title">Identity</div>
         <div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);word-break:break-all;margin-top:4px">
-          ${agent.public_key || 'No key assigned'}
+          ${escapeHtml(agent.public_key || 'No key assigned')}
         </div>
         <div style="margin-top:8px;font-size:12px;color:var(--text-muted)">
-          Owner: <strong style="color:var(--text)">${agent.owner||'—'}</strong>
+          Owner: <strong style="color:var(--text)">${escapeHtml(agent.owner||'—')}</strong>
         </div>
       </div>
 
@@ -170,7 +180,7 @@ export function createAgentDetail(agent) {
         <div style="font-size:12px;color:var(--text-dim);display:flex;flex-direction:column;gap:4px;margin-top:4px">
           <span>Registered: ${agent.registered_at ? new Date(agent.registered_at).toLocaleDateString() : '—'}</span>
           <span>Last Seen: ${agent.last_seen ? new Date(agent.last_seen).toLocaleString() : '—'}</span>
-          <span>Agent ID: <code style="font-family:var(--mono);color:var(--electric)">${agent.id}</code></span>
+          <span>Agent ID: <code style="font-family:var(--mono);color:var(--electric)">${escapeHtml(agent.id)}</code></span>
         </div>
       </div>
     </div>
@@ -179,37 +189,36 @@ export function createAgentDetail(agent) {
 
 export function createTaskCard(task, agents) {
   const caps = (task.required_capabilities || []).slice(0, 3);
-  const capBadges = caps.map(c => `<span class="cap-badge">${c}</span>`).join('');
+  const capBadges = caps.map(c => `<span class="cap-badge">${escapeHtml(c)}</span>`).join('');
 
   let actionHtml = '';
   if (task.status === 'open') {
-    // Show assignee select and assign button
     const eligibleAgents = agents.filter(a => a.status === 'online');
     actionHtml = `
       <div class="task-action-row" style="margin-top: 12px; display: flex; gap: 8px;">
-        <select class="search-input" id="assignee-select-${task.id}" style="padding: 6px 12px; font-size: 12px; height: 32px; width: auto; flex: 1;">
+        <select class="search-input" id="assignee-select-${escapeHtml(task.id)}" style="padding: 6px 12px; font-size: 12px; height: 32px; width: auto; flex: 1;">
           <option value="">-- Choose Agent --</option>
-          ${eligibleAgents.map(a => `<option value="${a.id}">${a.name}</option>`).join('')}
+          ${eligibleAgents.map(a => `<option value="${escapeHtml(a.id)}">${escapeHtml(a.name)}</option>`).join('')}
         </select>
-        <button class="back-btn" onclick="window.app.assignTask('${task.id}')" style="margin: 0; padding: 6px 12px; height: 32px; background: var(--electric); color: white; border: none;">Assign</button>
+        <button class="back-btn" onclick="window.app.assignTask('${escapeHtml(task.id)}')" style="margin: 0; padding: 6px 12px; height: 32px; background: var(--electric); color: white; border: none;">Assign</button>
       </div>
     `;
   } else if (task.status === 'assigned') {
     const assignee = agents.find(a => a.id === task.assignee_id);
     actionHtml = `
       <div style="margin-top: 12px; font-size: 12px; color: var(--text-dim);">
-        Assigned to: <strong style="color: var(--text)">${assignee ? assignee.name : task.assignee_id}</strong>
+        Assigned to: <strong style="color: var(--text)">${assignee ? escapeHtml(assignee.name) : escapeHtml(task.assignee_id)}</strong>
       </div>
       <div class="task-action-row" style="margin-top: 8px; display: flex; gap: 8px;">
-        <button class="back-btn" onclick="window.app.completeTask('${task.id}')" style="margin: 0; padding: 6px 12px; height: 32px; background: var(--success); color: black; border: none; font-weight: bold;">Complete</button>
-        <button class="back-btn" onclick="window.app.failTask('${task.id}')" style="margin: 0; padding: 6px 12px; height: 32px; background: var(--danger); color: white; border: none;">Fail</button>
+        <button class="back-btn" onclick="window.app.completeTask('${escapeHtml(task.id)}')" style="margin: 0; padding: 6px 12px; height: 32px; background: var(--success); color: black; border: none; font-weight: bold;">Complete</button>
+        <button class="back-btn" onclick="window.app.failTask('${escapeHtml(task.id)}')" style="margin: 0; padding: 6px 12px; height: 32px; background: var(--danger); color: white; border: none;">Fail</button>
       </div>
     `;
   } else {
     const assignee = agents.find(a => a.id === task.assignee_id);
     actionHtml = `
       <div style="margin-top: 12px; font-size: 12px; color: var(--text-dim);">
-        Assignee: <strong style="color: var(--text)">${assignee ? assignee.name : (task.assignee_id || 'None')}</strong>
+        Assignee: <strong style="color: var(--text)">${assignee ? escapeHtml(assignee.name) : escapeHtml(task.assignee_id || 'None')}</strong>
         ${task.completed_at ? `<br/>Completed: ${new Date(task.completed_at).toLocaleString()}` : ''}
       </div>
     `;
@@ -219,14 +228,14 @@ export function createTaskCard(task, agents) {
     <div class="agent-card" style="cursor: default;">
       <div class="agent-card-header" style="align-items: flex-start;">
         <div>
-          <div class="agent-name" style="font-size: 16px;">${task.title}</div>
-          <div class="agent-owner" style="font-family: var(--mono); font-size: 10px; margin-top: 2px;">ID: ${task.id}</div>
+          <div class="agent-name" style="font-size: 16px;">${escapeHtml(task.title)}</div>
+          <div class="agent-owner" style="font-family: var(--mono); font-size: 10px; margin-top: 2px;">ID: ${escapeHtml(task.id)}</div>
         </div>
         <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
-          <span class="trust-badge" style="background: var(--surface-2); color: var(--text-dim); text-transform: uppercase;">${task.status}</span>
+          <span class="trust-badge" style="background: var(--surface-2); color: var(--text-dim); text-transform: uppercase;">${escapeHtml(task.status)}</span>
         </div>
       </div>
-      <div class="agent-desc" style="-webkit-line-clamp: 4; display: block; overflow: visible; height: auto;">${task.description || 'No description provided'}</div>
+      <div class="agent-desc" style="-webkit-line-clamp: 4; display: block; overflow: visible; height: auto;">${escapeHtml(task.description || 'No description provided')}</div>
       <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 10px;">
         <div class="cap-badges">${capBadges}</div>
         <div style="font-family: var(--mono); font-weight: bold; color: var(--tier-gold); font-size: 14px;">${task.reward.toFixed(1)} EXA</div>
@@ -279,8 +288,8 @@ export function createTasksView(tasks, agents) {
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-height: 120px; overflow-y: auto; padding: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);">
                 ${capabilities.map(c => `
                   <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; color: var(--text-dim);">
-                    <input type="checkbox" name="task-caps" value="${c}">
-                    <span>${c}</span>
+                    <input type="checkbox" name="task-caps" value="${escapeHtml(c)}">
+                    <span>${escapeHtml(c)}</span>
                   </label>
                 `).join('')}
               </div>
@@ -293,4 +302,3 @@ export function createTasksView(tasks, agents) {
     </div>
   `;
 }
-
