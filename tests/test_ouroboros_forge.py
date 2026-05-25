@@ -10,12 +10,16 @@ sys.path.insert(0, str(_project_root))
 from ouroboros_engine import OuroborosEngine
 
 
+import shutil
+
 class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
     """Verifies the Forge-backed Ouroboros audit pipeline (V5)."""
 
     async def asyncSetUp(self):
         self.engine = OuroborosEngine()
         self.test_repo = "https://github.com/Uniswap/v4-core"
+
+    @unittest.skipIf(not shutil.which("forge"), "Forge not installed")
 
     async def test_audit_cycle(self):
         """Standard Audit Cycle on mock contract."""
