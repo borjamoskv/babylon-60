@@ -176,3 +176,121 @@ export function createAgentDetail(agent) {
     </div>
   </div>`;
 }
+
+export function createTaskCard(task, agents) {
+  const caps = (task.required_capabilities || []).slice(0, 3);
+  const capBadges = caps.map(c => `<span class="cap-badge">${c}</span>`).join('');
+
+  let actionHtml = '';
+  if (task.status === 'open') {
+    // Show assignee select and assign button
+    const eligibleAgents = agents.filter(a => a.status === 'online');
+    actionHtml = `
+      <div class="task-action-row" style="margin-top: 12px; display: flex; gap: 8px;">
+        <select class="search-input" id="assignee-select-${task.id}" style="padding: 6px 12px; font-size: 12px; height: 32px; width: auto; flex: 1;">
+          <option value="">-- Choose Agent --</option>
+          ${eligibleAgents.map(a => `<option value="${a.id}">${a.name}</option>`).join('')}
+        </select>
+        <button class="back-btn" onclick="window.app.assignTask('${task.id}')" style="margin: 0; padding: 6px 12px; height: 32px; background: var(--electric); color: white; border: none;">Assign</button>
+      </div>
+    `;
+  } else if (task.status === 'assigned') {
+    const assignee = agents.find(a => a.id === task.assignee_id);
+    actionHtml = `
+      <div style="margin-top: 12px; font-size: 12px; color: var(--text-dim);">
+        Assigned to: <strong style="color: var(--text)">${assignee ? assignee.name : task.assignee_id}</strong>
+      </div>
+      <div class="task-action-row" style="margin-top: 8px; display: flex; gap: 8px;">
+        <button class="back-btn" onclick="window.app.completeTask('${task.id}')" style="margin: 0; padding: 6px 12px; height: 32px; background: var(--success); color: black; border: none; font-weight: bold;">Complete</button>
+        <button class="back-btn" onclick="window.app.failTask('${task.id}')" style="margin: 0; padding: 6px 12px; height: 32px; background: var(--danger); color: white; border: none;">Fail</button>
+      </div>
+    `;
+  } else {
+    const assignee = agents.find(a => a.id === task.assignee_id);
+    actionHtml = `
+      <div style="margin-top: 12px; font-size: 12px; color: var(--text-dim);">
+        Assignee: <strong style="color: var(--text)">${assignee ? assignee.name : (task.assignee_id || 'None')}</strong>
+        ${task.completed_at ? `<br/>Completed: ${new Date(task.completed_at).toLocaleString()}` : ''}
+      </div>
+    `;
+  }
+
+  return `
+    <div class="agent-card" style="cursor: default;">
+      <div class="agent-card-header" style="align-items: flex-start;">
+        <div>
+          <div class="agent-name" style="font-size: 16px;">${task.title}</div>
+          <div class="agent-owner" style="font-family: var(--mono); font-size: 10px; margin-top: 2px;">ID: ${task.id}</div>
+        </div>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+          <span class="trust-badge" style="background: var(--surface-2); color: var(--text-dim); text-transform: uppercase;">${task.status}</span>
+        </div>
+      </div>
+      <div class="agent-desc" style="-webkit-line-clamp: 4; display: block; overflow: visible; height: auto;">${task.description || 'No description provided'}</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 10px;">
+        <div class="cap-badges">${capBadges}</div>
+        <div style="font-family: var(--mono); font-weight: bold; color: var(--tier-gold); font-size: 14px;">${task.reward.toFixed(1)} EXA</div>
+      </div>
+      ${actionHtml}
+    </div>
+  `;
+}
+
+export function createTasksView(tasks, agents) {
+  const capabilities = [
+    'code', 'security', 'intel', 'data', 'creative',
+    'marketing', 'osint', 'infra', 'finance', 'research', 'legal', 'design'
+  ];
+
+  const taskCards = tasks.length
+    ? tasks.map(t => createTaskCard(t, agents)).join('')
+    : '<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">No tasks available</div></div>';
+
+  return `
+    <div class="tasks-layout" style="display: grid; grid-template-columns: 1fr 350px; gap: 24px;">
+      <div>
+        <div class="section-title">Active Tasks</div>
+        <div class="agent-grid" style="grid-template-columns: 1fr;">
+          ${taskCards}
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">Create Task</div>
+        <div class="detail-card" style="position: sticky; top: 100px;">
+          <form id="create-task-form" onsubmit="event.preventDefault(); window.app.submitTask();">
+            <div style="margin-bottom: 12px;">
+              <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 4px;">Task Title</label>
+              <input class="search-input" id="task-title" required minlength="3" placeholder="e.g. Audit Smart Contracts" style="padding: 10px 14px;">
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 4px;">Description</label>
+              <textarea class="search-input" id="task-desc" placeholder="Provide instructions for the agent..." style="padding: 10px 14px; min-height: 100px; font-family: var(--font); resize: vertical;"></textarea>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 4px;">Reward (EXA)</label>
+              <input type="number" class="search-input" id="task-reward" value="100" min="0" step="0.1" style="padding: 10px 14px;">
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 6px;">Required Capabilities</label>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-height: 120px; overflow-y: auto; padding: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                ${capabilities.map(c => `
+                  <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; color: var(--text-dim);">
+                    <input type="checkbox" name="task-caps" value="${c}">
+                    <span>${c}</span>
+                  </label>
+                `).join('')}
+              </div>
+            </div>
+
+            <button type="submit" class="back-btn" style="width: 100%; margin: 0; padding: 12px; background: var(--electric); color: white; border: none; font-weight: bold; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Publish Task</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  `;
+}
+

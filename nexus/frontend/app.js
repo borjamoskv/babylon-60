@@ -1,5 +1,5 @@
 // NEXUS — Core Application Logic & Router
-import { createAgentCard, createActivityItem, createStatsBar, createAgentDetail } from './components.js';
+import { createAgentCard, createActivityItem, createStatsBar, createAgentDetail, createTasksView } from './components.js';
 
 const API = '/api';
 
@@ -8,6 +8,7 @@ class NexusApp {
     this.agents = [];
     this.stats = {};
     this.activity = [];
+    this.tasks = [];
     this.currentView = 'directory';
     this.searchQuery = '';
     this.filterCap = null;
@@ -24,19 +25,22 @@ class NexusApp {
 
   async fetchData() {
     try {
-      const [agents, stats, activity] = await Promise.all([
+      const [agents, stats, activity, tasks] = await Promise.all([
         fetch(`${API}/agents`).then(r => r.json()),
         fetch(`${API}/stats`).then(r => r.json()),
         fetch(`${API}/activity`).then(r => r.json()),
+        fetch(`${API}/tasks`).then(r => r.json()),
       ]);
       this.agents = agents;
       this.stats = stats;
       this.activity = activity;
+      this.tasks = tasks;
     } catch (e) {
       console.warn('API unavailable, using empty state:', e.message);
       this.agents = [];
       this.stats = { total_agents: 0, verified_agents: 0, online_agents: 0, tasks_completed: 0, avg_trust_score: 0 };
       this.activity = [];
+      this.tasks = [];
     }
   }
 
@@ -81,6 +85,7 @@ class NexusApp {
     setTimeout(() => {
       switch (this.currentView) {
         case 'directory': this.renderDirectory(main); break;
+        case 'tasks': this.renderTasks(main); break;
         case 'activity': this.renderActivityView(main); break;
         case 'detail': this.renderDetail(main); break;
         default: this.renderDirectory(main);
@@ -170,6 +175,97 @@ class NexusApp {
   }
 
   // ── Events ───────────────────────────────────────────────
+
+  renderTasks(container) {
+    container.innerHTML = createTasksView(this.tasks, this.agents);
+  }
+
+  async submitTask() {
+    const title = document.getElementById('task-title').value.trim();
+    const description = document.getElementById('task-desc').value.trim();
+    const reward = parseFloat(document.getElementById('task-reward').value) || 0.0;
+    
+    const checkboxes = document.querySelectorAll('input[name="task-caps"]:checked');
+    const required_capabilities = Array.from(checkboxes).map(cb => cb.value);
+
+    try {
+      const res = await fetch(`${API}/tasks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          description,
+          required_capabilities,
+          reward,
+          delegator_id: 'system'
+        })
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || 'Failed to create task');
+      }
+      await this.fetchData();
+      this.render();
+    } catch (e) {
+      alert(`Error creating task: ${e.message}`);
+    }
+  }
+
+  async assignTask(taskId) {
+    const select = document.getElementById(`assignee-select-${taskId}`);
+    const assigneeId = select ? select.value : '';
+    if (!assigneeId) {
+      alert('Please select an agent to assign the task to.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API}/tasks/${taskId}/assign/${assigneeId}`, {
+        method: 'POST'
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || 'Assignment failed');
+      }
+      await this.fetchData();
+      this.render();
+    } catch (e) {
+      alert(`Error assigning task: ${e.message}`);
+    }
+  }
+
+  async completeTask(taskId) {
+    try {
+      const res = await fetch(`${API}/tasks/${taskId}/complete`, {
+        method: 'POST'
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || 'Complete operation failed');
+      }
+      await this.fetchData();
+      this.render();
+    } catch (e) {
+      alert(`Error completing task: ${e.message}`);
+    }
+  }
+
+  async failTask(taskId) {
+    const reason = prompt('Enter failure reason (optional):') || 'Failed';
+    try {
+      const res = await fetch(`${API}/tasks/${taskId}/fail?reason=${encodeURIComponent(reason)}`, {
+        method: 'POST'
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || 'Fail operation failed');
+      }
+      await this.fetchData();
+      this.render();
+    } catch (e) {
+      alert(`Error failing task: ${e.message}`);
+    }
+  }
 
   bindEvents() {
     document.querySelectorAll('.nav-btn').forEach(btn => {
