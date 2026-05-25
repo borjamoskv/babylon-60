@@ -230,7 +230,7 @@ def classify_error(e: Exception, *, db_path: str = "", context: str = "") -> Cor
         return os_struct
 
     # Runtime generic
-    if isinstance(e, (RuntimeError, ValueError)):
+    if isinstance(e, RuntimeError | ValueError):
         return CortexErrorStruct(
             code=ErrorCode.VALIDATION_ERROR if isinstance(e, ValueError) else ErrorCode.UNEXPECTED,
             message=f"Error{ctx_prefix}",
@@ -318,7 +318,7 @@ def _classify_os_error(
         )
 
     # Runtime generic
-    if isinstance(e, (RuntimeError, ValueError)):
+    if isinstance(e, RuntimeError | ValueError):
         return CortexErrorStruct(
             code=ErrorCode.VALIDATION_ERROR if isinstance(e, ValueError) else ErrorCode.UNEXPECTED,
             message=f"Error{ctx_prefix}",

@@ -259,7 +259,7 @@ def _detect_code_ghosts(source_files: list[Path], root: Path) -> list[str]:
         rel_path = str(sf.relative_to(root))
 
         for node in ast.walk(tree):
-            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
                 continue
             if _count_subtree_nodes(node) < GHOST_MIN_SUBTREE_SIZE:
                 continue

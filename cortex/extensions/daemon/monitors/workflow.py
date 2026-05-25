@@ -187,7 +187,7 @@ class WorkflowMonitor(BaseMonitor[WorkflowAlert]):
             if info.get("blocked_by"):
                 continue
             try:
-                if isinstance(ts, (int, float)):
+                if isinstance(ts, int | float):
                     last = datetime.fromtimestamp(ts, tz=timezone.utc)
                 else:
                     last = datetime.fromisoformat(ts.replace("Z", "+00:00"))
