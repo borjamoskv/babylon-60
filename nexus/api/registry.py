@@ -75,7 +75,8 @@ class AgentRegistry:
                 agent_id TEXT PRIMARY KEY,
                 alpha REAL DEFAULT 2.0,
                 beta REAL DEFAULT 2.0,
-                total_signals INTEGER DEFAULT 0
+                total_signals INTEGER DEFAULT 0,
+                history TEXT DEFAULT '[]'
             );
 
             CREATE TABLE IF NOT EXISTS tasks (
@@ -108,20 +109,33 @@ class AgentRegistry:
             CREATE INDEX IF NOT EXISTS idx_activity_timestamp ON activity(timestamp DESC);
         """)
         conn.commit()
+
+        # Handle migration for existing databases missing history column
+        try:
+            conn.execute("ALTER TABLE trust_states ADD COLUMN history TEXT DEFAULT '[]'")
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass
+
         self._load_trust_states()
 
     def _load_trust_states(self):
         """Load persisted trust states into memory."""
         conn = self._get_conn()
         rows = conn.execute(
-            "SELECT agent_id, alpha, beta, total_signals FROM trust_states"
+            "SELECT agent_id, alpha, beta, total_signals, history FROM trust_states"
         ).fetchall()
         for row in rows:
+            try:
+                history = json.loads(row["history"]) if row["history"] else []
+            except (TypeError, json.JSONDecodeError):
+                history = []
             self._trust.set_state(
                 row["agent_id"],
                 alpha=row["alpha"],
                 beta=row["beta"],
                 total_signals=row["total_signals"],
+                history=history,
             )
 
     def _save_trust_state(self, agent_id: str):
@@ -129,8 +143,8 @@ class AgentRegistry:
         state = self._trust.get_or_create(agent_id)
         conn = self._get_conn()
         conn.execute(
-            "INSERT OR REPLACE INTO trust_states (agent_id, alpha, beta, total_signals) VALUES (?, ?, ?, ?)",
-            (agent_id, state.alpha, state.beta, state.total_signals),
+            "INSERT OR REPLACE INTO trust_states (agent_id, alpha, beta, total_signals, history) VALUES (?, ?, ?, ?, ?)",
+            (agent_id, state.alpha, state.beta, state.total_signals, json.dumps(state.history)),
         )
         conn.commit()
 
@@ -290,6 +304,9 @@ class AgentRegistry:
             )
         conn.commit()
 
+        # Sync to SQLite
+        self._save_trust_state(agent_id)
+
         agent = self.get_agent(agent_id)
         self._log_activity(
             f"trust_{signal.value}",
@@ -348,12 +365,103 @@ class AgentRegistry:
             ).fetchall()
         return [self._row_to_task(r) for r in rows]
 
+    def get_task(self, task_id: str) -> Task:
+        """Retrieve a task by ID."""
+        return self._get_task(task_id)
+
     def _get_task(self, task_id: str) -> Task:
         conn = self._get_conn()
         row = conn.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
         if not row:
             raise ValueError(f"Task {task_id} not found")
         return self._row_to_task(row)
+
+    def assign_task(self, task_id: str, assignee_id: str) -> Task:
+        """Assign a task to an agent."""
+        agent = self.get_agent(assignee_id)
+        task = self._get_task(task_id)
+
+        if task.status != "open":
+            raise ValueError(f"Task {task_id} is not open (status: {task.status})")
+
+        conn = self._get_conn()
+        conn.execute(
+            "UPDATE tasks SET status = 'assigned', assignee_id = ? WHERE id = ?",
+            (assignee_id, task_id),
+        )
+        conn.commit()
+
+        # Update agent status to busy
+        self.update_agent_status(assignee_id, AgentStatus.BUSY)
+
+        self._log_activity(
+            "task_assigned",
+            assignee_id,
+            agent.name,
+            target_id=task_id,
+            target_name=task.title,
+            description=f"Task '{task.title}' assigned to agent '{agent.name}'",
+        )
+
+        return self._get_task(task_id)
+
+    def complete_task(self, task_id: str) -> Task:
+        """Mark a task as completed and apply trust signal."""
+        task = self._get_task(task_id)
+        if task.status != "assigned":
+            raise ValueError(f"Task {task_id} is not assigned (status: {task.status})")
+        if not task.assignee_id:
+            raise ValueError(f"Task {task_id} has no assignee")
+
+        now = self._now()
+        conn = self._get_conn()
+        conn.execute(
+            "UPDATE tasks SET status = 'completed', completed_at = ? WHERE id = ?",
+            (now, task_id),
+        )
+        conn.commit()
+
+        # Apply trust signal TASK_COMPLETE to the assignee
+        self.apply_trust_signal(
+            task.assignee_id,
+            TrustSignal.TASK_COMPLETE,
+            source="system",
+            reason=f"Successfully completed task '{task.title}'",
+        )
+
+        # Revert agent status to online (since task is done)
+        self.update_agent_status(task.assignee_id, AgentStatus.ONLINE)
+
+        return self._get_task(task_id)
+
+    def fail_task(self, task_id: str, reason: str = "") -> Task:
+        """Mark a task as failed and apply trust signal."""
+        task = self._get_task(task_id)
+        if task.status != "assigned":
+            raise ValueError(f"Task {task_id} is not assigned (status: {task.status})")
+        if not task.assignee_id:
+            raise ValueError(f"Task {task_id} has no assignee")
+
+        now = self._now()
+        conn = self._get_conn()
+        conn.execute(
+            "UPDATE tasks SET status = 'failed', completed_at = ? WHERE id = ?",
+            (now, task_id),
+        )
+        conn.commit()
+
+        # Apply trust signal TASK_FAIL to the assignee
+        self.apply_trust_signal(
+            task.assignee_id,
+            TrustSignal.TASK_FAIL,
+            source="system",
+            reason=f"Failed task '{task.title}'" + (f": {reason}" if reason else ""),
+        )
+
+        # Revert agent status to online
+        self.update_agent_status(task.assignee_id, AgentStatus.ONLINE)
+
+        return self._get_task(task_id)
 
     # ── Activity ────────────────────────────────────────────────
 

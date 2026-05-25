@@ -124,6 +124,38 @@ def create_task(task: TaskCreate):
     return _reg().create_task(task).model_dump()
 
 
+@app.get("/api/tasks/{task_id}")
+def get_task(task_id: str):
+    try:
+        return _reg().get_task(task_id).model_dump()
+    except ValueError:
+        raise HTTPException(404, "Task not found")
+
+
+@app.post("/api/tasks/{task_id}/assign/{assignee_id}")
+def assign_task(task_id: str, assignee_id: str):
+    try:
+        return _reg().assign_task(task_id, assignee_id).model_dump()
+    except ValueError as e:
+        raise HTTPException(404 if "not found" in str(e) else 400, str(e))
+
+
+@app.post("/api/tasks/{task_id}/complete")
+def complete_task(task_id: str):
+    try:
+        return _reg().complete_task(task_id).model_dump()
+    except ValueError as e:
+        raise HTTPException(404 if "not found" in str(e) else 400, str(e))
+
+
+@app.post("/api/tasks/{task_id}/fail")
+def fail_task(task_id: str, reason: str = Query(default="")):
+    try:
+        return _reg().fail_task(task_id, reason).model_dump()
+    except ValueError as e:
+        raise HTTPException(404 if "not found" in str(e) else 400, str(e))
+
+
 # ── Activity ────────────────────────────────────────────────────
 
 
