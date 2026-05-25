@@ -330,6 +330,7 @@ async def test_wait_for_background_timeout(manager):
     # Queue should have been auto-drained due to timeout logic (since CORTEX_TESTING is set)
     assert manager._bg_queue.empty()
 
+
 @pytest.mark.asyncio
 async def test_reconcile_experience(manager):
     """Test reconciling an experience signal from the bus."""
@@ -356,7 +357,7 @@ async def test_reconcile_experience(manager):
             fact_type="knowledge",
             metadata={"source": "signal_bus"},
             layer="semantic",
-            use_bus=False
+            use_bus=False,
         )
 
 
@@ -391,7 +392,7 @@ async def test_store_direct_pipeline_with_bus(manager, mock_mem0_pipeline):
             project_id="proj",
             content="Fact to emit",
             fact_type="knowledge",
-            use_bus=True
+            use_bus=True,
         )
 
     assert result_id == "emitted_engram_456"
@@ -401,10 +402,7 @@ async def test_store_direct_pipeline_with_bus(manager, mock_mem0_pipeline):
 @pytest.mark.asyncio
 async def test_get_context_vector(manager):
     """Test get_context_vector logic."""
-    manager._l1.get_context.return_value = [
-        {"content": "First event"},
-        {"content": "Second event"}
-    ]
+    manager._l1.get_context.return_value = [{"content": "First event"}, {"content": "Second event"}]
 
     manager._hdc_encoder = MagicMock()
     manager._hdc_encoder.encode_text.side_effect = ["hv1", "hv2"]

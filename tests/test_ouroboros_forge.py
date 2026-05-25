@@ -12,6 +12,7 @@ from ouroboros_engine import OuroborosEngine
 
 from unittest.mock import patch, MagicMock
 
+
 class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
     """Verifies the Forge-backed Ouroboros audit pipeline (V5)."""
 
@@ -29,6 +30,7 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
 
         # Mock the subprocess calls
         from unittest.mock import AsyncMock
+
         mock_process = MagicMock()
         mock_process.communicate = AsyncMock(return_value=(b"mock stdout", b"mock stderr"))
         mock_process.returncode = 0
