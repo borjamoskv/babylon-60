@@ -6,9 +6,12 @@ import asyncio
 import json
 import sys
 
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
 # Add parent and local dirs to sys.path for high-agency imports
-sys.path.append("/Users/borjafernandezangulo/Cortex-Persist")
-sys.path.append("/Users/borjafernandezangulo/Cortex-Persist/cortex-core")
+sys.path.append(str(PROJECT_ROOT))
+sys.path.append(str(PROJECT_ROOT / "cortex-core"))
 
 try:
     from cortex.mcp.knowledge_watcher import start_knowledge_daemon
@@ -17,9 +20,7 @@ try:
 except ImportError as e:
     logging.error("Startup Failure: Dependency missing: %s", e)
 
-DB_PATH = (
-    "/Users/borjafernandezangulo/Cortex-Persist/cortex-core/cortex_memory_vsa.db"
-)
+DB_PATH = str(PROJECT_ROOT / "cortex-core" / "cortex_memory_vsa.db")
 WATCH_DIR = "/Users/borjafernandezangulo/.gemini/antigravity/knowledge"
 SWARM_QUEUE_FILE = "/tmp/cortex_swarm_queue.json"
 EXECUTION_LEDGER = "/tmp/cortex_execution_ledger.json"
@@ -54,7 +55,7 @@ class CortexDaemon:
 
     def ensure_hygiene(self):
         """Flushes redundant temporal caches to maintain strict Exergy."""
-        scratch_dir = "/Users/borjafernandezangulo/Cortex-Persist/.scratch"
+        scratch_dir = str(PROJECT_ROOT / ".scratch")
         if not os.path.exists(scratch_dir):
             return
 
@@ -188,22 +189,7 @@ class CortexDaemon:
         except Exception as e:
             logging.error("Swarm Dispatch Failure: %s", e)
 
-    def check_memory_integrity(self):
-        """Validates that the VSA memory substrate is synchronous."""
-        if not os.path.exists(DB_PATH):
-             logging.warning("⚠️ Memory Substrate Missing at %s", DB_PATH)
-             return
-        
-        try:
-            conn = sqlite3.connect(DB_PATH)
-            cursor = conn.cursor()
-            cursor.execute("SELECT count(*) FROM signals")
-            count = cursor.fetchone()[0]
-            conn.close()
-            if self.cycle_count % 50 == 0:
-                logging.info("🧠 [MEMORY] Integrity check: %d signals.", count)
-        except Exception:
-            logging.error("Memory Integrity Violation detected.")
+
 
     async def _run_council_deliberation(self):
         """Invoke SAGE COUNCIL decision engine."""
@@ -217,7 +203,7 @@ class CortexDaemon:
                 "status": "deliberating"
             }, source="daemon")
 
-        cmd = f"python3 /Users/borjafernandezangulo/Cortex-Persist/cortex-core/ouroboros_engine.py --target {target}"
+        cmd = f"python3 {str(PROJECT_ROOT / 'cortex-core' / 'ouroboros_engine.py')} --target {target}"
         self._queue_task("SAGE_COUNCIL", cmd)
 
     def _queue_task(self, agent: str, cmd: str):
@@ -246,8 +232,8 @@ class CortexDaemon:
         logging.info("👁️ [MIRROR] Starting Self-Audit...")
         
         # Path to self
-        self_path = "/Users/borjafernandezangulo/Cortex-Persist/cortex-core/cortex_daemon.py"
-        cmd = f"python3 /Users/borjafernandezangulo/Cortex-Persist/cortex-core/mirror_audit.py {self_path}"
+        self_path = str(PROJECT_ROOT / "cortex-core" / "cortex_daemon.py")
+        cmd = f"python3 {str(PROJECT_ROOT / 'cortex-core' / 'mirror_audit.py')} {self_path}"
         
         process = await asyncio.create_subprocess_shell(
             cmd,
@@ -265,7 +251,7 @@ class CortexDaemon:
                 with open(error_log, "w") as f:
                     json.dump(report, f)
                 
-                self._queue_task("OPTIMIZER", f"python3 /Users/borjafernandezangulo/Cortex-Persist/cortex-core/remediator.py {self_path} {error_log}")
+                self._queue_task("OPTIMIZER", f"python3 {str(PROJECT_ROOT / 'cortex-core' / 'remediator.py')} {self_path} {error_log}")
             else:
                 logging.info("✅ [MIRROR] Self-Audit Optimal (Score: %d)", report["exergy_score"])
         except Exception as e:

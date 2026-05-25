@@ -280,3 +280,7 @@ nexus-dashboard/.next/
 farandula_remix/
 cortex_rs/
 cortex_audit_ledger.jsonl
+
+# Local clones of audit/bounty targets
+engine-c5/targets/
+

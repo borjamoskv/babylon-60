@@ -4,12 +4,15 @@ import logging
 import re
 import sqlite3
 import time
+import json
+from pathlib import Path
 
 # CORTEX V5 Pulse Integration
 from cortex.extensions.signals.bus import SignalBus
 from cortex.config import DB_PATH
 
-SCRATCH_BASE = "/Users/borjafernandezangulo/Cortex-Persist/.scratch/ouroboros"
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+SCRATCH_BASE = str(PROJECT_ROOT / ".scratch" / "ouroboros")
 FORGE_PATH = "forge" # Verified in path
 logger = logging.getLogger("cortex.ouroboros")
 
@@ -183,7 +186,7 @@ contract {contract_name}OuroborosTest is Test {{
                 "id": f"remed_{int(time.time())}",
                 "agent": "SURGEON-1",
                 "type": "remediation",
-                "command": f"python3 /Users/borjafernandezangulo/Cortex-Persist/cortex-core/remediator.py {target_file} {log_file}",
+                "command": f"python3 {str(PROJECT_ROOT / 'cortex-core' / 'remediator.py')} {target_file} {log_file}",
                 "timestamp": time.time()
             })
             

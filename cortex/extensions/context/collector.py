@@ -246,8 +246,33 @@ class ContextCollector:
         """Collect recently modified files in workspace (best-effort)."""
         signals = []
         try:
+            exclude_dirs = {
+                "node_modules", ".git", ".venv", "venv", "env", "__pycache__",
+                "Library", "Applications", "Pictures", "Music", "Movies",
+                "Downloads", "Desktop", ".gemini", ".cortex", ".cargo", ".rustup",
+                ".npm", ".nvm", ".vscode", ".idea", ".cache", "site-packages"
+            }
+            py_files = []
+            
+            def _walk(dir_path: Path, current_depth: int, max_depth: int):
+                if current_depth > max_depth:
+                    return
+                try:
+                    for p in dir_path.iterdir():
+                        if p.is_dir():
+                            if p.name.startswith(".") or p.name in exclude_dirs:
+                                continue
+                            _walk(p, current_depth + 1, max_depth)
+                        elif p.is_file() and p.suffix == ".py":
+                            py_files.append(p)
+                except (OSError, PermissionError):
+                    pass
+
+            max_d = 2 if self.workspace_dir == Path.home() else 4
+            _walk(self.workspace_dir, 1, max_d)
+
             py_files = sorted(
-                self.workspace_dir.rglob("*.py"),
+                py_files,
                 key=lambda p: p.stat().st_mtime,
                 reverse=True,
             )[:limit]
