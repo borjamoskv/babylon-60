@@ -247,13 +247,32 @@ class ContextCollector:
         signals = []
         try:
             exclude_dirs = {
-                "node_modules", ".git", ".venv", "venv", "env", "__pycache__",
-                "Library", "Applications", "Pictures", "Music", "Movies",
-                "Downloads", "Desktop", ".gemini", ".cortex", ".cargo", ".rustup",
-                ".npm", ".nvm", ".vscode", ".idea", ".cache", "site-packages"
+                "node_modules",
+                ".git",
+                ".venv",
+                "venv",
+                "env",
+                "__pycache__",
+                "Library",
+                "Applications",
+                "Pictures",
+                "Music",
+                "Movies",
+                "Downloads",
+                "Desktop",
+                ".gemini",
+                ".cortex",
+                ".cargo",
+                ".rustup",
+                ".npm",
+                ".nvm",
+                ".vscode",
+                ".idea",
+                ".cache",
+                "site-packages",
             }
             py_files = []
-            
+
             def _walk(dir_path: Path, current_depth: int, max_depth: int):
                 if current_depth > max_depth:
                     return
