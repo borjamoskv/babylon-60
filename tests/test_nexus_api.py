@@ -160,3 +160,85 @@ def test_tasks_flow():
     # 4. Try to assign/complete/fail invalid task or transitioning states
     response = client.post(f"/api/tasks/{task_id}/assign/{agent_id}", headers=HEADERS_JULES)
     assert response.status_code == 400
+
+
+def test_enqueue_swarm_task_api_sync(monkeypatch, tmp_path):
+    from unittest.mock import patch, MagicMock
+    from persistence import enqueue_swarm_task
+    import json
+    import os
+
+    # Set temp swarm queue file path to avoid side-effects on the system
+    test_queue_file = tmp_path / "test_swarm_queue.json"
+    monkeypatch.setattr("persistence.SWARM_QUEUE_FILE", str(test_queue_file))
+
+    # Mock urllib.request.urlopen
+    mock_urlopen = MagicMock()
+    # Configure mock response
+    mock_response = MagicMock()
+    mock_response.status = 200
+    mock_response.__enter__.return_value = mock_response
+    mock_urlopen.return_value = mock_response
+
+    with patch("urllib.request.urlopen", mock_urlopen):
+        # Call function
+        payload = {"description": "Fix oracle vulnerability", "reward": 50.0}
+        enqueue_swarm_task("VulnerabilityFixer", payload)
+
+        # Verify the call to urlopen
+        assert mock_urlopen.called
+        args, kwargs = mock_urlopen.call_args
+        req = args[0]
+
+        # Check URL and Headers
+        assert req.full_url == "http://localhost:8600/api/tasks"
+        assert req.get_header("Content-type") == "application/json"
+        assert req.get_header("Authorization") == "Bearer ya29.cortex_swarm_dispatcher"
+
+        # Check Request body
+        body = json.loads(req.data.decode("utf-8"))
+        assert body["title"] == "Swarm: VulnerabilityFixer Task"
+        assert body["reward"] == 50.0
+        assert "Fix oracle vulnerability" in body["description"]
+        assert body["required_capabilities"] == ["security", "code"]
+        assert body["delegator_id"] == "system"
+
+    # Also verify it was correctly written to the local file queue fallback
+    assert os.path.exists(test_queue_file)
+    with open(test_queue_file) as f:
+        local_data = json.load(f)
+    assert len(local_data["pending_tasks"]) == 1
+    assert local_data["pending_tasks"][0]["agent"] == "VulnerabilityFixer"
+    assert local_data["pending_tasks"][0]["payload"] == payload
+
+
+def test_enqueue_swarm_task_api_sync_failure_fallback(monkeypatch, tmp_path):
+    from unittest.mock import patch, MagicMock
+    from urllib.error import URLError
+    from persistence import enqueue_swarm_task
+    import json
+    import os
+
+    # Set temp swarm queue file path to avoid side-effects
+    test_queue_file = tmp_path / "test_swarm_queue_fail.json"
+    monkeypatch.setattr("persistence.SWARM_QUEUE_FILE", str(test_queue_file))
+
+    # Mock urllib.request.urlopen to raise an error
+    mock_urlopen = MagicMock(side_effect=URLError("Connection refused"))
+
+    with patch("urllib.request.urlopen", mock_urlopen):
+        payload = {"action": "clean"}
+        # This call should not crash the application (no exception raised)
+        enqueue_swarm_task("OPTIMIZER", payload)
+
+        # Verify call was attempted
+        assert mock_urlopen.called
+
+    # Verify the task was still enqueued locally in the fallback queue file
+    assert os.path.exists(test_queue_file)
+    with open(test_queue_file) as f:
+        local_data = json.load(f)
+    assert len(local_data["pending_tasks"]) == 1
+    assert local_data["pending_tasks"][0]["agent"] == "OPTIMIZER"
+    assert local_data["pending_tasks"][0]["payload"] == payload
+

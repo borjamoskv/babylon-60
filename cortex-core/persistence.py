@@ -196,24 +196,32 @@ class HybridPersistenceManager:
         self.l2.start_glia()
 
 
-def enqueue_swarm_task(agent_name: str, payload: dict):
-    """Sovereign Swarm Queue Dispatcher with POSIX file locking."""
-    # Ensure queue file exists before locking
-    if not os.path.exists(SWARM_QUEUE_FILE):
-        try:
-            with open(SWARM_QUEUE_FILE, "w") as f:
-                json.dump({"pending_tasks": []}, f)
-        except OSError:
+def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
+    """Synchronous core implementation of the Swarm Queue Dispatcher and NEXUS API sync."""
+    # Ensure queue file exists without race conditions or truncation
+    try:
+        with open(SWARM_QUEUE_FILE, "a"):
             pass
+    except OSError:
+        pass
 
     try:
         with open(SWARM_QUEUE_FILE, "r+") as f:
             try:
                 fcntl.flock(f.fileno(), fcntl.LOCK_EX)
-                try:
-                    data = json.load(f)
-                except Exception:
+                content = f.read().strip()
+                if content:
+                    try:
+                        data = json.loads(content)
+                        if not isinstance(data, dict) or "pending_tasks" not in data:
+                            data = {"pending_tasks": []}
+                    except Exception:
+                        data = {"pending_tasks": []}
+                else:
                     data = {"pending_tasks": []}
+
+                if not isinstance(data.get("pending_tasks"), list):
+                    data["pending_tasks"] = []
 
                 data["pending_tasks"].append(
                     {"timestamp": time.time(), "agent": agent_name, "payload": payload}
@@ -226,3 +234,55 @@ def enqueue_swarm_task(agent_name: str, payload: dict):
                 fcntl.flock(f.fileno(), fcntl.LOCK_UN)
     except Exception as e:
         logger.error(f"Failed to enqueue swarm task: {e}")
+
+    # Centralized NEXUS API Task synchronization
+    nexus_url = os.getenv("NEXUS_API_URL", "http://localhost:8600")
+    nexus_token = os.getenv("NEXUS_BEARER_TOKEN", "ya29.cortex_swarm_dispatcher")
+
+    caps_map = {
+        "VulnerabilityFixer": ["security", "code"],
+        "InvariantValidator": ["security", "code"],
+        "SAGE_COUNCIL": ["intel", "research"],
+        "OPTIMIZER": ["code"]
+    }
+    required_caps = caps_map.get(agent_name, ["code"])
+
+    task_data = {
+        "title": f"Swarm: {agent_name} Task",
+        "description": json.dumps(payload) if isinstance(payload, dict) else str(payload),
+        "required_capabilities": required_caps,
+        "reward": float(payload.get("reward", 0.0)) if (isinstance(payload, dict) and "reward" in payload) else 0.0,
+        "delegator_id": "system"
+    }
+
+    try:
+        import urllib.request
+        import urllib.error
+        req = urllib.request.Request(
+            f"{nexus_url.rstrip('/')}/api/tasks",
+            data=json.dumps(task_data).encode("utf-8"),
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {nexus_token}"
+            },
+            method="POST"
+        )
+        # Timeout at 1.0 second to ensure non-blocking dispatch
+        with urllib.request.urlopen(req, timeout=1.0) as resp:
+            if resp.status in (200, 201):
+                logger.info(f"Successfully sync'd task to NEXUS API: {task_data['title']}")
+    except Exception as e:
+        logger.warning(f"Could not sync task to NEXUS API (server offline/unreachable): {e}")
+
+
+def enqueue_swarm_task(agent_name: str, payload: dict):
+    """Sovereign Swarm Queue Dispatcher. Offloads to executor if running inside an event loop to prevent event loop blocking/lag."""
+    try:
+        loop = asyncio.get_running_loop()
+        if loop.is_running():
+            loop.run_in_executor(None, _enqueue_swarm_task_sync, agent_name, payload)
+            return
+    except RuntimeError:
+        pass
+    _enqueue_swarm_task_sync(agent_name, payload)
+

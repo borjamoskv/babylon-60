@@ -121,6 +121,7 @@ Thumbs.db
 
 # ── Generated / Scratch ──────────────────────────
 .scratch/
+scratch/
 tmp/
 ouroboros-matrix/node_modules/
 engine-c5/fuzzer-cache/
