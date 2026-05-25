@@ -65,3 +65,10 @@ def pytest_configure(config):
     sys.settrace(None)
     sys.setprofile(None)
     gc.freeze()
+
+
+def pytest_sessionfinish(session, exitstatus):
+    """Force exit to prevent finalization hangs on leaked daemon threads."""
+    import os
+
+    os._exit(exitstatus)

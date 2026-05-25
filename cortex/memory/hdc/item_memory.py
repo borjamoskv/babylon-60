@@ -20,7 +20,7 @@ import logging
 from pathlib import Path
 from typing import Final, Optional
 
-import numpy as np
+from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 from cortex.memory.hdc.algebra import DEFAULT_DIM, HVType, random_bipolar
 

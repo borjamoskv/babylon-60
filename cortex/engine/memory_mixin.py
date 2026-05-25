@@ -89,7 +89,9 @@ class MemoryMixin(EngineMixinBase):
             )
             return
 
-        if find_spec("numpy") is None:
+        try:
+            import numpy  # noqa: F401
+        except ImportError:
             self._memory_manager = None
             self._memory_l1 = l1
             self._memory_l3 = l3

@@ -28,7 +28,7 @@ import logging
 from pathlib import Path
 from typing import Any, Final, Optional
 
-import numpy as np
+from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 from cortex.memory.drift import (
     DriftSignature,

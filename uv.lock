@@ -721,9 +721,6 @@ dependencies = [
     { name = "aiosqlite" },
     { name = "click" },
     { name = "cryptography" },
-    { name = "keyring" },
-    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "numpy", version = "2.4.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "pydantic" },
     { name = "rich" },
     { name = "sqlite-vec" },
@@ -747,9 +744,12 @@ all = [
     { name = "fastapi" },
     { name = "google-adk" },
     { name = "httpx" },
+    { name = "keyring" },
     { name = "markdownify" },
     { name = "mcp" },
     { name = "numba" },
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.4.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "onnxruntime", version = "1.24.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "onnxruntime", version = "1.24.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
@@ -791,6 +791,10 @@ cloud = [
     { name = "qdrant-client" },
     { name = "redis" },
 ]
+compute = [
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.4.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+]
 daemon = [
     { name = "aiofiles" },
     { name = "aiohttp" },
@@ -825,6 +829,9 @@ platform = [
     { name = "pyobjc-core", marker = "sys_platform == 'darwin'" },
     { name = "pyobjc-framework-cocoa", marker = "sys_platform == 'darwin'" },
 ]
+secure = [
+    { name = "keyring" },
+]
 toolbox = [
     { name = "toolbox-core" },
 ]
@@ -845,18 +852,18 @@ requires-dist = [
     { name = "beautifulsoup4", marker = "extra == 'mcp'" },
     { name = "chromadb", marker = "extra == 'knowledge'", specifier = ">=1.5.5" },
     { name = "click", specifier = ">=8.0" },
-    { name = "cortex-persist", extras = ["api", "mcp", "daemon", "platform", "authoring", "dev", "adk", "toolbox", "billing", "cloud", "trends", "embeddings", "knowledge", "acceleration"], marker = "extra == 'all'" },
+    { name = "cortex-persist", extras = ["compute", "secure", "api", "mcp", "daemon", "platform", "authoring", "dev", "adk", "toolbox", "billing", "cloud", "trends", "embeddings", "knowledge", "acceleration"], marker = "extra == 'all'" },
     { name = "cryptography", specifier = ">=46.0.7" },
     { name = "email-validator", marker = "extra == 'api'", specifier = ">=2.1.0" },
     { name = "fastapi", marker = "extra == 'api'", specifier = ">=0.110" },
     { name = "google-adk", marker = "extra == 'adk'", specifier = ">=0.5.0" },
     { name = "httpx", marker = "extra == 'api'", specifier = ">=0.27" },
     { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.27" },
-    { name = "keyring", specifier = ">=25.7.0" },
+    { name = "keyring", marker = "extra == 'secure'", specifier = ">=25.7.0" },
     { name = "markdownify", marker = "extra == 'mcp'", specifier = ">=0.13" },
     { name = "mcp", marker = "extra == 'mcp'", specifier = ">=1.0" },
     { name = "numba", marker = "extra == 'acceleration'", specifier = ">=0.65.0" },
-    { name = "numpy" },
+    { name = "numpy", marker = "extra == 'compute'" },
     { name = "onnxruntime", marker = "extra == 'embeddings'", specifier = ">=1.17" },
     { name = "pandas", marker = "extra == 'trends'", specifier = ">=2.0" },
     { name = "pydantic", specifier = ">=2.0" },
@@ -882,7 +889,7 @@ requires-dist = [
     { name = "watchdog", marker = "extra == 'mcp'", specifier = ">=6.0.0" },
     { name = "z3-solver", marker = "extra == 'dev'", specifier = ">=4.13.0" },
 ]
-provides-extras = ["api", "mcp", "daemon", "platform", "authoring", "dev", "adk", "toolbox", "billing", "cloud", "trends", "embeddings", "knowledge", "acceleration", "all"]
+provides-extras = ["compute", "secure", "api", "mcp", "daemon", "platform", "authoring", "dev", "adk", "toolbox", "billing", "cloud", "trends", "embeddings", "knowledge", "acceleration", "all"]
 
 [[package]]
 name = "coverage"

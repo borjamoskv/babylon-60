@@ -19,7 +19,7 @@ import time
 from pathlib import Path
 from typing import Any, Optional
 
-import numpy as np
+from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 try:
     import sqlite_vec
