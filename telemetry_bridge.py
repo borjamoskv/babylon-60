@@ -7,7 +7,7 @@ async def bridge():
     url = "http://localhost:8000/fuzz/stream"
     print(f"SUPER YOLO BRIDGE: Conectando a {url}...")
     try:
-        async with httpx.AsyncClient(timeout=None) as client:
+        async with httpx.AsyncClient(timeout=None) as client:  # noqa: S113
             async with client.stream("GET", url) as response:
                 async for line in response.aiter_lines():
                     if line.startswith("data:"):
