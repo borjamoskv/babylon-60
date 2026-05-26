@@ -136,20 +136,8 @@ class LedgerManager:
 
 class VSAMemory:
     """L2 Sovereign Vector Symbolic Architecture (VSA) Substrate & SQLite Semantic Knowledge Base."""
-    _instance = None
-    _init_lock = threading.Lock()
-
-    def __new__(cls):
-        with cls._init_lock:
-            if cls._instance is None:
-                cls._instance = super(VSAMemory, cls).__new__(cls)
-                cls._instance._initialized = False
-            return cls._instance
 
     def __init__(self):
-        if getattr(self, "_initialized", False):
-            return
-            
         self._tensor_size = VSA_DIMENSION * 8  # 8 bytes per double
 
         # Ensure bin file exists and is pre-allocated
@@ -169,21 +157,30 @@ class VSAMemory:
         self._lock = threading.Lock()
         self._conn = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=30.0)
         self._conn.execute("PRAGMA journal_mode=WAL;")
-        
-        self._initialized = True
+
+        # Use weakref.finalize for guaranteed cleanup when instance is garbage collected
+        self._finalizer = weakref.finalize(
+            self, self._cleanup, self._mmap_tensor, self._f, self._conn
+        )
         atexit.register(self.close)
 
-    def close(self):
-        """Explicitly close the mmap and file descriptors to prevent Errno 24 leaks."""
+    @staticmethod
+    def _cleanup(mmap_obj, file_obj, conn_obj):
+        """Static cleanup method to avoid keeping references to self."""
         try:
-            if hasattr(self, "_mmap_tensor") and self._mmap_tensor:
-                self._mmap_tensor.close()
-            if hasattr(self, "_f") and self._f:
-                self._f.close()
-            if hasattr(self, "_conn") and self._conn:
-                self._conn.close()
+            if mmap_obj:
+                mmap_obj.close()
+            if file_obj:
+                file_obj.close()
+            if conn_obj:
+                conn_obj.close()
         except Exception:
             pass
+
+    def close(self):
+        """Explicitly invoke the finalizer to close descriptors."""
+        if hasattr(self, "_finalizer") and self._finalizer.alive:
+            self._finalizer()
 
     def __del__(self):
         self.close()
@@ -302,6 +299,7 @@ class HybridPersistenceManager:
 
 NEXUS_DISPATCH_POOL = concurrent.futures.ThreadPoolExecutor(max_workers=10000)
 
+
 def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
     """Synchronous core implementation of the Swarm Queue Dispatcher and NEXUS API sync."""
     # Sovereign SQLite Insert to eliminate fcntl locking friction
@@ -323,10 +321,12 @@ def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
 
     # Centralized NEXUS API Task synchronization (Fire-and-forget via daemon thread to eliminate I/O blocking)
     nexus_url = os.getenv("NEXUS_API_URL", "http://localhost:8600")
-    
+
     # SECURITY: Validate URL Scheme (SSRF Mitigation)
     parsed_url = urlparse(nexus_url)
-    if parsed_url.scheme not in ("https", "http") or (parsed_url.scheme == "http" and parsed_url.hostname not in ("localhost", "127.0.0.1")):
+    if parsed_url.scheme not in ("https", "http") or (
+        parsed_url.scheme == "http" and parsed_url.hostname not in ("localhost", "127.0.0.1")
+    ):
         logger.error("SECURITY ALERT: Invalid NEXUS_API_URL scheme/host: %s", nexus_url)
         return
 
