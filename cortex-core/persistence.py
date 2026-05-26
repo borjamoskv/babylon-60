@@ -293,11 +293,99 @@ class HybridPersistenceManager:
         self.l2 = VSAMemory()
         self.l3 = LedgerManager()
         self.ide_guardian = IdeStatePreserver(self.l3)
+        self.outbox = OutboxDaemon(DB_PATH)
         self.l2.start_glia()
         self.ide_guardian.start_guardian()
+        self.outbox.start_guardian()
 
 
-NEXUS_DISPATCH_POOL = concurrent.futures.ThreadPoolExecutor(max_workers=10000)
+class OutboxDaemon:
+    """Outbox Pattern Daemon: Asynchronously drains pending swarm tasks to NEXUS API."""
+    def __init__(self, db_path: str):
+        self._db_path = db_path
+        self._daemon_task = None
+        
+    async def _drain_loop(self):
+        import urllib.request
+        import urllib.error
+        
+        while True:
+            await asyncio.sleep(2)
+            try:
+                conn = sqlite3.connect(self._db_path, timeout=10.0)
+                conn.execute("PRAGMA journal_mode=WAL;")
+                c = conn.cursor()
+                c.execute("SELECT id, agent, payload FROM cortex_swarm_queue WHERE status = 'pending' ORDER BY timestamp ASC LIMIT 50")
+                rows = c.fetchall()
+                if not rows:
+                    conn.close()
+                    continue
+
+                nexus_url = os.getenv("NEXUS_API_URL", "http://localhost:8600")
+                parsed_url = urlparse(nexus_url)
+                if parsed_url.scheme not in ("https", "http") or (parsed_url.scheme == "http" and parsed_url.hostname not in ("localhost", "127.0.0.1")):
+                    logger.error("SECURITY ALERT: Invalid NEXUS_API_URL scheme/host.")
+                    conn.close()
+                    continue
+                
+                nexus_token = os.getenv("NEXUS_BEARER_TOKEN")
+                if not nexus_token:
+                    logger.error("SECURITY ALERT: NEXUS_BEARER_TOKEN missing.")
+                    conn.close()
+                    continue
+
+                for row_id, agent_name, payload_str in rows:
+                    try:
+                        payload_dict = json.loads(payload_str)
+                    except json.JSONDecodeError:
+                        payload_dict = {}
+                    
+                    caps_map = {
+                        "VulnerabilityFixer": ["security", "code"],
+                        "InvariantValidator": ["security", "code"],
+                        "SAGE_COUNCIL": ["intel", "research"],
+                        "OPTIMIZER": ["code"],
+                    }
+                    
+                    task_data = {
+                        "title": f"Swarm: {agent_name} Task",
+                        "description": payload_str,
+                        "required_capabilities": caps_map.get(agent_name, ["code"]),
+                        "reward": float(payload_dict.get("reward", 0.0)) if isinstance(payload_dict, dict) and "reward" in payload_dict else 0.0,
+                        "delegator_id": "system",
+                    }
+
+                    req = urllib.request.Request(
+                        f"{nexus_url.rstrip('/')}/api/tasks",
+                        data=json.dumps(task_data).encode("utf-8"),
+                        headers={"Content-Type": "application/json", "Authorization": f"Bearer {nexus_token}"},
+                        method="POST"
+                    )
+
+                    loop = asyncio.get_running_loop()
+                    try:
+                        resp = await loop.run_in_executor(None, lambda: urllib.request.urlopen(req, timeout=2.0))
+                        if resp.status in (200, 201):
+                            c.execute("UPDATE cortex_swarm_queue SET status = 'completed' WHERE id = ?", (row_id,))
+                            logger.info("Outbox synced task: %s", task_data["title"])
+                        else:
+                            c.execute("UPDATE cortex_swarm_queue SET status = 'failed' WHERE id = ?", (row_id,))
+                    except urllib.error.URLError as e:
+                        logger.warning("Outbox sync deferred (network error): %s", e)
+                        break  # Stop processing to wait for network recovery
+                conn.commit()
+                conn.close()
+            except Exception as e:
+                logger.error("Outbox drainer error: %s", e)
+
+    def start_guardian(self):
+        if self._daemon_task:
+            return
+        try:
+            loop = asyncio.get_running_loop()
+            self._daemon_task = loop.create_task(self._drain_loop())
+        except RuntimeError:
+            pass
 
 
 def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
@@ -318,63 +406,6 @@ def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
     finally:
         if conn:
             conn.close()
-
-    # Centralized NEXUS API Task synchronization (Fire-and-forget via daemon thread to eliminate I/O blocking)
-    nexus_url = os.getenv("NEXUS_API_URL", "http://localhost:8600")
-
-    # SECURITY: Validate URL Scheme (SSRF Mitigation)
-    parsed_url = urlparse(nexus_url)
-    if parsed_url.scheme not in ("https", "http") or (
-        parsed_url.scheme == "http" and parsed_url.hostname not in ("localhost", "127.0.0.1")
-    ):
-        logger.error("SECURITY ALERT: Invalid NEXUS_API_URL scheme/host: %s", nexus_url)
-        return
-
-    nexus_token = os.getenv("NEXUS_BEARER_TOKEN")
-    if not nexus_token:
-        logger.error("SECURITY ALERT: NEXUS_BEARER_TOKEN is missing. Refusing to sync task.")
-        return
-
-    caps_map = {
-        "VulnerabilityFixer": ["security", "code"],
-        "InvariantValidator": ["security", "code"],
-        "SAGE_COUNCIL": ["intel", "research"],
-        "OPTIMIZER": ["code"],
-    }
-    required_caps = caps_map.get(agent_name, ["code"])
-
-    task_data = {
-        "title": f"Swarm: {agent_name} Task",
-        "description": json.dumps(payload) if isinstance(payload, dict) else str(payload),
-        "required_capabilities": required_caps,
-        "reward": float(payload.get("reward", 0.0))
-        if (isinstance(payload, dict) and "reward" in payload)
-        else 0.0,
-        "delegator_id": "system",
-    }
-
-    def _sync_to_nexus():
-        try:
-            import urllib.request
-            import urllib.error
-
-            req = urllib.request.Request(
-                f"{nexus_url.rstrip('/')}/api/tasks",
-                data=json.dumps(task_data).encode("utf-8"),
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {nexus_token}",
-                },
-                method="POST",
-            )
-            with urllib.request.urlopen(req, timeout=1.0) as resp:
-                if resp.status in (200, 201):
-                    logger.info("Successfully sync'd task to NEXUS API: %s", task_data["title"])
-        except Exception as e:
-            logger.warning("Could not sync task to NEXUS API (server offline/unreachable): %s", e)
-
-    # Dispatch to background thread (Zero-friction, bounded concurrency)
-    NEXUS_DISPATCH_POOL.submit(_sync_to_nexus)
 
 
 def enqueue_swarm_task(agent_name: str, payload: dict):
