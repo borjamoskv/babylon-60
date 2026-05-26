@@ -7,6 +7,7 @@ import logging
 import sqlite3
 import fcntl
 import subprocess
+import threading
 
 VSA_DIMENSION = 10000
 DB_PATH = os.getenv(
@@ -54,45 +55,48 @@ class LedgerManager:
     """L3 Sovereign Cryptographic Ledger — Audit Trail complying with EU AI Act."""
 
     def __init__(self):
+        self._lock = threading.Lock()
         self._init_db()
 
     def _init_db(self):
         # Ensure database parent directory exists
         os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-        conn = None
-        try:
-            conn = sqlite3.connect(DB_PATH)
-            c = conn.cursor()
-            c.execute("""
-                CREATE TABLE IF NOT EXISTS ledger_records (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    timestamp REAL,
-                    action TEXT,
-                    vector_id TEXT,
-                    yield_amount REAL,
-                    hash TEXT
-                )
-            """)
-            c.execute("""
-                CREATE TABLE IF NOT EXISTS cortex_knowledge (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    ki_id TEXT UNIQUE,
-                    summary TEXT,
-                    content TEXT
-                )
-            """)
-            conn.commit()
-        finally:
-            if conn:
-                conn.close()
+        self._conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+        c = self._conn.cursor()
+        c.execute("PRAGMA journal_mode=WAL;")
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS ledger_records (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp REAL,
+                action TEXT,
+                vector_id TEXT,
+                yield_amount REAL,
+                hash TEXT
+            )
+        """)
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS cortex_knowledge (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                ki_id TEXT UNIQUE,
+                summary TEXT,
+                content TEXT
+            )
+        """)
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS cortex_swarm_queue (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp REAL,
+                agent TEXT,
+                payload TEXT,
+                status TEXT
+            )
+        """)
+        self._conn.commit()
 
     def append(self, action: str, vector_id: str, yield_amount: float) -> str:
         """Hash-chain new transaction to guarantee auditable tamper-evident history."""
-        conn = None
-        try:
-            conn = sqlite3.connect(DB_PATH)
-            c = conn.cursor()
-
+        with self._lock:
+            c = self._conn.cursor()
             # Get previous hash
             c.execute("SELECT hash FROM ledger_records ORDER BY id DESC LIMIT 1")
             row = c.fetchone()
@@ -109,17 +113,12 @@ class LedgerManager:
             """,
                 (timestamp, action, vector_id, yield_amount, block_hash),
             )
-            conn.commit()
+            self._conn.commit()
             return block_hash
-        finally:
-            if conn:
-                conn.close()
 
     def get_total_yield(self, vector_id=None) -> float:
-        conn = None
-        try:
-            conn = sqlite3.connect(DB_PATH)
-            c = conn.cursor()
+        with self._lock:
+            c = self._conn.cursor()
             if vector_id:
                 c.execute(
                     "SELECT SUM(yield_amount) FROM ledger_records WHERE vector_id = ?", (vector_id,)
@@ -128,9 +127,6 @@ class LedgerManager:
                 c.execute("SELECT SUM(yield_amount) FROM ledger_records")
             res = c.fetchone()[0]
             return res or 0.0
-        finally:
-            if conn:
-                conn.close()
 
 
 class VSAMemory:
@@ -140,6 +136,9 @@ class VSAMemory:
         self._tensor = [0.0] * VSA_DIMENSION
         self._decay_rate = 0.99
         self._daemon_task = None
+        self._lock = threading.Lock()
+        self._conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+        self._conn.execute("PRAGMA journal_mode=WAL;")
 
     def record(self, key: str, value: str):
         """Map semantic trace to both RAM tensor and Persistent SQLite FTS5."""
@@ -147,21 +146,17 @@ class VSAMemory:
         idx = int(hashlib.sha256(ctx_string.encode("utf-8")).hexdigest(), 16) % VSA_DIMENSION
         self._tensor[idx] += 1.0
 
-        conn = None
         try:
-            conn = sqlite3.connect(DB_PATH)
-            c = conn.cursor()
-            ki_id = f"vsa_{int(time.time())}_{idx}"
-            c.execute(
-                "INSERT OR REPLACE INTO cortex_knowledge (ki_id, summary, content) VALUES (?, ?, ?)",
-                (ki_id, key, value),
-            )
-            conn.commit()
+            with self._lock:
+                c = self._conn.cursor()
+                ki_id = f"vsa_{int(time.time())}_{idx}"
+                c.execute(
+                    "INSERT OR REPLACE INTO cortex_knowledge (ki_id, summary, content) VALUES (?, ?, ?)",
+                    (ki_id, key, value),
+                )
+                self._conn.commit()
         except Exception as e:
             logger.error("VSA SQLite Record Failure: %s", e)
-        finally:
-            if conn:
-                conn.close()
 
     async def _decay_loop(self):
         """Periodically decay high-dimensional state space to model biological memory loss."""
@@ -197,27 +192,25 @@ class IdeStatePreserver:
         os.makedirs(self.backup_dir, exist_ok=True)
         timestamp = int(time.time())
         archive_path = os.path.join(self.backup_dir, f"antigravity_state_{timestamp}.tar.gz")
-        
+
         try:
             # C5-REAL snapshot using system tar
-            subprocess.run([
-                "tar", "-czf", archive_path, 
-                "--exclude=brain", 
-                self.target_dir
-            ], check=True, capture_output=True)
-            
+            subprocess.run(
+                ["tar", "-czf", archive_path, "--exclude=brain", self.target_dir],
+                check=True,
+                capture_output=True,
+            )
+
             # Hash the backup
             hasher = hashlib.sha256()
-            with open(archive_path, 'rb') as f:
+            with open(archive_path, "rb") as f:
                 while chunk := f.read(8192):
                     hasher.update(chunk)
             backup_hash = hasher.hexdigest()
-            
+
             # Register in L3 Ledger
             self.ledger.append(
-                action="IDE_STATE_SNAPSHOT",
-                vector_id=f"hash:{backup_hash[:16]}",
-                yield_amount=0.0
+                action="IDE_STATE_SNAPSHOT", vector_id=f"hash:{backup_hash[:16]}", yield_amount=0.0
             )
             logger.info("IDE State Snapshot secured: %s", archive_path)
         except Exception as e:
@@ -258,42 +251,21 @@ class HybridPersistenceManager:
 
 def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
     """Synchronous core implementation of the Swarm Queue Dispatcher and NEXUS API sync."""
-    # Ensure queue file exists without race conditions or truncation
+    # Sovereign SQLite Insert to eliminate fcntl locking friction
+    conn = None
     try:
-        with open(SWARM_QUEUE_FILE, "a"):
-            pass
-    except OSError:
-        pass
-
-    try:
-        with open(SWARM_QUEUE_FILE, "r+") as f:
-            try:
-                fcntl.flock(f.fileno(), fcntl.LOCK_EX)
-                content = f.read().strip()
-                if content:
-                    try:
-                        data = json.loads(content)
-                        if not isinstance(data, dict) or "pending_tasks" not in data:
-                            data = {"pending_tasks": []}
-                    except Exception:
-                        data = {"pending_tasks": []}
-                else:
-                    data = {"pending_tasks": []}
-
-                if not isinstance(data.get("pending_tasks"), list):
-                    data["pending_tasks"] = []
-
-                data["pending_tasks"].append(
-                    {"timestamp": time.time(), "agent": agent_name, "payload": payload}
-                )
-
-                f.seek(0)
-                json.dump(data, f, indent=2)
-                f.truncate()
-            finally:
-                fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+        conn = sqlite3.connect(DB_PATH, timeout=10.0)
+        c = conn.cursor()
+        c.execute(
+            "INSERT INTO cortex_swarm_queue (timestamp, agent, payload, status) VALUES (?, ?, ?, 'pending')",
+            (time.time(), agent_name, json.dumps(payload)),
+        )
+        conn.commit()
     except Exception as e:
-        logger.error("Failed to enqueue swarm task: %s", e)
+        logger.error("Failed to enqueue swarm task via SQLite: %s", e)
+    finally:
+        if conn:
+            conn.close()
 
     # Centralized NEXUS API Task synchronization
     nexus_url = os.getenv("NEXUS_API_URL", "http://localhost:8600")

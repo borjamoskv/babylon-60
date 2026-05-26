@@ -184,38 +184,45 @@ class CortexDaemon:
             json.dump(ledger, f, indent=2)
 
     async def process_swarm_queue(self):
-        """Consumes the Swarm Task Queue and executes autonomous work."""
-        # Ensure queue file exists without race conditions or truncation
-        try:
-            with open(SWARM_QUEUE_FILE, "a"):
-                pass
-        except OSError:
-            pass
-
+        """Consumes the Swarm Task Queue and executes autonomous work using Sovereign SQLite VSA bypass."""
         tasks = []
+        conn = None
         try:
-            with open(SWARM_QUEUE_FILE, "r+") as f:
-                try:
-                    fcntl.flock(f.fileno(), fcntl.LOCK_EX)
-                    content = f.read().strip()
-                    if content:
-                        try:
-                            queue = json.loads(content)
-                            if isinstance(queue, dict) and "pending_tasks" in queue:
-                                tasks = queue.get("pending_tasks", [])
-                        except Exception:
-                            pass
+            conn = sqlite3.connect(DB_PATH, timeout=10.0)
+            c = conn.cursor()
+            c.execute(
+                "SELECT id, timestamp, agent, payload FROM cortex_swarm_queue WHERE status = 'pending'"
+            )
+            rows = c.fetchall()
 
-                    # Clear queue after retrieving tasks, under lock
-                    if tasks:
-                        f.seek(0)
-                        json.dump({"pending_tasks": []}, f)
-                        f.truncate()
-                finally:
-                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+            for row in rows:
+                payload = row[3]
+                try:
+                    payload = json.loads(payload)
+                except Exception:
+                    pass
+
+                tasks.append(
+                    {
+                        "id": row[0],
+                        "timestamp": row[1],
+                        "agent": row[2],
+                        "payload": payload,
+                        "command": payload.get("command") if isinstance(payload, dict) else payload,
+                    }
+                )
+
+            if rows:
+                c.execute(
+                    "UPDATE cortex_swarm_queue SET status = 'processing' WHERE status = 'pending'"
+                )
+                conn.commit()
         except Exception as e:
-            logging.error("Swarm Queue Locking/Reading Failure: %s", e)
+            logging.error("Swarm Queue SQLite Reading Failure: %s", e)
             return
+        finally:
+            if conn:
+                conn.close()
 
         if not tasks:
             return
@@ -250,49 +257,32 @@ class CortexDaemon:
         self._queue_task("SAGE_COUNCIL", cmd)
 
     def _queue_task(self, agent: str, cmd: str):
-        """Internal helper to push tasks to the persistent queue."""
+        """Internal helper to push tasks to the persistent SQLite queue."""
+        conn = None
         try:
-            # Ensure queue file exists without race conditions or truncation
-            try:
-                with open(SWARM_QUEUE_FILE, "a"):
-                    pass
-            except OSError:
-                pass
-
-            with open(SWARM_QUEUE_FILE, "r+") as f:
-                try:
-                    fcntl.flock(f.fileno(), fcntl.LOCK_EX)
-                    content = f.read().strip()
-                    if content:
-                        try:
-                            queue = json.loads(content)
-                            if not isinstance(queue, dict) or "pending_tasks" not in queue:
-                                queue = {"pending_tasks": []}
-                        except Exception:
-                            queue = {"pending_tasks": []}
-                    else:
-                        queue = {"pending_tasks": []}
-
-                    if not isinstance(queue.get("pending_tasks"), list):
-                        queue["pending_tasks"] = []
-
-                    queue["pending_tasks"].append(
+            conn = sqlite3.connect(DB_PATH, timeout=10.0)
+            c = conn.cursor()
+            c.execute(
+                "INSERT INTO cortex_swarm_queue (timestamp, agent, payload, status) VALUES (?, ?, ?, 'pending')",
+                (
+                    time.time(),
+                    agent,
+                    json.dumps(
                         {
-                            "id": f"council_{int(time.time())}",
-                            "agent": agent,
                             "command": cmd,
                             "timestamp": time.time(),
+                            "id": f"council_{int(time.time())}",
                         }
-                    )
-
-                    f.seek(0)
-                    json.dump(queue, f, indent=2)
-                    f.truncate()
-                finally:
-                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
-            logging.info("📌 [COUNCIL] Mission queued: %s", cmd)
+                    ),
+                ),
+            )
+            conn.commit()
+            logging.info("📌 [COUNCIL] Mission queued in SQLite: %s", cmd)
         except Exception as e:
-            logging.error("Council Queue Failure: %s", e)
+            logging.error("Council SQLite Queue Failure: %s", e)
+        finally:
+            if conn:
+                conn.close()
 
     async def _run_self_audit(self):
         """Invoke Mirror Protocol to audit own source code (Ω₄)."""
