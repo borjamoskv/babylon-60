@@ -285,3 +285,7 @@ cortex_audit_ledger.jsonl
 # Local clones of audit/bounty targets
 engine-c5/targets/
 
+
+# Hardware simulation artifacts
+*.vcd
+*.vvp
