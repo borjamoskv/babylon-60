@@ -456,6 +456,9 @@ def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
 
 def enqueue_swarm_task(agent_name: str, payload: dict):
     """Sovereign Swarm Queue Dispatcher. Offloads to executor if running inside an event loop to prevent event loop blocking/lag."""
+    if os.getenv("CORTEX_TESTING") == "1":
+        _enqueue_swarm_task_sync(agent_name, payload)
+        return
     try:
         loop = asyncio.get_running_loop()
         if loop.is_running():
