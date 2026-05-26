@@ -28,6 +28,32 @@ ledger_entropy_event = threading.Event()
 _local = threading.local()
 
 
+def _setup_sqlite_pragmas(conn):
+    conn.execute("PRAGMA journal_mode=WAL;")
+    conn.execute("PRAGMA synchronous=NORMAL;")
+    conn.execute("PRAGMA cache_size=-64000;")
+    conn.execute("PRAGMA temp_store=MEMORY;")
+
+
+class SovereignResource:
+    """Base class for autonomous cleanup of file descriptors and connections via weakref."""
+    @staticmethod
+    def _safe_close(*resources):
+        for res in resources:
+            try:
+                if res:
+                    res.close()
+            except Exception:
+                pass
+
+    def close(self):
+        if hasattr(self, "_finalizer") and self._finalizer.alive:
+            self._finalizer()
+
+    def __del__(self):
+        self.close()
+
+
 def _close_local_conn():
     """Cleanup thread-local connection on process exit."""
     conn = getattr(_local, "conn", None)
@@ -45,10 +71,7 @@ def _get_local_conn(db_path, timeout=30.0):
     if getattr(_local, "db_path", None) != db_path or not hasattr(_local, "conn"):
         _local.db_path = db_path
         _local.conn = sqlite3.connect(db_path, timeout=timeout)
-        _local.conn.execute("PRAGMA journal_mode=WAL;")
-        _local.conn.execute("PRAGMA synchronous=NORMAL;")
-        _local.conn.execute("PRAGMA cache_size=-64000;")
-        _local.conn.execute("PRAGMA temp_store=MEMORY;")
+        _setup_sqlite_pragmas(_local.conn)
     return _local.conn
 
 
@@ -94,39 +117,21 @@ class ContextCache:
         return formatted_blocks
 
 
-class LedgerManager:
+class LedgerManager(SovereignResource):
     """L3 Sovereign Cryptographic Ledger — Audit Trail complying with EU AI Act."""
 
     def __init__(self):
         self._lock = threading.Lock()
         self._init_db()
-        self._finalizer = weakref.finalize(self, self._cleanup, self._conn)
+        self._finalizer = weakref.finalize(self, self._safe_close, self._conn)
         atexit.register(self.close)
-
-    @staticmethod
-    def _cleanup(conn_obj):
-        try:
-            if conn_obj:
-                conn_obj.close()
-        except Exception:
-            pass
-
-    def close(self):
-        if hasattr(self, "_finalizer") and self._finalizer.alive:
-            self._finalizer()
-
-    def __del__(self):
-        self.close()
 
     def _init_db(self):
         # Ensure database parent directory exists
         os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
         self._conn = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=30.0)
+        _setup_sqlite_pragmas(self._conn)
         c = self._conn.cursor()
-        c.execute("PRAGMA journal_mode=WAL;")
-        c.execute("PRAGMA synchronous=NORMAL;")
-        c.execute("PRAGMA cache_size=-64000;")
-        c.execute("PRAGMA temp_store=MEMORY;")
         c.execute("""
             CREATE TABLE IF NOT EXISTS ledger_records (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -222,7 +227,7 @@ class LedgerManager:
             return res or 0.0
 
 
-class VSAMemory:
+class VSAMemory(SovereignResource):
     """L2 Sovereign Vector Symbolic Architecture (VSA) Substrate & SQLite Semantic Knowledge Base."""
 
     def __init__(self):
@@ -250,37 +255,13 @@ class VSAMemory:
         self._daemon_task = None
         self._lock = threading.Lock()
         self._conn = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=30.0)
-        self._conn.execute("PRAGMA journal_mode=WAL;")
-        self._conn.execute("PRAGMA synchronous=NORMAL;")
-        self._conn.execute("PRAGMA cache_size=-64000;")
-        self._conn.execute("PRAGMA temp_store=MEMORY;")
+        _setup_sqlite_pragmas(self._conn)
 
         # Use weakref.finalize for guaranteed cleanup when instance is garbage collected
         self._finalizer = weakref.finalize(
-            self, self._cleanup, self._mmap_tensor, self._f, self._conn
+            self, self._safe_close, self._mmap_tensor, self._f, self._conn
         )
         atexit.register(self.close)
-
-    @staticmethod
-    def _cleanup(mmap_obj, file_obj, conn_obj):
-        """Static cleanup method to avoid keeping references to self."""
-        try:
-            if mmap_obj:
-                mmap_obj.close()
-            if file_obj:
-                file_obj.close()
-            if conn_obj:
-                conn_obj.close()
-        except Exception:
-            pass
-
-    def close(self):
-        """Explicitly invoke the finalizer to close descriptors."""
-        if hasattr(self, "_finalizer") and self._finalizer.alive:
-            self._finalizer()
-
-    def __del__(self):
-        self.close()
 
     def record(self, key: str, value: str):
         """Map semantic trace to both RAM tensor and Persistent SQLite FTS5."""
@@ -326,13 +307,6 @@ class VSAMemory:
                 self._tensor[i] = val * self._decay_rate
             elif val > 0.0:
                 self._tensor[i] = 0.0
-
-    async def _decay_loop(self):
-        pass  # Obsolete: Handled by metabolic record_count
-
-    def start_glia(self):
-        """DEPRECATED (Silicon Way): Glia is now metabolically driven by operations, not linear time."""
-        pass
 
 
 class IdeStatePreserver:
@@ -411,7 +385,6 @@ class HybridPersistenceManager:
         self.l3 = LedgerManager()
         self.ide_guardian = IdeStatePreserver(self.l3)
         self.outbox = OutboxDaemon(DB_PATH)
-        self.l2.start_glia()
         self.ide_guardian.start_guardian()
         self.outbox.start_guardian()
 
@@ -508,35 +481,17 @@ class ZeroCopyRingBuffer:
         return tasks
 
 
-class OutboxDaemon:
+class OutboxDaemon(SovereignResource):
     """Outbox Pattern Daemon: Asynchronously drains pending swarm tasks to NEXUS API."""
 
     def __init__(self, db_path: str):
         self._db_path = db_path
         self._daemon_task = None
         self._conn = sqlite3.connect(self._db_path, check_same_thread=False, timeout=10.0)
-        self._conn.execute("PRAGMA journal_mode=WAL;")
-        self._conn.execute("PRAGMA synchronous=NORMAL;")
-        self._conn.execute("PRAGMA cache_size=-64000;")
-        self._conn.execute("PRAGMA temp_store=MEMORY;")
+        _setup_sqlite_pragmas(self._conn)
         self._lock = threading.Lock()
-        self._finalizer = weakref.finalize(self, self._cleanup, self._conn)
+        self._finalizer = weakref.finalize(self, self._safe_close, self._conn)
         atexit.register(self.close)
-
-    @staticmethod
-    def _cleanup(conn_obj):
-        try:
-            if conn_obj:
-                conn_obj.close()
-        except Exception:
-            pass
-
-    def close(self):
-        if hasattr(self, "_finalizer") and self._finalizer.alive:
-            self._finalizer()
-
-    def __del__(self):
-        self.close()
 
     def _fetch_pending_tasks(self):
         with self._lock:
