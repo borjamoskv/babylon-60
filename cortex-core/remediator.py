@@ -113,7 +113,7 @@ class SovereignSurgeon:
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("Usage: python remediator.py <target_file> <error_log_path>")
+        sys.stderr.write("Usage: python remediator.py <target_file> <error_log_path>\n")
         sys.exit(1)
 
     target = sys.argv[1]

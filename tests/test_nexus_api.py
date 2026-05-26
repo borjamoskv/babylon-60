@@ -180,6 +180,9 @@ def test_enqueue_swarm_task_api_sync(monkeypatch, tmp_path):
     mock_response.__enter__.return_value = mock_response
     mock_urlopen.return_value = mock_response
 
+    # Set test token since hardcoded fallback was removed (HIGH-01)
+    monkeypatch.setenv("NEXUS_BEARER_TOKEN", "ya29.cortex_swarm_dispatcher")
+
     with patch("urllib.request.urlopen", mock_urlopen):
         # Call function
         payload = {"description": "Fix oracle vulnerability", "reward": 50.0}

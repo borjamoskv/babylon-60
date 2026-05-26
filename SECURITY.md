@@ -87,10 +87,34 @@ CORTEX assumes:
 | Unauthorized access | RBAC + API key + JWT authentication |
 | Secret leakage | Privacy Shield (11 regex patterns at ingress) |
 | **Composition leakage** | **Holistic cross-field correlation analysis at ingress** |
-| Malicious LLM code output | AST Sandbox (no eval/exec) |
+| Malicious LLM code output | AST Sandbox (deny-by-default whitelist on all JIT compilers) |
 | Cross-tenant data access | Tenant ID scoping on all queries |
+| Shell injection via subprocess | All subprocess calls use `create_subprocess_exec` (no shell=True) |
+| Credential leakage in source | No hardcoded secrets; env-var-only credential loading |
+| CORS misconfiguration | Wildcard `*` rejected in cloud/production deployment mode |
+| Unsafe file patching | AST validation gate before writing patches to `.py` files |
 
 > **⚠️ Composition Leakage:** Two individually innocuous data points that, when combined by an adversary, reconstruct a secret (e.g., deploy address + contract salt = proxy key). This is the differential privacy analog of correlation attacks. CORTEX's Privacy Shield evaluates facts holistically — not per-field — scoring each new fact against the combinatorial surface of related stored data.
+
+---
+
+## Security Audit Log
+
+### 2026-05-26 — Static Analysis Audit (C4-SIM)
+
+**Scope:** 28 core modules (~8,500 LOC)
+
+| Severity | Count | Status |
+|:---|:---:|:---|
+| Critical | 3 | ✅ Remediated |
+| High | 5 | ✅ Remediated |
+| Medium | 4 | ✅ Remediated |
+| Low | 6 | 📋 Documented |
+
+**Critical findings remediated:**
+1. Demiurge JIT `exec()` without AST validation — now gates via `ASTSandbox`
+2. Sortu JIT `__import__` in safe_builtins — removed (ACE vector)
+3. Ouroboros `os.system()` with unsanitized path — migrated to `subprocess.run()`
 
 ---
 
@@ -99,3 +123,4 @@ CORTEX assumes:
 For trust boundaries, verification flow, ledger continuity, and cognitive/state-mutation
 security surfaces, see
 [`docs/SECURITY_TRUST_MODEL.md`](./docs/SECURITY_TRUST_MODEL.md).
+
