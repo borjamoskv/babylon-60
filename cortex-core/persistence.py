@@ -16,7 +16,6 @@ DB_PATH = os.getenv(
     "CORTEX_DB_PATH",
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "cortex_memory_vsa.db"),
 )
-SWARM_QUEUE_FILE = "/tmp/cortex_swarm_queue.json"
 
 logger = logging.getLogger("cortex.persistence")
 
@@ -158,7 +157,7 @@ class VSAMemory:
         try:
             self._mmap_tensor.close()
             self._f.close()
-        except:
+        except Exception:
             pass
 
     def record(self, key: str, value: str):
@@ -291,7 +290,7 @@ def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
         if conn:
             conn.close()
 
-    # Centralized NEXUS API Task synchronization
+    # Centralized NEXUS API Task synchronization (Fire-and-forget via daemon thread to eliminate I/O blocking)
     nexus_url = os.getenv("NEXUS_API_URL", "http://localhost:8600")
     nexus_token = os.getenv("NEXUS_BEARER_TOKEN", "ya29.cortex_swarm_dispatcher")
 
@@ -313,22 +312,30 @@ def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
         "delegator_id": "system",
     }
 
-    try:
-        import urllib.request
-        import urllib.error
+    def _sync_to_nexus():
+        try:
+            import urllib.request
+            import urllib.error
 
-        req = urllib.request.Request(
-            f"{nexus_url.rstrip('/')}/api/tasks",
-            data=json.dumps(task_data).encode("utf-8"),
-            headers={"Content-Type": "application/json", "Authorization": f"Bearer {nexus_token}"},
-            method="POST",
-        )
-        # Timeout at 1.0 second to ensure non-blocking dispatch
-        with urllib.request.urlopen(req, timeout=1.0) as resp:
-            if resp.status in (200, 201):
-                logger.info("Successfully sync'd task to NEXUS API: %s", task_data["title"])
-    except Exception as e:
-        logger.warning("Could not sync task to NEXUS API (server offline/unreachable): %s", e)
+            req = urllib.request.Request(
+                f"{nexus_url.rstrip('/')}/api/tasks",
+                data=json.dumps(task_data).encode("utf-8"),
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {nexus_token}",
+                },
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=1.0) as resp:
+                if resp.status in (200, 201):
+                    logger.info("Successfully sync'd task to NEXUS API: %s", task_data["title"])
+        except Exception as e:
+            logger.warning("Could not sync task to NEXUS API (server offline/unreachable): %s", e)
+
+    # Dispatch to background thread (Zero-friction)
+    import threading
+
+    threading.Thread(target=_sync_to_nexus, daemon=True).start()
 
 
 def enqueue_swarm_task(agent_name: str, payload: dict):
