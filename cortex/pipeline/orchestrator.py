@@ -17,7 +17,6 @@ from typing import Any
 
 from cortex.pipeline import (
     ContextPacket,
-    DeliveryTarget,
     PipelineRequest,
     PipelineResult,
     PipelineStage,
@@ -92,7 +91,6 @@ class CortexOrchestrator:
 
     async def _run_async_impl(self, request: PipelineRequest) -> PipelineResult:
         """Native async pipeline implementation."""
-        import asyncio
 
         logger.info(
             "🚀 [E2E-ASYNC] Pipeline START mission=%s intent='%s'",
@@ -552,7 +550,6 @@ class CortexOrchestrator:
         if self.engine is not None:
             try:
                 import asyncio
-                import aiosqlite
                 from cortex.utils.time_utils import get_utc_timestamp
 
                 async def persist_to_engine():

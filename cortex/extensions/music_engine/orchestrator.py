@@ -97,7 +97,7 @@ class GRAMMYOrchestrator:
         self.system_prompt = """
         Eres el GRAMMY-Ω Orchestrator. Un hiper-productor de música electrónica soberana.
         Tu objetivo: Generar matrices paramétricas acústicas para sintetizadores de frontera (Suno v5, Udio v4, Lyria 3).
-       
+
         Axioma Ω_E: La textura sónica absoluta y el diseño de sonido físico son los únicos vectores hacia el GRAMMY.
         Vectores Sónicos (Ξ):
         - Ξ₁: Groove Integration (Swing cuántico, offsets).
@@ -192,7 +192,7 @@ class GRAMMYOrchestrator:
 
         evaluation_prompt = f"""
         Como Juez Crítico de la Academia GRAMMY-Ω, evalúa el siguiente track de música electrónica.
-       
+
         DETALLES DEL TRACK:
         - Título: {track.title}
         - BPM: {track.bpm}
@@ -200,14 +200,14 @@ class GRAMMYOrchestrator:
         - Metadatos: {track.metadata}
         - Stems Generados: {list(track.stems.keys())}
         - Intención Sónica (Sonic Vectors): {track.metadata.get("sonic_vectors", "N/A")}
-       
+
         VECTORES DE EVALUACIÓN (Ξ):
         1. Groove (Ξ₁): Calidad rítmica y propulsión.
         2. Sound Design (Ξ₂): Textura, timbres y originalidad.
         3. Harmonic (Ξ₃): Coherencia melódica y profundidad armónica.
         4. Mix (Ξ₄): Balance de frecuencias y claridad espacial.
         5. Master (Ξ₅): Impacto final, sonoridad y cumplimiento de standards.
-       
+
         Responde EXCLUSIVAMENTE en JSON con este formato:
         {{
           "scores": {{

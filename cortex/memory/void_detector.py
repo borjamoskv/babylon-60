@@ -21,7 +21,6 @@ from __future__ import annotations
 
 import enum
 import logging
-import math
 from dataclasses import dataclass
 from typing import Any, Final
 

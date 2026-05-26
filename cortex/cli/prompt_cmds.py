@@ -16,7 +16,6 @@ from __future__ import annotations
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Optional
 
 import click
 from rich.panel import Panel

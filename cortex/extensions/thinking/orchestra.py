@@ -30,7 +30,7 @@ import logging
 import os
 import random
 import time
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.llm._presets import load_presets
 from cortex.extensions.llm.provider import LLMProvider

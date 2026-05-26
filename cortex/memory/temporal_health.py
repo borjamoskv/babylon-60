@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Final, Optional
+from typing import Any, Final
 
 from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 

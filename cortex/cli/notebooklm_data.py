@@ -270,7 +270,7 @@ def _get_entities_and_relations(
                 params=(project,),  # type: ignore[type-error]
             )
             relations = pd.read_sql_query(  # type: ignore[reportCallIssue]
-                """SELECT e1.name as source, e2.name as target, r.relation_type 
+                """SELECT e1.name as source, e2.name as target, r.relation_type
                    FROM entity_relations r
                    JOIN entities e1 ON r.source_entity_id = e1.id
                    JOIN entities e2 ON r.target_entity_id = e2.id

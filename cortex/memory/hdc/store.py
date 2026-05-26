@@ -13,7 +13,7 @@ import logging
 import sqlite3
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 

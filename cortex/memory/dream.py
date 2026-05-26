@@ -24,7 +24,6 @@ Derivation: Ω₅ (Antifragile by Default) + Ω₄ (Aesthetic Integrity)
 from __future__ import annotations
 
 import logging
-import math
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field

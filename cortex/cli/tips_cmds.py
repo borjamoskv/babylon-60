@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import asyncio
 import sqlite3
-from typing import Optional
 
 import click
 from rich.panel import Panel

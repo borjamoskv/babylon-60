@@ -6,7 +6,6 @@ Axiom Ω₃: Byzantine Default — Nothing is trusted by default, including cons
 
 from __future__ import annotations
 
-import math
 from typing import Any
 
 from pydantic import BaseModel
