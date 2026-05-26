@@ -80,18 +80,26 @@ def fail_func(a):
         # Verify medium_func
         medium = next((f for f in complexity_findings if f["function"] == "medium_func"), None)
         assert medium is not None, "medium_func should have a complexity finding"
-        assert medium["complexity"] == 15, f"medium_func complexity should be 15, got {medium['complexity']}"
+        assert medium["complexity"] == 15, (
+            f"medium_func complexity should be 15, got {medium['complexity']}"
+        )
         assert medium["status"] == "WARN", "medium_func status should be WARN"
 
         # Verify fail_func
         fail = next((f for f in complexity_findings if f["function"] == "fail_func"), None)
         assert fail is not None, "fail_func should have a complexity finding"
-        assert fail["complexity"] == 25, f"fail_func complexity should be 25, got {fail['complexity']}"
+        assert fail["complexity"] == 25, (
+            f"fail_func complexity should be 25, got {fail['complexity']}"
+        )
         assert fail["status"] == "FAIL", "fail_func status should be FAIL"
 
         # Verify pass_func and simple_func are not in findings
-        assert not any(f["function"] == "pass_func" for f in complexity_findings), "pass_func should not be in findings"
-        assert not any(f["function"] == "simple_func" for f in complexity_findings), "simple_func should not be in findings"
+        assert not any(f["function"] == "pass_func" for f in complexity_findings), (
+            "pass_func should not be in findings"
+        )
+        assert not any(f["function"] == "simple_func" for f in complexity_findings), (
+            "simple_func should not be in findings"
+        )
 
     finally:
         if os.path.exists(test_file):

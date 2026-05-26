@@ -3,7 +3,7 @@ import os
 import sys
 import logging
 import time
-from typing import Any, Union
+from typing import Any
 
 # CORTEX Mirror Protocol v6.2 — The Epistemic Auditor
 logging.basicConfig(level=logging.INFO, format="👁️ [MIRROR] %(message)s")
