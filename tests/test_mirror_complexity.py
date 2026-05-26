@@ -1,66 +1,16 @@
 import os
 import sys
-import json
+import pytest
 
-def pass_func():
-    return True
+# Import MirrorAuditor from cortex-core/mirror_audit.py
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "cortex-core")))
+from mirror_audit import MirrorAuditor
 
-def simple_func(a):
-    if a > 0:
-        if a > 1:
-            if a > 2:
-                if a > 3:
-                    return True
-    return False
 
-def medium_func(a):
-    if a == 1: pass
-    elif a == 2: pass
-    elif a == 3: pass
-    elif a == 4: pass
-    elif a == 5: pass
-    elif a == 6: pass
-    elif a == 7: pass
-    elif a == 8: pass
-    elif a == 9: pass
-    elif a == 10: pass
-    elif a == 11: pass
-    elif a == 12: pass
-    elif a == 13: pass
-    elif a == 14: pass
-    return a
-
-def fail_func(a):
-    if a == 1: pass
-    if a == 2: pass
-    if a == 3: pass
-    if a == 4: pass
-    if a == 5: pass
-    if a == 6: pass
-    if a == 7: pass
-    if a == 8: pass
-    if a == 9: pass
-    if a == 10: pass
-    if a == 11: pass
-    if a == 12: pass
-    if a == 13: pass
-    if a == 14: pass
-    if a == 15: pass
-    if a == 16: pass
-    if a == 17: pass
-    if a == 18: pass
-    if a == 19: pass
-    if a == 20: pass
-    if a == 21: pass
-    if a == 22: pass
-    if a == 23: pass
-    if a == 24: pass
-
-if __name__ == "__main__":
+def test_cyclomatic_complexity():
     # Create a temporary file to audit
     test_file = "temp_audit_test.py"
-    with open(test_file, "w") as f:
-        f.write('''
+    content = """
 def pass_func():
     return True
 
@@ -114,14 +64,14 @@ def fail_func(a):
     if a == 22: pass
     if a == 23: pass
     if a == 24: pass
-''')
+"""
+    with open(test_file, "w") as f:
+        f.write(content)
 
-    # Import MirrorAuditor from cortex-core/mirror_audit.py
-    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'cortex-core')))
-    from mirror_audit import MirrorAuditor
+    try:
+        auditor = MirrorAuditor(test_file)
+        assert auditor.audit() is True
 
-    auditor = MirrorAuditor(test_file)
-    if auditor.audit():
         report = auditor.report()
         findings = report["findings"]
 
@@ -143,9 +93,18 @@ def fail_func(a):
         assert not any(f["function"] == "pass_func" for f in complexity_findings), "pass_func should not be in findings"
         assert not any(f["function"] == "simple_func" for f in complexity_findings), "simple_func should not be in findings"
 
+    finally:
+        if os.path.exists(test_file):
+            os.remove(test_file)
+
+
+if __name__ == "__main__":
+    try:
+        test_cyclomatic_complexity()
         print("✅ Cyclomatic complexity tests passed!")
-        os.remove(test_file)
-    else:
-        print("❌ Audit failed")
-        os.remove(test_file)
+    except AssertionError as e:
+        print(f"❌ Tests failed: {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"❌ An error occurred: {e}")
         sys.exit(1)
