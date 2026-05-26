@@ -18,12 +18,6 @@ from urllib.parse import urlparse
 outbox_wake_event = threading.Event()
 ledger_entropy_event = threading.Event()
 
-try:
-    import cortex_rs
-    HAS_CORTEX_RS = True
-except ImportError:
-    HAS_CORTEX_RS = False
-
 # Exergy-Maximized Thread-Local Connection Pool
 _local = threading.local()
 
@@ -250,15 +244,6 @@ class VSAMemory:
         self._conn.execute("PRAGMA cache_size=-64000;")
         self._conn.execute("PRAGMA temp_store=MEMORY;")
 
-        if HAS_CORTEX_RS:
-            try:
-                self._substrate = cortex_rs.CortexRsSubstrate(VSA_BIN_PATH, VSA_DIMENSION)
-            except Exception as e:
-                logger.warning("Failed to initialize Rust CortexRsSubstrate, using Python fallback: %s", e)
-                self._substrate = None
-        else:
-            self._substrate = None
-
         # Use weakref.finalize for guaranteed cleanup when instance is garbage collected
         self._finalizer = weakref.finalize(
             self, self._cleanup, self._mmap_tensor, self._f, self._conn
@@ -288,17 +273,6 @@ class VSAMemory:
 
     def record(self, key: str, value: str):
         """Map semantic trace to both RAM tensor and Persistent SQLite FTS5."""
-        if self._substrate is not None:
-            try:
-                self._substrate.record(key, value, DB_PATH)
-                self._record_count += 1
-                if self._record_count >= 1000:
-                    self._substrate.apply_decay(self._decay_rate)
-                    self._record_count = 0
-                return
-            except Exception as e:
-                logger.error("Rust CortexRsSubstrate Record Failure, falling back to Python: %s", e)
-
         ctx_string = f"{key}:{value}"
         idx = int(hashlib.sha256(ctx_string.encode("utf-8")).hexdigest(), 16) % VSA_DIMENSION
 
@@ -324,13 +298,6 @@ class VSAMemory:
             logger.error("VSA SQLite Record Failure: %s", e)
 
     def _apply_decay(self):
-        if self._substrate is not None:
-            try:
-                self._substrate.apply_decay(self._decay_rate)
-                return
-            except Exception as e:
-                logger.error("Rust apply_decay failure, falling back to Python: %s", e)
-
         for i in range(VSA_DIMENSION):
             val = self._tensor[i]
             if val > 0.001:
@@ -450,70 +417,56 @@ class ZeroCopyRingBuffer:
         self.tensor_size = self.capacity * self.task_size
         self.bin_path = os.path.join(os.path.dirname(DB_PATH), "swarm_ring_vsa.bin")
 
-        if HAS_CORTEX_RS:
-            try:
-                self._rust_buf = cortex_rs.ZeroCopyRingBuffer(self.bin_path, self.capacity)
-            except Exception as e:
-                logger.warning("Failed to initialize Rust ZeroCopyRingBuffer, using Python fallback: %s", e)
-                self._rust_buf = None
-        else:
-            self._rust_buf = None
+        if not os.path.exists(self.bin_path) or os.path.getsize(self.bin_path) < self.tensor_size:
+            with open(self.bin_path, "wb") as f:
+                f.write(b"\x00" * self.tensor_size)
 
-        if self._rust_buf is None:
-            if not os.path.exists(self.bin_path) or os.path.getsize(self.bin_path) < self.tensor_size:
-                with open(self.bin_path, "wb") as f:
-                    f.write(b"\x00" * self.tensor_size)
-
-            self._f = open(self.bin_path, "r+b")
-            self._mmap = mmap.mmap(self._f.fileno(), self.tensor_size)
-            self._buffer = memoryview(self._mmap)
-            self._lock = threading.Lock()
+        self._f = open(self.bin_path, "r+b")
+        self._mmap = mmap.mmap(self._f.fileno(), self.tensor_size)
+        self._buffer = memoryview(self._mmap)
+        self._lock = threading.Lock()
+            self._write_idx = 0
+            self._read_idx = 0
 
     def enqueue(self, agent_id: bytes, payload: bytes) -> bool:
         """O(1) Zero-copy memory write. Bypasses VSA OS locks."""
-        if self._rust_buf is not None:
-            try:
-                return self._rust_buf.enqueue(agent_id, payload)
-            except Exception as e:
-                logger.error("Rust ZeroCopyRingBuffer.enqueue failure, falling back to Python: %s", e)
-
         with self._lock:
-            for i in range(self.capacity):
-                offset = i * self.task_size
-                if self._buffer[offset] == 0:  # Free slot
-                    self._buffer[offset] = 1  # Pending
-                    # In a real C-extension this struct.pack is done via raw pointers
-                    import struct
+            offset = self._write_idx * self.task_size
+            if self._buffer[offset] != 0:
+                return False  # Buffer full
+                
+            self._buffer[offset] = 1  # Pending
+            import struct
+            struct.pack_into("d", self._buffer, offset + 1, time.time())
+            
+            agent_bytes = agent_id[:64].ljust(64, b"\x00")
+            self._buffer[offset + 9 : offset + 73] = agent_bytes
 
-                    struct.pack_into("d", self._buffer, offset + 1, time.time())
-
-                    agent_bytes = agent_id[:64].ljust(64, b"\x00")
-                    self._buffer[offset + 9 : offset + 73] = agent_bytes
-
-                    payload_bytes = payload[:183].ljust(183, b"\x00")
-                    self._buffer[offset + 73 : offset + 256] = payload_bytes
-                    return True
-            return False
+            payload_bytes = payload[:183].ljust(183, b"\x00")
+            self._buffer[offset + 73 : offset + 256] = payload_bytes
+            
+            self._write_idx = (self._write_idx + 1) % self.capacity
+            return True
 
     def fetch_pending(self):
         """Zero-copy read direct from C-contiguous memory."""
-        if self._rust_buf is not None:
-            try:
-                return self._rust_buf.fetch_pending()
-            except Exception as e:
-                logger.error("Rust ZeroCopyRingBuffer.fetch_pending failure, falling back to Python: %s", e)
-
         tasks = []
         import struct
 
-        for i in range(self.capacity):
-            offset = i * self.task_size
-            if self._buffer[offset] == 1:  # Pending
-                self._buffer[offset] = 2  # Mark Processing
-                ts = struct.unpack_from("d", self._buffer, offset + 1)[0]
-                agent_id = bytes(self._buffer[offset + 9 : offset + 73]).rstrip(b"\x00")
-                payload = bytes(self._buffer[offset + 73 : offset + 256]).rstrip(b"\x00")
-                tasks.append((i, ts, agent_id, payload))
+        with self._lock:
+            for _ in range(self.capacity):
+                offset = self._read_idx * self.task_size
+                if self._buffer[offset] == 1:  # Pending
+                    self._buffer[offset] = 2  # Mark Processing
+                    ts = struct.unpack_from("d", self._buffer, offset + 1)[0]
+                    agent_id = bytes(self._buffer[offset + 9 : offset + 73]).rstrip(b"\x00")
+                    payload = bytes(self._buffer[offset + 73 : offset + 256]).rstrip(b"\x00")
+                    tasks.append((self._read_idx, ts, agent_id, payload))
+                    
+                    self._buffer[offset] = 0 # Free it
+                    self._read_idx = (self._read_idx + 1) % self.capacity
+                else:
+                    break
         return tasks
 
 
