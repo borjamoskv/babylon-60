@@ -5,7 +5,6 @@ Implements dynamic autopoiesis, zero-trust execution, and Bayesian feedback.
 
 from __future__ import annotations
 
-import ast
 import asyncio
 import logging
 from typing import Any

@@ -43,7 +43,7 @@ def migrate_simplify_facts(conn: sqlite3.Connection) -> None:
         INSERT INTO facts_new (
             id, tenant_id, project, content, fact_type, tags, hash, created_at, updated_at, is_tombstoned, metadata
         )
-        SELECT 
+        SELECT
             id, tenant_id, project, content, fact_type, tags, hash, created_at, updated_at, is_tombstoned,
             json_set(
                 COALESCE(metadata, '{}'),

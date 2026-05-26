@@ -31,7 +31,7 @@ import functools
 import threading
 from collections.abc import Callable, Generator
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 __all__ = [
     "SlowOpTipEmitter",

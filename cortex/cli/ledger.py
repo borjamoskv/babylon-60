@@ -3,9 +3,7 @@
 import click
 from rich.console import Console
 
-import base64
 import json
-import uuid
 from pathlib import Path
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
@@ -137,9 +135,6 @@ def export_ledger_cmd(
     """Export forensic ledger package in public-v1-strict format."""
     from cortex.ledger.public_export import (
         _b64url_encode,
-    )
-    from cortex.ledger.public_verifier_utils import (
-        _canonical_public_json,
     )
 
     store = LedgerStore(db)

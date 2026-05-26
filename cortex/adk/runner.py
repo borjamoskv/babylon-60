@@ -16,7 +16,6 @@ import argparse
 import asyncio
 import logging
 import sys
-from typing import Optional
 
 __all__ = ["run_cli", "run_web", "main"]
 

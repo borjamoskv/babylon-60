@@ -105,7 +105,7 @@ class BrowserEngine:
                 discarded_opacity: 0,
                 accepted: 0
             };
-            
+
             elements.forEach((el) => {
                 const rect = el.getBoundingClientRect();
                 const computed = getComputedStyle(el);
@@ -123,13 +123,13 @@ class BrowserEngine:
                 }
 
                 if (discarded) return;
-                
+
                 // Assign ID
                 const cortexId = idCounter++;
                 el.setAttribute('data-cortex-id', cortexId);
-                
+
                 // Extract useful text
-                let text = el.innerText || el.value || el.placeholder || 
+                let text = el.innerText || el.value || el.placeholder ||
                            el.getAttribute('aria-label') || '';
                 text = text.trim().replace(/\\n/g, ' ');
                 if (text || el.tagName === 'INPUT') {
@@ -137,7 +137,7 @@ class BrowserEngine:
                     stats.accepted++;
                 }
             });
-            
+
             return {
                 dom: tree.join('\\n'),
                 stats: stats

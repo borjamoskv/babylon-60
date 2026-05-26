@@ -22,9 +22,9 @@ async def query_new_facts(
     """Queries for new facts of specific type since last_id."""
     async with engine.session() as conn:
         sql = """
-            SELECT id, content, meta 
-            FROM facts 
-            WHERE fact_type = ? AND id > ? 
+            SELECT id, content, meta
+            FROM facts
+            WHERE fact_type = ? AND id > ?
             ORDER BY id ASC
         """
         cursor = await conn.execute(sql, (fact_type, last_id))

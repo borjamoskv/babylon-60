@@ -14,7 +14,7 @@ All operations use numpy int8 arrays for memory efficiency:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Final, Optional
+from typing import TYPE_CHECKING, Any, Final
 
 from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 

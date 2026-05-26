@@ -32,9 +32,9 @@ def get_dashboard_html() -> str:
                 --font-mono: 'JetBrains Mono', monospace;
             }
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { 
-                background: var(--bg); 
-                color: var(--text); 
+            body {
+                background: var(--bg);
+                color: var(--text);
                 font-family: var(--font-sans);
                 overflow: hidden;
             }
@@ -68,7 +68,7 @@ def get_dashboard_html() -> str:
             }
             .logo { font-size: 14px; font-weight: 800; letter-spacing: 0.1em; color: var(--primary); }
             .status-pill { font-size: 10px; padding: 4px 10px; border: 1px solid var(--primary); border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); background: rgba(43, 59, 229, 0.1); }
-            
+
             .feed { padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
             .block {
                 padding: 16px;
@@ -98,7 +98,7 @@ def get_dashboard_html() -> str:
             ::-webkit-scrollbar { width: 4px; }
             ::-webkit-scrollbar-thumb { background: var(--border); }
             ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
-            
+
             #exergy-total { font-size: 32px; font-weight: 700; margin-bottom: 4px; color: var(--primary); text-shadow: 0 0 20px rgba(43,59,229,0.3); }
         </style>
     </head>

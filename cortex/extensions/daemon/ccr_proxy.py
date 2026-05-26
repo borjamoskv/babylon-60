@@ -2,7 +2,6 @@ import json
 import logging
 import os
 import time
-from typing import Optional
 
 import httpx
 from fastapi import FastAPI, Request

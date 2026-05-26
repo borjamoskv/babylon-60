@@ -96,10 +96,10 @@ class EntropicQueue:
             conn.execute("BEGIN IMMEDIATE")
             cursor = conn.execute(
                 """
-                SELECT id, type, payload, retries 
-                FROM entropic_queue 
+                SELECT id, type, payload, retries
+                FROM entropic_queue
                 WHERE status = 'pending' OR (status = 'failed' AND retries < ?)
-                ORDER BY priority ASC, id ASC 
+                ORDER BY priority ASC, id ASC
                 LIMIT 1
                 """,
                 (max_retries,),
@@ -140,8 +140,8 @@ class EntropicQueue:
         with self._get_conn() as conn:
             conn.execute(
                 """
-                UPDATE entropic_queue 
-                SET status = 'failed', updated_at = ?, retries = retries + 1, error = ? 
+                UPDATE entropic_queue
+                SET status = 'failed', updated_at = ?, retries = retries + 1, error = ?
                 WHERE id = ?
                 """,
                 (now, error, task_id),

@@ -168,7 +168,7 @@ class ProceduralMemory:
 
             cur.execute(
                 """
-                INSERT INTO procedural_engrams 
+                INSERT INTO procedural_engrams
                 (skill_name, invocations, success_rate, avg_latency_ms, last_invoked, permanent)
                 VALUES (?, ?, ?, ?, ?, ?)
                 ON CONFLICT(skill_name) DO UPDATE SET

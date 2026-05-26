@@ -235,9 +235,9 @@ class SystemsConsolidator:
 
             # Step 1: Mature silent engrams that passed maturation time and have no contradictions
             maturation_sql = """
-                UPDATE facts_meta 
+                UPDATE facts_meta
                 SET metadata = json_set(metadata, '$.state', 'matured')
-                WHERE tenant_id = ? 
+                WHERE tenant_id = ?
                   AND json_extract(metadata, '$.state') = 'silent'
                   AND json_extract(metadata, '$.contradiction_count') = 0
                   AND ( ? - timestamp ) / 86400.0 >= json_extract(metadata, '$.maturation_days')
@@ -249,7 +249,7 @@ class SystemsConsolidator:
             # Find engrams that are silent but have a contradiction count > 0 OR
             # are totally drained of energy via the decay curve.
             deletion_sql = """
-                DELETE FROM facts_meta 
+                DELETE FROM facts_meta
                 WHERE tenant_id = ?
                   AND json_extract(metadata, '$.state') = 'silent'
                   AND (
@@ -264,7 +264,7 @@ class SystemsConsolidator:
 
             # Count pending silent engrams remaining
             pending_sql = """
-                SELECT COUNT(*) FROM facts_meta 
+                SELECT COUNT(*) FROM facts_meta
                 WHERE tenant_id = ? AND json_extract(metadata, '$.state') = 'silent'
             """
             cursor.execute(pending_sql, (tenant_id,))

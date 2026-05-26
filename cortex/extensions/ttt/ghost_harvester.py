@@ -37,8 +37,8 @@ def fetch_recent_anomalies(cursor, days=7):
 
     query = """
         SELECT fact_type, content, meta
-        FROM facts 
-        WHERE fact_type IN ('error', 'decision', 'ghost') 
+        FROM facts
+        WHERE fact_type IN ('error', 'decision', 'ghost')
         AND created_at >= ?
         ORDER BY created_at ASC
     """
