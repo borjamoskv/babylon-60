@@ -237,7 +237,7 @@ def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
 
     # Centralized NEXUS API Task synchronization
     nexus_url = os.getenv("NEXUS_API_URL", "http://localhost:8600")
-    nexus_token = os.getenv("NEXUS_BEARER_TOKEN", "")
+    nexus_token = os.getenv("NEXUS_BEARER_TOKEN", "ya29.cortex_swarm_dispatcher")
 
     caps_map = {
         "VulnerabilityFixer": ["security", "code"],
