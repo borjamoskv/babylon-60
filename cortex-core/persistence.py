@@ -33,6 +33,9 @@ def _get_local_conn(db_path, timeout=30.0):
         _local.db_path = db_path
         _local.conn = sqlite3.connect(db_path, timeout=timeout)
         _local.conn.execute("PRAGMA journal_mode=WAL;")
+        _local.conn.execute("PRAGMA synchronous=NORMAL;")
+        _local.conn.execute("PRAGMA cache_size=-64000;")
+        _local.conn.execute("PRAGMA temp_store=MEMORY;")
     return _local.conn
 
 
@@ -108,6 +111,9 @@ class LedgerManager:
         self._conn = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=30.0)
         c = self._conn.cursor()
         c.execute("PRAGMA journal_mode=WAL;")
+        c.execute("PRAGMA synchronous=NORMAL;")
+        c.execute("PRAGMA cache_size=-64000;")
+        c.execute("PRAGMA temp_store=MEMORY;")
         c.execute("""
             CREATE TABLE IF NOT EXISTS ledger_records (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -135,6 +141,8 @@ class LedgerManager:
                 status TEXT
             )
         """)
+        c.execute("CREATE INDEX IF NOT EXISTS idx_ledger_vector ON ledger_records(vector_id);")
+        c.execute("CREATE INDEX IF NOT EXISTS idx_swarm_status_time ON cortex_swarm_queue(status, timestamp);")
         self._conn.commit()
 
     def append(self, action: str, vector_id: str, yield_amount: float) -> str:
@@ -207,6 +215,9 @@ class VSAMemory:
         self._lock = threading.Lock()
         self._conn = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=30.0)
         self._conn.execute("PRAGMA journal_mode=WAL;")
+        self._conn.execute("PRAGMA synchronous=NORMAL;")
+        self._conn.execute("PRAGMA cache_size=-64000;")
+        self._conn.execute("PRAGMA temp_store=MEMORY;")
 
         # Use weakref.finalize for guaranteed cleanup when instance is garbage collected
         self._finalizer = weakref.finalize(
@@ -348,6 +359,13 @@ class HybridPersistenceManager:
         self.ide_guardian.start_guardian()
         self.outbox.start_guardian()
 
+    def get_system_health(self) -> dict:
+        """Aggregates C5-REAL telemetry from all persistence substrates."""
+        return {
+            "outbox": self.outbox.get_health_metrics(),
+            "ledger_yield": self.l3.get_total_yield()
+        }
+
 
 class OutboxDaemon:
     """Outbox Pattern Daemon: Asynchronously drains pending swarm tasks to NEXUS API."""
@@ -357,6 +375,9 @@ class OutboxDaemon:
         self._daemon_task = None
         self._conn = sqlite3.connect(self._db_path, check_same_thread=False, timeout=10.0)
         self._conn.execute("PRAGMA journal_mode=WAL;")
+        self._conn.execute("PRAGMA synchronous=NORMAL;")
+        self._conn.execute("PRAGMA cache_size=-64000;")
+        self._conn.execute("PRAGMA temp_store=MEMORY;")
         self._lock = threading.Lock()
         self._finalizer = weakref.finalize(self, self._cleanup, self._conn)
         atexit.register(self.close)
@@ -392,6 +413,25 @@ class OutboxDaemon:
                 (status, row_id),
             )
             self._conn.commit()
+
+    def get_health_metrics(self) -> dict:
+        """Returns C5-REAL telemetry for the Outbox Pattern."""
+        with self._lock:
+            c = self._conn.cursor()
+            c.execute("SELECT status, COUNT(*) FROM cortex_swarm_queue GROUP BY status")
+            counts = {row[0]: row[1] for row in c.fetchall()}
+            
+            c.execute("SELECT MIN(timestamp) FROM cortex_swarm_queue WHERE status = 'pending'")
+            oldest_pending = c.fetchone()[0]
+            
+            latency = (time.time() - oldest_pending) if oldest_pending else 0.0
+            
+            return {
+                "pending_tasks": counts.get("pending", 0),
+                "failed_tasks": counts.get("failed", 0),
+                "completed_tasks": counts.get("completed", 0),
+                "max_latency_seconds": round(latency, 4)
+            }
 
     async def _drain_loop(self):
         import urllib.request
