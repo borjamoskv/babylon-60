@@ -17,7 +17,7 @@ import logging
 import sqlite3
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
@@ -564,13 +564,13 @@ class SovereignVectorStoreL2:
                     SELECT * FROM (
                         SELECT m.*, v.embedding as binary_emb,
                                coalesce(
-                                   (1.0 - vec_distance_cosine(vf.embedding, 
+                                   (1.0 - vec_distance_cosine(vf.embedding,
                                           vec_quantize_int8(?, 'unit')) / 2.0),
                                    (1.0 - (void_dist(?, v.embedding) / CAST(? AS REAL)))
                                ) as base_similarity,
                                (
                                    coalesce(
-                                       (1.0 - vec_distance_cosine(vf.embedding, 
+                                       (1.0 - vec_distance_cosine(vf.embedding,
                                               vec_quantize_int8(?, 'unit')) / 2.0),
                                        (1.0 - (void_dist(?, v.embedding) / CAST(? AS REAL)))
                                    ) *

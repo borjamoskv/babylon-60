@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -15,7 +15,6 @@ if TYPE_CHECKING:
     from cortex.embeddings.manager import EmbeddingManager
     from cortex.engine.auth import ByzantineAuthLayer
     from cortex.engine.lock import SovereignLock
-    from cortex.engine.trust_registry import TrustRegistry
     from cortex.facts.manager import FactManager
     from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
     from cortex.mac_maestro.executor import MaestroExecutor

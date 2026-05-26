@@ -139,6 +139,9 @@ app = FastAPI(
     docs_url="/docs" if not config.PROD else None,
     redoc_url="/redoc" if not config.PROD else None,
 )
+
+if not config.PROD:
+    logger.info("MED-04: /docs and /redoc endpoints exposed (DEPLOY_MODE != cloud)")
 app.state.swarm_manager = get_swarm_manager()
 
 
@@ -172,6 +175,10 @@ app.add_middleware(MeteringMiddleware)
 
 @app.exception_handler(ValueError)
 async def value_error_handler(request: Request, exc: ValueError) -> JSONResponse:
+    # MED-01: Avoid leaking internal state in production
+    if config.PROD:
+        logger.warning("ValueError suppressed in PROD: %s", exc)
+        return JSONResponse(status_code=422, content={"detail": "Invalid input."})
     return JSONResponse(status_code=422, content={"detail": str(exc)})
 
 

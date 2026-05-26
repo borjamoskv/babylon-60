@@ -5,7 +5,6 @@ Implements dynamic autopoiesis, zero-trust execution, and Bayesian feedback.
 
 from __future__ import annotations
 
-import ast
 import asyncio
 import logging
 from typing import Any
@@ -74,14 +73,19 @@ class DemiurgeCompiler:
                 if generated_code.startswith("python"):
                     generated_code = generated_code[6:].strip()
 
-            # Phase 3: Zero-Trust Validation (Syntax check)
-            try:
-                ast.parse(generated_code)
-            except SyntaxError as e:
-                await self._record_ghost(intent, generated_code, f"Syntax Error: {e}", 0.1)
+            # Phase 3: Zero-Trust Validation (AST Sandbox — CRIT-01 hardened)
+            from cortex.utils.sandbox import ASTSandbox
+
+            _sandbox = ASTSandbox(max_nodes=500, max_depth=20, timeout_seconds=5)
+            verdict = _sandbox.validate(generated_code)
+            if not verdict.is_safe:
+                violations_str = "; ".join(verdict.violations)
+                await self._record_ghost(
+                    intent, generated_code, f"AST violations: {violations_str}", 0.1
+                )
                 return {
                     "status": "FAILED",
-                    "reason": "Syntax Error",
+                    "reason": f"AST Security Violations: {violations_str}",
                     "utility": 0.1,
                     "code": generated_code,
                 }
@@ -92,7 +96,7 @@ class DemiurgeCompiler:
                 code_obj = compile(generated_code, "<demiurge_ast>", "exec")
                 # Security Justification: The Demiurge JIT compiler requires exec() for
                 # ephemeral skill generation (autopoiesis) within a controlled sandbox.
-                # All inputs are validated via AST analysis before execution.
+                # All inputs are validated via ASTSandbox whitelist before execution.
                 exec(code_obj, sandbox_globals)  # noqa: S102 # nosec B102
             except Exception as e:
                 # noqa: BLE001 — Compilation error during JIT forging is expected.

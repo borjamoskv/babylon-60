@@ -134,7 +134,7 @@ class ResultCache:
             with _db(self.db_path, exclusive=True) as conn:
                 conn.execute(
                     """
-                    INSERT OR REPLACE INTO results 
+                    INSERT OR REPLACE INTO results
                     (hash, response, expires_at, created_at, provider, model)
                     VALUES (?, ?, ?, ?, ?, ?)
                     """,

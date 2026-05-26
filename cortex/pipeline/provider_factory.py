@@ -16,8 +16,7 @@ import os
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cortex.extensions.llm._models import BaseProvider
-    from cortex.extensions.llm.router import CortexLLMRouter
+    pass
 
 logger = logging.getLogger("cortex.pipeline.provider_factory")
 

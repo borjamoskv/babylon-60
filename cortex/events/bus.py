@@ -11,7 +11,7 @@ persist to SQLite for cross-process reactive signaling.
 import asyncio
 import logging
 from collections.abc import Callable, Coroutine
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.events.bus")
 

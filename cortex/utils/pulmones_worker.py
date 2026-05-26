@@ -26,10 +26,10 @@ class PulmonesWorker:
             conn.row_factory = sqlite3.Row
             cursor = conn.execute(
                 """
-                SELECT id, target_func, payload, retries 
-                FROM fallback_queue 
-                WHERE next_retry_at <= ? 
-                ORDER BY next_retry_at ASC 
+                SELECT id, target_func, payload, retries
+                FROM fallback_queue
+                WHERE next_retry_at <= ?
+                ORDER BY next_retry_at ASC
                 LIMIT ?
                 """,
                 (now, self.batch_size),

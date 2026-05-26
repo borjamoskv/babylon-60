@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-import os
-import sys
-import subprocess
-import time
 import json
+import logging
+import os
+import subprocess
+import sys
+import time
 from pathlib import Path
-from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 class SubmissionBridge:
     def __init__(self, watch_dir="./engine-c5/targets/active"):
@@ -13,7 +15,8 @@ class SubmissionBridge:
         self.verified_pocs = []
         
     def log(self, msg, tier="INFO"):
-        print(f"[{datetime.now().time()}] [{tier}] [BRIDGE] {msg}")
+        # MED-03: Migrated from print() to structured logging
+        logger.info("[%s] [BRIDGE] %s", tier, msg)
 
     def verify_poc(self, target_path, poc_file):
         """Invoke Foundry (Forge) to verify the PoC."""
@@ -93,11 +96,11 @@ Validate state transitions and enforce strict access control on internal functio
                             poc_content = f.read()
                         self.generate_report(target.name, poc_content, logs)
             
-            time.sleep(30)
+            time.sleep(30)  # noqa: ASYNC101 — standalone CLI script, no event loop
 
 if __name__ == "__main__":
     bridge = SubmissionBridge()
     try:
         bridge.run_bridge_loop()
     except KeyboardInterrupt:
-        print("\nBridge Offline.")
+        logger.info("Bridge Offline.")

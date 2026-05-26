@@ -13,7 +13,7 @@ import os
 import sys
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import NoReturn, Optional
+from typing import NoReturn
 
 from rich.panel import Panel
 

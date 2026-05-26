@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from importlib.util import find_spec
 from pathlib import Path
 
 import aiosqlite
