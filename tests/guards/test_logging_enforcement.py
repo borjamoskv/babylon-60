@@ -13,6 +13,7 @@ TARGET_DIRS = [
     "cortex/agents",
 ]
 
+
 def find_bare_print_calls(directory: str) -> list[str]:
     violations = []
     root_path = Path(directory)
@@ -31,15 +32,16 @@ def find_bare_print_calls(directory: str) -> list[str]:
 
             for node in ast.walk(tree):
                 if (
-                    isinstance(node, ast.Call) and
-                    isinstance(node.func, ast.Name) and
-                    node.func.id == "print"
+                    isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Name)
+                    and node.func.id == "print"
                 ):
                     violations.append(f"{py_file}:{node.lineno}")
         except (OSError, SyntaxError):
             continue
 
     return violations
+
 
 @pytest.mark.parametrize("directory", TARGET_DIRS)
 def test_no_bare_print_in_core_modules(directory):
