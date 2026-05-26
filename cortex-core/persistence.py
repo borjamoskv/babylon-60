@@ -95,6 +95,8 @@ class ContextCache:
 
     def put(self, content_key: str, payload: dict):
         """Register payload with monotonic timestamp for deterministic L1 state management."""
+        if len(self._cache) > 10000:
+            self._cache.clear()  # O(1) Memory Entropy Purge
         self._cache[content_key] = {"payload": payload, "timestamp": time.monotonic()}
 
     def get(self, content_key: str) -> dict:
@@ -123,6 +125,7 @@ class LedgerManager(SovereignResource):
 
     def __init__(self):
         self._lock = threading.Lock()
+        self._entropy_counter = 0
         self._init_db()
         self._finalizer = weakref.finalize(self, self._safe_close, self._conn)
         atexit.register(self.close)
@@ -236,8 +239,11 @@ class LedgerManager(SovereignResource):
             )
             self._conn.commit()
 
-            # Autodidact-Ω: Signal entropy spike for downstream L0 Hypervisor logic
-            ledger_entropy_event.set()
+            # Autodidact-Ω: Precise O(1) Exergy Tracking
+            self._entropy_counter += 1
+            if self._entropy_counter >= 1000:
+                ledger_entropy_event.set()
+                self._entropy_counter = 0
 
             return block_hash
 
@@ -288,7 +294,6 @@ class VSAMemory(SovereignResource):
 
         self._decay_rate = 0.99
         self._record_count = 0  # Metabolic decay counter
-        self._daemon_task = None
         self._lock = threading.Lock()
         self._conn = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=30.0)
         _setup_sqlite_pragmas(self._conn)
@@ -383,19 +388,12 @@ class IdeStatePreserver:
             logger.error("Failed to snapshot IDE state: %s", e)
 
     async def _snapshot_loop(self):
-        """Entropy-driven snapshots. Triggered by Ledger cryptographic volume, not chronological time."""
+        """Entropy-driven snapshots. Triggered precisely by Ledger cryptographic volume."""
         loop = asyncio.get_running_loop()
-        entropy_threshold = 1000  # Number of ledger transactions before forcing a snapshot
-        accumulated_entropy = 0
-
         while True:
             await loop.run_in_executor(None, ledger_entropy_event.wait)
             ledger_entropy_event.clear()
-            accumulated_entropy += 1
-
-            if accumulated_entropy >= entropy_threshold:
-                await loop.run_in_executor(None, self._execute_snapshot)
-                accumulated_entropy = 0
+            await loop.run_in_executor(None, self._execute_snapshot)
 
     def start_guardian(self):
         if self._daemon_task:
@@ -419,6 +417,7 @@ class HybridPersistenceManager:
         self.l1 = ContextCache()
         self.l2 = VSAMemory()
         self.l3 = LedgerManager()
+        self.ring = ZeroCopyRingBuffer()  # L4 Zero-Copy Substrate
         self.ide_guardian = IdeStatePreserver(self.l3)
         self.outbox = OutboxDaemon(DB_PATH)
         self.ide_guardian.start_guardian()
