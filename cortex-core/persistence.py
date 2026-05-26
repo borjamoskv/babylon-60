@@ -5,13 +5,11 @@ import hashlib
 import asyncio
 import logging
 import sqlite3
-import fcntl
 import subprocess
 import threading
 import mmap
 import weakref
 import atexit
-import concurrent.futures
 from urllib.parse import urlparse
 
 from cryptography.hazmat.primitives.asymmetric import ed25519
@@ -96,14 +94,14 @@ class ContextCache:
         self._ttl = 300  # Default TTL of 5 minutes for ephemeral cache validation
 
     def put(self, content_key: str, payload: dict):
-        """Register payload with local timestamp for L1 state management."""
-        self._cache[content_key] = {"payload": payload, "timestamp": time.time()}
+        """Register payload with monotonic timestamp for deterministic L1 state management."""
+        self._cache[content_key] = {"payload": payload, "timestamp": time.monotonic()}
 
     def get(self, content_key: str) -> dict:
         """Retrieve cached payload if it exists and falls within TTL window."""
         if content_key in self._cache:
             entry = self._cache[content_key]
-            if time.time() - entry["timestamp"] < self._ttl:
+            if time.monotonic() - entry["timestamp"] < self._ttl:
                 return entry["payload"]
             else:
                 del self._cache[content_key]
@@ -183,6 +181,14 @@ class LedgerManager(SovereignResource):
                 agent TEXT,
                 payload TEXT,
                 status TEXT
+            )
+        """)
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS cortex_execution_ledger (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp REAL,
+                returncode INTEGER,
+                execution_time REAL
             )
         """)
         c.execute("CREATE INDEX IF NOT EXISTS idx_ledger_vector ON ledger_records(vector_id);")
@@ -757,11 +763,8 @@ def get_swarm_metrics() -> dict:
         latency_ms = (avg_exec * 1000.0) if avg_exec else 35.0
 
         # Active children: count pending elements in the swarm queue
-        try:
-            c.execute("SELECT COUNT(*) FROM cortex_swarm_queue WHERE status='pending'")
-            active_children = c.fetchone()[0]
-        except sqlite3.OperationalError:
-            active_children = 0
+        c.execute("SELECT COUNT(*) FROM cortex_swarm_queue WHERE status='pending'")
+        active_children = c.fetchone()[0]
 
         # Uncertainty: Failure rate in the ledger (returncode != 0)
         c.execute(
