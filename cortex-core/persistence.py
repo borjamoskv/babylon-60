@@ -266,16 +266,20 @@ class VSAMemory:
         except Exception as e:
             logger.error("VSA SQLite Record Failure: %s", e)
 
+    def _apply_decay(self):
+        for i in range(VSA_DIMENSION):
+            val = self._tensor[i]
+            if val > 0.001:
+                self._tensor[i] = val * self._decay_rate
+            elif val > 0.0:
+                self._tensor[i] = 0.0
+
     async def _decay_loop(self):
         """Periodically decay high-dimensional state space to model biological memory loss."""
+        loop = asyncio.get_running_loop()
         while True:
             await asyncio.sleep(60)
-            for i in range(VSA_DIMENSION):
-                val = self._tensor[i]
-                if val > 0.001:
-                    self._tensor[i] = val * self._decay_rate
-                elif val > 0.0:
-                    self._tensor[i] = 0.0
+            await loop.run_in_executor(None, self._apply_decay)
 
     def start_glia(self):
         """Start the background neural decay process safely."""
@@ -327,8 +331,9 @@ class IdeStatePreserver:
 
     async def _snapshot_loop(self):
         """Perform daily snapshots of IDE state to prevent entropy accumulation."""
+        loop = asyncio.get_running_loop()
         while True:
-            self._execute_snapshot()
+            await loop.run_in_executor(None, self._execute_snapshot)
             await asyncio.sleep(86400)  # 24 hours
 
     def start_guardian(self):
