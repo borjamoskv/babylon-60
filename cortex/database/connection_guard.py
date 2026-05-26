@@ -13,12 +13,15 @@ Copyright 2026 by borjamoskv.com — Apache-2.0
 
 from __future__ import annotations
 
+import logging
 import re
 import sys
 from pathlib import Path
 from typing import Optional
 
 __all__ = ["scan_raw_connects", "ConnectionViolation"]
+
+logger = logging.getLogger(__name__)
 
 # Modules allowed to use sqlite3.connect directly
 _WHITELISTED_MODULES: frozenset[str] = frozenset(
@@ -176,18 +179,18 @@ def main() -> int:
     violations = scan_raw_connects(args.root)
 
     if violations:
-        print(f"\n🔴 CONNECTION GUARD: {len(violations)} violation(s) found!\n")
-        print("These files use raw sqlite3.connect() instead of CortexEngine:")
-        print("─" * 60)
+        logger.warning("🔴 CONNECTION GUARD: %d violation(s) found!", len(violations))
+        logger.warning("These files use raw sqlite3.connect() instead of CortexEngine:")
+        logger.warning("─" * 60)
         for v in violations:
-            print(f"  ✗ {v}")
-        print("─" * 60)
-        print("\nFix: Use CortexEngine.get_conn() or database.core.connect()")
-        print("If this module genuinely needs raw access, add it to the whitelist")
-        print(f"in {__file__}")
+            logger.warning("  ✗ %s", v)
+        logger.warning("─" * 60)
+        logger.warning("Fix: Use CortexEngine.get_conn() or database.core.connect()")
+        logger.warning("If this module genuinely needs raw access, add it to the whitelist")
+        logger.warning("in %s", __file__)
         return 1
 
-    print("✅ CONNECTION GUARD: No unauthorized sqlite3.connect() usage found.")
+    logger.info("✅ CONNECTION GUARD: No unauthorized sqlite3.connect() usage found.")
     return 0
 
 

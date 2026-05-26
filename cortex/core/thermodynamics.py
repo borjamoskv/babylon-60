@@ -1,5 +1,6 @@
 import importlib.abc
 import importlib.machinery
+import logging
 import sys
 from typing import Final
 
@@ -9,6 +10,9 @@ class ThermodynamicViolationError(Exception):
     KETER-OMEGA EXCEPTION: La asimetría técnica ha sido violada.
     Terminación instantánea para proteger el Cold Node.
     """
+
+
+logger = logging.getLogger(__name__)
 
 
 class CyanideImportHook(importlib.abc.MetaPathFinder):
@@ -31,9 +35,9 @@ class CyanideImportHook(importlib.abc.MetaPathFinder):
         base_module = fullname.partition(".")[0]
         # or other pathological module names that python might allow internally.
         if "cortex.extensions.moltbook" in fullname or base_module in self._POISONED_MODULES:
-            print("🔥 THERMODYNAMIC BORDER COLLAPSE 🔥")
-            print(f"FATAL: Attempted to import '{fullname}' within Cold Mode.")
-            print("Activating Cyanide Protocol. Self-destructing.")
+            logger.error("🔥 THERMODYNAMIC BORDER COLLAPSE 🔥")
+            logger.error("FATAL: Attempted to import '%s' within Cold Mode.", fullname)
+            logger.error("Activating Cyanide Protocol. Self-destructing.")
             raise ThermodynamicViolationError(1)
 
         return None  # Continúa con el loader normal si es seguro

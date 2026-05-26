@@ -139,6 +139,6 @@ class LineageVerifier:
         # Fix line too long
         label = f"#{node.fact_id} [{node.fact_type}] in {node.project}"
         line = f"{prefix}{status} {label}"
-        print(f"{line}: {node.content[:50]}...")
+        logger.info("%s: %s...", line, node.content[:50])
         for p in node.parents:
             self.print_tree(p, indent + 1)

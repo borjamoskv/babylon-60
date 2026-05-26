@@ -7,10 +7,14 @@ Each designed to collapse the predictable response space and force genuine thoug
 Usage::
 
     from cortex.agents.pitches import PITCH_CTO_SKEPTIC, PITCH_MEMO_DEV, PITCH_OS_CONTRIBUTOR
-    print(PITCH_CTO_SKEPTIC)
+    # Use logger.info(PITCH_CTO_SKEPTIC)
 """
 
 from __future__ import annotations
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "PITCH_CTO_SKEPTIC",
