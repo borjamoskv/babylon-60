@@ -18,6 +18,11 @@ credentials.json
 **/secrets/
 service-account*.json
 
+# ── Sensitive operational data (NEVER track) ──────
+bounty_hunt/
+scripts/_archive/
+scripts/panopticon_live.py
+
 # ── Dependencies ──────────────────────────────────
 node_modules/
 .venv/
