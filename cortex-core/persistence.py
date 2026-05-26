@@ -14,6 +14,9 @@ import atexit
 import concurrent.futures
 from urllib.parse import urlparse
 
+from cryptography.hazmat.primitives.asymmetric import ed25519
+from cryptography.exceptions import InvalidSignature
+
 try:
     import cortex_rs
     HAS_CORTEX_RS = True
@@ -126,6 +129,24 @@ class LedgerManager(SovereignResource):
         self._finalizer = weakref.finalize(self, self._safe_close, self._conn)
         atexit.register(self.close)
 
+        # C5-REAL Sovereign Ed25519 Keypair (ZK-Seal Substrate)
+        key_path = os.path.join(os.path.dirname(DB_PATH), "cortex_sovereign.pem")
+        if os.path.exists(key_path):
+            from cryptography.hazmat.primitives import serialization
+            with open(key_path, "rb") as key_file:
+                self.private_key = serialization.load_pem_private_key(key_file.read(), password=None)
+        else:
+            from cryptography.hazmat.primitives import serialization
+            self.private_key = ed25519.Ed25519PrivateKey.generate()
+            os.makedirs(os.path.dirname(key_path), exist_ok=True)
+            with open(key_path, "wb") as key_file:
+                key_file.write(self.private_key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.PKCS8,
+                    encryption_algorithm=serialization.NoEncryption()
+                ))
+        self.public_key = self.private_key.public_key()
+
     def _init_db(self):
         # Ensure database parent directory exists
         os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
@@ -197,8 +218,8 @@ class LedgerManager(SovereignResource):
             block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
             # C5-REAL Cryptographic Vault Sealing (ZK-Proof / Inter-Nodal Trust)
-            zk_payload = f"{block_hash}_{action}_{timestamp}_CORTEX_L0"
-            zk_proof = f"zkSTARK_v1_{hashlib.blake2s(zk_payload.encode('utf-8')).hexdigest()}"
+            zk_payload = f"{block_hash}_{action}_{timestamp}_CORTEX_L0".encode('utf-8')
+            zk_proof = self.private_key.sign(zk_payload).hex()
 
             c.execute(
                 """
@@ -213,6 +234,15 @@ class LedgerManager(SovereignResource):
             ledger_entropy_event.set()
 
             return block_hash
+
+    def verify_zk_seal(self, payload: str, signature_hex: str) -> bool:
+        """Verifies a cryptographic seal against the Sovereign public key."""
+        try:
+            self.public_key.verify(bytes.fromhex(signature_hex), payload.encode("utf-8"))
+            return True
+        except (InvalidSignature, ValueError):
+            return False
+
 
     def get_total_yield(self, vector_id=None) -> float:
         with self._lock:
@@ -586,6 +616,16 @@ class OutboxDaemon(SovereignResource):
                     
                     if target_file and new_source:
                         try:
+                            # C5-REAL Vault Verification
+                            if signature:
+                                is_valid = self.ledger.verify_zk_seal(new_source, signature)
+                                if not is_valid:
+                                    logger.error(f"AST Mutation Rejected: Invalid C5-REAL ZK-Seal for {target_file}")
+                                    self._update_task_status(row_id, "failed")
+                                    continue
+                            else:
+                                logger.warning(f"AST Mutation accepted WITHOUT signature for {target_file} (Legacy Mode)")
+
                             engine = ASTAutopoiesisEngine(target_file)
                             if func_name:
                                 result = engine.mutate_function(func_name, new_source)
@@ -742,5 +782,5 @@ def get_swarm_metrics() -> dict:
         }
     except Exception as e:
         logger.error("Failed to extract swarm metrics (Deterministic C5-REAL Exception): %s", e)
-        # AMPUTATED STOCHASTIC FALLBACK: Erradicada la entropía local. Return zeros.
-        return {"latency_ms": 0.0, "active_children": 0, "uncertainty": 0.0}
+        # C5-REAL CIRCUIT BREAKER: Maximize entropy signal to isolate failing node.
+        return {"latency_ms": 99999.0, "active_children": -1, "uncertainty": 1.0}
