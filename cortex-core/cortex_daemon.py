@@ -111,8 +111,13 @@ class CortexDaemon:
             )
 
         try:
-            process = await asyncio.create_subprocess_shell(
-                cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            # HIGH-02 hardened: avoid shell interpretation of task commands
+            import shlex as _shlex
+
+            process = await asyncio.create_subprocess_exec(
+                *_shlex.split(cmd),
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await process.communicate()
 
@@ -295,10 +300,13 @@ class CortexDaemon:
 
         # Path to self
         self_path = str(PROJECT_ROOT / "cortex-core" / "cortex_daemon.py")
-        cmd = f"python3 {str(PROJECT_ROOT / 'cortex-core' / 'mirror_audit.py')} {self_path}"
+        mirror_script = str(PROJECT_ROOT / "cortex-core" / "mirror_audit.py")
 
-        process = await asyncio.create_subprocess_shell(
-            cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        # HIGH-02 hardened: use exec with explicit arg list
+        process = await asyncio.create_subprocess_exec(
+            "python3", mirror_script, self_path,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
         )
         stdout, _ = await process.communicate()
 

@@ -121,8 +121,15 @@ contract {contract_name}OuroborosTest is Test {{
              with open(os.path.join(self.scratch_dir, "src/Vault.sol"), "w") as f:
                  f.write("contract CortexVault { function deposit() external payable {} }")
 
-        # Initialize Forge project
-        os.system(f"cd {self.scratch_dir} && forge init --no-git")
+        # Initialize Forge project — CRIT-03 hardened: no shell injection
+        import subprocess
+
+        subprocess.run(  # noqa: S603
+            ["forge", "init", "--no-git"],
+            cwd=self.scratch_dir,
+            check=False,
+            capture_output=True,
+        )
 
         for c in contracts[:2]: # Limit to 2 for performance
             await self.generate_fuzz_test(c["name"], c["file"])

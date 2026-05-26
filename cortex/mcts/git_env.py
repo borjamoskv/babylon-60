@@ -28,8 +28,12 @@ class MCTSGitEnvironment:
 
     async def get_current_branch(self) -> str:
         """Devuelve el nombre de la rama actual."""
-        proc = await asyncio.create_subprocess_shell(
-            "git rev-parse --abbrev-ref HEAD", stdout=asyncio.subprocess.PIPE
+        proc = await asyncio.create_subprocess_exec(
+            "git",
+            "rev-parse",
+            "--abbrev-ref",
+            "HEAD",
+            stdout=asyncio.subprocess.PIPE,
         )
         stdout, _ = await proc.communicate()
         return stdout.decode().strip()

@@ -139,10 +139,14 @@ class CortexConfig:
             DB_PATH=os.environ.get("CORTEX_DB", str(DEFAULT_DB_PATH)),
             PG_URL=os.environ.get("CORTEX_PG_URL", ""),
             RUNBOOT_MODE=os.environ.get("CORTEX_RUNBOOT", "local"),
-            ALLOWED_ORIGINS=os.environ.get(
-                "CORTEX_ALLOWED_ORIGINS",
-                "http://localhost:3000,http://localhost:5173,http://127.0.0.1:5173",
-            ).split(","),
+            ALLOWED_ORIGINS=[
+                o.strip()
+                for o in os.environ.get(
+                    "CORTEX_ALLOWED_ORIGINS",
+                    "http://localhost:3000,http://localhost:5173,http://127.0.0.1:5173",
+                ).split(",")
+                if o.strip() != "*" or os.environ.get("CORTEX_DEPLOY", "local") != "cloud"
+            ],
             RATE_LIMIT=int(os.environ.get("CORTEX_RATE_LIMIT", "300")),
             RATE_WINDOW=int(os.environ.get("CORTEX_RATE_WINDOW", "60")),
             CHECKPOINT_BATCH_SIZE=int(os.environ.get("CORTEX_CHECKPOINT_BATCH", "1000")),

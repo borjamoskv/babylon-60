@@ -90,6 +90,15 @@ class SovereignSurgeon:
                 )
 
             if new_content != content:
+                # HIGH-05: Validate patched output is valid Python before writing
+                if self.target_file.endswith(".py"):
+                    try:
+                        import ast as _ast
+                        _ast.parse(new_content)
+                    except SyntaxError as syn_err:
+                        logging.error("Patch rejected — invalid syntax: %s", syn_err)
+                        return False
+
                 with open(self.target_file, "w") as f:
                     f.write(new_content)
                 logging.info("✅ Surgery successful on %s", os.path.basename(self.target_file))
