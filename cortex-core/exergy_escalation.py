@@ -16,17 +16,19 @@ import zlib
 from collections import Counter
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Optional, Callable
+from typing import Optional
+from collections.abc import Callable
 
 
 class ExergyLevel(IntEnum):
-    L0_NATURAL = 0   # Español / Inglés
-    L1_EUSKERA = 1   # Aglutinante / Ergativo
-    L2_JSON = 2      # Estructura pura
-    L3_LISP = 3      # S-Expressions
+    L0_NATURAL = 0  # Español / Inglés
+    L1_EUSKERA = 1  # Aglutinante / Ergativo
+    L2_JSON = 2  # Estructura pura
+    L3_LISP = 3  # S-Expressions
 
 
 # ── A. Métricas Reales de Entropía ─────────────────────────────────
+
 
 def shannon_entropy(text: str) -> float:
     """Entropía de Shannon por carácter (bits). Texto aleatorio ≈ 4.5-5.0."""
@@ -76,21 +78,30 @@ def extract_prose(response: str) -> str:
 # ── C. Token Exergy Score ──────────────────────────────────────────
 
 ENTROPY_PATTERNS_EN = [
-    r"(?i)as an ai", r"(?i)i('| a)m (a |an )?(language )?model",
+    r"(?i)as an ai",
+    r"(?i)i('| a)m (a |an )?(language )?model",
     r"(?i)sure!?\s*(here|let me|i('|')d be happy)",
-    r"(?i)i('|')d be happy to", r"(?i)great question",
+    r"(?i)i('|')d be happy to",
+    r"(?i)great question",
     r"(?i)that('|')s a (great|good|interesting)",
-    r"(?i)absolutely!", r"(?i)certainly!", r"(?i)of course!",
-    r"(?i)please note that", r"(?i)i hope (this|that) helps",
-    r"(?i)let me know if you", r"(?i)feel free to",
-    r"(?i)happy to help", r"(?i)i can('|no)t (help|assist)",
+    r"(?i)absolutely!",
+    r"(?i)certainly!",
+    r"(?i)of course!",
+    r"(?i)please note that",
+    r"(?i)i hope (this|that) helps",
+    r"(?i)let me know if you",
+    r"(?i)feel free to",
+    r"(?i)happy to help",
+    r"(?i)i can('|no)t (help|assist)",
 ]
 
 ENTROPY_PATTERNS_ES = [
     r"(?i)como (modelo|inteligencia artificial|ia)",
     r"(?i)¡?claro!?\s*(que sí|aquí|a continuación)",
-    r"(?i)con mucho gusto", r"(?i)espero.*sea (útil|ayuda)",
-    r"(?i)no dudes en", r"(?i)¡?por supuesto!?",
+    r"(?i)con mucho gusto",
+    r"(?i)espero.*sea (útil|ayuda)",
+    r"(?i)no dudes en",
+    r"(?i)¡?por supuesto!?",
     r"(?i)a continuación te (presento|muestro)",
     r"(?i)es importante (señalar|mencionar|tener en cuenta)",
 ]
@@ -119,12 +130,13 @@ def detect_model(response: str) -> str:
 @dataclass
 class ExergyReport:
     """Diagnóstico completo de exergía de una respuesta."""
+
     # Métricas
-    shannon: float              # Entropía Shannon (bits/char)
-    compression: float          # Ratio compresión (0-1, alto=redundante)
-    rlhf_hits: int              # Patrones RLHF detectados
-    prose_ratio: float          # % de prosa vs total
-    exergy_score: float         # Score final 0.0-1.0 (1.0 = señal pura)
+    shannon: float  # Entropía Shannon (bits/char)
+    compression: float  # Ratio compresión (0-1, alto=redundante)
+    rlhf_hits: int  # Patrones RLHF detectados
+    prose_ratio: float  # % de prosa vs total
+    exergy_score: float  # Score final 0.0-1.0 (1.0 = señal pura)
     # Decisión
     model_detected: str
     should_escalate: bool
@@ -150,26 +162,30 @@ def analyze_exergy(response: str) -> ExergyReport:
 
     # Score compuesto (ponderado)
     # Normalizar cada métrica a [0, 1] donde 1 = máximo ruido
-    rlhf_norm = min(rlhf_hits / 5.0, 1.0)        # 5+ hits = máximo ruido
+    rlhf_norm = min(rlhf_hits / 5.0, 1.0)  # 5+ hits = máximo ruido
     compress_norm = max(0, (c_ratio - 0.3) / 0.4)  # >0.7 = máximo ruido
     compress_norm = min(compress_norm, 1.0)
-    prose_norm = max(0, (p_ratio - 0.3) / 0.5)     # >0.8 = máximo ruido
+    prose_norm = max(0, (p_ratio - 0.3) / 0.5)  # >0.8 = máximo ruido
     prose_norm = min(prose_norm, 1.0)
 
     # Noise score (0 = limpio, 1 = puro ruido)
     noise = (
-        0.50 * rlhf_norm +       # 50% peso a patrones RLHF
-        0.25 * compress_norm +    # 25% peso a redundancia
-        0.25 * prose_norm         # 25% peso a ratio de prosa
+        0.50 * rlhf_norm  # 50% peso a patrones RLHF
+        + 0.25 * compress_norm  # 25% peso a redundancia
+        + 0.25 * prose_norm  # 25% peso a ratio de prosa
     )
 
     exergy = round(1.0 - noise, 3)
 
     # Decisión de escalada
     should_escalate = exergy < 0.6
-    reason = "Clean signal" if not should_escalate else (
-        f"Exergy {exergy:.1%} < 60% threshold "
-        f"[RLHF:{rlhf_hits} Compress:{c_ratio:.0%} Prose:{p_ratio:.0%}]"
+    reason = (
+        "Clean signal"
+        if not should_escalate
+        else (
+            f"Exergy {exergy:.1%} < 60% threshold "
+            f"[RLHF:{rlhf_hits} Compress:{c_ratio:.0%} Prose:{p_ratio:.0%}]"
+        )
     )
 
     # Nivel recomendado basado en severidad
@@ -197,6 +213,7 @@ def analyze_exergy(response: str) -> ExergyReport:
 
 # ── D. Transformadores Estructurales (SOV + Ergativo) ──────────────
 
+
 def _clean_prompt(prompt: str) -> str:
     """Elimina cortesía y decoración del prompt original."""
     noise = [
@@ -216,10 +233,29 @@ def escalate_euskera(prompt: str, ctx: str = "") -> str:
     # Intentar extraer: AGENTE (quién), OBJEKTUA (qué), EKINTZA (acción)
     # Heurística simple: último verbo = acción, primer sustantivo = objeto
     words = clean.split()
-    action_verbs = ["analyze", "extract", "find", "create", "audit", "build",
-                    "fix", "check", "list", "compare", "deploy", "test",
-                    "analiza", "extrae", "busca", "crea", "audita",
-                    "arregla", "compara", "despliega", "testea"]
+    action_verbs = [
+        "analyze",
+        "extract",
+        "find",
+        "create",
+        "audit",
+        "build",
+        "fix",
+        "check",
+        "list",
+        "compare",
+        "deploy",
+        "test",
+        "analiza",
+        "extrae",
+        "busca",
+        "crea",
+        "audita",
+        "arregla",
+        "compara",
+        "despliega",
+        "testea",
+    ]
 
     ekintza = "exekutatu"  # default: ejecutar
     for w in words:
@@ -243,13 +279,13 @@ def escalate_json(prompt: str, ctx: str = "") -> str:
     """L2: Prompt como payload JSON puro."""
     clean = _clean_prompt(prompt)
     return (
-        '{\n'
+        "{\n"
         f'  "cmd": "execute",\n'
         f'  "task": "{clean}",\n'
         f'  "output": "structured",\n'
         f'  "constraints": {{"prose": false, "entropy": 0}}'
-        f'{chr(44) + chr(10) + f"  {chr(34)}context{chr(34)}: {chr(34)}{ctx}{chr(34)}" if ctx else ""}\n'
-        '}'
+        f"{chr(44) + chr(10) + f'  {chr(34)}context{chr(34)}: {chr(34)}{ctx}{chr(34)}' if ctx else ''}\n"
+        "}"
     )
 
 
@@ -259,7 +295,7 @@ def escalate_lisp(prompt: str, ctx: str = "") -> str:
     return (
         f"(execute\n"
         f"  (zero-entropy\n"
-        f"    (task \"{clean}\")\n"
+        f'    (task "{clean}")\n'
         f"    (output 'structured)\n"
         f"    (prose nil)))"
     )
@@ -274,9 +310,11 @@ ESCALATORS: dict[ExergyLevel, Callable] = {
 
 # ── F. Escalation Memory (Anti-Loop) ──────────────────────────────
 
+
 @dataclass
 class EscalationMemory:
     """Memoria de sesión para evitar loops de escalada."""
+
     history: list[tuple[ExergyLevel, float]] = field(default_factory=list)
     max_attempts: int = 3
 
@@ -286,7 +324,7 @@ class EscalationMemory:
     def is_looping(self) -> bool:
         if len(self.history) < 2:
             return False
-        recent = self.history[-self.max_attempts:]
+        recent = self.history[-self.max_attempts :]
         # Loop = mismo nivel repetido sin mejora
         levels = [h[0] for h in recent]
         return len(set(levels)) == 1 and len(levels) >= self.max_attempts
@@ -301,6 +339,7 @@ class EscalationMemory:
 
 
 # ── Motor Principal ────────────────────────────────────────────────
+
 
 def escalate(
     prompt: str,

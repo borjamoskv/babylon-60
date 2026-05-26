@@ -13,6 +13,16 @@ Antes de ejecutar, LEER la skill completa:
 cat ~/.gemini/antigravity/skills/ouroboros-infinity/SKILL.md
 ```
 
+### Daily Cron (ejecución automática a las 06:00 CEST)
+```bash
+# Ejecución manual
+python3 ~/10_PROJECTS/cortex-persist/scripts/ouroboros_daily.py --verbose
+
+# Instalar cron launchd
+cp ~/10_PROJECTS/cortex-persist/scripts/com.moskv.ouroboros-daily.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/com.moskv.ouroboros-daily.plist
+```
+
 ---
 
 ## 🔮 Comandos Rápidos

@@ -182,3 +182,60 @@ class TestExecuteStub:
         # Second call should be no-op
         ex._ensure_stack()
         assert ex._initialized is True
+
+
+class TestExecutorExergy:
+    @pytest.mark.asyncio
+    async def test_exergy_escalation_loop(self, monkeypatch):
+        from unittest.mock import AsyncMock, MagicMock
+
+        ex = AgentExecutor()
+        ex._initialized = True
+
+        # Mock router
+        mock_router = AsyncMock()
+
+        # First call returns low exergy, second returns high exergy
+        low_exergy_resp = (
+            "Sure! I'd be happy to help! Let me know if you need anything else. As an AI model..."
+        )
+        high_exergy_resp = "vulnerability: reentrancy\nseverity: CRITICAL\n"
+
+        call_count = 0
+
+        async def mock_execute_resilient(prompt):
+            nonlocal call_count
+            call_count += 1
+            res = MagicMock()
+            res.is_ok.return_value = True
+            if call_count == 1:
+                res.value = low_exergy_resp
+            else:
+                # The prompt should be escalated to Euskera (L1) which uses uppercase phrases like 'AGENTEA-K'
+                assert (
+                    "AGENTEA-K" in prompt.working_memory[-1]["content"]
+                    or "ZERO" in prompt.working_memory[-1]["content"]
+                )
+                res.value = high_exergy_resp
+            return res
+
+        mock_router.execute_resilient = mock_execute_resilient
+        mock_router.primary.provider_name = "test-provider"
+
+        async def mock_ensure_router():
+            return mock_router
+
+        monkeypatch.setattr(ex, "_ensure_router", mock_ensure_router)
+
+        # Execute
+        res = await ex._execute_single_agent(
+            agent_id="security-analyst",
+            intent="Audit this contract",
+            context=None,
+            budget_remaining=0.10,
+        )
+
+        assert call_count == 2
+        assert res["content"] == high_exergy_resp
+        assert res["exergy_score"] >= 0.6
+        assert res["exergy_level"] == 0  # Final level of high_exergy_resp is L0 (clean natural)

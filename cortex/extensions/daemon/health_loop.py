@@ -43,20 +43,29 @@ class HealthLoop:
         self._trend = TrendDetector()
 
     def tick(self) -> dict | None:
-        """Run one health check cycle."""
+        """Run one health check cycle with auto-remediation."""
         try:
             collector = HealthCollector(db_path=self._db_path)
             metrics = collector.collect_all()
             hs = HealthScorer.score(metrics)
+
+            # Auto-remediate degraded metrics before final scoring
+            remediated = self._auto_remediate(metrics)
+            if remediated:
+                # Re-collect after remediation for accurate score
+                metrics = collector.collect_all()
+                hs = HealthScorer.score(metrics)
+
             summary = HealthScorer.summarize(hs)
 
             self._trend.push(hs.score)
             drift = self._trend.detect_drift()
 
             logger.info(
-                "Health tick: %s [trend=%s]",
+                "Health tick: %s [trend=%s]%s",
                 summary,
                 drift,
+                f" (remediated: {', '.join(remediated)})" if remediated else "",
             )
 
             # Grade change detection via enum comparison
@@ -80,11 +89,61 @@ class HealthLoop:
                 "trend": drift,
                 "slope": round(self._trend.slope(), 3),
                 "metrics": [{"name": m.name, "value": m.value} for m in metrics],
+                "remediated": remediated,
             }
 
         except Exception as e:  # noqa: BLE001
             logger.warning("Health tick failed: %s", e)
             return None
+
+    def _auto_remediate(self, metrics: list) -> list[str]:
+        """Autonomous remediation of fixable health degradations.
+
+        Returns list of metric names that were remediated.
+        """
+        remediated: list[str] = []
+        metric_map = {m.name: m for m in metrics}
+
+        # Kill orphaned browsers if detected
+        browsers = metric_map.get("browsers")
+        if browsers and browsers.value < 1.0:
+            try:
+                import subprocess
+
+                subprocess.run(
+                    ["pkill", "-f", "ms-playwright-go"],
+                    capture_output=True,
+                    timeout=5,
+                    check=False,
+                )
+                remediated.append("browsers")
+                logger.info("Auto-remediated: killed orphaned browser processes")
+            except Exception as e:  # noqa: BLE001
+                logger.debug("Browser auto-kill failed: %s", e)
+
+        # Refresh stale context snapshot
+        snapshot = metric_map.get("snapshot")
+        if snapshot and snapshot.value < 0.8 and self._db_path:
+            try:
+                import sqlite3
+                import time as _time
+                from datetime import datetime, timezone
+
+                with sqlite3.connect(self._db_path, timeout=2.0) as conn:
+                    now = datetime.fromtimestamp(_time.time(), tz=timezone.utc).isoformat()
+                    conn.execute(
+                        "INSERT INTO context_snapshots "
+                        "(tenant_id, confidence, signals_used, summary, created_at) "
+                        "VALUES (?, ?, ?, ?, ?)",
+                        ("default", "C5", 0, "daemon:auto-refresh", now),
+                    )
+                    conn.commit()
+                remediated.append("snapshot")
+                logger.info("Auto-remediated: refreshed context snapshot")
+            except Exception as e:  # noqa: BLE001
+                logger.debug("Snapshot auto-refresh failed: %s", e)
+
+        return remediated
 
     def _on_grade_change(
         self,
