@@ -167,10 +167,27 @@ def test_enqueue_swarm_task_api_sync(monkeypatch, tmp_path):
     from persistence import enqueue_swarm_task
     import json
     import os
+    import sqlite3
+    import time
 
-    # Set temp swarm queue file path to avoid side-effects on the system
-    test_queue_file = tmp_path / "test_swarm_queue.json"
-    monkeypatch.setattr("persistence.SWARM_QUEUE_FILE", str(test_queue_file))
+    # Set temp DB path to avoid side-effects on the system
+    test_db = tmp_path / "test_cortex_memory_vsa.db"
+    monkeypatch.setattr("persistence.DB_PATH", str(test_db))
+
+    # Initialize SQLite table
+    conn = sqlite3.connect(str(test_db))
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS cortex_swarm_queue (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp REAL,
+            agent TEXT,
+            payload TEXT,
+            status TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
 
     # Mock urllib.request.urlopen
     mock_urlopen = MagicMock()
@@ -187,6 +204,12 @@ def test_enqueue_swarm_task_api_sync(monkeypatch, tmp_path):
         # Call function
         payload = {"description": "Fix oracle vulnerability", "reward": 50.0}
         enqueue_swarm_task("VulnerabilityFixer", payload)
+
+        # Wait for the background thread to call mock_urlopen
+        for _ in range(50):
+            if mock_urlopen.called:
+                break
+            time.sleep(0.02)
 
         # Verify the call to urlopen
         assert mock_urlopen.called
@@ -206,13 +229,17 @@ def test_enqueue_swarm_task_api_sync(monkeypatch, tmp_path):
         assert body["required_capabilities"] == ["security", "code"]
         assert body["delegator_id"] == "system"
 
-    # Also verify it was correctly written to the local file queue fallback
-    assert os.path.exists(test_queue_file)
-    with open(test_queue_file) as f:
-        local_data = json.load(f)
-    assert len(local_data["pending_tasks"]) == 1
-    assert local_data["pending_tasks"][0]["agent"] == "VulnerabilityFixer"
-    assert local_data["pending_tasks"][0]["payload"] == payload
+    # Verify it was correctly written to SQLite
+    conn = sqlite3.connect(str(test_db))
+    c = conn.cursor()
+    c.execute("SELECT agent, payload, status FROM cortex_swarm_queue")
+    rows = c.fetchall()
+    conn.close()
+
+    assert len(rows) == 1
+    assert rows[0][0] == "VulnerabilityFixer"
+    assert json.loads(rows[0][1]) == payload
+    assert rows[0][2] == "pending"
 
 
 def test_enqueue_swarm_task_api_sync_failure_fallback(monkeypatch, tmp_path):
@@ -221,10 +248,27 @@ def test_enqueue_swarm_task_api_sync_failure_fallback(monkeypatch, tmp_path):
     from persistence import enqueue_swarm_task
     import json
     import os
+    import sqlite3
+    import time
 
-    # Set temp swarm queue file path to avoid side-effects
-    test_queue_file = tmp_path / "test_swarm_queue_fail.json"
-    monkeypatch.setattr("persistence.SWARM_QUEUE_FILE", str(test_queue_file))
+    # Set temp DB path to avoid side-effects
+    test_db = tmp_path / "test_cortex_memory_vsa_fail.db"
+    monkeypatch.setattr("persistence.DB_PATH", str(test_db))
+
+    # Initialize SQLite table
+    conn = sqlite3.connect(str(test_db))
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS cortex_swarm_queue (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp REAL,
+            agent TEXT,
+            payload TEXT,
+            status TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
 
     # Mock urllib.request.urlopen to raise an error
     mock_urlopen = MagicMock(side_effect=URLError("Connection refused"))
@@ -234,13 +278,23 @@ def test_enqueue_swarm_task_api_sync_failure_fallback(monkeypatch, tmp_path):
         # This call should not crash the application (no exception raised)
         enqueue_swarm_task("OPTIMIZER", payload)
 
+        # Wait for background thread
+        for _ in range(50):
+            if mock_urlopen.called:
+                break
+            time.sleep(0.02)
+
         # Verify call was attempted
         assert mock_urlopen.called
 
-    # Verify the task was still enqueued locally in the fallback queue file
-    assert os.path.exists(test_queue_file)
-    with open(test_queue_file) as f:
-        local_data = json.load(f)
-    assert len(local_data["pending_tasks"]) == 1
-    assert local_data["pending_tasks"][0]["agent"] == "OPTIMIZER"
-    assert local_data["pending_tasks"][0]["payload"] == payload
+    # Verify the task was still enqueued locally in SQLite
+    conn = sqlite3.connect(str(test_db))
+    c = conn.cursor()
+    c.execute("SELECT agent, payload, status FROM cortex_swarm_queue")
+    rows = c.fetchall()
+    conn.close()
+
+    assert len(rows) == 1
+    assert rows[0][0] == "OPTIMIZER"
+    assert json.loads(rows[0][1]) == payload
+    assert rows[0][2] == "pending"
