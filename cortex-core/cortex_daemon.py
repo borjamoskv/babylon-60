@@ -52,7 +52,7 @@ class CortexDaemon:
                 "PRAGMA synchronous = NORMAL; PRAGMA temp_store = MEMORY; PRAGMA mmap_size = 30000000000;"
             )
             self.db_conn.execute(
-                "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, exit_code INTEGER, execution_time REAL);"
+                "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, returncode INTEGER, execution_time REAL);"
             )
             self.bus = SignalBus(self.db_conn)
         except Exception as e:
@@ -159,7 +159,7 @@ class CortexDaemon:
                     "swarm_task_complete",
                     {
                         "agent": agent,
-                        "exit_code": process.returncode,
+                        "returncode": process.returncode,
                         "status": "success" if process.returncode == 0 else "failed",
                     },
                     source="daemon",
@@ -198,12 +198,12 @@ class CortexDaemon:
             with self.db_lock:
                 c = self.db_conn.cursor()
                 c.execute(
-                    "INSERT INTO cortex_execution_ledger (timestamp, agent, command, exit_code, execution_time) VALUES (?, ?, ?, ?, ?)",
+                    "INSERT INTO cortex_execution_ledger (timestamp, agent, command, returncode, execution_time) VALUES (?, ?, ?, ?, ?)",
                     (
                         result.get("timestamp", time.time()),
                         result.get("agent", "unknown"),
                         result.get("command", ""),
-                        result.get("exit_code", -1),
+                        result.get("returncode", -1),
                         result.get("execution_time", 0.0),
                     ),
                 )

@@ -67,7 +67,7 @@ class TestCortexDaemon:
             "CREATE TABLE IF NOT EXISTS cortex_swarm_queue (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, payload TEXT, status TEXT)"
         )
         c.execute(
-            "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, exit_code INTEGER, execution_time REAL)"
+            "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, returncode INTEGER, execution_time REAL)"
         )
         conn.commit()
         conn.close()
@@ -123,7 +123,7 @@ class TestCortexDaemon:
 
         with patch("asyncio.create_subprocess_exec") as mock_exec:
             mock_proc = AsyncMock()
-            mock_proc.exit_code = 0
+            mock_proc.returncode = 0
             mock_proc.communicate.return_value = (b"success", b"")
             mock_exec.return_value = mock_proc
 
@@ -136,7 +136,7 @@ class TestCortexDaemon:
             # Check if ledger was updated in SQLite
             conn = sqlite3.connect(cortex_daemon.DB_PATH)
             c = conn.cursor()
-            c.execute("SELECT agent, command, exit_code FROM cortex_execution_ledger")
+            c.execute("SELECT agent, command, returncode FROM cortex_execution_ledger")
             ledger = c.fetchall()
             conn.close()
 
