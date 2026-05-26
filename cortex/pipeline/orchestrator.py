@@ -396,24 +396,10 @@ class CortexOrchestrator:
             if asyncio.iscoroutine(result):
                 try:
                     asyncio.get_running_loop()
-                    import threading
+                    import concurrent.futures
 
-                    res_val = None
-                    exc_val = None
-
-                    def _worker():
-                        nonlocal res_val, exc_val
-                        try:
-                            res_val = asyncio.run(result)
-                        except Exception as ex:
-                            exc_val = ex
-
-                    t = threading.Thread(target=_worker)
-                    t.start()
-                    t.join()
-                    if exc_val:
-                        raise exc_val
-                    result = res_val
+                    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                        result = pool.submit(asyncio.run, result).result()
                 except RuntimeError:
                     result = asyncio.run(result)
         except (BudgetExhaustedError, PipelineCancelledError):
