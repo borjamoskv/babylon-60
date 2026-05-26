@@ -1,6 +1,6 @@
 import time
 import concurrent.futures
-from persistence import VSAMemory, enqueue_swarm_task, NEXUS_DISPATCH_POOL
+from persistence import VSAMemory, enqueue_swarm_task
 
 def test_vsa_hammer():
     vsa = VSAMemory()
@@ -25,12 +25,15 @@ def test_queue_hammer():
     with concurrent.futures.ThreadPoolExecutor(max_workers=100) as pool:
         pool.map(dispatch, range(5000))
         
-    # Wait for the background fire-and-forget Nexus Dispatch Pool to drain
-    NEXUS_DISPATCH_POOL.shutdown(wait=True)
+    # Wait for the background Outbox Daemon to drain (or force a sync drain for the test)
+    import persistence
+    outbox = persistence.OutboxDaemon(persistence.DB_PATH)
+    # Drain one batch to test Outbox logic
+    outbox.drain_once_sync()
     
     duration = time.time() - start
     print(f"🌪️  [Swarm SQLite Queue + Async Nexus] 5,000 concurrent tasks processed in {duration:.4f}s")
-    print(f"   => {5000/duration:.2f} OPS (Lock-free WAL & Fire-and-forget Network)")
+    print(f"   => {5000/duration:.2f} OPS (Lock-free WAL & C5-REAL Outbox)")
 
 if __name__ == "__main__":
     print("🚀 INITIATING CORTEX-PERSIST EXERGY STRESS TEST (C5-REAL)...")

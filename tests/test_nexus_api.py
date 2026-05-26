@@ -205,11 +205,11 @@ def test_enqueue_swarm_task_api_sync(monkeypatch, tmp_path):
         payload = {"description": "Fix oracle vulnerability", "reward": 50.0}
         enqueue_swarm_task("VulnerabilityFixer", payload)
 
-        # Wait for the background thread to call mock_urlopen
-        for _ in range(50):
-            if mock_urlopen.called:
-                break
-            time.sleep(0.02)
+        # Explicitly drain using OutboxDaemon (synchronous run) to avoid thread dependency
+        from persistence import OutboxDaemon
+
+        daemon = OutboxDaemon(str(test_db))
+        daemon.drain_once_sync()
 
         # Verify the call to urlopen
         assert mock_urlopen.called
@@ -229,7 +229,7 @@ def test_enqueue_swarm_task_api_sync(monkeypatch, tmp_path):
         assert body["required_capabilities"] == ["security", "code"]
         assert body["delegator_id"] == "system"
 
-    # Verify it was correctly written to SQLite
+    # Verify it was correctly written to SQLite and updated to completed
     conn = sqlite3.connect(str(test_db))
     c = conn.cursor()
     c.execute("SELECT agent, payload, status FROM cortex_swarm_queue")
@@ -239,7 +239,7 @@ def test_enqueue_swarm_task_api_sync(monkeypatch, tmp_path):
     assert len(rows) == 1
     assert rows[0][0] == "VulnerabilityFixer"
     assert json.loads(rows[0][1]) == payload
-    assert rows[0][2] == "pending"
+    assert rows[0][2] == "completed"
 
 
 def test_enqueue_swarm_task_api_sync_failure_fallback(monkeypatch, tmp_path):
@@ -279,16 +279,16 @@ def test_enqueue_swarm_task_api_sync_failure_fallback(monkeypatch, tmp_path):
         # This call should not crash the application (no exception raised)
         enqueue_swarm_task("OPTIMIZER", payload)
 
-        # Wait for background thread
-        for _ in range(50):
-            if mock_urlopen.called:
-                break
-            time.sleep(0.02)
+        # Explicitly drain using OutboxDaemon
+        from persistence import OutboxDaemon
+
+        daemon = OutboxDaemon(str(test_db))
+        daemon.drain_once_sync()
 
         # Verify call was attempted
         assert mock_urlopen.called
 
-    # Verify the task was still enqueued locally in SQLite
+    # Verify the task was still enqueued locally in SQLite and status is pending (due to fallback retry)
     conn = sqlite3.connect(str(test_db))
     c = conn.cursor()
     c.execute("SELECT agent, payload, status FROM cortex_swarm_queue")

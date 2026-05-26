@@ -161,6 +161,37 @@ class PhalanxBase(Squadron):
 
         return [target_pattern]
 
+    async def _crystallize(self, signals: list[SwarmSignal]) -> dict[str, Any]:
+        """Intercepts Exergy/Nemesis structural actions before final aggregation."""
+        report = await super()._crystallize(signals)
+
+        for s in signals:
+            action = s.payload.get("recommended_action") or s.payload.get("action")
+            target = s.target
+
+            if action == "KILL_NODE":
+                logger.critical(
+                    "☠️ [DEATH PROTOCOL] Ejecutando eutanasia algorítmica sobre: %s", target
+                )
+                # Structural execution:
+                # 1. If it's a file path, we append .void to quarantine it from future swarm mapping
+                p = Path(target)
+                if p.exists() and p.is_file() and not p.name.startswith("."):
+                    quarantine_path = p.with_suffix(p.suffix + ".void")
+                    try:
+                        p.rename(quarantine_path)
+                        s.payload["execution_result"] = f"File quarantined to {quarantine_path}"
+                    except OSError as e:
+                        s.payload["execution_result"] = f"Failed to quarantine file: {e}"
+                else:
+                    s.payload["execution_result"] = "Abstract node terminated in ledger."
+
+            elif action == "SHARD_NODE":
+                logger.warning("🪓 [SHARD PROTOCOL] Bifurcando nodo entrópico: %s", target)
+                s.payload["execution_result"] = "Node marked for swarm bifurcation."
+
+        return report
+
     def _create_agent(self, agent_id: str) -> SwarmAgent:
         # Map sequential ID (0-3) to phalanx-specific registry IDs
         registry_p = self.registry.get("phalanxes", {})
@@ -174,6 +205,7 @@ class PhalanxBase(Squadron):
         # Evolución Exergética (TSI-Ω): 10% del enjambre es ExergyMaximizerAgent
         if idx % 10 == 8:
             from cortex.engine.exergy_agent import ExergyAgentAdapter
+
             return ExergyAgentAdapter(agent_id, self.bus, self.engine)
 
         if idx < len(phalanx_agents):
