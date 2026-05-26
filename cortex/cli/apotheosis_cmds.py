@@ -23,12 +23,12 @@ __all__ = [
     "aix_cmd",
 ]
 
-console = Console()
+from cortex.cli.common import cli, console
 
 PROGRESS_DESC_FMT = "[progress.description]{task.description}"
 
 
-@click.group(name="apotheosis", help="👁️  APOTHEOSIS-∞: El Daemon Autárquico de Nivel 5.")
+@cli.group(name="apotheosis", help="👁️  APOTHEOSIS-∞: El Daemon Autárquico de Nivel 5.")
 def apotheosis_cmds() -> None:
     """El motor de manifestación y erradicación proactiva de MOSKV-1."""
 

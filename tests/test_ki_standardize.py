@@ -45,9 +45,9 @@ class TestKIStandardize:
             "date_created": 1700000000.0,
             "tags": ["web3", "defi"],
             "vulnerabilities": ["Reentrancy"],
-            "random_field": "drop me"
+            "random_field": "drop me",
         }
-        
+
         mock_path = MagicMock(spec=Path)
         mock_stat = MagicMock()
         mock_stat.st_birthtime = 1700000000.0
@@ -71,10 +71,7 @@ class TestKIStandardize:
         assert "name" in changes_str and "random_field" in changes_str and "dropped" in changes_str
 
     def test_standardize_ki_oversized_summary(self):
-        meta = {
-            "title": "Big Summary",
-            "summary": "A" * 600
-        }
+        meta = {"title": "Big Summary", "summary": "A" * 600}
         mock_path = MagicMock(spec=Path)
         mock_stat = MagicMock()
         mock_stat.st_mtime = 1700000000.0
@@ -83,6 +80,6 @@ class TestKIStandardize:
         mock_path.stat.return_value = mock_stat
 
         normalized, changes = ki_standardize.standardize_ki(meta, mock_path)
-        
+
         assert len(normalized["summary"]) == 600
         assert any(">500" in c for c in changes)
