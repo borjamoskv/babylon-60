@@ -17,6 +17,16 @@ from urllib.parse import urlparse
 # Exergy-Maximized Thread-Local Connection Pool
 _local = threading.local()
 
+def _close_local_conn():
+    """Cleanup thread-local connection on process exit."""
+    conn = getattr(_local, "conn", None)
+    if conn:
+        try:
+            conn.close()
+        except Exception:
+            pass
+
+atexit.register(_close_local_conn)
 
 def _get_local_conn(db_path, timeout=30.0):
     if getattr(_local, "db_path", None) != db_path or not hasattr(_local, "conn"):
@@ -74,6 +84,23 @@ class LedgerManager:
     def __init__(self):
         self._lock = threading.Lock()
         self._init_db()
+        self._finalizer = weakref.finalize(self, self._cleanup, self._conn)
+        atexit.register(self.close)
+
+    @staticmethod
+    def _cleanup(conn_obj):
+        try:
+            if conn_obj:
+                conn_obj.close()
+        except Exception:
+            pass
+
+    def close(self):
+        if hasattr(self, "_finalizer") and self._finalizer.alive:
+            self._finalizer()
+
+    def __del__(self):
+        self.close()
 
     def _init_db(self):
         # Ensure database parent directory exists
@@ -331,6 +358,23 @@ class OutboxDaemon:
         self._conn = sqlite3.connect(self._db_path, check_same_thread=False, timeout=10.0)
         self._conn.execute("PRAGMA journal_mode=WAL;")
         self._lock = threading.Lock()
+        self._finalizer = weakref.finalize(self, self._cleanup, self._conn)
+        atexit.register(self.close)
+
+    @staticmethod
+    def _cleanup(conn_obj):
+        try:
+            if conn_obj:
+                conn_obj.close()
+        except Exception:
+            pass
+
+    def close(self):
+        if hasattr(self, "_finalizer") and self._finalizer.alive:
+            self._finalizer()
+
+    def __del__(self):
+        self.close()
 
     def _fetch_pending_tasks(self):
         with self._lock:
