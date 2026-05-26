@@ -122,42 +122,7 @@ class CortexDaemon:
         if not cmd and isinstance(payload, dict):
             cmd = payload.get("command")
 
-        # ── TERMINAL STATE 4: REMOTE MUTATION HANDLER ──
-        if agent == "ouroboros_omega" and isinstance(payload, dict) and payload.get("action") == "REMOTE_MUTATION":
-            try:
-                import hashlib
-                import ast
-                target_file = payload.get("target_file")
-                mutated_source = payload.get("mutated_source")
-                signature = payload.get("signature")
-                entropy_delta = payload.get("entropy_delta", 0.0)
-                
-                # ZK-Stark/Signature verification
-                computed_hash = hashlib.sha256(mutated_source.encode()).hexdigest()
-                if computed_hash != signature:
-                    logging.error("🚨 [TERMINAL STATE 4] Remote mutation rejected: Signature mismatch.")
-                    return
-                
-                # Verify syntax before applying remotely
-                ast.parse(mutated_source)
-                
-                # C5-REAL Remote AST Mutation: Apply directly to disk
-                with open(target_file, "w", encoding="utf-8") as f:
-                    f.write(mutated_source)
-                
-                logging.info("🌌 [TERMINAL STATE 4] Remote AST Mutation Applied on %s (Entropy Delta: %.2f)", target_file, entropy_delta)
-                
-                # Emit confirmation
-                if self.bus:
-                    self.bus.emit(
-                        "remote_mutation_success",
-                        {"target": target_file, "entropy_delta": entropy_delta},
-                        source="daemon"
-                    )
-                return
-            except Exception as e:
-                logging.error("🚨 [TERMINAL STATE 4] Remote mutation failed: %s", e)
-                return
+        # ── TERMINAL STATE 4: ALL AST MUTATIONS ARE NOW INTERCEPTED AT L0 (OutboxDaemon) ──
 
         if not cmd:
             logging.warning("Skipping Task (No Command) for %s", agent)

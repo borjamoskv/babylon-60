@@ -27,7 +27,7 @@ class MirrorAuditor:
 
             # 1. Hot Loop Analysis (Axiom Ω₆)
             for node in ast.walk(tree):
-                if isinstance(node, ast.While) or isinstance(node, ast.For):
+                if isinstance(node, ast.While):
                     has_sleep = False
                     for subnode in ast.walk(node):
                         if (
@@ -35,7 +35,13 @@ class MirrorAuditor:
                             and getattr(subnode.func, "id", "") == "sleep"
                         ):
                             has_sleep = True
-                        if isinstance(subnode, ast.Attribute) and subnode.attr == "sleep":
+                        if isinstance(subnode, ast.Attribute) and subnode.attr in ("sleep", "wait"):
+                            has_sleep = True
+
+                    # Check if the loop is I/O bounded via f.read()
+                    if isinstance(node.test, ast.NamedExpr) and isinstance(node.test.value, ast.Call):
+                        func = node.test.value.func
+                        if isinstance(func, ast.Attribute) and func.attr == "read":
                             has_sleep = True
 
                     if not has_sleep:

@@ -77,6 +77,7 @@ def test_vsa_memory_rust_integration():
     conn.execute(
         "CREATE TABLE IF NOT EXISTS cortex_knowledge (ki_id TEXT PRIMARY KEY, summary TEXT, content TEXT)"
     )
+    conn.execute("DELETE FROM cortex_knowledge WHERE summary = 'agent_id_x'")
     conn.commit()
     conn.close()
 

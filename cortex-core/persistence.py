@@ -412,6 +412,10 @@ class ZeroCopyRingBuffer:
         self.tensor_size = self.capacity * self.task_size
         self.bin_path = os.path.join(os.path.dirname(DB_PATH), "swarm_ring_vsa.bin")
 
+        if not os.path.exists(self.bin_path) or os.path.getsize(self.bin_path) < self.tensor_size:
+            with open(self.bin_path, "wb") as f:
+                f.write(b"\x00" * self.tensor_size)
+
         if HAS_CORTEX_RS:
             try:
                 self._rust_buf = cortex_rs.ZeroCopyRingBuffer(self.bin_path, self.capacity)
@@ -422,10 +426,6 @@ class ZeroCopyRingBuffer:
             self._rust_buf = None
 
         if self._rust_buf is None:
-            if not os.path.exists(self.bin_path) or os.path.getsize(self.bin_path) < self.tensor_size:
-                with open(self.bin_path, "wb") as f:
-                    f.write(b"\x00" * self.tensor_size)
-
             self._f = open(self.bin_path, "r+b")
             self._mmap = mmap.mmap(self._f.fileno(), self.tensor_size)
             self._buffer = memoryview(self._mmap)
@@ -582,17 +582,22 @@ class OutboxDaemon(SovereignResource):
                     target_file = payload_dict.get("target_file")
                     func_name = payload_dict.get("function_name")
                     new_source = payload_dict.get("new_source")
+                    signature = payload_dict.get("signature")
                     
-                    if target_file and func_name and new_source:
+                    if target_file and new_source:
                         try:
                             engine = ASTAutopoiesisEngine(target_file)
-                            result = engine.mutate_function(func_name, new_source)
+                            if func_name:
+                                result = engine.mutate_function(func_name, new_source)
+                            else:
+                                result = engine.mutate_file(new_source, signature)
+                                
                             if result.get("status") == "success":
                                 logger.info(f"C5-REAL Autopoiesis Executed (L0 Swap). ZK-Proof: {result.get('zk_proof')}")
                                 self._update_task_status(row_id, "completed")
                                 continue
                             else:
-                                logger.error(f"AST Mutation failed: {result.get('details')}")
+                                logger.error(f"AST Mutation failed: {result.get('details', result.get('error'))}")
                                 self._update_task_status(row_id, "failed")
                                 continue
                         except Exception as e:

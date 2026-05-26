@@ -370,9 +370,9 @@ class OuroborosOmega:
                     from persistence import enqueue_swarm_task
 
                     payload = {
-                        "action": "REMOTE_MUTATION",
+                        "type": "AST_MUTATION",
                         "target_file": str(self.target_path.resolve()),
-                        "mutated_source": mutated_source,
+                        "new_source": mutated_source,
                         "signature": hashlib.sha256(mutated_source.encode()).hexdigest(),
                         "entropy_delta": entropy_delta,
                     }
