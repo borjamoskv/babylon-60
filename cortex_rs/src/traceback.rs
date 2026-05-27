@@ -16,7 +16,6 @@
 use serde::{Deserialize, Serialize};
 use rayon::prelude::*;
 use std::collections::{HashMap, HashSet, VecDeque};
-use std::time::Instant;
 
 // ─────────────────────────────────────────────────────────────
 // §1 — Core Types
@@ -414,6 +413,7 @@ impl DeductionDAG {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::time::Instant;
 
     fn build_test_dag() -> DeductionDAG {
         let mut dag = DeductionDAG::new();
@@ -518,14 +518,14 @@ mod tests {
         let elapsed = start.elapsed();
         let rate = iterations as f64 / elapsed.as_secs_f64();
 
-        eprintln!("═══════════════════════════════════════════");
-        eprintln!("  TRACEBACK THROUGHPUT BENCHMARK");
-        eprintln!("═══════════════════════════════════════════");
-        eprintln!("  Chain depth: 1000");
-        eprintln!("  Iterations:  {}", iterations);
-        eprintln!("  Elapsed:     {:.4?}", elapsed);
-        eprintln!("  Rate:        {:.0} tracebacks/sec", rate);
-        eprintln!("═══════════════════════════════════════════");
+        e// tracing::info!("═══════════════════════════════════════════");
+        e// tracing::info!("  TRACEBACK THROUGHPUT BENCHMARK");
+        e// tracing::info!("═══════════════════════════════════════════");
+        e// tracing::info!("  Chain depth: 1000");
+        e// tracing::info!("  Iterations:  {}", iterations);
+        e// tracing::info!("  Elapsed:     {:.4?}", elapsed);
+        e// tracing::info!("  Rate:        {:.0} tracebacks/sec", rate);
+        e// tracing::info!("═══════════════════════════════════════════");
 
         assert!(rate > 1000.0, "Traceback rate should exceed 1K ops/sec");
     }

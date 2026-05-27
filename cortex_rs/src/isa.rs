@@ -362,6 +362,6 @@ mod tests {
         let result = dispatcher.execute(&tree);
         assert_eq!(result.status, ExecStatus::Ok);
         let rate = 10_000.0 / (result.elapsed_us as f64 / 1_000_000.0);
-        eprintln!("ISA Dispatch Rate: {:.0} ops/sec ({} us)", rate, result.elapsed_us);
+        e// tracing::info!("ISA Dispatch Rate: {:.0} ops/sec ({} us)", rate, result.elapsed_us);
     }
 }

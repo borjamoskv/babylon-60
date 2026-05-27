@@ -15,6 +15,8 @@ use serde_json::{Value, json};
 pub mod isa;
 pub mod autocurative;
 pub mod traceback;
+pub mod curriculum;
+pub mod conjecturer;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct McpRequest {
@@ -88,7 +90,7 @@ impl CortexRsSubstrate {
 
     /// Read the VSA tensor values as a Python List
     pub fn read_tensor<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyList>> {
-        let mmap = self.mmap.lock().unwrap();
+        let mmap = self.mmap.lock().unwrap_or_else(|e| e.into_inner());
         let slice: &[f64] = unsafe {
             std::slice::from_raw_parts(mmap.as_ptr() as *const f64, self.dimension)
         };
@@ -97,7 +99,7 @@ impl CortexRsSubstrate {
 
     /// Apply standard VSA decay vector multiplication (Zero-copy Rust implementation)
     pub fn apply_decay(&self, rate: f64) -> PyResult<()> {
-        let mut mmap = self.mmap.lock().unwrap();
+        let mut mmap = self.mmap.lock().unwrap_or_else(|e| e.into_inner());
         let slice: &mut [f64] = unsafe {
             std::slice::from_raw_parts_mut(mmap.as_mut_ptr() as *mut f64, self.dimension)
         };
@@ -128,7 +130,7 @@ impl CortexRsSubstrate {
 
         // Zero-copy direct mmap write
         {
-            let mut mmap = self.mmap.lock().unwrap();
+            let mut mmap = self.mmap.lock().unwrap_or_else(|e| e.into_inner());
             let slice: &mut [f64] = unsafe {
                 std::slice::from_raw_parts_mut(mmap.as_mut_ptr() as *mut f64, self.dimension)
             };
@@ -140,7 +142,7 @@ impl CortexRsSubstrate {
 
     /// Expose the underlying memory address for zero-copy ctypes/memoryview integrations in Python
     pub fn get_address(&self) -> usize {
-        let mmap = self.mmap.lock().unwrap();
+        let mmap = self.mmap.lock().unwrap_or_else(|e| e.into_inner());
         mmap.as_ptr() as usize
     }
 }
@@ -192,7 +194,7 @@ impl ZeroCopyRingBuffer {
 
     /// Enqueue a task to the ring buffer by writing directly to mapped memory in O(1)
     pub fn enqueue(&self, agent_id: &[u8], payload: &[u8]) -> PyResult<bool> {
-        let mut mmap = self.mmap.lock().unwrap();
+        let mut mmap = self.mmap.lock().unwrap_or_else(|e| e.into_inner());
         let buffer: &mut [u8] = unsafe {
             std::slice::from_raw_parts_mut(mmap.as_mut_ptr(), self.capacity * self.task_size)
         };
@@ -236,7 +238,7 @@ impl ZeroCopyRingBuffer {
 
     /// Fetch pending tasks and transition status to 'processing' (2) in memory
     pub fn fetch_pending<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyList>> {
-        let mut mmap = self.mmap.lock().unwrap();
+        let mut mmap = self.mmap.lock().unwrap_or_else(|e| e.into_inner());
         let buffer: &mut [u8] = unsafe {
             std::slice::from_raw_parts_mut(mmap.as_mut_ptr(), self.capacity * self.task_size)
         };
@@ -271,13 +273,13 @@ impl ZeroCopyRingBuffer {
 
     /// Expose the underlying memory address for zero-copy ctypes/memoryview integrations in Python
     pub fn get_address(&self) -> usize {
-        let mmap = self.mmap.lock().unwrap();
+        let mmap = self.mmap.lock().unwrap_or_else(|e| e.into_inner());
         mmap.as_ptr() as usize
     }
 
     /// Reset all status and data bytes in the ring buffer to 0
     pub fn reset(&self) -> PyResult<()> {
-        let mut mmap = self.mmap.lock().unwrap();
+        let mut mmap = self.mmap.lock().unwrap_or_else(|e| e.into_inner());
         let buffer: &mut [u8] = unsafe {
             std::slice::from_raw_parts_mut(mmap.as_mut_ptr(), self.capacity * self.task_size)
         };
@@ -302,7 +304,7 @@ impl ZeroCopyRingBuffer {
         
         // Lock and extract pending tasks quickly
         {
-            let mut mmap = self.mmap.lock().unwrap();
+            let mut mmap = self.mmap.lock().unwrap_or_else(|e| e.into_inner());
             let buffer: &mut [u8] = unsafe {
                 std::slice::from_raw_parts_mut(mmap.as_mut_ptr(), self.capacity * self.task_size)
             };
@@ -337,7 +339,7 @@ impl ZeroCopyRingBuffer {
             }
         });
         {
-            let mut mmap = self.mmap.lock().unwrap();
+            let mut mmap = self.mmap.lock().unwrap_or_else(|e| e.into_inner());
             let buffer: &mut [u8] = unsafe {
                 std::slice::from_raw_parts_mut(mmap.as_mut_ptr(), self.capacity * self.task_size)
             };
@@ -399,7 +401,7 @@ impl UltramapSubstrate {
             return Ok(false);
         }
 
-        let mut mmap = self.mmap.lock().unwrap();
+        let mut mmap = self.mmap.lock().unwrap_or_else(|e| e.into_inner());
         let offset = agent_idx * self.node_size;
         let buffer: &mut [u8] = unsafe {
             std::slice::from_raw_parts_mut(mmap.as_mut_ptr(), self.capacity * self.node_size)
@@ -427,7 +429,7 @@ impl UltramapSubstrate {
             return Err(PyRuntimeError::new_err("Agent Index Out of Bounds"));
         }
 
-        let mmap = self.mmap.lock().unwrap();
+        let mmap = self.mmap.lock().unwrap_or_else(|e| e.into_inner());
         let offset = agent_idx * self.node_size;
         let buffer: &[u8] = unsafe {
             std::slice::from_raw_parts(mmap.as_ptr(), self.capacity * self.node_size)
@@ -475,7 +477,7 @@ impl UltramapSubstrate {
             return Ok(dict);
         }
 
-        let mmap = self.mmap.lock().unwrap();
+        let mmap = self.mmap.lock().unwrap_or_else(|e| e.into_inner());
         let offset = agent_idx * self.node_size;
         let buffer: &[u8] = unsafe {
             std::slice::from_raw_parts(mmap.as_ptr(), self.capacity * self.node_size)
@@ -520,7 +522,7 @@ impl UltramapSubstrate {
     }
 
     pub fn volume_transmit_hormones(&self, origin_x: f64, origin_y: f64, origin_z: f64, radius: f64, dopamine: f64, cortisol: f64, serotonin: f64, adrenaline: f64) -> PyResult<usize> {
-        let mut mmap = self.mmap.lock().unwrap();
+        let mut mmap = self.mmap.lock().unwrap_or_else(|e| e.into_inner());
         let buffer: &mut [u8] = unsafe {
             std::slice::from_raw_parts_mut(mmap.as_mut_ptr(), self.capacity * self.node_size)
         };
@@ -570,7 +572,7 @@ impl UltramapSubstrate {
     }
 
     pub fn get_address(&self) -> usize {
-        let mmap = self.mmap.lock().unwrap();
+        let mmap = self.mmap.lock().unwrap_or_else(|e| e.into_inner());
         mmap.as_ptr() as usize
     }
 }
@@ -612,14 +614,14 @@ impl McpNativeClient {
         }
 
         {
-            let mut stdin = self.stdin.lock().unwrap();
+            let mut stdin = self.stdin.lock().unwrap_or_else(|e| e.into_inner());
             stdin.write_all(req.as_bytes())
                 .map_err(|e| PyRuntimeError::new_err(format!("MCP Write failed: {}", e)))?;
             stdin.flush()
                 .map_err(|e| PyRuntimeError::new_err(format!("MCP Flush failed: {}", e)))?;
         }
 
-        let mut stdout = self.stdout.lock().unwrap();
+        let mut stdout = self.stdout.lock().unwrap_or_else(|e| e.into_inner());
         let mut response = String::new();
         stdout.read_line(&mut response)
             .map_err(|e| PyRuntimeError::new_err(format!("MCP Read failed: {}", e)))?;
@@ -771,9 +773,9 @@ impl McpSovereignHost {
                             if let Ok(list) = query_res.cast_bound::<pyo3::types::PyList>(py) {
                                 for item in list.iter() {
                                     if let Ok(dict) = item.cast::<pyo3::types::PyDict>() {
-                                        let id_val = dict.get_item("id").unwrap().unwrap().to_string();
-                                        let sim_val = dict.get_item("similarity").unwrap().unwrap().to_string();
-                                        let content_val = dict.get_item("content").unwrap().unwrap().to_string();
+                                        let id_val = dict.get_item("id").ok().flatten().map(|v| v.to_string()).unwrap_or_default();
+                                        let sim_val = dict.get_item("similarity").ok().flatten().map(|v| v.to_string()).unwrap_or_default();
+                                        let content_val = dict.get_item("content").ok().flatten().map(|v| v.to_string()).unwrap_or_default();
                                         out.push_str(&format!("- [{}] (Sim: {}): {}\n", id_val, sim_val, content_val));
                                     }
                                 }
@@ -794,13 +796,15 @@ impl McpSovereignHost {
                         let payload_str = args.and_then(|a| a.get("payload")).and_then(|c| serde_json::to_string(c).ok()).unwrap_or("{}".to_string());
                         
                         let kwargs = pyo3::types::PyDict::new(py);
-                        kwargs.set_item("project", project).unwrap();
-                        kwargs.set_item("action", action).unwrap();
+                        let _ = kwargs.set_item("project", project);
+                        let _ = kwargs.set_item("action", action);
                         
-                        // We must parse payload_str to a PyDict
-                        let json_module = py.import("json").unwrap();
-                        let parsed_payload = json_module.call_method1("loads", (payload_str,)).unwrap();
-                        kwargs.set_item("payload", parsed_payload).unwrap();
+                        // Parse payload_str to a PyDict — graceful fallback on failure
+                        if let Ok(json_module) = py.import("json") {
+                            if let Ok(parsed_payload) = json_module.call_method1("loads", (payload_str,)) {
+                                let _ = kwargs.set_item("payload", parsed_payload);
+                            }
+                        }
                         
                         let res = self.jis_auditor.call_method(py, "audit_transaction", (), Some(&kwargs));
                         if let Ok(violations_list) = res {
@@ -810,7 +814,7 @@ impl McpSovereignHost {
                                 } else {
                                     let mut out = String::from("[CORTEX MCP] JIS VIOLATIONS DETECTED:\n");
                                     for item in list.iter() {
-                                        let message = item.getattr("message").unwrap().to_string();
+                                        let message = item.getattr("message").map(|m| m.to_string()).unwrap_or_else(|_| "unknown violation".to_string());
                                         out.push_str(&format!("- {}\n", message));
                                     }
                                     result_text = out;
@@ -898,39 +902,39 @@ mod tests {
             let _ = std::fs::remove_file(bin_path);
             
             let capacity = 200000;
-            println!("=============================================================");
-            println!("  RUST NATIVE MULTI-THREADED BENCHMARK (C5-REAL)");
-            println!("=============================================================");
-            println!("[+] Initializing ZeroCopyRingBuffer with capacity={}", capacity);
+            // tracing::info!("=============================================================");
+            // tracing::info!("  RUST NATIVE MULTI-THREADED BENCHMARK (C5-REAL)");
+            // tracing::info!("=============================================================");
+            // tracing::info!("[+] Initializing ZeroCopyRingBuffer with capacity={}", capacity);
             let buffer = ZeroCopyRingBuffer::new(bin_path, Some(capacity)).expect("Failed to create buffer");
             buffer.reset().expect("Failed to reset");
 
             let agent_id = b"agent_vector_alpha_01";
             let payload = b"exergy_max:run_simulation:agent_dispatch_payload_data_hash_check";
 
-            println!("[+] Enqueuing {} tasks in native Rust...", capacity);
+            // tracing::info!("[+] Enqueuing {} tasks in native Rust...", capacity);
             let t0 = Instant::now();
             for _ in 0..capacity {
                 buffer.enqueue(agent_id, payload).expect("Failed to enqueue");
             }
             let t_enq = t0.elapsed();
             let enq_rate = capacity as f64 / t_enq.as_secs_f64();
-            println!("    - Native Enqueue Time: {:.4?} s", t_enq);
-            println!("    - Native Enqueue Rate: {:.2} tasks/sec", enq_rate);
+            // tracing::info!("    - Native Enqueue Time: {:.4?} s", t_enq);
+            // tracing::info!("    - Native Enqueue Rate: {:.2} tasks/sec", enq_rate);
 
-            println!("[+] Executing Native Rayon processing...");
+            // tracing::info!("[+] Executing Native Rayon processing...");
             let t1 = Instant::now();
             let (processed_count, rust_elapsed) = buffer.process_all_native(py, None).expect("Failed to process");
             let t_proc = t1.elapsed();
             let proc_rate_wall = processed_count as f64 / t_proc.as_secs_f64();
             let proc_rate_internal = processed_count as f64 / rust_elapsed;
 
-            println!("    - Processed Count    : {}", processed_count);
-            println!("    - Rust Internal Time : {:.4} s", rust_elapsed);
-            println!("    - Rust Internal Rate : {:.2} agents/sec", proc_rate_internal);
-            println!("    - Native Wall Time   : {:.4?} s", t_proc);
-            println!("    - Native Wall Rate   : {:.2} agents/sec", proc_rate_wall);
-            println!("=============================================================");
+            // tracing::info!("    - Processed Count    : {}", processed_count);
+            // tracing::info!("    - Rust Internal Time : {:.4} s", rust_elapsed);
+            // tracing::info!("    - Rust Internal Rate : {:.2} agents/sec", proc_rate_internal);
+            // tracing::info!("    - Native Wall Time   : {:.4?} s", t_proc);
+            // tracing::info!("    - Native Wall Rate   : {:.2} agents/sec", proc_rate_wall);
+            // tracing::info!("=============================================================");
 
             assert_eq!(processed_count, capacity);
 

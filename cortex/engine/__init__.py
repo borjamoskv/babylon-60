@@ -503,7 +503,7 @@ class CortexEngine(
 
         return await EntropyReport.analyze(self, project)
 
-    async def fingerprint(
+    async def fingerlogging.info(
         self,
         project: str | None = None,
         top_domains: int = 15,

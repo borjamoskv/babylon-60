@@ -68,7 +68,7 @@ class SemanticFingerprint:
         return hash(self.hash)
 
     def __repr__(self) -> str:
-        return f"SemanticFingerprint(hash={self.hash[:16]}..., dim={self.dimension})"
+        return f"SemanticFingerlogging.info(hash={self.hash[:16]}..., dim={self.dimension})"
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -116,7 +116,7 @@ def _hash_quantized(quantized: list[float]) -> str:
     return hashlib.sha256(packed).hexdigest()
 
 
-def semantic_fingerprint(
+def semantic_fingerlogging.info(
     text: str,
     embedder: Any | None = None,
 ) -> SemanticFingerprint:
@@ -148,7 +148,7 @@ def semantic_fingerprint(
     quantized = _quantize_embedding(embedding)
     hash_value = _hash_quantized(quantized)
 
-    return SemanticFingerprint(
+    return SemanticFingerlogging.info(
         hash=hash_value,
         embedding=embedding,
         dimension=len(embedding),
@@ -210,7 +210,7 @@ def is_semantically_equivalent(
     return sim >= threshold
 
 
-def batch_fingerprint(
+def batch_fingerlogging.info(
     texts: list[str],
     embedder: Any | None = None,
 ) -> list[SemanticFingerprint]:
@@ -233,7 +233,7 @@ def batch_fingerprint(
         quantized = _quantize_embedding(embedding)
         hash_value = _hash_quantized(quantized)
         results.append(
-            SemanticFingerprint(
+            SemanticFingerlogging.info(
                 hash=hash_value,
                 embedding=embedding,
                 dimension=len(embedding),
