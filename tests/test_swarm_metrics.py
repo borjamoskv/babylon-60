@@ -101,3 +101,34 @@ def test_swarm_metrics_caching():
     m6 = get_swarm_metrics()
     assert m6["latency_ms"] == 500.0
     assert m6 is not m1
+
+
+def test_swarm_metrics_active_children():
+    """Verify that active_children counts pending tasks from both SQLite and ZeroCopyRingBuffer."""
+    # Initially 0
+    m = get_swarm_metrics(bypass_cache=True)
+    assert m["active_children"] == 0
+
+    # 1. Insert into SQLite cortex_swarm_queue
+    conn = sqlite3.connect(persistence.DB_PATH)
+    c = conn.cursor()
+    c.execute(
+        "INSERT INTO cortex_swarm_queue (timestamp, agent, payload, status) VALUES (?, ?, ?, ?)",
+        (time.monotonic(), "TestAgent", "{}", "pending"),
+    )
+    conn.commit()
+    conn.close()
+
+    m = get_swarm_metrics(bypass_cache=True)
+    assert m["active_children"] == 1
+
+    # 2. Enqueue into ZeroCopyRingBuffer
+    ring = persistence._get_ring_buffer()
+    # Write a pending task (status = 1)
+    success = ring.enqueue(b"TestAgentRing", b"{}")
+    assert success is True
+
+    # Total should be 2 (1 from SQLite + 1 from Ring Buffer)
+    m = get_swarm_metrics(bypass_cache=True)
+    assert m["active_children"] == 2
+

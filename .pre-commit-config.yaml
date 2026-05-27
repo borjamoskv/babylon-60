@@ -23,7 +23,7 @@ repos:
       - id: cortex-fast-tests
         name: CORTEX Fast Tests
         entry: .venv/bin/pytest
-        args: [tests/, -m, "not slow", --tb=line, -q, --no-header]
+        args: [tests/, -m, "not slow", -n, auto, --tb=line, -q, --no-header]
         language: system
         pass_filenames: false
         always_run: true
