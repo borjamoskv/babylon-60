@@ -595,8 +595,8 @@ class CortexMemoryManager:
         if tasks_to_wait:
             try:
                 await asyncio.gather(*tasks_to_wait, return_exceptions=True)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Failed to gather tasks: %s", e)
 
         self._bg_workers.clear()
 

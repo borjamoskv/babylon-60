@@ -88,4 +88,4 @@ def pytest_unconfigure(config):
     import os
 
     exitstatus = getattr(config, "exitstatus", 0)
-    os._exit(exitstatus)
+    # os._exit(exitstatus)
