@@ -63,10 +63,7 @@ class VSAMemory(SovereignResource):
 
         # Contextualize file and mmap lifecycle. Hold references tightly.
         if HAS_CORTEX_RS:
-            try:
-                self._substrate = cortex_rs.CortexRsSubstrate(VSA_BIN_PATH, VSA_DIMENSION)
-            except AttributeError:
-                self._substrate = None
+            self._substrate = cortex_rs.CortexRsSubstrate(VSA_BIN_PATH, VSA_DIMENSION)
         else:
             self._substrate = None
 

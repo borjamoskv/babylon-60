@@ -175,7 +175,7 @@ def write_public_ledger_export(
         purpose=purpose,
         environment=environment,
         root=root,
-        has_checkpoints=bool(checkpoint_objects),
+        checkpoint_count=len(checkpoint_objects),
     )
     manifest = dict(manifest_without_signature)
     manifest["signature"] = {
@@ -261,8 +261,9 @@ def public_key_record(
     *,
     key_id: str,
     actor_id: str,
-    public_key: Ed25519PublicKey,
+    public_key: Any,
     permissions: Sequence[str],
+    algorithm: str = "ed25519",
     actor_type: str = "agent",
     environment: str = "test",
     valid_from: str = "2026-01-01T00:00:00Z",
@@ -273,7 +274,7 @@ def public_key_record(
     return {
         "actor_id": actor_id,
         "actor_type": actor_type,
-        "algorithm": "ed25519",
+        "algorithm": algorithm,
         "environment": environment,
         "hardware_backed": hardware_backed,
         "key_id": key_id,
@@ -297,9 +298,24 @@ def _manifest_document(
     purpose: str,
     environment: str,
     root: Path,
+    checkpoint_count: int = 0,
 ) -> dict[str, Any]:
     first = events[0]
     last = events[-1]
+    
+    hashes = {
+        "events_file_sha256": _sha256_file(root / "events.jsonl"),
+        "first_event_hash": event_hashes[0],
+        "key_events_file_sha256": _sha256_file(root / "key-events.jsonl"),
+        "last_event_hash": event_hashes[-1],
+        "merkle_root": _merkle_root_v1(event_hashes),
+        "public_keys_file_sha256": _sha256_file(root / "public-keys.json"),
+        "schema_file_sha256": _sha256_file(root / "schema.json"),
+        "verification_profile_sha256": _sha256_file(root / "verification-profile.json"),
+    }
+    if checkpoint_count > 0:
+        hashes["checkpoints_file_sha256"] = _sha256_file(root / "checkpoints.jsonl")
+
     return {
         "algorithms": {
             "event_hash": "sha256",
@@ -311,21 +327,13 @@ def _manifest_document(
             "erasure_tombstone_count": 0,
             "event_count": len(events),
             "redacted_event_count": 0,
+            "checkpoint_count": checkpoint_count,
         },
         "created_at": created_at,
         "created_by": created_by,
         "environment": environment,
         "export_id": export_id,
-        "hashes": {
-            "events_file_sha256": _sha256_file(root / "events.jsonl"),
-            "first_event_hash": event_hashes[0],
-            "key_events_file_sha256": _sha256_file(root / "key-events.jsonl"),
-            "last_event_hash": event_hashes[-1],
-            "merkle_root": _merkle_root_v1(event_hashes),
-            "public_keys_file_sha256": _sha256_file(root / "public-keys.json"),
-            "schema_file_sha256": _sha256_file(root / "schema.json"),
-            "verification_profile_sha256": _sha256_file(root / "verification-profile.json"),
-        },
+        "hashes": hashes,
         "limitations": [],
         "purpose": purpose,
         "range": {
@@ -439,12 +447,19 @@ def _validate_public_key_records(keys: Sequence[Mapping[str, Any]]) -> None:
         if key_id in seen:
             raise ValueError(f"duplicate public key id: {key_id}")
         seen.add(key_id)
-        if key.get("algorithm") != "ed25519":
+        if key.get("algorithm") not in ("ed25519", "mldsa44", "mldsa65", "mldsa87"):
             raise ValueError(f"public key algorithm unsupported: {key_id}")
         if not isinstance(key.get("public_key"), str):
             raise ValueError(f"public key missing material: {key_id}")
         if not isinstance(key.get("permissions"), list):
             raise ValueError(f"public key permissions missing: {key_id}")
+
+
+def _validate_public_checkpoints(checkpoints: Sequence[Mapping[str, Any]]) -> None:
+    for cp in checkpoints:
+        for field in ("root_hash", "start_event_id", "end_event_id", "event_count", "mldsa_signature", "mldsa_public_key"):
+            if field not in cp:
+                raise ValueError(f"checkpoint missing required field: {field}")
 
 
 def _prepare_export_dir(root: Path, *, allow_overwrite: bool) -> None:
@@ -489,7 +504,9 @@ def _b64url_encode(value: bytes) -> str:
     return base64.urlsafe_b64encode(value).decode("ascii").rstrip("=")
 
 
-def _public_key_b64url(public_key: Ed25519PublicKey) -> str:
+def _public_key_b64url(public_key: Any) -> str:
+    if hasattr(public_key, "public_bytes_raw"):
+        return _b64url_encode(public_key.public_bytes_raw())
     return _b64url_encode(public_key.public_bytes(Encoding.Raw, PublicFormat.Raw))
 
 

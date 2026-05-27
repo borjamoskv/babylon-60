@@ -223,6 +223,15 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         if commit:
             await conn.commit()
 
+        # Ingest ambient signals into the Right-Brain heuristic engine (O(1))
+        if hasattr(self, "right_brain") and self.right_brain is not None:
+            self.right_brain.ingest_ambient_signal({
+                "source": source or "unknown",
+                "fact_type": fact_type,
+                "project": project,
+                "tags": tags or [],
+            })
+
         # ═══ AX-II: Post-store hooks via GuardPipeline ═══
         if pipeline is not None:
             db_path = str(getattr(self, "_db_path", "") or "")

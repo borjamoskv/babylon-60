@@ -82,6 +82,7 @@ class VerificationInput:
     key_events_path: Path
     schema_path: Path
     verification_profile_path: Path
+    checkpoints_path: Path | None = None
 
     @staticmethod
     def from_export_dir(export_dir: str | Path) -> VerificationInput:
@@ -94,6 +95,7 @@ class VerificationInput:
             key_events_path=root / "key-events.jsonl",
             schema_path=root / "schema.json",
             verification_profile_path=root / "verification-profile.json",
+            checkpoints_path=root / "checkpoints.jsonl",
         )
 
 
@@ -180,6 +182,7 @@ class _PublicLedgerVerifier:
         self.errors: list[str] = []
         self.warnings: list[str] = []
         self.events: list[dict[str, Any]] = []
+        self.checkpoints: list[dict[str, Any]] = []
         self.key_registry: dict[str, Any] | None = None
         self.key_index: dict[str, dict[str, Any]] = {}
         self.manifest: dict[str, Any] | None = None
@@ -188,6 +191,7 @@ class _PublicLedgerVerifier:
 
     def verify(self) -> dict[str, Any]:
         self.events = self._load_events()
+        self.checkpoints = self._load_checkpoints()
         self.key_registry = self._load_optional_object(
             self.paths.public_keys_path,
             missing_error="public_keys_missing",
@@ -201,6 +205,7 @@ class _PublicLedgerVerifier:
 
         self._verify_events()
         self._verify_manifest()
+        self._verify_checkpoints()
         self._finalize_guarantees()
         return self._report()
 
@@ -236,6 +241,35 @@ class _PublicLedgerVerifier:
         if not events and not self.errors:
             self.errors.append("events_jsonl_empty")
         return events
+
+    def _load_checkpoints(self) -> list[dict[str, Any]]:
+        if not self.paths.checkpoints_path or not self.paths.checkpoints_path.exists():
+            return []
+
+        checkpoints: list[dict[str, Any]] = []
+        try:
+            lines = self.paths.checkpoints_path.read_text(encoding="utf-8").splitlines()
+        except OSError as exc:
+            self.errors.append(f"checkpoints_jsonl_unreadable:{exc.__class__.__name__}")
+            return []
+
+        for line_number, line in enumerate(lines, start=1):
+            if not line:
+                continue
+            try:
+                value = _loads_json_strict(line)
+            except json.JSONDecodeError as exc:
+                self.errors.append(f"checkpoints_jsonl_invalid_json:{line_number}:{exc.msg}")
+                continue
+            except ValueError as exc:
+                self.errors.append(f"checkpoints_jsonl_invalid_json:{line_number}:{exc}")
+                continue
+            if not isinstance(value, dict):
+                self.errors.append(f"checkpoints_jsonl_non_object:{line_number}")
+                continue
+            checkpoints.append(value)
+
+        return checkpoints
 
     def _load_optional_object(
         self,

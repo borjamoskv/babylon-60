@@ -85,6 +85,17 @@ class EndocrineRegistry:
                 reason=f"Calcification Stress (Index: {index:.2f})",
             )
 
+    def sync_with_free_energy(self, total_f: float) -> None:
+        """Ω₅-F: Sync systemic Cortisol with Variational Free Energy."""
+        f_stress = min(1.0, total_f / 10.0)
+        current = self._hormones.get(HormoneType.CORTISOL, 0.0)  # type: ignore[reportAttributeAccessIssue]
+        if f_stress > current:
+            self.pulse(
+                HormoneType.CORTISOL,
+                (f_stress - current) * 0.5,
+                reason=f"High Free Energy Stress (F: {total_f:.2f})",
+            )
+
     def prune(self) -> int:
         """
         Ω₆-P: Dynamic Pruning.

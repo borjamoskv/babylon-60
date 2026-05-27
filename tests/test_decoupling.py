@@ -7,7 +7,7 @@ is delayed or failing.
 import pytest
 
 from cortex.core.config import CortexConfig
-from cortex.engine import AsyncCortexEngine
+from cortex.engine import CortexEngine
 from cortex.enrichment.worker import EnrichmentWorker
 from cortex.verification.oracle import VerificationOracle
 
@@ -17,7 +17,7 @@ async def engine(tmp_path):
     db_path = str(tmp_path / "cortex_test.db")
 
     # Use the unified engine directly. It handles its own connection/pool logic.
-    engine = AsyncCortexEngine(db_path=db_path)
+    engine = CortexEngine(db_path=db_path)
     await engine.init_db()
 
     yield engine

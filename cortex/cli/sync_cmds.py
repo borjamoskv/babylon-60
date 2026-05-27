@@ -10,6 +10,7 @@ import click
 from rich.panel import Panel
 
 from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.slow_tip import tip_on_slow
 from cortex.extensions.sync import export_obsidian, export_snapshot, export_to_json, sync_memory
 
 __all__ = [
@@ -27,6 +28,7 @@ def _run_async(coro):
 
 @cli.command()
 @click.option("--db", default=DEFAULT_DB, help="Database path")
+@tip_on_slow(threshold=1.5, label="Sincronizando memoria CORTEX…", use_spinner=True)
 def sync(db) -> None:
     """Sincronizar ~/.agent/memory/ → CORTEX (incremental)."""
     engine = get_engine(db)
@@ -132,6 +134,7 @@ def export(db, out, fmt, project, min_confidence, types) -> None:
 
 @cli.command()
 @click.option("--db", default=DEFAULT_DB, help="Database path")
+@tip_on_slow(threshold=1.5, label="Ejecutando Write-back…")
 def writeback(db) -> None:
     """Write-back: CORTEX DB → ~/.agent/memory/ (DB es Source of Truth)."""
     engine = get_engine(db)

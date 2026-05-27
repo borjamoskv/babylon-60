@@ -31,7 +31,7 @@ class ImmunologyDaemon:
     def _safe_close(self, conn):
         try:
             conn.close()
-        except:
+        except Exception:
             pass
 
     def close(self):

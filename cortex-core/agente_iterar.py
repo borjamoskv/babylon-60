@@ -64,7 +64,10 @@ class ComplexityAnalyzer:
 
     @staticmethod
     def analyze_file(filepath: Path) -> dict:
-        """TODO: Document analyze_file"""
+        """
+        Parses a python file into an AST and calculates cyclomatic complexity for all functions.
+        Also identifies potentially dead code candidates based on function names and usage counts.
+        """
         try:
             source = filepath.read_text(encoding="utf-8")
             tree = ast.parse(source, filename=str(filepath))
@@ -110,7 +113,10 @@ class ComplexityAnalyzer:
 
     @staticmethod
     def scan_directory(directory: Path, exclude: set = None) -> list:
-        """TODO: Document scan_directory"""
+        """
+        Recursively scans a directory for Python files, analyzing complexity and dead code.
+        Skips excluded directories like __pycache__, node_modules, and .venv.
+        """
         exclude = exclude or {"__pycache__", ".venv", "node_modules", ".git"}
         results = []
         for py_file in directory.rglob("*.py"):
@@ -149,7 +155,10 @@ class AgenteIterar:
         self._init_persistence()
 
     def run_cycle(self) -> IterationResult:
-        """TODO: Document run_cycle"""
+        """
+        Executes a single continuous improvement cycle: Lint -> Test -> Analyze -> Seal -> Telemetry.
+        Returns the IterationResult containing the delta of the Exergy and complexity metrics.
+        """
         cycle_id = next(_cycle_counter)
         t0 = time.monotonic()
         result = IterationResult(cycle_id=cycle_id, timestamp=time.monotonic())
@@ -218,7 +227,7 @@ class AgenteIterar:
         logger.info("AGENTE ITERAR shutdown complete.")
 
     def stop(self) -> None:
-        """TODO: Document stop"""
+        """Terminates the autonomous iteration daemon loop."""
         self._running = False
 
     def get_summary(self) -> dict:

@@ -59,6 +59,7 @@ class TipCategory(str, Enum):
     DESIGN = "design"
     MEMORY = "memory"
     META = "meta"
+    ALPHA = "alpha"
 
 
 @dataclass(frozen=True)

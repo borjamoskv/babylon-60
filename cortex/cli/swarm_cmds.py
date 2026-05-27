@@ -9,6 +9,7 @@ import click
 from rich.panel import Panel
 
 from cortex.cli.common import cli, console
+from cortex.cli.slow_tip import tip_on_slow
 
 
 @cli.group()
@@ -20,6 +21,7 @@ def swarm():
 @swarm.command("audit")
 @click.argument("path", type=click.Path(exists=True))
 @click.option("--level", "-l", type=int, default=1, help="Escalation level (1-3)")
+@tip_on_slow(threshold=2.0, label="El Enjambre está auditando…", use_spinner=True)
 def swarm_audit(path, level):
     """Deep semantic audit of a file or directory using the swarm."""
     from cortex.extensions.mejoralo.swarm import MejoraloSwarm
@@ -59,6 +61,7 @@ def swarm_audit(path, level):
 @click.option("--level", "-l", type=int, default=1, help="Escalation level (1-3)")
 @click.option("--issue", "-i", multiple=True, help="Specific issue to fix")
 @click.option("--dry-run", is_flag=True, help="Show refactored code without overwriting")
+@tip_on_slow(threshold=2.0, label="El Enjambre está refactorizando…", use_spinner=True)
 def swarm_refactor(file, level, issue, dry_run):
     """Refactor a specific file using the full specialist squad."""
     from cortex.extensions.mejoralo.swarm import MejoraloSwarm
@@ -266,6 +269,7 @@ def swarm_cleanup(path):
     default="AUTO",
 )
 @click.option("--target", "-t", default=".*", help="Target pattern or URL for the swarm")
+@tip_on_slow(threshold=3.0, label="Ejecutando protocolo STRIKE…", use_spinner=True)
 def swarm_strike(phalanx, target):
     """Deploy CORTEX-SWARM-100 Architecture (20 Sovereign Vessels)"""
     import asyncio

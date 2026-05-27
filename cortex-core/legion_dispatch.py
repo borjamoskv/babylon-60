@@ -20,7 +20,7 @@ async def main():
         # Pre-generate tasks
         tasks = []
         for i in range(num_agents):
-            agent_id = f"LEGION_AGENT_{i:05d}".encode('utf-8')
+            agent_id = f"LEGION_AGENT_{i:05d}".encode()
             payload = json.dumps({"command": "audit", "target": f"sector_{i}", "directive": "C5-REAL"}).encode('utf-8')
             tasks.append((agent_id, payload))
 

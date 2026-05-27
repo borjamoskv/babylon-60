@@ -34,7 +34,7 @@ async def test_engine_lifecycle(tmp_path):
         patch("cortex.engine.PersistenceSupervisor.start"),
     ):
         await engine.init_db()
-        assert engine._conn is not None
+        assert engine.get_connection() is not None
         # engine._schema_ready will be True because it's set after run_migrations_async
         assert engine._schema_ready is True
 
@@ -44,7 +44,7 @@ async def test_engine_lifecycle(tmp_path):
     assert engine.system_state == "ACTIVE"
 
     await engine.close()
-    assert engine._conn is None
+    assert not getattr(engine, "_conns_by_loop", {})
 
 
 @pytest.mark.asyncio
@@ -100,6 +100,6 @@ async def test_engine_aenter_aexit(tmp_path):
     db_path = tmp_path / "aenter.db"
     async with CortexEngine(db_path=db_path, auto_embed=False) as engine:
         await engine.init_db()
-        assert engine._conn is not None
+        assert engine.get_connection() is not None
 
-    assert engine._conn is None  # Should be closed
+    assert not getattr(engine, "_conns_by_loop", {})

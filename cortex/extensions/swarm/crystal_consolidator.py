@@ -52,6 +52,7 @@ class ConsolidationResult:
     total_scanned: int = 0
     dry_run: bool = False
     details: list[str] | None = None
+    heuristic_insights: list[dict[str, Any]] | None = None
 
     @property
     def total_actions(self) -> int:
@@ -68,6 +69,7 @@ class ConsolidationResult:
             "total_scanned": self.total_scanned,
             "total_actions": self.total_actions,
             "dry_run": self.dry_run,
+            "heuristic_insights": self.heuristic_insights or [],
         }
 
 
@@ -286,6 +288,52 @@ async def _execute_diamond_promotion(
             result.errors += 1
 
 
+# ── Strategy 4: Heuristic Integration (Right-Brain) ───────────────────────
+
+
+async def _execute_heuristic_integration(
+    db_conn: Any,
+    vitals: list[CrystalVitals],
+    result: ConsolidationResult,
+    dry_run: bool,
+) -> None:
+    """Connect Right-Brain HeuristicEngine to enable automated architectural suggestions."""
+    from cortex.engine.right_brain import HeuristicEngine
+    from cortex.extensions.evolution.free_energy import FreeEnergyState
+    from cortex.extensions.evolution.agents import AgentDomain
+
+    if len(vitals) < 2:
+        return
+
+    heuristic_engine = HeuristicEngine()
+    
+    # Ingest ambient signals from crystals to form associations
+    for v in vitals:
+        heuristic_engine.ingest_ambient_signal({
+            "source": v.fact_id,
+            "temperature": v.temperature,
+            "resonance": v.resonance
+        })
+
+    # Simulate low-stress FreeEnergyState to trigger daydreaming during REM sleep
+    fep_state = FreeEnergyState(
+        domain=AgentDomain.MEMORY_CONSOLIDATION,
+        surprise=0.1,
+        free_energy=0.2
+    )
+    
+    insights = heuristic_engine.daydream(fep_state)
+    
+    if insights:
+        logger.info("🧠 [RIGHT-BRAIN] Generated %d architectural suggestions", len(insights))
+        if result.heuristic_insights is None:
+            result.heuristic_insights = []
+        result.heuristic_insights.extend(insights)
+        
+        for insight in insights:
+            logger.info("💡 Suggestion: %s", insight.get('payload'))
+
+
 # ── Public API ────────────────────────────────────────────────────────────
 
 
@@ -332,6 +380,9 @@ async def consolidate(
 
     # Strategy 3: Diamond Promotion
     await _execute_diamond_promotion(db_conn, remaining, result, dry_run)
+
+    # Strategy 4: Heuristic Integration (Right-Brain)
+    await _execute_heuristic_integration(db_conn, vitals, result, dry_run)
 
     # Count skipped
     result.skipped = result.total_scanned - (result.purged + result.merged + result.promoted)

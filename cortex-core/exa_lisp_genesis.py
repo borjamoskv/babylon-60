@@ -16,7 +16,11 @@ class ExergyEnvironment:
         self.ledger = ledger or LedgerManager()
 
     def consume(self, amount: int, op_name: str, vector_id: str='EXA_L0_DEFAULT') -> None:
-        """TODO: Document consume"""
+        """
+        Deducts the specified amount of Joules from the environment.
+        Raises EntropyDeath if insufficient Joules are available.
+        Seals the transaction into the cryptographic Ledger.
+        """
         if self.joules < amount:
             raise EntropyDeath(f"C5-DEATH: Entropy limit exceeded on '{op_name}'. Required: {amount}j, Available: {self.joules}j")
         self.joules -= amount
@@ -24,21 +28,31 @@ class ExergyEnvironment:
             self.ledger.append(action=op_name, vector_id=vector_id, yield_amount=float(-amount))
 
     def refund(self, amount: int, op_name: str, vector_id: str='EXA_REFUND') -> None:
-        """TODO: Document refund"""
+        """
+        Refunds or dissipates the specified amount of Joules back to the environment.
+        Seals the transaction into the cryptographic Ledger.
+        """
         self.joules += amount
         if self.ledger:
             self.ledger.append(action=op_name, vector_id=vector_id, yield_amount=float(amount))
 
     def clone(self):
-        """TODO: Document clone"""
+        """
+        Creates an isolated parallel ExergyEnvironment with the same Joule balance.
+        Ledger references are stripped for independent quantum branching.
+        """
         return ExergyEnvironment(self.joules, ledger=None)
 
 def tokenize(chars: str) -> list:
-    """TODO: Document tokenize"""
+    """
+    Transforms a raw Lisp expression string into a list of atomic tokens.
+    """
     return chars.replace('(', ' ( ').replace(')', ' ) ').split()
 
 def parse(tokens: list):
-    """TODO: Document parse"""
+    """
+    Parses a list of tokens into a nested abstract syntax tree (AST) representation.
+    """
     if not tokens:
         raise SyntaxError('unexpected EOF')
     token = tokens.pop(0)
@@ -54,7 +68,9 @@ def parse(tokens: list):
         return atom(token)
 
 def atom(token: str):
-    """TODO: Document atom"""
+    """
+    Casts a raw string token into its corresponding int, float, or sovereign 'j' metric type.
+    """
     if token.endswith('j') and token[:-1].isdigit():
         return token
     try:
@@ -66,7 +82,10 @@ def atom(token: str):
             return token
 
 def evaluate(x, env: ExergyEnvironment):
-    """TODO: Document evaluate"""
+    """
+    Recursively evaluates an AST node within the provided ExergyEnvironment context.
+    Executes C5-REAL ops like infer, z3-verify, umap-target, and q-let.
+    """
     env.consume(1, 'AST_EVAL', vector_id='EXA_STRUCTURAL')
     if isinstance(x, str):
         return x
@@ -164,7 +183,10 @@ def evaluate(x, env: ExergyEnvironment):
         env_b = env.clone()
 
         def eval_branch(branch, target_env):
-            """TODO: Document eval_branch"""
+            """
+            Evaluates a parallel superposition branch and computes its specific Joule cost.
+            Returns (None, inf) if EntropyDeath occurs during branch collapse.
+            """
             try:
                 start_j = target_env.joules
                 res = evaluate(branch, target_env)
@@ -187,7 +209,7 @@ def evaluate(x, env: ExergyEnvironment):
             return res_b
     elif op == '+':
         env.consume(5, 'MATH_ADD', vector_id='MATH')
-        return sum((evaluate(arg, env) for arg in x[1:]))
+        return sum(evaluate(arg, env) for arg in x[1:])
     else:
         raise ValueError(f'Unknown sovereign operator: {op}')
 if __name__ == '__main__':

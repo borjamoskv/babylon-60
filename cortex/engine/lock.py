@@ -19,6 +19,17 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.lock")
 
+_REDUCE_LOCKS: dict[tuple[str, int], asyncio.Lock] = {}
+
+def _get_local_lock(db_path: str | None) -> asyncio.Lock:
+    key = db_path or ":memory:"
+    loop_id = id(asyncio.get_running_loop())
+    lock_key = (key, loop_id)
+    if lock_key not in _REDUCE_LOCKS:
+        _REDUCE_LOCKS[lock_key] = asyncio.Lock()
+    return _REDUCE_LOCKS[lock_key]
+
+
 
 class SovereignLock:
     """

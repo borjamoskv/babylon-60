@@ -280,8 +280,11 @@ class FreeEnergyMonitor:
 
     def total_free_energy(self) -> float:
         """Aggregate F across all domains — system-level health."""
+        from cortex.engine.endocrine import ENDOCRINE
         states = self.snapshot()
-        return sum(s.free_energy for s in states.values())
+        total_f = sum(s.free_energy for s in states.values())
+        ENDOCRINE.sync_with_free_energy(total_f)
+        return total_f
 
     def rank_strategies(
         self,
