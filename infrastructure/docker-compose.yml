@@ -29,9 +29,6 @@ services:
         max-size: "10m"
         max-file: "3"
 
-volumes:
-  cortex_data:
-
   redis:
     image: redis:7-alpine
     container_name: cortex-redis
@@ -43,3 +40,6 @@ volumes:
       options:
         max-size: "10m"
         max-file: "3"
+
+volumes:
+  cortex_data:
