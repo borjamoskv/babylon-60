@@ -39,7 +39,7 @@ async def main() -> None:
     fact_id2 = await engine.store(
         project="demo-agent",
         content="Transaction flagged: IP geolocation mismatch detected",
-        fact_type="observation",
+        fact_type="knowledge",
     )
     print(f"[+] Second fact stored. ID: {fact_id2}")
 
