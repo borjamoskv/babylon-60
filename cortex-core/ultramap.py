@@ -7,18 +7,19 @@ import logging
 import weakref
 import atexit
 
+logger = logging.getLogger("cortex.ultramap")
+
 try:
     import cortex_rs
     HAS_RUST = True
-except ImportError:
+except ImportError as e:
     HAS_RUST = False
+    logger.warning(f"Failed to load CORTEX-RS: {e}. Falling back to Python mmap.")
 
 DB_PATH = os.getenv(
     "CORTEX_DB_PATH",
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "cortex_memory_vsa.db"),
 )
-
-logger = logging.getLogger("cortex.ultramap")
 
 class EntropyDeath(Exception):
     pass
