@@ -18,13 +18,16 @@
 
 > **AESTHETIC:** INDUSTRIAL NOIR 2026 (`#0A0A0A` / `#2B3BE5`)  
 > **EPISTEMOLOGY:** C5-REAL (Cryptographically Verified Reality)  
+> **CORE TENET:** EPISTEMIC HUMILITY (Generative output is conjecture; Evidence is absolute)  
 > **ARCHITECTURE:** ZERO-UI / O(1) DETERMINISTIC SUBSTRATE
 
 ---
 
-## ▀▄ EPISTEMIC CONTAINMENT
+## ▀▄ EPISTEMIC HUMILITY & CONTAINMENT
 
-Traditional logging and standard vector stores fail the epistemic containment test. CORTEX-Persist acts as an **L0 Hypervisor** for autonomous agents, implementing absolute structural determinism.
+At the core of CORTEX-Persist is **Epistemic Humility**: the acceptance that all generative AI output is fundamentally probabilistic conjecture. Traditional logging and standard vector stores blindly trust LLM outputs, failing the epistemic containment test. 
+
+CORTEX-Persist acts as an **L0 Hypervisor** for autonomous agents, enforcing absolute structural determinism to contain the inherent uncertainty of artificial intelligence. **We do not trust the model; we verify the cryptographic evidence.**
 
 | CAPABILITY | TRADITIONAL RAG / LOGS | CORTEX-PERSIST |
 | :--- | :--- | :--- |
