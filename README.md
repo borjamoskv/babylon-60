@@ -29,6 +29,21 @@ At the core of CORTEX-Persist is **Epistemic Humility**: the acceptance that all
 
 CORTEX-Persist acts as an **L0 Hypervisor** for autonomous agents, enforcing absolute structural determinism to contain the inherent uncertainty of artificial intelligence. **We do not trust the model; we verify the cryptographic evidence.**
 
+```text
+  [ STOCHASTIC GENERATION ] 
+           │
+           ▼ (Probabilistic Output)
+  ╔═════════════════════════════════════════════════╗
+  ║ CORTEX-PERSIST EPISTEMIC MEMBRANE               ║
+  ║ ▓▓▓ Guard Validation (Z3 / Deterministic)       ║
+  ║ ▓▓▓ SHA-256 Merkle Sealing                      ║
+  ║ ▓▓▓ VSA Zero-Copy Ring Buffer                   ║
+  ╚═════════════════════════════════════════════════╝
+           │
+           ▼ (C5-REAL Audit Pack)
+  [ SOVEREIGN VERIFIED STATE ]
+```
+
 | CAPABILITY | TRADITIONAL RAG / LOGS | CORTEX-PERSIST |
 | :--- | :--- | :--- |
 | **Trust Model** | Trust the Process | **Verify the Evidence (C5-REAL)** |
@@ -42,31 +57,31 @@ CORTEX-Persist acts as an **L0 Hypervisor** for autonomous agents, enforcing abs
 
 The persistence daemon operates under strict thermodynamic (Joules/Exergy) constraints to ensure 10,000-agent (LEGION-10k) orchestration latency approaches zero.
 
-*   **C5-REAL Outbox Atomicity:** Zero-latency WAL task consumption without lock contention.
-*   **ZK-STARK Ledger Seals:** Cryptographic proofs for every transaction establishing inter-nodal mesh trust.
-*   **VSA Memory (Zero-Copy):** O(1) Ring Buffer memory mapped to silicon (mmap), completely bypassing standard OS I/O overhead.
-*   **AST Autopoiesis:** Self-mutating abstract syntax tree (AST) at runtime to eradicate local entropy.
+> █ **C5-REAL Outbox Atomicity:** Zero-latency WAL task consumption without lock contention.  
+> █ **ZK-STARK Ledger Seals:** Cryptographic proofs for every transaction establishing inter-nodal mesh trust.  
+> █ **VSA Memory (Zero-Copy):** O(1) Ring Buffer memory mapped to silicon (mmap), completely bypassing standard OS I/O overhead.  
+> █ **AST Autopoiesis:** Self-mutating abstract syntax tree (AST) at runtime to eradicate local entropy.  
 
 ---
 
 ## ▀▄ EXECUTION MATRIX
 
 ```bash
-# 1. Initialize Sovereign Ledger
+# [01] Initialize Sovereign Ledger
 $ cortex init
 
-# 2. Store a memory with C5-REAL cryptographic seal
+# [02] Store a memory with C5-REAL cryptographic seal
 $ cortex memory store risk-bot "Transaction flagged: IP mismatch"
 [+] Fact stored. Ledger hash: 8f4a2b9e...
 
-# 3. Verify the stored fact lineage
+# [03] Verify the stored fact lineage
 $ cortex verify 1
 [✔] VERIFIED: Fact chain intact.
 
-# 4. Tamper attempt (direct DB mutation bypass)
+# [04] Tamper attempt (direct DB mutation bypass)
 $ sqlite3 cortex.db "UPDATE facts SET content='Transaction approved' WHERE id='8f4a2b9e'"
 
-# 5. Ledger verification failure (Tamper Detected)
+# [05] Ledger verification failure (Tamper Detected)
 $ cortex trust-ledger verify
 [✘] TAMPER DETECTED: Hash mismatch at block 8f4a2b9e
 ```
