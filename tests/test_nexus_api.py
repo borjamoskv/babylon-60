@@ -164,6 +164,8 @@ def test_tasks_flow():
 
 def test_enqueue_swarm_task_api_sync(monkeypatch, tmp_path):
     from unittest.mock import patch, MagicMock
+    import persistence
+    import daemons.outbox as _outbox_mod
     from persistence import enqueue_swarm_task
     import json
     import os
@@ -172,7 +174,10 @@ def test_enqueue_swarm_task_api_sync(monkeypatch, tmp_path):
 
     # Set temp DB path to avoid side-effects on the system
     test_db = tmp_path / "test_cortex_memory_vsa.db"
-    monkeypatch.setattr("persistence.DB_PATH", str(test_db))
+    monkeypatch.setattr(persistence, "DB_PATH", str(test_db))
+    monkeypatch.setattr(persistence.base, "DB_PATH", str(test_db))
+    monkeypatch.setattr(_outbox_mod, "DB_PATH", str(test_db))
+    monkeypatch.setattr(_outbox_mod, "_global_ring_buffer", None)
 
     # Initialize SQLite table
     conn = sqlite3.connect(str(test_db))
@@ -227,6 +232,8 @@ def test_enqueue_swarm_task_api_sync(monkeypatch, tmp_path):
 def test_enqueue_swarm_task_api_sync_failure_fallback(monkeypatch, tmp_path):
     from unittest.mock import patch, MagicMock
     from urllib.error import URLError
+    import persistence
+    import daemons.outbox as _outbox_mod
     from persistence import enqueue_swarm_task
     import json
     import os
@@ -235,7 +242,10 @@ def test_enqueue_swarm_task_api_sync_failure_fallback(monkeypatch, tmp_path):
 
     # Set temp DB path to avoid side-effects
     test_db = tmp_path / "test_cortex_memory_vsa_fail.db"
-    monkeypatch.setattr("persistence.DB_PATH", str(test_db))
+    monkeypatch.setattr(persistence, "DB_PATH", str(test_db))
+    monkeypatch.setattr(persistence.base, "DB_PATH", str(test_db))
+    monkeypatch.setattr(_outbox_mod, "DB_PATH", str(test_db))
+    monkeypatch.setattr(_outbox_mod, "_global_ring_buffer", None)
 
     # Initialize SQLite table
     conn = sqlite3.connect(str(test_db))
@@ -281,13 +291,18 @@ def test_enqueue_swarm_task_api_sync_failure_fallback(monkeypatch, tmp_path):
 
 
 def test_enqueue_swarm_task_exa_lisp(monkeypatch, tmp_path):
+    import persistence
+    import daemons.outbox as _outbox_mod
     from persistence import enqueue_swarm_task, OutboxDaemon, LedgerManager
     import sqlite3
     import time
 
     # Set temp DB path to avoid side-effects
     test_db = tmp_path / "test_cortex_memory_vsa_lisp.db"
-    monkeypatch.setattr("persistence.DB_PATH", str(test_db))
+    monkeypatch.setattr(persistence, "DB_PATH", str(test_db))
+    monkeypatch.setattr(persistence.base, "DB_PATH", str(test_db))
+    monkeypatch.setattr(_outbox_mod, "DB_PATH", str(test_db))
+    monkeypatch.setattr(_outbox_mod, "_global_ring_buffer", None)
 
     # Initialize the ledger
     ledger = LedgerManager()

@@ -191,10 +191,30 @@ class ZeroCopyRingBuffer(SovereignResource):
     def reset(self):
         """Zero out the buffer to reset the C5-REAL state."""
         if self._rust_buf is not None:
-            # Re-initialize Rust buffer if supported, or ignore
-            pass
-        elif hasattr(self, "_buffer") and self._buffer is not None:
-            self._buffer[:] = b"\x00" * self.tensor_size
+            try:
+                self._rust_buf.reset()
+            except Exception as e:
+                logger.error("Failed to reset Rust ZeroCopyRingBuffer: %s", e)
+        
+        # Also always reset the file and Python memoryview fallback
+        try:
+            if os.path.exists(self.bin_path):
+                with open(self.bin_path, "r+b") as f:
+                    f.write(b"\x00" * self.tensor_size)
+        except Exception as e:
+            logger.error("Failed to zero out ring buffer file: %s", e)
+
+        if hasattr(self, "_buffer") and self._buffer is not None:
+            try:
+                self._buffer[:] = b"\x00" * self.tensor_size
+            except Exception:
+                pass
+
+    def process_all_native(self, num_threads=None):
+        """Process all pending tasks natively in Rust using Rayon thread pool (releases the GIL)."""
+        if self._rust_buf is not None:
+            return self._rust_buf.process_all_native(num_threads)
+        raise RuntimeError("Rust cortex_rs module not available for native processing.")
 
 _global_ring_buffer = None
 

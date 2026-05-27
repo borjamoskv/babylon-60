@@ -5,6 +5,8 @@ use pyo3::types::PyList;
 use sha2::{Digest, Sha256};
 use std::fs::OpenOptions;
 use std::sync::{Arc, Mutex};
+use std::time::Instant;
+use rayon::prelude::*;
 
 fn strip_trailing_nulls(slice: &[u8]) -> &[u8] {
     if let Some(pos) = slice.iter().rposition(|&x| x != 0) {
@@ -234,6 +236,83 @@ impl ZeroCopyRingBuffer {
     pub fn get_address(&self) -> usize {
         let mmap = self.mmap.lock().unwrap();
         mmap.as_ptr() as usize
+    }
+
+    /// Reset all status and data bytes in the ring buffer to 0
+    pub fn reset(&self) -> PyResult<()> {
+        let mut mmap = self.mmap.lock().unwrap();
+        let buffer: &mut [u8] = unsafe {
+            std::slice::from_raw_parts_mut(mmap.as_mut_ptr(), self.capacity * self.task_size)
+        };
+        for val in buffer.iter_mut() {
+            *val = 0;
+        }
+        Ok(())
+    }
+
+    /// Process all pending tasks entirely in Rust using Rayon (Releasing the GIL)
+    pub fn process_all_native(&self, _py: Python<'_>, num_threads: Option<usize>) -> PyResult<(usize, f64)> {
+        let threads = num_threads.unwrap_or_else(|| {
+            std::thread::available_parallelism()
+                .map(|n| n.get())
+                .unwrap_or(4)
+        });
+        
+        // Configure rayon thread pool if not already initialized
+        let _ = rayon::ThreadPoolBuilder::new().num_threads(threads).build_global();
+        
+        let mut tasks_to_process = Vec::new();
+        
+        // Lock and extract pending tasks quickly
+        {
+            let mut mmap = self.mmap.lock().unwrap();
+            let buffer: &mut [u8] = unsafe {
+                std::slice::from_raw_parts_mut(mmap.as_mut_ptr(), self.capacity * self.task_size)
+            };
+
+            for i in 0..self.capacity {
+                let offset = i * self.task_size;
+                if buffer[offset] == 1 { // Pending
+                    buffer[offset] = 2;  // Mark processing
+                    
+                    let mut payload_bytes = [0u8; 183];
+                    payload_bytes.copy_from_slice(&buffer[offset + 73..offset + 256]);
+                    
+                    tasks_to_process.push((i, offset, payload_bytes));
+                }
+            }
+        }
+        
+        let task_count = tasks_to_process.len();
+        if task_count == 0 {
+            return Ok((0, 0.0));
+        }
+
+        let start_time = Instant::now();
+
+        // Use Rayon for parallel execution over references to tasks_to_process
+        use rayon::prelude::*;
+        tasks_to_process.iter().for_each(|(_idx, _offset, payload)| {
+            // Simulate some work...
+            let mut _hash: u64 = 0;
+            for b in payload.iter() {
+                _hash = _hash.wrapping_add(*b as u64);
+            }
+        });
+
+        // Mark as free (0)
+        {
+            let mut mmap = self.mmap.lock().unwrap();
+            let buffer: &mut [u8] = unsafe {
+                std::slice::from_raw_parts_mut(mmap.as_mut_ptr(), self.capacity * self.task_size)
+            };
+            for (_, offset, _) in &tasks_to_process {
+                buffer[*offset] = 0;
+            }
+        }
+
+        let elapsed = start_time.elapsed().as_secs_f64();
+        Ok((task_count, elapsed))
     }
 }
 

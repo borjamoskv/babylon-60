@@ -13,14 +13,14 @@ print("Initializing LEGION-1000 Swarm Substrate...")
 async def main():
     pm = HybridPersistenceManager()
     
-    def dispatch_legion():
-        print("[LEGION] Dispatching 1000 sovereign agents via ZeroCopyRingBuffer...")
+    def dispatch_legion(num_agents=10000):
+        print(f"[LEGION] Dispatching {num_agents} sovereign agents via ZeroCopyRingBuffer...")
         start_time = time.time()
         
         # Pre-generate tasks
         tasks = []
-        for i in range(1000):
-            agent_id = f"LEGION_AGENT_{i:04d}".encode('utf-8')
+        for i in range(num_agents):
+            agent_id = f"LEGION_AGENT_{i:05d}".encode('utf-8')
             payload = json.dumps({"command": "audit", "target": f"sector_{i}", "directive": "C5-REAL"}).encode('utf-8')
             tasks.append((agent_id, payload))
 
@@ -32,8 +32,8 @@ async def main():
                 
         enqueue_time = time.time() - start_time
         
-        print(f"--- LEGION 1000 DISPATCH REPORT ---", flush=True)
-        print(f"Agents Dispatched: {success}/1000", flush=True)
+        print(f"--- LEGION {num_agents} DISPATCH REPORT ---", flush=True)
+        print(f"Agents Dispatched: {success}/{num_agents}", flush=True)
         print(f"Enqueue Latency: {enqueue_time:.6f} seconds", flush=True)
         print(f"Throughput: {success/enqueue_time:.2f} agents/sec" if enqueue_time > 0 else "Throughput: INF agents/sec", flush=True)
         
@@ -53,7 +53,7 @@ async def main():
         processed = 0
         print("Starting ThreadPoolExecutor...", flush=True)
         try:
-            with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=500) as executor:
                 results = list(executor.map(process_task, pending_tasks))
                 processed = len(results)
         except Exception as e:
@@ -70,7 +70,13 @@ async def main():
         import sys
         sys.exit(0)
 
-    dispatch_legion()
+    num_agents = 10000
+    if len(sys.argv) > 1:
+        try:
+            num_agents = int(sys.argv[1])
+        except ValueError:
+            pass
+    dispatch_legion(num_agents)
 
 if __name__ == "__main__":
     asyncio.run(main())
