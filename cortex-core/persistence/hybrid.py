@@ -18,6 +18,7 @@ from .cache import ContextCache
 from .vsa import VSAMemory
 from .ledger import LedgerManager
 from daemons.outbox import ZeroCopyRingBuffer, OutboxDaemon
+from daemons.l0_immunology import ImmunologyDaemon
 from .ide_preserver import IdeStatePreserver
 from daemons.security_recon import SecurityReconDaemon
 
@@ -37,9 +38,11 @@ class HybridPersistenceManager:
         self.ultramap = UltramapSubstrate()  # L5 Sovereign Topological Space
         self.ide_guardian = IdeStatePreserver(self.l3)
         self.outbox = OutboxDaemon(DB_PATH, ledger=self.l3)
+        self.immunology = ImmunologyDaemon(DB_PATH)
         self.security_radar = SecurityReconDaemon(self.l3)
         self.ide_guardian.start_guardian()
         self.outbox.start_guardian()
+        self.immunology.start_guardian()
         self.security_radar.start_guardian()
 
     def get_system_health(self) -> dict:
