@@ -1,3 +1,9 @@
+// Crate-level clippy config: suppress cosmetic lints endemic to the codebase
+#![allow(clippy::collapsible_if)]
+#![allow(clippy::manual_clamp)]
+#![allow(clippy::new_without_default)]
+#![allow(clippy::too_many_arguments)]
+
 use memmap2::{MmapMut, MmapOptions};
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
