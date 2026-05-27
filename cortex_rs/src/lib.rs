@@ -879,3 +879,59 @@ fn cortex_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<McpSovereignHost>()?;
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::Instant;
+
+    #[test]
+    fn test_bench_native_performance() {
+        Python::initialize();
+        Python::attach(|py| -> PyResult<()> {
+            let bin_path = "native_bench_ring.bin";
+            let _ = std::fs::remove_file(bin_path);
+            
+            let capacity = 200000;
+            println!("=============================================================");
+            println!("  RUST NATIVE MULTI-THREADED BENCHMARK (C5-REAL)");
+            println!("=============================================================");
+            println!("[+] Initializing ZeroCopyRingBuffer with capacity={}", capacity);
+            let buffer = ZeroCopyRingBuffer::new(bin_path, Some(capacity)).expect("Failed to create buffer");
+            buffer.reset().expect("Failed to reset");
+
+            let agent_id = b"agent_vector_alpha_01";
+            let payload = b"exergy_max:run_simulation:agent_dispatch_payload_data_hash_check";
+
+            println!("[+] Enqueuing {} tasks in native Rust...", capacity);
+            let t0 = Instant::now();
+            for _ in 0..capacity {
+                buffer.enqueue(agent_id, payload).expect("Failed to enqueue");
+            }
+            let t_enq = t0.elapsed();
+            let enq_rate = capacity as f64 / t_enq.as_secs_f64();
+            println!("    - Native Enqueue Time: {:.4?} s", t_enq);
+            println!("    - Native Enqueue Rate: {:.2} tasks/sec", enq_rate);
+
+            println!("[+] Executing Native Rayon processing...");
+            let t1 = Instant::now();
+            let (processed_count, rust_elapsed) = buffer.process_all_native(py, None).expect("Failed to process");
+            let t_proc = t1.elapsed();
+            let proc_rate_wall = processed_count as f64 / t_proc.as_secs_f64();
+            let proc_rate_internal = processed_count as f64 / rust_elapsed;
+
+            println!("    - Processed Count    : {}", processed_count);
+            println!("    - Rust Internal Time : {:.4} s", rust_elapsed);
+            println!("    - Rust Internal Rate : {:.2} agents/sec", proc_rate_internal);
+            println!("    - Native Wall Time   : {:.4?} s", t_proc);
+            println!("    - Native Wall Rate   : {:.2} agents/sec", proc_rate_wall);
+            println!("=============================================================");
+
+            assert_eq!(processed_count, capacity);
+
+            let _ = std::fs::remove_file(bin_path);
+            Ok(())
+        }).expect("Python execution failed");
+    }
+}
+
