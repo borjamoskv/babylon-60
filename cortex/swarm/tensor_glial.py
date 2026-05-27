@@ -3,6 +3,8 @@ CORTEX-SWARM-PRIME: Tensor-Glial Legion
 Zero-Copy `mmap` tensor map mapped across 10,000 swarm agents representing High-Dimensional Memory.
 """
 
+from __future__ import annotations
+
 import hashlib
 import logging
 import os
