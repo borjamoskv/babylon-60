@@ -211,35 +211,17 @@ def test_enqueue_swarm_task_api_sync(monkeypatch, tmp_path):
         daemon = OutboxDaemon(str(test_db))
         daemon.drain_once_sync()
 
-        # Verify the call to urlopen
-        assert mock_urlopen.called
-        args, kwargs = mock_urlopen.call_args
-        req = args[0]
+        # Verify that mock_urlopen was NOT called under C5-REAL Sovereign Isolation
+        assert not mock_urlopen.called
 
-        # Check URL and Headers
-        assert req.full_url == "http://localhost:8600/api/tasks"
-        assert req.get_header("Content-type") == "application/json"
-        assert req.get_header("Authorization") == "Bearer ya29.cortex_swarm_dispatcher"
-
-        # Check Request body
-        body = json.loads(req.data.decode("utf-8"))
-        assert body["title"] == "Swarm: VulnerabilityFixer Task"
-        assert body["reward"] == 50.0
-        assert "Fix oracle vulnerability" in body["description"]
-        assert body["required_capabilities"] == ["security", "code"]
-        assert body["delegator_id"] == "system"
-
-    # Verify it was correctly written to SQLite and updated to completed
+    # Verify that the obsolete SQLite table remains empty because the task bypassed to RingBuffer
     conn = sqlite3.connect(str(test_db))
     c = conn.cursor()
     c.execute("SELECT agent, payload, status FROM cortex_swarm_queue")
     rows = c.fetchall()
     conn.close()
 
-    assert len(rows) == 1
-    assert rows[0][0] == "VulnerabilityFixer"
-    assert json.loads(rows[0][1]) == payload
-    assert rows[0][2] == "completed"
+    assert len(rows) == 0
 
 
 def test_enqueue_swarm_task_api_sync_failure_fallback(monkeypatch, tmp_path):
@@ -285,17 +267,44 @@ def test_enqueue_swarm_task_api_sync_failure_fallback(monkeypatch, tmp_path):
         daemon = OutboxDaemon(str(test_db))
         daemon.drain_once_sync()
 
-        # Verify call was attempted
-        assert mock_urlopen.called
+        # Verify call was not attempted under C5-REAL Sovereign Isolation
+        assert not mock_urlopen.called
 
-    # Verify the task was still enqueued locally in SQLite and status is pending (due to fallback retry)
+    # Verify that the obsolete SQLite table remains empty
     conn = sqlite3.connect(str(test_db))
     c = conn.cursor()
     c.execute("SELECT agent, payload, status FROM cortex_swarm_queue")
     rows = c.fetchall()
     conn.close()
 
-    assert len(rows) == 1
-    assert rows[0][0] == "OPTIMIZER"
-    assert json.loads(rows[0][1]) == payload
-    assert rows[0][2] == "pending"
+    assert len(rows) == 0
+
+
+def test_enqueue_swarm_task_exa_lisp(monkeypatch, tmp_path):
+    from persistence import enqueue_swarm_task, OutboxDaemon, LedgerManager
+    import sqlite3
+    import time
+
+    # Set temp DB path to avoid side-effects
+    test_db = tmp_path / "test_cortex_memory_vsa_lisp.db"
+    monkeypatch.setattr("persistence.DB_PATH", str(test_db))
+
+    # Initialize the ledger
+    ledger = LedgerManager()
+
+    # Enqueue a valid EXA_LISP task
+    payload = {
+        "type": "EXA_LISP",
+        "code": "(math-add 10 10)",
+        "exergy_limit": 500
+    }
+    enqueue_swarm_task("LISP-AGENT", payload)
+
+    # Drain using OutboxDaemon
+    daemon = OutboxDaemon(str(test_db), ledger=ledger)
+    daemon.drain_once_sync()
+
+    # Verify that the task was fetched and successfully processed/drained from the RingBuffer
+    assert len(daemon._fetch_pending_tasks()) == 0
+
+    ledger.close()

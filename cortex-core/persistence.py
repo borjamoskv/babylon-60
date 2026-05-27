@@ -12,6 +12,7 @@ import weakref
 import atexit
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.exceptions import InvalidSignature
+from ultramap import UltramapSubstrate
 
 try:
     import cortex_rs
@@ -158,6 +159,13 @@ class LedgerManager(SovereignResource):
                 ))
         self.public_key = self.private_key.public_key()
 
+        # Vector B: L3 Memory Mapped Ledger (Append-Only Binary)
+        self.aof_path = os.path.join(os.path.dirname(DB_PATH), "cortex_ledger_aof.bin")
+        # Ensure it exists
+        if not os.path.exists(self.aof_path):
+            with open(self.aof_path, "wb") as f:
+                f.write(b"")
+
         import queue
         self._tx_queue = queue.Queue()
         c = self._conn.cursor()
@@ -241,6 +249,18 @@ class LedgerManager(SovereignResource):
                                 "INSERT INTO ledger_records (timestamp, action, vector_id, yield_amount, hash, zk_proof) VALUES (?, ?, ?, ?, ?, ?)",
                                 (timestamp, action, vector_id, yield_amount, block_hash, zk_proof)
                             )
+                            # Vector B: Fast binary append-only write
+                            with open(self.aof_path, "ab") as f:
+                                import struct
+                                # timestamp (d), yield (d), action (64s), vector_id(64s), hash(64s), zk_proof(128s)
+                                packed = struct.pack("dd64s64s64s128s", 
+                                    timestamp, yield_amount, 
+                                    action.encode()[:64].ljust(64, b'\x00'),
+                                    vector_id.encode()[:64].ljust(64, b'\x00'),
+                                    block_hash.encode()[:64].ljust(64, b'\x00'),
+                                    zk_proof.encode()[:128].ljust(128, b'\x00')
+                                )
+                                f.write(packed)
                         self._conn.commit()
                         batch.clear()
                         break
@@ -563,6 +583,7 @@ class HybridPersistenceManager:
         self.l2 = VSAMemory()
         self.l3 = LedgerManager()
         self.ring = ZeroCopyRingBuffer()  # L4 Zero-Copy Substrate
+        self.ultramap = UltramapSubstrate() # L5 Sovereign Topological Space
         self.ide_guardian = IdeStatePreserver(self.l3)
         self.outbox = OutboxDaemon(DB_PATH, ledger=self.l3)
         self.security_radar = SecurityReconDaemon(self.l3)
@@ -608,20 +629,22 @@ class ZeroCopyRingBuffer:
             self._rust_buf = None
 
         if self._rust_buf is None:
+            import itertools
             self._f = open(self.bin_path, "r+b")
             self._mmap = mmap.mmap(self._f.fileno(), self.tensor_size)
             self._buffer = memoryview(self._mmap)
-            # Pure Lock-Free C5-REAL
-            self._write_idx = 0
-            self._read_idx = 0
+            # Pure Lock-Free C5-REAL (Atomic Counters)
+            self._write_counter = itertools.count()
+            self._read_counter = itertools.count()
 
     def enqueue(self, agent_id: bytes, payload: bytes) -> bool:
         """O(1) Zero-copy memory write. Bypasses VSA OS locks."""
         if self._rust_buf is not None:
             return self._rust_buf.enqueue(agent_id, payload)
 
-        # Zero-copy Lock-Free write (C5-REAL Enforced)
-        offset = self._write_idx * self.task_size
+        # Zero-copy Lock-Free write (C5-REAL Enforced via itertools atomic reservation)
+        write_idx = next(self._write_counter) % self.capacity
+        offset = write_idx * self.task_size
         if self._buffer[offset] != 0:
             return False  # Buffer full
             
@@ -635,7 +658,6 @@ class ZeroCopyRingBuffer:
         payload_bytes = payload[:183].ljust(183, b"\x00")
         self._buffer[offset + 73 : offset + 256] = payload_bytes
         
-        self._write_idx = (self._write_idx + 1) % self.capacity
         return True
 
     def fetch_pending(self):
@@ -646,19 +668,20 @@ class ZeroCopyRingBuffer:
         tasks = []
         import struct
 
-        # Zero-copy Lock-Free read (C5-REAL Enforced)
+        # Zero-copy Lock-Free read (C5-REAL Enforced via itertools atomic reservation)
         for _ in range(self.capacity):
-            offset = self._read_idx * self.task_size
+            read_idx = next(self._read_counter) % self.capacity
+            offset = read_idx * self.task_size
             if self._buffer[offset] == 1:  # Pending
                 self._buffer[offset] = 2  # Mark Processing
                 ts = struct.unpack_from("d", self._buffer, offset + 1)[0]
                 agent_id = bytes(self._buffer[offset + 9 : offset + 73]).rstrip(b"\x00")
                 payload = bytes(self._buffer[offset + 73 : offset + 256]).rstrip(b"\x00")
-                tasks.append((self._read_idx, ts, agent_id, payload))
+                tasks.append((read_idx, ts, agent_id, payload))
                 
                 self._buffer[offset] = 0 # Free it
-                self._read_idx = (self._read_idx + 1) % self.capacity
             else:
+                # Read skippage check
                 break
         return tasks
 

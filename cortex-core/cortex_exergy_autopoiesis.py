@@ -4,8 +4,7 @@ import sqlite3
 import time
 from persistence import OutboxDaemon, DB_PATH
 
-DUMMY_DIR = os.path.dirname(os.path.abspath(__file__))
-DUMMY_FILE = os.path.join(DUMMY_DIR, "dummy_exergy.py")
+DUMMY_FILE = "cortex-core/dummy_exergy.py"
 
 def setup():
     with open(DUMMY_FILE, "w") as f:

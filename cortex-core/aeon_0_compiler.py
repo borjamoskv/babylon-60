@@ -93,6 +93,45 @@ class AeonCompiler:
         # Ledger cleanup handles itself via weakref in Persistence, but we force exit.
         sys.exit(exit_code)
 
+
+class AEON0Compiler:
+    """
+    AEON-0 Compiler wrapper for the background OutboxDaemon.
+    Mutates the AST without engaged death protocol (sys.exit) to preserve daemon runtime.
+    """
+    def __init__(self, ledger):
+        self.ledger = ledger
+
+    def mutate(self, payload_dict: dict):
+        target_file = payload_dict.get("target_file")
+        func_name = payload_dict.get("function_name")
+        new_source = payload_dict.get("new_source")
+        yield_amount = payload_dict.get("yield_amount", 0.0)
+
+        # 1. Z3 Formal Verification
+        if not Z3ThermodynamicValidator.verify(new_source):
+            raise ValueError("Z3 Validation Failed: Thermodynamic bound exceeded.")
+
+        # 2. AST-Direct Mutation (Autopoiesis)
+        ast_engine = ASTAutopoiesisEngine(target_file)
+        result = ast_engine.mutate_function(func_name, new_source)
+
+        if result["status"] == "success":
+            # 3. ZK-STARK Dark Pool Generation & Yield Assimilation
+            final_yield = 0.0
+            if yield_amount > 0.0:
+                dark_pool = DarkPoolZK(self.ledger)
+                zk_proof = dark_pool.generate_exploit_proof(new_source)
+                final_yield = dark_pool.negotiate_yield(zk_proof, target_tvl=yield_amount * 10)
+
+            # 4. L2 Ledger Seal (Local Autopoiesis)
+            vector_id = f"AEON_0_{func_name}"
+            self.ledger.append(action="AEON_0_STRIKE", vector_id=vector_id, yield_amount=final_yield)
+            return True
+        else:
+            raise RuntimeError(f"Mutation Failed: {result.get('details')}")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="AEON-0 Compiler Terminal")
     parser.add_argument("--target", required=True, help="Path to target file")
