@@ -75,7 +75,7 @@ async def test_purge_logic_success():
     mock_conn.commit = AsyncMock()
     mock_cursor = MagicMock()
     mock_cursor.rowcount = 1
-    mock_cursor.fetchone = AsyncMock(return_value=(0,))
+    mock_cursor.fetchone = AsyncMock(side_effect=[(0,), ("hash123", "tx456")])
 
     async def mock_execute(*args, **kwargs):
         return mock_cursor

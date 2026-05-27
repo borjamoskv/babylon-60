@@ -154,11 +154,27 @@ async def purge_logic(
         if criticality > 0.8 and not force:
             raise RuntimeError("Bounded Demolition Denied: criticality > 0.8")
 
+        # Fetch the hash and tx_id of the fact before purging
+        cursor = await conn.execute(
+            "SELECT hash, tx_id FROM facts WHERE id = ? AND tenant_id = ?",
+            (fact_id, tenant_id),
+        )
+        fact_info = await cursor.fetchone()
+
+        fact_hash = fact_info[0] if fact_info else None
+        store_tx_id = fact_info[1] if fact_info else None
+
         await mixin_instance._log_transaction(
             conn,
             "system",
             "purge",
-            {"fact_id": fact_id, "force": force, "timestamp": now_iso()},
+            {
+                "fact_id": fact_id,
+                "force": force,
+                "timestamp": now_iso(),
+                "content_hash": fact_hash,
+                "store_tx_id": store_tx_id,
+            },
             tenant_id=tenant_id,
         )
 

@@ -173,6 +173,8 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         if dedupe_id is not None:
             return dedupe_id
 
+        from cortex.utils.canonical import compute_fact_hash
+        content_hash = compute_fact_hash(content)
         tx_id = (
             tx_id
             if tx_id is not None
@@ -180,7 +182,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 conn,
                 project,
                 "store",
-                {"fact_type": fact_type},
+                {"fact_type": fact_type, "content_hash": content_hash},
                 tenant_id=tenant_id,  # pyright: ignore
             )
         )
