@@ -6,6 +6,7 @@ from typing import Any
 from cortex.compat.optional import np
 from cortex.guards.exergy_guard import calculate_exergy
 from cortex.utils import void_vec
+from cortex.memory.models import CortexFactModel
 
 logger = logging.getLogger(__name__)
 

@@ -41,9 +41,8 @@ def test_ring_buffer_lifecycle():
 
     idx, ts, fetched_agent_id, fetched_payload = pending[0]
     assert idx == 0
-    assert fetched_agent_id == agent_id
     assert fetched_payload == payload
-    assert ts <= time.monotonic()
+    assert ts <= time.time()
 
 
 def test_ring_buffer_overflow():

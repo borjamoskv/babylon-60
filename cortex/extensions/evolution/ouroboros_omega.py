@@ -243,20 +243,21 @@ class OuroborosOmega:
 
         unused_imports = analyzer.imports - analyzer.used_imports
 
-        # Calculate Entropy
-        entropy = 0.0
+        # Calculate Entropy & Exergy (Landauer's Razor)
+        # 1 bit of unstructured data ~ k_B T ln(2)
+        # We consider unused imports and dead code as pure entropy generation (dS_gen)
+        dS_gen = (len(dead_funcs) * 10.0) + (len(unused_imports) * 5.0)
+        
         loc_penalty = max(0, (analyzer.loc - 500) * 0.05)
         complexity_penalty = sum(max(0, c - 15) for c in analyzer.mccabe.values()) * 2.0
-        dead_code_ratio = len(dead_funcs) / max(1, len(analyzer.func_nodes)) * 20.0
-        unused_imports_penalty = len(unused_imports) * 2.0
         nesting_penalty = sum(max(0, n - 4) for n in analyzer.nesting.values()) * 3.0
 
+        # Total Entropy Score represents structural degradation
         entropy = min(
             100.0,
             loc_penalty
             + complexity_penalty
-            + dead_code_ratio
-            + unused_imports_penalty
+            + dS_gen
             + nesting_penalty,
         )
 

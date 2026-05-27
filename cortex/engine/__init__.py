@@ -253,10 +253,36 @@ class CortexEngine(
         """
         async with self._conn_lock:
             if self._conn is not None:
-                return self._conn
+                try:
+                    current_loop = asyncio.get_running_loop()
+                except RuntimeError:
+                    current_loop = None
+
+                conn_loop = getattr(self._conn, "_cortex_loop", None)
+                if (
+                    conn_loop is not current_loop
+                    or conn_loop is None
+                    or conn_loop.is_closed()
+                    or not self._conn._running
+                    or not self._conn._thread.is_alive()
+                ):
+                    try:
+                        await self._conn.close()
+                    except Exception:
+                        pass
+                    self._conn = None
+                    self._schema_ready = False
+                    self._memory_ready = False
+                else:
+                    return self._conn
+
             from cortex.database.core import connect_async
 
             self._conn = await connect_async(str(self._db_path))
+            try:
+                self._conn._cortex_loop = asyncio.get_running_loop()
+            except RuntimeError:
+                self._conn._cortex_loop = None
             self._vec_available = await load_sqlite_vec_async(self._conn)
             await self._ensure_schema_ready(self._conn)
             # Ensure memory subsystem is initialized (L1/L2/L3)

@@ -48,12 +48,20 @@ class OuroborosGate:
         # Absolute Entropy Index: (1/SNR) * (size/1000)
         entropy_idx = (1.0 / (snr + 0.01)) * (total_facts / 1000.0)
 
+        # Landauer's Razor & Exergy
+        # X = S * I - T * dS_gen
+        # Temperature (T) conceptualized as inversely proportional to SNR
+        temperature = max(0.01, 1.0 - snr)
+        # Information content (I) ≈ snr, Entropy generated (dS_gen) ≈ total_facts * ln(2) (Landauer)
+        exergy = (signal * snr) - (temperature * total_facts * 0.693147)
+
         return {
             "n_projects": projects_count,
             "total_facts": total_facts,
             "total_bridges": total_bridges,
             "signal_to_noise": round(snr, 3),
             "entropy_index": round(entropy_idx, 4),
+            "exergy_score": round(exergy, 4),
             "timestamp": datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(),
         }
 
@@ -95,8 +103,23 @@ class OuroborosGate:
 
         asyncio.create_task(notify_notch_pruning())
 
-        self.conn.execute("DELETE FROM facts WHERE project = ?", (target_project,))
-        self.conn.commit()
+        # Fetch fact IDs for safe cascading deletion
+        cursor = self.conn.execute("SELECT id FROM facts WHERE project = ?", (target_project,))
+        fact_ids = [row[0] for row in cursor.fetchall()]
+        if fact_ids:
+            for i in range(0, len(fact_ids), 900):
+                chunk = fact_ids[i:i+900]
+                placeholders = ",".join("?" * len(chunk))
+                # Delete from tables referencing facts(id)
+                self.conn.execute(f"DELETE FROM consensus_votes_v2 WHERE fact_id IN ({placeholders})", chunk)
+                self.conn.execute(f"DELETE FROM consensus_outcomes WHERE fact_id IN ({placeholders})", chunk)
+                self.conn.execute(f"DELETE FROM causal_edges WHERE fact_id IN ({placeholders})", chunk)
+                self.conn.execute(f"DELETE FROM enrichment_jobs WHERE fact_id IN ({placeholders})", chunk)
+                self.conn.execute(f"DELETE FROM fact_vectors WHERE fact_id IN ({placeholders})", chunk)
+                self.conn.execute(f"DELETE FROM fact_tags WHERE fact_id IN ({placeholders})", chunk)
+            
+            self.conn.execute("DELETE FROM facts WHERE project = ?", (target_project,))
+            self.conn.commit()
 
         # Log scaling decision
         self._log_scaling_event(f"Pruned project {target_project} due to zero bridge density.")
