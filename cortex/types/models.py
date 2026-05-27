@@ -54,6 +54,7 @@ __all__ = [
     "VoteRequest",
     "VoteResponse",
     "VoteV2Request",
+    "UniversalMemorySchema",
 ]
 
 
@@ -519,3 +520,49 @@ class ContextSnapshotResponse(BaseModel):
     summary: str
     top_signals: list[ContextSignalModel] = Field(default_factory=list)
     projects_ranked: list[ProjectScoreModel] = Field(default_factory=list)
+
+
+# ─── Universal Memory Schema (UMS) Models ────────────────────────────
+
+
+class UmsHeader(BaseModel):
+    agent_did: str = Field(..., description="Decentralized Identifier of the agent")
+    owner_did: str = Field(..., description="Decentralized Identifier of the owner")
+    transaction_id: str = Field(..., description="Unique transaction hash")
+    timestamp: int = Field(..., description="Unix epoch timestamp")
+
+
+class UmsVectorReference(BaseModel):
+    hash: str = Field(..., description="Hash identifier of the raw vector payload")
+    dimensions: int = Field(1536, description="Embedding dimensional count")
+
+
+class UmsThermodynamics(BaseModel):
+    stochastic_entropy_in: float = Field(
+        ..., description="Entropy calculated during input sensory phase"
+    )
+    deterministic_exergy_out: float = Field(
+        ..., description="Exergy yielded during JIT output state phase"
+    )
+    half_life_seconds: int = Field(2592000, description="Memory decay half-life threshold")
+
+
+class UmsPayload(BaseModel):
+    block_id: str = Field(..., description="Deterministic block reference id")
+    type: str = Field(..., description="Classification category of the memory block")
+    content: str = Field(..., description="Text content payload of the memory")
+    confidence: float = Field(..., description="Cognitive confidence scale (0.0 to 1.0)")
+    vector_reference: UmsVectorReference
+    thermodynamics: UmsThermodynamics
+
+
+class UmsProof(BaseModel):
+    zk_merkle_root: str = Field(..., description="Cryptographic root reference verification")
+    signature: str = Field(..., description="Ed25519 signature validation block")
+
+
+class UniversalMemorySchema(BaseModel):
+    ums_version: str = Field("1.0.0", description="UMS semantic specification version")
+    header: UmsHeader
+    payload: UmsPayload
+    proof: UmsProof
