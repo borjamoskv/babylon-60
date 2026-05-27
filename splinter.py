@@ -3,7 +3,7 @@ import re
 
 # 1. Splinter ledger_core.py
 ledger_path = 'cortex/ledger/ledger_core.py'
-with open(ledger_path, 'r') as f:
+with open(ledger_path) as f:
     ledger_content = f.read()
 
 # Extract merkle components
