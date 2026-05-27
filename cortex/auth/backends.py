@@ -268,3 +268,90 @@ class AlloyDBAuthBackend(BaseAuthBackend):
         if self._pool:
             await self._pool.close()
             self._pool = None
+
+
+class TursoAuthBackend(BaseAuthBackend):
+    """Distributed authentication backend for Turso / libSQL over HTTP/WebSockets.
+
+    Optimized for Vercel/Serverless deployments using libsql-client.
+    """
+
+    def __init__(self, url: str, auth_token: str) -> None:
+        self.url = url
+        self.auth_token = auth_token
+        self._client: Any = None
+
+    async def _get_client(self) -> Any:
+        import libsql_client
+
+        if self._client is None:
+            self._client = libsql_client.create_client(self.url, auth_token=self.auth_token)
+        return self._client
+
+    async def initialize(self) -> None:
+        from cortex.auth import AUTH_SCHEMA
+
+        client = await self._get_client()
+        # Create statements, ignoring empty ones
+        statements = [s.strip() for s in AUTH_SCHEMA.split(";") if s.strip()]
+        for stmt in statements:
+            await client.execute(stmt)
+
+    async def get_key_by_hash(self, key_hash: str) -> KeyData | None:
+        client = await self._get_client()
+        res = await client.execute(
+            "SELECT * FROM api_keys WHERE key_hash = ? AND is_active = 1", [key_hash]
+        )
+        if res.rows:
+            return dict(zip(res.columns, res.rows[0], strict=False))
+        return None
+
+    async def store_key(
+        self,
+        name: str,
+        key_hash: str,
+        key_prefix: str,
+        tenant_id: str,
+        role: str,
+        permissions: list[str],
+        rate_limit: int,
+    ) -> int:
+        from cortex.auth import SQL_INSERT_KEY
+
+        client = await self._get_client()
+        args = [name, key_hash, key_prefix, tenant_id, role, json.dumps(permissions), rate_limit]
+        res = await client.execute(SQL_INSERT_KEY, args)
+        return res.last_insert_rowid
+
+    async def list_keys(self, tenant_id: str | None = None) -> list[KeyData]:
+        client = await self._get_client()
+        if tenant_id:
+            res = await client.execute(
+                "SELECT * FROM api_keys WHERE tenant_id = ? ORDER BY id DESC", [tenant_id]
+            )
+        else:
+            res = await client.execute("SELECT * FROM api_keys ORDER BY id DESC")
+        return [dict(zip(res.columns, row, strict=False)) for row in res.rows]
+
+    async def revoke_key(self, key_id: KeyID) -> bool:
+        client = await self._get_client()
+        res = await client.execute("UPDATE api_keys SET is_active = 0 WHERE id = ?", [key_id])
+        return res.rows_affected > 0
+
+    async def update_last_used(self, key_id: KeyID) -> None:
+        from datetime import datetime, timezone
+
+        client = await self._get_client()
+        try:
+            await client.execute(
+                "UPDATE api_keys SET last_used = ? WHERE id = ?",
+                [datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), key_id],
+            )
+        except Exception as e:
+            logger.debug("Could not update last_used in Turso: %s", e)
+
+    async def close(self) -> None:
+        """Close the Turso client."""
+        if self._client:
+            await self._client.close()
+            self._client = None

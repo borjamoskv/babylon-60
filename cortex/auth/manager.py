@@ -39,13 +39,32 @@ class AuthManager:
 
             backend = SQLiteAuthBackend(backend)
         elif backend is None:
-            from cortex.config import DB_PATH, PG_URL, RUNBOOT_MODE
+            from cortex.config import (
+                DB_PATH,
+                PG_URL,
+                RUNBOOT_MODE,
+                TURSO_DATABASE_URL,
+                TURSO_AUTH_TOKEN,
+            )
 
-            if RUNBOOT_MODE == "cloud" and PG_URL:
-                from cortex.auth.backends import AlloyDBAuthBackend
+            if RUNBOOT_MODE == "cloud":
+                if TURSO_DATABASE_URL:
+                    from cortex.auth.backends import TursoAuthBackend
 
-                logger.info("AuthManager: Using Cloud Sovereign (PostgreSQL) backend")
-                backend = AlloyDBAuthBackend(PG_URL)
+                    logger.info("AuthManager: Using Cloud Sovereign (Turso) backend")
+                    backend = TursoAuthBackend(TURSO_DATABASE_URL, TURSO_AUTH_TOKEN)
+                elif PG_URL:
+                    from cortex.auth.backends import AlloyDBAuthBackend
+
+                    logger.info("AuthManager: Using Cloud Sovereign (PostgreSQL) backend")
+                    backend = AlloyDBAuthBackend(PG_URL)
+                else:
+                    from cortex.auth.backends import SQLiteAuthBackend
+
+                    logger.info(
+                        "AuthManager: Using Local Sovereign (SQLite) backend fallback in Cloud"
+                    )
+                    backend = SQLiteAuthBackend(DB_PATH)
             else:
                 from cortex.auth.backends import SQLiteAuthBackend
 
