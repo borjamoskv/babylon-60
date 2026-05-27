@@ -8,10 +8,7 @@ import subprocess
 from .base import ledger_entropy_event, logger
 from .ledger import LedgerManager
 
-try:
-    import cortex_rs  # noqa: F401
-except ImportError:
-    pass
+
 
 class IdeStatePreserver:
     """Guardian para proteger el entorno IDE/Agent contra fallas estructurales."""

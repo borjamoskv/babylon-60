@@ -17,6 +17,7 @@ def clean_vsa_env(monkeypatch, tmp_path):
     monkeypatch.setattr("persistence.DB_PATH", str(test_db))
     monkeypatch.setattr("persistence.base.DB_PATH", str(test_db))
     monkeypatch.setattr("persistence.vsa.DB_PATH", str(test_db))
+    monkeypatch.setattr(_outbox_mod, "DB_PATH", str(test_db))
     monkeypatch.setattr(_outbox_mod, "_global_ring_buffer", None)
     monkeypatch.setattr("persistence.VSA_BIN_PATH", str(tmp_path / "vsa.bin"))
     monkeypatch.setattr("persistence.vsa.VSA_BIN_PATH", str(tmp_path / "vsa.bin"))

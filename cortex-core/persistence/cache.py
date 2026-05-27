@@ -2,10 +2,7 @@
 import time
 from collections import OrderedDict
 
-try:
-    import cortex_rs  # noqa: F401
-except ImportError:
-    pass
+
 
 
 class ContextCache:

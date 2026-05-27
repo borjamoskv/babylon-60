@@ -15,10 +15,7 @@ from cryptography.exceptions import InvalidSignature
 
 from .base import SovereignResource, _setup_sqlite_pragmas, DB_PATH, ledger_entropy_event, logger
 
-try:
-    import cortex_rs  # noqa: F401
-except ImportError:
-    pass
+
 
 # Pre-computed struct format for AOF binary layout
 # timestamp(d) + yield(d) + action(64s) + vector_id(64s) + hash(64s) + zk_proof(128s)

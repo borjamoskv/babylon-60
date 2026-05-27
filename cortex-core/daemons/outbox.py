@@ -9,12 +9,8 @@ import weakref
 import atexit
 
 from persistence.base import SovereignResource, _setup_sqlite_pragmas, _get_local_conn, HAS_CORTEX_RS, outbox_wake_event, logger, _metrics_cache, _metrics_cache_lock, DB_PATH
-
-try:
-    import cortex_rs  # noqa: F401
-    HAS_CORTEX_RS = True
-except ImportError:
-    pass
+if HAS_CORTEX_RS:
+    import cortex_rs
 
 from persistence.ledger import LedgerManager
 class ZeroCopyRingBuffer(SovereignResource):

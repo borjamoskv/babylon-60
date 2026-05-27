@@ -4,10 +4,7 @@ import asyncio
 from persistence.base import SovereignResource, logger
 from persistence.ledger import LedgerManager
 
-try:
-    import cortex_rs  # noqa: F401
-except ImportError:
-    pass
+
 
 from daemons.outbox import enqueue_swarm_task
 
