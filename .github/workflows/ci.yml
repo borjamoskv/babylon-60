@@ -80,6 +80,50 @@ jobs:
           echo "automation_only=$automation_only" >> "$GITHUB_OUTPUT"
           echo "sigint_related=$sigint_related" >> "$GITHUB_OUTPUT"
 
+  rust-check:
+    name: rust-check
+    needs: [change-scope]
+    if: needs.change-scope.outputs.automation_only != 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cortex_rs
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Check if Rust changed
+        id: rust-scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd ..
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags --prune origin "${{ github.base_ref }}" --depth=1
+            changed=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- cortex_rs/ Cargo.toml | wc -l)
+          elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            changed=$(git diff --name-only "${{ github.event.before }}...HEAD" -- cortex_rs/ Cargo.toml | wc -l)
+          else
+            changed=1
+          fi
+          echo "has_changes=$([ "$changed" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+      - name: Install Rust toolchain
+        if: steps.rust-scope.outputs.has_changes == 'true'
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        if: steps.rust-scope.outputs.has_changes == 'true'
+        with:
+          python-version: "3.13"
+      - name: Cargo check
+        if: steps.rust-scope.outputs.has_changes == 'true'
+        run: cargo check --all-targets
+      - name: Clippy
+        if: steps.rust-scope.outputs.has_changes == 'true'
+        run: cargo clippy --all-targets -- -D warnings
+      - name: Skip (no Rust changes)
+        if: steps.rust-scope.outputs.has_changes != 'true'
+        run: echo "No Rust changes detected, skipping."
+
   lint:
     needs: [change-scope]
     if: needs.change-scope.outputs.automation_only != 'true'
@@ -450,7 +494,7 @@ jobs:
           fi
 
   build:
-    needs: [change-scope, lint, security, test, test_status]
+    needs: [change-scope, lint, security, test, test_status, rust-check]
     if: needs.change-scope.outputs.automation_only != 'true'
     runs-on: ubuntu-latest
     steps:
