@@ -19,6 +19,7 @@ fn main() {
     let mut state = State {
         last_hash: "GENESIS".to_string(),
         memory: std::collections::HashMap::new(),
+        reputation: std::collections::HashMap::new(),
     };
     let mut dag = MemoryDAG::new();
 
@@ -103,6 +104,7 @@ fn main() {
     let genesis_state = State {
         last_hash: "GENESIS".to_string(),
         memory: std::collections::HashMap::new(),
+        reputation: std::collections::HashMap::new(),
     };
     let test_event = Event {
         id: "e_det".to_string(),
@@ -185,9 +187,52 @@ fn main() {
     println!("  Proof generated & verified: {}", proof_valid);
     println!();
 
+    // ── PHASE 7: FALSACIÓN — Trust-as-a-Service (Reputation Marketplace) ──
+    println!("[FALSACIÓN I6] Trust-as-a-Service Validation");
+    // L1: Unverified agent attempts critical action (should fail)
+    let critical_fail_event = Event {
+        id: "e_critical_fail".to_string(),
+        prev_hash: state.last_hash.clone(),
+        payload: b"CRITICAL:deploy_contract".to_vec(),
+        agent_id: "agent_zero_trust".to_string(),
+        signature: vec![],
+    };
+    let i6_fail = kernel::apply_event(state.clone(), critical_fail_event).is_err();
+    println!("  L1: Critical action with 0 trust rejected: {}", i6_fail);
+
+    // L2: Trust is minted
+    let mint_trust_event = Event {
+        id: "e_mint_trust".to_string(),
+        prev_hash: state.last_hash.clone(),
+        payload: b"TRUST_MINT:agent_elite:15".to_vec(),
+        agent_id: "system_oracle".to_string(),
+        signature: vec![],
+    };
+    let state_with_trust = kernel::apply_event(state.clone(), mint_trust_event).unwrap();
+    let elite_rep = *state_with_trust.reputation.get("agent_elite").unwrap_or(&0);
+    println!("  L2: Trust minted for agent_elite: {}", elite_rep);
+
+    // L3: Elite agent attempts critical action (should succeed)
+    let critical_pass_event = Event {
+        id: "e_critical_pass".to_string(),
+        prev_hash: state_with_trust.last_hash.clone(),
+        payload: b"CRITICAL:deploy_contract".to_vec(),
+        agent_id: "agent_elite".to_string(),
+        signature: vec![],
+    };
+    let final_state_res = kernel::apply_event(state_with_trust, critical_pass_event);
+    let i6_pass = final_state_res.is_ok();
+    println!("  L3: Critical action with >=10 trust accepted: {}", i6_pass);
+    
+    // Update main state reference to point to final
+    state = final_state_res.unwrap();
+    let i6_verdict = i6_fail && elite_rep == 15 && i6_pass;
+    println!("  VERDICT: I6 {} (C5-REAL)", if i6_verdict { "CONFIRMED ✓" } else { "FAILED ✗" });
+    println!();
+
     // ── SUMMARY ──
     let all_pass = i1_pass && i1_knockout_pass && i1_resurrection_pass
-        && i3_pass && i4_pass && i4_integrity && i5_forge_rejected;
+        && i3_pass && i4_pass && i4_integrity && i5_forge_rejected && i6_verdict;
     println!("═══════════════════════════════════════════════════");
     if all_pass {
         println!("  ALL INVARIANTS CONFIRMED — C5-REAL ✓");

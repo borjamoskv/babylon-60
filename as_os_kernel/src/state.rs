@@ -4,4 +4,5 @@ use std::collections::HashMap;
 pub struct State {
     pub last_hash: String,
     pub memory: HashMap<String, Vec<u8>>,
+    pub reputation: HashMap<String, u32>,
 }
