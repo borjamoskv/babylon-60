@@ -7,11 +7,13 @@ import sqlite3
 import mmap
 import weakref
 import atexit
+import threading
 
-from .base import SovereignResource, _setup_sqlite_pragmas, _get_local_conn, DB_PATH, HAS_CORTEX_RS, outbox_wake_event, logger
+from .base import SovereignResource, _setup_sqlite_pragmas, _get_local_conn, DB_PATH, HAS_CORTEX_RS, outbox_wake_event, logger, _metrics_cache, _metrics_cache_lock
 
 try:
-    import cortex_rs
+    import cortex_rs  # noqa: F401
+    HAS_CORTEX_RS = True
 except ImportError:
     pass
 
@@ -318,9 +320,8 @@ def get_swarm_metrics(bypass_cache: bool = False) -> dict:
         avg_exec = c.fetchone()[0]
         latency_ms = (avg_exec * 1000.0) if avg_exec else 35.0
 
-        # Active children: count of pending tasks in swarm queue
-        c.execute("SELECT COUNT(*) FROM cortex_swarm_queue WHERE status = 'pending'")
-        active_children = c.fetchone()[0]
+        # Active children: Strictly isolated to ZeroCopyRingBuffer (no SQLite tracking)
+        active_children = 0
 
         # Uncertainty: Failure rate in the ledger (returncode != 0)
         c.execute(

@@ -22,6 +22,8 @@ def clean_swarm_queue_db(monkeypatch, tmp_path):
 
     # Patch DB_PATH in imported modules
     monkeypatch.setattr("persistence.DB_PATH", str(test_db))
+    monkeypatch.setattr("persistence.base.DB_PATH", str(test_db))
+    monkeypatch.setattr("persistence.outbox.DB_PATH", str(test_db))
 
     # Reset cache
     with persistence._metrics_cache_lock:
