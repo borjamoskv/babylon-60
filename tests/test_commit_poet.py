@@ -282,3 +282,98 @@ class TestChangelog:
         assert "(engine)" in entry
         assert "new store mixin" in entry
         assert entry.startswith("- ")
+
+
+# ── LLM Fallback Tests ───────────────────────────────────────────────────────
+
+
+class TestLLMFallback:
+    """Verify LLM-based composition and narration with heuristic fallbacks."""
+
+    @pytest.mark.asyncio
+    async def test_compose_llm_success(self, poet: CommitPoet):
+        from unittest.mock import AsyncMock, patch
+
+        mock_complete = AsyncMock(
+            return_value="feat(adk): initiate the autopoietic synthesis of adk ⚡"
+        )
+
+        with patch("cortex.extensions.llm.provider.LLMProvider") as mock_provider_cls:
+            mock_provider_instance = mock_provider_cls.return_value
+            mock_provider_instance.complete = mock_complete
+
+            msg = await poet.compose_llm(
+                diff_summary="cortex/adk/core.py | 12 +++",
+                files=["cortex/adk/core.py"],
+            )
+
+            assert msg == "feat(adk): initiate the autopoietic synthesis of adk ⚡"
+            mock_complete.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_compose_llm_invalid_format_fallback(self, poet: CommitPoet):
+        from unittest.mock import AsyncMock, patch
+
+        # Returns message without conventional prefix/format
+        mock_complete = AsyncMock(return_value="this is a bad format commit message")
+
+        with patch("cortex.extensions.llm.provider.LLMProvider") as mock_provider_cls:
+            mock_provider_instance = mock_provider_cls.return_value
+            mock_provider_instance.complete = mock_complete
+
+            msg = await poet.compose_llm(
+                diff_summary="cortex/adk/core.py | 12 +++",
+                files=["cortex/adk/core.py"],
+            )
+
+            # Since the LLM returned invalid format, it must fallback to heuristics
+            assert msg.startswith("feat(adk):")
+
+    @pytest.mark.asyncio
+    async def test_compose_llm_exception_fallback(self, poet: CommitPoet):
+        from unittest.mock import patch
+
+        with patch(
+            "cortex.extensions.llm.provider.LLMProvider", side_effect=ValueError("API key missing")
+        ):
+            msg = await poet.compose_llm(
+                diff_summary="cortex/adk/core.py | 12 +++",
+                files=["cortex/adk/core.py"],
+            )
+
+            # Must gracefully fallback to heuristics
+            assert msg.startswith("feat(adk):")
+
+    @pytest.mark.asyncio
+    async def test_narrate_llm_success(self, poet: CommitPoet):
+        from unittest.mock import AsyncMock, patch
+
+        mock_complete = AsyncMock(return_value='"""Sovereign construct for test."""')
+
+        with patch("cortex.extensions.llm.provider.LLMProvider") as mock_provider_cls:
+            mock_provider_instance = mock_provider_cls.return_value
+            mock_provider_instance.complete = mock_complete
+
+            comment = await poet.narrate_llm(
+                code="class TestModule:",
+                context="testing",
+            )
+
+            assert comment == '"""Sovereign construct for test."""'
+            mock_complete.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_narrate_llm_exception_fallback(self, poet: CommitPoet):
+        from unittest.mock import patch
+
+        with patch(
+            "cortex.extensions.llm.provider.LLMProvider",
+            side_effect=ValueError("No network connection"),
+        ):
+            comment = await poet.narrate_llm(
+                code="class TestModule:",
+            )
+
+            # Must gracefully fallback to heuristics
+            assert '"""' in comment
+            assert "TestModule" in comment

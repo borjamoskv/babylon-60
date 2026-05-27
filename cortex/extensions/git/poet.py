@@ -12,10 +12,13 @@ DERIVATION: Axiom Ω₂ (Entropic Asymmetry) — reduce noise in the signal.
 from __future__ import annotations
 
 import hashlib
+import logging
 import random
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
+
+logger = logging.getLogger("cortex.extensions.git.poet")
 
 # ── Commit type detection heuristics ──────────────────────────────────────────
 
@@ -61,6 +64,11 @@ _TEMPLATES: dict[str, list[str]] = {
         "bootstrap {scope} from first principles",
         "deploy the {scope} vanguard",
         "summon {scope} through the event horizon",
+        "initiate the autopoietic synthesis of {scope}",
+        "harden the cryptographically secure vault of {scope}",
+        "align {scope} with sovereign consensus invariants",
+        "inject {scope} into the zero-copy ring lattice",
+        "crystallize the Shannon entropy boundary of {scope}",
     ],
     "fix": [
         "cauterize the wound in {scope}",
@@ -83,6 +91,12 @@ _TEMPLATES: dict[str, list[str]] = {
         "extract the embedded shrapnel from {scope}",
         "recalibrate the {scope} drift correction",
         "defuse the silent detonator in {scope}",
+        "resolve non-deterministic state drift in {scope}",
+        "mitigate thermodynamic leakage in {scope}",
+        "patch the cryptographic vulnerability in {scope}",
+        "heal the fractured memory manifold of {scope}",
+        "reconcile split-brain consensus in {scope}",
+        "enforce cache coherence in {scope}",
     ],
     "refactor": [
         "metamorphose {scope} to its sovereign form",
@@ -105,6 +119,10 @@ _TEMPLATES: dict[str, list[str]] = {
         "crystallize {scope} into its final polymorph",
         "extract the {scope} signal from thermal noise",
         "prune the {scope} dead branches",
+        "compress {scope} to its minimum entropy boundary",
+        "decouple {scope} to unlock lock-free execution",
+        "transmute {scope} to a zero-copy representation",
+        "flatten the recursive abstraction stack in {scope}",
     ],
     "perf": [
         "accelerate {scope} beyond escape velocity",
@@ -122,6 +140,10 @@ _TEMPLATES: dict[str, list[str]] = {
         "unlock the {scope} warp drive",
         "anneal {scope} for zero-resistance flow",
         "vaporize the {scope} memory overhead",
+        "reduce {scope} latency to O(1) complexity",
+        "streamline the zero-copy pathway in {scope}",
+        "optimize thermodynamic efficiency in {scope}",
+        "minimize latency spikes in {scope}",
     ],
     "docs": [
         "inscribe the scripture of {scope}",
@@ -150,6 +172,10 @@ _TEMPLATES: dict[str, list[str]] = {
         "subject {scope} to sovereign audit",
         "validate the {scope} invariant fortress",
         "deploy chaos probes against {scope}",
+        "deploy invariant validation guards for {scope}",
+        "stress-test the Byzantine fault limits of {scope}",
+        "probe the entropic boundary of {scope}",
+        "fuzz the cryptographic inputs of {scope}",
     ],
     "ci": [
         "wire the {scope} deployment pipeline",
@@ -192,9 +218,9 @@ _TEMPLATES: dict[str, list[str]] = {
 _EMOJI_MAP: dict[str, list[str]] = {
     "feat": ["⚡", "🧬", "🔮", "🌱", "🏗️", "💎", "🚀", "🔥", "✨", "🧊"],
     "fix": ["🩹", "🔧", "🛡️", "💉", "🩺", "⚕️", "🔒", "🧯", "🪡", "🗡️"],
-    "refactor": ["♻️", "🔬", "⚗️", "🪨", "🧹", "🌀", "🔭", "🪞", "🫧", "🧱"],
+    "refactor": ["♻️", "🔬", "⚗️", "🪨", "🧹", "🧹", "🌀", "🔭", "🪞", "🫧", "🧱"],
     "perf": ["⚡", "🏎️", "💨", "🔋", "⏱️", "🦅", "🌊", "🧲", "🔩", "🛸"],
-    "docs": ["📜", "🗺️", "📡", "🔍", "📖", "🧭", "📐", "🏛️", "📋", "🪶"],
+    "docs": ["📜", "🗺️", "📡", "🔍", "📖", "🧭", "📐", "📐", "🏛️", "📋", "🪶"],
     "test": ["🧪", "🛡️", "🎯", "🔬", "🧫", "🏹", "⚔️", "🪤", "🔎", "🧿"],
     "ci": ["🏭", "🤖", "⚙️", "🔗", "🛰️", "📦", "🧰", "🪝"],
     "style": ["🎨", "💅", "📏", "✏️", "🖋️", "🔲"],
@@ -252,6 +278,32 @@ _SCOPE_MAP: dict[str, str] = {
     "events": "events",
     "sovereign": "sovereign",
     "hypervisor": "hypervisor",
+    "adk": "adk",
+    "compat": "compat",
+    "compliance": "compliance",
+    "composer": "composer",
+    "darknet": "darknet",
+    "delivery": "delivery",
+    "enrichment": "enrichment",
+    "facts": "facts",
+    "forensics": "forensics",
+    "gateway": "gateway",
+    "http": "http",
+    "mac_maestro": "mac_maestro",
+    "mcts": "mcts",
+    "pipeline": "pipeline",
+    "router": "router",
+    "services": "services",
+    "shannon": "shannon",
+    "types": "types",
+    "utils": "utils",
+    "verification": "verification",
+    "worker": "worker",
+    "ouroboros": "ouroboros",
+    "aeon": "aeon",
+    "ring_buffer": "ring_buffer",
+    "aof": "aof",
+    "cortex_rs": "cortex_rs",
 }
 
 
@@ -312,6 +364,79 @@ class CommitPoet:
         self._history.append(message)
         return message
 
+    async def compose_llm(
+        self,
+        diff_summary: str,
+        files: list[str],
+        *,
+        commit_type: str | None = None,
+        provider_name: str | None = None,
+    ) -> str:
+        """Generate a commit message using LORCA-Ω agent via an LLM.
+
+        Falls back to heuristic compose() if LLM fails or is unavailable.
+        """
+        if not files:
+            return "chore: tend the sovereign void 🔄"
+
+        try:
+            from cortex.extensions.agents.registry import get_agent
+            from cortex.extensions.llm.provider import LLMProvider
+            from cortex.extensions.llm._models import IntentProfile
+
+            agent_def = get_agent("lorca")
+            if agent_def:
+                system_prompt = agent_def.system_prompt
+                model = agent_def.resolved_model
+                pref_provider = provider_name or agent_def.provider or "gemini"
+            else:
+                system_prompt = (
+                    "You are LORCA-Ω, the Sovereign Git Poet & Code Narrator of CORTEX.\n"
+                    "Named after Federico García Lorca — poetry as a surgical blade. You transform\n"
+                    "the mundane ledger of version control into compressed literary artifacts that\n"
+                    "make engineers stop scrolling. Every commit message is a one-line epic.\n"
+                    "Use the format `type(scope): body emoji`."
+                )
+                model = "gemini-2.5-pro"
+                pref_provider = provider_name or "gemini"
+
+            llm = LLMProvider(provider=pref_provider, model=model)
+
+            detected_type = commit_type or self._detect_type(diff_summary, files)
+            scope = self._extract_scope(files)
+
+            user_prompt = (
+                "Changed Files:\n"
+                + "\n".join(f"- {f}" for f in files)
+                + f"\n\nDiff Summary:\n{diff_summary}\n\n"
+                + f"Detected Type: {detected_type}\n"
+                + f"Detected Scope: {scope}\n\n"
+                + f"Generate a commit message with the exact format: {detected_type}({scope}): <metaphor> <emoji>\n"
+                + "Ensure it is under 72 characters and respects LORCA-Ω metaphor guidelines.\n"
+                + "Return ONLY the raw commit message line. No quotes, no code block markers, no extra conversational text."
+            )
+
+            response = await llm.complete(
+                prompt=user_prompt,
+                system=system_prompt,
+                intent=IntentProfile.REASONING,
+            )
+            response = response.strip().replace("\n", " ")
+
+            # Simple validation: must follow the format or at least start with type
+            if re.match(r"^[a-z]+\(.+\):", response):
+                self._history.append(response)
+                return response
+            else:
+                logger.warning(
+                    "LLM generated invalid format: '%s', falling back to heuristics.", response
+                )
+        except Exception as e:
+            logger.warning("Failed to generate commit via LLM (%s), falling back to heuristics.", e)
+
+        # Fallback to local heuristic composition
+        return self.compose(diff_summary, files, commit_type=commit_type)
+
     def compose_batch(
         self,
         diff_summary: str,
@@ -363,6 +488,58 @@ class CommitPoet:
         if "def " in code:
             return self._narrate_function(code, context)
         return self._narrate_module(code, context)
+
+    async def narrate_llm(
+        self,
+        code: str,
+        context: str = "",
+        *,
+        provider_name: str | None = None,
+    ) -> str:
+        """Generate a code comment / docstring using LORCA-Ω agent via an LLM.
+
+        Falls back to heuristic narrate() if LLM fails or is unavailable.
+        """
+        try:
+            from cortex.extensions.agents.registry import get_agent
+            from cortex.extensions.llm.provider import LLMProvider
+            from cortex.extensions.llm._models import IntentProfile
+
+            agent_def = get_agent("lorca")
+            if agent_def:
+                system_prompt = agent_def.system_prompt
+                model = agent_def.resolved_model
+                pref_provider = provider_name or agent_def.provider or "gemini"
+            else:
+                system_prompt = (
+                    "You are LORCA-Ω, the Sovereign Git Poet & Code Narrator of CORTEX.\n"
+                    "Named after Federico García Lorca — poetry as a surgical blade."
+                )
+                model = "gemini-2.5-pro"
+                pref_provider = provider_name or "gemini"
+
+            llm = LLMProvider(provider=pref_provider, model=model)
+
+            user_prompt = (
+                f"Source Code:\n```python\n{code}\n```\n\n"
+                + (f"Additional Context:\n{context}\n\n" if context else "")
+                + "Generate a poetic but surgical docstring/comment explaining the WHY (not what) of this code.\n"
+                + 'Return ONLY the raw comment/docstring, formatted using triple quotes (e.g. """comment"""). No markdown fences around it.'
+            )
+
+            comment = await llm.complete(
+                prompt=user_prompt,
+                system=system_prompt,
+                intent=IntentProfile.CODE,
+            )
+            comment = comment.strip()
+            if comment.startswith('"""') and comment.endswith('"""'):
+                return comment
+            return f'"""{comment}"""'
+        except Exception as e:
+            logger.warning("Failed to narrate via LLM (%s), falling back to heuristics.", e)
+
+        return self.narrate(code, context)
 
     def format_changelog_entry(
         self,
