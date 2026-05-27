@@ -14,8 +14,7 @@ async def test_reconciliation():
     if current_yield >= 0:
         deficit = -(current_yield + 35957.0)
         ledger.append(action="BURN_OUT", vector_id="SIMULATED_TEST", yield_amount=deficit)
-        import time
-        time.sleep(1.5) # Wait for signer thread
+        await asyncio.sleep(1.5) # Wait for signer thread
         new_yield = ledger.get_total_yield()
         print(f"Induced bankruptcy. New yield: {new_yield}")
         
@@ -30,7 +29,7 @@ async def test_reconciliation():
     print(f"Expanded? {expanded}")
     
     # Wait for reconciliation and next operations
-    time.sleep(1.5)
+    await asyncio.sleep(1.5)
     final_yield = ledger.get_total_yield()
     print(f"Final Yield: {final_yield}")
     
