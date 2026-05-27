@@ -70,8 +70,8 @@ class GossipNode:
                 await asyncio.sleep(0.5) 
             except asyncio.CancelledError:
                 break
-            except Exception as e:
-                logger.error(f"Gossip loop error: {e}")
+            except (ConnectionError, TimeoutError, RuntimeError) as e:
+                logger.error(f"Gossip loop networking or runtime error: {e}")
                 await asyncio.sleep(1.0)
 
     async def _propagate_state(self) -> None:

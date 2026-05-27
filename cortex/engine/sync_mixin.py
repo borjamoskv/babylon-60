@@ -60,7 +60,7 @@ class SyncMixin:
         self._closing = True  # Guard to prevent new checkpointing and tasks
         try:
             self._run_sync(self.close())
-        except Exception as e:
+        except (RuntimeError, asyncio.TimeoutError) as e:
             logger.exception(f"[SyncMixin] Error closing async engine synchronously: {e}")
 
         tls = self.__dict__.get("_sync_tls")
@@ -74,7 +74,7 @@ class SyncMixin:
                     if tasks:
                         loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
                     loop.close()
-                except Exception as e:
+                except (RuntimeError, ValueError) as e:
                     logger.debug(f"[SyncMixin] Handled error during loop teardown: {e}")
             delattr(tls, "loop")
 
