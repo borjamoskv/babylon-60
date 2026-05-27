@@ -26,6 +26,7 @@ pub mod py_inverse;
 pub mod oracle;
 pub mod mutator;
 pub mod mcp;
+pub mod vsa;
 pub use mcp::{McpNativeClient, McpSovereignHost};
 
 fn strip_trailing_nulls(slice: &[u8]) -> &[u8] {
@@ -581,6 +582,7 @@ fn cortex_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<oracle::FitnessOracleRs>()?;
     m.add_class::<mutator::GenomeMutatorRs>()?;
     py_inverse::register(m)?;
+    vsa::register(_py, m)?;
     Ok(())
 }
 
