@@ -3,6 +3,12 @@ import logging
 from swarm_manager import SwarmActuator
 from telemetry_gate import TelemetryGate
 
+import os
+from pathlib import Path
+
+# Force working directory to the script's parent directory to resolve dummy files correctly
+os.chdir(Path(__file__).parent)
+
 logging.basicConfig(level=logging.INFO)
 
 db_path = "cortex_memory_vsa.db"
@@ -33,7 +39,13 @@ failing_patch = json.dumps({
 success = gate.process_external_patch("GPT-4-Legacy", failing_patch)
 print(f"Result 2 (Expected False): {success}")
 
+import os
+from pathlib import Path
+
+dummy_path = Path(__file__).parent / "dummy_gate.py"
+
 # Check original file
-with open("dummy_gate.py") as f:
+with open(dummy_path) as f:
     content = f.read()
     print(f"\nFinal dummy_gate.py content:\n{content}")
+

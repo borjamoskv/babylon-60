@@ -4,6 +4,7 @@
 Single source of truth for version = pyproject.toml (0.3.0b7).
 SCHEMA_VERSION (5.4.3) is independent and stays in database/schema.py.
 """
+
 import re
 import sys
 from pathlib import Path
@@ -39,7 +40,7 @@ def process_file(filepath: Path, dry_run: bool = False) -> bool:
     # Handle case where entire docstring was just the version tag
     new_content = re.sub(r'"""[\s]*"""', '""""""', new_content)
     # Remove fully empty module docstrings
-    new_content = re.sub(r'^""""""[\s]*\n', '', new_content, flags=re.MULTILINE)
+    new_content = re.sub(r'^""""""[\s]*\n', "", new_content, flags=re.MULTILINE)
 
     if dry_run:
         return True
