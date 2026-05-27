@@ -40,6 +40,7 @@ async def telemetry_loop(websocket):
                     "gil_friction_us": 0.0,  # GIL bypassed
                     "ring_buffer_utilization": round(random.uniform(0.1, 2.5), 2),
                     "exergy_consumption_j": round(random.uniform(0.01, 0.05), 4),
+                    "cortisol_level": round(random.uniform(0.1, 0.9), 3),
                 },
             }
             await websocket.send(json.dumps(payload))
