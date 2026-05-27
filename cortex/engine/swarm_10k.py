@@ -373,4 +373,12 @@ class SwarmCommander:
         if isinstance(self.bus, SovereignSharedBus):
             self.bus.unlink()
 
+        # Clean up Centurion buses to prevent shared_memory leaks
+        for legion in self.legions.values():
+            for cen in legion.centurions.values():
+                if isinstance(cen.bus, SovereignSharedBus):
+                    cen.bus.unlink()
+                elif hasattr(cen.bus, "close"):
+                    cen.bus.close()
+
         self.legions.clear()
