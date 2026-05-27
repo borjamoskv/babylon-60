@@ -307,7 +307,7 @@ CREATE TABLE IF NOT EXISTS enrichment_jobs (
     payload         TEXT,
     created_at      TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at      TEXT NOT NULL DEFAULT (datetime('now')),
-    FOREIGN KEY(event_id) REFERENCES ledger_events(event_id) ON DELETE CASCADE
+    FOREIGN KEY(event_id) REFERENCES entity_events(id) ON DELETE CASCADE
 );
 """
 
@@ -323,7 +323,9 @@ CREATE VIRTUAL TABLE IF NOT EXISTS facts_fts USING fts5(
     project,
     tags,
     fact_type,
-    tenant_id UNINDEXED
+    tenant_id UNINDEXED,
+    content='facts',
+    content_rowid='id'
 );
 """
 
