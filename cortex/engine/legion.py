@@ -342,7 +342,7 @@ class LegionOmegaEngine:
         return SiegeResult(
             success=False,
             final_code=final_code,
-            cycles=self.max_cycles,
+            cycles=cycle,
             vulnerabilities=vulnerabilities if vulnerabilities else [],
         )
 

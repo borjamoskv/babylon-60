@@ -7,6 +7,12 @@ import logging
 import weakref
 import atexit
 
+try:
+    import cortex_rs
+    HAS_RUST = True
+except ImportError:
+    HAS_RUST = False
+
 DB_PATH = os.getenv(
     "CORTEX_DB_PATH",
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "cortex_memory_vsa.db"),
@@ -39,14 +45,21 @@ class UltramapSubstrate:
             with open(self.bin_path, "wb") as f:
                 f.write(b"\x00" * self.tensor_size)
 
-        self._f = open(self.bin_path, "r+b")
-        self._mmap = mmap.mmap(self._f.fileno(), self.tensor_size)
-        self._buffer = memoryview(self._mmap)
+        if HAS_RUST:
+            self._rs = cortex_rs.UltramapSubstrate(self.bin_path, self.capacity)
+            self._buffer = None
+            self._mmap = None
+            self._f = None
+        else:
+            self._rs = None
+            self._f = open(self.bin_path, "r+b")
+            self._mmap = mmap.mmap(self._f.fileno(), self.tensor_size)
+            self._buffer = memoryview(self._mmap)
+            
+            self._finalizer = weakref.finalize(self, self._safe_close, getattr(self, '_buffer', None), getattr(self, '_mmap', None), getattr(self, '_f', None))
+            atexit.register(self.close)
         
-        self._finalizer = weakref.finalize(self, self._safe_close, getattr(self, '_buffer', None), getattr(self, '_mmap', None), getattr(self, '_f', None))
-        atexit.register(self.close)
-        
-        logger.info(f"ULTRAMAP-Ω Initialized. Capacity: {self.capacity} agents. O(1) Memory Active.")
+        logger.info(f"ULTRAMAP-Ω Initialized. Capacity: {self.capacity} agents. O(1) Memory Active. (Rust: {HAS_RUST})")
 
     @staticmethod
     def _safe_close(buffer_obj, mmap_obj, f_obj):
@@ -64,6 +77,8 @@ class UltramapSubstrate:
                 pass
 
     def close(self):
+        if hasattr(self, "_rs") and self._rs is not None:
+            self._rs = None
         if hasattr(self, "_buffer") and self._buffer is not None:
             self._buffer.release()
             self._buffer = None
@@ -81,15 +96,10 @@ class UltramapSubstrate:
         if not (0 <= agent_idx < self.capacity):
             return False
             
+        if self._rs is not None:
+            return self._rs.update_agent_position(agent_idx, x, y, z, target, entropy)
+
         offset = agent_idx * self.node_size
-        
-        # We pack x, y, z first, then target_hash, then entropy
-        # Let's fix the layout mapping:
-        # 0-8: X
-        # 8-16: Y
-        # 16-24: Z
-        # 24-88: Target Hash
-        # 88-96: Entropy Gradient
         
         struct.pack_into("ddd", self._buffer, offset, x, y, z)
         target_bytes = target.encode('utf-8')[:64].ljust(64, b"\x00")
@@ -106,20 +116,19 @@ class UltramapSubstrate:
         if not (0 <= agent_idx < self.capacity):
             raise EntropyDeath("Agent Index Out of Bounds")
             
+        if self._rs is not None:
+            return self._rs.calculate_exergy_distance(agent_idx, target_hash)
+
         offset = agent_idx * self.node_size
         x, y, z = struct.unpack_from("ddd", self._buffer, offset)
         current_entropy = struct.unpack_from("d", self._buffer, offset + 88)[0]
         
-        # Target hash defines a deterministic point in space
         target_int = int(hashlib.sha256(target_hash.encode()).hexdigest()[:16], 16)
         tx = (target_int % 1000) / 10.0
         ty = ((target_int >> 4) % 1000) / 10.0
         tz = ((target_int >> 8) % 1000) / 10.0
         
         distance = ((tx - x)**2 + (ty - y)**2 + (tz - z)**2)**0.5
-        
-        # Joules = Distance * (1 / (Current Entropy + 0.01))
-        # High entropy areas require less exergy to exploit
         joules = distance * (1.0 / (current_entropy + 0.001))
         return joules
         
@@ -127,6 +136,9 @@ class UltramapSubstrate:
         if not (0 <= agent_idx < self.capacity):
             return {}
             
+        if self._rs is not None:
+            return self._rs.get_agent_state(agent_idx)
+
         offset = agent_idx * self.node_size
         x, y, z = struct.unpack_from("ddd", self._buffer, offset)
         target_bytes = bytes(self._buffer[offset + 24 : offset + 88]).rstrip(b"\x00")
@@ -141,7 +153,6 @@ class UltramapSubstrate:
         }
 
 if __name__ == "__main__":
-    # C5-REAL Initialization Test
     umap = UltramapSubstrate()
     umap.update_agent_position(0, 10.0, 20.0, 30.0, "CVE-2026-MINIPLASMA", 0.95)
     joules = umap.calculate_exergy_distance(0, "TARGET_DARKPOOL_0x1")

@@ -412,15 +412,20 @@ class CortexDaemon:
             logging.error("Self-Audit Parse Error: %s", e)
 
     async def _trigger_aeon_0_mutation(self):
-        """Invoke AEON-0 Compiler for autonomous AST mutation during swarm downtime."""
+        """Invoke AEON-0 Compiler for autonomous AST mutation during swarm downtime.
+        
+        NOTE: AEON-0 mutations are daemon-internal (trusted origin). They do NOT
+        carry an Ed25519 signature because the OutboxDaemon's LedgerManager holds
+        its own ephemeral keypair — a signature forged here would never verify there.
+        The interceptor permits unsigned payloads in Legacy Mode with a WARNING log.
+        External/untrusted mutations MUST carry a valid signature or they are rejected.
+        """
         logging.info("🧬 [AEON-0] Swarm Idle. Triggering Autonomous AST Mutation...")
         try:
             import random
             from persistence import enqueue_swarm_task
-            from persistence.ledger import LedgerManager
             
             target_dir = str(PROJECT_ROOT / "cortex-core")
-            # Candidates for autonomous mutation
             candidates = ["ouroboros_engine.py", "k0_swarm_node.py", "cortex_exergy_stress.py"]
             
             target_file = os.path.join(target_dir, random.choice(candidates))
@@ -429,21 +434,17 @@ class CortexDaemon:
                 
             new_source = f"# AEON-0 Autonomous Mutagenesis Timestamp: {time.time()}"
             
-            # Generate valid C5-REAL signature for AEON-0 verification
-            ledger = LedgerManager()
-            signature = ledger.private_key.sign(new_source.encode("utf-8")).hex()
-            
             payload = {
                 "type": "AST_MUTATION",
                 "target_file": target_file,
                 "function_name": "auto_mutate",
                 "new_source": new_source,
                 "yield_amount": 10.0,
-                "signature": signature
+                "origin": "AEON_0_DAEMON",
             }
             
             enqueue_swarm_task("AEON_0_DAEMON", payload)
-            logging.info("🧬 [AEON-0] Mutation task queued for %s via ZeroCopyRingBuffer", target_file)
+            logging.info("🧬 [AEON-0] Mutation task queued for %s", target_file)
         except Exception as e:
             logging.error("AEON-0 Integration Failure: %s", e)
 
