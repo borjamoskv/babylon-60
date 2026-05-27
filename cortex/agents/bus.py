@@ -174,16 +174,19 @@ class SqliteMessageBus:
             await self._conn.close()
             self._conn = None
 
+
 class ByzantineZeroCopyBus:
     """Zero-copy MessageBus implementation for Byzantine Swarms (C5-REAL).
-    
+
     Uses cortex_rs.ZeroCopyRingBuffer for O(1) Exergy message passing,
     and HMAC-SHA256 signatures to reject Byzantine faults and forged messages.
     """
-    
-    def __init__(self, bin_path: str = "cortex_swarm.bin", capacity: int = 10000, secret: str | None = None):
+
+    def __init__(
+        self, bin_path: str = "cortex_swarm.bin", capacity: int = 10000, secret: str | None = None
+    ):
         """Initialize Byzantine bus.
-        
+
         Args:
             secret: HMAC signing key. Defaults to CORTEX_BUS_SECRET env var,
                     or a random 32-byte key if neither is provided.
@@ -193,34 +196,38 @@ class ByzantineZeroCopyBus:
         self.bin_path = bin_path
         # Late import to prevent circular dependency
         import cortex_rs
+
         self.ring = cortex_rs.ZeroCopyRingBuffer(self.bin_path, capacity)
         resolved_secret = secret or os.environ.get("CORTEX_BUS_SECRET") or os.urandom(32).hex()
         self.secret = resolved_secret.encode("utf-8")
         self._lock = asyncio.Lock()
-        
+
     def _sign(self, msg_json: str) -> str:
         import hmac
         import hashlib
+
         return hmac.new(self.secret, msg_json.encode("utf-8"), hashlib.sha256).hexdigest()
 
     async def send(self, message: AgentMessage) -> None:
         """Enqueue a message with Byzantine signature."""
         msg_json = message.to_json()
         sig = self._sign(msg_json)
-        
+
         # Format: <sig_64_bytes>:<msg_json>
         payload_str = f"{sig}:{msg_json}"
         payload_bytes = payload_str.encode("utf-8")
-        
+
         if len(payload_bytes) > 4023:
-            raise ValueError(f"Message payload too large for ZeroCopyRingBuffer: {len(payload_bytes)} > 4023 bytes")
-            
+            raise ValueError(
+                f"Message payload too large for ZeroCopyRingBuffer: {len(payload_bytes)} > 4023 bytes"
+            )
+
         async with self._lock:
             # Enqueue returns True if successful
             success = self.ring.enqueue(message.recipient.encode("utf-8"), payload_bytes)
             if not success:
                 logger.error("ByzantineZeroCopyBus: Ring buffer is full!")
-                
+
         logger.debug(
             "ZeroCopyBus: %s → %s [%s]",
             message.sender,
@@ -237,7 +244,7 @@ class ByzantineZeroCopyBus:
             # In a real distributed system, we'd need acking, but for this C5-REAL local swarm,
             # fetch_pending removes it from the pending queue (sets to processing/0).
             pending = self.ring.fetch_pending()
-            
+
             for _idx, _ts, rec_id, payload_bytes in pending:
                 try:
                     rec_str = rec_id.decode("utf-8").strip("\x00")
@@ -245,16 +252,17 @@ class ByzantineZeroCopyBus:
                         payload_str = payload_bytes.decode("utf-8").strip("\x00")
                         if ":" not in payload_str:
                             continue
-                        
+
                         sig, msg_json = payload_str.split(":", 1)
                         expected_sig = self._sign(msg_json)
                         if sig != expected_sig:
                             logger.error(
-                                "Byzantine Fault Detected: Forged message signature rejected! %s != %s", 
-                                sig, expected_sig
+                                "Byzantine Fault Detected: Forged message signature rejected! %s != %s",
+                                sig,
+                                expected_sig,
                             )
                             continue
-                            
+
                         return AgentMessage.from_json(msg_json)
                 except (UnicodeDecodeError, json.JSONDecodeError, ValueError, KeyError) as e:
                     logger.warning("ZeroCopyBus: Failed to deserialize message: %s", e)
@@ -262,7 +270,7 @@ class ByzantineZeroCopyBus:
             if timeout <= 0 or (time.monotonic() - start) >= timeout:
                 break
             await asyncio.sleep(0.01)
-            
+
         return None
 
     async def broadcast(self, message: AgentMessage) -> None:
