@@ -28,6 +28,7 @@ from cortex.mcp.mega_tools import register_mega_tools
 from cortex.mcp.music_tools import register_music_tools
 from cortex.mcp.singularity_tools import register_singularity_tools
 from cortex.mcp.trust_tools import register_trust_tools
+from cortex.mcp.apollo_tools import register_apollo_tools
 from cortex.mcp.utils import (
     AsyncConnectionPool,
     MCPMetrics,
@@ -345,6 +346,9 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
     from cortex.mcp.pipeline_tools import register_pipeline_tools
 
     register_pipeline_tools(mcp, ctx)
+
+    # Apollo B2B Lead Extraction Tools
+    register_apollo_tools(mcp)
 
     return mcp
 
