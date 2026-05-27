@@ -1,0 +1,1909 @@
+{
+  "summary": {
+    "avg_boundary": 0.28888,
+    "final_boundary": 0.694,
+    "stability": 1.0
+  },
+  "full_log": [
+    {
+      "step": 0,
+      "noise_injected": 0.4,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 485,
+        "indistinguishable_worlds": 24,
+        "uniquely_identifiable": 476,
+        "boundary_score": 0.03,
+        "max_ambiguity_size": 8
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 1,
+      "noise_injected": 0.405,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 482,
+        "indistinguishable_worlds": 28,
+        "uniquely_identifiable": 472,
+        "boundary_score": 0.036,
+        "max_ambiguity_size": 10
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 2,
+      "noise_injected": 0.41000000000000003,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 471,
+        "indistinguishable_worlds": 38,
+        "uniquely_identifiable": 462,
+        "boundary_score": 0.058,
+        "max_ambiguity_size": 21
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 3,
+      "noise_injected": 0.41500000000000004,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 483,
+        "indistinguishable_worlds": 25,
+        "uniquely_identifiable": 475,
+        "boundary_score": 0.034,
+        "max_ambiguity_size": 11
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 4,
+      "noise_injected": 0.42000000000000004,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 478,
+        "indistinguishable_worlds": 29,
+        "uniquely_identifiable": 471,
+        "boundary_score": 0.044,
+        "max_ambiguity_size": 17
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 5,
+      "noise_injected": 0.42500000000000004,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 476,
+        "indistinguishable_worlds": 29,
+        "uniquely_identifiable": 471,
+        "boundary_score": 0.048,
+        "max_ambiguity_size": 21
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 6,
+      "noise_injected": 0.43000000000000005,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 468,
+        "indistinguishable_worlds": 47,
+        "uniquely_identifiable": 453,
+        "boundary_score": 0.064,
+        "max_ambiguity_size": 17
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 7,
+      "noise_injected": 0.43500000000000005,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 470,
+        "indistinguishable_worlds": 40,
+        "uniquely_identifiable": 460,
+        "boundary_score": 0.06,
+        "max_ambiguity_size": 22
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 8,
+      "noise_injected": 0.44,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 475,
+        "indistinguishable_worlds": 33,
+        "uniquely_identifiable": 467,
+        "boundary_score": 0.05,
+        "max_ambiguity_size": 19
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 9,
+      "noise_injected": 0.445,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 471,
+        "indistinguishable_worlds": 40,
+        "uniquely_identifiable": 460,
+        "boundary_score": 0.058,
+        "max_ambiguity_size": 19
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 10,
+      "noise_injected": 0.45,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 467,
+        "indistinguishable_worlds": 47,
+        "uniquely_identifiable": 453,
+        "boundary_score": 0.066,
+        "max_ambiguity_size": 20
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 11,
+      "noise_injected": 0.455,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 466,
+        "indistinguishable_worlds": 47,
+        "uniquely_identifiable": 453,
+        "boundary_score": 0.068,
+        "max_ambiguity_size": 23
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 12,
+      "noise_injected": 0.46,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 459,
+        "indistinguishable_worlds": 55,
+        "uniquely_identifiable": 445,
+        "boundary_score": 0.082,
+        "max_ambiguity_size": 29
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 13,
+      "noise_injected": 0.465,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 467,
+        "indistinguishable_worlds": 47,
+        "uniquely_identifiable": 453,
+        "boundary_score": 0.066,
+        "max_ambiguity_size": 18
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 14,
+      "noise_injected": 0.47000000000000003,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 453,
+        "indistinguishable_worlds": 60,
+        "uniquely_identifiable": 440,
+        "boundary_score": 0.094,
+        "max_ambiguity_size": 33
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 15,
+      "noise_injected": 0.47500000000000003,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 459,
+        "indistinguishable_worlds": 60,
+        "uniquely_identifiable": 440,
+        "boundary_score": 0.082,
+        "max_ambiguity_size": 22
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 16,
+      "noise_injected": 0.48000000000000004,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 461,
+        "indistinguishable_worlds": 59,
+        "uniquely_identifiable": 441,
+        "boundary_score": 0.078,
+        "max_ambiguity_size": 19
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 17,
+      "noise_injected": 0.48500000000000004,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 464,
+        "indistinguishable_worlds": 56,
+        "uniquely_identifiable": 444,
+        "boundary_score": 0.072,
+        "max_ambiguity_size": 17
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 18,
+      "noise_injected": 0.49,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 462,
+        "indistinguishable_worlds": 53,
+        "uniquely_identifiable": 447,
+        "boundary_score": 0.076,
+        "max_ambiguity_size": 25
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 19,
+      "noise_injected": 0.495,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 447,
+        "indistinguishable_worlds": 68,
+        "uniquely_identifiable": 432,
+        "boundary_score": 0.106,
+        "max_ambiguity_size": 39
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 20,
+      "noise_injected": 0.5,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 442,
+        "indistinguishable_worlds": 81,
+        "uniquely_identifiable": 419,
+        "boundary_score": 0.116,
+        "max_ambiguity_size": 33
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 21,
+      "noise_injected": 0.505,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 456,
+        "indistinguishable_worlds": 59,
+        "uniquely_identifiable": 441,
+        "boundary_score": 0.088,
+        "max_ambiguity_size": 30
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 22,
+      "noise_injected": 0.51,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 450,
+        "indistinguishable_worlds": 63,
+        "uniquely_identifiable": 437,
+        "boundary_score": 0.1,
+        "max_ambiguity_size": 38
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 23,
+      "noise_injected": 0.515,
+      "proof": {
+        "status": "PARTIALLY_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 451,
+        "indistinguishable_worlds": 69,
+        "uniquely_identifiable": 431,
+        "boundary_score": 0.098,
+        "max_ambiguity_size": 30
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 24,
+      "noise_injected": 0.52,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 427,
+        "indistinguishable_worlds": 103,
+        "uniquely_identifiable": 397,
+        "boundary_score": 0.146,
+        "max_ambiguity_size": 41
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 25,
+      "noise_injected": 0.525,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 444,
+        "indistinguishable_worlds": 76,
+        "uniquely_identifiable": 424,
+        "boundary_score": 0.112,
+        "max_ambiguity_size": 37
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 26,
+      "noise_injected": 0.53,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 426,
+        "indistinguishable_worlds": 102,
+        "uniquely_identifiable": 398,
+        "boundary_score": 0.148,
+        "max_ambiguity_size": 44
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 27,
+      "noise_injected": 0.535,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 442,
+        "indistinguishable_worlds": 77,
+        "uniquely_identifiable": 423,
+        "boundary_score": 0.116,
+        "max_ambiguity_size": 41
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 28,
+      "noise_injected": 0.54,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 441,
+        "indistinguishable_worlds": 79,
+        "uniquely_identifiable": 421,
+        "boundary_score": 0.118,
+        "max_ambiguity_size": 40
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 29,
+      "noise_injected": 0.545,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 431,
+        "indistinguishable_worlds": 94,
+        "uniquely_identifiable": 406,
+        "boundary_score": 0.138,
+        "max_ambiguity_size": 43
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 30,
+      "noise_injected": 0.55,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 429,
+        "indistinguishable_worlds": 90,
+        "uniquely_identifiable": 410,
+        "boundary_score": 0.142,
+        "max_ambiguity_size": 52
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 31,
+      "noise_injected": 0.555,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 421,
+        "indistinguishable_worlds": 100,
+        "uniquely_identifiable": 400,
+        "boundary_score": 0.158,
+        "max_ambiguity_size": 58
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 32,
+      "noise_injected": 0.56,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 434,
+        "indistinguishable_worlds": 78,
+        "uniquely_identifiable": 422,
+        "boundary_score": 0.132,
+        "max_ambiguity_size": 56
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 33,
+      "noise_injected": 0.5650000000000001,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 412,
+        "indistinguishable_worlds": 106,
+        "uniquely_identifiable": 394,
+        "boundary_score": 0.176,
+        "max_ambiguity_size": 71
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 34,
+      "noise_injected": 0.5700000000000001,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 436,
+        "indistinguishable_worlds": 84,
+        "uniquely_identifiable": 416,
+        "boundary_score": 0.128,
+        "max_ambiguity_size": 46
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 35,
+      "noise_injected": 0.575,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 413,
+        "indistinguishable_worlds": 112,
+        "uniquely_identifiable": 388,
+        "boundary_score": 0.174,
+        "max_ambiguity_size": 61
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 36,
+      "noise_injected": 0.5800000000000001,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 408,
+        "indistinguishable_worlds": 118,
+        "uniquely_identifiable": 382,
+        "boundary_score": 0.184,
+        "max_ambiguity_size": 63
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 37,
+      "noise_injected": 0.585,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 421,
+        "indistinguishable_worlds": 101,
+        "uniquely_identifiable": 399,
+        "boundary_score": 0.158,
+        "max_ambiguity_size": 57
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 38,
+      "noise_injected": 0.5900000000000001,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 414,
+        "indistinguishable_worlds": 113,
+        "uniquely_identifiable": 387,
+        "boundary_score": 0.172,
+        "max_ambiguity_size": 58
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 39,
+      "noise_injected": 0.595,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 403,
+        "indistinguishable_worlds": 125,
+        "uniquely_identifiable": 375,
+        "boundary_score": 0.194,
+        "max_ambiguity_size": 66
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 40,
+      "noise_injected": 0.6000000000000001,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 413,
+        "indistinguishable_worlds": 114,
+        "uniquely_identifiable": 386,
+        "boundary_score": 0.174,
+        "max_ambiguity_size": 57
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 41,
+      "noise_injected": 0.605,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 411,
+        "indistinguishable_worlds": 118,
+        "uniquely_identifiable": 382,
+        "boundary_score": 0.178,
+        "max_ambiguity_size": 58
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 42,
+      "noise_injected": 0.61,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 405,
+        "indistinguishable_worlds": 127,
+        "uniquely_identifiable": 373,
+        "boundary_score": 0.19,
+        "max_ambiguity_size": 61
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 43,
+      "noise_injected": 0.615,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 388,
+        "indistinguishable_worlds": 146,
+        "uniquely_identifiable": 354,
+        "boundary_score": 0.224,
+        "max_ambiguity_size": 78
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 44,
+      "noise_injected": 0.62,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 393,
+        "indistinguishable_worlds": 142,
+        "uniquely_identifiable": 358,
+        "boundary_score": 0.214,
+        "max_ambiguity_size": 66
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 45,
+      "noise_injected": 0.625,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 384,
+        "indistinguishable_worlds": 144,
+        "uniquely_identifiable": 356,
+        "boundary_score": 0.232,
+        "max_ambiguity_size": 86
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 46,
+      "noise_injected": 0.63,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 378,
+        "indistinguishable_worlds": 159,
+        "uniquely_identifiable": 341,
+        "boundary_score": 0.244,
+        "max_ambiguity_size": 82
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 47,
+      "noise_injected": 0.635,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 389,
+        "indistinguishable_worlds": 134,
+        "uniquely_identifiable": 366,
+        "boundary_score": 0.222,
+        "max_ambiguity_size": 82
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 48,
+      "noise_injected": 0.64,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 388,
+        "indistinguishable_worlds": 135,
+        "uniquely_identifiable": 365,
+        "boundary_score": 0.224,
+        "max_ambiguity_size": 89
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 49,
+      "noise_injected": 0.645,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 373,
+        "indistinguishable_worlds": 158,
+        "uniquely_identifiable": 342,
+        "boundary_score": 0.254,
+        "max_ambiguity_size": 94
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 50,
+      "noise_injected": 0.65,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 371,
+        "indistinguishable_worlds": 159,
+        "uniquely_identifiable": 341,
+        "boundary_score": 0.258,
+        "max_ambiguity_size": 90
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 51,
+      "noise_injected": 0.655,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 365,
+        "indistinguishable_worlds": 177,
+        "uniquely_identifiable": 323,
+        "boundary_score": 0.27,
+        "max_ambiguity_size": 92
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 52,
+      "noise_injected": 0.66,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 372,
+        "indistinguishable_worlds": 150,
+        "uniquely_identifiable": 350,
+        "boundary_score": 0.256,
+        "max_ambiguity_size": 102
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 53,
+      "noise_injected": 0.665,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 354,
+        "indistinguishable_worlds": 181,
+        "uniquely_identifiable": 319,
+        "boundary_score": 0.292,
+        "max_ambiguity_size": 108
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 54,
+      "noise_injected": 0.67,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 361,
+        "indistinguishable_worlds": 183,
+        "uniquely_identifiable": 317,
+        "boundary_score": 0.278,
+        "max_ambiguity_size": 89
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 55,
+      "noise_injected": 0.675,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 366,
+        "indistinguishable_worlds": 170,
+        "uniquely_identifiable": 330,
+        "boundary_score": 0.268,
+        "max_ambiguity_size": 97
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 56,
+      "noise_injected": 0.68,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 357,
+        "indistinguishable_worlds": 174,
+        "uniquely_identifiable": 326,
+        "boundary_score": 0.286,
+        "max_ambiguity_size": 110
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 57,
+      "noise_injected": 0.685,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 348,
+        "indistinguishable_worlds": 196,
+        "uniquely_identifiable": 304,
+        "boundary_score": 0.304,
+        "max_ambiguity_size": 104
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 58,
+      "noise_injected": 0.69,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 346,
+        "indistinguishable_worlds": 191,
+        "uniquely_identifiable": 309,
+        "boundary_score": 0.308,
+        "max_ambiguity_size": 115
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 59,
+      "noise_injected": 0.6950000000000001,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 325,
+        "indistinguishable_worlds": 218,
+        "uniquely_identifiable": 282,
+        "boundary_score": 0.35,
+        "max_ambiguity_size": 126
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 60,
+      "noise_injected": 0.7,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 339,
+        "indistinguishable_worlds": 197,
+        "uniquely_identifiable": 303,
+        "boundary_score": 0.322,
+        "max_ambiguity_size": 122
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 61,
+      "noise_injected": 0.7050000000000001,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 337,
+        "indistinguishable_worlds": 201,
+        "uniquely_identifiable": 299,
+        "boundary_score": 0.326,
+        "max_ambiguity_size": 121
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 62,
+      "noise_injected": 0.71,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 338,
+        "indistinguishable_worlds": 191,
+        "uniquely_identifiable": 309,
+        "boundary_score": 0.324,
+        "max_ambiguity_size": 133
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 63,
+      "noise_injected": 0.7150000000000001,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 320,
+        "indistinguishable_worlds": 215,
+        "uniquely_identifiable": 285,
+        "boundary_score": 0.36,
+        "max_ambiguity_size": 138
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 64,
+      "noise_injected": 0.72,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 316,
+        "indistinguishable_worlds": 231,
+        "uniquely_identifiable": 269,
+        "boundary_score": 0.368,
+        "max_ambiguity_size": 128
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 65,
+      "noise_injected": 0.7250000000000001,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 312,
+        "indistinguishable_worlds": 232,
+        "uniquely_identifiable": 268,
+        "boundary_score": 0.376,
+        "max_ambiguity_size": 136
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 66,
+      "noise_injected": 0.73,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 315,
+        "indistinguishable_worlds": 227,
+        "uniquely_identifiable": 273,
+        "boundary_score": 0.37,
+        "max_ambiguity_size": 136
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 67,
+      "noise_injected": 0.7350000000000001,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 303,
+        "indistinguishable_worlds": 234,
+        "uniquely_identifiable": 266,
+        "boundary_score": 0.394,
+        "max_ambiguity_size": 156
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 68,
+      "noise_injected": 0.74,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 317,
+        "indistinguishable_worlds": 224,
+        "uniquely_identifiable": 276,
+        "boundary_score": 0.366,
+        "max_ambiguity_size": 136
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 69,
+      "noise_injected": 0.745,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 292,
+        "indistinguishable_worlds": 243,
+        "uniquely_identifiable": 257,
+        "boundary_score": 0.416,
+        "max_ambiguity_size": 171
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 70,
+      "noise_injected": 0.75,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 316,
+        "indistinguishable_worlds": 218,
+        "uniquely_identifiable": 282,
+        "boundary_score": 0.368,
+        "max_ambiguity_size": 147
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 71,
+      "noise_injected": 0.755,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 297,
+        "indistinguishable_worlds": 242,
+        "uniquely_identifiable": 258,
+        "boundary_score": 0.406,
+        "max_ambiguity_size": 161
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 72,
+      "noise_injected": 0.76,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 299,
+        "indistinguishable_worlds": 238,
+        "uniquely_identifiable": 262,
+        "boundary_score": 0.402,
+        "max_ambiguity_size": 156
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 73,
+      "noise_injected": 0.765,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 285,
+        "indistinguishable_worlds": 259,
+        "uniquely_identifiable": 241,
+        "boundary_score": 0.43,
+        "max_ambiguity_size": 167
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 74,
+      "noise_injected": 0.77,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 268,
+        "indistinguishable_worlds": 264,
+        "uniquely_identifiable": 236,
+        "boundary_score": 0.464,
+        "max_ambiguity_size": 192
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 75,
+      "noise_injected": 0.775,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 279,
+        "indistinguishable_worlds": 256,
+        "uniquely_identifiable": 244,
+        "boundary_score": 0.442,
+        "max_ambiguity_size": 183
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 76,
+      "noise_injected": 0.78,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 267,
+        "indistinguishable_worlds": 278,
+        "uniquely_identifiable": 222,
+        "boundary_score": 0.466,
+        "max_ambiguity_size": 173
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 77,
+      "noise_injected": 0.785,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 259,
+        "indistinguishable_worlds": 279,
+        "uniquely_identifiable": 221,
+        "boundary_score": 0.482,
+        "max_ambiguity_size": 194
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 78,
+      "noise_injected": 0.79,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 244,
+        "indistinguishable_worlds": 298,
+        "uniquely_identifiable": 202,
+        "boundary_score": 0.512,
+        "max_ambiguity_size": 209
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 79,
+      "noise_injected": 0.795,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 254,
+        "indistinguishable_worlds": 287,
+        "uniquely_identifiable": 213,
+        "boundary_score": 0.492,
+        "max_ambiguity_size": 203
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 80,
+      "noise_injected": 0.8,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 254,
+        "indistinguishable_worlds": 281,
+        "uniquely_identifiable": 219,
+        "boundary_score": 0.492,
+        "max_ambiguity_size": 210
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 81,
+      "noise_injected": 0.805,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 269,
+        "indistinguishable_worlds": 265,
+        "uniquely_identifiable": 235,
+        "boundary_score": 0.462,
+        "max_ambiguity_size": 191
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 82,
+      "noise_injected": 0.81,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 232,
+        "indistinguishable_worlds": 291,
+        "uniquely_identifiable": 209,
+        "boundary_score": 0.536,
+        "max_ambiguity_size": 240
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 83,
+      "noise_injected": 0.815,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 244,
+        "indistinguishable_worlds": 291,
+        "uniquely_identifiable": 209,
+        "boundary_score": 0.512,
+        "max_ambiguity_size": 218
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 84,
+      "noise_injected": 0.8200000000000001,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 225,
+        "indistinguishable_worlds": 306,
+        "uniquely_identifiable": 194,
+        "boundary_score": 0.55,
+        "max_ambiguity_size": 245
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 85,
+      "noise_injected": 0.825,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 234,
+        "indistinguishable_worlds": 297,
+        "uniquely_identifiable": 203,
+        "boundary_score": 0.532,
+        "max_ambiguity_size": 228
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 86,
+      "noise_injected": 0.8300000000000001,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 233,
+        "indistinguishable_worlds": 300,
+        "uniquely_identifiable": 200,
+        "boundary_score": 0.534,
+        "max_ambiguity_size": 231
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 87,
+      "noise_injected": 0.835,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 231,
+        "indistinguishable_worlds": 295,
+        "uniquely_identifiable": 205,
+        "boundary_score": 0.538,
+        "max_ambiguity_size": 243
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 88,
+      "noise_injected": 0.8400000000000001,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 204,
+        "indistinguishable_worlds": 327,
+        "uniquely_identifiable": 173,
+        "boundary_score": 0.592,
+        "max_ambiguity_size": 265
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 89,
+      "noise_injected": 0.845,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 215,
+        "indistinguishable_worlds": 316,
+        "uniquely_identifiable": 184,
+        "boundary_score": 0.57,
+        "max_ambiguity_size": 251
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 90,
+      "noise_injected": 0.8500000000000001,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 198,
+        "indistinguishable_worlds": 334,
+        "uniquely_identifiable": 166,
+        "boundary_score": 0.604,
+        "max_ambiguity_size": 264
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 91,
+      "noise_injected": 0.855,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 196,
+        "indistinguishable_worlds": 334,
+        "uniquely_identifiable": 166,
+        "boundary_score": 0.608,
+        "max_ambiguity_size": 268
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 92,
+      "noise_injected": 0.8600000000000001,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 190,
+        "indistinguishable_worlds": 341,
+        "uniquely_identifiable": 159,
+        "boundary_score": 0.62,
+        "max_ambiguity_size": 275
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 93,
+      "noise_injected": 0.865,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 193,
+        "indistinguishable_worlds": 333,
+        "uniquely_identifiable": 167,
+        "boundary_score": 0.614,
+        "max_ambiguity_size": 281
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 94,
+      "noise_injected": 0.87,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 162,
+        "indistinguishable_worlds": 353,
+        "uniquely_identifiable": 147,
+        "boundary_score": 0.676,
+        "max_ambiguity_size": 325
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 95,
+      "noise_injected": 0.875,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 187,
+        "indistinguishable_worlds": 341,
+        "uniquely_identifiable": 159,
+        "boundary_score": 0.626,
+        "max_ambiguity_size": 286
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 96,
+      "noise_injected": 0.88,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 160,
+        "indistinguishable_worlds": 361,
+        "uniquely_identifiable": 139,
+        "boundary_score": 0.68,
+        "max_ambiguity_size": 317
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 97,
+      "noise_injected": 0.885,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 191,
+        "indistinguishable_worlds": 333,
+        "uniquely_identifiable": 167,
+        "boundary_score": 0.618,
+        "max_ambiguity_size": 281
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 98,
+      "noise_injected": 0.89,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 176,
+        "indistinguishable_worlds": 341,
+        "uniquely_identifiable": 159,
+        "boundary_score": 0.648,
+        "max_ambiguity_size": 309
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    },
+    {
+      "step": 99,
+      "noise_injected": 0.895,
+      "proof": {
+        "status": "NON_IDENTIFIABLE",
+        "total_worlds": 500,
+        "equivalence_classes_count": 153,
+        "indistinguishable_worlds": 372,
+        "uniquely_identifiable": 128,
+        "boundary_score": 0.694,
+        "max_ambiguity_size": 323
+      },
+      "partition": {
+        "partition_detected": false,
+        "clusters": 1,
+        "severity": "NONE"
+      },
+      "system_stability": 1.0
+    }
+  ]
+}

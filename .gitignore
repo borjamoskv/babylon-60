@@ -1,2 +1,36 @@
-# No build artifacts, dependencies, or temp files detected
-# Only source/config files present, so no ignores needed
+```python
+# Logs and temporary data files
+*.log
+*.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.ENV
+.python-version
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+*.tmp
+*.temp
+*.lock
+
+# VSCode
+.vscode/
+
+# Original rules preserved
+*.log
+```
