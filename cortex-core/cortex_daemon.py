@@ -39,6 +39,14 @@ class CortexDaemon:
         self.cycle_count = 0
         self.knowledge_observer = None
         self.bus = None
+        
+        # Integrate ULTRAMAP-Ω Substrate (O(1) Topological Memory)
+        try:
+            from ultramap import UltramapSubstrate
+            self.ultramap = UltramapSubstrate()
+        except ImportError:
+            logging.warning("UltramapSubstrate not found, running without topological memory.")
+            self.ultramap = None
 
         self.db_lock = threading.Lock()
 
@@ -102,8 +110,15 @@ class CortexDaemon:
         try:
             from persistence import get_swarm_metrics
             metrics = get_swarm_metrics()
-            logging.info("🔋 [EXERGY] Swarm Telemetry: Active=%d, Latency=%.2fms, Uncertainty=%.2f",
-                         metrics["active_children"], metrics["latency_ms"], metrics["uncertainty"])
+            
+            # Augment with ULTRAMAP topological metrics if available
+            umap_active = 0
+            if self.ultramap:
+                umap_active = self.ultramap.capacity
+                
+            logging.info("🔋 [EXERGY] Swarm Telemetry: Active=%d, UMAP_Nodes=%d, Latency=%.2fms, Uncertainty=%.2f",
+                         metrics["active_children"], umap_active, metrics["latency_ms"], metrics["uncertainty"])
+            
             if self.bus:
                 self.bus.emit(
                     "exergy_telemetry",
@@ -137,6 +152,21 @@ class CortexDaemon:
                 {"agent": agent, "command": cmd, "status": "dispatched"},
                 source="daemon",
             )
+            
+        # Update ULTRAMAP topology if available
+        if self.ultramap:
+            try:
+                # Derive deterministic coordinates from agent name
+                import hashlib
+                agent_hash = int(hashlib.md5(agent.encode()).hexdigest()[:8], 16)
+                idx = agent_hash % self.ultramap.capacity
+                x, y, z = (agent_hash % 100) / 10.0, ((agent_hash >> 4) % 100) / 10.0, ((agent_hash >> 8) % 100) / 10.0
+                
+                self.ultramap.update_agent_position(idx, x, y, z, cmd, 0.99)
+                exergy_cost = self.ultramap.calculate_exergy_distance(idx, cmd)
+                logging.info("🌌 [ULTRAMAP] Agent %s mapped at [%.1f, %.1f, %.1f] (Exergy: %.2f J)", agent, x, y, z, exergy_cost)
+            except Exception as e:
+                logging.error("Ultramap tracking failed: %s", e)
 
         try:
             # HIGH-02 hardened: avoid shell interpretation of task commands

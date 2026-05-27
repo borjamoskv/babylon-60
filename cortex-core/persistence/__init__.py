@@ -39,6 +39,11 @@ from daemons.security_recon import SecurityReconDaemon
 
 from .hybrid import HybridPersistenceManager
 
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from ultramap import UltramapSubstrate
+
 __all__ = [
     "SovereignResource",
     "_setup_sqlite_pragmas",
@@ -63,4 +68,5 @@ __all__ = [
     "_metrics_cache",
     "_metrics_cache_lock",
     "_get_ring_buffer",
+    "UltramapSubstrate",
 ]
