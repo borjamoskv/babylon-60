@@ -19,17 +19,24 @@ def _bootstrap_without_embeddings() -> Iterator[None]:
 
     `cortex init` should create a usable database quickly on a clean machine.
     The initial axiom seed does not need to pay the cold-start cost of loading
-    or downloading the local embedding model.
+    or downloading the local embedding model, nor run the Omega LLM auditor
+    (axiomatic identity facts are ground truth — not external claims).
     """
-    previous = os.environ.get("CORTEX_NO_EMBED")
+    prev_embed = os.environ.get("CORTEX_NO_EMBED")
+    prev_omega = os.environ.get("CORTEX_NO_OMEGA")
     os.environ["CORTEX_NO_EMBED"] = "1"
+    os.environ["CORTEX_NO_OMEGA"] = "1"
     try:
         yield
     finally:
-        if previous is None:
+        if prev_embed is None:
             os.environ.pop("CORTEX_NO_EMBED", None)
         else:
-            os.environ["CORTEX_NO_EMBED"] = previous
+            os.environ["CORTEX_NO_EMBED"] = prev_embed
+        if prev_omega is None:
+            os.environ.pop("CORTEX_NO_OMEGA", None)
+        else:
+            os.environ["CORTEX_NO_OMEGA"] = prev_omega
 
 
 @cli.command()

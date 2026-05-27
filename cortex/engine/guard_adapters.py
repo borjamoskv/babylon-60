@@ -183,6 +183,12 @@ class OmegaGuardAdapter:
         *,
         tenant_id: str = "default",
     ) -> None:
+        import os
+
+        # Allow bootstrap / init to skip LLM auditing for axiomatic facts.
+        if os.environ.get("CORTEX_NO_OMEGA") == "1":
+            return
+
         from cortex.guards.omega_auditor import run_omega_audit
 
         conflicts = await run_omega_audit(content, project)
