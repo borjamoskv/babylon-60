@@ -39,8 +39,15 @@ class PersistenceSupervisor:
         """Hibernates the supervisor and forces a final flush."""
         if self._task:
             self._stop_event.set()
-            await self._task
-            await self.flush()
+            try:
+                await asyncio.wait_for(self._task, timeout=2.0)
+            except asyncio.TimeoutError:
+                logger.warning("PersistenceSupervisor: Heartbeat loop did not exit in time.")
+            except asyncio.CancelledError:
+                pass
+            
+            await self.flush(reason="shutdown")
+            self._task = None
             logger.info("PersistenceSupervisor: C5 layer hibernated.")
 
     async def enqueue(self, fact_data: dict[str, Any]) -> None:

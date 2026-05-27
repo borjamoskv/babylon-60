@@ -19,15 +19,12 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.lock")
 
-_REDUCE_LOCKS: dict[str, asyncio.Lock] = {}
+_REDUCE_LOCKS: dict[tuple[asyncio.AbstractEventLoop, str, str], asyncio.Lock] = {}
 
 
-def _get_local_lock(db_path: str | None) -> asyncio.Lock:
-    key = db_path or ":memory:"
-    if key not in _REDUCE_LOCKS:
-        _REDUCE_LOCKS[key] = asyncio.Lock()
-    return _REDUCE_LOCKS[key]
-
+def _get_local_lock(db_path: str | None, resource: str) -> asyncio.Lock:
+    db_key = db_path or ":memory:"
+    
 
 class SovereignLock:
     """
@@ -103,27 +100,25 @@ class SovereignLock:
                 await asyncio.sleep(0.1)
 
             # Timeout path - must clean up intent to prevent zombie locks
-            local_lock = _get_local_lock(self._db_path)
-            async with local_lock:
-                # One last check to avoid race condition where we just got the lock
-                async with conn.execute(
-                    "SELECT holder_agent FROM lock_state WHERE resource = ?", (resource,)
-                ) as cursor:
-                    row = await cursor.fetchone()
-                if row and row[0] == agent_id:
-                    logger.debug(
-                        "SovereignLock: Resource %s acquired by %s right at timeout",
-                        resource,
-                        agent_id,
-                    )
-                    return True
-
-                # We didn't get it. Remove our request intent.
-                await conn.execute(
-                    "DELETE FROM lock_intents WHERE resource = ? AND agent_id = ? AND action LIKE 'request%'",
-                    (resource, agent_id),
+            # One last check to avoid race condition where we just got the lock
+            async with conn.execute(
+                "SELECT holder_agent FROM lock_state WHERE resource = ?", (resource,)
+            ) as cursor:
+                row = await cursor.fetchone()
+            if row and row[0] == agent_id:
+                logger.debug(
+                    "SovereignLock: Resource %s acquired by %s right at timeout",
+                    resource,
+                    agent_id,
                 )
-                await self._reduce_resource_inner(conn, resource)
+                return True
+
+            # We didn't get it. Remove our request intent.
+            await conn.execute(
+                "DELETE FROM lock_intents WHERE resource = ? AND agent_id = ? AND action LIKE 'request%'",
+                (resource, agent_id),
+            )
+            await self._reduce_resource_inner(conn, resource)
 
         logger.warning("SovereignLock: Timeout acquiring %s for %s", resource, agent_id)
         return False
@@ -156,9 +151,7 @@ class SovereignLock:
     # ─── Private Reduction Logic ───────────────────────────────────────
 
     async def _reduce_resource(self, conn: aiosqlite.Connection, resource: str):
-        local_lock = _get_local_lock(self._db_path)
-        async with local_lock:
-            await self._reduce_resource_inner(conn, resource)
+        await self._reduce_resource_inner(conn, resource)
 
     async def _reduce_resource_inner(self, conn: aiosqlite.Connection, resource: str):
         """The 'Reduction' logic: flattens the intent history into current state."""
@@ -239,21 +232,19 @@ class SovereignLock:
 
     async def _clear_expired(self, conn: aiosqlite.Connection, resource: str):
         """Cleanup expired lock state."""
-        local_lock = _get_local_lock(self._db_path)
-        async with local_lock:
-            # Get the current expired holder so we can remove their intents
-            async with conn.execute(
-                "SELECT holder_agent FROM lock_state WHERE resource = ?", (resource,)
-            ) as cursor:
-                row = await cursor.fetchone()
+        # Get the current expired holder so we can remove their intents
+        async with conn.execute(
+            "SELECT holder_agent FROM lock_state WHERE resource = ?", (resource,)
+        ) as cursor:
+            row = await cursor.fetchone()
 
-            if row and row[0]:
-                expired_holder = row[0]
-                # Remove their request intent so they don't immediately reclaim it
-                await conn.execute(
-                    "DELETE FROM lock_intents WHERE resource = ? AND agent_id = ?",
-                    (resource, expired_holder),
-                )
+        if row and row[0]:
+            expired_holder = row[0]
+            # Remove their request intent so they don't immediately reclaim it
+            await conn.execute(
+                "DELETE FROM lock_intents WHERE resource = ? AND agent_id = ?",
+                (resource, expired_holder),
+            )
 
-            await conn.execute("DELETE FROM lock_state WHERE resource = ?", (resource,))
-            await self._reduce_resource_inner(conn, resource)
+        await conn.execute("DELETE FROM lock_state WHERE resource = ?", (resource,))
+        await self._reduce_resource_inner(conn, resource)

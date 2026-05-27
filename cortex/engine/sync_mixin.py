@@ -65,10 +65,22 @@ class SyncMixin:
             with lock:
                 if hasattr(self, "_sync_loop"):
                     loop = self._sync_loop
-                    loop.call_soon_threadsafe(loop.stop)
+                    
+                    async def _shutdown():
+                        tasks = [t for t in asyncio.all_tasks(loop) if t is not asyncio.current_task(loop)]
+                        for t in tasks:
+                            t.cancel()
+                        if tasks:
+                            await asyncio.gather(*tasks, return_exceptions=True)
+                        loop.stop()
+                        
+                    asyncio.run_coroutine_threadsafe(_shutdown(), loop)
                     if hasattr(self, "_sync_thread"):
                         self._sync_thread.join(timeout=2.0)
                         delattr(self, "_sync_thread")
+                    
+                    if not loop.is_closed():
+                        loop.close()
                     delattr(self, "_sync_loop")
         else:
             try:

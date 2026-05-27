@@ -73,7 +73,7 @@ async def manager(mock_l1, mock_l2, mock_l3, mock_encoder):
     # Give tests control over background workers so we can test the synchronous logic
     # without hanging on active queues unless specifically testing the queues.
     yield mgr
-    mgr._cancel_background_tasks()
+    await mgr._cancel_background_tasks()
 
 
 @pytest.mark.asyncio
@@ -174,7 +174,7 @@ async def test_process_interaction_with_overflow_clean():
         assert args[2] == "sess"
         assert args[3] == "t1"
 
-    mgr._cancel_background_tasks()
+    await mgr._cancel_background_tasks()
 
 
 @pytest.mark.asyncio
@@ -320,7 +320,7 @@ async def test_wait_for_background_timeout(manager):
     async def hanging_compress(*args, **kwargs):
         await asyncio.sleep(5.0)
 
-    manager._cancel_background_tasks()  # Stop real workers
+    await manager._cancel_background_tasks()  # Stop real workers
     manager._bg_queue.put_nowait((["fake"], "s", "t", "p"))  # Unfinished item
 
     with patch("os.environ.get", return_value="1"):
