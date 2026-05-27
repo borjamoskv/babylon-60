@@ -333,6 +333,33 @@ class OutboxDaemon(SovereignResource):
                             self.ledger.append(action="C5_FALSATED_MUTATION", vector_id=agent_name, yield_amount=-50.0)
                         continue
 
+                # -- L1 ACTUATOR INTERCEPTOR: TELEMETRY GATE --
+                if payload_dict.get("type") == "L1_EXTERNAL_PATCH":
+                    try:
+                        from telemetry_gate import TelemetryGate
+                        from swarm_manager import SwarmActuator
+                        
+                        logger.info(f"C5-REAL L1_EXTERNAL_PATCH Invoked for agent {agent_name}. Routing to Telemetry Gate.")
+                        # Initialize actuator with DB path or reuse existing context
+                        actuator = SwarmActuator(self._db_path)
+                        gate = TelemetryGate(actuator)
+                        
+                        # Process the payload through the Guillotine
+                        # The payload must contain the serialized AST_MUTATION patch
+                        patch_string = json.dumps(payload_dict.get("patch", {}))
+                        
+                        success = gate.process_external_patch(agent_name, patch_string)
+                        
+                        if success:
+                            logger.info(f"Telemetry Gate ACCEPTED patch from {agent_name}.")
+                        else:
+                            logger.warning(f"Telemetry Gate REJECTED patch from {agent_name}.")
+                        
+                        continue
+                    except Exception as e:
+                        logger.error(f"L1_EXTERNAL_PATCH Gateway Error: {e}")
+                        continue
+
                 # -- C5-REAL SOVEREIGN ISOLATION --
                 # Todo tráfico de red externa está PROHIBIDO. Las tareas que no son manejadas
                 # por interceptores nativos L0 se ignoran para prevenir exfiltración de entropía.
