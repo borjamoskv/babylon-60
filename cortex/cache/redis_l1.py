@@ -13,7 +13,8 @@ import hashlib
 import logging
 import threading
 import time
-from typing import Any, Callable
+from typing import Any
+from collections.abc import Callable
 
 try:
     import redis

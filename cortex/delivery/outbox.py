@@ -150,9 +150,7 @@ class SovereignOutbox:
     def stats(self) -> dict[str, Any]:
         """Count tasks by status."""
         conn = self._get_conn()
-        rows = conn.execute(
-            "SELECT status, COUNT(*) FROM cortex_outbox GROUP BY status"
-        ).fetchall()
+        rows = conn.execute("SELECT status, COUNT(*) FROM cortex_outbox GROUP BY status").fetchall()
         result: dict[str, Any] = {"pending": 0, "claimed": 0, "completed": 0, "failed": 0}
         for row in rows:
             result[row[0]] = row[1]
