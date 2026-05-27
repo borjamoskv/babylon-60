@@ -1,9 +1,5 @@
-*
-!package.json
-!package-lock.json
-!astro.config.mjs
-!vercel.json
-!src
-!src/**
-!public
-!public/**
+docs/
+tests/
+scripts/
+examples/
+cortex_rs/

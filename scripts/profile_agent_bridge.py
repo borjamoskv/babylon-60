@@ -424,6 +424,9 @@ async def main():
                 transactions_checked = 1
 
         except Exception as e:
+            import traceback
+
+            traceback.print_exc()
             print(f"CortexEngine query error: {e}. Falling back to default values.")
         finally:
             await engine.close()
