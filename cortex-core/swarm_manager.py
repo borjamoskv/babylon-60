@@ -39,7 +39,7 @@ class SwarmActuator:
         logging.info(f"Task dispatched to {agent_id}. Exergy cost: {cost} tokens.")
         
         # Simulate external agent async dispatch
-        task_id = f"EXT_{int(time.time())}_{agent_id}"
+        task_id = f"EXT_{int(time.monotonic())}_{agent_id}"
         
         # In a real scenario, we would wait for the webhook or polling here.
         # Returning the task_id to track the lifecycle in Telemetry Gate.

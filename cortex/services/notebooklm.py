@@ -183,7 +183,7 @@ class NotebookLMService:
 
     def get_signature(self) -> str:
         """Apply Byzantine Defense (Ω₃): A tamper-evident signature for the export."""
-        return f"\n\n---\n**SOVEREIGN SIGNATURE**: {int(time.time())};mosaic-v8;borjamoskv\n"
+        return f"\n\n---\n**SOVEREIGN SIGNATURE**: {int(time.monotonic())};mosaic-v8;borjamoskv\n"
 
     def detect_cloud_sync(self) -> Path | None:
         """Detect appropriate cloud storage sync folder."""

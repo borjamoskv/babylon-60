@@ -43,7 +43,7 @@ class TaskResult:
     errors: list[str] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
     timestamp: str = field(
-        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        default_factory=lambda: datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
     )
 
 
@@ -54,7 +54,7 @@ class LoopSession:
     project: str
     source: str
     started_at: str = field(
-        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        default_factory=lambda: datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
     )
     tasks_completed: int = 0
     tasks_failed: int = 0

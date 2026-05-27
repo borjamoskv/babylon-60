@@ -19,10 +19,10 @@ async def test_aleph_omega():
     
     print("\n--- Mission: Test Axiomatic Leap ---")
     
-    t0 = time.time()
+    t0 = time.monotonic()
     # Trigger a mission. Standard consensus will fail, so it should leap.
     result = await engine.engage("Resolve the Riemann Hypothesis", formation=Formation.BLITZ)
-    t1 = time.time()
+    t1 = time.monotonic()
     
     print("\n[RESULT]")
     print(f"Status: {result.get('status')}")

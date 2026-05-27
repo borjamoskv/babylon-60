@@ -111,7 +111,7 @@ class HeuristicInjectionStrategy:
         domain = sovereign.domain_id.split("_")[0]
         weight = self.DOMAIN_WEIGHTS.get(domain, 0.5) + density_bonus
 
-        heuristic_key = f"hgt_{domain.lower()}_{int(time.time())}"
+        heuristic_key = f"hgt_{domain.lower()}_{int(time.monotonic())}"
         subagent.mutation.parameters[heuristic_key] = weight * 100
         fitness_boost = weight * 5.0
         subagent.fitness += fitness_boost
@@ -375,7 +375,7 @@ class CortexEvolutionEngine:
         for key, value in kwargs.items():
             if hasattr(metrics, key):
                 setattr(metrics, key, value)
-        metrics.timestamp = time.time()
+        metrics.timestamp = time.monotonic()
         self.metrics_backend.update_metrics(metrics)
 
     def evaluate_population(self, sovereign: SovereignAgent) -> list[dict[str, Any]]:
@@ -412,7 +412,7 @@ class CortexEvolutionEngine:
                 if result:
                     applied.add(name)
                     results.append(
-                        {"agent_id": subagent.agent_id, "timestamp": time.time(), **result}
+                        {"agent_id": subagent.agent_id, "timestamp": time.monotonic(), **result}
                     )
             except (ValueError, TypeError, AttributeError, RuntimeError) as exc:
                 results.append({"agent_id": subagent.agent_id, "strategy": name, "error": str(exc)})
@@ -427,7 +427,7 @@ class CortexEvolutionEngine:
         prev_avg = self._prev_avg_fitness.get(domain, current_avg)
         metrics.fitness_delta = current_avg - prev_avg
         self._prev_avg_fitness[domain] = current_avg
-        metrics.timestamp = time.time()
+        metrics.timestamp = time.monotonic()
         self.metrics_backend.update_metrics(metrics)
 
     def get_system_status(self) -> dict[str, Any]:

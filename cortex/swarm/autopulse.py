@@ -80,7 +80,7 @@ async def process_queue():
                     action = f"SwarmSolve:{agent}"
                     vector_id = payload.get("vector_id", "swarm_task_auto")
                     yield_amount = 1.0  # Unit of Autopoiesis
-                    timestamp = time.time()
+                    timestamp = time.monotonic()
 
                     block_payload = f"{prev_hash}_{action}_{vector_id}_{yield_amount}_{timestamp}"
                     block_hash = hashlib.sha256(block_payload.encode()).hexdigest()

@@ -11,7 +11,7 @@ SemanticStatus = Literal["pending", "processing", "indexed", "failed"]
 
 
 def utc_now_iso() -> str:
-    return datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+    return datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
 
 
 @dataclass(frozen=True)

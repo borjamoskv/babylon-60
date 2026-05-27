@@ -17,21 +17,21 @@ async def test_hologram():
     holo = HolographicMemory(store)
     
     print("Loading hologram matrix...")
-    t0 = time.time()
+    t0 = time.monotonic()
     await holo.initialize()
-    t1 = time.time()
+    t1 = time.monotonic()
     print(f"Loaded {len(holo._metadata)} records in {(t1-t0)*1000:.2f}ms")
     
     print("Benchmarking recall...")
     query = "Zero trust scaling architecture"
     
-    t0 = time.time()
+    t0 = time.monotonic()
     res1 = await store.recall_secure(tenant_id="default", project_id="MOSKV-1", query=query, limit=5)
-    t1 = time.time()
+    t1 = time.monotonic()
     
-    t2 = time.time()
+    t2 = time.monotonic()
     res2 = await holo.recall_holographic(query=query, limit=5, tenant_id="default", project_id="MOSKV-1")
-    t3 = time.time()
+    t3 = time.monotonic()
     
     sql_ms = (t1 - t0) * 1000
     holo_ms = (t3 - t2) * 1000

@@ -106,7 +106,7 @@ class SovereignGate:
                 "id": action_id,
                 "level": level.value,
                 "desc": description,
-                "ts": time.time(),
+                "ts": time.monotonic(),
             },
             sort_keys=True,
         )
@@ -164,7 +164,7 @@ class SovereignGate:
             raise GateInvalidSignature(f"Invalid signature for action {action_id}")
 
         action.status = ActionStatus.APPROVED
-        action.approved_at = time.time()
+        action.approved_at = time.monotonic()
         action.operator_id = operator_id
         self._log_audit("ACTION_APPROVED", action)
 
@@ -195,7 +195,7 @@ class SovereignGate:
                 action.description,
             )
             action.status = ActionStatus.APPROVED
-            action.approved_at = time.time()
+            action.approved_at = time.monotonic()
             action.operator_id = "auto-audit"
             self._log_audit("AUTO_APPROVED_AUDIT", action)
             return True
@@ -222,7 +222,7 @@ class SovereignGate:
 
         if response in ("s", "y", "si", "yes"):
             action.status = ActionStatus.APPROVED
-            action.approved_at = time.time()
+            action.approved_at = time.monotonic()
             action.operator_id = "interactive"
             self._log_audit("ACTION_APPROVED_INTERACTIVE", action)
             logger.info("✅ Gate: Action %s approved interactively", action_id)
@@ -266,7 +266,7 @@ class SovereignGate:
         logger.info("🚀 Gate: Executing approved action %s", action_id)
         result = subprocess.run(cmd, **kwargs)
         action.status = ActionStatus.EXECUTED
-        action.executed_at = time.time()
+        action.executed_at = time.monotonic()
         action.result = {
             "returncode": result.returncode,
             "stdout_len": len(result.stdout or ""),
@@ -327,7 +327,7 @@ class SovereignGate:
         """Append to the in-memory audit log."""
         entry = {
             "event": event,
-            "timestamp": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            "timestamp": datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(),
             **action.to_dict(),
         }
         self._audit_log.append(entry)

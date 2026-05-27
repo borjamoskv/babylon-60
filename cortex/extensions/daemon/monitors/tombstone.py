@@ -35,7 +35,7 @@ class TombstoneMonitor:
 
     def _in_maintenance_window(self) -> bool:
         """Check if current UTC time is within the maintenance window."""
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
+        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
         return self.start_hour <= now.hour < self.end_hour
 
     def check(self) -> list[TombstoneAlert]:

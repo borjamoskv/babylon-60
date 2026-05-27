@@ -122,7 +122,7 @@ class MirrorAuditor:
     def report(self):
         """Generates a Sovereign remediation report."""
         report = {
-            "timestamp": time.time(),
+            "timestamp": time.monotonic(),
             "target": self.target_path,
             "exergy_score": max(0, self.exergy_score),
             "findings": self.findings,

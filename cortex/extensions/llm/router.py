@@ -450,7 +450,7 @@ class CortexLLMRouter:
             return hedged_res
 
         # Phase 1: Primary sequential attempt
-        start = time.time()
+        start = time.monotonic()
 
         # Verify if primary provider is suitable for ULTRA_THINK
         reasoning_mode = getattr(prompt, "reasoning_mode", None)
@@ -467,7 +467,7 @@ class CortexLLMRouter:
         errors = []
         if primary_valid:
             res_primary = await self._try_provider(self._primary, prompt)
-            latency = (time.time() - start) * 1000
+            latency = (time.monotonic() - start) * 1000
 
             if res_primary.is_ok():
                 self._telemetry.emit(
@@ -503,9 +503,9 @@ class CortexLLMRouter:
                 errors.append(f"{provider.provider_name}: Skip (NXDOMAIN cached)")
                 continue
 
-            fb_start = time.time()
+            fb_start = time.monotonic()
             res_fb = await self._try_provider(provider, prompt)
-            fb_latency = (time.time() - fb_start) * 1000
+            fb_latency = (time.monotonic() - fb_start) * 1000
 
             if res_fb.is_ok():
                 tier = classify_tier(provider, prompt.intent)
@@ -533,7 +533,7 @@ class CortexLLMRouter:
                 project=prompt.project,
                 tier=CascadeTier.NONE,
                 depth=len(fallbacks) + 1,
-                latency_ms=(time.time() - start) * 1000,
+                latency_ms=(time.monotonic() - start) * 1000,
                 errors=errors,
             )
         )

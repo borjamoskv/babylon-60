@@ -94,7 +94,7 @@ class MetricSnapshot:
     description: str = ""
     remediation: str = ""
     collected_at: str = field(
-        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+        default_factory=lambda: datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(),
     )
 
     def __post_init__(self) -> None:
@@ -125,7 +125,7 @@ class HealthScore:
     metrics: list[MetricSnapshot] = field(default_factory=list)
     sub_indices: dict[str, float] = field(default_factory=dict)
     timestamp: str = field(
-        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+        default_factory=lambda: datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(),
     )
 
     def __post_init__(self) -> None:

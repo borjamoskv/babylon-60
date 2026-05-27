@@ -114,7 +114,7 @@ class HybridLogicalClock:
 
     def _wall_ms(self) -> int:
         """Physical wall clock in milliseconds."""
-        return int(time.time() * 1000)
+        return int(time.monotonic() * 1000)
 
     def tick(self) -> HLCTimestamp:
         """Advance the clock for a local event.

@@ -282,7 +282,7 @@ async def compact_session(
     except (sqlite3.Error, AttributeError):
         pass  # Already registered or unsupported
 
-    now = time.time()
+    now = time.monotonic()
     half_life = 7 * 24 * 3600  # 7 days in seconds
 
     async with conn.execute(

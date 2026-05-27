@@ -66,7 +66,7 @@ class ImmunologyDaemon:
             "mutation_hash": patch_id,
             "action": "HEAL_ENTROPY",
             "reason": falsation_type,
-            "timestamp": time.time()
+            "timestamp": time.monotonic()
         }
         
         if falsation_type == "C5_FALSATED_ENTROPY":

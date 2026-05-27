@@ -83,7 +83,7 @@ class MemoryCard(BaseModel):
         description="P(accurate retrieval) — similarity score × energy.",
     )
     last_accessed: datetime = Field(
-        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc),
+        default_factory=lambda: datetime.fromtimestamp(time.monotonic(), tz=timezone.utc),
         description="UTC timestamp of last structural access.",
     )
     access_frequency: int = Field(
@@ -196,7 +196,7 @@ class MetamemoryIndex:
 
         cards = list(self._cards.values())
         n = len(cards)
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
+        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
 
         return MetamemoryStats(
             total_memories=n,
@@ -276,9 +276,9 @@ def build_memory_card(
       retrieval_confidence  = retrieval_similarity × energy_level
       repair_needed         = detect_repair_needed(...)
     """
-    ts = last_accessed_ts or time.time()
+    ts = last_accessed_ts or time.monotonic()
     last_dt = datetime.fromtimestamp(ts, tz=timezone.utc)
-    days_since = max(0.0, (time.time() - ts) / 86400.0)
+    days_since = max(0.0, (time.monotonic() - ts) / 86400.0)
 
     return MemoryCard(
         memory_id=memory_id,

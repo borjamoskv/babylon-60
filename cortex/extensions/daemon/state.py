@@ -24,11 +24,11 @@ class HotMemory:
             del self.cache[oldest]
             del self.counters[oldest]
         self.cache[key] = value
-        self.counters[key] = time.time()
+        self.counters[key] = time.monotonic()
 
     def retrieve(self, key):
         if key in self.cache:
-            self.counters[key] = time.time()
+            self.counters[key] = time.monotonic()
             return self.cache[key]
         return None
 

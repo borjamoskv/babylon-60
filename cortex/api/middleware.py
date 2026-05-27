@@ -37,11 +37,11 @@ class TracingMiddleware(BaseHTTPMiddleware):
         token = request_id_var.set(req_id)
         request.state.request_id = req_id
 
-        start_time = time.time()
+        start_time = time.monotonic()
         try:
             response = await call_next(request)
             response.headers["X-Request-ID"] = req_id
-            process_time = time.time() - start_time
+            process_time = time.monotonic() - start_time
             logger.info(
                 json.dumps(
                     {
@@ -57,7 +57,7 @@ class TracingMiddleware(BaseHTTPMiddleware):
             )
             return response
         except Exception as e:  # noqa: BLE001 — tracing middleware must log all failures before raising
-            process_time = time.time() - start_time
+            process_time = time.monotonic() - start_time
             logger.error(
                 json.dumps(
                     {
@@ -173,7 +173,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if auth_header.startswith("Bearer "):
             bucket_id = f"key:{auth_header[7:19]}"
 
-        now = time.time()
+        now = time.monotonic()
 
         if bucket_id not in self.buckets:
             # Enforce capacity
@@ -286,7 +286,7 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
 
         try:
             async with pool.acquire() as conn:
-                now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+                now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
                 sql = "SELECT 1 FROM threat_intel WHERE ip_address = ? AND (expires_at IS NULL OR expires_at > ?)"
                 async with conn.execute(sql, (client_ip, now)) as cursor:
                     return bool(await cursor.fetchone())
@@ -303,7 +303,7 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
         )
 
         event = {
-            "timestamp": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            "timestamp": datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(),
             "ip_address": client_ip,
             "status_code": response.status_code,
             "payload": signature,

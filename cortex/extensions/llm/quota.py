@@ -129,7 +129,7 @@ class SovereignQuotaManager:
                             """INSERT INTO quota_bucket
                                (id, tokens, last_update, acquired, throttled, timeouts)
                                VALUES (1, ?, ?, 0, 0, 0)""",
-                            (self.capacity, time.time()),
+                            (self.capacity, time.monotonic()),
                         )
                 if candidate != self.db_path:
                     logger.warning(
@@ -157,7 +157,7 @@ class SovereignQuotaManager:
         """
         if tokens < 1:
             raise ValueError(f"tokens must be >= 1, got {tokens}")
-        now = time.time()
+        now = time.monotonic()
         try:
             with _db(self.db_path, exclusive=True) as conn:
                 row = conn.execute(
@@ -202,7 +202,7 @@ class SovereignQuotaManager:
         Returns:
             True si se adquirió la cuota, False si expiró el deadline.
         """
-        start = time.time()
+        start = time.monotonic()
         attempt = 0
 
         while True:
@@ -211,7 +211,7 @@ class SovereignQuotaManager:
             if wait <= 0:
                 return True
 
-            elapsed = time.time() - start
+            elapsed = time.monotonic() - start
             if elapsed >= deadline:
                 logger.error("PULMONES: Timeout tras %.1fs esperando %d tokens.", elapsed, tokens)
                 self._increment_timeouts()
@@ -228,7 +228,7 @@ class SovereignQuotaManager:
 
     def status(self) -> QuotaStatus:
         """Estado completo del bucket con métricas de observabilidad."""
-        now = time.time()
+        now = time.monotonic()
         with _db(self.db_path) as conn:
             row = conn.execute(
                 "SELECT tokens, last_update, acquired, throttled, timeouts "
@@ -259,7 +259,7 @@ class SovereignQuotaManager:
                 """UPDATE quota_bucket
                    SET tokens = ?, last_update = ?, acquired = 0, throttled = 0, timeouts = 0
                    WHERE id = 1""",
-                (self.capacity, time.time()),
+                (self.capacity, time.monotonic()),
             )
         logger.warning("PULMONES: Bucket reseteado a capacidad máxima (%s tokens).", self.capacity)
 

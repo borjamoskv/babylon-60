@@ -32,7 +32,7 @@ class PendingAction:
 
     def is_expired(self, timeout_seconds: float) -> bool:
         """Check if the action has exceeded its timeout."""
-        return time.time() - self.created_at > timeout_seconds
+        return time.monotonic() - self.created_at > timeout_seconds
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize to dictionary for API responses and audit log."""

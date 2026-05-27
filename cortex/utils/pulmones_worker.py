@@ -21,7 +21,7 @@ class PulmonesWorker:
 
     def _fetch_ripe_tasks(self) -> list:
         """O(1) fetch gracias al índice idx_next_retry."""
-        now = time.time()
+        now = time.monotonic()
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.execute(
@@ -45,7 +45,7 @@ class PulmonesWorker:
         new_retries = retries + 1
         # Backoff: 1m, 2m, 4m, 8m... max 60 min.
         delay = min(60 * (2**retries), 3600)
-        next_retry = time.time() + delay
+        next_retry = time.monotonic() + delay
 
         with sqlite3.connect(self.db_path) as conn:
             conn.execute(

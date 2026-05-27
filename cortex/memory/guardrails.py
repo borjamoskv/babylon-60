@@ -103,7 +103,7 @@ class SessionGuardrail:
     @property
     def session_duration_seconds(self) -> float:
         """How long this session has been active."""
-        return time.time() - self._started_at
+        return time.monotonic() - self._started_at
 
     def status(self) -> dict:
         """Return a status dict for telemetry/logging."""

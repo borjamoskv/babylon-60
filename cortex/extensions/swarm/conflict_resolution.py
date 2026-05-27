@@ -222,7 +222,7 @@ class ConflictResolver:
         """Execute the full escalation ladder."""
         self._conflict_counter += 1
         conflict_id = self._generate_id()
-        now = time.time()
+        now = time.monotonic()
         participants = list(agents.keys())
 
         logger.info(
@@ -451,7 +451,7 @@ class ConflictResolver:
 
     def _generate_id(self) -> str:
         """Generate a deterministic, ordered conflict ID."""
-        ts_hex = hashlib.sha256(str(time.time()).encode()).hexdigest()[:6]
+        ts_hex = hashlib.sha256(str(time.monotonic()).encode()).hexdigest()[:6]
         return f"CR-{self._conflict_counter:04d}-{ts_hex}"
 
     @property

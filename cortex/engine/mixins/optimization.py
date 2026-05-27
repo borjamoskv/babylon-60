@@ -54,7 +54,7 @@ class SovereignTLRUCache:
         """Retrieve value with TTL check and lazy eviction."""
         if key in self.cache:
             val, expiry = self.cache[key]
-            if time.time() < expiry:
+            if time.monotonic() < expiry:
                 return val
             # Lazy eviction (TTL)
             self._pop_with_proof(key, val, EvictionReason.TTL)
@@ -74,7 +74,7 @@ class SovereignTLRUCache:
                     old_val, _ = self.cache.pop(oldest_key)
                     self._generate_proof(oldest_key, old_val, EvictionReason.LRU)
 
-        self.cache[key] = (value, time.time() + self.ttl)
+        self.cache[key] = (value, time.monotonic() + self.ttl)
         self.order.append(key)
 
     def _pop_with_proof(self, key: str, value: Any, reason: EvictionReason):

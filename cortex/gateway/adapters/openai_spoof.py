@@ -58,7 +58,7 @@ async def openai_chat_completions(
     # 2. Translate to Sovereign Prompt
     prompt = _spoof_manager.to_cortex_prompt(body.model_dump())
 
-    start_time = time.time()
+    start_time = time.monotonic()
 
     if body.stream:
         # Falling back to a simpler stream for now as SovereignLLM.stream is not fully implemented
@@ -70,8 +70,8 @@ async def openai_chat_completions(
         mgr = LLMManager()
 
         async def event_generator():
-            request_id = f"chatcmpl-{int(time.time() * 1000)}"
-            created = int(time.time())
+            request_id = f"chatcmpl-{int(time.monotonic() * 1000)}"
+            created = int(time.monotonic())
 
             try:
                 async for chunk in mgr.stream(
@@ -113,7 +113,7 @@ async def openai_chat_completions(
                 intent=prompt.intent,
             )
 
-        latency = (time.time() - start_time) * 1000
+        latency = (time.monotonic() - start_time) * 1000
         logger.info(
             "🛡️ [SPOOF] Serviced %s via %s (%s) in %.2fms",
             body.model,
@@ -123,9 +123,9 @@ async def openai_chat_completions(
         )
 
         return {
-            "id": f"chatcmpl-{int(time.time() * 1000)}",
+            "id": f"chatcmpl-{int(time.monotonic() * 1000)}",
             "object": "chat.completion",
-            "created": int(time.time()),
+            "created": int(time.monotonic()),
             "model": body.model,
             "usage": {
                 "prompt_tokens": len(str(prompt.working_memory)) // 4,

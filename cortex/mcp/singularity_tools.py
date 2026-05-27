@@ -143,7 +143,7 @@ def register_singularity_tools(mcp) -> None:
         if "ledgers" not in _LEDGER_STATE:
             _LEDGER_STATE["ledgers"] = []
 
-        timestamp = time.time()
+        timestamp = time.monotonic()
         ledgers = _LEDGER_STATE["ledgers"]
         prev_hash = ledgers[-1]["hash"] if ledgers else "GENESIS_BLOCK"
 
@@ -198,10 +198,10 @@ def register_singularity_tools(mcp) -> None:
                     queue = json.load(f)
 
             task = {
-                "id": f"task_{int(time.time())}",
+                "id": f"task_{int(time.monotonic())}",
                 "agent": agent_id,
                 "command": command,
-                "timestamp": time.time(),
+                "timestamp": time.monotonic(),
             }
             queue["pending_tasks"].append(task)
 

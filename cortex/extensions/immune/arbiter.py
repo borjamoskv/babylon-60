@@ -55,7 +55,7 @@ class ImmuneArbiter:
         self.falsifier = EvolutionaryFalsifier()
         self.verifier = SovereignVerifier()
         self.processed_signals = 0
-        self.start_time = time.time()
+        self.start_time = time.monotonic()
 
     async def triage(
         self, signal: str, plan: dict[str, Any], confidence: float = 0.5

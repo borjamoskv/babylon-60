@@ -492,7 +492,7 @@ class SovereignVectorStoreL2:
             rotated_query = encode_query_qjl(query_vector)
             embedding_bytes = np.array(rotated_query, dtype=np.float32).tobytes()
             void_query = void_vec.pack_void_bit(rotated_query)
-            now = time.time()
+            now = time.monotonic()
 
             cursor = conn.cursor()
             meta_tb, vec_tb, vec_void_tb, mih_tb = self._get_domain_tables(

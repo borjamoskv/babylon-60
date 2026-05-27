@@ -28,7 +28,7 @@ VECTORS = [
 
 def add_log(msg, val):
     global LOG_HISTORY
-    LOG_HISTORY.append({"id": time.time(), "msg": msg, "val": val})
+    LOG_HISTORY.append({"id": time.monotonic(), "msg": msg, "val": val})
     LOG_HISTORY = LOG_HISTORY[-30:]
 
 

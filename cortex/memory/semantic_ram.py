@@ -167,7 +167,7 @@ class SemanticMutator:
             # LEGION-OMEGA (Chronos Sniper): Evitar deadlock, manejar sqlite3.Error general
             # (vía Exception genérico controlado)
             conn = self._store._get_conn()
-            now = time.time()
+            now = time.monotonic()
             try:
                 cursor = conn.cursor()
                 cursor.execute("BEGIN IMMEDIATE")
@@ -388,7 +388,7 @@ class DynamicSemanticSpace:
             "project": project,
             "content": content,
             "fact_type": fact_type,
-            "timestamp": str(time.time()),
+            "timestamp": str(time.monotonic()),
         }
         needs_flush = self.autonomic_buffer.add(fact_data)
         if needs_flush:

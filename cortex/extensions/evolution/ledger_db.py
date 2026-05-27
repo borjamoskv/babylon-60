@@ -138,7 +138,7 @@ class EvolutionLedgerDB:
 
     def record_metrics(self, agent_id: str, metrics: dict[str, Any]) -> None:
         """Store arbitrary telemetry for an agent."""
-        now = time.time()
+        now = time.monotonic()
         try:
             with db_connect(str(self.db_path)) as conn:
                 for name, val in metrics.items():
@@ -203,7 +203,7 @@ class EvolutionLedgerDB:
                     INSERT OR REPLACE INTO domain_evolution (domain, last_cycle, avg_fitness, updated_at)
                     VALUES (?, ?, ?, ?)
                 """,
-                    (domain, cycle, avg_fitness, time.time()),
+                    (domain, cycle, avg_fitness, time.monotonic()),
                 )
                 conn.commit()
         except sqlite3.Error as exc:

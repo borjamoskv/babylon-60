@@ -35,7 +35,7 @@ class EntropicEvaporator:
         logger.info("💨 [EVAPORATOR] Starting evaporation cycle (Ω₂)...")
 
         limit_date = (
-            datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=30)
+            datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) - timedelta(days=30)
         ).isoformat()
 
         # We query for candidate IDs

@@ -95,7 +95,7 @@ def crystallize_ledger(results: list[dict[str, Any]]) -> None:
     log(f"Matriz RPC exportada a {output_path} para inyección Flash Loan.", "SUCCESS")
 
 if __name__ == "__main__":
-    t0 = time.time()
+    t0 = time.monotonic()
     final_state = asyncio.run(swarm_commander())
     crystallize_ledger(final_state)
-    log(f"Operación finalizada en {time.time() - t0:.2f} segundos.", "SYSTEM")
+    log(f"Operación finalizada en {time.monotonic() - t0:.2f} segundos.", "SYSTEM")

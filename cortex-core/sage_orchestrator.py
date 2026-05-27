@@ -49,7 +49,7 @@ class SageOrchestrator:
 
     async def broadcast(self, event_type, data):
         payload = {
-            "id": int(time.time()),
+            "id": int(time.monotonic()),
             "type": event_type,
             "data": data,
             "global_yield": self.global_yield,

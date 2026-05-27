@@ -101,7 +101,7 @@ class PulseRegistry:
             if key not in self._metrics:
                 self._metrics[key] = PulseMetric(name=name, labels=labels or {})
             self._metrics[key].value += value
-            self._metrics[key].last_update = time.time()
+            self._metrics[key].last_update = time.monotonic()
 
     def set_gauge(self, name: str, value: float, labels: dict[str, str] | None = None) -> None:
         """Sets a pulse-driven gauge."""
@@ -110,7 +110,7 @@ class PulseRegistry:
             if key not in self._metrics:
                 self._metrics[key] = PulseMetric(name=name, labels=labels or {})
             self._metrics[key].value = value
-            self._metrics[key].last_update = time.time()
+            self._metrics[key].last_update = time.monotonic()
 
     def _gen_key(self, name: str, labels: dict[str, str] | None) -> str:
         if not labels:
@@ -125,7 +125,7 @@ class PulseRegistry:
                 "active_metrics": len(self._metrics),
                 "shadow_ghosts": list(self._ghost_metrics),
                 "pulse_rate": sum(
-                    1 for m in self._metrics.values() if time.time() - m.last_update < 60
+                    1 for m in self._metrics.values() if time.monotonic() - m.last_update < 60
                 ),
             }
 

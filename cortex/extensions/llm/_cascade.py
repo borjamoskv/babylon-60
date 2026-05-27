@@ -41,24 +41,24 @@ class CascadeManager:
 
     def set_nx_record(self, provider_name: str) -> None:
         """Cache a provider failure (NXDOMAIN) with thermodynamic decay."""
-        self._nxdomain_cache[provider_name] = time.time()
+        self._nxdomain_cache[provider_name] = time.monotonic()
         self._nxdomain_failures[provider_name] = self._nxdomain_failures.get(provider_name, 0) + 1
 
     def set_a_record(self, provider_name: str, latency_ms: float) -> None:
         """Cache a provider success (A-record) and reset decay."""
-        self._a_records[provider_name] = (time.time(), latency_ms)
+        self._a_records[provider_name] = (time.monotonic(), latency_ms)
         self._nxdomain_failures.pop(provider_name, None)
 
     def set_kv_affinity(self, provider_name: str, prefix_hash: str) -> None:
         """Mark that a provider has cached a specific context prefix."""
         if prefix_hash not in self._kv_affinity:
             self._kv_affinity[prefix_hash] = {}
-        self._kv_affinity[prefix_hash][provider_name] = time.time()
+        self._kv_affinity[prefix_hash][provider_name] = time.monotonic()
 
     def get_a_record(self, provider_name: str) -> tuple[float, float] | None:
         """Get success record if within TTL."""
         record = self._a_records.get(provider_name)
-        if record and (time.time() - record[0]) < self.positive_ttl:
+        if record and (time.monotonic() - record[0]) < self.positive_ttl:
             return record
         return None
 
@@ -69,7 +69,7 @@ class CascadeManager:
             failures = self._nxdomain_failures.get(provider_name, 1)
             # Thermodynamic decay: exponential backoff based on consecutive failures
             effective_ttl = self.negative_ttl * (2 ** (failures - 1))
-            if (time.time() - nx_at) < effective_ttl:
+            if (time.monotonic() - nx_at) < effective_ttl:
                 return True
         return False
 

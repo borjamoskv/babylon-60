@@ -55,7 +55,7 @@ class AgentMessage(BaseModel):
     priority: int = 0
     ttl_seconds: int | None = None
     created_at: datetime = Field(
-        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc)
+        default_factory=lambda: datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
     )
     trace_context: dict[str, Any] = Field(default_factory=dict)
 

@@ -137,7 +137,7 @@ class AuthManager:
             tenant_id=tenant_id,
             role=role,
             permissions=permissions,
-            created_at=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            created_at=datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(),
             last_used=None,
             is_active=True,
             rate_limit=rate_limit,

@@ -195,7 +195,7 @@ class DomainMetrics:
     @property
     def is_stale(self) -> bool:
         """True if snapshot older than 120 s (cache TTL)."""
-        return (time.time() - self._fetched_at) > 120.0
+        return (time.monotonic() - self._fetched_at) > 120.0
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -290,14 +290,14 @@ async def fetch_domain_metrics(
                         from datetime import datetime
 
                         dt = datetime.fromisoformat(str(row[0]).replace("Z", "+00:00"))
-                        age_s = time.time() - dt.timestamp()
+                        age_s = time.monotonic() - dt.timestamp()
                         m.last_decision_age_hours = age_s / 3600
                     except (ValueError, TypeError):
                         pass
 
             # ── LLM Telemetry (Afferent Cascade Signals) ──
             # Measure terminal failures and average depth in the last hour
-            hour_ago = time.time() - 3600
+            hour_ago = time.monotonic() - 3600
             async with conn.execute(
                 f"SELECT COUNT(*), AVG(latency_ms), AVG(depth) FROM llm_telemetry "
                 f"WHERE project IN ({placeholders}) AND timestamp > ?",
@@ -328,7 +328,7 @@ async def fetch_domain_metrics(
                     m.avg_llm_latency_ms = row[0] if row[0] is not None else 0.0
                     m.cascade_depth_avg = row[1] if row[1] is not None else 0.0
 
-            m._fetched_at = time.time()
+            m._fetched_at = time.monotonic()
             return m
 
     except (aiosqlite.Error, OSError) as exc:

@@ -24,7 +24,7 @@ VECTORS = [
 
 def add_log(msg, val):
     global LOG_HISTORY
-    LOG_HISTORY.append({"id": time.time() + random.random(), "msg": msg, "val": val})
+    LOG_HISTORY.append({"id": time.monotonic() + random.random(), "msg": msg, "val": val})
     # Keep only the last 50 logs in memory
     LOG_HISTORY = LOG_HISTORY[-50:]
 

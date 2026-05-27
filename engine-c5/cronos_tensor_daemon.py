@@ -29,7 +29,7 @@ def cronos_decay():
         logging.warning("Memory allocation failed for 10k x 10k tensor. Reducing to 5k x 5k.")
         swarm_tensors = np.random.randn(5000, 5000).astype(np.float32)
 
-    start_time = time.time()
+    start_time = time.monotonic()
     target_seconds = 30 * 60  # 30 minutes
     lambda_decay = 0.05
     iterations = 0
@@ -37,7 +37,7 @@ def cronos_decay():
     logging.info("CRONOS initialized. Commencing 30-minute thermodynamic decay of VSA Swarm Tensor.")
     
     while True:
-        elapsed = time.time() - start_time
+        elapsed = time.monotonic() - start_time
         if elapsed > target_seconds:
             break
             

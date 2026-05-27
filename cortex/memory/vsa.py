@@ -207,7 +207,7 @@ class KanervaSDM:
             self.initialize()
 
         activated = self._activated_locations(address)
-        now = time.time()
+        now = time.monotonic()
 
         for idx in activated:
             loc = self._locations[idx]
@@ -330,7 +330,7 @@ class SwarmMemory:
             id=rid,
             content=content,
             vector=vector,
-            timestamp=time.time(),
+            timestamp=time.monotonic(),
             tags=tags or [],
         )
 
@@ -423,7 +423,7 @@ class SwarmMemory:
                 for rid, rec in self._records.items()
             },
             "sdm_stats": self._sdm.stats,
-            "saved_at": time.time(),
+            "saved_at": time.monotonic(),
         }
 
         payload = json.dumps(data, ensure_ascii=False, indent=2)

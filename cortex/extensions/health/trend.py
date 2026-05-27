@@ -122,7 +122,7 @@ class TrendDetector:
                 ts_str = (
                     datetime.fromtimestamp(timestamp, tz=timezone.utc)
                     if timestamp
-                    else datetime.fromtimestamp(time.time(), tz=timezone.utc)
+                    else datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
                 ).isoformat()
                 conn.execute(
                     "INSERT INTO health_history (timestamp, score, grade) VALUES (?, ?, ?)",
@@ -146,7 +146,7 @@ class TrendDetector:
                 from datetime import timedelta
 
                 cutoff = (
-                    datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=keep_days)
+                    datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) - timedelta(days=keep_days)
                 ).isoformat()
                 conn.execute(
                     "DELETE FROM health_history WHERE timestamp < ?",

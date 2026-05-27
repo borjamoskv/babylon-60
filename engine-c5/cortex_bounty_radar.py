@@ -38,14 +38,14 @@ def execute_radar() -> None:
     
     req = urllib.request.Request(url, headers=headers)
     
-    start_time = time.time()
+    start_time = time.monotonic()
     try:
         with urllib.request.urlopen(req, timeout=5) as response:
             if response.status == 200:
                 data = json.loads(response.read().decode())
                 issues = data.get("items", [])
                 
-                log(f"Ping finalizado en {time.time() - start_time:.2f} segundos.", "NETWORK")
+                log(f"Ping finalizado en {time.monotonic() - start_time:.2f} segundos.", "NETWORK")
                 log(f"Detectadas {data.get('total_count', 0)} presas potenciales en la jungla pública.", "RADAR")
                 
                 bounties = []

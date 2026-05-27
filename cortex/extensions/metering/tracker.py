@@ -75,7 +75,7 @@ class UsageRecord:
         self.status_code = status_code
         self.tokens_used = tokens_used
         self.timestamp = (
-            timestamp or datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+            timestamp or datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
         )
 
 
@@ -146,7 +146,7 @@ class UsageTracker:
         """
         conn = self._get_conn()
         if month_bucket is None:
-            month_bucket = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m")
+            month_bucket = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime("%Y-%m")
 
         row = conn.execute(
             "SELECT total_calls, total_tokens, last_updated FROM usage_monthly_summary "
@@ -200,7 +200,7 @@ class UsageTracker:
         """Get per-endpoint breakdown for a tenant in a month."""
         conn = self._get_conn()
         if month_bucket is None:
-            month_bucket = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m")
+            month_bucket = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime("%Y-%m")
 
         rows = conn.execute(
             "SELECT endpoint, method, COUNT(*) as calls, SUM(tokens_used) as tokens "

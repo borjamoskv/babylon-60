@@ -93,7 +93,7 @@ async def _execute_pipeline(request: Any, verbose: bool) -> Any:
     """Async pipeline execution wrapper."""
     from cortex.pipeline.bridge import CortexPipelineBridge
 
-    start = time.time()
+    start = time.monotonic()
     bridge = CortexPipelineBridge()
 
     try:
@@ -103,7 +103,7 @@ async def _execute_pipeline(request: Any, verbose: bool) -> Any:
         if verbose:
             _print_telemetry(result)
 
-        _print_summary(result, time.time() - start)
+        _print_summary(result, time.monotonic() - start)
         return result
 
     finally:

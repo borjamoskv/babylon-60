@@ -92,8 +92,8 @@ class MoltbookClient:
         if not url.startswith("https://www.moltbook.com/"):
             raise ValueError(f"SECURITY: refusing to send request to {url}")
 
-        if self._rate_remaining <= 0 and time.time() < self._rate_reset:
-            wait = int(self._rate_reset - time.time()) + 1
+        if self._rate_remaining <= 0 and time.monotonic() < self._rate_reset:
+            wait = int(self._rate_reset - time.monotonic()) + 1
             raise MoltbookRateLimited(retry_after=wait)
 
         headers: dict[str, str] = {"Content-Type": "application/json"}

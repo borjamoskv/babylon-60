@@ -178,7 +178,7 @@ class ResilientFetcher:
                 "latency_ms": 0.0,
             }
 
-        start = time.time()
+        start = time.monotonic()
 
         for depth, provider in enumerate(self._providers, start=1):
             if not provider.circuit_breaker.can_execute():
@@ -186,12 +186,12 @@ class ResilientFetcher:
                 continue
 
             try:
-                prov_start = time.time()
+                prov_start = time.monotonic()
                 html, status_code = await asyncio.wait_for(
                     provider.fetch_fn(url, timeout),
                     timeout=timeout + 5.0,  # outer guard
                 )
-                latency_ms = (time.time() - prov_start) * 1000
+                latency_ms = (time.monotonic() - prov_start) * 1000
 
                 provider.circuit_breaker.record_success()
 
@@ -233,7 +233,7 @@ class ResilientFetcher:
                 await asyncio.sleep(0.5 * depth)
 
         # Total cascade failure — enqueue for deferred retry
-        total_latency = (time.time() - start) * 1000
+        total_latency = (time.monotonic() - start) * 1000
         self._queue.enqueue(
             "cortex.mcp.resilient_gateway.ResilientFetcher.fetch",
             (url,),

@@ -109,7 +109,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
         chain_valid, tip = self._verify_evidence_chain(eviction_records)
 
         report = OracleReport(
-            audited_at=time.time(),
+            audited_at=time.monotonic(),
             window_size=len(verdicts),
             verdicts=verdicts,
             regret_rate=regret_rate,
@@ -193,7 +193,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
 
     def _empty_report(self) -> OracleReport:
         return OracleReport(
-            audited_at=time.time(),
+            audited_at=time.monotonic(),
             window_size=0,
             verdicts=[],
             regret_rate=0.0,
@@ -223,9 +223,9 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
                 created_dt = datetime.fromisoformat(created_at_iso.replace("Z", "+00:00"))
                 created_at_ts = created_dt.timestamp()
             except (ValueError, TypeError, AttributeError):
-                created_at_ts = time.time()
+                created_at_ts = time.monotonic()
 
-            time_delta_hours = max((time.time() - created_at_ts) / 3600.0, 0.0)
+            time_delta_hours = max((time.monotonic() - created_at_ts) / 3600.0, 0.0)
 
             # Lambda rate: Axioms decaen muy lentamente, ghosts decaen rápido
             lambda_rate = 0.001 if fact.get("fact_type") == "axiom" else 0.05
@@ -251,7 +251,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
             async with self._engine.session() as conn:
                 await conn.execute(
                     "UPDATE facts SET fact_type = 'ghost', updated_at = ? WHERE id = ?",
-                    (datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), fact_id),
+                    (datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(), fact_id),
                 )
                 tenant_id = fact.get("tenant_id", "default")
                 await self._engine._log_transaction(

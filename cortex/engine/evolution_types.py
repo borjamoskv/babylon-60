@@ -21,7 +21,7 @@ class DomainMetrics:
     timestamp: float = field(default_factory=time.time)
 
     def is_stale(self, ttl_seconds: int = 60) -> bool:
-        return (time.time() - self.timestamp) > ttl_seconds
+        return (time.monotonic() - self.timestamp) > ttl_seconds
 
 
 @dataclass
@@ -36,7 +36,7 @@ class Mutation:
     entropy_resistance: float = 1.0
 
     def record_change(self, change_desc: str) -> None:
-        self.history_log.append(f"{time.time()}: {change_desc}")
+        self.history_log.append(f"{time.monotonic()}: {change_desc}")
 
 
 @dataclass

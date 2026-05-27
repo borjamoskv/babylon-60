@@ -107,7 +107,7 @@ async def _execute_cold_purge(
                         '$.purge_resonance', ?)
                     WHERE id = ?
                     """,
-                    (time.time(), v.temperature, v.resonance, v.fact_id),
+                    (time.monotonic(), v.temperature, v.resonance, v.fact_id),
                 )
                 # Actually remove from vector index for recall hygiene
                 cursor.execute(
@@ -215,7 +215,7 @@ async def _execute_semantic_merge(
                         # Update primary with fused content
                         cursor.execute(
                             "UPDATE facts_meta SET content = ?, updated_at = ? WHERE id = ?",
-                            (new_content, time.time(), id_a),
+                            (new_content, time.monotonic(), id_a),
                         )
                         # Delete the secondary
                         cursor.execute(

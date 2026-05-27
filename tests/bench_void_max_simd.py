@@ -19,11 +19,11 @@ def benchmark():
     batch = [void_vec.pack_void_bit(np.random.randn(dim)) for _ in range(count)]
 
     # Phase 1: Python Scalar (Fallback)
-    start_py = time.time()
+    start_py = time.monotonic()
     for _ in range(iters):
         # We manually simulate the sequential call to compare overhead
         [void_vec.void_hamming_dist(query, b) for b in batch]
-    end_py = time.time()
+    end_py = time.monotonic()
 
     py_time = (end_py - start_py) * 1000
     print(f"🐍 Python (Sequential): {py_time:.2f}ms")
@@ -32,10 +32,10 @@ def benchmark():
     if not void_vec._accel:
         print("❌ SIMD Accelerator not loaded. Skipping Neon phase.")
     else:
-        start_simd = time.time()
+        start_simd = time.monotonic()
         for _ in range(iters):
             void_vec.void_batch_hamming_dist(query, batch)
-        end_simd = time.time()
+        end_simd = time.monotonic()
 
         simd_time = (end_simd - start_simd) * 1000
         print(f"💎 Batch SIMD (Neon ARM64): {simd_time:.2f}ms")

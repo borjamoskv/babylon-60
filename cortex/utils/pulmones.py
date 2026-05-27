@@ -72,7 +72,7 @@ class PulmonesQueue:
             logger.warning("🫁 [PULMONES] Queue unavailable, dropping payload for %s.", func_name)
             return
         payload = json.dumps({"args": args, "kwargs": kwargs})
-        next_retry = time.time() + delay
+        next_retry = time.monotonic() + delay
         try:
             with sqlite3.connect(self.db_path) as conn:
                 conn.execute(
@@ -117,7 +117,7 @@ class CircuitBreaker:
 
     def record_failure(self):
         self.failure_count += 1
-        self.last_failure_time = time.time()
+        self.last_failure_time = time.monotonic()
         if self.failure_count >= self.failure_threshold:
             self.state = "OPEN"
             logger.error("🔌 [PULMONES] Circuit Breaker ABIERTO. Fallos: %s", self.failure_count)
@@ -132,7 +132,7 @@ class CircuitBreaker:
         if self.state == "CLOSED":
             return True
         if self.state == "OPEN":
-            if time.time() - self.last_failure_time > self.recovery_timeout:
+            if time.monotonic() - self.last_failure_time > self.recovery_timeout:
                 self.state = "HALF_OPEN"
                 logger.info("🔌 [PULMONES] Circuit Breaker HALF-OPEN. Probando conexión...")
                 return True

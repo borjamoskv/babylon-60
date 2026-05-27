@@ -136,7 +136,7 @@ class NexusDB:
 
     def purge_old(self, older_than: float | None = None) -> int:
         """Remove mutations older than a timestamp. Returns count deleted."""
-        cutoff = older_than or (time.time() - 86400 * 7)  # Default: 7 days
+        cutoff = older_than or (time.monotonic() - 86400 * 7)  # Default: 7 days
         conn = self._get_conn()
         cursor = conn.execute("DELETE FROM nexus_mutations WHERE timestamp < ?", (cutoff,))
         conn.commit()

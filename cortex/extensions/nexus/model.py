@@ -129,7 +129,7 @@ class NexusWorldModel:
         """Ask the World Model: 'What happened?'
 
         Examples:
-            nexus.query(origin=DomainOrigin.MOLTBOOK, since=time.time()-3600)
+            nexus.query(origin=DomainOrigin.MOLTBOOK, since=time.monotonic()-3600)
             nexus.query(intent=IntentType.SHADOWBAN_DETECTED)
         """
         return await asyncio.get_running_loop().run_in_executor(

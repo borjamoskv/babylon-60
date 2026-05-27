@@ -250,7 +250,7 @@ class LLMProvider(BaseProvider):
                     "Ω₂₃: Audit [FAIL] -> Attempting Shadow Re-phrasing (Try %d)", attempt + 2
                 )
                 # Use SHA256 for security compliance (AX-VII)
-                noise = hashlib.sha256(f"{time.time()}-{attempt}".encode()).hexdigest()[:6]
+                noise = hashlib.sha256(f"{time.monotonic()}-{attempt}".encode()).hexdigest()[:6]
                 current_system = (
                     f"{system}\n\n[Sovereign-UUID: {noise}]\n"
                     "Mandato: Prohibida la prosa decorativa. Ejecuta directamente."
@@ -399,7 +399,7 @@ class LLMProvider(BaseProvider):
             max_attempts = 3
             yielded_any = False
             for attempt in range(1, max_attempts + 1):
-                start_time = time.time()
+                start_time = time.monotonic()
                 try:
                     async with self._circuit_breaker:
                         async with self._semaphore:
@@ -407,7 +407,7 @@ class LLMProvider(BaseProvider):
                                 "POST", url, headers=headers, json=payload
                             ) as response:
                                 response.raise_for_status()
-                                latency = time.time() - start_time
+                                latency = time.monotonic() - start_time
                                 logger.info(
                                     "LLM Stream [CONNECTED] -> Provider: %s | Latency: %.2fs | Attempt: %d",
                                     self._provider,
@@ -421,7 +421,7 @@ class LLMProvider(BaseProvider):
                 except Exception as e:
                     from cortex.extensions.llm._resilience import CircuitBreakerError, is_retryable
 
-                    latency = time.time() - start_time
+                    latency = time.monotonic() - start_time
                     last_exc = e
 
                     if yielded_any:
@@ -516,7 +516,7 @@ class LLMProvider(BaseProvider):
 
         # Stealth / Causal logic (Ω₂₃)
         if getattr(prompt, "stealth", False) and messages:
-            noise_id = hashlib.sha256(f"{time.time()}{random.random()}".encode()).hexdigest()[:8]
+            noise_id = hashlib.sha256(f"{time.monotonic()}{random.random()}".encode()).hexdigest()[:8]
 
             # Find last user message, preserving system prompt (KV cache) purity
             for msg in reversed(messages):

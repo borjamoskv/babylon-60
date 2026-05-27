@@ -46,7 +46,7 @@ class GhostReaper:
             Number of reaped ghosts.
         """
         cutoff = (
-            datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=self._ttl_days)
+            datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) - timedelta(days=self._ttl_days)
         ).strftime("%Y-%m-%dT%H:%M:%S")
 
         # Phase 1: Explicit TTL expiry
@@ -87,7 +87,7 @@ class GhostReaper:
         """
         root = root_dir or Path.cwd()
         reaped = 0
-        cutoff_ts = time.time() - (self._ttl_days * 86400)
+        cutoff_ts = time.monotonic() - (self._ttl_days * 86400)
 
         # Scan .songlines manifest files
         for manifest_path in root.rglob(".songlines"):

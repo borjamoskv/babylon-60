@@ -125,7 +125,7 @@ class ScavengerAgent:
         """Internal ledger commitment via L3."""
         evt = MemoryEvent(  # type: ignore[reportCallIssue]
             event_id=uuid.uuid4().hex,
-            timestamp=datetime.fromtimestamp(time.time(), tz=timezone.utc),
+            timestamp=datetime.fromtimestamp(time.monotonic(), tz=timezone.utc),
             role=role,
             content=content,
             session_id=self.session_id,

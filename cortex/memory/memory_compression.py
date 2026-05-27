@@ -98,7 +98,7 @@ async def compress_and_store(
                 project_id=project_id,
                 content=summary,
                 embedding=vector,
-                timestamp=time.time(),
+                timestamp=time.monotonic(),
                 cognitive_layer="episodic",
                 metadata=_meta,
             )

@@ -36,7 +36,7 @@ class GhostWatcher(BaseMonitor[GhostAlert]):
             logger.error("Failed to read ghosts.json: %s", e)
             return []
 
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
+        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
         stale: list[GhostAlert] = []
 
         for project, data in ghosts.items():

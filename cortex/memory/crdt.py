@@ -54,7 +54,7 @@ class LWWRegister:
     agent_id: str = ""
 
     def update(self, new_value: str, agent_id: str) -> None:
-        now = time.time()
+        now = time.monotonic()
         if now >= self.timestamp:
             self.value = new_value
             self.timestamp = now
@@ -82,7 +82,7 @@ class ORSet:
     _elements: dict[str, float] = field(default_factory=dict)
 
     def add(self, element: str) -> None:
-        self._elements[element] = time.time()
+        self._elements[element] = time.monotonic()
 
     def remove(self, element: str) -> None:
         self._elements.pop(element, None)

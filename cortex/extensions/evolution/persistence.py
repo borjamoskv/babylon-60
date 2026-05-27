@@ -84,7 +84,7 @@ def save_swarm(agents: list[SovereignAgent], cycle: int, path: Path = DEFAULT_ST
         state = {
             "version": SCHEMA_VERSION,
             "cycle": cycle,
-            "timestamp": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            "timestamp": datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(),
             "agents": [_serialize_agent(a) for a in agents],
         }
 

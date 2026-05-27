@@ -89,7 +89,7 @@ class SovereignAgentError(Exception):
         self.suggested_alt = suggested_alt
         self.cause = cause
         self.context = context or {}
-        self.timestamp = time.time()
+        self.timestamp = time.monotonic()
 
     def as_report(self) -> DegradationReport:
         return DegradationReport(

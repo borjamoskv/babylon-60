@@ -88,7 +88,7 @@ class BaseAgent:
 
         while self.state.status == AgentStatus.RUNNING:
             try:
-                self.state.last_heartbeat_ts = time.time()
+                self.state.last_heartbeat_ts = time.monotonic()
 
                 # Try to receive a message
                 msg = await self.bus.receive(self.agent_id, timeout=1.0)
@@ -229,7 +229,7 @@ class BaseAgent:
                 "status": self.state.status.value,
                 "errors": self.state.error_count,
                 "messages_processed": self.state.total_messages_processed,
-                "ts": time.time(),
+                "ts": time.monotonic(),
             },
         )
         await self.bus.send(msg)

@@ -49,7 +49,7 @@ def approve_interactive(gate: "SovereignGate", action_id: str) -> bool:
             action.description,
         )
         action.status = ActionStatus.APPROVED
-        action.approved_at = time.time()
+        action.approved_at = time.monotonic()
         action.operator_id = "auto-audit"
         gate._log_audit("AUTO_APPROVED_AUDIT", action)
         return True
@@ -80,7 +80,7 @@ def _handle_interactive_enforce(gate: "SovereignGate", action: Any, action_id: s
 
     if response in ("s", "y", "si", "yes"):
         action.status = ActionStatus.APPROVED
-        action.approved_at = time.time()
+        action.approved_at = time.monotonic()
         action.operator_id = "interactive"
         gate._log_audit("ACTION_APPROVED_INTERACTIVE", action)
         logger.info("✅ Gate: Action %s approved interactively", action_id)

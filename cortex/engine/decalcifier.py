@@ -31,7 +31,7 @@ class SovereignDecalcifier:
         Executes one full REM cycle of memory consolidation.
         """
         logger.warning("🧠 [DECALCIFIER] Initiating REM Sleep Cycle (Deep memory sweep)...")
-        start_time = time.time()
+        start_time = time.monotonic()
 
         metrics = {"purged_orphans": 0, "compressed_engrams": 0, "serotonin_boost": 0.0}
 
@@ -79,7 +79,7 @@ class SovereignDecalcifier:
             await conn.rollback()
             return {"status": "interrupted", "error": str(e)}
 
-        duration = time.time() - start_time
+        duration = time.monotonic() - start_time
         logger.warning(
             "🧠 [DECALCIFIER] Cycle complete in %.2fs. Purged: %d. 🧬 SEROTONIN +%.2f",
             duration,

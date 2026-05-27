@@ -84,7 +84,7 @@ class GatewayRequest:
     tenant_id: str = "default"
     source: str = "api"
     caller_id: str = ""
-    request_id: str = field(default_factory=lambda: f"gw-{int(time.time() * 1000)}")
+    request_id: str = field(default_factory=lambda: f"gw-{int(time.monotonic() * 1000)}")
 
 
 @dataclass

@@ -82,7 +82,7 @@ class ExergySentinel:
         if git_lock.exists():
             # Check modification time
             mtime = os.path.getmtime(git_lock)
-            age = time.time() - mtime
+            age = time.monotonic() - mtime
             if age > 10.0:  # Lock older than 10 seconds is considered stale
                 try:
                     git_lock.unlink()
@@ -98,7 +98,7 @@ class ExergySentinel:
                 try:
                     if lock_file.exists():
                         mtime = os.path.getmtime(lock_file)
-                        if time.time() - mtime > 60.0:
+                        if time.monotonic() - mtime > 60.0:
                             # We don't delete database wal/shm files directly unless we are sure,
                             # but we log them.
                             pass
@@ -227,7 +227,7 @@ class ExergySentinel:
             
         # 6. Recalculate health metrics
         self.calculate_exergy_score()
-        self.state["last_pulse"] = time.time()
+        self.state["last_pulse"] = time.monotonic()
         self.save_state()
         self.log(f"Pulse cycle complete. Current Exergy: {self.state['exergy_score']}% [{self.state['status']}]", "INFO")
 

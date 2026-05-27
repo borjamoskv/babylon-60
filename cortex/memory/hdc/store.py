@@ -216,7 +216,7 @@ class HDCVectorStoreL2:
             content=query, fact_type=fact_type, project_id=project_id
         )
         embedding_bytes = np.array(query_hv, dtype=np.float32).tobytes()
-        now = time.time()
+        now = time.monotonic()
 
         # Retrieve toxic vectors if inhibit_ids are provided
         toxic_hvs = self._fetch_toxic_hvs(conn, inhibit_ids)

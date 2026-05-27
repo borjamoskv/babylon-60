@@ -1,12 +1,22 @@
 # 📜 CORTEX LORCA-Ω NARRATIVE LEDGER
 
 > **Sovereign Chronicle of the Substrate** | **Reality Level:** `C5-REAL`
-> **Generated at:** `2026-05-27T05:13:54.099794+00:00` | **Source:** `git history` (last 30 commits)
+> **Generated at:** `2026-05-27T05:21:55.826018+00:00` | **Source:** `git history` (last 30 commits)
 
 This ledger projects a retroactive narrative translation of repository mutations. Every standard commit is mapped through the entropy-to-metaphor pipeline of the CommitPoet engine.
 
 | Commit Hash | Date | Original Subject | LORCA-Ω Translation |
 | :---: | :--- | :--- | :--- |
+| `1809a021` | 2026-05-27 07:21 UTC | feat(cortex-core): integrate ultramap logic, legion engine optimizations and rust-accelerated memory bindings | fix(agents): extinguish the cascade failure in agents 🔧 |
+| `be52ee30` | 2026-05-27 07:21 UTC | chore(ouroboros): recursive digestion of cognitive rust | fix(engine): purge the toxic residue from engine ⚕️ |
+| `887f697c` | 2026-05-27 07:20 UTC | chore(ouroboros): daily metabolism and entropy reduction (Δ=-28.0) | refactor(evolution): extract the evolution signal from thermal noise 🧹 |
+| `5a0e0e67` | 2026-05-27 07:19 UTC | fix(deploy): remove relative package install for vercel | perf(api): minimize latency spikes in api ⚡ |
+| `1de2c9c9` | 2026-05-27 07:18 UTC | fix(persistence): detach weakref finalizers on manual close to prevent double-free exceptions & resolve vsa engine imports | docs(api): engrave api wisdom into the stone tablet 📡 |
+| `197a2fda` | 2026-05-27 07:18 UTC | feat(core): maximize exergy via execution plane optimization and entropy purge | feat(scripts): architect the scripts cantilever 🚀 |
+| `013b2709` | 2026-05-27 07:18 UTC | refactor(evolution): maximize exergy via OuroborosOmega AST mutation | refactor(scripts): realign scripts along the geodesic 🧹 |
+| `0fca30ac` | 2026-05-27 07:17 UTC | fix(deploy): relax libsql-client version requirement | docs(api): author the api survival manual 📐 |
+| `e6c20646` | 2026-05-27 07:15 UTC | fix(deploy): use parent directory for pip install in vercel requirements | docs(api): annotate the api archaeological record 🧭 |
+| `151d5018` | 2026-05-27 07:14 UTC | ci(docs): harden the docs delivery corridor 🔗 | docs(docs): author the docs survival manual 🏛️ |
 | `5a2465c1` | 2026-05-27 07:13 UTC | chore(deploy): adjust vercel deployment configuration and script tracebacks | feat(scripts): awaken scripts from the dormant lattice ⚡ |
 | `94ea0a8f` | 2026-05-27 07:12 UTC | feat(auth): integrate turso auth backend via libsql-client for vercel | docs(auth): chart the auth territory for future navigators 📜 |
 | `3c8b077c` | 2026-05-27 07:11 UTC | chore(vercel): streamline routing parameters for serverless backend | feat(core): initiate the autopoietic synthesis of core 🧊 |
@@ -27,16 +37,6 @@ This ledger projects a retroactive narrative translation of repository mutations
 | `baed928f` | 2026-05-27 06:50 UTC | docs: formalize sortu-apex foundation after 10k legion scaling | docs(docs): decode the docs rosetta stone 🗺️ |
 | `cfe3ecfd` | 2026-05-27 06:50 UTC | refactor(swarm): merge 10k logic into unified legion_dispatch.py, deprecate legacy dispatchers | fix(cortex-core): drain the abscess from cortex-core 🛡️ |
 | `5bd30142` | 2026-05-27 06:49 UTC | fix(core): reset ring buffer and inject ws telemetry bridge | fix(scripts): inoculate scripts against regression 🩺 |
-| `d66ff3a9` | 2026-05-27 06:48 UTC | feat(rust): enforce zero copy native processing | fix(tests): inoculate tests against regression 🔧 |
-| `0b509721` | 2026-05-27 06:43 UTC | feat(rust-ffi): Implement 10k LEGION processing bounds natively bypassing GIL | fix(cortex_rs): cauterize the wound in cortex_rs 🪡 |
-| `22e013e6` | 2026-05-27 06:41 UTC | feat(ledger): implement dual-ledger query logic and premium noir telemetry ui | feat(scripts): weave scripts into the living membrane 🏗️ |
-| `f21a3373` | 2026-05-27 06:36 UTC | docs(ledger): update the lorca-omega narrative ledger mappings 📜 | docs(docs): author the docs survival manual 🧭 |
-| `ccd78441` | 2026-05-27 06:35 UTC | feat(git): weave git into the living membrane 🧊 | docs(git): author the git survival manual 🗺️ |
-| `eb22408d` | 2026-05-27 06:34 UTC | fix(tests): resolve test_purge_logic_success error and format code | test(engine): probe the entropic boundary of engine 🛡️ |
-| `abcde1d5` | 2026-05-27 06:31 UTC | test(types): add universal memory schema validation tests | test(types): deploy chaos probes against types 🧫 |
-| `f5bda3ba` | 2026-05-27 06:30 UTC | docs(protocol): add mcp-2 formal specification | docs(docs): annotate the docs archaeological record 📜 |
-| `01ccf316` | 2026-05-27 06:30 UTC | docs(legion): add evaluation of 10k agents semantic assimilation | docs(docs): chronicle the docs epoch transition 🏛️ |
-| `c52afc62` | 2026-05-27 06:29 UTC | fix(demo): clean up demo database files at startup and teardown | feat(examples): graft examples onto the living architecture 🌱 |
 
 ---
 

@@ -147,14 +147,14 @@ class ProvenanceChain:
 def _uuid7() -> str:
     """Generate a UUID v7 (time-sortable) as string."""
     # UUID v7 not in stdlib until 3.14 — use v4 with timestamp prefix
-    ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y%m%d%H%M%S")
+    ts = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime("%Y%m%d%H%M%S")
     uid = uuid.uuid4().hex
     return f"{ts}-{uid[:16]}"
 
 
 def _now_iso() -> str:
     """Current UTC time as ISO 8601 string."""
-    return datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+    return datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
 
 
 @dataclass(frozen=True)

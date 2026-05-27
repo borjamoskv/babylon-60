@@ -166,7 +166,7 @@ def mejoralo_record(project, score_before, score_after, actions, db):
                     {
                         "project": project,
                         "timestamp": datetime.fromtimestamp(
-                            time.time(), tz=timezone.utc
+                            time.monotonic(), tz=timezone.utc
                         ).isoformat(),
                         "score_before": score_before,
                         "score_after": score_after,

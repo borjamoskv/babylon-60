@@ -152,7 +152,7 @@ class AgenteIterar:
         """TODO: Document run_cycle"""
         cycle_id = next(_cycle_counter)
         t0 = time.monotonic()
-        result = IterationResult(cycle_id=cycle_id, timestamp=time.time())
+        result = IterationResult(cycle_id=cycle_id, timestamp=time.monotonic())
         logger.info(f"═══ CYCLE #{cycle_id} ═══════════════════════════════")
         logger.info("Phase 1/5: LINT")
         before, after = self._run_lint()

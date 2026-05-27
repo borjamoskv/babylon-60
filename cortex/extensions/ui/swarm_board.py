@@ -54,7 +54,7 @@ class SwarmBoard:
             lambda: {
                 "state": STATE_INITIALIZING,
                 "task": "Booting...",
-                "last_seen": time.time(),
+                "last_seen": time.monotonic(),
                 "failures": 0,
             }
         )
@@ -95,7 +95,7 @@ class SwarmBoard:
             elif event == "swarm:error":
                 self.agents[source]["failures"] += 1
 
-            self.agents[source]["last_seen"] = time.time()
+            self.agents[source]["last_seen"] = time.monotonic()
 
     def generate_layout(self) -> Layout:
         """Create the Rich layout."""

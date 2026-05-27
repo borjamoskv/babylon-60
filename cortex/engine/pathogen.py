@@ -119,7 +119,7 @@ class PathogenEngine:
             console.print(f"[cyan]📡 RADAR-Ω: Tracking pathogen post {post_id}[/cyan]")
 
             while True:
-                elapsed = datetime.fromtimestamp(time.time(), tz=timezone.utc) - created_at
+                elapsed = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) - created_at
                 latency_hours = elapsed.total_seconds() / 3600.0
                 comments_data = await client.get_comments(post_id)
                 total_comments = len(comments_data.get("comments", []))

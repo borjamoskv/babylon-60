@@ -76,11 +76,11 @@ class CacheEntry:
 
     @property
     def is_expired(self) -> bool:
-        return time.time() > (self.created_at + self.ttl_seconds)
+        return time.monotonic() > (self.created_at + self.ttl_seconds)
 
     @property
     def age_seconds(self) -> float:
-        return time.time() - self.created_at
+        return time.monotonic() - self.created_at
 
 
 @dataclass
@@ -149,7 +149,7 @@ class ContextCacheManager:
         """
         import hashlib
 
-        now = time.time()
+        now = time.monotonic()
         cache_id = hashlib.sha256(
             f"{project}:{provider}:{model}:{now}:{agent_id}".encode()
         ).hexdigest()[:16]
@@ -219,7 +219,7 @@ class ContextCacheManager:
                 raw_tensor, bits=3.5, layer_depth_ratio=layer_depth_ratio
             )
 
-            handle = f"local_tq_3.5b_var_{int(time.time() * 1000)}"
+            handle = f"local_tq_3.5b_var_{int(time.monotonic() * 1000)}"
 
             # Ouroboros V2: MMAP Bypassing SQLite for raw tensor
             mmap_dir = "/tmp/cortex_mmap_kv"
@@ -240,7 +240,7 @@ class ContextCacheManager:
                 project_id=project or "kv_cache_engine",
                 content=f"KV_CACHE_PREFIX_DUMP:{provider}:{model}:{len(raw_tensor)}",
                 embedding=[0.0],  # Ouroboros V2 Bypass: The actual tensor is in MMAP!
-                timestamp=time.time(),
+                timestamp=time.monotonic(),
                 is_diamond=True,  # Immutable locally until TTL evicts
                 confidence="C5",
                 cognitive_layer="working",  # KV Cache es memoria de trabajo profunda

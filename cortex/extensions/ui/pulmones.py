@@ -96,7 +96,7 @@ class SystemRespiration:
             swarm_size_limit (int): Max agents to spawn (e.g. 5 up to 50).
             ok_to_run (bool): False if CPU load is critically high.
         """
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
+        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
         cpu_percent = psutil.cpu_percent(interval=None)
 
         if cpu_percent > 85.0:

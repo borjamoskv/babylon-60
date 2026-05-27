@@ -83,7 +83,7 @@ class OuroborosEngine:
         repo_name = (
             self.target_url.split("/")[-1].replace(".git", "") if self.target_url else "temp_audit"
         )
-        self.scratch_dir = os.path.join(SCRATCH_BASE, f"{repo_name}_{int(time.time())}")
+        self.scratch_dir = os.path.join(SCRATCH_BASE, f"{repo_name}_{int(time.monotonic())}")
         os.makedirs(self.scratch_dir, exist_ok=True)
 
         logger.info("Provisioned Ouroboros workspace: %s", self.scratch_dir)
@@ -212,7 +212,7 @@ contract {contract_name}OuroborosTest is Test {{
                 await self._emit_event(
                     "critical_finding",
                     {
-                        "id": f"VULN_{int(time.time())}",
+                        "id": f"VULN_{int(time.monotonic())}",
                         "msg": "CRITICAL_FINDING",
                         "val": f"Exploit detected in {c['name']} (Revert Flow)",
                     },
@@ -224,7 +224,7 @@ contract {contract_name}OuroborosTest is Test {{
                 await self._emit_event(
                     "ledger_append",
                     {
-                        "hash": f"AUR_{int(time.time())}_{c['name']}",
+                        "hash": f"AUR_{int(time.monotonic())}_{c['name']}",
                         "action": f"Security Audit: {c['name']}",
                         "yield_amount": score,
                         "vector_id": "Ouroboros-Fuzzer",
@@ -243,10 +243,10 @@ contract {contract_name}OuroborosTest is Test {{
                 os.path.dirname(os.path.abspath(__file__)), "remediator.py"
             )
             payload = {
-                "id": f"remed_{int(time.time())}",
+                "id": f"remed_{int(time.monotonic())}",
                 "type": "remediation",
                 "command": f"python3 {remediator_path} {target_file} {log_file}",
-                "timestamp": time.time(),
+                "timestamp": time.monotonic(),
             }
             
             enqueue_swarm_task("SURGEON-1", payload)

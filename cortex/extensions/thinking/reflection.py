@@ -99,7 +99,7 @@ def generate_reflection(
         summary=summary,
         errors=errors or [],
         decisions=decisions or [],
-        timestamp=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+        timestamp=datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(),
     )
 
     content = reflection.to_content()

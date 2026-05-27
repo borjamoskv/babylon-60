@@ -46,7 +46,7 @@ class MemoryQualityEvaluator:
             logger.warning("QualityEvaluator: Stale Memory check requires sovereign store.")
             return
 
-        stale_cutoff = time.time() - (stale_days * 86400)
+        stale_cutoff = time.monotonic() - (stale_days * 86400)
         conn = self._l2._get_conn()
         cursor = conn.cursor()
 

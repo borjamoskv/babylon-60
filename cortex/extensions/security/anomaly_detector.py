@@ -43,7 +43,7 @@ class SecurityEvent:
 
     def __post_init__(self) -> None:
         if not self.timestamp:  # 0.0 is sentinel: fill with current time
-            object.__setattr__(self, "timestamp", time.time())
+            object.__setattr__(self, "timestamp", time.monotonic())
 
 
 @dataclass()
@@ -148,7 +148,7 @@ class AnomalyDetector:
 
     def check_rate_limit(self, source: str) -> bool:
         """Quick check: is this source within rate limits?"""
-        now = time.time()
+        now = time.monotonic()
         self._prune_rate_tracker(source, now)
         return len(self._rate_tracker[source]) < self._rate_limit
 
@@ -171,7 +171,7 @@ class AnomalyDetector:
         baseline = ProjectBaseline(
             project=project,
             total_events=len(events),
-            last_updated=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            last_updated=datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(),
         )
 
         if len(events) >= 10:

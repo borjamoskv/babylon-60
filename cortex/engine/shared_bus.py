@@ -10,6 +10,7 @@ import json
 import logging
 import struct
 import time
+import weakref
 from multiprocessing.shared_memory import SharedMemory
 from typing import Any
 
@@ -67,6 +68,13 @@ class SovereignSharedBus:
                     raise
             except (OSError, PermissionError) as exc:
                 self._activate_local_fallback(total_size, exc)
+
+        # Register finalizer to clean up SharedMemory on garbage collection
+        # We use a static method to avoid keeping a reference to `self`
+        if self._shm is not None:
+            self._finalizer = weakref.finalize(self, self._cleanup_shm, self._shm)
+        else:
+            self._finalizer = None
 
     async def initialize(self) -> None:
         """Sovereign initialization: satisfy the SwarmCommander contract."""
@@ -162,7 +170,7 @@ class SovereignSharedBus:
         head, tail, exergy, latency, cap, slot = h[0], h[1], h[2], h[3], h[4], h[5]
 
         offset = HEADER_SIZE + (head * slot)
-        ts = time.time()
+        ts = time.monotonic()
 
         # 1. Write Data (Non-visible until head advances)
         record_header = struct.pack("dHH", ts, 0, sid)
@@ -222,7 +230,19 @@ class SovereignSharedBus:
 
         return results
 
+    @staticmethod
+    def _cleanup_shm(shm: SharedMemory | None) -> None:
+        """Safely close shared memory on GC."""
+        if shm is not None:
+            try:
+                shm.close()
+            except Exception:
+                pass
+
     def close(self):
+        if self._finalizer is not None:
+            self._finalizer.detach()
+
         shm = self._shm
         if shm is not None:
             try:
@@ -233,6 +253,9 @@ class SovereignSharedBus:
 
     def unlink(self):
         """Destroy the shared memory segment."""
+        if self._finalizer is not None:
+            self._finalizer.detach()
+
         shm = self._shm
         if shm is not None:
             try:

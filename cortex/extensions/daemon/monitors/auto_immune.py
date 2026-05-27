@@ -49,7 +49,7 @@ class AutoImmuneMonitor(BaseMonitor):
             logger.error("Failed to read ghosts.json: %s", e)
             return []
 
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
+        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
         queued_ids: list[str] = []
         changes_made = False
 

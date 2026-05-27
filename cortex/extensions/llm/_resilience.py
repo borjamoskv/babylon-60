@@ -48,7 +48,7 @@ class CircuitBreaker:
     async def __aenter__(self):
         async with self._lock:
             if self.state == CircuitState.OPEN:
-                if time.time() - self.last_failure_time > self.recovery_timeout:
+                if time.monotonic() - self.last_failure_time > self.recovery_timeout:
                     self.state = CircuitState.HALF_OPEN
                     logger.info(
                         "Circuit Breaker [%s] [HALF-OPEN] -> Probing provider...",
@@ -75,7 +75,7 @@ class CircuitBreaker:
             if self.is_countable_failure(exc_val):
                 async with self._lock:
                     self.failure_count += 1
-                    self.last_failure_time = time.time()
+                    self.last_failure_time = time.monotonic()
                     if (
                         self.state == CircuitState.HALF_OPEN
                         or self.failure_count >= self.failure_threshold
@@ -117,11 +117,11 @@ async def resilient_call(
     """Executes a function with retry and circuit breaker logic."""
     last_exc = None
     for attempt in range(1, max_attempts + 1):
-        start_time = time.time()
+        start_time = time.monotonic()
         try:
             async with circuit_breaker:
                 result = await func()
-                latency = time.time() - start_time
+                latency = time.monotonic() - start_time
                 logger.info(
                     "LLM Call [OK] -> Provider: %s | Latency: %.2fs | Attempt: %d",
                     provider_name,
@@ -130,7 +130,7 @@ async def resilient_call(
                 )
                 return result
         except Exception as e:
-            latency = time.time() - start_time
+            latency = time.monotonic() - start_time
             last_exc = e
 
             # Fail-fast if circuit breaker is active

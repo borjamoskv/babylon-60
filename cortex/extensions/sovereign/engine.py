@@ -72,7 +72,7 @@ class SovereignContext:
 
     @property
     def elapsed_ms(self) -> float:
-        return (time.time() - self.started_at) * 1000
+        return (time.monotonic() - self.started_at) * 1000
 
 
 # ---------------------------------------------------------------------------
@@ -82,13 +82,13 @@ class SovereignContext:
 
 async def _phase_fabrication(ctx: SovereignContext) -> PipelineResult:
     """Phase 1 — Invoke aether-1 to materialize artifacts."""
-    t0 = time.time()
+    t0 = time.monotonic()
     try:
         await asyncio.to_thread(ctx.bridge.execute, "aether-1")
         return PipelineResult(
             phase=Phase.FABRICATION,
             success=True,
-            duration_ms=(time.time() - t0) * 1000,
+            duration_ms=(time.monotonic() - t0) * 1000,
             details={"status": "Aether-1 materialized artifacts successfully"},
         )
     except (RuntimeError, ValueError, OSError) as e:
@@ -96,33 +96,33 @@ async def _phase_fabrication(ctx: SovereignContext) -> PipelineResult:
         return PipelineResult(
             phase=Phase.FABRICATION,
             success=False,
-            duration_ms=(time.time() - t0) * 1000,
+            duration_ms=(time.monotonic() - t0) * 1000,
             details={"error": str(e)},
         )
 
 
 async def _phase_orchestration(ctx: SovereignContext) -> PipelineResult:
     """Phase 2 — Keter-omega for multi-cloud readiness."""
-    t0 = time.time()
+    t0 = time.monotonic()
     try:
         await asyncio.to_thread(ctx.bridge.execute, "keter-omega")
         return PipelineResult(
             phase=Phase.ORCHESTRATION,
             success=True,
-            duration_ms=(time.time() - t0) * 1000,
+            duration_ms=(time.monotonic() - t0) * 1000,
         )
     except (RuntimeError, ValueError, OSError) as e:
         return PipelineResult(
             phase=Phase.ORCHESTRATION,
             success=False,
-            duration_ms=(time.time() - t0) * 1000,
+            duration_ms=(time.monotonic() - t0) * 1000,
             details={"error": str(e)},
         )
 
 
 async def _phase_swarm(ctx: SovereignContext) -> PipelineResult:
     """Phase 3 — Legion-Omega swarm execution."""
-    t0 = time.time()
+    t0 = time.monotonic()
     try:
         from cortex.engine.legion import LEGION_OMEGA
 
@@ -132,7 +132,7 @@ async def _phase_swarm(ctx: SovereignContext) -> PipelineResult:
         return PipelineResult(
             phase=Phase.SWARM,
             success=result.success,
-            duration_ms=(time.time() - t0) * 1000,
+            duration_ms=(time.monotonic() - t0) * 1000,
             details={
                 "cycles": result.cycles,
                 "immunity": "REACHED" if result.success else "BREACHED",
@@ -144,19 +144,19 @@ async def _phase_swarm(ctx: SovereignContext) -> PipelineResult:
         return PipelineResult(
             phase=Phase.SWARM,
             success=False,
-            duration_ms=(time.time() - t0) * 1000,
+            duration_ms=(time.monotonic() - t0) * 1000,
             details={"error": str(e)},
         )
 
 
 async def _phase_security(ctx: SovereignContext) -> PipelineResult:
     """Phase 5 — Run military-grade security scans."""
-    t0 = time.time()
+    t0 = time.monotonic()
     report = await asyncio.to_thread(run_security_scans, str(ctx.project_root / "cortex"))
     return PipelineResult(
         phase=Phase.SECURITY,
         success=report.passed,
-        duration_ms=(time.time() - t0) * 1000,
+        duration_ms=(time.monotonic() - t0) * 1000,
         details={
             "critical": report.critical,
             "high": report.high,
@@ -168,7 +168,7 @@ async def _phase_security(ctx: SovereignContext) -> PipelineResult:
 
 async def _phase_observability(ctx: SovereignContext) -> PipelineResult:
     """Phase 6 — Initial telemetry and initial power level check."""
-    t0 = time.time()
+    t0 = time.monotonic()
     init_telemetry()
 
     # Seed initial scores and apply the 130/100 sovereign multiplier
@@ -180,50 +180,50 @@ async def _phase_observability(ctx: SovereignContext) -> PipelineResult:
     return PipelineResult(
         phase=Phase.OBSERVABILITY,
         success=True,
-        duration_ms=(time.time() - t0) * 1000,
+        duration_ms=(time.monotonic() - t0) * 1000,
         details=power.to_dict(),
     )
 
 
 async def _phase_experience(ctx: SovereignContext) -> PipelineResult:
     """Phase 7 — Impactv-1 for UI/UX excellence."""
-    t0 = time.time()
+    t0 = time.monotonic()
     try:
         await asyncio.to_thread(ctx.bridge.execute, "impactv-1")
         return PipelineResult(
             phase=Phase.EXPERIENCE,
             success=True,
-            duration_ms=(time.time() - t0) * 1000,
+            duration_ms=(time.monotonic() - t0) * 1000,
         )
     except (RuntimeError, ValueError, OSError) as e:
         return PipelineResult(
             phase=Phase.EXPERIENCE,
             success=False,
-            duration_ms=(time.time() - t0) * 1000,
+            duration_ms=(time.monotonic() - t0) * 1000,
             details={"error": str(e)},
         )
 
 
 async def _phase_arbitration(ctx: SovereignContext) -> PipelineResult:
     """Phase — Calibrate the arbiter state."""
-    t0 = time.time()
+    t0 = time.monotonic()
     # Baseline justice check
     return PipelineResult(
         phase=Phase.ARBITRATION,
         success=True,
-        duration_ms=(time.time() - t0) * 1000,
+        duration_ms=(time.monotonic() - t0) * 1000,
         details={"status": "Epistemic arbiter calibrated and active"},
     )
 
 
 async def _phase_verification(ctx: SovereignContext) -> PipelineResult:
     """Phase 9 — Final verification: power ≥ 1300."""
-    t0 = time.time()
+    t0 = time.monotonic()
     power_val = ctx.power.power if ctx.power else 0
     return PipelineResult(
         phase=Phase.VERIFICATION,
         success=power_val >= 1300,
-        duration_ms=(time.time() - t0) * 1000,
+        duration_ms=(time.monotonic() - t0) * 1000,
         details={
             "power_level": power_val,
             "target": 1300,
@@ -239,7 +239,7 @@ async def _phase_verification(ctx: SovereignContext) -> PipelineResult:
 
 async def _phase_evolution(ctx: SovereignContext) -> PipelineResult:
     """Phase — Run one evolution cycle for continuous agent improvement."""
-    t0 = time.time()
+    t0 = time.monotonic()
     try:
         from cortex.extensions.evolution.engine import EvolutionEngine
 
@@ -251,7 +251,7 @@ async def _phase_evolution(ctx: SovereignContext) -> PipelineResult:
         return PipelineResult(
             phase=Phase.EVOLUTION,
             success=True,
-            duration_ms=(time.time() - t0) * 1000,
+            duration_ms=(time.monotonic() - t0) * 1000,
             details={
                 "cycle": stats.cycle,
                 "crossovers": stats.crossovers,
@@ -265,7 +265,7 @@ async def _phase_evolution(ctx: SovereignContext) -> PipelineResult:
         return PipelineResult(
             phase=Phase.EVOLUTION,
             success=False,
-            duration_ms=(time.time() - t0) * 1000,
+            duration_ms=(time.monotonic() - t0) * 1000,
             details={"error": str(e)},
         )
 
@@ -324,12 +324,12 @@ async def run_pipeline(
             result = await executor(ctx)
         else:
             # For unmapped phases, check if we have a direct skill mapping
-            t0 = time.time()
+            t0 = time.monotonic()
             skill_name = phase.name.lower().replace("_", "-")
             try:
                 ctx.bridge.execute(skill_name)
                 result = PipelineResult(
-                    phase=phase, success=True, duration_ms=(time.time() - t0) * 1000
+                    phase=phase, success=True, duration_ms=(time.monotonic() - t0) * 1000
                 )
             except (RuntimeError, ValueError, OSError) as e:
                 logger.debug("Skill fallback failed for %s: %s", skill_name, e)

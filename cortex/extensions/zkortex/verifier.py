@@ -78,7 +78,7 @@ class ZKOrtexVerifier:
             return VerificationResult(
                 is_valid=False,
                 proof_type="membership",
-                verified_at=time.time(),
+                verified_at=time.monotonic(),
                 details=f"Root mismatch. Expected: {self._expected_root[:16]}... "
                 f"Got: {proof.root[:16]}...",
                 public_root=proof.root,
@@ -90,7 +90,7 @@ class ZKOrtexVerifier:
             return VerificationResult(
                 is_valid=False,
                 proof_type="membership",
-                verified_at=time.time(),
+                verified_at=time.monotonic(),
                 details=f"Proof verification error: {e}",
                 public_root=proof.root,
             )
@@ -103,7 +103,7 @@ class ZKOrtexVerifier:
         return VerificationResult(
             is_valid=is_valid,
             proof_type="membership",
-            verified_at=time.time(),
+            verified_at=time.monotonic(),
             details="Proof valid — element is a member of the sovereign knowledge set."
             if is_valid
             else "Proof INVALID — element not in set or tampered proof.",
@@ -125,7 +125,7 @@ class ZKOrtexVerifier:
         return VerificationResult(
             is_valid=is_valid,
             proof_type="range",
-            verified_at=time.time(),
+            verified_at=time.monotonic(),
             details=f"CORTEX confirmed to have knowledge count in [{proof.min_val}, {proof.max_val}]."
             if is_valid
             else "Range proof structural check FAILED.",
@@ -154,7 +154,7 @@ class ZKOrtexVerifier:
             return VerificationResult(
                 is_valid=False,
                 proof_type="commitment_opening",
-                verified_at=time.time(),
+                verified_at=time.monotonic(),
                 details=f"Invalid blinding factor hex: {e}",
             )
 
@@ -165,7 +165,7 @@ class ZKOrtexVerifier:
         return VerificationResult(
             is_valid=is_valid,
             proof_type="commitment_opening",
-            verified_at=time.time(),
+            verified_at=time.monotonic(),
             details="Commitment opens correctly — secret is authentic."
             if is_valid
             else "Commitment DOES NOT match the revealed secret. ALERT: possible forgery.",
@@ -184,5 +184,5 @@ class ZKOrtexVerifier:
             "validity_rate": valid / total if total > 0 else 0.0,
             "proof_types": list({r.proof_type for r in results}),
             "root_pin": self._expected_root,
-            "generated_at": time.time(),
+            "generated_at": time.monotonic(),
         }

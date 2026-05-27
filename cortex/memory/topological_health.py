@@ -137,7 +137,7 @@ class TopologicalHealthMonitor:
             spectral_gap=spectral_gap,
             intrinsic_dim=intrinsic_dim,
             hubness=hubness,
-            timestamp=time.time(),
+            timestamp=time.monotonic(),
             model_hash=self._model_hash,
             sample_size=arr.shape[0],
         )

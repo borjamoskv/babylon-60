@@ -51,7 +51,7 @@ def append_cycle(report: CycleReport, path: Path = DEFAULT_TELEMETRY_PATH) -> No
     """Append a single cycle's metrics as one CSV row."""
     _ensure_header(path)
     row = [
-        f"{time.time():.3f}",
+        f"{time.monotonic():.3f}",
         report.cycle,
         f"{report.avg_agent_fitness:.2f}",
         f"{report.best_agent_fitness:.2f}",

@@ -184,7 +184,7 @@ class HolographicMemory:
 
         # 4. Map similarity + decay + OUROBOROS success rate
         final_scores = []
-        now = time.time()
+        now = time.monotonic()
         for i, original_idx in enumerate(indices_list):
             meta = self._metadata[original_idx]
 

@@ -41,7 +41,7 @@ class DecoyFact:
         self.project = project
         self.severity = severity
         self.created_at = (
-            created_at or datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+            created_at or datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
         )
         self.hash = h_hash or compute_fact_hash(content)
 

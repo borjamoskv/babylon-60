@@ -25,7 +25,7 @@ class SecurityAuditMiddleware:
 
     async def __call__(self, request: Request, call_next: Callable) -> Response:
         """Process the request and immutably log the outcome."""
-        start_time = time.time()
+        start_time = time.monotonic()
 
         # Privacy Shield: We do not log raw bodies containing secrets or PII.
         tenant_id = getattr(request.state, "tenant_id", "anonymous")
@@ -46,7 +46,7 @@ class SecurityAuditMiddleware:
             raise
 
         finally:
-            elapsed = time.time() - start_time
+            elapsed = time.monotonic() - start_time
             # Commit to the immutable ledger
             if self.ledger:
                 await self.ledger.log_action(

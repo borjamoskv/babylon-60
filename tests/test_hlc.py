@@ -58,7 +58,7 @@ class TestHybridLogicalClock:
         local = HybridLogicalClock(node_id=1)
         # Simulate a remote timestamp far in the future
         remote = HLCTimestamp(
-            physical_ms=int(time.time() * 1000) + 10_000_000,
+            physical_ms=int(time.monotonic() * 1000) + 10_000_000,
             logical=5,
             node_id=2,
         )

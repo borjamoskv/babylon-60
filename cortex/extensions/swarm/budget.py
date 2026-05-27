@@ -67,7 +67,7 @@ class SwarmBudgetManager:
         pricing = COST_PRICING.get(provider, COST_PRICING["default"])
         cost = (input_tokens / 1000 * pricing["input"]) + (output_tokens / 1000 * pricing["output"])
 
-        now = time.time()
+        now = time.monotonic()
         try:
             with db_connect(str(self.db_path)) as conn:
                 conn.execute(

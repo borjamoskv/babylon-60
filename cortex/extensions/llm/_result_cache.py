@@ -103,7 +103,7 @@ class ResultCache:
         if not self._available:
             return None
         h = self._make_hash(prompt)
-        now = time.time()
+        now = time.monotonic()
         try:
             with _db(self.db_path) as conn:
                 row = conn.execute(
@@ -128,7 +128,7 @@ class ResultCache:
         if not self._available:
             return
         h = self._make_hash(prompt)
-        now = time.time()
+        now = time.monotonic()
         expires = now + ttl
         try:
             with _db(self.db_path, exclusive=True) as conn:
@@ -156,7 +156,7 @@ class ResultCache:
         """Remove expired entries. Returns eviction count."""
         if not self._available:
             return 0
-        now = time.time()
+        now = time.monotonic()
         with _db(self.db_path, exclusive=True) as conn:
             cursor = conn.execute("DELETE FROM results WHERE expires_at <= ?", (now,))
             return cursor.get_count() if hasattr(cursor, "get_count") else cursor.rowcount  # pyright: ignore

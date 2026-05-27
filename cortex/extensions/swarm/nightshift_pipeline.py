@@ -82,7 +82,7 @@ class PlannerNode:
             if hasattr(target, "target"):
                 plan.append(
                     {
-                        "id": f"crystal-{int(time.time())}-{i}",
+                        "id": f"crystal-{int(time.monotonic())}-{i}",
                         "target": self._clean_target(target.target),
                         "intent": target.intent,
                         "priority": target.priority,
@@ -93,7 +93,7 @@ class PlannerNode:
             elif isinstance(target, dict):
                 plan.append(
                     {
-                        "id": f"crystal-{int(time.time())}-{i}",
+                        "id": f"crystal-{int(time.monotonic())}-{i}",
                         "target": self._clean_target(target["target"]),
                         "intent": target.get("intent", intent_fallback or "quick_read"),
                         "priority": target.get("priority", 5),
@@ -105,7 +105,7 @@ class PlannerNode:
                 # Plain string target — wrap as quick_read
                 plan.append(
                     {
-                        "id": f"crystal-{int(time.time())}-{i}",
+                        "id": f"crystal-{int(time.monotonic())}-{i}",
                         "target": self._clean_target(target),
                         "intent": intent_fallback or "quick_read",
                         "priority": 5,
@@ -350,7 +350,7 @@ class NightShiftPipeline:
             "priority": priority,
             "next_node": "planner",
             "is_paused": False,
-            "started_at": time.time(),
+            "started_at": time.monotonic(),
         }
 
         logger.info(
@@ -377,7 +377,7 @@ class NightShiftPipeline:
                 logger.info("⏸️ [NIGHTSHIFT] Pipeline paused at %s.", node_name)
                 break
 
-        state["completed_at"] = time.time()
+        state["completed_at"] = time.monotonic()
         state["total_steps"] = step
         state["duration_s"] = state["completed_at"] - state["started_at"]
 

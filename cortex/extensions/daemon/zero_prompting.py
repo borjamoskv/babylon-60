@@ -111,7 +111,7 @@ class ZeroPromptingDaemon:
                 "VALUES (lower(hex(randomblob(16))), 'decision', 'ZeroPrompt', ?, ?, 'C5')",
                 (
                     f"Evolved: {hypothesis}. Action: {action}. Improvement: {improvement}",
-                    time.time(),
+                    time.monotonic(),
                 ),
             )
             conn.commit()
@@ -151,7 +151,7 @@ class ZeroPromptingDaemon:
         """The core Zero-Prompting pulse."""
         logger.info("🧠 Zero-Prompting Evolution Daemon ONLINE.")
         while not self._shutdown:
-            now = time.time()
+            now = time.monotonic()
             if now - self.last_cycle > self.interval:
                 await self.evolution_cycle(focus="entropy")
                 self.last_cycle = now

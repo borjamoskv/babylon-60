@@ -84,7 +84,7 @@ class FitnessLandscape:
 
     def compute(self) -> LandscapeState:
         """Full landscape snapshot; cached for TTL seconds."""
-        now = time.time()
+        now = time.monotonic()
         if self._cache and (now - self._cache.computed_at) < _CACHE_TTL:
             return self._cache
 

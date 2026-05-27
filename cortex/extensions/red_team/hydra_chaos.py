@@ -72,7 +72,7 @@ class MockRedisClient:
 
     async def xadd(self, _stream: str, fields: dict[str, Any], **_kwargs: Any) -> str:
         await asyncio.sleep(0)
-        return f"{int(time.time() * 1000)}-0"
+        return f"{int(time.monotonic() * 1000)}-0"
 
     async def xreadgroup(
         self, _group: str, _consumer: str, _streams: dict[str, str], **_kwargs: Any

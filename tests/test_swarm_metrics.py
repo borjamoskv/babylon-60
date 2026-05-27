@@ -94,7 +94,7 @@ def test_swarm_metrics_caching():
     c = conn.cursor()
     c.execute(
         "INSERT INTO cortex_execution_ledger (timestamp, agent, command, returncode, execution_time) VALUES (?, ?, ?, ?, ?)",
-        (time.time(), "TestAgent", "TestCmd", 0, 0.5),
+        (time.monotonic(), "TestAgent", "TestCmd", 0, 0.5),
     )
     conn.commit()
     conn.close()

@@ -144,7 +144,7 @@ class _UnifiedHandler(FileSystemEventHandler):
             "path": path,
             "filename": Path(path).name,
             "source": "watchdog-hub",
-            "timestamp": time.time(),
+            "timestamp": time.monotonic(),
         }
 
         logger.debug("%s: %s", topic, path)

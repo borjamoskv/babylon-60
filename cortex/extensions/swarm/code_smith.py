@@ -149,7 +149,7 @@ class KGVTracker:
             file_path=file_path,
             content_hash=content_hash,
             commit_hash=commit_hash,
-            timestamp=time.time(),
+            timestamp=time.monotonic(),
         )
         logger.debug("KGV recorded: %s → %s", file_path, content_hash[:12])
 
@@ -374,7 +374,7 @@ class CodeSmith:
             # ── Phase 4: COMMIT ────────────────────────────────────
             result.phase_reached = SmithPhase.COMMIT
             commit_hash = hashlib.sha256(
-                f"{change_request.skill_id}:{time.time()}:{generated_code[:100]}".encode()
+                f"{change_request.skill_id}:{time.monotonic()}:{generated_code[:100]}".encode()
             ).hexdigest()[:12]
 
             result.commit_hash = commit_hash

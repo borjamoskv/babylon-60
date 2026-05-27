@@ -141,7 +141,7 @@ class AlmaEngine:
             synergy=round(res_s, 4),
             vibe=vibe,
             last_taste=self._last_taste,
-            timestamp=time.time(),
+            timestamp=time.monotonic(),
         )
 
     def evaluate_taste(

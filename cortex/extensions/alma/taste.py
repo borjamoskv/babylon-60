@@ -183,7 +183,7 @@ class TasteEngine:
             composite_score=round(composite, 4),
             grade=grade,
             verdict=verdict,
-            timestamp=time.time(),
+            timestamp=time.monotonic(),
         )
 
     def is_mediocre(self, verdict: TasteVerdict) -> bool:
@@ -586,5 +586,5 @@ class TasteEngine:
             composite_score=0.0,
             grade=GRADE_DEAD,
             verdict="Dead output — empty content.",
-            timestamp=time.time(),
+            timestamp=time.monotonic(),
         )

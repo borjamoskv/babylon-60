@@ -42,7 +42,7 @@ class ResonanceEmitter:
             "id": ghost_id,
             "intent": intent,
             "project": project,
-            "created_at": time.time(),
+            "created_at": time.monotonic(),
             "half_life": half_life_hours,
             "resonance": hv.tolist(),
         }

@@ -155,7 +155,7 @@ async def scan_all_crystals(
 
     axiom_embeddings = await get_axiom_embeddings(encoder) if encoder else []
 
-    now = time.time()
+    now = time.monotonic()
     vitals = []
 
     try:

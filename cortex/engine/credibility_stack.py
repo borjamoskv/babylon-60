@@ -49,7 +49,7 @@ class LedgerCredibilityStack:
         4. Generate signature and replay-validate it.
         5. Trigger physical VACUUM INTO database snapshot.
         """
-        start_time = time.time()
+        start_time = time.monotonic()
 
         # 1. Fetch facts
         rows = []
@@ -113,7 +113,7 @@ class LedgerCredibilityStack:
 
         stochastic_entropy = shannon_entropy(type_distribution)
 
-        execution_time = time.time() - start_time
+        execution_time = time.monotonic() - start_time
         if execution_time <= 0:
             execution_time = 0.001
 
@@ -165,7 +165,7 @@ class LedgerCredibilityStack:
             name=f"strike_{project}", tx_id=latest_tx_id, merkle_root=merkle_root
         )
 
-        duration_seconds = time.time() - start_time
+        duration_seconds = time.monotonic() - start_time
 
         return {
             "project": project,

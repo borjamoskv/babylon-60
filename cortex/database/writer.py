@@ -354,15 +354,15 @@ class SqliteWriteWorker:
         loop: asyncio.AbstractEventLoop,
     ) -> None:
         """Process a single write operation in the executor."""
-        start_wait = op.created_at if hasattr(op, "created_at") else time.time()  # type: ignore[reportAttributeAccessIssue]
-        wait_ms = (time.time() - start_wait) * 1000
+        start_wait = op.created_at if hasattr(op, "created_at") else time.monotonic()  # type: ignore[reportAttributeAccessIssue]
+        wait_ms = (time.monotonic() - start_wait) * 1000
         try:
-            start_exec = time.time()
+            start_exec = time.monotonic()
             cursor = await loop.run_in_executor(None, lambda: conn.execute(op.sql, op.params))
             # Auto-commit if not inside an explicit transaction
             if not conn.in_transaction:
                 await loop.run_in_executor(None, conn.commit)
-            exec_ms = (time.time() - start_exec) * 1000
+            exec_ms = (time.monotonic() - start_exec) * 1000
 
             # Update metrics
             ops = self._metrics["total_ops"]

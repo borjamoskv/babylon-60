@@ -37,10 +37,10 @@ class AgentTask:
     id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
     status: str = TaskStatus.PENDING
     created_at: str = field(
-        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        default_factory=lambda: datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
     )
     updated_at: str = field(
-        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        default_factory=lambda: datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
     )
     agent_id: str | None = None
     plan: str = ""

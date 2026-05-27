@@ -123,7 +123,7 @@ class LabilizationRecord:
     @property
     def is_expired(self) -> bool:
         """Has the labilization window closed?"""
-        return (time.time() - self.accessed_at) > self.window_seconds
+        return (time.monotonic() - self.accessed_at) > self.window_seconds
 
     @property
     def is_labile(self) -> bool:
@@ -133,7 +133,7 @@ class LabilizationRecord:
     @property
     def age_seconds(self) -> float:
         """How long this record has been alive."""
-        return time.time() - self.accessed_at
+        return time.monotonic() - self.accessed_at
 
 
 # ─── Confirmation Bias Detector ──────────────────────────────────────
@@ -395,7 +395,7 @@ class ReconsolidationTracker:
         energy_delta: float,
     ) -> ReconsolidationEvent:
         """Construct a ReconsolidationEvent from a resolved record."""
-        now = time.time()
+        now = time.monotonic()
         return ReconsolidationEvent(
             event_id=str(uuid.uuid4()),
             engram_id=record.engram_id,

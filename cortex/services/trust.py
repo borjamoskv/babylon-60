@@ -299,7 +299,7 @@ class TrustService:
         eu_score = max(0.0, 0.98 - (len(violations) * 0.15))
 
         return TrustSnapshot(
-            timestamp=time.time(),
+            timestamp=time.monotonic(),
             total_facts=total,
             signed_facts_ratio=(signed / total) if total > 0 else 1.0,
             chain_integrity=chain_ok,
@@ -382,7 +382,7 @@ class TrustService:
             "vulnerabilities_found": len(vulnerabilities),
             "vulnerabilities": vulnerabilities[:_SIEGE_REPORT_CAP],
             "bft_status": bft_status,
-            "timestamp": time.time(),
+            "timestamp": time.monotonic(),
         }
 
     # ------------------------------------------------------------------

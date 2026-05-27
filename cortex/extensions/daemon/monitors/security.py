@@ -122,7 +122,7 @@ class SecurityMonitor:
             confidence=confidence,
             summary=f"Matches known vector: {summary[:50]}",
             timestamp=event.get(
-                "timestamp", datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+                "timestamp", datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
             ),
         )
 

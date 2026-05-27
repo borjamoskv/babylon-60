@@ -82,7 +82,7 @@ class GossipProtocol:
             key=key,
             value=value,
             version=self._vector_clock[self.node_id],
-            timestamp=time.time(),
+            timestamp=time.monotonic(),
             author_node=self.node_id,
         )
         self._records[key] = record

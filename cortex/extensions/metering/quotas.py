@@ -152,7 +152,7 @@ class QuotaEnforcer:
     @staticmethod
     def _next_reset() -> str:
         """Calculate the next monthly reset timestamp (1st of next month, 00:00 UTC)."""
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
+        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
         if now.month == 12:
             reset = now.replace(year=now.year + 1, month=1, day=1, hour=0, minute=0, second=0)
         else:

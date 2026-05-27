@@ -28,7 +28,7 @@ class PermissionCache:
         if not entry:
             return None
 
-        if time.time() - entry.timestamp > entry.ttl:
+        if time.monotonic() - entry.timestamp > entry.ttl:
             del self._data[key]
             return None
 
@@ -40,7 +40,7 @@ class PermissionCache:
             # Simple eviction: binary reset
             self._data.clear()
 
-        self._data[key] = CacheEntry(value=value, timestamp=time.time())
+        self._data[key] = CacheEntry(value=value, timestamp=time.monotonic())
 
 
 # Singleton instance

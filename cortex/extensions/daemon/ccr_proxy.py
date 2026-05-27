@@ -129,7 +129,7 @@ def translate_anthropic_to_openai(anthropic_payload: dict) -> dict:
 
 def _build_anthropic_response(text: str) -> dict:
     return {
-        "id": f"msg_ccr_{int(time.time() * 1000)}",
+        "id": f"msg_ccr_{int(time.monotonic() * 1000)}",
         "type": "message",
         "role": "assistant",
         "model": "claude-3-5-sonnet-20241022",  # spoof

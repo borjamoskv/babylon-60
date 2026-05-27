@@ -253,7 +253,7 @@ class EventLedgerL3:
             "events_audited": count,
             "integrity_score": integrity,
             "findings": audit_log or ["Memory event chain shows 100% integrity."],
-            "timestamp": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            "timestamp": datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(),
         }
 
 

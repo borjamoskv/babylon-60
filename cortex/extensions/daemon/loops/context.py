@@ -42,7 +42,7 @@ async def capture_context(state, project_name: str, speak_func):
                     state.daemons["gidatu"]["context_map"][project_name][app_name] = {
                         "window_title": title,
                         "bounds": bounds,
-                        "captured_at": time.time(),
+                        "captured_at": time.monotonic(),
                     }
                     await speak_func(state, f"Contexto capturado para {project_name}: {app_name}.")
                     state.save_state()

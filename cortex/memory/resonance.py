@@ -186,7 +186,7 @@ class AdaptiveResonanceGate:
             boost = self._ltp_boost + (0.05 if precision_mode else 0.0)
             reinforced = best_match.model_copy(
                 update={
-                    "last_accessed": _time.time(),
+                    "last_accessed": _time.monotonic(),
                     "energy_level": min(1.0, best_match.energy_level + boost),
                     "entangled_refs": list(set(best_match.entangled_refs) | {candidate.id}),
                 }

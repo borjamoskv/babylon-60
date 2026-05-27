@@ -4,18 +4,18 @@ from persistence import VSAMemory, enqueue_swarm_task
 
 def test_vsa_hammer():
     vsa = VSAMemory()
-    start = time.time()
+    start = time.monotonic()
     
     # Hammer VSA with 100,000 semantic traces
     for i in range(100000):
         vsa.record(f"key_{i}", f"value_{i}")
         
-    duration = time.time() - start
+    duration = time.monotonic() - start
     print(f"⚡ [VSA Mmap Bypass] 100,000 semantic records embedded in {duration:.4f}s")
     print(f"   => {100000/duration:.2f} OPS (Zero-copy memory mapped)")
 
 def test_queue_hammer():
-    start = time.time()
+    start = time.monotonic()
     
     # Concurrently enqueue 10,000 swarm tasks to stress SQLite WAL and Nexus ThreadPool
     def dispatch(idx):
@@ -31,7 +31,7 @@ def test_queue_hammer():
     # Drain one batch to test Outbox logic
     outbox.drain_once_sync()
     
-    duration = time.time() - start
+    duration = time.monotonic() - start
     print(f"🌪️  [Swarm SQLite Queue + Async Nexus] 10,000 concurrent tasks processed in {duration:.4f}s")
     print(f"   => {10000/duration:.2f} OPS (Lock-free WAL & C5-REAL Outbox)")
 

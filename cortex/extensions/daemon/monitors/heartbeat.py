@@ -48,7 +48,7 @@ class TrueHeartbeatMonitor:
     async def poll(self, session: Any) -> SiteStatus:
         """Poll the endpoint and measure semantic drift."""
 
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
 
         try:
             start = time.monotonic()

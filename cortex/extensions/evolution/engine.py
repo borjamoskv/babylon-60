@@ -116,7 +116,7 @@ class EvolutionEngine(EvolutionOpsMixin):
         Returns:
             CycleReport: Telemetry and generation delta metrics.
         """
-        start_time = time.time()
+        start_time = time.monotonic()
         self.cycle_count += 1
 
         crossovers = 0
@@ -173,7 +173,7 @@ class EvolutionEngine(EvolutionOpsMixin):
             asyncio.to_thread(save_swarm, self.sovereigns, self.cycle_count)
         )
 
-        self.last_run = time.time()
+        self.last_run = time.monotonic()
         duration_ms = (self.last_run - start_time) * 1000
 
         all_subs = [sub for sov in self.sovereigns for sub in sov.subagents]

@@ -69,7 +69,7 @@ class ProceduralEngram:
             return raw
 
         # Exponential decay: value *= 2^(-elapsed / halflife)
-        elapsed = max(0.0, time.time() - self.last_invoked)
+        elapsed = max(0.0, time.monotonic() - self.last_invoked)
         decay = math.pow(2.0, -elapsed / _DECAY_HALFLIFE_SECONDS)
         return raw * decay
 
@@ -213,7 +213,7 @@ class ProceduralMemory:
         Time complexity: O(1) in-memory, plus asynchronous/synchronous write to DB.
         """
         existing = self._buffer.get(skill_name)
-        now = time.time()
+        now = time.monotonic()
 
         if not existing:
             new_engram = ProceduralEngram(

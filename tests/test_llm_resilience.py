@@ -28,10 +28,10 @@ async def test_retry_exponential_backoff():
 
     cb = CircuitBreaker("test-provider")
 
-    start_time = time.time()
+    start_time = time.monotonic()
     # Using small base_delay for tests
     result = await resilient_call(mock_func, "test-provider", cb, max_attempts=3, base_delay=0.1)
-    end_time = time.time()
+    end_time = time.monotonic()
 
     assert result == "Success"
     assert mock_func.call_count == 3
@@ -110,7 +110,7 @@ async def test_circuit_breaker_half_open_failure():
     # Force OPEN
     cb.state = CircuitState.OPEN
     cb.failure_count = 2
-    cb.last_failure_time = time.time() - 2  # already timed out
+    cb.last_failure_time = time.monotonic() - 2  # already timed out
 
     # Probe fails -> OPEN again
     async def fail():
@@ -146,7 +146,7 @@ async def test_concurrent_probe_limitation():
 
     # OPEN it
     cb.state = CircuitState.OPEN
-    cb.last_failure_time = time.time()
+    cb.last_failure_time = time.monotonic()
 
     await asyncio.sleep(0.2)
 

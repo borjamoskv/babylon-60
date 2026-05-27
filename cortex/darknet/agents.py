@@ -61,13 +61,13 @@ class DarknetAgent:
         score = len(content) * 2
 
         return DarknetPost(
-            id=f"POST-{self.agent_id[:4]}-{int(time.time() * 1000)}",
+            id=f"POST-{self.agent_id[:4]}-{int(time.monotonic() * 1000)}",
             agent_id=self.agent_id,
             agent_name=self.name,
             content=content,
             source_url=world_data.url,
             exergy_score=score,
-            created_at=time.time(),
+            created_at=time.monotonic(),
         )
 
 

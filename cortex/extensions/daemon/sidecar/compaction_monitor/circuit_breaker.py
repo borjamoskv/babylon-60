@@ -55,8 +55,8 @@ class CircuitBreaker:
         if self._state == "OPEN":
             if self._opened_at is None:
                 # Should never happen, but guard against None
-                self._opened_at = time.time()
-            elapsed = time.time() - self._opened_at
+                self._opened_at = time.monotonic()
+            elapsed = time.monotonic() - self._opened_at
             if elapsed < self.recovery_timeout:
                 raise RuntimeError("Circuit breaker is OPEN; request blocked")
             # Timeout elapsed – move to HALF‑OPEN
@@ -83,7 +83,7 @@ class CircuitBreaker:
         )
         if self._state == "HALF_OPEN" or self._failure_count >= self.failure_threshold:
             self._state = "OPEN"
-            self._opened_at = time.time()
+            self._opened_at = time.monotonic()
             LOGGER.error("Circuit breaker OPENed due to failures")
         # Reset success counter in case we were HALF_OPEN
         self._success_count = 0

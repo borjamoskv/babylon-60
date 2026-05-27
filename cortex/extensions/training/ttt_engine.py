@@ -106,7 +106,7 @@ class TTTEngine:
         # ShareGPT format is optimal for instruction tuning
         formatted_json = self.collector.format_for_sft(trajectories, format_type="sharegpt")
 
-        timestamp = int(time.time())
+        timestamp = int(time.monotonic())
         file_path = self.dataset_dir / f"golden_dataset_{timestamp}.jsonl"
 
         # MLX-LM expects JSONL

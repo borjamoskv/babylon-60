@@ -49,7 +49,7 @@ class MCPMetrics:
         self.cache_misses = 0
         self.errors_total = 0
         self.rejected_immune = 0
-        self.start_at = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        self.start_at = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
 
     def record_request(self, cached: bool = False):
         self.requests_total += 1
@@ -85,7 +85,7 @@ class SimpleAsyncCache:
         if key not in self._cache:
             return None
         timestamp, value = self._cache[key]
-        if time.time() - timestamp > self.ttl:
+        if time.monotonic() - timestamp > self.ttl:
             del self._cache[key]
             return None
         return value
@@ -95,7 +95,7 @@ class SimpleAsyncCache:
             # Simple eviction
             oldest_key = next(iter(self._cache))
             del self._cache[oldest_key]
-        self._cache[key] = (time.time(), value)
+        self._cache[key] = (time.monotonic(), value)
 
     def clear(self):
         self._cache.clear()

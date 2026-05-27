@@ -26,7 +26,7 @@ def inject_task():
     c = conn.cursor()
     c.execute(
         "INSERT INTO cortex_swarm_queue (agent, payload, status, timestamp) VALUES (?, ?, 'pending', ?)",
-        ("SAGE_COUNCIL", payload, time.time())
+        ("SAGE_COUNCIL", payload, time.monotonic())
     )
     conn.commit()
     conn.close()

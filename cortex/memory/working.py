@@ -73,7 +73,7 @@ class WorkingMemoryL1:
         """Lightweight heuristic to determine event retention priority."""
         score = 1.0
         # 1. Recency (base priority)
-        age_seconds = time.time() - event.timestamp.timestamp()
+        age_seconds = time.monotonic() - event.timestamp.timestamp()
         score += max(0.0, 1.0 - (age_seconds / 3600))  # higher if < 1 hour old
 
         # 2. Emotion/Valence

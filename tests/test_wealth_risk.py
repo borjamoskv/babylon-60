@@ -30,7 +30,7 @@ def _pos(
         stop_loss=Decimal(stop),
         take_profit=Decimal(tp),
         max_hold_time=24,
-        timestamp=ts or time.time(),
+        timestamp=ts or time.monotonic(),
         correlation_id="test",
     )
 
@@ -108,7 +108,7 @@ class TestDrawdown:
 class TestCorrelation:
     def test_approve_few_positions(self):
         rm = RiskManager()
-        old_ts = time.time() - 3600  # 1h ago — past cooldown
+        old_ts = time.monotonic() - 3600  # 1h ago — past cooldown
         existing = [_pos(symbol="BTC", ts=old_ts) for _ in range(2)]
         pos = _pos(symbol="BTC", size="1000")
         assert rm.approve_trade(pos, _portfolio(positions=existing)) is True

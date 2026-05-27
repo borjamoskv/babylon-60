@@ -175,7 +175,7 @@ class WorkflowMonitor(BaseMonitor[WorkflowAlert]):
         except (json.JSONDecodeError, OSError):
             return 0
 
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
+        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
         count = 0
         for _project, info in data.items():
             if not isinstance(info, dict):
@@ -203,7 +203,7 @@ class WorkflowMonitor(BaseMonitor[WorkflowAlert]):
             return None
         try:
             mtime = self._memory_path.stat().st_mtime
-            now = time.time()
+            now = time.monotonic()
             return (now - mtime) / 3600
         except OSError:
             return None

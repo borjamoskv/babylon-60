@@ -153,10 +153,10 @@ class ZeroPromptingEvolutionStrategy:
 
         # Phase 3: REPORT
         report = ResolutionReport(
-            report_id=f"zp-{int(time.time())}-{subagent.agent_id[:8]}",
+            report_id=f"zp-{int(time.monotonic())}-{subagent.agent_id[:8]}",
             domain_id=sovereign.domain_id,
             agent_id=subagent.agent_id,
-            timestamp=time.time(),
+            timestamp=time.monotonic(),
             entropy_before=entropy_before,
             entropy_after=entropy_after,
             ghosts_purged=ghosts_purged,
@@ -272,7 +272,7 @@ class ZeroPromptingEvolutionStrategy:
         subagent.fitness += fitness_boost
 
         # Inject corrective parameter
-        param_key = f"zp_correction_{int(time.time())}"
+        param_key = f"zp_correction_{int(time.monotonic())}"
         subagent.mutation.parameters[param_key] = correction_factor * 100
 
         desc = (

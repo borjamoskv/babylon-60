@@ -337,7 +337,7 @@ class TestAdaptiveResonanceGate:
             project_id="p",
             content="test engram",
             embedding=[1.0, 0.0, 0.0],
-            timestamp=time.time(),
+            timestamp=time.monotonic(),
             metadata={},
             cognitive_layer="semantic",
         )
@@ -371,7 +371,7 @@ class TestAdaptiveResonanceGate:
             project_id="p",
             content="very similar engram",
             embedding=[0.99, 0.01, 0.0],  # Very similar to [1, 0, 0]
-            timestamp=time.time(),
+            timestamp=time.monotonic(),
             metadata={},
             cognitive_layer="semantic",
             energy_level=0.5,  # Below max so LTP boost is observable
@@ -398,7 +398,7 @@ class TestAdaptiveResonanceGate:
             project_id="p",
             content="somewhat similar",
             embedding=[0.9, 0.3, 0.0],  # sim ~0.94 with [1,0,0]
-            timestamp=time.time(),
+            timestamp=time.monotonic(),
             metadata={},
             cognitive_layer="semantic",
         )

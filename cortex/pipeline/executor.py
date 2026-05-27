@@ -110,7 +110,7 @@ class AgentExecutor:
         total_cost = 0.0
 
         for agent_id in agents:
-            start = time.time()
+            start = time.monotonic()
 
             try:
                 result = await self._execute_single_agent(
@@ -119,7 +119,7 @@ class AgentExecutor:
                     context=context,
                     budget_remaining=budget_remaining - total_cost,
                 )
-                latency_ms = (time.time() - start) * 1000
+                latency_ms = (time.monotonic() - start) * 1000
 
                 results.append(
                     {
@@ -137,7 +137,7 @@ class AgentExecutor:
                 total_cost += result.get("cost_usd", 0.0)
 
             except Exception as e:
-                latency_ms = (time.time() - start) * 1000
+                latency_ms = (time.monotonic() - start) * 1000
                 logger.error("[EXECUTOR] Agent %s failed: %s", agent_id, e)
                 results.append(
                     {

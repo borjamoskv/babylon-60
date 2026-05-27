@@ -31,7 +31,7 @@ class EpistemicBreakerDaemon:
         # Internal state to track entropy derivative
         self._last_fact_count = 0
         self._last_error_count = 0
-        self._last_evaluation_time = datetime.fromtimestamp(time.time(), tz=timezone.utc)
+        self._last_evaluation_time = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
 
         # System State
         self.circuit_open = False  # False = System is awake and acting. True = Sleep/Compressing.

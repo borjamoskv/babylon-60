@@ -81,7 +81,7 @@ class FrontierDaemon:
             conn.execute(
                 "INSERT INTO facts (id, type, topic, content, timestamp, confidence) "
                 "VALUES (lower(hex(randomblob(16))), 'decision', 'Evolution', ?, ?, 'C5')",
-                (f"[{type.upper()}] {content}", time.time()),
+                (f"[{type.upper()}] {content}", time.monotonic()),
             )
             conn.commit()
             logger.info("[FRONTIER] Evolution event logged to CORTEX: %s", type)
@@ -92,7 +92,7 @@ class FrontierDaemon:
         """Main Frontier loop."""
         logger.info("Initializing Frontier Daemon (Evolution Engine)...")
         while not self._shutdown:
-            now = time.time()
+            now = time.monotonic()
 
             # Metabolism Cycle
             if now - self.last_metabolism > self.metabolism_interval:

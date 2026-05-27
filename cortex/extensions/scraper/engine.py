@@ -164,7 +164,7 @@ class ScraperEngine:
                 )
 
         job.status = JobStatus.COMPLETED
-        job.completed_at = time.time()
+        job.completed_at = time.monotonic()
 
         LOG.info(
             "✅ [BATCH] Job %s complete — %d/%d successful, %d errors",

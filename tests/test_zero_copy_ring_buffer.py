@@ -43,7 +43,7 @@ def test_ring_buffer_lifecycle():
     assert idx == 0
     assert fetched_agent_id == agent_id
     assert fetched_payload == payload
-    assert ts <= time.time()
+    assert ts <= time.monotonic()
 
 
 def test_ring_buffer_overflow():

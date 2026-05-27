@@ -55,7 +55,7 @@ def _has_recent_decision(engine, minutes: int = 60) -> bool:
         dt = datetime.fromisoformat(created_at_iso)
         dt_timestamp = dt.timestamp()
 
-        current_time = time.time()
+        current_time = time.monotonic()
         age_minutes = (current_time - dt_timestamp) / 60.0
 
         return age_minutes <= minutes

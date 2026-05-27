@@ -237,7 +237,7 @@ class JosuProactiveDaemon:
 
     async def _execute_in_isolation(self, target: GhostTarget) -> FixResult:
         """Spawn an ephemeral Pulse agent inside an isolated worktree."""
-        branch_name = f"josu/fix-{target.id}-{int(time.time())}"
+        branch_name = f"josu/fix-{target.id}-{int(time.monotonic())}"
         start = time.monotonic()
         source_id = f"josu-{target.id[:8]}"
 

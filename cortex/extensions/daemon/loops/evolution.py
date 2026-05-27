@@ -31,7 +31,7 @@ async def evolution_loop(state, cortex_root, speak_func):
                         for f1, f2 in itertools.combinations(files, 2):
                             overlap = calculate_module_overlap(f1, f2)
                             if overlap > 0.4:
-                                ghost_id = f"REF-{int(time.time()) % 1000}"
+                                ghost_id = f"REF-{int(time.monotonic()) % 1000}"
                                 state.daemons["ghost_field"]["resonances"].append(
                                     {
                                         "id": ghost_id,

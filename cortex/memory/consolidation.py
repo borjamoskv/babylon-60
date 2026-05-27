@@ -83,7 +83,7 @@ class SilentEngram(CortexSemanticEngram):
 
     def age_days(self) -> float:
         """How old is this engram in days."""
-        return max(0.0, (time.time() - self.created_at) / 86400.0)
+        return max(0.0, (time.monotonic() - self.created_at) / 86400.0)
 
     def is_mature(self) -> bool:
         """Check if this silent engram has completed maturation.
@@ -133,7 +133,7 @@ class SilentEngram(CortexSemanticEngram):
             self.contradiction_count + 1,
         )
         # Each contradiction resets the maturation clock
-        object.__setattr__(self, "created_at", time.time())
+        object.__setattr__(self, "created_at", time.monotonic())
         logger.debug(
             "Engram %s received contradiction #%d, maturation clock reset.",
             self.id,
@@ -230,7 +230,7 @@ class SystemsConsolidator:
         import time
 
         def run_sweep() -> dict[str, int]:
-            now = time.time()
+            now = time.monotonic()
             cursor = conn.cursor()
 
             # Step 1: Mature silent engrams that passed maturation time and have no contradictions

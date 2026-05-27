@@ -220,7 +220,7 @@ class Supervisor:
     async def health_check(self) -> dict[str, Any]:
         """Run health check on all agents. Auto-restart failed ones."""
         report: dict[str, Any] = {}
-        now = time.time()
+        now = time.monotonic()
 
         for agent_id, entry in self._agents.items():
             status = entry.agent.state.status

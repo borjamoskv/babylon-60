@@ -109,7 +109,7 @@ class PolicyEngine:
         # Precompute lowercased project names to avoid O(P*F) string matching
         project_names_lower = {p.lower() for p in project_index.keys()}
 
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
+        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
         actions: list[ActionItem] = []
 
         for fact in facts:

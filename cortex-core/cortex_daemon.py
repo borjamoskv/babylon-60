@@ -217,7 +217,7 @@ class CortexDaemon:
                 stderr += b"\n[SYSTEM] Terminated by CORTEX LGD-200 Kill-Switch (Timeout)."
 
             result = {
-                "timestamp": time.time(),
+                "timestamp": time.monotonic(),
                 "agent": agent,
                 "command": cmd,
                 "returncode": process.returncode if process.returncode is not None else -9,
@@ -272,7 +272,7 @@ class CortexDaemon:
                 c.execute(
                     "INSERT INTO cortex_execution_ledger (timestamp, agent, command, returncode, execution_time) VALUES (?, ?, ?, ?, ?)",
                     (
-                        result.get("timestamp", time.time()),
+                        result.get("timestamp", time.monotonic()),
                         result.get("agent", "unknown"),
                         result.get("command", ""),
                         result.get("returncode", -1),
@@ -365,8 +365,8 @@ class CortexDaemon:
         try:
             payload = {
                 "command": cmd,
-                "timestamp": time.time(),
-                "id": f"council_{int(time.time())}",
+                "timestamp": time.monotonic(),
+                "id": f"council_{int(time.monotonic())}",
             }
             enqueue_swarm_task(agent, payload)
             logging.info("📌 [COUNCIL] Mission queued via Sovereign Nexus: %s", cmd)
@@ -432,7 +432,7 @@ class CortexDaemon:
             if not os.path.exists(target_file):
                 return
                 
-            new_source = f"# AEON-0 Autonomous Mutagenesis Timestamp: {time.time()}"
+            new_source = f"# AEON-0 Autonomous Mutagenesis Timestamp: {time.monotonic()}"
             
             payload = {
                 "type": "AST_MUTATION",

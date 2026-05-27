@@ -64,7 +64,7 @@ class Opportunity:
     meta: dict[str, Any] = field(default_factory=dict)
     id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
     created_at: str = field(
-        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        default_factory=lambda: datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
     )
 
     @property
@@ -116,7 +116,7 @@ class ExecutionResult:
     duration_seconds: float = 0.0
     meta: dict[str, Any] = field(default_factory=dict)
     executed_at: str = field(
-        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        default_factory=lambda: datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
     )
 
     @property

@@ -38,7 +38,7 @@ def run_burst():
     
     cmd = ["cargo", "test", "-p", "endpoint-v2", "test_stellar_chaos_burst", "--", "--nocapture"]
     
-    start_time = time.time()
+    start_time = time.monotonic()
     try:
         process = subprocess.Popen(
             cmd,
@@ -57,7 +57,7 @@ def run_burst():
                 output_buffer.pop(0) # Mantener solo el final
                 
         process.wait()
-        duration = time.time() - start_time
+        duration = time.monotonic() - start_time
         
         if process.returncode == 0:
             log(f"Asalto completado en {duration:.2f}s. 10^6 resets confirmados.", "C5-SUCCESS")

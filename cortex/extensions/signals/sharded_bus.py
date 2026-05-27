@@ -211,7 +211,7 @@ class ShardedAsyncSignalBus:
             await self.initialize()
 
         cutoff = (
-            datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=max_age_days)
+            datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) - timedelta(days=max_age_days)
         ).isoformat()
         total_pruned = 0
 

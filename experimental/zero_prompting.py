@@ -33,16 +33,16 @@ class ZeroPrompting:
 
     idle_threshold_seconds: int = 900  # 15 minutes by default
     notify: Callable[[str], None] = print
-    _last_activity: float = field(default_factory=lambda: time.time(), init=False)
+    _last_activity: float = field(default_factory=lambda: time.monotonic(), init=False)
 
     # ---------------------------------------------------------------------
     def record_activity(self) -> None:
         """Call this whenever the user performs an action (e.g., a request)."""
-        self._last_activity = time.time()
+        self._last_activity = time.monotonic()
 
     # ---------------------------------------------------------------------
     def _idle_time(self) -> float:
-        return time.time() - self._last_activity
+        return time.monotonic() - self._last_activity
 
     # ---------------------------------------------------------------------
     def check_and_prompt(self) -> None:
@@ -61,7 +61,7 @@ class ZeroPrompting:
             )
             self.notify(message)
             # Reset timer after notifying to avoid spamming
-            self._last_activity = time.time()
+            self._last_activity = time.monotonic()
 
     # ---------------------------------------------------------------------
     def start_background_loop(self, interval: int = 30) -> None:

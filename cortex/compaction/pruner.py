@@ -54,7 +54,7 @@ class EmbeddingPrunerMixin:
             dict with 'pruned_count', 'skipped_count', 'errors'.
         """
         cutoff = (
-            datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=max_age_days)
+            datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) - timedelta(days=max_age_days)
         ).isoformat()
         stats = {"pruned_count": 0, "skipped_count": 0, "errors": []}
 

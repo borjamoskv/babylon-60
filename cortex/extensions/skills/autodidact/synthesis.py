@@ -284,7 +284,7 @@ async def execute_cognitive_synthesis(
         project_id="autodidact_knowledge",
         content=memo_content,
         embedding=final_embedding,
-        timestamp=time.time(),
+        timestamp=time.monotonic(),
         is_diamond=True,
         confidence="C5",
         cognitive_layer="semantic",

@@ -76,7 +76,7 @@ async def preflight_check(
     t0 = time.perf_counter()
 
     # ── Tier 0: in-process cache ──────────────────────────────────────────────
-    now = time.time()
+    now = time.monotonic()
     if now < client._suspended_until:
         remaining = int(client._suspended_until - now)
         elapsed_ms = (time.perf_counter() - t0) * 1_000
@@ -114,10 +114,10 @@ async def preflight_check(
                     until_dt = datetime.fromisoformat(until_str.replace("Z", "+00:00"))
                     client._suspended_until = until_dt.timestamp()
                 except ValueError:
-                    client._suspended_until = time.time() + 3_600  # 1h fallback
+                    client._suspended_until = time.monotonic() + 3_600  # 1h fallback
 
             client._suspended_reason = reason or "auto-mod (live probe)"
-            remaining = int(max(0, client._suspended_until - time.time()))
+            remaining = int(max(0, client._suspended_until - time.monotonic()))
 
             result = PreflightResult(
                 clear=False,

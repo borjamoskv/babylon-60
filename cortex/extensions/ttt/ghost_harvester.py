@@ -32,7 +32,7 @@ def fetch_recent_anomalies(cursor, days=7):
     Fetch `error`, `ghost`, and `decision` types from the past `days` days.
     """
     cutoff_date = (
-        datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=days)
+        datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) - timedelta(days=days)
     ).isoformat()
 
     query = """
@@ -131,7 +131,7 @@ def generate_nightly_dataset():
         dataset = format_for_lora(rows)
         file_out = os.path.join(
             OUTPUT_PATH,
-            f"moskv_nightly_{datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime('%Y%m%d')}.jsonl",
+            f"moskv_nightly_{datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime('%Y%m%d')}.jsonl",
         )
 
         with open(file_out, "w", encoding="utf-8") as f:

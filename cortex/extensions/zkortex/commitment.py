@@ -83,7 +83,7 @@ class KnowledgeCommitment:
     def from_public_dict(cls, d: dict[str, object]) -> KnowledgeCommitment:
         return cls(
             commitment_hex=str(d["commitment"]),
-            timestamp=float(d.get("timestamp", time.time())),  # type: ignore[arg-type]
+            timestamp=float(d.get("timestamp", time.monotonic())),  # type: ignore[arg-type]
             version=int(d.get("version", _COMMITMENT_VERSION)),  # type: ignore[arg-type]
             metadata=dict(d.get("metadata", {})),  # type: ignore[arg-type]
         )

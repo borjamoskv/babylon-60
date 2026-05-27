@@ -110,7 +110,7 @@ class BCI_Transmitter:
             "instruction": instruction,
             "payload": payload,
             "integrity_hash": calculated_hash,
-            "timestamp": int(time.time()),
+            "timestamp": int(time.monotonic()),
         }
 
         # Encode to bytes

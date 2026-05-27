@@ -212,7 +212,7 @@ class RiskManager:
         portfolio: Portfolio,
     ) -> bool:
         """Rechaza si hay una posición del mismo símbolo abierta hace < COOLDOWN_SECONDS."""
-        now = time.time()
+        now = time.monotonic()
         for p in portfolio.positions:
             if p.symbol == position.symbol:
                 elapsed = now - p.timestamp

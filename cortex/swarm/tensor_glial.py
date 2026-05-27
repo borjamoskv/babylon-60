@@ -70,14 +70,14 @@ class TensorGlialLegion:
         # Parallel arrays for yield tracking and autopoiesis (epistemic slashing)
         self.yield_tensor = np.zeros(self.num_agents, dtype="float32")  # Compound Yield
         self.token_burn_tensor = np.zeros(self.num_agents, dtype="float32")
-        self.last_update_ts = np.full(self.num_agents, time.time(), dtype="float64")
+        self.last_update_ts = np.full(self.num_agents, time.monotonic(), dtype="float64")
 
     def apply_fading_memory(self, lambda_decay: float = 0.001):
         """
         Glial Daemon: applies time-based Ebbinghaus forgetting universally across the 10,000x10,000 tensor.
         Executes via Direct-Silicon JIT (Numba) if available to bypass the GIL.
         """
-        now = time.time()
+        now = time.monotonic()
         fast_fading_memory(self.agents_tensor, self.last_update_ts, now, lambda_decay)
         self.async_flush()
 
@@ -98,7 +98,7 @@ class TensorGlialLegion:
         self.agents_tensor[agent_indices] += vsa_vecs
         self.agents_tensor[agent_indices] = self.normalize_batch(self.agents_tensor[agent_indices])
 
-        now = time.time()
+        now = time.monotonic()
         self.last_update_ts[agent_indices] = now
         self.async_flush()
 
@@ -149,7 +149,7 @@ class TensorGlialLegion:
             self.agents_tensor[corpse_idx] = self.vsa.normalize(new_vsa)
             self.yield_tensor[corpse_idx] = 0.0
             self.token_burn_tensor[corpse_idx] = 0.0
-            self.last_update_ts[corpse_idx] = time.time()
+            self.last_update_ts[corpse_idx] = time.monotonic()
             respawn_count += 1
 
         self.async_flush()
@@ -173,7 +173,7 @@ if __name__ == "__main__":
     # Fast test with 100 agents, 1000 D for speed
     legion = TensorGlialLegion(num_agents=100, d_dim=1000, file_path="tmp_legion.vsa_mmap")
 
-    start_time = time.time()
+    start_time = time.monotonic()
     # Apply glial memory fading over total batch
     legion.apply_fading_memory(lambda_decay=0.01)
 
@@ -187,7 +187,7 @@ if __name__ == "__main__":
     # Reduce
     centurion_state = legion.map_reduce_centurion(0, 100)
 
-    _log.info("Total execution time: %.4fs", time.time() - start_time)
+    _log.info("Total execution time: %.4fs", time.monotonic() - start_time)
     _log.info("Nodes respawned from corpses: %d", slashed)
     _log.info("Centurion MapReduce state dim: %s", centurion_state.shape)
     _log.info("Matrix SHA256 integrity: %s", legion.global_sha256_audit())

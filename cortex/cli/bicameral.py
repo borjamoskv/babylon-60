@@ -48,7 +48,7 @@ class BicameralConsole:
             "stream": stream,
             "source": source,
             "message": message,
-            "timestamp": str(int(time.time())),
+            "timestamp": str(int(time.monotonic())),
             "meta": meta or {},
         }
         # In this initial implementation, we append to a dedicated relay buffer file.

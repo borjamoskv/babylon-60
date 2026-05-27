@@ -34,7 +34,7 @@ async def notebooklm_status(
     # Digest status
     if DIGEST_FILE.exists():
         mtime = os.path.getmtime(DIGEST_FILE)
-        age_h = (time.time() - mtime) / 3600
+        age_h = (time.monotonic() - mtime) / 3600
         result["digest"] = {
             "exists": True,
             "size_bytes": os.path.getsize(DIGEST_FILE),
@@ -174,7 +174,7 @@ async def notebooklm_sync(
         return {"error": "No cloud sync provider detected. Specify drive_path."}
 
     target.mkdir(parents=True, exist_ok=True)
-    ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d")
+    ts = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime("%Y-%m-%d")
     synced: list[str] = []
 
     if mode in ("digest", "both") and DIGEST_FILE.exists():
@@ -188,7 +188,7 @@ async def notebooklm_sync(
             shutil.copy2(f, dest)
             synced.append(dest.name)
 
-    cutoff = time.time() - (7 * 86400)
+    cutoff = time.monotonic() - (7 * 86400)
     cleaned = 0
     synced_set = set(synced)
     for f in target.glob("*.md"):

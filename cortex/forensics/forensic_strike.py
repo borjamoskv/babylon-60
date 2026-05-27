@@ -34,7 +34,7 @@ class ForensicStrikeCommander:
 
     async def deploy_strike(self, target: StrikeTarget) -> str:
         """Deploy a 1,000-agent Forensic Strike against a specific contract."""
-        strike_id = f"strike-{target.protocol}-{int(time.time())}"
+        strike_id = f"strike-{target.protocol}-{int(time.monotonic())}"
 
         async def _strike_loop():
             # Phase 1: Overclocking (Ω₂)

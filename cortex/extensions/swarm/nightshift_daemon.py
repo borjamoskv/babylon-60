@@ -65,7 +65,7 @@ class NightShiftCrystalDaemon:
         Returns:
             Cycle report dict with metrics.
         """
-        cycle_start = time.time()
+        cycle_start = time.monotonic()
         cycle_id = f"nightshift-{int(cycle_start)}"
 
         logger.info(
@@ -88,7 +88,7 @@ class NightShiftCrystalDaemon:
                 "status": "radar_failed",
                 "error": str(e),
                 "crystals": 0,
-                "duration_s": time.time() - cycle_start,
+                "duration_s": time.monotonic() - cycle_start,
             }
             self._cycle_history.append(report)
             return report
@@ -99,7 +99,7 @@ class NightShiftCrystalDaemon:
                 "status": "radar_failed",
                 "error": str(e),
                 "crystals": 0,
-                "duration_s": time.time() - cycle_start,
+                "duration_s": time.monotonic() - cycle_start,
             }
             self._cycle_history.append(report)
             return report
@@ -110,7 +110,7 @@ class NightShiftCrystalDaemon:
                 "cycle_id": cycle_id,
                 "status": "idle",
                 "crystals": 0,
-                "duration_s": time.time() - cycle_start,
+                "duration_s": time.monotonic() - cycle_start,
             }
             self._cycle_history.append(report)
             return report
@@ -126,7 +126,7 @@ class NightShiftCrystalDaemon:
                 "error": str(e),
                 "targets_found": len(targets),
                 "crystals": 0,
-                "duration_s": time.time() - cycle_start,
+                "duration_s": time.monotonic() - cycle_start,
             }
             self._cycle_history.append(report)
             return report
@@ -138,7 +138,7 @@ class NightShiftCrystalDaemon:
                 "error": str(e),
                 "targets_found": len(targets),
                 "crystals": 0,
-                "duration_s": time.time() - cycle_start,
+                "duration_s": time.monotonic() - cycle_start,
             }
             self._cycle_history.append(report)
             return report
@@ -157,7 +157,7 @@ class NightShiftCrystalDaemon:
             "crystals_forged": crystals_forged,
             "confidence": confidence,
             "pipeline_steps": pipeline_result.get("total_steps", 0),
-            "duration_s": time.time() - cycle_start,
+            "duration_s": time.monotonic() - cycle_start,
         }
 
         if is_paused:
@@ -182,10 +182,10 @@ class NightShiftCrystalDaemon:
             consolidation_report.get("purged", 0) if consolidation_report else 0,
             consolidation_report.get("merged", 0) if consolidation_report else 0,
             consolidation_report.get("promoted", 0) if consolidation_report else 0,
-            time.time() - cycle_start,
+            time.monotonic() - cycle_start,
         )
 
-        report["duration_s"] = time.time() - cycle_start
+        report["duration_s"] = time.monotonic() - cycle_start
         return report
 
     # ── Perpetual Loop ────────────────────────────────────────────────

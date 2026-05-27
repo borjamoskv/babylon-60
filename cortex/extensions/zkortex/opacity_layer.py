@@ -167,7 +167,7 @@ class SovereignOpacityLayer:
             "proofs_emitted": stats["proofs_issued"],
             "commitments_emitted": stats["commitments_issued"],
             "knowledge_tree_active": stats["tree_built"],
-            "timestamp": time.time(),
+            "timestamp": time.monotonic(),
         }
 
     # ─── Internal ──────────────────────────────────────────────────────────────
@@ -177,7 +177,7 @@ class SovereignOpacityLayer:
         self._proof_log.append(
             {
                 "type": proof_type,
-                "timestamp": time.time(),
+                "timestamp": time.monotonic(),
                 **meta,
             }
         )

@@ -195,7 +195,7 @@ class DistributedSovereignCache:
     async def get(self, key: str) -> dict[str, Any] | None:
         if not self._is_available:
             # Quick Circuit Breaker Ping (Max once per 10 secs to avoid Event Loop spam)
-            now = time.time()
+            now = time.monotonic()
             if now - self._last_ping_time > 10.0:
                 self._last_ping_time = now
                 try:
@@ -266,7 +266,7 @@ class DistributedSovereignCache:
         Atomic Lua: Advance Tip + Log to Stream.
         """
         ph = _payload_hash(payload)
-        now = str(time.time())
+        now = str(time.monotonic())
 
         try:
             prev_tip, new_tip, count = await async_interceptor(

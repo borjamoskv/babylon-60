@@ -51,7 +51,7 @@ def _fake_signal(
         payload=payload or {},
         source=source,
         project=project,
-        created_at=datetime.fromtimestamp(time.time(), tz=timezone.utc),
+        created_at=datetime.fromtimestamp(time.monotonic(), tz=timezone.utc),
         consumed_by=[],
     )
 

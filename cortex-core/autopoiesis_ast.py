@@ -75,7 +75,7 @@ class ASTAutopoiesisEngine:
                         "function": func_name,
                         "hash": mutation_hash,
                         "zk_proof": zk_proof,
-                        "timestamp": time.time()
+                        "timestamp": time.monotonic()
                     }
                     
         return {"status": "failed", "error": "NotFound", "details": f"Function {func_name} not found in AST."}
@@ -113,7 +113,7 @@ class ASTAutopoiesisEngine:
             "target_file": self.target_file,
             "hash": mutation_hash,
             "zk_proof": zk_proof,
-            "timestamp": time.time()
+            "timestamp": time.monotonic()
         }
 
 if __name__ == "__main__":

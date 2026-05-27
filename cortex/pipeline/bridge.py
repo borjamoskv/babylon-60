@@ -219,7 +219,7 @@ class LedgerAdapter:
                     "mission_id": mission_id,
                     "result_hash": result_hash,
                     "tenant_id": tenant_id,
-                    "timestamp": time.time(),
+                    "timestamp": time.monotonic(),
                 }
             )
 

@@ -90,7 +90,7 @@ def _get_stripe():
 
 def _generate_api_key(email: str, plan: str) -> str:
     """Generate a unique API key with ctx_ prefix."""
-    seed = f"{email}:{plan}:{time.time()}:{os.urandom(16).hex()}"
+    seed = f"{email}:{plan}:{time.monotonic()}:{os.urandom(16).hex()}"
     return "ctx_" + hashlib.sha256(seed.encode()).hexdigest()[:48]
 
 

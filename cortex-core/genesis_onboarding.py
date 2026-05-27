@@ -48,7 +48,7 @@ def main():
             # Optional: inject into the Swarm Queue so agents immediately index it
             cursor.execute(
                 "INSERT INTO cortex_swarm_queue (timestamp, agent, payload, status) VALUES (?, ?, ?, ?)",
-                (time.time(), "SYSTEM", '{"event": "genesis_profile_updated"}', "PENDING")
+                (time.monotonic(), "SYSTEM", '{"event": "genesis_profile_updated"}', "PENDING")
             )
             
             conn.commit()

@@ -79,14 +79,14 @@ class CortexOrchestrator:
                 mission_id=request.mission_id,
                 status=PipelineStatus.FAILED,
                 error=f"Pipeline timeout after {request.timeout_s}s",
-                completed_at=time.time(),
+                completed_at=time.monotonic(),
             )
         except asyncio.CancelledError:
             return PipelineResult(
                 mission_id=request.mission_id,
                 status=PipelineStatus.CANCELLED,
                 error="Pipeline cancelled",
-                completed_at=time.time(),
+                completed_at=time.monotonic(),
             )
 
     async def _run_async_impl(self, request: PipelineRequest) -> PipelineResult:
@@ -153,25 +153,25 @@ class CortexOrchestrator:
             result.agent_chain = execution_plan.get("agents", []) if execution_plan else []
             result.cost_usd = sum(t.cost_usd for t in self._traces)
             result.stages = list(self._traces)
-            result.completed_at = time.time()
+            result.completed_at = time.monotonic()
 
         except BudgetExhaustedError as e:
             result.status = PipelineStatus.BUDGET_EXHAUSTED
             result.error = str(e)
             result.stages = list(self._traces)
-            result.completed_at = time.time()
+            result.completed_at = time.monotonic()
 
         except PipelineCancelledError as e:
             result.status = PipelineStatus.CANCELLED
             result.error = str(e)
             result.stages = list(self._traces)
-            result.completed_at = time.time()
+            result.completed_at = time.monotonic()
 
         except Exception as e:
             result.status = PipelineStatus.FAILED
             result.error = str(e)
             result.stages = list(self._traces)
-            result.completed_at = time.time()
+            result.completed_at = time.monotonic()
             logger.error(
                 "❌ [E2E-ASYNC] Pipeline FAILED mission=%s: %s",
                 request.mission_id,
@@ -195,7 +195,7 @@ class CortexOrchestrator:
         """Execute a pipeline stage asynchronously with timing."""
         import asyncio
 
-        start = time.time()
+        start = time.monotonic()
         error_msg = None
         result = None
 
@@ -212,7 +212,7 @@ class CortexOrchestrator:
             error_msg = str(e)
             raise
         finally:
-            end = time.time()
+            end = time.monotonic()
             trace = StageTrace(
                 stage=stage,
                 started_at=start,
@@ -275,13 +275,13 @@ class CortexOrchestrator:
             result.output = output
             result.ledger_hash = ledger_hash or ""
             result.stages = list(self._traces)
-            result.completed_at = time.time()
+            result.completed_at = time.monotonic()
 
         except Exception as e:
             result.status = PipelineStatus.FAILED
             result.error = str(e)
             result.stages = list(self._traces)
-            result.completed_at = time.time()
+            result.completed_at = time.monotonic()
 
         yield result
 
@@ -350,26 +350,26 @@ class CortexOrchestrator:
             result.agent_chain = execution_plan.get("agents", []) if execution_plan else []
             result.cost_usd = sum(t.cost_usd for t in self._traces)
             result.stages = list(self._traces)
-            result.completed_at = time.time()
+            result.completed_at = time.monotonic()
 
         except BudgetExhaustedError as e:
             result.status = PipelineStatus.BUDGET_EXHAUSTED
             result.error = str(e)
             result.stages = list(self._traces)
-            result.completed_at = time.time()
+            result.completed_at = time.monotonic()
             logger.critical("🛑 [Ω₃] %s", e)
 
         except PipelineCancelledError as e:
             result.status = PipelineStatus.CANCELLED
             result.error = str(e)
             result.stages = list(self._traces)
-            result.completed_at = time.time()
+            result.completed_at = time.monotonic()
 
         except Exception as e:
             result.status = PipelineStatus.FAILED
             result.error = str(e)
             result.stages = list(self._traces)
-            result.completed_at = time.time()
+            result.completed_at = time.monotonic()
             logger.error("❌ [E2E] Pipeline FAILED mission=%s: %s", request.mission_id, e)
 
         logger.info(
@@ -385,7 +385,7 @@ class CortexOrchestrator:
 
     def _run_stage(self, stage: PipelineStage, fn: Any) -> Any:
         """Execute a stage with timing and error capture."""
-        start = time.time()
+        start = time.monotonic()
         error_msg = None
         result = None
 
@@ -423,7 +423,7 @@ class CortexOrchestrator:
             raise
 
         finally:
-            end = time.time()
+            end = time.monotonic()
             trace = StageTrace(
                 stage=stage,
                 started_at=start,

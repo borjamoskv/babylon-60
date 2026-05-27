@@ -45,7 +45,7 @@ class NetworkVoidOracle:
 
         if not connected and not self._in_void:
             self._in_void = True
-            self._void_start = time.time()
+            self._void_start = time.monotonic()
             content = (
                 "DESCONEXIÓN DEL ENJAMBRE. Entrando en el Vacío (Void State). Aislamiento total."
             )
@@ -65,7 +65,7 @@ class NetworkVoidOracle:
                 )
 
         elif connected and self._in_void:
-            void_duration = time.time() - self._void_start
+            void_duration = time.monotonic() - self._void_start
             self._in_void = False
             content = f"RECONEXIÓN. Retorno desde el Vacío tras {void_duration:.1f} segundos."
 

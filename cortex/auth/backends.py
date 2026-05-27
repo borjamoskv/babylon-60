@@ -157,7 +157,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
         try:
             await conn.execute(
                 "UPDATE api_keys SET last_used = ? WHERE id = ?",
-                (datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), key_id),
+                (datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(), key_id),
             )
             await conn.commit()
         except (aiosqlite.Error, OSError) as e:
@@ -259,7 +259,7 @@ class AlloyDBAuthBackend(BaseAuthBackend):
         async with pool.acquire() as conn:
             await conn.execute(
                 "UPDATE api_keys SET last_used = $1 WHERE id = $2",
-                datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+                datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(),
                 key_id,
             )
 
@@ -345,7 +345,7 @@ class TursoAuthBackend(BaseAuthBackend):
         try:
             await client.execute(
                 "UPDATE api_keys SET last_used = ? WHERE id = ?",
-                [datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), key_id],
+                [datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(), key_id],
             )
         except Exception as e:
             logger.debug("Could not update last_used in Turso: %s", e)

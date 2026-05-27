@@ -18,7 +18,7 @@ class Action:
     input: Any
     observation: str | None = None
     timestamp: datetime = field(
-        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc)
+        default_factory=lambda: datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
     )
 
 

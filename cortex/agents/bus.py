@@ -158,7 +158,7 @@ class SqliteMessageBus:
     async def purge_consumed(self, older_than_seconds: float = 3600) -> int:
         """Delete consumed messages older than threshold."""
         conn = await self._get_conn()
-        cutoff = time.time() - older_than_seconds
+        cutoff = time.monotonic() - older_than_seconds
         async with self._lock:
             cursor = await conn.execute(
                 "DELETE FROM agent_messages WHERE consumed = 1 AND created_at < ?",

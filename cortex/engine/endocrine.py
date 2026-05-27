@@ -56,7 +56,7 @@ class EndocrineRegistry:
         current = self._hormones.get(hormone, 0.0)  # type: ignore[reportAttributeAccessIssue]
         new_val = max(0.0, min(1.0, current + delta))
         self._hormones[hormone] = new_val  # type: ignore[reportAttributeAccessIssue]
-        self._last_pulse[hormone] = time.time()  # type: ignore[reportAttributeAccessIssue]
+        self._last_pulse[hormone] = time.monotonic()  # type: ignore[reportAttributeAccessIssue]
 
         if abs(delta) > 0.05 or new_val > 0.8:
             logger.info(

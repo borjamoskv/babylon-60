@@ -412,7 +412,7 @@ class AssociativeDreamEngine:
                 current_valence = metadata.get("dream_valence", 0.0)
                 new_valence = min(1.0, current_valence + REWEIGHT_FACTOR)
                 metadata["dream_valence"] = round(new_valence, 3)
-                metadata["dream_cycle"] = time.time()
+                metadata["dream_cycle"] = time.monotonic()
                 reweighted += 1
 
             # Very isolated + low energy → dampen
@@ -420,7 +420,7 @@ class AssociativeDreamEngine:
                 current_valence = metadata.get("dream_valence", 0.0)
                 new_valence = max(-1.0, current_valence - REWEIGHT_FACTOR)
                 metadata["dream_valence"] = round(new_valence, 3)
-                metadata["dream_cycle"] = time.time()
+                metadata["dream_cycle"] = time.monotonic()
                 reweighted += 1
 
         return reweighted

@@ -164,7 +164,7 @@ class ErrorGhostPipeline:
             "source": source,
             "pipeline": "error_ghost_v1",
             "content_hash": content_hash,
-            "timestamp": time.time(),
+            "timestamp": time.monotonic(),
         }
         if extra_meta:
             meta.update(extra_meta)
@@ -274,7 +274,7 @@ class ErrorGhostPipeline:
         fallback_dir = Path.home() / ".cortex" / _FALLBACK_DIR_NAME
         fallback_dir.mkdir(parents=True, exist_ok=True)
 
-        filename = f"{meta.get('content_hash', 'unknown')}_{int(time.time())}.json"
+        filename = f"{meta.get('content_hash', 'unknown')}_{int(time.monotonic())}.json"
         payload = {
             "project": project,
             "content": content,

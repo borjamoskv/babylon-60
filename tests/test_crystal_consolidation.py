@@ -75,7 +75,7 @@ def _insert_crystal(
     project: str = "autodidact_knowledge",
 ) -> None:
     """Helper to insert a test crystal."""
-    timestamp = time.time() - (age_days * 86400)
+    timestamp = time.monotonic() - (age_days * 86400)
     metadata = json.dumps({"access_stats": {"total_access_count": recall_count}})
     emb = embedding or [0.1, 0.2, 0.3, 0.4]
     emb_bytes = np.array(emb, dtype=np.float32).tobytes()

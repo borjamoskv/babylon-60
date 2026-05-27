@@ -22,7 +22,7 @@ class DecayEngine:
 
         Formula: N(t) = N0 * (0.5 ^ (t / T1/2))
         """
-        now = time.time()
+        now = time.monotonic()
         age_seconds = now - created_at
         age_hours = age_seconds / 3600.0
 
