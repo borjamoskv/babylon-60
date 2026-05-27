@@ -60,6 +60,8 @@ class LedgerStore:
                     start_event_id TEXT NOT NULL,
                     end_event_id TEXT NOT NULL,
                     event_count INTEGER NOT NULL,
+                    mldsa_signature TEXT,
+                    mldsa_public_key TEXT,
                     created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
                 );
 
@@ -120,6 +122,7 @@ class LedgerStore:
             )
             self._ensure_compat_columns(conn, "enrichment_jobs")
             self._ensure_compat_columns(conn, "ledger_enrichment_jobs")
+            self._ensure_checkpoint_mldsa_columns(conn)
             conn.executescript(
                 """
                 CREATE INDEX IF NOT EXISTS idx_ledger_events_ts ON ledger_events(ts);
@@ -219,3 +222,10 @@ class LedgerStore:
         for column in ("next_attempt_ts", "next_attempt_at"):
             if column not in existing:
                 conn.execute(f"ALTER TABLE {table_name} ADD COLUMN {column} TEXT")
+
+    def _ensure_checkpoint_mldsa_columns(self, conn: sqlite3.Connection) -> None:
+        """Backfill compatibility columns for MLDSA post-quantum checkpoint signatures."""
+        existing = {row[1] for row in conn.execute("PRAGMA table_info(ledger_checkpoints)").fetchall()}
+        for column in ("mldsa_signature", "mldsa_public_key"):
+            if column not in existing:
+                conn.execute(f"ALTER TABLE ledger_checkpoints ADD COLUMN {column} TEXT")

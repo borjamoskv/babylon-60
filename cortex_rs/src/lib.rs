@@ -337,7 +337,7 @@ impl UltramapSubstrate {
     #[pyo3(signature = (bin_path, capacity=None))]
     pub fn new(bin_path: &str, capacity: Option<usize>) -> PyResult<Self> {
         let capacity = capacity.unwrap_or(10000);
-        let node_size = 96;
+        let node_size = 128; // Ampliado de 96 a 128 para Topographical Endocrinology (4x f64)
         let tensor_size = capacity * node_size;
 
         let file = OpenOptions::new()
@@ -473,13 +473,72 @@ impl UltramapSubstrate {
         entropy_bytes.copy_from_slice(&buffer[offset + 88..offset + 96]);
         let entropy = f64::from_ne_bytes(entropy_bytes);
 
+        let mut dop_b = [0u8; 8]; dop_b.copy_from_slice(&buffer[offset + 96..offset + 104]);
+        let mut cor_b = [0u8; 8]; cor_b.copy_from_slice(&buffer[offset + 104..offset + 112]);
+        let mut ser_b = [0u8; 8]; ser_b.copy_from_slice(&buffer[offset + 112..offset + 120]);
+        let mut adr_b = [0u8; 8]; adr_b.copy_from_slice(&buffer[offset + 120..offset + 128]);
+
         dict.set_item("x", x)?;
         dict.set_item("y", y)?;
         dict.set_item("z", z)?;
         dict.set_item("target", target)?;
         dict.set_item("entropy", entropy)?;
+        dict.set_item("dopamine", f64::from_ne_bytes(dop_b))?;
+        dict.set_item("cortisol", f64::from_ne_bytes(cor_b))?;
+        dict.set_item("serotonin", f64::from_ne_bytes(ser_b))?;
+        dict.set_item("adrenaline", f64::from_ne_bytes(adr_b))?;
 
         Ok(dict)
+    }
+
+    pub fn volume_transmit_hormones(&self, origin_x: f64, origin_y: f64, origin_z: f64, radius: f64, dopamine: f64, cortisol: f64, serotonin: f64, adrenaline: f64) -> PyResult<usize> {
+        let mut mmap = self.mmap.lock().unwrap();
+        let buffer: &mut [u8] = unsafe {
+            std::slice::from_raw_parts_mut(mmap.as_mut_ptr(), self.capacity * self.node_size)
+        };
+        
+        let mut affected = 0;
+        
+        for i in 0..self.capacity {
+            let offset = i * self.node_size;
+            
+            let mut x_bytes = [0u8; 8]; x_bytes.copy_from_slice(&buffer[offset..offset + 8]); let x = f64::from_ne_bytes(x_bytes);
+            let mut y_bytes = [0u8; 8]; y_bytes.copy_from_slice(&buffer[offset + 8..offset + 16]); let y = f64::from_ne_bytes(y_bytes);
+            let mut z_bytes = [0u8; 8]; z_bytes.copy_from_slice(&buffer[offset + 16..offset + 24]); let z = f64::from_ne_bytes(z_bytes);
+            
+            // Skip uninitialized
+            if x == 0.0 && y == 0.0 && z == 0.0 { continue; }
+            
+            let dist = ((x - origin_x).powi(2) + (y - origin_y).powi(2) + (z - origin_z).powi(2)).sqrt();
+            
+            if dist <= radius && radius > 0.0 {
+                // Inverse linear decay based on distance from origin
+                let intensity = 1.0 - (dist / radius);
+                
+                // Modulate dopamine [96:104]
+                let mut d_b = [0u8; 8]; d_b.copy_from_slice(&buffer[offset+96..offset+104]); 
+                let d = f64::from_ne_bytes(d_b) + (dopamine * intensity);
+                buffer[offset+96..offset+104].copy_from_slice(&d.min(1.0).max(0.0).to_ne_bytes());
+                
+                // Cortisol [104:112]
+                let mut c_b = [0u8; 8]; c_b.copy_from_slice(&buffer[offset+104..offset+112]); 
+                let c = f64::from_ne_bytes(c_b) + (cortisol * intensity);
+                buffer[offset+104..offset+112].copy_from_slice(&c.min(1.0).max(0.0).to_ne_bytes());
+                
+                // Serotonin [112:120]
+                let mut s_b = [0u8; 8]; s_b.copy_from_slice(&buffer[offset+112..offset+120]); 
+                let s = f64::from_ne_bytes(s_b) + (serotonin * intensity);
+                buffer[offset+112..offset+120].copy_from_slice(&s.min(1.0).max(0.0).to_ne_bytes());
+                
+                // Adrenaline [120:128]
+                let mut a_b = [0u8; 8]; a_b.copy_from_slice(&buffer[offset+120..offset+128]); 
+                let a = f64::from_ne_bytes(a_b) + (adrenaline * intensity);
+                buffer[offset+120..offset+128].copy_from_slice(&a.min(1.0).max(0.0).to_ne_bytes());
+                
+                affected += 1;
+            }
+        }
+        Ok(affected)
     }
 
     pub fn get_address(&self) -> usize {

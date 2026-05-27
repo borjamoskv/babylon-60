@@ -273,6 +273,7 @@ class CortexEngine(
                     self._conn = None
                     self._schema_ready = False
                     self._memory_ready = False
+                    self._ledger = None
                 else:
                     return self._conn
 
@@ -560,6 +561,7 @@ class CortexEngine(
 
     async def close(self):
         """Shutdown the engine, optimizer, and database connections."""
+        self._closing = True
         await self.stop_optimizer()
         if self._post_commit_tasks:
             try:

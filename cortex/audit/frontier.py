@@ -133,7 +133,7 @@ class FrontierAuditor:
             project=project_name,
             fact_type="audit_report",
             content=final_report,
-            confidence=0.95,
+            confidence="C5",
         )
 
         total_latency = tom_res.latency_ms + benji_res.latency_ms + oliver_res.latency_ms
@@ -189,7 +189,7 @@ class FrontierAuditor:
                 project="CORTEX",
                 fact_type="diagnostic",
                 content=res.content,
-                confidence=0.85,
+                confidence="C5",
             )
 
         return {

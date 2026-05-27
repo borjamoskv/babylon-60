@@ -81,9 +81,11 @@ class IdeStatePreserver:
         """Entropy-driven snapshots. Triggered precisely by Ledger cryptographic volume."""
         loop = asyncio.get_running_loop()
         while True:
-            await loop.run_in_executor(None, ledger_entropy_event.wait)
-            ledger_entropy_event.clear()
-            await self._execute_snapshot_async()
+            # Add timeout to prevent blocking the default executor indefinitely, allowing graceful loop shutdown
+            triggered = await loop.run_in_executor(None, ledger_entropy_event.wait, 1.0)
+            if triggered:
+                ledger_entropy_event.clear()
+                await self._execute_snapshot_async()
 
     def start_guardian(self):
         if self._daemon_task:

@@ -350,6 +350,15 @@ class OutboxDaemon(SovereignResource):
         except Exception as e:
             logger.error('Outbox drainer error: %s', e)
 
+    async def _drain_loop(self):
+        """Asynchronous loop for draining the queue."""
+        loop = asyncio.get_running_loop()
+        while True:
+            # Wait for wake event, but periodically check anyway
+            await loop.run_in_executor(None, outbox_wake_event.wait, 1.0)
+            outbox_wake_event.clear()
+            await loop.run_in_executor(None, self.drain_once_sync)
+
     def start_guardian(self) -> None:
         """TODO: Document start_guardian"""
         if self._daemon_task:

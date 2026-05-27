@@ -37,7 +37,7 @@ class UltramapSubstrate:
 
     def __init__(self, capacity=10000):
         self.capacity = capacity
-        self.node_size = 96
+        self.node_size = 128
         self.tensor_size = self.capacity * self.node_size
         self.bin_path = os.path.join(os.path.dirname(DB_PATH), "ultramap.bin")
 
@@ -154,17 +154,56 @@ class UltramapSubstrate:
         target_bytes = bytes(self._buffer[offset + 24 : offset + 88]).rstrip(b"\x00")
         entropy = struct.unpack_from("d", self._buffer, offset + 88)[0]
         
+        # Hormones are stored at [96:128]
+        dopamine, cortisol, serotonin, adrenaline = struct.unpack_from("dddd", self._buffer, offset + 96)
+        
         return {
             "x": x,
             "y": y,
             "z": z,
             "target": target_bytes.decode('utf-8', 'ignore'),
-            "entropy": entropy
+            "entropy": entropy,
+            "dopamine": dopamine,
+            "cortisol": cortisol,
+            "serotonin": serotonin,
+            "adrenaline": adrenaline
         }
+
+    def volume_transmit_hormones(self, origin_x: float, origin_y: float, origin_z: float, radius: float, dopamine: float, cortisol: float, serotonin: float, adrenaline: float) -> int:
+        """Topographical Endocrinology: Volume transmission of hormones across the spatial matrix."""
+        if self._rs is not None:
+            return self._rs.volume_transmit_hormones(origin_x, origin_y, origin_z, radius, dopamine, cortisol, serotonin, adrenaline)
+            
+        affected = 0
+        for i in range(self.capacity):
+            offset = i * self.node_size
+            x, y, z = struct.unpack_from("ddd", self._buffer, offset)
+            if x == 0.0 and y == 0.0 and z == 0.0:
+                continue
+                
+            dist = ((x - origin_x)**2 + (y - origin_y)**2 + (z - origin_z)**2)**0.5
+            if dist <= radius and radius > 0.0:
+                intensity = 1.0 - (dist / radius)
+                d, c, s, a = struct.unpack_from("dddd", self._buffer, offset + 96)
+                
+                d = max(0.0, min(1.0, d + (dopamine * intensity)))
+                c = max(0.0, min(1.0, c + (cortisol * intensity)))
+                s = max(0.0, min(1.0, s + (serotonin * intensity)))
+                a = max(0.0, min(1.0, a + (adrenaline * intensity)))
+                
+                struct.pack_into("dddd", self._buffer, offset + 96, d, c, s, a)
+                affected += 1
+                
+        return affected
 
 if __name__ == "__main__":
     umap = UltramapSubstrate()
     umap.update_agent_position(0, 10.0, 20.0, 30.0, "CVE-2026-MINIPLASMA", 0.95)
+    
+    # Simulate a topographical dopamine/adrenaline burst at origin (10.0, 20.0, 30.0) with radius 5.0
+    affected = umap.volume_transmit_hormones(10.0, 20.0, 30.0, 5.0, dopamine=0.8, cortisol=0.0, serotonin=0.0, adrenaline=0.5)
+    
     joules = umap.calculate_exergy_distance(0, "TARGET_DARKPOOL_0x1")
     logger.info(f"C5-REAL: Exergy Distance Calculated: {joules:.2f} Joules")
+    logger.info(f"Topographical Endocrinology: Transmitted to {affected} agents.")
     logger.info(f"Agent 0 State: {umap.get_agent_state(0)}")

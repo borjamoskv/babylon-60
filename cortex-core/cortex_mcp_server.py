@@ -28,7 +28,7 @@ DB_PATH = str(PROJECT_ROOT / "cortex-core" / "cortex_memory_vsa.db")
 @mcp.tool()
 async def cortex_ledger_append(action: str, vector_id: str, yield_amount: float) -> str:
     """
-    Cryptographic write to the CORTEX-Persist ledger. Secures Exergy via SHA-256 Merkle chain.
+    Cryptographic write to the CORTEX-Persist ledger. Secures Exergy via Ed25519 ZK-Seal and SHA-256 Merkle chain.
     """
     block_hash = ledger.append(action, vector_id, yield_amount)
     vsa.record(key=f"mcp_ledger:{vector_id}", value=action)

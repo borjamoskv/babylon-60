@@ -111,7 +111,7 @@ class LabilizationRecord:
     """
 
     engram_id: str
-    accessed_at: float = field(default_factory=time.time)
+    accessed_at: float = field(default_factory=time.monotonic)
     window_seconds: float = DEFAULT_LABILE_WINDOW_S
     confirmed: bool = False
     contradicted: bool = False

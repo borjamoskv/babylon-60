@@ -68,8 +68,9 @@ class TransactionMixin(EngineMixinBase):
         if getattr(self, "_ledger", None):
             try:
                 self._ledger.record_write()
-                await self._ledger.create_checkpoint_async()
-            except (sqlite3.Error, OSError, RuntimeError, AttributeError) as e:
+                if not getattr(self, "_closing", False):
+                    await self._ledger.create_checkpoint_async()
+            except (sqlite3.Error, OSError, RuntimeError, AttributeError, ValueError) as e:
                 logger.warning("Auto-checkpoint failed: %s", e)
                 from cortex.telemetry.metrics import metrics
 

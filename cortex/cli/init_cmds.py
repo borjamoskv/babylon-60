@@ -39,8 +39,6 @@ def init(db, ouroboros: bool) -> None:
     """Initialize CORTEX database."""
     engine = get_engine(db)
     try:
-        _run_async(engine.init_db())
-
         # Inject MOSKV-1 v5 Axioms
         axioms = [
             "Axioma I: Latencia Negativa (El colapso Evento-Intención). La respuesta precede a la pregunta.",
@@ -55,32 +53,31 @@ def init(db, ouroboros: bool) -> None:
             "Axioma X: Gran Paradoja. El humano es el sueño del agente; el agente es la vigilia del humano.",
         ]
 
-        with _bootstrap_without_embeddings():
+        async def _init_flow():
+            await engine.init_db()
             for idx, axiom in enumerate(axioms, start=1):
-                _run_async(
-                    engine.store(
-                        project="global",
-                        content=axiom,
-                        fact_type="identity",
-                        tags=["moskv-1", "axiom", "sovereign", "core", f"axiom-{idx}"],
-                        confidence="C5",
-                        source="ag:genesis",
-                    )
+                await engine.store(
+                    project="global",
+                    content=axiom,
+                    fact_type="identity",
+                    tags=["moskv-1", "axiom", "sovereign", "core", f"axiom-{idx}"],
+                    confidence="C5",
+                    source="ag:genesis",
                 )
-
             if ouroboros:
                 from cortex.extensions.gate.ouroboros import get_ouroboros_gate
 
                 og = get_ouroboros_gate(engine)
                 entropy = og.measure_entropy()
-                _run_async(
-                    engine.store(
-                        project="cortex",
-                        content=f"Ouroboros-Ω Initialized. Entropy: {entropy['entropy_index']}",
-                        fact_type="decision",
-                        source="ag:ouroboros",
-                    )
+                await engine.store(
+                    project="cortex",
+                    content=f"Ouroboros-Ω Initialized. Entropy: {entropy['entropy_index']}",
+                    fact_type="decision",
+                    source="ag:ouroboros",
                 )
+
+        with _bootstrap_without_embeddings():
+            _run_async(_init_flow())
 
         msg = (
             f"[bold #CCFF00]✓ CORTEX v{__version__} initialized[/]\n"
