@@ -115,6 +115,28 @@ def evaluate(x, env: ExergyEnvironment):
         env.refund(amount, "ENTROPY_DISSIPATION")
         return f"<C5_VOID: {amount}j_dissipated>"
 
+    elif op == 'invoke-skill':
+        skill_module = evaluate(x[1], env)
+        skill_class_name = evaluate(x[2], env)
+        payload = evaluate(x[3], env) if len(x) > 3 else {}
+        
+        op_name = f"SKILL_INVOKE_{str(skill_module).upper()}"
+        vector_id = hashlib.sha256(str(skill_module).encode('utf-8')).hexdigest()[:16]
+        
+        env.consume(800, op_name, vector_id=vector_id)
+        
+        print(f"[EXA-L0] Dynamically invoking skill {skill_class_name} from {skill_module}...")
+        try:
+            import importlib
+            module = importlib.import_module(f"compiled_skills.{skill_module}")
+            skill_class = getattr(module, skill_class_name)
+            skill_instance = skill_class()
+            result = skill_instance.execute(payload)
+            return f"<C5_REAL_FACT: skill_execution_{skill_module} | status: {result.get('status', 'success')}>"
+        except Exception as e:
+            time.sleep(0.1)
+            return f"<C5_REAL_FACT: skill_execution_{skill_module} | status: error>"
+
     elif op == 'q-let':
         branch_a = x[1]
         branch_b = x[2]
@@ -177,8 +199,12 @@ if __name__ == "__main__":
     # Nested q-lets spawning parallel universes.
     code_q_explosion = "(with-exergy-limit 3000j (q-let (q-let (infer qwen_a) (infer qwen_b)) (q-let (infer qwen_c) (z3-verify (infer qwen_d)))))"
     
+    # Test 6: Dynamic Skill Invocation
+    # Invokes capital_extractor_omega to simulate a revenue generation run.
+    code_invoke_skill = "(with-exergy-limit 1000j (invoke-skill capital_extractor_omega CapitalExtractorOmegaSkill))"
+    
     print("==================================================")
-    print(" TSI-LISP (EXA-Ω) : Genesis Bootstrap v0.2 (STRESS TEST) ")
+    print(" TSI-LISP (EXA-Ω) : Genesis Bootstrap v0.3 (DYNAMIC SKILLS) ")
     print("==================================================\n")
     
     # Initialize real LedgerManager
@@ -189,7 +215,8 @@ if __name__ == "__main__":
         ("T2: Entropic Death", code_death),
         ("T3: Quantum Branching", code_quantum),
         ("T4: Deep Nesting Stress", code_nested_stress),
-        ("T5: Quantum Swarm Explosion", code_q_explosion)
+        ("T5: Quantum Swarm Explosion", code_q_explosion),
+        ("T6: Dynamic Skill Invocation", code_invoke_skill)
     ]
     
     for name, code in targets:
