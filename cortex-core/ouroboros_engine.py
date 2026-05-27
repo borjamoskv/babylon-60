@@ -152,7 +152,8 @@ contract {contract_name}OuroborosTest is Test {{
         await self.provision()
         await self.clone_target()
 
-        contracts = self._detect_contracts()
+        loop = asyncio.get_running_loop()
+        contracts = await loop.run_in_executor(None, self._detect_contracts)
         logger.info("Detected %d contracts for audit.", len(contracts))
 
         if not contracts:
@@ -163,14 +164,13 @@ contract {contract_name}OuroborosTest is Test {{
                 f.write("contract CortexVault { function deposit() external payable {} }")
 
         # Initialize Forge project — CRIT-03 hardened: no shell injection
-        import subprocess
-
-        subprocess.run(  # noqa: S603
-            ["forge", "init", "--no-git"],
+        process = await asyncio.create_subprocess_exec(
+            "forge", "init", "--no-git",
             cwd=self.scratch_dir,
-            check=False,
-            capture_output=True,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
         )
+        await process.communicate()
 
         for c in contracts[:2]:  # Limit to 2 for performance
             await self.generate_fuzz_test(c["name"], c["file"])
@@ -219,7 +219,7 @@ contract {contract_name}OuroborosTest is Test {{
                 )
 
                 # Queue Remediation Task
-                self._queue_remediation(c["file"], error_log)
+                await loop.run_in_executor(None, self._queue_remediation, c["file"], error_log)
             else:
                 await self._emit_event(
                     "ledger_append",
@@ -236,30 +236,21 @@ contract {contract_name}OuroborosTest is Test {{
         logger.info("✅ Ouroboros audit cycle complete.")
 
     def _queue_remediation(self, target_file: str, log_file: str):
-        """Pushes a remediation task to the swarm queue."""
-        queue_path = "/tmp/cortex_swarm_queue.json"
+        """Pushes a remediation task to the swarm queue via C5-REAL ZeroCopyRingBuffer."""
         try:
-            queue = {"pending_tasks": []}
-            if os.path.exists(queue_path):
-                with open(queue_path) as f:
-                    queue = json.load(f)
-
+            from persistence import enqueue_swarm_task
             remediator_path = os.path.join(
                 os.path.dirname(os.path.abspath(__file__)), "remediator.py"
             )
-            queue["pending_tasks"].append(
-                {
-                    "id": f"remed_{int(time.time())}",
-                    "agent": "SURGEON-1",
-                    "type": "remediation",
-                    "command": f"python3 {remediator_path} {target_file} {log_file}",
-                    "timestamp": time.time(),
-                }
-            )
-
-            with open(queue_path, "w") as f:
-                json.dump(queue, f, indent=2)
-            logger.info("📌 [SURGEON] Remediation mission queued for %s", target_file)
+            payload = {
+                "id": f"remed_{int(time.time())}",
+                "type": "remediation",
+                "command": f"python3 {remediator_path} {target_file} {log_file}",
+                "timestamp": time.time(),
+            }
+            
+            enqueue_swarm_task("SURGEON-1", payload)
+            logger.info("📌 [SURGEON] Remediation mission queued via RingBuffer for %s", target_file)
         except Exception as e:
             logger.error("Remediation Queue Failure: %s", e)
 

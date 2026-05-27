@@ -93,7 +93,8 @@ class ExergySentinel:
 
         # Check SQLite journal/shm/wal files that might be orphaned/locked
         for ext in ["*.db-shm", "*.db-wal", "*.db-journal"]:
-            for lock_file in PROJECT_ROOT.rglob(ext):
+            # O(1) shallow search to prevent blocking sentinel loop
+            for lock_file in list(PROJECT_ROOT.glob(ext)) + list((PROJECT_ROOT / "cortex-core").glob(ext)):
                 try:
                     if lock_file.exists():
                         mtime = os.path.getmtime(lock_file)

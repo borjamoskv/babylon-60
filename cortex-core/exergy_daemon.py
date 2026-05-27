@@ -144,14 +144,18 @@ class ExergyDaemon:
         """Performs database WAL checkpoint (TRUNCATE) and VACUUM to prevent disk fragmentation."""
         db_path = config.DB_PATH
         logging.info("Exergy Daemon: Running DB maintenance on %s...", db_path)
+        
         try:
-            conn = sqlite3.connect(db_path, timeout=30.0)
-            try:
-                conn.execute("PRAGMA wal_checkpoint(TRUNCATE);")
-                conn.execute("VACUUM;")
-                logging.info("Exergy Daemon: WAL checkpoint and VACUUM completed successfully.")
-            finally:
-                conn.close()
+            loop = asyncio.get_running_loop()
+            def _maintenance():
+                conn = sqlite3.connect(db_path, timeout=30.0)
+                try:
+                    conn.execute("PRAGMA wal_checkpoint(TRUNCATE);")
+                    conn.execute("VACUUM;")
+                finally:
+                    conn.close()
+            await loop.run_in_executor(None, _maintenance)
+            logging.info("Exergy Daemon: WAL checkpoint and VACUUM completed successfully.")
         except Exception as e:
             logging.error("Exergy Daemon: Database maintenance failure: %s", e)
 
@@ -229,10 +233,14 @@ class ExergyDaemon:
     async def perform_health_assessment(self) -> float:
         """Runs the CORTEX Health Suite, logs to DB, and returns the aggregated score."""
         logging.info("Exergy Daemon: Running system health assessment...")
+        
         try:
-            collector = HealthCollector(db_path=config.DB_PATH)
-            metrics = collector.collect_all()
-            score = HealthScorer.score(metrics)
+            loop = asyncio.get_running_loop()
+            def _assess():
+                collector = HealthCollector(db_path=config.DB_PATH)
+                metrics = collector.collect_all()
+                return metrics, HealthScorer.score(metrics)
+            metrics, score = await loop.run_in_executor(None, _assess)
 
             logging.info(
                 "Exergy Daemon: Aggregate Health Score: %.2f/100 (Grade: %s)",
@@ -242,14 +250,15 @@ class ExergyDaemon:
 
             # Persist to SQLite health history table
             try:
-                trend = TrendDetector()
-                trend.push(score.score)
-                trend.persist_to_db(config.DB_PATH, score.score, score.grade.letter)
-                trend.prune_history(config.DB_PATH, keep_days=30)
+                def _persist():
+                    trend = TrendDetector()
+                    trend.push(score.score)
+                    trend.persist_to_db(config.DB_PATH, score.score, score.grade.letter)
+                    trend.prune_history(config.DB_PATH, keep_days=30)
+                await loop.run_in_executor(None, _persist)
                 logging.info("Exergy Daemon: Health score persisted and historical records pruned.")
             except Exception as trend_err:
                 logging.warning("Exergy Daemon: Failed to update health history database: %s", trend_err)
-
             # Print detail of each metric
             for m in metrics:
                 logging.info("  Metric '%s': %.2f (%s)", m.name, m.value, m.description)

@@ -24,6 +24,7 @@ def clean_swarm_queue_db(monkeypatch, tmp_path):
     monkeypatch.setattr("persistence.DB_PATH", str(test_db))
     monkeypatch.setattr("persistence.base.DB_PATH", str(test_db))
     monkeypatch.setattr("persistence.outbox.DB_PATH", str(test_db))
+    monkeypatch.setattr("persistence.outbox._global_ring_buffer", None)
 
     # Reset cache
     with persistence._metrics_cache_lock:
@@ -79,20 +80,20 @@ def test_swarm_metrics_caching():
     conn = sqlite3.connect(persistence.DB_PATH)
     c = conn.cursor()
     c.execute(
-        "INSERT INTO cortex_swarm_queue (timestamp, agent, payload, status) VALUES (?, ?, ?, ?)",
-        (time.monotonic(), "TestAgent", "{}", "pending"),
+        "INSERT INTO cortex_execution_ledger (timestamp, agent, command, returncode, execution_time) VALUES (?, ?, ?, ?, ?)",
+        (time.time(), "TestAgent", "TestCmd", 0, 0.5),
     )
     conn.commit()
     conn.close()
 
-    # Cached call should still return old values (active_children == 0)
+    # Cached call should still return old values (latency_ms == 35.0)
     m4 = get_swarm_metrics()
     assert m4 is m3
-    assert m4["active_children"] == 0
+    assert m4["latency_ms"] == 35.0
 
-    # Bypassed call should return updated value (active_children == 1)
+    # Bypassed call should return updated value (latency_ms == 500.0)
     m5 = get_swarm_metrics(bypass_cache=True)
-    assert m5["active_children"] == 1
+    assert m5["latency_ms"] == 500.0
     assert m5 is not m1
 
     # Let the cache expire (500ms)
@@ -100,5 +101,36 @@ def test_swarm_metrics_caching():
 
     # Next call should be a cache miss, returning updated values
     m6 = get_swarm_metrics()
-    assert m6["active_children"] == 1
+    assert m6["latency_ms"] == 500.0
     assert m6 is not m1
+
+
+def test_swarm_metrics_active_children():
+    """Verify that active_children counts pending tasks from both SQLite and ZeroCopyRingBuffer."""
+    # Initially 0
+    m = get_swarm_metrics(bypass_cache=True)
+    assert m["active_children"] == 0
+
+    # 1. Insert into SQLite cortex_swarm_queue
+    conn = sqlite3.connect(persistence.DB_PATH)
+    c = conn.cursor()
+    c.execute(
+        "INSERT INTO cortex_swarm_queue (timestamp, agent, payload, status) VALUES (?, ?, ?, ?)",
+        (time.monotonic(), "TestAgent", "{}", "pending"),
+    )
+    conn.commit()
+    conn.close()
+
+    m = get_swarm_metrics(bypass_cache=True)
+    assert m["active_children"] == 1
+
+    # 2. Enqueue into ZeroCopyRingBuffer
+    ring = persistence._get_ring_buffer()
+    # Write a pending task (status = 1)
+    success = ring.enqueue(b"TestAgentRing", b"{}")
+    assert success is True
+
+    # Total should be 2 (1 from SQLite + 1 from Ring Buffer)
+    m = get_swarm_metrics(bypass_cache=True)
+    assert m["active_children"] == 2
+
