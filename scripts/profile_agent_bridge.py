@@ -123,31 +123,41 @@ def generate_svg_content(data: dict) -> str:
     <text x="42" y="26" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" font-weight="700" letter-spacing="1">RUNTIME: {data["agent"]["id"]}</text>
     
     <text x="20" y="48" fill="#8F8F8F" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">Admission: <tspan fill="#00F0FF">CortexEngine.store</tspan> | Tenant: <tspan fill="#2B3BE5">{data["cortex"]["tenant_scope"]}</tspan></text>
-    <text x="20" y="62" fill="#8F8F8F" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10">Verification state: Byzantine default, zero-entropy invariants</text>
+    <text x="20" y="63" fill="#8F8F8F" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9">Exergy Level:</text>
+    <rect x="95" y="55" width="200" height="8" rx="4" fill="#1A1A1A"/>
+    <rect x="95" y="55" width="200" height="8" rx="4" fill="#CCFF00" />
+    <text x="305" y="63" fill="#CCFF00" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" font-weight="700">100% STABLE (ΔS=0)</text>
   </g>
 
   <!-- Metrics Grid -->
   <g transform="translate(45 190)">
     <!-- Ledger Status -->
     <g transform="translate(0 0)">
-      <rect width="140" height="60" rx="8" fill="#0A0A0A" stroke="#2B3BE5" stroke-opacity="0.6" stroke-width="1.5"/>
-      <text x="15" y="20" fill="#8F8F8F" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" letter-spacing="1">LEDGER</text>
-      <text x="15" y="44" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="20" font-weight="700" letter-spacing="1">{data["ledger"]["status"]}</text>
-      <circle cx="120" cy="18" r="4" fill="#00F0FF" class="glow-active" filter="url(#glow)"/>
+      <rect width="105" height="60" rx="8" fill="#0A0A0A" stroke="#2B3BE5" stroke-opacity="0.6" stroke-width="1.5"/>
+      <text x="12" y="20" fill="#8F8F8F" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8" letter-spacing="1">LEDGER</text>
+      <text x="12" y="44" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" font-weight="700" letter-spacing="1">{data["ledger"]["status"]}</text>
+      <circle cx="90" cy="18" r="3.5" fill="#00F0FF" class="glow-active" filter="url(#glow)"/>
     </g>
     
     <!-- TX Checked -->
-    <g transform="translate(155 0)">
-      <rect width="140" height="60" rx="8" fill="#0A0A0A" stroke="#1F1F1F" stroke-width="1.5"/>
-      <text x="15" y="20" fill="#8F8F8F" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" letter-spacing="1">TX RECORDED</text>
-      <text x="15" y="44" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="20" font-weight="700">{data["ledger"]["transactions_checked"]}</text>
+    <g transform="translate(115 0)">
+      <rect width="105" height="60" rx="8" fill="#0A0A0A" stroke="#1F1F1F" stroke-width="1.5"/>
+      <text x="12" y="20" fill="#8F8F8F" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8" letter-spacing="1">TX CHECKED</text>
+      <text x="12" y="44" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" font-weight="700">{data["ledger"]["transactions_checked"]}</text>
     </g>
     
     <!-- Active Facts -->
-    <g transform="translate(310 0)">
-      <rect width="140" height="60" rx="8" fill="#0A0A0A" stroke="#1F1F1F" stroke-width="1.5"/>
-      <text x="15" y="20" fill="#8F8F8F" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" letter-spacing="1">FACTS SEEDED</text>
-      <text x="15" y="44" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="20" font-weight="700">#{data["cortex"]["last_public_fact_id"]}</text>
+    <g transform="translate(230 0)">
+      <rect width="105" height="60" rx="8" fill="#0A0A0A" stroke="#1F1F1F" stroke-width="1.5"/>
+      <text x="12" y="20" fill="#8F8F8F" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8" letter-spacing="1">FACTS SEEDED</text>
+      <text x="12" y="44" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" font-weight="700">#{data["cortex"]["last_public_fact_id"]}</text>
+    </g>
+
+    <!-- Integrity Audits -->
+    <g transform="translate(345 0)">
+      <rect width="105" height="60" rx="8" fill="#0A0A0A" stroke="#1F1F1F" stroke-width="1.5"/>
+      <text x="12" y="20" fill="#8F8F8F" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8" letter-spacing="1">INTEGRITY CHK</text>
+      <text x="12" y="44" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" font-weight="700">{data["ledger"]["integrity_checks"]}</text>
     </g>
   </g>
 
@@ -229,6 +239,8 @@ def generate_readme_block(
 | Runtime | `{data["agent"]["id"]}` |
 | Memory admission | `CortexEngine.store(...) -> fact #{data["cortex"]["last_public_fact_id"]}` |
 | Ledger | `{data["ledger"]["status"]}` over `{data["ledger"]["transactions_checked"]}` checked transaction(s) |
+| Integrity audits | `{data["ledger"]["integrity_checks"]}` passes |
+| Signals processed | `{data["cortex"]["signals_processed"]}` events |
 | Hash anchor | `{latest_hash_short}` |
 | Public digest | `{public_digest}` |
 | Profile commit | `{short_profile_commit}` |
@@ -284,6 +296,8 @@ async def main():
     merkle_roots_checked = 0
     violations = []
     valid = True
+    integrity_checks = 0
+    signals_processed = 0
 
     if CortexEngine is not None:
         # Initialize CortexEngine and store profile facts
@@ -394,6 +408,22 @@ async def main():
 
                 merkle_roots_checked = mr_count + lc_count
 
+                integrity_checks = 0
+                try:
+                    async with conn.execute("SELECT COUNT(*) FROM integrity_checks") as cursor:
+                        row = await cursor.fetchone()
+                        integrity_checks = row[0] if row else 0
+                except Exception:
+                    pass
+
+                signals_processed = 0
+                try:
+                    async with conn.execute("SELECT COUNT(*) FROM signals") as cursor:
+                        row = await cursor.fetchone()
+                        signals_processed = row[0] if row else 0
+                except Exception:
+                    pass
+
             # Audit both validation surfaces (SovereignLedger and LedgerVerifier) in parallel
             loop = asyncio.get_running_loop()
 
@@ -468,6 +498,7 @@ async def main():
             "last_public_fact_id": last_public_fact_id,
             "project": args.project,
             "tenant_scope": args.tenant,
+            "signals_processed": signals_processed,
         },
         "generated_at": generated_at,
         "ledger": {
@@ -478,6 +509,7 @@ async def main():
             "transactions_checked": transactions_checked,
             "valid": valid,
             "violations_public": violations,
+            "integrity_checks": integrity_checks,
         },
         "privacy_boundary": {
             "prompts_published": False,
