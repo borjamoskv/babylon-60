@@ -1,10 +1,9 @@
 use pyo3::prelude::*;
 use rand::Rng;
-use rayon::prelude::*;
 use std::f32;
 
 /// A HyperVector representing a concept in the Vector Symbolic Architecture (VSA).
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Clone, Debug, PartialEq)]
 pub struct HyperVector {
     pub dim: usize,
@@ -82,7 +81,7 @@ impl HyperVector {
         Ok(dot_product / (norm_a * norm_b))
     }
     
-    pub fn to_list<'py>(&self, py: Python<'py>) -> PyResult<Vec<f32>> {
+    pub fn to_list<'py>(&self, _py: Python<'py>) -> PyResult<Vec<f32>> {
         Ok(self.data.clone())
     }
 }
@@ -118,13 +117,14 @@ pub fn bundle_sequence(vectors: Vec<HyperVector>) -> PyResult<HyperVector> {
     Ok(result)
 }
 
-#[pyclass]
+#[pyclass(skip_from_py_object)]
 pub struct EpistemicMembrane {
     dim: usize,
     item_memory: Vec<HyperVector>,
     role_consistency: HyperVector,
     role_novelty: HyperVector,
     threshold_consistency: f32,
+    #[allow(dead_code)]
     threshold_novelty: f32,
 }
 
@@ -202,7 +202,7 @@ impl EpistemicMembrane {
     }
 }
 
-pub fn register(_py: Python, m: &PyModule) -> PyResult<()> {
+pub fn register(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<HyperVector>()?;
     m.add_class::<EpistemicMembrane>()?;
     m.add_function(wrap_pyfunction!(bind_sequence, m)?)?;
