@@ -233,8 +233,7 @@ class K0Metabolism:
                         payload = json.loads(payload_json) if isinstance(payload_json, str) else payload_json
                         if payload.get("type") == "AST_MUTATION":
                             new_source = payload.get("new_source", "")
-                            signature = payload.get("signature", "")
-                            logger.info(f"🧬 Validando ZK-STARK bounds para mutación AST de AEON-0...")
+                            logger.info("🧬 Validando ZK-STARK bounds para mutación AST de AEON-0...")
                             
                             # Generar y validar ZK-STARK anchor para acotar termodinámicamente la mutación
                             zk_anchor = self.dark_pool.generate_resolution_proof(new_source)

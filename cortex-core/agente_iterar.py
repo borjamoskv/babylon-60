@@ -169,7 +169,7 @@ class AgenteIterar:
                 [sys.executable, "-m", "ruff", "check", ".", "--quiet"],
                 cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=30,
             )
-            before = len([l for l in res_before.stdout.splitlines() if l.strip()])
+            before = len([line for line in res_before.stdout.splitlines() if line.strip()])
 
             # Autofix
             subprocess.run(
@@ -187,7 +187,7 @@ class AgenteIterar:
                 [sys.executable, "-m", "ruff", "check", ".", "--quiet"],
                 cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=30,
             )
-            after = len([l for l in res_after.stdout.splitlines() if l.strip()])
+            after = len([line for line in res_after.stdout.splitlines() if line.strip()])
             return before, after
         except Exception as e:
             logger.error(f"Lint phase failed: {e}")
