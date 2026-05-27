@@ -39,8 +39,8 @@
 
 - [x] **PostgreSQL/AlloyDB backend** — High-throughput pgvector integration for infinite memory scaling.
 - [x] **Admin Web Dashboard** — Industrial Noir UI for memory management and cryptographically signed audit visualization.
-- [ ] **Multi-node Federation** — Distributed clusters with Gossip protocol for global swarm homeostasis.
-- [ ] **Dual Compliance Mode** — EU AI Act (Art. 12) + SOC 2 reporting pipelines.
+- [x] **Multi-node Federation** — Distributed clusters with Gossip protocol for global swarm homeostasis.
+- [x] **Dual Compliance Mode** — EU AI Act (Art. 12) + SOC 2 reporting pipelines.
 - [ ] **Zero-Knowledge Encryption** — Memories encrypted at rest on hardware keys.
 
 ---
