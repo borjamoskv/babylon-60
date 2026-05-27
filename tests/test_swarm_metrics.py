@@ -19,11 +19,12 @@ from persistence import get_swarm_metrics
 def clean_swarm_queue_db(monkeypatch, tmp_path):
     """Isolate SQLite database for each test and reset cache."""
     test_db = tmp_path / "test_cortex_memory_vsa.db"
+    import daemons.outbox as _outbox_mod
 
     # Patch DB_PATH in imported modules
     monkeypatch.setattr("persistence.DB_PATH", str(test_db))
     monkeypatch.setattr("persistence.base.DB_PATH", str(test_db))
-    monkeypatch.setattr("persistence.outbox._global_ring_buffer", None)
+    monkeypatch.setattr(_outbox_mod, "_global_ring_buffer", None)
 
     # Reset cache
     with persistence._metrics_cache_lock:

@@ -52,9 +52,9 @@ async def test_daemon_basic_queue_processing(tmp_path, monkeypatch):
     monkeypatch.setattr("persistence.base.VSA_BIN_PATH", bin_path)
 
     # Force _global_ring_buffer to None so it recreates with the new path
-    import persistence.outbox
+    import daemons.outbox as _outbox_mod
 
-    monkeypatch.setattr("persistence.outbox._global_ring_buffer", None)
+    monkeypatch.setattr(_outbox_mod, "_global_ring_buffer", None)
 
     # Initialize mock daemon
     daemon = CortexDaemon()
@@ -98,9 +98,9 @@ async def test_daemon_command_extraction(tmp_path, monkeypatch):
     monkeypatch.setattr("persistence.base.DB_PATH", db_path)
     monkeypatch.setattr("persistence.base.VSA_BIN_PATH", bin_path)
 
-    import persistence.outbox
+    import daemons.outbox as _outbox_mod
 
-    monkeypatch.setattr("persistence.outbox._global_ring_buffer", None)
+    monkeypatch.setattr(_outbox_mod, "_global_ring_buffer", None)
 
     daemon = CortexDaemon()
     import sqlite3
@@ -158,9 +158,9 @@ async def test_swarm_queue_contention(tmp_path, monkeypatch):
     monkeypatch.setattr("persistence.base.VSA_BIN_PATH", bin_path)
 
     # Force _global_ring_buffer to None so it recreates with the new path
-    import persistence.outbox
+    import daemons.outbox as _outbox_mod
 
-    monkeypatch.setattr("persistence.outbox._global_ring_buffer", None)
+    monkeypatch.setattr(_outbox_mod, "_global_ring_buffer", None)
     # Wait, just setting _global_ring_buffer to None is enough because __init__ reads from base.DB_PATH
 
     daemon = CortexDaemon()

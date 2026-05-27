@@ -12,11 +12,12 @@ from persistence import ZeroCopyRingBuffer, VSAMemory, DB_PATH, VSA_BIN_PATH
 def clean_vsa_env(monkeypatch, tmp_path):
     """Isolate DB and bin paths to tmp_path to prevent xdist concurrency conflicts."""
     test_db = tmp_path / "test_cortex.db"
+    import daemons.outbox as _outbox_mod
 
     monkeypatch.setattr("persistence.DB_PATH", str(test_db))
     monkeypatch.setattr("persistence.base.DB_PATH", str(test_db))
     monkeypatch.setattr("persistence.vsa.DB_PATH", str(test_db))
-    monkeypatch.setattr("persistence.outbox._global_ring_buffer", None)
+    monkeypatch.setattr(_outbox_mod, "_global_ring_buffer", None)
     monkeypatch.setattr("persistence.VSA_BIN_PATH", str(tmp_path / "vsa.bin"))
     monkeypatch.setattr("persistence.vsa.VSA_BIN_PATH", str(tmp_path / "vsa.bin"))
     yield
@@ -69,6 +70,7 @@ def test_vsa_memory_rust_integration():
 
     # Pre-create the database table if it doesn't exist
     import persistence
+
     conn = sqlite3.connect(persistence.DB_PATH)
     conn.execute(
         "CREATE TABLE IF NOT EXISTS cortex_knowledge (ki_id TEXT PRIMARY KEY, summary TEXT, content TEXT)"
