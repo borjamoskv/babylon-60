@@ -494,8 +494,6 @@ class ReflexionEngine:
         - Iteration 1: Remove the failing target (isolation)
         - Iteration 2+: Add timeout guards (resource protection)
         """
-        error_lower = str(error).lower()
-
         if iteration == 0:
             # First failure: assume transient, add retries
             logger.info("[REFLEXION] Rewrite strategy: RETRY_WRAPPER")
