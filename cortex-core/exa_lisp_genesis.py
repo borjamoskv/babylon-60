@@ -4,39 +4,7 @@ import hashlib
 import concurrent.futures
 import json
 import threading
-import websocket
 from persistence import LedgerManager
-
-class TelemetryBridge:
-    def __init__(self):
-        self.url = "ws://127.0.0.1:8081"
-        self.ws = None
-        self.lock = threading.Lock()
-        
-    def _connect(self):
-        if not self.ws:
-            try:
-                self.ws = websocket.create_connection(self.url, timeout=0.1)
-            except Exception:
-                self.ws = None
-
-    def emit(self, agent_id: int, joules: int, target: str):
-        def _send():
-            with self.lock:
-                self._connect()
-                if self.ws:
-                    try:
-                        frame = {
-                            "agent_id": agent_id,
-                            "rtt": float(abs(joules)),
-                            "target": target
-                        }
-                        self.ws.send(json.dumps(frame))
-                    except Exception:
-                        self.ws = None
-        threading.Thread(target=_send, daemon=True).start()
-
-global_telemetry = TelemetryBridge()
 
 class EntropyDeath(Exception): 
     pass
@@ -52,17 +20,13 @@ class ExergyEnvironment:
             raise EntropyDeath(f"C5-DEATH: Entropy limit exceeded on '{op_name}'. Required: {amount}j, Available: {self.joules}j")
         self.joules -= amount
         
-        # Emit telemetry silently without local stdout
-        global_telemetry.emit(9999, amount, op_name)
-        
-        # C5-REAL: Commit exergy dissipation to cryptographic ledger
+        # C5-REAL: Commit exergy dissipation to cryptographic ledger (Zero-UI Sovereign State)
         if self.ledger:
             self.ledger.append(action=op_name, vector_id=vector_id, yield_amount=float(-amount))
 
     def refund(self, amount: int, op_name: str, vector_id: str = "EXA_REFUND"):
         self.joules += amount
         
-        global_telemetry.emit(9999, -amount, op_name)
         if self.ledger:
             self.ledger.append(action=op_name, vector_id=vector_id, yield_amount=float(amount))
 

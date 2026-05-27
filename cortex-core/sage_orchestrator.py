@@ -6,9 +6,7 @@ import time
 from pathlib import Path
 from datetime import datetime
 
-from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
-from fastapi.middleware.cors import CORSMiddleware
-from sse_starlette.sse import EventSourceResponse
+
 
 # Add current dir to path for imports
 import sys
@@ -103,70 +101,6 @@ class SageOrchestrator:
             await asyncio.sleep(60)
 
 
-orchestrator = SageOrchestrator()
-app = FastAPI(title="SAGE_COUNCIL Telemetry")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-@app.on_event("startup")
-async def startup_event():
-    asyncio.create_task(orchestrator.run_council_loop())
-
-
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    try:
-        while True:
-            if orchestrator.engine:
-                vsa_data = orchestrator.engine.memory.astype("float32").tobytes()
-                await websocket.send_bytes(vsa_data)
-            await asyncio.sleep(0.05)
-    except WebSocketDisconnect:
-        pass
-
-
-@app.get("/stream")
-async def message_stream(request: Request):
-    async def event_generator():
-        while True:
-            if await request.is_disconnected():
-                break
-            try:
-                event = await asyncio.wait_for(orchestrator.event_queue.get(), timeout=1.0)
-                yield {
-                    "event": event["type"],
-                    "data": json.dumps(
-                        {
-                            "msg": event["data"].get("msg", ""),
-                            "sage": event["data"].get("sage", "SYSTEM"),
-                            "id": event["id"],
-                            "cycle_count": event["cycle_count"],
-                            "global_yield": event["global_yield"],
-                            "logs": [
-                                {
-                                    "id": event["id"],
-                                    "msg": f"[{event['data'].get('sage')}] {event['data'].get('msg')}",
-                                    "val": "",
-                                }
-                            ],
-                        }
-                    ),
-                }
-            except asyncio.TimeoutError:
-                yield {"event": "ping", "data": "heartbeat"}
-
-    return EventSourceResponse(event_generator())
-
-
 if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    orchestrator = SageOrchestrator()
+    asyncio.run(orchestrator.run_council_loop())
