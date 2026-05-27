@@ -8,6 +8,8 @@ use std::sync::{Arc, Mutex};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Instant;
 use rayon::prelude::*;
+use std::process::{Command, Stdio, ChildStdin, ChildStdout};
+use std::io::{Write, BufReader, BufRead};
 
 fn strip_trailing_nulls(slice: &[u8]) -> &[u8] {
     if let Some(pos) = slice.iter().rposition(|&x| x != 0) {
@@ -547,12 +549,66 @@ impl UltramapSubstrate {
     }
 }
 
+/// O(1) Stdio Bridge for MCP (Model Context Protocol) 
+/// Prevents Python asyncio event loop blocking and thermodynamic decay.
+#[pyclass]
+pub struct McpNativeClient {
+    stdin: Arc<Mutex<ChildStdin>>,
+    stdout: Arc<Mutex<BufReader<ChildStdout>>>,
+}
+
+#[pymethods]
+impl McpNativeClient {
+    #[new]
+    pub fn new(command: &str, args: Vec<String>) -> PyResult<Self> {
+        let mut child = Command::new(command)
+            .args(&args)
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .spawn()
+            .map_err(|e| PyRuntimeError::new_err(format!("Failed to start MCP server: {}", e)))?;
+
+        let stdin = child.stdin.take().ok_or_else(|| PyRuntimeError::new_err("Failed to open stdin"))?;
+        let stdout = child.stdout.take().ok_or_else(|| PyRuntimeError::new_err("Failed to open stdout"))?;
+
+        Ok(McpNativeClient {
+            stdin: Arc::new(Mutex::new(stdin)),
+            stdout: Arc::new(Mutex::new(BufReader::new(stdout))),
+        })
+    }
+
+    /// Dispatches a raw JSON-RPC string via Stdio and blocks (in Rust) until response.
+    /// Exergically efficient: Bypasses Python GIL and networking overhead.
+    pub fn dispatch(&self, request_json: &str) -> PyResult<String> {
+        let mut req = request_json.to_string();
+        if !req.ends_with("\n") {
+            req.push('\n');
+        }
+
+        {
+            let mut stdin = self.stdin.lock().unwrap();
+            stdin.write_all(req.as_bytes())
+                .map_err(|e| PyRuntimeError::new_err(format!("MCP Write failed: {}", e)))?;
+            stdin.flush()
+                .map_err(|e| PyRuntimeError::new_err(format!("MCP Flush failed: {}", e)))?;
+        }
+
+        let mut stdout = self.stdout.lock().unwrap();
+        let mut response = String::new();
+        stdout.read_line(&mut response)
+            .map_err(|e| PyRuntimeError::new_err(format!("MCP Read failed: {}", e)))?;
+
+        Ok(response.trim_end().to_string())
+    }
+}
+
 /// The main Python module initialization
 #[pymodule]
 fn cortex_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<CortexRsSubstrate>()?;
     m.add_class::<ZeroCopyRingBuffer>()?;
     m.add_class::<UltramapSubstrate>()?;
+    m.add_class::<McpNativeClient>()?;
     Ok(())
 }
 

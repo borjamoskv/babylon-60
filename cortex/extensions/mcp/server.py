@@ -7,7 +7,6 @@ via the Model Context Protocol (MCP).
 import sys
 import logging
 import asyncio
-from typing import Any, Dict
 
 # Assuming usage of an MCP python sdk if available, otherwise defining a stub
 try:
@@ -19,12 +18,14 @@ except ImportError:
     MCP_AVAILABLE = False
 
 from cortex.extensions.policy.jis_auditor import JISAuditor
+from cortex.memory.vsa import VSAPipelineBridge
 
 logger = logging.getLogger("cortex.mcp.server")
 
 if MCP_AVAILABLE:
     app = Server("cortex-persist-mcp")
     jis_auditor = JISAuditor(enforce_encryption=True)
+    vsa_bridge = VSAPipelineBridge(agent_id="cortex_mcp_server")
 
     @app.list_tools()
     async def list_tools() -> list[Tool]:
@@ -49,6 +50,30 @@ if MCP_AVAILABLE:
                     "properties": {},
                     "required": []
                 }
+            ),
+            Tool(
+                name="cortex_vsa_ingest",
+                description="Ingest new knowledge into the Sovereign VSA-SDM memory.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "content": {"type": "string", "description": "Text content to memorize"},
+                        "tags": {"type": "array", "items": {"type": "string"}, "description": "Optional tags"}
+                    },
+                    "required": ["content"]
+                }
+            ),
+            Tool(
+                name="cortex_vsa_query",
+                description="Query the Sovereign VSA-SDM memory using algebraic similarity.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "intent": {"type": "string", "description": "Natural language query"},
+                        "top_k": {"type": "integer", "description": "Max results to return"}
+                    },
+                    "required": ["intent"]
+                }
             )
         ]
 
@@ -69,6 +94,25 @@ if MCP_AVAILABLE:
             
         elif name == "cortex_read_ledger_status":
             return [TextContent(type="text", text="[CORTEX MCP] Ledger Status: ONLINE. Reality Level: C5-REAL. Entropy: ZERO. Cryptographic Signatures: ENFORCED.")]
+        
+        elif name == "cortex_vsa_ingest":
+            content = arguments.get("content")
+            tags = arguments.get("tags")
+            rid = vsa_bridge.ingest(content, tags=tags)
+            vsa_bridge.persist()
+            return [TextContent(type="text", text=f"[CORTEX MCP] Knowledge ingested into VSA memory with ID: {rid}")]
+
+        elif name == "cortex_vsa_query":
+            intent = arguments.get("intent")
+            top_k = arguments.get("top_k", 3)
+            results = vsa_bridge.query(intent, top_k=top_k)
+            if not results:
+                return [TextContent(type="text", text="[CORTEX MCP] No relevant VSA memory found.")]
+            
+            out = "[CORTEX MCP] VSA-SDM Query Results:\n"
+            for r in results:
+                out += f"- [{r['id']}] (Sim: {r['similarity']}): {r['content']}\n"
+            return [TextContent(type="text", text=out)]
         
         raise ValueError(f"Unknown tool: {name}")
 
