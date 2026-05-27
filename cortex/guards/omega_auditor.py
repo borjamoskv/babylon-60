@@ -36,10 +36,22 @@ class OmegaAuditor:
     """Sovereign Auditor for deep semantic health."""
 
     def __init__(self, provider: str = "gemini"):
+        import os
         if LLMProvider is not None:
             self._llm = LLMProvider(provider=provider)
+            dashscope_key = os.environ.get("DASHSCOPE_API_KEY")
+            if dashscope_key:
+                self._fallback_llm = LLMProvider(
+                    provider="custom",
+                    model="qwen3.6-27b",
+                    base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+                    api_key=dashscope_key
+                )
+            else:
+                self._fallback_llm = None
         else:
             self._llm = None
+            self._fallback_llm = None
 
     async def audit_decision(self, content: str, project: str) -> list[OmegaConflict]:
         """Audit a candidate decision against the massive context of the snapshot."""
@@ -104,22 +116,35 @@ INSTRUCTIONS:
 
         try:
             response = await self._llm.invoke(prompt)
-            if "CLEAN" in response.upper() and "[" not in response:
+        except Exception as e:
+            logger.warning("OmegaAuditor: Primary LLM failed (%s). Attempting API-Provider-OMEGA fallback.", e)
+            if self._fallback_llm:
+                try:
+                    response = await self._fallback_llm.invoke(prompt)
+                except Exception as fb_e:
+                    logger.error("OmegaAuditor: Fallback LLM also failed: %s", fb_e)
+                    return []
+            else:
+                logger.error("OmegaAuditor: Deep audit failed and no fallback available.")
                 return []
 
-            # Basic JSON extraction
-            import json
-            import re
+        if "CLEAN" in response.upper() and "[" not in response:
+            return []
 
-            json_match = re.search(r"\[.*\]", response, re.DOTALL)
-            if json_match:
+        # Basic JSON extraction
+        import json
+        import re
+
+        json_match = re.search(r"\[.*\]", response, re.DOTALL)
+        if json_match:
+            try:
                 data = json.loads(json_match.group(0))
                 return [OmegaConflict(**c) for c in data]
+            except Exception as parse_e:
+                logger.error("OmegaAuditor: Failed to parse JSON: %s", parse_e)
+                return []
 
-            return []
-        except Exception as e:  # noqa: BLE001 — LLM invocation boundary
-            logger.error("OmegaAuditor: Deep audit failed: %s", e)
-            return []
+        return []
 
 
 async def run_omega_audit(content: str, project: str) -> list[OmegaConflict]:

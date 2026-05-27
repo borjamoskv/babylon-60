@@ -189,6 +189,11 @@ class LLMProvider(BaseProvider):
             "max_tokens": max_tokens,
         }
 
+        # API-Provider-OMEGA (DashScope) reasoning trace support
+        if "dashscope" in getattr(self, "_base_url", ""):
+            payload["enable_thinking"] = True
+            payload["preserve_thinking"] = True
+
         # Apply KV Prefix Cache Optimization (AX-042)
         cache_config = get_prefix_cache_config(self._provider)
         if cache_config.get("enabled") and prefix_cache_key and self._provider == "gemini":
@@ -533,6 +538,11 @@ class LLMProvider(BaseProvider):
             "messages": messages,
             "temperature": prompt.temperature,
         }
+
+        # API-Provider-OMEGA (DashScope) reasoning trace support
+        if "dashscope" in getattr(self, "_base_url", ""):
+            payload["enable_thinking"] = True
+            payload["preserve_thinking"] = True
 
         # Apply KV Prefix Cache Optimization (AX-042)
         cache_config = get_prefix_cache_config(self._provider)
