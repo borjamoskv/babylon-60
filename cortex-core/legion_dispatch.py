@@ -8,13 +8,12 @@ import concurrent.futures
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 from persistence import HybridPersistenceManager
 
-print("Initializing LEGION-1000 Swarm Substrate...")
-
 async def main():
     pm = HybridPersistenceManager()
     pm.ring.reset()
     
     def dispatch_legion(num_agents=10000):
+        print(f"Initializing LEGION-{num_agents} Swarm Substrate...", flush=True)
         print(f"[LEGION] Dispatching {num_agents} sovereign agents via ZeroCopyRingBuffer...")
         start_time = time.time()
         
