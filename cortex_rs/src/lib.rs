@@ -12,6 +12,8 @@ use std::io::{Write, BufReader, BufRead};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
+pub mod isa;
+
 #[derive(Serialize, Deserialize, Debug)]
 struct McpRequest {
     jsonrpc: String,
