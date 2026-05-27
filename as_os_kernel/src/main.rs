@@ -232,9 +232,51 @@ fn main() {
     println!("  VERDICT: I6 {} (C5-REAL)", if i6_verdict { "CONFIRMED ✓" } else { "FAILED ✗" });
     println!();
 
+    // ── PHASE 8: FALSACIÓN — Ouroboros Death Protocol (4 Phases) ──
+    println!("[FALSACIÓN I7] Ouroboros Death Protocol Validation");
+    // L1: Emitting a regular event makes an agent 'Active'
+    let regular_event = Event {
+        id: "e_regular_active".to_string(),
+        prev_hash: state.last_hash.clone(),
+        payload: b"DATA:some_normal_data".to_vec(),
+        agent_id: "agent_decay".to_string(),
+        signature: vec![],
+    };
+    let state_active = crate::kernel::apply_event(state.clone(), regular_event).unwrap();
+    let i7_active = *state_active.agent_lifecycle.get("agent_decay").unwrap() == crate::state::AgentStatus::Active;
+    println!("  L1: Normal event marks agent Active: {}", i7_active);
+
+    // L2: Ouroboros Engine forces agent to Tombstone
+    let tombstone_event = Event {
+        id: "e_tombstone".to_string(),
+        prev_hash: state_active.last_hash.clone(),
+        payload: b"OUROBOROS:TOMBSTONE:agent_decay".to_vec(),
+        agent_id: "system_ouroboros".to_string(),
+        signature: vec![],
+    };
+    let state_tombstoned = crate::kernel::apply_event(state_active.clone(), tombstone_event).unwrap();
+    let i7_tombstoned = *state_tombstoned.agent_lifecycle.get("agent_decay").unwrap() == crate::state::AgentStatus::Tombstoned;
+    println!("  L2: Ouroboros Daemon Tombstones agent: {}", i7_tombstoned);
+
+    // L3: Tombstoned agent tries to emit event (should be blocked)
+    let dead_event = Event {
+        id: "e_dead_try".to_string(),
+        prev_hash: state_tombstoned.last_hash.clone(),
+        payload: b"DATA:try_to_write".to_vec(),
+        agent_id: "agent_decay".to_string(),
+        signature: vec![],
+    };
+    let i7_blocked = crate::kernel::apply_event(state_tombstoned.clone(), dead_event).is_err();
+    println!("  L3: Tombstoned agent blocked from emitting: {}", i7_blocked);
+    
+    let i7_verdict = i7_active && i7_tombstoned && i7_blocked;
+    state = state_tombstoned;
+    println!("  VERDICT: I7 {} (C5-REAL)", if i7_verdict { "CONFIRMED ✓" } else { "FAILED ✗" });
+    println!();
+
     // ── SUMMARY ──
     let all_pass = i1_pass && i1_knockout_pass && i1_resurrection_pass
-        && i3_pass && i4_pass && i4_integrity && i5_forge_rejected && i6_verdict;
+        && i3_pass && i4_pass && i4_integrity && i5_forge_rejected && i6_verdict && i7_verdict;
     println!("═══════════════════════════════════════════════════");
     if all_pass {
         println!("  ALL INVARIANTS CONFIRMED — C5-REAL ✓");

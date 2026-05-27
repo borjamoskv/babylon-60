@@ -1,9 +1,15 @@
-use crate::{event::Event, state::State, crypto::hash, verify::verify_event};
+use crate::{event::Event, state::{State, AgentStatus}, crypto::hash, verify::verify_event};
 
 pub fn apply_event(state: State, event: Event) -> Result<State, String> {
     // 1. VERIFY PRECONDITIONS
     if !verify_event(&event, &state.last_hash) {
         return Err("INVALID_EVENT".into());
+    }
+
+    // Death Protocol: Check Agent Lifecycle Status
+    let current_status = state.agent_lifecycle.get(&event.agent_id).unwrap_or(&AgentStatus::Active);
+    if *current_status == AgentStatus::Tombstoned || *current_status == AgentStatus::Purged {
+        return Err("AGENT_TERMINATED".into());
     }
 
     // Trust-as-a-Service: CRITICAL actions require reputation >= 10
@@ -22,9 +28,32 @@ pub fn apply_event(state: State, event: Event) -> Result<State, String> {
     new_state.last_hash = new_hash;
     new_state.memory.insert(event.id.clone(), event.payload.clone());
 
+    // Death Protocol: Any successful event resets the agent to Active (unless explicitly killed)
+    new_state.agent_lifecycle.insert(event.agent_id.clone(), AgentStatus::Active);
+
+    // Ouroboros Daemon Control Signals
+    if event.payload.starts_with(b"OUROBOROS:") {
+        let payload_str = String::from_utf8_lossy(&event.payload);
+        let parts: Vec<&str> = payload_str.split(':').collect();
+        if parts.len() == 3 {
+            let action = parts[1];
+            let target_agent = parts[2].to_string();
+            
+            let new_status = match action {
+                "QUARANTINE" => Some(AgentStatus::Quarantined),
+                "TOMBSTONE" => Some(AgentStatus::Tombstoned),
+                "PURGE" => Some(AgentStatus::Purged),
+                _ => None,
+            };
+            
+            if let Some(status) = new_status {
+                new_state.agent_lifecycle.insert(target_agent, status);
+            }
+        }
+    }
+
     // Trust-as-a-Service: Minting reputation
     if event.payload.starts_with(b"TRUST_MINT:") {
-        // e.g., TRUST_MINT:agent_0001:5
         let payload_str = String::from_utf8_lossy(&event.payload);
         let parts: Vec<&str> = payload_str.split(':').collect();
         if parts.len() == 3 {
