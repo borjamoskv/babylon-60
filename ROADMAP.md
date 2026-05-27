@@ -47,11 +47,12 @@
 
 ## Pricing Strategy (Cloud Roadmap)
 
-| Tier | Price | Target |
-| :--- | :--- | :--- |
-| **Self-Hosted** | Free forever | On-prem, unlimited, community support. |
-| **Pro** | $29/mo | Small agent ensembles, cloud database backends. |
-| **Team (LEGION)** | $99/mo | Multi-agent enterprise consensus, 99.9% SLA, full swarm analytics. |
+| Tier | Price | Target | Constraints & Reality Level |
+| :--- | :--- | :--- | :--- |
+| **Self-Hosted** | Free forever | On-prem, builders, sovereign nodes. | Bring your own compute (BYOC). C4/C5-REAL. Community support only. |
+| **Pro** | $29/mo | Indie hackers, small agent ensembles. | Shared cloud DB, basic telemetry, standard API rate limits. |
+| **LEGION (Team)** | $99/mo | Startups, production swarms (up to 1k agents). | High-throughput cloud backend, full swarm analytics, 99% Uptime (Best Effort). |
+| **SOVEREIGN (Ent.)** | Custom ($999+) | Enterprise, defense, financial sectors. | Multi-node consensus, Dedicated VPC, 99.99% SLA, SOC 2 / C5 Compliance, JISAuditor. |
 
 ---
 

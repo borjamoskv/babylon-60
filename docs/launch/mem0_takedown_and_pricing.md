@@ -68,10 +68,10 @@ Since Mem0 charges for **retrieval** (which penalizes actual agentic use), CORTE
 
 | Tier | Price | The "Anti-Mem0" Value Proposition |
 | :--- | :--- | :--- |
-| **Sovereign (Local)** | **Free / Open Source** | Unlimited memory, Unlimited retrieval, Graph + Vectors, AES-256. (Local SQLite/Qdrant). *You own your brain.* |
-| **Nexus (Cloud Sync)** | **$29 / month** | **B2C / Solo-Devs.** End-to-End Encrypted Cloud Backup. Sync your Agent's memory across multiple devices (Mac, Windows, Linux). Zero-knowledge architecture. The agent's brain follows you everywhere. |
-| **Legion (Team)** | **$199 / month** | **B2B / Small Teams.** Shared Swarm Memory. Multiple agents across different team members share a synchronized, RBAC-controlled vector/graph space. Includes API for external webhooks and LangChain/OpenAI integrations. |
-| **Abyssal (Enterprise)** | **Custom ($2k+)** | **Compliance & Scale.** Dedicated VPC deployment. Zero-Trust Policy Engines, Full EU AI Act compliance reporting, Advanced Sentinel API scanning, and SOC2 Audit Trails. |
+| **Sovereign (Self-Hosted)** | **Free / Open Source** | Unlimited memory, Unlimited retrieval, Graph + Vectors, AES-256. (Local SQLite/Qdrant). *You own your brain.* |
+| **Pro** | **$29 / month** | **B2C / Indie Hackers.** End-to-End Encrypted Cloud Backup. Sync your Agent's memory across multiple devices. The agent's brain follows you everywhere. |
+| **Legion (Team)** | **$99 / month** | **B2B / Startups.** Shared Swarm Memory. High-throughput cloud backend, full swarm analytics, up to 1k agents. 99% Uptime. |
+| **Sovereign (Enterprise)** | **Custom ($999+)** | **Compliance & Scale.** Dedicated VPC deployment, Multi-node consensus, 99.99% SLA, EU AI Act compliance reporting, and SOC2 / C5 Audit Trails. |
 
 **The Moat:**
 We give away what Mem0 charges $249 for (Graph Memory, Unlimited Retrieval, Local Privacy), and we charge for what enterprises actually pay for: **Secure Distributed Synchronization (Merkle Sync) and Compliance (EU AI Act).**
