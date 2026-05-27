@@ -317,7 +317,7 @@ async def _execute_heuristic_integration(
 
     # Simulate low-stress FreeEnergyState to trigger daydreaming during REM sleep
     fep_state = FreeEnergyState(
-        domain=AgentDomain.MEMORY_CONSOLIDATION,
+        domain=AgentDomain.MEMORY,
         surprise=0.1,
         free_energy=0.2
     )

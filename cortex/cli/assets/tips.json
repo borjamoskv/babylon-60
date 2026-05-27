@@ -486,5 +486,29 @@
       "eu": "Kaltzifikazioa gertatzen da birfaktoreatze kostua onura baino handiagoa denean. Landauer-en Navaja erabili: lerro batek entropia ez badu >= %1 murrizten, parasito termikoa da. Ezabatu hezur bihurtu aurretik."
     },
     "category": "architecture"
+  },
+  {
+    "content": {
+      "en": "C5-REAL constraints strictly prohibit simulation outputs as factual state. Ensure all ledger operations hit SQLite before emitting completion logs.",
+      "es": "Las restricciones C5-REAL prohíben estrictamente salidas simuladas como estado fáctico. Asegúrate de que todas las operaciones del ledger lleguen a SQLite antes de emitir logs de finalización.",
+      "eu": "C5-REAL murrizketek erabat debekatzen dituzte simulatutako irteerak egoera faktiko gisa. Ziurtatu ledger eragiketa guztiek SQLite-ra heltzen direla amaiera-erregistroak igorri aurretik."
+    },
+    "category": "alpha"
+  },
+  {
+    "content": {
+      "en": "SHIP-Ω closure protocol mandates zero pending write-locks on the engine. If the swarm audit halts, check for trailing async events.",
+      "es": "El protocolo de cierre SHIP-Ω exige cero bloqueos de escritura pendientes en el motor. Si la auditoría del enjambre se detiene, verifica eventos asíncronos residuales.",
+      "eu": "SHIP-Ω ixteko protokoloak idazketa-blokeo pendiente gabe egotea exijitzen du motorrean. Swarm audit-a gelditzen bada, begiratu asinkrono gertaera arrastorik dagoen."
+    },
+    "category": "alpha"
+  },
+  {
+    "content": {
+      "en": "O(1) performance invariants dictate that all tip resolution must occur asynchronously. Never block the main event loop.",
+      "es": "Las invariantes de rendimiento O(1) dictan que toda la resolución de tips debe ocurrir asincrónicamente. Nunca bloquees el bucle de eventos principal.",
+      "eu": "O(1) errendimenduaren aldaezinek tip guztien ebazpena modu asinkronoan gertatu behar dela diote. Inoiz ez blokeatu gertaera-begizta nagusia."
+    },
+    "category": "alpha"
   }
 ]

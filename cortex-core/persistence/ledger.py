@@ -82,6 +82,7 @@ class LedgerManager(SovereignResource):
 
         self._signer_thread = threading.Thread(target=self._signer_loop, daemon=True)
         self._signer_thread.start()
+        self._lock = threading.Lock()
 
     def _init_db(self):
         # Ensure database parent directory exists
@@ -190,21 +191,22 @@ class LedgerManager(SovereignResource):
         hash-chain serialization uses queue-based single-writer pattern.
         """
         current_time = time.monotonic()
-        if current_time <= self._last_timestamp:
-            logger.warning(
-                "SECURITY ALERT: Time-Jacking detected. Current: %f, Last: %f.",
-                current_time, self._last_timestamp
-            )
-            timestamp = self._last_timestamp + 0.001
-        else:
-            timestamp = current_time
+        with self._lock:
+            if current_time <= self._last_timestamp:
+                logger.warning(
+                    "SECURITY ALERT: Time-Jacking detected. Current: %f, Last: %f.",
+                    current_time, self._last_timestamp
+                )
+                timestamp = self._last_timestamp + 0.001
+            else:
+                timestamp = current_time
 
-        payload = f"{self._last_hash}_{action}_{vector_id}_{yield_amount}_{timestamp}"
-        block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
-        zk_payload = f"{block_hash}_{action}_{timestamp}_CORTEX_L0".encode()
+            payload = f"{self._last_hash}_{action}_{vector_id}_{yield_amount}_{timestamp}"
+            block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+            zk_payload = f"{block_hash}_{action}_{timestamp}_CORTEX_L0".encode()
 
-        self._last_hash = block_hash
-        self._last_timestamp = timestamp
+            self._last_hash = block_hash
+            self._last_timestamp = timestamp
         
         self._tx_queue.put((timestamp, action, vector_id, yield_amount, block_hash, zk_payload))
 
