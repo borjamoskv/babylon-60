@@ -128,6 +128,13 @@ class ContextCache:
 class LedgerManager(SovereignResource):
     """L3 Sovereign Cryptographic Ledger — Audit Trail complying with EU AI Act."""
 
+    def close(self):
+        if hasattr(self, '_tx_queue'):
+            self._tx_queue.put(None)
+            if hasattr(self, '_signer_thread') and self._signer_thread.is_alive():
+                self._signer_thread.join(timeout=1.0)
+        super().close()
+
     def __init__(self):
         self._lock = threading.Lock()
         self._entropy_counter = 0
@@ -306,6 +313,13 @@ class LedgerManager(SovereignResource):
 
 class VSAMemory(SovereignResource):
     """L2 Sovereign Vector Symbolic Architecture (VSA) Substrate & SQLite Semantic Knowledge Base."""
+
+    def close(self):
+        if hasattr(self, '_db_queue'):
+            self._db_queue.put(None)
+            if hasattr(self, '_db_thread') and self._db_thread.is_alive():
+                self._db_thread.join(timeout=1.0)
+        super().close()
 
     def __init__(self):
         self._tensor_size = VSA_DIMENSION * 8  # 8 bytes per double
