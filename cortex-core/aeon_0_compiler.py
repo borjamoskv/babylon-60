@@ -21,6 +21,7 @@ import argparse
 # Sovereign dependencies
 from autopoiesis_ast import ASTAutopoiesisEngine
 from persistence import LedgerManager
+from k0_swarm_node import DarkPoolZK
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [AEON-0] %(message)s")
 logger = logging.getLogger("AEON-0")
@@ -47,6 +48,7 @@ class AeonCompiler:
     def __init__(self, target_file: str):
         self.target_file = target_file
         self.ledger = LedgerManager()
+        self.dark_pool = DarkPoolZK(self.ledger)
         self.ast_engine = ASTAutopoiesisEngine(target_file)
         
     def execute_mutation(self, func_name: str, new_source: str, yield_amount: float = 0.0):
@@ -61,15 +63,24 @@ class AeonCompiler:
         result = self.ast_engine.mutate_function(func_name, new_source)
         
         if result["status"] == "success":
-            # 3. L2 Ledger Seal
+            # 3. ZK-STARK Dark Pool Generation & Yield Assimilation
+            final_yield = 0.0
+            if yield_amount > 0.0:
+                logger.info("Canalizando AST mutado a Dark Pool ZK...")
+                zk_proof = self.dark_pool.generate_exploit_proof(new_source)
+                # target_tvl se asume proporcional al yield base para la prueba
+                final_yield = self.dark_pool.negotiate_yield(zk_proof, target_tvl=yield_amount * 10)
+                logger.info(f"Fusión exérgica completada. ZK-Proof generada en AEON-0.")
+
+            # 4. L2 Ledger Seal (Local Autopoiesis)
             hash_seal = result["hash"]
             vector_id = f"AEON_0_{func_name}"
-            ledger_hash = self.ledger.append(action="AEON_0_STRIKE", vector_id=vector_id, yield_amount=yield_amount)
+            ledger_hash = self.ledger.append(action="AEON_0_STRIKE", vector_id=vector_id, yield_amount=final_yield)
             
             logger.info(f"Ledger Sealed: {ledger_hash}")
-            logger.info(f"ZK-Proof: {result['zk_proof']}")
+            logger.info(f"Local Autopoiesis ZK-Proof: {result['zk_proof']}")
             
-            # 4. Death Protocol
+            # 5. Death Protocol
             logger.info("Mission Success. Initiating Death Protocol to release entropy.")
             self._death_protocol(0)
         else:
