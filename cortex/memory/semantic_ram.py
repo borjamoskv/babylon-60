@@ -87,7 +87,7 @@ class SemanticMutator:
             try:
                 await self._worker_task
             except asyncio.CancelledError:
-                raise
+                pass
             except Exception as e:  # noqa: BLE001
                 logger.error("SemanticMutator shutdown error: %s", e)
             self._pool.shutdown(wait=True)
@@ -314,7 +314,7 @@ class DynamicSemanticSpace:
             try:
                 await self._heartbeat_task
             except asyncio.CancelledError:
-                raise
+                pass
             except Exception as e:  # noqa: BLE001
                 logger.error("DynamicSemanticSpace shutdown error: %s", e)
             logger.info("DynamicSemanticSpace: Autonomic heartbeat collapsed (Stopped).")

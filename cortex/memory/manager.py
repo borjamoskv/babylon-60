@@ -564,27 +564,40 @@ class CortexMemoryManager:
 
     async def wait_for_background(self, timeout: float = 30.0) -> None:
         """Wait for background tasks to complete with a hard timeout."""
-        if self._bg_queue.empty():
-            return
-        import os
+        if not self._bg_queue.empty():
+            try:
+                await asyncio.wait_for(self._bg_queue.join(), timeout=timeout)
+            except asyncio.TimeoutError:
+                logger.error("MemoryManager: wait_for_background timed out after %ds", timeout)
+        
+        # Always cancel workers when shutting down
+        await self._cancel_background_tasks()
 
-        _testing = os.environ.get("CORTEX_TESTING")
-        try:
-            await asyncio.wait_for(self._bg_queue.join(), timeout=timeout)
-        except asyncio.TimeoutError:
-            logger.error("MemoryManager: wait_for_background timed out after %ds", timeout)
-            if _testing:
-                self._cancel_background_tasks()
-
-    def _cancel_background_tasks(self) -> None:
+    async def _cancel_background_tasks(self) -> None:
         """Cancel pending tasks and workers aggressively to prevent event loop leaks."""
-        logger.warning("Canceling all background workers and Glial Daemon.")
+        logger.debug("Canceling all background workers and Glial Daemon.")
+        tasks_to_wait = []
         if self._memory_os and getattr(self._memory_os, "_glial_daemon_task", None):
             self._memory_os._glial_daemon_task.cancel()
+            tasks_to_wait.append(self._memory_os._glial_daemon_task)
 
         for worker in self._bg_workers:
             if not worker.done():
                 worker.cancel()
+                tasks_to_wait.append(worker)
+
+        if getattr(self, "_dynamic_space", None):
+            try:
+                await self._dynamic_space.stop()
+            except Exception as e:
+                logger.error("Error stopping dynamic semantic space: %s", e)
+                
+        if tasks_to_wait:
+            try:
+                await asyncio.gather(*tasks_to_wait, return_exceptions=True)
+            except Exception:
+                pass
+        
         self._bg_workers.clear()
 
         # Flush the queue
