@@ -292,7 +292,7 @@ impl ZeroCopyRingBuffer {
 
         // Use Rayon for parallel execution over references to tasks_to_process
         use rayon::prelude::*;
-        tasks_to_process.iter().for_each(|(_idx, _offset, payload)| {
+        tasks_to_process.par_iter().for_each(|(_idx, _offset, payload)| {
             // Simulate some work...
             let mut _hash: u64 = 0;
             for b in payload.iter() {

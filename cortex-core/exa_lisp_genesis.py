@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import time
 import hashlib
 from persistence import LedgerManager
@@ -83,7 +86,7 @@ def evaluate(x, env: ExergyEnvironment):
         if not limit_str.endswith("j"):
             raise ValueError("Exergy limit must end with 'j'")
         limit = int(limit_str[:-1])
-        print(f"\n[EXA-L0] INITIATING SOVEREIGN SCOPE: {limit} Joules Allocated.")
+        logger.info(f"\n[EXA-L0] INITIATING SOVEREIGN SCOPE: {limit} Joules Allocated.")
         local_env = ExergyEnvironment(limit, ledger=env.ledger)
         return evaluate(body, local_env)
     elif op == "infer":
@@ -92,7 +95,7 @@ def evaluate(x, env: ExergyEnvironment):
         op_name = f"LLM_INFERENCE_{str(model_name).upper()}"
         vector_id = hashlib.sha256(str(prompt).encode("utf-8")).hexdigest()[:16]
         env.consume(400, op_name, vector_id=vector_id)
-        print(f"[EXA-L0] Orchestrating {model_name} locally via Swarm Integration...")
+        logger.info(f"[EXA-L0] Orchestrating {model_name} locally via Swarm Integration...")
         try:
             from compiled_skills.qwen_3_5_max_omega import Qwen35MaxOmegaSkill
 
@@ -124,7 +127,7 @@ def evaluate(x, env: ExergyEnvironment):
         op_name = f"SKILL_INVOKE_{str(skill_module).upper()}"
         vector_id = hashlib.sha256(str(skill_module).encode("utf-8")).hexdigest()[:16]
         env.consume(800, op_name, vector_id=vector_id)
-        print(f"[EXA-L0] Dynamically invoking skill {skill_class_name} from {skill_module}...")
+        logger.info(f"[EXA-L0] Dynamically invoking skill {skill_class_name} from {skill_module}...")
         try:
             import importlib
 
@@ -169,7 +172,7 @@ def evaluate(x, env: ExergyEnvironment):
     elif op == "q-let":
         branch_a = x[1]
         branch_b = x[2]
-        print("\n[EXA-L0] SUPERPOSITION: Evaluating parallel quantum branches...")
+        logger.info("\n[EXA-L0] SUPERPOSITION: Evaluating parallel quantum branches...")
         env_a = env.clone()
         env_b = env.clone()
 
@@ -214,9 +217,9 @@ if __name__ == "__main__":
     code_invoke_skill = "(with-exergy-limit 1000j (invoke-skill capital_extractor_omega CapitalExtractorOmegaSkill))"
     code_umap_recon = "(with-exergy-limit 150000j (umap-recon 42 target_alpha))"
     code_umap_target = "(with-exergy-limit 500j (umap-target 42 10.5 20.5 30.5 target_beta))"
-    print("==================================================")
-    print(" TSI-LISP (EXA-Ω) : Genesis Bootstrap v0.4 (ULTRAMAP) ")
-    print("==================================================\n")
+    logger.info("==================================================")
+    logger.info(" TSI-LISP (EXA-Ω) : Genesis Bootstrap v0.4 (ULTRAMAP) ")
+    logger.info("==================================================\n")
     global_ledger = LedgerManager()
     targets = [
         ("T1: High-Exergy Inference", code_success),
@@ -229,12 +232,12 @@ if __name__ == "__main__":
         ("T8: UMAP Target Update", code_umap_target),
     ]
     for name, code in targets:
-        print(f"\n--- EXECUTION TARGET: {name} ---")
-        print(f"CODE: {code}")
+        logger.info(f"\n--- EXECUTION TARGET: {name} ---")
+        logger.info(f"CODE: {code}")
         ast = parse(tokenize(code))
         try:
             global_env = ExergyEnvironment(999999, ledger=global_ledger)
             result = evaluate(ast, global_env)
-            print(f"\n[OUTPUT] >> {result}")
+            logger.info(f"\n[OUTPUT] >> {result}")
         except EntropyDeath as e:
-            print(f"\n[HALT] >> {e}")
+            logger.info(f"\n[HALT] >> {e}")

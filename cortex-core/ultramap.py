@@ -166,5 +166,5 @@ if __name__ == "__main__":
     umap = UltramapSubstrate()
     umap.update_agent_position(0, 10.0, 20.0, 30.0, "CVE-2026-MINIPLASMA", 0.95)
     joules = umap.calculate_exergy_distance(0, "TARGET_DARKPOOL_0x1")
-    print(f"C5-REAL: Exergy Distance Calculated: {joules:.2f} Joules")
-    print(f"Agent 0 State: {umap.get_agent_state(0)}")
+    logger.info(f"C5-REAL: Exergy Distance Calculated: {joules:.2f} Joules")
+    logger.info(f"Agent 0 State: {umap.get_agent_state(0)}")
