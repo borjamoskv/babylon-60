@@ -98,3 +98,26 @@ def test_vsa_memory_rust_integration():
     assert len(rows) == 1
     assert rows[0][0] == "agent_id_x"
     assert rows[0][1] == "payload_y"
+
+
+def test_ring_buffer_reset_and_native_processing():
+    """Verify reset and native parallel processing capabilities of the ZeroCopyRingBuffer."""
+    from persistence import HAS_CORTEX_RS
+
+    buffer = ZeroCopyRingBuffer(capacity=10)
+
+    # Enqueue a task
+    assert buffer.enqueue(b"agent_x", b"payload_y") is True
+
+    if HAS_CORTEX_RS:
+        # Verify process_all_native
+        processed_count, elapsed = buffer.process_all_native()
+        assert processed_count == 1
+        assert elapsed >= 0.0
+
+        # Enqueue another task and verify reset
+        assert buffer.enqueue(b"agent_z", b"payload_w") is True
+        buffer.reset()
+        # Fetching pending should return 0 tasks because it's reset
+        pending = buffer.fetch_pending()
+        assert len(pending) == 0
