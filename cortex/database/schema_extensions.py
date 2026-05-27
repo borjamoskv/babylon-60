@@ -89,6 +89,7 @@ CREATE INDEX IF NOT EXISTS idx_votes_v2_fact ON consensus_votes_v2(fact_id);
 CREATE INDEX IF NOT EXISTS idx_votes_v2_agent ON consensus_votes_v2(agent_id);
 CREATE INDEX IF NOT EXISTS idx_trust_source ON trust_edges(source_agent);
 CREATE INDEX IF NOT EXISTS idx_trust_target ON trust_edges(target_agent);
+"""
 
 # ─── Graph Memory (Knowledge Graph) ──────────────────────────────────
 CREATE_ENTITIES = """
@@ -121,7 +122,6 @@ CREATE TABLE IF NOT EXISTS entity_relations (
 
 CREATE INDEX IF NOT EXISTS idx_relations_source ON entity_relations(source_entity_id);
 CREATE INDEX IF NOT EXISTS idx_relations_target ON entity_relations(target_entity_id);
-"""
 """
 
 # ─── Context Snapshots (Ambient Intelligence) ────────────────────────
