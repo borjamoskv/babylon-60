@@ -13,6 +13,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
 pub mod isa;
+pub mod autocurative;
+pub mod traceback;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct McpRequest {
@@ -879,6 +881,7 @@ fn cortex_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<UltramapSubstrate>()?;
     m.add_class::<McpNativeClient>()?;
     m.add_class::<McpSovereignHost>()?;
+    m.add_class::<autocurative::AutoCurativeEngine>()?;
     Ok(())
 }
 
