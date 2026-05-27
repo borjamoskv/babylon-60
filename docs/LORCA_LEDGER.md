@@ -1,14 +1,34 @@
 # 📜 CORTEX LORCA-Ω NARRATIVE LEDGER
 
 > **Sovereign Chronicle of the Substrate** | **Reality Level:** `C5-REAL`
-> **Generated at:** `2026-05-27T04:35:54.840258+00:00` | **Source:** `git history` (last 30 commits)
+> **Generated at:** `2026-05-27T05:08:21.114737+00:00` | **Source:** `git history` (last 30 commits)
 
 This ledger projects a retroactive narrative translation of repository mutations. Every standard commit is mapped through the entropy-to-metaphor pipeline of the CommitPoet engine.
 
 | Commit Hash | Date | Original Subject | LORCA-Ω Translation |
 | :---: | :--- | :--- | :--- |
-| `e5b7205b` | 2026-05-27 06:35 UTC | feat(git): weave git into the living membrane 🧊 | docs(git): annotate the git archaeological record 🧭 |
-| `693856e1` | 2026-05-27 06:34 UTC | refactor(ledger): annihilate entropy accumulated in ledger 🧹 | test(engine): validate the engine invariant fortress 🏹 |
+| `24e34626` | 2026-05-27 07:07 UTC | feat(telemetry): add webhook push to profile_agent_bridge for control plane sync | feat(scripts): conjure scripts from the thermodynamic void 💎 |
+| `c2109db6` | 2026-05-27 07:07 UTC | docs(api): align rest endpoints with c5-real health parameters and stress tests | feat(hardware): terraform hardware for habitation 🚀 |
+| `e9d23183` | 2026-05-27 07:07 UTC | docs(core): align sovereign documentation with scaling and execution standards | docs(docs): chronicle the docs epoch transition 📐 |
+| `f6e2354c` | 2026-05-27 07:07 UTC | refactor(cloud): isolate execution plane daemons from vercel serverless control plane | feat(api): ignite the api reactor 🚀 |
+| `2197355c` | 2026-05-27 07:03 UTC | feat(autopoiesis): forge l0 immunology daemon for self healing loop | feat(daemons): cast daemons in sovereign alloy 🧬 |
+| `7d6c78ce` | 2026-05-27 07:02 UTC | fix(tests): stabilize flaky queue contention test | test(tests): calibrate the tests truth oracle 🔬 |
+| `485f4458` | 2026-05-27 07:01 UTC | fix(cloud): migrate vercel routes to rewrites syntax for api resolution | feat(core): ignite the core reactor 🌱 |
+| `aa4aade7` | 2026-05-27 06:59 UTC | docs(core): inject premium documentation and stripe cloud tests | docs(docs): illuminate the dark matter of docs 📡 |
+| `4653635a` | 2026-05-27 06:59 UTC | fix(cloud): adjust vercel root_path and dependencies for seamless deployment | test(api): fire the api stress test barrage 🛡️ |
+| `a1976993` | 2026-05-27 06:54 UTC | feat(ouroboros): implement daily scheduler and python task driver, ignore vercel metadata | feat(scripts): deploy the scripts vanguard 🔥 |
+| `6e68c5d3` | 2026-05-27 06:53 UTC | feat(billing): inject stripe usage-based billing via c5-real middleware | feat(api): harden the cryptographically secure vault of api 🔥 |
+| `a3e89eec` | 2026-05-27 06:52 UTC | feat(cloud): init cortex cloud managed api and stripe topology | ci(scripts): establish the scripts sovereign supply chain 🏭 |
+| `4bf6d7b3` | 2026-05-27 06:51 UTC | feat(integrations): forge llamaindex vector store substrate | feat(llamaindex): forge llamaindex from the sovereign anvil 🏗️ |
+| `baed928f` | 2026-05-27 06:50 UTC | docs: formalize sortu-apex foundation after 10k legion scaling | docs(docs): decode the docs rosetta stone 🗺️ |
+| `cfe3ecfd` | 2026-05-27 06:50 UTC | refactor(swarm): merge 10k logic into unified legion_dispatch.py, deprecate legacy dispatchers | fix(cortex-core): drain the abscess from cortex-core 🛡️ |
+| `5bd30142` | 2026-05-27 06:49 UTC | fix(core): reset ring buffer and inject ws telemetry bridge | fix(scripts): inoculate scripts against regression 🩺 |
+| `d66ff3a9` | 2026-05-27 06:48 UTC | feat(rust): enforce zero copy native processing | fix(tests): inoculate tests against regression 🔧 |
+| `0b509721` | 2026-05-27 06:43 UTC | feat(rust-ffi): Implement 10k LEGION processing bounds natively bypassing GIL | fix(cortex_rs): cauterize the wound in cortex_rs 🪡 |
+| `22e013e6` | 2026-05-27 06:41 UTC | feat(ledger): implement dual-ledger query logic and premium noir telemetry ui | feat(scripts): weave scripts into the living membrane 🏗️ |
+| `f21a3373` | 2026-05-27 06:36 UTC | docs(ledger): update the lorca-omega narrative ledger mappings 📜 | docs(docs): author the docs survival manual 🧭 |
+| `ccd78441` | 2026-05-27 06:35 UTC | feat(git): weave git into the living membrane 🧊 | docs(git): author the git survival manual 🗺️ |
+| `eb22408d` | 2026-05-27 06:34 UTC | fix(tests): resolve test_purge_logic_success error and format code | test(engine): probe the entropic boundary of engine 🛡️ |
 | `abcde1d5` | 2026-05-27 06:31 UTC | test(types): add universal memory schema validation tests | test(types): deploy chaos probes against types 🧫 |
 | `f5bda3ba` | 2026-05-27 06:30 UTC | docs(protocol): add mcp-2 formal specification | docs(docs): annotate the docs archaeological record 📜 |
 | `01ccf316` | 2026-05-27 06:30 UTC | docs(legion): add evaluation of 10k agents semantic assimilation | docs(docs): chronicle the docs epoch transition 🏛️ |
@@ -17,26 +37,6 @@ This ledger projects a retroactive narrative translation of repository mutations
 | `768bbdfd` | 2026-05-27 06:28 UTC | feat(legion): upgrade swarm to 1000 agents and deploy dispatch mechanism | fix(cortex-core): resolve non-deterministic state drift in cortex-core 🔒 |
 | `24c2c4d8` | 2026-05-27 06:28 UTC | docs(launch): establish gtm-10 strategy and context fatigue outreach playbooks | docs(docs): annotate the docs archaeological record 🏛️ |
 | `1b27e608` | 2026-05-27 06:27 UTC | fix(dispatch): ensure stdout logs flush immediately during high-concurrency run | fix(cortex-core): extract the embedded shrapnel from cortex-core 🔒 |
-| `709f5b79` | 2026-05-27 06:27 UTC | docs(readme): integrate detailed architecture, threat model, and quickstart | docs(core): translate core from machine to human 🪶 |
-| `f0f19bea` | 2026-05-27 06:26 UTC | style: apply automatic linting and formatting fixes to legion 1000 dispatch script | fix(cortex-core): cauterize the wound in cortex-core 🗡️ |
-| `41c554f1` | 2026-05-27 06:26 UTC | feat(gtm): add 100 to 1000 developers scaling plan and update 1000 agent topology configuration | fix(engine): reconcile split-brain consensus in engine 🛡️ |
-| `e9b2a0a8` | 2026-05-27 06:25 UTC | docs(launch): add 10 to 100 users gtm roadmap | docs(docs): engrave docs wisdom into the stone tablet 📖 |
-| `84254fc5` | 2026-05-27 06:23 UTC | feat(genesis): implement developer companion memory genesis script | feat(cortex-core): weave cortex-core into the living membrane 🚀 |
-| `c868f4ed` | 2026-05-27 06:22 UTC | fix(ultramap): eliminate silent fallback and compile cortex rs for macos arm64 | feat(cortex-core): cast cortex-core in sovereign alloy 🧊 |
-| `36b3b412` | 2026-05-27 06:16 UTC | fix(core): resolve mmap finalizer leaks and integrate auditor entropy sentinel | feat(engine): conjure engine from the thermodynamic void 🌱 |
-| `b47f9a94` | 2026-05-27 05:33 UTC | fix(tests): resolve version drift in optional dependencies tests | test(thinking): fire the thinking stress test barrage 🔬 |
-| `01725c1a` | 2026-05-27 05:31 UTC | fix(tests): update optional dependency tests for v0.3.0b8 version bump | test(tests): simulate tests under adversarial conditions ⚔️ |
-| `91fb3ce3` | 2026-05-27 05:13 UTC | feat(tests): add definitive 10k legion swarm stress test validation | test(tests): deploy chaos probes against tests 🔬 |
-| `96550cd7` | 2026-05-27 05:11 UTC | fix(vsa): use direct refs in weakref.finalize instead of getattr capturing none | feat(persistence): deploy the persistence vanguard ✨ |
-| `216ffb97` | 2026-05-27 05:07 UTC | feat(cortex-core): implement ultramap spatial-temporal topology substrate and rust memory integration | test(tests): deploy invariant validation guards for tests 🛡️ |
-| `436457cf` | 2026-05-27 05:02 UTC | fix(cortex): purgar entropia sintactica y leaks async en test teardown | test(tests): construct the tests byzantine fault detector 🪤 |
-| `47dfd429` | 2026-05-27 05:01 UTC | fix(daemon): purge orphan LedgerManager keypair in AEON-0, add Rust UltramapSubstrate FFI, fix legion cycle counter | test(tests): simulate tests under adversarial conditions 🔎 |
-| `f08ee9f3` | 2026-05-27 04:58 UTC | chore(release): bump version to 0.3.0b8 for Terminal State 4 (Silicon Dispersion) | docs(core): translate core from machine to human 🪶 |
-| `3c64968b` | 2026-05-27 04:54 UTC | fix(docs): bump version references from 0.3.0b3/b5/b2 to 0.3.0b7 | docs(docs): illuminate the dark matter of docs 🪶 |
-| `5d90bd2f` | 2026-05-27 04:54 UTC | refactor(persistence): purge redundant import blocks and patch test db scope | perf(ledger): liquefy the ledger bottleneck 🛸 |
-| `9c2e83f9` | 2026-05-27 04:41 UTC | fix(tests): isolate ring buffer and thread-local connections across daemon test fixtures | test(tests): fuzz the cryptographic inputs of tests 🏹 |
-| `436b5b6c` | 2026-05-27 04:39 UTC | refactor(cortex): eliminate silent entropy vectors and enforce aeon-0 exergy bounds | docs(ledger): illuminate the dark matter of ledger 🪶 |
-| `8829324f` | 2026-05-27 04:21 UTC | chore(cortex): crystallize session delta [/memoria] | test(ledger): fuzz the cryptographic inputs of ledger 🛡️ |
 
 ---
 
