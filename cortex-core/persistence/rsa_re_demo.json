@@ -1,0 +1,38 @@
+{
+  "timestamp": 1779863383.4594097,
+  "system_confidence": 1.0,
+  "reality_graph_nodes": 3,
+  "active_forks": 3,
+  "lineages_tracked": 3,
+  "audit_findings_total": 0,
+  "decisions_audited": 3,
+  "sample_lineages": [
+    {
+      "event_id": "9bcbee8a-b61a-4b30-8c64-22e40a195514",
+      "origin": null,
+      "mutation_count": 0,
+      "reinforcement_count": 0,
+      "confidence": 1.0
+    },
+    {
+      "event_id": "9f462a56-26e1-45a0-8bb0-f521ad7e16ad",
+      "origin": null,
+      "mutation_count": 0,
+      "reinforcement_count": 0,
+      "confidence": 1.0
+    },
+    {
+      "event_id": "507a60f3-f430-4b93-9afe-802c5080de3e",
+      "origin": null,
+      "mutation_count": 0,
+      "reinforcement_count": 0,
+      "confidence": 1.0
+    }
+  ],
+  "recent_vulnerabilities": {
+    "total_vulnerabilities": 0,
+    "by_severity": {},
+    "details": {},
+    "attack_runs": 1
+  }
+}
