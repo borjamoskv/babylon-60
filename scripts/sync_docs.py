@@ -92,7 +92,7 @@ def verify_file_parity(source_path: Path, target_path: Path) -> list[str]:
             f"but {target_name} has {len(target_headings)}."
         )
     else:
-        for idx, ((s_level, s_text), (t_level, t_text)) in enumerate(zip(source_headings, target_headings)):
+        for idx, ((s_level, s_text), (t_level, t_text)) in enumerate(zip(source_headings, target_headings, strict=False)):
             if s_level != t_level:
                 errors.append(
                     f"Heading level mismatch at index {idx}: "
@@ -109,7 +109,7 @@ def verify_file_parity(source_path: Path, target_path: Path) -> list[str]:
             f"but {target_name} has {len(target_code)}."
         )
     else:
-        for idx, ((s_lang, s_content), (t_lang, t_content)) in enumerate(zip(source_code, target_code)):
+        for idx, ((s_lang, s_content), (t_lang, t_content)) in enumerate(zip(source_code, target_code, strict=False)):
             if s_lang != t_lang:
                 errors.append(
                     f"Code block language mismatch at index {idx}: "
@@ -140,14 +140,14 @@ def verify_file_parity(source_path: Path, target_path: Path) -> list[str]:
             f"but {target_name} has {len(target_tables)}."
         )
     else:
-        for idx, (s_table, t_table) in enumerate(zip(source_tables, target_tables)):
+        for idx, (s_table, t_table) in enumerate(zip(source_tables, target_tables, strict=False)):
             if len(s_table) != len(t_table):
                 errors.append(
                     f"Table row count mismatch at index {idx}: "
                     f"source has {len(s_table)} rows, target has {len(t_table)} rows."
                 )
             else:
-                for row_idx, (s_row, t_row) in enumerate(zip(s_table, t_table)):
+                for row_idx, (s_row, t_row) in enumerate(zip(s_table, t_table, strict=False)):
                     if len(s_row) != len(t_row):
                         errors.append(
                             f"Table column count mismatch at table index {idx}, row {row_idx}: "
