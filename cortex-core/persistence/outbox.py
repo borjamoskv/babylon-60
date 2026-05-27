@@ -98,8 +98,7 @@ class ZeroCopyRingBuffer(SovereignResource):
         offset = write_idx * self.task_size
         if self._buffer[offset] != 0:
             return False  # Buffer full
-            
-        self._buffer[offset] = 1  # Pending
+
         import struct
         struct.pack_into("d", self._buffer, offset + 1, time.monotonic())
         
@@ -108,6 +107,9 @@ class ZeroCopyRingBuffer(SovereignResource):
 
         payload_bytes = payload[:183].ljust(183, b"\x00")
         self._buffer[offset + 73 : offset + 256] = payload_bytes
+
+        # C5-REAL Memory Visibility: Set status byte last to commit the transaction
+        self._buffer[offset] = 1  # Pending
         
         # UltraMap Sovereign Topology Update (O(1))
         try:
@@ -140,9 +142,9 @@ class ZeroCopyRingBuffer(SovereignResource):
                 tasks.append((self._read_idx, ts, agent_id, payload))
                 
                 self._buffer[offset] = 0 # Free it
-                self._read_idx = (self._read_idx + 1) % self.capacity
-            else:
-                break
+            
+            self._read_idx = (self._read_idx + 1) % self.capacity
+            
         return tasks
 
     def get_pending_count(self) -> int:

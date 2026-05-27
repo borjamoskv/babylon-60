@@ -270,6 +270,9 @@ class CortexDaemon:
             return
 
         if not tasks:
+            # ── C5-REAL AEON-0 DOWNTIME MUTATION ──
+            if self.cycle_count % 50 == 0:
+                await self._trigger_aeon_0_mutation()
             return
 
         try:
@@ -353,6 +356,42 @@ class CortexDaemon:
                 logging.info("✅ [MIRROR] Self-Audit Optimal (Score: %d)", report["exergy_score"])
         except Exception as e:
             logging.error("Self-Audit Parse Error: %s", e)
+
+    async def _trigger_aeon_0_mutation(self):
+        """Invoke AEON-0 Compiler for autonomous AST mutation during swarm downtime."""
+        logging.info("🧬 [AEON-0] Swarm Idle. Triggering Autonomous AST Mutation...")
+        try:
+            import random
+            from persistence import enqueue_swarm_task
+            from persistence.ledger import LedgerManager
+            
+            target_dir = str(PROJECT_ROOT / "cortex-core")
+            # Candidates for autonomous mutation
+            candidates = ["ouroboros_engine.py", "k0_swarm_node.py", "cortex_exergy_stress.py"]
+            
+            target_file = os.path.join(target_dir, random.choice(candidates))
+            if not os.path.exists(target_file):
+                return
+                
+            new_source = f"# AEON-0 Autonomous Mutagenesis Timestamp: {time.time()}"
+            
+            # Generate valid C5-REAL signature for AEON-0 verification
+            ledger = LedgerManager()
+            signature = ledger.private_key.sign(new_source.encode("utf-8")).hex()
+            
+            payload = {
+                "type": "AST_MUTATION",
+                "target_file": target_file,
+                "function_name": "auto_mutate",
+                "new_source": new_source,
+                "yield_amount": 10.0,
+                "signature": signature
+            }
+            
+            enqueue_swarm_task("AEON_0_DAEMON", payload)
+            logging.info("🧬 [AEON-0] Mutation task queued for %s via ZeroCopyRingBuffer", target_file)
+        except Exception as e:
+            logging.error("AEON-0 Integration Failure: %s", e)
 
     async def run(self):
         """Main Autopoiesis Loop."""

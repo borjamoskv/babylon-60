@@ -225,7 +225,16 @@ class SovereignSharedBus:
     def close(self):
         shm = self._shm
         if shm is not None:
-            shm.close()
+            try:
+                shm.close()
+            except Exception:
+                pass
+            try:
+                from multiprocessing.resource_tracker import unregister
+
+                unregister(shm._name, "shared_memory")
+            except Exception:
+                pass
         self._local_buf = None
 
     def unlink(self):
@@ -242,4 +251,10 @@ class SovereignSharedBus:
                 logger.debug("Shared memory segment %s already unlinked", self.name)
             except OSError as exc:
                 logger.debug("Shared memory unlink failed for %s: %s", self.name, exc)
+            try:
+                from multiprocessing.resource_tracker import unregister
+
+                unregister(shm._name, "shared_memory")
+            except Exception:
+                pass
             self._shm = None

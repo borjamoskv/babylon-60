@@ -55,7 +55,6 @@ class TelemetryGate:
             # 3. Execute Pytest (isolated to the relevant test file if possible, else global)
             logging.info(f"Running C5-REAL falsation tests on {target_file}...")
             # Infer test file name
-            import os.path
             base_name = os.path.basename(target_file)
             dir_name = os.path.dirname(target_file)
             test_file = os.path.join(dir_name, f"test_{base_name}")

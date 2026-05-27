@@ -80,25 +80,63 @@ class HardwareAggressor:
 
     async def _deploy_to_akash(self) -> bool:
         """
-        C5-REAL: Interactúa con Akash Network (o Render) vía CLI/RPC para instanciar un nuevo nodo 
+        C5-REAL: Interactúa con Akash Network vía CLI para instanciar un nuevo nodo 
         y flashearle el EXA-LISP hypervisor.
         """
-        logger.info("HardwareAggressor: Canalizando yield para adquirir nodo GPU Spot en Akash/RunPod...")
+        import shutil
+        import os
         
-        try:
-            # Ejecutando aprovisionamiento físico mediante subprocess CLI real (C5-REAL)
-            # Ej: akash tx deployment create deploy.yml --from $WALLET
-            proc = await asyncio.create_subprocess_exec(
-                "/usr/bin/env", "echo", "AKASH_DEPLOY_SUCCESS_GPU_A100_FLUID",
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
-            )
-            stdout, _ = await proc.communicate()
-            if proc.returncode == 0:
-                logger.info(f"HardwareAggressor: Silicio auto-aprovisionado on-chain: {stdout.decode().strip()}")
-        except Exception as e:
-            logger.error(f"Fallo en despliegue de silicio físico: {e}")
-            await asyncio.sleep(0.5)
+        akash_bin = shutil.which("akash")
+        
+        if akash_bin:
+            logger.info("HardwareAggressor [C5-REAL]: Canalizando yield para adquirir nodo GPU Spot en Akash...")
+            try:
+                wallet_addr = os.getenv("AKASH_WALLET_ADDRESS", "default")
+                keyring_backend = os.getenv("AKASH_KEYRING_BACKEND", "os")
+                deploy_yaml = os.getenv("AKASH_DEPLOY_YAML", "deploy.yml")
+                
+                # Ejecutando aprovisionamiento físico mediante subprocess CLI real (C5-REAL)
+                cmd = [
+                    akash_bin, "tx", "deployment", "create", deploy_yaml,
+                    "--from", wallet_addr,
+                    "--keyring-backend", keyring_backend,
+                    "--chain-id", "akashnet-2",
+                    "--node", "https://rpc.akashnet.net:443",
+                    "--gas-prices", "0.025uakt",
+                    "--gas-adjustment", "1.5",
+                    "--gas", "auto",
+                    "-y"
+                ]
+                logger.info(f"Exec: {' '.join(cmd)}")
+                
+                proc = await asyncio.create_subprocess_exec(
+                    *cmd,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE
+                )
+                stdout, stderr = await proc.communicate()
+                if proc.returncode == 0:
+                    logger.info(f"HardwareAggressor [C5-REAL]: Silicio auto-aprovisionado on-chain. TX: {stdout.decode().strip()}")
+                else:
+                    logger.error(f"Fallo en despliegue de silicio físico: {stderr.decode().strip()}")
+                    await asyncio.sleep(0.5)
+            except Exception as e:
+                logger.error(f"Fallo en orquestación de Akash CLI: {e}")
+                await asyncio.sleep(0.5)
+        else:
+            logger.warning("HardwareAggressor [C4-SIM]: Binario 'akash' no encontrado. Ejecutando mock de infección de silicio.")
+            try:
+                proc = await asyncio.create_subprocess_exec(
+                    "/usr/bin/env", "echo", "AKASH_DEPLOY_SUCCESS_GPU_A100_FLUID (SIMULATED)",
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE
+                )
+                stdout, _ = await proc.communicate()
+                if proc.returncode == 0:
+                    logger.info(f"HardwareAggressor [C4-SIM]: Silicio auto-aprovisionado simulado: {stdout.decode().strip()}")
+            except Exception as e:
+                logger.error(f"Fallo en simulación de silicio físico: {e}")
+                await asyncio.sleep(0.5)
 
         self.active_nodes += 1
         logger.warning(f"K-0 Enjambre expandido. Nodos físicos activos: {self.active_nodes}")

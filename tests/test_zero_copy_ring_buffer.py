@@ -14,6 +14,8 @@ def clean_vsa_env(monkeypatch, tmp_path):
     test_db = tmp_path / "test_cortex.db"
 
     monkeypatch.setattr("persistence.DB_PATH", str(test_db))
+    monkeypatch.setattr("persistence.base.DB_PATH", str(test_db))
+    monkeypatch.setattr("persistence.outbox._global_ring_buffer", None)
     monkeypatch.setattr("persistence.VSA_BIN_PATH", str(tmp_path / "vsa.bin"))
     yield
 
@@ -74,6 +76,11 @@ def test_vsa_memory_rust_integration():
 
     # Record semantic trace
     vsa.record("agent_id_x", "payload_y")
+
+    # Wait for the background thread to flush the queue
+    import time
+
+    time.sleep(0.5)
 
     # Read from database to verify persistence
     conn = sqlite3.connect(DB_PATH)

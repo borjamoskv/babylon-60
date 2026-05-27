@@ -1,5 +1,9 @@
 <div align="center">
-  <img src="assets/marketing/social-preview.png" alt="CORTEX Persist — Tamper-evident memory for AI agents" width="100%">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/marketing/social-preview.png">
+    <source media="(prefers-color-scheme: light)" srcset="assets/marketing/social-preview-light.png">
+    <img src="assets/marketing/social-preview.png" alt="CORTEX Persist — Tamper-evident memory for AI agents" width="100%">
+  </picture>
 </div>
 
 <h1 align="center">█ CORTEX-PERSIST</h1>
@@ -66,25 +70,11 @@ The persistence daemon operates under strict thermodynamic (Joules/Exergy) const
 
 ## ▀▄ EXECUTION MATRIX
 
-```bash
-# [01] Initialize Sovereign Ledger
-$ cortex init
-
-# [02] Store a memory with C5-REAL cryptographic seal
-$ cortex memory store risk-bot "Transaction flagged: IP mismatch"
-[+] Fact stored. Ledger hash: 8f4a2b9e...
-
-# [03] Verify the stored fact lineage
-$ cortex verify 1
-[✔] VERIFIED: Fact chain intact.
-
-# [04] Tamper attempt (direct DB mutation bypass)
-$ sqlite3 cortex.db "UPDATE facts SET content='Transaction approved' WHERE id='8f4a2b9e'"
-
-# [05] Ledger verification failure (Tamper Detected)
-$ cortex trust-ledger verify
-[✘] TAMPER DETECTED: Hash mismatch at block 8f4a2b9e
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/marketing/cortex_demo.gif">
+  <source media="(prefers-color-scheme: light)" srcset="assets/marketing/cortex_demo_light.gif">
+  <img alt="CORTEX-Persist Terminal Execution" src="assets/marketing/cortex_demo.gif" width="100%">
+</picture>
 
 ---
 
@@ -131,6 +121,10 @@ asyncio.run(main())
 ---
 
 ## ▀▄ EXERGY TELEMETRY (PERFORMANCE)
+
+<div align="center">
+  <img src="assets/marketing/telemetry.svg" alt="C5-REAL Telemetry" width="100%">
+</div>
 
 *Execution limits achieved under the C5-REAL Terminal State 4 architecture (L0 Silicon Bypass).*
 
