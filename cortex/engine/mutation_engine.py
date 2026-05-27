@@ -455,7 +455,8 @@ class FactMutationEngine:
                 (confidence, fact_id),
             )
 
-    async def _proj_taint_update(
+    async def _proj_taint_update(  # noqa: C901
+
         self,
         conn: aiosqlite.Connection,
         fact_id: int,
@@ -529,7 +530,8 @@ class FactMutationEngine:
             params.append(resolved_tenant_id)
         await conn.execute(query, tuple(params))
 
-    async def _proj_reparent(
+    async def _proj_reparent(  # noqa: C901
+
         self,
         conn: aiosqlite.Connection,
         fact_id: int,

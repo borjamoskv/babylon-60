@@ -211,7 +211,7 @@ async def check_seal_2_type_safety() -> GateResult:
 # SEAL 3: SECURITY — Bandit + Cobbler Self-Audit
 # Fuses: old Seal 3 (Bandit) + old Seal 11 (Cobbler's Compliance)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async def check_seal_3_security() -> GateResult:
+async def check_seal_3_security() -> GateResult:  # noqa: C901
     printer.seal(3, "AX-VII Inmunología Computacional", "Security (Bandit + Self-Audit)")
     passed = True
 
@@ -373,7 +373,7 @@ async def _check_blocking_sleep(exclude_files: frozenset[str]) -> list[str]:
     return violations
 
 
-async def _check_temperature_determinism(critical_files: list[Path]) -> list[str]:
+async def _check_temperature_determinism(critical_files: list[Path]) -> list[str]:  # noqa: C901
     """Ensure LLM calls use temperature=0 for determinism."""
     import ast
 

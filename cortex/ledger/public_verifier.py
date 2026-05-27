@@ -308,6 +308,104 @@ class _PublicLedgerVerifier:
             index[key_id] = key
         return index
 
+    def _verify_single_event(  # noqa: C901
+        self,
+        event: dict[str, Any],
+        index: int,
+        seen_event_ids: set[str],
+        seen_nonces: set[str],
+        previous_sequence: int | None,
+        previous_hash: str,
+    ) -> tuple[bool, bool, bool, bool, bool, int, str]:
+        integrity_ok = True
+        origin_ok = True
+        authority_ok = True
+        replay_ok = True
+        temporal_ok = True
+
+        missing = sorted(STRICT_REQUIRED_EVENT_FIELDS - event.keys())
+        if missing:
+            self.errors.append(f"event_missing_required_fields:{index}:{','.join(missing)}")
+            return False, False, False, False, False, previous_sequence or 0, previous_hash
+
+        if event.get("hash_alg") != "sha256":
+            self.errors.append(f"event_unsupported_hash_alg:{index}:{event.get('hash_alg')}")
+            integrity_ok = False
+        if event.get("signature_alg") != "ed25519":
+            self.errors.append(
+                f"event_unsupported_signature_alg:{index}:{event.get('signature_alg')}"
+            )
+            origin_ok = False
+
+        event_id = _require_str(event, "event_id", index, self.errors)
+        nonce = _require_str(event, "nonce", index, self.errors)
+        sequence = _require_int(event, "sequence", index, self.errors)
+        if event_id in seen_event_ids:
+            self.errors.append(f"event_replay_duplicate_event_id:{event_id}")
+            replay_ok = False
+        seen_event_ids.add(event_id)
+        if nonce in seen_nonces:
+            self.errors.append(f"event_replay_duplicate_nonce:{nonce}")
+            replay_ok = False
+        seen_nonces.add(nonce)
+
+        if previous_sequence is None and sequence != 1:
+            self.errors.append(f"event_sequence_start_invalid:{index}:expected:1")
+            replay_ok = False
+        if previous_sequence is not None and sequence != previous_sequence + 1:
+            self.errors.append(f"event_sequence_gap:{index}:expected:{previous_sequence + 1}")
+            replay_ok = False
+        previous_sequence = sequence
+
+        prev_hash = _require_str(event, "prev_hash", index, self.errors)
+        if prev_hash != previous_hash:
+            self.errors.append(f"event_chain_break:{index}:expected:{previous_hash}")
+            integrity_ok = False
+
+        computed_hash = _event_hash(event)
+        expected_hash = _require_str(event, "hash", index, self.errors)
+        self.event_hashes.append(expected_hash)
+        if computed_hash != expected_hash:
+            self.errors.append(f"event_hash_mismatch:{event_id}")
+            integrity_ok = False
+        previous_hash = expected_hash
+
+        temporal_ok = temporal_ok and self._verify_event_time(event, index)
+        key = self.key_index.get(str(event.get("actor_key_id")))
+        if key is None:
+            self.errors.append(f"event_actor_key_missing:{event_id}")
+            origin_ok = False
+            authority_ok = False
+            temporal_ok = False
+            return integrity_ok, origin_ok, authority_ok, replay_ok, temporal_ok, previous_sequence, previous_hash
+
+        if key.get("actor_id") != event.get("actor_id"):
+            self.errors.append(f"event_actor_key_actor_mismatch:{event_id}")
+            authority_ok = False
+        if key.get("algorithm") != "ed25519":
+            self.errors.append(f"event_actor_key_unsupported_algorithm:{event_id}")
+            origin_ok = False
+        if event.get("action") not in _string_list(key.get("permissions")):
+            self.errors.append(f"event_actor_key_permission_denied:{event_id}")
+            authority_ok = False
+        if not self._key_valid_for_event(key, event, index):
+            temporal_ok = False
+            authority_ok = False
+
+        try:
+            _verify_ed25519(
+                _event_signature_scope(event),
+                str(event["origin_signature"]),
+                str(key["public_key"]),
+            )
+        except (InvalidSignature, PublicVerifierError, KeyError, TypeError, ValueError) as exc:
+            self.errors.append(
+                f"event_origin_signature_invalid:{event_id}:{exc.__class__.__name__}"
+            )
+            origin_ok = False
+            
+        return integrity_ok, origin_ok, authority_ok, replay_ok, temporal_ok, previous_sequence, previous_hash
+
     def _verify_events(self) -> None:
         seen_event_ids: set[str] = set()
         seen_nonces: set[str] = set()
@@ -320,91 +418,17 @@ class _PublicLedgerVerifier:
         temporal_ok = bool(self.events)
 
         for index, event in enumerate(self.events, start=1):
-            missing = sorted(STRICT_REQUIRED_EVENT_FIELDS - event.keys())
-            if missing:
-                self.errors.append(f"event_missing_required_fields:{index}:{','.join(missing)}")
-                integrity_ok = False
-                origin_ok = False
-                authority_ok = False
-                replay_ok = False
-                temporal_ok = False
-                continue
-
-            if event.get("hash_alg") != "sha256":
-                self.errors.append(f"event_unsupported_hash_alg:{index}:{event.get('hash_alg')}")
-                integrity_ok = False
-            if event.get("signature_alg") != "ed25519":
-                self.errors.append(
-                    f"event_unsupported_signature_alg:{index}:{event.get('signature_alg')}"
-                )
-                origin_ok = False
-
-            event_id = _require_str(event, "event_id", index, self.errors)
-            nonce = _require_str(event, "nonce", index, self.errors)
-            sequence = _require_int(event, "sequence", index, self.errors)
-            if event_id in seen_event_ids:
-                self.errors.append(f"event_replay_duplicate_event_id:{event_id}")
-                replay_ok = False
-            seen_event_ids.add(event_id)
-            if nonce in seen_nonces:
-                self.errors.append(f"event_replay_duplicate_nonce:{nonce}")
-                replay_ok = False
-            seen_nonces.add(nonce)
-
-            if previous_sequence is None and sequence != 1:
-                self.errors.append(f"event_sequence_start_invalid:{index}:expected:1")
-                replay_ok = False
-            if previous_sequence is not None and sequence != previous_sequence + 1:
-                self.errors.append(f"event_sequence_gap:{index}:expected:{previous_sequence + 1}")
-                replay_ok = False
-            previous_sequence = sequence
-
-            prev_hash = _require_str(event, "prev_hash", index, self.errors)
-            if prev_hash != previous_hash:
-                self.errors.append(f"event_chain_break:{index}:expected:{previous_hash}")
-                integrity_ok = False
-
-            computed_hash = _event_hash(event)
-            expected_hash = _require_str(event, "hash", index, self.errors)
-            self.event_hashes.append(expected_hash)
-            if computed_hash != expected_hash:
-                self.errors.append(f"event_hash_mismatch:{event_id}")
-                integrity_ok = False
-            previous_hash = expected_hash
-
-            temporal_ok = temporal_ok and self._verify_event_time(event, index)
-            key = self.key_index.get(str(event.get("actor_key_id")))
-            if key is None:
-                self.errors.append(f"event_actor_key_missing:{event_id}")
-                origin_ok = False
-                authority_ok = False
-                temporal_ok = False
-                continue
-
-            if key.get("actor_id") != event.get("actor_id"):
-                self.errors.append(f"event_actor_key_actor_mismatch:{event_id}")
-                authority_ok = False
-            if key.get("algorithm") != "ed25519":
-                self.errors.append(f"event_actor_key_unsupported_algorithm:{event_id}")
-                origin_ok = False
-            if event.get("action") not in _string_list(key.get("permissions")):
-                self.errors.append(f"event_actor_key_permission_denied:{event_id}")
-                authority_ok = False
-            if not self._key_valid_for_event(key, event, index):
-                temporal_ok = False
-                authority_ok = False
-
-            try:
-                _verify_ed25519(
-                    _event_signature_scope(event),
-                    str(event["origin_signature"]),
-                    str(key["public_key"]),
-                )
-            except (InvalidSignature, PublicVerifierError, KeyError, TypeError, ValueError) as exc:
-                self.errors.append(
-                    f"event_origin_signature_invalid:{event_id}:{exc.__class__.__name__}"
-                )
-                origin_ok = False
+            (
+                i_ok, o_ok, a_ok, r_ok, t_ok,
+                previous_sequence, previous_hash
+            ) = self._verify_single_event(
+                event, index, seen_event_ids, seen_nonces, previous_sequence, previous_hash
+            )
+            integrity_ok = integrity_ok and i_ok
+            origin_ok = origin_ok and o_ok
+            authority_ok = authority_ok and a_ok
+            replay_ok = replay_ok and r_ok
+            temporal_ok = temporal_ok and t_ok
 
         self.guarantees["integrity_verified"] = integrity_ok and not _has_error_prefix(
             self.errors,
@@ -452,12 +476,131 @@ class _PublicLedgerVerifier:
             return False
         return True
 
+    def _verify_single_checkpoint(  # noqa: C901
+        self,
+        index: int,
+        cp: dict,
+        mldsa: Any,
+        InvalidSignature: Any
+    ) -> bool:
+        required = {"root_hash", "start_event_id", "end_event_id", "event_count", "mldsa_signature", "mldsa_public_key"}
+        missing = sorted(required - cp.keys())
+        if missing:
+            self.errors.append(f"checkpoint_missing_required_fields:{index}:{','.join(missing)}")
+            return False
+
+        root_hash = cp["root_hash"]
+        start_ev = cp["start_event_id"]
+        end_ev = cp["end_event_id"]
+        count = cp["event_count"]
+        sig_hex = cp["mldsa_signature"]
+        pub_hex = cp["mldsa_public_key"]
+
+        try:
+            cp_pubkey_bytes = bytes.fromhex(pub_hex)
+        except ValueError:
+            self.errors.append(f"checkpoint_public_key_invalid_hex:{index}")
+            return False
+
+        matching_key = None
+        if self.key_registry and isinstance(self.key_registry.get("keys"), list):
+            for key_record in self.key_registry["keys"]:
+                if not isinstance(key_record, dict):
+                    continue
+                reg_pub_b64 = key_record.get("public_key")
+                if not isinstance(reg_pub_b64, str):
+                    continue
+                try:
+                    reg_pub_bytes = _b64url_decode(reg_pub_b64)
+                except Exception:
+                    continue
+                if reg_pub_bytes == cp_pubkey_bytes:
+                    matching_key = key_record
+                    break
+
+        if matching_key is None:
+            self.errors.append(f"checkpoint_key_not_found:{index}:{pub_hex}")
+            return False
+
+        status = matching_key.get("status")
+        if status not in {"active", "rotated", "revoked"}:
+            self.errors.append(f"checkpoint_key_not_active:{index}")
+            return False
+        if status == "revoked" and not matching_key.get("valid_until"):
+            self.errors.append(f"checkpoint_key_revoked_without_valid_until:{index}")
+            return False
+
+        if self.manifest:
+            try:
+                created_at = _parse_utc(str(self.manifest.get("created_at")))
+                valid_from = _parse_utc(str(matching_key["valid_from"]))
+                valid_until = _parse_utc(str(matching_key["valid_until"]))
+                if not valid_from <= created_at <= valid_until:
+                    self.errors.append(f"checkpoint_key_outside_validity:{index}")
+                    return False
+            except Exception:
+                pass
+
+        permissions = _string_list(matching_key.get("permissions"))
+        if not any(p in permissions for p in ("ledger.checkpoint", "ledger.export", "ledger.write")):
+            self.errors.append(f"checkpoint_key_missing_permission:{index}")
+            return False
+
+        try:
+            sig_bytes = bytes.fromhex(sig_hex)
+        except ValueError:
+            self.errors.append(f"checkpoint_signature_invalid_hex:{index}")
+            return False
+
+        try:
+            length = len(cp_pubkey_bytes)
+            if length == 1312:
+                pubkey = mldsa.MLDSA44PublicKey.from_public_bytes(cp_pubkey_bytes)
+            elif length == 1952:
+                pubkey = mldsa.MLDSA65PublicKey.from_public_bytes(cp_pubkey_bytes)
+            elif length == 2592:
+                pubkey = mldsa.MLDSA87PublicKey.from_public_bytes(cp_pubkey_bytes)
+            else:
+                raise ValueError(f"unsupported length {length}")
+
+            sig_payload = f"{root_hash}_{start_ev}_{end_ev}_{count}".encode()
+            pubkey.verify(sig_bytes, sig_payload)
+        except InvalidSignature:
+            self.errors.append(f"checkpoint_signature_invalid:{index}")
+            return False
+        except Exception as e:
+            self.errors.append(f"checkpoint_verification_error:{index}:{e}")
+            return False
+
+        start_idx = None
+        end_idx = None
+        for i, ev in enumerate(self.events):
+            if ev.get("event_id") == start_ev:
+                start_idx = i
+            if ev.get("event_id") == end_ev:
+                end_idx = i
+
+        if start_idx is None or end_idx is None or start_idx > end_idx:
+            self.errors.append(f"checkpoint_events_not_found:{index}:{start_ev}_to_{end_ev}")
+            return False
+
+        slice_events = self.events[start_idx : end_idx + 1]
+        if len(slice_events) != count:
+            self.errors.append(f"checkpoint_event_count_mismatch:{index}:{len(slice_events)}_vs_{count}")
+            return False
+
+        slice_hashes = [_event_hash(ev) for ev in slice_events]
+        calculated_root = _merkle_root_v1(slice_hashes)
+        if calculated_root != root_hash:
+            self.errors.append(f"checkpoint_merkle_root_mismatch:{index}:{calculated_root}_vs_{root_hash}")
+            return False
+
+        return True
+
     def _verify_checkpoints(self) -> None:
         if not self.checkpoints:
             return
 
-        all_ok = True
-        
         try:
             from cryptography.hazmat.primitives.asymmetric import mldsa
             from cryptography.exceptions import InvalidSignature
@@ -465,131 +608,10 @@ class _PublicLedgerVerifier:
             self.errors.append("mldsa_unsupported_by_cryptography")
             return
 
+        all_ok = True
         for index, cp in enumerate(self.checkpoints, start=1):
-            required = {"root_hash", "start_event_id", "end_event_id", "event_count", "mldsa_signature", "mldsa_public_key"}
-            missing = sorted(required - cp.keys())
-            if missing:
-                self.errors.append(f"checkpoint_missing_required_fields:{index}:{','.join(missing)}")
+            if not self._verify_single_checkpoint(index, cp, mldsa, InvalidSignature):
                 all_ok = False
-                continue
-
-            root_hash = cp["root_hash"]
-            start_ev = cp["start_event_id"]
-            end_ev = cp["end_event_id"]
-            count = cp["event_count"]
-            sig_hex = cp["mldsa_signature"]
-            pub_hex = cp["mldsa_public_key"]
-
-            try:
-                cp_pubkey_bytes = bytes.fromhex(pub_hex)
-            except ValueError:
-                self.errors.append(f"checkpoint_public_key_invalid_hex:{index}")
-                all_ok = False
-                continue
-
-            matching_key = None
-            if self.key_registry and isinstance(self.key_registry.get("keys"), list):
-                for key_record in self.key_registry["keys"]:
-                    if not isinstance(key_record, dict):
-                        continue
-                    reg_pub_b64 = key_record.get("public_key")
-                    if not isinstance(reg_pub_b64, str):
-                        continue
-                    try:
-                        reg_pub_bytes = _b64url_decode(reg_pub_b64)
-                    except Exception:
-                        continue
-                    if reg_pub_bytes == cp_pubkey_bytes:
-                        matching_key = key_record
-                        break
-
-            if matching_key is None:
-                self.errors.append(f"checkpoint_key_not_found:{index}:{pub_hex}")
-                all_ok = False
-                continue
-
-            status = matching_key.get("status")
-            if status not in {"active", "rotated", "revoked"}:
-                self.errors.append(f"checkpoint_key_not_active:{index}")
-                all_ok = False
-                continue
-            if status == "revoked" and not matching_key.get("valid_until"):
-                self.errors.append(f"checkpoint_key_revoked_without_valid_until:{index}")
-                all_ok = False
-                continue
-
-            if self.manifest:
-                try:
-                    created_at = _parse_utc(str(self.manifest.get("created_at")))
-                    valid_from = _parse_utc(str(matching_key["valid_from"]))
-                    valid_until = _parse_utc(str(matching_key["valid_until"]))
-                    if not valid_from <= created_at <= valid_until:
-                        self.errors.append(f"checkpoint_key_outside_validity:{index}")
-                        all_ok = False
-                        continue
-                except Exception:
-                    pass
-
-            permissions = _string_list(matching_key.get("permissions"))
-            if not any(p in permissions for p in ("ledger.checkpoint", "ledger.export", "ledger.write")):
-                self.errors.append(f"checkpoint_key_missing_permission:{index}")
-                all_ok = False
-                continue
-
-            try:
-                sig_bytes = bytes.fromhex(sig_hex)
-            except ValueError:
-                self.errors.append(f"checkpoint_signature_invalid_hex:{index}")
-                all_ok = False
-                continue
-
-            try:
-                length = len(cp_pubkey_bytes)
-                if length == 1312:
-                    pubkey = mldsa.MLDSA44PublicKey.from_public_bytes(cp_pubkey_bytes)
-                elif length == 1952:
-                    pubkey = mldsa.MLDSA65PublicKey.from_public_bytes(cp_pubkey_bytes)
-                elif length == 2592:
-                    pubkey = mldsa.MLDSA87PublicKey.from_public_bytes(cp_pubkey_bytes)
-                else:
-                    raise ValueError(f"unsupported length {length}")
-
-                sig_payload = f"{root_hash}_{start_ev}_{end_ev}_{count}".encode()
-                pubkey.verify(sig_bytes, sig_payload)
-            except InvalidSignature:
-                self.errors.append(f"checkpoint_signature_invalid:{index}")
-                all_ok = False
-                continue
-            except Exception as e:
-                self.errors.append(f"checkpoint_verification_error:{index}:{e}")
-                all_ok = False
-                continue
-
-            start_idx = None
-            end_idx = None
-            for i, ev in enumerate(self.events):
-                if ev.get("event_id") == start_ev:
-                    start_idx = i
-                if ev.get("event_id") == end_ev:
-                    end_idx = i
-
-            if start_idx is None or end_idx is None or start_idx > end_idx:
-                self.errors.append(f"checkpoint_events_not_found:{index}:{start_ev}_to_{end_ev}")
-                all_ok = False
-                continue
-
-            slice_events = self.events[start_idx : end_idx + 1]
-            if len(slice_events) != count:
-                self.errors.append(f"checkpoint_event_count_mismatch:{index}:{len(slice_events)}_vs_{count}")
-                all_ok = False
-                continue
-
-            slice_hashes = [_event_hash(ev) for ev in slice_events]
-            calculated_root = _merkle_root_v1(slice_hashes)
-            if calculated_root != root_hash:
-                self.errors.append(f"checkpoint_merkle_root_mismatch:{index}:{calculated_root}_vs_{root_hash}")
-                all_ok = False
-                continue
 
         if all_ok:
             self.guarantees["truth_verified"] = True
