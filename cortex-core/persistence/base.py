@@ -37,7 +37,10 @@ class SovereignResource:
         for res in resources:
             try:
                 if res:
-                    res.close()
+                    if hasattr(res, 'release'):
+                        res.release()
+                    if hasattr(res, 'close'):
+                        res.close()
             except Exception as e:
                 logger.warning(f'Silenced exception: {e}')
 

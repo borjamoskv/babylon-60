@@ -50,10 +50,29 @@ def clean_swarm_queue_db(monkeypatch, tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_daemon_basic_queue_processing():
+async def test_daemon_basic_queue_processing(tmp_path, monkeypatch):
     """Test enqueuing tasks and daemon processing them under basic conditions."""
+    db_path = str(tmp_path / "cortex_memory_vsa.db")
+    bin_path = str(tmp_path / "swarm_ring_vsa.bin")
+
+    # Patch all the possible paths
+    monkeypatch.setattr("cortex_daemon.DB_PATH", db_path)
+    monkeypatch.setattr("persistence.base.DB_PATH", db_path)
+    monkeypatch.setattr("persistence.base.VSA_BIN_PATH", bin_path)
+
+    # Force _global_ring_buffer to None so it recreates with the new path
+    import persistence.outbox
+
+    monkeypatch.setattr("persistence.outbox._global_ring_buffer", None)
+
     # Initialize mock daemon
     daemon = CortexDaemon()
+    import sqlite3
+
+    daemon.db_conn = sqlite3.connect(db_path, check_same_thread=False, isolation_level=None)
+    daemon.db_conn.execute(
+        "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, returncode INTEGER, execution_time REAL);"
+    )
 
     # Enqueue a mock task
     payload = {"command": "echo 'hello world'"}
@@ -128,9 +147,34 @@ async def test_daemon_command_extraction():
 
 
 @pytest.mark.asyncio
-async def test_swarm_queue_contention():
+async def test_swarm_queue_contention(tmp_path, monkeypatch):
     """Test high contention concurrent enqueues and dequeues to verify zero lost tasks."""
+    db_path = str(tmp_path / "cortex_memory_vsa.db")
+    bin_path = str(tmp_path / "swarm_ring_vsa.bin")
+
+    # Patch all the possible paths
+    monkeypatch.setattr("cortex_daemon.DB_PATH", db_path)
+    monkeypatch.setattr("persistence.base.DB_PATH", db_path)
+    monkeypatch.setattr("persistence.base.VSA_BIN_PATH", bin_path)
+
+    # Force _global_ring_buffer to None so it recreates with the new path
+    import persistence.outbox
+
+    monkeypatch.setattr("persistence.outbox._global_ring_buffer", None)
+    monkeypatch.setattr(
+        "persistence.outbox.ZeroCopyRingBuffer",
+        lambda **kwargs: persistence.outbox.ZeroCopyRingBuffer(capacity=10000),
+    )
+    # Wait, just setting _global_ring_buffer to None is enough because __init__ reads from base.DB_PATH
+
     daemon = CortexDaemon()
+    # Replace its DB connection
+    import sqlite3
+
+    daemon.db_conn = sqlite3.connect(db_path, check_same_thread=False, isolation_level=None)
+    daemon.db_conn.execute(
+        "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, returncode INTEGER, execution_time REAL);"
+    )
 
     executed_tasks = []
 

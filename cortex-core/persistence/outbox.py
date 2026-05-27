@@ -29,6 +29,8 @@ class ZeroCopyRingBuffer(SovereignResource):
     """
 
     def __init__(self, capacity=10000):
+        import os
+        import weakref
         self.capacity = capacity
         self.task_size = 256
         self.tensor_size = self.capacity * self.task_size
