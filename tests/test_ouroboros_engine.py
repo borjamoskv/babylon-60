@@ -83,16 +83,11 @@ class TestOuroborosEngine:
         assert "function test_FuzzExergy(uint256 amount)" in content
 
     def test_queue_remediation(self, engine, tmp_path):
-        queue_path = str(tmp_path / "cortex_swarm_queue.json")
         with patch("ouroboros_engine.time.time", return_value=12345):
-            with patch("ouroboros_engine.json.dump") as mock_dump:
-                # We monkeypatch the path directly in the method by writing to our tmp_path queue if it existed,
-                # but the method hardcodes /tmp. We will patch builtins.open
-                pass
-
-        # Since queue_path is hardcoded inside _queue_remediation to /tmp/cortex_swarm_queue.json,
-        # we can just test if the queue logic works by patching it.
-        with patch("ouroboros_engine.os.path.exists", return_value=False):
-            with patch("builtins.open", new_callable=MagicMock) as mock_open:
+            with patch("persistence.enqueue_swarm_task") as mock_enqueue:
                 engine._queue_remediation("/target/file.sol", "/target/error.log")
-                mock_open.assert_called_with("/tmp/cortex_swarm_queue.json", "w")
+                mock_enqueue.assert_called_once()
+                args, kwargs = mock_enqueue.call_args
+                assert args[0] == "SURGEON-1"
+                assert args[1]["type"] == "remediation"
+                assert "/target/file.sol" in args[1]["command"]
