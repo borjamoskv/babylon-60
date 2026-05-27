@@ -186,7 +186,9 @@ async def generate_session_boot(
     memory = EpisodicMemory(conn)
 
     # 1. Compute lookback timestamp
-    cutoff = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) - timedelta(hours=lookback_hours)
+    cutoff = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) - timedelta(
+        hours=lookback_hours
+    )
     since_iso = cutoff.strftime("%Y-%m-%dT%H:%M:%S")
 
     # 2. Recall recent episodes

@@ -37,6 +37,7 @@ logger = logging.getLogger("cortex.ledger")
 
 from .merkle import MerkleNode, MerkleTree, SemanticMerkleTree
 
+
 class SovereignLedger:
     """The Custodian of Immutable History (CORTEX Wave 5/8).
 

@@ -188,7 +188,9 @@ class OmegaGuardAdapter:
         conflicts = await run_omega_audit(content, project)
         if conflicts:
             # Block the store
-            reasons = "; ".join(f"[{c.severity.upper()}] {c.summary}: {c.reasoning}" for c in conflicts)
+            reasons = "; ".join(
+                f"[{c.severity.upper()}] {c.summary}: {c.reasoning}" for c in conflicts
+            )
             raise ValueError(f"[AX-II] Omega Auditor detected contradictions: {reasons}")
 
 

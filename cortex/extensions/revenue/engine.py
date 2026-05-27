@@ -235,7 +235,9 @@ class RevenueEngine:
         Returns:
             Revenue report with breakdown by vector.
         """
-        period = period or datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime("%Y-%m-%d")
+        period = period or datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime(
+            "%Y-%m-%d"
+        )
 
         by_vector: dict[str, dict[str, Any]] = {}
         total_revenue = Decimal("0")

@@ -9,6 +9,7 @@ from cortex.utils import void_vec
 
 logger = logging.getLogger(__name__)
 
+
 class WriteTrait:
     async def memorize(self, fact: CortexFactModel) -> None:
         """Encode and store a multi-tenant CortexFactModel.
@@ -128,4 +129,3 @@ class WriteTrait:
 
         async with self._lock:
             await asyncio.to_thread(_sync_insert)
-

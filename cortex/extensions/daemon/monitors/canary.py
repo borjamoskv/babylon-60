@@ -77,7 +77,9 @@ class CanaryMonitor:
                         similarity_score=1.0,
                         confidence="C5",
                         summary="CANARY_TRIPPED: Active HoneyPot hit detected.",
-                        timestamp=datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(),
+                        timestamp=datetime.fromtimestamp(
+                            time.monotonic(), tz=timezone.utc
+                        ).isoformat(),
                     )
                     alerts.append(alert)
                     self._last_stats[path] = current_val

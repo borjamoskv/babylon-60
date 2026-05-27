@@ -516,7 +516,9 @@ class LLMProvider(BaseProvider):
 
         # Stealth / Causal logic (Ω₂₃)
         if getattr(prompt, "stealth", False) and messages:
-            noise_id = hashlib.sha256(f"{time.monotonic()}{random.random()}".encode()).hexdigest()[:8]
+            noise_id = hashlib.sha256(f"{time.monotonic()}{random.random()}".encode()).hexdigest()[
+                :8
+            ]
 
             # Find last user message, preserving system prompt (KV cache) purity
             for msg in reversed(messages):

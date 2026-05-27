@@ -140,9 +140,9 @@ class TestQuarantineCandidates:
     def test_expired_ttl_appears(self, ledger):
         record = SkillRecord.new("old-skill", "1.0", {"x": "1"}, ttl_days=0)
         # Manually set ttl to past
-        record.ttl_expiration = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) - timedelta(
-            hours=1
-        )
+        record.ttl_expiration = datetime.fromtimestamp(
+            time.monotonic(), tz=timezone.utc
+        ) - timedelta(hours=1)
         ledger.register(record)
 
         # Advance to ACTIVE

@@ -5,6 +5,7 @@ import json
 from dataclasses import dataclass
 from typing import Any
 
+
 @dataclass(frozen=True)
 class MerkleNode:
     """A node within the Merkle Tree (V8 Immutable)."""

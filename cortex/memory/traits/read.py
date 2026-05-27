@@ -8,6 +8,7 @@ from cortex.memory.models import CortexFactModel
 from cortex.utils import void_vec
 from cortex.utils.turboquant import encode_query_qjl
 
+
 class ReadTrait:
     async def recall_secure(
         self,
@@ -223,4 +224,3 @@ class ReadTrait:
         return await self.recall_secure(
             tenant_id=tenant_id, project_id=project_id, query=query, limit=limit
         )
-

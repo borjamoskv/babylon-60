@@ -53,6 +53,7 @@ from cortex.memory.traits.schema import SchemaTrait
 from cortex.memory.traits.read import ReadTrait
 from cortex.memory.traits.write import WriteTrait
 
+
 class SovereignVectorStoreL2(SchemaTrait, ReadTrait, WriteTrait):
     """Async vector store for CORTEX v6 L2 semantic memory.
 

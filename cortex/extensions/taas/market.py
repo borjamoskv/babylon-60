@@ -9,20 +9,24 @@ from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.taas")
 
+
 class JobSLA(BaseModel):
     confidence_level: str
     max_latency_ms: int
     requires_zk_proof: bool
+
 
 class JobRequest(BaseModel):
     task_type: str
     payload: dict[str, Any]
     sla: JobSLA
 
+
 class JobQuote(BaseModel):
     job_id: str
     estimated_cost_credits: float
     estimated_time_ms: int
+
 
 class JobExecutionResult(BaseModel):
     job_id: str
@@ -30,6 +34,7 @@ class JobExecutionResult(BaseModel):
     result: dict[str, Any] | None
     proof: str | None
     executed_at: str
+
 
 class TaaSMarketplace:
     """Trust-as-a-Service (TaaS) Marketplace Engine."""
@@ -52,11 +57,7 @@ class TaaSMarketplace:
 
         est_time = 500 if req.sla.requires_zk_proof else 50
 
-        return JobQuote(
-            job_id=job_id,
-            estimated_cost_credits=base_cost,
-            estimated_time_ms=est_time
-        )
+        return JobQuote(job_id=job_id, estimated_cost_credits=base_cost, estimated_time_ms=est_time)
 
     async def execute_job(self, job_id: str) -> JobExecutionResult:
         if job_id not in self._jobs:
@@ -67,7 +68,7 @@ class TaaSMarketplace:
         # Simulate job execution on the swarm
         # In a real environment, this delegates to SwarmManager or AS-OS Kernel
         # Here we mock the deterministic C5-REAL execution
-        
+
         proof_payload = None
         if req.sla.requires_zk_proof:
             # We interact with AS-OS Kernel ZK representation (placeholder)
@@ -78,7 +79,7 @@ class TaaSMarketplace:
             status="COMPLETED",
             result={"status": "success", "processed_bytes": len(str(req.payload))},
             proof=proof_payload,
-            executed_at=datetime.now(timezone.utc).isoformat()
+            executed_at=datetime.now(timezone.utc).isoformat(),
         )
         self._results[job_id] = res
         return res

@@ -146,7 +146,8 @@ class TrendDetector:
                 from datetime import timedelta
 
                 cutoff = (
-                    datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) - timedelta(days=keep_days)
+                    datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
+                    - timedelta(days=keep_days)
                 ).isoformat()
                 conn.execute(
                     "DELETE FROM health_history WHERE timestamp < ?",

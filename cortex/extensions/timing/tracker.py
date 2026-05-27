@@ -150,7 +150,9 @@ class TimingTracker:
 
     def timeline(self, project: str | None = None, date: str | None = None) -> list[TimeEntry]:
         """Get detailed timeline for a date."""
-        date_str = date or datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime("%Y-%m-%d")
+        date_str = date or datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime(
+            "%Y-%m-%d"
+        )
         where = ["start_time LIKE ?"]
         params: list = [f"{date_str}%"]
         if project:

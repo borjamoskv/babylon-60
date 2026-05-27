@@ -228,7 +228,9 @@ class NativeVLLMProvider(BaseProvider):
         """Stream output natively directly from vLLM AsyncEngine."""
         from vllm import SamplingParams
 
-        request_id = hashlib.sha256(f"str_{time.monotonic()}_{prompt[:20]}".encode()).hexdigest()[:16]
+        request_id = hashlib.sha256(f"str_{time.monotonic()}_{prompt[:20]}".encode()).hexdigest()[
+            :16
+        ]
 
         sp = SamplingParams(
             temperature=temperature,

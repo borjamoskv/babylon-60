@@ -3,6 +3,7 @@ import logging
 from typing import Any
 from cortex.guards.exergy_guard import calculate_exergy
 from cortex.utils import void_vec
+
 try:
     import sqlite_vec
 except ImportError:
@@ -10,12 +11,14 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+
 def cortex_decay(is_diamond: int, timestamp: float, current_time: float, half_life: float) -> float:
     """Calcula el decaimiento temporal soberano."""
     if is_diamond:
         return 1.0
     age = max(0.0, current_time - timestamp)
     return float(0.5 ** (age / half_life))
+
 
 class SchemaTrait:
     def _get_conn(self) -> sqlite3.Connection:
@@ -285,4 +288,3 @@ class SchemaTrait:
             return meta_tb, vec_tb, vec_void_tb, vec_void_mih_tb
 
         return "facts_meta", "vec_facts", "vec_void", "vec_void_mih"
-

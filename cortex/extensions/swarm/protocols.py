@@ -37,7 +37,9 @@ class SwarmSignalSchema:
     confidence: float = 1.0
     exergy_spent: float = 0.0
     timestamp: str = field(
-        default_factory=lambda: datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+        default_factory=lambda: datetime.fromtimestamp(
+            time.monotonic(), tz=timezone.utc
+        ).isoformat()
     )
 
     def to_json(self) -> str:

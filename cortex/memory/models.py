@@ -289,7 +289,9 @@ class CortexFactModel(BaseModel):
         ) / new_count
         new_stats = stats.model_copy(
             update={
-                "last_successful_retrieval": datetime.fromtimestamp(time.monotonic(), tz=timezone.utc),
+                "last_successful_retrieval": datetime.fromtimestamp(
+                    time.monotonic(), tz=timezone.utc
+                ),
                 "total_access_count": new_count,
                 "average_retrieval_latency_ms": round(new_avg, 2),
             }

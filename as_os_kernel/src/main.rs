@@ -20,6 +20,7 @@ fn main() {
         last_hash: "GENESIS".to_string(),
         memory: std::collections::HashMap::new(),
         reputation: std::collections::HashMap::new(),
+        agent_lifecycle: std::collections::HashMap::new(),
     };
     let mut dag = MemoryDAG::new();
 
@@ -105,6 +106,7 @@ fn main() {
         last_hash: "GENESIS".to_string(),
         memory: std::collections::HashMap::new(),
         reputation: std::collections::HashMap::new(),
+        agent_lifecycle: std::collections::HashMap::new(),
     };
     let test_event = Event {
         id: "e_det".to_string(),
