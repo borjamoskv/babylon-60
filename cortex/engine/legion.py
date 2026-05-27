@@ -248,9 +248,9 @@ class BlueTeamAgent:
 class RedTeamSwarm:
     """😈 Red Team Swarm: The Annihilation Squad."""
 
-    def __init__(self, vectors: list[AttackVector] | None = None, replica_count: int = 100):
+    def __init__(self, vectors: list[AttackVector] | None = None, replica_count: int = 1000):
         self.vectors = vectors or list(RED_TEAM_SWARM.values())
-        # Enforce the 100 Sovereign Agents Topology
+        # Enforce the 1000 Sovereign Agents Topology
         self.replica_count = replica_count
 
     async def siege(self, code: str, context: Mapping[str, Any]) -> list[str]:
