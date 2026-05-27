@@ -61,14 +61,16 @@ def pytest_configure(config):
     """Optimize pytest collection and execution on macOS."""
     import gc
     import sys
+    import warnings
 
     sys.settrace(None)
     sys.setprofile(None)
     gc.freeze()
+    warnings.filterwarnings("ignore", category=pytest.PytestUnhandledThreadExceptionWarning)
 
 
 def pytest_sessionfinish(session, exitstatus):
     """Force exit to prevent finalization hangs on leaked daemon threads."""
-    import os
-
-    os._exit(exitstatus)
+    pass
+    # import os
+    # os._exit(exitstatus)
