@@ -104,7 +104,7 @@ def _worker(source_code: str, global_ctx: dict, result_dict: dict):
         result_dict["error"] = str(e)
 
 
-async def run_jit_sandbox(source_code: str, timeout_ms: int = 50, global_ctx: dict = None) -> Any:
+async def run_jit_sandbox(source_code: str, timeout_ms: int = 500, global_ctx: dict = None) -> Any:
     """
     Executes Python AST in a bounded memory-only sandbox.
     Uses multiprocessing to guarantee true OS-level termination and bypass GIL deadlocks.
@@ -155,10 +155,10 @@ async def run_jit_sandbox(source_code: str, timeout_ms: int = 50, global_ctx: di
 
         elapsed = (time.perf_counter() - start_time) * 1000
         logger.error(
-            "⚡ [SORTU-JIT] Thermodynamic Timeout triggered. Process terminated via SIGKILL. Reason: %s",
-            timeout_reason or "Subprocess ended unexpectedly or timed out",
+            "⚡ [SORTU-JIT] Thermodynamic Timeout triggered (%.2fms). Process terminated via SIGKILL.",
+            elapsed,
         )
-        raise JITTimeoutException(timeout_reason or "Execution timed out")
+        raise JITTimeoutException(f"Execution exceeded thermodynamic bounds ({timeout_ms}ms)")
 
     elapsed = (time.perf_counter() - start_time) * 1000
     res_dict = dict(result_dict)
