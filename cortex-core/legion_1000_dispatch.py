@@ -12,6 +12,7 @@ print("Initializing LEGION-1000 Swarm Substrate...")
 
 async def main():
     pm = HybridPersistenceManager()
+    pm.ring.reset()
     
     def dispatch_legion(num_agents=10000):
         print(f"[LEGION] Dispatching {num_agents} sovereign agents via ZeroCopyRingBuffer...")
@@ -24,6 +25,8 @@ async def main():
             payload = json.dumps({"command": "audit", "target": f"sector_{i}", "directive": "C5-REAL"}).encode('utf-8')
             tasks.append((agent_id, payload))
 
+        # Reset ring buffer to ensure clean C5-REAL execution
+        pm.ring.reset()
         success = 0
         # Enqueue using the underlying lock-free ring buffer
         for agent_id, payload in tasks:
