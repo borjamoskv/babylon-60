@@ -42,7 +42,6 @@ from cortex.extensions.agent.degradation_executor import (  # noqa: F401, E402
     sovereign_execute,
 )
 
-# ─── Re-export all types from the leaf module (zero intra-package deps) ──────
 from cortex.extensions.agent.degradation_types import (  # noqa: F401
     AgentAction,
     AgentCalcificationError,
@@ -57,19 +56,16 @@ from cortex.extensions.agent.degradation_types import (  # noqa: F401
 )
 
 __all__ = [
-    # Exception hierarchy
     "SovereignAgentError",
     "SchemaIncompatibilityError",
     "ToolRegistrationError",
     "ModelUnavailableError",
     "AgentDegradedError",
     "AgentCalcificationError",
-    # Data contracts
     "DegradationLevel",
     "AgentAction",
     "AgentResult",
     "DegradationReport",
-    # Decorator (re-exported from degradation_executor)
     "sovereign_execute",
     "_upgrade_to_l3",
     "_persist_to_cortex",
