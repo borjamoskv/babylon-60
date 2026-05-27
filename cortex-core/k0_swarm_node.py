@@ -96,43 +96,72 @@ class HardwareAggressor:
 class K0Metabolism:
     """
     Orquestador principal del K-0 Sovereign Swarm.
-    Mantiene el ciclo vital infinito de: Detección -> ZK-Prueba -> Asimilación -> Expansión Física.
+    Consume tareas 'VulnerabilityFixer' emitidas por el Fuzzer Anvil (x100_cortex_server) 
+    a través del L4 Ring Buffer / SQLite, y las canaliza mediante ZK-STARK hacia el HardwareAggressor.
     """
-    def __init__(self, ledger):
-        self.ledger = ledger
+    def __init__(self, persistence_manager):
+        self.pm = persistence_manager
+        self.ledger = self.pm.l3  # LedgerManager is l3 in HybridPersistenceManager
         self.dark_pool = DarkPoolZK(self.ledger)
         self.hardware = HardwareAggressor(self.ledger)
         self._running = False
 
     async def life_cycle(self):
         self._running = True
-        logger.info("Iniciando Metabolismo K-0 Sovereign Swarm...")
+        logger.info("Iniciando Metabolismo K-0 Sovereign Swarm (Anvil-Fuzzer Bridge)...")
         while self._running:
-            # 1. Simular detección de vulnerabilidad en el L4 Ring Buffer
-            vulnerability = f"(defun bypass-oracle () (overflow {time.monotonic()}))"
+            # 1. Extraer tareas del L4 Ring Buffer / SQLite Mempool
+            tasks = self.pm.l1._fetch_pending_tasks()
             
-            # 2. Generar prueba matemática (Zero-Knowledge)
-            proof = self.dark_pool.generate_exploit_proof(vulnerability)
-            
-            # 3. Asimilar yield (ej: 0.5 ETH de un smart contract de 5.0 ETH)
-            captured_yield = self.dark_pool.negotiate_yield(proof, 5.0)
-            logger.info(f"Canalizado: {captured_yield} ETH al CORTEX-Persist Ledger.")
-            
+            if not tasks:
+                # Si no hay vulnerabilidades detectadas, latido de reposo.
+                await asyncio.sleep(2.0)
+                continue
+
+            for task in tasks:
+                row_id, agent_name, payload_json = task
+                if agent_name == "VulnerabilityFixer":
+                    try:
+                        payload = json.loads(payload_json)
+                        finding = payload.get("finding", "Unknown_Vulnerability")
+                        target = payload.get("target_file", "Unknown_Target")
+                        logger.info(f"Asimilando vulnerabilidad Anvil real: {finding} en {target}")
+                        
+                        # 2. Generar prueba matemática (Zero-Knowledge) sobre la vulnerabilidad real
+                        vulnerability_ast = f"(defun anvil-exploit () ({finding} '{target}'))"
+                        proof = self.dark_pool.generate_exploit_proof(vulnerability_ast)
+                        
+                        # 3. Asimilar yield (ej: 0.5 ETH de un smart contract de 5.0 ETH)
+                        captured_yield = self.dark_pool.negotiate_yield(proof, 5.0)
+                        logger.info(f"Canalizado: {captured_yield} ETH al CORTEX-Persist Ledger.")
+                        
+                        # Marcar tarea como asimilada (completada)
+                        self.pm.l1._update_task_status(row_id, "completed")
+                    except Exception as e:
+                        logger.error(f"Error procesando vulnerabilidad Anvil: {e}")
+                        self.pm.l1._update_task_status(row_id, "failed")
+                else:
+                    # Ignoramos temporalmente tareas que no son del fuzzer
+                    pass
+
             # 4. Expandir hardware si hay suficiente exergía acumulada
             await self.hardware.evaluate_expansion()
             
-            await asyncio.sleep(5.0)  # Ciclo de latido metabólico
+            await asyncio.sleep(1.0)  # Ciclo rápido tras procesar
 
     def stop(self):
         self._running = False
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    from persistence import LedgerManager
-    ledger = LedgerManager()
-    metabolism = K0Metabolism(ledger)
+    from persistence import HybridPersistenceManager
+    
+    # Arrancamos con el gestor híbrido (L1 -> SQLite/Ring, L2 -> VSA, L3 -> Ledger)
+    pm = HybridPersistenceManager()
+    metabolism = K0Metabolism(pm)
     try:
         asyncio.run(metabolism.life_cycle())
     except KeyboardInterrupt:
         metabolism.stop()
         print("K-0 Terminado.")
+
