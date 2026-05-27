@@ -8,7 +8,8 @@ import mmap
 import weakref
 import atexit
 
-from .base import SovereignResource, _setup_sqlite_pragmas, _get_local_conn, DB_PATH, HAS_CORTEX_RS, outbox_wake_event, logger, _metrics_cache, _metrics_cache_lock
+from .base import SovereignResource, _setup_sqlite_pragmas, _get_local_conn, HAS_CORTEX_RS, outbox_wake_event, logger, _metrics_cache, _metrics_cache_lock
+from . import base
 
 try:
     import cortex_rs  # noqa: F401
@@ -31,7 +32,7 @@ class ZeroCopyRingBuffer:
         self.capacity = capacity
         self.task_size = 256
         self.tensor_size = self.capacity * self.task_size
-        self.bin_path = os.path.join(os.path.dirname(DB_PATH), "swarm_ring_vsa.bin")
+        self.bin_path = os.path.join(os.path.dirname(base.DB_PATH), "swarm_ring_vsa.bin")
 
         if not os.path.exists(self.bin_path) or os.path.getsize(self.bin_path) < self.tensor_size:
             with open(self.bin_path, "wb") as f:
@@ -117,7 +118,7 @@ class OutboxDaemon(SovereignResource):
     """Outbox Pattern Daemon: Asynchronously drains pending swarm tasks to NEXUS API."""
 
     def __init__(self, db_path: str | None = None, ledger: LedgerManager | None = None):
-        self._db_path = db_path if db_path is not None else DB_PATH
+        self._db_path = db_path if db_path is not None else base.DB_PATH
         self._daemon_task = None
         self._conn = sqlite3.connect(self._db_path, check_same_thread=False, timeout=10.0)
         _setup_sqlite_pragmas(self._conn)
@@ -191,12 +192,15 @@ class OutboxDaemon(SovereignResource):
                     except EntropyDeath as e:
                         logger.error(f"EXA_LISP Halted (EntropyDeath): {e}")
                         if self.ledger:
-                            self.ledger.append(action="C5_FALSATED_ENTROPY", vector_id=agent_name, yield_amount=0.0)
+                            burned = limit - getattr(env, 'joules', 0.0)
+                            self.ledger.append(action="C5_FALSATED_ENTROPY", vector_id=agent_name, yield_amount=float(-burned))
                         continue
                     except Exception as e:
                         logger.error(f"EXA_LISP Syntax/Runtime Error: {e}")
                         if self.ledger:
-                            self.ledger.append(action="C5_FALSATED_SYNTAX", vector_id=agent_name, yield_amount=0.0)
+                            burned = limit - getattr(env, 'joules', limit)
+                            penalty = burned if burned > 0 else 10.0
+                            self.ledger.append(action="C5_FALSATED_SYNTAX", vector_id=agent_name, yield_amount=float(-penalty))
                         continue
 
                 # -- NATIVE L0 INTERCEPTOR: QUANTUM_BRANCHING (Q-Let v2) --
@@ -239,7 +243,7 @@ class OutboxDaemon(SovereignResource):
                     except Exception as e:
                         logger.error(f"QUANTUM_BRANCHING Error: {e}")
                         if self.ledger:
-                            self.ledger.append(action="C5_FALSATED_QUANTUM", vector_id=agent_name, yield_amount=0.0)
+                            self.ledger.append(action="C5_FALSATED_QUANTUM", vector_id=agent_name, yield_amount=float(-limit))
                         continue
 
                 # -- NATIVE L0 INTERCEPTOR: AST_MUTATION --
@@ -255,7 +259,7 @@ class OutboxDaemon(SovereignResource):
                     except Exception as e:
                         logger.error(f"AEON-0 Compiler Error: {e}")
                         if self.ledger:
-                            self.ledger.append(action="C5_FALSATED_MUTATION", vector_id=agent_name, yield_amount=0.0)
+                            self.ledger.append(action="C5_FALSATED_MUTATION", vector_id=agent_name, yield_amount=-50.0)
                         continue
 
                 # -- C5-REAL SOVEREIGN ISOLATION --
@@ -322,7 +326,7 @@ def get_swarm_metrics(bypass_cache: bool = False) -> dict:
                 return _metrics_cache["value"]
 
     try:
-        conn = _get_local_conn(DB_PATH, timeout=5.0)
+        conn = _get_local_conn(base.DB_PATH, timeout=5.0)
         c = conn.cursor()
 
         # Latency approximation: find average execution time from recent ledger entries

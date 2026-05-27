@@ -1,20 +1,22 @@
-## What does this PR do?
+## ▀▄ CORTEX-PERSIST PULL REQUEST
 
-<!-- Brief description of the change -->
+### █ EPISTEMIC HUMILITY CHECKLIST
+All generative AI code is treated as conjecture until deterministic validation is proven. You MUST check all boxes before this PR can be merged.
 
-## Type of change
+- [ ] **Determinism:** I have not introduced any stochastic behaviour in the core runtime without deterministic guards.
+- [ ] **Hash Continuity:** I have verified that changes to `persistence` do not break existing SHA-256 Merkle chain validation.
+- [ ] **C5-REAL Validation:** I have executed the test suite locally and the output is deterministically successful.
+- [ ] **Industrial Noir 2026:** If UI/CLI changes are present, they adhere to the `#0A0A0A` (Black), `#2B3BE5` (Blue), and Humanist Sans brutalist aesthetic.
 
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Breaking change
-- [ ] Documentation update
-- [ ] Performance improvement
-- [ ] Security fix
+### █ ARCHITECTURAL IMPACT
+*(Provide a concise explanation of the causal effect of this PR. Zero decorative prose. Every sentence must change behavior.)*
 
-## Checklist
+**Context:**
+**Changes:**
+**Telemetry / Performance Delta (if any):**
 
-- [ ] Tests pass (`make test`)
-- [ ] Linter passes (`make lint`)
-- [ ] No hardcoded secrets or API keys
-- [ ] Documentation updated (if applicable)
-- [ ] CHANGELOG.md updated (if user-facing)
+### █ VERIFICATION EVIDENCE
+*(Paste relevant CLI output, test success logs, or C5-REAL cryptographic proofs demonstrating the change functions as claimed)*
+```bash
+# Paste verification logs here
+```
