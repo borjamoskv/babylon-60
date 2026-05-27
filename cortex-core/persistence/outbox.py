@@ -56,9 +56,24 @@ class ZeroCopyRingBuffer(SovereignResource):
             self._f = open(self.bin_path, "r+b")
             self._mmap = mmap.mmap(self._f.fileno(), self.tensor_size)
             self._buffer = memoryview(self._mmap)
+            
+            # C5-REAL State Recovery: Find first pending task for read pointer
+            self._read_idx = 0
+            for i in range(self.capacity):
+                if self._buffer[i * self.task_size] == 1:
+                    self._read_idx = i
+                    break
+                    
+            # Find first free slot after read_idx for write pointer
+            write_start = self._read_idx
+            for i in range(self.capacity):
+                idx = (self._read_idx + i) % self.capacity
+                if self._buffer[idx * self.task_size] == 0:
+                    write_start = idx
+                    break
+                    
             # Pure Lock-Free C5-REAL (Atomic Counters)
-            self._write_counter = itertools.count()
-            self._read_counter = itertools.count()
+            self._write_counter = itertools.count(write_start)
 
         # L5 Sovereign Topological Space Integration
         try:
@@ -115,16 +130,19 @@ class ZeroCopyRingBuffer(SovereignResource):
         tasks = []
         import struct
 
-        for idx in range(self.capacity):
-            offset = idx * self.task_size
+        for _ in range(self.capacity):
+            offset = self._read_idx * self.task_size
             if self._buffer[offset] == 1:  # Pending
                 self._buffer[offset] = 2  # Mark Processing
                 ts = struct.unpack_from("d", self._buffer, offset + 1)[0]
                 agent_id = bytes(self._buffer[offset + 9 : offset + 73]).rstrip(b"\x00")
                 payload = bytes(self._buffer[offset + 73 : offset + 256]).rstrip(b"\x00")
-                tasks.append((idx, ts, agent_id, payload))
+                tasks.append((self._read_idx, ts, agent_id, payload))
                 
                 self._buffer[offset] = 0 # Free it
+                self._read_idx = (self._read_idx + 1) % self.capacity
+            else:
+                break
         return tasks
 
     def get_pending_count(self) -> int:
@@ -149,6 +167,14 @@ class ZeroCopyRingBuffer(SovereignResource):
             logger.error("Failed to count pending tasks in ZeroCopyRingBuffer: %s", e)
         return count
 
+
+    def reset(self):
+        """Zero out the buffer to reset the C5-REAL state."""
+        if self._rust_buf is not None:
+            # Re-initialize Rust buffer if supported, or ignore
+            pass
+        elif hasattr(self, "_buffer") and self._buffer is not None:
+            self._buffer[:] = b"\x00" * self.tensor_size
 
 _global_ring_buffer = None
 
@@ -310,7 +336,7 @@ class OutboxDaemon(SovereignResource):
                 # -- C5-REAL SOVEREIGN ISOLATION --
                 # Todo tráfico de red externa está PROHIBIDO. Las tareas que no son manejadas
                 # por interceptores nativos L0 se ignoran para prevenir exfiltración de entropía.
-                logger.error(f"C5-REAL Isolation: Task {agent_name} rejected. Network dispatch is prohibited.")
+                logger.debug(f"C5-REAL Isolation: Task {agent_name} rejected. Network dispatch is prohibited.")
                 
         except Exception as e:
             logger.error("Outbox drainer error: %s", e)

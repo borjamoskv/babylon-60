@@ -34,15 +34,6 @@ def clean_swarm_queue_db(monkeypatch, tmp_path):
     # Initialize the tables in test_db
     conn = sqlite3.connect(str(test_db))
     c = conn.cursor()
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS cortex_swarm_queue (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp REAL,
-            agent TEXT,
-            payload TEXT,
-            status TEXT
-        )
-    """)
     conn.commit()
     conn.close()
 
@@ -98,9 +89,22 @@ async def test_daemon_basic_queue_processing(tmp_path, monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_daemon_command_extraction():
+async def test_daemon_command_extraction(tmp_path, monkeypatch):
     """Test that command is extracted from payload or command key correctly."""
+    db_path = str(tmp_path / "cortex_memory_vsa.db")
+    bin_path = str(tmp_path / "swarm_ring_vsa.bin")
+    
+    monkeypatch.setattr("cortex_daemon.DB_PATH", db_path)
+    monkeypatch.setattr("persistence.base.DB_PATH", db_path)
+    monkeypatch.setattr("persistence.base.VSA_BIN_PATH", bin_path)
+    
+    import persistence.outbox
+    monkeypatch.setattr("persistence.outbox._global_ring_buffer", None)
+    
     daemon = CortexDaemon()
+    import sqlite3
+    daemon.db_conn = sqlite3.connect(db_path, check_same_thread=False, isolation_level=None)
+    daemon.db_conn.execute("CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, returncode INTEGER, execution_time REAL);")
 
     # Task with command in payload
     task1 = {"agent": "AgentA", "payload": {"command": "cmd_a"}}
@@ -125,21 +129,13 @@ async def test_daemon_command_extraction():
 
     daemon._execute_task = mock_execute_raw
 
-    # Prepare queue content in SQLite
-    conn = sqlite3.connect(persistence.DB_PATH)
-    c = conn.cursor()
     for task in [task1, task2, task3]:
         agent = task["agent"]
         if "payload" in task:
             payload_val = task["payload"]
         else:
             payload_val = {"command": task["command"]}
-        c.execute(
-            "INSERT INTO cortex_swarm_queue (timestamp, agent, payload, status) VALUES (?, ?, ?, 'pending')",
-            (time.time(), agent, json.dumps(payload_val)),
-        )
-    conn.commit()
-    conn.close()
+        enqueue_swarm_task(agent, payload_val)
 
     await daemon.process_swarm_queue()
 
@@ -161,10 +157,6 @@ async def test_swarm_queue_contention(tmp_path, monkeypatch):
     import persistence.outbox
 
     monkeypatch.setattr("persistence.outbox._global_ring_buffer", None)
-    monkeypatch.setattr(
-        "persistence.outbox.ZeroCopyRingBuffer",
-        lambda **kwargs: persistence.outbox.ZeroCopyRingBuffer(capacity=10000),
-    )
     # Wait, just setting _global_ring_buffer to None is enough because __init__ reads from base.DB_PATH
 
     daemon = CortexDaemon()

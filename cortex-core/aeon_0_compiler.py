@@ -107,6 +107,13 @@ class AEON0Compiler:
         func_name = payload_dict.get("function_name")
         new_source = payload_dict.get("new_source")
         yield_amount = payload_dict.get("yield_amount", 0.0)
+        signature = payload_dict.get("signature")
+
+        # 0. ZK-Seal C5-REAL Validation
+        if not signature:
+            raise ValueError("SECURITY ALERT: AST Mutation Rejected. Missing C5-REAL ZK-Seal.")
+        if not self.ledger.verify_zk_seal(new_source, signature):
+            raise ValueError("SECURITY ALERT: AST Mutation Rejected. Invalid C5-REAL ZK-Seal.")
 
         # 1. Z3 Formal Verification
         if not Z3ThermodynamicValidator.verify(new_source):
