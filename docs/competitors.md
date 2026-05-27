@@ -33,11 +33,13 @@ The memory market has consolidated around three archetypes. None provide cryptog
 | **Hindsight** | Undisclosed | Multi-strategy retrieval (Graph/Temporal/Semantic) | Native MCP integration. High-accuracy benchmarks. | No formal verification guards. |
 | **LangMem** | Part of LangChain ecosystem | Native LangGraph plugin | Zero-friction for LangGraph teams. | LangChain vendor coupling. |
 
-### The structural failure across all:
+### The structural failure across all (The ROI Bleed):
 
-1. **No Verification Membrane.** They ingest whatever the LLM emits. If GPT-5 hallucinates a "fact", it becomes ground truth.
-2. **No EU AI Act Art. 12 compliance.** They cannot produce a cryptographically sealed audit artifact. The Act requires automatic, tamper-evident logging throughout the system lifecycle — enforceable Dec 2027 (standalone) / Aug 2028 (embedded).
-3. **No hash-chained state transitions.** An admin (or compromised API key) can silently mutate the memory graph. Zero mathematical proof of corruption.
+1. **Capital Extraction Leak:** Cloud compute costs spiral out of control when autonomous agents hit recursive failure loops. Because these systems lack an autopoietic immune layer (CPTA/Nemesis), agents burn tokens re-attempting failed paths. CORTEX's declarative `tether.md` stops the financial bleed O(1).
+2. **Context Loss Penalty:** A developer loses ~1 hour per session regaining context. Ephemeral memory means regenerating context. CORTEX's Sovereign Memory saves average enterprise teams $12,000 per engineer/year.
+3. **No Verification Membrane:** They ingest whatever the LLM emits. If GPT-5 hallucinates a "fact", it becomes ground truth, compounding error downstream.
+4. **No EU AI Act Art. 12 compliance:** They cannot produce a cryptographically sealed audit artifact. 
+5. **No hash-chained state transitions:** Zero mathematical proof of corruption.
 
 ---
 

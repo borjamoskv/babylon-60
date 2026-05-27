@@ -54,17 +54,17 @@ This creates `~/.cortex/cortex.db` with the core ledger/fact schema plus optiona
 Every fact is automatically hash-chained into an immutable ledger.
 
 ```bash
-# Store knowledge
-cortex memory store my-project "Redis uses skip lists for sorted sets" --tags "redis,data-structures"
+# Store knowledge (Alias `cortex store` preferred for DX speed)
+cortex store my-project "Redis uses skip lists for sorted sets" --tags "redis,data-structures"
 
 # Store a decision (with automatic provenance detection)
-cortex memory store my-project "We chose FastAPI over Flask for async support" --type decision
+cortex store my-project "We chose FastAPI over Flask for async support" --type decision
 
 # Store an error pattern
-cortex memory store my-project "OOM when batch size > 1024 on 8GB RAM" --type error
+cortex store my-project "OOM when batch size > 1024 on 8GB RAM" --type error
 
 # Store with explicit source
-cortex memory store my-project "Rate limit is 100 req/min" --type config --source "agent:gpt-4"
+cortex store my-project "Rate limit is 100 req/min" --type config --source "agent:gpt-4"
 ```
 
 ---
