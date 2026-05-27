@@ -153,6 +153,20 @@ class LedgerManager(SovereignResource):
                 ))
         self.public_key = self.private_key.public_key()
 
+        import queue
+        self._tx_queue = queue.Queue()
+        c = self._conn.cursor()
+        c.execute("SELECT hash, timestamp FROM ledger_records ORDER BY id DESC LIMIT 1")
+        row = c.fetchone()
+        if row:
+            self._last_hash, self._last_timestamp = row
+        else:
+            self._last_hash = "GENESIS_BLOCK"
+            self._last_timestamp = 0.0
+
+        self._signer_thread = threading.Thread(target=self._signer_loop, daemon=True)
+        self._signer_thread.start()
+
     def _init_db(self):
         # Ensure database parent directory exists
         os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
@@ -210,46 +224,57 @@ class LedgerManager(SovereignResource):
         )
         self._conn.commit()
 
+    def _signer_loop(self):
+        import queue
+        batch = []
+        while True:
+            try:
+                item = self._tx_queue.get(timeout=1.0)
+                if item is None:
+                    break
+                batch.append(item)
+                while len(batch) < 100:
+                    try:
+                        batch.append(self._tx_queue.get_nowait())
+                    except queue.Empty:
+                        break
+                
+                c = self._conn.cursor()
+                for timestamp, action, vector_id, yield_amount, block_hash, zk_payload in batch:
+                    zk_proof = self.private_key.sign(zk_payload).hex()
+                    c.execute(
+                        "INSERT INTO ledger_records (timestamp, action, vector_id, yield_amount, hash, zk_proof) VALUES (?, ?, ?, ?, ?, ?)",
+                        (timestamp, action, vector_id, yield_amount, block_hash, zk_proof)
+                    )
+                self._conn.commit()
+                batch.clear()
+            except queue.Empty:
+                continue
+            except Exception as e:
+                logger.error("LedgerManager _signer_loop error: %s", e)
+                batch.clear()
+
     def append(self, action: str, vector_id: str, yield_amount: float) -> str:
         """Hash-chain new transaction to guarantee auditable tamper-evident history."""
         with self._lock:
-            c = self._conn.cursor()
-            # Get previous hash and validate timestamp monotonicity (Anti-Time-Jacking)
-            c.execute("SELECT hash, timestamp FROM ledger_records ORDER BY id DESC LIMIT 1")
-            row = c.fetchone()
-            if row:
-                prev_hash, last_timestamp = row
-            else:
-                prev_hash = "GENESIS_BLOCK"
-                last_timestamp = 0.0
-
             current_time = time.monotonic()
-            # L2 Sequencer Enforcement: Prevent rollback / Time-Jacking
-            if current_time <= last_timestamp:
+            if current_time <= self._last_timestamp:
                 logger.warning(
-                    f"SECURITY ALERT: Time-Jacking or clock drift detected. Current: {current_time}, Last: {last_timestamp}. Enforcing monotonic sequence."
+                    f"SECURITY ALERT: Time-Jacking detected. Current: {current_time}, Last: {self._last_timestamp}."
                 )
-                timestamp = last_timestamp + 0.001
+                timestamp = self._last_timestamp + 0.001
             else:
                 timestamp = current_time
 
-            payload = f"{prev_hash}_{action}_{vector_id}_{yield_amount}_{timestamp}"
+            payload = f"{self._last_hash}_{action}_{vector_id}_{yield_amount}_{timestamp}"
             block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
-
-            # C5-REAL Cryptographic Vault Sealing (ZK-Proof / Inter-Nodal Trust)
             zk_payload = f"{block_hash}_{action}_{timestamp}_CORTEX_L0".encode()
-            zk_proof = self.private_key.sign(zk_payload).hex()
 
-            c.execute(
-                """
-                INSERT INTO ledger_records (timestamp, action, vector_id, yield_amount, hash, zk_proof)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """,
-                (timestamp, action, vector_id, yield_amount, block_hash, zk_proof),
-            )
-            self._conn.commit()
+            self._last_hash = block_hash
+            self._last_timestamp = timestamp
+            
+            self._tx_queue.put((timestamp, action, vector_id, yield_amount, block_hash, zk_payload))
 
-            # Autodidact-Ω: Precise O(1) Exergy Tracking
             self._entropy_counter += 1
             if self._entropy_counter >= 1000:
                 ledger_entropy_event.set()
@@ -313,6 +338,39 @@ class VSAMemory(SovereignResource):
             self, self._safe_close, self._mmap_tensor, self._f, self._conn
         )
         atexit.register(self.close)
+        
+        import queue
+        self._db_queue = queue.Queue()
+        self._db_thread = threading.Thread(target=self._db_loop, daemon=True)
+        self._db_thread.start()
+
+    def _db_loop(self):
+        import queue
+        batch = []
+        while True:
+            try:
+                item = self._db_queue.get(timeout=1.0)
+                if item is None:
+                    break
+                batch.append(item)
+                while len(batch) < 100:
+                    try:
+                        batch.append(self._db_queue.get_nowait())
+                    except queue.Empty:
+                        break
+                
+                c = self._conn.cursor()
+                c.executemany(
+                    "INSERT OR REPLACE INTO cortex_knowledge (ki_id, summary, content) VALUES (?, ?, ?)",
+                    batch
+                )
+                self._conn.commit()
+                batch.clear()
+            except queue.Empty:
+                continue
+            except Exception as e:
+                logger.error("VSAMemory _db_loop error: %s", e)
+                batch.clear()
 
     def record(self, key: str, value: str):
         """Map semantic trace to both RAM tensor and Persistent SQLite FTS5."""
@@ -338,17 +396,8 @@ class VSAMemory(SovereignResource):
                 self._apply_decay()
                 self._record_count = 0
 
-        try:
-            with self._lock:
-                c = self._conn.cursor()
-                ki_id = f"vsa_{int(time.monotonic())}_{idx}"
-                c.execute(
-                    "INSERT OR REPLACE INTO cortex_knowledge (ki_id, summary, content) VALUES (?, ?, ?)",
-                    (ki_id, key, value),
-                )
-                self._conn.commit()
-        except Exception as e:
-            logger.error("VSA SQLite Record Failure: %s", e)
+        ki_id = f"vsa_{int(time.monotonic())}_{idx}"
+        self._db_queue.put((ki_id, key, value))
 
     def _apply_decay(self):
         for i in range(VSA_DIMENSION):
@@ -668,7 +717,53 @@ class OutboxDaemon(SovereignResource):
                 row_id, agent_name, payload = task
                 logger.info("Processing task %s from %s", row_id, agent_name)
 
-                # -- END INTERCEPTOR --
+                try:
+                    payload_dict = json.loads(payload)
+                except Exception:
+                    payload_dict = {}
+
+                # -- NATIVE L0 INTERCEPTOR: EXA_LISP --
+                if payload_dict.get("type") == "EXA_LISP":
+                    try:
+                        from exa_lisp_genesis import parse, tokenize, evaluate, ExergyEnvironment, EntropyDeath
+                        logger.info(f"C5-REAL EXA_LISP Invoked. Limits: {payload_dict.get('exergy_limit', 1000)}j")
+                        code = payload_dict.get("code", "")
+                        limit = payload_dict.get("exergy_limit", 1000)
+                        
+                        env = ExergyEnvironment(joules=limit, ledger=self.ledger)
+                        ast = parse(tokenize(code))
+                        result = evaluate(ast, env)
+                        
+                        logger.info(f"EXA_LISP Output: {result}")
+                        if not str(row_id).startswith("ring_"):
+                            self._update_task_status(row_id, "completed")
+                        continue
+                    except EntropyDeath as e:
+                        logger.error(f"EXA_LISP Halted (EntropyDeath): {e}")
+                        if not str(row_id).startswith("ring_"):
+                            self._update_task_status(row_id, "failed")
+                        continue
+                    except Exception as e:
+                        logger.error(f"EXA_LISP Syntax/Runtime Error: {e}")
+                        if not str(row_id).startswith("ring_"):
+                            self._update_task_status(row_id, "failed")
+                        continue
+
+                # -- NATIVE L0 INTERCEPTOR: AST_MUTATION --
+                if payload_dict.get("type") == "AST_MUTATION":
+                    try:
+                        from aeon_0_compiler import AEON0Compiler
+                        logger.info("C5-REAL AST_MUTATION Invoked via AEON-0 Compiler.")
+                        compiler = AEON0Compiler(ledger=self.ledger)
+                        compiler.mutate(payload_dict)
+                        if not str(row_id).startswith("ring_"):
+                            self._update_task_status(row_id, "completed")
+                        continue
+                    except Exception as e:
+                        logger.error(f"AEON-0 Compiler Error: {e}")
+                        if not str(row_id).startswith("ring_"):
+                            self._update_task_status(row_id, "failed")
+                        continue
 
                 # -- C5-REAL SOVEREIGN ISOLATION --
                 # Todo tráfico de red externa está PROHIBIDO. Las tareas que no son manejadas
@@ -731,17 +826,7 @@ def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
 
 
 def enqueue_swarm_task(agent_name: str, payload: dict):
-    """Sovereign Swarm Queue Dispatcher. Offloads to executor if running inside an event loop to prevent event loop blocking/lag."""
-    if os.getenv("CORTEX_TESTING") == "1":
-        _enqueue_swarm_task_sync(agent_name, payload)
-        return
-    try:
-        loop = asyncio.get_running_loop()
-        if loop.is_running():
-            loop.run_in_executor(None, _enqueue_swarm_task_sync, agent_name, payload)
-            return
-    except RuntimeError:
-        pass
+    """Sovereign Swarm Queue Dispatcher. Pure Lock-Free execution bypasses executor overhead."""
     _enqueue_swarm_task_sync(agent_name, payload)
 
 
