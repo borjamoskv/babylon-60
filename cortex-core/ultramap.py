@@ -49,8 +49,10 @@ class UltramapSubstrate:
         logger.info(f"ULTRAMAP-Ω Initialized. Capacity: {self.capacity} agents. O(1) Memory Active.")
 
     @staticmethod
-    def _safe_close(mmap_obj, f_obj):
+    def _safe_close(buffer_obj, mmap_obj, f_obj):
         try:
+            if buffer_obj:
+                buffer_obj.release()
             if mmap_obj:
                 mmap_obj.close()
             if f_obj:
@@ -59,6 +61,15 @@ class UltramapSubstrate:
             pass
 
     def close(self):
+        if hasattr(self, "_buffer") and self._buffer is not None:
+            self._buffer.release()
+            self._buffer = None
+        if hasattr(self, "_mmap") and self._mmap is not None:
+            self._mmap.close()
+            self._mmap = None
+        if hasattr(self, "_f") and self._f is not None:
+            self._f.close()
+            self._f = None
         if hasattr(self, "_finalizer") and self._finalizer.alive:
             self._finalizer()
 

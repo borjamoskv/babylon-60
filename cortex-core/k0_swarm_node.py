@@ -70,7 +70,7 @@ class HardwareAggressor:
     def __init__(self, ledger: 'LedgerManager'):
         self.ledger = ledger
         self.expansion_threshold = 1.0  # ETH / CORTEX-Credits needed to buy 1 Spot GPU node
-        self.active_nodes = 1
+        self.active_nodes = 10000
         
         try:
             from ultramap import UltramapSubstrate

@@ -1,6 +1,7 @@
 
 import os
 import time
+import queue
 import struct
 import hashlib
 import sqlite3
@@ -8,7 +9,6 @@ import threading
 import mmap
 import weakref
 import atexit
-import queue
 
 from .base import SovereignResource, _setup_sqlite_pragmas, DB_PATH, VSA_BIN_PATH, VSA_DIMENSION, HAS_CORTEX_RS, logger
 
@@ -16,11 +16,6 @@ try:
     import cortex_rs
 except ImportError:
     pass
-
-# Pre-compiled struct for SIMD-friendly batch decay
-_DECAY_CHUNK = 512  # Process 512 doubles at a time (~4KB cache line)
-_DECAY_FMT = struct.Struct(f"{_DECAY_CHUNK}d")
-
 
 class VSAMemory(SovereignResource):
     """L2 Sovereign Vector Symbolic Architecture (VSA) Substrate & SQLite Semantic Knowledge Base."""
@@ -30,6 +25,18 @@ class VSAMemory(SovereignResource):
             self._db_queue.put(None)
             if hasattr(self, '_db_thread') and self._db_thread.is_alive():
                 self._db_thread.join(timeout=1.0)
+        if hasattr(self, "_tensor") and self._tensor is not None:
+            self._tensor.release()
+            self._tensor = None
+        if hasattr(self, "_base_view") and self._base_view is not None:
+            self._base_view.release()
+            self._base_view = None
+        if hasattr(self, "_mmap_tensor") and self._mmap_tensor is not None:
+            self._mmap_tensor.close()
+            self._mmap_tensor = None
+        if hasattr(self, "_f") and self._f is not None:
+            self._f.close()
+            self._f = None
         super().close()
 
     def __init__(self):
@@ -48,7 +55,8 @@ class VSAMemory(SovereignResource):
 
         self._f = open(VSA_BIN_PATH, "r+b")
         self._mmap_tensor = mmap.mmap(self._f.fileno(), self._tensor_size)
-        self._tensor = memoryview(self._mmap_tensor).cast("d")
+        self._base_view = memoryview(self._mmap_tensor)
+        self._tensor = self._base_view.cast("d")
 
         self._decay_rate = 0.99
         self._record_count = 0  # Metabolic decay counter
@@ -58,16 +66,16 @@ class VSAMemory(SovereignResource):
 
         # Use weakref.finalize for guaranteed cleanup when instance is garbage collected
         self._finalizer = weakref.finalize(
-            self, self._safe_close, self._mmap_tensor, self._f, self._conn
+            self, self._safe_close, getattr(self, '_tensor', None), getattr(self, '_base_view', None), getattr(self, '_mmap_tensor', None), getattr(self, '_f', None), getattr(self, '_conn', None)
         )
         atexit.register(self.close)
-
-        self._db_queue = queue.Queue()
+        
+        self._db_queue: queue.Queue = queue.Queue()
         self._db_thread = threading.Thread(target=self._db_loop, daemon=True)
         self._db_thread.start()
 
     def _db_loop(self):
-        batch = []
+        batch: list = []
         while True:
             try:
                 item = self._db_queue.get(timeout=1.0)
@@ -79,7 +87,7 @@ class VSAMemory(SovereignResource):
                         batch.append(self._db_queue.get_nowait())
                     except queue.Empty:
                         break
-
+                
                 for attempt in range(3):
                     try:
                         c = self._conn.cursor()
@@ -124,47 +132,16 @@ class VSAMemory(SovereignResource):
             self._record_count += 1
             if self._record_count >= 1000:
                 # Metabolic decay: driven by operation volume (Exergy), not arbitrary clock time
-                self._apply_decay_vectorized()
+                self._apply_decay()
                 self._record_count = 0
 
         ki_id = f"vsa_{int(time.monotonic())}_{idx}"
         self._db_queue.put((ki_id, key, value))
 
-    def _apply_decay_vectorized(self):
-        """Vectorized decay: process _DECAY_CHUNK doubles per iteration.
-        
-        ~20x faster than per-element Python loop on CPython by minimizing
-        interpreter overhead via struct pack/unpack batches.
-        """
-        rate = self._decay_rate
-        raw = self._mmap_tensor
-        total = VSA_DIMENSION
-        chunk = _DECAY_CHUNK
-        fmt = _DECAY_FMT
-
-        for start in range(0, total, chunk):
-            end = min(start + chunk, total)
-            n = end - start
-            byte_off = start * 8
-            byte_len = n * 8
-
-            if n == chunk:
-                vals = list(fmt.unpack_from(raw, byte_off))
-                for i in range(chunk):
-                    v = vals[i]
-                    if v > 0.001:
-                        vals[i] = v * rate
-                    elif v > 0.0:
-                        vals[i] = 0.0
-                fmt.pack_into(raw, byte_off, *vals)
-            else:
-                # Tail chunk
-                tail_fmt = struct.Struct(f"{n}d")
-                vals = list(tail_fmt.unpack_from(raw, byte_off))
-                for i in range(n):
-                    v = vals[i]
-                    if v > 0.001:
-                        vals[i] = v * rate
-                    elif v > 0.0:
-                        vals[i] = 0.0
-                tail_fmt.pack_into(raw, byte_off, *vals)
+    def _apply_decay(self):
+        for i in range(VSA_DIMENSION):
+            val = self._tensor[i]
+            if val > 0.001:
+                self._tensor[i] = val * self._decay_rate
+            elif val > 0.0:
+                self._tensor[i] = 0.0

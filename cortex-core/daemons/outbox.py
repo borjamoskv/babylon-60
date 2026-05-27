@@ -86,7 +86,19 @@ class ZeroCopyRingBuffer(SovereignResource):
             self.umap = None
         
         # C5-REAL: Prevent shared memory leak via weakref garbage collection
-        self._finalizer = weakref.finalize(self, self._safe_close, getattr(self, '_buffer', None), self._mmap, self._f)
+        self._finalizer = weakref.finalize(self, self._safe_close, getattr(self, '_buffer', None), getattr(self, '_mmap', None), getattr(self, '_f', None))
+
+    def close(self):
+        if hasattr(self, "_buffer") and self._buffer is not None:
+            self._buffer.release()
+            self._buffer = None
+        if hasattr(self, "_mmap") and self._mmap is not None:
+            self._mmap.close()
+            self._mmap = None
+        if hasattr(self, "_f") and self._f is not None:
+            self._f.close()
+            self._f = None
+        super().close()
 
     def enqueue(self, agent_id: bytes, payload: bytes) -> bool:
         """O(1) Zero-copy memory write. Bypasses VSA OS locks."""

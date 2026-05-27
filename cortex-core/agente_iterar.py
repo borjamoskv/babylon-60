@@ -201,7 +201,7 @@ class AgenteIterar:
             return True, 0
         try:
             res = subprocess.run(
-                [sys.executable, "-m", "pytest", "tests/", "-m", "not slow",
+                [sys.executable, "-m", "pytest", "tests/", "-n", "auto", "-m", "not slow",
                  "--tb=line", "-q", "--no-header"],
                 cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=90,
             )
