@@ -21,6 +21,7 @@ logger = logging.getLogger("cortex.lock")
 
 _REDUCE_LOCKS: dict[str, asyncio.Lock] = {}
 
+
 def _get_local_lock(db_path: str | None) -> asyncio.Lock:
     key = db_path or ":memory:"
     if key not in _REDUCE_LOCKS:
@@ -79,9 +80,7 @@ class SovereignLock:
 
             # 3. Wait for state collapse (polling projection)
             start_time = datetime.now(timezone.utc)
-            while (
-                datetime.now(timezone.utc) - start_time
-            ).total_seconds() < timeout_s:
+            while (datetime.now(timezone.utc) - start_time).total_seconds() < timeout_s:
                 async with conn.execute(
                     "SELECT holder_agent, expires_at FROM lock_state WHERE resource = ?",
                     (resource,),
@@ -113,10 +112,12 @@ class SovereignLock:
                     row = await cursor.fetchone()
                 if row and row[0] == agent_id:
                     logger.debug(
-                        "SovereignLock: Resource %s acquired by %s right at timeout", resource, agent_id
+                        "SovereignLock: Resource %s acquired by %s right at timeout",
+                        resource,
+                        agent_id,
                     )
                     return True
-                    
+
                 # We didn't get it. Remove our request intent.
                 await conn.execute(
                     "DELETE FROM lock_intents WHERE resource = ? AND agent_id = ? AND action LIKE 'request%'",
@@ -202,7 +203,7 @@ class SovereignLock:
                 row = await cursor.fetchone()
             if row:
                 new_holder, action_val = row
-                
+
                 # Decode TTL from action (e.g., 'request:30.0')
                 ttl_s = 30.0
                 if ":" in action_val:
@@ -210,10 +211,8 @@ class SovereignLock:
                         ttl_s = float(action_val.split(":")[1])
                     except ValueError:
                         pass
-                
-                new_expiry = (
-                    datetime.now(timezone.utc) + timedelta(seconds=ttl_s)
-                ).isoformat()
+
+                new_expiry = (datetime.now(timezone.utc) + timedelta(seconds=ttl_s)).isoformat()
 
                 await conn.execute(
                     "INSERT OR REPLACE INTO lock_state (resource, holder_agent, acquired_at, "
@@ -243,15 +242,17 @@ class SovereignLock:
         local_lock = _get_local_lock(self._db_path)
         async with local_lock:
             # Get the current expired holder so we can remove their intents
-            async with conn.execute("SELECT holder_agent FROM lock_state WHERE resource = ?", (resource,)) as cursor:
+            async with conn.execute(
+                "SELECT holder_agent FROM lock_state WHERE resource = ?", (resource,)
+            ) as cursor:
                 row = await cursor.fetchone()
-            
+
             if row and row[0]:
                 expired_holder = row[0]
                 # Remove their request intent so they don't immediately reclaim it
                 await conn.execute(
                     "DELETE FROM lock_intents WHERE resource = ? AND agent_id = ?",
-                    (resource, expired_holder)
+                    (resource, expired_holder),
                 )
 
             await conn.execute("DELETE FROM lock_state WHERE resource = ?", (resource,))

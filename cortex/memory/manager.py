@@ -569,7 +569,7 @@ class CortexMemoryManager:
                 await asyncio.wait_for(self._bg_queue.join(), timeout=timeout)
             except asyncio.TimeoutError:
                 logger.error("MemoryManager: wait_for_background timed out after %ds", timeout)
-        
+
         # Always cancel workers when shutting down
         await self._cancel_background_tasks()
 
@@ -591,13 +591,13 @@ class CortexMemoryManager:
                 await self._dynamic_space.stop()
             except Exception as e:
                 logger.error("Error stopping dynamic semantic space: %s", e)
-                
+
         if tasks_to_wait:
             try:
                 await asyncio.gather(*tasks_to_wait, return_exceptions=True)
             except Exception:
                 pass
-        
+
         self._bg_workers.clear()
 
         # Flush the queue

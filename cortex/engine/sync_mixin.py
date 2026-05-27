@@ -2,7 +2,6 @@ import asyncio
 import threading
 
 
-
 # pyright: reportAttributeAccessIssue=false
 class SyncMixin:
     def _run_sync(self, coro):
@@ -60,9 +59,7 @@ class SyncMixin:
             try:
                 self._run_sync(self.close())
             except Exception as e:
-                logger.error(
-                    f"[SyncMixin] Error closing async engine synchronously: {e}", exc_info=True
-                )
+                logger.exception(f"[SyncMixin] Error closing async engine synchronously: {e}")
 
             lock = self.__dict__.setdefault("_instance_sync_lock", threading.Lock())
             with lock:
@@ -81,10 +78,7 @@ class SyncMixin:
                 try:
                     asyncio.run(self.close())
                 except Exception as e:
-                    logger.error(
-                        f"[SyncMixin] Error closing async engine via asyncio.run: {e}",
-                        exc_info=True,
-                    )
+                    logger.exception(f"[SyncMixin] Error closing async engine via asyncio.run: {e}")
 
     def health_check_sync(self, *args, **kwargs):
         return self._run_sync(self.health_check(*args, **kwargs))

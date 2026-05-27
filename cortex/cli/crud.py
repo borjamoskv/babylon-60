@@ -31,6 +31,7 @@ def _run_async(coro: Coroutine[Any, Any, _T]) -> _T:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def delete(fact_id, reason, tenant_id, db) -> None:
     """Soft-delete: depreca un fact y auto-sincroniza JSON."""
+
     async def _do_delete():
         engine = get_engine(db)
         try:
@@ -44,13 +45,16 @@ def delete(fact_id, reason, tenant_id, db) -> None:
                 return
 
             from cortex.engine.models import Fact
+
             fact = cast(Fact, fact)
 
             console.print(
                 f"[dim]Deprecando:[/] [bold]#{fact_id}[/] "
                 f"[cyan]{fact.project}[/] ({fact.fact_type}) — {fact.content[:80]}..."
             )
-            success = await engine.deprecate(fact_id, reason or "deleted-via-cli", tenant_id=tenant_id)
+            success = await engine.deprecate(
+                fact_id, reason or "deleted-via-cli", tenant_id=tenant_id
+            )
             if success:
                 wb = await export_to_json(engine)
                 console.print(
@@ -61,7 +65,7 @@ def delete(fact_id, reason, tenant_id, db) -> None:
                 console.print(f"[red]✗ No se pudo deprecar/deprecate fact #{fact_id}[/]")
         finally:
             await engine.close()
-            
+
     _run_async(_do_delete())
 
 
@@ -73,6 +77,7 @@ def delete(fact_id, reason, tenant_id, db) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def list_facts(project, fact_type, limit, tenant_id, db) -> None:
     """Listar facts activos (tabulado)."""
+
     async def _do_list():
         engine = get_engine(db)
         try:
@@ -114,6 +119,7 @@ def list_facts(project, fact_type, limit, tenant_id, db) -> None:
             table.add_column("Tags", style="dim", width=15)
 
             from cortex.crypto import get_default_encrypter
+
             enc = get_default_encrypter()
             from cryptography.exceptions import InvalidTag
 
@@ -142,6 +148,7 @@ def list_facts(project, fact_type, limit, tenant_id, db) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def edit(fact_id, new_content, tenant_id, db) -> None:
     """Editar un fact: depreca el viejo y crea uno nuevo con el contenido actualizado."""
+
     async def _do_edit():
         engine = get_engine(db)
         try:
@@ -155,6 +162,7 @@ def edit(fact_id, new_content, tenant_id, db) -> None:
                 return
 
             from cortex.engine.models import Fact
+
             fact = cast(Fact, fact)
 
             await engine.deprecate(fact_id, "edited → new version", tenant_id=tenant_id)
@@ -186,6 +194,7 @@ def edit(fact_id, new_content, tenant_id, db) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def inspect(fact_id, tenant_id, db) -> None:
     """Deep inspection of a fact (Double-Plane V2 facets)."""
+
     async def _do_inspect():
         engine = get_engine(db)
         try:
@@ -242,7 +251,9 @@ def inspect(fact_id, tenant_id, db) -> None:
             # Enrichment Process
             info.add_row("", "")
             info.add_row("[bold underline]Process status (P0 Decoupling)[/]", "")
-            job_color = "red" if status == "failed" else ("yellow" if status == "pending" else "green")
+            job_color = (
+                "red" if status == "failed" else ("yellow" if status == "pending" else "green")
+            )
             info.add_row("Enrichment:", f"[{job_color}]{status.upper()}[/]")
             if error:
                 info.add_row("Error:", f"[red]{error}[/]")
@@ -255,7 +266,12 @@ def inspect(fact_id, tenant_id, db) -> None:
                     info.add_row("Relation:", fact.relation_type)
 
             console.print(
-                Panel(info, title=f"Fact [bold]#{fact_id}[/]", expand=False, border_style="bright_blue")
+                Panel(
+                    info,
+                    title=f"Fact [bold]#{fact_id}[/]",
+                    expand=False,
+                    border_style="bright_blue",
+                )
             )
 
             console.print("\n[bold]Content:[/]")

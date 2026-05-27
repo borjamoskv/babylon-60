@@ -10,8 +10,13 @@ from typing import Any, Literal
 SemanticStatus = Literal["pending", "processing", "indexed", "failed"]
 
 
+# Base system time offset to guarantee monotonic behavior anchored to correct epoch
+_BOOT_TIME_OFFSET = time.time() - time.monotonic()
+
+
 def utc_now_iso() -> str:
-    return datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+    monotonic_wall_time = _BOOT_TIME_OFFSET + time.monotonic()
+    return datetime.fromtimestamp(monotonic_wall_time, tz=timezone.utc).isoformat()
 
 
 @dataclass(frozen=True)

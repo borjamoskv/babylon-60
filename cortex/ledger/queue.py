@@ -8,8 +8,12 @@ from typing import Any
 from cortex.ledger.store import LedgerStore
 
 
+_BOOT_TIME_OFFSET = time.time() - time.monotonic()
+
+
 def utc_now_iso() -> str:
-    return datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+    monotonic_wall_time = _BOOT_TIME_OFFSET + time.monotonic()
+    return datetime.fromtimestamp(monotonic_wall_time, tz=timezone.utc).isoformat()
 
 
 class EnrichmentQueue:

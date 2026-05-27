@@ -154,7 +154,7 @@ class LedgerVerifier:
             # Post-Quantum ML-DSA Signature of Checkpoint Root
             pk = self._get_mldsa_private_key()
             pub = pk.public_key()
-            sig_payload = f"{root_hash}_{start_ev}_{end_ev}_{len(hashes)}".encode("utf-8")
+            sig_payload = f"{root_hash}_{start_ev}_{end_ev}_{len(hashes)}".encode()
             sig = pk.sign(sig_payload)
             sig_hex = sig.hex()
             pub_hex = pub.public_bytes_raw().hex()
@@ -207,7 +207,9 @@ class LedgerVerifier:
 
         with self.store.tx() as conn:
             # Check if columns exist
-            columns = {row[1] for row in conn.execute("PRAGMA table_info(ledger_checkpoints)").fetchall()}
+            columns = {
+                row[1] for row in conn.execute("PRAGMA table_info(ledger_checkpoints)").fetchall()
+            }
             if "mldsa_signature" not in columns or "mldsa_public_key" not in columns:
                 return {
                     "valid": True,
@@ -230,15 +232,17 @@ class LedgerVerifier:
                 pub_hex = row["mldsa_public_key"]
 
                 if not sig_hex or not pub_hex:
-                    violations.append(f"Checkpoint {c_id} is missing post-quantum signature or public key.")
+                    violations.append(
+                        f"Checkpoint {c_id} is missing post-quantum signature or public key."
+                    )
                     continue
 
                 try:
                     pubkey_bytes = bytes.fromhex(pub_hex)
                     sig_bytes = bytes.fromhex(sig_hex)
                     pubkey = mldsa.MLDSA44PublicKey.from_public_bytes(pubkey_bytes)
-                    
-                    sig_payload = f"{root_hash}_{start_ev}_{end_ev}_{count}".encode("utf-8")
+
+                    sig_payload = f"{root_hash}_{start_ev}_{end_ev}_{count}".encode()
                     pubkey.verify(sig_bytes, sig_payload)
                 except InvalidSignature:
                     violations.append(f"Invalid ML-DSA signature for checkpoint {c_id}.")
@@ -255,9 +259,11 @@ class LedgerVerifier:
         """Performs a comprehensive verification including both classical chain hashes and ML-DSA checkpoint signatures."""
         chain_report = self.verify_chain()
         checkpoint_report = self.verify_checkpoint_signatures()
-        
-        combined_violations = list(chain_report.get("violations", [])) + list(checkpoint_report.get("violations", []))
-        
+
+        combined_violations = list(chain_report.get("violations", [])) + list(
+            checkpoint_report.get("violations", [])
+        )
+
         return {
             "valid": len(combined_violations) == 0,
             "violations": combined_violations,

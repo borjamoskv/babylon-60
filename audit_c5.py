@@ -19,7 +19,7 @@ async def run_audit():
     print("\n--- AUDIT: ZERO-COPY RING BUFFER (LEGION-10k Scaling) ---")
     pm = HybridPersistenceManager()
     ring = _get_ring_buffer()
-    
+
     # 1. Enqueue a VulnerabilityFixer task into the Ring Buffer
     payload = json.dumps(
         {"finding": "CVE-2026-9999", "target_file": "src/core.rs", "severity": "Critical"}

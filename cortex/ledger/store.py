@@ -225,7 +225,9 @@ class LedgerStore:
 
     def _ensure_checkpoint_mldsa_columns(self, conn: sqlite3.Connection) -> None:
         """Backfill compatibility columns for MLDSA post-quantum checkpoint signatures."""
-        existing = {row[1] for row in conn.execute("PRAGMA table_info(ledger_checkpoints)").fetchall()}
+        existing = {
+            row[1] for row in conn.execute("PRAGMA table_info(ledger_checkpoints)").fetchall()
+        }
         for column in ("mldsa_signature", "mldsa_public_key"):
             if column not in existing:
                 conn.execute(f"ALTER TABLE ledger_checkpoints ADD COLUMN {column} TEXT")

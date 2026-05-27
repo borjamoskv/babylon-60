@@ -131,4 +131,3 @@ def test_post_quantum_checkpointing_verification(test_db):
     corrupted_report_2 = verifier.verify_checkpoint_signatures()
     assert corrupted_report_2["valid"] is False
     assert corrupted_report_2["checked_checkpoints"] == 1
-

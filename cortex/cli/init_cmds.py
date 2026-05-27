@@ -54,27 +54,30 @@ def init(db, ouroboros: bool) -> None:
         ]
 
         async def _init_flow():
-            await engine.init_db()
-            for idx, axiom in enumerate(axioms, start=1):
-                await engine.store(
-                    project="global",
-                    content=axiom,
-                    fact_type="identity",
-                    tags=["moskv-1", "axiom", "sovereign", "core", f"axiom-{idx}"],
-                    confidence="C5",
-                    source="ag:genesis",
-                )
-            if ouroboros:
-                from cortex.extensions.gate.ouroboros import get_ouroboros_gate
+            try:
+                await engine.init_db()
+                for idx, axiom in enumerate(axioms, start=1):
+                    await engine.store(
+                        project="global",
+                        content=axiom,
+                        fact_type="identity",
+                        tags=["moskv-1", "axiom", "sovereign", "core", f"axiom-{idx}"],
+                        confidence="C5",
+                        source="ag:genesis",
+                    )
+                if ouroboros:
+                    from cortex.extensions.gate.ouroboros import get_ouroboros_gate
 
-                og = get_ouroboros_gate(engine)
-                entropy = og.measure_entropy()
-                await engine.store(
-                    project="cortex",
-                    content=f"Ouroboros-Ω Initialized. Entropy: {entropy['entropy_index']}",
-                    fact_type="decision",
-                    source="ag:ouroboros",
-                )
+                    og = get_ouroboros_gate(engine)
+                    entropy = og.measure_entropy()
+                    await engine.store(
+                        project="cortex",
+                        content=f"Ouroboros-Ω Initialized. Entropy: {entropy['entropy_index']}",
+                        fact_type="decision",
+                        source="ag:ouroboros",
+                    )
+            finally:
+                await engine.close()
 
         with _bootstrap_without_embeddings():
             _run_async(_init_flow())
@@ -91,8 +94,6 @@ def init(db, ouroboros: bool) -> None:
                 border_style="#0A0A0A",
             )
         )
-    finally:
-        _run_async(engine.close())
 
 
 @cli.command()
@@ -102,21 +103,26 @@ def migrate(source, db) -> None:
     """Import CORTEX v3.1 data into v4.0."""
     from cortex.migrate import migrate_v31_to_v40
 
-    engine = get_engine(db)
-    _run_async(engine.init_db())
-    try:
-        with console.status("[bold blue]Migrating v3.1 → v4.0...[/]"):
-            stats = migrate_v31_to_v40(engine, source)
-        console.print(
-            Panel(
-                f"[bold green]✓ Migration complete![/]\n"
-                f"Facts imported: {stats['facts_imported']}\n"
-                f"Errors imported: {stats['errors_imported']}\n"
-                f"Bridges imported: {stats['bridges_imported']}\n"
-                f"Sessions imported: {stats['sessions_imported']}",
-                title="🔄 v3.1 → v4.0 Migration",
-                border_style="green",
+    async def _migrate_flow():
+        try:
+            await engine.init_db()
+            with console.status("[bold blue]Migrating v3.1 → v4.0...[/]"):
+                # Run the synchronous migrate in an executor to avoid blocking the event loop
+                import asyncio
+                loop = asyncio.get_running_loop()
+                stats = await loop.run_in_executor(None, migrate_v31_to_v40, engine, source)
+            console.print(
+                Panel(
+                    f"[bold green]✓ Migration complete![/]\n"
+                    f"Facts imported: {stats['facts_imported']}\n"
+                    f"Errors imported: {stats['errors_imported']}\n"
+                    f"Bridges imported: {stats['bridges_imported']}\n"
+                    f"Sessions imported: {stats['sessions_imported']}",
+                    title="🔄 v3.1 → v4.0 Migration",
+                    border_style="green",
+                )
             )
-        )
-    finally:
-        _run_async(engine.close())
+        finally:
+            await engine.close()
+
+    _run_async(_migrate_flow())

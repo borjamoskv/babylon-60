@@ -9,7 +9,7 @@ y generar saltos intuitivos cuando la homeostasis O(1) está garantizada.
 
 import logging
 import random
-from typing import Any, Dict, List
+from typing import Any
 
 from cortex.extensions.evolution.free_energy import FreeEnergyState
 
@@ -20,11 +20,11 @@ class HeuristicEngine:
     """Non-linear, associative processing module (Right Brain)."""
 
     def __init__(self, buffer_capacity: int = 1000):
-        self.ambient_buffer: List[Dict[str, Any]] = []
+        self.ambient_buffer: list[dict[str, Any]] = []
         self.buffer_capacity = buffer_capacity
         self.synaptic_noise_threshold = 0.3
 
-    def ingest_ambient_signal(self, signal: Dict[str, Any]) -> None:
+    def ingest_ambient_signal(self, signal: dict[str, Any]) -> None:
         """
         Ingests unstructured/fuzzy data from the swarm into the right-brain buffer.
         """
@@ -33,7 +33,7 @@ class HeuristicEngine:
             # Random forgetting to maintain heuristic noise
             self.ambient_buffer.pop(random.randint(0, len(self.ambient_buffer) // 2))
 
-    def daydream(self, free_energy_state: FreeEnergyState) -> List[Dict[str, Any]]:
+    def daydream(self, free_energy_state: FreeEnergyState) -> list[dict[str, Any]]:
         """
         Activates lateral thinking (Daydreaming) when free energy is low.
         Synthesizes ambient data to generate associative insights.
@@ -59,7 +59,7 @@ class HeuristicEngine:
             num_insights = random.randint(1, 3)
             for _ in range(num_insights):
                 a, b = random.sample(self.ambient_buffer, 2)
-                
+
                 source_a = a.get("source", "unknown_a")
                 source_b = b.get("source", "unknown_b")
 

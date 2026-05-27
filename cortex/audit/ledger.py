@@ -57,11 +57,13 @@ class EnterpriseAuditLedger:
         else:
             self.private_key = ed25519.Ed25519PrivateKey.generate()
             with open(key_path, "wb") as key_file:
-                key_file.write(self.private_key.private_bytes(
-                    encoding=serialization.Encoding.PEM,
-                    format=serialization.PrivateFormat.PKCS8,
-                    encryption_algorithm=serialization.NoEncryption()
-                ))
+                key_file.write(
+                    self.private_key.private_bytes(
+                        encoding=serialization.Encoding.PEM,
+                        format=serialization.PrivateFormat.PKCS8,
+                        encryption_algorithm=serialization.NoEncryption(),
+                    )
+                )
         self.public_key = self.private_key.public_key()
 
     async def ensure_table(self) -> None:
