@@ -21,21 +21,35 @@ class VSAMemory(SovereignResource):
     """L2 Sovereign Vector Symbolic Architecture (VSA) Substrate & SQLite Semantic Knowledge Base."""
 
     def close(self):
+        if hasattr(self, "_finalizer") and self._finalizer is not None and self._finalizer.alive:
+            self._finalizer.detach()
         if hasattr(self, '_db_queue'):
             self._db_queue.put(None)
             if hasattr(self, '_db_thread') and self._db_thread.is_alive():
                 self._db_thread.join(timeout=1.0)
         if hasattr(self, "_tensor") and self._tensor is not None:
-            self._tensor.release()
+            try:
+                self._tensor.release()
+            except ValueError:
+                pass
             self._tensor = None
         if hasattr(self, "_base_view") and self._base_view is not None:
-            self._base_view.release()
+            try:
+                self._base_view.release()
+            except ValueError:
+                pass
             self._base_view = None
         if hasattr(self, "_mmap_tensor") and self._mmap_tensor is not None:
-            self._mmap_tensor.close()
+            try:
+                self._mmap_tensor.close()
+            except ValueError:
+                pass
             self._mmap_tensor = None
         if hasattr(self, "_f") and self._f is not None:
-            self._f.close()
+            try:
+                self._f.close()
+            except OSError:
+                pass
             self._f = None
         super().close()
 

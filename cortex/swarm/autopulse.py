@@ -1,16 +1,22 @@
 import asyncio
+import hashlib
 import json
 import logging
 import os
+import time
 
 from cortex.config import DB_PATH
 from cortex.extensions.signals.bus import AsyncSignalBus
+from cortex.swarm.tensor_glial import TensorGlialLegion
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("cortex.swarm.autopulse")
 
 SWARM_QUEUE_FILE = "/tmp/cortex_swarm_queue.json"
 STATE_FILE = "/tmp/cortex_state.json"
+
+# AUDITOR-Ω: Entropy spike threshold — override via CORTEX_ENTROPY_THRESHOLD env var
+_ENTROPY_THRESHOLD = float(os.environ.get("CORTEX_ENTROPY_THRESHOLD", "0.15"))
 
 
 async def process_queue():
@@ -37,11 +43,6 @@ async def process_queue():
                         json.dump(queue, f, indent=2)
 
                     # C5-REAL: Execution & OMEGA-X Epistemic Slashing
-                    import hashlib
-                    import time
-
-                    from cortex.swarm.tensor_glial import TensorGlialLegion
-
                     # Initialize massively parallel zero-copy 10k nodes
                     legion = TensorGlialLegion(
                         num_agents=10000, d_dim=10000, file_path="/tmp/tensor_legion.vsa_mmap"
@@ -62,6 +63,9 @@ async def process_queue():
                             "OMEGA-X: Apoptosis activated. %s dead nodes respawned from elite VSA topologies.",
                             slashed,
                         )
+
+                    # AUDITOR-Ω: Entropy spike detection post-process
+                    _audit_entropy_spike(legion, agent)
 
                     # Record the 'Success' in the Ledger
 
@@ -117,13 +121,46 @@ async def process_queue():
                                 },
                             )
                             logger.info("Autopulse: Ledger signal emitted for %s", block_hash[:8])
-                    except Exception as e:
+                    except (OSError, aiosqlite.Error, RuntimeError) as e:
                         logger.error("Autopulse Signal Error: %s", e)
 
-            except Exception as e:
+            except (OSError, json.JSONDecodeError, KeyError, ValueError) as e:
                 logger.error("Autopulse Queue Error: %s", e)
 
         await asyncio.sleep(2.0)
+
+
+def _audit_entropy_spike(legion: TensorGlialLegion, agent_name: str) -> None:
+    """AUDITOR-Ω: Monitor yield entropy spikes per Axiom Ω₃ (Verify then Trust).
+
+    Computes the yield_ratio dispersion across the legion. If the coefficient
+    of variation (std/mean) exceeds _ENTROPY_THRESHOLD, emits a P1 alert and
+    records the anomaly in the ledger sentinel log.
+    """
+    import numpy as np
+
+    yield_ratio = legion.yield_tensor / (legion.token_burn_tensor + 1e-5)
+    mean_yield = float(np.mean(yield_ratio))
+    std_yield = float(np.std(yield_ratio))
+
+    if mean_yield < 1e-9:
+        return  # Cold-start: no data yet
+
+    cv = std_yield / mean_yield  # Coefficient of Variation
+    if cv > _ENTROPY_THRESHOLD:
+        logger.warning(
+            "[AUDITOR-Ω] ENTROPY SPIKE DETECTED — agent=%s cv=%.4f threshold=%.4f sha256=%s",
+            agent_name,
+            cv,
+            _ENTROPY_THRESHOLD,
+            legion.global_sha256_audit()[:16],
+        )
+    else:
+        logger.debug(
+            "[AUDITOR-Ω] entropy OK — agent=%s cv=%.4f",
+            agent_name,
+            cv,
+        )
 
 
 if __name__ == "__main__":

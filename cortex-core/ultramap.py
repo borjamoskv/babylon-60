@@ -77,19 +77,28 @@ class UltramapSubstrate:
                 pass
 
     def close(self):
+        if hasattr(self, "_finalizer") and self._finalizer.alive:
+            self._finalizer.detach()
         if hasattr(self, "_rs") and self._rs is not None:
             self._rs = None
         if hasattr(self, "_buffer") and self._buffer is not None:
-            self._buffer.release()
+            try:
+                self._buffer.release()
+            except ValueError:
+                pass
             self._buffer = None
         if hasattr(self, "_mmap") and self._mmap is not None:
-            self._mmap.close()
+            try:
+                self._mmap.close()
+            except ValueError:
+                pass
             self._mmap = None
         if hasattr(self, "_f") and self._f is not None:
-            self._f.close()
+            try:
+                self._f.close()
+            except OSError:
+                pass
             self._f = None
-        if hasattr(self, "_finalizer") and self._finalizer.alive:
-            self._finalizer()
 
     def update_agent_position(self, agent_idx: int, x: float, y: float, z: float, target: str, entropy: float):
         """Updates the topological coordinates of a swarm agent."""
