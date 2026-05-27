@@ -47,10 +47,20 @@ class UltramapSubstrate:
                 f.write(b"\x00" * self.tensor_size)
 
         if HAS_RUST:
-            self._rs = cortex_rs.UltramapSubstrate(self.bin_path, self.capacity)
-            self._buffer = None
-            self._mmap = None
-            self._f = None
+            try:
+                self._rs = cortex_rs.UltramapSubstrate(self.bin_path, self.capacity)
+                self._buffer = None
+                self._mmap = None
+                self._f = None
+            except AttributeError:
+                logger.warning("cortex_rs.UltramapSubstrate not available, using Python fallback")
+                self._rs = None
+                self._f = open(self.bin_path, "r+b")
+                self._mmap = mmap.mmap(self._f.fileno(), self.tensor_size)
+                self._buffer = memoryview(self._mmap)
+                
+                self._finalizer = weakref.finalize(self, self._safe_close, getattr(self, '_buffer', None), getattr(self, '_mmap', None), getattr(self, '_f', None))
+                atexit.register(self.close)
         else:
             self._rs = None
             self._f = open(self.bin_path, "r+b")

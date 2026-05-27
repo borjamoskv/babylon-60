@@ -93,7 +93,8 @@ def _get_local_conn(db_path: str, timeout: float = 30.0) -> sqlite3.Connection:
 
 
 VSA_DIMENSION = 10000
-VSA_BIN_PATH = os.getenv("VSA_BIN_PATH", "/Users/borjafernandezangulo/10_PROJECTS/vsa_nexus.bin")
+_VSA_DEFAULT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "vsa_nexus.bin")
+VSA_BIN_PATH = os.getenv("VSA_BIN_PATH", _VSA_DEFAULT_PATH)
 DB_PATH = os.getenv(
     "CORTEX_DB_PATH",
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "cortex_memory_vsa.db"),
