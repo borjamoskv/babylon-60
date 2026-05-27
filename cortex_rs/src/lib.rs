@@ -55,6 +55,7 @@ impl CortexRsSubstrate {
             .read(true)
             .write(true)
             .create(true)
+            .truncate(false)
             .open(bin_path)
             .map_err(|e| PyRuntimeError::new_err(format!("Failed to open VSA BIN: {}", e)))?;
 
@@ -158,6 +159,7 @@ impl ZeroCopyRingBuffer {
             .read(true)
             .write(true)
             .create(true)
+            .truncate(false)
             .open(bin_path)
             .map_err(|e| PyRuntimeError::new_err(format!("Failed to open ring buffer file: {}", e)))?;
 
@@ -363,6 +365,7 @@ impl UltramapSubstrate {
             .read(true)
             .write(true)
             .create(true)
+            .truncate(false)
             .open(bin_path)
             .map_err(|e| PyRuntimeError::new_err(format!("Failed to open ultramap file: {}", e)))?;
 

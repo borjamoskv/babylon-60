@@ -145,8 +145,8 @@ fn apply_mutation(conjecture: &Conjecture, op: &MutationOp) -> Option<Conjecture
             new_conclusion = new_conclusion.replace(from.as_str(), to.as_str());
         }
         MutationOp::Negate => {
-            new_conclusion = if new_conclusion.starts_with("¬") {
-                new_conclusion[2..].to_string() // Remove ¬
+            new_conclusion = if let Some(stripped) = new_conclusion.strip_prefix("¬") {
+                stripped.to_string() // Remove ¬
             } else {
                 format!("¬{}", new_conclusion)
             };

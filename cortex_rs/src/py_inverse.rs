@@ -184,6 +184,11 @@ impl PyCurriculumEngine {
         self.inner.len()
     }
 
+    /// Whether the curriculum is empty.
+    pub fn is_empty(&self) -> bool {
+        self.inner.is_empty()
+    }
+
     /// Whether the target is solved.
     pub fn is_target_solved(&self) -> bool {
         self.inner.is_target_solved()
@@ -288,6 +293,11 @@ impl PyConjecturer {
     /// Population size.
     pub fn len(&self) -> usize {
         self.inner.len()
+    }
+
+    /// Whether the population is empty.
+    pub fn is_empty(&self) -> bool {
+        self.inner.is_empty()
     }
 
     /// Count of surviving conjectures.

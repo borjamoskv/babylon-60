@@ -19,8 +19,8 @@ async def test_verify_seal_printer_logging(mock_cache):
     mock_cache.files = {Path("large.py"): "\n" * 800}
 
     with (
-        patch("cortex.guards.seals.arun_cmd", new_callable=AsyncMock) as mock_run,
-        patch("cortex.guards.seals.printer") as mock_printer,
+        patch("cortex.guards._seals_checks_1_5.arun_cmd", new_callable=AsyncMock) as mock_run,
+        patch("cortex.guards._seals_checks_1_5.printer") as mock_printer,
     ):
         mock_run.return_value = (0, "Ruff OK")
 
@@ -43,8 +43,8 @@ async def test_verify_seal_printer_ruff_fail(mock_cache):
     mock_cache.files = {Path("ok.py"): "code"}
 
     with (
-        patch("cortex.guards.seals.arun_cmd", new_callable=AsyncMock) as mock_run,
-        patch("cortex.guards.seals.printer") as mock_printer,
+        patch("cortex.guards._seals_checks_1_5.arun_cmd", new_callable=AsyncMock) as mock_run,
+        patch("cortex.guards._seals_checks_1_5.printer") as mock_printer,
     ):
         mock_run.return_value = (1, "Ruff Error Output")
 
