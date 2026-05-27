@@ -299,8 +299,6 @@ impl ZeroCopyRingBuffer {
                 _hash = _hash.wrapping_add(*b as u64);
             }
         });
-
-        // Mark as free (0)
         {
             let mut mmap = self.mmap.lock().unwrap();
             let buffer: &mut [u8] = unsafe {

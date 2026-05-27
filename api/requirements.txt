@@ -7,5 +7,4 @@ aiosqlite>=0.20.0
 gunicorn>=26.0.0
 
 
-# Install local cortex package
-..
+

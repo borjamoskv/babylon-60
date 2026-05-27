@@ -66,7 +66,7 @@ def run_pre_commit():
 def run_prepare_commit_msg(commit_msg_file):
     # Only auto-forge if the message is empty or standard default
     try:
-        with open(commit_msg_file, 'r') as f:
+        with open(commit_msg_file) as f:
             current_msg = f.read().strip()
     except FileNotFoundError:
         current_msg = ""

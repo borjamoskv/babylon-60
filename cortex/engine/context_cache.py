@@ -161,7 +161,7 @@ class ContextCacheManager:
             model=model,
             token_count=token_count,
             created_at=now,
-            last_accessed=now,
+            last_accessed=time.monotonic(),
             ttl_seconds=ttl_seconds or self._default_ttl,
             provider_handle=provider_handle,
             agent_id=agent_id,
@@ -322,7 +322,7 @@ class ContextCacheManager:
             del self._cache[cache_id]
             return None
 
-        entry.last_accessed = time.time()
+        entry.last_accessed = time.monotonic()
         self._hits += 1
         return entry
 
