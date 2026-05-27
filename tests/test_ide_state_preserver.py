@@ -15,10 +15,10 @@ from persistence import IdeStatePreserver
 
 class TestIdeStatePreserver:
     @pytest.mark.asyncio
-    @patch("persistence.asyncio.create_subprocess_exec")
-    @patch("persistence.os.makedirs")
-    @patch("persistence.open")
-    @patch("persistence.hashlib.sha256")
+    @patch("persistence.ide_preserver.asyncio.create_subprocess_exec")
+    @patch("persistence.ide_preserver.os.makedirs")
+    @patch("persistence.ide_preserver.open")
+    @patch("persistence.ide_preserver.hashlib.sha256")
     async def test_execute_snapshot_success(
         self, mock_sha256, mock_open, mock_makedirs, mock_create_subprocess
     ):
@@ -69,8 +69,8 @@ class TestIdeStatePreserver:
         assert call_kwargs["yield_amount"] == 0.0
 
     @pytest.mark.asyncio
-    @patch("persistence.asyncio.create_subprocess_exec")
-    @patch("persistence.logger")
+    @patch("persistence.ide_preserver.asyncio.create_subprocess_exec")
+    @patch("persistence.ide_preserver.logger")
     async def test_execute_snapshot_failure(self, mock_logger, mock_create_subprocess):
         # Setup subprocess run to fail
         mock_proc = MagicMock()
@@ -96,8 +96,8 @@ class TestIdeStatePreserver:
         # Ledger shouldn't have been appended
         ledger.append.assert_not_called()
 
-    @patch("persistence.subprocess.run")
-    @patch("persistence.os.makedirs")
+    @patch("persistence.ide_preserver.subprocess.run")
+    @patch("persistence.ide_preserver.os.makedirs")
     def test_execute_snapshot_sync(self, mock_makedirs, mock_run):
         ledger = MagicMock()
         preserver = IdeStatePreserver(ledger)

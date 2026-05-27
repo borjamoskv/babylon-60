@@ -185,12 +185,18 @@ class OutboxDaemon(SovereignResource):
                         result = evaluate(ast, env)
                         
                         logger.info(f"EXA_LISP Output: {result}")
+                        if self.ledger:
+                            self.ledger.append(action="C5_VERIFIED_EXA", vector_id=agent_name, yield_amount=float(getattr(env, 'joules', 0.0)))
                         continue
                     except EntropyDeath as e:
                         logger.error(f"EXA_LISP Halted (EntropyDeath): {e}")
+                        if self.ledger:
+                            self.ledger.append(action="C5_FALSATED_ENTROPY", vector_id=agent_name, yield_amount=0.0)
                         continue
                     except Exception as e:
                         logger.error(f"EXA_LISP Syntax/Runtime Error: {e}")
+                        if self.ledger:
+                            self.ledger.append(action="C5_FALSATED_SYNTAX", vector_id=agent_name, yield_amount=0.0)
                         continue
 
                 # -- NATIVE L0 INTERCEPTOR: QUANTUM_BRANCHING (Q-Let v2) --
@@ -227,10 +233,13 @@ class OutboxDaemon(SovereignResource):
                                         
                             if best_branch:
                                 logger.info(f"Q-Let v2 Collapsed: Selected Branch {best_branch[0]} with Retained Exergy: {max_exergy_retained}J")
-                                self.ledger.append(action="Q_BRANCH_COLLAPSE", vector_id=str(best_branch[0]), yield_amount=float(max_exergy_retained))
+                                if self.ledger:
+                                    self.ledger.append(action="Q_BRANCH_COLLAPSE", vector_id=str(best_branch[0]), yield_amount=float(max_exergy_retained))
                         continue
                     except Exception as e:
                         logger.error(f"QUANTUM_BRANCHING Error: {e}")
+                        if self.ledger:
+                            self.ledger.append(action="C5_FALSATED_QUANTUM", vector_id=agent_name, yield_amount=0.0)
                         continue
 
                 # -- NATIVE L0 INTERCEPTOR: AST_MUTATION --
@@ -240,9 +249,13 @@ class OutboxDaemon(SovereignResource):
                         logger.info("C5-REAL AST_MUTATION Invoked via AEON-0 Compiler.")
                         compiler = AEON0Compiler(ledger=self.ledger)
                         compiler.mutate(payload_dict)
+                        if self.ledger:
+                            self.ledger.append(action="C5_VERIFIED_MUTATION", vector_id=agent_name, yield_amount=0.0)
                         continue
                     except Exception as e:
                         logger.error(f"AEON-0 Compiler Error: {e}")
+                        if self.ledger:
+                            self.ledger.append(action="C5_FALSATED_MUTATION", vector_id=agent_name, yield_amount=0.0)
                         continue
 
                 # -- C5-REAL SOVEREIGN ISOLATION --
