@@ -790,8 +790,5 @@ def get_swarm_metrics(bypass_cache: bool = False) -> dict:
             _metrics_cache["expiry"] = now + 0.5  # Cache for 500ms
         return result
     except Exception as e:
-        logger.error("Error retrieving swarm metrics: %s", e)
-        return {"latency_ms": 0.0, "active_children": 0, "uncertainty": 0.0}
-    except Exception as e:
         logger.error("Failed to extract swarm metrics (Deterministic C5-REAL Exception): %s", e)
         return {"latency_ms": 99999.0, "active_children": -1, "uncertainty": 1.0}
