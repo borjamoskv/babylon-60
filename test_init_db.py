@@ -5,6 +5,7 @@ from cortex.engine import CortexEngine
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 async def f():
     e = CortexEngine()
     logger.info("init_db...")
@@ -18,5 +19,7 @@ async def f():
     except Exception as ex:
         logger.error(ex)
     logger.info("done!")
+
+
 if __name__ == "__main__":
     asyncio.run(f())

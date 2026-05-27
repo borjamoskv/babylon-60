@@ -130,6 +130,45 @@ class VirgoContextGuard:
                 f"Invalid Logos-Critique validation signature for agent fact. Sig: {logos_signature[:16]}...",
             )
 
+        # 3. Replay Protection: Check if this nonce has already been used
+        if nonce:
+            try:
+                async with conn.execute(
+                    "SELECT 1 FROM ledger_replay_admissions WHERE tenant_id = ? AND nonce = ?",
+                    (tenant_id, nonce),
+                ) as cursor:
+                    if await cursor.fetchone() is not None:
+                        await self._trigger_ledger_rollback(
+                            conn,
+                            f"Replay attack detected: nonce '{nonce}' already exists.",
+                            error_class=VirgoValidationError,
+                        )
+
+                from cortex.utils.canonical import now_iso
+
+                await conn.execute(
+                    """
+                    INSERT INTO ledger_replay_admissions (
+                        tenant_id, event_id, nonce, request_hash, payload_hash,
+                        ledger_event_id, actor_key_id, action, issued_at, accepted_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        tenant_id,
+                        f"evt_{nonce}",
+                        nonce,
+                        logos_signature or "hash",
+                        logos_signature or "hash",
+                        f"evt_{nonce}",
+                        agent_id or "unknown",
+                        "store",
+                        now_iso(),
+                        now_iso(),
+                    ),
+                )
+            except aiosqlite.Error as db_err:
+                logger.debug("ledger_replay_admissions write failed during Virgo check: %s", db_err)
+
     def _detect_context_poisoning(self, content: str) -> str | None:
         """
         Scans for heuristic context poisoning patterns.

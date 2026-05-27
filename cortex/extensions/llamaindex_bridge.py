@@ -1,6 +1,7 @@
-from llama_index.core.callbacks import BaseCallbackHandler
+from typing import Any, Dict, Optional, List
+from llama_index.core.callbacks.base_handler import BaseCallbackHandler
 from llama_index.core.callbacks.schema import CBEventType
-from cortex.engine.sync_mixin import CortexSyncEngine
+from cortex.engine import CortexEngine
 
 
 class CortexIndexCallback(BaseCallbackHandler):
@@ -8,17 +9,46 @@ class CortexIndexCallback(BaseCallbackHandler):
     C5-REAL Cryptographic tracing of LlamaIndex RAG retrieval paths.
     """
 
-    def __init__(self, engine: CortexSyncEngine, agent_id: str):
+    def __init__(self, engine: CortexEngine, agent_id: str):
         super().__init__(event_starts_to_ignore=[], event_ends_to_ignore=[])
         self.engine = engine
         self.agent_id = agent_id
 
-    def on_event_end(self, event_type: CBEventType, payload: dict, **kwargs):
+    def on_event_start(
+        self,
+        event_type: CBEventType,
+        payload: Optional[Dict[str, Any]] = None,
+        event_id: str = "",
+        parent_id: str = "",
+        **kwargs: Any,
+    ) -> str:
+        return event_id
+
+    def on_event_end(
+        self,
+        event_type: CBEventType,
+        payload: Optional[Dict[str, Any]] = None,
+        event_id: str = "",
+        **kwargs: Any,
+    ) -> None:
+        if payload is None:
+            payload = {}
         if event_type == CBEventType.RETRIEVE:
             nodes = payload.get("nodes", [])
-            sources = [n.node.node_id for n in nodes]
-            self.engine.store_fact(
-                agent_id=self.agent_id,
+            sources = [n.node.node_id for n in nodes if hasattr(n, "node") and hasattr(n.node, "node_id")]
+            self.engine.store_sync(
+                fact_type="rag_retrieve",
                 content=f"RETRIEVAL_EVENT: Fetched {len(sources)} nodes",
                 metadata={"nodes": sources, "event": "rag_retrieve"},
+                agent_id=self.agent_id,
             )
+
+    def start_trace(self, trace_id: Optional[str] = None) -> None:
+        pass
+
+    def end_trace(
+        self,
+        trace_id: Optional[str] = None,
+        trace_map: Optional[Dict[str, List[str]]] = None,
+    ) -> None:
+        pass

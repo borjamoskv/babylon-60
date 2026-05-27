@@ -323,9 +323,7 @@ CREATE VIRTUAL TABLE IF NOT EXISTS facts_fts USING fts5(
     project,
     tags,
     fact_type,
-    tenant_id UNINDEXED,
-    content='facts',
-    content_rowid='id'
+    tenant_id UNINDEXED
 );
 """
 
@@ -434,20 +432,17 @@ END;
 """
 
 CREATE_FACTS_FTS_TRIGGERS = """
-CREATE TRIGGER IF NOT EXISTS facts_ai AFTER INSERT ON facts BEGIN
+CREATE TRIGGER IF NOT EXISTS trg_facts_ai AFTER INSERT ON facts BEGIN
   INSERT INTO facts_fts(rowid, content, project, tags, fact_type, tenant_id)
   VALUES (new.id, new.content, new.project, new.tags, new.fact_type, new.tenant_id);
 END;
 
-CREATE TRIGGER IF NOT EXISTS facts_ad AFTER DELETE ON facts BEGIN
-  INSERT INTO facts_fts(facts_fts, rowid, content, project, tags, fact_type, tenant_id)
-  VALUES ('delete', old.id, old.content, old.project, old.tags, old.fact_type, old.tenant_id);
+CREATE TRIGGER IF NOT EXISTS trg_facts_ad AFTER DELETE ON facts BEGIN
+  DELETE FROM facts_fts WHERE rowid = old.id;
 END;
 
-CREATE TRIGGER IF NOT EXISTS facts_au
-AFTER UPDATE OF content, project, tags, fact_type, tenant_id ON facts BEGIN
-  INSERT INTO facts_fts(facts_fts, rowid, content, project, tags, fact_type, tenant_id)
-  VALUES ('delete', old.id, old.content, old.project, old.tags, old.fact_type, old.tenant_id);
+CREATE TRIGGER IF NOT EXISTS trg_facts_au AFTER UPDATE ON facts BEGIN
+  DELETE FROM facts_fts WHERE rowid = old.id;
   INSERT INTO facts_fts(rowid, content, project, tags, fact_type, tenant_id)
   VALUES (new.id, new.content, new.project, new.tags, new.fact_type, new.tenant_id);
 END;

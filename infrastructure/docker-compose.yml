@@ -16,9 +16,13 @@ services:
     working_dir: /app/cortex-persist
     command: >
       bash -c "
-      pip install cryptography &&
+      apt-get update && apt-get install -y curl build-essential &&
+      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y &&
+      source $$HOME/.cargo/env &&
+      pip install -e . &&
       python infrastructure/sdk_init.py &&
-      python -m cortex.cli start
+      python -m cortex.cli status &&
+      sleep infinity
       "
     ports:
       - "8080:8080"

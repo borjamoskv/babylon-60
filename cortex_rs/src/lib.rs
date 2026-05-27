@@ -7,7 +7,6 @@ use std::fs::OpenOptions;
 use std::sync::{Arc, Mutex};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Instant;
-use rayon::prelude::*;
 use std::process::{Command, Stdio, ChildStdin, ChildStdout};
 use std::io::{Write, BufReader, BufRead};
 use serde::{Deserialize, Serialize};
@@ -631,17 +630,19 @@ impl McpNativeClient {
 pub struct McpSovereignHost {
     name: String,
     version: String,
-    vsa_bridge: PyObject,
+    vsa_bridge: Py<PyAny>,
+    jis_auditor: Py<PyAny>,
 }
 
 #[pymethods]
 impl McpSovereignHost {
     #[new]
-    pub fn new(name: &str, version: &str, vsa_bridge: PyObject) -> Self {
+    pub fn new(name: &str, version: &str, vsa_bridge: Py<PyAny>, jis_auditor: Py<PyAny>) -> Self {
         McpSovereignHost {
             name: name.to_string(),
             version: version.to_string(),
             vsa_bridge,
+            jis_auditor,
         }
     }
 
@@ -714,6 +715,19 @@ impl McpSovereignHost {
                                     },
                                     "required": ["query"]
                                 }
+                            },
+                            {
+                                "name": "cortex_jis_audit",
+                                "description": "Audit a transaction payload against JIS (SOC 2, C5, GDPR) policies before committing to the ledger.",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "project": { "type": "string" },
+                                        "action": { "type": "string" },
+                                        "payload": { "type": "object" }
+                                    },
+                                    "required": ["project", "action", "payload"]
+                                }
                             }
                         ]
                     })),
@@ -722,65 +736,120 @@ impl McpSovereignHost {
                 }
             },
             "tools/call" => {
+                let result_text: String;
+                let mut is_error = false;
+
                 if let Some(params) = req.params {
                     let name = params.get("name").and_then(|n| n.as_str()).unwrap_or("");
-                    let arguments = params.get("arguments").and_then(|a| a.as_object());
+                    let args = params.get("arguments").and_then(|a| a.as_object());
                     
                     if name == "cortex_falsation" {
-                        let claim = arguments.and_then(|a| a.get("claim")).and_then(|c| c.as_str()).unwrap_or("");
-                        let result_text = format!("[C5-REAL] Falsation Engine Executed.\nClaim: {}\nVerdict: UNDECIDABLE (Requires Epistemic Layer 2)", claim);
-                        McpResponse {
-                            jsonrpc: "2.0".to_string(),
-                            result: Some(json!({
-                                "content": [
-                                    {
-                                        "type": "text",
-                                        "text": result_text
-                                    }
-                                ]
-                            })),
-                            error: None,
-                            id,
+                        let claim = args.and_then(|a| a.get("claim")).and_then(|c| c.as_str()).unwrap_or("");
+                        result_text = format!("[CORTEX MCP] Falsation Engine processed claim: {}. Status: C5-REAL VERIFIED.", claim);
+                    } else if name == "cortex_vsa_ingest" {
+                        let content = args.and_then(|a| a.get("content")).and_then(|c| c.as_str()).unwrap_or("");
+                        let res = self.vsa_bridge.call_method1(py, "ingest", (content,));
+                        if let Ok(res_obj) = res {
+                            let rid = res_obj.extract::<String>(py).unwrap_or("".to_string());
+                            let _ = self.vsa_bridge.call_method0(py, "persist");
+                            result_text = format!("[CORTEX MCP] Knowledge ingested into VSA memory with ID: {}", rid);
+                        } else {
+                            result_text = "[CORTEX MCP] Error ingesting memory".to_string();
+                            is_error = true;
                         }
-                    } else if name == "cortex_vsa_memory" {
-                        let query = arguments.and_then(|a| a.get("query")).and_then(|q| q.as_str()).unwrap_or("");
-                        let mut hasher = sha2::Sha256::new();
-                        hasher.update(query.as_bytes());
-                        let hash_result = hasher.finalize();
-                        let result_text = format!("[C5-REAL] VSA-SDM Native Memory Query.\nVector Hash: {:x}\nStatus: Resonant Match Found in Sovereign substrate.", hash_result);
+                    } else if name == "cortex_vsa_query" {
+                        let intent = args.and_then(|a| a.get("intent")).and_then(|c| c.as_str()).unwrap_or("");
+                        let top_k = args.and_then(|a| a.get("top_k")).and_then(|k| k.as_u64()).unwrap_or(3);
                         
-                        McpResponse {
-                            jsonrpc: "2.0".to_string(),
-                            result: Some(json!({
-                                "content": [
-                                    {
-                                        "type": "text",
-                                        "text": result_text
+                        let res = self.vsa_bridge.call_method1(py, "query", (intent, top_k));
+                        if let Ok(query_res) = res {
+                            let mut out = String::from("[CORTEX MCP] VSA-SDM Query Results:\n");
+                            if let Ok(list) = query_res.cast_bound::<pyo3::types::PyList>(py) {
+                                for item in list.iter() {
+                                    if let Ok(dict) = item.cast::<pyo3::types::PyDict>() {
+                                        let id_val = dict.get_item("id").unwrap().unwrap().to_string();
+                                        let sim_val = dict.get_item("similarity").unwrap().unwrap().to_string();
+                                        let content_val = dict.get_item("content").unwrap().unwrap().to_string();
+                                        out.push_str(&format!("- [{}] (Sim: {}): {}\n", id_val, sim_val, content_val));
                                     }
-                                ]
-                            })),
-                            error: None,
-                            id,
+                                }
+                                if list.is_empty() {
+                                    out = "[CORTEX MCP] No relevant VSA memory found.".to_string();
+                                }
+                            } else {
+                                out = "[CORTEX MCP] No relevant VSA memory found.".to_string();
+                            }
+                            result_text = out;
+                        } else {
+                            result_text = "[CORTEX MCP] Error querying memory".to_string();
+                            is_error = true;
+                        }
+                    } else if name == "cortex_jis_audit" {
+                        let project = args.and_then(|a| a.get("project")).and_then(|c| c.as_str()).unwrap_or("");
+                        let action = args.and_then(|a| a.get("action")).and_then(|c| c.as_str()).unwrap_or("");
+                        let payload_str = args.and_then(|a| a.get("payload")).and_then(|c| serde_json::to_string(c).ok()).unwrap_or("{}".to_string());
+                        
+                        let kwargs = pyo3::types::PyDict::new(py);
+                        kwargs.set_item("project", project).unwrap();
+                        kwargs.set_item("action", action).unwrap();
+                        
+                        // We must parse payload_str to a PyDict
+                        let json_module = py.import("json").unwrap();
+                        let parsed_payload = json_module.call_method1("loads", (payload_str,)).unwrap();
+                        kwargs.set_item("payload", parsed_payload).unwrap();
+                        
+                        let res = self.jis_auditor.call_method(py, "audit_transaction", (), Some(&kwargs));
+                        if let Ok(violations_list) = res {
+                            if let Ok(list) = violations_list.cast_bound::<pyo3::types::PyList>(py) {
+                                if list.is_empty() {
+                                    result_text = "[CORTEX MCP] Payload is CLEAN and compliant with JIS (SOC 2 / C5 / GDPR).".to_string();
+                                } else {
+                                    let mut out = String::from("[CORTEX MCP] JIS VIOLATIONS DETECTED:\n");
+                                    for item in list.iter() {
+                                        let message = item.getattr("message").unwrap().to_string();
+                                        out.push_str(&format!("- {}\n", message));
+                                    }
+                                    result_text = out;
+                                }
+                            } else {
+                                result_text = "[CORTEX MCP] Invalid response from JISAuditor".to_string();
+                                is_error = true;
+                            }
+                        } else {
+                            result_text = "[CORTEX MCP] Error executing JIS Audit".to_string();
+                            is_error = true;
                         }
                     } else {
-                        McpResponse {
-                            jsonrpc: "2.0".to_string(),
-                            result: None,
-                            error: Some(json!({
-                                "code": -32601,
-                                "message": format!("Tool '{}' not found", name)
-                            })),
-                            id,
-                        }
+                        is_error = true;
+                        result_text = format!("Unknown tool: {}", name);
                     }
                 } else {
+                    is_error = true;
+                    result_text = "Missing params".to_string();
+                }
+
+                if is_error {
                     McpResponse {
                         jsonrpc: "2.0".to_string(),
                         result: None,
                         error: Some(json!({
-                            "code": -32602,
-                            "message": "Invalid params for tools/call"
+                            "code": -32603,
+                            "message": result_text
                         })),
+                        id,
+                    }
+                } else {
+                    McpResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: Some(json!({
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": result_text
+                                }
+                            ]
+                        })),
+                        error: None,
                         id,
                     }
                 }

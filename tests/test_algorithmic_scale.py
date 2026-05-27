@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import sqlite3
+import pytest
 
 # ─── Index Tests ──────────────────────────────────────────────────────
 
@@ -56,138 +57,85 @@ class TestCoveringIndices:
         conn.close()
 
 
-# ─── FTS5 Trigger Tests ──────────────────────────────────────────────
+# ─── FTS5 Engine Synchronization Tests ────────────────────────────────
 
 
 class TestFTS5Triggers:
-    """Verify FTS5 auto-sync triggers fire correctly."""
+    """Verify FTS5 manual sync operations via CortexEngine work correctly."""
 
-    def _setup_db(self, db_path: str) -> sqlite3.Connection:
-        """Create facts table + FTS5 + triggers."""
-        from cortex.database.schema import CREATE_FACTS, CREATE_FACTS_INDEXES
-        from cortex.database.schema_extensions import (
-            CREATE_FACTS_FTS,
-            CREATE_FACTS_FTS_TRIGGERS,
+    @pytest.mark.asyncio
+    async def test_insert_trigger_populates_fts(self, tmp_path):
+        """Storing via CortexEngine populates facts_fts."""
+        from cortex.engine import CortexEngine
+        db = str(tmp_path / "test_fts_insert.db")
+        engine = CortexEngine(db_path=db, auto_embed=False)
+        await engine.init_db()
+
+        await engine.store(
+            project="test-proj",
+            content="sovereign memory system",
+            fact_type="decision",
+            source="test",
         )
-
-        conn = sqlite3.connect(db_path)
-        for stmt in CREATE_FACTS.strip().split(";"):
-            s = stmt.strip()
-            if s:
-                conn.execute(s + ";")
-        for stmt in CREATE_FACTS_INDEXES.strip().split(";"):
-            s = stmt.strip()
-            if s:
-                conn.execute(s + ";")
-        # FTS5 virtual table
-        conn.executescript(CREATE_FACTS_FTS)
-        # Triggers
-        conn.executescript(CREATE_FACTS_FTS_TRIGGERS)
-        conn.commit()
-        return conn
-
-    def test_insert_trigger_populates_fts(self, tmp_path):
-        """INSERT into facts auto-populates facts_fts."""
-        conn = self._setup_db(str(tmp_path / "test.db"))
-        conn.execute(
-            "INSERT INTO facts "
-            "(tenant_id, project, content, fact_type, confidence, "
-            "valid_from, tags, source, metadata, exergy_score, "
-            "created_at, updated_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                "default",
-                "test-proj",
-                "sovereign memory system",
-                "decision",
-                "C4",
-                "2026-01-01",
-                "[]",
-                "test",
-                "{}",
-                1.0,
-                "2026-01-01",
-                "2026-01-01",
-            ),
-        )
-        conn.commit()
 
         # Search FTS5
-        cursor = conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'sovereign'")
-        rows = cursor.fetchall()
-        assert len(rows) == 1, f"Expected 1 FTS hit, got {len(rows)}"
-        conn.close()
+        async with engine.session() as conn:
+            cursor = await conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'sovereign'")
+            rows = await cursor.fetchall()
+            assert len(rows) == 1
+        await engine.close()
 
-    def test_update_trigger_syncs_fts(self, tmp_path):
-        """UPDATE facts.content syncs to facts_fts."""
-        conn = self._setup_db(str(tmp_path / "test.db"))
-        conn.execute(
-            "INSERT INTO facts "
-            "(tenant_id, project, content, fact_type, confidence, "
-            "valid_from, tags, source, metadata, exergy_score, "
-            "created_at, updated_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                "default",
-                "test-proj",
-                "old content here",
-                "decision",
-                "C4",
-                "2026-01-01",
-                "[]",
-                "test",
-                "{}",
-                1.0,
-                "2026-01-01",
-                "2026-01-01",
-            ),
+    @pytest.mark.asyncio
+    async def test_update_trigger_syncs_fts(self, tmp_path):
+        """Updating via CortexEngine syncs facts_fts."""
+        from cortex.engine import CortexEngine
+        db = str(tmp_path / "test_fts_update.db")
+        engine = CortexEngine(db_path=db, auto_embed=False)
+        await engine.init_db()
+
+        fact_id = await engine.store(
+            project="test-proj",
+            content="old content here",
+            fact_type="decision",
+            source="test",
         )
-        conn.commit()
 
-        conn.execute("UPDATE facts SET content = 'new sovereign content' WHERE id = 1")
-        conn.commit()
-
-        # Old content should be gone
-        cursor = conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'old'")
-        assert cursor.fetchone() is None, "Old content still in FTS"
-
-        # New content should be findable
-        cursor = conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'sovereign'")
-        assert cursor.fetchone() is not None, "New content missing from FTS"
-        conn.close()
-
-    def test_delete_trigger_removes_from_fts(self, tmp_path):
-        """DELETE from facts removes from facts_fts."""
-        conn = self._setup_db(str(tmp_path / "test.db"))
-        conn.execute(
-            "INSERT INTO facts "
-            "(tenant_id, project, content, fact_type, confidence, "
-            "valid_from, tags, source, metadata, exergy_score, "
-            "created_at, updated_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                "default",
-                "test-proj",
-                "ephemeral data",
-                "decision",
-                "C4",
-                "2026-01-01",
-                "[]",
-                "test",
-                "{}",
-                1.0,
-                "2026-01-01",
-                "2026-01-01",
-            ),
+        await engine.update(
+            fact_id=fact_id,
+            content="new sovereign content",
         )
-        conn.commit()
 
-        conn.execute("DELETE FROM facts WHERE id = 1")
-        conn.commit()
+        async with engine.session() as conn:
+            # Old content should be gone
+            cursor = await conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'old'")
+            assert await cursor.fetchone() is None
 
-        cursor = conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'ephemeral'")
-        assert cursor.fetchone() is None, "Deleted fact still in FTS"
-        conn.close()
+            # New content should be findable
+            cursor = await conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'sovereign'")
+            assert await cursor.fetchone() is not None
+        await engine.close()
+
+    @pytest.mark.asyncio
+    async def test_delete_trigger_removes_from_fts(self, tmp_path):
+        """Purging via CortexEngine removes from facts_fts."""
+        from cortex.engine import CortexEngine
+        db = str(tmp_path / "test_fts_delete.db")
+        engine = CortexEngine(db_path=db, auto_embed=False)
+        await engine.init_db()
+
+        fact_id = await engine.store(
+            project="test-proj",
+            content="ephemeral data",
+            fact_type="decision",
+            source="test",
+        )
+
+        await engine.purge(fact_id, force=True)
+
+        async with engine.session() as conn:
+            cursor = await conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'ephemeral'")
+            assert await cursor.fetchone() is None
+        await engine.close()
 
 
 # ─── WAL Checkpoint Tests ────────────────────────────────────────────

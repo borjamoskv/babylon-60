@@ -11,7 +11,7 @@ logger = logging.getLogger("cortex.ultramap")
 
 try:
     import cortex_rs
-    HAS_RUST = True
+    HAS_RUST = hasattr(cortex_rs, 'UltramapSubstrate')
 except ImportError as e:
     HAS_RUST = False
     logger.warning(f"Failed to load CORTEX-RS: {e}. Falling back to Python mmap.")

@@ -12,10 +12,14 @@ router = APIRouter(tags=["taas"])
 logger = logging.getLogger("uvicorn.error")
 
 
+_marketplace_instance: TaaSMarketplace | None = None
+
 def get_taas_marketplace(engine: AsyncCortexEngine = Depends(get_async_engine)) -> TaaSMarketplace:
-    # Use application state or instantiate on demand.
-    # In a full deployment, this could be cached in app.state
-    return TaaSMarketplace(engine)
+    global _marketplace_instance
+    if _marketplace_instance is None:
+        _marketplace_instance = TaaSMarketplace(engine)
+    return _marketplace_instance
+
 
 
 @router.post("/v1/taas/jobs/quote", response_model=JobQuote)

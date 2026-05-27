@@ -354,7 +354,7 @@ async def _fetch_decision_rows(
         fts_terms = " OR ".join(list(new_tokens)[:8])
         cursor = await conn.execute(
             """
-            SELECT f.id, f.project, f.content, f.created_at
+            SELECT f.id, f.project, fts.content AS content, f.created_at
             FROM facts f
             JOIN facts_fts fts ON fts.rowid = f.id
             WHERE fts.facts_fts MATCH ?

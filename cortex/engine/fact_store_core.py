@@ -286,7 +286,7 @@ async def _post_insert_actions(
 
     try:
         await conn.execute(
-            "INSERT INTO facts_fts (rowid, content, project, tags, fact_type, tenant_id) VALUES (?, ?, ?, ?, ?, ?)",
+            "INSERT OR REPLACE INTO facts_fts (rowid, content, project, tags, fact_type, tenant_id) VALUES (?, ?, ?, ?, ?, ?)",
             (fact_id, content, project, tags_json, fact_type, tenant_id),
         )
     except Exception as e:

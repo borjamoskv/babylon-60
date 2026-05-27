@@ -64,11 +64,15 @@ def sovereign_mcp() -> None:
     import sys
     import json
     from cortex_rs import McpSovereignHost
+    from cortex.memory.vsa import VSAPipelineBridge
+    from cortex.extensions.policy.jis_auditor import JISAuditor
 
     sys.stderr.write("🚀 Booting CORTEX Sovereign MCP Server (Rust-native, Transport: stdio)...\n")
     sys.stderr.flush()
 
-    host = McpSovereignHost("cortex-sovereign-mcp", "1.0.0")
+    vsa_bridge = VSAPipelineBridge(agent_id="cortex_mcp_server")
+    jis_auditor = JISAuditor(enforce_encryption=True)
+    host = McpSovereignHost("cortex-sovereign-mcp", "1.0.0", vsa_bridge, jis_auditor)
 
     # Simple Stdio loop for MCP
     while True:

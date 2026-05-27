@@ -3,12 +3,12 @@ import pytest
 llama_index = pytest.importorskip("llama_index")
 from unittest.mock import MagicMock
 from llama_index.core.callbacks.schema import CBEventType
-from cortex.engine.sync_mixin import CortexSyncEngine
+from cortex.engine import CortexEngine
 from cortex.extensions.llamaindex_bridge import CortexIndexCallback
 
 
 def test_cortex_index_callback_retrieve():
-    engine_mock = MagicMock(spec=CortexSyncEngine)
+    engine_mock = MagicMock(spec=CortexEngine)
     agent_id = "test-agent-123"
 
     callback = CortexIndexCallback(engine=engine_mock, agent_id=agent_id)
@@ -32,19 +32,20 @@ def test_cortex_index_callback_retrieve():
     # Trigger event
     callback.on_event_end(event_type=CBEventType.RETRIEVE, payload=payload)
 
-    # Verify engine store_fact called correctly
-    engine_mock.store_fact.assert_called_once_with(
-        agent_id=agent_id,
+    # Verify engine store_sync called correctly
+    engine_mock.store_sync.assert_called_once_with(
+        fact_type="rag_retrieve",
         content="RETRIEVAL_EVENT: Fetched 2 nodes",
         metadata={"nodes": ["node-1", "node-2"], "event": "rag_retrieve"},
+        agent_id=agent_id,
     )
 
 
 def test_cortex_index_callback_other_event():
-    engine_mock = MagicMock(spec=CortexSyncEngine)
+    engine_mock = MagicMock(spec=CortexEngine)
     callback = CortexIndexCallback(engine=engine_mock, agent_id="agent")
 
     callback.on_event_end(event_type=CBEventType.LLM, payload={})
 
-    # Verify engine store_fact NOT called
-    engine_mock.store_fact.assert_not_called()
+    # Verify engine store_sync NOT called
+    engine_mock.store_sync.assert_not_called()
