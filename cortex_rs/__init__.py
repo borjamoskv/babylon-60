@@ -5,15 +5,20 @@ import sys
 
 # Resolve the path to the compiled Rust extension (macOS uses .dylib, fallback to .so)
 _ext_names = ["libcortex_rs.dylib", "libcortex_rs.so", "cortex_rs.dll"]
-_root = pathlib.Path(__file__).resolve().parent.parent / "cortex_rs" / "target" / "release"
+_base = pathlib.Path(__file__).resolve().parent.parent / "cortex_rs" / "target"
 _lib_path = None
-for name in _ext_names:
-    candidate = _root / name
-    if candidate.is_file():
-        _lib_path = candidate
+for _dir in ["release", "debug"]:
+    _root = _base / _dir
+    for name in _ext_names:
+        candidate = _root / name
+        if candidate.is_file():
+            _lib_path = candidate
+            break
+    if _lib_path:
         break
+
 if _lib_path is None:
-    raise ImportError(f"Compiled cortex_rs library not found in {_root}")
+    raise ImportError(f"Compiled cortex_rs library not found in {_base}")
 
 # Load the compiled extension as a Python module named 'cortex_rs'
 loader = importlib.machinery.ExtensionFileLoader("cortex_rs", str(_lib_path))
