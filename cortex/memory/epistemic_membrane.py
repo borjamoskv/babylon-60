@@ -192,7 +192,7 @@ class EpistemicMembrane:
 
     def detect_and_mutate(
         self, recent_proposals: list[torch.Tensor], generations: int = 3
-    ) -> tuple[Optional[torch.Tensor], Optional[dict]]:
+    ) -> tuple[torch.Tensor | None, dict | None]:
         """
         Autopoietic Mutation: Adjusts the epistemic membrane if global coherence drops.
         Generates a controlled mutant that anchors back to historical memory.

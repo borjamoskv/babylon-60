@@ -13,6 +13,7 @@ from cortex.memory.epistemic_membrane import EpistemicMembrane
 # Configure logging to write to stdout
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 
+
 def run_stress_test():
     logging.info("=== Epistemic Membrane Stress Test (C5-REAL) ===")
 
@@ -44,24 +45,24 @@ def run_stress_test():
         mutated_obj = base_components[2][1].clone()
         flip_mask = torch.rand(dim, device=device) < 0.15
         mutated_obj[flip_mask] = -mutated_obj[flip_mask]
-        
+
         episode = [
             ("subject", base_components[0][1]),
             ("action", base_components[1][1]),
             ("object", mutated_obj),
         ]
-        
+
         prop_hv = membrane.encode_episode(episode, timestep=0)
         check = membrane.check_proposal(prop_hv)
-        
+
         if check["accept"]:
             membrane.commit(prop_hv, metadata=check)
             recent_hvs.append(prop_hv)
             acceptances += 1
-            
+
     logging.info(f"Normal learning phase complete. Accepted {acceptances}/100 episodes.")
     logging.info(f"Ledger size: {len(membrane.ledger.leaves)}")
-    
+
     # 2. Adversarial Injection
     logging.info("\n--- 2. Adversarial Injection Phase ---")
     # Completely random episode (Noise)
@@ -73,7 +74,7 @@ def run_stress_test():
     adv_hv = membrane.encode_episode(adv_components, timestep=101)
     check_adv = membrane.check_proposal(adv_hv)
     logging.info(f"Adversarial Proposal Check: {check_adv}")
-    
+
     # 3. Inducing Epistemic Crisis & Autopoietic Mutation
     logging.info("\n--- 3. Epistemic Crisis Phase ---")
     # We simulate a paradigm shift by creating vectors that drift significantly from genesis
@@ -97,6 +98,7 @@ def run_stress_test():
         logging.info("Coherence did not drop below threshold, no mutation needed.")
 
     logging.info("\n--- Benchmark Complete ---")
+
 
 if __name__ == "__main__":
     run_stress_test()
