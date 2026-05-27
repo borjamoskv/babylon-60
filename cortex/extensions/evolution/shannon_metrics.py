@@ -3,14 +3,21 @@
 Implements recursive TTL adaptation via logistic sigmoid decay
 based on the volatility (entropy) of the afferent metric stream.
 """
+
 import logging
 import math
 import sqlite3
 import time
 from pathlib import Path
 from cortex.extensions.evolution.agents import AgentDomain
-from cortex.extensions.evolution.cortex_metrics import _DEFAULT_DB, DOMAIN_PROJECT_MAP, DomainMetrics
-logger = logging.getLogger('cortex.extensions.evolution.shannon')
+from cortex.extensions.evolution.cortex_metrics import (
+    _DEFAULT_DB,
+    DOMAIN_PROJECT_MAP,
+    DomainMetrics,
+)
+
+logger = logging.getLogger("cortex.extensions.evolution.shannon")
+
 
 class CortexMetrics:
     """Sync CORTEX DB querier with per-domain caching.
@@ -18,15 +25,17 @@ class CortexMetrics:
     Thread-safe. Uses raw sqlite3 to avoid async conflicts
     when called from asyncio.to_thread offloads.
     """
+
     _BASE_TTL: float = 60.0
     _MAX_HISTORY: int = 20
 
-    def __init__(self, db_path: str | Path=_DEFAULT_DB) -> None:
+    def __init__(self, db_path: str | Path = _DEFAULT_DB) -> None:
         self._db_path = Path(db_path)
         self._cache: dict[AgentDomain, DomainMetrics] = {}
         self._cache_time: float = 0.0
         self._cache_ttl: float = self._BASE_TTL
         self._history: list[dict[AgentDomain, DomainMetrics]] = []
+
     _ENTROPY_K: float = 1.5
     _ENTROPY_THETA: float = 2.0
     _TTL_FLOOR: float = 5.0

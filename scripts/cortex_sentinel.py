@@ -19,27 +19,33 @@ CORTEX_RESET = "\033[0m"
 SECRETS_REGEX = [
     (r"sk_live_[0-9a-zA-Z]{24}", "Stripe Live Key"),
     (r"0x[a-fA-F0-9]{64}", "EVM Private Key"),
-    (r"(?i)api_key\s*=\s*['\"][a-zA-Z0-9_\-]{20,}['\"]", "Generic API Key")
+    (r"(?i)api_key\s*=\s*['\"][a-zA-Z0-9_\-]{20,}['\"]", "Generic API Key"),
 ]
 
 TRASH_REGEX = [
     (r"(?<!_)" + "pri" + r"nt\s*\(", "Residual standard output"),
     (r"import pdb; pdb\.set_trace\(\)", "Residual PDB trace"),
-    (r"console\.log\(", "Residual console.log()")
+    (r"console\.log\(", "Residual console.log()"),
 ]
+
 
 def print_cortex(msg, error=False):
     color = CORTEX_NOIR_RED if error else CORTEX_NOIR_BLUE
     prefix = "[CORTEX-SENTINEL: C5-DEATH]" if error else "[CORTEX-SENTINEL: C5-REAL]"
     sys.stdout.write(f"{color}{prefix} {msg}{CORTEX_RESET}\n")
 
+
 def get_staged_diff():
     result = subprocess.run(["git", "diff", "--cached"], capture_output=True, text=True)
     return result.stdout
 
+
 def get_staged_files():
-    result = subprocess.run(["git", "diff", "--cached", "--name-only"], capture_output=True, text=True)
+    result = subprocess.run(
+        ["git", "diff", "--cached", "--name-only"], capture_output=True, text=True
+    )
     return [f for f in result.stdout.splitlines() if f.strip()]
+
 
 # --- PHASE 1: PRE-COMMIT (LEA-Ω PURGE) ---
 def run_pre_commit():
@@ -50,17 +56,24 @@ def run_pre_commit():
     # 1. Annihilate Secrets
     for pattern, name in SECRETS_REGEX:
         if re.search(pattern, diff):
-            print_cortex(f"CRITICAL VIOLATION: {name} detected in staged changes. Committing blocked.", error=True)
+            print_cortex(
+                f"CRITICAL VIOLATION: {name} detected in staged changes. Committing blocked.",
+                error=True,
+            )
             return 1
 
     # 2. Annihilate Trash (LEA-Ω)
     for pattern, name in TRASH_REGEX:
         if re.search(r"^\+.*" + pattern, diff, re.MULTILINE):
-            print_cortex(f"ENTROPY DETECTED: {name} in staged changes. Clean up before committing.", error=True)
+            print_cortex(
+                f"ENTROPY DETECTED: {name} in staged changes. Clean up before committing.",
+                error=True,
+            )
             return 1
 
     print_cortex("Pre-commit validation passed. Entropy zero.")
     return 0
+
 
 # --- PHASE 2: PREPARE-COMMIT-MSG (SEMANTIC FORGE) ---
 def run_prepare_commit_msg(commit_msg_file):
@@ -100,15 +113,16 @@ def run_prepare_commit_msg(commit_msg_file):
 
     file_summary = ", ".join([Path(f).name for f in files[:3]])
     if len(files) > 3:
-        file_summary += f" and {len(files)-3} more"
+        file_summary += f" and {len(files) - 3} more"
 
     auto_msg = f"{type_tag}({scope}): auto-update {file_summary}\n\n[CORTEX-SENTINEL: C5-REAL Auto-Forge]\n"
 
-    with open(commit_msg_file, 'w') as f:
+    with open(commit_msg_file, "w") as f:
         f.write(auto_msg + current_msg)
 
     print_cortex(f"Forged semantic commit message: {type_tag}({scope})")
     return 0
+
 
 # --- DISPATCH ---
 def main():
@@ -124,14 +138,16 @@ def main():
     else:
         # Direct run / testing
         print_cortex("Direct execution. Installing hooks...")
-        repo_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True).stdout.strip()
+        repo_root = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True
+        ).stdout.strip()
         if not repo_root:
             print_cortex("Not inside a git repository.", error=True)
             sys.exit(1)
-        
+
         hooks_dir = Path(repo_root) / ".git" / "hooks"
         target_script = Path(__file__).resolve()
-        
+
         for hook in ["pre-commit", "prepare-commit-msg"]:
             hook_path = hooks_dir / hook
             if hook_path.exists():
@@ -141,6 +157,7 @@ def main():
             print_cortex(f"Injected {hook} -> {target_script}")
 
         sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

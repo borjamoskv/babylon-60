@@ -34,27 +34,6 @@ Usage::
             ...
 """
 
-from __future__ import annotations
-
-from cortex.extensions.agent.degradation_executor import (  # noqa: F401, E402
-    _persist_to_cortex,
-    _upgrade_to_l3,
-    sovereign_execute,
-)
-
-from cortex.extensions.agent.degradation_types import (  # noqa: F401
-    AgentAction,
-    AgentCalcificationError,
-    AgentDegradedError,
-    AgentResult,
-    DegradationLevel,
-    DegradationReport,
-    ModelUnavailableError,
-    SchemaIncompatibilityError,
-    SovereignAgentError,
-    ToolRegistrationError,
-)
-
 __all__ = [
     "SovereignAgentError",
     "SchemaIncompatibilityError",
