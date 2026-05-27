@@ -64,9 +64,9 @@ class VSAMemory(SovereignResource):
         self._conn = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=30.0)
         _setup_sqlite_pragmas(self._conn)
 
-        # Use weakref.finalize for guaranteed cleanup when instance is garbage collected
+        # FIX(P0): finalize AFTER all resources are assigned (not getattr which captured None)
         self._finalizer = weakref.finalize(
-            self, self._safe_close, getattr(self, '_tensor', None), getattr(self, '_base_view', None), getattr(self, '_mmap_tensor', None), getattr(self, '_f', None), getattr(self, '_conn', None)
+            self, self._safe_close, self._tensor, self._base_view, self._mmap_tensor, self._f, self._conn
         )
         atexit.register(self.close)
         
