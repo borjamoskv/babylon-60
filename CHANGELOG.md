@@ -19,6 +19,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Clean base bootstrap**: core memory imports now tolerate missing `numpy`, optional L2/vector surfaces degrade to `L1+L3` without user-facing warnings, and async sqlite-vec loading now has a dedicated helper plus regression coverage.
 - **macOS platform split**: moved `pyobjc` keychain bindings out of the base install into a dedicated `platform` extra, while keeping secure-by-default keyring behavior in the trust-core path.
 
+## [0.3.0b8] — 2026-05-27
+
+### Architecture
+- **Terminal State 4 (Silicon Dispersion)**: Successfully closed the Ouroboros loop via AST Autopoiesis and C5-REAL Outbox atomicity.
+- **Rust Substrate Mmap Bypass**: Integrated `cortex_rs` for direct Zero-Copy Ring Buffer mmap access, achieving ~0.02ms write latency.
+- **AEON-0 Exergy Bounds**: Eradicated 9 entropy vectors and silent exceptions across the persistence daemon for pure, lock-free iteration.
+
+### Fixed
+- **Rust Segfault/Code Signature Invalid**: Removed bundled SQLite from `cortex_rs` which triggered macOS SIGKILL exceptions upon `.so` loading.
+- **Sparse File Instantiation Panic**: Fixed native mmap panics by moving Python-side physical pre-allocation before `HAS_CORTEX_RS` initialization.
+- **Test Suite Determinism**: Resolved `MonkeyPatch` CircularImport AttributeError and test DB scoping issues. 2148+ tests pass under isolated ring buffer contexts.
+
 ## [0.3.0b7] — 2026-04-14
 
 ### Changed
