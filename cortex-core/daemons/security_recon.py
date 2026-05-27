@@ -10,6 +10,8 @@ except ImportError:
     pass
 
 from daemons.outbox import enqueue_swarm_task
+
+
 class SecurityReconDaemon(SovereignResource):
     """C5-REAL SOTA AI Agents Radar. Continuously investigates new SOTA AI agents and autonomous frameworks."""
 
@@ -21,7 +23,6 @@ class SecurityReconDaemon(SovereignResource):
     async def _recon_loop(self):
         loop = asyncio.get_running_loop()
         while True:
-            # Enqueue a high-exergy Swarm Task to the SAGE_COUNCIL to fetch SOTA AI Agents Fronts
             payload = {
                 "type": "RESEARCH_SOTA_IA_AGENTS",
                 "target": "agente-sota",
@@ -29,11 +30,12 @@ class SecurityReconDaemon(SovereignResource):
                 "description": "Continuous SOTA AI agents investigation. Extract exergy voids and evaluate empirical results from agentic architectures."
             }
             try:
-                loop.run_in_executor(None, enqueue_swarm_task, "SAGE_COUNCIL", payload)
+                # E9 FIX: Properly await the executor future instead of fire-and-forget
+                await loop.run_in_executor(None, enqueue_swarm_task, "SAGE_COUNCIL", payload)
                 logger.info("SecurityReconDaemon: Dispatched continuous SOTA IA agents investigation task.")
             except Exception as e:
                 logger.error("SecurityReconDaemon error: %s", e)
-            
+
             await asyncio.sleep(self._interval)
 
     def start_guardian(self):
@@ -44,6 +46,3 @@ class SecurityReconDaemon(SovereignResource):
             self._daemon_task = loop.create_task(self._recon_loop())
         except RuntimeError:
             logger.warning("SecurityReconDaemon could not start: no event loop.")
-
-
-
