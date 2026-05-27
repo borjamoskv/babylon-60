@@ -47,16 +47,10 @@ class UltramapSubstrate:
                 f.write(b"\x00" * self.tensor_size)
 
         if HAS_RUST:
-            try:
-                self._rs = cortex_rs.UltramapSubstrate(self.bin_path, self.capacity)
-                self._buffer = None
-                self._mmap = None
-                self._f = None
-            except AttributeError:
-                self._rs = None
-                self._f = open(self.bin_path, "r+b")
-                self._mmap = mmap.mmap(self._f.fileno(), self.tensor_size)
-                self._buffer = memoryview(self._mmap)
+            self._rs = cortex_rs.UltramapSubstrate(self.bin_path, self.capacity)
+            self._buffer = None
+            self._mmap = None
+            self._f = None
         else:
             self._rs = None
             self._f = open(self.bin_path, "r+b")
