@@ -12,11 +12,10 @@ from persistence import ZeroCopyRingBuffer, VSAMemory, DB_PATH, VSA_BIN_PATH
 def clean_vsa_env(monkeypatch, tmp_path):
     """Isolate DB and bin paths to tmp_path to prevent xdist concurrency conflicts."""
     test_db = tmp_path / "test_cortex.db"
-    
+
     monkeypatch.setattr("persistence.DB_PATH", str(test_db))
     monkeypatch.setattr("persistence.VSA_BIN_PATH", str(tmp_path / "vsa.bin"))
     yield
-
 
 
 def test_ring_buffer_lifecycle():

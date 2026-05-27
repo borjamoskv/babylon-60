@@ -9,11 +9,7 @@ DUMMY_FILE = "cortex-core/dummy_exergy.py"
 def setup():
     with open(DUMMY_FILE, "w") as f:
         f.write("def calculate_exergy():\n    return 1.0\n")
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute("DELETE FROM cortex_swarm_queue")
-    conn.commit()
-    conn.close()
+    # No queue clearing needed for ZeroCopyRingBuffer in setup as it's purely ephemeral
     import time
     time.sleep(0.5)
 

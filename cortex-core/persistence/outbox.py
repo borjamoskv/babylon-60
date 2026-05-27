@@ -18,7 +18,7 @@ except ImportError:
     pass
 
 from .ledger import LedgerManager
-class ZeroCopyRingBuffer:
+class ZeroCopyRingBuffer(SovereignResource):
     """L4 Sovereign Zero-Copy Ring Buffer.
     Bypasses SQLite & JSON deserialization using C-contiguous mmap memoryviews.
     Memory Layout per Task (256 bytes):
@@ -33,6 +33,8 @@ class ZeroCopyRingBuffer:
         self.task_size = 256
         self.tensor_size = self.capacity * self.task_size
         self.bin_path = os.path.join(os.path.dirname(base.DB_PATH), "swarm_ring_vsa.bin")
+        self._mmap = None
+        self._f = None
 
         if not os.path.exists(self.bin_path) or os.path.getsize(self.bin_path) < self.tensor_size:
             with open(self.bin_path, "wb") as f:
@@ -56,6 +58,19 @@ class ZeroCopyRingBuffer:
             self._write_counter = itertools.count()
             self._read_counter = itertools.count()
 
+        # L5 Sovereign Topological Space Integration
+        try:
+            import sys
+            sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            from ultramap import UltramapSubstrate
+            self.umap = UltramapSubstrate(capacity=self.capacity)
+        except Exception as e:
+            logger.warning("UltraMap integration failed: %s", e)
+            self.umap = None
+        
+        # C5-REAL: Prevent shared memory leak via weakref garbage collection
+        self._finalizer = weakref.finalize(self, self._safe_close, getattr(self, '_buffer', None), self._mmap, self._f)
+
     def enqueue(self, agent_id: bytes, payload: bytes) -> bool:
         """O(1) Zero-copy memory write. Bypasses VSA OS locks."""
         if self._rust_buf is not None:
@@ -77,6 +92,17 @@ class ZeroCopyRingBuffer:
         payload_bytes = payload[:183].ljust(183, b"\x00")
         self._buffer[offset + 73 : offset + 256] = payload_bytes
         
+        # UltraMap Sovereign Topology Update (O(1))
+        try:
+            if hasattr(self, 'umap') and self.umap is not None:
+                x = (time.monotonic() * 10.0) % 1000.0
+                y = (write_idx * 13.37) % 1000.0
+                z = len(payload) * 1.0
+                target = agent_id.decode('utf-8', 'ignore').strip('\x00')
+                self.umap.update_agent_position(write_idx, x, y, z, target, 0.8)
+        except Exception as e:
+            logger.error("UltraMap topological update error: %s", e)
+
         return True
 
     def fetch_pending(self):
@@ -87,22 +113,39 @@ class ZeroCopyRingBuffer:
         tasks = []
         import struct
 
-        # Zero-copy Lock-Free read (C5-REAL Enforced via itertools atomic reservation)
-        for _ in range(self.capacity):
-            read_idx = next(self._read_counter) % self.capacity
-            offset = read_idx * self.task_size
+        for idx in range(self.capacity):
+            offset = idx * self.task_size
             if self._buffer[offset] == 1:  # Pending
                 self._buffer[offset] = 2  # Mark Processing
                 ts = struct.unpack_from("d", self._buffer, offset + 1)[0]
                 agent_id = bytes(self._buffer[offset + 9 : offset + 73]).rstrip(b"\x00")
                 payload = bytes(self._buffer[offset + 73 : offset + 256]).rstrip(b"\x00")
-                tasks.append((read_idx, ts, agent_id, payload))
+                tasks.append((idx, ts, agent_id, payload))
                 
                 self._buffer[offset] = 0 # Free it
-            else:
-                # Read skippage check
-                break
         return tasks
+
+    def get_pending_count(self) -> int:
+        """Scan the buffer memory or binary file to count tasks with status = 1 (Pending)."""
+        count = 0
+        try:
+            if hasattr(self, "_buffer") and self._buffer is not None:
+                # Python mode: read directly from mapped memory
+                for i in range(self.capacity):
+                    if self._buffer[i * self.task_size] == 1:
+                        count += 1
+            else:
+                # Rust mode or fallback to binary file on disk: read the file contents
+                if os.path.exists(self.bin_path):
+                    with open(self.bin_path, "rb") as f:
+                        data = f.read(self.capacity * self.task_size)
+                        for i in range(self.capacity):
+                            offset = i * self.task_size
+                            if offset < len(data) and data[offset] == 1:
+                                count += 1
+        except Exception as e:
+            logger.error("Failed to count pending tasks in ZeroCopyRingBuffer: %s", e)
+        return count
 
 
 _global_ring_buffer = None
@@ -134,7 +177,7 @@ class OutboxDaemon(SovereignResource):
             ring = _get_ring_buffer()
             ring_tasks = ring.fetch_pending()
             if ring_tasks:
-                return [(f"ring_{idx}", agent.decode('utf-8', 'ignore'), payload.decode('utf-8', 'ignore')) 
+                return [(f"ring_{idx}", agent.decode('utf-8', 'ignore').rstrip('\x00'), payload.decode('utf-8', 'ignore').rstrip('\x00')) 
                         for idx, ts, agent, payload in ring_tasks]
         except Exception as e:
             logger.error("ZeroCopyRingBuffer fetch failed: %s", e)

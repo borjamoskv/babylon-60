@@ -293,11 +293,7 @@ def test_enqueue_swarm_task_exa_lisp(monkeypatch, tmp_path):
     ledger = LedgerManager()
 
     # Enqueue a valid EXA_LISP task
-    payload = {
-        "type": "EXA_LISP",
-        "code": "(math-add 10 10)",
-        "exergy_limit": 500
-    }
+    payload = {"type": "EXA_LISP", "code": "(math-add 10 10)", "exergy_limit": 500}
     enqueue_swarm_task("LISP-AGENT", payload)
 
     # Drain using OutboxDaemon

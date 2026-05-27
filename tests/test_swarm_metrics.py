@@ -23,7 +23,6 @@ def clean_swarm_queue_db(monkeypatch, tmp_path):
     # Patch DB_PATH in imported modules
     monkeypatch.setattr("persistence.DB_PATH", str(test_db))
     monkeypatch.setattr("persistence.base.DB_PATH", str(test_db))
-    monkeypatch.setattr("persistence.outbox.DB_PATH", str(test_db))
     monkeypatch.setattr("persistence.outbox._global_ring_buffer", None)
 
     # Reset cache
@@ -133,4 +132,3 @@ def test_swarm_metrics_active_children():
     # Total should be 2 (1 from SQLite + 1 from Ring Buffer)
     m = get_swarm_metrics(bypass_cache=True)
     assert m["active_children"] == 2
-

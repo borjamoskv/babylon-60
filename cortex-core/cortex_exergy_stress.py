@@ -11,11 +11,9 @@ async def run_stress_test():
     
     # Red externa eliminada, operamos en aislamiento Ring-0
     
-    # Preparar base de datos limpia para la prueba
-    conn = sqlite3.connect(os.getenv("CORTEX_DB_PATH", "cortex_memory_vsa.db"))
-    conn.execute("DELETE FROM cortex_swarm_queue")
-    conn.commit()
-    conn.close()
+    # Preparar Ring Buffer limpio para la prueba
+    from persistence import _get_ring_buffer
+    _get_ring_buffer().reset()
 
     NUM_TASKS = 10000
     print(f"[+] Inyectando {NUM_TASKS} tareas en ráfaga (Simulación de Enjambre Masivo)...")
@@ -37,15 +35,13 @@ async def run_stress_test():
     print("[+] Observando drenaje del Outbox Daemon durante 3 segundos...")
     await asyncio.sleep(3.0)
     
-    conn = sqlite3.connect(os.getenv("CORTEX_DB_PATH", "cortex_memory_vsa.db"))
-    c = conn.cursor()
-    c.execute("SELECT status, COUNT(*) FROM cortex_swarm_queue GROUP BY status")
-    results = c.fetchall()
-    conn.close()
+    from persistence import _get_ring_buffer
+    ring = _get_ring_buffer()
+    pending = ring.get_pending_count()
     
-    print("[+] Estado final de la cola:")
-    for status, count in results:
-        print(f"    - {status.upper()}: {count}")
+    print("[+] Estado final de la cola (L4 Ring Buffer):")
+    print(f"    - PENDING: {pending}")
+    print(f"    - PROCESSED/DROPPED: {NUM_TASKS - pending}")
     
     print("[!] STRESS TEST C5-REAL COMPLETADO.")
 

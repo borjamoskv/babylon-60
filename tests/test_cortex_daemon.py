@@ -35,7 +35,8 @@ class TestCortexDaemon:
         import persistence
 
         monkeypatch.setattr(persistence, "DB_PATH", str(test_db))
-        monkeypatch.setattr(persistence, "_global_ring_buffer", None)
+        monkeypatch.setattr(persistence.base, "DB_PATH", str(test_db))
+        monkeypatch.setattr(persistence.outbox, "_global_ring_buffer", None)
 
         # Initialize the test SQLite schema
         conn = sqlite3.connect(str(test_db))
