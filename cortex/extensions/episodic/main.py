@@ -1,5 +1,5 @@
 """
-CORTEX v5.1 — Episodic Memory Engine.
+Episodic Memory Engine.
 
 Persistent native memory: stores timestamped episodic events (decisions,
 errors, discoveries, flow states) across sessions, detects recurring patterns,

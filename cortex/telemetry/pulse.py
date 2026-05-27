@@ -2,7 +2,7 @@
 # Licensed under the Apache License, Version 2.0.
 # See top-level LICENSE file for details.
 
-"""CORTEX v6.0 — Pulse-Driven Observability (Ω₄: Aesthetic Integrity).
+"""Pulse-Driven Observability (Ω₄: Aesthetic Integrity).
 
 True observability operates on the pulse (SignalBus) instead of the corpse (post-hoc logs).
 This module provides a sovereign registry that derives system metrics directly from

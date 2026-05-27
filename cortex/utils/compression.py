@@ -1,4 +1,4 @@
-"""CORTEX v5.0 — Embedding Compression.
+"""Embedding Compression.
 
 int8 quantization for embedding storage. Reduces storage from 1.5KB to 388 bytes
 per vector (3.9x compression). Search quality impact is negligible for

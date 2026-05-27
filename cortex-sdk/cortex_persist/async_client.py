@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Async Python SDK Client
+Async Python SDK Client
 
 This module implements the SORTU-Ω v0.2 public SDK surface asynchronously.
 It exposes a main `AsyncCortexClient`, which branches into modular domain

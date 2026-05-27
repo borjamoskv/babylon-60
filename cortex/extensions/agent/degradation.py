@@ -1,4 +1,4 @@
-"""CORTEX v7 — Sovereign Degradation Protocol (Ω₅ Applied).
+"""Sovereign Degradation Protocol (Ω₅ Applied).
 
 Materializes §14 of AGENTICA.md: "Degradación Soberana — Ω₅ Aplicado a Sistemas Agénticos".
 

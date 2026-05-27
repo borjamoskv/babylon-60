@@ -1,5 +1,5 @@
 """
-CORTEX v5.2 — Gossip Protocol (KETER-∞ Metal-Level).
+Gossip Protocol (KETER-∞ Metal-Level).
 
 Anti-entropy protocol for syncing state between GEACL nodes.
 Implements Semantic Digests and Vector Clocks to ensure eventual consistency.

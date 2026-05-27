@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v5.1 — Weighted Byzantine Fault Tolerance (KETER-∞ Ola 3).
+"""Weighted Byzantine Fault Tolerance (KETER-∞ Ola 3).
 
 Implements WBFT consensus for multi-model LLM response evaluation.
 When N models produce responses, this module determines which responses

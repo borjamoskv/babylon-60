@@ -1,5 +1,5 @@
 """
-CORTEX v6 — Native vLLM Edge Provider.
+Native vLLM Edge Provider.
 
 Operates `vllm.AsyncLLMEngine` in-process to allow deep extraction and
 TurboQuant compression (arXiv:2504.19874) of PagedAttention Context Windows

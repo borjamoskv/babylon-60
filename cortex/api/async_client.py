@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Async Python SDK Client.
+Async Python SDK Client.
 
 Fully asynchronous client for the CORTEX REST API using httpx.AsyncClient.
 

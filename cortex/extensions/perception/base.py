@@ -1,5 +1,5 @@
 """
-CORTEX v5.1 — Perception Base & Models.
+Perception Base & Models.
 
 Foundational types and classification logic used by the Perception Engine.
 Optimized for high-frequency file event processing and project inference.

@@ -2,7 +2,7 @@
 # Licensed under the Apache License, Version 2.0.
 # See top-level LICENSE file for details.
 
-"""CORTEX v5.0 — DependencyGuard v2: Axiom 4 Enforcement.
+"""DependencyGuard v2: Axiom 4 Enforcement.
 
 Red-Teamed static analysis guard. Detects oracle dependencies through
 MULTIPLE detection strategies, not just subprocess pattern matching.

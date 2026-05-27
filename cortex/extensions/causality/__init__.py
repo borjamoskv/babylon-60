@@ -1,4 +1,4 @@
-"""CORTEX v5.5 — Causality Module.
+"""Causality Module.
 
 Taint propagation, causal DAG integrity, and effective confidence
 recomputation. Implements Axiom Ω₁₃ thermodynamic enforcement:

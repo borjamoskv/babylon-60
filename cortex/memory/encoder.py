@@ -1,5 +1,5 @@
 """
-CORTEX v5.2 — Async Embedding Encoder.
+Async Embedding Encoder.
 
 Wraps the existing LocalEmbedder in asyncio.to_thread() to guarantee
 event-loop immunity for CPU-bound ML inference.

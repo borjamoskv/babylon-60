@@ -1,5 +1,5 @@
 """
-CORTEX v6.0 — Storage CLI Commands.
+Storage CLI Commands.
 
 Commands for managing CORTEX storage backends:
   storage-init-pg   Initialize PostgreSQL schema (idempotent)

@@ -1,5 +1,5 @@
 """
-CORTEX v5.3 — BYOK Embedding Engine.
+BYOK Embedding Engine.
 
 Wraps either the LocalEmbedder or an External Provider (OpenAI, Gemini)
 based on Tenant configuration. Ensures SQLite-vec dimension compatibility.

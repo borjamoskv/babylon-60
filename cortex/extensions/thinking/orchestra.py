@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v5.0 — Thought Orchestra.
+"""Thought Orchestra.
 
 N modelos pensando en paralelo con fusión por consenso.
 El cerebro distribuido de CORTEX.

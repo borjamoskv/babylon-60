@@ -1,5 +1,5 @@
 """
-CORTEX v5.2 — Perception Layer 2: Metabolic Scaling.
+Perception Layer 2: Metabolic Scaling.
 
 Regulates the intensity of file system monitoring based on the
 thermodynamic value (Exergy) of recent actions and the biological

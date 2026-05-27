@@ -1,5 +1,5 @@
 """
-CORTEX v6 — Topological ID Generator (SovereignFlake)
+Topological ID Generator (SovereignFlake)
 
 Axiom: Entropic Asymmetry & Multi-Scale Causality
 Replaces UUIDv4. Generates lexicographically sortable, distributed IDs.

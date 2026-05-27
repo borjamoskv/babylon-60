@@ -1,4 +1,4 @@
-"""CORTEX v8.0 — The Code Smith (Safe Self-Evolution).
+"""The Code Smith (Safe Self-Evolution).
 
 ASE pipeline: REQUEST → DESIGN → EDIT → VALIDATE → TEST → COMMIT.
 Kill switch, 4-layer rollback, AST whitelist, complexity guard, immune integration.

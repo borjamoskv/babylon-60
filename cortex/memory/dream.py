@@ -1,4 +1,4 @@
-"""CORTEX v8 — Associative Dream Engine (REM Phase).
+"""Associative Dream Engine (REM Phase).
 
 The creative counterpart to HippocampalReplay (NREM).
 While NREM consolidates and compresses, REM CREATES:

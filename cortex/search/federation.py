@@ -1,4 +1,4 @@
-"""CORTEX v8 — Federated Search Engine.
+"""Federated Search Engine.
 
 Enables transparent search across partitioned memory databases:
   - core     → ~/.cortex/cortex.db (CORTEX infra, IA, tooling)

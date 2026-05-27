@@ -1,5 +1,5 @@
 """
-CORTEX v8 — Anomaly Detector.
+Anomaly Detector.
 
 Statistical behavioral anomaly detection for CORTEX fact storage.
 Monitors rate of mutations, entropy of content, and behavioral

@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Custom Exceptions.
+Custom Exceptions.
 
 Typed error hierarchy to avoid leaking internal DB details
 through API boundaries (Sprint 0 security directive).

@@ -1,4 +1,4 @@
-"""CORTEX v8.0 — NightShift Pipeline (Autonomous Crystal Generation).
+"""NightShift Pipeline (Autonomous Crystal Generation).
 
 Wires target discovery (KnowledgeRadar) with the AUTODIDACT-Ω crystallization
 engine to form a fully autonomous DAG for background knowledge generation.

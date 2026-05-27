@@ -1,4 +1,4 @@
-"""CORTEX v8.0 — Crystal Synthesis Node.
+"""Crystal Synthesis Node.
 
 Executes a deep synthesis of conflicting or redundant knowledge crystals.
 Used by the CrystalConsolidator to fuse near-duplicate crystals while

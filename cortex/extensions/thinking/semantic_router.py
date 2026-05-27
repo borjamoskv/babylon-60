@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v5.1 — Semantic Router (KETER-∞ Ola 3).
+"""Semantic Router (KETER-∞ Ola 3).
 
 Zero-conceptual semantic routing: analyzes prompt content and automatically
 selects the optimal ThinkingMode instead of requiring manual selection.

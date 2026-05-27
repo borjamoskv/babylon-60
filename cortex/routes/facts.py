@@ -22,7 +22,7 @@ from cortex.types.models import (
 from cortex.utils.i18n import get_trans
 
 """
-CORTEX v5.1 - Facts Router.
+Facts Router.
 Consolidated Memory-as-a-Service capabilities.
 """
 

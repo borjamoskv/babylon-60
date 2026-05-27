@@ -1,4 +1,4 @@
-"""CORTEX v5.0 — Dependency Extractor.
+"""Dependency Extractor.
 
 Calculates topological dependencies for topological sorting.
 """

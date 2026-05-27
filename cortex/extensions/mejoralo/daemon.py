@@ -1,5 +1,5 @@
 """
-CORTEX v8.0 — Sovereign MEJORAlo Ouroboros Daemon.
+Sovereign MEJORAlo Ouroboros Daemon.
 
 Replaces loop_mejoralo.sh with a sovereign, cross-platform Python implementation.
 Ensures continuous code quality evolution with graceful handling.

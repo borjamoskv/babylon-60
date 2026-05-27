@@ -1,5 +1,5 @@
 """
-CORTEX v8 — Daily Shield Monitor (Daemon).
+Daily Shield Monitor (Daemon).
 
 Scheduled security pipeline that runs daily:
   04:00 → ThreatFeedEngine.update_daily()

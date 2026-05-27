@@ -1,5 +1,5 @@
 """
-CORTEX v5.1 — Perception Layer 1.5: Diff Management.
+Perception Layer 1.5: Diff Management.
 
 Maintains a shadow state of the workspace to compute line-level diffs
 between file system events. Optimized for memory-efficient tracking

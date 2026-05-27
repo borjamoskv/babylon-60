@@ -1,4 +1,4 @@
-"""CORTEX v8.0 — NightShift Crystal Daemon (Autonomous Knowledge Generation).
+"""NightShift Crystal Daemon (Autonomous Knowledge Generation).
 
 Background daemon that periodically discovers targets via KnowledgeRadar,
 runs them through the NightShift Pipeline, consolidates existing crystals,

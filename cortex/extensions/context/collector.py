@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Context Collector.
+Context Collector.
 
 Gathers ambient signals from multiple sources: database (facts, ghosts,
 transactions, heartbeats), filesystem, and git log.

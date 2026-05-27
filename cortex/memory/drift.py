@@ -1,4 +1,4 @@
-"""CORTEX v8 — Drift Monitor (Topological Stability Engine).
+"""Drift Monitor (Topological Stability Engine).
 
 Detects catastrophic drift in the L2 vector space before recall degrades
 silently. Uses 3 computationally honest proxies instead of theoretical TDA:

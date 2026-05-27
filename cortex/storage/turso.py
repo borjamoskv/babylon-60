@@ -1,5 +1,5 @@
 """
-CORTEX v5.1 — Turso (libSQL) Cloud Backend.
+Turso (libSQL) Cloud Backend.
 
 Sovereign-grade cloud storage backend using libSQL.
 Optimized for edge performance with transactional batching and

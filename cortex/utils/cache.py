@@ -1,5 +1,5 @@
 """
-CORTEX v5.5 — Sovereign Bounded Cache.
+Sovereign Bounded Cache.
 
 A thread-safe, async-friendly LRU+TTL cache with eviction hooks for
 persistence and audit trails.

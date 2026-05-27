@@ -1,4 +1,4 @@
-"""CORTEX v6 — Error Boundary (Ω₅ Antifragile Decorator).
+"""Error Boundary (Ω₅ Antifragile Decorator).
 
 Decorator + async context manager that wraps functions to auto-persist
 uncaught errors as ghosts via the ErrorGhostPipeline.

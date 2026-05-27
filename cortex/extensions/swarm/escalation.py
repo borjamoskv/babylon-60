@@ -1,4 +1,4 @@
-"""CORTEX v6.0 — Human Escalation Protocol.
+"""Human Escalation Protocol.
 
 Provides the escalation mechanism when an agent enters
 an unrecoverable state or requires human intervention

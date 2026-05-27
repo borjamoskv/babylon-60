@@ -1,5 +1,5 @@
 """
-CORTEX v8 — Threat Feed Engine.
+Threat Feed Engine.
 
 Daily-updated threat intelligence from NVD, GitHub Advisory DB,
 and AbuseIPDB. Maintains a local vector store of attack signatures

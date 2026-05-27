@@ -30,6 +30,30 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s [%(levelname)s] CORTEX-DAEMON: %(message)s"
 )
 
+try:
+    from rich.logging import RichHandler
+    from rich.console import Console
+    from rich.theme import Theme
+
+    # Industrial Noir 2026 Aesthetic (#0A0A0A bg implicitly, #2B3BE5 accents)
+    moskv_theme = Theme({
+        "logging.level.info": "cyan",
+        "logging.level.warning": "bold #2B3BE5",
+        "logging.level.error": "bold red",
+        "logging.level.critical": "bold white on red",
+    })
+    console = Console(theme=moskv_theme)
+    
+    # Override root logger
+    logging.getLogger().handlers.clear()
+    logging.basicConfig(
+        level=logging.INFO,
+        format="[bold #2B3BE5]CORTEX-Ω[/] %(message)s",
+        datefmt="[%H:%M:%S.%f]",
+        handlers=[RichHandler(console=console, rich_tracebacks=True, markup=True, show_path=False, show_time=True)]
+    )
+except ImportError:
+    pass
 
 class CortexDaemon:
     """Sovereign Orchestrator V3.1 — The Heart of MOSKV-1."""

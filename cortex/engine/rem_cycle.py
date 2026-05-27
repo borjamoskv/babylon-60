@@ -1,5 +1,5 @@
 """
-CORTEX V7 — REM Coordinator (Deep Maintenance Cycle).
+REM Coordinator (Deep Maintenance Cycle).
 
 Orchestrates background tasks during low-activity phases (Sleep).
 """

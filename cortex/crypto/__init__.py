@@ -1,5 +1,5 @@
 """
-CORTEX v6 — Cryptographic Security.
+Cryptographic Security.
 """
 
 from .aes import CortexEncrypter, get_default_encrypter

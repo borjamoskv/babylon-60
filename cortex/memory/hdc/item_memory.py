@@ -1,4 +1,4 @@
-"""CORTEX v7 — HDC Item Memory (Codebook).
+"""HDC Item Memory (Codebook).
 
 Deterministic mapping of atomic symbols (tokens, roles, projects)
 to random bipolar hypervectors. Uses seeded RNG for reproducibility:

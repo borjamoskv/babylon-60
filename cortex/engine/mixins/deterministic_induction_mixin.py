@@ -1,5 +1,5 @@
 """
-CORTEX v7 — Deterministic Induction Mixin (AX-VI (JIT Concept)).
+Deterministic Induction Mixin (AX-VI (JIT Concept)).
 
 Enforces mathematical determinism on generated code payloads before they hit
 the ledger. Rejects blocking I/O (time.sleep, socket, os.system), network

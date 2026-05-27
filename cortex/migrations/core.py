@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Schema Migrations Core.
+Schema Migrations Core.
 """
 
 from __future__ import annotations

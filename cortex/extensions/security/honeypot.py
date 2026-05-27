@@ -1,5 +1,5 @@
 """
-CORTEX v8 — Honeypot Manager.
+Honeypot Manager.
 
 Implements active deceptive defense by injecting "synthetic secrets"
 and monitoring for unauthorized access or leakage.

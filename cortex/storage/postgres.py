@@ -1,5 +1,5 @@
 """
-CORTEX v6.0 — PostgreSQL Cloud Backend.
+PostgreSQL Cloud Backend.
 
 Production-grade cloud storage backend using asyncpg.
 Designed for AlloyDB/CloudSQL/RDS deployments with connection

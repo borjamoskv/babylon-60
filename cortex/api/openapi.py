@@ -1,5 +1,5 @@
 """
-CORTEX v6.1 — OpenAPI Spec Generator.
+OpenAPI Spec Generator.
 
 Exports the FastAPI OpenAPI schema as a static JSON file.
 Useful for SDK generation, documentation portals, and API contracts.

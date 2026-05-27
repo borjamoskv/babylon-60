@@ -1,5 +1,5 @@
 """
-CORTEX v5.5 — IMMUNITAS-Ω Chaos Engineering.
+IMMUNITAS-Ω Chaos Engineering.
 Generalized 'Logic-Bomb' pattern for external dependencies.
 """
 

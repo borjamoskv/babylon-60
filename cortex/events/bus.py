@@ -1,5 +1,5 @@
 """
-CORTEX v6 — Distributed Event Bus.
+Distributed Event Bus.
 
 Allows multi-node synchronization of memories and swarm telemetry.
 Transitions CORTEX from a Local Daemon to a Mesh Network.

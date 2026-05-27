@@ -1,5 +1,5 @@
 """
-CORTEX V5 - Sovereign Autopoiesis Engine
+Sovereign Autopoiesis Engine
 Second-Order Cybernetics (Maturana / Varela): Axiom 10 Recursive Auto-Evolution.
 """
 

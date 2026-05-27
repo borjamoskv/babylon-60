@@ -1,4 +1,4 @@
-"""CORTEX v5.0 — CLI.
+"""CLI.
 
 Sovereign Command-Line Interface for CORTEX.
 """

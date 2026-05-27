@@ -1,5 +1,5 @@
 """
-CORTEX v5.2 — GEACL Coordinator (KETER-∞ Metal-Level).
+GEACL Coordinator (KETER-∞ Metal-Level).
 
 GEACL (Gossip-Enabled Async Consensus Ledger) ties together:
 1. WBFT (Weighted Byzantine Fault Tolerance) for LLM evaluation.

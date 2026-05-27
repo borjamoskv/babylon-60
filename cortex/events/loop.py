@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v5.1 — Sovereign Event Loop (KETER-∞ Ola 2).
+"""Sovereign Event Loop (KETER-∞ Ola 2).
 
 Centralizes asyncio event loop policy with automatic uvloop
 acceleration on supported platforms (Linux/macOS).

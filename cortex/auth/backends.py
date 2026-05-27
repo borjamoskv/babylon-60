@@ -1,5 +1,5 @@
 """
-CORTEX v6 — Authentication Backends.
+Authentication Backends.
 
 Decouples authentication storage from the core AuthManager logic.
 Supports SQLite (Local v5) and distributed cloud backends (v6).

@@ -1,5 +1,5 @@
 """
-CORTEX v8 — Sovereign Immutable Ledger (CHRONOS-1 Standard).
+Sovereign Immutable Ledger (CHRONOS-1 Standard).
 
 Axiom Reference:
 - Ω₃ (Byzantine Default): "I verify, then trust. Never reversed."

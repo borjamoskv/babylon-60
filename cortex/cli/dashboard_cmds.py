@@ -1,4 +1,4 @@
-"""CORTEX v7.0 — Sovereign Dashboard (Industrial Noir).
+"""Sovereign Dashboard (Industrial Noir).
 
 Live terminal dashboard showing system health, Shannon entropy,
 ledger integrity, and recent activity. Refreshes every 2 seconds.

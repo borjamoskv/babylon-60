@@ -1,4 +1,4 @@
-"""CORTEX v5.2 — Solid-State Mutation Engine (CQRS Write Gateway).
+"""Solid-State Mutation Engine (CQRS Write Gateway).
 The ONLY sanctioned write path for fact state changes. Every mutation is:
 1. Appended to `entity_events` (immutable, hash-chained, schema-free payload)
 2. Projected into `facts` (mutable materialized view for O(1) reads)

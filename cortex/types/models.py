@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — API Models.
+API Models.
 Centralized Pydantic models for request/response validation.
 """
 

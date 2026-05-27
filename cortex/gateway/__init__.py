@@ -1,4 +1,4 @@
-"""CORTEX v5.0 — Gateway.
+"""Gateway.
 
 Sovereign Signal Bus and Cross-Axiom Orchestration.
 """

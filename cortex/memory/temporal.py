@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Temporal Fact Management.
+Temporal Fact Management.
 
 Handles versioned facts with valid_from/valid_until semantics.
 Never deletes — only deprecates. Enables time-travel queries.

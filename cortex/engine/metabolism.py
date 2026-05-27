@@ -1,4 +1,4 @@
-"""CORTEX v8.0 — Sovereign Biological Metabolism.
+"""Sovereign Biological Metabolism.
 
 The first agent engine with a heartbeat (derived from PULSE).
 Agents don't decide when to stop. Their metabolism does.

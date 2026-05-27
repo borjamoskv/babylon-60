@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v5.2 — Sovereign Write Worker (KETER-∞ Metal-Level).
+"""Sovereign Write Worker (KETER-∞ Metal-Level).
 
 Eliminates SQLite BUSY errors by routing ALL writes through a single
 dedicated thread with one persistent connection using BEGIN IMMEDIATE.

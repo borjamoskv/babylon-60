@@ -1,5 +1,5 @@
 """
-CORTEX V5 - Byzantine Consensus (LEGION-Ω)
+Byzantine Consensus (LEGION-Ω)
 Byzantine Fault Tolerance / Zero-Trust Mathematics: Axiom 4.
 """
 

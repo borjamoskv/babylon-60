@@ -1,5 +1,5 @@
 """
-CORTEX V5 - Continuous Autopoiesis (Heartbeat Daemon).
+Continuous Autopoiesis (Heartbeat Daemon).
 Vector 1 of the Singularity: non-discrete temporal execution.
 """
 

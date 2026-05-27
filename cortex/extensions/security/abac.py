@@ -1,5 +1,5 @@
 """
-CORTEX v8 — Attribute-Based Access Control (ABAC).
+Attribute-Based Access Control (ABAC).
 
 Fine-grained policy engine layered on top of RBAC.
 Evaluates access based on subject attributes (role, tenant_id),

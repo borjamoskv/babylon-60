@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""CORTEX v5.3 — Scavenger Tactical Suite Core.
+"""Scavenger Tactical Suite Core.
 
 Implements the 4-valve pipeline (Tox-Vision, Cadastral-Radar, Negotiator, Heavy-Geo)
 to acquire structural materials with zero lethal or legal friction.

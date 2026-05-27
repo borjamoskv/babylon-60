@@ -1,4 +1,4 @@
-"""CORTEX v5.3 — Cognitive Memory Orchestrator."""
+"""Cognitive Memory Orchestrator."""
 
 from __future__ import annotations
 

@@ -1,5 +1,5 @@
 """
-CORTEX V7 — Test-Time Training (TTT) Engine.
+Test-Time Training (TTT) Engine.
 The Event Horizon of Autonomous Evolution.
 
 This engine runs during the Nocturnal Cycle (Conscious Recurrence).

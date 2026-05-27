@@ -1,5 +1,5 @@
 """
-CORTEX v6 — Frontier Auditor (MODELOPFRONTERA).
+Frontier Auditor (MODELOPFRONTERA).
 
 Implementa la Tríada Soberana (TOM, OLIVER & BENJI) vía un LLM de frontera,
 inyectando el contexto completo de un proyecto desde la DB local de CORTEX.

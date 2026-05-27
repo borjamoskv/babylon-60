@@ -1,5 +1,5 @@
 """
-CORTEX V5 - Entropy Annihilator (JARL-Ω)
+Entropy Annihilator (JARL-Ω)
 Information Thermodynamics & Landauer's Razor: Axiom 12 Net-Negative Entropy.
 """
 

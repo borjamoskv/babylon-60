@@ -1,4 +1,4 @@
-"""CORTEX v5.0 — Swarm.
+"""Swarm.
 
 High-agency orchestration for 10,000+ autonomous agents.
 """

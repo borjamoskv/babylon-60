@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 """
-CORTEX v6.0 — Antipattern Scanner.
+Antipattern Scanner.
 
 AST-based detection of code quality violations that the GEMINI.md rules
 mandate but were never enforced automatically. Each scanner implements

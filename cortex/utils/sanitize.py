@@ -1,4 +1,4 @@
-"""CORTEX v5.2 — Sovereign Input Sanitization.
+"""Sovereign Input Sanitization.
 
 Centralizes input validation for all API-facing parameters.
 Prevents injection, path traversal, and encoding attacks.

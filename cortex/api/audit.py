@@ -1,5 +1,5 @@
 """
-CORTEX v6 — Enterprise Audit Middleware.
+Enterprise Audit Middleware.
 
 Intercepts all API requests and logs them immutably into the
 Enterprise Audit Ledger using PoQ-6 Standards (Privacy Shield).

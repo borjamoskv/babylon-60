@@ -1,4 +1,4 @@
-"""CORTEX v8.0 — Distributed Swarm Heartbeat (Ω₃ Byzantine Default).
+"""Distributed Swarm Heartbeat (Ω₃ Byzantine Default).
 
 Every daemon thread emits periodic proof-of-life. A reaper detects silent
 deaths. Any node that doesn't pulse within a configurable window is moved

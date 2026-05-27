@@ -1,4 +1,4 @@
-"""CORTEX v6.0 — Memories Router (Public API Surface).
+"""Memories Router (Public API Surface).
 
 Developer-friendly endpoints for the Memory-as-a-Service product.
 Clean, intuitive naming that delegates to the existing CortexEngine.

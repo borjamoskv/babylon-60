@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Neural-Bandwidth Sync (Zero-Latency Intent Ingestion).
+Neural-Bandwidth Sync (Zero-Latency Intent Ingestion).
 
 Simulates "telepathic" intent inference on macOS by aggressively
 monitoring implicit context (active window, clipboard) and deducing

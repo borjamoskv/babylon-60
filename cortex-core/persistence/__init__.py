@@ -1,4 +1,6 @@
 import sys
+import os
+from pathlib import Path
 from .base import (
     SovereignResource,
     _setup_sqlite_pragmas,
@@ -16,6 +18,11 @@ from .base import (
 from .cache import ContextCache
 from .ledger import LedgerManager
 from .vsa import VSAMemory
+
+# Ensure parent dir is on path for sibling package imports
+_core_dir = str(Path(__file__).resolve().parent.parent)
+if _core_dir not in sys.path:
+    sys.path.insert(0, _core_dir)
 
 import daemons.outbox
 
@@ -39,9 +46,6 @@ from daemons.security_recon import SecurityReconDaemon
 
 from .hybrid import HybridPersistenceManager
 
-import sys
-from pathlib import Path
-sys.path.append(str(Path(__file__).resolve().parent.parent))
 from ultramap import UltramapSubstrate
 
 __all__ = [
@@ -69,4 +73,7 @@ __all__ = [
     "_metrics_cache_lock",
     "_get_ring_buffer",
     "UltramapSubstrate",
+    "IterationDaemon",
 ]
+
+from .iteration_daemon import IterationDaemon

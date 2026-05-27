@@ -1,4 +1,4 @@
-"""CORTEX v7.5 — Hydra Chaos Engine (Audit Stream L1 Siege).
+"""Hydra Chaos Engine (Audit Stream L1 Siege).
 
 Orchestrates simulated failures on external dependencies (Redis, APIs, etc.)
 to verify system antifragility (Ω₅).

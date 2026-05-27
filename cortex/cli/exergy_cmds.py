@@ -1,7 +1,7 @@
 # This file is part of CORTEX. Apache-2.0. Change Date: 2030-01-01.
 
 """
-CORTEX v5.0 — Exergy Engine CLI Commands.
+Exergy Engine CLI Commands.
 
 CLI interface for the Exergy Daemon background loop.
 """

@@ -1,5 +1,5 @@
 """
-CORTEX v8 — L2 Hybrid Search Engine (Mem0-Killer).
+L2 Hybrid Search Engine (Mem0-Killer).
 
 Implements Reciprocal Rank Fusion (RRF) over the L2 vector database
 (SovereignVectorStoreL2 — facts_meta + vec_facts + facts_meta_fts).

@@ -1,5 +1,5 @@
 """
-CORTEX V7 — Neural Growth Engine (Synaptic Plasticity).
+Neural Growth Engine (Synaptic Plasticity).
 
 Manages fact consolidation and autonomous pattern promotion (Bridges -> Global Axioms).
 """

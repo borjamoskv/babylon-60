@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — SovereignGate Exceptions.
+SovereignGate Exceptions.
 """
 
 __all__ = [

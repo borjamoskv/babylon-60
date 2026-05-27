@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Merkle Tree Utilities.
+Merkle Tree Utilities.
 
 Provides Merkle tree computation and verification for ledger checkpoints.
 """

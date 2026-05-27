@@ -1,4 +1,4 @@
-"""CORTEX v5.0 — Cascade Manager.
+"""Cascade Manager.
 
 Resilient transition and grouping for LLM providers.
 """

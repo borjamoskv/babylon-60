@@ -1,5 +1,5 @@
 """
-CORTEX v6.0 — PostgreSQL Schema Definitions.
+PostgreSQL Schema Definitions.
 
 Translated from SQLite schema.py for PostgreSQL/AlloyDB compatibility.
 Key differences:

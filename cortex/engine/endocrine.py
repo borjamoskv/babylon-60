@@ -1,5 +1,5 @@
 """
-CORTEX V7 — Digital Endocrine System (Hormonal Homeostasis).
+Digital Endocrine System (Hormonal Homeostasis).
 
 Regulates system-wide behavior using hormonal signals (Cortisol, Neural-Growth).
 """

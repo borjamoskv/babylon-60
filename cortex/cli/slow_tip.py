@@ -1,5 +1,5 @@
 """
-CORTEX v5.2 — Slow-Op Tip Emitter.
+Slow-Op Tip Emitter.
 
 Automatically surfaces contextual tips whenever a CLI operation exceeds
 a configurable latency threshold. Zero overhead on fast paths.

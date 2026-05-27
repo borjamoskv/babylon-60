@@ -1,5 +1,5 @@
 """
-CORTEX v6.0 — StorageAdapter Protocol.
+StorageAdapter Protocol.
 
 Unified interface that abstracts all read/write operations from the engine.
 All storage backends (SQLite, PostgreSQL, Turso) must implement this protocol

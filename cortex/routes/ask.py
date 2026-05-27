@@ -7,7 +7,7 @@ from typing import Any
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v5.0 — Ask Router (RAG endpoint).
+"""Ask Router (RAG endpoint).
 
 POST /v1/ask — Search facts → synthesize with LLM → return answer.
 Gracefully returns 503 if no LLM provider is configured.

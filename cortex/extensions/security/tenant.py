@@ -1,4 +1,4 @@
-"""CORTEX v5.2 — Tenancy Context (RLS Support).
+"""Tenancy Context (RLS Support).
 
 Stores and retrieves the tenant ID context dynamically for Row Level Security (RLS)
 isolation in the database engine without explicitly passing it down all call chains.

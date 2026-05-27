@@ -1,5 +1,5 @@
 """
-CORTEX V7 — Autonomous Training Daemon (Sleep Cycle).
+Autonomous Training Daemon (Sleep Cycle).
 Tracks daily session trajectories, triggers Test-Time Training (TTT),
 verifies output LoRA adapters, and registers them.
 """

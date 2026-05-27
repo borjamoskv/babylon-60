@@ -1,5 +1,5 @@
 """
-CORTEX v6 — Infinite Minds Manager.
+Infinite Minds Manager.
 
 Orchestrator for KETER-∞ Swarm architectures.
 Implements Zero-Copy Semantics via Temporal Projection Matrices (Deltas).

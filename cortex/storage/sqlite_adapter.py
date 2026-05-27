@@ -1,5 +1,5 @@
 """
-CORTEX v6.0 — SQLite StorageAdapter.
+SQLite StorageAdapter.
 
 Zero-cost thin wrapper that adapts an existing aiosqlite.Connection
 to the StorageAdapter protocol. The engine retains its current

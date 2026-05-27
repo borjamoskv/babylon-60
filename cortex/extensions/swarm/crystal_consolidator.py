@@ -1,4 +1,4 @@
-"""CORTEX v8.0 — Crystal Consolidator (REM Sleep Phase).
+"""Crystal Consolidator (REM Sleep Phase).
 
 The destructive half of the NightShift cycle. Executes 4 consolidation
 strategies on crystals based on their CrystalVitals assessment:

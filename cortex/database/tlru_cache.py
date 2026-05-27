@@ -1,5 +1,5 @@
 """
-CORTEX v5.3 — Time-aware LRU Cache (TLRU).
+Time-aware LRU Cache (TLRU).
 
 Bounded-memory deduplication cache with automatic TTL eviction.
 Replaces unbounded dict caches (Nexus dedup, etc.) to prevent

@@ -1,5 +1,5 @@
 """
-CORTEX v8 — Integrity Auditor.
+Integrity Auditor.
 
 Daily cryptographic integrity audit for the fact ledger.
 Verifies Ed25519 signatures, SHA-256 hash chain continuity,

@@ -1,5 +1,5 @@
 """
-CORTEX v5.2 — Bridge Validation Guard.
+Bridge Validation Guard.
 
 Prevents cross-project contamination by validating bridge facts
 before they propagate patterns between projects.

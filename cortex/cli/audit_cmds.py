@@ -1,5 +1,5 @@
 """
-CORTEX v6 — Audit Commands
+Audit Commands
 Commands for system security and architectural auditing.
 """
 

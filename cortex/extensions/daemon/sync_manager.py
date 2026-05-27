@@ -1,5 +1,5 @@
 """
-CORTEX v6 — Sync Orchestrator (Ouroboros Phase).
+Sync Orchestrator (Ouroboros Phase).
 
 Decouples the synchronization logic from the MoskvDaemon core.
 Handles JSON memory ↔ SQLite DB synchronization using an asynchronous-friendly

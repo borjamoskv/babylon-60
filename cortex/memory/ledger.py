@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v5.3 — L3 Event Ledger (Immutable Event Sourcing).
+"""L3 Event Ledger (Immutable Event Sourcing).
 
 Every interaction, thought, and state change is recorded as an immutable
 event in SQLite WAL via `cortex.db`. If L1 or L2 collapse, the full

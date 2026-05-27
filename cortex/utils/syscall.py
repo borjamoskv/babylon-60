@@ -1,7 +1,7 @@
 # This file is part of CORTEX.
 # Licensed under the Apache License, Version 2.0.
 
-"""CORTEX v5.2 — Sovereign Syscalls (EXOSKELETON).
+"""Sovereign Syscalls (EXOSKELETON).
 
 Centralizes all host-level interactions for agents.
 Implements Axiom Ω₃ (Byzantine Default) by enforcing argument lists

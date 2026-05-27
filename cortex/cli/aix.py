@@ -1,5 +1,5 @@
 """
-CORTEX V7 — Apotheosis Index (AIx) CLI.
+Apotheosis Index (AIx) CLI.
 
 Quantifies agent sovereignty and system evolution metrics.
 """

@@ -1,4 +1,4 @@
-"""CORTEX v5.0 — LLM Router.
+"""LLM Router.
 
 Enrutador resiliente con routing determinista por intención.
 Implementa Strategy + Circuit Breaker + ROP (Ω₂ Landauer split).

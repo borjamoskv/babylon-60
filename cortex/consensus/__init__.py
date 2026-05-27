@@ -1,4 +1,4 @@
-"""CORTEX v5.0 — Consensus.
+"""Consensus.
 
 Neural Swarm Consensus and Reputation-Weighted validation.
 """

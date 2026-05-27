@@ -1,4 +1,4 @@
-"""CORTEX v7 — SMT Model Extractor.
+"""SMT Model Extractor.
 
 Translates Python AST into semantic constraints for the Z3 verifier.
 Identifies potential invariant violations at the architectural level.

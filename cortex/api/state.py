@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — API State.
+API State.
 Global instances and shared state for the API layer.
 """
 

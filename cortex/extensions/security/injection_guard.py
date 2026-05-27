@@ -1,5 +1,5 @@
 """
-CORTEX v8 — Injection Guard.
+Injection Guard.
 
 Multi-layer defense against content injection attacks.
 Hooks into the pre-persist pipeline alongside Privacy Shield.

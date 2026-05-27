@@ -1,5 +1,5 @@
 """
-CORTEX v6.7 — Privacy-Aware Data Classifier v2.
+Privacy-Aware Data Classifier v2.
 
 Detects sensitive information (API keys, secrets, PII, tokens) in facts
 to prevent accidental synchronization to cloud backends.

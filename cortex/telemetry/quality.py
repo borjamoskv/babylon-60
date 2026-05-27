@@ -1,5 +1,5 @@
 """
-CORTEX v8.0 — Quality & Memory Evaluation.
+Quality & Memory Evaluation.
 
 Implements background heuristics for:
 1. Proxies for Recall Precision (overlap evaluation).

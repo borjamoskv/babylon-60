@@ -1,5 +1,5 @@
 """
-CORTEX v8.0 — Josu Proactive Daemon (Always-On Proactivity).
+Josu Proactive Daemon (Always-On Proactivity).
 
 The Code Sniper: scans CORTEX DB for resolvable ghosts and low-complexity
 entropy, spawns ephemeral Pulse agents to fix them autonomously, and

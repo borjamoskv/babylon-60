@@ -1,4 +1,4 @@
-"""CORTEX v8 — Temporal Health Scheduler (Sovereign Temporal Hierarchy).
+"""Temporal Health Scheduler (Sovereign Temporal Hierarchy).
 
 The Axiom: La jerarquía temporal ES la arquitectura.
 

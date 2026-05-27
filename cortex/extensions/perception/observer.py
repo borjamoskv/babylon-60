@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Perception Layer 1: File Activity Observer.
+Perception Layer 1: File Activity Observer.
 
 Watches workspace via watchdog FSEvents with debouncing.
 """

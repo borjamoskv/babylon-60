@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v5.1 — Thought Orchestra: Introspection Mixin.
+"""Thought Orchestra: Introspection Mixin.
 
 Extracted from orchestra.py to keep file size under 400 LOC.
 Contains status, stats, history, and convenience think methods.

@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — MEJORAlo Router.
+MEJORAlo Router.
 
 API endpoints for the MEJORAlo v7.3 protocol.
 """

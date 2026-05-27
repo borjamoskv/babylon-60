@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Neural-Bandwidth Sync (Zero-Latency Intent Ingestion).
+Neural-Bandwidth Sync (Zero-Latency Intent Ingestion).
 
 Re-exports the neural agent implementation from cortex.extensions.agents.neural
 to eliminate duplication.

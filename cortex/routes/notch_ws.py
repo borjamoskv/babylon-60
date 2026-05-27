@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Notch WebSocket Hub (Bridge #6 Server-Side).
+Notch WebSocket Hub (Bridge #6 Server-Side).
 
 Bidirectional communication between CORTEX and Notch Live:
 - CORTEX → Notch: push commands (thinking, idle, mode:X, model:X, ghost:refresh)

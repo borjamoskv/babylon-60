@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v6.0 — Cross-Encoder Reranking Layer.
+"""Cross-Encoder Reranking Layer.
 
 Resolves Ghost RETRIEVAL-RERANK-001: zero contextual reranking across
 all retrieval surfaces. Injects a cross-encoder evaluation between

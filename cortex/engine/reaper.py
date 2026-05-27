@@ -1,5 +1,5 @@
 """
-CORTEX v5.2 — Ghost Reaper (TTL-based auto-expiry).
+Ghost Reaper (TTL-based auto-expiry).
 
 Purges expired ghosts from both the legacy DB table and
 Songlines filesystem traces (xattrs / .songlines manifests).

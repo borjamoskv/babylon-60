@@ -1,4 +1,4 @@
-"""CORTEX v6 — Hypothesis Engine Tool for DIABLO-Ω.
+"""Hypothesis Engine Tool for DIABLO-Ω.
 
 Custom agent tool for the R&D Cognitive Cycle. Persists
 hypotheses, experiments, and research findings to the CORTEX

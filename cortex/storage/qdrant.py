@@ -1,5 +1,5 @@
 """
-CORTEX v6.0 — Qdrant Vector Store Backend.
+Qdrant Vector Store Backend.
 
 Production-grade vector search backend using Qdrant.
 Drop-in replacement for sqlite-vec (fact_embeddings virtual table).

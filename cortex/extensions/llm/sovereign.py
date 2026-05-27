@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v5.0 — SovereignLLM: Zero-Trust LLM Access.
+"""SovereignLLM: Zero-Trust LLM Access.
 
 The antidote to Axiom 4 violations. A self-contained LLM interface
 that NEVER depends on a single external oracle. It chains through every

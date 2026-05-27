@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v5.1 — Railway Oriented Programming (Result Monads).
+"""Railway Oriented Programming (Result Monads).
 
 Sovereign implementation of the Result pattern for deterministic error flow.
 Replaces exception-based control flow in liminal layers (LLM <-> Engine <-> MCP).

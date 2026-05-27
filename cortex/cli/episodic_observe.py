@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Episodic Memory: Observe Command.
+Episodic Memory: Observe Command.
 
 Extracted from episodic_cmds.py to keep file size under 300 LOC.
 """

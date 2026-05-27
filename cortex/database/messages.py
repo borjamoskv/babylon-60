@@ -1,4 +1,4 @@
-"""CORTEX v5.1 — Sovereign Write Worker: Internal Message Types.
+"""Sovereign Write Worker: Internal Message Types.
 
 Extracted from db_writer.py to keep file size under 400 LOC.
 Contains the internal message dataclasses and TransactionProxy used

@@ -1,5 +1,5 @@
 """
-CORTEX v5.3 — Cognitive Memory Domain Models.
+Cognitive Memory Domain Models.
 
 Tripartite Memory Architecture (KETER-∞ Frontera 2):
 - MemoryEntry: Legacy L2 vector store payload (Qdrant-compatible).

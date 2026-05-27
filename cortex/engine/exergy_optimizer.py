@@ -1,5 +1,5 @@
 """
-CORTEX v6.0 — Exergy Optimizer.
+Exergy Optimizer.
 O(1) Heuristic Engine for Thermal utility and Swarm density.
 """
 

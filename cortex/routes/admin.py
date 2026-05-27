@@ -1,5 +1,5 @@
 """
-CORTEX v5.1 — Admin & Governance Router.
+Admin & Governance Router.
 
 High-privilege endpoints for project management, API key governance,
 and session handoff orchestration. Enforces strict RBAC and input validation.

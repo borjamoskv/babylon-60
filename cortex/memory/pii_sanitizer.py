@@ -1,5 +1,5 @@
 """
-CORTEX v8 — Sovereign PII Sanitizer.
+Sovereign PII Sanitizer.
 
 Detects Personally Identifiable Information (PII) in raw content before
 it is vectorized and stored in L2. Applies selective field-level encryption

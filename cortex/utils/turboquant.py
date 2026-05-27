@@ -1,5 +1,5 @@
 """
-CORTEX v6 — TurboQuant Integration.
+TurboQuant Integration.
 
 Ref: arXiv:2504.19874 (TurboQuant: Online Vector Quantization)
 Two-Stage approach: Random Rotation + MSE Quantization + 1-bit QJL Transform.

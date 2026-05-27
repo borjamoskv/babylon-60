@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Daemon Router.
+Daemon Router.
 """
 
 from fastapi import APIRouter, Depends, Request

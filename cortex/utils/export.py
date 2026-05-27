@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Export Module.
+Export Module.
 
 Supports JSON, CSV, and JSONL export formats for project facts.
 """

@@ -1,5 +1,5 @@
 """
-CORTEX v8 — Security Visual Sync.
+Security Visual Sync.
 
 Bridge between the Security Layer and Notch Live (via WebSocket).
 Translates security events into visual moods for the Notch CNS.

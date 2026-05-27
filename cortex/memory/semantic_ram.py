@@ -1,5 +1,5 @@
 """
-CORTEX v7 — Semantic RAM & Topological Mutator (130/100 Sovereign Standard).
+Semantic RAM & Topological Mutator (130/100 Sovereign Standard).
 
 Zero-Copy Infinite Minds architecture pillar.
 Implements Read-as-Rewrite: as vectors are co-activated and proved useful,

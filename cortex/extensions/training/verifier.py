@@ -1,5 +1,5 @@
 """
-CORTEX V7 — Adapter Verifier.
+Adapter Verifier.
 Verifies the structural, loading, and ethical integrity of LoRA adapters.
 """
 

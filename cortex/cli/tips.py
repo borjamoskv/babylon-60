@@ -1,5 +1,5 @@
 """
-CORTEX v5.1 — TIPS System.
+TIPS System.
 
 Contextual tips engine that surfaces useful knowledge while the agent
 thinks and executes. Combines a static knowledge bank with dynamic

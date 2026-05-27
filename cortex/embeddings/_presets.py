@@ -1,4 +1,4 @@
-"""CORTEX v5.0 — Embedding Provider Presets Loader.
+"""Embedding Provider Presets Loader.
 
 Loads embedding provider configurations from config/embedding_presets.json.
 Mirrors the pattern of cortex.llm._presets for LLM providers.

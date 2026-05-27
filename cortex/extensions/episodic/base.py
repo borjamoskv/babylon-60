@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Episodic Base & Models.
+Episodic Base & Models.
 
 Foundational types and constants for the Episodic Memory system.
 Extracted to mitigate LOC bloat and enhance maintainability.

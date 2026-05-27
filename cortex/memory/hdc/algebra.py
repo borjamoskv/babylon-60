@@ -1,4 +1,4 @@
-"""CORTEX v7 — HDC Algebraic Operations.
+"""HDC Algebraic Operations.
 
 Core operations on bipolar hypervectors (±1, int8):
     - bind(a, b):     Element-wise XOR analogue for bipolar → a * b

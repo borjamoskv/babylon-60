@@ -1,4 +1,4 @@
-"""CORTEX v6.0 — Swarm Kanban Board (TUI).
+"""Swarm Kanban Board (TUI).
 
 A rich-based live dashboard to monitor Sovereign Swarm agents in real-time.
 Listens to the CORTEX SignalBus for state changes.

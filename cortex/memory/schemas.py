@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v6 — Schema Theory (Top-Down Memory Processing).
+"""Schema Theory (Top-Down Memory Processing).
 
 Based on Bartlett (1932): Memory is guided by pre-existing schemas.
 Schemas act as attentional filters (encoding) and retrieval guides,

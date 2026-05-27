@@ -1,5 +1,5 @@
 """
-CORTEX V5 - Centauro Engine (LEGION-Ω)
+Centauro Engine (LEGION-Ω)
 Orchestration engine for the Sovereign Swarm. Implements Byzantine Consensus
 and adaptive agent formations for Zero-Trust problem solving.
 """

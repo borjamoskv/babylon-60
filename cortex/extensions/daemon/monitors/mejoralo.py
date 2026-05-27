@@ -1,5 +1,5 @@
 """
-CORTEX v6.0 — OMEGA-SINGULARITY: Unified Project Quality Monitor.
+OMEGA-SINGULARITY: Unified Project Quality Monitor.
 
 Unifies AutonomousMejoraloMonitor and EntropyMonitor into a single,
 zero-redundancy thermodynamic sweep.

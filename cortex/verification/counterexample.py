@@ -1,4 +1,4 @@
-"""CORTEX v7 — Counterexample Learning Protocol.
+"""Counterexample Learning Protocol.
 
 Transforms formal verification failures into persistent sematic memories
 to prevent the RSI loop from repeating prohibited patterns.

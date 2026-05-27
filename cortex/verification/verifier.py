@@ -1,4 +1,4 @@
-"""CORTEX v7 — Z3 Formal Verification Engine.
+"""Z3 Formal Verification Engine.
 
 Orchestrates formal proofs for code mutations against Sovereign Safety Invariants.
 Uses z3-solver as the SMT core.

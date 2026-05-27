@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Python SDK Client
+Python SDK Client
 
 This module implements the SORTU-Ω v0.2 public SDK surface.
 It exposes a main `CortexClient`, which branches into modular domain

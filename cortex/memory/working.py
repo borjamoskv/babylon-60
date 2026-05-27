@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v5.3 — L1 Working Memory (Sliding Window).
+"""L1 Working Memory (Sliding Window).
 
 Volatile, token-budgeted buffer that retains the N most recent
 interaction events. When the budget overflows, oldest events are

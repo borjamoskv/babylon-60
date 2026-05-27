@@ -1,5 +1,5 @@
 """
-CORTEX v5.1 — Edge Security & Traffic Middleware.
+Edge Security & Traffic Middleware.
 
 Separated from `api.py` to maintain architectural limits (<300 LOC per file)
 and consolidate defensive mechanisms in a single Sovereign module (KETER-∞).

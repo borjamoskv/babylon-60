@@ -1,5 +1,5 @@
 """
-CORTEX V6 - Physical Parity Layer (Vector 4 of the Singularity).
+Physical Parity Layer (Vector 4 of the Singularity).
 
 Provides the Autonomous Heartbeat Daemon with direct, unfiltered
 access to the underlying OS (macOS/Cloud) via bindings inspired by

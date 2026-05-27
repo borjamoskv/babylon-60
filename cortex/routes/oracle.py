@@ -5,7 +5,7 @@ from __future__ import annotations
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v5.0 — The Oracle Router (B2B SaaS Endpoint).
+"""The Oracle Router (B2B SaaS Endpoint).
 
 POST /v1/oracle/audit — Executes a Sovereign Agent to audit a target.
 Requires an API key provided by Stripe (pro or team plan).

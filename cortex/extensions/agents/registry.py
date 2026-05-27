@@ -1,4 +1,4 @@
-"""CORTEX v6 — Agent Registry (Dynamic Loading).
+"""Agent Registry (Dynamic Loading).
 
 Dynamically loads Swarm Specialists and Sovereign Agents from YAML definitions
 located in `cortex.agents/definitions/`. This allows modifying agent

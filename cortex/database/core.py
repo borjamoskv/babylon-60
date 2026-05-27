@@ -1,5 +1,5 @@
 """
-CORTEX v5.2 — Sovereign Connection Factory (KETER-∞ Metal-Level).
+Sovereign Connection Factory (KETER-∞ Metal-Level).
 
 Single source of truth for ALL SQLite connections in the CORTEX ecosystem.
 Every connection created through this module is guaranteed to have:

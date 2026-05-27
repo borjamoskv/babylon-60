@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — MOSKV-1 Daemon CLI.
+MOSKV-1 Daemon CLI.
 
 Command-line interface for the persistent watchdog.
 

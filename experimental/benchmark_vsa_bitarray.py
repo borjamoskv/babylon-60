@@ -1,4 +1,4 @@
-"""CORTEX v7 — HDC Bitwise Representation Benchmarking.
+"""HDC Bitwise Representation Benchmarking.
 
 Compares:
 1. Bipolar int8 (Current implementation: 8000 bytes per HV)

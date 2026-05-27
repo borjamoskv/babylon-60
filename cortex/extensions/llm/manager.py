@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v5.0 — LLM Manager.
+"""LLM Manager.
 
 Lazy-loading singleton for LLM providers. Mirrors the pattern
 from EmbeddingManager. Gracefully degrades when no LLM is configured.

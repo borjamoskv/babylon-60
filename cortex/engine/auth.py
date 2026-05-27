@@ -1,5 +1,5 @@
 """
-CORTEX V6 - Byzantine Default Auth Layer (Axiom 3).
+Byzantine Default Auth Layer (Axiom 3).
 Vector 5 of the Singularity.
 
 Blocks executing destructive physical actions (OS commands, massive SQL deletions)

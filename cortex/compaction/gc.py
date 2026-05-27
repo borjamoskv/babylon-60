@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Vector Memory Garbage Collection Pipeline.
+Vector Memory Garbage Collection Pipeline.
 
 Implements deferred physical deletion for tombstoned facts.
 To safeguard database IOPS during peak daytime traffic, physical deletion

@@ -1,5 +1,5 @@
 """
-CORTEX v7 — Thalamus Gate (Pre-Persistence Admission Filter).
+Thalamus Gate (Pre-Persistence Admission Filter).
 
 Implements Active Forgetting (selective encoding) BEFORE persistence.
 Three deterministic filters run in sequence:

@@ -1,4 +1,4 @@
-"""CORTEX v8.0 — Knowledge Radar (NightShift Target Discovery).
+"""Knowledge Radar (NightShift Target Discovery).
 
 Discovers crystallization targets from 3 sovereign sources:
     1. Ghost Knowledge Gaps — CORTEX DB facts tagged 'knowledge_gap'/'auto_ghost'

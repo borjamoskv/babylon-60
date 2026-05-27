@@ -1,4 +1,4 @@
-"""CORTEX v8.0 — Conflict Resolution Protocol (LEGION-Ω).
+"""Conflict Resolution Protocol (LEGION-Ω).
 
 4-tier escalation: Triangulation → Weighted Vote → Architect → Heuristic Deadlock.
 Axioms: Ω₃ (Byzantine), Ω₂ (Entropic Asymmetry), Ω₅ (Antifragile).

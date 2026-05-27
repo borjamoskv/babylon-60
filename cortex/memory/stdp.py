@@ -1,4 +1,4 @@
-"""CORTEX v8 — Spike-Timing Dependent Plasticity (STDP).
+"""Spike-Timing Dependent Plasticity (STDP).
 
 Hebbian learning rule adapted for semantic graphs:
   "Neurons that fire together, wire together — but TIMING matters."

@@ -1,5 +1,5 @@
 """
-CORTEX v5.3 — Circuit Breaker Pattern.
+Circuit Breaker Pattern.
 
 Protects the system from cascading failures when a subsystem
 (e.g., Ledger integrity verification) fails repeatedly.

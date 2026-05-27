@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 - Agents Router (Reputation Management).
+Agents Router (Reputation Management).
 """
 
 import logging

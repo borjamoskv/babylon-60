@@ -1,5 +1,5 @@
 """
-CORTEX V5 - Temporal Inversion & Fluid Dynamics (PULMONES)
+Temporal Inversion & Fluid Dynamics (PULMONES)
 Visual/UI/UX: KAIROS-Ω, Fluid Dynamics, NotchLive integration.
 """
 

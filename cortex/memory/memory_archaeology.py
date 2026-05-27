@@ -1,5 +1,5 @@
 """
-CORTEX v7 — Anamnesis-Ω Semantic Deduplicator (Memory Archaeology).
+Anamnesis-Ω Semantic Deduplicator (Memory Archaeology).
 
 Finds isolated, isomorphic facts across the timeline and condenses them
 into unified "crystallized" patterns. Transfers causal links (parent_decision_id).

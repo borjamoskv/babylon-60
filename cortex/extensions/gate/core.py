@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — SovereignGate Core Logic.
+SovereignGate Core Logic.
 """
 
 import collections

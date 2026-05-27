@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 - Graph Router.
+Graph Router.
 
 Exposes entity graph endpoints for UI and external consumers.
 """

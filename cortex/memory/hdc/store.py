@@ -1,4 +1,4 @@
-"""CORTEX v7 — Sovereign HDC Vector Store.
+"""Sovereign HDC Vector Store.
 
 Replaces dense Qdrant/sqlite-vec storage with purely NumPy/SQLite HDC vectors.
 Supports normal semantic recall AND 'traceable unbinding' to extract the

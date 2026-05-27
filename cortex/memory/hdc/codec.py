@@ -1,4 +1,4 @@
-"""CORTEX v7 — HDC Encoder (Text to Hypervector).
+"""HDC Encoder (Text to Hypervector).
 
 Converts raw text into a 10k-dim bipolar hypervector algebraically.
 No ML model, no neural network dependency. Cold start in <100ms.

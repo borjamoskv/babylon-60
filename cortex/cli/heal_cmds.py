@@ -3,7 +3,7 @@ from __future__ import annotations
 # This file is part of CORTEX.
 # Licensed under the Apache License, Version 2.0.
 
-"""CORTEX v5.0 — Auto-Healer (Entropía a O(1)).
+"""Auto-Healer (Entropía a O(1)).
 
 Apotheosis Nivel 5: Auto-resolución de código denso mediante LLMs configurados.
 """

@@ -1,5 +1,5 @@
 """
-CORTEX V6 - Holographic Memory (Vector 2 of the Singularity).
+Holographic Memory (Vector 2 of the Singularity).
 
 Maintains a RAM-resident mapping of the Sovereign Vector Store.
 Bypasses SQLite and I/O latency for background swarm (Heartbeat) context retrieval

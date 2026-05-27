@@ -1,5 +1,5 @@
 """
-CORTEX v6 — Enterprise Audit Ledger (SOC 2 Compliance).
+Enterprise Audit Ledger (SOC 2 Compliance).
 
 Append-only cryptographic ledger tracking all operations.
 Secures the `tenant_id` and the identity of the operator, creating

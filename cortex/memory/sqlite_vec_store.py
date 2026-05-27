@@ -1,5 +1,5 @@
 """
-CORTEX v6 — Sovereign Vector Store (SQLite-Vec).
+Sovereign Vector Store (SQLite-Vec).
 
 Zero-Trust, Multi-Tenant Semantic Memory backed by sqlite-vec.
 Enforces partition by tenant_id and incorporates OUROBOROS success_rate

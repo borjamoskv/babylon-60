@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v5.0 — Architectural Respiration (PULMONES).
+"""Architectural Respiration (PULMONES).
 
 Axiom 2: Entropic Asymmetry.
 A system without space suffocates. These primitives ensure that tight loops,

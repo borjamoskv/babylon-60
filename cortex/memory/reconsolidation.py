@@ -1,4 +1,4 @@
-"""CORTEX v8.0 — Memory Reconsolidation v2 (Nader 2000 + Sprint 2 upgrades).
+"""Memory Reconsolidation v2 (Nader 2000 + Sprint 2 upgrades).
 
 Sprint 2 of the 130/100 plan.
 

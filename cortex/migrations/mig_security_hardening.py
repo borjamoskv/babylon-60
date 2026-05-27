@@ -1,5 +1,5 @@
 """
-CORTEX v5.2 — Migration 018: Security Hardening (Cibercentro Mitigations).
+Migration 018: Security Hardening (Cibercentro Mitigations).
 
 Adds quarantine support to facts and TTL support to ghosts.
 """

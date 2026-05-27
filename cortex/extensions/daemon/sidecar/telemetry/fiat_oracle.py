@@ -1,5 +1,5 @@
 """
-CORTEX v6 — Fiat Oracle Sidecar (Operation Citadel).
+Fiat Oracle Sidecar (Operation Citadel).
 Monitors financial transactions (Simulated/Bunq) and pushes facts to the ledger.
 Sovereign Standard (130/100): Zero-Trust inputs, Backoff, Persistent Queues, Idempotency.
 """

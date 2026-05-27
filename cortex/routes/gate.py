@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — SovereignGate API Router.
+SovereignGate API Router.
 
 REST endpoints for remote operator approval of L3 actions.
 """

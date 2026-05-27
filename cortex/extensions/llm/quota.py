@@ -1,4 +1,4 @@
-"""CORTEX v6.2 — Sovereign Quota Manager.
+"""Sovereign Quota Manager.
 
 Implementa el Protocolo PULMONES (rate-limiting inter-proceso) utilizando
 SQLite WAL para sincronización de latencia cero. Previene estrangulamiento

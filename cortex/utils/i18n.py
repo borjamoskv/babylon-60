@@ -1,4 +1,4 @@
-"""CORTEX v5.3 — Internationalization Module (i18n).
+"""Internationalization Module (i18n).
 
 Sovereign-grade multilingual support for the CORTEX ecosystem.
 Optimized for low-latency lookups (LRU) and modular asset management.

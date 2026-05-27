@@ -1,4 +1,4 @@
-"""CORTEX v5.1 — TIPS API Routes.
+"""TIPS API Routes.
 
 REST endpoints for the TIPS system.
 

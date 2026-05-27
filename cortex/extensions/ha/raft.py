@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 """
-CORTEX v5.0 — Raft Consensus Implementation.
+Raft Consensus Implementation.
 
 Handles leader election and log replication state.
 """

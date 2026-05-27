@@ -1,4 +1,4 @@
-"""CORTEX v6.0 — Usage Router.
+"""Usage Router.
 
 Exposes API consumption metrics to authenticated tenants.
 Enables developers to track their usage and plan limits.

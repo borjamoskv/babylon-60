@@ -1,5 +1,5 @@
 """
-CORTEX V5 - IMMUNE-SYSTEM-V1 (The Epistemic Arbitrator).
+IMMUNE-SYSTEM-V1 (The Epistemic Arbitrator).
 Interprets and arbitrates signals between perception and execution.
 
 Uses __getattr__ lazy loading to avoid cascading import failures

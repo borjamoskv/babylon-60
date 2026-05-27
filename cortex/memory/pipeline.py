@@ -1,5 +1,5 @@
 """
-CORTEX v8 — Neuromorphic Pipeline (Pre-Query & Pre-Store Cognitive Gateway).
+Neuromorphic Pipeline (Pre-Query & Pre-Store Cognitive Gateway).
 
 Orchestrates the cognitive assessment layer that wraps every memory operation:
 

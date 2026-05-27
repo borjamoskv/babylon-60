@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 """
-CORTEX v5.0 — Episodic Memory CLI Commands.
+Episodic Memory CLI Commands.
 
 CLI interface for recording, recalling, and analyzing episodic memories.
 """

@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v5.1 — Sovereign Trace Layer (KETER-∞ Ola 4).
+"""Sovereign Trace Layer (KETER-∞ Ola 4).
 
 Zero-dependency structured tracing for CORTEX.
 No OpenTelemetry, no Logfire — pure Python with contextvars propagation.

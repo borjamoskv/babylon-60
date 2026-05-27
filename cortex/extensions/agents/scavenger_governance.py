@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""CORTEX v5.3 — Scavenger Governance Policy.
+"""Scavenger Governance Policy.
 
 Enforces deterministic validation boundaries for the Scavenger Tactical Suite.
 """

@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Real-Time Perception Engine.
+Real-Time Perception Engine.
 
 Three-layer behavioral perception:
   1. FileActivityObserver — watches workspace via watchdog FSEvents

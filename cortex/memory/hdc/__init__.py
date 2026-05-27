@@ -1,4 +1,4 @@
-"""CORTEX v7 — Hyperdimensional Computing Memory Engine.
+"""Hyperdimensional Computing Memory Engine.
 
 Sovereign semantic memory using algebraic hypervectors (10k-dim bipolar ±1).
 Replaces dense ML embeddings with composable, traceable, zero-model vector ops.

@@ -1,4 +1,4 @@
-"""CORTEX v5.0 — SAP Entity Mapper.
+"""SAP Entity Mapper.
 
 Transforms SAP OData entities into CORTEX facts and back.
 Handles diffing for bidirectional sync.

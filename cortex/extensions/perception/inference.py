@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Perception Layer 2: Behavioral Inference.
+Perception Layer 2: Behavioral Inference.
 
 Rule-based intent inference from file activity statistics.
 """

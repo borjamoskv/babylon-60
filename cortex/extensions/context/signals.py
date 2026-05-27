@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Context Signals.
+Context Signals.
 
 Data models for the ambient signal system.
 Each signal represents a contextual cue from a specific source.

@@ -1,4 +1,4 @@
-"""CORTEX v7 — Sovereign Degradation Types (leaf module).
+"""Sovereign Degradation Types (leaf module).
 
 Contains the exception hierarchy, data contracts, and taxonomy shared by
 degradation.py and degradation_executor.py. This module has zero

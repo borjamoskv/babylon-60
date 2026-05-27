@@ -1,4 +1,4 @@
-"""CORTEX v8.0 — Error→Ghost Pipeline (Ω₅ Antifragile Autopersistence).
+"""Error→Ghost Pipeline (Ω₅ Antifragile Autopersistence).
 
 Every uncaught error in the daemon/swarm is automatically persisted as a
 ghost fact in cortex.db. This ensures CORTEX cannot die silently — every

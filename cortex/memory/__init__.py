@@ -1,5 +1,5 @@
 """
-CORTEX v5.3 — Cognitive Memory Module.
+Cognitive Memory Module.
 
 Tripartite Memory Architecture (KETER-∞ Frontera 2):
     L1: WorkingMemoryL1  — Token-budgeted sliding window

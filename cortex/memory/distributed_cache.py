@@ -1,5 +1,5 @@
 """
-CORTEX v7.5 — "Hydra-Log" Distributed Cache (Redis Streams + Atomic Lua).
+"Hydra-Log" Distributed Cache (Redis Streams + Atomic Lua).
 
 Axiom: Ω₁ (Multi-Scale Causality) × Ω₃ (Byzantine Default)
   - All state transitions must be causally reachable (at-least-once).

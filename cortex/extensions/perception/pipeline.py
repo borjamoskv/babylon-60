@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Perception Layer 3: Recorder & Pipeline.
+Perception Layer 3: Recorder & Pipeline.
 
 Auto-records behavioral snapshots to episodic memory
 and orchestrates the full perception pipeline.

@@ -1,4 +1,4 @@
-"""CORTEX v7 — Sovereign Safety Invariants.
+"""Sovereign Safety Invariants.
 
 Defines the mathematical properties that no RSI mutation may ever violate.
 These are used by the FormalVerificationGate (Z3) to validate code before commit.

@@ -1,5 +1,5 @@
 """
-CORTEX v6 — Advanced Audit Analyst (Grok 4.1 Pattern).
+Advanced Audit Analyst (Grok 4.1 Pattern).
 
 Autonomous background monitor that scans the Enterprise Audit Ledger
 using heuristic-based anomaly detection to identify potential

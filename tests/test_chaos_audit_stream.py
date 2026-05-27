@@ -1,4 +1,4 @@
-"""CORTEX v8.0 — Chaos Simulation Tests for Audit Stream L1.
+"""Chaos Simulation Tests for Audit Stream L1.
 
 Axiom: Ω₅ (Antifragile by Default)
   - Every chaos scenario MUST:

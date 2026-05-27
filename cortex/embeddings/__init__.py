@@ -1,4 +1,4 @@
-"""CORTEX v5.0 — Embeddings.
+"""Embeddings.
 
 Vector substrate for semantic memory and similarity search.
 """

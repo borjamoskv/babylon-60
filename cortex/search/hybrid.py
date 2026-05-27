@@ -1,5 +1,5 @@
 """
-CORTEX v5.1 — Hybrid Search Engine.
+Hybrid Search Engine.
 
 Implements Reciprocal Rank Fusion (RRF) to unify semantic vector search
 and full-text lexical search. Optimized for high-precision recall.

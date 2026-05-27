@@ -1,5 +1,5 @@
 """
-CORTEX v5.1 — REST API.
+REST API.
 
 FastAPI server exposing the sovereign memory engine.
 Main entry point for initialization, security middleware, and routing.

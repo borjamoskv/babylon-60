@@ -1,5 +1,5 @@
 """
-CORTEX v5.1 — Admin Security Middleware.
+Admin Security Middleware.
 
 Rate limiting, audit logging, and self-healing trigger for governance endpoints.
 Designed for FastAPI dependency injection — zero overhead on non-admin routes.

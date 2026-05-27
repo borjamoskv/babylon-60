@@ -1,5 +1,5 @@
 """
-CORTEX v7 — Topology WebSocket Router.
+Topology WebSocket Router.
 Streaming real-time graph updates and Doubt Circuit alerts to the dashboard.
 """
 

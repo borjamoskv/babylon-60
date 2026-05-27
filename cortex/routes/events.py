@@ -1,5 +1,5 @@
 """
-CORTEX v6.0 - Event Bus Adapter (SSE).
+Event Bus Adapter (SSE).
 """
 
 from __future__ import annotations

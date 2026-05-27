@@ -1,5 +1,5 @@
 """
-CORTEX v6.0 — DiscoveryProvider (Ω₁: Multi-Scale Causality).
+DiscoveryProvider (Ω₁: Multi-Scale Causality).
 
 Motor soberano de reconocimiento para el Red Team Swarm.
 Escanea el sistema en busca de superficies de ataque y genera

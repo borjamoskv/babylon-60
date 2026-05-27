@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Context Engine.
+Context Engine.
 
 Ambient signal collection, multi-signal inference for contextual intelligence,
 and HiAgent subgoal compression for long-horizon loops.

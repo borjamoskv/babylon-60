@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Tiered Caching Strategy.
+Tiered Caching Strategy.
 
 Multi-level cache with L1 (Memory) and PubSub invalidation.
 """

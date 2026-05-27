@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — SQLite Schema Definitions.
+SQLite Schema Definitions.
 
 All tables, indexes, and virtual tables for the sovereign memory engine.
 Extended tables (consensus, episodes, signals, entity_events, evolution_state)

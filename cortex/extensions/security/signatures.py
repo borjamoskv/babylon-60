@@ -1,5 +1,5 @@
 """
-CORTEX v8 — Ed25519 Digital Signatures.
+Ed25519 Digital Signatures.
 
 Provides cryptographic fact signing and verification.
 Every fact stored in the ledger can carry a digital signature from

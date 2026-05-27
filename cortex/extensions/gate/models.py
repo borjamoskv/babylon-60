@@ -1,5 +1,5 @@
 """
-CORTEX v5.1 — SovereignGate Models.
+SovereignGate Models.
 """
 
 import time

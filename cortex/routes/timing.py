@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Timing Router.
+Timing Router.
 """
 
 import logging

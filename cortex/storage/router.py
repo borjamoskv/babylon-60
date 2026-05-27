@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Tenant Router.
+Tenant Router.
 
 Routes requests to the correct database based on tenant_id.
 """

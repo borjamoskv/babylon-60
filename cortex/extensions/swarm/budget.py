@@ -1,4 +1,4 @@
-"""CORTEX v7.0 — Swarm Budget Manager.
+"""Swarm Budget Manager.
 
 Tracks token consumption and costs per mission using SQLite.
 Integrates with LLMProvider to capture actual 'usage' metrics.

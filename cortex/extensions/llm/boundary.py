@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v5.0 — Sovereign Immune Boundary.
+"""Sovereign Immune Boundary.
 
 Frontera determinista (KETER-∞ Phase 1) que garantiza que ninguna
 salida malformada de un LLM contamine el estado interno de CORTEX.

@@ -1,4 +1,4 @@
-"""CORTEX v5.0 — SAP OData Integration.
+"""SAP OData Integration.
 
 Bidirectional sync between SAP business objects and CORTEX facts.
 Enables AI agents to read/write SAP entities with full ledger traceability.

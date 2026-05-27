@@ -1,5 +1,5 @@
 """
-CORTEX v7 — Topological Health Monitor (130/100 Sovereign Standard).
+Topological Health Monitor (130/100 Sovereign Standard).
 
 Breaks the circular Bayesian confirmation loop: reference signatures (p_0)
 are versioned against the exact embedding model that generated them.

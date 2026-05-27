@@ -1,5 +1,5 @@
 """
-CORTEX v5.0 — Migration 020: Tombstoning GC columns for Facts.
+Migration 020: Tombstoning GC columns for Facts.
 """
 
 import sqlite3

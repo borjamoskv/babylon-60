@@ -1,5 +1,5 @@
 """
-CORTEX V6 - ALEPH-Ω (Axiomatic Leap Engine).
+ALEPH-Ω (Axiomatic Leap Engine).
 Vector 3 of the Singularity.
 
 Provides non-derivative stochastic leaps when deterministic or

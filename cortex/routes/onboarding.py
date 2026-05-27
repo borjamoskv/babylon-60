@@ -1,4 +1,4 @@
-"""CORTEX v6.0 — Developer Onboarding Router.
+"""Developer Onboarding Router.
 
 Self-service signup flow for Memory-as-a-Service.
 Creates tenant, provisions free-tier API key, returns quickstart info.

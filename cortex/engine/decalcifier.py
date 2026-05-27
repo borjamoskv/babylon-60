@@ -1,5 +1,5 @@
 """
-CORTEX V6 - Sovereign Decalcifier (REM Phase Memory Consolidation).
+Sovereign Decalcifier (REM Phase Memory Consolidation).
 
 Executes deep background maintenance on the SQLite persistence layer.
 Only runs when the Endocrine system indicates low Cortisol (safety/rest).

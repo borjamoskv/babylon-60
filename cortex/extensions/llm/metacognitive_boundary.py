@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX v8.0 — Metacognitive Boundary Layer.
+"""Metacognitive Boundary Layer.
 
 Sprint 1 of the 130/100 plan: closes the LLM↔Memory gap.
 
