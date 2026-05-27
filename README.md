@@ -57,6 +57,56 @@ CORTEX-Persist acts as an **L0 Hypervisor** for autonomous agents, enforcing abs
 
 ---
 
+## ▀▄ DETAILED ARCHITECTURE & DATA FLOW
+
+CORTEX-Persist intercept structures force stochastically produced text outputs through deterministic verification shields before committing state to the cryptographically bound Ledger.
+
+```mermaid
+graph TD
+    classDef default fill:#0A0A0A,stroke:#2B3BE5,stroke-width:1px,color:#F0F0F0;
+    classDef highlight fill:#2B3BE5,stroke:#CCFF00,stroke-width:1.5px,color:#FFFFFF;
+    classDef guard fill:#1A1A1A,stroke:#FF0055,stroke-width:1px,color:#F0F0F0;
+
+    subgraph Stochastic Space
+        LLM[Agent Stochastic Output]:::default
+    end
+
+    subgraph Epistemic Membrane [CORTEX-Persist Containment Shield]
+        direction TB
+        G1[Z3 SMT Guard / Admission Gate]:::guard
+        VSA[Zero-Copy VSA Ring Buffer]:::default
+        mmap[( mmap Silicon Space )]:::default
+        Hash[SHA-256 Block Sealing]:::default
+        Merkle[Merkle Provenance Chain]:::default
+    end
+
+    subgraph Trust Substrate
+        Ledger[(Append-Only AOF Ledger)]:::highlight
+        Proof[Verifiable Audit Pack JSON]:::default
+    end
+
+    LLM -->|Decision / Observation| G1
+    G1 -->|Passed Asserts| VSA
+    VSA -->|Zero I/O Overhead| mmap
+    VSA -->|Batch Commit| Hash
+    Hash -->|Hash Link| Merkle
+    Merkle -->|State Anchoring| Ledger
+    Ledger -->|Generate| Proof
+    
+    style Epistemic Membrane fill:#050505,stroke:#2B3BE5,stroke-dasharray: 5 5;
+    style Trust Substrate fill:#050505,stroke:#CCFF00,stroke-dasharray: 5 5;
+```
+
+### Threat Model & Trust Guarantees
+| Threat Vector | Mitigation Strategy | State Guarantee |
+| :--- | :--- | :--- |
+| **Generative Drift (State Drift)** | Automated validation checks generated via a local Z3-solver SMT loop | **C5-REAL Hard Check** |
+| **State Tampering (CRUD Bypass)** | SHA-256 hash chaining + Append-Only File (AOF) binary ledger | **Tamper-Evident State** |
+| **System I/O Bottlenecks** | Vector Symbolic Architecture (VSA) mmap ring buffer bypassing standard disk writes | **O(1) Memory Bypass** |
+| **Self-Auditing Degradation** | Runtime autopoietic mutation (AST rebuilds) to recover from system prompt drift | **Autopoietic Equilibrium** |
+
+---
+
 ## ▀▄ TERMINAL STATE 4: SILICON DISPERSION
 
 The persistence daemon operates under strict thermodynamic (Joules/Exergy) constraints to ensure 10,000-agent (LEGION-10k) orchestration latency approaches zero.
@@ -78,24 +128,37 @@ The persistence daemon operates under strict thermodynamic (Joules/Exergy) const
 
 ---
 
-## ▀▄ DEPLOYMENT VECTORS
+## ▀▄ DEPLOYMENT & 3-MINUTE QUICKSTART
 
-The supported PyPI base flow requires no external daemon. It is purely local-first and self-contained.
-
+### 1. Installation
+The local-first engine requires Python 3.10+ and no external daemon:
 ```bash
 pip install cortex-persist
 ```
 
-**Extended Primitives:**
+For advanced features:
 ```bash
 pip install "cortex-persist[embeddings]"     # Local semantic embeddings
 pip install "cortex-persist[knowledge]"      # Chroma-backed knowledge sync
-pip install "cortex-persist[acceleration]"   # JIT acceleration
-pip install "cortex-persist[platform]"       # macOS keychain support
-pip install "cortex-persist[api,mcp,daemon]" # Server and MCP surfaces
+...
+pip install "cortex-persist[api,mcp,daemon]" # Web Server & MCP endpoints
 ```
 
-### Sovereign Integration (Python)
+### 2. Running the Canonical Demo
+To run the full verification loop, semantic search, and database tampering detection flow in under 3 minutes:
+```bash
+# Clone the repository
+git clone https://github.com/borjamoskv/Cortex-Persist.git
+cd Cortex-Persist
+
+# Install in editable mode with development dependencies
+pip install -e ".[dev,acceleration]"
+
+# Execute the canonical demo script
+python examples/demo_canonical.py
+```
+
+### 3. Sovereign Integration (Python)
 ```python
 import asyncio
 from cortex import CortexEngine
@@ -115,7 +178,11 @@ async def main() -> None:
     result = await engine.verify_ledger()
     assert result.get("valid") is True
 
-asyncio.run(main())
+async def run():
+    await main()
+
+if __name__ == "__main__":
+    asyncio.run(run())
 ```
 
 ---
