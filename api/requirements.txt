@@ -8,4 +8,4 @@ gunicorn>=26.0.0
 libsql-client>=0.4.3
 
 # Install local cortex package
-.
+..
