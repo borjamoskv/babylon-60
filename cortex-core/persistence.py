@@ -430,6 +430,43 @@ class IdeStatePreserver:
             self._execute_snapshot_sync()
 
 
+class SecurityReconDaemon(SovereignResource):
+    """C5-REAL SOTA Security Radar. Continuously investigates new security vulnerabilities globally."""
+
+    def __init__(self, ledger: LedgerManager):
+        self.ledger = ledger
+        self._daemon_task = None
+        self._interval = 3600  # 1 hour
+
+    async def _recon_loop(self):
+        loop = asyncio.get_running_loop()
+        while True:
+            # Enqueue a high-exergy Swarm Task to the SAGE_COUNCIL to fetch SOTA Security Fronts
+            payload = {
+                "type": "RESEARCH_SOTA_SECURITY",
+                "target": "global_cve_0day_feed",
+                "reward": 10.0,
+                "description": "Investigate new zero-days, vulnerabilities, and SOTA security models."
+            }
+            try:
+                loop.run_in_executor(None, enqueue_swarm_task, "SAGE_COUNCIL", payload)
+                logger.info("SecurityReconDaemon: Dispatched global security research task.")
+            except Exception as e:
+                logger.error("SecurityReconDaemon error: %s", e)
+            
+            await asyncio.sleep(self._interval)
+
+    def start_guardian(self):
+        if self._daemon_task:
+            return
+        try:
+            loop = asyncio.get_running_loop()
+            self._daemon_task = loop.create_task(self._recon_loop())
+        except RuntimeError:
+            logger.warning("SecurityReconDaemon could not start: no event loop.")
+
+
+
 class HybridPersistenceManager:
     """
     Sovereign Hybrid Persistence Manager.
@@ -443,8 +480,10 @@ class HybridPersistenceManager:
         self.ring = ZeroCopyRingBuffer()  # L4 Zero-Copy Substrate
         self.ide_guardian = IdeStatePreserver(self.l3)
         self.outbox = OutboxDaemon(DB_PATH, ledger=self.l3)
+        self.security_radar = SecurityReconDaemon(self.l3)
         self.ide_guardian.start_guardian()
         self.outbox.start_guardian()
+        self.security_radar.start_guardian()
 
     def get_system_health(self) -> dict:
         """Aggregates C5-REAL telemetry from all persistence substrates."""
@@ -620,123 +659,14 @@ class OutboxDaemon(SovereignResource):
 
     def drain_once_sync(self):
         """Synchronously drains a batch of pending tasks (primarily for tests and synchronous fallbacks)."""
-        import urllib.request
-        import urllib.error
-
-        try:
-            from .autopoiesis_ast import ASTAutopoiesisEngine
-        except ImportError:
-            try:
-                from autopoiesis_ast import ASTAutopoiesisEngine
-            except ImportError:
-                ASTAutopoiesisEngine = None
-
-        try:
-            rows = self._fetch_pending_tasks()
-            if not rows:
-                return
-
-            for row_id, agent_name, payload_str in rows:
-                try:
-                    payload_dict = json.loads(payload_str)
-                except json.JSONDecodeError:
-                    payload_dict = {}
-
-                # -- TERMINAL STATE 4: AST Autopoiesis Interceptor --
-                if payload_dict.get("type") == "AST_MUTATION" and ASTAutopoiesisEngine:
-                    target_file = payload_dict.get("target_file")
-                    func_name = payload_dict.get("function_name")
-                    new_source = payload_dict.get("new_source")
-                    signature = payload_dict.get("signature")
-                    
-                    if target_file and new_source:
-                        try:
-                            # C5-REAL Vault Verification
-                            if signature:
-                                if not self.ledger:
-                                    self.ledger = LedgerManager()
-                                is_valid = self.ledger.verify_zk_seal(new_source, signature)
-                                if not is_valid:
-                                    logger.error(f"AST Mutation Rejected: Invalid C5-REAL ZK-Seal for {target_file}")
-                                    self._update_task_status(row_id, "failed")
-                                    continue
-                            else:
-                                logger.warning(f"AST Mutation accepted WITHOUT signature for {target_file} (Legacy Mode)")
-
-                            engine = ASTAutopoiesisEngine(target_file)
-                            if func_name:
-                                result = engine.mutate_function(func_name, new_source)
-                            else:
-                                result = engine.mutate_file(new_source, signature)
-                                
-                            if result.get("status") == "success":
-                                logger.info(f"C5-REAL Autopoiesis Executed (L0 Swap). ZK-Proof: {result.get('zk_proof')}")
-                                self._update_task_status(row_id, "completed")
-                                continue
-                            else:
-                                logger.error(f"AST Mutation failed: {result.get('details', result.get('error'))}")
-                                self._update_task_status(row_id, "failed")
-                                continue
-                        except Exception as e:
-                            logger.error(f"AST Mutation crash: {e}")
-                            self._update_task_status(row_id, "failed")
-                            continue
                 # -- END INTERCEPTOR --
 
-                nexus_url = os.getenv("NEXUS_API_URL", "http://localhost:8600")
-                parsed_url = urlparse(nexus_url)
-                if parsed_url.scheme not in ("https", "http") or (
-                    parsed_url.scheme == "http"
-                    and parsed_url.hostname not in ("localhost", "127.0.0.1")
-                ):
-                    logger.error("SECURITY ALERT: Invalid NEXUS_API_URL scheme/host.")
-                    self._update_task_status(row_id, "failed")
-                    continue
-
-                nexus_token = os.getenv("NEXUS_BEARER_TOKEN")
-                if not nexus_token:
-                    logger.error("SECURITY ALERT: NEXUS_BEARER_TOKEN missing.")
-                    self._update_task_status(row_id, "failed")
-                    continue
-
-                caps_map = {
-                    "VulnerabilityFixer": ["security", "code"],
-                    "InvariantValidator": ["security", "code"],
-                    "SAGE_COUNCIL": ["intel", "research"],
-                    "OPTIMIZER": ["code"],
-                }
-
-                task_data = {
-                    "title": f"Swarm: {agent_name} Task",
-                    "description": payload_str,
-                    "required_capabilities": caps_map.get(agent_name, ["code"]),
-                    "reward": float(payload_dict.get("reward", 0.0))
-                    if isinstance(payload_dict, dict) and "reward" in payload_dict
-                    else 0.0,
-                    "delegator_id": "system",
-                }
-
-                req = urllib.request.Request(
-                    f"{nexus_url.rstrip('/')}/api/tasks",
-                    data=json.dumps(task_data).encode("utf-8"),
-                    headers={
-                        "Content-Type": "application/json",
-                        "Authorization": f"Bearer {nexus_token}",
-                    },
-                    method="POST",
-                )
-
-                try:
-                    resp = urllib.request.urlopen(req, timeout=2.0)
-                    if resp.status in (200, 201):
-                        self._update_task_status(row_id, "completed")
-                        logger.info("Outbox synced task: %s", task_data["title"])
-                    else:
-                        self._update_task_status(row_id, "failed")
-                except urllib.error.URLError as e:
-                    logger.warning("Outbox sync deferred (network error): %s", e)
-                    self._update_task_status(row_id, "pending")
-                    break  # Stop processing to wait for network recovery
+                # -- C5-REAL SOVEREIGN ISOLATION --
+                # Todo tráfico de red externa está PROHIBIDO. Las tareas que no son manejadas
+                # por interceptores nativos L0 se marcan como fallidas para prevenir exfiltración de entropía.
+                logger.error(f"C5-REAL Isolation: Task {agent_name} rejected. Network dispatch is prohibited.")
+                self._update_task_status(row_id, "failed")
+                
         except Exception as e:
             logger.error("Outbox drainer error: %s", e)
 
@@ -847,7 +777,3 @@ def get_swarm_metrics(bypass_cache: bool = False) -> dict:
             _metrics_cache["value"] = result
             _metrics_cache["expiry"] = now + 0.5  # Cache for 500ms
         return result
-    except Exception as e:
-        logger.error("Failed to extract swarm metrics (Deterministic C5-REAL Exception): %s", e)
-        # C5-REAL CIRCUIT BREAKER: Maximize entropy signal to isolate failing node.
-        return {"latency_ms": 99999.0, "active_children": -1, "uncertainty": 1.0}

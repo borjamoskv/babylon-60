@@ -9,9 +9,7 @@ async def run_stress_test():
     print("[+] Inicializando HybridPersistenceManager (Outbox Daemon)...")
     manager = HybridPersistenceManager()
     
-    # Configurar MOCK de NEXUS para evitar ban/throttling de red real durante stress test
-    os.environ["NEXUS_API_URL"] = "http://localhost:8600"
-    os.environ["NEXUS_BEARER_TOKEN"] = "mock_token_c5_real"
+    # Red externa eliminada, operamos en aislamiento Ring-0
     
     # Preparar base de datos limpia para la prueba
     conn = sqlite3.connect(os.getenv("CORTEX_DB_PATH", "cortex_memory_vsa.db"))

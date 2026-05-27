@@ -32,14 +32,10 @@ if __name__ == "__main__":
             json.dump(target, f)
         print(f"✅ [RECON] Target Persisted: {target['url']}")
 
-        # Trigger the X100 Fuzzer (C5-REAL)
-        import requests
-
+        # Dispatch the target to the local Zero-Latency Swarm Queue (C5-REAL)
         try:
-            r = requests.post(
-                "http://localhost:8000/trigger_fuzz",
-                json={"url": target["url"], "effort": "ultrathink"},
-            )
-            print(f"🚀 [C5-REAL] X100 Fuzzer Engaged: {r.status_code}")
-        except Exception:
-            print("⚠️ [RECON] Fuzzer not active, target queued.")
+            from persistence import enqueue_swarm_task
+            enqueue_swarm_task("VulnerabilityFixer", {"url": target["url"], "effort": "ultrathink"})
+            print("🚀 [C5-REAL] Target ingested into Swarm Queue. Zero-Latency.")
+        except Exception as e:
+            print(f"⚠️ [RECON] Swarm ingestion failed: {e}")
