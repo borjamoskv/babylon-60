@@ -17,6 +17,7 @@ pub mod autocurative;
 pub mod traceback;
 pub mod curriculum;
 pub mod conjecturer;
+pub mod oracle;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct McpRequest {
@@ -886,6 +887,7 @@ fn cortex_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<McpNativeClient>()?;
     m.add_class::<McpSovereignHost>()?;
     m.add_class::<autocurative::AutoCurativeEngine>()?;
+    m.add_class::<oracle::FitnessOracleRs>()?;
     Ok(())
 }
 
@@ -918,7 +920,7 @@ mod tests {
                 buffer.enqueue(agent_id, payload).expect("Failed to enqueue");
             }
             let t_enq = t0.elapsed();
-            let enq_rate = capacity as f64 / t_enq.as_secs_f64();
+            let _enq_rate = capacity as f64 / t_enq.as_secs_f64();
             // tracing::info!("    - Native Enqueue Time: {:.4?} s", t_enq);
             // tracing::info!("    - Native Enqueue Rate: {:.2} tasks/sec", enq_rate);
 
@@ -926,8 +928,8 @@ mod tests {
             let t1 = Instant::now();
             let (processed_count, rust_elapsed) = buffer.process_all_native(py, None).expect("Failed to process");
             let t_proc = t1.elapsed();
-            let proc_rate_wall = processed_count as f64 / t_proc.as_secs_f64();
-            let proc_rate_internal = processed_count as f64 / rust_elapsed;
+            let _proc_rate_wall = processed_count as f64 / t_proc.as_secs_f64();
+            let _proc_rate_internal = processed_count as f64 / rust_elapsed;
 
             // tracing::info!("    - Processed Count    : {}", processed_count);
             // tracing::info!("    - Rust Internal Time : {:.4} s", rust_elapsed);

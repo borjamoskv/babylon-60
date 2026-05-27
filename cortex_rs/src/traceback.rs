@@ -518,14 +518,14 @@ mod tests {
         let elapsed = start.elapsed();
         let rate = iterations as f64 / elapsed.as_secs_f64();
 
-        e// tracing::info!("═══════════════════════════════════════════");
-        e// tracing::info!("  TRACEBACK THROUGHPUT BENCHMARK");
-        e// tracing::info!("═══════════════════════════════════════════");
-        e// tracing::info!("  Chain depth: 1000");
-        e// tracing::info!("  Iterations:  {}", iterations);
-        e// tracing::info!("  Elapsed:     {:.4?}", elapsed);
-        e// tracing::info!("  Rate:        {:.0} tracebacks/sec", rate);
-        e// tracing::info!("═══════════════════════════════════════════");
+        // tracing::info!("═══════════════════════════════════════════");
+        // tracing::info!("  TRACEBACK THROUGHPUT BENCHMARK");
+        // tracing::info!("═══════════════════════════════════════════");
+        // tracing::info!("  Chain depth: 1000");
+        // tracing::info!("  Iterations:  {}", iterations);
+        // tracing::info!("  Elapsed:     {:.4?}", elapsed);
+        // tracing::info!("  Rate:        {:.0} tracebacks/sec", rate);
+        // tracing::info!("═══════════════════════════════════════════");
 
         assert!(rate > 1000.0, "Traceback rate should exceed 1K ops/sec");
     }

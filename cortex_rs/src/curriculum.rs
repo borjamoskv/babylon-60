@@ -539,7 +539,7 @@ mod tests {
         let mut engine = CurriculumEngine::new();
 
         // Set a target problem (e.g., geometry theorem)
-        let target_id = engine.set_target(
+        let _target_id = engine.set_target(
             vec![
                 "triangle(A,B,C)".into(),
                 "midpoint(M,A,B)".into(),
@@ -569,7 +569,7 @@ mod tests {
         // tracing::info!("  Generated:    {} variants", generated);
         // tracing::info!("  Total nodes:  {}", stats.total_variants);
         // tracing::info!("  Difficulty:   [{:.2}, {:.2}] avg={:.2}",
-            stats.min_difficulty, stats.max_difficulty, stats.avg_difficulty);
+        //     stats.min_difficulty, stats.max_difficulty, stats.avg_difficulty);
         // tracing::info!("═══════════════════════════════════════════");
     }
 
@@ -634,7 +634,7 @@ mod tests {
     #[test]
     fn test_solve_and_elo_propagation() {
         let mut engine = CurriculumEngine::new();
-        let target_id = engine.set_target(
+        let _target_id = engine.set_target(
             vec!["p1".into(), "p2".into(), "p3".into()],
             "goal".into(),
             0.9,
@@ -692,7 +692,7 @@ mod tests {
         let start = Instant::now();
         let generated = engine.generate(3);
         let elapsed = start.elapsed();
-        let rate = generated as f64 / elapsed.as_secs_f64();
+        let _rate = generated as f64 / elapsed.as_secs_f64();
 
         // tracing::info!("═══════════════════════════════════════════");
         // tracing::info!("  CURRICULUM THROUGHPUT BENCHMARK");

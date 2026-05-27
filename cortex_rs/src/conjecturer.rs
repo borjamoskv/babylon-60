@@ -585,7 +585,7 @@ mod tests {
             let stats = engine.evolve();
             total_mutations += stats.mutations_generated;
         }
-        let elapsed = start.elapsed();
+        let _elapsed = start.elapsed();
 
         // tracing::info!("═══════════════════════════════════════════");
         // tracing::info!("  EVOLUTION THROUGHPUT BENCHMARK");
@@ -596,7 +596,7 @@ mod tests {
         // tracing::info!("  Total mutants:  {}", total_mutations);
         // tracing::info!("  Elapsed:        {:.4?}", elapsed);
         // tracing::info!("  Rate:           {:.0} conjectures/sec",
-            total_mutations as f64 / elapsed.as_secs_f64());
+        //     total_mutations as f64 / elapsed.as_secs_f64());
         // tracing::info!("═══════════════════════════════════════════");
 
         assert!(engine.len() > 10, "Population should grow");
