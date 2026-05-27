@@ -20,18 +20,24 @@
   <a href="https://pypi.org/project/cortex-persist/"><img src="https://img.shields.io/pypi/v/cortex-persist.svg?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5" alt="PyPI"></a>
 </p>
 
-> **AESTHETIC:** INDUSTRIAL NOIR 2026 (`#0A0A0A` / `#2B3BE5`)  
-> **EPISTEMOLOGY:** C5-REAL (Cryptographically Verified Reality)  
-> **CORE TENET:** EPISTEMIC HUMILITY (Generative output is conjecture; Evidence is absolute)  
-> **ARCHITECTURE:** ZERO-UI / O(1) DETERMINISTIC SUBSTRATE
+```yaml
+AESTHETIC: INDUSTRIAL NOIR 2026 (#0A0A0A / #2B3BE5)
+EPISTEMOLOGY: C5-REAL (Cryptographically Verified Reality)
+CORE TENET: EPISTEMIC HUMILITY (Generative output is conjecture; Evidence is absolute)
+ARCHITECTURE: ZERO-UI / O(1) DETERMINISTIC SUBSTRATE
+```
 
 ---
 
-## ▀▄ EPISTEMIC HUMILITY & CONTAINMENT
+## ▀▄ EPISTEMIC CONTAINMENT
 
-At the core of CORTEX-Persist is **Epistemic Humility**: the acceptance that all generative AI output is fundamentally probabilistic conjecture. Traditional logging and standard vector stores blindly trust LLM outputs, failing the epistemic containment test. 
-
-CORTEX-Persist acts as an **L0 Hypervisor** for autonomous agents, enforcing absolute structural determinism to contain the inherent uncertainty of artificial intelligence. **We do not trust the model; we verify the cryptographic evidence.**
+```yaml
+Concept: Epistemic Humility
+Premise: Generative AI output is fundamentally probabilistic conjecture.
+Vulnerability: Traditional RAG and logging blindly trust stochastic output.
+Solution: L0 Hypervisor. Enforced structural determinism.
+Rule: Do not trust the model. Verify cryptographic evidence.
+```
 
 ```text
   [ STOCHASTIC GENERATION ] 
@@ -57,9 +63,9 @@ CORTEX-Persist acts as an **L0 Hypervisor** for autonomous agents, enforcing abs
 
 ---
 
-## ▀▄ DETAILED ARCHITECTURE & DATA FLOW
+## ▀▄ ARCHITECTURE & DATA FLOW
 
-CORTEX-Persist intercept structures force stochastically produced text outputs through deterministic verification shields before committing state to the cryptographically bound Ledger.
+**MECHANISM:** Intercepts stochastic text. Enforces deterministic shield. Commits state to cryptographically bound Ledger.
 
 ```mermaid
 graph TD
@@ -97,26 +103,30 @@ graph TD
     style Trust Substrate fill:#050505,stroke:#CCFF00,stroke-dasharray: 5 5;
 ```
 
-### Threat Model & Trust Guarantees
-| Threat Vector | Mitigation Strategy | State Guarantee |
+### THREAT MODEL & GUARANTEES
+| THREAT VECTOR | MITIGATION STRATEGY | STATE GUARANTEE |
 | :--- | :--- | :--- |
-| **Generative Drift (State Drift)** | Automated validation checks generated via a local Z3-solver SMT loop | **C5-REAL Hard Check** |
-| **State Tampering (CRUD Bypass)** | SHA-256 hash chaining + Append-Only File (AOF) binary ledger | **Tamper-Evident State** |
-| **System I/O Bottlenecks** | Vector Symbolic Architecture (VSA) mmap ring buffer bypassing standard disk writes | **O(1) Memory Bypass** |
-| **Python GIL Asphyxiation** | 100% Rust-FFI (`rayon`) core execution for LEGION-10k swarm orchestration | **~390k Agents/Sec** |
-| **Self-Auditing Degradation** | Runtime autopoietic mutation (AST rebuilds) to recover from system prompt drift | **Autopoietic Equilibrium** |
+| **Generative Drift** | Automated validation (local Z3-solver SMT loop) | **C5-REAL Hard Check** |
+| **State Tampering** | SHA-256 hash chaining + Append-Only File (AOF) binary ledger | **Tamper-Evident State** |
+| **System I/O Bottlenecks** | Vector Symbolic Architecture (VSA) mmap ring buffer | **O(1) Memory Bypass** |
+| **Python GIL Asphyxiation** | 100% Rust-FFI (`rayon`) core execution | **~390k Agents/Sec** |
+| **Self-Auditing Degradation** | Runtime autopoietic mutation (AST rebuilds) | **Autopoietic Equilibrium** |
 
 ---
 
 ## ▀▄ TERMINAL STATE 4: SILICON DISPERSION
 
-The persistence daemon operates under strict thermodynamic (Joules/Exergy) constraints to ensure 10,000-agent (LEGION-10k) orchestration latency approaches zero. The Python Global Interpreter Lock (GIL) has been completely annihilated.
+```yaml
+Constraint: Thermodynamic (Joules/Exergy) limits.
+Target: LEGION-10k (10,000-agent orchestration) at near-zero latency.
+Status: Python GIL annihilated.
+```
 
-> █ **Rust-Native Swarm Engine:** Parallel task execution via Rust `rayon` threading bypassing the Python GIL (O(1) throughput).  
-> █ **C5-REAL Outbox Atomicity:** Zero-latency WAL task consumption without lock contention.  
-> █ **ZK-STARK Ledger Seals:** Cryptographic proofs for every transaction establishing inter-nodal mesh trust.  
-> █ **VSA Memory (Zero-Copy):** O(1) Ring Buffer memory mapped to silicon (mmap), completely bypassing standard OS I/O overhead.  
-> █ **Live Telemetry:** Industrial Noir 20Hz WebSocket daemon anchoring real-time swarm exergy metrics to `agents.archi`.  
+> █ **Rust-Native Swarm Engine:** Parallel task execution via Rust `rayon`. Python GIL bypassed (O(1) throughput).  
+> █ **C5-REAL Outbox Atomicity:** Zero-latency WAL task consumption. Lock contention eliminated.  
+> █ **ZK-STARK Ledger Seals:** Cryptographic transaction proofs. Inter-nodal mesh trust.  
+> █ **VSA Memory (Zero-Copy):** O(1) Ring Buffer (mmap). OS I/O overhead bypassed.  
+> █ **Live Telemetry:** Industrial Noir 20Hz WebSocket daemon. Real-time exergy metrics on `agents.archi`.  
 
 ---
 
@@ -130,38 +140,31 @@ The persistence daemon operates under strict thermodynamic (Joules/Exergy) const
 
 ---
 
-## ▀▄ DEPLOYMENT & 3-MINUTE QUICKSTART
+## ▀▄ DEPLOYMENT
 
-### 1. Installation
-The local-first engine requires Python 3.10+ and no external daemon:
+### 1. INSTALLATION
+**Requirements:** `Python 3.10+`. Zero external daemons.
+
 ```bash
 pip install cortex-persist
-```
 
-For advanced features:
-```bash
+# Optional Modules
 pip install "cortex-persist[embeddings]"     # Local semantic embeddings
 pip install "cortex-persist[knowledge]"      # Chroma-backed knowledge sync
-...
 pip install "cortex-persist[api,mcp,daemon]" # Web Server & MCP endpoints
 ```
 
-### 2. Running the Canonical Demo
-To run the full verification loop, semantic search, and database tampering detection flow in under 3 minutes:
+### 2. CANONICAL DEMO
+Execute the C5-REAL verification loop, semantic search, and tampering detection in <3 minutes:
 ```bash
-# Clone the repository
 git clone https://github.com/borjamoskv/Cortex-Persist.git
 cd Cortex-Persist
-
-# Install in editable mode with development dependencies
 pip install -e ".[dev,acceleration]"
-
-# Execute the canonical demo script
 python examples/demo_canonical.py
 ```
 
-### 3. Sovereign Integration (Zero Friction)
-Integrate the CORTEX memory substrate into any existing agent pipeline (LangChain, LlamaIndex, etc.) with a single magic decorator.
+### 3. SOVEREIGN INTEGRATION (ZERO FRICTION)
+Inject the CORTEX memory substrate into any existing agent pipeline via magic decorator.
 
 ```python
 import asyncio
@@ -169,8 +172,7 @@ from cortex.magic import sovereign_persist
 
 @sovereign_persist(memory="cortex-cloud", strict=True)
 async def my_agent_chain(user_prompt: str):
-    # Your standard LLM logic here. CORTEX intercepts, verifies, 
-    # and cryptographically seals the memory autonomously.
+    # CORTEX intercepts, verifies, and cryptographically seals memory autonomously.
     response = await llm.generate(user_prompt)
     return response
 
