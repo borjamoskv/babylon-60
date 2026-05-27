@@ -294,7 +294,7 @@ class GenesisEngine:
 
     # ── Registry ──────────────────────────────────────────────
 
-    def register_bluelogging.info(self, blueprint: AgentBlueprint) -> str:
+    def register_blueprint(self, blueprint: AgentBlueprint) -> str:
         """Register a new agent blueprint in the species registry."""
         key = f"{blueprint.species}_{blueprint.genome.genome_hash[:8]}"
         self._registry[key] = blueprint
@@ -306,7 +306,7 @@ class GenesisEngine:
         )
         return key
 
-    def get_bluelogging.info(self, key: str) -> AgentBlueprint | None:
+    def get_blueprint(self, key: str) -> AgentBlueprint | None:
         return self._registry.get(key)
 
     @property
@@ -347,11 +347,11 @@ class GenesisEngine:
     ) -> SpawnedAgent:
         """Spawn an agent directly from a species template."""
         genome = species_factory(**kwargs)
-        blueprint = AgentBluelogging.info(
+        blueprint = AgentBlueprint(
             species=species_name if species_name != "auto" else genome.name,
             genome=genome,
         )
-        self.register_bluelogging.info(blueprint)
+        self.register_blueprint(blueprint)
         return self.spawn(blueprint)
 
     # ── Evolution ─────────────────────────────────────────────
@@ -388,13 +388,13 @@ class GenesisEngine:
         # Mutations on top performers
         for agent in ranked[:mutations_per_cycle]:
             child_genome = self.mutator.mutate(agent.blueprint.genome)
-            child_blueprint = AgentBluelogging.info(
+            child_blueprint = AgentBlueprint(
                 species=f"{agent.blueprint.species}_evolved",
                 genome=child_genome,
                 capabilities=list(agent.blueprint.capabilities),
                 resource_budget=dict(agent.blueprint.resource_budget),
             )
-            self.register_bluelogging.info(child_blueprint)
+            self.register_blueprint(child_blueprint)
             child_agent = self.spawn(child_blueprint)
             events.append(
                 {
@@ -414,11 +414,11 @@ class GenesisEngine:
                 parent_a.blueprint.genome,
                 parent_b.blueprint.genome,
             )
-            child_blueprint = AgentBluelogging.info(
+            child_blueprint = AgentBlueprint(
                 species=f"crossover_{parent_a.blueprint.species}",
                 genome=child_genome,
             )
-            self.register_bluelogging.info(child_blueprint)
+            self.register_blueprint(child_blueprint)
             child_agent = self.spawn(child_blueprint)
             events.append(
                 {

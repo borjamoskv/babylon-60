@@ -53,6 +53,7 @@ def reset_anomaly_detector():
 def inject_test_master_key(monkeypatch):
     """Ensure a deterministic Master Key is available for tests."""
     monkeypatch.setenv("CORTEX_TESTING", "1")
+    monkeypatch.setenv("CORTEX_NO_OMEGA", "1")
     # Base64 for 32 bytes of '0'
     monkeypatch.setenv("CORTEX_MASTER_KEY", "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=")
 
@@ -70,7 +71,15 @@ def pytest_configure(config):
 
 
 def pytest_sessionfinish(session, exitstatus):
+    """Save exit status before finalization."""
+    session.config.exitstatus = exitstatus
+
+
+def pytest_unconfigure(config):
     """Force exit to prevent finalization hangs on leaked daemon threads."""
-    pass
-    # import os
-    # os._exit(exitstatus)
+    if hasattr(config, "workerinput"):
+        return
+    import os
+
+    exitstatus = getattr(config, "exitstatus", 0)
+    os._exit(exitstatus)

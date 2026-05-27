@@ -15,6 +15,7 @@ Reality Level: C5-REAL (real code execution, mock dispatch targets)
 
 import asyncio
 import json
+import logging
 import random
 import time
 import sys
@@ -120,7 +121,7 @@ def test_genome_serialization():
     assert restored.complexity == genome.complexity
     assert restored.targets == genome.targets
     logging.info("  ✅ Serialization round-trip PASSED")
-    logging.info()
+    logging.info("")
 
 
 def test_mutation_operators():
@@ -145,7 +146,7 @@ def test_mutation_operators():
         assert genome.genome_hash == original_hash
 
     logging.info("  ✅ All mutation operators PASSED")
-    logging.info()
+    logging.info("")
 
 
 def test_crossover():
@@ -173,7 +174,7 @@ def test_crossover():
     logging.info(f"  Child gen: {child.lineage.generation}")
     logging.info(f"  Child parent_hash: {child.lineage.parent_hash}")
     logging.info("  ✅ Crossover PASSED")
-    logging.info()
+    logging.info("")
 
 
 def test_genesis():
@@ -194,8 +195,8 @@ def test_genesis():
     ]
 
     for name, genome in species:
-        blueprint = AgentBluelogging.info(species=name, genome=genome)
-        genesis.register_bluelogging.info(blueprint)
+        blueprint = AgentBlueprint(species=name, genome=genome)
+        genesis.register_blueprint(blueprint)
         agent = genesis.spawn(blueprint)
         logging.info(
             f"  Spawned: {agent.agent_id} "
@@ -218,7 +219,7 @@ def test_genesis():
     census = genesis.census()
     logging.info(f"  Census: {json.dumps(census, indent=2, default=str)}")
     logging.info("  ✅ Genesis PASSED")
-    logging.info()
+    logging.info("")
 
 
 async def test_evolution_cycle():
@@ -258,7 +259,7 @@ async def test_evolution_cycle():
     logging.info(f"  Final: {agent}")
     logging.info(f"  State: {json.dumps(agent.state.to_dict(), indent=2)}")
     logging.info("  ✅ Evolution Cycle PASSED")
-    logging.info()
+    logging.info("")
 
 
 async def test_continuous_evolution():
@@ -305,7 +306,7 @@ async def test_continuous_evolution():
     logging.info(f"  Discards: {summary['total_discards']}")
     logging.info(f"  Meta-mutations: {summary['meta_mutations']}")
     logging.info(f"  Duration: {summary['total_latency_ms']:.1f}ms")
-    logging.info()
+    logging.info("")
 
     # Introspection
     intro = agent.introspect()
@@ -323,7 +324,7 @@ async def test_continuous_evolution():
     post_rollback_hash = agent.genome.genome_hash[:8]
     logging.info(f"  Rollback: {pre_rollback_hash} → {post_rollback_hash}")
     logging.info("  ✅ Continuous Evolution PASSED")
-    logging.info()
+    logging.info("")
 
 
 async def test_genome_export_import():
@@ -356,19 +357,19 @@ async def test_genome_export_import():
     logging.info(f"  Imported into agent2: {agent2.genome}")
     assert agent.genome.name == agent2.genome.name
     logging.info("  ✅ Export/Import PASSED")
-    logging.info()
+    logging.info("")
 
 
 # ─── Main ────────────────────────────────────────────────────────
 
 
 async def main():
-    logging.info()
+    logging.info("")
     logging.info("╔══════════════════════════════════════════════════════════╗")
     logging.info("║        LEVEL 7 AUTOPOIETIC AGENT — VALIDATION          ║")
     logging.info("║        Reality Level: C5-REAL                           ║")
     logging.info("╚══════════════════════════════════════════════════════════╝")
-    logging.info()
+    logging.info("")
 
     t0 = time.perf_counter()
 

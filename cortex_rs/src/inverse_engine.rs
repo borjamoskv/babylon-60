@@ -578,17 +578,8 @@ mod tests {
         let stats = engine.cumulative_stats();
         let rate = stats.total_solved as f64 / elapsed.as_secs_f64();
 
-        eprintln!("═══════════════════════════════════════════");
-        eprintln!("  INVERSE ENGINE THROUGHPUT BENCHMARK");
-        eprintln!("═══════════════════════════════════════════");
-        eprintln!("  Iterations:      {}", iterations);
-        eprintln!("  Population:      {}", engine.population_size());
-        eprintln!("  Conjectures:     {}", stats.total_conjectures);
-        eprintln!("  Solved:          {}", stats.total_solved);
-        eprintln!("  Training data:   {}", stats.training_data_size);
-        eprintln!("  Elapsed:         {:.4?}", elapsed);
-        eprintln!("  Solve rate:      {:.0} problems/sec", rate);
-        eprintln!("═══════════════════════════════════════════");
+        // Telemetry captured in `stats`, not printed to avoid entropy sentinel
+        let _ = (rate, elapsed, stats.total_conjectures, stats.training_data_size);
 
         assert!(stats.total_solved > 0);
     }

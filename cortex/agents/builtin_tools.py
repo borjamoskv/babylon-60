@@ -1,0 +1,350 @@
+"""CORTEX Agent Runtime — Built-in Tools for Autonomous Agent.
+
+Provides concrete Tool implementations for the AutonomousAgent's
+ToolRegistry. Each tool follows the Tool protocol and can be
+independently tested.
+
+Tools included:
+    - ShellTool: Execute shell commands (subprocess)
+    - FileSystemTool: Read/write/list filesystem operations
+    - HttpTool: HTTP requests (GET/POST)
+    - ExergyAuditTool: Thermodynamic audit of agent state
+    - NoOpTool: Passthrough tool for testing
+
+All tools enforce C5-REAL execution: every invocation produces
+real, verifiable side effects. No simulated output.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import logging
+import os
+import subprocess
+import time
+from pathlib import Path
+from typing import Any
+
+logger = logging.getLogger("cortex.agents.builtin_tools")
+
+
+class ShellTool:
+    """Execute shell commands with timeout and output capture.
+
+    Reality Level: C5-REAL — commands execute on the host.
+    """
+
+    @property
+    def name(self) -> str:
+        return "shell"
+
+    async def execute(
+        self,
+        *,
+        cmd: str,
+        cwd: str | None = None,
+        timeout: float = 30.0,
+        env: dict[str, str] | None = None,
+    ) -> dict[str, Any]:
+        """Run a shell command and return stdout/stderr/returncode."""
+        run_env = {**os.environ, **(env or {})}
+
+        try:
+            proc = await asyncio.create_subprocess_shell(
+                cmd,
+                cwd=cwd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                env=run_env,
+            )
+            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
+
+            return {
+                "returncode": proc.returncode,
+                "stdout": stdout.decode("utf-8", errors="replace")[:10_000],
+                "stderr": stderr.decode("utf-8", errors="replace")[:5_000],
+                "success": proc.returncode == 0,
+            }
+
+        except asyncio.TimeoutError:
+            return {
+                "returncode": -1,
+                "stdout": "",
+                "stderr": f"Command timed out after {timeout}s",
+                "success": False,
+            }
+        except Exception as exc:
+            return {
+                "returncode": -1,
+                "stdout": "",
+                "stderr": str(exc),
+                "success": False,
+            }
+
+
+class FileSystemTool:
+    """Read, write, list, and check filesystem paths.
+
+    Reality Level: C5-REAL — operates on the real filesystem.
+    """
+
+    @property
+    def name(self) -> str:
+        return "filesystem"
+
+    async def execute(
+        self,
+        *,
+        action: str,
+        path: str,
+        content: str | None = None,
+        encoding: str = "utf-8",
+    ) -> dict[str, Any]:
+        """Execute a filesystem operation.
+
+        Actions:
+            read: Read file contents
+            write: Write content to file (creates parent dirs)
+            append: Append content to file
+            exists: Check if path exists
+            list: List directory contents
+            stat: Get file metadata
+            delete: Delete a file
+        """
+        target = Path(path)
+
+        try:
+            if action == "read":
+                text = target.read_text(encoding=encoding)
+                return {"ok": True, "content": text[:50_000], "size": len(text)}
+
+            elif action == "write":
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(content or "", encoding=encoding)
+                return {"ok": True, "path": str(target), "bytes_written": len(content or "")}
+
+            elif action == "append":
+                with target.open("a", encoding=encoding) as f:
+                    f.write(content or "")
+                return {"ok": True, "path": str(target)}
+
+            elif action == "exists":
+                return {"ok": True, "exists": target.exists(), "is_file": target.is_file()}
+
+            elif action == "list":
+                if not target.is_dir():
+                    return {"ok": False, "error": f"Not a directory: {path}"}
+                entries = [
+                    {
+                        "name": e.name,
+                        "is_dir": e.is_dir(),
+                        "size": e.stat().st_size if e.is_file() else None,
+                    }
+                    for e in sorted(target.iterdir())
+                    if not e.name.startswith(".")
+                ]
+                return {"ok": True, "entries": entries[:200], "total": len(entries)}
+
+            elif action == "stat":
+                if not target.exists():
+                    return {"ok": False, "error": f"Path not found: {path}"}
+                st = target.stat()
+                return {
+                    "ok": True,
+                    "size": st.st_size,
+                    "modified": st.st_mtime,
+                    "is_file": target.is_file(),
+                    "is_dir": target.is_dir(),
+                }
+
+            elif action == "delete":
+                if target.is_file():
+                    target.unlink()
+                    return {"ok": True, "deleted": str(target)}
+                return {"ok": False, "error": "Can only delete files"}
+
+            else:
+                return {"ok": False, "error": f"Unknown action: {action}"}
+
+        except Exception as exc:
+            return {"ok": False, "error": str(exc)}
+
+
+class HttpTool:
+    """Make HTTP requests using aiohttp or urllib fallback.
+
+    Reality Level: C5-REAL — makes real network requests.
+    """
+
+    @property
+    def name(self) -> str:
+        return "http"
+
+    async def execute(
+        self,
+        *,
+        method: str = "GET",
+        url: str,
+        headers: dict[str, str] | None = None,
+        body: str | None = None,
+        timeout: float = 15.0,
+    ) -> dict[str, Any]:
+        """Execute an HTTP request."""
+        import urllib.request
+        import urllib.error
+
+        try:
+            req = urllib.request.Request(
+                url,
+                data=body.encode() if body else None,
+                headers=headers or {},
+                method=method.upper(),
+            )
+
+            loop = asyncio.get_event_loop()
+            response = await loop.run_in_executor(
+                None,
+                lambda: urllib.request.urlopen(req, timeout=timeout),
+            )
+
+            response_body = response.read().decode("utf-8", errors="replace")
+            return {
+                "ok": True,
+                "status": response.status,
+                "headers": dict(response.headers),
+                "body": response_body[:20_000],
+            }
+
+        except urllib.error.HTTPError as exc:
+            return {
+                "ok": False,
+                "status": exc.code,
+                "error": str(exc),
+                "body": exc.read().decode("utf-8", errors="replace")[:5_000] if exc.fp else "",
+            }
+        except Exception as exc:
+            return {"ok": False, "error": str(exc)}
+
+
+class ExergyAuditTool:
+    """Audit the thermodynamic state of agent execution.
+
+    Reads the current plan and computes exergy efficiency ratios.
+    Does not produce side effects — pure observation.
+    """
+
+    @property
+    def name(self) -> str:
+        return "exergy_audit"
+
+    async def execute(
+        self,
+        *,
+        plan_summary: dict[str, Any] | None = None,
+        agent_telemetry: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Audit exergy metrics and return diagnostic report."""
+        if not plan_summary:
+            return {"ok": True, "status": "NO_PLAN", "recommendation": "idle"}
+
+        exergy = plan_summary.get("net_exergy", 0)
+        entropy = plan_summary.get("entropy_paid", 0)
+        progress = plan_summary.get("progress", "0%")
+
+        # Efficiency ratio
+        efficiency = exergy / max(entropy, 0.001)
+
+        # Diagnostic
+        if efficiency > 2.0:
+            status = "OPTIMAL"
+            recommendation = "continue"
+        elif efficiency > 1.0:
+            status = "HEALTHY"
+            recommendation = "continue"
+        elif efficiency > 0.5:
+            status = "DEGRADED"
+            recommendation = "reduce_entropy"
+        else:
+            status = "CRITICAL"
+            recommendation = "halt_and_reassess"
+
+        return {
+            "ok": True,
+            "status": status,
+            "efficiency": round(efficiency, 4),
+            "net_exergy": exergy,
+            "entropy_paid": entropy,
+            "progress": progress,
+            "recommendation": recommendation,
+        }
+
+
+class NoOpTool:
+    """Passthrough tool for testing and plan validation."""
+
+    @property
+    def name(self) -> str:
+        return "noop"
+
+    async def execute(self, **kwargs: Any) -> dict[str, Any]:
+        """Return kwargs as-is."""
+        return {"ok": True, "echo": kwargs}
+
+
+class GitTool:
+    """Git operations for autonomous code management.
+
+    Reality Level: C5-REAL — executes real git commands.
+    """
+
+    @property
+    def name(self) -> str:
+        return "git"
+
+    async def execute(
+        self,
+        *,
+        action: str,
+        repo_path: str,
+        args: str = "",
+    ) -> dict[str, Any]:
+        """Execute git operations.
+
+        Actions: status, add, commit, push, pull, clone, diff, log, branch
+        """
+        shell = ShellTool()
+
+        if action == "clone":
+            return await shell.execute(cmd=f"git clone {args} {repo_path}")
+
+        cmd_map = {
+            "status": "git status --porcelain",
+            "add": f"git add {args or '.'}",
+            "commit": f"git commit -m {args!r}" if args else "git commit --allow-empty -m 'auto'",
+            "push": f"git push {args}",
+            "pull": f"git pull {args}",
+            "diff": f"git diff {args}",
+            "log": f"git log --oneline -n 10 {args}",
+            "branch": f"git branch {args}",
+        }
+
+        cmd = cmd_map.get(action)
+        if not cmd:
+            return {"ok": False, "error": f"Unknown git action: {action}"}
+
+        return await shell.execute(cmd=cmd, cwd=repo_path)
+
+
+def register_all_builtin_tools(registry: Any) -> None:
+    """Register all built-in tools into a ToolRegistry."""
+    tools = [
+        ShellTool(),
+        FileSystemTool(),
+        HttpTool(),
+        ExergyAuditTool(),
+        NoOpTool(),
+        GitTool(),
+    ]
+    for tool in tools:
+        registry.register(tool)
+    logger.info("Registered %d built-in tools: %s", len(tools), [t.name for t in tools])
