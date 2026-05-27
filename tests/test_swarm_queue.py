@@ -199,12 +199,17 @@ async def test_swarm_queue_contention(tmp_path, monkeypatch):
     t1 = asyncio.create_task(enqueuer("AgentX", 10))
     t2 = asyncio.create_task(enqueuer("AgentY", 10))
 
-    # Consume queue concurrently
-    consumer_runs = 0
-    while not (t1.done() and t2.done()):
-        await daemon.process_swarm_queue()
-        consumer_runs += 1
-        await asyncio.sleep(0.03)
+    # Consume queue concurrently in a background task
+    async def consumer():
+        while not (t1.done() and t2.done()):
+            await daemon.process_swarm_queue()
+            await asyncio.sleep(0.03)
+
+    c_task = asyncio.create_task(consumer())
+
+    # Wait for enqueuers to finish and propagate exceptions
+    await asyncio.gather(t1, t2)
+    await c_task
 
     # Final sweep to ensure queue is completely empty
     for _ in range(100):
