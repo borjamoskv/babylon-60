@@ -4,14 +4,20 @@
   "trailingSlash": false,
   "redirects": [
     {
-      "source": "/(.*)",
+      "source": "/:path*",
       "has": [{ "type": "host", "value": "www.cortexpersist.com" }],
-      "destination": "https://cortexpersist.com/$1",
+      "destination": "https://cortexpersist.com/:path*",
       "permanent": true
     },
     {
-      "source": "/(.*)",
+      "source": "/:path*",
       "has": [{ "type": "host", "value": "cortexpersist.dev" }],
+      "destination": "https://github.com/borjamoskv/Cortex-Persist/tree/main/docs",
+      "permanent": false
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.cortexpersist.dev" }],
       "destination": "https://github.com/borjamoskv/Cortex-Persist/tree/main/docs",
       "permanent": false
     }
