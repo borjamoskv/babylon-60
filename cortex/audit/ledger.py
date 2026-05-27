@@ -9,9 +9,13 @@ a hash-chain to prove immutability of the audit logs.
 import hashlib
 import logging
 import time
+import os
 from datetime import datetime, timezone
 from typing import Any
 
+from cryptography.hazmat.primitives.asymmetric import ed25519
+from cryptography.hazmat.primitives import serialization
+from cryptography.exceptions import InvalidSignature
 import aiosqlite
 
 logger = logging.getLogger("cortex.audit.ledger")
@@ -35,12 +39,30 @@ CREATE TABLE IF NOT EXISTS security_audit_log (
 class EnterpriseAuditLedger:
     """Immutable Audit Ledger for enterprise-grade SOC 2 compliance."""
 
-    __slots__ = ("_conn", "_ready", "_last_hash")
+    __slots__ = ("_conn", "_ready", "_last_hash", "private_key", "public_key")
 
     def __init__(self, conn: aiosqlite.Connection) -> None:
         self._conn = conn
         self._ready = False
         self._last_hash = "GENESIS"
+
+        # C5-REAL Sovereign Ed25519 Keypair (Audit ZK-Seal Substrate)
+        # Almacena la clave localmente para persistir la identidad del auditor
+        key_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "audit_sovereign.pem")
+        if os.path.exists(key_path):
+            with open(key_path, "rb") as key_file:
+                pk = serialization.load_pem_private_key(key_file.read(), password=None)
+            assert isinstance(pk, ed25519.Ed25519PrivateKey)
+            self.private_key = pk
+        else:
+            self.private_key = ed25519.Ed25519PrivateKey.generate()
+            with open(key_path, "wb") as key_file:
+                key_file.write(self.private_key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.PKCS8,
+                    encryption_algorithm=serialization.NoEncryption()
+                ))
+        self.public_key = self.private_key.public_key()
 
     async def ensure_table(self) -> None:
         if self._ready:
@@ -81,9 +103,9 @@ class EnterpriseAuditLedger:
         timestamp = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
         audit_id = hashlib.sha256(f"{timestamp}{actor_id}{action}".encode()).hexdigest()
 
-        # Calculate new signature ensuring immutability chain
+        # Calculate new signature ensuring immutability chain via Ed25519 ZK-Seal
         payload = f"{audit_id}:{timestamp}:{tenant_id}:{actor_id}:{action}:{self._last_hash}"
-        signature = hashlib.sha3_256(payload.encode()).hexdigest()
+        signature = self.private_key.sign(payload.encode()).hex()
 
         await self._conn.execute(
             """INSERT INTO security_audit_log
@@ -106,3 +128,11 @@ class EnterpriseAuditLedger:
         await self._conn.commit()
         self._last_hash = signature
         return audit_id
+
+    def verify_zk_seal(self, payload: str, signature_hex: str) -> bool:
+        """Verifies a cryptographic seal against the Audit Sovereign public key."""
+        try:
+            self.public_key.verify(bytes.fromhex(signature_hex), payload.encode("utf-8"))
+            return True
+        except (InvalidSignature, ValueError):
+            return False
