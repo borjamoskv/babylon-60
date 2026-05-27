@@ -1,12 +1,16 @@
 # 📜 CORTEX LORCA-Ω NARRATIVE LEDGER
 
 > **Sovereign Chronicle of the Substrate** | **Reality Level:** `C5-REAL`
-> **Generated at:** `2026-05-27T05:08:21.114737+00:00` | **Source:** `git history` (last 30 commits)
+> **Generated at:** `2026-05-27T05:13:54.099794+00:00` | **Source:** `git history` (last 30 commits)
 
 This ledger projects a retroactive narrative translation of repository mutations. Every standard commit is mapped through the entropy-to-metaphor pipeline of the CommitPoet engine.
 
 | Commit Hash | Date | Original Subject | LORCA-Ω Translation |
 | :---: | :--- | :--- | :--- |
+| `5a2465c1` | 2026-05-27 07:13 UTC | chore(deploy): adjust vercel deployment configuration and script tracebacks | feat(scripts): awaken scripts from the dormant lattice ⚡ |
+| `94ea0a8f` | 2026-05-27 07:12 UTC | feat(auth): integrate turso auth backend via libsql-client for vercel | docs(auth): chart the auth territory for future navigators 📜 |
+| `3c8b077c` | 2026-05-27 07:11 UTC | chore(vercel): streamline routing parameters for serverless backend | feat(core): initiate the autopoietic synthesis of core 🧊 |
+| `4e58d32a` | 2026-05-27 07:09 UTC | fix(cloud): adjust vercel ignore command and update retroactive log | docs(docs): chart the docs territory for future navigators 🧭 |
 | `24e34626` | 2026-05-27 07:07 UTC | feat(telemetry): add webhook push to profile_agent_bridge for control plane sync | feat(scripts): conjure scripts from the thermodynamic void 💎 |
 | `c2109db6` | 2026-05-27 07:07 UTC | docs(api): align rest endpoints with c5-real health parameters and stress tests | feat(hardware): terraform hardware for habitation 🚀 |
 | `e9d23183` | 2026-05-27 07:07 UTC | docs(core): align sovereign documentation with scaling and execution standards | docs(docs): chronicle the docs epoch transition 📐 |
@@ -33,10 +37,6 @@ This ledger projects a retroactive narrative translation of repository mutations
 | `f5bda3ba` | 2026-05-27 06:30 UTC | docs(protocol): add mcp-2 formal specification | docs(docs): annotate the docs archaeological record 📜 |
 | `01ccf316` | 2026-05-27 06:30 UTC | docs(legion): add evaluation of 10k agents semantic assimilation | docs(docs): chronicle the docs epoch transition 🏛️ |
 | `c52afc62` | 2026-05-27 06:29 UTC | fix(demo): clean up demo database files at startup and teardown | feat(examples): graft examples onto the living architecture 🌱 |
-| `652003b6` | 2026-05-27 06:29 UTC | fix(demo): adjust fact type to match knowledge classification in demo_canonical | feat(examples): initiate the autopoietic synthesis of examples 🏗️ |
-| `768bbdfd` | 2026-05-27 06:28 UTC | feat(legion): upgrade swarm to 1000 agents and deploy dispatch mechanism | fix(cortex-core): resolve non-deterministic state drift in cortex-core 🔒 |
-| `24c2c4d8` | 2026-05-27 06:28 UTC | docs(launch): establish gtm-10 strategy and context fatigue outreach playbooks | docs(docs): annotate the docs archaeological record 🏛️ |
-| `1b27e608` | 2026-05-27 06:27 UTC | fix(dispatch): ensure stdout logs flush immediately during high-concurrency run | fix(cortex-core): extract the embedded shrapnel from cortex-core 🔒 |
 
 ---
 
