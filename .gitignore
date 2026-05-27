@@ -1,1 +1,24 @@
-Nothing needs to be added to the .gitignore file since the changes only include source code files (.py files) which should not be ignored.
+```
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Database and persistence files
+*.db
+*.bin
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Environment
+.env
+.env.local
+.env.*
+
+# Dependencies
+.venv/
+venv/
+```

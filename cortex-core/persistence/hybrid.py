@@ -13,14 +13,29 @@ from ultramap import UltramapSubstrate
 from .base import DB_PATH
 
 
-
 from .cache import ContextCache
 from .vsa import VSAMemory
 from .ledger import LedgerManager
-from daemons.outbox import ZeroCopyRingBuffer, OutboxDaemon
-from daemons.l0_immunology import ImmunologyDaemon
 from .ide_preserver import IdeStatePreserver
-from daemons.security_recon import SecurityReconDaemon
+
+# Lazy imports to avoid circular dependencies
+def __getattr__(name):
+    if name in ("ZeroCopyRingBuffer", "OutboxDaemon"):
+        from daemons.outbox import ZeroCopyRingBuffer, OutboxDaemon
+        globals().update({
+            "ZeroCopyRingBuffer": ZeroCopyRingBuffer,
+            "OutboxDaemon": OutboxDaemon,
+        })
+        return globals()[name]
+    if name == "ImmunologyDaemon":
+        from daemons.l0_immunology import ImmunologyDaemon
+        globals()["ImmunologyDaemon"] = ImmunologyDaemon
+        return ImmunologyDaemon
+    if name == "SecurityReconDaemon":
+        from daemons.security_recon import SecurityReconDaemon
+        globals()["SecurityReconDaemon"] = SecurityReconDaemon
+        return SecurityReconDaemon
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 class HybridPersistenceManager:
@@ -31,6 +46,11 @@ class HybridPersistenceManager:
     """
 
     def __init__(self):
+        # Import lazily to avoid circular dependency
+        from daemons.outbox import ZeroCopyRingBuffer, OutboxDaemon
+        from daemons.l0_immunology import ImmunologyDaemon
+        from daemons.security_recon import SecurityReconDaemon
+        
         self.l1 = ContextCache()
         self.l2 = VSAMemory()
         self.l3 = LedgerManager()
