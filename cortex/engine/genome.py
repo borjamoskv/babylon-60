@@ -392,6 +392,7 @@ class GenomeMutator:
         if mutation_type in ast_mutation_types:
             try:
                 import cortex_rs
+
                 tree_json = json.dumps(child.dispatch_tree, default=str)
                 new_tree_json = cortex_rs.GenomeMutatorRs.mutate_tree(
                     tree_json, mutation_type.value, child.lineage.generation
