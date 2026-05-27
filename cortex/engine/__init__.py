@@ -596,10 +596,14 @@ class CortexEngine(
         self._memory_ready = False
         if self._persistence:
             await self._persistence.stop()
-        if self._conn:
-            await self._conn.close()
-            self._conn = None
-        # Clean up Wave 6 references
+        if hasattr(self, "_conns_by_loop"):
+            conns = list(self._conns_by_loop.values())
+            for conn in conns:
+                try:
+                    await conn.close()
+                except Exception:
+                    pass
+            self._conns_by_loop.clear()
         self.mac_maestro = None  # type: ignore
         self.ledger_writer = None  # type: ignore
         self.enrichment_queue = None  # type: ignore
