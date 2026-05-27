@@ -1,4 +1,5 @@
 import pytest
+
 pytest.importorskip("numpy")
 import asyncio
 import numpy as np

@@ -11,6 +11,7 @@ import sqlite3
 import time
 
 import pytest
+
 pytest.importorskip("numpy")
 import numpy as np
 

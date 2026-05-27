@@ -13,6 +13,7 @@ from __future__ import annotations
 import asyncio
 import json
 import pytest
+
 pytest.importorskip("redis")
 import redis.asyncio
 from cortex.database.cache import _MAX_REDIS_VALUE_BYTES, CacheEvent, TieredCache
