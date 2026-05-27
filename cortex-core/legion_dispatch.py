@@ -60,7 +60,8 @@ async def main():
         
         # Force exit to prevent daemons from hanging the process
         print("Exiting...", flush=True)
-        sys.exit(0)
+        import os
+        os._exit(0)
 
     num_agents = 10000
     if len(sys.argv) > 1:

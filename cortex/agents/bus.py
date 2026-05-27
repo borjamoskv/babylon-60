@@ -101,10 +101,11 @@ class SqliteMessageBus:
         """Fetch and consume one message atomically."""
         row = None
         async with self._lock:
+            # Atomic update with RETURNING clause to prevent multi-process race conditions
             async with conn.execute(
-                "SELECT id, payload FROM agent_messages "
-                "WHERE recipient = ? AND consumed = 0 "
-                "ORDER BY id ASC LIMIT 1",
+                "UPDATE agent_messages SET consumed = 1 "
+                "WHERE id = (SELECT id FROM agent_messages WHERE recipient = ? AND consumed = 0 ORDER BY id ASC LIMIT 1) "
+                "RETURNING id, payload",
                 (agent_id,),
             ) as cursor:
                 row = await cursor.fetchone()
@@ -113,10 +114,6 @@ class SqliteMessageBus:
                 return None
 
             row_id, raw_payload = row
-            await conn.execute(
-                "UPDATE agent_messages SET consumed = 1 WHERE id = ?",
-                (row_id,),
-            )
             await conn.commit()
 
         try:

@@ -1,0 +1,43 @@
+{
+  "agent": {
+    "id": "cortex-profile-agent",
+    "memory_admission": "CortexEngine.store",
+    "runtime_boundary": "cortex-profile-agent"
+  },
+  "artifacts": {
+    "readme_block_markers": [
+      "<!-- CORTEX-PROFILE-AGENT:START -->",
+      "<!-- CORTEX-PROFILE-AGENT:END -->"
+    ],
+    "status_json": "assets/cortex-profile-agent.status.json",
+    "status_svg": "assets/cortex-profile-agent.svg"
+  },
+  "cortex": {
+    "last_public_fact_id": 1,
+    "project": "github-profile-agent",
+    "tenant_scope": "public-profile"
+  },
+  "generated_at": "2026-05-27T05:21:23.970059+00:00",
+  "ledger": {
+    "latest_hash": "1d4595077d35b3f6622ff3f5a027447a6bfe985c1f55e9e76e0dabe637b8a172",
+    "latest_hash_short": "1d4595077d35b3f662",
+    "merkle_roots_checked": 0,
+    "status": "VALID",
+    "transactions_checked": 1,
+    "valid": true,
+    "violations_public": []
+  },
+  "privacy_boundary": {
+    "prompts_published": false,
+    "public_projection_only": true,
+    "raw_memory_published": false,
+    "secrets_published": false,
+    "tenant_payloads_published": false
+  },
+  "repositories": {
+    "profile": "borjamoskv/borjamoskv",
+    "profile_commit": "be52ee30a7265c4f091c6923058e8f82ff1d83de",
+    "source": "borjamoskv/Cortex-Persist"
+  },
+  "schema_version": 1
+}
