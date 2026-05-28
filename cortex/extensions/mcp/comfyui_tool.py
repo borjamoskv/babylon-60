@@ -1,7 +1,7 @@
 import json
 import uuid
 import sys
-from typing import Dict, Any
+
 
 # CORTEX-Persist Visual Engine (ComfyUI)
 # MCP Tool Bridge
