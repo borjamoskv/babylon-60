@@ -166,43 +166,29 @@ def test_cli_base_flow_without_extended_runtime_dependencies(tmp_path: Path) -> 
         ["aiofiles", "aiohttp", "bs4", "arq", "email_validator", "watchdog", "yaml"],
     )
     env["CORTEX_NO_EMBED"] = "1"
+    env["CORTEX_LLM_PROVIDER"] = ""
+    env["CORTEX_MASTER_KEY"] = "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA="
+    for k in ["GEMINI_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GROQ_API_KEY", "DEEPSEEK_API_KEY"]:
+        env.pop(k, None)
     db_path = tmp_path / "base-flow.db"
+    commands = [
+        ["--version"],
+        ["init", "--db", str(db_path)],
+        ["memory", "store", "demo-project", "base flow fact", "--db", str(db_path)],
+        ["trust-ledger", "verify", "--db", str(db_path)],
+    ]
 
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-c",
-            "\n".join(
-                [
-                    "from click.testing import CliRunner",
-                    "from cortex.cli.main import cli",
-                    f"db_path = r'{db_path}'",
-                    "runner = CliRunner()",
-                    "commands = [",
-                    "    ['--version'],",
-                    "    ['init', '--db', db_path],",
-                    "    ['memory', 'store', 'demo-project', 'base flow fact', '--db', db_path],",
-                    "    ['trust-ledger', 'verify', '--db', db_path],",
-                    "]",
-                    "for cmd in commands:",
-                    "    result = runner.invoke(cli, cmd)",
-                    "    print(result.output)",
-                    "    if result.exception:",
-                    "        import os; os._exit(1)",
-                    "    if result.exit_code:",
-                    "        import os; os._exit(result.exit_code)",
-                    "import os; os._exit(0)",
-                ]
-            ),
-        ],
-        capture_output=True,
-        text=True,
-        env=env,
-        check=False,
-    )
-
-    combined = result.stdout + result.stderr
-    assert result.returncode == 0, combined
+    combined = ""
+    for cmd in commands:
+        result = subprocess.run(
+            [sys.executable, "-m", "cortex"] + cmd,
+            capture_output=True,
+            text=True,
+            env=env,
+            check=False,
+        )
+        combined += result.stdout + result.stderr
+        assert result.returncode == 0, f"Command {cmd} failed. Output:\n{result.stdout}\n{result.stderr}"
     assert "blocked by test harness" not in combined
     assert "ImportError" not in combined
     assert "CORTEX v0.3.0b8 initialized" in combined
@@ -213,44 +199,29 @@ def test_cli_base_flow_without_extended_runtime_dependencies(tmp_path: Path) -> 
 def test_cli_base_flow_without_keyring_when_env_master_key_is_set(tmp_path: Path) -> None:
     env = _blocked_import_env(tmp_path, ["keyring", "AppKit", "Foundation", "Cocoa", "objc"])
     env["CORTEX_NO_EMBED"] = "1"
+    env["CORTEX_LLM_PROVIDER"] = ""
     env["CORTEX_MASTER_KEY"] = "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA="
+    for k in ["GEMINI_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GROQ_API_KEY", "DEEPSEEK_API_KEY"]:
+        env.pop(k, None)
     db_path = tmp_path / "env-master-key.db"
+    commands = [
+        ["--version"],
+        ["init", "--db", str(db_path)],
+        ["memory", "store", "demo-project", "env key fact", "--db", str(db_path)],
+        ["trust-ledger", "verify", "--db", str(db_path)],
+    ]
 
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-c",
-            "\n".join(
-                [
-                    "from click.testing import CliRunner",
-                    "from cortex.cli.main import cli",
-                    f"db_path = r'{db_path}'",
-                    "runner = CliRunner()",
-                    "commands = [",
-                    "    ['--version'],",
-                    "    ['init', '--db', db_path],",
-                    "    ['memory', 'store', 'demo-project', 'env key fact', '--db', db_path],",
-                    "    ['trust-ledger', 'verify', '--db', db_path],",
-                    "]",
-                    "for cmd in commands:",
-                    "    result = runner.invoke(cli, cmd)",
-                    "    print(result.output)",
-                    "    if result.exception:",
-                    "        import os; os._exit(1)",
-                    "    if result.exit_code:",
-                    "        import os; os._exit(result.exit_code)",
-                    "import os; os._exit(0)",
-                ]
-            ),
-        ],
-        capture_output=True,
-        text=True,
-        env=env,
-        check=False,
-    )
-
-    combined = result.stdout + result.stderr
-    assert result.returncode == 0, combined
+    combined = ""
+    for cmd in commands:
+        result = subprocess.run(
+            [sys.executable, "-m", "cortex"] + cmd,
+            capture_output=True,
+            text=True,
+            env=env,
+            check=False,
+        )
+        combined += result.stdout + result.stderr
+        assert result.returncode == 0, f"Command {cmd} failed. Output:\n{result.stdout}\n{result.stderr}"
     assert "ImportError: keyring blocked by test harness" not in combined
     assert "CORTEX v0.3.0b8 initialized" in combined
     assert "Stored fact" in combined
