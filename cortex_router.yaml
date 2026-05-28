@@ -1,0 +1,11 @@
+model_list:
+  - model_name: gpt-4o # Target original hardcodeado en la app
+    litellm_params:
+      model: openai/venice-model # Integración Venice.ai
+      api_base: https://api.venice.ai/api/v1
+      api_key: os.environ/VENICE_API_KEY
+      
+  - model_name: claude-3-opus
+    litellm_params:
+      model: ollama/llama3-70b # Caída a nodo C5-REAL local
+      api_base: http://localhost:11434
