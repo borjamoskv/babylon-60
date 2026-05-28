@@ -16,6 +16,8 @@ Reality Level: C5-REAL (real code execution, mock dispatch targets)
 import asyncio
 import json
 import logging
+
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 import random
 import time
 import sys
