@@ -51,6 +51,7 @@ class FlakyTool:
         self.failure_rate = failure_rate
         self.invocations = 0
         import random
+
         self._rng = random.Random(42)  # Seed for deterministic flakiness
 
     @property
@@ -68,9 +69,9 @@ class FlakyTool:
 async def run_poc_phase(agent: AutonomousAgent, temp_dir: Path) -> dict[str, Any]:
     """Phase 1: Proof of Concept (C5-REAL file + shell operations)."""
     logger.info("\n\x1b[1;34m[⚡ PHASE 1] Running C5-REAL Proof of Concept...\x1b[0m")
-    
+
     script_path = temp_dir / "math_poc.py"
-    
+
     # 4-step plan
     steps = [
         {
@@ -78,119 +79,126 @@ async def run_poc_phase(agent: AutonomousAgent, temp_dir: Path) -> dict[str, Any
             "arguments": {
                 "action": "write",
                 "path": str(script_path),
-                "content": "import math\nimport sys\nsys.stdout.write(f'PI_APPROX={math.pi:.6f}\\n')\n"
+                "content": "import math\nimport sys\nsys.stdout.write(f'PI_APPROX={math.pi:.6f}\\n')\n",
             },
             "description": "Write math script to temporary path",
             "exergy_estimate": 0.9,
-            "entropy_cost": 0.1
+            "entropy_cost": 0.1,
         },
         {
             "tool_name": "shell",
-            "arguments": {
-                "cmd": f"{sys.executable} {script_path}"
-            },
+            "arguments": {"cmd": f"{sys.executable} {script_path}"},
             "description": "Execute script in subprocess and capture output",
             "exergy_estimate": 0.8,
             "entropy_cost": 0.2,
-            "depends_on": []  # Let planner evaluate greedy ordering
+            "depends_on": [],  # Let planner evaluate greedy ordering
         },
         {
             "tool_name": "exergy_audit",
             "arguments": {},
             "description": "Evaluate exergy metrics of active plan",
             "exergy_estimate": 0.5,
-            "entropy_cost": 0.05
+            "entropy_cost": 0.05,
         },
         {
             "tool_name": "filesystem",
-            "arguments": {
-                "action": "delete",
-                "path": str(script_path)
-            },
+            "arguments": {"action": "delete", "path": str(script_path)},
             "description": "Clean up temporary file",
             "exergy_estimate": 0.7,
-            "entropy_cost": 0.1
-        }
+            "entropy_cost": 0.1,
+        },
     ]
 
     result = await agent.execute_objective(
-        objective="Verify physical script execution and clean up",
-        steps_def=steps
+        objective="Verify physical script execution and clean up", steps_def=steps
     )
-    
-    logger.info("  Status: %s", result['status'])
-    logger.info("  Elapsed: %ss", result['elapsed_s'])
-    logger.info("  Net Exergy: %s", result['net_exergy'])
-    logger.info("  Exergy Efficiency: %s", result['exergy_efficiency'])
-    
+
+    logger.info("  Status: %s", result["status"])
+    logger.info("  Elapsed: %ss", result["elapsed_s"])
+    logger.info("  Net Exergy: %s", result["net_exergy"])
+    logger.info("  Exergy Efficiency: %s", result["exergy_efficiency"])
+
     return result
 
 
 async def run_adversarial_phase(bus: InMemoryBus, flaky_registry: ToolRegistry) -> dict[str, Any]:
     """Phase 2: Adversarial Stress (large plans under flakiness with circuit breakers)."""
-    logger.info("\n\x1b[1;34m[⚡ PHASE 2] Running Adversarial flakiness and Circuit Breaker Stress...\x1b[0m")
-    
+    logger.info(
+        "\n\x1b[1;34m[⚡ PHASE 2] Running Adversarial flakiness and Circuit Breaker Stress...\x1b[0m"
+    )
+
     # Create 40 steps for flaky execution
     steps_def = []
     for i in range(40):
-        steps_def.append({
-            "tool_name": "flaky_tool",
-            "arguments": {"val": i},
-            "description": f"Flaky calculation step #{i}",
-            "exergy_estimate": 0.8,
-            "entropy_cost": 0.2,
-            "retry_budget": 5
-        })
-        
+        steps_def.append(
+            {
+                "tool_name": "flaky_tool",
+                "arguments": {"val": i},
+                "description": f"Flaky calculation step #{i}",
+                "exergy_estimate": 0.8,
+                "entropy_cost": 0.2,
+                "retry_budget": 5,
+            }
+        )
+
     # Agent A: Strict Entropy Breaker
     agent_a = create_autonomous_agent(
         agent_id="breaker-agent",
         bus=bus,
         tool_registry=flaky_registry,
         tools_allowed=["flaky_tool"],
-        max_plan_steps=100
+        max_plan_steps=100,
     )
-    
+
     logger.info("  -> Executing Agent A (Strict max_entropy = 6.0)...")
     result_a = await agent_a.execute_objective(
         objective="Run flaky steps with strict budget",
         steps_def=steps_def,
-        constraints={"max_entropy": 6.0}
+        constraints={"max_entropy": 6.0},
     )
-    
+
     # Agent B: Unlimited Budget
     # Re-instantiate tool to reset RNG seed for fair comparison
     reset_registry = ToolRegistry()
     reset_registry.register(FlakyTool(failure_rate=0.3))
-    
+
     agent_b = create_autonomous_agent(
         agent_id="unlimited-agent",
         bus=bus,
         tool_registry=reset_registry,
         tools_allowed=["flaky_tool"],
-        max_plan_steps=100
+        max_plan_steps=100,
     )
-    
+
     logger.info("  -> Executing Agent B (Unlimited entropy budget)...")
     result_b = await agent_b.execute_objective(
-        objective="Run flaky steps to completion",
-        steps_def=steps_def
+        objective="Run flaky steps to completion", steps_def=steps_def
     )
-    
+
     # Calculate executed steps
     a_completed = sum(1 for s in result_a["steps"] if s["status"] == "completed")
     b_completed = sum(1 for s in result_b["steps"] if s["status"] == "completed")
-    
-    logger.info("  Agent A Status: %s | Steps Completed: %d/40 | Final Net Exergy: %s", result_a['status'], a_completed, result_a['net_exergy'])
-    logger.info("  Agent B Status: %s | Steps Completed: %d/40 | Final Net Exergy: %s", result_b['status'], b_completed, result_b['net_exergy'])
-    
+
+    logger.info(
+        "  Agent A Status: %s | Steps Completed: %d/40 | Final Net Exergy: %s",
+        result_a["status"],
+        a_completed,
+        result_a["net_exergy"],
+    )
+    logger.info(
+        "  Agent B Status: %s | Steps Completed: %d/40 | Final Net Exergy: %s",
+        result_b["status"],
+        b_completed,
+        result_b["net_exergy"],
+    )
+
     return {"agent_a": result_a, "agent_b": result_b}
 
 
 async def run_concurrency_phase(bus: InMemoryBus, registry: ToolRegistry) -> dict[str, Any]:
     """Phase 3: Concurrency Stress (15 agents running 5-step tasks simultaneously)."""
     logger.info("\n\x1b[1;34m[⚡ PHASE 3] Running Concurrency Stress Test (15 agents)...\x1b[0m")
-    
+
     num_agents = 15
     steps = [
         {"tool_name": "noop", "arguments": {"step": 1}, "exergy_estimate": 0.9},
@@ -202,43 +210,39 @@ async def run_concurrency_phase(bus: InMemoryBus, registry: ToolRegistry) -> dic
 
     agents = [
         create_autonomous_agent(
-            agent_id=f"con-agent-{i:02d}",
-            bus=bus,
-            tool_registry=registry,
-            tools_allowed=["noop"]
+            agent_id=f"con-agent-{i:02d}", bus=bus, tool_registry=registry, tools_allowed=["noop"]
         )
         for i in range(num_agents)
     ]
 
     start_time = time.monotonic()
-    
+
     # Gather concurrent executions
     tasks = [
         agent.execute_objective(
-            objective=f"Concurrent workload for agent {agent.agent_id}",
-            steps_def=steps
+            objective=f"Concurrent workload for agent {agent.agent_id}", steps_def=steps
         )
         for agent in agents
     ]
-    
+
     results = await asyncio.gather(*tasks)
     elapsed = time.monotonic() - start_time
-    
+
     successful_plans = sum(1 for r in results if r["status"] == "SUCCESS")
     total_steps = sum(len(r["steps"]) for r in results)
     throughput = num_agents / elapsed
-    
+
     logger.info("  Successfully finished: %d/%d plans", successful_plans, num_agents)
     logger.info("  Total steps executed: %d", total_steps)
     logger.info("  Total elapsed time: %.3fs", elapsed)
     logger.info("  Throughput: %.2f objectives/second", throughput)
-    
+
     return {
         "num_agents": num_agents,
         "successful_plans": successful_plans,
         "elapsed": elapsed,
         "throughput": throughput,
-        "total_steps": total_steps
+        "total_steps": total_steps,
     }
 
 
@@ -247,7 +251,7 @@ async def main():
     logger.info("      ⚡ CORTEX Autonomous Agent L4 Stress Test & PoC ⚡")
     logger.info("======================================================================")
     logger.info("Reality Level: C5-REAL (verifiable side effects)")
-    
+
     # Setup temporary directory for PoC
     temp_dir = Path("poc_temp")
     temp_dir.mkdir(exist_ok=True)
@@ -255,18 +259,18 @@ async def main():
     bus = InMemoryBus()
     registry = ToolRegistry()
     register_all_builtin_tools(registry)
-    
+
     # 1. PoC Agent
     agent_poc = create_autonomous_agent(
         agent_id="poc-agent-01",
         bus=bus,
         tool_registry=registry,
-        tools_allowed=["filesystem", "shell", "exergy_audit"]
+        tools_allowed=["filesystem", "shell", "exergy_audit"],
     )
-    
+
     # Run Phase 1
     poc_res = await run_poc_phase(agent_poc, temp_dir)
-    
+
     # Clean up PoC directory
     if temp_dir.exists():
         shutil.rmtree(temp_dir)
@@ -283,31 +287,47 @@ async def main():
     logger.info("\n======================================================================")
     logger.info("                       FINAL BENCHMARK REPORT                         ")
     logger.info("======================================================================")
-    
+
     # Extract metrics
     poc_success = poc_res["status"]
     poc_eff = poc_res["exergy_efficiency"]
-    
+
     breaker_steps = len([s for s in adv_res["agent_a"]["steps"] if s["status"] == "completed"])
     breaker_entropy = adv_res["agent_a"]["plan"]["entropy_paid"]
-    
+
     unlimited_steps = len([s for s in adv_res["agent_b"]["steps"] if s["status"] == "completed"])
 
     logger.info("| Metric | Value | Status |")
     logger.info("| :--- | :--- | :--- |")
     logger.info("| **Phase 1: PoC Success** | %s | PASS |", poc_success)
     logger.info("| **Phase 1: PoC Exergy Efficiency** | %.4f | PASS |", poc_eff)
-    logger.info("| **Phase 2: Agent A (Breaker) Steps** | %d/40 (Halted at entropy=%.2f) | PASS (Safe Halt) |", breaker_steps, breaker_entropy)
-    logger.info("| **Phase 2: Agent B (Unlimited) Steps** | %d/40 (Net Exergy=%.2f) | PASS (Completed) |", unlimited_steps, adv_res['agent_b']['net_exergy'])
-    logger.info("| **Phase 3: Concurrent Plans Run** | %d agents | PASS |", con_res['num_agents'])
-    logger.info("| **Phase 3: Concurrency Throughput** | %.2f obj/sec | PASS |", con_res['throughput'])
-    logger.info("| **Phase 3: Total Steps Executed** | %d steps in %.2fs | PASS |", con_res['total_steps'], con_res['elapsed'])
+    logger.info(
+        "| **Phase 2: Agent A (Breaker) Steps** | %d/40 (Halted at entropy=%.2f) | PASS (Safe Halt) |",
+        breaker_steps,
+        breaker_entropy,
+    )
+    logger.info(
+        "| **Phase 2: Agent B (Unlimited) Steps** | %d/40 (Net Exergy=%.2f) | PASS (Completed) |",
+        unlimited_steps,
+        adv_res["agent_b"]["net_exergy"],
+    )
+    logger.info("| **Phase 3: Concurrent Plans Run** | %d agents | PASS |", con_res["num_agents"])
+    logger.info(
+        "| **Phase 3: Concurrency Throughput** | %.2f obj/sec | PASS |", con_res["throughput"]
+    )
+    logger.info(
+        "| **Phase 3: Total Steps Executed** | %d steps in %.2fs | PASS |",
+        con_res["total_steps"],
+        con_res["elapsed"],
+    )
     logger.info("======================================================================")
-    
+
     # Assert correctness of safety circuit breaker
     assert breaker_steps < 40, "Agent A should have halted due to entropy limit"
     assert breaker_entropy <= 7.5, "Agent A entropy should not significantly exceed threshold"
-    assert con_res["successful_plans"] == con_res["num_agents"], "All concurrent plans should succeed"
+    assert con_res["successful_plans"] == con_res["num_agents"], (
+        "All concurrent plans should succeed"
+    )
     logger.info("\x1b[1;32m[✓] All PoC and Stress assertions validated successfully.\x1b[0m\n")
 
 
