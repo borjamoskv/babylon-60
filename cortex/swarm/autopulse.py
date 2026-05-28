@@ -124,18 +124,27 @@ async def process_queue():
                     except (OSError, aiosqlite.Error, RuntimeError) as e:
                         logger.error("Autopulse Signal Error: %s", e)
 
+            except EntropySpikeException as e:
+                logger.error("Autopulse Circuit Breaker Tripped! Task aborted for %s. Error: %s", agent, e)
+                # Halt further queue processing for 30s to allow metrics to cool down or operators to intervene
+                await asyncio.sleep(30.0)
             except (OSError, json.JSONDecodeError, KeyError, ValueError) as e:
                 logger.error("Autopulse Queue Error: %s", e)
 
         await asyncio.sleep(2.0)
 
 
+class EntropySpikeException(Exception):
+    """Raised when swarm yield dispersion exceeds the safety threshold."""
+    pass
+
 def _audit_entropy_spike(legion: TensorGlialLegion, agent_name: str) -> None:
-    """AUDITOR-Ω: Monitor yield entropy spikes per Axiom Ω₃ (Verify then Trust).
+    """AUDITOR-Ω Circuit Breaker: Monitor yield entropy spikes per Axiom Ω₃.
 
     Computes the yield_ratio dispersion across the legion. If the coefficient
     of variation (std/mean) exceeds _ENTROPY_THRESHOLD, emits a P1 alert and
-    records the anomaly in the ledger sentinel log.
+    raises an EntropySpikeException to trip the Circuit Breaker and prevent
+    ledger pollution.
     """
     import numpy as np
 
@@ -148,13 +157,14 @@ def _audit_entropy_spike(legion: TensorGlialLegion, agent_name: str) -> None:
 
     cv = std_yield / mean_yield  # Coefficient of Variation
     if cv > _ENTROPY_THRESHOLD:
-        logger.warning(
-            "[AUDITOR-Ω] ENTROPY SPIKE DETECTED — agent=%s cv=%.4f threshold=%.4f sha256=%s",
+        logger.error(
+            "[AUDITOR-Ω] CIRCUIT BREAKER TRIPPED! Entropy Spike Detected — agent=%s cv=%.4f threshold=%.4f sha256=%s",
             agent_name,
             cv,
             _ENTROPY_THRESHOLD,
             legion.global_sha256_audit()[:16],
         )
+        raise EntropySpikeException(f"Entropy Circuit Breaker tripped for agent {agent_name} (cv={cv:.4f})")
     else:
         logger.debug(
             "[AUDITOR-Ω] entropy OK — agent=%s cv=%.4f",
