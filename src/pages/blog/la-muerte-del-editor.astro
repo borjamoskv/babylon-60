@@ -1,0 +1,169 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+const openSourceUrl = 'https://cortexpersist.org';
+---
+
+<SiteLayout
+	title="La Muerte del Editor | CORTEX Persist Blog"
+	description="Google desmanteló el editor local en Antigravity 2.0. Análisis de por qué la industria fuerza interfaces conversacionales y cómo ataca la soberanía del programador."
+	canonical="https://cortexpersist.com/blog/la-muerte-del-editor"
+>
+	<main class="landing-shell">
+		<header class="masthead">
+			<a class="brand" href="/" aria-label="CORTEX Persist home">
+				<span class="brand-mark">CP</span>
+				<span class="brand-copy"><strong>CORTEX Persist</strong><span>Verifiable memory for AI agents</span></span>
+			</a>
+			<nav class="site-nav" aria-label="Primary">
+				<a class="nav-link" href="/#problem">Problem</a>
+				<a class="nav-link" href="/#fit">Fit</a>
+				<a class="nav-link" href="/#pilot">Pilot</a>
+				<a class="nav-link" href="/blog" style="color: var(--accent-bright);">Blog</a>
+			</nav>
+			<div class="masthead-actions">
+				<a class="button-tertiary" href={openSourceUrl} target="_blank" rel="noreferrer">Open Source</a>
+				<a class="button-primary" href="/async-demo">Async Demo</a>
+			</div>
+		</header>
+
+		<article class="section-frame surface" style="margin-top: 2rem;">
+			<div class="section-heading">
+				<p class="section-kicker">Mayo 2026</p>
+				<h1 style="font-family: 'Orbitron', sans-serif; font-weight: 800; letter-spacing: 0.05em; line-height: 1.1; text-transform: uppercase; font-size: clamp(1.5rem, 3.5vw, 2.6rem);">La Muerte del Editor: La IA Agéntica como Modelo de Extracción de Renta</h1>
+			</div>
+
+			<div style="max-width: 72ch; display: grid; gap: 2rem;">
+
+				<p class="surface-copy">En mayo de 2026, Google lanzó Antigravity 2.0. El comunicado de prensa celebraba «la interfaz más avanzada para desarrollo asistido por IA». Lo que no celebraba era lo que había desaparecido: el editor de código.</p>
+
+				<p class="surface-copy">No se trataba de un bug. No era un oversight técnico. Era una decisión de arquitectura que revela, con precisión milimétrica, cómo funciona la extracción de renta en la era de la IA agéntica.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">I. El patrón histórico: control → libertad → control</h2>
+
+				<p class="surface-copy">La historia de la computación es un péndulo entre centralización y soberanía. Los mainframes de los 60 concentraban todo el poder computacional en una sala controlada por IBM. El PC de los 80 devolvió el control al usuario. La nube de los 2010 volvió a centralizar. Cada ciclo promete libertad y entrega dependencia.</p>
+
+				<p class="surface-copy">La IA agéntica es el cuarto movimiento del péndulo. Y esta vez, el mecanismo de control no es el hardware ni la infraestructura: es la <strong>interfaz</strong>.</p>
+
+				<p class="surface-copy">Cuando el editor desaparece, la relación programador-código cambia de forma irreversible. El desarrollador deja de ser quien escribe y pasa a ser quien pide. La conversación reemplaza al commit. El chat reemplaza al diff. Y la plataforma captura algo que antes era imposible de capturar: la <strong>intención</strong>.</p>
+
+				<div class="surface-sunken" style="padding: 1.2rem; border-radius: var(--radius-lg);">
+					<p class="surface-label">Transición de control</p>
+					<pre class="console-block" style="margin-top: 0.8rem;">Mainframe (1960s)  → IBM controla el hardware
+PC (1980s)         → Usuario controla la ejecución
+Cloud (2010s)      → Proveedor controla la infraestructura
+AI Agent (2020s)   → Plataforma controla la interfaz + intención</pre>
+				</div>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">II. La economía de la conversación cautiva</h2>
+
+				<p class="surface-copy">Un editor de código es una herramienta de bajo margen. El usuario puede cambiar de VS Code a Neovim a Zed sin perder nada excepto configuración. Los archivos son suyos. El lenguaje es estándar. El lock-in es mínimo.</p>
+
+				<p class="surface-copy">Una interfaz conversacional invierte esa ecuación. Cada interacción alimenta un contexto que el usuario no puede exportar. Los prompts, las correcciones, el historial de decisiones — todo vive en la plataforma. El switching cost no es la herramienta: es la <strong>memoria acumulada</strong>.</p>
+
+				<p class="surface-copy">Google lo sabe. OpenAI lo sabe. Anthropic lo sabe. Por eso las tres compañías han convergido en el mismo diseño: interfaz conversacional como punto de captura, no como mejora ergonómica.</p>
+
+				<div class="surface-sunken" style="padding: 1.2rem; border-radius: var(--radius-lg);">
+					<p class="surface-label">Métricas que importan</p>
+					<div style="display: grid; gap: 0.5rem; margin-top: 0.8rem;">
+						<p class="surface-copy"><strong style="color: var(--gold);">Editor local:</strong> archivos/hora, líneas/commit, tiempo en IDE → métricas de <em>productividad</em></p>
+						<p class="surface-copy"><strong style="color: var(--accent-soft);">Chat cautivo:</strong> tokens/sesión, retención diaria, prompts/usuario → métricas de <em>engagement</em></p>
+					</div>
+				</div>
+
+				<p class="surface-copy">El cambio de métricas delata el cambio de modelo de negocio. Cuando la interfaz optimiza engagement en vez de productividad, el usuario ha dejado de ser el cliente para convertirse en el producto.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">III. Lo que se pierde cuando desaparece el editor</h2>
+
+				<p class="surface-copy">Un editor no es solo una superficie de texto. Es un contrato implícito entre el desarrollador y su código. Ese contrato incluye:</p>
+
+				<div style="display: grid; gap: 0.8rem;">
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong>Inspección directa</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">El desarrollador puede ver todo el estado del proyecto. No depende de que un modelo resuma correctamente lo que hay en los archivos.</p>
+					</div>
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong>Edición determinista</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">Un keystroke produce exactamente un carácter. No hay interpretación, no hay alucinación, no hay «¿quisiste decir esto?».</p>
+					</div>
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong>Propiedad del artefacto</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">El archivo resultante vive en el filesystem del usuario. No en un sandbox temporal de la plataforma.</p>
+					</div>
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong>Verificabilidad</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">git diff muestra exactamente qué cambió. En un flujo conversacional, el diff es entre «lo que pediste» y «lo que el modelo interpretó que pediste».</p>
+					</div>
+				</div>
+
+				<p class="surface-copy">Cada una de estas propiedades desaparece cuando la interfaz primaria es una conversación. Y cada una de estas propiedades es exactamente lo que una plataforma de extracción de renta necesita eliminar para maximizar dependencia.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">IV. VS Code como precedente y anomalía</h2>
+
+				<p class="surface-copy">Cuando Microsoft lanzó VS Code en 2015, hizo algo inusual: creó una herramienta gratuita, open-source, que no capturaba datos de uso de forma agresiva. El modelo de negocio era indirecto — atraer desarrolladores al ecosistema Azure.</p>
+
+				<p class="surface-copy">VS Code demostró que un editor poderoso no necesita ser un vector de extracción. Pero también demostró que la <em>gratuidad</em> es un caballo de Troya cuando el objetivo real es la adopción de plataforma. GitHub Copilot, que nació dentro de VS Code, se convirtió en el prototipo de la interfaz conversacional actual.</p>
+
+				<p class="surface-copy">La evolución fue sutil: del autocompletado (2021) al chat inline (2023) al agente autónomo (2025) a la eliminación del editor (2026). Cada paso reducía la superficie de control del desarrollador y aumentaba la superficie de captura de la plataforma.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">V. El argumento de la productividad</h2>
+
+				<p class="surface-copy">La defensa estándar es que la interfaz conversacional es «más productiva». El desarrollador describe lo que quiere, el agente lo implementa. Menos tiempo escribiendo, más tiempo pensando.</p>
+
+				<p class="surface-copy">El argumento tiene un error empírico y un error estructural.</p>
+
+				<p class="surface-copy">El error empírico: los datos internos de productividad que han filtrado equipos de Google, Microsoft y startups como Cursor muestran que la <strong>ganancia neta de productividad con agentes conversacionales se estabiliza en ~15-25%</strong> tras el periodo de novedad. No es 10x. No es el «cambio de paradigma» que vende la narrativa.</p>
+
+				<p class="surface-copy">El error estructural: la productividad de una herramienta no se mide solo en velocidad de output. Se mide también en <strong>calidad de comprensión</strong>. Un desarrollador que escribe cada línea entiende cada línea. Un desarrollador que acepta bloques generados entiende los bloques que revisa — y asume que los demás están bien.</p>
+
+				<p class="surface-copy">El resultado es una deuda de comprensión que crece más rápido que la deuda técnica tradicional. Y esa deuda solo se hace visible cuando algo falla en producción y nadie entiende el código que «escribió» el agente.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">VI. La posición CORTEX</h2>
+
+				<p class="surface-copy">CORTEX Persist no tiene opinión sobre qué interfaz uses. Editor, conversación, comando, voz — eso es ergonomía, y la ergonomía es personal.</p>
+
+				<p class="surface-copy">Lo que sí tiene es una posición sobre <strong>propiedad</strong>: la memoria del agente pertenece al operador. No a la plataforma. No al modelo. No al proveedor de la interfaz.</p>
+
+				<pre class="console-block">cortex store deployment-bot \
+  "Deployed v2.4.1 to staging" \
+  --type decision \
+  --source agent:deployment-bot
+
+# La decisión queda en TU ledger.
+# No en el historial de chat de Google.
+# No en los logs de OpenAI.
+# En tu infraestructura. Verificable.</pre>
+
+				<p class="surface-copy">La muerte del editor es un síntoma. La enfermedad es la pérdida de soberanía sobre el proceso de desarrollo. CORTEX no resucita el editor — eso es trabajo de la comunidad open source. Lo que hace es asegurar que, independientemente de la interfaz, el registro de decisiones siga siendo tuyo.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">VII. Qué hacer</h2>
+
+				<div style="display: grid; gap: 0.6rem;">
+					<p class="surface-copy"><strong style="color: var(--success);">1.</strong> Mantén tu editor local como interfaz primaria. Usa agentes como herramienta, no como reemplazo.</p>
+					<p class="surface-copy"><strong style="color: var(--success);">2.</strong> Exporta tu contexto. Si no puedes exportar el historial de conversación con el agente, ese historial no es tuyo.</p>
+					<p class="surface-copy"><strong style="color: var(--success);">3.</strong> Verifica el output. git diff no es opcional cuando el agente escribe código.</p>
+					<p class="surface-copy"><strong style="color: var(--success);">4.</strong> Registra las decisiones. No en el chat de la plataforma. En un ledger que controles.</p>
+					<p class="surface-copy"><strong style="color: var(--success);">5.</strong> Mide productividad real. No tokens generados. Líneas que sobreviven al primer code review.</p>
+				</div>
+
+				<div class="surface-sunken" style="padding: 1.2rem; border-radius: var(--radius-lg); margin-top: 1rem;">
+					<p class="surface-label" style="color: var(--gold);">Conclusión</p>
+					<p class="surface-copy" style="margin-top: 0.5rem;">La muerte del editor no es un accidente de diseño. Es un modelo de negocio. Y como todo modelo de negocio, se puede aceptar, resistir o construir la alternativa. CORTEX existe porque la tercera opción siempre ha sido la más difícil — y la única que dura.</p>
+				</div>
+			</div>
+		</article>
+
+		<div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+			<a class="button-secondary" href="/blog">← All Articles</a>
+			<a class="button-primary" href="/async-demo">Request Async Demo</a>
+		</div>
+
+		<footer class="site-footer" style="margin-top: 4rem;">
+			<p class="footer-note">CORTEX Persist / The swarm verifies. The hardware remembers.</p>
+			<div class="footer-links">
+				<a href={openSourceUrl} target="_blank" rel="noreferrer">Open Source</a>
+				<a href="https://cortexpersist.dev" target="_blank" rel="noreferrer">Docs</a>
+				<a href="/vsa">Public Shell</a>
+			</div>
+		</footer>
+	</main>
+</SiteLayout>

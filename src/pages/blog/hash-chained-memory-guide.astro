@@ -1,0 +1,116 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+const openSourceUrl = 'https://cortexpersist.org';
+---
+
+<SiteLayout title="Hash-Chained Memory: A Practical Guide to Tamper-Evident Agent State | CORTEX Persist Blog" description="How to implement Merkle-style integrity for agent decisions without a blockchain or consensus overhead." canonical="https://cortexpersist.com/blog/hash-chained-memory-guide">
+	<main class="landing-shell">
+		<header class="masthead">
+			<a class="brand" href="/" aria-label="CORTEX Persist home"><span class="brand-mark">CP</span><span class="brand-copy"><strong>CORTEX Persist</strong><span>Verifiable memory for AI agents</span></span></a>
+			<nav class="site-nav" aria-label="Primary"><a class="nav-link" href="/#problem">Problem</a><a class="nav-link" href="/#fit">Fit</a><a class="nav-link" href="/#pilot">Pilot</a><a class="nav-link" href="/blog" style="color: var(--accent-bright);">Blog</a></nav>
+			<div class="masthead-actions"><a class="button-tertiary" href={openSourceUrl} target="_blank" rel="noreferrer">Open Source</a><a class="button-primary" href="/async-demo">Async Demo</a></div>
+		</header>
+
+		<article class="section-frame surface" style="margin-top: 2rem;">
+			<div class="section-heading">
+				<p class="section-kicker">May 2026</p>
+				<h1 style="font-family: 'Orbitron', sans-serif; font-weight: 800; letter-spacing: 0.05em; line-height: 1.1; text-transform: uppercase; font-size: clamp(1.5rem, 3.5vw, 2.6rem);">Hash-Chained Memory: A Practical Guide</h1>
+			</div>
+
+			<div style="max-width: 72ch; display: grid; gap: 2rem;">
+				<p class="surface-copy">When an AI agent runs autonomously on your infrastructure, it makes hundreds of small, non-deterministic decisions. It decides whether a test passed, whether an API response is valid, or whether a code change is safe to commit. If you cannot guarantee the integrity of the agent's historical state, you cannot trust its future decisions.</p>
+
+				<p class="surface-copy">This guide provides a practical implementation blueprint for <strong>Hash-Chained Memory</strong>: a system that leverages Merkle-style integrity to ensure your agent's state is tamper-evident, reproducible, and verifiable, without the latency or complexity of a blockchain.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">The Anatomy of a Memory Transaction</h2>
+
+				<p class="surface-copy">A memory chain is a singly-linked list of structured records where each record contains the cryptographic hash of its parent. The state is represented as a JSON sequence containing metadata, content, and signatures.</p>
+
+				<div class="surface-sunken" style="padding: 1.2rem; border-radius: var(--radius-lg);">
+					<p class="surface-label">Memory Record Schema (JSON)</p>
+					<pre class="console-block" style="margin-top: 0.8rem;">{`{
+  "index": 47,
+  "timestamp": "2026-05-28T03:19:00Z",
+  "type": "decision",
+  "content": {
+    "action": "git:commit",
+    "rationale": "Fixes syntax error in server.js"
+  },
+  "parent_hash": "0x58f7e2a9b3c4...",
+  "hash": "0x9c3d2e1b8a7f..."
+}`}</pre>
+				</div>
+
+				<p class="surface-copy">The <code>hash</code> of the record is computed by serializing the properties (excluding the hash itself) and running them through SHA-256. This means any change to the content, index, timestamp, or parent hash will invalidate the hash of the current record—and every subsequent record in the chain.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">Implementing in Python</h2>
+
+				<p class="surface-copy">Here is the minimal logic to implement a verifiable memory writer in Python using standard libraries:</p>
+
+				<pre class="console-block">{`import json
+import hashlib
+from datetime import datetime
+
+class MemoryChain:
+    def __init__(self):
+        self.chain = []
+        
+    def create_block(self, block_type: str, content: dict) -> dict:
+        parent_hash = self.chain[-1]['hash'] if self.chain else "0" * 64
+        block = {
+            "index": len(self.chain),
+            "timestamp": datetime.utcnow().isoformat(),
+            "type": block_type,
+            "content": content,
+            "parent_hash": parent_hash
+        }
+        block["hash"] = self.compute_hash(block)
+        self.chain.append(block)
+        return block
+
+    @staticmethod
+    def compute_hash(block: dict) -> str:
+        # Sort keys to ensure deterministic serialization
+        serialized = json.dumps({
+            k: v for k, v in block.items() if k != "hash"
+        }, sort_keys=True)
+        return hashlib.sha256(serialized.encode('utf-8')).hexdigest()
+
+    def verify(self) -> bool:
+        for i in range(1, len(self.chain)):
+            current = self.chain[i]
+            parent = self.chain[i-1]
+            if current['parent_hash'] != parent['hash']:
+                return False
+            if current['hash'] != self.compute_hash(current):
+                return False
+        return True`}</pre>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">Why Not a Database?</h2>
+
+				<p class="surface-copy">Standard database rows are mutable. Any process with write permissions can run an <code>UPDATE</code> statement to rewrite history. If a compromised or hallucinating agent modifies its own past logs to hide an error, you will have no way of knowing what actually happened.</p>
+
+				<p class="surface-copy">With a hash-chained memory ledger, historical mutations are mathematically impossible without breaking the tip hash. If a validator agent checks the chain periodically, it can guarantee that the history is unbroken and unmodified since initialization.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">Verifying the Chain in Production</h2>
+
+				<p class="surface-copy">CORTEX Persist embeds this verification directly into the workspace. When you boot an agent session, CORTEX verifies the integrity of the ledger before loading it into the context window. If the verification fails, it throws an alert, quarantine the repository, and halts execution.</p>
+
+				<div class="surface-sunken" style="padding: 1.2rem; border-radius: var(--radius-lg); margin-top: 1rem;">
+					<p class="surface-label" style="color: var(--success);">Continuous Security</p>
+					<p class="surface-copy" style="margin-top: 0.5rem;">CORTEX Persist provides cryptographic primitives to ensure that the memory of your enjambres remains uncorrupted, transparent, and auditable across every system boundary.</p>
+				</div>
+			</div>
+		</article>
+
+		<div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+			<a class="button-secondary" href="/blog">← All Articles</a>
+			<a class="button-primary" href="/async-demo">Request Async Demo</a>
+		</div>
+
+		<footer class="site-footer" style="margin-top: 4rem;">
+			<p class="footer-note">CORTEX Persist / The swarm verifies. The hardware remembers.</p>
+			<div class="footer-links"><a href={openSourceUrl} target="_blank" rel="noreferrer">Open Source</a><a href="https://cortexpersist.dev" target="_blank" rel="noreferrer">Docs</a><a href="/vsa">Public Shell</a></div>
+		</footer>
+	</main>
+</SiteLayout>

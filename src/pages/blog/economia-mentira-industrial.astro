@@ -1,0 +1,153 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+const openSourceUrl = 'https://cortexpersist.org';
+---
+
+<SiteLayout
+	title="La Economía de la Mentira | CORTEX Persist Blog"
+	description="Análisis de la industria del influencer de IA: quién gana, quién pierde, y por qué el humo digital retrasa el progreso real."
+	canonical="https://cortexpersist.com/blog/economia-mentira-industrial"
+>
+	<main class="landing-shell">
+		<header class="masthead">
+			<a class="brand" href="/" aria-label="CORTEX Persist home">
+				<span class="brand-mark">CP</span>
+				<span class="brand-copy"><strong>CORTEX Persist</strong><span>Verifiable memory for AI agents</span></span>
+			</a>
+			<nav class="site-nav" aria-label="Primary">
+				<a class="nav-link" href="/#problem">Problem</a>
+				<a class="nav-link" href="/#fit">Fit</a>
+				<a class="nav-link" href="/#pilot">Pilot</a>
+				<a class="nav-link" href="/blog" style="color: var(--accent-bright);">Blog</a>
+			</nav>
+			<div class="masthead-actions">
+				<a class="button-tertiary" href={openSourceUrl} target="_blank" rel="noreferrer">Open Source</a>
+				<a class="button-primary" href="/async-demo">Async Demo</a>
+			</div>
+		</header>
+
+		<article class="section-frame surface" style="margin-top: 2rem;">
+			<div class="section-heading">
+				<p class="section-kicker">Mayo 2026</p>
+				<h1 style="font-family: 'Orbitron', sans-serif; font-weight: 800; letter-spacing: 0.05em; line-height: 1.1; text-transform: uppercase; font-size: clamp(1.5rem, 3.5vw, 2.6rem);">La Economía de la Mentira: Los Influencers de IA y la Industria del Humo Digital</h1>
+			</div>
+
+			<div style="max-width: 72ch; display: grid; gap: 2rem;">
+
+				<p class="surface-copy">En mayo de 2026 hay más de 47.000 cuentas en X/Twitter que se autodefinen como «AI experts», «AI founders» o «AI builders». De esas, menos del 2% tiene un repositorio público con más de 10 commits en los últimos 90 días. El 98% restante vende humo con producción audiovisual de primera.</p>
+
+				<p class="surface-copy">Esta no es una queja estética. Es un análisis de mercado. La industria del influencer de IA mueve más capital que muchas startups reales de infraestructura — y ese capital tiene un coste de oportunidad que se paga en progreso técnico retrasado.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">I. Los números del avatar</h2>
+
+				<p class="surface-copy">Aitana López, influencer virtual creada por The Clueless, genera estimados €10.000/mes en patrocinios. No come, no duerme, no tiene mal día. Su «creador» es un equipo de tres personas en Barcelona con Stable Diffusion y un calendario editorial.</p>
+
+				<p class="surface-copy">Compara eso con un ingeniero de ML senior en el mismo mercado: €65.000-90.000/año brutos. Aitana gana más con menos coste operativo. Y Aitana no es un caso aislado — es la punta visible de una economía que ha descubierto que <strong>hablar sobre IA rinde más que construir IA</strong>.</p>
+
+				<div class="surface-sunken" style="padding: 1.2rem; border-radius: var(--radius-lg);">
+					<p class="surface-label">Economía comparada (2026)</p>
+					<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.8rem;">
+						<div>
+							<strong style="color: var(--gold);">Influencer IA top-tier</strong>
+							<p class="surface-copy" style="margin-top: 0.3rem;">$240K-$1.2M/año en sponsors + cursos. Coste: 1-3 personas + herramientas de generación. Margen: 70-85%.</p>
+						</div>
+						<div>
+							<strong style="color: var(--accent-soft);">Startup IA infraestructura</strong>
+							<p class="surface-copy" style="margin-top: 0.3rem;">$0-$120K ARR primer año. Coste: equipo de 3-8 ingenieros + cloud. Margen: negativo 12-24 meses.</p>
+						</div>
+					</div>
+				</div>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">II. La estructura de incentivos</h2>
+
+				<p class="surface-copy">¿Por qué un ingeniero competente abandona el código para hacer threads? Porque el mercado premia la señal equivocada. Las plataformas de contenido (X, LinkedIn, YouTube) optimizan para engagement, no para veracidad técnica. Un thread sobre «5 AI tools that will replace your team» genera 10x más impresiones que un post-mortem técnico sobre un deployment real.</p>
+
+				<p class="surface-copy">El resultado es una selección adversa: los perfiles que más crecen son los que mejor optimizan para dopamina, no para información. Y los que mejor optimizan para dopamina son los que hacen claims más grandes con menos evidencia.</p>
+
+				<p class="surface-copy">El ciclo se retroalimenta:</p>
+
+				<pre class="console-block">1. Claim grande sin evidencia → engagement alto
+2. Engagement alto → más seguidores
+3. Más seguidores → sponsors + cursos
+4. Sponsors + cursos → incentivo para más claims
+5. Más claims → la barra de evidencia baja aún más
+6. GOTO 1</pre>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">III. El gap demo-producción</h2>
+
+				<p class="surface-copy">El artefacto más dañino del ecosistema de influencers de IA es el <strong>demo video</strong>. Un video de 90 segundos que muestra un agente haciendo algo impresionante — sin mostrar las 47 tomas fallidas, el prompt hardcodeado, los datos cherry-picked, ni el hecho de que la misma operación falla el 60% de las veces en condiciones reales.</p>
+
+				<p class="surface-copy">El gap entre demo y producción en IA es el más grande de cualquier tecnología en la historia reciente. La razón es simple: los LLMs son estocásticos. Una demo exitosa no implica un producto funcional. Pero el formato video no tiene espacio para esa nuance.</p>
+
+				<div style="display: grid; gap: 0.8rem;">
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong style="color: var(--warning);">Lo que muestra el demo</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">«Construí una app entera con un solo prompt en 3 minutos.»</p>
+					</div>
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong style="color: var(--success);">Lo que pasa en producción</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">La app funciona para el caso de demo. Falla en autenticación, edge cases, concurrencia, y cualquier input que no sea exactamente el del video. El «3 minutos» se convierten en 3 semanas de debugging.</p>
+					</div>
+				</div>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">IV. La asimetría de información</h2>
+
+				<p class="surface-copy">El influencer de IA opera en un mercado con asimetría de información extrema. Su audiencia — mayoritariamente no-técnica o early-career — no puede verificar los claims técnicos. El coste de verificación es alto (necesitas intentar replicar el resultado) y el coste de creer es bajo (solo necesitas hacer scroll).</p>
+
+				<p class="surface-copy">Esta asimetría crea un mercado de «lemons» clásico. Los buenos contenidos técnicos (que son honestos sobre limitaciones) no pueden competir en engagement con los contenidos inflados. Resultado: los buenos salen del mercado y quedan los inflados.</p>
+
+				<p class="surface-copy">El fenómeno no es nuevo — es el mismo que afectó a SEO en la era pre-LLM. Pero en IA el daño es mayor porque las decisiones de adopción tecnológica basadas en contenido inflado tienen costes reales de infraestructura, equipo y tiempo de mercado.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">V. El coste del ruido</h2>
+
+				<p class="surface-copy">El coste del ruido no es solo atencional. Tiene efectos medibles:</p>
+
+				<div style="display: grid; gap: 0.6rem;">
+					<p class="surface-copy"><strong style="color: var(--gold);">Decisiones de adopción prematura.</strong> CTOs que adoptan herramientas basándose en demos de influencers sin evaluación técnica. Coste promedio de una mala adopción de stack: $200K-$500K en el primer año (equipo + migración).</p>
+					<p class="surface-copy"><strong style="color: var(--gold);">Inflación de expectativas.</strong> Equipos ejecutivos que esperan «resultados de IA» en semanas porque vieron un video de 90 segundos. Resultado: presión insostenible sobre equipos técnicos.</p>
+					<p class="surface-copy"><strong style="color: var(--gold);">Talento mal asignado.</strong> Ingenieros que optimizan para «AI-adjacent» (crear contenido, hacer demos) en vez de profundizar en problemas técnicos reales.</p>
+					<p class="surface-copy"><strong style="color: var(--gold);">Desconfianza acumulada.</strong> Cuando la realidad no cumple el hype, la reacción no es «el influencer mentía» sino «la IA no funciona». El ruido daña la credibilidad de toda la industria.</p>
+				</div>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">VI. Señal vs ruido: cómo distinguirlos</h2>
+
+				<div class="surface-sunken" style="padding: 1.2rem; border-radius: var(--radius-lg);">
+					<p class="surface-label">Filtro de señal</p>
+					<div style="display: grid; gap: 0.5rem; margin-top: 0.8rem;">
+						<p class="surface-copy"><strong style="color: var(--success);">Señal:</strong> Muestra el error. Explica por qué falló. Comparte el post-mortem.</p>
+						<p class="surface-copy"><strong style="color: var(--warning);">Ruido:</strong> Solo muestra el éxito. Nunca falla. Todo funciona «a la primera».</p>
+						<p class="surface-copy"><strong style="color: var(--success);">Señal:</strong> Tiene repo público con commits reales. Puedes leer el código.</p>
+						<p class="surface-copy"><strong style="color: var(--warning);">Ruido:</strong> «DM me for the prompt» o link a un curso de $497.</p>
+						<p class="surface-copy"><strong style="color: var(--success);">Señal:</strong> Cita limitaciones del modelo. Dice «esto no funciona para X».</p>
+						<p class="surface-copy"><strong style="color: var(--warning);">Ruido:</strong> «This will replace developers in 6 months.»</p>
+					</div>
+				</div>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">VII. La lente CORTEX</h2>
+
+				<p class="surface-copy">CORTEX Persist existe porque la evidencia importa más que las vibes. En un ecosistema saturado de claims no verificables, la respuesta no es más contenido — es <strong>más verificabilidad</strong>.</p>
+
+				<p class="surface-copy">Cada decisión de un agente CORTEX queda registrada en un ledger tamper-evident. No porque sea bonito o teórico. Porque cuando alguien pregunte «¿qué hizo el agente y por qué?», la respuesta no debería ser un thread de Twitter. Debería ser un artefacto que puedas auditar.</p>
+
+				<div class="surface-sunken" style="padding: 1.2rem; border-radius: var(--radius-lg); margin-top: 1rem;">
+					<p class="surface-label" style="color: var(--gold);">Conclusión</p>
+					<p class="surface-copy" style="margin-top: 0.5rem;">La economía de la mentira no se combate con más ruido. Se combate con estándares de evidencia. Si tu agente no puede probar lo que hizo, no importa cuántos seguidores tenga tu thread — no tienes nada verificable. Y en producción, lo no verificable es indistinguible de lo inexistente.</p>
+				</div>
+			</div>
+		</article>
+
+		<div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+			<a class="button-secondary" href="/blog">← All Articles</a>
+			<a class="button-primary" href="/async-demo">Request Async Demo</a>
+		</div>
+
+		<footer class="site-footer" style="margin-top: 4rem;">
+			<p class="footer-note">CORTEX Persist / The swarm verifies. The hardware remembers.</p>
+			<div class="footer-links">
+				<a href={openSourceUrl} target="_blank" rel="noreferrer">Open Source</a>
+				<a href="https://cortexpersist.dev" target="_blank" rel="noreferrer">Docs</a>
+				<a href="/vsa">Public Shell</a>
+			</div>
+		</footer>
+	</main>
+</SiteLayout>

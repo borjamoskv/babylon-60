@@ -1,0 +1,128 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+const openSourceUrl = 'https://cortexpersist.org';
+---
+
+<SiteLayout title="Why Your AI Agent Has Alzheimer's | CORTEX Persist Blog" description="The most expensive bug in AI: 100% amnesia between sessions. Why context windows are not memory and what to do about it." canonical="https://cortexpersist.com/blog/why-your-ai-agent-has-alzheimers">
+	<main class="landing-shell">
+		<header class="masthead">
+			<a class="brand" href="/" aria-label="CORTEX Persist home"><span class="brand-mark">CP</span><span class="brand-copy"><strong>CORTEX Persist</strong><span>Verifiable memory for AI agents</span></span></a>
+			<nav class="site-nav" aria-label="Primary"><a class="nav-link" href="/#problem">Problem</a><a class="nav-link" href="/#fit">Fit</a><a class="nav-link" href="/#pilot">Pilot</a><a class="nav-link" href="/blog" style="color: var(--accent-bright);">Blog</a></nav>
+			<div class="masthead-actions"><a class="button-tertiary" href={openSourceUrl} target="_blank" rel="noreferrer">Open Source</a><a class="button-primary" href="/async-demo">Async Demo</a></div>
+		</header>
+
+		<article class="section-frame surface" style="margin-top: 2rem;">
+			<div class="section-heading">
+				<p class="section-kicker">February 2026</p>
+				<h1 style="font-family: 'Orbitron', sans-serif; font-weight: 800; letter-spacing: 0.05em; line-height: 1.1; text-transform: uppercase; font-size: clamp(1.5rem, 3.5vw, 2.6rem);">Why Your AI Agent Has Alzheimer's</h1>
+			</div>
+
+			<div style="max-width: 72ch; display: grid; gap: 2rem;">
+				<p class="surface-copy">You spent three hours teaching your AI agent the codebase. You walked it through the architecture, the naming conventions, the deployment pipeline, the edge cases. By the end of the session, it was producing clean, context-aware code that felt like working with a senior engineer.</p>
+
+				<p class="surface-copy">Next morning, you open a new session. The agent has no idea who you are.</p>
+
+				<p class="surface-copy">100% amnesia. Every session starts from zero. Three hours of onboarding, gone. This is not a limitation — it is the <strong>default behavior</strong> of every major AI coding agent in 2026.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">The Cost Nobody Measures</h2>
+
+				<p class="surface-copy">Let's put numbers on it. A mid-level developer using an AI agent spends approximately 15-45 minutes per session re-establishing context. At 2-4 sessions per day, that's 30 minutes to 3 hours of pure waste. Across a team of 10, that's 25-150 person-hours per week spent telling the machine things it already knew yesterday.</p>
+
+				<div class="surface-sunken" style="padding: 1.2rem; border-radius: var(--radius-lg);">
+					<p class="surface-label">Annual re-teaching cost (10-person team)</p>
+					<pre class="console-block" style="margin-top: 0.8rem;">Conservative: 25 hrs/week × 48 weeks × $75/hr = $90,000
+Moderate:     75 hrs/week × 48 weeks × $75/hr = $270,000
+Aggressive:  150 hrs/week × 48 weeks × $75/hr = $540,000
+
+None of this produces value. All of it is friction.</pre>
+				</div>
+
+				<p class="surface-copy">Nobody budgets for this. Nobody tracks it. It shows up as "developer productivity" in dashboards that measure output, not input waste. The agent amnesia tax is invisible — until you realize your team is spending more time teaching the tool than using it.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">Context Windows Are Not Memory</h2>
+
+				<p class="surface-copy">The industry has a category error. "Context window" is marketed as if it were memory. It is not. A context window is working memory — the scratch pad the model uses during a single inference. When the session ends, the scratch pad is wiped clean.</p>
+
+				<p class="surface-copy">Human cognition has (at minimum) three memory systems:</p>
+
+				<div style="display: grid; gap: 0.8rem;">
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong>Working memory</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">Active, short-term, capacity-limited. This is what a context window provides. It is necessary but not sufficient.</p>
+					</div>
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong>Episodic memory</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">Records of specific events: "I deployed v2.3 on Tuesday and it broke the auth service." No AI agent has this natively.</p>
+					</div>
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong>Semantic memory</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">General knowledge and facts: "Our API uses JWT tokens with 15-minute expiry." Agents lose this between sessions.</p>
+					</div>
+				</div>
+
+				<p class="surface-copy">An agent with only working memory is a goldfish with a 200K-token attention span. It can process complex information within a session but cannot form persistent knowledge. Every session is Groundhog Day.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">The RAG Illusion</h2>
+
+				<p class="surface-copy">The standard industry response to agent amnesia is RAG — Retrieval-Augmented Generation. Embed your documents, store them in a vector database, retrieve relevant chunks at query time. Problem solved, right?</p>
+
+				<p class="surface-copy">Wrong. RAG solves <em>retrieval</em>, not <em>memory</em>. The distinction matters:</p>
+
+				<div class="surface-sunken" style="padding: 1.2rem; border-radius: var(--radius-lg);">
+					<div style="display: grid; gap: 0.5rem;">
+						<p class="surface-copy"><strong style="color: var(--warning);">Retrieval:</strong> "Find chunks of text similar to the query." Stateless. No lineage. No awareness of what was previously retrieved or used.</p>
+						<p class="surface-copy"><strong style="color: var(--success);">Memory:</strong> "I know this because I learned it in session #47 when we debugged the payment service. The context was a production incident on March 3rd." Stateful. Traceable. Verifiable.</p>
+					</div>
+				</div>
+
+				<p class="surface-copy">RAG cannot tell you what the agent knew at decision time. It cannot tell you whether the retrieved context was actually used or ignored. It cannot detect if the same question received contradictory answers across sessions. RAG retrieves tokens. Memory requires lineage.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">What Actual Memory Looks Like</h2>
+
+				<p class="surface-copy">Real agent memory has five properties that RAG does not provide:</p>
+
+				<div style="display: grid; gap: 0.6rem;">
+					<p class="surface-copy"><strong style="color: var(--success);">1. Typed facts.</strong> Not blobs of text — structured records with schemas. A decision is not the same as an observation is not the same as a preference.</p>
+					<p class="surface-copy"><strong style="color: var(--success);">2. Temporal ordering.</strong> Facts have timestamps and can be queried in sequence. "What did the agent know on Tuesday at 3pm?" should be answerable.</p>
+					<p class="surface-copy"><strong style="color: var(--success);">3. Provenance.</strong> Every fact records its source. Was this learned from user input, inferred by the model, or retrieved from documentation?</p>
+					<p class="surface-copy"><strong style="color: var(--success);">4. Continuity verification.</strong> The memory chain can be verified for integrity. No silent edits. No retroactive rewrites.</p>
+					<p class="surface-copy"><strong style="color: var(--success);">5. Cross-session persistence.</strong> Memory survives restarts, model upgrades, and infrastructure changes.</p>
+				</div>
+
+				<pre class="console-block">cortex store risk-bot \
+  "Transaction flagged: IP mismatch from Lagos" \
+  --type decision \
+  --source agent:risk-bot \
+  --context "user:alice session:47 amount:$12,400"
+
+cortex trust-ledger verify
+# Hash chain: VALID
+# Facts: 1,247
+# Continuity: UNBROKEN since init</pre>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">The Trust Problem</h2>
+
+				<p class="surface-copy">Even when agents do "remember" — through RAG, fine-tuning, or prompt engineering — there is a deeper problem: <strong>you cannot verify what they remember</strong>.</p>
+
+				<p class="surface-copy">If an agent makes a decision based on retrieved context, can you prove which context it used? Can you prove it did not hallucinate additional context? Can you prove the same query would return the same context tomorrow?</p>
+
+				<p class="surface-copy">In regulated environments (finance, healthcare, legal), the inability to answer these questions is not an inconvenience. It is a compliance failure waiting to happen. And "the AI forgot" is not an acceptable explanation in an incident review.</p>
+
+				<div class="surface-sunken" style="padding: 1.2rem; border-radius: var(--radius-lg); margin-top: 1rem;">
+					<p class="surface-label" style="color: var(--gold);">The fix</p>
+					<p class="surface-copy" style="margin-top: 0.5rem;">Agent memory is not a feature to add later. It is infrastructure that determines whether your agent is a toy or a production system. CORTEX Persist provides that infrastructure: typed memory, hash-chained lineage, and verification that survives the session boundary. Because the most expensive bug is the one nobody tracks.</p>
+				</div>
+			</div>
+		</article>
+
+		<div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+			<a class="button-secondary" href="/blog">← All Articles</a>
+			<a class="button-primary" href="/async-demo">Request Async Demo</a>
+		</div>
+
+		<footer class="site-footer" style="margin-top: 4rem;">
+			<p class="footer-note">CORTEX Persist / The swarm verifies. The hardware remembers.</p>
+			<div class="footer-links"><a href={openSourceUrl} target="_blank" rel="noreferrer">Open Source</a><a href="https://cortexpersist.dev" target="_blank" rel="noreferrer">Docs</a><a href="/vsa">Public Shell</a></div>
+		</footer>
+	</main>
+</SiteLayout>

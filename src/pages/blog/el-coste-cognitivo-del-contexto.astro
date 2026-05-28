@@ -1,0 +1,67 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+---
+
+<SiteLayout
+	title="El Coste Cognitivo de la Ventana de Contexto | CORTEX Persist"
+	description="Meter 200K tokens en un LLM no te da memoria, te da latencia. Por qué la persistencia estructural es el único camino."
+	canonical="https://cortexpersist.com/blog/el-coste-cognitivo-del-contexto"
+>
+	<main class="landing-shell">
+		<article class="section-frame surface" style="margin-top: 2rem; padding: 2rem;">
+			<div class="section-heading" style="text-align: left; margin-bottom: 2rem;">
+				<p class="section-kicker">Systems Engineering</p>
+				<h1 style="font-family: 'Orbitron', sans-serif; font-weight: 800; line-height: 1.1; margin: 0; font-size: clamp(1.8rem, 4vw, 2.8rem);">El Coste Cognitivo de la Ventana de Contexto</h1>
+				<p style="color: var(--muted); margin-top: 1rem;">
+					Meter 200K tokens en un LLM no te da memoria, te da latencia. Por qué la persistencia estructural es el único camino hacia la inteligencia autónoma.
+				</p>
+			</div>
+
+			<div class="content-body" style="font-size: 1.1rem; line-height: 1.7; display: grid; gap: 1.5rem;">
+				<p>
+					La industria está obsesionada con el tamaño de la ventana de contexto. "¡Un millón de tokens!", anuncian. La asunción es que si podemos meter toda la base de código y la historia de vida de un agente en un solo prompt, hemos resuelto el problema de la memoria. 
+				</p>
+				
+				<p>
+					Esto es una falacia arquitectónica masiva. 
+				</p>
+
+				<h2 style="margin-top: 1.5rem; font-family: 'Orbitron', sans-serif;">El Impuesto Termodinámico</h2>
+
+				<p>
+					Atiborrar la ventana de contexto tiene un impuesto termodinámico severo:
+				</p>
+
+				<ul style="padding-left: 1.5rem;">
+					<li><strong>Latencia Lineal:</strong> El Time-To-First-Token (TTFT) se degrada a medida que el contexto crece.</li>
+					<li><strong>Lost in the Middle:</strong> La atención se dispersa. Los modelos recuerdan el principio y el final, pero ignoran la información crítica enterrada en el centro.</li>
+					<li><strong>Costes Económicos:</strong> Pasar 128K tokens de contexto en cada ciclo iterativo destruye los márgenes de cualquier sistema autónomo (Token Hygiene).</li>
+				</ul>
+
+				<h2 style="margin-top: 1.5rem; font-family: 'Orbitron', sans-serif;">El Grafo de Estado Persistente</h2>
+
+				<p>
+					CORTEX Persist toma el camino opuesto. Asume que la ventana de contexto debe ser espartana y densa en señales. En lugar de pasar todo el historial, el agente interactúa con una <strong>Ontología de Memoria</strong> externa.
+				</p>
+
+				<p>
+					El agente mantiene "punteros" al conocimiento, no el conocimiento en sí mismo. Cuando necesita detalle, extrae (pull) la información específica a través de llamadas a funciones. Cuando sintetiza una conclusión, la empuja (push) al grafo de conocimiento de CORTEX.
+				</p>
+
+				<div class="surface-sunken" style="padding: 1.5rem; border-left: 4px solid var(--accent-bright);">
+					<p style="margin: 0; font-family: 'Space Mono', monospace; font-size: 0.9rem;">
+						La memoria no es algo que inyectas en un prompt. Es una infraestructura estatal que el agente consulta de manera asíncrona.
+					</p>
+				</div>
+
+				<p>
+					Reducir la dependencia del contexto largo es el primer paso para construir sistemas que operan a velocidades de máquina.
+				</p>
+			</div>
+			
+			<div style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+				<a href="/blog" class="button-tertiary">← Back to Blog</a>
+			</div>
+		</article>
+	</main>
+</SiteLayout>

@@ -1,0 +1,73 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+const openSourceUrl = 'https://cortexpersist.org';
+---
+
+<SiteLayout title="Los 10 Inviernos de la IA: De Turing a los Transformers | CORTEX Persist Blog" description="Una historia técnica de las crisis y renacimientos que forjaron la inteligencia artificial moderna." canonical="https://cortexpersist.com/blog/diez-inviernos-ia" lang="es">
+	<main class="landing-shell">
+		<header class="masthead">
+			<a class="brand" href="/" aria-label="Inicio CORTEX Persist"><span class="brand-mark">CP</span><span class="brand-copy"><strong>CORTEX Persist</strong><span>Memoria verificable para agentes de IA</span></span></a>
+			<nav class="site-nav" aria-label="Principal"><a class="nav-link" href="/#problem">Problem</a><a class="nav-link" href="/#fit">Fit</a><a class="nav-link" href="/#pilot">Piloto</a><a class="nav-link" href="/blog" style="color: var(--accent-bright);">Blog</a></nav>
+			<div class="masthead-actions"><a class="button-tertiary" href={openSourceUrl} target="_blank" rel="noreferrer">Open Source</a><a class="button-primary" href="/async-demo">Demo Async</a></div>
+		</header>
+
+		<article class="section-frame surface" style="margin-top: 2rem;">
+			<div class="section-heading">
+				<p class="section-kicker">Abril 2026</p>
+				<h1 style="font-family: 'Orbitron', sans-serif; font-weight: 800; letter-spacing: 0.05em; line-height: 1.1; text-transform: uppercase; font-size: clamp(1.5rem, 3.5vw, 2.6rem);">Los 10 Inviernos de la IA</h1>
+			</div>
+
+			<div style="max-width: 72ch; display: grid; gap: 2rem;">
+				<p class="surface-copy">La narrativa popular de la Inteligencia Artificial suele presentar la disciplina como un ascenso continuo e imparable hacia la Singularidad. Los historiadores del software y los ingenieros de sistemas, sin embargo, sabemos que la IA avanza mediante una serie de ciclos de auge extremo seguidos de colapsos brutales de financiación y credibilidad: los llamados inviernos de la IA.</p>
+
+				<p class="surface-copy">Lejos de ser simples retrocesos, estos inviernos fueron los periodos de mayor exergía evolutiva de la computación. Cuando el humo del marketing se disipaba, los investigadores se veían obligados a volver a los primeros principios matemáticos y termodinámicos. Este artículo analiza los momentos clave de crisis que forjaron la tecnología que hoy llamamos IA agéntica.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">Cronología de la Crisis Cognitiva</h2>
+
+				<p class="surface-copy">A lo largo de los últimos 70 años, la disciplina ha sufrido varios colapsos estructurales importantes:</p>
+
+				<div style="display: grid; gap: 0.8rem;">
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong>1966: El Colapso de la Traducción Automática (Informe ALPAC)</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">El gobierno de EE.UU. suspendió la financiación de proyectos de traducción automática tras constatar que las computadoras eran incapaces de entender el contexto semántico básico.</p>
+					</div>
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong>1973: El Informe Lighthill y la muerte de la IA Simbólica</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">En el Reino Unido, Sir James Lighthill evaluó el estado del arte y concluyó que el crecimiento exponencial de las combinaciones posibles convertía la resolución de problemas lógicos en algo intratable.</p>
+					</div>
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong>1987: La Explosión del Mercado de LISP y Sistemas Expertos</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">El hardware dedicado para sistemas expertos colapsó ante la llegada de las microcomputadoras baratas de Intel, dejando al sector sin viabilidad comercial.</p>
+					</div>
+				</div>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">La Lección de los Inviernos: El Hardware Siempre Gana</h2>
+
+				<p class="surface-copy">Si analizamos cada invierno, la causa raíz del colapso nunca fue la falta de ideas teóricas elegantes. Las redes neuronales multicapa ya estaban descritas matemáticamente en los años 60, y los conceptos de procesamiento paralelo eran comunes en los 80.</p>
+
+				<p class="surface-copy">El problema era la termodinámica del silicio de la época. La densidad computacional disponible no permitía procesar la cantidad de información necesaria para superar el ruido estadístico. La IA no carecía de algoritmos; carecía de la escala exergética que solo la Ley de Moore y el advenimiento de las GPUs modernas pudieron proveer a partir de 2012.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">¿Hacia el 11º Invierno? El Límite Termodinámico de la Escala</h2>
+
+				<p class="surface-copy">En 2026, la industria se enfrenta a una nueva meseta. La escalabilidad mediante fuerza bruta de los modelos fundacionales (añadir más tokens de texto y más parámetros) está chocando contra límites físicos evidentes: la escasez de datos humanos de alta calidad y el consumo de energía de los centros de datos.</p>
+
+				<p class="surface-copy">La salida de esta posible crisis no pasa por crear modelos más grandes, sino por construir arquitecturas de sistemas más eficientes alrededor de los modelos actuales. La IA agéntica soberana—que prioriza la memoria local persistente, la inmutabilidad de datos y la orquestación distribuida—es el camino para seguir extrayendo exergía del silicio sin depender de la fuerza bruta.</p>
+
+				<div class="surface-sunken" style="padding: 1.2rem; border-radius: var(--radius-lg); margin-top: 1rem;">
+					<p class="surface-label" style="color: var(--gold);">Perspectiva</p>
+					<p class="surface-copy" style="margin-top: 0.5rem;">CORTEX Persist se sitúa en la vanguardia del diseño post-escalado: no buscamos entrenar el modelo más grande, sino garantizar la persistencia e integridad de los datos en sistemas autónomos reales.</p>
+				</div>
+			</div>
+		</article>
+
+		<div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+			<a class="button-secondary" href="/blog">← Todos los Artículos</a>
+			<a class="button-primary" href="/async-demo">Solicitar Demo Async</a>
+		</div>
+
+		<footer class="site-footer" style="margin-top: 4rem;">
+			<p class="footer-note">CORTEX Persist / El enjambre verifica. El hardware recuerda.</p>
+			<div class="footer-links"><a href={openSourceUrl} target="_blank" rel="noreferrer">Open Source</a><a href="https://cortexpersist.dev" target="_blank" rel="noreferrer">Docs</a><a href="/vsa">Public Shell</a></div>
+		</footer>
+	</main>
+</SiteLayout>

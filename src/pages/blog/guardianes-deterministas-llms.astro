@@ -1,0 +1,63 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+---
+
+<SiteLayout
+	title="Guardianes Deterministas vs. Modelos Estocásticos | CORTEX Persist"
+	description="Por qué no puedes usar un LLM para vigilar a otro LLM y cómo implementar circuitos de hardware para acotar los sistemas autónomos."
+	canonical="https://cortexpersist.com/blog/guardianes-deterministas-llms"
+>
+	<main class="landing-shell">
+		<article class="section-frame surface" style="margin-top: 2rem; padding: 2rem;">
+			<div class="section-heading" style="text-align: left; margin-bottom: 2rem;">
+				<p class="section-kicker">Security Architecture</p>
+				<h1 style="font-family: 'Orbitron', sans-serif; font-weight: 800; line-height: 1.1; margin: 0; font-size: clamp(1.8rem, 4vw, 2.8rem);">Guardianes Deterministas vs. Modelos Estocásticos</h1>
+				<p style="color: var(--muted); margin-top: 1rem;">
+					La falacia de "LLM-as-a-Judge" y por qué los verdaderos límites de un sistema autónomo deben escribirse en código determinista.
+				</p>
+			</div>
+
+			<div class="content-body" style="font-size: 1.1rem; line-height: 1.7; display: grid; gap: 1.5rem;">
+				<p>
+					Existe un patrón antipatrón predominante en la ingeniería de IA moderna: usar un LLM más rápido/barato (como Claude Haiku o GPT-4o-mini) para vigilar, auditar y controlar a un LLM más grande que toma las decisiones.
+				</p>
+				
+				<p>
+					Este enfoque está condenado al fracaso en operaciones de capital intensivo. No puedes usar sistemas estocásticos (probabilísticos) para imponer restricciones críticas. 
+				</p>
+
+				<h2 style="margin-top: 1.5rem; font-family: 'Orbitron', sans-serif;">El Colapso en Cadena</h2>
+
+				<p>
+					Cuando un LLM-Guard sufre una alucinación correlacionada (donde la misma ambigüedad en el prompt o el contexto engaña a ambos modelos), la seguridad colapsa por completo. Peor aún, las inyecciones de prompt estructuradas pueden sobrepasar los filtros LLM con una tasa de éxito alarmante.
+				</p>
+
+				<h2 style="margin-top: 1.5rem; font-family: 'Orbitron', sans-serif;">Los Guardianes de CORTEX</h2>
+
+				<p>
+					La arquitectura CORTEX utiliza <strong>Circuit Breakers Deterministas</strong>. Son scripts en Python o Rust (no modelos) que interceptan cada propuesta de transición de estado del agente.
+				</p>
+
+				<ul style="padding-left: 1.5rem;">
+					<li><strong>Type-Checking Fuerte:</strong> Validaciones de esquema Pydantic para cada output de IA antes de que entre al bus de eventos.</li>
+					<li><strong>Restricciones Epistémicas:</strong> Si el agente intenta declarar que un archivo existe (C5-REAL), el script hace un simple <code>os.path.exists()</code>. Si es falso, el agente recibe un PANIC.</li>
+					<li><strong>Límites Estructurales:</strong> Rutas de directorio prohibidas (Protected Paths), como `/System/Volumes`, generan abortos inmediatos ineludibles por el LLM.</li>
+				</ul>
+
+				<div class="surface-sunken" style="padding: 1.5rem; border-left: 4px solid var(--accent-bright);">
+					<p style="margin: 0; font-family: 'Space Mono', monospace; font-size: 0.9rem;">
+						La regla es simple: La heurística y la lógica de negocio son para el LLM. Las leyes de la física y la validación de estado son para el hardware determinista.
+					</p>
+				</div>
+
+				<p>
+					Para construir sistemas autónomos que no asusten a tus inversores o a tu equipo de SRE, separa la toma de decisiones probabilística de la validación determinista.
+				</p>
+			</div>
+			
+			<div style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+				<a href="/blog" class="button-tertiary">← Back to Blog</a>
+			</div>
+		</article>
+	</main>
+</SiteLayout>

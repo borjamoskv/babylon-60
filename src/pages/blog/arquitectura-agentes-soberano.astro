@@ -1,0 +1,80 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+const openSourceUrl = 'https://cortexpersist.org';
+---
+
+<SiteLayout title="Arquitectura de Agentes: Del Copiloto al Enjambre Soberano | CORTEX Persist Blog" description="La diferencia entre un wrapper de LLM y un agente real es una cadena de verificación que sobrevive al reinicio." canonical="https://cortexpersist.com/blog/arquitectura-agentes-soberano" lang="es">
+	<main class="landing-shell">
+		<header class="masthead">
+			<a class="brand" href="/" aria-label="Inicio CORTEX Persist"><span class="brand-mark">CP</span><span class="brand-copy"><strong>CORTEX Persist</strong><span>Memoria verificable para agentes de IA</span></span></a>
+			<nav class="site-nav" aria-label="Principal"><a class="nav-link" href="/#problem">Problema</a><a class="nav-link" href="/#fit">Fit</a><a class="nav-link" href="/#pilot">Piloto</a><a class="nav-link" href="/blog" style="color: var(--accent-bright);">Blog</a></nav>
+			<div class="masthead-actions"><a class="button-tertiary" href={openSourceUrl} target="_blank" rel="noreferrer">Open Source</a><a class="button-primary" href="/async-demo">Demo Async</a></div>
+		</header>
+
+		<article class="section-frame surface" style="margin-top: 2rem;">
+			<div class="section-heading">
+				<p class="section-kicker">Mayo 2026</p>
+				<h1 style="font-family: 'Orbitron', sans-serif; font-weight: 800; letter-spacing: 0.05em; line-height: 1.1; text-transform: uppercase; font-size: clamp(1.5rem, 3.5vw, 2.6rem);">Arquitectura de Agentes: Del Copiloto al Enjambre Soberano</h1>
+			</div>
+
+			<div style="max-width: 72ch; display: grid; gap: 2rem;">
+				<p class="surface-copy">El mercado del software está inundado de lo que la industria llama "agentes". En la práctica, la gran mayoría no son más que copilotos glorified: wrappers de llamadas a APIs de modelos lingüísticos que ejecutan un bucle while-true y leen el output del terminal. Tienen un ciclo de vida efímero y una dependencia absoluta de la sesión actual.</p>
+
+				<p class="surface-copy">Un <strong>agente soberano</strong> opera bajo principios diferentes. La soberanía no es un término filosófico, sino un criterio de diseño de sistemas: es la capacidad de un agente para persistir, verificar su propio estado de memoria y coordinarse de forma autónoma sin depender de una infraestructura centralizada o de un contexto efímero de sesión.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">La Cadena de Verificación Fisiológica</h2>
+
+				<p class="surface-copy">La gran debilidad de los enjambres multi-agente tradicionales es la falta de consistencia e integridad del estado a través del tiempo. Si un subagente es asesinado o se desconecta debido a un error de red o de infraestructura, ¿cómo retoma el sistema su trabajo de forma segura?</p>
+
+				<p class="surface-copy">En una arquitectura soberana, la respuesta es una cadena de bloques lógicos local: un registro de hechos inmutable firmado criptográficamente. Cada decisión tomada, cada comando de bash propuesto y ejecutado, y cada hecho verificado se emite como una transacción firmada por la clave privada del agente en un ledger interno.</p>
+
+				<div class="surface-sunken" style="padding: 1.2rem; border-radius: var(--radius-lg);">
+					<p class="surface-label">Esquema de Transición de Estado de un Agente Soberano</p>
+					<pre class="console-block" style="margin-top: 0.8rem;">[Estado S_n] -> [Decisión / Transacción] -> [Verificación de Políticas] -> [Estado S_n+1]
+                                                    |
+                                          (Firma criptográfica/Hash chain)</pre>
+				</div>
+
+				<p class="surface-copy">Cuando el sistema se reinicia, el agente no depende de la lectura de un historial de chat en texto plano (que puede sufrir de prompt injection). En su lugar, lee el ledger, reconstruye el estado actual aplicando las transiciones de forma secuencial y valida que el hash acumulado sea correcto. Si el ledger ha sido manipulado, la ejecución se detiene inmediatamente.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">El Paso del Copiloto al Enjambre Soberano</h2>
+
+				<p class="surface-copy">Los copilotos actúan como esclavos de ejecución directa de un solo usuario humano. Un enjambre soberano, en cambio, distribuye el trabajo entre múltiples agentes autónomos especializados, donde cada uno actúa como un actor independiente en un entorno descentralizado. Para que esto funcione sin un orquestador central que represente un único punto de fallo, se requieren tres pilares:</p>
+
+				<div style="display: grid; gap: 0.8rem;">
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong>1. Canales de comunicación con verificación de firmas</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">Los agentes no se envían texto plano; se envían mensajes firmados. El agente receptor verifica la firma contra la clave pública del emisor antes de procesar el comando.</p>
+					</div>
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong>2. Memoria compartida y determinista</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">Uso de arquitecturas VSA (Vector Symbolic Architectures) para representar conceptos complejos en hipervectores que pueden ser cruzados y compartidos de forma instantánea entre agentes con distintos modelos base.</p>
+					</div>
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong>3. Reglas de mitigación de drift</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">Políticas autocontenidas que impiden que un agente mute su propia configuración o comportamiento más allá de ciertos límites termodinámicos o de exergía predefinidos.</p>
+					</div>
+				</div>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">Conclusión: Soberanía de los Datos</h2>
+
+				<p class="surface-copy">El futuro de la automatización del desarrollo y de la infraestructura no pertenece a los agentes dependientes del cloud centralizado de grandes proveedores tecnológicos. Pertenece a los sistemas que pueden autogestionarse en local, garantizando la privacidad de los datos, la inmutabilidad de sus logs y la trazabilidad de sus acciones. La memoria soberana no es una opción de cumplimiento legal; es el prerrequisito técnico de la autonomía real.</p>
+
+				<div class="surface-sunken" style="padding: 1.2rem; border-radius: var(--radius-lg); margin-top: 1rem;">
+					<p class="surface-label" style="color: var(--gold);">El Paradigma</p>
+					<p class="surface-copy" style="margin-top: 0.5rem;">CORTEX Persist es el sustrato de almacenamiento, computación y consistencia criptográfica que transforma enjambres multi-agente estocásticos en enjambres soberanos y deterministas.</p>
+				</div>
+			</div>
+		</article>
+
+		<div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+			<a class="button-secondary" href="/blog">← Todos los Artículos</a>
+			<a class="button-primary" href="/async-demo">Solicitar Demo Async</a>
+		</div>
+
+		<footer class="site-footer" style="margin-top: 4rem;">
+			<p class="footer-note">CORTEX Persist / El enjambre verifica. El hardware recuerda.</p>
+			<div class="footer-links"><a href={openSourceUrl} target="_blank" rel="noreferrer">Open Source</a><a href="https://cortexpersist.dev" target="_blank" rel="noreferrer">Docs</a><a href="/vsa">Public Shell</a></div>
+		</footer>
+	</main>
+</SiteLayout>

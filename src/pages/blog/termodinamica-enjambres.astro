@@ -1,0 +1,79 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+const openSourceUrl = 'https://cortexpersist.org';
+---
+
+<SiteLayout title="La Termodinámica de los Enjambres: Entropía, Exergía y Coordinación Multi-Agente | CORTEX Persist Blog" description="Aplicando principios termodinámicos a la coordinación de sistemas multi-agente para minimizar el trabajo perdido." canonical="https://cortexpersist.com/blog/termodinamica-enjambres" lang="es">
+	<main class="landing-shell">
+		<header class="masthead">
+			<a class="brand" href="/" aria-label="Inicio CORTEX Persist"><span class="brand-mark">CP</span><span class="brand-copy"><strong>CORTEX Persist</strong><span>Memoria verificable para agentes de IA</span></span></a>
+			<nav class="site-nav" aria-label="Principal"><a class="nav-link" href="/#problem">Problema</a><a class="nav-link" href="/#fit">Fit</a><a class="nav-link" href="/#pilot">Piloto</a><a class="nav-link" href="/blog" style="color: var(--accent-bright);">Blog</a></nav>
+			<div class="masthead-actions"><a class="button-tertiary" href={openSourceUrl} target="_blank" rel="noreferrer">Open Source</a><a class="button-primary" href="/async-demo">Demo Async</a></div>
+		</header>
+
+		<article class="section-frame surface" style="margin-top: 2rem;">
+			<div class="section-heading">
+				<p class="section-kicker">Abril 2026</p>
+				<h1 style="font-family: 'Orbitron', sans-serif; font-weight: 800; letter-spacing: 0.05em; line-height: 1.1; text-transform: uppercase; font-size: clamp(1.5rem, 3.5vw, 2.6rem);">La Termodinámica de los Enjambres</h1>
+			</div>
+
+			<div style="max-width: 72ch; display: grid; gap: 2rem;">
+				<p class="surface-copy">Cuando coordinamos decenas de agentes autónomos para realizar una tarea compleja—como migrar una base de datos o refactorizar un servicio heredado—solemnoes ver el problema como un desafío puramente algorítmico o de ingeniería de software. Diseñamos protocolos de mensajería, árboles de decisión y flujos de trabajo rígidos.</p>
+
+				<p class="surface-copy">Sin embargo, los sistemas multi-agente son, en última instancia, sistemas físicos que consumen energía y procesan información. Al modelar la coordinación de agentes a través de las leyes de la **termodinámica de la información**, podemos optimizar radicalmente la eficiencia del sistema, minimizando la entropía (el desorden cognitivo) y maximizando la exergía (el trabajo útil realizado por token consumido).</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">Entropía de la Información y Trabajo Perdido</h2>
+
+				<p class="surface-copy">En física, la segunda ley de la termodinámica establece que la entropía de un sistema aislado siempre aumenta. En los enjambres de agentes, la entropía se manifiesta como la pérdida de coherencia del contexto: respuestas contradictorias, subagentes ejecutando tareas redundantes y la acumulación de datos obsoletos o "ruido" en la memoria de trabajo.</p>
+
+				<p class="surface-copy">Cada vez que un agente lee un contexto desordenado o mal estructurado, se requiere trabajo computacional (y por lo tanto, energía eléctrica y presupuesto de API) para volver a centrar al modelo en la tarea real. Este es el equivalente informático del **trabajo perdido** debido a la fricción térmica en un motor de combustión.</p>
+
+				<div class="surface-sunken" style="padding: 1.2rem; border-radius: var(--radius-lg);">
+					<p class="surface-label">Fórmula de Exergía Cognitiva</p>
+					<pre class="console-block" style="margin-top: 0.8rem;">Exergía (W_util) = E_total - T × S_cognitiva
+
+Donde:
+- E_total es la energía total de cómputo invertida (tokens).
+- T es el factor de temperatura del modelo (variabilidad estadística).
+- S_cognitiva es la entropía del estado de memoria acumulado.</pre>
+				</div>
+
+				<p class="surface-copy">Para maximizar el trabajo útil (W_util), debemos mantener la entropía de la memoria (S_cognitiva) lo más cercana a cero posible. Si permitimos que el historial de ejecución se convierta en una cadena caótica de logs desestructurados, destruimos la exergía del sistema y provocamos bucles infinitos de alucinación.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">La Regulación de Exergía en CORTEX</h2>
+
+				<p class="surface-copy">CORTEX Persist aborda este problema aplicando tres filtros termodinámicos en la gestión de memoria del enjambre:</p>
+
+				<div style="display: grid; gap: 0.8rem;">
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong>1. Compactación Entrópica</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">Los logs redundantes e intermedios de los subagentes se eliminan sistemáticamente de la memoria activa tras completar cada tarea. Solo los hechos confirmados e inmutables persisten, reduciendo el ruido en un 90%.</p>
+					</div>
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong>2. Estructuración Cristalina</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">La memoria no es un flujo amorfo de texto plano; se organiza en redes cristalinas de hechos estructurados y tipados que se alinean perfectamente con el espacio semántico de los modelos, reduciendo el esfuerzo de decodificación.</p>
+					</div>
+				</div>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">Conclusión: Programación Exergética</h2>
+
+				<p class="surface-copy">Optimizar agentes ya no es una cuestión de "prompt engineering" artesanal. Es una disciplina de ingeniería rigurosa que exige tratar la información con la misma seriedad física con la que un ingeniero mecánico trata el calor y la presión. Minimizar el desorden es la única forma de escalar la automatización cognitiva de forma económica y sostenible.</p>
+
+				<div class="surface-sunken" style="padding: 1.2rem; border-radius: var(--radius-lg); margin-top: 1rem;">
+					<p class="surface-label" style="color: var(--gold);">El Objetivo</p>
+					<p class="surface-copy" style="margin-top: 0.5rem;">CORTEX Persist funciona como un disipador de entropía cognitiva para enjambres multi-agente, asegurando que cada token consumido genere valor verificable y medible.</p>
+				</div>
+			</div>
+		</article>
+
+		<div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+			<a class="button-secondary" href="/blog">← Todos los Artículos</a>
+			<a class="button-primary" href="/async-demo">Solicitar Demo Async</a>
+		</div>
+
+		<footer class="site-footer" style="margin-top: 4rem;">
+			<p class="footer-note">CORTEX Persist / El enjambre verifica. El hardware recuerda.</p>
+			<div class="footer-links"><a href={openSourceUrl} target="_blank" rel="noreferrer">Open Source</a><a href="https://cortexpersist.dev" target="_blank" rel="noreferrer">Docs</a><a href="/vsa">Public Shell</a></div>
+		</footer>
+	</main>
+</SiteLayout>

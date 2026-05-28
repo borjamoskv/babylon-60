@@ -1,0 +1,206 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+
+const articles = [
+	{
+		date: 'May 2026',
+		title: 'C5-REAL: Epistemología Criptográfica para Agentes',
+		desc: 'Por qué la realidad no se puede simular y cómo los niveles de certeza (C1-C5) defienden a los sistemas autónomos de la degeneración epistémica.',
+		href: '/blog/c5-real-epistemologia-criptografica',
+		featured: true,
+	},
+	{
+		date: 'May 2026',
+		title: 'OUROBOROS-∞: El Motor de Mejora Recursiva',
+		desc: 'Metabolismo autopoiético en arquitecturas soberanas: cómo construir agentes que refactorizan y purgan su propio código para combatir la entropía estructural.',
+		href: '/blog/ouroboros-mejora-recursiva',
+	},
+	{
+		date: 'May 2026',
+		title: 'Guardianes Deterministas vs. Modelos Estocásticos',
+		desc: 'La falacia de "LLM-as-a-Judge" y por qué los verdaderos límites de un sistema autónomo deben escribirse en código determinista.',
+		href: '/blog/guardianes-deterministas-llms',
+	},
+	{
+		date: 'May 2026',
+		title: 'Sistemas Exérgicos en la Era Multi-Agente',
+		desc: 'Cómo el concepto físico de "Exergía" determina qué arquitecturas de agentes sobreviven y cuáles se ahogan en su propia entropía.',
+		href: '/blog/sistemas-exergicos-ia',
+	},
+	{
+		date: 'May 2026',
+		title: 'El Coste Cognitivo de la Ventana de Contexto',
+		desc: 'Meter 200K tokens en un LLM no te da memoria, te da latencia. Por qué la persistencia estructural es el único camino hacia la inteligencia autónoma.',
+		href: '/blog/el-coste-cognitivo-del-contexto',
+	},
+	{
+		date: 'May 2026',
+		title: 'La Muerte del Editor: La IA Agéntica como Modelo de Extracción de Renta',
+		desc: 'Google desmanteló el editor local en Antigravity 2.0. ¿Por qué a la industria le interesa forzar interfaces conversacionales y cómo ataca esto a la soberanía del programador?',
+		href: '/blog/la-muerte-del-editor',
+	},
+	{
+		date: 'May 2026',
+		title: 'La Economía de la Mentira: Los Influencers de IA y la Industria del Humo Digital',
+		desc: 'En un mercado donde un avatar sin pulmones gana 40 veces más que un creador humano, la pregunta no es si la IA es el futuro, sino quién se está quedando con el presente.',
+		href: '/blog/economia-mentira-industrial',
+	},
+	{
+		date: 'May 2026',
+		title: 'The Agent Memory Tax: Why RAG Is Not Enough',
+		desc: 'Vector search retrieves tokens. Memory requires lineage. Here is why the industry conflates the two — and what it costs teams in production.',
+		href: '/blog/agent-memory-tax',
+	},
+	{
+		date: 'May 2026',
+		title: 'Arquitectura de Agentes: Del Copiloto al Enjambre Soberano',
+		desc: 'La diferencia entre un wrapper de LLM y un agente real es una cadena de verificación que sobrevive al reinicio.',
+		href: '/blog/arquitectura-agentes-soberano',
+	},
+	{
+		date: 'May 2026',
+		title: 'Hash-Chained Memory: A Practical Guide to Tamper-Evident Agent State',
+		desc: 'How to implement Merkle-style integrity for agent decisions without a blockchain or consensus overhead.',
+		href: '/blog/hash-chained-memory-guide',
+	},
+	{
+		date: 'Apr 2026',
+		title: 'Los 10 Inviernos de la IA: De Turing a los Transformers',
+		desc: 'Una historia técnica de las crisis y renacimientos que forjaron la inteligencia artificial moderna.',
+		href: '/blog/diez-inviernos-ia',
+	},
+	{
+		date: 'Apr 2026',
+		title: 'Prompt Injection Is Memory Corruption',
+		desc: 'Reframing the #1 LLM vulnerability through the lens of systems programming and memory safety.',
+		href: '/blog/prompt-injection-memory-corruption',
+	},
+	{
+		date: 'Apr 2026',
+		title: 'La Termodinámica de los Enjambres: Entropía, Exergía y Coordinación Multi-Agente',
+		desc: 'Aplicando principios termodinámicos a la coordinación de sistemas multi-agente para minimizar el trabajo perdido.',
+		href: '/blog/termodinamica-enjambres',
+	},
+	{
+		date: 'Mar 2026',
+		title: 'Audit Packs: The Missing Artifact in AI Compliance',
+		desc: 'Regulators ask what the agent knew. Most teams hand them logs. Here is what an actual evidence artifact looks like.',
+		href: '/blog/audit-packs-ai-compliance',
+	},
+	{
+		date: 'Mar 2026',
+		title: 'GPT-5.6 Canary: What Inverse Autodidacts Tell Us About Frontier Training',
+		desc: 'Analyzing frontier model behavior through the lens of autodidactic inverse architectures and thermodynamic bounds.',
+		href: '/blog/gpt-56-canary-inverse',
+	},
+	{
+		date: 'Mar 2026',
+		title: 'El Manifiesto del Agente Soberano: Memoria como Infraestructura',
+		desc: 'Por qué la memoria del agente no es un feature — es la infraestructura sobre la que se construye confianza.',
+		href: '/blog/manifiesto-agente-soberano',
+	},
+	{
+		date: 'Feb 2026',
+		title: "Why Your AI Agent Has Alzheimer's",
+		desc: "You spent 3 hours teaching your AI agent the codebase. Next session? Gone. 100% amnesia. This is the most expensive bug in AI — and nobody's talking about it.",
+		href: '/blog/why-your-ai-agent-has-alzheimers',
+	},
+	{
+		date: 'Feb 2026',
+		title: 'Circuit Breakers for AI: Deterministic Guards in Non-Deterministic Systems',
+		desc: 'How to build policy enforcement that survives hallucination, prompt injection, and context window overflow.',
+		href: '/blog/circuit-breakers-ai-guards',
+	},
+	{
+		date: 'Feb 2026',
+		title: 'Tarkovsky and the Agent: Time, Memory, and the Zone',
+		desc: "What Andrei Tarkovsky's sculpting in time teaches us about agent state, persistence, and the non-linear nature of machine memory.",
+		href: '/blog/tarkovsky-agent-memory',
+	},
+	{
+		date: 'Feb 2026',
+		title: 'The PARA Delusion: Why Personal Knowledge Management Failed the Machine Age',
+		desc: 'PARA, Zettelkasten, and second brains were designed for humans. Agents need something fundamentally different.',
+		href: '/blog/para-delusion-pkm',
+	},
+];
+
+const openSourceUrl = 'https://cortexpersist.org';
+---
+
+<SiteLayout
+	title="CORTEX Persist | Blog & Intelligence"
+	description="Technical intelligence, sovereign engineering insights, and the operational reality of autonomous AI agents."
+	canonical="https://cortexpersist.com/blog"
+>
+	<main class="landing-shell">
+		<header class="masthead">
+			<a class="brand" href="/" aria-label="CORTEX Persist home">
+				<span class="brand-mark">CP</span>
+				<span class="brand-copy">
+					<strong>CORTEX Persist</strong>
+					<span>Verifiable memory for AI agents</span>
+				</span>
+			</a>
+
+			<nav class="site-nav" aria-label="Primary">
+				<a class="nav-link" href="/#problem">Problem</a>
+				<a class="nav-link" href="/#fit">Fit</a>
+				<a class="nav-link" href="/#pilot">Pilot</a>
+				<a class="nav-link" href="/blog" style="color: var(--accent-bright);">Blog</a>
+			</nav>
+
+			<div class="masthead-actions">
+				<a class="button-tertiary" href={openSourceUrl} target="_blank" rel="noreferrer">
+					Open Source
+				</a>
+				<a class="button-primary" href="/async-demo">
+					Async Demo
+				</a>
+			</div>
+		</header>
+
+		<section class="section-frame surface" style="margin-top: 2rem;">
+			<div class="section-heading">
+				<p class="section-kicker">Intelligence</p>
+				<h1 style="font-family: 'Orbitron', sans-serif; font-weight: 800; letter-spacing: 0.05em; line-height: 0.98; margin: 0; text-transform: uppercase; font-size: clamp(1.8rem, 4.2vw, 3.2rem);">Sovereign Agent Operations</h1>
+				<p>
+					Technical essays and state-of-the-art research on memory, autonomy, and the economics of verifiable AI.
+				</p>
+			</div>
+
+			<div style="display: grid; gap: 1rem; margin-top: 1rem;">
+				{articles.map((article, i) => (
+					<article
+						class:list={[
+							'surface-sunken',
+							article.featured && 'pricing-card-featured',
+						]}
+						style="display: grid; gap: 1rem; padding: 1.5rem; border-radius: var(--radius-xl);"
+					>
+						<div style="display: flex; justify-content: space-between; align-items: center;">
+							<p class="surface-label">{article.date}</p>
+							{article.featured && (
+								<span class="plan-tag" style="position: static; font-size: 0.7rem; padding: 0.2rem 0.6rem;">Latest</span>
+							)}
+						</div>
+						<h2 style="font-size: 1.3rem; margin: 0; line-height: 1.25;">{article.title}</h2>
+						<p style="color: var(--muted); font-size: 0.95rem; line-height: 1.65; margin: 0;">{article.desc}</p>
+						<a class="button-secondary" href={article.href} style="justify-self: start;">
+							Read Article
+						</a>
+					</article>
+				))}
+			</div>
+		</section>
+
+		<footer class="site-footer" style="margin-top: 4rem;">
+			<p class="footer-note">CORTEX Persist / The swarm verifies. The hardware remembers.</p>
+			<div class="footer-links">
+				<a href={openSourceUrl} target="_blank" rel="noreferrer">Open Source</a>
+				<a href="https://cortexpersist.dev" target="_blank" rel="noreferrer">Docs</a>
+				<a href="/vsa">Public Shell</a>
+			</div>
+		</footer>
+	</main>
+</SiteLayout>

@@ -1,0 +1,85 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+const openSourceUrl = 'https://cortexpersist.org';
+---
+
+<SiteLayout title="Circuit Breakers for AI: Deterministic Guards in Non-Deterministic Systems | CORTEX Persist Blog" description="How to build policy enforcement that survives hallucination, prompt injection, and context window overflow." canonical="https://cortexpersist.com/blog/circuit-breakers-ai-guards">
+	<main class="landing-shell">
+		<header class="masthead">
+			<a class="brand" href="/" aria-label="CORTEX Persist home"><span class="brand-mark">CP</span><span class="brand-copy"><strong>CORTEX Persist</strong><span>Verifiable memory for AI agents</span></span></a>
+			<nav class="site-nav" aria-label="Primary"><a class="nav-link" href="/#problem">Problem</a><a class="nav-link" href="/#fit">Fit</a><a class="nav-link" href="/#pilot">Pilot</a><a class="nav-link" href="/blog" style="color: var(--accent-bright);">Blog</a></nav>
+			<div class="masthead-actions"><a class="button-tertiary" href={openSourceUrl} target="_blank" rel="noreferrer">Open Source</a><a class="button-primary" href="/async-demo">Async Demo</a></div>
+		</header>
+
+		<article class="section-frame surface" style="margin-top: 2rem;">
+			<div class="section-heading">
+				<p class="section-kicker">February 2026</p>
+				<h1 style="font-family: 'Orbitron', sans-serif; font-weight: 800; letter-spacing: 0.05em; line-height: 1.1; text-transform: uppercase; font-size: clamp(1.5rem, 3.5vw, 2.6rem);">Circuit Breakers for AI</h1>
+			</div>
+
+			<div style="max-width: 72ch; display: grid; gap: 2rem;">
+				<p class="surface-copy">When developers deploy autonomous AI agents with access to real-world APIs, databases, or terminal interfaces, the primary design challenge is safety. How do you prevent an agent from running a destructive shell command or executing an unauthorized bank transfer due to a hallucination or prompt injection?</p>
+
+				<p class="surface-copy">The standard industry approach is to write "safety guidelines" into the system prompt: <em>"Never delete files under /src."</em> or <em>"Only execute transactions up to $500."</em> This is a catastrophic anti-pattern. Instructions in the prompt are non-deterministic; under stress, alignment drift, or prompt injection, the model will bypass them.</p>
+
+				<p class="surface-copy">Instead, we must borrow a fundamental pattern from distributed systems engineering: **Circuit Breakers**—deterministic, out-of-band guards that wrap non-deterministic executions.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">The Fallacy of In-Context Safety</h2>
+
+				<p class="surface-copy">Why do in-context rules fail? In systems programming, we separate the execution runtime from the security policy. A process cannot write to its own read-only memory segment because the CPU hardware page tables enforce the boundary, not because the process promised to behave.</p>
+
+				<p class="surface-copy">When you put safety rules in the system prompt, you are asking the process to enforce its own page tables. The moment a user inputs untrusted data that shifts the attention weights of the model, the security context collapses. The model doesn't "choose" to break the rule; the mathematical representation of the rule inside the transformer layers is overwritten by the new input signals.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">Designing Out-of-Band Circuit Breakers</h2>
+
+				<p class="surface-copy">A deterministic circuit breaker sits outside the model execution loop. It intercepts the agent's proposed action, evaluates it against rigid rules, and enforces boundaries before the action reaches the target system.</p>
+
+				<div class="surface-sunken" style="padding: 1.2rem; border-radius: var(--radius-lg);">
+					<p class="surface-label">The Circuit Breaker Pattern</p>
+					<pre class="console-block" style="margin-top: 0.8rem;">[Agent proposed action] -> [Deterministic Guard (Regex/AST/Policy Parser)]
+                                    |
+                -----------------------------------------
+               |                                         |
+         [Matches rules]                        [Violates rules]
+               |                                         |
+    (Blocked & logged)                     (Executed & state updated)
+               |                                         |
+     cortex circuit-breaker open!              State transition recorded</pre>
+				</div>
+
+				<p class="surface-copy">For example, if an agent proposes a command line action, the CORTEX environment passes the command through an AST (Abstract Syntax Tree) parser. If the AST contains node references to deletion commands targeting protected directory paths, the circuit breaker trips instantly, preventing execution and notifying the parent validator agent.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">Implementing Guards in CORTEX</h2>
+
+				<p class="surface-copy">CORTEX Persist implements these guards as standard interceptors in the execution loop. Because the memory ledger is structured, the circuit breakers don't just inspect the current step; they can analyze the historical context of the session. If an agent tries to execute three file writes in under five seconds, a rate-limiting circuit breaker trips to prevent automated file corruption.</p>
+
+				<pre class="console-block">cortex register-guard file-protection \
+  --path "/Users/borjafernandezangulo/private/*" \
+  --mode read-only \
+  --action block
+
+# Registered deterministic guard.
+# Any agent command targeting this path is immediately intercepted and blocked.</pre>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">Conclusion: The Hybrid Reality</h2>
+
+				<p class="surface-copy">Autonomous agent safety is not a machine learning problem; it is a systems engineering problem. The solution is hybrid: use the non-deterministic reasoning power of LLMs to generate actions, but wrap them in the deterministic steel of code-level circuit breakers. Do not ask the model to be safe. Build infrastructure that makes it impossible for it to be dangerous.</p>
+
+				<div class="surface-sunken" style="padding: 1.2rem; border-radius: var(--radius-lg); margin-top: 1rem;">
+					<p class="surface-label" style="color: var(--gold);">The Policy</p>
+					<p class="surface-copy" style="margin-top: 0.5rem;">CORTEX Persist provides out-of-band circuit breakers that validate agent outputs at the API and file system level, establishing reliable runtime boundaries for autonomous swarms.</p>
+				</div>
+			</div>
+		</article>
+
+		<div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+			<a class="button-secondary" href="/blog">← All Articles</a>
+			<a class="button-primary" href="/async-demo">Request Async Demo</a>
+		</div>
+
+		<footer class="site-footer" style="margin-top: 4rem;">
+			<p class="footer-note">CORTEX Persist / The swarm verifies. The hardware remembers.</p>
+			<div class="footer-links"><a href={openSourceUrl} target="_blank" rel="noreferrer">Open Source</a><a href="https://cortexpersist.dev" target="_blank" rel="noreferrer">Docs</a><a href="/vsa">Public Shell</a></div>
+		</footer>
+	</main>
+</SiteLayout>

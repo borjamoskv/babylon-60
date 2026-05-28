@@ -1,0 +1,245 @@
+---
+import '../styles/custom.css';
+
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			name="description"
+			content="CORTEX Persist is local-first trust infrastructure for AI agents: tamper-evident memory, cryptographic lineage, and audit-ready decision history."
+		/>
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;800&family=Outfit:wght@300;500;800&display=swap"
+			rel="stylesheet"
+		/>
+		<title>{title}</title>
+	</head>
+	<body class="site-shell">
+		<header class="sl-header">
+			<div class="nav-container">
+				<a href="/" class="logo">
+					<span class="logo-symbol">CP</span>
+					<span class="logo-text">CORTEX</span>
+				</a>
+				<nav class="nav-links">
+					<a href="/" class="nav-link">HOME</a>
+					<a href="/vsa" class="nav-link">VSA_EXPLORER</a>
+					<a
+						href="https://github.com/borjamoskv/Cortex-Persist"
+						class="nav-link"
+						target="_blank"
+						rel="noreferrer"
+					>
+						GITHUB
+					</a>
+				</nav>
+				<a
+					href="https://github.com/borjamoskv/Cortex-Persist"
+					class="nav-cta"
+					target="_blank"
+					rel="noreferrer"
+				>
+					OPEN_SOURCE
+				</a>
+			</div>
+		</header>
+
+		<slot />
+
+		<footer class="sl-footer">
+			<div class="footer-content">
+				<p>© 2026 CORTEX-PERSIST | LOCAL-FIRST TRUST INFRASTRUCTURE FOR AGENTS</p>
+			</div>
+		</footer>
+	</body>
+</html>
+
+<style is:global>
+	:root {
+		--ctx-abyssal: #040506;
+		--ctx-panel: rgba(15, 19, 24, 0.84);
+		--ctx-panel-strong: rgba(20, 24, 31, 0.96);
+		--ctx-line: rgba(116, 224, 212, 0.18);
+		--ctx-line-strong: rgba(116, 224, 212, 0.36);
+		--ctx-electric: #74e0d4;
+		--ctx-electric-soft: #bcefe6;
+		--ctx-copper: #d6a77b;
+		--ctx-copy: rgba(236, 240, 244, 0.9);
+		--ctx-muted: rgba(236, 240, 244, 0.58);
+		--ctx-shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+	}
+
+	html {
+		scroll-behavior: smooth;
+	}
+
+	body.site-shell {
+		min-height: 100vh;
+		background:
+			radial-gradient(circle at top left, rgba(116, 224, 212, 0.08), transparent 32%),
+			radial-gradient(circle at 80% 18%, rgba(214, 167, 123, 0.12), transparent 28%),
+			linear-gradient(180deg, #05070a 0%, #090d12 42%, #050607 100%);
+		color: var(--ctx-copy);
+	}
+
+	body.site-shell::before {
+		content: '';
+		position: fixed;
+		inset: 0;
+		background-image:
+			linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+		background-size: 120px 120px;
+		mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.25), transparent 84%);
+		pointer-events: none;
+	}
+
+	.sl-header {
+		position: sticky;
+		top: 0;
+		z-index: 50;
+		backdrop-filter: blur(18px);
+		background: rgba(4, 5, 6, 0.72);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+	}
+
+	.nav-container {
+		max-width: 1240px;
+		margin: 0 auto;
+		height: 74px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0 2rem;
+		gap: 1.25rem;
+	}
+
+	.logo {
+		display: flex;
+		align-items: center;
+		gap: 0.8rem;
+		text-decoration: none;
+	}
+
+	.logo-symbol {
+		background: linear-gradient(135deg, var(--ctx-electric), var(--ctx-copper));
+		color: var(--ctx-abyssal);
+		font-family: 'Orbitron', sans-serif;
+		font-weight: 900;
+		padding: 0.24rem 0.58rem;
+		font-size: 0.9rem;
+		border-radius: 999px;
+		box-shadow: 0 0 24px rgba(116, 224, 212, 0.22);
+	}
+
+	.logo-text {
+		font-family: 'Orbitron', sans-serif;
+		font-weight: 700;
+		letter-spacing: 0.28rem;
+		font-size: 1.1rem;
+		color: #fafafa;
+	}
+
+	.nav-links {
+		display: flex;
+		gap: 2rem;
+		margin-left: auto;
+	}
+
+	.nav-link {
+		font-family: 'Inter', sans-serif;
+		font-size: 0.7rem;
+		font-weight: 600;
+		letter-spacing: 0.1rem;
+		color: rgba(250, 250, 250, 0.62);
+		text-decoration: none;
+		transition: all 0.3s ease;
+	}
+
+	.nav-link:hover {
+		color: var(--ctx-electric);
+		text-shadow: 0 0 10px rgba(116, 224, 212, 0.32);
+	}
+
+	.nav-cta {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.82rem 1rem;
+		border-radius: 999px;
+		border: 1px solid rgba(214, 167, 123, 0.28);
+		background: rgba(214, 167, 123, 0.12);
+		color: #fdf2e6;
+		font-family: 'Orbitron', sans-serif;
+		font-size: 0.68rem;
+		letter-spacing: 0.16rem;
+		text-decoration: none;
+		transition: transform 0.24s ease, border-color 0.24s ease, background 0.24s ease;
+	}
+
+	.nav-cta:hover {
+		transform: translateY(-1px);
+		border-color: rgba(214, 167, 123, 0.54);
+		background: rgba(214, 167, 123, 0.18);
+	}
+
+	.footer-content {
+		max-width: 1240px;
+		margin: 0 auto;
+		padding: 2.5rem 2rem 3.5rem;
+		text-align: center;
+		color: rgba(250, 250, 250, 0.34);
+		font-size: 0.6rem;
+		letter-spacing: 0.1rem;
+		border-top: 1px solid rgba(116, 224, 212, 0.08);
+	}
+
+	@media (max-width: 900px) {
+		.nav-container {
+			height: auto;
+			padding: 1rem 1.25rem;
+			flex-wrap: wrap;
+		}
+
+		.nav-links {
+			order: 3;
+			width: 100%;
+			justify-content: space-between;
+			margin-left: 0;
+			gap: 1rem;
+		}
+
+		.nav-cta {
+			margin-left: auto;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.logo-text {
+			letter-spacing: 0.18rem;
+			font-size: 0.95rem;
+		}
+
+		.nav-links {
+			font-size: 0.65rem;
+			flex-wrap: wrap;
+		}
+
+		.nav-cta {
+			width: 100%;
+			margin-left: 0;
+		}
+	}
+</style>

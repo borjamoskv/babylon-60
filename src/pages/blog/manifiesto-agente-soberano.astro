@@ -1,0 +1,73 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+const openSourceUrl = 'https://cortexpersist.org';
+---
+
+<SiteLayout title="El Manifiesto del Agente Soberano: Memoria como Infraestructura | CORTEX Persist Blog" description="Por qué la memoria del agente no es un feature — es la infraestructura sobre la que se construye confianza." canonical="https://cortexpersist.com/blog/manifiesto-agente-soberano" lang="es">
+	<main class="landing-shell">
+		<header class="masthead">
+			<a class="brand" href="/" aria-label="Inicio CORTEX Persist"><span class="brand-mark">CP</span><span class="brand-copy"><strong>CORTEX Persist</strong><span>Memoria verificable para agentes de IA</span></span></a>
+			<nav class="site-nav" aria-label="Principal"><a class="nav-link" href="/#problem">Problema</a><a class="nav-link" href="/#fit">Fit</a><a class="nav-link" href="/#pilot">Piloto</a><a class="nav-link" href="/blog" style="color: var(--accent-bright);">Blog</a></nav>
+			<div class="masthead-actions"><a class="button-tertiary" href={openSourceUrl} target="_blank" rel="noreferrer">Open Source</a><a class="button-primary" href="/async-demo">Demo Async</a></div>
+		</header>
+
+		<article class="section-frame surface" style="margin-top: 2rem;">
+			<div class="section-heading">
+				<p class="section-kicker">Marzo 2026</p>
+				<h1 style="font-family: 'Orbitron', sans-serif; font-weight: 800; letter-spacing: 0.05em; line-height: 1.1; text-transform: uppercase; font-size: clamp(1.5rem, 3.5vw, 2.6rem);">El Manifiesto del Agente Soberano</h1>
+			</div>
+
+			<div style="max-width: 72ch; display: grid; gap: 2rem;">
+				<p class="surface-copy">La informática se encuentra en una encrucijada histórica. En la transición hacia sistemas de desarrollo y automatización dominados por la IA, la industria está aceptando un compromiso inaceptable: delegar decisiones críticas a agentes estocásticos que sufren amnesia en cada reinicio de sesión y cuyo "conocimiento" es una ilusión generada al recuperar vectores de forma estadística.</p>
+
+				<p class="surface-copy">Nos negamos a aceptar este statu quo. Declaramos que la soberanía de los agentes de IA es el único camino viable para construir un software seguro, auditable y verdaderamente autónomo. Y la base técnica de esa soberanía no radica en el tamaño del modelo fundacional, sino en su infraestructura de memoria.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">La Memoria No Es Un Feature</h2>
+
+				<p class="surface-copy">Durante años, la memoria de los agentes se ha tratado como una característica secundaria, un plugin que se añade al final de un proyecto: una llamada a una base de datos vectorial externa o un script que guarda variables en un JSON local. Este enfoque es erróneo.</p>
+
+				<p class="surface-copy">La memoria no es un feature; **es la infraestructura fundamental sobre la que se construye la confianza**. Sin memoria persistente, criptográficamente verificable y estructurada, un agente es incapaz de:</p>
+
+				<div style="display: grid; gap: 0.8rem;">
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong>1. Acumular Experiencia Real</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">Un agente debe aprender de sus propios errores en producción. Si resuelve un problema de configuración en el puerto 8080 el lunes, debe saberlo de forma determinista el martes, sin requerir re-onboarding.</p>
+					</div>
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong>2. Ofrecer Garantías de Cumplimiento</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">En industrias reguladas, la incapacidad para auditar el historial exacto de un agente invalida su uso en producción. Necesitamos un registro de hechos inmutable.</p>
+					</div>
+				</div>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">Los Tres Pilares de la Soberanía Cognitiva</h2>
+
+				<p class="surface-copy">Para que un agente de IA sea soberano, debe operar bajo tres principios arquitectónicos estrictos:</p>
+
+				<p class="surface-copy"><strong style="color: var(--success);">1. Autonomía de Datos:</strong> El agente controla su propio almacenamiento físico e intelectual. Sus datos no están secuestrados en las bases de datos propietarias de un proveedor de APIs de modelos en la nube.</p>
+
+				<p class="surface-copy"><strong style="color: var(--success);">2. Integridad Criptográfica:</strong> Las transiciones de estado de la memoria del agente están unidas mediante firmas y hashes SHA-256. El historial del agente es inalterable, incluso ante intrusiones de red o alucinaciones severas.</p>
+
+				<p class="surface-copy"><strong style="color: var(--success);">3. Verificación Descentralizada:</strong> La coordinación entre múltiples agentes se basa en la validación mutua de sus cadenas de hechos. Un agente no confía en otro porque compartan servidor, sino porque puede auditar criptográficamente su historial de ejecución.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">Un Llamado a la Acción para los Ingenieros</h2>
+
+				<p class="surface-copy">Es hora de dejar de construir juguetes efímeros y empezar a diseñar sistemas de producción reales. El valor a largo plazo de los agentes que construimos hoy no residirá en la llamada a la API que hagamos esta tarde, sino en la riqueza y la integridad del ledger de memoria que construyan a lo largo de meses de operación.</p>
+
+				<div class="surface-sunken" style="padding: 1.2rem; border-radius: var(--radius-lg); margin-top: 1rem;">
+					<p class="surface-label" style="color: var(--gold);">El Manifiesto</p>
+					<p class="surface-copy" style="margin-top: 0.5rem;">CORTEX Persist nace para dar forma a este futuro. Construimos las herramientas que permiten a los desarrolladores dotar a sus agentes de un sustrato de memoria inmutable, soberano y auditable. Porque lo que no se registra criptográficamente, se disipa en la entropía del software.</p>
+				</div>
+			</div>
+		</article>
+
+		<div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+			<a class="button-secondary" href="/blog">← Todos los Artículos</a>
+			<a class="button-primary" href="/async-demo">Solicitar Demo Async</a>
+		</div>
+
+		<footer class="site-footer" style="margin-top: 4rem;">
+			<p class="footer-note">CORTEX Persist / El enjambre verifica. El hardware recuerda.</p>
+			<div class="footer-links"><a href={openSourceUrl} target="_blank" rel="noreferrer">Open Source</a><a href="https://cortexpersist.dev" target="_blank" rel="noreferrer">Docs</a><a href="/vsa">Public Shell</a></div>
+		</footer>
+	</main>
+</SiteLayout>

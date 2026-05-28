@@ -1,0 +1,88 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+const openSourceUrl = 'https://cortexpersist.org';
+---
+
+<SiteLayout title="Audit Packs: The Missing Artifact in AI Compliance | CORTEX Persist Blog" description="Regulators ask what the agent knew. Most teams hand them logs. Here is what an actual evidence artifact looks like." canonical="https://cortexpersist.com/blog/audit-packs-ai-compliance">
+	<main class="landing-shell">
+		<header class="masthead">
+			<a class="brand" href="/" aria-label="CORTEX Persist home"><span class="brand-mark">CP</span><span class="brand-copy"><strong>CORTEX Persist</strong><span>Verifiable memory for AI agents</span></span></a>
+			<nav class="site-nav" aria-label="Primary"><a class="nav-link" href="/#problem">Problem</a><a class="nav-link" href="/#fit">Fit</a><a class="nav-link" href="/#pilot">Pilot</a><a class="nav-link" href="/blog" style="color: var(--accent-bright);">Blog</a></nav>
+			<div class="masthead-actions"><a class="button-tertiary" href={openSourceUrl} target="_blank" rel="noreferrer">Open Source</a><a class="button-primary" href="/async-demo">Async Demo</a></div>
+		</header>
+
+		<article class="section-frame surface" style="margin-top: 2rem;">
+			<div class="section-heading">
+				<p class="section-kicker">March 2026</p>
+				<h1 style="font-family: 'Orbitron', sans-serif; font-weight: 800; letter-spacing: 0.05em; line-height: 1.1; text-transform: uppercase; font-size: clamp(1.5rem, 3.5vw, 2.6rem);">Audit Packs: The Missing Artifact</h1>
+			</div>
+
+			<div style="max-width: 72ch; display: grid; gap: 2rem;">
+				<p class="surface-copy">With the implementation of strict AI compliance frameworks across North America and Europe, enterprise teams are facing a new regulatory reality. If an autonomous agent makes a financial transaction, handles sensitive medical data, or alters production infrastructure, you can no longer shrug and blame a black-box model.</p>
+
+				<p class="surface-copy">Regulators ask a simple question: <strong>"What did the agent know, and which policies did it enforce at the exact moment this decision was made?"</strong></p>
+
+				<p class="surface-copy">Most engineering teams respond by exporting raw, unstructured JSON logs from Datadog or CloudWatch. This is a critical compliance error. Raw log files do not constitute legally verifiable proof of proper alignment or compliance. What the industry actually needs is a standardized <strong>Audit Pack</strong>.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">Why Logs Are Not Evidence</h2>
+
+				<p class="surface-copy">There are three reasons why standard debug logs fail to meet compliance standards in regulated industries:</p>
+
+				<div style="display: grid; gap: 0.8rem;">
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong>Mutability</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">Logs stored in central management tools can be edited, deleted, or filtered by anyone with administrative database access. They lack cryptographic guarantees of historical integrity.</p>
+					</div>
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong>Absence of Context</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">A log entry might record "API call to /payment returned 200". It does not record the prompt state, active policy limits, or target safety evaluations that justified making that API call in the first place.</p>
+					</div>
+					<div class="surface-sunken" style="padding: 1rem; border-radius: var(--radius-lg);">
+						<strong>Lack of Reproducibility</strong>
+						<p class="surface-copy" style="margin-top: 0.4rem;">Because vector databases (RAG) and model configurations drift over time, feeding the same prompt to the model next month will produce a different response. You cannot reproduce the decision path.</p>
+					</div>
+				</div>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">The Anatomy of a CORTEX Audit Pack</h2>
+
+				<p class="surface-copy">A CORTEX Audit Pack is a self-contained, tamper-evident ZIP/tarball archive containing signed cognitive artifacts. It is generated automatically at the end of a transaction or session loop and contains:</p>
+
+				<div class="surface-sunken" style="padding: 1.2rem; border-radius: var(--radius-lg);">
+					<p class="surface-label">Audit Pack Directory Structure</p>
+					<pre class="console-block" style="margin-top: 0.8rem;">cortex-audit-0x4f8a/
+├── manifest.json         # Signed metadata, hashes, and model configurations
+├── trust_ledger.jsonl    # Hash-chained memory ledger of all steps taken
+├── policy_snapshot.yaml  # Precise state of system instructions and safety limits
+└── verification_seal     # Cryptographic signature of the hardware enclave</pre>
+				</div>
+
+				<p class="surface-copy">The <code>manifest.json</code> defines the environmental parameters of the run (exact model version, temperature, and seeds), while the <code>trust_ledger.jsonl</code> lists the logical timeline of events. Because every entry in the ledger references the hash of its predecessor, the entire file acts as a Merkle branch proving that no records have been altered.</p>
+
+				<h2 style="font-size: 1.15rem; margin: 0; color: var(--accent-bright); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase;">The Compliance Value</h2>
+
+				<p class="surface-copy">When compliance officers or regulators request an audit, you do not hand them access to your CloudWatch instances. You hand them the Audit Pack. Any validator tool can run a single command to verify the signature and confirm that the execution complied with the active policy rules at that precise timestamp.</p>
+
+				<pre class="console-block">cortex verify-pack cortex-audit-0x4f8a/
+# Reading manifest... DONE
+# Verifying hash chain integrity... VALID
+# Validating policy alignment... ENFORCED
+# Cryptographic Seal: UNBROKEN (Signed by enclave: 0x9a8b7c...)</pre>
+
+				<div class="surface-sunken" style="padding: 1.2rem; border-radius: var(--radius-lg); margin-top: 1rem;">
+					<p class="surface-label" style="color: var(--gold);">The Standard</p>
+					<p class="surface-copy" style="margin-top: 0.5rem;">CORTEX Persist introduces deterministic compliance tooling to the AI stack. Don't audit with logs. Audit with cryptographic evidence packs.</p>
+				</div>
+			</div>
+		</article>
+
+		<div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+			<a class="button-secondary" href="/blog">← All Articles</a>
+			<a class="button-primary" href="/async-demo">Request Async Demo</a>
+		</div>
+
+		<footer class="site-footer" style="margin-top: 4rem;">
+			<p class="footer-note">CORTEX Persist / The swarm verifies. The hardware remembers.</p>
+			<div class="footer-links"><a href={openSourceUrl} target="_blank" rel="noreferrer">Open Source</a><a href="https://cortexpersist.dev" target="_blank" rel="noreferrer">Docs</a><a href="/vsa">Public Shell</a></div>
+		</footer>
+	</main>
+</SiteLayout>
