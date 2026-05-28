@@ -208,11 +208,26 @@ class CortexEngine(
             await self._persistence.stop()
         if hasattr(self, "_conns_by_loop"):
             conns = list(self._conns_by_loop.values())
+            try:
+                current_loop = asyncio.get_running_loop()
+            except RuntimeError:
+                current_loop = None
+
             for conn in conns:
-                try:
-                    await conn.close()
-                except Exception:
-                    pass
+                conn_loop = getattr(conn, "_cortex_loop", current_loop)
+                if conn_loop is None or conn_loop.is_closed():
+                    continue
+
+                if conn_loop is current_loop:
+                    try:
+                        await conn.close()
+                    except Exception:
+                        pass
+                else:
+                    try:
+                        asyncio.run_coroutine_threadsafe(conn.close(), conn_loop)
+                    except Exception:
+                        pass
             self._conns_by_loop.clear()
         self.mac_maestro = None  # type: ignore
         self.ledger_writer = None  # type: ignore
