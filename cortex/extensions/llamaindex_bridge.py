@@ -1,4 +1,4 @@
-from typing import Any, Optional, List
+from typing import Any, Optional
 from llama_index.core.callbacks.base_handler import BaseCallbackHandler
 from llama_index.core.callbacks.schema import CBEventType
 from llama_index.core.schema import NodeWithScore
@@ -13,11 +13,14 @@ class ExergyFilter(BaseNodePostprocessor):
     Aniquila la entropía (nodos basura) antes de que contaminen la inferencia.
     "Elegir es CERRAR puertas."
     """
-    min_exergy: float = Field(default=0.75, description="Mínima exergía requerida para sobrevivir al filtro.")
+
+    min_exergy: float = Field(
+        default=0.75, description="Mínima exergía requerida para sobrevivir al filtro."
+    )
 
     def _postprocess_nodes(
-        self, nodes: List[NodeWithScore], query_bundle: Optional[Any] = None
-    ) -> List[NodeWithScore]:
+        self, nodes: list[NodeWithScore], query_bundle: Any | None = None
+    ) -> list[NodeWithScore]:
         exergic_nodes = []
         for n in nodes:
             # Score de similitud como proxy termodinámico (Exergía = Trabajo Útil)
@@ -58,7 +61,7 @@ class CortexIndexCallback(BaseCallbackHandler):
             payload = {}
         if event_type == CBEventType.RETRIEVE:
             nodes = payload.get("nodes", [])
-            
+
             # Cómputo termodinámico: calcular la exergía media del retrieval
             total_nodes = len(nodes)
             avg_exergy = 0.0

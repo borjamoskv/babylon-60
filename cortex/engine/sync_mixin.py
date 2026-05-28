@@ -75,15 +75,15 @@ class SyncMixin:
                         t.cancel()
                     if tasks:
                         loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
-                    
-                    if hasattr(loop, 'shutdown_asyncgens'):
+
+                    if hasattr(loop, "shutdown_asyncgens"):
                         loop.run_until_complete(loop.shutdown_asyncgens())
-                    if hasattr(loop, 'shutdown_default_executor'):
+                    if hasattr(loop, "shutdown_default_executor"):
                         try:
                             loop.run_until_complete(loop.shutdown_default_executor())
                         except NotImplementedError:
                             pass
-                            
+
                     loop.close()
                 except (RuntimeError, ValueError) as e:
                     logger.debug(f"[SyncMixin] Handled error during loop teardown: {e}")
