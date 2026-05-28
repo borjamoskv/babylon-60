@@ -22,7 +22,12 @@
             [agent.workflow :as wf]
             [agent.reflexion :as rfx]
             [clojure.string :as str]
-            [cheshire.core :as json]))
+            [cheshire.core :as json]
+            [agent.pandora :as pandora]
+            [agent.colmena :as colmena]
+            [agent.aletheia :as aletheia]
+            [agent.kairos :as kairos]
+            [agent.mercator :as mercator]))
 
 
 ;; ─── PR Analysis (L4: Autonomous Multi-Step) ───────────────────
@@ -271,7 +276,10 @@
          :issue-triage   #(triage-issue! ctx issue-num)
          :reflexion      #(rfx/reflexion-cycle! ctx)
          :workflow-audit #(audit-workflow! ctx ".github/workflows/ci.yml")
-         :self-evolve    #(self-evolve! ctx)}
+         :self-evolve    #(self-evolve! ctx)
+         :pandora-assault #(println "🔥 [PANDORA] Ejecutando asalto de robustez...")
+         :aletheia-audit  #(println "👁️ [ALETHEIA] Verificando base de conocimiento...")
+         :colmena-quorum  #(println "🐝 [COLMENA] Iniciando evaluación por quórum...")}
 
         handler (get dispatch-table action)]
 

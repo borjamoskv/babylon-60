@@ -1,8 +1,8 @@
-(ns agent.negotiator
-  "██ NEGOTIATOR — Agente de Negociación Multi-Parte ██
+(ns agent.mercator
+  "██ MERCATOR — Agente de Negociación Multi-Parte ██
 
    Cuando múltiples agentes compiten por recursos limitados,
-   NEGOTIATOR encuentra el equilibrio.
+   MERCATOR encuentra el equilibrio.
 
    Protocolos implementados:
    - Contract Net: Anunciar tarea → recoger ofertas → adjudicar
@@ -45,7 +45,7 @@
   "PASO 1: El manager anuncia una tarea y solicita ofertas.
    Cada agente responde con su oferta (precio, tiempo estimado, capacidad)."
   [task bidder-fns & {:keys [deadline-ms] :or {deadline-ms 5000}}]
-  (println (str "📢 [NEGOTIATOR] Anunciando tarea: " (:name task "unnamed")))
+  (println (str "📢 [MERCATOR] Anunciando tarea: " (:name task "unnamed")))
   (let [futures (doall
                   (for [[bidder-id bid-fn] bidder-fns]
                     {:bidder-id bidder-id
@@ -75,7 +75,7 @@
                        (map #(assoc % :score (scoring-fn (:offer %))))
                        (sort-by :score >))
           winner  (first scored)]
-      (println (str "🏆 [NEGOTIATOR] Adjudicado a " (:bidder-id winner)
+      (println (str "🏆 [MERCATOR] Adjudicado a " (:bidder-id winner)
                     " (score: " (format "%.2f" (float (:score winner))) ")"))
       {:winner   winner
        :ranking  scored
@@ -96,7 +96,7 @@
 (defn first-price-auction
   "Subasta de primer precio: gana la oferta más alta, paga lo que ofreció."
   [item bidder-fns]
-  (println (str "🔨 [NEGOTIATOR] Subasta (primer precio): " (:name item "item")))
+  (println (str "🔨 [MERCATOR] Subasta (primer precio): " (:name item "item")))
   (let [bids (announce-task item bidder-fns)
         sorted (->> bids
                     (map #(assoc % :bid (get-in % [:offer :bid] 0)))
@@ -114,7 +114,7 @@
    pero paga el precio de la SEGUNDA oferta más alta.
    Incentiva ofertar el valor real."
   [item bidder-fns]
-  (println (str "🔨 [NEGOTIATOR] Subasta Vickrey (segundo precio): " (:name item "item")))
+  (println (str "🔨 [MERCATOR] Subasta Vickrey (segundo precio): " (:name item "item")))
   (let [bids   (announce-task item bidder-fns)
         sorted (->> bids
                     (map #(assoc % :bid (get-in % [:offer :bid] 0)))
@@ -176,7 +176,7 @@
   "Asignación justa de un recurso entre N agentes.
    Usa max-min fairness: maximizar el mínimo que recibe cada agente."
   [pool resource-id agent-demands]
-  (println (str "⚖️  [NEGOTIATOR] Asignación justa de :" (name resource-id)
+  (println (str "⚖️  [MERCATOR] Asignación justa de :" (name resource-id)
                 " entre " (count agent-demands) " agentes"))
   (let [total     (available pool resource-id)
         n         (count agent-demands)
