@@ -15,6 +15,8 @@
    Reality Level: C5-REAL"
   (:require [clojure.string :as str]))
 
+(declare find-contradictions)
+
 
 ;; ─── Belief (La unidad epistémica) ──────────────────────────────
 
