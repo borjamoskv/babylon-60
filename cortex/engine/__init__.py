@@ -221,14 +221,16 @@ class CortexEngine(
                     if hasattr(conn, "_tx"):
                         try:
                             from aiosqlite.core import _STOP_RUNNING_SENTINEL
-                            def close_and_stop():
-                                if getattr(conn, "_connection", None) is not None:
+
+                            def close_and_stop(c=conn):
+                                if getattr(c, "_connection", None) is not None:
                                     try:
-                                        conn._connection.close()
+                                        c._connection.close()
                                     except Exception:
                                         pass
-                                    conn._connection = None
+                                    c._connection = None
                                 return _STOP_RUNNING_SENTINEL
+
                             conn._tx.put_nowait((None, close_and_stop))
                         except Exception:
                             if hasattr(conn, "stop"):

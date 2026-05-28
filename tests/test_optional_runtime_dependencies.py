@@ -169,7 +169,13 @@ def test_cli_base_flow_without_extended_runtime_dependencies(tmp_path: Path) -> 
     env["CORTEX_LLM_PROVIDER"] = ""
     env["CORTEX_MASTER_KEY"] = "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA="
     env["CORTEX_TESTING"] = "1"
-    for k in ["GEMINI_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GROQ_API_KEY", "DEEPSEEK_API_KEY"]:
+    for k in [
+        "GEMINI_API_KEY",
+        "OPENAI_API_KEY",
+        "ANTHROPIC_API_KEY",
+        "GROQ_API_KEY",
+        "DEEPSEEK_API_KEY",
+    ]:
         env.pop(k, None)
     db_path = tmp_path / "base-flow.db"
     commands = [
@@ -189,7 +195,9 @@ def test_cli_base_flow_without_extended_runtime_dependencies(tmp_path: Path) -> 
             check=False,
         )
         combined += result.stdout + result.stderr
-        assert result.returncode == 0, f"Command {cmd} failed. Output:\n{result.stdout}\n{result.stderr}"
+        assert result.returncode == 0, (
+            f"Command {cmd} failed. Output:\n{result.stdout}\n{result.stderr}"
+        )
     assert "blocked by test harness" not in combined
     assert "ImportError" not in combined
     assert "CORTEX v0.3.0b8 initialized" in combined
@@ -203,7 +211,13 @@ def test_cli_base_flow_without_keyring_when_env_master_key_is_set(tmp_path: Path
     env["CORTEX_LLM_PROVIDER"] = ""
     env["CORTEX_MASTER_KEY"] = "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA="
     env["CORTEX_TESTING"] = "1"
-    for k in ["GEMINI_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GROQ_API_KEY", "DEEPSEEK_API_KEY"]:
+    for k in [
+        "GEMINI_API_KEY",
+        "OPENAI_API_KEY",
+        "ANTHROPIC_API_KEY",
+        "GROQ_API_KEY",
+        "DEEPSEEK_API_KEY",
+    ]:
         env.pop(k, None)
     db_path = tmp_path / "env-master-key.db"
     commands = [
@@ -223,7 +237,9 @@ def test_cli_base_flow_without_keyring_when_env_master_key_is_set(tmp_path: Path
             check=False,
         )
         combined += result.stdout + result.stderr
-        assert result.returncode == 0, f"Command {cmd} failed. Output:\n{result.stdout}\n{result.stderr}"
+        assert result.returncode == 0, (
+            f"Command {cmd} failed. Output:\n{result.stdout}\n{result.stderr}"
+        )
     assert "ImportError: keyring blocked by test harness" not in combined
     assert "CORTEX v0.3.0b8 initialized" in combined
     assert "Stored fact" in combined

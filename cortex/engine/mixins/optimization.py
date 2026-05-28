@@ -170,7 +170,7 @@ class OptimizationMixin:
             await self._write_buffer.put(None)
             await self._buffer_task
             self._buffer_task = None
-        
+
         if OptimizationMixin._executor is not None:
             # Force terminate child processes to completely avoid atexit hang
             try:
