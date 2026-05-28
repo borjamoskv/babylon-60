@@ -1,0 +1,51 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+---
+
+<SiteLayout
+	title="El Ocaso del Prompting | CORTEX Persist"
+	description="Máquinas de estado continuas y ciclos deterministas vs. el fetichismo request-response."
+	canonical="https://cortexpersist.com/blog/el-ocaso-del-prompting"
+>
+	<main class="landing-shell">
+		<article class="section-frame surface" style="margin-top: 2rem; padding: 2rem;">
+			<div class="section-heading" style="text-align: left; margin-bottom: 2rem;">
+				<p class="section-kicker">Architecture & Design</p>
+				<h1 style="font-family: 'Orbitron', sans-serif; font-weight: 800; line-height: 1.1; margin: 0; font-size: clamp(1.8rem, 4vw, 2.8rem);">El Ocaso del Prompting</h1>
+				<p style="color: var(--muted); margin-top: 1rem;">
+					Máquinas de estado continuas y ciclos deterministas vs. el fetichismo request-response.
+				</p>
+			</div>
+
+			<div class="content-body" style="font-size: 1.1rem; line-height: 1.7; display: grid; gap: 1.5rem;">
+				<p>
+					La industria actual trata la "Ingeniería de Prompts" como una disciplina oscura, un arte místico de encontrar las palabras mágicas que harán que un LLM haga su trabajo. Esto es lo que llamamos el <em>fetichismo del prompt</em>. Es un callejón sin salida arquitectónico.
+				</p>
+
+				<h2 style="margin-top: 1.5rem; font-family: 'Orbitron', sans-serif;">El Paradigma Request-Response está Roto</h2>
+				<p>
+					Si dependes de la calidad de un bloque gigante de texto para inyectar contexto, reglas y estado en cada petición (Request-Response), estás admitiendo la derrota. Estás forzando a la máquina a simular un cerebro completo desde cero en cada inferencia.
+				</p>
+
+				<h2 style="margin-top: 1.5rem; font-family: 'Orbitron', sans-serif;">Máquinas de Estado Continuas (Continuous State Machines)</h2>
+				<p>
+					Los agentes reales no funcionan a base de prompts ingeniosos. Operan como <strong>Máquinas de Estado Continuas</strong> orquestadas por código de sistemas duros.
+				</p>
+
+				<div class="surface-sunken" style="padding: 1.5rem; border-left: 4px solid var(--accent-bright);">
+					<p style="margin: 0; font-family: 'Space Mono', monospace; font-size: 0.9rem;">
+						<strong>Postulado Anti-Prompt:</strong> Si tienes que explicarle a tu agente las "reglas del juego" dentro de un prompt para que no se equivoque, tu arquitectura ha fallado. Las reglas deben estar encriptadas en la topología de ejecución y aplicadas por Guardianes C5.
+					</p>
+				</div>
+
+				<p>
+					En lugar de un megáfono verbal, usamos "Small-Scope Prompts" que solo traducen tareas diminutas y bien tipadas (ej: extraer un JSON de un HTML), mientras que un bucle asíncrono (ej: `langgraph_supervisor.py` o CORTEX Engine) mantiene el estado global inmutable. El prompting muere para dejar paso a la ingeniería de control determinista.
+				</p>
+			</div>
+			
+			<div style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+				<a href="/blog" class="button-tertiary">← Back to Blog</a>
+			</div>
+		</article>
+	</main>
+</SiteLayout>

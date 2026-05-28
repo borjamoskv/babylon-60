@@ -1,0 +1,55 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+---
+
+<SiteLayout
+	title="Hyper-Determinismo Computacional | CORTEX Persist"
+	description="Erradicando la ilusión estocástica de los LLMs mediante grafos de ejecución de estado sólido."
+	canonical="https://cortexpersist.com/blog/hyper-determinismo-computacional"
+>
+	<main class="landing-shell">
+		<article class="section-frame surface" style="margin-top: 2rem; padding: 2rem;">
+			<div class="section-heading" style="text-align: left; margin-bottom: 2rem;">
+				<p class="section-kicker">Systems Engineering</p>
+				<h1 style="font-family: 'Orbitron', sans-serif; font-weight: 800; line-height: 1.1; margin: 0; font-size: clamp(1.8rem, 4vw, 2.8rem);">Hyper-Determinismo Computacional</h1>
+				<p style="color: var(--muted); margin-top: 1rem;">
+					Erradicando la ilusión estocástica de los LLMs mediante grafos de ejecución de estado sólido.
+				</p>
+			</div>
+
+			<div class="content-body" style="font-size: 1.1rem; line-height: 1.7; display: grid; gap: 1.5rem;">
+				<p>
+					La industria de la inteligencia artificial está obsesionada con "guiar" modelos estocásticos usando lenguaje natural. Se asume que si escribes un prompt lo suficientemente bueno, la máquina se comportará de manera predecible. Esto es fundamentalmente falso desde un punto de vista termodinámico y de ingeniería de sistemas. Un modelo probabilístico siempre divergerá.
+				</p>
+
+				<h2 style="margin-top: 1.5rem; font-family: 'Orbitron', sans-serif;">El Problema Estocástico</h2>
+				<p>
+					Cuando delegas lógica de control a un LLM (por ejemplo, "si pasa X, ejecuta Y, pero solo si Z es verdadero"), estás construyendo castillos sobre un pantano cuántico. La probabilidad de que el modelo decida alucinar una regla de negocio o ignorar una restricción de seguridad es mayor que cero. A escala, esto significa un fallo catastrófico garantizado.
+				</p>
+
+				<h2 style="margin-top: 1.5rem; font-family: 'Orbitron', sans-serif;">Hyper-Determinismo</h2>
+				<p>
+					El <strong>Hyper-Determinismo</strong> invierte la polaridad. El LLM deja de ser el controlador y pasa a ser un mero "coprocesador lingüístico" invocado por un grafo de estado sólido.
+				</p>
+
+				<div class="surface-sunken" style="padding: 1.5rem; border-left: 4px solid var(--accent-bright);">
+					<p style="margin: 0; font-family: 'Space Mono', monospace; font-size: 0.9rem;">
+						<strong>Postulado 1:</strong> La lógica de negocio, las decisiones de bifurcación (branching) y las validaciones de seguridad DEBEN estar escritas en lenguajes deterministas (Python, Rust). El LLM solo se invoca para tareas puras de traducción, síntesis o extracción.
+					</p>
+				</div>
+
+				<p>
+					Bajo esta arquitectura, el grafo es la fuente de verdad. Si un agente decide que debe transferir fondos, esa decisión no la toma un modelo prediciendo el siguiente token. La toma una función estricta que evalúa un AST (Abstract Syntax Tree) validado criptográficamente.
+				</p>
+
+				<p>
+					Erradicar la ilusión estocástica no es una preferencia arquitectónica; es la única forma de construir sistemas autónomos que no implosionen bajo su propio peso.
+				</p>
+			</div>
+			
+			<div style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+				<a href="/blog" class="button-tertiary">← Back to Blog</a>
+			</div>
+		</article>
+	</main>
+</SiteLayout>

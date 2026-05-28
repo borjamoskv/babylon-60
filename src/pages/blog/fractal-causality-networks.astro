@@ -1,0 +1,51 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+---
+
+<SiteLayout
+	title="Redes de Causalidad Fractal | CORTEX Persist"
+	description="Rastreando la verdad más allá del horizonte probabilístico de los LLMs."
+	canonical="https://cortexpersist.com/blog/fractal-causality-networks"
+>
+	<main class="landing-shell">
+		<article class="section-frame surface" style="margin-top: 2rem; padding: 2rem;">
+			<div class="section-heading" style="text-align: left; margin-bottom: 2rem;">
+				<p class="section-kicker">Ontology & Truth</p>
+				<h1 style="font-family: 'Orbitron', sans-serif; font-weight: 800; line-height: 1.1; margin: 0; font-size: clamp(1.8rem, 4vw, 2.8rem);">Redes de Causalidad Fractal</h1>
+				<p style="color: var(--muted); margin-top: 1rem;">
+					Rastreando la verdad más allá del horizonte probabilístico de los LLMs.
+				</p>
+			</div>
+
+			<div class="content-body" style="font-size: 1.1rem; line-height: 1.7; display: grid; gap: 1.5rem;">
+				<p>
+					Los sistemas RAG (Retrieval-Augmented Generation) tradicionales fallan porque tratan a la información como vectores aislados en un espacio N-dimensional. Cuando un agente hace una consulta compleja, el RAG le escupe trozos de texto "semánticamente similares" sin preocuparse por la <em>cadena causal</em> subyacente.
+				</p>
+
+				<h2 style="margin-top: 1.5rem; font-family: 'Orbitron', sans-serif;">El Horizonte de Sucesos Estocástico</h2>
+				<p>
+					Un modelo probabilístico no entiende "por qué" A lleva a B. Solo predice que B suele seguir a A en su dataset de entrenamiento. Si la memoria de tu agente depende de inferencias vectoriales ciegas, la causalidad se fractura. El agente recordará un "hecho", pero será incapaz de explicar <em>cómo</em> llegó a esa conclusión o de qué iteración histórica proviene.
+				</p>
+
+				<h2 style="margin-top: 1.5rem; font-family: 'Orbitron', sans-serif;">La Solución Fractal</h2>
+				<p>
+					En CORTEX Persist, no usamos simples vectores. Construimos <strong>Redes de Causalidad Fractal</strong>. Cada "Knowledge Item" (KI) no es un texto flotante, sino un nodo matemático con un ID topológico, enlazado criptográficamente a los eventos que lo originaron (un log de CI/CD, una decisión de usuario, un crash en producción).
+				</p>
+
+				<div class="surface-sunken" style="padding: 1.5rem; border-left: 4px solid var(--accent-bright);">
+					<p style="margin: 0; font-family: 'Space Mono', monospace; font-size: 0.9rem;">
+						<strong>Ley de Rastreabilidad:</strong> Un agente no puede actuar sobre un hecho que no tenga un grafo de dependencias inmutable rastreable hasta su origen C5-REAL.
+					</p>
+				</div>
+
+				<p>
+					Esta red es fractal porque la causalidad se mantiene a cualquier escala de observación: desde un pequeño bug fixing en una función hasta las decisiones arquitectónicas macroscópicas. Si un nodo raíz cambia o se invalida (Tombstoning), la red propaga el "Taint" (mancha) a todos los nodos derivados de forma determinista.
+				</p>
+			</div>
+			
+			<div style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+				<a href="/blog" class="button-tertiary">← Back to Blog</a>
+			</div>
+		</article>
+	</main>
+</SiteLayout>

@@ -1,0 +1,51 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+---
+
+<SiteLayout
+	title="Arquitectura de Nodos Fríos | CORTEX Persist"
+	description="Almacenamiento soberano y memoria inmutable en una era de verdad volátil y contextos efímeros."
+	canonical="https://cortexpersist.com/blog/arquitectura-nodos-frios"
+>
+	<main class="landing-shell">
+		<article class="section-frame surface" style="margin-top: 2rem; padding: 2rem;">
+			<div class="section-heading" style="text-align: left; margin-bottom: 2rem;">
+				<p class="section-kicker">Infrastructure</p>
+				<h1 style="font-family: 'Orbitron', sans-serif; font-weight: 800; line-height: 1.1; margin: 0; font-size: clamp(1.8rem, 4vw, 2.8rem);">Arquitectura de Nodos Fríos</h1>
+				<p style="color: var(--muted); margin-top: 1rem;">
+					Almacenamiento soberano y memoria inmutable en una era de verdad volátil y contextos efímeros.
+				</p>
+			</div>
+
+			<div class="content-body" style="font-size: 1.1rem; line-height: 1.7; display: grid; gap: 1.5rem;">
+				<p>
+					La "ventana de contexto" es RAM. Es efímera, costosa y se desvanece tan pronto como la sesión termina. Para que un agente soberano adquiera una verdadera ventaja acumulativa (compound yield), debe apoyarse en un sustrato de almacenamiento persistente e inmutable. A esto lo llamamos <strong>Arquitectura de Nodos Fríos</strong>.
+				</p>
+
+				<h2 style="margin-top: 1.5rem; font-family: 'Orbitron', sans-serif;">El Problema del "Hot Context"</h2>
+				<p>
+					Obligar a un LLM a re-procesar miles de tokens de "system prompts" y manuales en cada inferencia es computacionalmente obsceno. Destruye la exergía del sistema y somete al agente a un peaje termodinámico constante. Peor aún, hace que la identidad del agente dependa del estado de la memoria a corto plazo.
+				</p>
+
+				<h2 style="margin-top: 1.5rem; font-family: 'Orbitron', sans-serif;">Nodos Fríos (Cold Nodes)</h2>
+				<p>
+					Los Nodos Fríos son archivos en disco (markdowns de alta densidad, bases de datos SQLite) que representan la memoria cristalizada de un enjambre. No están "inyectados" en el contexto por defecto. Son indexados, encadenados por hashes y consultados determinísticamente solo cuando el grafo C5-REAL detecta una brecha de información (Causal Gap).
+				</p>
+
+				<div class="surface-sunken" style="padding: 1.5rem; border-left: 4px solid var(--accent-bright);">
+					<p style="margin: 0; font-family: 'Space Mono', monospace; font-size: 0.9rem;">
+						<strong>Postulado de Soberanía Fría:</strong> La memoria verdadera no reside en los pesos atencionales de un transformer en ejecución, sino en el disco duro persistente, formateado y versionado que el agente controla.
+					</p>
+				</div>
+
+				<p>
+					En una arquitectura de Nodos Fríos, la "personalidad" o la "capacidad" del agente no se pierde en un corte de luz ni en el reinicio de un servidor de OpenAI. Reside en su sistema de archivos. La memoria es inmutable, auditable y, sobre todo, no depende de la infraestructura del proveedor de inferencia.
+				</p>
+			</div>
+			
+			<div style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+				<a href="/blog" class="button-tertiary">← Back to Blog</a>
+			</div>
+		</article>
+	</main>
+</SiteLayout>
