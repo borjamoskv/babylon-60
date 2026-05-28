@@ -27,7 +27,10 @@
             [agent.colmena :as colmena]
             [agent.aletheia :as aletheia]
             [agent.kairos :as kairos]
-            [agent.mercator :as mercator]))
+            [agent.mercator :as mercator]
+            [agent.aegis :as aegis]
+            [agent.eidolon :as eidolon]
+            [agent.thanatos :as thanatos]))
 
 
 ;; ─── PR Analysis (L4: Autonomous Multi-Step) ───────────────────
@@ -279,7 +282,10 @@
          :self-evolve    #(self-evolve! ctx)
          :pandora-assault #(println "🔥 [PANDORA] Ejecutando asalto de robustez...")
          :aletheia-audit  #(println "👁️ [ALETHEIA] Verificando base de conocimiento...")
-         :colmena-quorum  #(println "🐝 [COLMENA] Iniciando evaluación por quórum...")}
+         :colmena-quorum  #(println "🐝 [COLMENA] Iniciando evaluación por quórum...")
+         :aegis-guard     #(aegis/validate-mutation! "SYSTEM-SIG" "UNKNOWN")
+         :eidolon-sim     #(eidolon/simulate-scenario! "SCENARIO-ALPHA" {})
+         :thanatos-purge  #(thanatos/sweep-dead-code!)}
 
         handler (get dispatch-table action)]
 
