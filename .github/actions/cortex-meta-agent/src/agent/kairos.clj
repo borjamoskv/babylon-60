@@ -1,5 +1,5 @@
-(ns agent.temporal
-  "██ TEMPORAL — Agente Consciente del Tiempo ██
+(ns agent.kairos
+  "██ KAIROS — Agente Consciente del Tiempo ██
 
    Un agente que no solo procesa — RECUERDA, OLVIDA, y PREDICE.
 
