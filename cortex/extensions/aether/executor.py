@@ -128,7 +128,7 @@ class ExecutorAgent:
             tool_call = self._parse_tool_call(response)
             if tool_call:
                 state.last_tool = tool_call.name
-                result = toolkit.dispatch(tool_call.name, tool_call.args)
+                result = await toolkit.dispatch(tool_call.name, tool_call.args)
                 state.tool_results.append(f"[{tool_call.name}] → {result[:500]}")
                 logger.debug("Tool [%s] result: %s", tool_call.name, result[:200])
                 state.messages.append(

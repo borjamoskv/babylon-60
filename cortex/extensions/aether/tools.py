@@ -59,6 +59,9 @@ FORBIDDEN_BASH_PATTERNS: frozenset[str] = frozenset(
 )
 
 
+from cortex.extensions.aether.hooks import hooked_tool_execution
+
+
 class AgentToolkit:
     """Sandboxed tool set for the Aether Executor agent.
 
@@ -293,6 +296,7 @@ class AgentToolkit:
 
     # ── Dispatch ──────────────────────────────────────────────────────
 
+    @hooked_tool_execution(timeout_limit=5.0)
     def dispatch(self, tool_name: str, args: dict[str, str]) -> str:
         """Dispatch a tool call by name. Returns string result."""
 

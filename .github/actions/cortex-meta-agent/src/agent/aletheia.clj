@@ -1,10 +1,10 @@
-(ns agent.epistemic
-  "██ EPISTEMIC — Agente de Gestión del Conocimiento ██
+(ns agent.aletheia
+  "██ ALETHEIA — Agente de Gestión del Conocimiento ██
 
    Cada hecho tiene un nivel de certeza. Cada inferencia lo propaga.
    Cada contradicción se detecta. Cada olvido es consciente.
 
-   El agente epistémico NO almacena 'datos' — almacena CREENCIAS
+   El agente epistémico ALETHEIA no almacena 'datos' — almacena CREENCIAS
    con niveles de confianza, fuentes, y cadenas de razonamiento.
 
    Inspirado en:
@@ -69,7 +69,7 @@
     ;; Detección de contradicciones
     (let [contradictions (find-contradictions kb new-id)]
       (when (seq contradictions)
-        (println (str "⚡ [EPISTEMIC] Contradicción detectada: "
+        (println (str "⚡ [ALETHEIA] Contradicción detectada: "
                       (:claim belief) " vs "
                       (count contradictions) " creencias existentes"))
         (doseq [c-id contradictions]

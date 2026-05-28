@@ -1,14 +1,14 @@
-(ns agent.nemesis
-  "██ NEMESIS — Agente Adversarial (Red Team) ██
+(ns agent.pandora
+  "██ PANDORA — Agente Adversarial (Red Team) ██
 
    El agente que ATACA a otros agentes para encontrar debilidades.
 
    Filosofía: Un sistema que no se somete a adversarios controlados
    es un sistema que espera al adversario real para descubrir sus fallos.
 
-   NEMESIS no es malicioso — es el sistema inmunitario del enjambre.
-   Como las pruebas de estrés cardíaco: provocar el fallo controlado
-   para prevenir el fallo catastrófico.
+   PANDORA no es malicioso — es el sistema inmunitario del enjambre.
+   Como abrir la caja de Pandora de forma controlada para estudiar los males
+   y contenerlos antes de que ocurra una catástrofe.
 
    Tácticas:
    - Fuzzing: Inyectar inputs malformados
@@ -81,7 +81,7 @@
     :severity    :medium
     :description "Lanzar excepción aleatoria"
     :generate    (fn [_]
-                   (throw (ex-info "NEMESIS: Chaos injection"
+                   (throw (ex-info "PANDORA: Chaos injection"
                                    {:vector :chaos-exception})))}
 
    :sybil-fake-result
@@ -92,8 +92,8 @@
                    (cond
                      (map? expected-shape)
                      (zipmap (keys expected-shape)
-                             (repeat "NEMESIS_INJECTED"))
-                     :else {:status "ok" :data "NEMESIS_INJECTED"}))}})
+                             (repeat "PANDORA_INJECTED"))
+                     :else {:status "ok" :data "PANDORA_INJECTED"}))}})
 
 
 ;; ─── Probe (Ejecución de un ataque individual) ─────────────────
@@ -143,7 +143,7 @@
    El equivalente de un pentest automatizado."
   [target-fn & {:keys [schema exclude]
                 :or   {schema nil exclude #{}}}]
-  (println "⚔️  [NEMESIS] Iniciando asalto completo...")
+  (println "⚔️  [PANDORA] Iniciando asalto completo...")
   (let [vectors (remove #(contains? exclude (key %)) attack-catalog)
         results (doall
                   (for [[k _] vectors]
@@ -154,7 +154,7 @@
         vulns   (filter :vulnerable results)]
 
     (println "")
-    (println (str "═══ NEMESIS Report ═══"))
+    (println (str "═══ PANDORA Report ═══"))
     (println (str "  Vectores probados: " (count results)))
     (println (str "  Vulnerabilidades:  " (count vulns)))
     (when (seq vulns)
@@ -187,7 +187,7 @@
   "Campaña de caos: ejecutar ataques aleatorios durante N iteraciones.
    Simula un adversario persistente e impredecible."
   [target-fn iterations & {:keys [report-every] :or {report-every 10}}]
-  (println (str "🌪️  [NEMESIS] Campaña de caos: " iterations " iteraciones"))
+  (println (str "🌪️  [PANDORA] Campaña de caos: " iterations " iteraciones"))
   (let [vector-keys (vec (keys attack-catalog))
         results     (atom {:hits 0 :misses 0 :errors []})]
 

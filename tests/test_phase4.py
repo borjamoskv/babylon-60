@@ -28,24 +28,26 @@ def temp_repo(tmp_path):
 # ── 1. Tool Sealing Tests (Ω₃) ─────────────────────────────────────────
 
 
-def test_toolkit_sealing_allowed(tmp_path):
+@pytest.mark.asyncio
+async def test_toolkit_sealing_allowed(tmp_path):
     """Verify that allowed tools dispatch correctly."""
     toolkit = AgentToolkit(tmp_path, allowed_tools=["read_file"])
 
     # Mock read_file to avoid actual IO
     toolkit.read_file = MagicMock(return_value="content")
 
-    result = toolkit.dispatch("read_file", {"path": "foo.py"})
+    result = await toolkit.dispatch("read_file", {"path": "foo.py"})
     assert result == "content"
     toolkit.read_file.assert_called_once()
 
 
-def test_toolkit_sealing_blocked(tmp_path):
+@pytest.mark.asyncio
+async def test_toolkit_sealing_blocked(tmp_path):
     """Verify that unauthorized tools are intercepted."""
     toolkit = AgentToolkit(tmp_path, allowed_tools=["read_file"])
 
     # Try to dispatch 'bash', which is NOT in allowed_tools
-    result = toolkit.dispatch("bash", {"cmd": "ls"})
+    result = await toolkit.dispatch("bash", {"cmd": "ls"})
     assert "ToolNotAllowedError" in result
     assert "bash" in result
 
@@ -61,12 +63,13 @@ def test_toolkit_expansion(tmp_path):
     assert "bash" not in toolkit.allowed_tools
 
 
-def test_toolkit_unrestricted_by_default(tmp_path):
+@pytest.mark.asyncio
+async def test_toolkit_unrestricted_by_default(tmp_path):
     """Verify that if allowed_tools is None, everything is allowed (legacy)."""
     toolkit = AgentToolkit(tmp_path, allowed_tools=None)
     toolkit.read_file = MagicMock(return_value="content")
 
-    result = toolkit.dispatch("read_file", {"path": "foo.py"})
+    result = await toolkit.dispatch("read_file", {"path": "foo.py"})
     assert result == "content"
 
 
@@ -158,3 +161,119 @@ async def test_process_ghost_triggers_merge(mock_merge, mock_execute):
     assert result.success is True
     mock_merge.assert_called_once_with("autofix/ghost-123")
     assert "Merged to main" in result.summary
+
+
+@pytest.mark.asyncio
+async def test_hooked_tool_execution_timeout():
+    """Verify that hooked_tool_execution enforces the timeout limit."""
+    import time
+    import asyncio
+    from cortex.extensions.aether.hooks import hooked_tool_execution
+
+    @hooked_tool_execution(timeout_limit=0.1)
+    async def async_slow_tool():
+        await asyncio.sleep(0.5)
+        return "ok"
+
+    @hooked_tool_execution(timeout_limit=0.1)
+    def sync_slow_tool():
+        time.sleep(0.5)
+        return "ok"
+
+    @hooked_tool_execution(timeout_limit=0.5)
+    async def async_fast_tool():
+        return "fast_async"
+
+    @hooked_tool_execution(timeout_limit=0.5)
+    def sync_fast_tool():
+        return "fast_sync"
+
+    res_async_slow = await async_slow_tool()
+    assert "[ERROR]" in res_async_slow
+    assert "timed out after 0.1 seconds" in res_async_slow
+
+    res_sync_slow = await sync_slow_tool()
+    assert "[ERROR]" in res_sync_slow
+    assert "timed out after 0.1 seconds" in res_sync_slow
+
+    res_async_fast = await async_fast_tool()
+    assert res_async_fast == "fast_async"
+
+    res_sync_fast = await sync_fast_tool()
+    assert res_sync_fast == "fast_sync"
+
+
+@pytest.mark.asyncio
+async def test_evolution_supervisor_multipass_loop():
+    """Verify that EvolutionSupervisor executes the multipass loop with pre/post-eval."""
+    from cortex.agents.supervisor import EvolutionSupervisor
+    from cortex.agents.base import BaseAgent
+    from cortex.agents.manifest import AgentManifest
+
+    # Create dummy agent
+    manifest = AgentManifest(
+        agent_id="test-evo-agent",
+        purpose="testing",
+        tools_allowed=[],
+        can_delegate=False,
+        daemon=False,
+    )
+
+    # We mock BaseAgent and add a execute_objective method
+    class MockAutonomousAgent(BaseAgent):
+        def __init__(self, manifest, bus):
+            super().__init__(manifest, bus)
+            self.execution_count = 0
+
+        async def execute_objective(self, objective: str) -> dict:
+            self.execution_count += 1
+            if self.execution_count >= 2:
+                return {"status": "SUCCESS", "info": "achieved"}
+            return {"status": "FAILED", "info": "not yet"}
+
+    bus = MagicMock()
+    agent = MockAutonomousAgent(manifest, bus)
+
+    supervisor = EvolutionSupervisor()
+    supervisor.register(agent)
+
+    # Pre-eval and Post-eval mocks
+    pre_eval_mock = MagicMock(return_value={"pre_metric": 42})
+    post_eval_mock = MagicMock(
+        side_effect=[{"success": False, "score": 0.5}, {"success": True, "score": 1.0}]
+    )
+
+    # Mock Dream Engine
+    dream_engine_mock = MagicMock()
+
+    class DummyDreamResult:
+        clusters_found = 3
+        bridges_created = 5
+        engrams_reweighted = 2
+        duration_ms = 120.0
+
+    # Make dream_cycle an async mock
+    async def dummy_dream_cycle(tenant_id):
+        return DummyDreamResult()
+
+    dream_engine_mock.dream_cycle = dummy_dream_cycle
+
+    res = await supervisor.run_autonomous_loop(
+        agent_id="test-evo-agent",
+        objective="Self-Improve",
+        pre_eval=pre_eval_mock,
+        post_eval=post_eval_mock,
+        max_passes=3,
+        dream_engine=dream_engine_mock,
+    )
+
+    assert res["status"] == "SUCCESS"
+    assert res["passes_executed"] == 2
+    assert agent.execution_count == 2
+    assert pre_eval_mock.call_count == 2
+    assert post_eval_mock.call_count == 2
+
+    dream_int = res["dream_integration"]
+    assert dream_int["status"] == "COMPLETED"
+    assert dream_int["clusters_found"] == 3
+    assert dream_int["bridges_created"] == 5

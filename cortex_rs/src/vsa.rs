@@ -1,6 +1,9 @@
 use pyo3::prelude::*;
 use rand::Rng;
 use std::f32;
+use sha2::{Sha256, Digest};
+use std::fs::OpenOptions;
+use std::io::Write;
 
 /// A HyperVector representing a concept in the Vector Symbolic Architecture (VSA).
 #[pyclass(from_py_object)]
@@ -83,6 +86,15 @@ impl HyperVector {
     
     pub fn to_list<'py>(&self, _py: Python<'py>) -> PyResult<Vec<f32>> {
         Ok(self.data.clone())
+    }
+
+    /// Computes the SHA-256 hash of the hypervector
+    pub fn hash(&self) -> String {
+        let mut hasher = Sha256::new();
+        for val in &self.data {
+            hasher.update(val.to_bits().to_le_bytes());
+        }
+        hex::encode(hasher.finalize())
     }
 }
 
@@ -197,8 +209,29 @@ impl EpistemicMembrane {
         Ok(dict)
     }
 
-    pub fn commit(&mut self, proposal_hv: HyperVector) {
+    pub fn commit(&mut self, proposal_hv: HyperVector) -> PyResult<String> {
+        let h_hash = proposal_hv.hash();
+        
+        // C5-REAL: Cryptographic append-only ledger
+        if let Ok(mut file) = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open("cortex_ledger.jsonl")
+        {
+            let timestamp = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap_or_default()
+                .as_secs();
+            let log_entry = format!("{{\"timestamp\": {}, \"hash\": \"{}\", \"dim\": {}}}\n",
+                timestamp,
+                h_hash,
+                proposal_hv.dim
+            );
+            let _ = file.write_all(log_entry.as_bytes());
+        }
+
         self.item_memory.push(proposal_hv);
+        Ok(h_hash)
     }
 }
 

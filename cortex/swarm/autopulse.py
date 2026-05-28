@@ -125,7 +125,9 @@ async def process_queue():
                         logger.error("Autopulse Signal Error: %s", e)
 
             except EntropySpikeException as e:
-                logger.error("Autopulse Circuit Breaker Tripped! Task aborted for %s. Error: %s", agent, e)
+                logger.error(
+                    "Autopulse Circuit Breaker Tripped! Task aborted for %s. Error: %s", agent, e
+                )
                 # Halt further queue processing for 30s to allow metrics to cool down or operators to intervene
                 await asyncio.sleep(30.0)
             except (OSError, json.JSONDecodeError, KeyError, ValueError) as e:
@@ -136,7 +138,9 @@ async def process_queue():
 
 class EntropySpikeException(Exception):
     """Raised when swarm yield dispersion exceeds the safety threshold."""
+
     pass
+
 
 def _audit_entropy_spike(legion: TensorGlialLegion, agent_name: str) -> None:
     """AUDITOR-Ω Circuit Breaker: Monitor yield entropy spikes per Axiom Ω₃.
@@ -164,7 +168,9 @@ def _audit_entropy_spike(legion: TensorGlialLegion, agent_name: str) -> None:
             _ENTROPY_THRESHOLD,
             legion.global_sha256_audit()[:16],
         )
-        raise EntropySpikeException(f"Entropy Circuit Breaker tripped for agent {agent_name} (cv={cv:.4f})")
+        raise EntropySpikeException(
+            f"Entropy Circuit Breaker tripped for agent {agent_name} (cv={cv:.4f})"
+        )
     else:
         logger.debug(
             "[AUDITOR-Ω] entropy OK — agent=%s cv=%.4f",

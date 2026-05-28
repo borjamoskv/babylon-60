@@ -13,8 +13,10 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import inspect
 import time
 from dataclasses import dataclass, field
+from collections.abc import Callable
 from typing import Any
 
 from cortex.agents.base import BaseAgent
@@ -295,3 +297,156 @@ class Supervisor:
         if entry is None:
             raise KeyError(f"Agent '{agent_id}' not registered")
         return entry
+
+
+class EvolutionSupervisor(Supervisor):
+    """Supervisor that runs an agent inside a multipass autonomous evolution loop.
+
+    Integrates pre_eval and post_eval metrics for quality checking.
+    Consolidates state anomalies / daydreams on exit.
+    """
+
+    async def run_autonomous_loop(
+        self,
+        agent_id: str,
+        objective: str,
+        pre_eval: Callable[[], Any] | None = None,
+        post_eval: Callable[[], Any] | None = None,
+        max_passes: int = 3,
+        tenant_id: str = "default",
+        dream_engine: Any = None,
+    ) -> dict[str, Any]:
+        """Execute a multipass loop of agent objective execution with pre/post-eval metrics.
+
+        On exit, triggers the memory dream/consolidation cycle (AutoDream integration).
+        """
+        logger.info(
+            "🔄 Starting Evolution Loop for agent '%s' (Objective: '%s', passes=%d)",
+            agent_id,
+            objective,
+            max_passes,
+        )
+
+        entry = self._get_entry(agent_id)
+        agent = entry.agent
+
+        trace = []
+        success = False
+
+        for run_pass in range(1, max_passes + 1):
+            logger.info("👉 Evolution Loop Pass %d/%d", run_pass, max_passes)
+
+            # ── 1. Pre-eval ──
+            pre_metrics = {}
+            if pre_eval is not None:
+                try:
+                    if inspect.iscoroutinefunction(pre_eval):
+                        pre_metrics = await pre_eval()
+                    else:
+                        pre_metrics = pre_eval()
+                    logger.info("   [PRE-EVAL] Metrics: %s", pre_metrics)
+                except Exception as exc:
+                    logger.error("   [PRE-EVAL] Failed: %s", exc)
+                    pre_metrics = {"error": str(exc)}
+
+            # ── 2. Run agent execution ──
+            exec_result = {}
+            if hasattr(agent, "execute_objective"):
+                try:
+                    exec_result = await agent.execute_objective(objective)
+                except Exception as exc:
+                    logger.exception("   [EXECUTION] Agent objective execution failed")
+                    exec_result = {"status": "FAILED", "error": str(exc)}
+            else:
+                logger.warning("   [EXECUTION] Agent does not have execute_objective method")
+                exec_result = {"status": "FAILED", "error": "Agent lacks execute_objective method"}
+
+            # ── 3. Post-eval ──
+            post_metrics = {}
+            if post_eval is not None:
+                try:
+                    if inspect.iscoroutinefunction(post_eval):
+                        post_metrics = await post_eval()
+                    else:
+                        post_metrics = post_eval()
+                    logger.info("   [POST-EVAL] Metrics: %s", post_metrics)
+                except Exception as exc:
+                    logger.error("   [POST-EVAL] Failed: %s", exc)
+                    post_metrics = {"error": str(exc)}
+
+            # Record this pass
+            pass_record = {
+                "pass": run_pass,
+                "pre_metrics": pre_metrics,
+                "exec_result": exec_result,
+                "post_metrics": post_metrics,
+            }
+            trace.append(pass_record)
+
+            # Determine early exit if objective is met
+            # Condition 1: post_eval indicates success
+            if post_eval is not None and post_metrics.get("success", False):
+                logger.info(
+                    "✅ Evolution Loop succeeded early on pass %d: post_eval signaled success",
+                    run_pass,
+                )
+                success = True
+                break
+
+            # Condition 2: Agent execution succeeded and no post_eval succeeded/existed
+            if post_eval is None and exec_result.get("status") == "SUCCESS":
+                logger.info(
+                    "✅ Evolution Loop succeeded on pass %d: agent execution finished successfully",
+                    run_pass,
+                )
+                success = True
+                break
+
+        # ── 4. AutoDream Integration on Exit ──
+        dream_report = {}
+        if dream_engine is not None:
+            logger.info("💤 Initiating AutoDream Integration on Evolution Loop exit...")
+            try:
+                if hasattr(dream_engine, "dream_cycle"):
+                    # AssociativeDreamEngine
+                    dream_result = await dream_engine.dream_cycle(tenant_id=tenant_id)
+                    dream_report = {
+                        "status": "COMPLETED",
+                        "clusters_found": getattr(dream_result, "clusters_found", 0),
+                        "bridges_created": getattr(dream_result, "bridges_created", 0),
+                        "engrams_reweighted": getattr(dream_result, "engrams_reweighted", 0),
+                        "duration_ms": getattr(dream_result, "duration_ms", 0.0),
+                    }
+                elif hasattr(dream_engine, "run_full_cycle"):
+                    # SleepOrchestrator
+                    sleep_report = await dream_engine.run_full_cycle(tenant_id=tenant_id)
+                    dream_report = {
+                        "status": "COMPLETED",
+                        "nrem_merged": sleep_report.nrem_merged,
+                        "nrem_reinforced": sleep_report.nrem_reinforced,
+                        "rem_clusters_found": sleep_report.rem_clusters_found,
+                        "rem_bridges_created": sleep_report.rem_bridges_created,
+                        "total_duration_ms": sleep_report.total_duration_ms,
+                    }
+                else:
+                    logger.warning(
+                        "   [AutoDream] dream_engine lacks standard run_full_cycle or dream_cycle method"
+                    )
+                    dream_report = {
+                        "status": "SKIPPED",
+                        "reason": "Unsupported dream engine interface",
+                    }
+                logger.info("💤 AutoDream consolidation finished: %s", dream_report)
+            except Exception as exc:
+                logger.error("❌ [AutoDream] Consolidation failed: %s", exc)
+                dream_report = {"status": "FAILED", "error": str(exc)}
+        else:
+            logger.info("💤 AutoDream skipped: no dream engine provided")
+            dream_report = {"status": "SKIPPED", "reason": "No dream engine provided"}
+
+        return {
+            "status": "SUCCESS" if success else "FAILED",
+            "passes_executed": len(trace),
+            "trace": trace,
+            "dream_integration": dream_report,
+        }

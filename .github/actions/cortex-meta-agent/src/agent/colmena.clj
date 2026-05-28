@@ -1,5 +1,5 @@
-(ns agent.swarm
-  "██ SWARM — Coordinador de Enjambre Multi-Agente ██
+(ns agent.colmena
+  "██ COLMENA — Coordinador de Enjambre Multi-Agente ██
 
    Orquesta múltiples agentes en paralelo con:
    - Fan-out / Fan-in: distribuir trabajo y recoger resultados
@@ -55,7 +55,7 @@
 
    Útil para: redundancia, verificación cruzada, diversidad de soluciones."
   [registry task & {:keys [timeout-ms] :or {timeout-ms 10000}}]
-  (println (str "📡 [SWARM] Fan-out a " (count @registry) " agentes..."))
+  (println (str "📡 [COLMENA] Fan-out a " (count @registry) " agentes..."))
   (let [agents  (vals @registry)
         futures (doall
                   (for [ag agents]
@@ -87,7 +87,7 @@
 
    Útil para: dividir y conquistar, procesamiento paralelo."
   [registry task-assignments & {:keys [timeout-ms] :or {timeout-ms 10000}}]
-  (println (str "🔀 [SWARM] Fan-in: " (count task-assignments) " sub-tareas..."))
+  (println (str "🔀 [COLMENA] Fan-in: " (count task-assignments) " sub-tareas..."))
   (let [futures (doall
                   (for [{:keys [agent-id task]} task-assignments
                         :let [ag (get @registry agent-id)]
@@ -117,7 +117,7 @@
   [registry task required-agreement & {:keys [timeout-ms comparator]
                                         :or   {timeout-ms 10000
                                                comparator =}}]
-  (println (str "🗳️  [SWARM] Quorum: necesarios " required-agreement
+  (println (str "🗳️  [COLMENA] Quorum: necesarios " required-agreement
                 " de " (count @registry) "..."))
   (let [fan-result (fan-out registry task :timeout-ms timeout-ms)
         successes  (filter :success? (:results fan-result))
@@ -152,7 +152,7 @@
 
    Útil para: optimización, encontrar la mejor solución entre alternativas."
   [registry task scoring-fn & {:keys [timeout-ms] :or {timeout-ms 10000}}]
-  (println (str "🏆 [SWARM] Tournament: " (count @registry) " competidores..."))
+  (println (str "🏆 [COLMENA] Tournament: " (count @registry) " competidores..."))
   (let [fan-result (fan-out registry task :timeout-ms timeout-ms)
         scored     (->> (:results fan-result)
                         (filter :success?)
@@ -175,7 +175,7 @@
 
    Útil para: transformación progresiva, refinamiento iterativo."
   [registry agent-ids initial-input]
-  (println (str "⛓️  [SWARM] Pipeline: " (str/join " → " agent-ids)))
+  (println (str "⛓️  [COLMENA] Pipeline: " (str/join " → " agent-ids)))
   (reduce
     (fn [acc agent-id]
       (if-let [ag (get @registry agent-id)]
