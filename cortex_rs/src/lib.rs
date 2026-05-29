@@ -154,8 +154,8 @@ impl ZeroCopyRingBuffer {
     #[new]
     #[pyo3(signature = (bin_path, capacity=None))]
     pub fn new(bin_path: &str, capacity: Option<usize>) -> PyResult<Self> {
-        let capacity = capacity.unwrap_or(10000);
-        let task_size = 4096;
+        let capacity = capacity.unwrap_or(1000000);
+        let task_size = 256;
         let total_size = capacity * task_size;
 
         let file = OpenOptions::new()
@@ -218,11 +218,11 @@ impl ZeroCopyRingBuffer {
                 agent_bytes[..len].copy_from_slice(&agent_id[..len]);
                 buffer[offset + 9..offset + 73].copy_from_slice(&agent_bytes);
 
-                // Write binary payload (4023 bytes)
-                let mut payload_bytes = [0u8; 4023];
-                let len = payload.len().min(4023);
+                // Write binary payload (183 bytes)
+                let mut payload_bytes = [0u8; 183];
+                let len = payload.len().min(183);
                 payload_bytes[..len].copy_from_slice(&payload[..len]);
-                buffer[offset + 73..offset + 4096].copy_from_slice(&payload_bytes);
+                buffer[offset + 73..offset + 256].copy_from_slice(&payload_bytes);
 
                 return Ok(true);
             }
@@ -251,7 +251,7 @@ impl ZeroCopyRingBuffer {
                 let agent_raw = &buffer[offset + 9..offset + 73];
                 let agent_id = strip_trailing_nulls(agent_raw);
 
-                let payload_raw = &buffer[offset + 73..offset + 4096];
+                let payload_raw = &buffer[offset + 73..offset + 256];
                 let payload = strip_trailing_nulls(payload_raw);
 
                 let py_agent = pyo3::types::PyBytes::new(py, agent_id);
@@ -308,8 +308,8 @@ impl ZeroCopyRingBuffer {
                 if buffer[offset] == 1 { // Pending
                     buffer[offset] = 2;  // Mark processing
                     
-                    let mut payload_bytes = [0u8; 4023];
-                    payload_bytes.copy_from_slice(&buffer[offset + 73..offset + 4096]);
+                    let mut payload_bytes = [0u8; 183];
+                    payload_bytes.copy_from_slice(&buffer[offset + 73..offset + 256]);
                     
                     tasks_to_process.push((i, offset, payload_bytes));
                 }

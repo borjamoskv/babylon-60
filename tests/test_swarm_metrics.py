@@ -8,8 +8,8 @@ import sys
 
 # Add project root to sys.path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-sys.path.append(str(PROJECT_ROOT))
-sys.path.append(str(PROJECT_ROOT / "cortex-core"))
+sys.path.insert(0, str(PROJECT_ROOT))
+sys.path.insert(0, str(PROJECT_ROOT / "cortex-core"))
 
 import persistence
 from persistence import get_swarm_metrics
@@ -140,7 +140,11 @@ def test_swarm_metrics_active_children():
     # 2. Enqueue into ZeroCopyRingBuffer
     ring = persistence._get_ring_buffer()
     # Write a pending task (status = 1)
-    success = ring.enqueue(b"TestAgentRing", b"{}")
+    try:
+        success = ring.enqueue(b"TestAgentRing", b"{}")
+    except Exception as e:
+        pass
+        success = False
     assert success is True
 
     # Total should be 2 (1 from SQLite + 1 from Ring Buffer)

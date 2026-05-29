@@ -141,16 +141,11 @@ class ZeroCopyRingBuffer(SovereignResource):
         count = 0
         try:
             if hasattr(self, '_buffer') and self._buffer is not None:
-                for i in range(self.capacity):
-                    if self._buffer[i * self.task_size] == 1:
-                        count += 1
+                count = self._buffer[0::self.task_size].tobytes().count(b'\x01')
             elif os.path.exists(self.bin_path):
                 with open(self.bin_path, 'rb') as f:
                     data = f.read(self.capacity * self.task_size)
-                    for i in range(self.capacity):
-                        offset = i * self.task_size
-                        if offset < len(data) and data[offset] == 1:
-                            count += 1
+                    count = data[0::self.task_size].count(b'\x01')
         except Exception as e:
             logger.error('Failed to count pending tasks in ZeroCopyRingBuffer: %s', e)
         return count
@@ -412,15 +407,11 @@ def get_swarm_metrics(bypass_cache: bool=False) -> dict:
                 elif os.path.exists(ring.bin_path):
                     with open(ring.bin_path, 'rb') as f:
                         data = f.read()
-                    for idx in range(ring.capacity):
-                        offset = idx * ring.task_size
-                        if offset < len(data) and data[offset] in (1, 2):
-                            active_children += 1
+                    statuses = data[0::ring.task_size]
+                    active_children += statuses.count(b'\x01') + statuses.count(b'\x02')
             elif hasattr(ring, '_buffer') and ring._buffer is not None:
-                for idx in range(ring.capacity):
-                    offset = idx * ring.task_size
-                    if ring._buffer[offset] in (1, 2):
-                        active_children += 1
+                statuses = ring._buffer[0::ring.task_size].tobytes()
+                active_children += statuses.count(b'\x01') + statuses.count(b'\x02')
         except Exception as e:
             logger.error('Failed to count RingBuffer tasks in metrics: %s', e)
         try:
@@ -439,7 +430,7 @@ def get_swarm_metrics(bypass_cache: bool=False) -> dict:
         result = {'latency_ms': round(latency_ms, 2), 'active_children': active_children, 'uncertainty': round(uncertainty, 4)}
         with _metrics_cache_lock:
             _metrics_cache['value'] = result
-            _metrics_cache['expiry'] = now + 0.5
+            _metrics_cache['expiry'] = time.monotonic() + 0.5
         return result
     except Exception as e:
         logger.error('Failed to extract swarm metrics (Deterministic C5-REAL Exception): %s', e)
