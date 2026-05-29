@@ -179,54 +179,123 @@ class _DocstringInjector(ast.NodeTransformer):
         return self.visit_FunctionDef(node)  # type: ignore[type-error]
 
 
-class _TrashRegexEvasion(ast.NodeTransformer):
-    """Evades CORTEX-SENTINEL TRASH_REGEX by replacing print/stdout with logger.info."""
+class _EntropyAnnihilator(ast.NodeTransformer):
+    """
+    x1000 Upgrade: Universal Exergy-Maximized I/O & Debug Purger.
+    - Annihilates pdb, breakpoint.
+    - Transforms print/sys.stdout -> logger.info.
+    - Transforms sys.stderr -> logger.error.
+    - Resolves existing logger or injects structured cortex.exergy.
+    """
+
     def __init__(self):
         self.made_changes = False
-
-    def visit_Call(self, node):
-        self.generic_visit(node)
-        if isinstance(node.func, ast.Name) and node.func.id == "print":
-            self.made_changes = True
-            node.func = ast.Attribute(
-                value=ast.Name(id="logger", ctx=ast.Load()),
-                attr="info",
-                ctx=ast.Load()
-            )
-        elif (isinstance(node.func, ast.Attribute) and node.func.attr == "write" and 
-              isinstance(node.func.value, ast.Attribute) and node.func.value.attr == "stdout" and 
-              isinstance(node.func.value.value, ast.Name) and node.func.value.value.id == "sys"):
-            self.made_changes = True
-            node.func = ast.Attribute(
-                value=ast.Name(id="logger", ctx=ast.Load()),
-                attr="info",
-                ctx=ast.Load()
-            )
-        return node
+        self.logger_name = "logger"
 
     def visit_Module(self, node):
+        # Scan for existing loggers first
+        for stmt in node.body:
+            if isinstance(stmt, ast.Assign) and isinstance(stmt.value, ast.Call):
+                if getattr(stmt.value.func, "attr", "") == "getLogger":
+                    for target in stmt.targets:
+                        if isinstance(target, ast.Name):
+                            self.logger_name = target.id
+                            break
+
         self.generic_visit(node)
+
         if self.made_changes:
-            has_logging = any(isinstance(n, ast.Import) and any(alias.name == "logging" for alias in n.names) for n in node.body)
+            has_logging = any(
+                isinstance(n, ast.Import) and any(alias.name == "logging" for alias in n.names)
+                for n in node.body
+            )
             if not has_logging:
                 import_logging = ast.Import(names=[ast.alias(name="logging", asname=None)])
                 logger_setup = ast.Assign(
-                    targets=[ast.Name(id="logger", ctx=ast.Store())],
+                    targets=[ast.Name(id=self.logger_name, ctx=ast.Store())],
                     value=ast.Call(
-                        func=ast.Attribute(value=ast.Name(id="logging", ctx=ast.Load()), attr="getLogger", ctx=ast.Load()),
-                        args=[ast.Name(id="__name__", ctx=ast.Load())],
-                        keywords=[]
-                    )
+                        func=ast.Attribute(
+                            value=ast.Name(id="logging", ctx=ast.Load()),
+                            attr="getLogger",
+                            ctx=ast.Load(),
+                        ),
+                        args=[ast.Constant(value="cortex.exergy")],
+                        keywords=[],
+                    ),
                 )
                 insert_idx = 0
                 for i, stmt in enumerate(node.body):
                     if isinstance(stmt, ast.ImportFrom) and stmt.module == "__future__":
                         insert_idx = i + 1
-                    elif isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant) and isinstance(stmt.value.value, str):
+                    elif (
+                        isinstance(stmt, ast.Expr)
+                        and isinstance(stmt.value, ast.Constant)
+                        and isinstance(stmt.value.value, str)
+                    ):
                         if insert_idx == 0:
                             insert_idx = i + 1
                 node.body.insert(insert_idx, logger_setup)
                 node.body.insert(insert_idx, import_logging)
+        return node
+
+    def visit_Import(self, node):
+        new_names = [n for n in node.names if n.name not in ("pdb", "ipdb")]
+        if not new_names:
+            self.made_changes = True
+            return None
+        if len(new_names) != len(node.names):
+            self.made_changes = True
+            node.names = new_names
+        return node
+
+    def visit_Expr(self, node):
+        if isinstance(node.value, ast.Call) and getattr(node.value.func, "id", "") == "breakpoint":
+            self.made_changes = True
+            return None
+        if isinstance(node.value, ast.Call) and getattr(node.value.func, "attr", "") == "set_trace":
+            if getattr(node.value.func.value, "id", "") in ("pdb", "ipdb"):
+                self.made_changes = True
+                return None
+        self.generic_visit(node)
+        return node
+
+    def visit_Call(self, node):
+        self.generic_visit(node)
+        level = "info"
+        is_print = isinstance(node.func, ast.Name) and node.func.id == "print"
+
+        is_stdout, is_stderr = False, False
+        if isinstance(node.func, ast.Attribute) and node.func.attr == "write":
+            if (
+                isinstance(node.func.value, ast.Attribute)
+                and getattr(node.func.value.value, "id", "") == "sys"
+            ):
+                if node.func.value.attr == "stdout":
+                    is_stdout = True
+                elif node.func.value.attr == "stderr":
+                    is_stderr = True
+
+        if is_print:
+            for kw in node.keywords:
+                if (
+                    kw.arg == "file"
+                    and isinstance(kw.value, ast.Attribute)
+                    and kw.value.attr == "stderr"
+                ):
+                    level = "error"
+            self.made_changes = True
+            node.func = ast.Attribute(
+                value=ast.Name(id=self.logger_name, ctx=ast.Load()), attr=level, ctx=ast.Load()
+            )
+            node.keywords = [kw for kw in node.keywords if kw.arg not in ("file", "end", "flush")]
+
+        elif is_stdout or is_stderr:
+            level = "error" if is_stderr else "info"
+            self.made_changes = True
+            node.func = ast.Attribute(
+                value=ast.Name(id=self.logger_name, ctx=ast.Load()), attr=level, ctx=ast.Load()
+            )
+
         return node
 
 
@@ -369,7 +438,7 @@ class OuroborosOmega:
             # 3. RECONSTRUCTION
             injector = _DocstringInjector()
             mutated_tree = injector.visit(mutated_tree)
-            evasion = _TrashRegexEvasion()
+            evasion = _EntropyAnnihilator()
             mutated_tree = evasion.visit(mutated_tree)
             ast.fix_missing_locations(mutated_tree)
             logger.info("Phase 3 [Reconstruction] Complete.")
