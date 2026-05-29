@@ -82,3 +82,11 @@ async fn meta_loop(topology: &mut Topology) {
 ---
 **NOTA DE EJECUCIÓN (CORTEX):** 
 Este archivo rige el desarrollo del runtime. El sistema reescribirá su propia topología. El modo adversarial (Depredador/Presa) se utilizará para forzar el descarte de genes de baja exergía.
+
+## 6. PYTHON SUBSTRATE INTEGRATION (AST PARSING)
+
+La transmutación biológica a código se ejecuta mediante el parser AST (`cortex/engine/smte/parser.py`).
+- **Transcription**: `AgentASTParser` carga el código en memoria y extrae topología (clases, funciones, docstrings).
+- **Mutation**: Mutadores aplican transformaciones estructurales (ej. inyectar guards o auto-etiquetas).
+- **Survival**: Se compila en memoria. Si el AST es válido y genera una ganancia neta en `ExergyGuard`, se cristaliza en disco.
+- **Proof of Life**: `trigger_mutation.py` demuestra una iteración completa Ouroboros (Lectura → Mutación Termodinámica → Cristalización C5-REAL).
