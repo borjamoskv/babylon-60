@@ -18,6 +18,7 @@ use std::time::Instant;
 
 pub mod isa;
 pub mod autocurative;
+pub mod ouroboros_compiler;
 pub mod traceback;
 pub mod curriculum;
 pub mod conjecturer;
