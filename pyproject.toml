@@ -34,6 +34,7 @@ dependencies = [
     "aiosqlite>=0.20.0",
     "cryptography>=46.0.7",
     "pydantic>=2.0",
+    "dbt-bigquery>=1.11.1",
 ]
 
 [project.urls]
