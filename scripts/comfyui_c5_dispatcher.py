@@ -95,7 +95,7 @@ def run_c5_real_pipeline():
 
     try:
         ws.connect(f"ws://{SERVER_ADDRESS}/ws?clientId={CLIENT_ID}")
-    except Exception as e:
+    except Exception:
         sys.exit(1)
 
     prompt_res = queue_prompt(PROMPT_GRAPH)
