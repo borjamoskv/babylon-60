@@ -5,6 +5,43 @@ use sha2::{Sha256, Digest};
 use std::fs::OpenOptions;
 use std::io::Write;
 
+#[derive(Clone)]
+pub struct MerkleTree {
+    leaves: Vec<String>,
+}
+
+impl MerkleTree {
+    pub fn new() -> Self {
+        Self { leaves: Vec::new() }
+    }
+
+    pub fn push(&mut self, hash: String) {
+        self.leaves.push(hash);
+    }
+
+    pub fn root(&self) -> String {
+        if self.leaves.is_empty() {
+            return "empty".to_string();
+        }
+        let mut current_level = self.leaves.clone();
+        while current_level.len() > 1 {
+            let mut next_level = Vec::new();
+            for chunk in current_level.chunks(2) {
+                let mut hasher = Sha256::new();
+                hasher.update(chunk[0].as_bytes());
+                if chunk.len() > 1 {
+                    hasher.update(chunk[1].as_bytes());
+                } else {
+                    hasher.update(chunk[0].as_bytes());
+                }
+                next_level.push(hex::encode(hasher.finalize()));
+            }
+            current_level = next_level;
+        }
+        current_level[0].clone()
+    }
+}
+
 /// A HyperVector representing a concept in the Vector Symbolic Architecture (VSA).
 #[pyclass(from_py_object)]
 #[derive(Clone, Debug, PartialEq)]
@@ -138,6 +175,7 @@ pub struct EpistemicMembrane {
     threshold_consistency: f32,
     #[allow(dead_code)]
     threshold_novelty: f32,
+    merkle: MerkleTree,
 }
 
 #[pymethods]
@@ -151,6 +189,7 @@ impl EpistemicMembrane {
             role_novelty: HyperVector::random(dim),
             threshold_consistency: 0.65,
             threshold_novelty: 0.35,
+            merkle: MerkleTree::new(),
         }
     }
 
@@ -211,6 +250,8 @@ impl EpistemicMembrane {
 
     pub fn commit(&mut self, proposal_hv: HyperVector) -> PyResult<String> {
         let h_hash = proposal_hv.hash();
+        self.merkle.push(h_hash.clone());
+        let root_hash = self.merkle.root();
         
         // C5-REAL: Cryptographic append-only ledger
         if let Ok(mut file) = OpenOptions::new()
@@ -222,16 +263,17 @@ impl EpistemicMembrane {
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap_or_default()
                 .as_secs();
-            let log_entry = format!("{{\"timestamp\": {}, \"hash\": \"{}\", \"dim\": {}}}\n",
+            let log_entry = format!("{{\"timestamp\": {}, \"hash\": \"{}\", \"root_hash\": \"{}\", \"dim\": {}}}\n",
                 timestamp,
                 h_hash,
+                root_hash,
                 proposal_hv.dim
             );
             let _ = file.write_all(log_entry.as_bytes());
         }
 
         self.item_memory.push(proposal_hv);
-        Ok(h_hash)
+        Ok(root_hash)
     }
 }
 
