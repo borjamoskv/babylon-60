@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import logging
 import time
+from pathlib import Path
 from typing import Any
 
 from cortex.agents.base import BaseAgent
@@ -37,9 +38,15 @@ from cortex.agents.manifest import AgentManifest
 from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
 from cortex.agents.state import AgentStatus
 from cortex.agents.tools import ToolRegistry
+from cortex.sica.autonomy import (
+    AdaptiveRetry,
+    AutonomousTick,
+    SpeculativeFork,
+)
 from cortex.sica.constitution import Constitution, Severity
 from cortex.sica.meta_level import MetaLevel, MetaJudgment, MetaAction
 from cortex.sica.object_level import ObjectLevel, StepOutcome
+from cortex.sica.persistence import load_or_default, save_genome
 from cortex.sica.strategy import SearchStrategy, default_genome
 
 logger = logging.getLogger("cortex.sica.agent")
@@ -67,14 +74,32 @@ class SICAAgent(BaseAgent):
         constitution: Constitution | None = None,
         strategy: SearchStrategy | None = None,
         max_retries_per_task: int = 3,
+        persist_dir: Path | str | None = None,
+        enable_autonomy: bool = True,
     ) -> None:
         super().__init__(manifest, bus, tool_registry)
-        self._strategy = strategy or SearchStrategy(default_genome())
+
+        # ── Strategy: resume from persisted genome or start fresh ──
+        if strategy is not None:
+            self._strategy = strategy
+        else:
+            self._strategy = load_or_default(
+                manifest.agent_id,
+                directory=persist_dir,
+            )
+
+        self._persist_dir = persist_dir
         self._object_level = ObjectLevel(self._strategy)
         self._meta_level = MetaLevel(self._strategy, constitution)
         self._max_retries = max_retries_per_task
         self._task_counter = 0
         self._lifetime_stats = _LifetimeStats()
+
+        # ── Autonomy primitives ──────────────────────────────────
+        self._autonomy_enabled = enable_autonomy
+        self._speculative_fork = SpeculativeFork(n_forks=3)
+        self._adaptive_retry = AdaptiveRetry(base_budget=max_retries_per_task)
+        self._autonomous_tick = AutonomousTick(min_interval_s=60.0)
 
     @property
     def strategy(self) -> SearchStrategy:
@@ -101,18 +126,64 @@ class SICAAgent(BaseAgent):
 
     async def on_start(self) -> None:
         logger.info(
-            "[%s] SICA Agent started (genome gen=%d, hash=%s)",
+            "[%s] SICA Agent started (genome gen=%d, hash=%s, autonomy=%s)",
             self.agent_id,
             self._strategy.genome.generation,
             self._strategy.genome.genome_hash,
+            self._autonomy_enabled,
         )
 
     async def on_stop(self) -> None:
+        # Persist genome on shutdown — learned strategies survive restarts
+        try:
+            save_genome(
+                self._strategy.genome,
+                agent_id=self.agent_id,
+                directory=self._persist_dir,
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.error("[%s] Failed to persist genome: %s", self.agent_id, exc)
+
         logger.info(
             "[%s] SICA Agent stopped. Lifetime: %s",
             self.agent_id,
             self._lifetime_stats.summary(),
         )
+
+    async def tick(self) -> None:
+        """Autonomous self-diagnostic tick (runs during idle).
+
+        This is the agent's inner monologue — proactive reflection
+        without external stimulus. Nelson-Narens without a trigger.
+        """
+        if not self._autonomy_enabled:
+            return
+        if not self._autonomous_tick.should_tick():
+            return
+
+        report = self._autonomous_tick.execute(
+            self._strategy,
+            self._object_level,
+            self._meta_level,
+        )
+
+        if report["actions"]:
+            logger.info(
+                "[%s] Autonomous tick #%d: %s",
+                self.agent_id,
+                self._autonomous_tick.tick_count,
+                report["actions"],
+            )
+
+            # Auto-save after autonomous modifications
+            try:
+                save_genome(
+                    self._strategy.genome,
+                    agent_id=self.agent_id,
+                    directory=self._persist_dir,
+                )
+            except Exception as exc:  # noqa: BLE001
+                logger.error("[%s] Auto-save failed: %s", self.agent_id, exc)
 
     # ── Core SICA Loop ───────────────────────────────────────────
 
@@ -138,9 +209,10 @@ class SICAAgent(BaseAgent):
         )
 
         retry_count = 0
+        max_retries = self._max_retries
         last_judgment: MetaJudgment | None = None
 
-        while retry_count <= self._max_retries:
+        while retry_count <= max_retries:
             # ── Phase 1: Object-Level Execution ──────────────────
             trace = self._object_level.begin_task(task_id, objective)
 
@@ -178,12 +250,32 @@ class SICAAgent(BaseAgent):
             if judgment.requires_strategy_mutation:
                 mutations = self._meta_level.control(judgment)
                 self._lifetime_stats.mutations += len(mutations)
+
+                # Speculative forking on meta-failures
+                if (
+                    self._autonomy_enabled
+                    and judgment.is_meta_failure
+                    and len(self._object_level.trace_archive) >= 3
+                ):
+                    self._strategy = self._speculative_fork.speculate(
+                        self._strategy,
+                        judgment,
+                        self._object_level.trace_archive[-5:],
+                    )
+                    # Update references after potential fork adoption
+                    self._object_level.strategy = self._strategy
+                    self._meta_level._strategy = self._strategy
+
                 logger.info(
                     "[%s] Applied %d strategy mutations (gen=%d)",
                     self.agent_id,
                     len(mutations),
                     self._strategy.genome.generation,
                 )
+
+            # ── Phase 3b: Adaptive Retry Budget ──────────────────
+            if self._autonomy_enabled:
+                max_retries = self._adaptive_retry.compute_budget(judgment)
 
             # ── Phase 4: Constitutional Gate ─────────────────────
             if judgment.constitutional_verdict and judgment.constitutional_verdict.abort_needed:
@@ -220,19 +312,19 @@ class SICAAgent(BaseAgent):
                     "(attempt %d/%d, genome=%s)",
                     self.agent_id,
                     retry_count,
-                    self._max_retries,
+                    max_retries,
                     self._strategy.genome.genome_hash,
                 )
                 continue
             else:
                 # Object-failure: simple retry without strategy change
                 retry_count += 1
-                if retry_count <= self._max_retries:
+                if retry_count <= max_retries:
                     logger.info(
                         "[%s] Object-level failure. Simple retry (%d/%d)",
                         self.agent_id,
                         retry_count,
-                        self._max_retries,
+                        max_retries,
                     )
                     continue
 
@@ -241,7 +333,7 @@ class SICAAgent(BaseAgent):
             "[%s] Task %s exhausted %d retries",
             self.agent_id,
             task_id,
-            self._max_retries,
+            max_retries,
         )
 
         # Check if we should escalate

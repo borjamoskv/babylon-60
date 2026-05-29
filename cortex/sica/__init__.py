@@ -17,9 +17,21 @@ Constitutional evaluation layer inspired by Anthropic Constitutional AI:
 from __future__ import annotations
 
 from cortex.sica.agent import SICAAgent
+from cortex.sica.autonomy import (
+    AdaptiveRetry,
+    AutonomousTick,
+    MetaMetaController,
+    SpeculativeFork,
+    TraceSynthesizer,
+)
 from cortex.sica.constitution import Constitution, Principle
 from cortex.sica.meta_level import MetaLevel, MetaJudgment
 from cortex.sica.object_level import ObjectLevel, ExecutionTrace
+from cortex.sica.persistence import (
+    load_genome,
+    load_or_default,
+    save_genome,
+)
 from cortex.sica.strategy import (
     SearchStrategy,
     StrategyMutation,
@@ -28,12 +40,26 @@ from cortex.sica.strategy import (
 
 __all__ = [
     "SICAAgent",
+    # Autonomy
+    "AdaptiveRetry",
+    "AutonomousTick",
+    "MetaMetaController",
+    "SpeculativeFork",
+    "TraceSynthesizer",
+    # Constitution
     "Constitution",
     "Principle",
+    # Meta-level
     "MetaLevel",
     "MetaJudgment",
+    # Object-level
     "ObjectLevel",
     "ExecutionTrace",
+    # Persistence
+    "load_genome",
+    "load_or_default",
+    "save_genome",
+    # Strategy
     "SearchStrategy",
     "StrategyMutation",
     "StrategyGenome",

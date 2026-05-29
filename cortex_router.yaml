@@ -21,3 +21,14 @@ model_list:
     litellm_params:
       model: ollama/qwen2.5-coder:32b
       api_base: http://localhost:11434
+
+  - model_name: autodidact
+    litellm_params:
+      model: openai/qwen3.6-27b
+      api_base: https://dashscope-intl.aliyuncs.com/compatible-mode/v1
+      api_key: os.environ/DASHSCOPE_API_KEY
+      extra_body:
+        enable_thinking: true
+        preserve_thinking: true
+      fallbacks: ["gpt-4o", "venice-model", "local-ollama"]
+
