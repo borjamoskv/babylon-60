@@ -290,7 +290,126 @@ impl Dispatcher {
 }
 
 // ─────────────────────────────────────────────────────────────
-// §6 — Tests
+// §6 — PyO3 Bridge (Python → Rust FFI crossing point)
+// ─────────────────────────────────────────────────────────────
+
+use pyo3::prelude::*;
+use pyo3::exceptions::PyRuntimeError;
+
+/// Python-facing ISA Dispatcher.
+///
+/// Receives JSON-serialized AgentOp trees from the Python DSL,
+/// deserializes them into native Rust enums, and executes the
+/// entire tree in Rust with rayon parallelism.
+///
+/// The GIL is released during execution — Python is free to
+/// continue other work while Rust dispatches agents.
+///
+/// Usage from Python:
+/// ```python
+/// from cortex_rs import IsaDispatcher
+/// from cortex.isa import seq, par, dispatch, to_json
+///
+/// plan = seq(par(dispatch("a", id=1), dispatch("b", id=2)))
+/// dispatcher = IsaDispatcher()
+/// result = dispatcher.execute(to_json(plan))
+/// ```
+#[pyclass]
+pub struct IsaDispatcher {
+    total_executions: u64,
+    total_nodes: u64,
+    total_us: u64,
+}
+
+#[pymethods]
+impl IsaDispatcher {
+    #[new]
+    pub fn new() -> Self {
+        IsaDispatcher {
+            total_executions: 0,
+            total_nodes: 0,
+            total_us: 0,
+        }
+    }
+
+    /// Execute a JSON-serialized AgentOp tree entirely in Rust.
+    ///
+    /// Args:
+    ///     plan_json: JSON string from Python's `to_json(plan)`
+    ///
+    /// Returns:
+    ///     JSON string with ExecResult (status, output, nodes_processed, elapsed_us)
+    pub fn execute(&mut self, plan_json: &str) -> PyResult<String> {
+        // Deserialize: data → code
+        let op = AgentOp::from_json(plan_json)
+            .map_err(|e| PyRuntimeError::new_err(format!("ISA deserialize error: {}", e)))?;
+
+        // Execute: pure Rust, no GIL, rayon parallelism
+        let mut dispatcher = Dispatcher::new();
+        let result = dispatcher.execute(&op);
+
+        // Track telemetry
+        self.total_executions += 1;
+        self.total_nodes += result.nodes_processed as u64;
+        self.total_us += result.elapsed_us;
+
+        // Serialize result: code → data
+        serde_json::to_string(&result)
+            .map_err(|e| PyRuntimeError::new_err(format!("ISA serialize error: {}", e)))
+    }
+
+    /// Execute and return a Python dict instead of JSON string.
+    /// More ergonomic for Python consumption.
+    pub fn execute_dict<'py>(&mut self, py: Python<'py>, plan_json: &str) -> PyResult<Bound<'py, pyo3::types::PyAny>> {
+        let result_json = self.execute(plan_json)?;
+        let json_module = py.import("json")?;
+        json_module.call_method1("loads", (result_json,))
+    }
+
+    /// Introspect a plan without executing it.
+    /// Returns: { "node_count": N, "depth": D, "targets": [...] }
+    pub fn introspect(&self, plan_json: &str) -> PyResult<String> {
+        let op = AgentOp::from_json(plan_json)
+            .map_err(|e| PyRuntimeError::new_err(format!("ISA deserialize error: {}", e)))?;
+
+        let info = serde_json::json!({
+            "node_count": op.node_count(),
+            "depth": op.depth(),
+            "targets": op.dispatch_targets(),
+        });
+
+        serde_json::to_string_pretty(&info)
+            .map_err(|e| PyRuntimeError::new_err(format!("ISA serialize error: {}", e)))
+    }
+
+    /// Rewrite a node in the plan by OpId, returning the modified plan as JSON.
+    /// This is code-as-data self-modification: Python mutates the Rust tree.
+    pub fn rewrite(&self, plan_json: &str, target_id: u64, replacement_json: &str) -> PyResult<String> {
+        let op = AgentOp::from_json(plan_json)
+            .map_err(|e| PyRuntimeError::new_err(format!("ISA deserialize plan: {}", e)))?;
+        let replacement = AgentOp::from_json(replacement_json)
+            .map_err(|e| PyRuntimeError::new_err(format!("ISA deserialize replacement: {}", e)))?;
+
+        let rewritten = op.rewrite_by_id(target_id, &replacement);
+
+        rewritten.to_json()
+            .map_err(|e| PyRuntimeError::new_err(format!("ISA serialize error: {}", e)))
+    }
+
+    /// Get cumulative telemetry from all executions on this dispatcher.
+    pub fn telemetry(&self) -> String {
+        serde_json::json!({
+            "total_executions": self.total_executions,
+            "total_nodes_processed": self.total_nodes,
+            "total_elapsed_us": self.total_us,
+            "avg_nodes_per_exec": if self.total_executions > 0 { self.total_nodes as f64 / self.total_executions as f64 } else { 0.0 },
+            "avg_us_per_exec": if self.total_executions > 0 { self.total_us as f64 / self.total_executions as f64 } else { 0.0 },
+        }).to_string()
+    }
+}
+
+// ─────────────────────────────────────────────────────────────
+// §7 — Tests
 // ─────────────────────────────────────────────────────────────
 
 #[cfg(test)]
