@@ -41,7 +41,7 @@ def check_file_entropy(filepath):
     try:
         tree = ast.parse(content)
         for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
                 if len(node.body) == 1 and isinstance(node.body[0], ast.Pass):
                     penalties += 3
                     issues.append(f"Empty stub detected: '{node.name}'. Penalty: +3")
@@ -50,7 +50,7 @@ def check_file_entropy(filepath):
                 # Very basic depth check representation
                 depth = 0
                 for child in ast.walk(node):
-                    if isinstance(child, (ast.If, ast.For, ast.While, ast.Try)):
+                    if isinstance(child, ast.If | ast.For | ast.While | ast.Try):
                         depth += 1
                 if depth > 10:
                     penalties += 2

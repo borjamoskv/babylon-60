@@ -55,7 +55,7 @@ class OuroborosCompiler:
                             "mutate_prompt",
                         ):
                             llm_calls += 1
-                elif isinstance(node, (ast.If, ast.For, ast.While)):
+                elif isinstance(node, ast.If | ast.For | ast.While):
                     complexity += 1
 
             # Formula: Heavy penalty for LLM calls (entropy source), minor for structural branching
