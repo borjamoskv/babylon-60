@@ -25,6 +25,7 @@ from cortex.vsa_engine import VSAEngine
 # --- Direct-Silicon JIT Kernels ---
 if HAS_NUMBA:
     import math
+
     @njit(parallel=True, fastmath=True)
     def fast_fading_memory(tensor_view, last_update_ts, now_ts, lambda_decay):
         for i in prange(tensor_view.shape[0]):
