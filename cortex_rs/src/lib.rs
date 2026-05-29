@@ -585,6 +585,7 @@ fn cortex_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<oracle::FitnessOracleRs>()?;
     m.add_class::<mutator::GenomeMutatorRs>()?;
     m.add_class::<isa::IsaDispatcher>()?;
+    m.add_class::<ouroboros_compiler::OuroborosExecutionGraph>()?;
     py_inverse::register(m)?;
     vsa::register(_py, m)?;
     Ok(())

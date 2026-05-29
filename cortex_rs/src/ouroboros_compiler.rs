@@ -4,6 +4,8 @@
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use pyo3::prelude::*;
+use pyo3::exceptions::PyValueError;
 
 /// Definición formal de un agente en el entorno de fricción
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -21,13 +23,16 @@ pub struct AgentNode {
 }
 
 /// OUROBOROS EXECUTION GRAPH (OEG)
+#[pyclass]
 #[derive(Debug)]
 pub struct OuroborosExecutionGraph {
     pub nodes: HashMap<String, AgentNode>,
     pub edges: Vec<(String, String, f64)>, // (Source, Target, Friction Weight)
 }
 
+#[pymethods]
 impl OuroborosExecutionGraph {
+    #[new]
     pub fn new() -> Self {
         Self {
             nodes: HashMap::new(),
@@ -35,23 +40,17 @@ impl OuroborosExecutionGraph {
         }
     }
 
-    /// PHASE 1 — PARSE (Semantic Digestion)
-    pub fn parse_swarm(&mut self, agents_input: Vec<AgentNode>) {
+    /// PHASE 1 — PARSE (Semantic Digestion) from JSON
+    pub fn parse_swarm(&mut self, agents_json: &str) -> PyResult<()> {
+        let agents_input: Vec<AgentNode> = serde_json::from_str(agents_json)
+            .map_err(|e| PyValueError::new_err(format!("Failed to parse agents: {}", e)))?;
+            
         for mut a in agents_input {
             a.energy = self.estimate_exergy(&a.goal);
             a.friction = self.detect_conflict(&a.memory);
             self.nodes.insert(a.id.clone(), a);
         }
-    }
-
-    fn estimate_exergy(&self, _goal: &str) -> f64 {
-        // En C5-REAL esto extrae entropía de la fricción estructural
-        1.0 
-    }
-
-    fn detect_conflict(&self, _memory: &[String]) -> f64 {
-        // Medición de densidad de enlaces contradictorios
-        0.8 
+        Ok(())
     }
 
     /// PHASE 2 — LIMERENCE VECTORIZATION
@@ -64,8 +63,8 @@ impl OuroborosExecutionGraph {
 
     /// PHASE 3 — OUROBOROS LINKING
     pub fn link_ouroboros_cycles(&mut self) {
-        // Todo nodo debe poder destruirse a sí mismo indirectamente
         let ids: Vec<String> = self.nodes.keys().cloned().collect();
+        if ids.is_empty() { return; }
         for i in 0..ids.len() {
             let src = &ids[i];
             let tgt = &ids[(i + 1) % ids.len()];
@@ -93,13 +92,29 @@ impl OuroborosExecutionGraph {
 
     /// PHASE 6 — RUNTIME EXECUTION LOOP (C5-REAL Tick)
     pub fn execution_tick(&mut self) {
-        // 1. Execute graph (simulated traversal)
-        // 2. Measure friction
         self.vectorize_limerence(1.0, 1.5, 0.5);
-        // 3. Prune low signal nodes
         self.filter_exergy();
-        // 4. Rewrite high friction nodes
         self.fractal_rewrite();
+    }
+    
+    /// Extract Graph state as JSON
+    pub fn state_json(&self) -> PyResult<String> {
+        let state = serde_json::json!({
+            "nodes": self.nodes,
+            "edges": self.edges
+        });
+        serde_json::to_string(&state)
+            .map_err(|e| PyValueError::new_err(format!("Serialize error: {}", e)))
+    }
+}
+
+impl OuroborosExecutionGraph {
+    fn estimate_exergy(&self, _goal: &str) -> f64 {
+        1.0 
+    }
+
+    fn detect_conflict(&self, _memory: &[String]) -> f64 {
+        0.8 
     }
 }
 
