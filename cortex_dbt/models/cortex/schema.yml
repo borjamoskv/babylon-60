@@ -15,3 +15,15 @@ models:
         description: "Cognitive friction score normalized between 0 and 100."
       - name: normalized_device
         description: "Device type accessing the LP, cleaned."
+  - name: int_exergy_ledger
+    description: "Core integration layer. Calculates total Exergy yield and isolates high-signal interactions."
+    columns:
+      - name: session_id
+        description: "Unique identifier for the high-signal LP session."
+        tests:
+          - unique
+          - not_null
+      - name: normalized_device
+        description: "Device type accessing the LP."
+      - name: session_exergy_yield
+        description: "Average cognitive friction score representing Exergy yield."
