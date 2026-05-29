@@ -1,3 +1,5 @@
+pub mod swarm;
+
 use wasmtime::*;
 use anyhow::Result;
 use tracing::{info, warn};
