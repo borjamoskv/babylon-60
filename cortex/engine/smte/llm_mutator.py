@@ -12,9 +12,9 @@ logger = logging.getLogger("cortex.engine.smte.llm_mutator")
 
 def call_qwen_mutator(source_code: str, topology_info: dict, temperature: float = 0.3) -> str:
     """Calls Qwen API to propose a C5-REAL mutation of the AST source code."""
-    api_key = os.environ.get("QWEN_API_KEY")
+    api_key = os.environ.get("DASHSCOPE_API_KEY") or os.environ.get("QWEN_API_KEY")
     if not api_key:
-        logger.warning("No QWEN_API_KEY found, returning source code unmodified.")
+        logger.warning("No DASHSCOPE_API_KEY or QWEN_API_KEY found, returning source code unmodified.")
         return source_code
         
     url = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
