@@ -178,13 +178,31 @@ Proof:
 
 ---
 
+### Hito 17: Labyrinth Proxy & CORTEX LIVE Integration
+- **Target:** `cortex/routes/llm_proxy.py`, `scripts/live_emit.py`
+- **Objective:** Transformar CORTEX en un middleware LLM universal (OpenAI Proxy) con filtrado termodinámico (Deterministic Labyrinth). Emisión de exergía en vivo a CORTEX LIVE vía Aether Matrix (SSE bus) mediante `AsyncSignalBus`.
+- **Yield Target:** Filtrado 100% libre de prosa estocástica. Emisión SSE en O(1).
+- **Reality Level:** `C5-REAL`
+- **Evidence:** Commit `feat(api): emit events to live event bus`
+```yaml
+Claim: CORTEX-LIVE Middleware Integrado
+Proof:
+  Base: "/api/llm-proxy/v1 operando y recibiendo señales exergy.live.payload"
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-05-29
+```
+- **Status:** ✅ COMPLETE — 29 Mayo 2026
+
+---
+
 ## 🛡️ Thermodynamic Enforcement
 All milestone claims must map directly to a `Claim/Proof` matrix.
 ```yaml
-Claim: 16/16 Milestones Verified
+Claim: 17/17 Milestones Verified
 Proof:
   Base: Continuous Silicon Checkpoint Execution
-  Variables: [r=1, d=1, n=16, S=100]
+  Variables: [r=1, d=1, n=17, S=100]
   Range: [C5, C5]
   Confidence: C5-REAL
   Date: 2026-05-29

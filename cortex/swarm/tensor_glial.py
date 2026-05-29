@@ -24,14 +24,14 @@ from cortex.vsa_engine import VSAEngine
 
 # --- Direct-Silicon JIT Kernels ---
 if HAS_NUMBA:
-
+    import math
     @njit(parallel=True, fastmath=True)
     def fast_fading_memory(tensor_view, last_update_ts, now_ts, lambda_decay):
         for i in prange(tensor_view.shape[0]):
             dt = now_ts - last_update_ts[i]
             if dt < 0:
                 dt = 0.0
-            decay = np.exp(-lambda_decay * dt)
+            decay = math.exp(-lambda_decay * dt)
             for j in range(tensor_view.shape[1]):
                 tensor_view[i, j] *= decay
             last_update_ts[i] = now_ts
