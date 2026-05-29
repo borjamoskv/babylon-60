@@ -20,6 +20,7 @@ except ImportError:
 
 from cortex.extensions.policy.jis_auditor import JISAuditor
 from cortex.memory.vsa import VSAPipelineBridge
+from cortex.extensions.mcp.claude_tool import run_claude_query
 
 logger = logging.getLogger("cortex.mcp.server")
 
@@ -76,6 +77,18 @@ if MCP_AVAILABLE:
                     "required": ["intent"],
                 },
             ),
+            Tool(
+                name="cortex_invoke_claude",
+                description="Deterministic execution of Claude Opus 4.8 via Anthropic API.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "prompt": {"type": "string", "description": "The prompt to execute"},
+                        "model": {"type": "string", "description": "The model ID (default: claude-3-opus-20240229)"},
+                    },
+                    "required": ["prompt"],
+                },
+            ),
         ]
 
     @app.call_tool()
@@ -129,6 +142,12 @@ if MCP_AVAILABLE:
             for r in results:
                 out += f"- [{r['id']}] (Sim: {r['similarity']}): {r['content']}\n"
             return [TextContent(type="text", text=out)]
+
+        elif name == "cortex_invoke_claude":
+            prompt = arguments.get("prompt")
+            model = arguments.get("model", "claude-3-opus-20240229")
+            response_json = run_claude_query(prompt, model)
+            return [TextContent(type="text", text=response_json)]
 
         raise ValueError(f"Unknown tool: {name}")
 
