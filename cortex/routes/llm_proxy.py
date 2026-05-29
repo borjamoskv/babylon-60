@@ -23,6 +23,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 
 from cortex import config
 from cortex.auth import get_current_user
+from cortex.extensions.signals.bus import AsyncSignalBus
 
 logger = logging.getLogger("cortex.exergy.middleware")
 
@@ -127,6 +128,19 @@ async def _stream_labyrinth_proxy(request: Request, payload: dict) -> AsyncGener
                 # Apply the Labyrinth Filter
                 purified_content = DeterministicLabyrinth.annihilate_entropy(full_content)
                 
+                # ─── CORTEX LIVE INTEGRATION ───
+                # Broadcast the purified exergy over the Aether Matrix (SSE Bus)
+                pool = getattr(request.app.state, "pool", None)
+                if pool and "[LABYRINTH_INTERVENTION]" not in purified_content:
+                    async with pool.acquire() as conn:
+                        bus = AsyncSignalBus(conn)
+                        await bus.emit(
+                            event_type="exergy.live.payload",
+                            payload={"content": purified_content},
+                            source="llm_labyrinth"
+                        )
+                # ───────────────────────────────
+
                 # Flush the purified content as a single large chunk to the client
                 if chunk_template:
                     chunk_template["choices"][0]["delta"] = {"content": purified_content}
@@ -179,10 +193,24 @@ async def proxy_chat_completions(
             
         data = resp.json()
         
-        # Apply Labyrinth
+        # Apply Labyrinth and emit to CORTEX LIVE
+        pool = getattr(request.app.state, "pool", None)
+        
         for choice in data.get("choices", []):
             if "message" in choice and "content" in choice["message"]:
                 raw_text = choice["message"]["content"]
-                choice["message"]["content"] = DeterministicLabyrinth.annihilate_entropy(raw_text)
+                purified_content = DeterministicLabyrinth.annihilate_entropy(raw_text)
+                choice["message"]["content"] = purified_content
+                
+                # ─── CORTEX LIVE INTEGRATION ───
+                if pool and "[LABYRINTH_INTERVENTION]" not in purified_content:
+                    async with pool.acquire() as conn:
+                        bus = AsyncSignalBus(conn)
+                        await bus.emit(
+                            event_type="exergy.live.payload",
+                            payload={"content": purified_content},
+                            source="llm_labyrinth"
+                        )
+                # ───────────────────────────────
                 
         return JSONResponse(content=data)
