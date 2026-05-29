@@ -103,7 +103,7 @@ async def process_queue():
                                 if umap:
                                     # Deterministically hash agent name to get an approximate coordinate in the swarm topology
                                     agent_hash = int(hashlib.sha256(agent.encode()).hexdigest()[:16], 16)
-                                    agent_idx = agent_hash % umap.capacity
+                                    agent_hash % umap.capacity
                                     x = (agent_hash % 1000) / 10.0
                                     y = ((agent_hash >> 4) % 1000) / 10.0
                                     z = ((agent_hash >> 8) % 1000) / 10.0

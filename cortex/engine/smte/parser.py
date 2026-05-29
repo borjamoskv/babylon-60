@@ -6,7 +6,7 @@ Parses, analyzes, and reconstructs Python source code for mutation.
 
 import ast
 import logging
-from typing import Dict, Any
+from typing import Any
 
 logger = logging.getLogger("cortex.engine.smte.parser")
 

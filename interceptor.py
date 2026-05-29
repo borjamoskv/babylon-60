@@ -25,7 +25,7 @@ class CortexShield:
         episode = self.membrane.encode_episode([("consistency", self.base_hv)])
         
         # Force commit the system prompt as the Genesis block
-        res = self.membrane.check_proposal(episode)
+        self.membrane.check_proposal(episode)
         root_hash = self.membrane.commit(episode)
         import sys
         sys.stdout.write(f"[CortexShield] Genesis Block Commited. Merkle Root: {root_hash[:16]}...\n")

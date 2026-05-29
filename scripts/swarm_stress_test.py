@@ -13,7 +13,7 @@ import sys
 SWARM_QUEUE_FILE = os.getenv("CORTEX_SWARM_QUEUE", "/tmp/cortex_swarm_queue.json")
 
 def ignite_stress_test():
-    print(f"=== INICIANDO STRESS TEST DEL ENJAMBRE C5-REAL ===")
+    print("=== INICIANDO STRESS TEST DEL ENJAMBRE C5-REAL ===")
     print(f"Target Queue: {SWARM_QUEUE_FILE}")
     
     tasks = []

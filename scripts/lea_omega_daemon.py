@@ -39,7 +39,7 @@ def autopoietic_heal_file(filepath: str) -> bool:
     logger.warning(f"[LEA-Ω] ⚠️ ENTROPÍA CRÍTICA DETECTADA: {penalty} puntos.")
     logger.warning(f"        Vectores de degradación: {details}")
     
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         original_code = f.read()
 
     # Preparar el contexto de la topología (simulamos un get_topology básico)
@@ -74,7 +74,6 @@ def autopoietic_heal_file(filepath: str) -> bool:
         visitor.visit(ast.parse(mutated_code))
         visitor.finalize()
         new_penalty = sum(visitor.penalties.values())
-        new_details = visitor.penalties
     except Exception as e:
         logger.error(f"[LEA-Ω] Error evaluando el nuevo AST: {e}")
         return False

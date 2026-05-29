@@ -42,7 +42,7 @@ class FrictionAnnihilatorAgent:
         if not target_path.exists():
             return {"status": "failed", "reason": "Target file not found."}
 
-        with open(target_path, "r", encoding="utf-8") as f:
+        with open(target_path, encoding="utf-8") as f:
             code_content = f.read()
 
         prompt = (
