@@ -21,7 +21,7 @@ class ZeroCopyRingBuffer(SovereignResource):
       [73:]  : Binary Payload (183 bytes)
     """
 
-    def __init__(self, capacity=10000):
+    def __init__(self, capacity=1000000):
         import os
         import weakref
         self.capacity = capacity

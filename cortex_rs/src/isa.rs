@@ -406,6 +406,118 @@ impl IsaDispatcher {
             "avg_us_per_exec": if self.total_executions > 0 { self.total_us as f64 / self.total_executions as f64 } else { 0.0 },
         }).to_string()
     }
+
+    /// Execute an ISA plan with live MCP tool dispatch.
+    ///
+    /// When a Dispatch node targets "mcp:<tool_name>", the dispatcher
+    /// routes the payload to the McpSovereignHost as a tools/call request.
+    /// All other nodes execute in pure Rust as before.
+    ///
+    /// Args:
+    ///     plan_json: JSON string from Python's `to_json(plan)`
+    ///     mcp_host: Reference to McpSovereignHost instance
+    ///
+    /// Returns:
+    ///     JSON string with ExecResult including MCP call results
+    pub fn execute_with_mcp(&mut self, py: Python<'_>, plan_json: &str, mcp_host: &crate::mcp::McpSovereignHost) -> PyResult<String> {
+        let op = AgentOp::from_json(plan_json)
+            .map_err(|e| PyRuntimeError::new_err(format!("ISA deserialize error: {}", e)))?;
+
+        let start = Instant::now();
+        let result = self.exec_with_mcp_inner(py, &op, mcp_host);
+        let elapsed = start.elapsed().as_micros() as u64;
+
+        self.total_executions += 1;
+
+        let exec_result = ExecResult {
+            status: result.0,
+            output: result.1,
+            nodes_processed: self.total_nodes as usize,
+            elapsed_us: elapsed,
+        };
+
+        serde_json::to_string(&exec_result)
+            .map_err(|e| PyRuntimeError::new_err(format!("ISA serialize error: {}", e)))
+    }
+
+    /// Compile an OuroborosExecutionGraph into an ISA dispatch plan.
+    ///
+    /// Converts Ouroboros agent nodes into Par(Dispatch(...)) nodes
+    /// so the entire swarm can be dispatched via the ISA pipeline.
+    ///
+    /// Args:
+    ///     agents_json: JSON array of AgentNode objects
+    ///
+    /// Returns:
+    ///     JSON ISA plan (AgentOp tree) for execution
+    pub fn compile_ouroboros(&self, agents_json: &str) -> PyResult<String> {
+        let agents: Vec<crate::ouroboros_compiler::AgentNode> = serde_json::from_str(agents_json)
+            .map_err(|e| PyRuntimeError::new_err(format!("Ouroboros parse error: {}", e)))?;
+
+        // Convert each agent into an ISA Dispatch node
+        let ops: Vec<AgentOp> = agents.iter().enumerate().map(|(i, agent)| {
+            AgentOp::Dispatch {
+                id: i as u64,
+                target: format!("ouroboros:{}", agent.id),
+                payload: serde_json::json!({
+                    "goal": agent.goal,
+                    "energy": agent.energy,
+                    "friction": agent.friction,
+                    "limerence": agent.limerence,
+                }),
+            }
+        }).collect();
+
+        // Wrap in Seq: exergy filter → par dispatch → fractal rewrite check
+        let plan = AgentOp::Seq(vec![
+            AgentOp::Bind { name: "swarm_size".into(), value: serde_json::json!(ops.len()) },
+            AgentOp::Par(ops),
+            AgentOp::Reflect(SelfQuery::ExecStats),
+        ]);
+
+        plan.to_json()
+            .map_err(|e| PyRuntimeError::new_err(format!("ISA serialize error: {}", e)))
+    }
+}
+
+impl IsaDispatcher {
+    /// Internal recursive executor with live MCP routing
+    fn exec_with_mcp_inner(&mut self, py: Python<'_>, op: &AgentOp, mcp_host: &crate::mcp::McpSovereignHost) -> (ExecStatus, Option<Value>) {
+        self.total_nodes += 1;
+        match op {
+            AgentOp::Dispatch { id, target, payload } if target.starts_with("mcp:") => {
+                let tool_name = &target[4..]; // strip "mcp:" prefix
+                let rpc_request = serde_json::json!({
+                    "jsonrpc": "2.0",
+                    "method": "tools/call",
+                    "params": {
+                        "name": tool_name,
+                        "arguments": payload,
+                    },
+                    "id": *id,
+                });
+                let rpc_json = serde_json::to_string(&rpc_request).unwrap_or_default();
+                match mcp_host.process_request(py, &rpc_json) {
+                    Ok(response_json) => {
+                        let response: Value = serde_json::from_str(&response_json).unwrap_or(Value::Null);
+                        (ExecStatus::Ok, Some(serde_json::json!({
+                            "mcp_dispatched": true,
+                            "id": id,
+                            "tool": tool_name,
+                            "response": response,
+                        })))
+                    }
+                    Err(e) => (ExecStatus::Error(format!("MCP dispatch failed: {}", e)), None),
+                }
+            }
+            // For non-MCP nodes, delegate to the pure Rust dispatcher
+            other => {
+                let mut dispatcher = Dispatcher::new();
+                let result = dispatcher.execute(other);
+                (result.status, result.output)
+            }
+        }
+    }
 }
 
 // ─────────────────────────────────────────────────────────────

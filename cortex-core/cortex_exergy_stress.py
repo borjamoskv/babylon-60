@@ -15,7 +15,7 @@ async def run_stress_test():
     from persistence import _get_ring_buffer
     _get_ring_buffer().reset()
 
-    NUM_TASKS = 10000
+    NUM_TASKS = 1000000
     print(f"[+] Inyectando {NUM_TASKS} tareas en ráfaga (Simulación de Enjambre Masivo)...")
     
     start_time = time.monotonic()
