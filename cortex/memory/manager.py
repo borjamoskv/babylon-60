@@ -361,28 +361,17 @@ class CortexMemoryManager:
         )
         return fact_id
 
-    async def store(
+    async def _evaluate_gates(
         self,
-        tenant_id: str | None = None,
-        project_id: str = "default",
-        content: str = "",
-        fact_type: str = "general",
-        metadata: dict[str, Any] | None = None,
-        layer: str = "semantic",
-        parent_decision_id: str | int | None = None,
-        use_bus: bool = False,
-    ) -> str:
-        """Directly persist a high-value fact to L2 memory layers.
-
-        Bypasses the L1 working memory buffer. Useful for errors,
-        decisions, and formal proof counterexamples.
-
-        Pipeline: Mem0 exergy gate → Thalamus → dedup → encode → resonance → L2
-        """
-        tenant_id = tenant_id or get_tenant_id()
-        conn = self._l2._get_conn() if hasattr(self._l2, "_get_conn") else None
-
-        # ── Mem0 Exergy Pre-Filter (RFC-CORTEX-MEMORY-OS) ──────────
+        tenant_id: str,
+        project_id: str,
+        content: str,
+        fact_type: str,
+        metadata: dict[str, Any] | None,
+        parent_decision_id: str | int | None,
+        conn: Any,
+    ) -> str | None:
+        """Evaluate Mem0 Exergy and Thalamus gates. Returns rejection reason or None if passed."""
         exergy = await self._mem0_pipeline.evaluate_exergy(
             {"content": content, "fact_type": fact_type, "metadata": metadata}
         )
@@ -411,6 +400,35 @@ class CortexMemoryManager:
                 logger.debug("notch_ws unavailable (FastAPI not installed), skipping notification")
             return f"filtered:{action}"
 
+        return None
+
+    async def store(
+        self,
+        tenant_id: str | None = None,
+        project_id: str = "default",
+        content: str = "",
+        fact_type: str = "general",
+        metadata: dict[str, Any] | None = None,
+        layer: str = "semantic",
+        parent_decision_id: str | int | None = None,
+        use_bus: bool = False,
+    ) -> str:
+        """Directly persist a high-value fact to L2 memory layers.
+
+        Bypasses the L1 working memory buffer. Useful for errors,
+        decisions, and formal proof counterexamples.
+
+        Pipeline: Mem0 exergy gate → Thalamus → dedup → encode → resonance → L2
+        """
+        tenant_id = tenant_id or get_tenant_id()
+        conn = self._l2._get_conn() if hasattr(self._l2, "_get_conn") else None
+
+        gate_rejection = await self._evaluate_gates(
+            tenant_id, project_id, content, fact_type, metadata, parent_decision_id, conn
+        )
+        if gate_rejection:
+            return gate_rejection
+
         dedup_id = await self._check_deduplication(tenant_id, project_id, content)
         if dedup_id:
             return f"filtered:{dedup_id}" if dedup_id == "empty" else f"deduplicated:{dedup_id}"
@@ -421,9 +439,7 @@ class CortexMemoryManager:
 
         adjusted_layer = self._determine_layer(project_id, layer)
 
-        if matched_schema := self._schema_engine.match_schema(content):
-            content = self._schema_engine.apply_encoding_schema(matched_schema, content)
-            _meta.update({"active_schema": matched_schema.name})
+        content, _meta = self._apply_schema(content, _meta)
 
         vector = await self._encoder.encode(content)
         fact_id = str(uuid.uuid4())
@@ -440,6 +456,30 @@ class CortexMemoryManager:
             parent_decision_id=int(parent_decision_id) if parent_decision_id is not None else None,
         )
 
+        return await self._finalize_store(
+            candidate, fact_id, tenant_id, project_id, content, fact_type, adjusted_layer, metadata, use_bus
+        )
+
+    def _apply_schema(self, content: str, _meta: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+        """Apply schema encoding to content if a schema matches."""
+        if matched_schema := self._schema_engine.match_schema(content):
+            content = self._schema_engine.apply_encoding_schema(matched_schema, content)
+            _meta.update({"active_schema": matched_schema.name})
+        return content, _meta
+
+    async def _finalize_store(
+        self,
+        candidate: CortexSemanticEngram,
+        fact_id: str,
+        tenant_id: str,
+        project_id: str,
+        content: str,
+        fact_type: str,
+        adjusted_layer: str,
+        metadata: dict[str, Any] | None,
+        use_bus: bool,
+    ) -> str:
+        """Handle resonance gating and bus emission/HDC memorization."""
         if self._resonance_gate is None:
             raise RuntimeError("Resonance gate unavailable; refusing to persist without validation")
 
@@ -578,21 +618,9 @@ class CortexMemoryManager:
     async def _cancel_background_tasks(self) -> None:
         """Cancel pending tasks and workers aggressively to prevent event loop leaks."""
         logger.debug("Canceling all background workers and Glial Daemon.")
-        tasks_to_wait = []
-        if self._memory_os and getattr(self._memory_os, "_glial_daemon_task", None):
-            self._memory_os._glial_daemon_task.cancel()
-            tasks_to_wait.append(self._memory_os._glial_daemon_task)
+        tasks_to_wait = self._gather_tasks_to_cancel()
 
-        for worker in self._bg_workers:
-            if not worker.done():
-                worker.cancel()
-                tasks_to_wait.append(worker)
-
-        if getattr(self, "_dynamic_space", None):
-            try:
-                await self._dynamic_space.stop()
-            except Exception as e:
-                logger.error("Error stopping dynamic semantic space: %s", e)
+        await self._stop_dynamic_space()
 
         if tasks_to_wait:
             try:
@@ -604,11 +632,33 @@ class CortexMemoryManager:
 
         # Flush the queue
         while not self._bg_queue.empty():
+            await asyncio.sleep(0)  # Throttle to prevent HOT_LOOP
             try:
                 self._bg_queue.get_nowait()
                 self._bg_queue.task_done()
             except asyncio.QueueEmpty:
                 break
+
+    def _gather_tasks_to_cancel(self) -> list[asyncio.Task]:
+        """Gather tasks that need to be canceled."""
+        tasks_to_wait = []
+        if self._memory_os and getattr(self._memory_os, "_glial_daemon_task", None):
+            self._memory_os._glial_daemon_task.cancel()
+            tasks_to_wait.append(self._memory_os._glial_daemon_task)
+
+        for worker in self._bg_workers:
+            if not worker.done():
+                worker.cancel()
+                tasks_to_wait.append(worker)
+        return tasks_to_wait
+
+    async def _stop_dynamic_space(self) -> None:
+        """Stop dynamic semantic space if it exists."""
+        if getattr(self, "_dynamic_space", None):
+            try:
+                await self._dynamic_space.stop()
+            except Exception as e:
+                logger.error("Error stopping dynamic semantic space: %s", e)
 
     def __repr__(self) -> str:
         return f"CortexMemoryManager(l1={self._l1!r}, bg_queue_size={self._bg_queue.qsize()})"
