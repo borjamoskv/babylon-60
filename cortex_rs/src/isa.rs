@@ -205,17 +205,106 @@ impl AgentOp {
 }
 
 // ─────────────────────────────────────────────────────────────
-// §5 — Dispatcher (Tree Walker)
+// §5 — Dispatcher (Tree Walker with Execution Scope)
 // ─────────────────────────────────────────────────────────────
+
+use std::collections::HashMap;
+
+/// Execution scope — the variable environment for a dispatch tree.
+/// Bind writes here, Cond/Transform read from here.
+#[derive(Clone, Debug, Default)]
+pub struct Scope {
+    pub bindings: HashMap<String, Value>,
+}
+
+impl Scope {
+    pub fn new() -> Self { Scope { bindings: HashMap::new() } }
+
+    /// Resolve a Ref to its Value in the current scope
+    pub fn resolve(&self, r: &Ref) -> Option<&Value> {
+        match r {
+            Ref::Named(name) => self.bindings.get(name),
+            Ref::LedgerKey(key) => self.bindings.get(key),
+            Ref::Index(idx) => {
+                self.bindings.get("$_last_output")
+                    .and_then(|v| v.as_array())
+                    .and_then(|arr| arr.get(*idx))
+            }
+        }
+    }
+
+    pub fn set(&mut self, name: String, value: Value) {
+        self.bindings.insert(name, value);
+    }
+}
+
+/// Built-in transform functions — pure, deterministic, no FFI
+fn apply_builtin_transform(func: &str, input: &Value) -> Value {
+    match func {
+        "uppercase" => match input.as_str() {
+            Some(s) => Value::String(s.to_uppercase()),
+            None => Value::String(input.to_string().to_uppercase()),
+        },
+        "lowercase" => match input.as_str() {
+            Some(s) => Value::String(s.to_lowercase()),
+            None => Value::String(input.to_string().to_lowercase()),
+        },
+        "length" | "len" => match input {
+            Value::String(s) => serde_json::json!(s.len()),
+            Value::Array(a) => serde_json::json!(a.len()),
+            Value::Object(o) => serde_json::json!(o.len()),
+            _ => serde_json::json!(0),
+        },
+        "json_keys" => match input.as_object() {
+            Some(obj) => Value::Array(obj.keys().map(|k| Value::String(k.clone())).collect()),
+            None => Value::Array(vec![]),
+        },
+        "sum" => match input.as_array() {
+            Some(arr) => { let t: f64 = arr.iter().filter_map(|v| v.as_f64()).sum(); serde_json::json!(t) }
+            None => input.clone(),
+        },
+        "count" => match input.as_array() {
+            Some(arr) => serde_json::json!(arr.len()),
+            None => serde_json::json!(1),
+        },
+        "reverse" => match input {
+            Value::String(s) => Value::String(s.chars().rev().collect()),
+            Value::Array(a) => { let mut r = a.clone(); r.reverse(); Value::Array(r) }
+            _ => input.clone(),
+        },
+        "sha256" => {
+            use sha2::{Digest, Sha256};
+            let bytes = input.to_string();
+            let hash = Sha256::digest(bytes.as_bytes());
+            Value::String(format!("{:x}", hash))
+        },
+        "identity" | "id" => input.clone(),
+        "type" => Value::String(match input {
+            Value::Null => "null", Value::Bool(_) => "bool", Value::Number(_) => "number",
+            Value::String(_) => "string", Value::Array(_) => "array", Value::Object(_) => "object",
+        }.to_string()),
+        "not_null" => serde_json::json!(!input.is_null()),
+        _ => serde_json::json!({ "error": format!("unknown transform: {}", func), "input": input }),
+    }
+}
 
 pub struct Dispatcher {
     pub nodes_processed: usize,
+    pub scope: Scope,
+    tree_ref: Option<AgentOp>,
 }
 
 impl Dispatcher {
-    pub fn new() -> Self { Dispatcher { nodes_processed: 0 } }
+    pub fn new() -> Self {
+        Dispatcher { nodes_processed: 0, scope: Scope::new(), tree_ref: None }
+    }
+
+    pub fn with_scope(scope: Scope) -> Self {
+        Dispatcher { nodes_processed: 0, scope, tree_ref: None }
+    }
 
     pub fn execute(&mut self, op: &AgentOp) -> ExecResult {
+        self.tree_ref = Some(op.clone());
         let start = Instant::now();
         let result = self.exec_inner(op);
         let elapsed = start.elapsed().as_micros() as u64;
@@ -227,52 +316,135 @@ impl Dispatcher {
         match op {
             AgentOp::Noop => (ExecStatus::Ok, None),
             AgentOp::Halt(reason) => (ExecStatus::Halted(reason.clone()), None),
-            AgentOp::Bind { name, value } => (ExecStatus::Ok, Some(serde_json::json!({ "bound": name, "value": value }))),
-            AgentOp::Dispatch { id, target, payload } => (ExecStatus::Ok, Some(serde_json::json!({
-                "dispatched": true, "id": id, "target": target, "payload_size": payload.to_string().len(),
-            }))),
+
+            AgentOp::Bind { name, value } => {
+                self.scope.set(name.clone(), value.clone());
+                (ExecStatus::Ok, Some(serde_json::json!({ "bound": name, "value": value })))
+            }
+
+            AgentOp::Dispatch { id, target, payload } => {
+                let enriched = self.enrich_payload(payload);
+                (ExecStatus::Ok, Some(serde_json::json!({
+                    "dispatched": true, "id": id, "target": target,
+                    "payload": enriched, "payload_size": enriched.to_string().len(),
+                })))
+            }
+
             AgentOp::Seq(ops) => {
                 let mut last_output = None;
                 for child in ops {
                     let (status, output) = self.exec_inner(child);
+                    if let Some(ref out) = output {
+                        self.scope.set("$_last_output".to_string(), out.clone());
+                    }
                     last_output = output;
                     if status != ExecStatus::Ok { return (status, last_output); }
                 }
                 (ExecStatus::Ok, last_output)
             }
+
             AgentOp::Par(ops) => {
+                let parent_scope = self.scope.clone();
                 let results: Vec<Value> = ops.par_iter().map(|child| {
-                    let mut sub = Dispatcher::new();
+                    let mut sub = Dispatcher::with_scope(parent_scope.clone());
                     let result = sub.execute(child);
-                    serde_json::json!({ "status": format!("{:?}", result.status), "output": result.output, "nodes": result.nodes_processed, "elapsed_us": result.elapsed_us })
+                    serde_json::json!({
+                        "status": format!("{:?}", result.status), "output": result.output,
+                        "nodes": result.nodes_processed, "elapsed_us": result.elapsed_us,
+                    })
                 }).collect();
                 self.nodes_processed += ops.len();
                 (ExecStatus::Ok, Some(Value::Array(results)))
             }
+
             AgentOp::Cond { predicate, then_branch, else_branch } => {
-                if self.eval_predicate(predicate) { self.exec_inner(then_branch) } else { self.exec_inner(else_branch) }
+                if self.eval_predicate(predicate) { self.exec_inner(then_branch) }
+                else { self.exec_inner(else_branch) }
             }
+
             AgentOp::Loop { count, body } => {
                 let mut last_output = None;
-                for _ in 0..*count {
+                for i in 0..*count {
+                    self.scope.set("$_loop_index".to_string(), serde_json::json!(i));
                     let (status, output) = self.exec_inner(body);
                     last_output = output;
                     if status != ExecStatus::Ok { return (status, last_output); }
                 }
                 (ExecStatus::Ok, last_output)
             }
+
+            AgentOp::Transform { input, func, output } => {
+                let input_val = self.scope.resolve(input).cloned().unwrap_or(Value::Null);
+                let result = apply_builtin_transform(func, &input_val);
+                match output {
+                    Ref::Named(name) => self.scope.set(name.clone(), result.clone()),
+                    Ref::LedgerKey(key) => self.scope.set(key.clone(), result.clone()),
+                    _ => {}
+                }
+                (ExecStatus::Ok, Some(result))
+            }
+
+            AgentOp::Query(q) => {
+                let result = serde_json::json!({ "query": q.table, "filter": q.filter, "limit": q.limit, "status": "executed" });
+                match &q.output_ref {
+                    Ref::Named(name) => self.scope.set(name.clone(), result.clone()),
+                    Ref::LedgerKey(key) => self.scope.set(key.clone(), result.clone()),
+                    _ => {}
+                }
+                (ExecStatus::Ok, Some(result))
+            }
+
+            AgentOp::Mutate(m) => (ExecStatus::Ok, Some(serde_json::json!({
+                "mutate": m.table, "operation": format!("{:?}", m.operation),
+                "payload_keys": m.payload.as_object().map(|o| o.keys().cloned().collect::<Vec<_>>()).unwrap_or_default(),
+            }))),
+
             AgentOp::Reflect(query) => {
                 let output = match query {
-                    SelfQuery::NodeCount => serde_json::json!({ "node_count": self.nodes_processed }),
-                    SelfQuery::ExecStats => serde_json::json!({ "nodes_processed": self.nodes_processed }),
-                    _ => serde_json::json!({ "reflect": format!("{:?}", query) }),
+                    SelfQuery::NodeCount => serde_json::json!({ "node_count": self.tree_ref.as_ref().map(|t| t.node_count()).unwrap_or(0) }),
+                    SelfQuery::TreeDepth => serde_json::json!({ "tree_depth": self.tree_ref.as_ref().map(|t| t.depth()).unwrap_or(0) }),
+                    SelfQuery::DispatchTargets => serde_json::json!({ "targets": self.tree_ref.as_ref().map(|t| t.dispatch_targets()).unwrap_or_default() }),
+                    SelfQuery::ExecStats => serde_json::json!({
+                        "nodes_processed": self.nodes_processed,
+                        "scope_size": self.scope.bindings.len(),
+                        "scope_keys": self.scope.bindings.keys().cloned().collect::<Vec<_>>(),
+                    }),
+                    SelfQuery::CurrentTree => self.tree_ref.as_ref().and_then(|t| serde_json::to_value(t).ok()).unwrap_or(Value::Null),
                 };
                 (ExecStatus::Ok, Some(output))
             }
-            AgentOp::Transform { input, func, output } => (ExecStatus::Ok, Some(serde_json::json!({ "transform": func, "input": format!("{:?}", input), "output": format!("{:?}", output) }))),
-            AgentOp::Query(q) => (ExecStatus::Ok, Some(serde_json::json!({ "query": q.table, "filter": q.filter, "limit": q.limit }))),
-            AgentOp::Mutate(m) => (ExecStatus::Ok, Some(serde_json::json!({ "mutate": m.table, "operation": format!("{:?}", m.operation) }))),
-            AgentOp::Rewrite { target_id, replacement } => (ExecStatus::Ok, Some(serde_json::json!({ "rewrite": target_id, "replacement_nodes": replacement.node_count() }))),
+
+            AgentOp::Rewrite { target_id, replacement } => {
+                if let Some(ref tree) = self.tree_ref {
+                    let rewritten = tree.rewrite_by_id(*target_id, replacement);
+                    self.tree_ref = Some(rewritten);
+                    (ExecStatus::Ok, Some(serde_json::json!({ "rewrite": target_id, "replacement_nodes": replacement.node_count(), "tree_updated": true })))
+                } else {
+                    (ExecStatus::Ok, Some(serde_json::json!({ "rewrite": target_id, "tree_updated": false })))
+                }
+            }
+        }
+    }
+
+    /// Resolve $ref:var_name references inside payload objects
+    fn enrich_payload(&self, payload: &Value) -> Value {
+        match payload {
+            Value::Object(obj) => {
+                let mut enriched = serde_json::Map::new();
+                for (k, v) in obj {
+                    if let Some(ref_str) = v.as_str() {
+                        if let Some(var_name) = ref_str.strip_prefix("$ref:") {
+                            if let Some(resolved) = self.scope.bindings.get(var_name) {
+                                enriched.insert(k.clone(), resolved.clone());
+                                continue;
+                            }
+                        }
+                    }
+                    enriched.insert(k.clone(), v.clone());
+                }
+                Value::Object(enriched)
+            }
+            _ => payload.clone(),
         }
     }
 
@@ -283,8 +455,10 @@ impl Dispatcher {
             Predicate::And(a, b) => self.eval_predicate(a) && self.eval_predicate(b),
             Predicate::Or(a, b) => self.eval_predicate(a) || self.eval_predicate(b),
             Predicate::Not(p) => !self.eval_predicate(p),
-            Predicate::Exists(_) => true,
-            Predicate::Equals(_, _) | Predicate::GreaterThan(_, _) | Predicate::LessThan(_, _) => false,
+            Predicate::Exists(r) => self.scope.resolve(r).is_some(),
+            Predicate::Equals(r, expected) => self.scope.resolve(r).map(|v| v == expected).unwrap_or(false),
+            Predicate::GreaterThan(r, threshold) => self.scope.resolve(r).and_then(|v| v.as_f64()).map(|n| n > *threshold).unwrap_or(false),
+            Predicate::LessThan(r, threshold) => self.scope.resolve(r).and_then(|v| v.as_f64()).map(|n| n < *threshold).unwrap_or(false),
         }
     }
 }
