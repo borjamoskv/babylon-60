@@ -275,6 +275,44 @@ impl EpistemicMembrane {
         self.item_memory.push(proposal_hv);
         Ok(root_hash)
     }
+
+    pub fn consolidate_memory(&mut self) -> PyResult<usize> {
+        if self.item_memory.is_empty() {
+            return Ok(0);
+        }
+        
+        let mut unique_memories = Vec::new();
+        // Bundle everything to get the "core consensus" of current memory
+        let mut consensus = self.item_memory[0].clone();
+        for mem in self.item_memory.iter().skip(1) {
+            consensus = consensus.bundle(mem)?;
+        }
+        
+        // Normalize consensus
+        let norm: f32 = consensus.data.iter().map(|v| v * v).sum::<f32>().sqrt();
+        if norm > 0.0 {
+            consensus.data.iter_mut().for_each(|v| *v /= norm);
+        }
+        
+        unique_memories.push(consensus);
+        
+        for mem in self.item_memory.iter() {
+            let mut is_redundant = false;
+            for unique in unique_memories.iter() {
+                if mem.similarity(unique)? > 0.85 {
+                    is_redundant = true;
+                    break;
+                }
+            }
+            if !is_redundant && unique_memories.len() < 15 {
+                unique_memories.push(mem.clone());
+            }
+        }
+        
+        let purged = self.item_memory.len() - unique_memories.len();
+        self.item_memory = unique_memories;
+        Ok(purged)
+    }
 }
 
 pub fn register(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {

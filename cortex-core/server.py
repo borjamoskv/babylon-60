@@ -110,3 +110,16 @@ async def get_ledger():
         return {"ledger": entries}
     except FileNotFoundError:
         return {"ledger": []}
+
+@app.post("/consolidate")
+async def consolidate():
+    """
+    Sleep-like consolidation: bundles all validators to extract majority vote 
+    and purges redundant memory vectors to reset entropy.
+    """
+    purged_count = membrane.consolidate_memory()
+    return {
+        "status": "CONSOLIDATED",
+        "purged_redundant_vectors": purged_count,
+        "active_vectors": len(membrane.to_dict()["item_memory"]) if hasattr(membrane, "to_dict") else "optimized"
+    }
