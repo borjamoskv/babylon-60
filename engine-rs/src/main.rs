@@ -1,3 +1,5 @@
+pub mod smte;
+
 use futures::future::join_all;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -23,6 +25,13 @@ struct Target {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let t0 = Instant::now();
     println!("[{}] [SYSTEM] [MOSKV-10k-RS] Iniciando Matriz Atómica (X18-REAL)...", chrono::Local::now().format("%H:%M:%S%.3f"));
+    
+    // Inyección Termodinámica SMTE
+    println!("[{}] [SMTE] Soltando bucle termodinámico evolutivo (Modo Adversarial)...", chrono::Local::now().format("%H:%M:%S%.3f"));
+    let initial_topology = smte::Topology::new(true);
+    smte::topology_loop(initial_topology).await;
+    println!("[{}] [SMTE] Bucle Termodinámico estabilizado. Procediendo al asalto RPC...", chrono::Local::now().format("%H:%M:%S%.3f"));
+
     println!("[{}] [SWARM] Liberando Legión Bare-Metal de {} Agentes en TCP/UDP crudo.", chrono::Local::now().format("%H:%M:%S%.3f"), TOTAL_AGENTS);
 
     let targets = vec![
