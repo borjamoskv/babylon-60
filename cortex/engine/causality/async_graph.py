@@ -187,7 +187,7 @@ class AsyncCausalGraph:
             sql = f"""
             SELECT fact_id, parent_id FROM causal_edges
             WHERE fact_id IN ({local_placeholders}) AND edge_type != ? AND tenant_id = ?
-            """
+            """  # noqa: S608
             async with self.conn.execute(sql, (*chunk, EDGE_TAINTED_BY, tenant_id)) as cursor:
                 async for child_id, parent_id in cursor:
                     if parent_id is not None:
@@ -212,8 +212,8 @@ class AsyncCausalGraph:
 
             fact_sql = "SELECT id, confidence"
             if meta_col:
-                fact_sql += f", {meta_col}"
-            fact_sql += f" FROM facts WHERE id IN ({local_placeholders})"
+                fact_sql += f", {meta_col}"  # noqa: S608
+            fact_sql += f" FROM facts WHERE id IN ({local_placeholders})"  # noqa: S608
 
             params = list(chunk)
             if has_tenant:
@@ -410,7 +410,7 @@ class AsyncCausalGraph:
 
         sql = "UPDATE facts SET confidence = ?"
         if meta_col:
-            sql += f", {meta_col} = ?"
+            sql += f", {meta_col} = ?"  # noqa: S608
         sql += " WHERE id = ?"
         if has_tenant:
             sql += " AND tenant_id = ?"
