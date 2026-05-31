@@ -167,9 +167,9 @@ def generate_html_report():
         "".join(
             f'''
                         <tr>
-                            <td class="px-6 py-4 text-sm font-semibold text-white">{c['axioma_filosofico_declarado']}</td>
-                            <td class="px-6 py-4 text-sm text-gray-300">{c['accion_real_documentada']}</td>
-                            <td class="px-6 py-4 text-sm text-neon font-mono"><a href="{c['evidencia_url']}" target="_blank" class="hover:underline">{c['evidencia_url']}</a></td>
+                            <td class="px-6 py-4 text-sm font-semibold text-white">{c["axioma_filosofico_declarado"]}</td>
+                            <td class="px-6 py-4 text-sm text-gray-300">{c["accion_real_documentada"]}</td>
+                            <td class="px-6 py-4 text-sm text-neon font-mono"><a href="{c["evidencia_url"]}" target="_blank" class="hover:underline">{c["evidencia_url"]}</a></td>
                         </tr>
                         '''
             for c in data["contradicciones"]
