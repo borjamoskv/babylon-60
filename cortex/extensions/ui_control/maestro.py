@@ -131,7 +131,6 @@ class MaestroUI:
         """Activa una aplicación en primer plano."""
         script = f'tell application "{target.name}" to activate'
         try:
-            from cortex.extensions.ui_control.applescript import run_applescript
             await run_applescript(script)
             return InteractionResult(success=True)
         except Exception as e:
@@ -145,7 +144,6 @@ class MaestroUI:
     ) -> InteractionResult:
         """Activa la app y envía un keystroke de AppleScript."""
         modifiers = modifiers or []
-        from cortex.extensions.ui_control.applescript import is_app_running, run_applescript
         if not await is_app_running(target.name):
             return InteractionResult(success=False, error=f"{target.name} is not running")
 
@@ -193,7 +191,6 @@ class MaestroUI:
         """
 
         try:
-            from cortex.extensions.ui_control.applescript import run_applescript
             await run_applescript(script)
             return InteractionResult(success=True)
         except Exception as e:

@@ -327,8 +327,8 @@ class SovereignScheduler:
                             "source": "scheduler",
                         },
                     )
-                except Exception:
-                    pass  # bus errors must not kill scheduler
+                except Exception as e:
+                    logger.debug("Scheduler event bus publish failed: %s", e, exc_info=True)  # bus errors must not kill scheduler
 
             # Hot state update
             if self._hot_state is not None:
@@ -341,8 +341,8 @@ class SovereignScheduler:
                             "ok": not error,
                         },
                     )
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug("Scheduler hot state set failed: %s", e, exc_info=True)
 
             level = "✅" if not error else "❌"
             logger.info(

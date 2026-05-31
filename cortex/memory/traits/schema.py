@@ -80,10 +80,11 @@ class SchemaTrait:
                 )
             """)
             if self._vector_enabled:
+                # pyright: ignore[reportAttributeAccessIssue]
                 self._conn.executescript(
                     f"""
                     CREATE VIRTUAL TABLE IF NOT EXISTS vec_facts USING vec0(
-                        embedding int8[{self._encoder.dimension}]  # pyright: ignore[reportAttributeAccessIssue]
+                        embedding int8[{self._encoder.dimension}]
                     );
                     CREATE TABLE IF NOT EXISTS vec_void (
                         rowid INTEGER PRIMARY KEY,

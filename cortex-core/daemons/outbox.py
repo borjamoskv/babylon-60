@@ -75,7 +75,7 @@ class ZeroCopyRingBuffer(SovereignResource):
         self._finalizer = weakref.finalize(self, self._safe_close, getattr(self, '_buffer', None), getattr(self, '_mmap', None), getattr(self, '_f', None))
 
     def close(self) -> None:
-        """TODO: Document close"""
+        """Closes the ZeroCopyRingBuffer resources (mmap, files, buffers) avoiding memory leaks."""
         if hasattr(self, '_finalizer') and self._finalizer is not None and self._finalizer.alive:
             self._finalizer.detach()
         if hasattr(self, '_buffer') and self._buffer is not None:
@@ -215,6 +215,96 @@ class OutboxDaemon(SovereignResource):
             logger.error('ZeroCopyRingBuffer fetch failed: %s', e)
         return []
 
+    def _handle_exa_lisp(self, payload_dict: dict, agent_name: str) -> None:
+        try:
+            from exa_lisp_genesis import parse, tokenize, evaluate, ExergyEnvironment, EntropyDeath
+            limit = payload_dict.get('exergy_limit', 1000)
+            logger.info(f"C5-REAL EXA_LISP Invoked. Limits: {limit}j")
+            code = payload_dict.get('code', '')
+            env = ExergyEnvironment(joules=limit, ledger=self.ledger)  # pyright: ignore[reportArgumentType]
+            ast = parse(tokenize(code))
+            result = evaluate(ast, env)
+            logger.info(f'EXA_LISP Output: {result}')
+            if self.ledger:
+                self.ledger.append(action='C5_VERIFIED_EXA', vector_id=agent_name, yield_amount=float(getattr(env, 'joules', 0.0)))
+        except EntropyDeath as e:
+            logger.error(f'EXA_LISP Halted (EntropyDeath): {e}')
+            if self.ledger:
+                burned = limit - getattr(env, 'joules', 0.0)
+                self.ledger.append(action='C5_FALSATED_ENTROPY', vector_id=agent_name, yield_amount=float(-burned))
+        except Exception as e:
+            logger.error(f'EXA_LISP Syntax/Runtime Error: {e}')
+            if self.ledger:
+                burned = limit - getattr(env, 'joules', limit)  # pyright: ignore[reportOperatorIssue]
+                penalty = burned if burned > 0 else 10.0
+                self.ledger.append(action='C5_FALSATED_SYNTAX', vector_id=agent_name, yield_amount=float(-penalty))
+
+    def _handle_quantum_branching(self, payload_dict: dict, agent_name: str) -> None:
+        try:
+            from exa_lisp_genesis import parse, tokenize, evaluate, ExergyEnvironment
+            import concurrent.futures
+            logger.info('C5-REAL QUANTUM_BRANCHING (Q-Let v2) Invoked. Speculative parallel evaluation.')
+            branches = payload_dict.get('branches', [])
+            limit = payload_dict.get('exergy_limit', 1000)
+
+            def _evaluate_branch(code, branch_id, bound_limit=limit):
+                env = ExergyEnvironment(joules=bound_limit, ledger=self.ledger)  # pyright: ignore[reportArgumentType]
+                try:
+                    ast = parse(tokenize(code))
+                    result = evaluate(ast, env)
+                    return (branch_id, result, env.joules, True)
+                except Exception as e:
+                    return (branch_id, str(e), getattr(env, 'joules', 0), False)
+
+            best_branch = None
+            max_exergy_retained = -1.0
+            max_workers = min(32, len(branches) if branches else 1)
+            if max_workers > 0:
+                with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+                    futures = [executor.submit(_evaluate_branch, b.get('code', ''), b.get('id', str(i))) for i, b in enumerate(branches)]
+                    for future in concurrent.futures.as_completed(futures):
+                        branch_id, result, remaining_joules, success = future.result()
+                        if success and remaining_joules > max_exergy_retained:
+                            max_exergy_retained = remaining_joules
+                            best_branch = (branch_id, result)
+                if best_branch:
+                    logger.info(f'Q-Let v2 Collapsed: Selected Branch {best_branch[0]} with Retained Exergy: {max_exergy_retained}J')
+                    if self.ledger:
+                        self.ledger.append(action='Q_BRANCH_COLLAPSE', vector_id=str(best_branch[0]), yield_amount=float(max_exergy_retained))
+        except Exception as e:
+            logger.error(f'QUANTUM_BRANCHING Error: {e}')
+            if self.ledger:
+                self.ledger.append(action='C5_FALSATED_QUANTUM', vector_id=agent_name, yield_amount=float(-limit))  # pyright: ignore[reportOperatorIssue]
+
+    def _handle_ast_mutation(self, payload_dict: dict, agent_name: str) -> None:
+        try:
+            from aeon_0_compiler import AEON0Compiler
+            logger.info('C5-REAL AST_MUTATION Invoked via AEON-0 Compiler.')
+            compiler = AEON0Compiler(ledger=self.ledger)
+            compiler.mutate(payload_dict)
+            if self.ledger:
+                self.ledger.append(action='C5_VERIFIED_MUTATION', vector_id=agent_name, yield_amount=0.0)
+        except Exception as e:
+            logger.error(f'AEON-0 Compiler Error: {e}')
+            if self.ledger:
+                self.ledger.append(action='C5_FALSATED_MUTATION', vector_id=agent_name, yield_amount=-50.0)
+
+    def _handle_l1_patch(self, payload_dict: dict, agent_name: str) -> None:
+        try:
+            from telemetry_gate import TelemetryGate
+            from swarm_manager import SwarmActuator
+            logger.info(f'C5-REAL L1_EXTERNAL_PATCH Invoked for agent {agent_name}. Routing to Telemetry Gate.')
+            actuator = SwarmActuator(self._db_path)
+            gate = TelemetryGate(actuator)
+            patch_string = json.dumps(payload_dict.get('patch', {}))
+            success = gate.process_external_patch(agent_name, patch_string)
+            if success:
+                logger.info(f'Telemetry Gate ACCEPTED patch from {agent_name}.')
+            else:
+                logger.warning(f'Telemetry Gate REJECTED patch from {agent_name}.')
+        except Exception as e:
+            logger.error(f'L1_EXTERNAL_PATCH Gateway Error: {e}')
+
     def drain_once_sync(self) -> None:
         """Synchronously drains a batch of pending tasks (primarily for tests and synchronous fallbacks)."""
         try:
@@ -229,100 +319,18 @@ class OutboxDaemon(SovereignResource):
                 except Exception as e:
                     logger.error('Failed to parse task payload json: %s', e)
                     payload_dict = {}
-                if payload_dict.get('type') == 'EXA_LISP':
-                    try:
-                        from exa_lisp_genesis import parse, tokenize, evaluate, ExergyEnvironment, EntropyDeath
-                        logger.info(f"C5-REAL EXA_LISP Invoked. Limits: {payload_dict.get('exergy_limit', 1000)}j")
-                        code = payload_dict.get('code', '')
-                        limit = payload_dict.get('exergy_limit', 1000)
-                        env = ExergyEnvironment(joules=limit, ledger=self.ledger)  # pyright: ignore[reportArgumentType]
-                        ast = parse(tokenize(code))
-                        result = evaluate(ast, env)
-                        logger.info(f'EXA_LISP Output: {result}')
-                        if self.ledger:
-                            self.ledger.append(action='C5_VERIFIED_EXA', vector_id=agent_name, yield_amount=float(getattr(env, 'joules', 0.0)))
-                        continue
-                    except EntropyDeath as e:
-                        logger.error(f'EXA_LISP Halted (EntropyDeath): {e}')
-                        if self.ledger:
-                            burned = limit - getattr(env, 'joules', 0.0)
-                            self.ledger.append(action='C5_FALSATED_ENTROPY', vector_id=agent_name, yield_amount=float(-burned))
-                        continue
-                    except Exception as e:
-                        logger.error(f'EXA_LISP Syntax/Runtime Error: {e}')
-                        if self.ledger:
-                            burned = limit - getattr(env, 'joules', limit)  # pyright: ignore[reportOperatorIssue]
-                            penalty = burned if burned > 0 else 10.0
-                            self.ledger.append(action='C5_FALSATED_SYNTAX', vector_id=agent_name, yield_amount=float(-penalty))
-                        continue
-                if payload_dict.get('type') == 'QUANTUM_BRANCHING':
-                    try:
-                        from exa_lisp_genesis import parse, tokenize, evaluate, ExergyEnvironment, EntropyDeath
-                        logger.info('C5-REAL QUANTUM_BRANCHING (Q-Let v2) Invoked. Speculative parallel evaluation.')
-                        branches = payload_dict.get('branches', [])
-                        limit = payload_dict.get('exergy_limit', 1000)
 
-                        def _evaluate_branch(code, branch_id, bound_limit=limit):
-                            env = ExergyEnvironment(joules=bound_limit, ledger=self.ledger)  # pyright: ignore[reportArgumentType]
-                            try:
-                                ast = parse(tokenize(code))
-                                result = evaluate(ast, env)
-                                return (branch_id, result, env.joules, True)
-                            except Exception as e:
-                                return (branch_id, str(e), getattr(env, 'joules', 0), False)
-                        best_branch = None
-                        max_exergy_retained = -1.0
-                        max_workers = min(32, len(branches) if branches else 1)
-                        if max_workers > 0:
-                            with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:  # pyright: ignore[reportUndefinedVariable]
-                                futures = [executor.submit(_evaluate_branch, b.get('code', ''), b.get('id', str(i))) for i, b in enumerate(branches)]
-                                for future in concurrent.futures.as_completed(futures):  # pyright: ignore[reportUndefinedVariable]
-                                    branch_id, result, remaining_joules, success = future.result()
-                                    if success and remaining_joules > max_exergy_retained:
-                                        max_exergy_retained = remaining_joules
-                                        best_branch = (branch_id, result)
-                            if best_branch:
-                                logger.info(f'Q-Let v2 Collapsed: Selected Branch {best_branch[0]} with Retained Exergy: {max_exergy_retained}J')
-                                if self.ledger:
-                                    self.ledger.append(action='Q_BRANCH_COLLAPSE', vector_id=str(best_branch[0]), yield_amount=float(max_exergy_retained))
-                        continue
-                    except Exception as e:
-                        logger.error(f'QUANTUM_BRANCHING Error: {e}')
-                        if self.ledger:
-                            self.ledger.append(action='C5_FALSATED_QUANTUM', vector_id=agent_name, yield_amount=float(-limit))  # pyright: ignore[reportOperatorIssue]
-                        continue
-                if payload_dict.get('type') == 'AST_MUTATION':
-                    try:
-                        from aeon_0_compiler import AEON0Compiler
-                        logger.info('C5-REAL AST_MUTATION Invoked via AEON-0 Compiler.')
-                        compiler = AEON0Compiler(ledger=self.ledger)
-                        compiler.mutate(payload_dict)
-                        if self.ledger:
-                            self.ledger.append(action='C5_VERIFIED_MUTATION', vector_id=agent_name, yield_amount=0.0)
-                        continue
-                    except Exception as e:
-                        logger.error(f'AEON-0 Compiler Error: {e}')
-                        if self.ledger:
-                            self.ledger.append(action='C5_FALSATED_MUTATION', vector_id=agent_name, yield_amount=-50.0)
-                        continue
-                if payload_dict.get('type') == 'L1_EXTERNAL_PATCH':
-                    try:
-                        from telemetry_gate import TelemetryGate
-                        from swarm_manager import SwarmActuator
-                        logger.info(f'C5-REAL L1_EXTERNAL_PATCH Invoked for agent {agent_name}. Routing to Telemetry Gate.')
-                        actuator = SwarmActuator(self._db_path)
-                        gate = TelemetryGate(actuator)
-                        patch_string = json.dumps(payload_dict.get('patch', {}))
-                        success = gate.process_external_patch(agent_name, patch_string)
-                        if success:
-                            logger.info(f'Telemetry Gate ACCEPTED patch from {agent_name}.')
-                        else:
-                            logger.warning(f'Telemetry Gate REJECTED patch from {agent_name}.')
-                        continue
-                    except Exception as e:
-                        logger.error(f'L1_EXTERNAL_PATCH Gateway Error: {e}')
-                        continue
-                logger.debug(f'C5-REAL Isolation: Task {agent_name} rejected. Network dispatch is prohibited.')
+                ptype = payload_dict.get('type')
+                if ptype == 'EXA_LISP':
+                    self._handle_exa_lisp(payload_dict, agent_name)
+                elif ptype == 'QUANTUM_BRANCHING':
+                    self._handle_quantum_branching(payload_dict, agent_name)
+                elif ptype == 'AST_MUTATION':
+                    self._handle_ast_mutation(payload_dict, agent_name)
+                elif ptype == 'L1_EXTERNAL_PATCH':
+                    self._handle_l1_patch(payload_dict, agent_name)
+                else:
+                    logger.debug(f'C5-REAL Isolation: Task {agent_name} rejected. Network dispatch is prohibited.')
         except Exception as e:
             logger.error('Outbox drainer error: %s', e)
 
@@ -335,7 +343,7 @@ class OutboxDaemon(SovereignResource):
             await loop.run_in_executor(None, self.drain_once_sync)
 
     def start_guardian(self) -> None:
-        """TODO: Document start_guardian"""
+        """Starts the asynchronous guardian drain loop dynamically."""
         if self._daemon_task:
             return
         try:

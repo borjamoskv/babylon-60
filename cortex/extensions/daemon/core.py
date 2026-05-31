@@ -402,14 +402,12 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
         return status
 
     def run(self, interval: int = DEFAULT_INTERVAL) -> None:
-        """Run the daemon. Uses sovereign async loop if available, else legacy threads."""
+        """Run the daemon using the sovereign async loop (all subsystems as tasks)."""
         from cortex.events.loop import sovereign_run
 
-        try:
-            sovereign_run(self.run_sovereign(interval=interval))
-        except ImportError:
-            logger.info("uvloop not available, falling back to legacy threading mode")
-            self._run_legacy(interval=interval)
+        logger.info("🚀 MOSKV-1 Daemon starting in sovereign async mode (interval=%ds)", interval)
+        sovereign_run(self.run_sovereign(interval=interval))
+
 
     async def run_sovereign(self, interval: int = DEFAULT_INTERVAL) -> None:
         """Sovereign async execution - single event loop, all subsystems as tasks.
@@ -619,84 +617,6 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
                 interval_s=600,
                 priority=8,
             )
-
-    def _run_legacy(self, interval: int = DEFAULT_INTERVAL) -> None:
-        """Legacy threading-based execution (fallback)."""
-
-        def _handle_signal(signum: int, frame: object) -> None:
-            sig_name = signal.Signals(signum).name
-
-            logger.info("Received %s, shutting down gracefully...", sig_name)
-
-            self._shutdown = True
-
-            self._stop_event.set()
-
-        signal.signal(signal.SIGTERM, _handle_signal)
-
-        signal.signal(signal.SIGINT, _handle_signal)
-
-        logger.info("🚀 MOSKV-1 Daemon starting [LEGACY] (interval=%ds)", interval)
-
-        if self._aether_daemon is not None:
-            self._spawn_thread(self._aether_daemon.start, "AetherAgent")
-
-        self._spawn_thread(self._run_neural_loop, "NeuralSync")
-
-        if self.ast_oracle:
-            self._spawn_thread(lambda: self._run_lifecycle_daemon(self.ast_oracle, "AST Oracle", "👁️"), "ASTOracle")
-
-        if getattr(self, "iot_oracle", None):
-            self._spawn_thread(lambda: self._run_lifecycle_daemon(self.iot_oracle, "IoT Oracle", "📡"), "IoTOracle")
-
-        if self.fiat_oracle:
-            self._spawn_thread(self.fiat_oracle.run_sync_loop, "FiatOracle")
-
-        if self.heartbeat_daemon:
-            self._spawn_thread(lambda: self._run_lifecycle_daemon(self.heartbeat_daemon, "Heartbeat", "❤️"), "HeartbeatDaemon")
-
-        if self.entropic_wake_daemon:
-            self._spawn_thread(lambda: self._run_loop_daemon(self.entropic_wake_daemon, "Entropic Wake", "🌌"), "EntropicWakeDaemon")
-
-        if self.frontier_daemon:
-            self._spawn_thread(lambda: self._run_loop_daemon(self.frontier_daemon, "Frontier", "🚀"), "FrontierDaemon")
-
-        if getattr(self, "zero_prompting_daemon", None):
-            self._spawn_thread(lambda: self._run_loop_daemon(self.zero_prompting_daemon, "Zero-Prompting", "🧠"), "ZeroPromptingDaemon")
-
-        if getattr(self, "epistemic_breaker_daemon", None):
-            self._spawn_thread(lambda: self._run_loop_daemon(self.epistemic_breaker_daemon, "Epistemic Breaker", "🛡️", run_method="run"), "EpistemicBreakerDaemon")
-
-        if getattr(self, "sentinel_oracle", None):
-            self._spawn_thread(lambda: self._run_loop_daemon(self.sentinel_oracle, "Sentinel Oracle", "🛡️"), "SentinelOracle")
-
-        self._spawn_thread(self._run_health_loop, "HealthMonitor")
-
-        logger.info("Daemon started with %d threads", len(self._threads))
-
-        try:
-            while not self._shutdown:
-                self.check()
-
-                self._stop_event.wait(timeout=interval)
-
-        except KeyboardInterrupt:
-            pass
-
-        finally:
-            logger.info("MOSKV-1 Daemon stopped")
-
-            if self.entropic_wake_daemon:
-                self.entropic_wake_daemon.stop()
-
-            if self.frontier_daemon:
-                self.frontier_daemon.stop()
-
-            if getattr(self, "zero_prompting_daemon", None):
-                self.zero_prompting_daemon.stop()  # type: ignore[union-attr]
-
-            if getattr(self, "epistemic_breaker_daemon", None):
-                self.epistemic_breaker_daemon.stop()
 
     def _save_status(self, status: DaemonStatus) -> None:
         """Persist status to disk."""

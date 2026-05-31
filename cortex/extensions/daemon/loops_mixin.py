@@ -63,30 +63,6 @@ class LoopsMixin:
 
     """Mixin providing daemon background thread loop methods."""
 
-    def _spawn_thread(self, target, name: str) -> None:
-        """Spawn a daemon thread and track it."""
-        t = threading.Thread(target=target, name=name, daemon=True)
-        t.start()
-        self._threads.append(t)
-
-    def _run_lifecycle_daemon(self, daemon: Any, name: str, emoji: str) -> None:
-        """Runs a daemon with start/stop lifecycle in a sync thread event loop."""
-        if not daemon:
-            return
-        logger.info("%s %s thread started", emoji, name)
-
-        async def _lifecycle():
-            task = asyncio.create_task(daemon.start())
-            while not self._shutdown:
-                await asyncio.sleep(1.0)
-            await daemon.stop()
-            await task
-
-        try:
-            asyncio.run(_lifecycle())
-        except Exception as e:  # noqa: BLE001
-            logger.error("%s loop error: %s", name, e)
-
     async def _run_lifecycle_daemon_async(self, daemon: Any, name: str, emoji: str) -> None:
         """Runs a daemon with start/stop lifecycle as an async task."""
         if not daemon:
@@ -101,19 +77,6 @@ class LoopsMixin:
         await daemon.stop()
         await task
 
-    def _run_loop_daemon(self, daemon: Any, name: str, emoji: str, run_method: str = "run_loop") -> None:
-        """Runs a daemon's run_loop/run method inside a sync thread event loop."""
-        if not daemon:
-            return
-        logger.info("%s %s thread started", emoji, name)
-        try:
-            method = getattr(daemon, run_method)
-            res = method()
-            if asyncio.iscoroutine(res):
-                asyncio.run(res)
-        except Exception as e:  # noqa: BLE001
-            logger.error("%s loop error: %s", name, e)
-
     async def _run_loop_daemon_async(self, daemon: Any, name: str, emoji: str, run_method: str = "run_loop") -> None:
         """Runs a daemon's run_loop/run method as an async task."""
         if not daemon:
@@ -127,17 +90,6 @@ class LoopsMixin:
         except Exception as e:  # noqa: BLE001
             logger.error("%s loop error: %s", name, e)
 
-    def _run_neural_loop(self) -> None:
-        """Fast polling loop for zero-latency neural intent ingestion."""
-        logger.info("🧠 Neural-Bandwidth Sync thread started (1Hz)")
-        while not self._shutdown:
-            try:
-                alerts = self.neural_monitor.check()
-                if alerts:
-                    self._alert_neural(alerts)
-            except Exception as e:  # noqa: BLE001
-                logger.debug("Neural loop error: %s", e)
-            self._stop_event.wait(timeout=1.0)
 
 
 
@@ -192,52 +144,6 @@ class LoopsMixin:
             return False
         self._last_alerts[key] = now
         return True
-
-    def _run_health_loop(self) -> None:
-        """Periodic health monitoring via Health Index."""
-        logger.info("🏥 Health Monitor thread started (5min interval)")
-
-        from cortex.extensions.daemon.health_loop import HealthLoop
-
-        db_path = ""
-        if self._shared_engine:
-            db_path = str(getattr(self._shared_engine, "_db_path", ""))
-
-        health = HealthLoop(
-            db_path=db_path,
-            notify_fn=(self._send_notification if hasattr(self, "_send_notification") else None),
-        )
-
-        base_interval = 300.0
-        max_interval = 3600.0
-        current_interval = base_interval
-
-        while not self._shutdown:
-            try:
-                data = health.tick()
-                if data is None:
-                    # tick() failed (returns None on internal exception)
-                    current_interval = min(current_interval * 2, max_interval)
-                    logger.warning(
-                        "Health check failed. Backing off to %.1fs",
-                        current_interval,
-                    )
-                else:
-                    # Success resets backoff
-                    if current_interval > base_interval:
-                        logger.info(
-                            "Health check recovered. Resetting interval to %.1fs", base_interval
-                        )
-                    current_interval = base_interval
-                    if self._shared_engine:
-                        health.persist_snapshot(self._shared_engine, data)
-            except Exception as e:  # noqa: BLE001 — safety net
-                current_interval = min(current_interval * 2, max_interval)
-                logger.error(
-                    "Health loop critical error: %s. Backing off to %.1fs", e, current_interval
-                )
-
-            self._stop_event.wait(timeout=current_interval)
 
     async def _run_neural_loop_async(self) -> None:
         """Fast polling loop for zero-latency neural intent ingestion (Async)."""

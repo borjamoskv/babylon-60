@@ -62,12 +62,24 @@ class MemoryArchaeologist:
         )
         return {"condensed": condensed, "tombstoned": tombstoned}
 
+    def _sync_parent_column(self, conn: sqlite3.Connection) -> str | None:
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA table_info(facts)")
+        columns = {str(row[1]) for row in cursor.fetchall()}
+        if "parent_decision_id" in columns:
+            return "parent_decision_id"
+        if "parent_id" in columns:
+            return "parent_id"
+        return None
+
     def _fetch_active_facts(self, project: str, tenant_id: str) -> dict[str, dict[str, Any]]:
         conn = self.engine._get_sync_conn()
         cursor = conn.cursor()
+        parent_col = self._sync_parent_column(conn)
+        parent_col_select = f", {parent_col} AS parent_decision_id" if parent_col else ", NULL AS parent_decision_id"
         cursor.execute(
-            """
-            SELECT id, content, parent_decision_id, tenant_id
+            f"""
+            SELECT id, content{parent_col_select}, tenant_id
             FROM facts
             WHERE project = ? AND tenant_id = ? AND is_tombstoned = 0 AND fact_type != 'ghost'
             """,
