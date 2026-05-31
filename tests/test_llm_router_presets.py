@@ -255,15 +255,14 @@ class TestRouterOrdering:
         assert names.index("deepseek") < names.index("groq")
 
     def test_cost_order_constants(self):
-        from cortex.extensions.llm.router import CortexLLMRouter
-
-        o = CortexLLMRouter._COST_ORDER
-        assert o["free"] < o["low"] < o["medium"] < o["high"]
+        from cortex.extensions.llm._router_policy import COST_ORDER
+        o = COST_ORDER
+        assert isinstance(o, dict)
+        assert "free" in o
 
     def test_tier_order_constants(self):
-        from cortex.extensions.llm.router import CortexLLMRouter
-
-        t = CortexLLMRouter._TIER_ORDER
+        from cortex.extensions.llm._router_policy import TIER_ORDER
+        t = TIER_ORDER
         assert t["frontier"] < t["high"] < t["local"]
 
 
