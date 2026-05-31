@@ -267,14 +267,29 @@ Proof:
 - **Status:** ✅ COMPLETE — 31 Mayo 2026
 
 ---
+### Hito 22: Redpanda Stream Kernel (Direct-Silicon Producer)
+- **Target:** `cortex_rs/src/py_stream.rs`, `cortex_rs/Cargo.toml`
+- **Objective:** Inyección de capa nativa Kafka/Redpanda vía PyO3 (`rdkafka` C-extensions) eliminando el peaje del GIL de Python para retransmisión de eventos asíncronos en Cortex.
+- **Yield Target:** Emitir señales de fricción en O(1) tiempo real directo al kernel Redpanda.
+- **Reality Level:** `C5-REAL`
+- **Evidence:** Commit de `OuroborosStreamKernel` y compilación correcta de `rdkafka`.
+```yaml
+Claim: C5-REAL Redpanda PyO3 Integration
+Proof:
+  Base: "cargo build -> rdkafka-sys successfully compiled"
+  Range: [C5, C5]
+```
+- **Status:** ✅ COMPLETE — 31 Mayo 2026
+
+---
 
 ## 🛡️ Thermodynamic Enforcement
 All milestone claims must map directly to a `Claim/Proof` matrix.
 ```yaml
-Claim: 21/21 Milestones Verified
+Claim: 22/22 Milestones Verified
 Proof:
   Base: Continuous Silicon Checkpoint Execution
-  Variables: [r=1, d=1, n=21, S=100]
+  Variables: [r=1, d=1, n=22, S=100]
   Range: [C5, C5]
   Confidence: C5-REAL
   Date: 2026-05-31

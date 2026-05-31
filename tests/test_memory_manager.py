@@ -134,7 +134,7 @@ async def test_process_interaction_with_overflow(manager, mock_l1):
     # The worker might pick it up immediately, so we just wait for queue to process or assert it
     # We will cancel the workers right away to inspect the queue or just wait.
     # Actually, the worker is running. Let's patch compress_and_store to verify it's called.
-    with patch("cortex.memory.manager.compress_and_store", new_callable=AsyncMock):
+    with patch("cortex.memory._manager_bg.compress_and_store", new_callable=AsyncMock):
         # Give worker a tick to pick it up
         await asyncio.sleep(0.01)
         # The task was added *before* this patch. The worker might have already processed
@@ -154,7 +154,7 @@ async def test_process_interaction_with_overflow_clean():
         max_bg_tasks=1,
     )
 
-    with patch("cortex.memory.manager.compress_and_store", new_callable=AsyncMock) as mock_compress:
+    with patch("cortex.memory._manager_bg.compress_and_store", new_callable=AsyncMock) as mock_compress:
         await mgr.process_interaction(
             role="user",
             content="Testing queue",

@@ -162,7 +162,7 @@ async def test_deduplication_exact_match(manager, mock_l2):
 async def test_wait_for_background_success(manager):
     """Test wait_for_background with actual task completion."""
     # Mock compress_and_store to do nothing
-    with patch("cortex.memory.manager.compress_and_store", new_callable=AsyncMock):
+    with patch("cortex.memory._manager_bg.compress_and_store", new_callable=AsyncMock):
         manager._bg_queue.put_nowait((["item"], "s", "t", "p"))
         # The worker should pick it up and call task_done
         await manager.wait_for_background(timeout=1.0)

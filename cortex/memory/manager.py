@@ -5,19 +5,25 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-import uuid
 from typing import Any
 
 # Memory OS (RFC-CORTEX-MEMORY-OS)
 from cortex.compaction.mem0_pipeline import Mem0Pipeline
 from cortex.memory.encoder import AsyncEncoder
-from cortex.memory.engrams import CortexSemanticEngram
 from cortex.memory.ledger import EventLedgerL3
-from cortex.memory.memory_compression import compress_and_store
 from cortex.memory.models import MemoryEvent
 from cortex.memory.schemas import SchemaEngine
 from cortex.memory.thalamus import ThalamusGate
 from cortex.memory.working import WorkingMemoryL1
+
+from cortex.memory._manager_init import (
+    init_dynamic_space,
+    init_hologram,
+    init_metamemory,
+    init_resonance_gate,
+)
+from cortex.memory._manager_bg import compression_worker_loop, cancel_background_tasks, compress_and_store
+from cortex.memory._manager_store import store_fact, check_deduplication
 
 try:
     from cortex.memory.hdc import HDCEncoder, HDCVectorStoreL2
@@ -37,7 +43,6 @@ except ImportError:
     def get_tenant_id() -> str:
         return "default"
 
-
 try:
     from cortex.extensions.sovereign.endocrine import DigitalEndocrine
 except ImportError:
@@ -53,7 +58,6 @@ except ImportError:
 try:
     from cortex.memory.semantic_ram import DynamicSemanticSpace
     from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
-
     VectorStoreL2 = SovereignVectorStoreL2
 except ImportError:
     VectorStoreL2 = None  # type: ignore[assignment,misc]
@@ -65,18 +69,7 @@ logger = logging.getLogger("cortex.memory.manager")
 
 
 class CortexMemoryManager:
-    """Orchestrator for the Tripartite Cognitive Memory Architecture.
-
-    Coordinates L1 (Working Memory), L2 (Vector Store), and L3 (Event Ledger)
-    into a unified memory pipeline that never blocks the async event loop.
-
-    Args:
-        l1: Working memory instance.
-        l2: Vector store instance (sqlite-vec backed).
-        l3: Event ledger instance (SQLite-backed).
-        encoder: Async embedder for L2 vectorization.
-        router: Optional LLM router for semantic compression.
-    """
+    """Orchestrator for the Tripartite Cognitive Memory Architecture."""
 
     __slots__ = (
         "_encoder",
@@ -130,112 +123,30 @@ class CortexMemoryManager:
         )
         self._bg_workers: list[asyncio.Task[Any]] = []
         self.thalamus = ThalamusGate(self)
-        self._dynamic_space = self._init_dynamic_space()
-        self._hologram = self._init_hologram()
+        self._dynamic_space = init_dynamic_space(self._l2, self)
+        self._hologram = init_hologram(self._l2)
 
         self._endocrine = DigitalEndocrine() if DigitalEndocrine else None
         self._schema_engine = SchemaEngine()
-        self.metamemory = self._init_metamemory()
+        self.metamemory = init_metamemory()
 
-        # Memory OS subsystems (RFC-CORTEX-MEMORY-OS / Axiom Ω₁₃)
         self._mem0_pipeline = Mem0Pipeline()
         self._memory_os = MemoryOS() if MemoryOS else None
         if self._memory_os and hasattr(self._memory_os, "start_glial_daemon"):
             self._memory_os.start_glial_daemon()
 
-        # ART-v2 Resonance Engine [v6.2]
-        self._resonance_gate = self._init_resonance_gate()
+        self._resonance_gate = init_resonance_gate(self._l2, self._endocrine)
 
         if self._dynamic_space:
             self._dynamic_space.start()
         self._fusion = ContextFusion(judge_provider=router) if ContextFusion else None
         self._start_bg_workers()
 
-    def _init_dynamic_space(self) -> Any | None:
-        """Initialize semantic RAM if the optional module is healthy."""
-        if not self._l2 or DynamicSemanticSpace is None:
-            return None
-        try:
-            return DynamicSemanticSpace(self._l2, manager=self)
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("Dynamic semantic space unavailable: %s", exc)
-            return None
-
-    def _init_hologram(self) -> Any | None:
-        """Initialize the RAM hologram without blocking manager startup."""
-        if not self._l2:
-            return None
-        try:
-            from cortex.memory.hologram import HolographicMemory
-
-            return HolographicMemory(self._l2)
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("Holographic memory unavailable: %s", exc)
-            return None
-
-    def _init_metamemory(self) -> Any | None:
-        """Initialize metamemory telemetry if the module is available."""
-        try:
-            from cortex.memory.metamemory import MetamemoryMonitor
-
-            return MetamemoryMonitor()
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("Metamemory monitor unavailable: %s", exc)
-            return None
-
-    def _init_resonance_gate(self) -> Any | None:
-        """Initialize the critical resonance validator lazily.
-
-        Startup may degrade if optional enrichers are unavailable, but writes
-        must still fail closed when the gate itself cannot be constructed.
-        """
-        if not self._l2:
-            return None
-
-        sensor = None
-        try:
-            from cortex.extensions.songlines.sensor import TopographicSensor
-
-            sensor = TopographicSensor()
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("Topographic sensor unavailable for resonance gate: %s", exc)
-
-        try:
-            from cortex.memory.resonance import AdaptiveResonanceGate
-
-            return AdaptiveResonanceGate(
-                vector_store=self._l2,
-                songline_sensor=sensor,
-                endocrine=self._endocrine,
-            )
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("Resonance gate unavailable during startup: %s", exc)
-            return None
-
     def _start_bg_workers(self) -> None:
-        """Initialize persistent background workers for L2 compression."""
-        # 3 workers default, bounding the active compression coroutines to 3.
         num_workers = min(3, max(1, self._max_bg_tasks // 10))
         for i in range(num_workers):
-            task = asyncio.create_task(self._compression_worker_loop(i))
+            task = asyncio.create_task(compression_worker_loop(i, self._bg_queue, self))
             self._bg_workers.append(task)
-
-    async def _compression_worker_loop(self, worker_id: int) -> None:
-        """Persistent worker loop consuming from the background queue."""
-        while True:
-            try:
-                overflowed, session_id, tenant_id, project_id = await self._bg_queue.get()
-                try:
-                    await compress_and_store(self, overflowed, session_id, tenant_id, project_id)
-                except (ValueError, TypeError, RuntimeError, OSError) as e:
-                    logger.error("MemoryManager: Worker %d failed compression: %s", worker_id, e)
-                finally:
-                    self._bg_queue.task_done()
-            except asyncio.CancelledError:
-                raise
-            except (ValueError, TypeError, RuntimeError, OSError) as e:
-                logger.error("MemoryManager: Worker %d encountered fatal error: %s", worker_id, e)
-                await asyncio.sleep(1)
 
     # ─── Primary API ──────────────────────────────────────────────
 
@@ -249,12 +160,6 @@ class CortexMemoryManager:
         project_id: str = "default_project",
         metadata: dict[str, Any] | None = None,
     ) -> MemoryEvent:
-        """Process a new interaction through the memory pipeline.
-
-        1. Persist to L3 (immutable ledger)
-        2. Push to L1 (working memory)
-        3. If overflow → compress and embed to L2 in background
-        """
         tenant_id = tenant_id or get_tenant_id()
         _meta = metadata or {}
         _meta["tenant_id"] = tenant_id
@@ -271,7 +176,6 @@ class CortexMemoryManager:
 
         await self._l3.append_event(event)
 
-        # Ingest into Digital Endocrine system [v6.2]
         if self._endocrine:
             self._endocrine.ingest_context(content, tenant_id=tenant_id, metadata=_meta)
 
@@ -289,77 +193,17 @@ class CortexMemoryManager:
 
         return event
 
-    async def _check_deduplication(
-        self, tenant_id: str, project_id: str, content: str
-    ) -> str | None:
-        """Return deduplicated ID if fact exists, else None (async)."""
-        if not content or not content.strip():
-            logger.warning("CortexMemoryManager: Rejected empty fact pipeline.")
-            return "empty"
-
-        if self._l2 and hasattr(self._l2, "_get_conn"):
-
-            def _sync_dedup():
-                try:
-                    conn = self._l2._get_conn()
-                    cursor = conn.cursor()
-                    cursor.execute(
-                        "SELECT id FROM facts_meta WHERE tenant_id = ? AND "
-                        "project_id = ? AND content = ?",
-                        (tenant_id, project_id, content),
-                    )
-                    row = cursor.fetchone()
-                    conn.rollback()  # Release shared lock left by SELECT
-                    if row:
-                        return str(row["id"])
-                except (OSError, RuntimeError, ValueError) as e:
-                    logger.warning("CortexMemoryManager: Deduplication check failed: %s", e)
-                return None
-
-            dedup_id = await asyncio.to_thread(_sync_dedup)
-            if dedup_id:
-                logger.info("CortexMemoryManager: Fact deduplicated (exact match).")
-                return dedup_id
-        return None
+    async def _check_deduplication(self, tenant_id: str, project_id: str, content: str) -> str | None:
+        """Forwarder to detached logic."""
+        return await check_deduplication(self._l2, tenant_id, project_id, content)
 
     def _determine_layer(self, project_id: str, layer: str) -> str:
-        """Determine cognitive layer based on project ID semantic rules."""
         _pid_lower = project_id.lower()
         if _pid_lower in ("moskv", "personal", "home", "moskv-1"):
             return "assistant"
         if _pid_lower in ("cortex", "core", "system"):
             return "system"
         return layer if layer else "semantic"
-
-    async def _emit_to_bus(
-        self,
-        fact_id: str,
-        tenant_id: str,
-        project_id: str,
-        content: str,
-        fact_type: str,
-        layer: str,
-        metadata: dict[str, Any] | None,
-    ) -> str:
-        """Emit fact record to the experience bus."""
-        logger.info("ExperienceBus: Emitting experience:recorded for #%s", fact_id)
-        payload = {
-            "fact_id": fact_id,
-            "tenant_id": tenant_id,
-            "project_id": project_id,
-            "content": content,
-            "fact_type": fact_type,
-            "layer": layer,
-            "metadata": metadata or {},
-        }
-        await asyncio.to_thread(
-            self._bus.emit,  # type: ignore[reportOptionalMemberAccess]
-            event_type="experience:recorded",
-            payload=payload,
-            source="memory:manager",
-            project=project_id,
-        )
-        return fact_id
 
     async def store(
         self,
@@ -372,97 +216,20 @@ class CortexMemoryManager:
         parent_decision_id: str | int | None = None,
         use_bus: bool = False,
     ) -> str:
-        """Directly persist a high-value fact to L2 memory layers.
-
-        Bypasses the L1 working memory buffer. Useful for errors,
-        decisions, and formal proof counterexamples.
-
-        Pipeline: Mem0 exergy gate → Thalamus → dedup → encode → resonance → L2
-        """
         tenant_id = tenant_id or get_tenant_id()
-        conn = self._l2._get_conn() if hasattr(self._l2, "_get_conn") else None
-
-        # ── Mem0 Exergy Pre-Filter (RFC-CORTEX-MEMORY-OS) ──────────
-        exergy = await self._mem0_pipeline.evaluate_exergy(
-            {"content": content, "fact_type": fact_type, "metadata": metadata}
+        return await store_fact(
+            self,
+            tenant_id,
+            project_id,
+            content,
+            fact_type,
+            metadata,
+            layer,
+            parent_decision_id,
+            use_bus,
         )
-        if exergy.score < self._mem0_pipeline.exergy_threshold:
-            logger.info(
-                "CortexMemoryManager: Fact rejected by Mem0 exergy gate: %s",
-                exergy.score,
-            )
-            return f"filtered:low_exergy:{exergy.score}"
-
-        should_process, action, _ = await self.thalamus.filter(
-            content=content,
-            project_id=project_id,
-            tenant_id=tenant_id,
-            fact_type=fact_type,
-            parent_decision_id=int(parent_decision_id) if parent_decision_id else None,
-            conn=conn,
-        )
-        if not should_process:
-            logger.info("CortexMemoryManager: Fact filtered by Thalamus. Action: %s", action)
-            try:
-                from cortex.routes.notch_ws import notify_notch_pruning
-
-                await notify_notch_pruning()
-            except ImportError:
-                logger.debug("notch_ws unavailable (FastAPI not installed), skipping notification")
-            return f"filtered:{action}"
-
-        dedup_id = await self._check_deduplication(tenant_id, project_id, content)
-        if dedup_id:
-            return f"filtered:{dedup_id}" if dedup_id == "empty" else f"deduplicated:{dedup_id}"
-
-        _meta = metadata or {}
-        if "confidence_score" not in _meta:
-            _meta["confidence_score"] = 0.8
-
-        adjusted_layer = self._determine_layer(project_id, layer)
-
-        if matched_schema := self._schema_engine.match_schema(content):
-            content = self._schema_engine.apply_encoding_schema(matched_schema, content)
-            _meta.update({"active_schema": matched_schema.name})
-
-        vector = await self._encoder.encode(content)
-        fact_id = str(uuid.uuid4())
-
-        candidate = CortexSemanticEngram(
-            id=fact_id,
-            tenant_id=tenant_id,
-            project_id=project_id,
-            content=content,
-            embedding=vector,
-            timestamp=time.monotonic(),
-            metadata=_meta,
-            cognitive_layer=adjusted_layer,  # type: ignore[reportArgumentType]
-            parent_decision_id=int(parent_decision_id) if parent_decision_id is not None else None,
-        )
-
-        if self._resonance_gate is None:
-            raise RuntimeError("Resonance gate unavailable; refusing to persist without validation")
-
-        status, engram = await self._resonance_gate.gate(
-            candidate=candidate, precision_mode=(fact_type in ("decision", "rule"))
-        )
-
-        if status == "resonance":
-            logger.info("CortexMemoryManager: Fact assimilated via resonance with #%s", engram.id)
-            return f"deduplicated:{engram.id}"
-
-        if use_bus and self._bus:
-            return await self._emit_to_bus(
-                fact_id, tenant_id, project_id, content, fact_type, adjusted_layer, metadata
-            )
-
-        if self._hdc:
-            await self._hdc.memorize(engram, fact_type=fact_type)
-
-        return engram.id
 
     async def reconcile_experience(self, signal: Any) -> str:
-        """Process an experience signal from the bus and commit it to L2."""
         payload = signal.payload
         tenant_id = payload.get("tenant_id") or get_tenant_id()
         return await self.store(
@@ -484,13 +251,11 @@ class CortexMemoryManager:
         fuse_context: bool = False,
         layer: str | None = None,
     ) -> dict[str, Any]:
-        """Build an optimized context for LLM injection."""
         tenant_id = tenant_id or get_tenant_id()
         working_set = self._l1.get_context(tenant_id=tenant_id)
 
         _start_recall = time.perf_counter()
         from cortex.memory.memory_retrieval import retrieve_episodic_context
-
         episodic_facts = await retrieve_episodic_context(
             self, tenant_id, project_id, query, max_episodes, layer=layer
         )
@@ -514,7 +279,6 @@ class CortexMemoryManager:
         return context
 
     def get_context_vector(self, tenant_id: str | None = None) -> Any | None:
-        """Return the current context as a bundled hypervector (Vector Alpha)."""
         tenant_id = tenant_id or get_tenant_id()
         if not self._hdc_encoder:
             return None
@@ -523,7 +287,6 @@ class CortexMemoryManager:
             return None
         hvs = [self._hdc_encoder.encode_text(e["content"]) for e in events]
         from cortex.memory.hdc.algebra import bundle
-
         try:
             return hvs[0] if len(hvs) == 1 else bundle(*hvs)
         except (ValueError, TypeError) as e:
@@ -533,7 +296,6 @@ class CortexMemoryManager:
     # ─── NREM Consolidation ─────────────────────────────────────────
 
     async def nrem_consolidation(self, tenant_id: str, project_id: str | None = None) -> dict:
-        """Run a full NREM consolidation cycle."""
         from cortex.memory.consolidation import SystemsConsolidator
         from cortex.memory.homeostasis import EntropyPruner, HomeostaticScaler
         from cortex.memory.nrem_cycle import NREMConsolidationCycle
@@ -550,7 +312,6 @@ class CortexMemoryManager:
         )
         report = await cycle.run(tenant_id=tenant_id, project_id=project_id)
         import dataclasses
-
         return dataclasses.asdict(report)
 
     # ─── Introspection ────────────────────────────────────────────
@@ -564,7 +325,6 @@ class CortexMemoryManager:
         return self._l3
 
     async def wait_for_background(self, timeout: float = 30.0) -> None:
-        """Wait for background tasks to complete with a hard timeout."""
         try:
             if not self._bg_queue.empty():
                 try:
@@ -572,43 +332,12 @@ class CortexMemoryManager:
                 except asyncio.TimeoutError:
                     logger.error("MemoryManager: wait_for_background timed out after %ds", timeout)
         finally:
-            # Always cancel workers when shutting down
             await self._cancel_background_tasks()
 
     async def _cancel_background_tasks(self) -> None:
-        """Cancel pending tasks and workers aggressively to prevent event loop leaks."""
-        logger.debug("Canceling all background workers and Glial Daemon.")
-        tasks_to_wait = []
-        if self._memory_os and getattr(self._memory_os, "_glial_daemon_task", None):
-            self._memory_os._glial_daemon_task.cancel()
-            tasks_to_wait.append(self._memory_os._glial_daemon_task)
-
-        for worker in self._bg_workers:
-            if not worker.done():
-                worker.cancel()
-                tasks_to_wait.append(worker)
-
-        if getattr(self, "_dynamic_space", None):
-            try:
-                await self._dynamic_space.stop()
-            except Exception as e:
-                logger.error("Error stopping dynamic semantic space: %s", e)
-
-        if tasks_to_wait:
-            try:
-                await asyncio.gather(*tasks_to_wait, return_exceptions=True)
-            except Exception as e:
-                logger.debug("Failed to gather tasks: %s", e)
-
-        self._bg_workers.clear()
-
-        # Flush the queue
-        while not self._bg_queue.empty():
-            try:
-                self._bg_queue.get_nowait()
-                self._bg_queue.task_done()
-            except asyncio.QueueEmpty:
-                break
+        await cancel_background_tasks(
+            self._bg_workers, self._bg_queue, self._memory_os, self._dynamic_space
+        )
 
     def __repr__(self) -> str:
         return f"CortexMemoryManager(l1={self._l1!r}, bg_queue_size={self._bg_queue.qsize()})"
