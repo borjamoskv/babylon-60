@@ -351,15 +351,17 @@ class EvolutionSupervisor(Supervisor):
 
             # ── 2. Run agent execution ──
             exec_result = {}
-            if hasattr(agent, "execute_objective"):
+            execute_fn = getattr(agent, "execute_objective", None)
+            if execute_fn is not None:
                 try:
-                    exec_result = await agent.execute_objective(objective)
+                    exec_result = await execute_fn(objective)
                 except Exception as exc:
                     logger.exception("   [EXECUTION] Agent objective execution failed")
                     exec_result = {"status": "FAILED", "error": str(exc)}
             else:
                 logger.warning("   [EXECUTION] Agent does not have execute_objective method")
                 exec_result = {"status": "FAILED", "error": "Agent lacks execute_objective method"}
+
 
             # ── 3. Post-eval ──
             post_metrics = {}
