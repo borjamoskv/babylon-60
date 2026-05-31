@@ -13,20 +13,8 @@ from rich.table import Table
 from cortex.cli.common import DEFAULT_DB, console  # type: ignore[reportAttributeAccessIssue]
 
 
-@click.command("dashboard")
-@click.option("--db", "db_path", default=None, help="DB path override.")
-def dashboard(db_path: str | None) -> None:
-    """Rich interactive live dashboard for CORTEX Health."""
-    from cortex.extensions.health.collector import HealthCollector
+def _render_grade_panel(hs, path: str) -> None:
     from cortex.extensions.health.models import Grade
-    from cortex.extensions.health.scorer import HealthScorer
-
-    path = db_path or str(DEFAULT_DB)
-    collector = HealthCollector(db_path=path)
-    metrics = collector.collect_all()
-    hs = HealthScorer.score(metrics)
-
-    # ─── Grade Panel ──────────────────────────────────────
     grade_colors = {
         Grade.SOVEREIGN: "bright_green",
         Grade.EXCELLENT: "green",
@@ -36,7 +24,6 @@ def dashboard(db_path: str | None) -> None:
         Grade.FAILED: "bright_red",
     }
     color = grade_colors.get(hs.grade, "white")
-
     console.print()
     console.print(
         Panel(
@@ -48,7 +35,8 @@ def dashboard(db_path: str | None) -> None:
         )
     )
 
-    # ─── Metrics Table ────────────────────────────────────
+
+def _render_metrics_table(metrics) -> None:
     table = Table(
         title="Metric Breakdown",
         show_header=True,
@@ -84,32 +72,34 @@ def dashboard(db_path: str | None) -> None:
             f"{latency:.0f}",
             desc[:30] if desc else "",
         )
-
     console.print(table)
 
-    # ─── Sub-Indices ──────────────────────────────────────
-    if hs.sub_indices:
-        lines = []
-        for idx_name, val in hs.sub_indices.items():
-            filled = int(val / 100 * 20)
-            bar = "█" * filled + "░" * (20 - filled)
-            if val >= 80:
-                c = "green"
-            elif val >= 50:
-                c = "yellow"
-            else:
-                c = "red"
-            lines.append(f"  {idx_name:16s} [{c}]{bar}[/] {val:.1f}/100")
-        console.print(
-            Panel(
-                "\n".join(lines),
-                title="[bold]Sub-Indices[/]",
-                border_style="blue",
-                width=60,
-            )
-        )
 
-    # ─── Warnings & Recommendations ──────────────────────
+def _render_sub_indices(hs) -> None:
+    if not hs.sub_indices:
+        return
+    lines = []
+    for idx_name, val in hs.sub_indices.items():
+        filled = int(val / 100 * 20)
+        bar = "█" * filled + "░" * (20 - filled)
+        if val >= 80:
+            c = "green"
+        elif val >= 50:
+            c = "yellow"
+        else:
+            c = "red"
+        lines.append(f"  {idx_name:16s} [{c}]{bar}[/] {val:.1f}/100")
+    console.print(
+        Panel(
+            "\n".join(lines),
+            title="[bold]Sub-Indices[/]",
+            border_style="blue",
+            width=60,
+        )
+    )
+
+
+def _render_warnings(hs, metrics) -> None:
     warns: list[str] = []
     recs: list[str] = []
     actions: list[str] = []
@@ -129,42 +119,31 @@ def dashboard(db_path: str | None) -> None:
         recs.append("💡 Run `cortex compact` to reduce entropy")
 
     if warns:
-        console.print(
-            Panel(
-                "\n".join(warns),
-                title="[bold red]Warnings[/]",
-                border_style="red",
-                width=60,
-            )
-        )
-
+        console.print(Panel("\n".join(warns), title="[bold red]Warnings[/]", border_style="red", width=60))
     if recs:
-        console.print(
-            Panel(
-                "\n".join(recs),
-                title="[bold yellow]Recommendations[/]",
-                border_style="yellow",
-                width=60,
-            )
-        )
-
+        console.print(Panel("\n".join(recs), title="[bold yellow]Recommendations[/]", border_style="yellow", width=60))
     if actions:
-        console.print(
-            Panel(
-                "\n".join(actions),
-                title="[bold]Actions[/]",
-                border_style="magenta",
-                width=60,
-            )
-        )
+        console.print(Panel("\n".join(actions), title="[bold]Actions[/]", border_style="magenta", width=60))
 
     if not warns and not recs:
-        console.print(
-            Panel(
-                "[green]✅ All systems nominal[/]",
-                border_style="green",
-                width=60,
-            )
-        )
-
+        console.print(Panel("[green]✅ All systems nominal[/]", border_style="green", width=60))
     console.print()
+
+
+@click.command("dashboard")
+@click.option("--db", "db_path", default=None, help="DB path override.")
+def dashboard(db_path: str | None) -> None:
+    """Rich interactive live dashboard for CORTEX Health."""
+    from cortex.extensions.health.collector import HealthCollector
+    from cortex.extensions.health.scorer import HealthScorer
+
+    path = db_path or str(DEFAULT_DB)
+    collector = HealthCollector(db_path=path)
+    metrics = collector.collect_all()
+    hs = HealthScorer.score(metrics)
+
+    _render_grade_panel(hs, path)
+    _render_metrics_table(metrics)
+    _render_sub_indices(hs)
+    _render_warnings(hs, metrics)
+
