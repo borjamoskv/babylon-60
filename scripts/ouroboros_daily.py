@@ -173,16 +173,31 @@ def run_gate_check() -> dict:
 
         conn = sqlite3.connect(DB_PATH)
         from cortex.extensions.gate.ouroboros import OuroborosGate
+        try:
+            from cortex_rs import OuroborosStateAccumulator
+            acc = OuroborosStateAccumulator()
+        except ImportError:
+            acc = None
 
         gate = OuroborosGate(conn)
         entropy = gate.measure_entropy()
         dead_weight = gate.identify_dead_weight()
+        
+        acc_root = "N/A"
+        if acc is not None:
+            import json
+            # Accumulate entropy state
+            acc.append_state("ouroboros_gate", json.dumps(entropy))
+            # If we had multiple agents, we'd accumulate them here
+            acc_root = acc.get_root()
+
         conn.close()
 
         return {
             "status": "OK",
             "entropy_metrics": entropy,
             "dead_weight_candidate": dead_weight,
+            "accumulator_root": acc_root,
         }
     except Exception as e:
         return {"status": "ERROR", "reason": str(e)}
@@ -272,15 +287,21 @@ def print_summary(report: dict):
             delta = m.get("delta", "N/A")
             print(f"  → {m['file']}: {status} (Δ={delta})")
 
-    gate = report["gate"]
-    if gate["status"] == "OK":
-        metrics = gate["entropy_metrics"]
-        print("\n  GATE STATUS:")
-        print(f"  SNR:            {metrics['signal_to_noise']}")
-        print(f"  Entropy Index:  {metrics['entropy_index']}")
-        print(f"  Total Facts:    {metrics['total_facts']}")
-        if gate.get("dead_weight_candidate"):
-            print(f"  ⚠ Dead Weight:  {gate['dead_weight_candidate']}")
+    gate_result = report["gate"]
+    gate_str = ""
+    if gate_result.get("status") == "OK":
+        metrics = gate_result.get("entropy_metrics", {})
+        dw = gate_result.get("dead_weight_candidate")
+        dw_str = f"\n  ⚠ Dead Weight:  {dw}" if dw else ""
+        acc_root = gate_result.get("accumulator_root", "N/A")
+        
+        gate_str = f"""
+  GATE STATUS:
+  SNR:            {metrics.get("signal_to_noise", 0.0):.3f}
+  Entropy Index:  {metrics.get("entropy_index", 0.0):.4f}
+  Total Facts:    {metrics.get("total_facts", 0)}
+  State Root:     {acc_root}{dw_str}"""
+    print(gate_str)
 
     print("=" * 60)
     print()
