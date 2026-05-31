@@ -38,6 +38,7 @@ pub mod vsa;
 pub mod antilimerence;
 pub mod py_wasm;
 pub mod py_stream;
+pub mod py_accumulator;
 pub use mcp::{McpNativeClient, McpSovereignHost};
 
 fn strip_trailing_nulls(slice: &[u8]) -> &[u8] {
@@ -633,6 +634,7 @@ fn cortex_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<ouroboros_compiler::OuroborosExecutionGraph>()?;
     m.add_class::<py_wasm::PyWasmSwarm>()?;
     m.add_class::<py_stream::OuroborosStreamKernel>()?;
+    m.add_class::<py_accumulator::OuroborosStateAccumulator>()?;
     py_inverse::register(m)?;
     vsa::register(_py, m)?;
     Ok(())
