@@ -110,23 +110,17 @@ class OuroborosGate:
             for i in range(0, len(fact_ids), 900):
                 chunk = fact_ids[i : i + 900]
                 placeholders = ",".join("?" * len(chunk))
-                # Delete from tables referencing facts(id)
-                self.conn.execute(
-                    f"DELETE FROM consensus_votes_v2 WHERE fact_id IN ({placeholders})", chunk
-                )
-                self.conn.execute(
-                    f"DELETE FROM consensus_outcomes WHERE fact_id IN ({placeholders})", chunk
-                )
-                self.conn.execute(
-                    f"DELETE FROM causal_edges WHERE fact_id IN ({placeholders})", chunk
-                )
-                self.conn.execute(
-                    f"DELETE FROM enrichment_jobs WHERE fact_id IN ({placeholders})", chunk
-                )
-                self.conn.execute(
-                    f"DELETE FROM fact_vectors WHERE fact_id IN ({placeholders})", chunk
-                )
-                self.conn.execute(f"DELETE FROM fact_tags WHERE fact_id IN ({placeholders})", chunk)
+                # Try deleting from tables referencing facts(id), ignore if they don't exist
+                tables_to_clean = [
+                    "consensus_votes_v2", "consensus_outcomes", "causal_edges",
+                    "enrichment_jobs", "fact_vectors", "fact_embeddings", "fact_tags"
+                ]
+                for table in tables_to_clean:
+                    try:
+                        self.conn.execute(f"DELETE FROM {table} WHERE fact_id IN ({placeholders})", chunk)
+                    except Exception as e:
+                        logger.debug(f"Skipping table {table} during pruning: {e}")
+
 
             self.conn.execute("DELETE FROM facts WHERE project = ?", (target_project,))
             self.conn.commit()
