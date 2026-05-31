@@ -43,6 +43,11 @@ def execute_batch_loop(targets_file: str):
         else:
             print(f"[0x02_EDGE] Imposible extraer subtítulos para {vid_id} (API Rate Limit o Ausencia de CC).")
         
+        # Fase 3: Minería de Caja de Comentarios (eventos_acoso)
+        from comments_scraper_omega import scan_and_inject_comments
+        print(f"[SYS] Iniciando barrido de comunidad (Vector Alpha) para {vid_id}...")
+        scan_and_inject_comments(vid_id, url)
+        
         # Evasión de Throttling (Anti-Ban)
         time.sleep(2)
 
