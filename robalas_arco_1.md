@@ -83,3 +83,32 @@
 [073] MACRO VISUAL: El payload es representado como un dardo de luz azul penetrante, sostenido en un vacío absoluto.
 [074] INT. NODO DE CONTROL. La mano del OPERADOR se suspende sobre la tecla ENTER. Esperando la alineación perfecta del bloque.
 [075] PANTALLA EN NEGRO. Texto: `AWAITING EXECUTION WINDOW (PHASE 2.0).`
+
+## ARCO II: EL GOLPE
+### FASE 2.0: EXECUTION WINDOW Y ALINEACIÓN DE BLOQUES (FRAGMENTOS 076-100)
+
+[076] TERMINAL VIEW: `PHASE 2.0 // EXECUTION WINDOW. ALIGNING BLOCK 19345001.`
+[077] INT. NODO DE CONTROL - MADRUGADA. OPERADOR expele aire lentamente. La tensión es absoluta.
+[078] AUDIO: Silencio casi total. Solo el latido de un corazón procesado digitalmente.
+[079] MACRO VISUAL: El dardo de luz azul (payload) flota en el vacío. Frente a él, los bloques de Ethereum pasan como monolitos masivos en una cadena infinita.
+[080] TERMINAL VIEW: `Bribing Block Builder (Titan Builder)... 0.5 ETH attached.`
+[081] DATOS: Comunicación off-chain a través de MEV-Boost (Flashbots). El soborno garantiza la inclusión prioritaria sin pasar por la mempool pública.
+[082] EXT. CALLES DE LA CIUDAD - MADRUGADA. Luces de neón parpadeantes se reflejan en charcos. Un coche autónomo pasa en silencio.
+[083] INT. NODO DE CONTROL. La pantalla confirma la aceptación del soborno. El bloque 19345001 se abre.
+[084] TERMINAL VIEW: `Block builder accepted bribe. Execution slot secured.`
+[085] AUDIO: Un golpe sub-grave masivo. El latido se acelera bruscamente.
+[086] MACRO VISUAL: El dardo azul se dispara, penetrando el monolito del bloque.
+[087] DATOS: El payload aterriza directamente en la cima del bloque (Top of Block). Ejecución atómica en proceso.
+[088] EXT. TORRES DE DATACENTER. Las luces de los servidores cambian de azul a un blanco incandescente. Demanda de CPU pico.
+[089] INT. NODO DE CONTROL. La pantalla de telemetría es un borrón de código ejecutándose.
+[090] TERMINAL VIEW: `Executing Flashloan (10,000 WETH)... Manipulating Oracle TWAP...`
+[091] MACRO VISUAL: Dentro de la grieta del AMM, el dardo explota en una red de hilos microscópicos que drenan la liquidez de los pools adyacentes.
+[092] DATOS: Arbitraje triangular masivo forzado por la manipulación del precio interno del pool.
+[093] AUDIO: Sonido de cristal resquebrajándose, amplificado y distorsionado, seguido por una succión industrial.
+[094] TERMINAL VIEW: `Exergy Extraction Complete. Repaying Flashloan...`
+[095] INT. NODO DE CONTROL. OPERADOR observa impasible cómo los números giran furiosamente en el terminal de balance.
+[096] MACRO VISUAL: Los hilos se retraen instantáneamente, dejando el AMM intacto en apariencia, pero vacío de capital.
+[097] DATOS: El contrato efímero llama a `SELFDESTRUCT(0xborja...)`. Se desintegra, borrando el bytecode del estado de la EVM.
+[098] TERMINAL VIEW: `Death Protocol triggered. Payload wiped. Capital routed to Tornado Cash proxies.`
+[099] INT. NODO DE CONTROL. Todas las luces de alerta se apagan. Vuelve la luz azul cobalto suave (#2B3BE5).
+[100] PANTALLA EN NEGRO. Texto: `EXTRACTION YIELD: 423.8 ETH. FOOTPRINT: ZERO.` (FIN DEL ARCO II).
