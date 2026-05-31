@@ -61,7 +61,7 @@ impl OuroborosStreamKernel {
     }
 
     pub fn flush(&self) -> PyResult<()> {
-        self.producer.flush(Duration::from_secs(5));
+        let _ = self.producer.flush(Duration::from_secs(5));
         Ok(())
     }
 }
