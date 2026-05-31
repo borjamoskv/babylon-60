@@ -36,7 +36,7 @@ def compute_event_stats(events: list[FileEvent]) -> dict:
         files[e.path] += 1
     max_dir_count = max(dirs.values()) if dirs else 0
     max_file_count = max(files.values()) if files else 0
-    source_modified = sum((1 for e in events if e.role == 'source' and e.event_type == 'modified'))
+    source_modified = sum(1 for e in events if e.role == 'source' and e.event_type == 'modified')
     return {'total': total, 'test_ratio': roles.get('test', 0) / total, 'config_ratio': roles.get('config', 0) / total, 'docs_ratio': roles.get('docs', 0) / total, 'source_ratio': roles.get('source', 0) / total, 'create_ratio': event_types.get('created', 0) / total, 'delete_ratio': event_types.get('deleted', 0) / total, 'modify_ratio': event_types.get('modified', 0) / total, 'max_dir_ratio': max_dir_count / total, 'max_file_ratio': max_file_count / total, 'source_modified': source_modified, 'unique_files': len(files), 'unique_dirs': len(dirs)}
 
 def infer_behavior(events: list[FileEvent]) -> BehavioralSnapshot:

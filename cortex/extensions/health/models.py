@@ -1,8 +1,5 @@
-"""Health data models - scores, thresholds, snapshots.
+from __future__ import annotations
 
-Grade is a sealed enum. MetricSnapshot is frozen. Invalid states
-are structurally impossible.
-"""
 import enum
 import time
 from dataclasses import dataclass, field
