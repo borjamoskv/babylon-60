@@ -18,9 +18,13 @@ async def test_deprecate_impl_logic_success():
     mock_mixin = MagicMock()
     mock_mixin._log_transaction = AsyncMock()
 
-    with patch(
-        "cortex.engine.store_mutation._fetch_fact_state", return_value=(1, "knowledge", None, 0, 0)
-    ) as mock_fetch, patch("cortex.engine.store_mutation.AsyncCausalGraph") as mock_graph:
+    with (
+        patch(
+            "cortex.engine.store_mutation._fetch_fact_state",
+            return_value=(1, "knowledge", None, 0, 0),
+        ) as mock_fetch,
+        patch("cortex.engine.store_mutation.AsyncCausalGraph") as mock_graph,
+    ):
         mock_graph_instance = mock_graph.return_value
         mock_graph_instance.propagate_taint = AsyncMock()
 
@@ -47,9 +51,13 @@ async def test_invalidate_impl_logic_success():
     mock_mixin = MagicMock()
     mock_mixin._log_transaction = AsyncMock()
 
-    with patch(
-        "cortex.engine.store_mutation._fetch_fact_state", return_value=(1, "knowledge", None, 0, 0)
-    ) as mock_fetch, patch("cortex.engine.store_mutation.AsyncCausalGraph") as mock_graph:
+    with (
+        patch(
+            "cortex.engine.store_mutation._fetch_fact_state",
+            return_value=(1, "knowledge", None, 0, 0),
+        ) as mock_fetch,
+        patch("cortex.engine.store_mutation.AsyncCausalGraph") as mock_graph,
+    ):
         mock_graph_instance = mock_graph.return_value
         mock_graph_instance.propagate_taint = AsyncMock()
 

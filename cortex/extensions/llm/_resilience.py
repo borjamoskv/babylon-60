@@ -25,7 +25,6 @@ class CircuitBreakerError(httpx.ConnectError):
     """Raised when the circuit breaker is open or half-open and probing."""
 
 
-
 class CircuitBreaker:
     """Circuit breaker to track provider failures and fail fast.
 

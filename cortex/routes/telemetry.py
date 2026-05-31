@@ -86,9 +86,10 @@ async def fiat_stream_ws(
     logger.info("💰 Financial Telemetry connected to Fiat Oracle.")
 
     # Fetch last known ID
-    async with engine.session() as conn, conn.execute(
-        "SELECT MAX(id) FROM facts WHERE fact_type = 'fiat_transaction'"
-    ) as cursor:
+    async with (
+        engine.session() as conn,
+        conn.execute("SELECT MAX(id) FROM facts WHERE fact_type = 'fiat_transaction'") as cursor,
+    ):
         row = await cursor.fetchone()
         last_id = row[0] or 0  # type: ignore[reportOptionalSubscript]
 

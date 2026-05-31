@@ -98,7 +98,6 @@ class DemiurgeCompiler:
                 # All inputs are validated via ASTSandbox whitelist before execution.
                 exec(code_obj, sandbox_globals)  # nosec B102
             except Exception as e:
-
                 await self._record_ghost(intent, generated_code, f"Compilation Error: {e}", 0.15)
                 return {
                     "status": "FAILED",

@@ -16,9 +16,9 @@ from cortex.pipeline import (
     PipelineStatus,
     StageTrace,
 )
-from cortex.pipeline.orchestrator import (
+from cortex.pipeline.orchestrator import CortexOrchestrator
+from cortex.pipeline._orchestrator_exceptions import (
     BudgetExhaustedError,
-    CortexOrchestrator,
     PipelineCancelledError,
 )
 from cortex.router.router import AgentRouter, AgentCapability

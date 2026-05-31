@@ -90,9 +90,10 @@ class DelegatesMixin:
         """Retrieve an active fact. Raises FactNotFound if missing or deprecated."""
         from cortex.utils.errors import FactNotFound
 
-        async with self.session() as conn, conn.execute(
-            f"SELECT {FACT_COLUMNS} {FACT_JOIN} WHERE f.id = ?", (fact_id,)
-        ) as cursor:
+        async with (
+            self.session() as conn,
+            conn.execute(f"SELECT {FACT_COLUMNS} {FACT_JOIN} WHERE f.id = ?", (fact_id,)) as cursor,
+        ):
             row = await cursor.fetchone()
         fact = row_to_fact(tuple(row)) if row else None
         if not fact or fact.valid_until:

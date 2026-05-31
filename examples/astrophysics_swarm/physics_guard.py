@@ -52,6 +52,4 @@ class EpistemicPhysicsGuard:
 
             return True
 
-        raise TypeError(
-            f"[Guard Failure] Tipo de inducción estructural desconocido: {ast_type}"
-        )
+        raise TypeError(f"[Guard Failure] Tipo de inducción estructural desconocido: {ast_type}")

@@ -118,7 +118,12 @@ def migrate(db_path: str = DB_PATH) -> None:
                         meta[col] = val
             elif col == "verification_status" and val == "unsupported":
                 continue  # Skip default value
-            elif (col == "pinned" and val == 0) or (col == "exergy" and val == 0.0) or (col == "success_rate" and val == 1.0) or (col == "is_bridge" and val == 0):
+            elif (
+                (col == "pinned" and val == 0)
+                or (col == "exergy" and val == 0.0)
+                or (col == "success_rate" and val == 1.0)
+                or (col == "is_bridge" and val == 0)
+            ):
                 continue  # Skip default
             elif col == "last_revalidated_at" and not val:
                 continue  # Skip empty

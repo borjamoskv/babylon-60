@@ -43,9 +43,11 @@ async def execute_stream(
     for attempt in range(1, max_attempts + 1):
         start_time = time.monotonic()
         try:
-            async with circuit_breaker, semaphore, client.stream(
-                "POST", url, headers=headers, json=payload
-            ) as response:
+            async with (
+                circuit_breaker,
+                semaphore,
+                client.stream("POST", url, headers=headers, json=payload) as response,
+            ):
                 response.raise_for_status()
                 latency = time.monotonic() - start_time
                 logger.info(

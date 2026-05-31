@@ -80,10 +80,13 @@ class TestPurgeBounded:
         assert result is True
 
         # 5. Verify edges are also gone
-        async with engine.session() as conn, conn.execute(
-            "SELECT count(*) FROM causal_edges WHERE fact_id = ? OR parent_id = ?",
-            (rule_id, rule_id),
-        ) as cursor:
+        async with (
+            engine.session() as conn,
+            conn.execute(
+                "SELECT count(*) FROM causal_edges WHERE fact_id = ? OR parent_id = ?",
+                (rule_id, rule_id),
+            ) as cursor,
+        ):
             row = await cursor.fetchone()
             assert row[0] == 0
 

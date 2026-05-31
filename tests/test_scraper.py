@@ -376,9 +376,12 @@ class TestScraperEngine:
             return_value=("Test Title", "# Test Content\n\nEnough content to pass checks.")
         )
 
-        with patch.dict(
-            "cortex.extensions.scraper.extractors.EXTRACTORS", {"http_fast": mock_extractor}
-        ), patch("cortex.extensions.scraper.extractors.CASCADE_ORDER", ["http_fast"]):
+        with (
+            patch.dict(
+                "cortex.extensions.scraper.extractors.EXTRACTORS", {"http_fast": mock_extractor}
+            ),
+            patch("cortex.extensions.scraper.extractors.CASCADE_ORDER", ["http_fast"]),
+        ):
             result = await engine._cascade_extract("https://example.com", 15.0)
 
         assert result.status == "success"
@@ -419,9 +422,14 @@ class TestScraperEngine:
         mock_ext = AsyncMock()
         mock_ext.extract = AsyncMock(side_effect=ExtractionError("Failed"))
 
-        with patch.dict(
-            "cortex.extensions.scraper.extractors.EXTRACTORS", {"http_fast": mock_ext}, clear=True
-        ), patch("cortex.extensions.scraper.extractors.CASCADE_ORDER", ["http_fast"]):
+        with (
+            patch.dict(
+                "cortex.extensions.scraper.extractors.EXTRACTORS",
+                {"http_fast": mock_ext},
+                clear=True,
+            ),
+            patch("cortex.extensions.scraper.extractors.CASCADE_ORDER", ["http_fast"]),
+        ):
             result = await engine._cascade_extract("https://example.com", 15.0)
 
         assert result.status == "error"

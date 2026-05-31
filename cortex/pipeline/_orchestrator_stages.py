@@ -85,11 +85,11 @@ class StagesMixin:
 
             def coro_factory():
                 return self._executor.execute(
-                            intent=request.intent,
-                            context=context,
-                            plan=plan,
-                            budget_remaining=request.budget_limit_usd,
-                        )
+                    intent=request.intent,
+                    context=context,
+                    plan=plan,
+                    budget_remaining=request.budget_limit_usd,
+                )
 
             try:
                 asyncio.get_running_loop()

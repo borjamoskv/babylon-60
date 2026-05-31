@@ -132,7 +132,9 @@ class TemporalAbstractor:
         results = []
         for e in engrams:
             meta = getattr(e, "metadata", {})
-            if (isinstance(meta, dict) and meta.get("fact_type") == fact_type) or (hasattr(e, "fact_type") and e.fact_type == fact_type):
+            if (isinstance(meta, dict) and meta.get("fact_type") == fact_type) or (
+                hasattr(e, "fact_type") and e.fact_type == fact_type
+            ):
                 results.append(e.content[:200])
         return results
 

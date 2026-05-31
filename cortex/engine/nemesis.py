@@ -22,7 +22,6 @@ class NemesisRejection(Exception):
     """Raised when a fact violates the 130/100 standard and is rejected by Nemesis."""
 
 
-
 class NemesisProtocol:
     """Enforces the 130/100 standard on all incoming memory facts."""
 

@@ -23,10 +23,8 @@ class VirgoValidationError(ValueError, CortexError):
     """Exception raised when a fact fails Logos-Critique (Virgo ♍) validation."""
 
 
-
 class ContextPoisoningError(VirgoValidationError):
     """Exception raised when a fact contains active context poisoning patterns."""
-
 
 
 class VirgoContextGuard:

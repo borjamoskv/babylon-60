@@ -286,8 +286,4 @@ class SleepOrchestrator:
     def __repr__(self) -> str:
         brier = self._metamemory.calibration_score()
         brier_str = f"{brier:.4f}" if brier >= 0 else "n/a"
-        return (
-            f"SleepOrchestrator("
-            f"fok={self._metamemory._fok_threshold:.2f}, "
-            f"brier={brier_str})"
-        )
+        return f"SleepOrchestrator(fok={self._metamemory._fok_threshold:.2f}, brier={brier_str})"

@@ -103,10 +103,13 @@ async def _fetch_aiohttp(url: str, timeout: float) -> tuple[str, int]:
     if aiohttp is None:
         raise ImportError("aiohttp not available")
     client_timeout = aiohttp.ClientTimeout(total=timeout)
-    async with aiohttp.ClientSession(
-        timeout=client_timeout,
-        headers=_HEADERS,
-    ) as session, session.get(url, allow_redirects=True) as resp:
+    async with (
+        aiohttp.ClientSession(
+            timeout=client_timeout,
+            headers=_HEADERS,
+        ) as session,
+        session.get(url, allow_redirects=True) as resp,
+    ):
         resp.raise_for_status()
         text = await resp.text()
         return text, resp.status

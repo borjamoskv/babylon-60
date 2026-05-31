@@ -206,11 +206,14 @@ def create_aether_server(
         """
         await ctx.ensure_ready()
 
-        async with ctx.pool.acquire() as conn, conn.execute(
-            "SELECT COUNT(*), AVG(reputation_score), COUNT(DISTINCT agent_type) "
-            "FROM agents WHERE tenant_id = ?",
-            (tenant_id,),
-        ) as cursor:
+        async with (
+            ctx.pool.acquire() as conn,
+            conn.execute(
+                "SELECT COUNT(*), AVG(reputation_score), COUNT(DISTINCT agent_type) "
+                "FROM agents WHERE tenant_id = ?",
+                (tenant_id,),
+            ) as cursor,
+        ):
             row = await cursor.fetchone()
             if not row or row[0] == 0:
                 return "Swarm is currently inactive (0 agents)."

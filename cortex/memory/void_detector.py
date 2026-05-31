@@ -310,7 +310,9 @@ class EpistemicVoidDetector:
             age = c.get("age_days")
 
             is_stale = False
-            if (energy is not None and energy < self._stale_energy) or (age is not None and age > self._stale_age_days):
+            if (energy is not None and energy < self._stale_energy) or (
+                age is not None and age > self._stale_age_days
+            ):
                 is_stale = True
 
             if is_stale:

@@ -28,7 +28,6 @@ class KnowledgeGapException(Exception):
     """Raised when Metamemory FOK evaluates retrieval potential as too low to proceed."""
 
 
-
 def _dict_from_fact(f: Any) -> dict[str, Any]:
     """Pragmatic conversion from model to dict for LLM consumption."""
     return {

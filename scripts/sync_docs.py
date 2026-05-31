@@ -208,9 +208,7 @@ def main() -> int:
     if all_passed:
         _print(f"{GREEN}{BOLD}🎉 DOCUMENTATION IN SYNC (C5-REAL Realized){RESET}\n")
         return 0
-    _print(
-        f"{RED}{BOLD}🛑 PARITY ERRORS DETECTED. Update translations before committing.{RESET}\n"
-    )
+    _print(f"{RED}{BOLD}🛑 PARITY ERRORS DETECTED. Update translations before committing.{RESET}\n")
     return 1
 
 

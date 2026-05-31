@@ -333,7 +333,9 @@ class DreamEngine:
         """
         prunable = 0
         for trace in traces:
-            if (trace.step_count == 1 and trace.final_outcome == StepOutcome.SUCCESS) or trace.step_count == 0:
+            if (
+                trace.step_count == 1 and trace.final_outcome == StepOutcome.SUCCESS
+            ) or trace.step_count == 0:
                 prunable += 1
         return prunable
 

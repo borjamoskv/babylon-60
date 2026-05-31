@@ -223,13 +223,16 @@ class TestExecutorNode:
                 {"id": "crystal-1", "target": "https://example.com", "intent": "quick_read"},
             ],
         }
-        with patch(
-            "cortex.extensions.swarm.nightshift_pipeline.autodidact_pipeline",
-            new=autodidact_success_mock,
-            create=True,
-        ), patch(
-            "cortex.extensions.skills.autodidact.actuator.autodidact_pipeline",
-            new=autodidact_success_mock,
+        with (
+            patch(
+                "cortex.extensions.swarm.nightshift_pipeline.autodidact_pipeline",
+                new=autodidact_success_mock,
+                create=True,
+            ),
+            patch(
+                "cortex.extensions.skills.autodidact.actuator.autodidact_pipeline",
+                new=autodidact_success_mock,
+            ),
         ):
             result = await executor.execute(state)
 

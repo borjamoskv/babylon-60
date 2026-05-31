@@ -279,9 +279,7 @@ def prompt_copy(variant: str) -> None:
         return
 
     try:
-        sp.run(
-            [pbcopy_executable], input=text.encode(), check=True, timeout=5
-        )
+        sp.run([pbcopy_executable], input=text.encode(), check=True, timeout=5)
         console.print(
             Panel(
                 f"[bold green]✓ Copied to clipboard![/] ({variant}, ~{token_estimate} tokens)\n"

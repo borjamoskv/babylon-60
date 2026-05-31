@@ -156,12 +156,15 @@ def search(query, project, top, scope, db, epistemic) -> None:
     try:
         if scope == "core":
             # Fast path: standard search, no federation overhead
-            with with_slow_tips(
-                "Buscando en CORTEX…",
-                threshold=2.0,
-                interval=8.0,
-                engine=engine,
-            ), console.status("[noir.violet]Searching...[/]"):
+            with (
+                with_slow_tips(
+                    "Buscando en CORTEX…",
+                    threshold=2.0,
+                    interval=8.0,
+                    engine=engine,
+                ),
+                console.status("[noir.violet]Searching...[/]"),
+            ):
                 results = _run_async(
                     engine.search(query, project=project, top_k=top),
                 )

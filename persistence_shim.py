@@ -1,7 +1,6 @@
 # Thin shim to expose Rust extension symbols
 
 try:
-
     HAS_CORTEX_RS = True
 except Exception as e:
     import warnings

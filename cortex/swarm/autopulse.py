@@ -216,7 +216,6 @@ class EntropySpikeException(Exception):
     """Raised when swarm yield dispersion exceeds the safety threshold."""
 
 
-
 def _audit_entropy_spike(legion: TensorGlialLegion, agent_name: str) -> None:
     """AUDITOR-Ω Circuit Breaker: Monitor yield entropy spikes per Axiom Ω₃.
 

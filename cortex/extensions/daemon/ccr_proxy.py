@@ -221,6 +221,7 @@ async def messages_endpoint(request: Request):
             text = data["choices"][0]["message"]["content"]
             anth_resp = _build_anthropic_response(text)
             return JSONResponse(content=anth_resp)
+
         # Streaming response generator
         async def stream_generator():
             async with client.stream("POST", LOCAL_OPENAI_URL, json=openai_payload) as resp:
@@ -255,8 +256,7 @@ async def messages_endpoint(request: Request):
                                 "delta": {"type": "text_delta", "text": delta_text},
                             }
                             yield (
-                                f"event: content_block_delta\n"
-                                f"data: {json.dumps(event_data)}\n\n"
+                                f"event: content_block_delta\ndata: {json.dumps(event_data)}\n\n"
                             )
                     except Exception:
                         continue

@@ -15,7 +15,6 @@ class VoidStateSecurityError(Exception):
     """Raised when an active fact mathematically fails the ZK-Swarm cryptographic proof."""
 
 
-
 class ZKSwarmGuard:
     """The local engine verification point for Subagent Ed25519 signatures."""
 
