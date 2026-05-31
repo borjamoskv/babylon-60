@@ -11,7 +11,7 @@ from cortex.ledger.public_verifier_utils import (
 )
 
 if TYPE_CHECKING:
-    from cortex.ledger.public_verifier import _PublicLedgerVerifier
+    from cortex.ledger._types import PublicVerifierProtocol as _PublicLedgerVerifier
 
 
 def verify_checkpoints(verifier: _PublicLedgerVerifier) -> None:

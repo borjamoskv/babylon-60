@@ -36,7 +36,7 @@ logger = logging.getLogger("cortex.memory.semantic_ram")
 
 # Import topological health types (lazy to avoid circular imports)
 if TYPE_CHECKING:
-    from cortex.memory.manager import CortexMemoryManager
+    from cortex.memory._protocols import CortexMemoryManagerProtocol as CortexMemoryManager
     from cortex.memory.models import CortexFactModel
     from cortex.memory.topological_health import (
         TopologicalAnchor,
