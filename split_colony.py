@@ -20,11 +20,11 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
-{classes.get('GeneFragment', '')}
+{classes.get("GeneFragment", "")}
 
-{classes.get('TournamentResult', '')}
+{classes.get("TournamentResult", "")}
 
-{classes.get('AgentSpecialization', '')}
+{classes.get("AgentSpecialization", "")}
 """
 
 genetics_code = f"""from __future__ import annotations
@@ -40,9 +40,9 @@ from .types import GeneFragment
 
 logger = logging.getLogger("cortex.sica.colony.genetics")
 
-{classes.get('GenePool', '')}
+{classes.get("GenePool", "")}
 
-{classes.get('GenomeCrossover', '')}
+{classes.get("GenomeCrossover", "")}
 """
 
 tournament_code = f"""from __future__ import annotations
@@ -55,7 +55,7 @@ from .genetics import GenePool
 
 logger = logging.getLogger("cortex.sica.colony.tournament")
 
-{classes.get('Tournament', '')}
+{classes.get("Tournament", "")}
 """
 
 specialization_code = f"""from __future__ import annotations
@@ -67,7 +67,7 @@ from .types import AgentSpecialization
 
 logger = logging.getLogger("cortex.sica.colony.specialization")
 
-{classes.get('SpecializationDetector', '')}
+{classes.get("SpecializationDetector", "")}
 """
 
 core_code = f"""from __future__ import annotations
@@ -83,10 +83,10 @@ from .specialization import SpecializationDetector
 
 logger = logging.getLogger("cortex.sica.colony.core")
 
-{classes.get('Colony', '')}
+{classes.get("Colony", "")}
 """
 
-init_code = f"""from .types import GeneFragment, TournamentResult, AgentSpecialization
+init_code = """from .types import GeneFragment, TournamentResult, AgentSpecialization
 from .genetics import GenePool, GenomeCrossover
 from .tournament import Tournament
 from .specialization import SpecializationDetector

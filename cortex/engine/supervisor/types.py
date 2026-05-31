@@ -5,6 +5,7 @@ from typing import Any
 from cortex.engine._autocurative_config import AutoCurativeConfig
 from cortex.engine.self_optimizer import OptimizerConfig
 
+
 class AgentStatus(str, Enum):
     UNINITIALIZED = "uninitialized"
     BOOTING = "booting"
@@ -12,6 +13,7 @@ class AgentStatus(str, Enum):
     DEGRADED = "degraded"
     STOPPED = "stopped"
     FAILED = "failed"
+
 
 @dataclass
 class AgentInfo:
@@ -33,6 +35,7 @@ class AgentInfo:
             "error_count": self.error_count,
             "alive": self.status == AgentStatus.RUNNING,
         }
+
 
 @dataclass
 class SupervisorConfig:

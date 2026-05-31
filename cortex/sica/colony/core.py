@@ -11,6 +11,7 @@ from .specialization import SpecializationDetector
 
 logger = logging.getLogger("cortex.sica.colony.core")
 
+
 class Colony:
     """Top-level colony coordinator.
 

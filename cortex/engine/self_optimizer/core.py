@@ -13,6 +13,7 @@ from .tuners import OptimizationTuners
 
 logger = logging.getLogger("cortex.engine.self_optimizer")
 
+
 class SelfOptimizer:
     def __init__(self, tracker: PerformanceTracker, config: OptimizerConfig | None = None) -> None:
         self.config = config or OptimizerConfig()
@@ -37,7 +38,10 @@ class SelfOptimizer:
         skipped = 0
 
         for decision in decisions:
-            if applied >= self.config.max_tunings_per_cycle or decision.confidence < self.config.confidence_threshold:
+            if (
+                applied >= self.config.max_tunings_per_cycle
+                or decision.confidence < self.config.confidence_threshold
+            ):
                 skipped += 1
                 continue
             self._apply_decision(decision)
@@ -55,10 +59,16 @@ class SelfOptimizer:
         self._total_tunings_applied += applied
 
         if applied > 0:
-            ENDOCRINE.pulse(HormoneType.DOPAMINE, 0.02 * applied, reason=f"Self-optimization: {applied} tunings applied")
+            ENDOCRINE.pulse(
+                HormoneType.DOPAMINE,
+                0.02 * applied,
+                reason=f"Self-optimization: {applied} tunings applied",
+            )
 
         cycle_ms = (time.perf_counter_ns() - cycle_start) / 1e6
-        event = OptimizationEvent(time.time(), snapshot.to_dict(), decisions, applied, skipped, cycle_ms)
+        event = OptimizationEvent(
+            time.time(), snapshot.to_dict(), decisions, applied, skipped, cycle_ms
+        )
         self._events.append(event)
         return event
 
@@ -69,34 +79,65 @@ class SelfOptimizer:
             if metrics is None or metrics.total_executions < self.config.min_samples_for_tuning:
                 continue
 
-            decisions.extend(OptimizationTuners.tune_timeout(name, metrics, self.get_tuned_timeout(name), self.config))
-            decisions.extend(OptimizationTuners.tune_batch_size(name, metrics, self.get_tuned_batch_size(name), self.config))
-            decisions.extend(OptimizationTuners.tune_breaker(name, metrics, self.get_tuned_breaker_threshold(name), self.config))
+            decisions.extend(
+                OptimizationTuners.tune_timeout(
+                    name, metrics, self.get_tuned_timeout(name), self.config
+                )
+            )
+            decisions.extend(
+                OptimizationTuners.tune_batch_size(
+                    name, metrics, self.get_tuned_batch_size(name), self.config
+                )
+            )
+            decisions.extend(
+                OptimizationTuners.tune_breaker(
+                    name, metrics, self.get_tuned_breaker_threshold(name), self.config
+                )
+            )
             decisions.extend(OptimizationTuners.tune_strategies(name, metrics, self.config))
-            decisions.extend(OptimizationTuners.tune_cooldown(name, metrics, self.get_tuned_cooldown(name), self.config))
+            decisions.extend(
+                OptimizationTuners.tune_cooldown(
+                    name, metrics, self.get_tuned_cooldown(name), self.config
+                )
+            )
         return decisions
 
     def _apply_decision(self, decision: TuningDecision) -> None:
         if decision.subsystem not in self._tuned_params:
             self._tuned_params[decision.subsystem] = {}
         self._tuned_params[decision.subsystem][decision.parameter] = decision.new_value
-        logger.info("[OPTIMIZER] %s.%s: %s -> %s", decision.subsystem, decision.parameter, decision.old_value, decision.new_value)
+        logger.info(
+            "[OPTIMIZER] %s.%s: %s -> %s",
+            decision.subsystem,
+            decision.parameter,
+            decision.old_value,
+            decision.new_value,
+        )
 
     def _record_baseline(self, snapshot: PerformanceSnapshot) -> None:
         for name, data in snapshot.subsystems.items():
-            self._baselines[name] = {"error_rate": data.get("error_rate", 0), "mean_latency_ms": data.get("mean_latency_ms", 0), "p99_ms": data.get("p99_ms", 0)}
+            self._baselines[name] = {
+                "error_rate": data.get("error_rate", 0),
+                "mean_latency_ms": data.get("mean_latency_ms", 0),
+                "p99_ms": data.get("p99_ms", 0),
+            }
 
     def _check_degradation(self, snapshot: PerformanceSnapshot) -> list[TuningDecision]:
         reverts = []
         for name, data in snapshot.subsystems.items():
             baseline = self._baselines.get(name)
-            if not baseline: continue
+            if not baseline:
+                continue
             current_err = data.get("error_rate", 0)
             baseline_err = baseline.get("error_rate", 0)
-            if baseline_err > 0 and current_err > baseline_err * (1 + self.config.degradation_threshold):
+            if baseline_err > 0 and current_err > baseline_err * (
+                1 + self.config.degradation_threshold
+            ):
                 if name in self._tuned_params:
                     self._tuned_params.pop(name, None)
-                    ENDOCRINE.pulse(HormoneType.CORTISOL, 0.03, reason=f"Optimizer revert: {name} degraded")
+                    ENDOCRINE.pulse(
+                        HormoneType.CORTISOL, 0.03, reason=f"Optimizer revert: {name} degraded"
+                    )
                     # Placeholder for valid TuningDecision returns
         return reverts
 
@@ -119,7 +160,8 @@ class SelfOptimizer:
         return dict(self._tuned_params)
 
     async def start_daemon(self) -> None:
-        if self._is_running: return
+        if self._is_running:
+            return
         self._is_running = True
         while self._is_running:
             try:

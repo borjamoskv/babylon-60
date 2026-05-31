@@ -4,6 +4,7 @@ from typing import Any
 from dataclasses import dataclass
 from cortex.sica.meta_level import MetaJudgment
 
+
 class _LifetimeStats:
     """Accumulated statistics across the agent's lifetime."""
 

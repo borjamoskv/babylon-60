@@ -4,9 +4,9 @@ from cortex.sica.meta_level import MetaJudgment
 from cortex.sica.object_level import ExecutionTrace, StepOutcome
 from cortex.sica.strategy import SearchStrategy
 import logging
-logger = logging.getLogger('cortex.sica.autonomy.fork')
-from dataclasses import dataclass
 
+logger = logging.getLogger("cortex.sica.autonomy.fork")
+from dataclasses import dataclass
 
 
 @dataclass
@@ -179,5 +179,3 @@ class SpeculativeFork:
             score -= 0.1
 
         return max(0.0, min(1.0, score))
-
-

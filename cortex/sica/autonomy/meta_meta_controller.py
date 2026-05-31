@@ -6,7 +6,6 @@ from cortex.sica.meta_level import MetaLevel
 from cortex.sica.strategy import SearchStrategy
 
 
-
 @dataclass
 class MetaMetaDiagnosis:
     """Diagnosis of the meta-level's own performance."""
@@ -216,5 +215,3 @@ class MetaMetaController:
                 details=f"Weight variance={variance:.4f}, all heuristics converged",
             )
         return None
-
-

@@ -9,6 +9,7 @@ from cortex.sica.agent.stats import _LifetimeStats
 
 logger = logging.getLogger("cortex.sica.agent.emission")
 
+
 class AgentEmitter:
     """Handles routing and formatting of outbound SICA messages."""
 

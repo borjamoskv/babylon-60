@@ -12,6 +12,7 @@ from .types import GeneFragment
 
 logger = logging.getLogger("cortex.sica.colony.genetics")
 
+
 def _interleave(a: list[str], b: list[str]) -> list[str]:
     """Interleave two lists."""
     result: list[str] = []
@@ -200,7 +201,7 @@ class GenePool:
             name = fragment.payload["name"]
             desc = fragment.payload.get("description", "")
             base_weight = fragment.payload.get("weight", 0.5)
-            
+
             # Integrate Heuristic drift logic during adoption
             drift = random.uniform(-0.1, 0.1) if random.random() < 0.2 else 0.0
             mutated_weight = max(0.1, min(1.0, base_weight + drift))
@@ -241,6 +242,7 @@ class GenePool:
         while len(self._fragments) > self._max_fragments:
             worst = min(self._fragments.values(), key=lambda f: f.value_score)
             del self._fragments[worst.fragment_id]
+
 
 class GenomeCrossover:
     """Combine the best parts of two parent genomes.

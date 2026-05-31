@@ -27,11 +27,11 @@ class OuroborosCompiler:
     def _ensure_engine(self) -> None:
         if self._engine is not None:
             return
-        from cortex.cli.common import get_engine
+        from cortex.engine import CortexEngine
         from cortex.config import DEFAULT_DB_PATH
 
         db_val = str(self._db_path) if self._db_path else DEFAULT_DB_PATH
-        self._engine = get_engine(db_val)
+        self._engine = CortexEngine(db_path=db_val)
 
     def analyze_limerence(self, source_code: str) -> dict[str, Any]:
         """Analyze code for high maintenance cost vs utility using L-EPI empirical metrics.

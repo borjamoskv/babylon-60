@@ -9,6 +9,7 @@ from .types import AgentStatus
 
 logger = logging.getLogger("cortex.supervisor")
 
+
 class SupervisorDaemon:
     def __init__(self, supervisor: Any) -> None:
         self.sup = supervisor
@@ -40,7 +41,11 @@ class SupervisorDaemon:
             try:
                 predictions = self.sup._predictor.predict_all()
                 self.sup._total_predictions += len(predictions)
-                critical = [p for p in predictions if p.is_critical and p.confidence >= self.config.preemptive_confidence]
+                critical = [
+                    p
+                    for p in predictions
+                    if p.is_critical and p.confidence >= self.config.preemptive_confidence
+                ]
                 for p in critical:
                     await self._apply_preemptive_action(p)
                 self.sup._agents["predictor"].last_heartbeat = time.monotonic()
@@ -57,7 +62,9 @@ class SupervisorDaemon:
                         staleness = time.monotonic() - info.last_heartbeat
                         if staleness > self.config.health_check_interval_s * 5:
                             info.status = AgentStatus.DEGRADED
-                            logger.warning("[SUPERVISOR] %s heartbeat stale (%.0fs)", info.name, staleness)
+                            logger.warning(
+                                "[SUPERVISOR] %s heartbeat stale (%.0fs)", info.name, staleness
+                            )
                 cortisol = ENDOCRINE.get_level(HormoneType.CORTISOL)
                 if cortisol > self.config.cortisol_alarm:
                     logger.warning("[SUPERVISOR] System cortisol alarm: %.3f", cortisol)
@@ -83,7 +90,13 @@ class SupervisorDaemon:
     async def _apply_preemptive_action(self, prediction: Prediction) -> None:
         action = prediction.recommended_action
         sub = prediction.subsystem
-        logger.warning("[SUPERVISOR] Preemptive: %s on '%s' (conf=%.2f, TTF=%.0fs)", action, sub, prediction.confidence, prediction.estimated_time_to_failure_s)
+        logger.warning(
+            "[SUPERVISOR] Preemptive: %s on '%s' (conf=%.2f, TTF=%.0fs)",
+            action,
+            sub,
+            prediction.confidence,
+            prediction.estimated_time_to_failure_s,
+        )
 
         if action == "PREEMPTIVE_BATCH_REDUCTION":
             current = self.sup._l6.get_tuned_batch_size(sub)

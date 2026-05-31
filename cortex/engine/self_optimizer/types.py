@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
+
 class TuningType(str, Enum):
     TIMEOUT_ADJUSTMENT = "timeout_adjustment"
     BATCH_SIZE_TUNING = "batch_size_tuning"
@@ -11,6 +12,7 @@ class TuningType(str, Enum):
     STRATEGY_PROMOTION = "strategy_promotion"
     STRATEGY_DEMOTION = "strategy_demotion"
     COOLDOWN_ADJUSTMENT = "cooldown_adjustment"
+
 
 @dataclass
 class TuningDecision:
@@ -33,6 +35,7 @@ class TuningDecision:
             "confidence": round(self.confidence, 3),
         }
 
+
 @dataclass
 class OptimizationEvent:
     timestamp: float
@@ -51,6 +54,7 @@ class OptimizationEvent:
             "cycle_ms": round(self.cycle_ms, 3),
             "decisions": [d.to_dict() for d in self.decisions],
         }
+
 
 @dataclass
 class OptimizerConfig:

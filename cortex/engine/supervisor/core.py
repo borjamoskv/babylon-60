@@ -14,15 +14,18 @@ from .daemon import SupervisorDaemon
 
 logger = logging.getLogger("cortex.supervisor")
 
+
 class CortexSupervisor:
     def __init__(self, config: SupervisorConfig | None = None) -> None:
         self.config = config or SupervisorConfig()
         self._tracker = PerformanceTracker()
         self._store = TuningStore(base_dir=self.config.persist_dir)
-        self._predictor = PredictiveHealer(tracker=self._tracker, cortisol_threshold=self.config.cortisol_alarm)
+        self._predictor = PredictiveHealer(
+            tracker=self._tracker, cortisol_threshold=self.config.cortisol_alarm
+        )
         self._l5 = AutoCurativeAgent(config=self.config.curative_config)
         self._l6 = SelfOptimizer(tracker=self._tracker, config=self.config.optimizer_config)
-        
+
         self._agents: dict[str, AgentInfo] = {
             "tracker": AgentInfo(name="PerformanceTracker", level=0),
             "store": AgentInfo(name="TuningStore", level=0),
@@ -30,7 +33,7 @@ class CortexSupervisor:
             "l6": AgentInfo(name="SelfOptimizer", level=6),
             "predictor": AgentInfo(name="PredictiveHealer", level=6),
         }
-        
+
         self._is_running = False
         self._start_time: float = 0.0
         self._boot_sequence_completed = False
@@ -64,11 +67,16 @@ class CortexSupervisor:
 
     async def _boot_agent(self, key: str) -> None:
         info = self._agents[key]
-        if key == "tracker": info.instance = self._tracker
-        elif key == "store": info.instance = self._store
-        elif key == "l5": info.instance = self._l5
-        elif key == "l6": info.instance = self._l6
-        elif key == "predictor": info.instance = self._predictor
+        if key == "tracker":
+            info.instance = self._tracker
+        elif key == "store":
+            info.instance = self._store
+        elif key == "l5":
+            info.instance = self._l5
+        elif key == "l6":
+            info.instance = self._l6
+        elif key == "predictor":
+            info.instance = self._predictor
 
     def _restore_tunings(self) -> None:
         saved = self._store.load_all()
@@ -77,7 +85,14 @@ class CortexSupervisor:
                 self._l6._tuned_params[sub] = params
             self._sync_l6_to_l5()
 
-    async def execute(self, task: Any, subsystem: str = "default", context: dict[str, Any] | None = None, *args: Any, **kwargs: Any) -> Any:
+    async def execute(
+        self,
+        task: Any,
+        subsystem: str = "default",
+        context: dict[str, Any] | None = None,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Any:
         if not self._boot_sequence_completed:
             await self.boot()
         ctx = context or {}
@@ -86,7 +101,9 @@ class CortexSupervisor:
         ctx["batch_size"] = self._l6.get_tuned_batch_size(subsystem)
         ctx["cooldown_s"] = self._l6.get_tuned_cooldown(subsystem)
         try:
-            result = await self._l5.execute_with_healing(task, *args, subsystem=subsystem, context=ctx, **kwargs)
+            result = await self._l5.execute_with_healing(
+                task, *args, subsystem=subsystem, context=ctx, **kwargs
+            )
             latency_ms = (time.perf_counter_ns() - start_ns) / 1e6
             self._tracker.record_execution(subsystem, latency_ms, success=True)
             self._total_tasks_executed += 1
@@ -99,8 +116,10 @@ class CortexSupervisor:
             raise
 
     async def start(self, engine: Any = None) -> None:
-        if self._is_running: return
-        if not self._boot_sequence_completed: await self.boot()
+        if self._is_running:
+            return
+        if not self._boot_sequence_completed:
+            await self.boot()
         self._is_running = True
         logger.info("[SUPERVISOR] Autonomous daemon started")
         await asyncio.gather(
@@ -118,11 +137,14 @@ class CortexSupervisor:
             breaker = self._l5._breakers.get(subsystem)
             if breaker is not None:
                 threshold = params.get("breaker_threshold")
-                if threshold is not None: breaker._threshold = threshold
+                if threshold is not None:
+                    breaker._threshold = threshold
             timeout = params.get("timeout_ms")
-            if timeout is not None: self._l5.config.healing_timeout_s = timeout / 1000.0
+            if timeout is not None:
+                self._l5.config.healing_timeout_s = timeout / 1000.0
             cooldown = params.get("cooldown_s")
-            if cooldown is not None: self._l5.config.cooldown_after_repair_s = cooldown
+            if cooldown is not None:
+                self._l5.config.cooldown_after_repair_s = cooldown
 
     async def _apply_preemptive_action(self, prediction: Prediction) -> None:
         """Test proxy for the daemon method."""
@@ -133,15 +155,21 @@ class CortexSupervisor:
         self._l5.stop_daemon()
         self._l6.stop_daemon()
         all_params = self._l6.get_all_tuned_params()
-        if all_params: self._store.snapshot(all_params, self._l6.stats)
-        for info in self._agents.values(): info.status = AgentStatus.STOPPED
+        if all_params:
+            self._store.snapshot(all_params, self._l6.stats)
+        for info in self._agents.values():
+            info.status = AgentStatus.STOPPED
         ENDOCRINE.pulse(HormoneType.SEROTONIN, 0.5, reason="Supervisor shutdown")
 
     def health(self) -> dict[str, Any]:
         uptime = time.monotonic() - self._start_time if self._start_time else 0
         agent_reports = {k: v.to_dict() for k, v in self._agents.items()}
         running_count = sum(1 for v in self._agents.values() if v.status == AgentStatus.RUNNING)
-        system_status = "healthy" if running_count == len(self._agents) else ("degraded" if running_count > 0 else "critical")
+        system_status = (
+            "healthy"
+            if running_count == len(self._agents)
+            else ("degraded" if running_count > 0 else "critical")
+        )
         cortisol = ENDOCRINE.get_level(HormoneType.CORTISOL)
         return {
             "status": system_status,
@@ -165,12 +193,21 @@ class CortexSupervisor:
         return f"[{h['status'].upper()}] agents={h['agents_running']}/{h['agents_total']} tasks={h['tasks_executed']} cortisol={h['cortisol']:.3f} uptime={h['uptime_s']:.0f}s"
 
     @property
-    def l5(self) -> AutoCurativeAgent: return self._l5
+    def l5(self) -> AutoCurativeAgent:
+        return self._l5
+
     @property
-    def l6(self) -> SelfOptimizer: return self._l6
+    def l6(self) -> SelfOptimizer:
+        return self._l6
+
     @property
-    def tracker(self) -> PerformanceTracker: return self._tracker
+    def tracker(self) -> PerformanceTracker:
+        return self._tracker
+
     @property
-    def predictor(self) -> PredictiveHealer: return self._predictor
+    def predictor(self) -> PredictiveHealer:
+        return self._predictor
+
     @property
-    def store(self) -> TuningStore: return self._store
+    def store(self) -> TuningStore:
+        return self._store

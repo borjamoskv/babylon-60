@@ -362,7 +362,6 @@ class EvolutionSupervisor(Supervisor):
                 logger.warning("   [EXECUTION] Agent does not have execute_objective method")
                 exec_result = {"status": "FAILED", "error": "Agent lacks execute_objective method"}
 
-
             # ── 3. Post-eval ──
             post_metrics = {}
             if post_eval is not None:

@@ -5,6 +5,7 @@ from cortex.sica.object_level import ObjectLevel, StepOutcome
 from cortex.sica.meta_level import MetaJudgment
 from cortex.sica.strategy import SearchStrategy
 
+
 class SelfAssessor:
     """Handles confidence assessment and output revision."""
 

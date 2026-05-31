@@ -9,6 +9,7 @@ from cortex.sica.strategy import SearchStrategy
 
 logger = logging.getLogger("cortex.sica.colony.tournament")
 
+
 class Tournament:
     """Competitive evaluation of genomes.
 

@@ -8,6 +8,7 @@ from cortex.sica.strategy import SearchStrategy, StrategyGenome
 
 logger = logging.getLogger("cortex.sica.colony.specialization")
 
+
 class SpecializationDetector:
     """Detect emergent specialization in a colony of agents.
 

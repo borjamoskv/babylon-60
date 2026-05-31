@@ -7,8 +7,8 @@ from cortex.sica.strategy import SearchStrategy
 from .trace_synthesizer import TraceSynthesizer
 from .meta_meta_controller import MetaMetaController
 import logging
-logger = logging.getLogger('cortex.sica.autonomy.tick')
 
+logger = logging.getLogger("cortex.sica.autonomy.tick")
 
 
 class AutonomousTick:

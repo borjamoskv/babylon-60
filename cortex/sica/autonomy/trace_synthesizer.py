@@ -3,8 +3,8 @@ from cortex.sica.object_level import ExecutionTrace, StepOutcome
 from cortex.sica.strategy import Heuristic
 from collections import Counter
 import logging
-logger = logging.getLogger('cortex.sica.autonomy.trace')
 
+logger = logging.getLogger("cortex.sica.autonomy.trace")
 
 
 class TraceSynthesizer:
@@ -148,5 +148,3 @@ class TraceSynthesizer:
                 weight=0.5,
             )
         return None
-
-

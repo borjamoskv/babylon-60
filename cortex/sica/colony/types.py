@@ -3,6 +3,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
+
 @dataclass(kw_only=True)
 class GeneFragment:
     """A shareable piece of a strategy genome.
@@ -32,6 +33,7 @@ class GeneFragment:
         """Combined score: donor fitness + adoption success."""
         return self.fitness_at_donation * 0.4 + self.adoption_success_rate * 0.6
 
+
 @dataclass(kw_only=True)
 class TournamentResult:
     """Result of a genome tournament."""
@@ -39,6 +41,7 @@ class TournamentResult:
     winner: str  # agent_id
     rankings: list[tuple[str, float]]  # [(agent_id, score)]
     selection_pressure: float  # How much the winner dominated
+
 
 @dataclass(kw_only=True)
 class AgentSpecialization:

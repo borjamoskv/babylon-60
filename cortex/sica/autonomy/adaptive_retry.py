@@ -3,7 +3,6 @@ from cortex.sica.meta_level import MetaJudgment
 from collections import Counter
 
 
-
 class AdaptiveRetry:
     """Dynamic retry budgets based on failure classification.
 
@@ -50,5 +49,3 @@ class AdaptiveRetry:
         """Reset the counter for a failure class (e.g., after a success)."""
         if failure_class in self._seen_failure_classes:
             del self._seen_failure_classes[failure_class]
-
-
