@@ -243,7 +243,7 @@ class ObjectLevel:
                 h = self._strategy._find_heuristic(heuristic_applied)
                 h.activate(success=(outcome == StepOutcome.SUCCESS))
             except KeyError:
-                print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Heuristic may have been pruned mid-execution
+                import logging; logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Heuristic may have been pruned mid-execution
 
         return step
 

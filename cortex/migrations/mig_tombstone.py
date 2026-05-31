@@ -10,11 +10,11 @@ def _migration_020_tombstone(conn: sqlite3.Connection) -> None:
     try:
         conn.execute("ALTER TABLE facts ADD COLUMN is_tombstoned INTEGER NOT NULL DEFAULT 0")
     except sqlite3.OperationalError:
-        print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Column already exists
+        import logging; logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Column already exists
 
     try:
         conn.execute("ALTER TABLE facts ADD COLUMN tombstoned_at TEXT")
     except sqlite3.OperationalError:
-        print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Column already exists
+        import logging; logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Column already exists
 
     conn.execute("CREATE INDEX IF NOT EXISTS idx_facts_tombstone ON facts(is_tombstoned)")

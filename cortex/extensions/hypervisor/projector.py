@@ -104,7 +104,7 @@ class EventProjector:
             endocrine = DigitalEndocrine()
             endocrine.signal(hormone, intensity=intensity)  # type: ignore[reportAttributeAccessIssue]
         except (ImportError, AttributeError, TypeError):
-            print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Endocrine not installed - degrade gracefully
+            import logging; logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Endocrine not installed - degrade gracefully
 
     async def _verify_songlines(self, project: str) -> None:
         """Trigger autopoiesis songline verification if available."""
@@ -114,4 +114,4 @@ class EventProjector:
             ap = Autopoiesis()
             await ap.verify_songlines(project)  # type: ignore[reportAttributeAccessIssue]
         except (ImportError, AttributeError, TypeError):
-            print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Autopoiesis not installed - degrade gracefully
+            import logging; logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Autopoiesis not installed - degrade gracefully

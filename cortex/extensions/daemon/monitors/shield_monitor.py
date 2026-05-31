@@ -176,4 +176,4 @@ class DailyShieldMonitor:
                 timeout=5,
             )
         except (OSError, subprocess.TimeoutExpired):
-            print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Notification is best-effort
+            import logging; logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Notification is best-effort

@@ -269,7 +269,7 @@ async def health_check(request: Request) -> dict:
         RuntimeError,
         AttributeError,
     ):
-        print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")
+        import logging; logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")
 
     # Health Index integration
     health_score = 0.0

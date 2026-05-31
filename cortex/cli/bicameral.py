@@ -57,7 +57,7 @@ class BicameralConsole:
             with open(relay_path, "a") as f:
                 f.write(json.dumps(event) + "\n")
         except OSError:
-            print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Fail silently to avoid interrupting the agent loop
+            import logging; logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Fail silently to avoid interrupting the agent loop
 
     def log_limbic(self, message: str, source: str = "LORE") -> None:
         """Logs emotional, historical, or allergy-driven reasoning."""

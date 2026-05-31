@@ -10,7 +10,7 @@ from typing import Optional
 try:
     from persistence import LedgerManager, _get_ring_buffer
 except ImportError:
-    print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Allow standalone testing
+    import logging; logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Allow standalone testing
 
 logger = logging.getLogger("cortex.k0_swarm")
 

@@ -532,7 +532,7 @@ class ReflexionEngine:
                 ENDOCRINE.pulse(HormoneType.NEURAL_GROWTH, 0.01)
                 ENDOCRINE.pulse(HormoneType.CORTISOL, -0.02)
         except ImportError:
-            print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Endocrine system not available
+            import logging; logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Endocrine system not available
 
     def get_session_stats(self) -> dict[str, Any]:
         """Return session-level metrics for the meta-level monitor."""

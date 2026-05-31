@@ -113,7 +113,7 @@ def check_file_contents(files: list[str], *, source: str, untracked_files: set[s
                     violations.append(f"  🔍 CONTENT: {filepath} contains '{pattern.pattern}'")
                     break
         except (OSError, ValueError):
-            print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Binary files or access errors - skip
+            import logging; logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Binary files or access errors - skip
     return violations
 
 
