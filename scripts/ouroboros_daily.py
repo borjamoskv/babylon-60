@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
-OUROBOROS-∞ Daily Metabolism - Autonomous Self-Improvement Cron
+[DEPRECATED] OUROBOROS-∞ Daily Metabolism - Autonomous Self-Improvement Cron
 ==============================================================
+WARNING (C5-REAL): This static AST-based script has been superseded by the
+Rust continuous exergy daemon `crates/ouroboros_omega`. Do not use.
+
 
 Runs daily via launchd. Scans the cortex-persist codebase, diagnoses entropy,
 triages the worst offenders, and (optionally) metabolizes them.
