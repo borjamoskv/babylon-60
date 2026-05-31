@@ -14,7 +14,7 @@ class ASLProtocol:
     """Agent Specification Language (ASL) Constraints."""
     
     @staticmethod
-    def validate(payload: Dict[str, Any]) -> bool:
+    def validate(payload: dict[str, Any]) -> bool:
         """Enforces ASL topological integrity."""
         required_keys = {"agent_id", "intent", "reality_level"}
         if not required_keys.issubset(payload.keys()):
@@ -36,7 +36,7 @@ class PersistExecutor:
         self.memory_manager = CortexMemoryManager()
         self.vsa_memory = SwarmMemory(db_path=db_path)
         
-    def execute_mutation(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def execute_mutation(self, payload: dict[str, Any]) -> dict[str, Any]:
         """
         Executes an ASL payload and crystallizes the mutation in CORTEX memory.
         """
