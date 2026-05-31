@@ -10,9 +10,8 @@ from cortex.memory.engrams import CortexSemanticEngram
 
 logger = logging.getLogger("cortex.memory._manager_store")
 
-async def check_deduplication(
-    l2: Any, tenant_id: str, project_id: str, content: str
-) -> str | None:
+
+async def check_deduplication(l2: Any, tenant_id: str, project_id: str, content: str) -> str | None:
     """Return deduplicated ID if fact exists, else None (async)."""
     if not content or not content.strip():
         logger.warning("CortexMemoryManager: Rejected empty fact pipeline.")
@@ -43,6 +42,7 @@ async def check_deduplication(
             return dedup_id
     return None
 
+
 async def emit_to_bus(
     bus: Any,
     fact_id: str,
@@ -72,6 +72,7 @@ async def emit_to_bus(
         project=project_id,
     )
     return fact_id
+
 
 async def store_fact(
     manager: Any,
@@ -109,6 +110,7 @@ async def store_fact(
         logger.info("CortexMemoryManager: Fact filtered by Thalamus. Action: %s", action)
         try:
             from cortex.routes.notch_ws import notify_notch_pruning
+
             await notify_notch_pruning()
         except ImportError:
             logger.debug("notch_ws unavailable, skipping notification")
@@ -156,7 +158,14 @@ async def store_fact(
 
     if use_bus and manager._bus:
         return await emit_to_bus(
-            manager._bus, fact_id, tenant_id, project_id, content, fact_type, adjusted_layer, metadata
+            manager._bus,
+            fact_id,
+            tenant_id,
+            project_id,
+            content,
+            fact_type,
+            adjusted_layer,
+            metadata,
         )
 
     if manager._hdc:

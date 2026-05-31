@@ -321,6 +321,7 @@ class CortexLLMRouter:
         """Resolve the optimal model for the primary provider's intent."""
         try:
             from cortex.extensions.llm._presets import resolve_model
+
             return resolve_model(self._primary.provider_name, intent)
         except ImportError:
             return None
@@ -335,6 +336,7 @@ class CortexLLMRouter:
         """Return (provider_name, model) pairs for an intent, cost-optimized."""
         try:
             from cortex.extensions.llm._presets import providers_for_intent
+
             return providers_for_intent(
                 intent, min_tier=min_tier, max_cost=max_cost, sort_by="cost"
             )
@@ -346,6 +348,7 @@ class CortexLLMRouter:
         """Return frontier-tier providers for an intent, cheapest first."""
         try:
             from cortex.extensions.llm._presets import frontier_providers
+
             return frontier_providers(intent)
         except ImportError:
             return []

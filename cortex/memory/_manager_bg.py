@@ -8,6 +8,7 @@ from cortex.memory.memory_compression import compress_and_store
 
 logger = logging.getLogger("cortex.memory._manager_bg")
 
+
 async def compression_worker_loop(worker_id: int, bg_queue: asyncio.Queue, manager: Any) -> None:
     """Persistent worker loop consuming from the background queue."""
     while True:
@@ -25,11 +26,9 @@ async def compression_worker_loop(worker_id: int, bg_queue: asyncio.Queue, manag
             logger.error("MemoryManager: Worker %d encountered fatal error: %s", worker_id, e)
             await asyncio.sleep(1)
 
+
 async def cancel_background_tasks(
-    bg_workers: list[asyncio.Task],
-    bg_queue: asyncio.Queue,
-    memory_os: Any,
-    dynamic_space: Any
+    bg_workers: list[asyncio.Task], bg_queue: asyncio.Queue, memory_os: Any, dynamic_space: Any
 ) -> None:
     """Cancel pending tasks and workers aggressively to prevent event loop leaks."""
     logger.debug("Canceling all background workers and Glial Daemon.")

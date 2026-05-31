@@ -17,7 +17,11 @@ from cortex.database.core import connect
 from cortex.ledger.ledger_core import SovereignLedger
 from cortex.utils.canonical import now_iso
 
-from cortex.forensics.crypto.hashing import canonical_json_bytes, sha256_hex, manifest_sha256 as _manifest_sha256
+from cortex.forensics.crypto.hashing import (
+    canonical_json_bytes,
+    sha256_hex,
+    manifest_sha256 as _manifest_sha256,
+)
 from cortex.forensics._evidence_ledger import (
     EVIDENCE_COMMIT_ACTION,
     _commit_detail,

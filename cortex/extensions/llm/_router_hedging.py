@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.extensions.llm._router_hedging")
 
+
 async def execute_hedged(
     prompt: CortexPrompt,
     hedging_providers: list[BaseProvider],
@@ -27,9 +28,7 @@ async def execute_hedged(
         return None
 
     active_hedgers = [
-        p
-        for p in hedging_providers
-        if not cascade.is_nxdomain_cached(p.provider_name)
+        p for p in hedging_providers if not cascade.is_nxdomain_cached(p.provider_name)
     ]
     if not active_hedgers:
         return None
@@ -54,6 +53,7 @@ async def execute_hedged(
         cascade.set_nx_record(p.provider_name)
     return None
 
+
 async def execute_swarm(
     prompt: CortexPrompt,
     primary: BaseProvider,
@@ -66,7 +66,7 @@ async def execute_swarm(
 
     swarm_peers = []
     reasoning_mode = getattr(prompt, "reasoning_mode", None)
-    
+
     if reasoning_mode == ReasoningMode.ULTRA_THINK and getattr(primary, "tier", None) != "frontier":
         pass
     else:
@@ -74,9 +74,7 @@ async def execute_swarm(
 
     swarm_peers.extend(fallbacks_ordered[:2])
 
-    active_peers = [
-        p for p in swarm_peers if not cascade.is_nxdomain_cached(p.provider_name)
-    ]
+    active_peers = [p for p in swarm_peers if not cascade.is_nxdomain_cached(p.provider_name)]
 
     if len(active_peers) < 2:
         return None

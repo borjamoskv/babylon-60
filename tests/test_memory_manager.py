@@ -154,7 +154,9 @@ async def test_process_interaction_with_overflow_clean():
         max_bg_tasks=1,
     )
 
-    with patch("cortex.memory._manager_bg.compress_and_store", new_callable=AsyncMock) as mock_compress:
+    with patch(
+        "cortex.memory._manager_bg.compress_and_store", new_callable=AsyncMock
+    ) as mock_compress:
         await mgr.process_interaction(
             role="user",
             content="Testing queue",

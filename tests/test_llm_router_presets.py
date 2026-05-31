@@ -256,12 +256,14 @@ class TestRouterOrdering:
 
     def test_cost_order_constants(self):
         from cortex.extensions.llm._router_policy import COST_ORDER
+
         o = COST_ORDER
         assert isinstance(o, dict)
         assert "free" in o
 
     def test_tier_order_constants(self):
         from cortex.extensions.llm._router_policy import TIER_ORDER
+
         t = TIER_ORDER
         assert t["frontier"] < t["high"] < t["local"]
 

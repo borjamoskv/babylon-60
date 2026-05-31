@@ -12,6 +12,7 @@ from cortex.utils.canonical import compute_tx_hash, compute_tx_hash_v1
 # Action constant used by ledger
 EVIDENCE_COMMIT_ACTION = "forensic_evidence_commit"
 
+
 def _commit_detail(manifest: Mapping[str, Any], normalize_fn) -> dict[str, Any]:
     bundle_id = manifest.get("bundle_id")
     if not isinstance(bundle_id, str) or not bundle_id.strip():
@@ -25,7 +26,7 @@ def _commit_detail(manifest: Mapping[str, Any], normalize_fn) -> dict[str, Any]:
     manifest_sha256 = manifest.get("manifest_sha256")
     if not isinstance(manifest_sha256, str) or not manifest_sha256.strip():
         raise ValueError("manifest_sha256 must be a non-empty string")
-        
+
     return {
         "schema": "cortex.forensics.evidence_commit.v1",
         "bundle_id": bundle_id,
@@ -45,9 +46,11 @@ def _commit_detail(manifest: Mapping[str, Any], normalize_fn) -> dict[str, Any]:
         ],
     }
 
+
 def _commit_project(detail: Mapping[str, Any]) -> str:
     project = detail.get("project")
     return str(project) if project else "forensics"
+
 
 def _find_existing_commit(
     conn: sqlite3.Connection,
@@ -75,6 +78,7 @@ def _find_existing_commit(
             return row
     return None
 
+
 def _verify_tenant_chain(conn: sqlite3.Connection, tenant_id: str) -> list[dict[str, Any]]:
     violations = []
     rows = conn.execute(
@@ -85,14 +89,21 @@ def _verify_tenant_chain(conn: sqlite3.Connection, tenant_id: str) -> list[dict[
     expected_prev = "GENESIS"
     for row in rows:
         if row["prev_hash"] != expected_prev:
-            violations.append({
-                "type": "CHAIN_BREAK",
-                "tx_id": row["id"],
-                "expected": expected_prev,
-                "actual": row["prev_hash"],
-            })
+            violations.append(
+                {
+                    "type": "CHAIN_BREAK",
+                    "tx_id": row["id"],
+                    "expected": expected_prev,
+                    "actual": row["prev_hash"],
+                }
+            )
         computed_v3 = compute_tx_hash(
-            row["prev_hash"], row["project"], row["action"], row["detail"], row["timestamp"], tenant_id=tenant_id
+            row["prev_hash"],
+            row["project"],
+            row["action"],
+            row["detail"],
+            row["timestamp"],
+            tenant_id=tenant_id,
         )
         computed_v2 = compute_tx_hash(
             row["prev_hash"], row["project"], row["action"], row["detail"], row["timestamp"]
@@ -104,6 +115,7 @@ def _verify_tenant_chain(conn: sqlite3.Connection, tenant_id: str) -> list[dict[
             violations.append({"type": "TAMPER_DETECTED", "tx_id": row["id"]})
         expected_prev = row["hash"]
     return violations
+
 
 def _verify_merkle_roots(conn: sqlite3.Connection) -> list[dict[str, Any]]:
     violations = []
@@ -130,12 +142,15 @@ def _verify_merkle_roots(conn: sqlite3.Connection) -> list[dict[str, Any]]:
             ).fetchall()
         computed_root = MerkleTree([row["hash"] for row in rows]).root_hash
         if computed_root != root["root_hash"]:
-            violations.append({
-                "type": "MERKLE_MISMATCH",
-                "tenant_id": root_tenant_id,
-                "range": f"{root['tx_start_id']}-{root['tx_end_id']}",
-            })
+            violations.append(
+                {
+                    "type": "MERKLE_MISMATCH",
+                    "tenant_id": root_tenant_id,
+                    "range": f"{root['tx_start_id']}-{root['tx_end_id']}",
+                }
+            )
     return violations
+
 
 def _verify_existing_commit(
     conn: sqlite3.Connection,
@@ -154,4 +169,3 @@ def _verify_existing_commit(
     violations.extend(_verify_tenant_chain(conn, tenant_id))
     violations.extend(_verify_merkle_roots(conn))
     return violations
-

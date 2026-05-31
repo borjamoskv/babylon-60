@@ -4,6 +4,7 @@ import logging
 
 logger = logging.getLogger("cortex.extensions.llm._router_shannon")
 
+
 def compress_working_memory(
     messages: list[dict[str, str]],
     max_words: int,

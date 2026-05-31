@@ -22,7 +22,11 @@ from cortex.memory._manager_init import (
     init_metamemory,
     init_resonance_gate,
 )
-from cortex.memory._manager_bg import compression_worker_loop, cancel_background_tasks, compress_and_store
+from cortex.memory._manager_bg import (
+    compression_worker_loop,
+    cancel_background_tasks,
+    compress_and_store,
+)
 from cortex.memory._manager_store import store_fact, check_deduplication
 
 try:
@@ -43,6 +47,7 @@ except ImportError:
     def get_tenant_id() -> str:
         return "default"
 
+
 try:
     from cortex.extensions.sovereign.endocrine import DigitalEndocrine
 except ImportError:
@@ -58,6 +63,7 @@ except ImportError:
 try:
     from cortex.memory.semantic_ram import DynamicSemanticSpace
     from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+
     VectorStoreL2 = SovereignVectorStoreL2
 except ImportError:
     VectorStoreL2 = None  # type: ignore[assignment,misc]
@@ -193,7 +199,9 @@ class CortexMemoryManager:
 
         return event
 
-    async def _check_deduplication(self, tenant_id: str, project_id: str, content: str) -> str | None:
+    async def _check_deduplication(
+        self, tenant_id: str, project_id: str, content: str
+    ) -> str | None:
         """Forwarder to detached logic."""
         return await check_deduplication(self._l2, tenant_id, project_id, content)
 
@@ -256,6 +264,7 @@ class CortexMemoryManager:
 
         _start_recall = time.perf_counter()
         from cortex.memory.memory_retrieval import retrieve_episodic_context
+
         episodic_facts = await retrieve_episodic_context(
             self, tenant_id, project_id, query, max_episodes, layer=layer
         )
@@ -287,6 +296,7 @@ class CortexMemoryManager:
             return None
         hvs = [self._hdc_encoder.encode_text(e["content"]) for e in events]
         from cortex.memory.hdc.algebra import bundle
+
         try:
             return hvs[0] if len(hvs) == 1 else bundle(*hvs)
         except (ValueError, TypeError) as e:
@@ -312,6 +322,7 @@ class CortexMemoryManager:
         )
         report = await cycle.run(tenant_id=tenant_id, project_id=project_id)
         import dataclasses
+
         return dataclasses.asdict(report)
 
     # ─── Introspection ────────────────────────────────────────────

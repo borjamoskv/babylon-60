@@ -26,6 +26,7 @@ TIER_ORDER: dict[str, int] = {
     "local": 2,
 }
 
+
 def promote_by_latency_then_cost(
     cascade: CascadeManager,
     providers: list[BaseProvider],
@@ -76,6 +77,7 @@ def promote_by_latency_then_cost(
 
     return process_group(fits_context) + process_group(overflows_context)
 
+
 def ordered_fallbacks(
     cascade: CascadeManager,
     fallbacks: list[BaseProvider],
@@ -90,7 +92,7 @@ def ordered_fallbacks(
     else:
         effective_intent = prompt.intent
         reasoning_mode = prompt.reasoning_mode
-        
+
         system_instruction = getattr(prompt, "system_instruction", "") or ""
         working_memory = getattr(prompt, "working_memory", []) or []
         total_chars = len(system_instruction)

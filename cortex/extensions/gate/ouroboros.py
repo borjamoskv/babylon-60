@@ -112,15 +112,21 @@ class OuroborosGate:
                 placeholders = ",".join("?" * len(chunk))
                 # Try deleting from tables referencing facts(id), ignore if they don't exist
                 tables_to_clean = [
-                    "consensus_votes_v2", "consensus_outcomes", "causal_edges",
-                    "enrichment_jobs", "fact_vectors", "fact_embeddings", "fact_tags"
+                    "consensus_votes_v2",
+                    "consensus_outcomes",
+                    "causal_edges",
+                    "enrichment_jobs",
+                    "fact_vectors",
+                    "fact_embeddings",
+                    "fact_tags",
                 ]
                 for table in tables_to_clean:
                     try:
-                        self.conn.execute(f"DELETE FROM {table} WHERE fact_id IN ({placeholders})", chunk)
+                        self.conn.execute(
+                            f"DELETE FROM {table} WHERE fact_id IN ({placeholders})", chunk
+                        )
                     except Exception as e:
                         logger.debug(f"Skipping table {table} during pruning: {e}")
-
 
             self.conn.execute("DELETE FROM facts WHERE project = ?", (target_project,))
             self.conn.commit()
