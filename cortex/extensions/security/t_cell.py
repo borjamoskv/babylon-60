@@ -47,7 +47,7 @@ class BabestuTCell:
                         False,
                         f"Llamada a ejecución dinámica o sistema prohibida: {node.func.id}()",
                     )
-                elif isinstance(node.func, ast.Attribute) and node.func.attr in cls.FORBIDDEN_CALLS:
+                if isinstance(node.func, ast.Attribute) and node.func.attr in cls.FORBIDDEN_CALLS:
                     return False, f"Invocación de atributo prohibida: {node.func.attr}()"
 
             elif isinstance(node, ast.Import):

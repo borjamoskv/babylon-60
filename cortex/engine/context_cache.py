@@ -35,10 +35,10 @@ from typing import Any
 logger = logging.getLogger("cortex.context_cache")
 
 __all__ = [
-    "ContextCacheManager",
     "CacheEntry",
-    "EvictionPolicy",
     "CacheStats",
+    "ContextCacheManager",
+    "EvictionPolicy",
 ]
 
 

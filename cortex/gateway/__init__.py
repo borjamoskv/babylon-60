@@ -13,11 +13,11 @@ if TYPE_CHECKING:
     from cortex.gateway.router import GatewayIntent, GatewayRequest, GatewayResponse, GatewayRouter
 
 __all__ = [
-    "SignalBus",
     "GatewayIntent",
     "GatewayRequest",
     "GatewayResponse",
     "GatewayRouter",
+    "SignalBus",
 ]
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {

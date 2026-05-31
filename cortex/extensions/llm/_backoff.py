@@ -27,7 +27,7 @@ def extract_retry_delay(text: str) -> float | None:
             if delay_str and isinstance(delay_str, str):
                 if delay_str.endswith("ms"):
                     return float(delay_str[:-2]) / 1000.0
-                elif delay_str.endswith("s"):
+                if delay_str.endswith("s"):
                     return float(delay_str[:-1])
     except (KeyError, TypeError, ValueError, AttributeError):
         pass

@@ -47,7 +47,7 @@ except ImportError:
 class _ClientSession:
     """Tracks a connected IDE client."""
 
-    __slots__ = ("session_id", "websocket", "connected_at", "messages_received", "messages_sent")
+    __slots__ = ("connected_at", "messages_received", "messages_sent", "session_id", "websocket")
 
     def __init__(self, websocket: Any) -> None:
         self.session_id = f"session-{uuid4().hex[:8]}"

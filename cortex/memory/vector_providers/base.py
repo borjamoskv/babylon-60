@@ -10,7 +10,6 @@ class VectorStoreProvider(ABC):
     @abstractmethod
     async def ensure_collection(self, collection_name: str, dimension: int) -> None:
         """Ensure the collection exists."""
-        pass
 
     @abstractmethod
     async def upsert(
@@ -19,7 +18,6 @@ class VectorStoreProvider(ABC):
         entries: list[tuple[str, list[float], dict[str, Any]]],
     ) -> None:
         """Upsert points into the collection."""
-        pass
 
     @abstractmethod
     async def query(
@@ -31,19 +29,15 @@ class VectorStoreProvider(ABC):
         score_threshold: float | None = None,
     ) -> list[dict[str, Any]]:
         """Query for similar vectors."""
-        pass
 
     @abstractmethod
     async def delete(self, collection_name: str, ids: list[str]) -> None:
         """Delete points by ID."""
-        pass
 
     @abstractmethod
     async def get_count(self, collection_name: str) -> int:
         """Get total point count."""
-        pass
 
     @abstractmethod
     async def close(self) -> None:
         """Release resources."""
-        pass

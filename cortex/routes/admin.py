@@ -487,5 +487,5 @@ async def execute_credibility_strike(
         logger.error("Credibility strike failed for project=%s: %s", project, exc)
         raise HTTPException(
             status_code=500,
-            detail=f"Credibility strike execution failed: {str(exc)}",
+            detail=f"Credibility strike execution failed: {exc!s}",
         )

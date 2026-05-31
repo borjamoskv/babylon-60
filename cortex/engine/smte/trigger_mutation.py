@@ -1,4 +1,3 @@
-import ast
 import logging
 from cortex.engine.smte.parser import AgentASTParser
 from cortex.engine.smte.llm_mutator import llm_driven_mutator
@@ -25,9 +24,8 @@ def run_mutation_cycle(target_path: str):
                     f"[+] Mutation improved/maintained exergy ({initial_exergy:.4f} -> {new_exergy:.4f})"
                 )
                 return True
-            else:
-                logger.warning("[-] Exergy degraded. Rejecting mutation.")
-                return False
+            logger.warning("[-] Exergy degraded. Rejecting mutation.")
+            return False
         logger.error("[-] Mutation structural check failed.")
         return False
 

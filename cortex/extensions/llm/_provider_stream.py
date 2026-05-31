@@ -7,7 +7,6 @@ import random
 import logging
 from typing import Any
 from collections.abc import AsyncGenerator
-from cortex.extensions.llm._stealth import prepare_stealth_headers
 from cortex.extensions.llm._resilience import CircuitBreakerError, is_retryable
 
 logger = logging.getLogger("cortex.extensions.llm")
@@ -44,23 +43,21 @@ async def execute_stream(
     for attempt in range(1, max_attempts + 1):
         start_time = time.monotonic()
         try:
-            async with circuit_breaker:
-                async with semaphore:
-                    async with client.stream(
-                        "POST", url, headers=headers, json=payload
-                    ) as response:
-                        response.raise_for_status()
-                        latency = time.monotonic() - start_time
-                        logger.info(
-                            "LLM Stream [CONNECTED] -> Provider: %s | Latency: %.2fs | Attempt: %d",
-                            provider_name,
-                            latency,
-                            attempt,
-                        )
-                        async for chunk in process_stream_lines(response):
-                            yield chunk
-                            yielded_any = True
-                        return
+            async with circuit_breaker, semaphore, client.stream(
+                "POST", url, headers=headers, json=payload
+            ) as response:
+                response.raise_for_status()
+                latency = time.monotonic() - start_time
+                logger.info(
+                    "LLM Stream [CONNECTED] -> Provider: %s | Latency: %.2fs | Attempt: %d",
+                    provider_name,
+                    latency,
+                    attempt,
+                )
+                async for chunk in process_stream_lines(response):
+                    yield chunk
+                    yielded_any = True
+                return
         except Exception as e:
             latency = time.monotonic() - start_time
             last_exc = e

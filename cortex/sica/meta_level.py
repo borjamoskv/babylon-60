@@ -24,7 +24,6 @@ from cortex.sica.constitution import Constitution, ConstitutionalVerdict
 from cortex.sica.object_level import ExecutionTrace, StepOutcome
 from cortex.sica.strategy import (
     Heuristic,
-    MutationType,
     SearchStrategy,
     StrategyMutation,
 )

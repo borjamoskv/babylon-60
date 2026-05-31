@@ -177,7 +177,7 @@ async def generate_handoff(
                             ],
                         }
                     )
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.debug("Causal chain extraction skipped: %s", e)
 
         # ── Active Projects (with activity in last 24h) ───────────────
@@ -219,7 +219,7 @@ async def generate_handoff(
 
         fp = await FingerprintExtractor.extract(engine, project=None, top_domains=10)
         cognitive_fingerprint = fp.to_dict()
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         logger.debug("Cognitive fingerprint skipped: %s", e)
 
     handoff = {

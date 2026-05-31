@@ -46,12 +46,12 @@ except ImportError:  # pragma: no cover - sqlite-vec is a base dependency in rel
 from cortex.utils.errors import DBLockError
 
 __all__ = [
-    "connect",
-    "connect_writer",
-    "connect_async",
-    "connect_async_ctx",
     "apply_pragmas_async",
     "apply_pragmas_async_readonly",
+    "connect",
+    "connect_async",
+    "connect_async_ctx",
+    "connect_writer",
     "load_sqlite_vec_async",
 ]
 

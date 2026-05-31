@@ -19,8 +19,8 @@ from typing import TYPE_CHECKING
 
 __all__ = [
     "AUTO_TAGS",
-    "InjectedLearning",
     "LEARNABLE_TYPES",
+    "InjectedLearning",
     "Reflection",
     "format_injection_json",
     "format_injection_markdown",

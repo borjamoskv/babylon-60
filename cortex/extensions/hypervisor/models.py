@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal
 
-__all__ = ["Memory", "HealthReport", "Receipt"]
+__all__ = ["HealthReport", "Memory", "Receipt"]
 
 
 @dataclass(frozen=True)

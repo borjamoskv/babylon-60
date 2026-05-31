@@ -20,7 +20,7 @@ from rich.console import Console
 from cortex.guards import analysis
 from cortex.guards.models import DependencyViolation
 
-__all__ = ["DependencyViolation", "scan_file", "scan_directory"]
+__all__ = ["DependencyViolation", "scan_directory", "scan_file"]
 
 logger = logging.getLogger("cortex.guards.dependency_guard")
 

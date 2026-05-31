@@ -25,7 +25,6 @@ from cortex.memory._manager_init import (
 from cortex.memory._manager_bg import (
     compression_worker_loop,
     cancel_background_tasks,
-    compress_and_store,
 )
 from cortex.memory._manager_store import store_fact, check_deduplication
 
@@ -78,27 +77,27 @@ class CortexMemoryManager:
     """Orchestrator for the Tripartite Cognitive Memory Architecture."""
 
     __slots__ = (
+        "_bg_queue",
+        "_bg_workers",
+        "_bus",
+        "_dynamic_space",
         "_encoder",
+        "_endocrine",
+        "_fusion",
+        "_hdc",
+        "_hdc_encoder",
+        "_hologram",
         "_l1",
         "_l2",
         "_l3",
-        "_hdc",
-        "_hdc_encoder",
-        "_router",
-        "_bg_queue",
-        "_bg_workers",
         "_max_bg_tasks",
-        "_fusion",
-        "_dynamic_space",
-        "_hologram",
-        "_bus",
-        "thalamus",
-        "_resonance_gate",
-        "_endocrine",
-        "_schema_engine",
-        "metamemory",
         "_mem0_pipeline",
         "_memory_os",
+        "_resonance_gate",
+        "_router",
+        "_schema_engine",
+        "metamemory",
+        "thalamus",
     )
 
     DEFAULT_MAX_BG_TASKS: int = 100

@@ -29,18 +29,18 @@ if TYPE_CHECKING:
     from cortex.extensions.sync.write import export_to_json
 
 __all__ = [
-    "sync_memory",
-    "export_to_json",
-    "export_snapshot",
-    "export_obsidian",
-    "SyncResult",
-    "WritebackResult",
-    "MEMORY_DIR",
     "AGENT_DIR",
     "CORTEX_DIR",
+    "MEMORY_DIR",
     "SYNC_STATE_FILE",
-    "_file_hash",
+    "SyncResult",
+    "WritebackResult",
     "_db_content_hash",
+    "_file_hash",
+    "export_obsidian",
+    "export_snapshot",
+    "export_to_json",
+    "sync_memory",
 ]
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {

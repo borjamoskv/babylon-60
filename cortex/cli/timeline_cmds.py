@@ -24,7 +24,6 @@ __all__ = [
 @cli.group()
 def timeline():
     """Navigate the CORTEX timeline and manage snapshots."""
-    pass
 
 
 @timeline.command("log")
@@ -108,7 +107,6 @@ def timeline_checkout(tx_id, project, db):
 @timeline.group("snapshot")
 def timeline_snapshot():
     """Manage physical database snapshots."""
-    pass
 
 
 @timeline_snapshot.command("create")

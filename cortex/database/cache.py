@@ -13,7 +13,7 @@ from collections import OrderedDict
 from enum import Enum
 from typing import Generic, TypeVar
 
-__all__ = ["T", "CacheEvent", "TieredCache"]
+__all__ = ["CacheEvent", "T", "TieredCache"]
 
 _MAX_REDIS_VALUE_BYTES = 64 * 1024  # 64 KiB threshold for L2 storage
 

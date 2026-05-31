@@ -10,7 +10,7 @@ STEADY_STATE_SAMPLES = 2
 
 def _measure_import_once() -> float:
     start = time.perf_counter()
-    subprocess.run(  # noqa: S603
+    subprocess.run(
         [sys.executable, "-c", IMPORT_PROBE],
         check=True,
         stdout=subprocess.DEVNULL,

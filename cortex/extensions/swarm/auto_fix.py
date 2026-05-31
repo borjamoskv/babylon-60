@@ -116,7 +116,7 @@ class AutoFixPipeline:
             result = await self._execute(task)
         except asyncio.CancelledError:
             raise
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             elapsed = (time.monotonic() - t0) * 1000
             logger.error(
                 "☠️ [AUTOFIX] Execution failed for ghost [%s]: %s",
@@ -158,37 +158,36 @@ class AutoFixPipeline:
                 duration_ms=elapsed,
                 tests_passed=True,
             )
-        else:
-            error_msg = result.get("error", "validation failed")
-            if "Ω₆ Siege-Verification aborted" in error_msg:
-                logger.info("🛡️  [AUTOFIX] Ω₆ prevented hallucination for ghost [%s].", ghost_id)
-                return FixAttempt(
-                    ghost_id=ghost_id,
-                    classification=classification,
-                    success=False,
-                    branch=result.get("branch", ""),
-                    summary="Aborted: Repro test passed (Hallucination averted)",
-                    error=error_msg,
-                    duration_ms=elapsed,
-                    tests_passed=result.get("tests_passed", False),
-                )
-
-            await self._escalate(
-                ghost_id,
-                classification,
-                error_msg,
-                project,
-            )
+        error_msg = result.get("error", "validation failed")
+        if "Ω₆ Siege-Verification aborted" in error_msg:
+            logger.info("🛡️  [AUTOFIX] Ω₆ prevented hallucination for ghost [%s].", ghost_id)
             return FixAttempt(
                 ghost_id=ghost_id,
                 classification=classification,
                 success=False,
                 branch=result.get("branch", ""),
-                summary=result.get("summary", ""),
+                summary="Aborted: Repro test passed (Hallucination averted)",
                 error=error_msg,
                 duration_ms=elapsed,
                 tests_passed=result.get("tests_passed", False),
             )
+
+        await self._escalate(
+            ghost_id,
+            classification,
+            error_msg,
+            project,
+        )
+        return FixAttempt(
+            ghost_id=ghost_id,
+            classification=classification,
+            success=False,
+            branch=result.get("branch", ""),
+            summary=result.get("summary", ""),
+            error=error_msg,
+            duration_ms=elapsed,
+            tests_passed=result.get("tests_passed", False),
+        )
 
     @staticmethod
     def classify(description: str) -> GhostClass:
@@ -258,7 +257,7 @@ class AutoFixPipeline:
                 }
         except asyncio.CancelledError:
             raise
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             return {
                 "status": "failed",
                 "branch": branch_name,
@@ -314,9 +313,8 @@ class AutoFixPipeline:
                     timeout=5,
                 )
                 return True
-            else:
-                logger.error("🛑 [AUTOFIX] Merge failed (requires human): %s", proc_merge.stderr)
-                return False
+            logger.error("🛑 [AUTOFIX] Merge failed (requires human): %s", proc_merge.stderr)
+            return False
 
         except (subprocess.SubprocessError, OSError, ValueError) as e:
             logger.error("☠️ [AUTOFIX] Merge exception: %s", e)

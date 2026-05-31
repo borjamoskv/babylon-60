@@ -15,7 +15,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
-__all__ = ["GossipProtocol", "StateRecord", "SemanticDigest"]
+__all__ = ["GossipProtocol", "SemanticDigest", "StateRecord"]
 
 logger = logging.getLogger("cortex.extensions.ha.gossip")
 

@@ -9,7 +9,7 @@ from cortex.core.config import (
 
 __all__ = [
     "CORTEX_DIR",
-    "CortexConfig",
     "DEFAULT_DB_PATH",
+    "CortexConfig",
     "reload",
 ]

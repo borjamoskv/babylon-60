@@ -1,7 +1,6 @@
 # Thin shim to expose Rust extension symbols
 
 try:
-    from cortex_rs import ZeroCopyRingBuffer, CortexRsSubstrate
 
     HAS_CORTEX_RS = True
 except Exception as e:

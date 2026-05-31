@@ -30,7 +30,6 @@ class DemiurgeCompiler:
     async def initialize(self) -> None:
         """Initialize engine if needed."""
         # CortexEngine is initialized synchronously.
-        pass
 
     async def forge_skill(self, intent: str, project_scope: str = "demiurge") -> dict[str, Any]:
         """
@@ -97,9 +96,9 @@ class DemiurgeCompiler:
                 # Security Justification: The Demiurge JIT compiler requires exec() for
                 # ephemeral skill generation (autopoiesis) within a controlled sandbox.
                 # All inputs are validated via ASTSandbox whitelist before execution.
-                exec(code_obj, sandbox_globals)  # noqa: S102 # nosec B102
+                exec(code_obj, sandbox_globals)  # nosec B102
             except Exception as e:
-                # noqa: BLE001 - Compilation error during JIT forging is expected.
+
                 await self._record_ghost(intent, generated_code, f"Compilation Error: {e}", 0.15)
                 return {
                     "status": "FAILED",
@@ -149,7 +148,7 @@ class DemiurgeCompiler:
                     "code": generated_code,
                 }
 
-            except Exception as run_err:  # noqa: BLE001
+            except Exception as run_err:
                 await self._record_ghost(intent, generated_code, str(run_err), 0.2)
                 return {
                     "status": "FAILED",
@@ -158,7 +157,7 @@ class DemiurgeCompiler:
                     "code": generated_code,
                 }
 
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.debug("Ghost recorded: %s", intent[:30])
             return {"status": "ERROR", "reason": str(e)}
 

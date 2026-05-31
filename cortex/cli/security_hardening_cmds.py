@@ -6,7 +6,7 @@ import click
 
 from cortex.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
 
-__all__ = ["quarantine", "unquarantine", "reap_ghosts"]
+__all__ = ["quarantine", "reap_ghosts", "unquarantine"]
 
 
 @cli.command()

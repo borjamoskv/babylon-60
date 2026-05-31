@@ -22,7 +22,7 @@ from cortex.extensions.agent.degradation_types import (
     SovereignAgentError,
 )
 
-__all__ = ["sovereign_execute", "_upgrade_to_l3", "_persist_to_cortex"]
+__all__ = ["_persist_to_cortex", "_upgrade_to_l3", "sovereign_execute"]
 
 logger = logging.getLogger("cortex.extensions.agent.degradation")
 
@@ -93,7 +93,7 @@ def sovereign_execute(
                                 f"Suggested model: {e.suggested_alt}"
                             )
                         return result
-                    except Exception as inner_exc:  # noqa: BLE001
+                    except Exception as inner_exc:
                         raise AgentDegradedError(
                             cause=inner_exc,
                             component=e.component,
@@ -114,7 +114,7 @@ def sovereign_execute(
                 await _persist_to_cortex(cortex_engine, project, e)
                 raise
 
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 upgraded = AgentDegradedError(
                     cause=e,
                     component=fn.__name__,
@@ -163,7 +163,7 @@ async def _persist_to_cortex(
             source="agent:degradation_protocol",
             metadata={"component": report.component, "level": report.level.value},
         )
-    except Exception as persist_exc:  # noqa: BLE001
+    except Exception as persist_exc:
         logger.debug(
             "sovereign_execute: Failed to persist degradation report to CORTEX: %s",
             persist_exc,

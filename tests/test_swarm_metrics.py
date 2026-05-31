@@ -69,7 +69,7 @@ def clean_swarm_queue_db(monkeypatch, tmp_path):
     conn.commit()
     conn.close()
 
-    yield test_db
+    return test_db
 
 
 def test_swarm_metrics_caching():
@@ -143,7 +143,6 @@ def test_swarm_metrics_active_children():
     try:
         success = ring.enqueue(b"TestAgentRing", b"{}")
     except Exception as e:
-        pass
         success = False
     assert success is True
 

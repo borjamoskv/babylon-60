@@ -21,9 +21,9 @@ def generate_and_store_master_key():
 
 
 __all__ = [
-    "Vault",
-    "get_master_key",
-    "generate_and_store_master_key",
     "CortexEncrypter",
+    "Vault",
+    "generate_and_store_master_key",
     "get_default_encrypter",
+    "get_master_key",
 ]

@@ -129,7 +129,7 @@ async def audit_target(
         )
     except (OSError, RuntimeError) as e:
         logger.error("Oracle execution failed: %s", e)
-        raise HTTPException(status_code=502, detail=f"Oracle Engine Error: {str(e)}") from e
+        raise HTTPException(status_code=502, detail=f"Oracle Engine Error: {e!s}") from e
 
     if not report:
         raise HTTPException(status_code=500, detail="Oracle yielded no insights.")
@@ -151,7 +151,7 @@ async def audit_target(
                 "depth": req.depth,
             },
         )
-    except Exception as e:  # noqa: BLE001 - ledger persistence must not block oracle response
+    except Exception as e:
         logger.warning("Failed to persist Oracle audit to ledger: %s", e)
 
     return OracleResponse(

@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-from typing import Any, TYPE_CHECKING
-from pathlib import Path
+from typing import TYPE_CHECKING
 from cryptography.exceptions import InvalidSignature
 
 from cortex.ledger.public_verifier_utils import (
     PublicVerifierError,
     _manifest_signature_scope,
     _merkle_root_v1,
-    _parse_utc,
     _sha256_file,
     _string_list,
     _verify_ed25519,

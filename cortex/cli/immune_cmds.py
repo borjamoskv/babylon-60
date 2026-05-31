@@ -15,7 +15,6 @@ console = Console()
 @cli.group("immune")
 def immune_group():
     """Immune system and epistemic membrane commands."""
-    pass
 
 
 @immune_group.command("circuit-breaker")

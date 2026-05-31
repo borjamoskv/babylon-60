@@ -97,7 +97,7 @@ class RedTeamSwarm:
                             "🦾 [RED-TEAM] Surface survived. Immunity confirmed for %s.",
                             func.__name__,
                         )
-                except Exception as e:  # noqa: BLE001
+                except Exception as e:
                     # Si el propio inyector explota, es un error del Red Team, no del objetivo.
                     logger.error(
                         "❌ [RED-TEAM] Red Team internal failure (Byzantine Swarm Error): %s", e

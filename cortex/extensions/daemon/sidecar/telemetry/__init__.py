@@ -9,4 +9,4 @@ from cortex.extensions.daemon.sidecar.telemetry.fs_entropy_oracle import FSEntro
 from cortex.extensions.daemon.sidecar.telemetry.network_void_oracle import NetworkVoidOracle
 from cortex.extensions.daemon.sidecar.telemetry.thermodynamics_oracle import ThermodynamicsOracle
 
-__all__ = ["ASTOracle", "ThermodynamicsOracle", "FSEntropyOracle", "NetworkVoidOracle"]
+__all__ = ["ASTOracle", "FSEntropyOracle", "NetworkVoidOracle", "ThermodynamicsOracle"]

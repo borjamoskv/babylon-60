@@ -1,10 +1,7 @@
 from __future__ import annotations
 import logging
-import random
-from typing import Any
 
-from .types import GeneFragment, TournamentResult
-from .genetics import GenePool
+from .types import TournamentResult
 from cortex.sica.strategy import SearchStrategy
 
 logger = logging.getLogger("cortex.sica.colony.tournament")

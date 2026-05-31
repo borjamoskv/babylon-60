@@ -82,7 +82,7 @@ class HealthLoop:
                 "metrics": [{"name": m.name, "value": m.value} for m in metrics],
             }
 
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.warning("Health tick failed: %s", e)
             return None
 
@@ -136,7 +136,7 @@ class HealthLoop:
         if self._notify_fn:
             try:
                 self._notify_fn(title, body)
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 logger.debug("Notification failed: %s", e)
             return
         try:
@@ -147,7 +147,7 @@ class HealthLoop:
                 check=False,
                 capture_output=True,
             )
-        except Exception:  # noqa: BLE001
+        except Exception:
             logger.debug("macOS notifications unavailable")
 
     def persist_snapshot(
@@ -166,5 +166,5 @@ class HealthLoop:
                 meta=data,
                 confidence="C5",
             )
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.debug("Health persist failed: %s", e)

@@ -22,7 +22,7 @@ from cortex.database.core import connect as db_connect
 
 logger = logging.getLogger("cortex.chronos")
 
-__all__ = ["ChronosROI", "ChronosReport", "CHRONOS"]
+__all__ = ["CHRONOS", "ChronosROI", "ChronosReport"]
 
 
 # ── Data Model ──────────────────────────────────────────────────────
@@ -94,7 +94,7 @@ class ChronosROI:
         """Extract 'Sovereign Proof of Work' from Git history."""
         try:
             cmd = ["git", "log", "--since=24 hours ago", "--pretty=tformat:", "--numstat"]
-            out = subprocess.check_output(  # noqa: S603
+            out = subprocess.check_output(
                 cmd,
                 cwd=project_path,
                 text=True,
@@ -112,7 +112,7 @@ class ChronosROI:
 
             commit_count_cmd = ["git", "rev-list", "--count", "HEAD", "--since=24 hours ago"]
             commit_count = int(
-                subprocess.check_output(  # noqa: S603
+                subprocess.check_output(
                     commit_count_cmd,
                     cwd=project_path,
                     timeout=10,

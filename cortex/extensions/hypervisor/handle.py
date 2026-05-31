@@ -34,7 +34,7 @@ class AgentHandle:
         health = await handle.reflect()
     """
 
-    __slots__ = ("_tenant", "_project", "_hypervisor")
+    __slots__ = ("_hypervisor", "_project", "_tenant")
 
     def __init__(
         self,

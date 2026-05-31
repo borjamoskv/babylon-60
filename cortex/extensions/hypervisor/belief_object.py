@@ -28,8 +28,8 @@ from datetime import datetime, timezone
 from enum import Enum
 
 __all__ = [
-    "BeliefObject",
     "BeliefConfidence",
+    "BeliefObject",
     "BeliefStatus",
     "BeliefVerdict",
     "ProvenanceChain",

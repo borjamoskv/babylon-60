@@ -85,8 +85,7 @@ def _handle_interactive_enforce(gate: "SovereignGate", action: Any, action_id: s
         gate._log_audit("ACTION_APPROVED_INTERACTIVE", action)
         logger.info("✅ Gate: Action %s approved interactively", action_id)
         return True
-    else:
-        action.status = ActionStatus.DENIED
-        gate._log_audit("ACTION_DENIED", action)
-        logger.warning("❌ Gate: Action %s denied by operator", action_id)
-        raise GateNotApproved(f"Action {action_id} denied by operator")
+    action.status = ActionStatus.DENIED
+    gate._log_audit("ACTION_DENIED", action)
+    logger.warning("❌ Gate: Action %s denied by operator", action_id)
+    raise GateNotApproved(f"Action {action_id} denied by operator")

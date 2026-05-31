@@ -19,7 +19,7 @@ from cortex.engine.legacy_mixin import LegacyMixin
 from cortex.engine.memory_mixin import MemoryMixin
 from cortex.engine.mixins.components import ComponentsMixin
 from cortex.engine.mixins.optimization import OptimizationMixin
-from cortex.engine.models import row_to_fact  # noqa: F401 - re-exported
+from cortex.engine.models import row_to_fact
 from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
@@ -189,7 +189,7 @@ class CortexEngine(
                     asyncio.gather(*self._post_commit_tasks, return_exceptions=True),
                     timeout=5.0,
                 )
-            except (asyncio.TimeoutError, Exception):  # noqa: BLE001
+            except (asyncio.TimeoutError, Exception):
                 logger.debug("Post-commit task drain timed out - forcing close")
             self._post_commit_tasks.clear()
         if self._memory_manager:
@@ -198,7 +198,7 @@ class CortexEngine(
                     self._memory_manager.wait_for_background(),  # type: ignore
                     timeout=5.0,
                 )
-            except (asyncio.TimeoutError, Exception):  # noqa: BLE001
+            except (asyncio.TimeoutError, Exception):
                 logger.debug("Memory manager background drain timed out - forcing close")
             self._memory_manager = None
         self._memory_l1 = None

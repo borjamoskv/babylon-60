@@ -16,7 +16,7 @@ from typing import Any, Final
 logger = logging.getLogger("cortex.memory.metamemory")
 
 # Re-export schema layer for backward compatibility (Ω₂: zero import breakage)
-from cortex.memory.metamemory_schema import (  # noqa: E402
+from cortex.memory.metamemory_schema import (
     ConsolidationStatus,
     FOKDirective,
     MemoryCard,
@@ -32,8 +32,8 @@ __all__ = [
     "ConsolidationStatus",
     "FOKDirective",
     "MemoryCard",
-    "MetacognitiveJudge",
     "MetaJudgment",
+    "MetacognitiveJudge",
     "MetamemoryIndex",
     "MetamemoryMonitor",
     "MetamemoryStats",
@@ -110,7 +110,7 @@ def _embedding_norm(embedding: list[float]) -> float:
 class MetamemoryMonitor:
     """Continuous metacognitive introspection engine (pure in-memory, no I/O)."""
 
-    __slots__ = ("_outcomes", "_query_failures", "_fok_threshold")
+    __slots__ = ("_fok_threshold", "_outcomes", "_query_failures")
 
     def __init__(self, fok_threshold: float = _FOK_THRESHOLD) -> None:
         self._outcomes: deque[RetrievalOutcome] = deque(maxlen=_MAX_OUTCOME_HISTORY)
@@ -166,7 +166,7 @@ class MetamemoryMonitor:
         """Route query based on initial FOK assessment without full retrieval."""
         if fok_score >= 0.8:
             return FOKDirective.RETRIEVE_INTERNAL
-        elif fok_score >= 0.5:
+        if fok_score >= 0.5:
             return FOKDirective.RETRIEVE_WITH_VERIFICATION
         return FOKDirective.EXTERNAL_SEARCH
 

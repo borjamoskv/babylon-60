@@ -280,7 +280,7 @@ class SleepOrchestrator:
 
         # Direct attribute write - MetamemoryMonitor uses __slots__
         # with mutable _fok_threshold, so this is safe
-        self._metamemory._fok_threshold = new_threshold  # noqa: SLF001
+        self._metamemory._fok_threshold = new_threshold
         return new_threshold - current
 
     def __repr__(self) -> str:
@@ -288,6 +288,6 @@ class SleepOrchestrator:
         brier_str = f"{brier:.4f}" if brier >= 0 else "n/a"
         return (
             f"SleepOrchestrator("
-            f"fok={self._metamemory._fok_threshold:.2f}, "  # noqa: SLF001
+            f"fok={self._metamemory._fok_threshold:.2f}, "
             f"brier={brier_str})"
         )

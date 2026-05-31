@@ -83,9 +83,8 @@ def cmd_cancel(args: argparse.Namespace) -> int:
     if queue.cancel(args.task_id):
         print(f"🚫 Cancelled task [{args.task_id}]")
         return 0
-    else:
-        print(f"Task [{args.task_id}] not found or already terminal.")
-        return 1
+    print(f"Task [{args.task_id}] not found or already terminal.")
+    return 1
 
 
 def cmd_run(args: argparse.Namespace) -> int:

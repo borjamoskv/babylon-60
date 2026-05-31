@@ -20,13 +20,13 @@ from cortex.extensions.context.signals import Signal
 from cortex.memory.temporal import now_iso
 
 __all__ = [
-    "ContextCollector",
     "WEIGHT_ACTIVE_GHOST",
     "WEIGHT_FS_RECENT",
     "WEIGHT_GIT_COMMIT",
     "WEIGHT_HEARTBEAT",
     "WEIGHT_RECENT_FACT",
     "WEIGHT_RECENT_TX",
+    "ContextCollector",
 ]
 
 if TYPE_CHECKING:

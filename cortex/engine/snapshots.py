@@ -12,7 +12,7 @@ from pathlib import Path
 from cortex.config import DEFAULT_DB_PATH
 from cortex.database.core import connect_async_ctx
 
-__all__ = ["SnapshotRecord", "SnapshotManager"]
+__all__ = ["SnapshotManager", "SnapshotRecord"]
 
 logger = logging.getLogger("cortex")
 

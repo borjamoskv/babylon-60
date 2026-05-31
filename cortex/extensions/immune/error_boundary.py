@@ -45,7 +45,7 @@ class ErrorBoundary:
         extra_meta: Additional metadata dict merged into the ghost record.
     """
 
-    __slots__ = ("_source", "_project", "_reraise", "_extra_meta")
+    __slots__ = ("_extra_meta", "_project", "_reraise", "_source")
 
     def __init__(
         self,
@@ -160,17 +160,16 @@ def error_boundary(
                     return await func(*args, **kwargs)
 
             return async_wrapper
-        else:
 
-            @functools.wraps(func)
-            def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
-                """TODO: Document sync_wrapper"""
-                boundary = ErrorBoundary(
-                    source, project=project, reraise=reraise, extra_meta=extra_meta
-                )
-                with boundary:
-                    return func(*args, **kwargs)
+        @functools.wraps(func)
+        def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
+            """TODO: Document sync_wrapper"""
+            boundary = ErrorBoundary(
+                source, project=project, reraise=reraise, extra_meta=extra_meta
+            )
+            with boundary:
+                return func(*args, **kwargs)
 
-            return sync_wrapper
+        return sync_wrapper
 
     return decorator

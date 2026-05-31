@@ -243,7 +243,7 @@ class TriggerEngine:
             try:
                 if not trigger.predicate(signal):
                     continue
-            except Exception:  # noqa: BLE001
+            except Exception:
                 logger.debug(
                     "Predicate failed for trigger %s on signal %s",
                     trigger.id,
@@ -327,7 +327,7 @@ class TriggerEngine:
             try:
                 await self._dispatch_single(action, trigger, signal)
                 dispatched += 1
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 logger.error(
                     "Action dispatch failed for trigger %s, action %s: %s",
                     trigger.id,

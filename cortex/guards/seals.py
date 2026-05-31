@@ -30,27 +30,20 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from cortex.guards._seals_cache import GlobalSourceCache, printer, arun_cmd  # noqa: E402
-from cortex.guards._seals_checks_1_5 import (  # noqa: E402
+from cortex.guards._seals_cache import GlobalSourceCache, printer
+from cortex.guards._seals_checks_1_5 import (
     check_seal_1_code_quality,
     check_seal_2_type_safety,
     check_seal_3_security,
     check_seal_4_tests,
     check_seal_5_ledger,
 )
-from cortex.guards._seals_checks_6_10 import (  # noqa: E402
+from cortex.guards._seals_checks_6_10 import (
     check_seal_6_async_perf,
     check_seal_7_axiom_registry,
     check_seal_8_dependency,
     check_seal_9_compliance,
     check_seal_10_preservation,
-    _check_temperature_determinism,
-    _check_latency_telemetry,
-)
-from cortex.guards.sovereign_seals import (  # noqa: E402
-    check_seal_8_dependency_impl,
-    check_seal_9_compliance_impl,
-    check_gate_21_preservation,
 )
 
 # ── Gate Result Type ──

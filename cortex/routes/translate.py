@@ -13,7 +13,7 @@ try:
 except ImportError:
     genai = None
 
-__all__ = ["router", "TranslateRequest", "TranslateResponse", "translate_texts"]
+__all__ = ["TranslateRequest", "TranslateResponse", "router", "translate_texts"]
 
 router = APIRouter(prefix="/v1/translate", tags=["translate"])
 logger = logging.getLogger("uvicorn.error")

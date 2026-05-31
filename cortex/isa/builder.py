@@ -33,7 +33,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 
 # -----------------------------------------------------------
@@ -366,18 +366,17 @@ def node_count(op: AgentOp) -> int:
     for variant, data in op.items():
         if variant in ("Seq", "Par") and isinstance(data, list):
             return 1 + sum(node_count(child) for child in data)
-        elif variant == "Cond" and isinstance(data, dict):
+        if variant == "Cond" and isinstance(data, dict):
             return (
                 1
                 + node_count(data.get("then_branch", {}))
                 + node_count(data.get("else_branch", {}))
             )
-        elif variant == "Loop" and isinstance(data, dict):
+        if variant == "Loop" and isinstance(data, dict):
             return 1 + node_count(data.get("body", {}))
-        elif variant == "Rewrite" and isinstance(data, dict):
+        if variant == "Rewrite" and isinstance(data, dict):
             return 1 + node_count(data.get("replacement", {}))
-        else:
-            return 1
+        return 1
     return 1
 
 

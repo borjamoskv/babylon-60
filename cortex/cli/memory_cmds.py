@@ -161,11 +161,10 @@ def search(query, project, top, scope, db, epistemic) -> None:
                 threshold=2.0,
                 interval=8.0,
                 engine=engine,
-            ):
-                with console.status("[noir.violet]Searching...[/]"):
-                    results = _run_async(
-                        engine.search(query, project=project, top_k=top),
-                    )
+            ), console.status("[noir.violet]Searching...[/]"):
+                results = _run_async(
+                    engine.search(query, project=project, top_k=top),
+                )
         else:
             # Federated search across partitioned databases
             from cortex.search.federation import federated_search_sync

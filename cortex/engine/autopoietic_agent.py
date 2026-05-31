@@ -45,8 +45,8 @@ from cortex.engine._autopoietic_helper import (
 
 __all__ = [
     "AutopoieticAgent",
-    "EvolutionConfig",
     "AutopoieticState",
+    "EvolutionConfig",
 ]
 
 logger = logging.getLogger("cortex.engine.autopoietic_agent")

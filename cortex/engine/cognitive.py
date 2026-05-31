@@ -17,7 +17,7 @@ _WEB3_LIBS = frozenset(("web3", "eth_account", "solcx", "brownie", "ape", "moral
 class PredictorAST(ast.NodeVisitor):
     """AST analysis for intent prediction and background error resolution."""
 
-    __slots__ = ("complex_branches", "bare_excepts", "web3_entropy")
+    __slots__ = ("bare_excepts", "complex_branches", "web3_entropy")
 
     def __init__(self) -> None:
         self.complex_branches = 0

@@ -23,10 +23,10 @@ def _resolve_device() -> str:
 
 __all__ = [
     "EMBEDDING_DIM",
+    "_DEVICE",
     "EmbeddingManager",
     "EmbeddingProvider",
     "LocalEmbedder",
-    "_DEVICE",
     "_resolve_device",
 ]
 

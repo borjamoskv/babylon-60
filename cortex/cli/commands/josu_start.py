@@ -12,7 +12,6 @@ logger = logging.getLogger("cortex.cli.josu")
 @click.group("josu")
 def app():
     """Manage the JOSU proactive daemon."""
-    pass
 
 
 @app.command("start")

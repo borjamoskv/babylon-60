@@ -27,7 +27,7 @@ async def enforce_store_guards(
             InjectionGuardWrapper,
             enforce_guard_pipeline,
         )
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise RuntimeError(f"FAIL-CLOSED: security guard runtime unavailable: {exc}") from exc
 
     context = {

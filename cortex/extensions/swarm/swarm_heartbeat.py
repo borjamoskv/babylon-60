@@ -207,7 +207,7 @@ class SwarmHeartbeat:
                 source="swarm_heartbeat",
                 project="CORTEX_SWARM",
             )
-        except Exception:  # noqa: BLE001
+        except Exception:
             logger.debug(
                 "Health signal emission failed for %s",
                 event_type,

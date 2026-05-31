@@ -4,8 +4,6 @@ import torch
 import torchhd
 from torchhd import functional as F
 import numpy as np
-from dataclasses import dataclass
-from typing import Optional
 
 D = 16384
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

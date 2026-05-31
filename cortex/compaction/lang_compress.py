@@ -28,8 +28,8 @@ from typing import Any
 logger = logging.getLogger("cortex.lang_compress")
 
 __all__ = [
-    "LangCompressor",
     "CompressionResult",
+    "LangCompressor",
     "detect_language",
     "estimate_token_savings",
 ]

@@ -18,7 +18,6 @@ console = Console()
 @click.group(name="mcts")
 def mcts_cmds() -> None:
     """CORTEX Chronos (Git-MCTS) - Búsqueda de Mutaciones Asintóticas."""
-    pass
 
 
 @mcts_cmds.command()

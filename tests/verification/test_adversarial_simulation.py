@@ -245,10 +245,9 @@ async def test_event_sourcing_state_replay(engine):
 
     enc = get_default_encrypter()
 
-    async with engine.session() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute("SELECT project, content, fact_type FROM facts ORDER BY id ASC")
-            rows = await cur.fetchall()
+    async with engine.session() as conn, conn.cursor() as cur:
+        await cur.execute("SELECT project, content, fact_type FROM facts ORDER BY id ASC")
+        rows = await cur.fetchall()
 
     event_stream = [
         {"project": r[0], "content": enc.decrypt_str(r[1], tenant_id="default"), "fact_type": r[2]}

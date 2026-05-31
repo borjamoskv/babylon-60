@@ -12,7 +12,7 @@ from typing import Literal
 
 from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
-__all__ = ["HealthTier", "SchedulerConfig", "HealthReport"]
+__all__ = ["HealthReport", "HealthTier", "SchedulerConfig"]
 
 # ─── Temporal Tiers ──────────────────────────────────────────────────
 

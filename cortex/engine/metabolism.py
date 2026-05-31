@@ -136,6 +136,6 @@ class Metabolism:
             f"│ Signal:  {'█' * int(v.signal * 10):.<10} {v.signal:.2f}        │\n"
             f"│ Entropy: {'░' * int(v.entropy * 3):.<10} {v.entropy:.2f}        │\n"
             f"│ Temp:    {v.temperature:.2f}                       │\n"
-            f"│ Novel:   {str(d.get('novel', '?')):<5}                       │\n"
+            f"│ Novel:   {d.get('novel', '?')!s:<5}                       │\n"
             f"└──────────────────────────────────────┘"
         )

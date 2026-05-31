@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 class CortexRsSubstrate:
     def __init__(self, bin_path: str, dimension: int) -> None: ...

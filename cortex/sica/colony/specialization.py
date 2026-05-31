@@ -1,7 +1,5 @@
 from __future__ import annotations
 import logging
-from collections import Counter
-from typing import Any
 
 from .types import AgentSpecialization
 from cortex.sica.strategy import SearchStrategy, StrategyGenome

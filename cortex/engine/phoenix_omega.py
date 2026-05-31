@@ -117,7 +117,7 @@ class AnalysisEngine(BaseEngine):
                     atoms.update(file_atoms)
                 except SyntaxError as e:
                     logger.error("SyntaxError inside %s: %s", path, e)
-                except Exception as e:  # noqa: BLE001 - parser boundary isolates file failures
+                except Exception as e:
                     logger.error("Failed to read %s: %s", path, e)
 
         # O(1) Graph linking
@@ -195,7 +195,7 @@ class AnalysisEngine(BaseEngine):
 
     def _link_dependencies(self, atoms: dict[str, StructuralAtom]):
         """DERIVATION: O(1) O Muerte -> Uses dict/set intersection"""
-        atom_names = {aid.split("::")[-1]: aid for aid in atoms.keys()}
+        atom_names = {aid.split("::")[-1]: aid for aid in atoms}
 
         for aid, atom in atoms.items():
             for dep in atom.dependencies:

@@ -23,7 +23,6 @@ console = Console()
 @click.group(name="ledger")
 def ledger_cmds():
     """Sovereign Ledger Operations (Wave 6: High-Performance Chaining)."""
-    pass
 
 
 @ledger_cmds.command("verify")

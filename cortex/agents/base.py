@@ -81,7 +81,7 @@ class BaseAgent:
 
         try:
             await self.on_start()
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.error("[%s] on_start failed: %s", self.agent_id, exc)
             self.state.status = AgentStatus.FAILED
             return
@@ -107,7 +107,7 @@ class BaseAgent:
                     await self.tick()
                     self.state.record_success()
 
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 self.state.record_error(repr(exc))
                 logger.warning(
                     "[%s] Error (consecutive=%d): %s",
@@ -132,7 +132,7 @@ class BaseAgent:
         # Cleanup - preserve terminal statuses (QUARANTINED, FAILED)
         try:
             await self.on_stop()
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.error("[%s] on_stop failed: %s", self.agent_id, exc)
 
         if self.state.status not in (

@@ -24,17 +24,14 @@ class AudioAdapter(abc.ABC):
     @abc.abstractmethod
     async def generate(self, prompt_matrix: dict[str, Any]) -> str:
         """Genera audio basado en una matriz de parámetros y devuelve el URI/Path."""
-        pass
 
     @abc.abstractmethod
     async def get_stems(self, job_id: str) -> dict[str, str]:
         """Aislar stems (vocals, bass, drums, other)."""
-        pass
 
     @abc.abstractmethod
     async def close(self) -> None:
         """Cierra los recursos del cliente."""
-        pass
 
 
 class SunoV5Adapter(AudioAdapter):

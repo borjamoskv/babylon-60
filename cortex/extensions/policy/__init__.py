@@ -7,4 +7,4 @@ via a Bellman-inspired value function: V(s) = R(s,a) + γ·V(s').
 from cortex.extensions.policy.engine import PolicyEngine
 from cortex.extensions.policy.models import ActionItem, PolicyConfig
 
-__all__ = ["PolicyEngine", "ActionItem", "PolicyConfig"]
+__all__ = ["ActionItem", "PolicyConfig", "PolicyEngine"]

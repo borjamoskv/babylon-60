@@ -45,7 +45,7 @@ from cortex.extensions.thinking.fusion_models import (
     _tokenize,
 )
 
-__all__ = ["WBFTConsensus", "ByzantineVerdict", "ResponseTrust"]
+__all__ = ["ByzantineVerdict", "ResponseTrust", "WBFTConsensus"]
 
 logger = logging.getLogger("cortex.consensus.byzantine")
 

@@ -18,15 +18,15 @@ from __future__ import annotations
 import logging
 import math
 import time
-from collections import defaultdict, deque
+from collections import deque
 from dataclasses import dataclass, field
 from typing import Any
 
 __all__ = [
-    "PerformanceTracker",
-    "SubsystemMetrics",
-    "StrategyEffectiveness",
     "PerformanceSnapshot",
+    "PerformanceTracker",
+    "StrategyEffectiveness",
+    "SubsystemMetrics",
 ]
 
 logger = logging.getLogger("cortex.engine.performance_tracker")

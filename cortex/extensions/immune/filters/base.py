@@ -32,9 +32,7 @@ class ImmuneFilter(ABC):
     @abstractmethod
     def filter_id(self) -> str:
         """The canonical ID of the filter (e.g. 'F1', 'F2')."""
-        pass
 
     @abstractmethod
     async def evaluate(self, signal: Any, context: dict[str, Any]) -> FilterResult:
         """Evaluate a signal and return a verdict."""
-        pass

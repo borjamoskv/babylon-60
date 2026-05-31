@@ -2,10 +2,9 @@ import hashlib
 import json
 import time
 import uuid
-from typing import Optional, Any
+from typing import Any
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from pydantic import BaseModel
-import asyncio
 
 try:
     import ed25519  # Fallback if needed, we'll mock the crypto for now if ed25519 is missing, but let's use standard hashlib

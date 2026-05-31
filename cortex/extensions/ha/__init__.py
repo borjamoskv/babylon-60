@@ -9,9 +9,9 @@ from .gossip import GossipProtocol
 from .raft import NodeRole, RaftNode
 
 __all__ = [
-    "LWWRegister",
-    "VectorClock",
     "GossipProtocol",
+    "LWWRegister",
     "NodeRole",
     "RaftNode",
+    "VectorClock",
 ]

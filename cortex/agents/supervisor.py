@@ -201,7 +201,7 @@ class Supervisor:
         for agent_id in list(self._agents.keys()):
             try:
                 await self.stop_agent(agent_id)
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 logger.error("Supervisor: Error stopping '%s': %s", agent_id, exc)
 
         logger.info("Supervisor: All agents stopped")
@@ -216,7 +216,7 @@ class Supervisor:
                 await self.health_check()
             except asyncio.CancelledError:
                 break
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 logger.error("Supervisor: Health monitor error: %s", exc)
 
     async def health_check(self) -> dict[str, Any]:

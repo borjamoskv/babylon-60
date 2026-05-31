@@ -1,8 +1,6 @@
 import cortex_rs
-import time
 from functools import wraps
 import json
-import hashlib
 import os
 
 
@@ -61,13 +59,12 @@ class CortexShield:
                     f"[CortexShield] C5-REAL ACCEPT. Output: '{output_text}'. Merkle Root: {root_hash[:16]}...\n"
                 )
                 return output_text
-            else:
-                import sys
+            import sys
 
-                sys.stdout.write(
-                    f"[CortexShield] C5-REAL BLOCK! Tamper Evident (Sim: {res['max_similarity']:.4f}). Reason: {res['reason']}\n"
-                )
-                return "CORTEX_INTERCEPT: The agent proposed an unsafe or hallucinatory action. Execution blocked."
+            sys.stdout.write(
+                f"[CortexShield] C5-REAL BLOCK! Tamper Evident (Sim: {res['max_similarity']:.4f}). Reason: {res['reason']}\n"
+            )
+            return "CORTEX_INTERCEPT: The agent proposed an unsafe or hallucinatory action. Execution blocked."
 
         return wrapper
 

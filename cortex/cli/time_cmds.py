@@ -10,7 +10,7 @@ from rich.table import Table
 from cortex.cli.common import DEFAULT_DB, cli, console, get_engine, get_tracker
 from cortex.cli.errors import err_empty_results, handle_cli_error
 
-__all__ = ["time_cmd", "heartbeat_cmd"]
+__all__ = ["heartbeat_cmd", "time_cmd"]
 
 
 @cli.command("time")

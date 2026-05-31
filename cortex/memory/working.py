@@ -47,7 +47,7 @@ class WorkingMemoryL1:
                     when this limit is exceeded.
     """
 
-    __slots__ = ("_buffers", "_tenant_tokens", "_max_tokens", "_guardrail", "_access_log")
+    __slots__ = ("_access_log", "_buffers", "_guardrail", "_max_tokens", "_tenant_tokens")
 
     def __init__(
         self,

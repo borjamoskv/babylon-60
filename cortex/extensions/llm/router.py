@@ -135,7 +135,7 @@ class CortexLLMRouter:
             result = await self._execute_resilient_impl(prompt)
             future.set_result(result)
             return result
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             if not future.done():
                 future.set_exception(exc)
             raise
@@ -304,7 +304,7 @@ class CortexLLMRouter:
                 )
                 self._evicted.add(provider.provider_name)
             return Err(str(exc))
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             if "HTTP 401" in str(exc) or "401" in str(exc) or "invalid_api_key" in str(exc):
                 logger.error(
                     "🚫 [EVICTION] Provider %s hit 401 Unauthorized. Evicting...",

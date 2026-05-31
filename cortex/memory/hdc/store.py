@@ -43,13 +43,13 @@ class HDCVectorStoreL2:
     """
 
     __slots__ = (
+        "_conn",
         "_db_path",
         "_encoder",
+        "_half_life",
         "_item_memory",
-        "_conn",
         "_lock",
         "_ready",
-        "_half_life",
     )
 
     def __init__(

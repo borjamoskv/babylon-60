@@ -5,7 +5,7 @@ Dashboard Router.
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 
-__all__ = ["router", "get_dashboard_html"]
+__all__ = ["get_dashboard_html", "router"]
 
 
 def get_dashboard_html() -> str:

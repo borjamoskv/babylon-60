@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import time
 from typing import Any
 from collections.abc import Awaitable, Callable
 from uuid import uuid4
@@ -194,7 +193,7 @@ class DebounceController:
 class DebounceStats:
     """Internal telemetry counters for the debounce controller."""
 
-    __slots__ = ("total_scheduled", "total_fired", "total_cancelled", "total_coalesced")
+    __slots__ = ("total_cancelled", "total_coalesced", "total_fired", "total_scheduled")
 
     def __init__(self) -> None:
         self.total_scheduled: int = 0

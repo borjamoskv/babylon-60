@@ -116,7 +116,7 @@ def register_singularity_tools(mcp) -> None:
                 )
             return "\n".join(out)
         except Exception as e:
-            return f"CORTEX-MCP ChromaDB Engine Error: {str(e)}"
+            return f"CORTEX-MCP ChromaDB Engine Error: {e!s}"
 
     @mcp.tool()
     def cortex_ledger_append(action: str, vector_id: str, yield_amount: float) -> str:
@@ -211,7 +211,7 @@ def register_singularity_tools(mcp) -> None:
             logging.info("🚀 [DISPATCH] Handed task to daemon: %s", command)
             return f"✅ Task dispatched to CORTEX Swarm. Agent [{agent_id}] is executing."
         except Exception as e:
-            return f"[ERROR] Dispatch Failure: {str(e)}"
+            return f"[ERROR] Dispatch Failure: {e!s}"
 
     @mcp.tool()
     def cortex_council_deliberate() -> str:
@@ -243,7 +243,7 @@ def register_singularity_tools(mcp) -> None:
             # Need to reference tools via self if inside class, or just call directly if helper
             return cortex_swarm_dispatch("SAGE_COUNCIL", cmd)
         except Exception as e:
-            return f"[ERROR] Audit Dispatch Failure: {str(e)}"
+            return f"[ERROR] Audit Dispatch Failure: {e!s}"
 
 
 if __name__ == "__main__":

@@ -25,7 +25,6 @@ console = Console()
 @click.group(name="security", help="🛡️  Anti-Hacker Shield - Daily-Updated Defense System.")
 def security_cli() -> None:
     """CORTEX Security Shield commands."""
-    pass
 
 
 @security_cli.command("status")
@@ -260,7 +259,6 @@ def security_report() -> None:
 @security_cli.group(name="honeypot", help="🍯  Active Deceptive Defense (Traps).")
 def honeypot_group() -> None:
     """Manage honeypot traps."""
-    pass
 
 
 @honeypot_group.command("generate")

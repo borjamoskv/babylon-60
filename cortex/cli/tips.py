@@ -30,7 +30,7 @@ from typing import TYPE_CHECKING, Final, NamedTuple
 
 import aiosqlite
 
-__all__ = ["TipCategory", "Tip", "TipsEngine"]
+__all__ = ["Tip", "TipCategory", "TipsEngine"]
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
@@ -88,7 +88,7 @@ _STATIC_TIPS_CACHE: list[Tip] | None = None
 
 def _load_static_tips() -> list[Tip]:
     """Lazy-load static tips from disk. Thread-safe."""
-    global _STATIC_TIPS_CACHE  # noqa: PLW0603
+    global _STATIC_TIPS_CACHE
 
     # Fast-path: already loaded.
     if _STATIC_TIPS_CACHE is not None:
@@ -156,14 +156,14 @@ class TipsEngine:
     """
 
     __slots__ = (
-        "_engine",
-        "lang",
-        "_include_dynamic",
-        "_max_dynamic",
+        "_cache_ts",
         "_cache_ttl",
         "_dynamic_cache",
-        "_cache_ts",
+        "_engine",
+        "_include_dynamic",
+        "_max_dynamic",
         "_shown_ids",
+        "lang",
     )
 
     def __init__(
@@ -217,7 +217,7 @@ class TipsEngine:
         else:
             available = pool
 
-        tip = random.choice(available)  # noqa: S311
+        tip = random.choice(available)
         self._shown_ids.add(tip.id)
         return tip
 

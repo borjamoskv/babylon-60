@@ -227,12 +227,11 @@ class TestExecutorNode:
             "cortex.extensions.swarm.nightshift_pipeline.autodidact_pipeline",
             new=autodidact_success_mock,
             create=True,
+        ), patch(
+            "cortex.extensions.skills.autodidact.actuator.autodidact_pipeline",
+            new=autodidact_success_mock,
         ):
-            with patch(
-                "cortex.extensions.skills.autodidact.actuator.autodidact_pipeline",
-                new=autodidact_success_mock,
-            ):
-                result = await executor.execute(state)
+            result = await executor.execute(state)
 
         assert len(result["results"]) == 1
         assert result["results"][0]["success"] is True

@@ -24,7 +24,6 @@ class CircuitState:
 class CircuitBreakerError(httpx.ConnectError):
     """Raised when the circuit breaker is open or half-open and probing."""
 
-    pass
 
 
 class CircuitBreaker:

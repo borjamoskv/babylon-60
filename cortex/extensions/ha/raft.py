@@ -16,7 +16,7 @@ from enum import Enum
 
 import aiosqlite
 
-__all__ = ["NodeRole", "PreVoteResult", "RaftNode", "NodeRegistry"]
+__all__ = ["NodeRegistry", "NodeRole", "PreVoteResult", "RaftNode"]
 
 logger = logging.getLogger(__name__)
 
@@ -323,7 +323,7 @@ class RaftNode:
                 granted = task.result()
                 if granted:
                     votes_received += 1
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 logger.debug("Vote request failed: %s", exc)
 
         # If term changed while we were voting (split-brain / higher term), abort

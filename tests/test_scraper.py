@@ -378,9 +378,8 @@ class TestScraperEngine:
 
         with patch.dict(
             "cortex.extensions.scraper.extractors.EXTRACTORS", {"http_fast": mock_extractor}
-        ):
-            with patch("cortex.extensions.scraper.extractors.CASCADE_ORDER", ["http_fast"]):
-                result = await engine._cascade_extract("https://example.com", 15.0)
+        ), patch("cortex.extensions.scraper.extractors.CASCADE_ORDER", ["http_fast"]):
+            result = await engine._cascade_extract("https://example.com", 15.0)
 
         assert result.status == "success"
         assert result.title == "Test Title"
@@ -422,9 +421,8 @@ class TestScraperEngine:
 
         with patch.dict(
             "cortex.extensions.scraper.extractors.EXTRACTORS", {"http_fast": mock_ext}, clear=True
-        ):
-            with patch("cortex.extensions.scraper.extractors.CASCADE_ORDER", ["http_fast"]):
-                result = await engine._cascade_extract("https://example.com", 15.0)
+        ), patch("cortex.extensions.scraper.extractors.CASCADE_ORDER", ["http_fast"]):
+            result = await engine._cascade_extract("https://example.com", 15.0)
 
         assert result.status == "error"
         assert "All strategies failed" in (result.error or "")

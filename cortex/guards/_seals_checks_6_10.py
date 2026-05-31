@@ -3,7 +3,6 @@ from __future__ import annotations
 import ast
 import asyncio
 from pathlib import Path
-import sys
 
 from cortex.guards._seals_cache import GlobalSourceCache, ROOT_DIR, printer
 from cortex.guards.sovereign_seals import (
@@ -34,17 +33,14 @@ async def _check_blocking_sleep(exclude_files: frozenset[str]) -> list[str]:
                         and node.func.attr == "sleep"
                         and isinstance(node.func.value, ast.Name)
                         and node.func.value.id == "time"
-                    ):
-                        violations.append(f"{py_file.name}:{node.lineno}")
-                    # Check for bare sleep() (if imported)
-                    elif isinstance(node.func, ast.Name) and node.func.id == "sleep":
+                    ) or (isinstance(node.func, ast.Name) and node.func.id == "sleep"):
                         violations.append(f"{py_file.name}:{node.lineno}")
         except SyntaxError:
             pass
     return violations
 
 
-async def _check_temperature_determinism(critical_files: list[Path]) -> list[str]:  # noqa: C901
+async def _check_temperature_determinism(critical_files: list[Path]) -> list[str]:
     """Ensure LLM calls use temperature=0 for determinism."""
     violations = []
     zero_values = (0, 0.0)
@@ -172,7 +168,7 @@ async def check_seal_7_axiom_registry() -> GateResult:
             printer.success(f"Registry: {total} Sovereign Axioms, {enf} CI-enforced.")
     except ImportError:
         printer.warn("Axioms extension not found. Skipping registry check.")
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         printer.fail(f"Registry error: {e}")
         passed = False
 

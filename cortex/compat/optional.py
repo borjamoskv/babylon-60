@@ -14,7 +14,7 @@ from typing import Any
 class _LazyModule:
     """Proxy that defers ImportError until first attribute access."""
 
-    __slots__ = ("_name", "_extra", "_module")
+    __slots__ = ("_extra", "_module", "_name")
 
     def __init__(self, name: str, extra: str) -> None:
         object.__setattr__(self, "_name", name)

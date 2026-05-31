@@ -72,7 +72,7 @@ CÓDIGO FUENTE ACTUAL:
             mutated_code = mutated_code.replace("```python", "").replace("```", "").strip()
             return mutated_code
     except Exception as e:
-        logger.error(f"API Qwen mutation failed: {str(e)}")
+        logger.error(f"API Qwen mutation failed: {e!s}")
         return source_code
 
 

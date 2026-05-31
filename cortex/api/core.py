@@ -268,7 +268,7 @@ async def health_check(request: Request) -> dict:
         OSError,
         RuntimeError,
         AttributeError,
-    ):  # noqa: BLE001 - health check must never crash
+    ):
         pass
 
     # Health Index integration
@@ -286,7 +286,7 @@ async def health_check(request: Request) -> dict:
         hs = HealthScorer.score(metrics_snap)
         health_score = round(hs.score, 2)
         health_grade = hs.grade
-    except (ValueError, KeyError, OSError, RuntimeError, AttributeError):  # noqa: BLE001
+    except (ValueError, KeyError, OSError, RuntimeError, AttributeError):
         pass
 
     return {

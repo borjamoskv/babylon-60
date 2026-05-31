@@ -16,7 +16,6 @@ from cortex.extensions.evolution.demiurge import DemiurgeCompiler
 @cli.group(name="demiurge")
 def demiurge_group() -> None:
     """Demiurge Omega: Sovereign JIT Skill Compiler."""
-    pass
 
 
 @demiurge_group.command(name="forge")

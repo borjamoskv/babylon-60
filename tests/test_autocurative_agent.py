@@ -429,7 +429,7 @@ async def test_full_healing_loop_integration():
         call_count += 1
         if call_count == 1:
             raise TimeoutError("request timeout")
-        elif call_count == 2:
+        if call_count == 2:
             raise ConnectionError("connection reset")
         return {"status": "healed", "attempts": call_count}
 

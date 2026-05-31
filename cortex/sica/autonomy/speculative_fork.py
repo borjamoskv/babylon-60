@@ -90,13 +90,12 @@ class SpeculativeFork:
                 best_mutations,
             )
             return best_fork
-        else:
-            logger.info(
-                "SpeculativeFork: no improvement found (best=%.3f, current=%.3f)",
-                best_fitness,
-                original_fitness,
-            )
-            return strategy
+        logger.info(
+            "SpeculativeFork: no improvement found (best=%.3f, current=%.3f)",
+            best_fitness,
+            original_fitness,
+        )
+        return strategy
 
     def _apply_random_mutations(
         self,

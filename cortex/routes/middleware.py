@@ -23,7 +23,7 @@ __all__ = [
 logger = logging.getLogger("cortex.admin.middleware")
 
 # ─── Audit Log Configuration ──────────────────────────────────────────
-from cortex.core.paths import AUDIT_LOG_PATH as _AUDIT_LOG_PATH  # noqa: E402
+from cortex.core.paths import AUDIT_LOG_PATH as _AUDIT_LOG_PATH
 
 if not logger.handlers:
     try:
@@ -42,7 +42,7 @@ if not logger.handlers:
 class _TokenBucket:
     """Thread-safe token bucket for a single key."""
 
-    __slots__ = ("_capacity", "_tokens", "_refill_rate", "_last_refill", "_lock")
+    __slots__ = ("_capacity", "_last_refill", "_lock", "_refill_rate", "_tokens")
 
     def __init__(self, capacity: int, refill_rate: float) -> None:
         self._capacity = capacity

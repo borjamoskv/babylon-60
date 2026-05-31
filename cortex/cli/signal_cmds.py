@@ -32,7 +32,6 @@ def _get_signal_bus(db: str):
 @cli.group("signal")
 def signal_cmds() -> None:
     """Signal Bus - L1 consciousness for cross-tool communication."""
-    pass
 
 
 @signal_cmds.command("emit")

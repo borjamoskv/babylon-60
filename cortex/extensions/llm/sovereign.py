@@ -49,7 +49,7 @@ from cortex.extensions.llm._presets import check_api_key, load_presets
 from cortex.extensions.llm.provider import LLMProvider
 from cortex.extensions.llm.router import IntentProfile
 
-__all__ = ["SovereignLLM", "SovereignResult", "Inquisitor"]
+__all__ = ["Inquisitor", "SovereignLLM", "SovereignResult"]
 
 logger = logging.getLogger("cortex.extensions.llm.sovereign")
 

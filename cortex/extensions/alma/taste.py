@@ -16,14 +16,14 @@ from dataclasses import dataclass
 from typing import Any
 
 __all__ = [
-    "TasteDimension",
-    "TasteVerdict",
-    "TasteEngine",
-    "GRADE_GOAT",
-    "GRADE_STRONG",
-    "GRADE_FUNCTIONAL",
-    "GRADE_MEDIOCRE",
     "GRADE_DEAD",
+    "GRADE_FUNCTIONAL",
+    "GRADE_GOAT",
+    "GRADE_MEDIOCRE",
+    "GRADE_STRONG",
+    "TasteDimension",
+    "TasteEngine",
+    "TasteVerdict",
 ]
 
 # --- Grade constants ---

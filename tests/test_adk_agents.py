@@ -12,7 +12,7 @@ class TestADKModuleImport:
 
     def test_adk_package_import(self):
         """ADK package should be importable."""
-        import cortex.adk  # noqa: F401
+        import cortex.adk
 
     def test_tools_module_import(self):
         """Tools module should be importable."""

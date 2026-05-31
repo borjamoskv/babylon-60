@@ -48,7 +48,7 @@ class MemoryMixin(EngineMixinBase):
                 from cortex.memory.working import WorkingMemoryL1
 
                 l1 = WorkingMemoryL1()
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             self._memory_manager = None
             self._memory_l1 = None
             self._memory_l3 = None
@@ -69,7 +69,7 @@ class MemoryMixin(EngineMixinBase):
             sync_conn = self._get_sync_conn()
             bus = SignalBus(sync_conn)
             bus.ensure_table()
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.warning("SignalBus initialization failed: %s", e)
 
         # v7 (G10): HDC is opt-in by default.
@@ -99,7 +99,7 @@ class MemoryMixin(EngineMixinBase):
             return
 
         try:
-            import numpy  # noqa: F401
+            import numpy
         except ImportError:
             self._memory_manager = None
             self._memory_l1 = l1
@@ -123,7 +123,7 @@ class MemoryMixin(EngineMixinBase):
             l2 = SovereignVectorStoreL2(encoder=encoder, db_path=vector_path / "vectors.db")
 
             logger.info("Memory L2 (SovereignVectorStoreL2) initialized at %s", vector_path)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             if isinstance(e, ImportError | ModuleNotFoundError) or "numpy" in str(e).lower():
                 l2_skip_reason = str(e)
             else:
@@ -143,7 +143,7 @@ class MemoryMixin(EngineMixinBase):
                     encoder=hdc_encoder, item_memory=item_mem, db_path=hdc_path / "hdc.db"
                 )
                 logger.info("Vector Alpha (HDC) initialized at %s", hdc_path)
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 logger.warning("Vector Alpha (HDC) initialization failed: %s", e)
 
         if l2 and encoder:
@@ -159,7 +159,7 @@ class MemoryMixin(EngineMixinBase):
                     hdc_encoder=hdc_encoder,
                     bus=bus,
                 )
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 logger.warning("Memory manager unavailable (degrading to L1+L3 only): %s", e)
                 self._memory_manager = None
                 self._memory_l1 = l1

@@ -3,9 +3,7 @@ import copy
 import logging
 import random
 import time
-from dataclasses import dataclass, field
 from typing import Any
-from collections import defaultdict
 from cortex.sica.strategy import Heuristic, SearchStrategy, StrategyGenome
 
 from .types import GeneFragment
@@ -213,7 +211,7 @@ class GenePool:
             )
             return True
 
-        elif fragment.fragment_type == "tool_order":
+        if fragment.fragment_type == "tool_order":
             new_order = fragment.payload.get("tool_priority", [])
             if new_order:
                 # Merge: add new tools, keep existing order for known tools

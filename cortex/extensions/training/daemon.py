@@ -146,14 +146,13 @@ class AutonomousTrainingDaemon:
                         "adapter": str(adapter_path),
                         "metrics": metrics,
                     }
-                else:
-                    logger.error("❌ Adapter verification failed: %s", verify_res.get("error"))
-                    return {
-                        "status": "verification_failed",
-                        "error": verify_res.get("error"),
-                        "processed_sessions": 0,
-                    }
-            elif result.get("status") == "skipped":
+                logger.error("❌ Adapter verification failed: %s", verify_res.get("error"))
+                return {
+                    "status": "verification_failed",
+                    "error": verify_res.get("error"),
+                    "processed_sessions": 0,
+                }
+            if result.get("status") == "skipped":
                 # Even if skipped (e.g., no high reward data), we mark them as processed to avoid re-evaluating
                 new_consolidated = consolidated.union(unconsolidated)
                 self.save_consolidated_sessions(new_consolidated)
@@ -163,13 +162,12 @@ class AutonomousTrainingDaemon:
                     "reason": result.get("reason"),
                     "processed_sessions": len(unconsolidated),
                 }
-            else:
-                logger.error("❌ Consolidation pipeline failed: %s", result.get("error"))
-                return {
-                    "status": "failed",
-                    "error": result.get("error"),
-                    "processed_sessions": 0,
-                }
+            logger.error("❌ Consolidation pipeline failed: %s", result.get("error"))
+            return {
+                "status": "failed",
+                "error": result.get("error"),
+                "processed_sessions": 0,
+            }
 
         except Exception as e:
             logger.error("Exception during training cycle: %s", e)

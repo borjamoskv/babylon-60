@@ -61,10 +61,10 @@ class MaestroUI:
 
     async def _retry(
         self,
-        coro_fn,  # noqa: ANN001
+        coro_fn,
         *args,
         retries: int = MAX_RETRIES,
-        **kwargs,  # noqa: ANN003
+        **kwargs,
     ) -> InteractionResult:
         """Ejecuta una coroutine con reintentos automáticos."""
         last_error = ""

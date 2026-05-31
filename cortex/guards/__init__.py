@@ -5,14 +5,14 @@ from cortex.guards.scrape_guard import SanitizedPayload, ScrapeSanitizerGuard
 from cortex.guards.virgo import VirgoContextGuard, VirgoValidationError, ContextPoisoningError
 
 __all__ = [
-    "HealthGuard",
-    "Capability",
-    "RiskTier",
-    "CapabilityGuard",
     "AgentCredentials",
-    "ScrapeSanitizerGuard",
+    "Capability",
+    "CapabilityGuard",
+    "ContextPoisoningError",
+    "HealthGuard",
+    "RiskTier",
     "SanitizedPayload",
+    "ScrapeSanitizerGuard",
     "VirgoContextGuard",
     "VirgoValidationError",
-    "ContextPoisoningError",
 ]

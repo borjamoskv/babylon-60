@@ -30,11 +30,11 @@ class ShardedAsyncSignalBus:
 
     __slots__ = (
         "_base_dir",
-        "_shards",
         "_ready",
+        "_shards",
+        "num_shards",
         "session_emitted",
         "session_errors",
-        "num_shards",
     )
 
     def __init__(self, base_dir: Path | str, num_shards: int = NUM_SHARDS) -> None:

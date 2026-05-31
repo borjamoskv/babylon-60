@@ -18,11 +18,11 @@ from enum import Enum
 from cortex.extensions.thinking.fusion import FusionStrategy
 
 __all__ = [
-    "ThinkingMode",
-    "MODE_SYSTEM_PROMPTS",
     "DEFAULT_ROUTING",
-    "OrchestraConfig",
     "METACOGNITIVE_PREAMBLE_TEMPLATE",
+    "MODE_SYSTEM_PROMPTS",
+    "OrchestraConfig",
+    "ThinkingMode",
 ]
 
 

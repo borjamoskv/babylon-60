@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-__all__ = ["PolicyRecommendation", "EvictionVerdict", "OracleReport"]
+__all__ = ["EvictionVerdict", "OracleReport", "PolicyRecommendation"]
 
 
 class PolicyRecommendation(Enum):

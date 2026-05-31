@@ -121,7 +121,7 @@ def from_yaml(path: str) -> None:
     try:
         with open(path, encoding="utf-8") as f:
             data = yaml.safe_load(f)
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         console.print(f"[bold red]Failed to parse YAML:[/] {e}")
         sys.exit(1)
 
@@ -304,19 +304,18 @@ def _default_components_for_type(system_type: str) -> list:
                 dependencies=["models"],
             ),
         ]
-    elif system_type == "skill":
+    if system_type == "skill":
         return [
             ComponentSpec(name="skill", component_type="skill"),
         ]
-    elif system_type == "agent":
+    if system_type == "agent":
         return [
             ComponentSpec(name="agent", component_type="agent"),
         ]
-    elif system_type == "workflow":
+    if system_type == "workflow":
         return [
             ComponentSpec(name="workflow", component_type="workflow"),
         ]
-    else:
-        return [
-            ComponentSpec(name="core", component_type="module"),
-        ]
+    return [
+        ComponentSpec(name="core", component_type="module"),
+    ]

@@ -35,7 +35,7 @@ class EpistemicPhysicsGuard:
                 )
             return True
 
-        elif ast_type == "bayes_inference_model":
+        if ast_type == "bayes_inference_model":
             params = set(induced_ast.get("parameters", []))
             if not cls.REQUIRED_COSMOLOGY_PARAMS.issubset(params):
                 missing = cls.REQUIRED_COSMOLOGY_PARAMS - params
@@ -52,7 +52,6 @@ class EpistemicPhysicsGuard:
 
             return True
 
-        else:
-            raise TypeError(
-                f"[Guard Failure] Tipo de inducción estructural desconocido: {ast_type}"
-            )
+        raise TypeError(
+            f"[Guard Failure] Tipo de inducción estructural desconocido: {ast_type}"
+        )

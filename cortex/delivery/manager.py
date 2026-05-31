@@ -27,18 +27,17 @@ class DeliveryManager:
         try:
             if target.type == DeliveryType.STDOUT:
                 return self._deliver_stdout(output, target)
-            elif target.type == DeliveryType.FILE:
+            if target.type == DeliveryType.FILE:
                 return self._deliver_file(output, target, mission_id)
-            elif target.type == DeliveryType.WEBHOOK:
+            if target.type == DeliveryType.WEBHOOK:
                 return self._deliver_webhook(output, target, mission_id)
-            elif target.type == DeliveryType.MCP:
+            if target.type == DeliveryType.MCP:
                 return self._deliver_mcp(output, target, mission_id)
-            elif target.type == DeliveryType.MEMORY:
+            if target.type == DeliveryType.MEMORY:
                 logger.debug("[DELIVERY] MEMORY target - no external delivery")
                 return True
-            else:
-                logger.warning("[DELIVERY] Unknown target type: %s", target.type)
-                return False
+            logger.warning("[DELIVERY] Unknown target type: %s", target.type)
+            return False
         except Exception as e:
             logger.error("[DELIVERY] Failed for mission %s: %s", mission_id, e)
             return False

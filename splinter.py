@@ -1,5 +1,3 @@
-import os
-import re
 
 # 1. Splinter ledger_core.py
 ledger_path = "cortex/ledger/ledger_core.py"

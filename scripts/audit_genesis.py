@@ -11,9 +11,8 @@ import asyncio
 import sqlite3
 import os
 import logging
-from pathlib import Path
 
-from cortex.guards.omega_auditor import OmegaAuditor, OmegaConflict
+from cortex.guards.omega_auditor import OmegaAuditor
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("GenesisAuditor")

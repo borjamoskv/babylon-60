@@ -30,12 +30,10 @@ class BaseAuthBackend(ABC):
     @abstractmethod
     async def initialize(self) -> None:
         """Initialize the storage schema (e.g., create tables)."""
-        pass
 
     @abstractmethod
     async def get_key_by_hash(self, key_hash: str) -> KeyData | None:
         """Retrieve an active API key by its hash."""
-        pass
 
     @abstractmethod
     async def store_key(
@@ -49,22 +47,18 @@ class BaseAuthBackend(ABC):
         rate_limit: int,
     ) -> int:
         """Store a new API key. Returns the backend-specific unique ID."""
-        pass
 
     @abstractmethod
     async def list_keys(self, tenant_id: str | None = None) -> list[KeyData]:
         """List API keys, optionally filtered by tenant."""
-        pass
 
     @abstractmethod
     async def revoke_key(self, key_id: KeyID) -> bool:
         """Revoke (deactivate) an API key."""
-        pass
 
     @abstractmethod
     async def update_last_used(self, key_id: KeyID) -> None:
         """Update the last_used timestamp for a key."""
-        pass
 
 
 class SQLiteAuthBackend(BaseAuthBackend):

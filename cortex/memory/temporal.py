@@ -72,13 +72,12 @@ def build_temporal_filter_params(
 
     if as_of is None:
         return f"{prefix}is_tombstoned = 0", []
-    else:
-        return (
-            f"coalesce(json_extract({prefix}metadata, '$.valid_from'), {prefix}created_at) <= ? AND "
-            f"({prefix}is_tombstoned = 0 OR json_extract({prefix}metadata, '$.valid_until') > ? OR "
-            f"json_extract({prefix}metadata, '$.tombstoned_at') > ?)",
-            [as_of, as_of, as_of],
-        )
+    return (
+        f"coalesce(json_extract({prefix}metadata, '$.valid_from'), {prefix}created_at) <= ? AND "
+        f"({prefix}is_tombstoned = 0 OR json_extract({prefix}metadata, '$.valid_until') > ? OR "
+        f"json_extract({prefix}metadata, '$.tombstoned_at') > ?)",
+        [as_of, as_of, as_of],
+    )
 
 
 def time_travel_filter(

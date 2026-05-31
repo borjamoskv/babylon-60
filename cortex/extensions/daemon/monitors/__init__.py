@@ -41,6 +41,7 @@ __all__ = [
     "DiskMonitor",
     "EngineHealthCheck",
     "EntropyMonitor",
+    "EpistemicMonitor",
     "EvaluationMonitor",
     "GhostWatcher",
     "MemorySyncer",
@@ -53,7 +54,6 @@ __all__ = [
     "TrendsMonitor",
     "UnifiedMejoraloMonitor",
     "WorkflowMonitor",
-    "EpistemicMonitor",
 ]
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {

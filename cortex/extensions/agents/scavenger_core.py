@@ -113,7 +113,7 @@ def valve_geo_logistics(item_mass_tons: float, lat: float, lon: float) -> Dispat
 class ScavengerAgent:
     """The main Scavenger Core agent implementing the zero-debt tactical pipeline."""
 
-    __slots__ = ("_ledger", "_bus", "tenant_id", "session_id")
+    __slots__ = ("_bus", "_ledger", "session_id", "tenant_id")
 
     def __init__(self, ledger: EventLedgerL3, bus: DistributedEventBus, tenant_id: str) -> None:
         self._ledger = ledger

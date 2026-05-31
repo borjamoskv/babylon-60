@@ -71,7 +71,7 @@ def register_hilbert_tools(mcp, ctx) -> None:  # type: ignore
                     )
                 return "\n".join(lines)
 
-            elif attack == "millennium":
+            if attack == "millennium":
                 from millennium_assault import (  # type: ignore[import-not-found, reportMissingImports]
                     MillenniumAssaultEngine,
                 )
@@ -88,7 +88,7 @@ def register_hilbert_tools(mcp, ctx) -> None:  # type: ignore
                     )
                 return "\n".join(lines)
 
-            elif attack == "prove":
+            if attack == "prove":
                 if not problem:
                     return "❌ Specify a theorem name with 'problem' arg."
                 from hilbert_engine import attack_theorem  # type: ignore[reportMissingImports]
@@ -110,6 +110,6 @@ def register_hilbert_tools(mcp, ctx) -> None:  # type: ignore
 
             return f"❌ Unknown attack mode: {attack}"
 
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.error("Hilbert-Omega error: %s", e)
             return f"❌ Hilbert-Omega error: {e}"

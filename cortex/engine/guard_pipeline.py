@@ -102,7 +102,7 @@ class GuardPipeline:
                     source=source,
                     db_path=db_path,
                 )
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 logger.debug(
                     "[GuardPipeline] Post-hook %s failed: %s",
                     type(hook).__name__,

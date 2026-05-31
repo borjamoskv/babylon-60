@@ -45,7 +45,6 @@ STRICT CONSTRAINTS:
 @click.group(name="bibliotecario")
 def bibliotecario_cmds():
     """📚 LIBRARIAN-1: Se encarga de ordenar y estructurar conocimiento."""
-    pass
 
 
 async def _ingest_and_organize(path: Path) -> str:
@@ -57,7 +56,7 @@ async def _ingest_and_organize(path: Path) -> str:
     if path.is_file():
         try:
             content = path.read_text(encoding="utf-8")
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             return f"Error reading file {path}: {e}"
     elif path.is_dir():
         for root, _, files in os.walk(path):

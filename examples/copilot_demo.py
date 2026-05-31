@@ -26,7 +26,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from cortex.agents.builtins.copilot_agent import (
     CopilotAgent,
-    InlineCompletionStrategy,
     create_copilot_agent,
 )
 from cortex.agents.copilot_contracts import (

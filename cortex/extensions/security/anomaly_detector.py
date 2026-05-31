@@ -21,8 +21,8 @@ logger = logging.getLogger("cortex.extensions.security.anomaly_detector")
 __all__ = [
     "AnomalyDetector",
     "AnomalyReport",
-    "SecurityEvent",
     "ProjectBaseline",
+    "SecurityEvent",
 ]
 
 

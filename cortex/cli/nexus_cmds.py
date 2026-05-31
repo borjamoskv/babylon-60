@@ -51,7 +51,6 @@ def run_nexus_skill(args: list[str]):
 @click.group(name="nexus")
 def nexus_cmds():
     """🌌 Singularity Nexus v∞: Cross-Project Unification."""
-    pass
 
 
 @nexus_cmds.command()

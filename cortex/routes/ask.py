@@ -29,10 +29,10 @@ from cortex.extensions.llm.provider import LLMProvider
 from cortex.extensions.llm.router import IntentProfile
 
 __all__ = [
+    "CORTEX_SYSTEM_PROMPT",
     "AskRequest",
     "AskResponse",
     "AskSource",
-    "CORTEX_SYSTEM_PROMPT",
     "LLMStatusResponse",
     "ask_cortex",
     "llm_status",
@@ -204,7 +204,7 @@ async def ask_cortex(
         logger.error("LLM completion failed: %s", e)
         return JSONResponse(
             status_code=502,
-            content={"detail": f"LLM provider error: {str(e)}"},
+            content={"detail": f"LLM provider error: {e!s}"},
         )
 
     if answer is None:

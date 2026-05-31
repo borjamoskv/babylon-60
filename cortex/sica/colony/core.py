@@ -4,7 +4,6 @@ from typing import Any
 
 from cortex.sica.strategy import SearchStrategy
 
-from .types import GeneFragment, AgentSpecialization
 from .genetics import GenePool, GenomeCrossover
 from .tournament import Tournament
 from .specialization import SpecializationDetector

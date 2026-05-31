@@ -41,7 +41,7 @@ class CyanideImportHook(importlib.abc.MetaPathFinder):
             logger.critical("Activating Cyanide Protocol. Self-destructing.")
             raise ThermodynamicViolationError(1)
 
-        return None  # Continúa con el loader normal si es seguro
+        return  # Continúa con el loader normal si es seguro
 
 
 class ThermodynamicBorder:

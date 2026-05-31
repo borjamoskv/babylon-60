@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_scanner():
     """Patch MemoryScanner to return controlled data."""
     with patch("cortex.extensions.shannon.immortality.MemoryScanner") as mock_cls:

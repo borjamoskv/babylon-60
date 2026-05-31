@@ -27,21 +27,21 @@ if TYPE_CHECKING:
 
 __all__ = [
     "Entity",
-    "Relationship",
     "Ghost",
     "GraphBackend",
+    "Relationship",
     "SQLiteBackend",
-    "extract_entities",
     "detect_relationships",
-    "process_fact_graph",
-    "process_fact_graph_sync",
+    "extract_entities",
+    "find_path",
+    "get_backend",
+    "get_context_subgraph",
     "get_graph",
     "get_graph_sync",
+    "process_fact_graph",
+    "process_fact_graph_sync",
     "query_entity",
     "query_entity_sync",
-    "find_path",
-    "get_context_subgraph",
-    "get_backend",
 ]
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {

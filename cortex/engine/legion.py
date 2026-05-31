@@ -30,15 +30,15 @@ from cortex.engine.legion_vectors import RED_TEAM_SWARM, AttackVector
 logger = logging.getLogger(__name__)
 
 __all__ = [
-    "SwarmSignal",
+    "LEGION_OMEGA",
     "AsyncSignalBus",
-    "SwarmAgent",
-    "Squadron",
     "BlueTeamAgent",
     "LegionOmegaEngine",
     "RedTeamSwarm",
     "SiegeResult",
-    "LEGION_OMEGA",
+    "Squadron",
+    "SwarmAgent",
+    "SwarmSignal",
 ]
 
 
@@ -90,7 +90,7 @@ class SwarmAgent(ABC):
             try:
                 signal = await self.execute(target)
                 await self.bus.emit(signal)
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 await self.bus.emit(
                     SwarmSignal(
                         agent_id=self.agent_id,

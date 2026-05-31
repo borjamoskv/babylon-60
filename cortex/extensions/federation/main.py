@@ -166,7 +166,6 @@ def get_engine(auto_embed: bool = True):
     if FEDERATION_MODE == "federated":
         logger.info("Starting in FEDERATED mode (shard_dir=%s)", SHARD_DIR)
         return FederatedEngine(auto_embed=auto_embed)
-    else:
-        from cortex.engine import CortexEngine
+    from cortex.engine import CortexEngine
 
-        return CortexEngine(auto_embed=auto_embed)
+    return CortexEngine(auto_embed=auto_embed)

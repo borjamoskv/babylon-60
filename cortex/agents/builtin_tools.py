@@ -20,8 +20,6 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
-import subprocess
-import time
 from pathlib import Path
 from typing import Any
 
@@ -118,20 +116,20 @@ class FileSystemTool:
                 text = target.read_text(encoding=encoding)
                 return {"ok": True, "content": text[:50_000], "size": len(text)}
 
-            elif action == "write":
+            if action == "write":
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_text(content or "", encoding=encoding)
                 return {"ok": True, "path": str(target), "bytes_written": len(content or "")}
 
-            elif action == "append":
+            if action == "append":
                 with target.open("a", encoding=encoding) as f:
                     f.write(content or "")
                 return {"ok": True, "path": str(target)}
 
-            elif action == "exists":
+            if action == "exists":
                 return {"ok": True, "exists": target.exists(), "is_file": target.is_file()}
 
-            elif action == "list":
+            if action == "list":
                 if not target.is_dir():
                     return {"ok": False, "error": f"Not a directory: {path}"}
                 entries = [
@@ -145,7 +143,7 @@ class FileSystemTool:
                 ]
                 return {"ok": True, "entries": entries[:200], "total": len(entries)}
 
-            elif action == "stat":
+            if action == "stat":
                 if not target.exists():
                     return {"ok": False, "error": f"Path not found: {path}"}
                 st = target.stat()
@@ -157,14 +155,13 @@ class FileSystemTool:
                     "is_dir": target.is_dir(),
                 }
 
-            elif action == "delete":
+            if action == "delete":
                 if target.is_file():
                     target.unlink()
                     return {"ok": True, "deleted": str(target)}
                 return {"ok": False, "error": "Can only delete files"}
 
-            else:
-                return {"ok": False, "error": f"Unknown action: {action}"}
+            return {"ok": False, "error": f"Unknown action: {action}"}
 
         except Exception as exc:
             return {"ok": False, "error": str(exc)}

@@ -16,7 +16,6 @@ from cortex.extensions.swarm.autodidact_actuator import autodidact_ingest
 @cli.group(name="autodidact")
 def autodidact_group() -> None:
     """Autodidact Omega: Sovereign Thermodynamic Crystal Forge."""
-    pass
 
 
 @autodidact_group.command(name="ingest")

@@ -13,7 +13,7 @@ import logging
 import re
 from typing import Final
 
-__all__ = ["DataSensitivity", "classify_content", "SECRET_PATTERNS"]
+__all__ = ["SECRET_PATTERNS", "DataSensitivity", "classify_content"]
 
 logger = logging.getLogger("cortex.storage.classifier")
 
@@ -98,7 +98,7 @@ PLATFORM_PATTERNS: Final[frozenset[str]] = frozenset(
 class DataSensitivity:
     """Result of a data sensitivity analysis."""
 
-    __slots__ = ("score", "matches")
+    __slots__ = ("matches", "score")
 
     def __init__(self, score: float, matches: list[str]):
         self.score = score  # 0.0 (Public) → 1.0 (Critical)

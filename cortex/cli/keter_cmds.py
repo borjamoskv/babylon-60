@@ -19,7 +19,6 @@ console = Console()
 @click.group(name="keter", help="👑 KETER-∞: El Botón de Dios (Orquestación Soberana).")
 def keter_cmds() -> None:
     """Invoca la cascada fractal para construir ecosistemas."""
-    pass
 
 
 @keter_cmds.command("build")
@@ -59,7 +58,6 @@ def rewrite_cmd(target: str) -> None:
 @click.group(name="sovereign", help="⚡ SOVEREIGN: Orchestration and Biological Control.")
 def sovereign_cmds() -> None:
     """Acceso directo al motor soberano de MOSKV-1."""
-    pass
 
 
 @sovereign_cmds.command("status")
@@ -104,7 +102,7 @@ def sovereign_ignite_cmd(env: str) -> None:
             if ctx.power.power >= 1300:
                 console.print("[bold green]🏆 ESTADO SOBERANO VALIDADO[/]")
 
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         console.print(f"[bold red]Error de Ignición:[/] {e}")
         raise click.Abort() from e
 

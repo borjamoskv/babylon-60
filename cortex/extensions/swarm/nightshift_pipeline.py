@@ -179,7 +179,7 @@ class ExecutorNode:
                         result.get("error", estado),
                     )
 
-            except Exception as e:  # noqa: BLE001 - boundary for autodidact execution
+            except Exception as e:
                 logger.error("❌ [EXECUTOR] Fatal: %s → %s", task_id, e)
                 results.append(
                     {

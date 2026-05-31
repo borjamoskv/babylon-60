@@ -24,7 +24,7 @@ import struct
 import time
 from dataclasses import dataclass
 
-__all__ = ["HybridLogicalClock", "HLCTimestamp"]
+__all__ = ["HLCTimestamp", "HybridLogicalClock"]
 
 # Maximum logical counter before forcing physical clock advance
 _MAX_LOGICAL = 0xFFFF  # 65535

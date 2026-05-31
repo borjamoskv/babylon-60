@@ -210,7 +210,7 @@ class TrustRegistry:
             runner_prior = self.get_profile(runner_up.agent_id).prior
             if runner_prior > top_prior:
                 return runner_up, {"reason_code": "TIE_BROKEN_BY_PRIOR"}
-            elif runner_prior == top_prior:
+            if runner_prior == top_prior:
                 # Last resort: Hash comparison of proposal contents for absolute determinism
                 top_hash = hash(top.action + top.agent_id)
                 runner_hash = hash(runner_up.action + runner_up.agent_id)

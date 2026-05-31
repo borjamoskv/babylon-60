@@ -17,12 +17,11 @@ async def test_agent_reputation_slashing(tmp_path):
     # 2. Register agent (reputation defaults to 0.5 via agents table schema)
     agent_id = await engine.consensus.register_agent(name="malicious_0x9", tenant_id=tenant)
 
-    async with engine.session() as conn:
-        async with conn.execute(
-            "SELECT reputation_score FROM agents WHERE id = ?", (agent_id,)
-        ) as cursor:
-            row = await cursor.fetchone()
-            assert row[0] == 0.5
+    async with engine.session() as conn, conn.execute(
+        "SELECT reputation_score FROM agents WHERE id = ?", (agent_id,)
+    ) as cursor:
+        row = await cursor.fetchone()
+        assert row[0] == 0.5
 
     # 3. Simulate a MAJOR_DEVIATION slash event
     new_rep = await engine.consensus.slash_vote_deviation(
@@ -37,12 +36,11 @@ async def test_agent_reputation_slashing(tmp_path):
     assert new_rep == 0.30
 
     # 5. Verify persistence in DB
-    async with engine.session() as conn:
-        async with conn.execute(
-            "SELECT reputation_score FROM agents WHERE id = ?", (agent_id,)
-        ) as cursor:
-            row = await cursor.fetchone()
-            assert row[0] == 0.30
+    async with engine.session() as conn, conn.execute(
+        "SELECT reputation_score FROM agents WHERE id = ?", (agent_id,)
+    ) as cursor:
+        row = await cursor.fetchone()
+        assert row[0] == 0.30
 
 
 @pytest.mark.asyncio

@@ -29,14 +29,14 @@ def check_python() -> dict:
 def check_dependencies() -> dict:
     deps = {}
     try:
-        import aiosqlite  # noqa: F401
+        import aiosqlite
 
         deps["aiosqlite"] = "installed"
     except ImportError:
         deps["aiosqlite"] = "missing"
 
     try:
-        import rich  # noqa: F401
+        import rich
 
         deps["rich"] = "installed"
     except ImportError:

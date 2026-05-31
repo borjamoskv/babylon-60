@@ -35,7 +35,6 @@ def _run_async(coro):
 @cli.group("lineage")
 def lineage_group():
     """Epistemic lineage (Ω₃-V) commands."""
-    pass
 
 
 @lineage_group.command("trace")

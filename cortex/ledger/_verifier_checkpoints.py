@@ -34,7 +34,7 @@ def verify_checkpoints(verifier: _PublicLedgerVerifier) -> None:
         verifier.guarantees["truth_verified"] = True
 
 
-def _verify_single_checkpoint(  # noqa: C901
+def _verify_single_checkpoint(
     verifier: _PublicLedgerVerifier, index: int, cp: dict, mldsa: Any, InvalidSignature: Any
 ) -> bool:
     required = {

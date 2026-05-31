@@ -36,8 +36,8 @@ from cortex.extensions.mejoralo.models import ScanResult
 from cortex.extensions.mejoralo.taint import is_file_tainted, mark_file_tainted
 
 __all__ = [
-    "heal_project",
     "heal_proj",
+    "heal_project",
 ]
 
 logger = logging.getLogger("cortex.extensions.mejoralo.heal")
@@ -316,7 +316,7 @@ def _commit_healed_file(
                     ],
                 )
                 console.print(f"  [dim]⏱ CHRONOS-1: {hours}h saved recorded in ledger.[/]")
-            except Exception:  # noqa: BLE001
+            except Exception:
                 logger.exception("Failed to record CHRONOS-1 yield for %s", top_file_rel)
         return True
     except (OSError, subprocess.SubprocessError):

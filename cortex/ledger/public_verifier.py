@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -13,7 +12,6 @@ from cortex.ledger.public_verifier_utils import (
 from cortex.utils.canonical import canonical_json, compute_tx_hash
 
 from cortex.ledger._verifier_events import (
-    STRICT_REQUIRED_EVENT_FIELDS,
     verify_events,
 )
 from cortex.ledger._verifier_manifest import (
@@ -103,7 +101,7 @@ class _LegacyVectorVerifier:
             self.errors.append("legacy_vector_missing")
         for path in self.vector_paths:
             self._verify_vector(path)
-        guarantees = {name: False for name in REPORT_GUARANTEES}
+        guarantees = dict.fromkeys(REPORT_GUARANTEES, False)
         guarantees["integrity_verified"] = not self.errors and bool(self.hashes)
         guarantees["truth_verified"] = False
         guarantees["online_freshness_verified"] = False
@@ -168,7 +166,7 @@ class _PublicLedgerVerifier:
         self.key_index: dict[str, dict[str, Any]] = {}
         self.manifest: dict[str, Any] | None = None
         self.event_hashes: list[str] = []
-        self.guarantees: dict[str, bool] = {name: False for name in REPORT_GUARANTEES}
+        self.guarantees: dict[str, bool] = dict.fromkeys(REPORT_GUARANTEES, False)
 
     def verify(self) -> dict[str, Any]:
         self.events = load_events(self)

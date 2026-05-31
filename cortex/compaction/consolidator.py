@@ -34,8 +34,8 @@ logger = logging.getLogger("cortex.consolidator")
 
 __all__ = [
     "BeliefConsolidator",
-    "ConsolidationResult",
     "ClusterResult",
+    "ConsolidationResult",
 ]
 
 # Fact types eligible for consolidation

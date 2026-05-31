@@ -14,7 +14,7 @@ import logging
 from typing import Any
 
 try:
-    from z3 import And, ArithRef, Bool, Int, Or, Real, Solver, sat, unsat  # noqa: F401
+    from z3 import And, ArithRef, Bool, Int, Or, Real, Solver, sat, unsat
 
     HAS_Z3 = True
 except ImportError:

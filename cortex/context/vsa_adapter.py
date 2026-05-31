@@ -29,7 +29,7 @@ def _ensure_vsa_importable() -> bool:
         sys.path.insert(0, str(_VSA_SKILL_DIR))
 
     try:
-        import vsa_engine  # noqa: F401
+        import vsa_engine
 
         return True
     except ImportError:

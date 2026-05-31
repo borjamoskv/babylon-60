@@ -22,15 +22,15 @@ if TYPE_CHECKING:
     )
 
 __all__ = [
-    "RevenueEngine",
-    "Opportunity",
     "ExecutionResult",
+    "Opportunity",
+    "RevenueEngine",
     "RevenueReport",
     "RevenueVector",
 ]
 
 
-def __getattr__(name: str):  # noqa: ANN001
+def __getattr__(name: str):
     """Lazy imports to avoid heavy startup cost."""
     if name == "RevenueEngine":
         from cortex.extensions.revenue.engine import RevenueEngine

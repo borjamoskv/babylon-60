@@ -148,7 +148,7 @@ class SICAAgent(BaseAgent):
                 agent_id=self.agent_id,
                 directory=self._persist_dir,
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.error("[%s] Failed to persist genome: %s", self.agent_id, exc)
 
         logger.info(
@@ -189,7 +189,7 @@ class SICAAgent(BaseAgent):
                     agent_id=self.agent_id,
                     directory=self._persist_dir,
                 )
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 logger.error("[%s] Auto-save failed: %s", self.agent_id, exc)
 
     # ── Core SICA Loop ───────────────────────────────────────────
@@ -219,7 +219,7 @@ class SICAAgent(BaseAgent):
             try:
                 result = await self._run_object_level(task_input, objective)
                 outcome = StepOutcome.SUCCESS
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 self._object_level.record_step(
                     action="task_execution",
                     outcome=StepOutcome.FAILURE,
@@ -313,17 +313,16 @@ class SICAAgent(BaseAgent):
                     self._strategy.genome.genome_hash,
                 )
                 continue
-            else:
-                # Object-failure: simple retry without strategy change
-                retry_count += 1
-                if retry_count <= max_retries:
-                    logger.info(
-                        "[%s] Object-level failure. Simple retry (%d/%d)",
-                        self.agent_id,
-                        retry_count,
-                        max_retries,
-                    )
-                    continue
+            # Object-failure: simple retry without strategy change
+            retry_count += 1
+            if retry_count <= max_retries:
+                logger.info(
+                    "[%s] Object-level failure. Simple retry (%d/%d)",
+                    self.agent_id,
+                    retry_count,
+                    max_retries,
+                )
+                continue
 
         # Exhausted retries
         logger.error(
@@ -377,14 +376,13 @@ class SICAAgent(BaseAgent):
                         output_summary=str(result)[:200] if result else "",
                     )
                     return {"tool": tool_name, "result": result}
-                else:
-                    self._object_level.record_step(
-                        action=f"tool_lookup:{tool_name}",
-                        outcome=StepOutcome.SKIPPED,
-                        tool_used=tool_name,
-                        output_summary=f"Tool '{tool_name}' not available",
-                    )
-            except Exception as exc:  # noqa: BLE001
+                self._object_level.record_step(
+                    action=f"tool_lookup:{tool_name}",
+                    outcome=StepOutcome.SKIPPED,
+                    tool_used=tool_name,
+                    output_summary=f"Tool '{tool_name}' not available",
+                )
+            except Exception as exc:
                 duration = (time.monotonic() - start) * 1000
                 self._object_level.record_step(
                     action=f"use_tool:{tool_name}",

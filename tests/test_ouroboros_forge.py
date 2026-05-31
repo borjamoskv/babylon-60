@@ -56,7 +56,7 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
                     await self.engine.run_audit()
                     logger.info("Audit Cycle 1/1 verified.")
                 except Exception as e:
-                    self.fail(f"Ouroboros Engine Crashed: {str(e)}")
+                    self.fail(f"Ouroboros Engine Crashed: {e!s}")
 
     async def test_signal_emission(self):
         """Verify SignalBus emits audit findings correctly."""

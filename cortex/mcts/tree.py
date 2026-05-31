@@ -130,8 +130,7 @@ class MCTSEngine:
                 best_node.value / best_node.visits,
             )
             return best_branch
-        else:
-            logger.warning(
-                "💀 [CHRONOS] Ninguna línea temporal superó los tests. Extinción local declarada."
-            )
-            return base_branch
+        logger.warning(
+            "💀 [CHRONOS] Ninguna línea temporal superó los tests. Extinción local declarada."
+        )
+        return base_branch

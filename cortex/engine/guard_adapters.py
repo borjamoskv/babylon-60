@@ -13,16 +13,16 @@ from typing import Any
 import aiosqlite
 
 __all__ = [
-    "HealthGuardAdapter",
     "ContradictionGuardAdapter",
-    "VerifierGuardAdapter",
-    "ExergyGuardAdapter",
-    "ZKGuardAdapter",
-    "VirgoGuardAdapter",
-    "LedgerCheckpointHook",
-    "SignalEmitHook",
     "EpistemicBreakerHook",
+    "ExergyGuardAdapter",
+    "HealthGuardAdapter",
+    "LedgerCheckpointHook",
     "OmegaGuardAdapter",
+    "SignalEmitHook",
+    "VerifierGuardAdapter",
+    "VirgoGuardAdapter",
+    "ZKGuardAdapter",
 ]
 
 logger = logging.getLogger("cortex.engine")

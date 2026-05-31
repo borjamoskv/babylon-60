@@ -66,10 +66,10 @@ class NREMConsolidationCycle:
 
     __slots__ = (
         "_consolidator",
-        "_pruner",
-        "_stdp",
-        "_scaler",
         "_decay_factor",
+        "_pruner",
+        "_scaler",
+        "_stdp",
     )
 
     def __init__(

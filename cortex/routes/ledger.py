@@ -87,12 +87,11 @@ async def create_checkpoint(
             return CheckpointResponse(
                 checkpoint_id=cp_id, message=f"Merkle checkpoint #{cp_id} created successfully"
             )
-        else:
-            return CheckpointResponse(
-                checkpoint_id=None,
-                message="No new transactions to checkpoint or batch size not reached",
-                status="no_action",
-            )
+        return CheckpointResponse(
+            checkpoint_id=None,
+            message="No new transactions to checkpoint or batch size not reached",
+            status="no_action",
+        )
     except (sqlite3.Error, OSError, RuntimeError) as e:
         logger.exception("Merkle checkpoint creation failed")
         lang = request.headers.get("Accept-Language", "en")

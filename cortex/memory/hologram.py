@@ -28,14 +28,14 @@ class HolographicMemory:
     """RAM-resident semantic memory map for zero-latency CORTEX retrieval."""
 
     __slots__ = (
-        "_store",
+        "_half_life",
         "_lock",
-        "_tensor",
         "_metadata",
-        "_tenant_idx",
         "_project_idx",
         "_ready",
-        "_half_life",
+        "_store",
+        "_tenant_idx",
+        "_tensor",
     )
 
     def __init__(self, store: SovereignVectorStoreL2, half_life_days: int = 7):

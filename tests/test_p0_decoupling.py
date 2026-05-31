@@ -31,13 +31,12 @@ async def test_store_decoupled(engine):
     assert fact.content == "Worker test fact"
 
     # Check that a job is in the enrichment_jobs table
-    async with aiosqlite.connect(str(engine._db_path)) as db:
-        async with db.execute(
-            "SELECT fact_id, status FROM enrichment_jobs WHERE fact_id = ?", (fact_id,)
-        ) as cursor:
-            row = await cursor.fetchone()
-            assert row is not None
-            assert row[1] == "pending"
+    async with aiosqlite.connect(str(engine._db_path)) as db, db.execute(
+        "SELECT fact_id, status FROM enrichment_jobs WHERE fact_id = ?", (fact_id,)
+    ) as cursor:
+        row = await cursor.fetchone()
+        assert row is not None
+        assert row[1] == "pending"
 
 
 @pytest.mark.asyncio
@@ -55,19 +54,17 @@ async def test_worker_processing(engine):
     worker = EnrichmentWorker(db_path=str(engine._db_path), provider=NullEmbeddingProvider())
 
     # Process one job
-    async with aiosqlite.connect(str(engine._db_path)) as db:
-        async with db.execute(
-            "SELECT id, fact_id FROM enrichment_jobs WHERE fact_id = ?", (fact_id,)
-        ) as cursor:
-            job = await cursor.fetchone()
-            # SQLite row indexing: id[0], fact_id[1]
-            await worker._process_job(db, job[0], job[1])
-            await db.commit()
+    async with aiosqlite.connect(str(engine._db_path)) as db, db.execute(
+        "SELECT id, fact_id FROM enrichment_jobs WHERE fact_id = ?", (fact_id,)
+    ) as cursor:
+        job = await cursor.fetchone()
+        # SQLite row indexing: id[0], fact_id[1]
+        await worker._process_job(db, job[0], job[1])
+        await db.commit()
 
     # Verify job status is updated to completed
-    async with aiosqlite.connect(str(engine._db_path)) as db:
-        async with db.execute(
-            "SELECT status FROM enrichment_jobs WHERE fact_id = ?", (fact_id,)
-        ) as cursor:
-            row = await cursor.fetchone()
-            assert row[0] == "completed"
+    async with aiosqlite.connect(str(engine._db_path)) as db, db.execute(
+        "SELECT status FROM enrichment_jobs WHERE fact_id = ?", (fact_id,)
+    ) as cursor:
+        row = await cursor.fetchone()
+        assert row[0] == "completed"

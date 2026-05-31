@@ -20,7 +20,6 @@ console = Console()
 @cli.group(name="grammy", help="🎵 GRAMMY-Ω: Producción de música electrónica soberana.")
 def grammy_cmds():
     """Grupo de comandos para GRAMMY-Ω."""
-    pass
 
 
 @grammy_cmds.command("produce")
@@ -40,7 +39,7 @@ def produce_cmd(title, concept, bpm, key):
             TrackContext,
             TrackState,
         )
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         console.print(f"[bold red]✗ GRAMMY-Ω no está disponible en este entorno:[/bold red] {exc}")
         return
 

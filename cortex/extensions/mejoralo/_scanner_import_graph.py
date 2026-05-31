@@ -15,11 +15,11 @@ from cortex.extensions.mejoralo.constants import MAX_FAN_OUT, SKIP_DIRS
 from cortex.extensions.mejoralo.models import AntipatternFinding
 
 __all__ = [
+    "MAX_FAN_OUT",
     "build_import_graph",
     "detect_circular_deps",
     "detect_fan_out",
     "run_graph_scanners",
-    "MAX_FAN_OUT",
 ]
 
 

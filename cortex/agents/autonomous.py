@@ -33,7 +33,6 @@ import time
 from typing import Any
 
 from cortex.agents.base import BaseAgent
-from cortex.agents.contracts import TaskRequestPayload
 from cortex.agents.manifest import AgentManifest
 from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
 from cortex.agents.planner import (
@@ -42,7 +41,6 @@ from cortex.agents.planner import (
     PlanStep,
     StepStatus,
 )
-from cortex.agents.state import AgentStatus
 from cortex.agents.tools import ToolRegistry
 
 logger = logging.getLogger("cortex.agents.autonomous")
@@ -330,7 +328,7 @@ class AutonomousAgent(BaseAgent):
                 step.mark_failed(f"Permission denied: {exc}")
                 logger.error("[%s] Step %s PERMISSION DENIED: %s", self.agent_id, step.step_id, exc)
 
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 error_msg = f"{type(exc).__name__}: {exc}"
                 step.mark_failed(error_msg)
                 logger.warning(

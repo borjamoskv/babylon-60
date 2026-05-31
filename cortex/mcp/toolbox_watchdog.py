@@ -52,14 +52,14 @@ class ToolboxWatchdog:
     """
 
     __slots__ = (
-        "_port",
-        "_tools_yaml",
-        "_db_path",
-        "_process",
         "_backoff",
+        "_db_path",
+        "_log_fd",
+        "_port",
+        "_process",
         "_restart_count",
         "_shutdown",
-        "_log_fd",
+        "_tools_yaml",
     )
 
     def __init__(
@@ -116,7 +116,7 @@ class ToolboxWatchdog:
                 self._shutdown = True
                 self._kill()
                 raise
-            except Exception as exc:  # noqa: BLE001 - supervisor catches all crashes
+            except Exception as exc:
                 logger.error(
                     "☠️ [WATCHDOG] Crash detected: %s",
                     exc,

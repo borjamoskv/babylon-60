@@ -3,7 +3,6 @@ CORTEX - Weismann Barrier (Kernel Isolation Protocol)
 Protects the CORTEX-Persist kernel from fatal mutations during autopoiesis.
 """
 
-import os
 import shutil
 import tempfile
 import subprocess

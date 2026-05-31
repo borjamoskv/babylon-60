@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 from llama_index.core.callbacks.base_handler import BaseCallbackHandler
 from llama_index.core.callbacks.schema import CBEventType
 from llama_index.core.schema import NodeWithScore

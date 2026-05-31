@@ -5,12 +5,12 @@ from .specialization import SpecializationDetector
 from .core import Colony
 
 __all__ = [
-    "GeneFragment",
-    "TournamentResult",
     "AgentSpecialization",
+    "Colony",
+    "GeneFragment",
     "GenePool",
     "GenomeCrossover",
-    "Tournament",
     "SpecializationDetector",
-    "Colony",
+    "Tournament",
+    "TournamentResult",
 ]

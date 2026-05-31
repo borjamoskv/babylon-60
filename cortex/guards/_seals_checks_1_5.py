@@ -68,26 +68,24 @@ async def check_seal_2_type_safety() -> GateResult:
                         f"Type checks passed (within baseline threshold: {ecount}/165)."
                     )
                     return True, "verified"
-                else:
-                    printer.fail(f"Type checking failed (threshold: {ecount}/165).")
-                    printer.print(out[:2000], style="dim")
-                    return False, "verified"
+                printer.fail(f"Type checking failed (threshold: {ecount}/165).")
+                printer.print(out[:2000], style="dim")
+                return False, "verified"
         except (ValueError, KeyError, json.JSONDecodeError):
             pass
 
     if code == 0 or "Success: no issues found" in out or '"errorCount":0' in out:
         printer.success("Type checks passed.")
         return True, "verified"
-    else:
-        printer.fail("Type checking failed.")
-        printer.print(out[:2000], style="dim")
-        return False, "verified"
+    printer.fail("Type checking failed.")
+    printer.print(out[:2000], style="dim")
+    return False, "verified"
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # SEAL 3: SECURITY - Bandit + Cobbler Self-Audit
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async def check_seal_3_security() -> GateResult:  # noqa: C901
+async def check_seal_3_security() -> GateResult:
     printer.seal(3, "AX-VII Inmunología Computacional", "Security (Bandit + Self-Audit)")
     passed = True
 
@@ -175,10 +173,9 @@ async def check_seal_4_tests() -> GateResult:
     if code == 0:
         printer.success("All tests passed.")
         return True, "verified"
-    else:
-        printer.fail("Tests failed.")
-        printer.print(out[:3000], style="dim")
-        return False, "verified"
+    printer.fail("Tests failed.")
+    printer.print(out[:3000], style="dim")
+    return False, "verified"
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -196,7 +193,7 @@ async def check_seal_5_ledger() -> GateResult:
         await engine.init_db()
         await engine.close()
         printer.success("Ledger schema initialized successfully.")
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         printer.fail(f"Ledger initialization threw error: {e}")
         passed = False
 

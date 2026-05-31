@@ -236,7 +236,7 @@ class ErrorGhostPipeline:
                 meta=meta,
             )
             return fact_id
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.error("AUTO-GHOST DB persist failed, falling back to FS: %s", e)
             self._fallback_fs_persist(project, content, source, meta)
             return None
@@ -255,7 +255,7 @@ class ErrorGhostPipeline:
         try:
             fact_id = asyncio.run(self._persist_async(project, content, source, meta))
             self._record_emission(content_hash, source, fact_id)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             # Last resort - never let ghost persistence crash the daemon
             logger.error("AUTO-GHOST sync persist failed: %s", e)
             self._record_emission(content_hash, source, None)

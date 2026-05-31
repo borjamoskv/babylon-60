@@ -85,12 +85,11 @@ class LedgerVerifier:
             with open(key_path, "rb") as key_file:
                 seed = key_file.read()
             return mldsa.MLDSA44PrivateKey.from_seed_bytes(seed)
-        else:
-            private_key = mldsa.MLDSA44PrivateKey.generate()
-            os.makedirs(db_dir, exist_ok=True)
-            with open(key_path, "wb") as key_file:
-                key_file.write(private_key.private_bytes_raw())
-            return private_key
+        private_key = mldsa.MLDSA44PrivateKey.generate()
+        os.makedirs(db_dir, exist_ok=True)
+        with open(key_path, "wb") as key_file:
+            key_file.write(private_key.private_bytes_raw())
+        return private_key
 
     def create_checkpoint(self, batch_size: int = 10) -> int | None:
         from cortex.consensus.merkle import MerkleTree

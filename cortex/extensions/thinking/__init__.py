@@ -17,13 +17,13 @@ from cortex.extensions.thinking.pool import ThinkingRecord
 from cortex.extensions.thinking.presets import OrchestraConfig, ThinkingMode
 
 __all__ = [
-    "ThoughtOrchestra",
+    "FusedThought",
+    "FusionStrategy",
+    "ModelResponse",
     "OrchestraConfig",
+    "ThinkingHistory",
     "ThinkingMode",
     "ThinkingRecord",
     "ThoughtFusion",
-    "FusionStrategy",
-    "FusedThought",
-    "ModelResponse",
-    "ThinkingHistory",
+    "ThoughtOrchestra",
 ]

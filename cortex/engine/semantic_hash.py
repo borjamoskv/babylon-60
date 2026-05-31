@@ -26,10 +26,10 @@ logger = logging.getLogger("cortex.semantic_hash")
 
 __all__ = [
     "SemanticFingerprint",
-    "semantic_fingerprint",
-    "semantic_distance",
-    "is_semantically_equivalent",
     "cosine_similarity",
+    "is_semantically_equivalent",
+    "semantic_distance",
+    "semantic_fingerprint",
 ]
 
 # Quantization precision for deterministic hashing.
@@ -45,7 +45,7 @@ class SemanticFingerprint:
     raw embedding vector (for cosine distance computation).
     """
 
-    __slots__ = ("hash", "embedding", "dimension", "text_preview")
+    __slots__ = ("dimension", "embedding", "hash", "text_preview")
 
     def __init__(
         self,

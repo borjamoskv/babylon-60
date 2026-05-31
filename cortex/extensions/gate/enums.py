@@ -2,7 +2,7 @@
 
 from enum import Enum
 
-__all__ = ["ActionLevel", "GatePolicy", "ActionStatus"]
+__all__ = ["ActionLevel", "ActionStatus", "GatePolicy"]
 
 
 class ActionLevel(str, Enum):

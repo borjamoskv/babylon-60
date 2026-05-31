@@ -145,14 +145,14 @@ class PostgresBackend:
         try:
             await self.executescript(PG_EXTENSIONS)
             logger.debug("PostgreSQL: Extensions applied (pgvector, pg_trgm).")
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.warning("PostgreSQL: Extensions skipped (insufficient privileges): %s", exc)
 
         # Apply all schema statements - each is idempotent
         for i, schema_sql in enumerate(PG_ALL_SCHEMA):
             try:
                 await self.executescript(schema_sql)
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 logger.error(
                     "PostgreSQL: Schema statement %d/%d failed: %s",
                     i + 1,
@@ -222,7 +222,7 @@ class PostgresBackend:
                 logger.warning("PG Slow Query (%.2fms): %s", elapsed_ms, sql[:100])
 
             return [dict(row) for row in rows]
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.error("PG Query Error: %s | Query: %s", exc, sql[:500])
             raise
 
@@ -245,7 +245,7 @@ class PostgresBackend:
             async with self._pool.acquire() as conn:
                 row = await conn.fetchrow(pg_sql, *pg_params)
                 return row["id"] if row else 0
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.error("PG Insert Error: %s", exc)
             raise
 
@@ -258,11 +258,10 @@ class PostgresBackend:
         pg_sql, _ = self._translate_params(sql, ())
 
         try:
-            async with self._pool.acquire() as conn:
-                async with conn.transaction():
-                    # asyncpg executemany is optimized for batch operations
-                    await conn.executemany(pg_sql, params_list)
-        except Exception as exc:  # noqa: BLE001
+            async with self._pool.acquire() as conn, conn.transaction():
+                # asyncpg executemany is optimized for batch operations
+                await conn.executemany(pg_sql, params_list)
+        except Exception as exc:
             logger.error("PG Batch Error (size=%d): %s", len(params_list), exc)
             raise
 
@@ -279,11 +278,10 @@ class PostgresBackend:
             return
 
         try:
-            async with self._pool.acquire() as conn:
-                async with conn.transaction():
-                    for stmt in statements:
-                        await conn.execute(stmt)
-        except Exception as exc:  # noqa: BLE001
+            async with self._pool.acquire() as conn, conn.transaction():
+                for stmt in statements:
+                    await conn.execute(stmt)
+        except Exception as exc:
             logger.error("PG Script Error (%d stmts): %s", len(statements), exc)
             raise
 
@@ -293,7 +291,7 @@ class PostgresBackend:
             try:
                 await self._pool.close()
                 logger.debug("PostgreSQL: Pool closed cleanly.")
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 logger.warning("PostgreSQL: Unclean pool close: %s", exc)
             finally:
                 self._pool = None
@@ -303,7 +301,7 @@ class PostgresBackend:
         try:
             result = await self.execute("SELECT 1 AS ok")
             return len(result) > 0 and result[0].get("ok") == 1
-        except Exception:  # noqa: BLE001 - health probe must always return bool
+        except Exception:
             return False
 
     def __repr__(self) -> str:

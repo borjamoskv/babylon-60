@@ -17,7 +17,6 @@ logger = logging.getLogger("cortex.cli.mcp")
 @cli.group("mcp")
 def mcp_cmds() -> None:
     """Model Context Protocol (MCP) integrations."""
-    pass
 
 
 @mcp_cmds.command("aether")

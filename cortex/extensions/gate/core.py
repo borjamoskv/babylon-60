@@ -227,11 +227,10 @@ class SovereignGate:
             self._log_audit("ACTION_APPROVED_INTERACTIVE", action)
             logger.info("✅ Gate: Action %s approved interactively", action_id)
             return True
-        else:
-            action.status = ActionStatus.DENIED
-            self._log_audit("ACTION_DENIED", action)
-            logger.warning("❌ Gate: Action %s denied by operator", action_id)
-            raise GateNotApproved(f"Action {action_id} denied by operator")
+        action.status = ActionStatus.DENIED
+        self._log_audit("ACTION_DENIED", action)
+        logger.warning("❌ Gate: Action %s denied by operator", action_id)
+        raise GateNotApproved(f"Action {action_id} denied by operator")
 
     def deny(self, action_id: str, reason: str = "") -> None:
         """Explicitly deny a pending action."""

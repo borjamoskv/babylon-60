@@ -37,7 +37,7 @@ from dataclasses import dataclass, field
 
 from cortex.extensions.thinking.presets import ThinkingMode
 
-__all__ = ["SemanticRouter", "RouteDecision"]
+__all__ = ["RouteDecision", "SemanticRouter"]
 
 logger = logging.getLogger("cortex.extensions.thinking.semantic_router")
 

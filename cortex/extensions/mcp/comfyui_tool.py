@@ -1,6 +1,5 @@
 import json
 import uuid
-import sys
 
 
 # CORTEX-Persist Visual Engine (ComfyUI)

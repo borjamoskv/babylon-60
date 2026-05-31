@@ -6,9 +6,7 @@ we use float with explicit rounding for V1 speed.
 
 from __future__ import annotations
 
-from datetime import datetime
 from enum import Enum
-from typing import Optional
 
 from pydantic import BaseModel, Field
 

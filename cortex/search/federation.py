@@ -27,10 +27,10 @@ from cortex.search.models import SearchResult, SearchScope
 from cortex.search.text import text_search, text_search_sync
 
 __all__ = [
-    "federated_search",
-    "federated_search_sync",
     "attach_federated_dbs",
     "attach_federated_dbs_async",
+    "federated_search",
+    "federated_search_sync",
 ]
 
 logger = logging.getLogger("cortex.search.federation")

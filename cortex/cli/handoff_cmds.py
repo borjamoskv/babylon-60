@@ -14,7 +14,7 @@ from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
 from cortex.cli.errors import err_empty_results, handle_cli_error
 from cortex.extensions.agents.handoff import generate_handoff, load_handoff, save_handoff
 
-__all__ = ["handoff", "generate", "load"]
+__all__ = ["generate", "handoff", "load"]
 
 
 def _run_async(coro):
@@ -25,7 +25,6 @@ def _run_async(coro):
 @cli.group()
 def handoff() -> None:
     """Session Handoff Protocol - compact session continuity."""
-    pass
 
 
 @handoff.command("generate")

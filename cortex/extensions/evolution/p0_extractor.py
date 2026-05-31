@@ -178,7 +178,7 @@ class P0VulnerabilityExtractor:
                 report.high_count,
                 target_file,
             )
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.error("P0 extraction failed for %s: %s", target_file, e)
             report.status = f"failed: {e}"
 

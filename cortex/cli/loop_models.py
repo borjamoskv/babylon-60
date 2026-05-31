@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 
-__all__ = ["TaskStatus", "PersistenceType", "TaskResult", "LoopSession"]
+__all__ = ["LoopSession", "PersistenceType", "TaskResult", "TaskStatus"]
 
 
 class TaskStatus(Enum):

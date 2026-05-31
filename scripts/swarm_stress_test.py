@@ -8,7 +8,6 @@ massive Epistemic Limerence evaluation and Cortisol shockwaves.
 
 import json
 import os
-import sys
 
 SWARM_QUEUE_FILE = os.getenv("CORTEX_SWARM_QUEUE", "/tmp/cortex_swarm_queue.json")
 

@@ -20,7 +20,6 @@ from cortex.cli.common import (
 @cli.group(name="anomaly")
 def anomaly_cmds():
     """🔍 ANOMALY-HUNTER-DAEMON (NightShift Memory Refiner)."""
-    pass
 
 
 @anomaly_cmds.command("anomaly-hunt")

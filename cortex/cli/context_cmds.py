@@ -26,7 +26,6 @@ __all__ = [
 @cli.group()
 def context():
     """Context Engine - ambient intelligence."""
-    pass
 
 
 @context.command("infer")

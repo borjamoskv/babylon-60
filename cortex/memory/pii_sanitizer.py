@@ -30,7 +30,7 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum
 
-__all__ = ["PIISanitizer", "PIIMatch", "PIICategory", "SanitizationReport"]
+__all__ = ["PIICategory", "PIIMatch", "PIISanitizer", "SanitizationReport"]
 
 logger = logging.getLogger("cortex.memory.pii_sanitizer")
 
@@ -280,7 +280,7 @@ _default_sanitizer: PIISanitizer | None = None
 
 def get_pii_sanitizer(encrypt: bool = True) -> PIISanitizer:
     """Return the module-level default PIISanitizer (lazy singleton)."""
-    global _default_sanitizer  # noqa: PLW0603
+    global _default_sanitizer
     if _default_sanitizer is None or _default_sanitizer._encrypt != encrypt:
         _default_sanitizer = PIISanitizer(encrypt=encrypt)
     return _default_sanitizer

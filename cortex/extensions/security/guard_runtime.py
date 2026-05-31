@@ -181,8 +181,7 @@ def enforce_guard_pipeline(guards: list[BaseGuard], context: dict[str, Any]) -> 
                         outcome.reason,
                     )
                     raise ValueError(f"SECURITY GUARD BLOCK [{guard.name}]: {outcome.reason}")
-                else:
-                    logger.warning("🛡️ [GUARD WARNING] %s flagged: %s", guard.name, outcome.reason)
+                logger.warning("🛡️ [GUARD WARNING] %s flagged: %s", guard.name, outcome.reason)
 
         except Exception as e:
             if guard.required:

@@ -1,6 +1,5 @@
 import os
 import yaml
-import json
 import logging
 from pathlib import Path
 from datetime import datetime, timezone

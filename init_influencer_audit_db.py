@@ -1,5 +1,4 @@
 import sqlite3
-import os
 
 DB_PATH = "influencer_audit_v1.db"
 

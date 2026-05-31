@@ -353,7 +353,7 @@ class WorldModel:
         if step.outcome == StepOutcome.SUCCESS:
             # Surprise = probability we assigned to failure
             return 1.0 - p_success
-        elif step.outcome == StepOutcome.FAILURE:
+        if step.outcome == StepOutcome.FAILURE:
             # Surprise = probability we assigned to success
             return p_success
         return 0.0

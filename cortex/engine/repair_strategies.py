@@ -20,11 +20,11 @@ from enum import Enum, auto
 from typing import Any, Protocol
 
 __all__ = [
+    "REPAIR_REGISTRY",
+    "RepairRegistry",
     "RepairResult",
     "RepairStatus",
     "RepairStrategy",
-    "RepairRegistry",
-    "REPAIR_REGISTRY",
 ]
 
 logger = logging.getLogger("cortex.engine.repair")

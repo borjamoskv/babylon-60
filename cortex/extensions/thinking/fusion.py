@@ -18,7 +18,7 @@ from cortex.extensions.thinking.fusion_models import (
     _tokenize,
 )
 
-__all__ = ["ThoughtFusion", "ContextFusion"]
+__all__ = ["ContextFusion", "ThoughtFusion"]
 
 logger = logging.getLogger("cortex.extensions.thinking.fusion")
 

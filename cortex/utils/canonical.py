@@ -20,9 +20,9 @@ from typing import Any
 
 __all__ = [
     "canonical_json",
+    "compute_fact_hash",
     "compute_tx_hash",
     "compute_tx_hash_v1",
-    "compute_fact_hash",
     "now_iso",
 ]
 

@@ -15,13 +15,13 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-__all__ = ["sync_to_langbase", "enrich_from_langbase"]
+__all__ = ["enrich_from_langbase", "sync_to_langbase"]
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine as AsyncCortexEngine
     from cortex.extensions.langbase.client import LangbaseClient
 
-from cortex.extensions.langbase.client import LangbaseError  # noqa: E402
+from cortex.extensions.langbase.client import LangbaseError
 
 logger = logging.getLogger("cortex.extensions.langbase.sync")
 

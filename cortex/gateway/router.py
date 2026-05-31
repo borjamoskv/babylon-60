@@ -192,7 +192,7 @@ class GatewayRouter:
                 request_id=request.request_id,
                 latency_ms=latency,
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             latency = (time.perf_counter() - t0) * 1000
             logger.exception(
                 "Gateway [%s] %s → error: %s",
@@ -211,7 +211,7 @@ class GatewayRouter:
                     extra_meta={"request_id": request.request_id, "source": request.source},
                 )
                 await boundary._persist(exc)
-            except Exception:  # noqa: BLE001 - boundary persistence must never break gateway
+            except Exception:
                 pass
             return GatewayResponse(
                 ok=False,

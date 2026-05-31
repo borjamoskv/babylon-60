@@ -88,7 +88,7 @@ class ByzantineAuthLayer:
                 logger.warning("🔓 [AXIOM 3] Operator approved intent '%s'. Executing...", intent)
                 challenge_path.unlink()
                 return True
-            elif current_data.get("status") in ["DENIED", "REJECTED"]:
+            if current_data.get("status") in ["DENIED", "REJECTED"]:
                 logger.error("🚫 [AXIOM 3] Operator rejected intent '%s'.", intent)
                 challenge_path.unlink()
                 return False

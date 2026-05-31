@@ -19,7 +19,6 @@ from cortex.utils.errors import CortexError
 @click.group("pathogen")
 def pathogen_cmds():
     """🦠 Pathogen-Omega: The Inverse Immune System. Outsource ghosts to Moltbook."""
-    pass
 
 
 @pathogen_cmds.command("craft")

@@ -13,11 +13,10 @@ import time
 from collections import deque
 from typing import Any
 
-from cortex.engine.circuit_breaker import CircuitBreaker, CircuitState
+from cortex.engine.circuit_breaker import CircuitBreaker
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
 from cortex.engine.repair_strategies import (
     REPAIR_REGISTRY,
-    RepairResult,
 )
 
 from cortex.engine._autocurative_state import HealingPhase, HealingEvent, AgentHealth
@@ -29,10 +28,10 @@ from cortex.engine._autocurative_helper import (
 )
 
 __all__ = [
+    "AgentHealth",
     "AutoCurativeAgent",
     "AutoCurativeConfig",
     "HealingEvent",
-    "AgentHealth",
 ]
 
 logger = logging.getLogger("cortex.engine.autocurative")

@@ -139,7 +139,7 @@ class ProceduralMemory:
                     )
                 except ImportError:
                     pass
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             import logging
 
             logging.getLogger("cortex.memory.procedural").error(

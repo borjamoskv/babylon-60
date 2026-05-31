@@ -19,9 +19,9 @@ import httpx
 __all__ = [
     "DEFAULT_BASE_URL",
     "DEFAULT_TIMEOUT",
+    "PIPE_TIMEOUT",
     "LangbaseClient",
     "LangbaseError",
-    "PIPE_TIMEOUT",
 ]
 
 logger = logging.getLogger("cortex.extensions.langbase.client")

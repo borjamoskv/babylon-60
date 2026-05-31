@@ -25,9 +25,9 @@ from cortex.engine.endocrine import ENDOCRINE, HormoneType
 from cortex.engine.performance_tracker import PerformanceTracker
 
 __all__ = [
-    "PredictiveHealer",
     "Prediction",
     "PredictionType",
+    "PredictiveHealer",
 ]
 
 logger = logging.getLogger("cortex.engine.predictive")
@@ -154,7 +154,7 @@ class _TrendWindow:
             target_t = (threshold - intercept) / slope
             remaining = target_t - current_t
             return max(0, remaining)
-        elif slope < 0 and current_val > threshold:
+        if slope < 0 and current_val > threshold:
             target_t = (threshold - intercept) / slope
             remaining = target_t - current_t
             return max(0, remaining)

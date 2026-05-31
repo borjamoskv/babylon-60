@@ -161,7 +161,6 @@ class FundingRateScanner:
 
         if long_onchain and short_onchain:
             return "high"  # Riesgo smart contract doble
-        elif long_onchain or short_onchain:
+        if long_onchain or short_onchain:
             return "medium"  # Bridge/custodia mixta
-        else:
-            return "low"  # Ambos CEX (riesgo counterparty)
+        return "low"  # Ambos CEX (riesgo counterparty)

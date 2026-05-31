@@ -35,7 +35,6 @@ console = Console()
 @click.group()
 def episode():
     """Episodic Memory - persistent native memory."""
-    pass
 
 
 # ─── Record ──────────────────────────────────────────────────────────

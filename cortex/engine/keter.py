@@ -49,7 +49,6 @@ class SovereignPhase(ABC):
     @abstractmethod
     async def execute(self, payload: KeterPayload) -> KeterPayload:
         """Runs the KETER phase on the given payload."""
-        pass
 
 
 class IntentAlchemist(SovereignPhase):

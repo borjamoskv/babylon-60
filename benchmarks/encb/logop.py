@@ -131,7 +131,7 @@ def weighted_logop_categorical(
     if not observations:
         return categories[0] if categories else None, 0.0
 
-    scores: dict[Any, float] = {c: 0.0 for c in categories}
+    scores: dict[Any, float] = dict.fromkeys(categories, 0.0)
 
     for chosen, conf, rel in observations:
         c_eff = effective_confidence(conf, rel, config=config)

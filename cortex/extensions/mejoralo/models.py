@@ -5,12 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 __all__ = [
+    "AntipatternFinding",
+    "AntipatternReport",
     "DimensionResult",
     "ScanResult",
     "ShipResult",
     "ShipSeal",
-    "AntipatternFinding",
-    "AntipatternReport",
 ]
 
 

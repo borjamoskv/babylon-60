@@ -106,11 +106,10 @@ async def _fetch_aiohttp(url: str, timeout: float) -> tuple[str, int]:
     async with aiohttp.ClientSession(
         timeout=client_timeout,
         headers=_HEADERS,
-    ) as session:
-        async with session.get(url, allow_redirects=True) as resp:
-            resp.raise_for_status()
-            text = await resp.text()
-            return text, resp.status
+    ) as session, session.get(url, allow_redirects=True) as resp:
+        resp.raise_for_status()
+        text = await resp.text()
+        return text, resp.status
 
 
 async def _fetch_urllib(url: str, timeout: float) -> tuple[str, int]:
@@ -222,7 +221,7 @@ class ResilientFetcher:
                 errors.append(f"{provider.name}: TIMEOUT ({timeout}s)")
                 logger.warning("⏱️ [GATEWAY] %s timed out on %s", provider.name, url[:80])
 
-            except Exception as e:  # noqa: BLE001 - catches all provider-specific HTTP errors
+            except Exception as e:
                 provider.circuit_breaker.record_failure()
                 error_msg = f"{provider.name}: {type(e).__name__}: {e}"
                 errors.append(error_msg)

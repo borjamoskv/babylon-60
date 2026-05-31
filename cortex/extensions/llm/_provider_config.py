@@ -14,11 +14,10 @@ def resolve_provider_config(
 ) -> dict[str, Any]:
     if provider == "custom":
         return _resolve_custom(api_key, model, base_url)
-    elif provider in presets:
+    if provider in presets:
         return _resolve_preset(provider, presets[provider], api_key, model, base_url)
-    else:
-        supported = sorted(list(presets.keys()) + ["custom"])
-        raise ValueError(f"Unknown LLM provider '{provider}'. Supported: {supported}")
+    supported = sorted(list(presets.keys()) + ["custom"])
+    raise ValueError(f"Unknown LLM provider '{provider}'. Supported: {supported}")
 
 
 def _resolve_custom(api_key: str | None, model: str | None, base_url: str | None) -> dict[str, Any]:

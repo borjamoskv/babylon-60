@@ -22,9 +22,9 @@ from cortex.engine import CortexEngine
 
 __all__ = [
     "LANG_DESC",
+    "CategoriesResponse",
     "TipResponse",
     "TipsListResponse",
-    "CategoriesResponse",
     "get_tips",
     "get_tips_by_category",
     "get_tips_by_project",
@@ -92,7 +92,7 @@ _tips_engine: TipsEngine | None = None
 
 def _get_tips_engine(engine: CortexEngine) -> TipsEngine:
     """Lazy-init the tips engine with the API's CORTEX engine."""
-    global _tips_engine  # noqa: PLW0603
+    global _tips_engine
     if _tips_engine is None:
         _tips_engine = TipsEngine(engine, include_dynamic=True)
     return _tips_engine

@@ -8,7 +8,7 @@ from persistence.ledger import LedgerManager
 
 async def run_recon():
     ledger = LedgerManager()
-    recon = SecurityReconDaemon(ledger)  # noqa: F841
+    SecurityReconDaemon(ledger)
     print("Initiating SecurityReconDaemon single pass...")
     # Just enqueue one task
     import persistence.outbox as outbox

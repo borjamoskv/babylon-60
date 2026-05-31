@@ -18,8 +18,8 @@ if TYPE_CHECKING:
 
 __all__ = [
     "compress_and_store",
-    "summarize_events",
     "raw_concat",
+    "summarize_events",
 ]
 
 logger = logging.getLogger("cortex.memory.compression")

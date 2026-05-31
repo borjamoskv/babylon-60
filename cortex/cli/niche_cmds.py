@@ -14,7 +14,6 @@ from cortex.extensions.skills.niche_arbitrage.pipeline import NicheArbitrageEngi
 @click.group(name="niche", help="Niche Arbitrage - Market Intelligence Pipeline")
 def niche_cmds():
     """Domain intelligence and market anomaly arbitrage."""
-    pass
 
 
 @niche_cmds.command("extract", help="Run the extraction and synthesis pipeline on a target.")

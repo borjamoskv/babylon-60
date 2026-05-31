@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import sys
-import os
 import asyncio
 from pathlib import Path
 
@@ -9,7 +8,6 @@ root_dir = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(root_dir))
 
 from cortex.engine.smte.ouroboros_compiler import OuroborosCompiler
-from scripts.claude_stress_test import run_stress_test
 
 
 async def main():

@@ -50,10 +50,10 @@ class CircuitBreaker:
     """
 
     __slots__ = (
-        "_name",
-        "_state",
         "_failures",
         "_last_failure_time",
+        "_name",
+        "_state",
         "_threshold",
         "_timeout",
         "_total_trips",
@@ -107,7 +107,7 @@ class CircuitBreaker:
             result = await func(*args, **kwargs)
             self._on_success()
             return result
-        except Exception as e:  # noqa: BLE001 - breaker intercepts all downstream errors
+        except Exception as e:
             self._on_failure()
             raise e
 

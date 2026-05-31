@@ -86,12 +86,11 @@ class LWWRegister(Generic[T]):
     def merge(self, other: LWWRegister[T]) -> LWWRegister[T]:
         if other.timestamp > self.timestamp:
             return other
-        elif other.timestamp < self.timestamp:
+        if other.timestamp < self.timestamp:
             return self
-        else:
-            # Tie-breaker: arbitrary but deterministic (e.g. value hash or comparison)
-            # Here we just keep self if equal
-            return self
+        # Tie-breaker: arbitrary but deterministic (e.g. value hash or comparison)
+        # Here we just keep self if equal
+        return self
 
 
 class ORSet(Generic[T]):

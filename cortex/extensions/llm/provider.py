@@ -11,7 +11,7 @@ import logging
 import os
 import random
 import time
-from typing import Any, Final
+from typing import Any
 from collections.abc import AsyncGenerator
 
 import httpx

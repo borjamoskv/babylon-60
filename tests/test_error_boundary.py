@@ -102,9 +102,8 @@ def test_sync_cm_captures_error(_reset_pipeline):
     """Sync context manager captures and persists errors."""
     _, mock_persist_sync = _reset_pipeline
 
-    with pytest.raises(ValueError, match="sync error"):
-        with ErrorBoundary("test.sync_module"):
-            raise ValueError("sync error")
+    with pytest.raises(ValueError, match="sync error"), ErrorBoundary("test.sync_module"):
+        raise ValueError("sync error")
 
     mock_persist_sync.assert_called_once()
 

@@ -58,7 +58,7 @@ class SchemaEngine:
     Applies Schema Theory top-down processing to memory operations.
     """
 
-    __slots__ = ("_schemas", "_config")
+    __slots__ = ("_config", "_schemas")
 
     def __init__(
         self,

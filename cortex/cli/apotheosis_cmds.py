@@ -15,11 +15,11 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 
 __all__ = [
     "PROGRESS_DESC_FMT",
+    "aix_cmd",
     "apotheosis_cmds",
     "guard_cmd",
     "manifest_cmd",
     "nirvana_cmd",
-    "aix_cmd",
 ]
 
 from cortex.cli.common import cli, console

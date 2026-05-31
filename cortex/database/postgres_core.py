@@ -26,8 +26,8 @@ except ImportError:
 from cortex.utils.errors import DBLockError
 
 __all__ = [
-    "create_pool_async",
     "connect_async_ctx",
+    "create_pool_async",
 ]
 
 logger = logging.getLogger("cortex.db.postgres")

@@ -56,7 +56,7 @@ async def event_generator(request: Request) -> AsyncGenerator[str, None]:
             logger.info("SSE: Stream cancelled for %s", consumer_id)
         except Exception as e:
             logger.error("SSE: Stream error: %s", e)
-            yield f'data: {{"error": "{str(e)}"}}\n\n'
+            yield f'data: {{"error": "{e!s}"}}\n\n'
 
 
 @router.get("/stream")

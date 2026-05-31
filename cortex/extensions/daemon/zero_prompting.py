@@ -84,10 +84,9 @@ class ZeroPromptingDaemon:
                 m_engine.relentless_heal, "CORTEX_ZERO", str(self.root), scan_result
             )
             return {"action": "relentless_heal", "success": success}
-        else:
-            ouroboros = OuroborosOmega(str(self.root))
-            success = await asyncio.to_thread(ouroboros.execute_atomic_cycle)
-            return {"action": "ouroboros_atomic_cycle", "success": success}
+        ouroboros = OuroborosOmega(str(self.root))
+        success = await asyncio.to_thread(ouroboros.execute_atomic_cycle)
+        return {"action": "ouroboros_atomic_cycle", "success": success}
 
     async def _measure_improvement(self, state_before: dict, action_result: dict) -> dict[str, Any]:
         """Rigorously measures if the mutation improved the metrics."""
@@ -143,9 +142,8 @@ class ZeroPromptingDaemon:
         if improvement["net_positive"]:
             await self._crystallize(hypothesis, action_result, improvement)
             return {"evolved": True, "improvement": improvement}
-        else:
-            await self._revert(action_result)
-            return {"evolved": False, "reason": "Net negative improvement"}
+        await self._revert(action_result)
+        return {"evolved": False, "reason": "Net negative improvement"}
 
     async def run_loop(self) -> None:
         """The core Zero-Prompting pulse."""

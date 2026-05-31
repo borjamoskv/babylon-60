@@ -139,8 +139,8 @@ async def generate_handoff(
     _db_path_obj = Path(engine._db_path)
     # Compute size synchronously before any await (ASYNC240 - pre-await, does not block loop)
     db_size_mb: float = (
-        round(_db_path_obj.stat().st_size / (1024 * 1024), 2)  # noqa: ASYNC240
-        if _db_path_obj.exists()  # noqa: ASYNC240
+        round(_db_path_obj.stat().st_size / (1024 * 1024), 2)
+        if _db_path_obj.exists()
         else 0.0
     )
 

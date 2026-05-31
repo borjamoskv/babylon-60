@@ -18,7 +18,6 @@ class BaseMonitor(ABC, Generic[T]):
     @abstractmethod
     def check(self) -> list[T]:
         """Execute the monitor logic and return a list of alerts/results."""
-        pass
 
 
 class IntervalProjectMonitor(BaseMonitor[T]):

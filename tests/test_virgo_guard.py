@@ -255,10 +255,9 @@ class TestVirgoSystemBypassAndRollback:
             await engine.store_many(facts)
 
         # 3. Verify that none of the facts (especially fact 1) was persisted in the SQLite database
-        async with engine.session() as conn:
-            async with conn.cursor() as cur:
-                await cur.execute("SELECT id FROM facts WHERE content = ?", (content_1,))
-                row = await cur.fetchone()
-                assert row is None, (
-                    "First fact should have been rolled back because the second fact failed validation!"
-                )
+        async with engine.session() as conn, conn.cursor() as cur:
+            await cur.execute("SELECT id FROM facts WHERE content = ?", (content_1,))
+            row = await cur.fetchone()
+            assert row is None, (
+                "First fact should have been rolled back because the second fact failed validation!"
+            )

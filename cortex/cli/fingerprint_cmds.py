@@ -15,7 +15,6 @@ __all__ = ["fingerprint", "fingerprint_extract"]
 @cli.group()
 def fingerprint():
     """Cognitive Fingerprint - Extract your decision-making patterns."""
-    pass
 
 
 def _bar(value: float, width: int = 20) -> str:

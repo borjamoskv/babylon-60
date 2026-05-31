@@ -3,7 +3,6 @@ import os
 import torch
 import torchhd
 import logging
-from torchhd import functional as F
 
 # Adjust path to import cortex module
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

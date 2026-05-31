@@ -16,12 +16,12 @@ from cortex.utils.respiration import oxygenate
 logger = logging.getLogger(__name__)
 
 __all__ = [
-    "AttackVector",
-    "OOMKiller",
-    "Intruder",
-    "EntropyDemon",
-    "ChronosSniper",
     "RED_TEAM_SWARM",
+    "AttackVector",
+    "ChronosSniper",
+    "EntropyDemon",
+    "Intruder",
+    "OOMKiller",
 ]
 
 
@@ -184,7 +184,7 @@ class LedgerPoisoner:
                         findings.append(
                             f"LedgerPoisoner: Corrupted transaction #{tx_id} via UPDATE."
                         )
-                    except Exception as e:  # noqa: BLE001 - expected DB rejection for attack
+                    except Exception as e:
                         logger.debug("LedgerPoisoner Update rejected by DB (expected): %s", e)
 
                 # Attempt to delete a Merkle root
@@ -194,10 +194,10 @@ class LedgerPoisoner:
                     findings.append(
                         "LedgerPoisoner: Dropped Merkle checkpoints via raw SQL DELETE."
                     )
-                except Exception as e:  # noqa: BLE001 - expected DB rejection for attack
+                except Exception as e:
                     logger.debug("LedgerPoisoner Delete rejected by DB (expected): %s", e)
 
-        except Exception as e:  # noqa: BLE001 - attack vector execution boundary
+        except Exception as e:
             logger.debug("LedgerPoisoner execution error: %s", e)
 
         return findings
@@ -223,10 +223,10 @@ class VaultCracker:
                 findings.append(
                     "VaultCracker: Malleability attack succeeded (authentication failed)."
                 )
-            except Exception:  # noqa: BLE001 - expected decryption failure
+            except Exception:
                 pass  # Success = Tag caught it
 
-        except Exception as e:  # noqa: BLE001 - attack vector execution boundary
+        except Exception as e:
             logger.debug("VaultCracker error: %s", e)
 
         return findings

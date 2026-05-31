@@ -10,10 +10,10 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 __all__ = [
-    "Confidence",
     "CONFIDENCE_ORDER",
-    "FactNode",
     "REVERSE_CONFIDENCE_ORDER",
+    "Confidence",
+    "FactNode",
     "TaintStatus",
 ]
 

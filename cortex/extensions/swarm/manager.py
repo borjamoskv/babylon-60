@@ -78,7 +78,7 @@ class SwarmManager:
                     ready_event.set()
                     logger.info("Worktree %s active at %s", worktree_id, path)
                     await state.shutdown_event.wait()
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 state.status = "failed"
                 ready_event.set()
                 logger.error("Worktree %s lifecycle failed: %s", worktree_id, exc)
@@ -346,7 +346,7 @@ class CapatazOrchestrator:
             task.status = TaskStatus.COMPLETED
             task.result = result
             return result
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             task.status = TaskStatus.FAILED
             task.error = str(exc)
             logger.error("[%s] Capataz: Agent %s failed: %s", self.mission_id, agent_name, exc)
@@ -398,7 +398,7 @@ class CapatazOrchestrator:
         system_prompts = []
         for td in task_definitions:
             kwargs = td.get("kwargs", {})
-            if "system" in kwargs and kwargs["system"]:
+            if kwargs.get("system"):
                 system_prompts.append(kwargs["system"])
 
         if len(system_prompts) > 1:

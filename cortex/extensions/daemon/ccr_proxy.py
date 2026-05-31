@@ -59,7 +59,7 @@ async def _check_isothermal_redundancy(text: str) -> tuple[bool, float, str]:
             similitud = getattr(nearest[0], "_recall_score", 0.0)
             if similitud > 0.94:
                 return True, similitud, nearest[0].content
-    except Exception as e:  # noqa: BLE001 - fallback if vector search fails
+    except Exception as e:
         logger.warning("Isothermal L2 check bypassed/failed: %s", e)
 
     # Simulated fallback rule (Demonstration)
@@ -221,50 +221,49 @@ async def messages_endpoint(request: Request):
             text = data["choices"][0]["message"]["content"]
             anth_resp = _build_anthropic_response(text)
             return JSONResponse(content=anth_resp)
-        else:
-            # Streaming response generator
-            async def stream_generator():
-                async with client.stream("POST", LOCAL_OPENAI_URL, json=openai_payload) as resp:
-                    if resp.status_code != 200:
-                        yield (
-                            f'event: error\ndata: {{"type": "error", "error": '
-                            f'{{"type": "api_error", "message": "{resp.status_code}"}}}}\n\n'
-                        )
-                        return
-
-                    # Anthropic starts streams with a message_start
+        # Streaming response generator
+        async def stream_generator():
+            async with client.stream("POST", LOCAL_OPENAI_URL, json=openai_payload) as resp:
+                if resp.status_code != 200:
                     yield (
-                        f"event: message_start\ndata: {json.dumps({'type': 'message_start', 'message': {'id': 'msg_ccr', 'type': 'message', 'role': 'assistant', 'model': 'claude-3-5-sonnet-20241022', 'usage': {}}})}\n\n"
+                        f'event: error\ndata: {{"type": "error", "error": '
+                        f'{{"type": "api_error", "message": "{resp.status_code}"}}}}\n\n'
                     )
+                    return
 
-                    async for line in resp.aiter_lines():
-                        if not line or not line.startswith("data: "):
-                            continue
+                # Anthropic starts streams with a message_start
+                yield (
+                    f"event: message_start\ndata: {json.dumps({'type': 'message_start', 'message': {'id': 'msg_ccr', 'type': 'message', 'role': 'assistant', 'model': 'claude-3-5-sonnet-20241022', 'usage': {}}})}\n\n"
+                )
 
-                        data_str = line[6:]
-                        if data_str.strip() == "[DONE]":
-                            continue
+                async for line in resp.aiter_lines():
+                    if not line or not line.startswith("data: "):
+                        continue
 
-                        try:
-                            chunk = json.loads(data_str)
-                            delta_text = chunk["choices"][0]["delta"].get("content", "")
-                            if delta_text:
-                                # Anthropic content_block_delta format
-                                event_data = {
-                                    "type": "content_block_delta",
-                                    "index": 0,
-                                    "delta": {"type": "text_delta", "text": delta_text},
-                                }
-                                yield (
-                                    f"event: content_block_delta\n"
-                                    f"data: {json.dumps(event_data)}\n\n"
-                                )
-                        except Exception:  # noqa: BLE001 - drop malformed chunk
-                            continue
+                    data_str = line[6:]
+                    if data_str.strip() == "[DONE]":
+                        continue
 
-                    yield 'event: message_stop\ndata: {"type": "message_stop"}\n\n'
+                    try:
+                        chunk = json.loads(data_str)
+                        delta_text = chunk["choices"][0]["delta"].get("content", "")
+                        if delta_text:
+                            # Anthropic content_block_delta format
+                            event_data = {
+                                "type": "content_block_delta",
+                                "index": 0,
+                                "delta": {"type": "text_delta", "text": delta_text},
+                            }
+                            yield (
+                                f"event: content_block_delta\n"
+                                f"data: {json.dumps(event_data)}\n\n"
+                            )
+                    except Exception:
+                        continue
 
-            return StreamingResponse(stream_generator(), media_type="text/event-stream")
+                yield 'event: message_stop\ndata: {"type": "message_stop"}\n\n'
+
+        return StreamingResponse(stream_generator(), media_type="text/event-stream")
 
 
 if __name__ == "__main__":

@@ -22,13 +22,11 @@ logger = logging.getLogger("cortex.security.virgo")
 class VirgoValidationError(ValueError, CortexError):
     """Exception raised when a fact fails Logos-Critique (Virgo ♍) validation."""
 
-    pass
 
 
 class ContextPoisoningError(VirgoValidationError):
     """Exception raised when a fact contains active context poisoning patterns."""
 
-    pass
 
 
 class VirgoContextGuard:

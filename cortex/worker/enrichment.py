@@ -78,7 +78,6 @@ class EnrichmentWorker:
                 logger.info("Enriching fact %d via provider...", fact_id)
                 # This would call the provider to embed the fact
                 # For now, we just simulate success in the worker logic
-                pass
 
             await self._mark_success(conn, job_id)
             logger.info("Enriched fact %d (job %d)", fact_id, job_id)

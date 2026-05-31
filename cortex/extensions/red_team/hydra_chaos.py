@@ -127,7 +127,6 @@ class MockRedisClient:
 
         async def __aexit__(*args: Any, **kwargs: Any) -> None:
             """Mock async context manager exit."""
-            pass
 
         mock.__aenter__ = __aenter__
         mock.__aexit__ = __aexit__
@@ -198,7 +197,7 @@ class HydraChaosEngine:
             logger.error("🚨 [HYDRA-CHAOS] Engine failure: %s", e)
             critical_interrupted = True
             error_type = "AssertionError"
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.error("🚨 [HYDRA-CHAOS] Unexpected failure: %s", e)
             critical_interrupted = True
             error_type = type(e).__name__

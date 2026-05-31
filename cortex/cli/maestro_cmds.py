@@ -19,7 +19,6 @@ from cortex.extensions.ui_control.models import AppTarget
 @click.group(name="maestro")
 def maestro():
     """MAC-Ω: Automatización soberana de escritorio (AppleScript/Native)."""
-    pass
 
 
 # ─── Inspección ─────────────────────────────────────────────────

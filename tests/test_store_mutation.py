@@ -20,23 +20,22 @@ async def test_deprecate_impl_logic_success():
 
     with patch(
         "cortex.engine.store_mutation._fetch_fact_state", return_value=(1, "knowledge", None, 0, 0)
-    ) as mock_fetch:
-        with patch("cortex.engine.store_mutation.AsyncCausalGraph") as mock_graph:
-            mock_graph_instance = mock_graph.return_value
-            mock_graph_instance.propagate_taint = AsyncMock()
+    ) as mock_fetch, patch("cortex.engine.store_mutation.AsyncCausalGraph") as mock_graph:
+        mock_graph_instance = mock_graph.return_value
+        mock_graph_instance.propagate_taint = AsyncMock()
 
-            result = await deprecate_impl_logic(
-                mixin_instance=mock_mixin,
-                conn=mock_conn,
-                fact_id=1,
-                reason="test_reason",
-                tenant_id="tenant1",
-            )
+        result = await deprecate_impl_logic(
+            mixin_instance=mock_mixin,
+            conn=mock_conn,
+            fact_id=1,
+            reason="test_reason",
+            tenant_id="tenant1",
+        )
 
-            assert result is True
-            mock_conn.execute.assert_called_once()
-            mock_mixin._log_transaction.assert_called_once()
-            mock_graph_instance.propagate_taint.assert_called_once()
+        assert result is True
+        mock_conn.execute.assert_called_once()
+        mock_mixin._log_transaction.assert_called_once()
+        mock_graph_instance.propagate_taint.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -50,23 +49,22 @@ async def test_invalidate_impl_logic_success():
 
     with patch(
         "cortex.engine.store_mutation._fetch_fact_state", return_value=(1, "knowledge", None, 0, 0)
-    ) as mock_fetch:
-        with patch("cortex.engine.store_mutation.AsyncCausalGraph") as mock_graph:
-            mock_graph_instance = mock_graph.return_value
-            mock_graph_instance.propagate_taint = AsyncMock()
+    ) as mock_fetch, patch("cortex.engine.store_mutation.AsyncCausalGraph") as mock_graph:
+        mock_graph_instance = mock_graph.return_value
+        mock_graph_instance.propagate_taint = AsyncMock()
 
-            result = await invalidate_impl_logic(
-                mixin_instance=mock_mixin,
-                conn=mock_conn,
-                fact_id=1,
-                reason="test_invalid",
-                tenant_id="tenant1",
-            )
+        result = await invalidate_impl_logic(
+            mixin_instance=mock_mixin,
+            conn=mock_conn,
+            fact_id=1,
+            reason="test_invalid",
+            tenant_id="tenant1",
+        )
 
-            assert result is True
-            mock_conn.execute.assert_called_once()
-            mock_mixin._log_transaction.assert_called_once()
-            mock_graph_instance.propagate_taint.assert_called_once()
+        assert result is True
+        mock_conn.execute.assert_called_once()
+        mock_mixin._log_transaction.assert_called_once()
+        mock_graph_instance.propagate_taint.assert_called_once()
 
 
 @pytest.mark.asyncio

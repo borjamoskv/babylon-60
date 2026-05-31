@@ -10,19 +10,16 @@ logger = logging.getLogger("cortex.extensions.ui_control")
 class UIControlError(Exception):
     """Base exception for all UI control errors."""
 
-    pass
 
 
 class AppNotRunningError(UIControlError):
     """When the target application is not currently active."""
 
-    pass
 
 
 class UIElementNotFoundError(UIControlError):
     """When an AppleScript cannot find the requested window, button, or element."""
 
-    pass
 
 
 class AppleScriptExecutionError(UIControlError):
@@ -37,7 +34,6 @@ class AppleScriptExecutionError(UIControlError):
 class UITimeoutError(UIControlError):
     """When an element or condition is not met within the allotted time."""
 
-    pass
 
 
 # ─── Data Models ─────────────────────────────────────────────────

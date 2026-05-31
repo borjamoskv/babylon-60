@@ -66,7 +66,7 @@ class StoreResult:
 
 
 class NeuromorphicPipeline:
-    __slots__ = ("_metamemory", "_void_detector", "_schema_engine", "_stdp")
+    __slots__ = ("_metamemory", "_schema_engine", "_stdp", "_void_detector")
 
     def __init__(
         self,

@@ -16,9 +16,9 @@ if TYPE_CHECKING:
 
 __all__ = [
     "KnowledgeGapException",
-    "retrieve_episodic_context",
     "apply_rrf",
     "fact_to_dict",
+    "retrieve_episodic_context",
 ]
 
 logger = logging.getLogger("cortex.memory.retrieval")
@@ -27,7 +27,6 @@ logger = logging.getLogger("cortex.memory.retrieval")
 class KnowledgeGapException(Exception):
     """Raised when Metamemory FOK evaluates retrieval potential as too low to proceed."""
 
-    pass
 
 
 def _dict_from_fact(f: Any) -> dict[str, Any]:

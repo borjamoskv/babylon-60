@@ -30,15 +30,15 @@ class Position:
     """Inmutable position descriptor."""
 
     __slots__ = (
-        "symbol",
-        "side",
+        "correlation_id",
         "entry_price",
+        "max_hold_time",
+        "side",
         "size",
         "stop_loss",
+        "symbol",
         "take_profit",
-        "max_hold_time",
         "timestamp",
-        "correlation_id",
     )
     symbol: str
     side: str  # "long" | "short"

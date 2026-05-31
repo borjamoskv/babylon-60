@@ -15,13 +15,13 @@ from cortex.extensions.sap.mapper import SAPMapper, SyncDiff
 from cortex.extensions.sap.sync import SAPSync, SAPSyncResult
 
 __all__ = [
+    "SAPAuthError",
     "SAPClient",
     "SAPConfig",
+    "SAPConnectionError",
+    "SAPEntityError",
     "SAPMapper",
     "SAPSync",
     "SAPSyncResult",
     "SyncDiff",
-    "SAPConnectionError",
-    "SAPAuthError",
-    "SAPEntityError",
 ]

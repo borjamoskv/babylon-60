@@ -34,7 +34,7 @@ async def _run_lens(
                 intent=IntentProfile.REASONING,
             )
             return name, result.content
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             return name, f"[ERROR] Lens '{name}' failed: {type(e).__name__}: {e}"
 
 

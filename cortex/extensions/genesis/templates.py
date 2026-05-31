@@ -21,7 +21,7 @@ from cortex.extensions.genesis.renderers import (
     _render_workflow_md,
 )
 
-__all__ = ["TemplateRegistry", "SystemTemplate"]
+__all__ = ["SystemTemplate", "TemplateRegistry"]
 
 logger = logging.getLogger("cortex.extensions.genesis.templates")
 

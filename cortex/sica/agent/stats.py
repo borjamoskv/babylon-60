@@ -1,7 +1,6 @@
 """Statistics tracking for the SICA Agent."""
 
 from typing import Any
-from dataclasses import dataclass
 from cortex.sica.meta_level import MetaJudgment
 
 

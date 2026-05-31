@@ -14,7 +14,6 @@ from cortex.cli.common import console, get_engine
 @click.group("audit")
 def audit_cmds():
     """🛡️ Sovereign Audit: Security & Entropy detection."""
-    pass
 
 
 @audit_cmds.command("frontier")

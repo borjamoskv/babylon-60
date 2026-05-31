@@ -17,7 +17,7 @@ import asyncio
 import logging
 import sys
 
-__all__ = ["run_cli", "run_web", "main"]
+__all__ = ["main", "run_cli", "run_web"]
 
 logger = logging.getLogger("cortex.extensions.adk.runner")
 

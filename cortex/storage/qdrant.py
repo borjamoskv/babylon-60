@@ -20,7 +20,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Final, Protocol, runtime_checkable
 
-__all__ = ["VectorBackend", "QdrantVectorBackend", "get_vector_backend"]
+__all__ = ["QdrantVectorBackend", "VectorBackend", "get_vector_backend"]
 
 logger = logging.getLogger("cortex.storage.qdrant")
 

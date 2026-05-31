@@ -23,6 +23,9 @@ from cortex.cli.common import console
 from cortex.utils.i18n import get_trans
 
 __all__ = [
+    "CortexErrorStruct",
+    "ErrorCode",
+    "classify_error",
     "err_db_corrupted",
     "err_db_locked",
     "err_db_not_found",
@@ -37,9 +40,6 @@ __all__ = [
     "err_unexpected",
     "err_validation",
     "handle_cli_error",
-    "ErrorCode",
-    "CortexErrorStruct",
-    "classify_error",
 ]
 
 # ─── Data Structures ─────────────────────────────────────────────────

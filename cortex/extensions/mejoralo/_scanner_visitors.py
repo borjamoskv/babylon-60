@@ -11,7 +11,7 @@ import ast
 
 from cortex.extensions.mejoralo.models import AntipatternFinding
 
-__all__ = ["_BroadExceptionVisitor", "_AsyncIntegrityVisitor"]
+__all__ = ["_AsyncIntegrityVisitor", "_BroadExceptionVisitor"]
 
 # Mirrors the constant in antipatterns.py - kept in sync manually.
 _BLOCKING_CALLS: dict[str, str] = {

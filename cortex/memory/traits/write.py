@@ -90,7 +90,7 @@ class WriteTrait:
                     # Store 1-bit Vector (Legion Recall)
                     if vec_void_tb:
                         insert_void_sql = (
-                            f"INSERT INTO {vec_void_tb}(rowid, embedding) VALUES (?, ?)"  # noqa: S608
+                            f"INSERT INTO {vec_void_tb}(rowid, embedding) VALUES (?, ?)"
                         )
                         cursor.execute(
                             insert_void_sql,

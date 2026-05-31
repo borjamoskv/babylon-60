@@ -133,7 +133,6 @@ class AxiomRegistry:
 
     async def load(self) -> None:
         """Mock load for interface compatibility."""
-        pass
 
     def get(self, axiom_id: str) -> Axiom | None:
         return self._axioms.get(axiom_id)

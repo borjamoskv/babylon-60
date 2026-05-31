@@ -13,14 +13,14 @@ from cortex.extensions.alma.taste import (
 )
 
 __all__ = [
+    "GRADE_DEAD",
+    "GRADE_FUNCTIONAL",
+    "GRADE_GOAT",
+    "GRADE_MEDIOCRE",
+    "GRADE_STRONG",
     "AlmaEngine",
     "SoulState",
+    "TasteDimension",
     "TasteEngine",
     "TasteVerdict",
-    "TasteDimension",
-    "GRADE_GOAT",
-    "GRADE_STRONG",
-    "GRADE_FUNCTIONAL",
-    "GRADE_MEDIOCRE",
-    "GRADE_DEAD",
 ]

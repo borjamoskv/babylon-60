@@ -88,11 +88,11 @@ class JosuProactiveDaemon:
     """
 
     __slots__ = (
+        "_active_tasks",
+        "_results",
+        "_toolbox_watchdog",
         "db",
         "workspace_manager",
-        "_results",
-        "_active_tasks",
-        "_toolbox_watchdog",
     )
 
     def __init__(
@@ -225,12 +225,11 @@ class JosuProactiveDaemon:
                                 f"Failed to fix {target.id} after {target.max_attempts} "
                                 f"attempts. Error: {result.error}",
                             )
-                        else:
-                            await bus.emit(
-                                "swarm:error",
-                                {"error": result.error or "Pulse failed"},
-                                source=source_id,
-                            )
+                        await bus.emit(
+                            "swarm:error",
+                            {"error": result.error or "Pulse failed"},
+                            source=source_id,
+                        )
 
             finally:
                 self._active_tasks -= 1

@@ -2,9 +2,9 @@ from .types import OptimizerConfig, TuningDecision, OptimizationEvent, TuningTyp
 from .core import SelfOptimizer
 
 __all__ = [
-    "SelfOptimizer",
-    "OptimizerConfig",
-    "TuningDecision",
     "OptimizationEvent",
+    "OptimizerConfig",
+    "SelfOptimizer",
+    "TuningDecision",
     "TuningType",
 ]

@@ -63,7 +63,7 @@ async def handle_instruction(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await context.bot.edit_message_text(
             chat_id=update.effective_chat.id,
             message_id=status_msg.message_id,
-            text=f"❌ Fallo de ejecución local: {str(e)}",
+            text=f"❌ Fallo de ejecución local: {e!s}",
         )
 
 

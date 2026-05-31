@@ -24,7 +24,6 @@ __all__ = [
 @cli.group()
 def entropy():
     """ENTROPY-0 v1.0 - El Guardián de la Deuda Técnica."""
-    pass
 
 
 @entropy.command("install-hook")

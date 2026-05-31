@@ -34,7 +34,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, Generic, TypeVar
 
-__all__ = ["Ok", "Err", "Result", "safe", "safe_async"]
+__all__ = ["Err", "Ok", "Result", "safe", "safe_async"]
 
 T = TypeVar("T")
 E = TypeVar("E")
@@ -121,7 +121,7 @@ def safe(fn: Callable[..., T]) -> Callable[..., Result[T, str]]:
     def wrapper(*args: Any, **kwargs: Any) -> Result[T, str]:
         try:
             return Ok(fn(*args, **kwargs))
-        except Exception as exc:  # noqa: BLE001 - deliberate boundary - @safe wraps any callable
+        except Exception as exc:
             tb = traceback.format_exception(type(exc), exc, exc.__traceback__)
             return Err(f"{type(exc).__name__}: {exc}\n{''.join(tb[-3:])}")
 
@@ -136,7 +136,7 @@ def safe_async(fn: Callable[..., Any]) -> Callable[..., Any]:
     async def wrapper(*args: Any, **kwargs: Any) -> Result[T, str]:
         try:
             return Ok(await fn(*args, **kwargs))
-        except Exception as exc:  # noqa: BLE001 - deliberate boundary - @safe_async wraps any async callable
+        except Exception as exc:
             tb = traceback.format_exception(type(exc), exc, exc.__traceback__)
             return Err(f"{type(exc).__name__}: {exc}\n{''.join(tb[-3:])}")
 

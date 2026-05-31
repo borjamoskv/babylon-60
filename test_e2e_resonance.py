@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import os
 import aiosqlite
 from cortex.memory.manager import CortexMemoryManager
 from cortex.memory.working import WorkingMemoryL1

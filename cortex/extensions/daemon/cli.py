@@ -60,7 +60,7 @@ def _get_plist_dest() -> Path:
 def _get_systemd_unit() -> Path:
     """Linux systemd user unit destination."""
     svc_dir = get_service_dir()
-    assert svc_dir is not None  # noqa: S101
+    assert svc_dir is not None
     return svc_dir / f"{BUNDLE_ID}.service"
 
 

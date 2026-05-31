@@ -1,6 +1,5 @@
 import asyncio
 import random
-import time
 import sys
 
 # Aesthetic Industrial Noir 2026 Colors

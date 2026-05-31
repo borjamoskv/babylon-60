@@ -82,7 +82,6 @@ def autorouter_cmds():
 
     Daemon soberano que muta el modelo de IA según el modo de operación.
     """
-    pass
 
 
 @autorouter_cmds.command()

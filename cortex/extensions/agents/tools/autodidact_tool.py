@@ -54,9 +54,9 @@ class AutodidactIngestionTool:
                 f"Protocolo AUTODIDACT ejecutado sobre '{target}' con intent '{intent}'. "
                 f"El conocimiento ha sido/será destilado y sembrado en cortex.db (vía PULMONES si hubo fallo de red)."
             )
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.error("Falla crítica en herramienta Autodidact: %s", e)
-            return f"❌ ERROR DE INGESTA COGNITIVA: {str(e)}."
+            return f"❌ ERROR DE INGESTA COGNITIVA: {e!s}."
 
     def _run(self, *args, **kwargs) -> Any:
         raise NotImplementedError("AUTODIDACT-Ω es puramente asíncrono (PULMONES). Usa _arun.")

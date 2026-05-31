@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from collections.abc import Mapping
 from typing import Any, TYPE_CHECKING
 
@@ -83,7 +82,7 @@ def verify_events(verifier: _PublicLedgerVerifier) -> None:
     verifier.guarantees["temporal_consistency_verified"] = temporal_ok
 
 
-def _verify_single_event(  # noqa: C901
+def _verify_single_event(
     verifier: _PublicLedgerVerifier,
     event: dict[str, Any],
     index: int,

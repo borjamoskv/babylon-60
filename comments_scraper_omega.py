@@ -3,7 +3,6 @@ import re
 import subprocess
 import json
 import sys
-import os
 
 DB_PATH = "influencer_audit_v1.db"
 

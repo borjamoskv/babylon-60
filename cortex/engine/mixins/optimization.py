@@ -105,7 +105,7 @@ class SovereignTLRUCache:
             }
             try:
                 self.on_evict(key, value, audit)
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 logger.error("SovereignTLRUCache: Eviction hook failed: %s", e)
 
     def prove_forgetting(self) -> dict[str, Any]:
@@ -154,7 +154,7 @@ class OptimizationMixin:
         try:
             async with self.session() as conn:  # type: ignore
                 await self._log_transaction(conn, "SYSTEM", "CACHE_EVICTION", detail)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.error("Failed to anchor cache eviction: %s", e)
 
     async def start_optimizer(self):
@@ -217,10 +217,10 @@ class OptimizationMixin:
                             future.set_result(Ok(cursor.lastrowid))
                         else:
                             future.set_result(Ok(cursor.rowcount))
-                    except Exception as e:  # noqa: BLE001
+                    except Exception as e:
                         future.set_result(Err(str(e)))
                 await conn.commit()
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 await conn.rollback()
                 for future, _, _ in batch:
                     if not future.done():

@@ -14,7 +14,7 @@ async def engine(tmp_path):
     db_path = tmp_path / "test_lock.db"
     eng = CortexEngine(db_path=str(db_path))
     await eng.init_db()  # Initialize schema properly
-    yield eng
+    return eng
 
 
 @pytest.mark.asyncio

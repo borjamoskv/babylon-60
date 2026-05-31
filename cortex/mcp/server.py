@@ -62,7 +62,7 @@ class _MCPContext:
     that owns its lifecycle.
     """
 
-    __slots__ = ("cfg", "metrics", "executor", "pool", "search_cache", "_initialized", "membrane")
+    __slots__ = ("_initialized", "cfg", "executor", "membrane", "metrics", "pool", "search_cache")
 
     def __init__(self, cfg: MCPServerConfig) -> None:
         self.cfg = cfg
@@ -194,7 +194,7 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
                 "MCP Immune System rejected search: %s\nRisks: %s", query, triage.risks_assumed
             )
             return f"❌ Rejected by Immune System (Ω₃): {', '.join(triage.risks_assumed)}"
-        elif triage.verdict == Verdict.HOLD:
+        if triage.verdict == Verdict.HOLD:
             # We can allow HOLD for search, but log it
             logger.info("Search passed with HOLD warnings: %s", triage.risks_assumed)
 

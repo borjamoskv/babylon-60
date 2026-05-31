@@ -24,9 +24,9 @@ from cortex.extensions.episodic.main import Episode, EpisodicMemory, Pattern
 from cortex.memory.temporal import now_iso
 
 __all__ = [
-    "BootPayload",
     "DEFAULT_LOOKBACK_HOURS",
     "MAX_BOOT_CHARS",
+    "BootPayload",
     "generate_session_boot",
 ]
 

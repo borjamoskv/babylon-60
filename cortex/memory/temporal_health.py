@@ -39,14 +39,14 @@ from cortex.memory.drift import (
 )
 
 __all__ = [
-    "TemporalHealthScheduler",
-    "HealthTier",
     "HealthReport",
+    "HealthTier",
     "SchedulerConfig",
+    "TemporalHealthScheduler",
 ]
 
 # Models → temporal_health_models.py (Landauer LOC barrier)
-from cortex.memory.temporal_health_models import (  # noqa: E402
+from cortex.memory.temporal_health_models import (
     HealthReport,
     HealthTier,
     SchedulerConfig,

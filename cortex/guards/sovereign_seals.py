@@ -223,8 +223,8 @@ def _resolve_git_hook_path(hook_name: str) -> Path:
     if git_executable is None:
         return fallback
     try:
-        result = subprocess.run(  # noqa: S603
-            [git_executable, "-C", str(ROOT_DIR), "rev-parse", "--git-path", f"hooks/{hook_name}"],  # noqa: S603
+        result = subprocess.run(
+            [git_executable, "-C", str(ROOT_DIR), "rev-parse", "--git-path", f"hooks/{hook_name}"],
             capture_output=True,
             text=True,
             timeout=5,
@@ -414,7 +414,7 @@ async def check_seal_9_compliance_impl() -> tuple[bool, str]:
             printer.success(f"EU AI Act audit trail: {len(tables)} audit table(s) found.")
         else:
             printer.warn("EU AI Act: no audit tables found - implement for compliance.")
-    except Exception:  # noqa: BLE001 - compliance check boundary
+    except Exception:
         printer.warn("EU AI Act audit check skipped (engine not available).")
 
     # ── SSRF URLGuard Verification (CodeQL #95) ──
@@ -482,8 +482,8 @@ async def check_gate_21_preservation(
         checks.append("HEAD lineage (unchecked)")
     else:
         try:
-            result = subprocess.run(  # noqa: S603
-                [git_executable, "rev-parse", "HEAD~1"],  # noqa: S603
+            result = subprocess.run(
+                [git_executable, "rev-parse", "HEAD~1"],
                 cwd=str(ROOT_DIR),
                 capture_output=True,
                 text=True,

@@ -29,18 +29,14 @@ from cortex.isa.builder import (
     AgentOp,
     dispatch_targets,
     node_count,
-    reflect,
-    rewrite,
     to_json,
-    from_json,
-    SelfQuery,
 )
 
 __all__ = [
-    "ReflexionEngine",
     "Reflection",
-    "ReflexionOutcome",
     "ReflexionConfig",
+    "ReflexionEngine",
+    "ReflexionOutcome",
 ]
 
 logger = logging.getLogger("cortex.engine.reflexion")
@@ -500,7 +496,7 @@ class ReflexionEngine:
             logger.info("[REFLEXION] Rewrite strategy: RETRY_WRAPPER")
             return TreeRewriter.apply_retry_wrapper(tree, max_retries=2)
 
-        elif iteration == 1:
+        if iteration == 1:
             # Second failure: isolate the problematic target
             targets = dispatch_targets(tree)
             if targets:

@@ -1,14 +1,14 @@
 import unittest
 import os
 import sqlite3
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 # Importar los componentes del pipeline
 from init_influencer_audit_db import init_db
 from ingest_influencer_data import AuditIngestionEngine
 from nlp_martyr_loop import parse_vtt_and_analyze
 from comments_scraper_omega import scan_and_inject_comments
-from generate_report import get_analytics_data, generate_html_report
+from generate_report import generate_html_report
 
 TEST_DB = "influencer_audit_test.db"
 MOCK_VTT = "test_subs.es.vtt"

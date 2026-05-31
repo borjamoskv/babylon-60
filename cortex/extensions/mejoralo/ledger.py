@@ -7,7 +7,7 @@ from typing import Any
 from cortex.engine import CortexEngine
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
 
-__all__ = ["record_session", "get_history", "record_scar", "get_scars"]
+__all__ = ["get_history", "get_scars", "record_scar", "record_session"]
 
 logger = logging.getLogger("cortex.extensions.mejoralo")
 

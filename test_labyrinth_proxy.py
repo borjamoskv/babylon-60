@@ -52,7 +52,7 @@ def test_labyrinth_routing():
 
     except Exception as e:
         output_msg("Claim: Proxy connection or filter rejected payload.")
-        output_msg(f"Proof: {{ Error: [{str(e)}], Confidence: [C5-REAL] }}")
+        output_msg(f"Proof: {{ Error: [{e!s}], Confidence: [C5-REAL] }}")
         sys.exit(1)
 
 

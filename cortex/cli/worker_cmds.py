@@ -16,7 +16,6 @@ logger = logging.getLogger("cortex")
 @click.group(name="worker")
 def worker_group():
     """Manage background workers (Enrichment, etc)."""
-    pass
 
 
 @worker_group.command(name="start")

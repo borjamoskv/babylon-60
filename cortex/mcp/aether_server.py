@@ -79,7 +79,7 @@ def _axiom_3_verify(action_type: str, details: str) -> bool:
     except subprocess.TimeoutExpired:
         logger.error("Axiom 3 Verification Timed out after 5 minutes.")
         return False
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         logger.error("Axiom 3 Verification OSAScript failed: %s", e)
         return False
 
@@ -165,7 +165,7 @@ def create_aether_server(
             return await asyncio.to_thread(_read)
         except UnicodeDecodeError:
             return f"❌ File {filepath} is binary or not UTF-8."
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             return f"❌ Error reading file: {e}"
 
     @mcp.tool()
@@ -206,17 +206,16 @@ def create_aether_server(
         """
         await ctx.ensure_ready()
 
-        async with ctx.pool.acquire() as conn:
-            async with conn.execute(
-                "SELECT COUNT(*), AVG(reputation_score), COUNT(DISTINCT agent_type) "
-                "FROM agents WHERE tenant_id = ?",
-                (tenant_id,),
-            ) as cursor:
-                row = await cursor.fetchone()
-                if not row or row[0] == 0:
-                    return "Swarm is currently inactive (0 agents)."
+        async with ctx.pool.acquire() as conn, conn.execute(
+            "SELECT COUNT(*), AVG(reputation_score), COUNT(DISTINCT agent_type) "
+            "FROM agents WHERE tenant_id = ?",
+            (tenant_id,),
+        ) as cursor:
+            row = await cursor.fetchone()
+            if not row or row[0] == 0:
+                return "Swarm is currently inactive (0 agents)."
 
-                count, avg_rep, types = row
+            count, avg_rep, types = row
 
         return (
             f"🔱 CORTEX Swarm Report [{tenant_id}]\n"
@@ -256,7 +255,7 @@ def create_aether_server(
                 res += f"STDERR:\n{err_output}\n"
 
             return res
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             return f"❌ Subprocess error: {e}"
 
     return mcp

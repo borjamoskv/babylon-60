@@ -12,12 +12,12 @@ from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_e
 __all__ = [
     "mejoralo",
     "mejoralo_antipatterns",
+    "mejoralo_awwwards_fix",
+    "mejoralo_daemon",
     "mejoralo_history",
     "mejoralo_record",
     "mejoralo_scan",
     "mejoralo_ship",
-    "mejoralo_awwwards_fix",
-    "mejoralo_daemon",
     "mejoralo_trend",
 ]
 
@@ -25,7 +25,6 @@ __all__ = [
 @cli.group()
 def mejoralo():
     """MEJORAlo v8.0 - Protocolo de auditoría y mejora de código. Modo Relentless."""
-    pass
 
 
 @mejoralo.command("scan")

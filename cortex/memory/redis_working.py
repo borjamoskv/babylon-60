@@ -38,7 +38,7 @@ _ACCESS_LOG_MAXLEN: Final[int] = 2048
 class RedisWorkingMemoryL1:
     """Token-budgeted FIFO sliding window for short-term context backed by Redis."""
 
-    __slots__ = ("_redis", "_max_tokens", "_guardrail", "_prefix")
+    __slots__ = ("_guardrail", "_max_tokens", "_prefix", "_redis")
 
     def __init__(
         self,

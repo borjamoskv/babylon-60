@@ -21,7 +21,7 @@ logger = logging.getLogger("cortex.facts")
 
 try:
     from cortex.security.haiku import HaikuGuard
-except Exception:  # noqa: BLE001
+except Exception:
     HaikuGuard = None
 
 

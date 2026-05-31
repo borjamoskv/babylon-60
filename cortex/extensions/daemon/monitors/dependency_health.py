@@ -17,7 +17,7 @@ import os
 from dataclasses import dataclass
 from typing import Any
 
-__all__ = ["DependencyHealthMonitor", "DependencyAlert"]
+__all__ = ["DependencyAlert", "DependencyHealthMonitor"]
 
 logger = logging.getLogger("cortex.extensions.daemon.dependency_health")
 
@@ -94,7 +94,7 @@ class PostgreSQLHealthCheck(HealthCheck):
             return None
         except ImportError:
             return DependencyAlert("postgresql", "unavailable", "psycopg2 not installed")
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             return DependencyAlert("postgresql", "unavailable", str(e))
 
 
@@ -116,7 +116,7 @@ class QdrantHealthCheck(HealthCheck):
             if resp.status_code != 200:
                 return DependencyAlert("qdrant", "degraded", f"HTTP {resp.status_code}")
             return None
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             return DependencyAlert("qdrant", "unavailable", str(e))
 
 
@@ -139,7 +139,7 @@ class RedisHealthCheck(HealthCheck):
             return None
         except ImportError:
             return DependencyAlert("redis", "unavailable", "redis-py not installed")
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             return DependencyAlert("redis", "unavailable", str(e))
 
 
@@ -203,7 +203,7 @@ class DependencyHealthMonitor:
                         alert.status,
                         alert.detail,
                     )
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 alerts.append(DependencyAlert(health_check.name, "error", f"Check crashed: {e}"))
         return alerts
 
@@ -220,6 +220,6 @@ class DependencyHealthMonitor:
                     results[health_check.name] = {"status": "healthy"}
                 else:
                     results[health_check.name] = alert.to_dict()
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 results[health_check.name] = {"status": "error", "detail": str(e)}
         return results

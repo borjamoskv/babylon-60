@@ -41,7 +41,7 @@ def clean_swarm_queue_db(monkeypatch, tmp_path):
     conn.commit()
     conn.close()
 
-    yield test_db
+    return test_db
 
 
 @pytest.mark.asyncio

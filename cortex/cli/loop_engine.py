@@ -19,7 +19,7 @@ from typing import Any
 from cortex.cli.common import DEFAULT_DB, _detect_agent_source, _run_async, get_engine
 from cortex.cli.loop_models import LoopSession, PersistenceType, TaskResult, TaskStatus
 
-__all__ = ["ExecutionLoop", "PersistSupervisor", "PERSIST_INTERVAL"]
+__all__ = ["PERSIST_INTERVAL", "ExecutionLoop", "PersistSupervisor"]
 
 logger = logging.getLogger("cortex.loop.engine")
 
@@ -81,7 +81,7 @@ class PersistSupervisor:
         while not self._stop.wait(timeout=self._interval):
             try:
                 self._flush(source="supervisor")
-            except Exception as exc:  # noqa: BLE001 - supervisor must not die
+            except Exception as exc:
                 logger.warning("PersistSupervisor: flush error (non-fatal): %s", exc)
 
 
@@ -142,7 +142,7 @@ class ExecutionLoop:
             result.output = "Task cancelled by user"
             result.duration_ms = (time.monotonic() - t0) * 1000
 
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             elapsed = (time.monotonic() - t0) * 1000
             result.status = TaskStatus.FAILED
             result.output = str(exc)
@@ -180,7 +180,7 @@ class ExecutionLoop:
                 parts.append(f"Quality: {payload['score_130_100']}/100")
             parts.append(f"Status: {payload.get('status', 'unknown')}")
             return " │ ".join(parts)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.warning("KETER execution failed, storing as knowledge: %s", exc)
             return f"Task registered: {task}"
 

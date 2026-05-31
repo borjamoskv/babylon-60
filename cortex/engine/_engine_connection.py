@@ -11,13 +11,11 @@ import sqlite3
 import warnings
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from pathlib import Path
-from typing import Any
 
 import aiosqlite
 import sqlite_vec
 
-from cortex.database.core import load_sqlite_vec_async, connect_async, connect
+from cortex.database.core import load_sqlite_vec_async, connect
 from cortex.database.schema import get_init_meta
 from cortex.migrations.core import run_migrations_async
 from cortex.telemetry.metrics import metrics

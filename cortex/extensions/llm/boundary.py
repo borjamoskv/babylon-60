@@ -129,7 +129,7 @@ class ImmuneBoundary:
             except (ValueError, TypeError) as e:
                 last_exception = e
                 # Si falló por argumentos (TypeError), informamos detalle
-                last_error_msg = f"Parsing failure: {str(e)}"
+                last_error_msg = f"Parsing failure: {e!s}"
                 logger.warning(
                     "ImmuneBoundary: Parsing failure for %s (attempt %d/%d): %s",
                     schema.__name__,

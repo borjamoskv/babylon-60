@@ -81,7 +81,6 @@ def handle_ghost_response(returncode: int, stdout: str, stderr: str, title: str)
 @click.group(name="ghost")
 def ghost_cmds():
     """👻 GHOST-1: OS Control & Songlines Architecture."""
-    pass
 
 
 @ghost_cmds.command()

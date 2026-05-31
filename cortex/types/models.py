@@ -51,10 +51,10 @@ __all__ = [
     "StoreResponse",
     "TimeSummaryResponse",
     "TraceInput",
+    "UniversalMemorySchema",
     "VoteRequest",
     "VoteResponse",
     "VoteV2Request",
-    "UniversalMemorySchema",
 ]
 
 

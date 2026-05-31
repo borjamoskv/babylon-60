@@ -9,8 +9,7 @@ Token estimation: ~4 chars per token (tiktoken-free approximation).
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
-from typing import Any
+from dataclasses import dataclass
 
 from pydantic import BaseModel, Field
 
@@ -315,7 +314,7 @@ def is_inside_string(text: str, position: int, language: str = "python") -> bool
                     current_quote = None
                     i += 3
                     continue
-                elif not in_string:
+                if not in_string:
                     in_string = True
                     current_quote = triple
                     i += 3

@@ -46,13 +46,13 @@ class SovereignCache(Generic[T]):
 
     __slots__ = (
         "_cache",
-        "_maxsize",
-        "_ttl",
-        "_on_evict",
-        "_lock",
+        "_eviction_count",
         "_eviction_tasks",
         "_evidence_hash",
-        "_eviction_count",
+        "_lock",
+        "_maxsize",
+        "_on_evict",
+        "_ttl",
     )
 
     def __init__(
@@ -134,7 +134,7 @@ class SovereignCache(Generic[T]):
                 task.add_done_callback(self._eviction_tasks.discard)
             else:
                 self._on_evict(key, value, self._evidence_hash, self._eviction_count)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.error("SovereignCache: Eviction hook failed for key %s: %s", key, e)
 
     def get_forgetting_proof(self) -> dict[str, Any]:

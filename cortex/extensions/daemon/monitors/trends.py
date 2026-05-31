@@ -27,6 +27,6 @@ class TrendsMonitor(BaseMonitor[TrendsAlert]):
             # We fetch all alerts generated since the last cycle
             alerts = self._oracle.consume_alerts()
             return alerts
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.error("TrendsMonitor check failed: %s", e)
             return []

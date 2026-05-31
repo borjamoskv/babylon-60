@@ -54,7 +54,7 @@ _SEMANTIC_KEYS = frozenset({"role", "title", "description", "identifier", "value
 def _backoff_sleep(attempt: int) -> float:
     """Exponential backoff with jitter."""
     delay = min(BACKOFF_BASE * (2**attempt), BACKOFF_CAP)
-    jitter = random.uniform(0, BACKOFF_JITTER)  # noqa: S311
+    jitter = random.uniform(0, BACKOFF_JITTER)
     total = delay + jitter
     time.sleep(total)
     return total

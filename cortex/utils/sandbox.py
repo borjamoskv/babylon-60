@@ -52,7 +52,7 @@ import sys
 from dataclasses import dataclass, field
 from io import StringIO
 
-__all__ = ["ASTSandbox", "SandboxVerdict", "ExecResult"]
+__all__ = ["ASTSandbox", "ExecResult", "SandboxVerdict"]
 
 logger = logging.getLogger("cortex.sandbox")
 
@@ -395,7 +395,7 @@ class ASTSandbox:
 
             try:
                 # nosec B102 - guarded by AST whitelist + timeout + restricted builtins
-                exec(compile(code, "<sandbox>", "exec"), namespace)  # noqa: S102  # nosec B102 - exec() in sandboxed namespace - explicit design decision for REPL
+                exec(compile(code, "<sandbox>", "exec"), namespace)  # nosec B102 - exec() in sandboxed namespace - explicit design decision for REPL
             finally:
                 if hasattr(signal, "SIGALRM"):
                     signal.alarm(0)
@@ -408,7 +408,7 @@ class ASTSandbox:
                 stdout=captured.getvalue(),
                 duration_ms=(_time.monotonic() - start) * 1000,
             )
-        except Exception as e:  # noqa: BLE001 - sandbox restriction catches all dynamic execution errors
+        except Exception as e:
             return ExecResult(
                 success=False,
                 error=f"{type(e).__name__}: {e}",

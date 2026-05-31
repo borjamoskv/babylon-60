@@ -42,10 +42,6 @@ from cortex.engine.autopoietic_agent import (
     EvolutionConfig,
 )
 from cortex.isa.builder import (
-    dispatch,
-    seq,
-    par,
-    to_json,
     node_count,
     dispatch_targets,
 )

@@ -87,7 +87,7 @@ class SovereignTriad:
             except httpx.HTTPStatusError as e:
                 return f"[ERROR] Exa Status {e.response.status_code}"
             except httpx.RequestError as e:
-                return f"[ERROR] Exa Fallo de red: {str(e)}"
+                return f"[ERROR] Exa Fallo de red: {e!s}"
 
     async def neural_search_exa(self, query: str, num_results: int = 5) -> list[dict[str, Any]]:
         """

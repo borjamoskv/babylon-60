@@ -15,9 +15,8 @@ from __future__ import annotations
 import logging
 import time
 from collections import OrderedDict
-from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from cortex.agents.copilot_contracts import SuggestionBatch
 
@@ -43,7 +42,7 @@ class CacheStats(BaseModel):
 class _CacheEntry:
     """Internal cache entry with timestamp for TTL."""
 
-    __slots__ = ("batch", "created_at", "context_hash", "file_paths")
+    __slots__ = ("batch", "context_hash", "created_at", "file_paths")
 
     def __init__(
         self,

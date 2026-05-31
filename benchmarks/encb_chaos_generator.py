@@ -317,7 +317,7 @@ class EpisodicSpamGenerator:
         """Create signal facts."""
         self._signal_facts = [self._generate_signal_fact(i) for i in range(self.num_signal_facts)]
         return GroundTruth(
-            propositions={f: True for f in self._signal_facts},
+            propositions=dict.fromkeys(self._signal_facts, True),
             entails_chains=[],
             signal_facts=list(self._signal_facts),
         )
@@ -410,11 +410,10 @@ class EpisodicSpamGenerator:
 
         if idx % 3 == 0:
             return f"{filler}, {source.lower()} (ref: unverified)"
-        elif idx % 3 == 1:
+        if idx % 3 == 1:
             random.shuffle(words)
             return f"{' '.join(words)} - {filler}"
-        else:
-            return f"Re: {source[:40]}... {filler}, this is well-known"
+        return f"Re: {source[:40]}... {filler}, this is well-known"
 
 
 # ── Unified Chaos Orchestrator ─────────────────────────────────────────────

@@ -21,7 +21,6 @@ logger = logging.getLogger("cortex.nemesis")
 class NemesisRejection(Exception):
     """Raised when a fact violates the 130/100 standard and is rejected by Nemesis."""
 
-    pass
 
 
 class NemesisProtocol:
@@ -167,7 +166,7 @@ class NemesisProtocol:
                     source="nemesis-protocol",
                     project="system",
                 )
-        except Exception as e:  # noqa: BLE001 - signal emission failure should not crash analysis
+        except Exception as e:
             logger.debug("Failed to emit nemesis signal: %s", e)
 
     def assimilate(cls, vector: str, reason: str, db_path: str | None = None) -> bool:
@@ -197,7 +196,7 @@ class NemesisProtocol:
                         source="nemesis-protocol",
                         project="system",
                     )
-            except Exception as e:  # noqa: BLE001 - must not crash analysis
+            except Exception as e:
                 logger.debug("Failed to emit assimilation signal: %s", e)
 
         return True

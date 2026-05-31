@@ -9,10 +9,8 @@ import copy
 import json
 import logging
 import random
-from typing import Any
 
 from cortex.isa.builder import (
-    AgentOp,
     dispatch,
     seq,
     par,

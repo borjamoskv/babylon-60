@@ -184,7 +184,7 @@ class AuthManager:
         async def _wrapper() -> None:
             try:
                 res.append(await coro)
-            except Exception as e:  # noqa: BLE001 - relay to calling thread
+            except Exception as e:
                 err.append(e)
             finally:
                 event.set()
@@ -216,7 +216,7 @@ class AuthManager:
         async def _wrapper() -> None:
             try:
                 res.append(await self.authenticate_async(raw_key))
-            except Exception as e:  # noqa: BLE001 - relay to calling thread
+            except Exception as e:
                 err.append(e)
             finally:
                 event.set()
@@ -292,7 +292,7 @@ _auth_lock = threading.Lock()
 
 def get_auth_manager() -> AuthManager:
     """Lazy-load the global AuthManager instance (thread-safe)."""
-    global _auth_manager  # noqa: PLW0603
+    global _auth_manager
     if _auth_manager is None:
         with _auth_lock:
             if _auth_manager is None:
@@ -302,5 +302,5 @@ def get_auth_manager() -> AuthManager:
 
 def reset_auth_manager() -> None:
     """Reset the global AuthManager instance (useful for tests)."""
-    global _auth_manager  # noqa: PLW0603
+    global _auth_manager
     _auth_manager = None

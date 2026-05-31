@@ -10,11 +10,9 @@ import hashlib
 import json
 import secrets
 import sqlite3
-import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
 
 from .models import (
     Agent,

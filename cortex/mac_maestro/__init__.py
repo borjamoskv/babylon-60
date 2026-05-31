@@ -4,10 +4,10 @@ from .intent import MacAction, MacIntent
 from .oracle import OracleVerdict, VerificationOracle
 
 __all__ = [
-    "MaestroExecutor",
     "MacAction",
     "MacIntent",
-    "VerificationOracle",
+    "MaestroExecutor",
     "OracleVerdict",
+    "VerificationOracle",
     "build_mac_maestro_event",
 ]

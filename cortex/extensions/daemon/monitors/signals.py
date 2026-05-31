@@ -82,7 +82,7 @@ class SignalMonitor:
                             message=f"Reflex executed for {sig.event_type}",
                         )
                     )
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.error("SignalMonitor check failed: %s", e)
 
         return alerts

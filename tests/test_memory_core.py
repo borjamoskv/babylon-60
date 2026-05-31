@@ -205,7 +205,8 @@ class TestSemanticCompressor:
 
     def test_custom_summarizer(self):
         compressor = SemanticCompressor(min_cluster_size=2)
-        summarizer = lambda contents: "COMPRESSED"  # noqa: E731
+        def summarizer(contents):
+            return "COMPRESSED"
         engrams = [MockEngram(content="a" * 100), MockEngram(content="b" * 100)]
 
         result = compressor.compress(engrams, summarizer=summarizer)

@@ -203,7 +203,7 @@ class ConflictResolver:
     CONSENSUS_THRESHOLD: float = 0.70
     ARCHITECT_CONFIDENCE_GATE: float = 0.80
 
-    __slots__ = ("_history", "_deadlock_breaker", "_conflict_counter")
+    __slots__ = ("_conflict_counter", "_deadlock_breaker", "_history")
 
     def __init__(self, budget: float = 100.0) -> None:
         self._history: list[ConflictResolution] = []
@@ -417,7 +417,7 @@ class ConflictResolver:
                 reasoning=f"Architect decision (conf={confidence:.2f}): {reasoning}",
             )
 
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.error("Architect arbitration failed: %s", exc)
             return None
 

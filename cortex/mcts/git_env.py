@@ -129,9 +129,8 @@ class MCTSGitEnvironment:
             )
             # En la versión P0, es binario
             return 1.0
-        else:
-            logger.warning("💥 [CHRONOS] Mutación aniquilada: Falla aserción o causa regresión.")
-            return 0.0
+        logger.warning("💥 [CHRONOS] Mutación aniquilada: Falla aserción o causa regresión.")
+        return 0.0
 
     async def secure_checkout(self, branch: str) -> None:
         """Vuelve a una rama segura restaurando cualquier cambio."""

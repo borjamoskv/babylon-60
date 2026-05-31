@@ -11,16 +11,13 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass
-from typing import Any, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 from uuid import uuid4
 
 from cortex.agents.builtins.copilot_agent import SuggestionStrategy
 from cortex.agents.copilot_cache import SuggestionCache
 from cortex.agents.copilot_context import (
     ContextWindow,
-    FIM_MIDDLE_TAG,
-    FIM_PREFIX_TAG,
-    FIM_SUFFIX_TAG,
     build_context_window,
 )
 from cortex.agents.copilot_contracts import (
@@ -253,9 +250,8 @@ class LLMCompletionStrategy(SuggestionStrategy):
         if self._use_fim and self._model_supports_fim(model):
             # FIM format: <prefix>...<suffix>...<middle>
             return f"{window.fim_prefix}{window.fim_suffix}{window.fim_middle}"
-        else:
-            # Standard completion: just the prefix
-            return window.prefix
+        # Standard completion: just the prefix
+        return window.prefix
 
     @staticmethod
     def _model_supports_fim(model: str) -> bool:

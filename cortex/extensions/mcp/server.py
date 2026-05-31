@@ -114,7 +114,7 @@ if MCP_AVAILABLE:
                 report += f"- [{v.severity}] {v.policy}: {v.reason}\n"
             return [TextContent(type="text", text=report)]
 
-        elif name == "cortex_read_ledger_status":
+        if name == "cortex_read_ledger_status":
             return [
                 TextContent(
                     type="text",
@@ -122,7 +122,7 @@ if MCP_AVAILABLE:
                 )
             ]
 
-        elif name == "cortex_vsa_ingest":
+        if name == "cortex_vsa_ingest":
             content = arguments.get("content")
             tags = arguments.get("tags")
             rid = vsa_bridge.ingest(content, tags=tags)
@@ -134,7 +134,7 @@ if MCP_AVAILABLE:
                 )
             ]
 
-        elif name == "cortex_vsa_query":
+        if name == "cortex_vsa_query":
             intent = arguments.get("intent")
             top_k = arguments.get("top_k", 3)
             results = vsa_bridge.query(intent, top_k=top_k)
@@ -146,7 +146,7 @@ if MCP_AVAILABLE:
                 out += f"- [{r['id']}] (Sim: {r['similarity']}): {r['content']}\n"
             return [TextContent(type="text", text=out)]
 
-        elif name == "cortex_invoke_claude":
+        if name == "cortex_invoke_claude":
             prompt = arguments.get("prompt")
             model = arguments.get("model", "claude-3-opus-20240229")
             response_json = run_claude_query(prompt, model)

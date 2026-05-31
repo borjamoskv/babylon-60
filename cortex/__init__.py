@@ -54,4 +54,4 @@ def __getattr__(name: str):
     raise AttributeError(f"module 'cortex' has no attribute {name!r}")
 
 
-__all__ = ["CortexEngine", "api", "routes", "__version__"]  # pyright: ignore[reportUnsupportedDunderAll]
+__all__ = ["CortexEngine", "__version__", "api", "routes"]  # pyright: ignore[reportUnsupportedDunderAll]

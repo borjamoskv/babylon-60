@@ -15,9 +15,9 @@ chain including optional dependencies.
 from __future__ import annotations
 
 import importlib
-import socket  # noqa: F401
-import ssl  # noqa: F401 - re-export for backward compat (tests patch via cortex.daemon.ssl)
-import time  # noqa: F401
+import socket
+import ssl
+import time
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

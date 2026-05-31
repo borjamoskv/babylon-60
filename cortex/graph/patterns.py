@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import re
 
-__all__ = ["ENTITY_PATTERNS", "RELATION_SIGNALS", "COMMON_WORDS"]
+__all__ = ["COMMON_WORDS", "ENTITY_PATTERNS", "RELATION_SIGNALS"]
 
 # ─── Entity Type Patterns ───────────────────────────────────────────
 

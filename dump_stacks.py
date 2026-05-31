@@ -1,5 +1,4 @@
 import asyncio
-import traceback
 import sys
 
 

@@ -22,9 +22,9 @@ from cortex.engine.causality import (
 )
 
 __all__ = [
+    "Derivation",
     "InferenceEngine",
     "InferenceRule",
-    "Derivation",
     "derive_facts",
 ]
 

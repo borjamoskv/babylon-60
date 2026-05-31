@@ -25,7 +25,7 @@ _tracker: UsageTracker | None = None
 
 def get_tracker() -> UsageTracker:
     """FastAPI dependency for UsageTracker (singleton, overridable)."""
-    global _tracker  # noqa: PLW0603
+    global _tracker
     if _tracker is None:
         _tracker = UsageTracker()
     return _tracker

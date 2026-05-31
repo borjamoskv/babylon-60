@@ -73,7 +73,7 @@ class HeartbeatDaemon:
                 async with connect_async_ctx(CORTEX_DB) as conn:  # pyright: ignore
                     await decalcifier.decalcify_cycle(conn)
 
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 logger.error("🧬 [Ω₃-E+] Decalcifier hourly loop error: %s", e)
 
     async def start(self) -> None:
@@ -132,7 +132,7 @@ class HeartbeatDaemon:
 
             except asyncio.CancelledError:
                 raise
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 logger.error("Heartbeat loop error: %s", e)
                 await asyncio.sleep(10.0)
 
@@ -207,7 +207,7 @@ class HeartbeatDaemon:
         payload = task["payload"]
         if task["type"] == "RESEARCH":
             return f"Deep dive on: {payload.get('topic')}. Context: {payload.get('context', '')}"
-        elif task["type"] == "REFACTOR":
+        if task["type"] == "REFACTOR":
             return f"Apply BERRERAIKI pattern to file: {payload.get('file_path')}"
         return f"Task type {task['type']}: {json.dumps(payload)}"
 

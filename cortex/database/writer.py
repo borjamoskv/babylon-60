@@ -308,7 +308,7 @@ class SqliteWriteWorker:
         if isinstance(msg, _Shutdown):
             await self._handle_shutdown(conn, loop, msg.future)
             return True
-        elif isinstance(msg, _WriteOp):
+        if isinstance(msg, _WriteOp):
             await self._process_write(conn, msg, loop)
         elif isinstance(msg, _TxBegin):
             await self._handle_tx_sql(conn, loop, msg.future, "BEGIN IMMEDIATE")

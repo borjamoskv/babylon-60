@@ -21,7 +21,6 @@ console = Console()
 @click.group()
 def scraper():
     """SCRAPER-Ω: Sovereign Web Extraction Engine."""
-    pass
 
 
 @scraper.command()
@@ -250,5 +249,5 @@ def _persist_to_cortex(result) -> None:
             )
         )
         console.print("[dim green]💎 Persisted to CORTEX Ledger[/dim green]")
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         console.print(f"[dim red]⚠️ CORTEX persist failed: {e}[/dim red]")

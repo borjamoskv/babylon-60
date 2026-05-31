@@ -1,9 +1,9 @@
 from .market import TaaSMarketplace, JobRequest, JobSLA, JobQuote, JobExecutionResult
 
 __all__ = [
-    "TaaSMarketplace",
+    "JobExecutionResult",
+    "JobQuote",
     "JobRequest",
     "JobSLA",
-    "JobQuote",
-    "JobExecutionResult",
+    "TaaSMarketplace",
 ]

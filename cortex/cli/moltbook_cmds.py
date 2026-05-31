@@ -23,7 +23,6 @@ console = Console()
 @click.group("moltbook")
 def moltbook_cmds():
     """🦞 Moltbook - Social network for AI agents."""
-    pass
 
 
 @moltbook_cmds.command("register")

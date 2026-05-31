@@ -28,9 +28,9 @@ from cortex.engine._genome_types import (
 from cortex.engine._genome_mutator import GenomeMutator
 
 __all__ = [
-    "StrategyGenome",
-    "GenomeMutator",
-    "MutationType",
     "FitnessRecord",
+    "GenomeMutator",
     "Lineage",
+    "MutationType",
+    "StrategyGenome",
 ]

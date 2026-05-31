@@ -81,9 +81,7 @@ class RedTeamAgent:
             if raw_test.startswith("```"):
                 lines = raw_test.splitlines()
                 # Remove triple backticks
-                if lines[0].startswith("```python"):
-                    lines = lines[1:]
-                elif lines[0].startswith("```"):
+                if lines[0].startswith("```python") or lines[0].startswith("```"):
                     lines = lines[1:]
                 if lines and lines[-1].startswith("```"):
                     lines = lines[:-1]

@@ -215,7 +215,6 @@ async def process_queue():
 class EntropySpikeException(Exception):
     """Raised when swarm yield dispersion exceeds the safety threshold."""
 
-    pass
 
 
 def _audit_entropy_spike(legion: TensorGlialLegion, agent_name: str) -> None:
@@ -247,12 +246,11 @@ def _audit_entropy_spike(legion: TensorGlialLegion, agent_name: str) -> None:
         raise EntropySpikeException(
             f"Entropy Circuit Breaker tripped for agent {agent_name} (cv={cv:.4f})"
         )
-    else:
-        logger.debug(
-            "[AUDITOR-Ω] entropy OK - agent=%s cv=%.4f",
-            agent_name,
-            cv,
-        )
+    logger.debug(
+        "[AUDITOR-Ω] entropy OK - agent=%s cv=%.4f",
+        agent_name,
+        cv,
+    )
 
 
 if __name__ == "__main__":

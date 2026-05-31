@@ -33,14 +33,13 @@ def export_facts(facts: list[Fact], fmt: str = "json") -> str:
     fmt = fmt.strip().lower()
     if fmt == "json":
         return _export_json(facts)
-    elif fmt == "csv":
+    if fmt == "csv":
         return _export_csv(facts)
-    elif fmt == "jsonl":
+    if fmt == "jsonl":
         return _export_jsonl(facts)
-    elif fmt == "notebooklm":
+    if fmt == "notebooklm":
         return _export_notebooklm(facts)
-    else:
-        raise ValueError(f"Unsupported export format: '{fmt}'. Use: json, csv, jsonl, notebooklm")
+    raise ValueError(f"Unsupported export format: '{fmt}'. Use: json, csv, jsonl, notebooklm")
 
 
 def _export_notebooklm(facts: list[Fact]) -> str:

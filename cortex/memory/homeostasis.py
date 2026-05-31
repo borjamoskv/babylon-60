@@ -149,7 +149,7 @@ class HomeostaticScaler:
     without displacing it.
     """
 
-    __slots__ = ("_vs", "_set_point")
+    __slots__ = ("_set_point", "_vs")
 
     def __init__(
         self,

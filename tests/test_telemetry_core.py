@@ -132,22 +132,20 @@ class TestSpanContext:
 
     def test_duration_is_positive(self):
         with SpanContext("timed"):
-            time.sleep(0.01)  # noqa: TID251
+            time.sleep(0.01)
         span = collector.spans[0]
         assert span.duration_ms >= 10.0
 
     def test_error_captured_on_exception(self):
-        with pytest.raises(ValueError):
-            with SpanContext("failing"):
-                raise ValueError("expected")
+        with pytest.raises(ValueError), SpanContext("failing"):
+            raise ValueError("expected")
         span = collector.spans[0]
         assert span.ok is False
         assert "ValueError" in span.error
 
     def test_exception_not_suppressed(self):
-        with pytest.raises(RuntimeError):
-            with SpanContext("propagate"):
-                raise RuntimeError("should propagate")
+        with pytest.raises(RuntimeError), SpanContext("propagate"):
+            raise RuntimeError("should propagate")
 
     def test_attributes_stored(self):
         with SpanContext("tagged", key="value") as span:
@@ -157,9 +155,8 @@ class TestSpanContext:
         assert recorded.attributes["extra"] == 42
 
     def test_parent_propagation(self):
-        with SpanContext("parent"):
-            with SpanContext("child"):
-                pass
+        with SpanContext("parent"), SpanContext("child"):
+            pass
         spans = collector.spans
         # child recorded first due to inner exit
         child = next(s for s in spans if s.name == "child")

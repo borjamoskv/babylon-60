@@ -78,7 +78,7 @@ class AetherAgent:
             plan = await self._planner.plan(task.description, toolkit)
             queue.update(task.id, plan=plan.to_prompt_str())
             logger.info("📋 Plan: %s - %d steps", plan.summary, len(plan.steps))
-        except Exception as e:  # noqa: BLE001 - LLM failure boundary
+        except Exception as e:
             return await self._fail(task, queue, f"Planner error: {e}")
 
         # ── 1.5 Ω₆ Siege-Verification (Pathogen Matching) ─────────────
@@ -111,7 +111,7 @@ class AetherAgent:
                     )
 
                 execute_result = await self._executor.execute(plan, instruction, toolkit)
-            except Exception as e:  # noqa: BLE001 - LLM execution failure boundary
+            except Exception as e:
                 return await self._fail(task, queue, f"Executor error: {e}")
 
             # ── 3. Critique ───────────────────────────────────────────
@@ -119,29 +119,28 @@ class AetherAgent:
             logger.info("🔍 Critiquing...")
             try:
                 critique = await self._critic.critique(task.description, toolkit)
-            except Exception as e:  # noqa: BLE001 - LLM critique failure boundary
+            except Exception as e:
                 logger.warning("Critic failed (%s) - skipping", e)
                 break
 
             if critique.approved:
                 logger.info("✅ Critic approved")
                 break
-            else:
-                logger.info(
-                    "⚠️  Critic rejected (attempt %d): %s",
-                    attempt + 1,
-                    "; ".join(critique.issues),
+            logger.info(
+                "⚠️  Critic rejected (attempt %d): %s",
+                attempt + 1,
+                "; ".join(critique.issues),
+            )
+            if attempt < _MAX_EXECUTOR_RETRIES:
+                # Feed critic feedback back as a new description
+                fix_desc = (
+                    f"ORIGINAL TASK: {task.description}\n\n"
+                    f"CRITIC ISSUES TO FIX:\n"
+                    + "\n".join(f"- {i}" for i in critique.issues)
+                    + f"\n\n{critique.suggestions}"
                 )
-                if attempt < _MAX_EXECUTOR_RETRIES:
-                    # Feed critic feedback back as a new description
-                    fix_desc = (
-                        f"ORIGINAL TASK: {task.description}\n\n"
-                        f"CRITIC ISSUES TO FIX:\n"
-                        + "\n".join(f"- {i}" for i in critique.issues)
-                        + f"\n\n{critique.suggestions}"
-                    )
-                    task.description = fix_desc
-                    queue.update(task.id, status=TaskStatus.EXECUTING)
+                task.description = fix_desc
+                queue.update(task.id, status=TaskStatus.EXECUTING)
 
         # ── 4. Test ───────────────────────────────────────────────────
         queue.update(task.id, status=TaskStatus.TESTING)
@@ -151,7 +150,7 @@ class AetherAgent:
                 None, self._tester.run, toolkit
             )
 
-        except Exception as e:  # noqa: BLE001 - Testing framework boundary isolation
+        except Exception as e:
             logger.warning("Tester failed (%s) - ignoring", e)
             test_result = None
 

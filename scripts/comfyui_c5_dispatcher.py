@@ -14,7 +14,6 @@ import urllib.parse
 import websocket
 import uuid
 import sys
-import time
 
 # Configuración del nodo ComfyUI
 SERVER_ADDRESS = "127.0.0.1:8188"

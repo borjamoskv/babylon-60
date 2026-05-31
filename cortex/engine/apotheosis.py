@@ -221,7 +221,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
                                     "🚫 [IMMUNE] Action BLOCKED: %s", action.description
                                 )
                                 continue
-                            elif triage.verdict == Verdict.HOLD:
+                            if triage.verdict == Verdict.HOLD:
                                 logger.warning(
                                     "⏸️ [IMMUNE] Action HOLD: %s. Justification: %s",
                                     action.description,
@@ -329,7 +329,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
                 if triage.verdict == Verdict.BLOCK:
                     logger.critical("🚫 [IMMUNE] Healing BLOCKED for %s", py_file.name)
                     return
-                elif triage.verdict == Verdict.HOLD:
+                if triage.verdict == Verdict.HOLD:
                     logger.warning("⏸️ [IMMUNE] Healing HOLD for %s", py_file.name)
                     return
 

@@ -19,7 +19,7 @@ logger = logging.getLogger("cortex.events.bus")
 class DistributedEventBus:
     """Async Event Bus for cross-node Agent communication."""
 
-    __slots__ = ("_subscribers", "_running", "_signal_bus")
+    __slots__ = ("_running", "_signal_bus", "_subscribers")
 
     def __init__(self) -> None:
         self._subscribers: dict[
@@ -59,7 +59,7 @@ class DistributedEventBus:
                     source=payload.get("source", "event-bus"),
                     project=payload.get("project"),
                 )
-            except Exception:  # noqa: BLE001 - persistence must not break event delivery
+            except Exception:
                 logger.warning(
                     "Signal Bus persistence failed for topic %s",
                     topic,

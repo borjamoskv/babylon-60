@@ -55,7 +55,7 @@ def register_music_tools(mcp: FastMCP):
             )
         except Exception as e:
             logger.error("Failed to generate track: %s", e)
-            return f"Error generating track: {str(e)}"
+            return f"Error generating track: {e!s}"
 
     @mcp.tool()
     async def music_evaluate_gri(track_id: str, audio_path: str) -> str:
@@ -70,4 +70,4 @@ def register_music_tools(mcp: FastMCP):
             evaluated_track = await orchestrator.evaluate_track_gri(track)
             return f"GRI Evaluation complete for {track_id}. Score: {evaluated_track.gri_score:.2f}"  # type: ignore[type-error]
         except Exception as e:
-            return f"Evaluation failed: {str(e)}"
+            return f"Evaluation failed: {e!s}"

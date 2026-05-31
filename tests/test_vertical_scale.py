@@ -158,11 +158,10 @@ class TestDeviceResolution:
         import cortex.embeddings as emb_pkg
         import cortex.embeddings.local as emb
 
-        with patch.object(emb, "_DEVICE", "auto"):
-            with patch.object(emb_pkg, "_DEVICE", "auto"):
-                with patch.dict("os.environ", {"CORTEX_DEVICE": "cpu"}):
-                    result = emb._resolve_device()
-                    assert result == "cpu"
+        with patch.object(emb, "_DEVICE", "auto"), patch.object(emb_pkg, "_DEVICE", "auto"):
+            with patch.dict("os.environ", {"CORTEX_DEVICE": "cpu"}):
+                result = emb._resolve_device()
+                assert result == "cpu"
 
     def test_local_embedder_accepts_device(self):
         """LocalEmbedder constructor stores explicit device."""

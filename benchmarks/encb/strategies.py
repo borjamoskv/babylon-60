@@ -42,14 +42,14 @@ class PropState:
     """
 
     __slots__ = (
-        "key",
         "belief_type",
-        "truth",
-        "current_value",
+        "categories",
         "confidence",
         "conflict_mass",
-        "categories",
+        "current_value",
+        "key",
         "set_universe",
+        "truth",
     )
 
     def __init__(

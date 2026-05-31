@@ -21,7 +21,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
-__all__ = ["StorageGuard", "GuardViolation", "StoreProposal"]
+__all__ = ["GuardViolation", "StorageGuard", "StoreProposal"]
 
 logger = logging.getLogger("cortex.guard.storage")
 
@@ -226,7 +226,7 @@ class StorageGuard:
                 if "empty" in msg or "at least 1" in msg:
                     raise GuardViolation("PROJECT_REQUIRED", "project cannot be empty") from e
                 raise GuardViolation("PROJECT_TOO_LONG", msg.replace("Value error, ", "")) from e
-            elif "content" in loc:
+            if "content" in loc:
                 if "empty" in msg or "at least 1" in msg:
                     raise GuardViolation("CONTENT_REQUIRED", "content cannot be empty") from e
                 if "too short" in msg:
@@ -238,13 +238,13 @@ class StorageGuard:
                         "POISONING_DETECTED", msg.replace("Value error, ", "")
                     ) from e
                 raise GuardViolation("CONTENT_TOO_LONG", msg.replace("Value error, ", "")) from e
-            elif "fact_type" in loc:
+            if "fact_type" in loc:
                 raise GuardViolation("INVALID_FACT_TYPE", msg.replace("Value error, ", "")) from e
-            elif "source" in loc:
+            if "source" in loc:
                 raise GuardViolation("SOURCE_REQUIRED", msg.replace("Value error, ", "")) from e
-            elif "confidence" in loc:
+            if "confidence" in loc:
                 raise GuardViolation("INVALID_CONFIDENCE", msg.replace("Value error, ", "")) from e
-            elif "tags" in loc:
+            if "tags" in loc:
                 if "str" in msg or "list" in msg:
                     raise GuardViolation("TAGS_TYPE_ERROR", msg.replace("Value error, ", "")) from e
                 if "invalid tag" in msg:

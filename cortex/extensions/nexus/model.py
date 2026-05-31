@@ -31,7 +31,7 @@ class NexusWorldModel:
         - Direct query interface
     """
 
-    __slots__ = ("_db", "_hooks", "_stats", "_dedup_cache")
+    __slots__ = ("_db", "_dedup_cache", "_hooks", "_stats")
 
     def __init__(self, db_path: str = _DEFAULT_DB) -> None:
         self._db = NexusDB(db_path)

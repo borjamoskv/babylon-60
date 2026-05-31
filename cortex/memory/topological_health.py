@@ -26,10 +26,10 @@ if TYPE_CHECKING:
     from cortex.memory.encoder import AsyncEncoder
 
 __all__ = [
-    "TopologicalAnchor",
-    "TopologicalHealthMonitor",
     "AnchorInvalidError",
     "ProxyType",
+    "TopologicalAnchor",
+    "TopologicalHealthMonitor",
 ]
 
 logger = logging.getLogger("cortex.memory.topological_health")
@@ -84,14 +84,14 @@ class TopologicalHealthMonitor:
     """
 
     __slots__ = (
-        "_model_hash",
-        "_rotation_interval",
-        "_checkpoints_seen",
         "_active_proxy_idx",
-        "_proxy_sequence",
-        "_history_spectral",
-        "_history_idim",
+        "_checkpoints_seen",
         "_history_hubness",
+        "_history_idim",
+        "_history_spectral",
+        "_model_hash",
+        "_proxy_sequence",
+        "_rotation_interval",
     )
 
     def __init__(self, encoder: AsyncEncoder, rotation_interval: int = 100) -> None:

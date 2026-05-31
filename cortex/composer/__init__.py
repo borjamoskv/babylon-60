@@ -9,4 +9,4 @@ from .engine import ComposerEngine
 from .manifesto import COMPOSER_MANIFESTO
 from .vision_qa import AestheticAuditor
 
-__all__ = ["AestheticAuditor", "COMPOSER_MANIFESTO", "ComposerEngine"]
+__all__ = ["COMPOSER_MANIFESTO", "AestheticAuditor", "ComposerEngine"]

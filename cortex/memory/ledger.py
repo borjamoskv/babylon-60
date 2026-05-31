@@ -67,7 +67,7 @@ class EventLedgerL3:
     connection) ensuring non-blocking, crash-safe persistence.
     """
 
-    __slots__ = ("_conn", "_ready", "_last_hash_cache")
+    __slots__ = ("_conn", "_last_hash_cache", "_ready")
 
     def __init__(self, conn: aiosqlite.Connection) -> None:
         self._conn = conn

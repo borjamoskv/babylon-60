@@ -14,7 +14,7 @@ from cortex.engine import CortexEngine as AsyncCortexEngine
 from cortex.types.models import AgentRegisterRequest, AgentResponse
 from cortex.utils.i18n import get_trans
 
-__all__ = ["register_agent", "get_agent", "list_agents"]
+__all__ = ["get_agent", "list_agents", "register_agent"]
 
 router = APIRouter(tags=["agents"])
 logger = logging.getLogger("uvicorn.error")

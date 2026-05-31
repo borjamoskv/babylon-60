@@ -70,11 +70,10 @@ def send_heartbeat():
             )
             print(f"[Web3 Oracle] 🔗 Tx Hash: {w3.to_hex(tx_hash)}")
             return True
-        else:
-            print(f"[Web3 Oracle] ❌ Tx Failed. Block {receipt.blockNumber}. Entropy rising.")  # type: ignore[type-error]
-            return False
+        print(f"[Web3 Oracle] ❌ Tx Failed. Block {receipt.blockNumber}. Entropy rising.")  # type: ignore[type-error]
+        return False
 
-    except Exception as e:  # noqa: BLE001 - Web3 transaction boundary
+    except Exception as e:
         print(f"[Web3 Oracle] ❌ Oracle execution error: {e}")
         return False
 

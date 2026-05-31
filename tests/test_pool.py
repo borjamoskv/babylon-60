@@ -51,19 +51,17 @@ class TestInitialization:
 
 class TestAcquire:
     async def test_acquire_returns_healthy_connection(self, pool: CortexConnectionPool):
-        async with pool.acquire() as conn:
-            async with conn.execute("SELECT 1") as cursor:
-                row = await cursor.fetchone()
-                assert row[0] == 1
+        async with pool.acquire() as conn, conn.execute("SELECT 1") as cursor:
+            row = await cursor.fetchone()
+            assert row[0] == 1
 
     async def test_acquire_multiple_connections(self, pool: CortexConnectionPool):
         """Acquire several connections concurrently."""
         import asyncio
 
         async def use_conn():
-            async with pool.acquire() as conn:
-                async with conn.execute("SELECT 1") as cursor:
-                    await cursor.fetchone()
+            async with pool.acquire() as conn, conn.execute("SELECT 1") as cursor:
+                await cursor.fetchone()
 
         await asyncio.gather(*[use_conn() for _ in range(5)])
 
@@ -106,9 +104,8 @@ class TestAutoInit:
     async def test_acquire_auto_initializes(self, db_path: str):
         p = CortexConnectionPool(db_path, min_connections=1, max_connections=3)
         assert p._initialized is False
-        async with p.acquire() as conn:
-            async with conn.execute("SELECT 1") as cursor:
-                row = await cursor.fetchone()
-                assert row[0] == 1
+        async with p.acquire() as conn, conn.execute("SELECT 1") as cursor:
+            row = await cursor.fetchone()
+            assert row[0] == 1
         assert p._initialized is True
         await p.close()

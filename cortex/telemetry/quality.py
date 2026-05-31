@@ -75,7 +75,7 @@ class MemoryQualityEvaluator:
 
             # Add to stale cleared if we decide to prune here (for now just reporting)
             logger.debug("Stale memory ratio for [%s/%s]: %s", tenant_id, project_id, ratio)
-        except Exception as e:  # noqa: BLE001 - quality evaluator must isolate failures
+        except Exception as e:
             logger.error("Failed to calculate stale memory ratio: %s", e)
 
     async def _detect_contradictions(self, tenant_id: str, project_id: str) -> None:
@@ -85,4 +85,3 @@ class MemoryQualityEvaluator:
         # Deep semantic contradiction requires full LLM pass. Example skeleton:
         logger.debug("Contradiction detection pass running on [%s/%s]...", tenant_id, project_id)
         # (Implementation details for contradiction logic will rely on ContextFusion or equivalent)
-        pass

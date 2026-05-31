@@ -12,7 +12,6 @@ from cortex.extensions.songlines.sensor import TopographicSensor
 @click.group(name="radar")
 def radar_cmds():
     """📡 RADAR-Ω: Sovereign monitoring and architectural enforcement."""
-    pass
 
 
 @radar_cmds.command(name="scan")

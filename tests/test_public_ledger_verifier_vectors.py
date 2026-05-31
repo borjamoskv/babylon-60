@@ -167,7 +167,7 @@ def test_legacy_v0_vectors_match_current_compute_tx_hash(fixture_name: str) -> N
 
 def test_public_v1_strict_event_hash_matches_fixture() -> None:
     event = load_jsonl_one(STRICT / "events.jsonl")
-    assert STRICT_REQUIRED_FIELDS <= event.keys()
+    assert event.keys() >= STRICT_REQUIRED_FIELDS
     assert event_hash(event) == event["hash"]
     assert event["hash"] == "518375b3ebdb916e0a779eb2baa6c9fcfbe4ae246a18eda9b4dfad0f32d2d59b"
 
@@ -225,7 +225,7 @@ def test_missing_nonce_fixture_is_invalid_strict_schema() -> None:
     event = load_jsonl_one(MUTATIONS / "missing_nonce" / "events.jsonl")
 
     assert "nonce" not in event
-    assert not STRICT_REQUIRED_FIELDS <= event.keys()
+    assert not event.keys() >= STRICT_REQUIRED_FIELDS
 
 
 def test_tampered_detail_changes_event_hash() -> None:

@@ -20,7 +20,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["scan_raw_connects", "ConnectionViolation"]
+__all__ = ["ConnectionViolation", "scan_raw_connects"]
 
 # Modules allowed to use sqlite3.connect directly
 _WHITELISTED_MODULES: frozenset[str] = frozenset(

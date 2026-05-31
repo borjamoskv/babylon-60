@@ -46,7 +46,6 @@ logger = logging.getLogger(__name__)
 @click.group("notebooklm")
 def notebooklm_cmds():
     """📓 NotebookLM synchronization commands."""
-    pass
 
 
 @notebooklm_cmds.command("digest")

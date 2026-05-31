@@ -35,8 +35,8 @@ from typing import TYPE_CHECKING
 
 __all__ = [
     "SlowOpTipEmitter",
-    "tip_on_slow",
     "slow_tips_spinner",
+    "tip_on_slow",
     "with_slow_tips",
 ]
 
@@ -62,13 +62,13 @@ class SlowOpTipEmitter:
     """
 
     __slots__ = (
+        "_engine",
+        "_interval",
+        "_label",
+        "_lang",
         "_stop_event",
         "_thread",
         "_threshold",
-        "_interval",
-        "_lang",
-        "_engine",
-        "_label",
     )
 
     def __init__(
@@ -147,7 +147,7 @@ class SlowOpTipEmitter:
                     padding=(0, 2),
                 )
             )
-        except (ValueError, KeyError, OSError, RuntimeError, ImportError):  # noqa: BLE001
+        except (ValueError, KeyError, OSError, RuntimeError, ImportError):
             pass  # Tips are non-critical; never break the CLI
 
 

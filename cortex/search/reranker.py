@@ -28,9 +28,9 @@ from collections.abc import Sequence
 from typing import Any, TypeVar
 
 __all__ = [
-    "rerank_search_results",
-    "rerank_dicts",
     "CrossEncoderReranker",
+    "rerank_dicts",
+    "rerank_search_results",
 ]
 
 logger = logging.getLogger("cortex.search.reranker")

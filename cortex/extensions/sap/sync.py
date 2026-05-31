@@ -15,7 +15,7 @@ from typing import Any
 from cortex.extensions.sap.client import SAPClient
 from cortex.extensions.sap.mapper import SAPMapper
 
-__all__ = ["SAPSyncResult", "SAPSync"]
+__all__ = ["SAPSync", "SAPSyncResult"]
 
 logger = logging.getLogger("cortex.extensions.sap.sync")
 
@@ -237,8 +237,7 @@ class SAPSync:
                 getattr(self.engine, "recall", None)
             ):
                 return await self.engine.recall(project=project, fact_type="sap_entity")
-            else:
-                return self.engine.recall_sync(project=project, fact_type="sap_entity")
+            return self.engine.recall_sync(project=project, fact_type="sap_entity")
         except (OSError, ValueError, KeyError):
             logger.warning("Failed to recall SAP facts for project %s", project)
             return []
@@ -256,13 +255,12 @@ class SAPSync:
                 source=fact_data.get("source"),
                 meta=fact_data.get("meta"),
             )
-        else:
-            return self.engine.store_sync(
-                project=fact_data["project"],
-                content=fact_data["content"],
-                fact_type=fact_data["fact_type"],
-                tags=fact_data.get("tags", []),
-            )
+        return self.engine.store_sync(
+            project=fact_data["project"],
+            content=fact_data["content"],
+            fact_type=fact_data["fact_type"],
+            tags=fact_data.get("tags", []),
+        )
 
     @staticmethod
     def _fact_matches_entity_set(fact: dict[str, Any], entity_set: str) -> bool:

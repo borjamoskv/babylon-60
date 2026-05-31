@@ -28,7 +28,7 @@ class SemanticFactPayload(TypedDict):
     timestamp: str
 
 
-from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2  # noqa: E402
+from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
 __all__ = ["DynamicSemanticSpace", "SemanticMutator"]
 
@@ -57,7 +57,7 @@ class SemanticMutator:
     mutates the embeddings in the database via numpy vector math.
     """
 
-    __slots__ = ("_store", "_queue", "_worker_task", "_pool", "_health_monitor", "_anchor")
+    __slots__ = ("_anchor", "_health_monitor", "_pool", "_queue", "_store", "_worker_task")
 
     def __init__(
         self,
@@ -88,7 +88,7 @@ class SemanticMutator:
                 await self._worker_task
             except asyncio.CancelledError:
                 pass
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 logger.error("SemanticMutator shutdown error: %s", e)
             if hasattr(self._pool, "shutdown"):
                 self._pool.shutdown(wait=False, cancel_futures=True)
@@ -176,7 +176,7 @@ class SemanticMutator:
                 self._mutate_batch(cursor, batch, now)
 
                 conn.commit()
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 # Si una DB lock o constraint quiebra la query, asegura rollback de BEGIN IMMEDIATE
                 conn.rollback()
                 logger.error("SemanticMutator: Unrecoverable mutation error: %s", e)
@@ -316,7 +316,7 @@ class DynamicSemanticSpace:
                 await self._heartbeat_task
             except asyncio.CancelledError:
                 pass
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 logger.error("DynamicSemanticSpace shutdown error: %s", e)
             logger.info("DynamicSemanticSpace: Autonomic heartbeat collapsed (Stopped).")
 
@@ -328,7 +328,7 @@ class DynamicSemanticSpace:
                 await self.force_autonomic_flush(reason="Standard Heartbeat")
             except asyncio.CancelledError:
                 raise
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 logger.error("DynamicSemanticSpace: Heartbeat failure: %s", e)
 
     async def force_autonomic_flush(self, reason: str = "Unknown") -> None:

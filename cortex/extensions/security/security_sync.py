@@ -13,7 +13,7 @@ from typing import Any
 
 logger = logging.getLogger("cortex.extensions.security.sync")
 
-__all__ = ["SecurityVisualSync", "SIGNAL"]
+__all__ = ["SIGNAL", "SecurityVisualSync"]
 
 
 class SecurityVisualSync:

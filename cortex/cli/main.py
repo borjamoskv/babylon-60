@@ -55,4 +55,4 @@ LOADED_COMMAND_MODULES, FAILED_COMMAND_MODULES = _load_command_modules()
 cli.loaded_command_modules = tuple(LOADED_COMMAND_MODULES)  # type: ignore[attr-defined]
 cli.failed_command_modules = dict(FAILED_COMMAND_MODULES)  # type: ignore[attr-defined]
 
-__all__ = ["cli", "FAILED_COMMAND_MODULES", "LOADED_COMMAND_MODULES"]
+__all__ = ["FAILED_COMMAND_MODULES", "LOADED_COMMAND_MODULES", "cli"]

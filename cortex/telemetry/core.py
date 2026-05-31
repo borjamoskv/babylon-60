@@ -45,7 +45,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from cortex.telemetry.metrics import MetricsRegistry
 
-__all__ = ["traced", "SpanContext", "Span", "TraceCollector", "collector"]
+__all__ = ["Span", "SpanContext", "TraceCollector", "collector", "traced"]
 
 logger = logging.getLogger("cortex.telemetry")
 
@@ -173,7 +173,7 @@ class SpanContext:
         collector.record(self._span)
         if self._token is not None:
             _current_span.reset(self._token)
-        return None  # Don't suppress exceptions
+        return  # Don't suppress exceptions
 
 
 # ─── @traced Decorator ───────────────────────────────────────────────
@@ -206,14 +206,13 @@ def traced(fn=None, *, name: str | None = None):
                 return await fn(*args, **kwargs)
 
         return async_wrapper
-    else:
 
-        @functools.wraps(fn)
-        def sync_wrapper(*args, **kwargs):
-            with SpanContext(span_name):
-                return fn(*args, **kwargs)
+    @functools.wraps(fn)
+    def sync_wrapper(*args, **kwargs):
+        with SpanContext(span_name):
+            return fn(*args, **kwargs)
 
-        return sync_wrapper
+    return sync_wrapper
 
 
 def _is_coroutine_function(fn) -> bool:

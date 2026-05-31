@@ -5,8 +5,7 @@ import sqlite3
 from collections.abc import Mapping
 from typing import Any
 
-from cortex.database.core import connect
-from cortex.ledger.ledger_core import MerkleTree, SovereignLedger
+from cortex.ledger.ledger_core import MerkleTree
 from cortex.utils.canonical import compute_tx_hash, compute_tx_hash_v1
 
 # Action constant used by ledger

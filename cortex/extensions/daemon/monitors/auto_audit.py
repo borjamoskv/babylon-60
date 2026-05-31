@@ -98,7 +98,7 @@ class AutoAuditMonitor(BaseMonitor[AutoAuditAlert]):
             self._last_run = now
         except sqlite3.OperationalError as e:
             logger.debug("AutoAuditMonitor DB check skipped (table missing or locked): %s", e)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.error("AutoAuditMonitor failed: %s", e)
 
         return alerts

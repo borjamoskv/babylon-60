@@ -113,7 +113,7 @@ def _git_tag() -> str:
         return "v0.3.0b5"
 
     try:
-        result = subprocess.run(  # noqa: S603 - fixed local command resolved via shutil.which
+        result = subprocess.run(
             [git_executable, "describe", "--tags", "--abbrev=0"],
             capture_output=True,
             text=True,
@@ -279,7 +279,7 @@ def prompt_copy(variant: str) -> None:
         return
 
     try:
-        sp.run(  # noqa: S603 - fixed local clipboard helper resolved via shutil.which
+        sp.run(
             [pbcopy_executable], input=text.encode(), check=True, timeout=5
         )
         console.print(

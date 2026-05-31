@@ -70,7 +70,7 @@ class HotStateDB:
         print(state.metrics())           # {"uptime_s": ..., "cycle_count": ...}
     """
 
-    __slots__ = ("_db_path", "_boot_time")
+    __slots__ = ("_boot_time", "_db_path")
 
     def __init__(self, db_path: Path | str | None = None) -> None:
         if db_path is None:

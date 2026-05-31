@@ -21,7 +21,7 @@ logger = logging.getLogger("cortex.extensions.swarm.code_smith")
 # ── Constants ──────────────────────────────────────────────────────────────
 
 # Re-exported from ast_validator for backward compatibility
-from cortex.extensions.swarm.ast_validator import (  # noqa: E402
+from cortex.extensions.swarm.ast_validator import (
     ASTValidationResult,
     ASTValidator,
 )
@@ -264,11 +264,11 @@ class CodeSmith:
 
     __slots__ = (
         "_generator",
+        "_history",
+        "_kgv_tracker",
+        "_operation_count",
         "_sandbox",
         "_validator",
-        "_kgv_tracker",
-        "_history",
-        "_operation_count",
     )
 
     def __init__(
@@ -389,7 +389,7 @@ class CodeSmith:
                 commit_hash,
             )
 
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             result.error = f"Unhandled exception in phase {result.phase_reached.value}: {exc}"
             logger.error("💥 CodeSmith: %s", result.error)
 
@@ -400,7 +400,7 @@ class CodeSmith:
             # Cleanup sandbox (best-effort)
             try:
                 await self._sandbox.cleanup()
-            except Exception:  # noqa: BLE001 - best-effort cleanup
+            except Exception:
                 pass
 
         return result

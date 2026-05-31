@@ -22,7 +22,7 @@ from typing import Any
 
 logger = logging.getLogger("cortex.extensions.security.injection_guard")
 
-__all__ = ["InjectionGuard", "InjectionReport", "InjectionMatch"]
+__all__ = ["InjectionGuard", "InjectionMatch", "InjectionReport"]
 
 
 # ═══════════════════════════════════════
@@ -349,7 +349,7 @@ class InjectionGuard:
                     )
                     report.is_safe = False
                     report.highest_severity = "critical"
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 logger.warning("Semantic WAF evaluation failed (fallback to fast-path): %s", e)
 
         return report

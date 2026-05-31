@@ -39,8 +39,8 @@ logger = logging.getLogger("cortex.compactor")
 _LOG_FMT = "Compactor [%s] %s"
 
 __all__ = [
-    "CompactionStrategy",
     "CompactionResult",
+    "CompactionStrategy",
     "compact",
     "compact_session",
     "get_compaction_stats",

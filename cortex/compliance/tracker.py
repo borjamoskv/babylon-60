@@ -45,7 +45,7 @@ class ComplianceTracker:
         project: Default project namespace for all operations.
     """
 
-    __slots__ = ("_engine", "_default_project", "_initialized")
+    __slots__ = ("_default_project", "_engine", "_initialized")
 
     def __init__(
         self,

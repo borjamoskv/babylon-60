@@ -11,7 +11,7 @@ from rich.panel import Panel
 from cortex.config import DEFAULT_DB_PATH
 from cortex.extensions.timing.chronos import ChronosEngine
 
-__all__ = ["chronos_cmds", "analyze", "compound", "projection"]
+__all__ = ["analyze", "chronos_cmds", "compound", "projection"]
 
 console = Console()
 
@@ -19,7 +19,6 @@ console = Console()
 @click.group(name="chronos")
 def chronos_cmds() -> None:
     """CHRONOS-1 - Benchmark of Senior Human Time vs AI Swarm Time."""
-    pass
 
 
 @chronos_cmds.command()
@@ -129,7 +128,7 @@ def compound(project: str | None, persist: bool) -> None:
             if fact_id:
                 console.print(f"[green]✔ Report persisted as Fact #{fact_id}[/green]")
 
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
         raise click.Abort() from e
 
@@ -181,6 +180,6 @@ def projection(years: int, base_hours: float, rate: float) -> None:
             Panel(summary, title="[bold magenta]10-Year Event Horizon[/bold magenta]", expand=False)
         )
 
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
         raise click.Abort() from e

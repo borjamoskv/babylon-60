@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-__all__ = ["sync_fact_to_repo", "export_gitops_memory"]
+__all__ = ["export_gitops_memory", "sync_fact_to_repo"]
 
 logger = logging.getLogger("cortex.extensions.sync.gitops")
 

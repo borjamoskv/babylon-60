@@ -90,11 +90,10 @@ def autopoietic_heal_file(filepath: str) -> bool:
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(mutated_code + "\n")
         return True
-    else:
-        logger.warning(
-            "[LEA-Ω] ❌ Mutación rechazada (La entropía no mejoró). El código original sobrevive."
-        )
-        return False
+    logger.warning(
+        "[LEA-Ω] ❌ Mutación rechazada (La entropía no mejoró). El código original sobrevive."
+    )
+    return False
 
 
 def scan_and_heal(target_dir: str):

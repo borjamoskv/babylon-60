@@ -20,7 +20,6 @@ __all__ = [
 @cli.group(name="exergy", help="⚡ Exergy - autonomous self-healing and code/health sentinel.")
 def exergy_cmds() -> None:
     """El motor de salud y auto-reparación de CORTEX."""
-    pass
 
 
 @exergy_cmds.command("daemon")

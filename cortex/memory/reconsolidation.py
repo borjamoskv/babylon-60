@@ -431,11 +431,11 @@ class ReconsolidationTracker:
 # ─── Public API ──────────────────────────────────────────────────────
 
 __all__ = [
-    "ConfirmationBiasDetector",
     "DEFAULT_LABILE_WINDOW_S",
     "IGNORE_DECAY",
-    "LabilizationRecord",
     "RECONSOLIDATE_BOOST",
+    "ConfirmationBiasDetector",
+    "LabilizationRecord",
     "ReconsolidationEvent",
     "ReconsolidationOutcome",
     "ReconsolidationTracker",

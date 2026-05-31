@@ -16,7 +16,7 @@ from cortex.memory.temporal import now_iso
 
 logger = logging.getLogger("cortex.chronos.compound")
 
-__all__ = ["CompoundChain", "CompoundReport", "CompoundProjector", "CompoundYieldTracker"]
+__all__ = ["CompoundChain", "CompoundProjector", "CompoundReport", "CompoundYieldTracker"]
 
 
 # ── Data Models ───────────────────────────────────────────────────────

@@ -121,21 +121,20 @@ class TesseractManifold:
             if ConvergenceEngine.evaluate(state):
                 logger.info("◈ CONVERGENCIA ALCANZADA EN %d CICLOS", cycle)
                 break
-            else:
-                amps = ConvergenceEngine.calculate_amplification(state)
-                logger.info(
-                    "Divergencia detectada. Amplificando: %s",
-                    [a.value for a in amps],
-                )
+            amps = ConvergenceEngine.calculate_amplification(state)
+            logger.info(
+                "Divergencia detectada. Amplificando: %s",
+                [a.value for a in amps],
+            )
 
-                # If D4 found issues, inject them back into D2/D3 reality for next loop
-                if d4_res and not d4_res.get("approved"):
-                    issues = []
-                    critique = d4_res.get("critique")
-                    if critique:
-                        issues = getattr(critique, "issues", [])
-                    if issues:
-                        task.description += "\n\nSIEGE FEEDBACK:\n- " + "\n- ".join(issues)
+            # If D4 found issues, inject them back into D2/D3 reality for next loop
+            if d4_res and not d4_res.get("approved"):
+                issues = []
+                critique = d4_res.get("critique")
+                if critique:
+                    issues = getattr(critique, "issues", [])
+                if issues:
+                    task.description += "\n\nSIEGE FEEDBACK:\n- " + "\n- ".join(issues)
 
         else:
             logger.warning(

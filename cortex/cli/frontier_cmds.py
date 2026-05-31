@@ -14,7 +14,6 @@ from cortex.extensions.daemon.frontier import FrontierDaemon
 @click.group("frontier")
 def frontier_cmds():
     """🚀 Frontier: Sovereign Evolution & Metabolism."""
-    pass
 
 
 @frontier_cmds.command("scan")

@@ -22,7 +22,7 @@ Generate with live stats::
 
 from __future__ import annotations
 
-__all__ = ["SYSTEM_PROMPT", "SYSTEM_PROMPT_SHORT", "SYSTEM_PROMPT_MEDIUM"]
+__all__ = ["SYSTEM_PROMPT", "SYSTEM_PROMPT_MEDIUM", "SYSTEM_PROMPT_SHORT"]
 
 
 # ─── Short (~500 tokens) - for small-context models ─────────────────

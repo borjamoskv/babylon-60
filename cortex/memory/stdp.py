@@ -113,8 +113,8 @@ class STDPEngine:
     __slots__ = (
         "_activations",
         "_edges",
-        "_lr_ltp",
         "_lr_ltd",
+        "_lr_ltp",
         "_max_activations",
     )
 

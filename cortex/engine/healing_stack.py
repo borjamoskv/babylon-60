@@ -27,7 +27,6 @@ from typing import Any
 
 from cortex.engine.autocurative_agent import AutoCurativeAgent
 from cortex.engine._autocurative_config import AutoCurativeConfig
-from cortex.engine._autocurative_state import HealingEvent
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
 from cortex.engine.performance_tracker import PerformanceTracker
 from cortex.engine.predictive_healer import PredictiveHealer, Prediction

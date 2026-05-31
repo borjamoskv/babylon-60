@@ -136,7 +136,7 @@ class AssociativeDreamEngine:
         result = await engine.dream_cycle(tenant_id="default")
     """
 
-    __slots__ = ("_vs", "_bridge_min", "_bridge_max", "_cluster_threshold")
+    __slots__ = ("_bridge_max", "_bridge_min", "_cluster_threshold", "_vs")
 
     def __init__(
         self,

@@ -54,7 +54,7 @@ async def run_applescript(script: str, timeout_seconds: int = 30) -> tuple[bool,
 
     except OSError as e:
         logger.error("OSError executing osascript: %s", e)
-        return False, "", f"OSError: {str(e)}"
+        return False, "", f"OSError: {e!s}"
     except ValueError as e:
         logger.error("ValueError executing osascript: %s", e)
-        return False, "", f"ValueError: {str(e)}"
+        return False, "", f"ValueError: {e!s}"

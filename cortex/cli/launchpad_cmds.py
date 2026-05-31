@@ -19,7 +19,6 @@ __all__ = ["launchpad", "mission_launch", "mission_list"]
 @cli.group()
 def launchpad():
     """Orchestrate AI Swarm missions via CORTEX Launchpad."""
-    pass
 
 
 @launchpad.command("launch")

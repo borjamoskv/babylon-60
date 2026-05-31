@@ -33,7 +33,7 @@ from typing import Any
 
 logger = logging.getLogger("cortex.daemon.scheduler")
 
-__all__ = ["SovereignScheduler", "ScheduleEntry"]
+__all__ = ["ScheduleEntry", "SovereignScheduler"]
 
 _SCHEMA = """\
 CREATE TABLE IF NOT EXISTS schedules (
@@ -243,7 +243,7 @@ class SovereignScheduler:
         while self._running:
             try:
                 await self._tick()
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 logger.error("Scheduler tick error: %s", e)
 
             try:
@@ -291,7 +291,7 @@ class SovereignScheduler:
             except asyncio.TimeoutError:
                 error = "Timeout (300s)"
                 logger.warning("Task %s timed out", entry.name)
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 error = str(e)
                 logger.error("Task %s failed: %s", entry.name, e)
 
@@ -327,7 +327,7 @@ class SovereignScheduler:
                             "source": "scheduler",
                         },
                     )
-                except Exception:  # noqa: BLE001
+                except Exception:
                     pass  # bus errors must not kill scheduler
 
             # Hot state update
@@ -341,7 +341,7 @@ class SovereignScheduler:
                             "ok": not error,
                         },
                     )
-                except Exception:  # noqa: BLE001
+                except Exception:
                     pass
 
             level = "✅" if not error else "❌"

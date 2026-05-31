@@ -20,15 +20,15 @@ from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
 logger = logging.getLogger("cortex.engine.causality")
 
 __all__ = [
+    "EDGE_DERIVED_FROM",
+    "EDGE_TAINTED_BY",
+    "EDGE_TRIGGERED_BY",
+    "EDGE_UPDATED_FROM",
     "AsyncCausalGraph",
     "AsyncCausalOracle",
     "CausalGraph",
     "CausalOracle",
     "Confidence",
-    "EDGE_DERIVED_FROM",
-    "EDGE_TAINTED_BY",
-    "EDGE_TRIGGERED_BY",
-    "EDGE_UPDATED_FROM",
     "EpistemicStatus",
     "LedgerEvent",
     "TaintReport",
@@ -562,7 +562,7 @@ class AsyncCausalOracle:
             for sig in recent:
                 if sig.event_type in ("plan:done", "task:start", "apotheosis:heal"):
                     return sig.id
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.debug("Async causal lookup failed: %s", e)
         return None
 
@@ -583,7 +583,7 @@ class CausalOracle:
                 for sig in recent:
                     if sig.event_type in ("plan:done", "task:start", "apotheosis:heal"):
                         return sig.id
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             logger.debug("Sync causal lookup failed: %s", e)
         return None
 

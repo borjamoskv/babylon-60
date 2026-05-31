@@ -195,7 +195,7 @@ class APIEmbedder:
 
         if self._provider in ("gemini", "gemini-v2"):
             return await self._embed_gemini(str(text))
-        elif self._provider == "openai":
+        if self._provider == "openai":
             return await self._embed_openai(str(text))
 
         raise ValueError(f"No embed implementation for {self._provider}")

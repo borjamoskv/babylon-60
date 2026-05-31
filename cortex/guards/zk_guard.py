@@ -14,7 +14,6 @@ from cortex.crypto.keys import ZKSwarmIdentity
 class VoidStateSecurityError(Exception):
     """Raised when an active fact mathematically fails the ZK-Swarm cryptographic proof."""
 
-    pass
 
 
 class ZKSwarmGuard:

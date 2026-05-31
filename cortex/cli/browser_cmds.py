@@ -11,7 +11,6 @@ console = Console()
 @click.group()
 def browser():
     """BROWSER-Ω: Autonomous Sovereign Web Automation."""
-    pass
 
 
 @browser.command()
@@ -45,5 +44,5 @@ def surf(url: str, objective: str, headless: bool, provider: str, model: str):
         console.print("[bold green]BROWSER-Ω Execution Complete.[/bold green]")
     except KeyboardInterrupt:
         console.print("[bold yellow]BROWSER-Ω Execution Aborted.[/bold yellow]")
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         console.print(f"[bold red]BROWSER-Ω Error:[/bold red] {e}")

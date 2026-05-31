@@ -52,12 +52,12 @@ class UsageRecord:
     """A single API usage record."""
 
     __slots__ = (
-        "tenant_id",
         "endpoint",
         "method",
         "status_code",
-        "tokens_used",
+        "tenant_id",
         "timestamp",
+        "tokens_used",
     )
 
     def __init__(

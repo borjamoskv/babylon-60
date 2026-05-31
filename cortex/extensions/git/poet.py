@@ -143,10 +143,9 @@ class CommitPoet:
             if re.match(r"^[a-z]+\(.+\):", response):
                 self._history.append(response)
                 return response
-            else:
-                logger.warning(
-                    "LLM generated invalid format: '%s', falling back to heuristics.", response
-                )
+            logger.warning(
+                "LLM generated invalid format: '%s', falling back to heuristics.", response
+            )
         except Exception as e:
             logger.warning("Failed to generate commit via LLM (%s), falling back to heuristics.", e)
 

@@ -201,13 +201,12 @@ class TestTaintIntegration:
         # Let's manually create EDGE_DERIVED_FROM just in case.
         from cortex.engine.causality import EDGE_DERIVED_FROM
 
-        async with engine.session() as conn:
-            async with conn.cursor() as cur:
-                await cur.execute(
-                    "INSERT INTO causal_edges (fact_id, parent_id, edge_type) VALUES (?, ?, ?)",
-                    (child_id, parent_id, EDGE_DERIVED_FROM),
-                )
-                await conn.commit()
+        async with engine.session() as conn, conn.cursor() as cur:
+            await cur.execute(
+                "INSERT INTO causal_edges (fact_id, parent_id, edge_type) VALUES (?, ?, ?)",
+                (child_id, parent_id, EDGE_DERIVED_FROM),
+            )
+            await conn.commit()
 
         # 3. Deprecate the parent fact. This should trigger propagate_taint.
         await engine.deprecate(parent_id, reason="testing taint propagation")
@@ -222,17 +221,16 @@ class TestTaintIntegration:
         # Check that it's marked as tainted in causal_edges
         from cortex.engine.causality import EDGE_TAINTED_BY
 
-        async with engine.session() as conn:
-            async with conn.cursor() as cur:
-                await cur.execute(
-                    "SELECT fact_id FROM causal_edges WHERE parent_id = ? AND edge_type = ?",
-                    (parent_id, EDGE_TAINTED_BY),
-                )
-                taint_edges = await cur.fetchall()
-                taint_sources = [row[0] for row in taint_edges]
-                assert child_id in taint_sources, (
-                    "Child should be linked by EDGE_TAINTED_BY to the deprecated parent"
-                )
+        async with engine.session() as conn, conn.cursor() as cur:
+            await cur.execute(
+                "SELECT fact_id FROM causal_edges WHERE parent_id = ? AND edge_type = ?",
+                (parent_id, EDGE_TAINTED_BY),
+            )
+            taint_edges = await cur.fetchall()
+            taint_sources = [row[0] for row in taint_edges]
+            assert child_id in taint_sources, (
+                "Child should be linked by EDGE_TAINTED_BY to the deprecated parent"
+            )
 
     async def test_invalidate_triggers_taint_propagation(self, engine):
         # 1. Create parent fact
@@ -255,37 +253,35 @@ class TestTaintIntegration:
 
         from cortex.engine.causality import EDGE_DERIVED_FROM, EDGE_TAINTED_BY
 
-        async with engine.session() as conn:
-            async with conn.cursor() as cur:
-                await cur.execute(
-                    "INSERT INTO causal_edges (fact_id, parent_id, edge_type) VALUES (?, ?, ?)",
-                    (child_id, parent_id, EDGE_DERIVED_FROM),
-                )
-                await conn.commit()
+        async with engine.session() as conn, conn.cursor() as cur:
+            await cur.execute(
+                "INSERT INTO causal_edges (fact_id, parent_id, edge_type) VALUES (?, ?, ?)",
+                (child_id, parent_id, EDGE_DERIVED_FROM),
+            )
+            await conn.commit()
 
         # 3. Invalidate the parent
         await engine.invalidate(parent_id, reason="testing invalidation taint")
 
         # 4. Check the parent fact (should be C1 and tombstoned -- tombstone might remove it from get_fact if it filters status, let's see)
-        async with engine.session() as conn:
-            async with conn.cursor() as cur:
-                await cur.execute(
-                    "SELECT confidence, is_tombstoned FROM facts WHERE id = ?", (parent_id,)
-                )
-                p_row = await cur.fetchone()
-                assert p_row is not None
-                assert p_row[0] == "C1", "Parent confidence should be C1 after invalidate"
-                assert p_row[1] == 1, "Parent should be tombstoned"
+        async with engine.session() as conn, conn.cursor() as cur:
+            await cur.execute(
+                "SELECT confidence, is_tombstoned FROM facts WHERE id = ?", (parent_id,)
+            )
+            p_row = await cur.fetchone()
+            assert p_row is not None
+            assert p_row[0] == "C1", "Parent confidence should be C1 after invalidate"
+            assert p_row[1] == 1, "Parent should be tombstoned"
 
-                await cur.execute("SELECT confidence FROM facts WHERE id = ?", (child_id,))
-                c_row = await cur.fetchone()
-                assert c_row is not None
-                assert c_row[0] == "C4", "Child confidence should be downgraded to C4"
+            await cur.execute("SELECT confidence FROM facts WHERE id = ?", (child_id,))
+            c_row = await cur.fetchone()
+            assert c_row is not None
+            assert c_row[0] == "C4", "Child confidence should be downgraded to C4"
 
-                await cur.execute(
-                    "SELECT fact_id FROM causal_edges WHERE parent_id = ? AND edge_type = ?",
-                    (parent_id, EDGE_TAINTED_BY),
-                )
-                taint_edges = await cur.fetchall()
-                taint_sources = [row[0] for row in taint_edges]
-                assert child_id in taint_sources, "Child should have TAINTED_BY edge"
+            await cur.execute(
+                "SELECT fact_id FROM causal_edges WHERE parent_id = ? AND edge_type = ?",
+                (parent_id, EDGE_TAINTED_BY),
+            )
+            taint_edges = await cur.fetchall()
+            taint_sources = [row[0] for row in taint_edges]
+            assert child_id in taint_sources, "Child should have TAINTED_BY edge"

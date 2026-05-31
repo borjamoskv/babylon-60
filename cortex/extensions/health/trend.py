@@ -82,7 +82,7 @@ class TrendDetector:
         s = self.slope()
         if s > 0.5:
             return "improving"
-        elif s < -0.5:
+        if s < -0.5:
             return "degrading"
         return "stable"
 

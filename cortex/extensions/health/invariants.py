@@ -69,7 +69,7 @@ def verify_health_system(
             g = Grade.from_score(score)
             if not isinstance(g, Grade):
                 violations.append(f"Grade.from_score({score}) returned non-Grade: {type(g)}")
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             violations.append(f"Grade.from_score({score}) raised: {e}")
 
     # 7. Registry Truthiness (C1)

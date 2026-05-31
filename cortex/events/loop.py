@@ -51,7 +51,7 @@ def install_uvloop() -> bool:
     Returns True if uvloop is available, False otherwise.
     Safe to call multiple times (idempotent).
     """
-    global _uvloop_installed  # noqa: PLW0603
+    global _uvloop_installed
 
     if _uvloop_installed:
         return True
@@ -89,7 +89,7 @@ def sovereign_run(
     Returns:
         The result of the coroutine.
     """
-    global _uvloop_installed  # noqa: PLW0603
+    global _uvloop_installed
 
     # 1. Detect loop capability first (cached)
     has_uvloop = False

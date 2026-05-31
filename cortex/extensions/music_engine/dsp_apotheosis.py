@@ -16,7 +16,7 @@ try:
 except ImportError:
     _NUMBA_AVAILABLE = False
 
-    def njit(func):  # type: ignore[misc]  # noqa: E302
+    def njit(func):  # type: ignore[misc]
         """No-op decorator when numba is not available."""
         return func
 
@@ -139,11 +139,10 @@ class DSPApotheosis:
                 boost = np.where(diff > TRANSIENT_BOOST_THRESHOLD, TRANSIENT_BOOST_FACTOR, 1.0)
                 processed[:, ch] = audio_data[:, ch] * boost
             return processed
-        else:
-            env = _fast_envelope_follower(audio_data, alpha_at, alpha_re)
-            diff = np.diff(env, prepend=0)
-            boost = np.where(diff > TRANSIENT_BOOST_THRESHOLD, TRANSIENT_BOOST_FACTOR, 1.0)
-            return audio_data * boost
+        env = _fast_envelope_follower(audio_data, alpha_at, alpha_re)
+        diff = np.diff(env, prepend=0)
+        boost = np.where(diff > TRANSIENT_BOOST_THRESHOLD, TRANSIENT_BOOST_FACTOR, 1.0)
+        return audio_data * boost
 
     def master_track(self, audio_data: np.ndarray, sample_rate: int) -> np.ndarray:
         """

@@ -10,7 +10,6 @@ into Open Sound Control (OSC) packets for Ableton, TouchDesigner, or MaxMSP.
 import json
 import logging
 import socket
-import struct
 import sys
 import urllib.request
 import urllib.error

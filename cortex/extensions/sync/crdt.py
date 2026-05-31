@@ -27,10 +27,10 @@ from cortex.extensions.sync.hlc import HLCTimestamp
 logger = logging.getLogger("cortex.extensions.sync.crdt")
 
 __all__ = [
-    "CortexCRDT",
-    "MergeResult",
-    "FactReplica",
     "ConflictRecord",
+    "CortexCRDT",
+    "FactReplica",
+    "MergeResult",
 ]
 
 # Fact types that use MV-Register (preserve both sides on conflict)

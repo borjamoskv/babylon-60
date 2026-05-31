@@ -40,18 +40,17 @@ class SQLiteStoreMixin:
             else:
                 self.conn.execute(query_update, (count + 1, timestamp, entity_id))
             return entity_id
-        else:
-            query_insert = (
-                "INSERT INTO entities (name, entity_type, project, tenant_id, "
-                "first_seen, last_seen, mention_count) VALUES (?, ?, ?, ?, ?, ?, 1)"
-            )
-            params_insert = (name, entity_type, project, tenant_id, timestamp, timestamp)
-            if self._is_async:
-                async with self.conn.execute(query_insert, params_insert) as cursor:
-                    return cursor.lastrowid
-            else:
-                cursor = self.conn.execute(query_insert, params_insert)
+        query_insert = (
+            "INSERT INTO entities (name, entity_type, project, tenant_id, "
+            "first_seen, last_seen, mention_count) VALUES (?, ?, ?, ?, ?, ?, 1)"
+        )
+        params_insert = (name, entity_type, project, tenant_id, timestamp, timestamp)
+        if self._is_async:
+            async with self.conn.execute(query_insert, params_insert) as cursor:
                 return cursor.lastrowid
+        else:
+            cursor = self.conn.execute(query_insert, params_insert)
+            return cursor.lastrowid
 
     def upsert_entity_sync(
         self,
@@ -75,13 +74,12 @@ class SQLiteStoreMixin:
                 (count + 1, timestamp, entity_id),
             )
             return entity_id
-        else:
-            cursor = self.conn.execute(
-                "INSERT INTO entities (name, entity_type, project, tenant_id, first_seen, "
-                "last_seen, mention_count) VALUES (?, ?, ?, ?, ?, ?, 1)",
-                (name, entity_type, project, tenant_id, timestamp, timestamp),
-            )
-            return cursor.lastrowid
+        cursor = self.conn.execute(
+            "INSERT INTO entities (name, entity_type, project, tenant_id, first_seen, "
+            "last_seen, mention_count) VALUES (?, ?, ?, ?, ?, ?, 1)",
+            (name, entity_type, project, tenant_id, timestamp, timestamp),
+        )
+        return cursor.lastrowid
 
     async def upsert_relationship(
         self,
@@ -112,19 +110,18 @@ class SQLiteStoreMixin:
             else:
                 self.conn.execute(query_update, (weight + 0.5, relation_type, rel_id))
             return rel_id
-        else:
-            query_insert = (
-                "INSERT INTO entity_relations (source_entity_id, target_entity_id, "
-                "relation_type, weight, first_seen, source_fact_id, tenant_id) "
-                "VALUES (?, ?, ?, 1.0, ?, ?, ?)"
-            )
-            params_insert = (source_id, target_id, relation_type, timestamp, fact_id, tenant_id)
-            if self._is_async:
-                async with self.conn.execute(query_insert, params_insert) as cursor:
-                    return cursor.lastrowid
-            else:
-                cursor = self.conn.execute(query_insert, params_insert)
+        query_insert = (
+            "INSERT INTO entity_relations (source_entity_id, target_entity_id, "
+            "relation_type, weight, first_seen, source_fact_id, tenant_id) "
+            "VALUES (?, ?, ?, 1.0, ?, ?, ?)"
+        )
+        params_insert = (source_id, target_id, relation_type, timestamp, fact_id, tenant_id)
+        if self._is_async:
+            async with self.conn.execute(query_insert, params_insert) as cursor:
                 return cursor.lastrowid
+        else:
+            cursor = self.conn.execute(query_insert, params_insert)
+            return cursor.lastrowid
 
     def upsert_relationship_sync(
         self,
@@ -149,14 +146,13 @@ class SQLiteStoreMixin:
                 (weight + 0.5, relation_type, rel_id),
             )
             return rel_id
-        else:
-            cursor = self.conn.execute(
-                "INSERT INTO entity_relations (source_entity_id, target_entity_id, "
-                "relation_type, weight, first_seen, source_fact_id, tenant_id) "
-                "VALUES (?, ?, ?, 1.0, ?, ?, ?)",
-                (source_id, target_id, relation_type, timestamp, fact_id, tenant_id),
-            )
-            return cursor.lastrowid
+        cursor = self.conn.execute(
+            "INSERT INTO entity_relations (source_entity_id, target_entity_id, "
+            "relation_type, weight, first_seen, source_fact_id, tenant_id) "
+            "VALUES (?, ?, ?, 1.0, ?, ?, ?)",
+            (source_id, target_id, relation_type, timestamp, fact_id, tenant_id),
+        )
+        return cursor.lastrowid
 
     async def upsert_ghost(
         self,

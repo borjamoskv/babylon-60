@@ -6,7 +6,6 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 
 from .models import AgentRegistration, TrustSignalRequest, TaskCreate, TrustSignal
 from .registry import AgentRegistry

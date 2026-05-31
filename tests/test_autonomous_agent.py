@@ -213,11 +213,11 @@ class TestPlanner:
 class TestAutonomousAgent:
     """Test the AutonomousAgent execution loop."""
 
-    @pytest.fixture()
+    @pytest.fixture
     def bus(self) -> InMemoryBus:
         return InMemoryBus()
 
-    @pytest.fixture()
+    @pytest.fixture
     def registry(self) -> ToolRegistry:
         reg = ToolRegistry()
         reg.register(SuccessTool())
@@ -226,7 +226,7 @@ class TestAutonomousAgent:
         reg.register(NoOpTool())
         return reg
 
-    @pytest.fixture()
+    @pytest.fixture
     def agent(self, bus: InMemoryBus, registry: ToolRegistry) -> AutonomousAgent:
         return create_autonomous_agent(
             agent_id="test-l4-agent",
@@ -236,7 +236,7 @@ class TestAutonomousAgent:
             step_timeout_s=2.0,
         )
 
-    @pytest.mark.asyncio()
+    @pytest.mark.asyncio
     async def test_simple_success(self, agent: AutonomousAgent) -> None:
         """Single successful step."""
         result = await agent.execute_objective(
@@ -251,7 +251,7 @@ class TestAutonomousAgent:
         assert len(result["steps"]) == 1
         assert result["steps"][0]["status"] == "completed"
 
-    @pytest.mark.asyncio()
+    @pytest.mark.asyncio
     async def test_multi_step_success(self, agent: AutonomousAgent) -> None:
         """Multiple steps all succeed."""
         result = await agent.execute_objective(
@@ -268,7 +268,7 @@ class TestAutonomousAgent:
         assert all(s["status"] == "completed" for s in result["steps"])
         assert result["net_exergy"] > 0
 
-    @pytest.mark.asyncio()
+    @pytest.mark.asyncio
     async def test_step_failure_halts_plan(self, agent: AutonomousAgent) -> None:
         """L4 behavior: a failed step halts the entire plan."""
         result = await agent.execute_objective(
@@ -287,7 +287,7 @@ class TestAutonomousAgent:
         assert step_statuses[1] == "failed"
         # Third step should not have been executed (skipped or not in results)
 
-    @pytest.mark.asyncio()
+    @pytest.mark.asyncio
     async def test_retry_within_budget(self, bus: InMemoryBus) -> None:
         """Steps retry within their retry budget."""
         registry = ToolRegistry()
@@ -313,7 +313,7 @@ class TestAutonomousAgent:
         assert counter.total_calls == 2  # Failed once, succeeded once
         assert result["steps"][0]["retries"] == 1
 
-    @pytest.mark.asyncio()
+    @pytest.mark.asyncio
     async def test_timeout_step(self, agent: AutonomousAgent) -> None:
         """Steps that exceed timeout are marked as failed."""
         result = await agent.execute_objective(
@@ -326,7 +326,7 @@ class TestAutonomousAgent:
         assert result["status"] != "SUCCESS"
         assert "timed out" in result["steps"][0]["error"].lower()
 
-    @pytest.mark.asyncio()
+    @pytest.mark.asyncio
     async def test_entropy_circuit_breaker(self, agent: AutonomousAgent) -> None:
         """Plan halts when entropy budget is exceeded."""
         result = await agent.execute_objective(
@@ -342,7 +342,7 @@ class TestAutonomousAgent:
         completed_count = sum(1 for s in result["steps"] if s["status"] == "completed")
         assert completed_count <= 1  # At most one step ran
 
-    @pytest.mark.asyncio()
+    @pytest.mark.asyncio
     async def test_exergy_efficiency_tracked(self, agent: AutonomousAgent) -> None:
         """Exergy efficiency ratio is computed correctly."""
         result = await agent.execute_objective(
@@ -356,7 +356,7 @@ class TestAutonomousAgent:
         assert result["exergy_efficiency"] > 0
         assert result["net_exergy"] > 0
 
-    @pytest.mark.asyncio()
+    @pytest.mark.asyncio
     async def test_telemetry(self, agent: AutonomousAgent) -> None:
         """Telemetry is available during and after execution."""
         await agent.execute_objective(
@@ -368,7 +368,7 @@ class TestAutonomousAgent:
         assert tele["agent_id"] == "test-l4-agent"
         assert tele["total_steps_executed"] >= 1
 
-    @pytest.mark.asyncio()
+    @pytest.mark.asyncio
     async def test_message_driven_execution(self, agent: AutonomousAgent, bus: InMemoryBus) -> None:
         """Agent can receive task requests via message bus."""
         task_msg = new_message(
@@ -389,7 +389,7 @@ class TestAutonomousAgent:
         sent_kinds = [m.kind for m in bus.sent_messages]
         assert MessageKind.TASK_ACCEPTED in sent_kinds
 
-    @pytest.mark.asyncio()
+    @pytest.mark.asyncio
     async def test_max_plan_steps_enforced(self, bus: InMemoryBus, registry: ToolRegistry) -> None:
         """Plans exceeding max_plan_steps are rejected."""
         agent = create_autonomous_agent(
@@ -415,7 +415,7 @@ class TestAutonomousAgent:
 class TestIntegration:
     """Full integration test with Supervisor + AutonomousAgent."""
 
-    @pytest.mark.asyncio()
+    @pytest.mark.asyncio
     async def test_full_lifecycle(self) -> None:
         """Test complete: register → start → execute → stop."""
         from cortex.agents.supervisor import Supervisor

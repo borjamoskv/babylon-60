@@ -436,7 +436,6 @@ async def main():
 
             async def audit_tx():
                 try:
-                    from cortex.ledger.ledger_core import SovereignLedger
 
                     sync_ledger = await engine._get_or_create_ledger()
                     return await sync_ledger.audit_integrity_async()

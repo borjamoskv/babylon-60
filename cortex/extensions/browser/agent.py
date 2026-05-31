@@ -55,7 +55,7 @@ class SovereignBrowserAgent:
                 if cmd == "done":
                     LOG.info("BROWSER-Ω: Objective complete. Result: %s", action.get("result"))
                     break
-                elif cmd == "click":
+                if cmd == "click":
                     cortex_id = action.get("cortex_id")
                     await self.engine.click(int(cortex_id))  # type: ignore[reportArgumentType]
                 elif cmd == "type":

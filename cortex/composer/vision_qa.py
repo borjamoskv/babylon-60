@@ -111,8 +111,7 @@ class AestheticAuditor:
                 evaluation = res.unwrap().strip()
                 if evaluation.startswith("PASS"):
                     return Ok("Aesthetic Check Passed.")
-                else:
-                    return Err(evaluation)
+                return Err(evaluation)
             return Err(f"QA Router Error: {res.error}")
         except Exception as e:
             return Err(f"Vision API Error: {e}")

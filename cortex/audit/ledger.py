@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS security_audit_log (
 class EnterpriseAuditLedger:
     """Immutable Audit Ledger for enterprise-grade SOC 2 compliance."""
 
-    __slots__ = ("_conn", "_ready", "_last_hash", "private_key", "public_key")
+    __slots__ = ("_conn", "_last_hash", "_ready", "private_key", "public_key")
 
     def __init__(self, conn: aiosqlite.Connection) -> None:
         self._conn = conn

@@ -199,16 +199,15 @@ class AdversarialStressStrategy:
                 "resilience_bonus": 3.0,
                 "p_queen": round(p_queen, 3),
             }
-        else:
-            subagent.fitness = max(0.0, new_fitness)
-            subagent.mutation.record_change(f"RedQueen failed: fitness->{new_fitness:.2f}")
-            return {
-                "strategy": "AdversarialStress",
-                "result": "failed",
-                "stress_hit": stress_hit,
-                "new_fitness": new_fitness,
-                "p_queen": round(p_queen, 3),
-            }
+        subagent.fitness = max(0.0, new_fitness)
+        subagent.mutation.record_change(f"RedQueen failed: fitness->{new_fitness:.2f}")
+        return {
+            "strategy": "AdversarialStress",
+            "result": "failed",
+            "stress_hit": stress_hit,
+            "new_fitness": new_fitness,
+            "p_queen": round(p_queen, 3),
+        }
 
 
 class EntropyReductionStrategy:

@@ -65,11 +65,11 @@ def check_file_entropy(filepath):
 def get_grade(total_penalties):
     if total_penalties == 0:
         return "A"
-    elif total_penalties <= 2:
+    if total_penalties <= 2:
         return "B"
-    elif total_penalties <= 5:
+    if total_penalties <= 5:
         return "C"
-    elif total_penalties <= 10:
+    if total_penalties <= 10:
         return "D"
     return "F"
 

@@ -26,7 +26,7 @@ class ConvergenceDiagnostics(TypedDict, total=False):
     total_minds: int
 
 
-__all__ = ["InfiniteMindsManager", "AgentMind"]
+__all__ = ["AgentMind", "InfiniteMindsManager"]
 
 logger = logging.getLogger("cortex.extensions.swarm.infinite_minds")
 
@@ -39,7 +39,7 @@ class AgentMind:
     queries map into the master topology.
     """
 
-    __slots__ = ("agent_id", "semantic_bias", "tenant_id", "project_id", "_space")
+    __slots__ = ("_space", "agent_id", "project_id", "semantic_bias", "tenant_id")
 
     def __init__(
         self,

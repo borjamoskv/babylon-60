@@ -23,9 +23,9 @@ from cortex.database.core import connect_async_ctx
 logger = logging.getLogger("cortex.extensions.security.integrity_audit")
 
 __all__ = [
-    "IntegrityAuditor",
     "AuditReport",
     "ChainStatus",
+    "IntegrityAuditor",
     "TamperedFact",
 ]
 

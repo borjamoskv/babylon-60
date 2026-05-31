@@ -21,7 +21,6 @@ from cortex.cli.common import (
 @click.group("policy")
 def policy_cmds() -> None:
     """🎯 Bellman Policy Engine - Prioritized action queue."""
-    pass
 
 
 @policy_cmds.command("evaluate")

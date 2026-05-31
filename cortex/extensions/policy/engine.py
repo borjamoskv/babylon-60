@@ -67,7 +67,7 @@ class PolicyEngine:
         γ      = discount factor from PolicyConfig
     """
 
-    __slots__ = ("_engine", "_config")
+    __slots__ = ("_config", "_engine")
 
     def __init__(
         self,
@@ -107,7 +107,7 @@ class PolicyEngine:
             project_index.setdefault(f.project, []).append(f)
 
         # Precompute lowercased project names to avoid O(P*F) string matching
-        project_names_lower = {p.lower() for p in project_index.keys()}
+        project_names_lower = {p.lower() for p in project_index}
 
         now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
         actions: list[ActionItem] = []

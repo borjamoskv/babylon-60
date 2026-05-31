@@ -51,7 +51,7 @@ class ManifoldDaemon:
                             continue
                         try:
                             await client.write(f"data: {data}\n\n".encode())
-                        except BaseException:  # noqa: BLE001
+                        except BaseException:
                             dead_clients.add(client_ref)
 
                     self.clients -= dead_clients

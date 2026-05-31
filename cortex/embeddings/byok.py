@@ -23,7 +23,7 @@ except ImportError:
 class BYOKEmbedder:
     """Delegates embedding generation securely preserving tokenomics."""
 
-    __slots__ = ("_default_local", "_api_key", "_model", "_dimension", "_client")
+    __slots__ = ("_api_key", "_client", "_default_local", "_dimension", "_model")
 
     def __init__(
         self,
@@ -53,7 +53,7 @@ class BYOKEmbedder:
                 embeddings = [data.embedding for data in response.data]
                 return embeddings[0] if isinstance(text, str) else embeddings
             except (RuntimeError, OSError, ValueError, TypeError) as e:
-                logger.error("BYOK Embedding failed: %s. Falling back to default if permitted.", e)  # noqa: G004
+                logger.error("BYOK Embedding failed: %s. Falling back to default if permitted.", e)
                 # We can decide to either bounce or fallback
 
         # Fallback to local (requires strict rate limits upstream)

@@ -11,7 +11,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any
 
-__all__ = ["SyncDiff", "SAPMapper"]
+__all__ = ["SAPMapper", "SyncDiff"]
 
 logger = logging.getLogger("cortex.extensions.sap.mapper")
 

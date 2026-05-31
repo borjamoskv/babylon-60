@@ -80,13 +80,12 @@ class TestPurgeBounded:
         assert result is True
 
         # 5. Verify edges are also gone
-        async with engine.session() as conn:
-            async with conn.execute(
-                "SELECT count(*) FROM causal_edges WHERE fact_id = ? OR parent_id = ?",
-                (rule_id, rule_id),
-            ) as cursor:
-                row = await cursor.fetchone()
-                assert row[0] == 0
+        async with engine.session() as conn, conn.execute(
+            "SELECT count(*) FROM causal_edges WHERE fact_id = ? OR parent_id = ?",
+            (rule_id, rule_id),
+        ) as cursor:
+            row = await cursor.fetchone()
+            assert row[0] == 0
 
     async def test_purge_knowledge_with_dependencies_allowed_but_quarantined_logic(self, engine):
         # Knowledge facts max out at 0.4 criticality in current heuristic,

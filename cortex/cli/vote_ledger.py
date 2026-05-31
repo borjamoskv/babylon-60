@@ -62,7 +62,6 @@ def vote(fact_id, value, agent, db) -> None:
 @cli.group()
 def ledger():
     """Administrar el registro inmutable de votos."""
-    pass
 
 
 @ledger.command("status")

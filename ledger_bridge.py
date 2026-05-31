@@ -13,7 +13,6 @@ import hashlib
 import argparse
 import logging
 from pathlib import Path
-from typing import Optional
 
 # Logger configuration
 logging.basicConfig(
@@ -77,11 +76,10 @@ class LedgerBridge:
                 block = self.jit_lib.fetch_ultrathin_rpc_block()
                 if block > 0:
                     return block, "C5-REAL"
-                else:
-                    logger.warning(
-                        "JIT block fetch returned 0. Total RPC collapse. Falling back to degraded simulation."
-                    )
-                    return 0, "C4-SIM"
+                logger.warning(
+                    "JIT block fetch returned 0. Total RPC collapse. Falling back to degraded simulation."
+                )
+                return 0, "C4-SIM"
             except Exception as e:
                 logger.error(f"Error during JIT block fetch: {e}")
                 return 0, "C4-SIM"
@@ -108,9 +106,8 @@ class LedgerBridge:
                 if res == 0:
                     hash_hex = bytes(output_array).hex()
                     return hash_hex, "C5-REAL"
-                else:
-                    logger.error(f"JIT crystallize function returned error code: {res}")
-                    return hashlib.sha256(data).hexdigest(), "C4-SIM"
+                logger.error(f"JIT crystallize function returned error code: {res}")
+                return hashlib.sha256(data).hexdigest(), "C4-SIM"
             except Exception as e:
                 logger.error(f"JIT crystallize failed: {e}. Falling back to standard hash.")
                 return hashlib.sha256(data).hexdigest(), "C4-SIM"

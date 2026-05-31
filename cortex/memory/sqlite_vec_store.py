@@ -6,7 +6,6 @@ Enforces partition by tenant_id and incorporates OUROBOROS success_rate
 and temporal decay directly in the embedding retrieval.
 """
 
-# ruff: noqa: S608
 # This module uses validated dynamic sqlite identifiers for tenant/project sharded tables.
 
 from __future__ import annotations
@@ -55,13 +54,13 @@ class SovereignVectorStoreL2(SchemaTrait, ReadTrait, WriteTrait):
     """
 
     __slots__ = (
+        "_conn",
         "_db_path",
         "_encoder",
-        "_conn",
-        "_lock",
-        "_ready",
         "_half_life",
         "_hybrid",
+        "_lock",
+        "_ready",
         "_sanitizer",
         "_vector_enabled",
     )

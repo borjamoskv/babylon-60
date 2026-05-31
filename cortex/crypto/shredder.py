@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.crypto.shredder")
 
-__all__ = ["CryptoShredder", "ShredResult", "ShredBatchResult"]
+__all__ = ["CryptoShredder", "ShredBatchResult", "ShredResult"]
 
 
 @dataclass

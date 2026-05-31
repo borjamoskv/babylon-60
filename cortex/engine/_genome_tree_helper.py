@@ -5,7 +5,6 @@ Reality Level: C5-REAL
 
 from __future__ import annotations
 
-import copy
 from cortex.isa.builder import AgentOp
 
 

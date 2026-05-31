@@ -154,4 +154,3 @@ def _detect_agent_source() -> str:
 @click.version_option(__version__, prog_name="cortex")
 def cli() -> None:
     """CORTEX - Trust Infrastructure for Autonomous AI."""
-    pass

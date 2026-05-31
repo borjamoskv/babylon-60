@@ -43,7 +43,7 @@ _IS_LINUX = _PLATFORM == "Linux"
 
 # Probe psutil availability without importing at module level in workers
 try:
-    import psutil as _psutil_probe  # type: ignore[import]  # noqa: F401
+    import psutil as _psutil_probe  # type: ignore[import]
 
     _HAS_PSUTIL: bool = True
 except ModuleNotFoundError:
@@ -118,25 +118,25 @@ def _collect_snapshot() -> MemorySnapshot:
 
     if _HAS_PSUTIL:
         try:
-            import psutil as _p  # noqa: PLC0415
+            import psutil as _p
 
             mi = _p.Process(os.getpid()).memory_info()
             rss, vms = mi.rss, mi.vms
             vm = _p.virtual_memory()
             sys_avail, sys_total = vm.available, vm.total
-        except (ValueError, KeyError, OSError, RuntimeError, ImportError):  # noqa: BLE001 - boundary; caller handles alerts
+        except (ValueError, KeyError, OSError, RuntimeError, ImportError):
             pass
 
     if _IS_LINUX:
         # Lazy import: ctypes.CDLL("libc.so.6") only attempted on Linux
         try:
-            from cortex.extensions.daemon.sidecar.compaction_monitor.memory_wrapper import (  # noqa: PLC0415
+            from cortex.extensions.daemon.sidecar.compaction_monitor.memory_wrapper import (
                 get_mallinfo2,
             )
 
             info = get_mallinfo2()
             arena, free_b = info.arena, info.fordblks
-        except (ValueError, KeyError, OSError, RuntimeError, ImportError):  # noqa: BLE001
+        except (ValueError, KeyError, OSError, RuntimeError, ImportError):
             pass
 
     return MemorySnapshot(
@@ -155,13 +155,13 @@ def _do_malloc_trim() -> bool:
     if not _IS_LINUX:
         return False
     try:
-        from cortex.extensions.daemon.sidecar.compaction_monitor.memory_wrapper import (  # noqa: PLC0415
+        from cortex.extensions.daemon.sidecar.compaction_monitor.memory_wrapper import (
             malloc_trim,
         )
 
         malloc_trim(0)
         return True
-    except Exception:  # noqa: BLE001
+    except Exception:
         return False
 
 
@@ -264,12 +264,12 @@ class MemoryPressureMonitor:
                     await self._tick()
                 except asyncio.CancelledError:
                     raise
-                except Exception as e:  # noqa: BLE001
+                except Exception as e:
                     logger.error("Sample loop crashed: %s", e)
             except asyncio.CancelledError:
                 self._running = False
                 raise  # Re-raise to allow task to be cleanly cancelled
-            except Exception as exc:  # noqa: BLE001 - top-level resilience
+            except Exception as exc:
                 logger.exception("MemoryPressureSidecar tick error: %s", exc)
             try:
                 await asyncio.sleep(self.interval)
@@ -321,7 +321,7 @@ class MemoryPressureMonitor:
             await self._alert_callback(alert)
         if self.use_legion:
             try:
-                from legion import send_alert  # type: ignore[import]  # noqa: PLC0415
+                from legion import send_alert  # type: ignore[import]
 
                 await send_alert(alert.message)
             except ImportError:

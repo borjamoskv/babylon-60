@@ -12,7 +12,7 @@ import aiosqlite
 
 from cortex.extensions.signals.models import Signal, signal_from_row
 
-__all__ = ["SignalBus", "AsyncSignalBus"]
+__all__ = ["AsyncSignalBus", "SignalBus"]
 
 logger = logging.getLogger("cortex.extensions.signals.bus")
 

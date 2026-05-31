@@ -9,4 +9,4 @@ from __future__ import annotations
 from cortex.extensions.llm.manager import LLMManager
 from cortex.extensions.llm.provider import LLMProvider
 
-__all__ = ["LLMProvider", "LLMManager"]
+__all__ = ["LLMManager", "LLMProvider"]

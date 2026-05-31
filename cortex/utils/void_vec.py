@@ -15,11 +15,11 @@ import os
 from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 __all__ = [
+    "cosine_similarity",
     "pack_void_bit",
+    "unpack_void_bit",
     "void_hamming_dist",
     "void_similarity",
-    "unpack_void_bit",
-    "cosine_similarity",
 ]
 
 

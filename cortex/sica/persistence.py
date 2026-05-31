@@ -24,7 +24,6 @@ from cortex.sica.strategy import (
     Heuristic,
     SearchStrategy,
     StrategyGenome,
-    StrategyMutation,
 )
 
 logger = logging.getLogger("cortex.sica.persistence")
@@ -199,9 +198,8 @@ def load_or_default(
             genome.genome_hash,
         )
         return SearchStrategy(genome)
-    else:
-        logger.info("SICA starting fresh - no saved genome for '%s'", agent_id)
-        return SearchStrategy(default_genome())
+    logger.info("SICA starting fresh - no saved genome for '%s'", agent_id)
+    return SearchStrategy(default_genome())
 
 
 def list_generations(

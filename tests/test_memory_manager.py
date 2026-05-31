@@ -140,7 +140,6 @@ async def test_process_interaction_with_overflow(manager, mock_l1):
         # The task was added *before* this patch. The worker might have already processed
         # it using the real compress_and_store and failed. We should patch it before
         # calling process_interaction.
-        pass
 
 
 @pytest.mark.asyncio

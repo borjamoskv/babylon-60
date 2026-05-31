@@ -76,7 +76,7 @@ class TrustService:
       • verify_batch:        O(N) batch verification (new in V6).
     """
 
-    __slots__ = ("db_path", "_cached_conn")
+    __slots__ = ("_cached_conn", "db_path")
 
     def __init__(self, db_path: str) -> None:
         self.db_path = db_path

@@ -7,7 +7,6 @@ highest Exergy extraction targets.
 Reality Level: C4-SIM (Input Data) / C5-REAL (Engine Execution)
 """
 
-import hashlib
 import logging
 import os
 import time

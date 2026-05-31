@@ -6,9 +6,6 @@ and AbuseIPDB. Maintains a local vector store of attack signatures
 for semantic similarity matching. HMAC-SHA256 verified feeds.
 """
 
-import asyncio
-import hashlib
-import hmac
 import json
 import logging
 import math
@@ -21,7 +18,7 @@ from typing import Any
 from cortex.extensions.security.threat_signatures import BUILT_IN_SIGNATURES
 
 logger = logging.getLogger("cortex.extensions.security.threat_feed")
-__all__ = ["ThreatFeedEngine", "ThreatFeedReport", "ThreatMatch", "BUILT_IN_SIGNATURES"]
+__all__ = ["BUILT_IN_SIGNATURES", "ThreatFeedEngine", "ThreatFeedReport", "ThreatMatch"]
 _COMPILED_SIGNATURES: list[tuple[dict[str, Any], re.Pattern[str]]] = []
 for _sig in BUILT_IN_SIGNATURES:
     try:

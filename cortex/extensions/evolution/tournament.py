@@ -112,9 +112,7 @@ def speciate(
     current_group: list[SubAgent] = []
 
     for sub in sorted_subs:
-        if not current_group:
-            current_group.append(sub)
-        elif abs(sub.fitness - current_group[0].fitness) <= threshold:
+        if not current_group or abs(sub.fitness - current_group[0].fitness) <= threshold:
             current_group.append(sub)
         else:
             centroid = sum(s.fitness for s in current_group) / len(current_group)

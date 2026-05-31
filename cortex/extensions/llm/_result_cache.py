@@ -35,7 +35,7 @@ def _db(path: Path, exclusive: bool = False) -> Generator[sqlite3.Connection, No
             conn.execute("BEGIN EXCLUSIVE")
         yield conn
         conn.commit()
-    except Exception:  # noqa: BLE001
+    except Exception:
         conn.rollback()
         raise
     finally:

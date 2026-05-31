@@ -15,7 +15,7 @@ from cortex.extensions.manifold.models import (
 __all__ = [
     "ConvergenceEngine",
     "ConvergenceMetrics",
-    "DimensionalState",
     "DimensionType",
+    "DimensionalState",
     "WaveState",
 ]

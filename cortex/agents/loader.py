@@ -28,14 +28,14 @@ class AgentInstance:
     """
 
     __slots__ = (
-        "role",
-        "working_memory",
-        "guardrail",
+        "_vector_store",
         "art_gate",
         "bift_router",
         "cms",
+        "guardrail",
+        "role",
         "sparse_encoder",
-        "_vector_store",
+        "working_memory",
     )
 
     def __init__(

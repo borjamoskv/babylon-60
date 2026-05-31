@@ -83,12 +83,13 @@ class StagesMixin:
         if self._executor is not None:
             import asyncio
 
-            coro_factory = lambda: self._executor.execute(  # noqa: E731
-                intent=request.intent,
-                context=context,
-                plan=plan,
-                budget_remaining=request.budget_limit_usd,
-            )
+            def coro_factory():
+                return self._executor.execute(
+                            intent=request.intent,
+                            context=context,
+                            plan=plan,
+                            budget_remaining=request.budget_limit_usd,
+                        )
 
             try:
                 asyncio.get_running_loop()

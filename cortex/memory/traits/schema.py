@@ -148,7 +148,7 @@ class SchemaTrait:
 
                 self._hybrid = L2HybridSearch(self)
                 self._hybrid.ensure_fts_table()
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 logger.warning("L2HybridSearch init failed (FTS5 unavailable): %s", e)
                 self._hybrid = None
 

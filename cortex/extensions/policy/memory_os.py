@@ -64,7 +64,7 @@ class MemoryOS:
         if tier == MemoryTier.WORKING:
             self._working_memory[key] = value
             return True
-        elif tier == MemoryTier.EPISODIC:
+        if tier == MemoryTier.EPISODIC:
             # Map & Bind context into fixed-size VSA tensor (O(1) memory footprint)
             ctx_string = f"{key}:{value}"
             idx = int(hashlib.sha256(ctx_string.encode("utf-8")).hexdigest(), 16) % VSA_DIMENSION
@@ -72,7 +72,7 @@ class MemoryOS:
             # Also record in bounded trace log for test observability
             self._episodic_traces.append({"key": key, "value": value})
             return True
-        elif tier == MemoryTier.SEMANTIC:
+        if tier == MemoryTier.SEMANTIC:
             # Requires Maxwell's Demon (Mem0 pipeline)
             raise NotImplementedError(
                 "Semantic writes must pass through mem0_pipeline for exergy validation."
