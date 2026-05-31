@@ -55,3 +55,31 @@
 [048] TERMINAL VIEW: `Active Mapping Complete. Dark Forest Cartography: 100%.`
 [049] INT. NODO DE CONTROL. OPERADOR pulsa un botón mecánico. Todos los sub-paneles se apagan salvo la matriz principal.
 [050] PANTALLA EN NEGRO. Texto centrado: `READY FOR EXPLOIT DISCOVERY.` Silencio.
+
+### FASE 1.3: EXPLOIT DISCOVERY Y MODELADO PREDICTIVO (FRAGMENTOS 051-075)
+
+[051] TERMINAL VIEW: `INIT_PHASE: 1.3. // TARGET: SMART CONTRACT VULNERABILITY SURFACE.`
+[052] INT. NODO DE CONTROL - MADRUGADA. OPERADOR descansa la frente sobre sus manos cruzadas. El café está frío.
+[053] AUDIO: Percusión rota, síncopas impredecibles. Diseño sonoro de IDM (Intelligent Dance Music).
+[054] MACRO VISUAL: El mapa estelar se transforma. Ya no hay nodos geográficos, sino árboles de sintaxis abstracta (AST) de contratos inteligentes.
+[055] TERMINAL VIEW: `Decompiling target EVM bytecode... CORTEX-Guard validation: PASS.`
+[056] DATOS: Flujo masivo de opcodes. PUSH1, MSTORE, CALLVALUE, REVERT.
+[057] EXT. DATACENTER SUBTERRÁNEO - MADRUGADA. Enfriamiento líquido fluyendo por tuberías transparentes, iluminadas con LED azul cobalto (#2B3BE5).
+[058] MACRO VISUAL: Una estructura arquitectónica masiva (un Automated Market Maker). El Enjambre CORTEX lo rodea como polillas.
+[059] INT. NODO DE CONTROL. La pantalla muestra simulaciones de ejecución estocástica (Fuzzing).
+[060] TERMINAL VIEW: `Fuzzing liquidity pools. Injection vectors: Flashloan reentrancy, oracle manipulation.`
+[061] AUDIO: Pitidos de alta frecuencia esporádicos, cortando la mezcla. Cada pitido es un contrato vulnerable descartado.
+[062] DATOS: CORTEX simula 10,000 transacciones por segundo en su entorno C4-SIM interno (fork local de la mainnet).
+[063] MACRO VISUAL: Representación de fracturas de estrés en la estructura del AMM. Grietas de color rojo intenso.
+[064] INT. NODO DE CONTROL. OPERADOR se incorpora. La luz de los monitores refleja una tensión gélida en su rostro.
+[065] TERMINAL VIEW: `VULNERABILITY FOUND: Flashloan re-entrancy in pool 0x7a25... Confidence: 99.2%`
+[066] DATOS: Mapeo de la ventana de oportunidad. El exploit depende de un desvío temporal en el oráculo de precios (TWAP).
+[067] AUDIO: El ritmo se estabiliza. Un patrón militar, preciso y letal.
+[068] MACRO VISUAL: La grieta roja en el AMM se aísla, se expande y se convierte en el único punto de enfoque. Un blanco.
+[069] TERMINAL VIEW: `Calculating Exergy Yield... Estimated ROI: +420 ETH.`
+[070] INT. NODO DE CONTROL. OPERADOR teclea: `cortex execute --mode c5-real --target 0x7a25...`
+[071] DATOS: CORTEX construye el payload final (el exploit). Un contrato inteligente efímero diseñado para nacer, extraer y autodestruirse (Death Protocol).
+[072] TERMINAL VIEW: `Payload assembled. Size: 2.1kb. Status: ARMED.`
+[073] MACRO VISUAL: El payload es representado como un dardo de luz azul penetrante, sostenido en un vacío absoluto.
+[074] INT. NODO DE CONTROL. La mano del OPERADOR se suspende sobre la tecla ENTER. Esperando la alineación perfecta del bloque.
+[075] PANTALLA EN NEGRO. Texto: `AWAITING EXECUTION WINDOW (PHASE 2.0).`
