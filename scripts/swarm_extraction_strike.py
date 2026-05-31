@@ -1,5 +1,6 @@
 import asyncio
 import os
+import subprocess
 from datetime import datetime
 
 import yaml
@@ -44,6 +45,7 @@ class CortexSwarmPrime:
         print(f"[+] Generando Code4rena Report.md en `reports/{self.target}_extraction.md`")
 
         os.makedirs("reports", exist_ok=True)
+        report_path = f"reports/{self.target}_extraction.md"
         report_content = f"""# {self.target.upper()} AUDIT REPORT
 ### Severity: HIGH
 ### Exergy Ratio: 5.4
@@ -52,8 +54,19 @@ class CortexSwarmPrime:
 **Vector**: `{self.target}`
 **Swarm Confidence**: 0.92
         """
-        with open(f"reports/{self.target}_extraction.md", "w") as f:
+        with open(report_path, "w") as f:
             f.write(report_content)
+
+        # ELEVACIÓN A C5-REAL (macOS AppleScript Bridge)
+        print("\n[+] [C5-REAL BRIDGE] Escalando vector a interfaz de hardware (Google Chrome)...")
+        try:
+            # Ejecutar el subidor autónomo nativo de Mac
+            subprocess.run(
+                ["python3", "scripts/c4_real_submitter.py", "--target", self.target, "--report", report_path],
+                check=True
+            )
+        except Exception as e:
+            print(f"[-] [C5-REAL ERROR] Falló la inyección en navegador: {e}")
 
         print("[∴] OPERACIÓN C5-DYNAMIC COMPLETED. ZERO-FRICTION YIELD SECURED.")
 
