@@ -33,7 +33,10 @@ impl GenomeMutatorRs {
 
         match mutation_type {
             "parameter_drift" => {
-                // Handled in Python or implemented separately since tree is just AgentOp
+                tree = Self::drift_parameters_recursive(tree);
+            }
+            "heuristic_optimization" => {
+                tree = Self::heuristic_optimize(tree);
             }
             "subtree_swap" => {
                 let targets = Self::dispatch_targets(&tree);
@@ -284,6 +287,117 @@ impl GenomeMutatorRs {
                     }
                 }
                 Value::Object(map)
+            }
+            other => other
+        }
+    }
+
+    fn drift_parameters_recursive(tree: Value) -> Value {
+        let mut rng = rand::thread_rng();
+        match tree {
+            Value::Object(mut map) => {
+                if let Some(dispatch) = map.get_mut("Dispatch") {
+                    if let Some(params) = dispatch.get_mut("parameters") {
+                        if let Some(p_obj) = params.as_object_mut() {
+                            for (_, v) in p_obj.iter_mut() {
+                                let delta = rng.gen_range(-0.15..=0.15);
+                                if v.is_f64() {
+                                    if let Some(num) = v.as_f64() {
+                                        *v = json!(num * (1.0 + delta));
+                                    }
+                                } else if v.is_i64() {
+                                    if let Some(num) = v.as_i64() {
+                                        let new_val = (num as f64 * (1.0 + delta)).round() as i64;
+                                        *v = json!(new_val);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else if let Some(seq) = map.get_mut("Seq") {
+                    *seq = Self::drift_parameters_recursive(seq.clone());
+                } else if let Some(par) = map.get_mut("Par") {
+                    *par = Self::drift_parameters_recursive(par.clone());
+                } else if let Some(cond) = map.get_mut("Cond") {
+                    if let Some(then_b) = cond.get_mut("then_branch") {
+                        *then_b = Self::drift_parameters_recursive(then_b.clone());
+                    }
+                    if let Some(else_b) = cond.get_mut("else_branch") {
+                        *else_b = Self::drift_parameters_recursive(else_b.clone());
+                    }
+                } else if let Some(loop_n) = map.get_mut("Loop") {
+                    if let Some(body) = loop_n.get_mut("body") {
+                        *body = Self::drift_parameters_recursive(body.clone());
+                    }
+                }
+                Value::Object(map)
+            }
+            Value::Array(arr) => {
+                let new_arr = arr.into_iter().map(|item| Self::drift_parameters_recursive(item)).collect();
+                Value::Array(new_arr)
+            }
+            other => other
+        }
+    }
+
+    fn heuristic_optimize(tree: Value) -> Value {
+        match tree {
+            Value::Object(mut map) => {
+                if let Some(seq) = map.get_mut("Seq") {
+                    if let Some(arr) = seq.as_array() {
+                        let mut new_arr = Vec::new();
+                        for item in arr {
+                            let opt = Self::heuristic_optimize(item.clone());
+                            if opt != Value::String("Noop".to_string()) {
+                                new_arr.push(opt);
+                            }
+                        }
+                        if new_arr.is_empty() {
+                            return Value::String("Noop".to_string());
+                        } else if new_arr.len() == 1 {
+                            return new_arr.into_iter().next().unwrap();
+                        }
+                        *seq = Value::Array(new_arr);
+                    }
+                } else if let Some(par) = map.get_mut("Par") {
+                    if let Some(arr) = par.as_array() {
+                        let mut new_arr = Vec::new();
+                        for item in arr {
+                            let opt = Self::heuristic_optimize(item.clone());
+                            if opt != Value::String("Noop".to_string()) {
+                                new_arr.push(opt);
+                            }
+                        }
+                        if new_arr.is_empty() {
+                            return Value::String("Noop".to_string());
+                        } else if new_arr.len() == 1 {
+                            return new_arr.into_iter().next().unwrap();
+                        }
+                        *par = Value::Array(new_arr);
+                    }
+                } else if let Some(cond) = map.get_mut("Cond") {
+                    if let Some(then_b) = cond.get_mut("then_branch") {
+                        *then_b = Self::heuristic_optimize(then_b.clone());
+                    }
+                    if let Some(else_b) = cond.get_mut("else_branch") {
+                        *else_b = Self::heuristic_optimize(else_b.clone());
+                    }
+                } else if let Some(loop_n) = map.get_mut("Loop") {
+                    if let Some(body) = loop_n.get_mut("body") {
+                        *body = Self::heuristic_optimize(body.clone());
+                        if *body == Value::String("Noop".to_string()) {
+                            return Value::String("Noop".to_string());
+                        }
+                    }
+                }
+                Value::Object(map)
+            }
+            Value::Array(arr) => {
+                let new_arr: Vec<Value> = arr.into_iter()
+                    .map(|item| Self::heuristic_optimize(item))
+                    .filter(|item| *item != Value::String("Noop".to_string()))
+                    .collect();
+                Value::Array(new_arr)
             }
             other => other
         }
