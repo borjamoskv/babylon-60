@@ -33,7 +33,10 @@ def enforce_weismann_barrier(target_kernel_file: str, mutator_callback) -> bool:
         # 2. Mutate Clone
         # mutator_callback should read mutant_file, mutate, and write back to mutant_file
         logger.info(f"[WEISMANN] Injecting mutation into somatic clone: {mutant_file}")
-        success = mutator_callback(str(mutant_file))
+        if mutator_callback is not None:
+            success = mutator_callback(str(mutant_file))
+        else:
+            success = True
 
         if not success:
             logger.warning("[WEISMANN] Mutation failed to generate valid AST on clone.")

@@ -11,7 +11,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from cortex.engine.smte.llm_mutator import LLMMutator
+from cortex.engine.smte.llm_mutator import call_qwen_mutator
 from cortex.engine.smte.weismann_barrier import enforce_weismann_barrier
 
 logger = logging.getLogger("cortex.engine.smte.ouroboros_compiler")
@@ -19,55 +19,58 @@ logger = logging.getLogger("cortex.engine.smte.ouroboros_compiler")
 
 class OuroborosCompiler:
     """AOT Compiler that converts limerent agents into compressed minimal paths."""
-
     def __init__(self, db_path: str | Path | None = None):
-        self.mutator = LLMMutator()
         self._db_path = db_path
         self._engine: Any = None
 
     def _ensure_engine(self) -> None:
         if self._engine is not None:
             return
-        from cortex.cli import get_engine
+        from cortex.cli.common import get_engine
         from cortex.config import DEFAULT_DB_PATH
 
         db_val = str(self._db_path) if self._db_path else DEFAULT_DB_PATH
         self._engine = get_engine(db_val)
 
     def analyze_limerence(self, source_code: str) -> dict[str, Any]:
-        """Analyze code for high maintenance cost vs utility.
+        """Analyze code for high maintenance cost vs utility using L-EPI empirical metrics.
 
-        Calculates C(entity) via heuristics: LLM network calls and cyclomatic complexity.
+        Calculates AST Complexity and Dead Code Ratio to enforce the Ouroboros-Omega L-EPI Guard.
         """
+        from cortex.engine.smte.analyzer import calculate_ast_complexity, estimate_dead_code_ratio
+        
+        complexity = calculate_ast_complexity(source_code)
+        dead_code_ratio = estimate_dead_code_ratio(source_code)
+        
+        # We assume empirical_usage = 1.0 statically unless dynamically passed
+        empirical_usage = 1.0 
+        limerence_penalty = (complexity / empirical_usage) * 10.0
+        
+        # Combine old metric style with new L-EPI Guard style
+        llm_calls = 0
         try:
             tree = ast.parse(source_code)
-            llm_calls = 0
-            complexity = 0
-
             for node in ast.walk(tree):
-                if isinstance(node, ast.Call):
-                    if isinstance(node.func, ast.Attribute):
-                        if node.func.attr in (
-                            "complete",
-                            "chat",
-                            "predict",
-                            "generate",
-                            "mutate_prompt",
-                        ):
-                            llm_calls += 1
-                elif isinstance(node, ast.If | ast.For | ast.While):
-                    complexity += 1
-
-            # Formula: Heavy penalty for LLM calls (entropy source), minor for structural branching
-            cost = (llm_calls * 10) + complexity
-            return {
-                "llm_calls": llm_calls,
-                "complexity": complexity,
-                "maintenance_cost": cost,
-                "is_limerent": cost > 15,
-            }
+                if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
+                    if node.func.attr in ("complete", "chat", "predict", "generate", "mutate_prompt"):
+                        llm_calls += 1
         except SyntaxError:
-            return {"is_limerent": False, "maintenance_cost": 0}
+            pass
+
+        cost = (llm_calls * 10) + complexity
+        
+        is_limerent = cost > 15 or limerence_penalty > 10.0
+        must_amputate = dead_code_ratio > 0.4 and limerence_penalty > 10.0
+
+        return {
+            "llm_calls": llm_calls,
+            "complexity": complexity,
+            "dead_code_ratio": dead_code_ratio,
+            "limerence_penalty": limerence_penalty,
+            "maintenance_cost": cost,
+            "is_limerent": is_limerent,
+            "must_amputate": must_amputate
+        }
 
     async def compile_entity(self, target_file: str | Path) -> bool:
         """Compile an agent into its minimal deterministic path."""
@@ -82,6 +85,26 @@ class OuroborosCompiler:
             source = f.read()
 
         analysis = self.analyze_limerence(source)
+        
+        self._ensure_engine()
+        
+        if analysis.get("must_amputate"):
+            logger.info(
+                f"[L-EPI GUARD] FATAL: Limerencia Epistémica detectada en {target_path.name}. "
+                f"dead_code_ratio={analysis['dead_code_ratio']:.2f}, limerence_penalty={analysis['limerence_penalty']:.2f}. "
+                "Amputación automática iniciada."
+            )
+            target_path.unlink()
+            await self._engine.store(
+                project="SYSTEM",
+                content=f"L-EPI Guard amputated {target_path.name} due to high limerence/dead code.",
+                fact_type="bridge",
+                confidence="C5",
+                source="agent:ouroboros-compiler",
+                meta={"sub_type": "l_epi_amputation", "target_file": str(target_path), "logos_signature": "smte_ouroboros"},
+            )
+            return True
+            
         if not analysis.get("is_limerent"):
             logger.info("Entity is not limerent (C <= U). No compilation needed.")
             return True
@@ -90,18 +113,19 @@ class OuroborosCompiler:
             f"Limerence detected: Maintenance Cost {analysis['maintenance_cost']}. "
             "Compressing graph..."
         )
-        self._ensure_engine()
 
-        # Generate compressed AST representation using LLMMutator
+        # Generate compressed AST representation using Qwen LLM
         prompt = (
-            "SYSTEM: You are the Ouroboros Compiler. Your objective is AOT structural compression.\n"
-            "Eliminate 'limerent' (stochastic, unnecessary LLM) logic and replace it with pure, deterministic paths.\n"
-            "Compress the complexity (C) to the absolute minimum required to achieve the utility (U).\n"
+            "SYSTEM: You are the Ouroboros Compiler. Your objective is AOT structural compression.\\n"
+            "Eliminate 'limerent' (stochastic, unnecessary LLM) logic and replace it with pure, deterministic paths.\\n"
+            "Compress the complexity (C) to the absolute minimum required to achieve the utility (U).\\n"
             "Return ONLY the pure python code. No markdown formatting, no explanations."
         )
 
         try:
-            compiled_code = await self.mutator.mutate_prompt(prompt, source)
+            # We pass a simple dict for topology_info since this is a global compile
+            topology_info = {"prompt": prompt}
+            compiled_code = call_qwen_mutator(source, topology_info)
 
             # Clean formatting
             compiled_code = compiled_code.strip()
@@ -139,7 +163,7 @@ class OuroborosCompiler:
                 fact_type="bridge",
                 confidence="C5",
                 source="agent:ouroboros-compiler",
-                meta={"sub_type": "graph_compression", "target_file": str(target_path)},
+                meta={"sub_type": "graph_compression", "target_file": str(target_path), "logos_signature": "smte_ouroboros"},
             )
             return True
 
