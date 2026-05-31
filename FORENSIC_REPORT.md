@@ -1,57 +1,43 @@
 # 🕵️ DETECTIVE-Ω FORENSIC REPORT
+**Target Ecosystem**: `cortex-persist`  
+**Timestamp**: 2026-06-01T00:18:00+02:00  
+**Level**: C5-REAL (Systematic Entropy Scan)
 
-**Workspace:** CORTEX-Persist
-**Reality Level:** C5-REAL
-**Timestamp:** 2026-05-31
+## 1. 📊 Surface Metrics
+* **Total Scanned Files**: 4,256
+* **Total Lines of Code (LOC)**: 708,735
 
-## 1. Codebase Surface Area (Python + Rust)
-- **Total LOC (Source files):** 304,938
-- **Total Python Files:** 1,846
-- **Total Rust Files:** 46
-- **Highest Entropy Nodes (God Objects - >500 LOC):**
-  - 🔴 `tests/test_e2e_pipeline.py` (833 LOC)
-  - 🔴 `cortex_rs/src/isa.rs` (772 LOC)
-  - 🔴 `cortex_rs/src/curriculum.rs` (709 LOC)
-  - 🔴 `cortex_rs/src/lib.rs` (698 LOC)
-  - 🔴 `cortex/extensions/daemon/core.py` (630 LOC)
-  - 🔴 `cortex_rs/src/conjecturer.rs` (627 LOC)
-  - 🔴 `cortex/extensions/evolution/ouroboros_omega.py` (616 LOC)
-  - 🔴 `cortex/engine/causality.py` (604 LOC)
-  - 🔴 `cortex/extensions/alma/taste.py` (590 LOC)
-  - 🔴 `cortex/sica/meta_level.py` (589 LOC)
-  - 🔴 `cortex/sica/dream.py` (581 LOC)
-  - 🔴 `cortex/engine/repair_strategies.py` (576 LOC)
-  - 🔴 `cortex/engine/reflexion.py` (565 LOC)
-  - 🔴 `cortex/guards/contradiction_guard.py` (562 LOC)
-  - 🔴 `cortex/ledger/ledger_core.py` (559 LOC)
-  - 🔴 `cortex/engine/genesis.py` (546 LOC)
-  - 🔴 `cortex/memory/vsa.py` (512 LOC)
+### Size by Substrate:
+* **Python (`.py`)**: 298,255 LOC
+* **Solidity (`.sol`)**: 172,584 LOC
+* **Move (`.move`)**: 124,608 LOC
+* **FunC (`.fc`)**: 44,649 LOC
+* **Rust (`.rs`)**: 23,823 LOC
 
-## 2. Interrogation Heatmap
-| Vector | Status | Metric / Findings |
-|---|---|---|
-| **1. God Objects** | 🔴 Critical | 17 source/test files exceed 500 LOC. Core files like `cortex/extensions/daemon/core.py` (630 LOC) and `cortex/engine/causality.py` (604 LOC) handle massive orchestration and are candidates for division. |
-| **2. Circulars** | 🟢 Clean | Well-defined imports, cycles avoided using dynamic runtime imports. |
-| **3. Dead Code/Tags** | 🟠 Warn | 33 active `TODO` or `FIXME` comments in docstrings and placeholders (e.g. `cortex/agents/builtins/copilot_agent.py`, `cortex/extensions/immune/error_boundary.py`). |
-| **4. Copy-Paste** | 🟠 Warn | Sync and async duplicated signatures exist (e.g., `AsyncCausalOracle` vs `CausalOracle` in `cortex/engine/causality.py`). |
-| **5. Security** | 🟢 Clean | No hardcoded credentials or API keys found in source code. |
-| **6. Error Handling** | 🟠 Warn | Generic `except Exception: pass` and `except: pass` blocks exist across 11 modules (e.g. `cortex/routes/health.py`, `cortex/gateway/router.py`), silencing critical debugging indicators. |
-| **7. Naming** | 🟢 Clean | Professional, Domain-specific nomenclature matching CORTEX axioms. |
-| **8. Perf** | 🟢 Clean | Core execution loop behaves optimally; O(N²) loops are limited to Byzantine pairwise comparison where N is small. |
+## 2. 🚨 Interrogation Vectors (8 Dimensions)
 
-## 3. Recommended Execution Sprints
+| Dimension | Status | Severity | Details |
+| :--- | :---: | :---: | :--- |
+| **1. God Objects** | 🔴 | High | **159 files** exceed 500 LOC or 10+ methods. <br> (e.g. `tests/test_e2e_pipeline.py` [833 LOC], `cortex_rs/src/isa.rs` [772 LOC], `cortex/extensions/daemon/core.py` [631 LOC]) |
+| **2. Alarms (TODO/FIXME/HACK)**| 🟠 | Med | **71 instances** found scattered in codebase. |
+| **3. Error Handling** | 🔴 | High | **246 Empty `except` blocks** acting as silent black holes. <br> (e.g. `cortex/database/cache.py:208`, `cortex/consensus/__init__.py:23`) |
+| **4. Dead Code / Security** | 🟡 | Low/Med | Pending deep AST pass, but empty excepts hint at unstable execution contexts. |
 
-### Sprint 1: Quick Wins (Auto-Fix Express)
-- [ ] Refactor silent `except Exception: pass` blocks in non-middleware modules (like `cortex/routes/health.py:131` and `cortex/engine/mixins/optimization.py`) to log debug errors instead.
-- [ ] Address docstring TODOs in `cortex/extensions/immune/error_boundary.py`.
-- [ ] Stabilize pending changes in `cortex/extensions/moltbook/influencer_guard.py` and `scripts/comments_scraper_omega.py` through verification tests.
+---
 
-### Sprint 2: Medium Refactors
-- [ ] Extract scheduler setup and monitors initialization out of `MoskvDaemon` (`cortex/extensions/daemon/core.py`) into dedicated helper modules to bring LOC below 500.
-- [ ] Decouple helper methods from `cortex/engine/causality.py` into `cortex/engine/causality_helpers.py`.
+## 3. 🗺️ Refactoring Roadmap (Sprints)
 
-### Sprint 3: Deep Overhaul
-- [ ] Unify `CausalOracle` and `AsyncCausalOracle` using unified wrappers to reduce copy-paste duplication.
+### Sprint 1: Quick Wins (Auto-Fix Express) - *1-2h*
+- **Purga de Empty Excepts (246)**: Implementar parches automáticos sobre `cortex/database/cache.py` y el motor `cortex/consensus`. Reemplazar `pass` con telemetría C5-REAL (e.g., `logger.error("...")`).
+- **Limpieza de Alarms (71)**: Resolver HACKS en el directorio `/engine-c5` y `cortex_rs`.
 
-***
-*Generated by Detective-Ω Autonomous Protocol (borjamoskv)*
+### Sprint 2: Medium Refactors - *3-5h*
+- **Desintegración de God Objects Menores**: Fragmentar el motor de daemon (`cortex/extensions/daemon/core.py`) aislando el manejo de eventos y orquestación de recursos a submódulos (`event_loop.py`, `resource_mgr.py`).
+- **Rust Modularization**: Fragmentar `cortex_rs/src/isa.rs` en módulos semánticos de instrucción pura.
+
+### Sprint 3: Deep Logic Overhaul (Architectural Mutability) - *2+ days*
+- **Test E2E Refactor**: `tests/test_e2e_pipeline.py` tiene excesiva responsabilidad (833 LOC, 61 métodos). Desacoplar pruebas por dominio (Storage, Auth, Consensus).
+- **Hardening de `cortex_mev_base`**: Auditar dependencias pesadas de `forge-std`.
+
+---
+*Generated by DETECTIVE-Ω. Exergy Positive.*
