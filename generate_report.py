@@ -2,17 +2,14 @@ import sqlite3
 import json
 import os
 
-DB_PATH = 'influencer_audit_v1.db'
-OUTPUT_HTML = 'report_influencer_audit.html'
+DB_PATH = "influencer_audit_v1.db"
+OUTPUT_HTML = "report_influencer_audit.html"
+
 
 def get_analytics_data():
     """Recupera los datos de la base de datos y los retorna en formato estructurado para JS."""
     if not os.path.exists(DB_PATH):
-        return {
-            "creadores": [],
-            "toxicidad": [],
-            "contradicciones": []
-        }
+        return {"creadores": [], "toxicidad": [], "contradicciones": []}
 
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -21,7 +18,7 @@ def get_analytics_data():
     # 1. Rage-to-Revenue data
     creadores = []
     try:
-        cursor.execute('''
+        cursor.execute("""
             SELECT 
                 v.creador_id,
                 COUNT(DISTINCT v.video_id) as total_videos,
@@ -34,7 +31,7 @@ def get_analytics_data():
             FROM videos_fuente v
             LEFT JOIN eventos_victimismo ev ON v.video_id = ev.video_id
             GROUP BY v.creador_id;
-        ''')
+        """)
         creadores = [dict(row) for row in cursor.fetchall()]
     except Exception as e:
         print(f"[ERROR] Query 1 fallida: {e}")
@@ -42,11 +39,11 @@ def get_analytics_data():
     # 2. Toxicidad Data
     toxicidad = []
     try:
-        cursor.execute('''
+        cursor.execute("""
             SELECT taxonomia_ataque, COUNT(*) as count 
             FROM eventos_acoso 
             GROUP BY taxonomia_ataque;
-        ''')
+        """)
         toxicidad = [dict(row) for row in cursor.fetchall()]
     except Exception as e:
         print(f"[ERROR] Query 2 fallida: {e}")
@@ -54,25 +51,22 @@ def get_analytics_data():
     # 3. Contradicciones
     contradicciones = []
     try:
-        cursor.execute('''
+        cursor.execute("""
             SELECT axioma_filosofico_declarado, accion_real_documentada, evidencia_url 
             FROM contradicciones_documentadas;
-        ''')
+        """)
         contradicciones = [dict(row) for row in cursor.fetchall()]
     except Exception as e:
         print(f"[ERROR] Query 3 fallida: {e}")
 
     conn.close()
-    return {
-        "creadores": creadores,
-        "toxicidad": toxicidad,
-        "contradicciones": contradicciones
-    }
+    return {"creadores": creadores, "toxicidad": toxicidad, "contradicciones": contradicciones}
+
 
 def generate_html_report():
     """Genera el dashboard HTML interactivo bajo la estética Industrial Noir 2026."""
     data = get_analytics_data()
-    
+
     html_content = f"""<!DOCTYPE html>
 <html lang="es" class="h-full">
 <head>
@@ -121,15 +115,21 @@ def generate_html_report():
         <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-card p-6 rounded-lg">
                 <span class="text-xs text-gray-500 uppercase tracking-wider">Creadores Auditados</span>
-                <div class="text-3xl font-bold font-title text-white mt-2">{len(data['creadores'])}</div>
+                <div class="text-3xl font-bold font-title text-white mt-2">{
+        len(data["creadores"])
+    }</div>
             </div>
             <div class="bg-card p-6 rounded-lg">
                 <span class="text-xs text-gray-500 uppercase tracking-wider">Ataques Catalogados</span>
-                <div class="text-3xl font-bold font-title text-white mt-2">{sum(t['count'] for t in data['toxicidad'])}</div>
+                <div class="text-3xl font-bold font-title text-white mt-2">{
+        sum(t["count"] for t in data["toxicidad"])
+    }</div>
             </div>
             <div class="bg-card p-6 rounded-lg">
                 <span class="text-xs text-gray-500 uppercase tracking-wider">Disonancias Discursivas</span>
-                <div class="text-3xl font-bold font-title text-white mt-2">{len(data['contradicciones'])}</div>
+                <div class="text-3xl font-bold font-title text-white mt-2">{
+        len(data["contradicciones"])
+    }</div>
             </div>
         </section>
 
@@ -163,13 +163,18 @@ def generate_html_report():
                     </thead>
                     <tbody class="divide-y divide-neutral-800">
                         <!-- Inyección dinámica de contradicciones -->
-                        {"".join(f'''
+                        {
+        "".join(
+            f'''
                         <tr>
                             <td class="px-6 py-4 text-sm font-semibold text-white">{c['axioma_filosofico_declarado']}</td>
                             <td class="px-6 py-4 text-sm text-gray-300">{c['accion_real_documentada']}</td>
                             <td class="px-6 py-4 text-sm text-neon font-mono"><a href="{c['evidencia_url']}" target="_blank" class="hover:underline">{c['evidencia_url']}</a></td>
                         </tr>
-                        ''' for c in data['contradicciones'])}
+                        '''
+            for c in data["contradicciones"]
+        )
+    }
                     </tbody>
                 </table>
             </div>
@@ -246,9 +251,10 @@ def generate_html_report():
 </body>
 </html>
 """
-    with open(OUTPUT_HTML, 'w', encoding='utf-8') as f:
+    with open(OUTPUT_HTML, "w", encoding="utf-8") as f:
         f.write(html_content)
     print(f"[C5-REAL] Dashboard HTML exitosamente generado en: {OUTPUT_HTML}")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     generate_html_report()

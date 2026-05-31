@@ -1,7 +1,8 @@
 import sqlite3
 import sys
 
-DB_PATH = 'influencer_audit_v1.db'
+DB_PATH = "influencer_audit_v1.db"
+
 
 class ContradictionTracker:
     def __init__(self, db_path=DB_PATH):
@@ -14,25 +15,31 @@ class ContradictionTracker:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         try:
-            cursor.execute('''
+            cursor.execute(
+                """
                 INSERT INTO contradicciones_documentadas (axioma_filosofico_declarado, accion_real_documentada, evidencia_url)
                 VALUES (?, ?, ?)
-            ''', (axioma, accion, evidencia_url))
+            """,
+                (axioma, accion, evidencia_url),
+            )
             conn.commit()
-            print(f"[C5-REAL] Contradicción registrada con éxito en el Ledger.")
+            print("[C5-REAL] Contradicción registrada con éxito en el Ledger.")
         except Exception as e:
             print(f"[ERROR] Fallo al escribir contradicción: {e}")
         finally:
             conn.close()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     if len(sys.argv) < 4:
-        print("Usage: python contradiction_tracker.py <axioma_declarado> <accion_documentada> <evidencia_url>")
+        print(
+            "Usage: python contradiction_tracker.py <axioma_declarado> <accion_documentada> <evidencia_url>"
+        )
         sys.exit(1)
-        
+
     axioma = sys.argv[1]
     accion = sys.argv[2]
     url = sys.argv[3]
-    
+
     tracker = ContradictionTracker()
     tracker.log_contradiction(axioma, accion, url)
