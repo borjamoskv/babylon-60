@@ -15,6 +15,7 @@ from cortex.cli.common import DEFAULT_DB, console  # type: ignore[reportAttribut
 
 def _render_grade_panel(hs, path: str) -> None:
     from cortex.extensions.health.models import Grade
+
     grade_colors = {
         Grade.SOVEREIGN: "bright_green",
         Grade.EXCELLENT: "green",
@@ -119,11 +120,22 @@ def _render_warnings(hs, metrics) -> None:
         recs.append("💡 Run `cortex compact` to reduce entropy")
 
     if warns:
-        console.print(Panel("\n".join(warns), title="[bold red]Warnings[/]", border_style="red", width=60))
+        console.print(
+            Panel("\n".join(warns), title="[bold red]Warnings[/]", border_style="red", width=60)
+        )
     if recs:
-        console.print(Panel("\n".join(recs), title="[bold yellow]Recommendations[/]", border_style="yellow", width=60))
+        console.print(
+            Panel(
+                "\n".join(recs),
+                title="[bold yellow]Recommendations[/]",
+                border_style="yellow",
+                width=60,
+            )
+        )
     if actions:
-        console.print(Panel("\n".join(actions), title="[bold]Actions[/]", border_style="magenta", width=60))
+        console.print(
+            Panel("\n".join(actions), title="[bold]Actions[/]", border_style="magenta", width=60)
+        )
 
     if not warns and not recs:
         console.print(Panel("[green]✅ All systems nominal[/]", border_style="green", width=60))
@@ -146,4 +158,3 @@ def dashboard(db_path: str | None) -> None:
     _render_metrics_table(metrics)
     _render_sub_indices(hs)
     _render_warnings(hs, metrics)
-
