@@ -25,6 +25,13 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
+try:
+    from cortex_rs import OuroborosStreamKernel
+    stream_kernel = OuroborosStreamKernel("localhost:9092", "ouroboros-stream")
+except ImportError:
+    stream_kernel = None
+
+
 # ── Paths ──────────────────────────────────────────────────────────
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CORTEX_CORE = PROJECT_ROOT / "cortex-core"
@@ -327,6 +334,12 @@ async def main():
             file_path = PROJECT_ROOT / diag["file"]
             dry_run = not args.commit
             result = await metabolize_file(file_path, dry_run=dry_run)
+            if not dry_run and result.get("status") == "OK" and stream_kernel:
+                delta = result.get("delta", 0.0)
+                try:
+                    stream_kernel.emit_rewrite("ouroboros_daily", True, float(abs(delta)))
+                except Exception as e:
+                    logger.warning(f"Kafka stream error: {e}")
             metabolisms.append(result)
 
     # 5. GATE CHECK
@@ -341,6 +354,12 @@ async def main():
 
     print_summary(report)
     print(f"  Report saved: {report_path}")
+
+    if stream_kernel:
+        try:
+            stream_kernel.flush()
+        except Exception:
+            pass
 
     # 7. PERSIST (best-effort)
     try:
