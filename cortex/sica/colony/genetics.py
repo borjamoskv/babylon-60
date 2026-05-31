@@ -354,7 +354,7 @@ class GenomeMutator:
 
     def mutate(self, genome: StrategyGenome, mutation_rate: float = 0.05) -> StrategyGenome:
         """Apply spontaneous point mutations to a genome.
-        
+
         Args:
             genome: The target genome to mutate.
             mutation_rate: The baseline probability of a mutation event.
