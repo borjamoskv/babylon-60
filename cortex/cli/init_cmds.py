@@ -38,8 +38,9 @@ def _bootstrap_without_embeddings() -> Iterator[None]:
 def init(db, ouroboros: bool) -> None:
     """Initialize CORTEX database."""
     engine = get_engine(db)
-    try:
-        _run_async(engine.init_db())
+
+    async def do_init() -> None:
+        await engine.init_db()
 
         # Inject MOSKV-1 v5 Axioms
         axioms = [
@@ -57,15 +58,13 @@ def init(db, ouroboros: bool) -> None:
 
         with _bootstrap_without_embeddings():
             for idx, axiom in enumerate(axioms, start=1):
-                _run_async(
-                    engine.store(
-                        project="global",
-                        content=axiom,
-                        fact_type="identity",
-                        tags=["moskv-1", "axiom", "sovereign", "core", f"axiom-{idx}"],
-                        confidence="C5",
-                        source="ag:genesis",
-                    )
+                await engine.store(
+                    project="global",
+                    content=axiom,
+                    fact_type="identity",
+                    tags=["moskv-1", "axiom", "sovereign", "core", f"axiom-{idx}"],
+                    confidence="C5",
+                    source="ag:genesis",
                 )
 
             if ouroboros:
@@ -73,15 +72,15 @@ def init(db, ouroboros: bool) -> None:
 
                 og = get_ouroboros_gate(engine)
                 entropy = og.measure_entropy()
-                _run_async(
-                    engine.store(
-                        project="cortex",
-                        content=f"Ouroboros-Ω Initialized. Entropy: {entropy['entropy_index']}",
-                        fact_type="decision",
-                        source="ag:ouroboros",
-                    )
+                await engine.store(
+                    project="cortex",
+                    content=f"Ouroboros-Ω Initialized. Entropy: {entropy['entropy_index']}",
+                    fact_type="decision",
+                    source="ag:ouroboros",
                 )
 
+    try:
+        _run_async(do_init())
         msg = (
             f"[bold #CCFF00]✓ CORTEX v{__version__} initialized[/]\n"
             f"{'↳ Ouroboros-Ω Active' if ouroboros else '↳ 10 Sovereign Axioms Injected'}\n"

@@ -41,7 +41,7 @@ class CapabilityRegistry:
 
     def _detect_initial_capabilities(self) -> RuntimeCapabilities:
         """Heuristic detection of available subsystems."""
-        no_embed = os.getenv("CORTEX_NO_EMBED", "false").lower() == "true"
+        no_embed = os.getenv("CORTEX_NO_EMBED", "false").lower() in ("true", "1")
 
         # Check embeddings without importing torch
         # We check if sentence-transformers is in the environment
@@ -63,7 +63,7 @@ class CapabilityRegistry:
 
             connect(":memory:")
             # We don't load the extension yet, just check if we want to
-            if os.getenv("CORTEX_NO_VEC", "false").lower() == "true":
+            if os.getenv("CORTEX_NO_VEC", "false").lower() in ("true", "1"):
                 has_vector = False
         except Exception:
             has_vector = False

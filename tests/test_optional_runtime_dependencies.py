@@ -31,9 +31,11 @@ def _blocked_import_env(tmp_path: Path, blocked_modules: list[str]) -> dict[str,
     )
 
     env = os.environ.copy()
+    import sys
+    sys_paths = ":".join(p for p in sys.path if p)
     pythonpath = env.get("PYTHONPATH")
     env["PYTHONPATH"] = (
-        f"{tmp_path}:{repo_root}" if not pythonpath else f"{tmp_path}:{repo_root}:{pythonpath}"
+        f"{tmp_path}:{repo_root}:{sys_paths}" if not pythonpath else f"{tmp_path}:{repo_root}:{sys_paths}:{pythonpath}"
     )
     return env
 
