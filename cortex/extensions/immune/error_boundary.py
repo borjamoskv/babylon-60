@@ -17,14 +17,19 @@ Usage as context manager::
 Both sync and async functions are supported. The decorator detects
 whether the wrapped function is a coroutine and adapts accordingly.
 """
+
+from __future__ import annotations
+
 import asyncio
 import functools
 import inspect
 import logging
 from typing import Any, TypeVar
-logger = logging.getLogger('cortex.extensions.immune.error_boundary')
-F = TypeVar('F')
+
+logger = logging.getLogger("cortex.extensions.immune.error_boundary")
+F = TypeVar("F")
 _PASSTHROUGH = (KeyboardInterrupt, SystemExit, GeneratorExit, asyncio.CancelledError)
+
 
 class ErrorBoundary:
     """Async context manager and decorator for sovereign error capture.
@@ -39,9 +44,17 @@ class ErrorBoundary:
                  swallow the error (use for daemon loops where crash = death).
         extra_meta: Additional metadata dict merged into the ghost record.
     """
-    __slots__ = ('_source', '_project', '_reraise', '_extra_meta')
 
-    def __init__(self, source: str, *, project: str='CORTEX', reraise: bool=True, extra_meta: dict[str, Any] | None=None) -> None:
+    __slots__ = ("_source", "_project", "_reraise", "_extra_meta")
+
+    def __init__(
+        self,
+        source: str,
+        *,
+        project: str = "CORTEX",
+        reraise: bool = True,
+        extra_meta: dict[str, Any] | None = None,
+    ) -> None:
         self._source = source
         self._project = project
         self._reraise = reraise
@@ -50,7 +63,9 @@ class ErrorBoundary:
     async def __aenter__(self) -> ErrorBoundary:
         return self
 
-    async def __aexit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: Any) -> bool:
+    async def __aexit__(
+        self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: Any
+    ) -> bool:
         if exc_val is None or isinstance(exc_val, _PASSTHROUGH):
             return False
         await self._persist(exc_val)
@@ -59,7 +74,9 @@ class ErrorBoundary:
     def __enter__(self) -> ErrorBoundary:
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: Any) -> bool:
+    def __exit__(
+        self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: Any
+    ) -> bool:
         if exc_val is None or isinstance(exc_val, _PASSTHROUGH):
             return False
         self._persist_sync(exc_val)
@@ -69,24 +86,48 @@ class ErrorBoundary:
         """Persist error to ghost pipeline (async path)."""
         try:
             from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
+
             pipeline = ErrorGhostPipeline()
-            fact_id = await pipeline.capture(error, source=f'boundary:{self._source}', project=self._project, extra_meta=self._extra_meta)
-            logger.info('ErrorBoundary [%s] captured %s → ghost #%s', self._source, type(error).__qualname__, fact_id)
+            fact_id = await pipeline.capture(
+                error,
+                source=f"boundary:{self._source}",
+                project=self._project,
+                extra_meta=self._extra_meta,
+            )
+            logger.info(
+                "ErrorBoundary [%s] captured %s → ghost #%s",
+                self._source,
+                type(error).__qualname__,
+                fact_id,
+            )
             return fact_id
         except Exception as persist_err:
-            logger.error('ErrorBoundary [%s] failed to persist: %s', self._source, persist_err)
+            logger.error("ErrorBoundary [%s] failed to persist: %s", self._source, persist_err)
             return None
 
     def _persist_sync(self, error: BaseException) -> None:
         """Persist error to ghost pipeline (sync path)."""
         try:
             from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
-            pipeline = ErrorGhostPipeline()
-            pipeline.capture_sync(error, source=f'boundary:{self._source}', project=self._project, extra_meta=self._extra_meta)
-        except Exception as persist_err:
-            logger.error('ErrorBoundary [%s] sync persist failed: %s', self._source, persist_err)
 
-def error_boundary(source: str, *, project: str='CORTEX', reraise: bool=True, extra_meta: dict[str, Any] | None=None) -> Any:
+            pipeline = ErrorGhostPipeline()
+            pipeline.capture_sync(
+                error,
+                source=f"boundary:{self._source}",
+                project=self._project,
+                extra_meta=self._extra_meta,
+            )
+        except Exception as persist_err:
+            logger.error("ErrorBoundary [%s] sync persist failed: %s", self._source, persist_err)
+
+
+def error_boundary(
+    source: str,
+    *,
+    project: str = "CORTEX",
+    reraise: bool = True,
+    extra_meta: dict[str, Any] | None = None,
+) -> Any:
     """Decorator that wraps a function with an ErrorBoundary.
 
     Supports both sync and async functions. Detects coroutine functions
@@ -112,17 +153,24 @@ def error_boundary(source: str, *, project: str='CORTEX', reraise: bool=True, ex
             @functools.wraps(func)
             async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
                 """TODO: Document async_wrapper"""
-                boundary = ErrorBoundary(source, project=project, reraise=reraise, extra_meta=extra_meta)
+                boundary = ErrorBoundary(
+                    source, project=project, reraise=reraise, extra_meta=extra_meta
+                )
                 async with boundary:
                     return await func(*args, **kwargs)
+
             return async_wrapper
         else:
 
             @functools.wraps(func)
             def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
                 """TODO: Document sync_wrapper"""
-                boundary = ErrorBoundary(source, project=project, reraise=reraise, extra_meta=extra_meta)
+                boundary = ErrorBoundary(
+                    source, project=project, reraise=reraise, extra_meta=extra_meta
+                )
                 with boundary:
                     return func(*args, **kwargs)
+
             return sync_wrapper
+
     return decorator

@@ -27,6 +27,7 @@ from pathlib import Path
 
 try:
     from cortex_rs import OuroborosStreamKernel
+
     stream_kernel = OuroborosStreamKernel("localhost:9092", "ouroboros-stream")
 except ImportError:
     stream_kernel = None
