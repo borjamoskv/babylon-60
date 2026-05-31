@@ -1,10 +1,10 @@
-"""Tuning Persistence — Save and Restore Learned Optimizations.
+"""Tuning Persistence — Save and Restore Learned Optimizations (C5-REAL).
 
-Persists L6 Self-Optimizer tunings to disk so the system retains
-its learned parameter optimizations across restarts.
+Persists L6 Self-Optimizer tunings to a SQLite database so the system
+retains its thermodynamic state and learned optimizations across restarts.
 
-Storage format: JSON (human-readable, git-diffable).
-Location: project_root/.cortex/tunings/<subsystem>.json
+Storage format: SQLite3 (C5-REAL thermodynamic persistence).
+Location: project_root/.cortex/tunings.db
 
 Reality Level: C5-REAL
 """
@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import json
 import logging
-import os
+import sqlite3
 import time
 from pathlib import Path
 from typing import Any
@@ -22,86 +22,93 @@ __all__ = ["TuningStore"]
 
 logger = logging.getLogger("cortex.engine.tuning_store")
 
-_DEFAULT_DIR = ".cortex/tunings"
+_DEFAULT_DB = ".cortex/tunings.db"
 
 
 class TuningStore:
-    """Persistent storage for learned parameter optimizations.
+    """Persistent storage for learned parameter optimizations via SQLite.
 
-    Saves tuning decisions to disk as JSON files, one per subsystem.
+    Saves tuning decisions and system thermodynamic state to a C5-REAL SQLite DB.
     On startup, loads previous tunings to avoid cold-start re-learning.
-
-    Usage:
-        store = TuningStore(base_dir="/path/to/project")
-
-        # Save after optimization cycle
-        store.save("api", {"timeout_ms": 8000, "batch_size": 200})
-
-        # Load on startup
-        params = store.load("api")
-
-        # Load all
-        all_params = store.load_all()
-
-        # Snapshot entire optimizer state
-        store.snapshot(optimizer.get_all_tuned_params(), optimizer.stats)
     """
 
     def __init__(self, base_dir: str | Path | None = None) -> None:
         if base_dir is None:
             base_dir = Path.cwd()
-        self._base = Path(base_dir) / _DEFAULT_DIR
-        self._base.mkdir(parents=True, exist_ok=True)
-        self._snapshot_path = self._base / "_snapshot.json"
+        self._db_path = Path(base_dir) / _DEFAULT_DB
+        self._db_path.parent.mkdir(parents=True, exist_ok=True)
+        self._init_db()
+
+    def _init_db(self) -> None:
+        with sqlite3.connect(self._db_path) as conn:
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS tunings (
+                    subsystem TEXT PRIMARY KEY,
+                    params JSON,
+                    saved_at REAL
+                )
+                """
+            )
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS snapshots (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    snapshot_data JSON,
+                    stats_data JSON,
+                    snapshot_at REAL
+                )
+                """
+            )
+            conn.commit()
 
     def save(self, subsystem: str, params: dict[str, Any]) -> Path:
         """Save tuned parameters for a subsystem."""
-        path = self._subsystem_path(subsystem)
-        data = {
-            "subsystem": subsystem,
-            "params": params,
-            "saved_at": time.time(),
-            "saved_at_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        }
-        path.write_text(json.dumps(data, indent=2, default=str))
-        logger.debug("[TUNING_STORE] Saved %s → %s", subsystem, path)
-        return path
+        with sqlite3.connect(self._db_path) as conn:
+            conn.execute(
+                """
+                INSERT INTO tunings (subsystem, params, saved_at)
+                VALUES (?, ?, ?)
+                ON CONFLICT(subsystem) DO UPDATE SET
+                    params=excluded.params,
+                    saved_at=excluded.saved_at
+                """,
+                (subsystem, json.dumps(params), time.time()),
+            )
+        logger.debug("[TUNING_STORE] Saved %s to SQLite", subsystem)
+        return self._db_path
 
     def load(self, subsystem: str) -> dict[str, Any] | None:
         """Load tuned parameters for a subsystem. Returns None if not found."""
-        path = self._subsystem_path(subsystem)
-        if not path.exists():
-            return None
-        try:
-            data = json.loads(path.read_text())
-            return data.get("params", {})
-        except (json.JSONDecodeError, OSError) as e:
-            logger.warning("[TUNING_STORE] Failed to load %s: %s", subsystem, e)
-            return None
+        with sqlite3.connect(self._db_path) as conn:
+            cursor = conn.execute("SELECT params FROM tunings WHERE subsystem = ?", (subsystem,))
+            row = cursor.fetchone()
+            if row:
+                try:
+                    return json.loads(row[0])
+                except json.JSONDecodeError:
+                    return None
+        return None
 
     def load_all(self) -> dict[str, dict[str, Any]]:
         """Load all persisted tunings. Returns {subsystem: params}."""
         result = {}
-        for path in self._base.glob("*.json"):
-            if path.name.startswith("_"):
-                continue
-            try:
-                data = json.loads(path.read_text())
-                sub = data.get("subsystem", path.stem)
-                params = data.get("params", {})
-                if params:
-                    result[sub] = params
-            except (json.JSONDecodeError, OSError):
-                continue
+        with sqlite3.connect(self._db_path) as conn:
+            cursor = conn.execute("SELECT subsystem, params FROM tunings")
+            for row in cursor.fetchall():
+                try:
+                    params = json.loads(row[1])
+                    if params:
+                        result[row[0]] = params
+                except json.JSONDecodeError:
+                    continue
         return result
 
     def delete(self, subsystem: str) -> bool:
         """Delete persisted tunings for a subsystem."""
-        path = self._subsystem_path(subsystem)
-        if path.exists():
-            path.unlink()
-            return True
-        return False
+        with sqlite3.connect(self._db_path) as conn:
+            cursor = conn.execute("DELETE FROM tunings WHERE subsystem = ?", (subsystem,))
+            return cursor.rowcount > 0
 
     def snapshot(
         self,
@@ -109,40 +116,52 @@ class TuningStore:
         stats: dict[str, Any] | None = None,
     ) -> Path:
         """Save a complete optimizer state snapshot."""
-        data = {
-            "params": all_params,
-            "stats": stats or {},
-            "snapshot_at": time.time(),
-            "snapshot_at_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        }
-        self._snapshot_path.write_text(json.dumps(data, indent=2, default=str))
-
-        # Also save individual subsystem files
-        for sub, params in all_params.items():
-            self.save(sub, params)
-
-        logger.info("[TUNING_STORE] Snapshot saved: %d subsystems", len(all_params))
-        return self._snapshot_path
+        with sqlite3.connect(self._db_path) as conn:
+            # Save the global snapshot
+            conn.execute(
+                """
+                INSERT INTO snapshots (snapshot_data, stats_data, snapshot_at)
+                VALUES (?, ?, ?)
+                """,
+                (json.dumps(all_params), json.dumps(stats or {}), time.time()),
+            )
+            # Also update the individual subsystem tunings
+            for sub, params in all_params.items():
+                conn.execute(
+                    """
+                    INSERT INTO tunings (subsystem, params, saved_at)
+                    VALUES (?, ?, ?)
+                    ON CONFLICT(subsystem) DO UPDATE SET
+                        params=excluded.params,
+                        saved_at=excluded.saved_at
+                    """,
+                    (sub, json.dumps(params), time.time()),
+                )
+        logger.info("[TUNING_STORE] Snapshot saved: %d subsystems to SQLite", len(all_params))
+        return self._db_path
 
     def load_snapshot(self) -> dict[str, Any] | None:
         """Load the last optimizer snapshot."""
-        if not self._snapshot_path.exists():
-            return None
-        try:
-            return json.loads(self._snapshot_path.read_text())
-        except (json.JSONDecodeError, OSError):
-            return None
+        with sqlite3.connect(self._db_path) as conn:
+            cursor = conn.execute(
+                "SELECT snapshot_data, stats_data, snapshot_at FROM snapshots ORDER BY id DESC LIMIT 1"
+            )
+            row = cursor.fetchone()
+            if row:
+                try:
+                    return {
+                        "params": json.loads(row[0]),
+                        "stats": json.loads(row[1]),
+                        "snapshot_at": row[2],
+                        "snapshot_at_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(row[2])),
+                    }
+                except json.JSONDecodeError:
+                    pass
+        return None
 
     @property
     def subsystems(self) -> list[str]:
         """List all subsystems with persisted tunings."""
-        result = []
-        for path in self._base.glob("*.json"):
-            if not path.name.startswith("_"):
-                result.append(path.stem)
-        return result
-
-    def _subsystem_path(self, subsystem: str) -> Path:
-        # Sanitize subsystem name for filesystem
-        safe = "".join(c if c.isalnum() or c in "-_" else "_" for c in subsystem)
-        return self._base / f"{safe}.json"
+        with sqlite3.connect(self._db_path) as conn:
+            cursor = conn.execute("SELECT subsystem FROM tunings")
+            return [row[0] for row in cursor.fetchall()]
