@@ -6,7 +6,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 from collections import defaultdict
-from cortex.sica.strategy import SearchStrategy, StrategyGenome
+from cortex.sica.strategy import Heuristic, SearchStrategy, StrategyGenome
 
 from .types import GeneFragment
 

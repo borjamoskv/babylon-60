@@ -5,6 +5,7 @@ from typing import Any
 
 from .types import GeneFragment, TournamentResult
 from .genetics import GenePool
+from cortex.sica.strategy import SearchStrategy
 
 logger = logging.getLogger("cortex.sica.colony.tournament")
 

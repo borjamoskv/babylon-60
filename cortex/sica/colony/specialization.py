@@ -4,6 +4,7 @@ from collections import Counter
 from typing import Any
 
 from .types import AgentSpecialization
+from cortex.sica.strategy import SearchStrategy, StrategyGenome
 
 logger = logging.getLogger("cortex.sica.colony.specialization")
 
