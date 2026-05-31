@@ -319,3 +319,85 @@ class GenomeCrossover:
             child.exploration_rate,
         )
         return child
+
+
+class GenomeMutator:
+    """Spontaneous point-mutation engine (Gamma Ray Exposure).
+
+    Unlike crossover or adoption, this introduces entirely novel variance
+    into a single genome without requiring external donors. It prevents
+    the swarm from converging entirely on a local optimum.
+    """
+
+    LATENT_HEURISTICS = [
+        Heuristic(
+            name="lateral_thinking",
+            description="If blocked, abandon the current context entirely and restart from a new angle.",
+            weight=0.5,
+        ),
+        Heuristic(
+            name="simplification_bias",
+            description="Aggressively reduce the scope of the problem to the smallest testable unit.",
+            weight=0.6,
+        ),
+        Heuristic(
+            name="adversarial_validation",
+            description="Write tests designed specifically to break the proposed solution.",
+            weight=0.7,
+        ),
+        Heuristic(
+            name="memory_archaeology",
+            description="Force a deep scan of the semantic ledger before attempting a novel solution.",
+            weight=0.5,
+        ),
+    ]
+
+    def mutate(self, genome: StrategyGenome, mutation_rate: float = 0.05) -> StrategyGenome:
+        """Apply spontaneous point mutations to a genome.
+        
+        Args:
+            genome: The target genome to mutate.
+            mutation_rate: The baseline probability of a mutation event.
+        """
+        mutated = copy.deepcopy(genome)
+        mutated_flag = False
+
+        # 1. Point Drift on existing heuristics
+        for h in mutated.heuristics:
+            if random.random() < mutation_rate:
+                # Spontaneous heavy drift
+                drift = random.uniform(-0.3, 0.3)
+                h.weight = max(0.1, min(1.0, h.weight + drift))
+                mutated_flag = True
+
+        # 2. Spontaneous Injection (Innovation)
+        if random.random() < (mutation_rate * 0.5):
+            novel = copy.deepcopy(random.choice(self.LATENT_HEURISTICS))
+            # Inject only if it doesn't already exist
+            if not any(h.name == novel.name for h in mutated.heuristics):
+                mutated.heuristics.append(novel)
+                mutated_flag = True
+
+        # 3. Gene Deletion (Pruning stagnated sequences)
+        if len(mutated.heuristics) > 3 and random.random() < mutation_rate:
+            # Drop the lowest weight heuristic
+            worst = min(mutated.heuristics, key=lambda h: h.weight)
+            mutated.heuristics.remove(worst)
+            mutated_flag = True
+
+        # 4. Exploration Rate shift
+        if random.random() < mutation_rate:
+            shift = random.uniform(-0.2, 0.2)
+            mutated.exploration_rate = max(0.1, min(0.9, mutated.exploration_rate + shift))
+            mutated_flag = True
+
+        if mutated_flag:
+            mutated.generation += 1
+            mutated.parent_hash = f"mut({genome.genome_hash})"
+            logger.info(
+                "Spontaneous Mutation: %s → %s",
+                genome.genome_hash,
+                mutated.genome_hash,
+            )
+
+        return mutated
