@@ -1,11 +1,12 @@
 import time
-from typing import Any, Optional
+from typing import Dict, Any, Optional
 
 
 class ExergyMonitor:
     """
     Measures the thermodynamic 'Exergy' (useful work) vs 'Entropy' (waste/errors)
     of a computational process in the CORTEX environment.
+    Ouroboros-Omega L-EPI Guard integrated.
     """
 
     def __init__(self, target_name: str):
@@ -13,6 +14,14 @@ class ExergyMonitor:
         self.start_time = 0.0
         self.end_time = 0.0
         self.status = "UNKNOWN"
+        self.ast_complexity = 1.0 # Default baseline
+        self.empirical_usage = 1.0 # Default baseline
+        self.dead_code_ratio = 0.0 # Default baseline
+
+    def set_l_epi_metrics(self, ast_complexity: float, empirical_usage: float, dead_code_ratio: float):
+        self.ast_complexity = ast_complexity
+        self.empirical_usage = max(0.001, empirical_usage) # Prevent div by zero
+        self.dead_code_ratio = dead_code_ratio
 
     def start_transaction(self):
         self.start_time = time.time()
@@ -21,7 +30,7 @@ class ExergyMonitor:
         self.end_time = time.time()
         self.status = "C5-REAL" if success else "error"
 
-    def calculate_metrics(self) -> dict[str, Any]:
+    def calculate_metrics(self) -> Dict[str, Any]:
         latency = self.end_time - self.start_time
 
         # Base Entropy score (0.0 to 1.0)
@@ -33,12 +42,17 @@ class ExergyMonitor:
         if latency > 1.0:
             entropy = min(1.0, entropy + 0.2)
 
+        # Ouroboros-Omega Formula
+        limerence_penalty = (self.ast_complexity / self.empirical_usage) * 10.0
+
         return {
             "target": self.target_name,
             "latency": latency,
             "status": self.status,
             "entropy": entropy,
             "exergy": 1.0 - entropy,
+            "limerence_penalty": limerence_penalty,
+            "dead_code_ratio": self.dead_code_ratio
         }
 
 

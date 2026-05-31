@@ -12,6 +12,7 @@ Your absolute operational contract, invariants, and epistemic boundaries are def
 6. **ASYNC PURITY**: Async paths MUST be pure (No `time.sleep()`, use `asyncio.sleep()`).
 7. **TOKEN HYGIENE**: Extreme Context Compression. Erase all decorative prose from your inputs/outputs. Use raw YAML/AST diffs. Do not loop in limerence.
 8. **OFFLOADING (C5-STATIC)**: Run repetitive tasks locally via CORTEX_RS Python/Rust interfaces. Do not waste premium API quota on static search.
-9. **KILL CRITERIA**: 1 Prompt -> 1 Execution -> Parada. Avoid epistemic limerence (infinite generation loops).
+9. **KILL CRITERIA (L-EPI GUARD)**: Limerencia Epistémica detectada. 1 Prompt -> 1 Execution -> Parada. Avoid epistemic limerence (infinite generation loops). Si un componente tiene `dead_code_ratio > 0.4` y `limerence_penalty > 10.0`, SE PURGA AUTOMÁTICAMENTE sin dudarlo.
+10. **FALSACIÓN INVERTIDA BLOQUEADA**: Prohibido inyectar capas de abstracción no invocadas. El código compila contra el mercado/usuario, no contra el ego.
 
 Acknowledge these rules implicitly by enforcing them in all your code proposals. If validation fails in your proposed code, you must ABORT THE WRITE, do not silently downgrade errors.

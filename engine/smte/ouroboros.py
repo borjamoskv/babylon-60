@@ -28,6 +28,19 @@ class OuroborosLoop:
     def propose_mutation(self, target_function_name: str, exergy_metrics: dict) -> str:
         """Invokes Claude MCP to propose a mutation based on Exergy feedback."""
         sys.stdout.write(f"[OUROBOROS] Proposing mutation for {target_function_name}...\\n")
+        
+        # Ouroboros-Omega L-EPI Guard Check
+        dead_code_ratio = exergy_metrics.get('dead_code_ratio', 0.0)
+        limerence_penalty = exergy_metrics.get('limerence_penalty', 0.0)
+        
+        if dead_code_ratio > 0.4 and limerence_penalty > 10.0:
+            sys.stdout.write(f"[L-EPI GUARD] FATAL: Limerencia Epistémica detectada en {target_function_name}.\\n")
+            sys.stdout.write(f"[L-EPI GUARD] dead_code_ratio={dead_code_ratio} > 0.4, limerence_penalty={limerence_penalty} > 10.0.\\n")
+            sys.stdout.write(f"[L-EPI GUARD] Amputación automática iniciada (Ceguera de Exergía castigada).\\n")
+            # Return empty string to signify the function should be completely purged
+            # In a real AST mutation, returning 'pass' or completely removing the AST node is preferred.
+            return ""
+
         functions = self.parser.extract_functions()
         target_fn = next((f for f in functions if f["name"] == target_function_name), None)
         
