@@ -79,3 +79,21 @@ async def test_psychohistory_simulation_api(client, mock_engine):
     assert store_kwargs["confidence"] == "C5"
     assert store_kwargs["source"] == "swarm:psychohistory"
     assert store_kwargs["meta"]["scenario"] == "Apagón Satelital Test"
+
+
+@pytest.mark.asyncio
+async def test_psychohistory_simulation_api_custom_concurrency(client, mock_engine):
+    payload = {
+        "scenario_name": "High-Speed Fracture Test",
+        "simulated_years": 5,
+        "project": "SPEED_TEST",
+        "max_concurrency": 50,
+    }
+
+    resp = await client.post("/v1/swarm/psychohistory", json=payload)
+    assert resp.status_code == 200
+
+    data = resp.json()
+    assert data["scenario"] == "High-Speed Fracture Test"
+    assert data["active_agents"] == len(AGENT_BIASES)  # Should be 50
+    assert data["resonance"] > 0

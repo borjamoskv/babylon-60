@@ -29,6 +29,7 @@ class PsychohistoryRequest(BaseModel):
         5, description="Number of years to simulate into the future", ge=1, le=1000
     )
     project: str = Field("SYSTEM", description="Project namespace to save the crystal")
+    max_concurrency: int = Field(5, description="Maximum concurrency for LLM calls", ge=1, le=100)
 
 
 class WorktreeResponse(BaseModel):
@@ -119,7 +120,7 @@ async def run_psychohistory_simulation(
     Orchestrates 50 specialized agents using a Semaphore to calculate catastrophic cascades.
     Extracts a Byzantine consensus O(1) Contingency Crystal.
     """
-    orchestrator = PsychohistoryOrchestrator(engine)
+    orchestrator = PsychohistoryOrchestrator(engine, max_concurrency=req.max_concurrency)
 
     try:
         result = await orchestrator.simulate_fracture(

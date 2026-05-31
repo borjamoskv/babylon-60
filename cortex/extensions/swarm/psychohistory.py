@@ -42,9 +42,9 @@ class PsychohistoryOrchestrator:
     catastrophic scenarios and crystallize a single O(1) Contingency Plan.
     """
 
-    def __init__(self, engine: Any):
+    def __init__(self, engine: Any, max_concurrency: int = 5):
         self.engine = engine
-        self._semaphore = asyncio.Semaphore(5)  # Strict rate-limit protection
+        self._semaphore = asyncio.Semaphore(max_concurrency)  # Configurable rate-limit protection
 
     async def simulate_fracture(
         self, scenario: str, years: int, project: str = "SYSTEM"
