@@ -301,13 +301,31 @@ Proof:
 
 ---
 
+### Hito 24: MacMaestro 10x Sovereign UI Evolution (Quartz Event Injection)
+- **Target:** `mac-maestro/`
+- **Objective:** Inyección de acciones nativas avanzadas (double_click, right_click, hover, scroll) con mecanismos de contingencia Quartz/CoreGraphics y validaciones ZUTS (Zero-Trust Safety).
+- **Yield Target:** 100% testak igarota eta linter garbitua.
+- **Reality Level:** `C5-REAL`
+- **Evidence:** Commit `08409a6 feat(core): implement double_click, right_click, hover, and scroll actions`
+```yaml
+Claim: MacMaestro 10x Actions & Safety gates integrated
+Proof:
+  Base: "PYTHONPATH=src uv run pytest passed with 6 tests"
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-05-31
+```
+- **Status:** ✅ COMPLETE — 31 Mayo 2026
+
+---
+
 ## 🛡️ Thermodynamic Enforcement
 All milestone claims must map directly to a `Claim/Proof` matrix.
 ```yaml
-Claim: 23/23 Milestones Verified
+Claim: 24/24 Milestones Verified
 Proof:
   Base: Continuous Silicon Checkpoint Execution
-  Variables: [r=1, d=1, n=23, S=100]
+  Variables: [r=1, d=1, n=24, S=100]
   Range: [C5, C5]
   Confidence: C5-REAL
   Date: 2026-05-31
