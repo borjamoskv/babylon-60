@@ -211,7 +211,8 @@ class SwarmCommander:
     ):
         self.use_shm = use_shm
         if use_shm:
-            self.bus = SovereignSharedBus(create=True)
+            shm_name = f"ctx_bus_{hash(str(bus_path)) % 10**8}"
+            self.bus = SovereignSharedBus(name=shm_name, create=True)
         else:
             self.bus = ShardedAsyncSignalBus(base_dir=bus_path)
 

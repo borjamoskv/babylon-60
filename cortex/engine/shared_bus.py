@@ -169,6 +169,10 @@ class SovereignSharedBus:
         h = self._read_header()
         head, tail, exergy, latency, cap, slot = h[0], h[1], h[2], h[3], h[4], h[5]
 
+        # Prevent division/modulo by zero and malformed slot sizes
+        cap = cap or self.capacity
+        slot = slot or self.slot_size
+
         offset = HEADER_SIZE + (head * slot)
         ts = time.monotonic()
 
@@ -196,6 +200,10 @@ class SovereignSharedBus:
 
         header = self._read_header()
         head, tail, cap, slot = header[0], header[1], header[4], header[5]
+
+        # Prevent division/modulo by zero and malformed slot sizes
+        cap = cap or self.capacity
+        slot = slot or self.slot_size
 
         # Fast-Path: If last_index is head, no work to do
         if last_index == head:
