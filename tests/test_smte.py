@@ -220,7 +220,7 @@ class TestOuroborosCompiler:
 
     @pytest.mark.asyncio
     @patch("cortex.engine.smte.ouroboros_compiler.call_qwen_mutator")
-    @patch("cortex_core.engine.CortexEngine")
+    @patch("cortex.engine.CortexEngine")
     async def test_compile_entity_success(self, mock_engine_cls, mock_qwen, temp_source_file):
         # Mock CortexEngine store method
         mock_engine = MagicMock()
@@ -244,7 +244,7 @@ class TestOuroborosCompiler:
         mock_engine.store.assert_awaited_once()
 
     @pytest.mark.asyncio
-    @patch("cortex_core.engine.CortexEngine")
+    @patch("cortex.engine.CortexEngine")
     async def test_compile_entity_amputation(self, mock_engine_cls, temp_source_file):
         mock_engine = MagicMock()
         mock_engine.store = AsyncMock()
@@ -275,9 +275,9 @@ class TestLLMDrivenMutator:
     def test_llm_driven_mutator_success(self, mock_qwen, temp_source_file):
         parser = AgentASTParser(temp_source_file)
         
-        # Qwen returns valid updated python code
-        mock_qwen.return_value = SAMPLE_CODE + "\n# extra comment\n"
+        # Qwen returns valid updated python code with a functional statement
+        mock_qwen.return_value = SAMPLE_CODE + "\nEXTRA_VAR = 999\n"
         
         success = llm_driven_mutator(parser)
         assert success is True
-        assert "# extra comment" in ast.unparse(parser.tree)
+        assert "EXTRA_VAR = 999" in ast.unparse(parser.tree)
