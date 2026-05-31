@@ -27,17 +27,17 @@ TIER_ORDER: dict[str, int] = {
 }
 
 def promote_by_latency_then_cost(
-    cascade: "CascadeManager",
-    providers: list["BaseProvider"],
+    cascade: CascadeManager,
+    providers: list[BaseProvider],
     intent: IntentProfile,
     estimated_tokens: int = 0,
     requires_frontier: bool = False,
-) -> list["BaseProvider"]:
+) -> list[BaseProvider]:
     """A-record first (by latency), unknowns by (cost, tier)."""
     from cortex.config import LLM_LOCAL_FIRST
 
-    fits_context: list["BaseProvider"] = []
-    overflows_context: list["BaseProvider"] = []
+    fits_context: list[BaseProvider] = []
+    overflows_context: list[BaseProvider] = []
     for p in providers:
         p_window = getattr(p, "context_window", 128000)
         if p_window and estimated_tokens > p_window:
@@ -45,7 +45,7 @@ def promote_by_latency_then_cost(
         else:
             fits_context.append(p)
 
-    def process_group(group: list["BaseProvider"]) -> list["BaseProvider"]:
+    def process_group(group: list[BaseProvider]) -> list[BaseProvider]:
         if not group:
             return []
         p_known = cascade.promote_known_good(group, intent)
@@ -77,10 +77,10 @@ def promote_by_latency_then_cost(
     return process_group(fits_context) + process_group(overflows_context)
 
 def ordered_fallbacks(
-    cascade: "CascadeManager",
-    fallbacks: list["BaseProvider"],
-    prompt: "CortexPrompt | IntentProfile",
-) -> list["BaseProvider"]:
+    cascade: CascadeManager,
+    fallbacks: list[BaseProvider],
+    prompt: CortexPrompt | IntentProfile,
+) -> list[BaseProvider]:
     """Ordena fallbacks: intent affinity → A-record → cost → tier."""
     if isinstance(prompt, IntentProfile):
         effective_intent = prompt
@@ -114,8 +114,8 @@ def ordered_fallbacks(
     ):
         effective_intent = IntentProfile.REASONING
 
-    typed_matches: list["BaseProvider"] = []
-    safety_net: list["BaseProvider"] = []
+    typed_matches: list[BaseProvider] = []
+    safety_net: list[BaseProvider] = []
 
     for p in fallbacks:
         if classify_tier(p, effective_intent) == CascadeTier.TYPED_MATCH:

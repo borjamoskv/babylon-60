@@ -2,7 +2,8 @@
 
 import hashlib
 import json
-from typing import Any, Mapping
+from typing import Any
+from collections.abc import Mapping
 
 from cortex.utils.canonical import canonical_json
 

@@ -17,11 +17,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger("cortex.extensions.llm._router_hedging")
 
 async def execute_hedged(
-    prompt: "CortexPrompt",
-    hedging_providers: list["BaseProvider"],
-    cascade: "CascadeManager",
-    telemetry: "CascadeTelemetry",
-) -> "Result[str, str] | None":
+    prompt: CortexPrompt,
+    hedging_providers: list[BaseProvider],
+    cascade: CascadeManager,
+    telemetry: CascadeTelemetry,
+) -> Result[str, str] | None:
     """Attempt hedged (parallel) execution if peers are available."""
     if not hedging_providers:
         return None
@@ -55,12 +55,12 @@ async def execute_hedged(
     return None
 
 async def execute_swarm(
-    prompt: "CortexPrompt",
-    primary: "BaseProvider",
-    fallbacks_ordered: list["BaseProvider"],
-    cascade: "CascadeManager",
-    telemetry: "CascadeTelemetry",
-) -> "Result[str, str] | None":
+    prompt: CortexPrompt,
+    primary: BaseProvider,
+    fallbacks_ordered: list[BaseProvider],
+    cascade: CascadeManager,
+    telemetry: CascadeTelemetry,
+) -> Result[str, str] | None:
     """Ω₂₁: Parallel Swarm Racing."""
     from cortex.extensions.llm._models import ReasoningMode
 
