@@ -250,13 +250,31 @@ Proof:
 
 ---
 
+### Hito 21: WASM Swarm Topology (Direct-Silicon Pure Latency)
+- **Target:** `crates/agent-pure/`, `cortex_rs/src/py_wasm.rs`
+- **Objective:** Inyección de módulos WASM puros (compilados a `wasm32-unknown-unknown`) directamente en el motor PyO3 mediante `wasmtime`, logrando latencias de fricción por debajo de los 100 microsegundos en la ruta crítica del GIL.
+- **Yield Target:** Latencia de ciclo < 0.1ms pura.
+- **Reality Level:** `C5-REAL`
+- **Evidence:** Commit `642126dd` y script `test_wasm_swarm.py`.
+```yaml
+Claim: C5-REAL WASM SWARM VERIFICADO. Latencia pura.
+Proof:
+  Base: "Fricción inyectada: 5.0 -> Entropía delta: -4.25 | Latency: 0.0889 ms"
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-05-31
+```
+- **Status:** ✅ COMPLETE — 31 Mayo 2026
+
+---
+
 ## 🛡️ Thermodynamic Enforcement
 All milestone claims must map directly to a `Claim/Proof` matrix.
 ```yaml
-Claim: 20/20 Milestones Verified
+Claim: 21/21 Milestones Verified
 Proof:
   Base: Continuous Silicon Checkpoint Execution
-  Variables: [r=1, d=1, n=20, S=100]
+  Variables: [r=1, d=1, n=21, S=100]
   Range: [C5, C5]
   Confidence: C5-REAL
   Date: 2026-05-31
