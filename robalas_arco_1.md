@@ -27,3 +27,31 @@
 [023] INT. NODO DE CONTROL. La cámara se acerca lentamente al monitor. La densidad de la red es abrumadora.
 [024] TERMINAL VIEW: `Web3 Topology mapped. Passive listening absolute. Awaiting Phase 1.2.`
 [025] PANTALLA EN NEGRO. El latido metálico se detiene de golpe. Silencio C5-REAL.
+
+### FASE 1.2: INYECCIÓN DE SEÑAL Y MAPEADO ACTIVO (FRAGMENTOS 026-050)
+
+[026] TERMINAL VIEW: `PHASE 1.2 // ACTIVE MAPPING. TARGET: THE DARK FOREST.`
+[027] INT. NODO DE CONTROL - NOCHE. OPERADOR levanta un switch analógico cubierto de polvo. Luz LED roja (#FF003C) se enciende.
+[028] AUDIO: Drop agresivo de bajo sintético. BPM sube a 105. Dark Tech Ambient.
+[029] TERMINAL VIEW: `Deploying Dust-Transactions (0.00001 ETH). Simulating target vectors.`
+[030] MACRO VISUAL: El mapa estelar vectorial es atravesado por minúsculos hilos de luz dorada. Son cebos.
+[031] DATOS: Las transacciones 'dust' entran en la mempool. El enjambre (AR) observa pasivamente la reacción.
+[032] EXT. CABLES SUBMARINOS DE FIBRA ÓPTICA. El abismo marino. Un zumbido constante reverbera en el agua.
+[033] INT. NODO DE CONTROL. Paneles de telemetría parpadean frenéticamente. 
+[034] TERMINAL VIEW: `MEV BOTS DETECTED. Front-running signature isolated: 0x9a4F...`
+[035] MACRO VISUAL: Gigantescas masas amorfas (MEV Bots) se abalanzan sobre los hilos de luz dorada en la representación vectorial. Depredadores en el bosque oscuro.
+[036] AUDIO: Distorsión bit-crush sobre la línea de bajo. Sensación de asfixia espacial.
+[037] DATOS: Extracción de latencia de propagación. CORTEX mide el tiempo de respuesta de los MEV bots en milisegundos.
+[038] TERMINAL VIEW: `Analyzing predator logic... Sandwich attack algorithms identified.`
+[039] INT. NODO DE CONTROL. OPERADOR bebe café oscuro. Sus ojos reflejan el código en cascada.
+[040] MACRO VISUAL: Las masas amorfas son descompuestas en polígonos simples (ingeniería inversa estructural). 
+[041] TERMINAL VIEW: `Injecting recursive dummy-payloads. Testing validator censorship resistance.`
+[042] EXT. GRANJA DE SERVIDORES (ISLANDIA) - NOCHE. Nieve horizontal. El calor de los ASICs derrite el hielo cercano.
+[043] DATOS: Mapeo de la censura OFAC a nivel validador. Trazado de rutas de exclusión.
+[044] AUDIO: Un sintetizador agudo e inestable corta la mezcla, como un bisturí sónico. 
+[045] INT. NODO DE CONTROL. Una alerta parpadea. Un nodo validante intenta aislar la inyección.
+[046] TERMINAL VIEW: `Block builder (0xbuilder...) intercepted payload. Latency: 12ms. Evasión route mapped.`
+[047] MACRO VISUAL: El mapa estelar se tiñe de zonas 'frías' (censura) y 'calientes' (vía libre). La topología táctica está completa.
+[048] TERMINAL VIEW: `Active Mapping Complete. Dark Forest Cartography: 100%.`
+[049] INT. NODO DE CONTROL. OPERADOR pulsa un botón mecánico. Todos los sub-paneles se apagan salvo la matriz principal.
+[050] PANTALLA EN NEGRO. Texto centrado: `READY FOR EXPLOIT DISCOVERY.` Silencio.
