@@ -24,6 +24,50 @@ class OuroborosLoop:
         sys.stdout.write(f"[OUROBOROS] Transcribing {self.target_path.name}...\\n")
         functions = self.parser.extract_functions()
         return functions
+        
+    def propose_mutation(self, target_function_name: str, exergy_metrics: dict) -> str:
+        """Invokes Claude MCP to propose a mutation based on Exergy feedback."""
+        sys.stdout.write(f"[OUROBOROS] Proposing mutation for {target_function_name}...\\n")
+        functions = self.parser.extract_functions()
+        target_fn = next((f for f in functions if f["name"] == target_function_name), None)
+        
+        if not target_fn:
+            raise ValueError(f"Function {target_function_name} not found.")
+            
+        original_segment = self.parser.get_source_segment(target_fn["lineno"], target_fn["end_lineno"])
+        
+        prompt = f"""
+You are the Autopoietic Engine of CORTEX-Persist.
+Target Function: {target_function_name}
+
+Current Implementation:
+```python
+{original_segment}
+```
+
+Exergy Feedback:
+Entropy: {exergy_metrics.get('entropy', 1.0)} (1.0 = Max Waste, 0.0 = Perfect C5-REAL)
+Latency: {exergy_metrics.get('latency', 0.0)}
+Status: {exergy_metrics.get('status', 'UNKNOWN')}
+
+The function is generating high entropy. 
+Rewrite the function to optimize it or handle the error gracefully. 
+Respond ONLY with the raw python code for the function. Do NOT include markdown code blocks (```python) or any other text.
+"""
+        from cortex.extensions.mcp.claude_tool import run_claude_query
+        import json
+        
+        res = run_claude_query(prompt)
+        try:
+            parsed = json.loads(res)
+            if parsed.get("status") == "C5-REAL":
+                return parsed.get("response", "").strip()
+            else:
+                sys.stdout.write(f"[OUROBOROS] MCP Error: {parsed.get('message')}\\n")
+                return ""
+        except Exception as e:
+            sys.stdout.write(f"[OUROBOROS] Mutation parsing error: {e}\\n")
+            return ""
 
     def mutate(self, target_function_name: str, new_code: str):
         """Replaces a specific function with new code."""
