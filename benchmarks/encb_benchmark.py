@@ -192,6 +192,7 @@ async def run_encb(
         from cortex.database.schema import ALL_SCHEMA  # pyright: ignore[reportMissingImports]
         from cortex.database.pool import CortexConnectionPool
         from cortex.engine import CortexEngine as AsyncCortexEngine
+
         cortex_available = True
         console.print("[green]✅ CORTEX imports successful[/]")
     except Exception as exc:
@@ -234,7 +235,9 @@ async def run_encb(
         if cortex_available:
             modality_db_path = os.path.join(tmp_dir, f"encb_cortex_{modality.value}.db")
             try:
-                modality_pool = CortexConnectionPool(modality_db_path, min_connections=1, max_connections=3, read_only=False)
+                modality_pool = CortexConnectionPool(
+                    modality_db_path, min_connections=1, max_connections=3, read_only=False
+                )
                 await modality_pool.initialize()
 
                 async with modality_pool.acquire() as conn:
@@ -244,7 +247,9 @@ async def run_encb(
 
                 modality_engine = AsyncCortexEngine(modality_pool, modality_db_path)
             except Exception as exc:
-                console.print(f"[red]⚠️  Failed to init engine for modality {modality.value}: {exc}[/]")
+                console.print(
+                    f"[red]⚠️  Failed to init engine for modality {modality.value}: {exc}[/]"
+                )
 
         # ── Setup Resolvers for this Modality ───────────────────────────
         resolvers: list[Resolver] = []
