@@ -52,6 +52,45 @@ class _HtmlToMarkdown(HTMLParser):
         self._tag_stack: list[str] = []
         self._title = ""
         self._in_title = False
+        
+        self._start_handlers = {
+            "title": self._start_title,
+            "br": lambda attrs: self._output.append("\n"),
+            "a": self._start_a,
+            "li": lambda attrs: self._output.append("\n- "),
+            "strong": lambda attrs: self._output.append("**"),
+            "b": lambda attrs: self._output.append("**"),
+            "em": lambda attrs: self._output.append("*"),
+            "i": lambda attrs: self._output.append("*"),
+            "code": lambda attrs: self._output.append("`"),
+        }
+        
+        self._end_handlers = {
+            "title": self._end_title,
+            "a": self._end_a,
+            "strong": lambda: self._output.append("**"),
+            "b": lambda: self._output.append("**"),
+            "em": lambda: self._output.append("*"),
+            "i": lambda: self._output.append("*"),
+            "code": lambda: self._output.append("`"),
+        }
+
+    def _start_title(self, attrs):
+        self._in_title = True
+        
+    def _start_a(self, attrs):
+        href = dict(attrs).get("href", "")
+        self._output.append("[")
+        self._tag_stack.append(f"__a_href:{href}")
+
+    def _end_title(self):
+        self._in_title = False
+        
+    def _end_a(self):
+        href = ""
+        while self._tag_stack and self._tag_stack[-1].startswith("__a_href:"):
+            href = self._tag_stack.pop().split(":", 1)[1]
+        self._output.append(f"]({href})")
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         """Handle the start of an HTML tag, tracking depth and mapping to Markdown format."""
@@ -61,27 +100,15 @@ class _HtmlToMarkdown(HTMLParser):
             return
         if self._skip_depth:
             return
+            
         self._tag_stack.append(tag)
-        if tag == "title":
-            self._in_title = True
+        
+        if handler := self._start_handlers.get(tag):
+            handler(attrs)
         elif tag in _HEADING_MAP:
             self._output.append("\n\n" + _HEADING_MAP[tag])
-        elif tag == "br":
-            self._output.append("\n")
-        elif tag == "a":
-            href = dict(attrs).get("href", "")
-            self._output.append("[")
-            self._tag_stack.append(f"__a_href:{href}")
-        elif tag == "li":
-            self._output.append("\n- ")
         elif tag in _BLOCK_TAGS:
             self._output.append("\n\n")
-        elif tag == "strong" or tag == "b":
-            self._output.append("**")
-        elif tag == "em" or tag == "i":
-            self._output.append("*")
-        elif tag == "code":
-            self._output.append("`")
 
     def handle_endtag(self, tag: str) -> None:
         """Handle the end of an HTML tag, emitting markdown closures where necessary."""
@@ -91,21 +118,12 @@ class _HtmlToMarkdown(HTMLParser):
             return
         if self._skip_depth:
             return
-        if tag == "title":
-            self._in_title = False
-        elif tag == "a":
-            href = ""
-            while self._tag_stack and self._tag_stack[-1].startswith("__a_href:"):
-                href = self._tag_stack.pop().split(":", 1)[1]
-            self._output.append(f"]({href})")
-        elif tag == "strong" or tag == "b":
-            self._output.append("**")
-        elif tag == "em" or tag == "i":
-            self._output.append("*")
-        elif tag == "code":
-            self._output.append("`")
+            
+        if handler := self._end_handlers.get(tag):
+            handler()
         elif tag in _BLOCK_TAGS:
             self._output.append("\n")
+            
         if self._tag_stack and self._tag_stack[-1] == tag:
             self._tag_stack.pop()
 
