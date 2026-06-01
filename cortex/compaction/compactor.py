@@ -280,7 +280,8 @@ async def compact_session(
     try:
         await conn.create_function("cortex_decay", 4, _cortex_decay)
     except (sqlite3.Error, AttributeError):
-        import logging; logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Already registered or unsupported
+        import logging
+        logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Already registered or unsupported
 
     now = time.monotonic()
     half_life = 7 * 24 * 3600  # 7 days in seconds

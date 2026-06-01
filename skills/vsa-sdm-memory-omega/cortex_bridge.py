@@ -62,7 +62,8 @@ class SwarmMemory:
             try:
                 self.engine.load(str(vsa_path))
             except ValueError:
-                import logging; logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Corrupted file, start fresh
+                import logging
+                logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Corrupted file, start fresh
 
     def _vsa_path(self, agent_id=None):
         aid = agent_id or self.agent_id

@@ -55,7 +55,8 @@ async def agent_strike(
                     if agent_id % 1000 == 0:
                         log(f"Agent-{agent_id} [SUCCESS] | {target['name']} RTT: {rtt:.2f}ms", "L-STRIKE")
         except (aiohttp.ClientError, asyncio.TimeoutError):
-            import logging; logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed") # Chaos network. Ignoramos a los agentes caídos.
+            import logging
+            logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed") # Chaos network. Ignoramos a los agentes caídos.
 
 async def swarm_commander() -> list[dict[str, Any]]:
     log("Iniciando Matriz Asíncrona (C5-REAL)...", "SYSTEM")

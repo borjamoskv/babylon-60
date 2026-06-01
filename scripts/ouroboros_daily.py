@@ -419,7 +419,8 @@ async def main():
                 timeout=10,
             )
     except Exception:
-        import logging; logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Best-effort persistence
+        import logging
+        logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Best-effort persistence
 
 
 if __name__ == "__main__":

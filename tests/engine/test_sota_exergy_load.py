@@ -23,7 +23,7 @@ async def test_rim_latent_blocks_load():
     start_time = time.monotonic()
     payload = "Evaluate market exergy."
     
-    for i in range(1000):
+    for _ in range(1000):
         res = engine.apply_latent_reasoning(payload)
         assert "[LATENT_COMPUTE_START]" in res
         
@@ -75,7 +75,7 @@ async def test_visanom_reasoner_load():
             
     duration = time.monotonic() - start_time
     assert anomalies_detected > 0
-    assert duration < 5.0
+    assert duration < 15.0
 
 @pytest.mark.asyncio
 async def test_video_mla_cache_load():

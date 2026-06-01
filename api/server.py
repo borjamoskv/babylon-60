@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import aiosqlite
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any
 
 app = FastAPI(
     title="CORTEX Persist API",

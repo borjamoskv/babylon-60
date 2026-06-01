@@ -269,7 +269,8 @@ async def health_check(request: Request) -> dict:
         RuntimeError,
         AttributeError,
     ):
-        import logging; logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")
+        import logging
+        logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")
 
     # Health Index integration
     health_score = 0.0

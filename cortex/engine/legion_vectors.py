@@ -224,7 +224,8 @@ class VaultCracker:
                     "VaultCracker: Malleability attack succeeded (authentication failed)."
                 )
             except Exception:
-                import logging; logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Success = Tag caught it
+                import logging
+                logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Success = Tag caught it
 
         except Exception as e:
             logger.debug("VaultCracker error: %s", e)

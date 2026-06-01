@@ -79,7 +79,8 @@ class MejoraloDaemon:
             try:
                 await self._loop_task
             except asyncio.CancelledError:
-                import logging; logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # expected - task was cancelled by us
+                import logging
+                logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # expected - task was cancelled by us
             self._loop_task = None
         logger.info("Sovereign Daemon: Ouroboros cycle paused.")
 

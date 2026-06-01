@@ -138,7 +138,8 @@ class RaftNode:
                 try:
                     await task
                 except asyncio.CancelledError:
-                    import logging; logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Expected - do NOT re-raise during shutdown
+                    import logging
+                    logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Expected - do NOT re-raise during shutdown
         self._election_task = None
         self._heartbeat_task = None
         NodeRegistry.deregister(self.node_id)

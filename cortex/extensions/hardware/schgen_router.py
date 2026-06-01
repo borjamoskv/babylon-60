@@ -39,7 +39,7 @@ class SchGenRouter:
         connection_count = 0
         
         # Deterministic generation based on semantic intent length
-        intent_complexity = len(semantic_intent.split())
+        len(semantic_intent.split())
         
         for i, comp in enumerate(available_components):
             # Assign semantic roles based on position and intent

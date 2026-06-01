@@ -253,7 +253,8 @@ class SovereignScheduler:
                 )
                 break  # stop_event was set
             except asyncio.TimeoutError:
-                import logging; logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # normal tick timeout
+                import logging
+                logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # normal tick timeout
 
         logger.info("SovereignScheduler stopped")
 

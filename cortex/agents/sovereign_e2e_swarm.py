@@ -79,7 +79,7 @@ async def main():
     )
 
     # Instanciamos el Agente Principal (Jules-Secretario)
-    agent = Agent(config)
+    Agent(config)
 
     # Ejemplo de ejecución E2E
     user_prompt = "Audita el UI actual y elimina componentes React sin uso."

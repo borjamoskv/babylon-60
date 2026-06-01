@@ -148,7 +148,8 @@ class SlowOpTipEmitter:
                 )
             )
         except (ValueError, KeyError, OSError, RuntimeError, ImportError):
-            import logging; logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Tips are non-critical; never break the CLI
+            import logging
+            logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Tips are non-critical; never break the CLI
 
 
 # ─── Context Manager ─────────────────────────────────────────────────
