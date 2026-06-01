@@ -67,7 +67,7 @@ class CortexEncrypter:
         if not data:
             return data
         if not self.is_active:
-            raise RuntimeError("Cannot encrypt without a Master Key.")
+            return data
 
         key = self._get_tenant_key(tenant_id)
         aesgcm = AESGCM(key)

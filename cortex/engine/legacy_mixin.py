@@ -60,7 +60,7 @@ class LegacyMixin:
         return fact
 
     async def vote_v2(self, *args, **kwargs):
-        return await self.consensus.vote_v2(*args, **kwargs)
+        return await super().vote_v2(*args, **kwargs)
 
     async def get_all_active_facts(self, *args, **kwargs):
         results = await super().get_all_active_facts(*args, **kwargs)

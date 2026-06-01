@@ -56,6 +56,7 @@ _ALLOWED_FACT_TYPES: frozenset[str] = frozenset(
         "evolution",
         "test",
         "system_health",
+        "discovery",
     }
 )
 

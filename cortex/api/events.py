@@ -8,7 +8,7 @@ from fastapi.responses import StreamingResponse
 
 from cortex.extensions.signals.bus import AsyncSignalBus
 
-router = APIRouter(prefix="/v1/events", tags=["events"])
+router = APIRouter(prefix="/v1/public/events", tags=["events"])
 logger = logging.getLogger("cortex.api.events")
 
 

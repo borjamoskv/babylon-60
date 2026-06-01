@@ -238,6 +238,9 @@ def calculate_f1_score(predicted: set[str], actual: set[str]) -> float:
     Calculates the F1 score for detection tasks (e.g., Byzantine node detection).
     Replaces simple recall to penalize false positives.
     """
+    if not actual:
+        return 1.0 if not predicted else 0.0
+
     # True Positives: predicted AND actual
     tp = len(predicted.intersection(actual))
     # False Positives: predicted BUT NOT actual

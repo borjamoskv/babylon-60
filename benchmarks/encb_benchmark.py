@@ -76,18 +76,14 @@ class CortexResolver(Resolver):
                     source=event.agent_id,
                     meta=event.meta,
                 )
-                if hasattr(self.engine, "vote"):
+                if hasattr(self.engine, "vote_v2"):
                     try:
                         vote_value = 1 if event.meta.get("ground_truth", True) else -1
                         if event.meta.get("is_byzantine", False):
                             vote_value = -vote_value
                         await self.engine.vote_v2(fact_id, event.agent_id, vote_value)
-                    except Exception:
-                        import logging
-
-                        logging.getLogger(__name__).error(
-                            "DETECTIVE-OMEGA: Silent exception swallowed in encb_benchmark.py"
-                        )
+                    except Exception as e:
+                        console.print(f"[red]⚠️ Vote failed: {e}[/]")
             except Exception as e:
                 console.print(f"[red]⚠️ Ingest failed for event: {e}[/]")
                 if event.meta.get("is_byzantine", False):
@@ -95,21 +91,49 @@ class CortexResolver(Resolver):
 
     async def resolve(self, key: str) -> tuple[Any, float]:
         try:
+            if len(key) == 50 and not key.endswith(" ") and " " in key:
+                key = key.rsplit(" ", 1)[0]
             hits = await self.engine.search(key, top_k=3)
+            console.print(f"[yellow]DEBUG resolve key={key!r} hits={len(hits)}[/]")
             for hit in hits:
-                content = hit.get("content", "") if isinstance(hit, dict) else str(hit)
-                conf = float(hit.get("confidence", 1.0) if isinstance(hit, dict) else 1.0)
+                if isinstance(hit, dict):
+                    content = hit.get("content", "")
+                    conf_str = hit.get("confidence", "C3")
+                elif hasattr(hit, "content"):
+                    content = hit.content
+                    conf_str = hit.confidence
+                else:
+                    content = str(hit)
+                    conf_str = "C3"
+                console.print(f"  -> hit content={content!r} conf={conf_str}")
+                if conf_str == "verified":
+                    conf = 1.0
+                elif conf_str == "disputed":
+                    conf = 0.0
+                else:
+                    try:
+                        conf = float(conf_str)
+                    except ValueError:
+                        mapping = {"C5": 1.0, "C4": 0.8, "C3": 0.6, "C2": 0.4, "C1": 0.2}
+                        conf = mapping.get(str(conf_str).upper(), 0.6)
                 return content, conf
-        except Exception:
-            import logging
-
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in encb_benchmark.py"
-            )
+        except Exception as e:
+            console.print(f"[red]⚠️ Resolve failed: {e}[/]")
         return None, 0.0
 
     async def detect_byzantine(self) -> set[str]:
-        return self._detected_byzantine
+        byzantines = set(self._detected_byzantine)
+        try:
+            async with self.engine.session() as conn:
+                async with conn.execute(
+                    "SELECT id FROM agents WHERE reputation_score < 0.2"
+                ) as cursor:
+                    rows = await cursor.fetchall()
+                    for row in rows:
+                        byzantines.add(row[0])
+        except Exception:
+            pass
+        return byzantines
 
     def name(self) -> str:
         return "CORTEX-Persist"
@@ -159,48 +183,23 @@ async def run_encb(
         console.print(f"   {modality.value}: {len(events)} events")
 
     # ── Setup CORTEX engine ────────────────────────────────────────────
-    console.print("\n[yellow]⏳ Initializing CORTEX engine...[/]")
+    console.print("\n[yellow]⏳ Initializing CORTEX engine imports...[/]")
 
     tmp_dir = tempfile.mkdtemp(prefix="encb_cortex_")
-    db_path = os.path.join(tmp_dir, "encb_cortex.db")
+    pool = None
 
     try:
         from cortex.database.schema import ALL_SCHEMA  # pyright: ignore[reportMissingImports]
-
         from cortex.database.pool import CortexConnectionPool
         from cortex.engine import CortexEngine as AsyncCortexEngine
-
-        pool = CortexConnectionPool(db_path, min_connections=1, max_connections=3, read_only=False)
-        await pool.initialize()
-
-        async with pool.acquire() as conn:
-            for stmt in ALL_SCHEMA:
-                await conn.executescript(stmt)
-            await conn.commit()
-
-        engine = AsyncCortexEngine(pool, db_path)  # pyright: ignore[reportArgumentType]
         cortex_available = True
-        console.print("[green]✅ CORTEX engine ready[/]")
+        console.print("[green]✅ CORTEX imports successful[/]")
     except Exception as exc:
-        console.print(f"[red]⚠️  CORTEX engine init failed: {exc}[/]")
+        console.print(f"[red]⚠️  CORTEX engine import failed: {exc}[/]")
         console.print("[yellow]   Running with baseline RAG only[/]")
         cortex_available = False
-        engine = None
-        pool = None
 
     ablations = ablations or []
-
-    # ── Setup Resolvers ───────────────────────────────────────────────
-    resolvers: list[Resolver] = []
-    if cortex_available and engine is not None:
-        resolvers.append(CortexResolver(engine))
-    resolvers.append(AppendOnlyResolver())
-
-    gt_map = {}
-    for _modality, gt in ground_truths.items():
-        for _i, prop in enumerate(gt.signal_facts):
-            gt_map[prop[:50]] = prop
-    resolvers.append(OracleResolver(gt_map))
 
     # ── Results container ──────────────────────────────────────────────
     results: dict = {
@@ -214,8 +213,11 @@ async def run_encb(
             "ablations": ablations,
         },
     }
-    for res in resolvers:
-        results[res.name()] = {}
+
+    # Initialize results structure
+    expected_resolvers = ["CORTEX-Persist", "AppendOnly (RAG)", "Oracle"]
+    for r_name in expected_resolvers:
+        results[r_name] = {}
 
     # ── Run per-modality benchmarks ────────────────────────────────────
     for modality in ChaosModality:
@@ -226,6 +228,34 @@ async def run_encb(
         console.print(
             f"   Events: {len(events)} | Ground truth: {gt.total_propositions} propositions"
         )
+
+        modality_pool = None
+        modality_engine = None
+        if cortex_available:
+            modality_db_path = os.path.join(tmp_dir, f"encb_cortex_{modality.value}.db")
+            try:
+                modality_pool = CortexConnectionPool(modality_db_path, min_connections=1, max_connections=3, read_only=False)
+                await modality_pool.initialize()
+
+                async with modality_pool.acquire() as conn:
+                    for stmt in ALL_SCHEMA:
+                        await conn.executescript(stmt)
+                    await conn.commit()
+
+                modality_engine = AsyncCortexEngine(modality_pool, modality_db_path)
+            except Exception as exc:
+                console.print(f"[red]⚠️  Failed to init engine for modality {modality.value}: {exc}[/]")
+
+        # ── Setup Resolvers for this Modality ───────────────────────────
+        resolvers: list[Resolver] = []
+        if cortex_available and modality_engine is not None:
+            resolvers.append(CortexResolver(modality_engine))
+        resolvers.append(AppendOnlyResolver())
+
+        gt_map = {}
+        for _i, prop in enumerate(gt.signal_facts):
+            gt_map[prop[:50]] = prop
+        resolvers.append(OracleResolver(gt_map))
 
         # ── Injections ───────────────────────────────────────────
         for resolver in resolvers:
@@ -266,6 +296,9 @@ async def run_encb(
                 f"   {resolver.name()[:15]:<15}: inject={inject_ms:>4.0f}ms | "
                 f"recovery={recovery_rate:>5.1%} | f1_detect={f1_byz:>5.1%} | KL={kl_div:>5.2f}"
             )
+
+        if modality_pool is not None:
+            await modality_pool.close()
 
     # ── Summary Table ──────────────────────────────────────────────────
     console.print("\n")

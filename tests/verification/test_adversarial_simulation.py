@@ -154,12 +154,18 @@ async def test_contradictory_consensus_detection(engine):
     """Verify that contradictory outputs across different decisions trigger conflicts."""
     # First, store a valid baseline decision
     content_a = "The system must always use SHA-256 for all ledger cryptographic seals."
+    project = "ledger_protocol"
+    nonce = "nonce_contradiction"
+    logos_sig = hashlib.sha256(f"{content_a}{nonce}{project}".encode()).hexdigest()
+
     await engine.store(
-        project="ledger_protocol",
+        project=project,
         content=content_a,
         fact_type="decision",
         source="user",
         agent_id="user",
+        logos_signature=logos_sig,
+        nonce=nonce,
     )
 
     # Next, simulate an adversarial agent trying to contradict the baseline decision
