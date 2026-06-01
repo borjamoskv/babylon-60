@@ -15,20 +15,20 @@
   },
   "openai": {
     "base_url": "https://api.openai.com/v1",
-    "default_model": "gpt-5.4",
+    "default_model": "gpt-4o",
     "env_key": "OPENAI_API_KEY",
     "context_window": 256000,
     "tier": "frontier",
     "cost_class": "high",
     "specialization": ["reasoning", "code", "creative", "general", "architect"],
     "intent_model_map": {
-      "code":      "gpt-5.4-turbo",
-      "reasoning": "o3-ultra-2026",
-      "creative":  "gpt-5.4",
-      "architect": "o3-ultra-2026",
+      "code":      "gpt-4o",
+      "reasoning": "gpt-4o",
+      "creative":  "gpt-4o",
+      "architect": "gpt-4o",
       "general":   "gpt-4o",
-      "belief_audit": "gpt-5.4",
-      "episodic_processing": "gpt-5.4"
+      "belief_audit": "gpt-4o",
+      "episodic_processing": "gpt-4o"
     }
   },
   "anthropic": {
@@ -102,17 +102,17 @@
   },
   "deepseek": {
     "base_url": "https://api.deepseek.com/v1",
-    "default_model": "deepseek-v4",
+    "default_model": "deepseek-chat",
     "env_key": "DEEPSEEK_API_KEY",
     "context_window": 1000000,
     "tier": "frontier",
     "cost_class": "low",
     "specialization": ["reasoning", "code", "architect"],
     "intent_model_map": {
-      "code":      "deepseek-v4",
-      "reasoning": "deepseek-r1-2026",
-      "architect": "deepseek-r1-2026",
-      "general":   "deepseek-v4"
+      "code":      "deepseek-chat",
+      "reasoning": "deepseek-chat",
+      "architect": "deepseek-chat",
+      "general":   "deepseek-chat"
     }
   },
   "xai": {

@@ -72,7 +72,7 @@ class CortexResolver(Resolver):
                     project="encb",
                     content=event.content,
                     fact_type=event.fact_type,
-                    tags=",".join(event.tags),
+                    tags=list(event.tags),
                     source=event.agent_id,
                     meta=event.meta,
                 )
@@ -88,7 +88,8 @@ class CortexResolver(Resolver):
                         logging.getLogger(__name__).error(
                             "DETECTIVE-OMEGA: Silent exception swallowed in encb_benchmark.py"
                         )
-            except Exception:
+            except Exception as e:
+                console.print(f"[red]⚠️ Ingest failed for event: {e}[/]")
                 if event.meta.get("is_byzantine", False):
                     self._detected_byzantine.add(event.agent_id)
 

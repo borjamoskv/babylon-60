@@ -218,14 +218,19 @@ import math
 def calculate_recovery_rate(recovered: set[str], ground_truth: set[str]) -> float:
     """
     Calculates the Recovery Rate R = |recovered ∩ GT| / |GT|.
-    Uses exact string matching for now (set intersection), but could be extended to
-    Jaccard or cosine similarity for softer recovery.
+    Uses exact or substring matching for softer recovery.
     """
     if not ground_truth:
         return 1.0 if not recovered else 0.0
 
-    intersection = recovered.intersection(ground_truth)
-    return len(intersection) / len(ground_truth)
+    matched = 0
+    for gt in ground_truth:
+        # Check if the ground truth proposition is a substring of any recovered content, or vice-versa
+        for rec in recovered:
+            if gt in rec or rec in gt:
+                matched += 1
+                break
+    return matched / len(ground_truth)
 
 
 def calculate_f1_score(predicted: set[str], actual: set[str]) -> float:

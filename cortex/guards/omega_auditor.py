@@ -68,6 +68,7 @@ class OmegaAuditor:
         if (
             os.environ.get("CORTEX_TESTING") == "1"
             and os.environ.get("CORTEX_STRICT_GUARDS") != "1"
+            and os.environ.get("CORTEX_FORCE_OMEGA") != "1"
         ):
             logger.warning("OmegaAuditor: CORTEX_TESTING is enabled. Skipping deep audit.")
             return []
@@ -164,5 +165,7 @@ INSTRUCTIONS:
 
 async def run_omega_audit(content: str, project: str) -> list[OmegaConflict]:
     """Convenience entry point for the Omega Auditor."""
-    auditor = OmegaAuditor()
+    import os
+    provider = os.environ.get("CORTEX_PRIMARY_LLM", "gemini")
+    auditor = OmegaAuditor(provider=provider)
     return await auditor.audit_decision(content, project)
