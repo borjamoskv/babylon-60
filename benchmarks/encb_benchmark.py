@@ -164,12 +164,12 @@ async def run_encb(
     db_path = os.path.join(tmp_dir, "encb_cortex.db")
 
     try:
-        from cortex.schema import ALL_SCHEMA  # pyright: ignore[reportMissingImports]
+        from cortex.database.schema import ALL_SCHEMA  # pyright: ignore[reportMissingImports]
 
         from cortex.database.pool import CortexConnectionPool
         from cortex.engine import CortexEngine as AsyncCortexEngine
 
-        pool = CortexConnectionPool(db_path, min_connections=1, max_connections=3)
+        pool = CortexConnectionPool(db_path, min_connections=1, max_connections=3, read_only=False)
         await pool.initialize()
 
         async with pool.acquire() as conn:
