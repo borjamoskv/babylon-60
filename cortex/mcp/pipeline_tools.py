@@ -95,7 +95,15 @@ def _result_to_dict(result: PipelineResult) -> dict[str, Any]:
 
 # ── Internal Logic Delegates ──────────────────────────────────────────
 
-async def _execute_run(ctx: _MCPContext | None, intent: str, budget_usd: float, delivery: str, context_hints: str, priority: int) -> str:
+
+async def _execute_run(
+    ctx: _MCPContext | None,
+    intent: str,
+    budget_usd: float,
+    delivery: str,
+    context_hints: str,
+    priority: int,
+) -> str:
     if not intent or not intent.strip():
         return json.dumps({"error": "Empty intent", "status": "failed"})
 
@@ -132,7 +140,14 @@ async def _execute_run(ctx: _MCPContext | None, intent: str, budget_usd: float, 
         return json.dumps({"error": str(e), "status": "failed", "mission_id": request.mission_id})
 
 
-async def _execute_run_async(ctx: _MCPContext | None, intent: str, budget_usd: float, timeout_s: float, context_hints: str, priority: int) -> str:
+async def _execute_run_async(
+    ctx: _MCPContext | None,
+    intent: str,
+    budget_usd: float,
+    timeout_s: float,
+    context_hints: str,
+    priority: int,
+) -> str:
     if not intent or not intent.strip():
         return json.dumps({"error": "Empty intent", "status": "failed"})
 
@@ -171,17 +186,21 @@ async def _execute_cancel(ctx: _MCPContext | None, mission_id: str) -> str:
     try:
         if hasattr(bridge, "cancel"):
             cancelled = await bridge.cancel(mission_id.strip())
-            return json.dumps({
+            return json.dumps(
+                {
+                    "mission_id": mission_id.strip(),
+                    "cancelled": cancelled,
+                    "status": "cancelled" if cancelled else "not_found",
+                }
+            )
+        return json.dumps(
+            {
                 "mission_id": mission_id.strip(),
-                "cancelled": cancelled,
-                "status": "cancelled" if cancelled else "not_found",
-            })
-        return json.dumps({
-            "mission_id": mission_id.strip(),
-            "cancelled": False,
-            "status": "cancel_not_supported",
-            "note": "Bridge does not support cancellation yet",
-        })
+                "cancelled": False,
+                "status": "cancel_not_supported",
+                "note": "Bridge does not support cancellation yet",
+            }
+        )
     except Exception as e:
         logger.error("[MCP] Cancel failed: %s", e)
         return json.dumps({"error": str(e), "status": "failed"})
@@ -217,6 +236,7 @@ def _get_status() -> str:
 
     try:
         from cortex.extensions.swarm.budget import get_budget_manager
+
         bm = get_budget_manager()
         budget_info = bm.get_remaining_budget()
         status["budget"] = {
