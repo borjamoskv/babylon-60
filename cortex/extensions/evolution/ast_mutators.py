@@ -1,6 +1,5 @@
 from __future__ import annotations
 import ast
-import copy
 
 class _AstAnalyzer(ast.NodeVisitor):
     def __init__(self):

@@ -180,4 +180,3 @@ class EventLoopMixin:
 
         logger.info("MOSKV-1 Sovereign Daemon stopped")
 
-    @staticmethod

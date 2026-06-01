@@ -13,19 +13,13 @@ from typing import TYPE_CHECKING
 
 from cortex.extensions.ui_control.accessibility import AccessibilityEngine
 from cortex.extensions.ui_control.applescript import (
-    get_clipboard,
-    get_frontmost_app,
     is_app_running,
     run_applescript,
-    set_clipboard,
 )
 from cortex.extensions.ui_control.keyboard import KeyboardEngine
 from cortex.extensions.ui_control.models import (
     AppTarget,
-    AXElement,
     InteractionResult,
-    KeyCombo,
-    WindowInfo,
 )
 from cortex.extensions.ui_control.mouse import MouseEngine
 from cortex.extensions.ui_control.vision import VisionEngine

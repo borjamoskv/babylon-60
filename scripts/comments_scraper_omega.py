@@ -2,7 +2,7 @@ import asyncio
 import json
 import sqlite3
 import sys
-from typing import List, Dict, Any
+from typing import Any
 
 DB_PATH = "influencer_audit_v1.db"
 

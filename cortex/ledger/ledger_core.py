@@ -9,7 +9,6 @@ Axiom Reference:
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import sqlite3
 import time
@@ -26,7 +25,6 @@ if TYPE_CHECKING:
 from cortex.utils.canonical import (
     canonical_json,
     compute_tx_hash,
-    compute_tx_hash_v1,
     now_iso,
 )
 

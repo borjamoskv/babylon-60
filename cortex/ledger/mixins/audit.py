@@ -2,11 +2,10 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    import aiosqlite
-    from cortex.database.pool import CortexConnectionPool
+    pass
 
 from cortex.utils.canonical import (
     compute_tx_hash,

@@ -24,7 +24,6 @@ from .models import (
     ActivityEvent,
     DirectoryStats,
     Task,
-    TaskCreate,
 )
 from .trust_engine import NexusTrustEngine, TrustSignal
 

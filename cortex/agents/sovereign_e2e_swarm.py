@@ -1,6 +1,5 @@
 import asyncio
 import subprocess
-from typing import List
 
 from google.antigravity import Agent, types
 from google.antigravity.connections.local import LocalAgentConfig

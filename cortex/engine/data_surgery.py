@@ -8,7 +8,6 @@ from __future__ import annotations
 import hashlib
 import logging
 from dataclasses import dataclass
-from typing import Any
 
 logger = logging.getLogger("cortex.exergy.surgeon")
 

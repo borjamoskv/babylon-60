@@ -2,10 +2,9 @@ from __future__ import annotations
 import json
 import uuid
 from typing import TYPE_CHECKING
-import sqlite3
 
 if TYPE_CHECKING:
-    from nexus.api.registry import AgentRegistry
+    pass
 
 from nexus.api.models import Task, TaskCreate, Capability, AgentStatus
 from nexus.api.trust_engine import TrustSignal

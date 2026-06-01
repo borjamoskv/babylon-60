@@ -10,7 +10,6 @@ New subsystems: SovereignScheduler, HotStateDB, WatchdogHub, HumanCallbackAPI.
 import asyncio
 import json
 import logging
-import signal
 import threading
 import time
 from datetime import datetime, timezone
@@ -27,20 +26,12 @@ from cortex.extensions.daemon.loops_mixin import LoopsMixin
 from cortex.extensions.daemon.models import (
     AGENT_DIR,
     DEFAULT_COOLDOWN,
-    DEFAULT_INTERVAL,
     DEFAULT_MEMORY_STALE_HOURS,
     DEFAULT_STALE_HOURS,
     STATUS_FILE,
     DaemonStatus,
-    CORTEX_DB,
-    CORTEX_DIR,
 )
 
-from cortex.extensions.daemon.monitors import (
-    CloudSyncMonitor,
-    DiskMonitor,
-    EngineHealthCheck,
-)
 
 try:
     from cortex.extensions.daemon.hot_state import HotStateDB

@@ -6,9 +6,7 @@ import json
 import logging
 import time
 from collections import deque
-from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from enum import Enum
 from typing import Any
 
 import aiosqlite
@@ -23,8 +21,6 @@ from cortex.engine.causality_models import (
     EDGE_TRIGGERED_BY,
     EDGE_UPDATED_FROM,
     EDGE_TAINTED_BY,
-    CONFIDENCE_ORDER,
-    CONFIDENCE_LEVELS,
 )
 
 from cortex.crypto import get_default_encrypter
