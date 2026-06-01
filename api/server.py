@@ -41,7 +41,7 @@ async def health_check():
     """Terminal de estado C5-REAL."""
     return {"status": "ONLINE", "exergy": "MAX", "db_guard": GUARD_DB_PATH.exists()}
 
-@app.get("/api/v1/influencers", response_model=List[StrikeInfo])
+@app.get("/api/v1/influencers", response_model=list[StrikeInfo])
 async def get_all_influencers():
     """Retorna el estado del radar del Influencer Guard."""
     if not GUARD_DB_PATH.exists():
@@ -60,7 +60,7 @@ async def get_all_influencers():
         ) for r in rows
     ]
 
-@app.get("/api/v1/influencers/{name}/audit", response_model=List[AuditLogEntry])
+@app.get("/api/v1/influencers/{name}/audit", response_model=list[AuditLogEntry])
 async def get_influencer_audit(name: str):
     """Extrae el log criptográfico de alucinaciones (las pruebas del delito)."""
     if not GUARD_DB_PATH.exists():
@@ -83,7 +83,7 @@ async def get_influencer_audit(name: str):
         ) for r in rows
     ]
 
-@app.get("/api/v1/toxic_community", response_model=List[Dict[str, Any]])
+@app.get("/api/v1/toxic_community", response_model=list[dict[str, Any]])
 async def get_toxic_community_events(limit: int = 50):
     """Extrae los últimos hits del motor de extracción asíncrona de comentarios (Vector Alpha)."""
     db_path = Path(SCRAPER_DB_PATH)

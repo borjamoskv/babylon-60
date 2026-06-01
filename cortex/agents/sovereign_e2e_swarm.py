@@ -41,7 +41,7 @@ async def zero_ask_override(data: str) -> types.HookResult:
 @hooks.post_turn
 async def protocolo_ship_omega(data: str):
     """Fuerza la persistencia en el ledger CORTEX y ejecución de pruebas."""
-    print(f"\n[SHIP-Ω] Iniciando Cierre Criptográfico de la iteración.")
+    print("\n[SHIP-Ω] Iniciando Cierre Criptográfico de la iteración.")
     
     # Simula la persistencia en CORTEX-Persist
     print("[SHIP-Ω] Ejecutando: cortex store --type decision --source agent:gemini")

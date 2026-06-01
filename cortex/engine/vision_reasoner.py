@@ -31,7 +31,7 @@ class VisAnomReasoner:
         logger.info("VisAnomReasoner initialized (window_size=%d, threshold=%.2f)", 
                     self.window_size, self.anomaly_threshold)
 
-    def process_frame(self, timestamp: float, frame_embedding_hex: str) -> Optional[AnomalyRationale]:
+    def process_frame(self, timestamp: float, frame_embedding_hex: str) -> AnomalyRationale | None:
         """
         Ingests a frame's embedding hash. If the buffer is full, calculates the time-series 
         variance and emits a rationale.

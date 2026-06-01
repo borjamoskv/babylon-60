@@ -10,7 +10,7 @@ def parse_report(report_path):
         print(f"[-] Error: Report not found at {report_path}", file=sys.stderr)
         sys.exit(1)
         
-    with open(report_path, "r", encoding="utf-8") as f:
+    with open(report_path, encoding="utf-8") as f:
         content = f.read()
         
     # Extraer título y severidad

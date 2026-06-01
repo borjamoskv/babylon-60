@@ -51,7 +51,7 @@ class VideoMLACache:
         )
         logger.debug("Stored KV for frame %d (Ratio: %.2fx)", frame_idx, ratio)
 
-    def retrieve_kv(self, frame_idx: int, key_tensor: str) -> Optional[LatentKVPair]:
+    def retrieve_kv(self, frame_idx: int, key_tensor: str) -> LatentKVPair | None:
         """
         Retrieves a compressed KV pair based on the frame index and key.
         """

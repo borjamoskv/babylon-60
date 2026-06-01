@@ -53,7 +53,7 @@ class ReasoningInMemoryEngine:
             mutated_payload = block.inject_to_prompt(mutated_payload)
         return mutated_payload
 
-    def audit_exergy(self) -> Dict[str, Any]:
+    def audit_exergy(self) -> dict[str, Any]:
         """
         Calcula la exergía salvada (eliminación de desperdicio de tokens).
         """

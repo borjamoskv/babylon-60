@@ -67,7 +67,7 @@ class DataSurgeon:
             return dataset_chunks
             
         pruned_chunks = [
-            chunk for chunk, keep in zip(dataset_chunks, audit.surgical_pruning_mask)
+            chunk for chunk, keep in zip(dataset_chunks, audit.surgical_pruning_mask, strict=False)
             if keep == 1
         ]
         
