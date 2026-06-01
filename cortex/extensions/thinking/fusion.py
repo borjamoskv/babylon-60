@@ -62,7 +62,7 @@ class ContextFusion:
                     self._judge.complete(prompt=prompt, system=system, **kwargs),
                     timeout=self.JUDGE_TIMEOUT_S,
                 )
-            except (OSError, RuntimeError, asyncio.TimeoutError, AttributeError) as e:
+            except (TimeoutError, OSError, RuntimeError, AttributeError) as e:
                 logger.warning(
                     "ContextFusion error (attempt %d/%d): %s",
                     attempt + 1,
@@ -261,7 +261,7 @@ class ThoughtFusion:
                     self._judge.complete(prompt=prompt, system=system, **kwargs),
                     timeout=self.JUDGE_TIMEOUT_S,
                 )
-            except (OSError, RuntimeError, asyncio.TimeoutError, AttributeError) as e:
+            except (TimeoutError, OSError, RuntimeError, AttributeError) as e:
                 logger.warning(
                     "Judge error (attempt %d/%d): %s", attempt + 1, self.JUDGE_MAX_RETRIES + 1, e
                 )

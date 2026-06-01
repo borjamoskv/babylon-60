@@ -9,8 +9,7 @@ Logic: Autonomous Discovery -> Semantic Profiling -> Strike Pattern Extraction -
 import asyncio
 import json
 import logging
-from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from cortex.engine import AsyncCortexEngine
 
@@ -56,13 +55,13 @@ class MercorExtractorV2:
             )
             logger.info(f"◈ Strike Pattern Anchored: {pattern.get('id')} [Fact ID: {fact_id}]")
 
-    async def _discover_experts(self) -> List[str]:
+    async def _discover_experts(self) -> list[str]:
         """◈ DISCOVERY: Identify high-signal profiles."""
         logger.info(f"Nodes: Initiating Discovery for {self.target_skill}")
         # In production, this integrates with BrowserSubagent
         return ["@0x_expert_node", "Paradigm_Research", "Stateless_Auditor"]
 
-    async def _extract_alpha(self, profile: str) -> List[Dict[str, Any]]:
+    async def _extract_alpha(self, profile: str) -> list[dict[str, Any]]:
         """◈ EXTRACTION: Convert profile signals into actionable patterns."""
         logger.info(f"Nodes: Extracting Alpha from {profile}")
         # Synthetic alpha extraction for the Hito 12 release

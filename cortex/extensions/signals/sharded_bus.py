@@ -10,7 +10,7 @@ import hashlib
 import json
 import logging
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import aiosqlite
@@ -211,7 +211,7 @@ class ShardedAsyncSignalBus:
             await self.initialize()
 
         cutoff = (
-            datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=max_age_days)
+            datetime.fromtimestamp(time.time(), tz=UTC) - timedelta(days=max_age_days)
         ).isoformat()
         total_pruned = 0
 

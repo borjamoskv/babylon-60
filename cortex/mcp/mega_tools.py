@@ -13,7 +13,7 @@ import logging
 import os
 import tempfile
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -83,7 +83,7 @@ def _register_reality_weaver(mcp: FastMCP, ctx: _MCPContext) -> None:
 
             # Recent decisions (last 30 days)
             cutoff_30d = (
-                datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=30)
+                datetime.fromtimestamp(time.time(), tz=UTC) - timedelta(days=30)
             ).isoformat()
             cursor = await conn.execute(
                 """
@@ -313,7 +313,7 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
         """
         await ctx.ensure_ready()
 
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
+        now = datetime.fromtimestamp(time.time(), tz=UTC)
         cutoff_7d = (now - timedelta(days=7)).isoformat()
         cutoff_14d = (now - timedelta(days=14)).isoformat()
 

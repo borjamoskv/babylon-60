@@ -1,24 +1,22 @@
 #!/usr/bin/env python3
-import os
-import json
 import asyncio
-import urllib.request
-import urllib.error
-from typing import List, Dict, Optional
-from datetime import datetime
+import json
+import os
 import subprocess
+from datetime import datetime
+
 
 def log(msg: str, tier: str = "INFO") -> None:
     print(f"[{datetime.now().time()}] [{tier}] [IMMUNEFI-SCOUT] {msg}")
 
-async def fetch_open_bounties() -> List[Dict[str, str]]:
+async def fetch_open_bounties() -> list[dict[str, str]]:
     """Captura los targets reales de Immunefi desde el JSON generado por el subagente."""
     path = os.path.expanduser("~/Cortex-Persist/engine-c5/real_bounties.json")
     log(f"Extrayendo targets reales desde: {path}", "EXTRACT")
     
     try:
         if os.path.exists(path):
-            with open(path, "r") as f:
+            with open(path) as f:
                 return json.load(f)
         else:
             log("No se encontró real_bounties.json. Hallucinando fallback seguro.", "WARN")

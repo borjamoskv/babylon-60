@@ -22,7 +22,7 @@ import json
 import logging
 import sqlite3
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any, Optional
 
 from cortex.compaction.compaction_drift import apply_drift_check as _apply_drift_check
@@ -50,7 +50,7 @@ __all__ = [
 # ─── Strategy Enum ───────────────────────────────────────────────────
 
 
-class CompactionStrategy(str, Enum):
+class CompactionStrategy(StrEnum):
     """Available compaction strategies."""
 
     DEDUP = "dedup"

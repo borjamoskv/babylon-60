@@ -7,20 +7,20 @@ and event envelopes, strictly adhering to the v0.2 RFC specifications.
 """
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Literal, TypedDict
 
 # ─── Trust Semantics Enums ─────────────────────────────────────────────
 
 
-class EvidenceLevel(str, Enum):
+class EvidenceLevel(StrEnum):
     NONE = "none"
     BASIC = "basic"
     TRACEABLE = "traceable"
     VERIFIED = "verified"
 
 
-class TrustGrade(str, Enum):
+class TrustGrade(StrEnum):
     A = "A"  # Verified, strict policy, high integrity
     B = "B"  # Traceable, standard policy
     C = "C"  # Basic provenance, some warnings
@@ -28,7 +28,7 @@ class TrustGrade(str, Enum):
     F = "F"  # Untrusted or tainted
 
 
-class IntegrityState(str, Enum):
+class IntegrityState(StrEnum):
     UNKNOWN = "unknown"
     PARTIAL = "partial"
     VERIFIED = "verified"
@@ -36,7 +36,7 @@ class IntegrityState(str, Enum):
     STALE = "stale"
 
 
-class TaintState(str, Enum):
+class TaintState(StrEnum):
     NONE = "none"
     LOW = "low"
     MEDIUM = "medium"

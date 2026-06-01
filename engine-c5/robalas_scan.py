@@ -1,12 +1,11 @@
 import os
 import sys
-import numpy as np
 
 # Cargar el Sustrato CORTEX (Mock si no se puede importar directamente)
 # Para máxima eficiencia en el asalto, inyectamos la lógica HDC directamente
 try:
     sys.path.append("/Users/borjafernandezangulo/.gemini/antigravity/skills/CORTEX-Swarm-Prime/scripts")
-    from tensor_glial_core import encode_text_vsa, KanervaGuard, SwarmCommanderMPS
+    from tensor_glial_core import KanervaGuard, SwarmCommanderMPS, encode_text_vsa
 except ImportError:
     # Logic fallback if needed
     pass
@@ -17,7 +16,7 @@ RESONANCE_THRESHOLD = 0.35
 def scan_file(file_path, guard):
     """Escanea un archivo individual con el Vector ROBALAS."""
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path) as f:
             content = f.read()
     except Exception:
         return
@@ -38,7 +37,7 @@ def scan_file(file_path, guard):
             print(f"   Función: '{intent.strip()}'")
             print(f"   Categoría: {target}")
             print(f"   Resonancia: {resonance:.4f}")
-            print(f"   [!] POTENCIAL 0-DAY EXTRACTION DETECTADO")
+            print("   [!] POTENCIAL 0-DAY EXTRACTION DETECTADO")
 
 def run_assault():
     print("\\033[1;34m══════════════════════════════════════════════════════════\\033[0m")
@@ -54,7 +53,7 @@ def run_assault():
     ]
     
     found_files = []
-    for root, dirs, files in os.walk(TARGET_DIR):
+    for root, _dirs, files in os.walk(TARGET_DIR):
         for file in files:
             if file.endswith(".rs"):
                 if file in critical_files or "auth" in file or "owner" in file:

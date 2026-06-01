@@ -1,19 +1,20 @@
-import os
-import time
-import sqlite3
-import logging
 import asyncio
 import json
+import logging
+import os
+import sqlite3
 import sys
+import time
 
 # Add parent and local dirs to sys.path for high-agency imports
 sys.path.append("/Users/borjafernandezangulo/Cortex-Persist")
 sys.path.append("/Users/borjafernandezangulo/Cortex-Persist/cortex-core")
 
 try:
-    from cortex.mcp.knowledge_watcher import start_knowledge_daemon
     from skill_compiler import run_compiler
+
     from cortex.extensions.signals.bus import SignalBus
+    from cortex.mcp.knowledge_watcher import start_knowledge_daemon
 except ImportError as e:
     logging.error("Startup Failure: Dependency missing: %s", e)
 
@@ -151,7 +152,7 @@ class CortexDaemon:
         ledger = []
         if os.path.exists(EXECUTION_LEDGER):
              try:
-                 with open(EXECUTION_LEDGER, "r") as f:
+                 with open(EXECUTION_LEDGER) as f:
                      ledger = json.load(f)
              except Exception:
                  ledger = []
@@ -169,7 +170,7 @@ class CortexDaemon:
             return
 
         try:
-            with open(SWARM_QUEUE_FILE, "r") as f:
+            with open(SWARM_QUEUE_FILE) as f:
                 queue = json.load(f)
 
             tasks = queue.get("pending_tasks", [])
@@ -225,7 +226,7 @@ class CortexDaemon:
         try:
             queue = {"pending_tasks": []}
             if os.path.exists(SWARM_QUEUE_FILE):
-                with open(SWARM_QUEUE_FILE, "r") as f:
+                with open(SWARM_QUEUE_FILE) as f:
                     queue = json.load(f)
             
             queue["pending_tasks"].append({

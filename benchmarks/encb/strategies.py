@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import statistics
 from collections import defaultdict
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from benchmarks.encb.agents import NodeProfile, update_reliability
@@ -25,7 +25,7 @@ from benchmarks.encb.logop import (
 )
 
 
-class StrategyID(str, Enum):
+class StrategyID(StrEnum):
     """The four resolution strategies."""
 
     LWW = "S0_lww"

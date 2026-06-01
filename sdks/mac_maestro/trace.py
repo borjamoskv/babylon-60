@@ -54,7 +54,7 @@ def emit_trace(
     The `degraded` flag is automatically set if critical context
     (pid, window_title) is missing.
     """
-    timestamp = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
+    timestamp = datetime.datetime.now(tz=datetime.UTC).isoformat()
 
     # ── Degradation Detection ──
     degraded = pid is None

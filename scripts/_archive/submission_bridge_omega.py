@@ -1,6 +1,6 @@
-import os
 import json
 import logging
+import os
 from datetime import datetime
 
 # CORTEX Submission Bridge v1.0

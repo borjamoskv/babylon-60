@@ -6,7 +6,7 @@ import asyncio
 import logging
 import time
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -16,7 +16,7 @@ logger = logging.getLogger("cortex.extensions.swarm.auto_fix")
 # ── Classification ────────────────────────────────────────────────────
 
 
-class GhostClass(str, Enum):
+class GhostClass(StrEnum):
     """Ghost classification for routing to the correct fix strategy."""
 
     CODE_BUG = "code_bug"

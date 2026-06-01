@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: ChatGPT-Bridge-Omega
 Description: Local proxy bridge to give ChatGPT Plus (via Custom GPT Actions) direct God Mode execution access to the CORTEX environment via FastAPI and Ngrok tunneling.
 """
-import json
 import logging
+
 
 class ChatgptBridgeOmegaSkill:
     def __init__(self):

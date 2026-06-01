@@ -10,13 +10,13 @@ import hashlib
 import logging
 import time
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger("cortex.extensions.swarm.conflict_resolution")
 
 
-class ConflictType(str, Enum):
+class ConflictType(StrEnum):
     """Classification of conflict nature."""
 
     FACTUAL = "factual"  # Verifiable, e.g. version numbers
@@ -25,7 +25,7 @@ class ConflictType(str, Enum):
     PRIORITY = "priority"  # Ordering disputes
 
 
-class ResolutionMethod(str, Enum):
+class ResolutionMethod(StrEnum):
     """How the conflict was ultimately resolved."""
 
     TRIANGULATION = "triangulation"

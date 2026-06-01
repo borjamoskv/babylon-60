@@ -1,7 +1,9 @@
 import json
 import os
-import yaml
 import re
+
+import yaml
+
 
 class BountyGuard:
     """
@@ -9,7 +11,7 @@ class BountyGuard:
     Ensures all extraction targets are defensible and in-scope.
     """
     def __init__(self, config_path="config.yaml"):
-        with open(config_path, 'r') as f:
+        with open(config_path) as f:
             self.config = yaml.safe_load(f)
         self.policies_dir = self.config.get("policies", {}).get("dir", "data/policies")
         self.enforce = self.config.get("policies", {}).get("enforce_compliance", True)
@@ -23,7 +25,7 @@ class BountyGuard:
             if f.endswith(".json") and not f.endswith(".compiled.json"):
                 # In production, we'd use the compiled version if available
                 p_path = os.path.join(self.policies_dir, f)
-                with open(p_path, 'r') as pf:
+                with open(p_path) as pf:
                     try:
                         policy = json.load(pf)
                         if "program_id" in policy:

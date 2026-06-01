@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 __all__ = ["register_trust_tools"]
@@ -105,7 +105,7 @@ def _register_audit_trail(mcp: FastMCP, ctx: _MCPContext) -> None:
 
         lines = [
             "═══ CORTEX AUDIT TRAIL ═══",
-            f"Generated: {datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()}",
+            f"Generated: {datetime.fromtimestamp(time.time(), tz=UTC).isoformat()}",
             f"Entries: {len(rows)}",  # type: ignore[reportArgumentType]
             f"Filters: project={project or '*'}, agent={agent_id or '*'}, since={since or 'all'}",
             "═" * 40,

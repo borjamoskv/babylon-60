@@ -1,21 +1,22 @@
-import subprocess
 import json
 import operator
-from typing import TypedDict, Annotated, Sequence, List, Dict, Any
+import subprocess
+from collections.abc import Sequence
 from pathlib import Path
+from typing import Annotated, Any, TypedDict
 
-from langgraph.graph import StateGraph, END
-from langchain_core.messages import BaseMessage, HumanMessage
-from langchain_community.chat_models import ChatOllama
-from native_paths import resolve_native_binary
 from context_compressor import ContextCompressor
+from langchain_community.chat_models import ChatOllama
+from langchain_core.messages import BaseMessage, HumanMessage
+from langgraph.graph import END, StateGraph
+from native_paths import resolve_native_binary
 
 # ◈ SCALABLE DEFAULTS
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 HOUND_DEBUG_BIN = PROJECT_ROOT / "engine" / "cortex-core" / "target" / "debug" / "cortex-hound"
 
 try:
-    from db import log_scaffold_experiment, get_failed_experiments
+    from db import get_failed_experiments, log_scaffold_experiment
 except ImportError:
     print("[!] Database layer not found. Logging locally only.")
     def log_scaffold_experiment(*args): pass
@@ -29,12 +30,12 @@ class AgentState(TypedDict):
     bounty_url: str
     target_code: str
     compressed_code: str
-    hypotheses: List[str]
-    scaffold_commands: List[str]
+    hypotheses: list[str]
+    scaffold_commands: list[str]
     proof_of_concept: str
     is_verified: bool
     iterations: int
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 def semantic_compressor(state: AgentState):
     """Nodo de compresión de contexto para optimizar KV-Cache."""
@@ -85,7 +86,7 @@ def mythos_analyzer(state: AgentState):
         return {"hypotheses": [f"FAIL: {e}"], "scaffold_commands": ["exit 1"], "iterations": state.get("iterations", 0) + 1}
 
 def formal_verification(state: AgentState):
-    print(f"[◈ FORMAL] Native Scan...")
+    print("[◈ FORMAL] Native Scan...")
     tmp_file = Path("/tmp/target_mythos.sol")
     tmp_file.write_text(state["target_code"]) # Use original for formal verification
     rust_bin = resolve_native_binary("cortex-hound", "CORTEX_NATIVE_HOUND_BIN")
@@ -97,7 +98,7 @@ def formal_verification(state: AgentState):
     return {"is_verified": True}
 
 def glasswing_scaffold(state: AgentState):
-    print(f"[◈ SCAFFOLD] Native Scaffold...")
+    print("[◈ SCAFFOLD] Native Scaffold...")
     rust_bin = resolve_native_binary("cortex-hound", "CORTEX_NATIVE_HOUND_BIN")
     if rust_bin is None and HOUND_DEBUG_BIN.is_file(): rust_bin = HOUND_DEBUG_BIN
     cmd_json = json.dumps({"commands": state["scaffold_commands"]})

@@ -28,7 +28,7 @@ import logging
 import sqlite3
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
@@ -178,7 +178,7 @@ class CryptoShredder:
             )
 
         try:
-            ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+            ts = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
             self._conn.execute(
                 "INSERT INTO shredded_keys "
                 "(fact_id, tenant_id, reason, shredded_by, shredded_at) "
@@ -238,7 +238,7 @@ class CryptoShredder:
             )
 
         try:
-            ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+            ts = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
             await self._conn.execute(  # type: ignore[reportAttributeAccessIssue]
                 "INSERT INTO shredded_keys "
                 "(fact_id, tenant_id, reason, shredded_by, shredded_at) "
@@ -390,5 +390,5 @@ class CryptoShredder:
             "total_shredded": total,
             "by_reason": reasons,
             "compliant": True,
-            "audit_timestamp": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            "audit_timestamp": datetime.fromtimestamp(time.time(), tz=UTC).isoformat(),
         }

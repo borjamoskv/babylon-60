@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import json
 import logging
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -25,7 +25,7 @@ from cortex.extensions.music_engine.dsp_apotheosis import DSPApotheosis
 logger = logging.getLogger(__name__)
 
 
-class TrackState(str, Enum):
+class TrackState(StrEnum):
     CONCEPT = "concept"
     PRE_PRODUCTION = "pre_production"
     TRACKING = "tracking"
@@ -34,7 +34,7 @@ class TrackState(str, Enum):
     REJECTED = "rejected"
 
 
-class SoundVector(str, Enum):
+class SoundVector(StrEnum):
     GROOVE = "groove"  # Ξ₁
     SOUND_DESIGN = "sound_design"  # Ξ₂
     HARMONIC = "harmonic"  # Ξ₃

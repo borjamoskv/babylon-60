@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any
 
@@ -235,7 +235,7 @@ class RevenueEngine:
         Returns:
             Revenue report with breakdown by vector.
         """
-        period = period or datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d")
+        period = period or datetime.fromtimestamp(time.time(), tz=UTC).strftime("%Y-%m-%d")
 
         by_vector: dict[str, dict[str, Any]] = {}
         total_revenue = Decimal("0")

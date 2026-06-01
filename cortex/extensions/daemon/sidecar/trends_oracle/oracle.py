@@ -4,7 +4,7 @@ import asyncio
 import logging
 import random
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import pandas as pd
@@ -233,7 +233,7 @@ class TrendsOracle:
         self, keyword: str, traffic: str, geo: str, category: int, trend_type: str
     ) -> TrendsAlert | None:
         """Stores the trend as a CORTEX fact and creates a Daemon Alert."""
-        iso_now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        iso_now = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
         geo_str = geo if geo else "Global"
 
         # 1. Create Fact Payload

@@ -24,7 +24,7 @@ import sqlite3
 import threading
 import time
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import TYPE_CHECKING, Final, NamedTuple, Optional
 
@@ -45,7 +45,7 @@ _ASSET_CANDIDATES: Final[tuple[Path, ...]] = (_PACKAGE_ASSET_PATH, _LEGACY_ASSET
 # ─── Models ──────────────────────────────────────────────────────────
 
 
-class TipCategory(str, Enum):
+class TipCategory(StrEnum):
     """Tip categories for filtering."""
 
     CORTEX = "cortex"

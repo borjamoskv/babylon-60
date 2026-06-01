@@ -109,7 +109,7 @@ class Supervisor:
         # Wait for graceful shutdown with timeout
         try:
             await asyncio.wait_for(entry.task, timeout=5.0)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.warning(
                 "Supervisor: '%s' did not stop gracefully, force-cancelling",
                 agent_id,

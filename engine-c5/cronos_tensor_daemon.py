@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-import time
-import math
-import numpy as np
 import logging
+import math
+import time
+
+import numpy as np
 
 """
 CRONOS-Ω: Tensor-Glial Metabolism Demon

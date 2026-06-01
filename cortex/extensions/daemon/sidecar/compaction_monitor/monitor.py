@@ -244,7 +244,7 @@ class MemoryPressureMonitor:
             try:
                 # Give it a moment to finish cleanup
                 await asyncio.wait_for(self._task, timeout=1.0)
-            except (asyncio.CancelledError, asyncio.TimeoutError):
+            except (TimeoutError, asyncio.CancelledError):
                 pass
 
         self._executor.shutdown(wait=False, cancel_futures=True)

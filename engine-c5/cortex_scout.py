@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
-import sys
 import subprocess
+import sys
 from datetime import datetime
 
 TARGET_DIR = os.path.expanduser("~/Cortex-Persist/engine-c5/targets")

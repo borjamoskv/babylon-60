@@ -14,7 +14,7 @@ import hashlib
 import json
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 logger = logging.getLogger("cortex.engine.auth")
@@ -59,7 +59,7 @@ class ByzantineAuthLayer:
                 return True
 
         # Action is destructive and lacks Zenith. Wait for operator verification.
-        challenge_id = f"auth_{datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime('%Y%m%d_%H%M%S')}_{action_hash[:8]}"
+        challenge_id = f"auth_{datetime.fromtimestamp(time.time(), tz=UTC).strftime('%Y%m%d_%H%M%S')}_{action_hash[:8]}"
         challenge_path = AUTH_DIR / f"{challenge_id}.json"
 
         challenge_data = {
@@ -68,7 +68,7 @@ class ByzantineAuthLayer:
             "hash": action_hash,
             "status": "PENDING",
             "zenith_score": zenith_score,
-            "timestamp": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            "timestamp": datetime.fromtimestamp(time.time(), tz=UTC).isoformat(),
         }
 
         challenge_path.write_text(json.dumps(challenge_data, indent=2))

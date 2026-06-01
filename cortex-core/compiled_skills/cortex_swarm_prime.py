@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: CORTEX-Swarm-Prime
 Description: Sovereign Swarm Core & Orchestration — Unified membrane for hierarchical parallel execution (100-10,000 agents), structural integrity enforcement, and zero-latency Void-State orchestration.
 """
-import json
 import logging
+
 
 class CortexSwarmPrimeSkill:
     def __init__(self):

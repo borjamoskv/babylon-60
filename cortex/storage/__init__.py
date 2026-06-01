@@ -14,13 +14,13 @@ from __future__ import annotations
 
 import logging
 import os
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Protocol, runtime_checkable
 
 logger = logging.getLogger("cortex.storage")
 
 
-class StorageMode(str, Enum):
+class StorageMode(StrEnum):
     LOCAL = "local"
     TURSO = "turso"
     POSTGRES = "postgres"

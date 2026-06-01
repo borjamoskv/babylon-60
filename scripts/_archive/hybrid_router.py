@@ -1,12 +1,13 @@
 import json
 import subprocess
 
+import db
+
 # CORTEX-PERSIST: Hybrid Router (Strategic Compliance Edition)
 from agent_hound_omega import build_mythos_graph
-import db
-from native_paths import resolve_native_binary
 from bounty_guard import BountyGuard
 from hitl_handler import HITLHandler
+from native_paths import resolve_native_binary
 
 RUST_BIN = resolve_native_binary("cortex-strike", "CORTEX_NATIVE_STRIKE_BIN", "CORTEX_STRIKE_BIN")
 
@@ -74,7 +75,7 @@ def route_target(title, url, exergy):
             print("[HYBRID-HALT] Human authorization denied. Aborting flow.")
             return
 
-        print(f"\n[HYBRID] ◈ AUTHORIZATION SIGNED ◈ -> Waking CORTEX-HOUND-Omega")
+        print("\n[HYBRID] ◈ AUTHORIZATION SIGNED ◈ -> Waking CORTEX-HOUND-Omega")
         
         snippet = report_json.get("contract_snippet") 
         if not snippet or snippet == "None":
@@ -120,7 +121,7 @@ def route_target(title, url, exergy):
             db.log_intelligence_report("SYSTEM", f"Hound execution error: {e}", "C4-FAIL")
             
     else:
-        print(f"\n[HYBRID] ◈ STRIKE GATE CLOSED ◈ -> Target Archived.")
+        print("\n[HYBRID] ◈ STRIKE GATE CLOSED ◈ -> Target Archived.")
 
 
 if __name__ == "__main__":

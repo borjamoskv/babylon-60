@@ -21,7 +21,7 @@ import logging
 import sqlite3
 import time
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -100,7 +100,7 @@ class HotStateDB:
         with self._conn() as conn:
             conn.executescript(_SCHEMA)
             # Initialize default metrics
-            now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+            now = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
             for key, val in _DEFAULT_METRICS.items():
                 conn.execute(
                     """
@@ -125,7 +125,7 @@ class HotStateDB:
             return
         try:
             data = json.loads(legacy.read_text())
-            now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+            now = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
             with self._conn() as conn:
                 for key, value in data.items():
                     conn.execute(
@@ -143,13 +143,13 @@ class HotStateDB:
 
     def set(self, key: str, value: Any, ttl_s: float | None = None) -> None:
         """Set or update a key-value pair. Value is JSON-serialized."""
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
         ttl_expires = None
         if ttl_s is not None:
             from datetime import timedelta
 
             ttl_expires = (
-                datetime.fromtimestamp(time.time(), tz=timezone.utc) + timedelta(seconds=ttl_s)
+                datetime.fromtimestamp(time.time(), tz=UTC) + timedelta(seconds=ttl_s)
             ).isoformat()
 
         serialized = json.dumps(value, default=str)
@@ -168,7 +168,7 @@ class HotStateDB:
 
     def get(self, key: str, default: Any = None) -> Any:
         """Get a value by key. Returns default if missing or expired."""
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
         with self._conn() as conn:
             row = conn.execute(
                 """
@@ -210,7 +210,7 @@ class HotStateDB:
 
     def purge_expired(self) -> int:
         """Remove all expired keys. Returns count removed."""
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
         with self._conn() as conn:
             result = conn.execute(
                 "DELETE FROM hot_kv WHERE ttl_expires IS NOT NULL AND ttl_expires < ?",
@@ -225,7 +225,7 @@ class HotStateDB:
 
     def increment(self, metric: str, delta: float = 1.0) -> float:
         """Atomically increment a metric counter. Returns new value."""
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
         with self._conn() as conn:
             conn.execute(
                 """
@@ -242,7 +242,7 @@ class HotStateDB:
 
     def set_metric(self, metric: str, value: float) -> None:
         """Set a metric to an absolute value."""
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
         with self._conn() as conn:
             conn.execute(
                 """
@@ -287,7 +287,7 @@ class HotStateDB:
         return {
             "kv": {r["key"]: json.loads(r["value"]) for r in kv_rows},
             "metrics": {r["key"]: r["value"] for r in metric_rows},
-            "exported_at": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            "exported_at": datetime.fromtimestamp(time.time(), tz=UTC).isoformat(),
             "db_path": str(self._db_path),
         }
 

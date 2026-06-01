@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import aiosqlite
@@ -96,7 +96,7 @@ class TestWorkerLifecycle:
             await worker.stop()
             try:
                 await asyncio.wait_for(task, timeout=1.0)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 task.cancel()
         assert worker._running is False
 
@@ -158,7 +158,7 @@ class TestMarkFailure:
         assert row["last_error"] == "Test error"
         # next_attempt_at should be ~5 minutes from now
         next_dt = datetime.fromisoformat(row["next_attempt_at"])
-        assert next_dt > datetime.fromtimestamp(time.time(), tz=timezone.utc) + timedelta(minutes=4)
+        assert next_dt > datetime.fromtimestamp(time.time(), tz=UTC) + timedelta(minutes=4)
         await conn.close()
 
 
@@ -289,7 +289,7 @@ class TestProcessBatch:
 
         db_path = str(tmp_path / "retry.db")
         past = (
-            datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(minutes=10)
+            datetime.fromtimestamp(time.time(), tz=UTC) - timedelta(minutes=10)
         ).isoformat()
         async with _aio.connect(db_path) as conn:
             conn.row_factory = _aio.Row

@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 __all__ = ["IngestionFact", "Provenance"]
 
 
-class Provenance(str, Enum):
+class Provenance(StrEnum):
     USER_DIRECT = "user_direct"
     INFERENCE = "inference"
     SYSTEM = "system"

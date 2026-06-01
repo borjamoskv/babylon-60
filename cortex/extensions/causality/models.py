@@ -7,7 +7,7 @@ a boolean taint would rupture half the DAG on a mild suspicion.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 
 __all__ = [
     "Confidence",
@@ -18,7 +18,7 @@ __all__ = [
 ]
 
 
-class Confidence(str, Enum):
+class Confidence(StrEnum):
     """Epistemic confidence levels C1 (hypothesis) → C5 (confirmed)."""
 
     C1 = "C1"
@@ -28,7 +28,7 @@ class Confidence(str, Enum):
     C5 = "C5"
 
 
-class TaintStatus(str, Enum):
+class TaintStatus(StrEnum):
     """Tri-state causal taint.
 
     - CLEAN: no contamination detected

@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: token-reducer
 Description: LLM Token Reduction Engine v3.0 — Structural compression for prompts, context, and skill descriptions with 0% fact loss.
 """
-import json
 import logging
+
 
 class TokenReducerSkill:
     def __init__(self):

@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: Devin-Apex
 Description: Sovereign Code Agency Engine — Unified autonomous software engineering suite. Orchestrates both external high-reasoning APIs (Devin v3) and local Sovereign Native bypass for zero-cost, private execution.
 """
-import json
 import logging
+
 
 class DevinApexSkill:
     def __init__(self):

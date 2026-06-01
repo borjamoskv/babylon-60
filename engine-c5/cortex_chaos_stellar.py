@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-import os
-import sys
-import subprocess
 import json
+import os
+import subprocess
 import time
 from datetime import datetime
 
@@ -17,7 +16,7 @@ def log(msg: str, tier: str = "INFO") -> None:
 def update_ledger(details: str):
     try:
         if os.path.exists(LEDGER_PATH):
-            with open(LEDGER_PATH, "r") as f:
+            with open(LEDGER_PATH) as f:
                 ledger = json.load(f)
         else:
             ledger = {}

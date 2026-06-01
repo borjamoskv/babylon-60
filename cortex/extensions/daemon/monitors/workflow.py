@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Optional
 
@@ -176,7 +176,7 @@ class WorkflowMonitor(BaseMonitor[WorkflowAlert]):
         except (json.JSONDecodeError, OSError):
             return 0
 
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
+        now = datetime.fromtimestamp(time.time(), tz=UTC)
         count = 0
         for _project, info in data.items():
             if not isinstance(info, dict):
@@ -188,7 +188,7 @@ class WorkflowMonitor(BaseMonitor[WorkflowAlert]):
                 continue
             try:
                 if isinstance(ts, (int, float)):
-                    last = datetime.fromtimestamp(ts, tz=timezone.utc)
+                    last = datetime.fromtimestamp(ts, tz=UTC)
                 else:
                     last = datetime.fromisoformat(ts.replace("Z", "+00:00"))
                 hours = (now - last).total_seconds() / 3600

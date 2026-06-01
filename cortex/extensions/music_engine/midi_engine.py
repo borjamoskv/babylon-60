@@ -10,7 +10,7 @@ import math
 import os
 import random
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 
 import numpy as np
 
@@ -53,7 +53,7 @@ SNARE_NOISE_MS = 120
 HAT_NOISE_MS = 30
 
 
-class SynthType(str, Enum):
+class SynthType(StrEnum):
     """Waveform types for pure-Python synthesis."""
 
     SINE = "sine"

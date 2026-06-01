@@ -1,7 +1,7 @@
 import os
 import random
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 # Ensure we can import from cortex
@@ -17,7 +17,7 @@ PROJECT_NAROA = "naroa-web"
 
 # Time ranges (relative to NOW)
 # 8 hours ago -> Start of day
-NOW = datetime.now(timezone.utc)
+NOW = datetime.now(UTC)
 START_OF_DAY = NOW - timedelta(hours=8)
 
 SCHEDULE = [

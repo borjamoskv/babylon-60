@@ -1,8 +1,7 @@
 import json
-import time
-import random
 import os
-import subprocess
+import random
+import time
 
 # Ruta esclava al Matrix Frontend
 MATRIX_STATE_FILE = "/Users/borjafernandezangulo/10_PROJECTS/cortex-exergy-matrix/public/cortex_state.json"

@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: ouroboros-capital-omega
 Description: Sovereign Capital & Exergy Extraction Engine — Generates fiat/crypto capital across bounty, grant, arbitrage, and sponsor vectors with recursive self-improvement.
 """
-import json
 import logging
+
 
 class OuroborosCapitalOmegaSkill:
     def __init__(self):

@@ -226,7 +226,7 @@ class AetherAgent:
             )
             # Fire and forget / bounded wait
             await asyncio.wait_for(proc.communicate(), timeout=10.0)
-        except (asyncio.TimeoutError, OSError) as e:
+        except (TimeoutError, OSError) as e:
             logger.debug("CORTEX persist failed: %s", e)
 
     @staticmethod
@@ -250,7 +250,7 @@ class AetherAgent:
                 stderr=asyncio.subprocess.PIPE,
             )
             await asyncio.wait_for(proc.communicate(), timeout=10.0)
-        except (asyncio.TimeoutError, OSError) as e:
+        except (TimeoutError, OSError) as e:
             logger.debug("CORTEX error persist failed: %s", e)
 
     @staticmethod
@@ -269,5 +269,5 @@ class AetherAgent:
                 stderr=asyncio.subprocess.PIPE,
             )
             await asyncio.wait_for(proc.communicate(), timeout=5.0)
-        except (asyncio.TimeoutError, OSError):
+        except (TimeoutError, OSError):
             pass

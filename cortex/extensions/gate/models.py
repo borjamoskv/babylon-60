@@ -4,7 +4,7 @@ CORTEX v5.1 — SovereignGate Models.
 
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Optional
 
 from .enums import ActionLevel, ActionStatus, GatePolicy
@@ -43,9 +43,9 @@ class PendingAction:
             "command": self.command,
             "project": self.project,
             "status": self.status.value,
-            "created_at": datetime.fromtimestamp(self.created_at, tz=timezone.utc).isoformat(),
+            "created_at": datetime.fromtimestamp(self.created_at, tz=UTC).isoformat(),
             "approved_at": (
-                datetime.fromtimestamp(self.approved_at, tz=timezone.utc).isoformat()
+                datetime.fromtimestamp(self.approved_at, tz=UTC).isoformat()
                 if self.approved_at
                 else None
             ),

@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: Capital-Extractor-Omega
 Description: Sovereign Revenue Extraction Engine — Autonomous capital generation across bounty, grant, arbitrage, sponsorship, and freelance vectors with cryptographic audit trail.
 """
-import json
 import logging
+
 
 class CapitalExtractorOmegaSkill:
     def __init__(self):

@@ -14,7 +14,7 @@ import logging
 import sqlite3
 import time
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Optional
 
 __all__ = [
@@ -99,7 +99,7 @@ def generate_reflection(
         summary=summary,
         errors=errors or [],
         decisions=decisions or [],
-        timestamp=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+        timestamp=datetime.fromtimestamp(time.time(), tz=UTC).isoformat(),
     )
 
     content = reflection.to_content()

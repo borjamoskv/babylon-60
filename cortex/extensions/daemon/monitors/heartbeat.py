@@ -7,7 +7,7 @@ and alert solely when the semantic asymmetry deviates from the given threshold.
 import hashlib
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from cortex.extensions.daemon.models import SiteStatus
@@ -48,7 +48,7 @@ class TrueHeartbeatMonitor:
     async def poll(self, session: Any) -> SiteStatus:
         """Poll the endpoint and measure semantic drift."""
 
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
 
         try:
             start = time.monotonic()

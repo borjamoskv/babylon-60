@@ -41,7 +41,7 @@ class PhysicalActuator:
                 "stdout": stdout.decode("utf-8", errors="replace").strip(),
                 "stderr": stderr.decode("utf-8", errors="replace").strip(),
             }
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.error("🦾 [PHYSICAL PARITY] Command timed out: %s", command)
             return {
                 "status": "timeout",

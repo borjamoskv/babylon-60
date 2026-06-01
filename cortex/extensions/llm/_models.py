@@ -14,7 +14,7 @@ from __future__ import annotations
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Optional
 
 from pydantic import BaseModel, Field
@@ -32,7 +32,7 @@ __all__ = [
 # ─── Cognitive Reasoning Modes (Axiom Ω₁₆) ──────────────────────────────
 
 
-class ReasoningMode(str, Enum):
+class ReasoningMode(StrEnum):
     """Execution modes that dictate provider selection, hedging, and capability requirements."""
 
     DEEP_THINK = "deep"
@@ -49,7 +49,7 @@ class ReasoningMode(str, Enum):
 # ─── Intent Classification ─────────────────────────────────────────────────
 
 
-class IntentProfile(str, Enum):
+class IntentProfile(StrEnum):
     """Clasificación soberana de la intención del prompt.
 
     Permite al router seleccionar fallbacks con afinidad semántica,
@@ -80,7 +80,7 @@ class IntentProfile(str, Enum):
     Routes to Infrastructure (Gemini 3.1 Pro) for cost-gated prescreen."""
 
 
-class CascadeTier(str, Enum):
+class CascadeTier(StrEnum):
     """Classification of which cascade tier resolved the call."""
 
     PRIMARY = "primary"

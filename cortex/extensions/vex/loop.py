@@ -170,7 +170,7 @@ class VEXRunner:
             output = str(result_data.get("output", ""))
             error = result_data.get("error") if not success else None
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             elapsed_ms = int((time.monotonic() - t0) * 1000)
             success = False
             output = ""

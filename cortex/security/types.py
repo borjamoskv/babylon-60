@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Optional
 
 
-class ImmunityState(str, Enum):
+class ImmunityState(StrEnum):
     OBSERVED = "observed"
     QUARANTINED = "quarantined"
     PROMOTABLE = "promotable"
@@ -15,7 +15,7 @@ class ImmunityState(str, Enum):
     AMPUTATED = "amputated"
 
 
-class RiskLevel(str, Enum):
+class RiskLevel(StrEnum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"

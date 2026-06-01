@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from cortex.ledger import ImmutableLedger
@@ -100,7 +100,7 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
         ledger = ImmutableLedger(ctx.pool)  # type: ignore[reportArgumentType]
         integrity = await ledger.audit_integrity_async()
 
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
 
         lines = [
             "╔══════════════════════════════════════════════════╗",

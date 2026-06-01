@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: Cognitive-Crystallizer-Omega
 Description: Sovereign Intelligence & Autopoiesis Engine — The core logic for JIT knowledge extraction, self-play learning, syntactic reduction, and causal memory anclaje. Fuses the 6 primary cognitive vectors of CORTEX.
 """
-import json
 import logging
+
 
 class CognitiveCrystallizerOmegaSkill:
     def __init__(self):

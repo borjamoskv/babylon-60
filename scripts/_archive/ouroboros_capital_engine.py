@@ -6,22 +6,23 @@ Persists all targets to CORTEX-PERSIST DB (WAL mode).
 """
 
 import json
-import time
-import urllib.request
-import urllib.error
-import yaml
 import os
+import time
+import urllib.error
+import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
+import yaml
 
 # ── Load Config ──────────────────────────────────────────────
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-with open(PROJECT_ROOT / "config.yaml", "r") as f:
+with open(PROJECT_ROOT / "config.yaml") as f:
     CONFIG = yaml.safe_load(f)
 
 # ── Import DB Layer ──────────────────────────────────────────
-from db import init_db, upsert_bounty, log_scan
+from db import init_db, log_scan, upsert_bounty
 
 # ── Import Strike Engine (Motor Muscular) ────────────────────
 from strike_engine import dispatch_strike_async

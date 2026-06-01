@@ -8,7 +8,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import aiosqlite
 
@@ -54,7 +54,7 @@ class EnrichmentWorker:
                 AND (next_attempt_at IS NULL OR next_attempt_at <= ?)
                 LIMIT ?
             """
-            now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+            now = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
             async with conn.execute(query, (now, batch_size)) as cursor:
                 jobs = await cursor.fetchall()
 
@@ -94,13 +94,13 @@ class EnrichmentWorker:
             WHERE id = ?
         """
         await conn.execute(
-            query, (datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), job_id)
+            query, (datetime.fromtimestamp(time.time(), tz=UTC).isoformat(), job_id)
         )
 
     async def _mark_failure(self, conn: aiosqlite.Connection, job_id: int, error: str):
         # Exponential backoff logic
         next_attempt = (
-            datetime.fromtimestamp(time.time(), tz=timezone.utc) + timedelta(minutes=5)
+            datetime.fromtimestamp(time.time(), tz=UTC) + timedelta(minutes=5)
         ).isoformat()
         query = """
             UPDATE enrichment_jobs
@@ -116,7 +116,7 @@ class EnrichmentWorker:
             (
                 error,
                 next_attempt,
-                datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+                datetime.fromtimestamp(time.time(), tz=UTC).isoformat(),
                 job_id,
             ),
         )

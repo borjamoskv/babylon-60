@@ -181,7 +181,7 @@ class OptimizationMixin:
                     break
                 batch.append(item)
                 self._process_batch(batch)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 self._process_batch(batch)
 
     def _process_batch(self, batch):

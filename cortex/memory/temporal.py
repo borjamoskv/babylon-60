@@ -8,7 +8,7 @@ Never deletes — only deprecates. Enables time-travel queries.
 from __future__ import annotations
 
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 __all__ = [
     "build_temporal_filter_params",
@@ -20,7 +20,7 @@ __all__ = [
 
 def now_iso() -> str:
     """Return current UTC timestamp in ISO 8601 format."""
-    return datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+    return datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
 
 
 def is_valid_at(valid_from: str, valid_until: str | None, at: str | None = None) -> bool:

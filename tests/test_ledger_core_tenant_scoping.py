@@ -11,8 +11,8 @@ import sqlite3
 import tempfile
 from pathlib import Path
 
-import pytest
 import aiosqlite
+import pytest
 
 from cortex.ledger.ledger_core import SovereignLedger
 
@@ -45,8 +45,8 @@ class TestSyncTenantScoping:
     def test_default_tenant_chain(self, sync_db):
         """Default tenant starts from GENESIS."""
         ledger = SovereignLedger(sync_db)
-        h1 = ledger.record_transaction("proj", "store", {"key": "v1"})
-        h2 = ledger.record_transaction("proj", "store", {"key": "v2"})
+        ledger.record_transaction("proj", "store", {"key": "v1"})
+        ledger.record_transaction("proj", "store", {"key": "v2"})
 
         # Verify chain: h2 should reference h1
         cursor = sync_db.execute(
@@ -67,7 +67,7 @@ class TestSyncTenantScoping:
         h_b1 = ledger.record_transaction(
             "proj", "store", {"t": "b1"}, tenant_id="tenant_b"
         )
-        h_a2 = ledger.record_transaction(
+        ledger.record_transaction(
             "proj", "store", {"t": "a2"}, tenant_id="tenant_a"
         )
 
@@ -154,10 +154,10 @@ class TestAsyncTenantScoping:
         h_a = await ledger.record_transaction_async(
             "p", "store", {"x": 1}, tenant_id="alpha"
         )
-        h_b = await ledger.record_transaction_async(
+        await ledger.record_transaction_async(
             "p", "store", {"x": 2}, tenant_id="beta"
         )
-        h_a2 = await ledger.record_transaction_async(
+        await ledger.record_transaction_async(
             "p", "store", {"x": 3}, tenant_id="alpha"
         )
 

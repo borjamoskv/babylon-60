@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Optional
 
 __all__ = [
@@ -27,14 +27,14 @@ logger = logging.getLogger("cortex.extensions.security.abac")
 ATTR_SUBJECT_ROLE = "subject.role"
 
 
-class Effect(str, Enum):
+class Effect(StrEnum):
     """Policy effect — explicitly allow or deny."""
 
     ALLOW = "allow"
     DENY = "deny"
 
 
-class AccessDecision(str, Enum):
+class AccessDecision(StrEnum):
     """Final access decision after policy evaluation."""
 
     GRANTED = "granted"

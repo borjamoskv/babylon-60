@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: Moskv-Disciplinant-Omega
 Description: Sovereign Self-Discipline Engine — Habit enforcement, focus protection, distraction annihilation, and cognitive load management for peak sovereign performance.
 """
-import json
 import logging
+
 
 class MoskvDisciplinantOmegaSkill:
     def __init__(self):

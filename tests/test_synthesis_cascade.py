@@ -8,7 +8,6 @@ import pytest
 
 from cortex.extensions.llm._models import IntentProfile
 from cortex.extensions.llm.router import CortexLLMRouter
-
 from cortex.utils.result import Ok
 
 # ─── Helper: build a fake router ──────────────────────────────────────────────

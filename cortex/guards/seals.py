@@ -67,11 +67,11 @@ async def arun_cmd(cmd: list[str], timeout: float = 60.0) -> tuple[int, str]:
         try:
             stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=timeout)
             return proc.returncode or 0, stdout.decode(errors="replace")
-        except asyncio.TimeoutError:
+        except TimeoutError:
             try:
                 proc.kill()
                 await asyncio.wait_for(proc.wait(), timeout=5.0)
-            except (ProcessLookupError, asyncio.TimeoutError):
+            except (TimeoutError, ProcessLookupError):
                 pass
             return 124, f"Command timed out after {timeout}s: {' '.join(cmd)}"
     except FileNotFoundError:
@@ -290,7 +290,7 @@ async def check_seal_4_tests() -> GateResult:
     cmd = [str(python_cmd), "-m", "pytest", "tests/", "-x", "-q", "--tb=short"]
     try:
         code, out = await asyncio.wait_for(arun_cmd(cmd, timeout=600.0), timeout=605.0)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         printer.fail("Tests timed out after 600 seconds (Singularity Prevention).")
         return False, "verified"
 

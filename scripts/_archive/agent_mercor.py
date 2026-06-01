@@ -5,11 +5,10 @@
 Logic: Discovery -> Profiling -> Extraction -> pattern-injection
 """
 
-import os
 import json
 import sys
-from typing import List, TypedDict
 from pathlib import Path
+from typing import TypedDict
 
 # CORTEX Imports
 sys.path.append(str(Path(__file__).resolve().parents[3] / "scripts"))
@@ -20,8 +19,8 @@ except ImportError:
 
 class ExpertState(TypedDict):
     target_skill: str
-    discovered_profiles: List[str]
-    credible_findings: List[str]
+    discovered_profiles: list[str]
+    credible_findings: list[str]
     injected_to_artemis: bool
 
 class MercorOmega:

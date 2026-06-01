@@ -13,7 +13,7 @@ import hashlib
 import json
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Optional
 
 __all__ = [
@@ -27,7 +27,7 @@ __all__ = [
 
 def _now_iso() -> str:
     """UTC ISO timestamp."""
-    return datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+    return datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
 
 
 def _sha256(data: str) -> str:
@@ -35,7 +35,7 @@ def _sha256(data: str) -> str:
     return hashlib.sha256(data.encode("utf-8")).hexdigest()
 
 
-class VEXStatus(str, enum.Enum):
+class VEXStatus(enum.StrEnum):
     """Execution status lifecycle."""
 
     PLANNED = "planned"

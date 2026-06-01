@@ -4,8 +4,8 @@
 Bundles verified exploits from the ledger into submission-ready strike packages.
 """
 
-from pathlib import Path
 import sys
+from pathlib import Path
 
 # Paths
 PROJECT_ROOT = Path(__file__).resolve().parent.parent

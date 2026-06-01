@@ -14,7 +14,7 @@ import logging
 import time
 import uuid
 from collections import deque
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Final
 
@@ -286,7 +286,7 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
 
         try:
             async with pool.acquire() as conn:
-                now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+                now = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
                 sql = "SELECT 1 FROM threat_intel WHERE ip_address = ? AND (expires_at IS NULL OR expires_at > ?)"
                 async with conn.execute(sql, (client_ip, now)) as cursor:
                     return bool(await cursor.fetchone())
@@ -303,7 +303,7 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
         )
 
         event = {
-            "timestamp": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            "timestamp": datetime.fromtimestamp(time.time(), tz=UTC).isoformat(),
             "ip_address": client_ip,
             "status_code": response.status_code,
             "payload": signature,

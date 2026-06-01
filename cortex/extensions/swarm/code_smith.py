@@ -11,7 +11,7 @@ import hashlib
 import logging
 import time
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -29,7 +29,7 @@ from cortex.extensions.swarm.ast_validator import (  # noqa: E402
 # ── Enums ──────────────────────────────────────────────────────────────────
 
 
-class SmithPhase(str, Enum):
+class SmithPhase(StrEnum):
     """Pipeline phases for the Code Smith."""
 
     REQUEST = "request"
@@ -219,7 +219,7 @@ class LocalProcessSandbox:
                 exit_code=proc.returncode or 0,
                 duration_ms=duration,
             )
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return SandboxResult(
                 success=False,
                 stderr=f"Command timed out after {timeout_s}s",

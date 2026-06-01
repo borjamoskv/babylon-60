@@ -1,5 +1,6 @@
 import sys
 
+
 class CortexGuard:
     """
     Law Ω₄: Lab Homeostasis.

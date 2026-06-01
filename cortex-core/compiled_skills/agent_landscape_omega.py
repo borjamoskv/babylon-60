@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: agent-landscape-omega
 Description: Competitive Intelligence Engine — Autonomous Agent Landscape 2026. Devin, Operator, Claude, Gemini, Manus vs CORTEX.
 """
-import json
 import logging
+
 
 class AgentLandscapeOmegaSkill:
     def __init__(self):

@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 
-class AgentMode(str, Enum):
+class AgentMode(StrEnum):
     ACTIVE = "active"
     DEGRADED = "degraded"
     DECORATIVE = "decorative"

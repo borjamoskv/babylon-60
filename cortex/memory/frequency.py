@@ -23,7 +23,7 @@ logger = logging.getLogger("cortex.memory.frequency")
 # ─── Strategy 1: Continuous Memory System (CMS) ─────────────────────
 
 
-class MemoryFrequency(str, enum.Enum):
+class MemoryFrequency(enum.StrEnum):
     """Memory tier frequencies inspired by HOPE/Titans."""
 
     HOT = "hot"  # Every query — working memory
@@ -114,7 +114,7 @@ class ContinuousMemorySystem:
 # ─── Strategy 5: BIFT Frequency Bands for Retrieval ─────────────────
 
 
-class RetrievalBand(str, enum.Enum):
+class RetrievalBand(enum.StrEnum):
     """Neural oscillation-inspired retrieval bands."""
 
     GAMMA = "gamma"  # High freq: exact match, keyword, recent facts

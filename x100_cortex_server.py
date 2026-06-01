@@ -1,19 +1,19 @@
 import asyncio
-import time
-import os
-import subprocess
-import shutil
 import glob
-import re
 import json
+import os
+import re
+import shutil
+import struct
+import subprocess
+import sys
+import time
+
+import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from sse_starlette.sse import EventSourceResponse
 from pydantic import BaseModel
-import uvicorn
-import hashlib
-import sys
-import struct
+from sse_starlette.sse import EventSourceResponse
 
 # Maintain CORTEX-V3.0 Alignment
 sys.path.append(os.path.join(os.path.dirname(__file__), "cortex-core"))
@@ -77,7 +77,7 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             # Maintain connection alive (client can send heartbeats)
-            data = await websocket.receive_text()
+            await websocket.receive_text()
     except WebSocketDisconnect:
         manager.disconnect(websocket)
 
@@ -170,7 +170,7 @@ async def neuro_static_fuzz(repo_url: str, effort: str = "think"):
     add_log("SLITHER-SIM ANALYZER", f"Scanned {len(sol_files)} Contracts")
 
     for filepath in sol_files:
-        with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+        with open(filepath, encoding="utf-8", errors="ignore") as f:
             content = f.read()
             findings = SolidityAnalyzer.scan(content)
             for fnd in findings:

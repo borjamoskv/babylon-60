@@ -1,9 +1,10 @@
-import os
-import sys
-import json
-import subprocess
 import datetime
-from typing import Dict, Any
+import json
+import os
+import subprocess
+import sys
+from typing import Any
+
 
 class OuroborosIncalmo:
     """
@@ -16,10 +17,10 @@ class OuroborosIncalmo:
         self.reports_dir = os.path.join(root_dir, "reports")
         self.guard_path = os.path.join(root_dir, "cortex_guard.py")
         
-        with open(self.primitives_path, "r") as f:
+        with open(self.primitives_path) as f:
             self.spec = json.load(f)
 
-    def run_intent(self, intent_name: str, cost: float = 0.1) -> Dict[str, Any]:
+    def run_intent(self, intent_name: str, cost: float = 0.1) -> dict[str, Any]:
         """
         Executes a declarative security intent.
         """
@@ -74,7 +75,7 @@ class OuroborosIncalmo:
         self._persist_report(report)
         return report
 
-    def _persist_report(self, report: Dict[str, Any]):
+    def _persist_report(self, report: dict[str, Any]):
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"incalmo_strike_{report['intent']}_{timestamp}.json"
         filepath = os.path.join(self.reports_dir, filename)

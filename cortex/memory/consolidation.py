@@ -28,7 +28,7 @@ from cortex.memory.engrams import CortexSemanticEngram
 logger = logging.getLogger("cortex.memory.consolidation")
 
 
-class EngramState(str, enum.Enum):
+class EngramState(enum.StrEnum):
     """Lifecycle state of an engram in the consolidation pipeline."""
 
     ACTIVE = "active"  # Hippocampal — immediately retrievable

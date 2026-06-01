@@ -15,7 +15,7 @@ import os
 import shutil
 import time
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import click
@@ -58,7 +58,7 @@ def digest_cmd(output: str):
 
     async def _digest():
         facts = await _get_engine_active_facts()
-        ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        ts = datetime.fromtimestamp(time.time(), tz=UTC).strftime("%Y-%m-%d %H:%M:%S")
         projects_data = defaultdict(list)
         for f in facts:
             projects_data[f.project].append(f)
@@ -133,7 +133,7 @@ def fragment_cmd(output_dir: str):
         out = Path(output_dir)
         out.mkdir(exist_ok=True)
         facts = await _get_engine_active_facts()
-        ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d")
+        ts = datetime.fromtimestamp(time.time(), tz=UTC).strftime("%Y-%m-%d")
 
         # Classify facts by domain (O(1) with defaultdict)
         domain_facts = defaultdict(list)
@@ -215,7 +215,7 @@ def sync_cmd(drive_path: str | None, mode: str):
         target, provider_name = detected
 
     target.mkdir(parents=True, exist_ok=True)
-    ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d")
+    ts = datetime.fromtimestamp(time.time(), tz=UTC).strftime("%Y-%m-%d")
     synced_files = []
 
     if mode in ("digest", "both"):

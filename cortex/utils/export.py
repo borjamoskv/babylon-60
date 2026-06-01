@@ -9,6 +9,7 @@ from __future__ import annotations
 import csv
 import io
 import json
+from datetime import UTC
 from typing import TYPE_CHECKING
 
 __all__ = ["export_facts"]
@@ -49,7 +50,7 @@ def _export_notebooklm(facts: list[Fact]) -> str:
         return ""
 
     import time
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     # Group by project
     projects: dict[str, list[Fact]] = {}
@@ -58,7 +59,7 @@ def _export_notebooklm(facts: list[Fact]) -> str:
             projects[f.project] = []
         projects[f.project].append(f)
 
-    now = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    now = datetime.fromtimestamp(time.time(), tz=UTC).strftime("%Y-%m-%d %H:%M:%S")
     lines = ["# CORTEX Master Digest\n", f"> Snapshot Date: {now}\n", "---\n"]
 
     for project, p_facts in sorted(projects.items()):

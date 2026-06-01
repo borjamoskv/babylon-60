@@ -1,16 +1,14 @@
 import asyncio
-import sqlite3
-import numpy as np
-import os
-import json
-import uuid
 import logging
+import os
 
+import numpy as np
+
+from cortex.memory.encoder import AsyncEncoder
+from cortex.memory.l2_hybrid_search import L2HybridSearch
+from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 from cortex.utils import void_vec
 from cortex.utils.void_mih import slice_void_bit
-from cortex.memory.encoder import AsyncEncoder
-from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
-from cortex.memory.l2_hybrid_search import L2HybridSearch
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("OuroborosGenesis")

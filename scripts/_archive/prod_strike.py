@@ -4,9 +4,11 @@
 Ejecución masiva del motor Hound-Omega v7.3 sobre objetivos reales del Ledger.
 """
 
-from db import init_db, get_bounties
-from strike_engine import execute_strike
 import os
+
+from db import get_bounties, init_db
+from strike_engine import execute_strike
+
 
 def main():
     print("∴ CORTEX-PROD-STRIKE ACTIVE — TARGETING REAL EXERGY")

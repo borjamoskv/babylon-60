@@ -13,7 +13,7 @@ import logging
 import threading
 from collections.abc import Generator
 from contextlib import contextmanager
-from enum import Enum
+from enum import StrEnum
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Final, NamedTuple, Optional
@@ -26,7 +26,7 @@ TranslationMap = dict[str, str]
 LocaleData = dict[TranslationKey, TranslationMap]
 
 
-class Lang(str, Enum):
+class Lang(StrEnum):
     """Supported language codes (ISO 639-1)."""
 
     EN = "en"

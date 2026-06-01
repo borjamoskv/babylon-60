@@ -26,7 +26,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Final
 
 logger = logging.getLogger("cortex.memory.reconsolidation")
@@ -56,7 +56,7 @@ _BIAS_MIN_EVENTS: Final[int] = 5
 # ─── Event Types ─────────────────────────────────────────────────────
 
 
-class ReconsolidationOutcome(str, Enum):
+class ReconsolidationOutcome(StrEnum):
     """Outcome of a labilization window resolution."""
 
     CONFIRMED = "confirmed"  # Re-stabilized → energy boost

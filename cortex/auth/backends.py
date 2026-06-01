@@ -11,6 +11,7 @@ import json
 import logging
 import time
 from abc import ABC, abstractmethod
+from datetime import UTC
 from typing import Any, Optional
 
 import aiosqlite
@@ -149,13 +150,13 @@ class SQLiteAuthBackend(BaseAuthBackend):
             await conn.close()
 
     async def update_last_used(self, key_id: int | str) -> None:
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         conn = await self._get_conn_async()
         try:
             await conn.execute(
                 "UPDATE api_keys SET last_used = ? WHERE id = ?",
-                (datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), key_id),
+                (datetime.fromtimestamp(time.time(), tz=UTC).isoformat(), key_id),
             )
             await conn.commit()
         except (aiosqlite.Error, OSError) as e:
@@ -251,13 +252,13 @@ class AlloyDBAuthBackend(BaseAuthBackend):
             return res.endswith("1")
 
     async def update_last_used(self, key_id: int | str) -> None:
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         pool = await self._get_pool()
         async with pool.acquire() as conn:
             await conn.execute(
                 "UPDATE api_keys SET last_used = $1 WHERE id = $2",
-                datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+                datetime.fromtimestamp(time.time(), tz=UTC).isoformat(),
                 key_id,
             )
 

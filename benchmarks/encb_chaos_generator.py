@@ -18,12 +18,12 @@ import hashlib
 import random
 import time
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from types import MappingProxyType
 from typing import Any
 
 
-class ChaosModality(str, Enum):
+class ChaosModality(StrEnum):
     """The three epistemic noise dimensions."""
 
     TEMPORAL_CONTRADICTION = "temporal_contradiction"

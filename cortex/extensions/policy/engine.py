@@ -12,7 +12,7 @@ import logging
 import math
 import re
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Optional
 
 from cortex.extensions.policy.models import (
@@ -42,12 +42,12 @@ def _parse_ts(ts: Optional[str]) -> Optional[datetime]:
     ts = ts.strip()
     for fmt in (_ISO_FMT_FRAC, _ISO_FMT):
         try:
-            return datetime.strptime(ts, fmt).replace(tzinfo=timezone.utc)
+            return datetime.strptime(ts, fmt).replace(tzinfo=UTC)
         except ValueError:
             continue
     # Last resort: truncate to seconds precision
     try:
-        return datetime.strptime(ts[:19], _ISO_FMT).replace(tzinfo=timezone.utc)
+        return datetime.strptime(ts[:19], _ISO_FMT).replace(tzinfo=UTC)
     except (ValueError, IndexError):
         return None
 
@@ -109,7 +109,7 @@ class PolicyEngine:
         # Precompute lowercased project names to avoid O(P*F) string matching
         project_names_lower = {p.lower() for p in project_index.keys()}
 
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
+        now = datetime.fromtimestamp(time.time(), tz=UTC)
         actions: list[ActionItem] = []
 
         for fact in facts:

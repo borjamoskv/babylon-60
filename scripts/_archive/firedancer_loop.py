@@ -4,9 +4,9 @@
 Persistent extraction loop for the $1,000,000 Firedancer bounty.
 """
 
-import time
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 # Fix python paths for Cortex script imports

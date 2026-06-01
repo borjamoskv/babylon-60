@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: CORTEX-Guard-Omega
 Description: Sovereign Quality & Security Enforcer — Unified suite for structural sanitization, token hygiene, and backend integrity auditing. Protects the CORTEX environment from code rot and resource leakage.
 """
-import json
 import logging
+
 
 class CortexGuardOmegaSkill:
     def __init__(self):

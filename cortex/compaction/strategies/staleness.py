@@ -4,7 +4,7 @@ Staleness pruning strategy for compaction.
 
 import logging
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 
 __all__ = ["execute_staleness_prune", "find_stale_facts"]
@@ -50,7 +50,7 @@ async def find_stale_facts(
     """Find facts older than max_age_days with consensus below min_consensus."""
     conn = await engine.get_conn()
     cutoff = (
-        datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=max_age_days)
+        datetime.fromtimestamp(time.time(), tz=UTC) - timedelta(days=max_age_days)
     ).isoformat()
 
     cursor = await conn.execute(

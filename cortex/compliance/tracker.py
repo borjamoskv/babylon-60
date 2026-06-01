@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -102,7 +102,7 @@ class ComplianceTracker:
 
         proj = project or self._default_project
         tid = tenant_id or self._tenant_id
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
 
         eu_meta: dict[str, Any] = {
             "eu_ai_act": {
@@ -206,7 +206,7 @@ class ComplianceTracker:
             },
             "integrity": integrity,
             "facts_summary": facts_summary,
-            "generated_at": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            "generated_at": datetime.fromtimestamp(time.time(), tz=UTC).isoformat(),
             "project": proj,
         }
 

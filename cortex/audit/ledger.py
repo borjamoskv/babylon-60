@@ -9,7 +9,7 @@ a hash-chain to prove immutability of the audit logs.
 import hashlib
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import aiosqlite
@@ -78,7 +78,7 @@ class EnterpriseAuditLedger:
         """Securely logs an action with a cryptographic hash chain."""
         await self.ensure_table()
 
-        timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        timestamp = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
         audit_id = hashlib.sha256(f"{timestamp}{actor_id}{action}".encode()).hexdigest()
 
         # Calculate new signature ensuring immutability chain

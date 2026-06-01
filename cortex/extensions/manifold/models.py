@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class DimensionType(str, Enum):
+class DimensionType(StrEnum):
     D1_PERCEPTION = "D1"
     D2_DECISION = "D2"
     D3_CREATION = "D3"

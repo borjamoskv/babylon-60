@@ -295,7 +295,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
             )
             return None, last_error
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             last_error = f"Timeout ({self.config.timeout_seconds}s)"
             logger.warning(
                 "%s:%s timeout (intento %d/%d)",

@@ -1,6 +1,6 @@
+import json
 import os
 import re
-import json
 
 SKILLS_DIR = "/Users/borjafernandezangulo/.gemini/antigravity/skills"
 TARGET_DIR = (
@@ -11,7 +11,7 @@ TARGET_DIR = (
 def parse_skill_markdown(filepath):
     """Parse skill markdown and extract metadata and body."""
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             content = f.read()
     except Exception:
         return None

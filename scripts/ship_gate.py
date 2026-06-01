@@ -17,7 +17,7 @@ import subprocess
 import sys
 import time
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Final
 
@@ -226,7 +226,7 @@ def main() -> None:
     console = _init_console(json_only)
 
     t0 = time.monotonic()
-    report = GateReport(timestamp=datetime.now(timezone.utc).isoformat())
+    report = GateReport(timestamp=datetime.now(UTC).isoformat())
 
     checks = [
         ("Lint", check_ruff),

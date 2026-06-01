@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: Silicon-Overlord-Omega
 Description: Sovereign Hardware Synthesis Engine — Verilog/SystemVerilog generation, KiCad PCB design, FPGA deployment, and Direct-Silicon JIT compilation for P0 critical paths.
 """
-import json
 import logging
+
 
 class SiliconOverlordOmegaSkill:
     def __init__(self):

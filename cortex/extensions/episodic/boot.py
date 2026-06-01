@@ -17,7 +17,7 @@ import logging
 import sqlite3
 import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Final, Optional
 
 from cortex.extensions.episodic.main import Episode, EpisodicMemory, Pattern
@@ -186,7 +186,7 @@ async def generate_session_boot(
     memory = EpisodicMemory(conn)
 
     # 1. Compute lookback timestamp
-    cutoff = datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(hours=lookback_hours)
+    cutoff = datetime.fromtimestamp(time.time(), tz=UTC) - timedelta(hours=lookback_hours)
     since_iso = cutoff.strftime("%Y-%m-%dT%H:%M:%S")
 
     # 2. Recall recent episodes

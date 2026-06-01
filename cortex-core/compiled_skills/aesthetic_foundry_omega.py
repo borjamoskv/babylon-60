@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: Aesthetic-Foundry-Omega
 Description: Sovereign Visual Design Engine — Industrial Noir 2026 design system, UI/UX generation, typography enforcement, and premium aesthetic validation across all CORTEX surfaces.
 """
-import json
 import logging
+
 
 class AestheticFoundryOmegaSkill:
     def __init__(self):

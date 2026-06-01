@@ -4,9 +4,8 @@
 from __future__ import annotations
 
 import asyncio
-from pathlib import Path
-
 import logging
+from pathlib import Path
 
 from cortex.guards._seal_printer import SealPrinter
 

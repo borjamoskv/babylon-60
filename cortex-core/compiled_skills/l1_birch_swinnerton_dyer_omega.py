@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: L1-Birch-Swinnerton-Dyer-Omega
 Description: Sovereign Arithmetic Geometry Engine — Clúster especializado en la minería de curvas elípticas y verificación del L-function order (Rango de Mordell-Weil) utilizando computación exergética.
 """
-import json
 import logging
+
 
 class L1BirchSwinnertonDyerOmegaSkill:
     def __init__(self):

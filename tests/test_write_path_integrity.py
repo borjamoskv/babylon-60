@@ -8,7 +8,6 @@ Validates:
 """
 
 import hashlib
-import json
 import sqlite3
 import tempfile
 from pathlib import Path
@@ -102,13 +101,13 @@ class TestMerkleTree:
         """Single-leaf tree: root = hash(leaf)."""
         tree = MerkleTree(["abc123"])
         root = tree.root
-        expected = hashlib.sha256("abc123".encode()).hexdigest()
+        expected = hashlib.sha256(b"abc123").hexdigest()
         assert root == expected
 
     def test_two_leaves(self):
         """Two-leaf tree: root = hash(h(leaf1) + h(leaf2))."""
-        h1 = hashlib.sha256("a".encode()).hexdigest()
-        h2 = hashlib.sha256("b".encode()).hexdigest()
+        h1 = hashlib.sha256(b"a").hexdigest()
+        h2 = hashlib.sha256(b"b").hexdigest()
         expected_root = hashlib.sha256((h1 + h2).encode()).hexdigest()
 
         tree = MerkleTree(["a", "b"])

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+from datetime import UTC
 
 import click
 from rich.table import Table
@@ -151,7 +152,7 @@ def mejoralo_record(project, score_before, score_after, actions, db):
 
         # Update mejora_loop_state.json if it exists
         import json
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         from cortex.core.paths import CORTEX_DIR
 
@@ -166,7 +167,7 @@ def mejoralo_record(project, score_before, score_after, actions, db):
                     {
                         "project": project,
                         "timestamp": datetime.fromtimestamp(
-                            time.time(), tz=timezone.utc
+                            time.time(), tz=UTC
                         ).isoformat(),
                         "score_before": score_before,
                         "score_after": score_after,

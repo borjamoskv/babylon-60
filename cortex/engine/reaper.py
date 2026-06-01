@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import logging
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Optional
 
@@ -46,7 +46,7 @@ class GhostReaper:
             Number of reaped ghosts.
         """
         cutoff = (
-            datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=self._ttl_days)
+            datetime.fromtimestamp(time.time(), tz=UTC) - timedelta(days=self._ttl_days)
         ).strftime("%Y-%m-%dT%H:%M:%S")
 
         # Phase 1: Explicit TTL expiry

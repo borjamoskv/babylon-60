@@ -1,5 +1,5 @@
-import json
 import hashlib
+import json
 import os
 import subprocess
 import uuid
@@ -7,11 +7,10 @@ from datetime import datetime
 from pathlib import Path
 
 import yaml
-
 from native_paths import PROJECT_ROOT, resolve_native_binary
 
 # ── Load Config ──────────────────────────────────────────────
-with open(PROJECT_ROOT / "config.yaml", "r") as f:
+with open(PROJECT_ROOT / "config.yaml") as f:
     CONFIG = yaml.safe_load(f)
 
 # Path to the Native Rust LEDGER binary
@@ -322,7 +321,7 @@ def get_exergy_metrics(limit: int = 100):
         try:
             meta = json.loads(evt.get("metadata_json") or "{}")
             actual = meta.get("actual_tokens", 0)
-            estimate = meta.get("estimate", 0)
+            meta.get("estimate", 0)
             model = meta.get("model", "unknown")
             
             # Simple savings heuristic (Pro cost vs Flash cost saved)
@@ -378,7 +377,7 @@ VSA_PARENT_LABEL = b"\xaa" * 1250 # Deterministic Role Vector (10,000 bits = 125
 
 def vsa_xor(v1: bytes, v2: bytes) -> bytes:
     """MAP-B Binding operation (XOR)."""
-    return bytes(a ^ b for a, b in zip(v1, v2))
+    return bytes(a ^ b for a, b in zip(v1, v2, strict=False))
 
 def vsa_bundle(v1: bytes, v2: bytes) -> bytes:
     """MAP-B Bundling operation (Simple XOR for binary, or majority vote).

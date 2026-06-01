@@ -10,7 +10,7 @@ from __future__ import annotations
 import hashlib
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from functools import lru_cache
 from typing import Any
 
@@ -32,7 +32,7 @@ class PrefixSlot:
     provider_name: str  # Proveedor físico donde reside el prefix (EJ: 'gemini', 'anthropic')
     model_name: str  # Modelo físico (EJ: 'gemini-1.5-pro')
     created_at: str = field(
-        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
     )
     hits: int = 0  # agentes que reutilizaron este slot
 

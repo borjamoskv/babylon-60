@@ -29,7 +29,7 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger("cortex.context_cache")
@@ -42,7 +42,7 @@ __all__ = [
 ]
 
 
-class EvictionPolicy(str, Enum):
+class EvictionPolicy(StrEnum):
     """Cache eviction strategy."""
 
     LRU = "lru"  # Least Recently Used

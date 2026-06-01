@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: x-copy-omega
 Description: Sovereign Replication Engine — Bit-perfect cloning, structural extraction, and zero-loss assimilation of external agentic architectures.
 """
-import json
 import logging
+
 
 class XCopyOmegaSkill:
     def __init__(self):

@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 import time
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 from typing import Any
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
 
-class MessageState(str, Enum):
+class MessageState(StrEnum):
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
@@ -18,7 +18,7 @@ class MessageState(str, Enum):
     DEAD_LETTER = "dead_letter"
 
 
-class MessageKind(str, Enum):
+class MessageKind(StrEnum):
     TASK_REQUEST = "task.request"
     TASK_ACCEPTED = "task.accepted"
     TASK_PROGRESS = "task.progress"
@@ -55,7 +55,7 @@ class AgentMessage(BaseModel):
     priority: int = 0
     ttl_seconds: int | None = None
     created_at: datetime = Field(
-        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc)
+        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=UTC)
     )
     trace_context: dict[str, Any] = Field(default_factory=dict)
 

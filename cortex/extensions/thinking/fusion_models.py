@@ -14,7 +14,7 @@ from __future__ import annotations
 import re
 from collections import defaultdict
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Optional
 
 __all__ = [
@@ -103,7 +103,7 @@ _PUNCT_RE = re.compile(r"[.,!?;:\"'()\[\]{}—–\-/\\<>@#$%^&*~`|+=]")
 # ─── Enums ───────────────────────────────────────────────────────────
 
 
-class FusionStrategy(str, Enum):
+class FusionStrategy(StrEnum):
     """Estrategia de fusión de pensamiento."""
 
     MAJORITY = "majority"

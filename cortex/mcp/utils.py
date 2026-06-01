@@ -9,7 +9,7 @@ import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -49,7 +49,7 @@ class MCPMetrics:
         self.cache_misses = 0
         self.errors_total = 0
         self.rejected_immune = 0
-        self.start_at = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        self.start_at = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
 
     def record_request(self, cached: bool = False):
         self.requests_total += 1
@@ -144,7 +144,7 @@ class AsyncConnectionPool:
         conn: aiosqlite.Connection | None = None
         try:
             conn = await asyncio.wait_for(self._pool.get(), timeout=self.acquire_timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.error("Connection pool exhausted (timeout after %ss)", self.acquire_timeout)
             raise RuntimeError("Database connection timed out") from None
 

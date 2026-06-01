@@ -165,7 +165,7 @@ class LegionSupervisor:
         self._thermal_event.clear()
         try:
             await asyncio.wait_for(self._thermal_event.wait(), timeout=5.0)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.warning("Thermal timeout (5s) exceeded. Forcing dispatch.")
             self._thermal_event.set()
 

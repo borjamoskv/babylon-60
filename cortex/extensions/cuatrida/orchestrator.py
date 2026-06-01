@@ -2,7 +2,7 @@ import json
 import logging
 import subprocess
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Optional
 
@@ -36,7 +36,7 @@ class CuatridaOrchestrator:
         """
         Dimension B: Seals a decision into the immutable ledger.
         """
-        timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        timestamp = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
         metadata = metadata or {}
 
         # Dimension B: Hook into CORTEX ledger.
@@ -144,7 +144,7 @@ class CuatridaOrchestrator:
         status = "unknown"
 
         if ghost_path.exists():
-            start = datetime.fromtimestamp(time.time(), tz=timezone.utc)
+            start = datetime.fromtimestamp(time.time(), tz=UTC)
             try:
                 subprocess.run(
                     ["python3", str(ghost_path), "status"],
@@ -153,7 +153,7 @@ class CuatridaOrchestrator:
                     check=False,
                 )
                 latency = (
-                    datetime.fromtimestamp(time.time(), tz=timezone.utc) - start
+                    datetime.fromtimestamp(time.time(), tz=UTC) - start
                 ).total_seconds() * 1000
                 status = "active"
             except (subprocess.SubprocessError, OSError):

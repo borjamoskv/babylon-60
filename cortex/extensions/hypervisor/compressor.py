@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from cortex.extensions.hypervisor.models import HealthReport, Memory, Receipt
@@ -102,11 +102,11 @@ def _parse_iso(iso_str: str | None) -> datetime:
         # Handle both naive and aware datetime strings
         dt = datetime.fromisoformat(iso_str)
         if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
+            dt = dt.replace(tzinfo=UTC)
         return dt
     except (ValueError, TypeError):
         return _now()
 
 
 def _now() -> datetime:
-    return datetime.fromtimestamp(time.time(), tz=timezone.utc)
+    return datetime.fromtimestamp(time.time(), tz=UTC)

@@ -2,9 +2,8 @@
 """
 Test Hito 09: VSA Recursive Anchoring
 """
-import hashlib
-import json
-from db import store_fact, load_vsa_tensor, vsa_xor, VSA_PARENT_LABEL
+from db import VSA_PARENT_LABEL, load_vsa_tensor, store_fact, vsa_xor
+
 
 def test_vsa_recursion():
     print("--- TESTING HITO 09: RECURSIVE ANCHOR ---")
@@ -18,8 +17,8 @@ def test_vsa_recursion():
     
     # Manually save a dummy vector for the parent (normally the LLM bridge does this)
     dummy_vec = b"\x11" * 1250
+
     from native_paths import PROJECT_ROOT
-    from pathlib import Path
     vsa_dir = PROJECT_ROOT / "data" / "vsa_memory"
     vsa_dir.mkdir(parents=True, exist_ok=True)
     (vsa_dir / f"cortex_default_{parent_id}.vsa").write_bytes(dummy_vec)

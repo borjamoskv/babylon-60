@@ -1,7 +1,6 @@
-import subprocess
 import json
-import os
-import sys
+import subprocess
+
 
 # CORTEX On-Chain Recon v6.5 — Target Acquisition (Ω₆)
 def get_live_target():

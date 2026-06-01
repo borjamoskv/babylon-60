@@ -6,14 +6,14 @@ import json
 import logging
 import time
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger("cortex.swarm.protocols")
 
 
-class SwarmIntent(str, Enum):
+class SwarmIntent(StrEnum):
     DISCOVERY = "discovery"
     ROADBLOCK = "roadblock"
     VERIFICATION = "verification"
@@ -21,7 +21,7 @@ class SwarmIntent(str, Enum):
     HEALING = "healing"
 
 
-class AgentRole(str, Enum):
+class AgentRole(StrEnum):
     CAPATAZ = "capataz"
     WORKER = "worker"
     ELDER = "elder"
@@ -37,7 +37,7 @@ class SwarmSignalSchema:
     confidence: float = 1.0
     exergy_spent: float = 0.0
     timestamp: str = field(
-        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
     )
 
     def to_json(self) -> str:

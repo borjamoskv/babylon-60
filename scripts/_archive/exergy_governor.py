@@ -1,12 +1,11 @@
-import json
 import hashlib
-import re
+import json
 import math
-from datetime import datetime
-from typing import Dict, Any, List, Optional
+import re
+from typing import Any, Optional
 
 try:
-    from db import record_memory_event, query_events_native
+    from db import query_events_native, record_memory_event
 except ImportError:
     # Fallback for standalone testing
     def record_memory_event(*args, **kwargs): print(f"[synthetic-DB] Record: {args} {kwargs}")
@@ -34,7 +33,7 @@ class ExergyGovernor:
     def __init__(self):
         self.history_limit = 100
 
-    def calculate_pci(self, prompt: str, tools: Optional[List] = None) -> float:
+    def calculate_pci(self, prompt: str, tools: Optional[list] = None) -> float:
         """
         Calculates the Prompt Complexity Index (PCI).
         Enforces feaciente logic: detecting high-entropy instructions.
@@ -71,7 +70,7 @@ class ExergyGovernor:
         
         return min(confidence, 0.95)
 
-    def route(self, prompt: str, requested_model: str, tools: Optional[List] = None) -> Dict[str, Any]:
+    def route(self, prompt: str, requested_model: str, tools: Optional[list] = None) -> dict[str, Any]:
         """
         ∴ Feaciente Governance: Decides model with explicit confidence score.
         If confidence < threshold, avoids optimization to preserve exergy integrity.
@@ -101,7 +100,7 @@ class ExergyGovernor:
             "original_request": requested_model
         }
 
-    def log_result(self, prompt: str, routing_info: Dict, actual_tokens: int, duration_ms: float):
+    def log_result(self, prompt: str, routing_info: dict, actual_tokens: int, duration_ms: float):
         """
         Seals the transaction. Adds 'optimal_choice_verified' if exergy yield > 0.9.
         """

@@ -11,7 +11,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from cortex.events.bus import DistributedEventBus
@@ -125,7 +125,7 @@ class ScavengerAgent:
         """Internal ledger commitment via L3."""
         evt = MemoryEvent(  # type: ignore[reportCallIssue]
             event_id=uuid.uuid4().hex,
-            timestamp=datetime.fromtimestamp(time.time(), tz=timezone.utc),
+            timestamp=datetime.fromtimestamp(time.time(), tz=UTC),
             role=role,
             content=content,
             session_id=self.session_id,

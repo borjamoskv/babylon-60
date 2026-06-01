@@ -4,10 +4,10 @@
 Systematic distillation of 30 days of agentic intelligence (Axiom VI).
 """
 
-import sys
 import sqlite3
-from pathlib import Path
+import sys
 from datetime import datetime
+from pathlib import Path
 
 # Fix PYTHONPATH
 PROJECT_ROOT = Path(__file__).resolve().parent.parent

@@ -223,7 +223,7 @@ class NightShiftCrystalDaemon:
                 )
                 # If we get here, stop was called
                 break
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 # Normal: cooldown elapsed, time for next cycle
                 continue
 

@@ -272,7 +272,7 @@ class SovereignLLM:
                 errors.append("orchestra: empty/short response")
         except ImportError:
             errors.append("orchestra: import failed")
-        except asyncio.TimeoutError:
+        except TimeoutError:
             errors.append(f"orchestra: timeout ({self._timeout}s)")
         # D1 fix: specific exceptions instead of bare Exception
         except (OSError, ValueError, KeyError, RuntimeError) as e:
@@ -326,7 +326,7 @@ class SovereignLLM:
                 )
             errors.append(f"{provider_name}: empty/short response")
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             errors.append(f"{provider_name}: timeout ({self._timeout}s)")
         except (OSError, ValueError, KeyError) as e:
             errors.append(f"{provider_name}: {e!r}")

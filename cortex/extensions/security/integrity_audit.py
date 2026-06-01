@@ -12,7 +12,7 @@ import hashlib
 import logging
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import aiosqlite
@@ -109,7 +109,7 @@ class IntegrityAuditor:
         """
         start = time.monotonic()
         report = AuditReport(
-            timestamp=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            timestamp=datetime.fromtimestamp(time.time(), tz=UTC).isoformat(),
         )
 
         try:

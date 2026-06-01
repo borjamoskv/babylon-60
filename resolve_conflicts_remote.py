@@ -1,5 +1,4 @@
 import re
-import sys
 from pathlib import Path
 
 CONFLICT_RE = re.compile(

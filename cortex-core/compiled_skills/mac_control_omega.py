@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: mac-control-omega
 Description: Sovereign Native macOS UI Automation & Extractor — Raw CDP (DevTools) engine for 100x high-performance, zero-auth structural extraction and interaction.
 """
-import json
 import logging
+
 
 class MacControlOmegaSkill:
     def __init__(self):

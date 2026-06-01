@@ -79,7 +79,7 @@ class PersistenceSupervisor:
             try:
                 await asyncio.wait_for(self._stop_event.wait(), timeout=self._interval)
                 break  # Event was set, exit loop
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 await self.flush(reason="heartbeat")
             except asyncio.CancelledError:
                 break

@@ -4,7 +4,7 @@ import asyncio
 import json
 import logging
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from cortex.ledger.queue import EnrichmentQueue
@@ -45,7 +45,7 @@ class EnrichmentWorker:
         if self._task:
             try:
                 await asyncio.wait_for(self._task, timeout=5.0)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 self._task.cancel()
         logger.info("EnrichmentWorker stopped.")
 
@@ -76,7 +76,7 @@ class EnrichmentWorker:
         if not self._compat_db_mode:
             return self.queue.claim_one()  # type: ignore[reportOptionalMemberAccess]
 
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
         async with self.engine.session() as conn:
             cursor = await conn.execute(
                 """
@@ -167,7 +167,7 @@ class EnrichmentWorker:
                     SET status = 'completed', updated_at = ?
                     WHERE id = ?
                     """,
-                    (datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), job_id),
+                    (datetime.fromtimestamp(time.time(), tz=UTC).isoformat(), job_id),
                 )
                 await conn.commit()
         except Exception as e:
@@ -185,10 +185,10 @@ class EnrichmentWorker:
                     (
                         str(e),
                         (
-                            datetime.fromtimestamp(time.time(), tz=timezone.utc)
+                            datetime.fromtimestamp(time.time(), tz=UTC)
                             + timedelta(minutes=5)
                         ).isoformat(),
-                        datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+                        datetime.fromtimestamp(time.time(), tz=UTC).isoformat(),
                         job_id,
                     ),
                 )

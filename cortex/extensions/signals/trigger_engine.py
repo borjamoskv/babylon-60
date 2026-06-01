@@ -20,7 +20,7 @@ import time
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from cortex.extensions.signals.models import Signal
@@ -42,7 +42,7 @@ logger = logging.getLogger("cortex.extensions.signals.trigger_engine")
 # ═════════════════════════════════════════════════════════════════════════
 
 
-class EventHorizonPriority(str, Enum):
+class EventHorizonPriority(StrEnum):
     """Maps to GEMINI.md §5 Event Horizon Triggers.
 
     P0 — Singularity: Immediate. Prod breakage, data loss, security risk.
@@ -55,7 +55,7 @@ class EventHorizonPriority(str, Enum):
     P2_KINETIC = "P2"
 
 
-class ActionType(str, Enum):
+class ActionType(StrEnum):
     """What to do when a trigger fires."""
 
     EMIT_SIGNAL = "emit_signal"

@@ -8,12 +8,9 @@ high_fidelity mode: Retiene ~90% del código para auditorías críticas donde
 la pérdida de detalle menor es inaceptable. Solo elimina líneas vacías y comentarios puros.
 """
 
-import re
-import math
-from typing import List, Tuple
 
 class ContextCompressor:
-    def __init__(self, target_keywords: List[str] = None):
+    def __init__(self, target_keywords: list[str] = None):
         self.target_keywords = target_keywords or [
             "delegatecall", "selfdestruct", "reentrancy", "flashloan",
             "access", "owner", "admin", "vault", "transfer", "withdraw"
@@ -69,7 +66,7 @@ class ContextCompressor:
                 compressed.append(line)
             return "\n".join(compressed)
             
-        scored_lines: List[Tuple[int, str, float]] = []
+        scored_lines: list[tuple[int, str, float]] = []
         for i, line in enumerate(lines):
             score = self._calculate_importance(line)
             scored_lines.append((i, line, score))
@@ -91,7 +88,7 @@ class ContextCompressor:
                 
         return "\n".join(compressed)
 
-    def summarize_context(self, history: List[dict]) -> str:
+    def summarize_context(self, history: list[dict]) -> str:
         """Comprime el historial de mensajes de LangGraph."""
         # TODO: Implementar integración real con el Skill vsa-sdm-memory-omega
         # Por ahora, un resumen textual directo

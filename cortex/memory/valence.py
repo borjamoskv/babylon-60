@@ -23,7 +23,7 @@ from pydantic import BaseModel, Field
 logger = logging.getLogger("cortex.memory.valence")
 
 
-class EmotionalTag(str, enum.Enum):
+class EmotionalTag(enum.StrEnum):
     """Discrete emotional categories for memory tagging."""
 
     CRITICAL = "critical"  # Must never forget (errors, breakthroughs)

@@ -24,8 +24,8 @@ from __future__ import annotations
 import time
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 
 __all__ = [
     "BeliefObject",
@@ -40,7 +40,7 @@ __all__ = [
 # ─── Enums ──────────────────────────────────────────────────────────────────
 
 
-class BeliefConfidence(str, Enum):
+class BeliefConfidence(StrEnum):
     """Epistemic confidence level — maps to CORTEX C1→C5 scale."""
 
     C1_HYPOTHESIS = "C1"
@@ -59,7 +59,7 @@ class BeliefConfidence(str, Enum):
     """Foundational truth — contradicting this triggers premium audit."""
 
 
-class BeliefStatus(str, Enum):
+class BeliefStatus(StrEnum):
     """Lifecycle state of a belief in the cognitive layer."""
 
     ACTIVE = "active"
@@ -75,7 +75,7 @@ class BeliefStatus(str, Enum):
     """Multiple conflicting beliefs exist — awaiting arbitration."""
 
 
-class VerdictAction(str, Enum):
+class VerdictAction(StrEnum):
     """Actions the CognitiveHandoff can take on a belief."""
 
     ACCEPT = "accept"
@@ -147,14 +147,14 @@ class ProvenanceChain:
 def _uuid7() -> str:
     """Generate a UUID v7 (time-sortable) as string."""
     # UUID v7 not in stdlib until 3.14 — use v4 with timestamp prefix
-    ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y%m%d%H%M%S")
+    ts = datetime.fromtimestamp(time.time(), tz=UTC).strftime("%Y%m%d%H%M%S")
     uid = uuid.uuid4().hex
     return f"{ts}-{uid[:16]}"
 
 
 def _now_iso() -> str:
     """Current UTC time as ISO 8601 string."""
-    return datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+    return datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
 
 
 @dataclass(frozen=True)

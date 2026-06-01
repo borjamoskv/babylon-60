@@ -17,7 +17,7 @@ Coverage:
 from __future__ import annotations
 
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from unittest.mock import AsyncMock
 
@@ -51,7 +51,7 @@ def _fake_signal(
         payload=payload or {},
         source=source,
         project=project,
-        created_at=datetime.fromtimestamp(time.time(), tz=timezone.utc),
+        created_at=datetime.fromtimestamp(time.time(), tz=UTC),
         consumed_by=[],
     )
 

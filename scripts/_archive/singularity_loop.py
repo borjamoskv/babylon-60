@@ -4,11 +4,10 @@
 Bucle autónomo de reciclaje de exergía y purificación de señales.
 """
 
-import time
-import json
 import logging
-from pathlib import Path
-from db import query_events_native, record_memory_event, get_sovereign_seals
+import time
+
+from db import get_sovereign_seals, query_events_native, record_memory_event
 
 # Configuración del Bucle
 LOOP_INTERVAL_SEC = 600 # 10 minutos

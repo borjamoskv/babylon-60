@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: Omniscience-Ingest-Omega
 Description: Sovereign Data Ingestion Engine — Multi-source structured extraction from web, APIs, documents, and feeds with automatic CORTEX Ledger crystallization.
 """
-import json
 import logging
+
 
 class OmniscienceIngestOmegaSkill:
     def __init__(self):

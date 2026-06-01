@@ -6,17 +6,16 @@ Designed for launchd/crontab execution.
 """
 
 import os
-import yaml
 import subprocess
 
-
+import yaml
 from native_paths import PROJECT_ROOT, resolve_native_binary
 
 # ── Load Config ──────────────────────────────────────────────
-with open(PROJECT_ROOT / "config.yaml", "r") as f:
+with open(PROJECT_ROOT / "config.yaml") as f:
     CONFIG = yaml.safe_load(f)
 
-from db import init_db, get_yield_history, log_intelligence_report
+from db import get_yield_history, init_db, log_intelligence_report
 
 try:
     from hybrid_router import HybridRouter

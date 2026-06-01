@@ -1,10 +1,10 @@
-import os
-import json
-import time
-import hashlib
 import asyncio
+import hashlib
+import json
 import logging
+import os
 import sqlite3
+import time
 
 VSA_DIMENSION = 10000
 DB_PATH = "/Users/borjafernandezangulo/Cortex-Persist/cortex-core/cortex_memory_vsa.db"
@@ -110,7 +110,7 @@ def enqueue_swarm_task(agent_name: str, payload: dict):
     if not os.path.exists(SWARM_QUEUE_FILE):
         data = {"pending_tasks": []}
     else:
-        with open(SWARM_QUEUE_FILE, "r") as f:
+        with open(SWARM_QUEUE_FILE) as f:
             try:
                 data = json.load(f)
             except:

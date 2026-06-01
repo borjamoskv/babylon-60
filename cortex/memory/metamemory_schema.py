@@ -16,7 +16,7 @@ from __future__ import annotations
 import enum
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Final, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -33,7 +33,7 @@ DEFAULT_STALE_DAYS: Final[float] = 90.0  # 3 months without access → stale
 # ─── Verdict Enum ─────────────────────────────────────────────────────
 
 
-class Verdict(str, enum.Enum):
+class Verdict(enum.StrEnum):
     """Metacognitive decision emitted by the judge."""
 
     RESPOND = "respond"  # Confidence high → answer now
@@ -41,7 +41,7 @@ class Verdict(str, enum.Enum):
     ABSTAIN = "abstain"  # Nothing reliable → say "I don't know"
 
 
-class FOKDirective(str, enum.Enum):
+class FOKDirective(enum.StrEnum):
     """Pre-retrieval routing directive based on Feeling of Knowing."""
 
     RETRIEVE_INTERNAL = "retrieve_internal"  # High FOK -> search memory
@@ -83,7 +83,7 @@ class MemoryCard(BaseModel):
         description="P(accurate retrieval) — similarity score × energy.",
     )
     last_accessed: datetime = Field(
-        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc),
+        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=UTC),
         description="UTC timestamp of last structural access.",
     )
     access_frequency: int = Field(
@@ -196,7 +196,7 @@ class MetamemoryIndex:
 
         cards = list(self._cards.values())
         n = len(cards)
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
+        now = datetime.fromtimestamp(time.time(), tz=UTC)
 
         return MetamemoryStats(
             total_memories=n,
@@ -277,7 +277,7 @@ def build_memory_card(
       repair_needed         = detect_repair_needed(...)
     """
     ts = last_accessed_ts or time.time()
-    last_dt = datetime.fromtimestamp(ts, tz=timezone.utc)
+    last_dt = datetime.fromtimestamp(ts, tz=UTC)
     days_since = max(0.0, (time.time() - ts) / 86400.0)
 
     return MemoryCard(

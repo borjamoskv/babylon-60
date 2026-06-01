@@ -12,7 +12,7 @@ import json
 import logging
 import sqlite3
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import aiosqlite
 
@@ -54,7 +54,7 @@ class EmbeddingPrunerMixin:
             dict with 'pruned_count', 'skipped_count', 'errors'.
         """
         cutoff = (
-            datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=max_age_days)
+            datetime.fromtimestamp(time.time(), tz=UTC) - timedelta(days=max_age_days)
         ).isoformat()
         stats = {"pruned_count": 0, "skipped_count": 0, "errors": []}
 

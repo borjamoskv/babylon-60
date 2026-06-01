@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: Specialized-Vectors-Omega
 Description: Sovereign Vector Intelligence Engine — Domain-specific embedding generation, similarity search optimization, and vector index management for CORTEX memory and retrieval.
 """
-import json
 import logging
+
 
 class SpecializedVectorsOmegaSkill:
     def __init__(self):

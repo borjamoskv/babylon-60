@@ -28,14 +28,14 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 
 __all__ = ["PIISanitizer", "PIIMatch", "PIICategory", "SanitizationReport"]
 
 logger = logging.getLogger("cortex.memory.pii_sanitizer")
 
 
-class PIICategory(str, Enum):
+class PIICategory(StrEnum):
     EMAIL = "email"
     PHONE = "phone"
     ADDRESS = "address"

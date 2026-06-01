@@ -2,15 +2,15 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
-from enum import Enum
+from datetime import UTC, datetime, timedelta
+from enum import StrEnum
 
 
 def _now_utc() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
-class SortuState(str, Enum):
+class SortuState(StrEnum):
     DRAFT = "DRAFT"
     AUDITED = "AUDITED"
     FORGED = "FORGED"
@@ -43,7 +43,7 @@ def validate_transition(from_state: SortuState, to_state: SortuState) -> bool:
     return to_state in TRANSITIONS[from_state]
 
 
-class AbortReason(str, Enum):
+class AbortReason(StrEnum):
     REDUNDANT_COMPUTATION = "REDUNDANT_COMPUTATION"
     CONTRACT_VERIFICATION_FAILED = "CONTRACT_VERIFICATION_FAILED"
     INVALID_CAUSAL_PARENT = "INVALID_CAUSAL_PARENT"

@@ -18,7 +18,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import aiosqlite
@@ -85,7 +85,7 @@ class FactMutationEngine:
             The UUID of the newly created event.
         """
         event_id = flake_gen.next_lexicographic_id()
-        ts = datetime.now(timezone.utc).isoformat()
+        ts = datetime.now(UTC).isoformat()
         payload_str = json.dumps(payload, sort_keys=True, default=str)
         # ── 1. Hash-chain: link to the last event for this entity ────
         prev_hash = await self._get_last_hash(conn, fact_id)
@@ -219,7 +219,7 @@ class FactMutationEngine:
     ) -> None:
         """Protocol Ω₃-E: Reduce certainty over time to prevent stagnation."""
         decay_factor = payload.get("decay_factor", 0.95)
-        ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
+        ts = payload.get("timestamp") or datetime.now(UTC).isoformat()
         facts_columns = await self._facts_columns(conn)
         has_consensus_column = "consensus_score" in facts_columns
         # 1. Fetch current scores
@@ -262,7 +262,7 @@ class FactMutationEngine:
         fact_id: int,
         payload: dict,
     ) -> None:
-        ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
+        ts = payload.get("timestamp") or datetime.now(UTC).isoformat()
         reason = payload.get("reason", "deprecated")
         # Ω₂: Robust Metadata Projection.
         # If meta is encrypted (v6_aesgcm:...), json_set will fail.
@@ -283,7 +283,7 @@ class FactMutationEngine:
         payload: dict,
     ) -> None:
         """Project an evaporation event into ghost state."""
-        ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
+        ts = payload.get("timestamp") or datetime.now(UTC).isoformat()
         await conn.execute(
             "UPDATE facts SET fact_type = 'ghost', updated_at = ? WHERE id = ?",
             (ts, fact_id),
@@ -296,7 +296,7 @@ class FactMutationEngine:
         tenant_id: str | None = None,
     ) -> None:
         reason = payload.get("reason", "tombstoned")
-        ts = payload.get("timestamp", datetime.now(timezone.utc).isoformat())
+        ts = payload.get("timestamp", datetime.now(UTC).isoformat())
         query = (
             "UPDATE facts SET valid_until = ?, is_tombstoned = 1, updated_at = ?, "
             "metadata = CASE "
@@ -324,7 +324,7 @@ class FactMutationEngine:
         tenant_id: str | None = None,
     ) -> None:
         """Archive a superseded fact without treating it as invalidated/tainted."""
-        ts = payload.get("timestamp", datetime.now(timezone.utc).isoformat())
+        ts = payload.get("timestamp", datetime.now(UTC).isoformat())
         reason = payload.get("reason", "archaeology-merged")
         replacement_fact_id = payload.get("replacement_fact_id")
         metadata_column = await self._metadata_column(conn)
@@ -358,7 +358,7 @@ class FactMutationEngine:
         payload: dict,
         tenant_id: str | None = None,
     ) -> None:
-        ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
+        ts = payload.get("timestamp") or datetime.now(UTC).isoformat()
         reason = payload.get("reason", "quarantined")
         await conn.execute(
             "UPDATE facts SET is_quarantined = 1, quarantined_at = ?, "
@@ -381,7 +381,7 @@ class FactMutationEngine:
         fact_id: int,
         payload: dict,
     ) -> None:
-        ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
+        ts = payload.get("timestamp") or datetime.now(UTC).isoformat()
         await conn.execute(
             "UPDATE facts SET is_quarantined = 0, quarantined_at = NULL, "
             "quarantine_reason = NULL, updated_at = ? WHERE id = ?",
@@ -501,7 +501,7 @@ class FactMutationEngine:
             params.append(metadata_value)
         if "updated_at" in facts_columns:
             set_clauses.append("updated_at = ?")
-            params.append(payload.get("taint_timestamp") or datetime.now(timezone.utc).isoformat())
+            params.append(payload.get("taint_timestamp") or datetime.now(UTC).isoformat())
         if not set_clauses:
             return
         query = f"UPDATE facts SET {', '.join(set_clauses)} WHERE id = ?"
@@ -561,7 +561,7 @@ class FactMutationEngine:
             params.append(metadata_value)
         if "updated_at" in facts_columns:
             set_clauses.append("updated_at = ?")
-            params.append(payload.get("timestamp") or datetime.now(timezone.utc).isoformat())
+            params.append(payload.get("timestamp") or datetime.now(UTC).isoformat())
         if not set_clauses:
             return
         query = f"UPDATE facts SET {', '.join(set_clauses)} WHERE id = ?"
@@ -576,7 +576,7 @@ class FactMutationEngine:
         fact_id: int,
         payload: dict,
     ) -> None:
-        ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
+        ts = payload.get("timestamp") or datetime.now(UTC).isoformat()
         await conn.execute(
             "UPDATE facts SET valid_until = NULL, is_tombstoned = 0, "
             "tombstoned_at = NULL, is_quarantined = 0, quarantined_at = NULL, "

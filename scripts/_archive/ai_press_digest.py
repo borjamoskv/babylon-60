@@ -1,8 +1,5 @@
-import os
-import json
-import logging
 import datetime
-from typing import List, Dict
+import logging
 
 # Assuming standard CORTEX structure
 try:
@@ -48,7 +45,7 @@ class AIPressEngine:
         
         return intel_report
 
-    def crystallize_intelligence(self, report: Dict):
+    def crystallize_intelligence(self, report: dict):
         """Logs the acquired intelligence to the Sovereign Ledger."""
         summary = f"IA Press Digest: {report['top_insight']}"
         record_memory_event(

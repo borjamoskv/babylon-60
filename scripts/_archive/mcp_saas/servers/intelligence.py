@@ -3,8 +3,9 @@ import asyncio
 import json
 import sys
 from pathlib import Path
+
 from mcp.server import Server
-from mcp.types import Tool, TextContent
+from mcp.types import TextContent, Tool
 
 # Ensure CORTEX paths are available
 SCRIPTS_DIR = Path(__file__).resolve().parent.parent.parent

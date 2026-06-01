@@ -7,10 +7,10 @@ into unified "crystallized" patterns. Transfers causal links (parent_decision_id
 
 from __future__ import annotations
 
-import logging
 import _sqlite3
+import logging
 import sqlite3
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, cast
 
 import aiosqlite
@@ -227,7 +227,7 @@ class MemoryArchaeologist:
         old_ids = [str(f["id"]) for f in cluster_facts]
         if any(str(f.get("tenant_id") or "default") != tenant_id for f in cluster_facts):
             raise ValueError("Archaeology cluster spans multiple tenants")
-        ts = datetime.now(timezone.utc).isoformat()
+        ts = datetime.now(UTC).isoformat()
         new_fact_id = await self.engine.store(
             project=project,
             tenant_id=tenant_id,

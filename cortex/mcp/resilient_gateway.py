@@ -217,7 +217,7 @@ class ResilientFetcher:
                     "truncated": len(markdown) > MAX_CONTENT_CHARS,
                 }
 
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 provider.circuit_breaker.record_failure()
                 errors.append(f"{provider.name}: TIMEOUT ({timeout}s)")
                 logger.warning("⏱️ [GATEWAY] %s timed out on %s", provider.name, url[:80])

@@ -15,10 +15,10 @@ import uvicorn
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-from sse_starlette.sse import EventSourceResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from sse_starlette.sse import EventSourceResponse
 
 # Ensure project root is in path for db import
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -114,7 +114,7 @@ async def fetch_events(limit: int = 50):
             status = "REASONING"
             
             # Check for consensus signature
-            if meta.get("consensus") == True or "CONSENSUS" in content.upper():
+            if meta.get("consensus") or "CONSENSUS" in content.upper():
                 status = "CONSENSUS"
             elif "PLANNING" in content.upper(): 
                 status = "PLANNING"
@@ -213,16 +213,21 @@ async def fetch_strikes(limit: int = 50):
 @app.get("/api/intelligence")
 async def fetch_intelligence(category: Optional[str] = None, limit: int = 10):
     """Retrieve aggregated intelligence reports including Ω₄ reflexions."""
-    from db import get_intelligence_logs, query_bridge_responses, query_events_native, get_reflexion_logs
+    from db import (
+        get_intelligence_logs,
+        get_reflexion_logs,
+        query_bridge_responses,
+        query_events_native,
+    )
     
     # 1. Get standard logs from ledger
-    rows = get_intelligence_logs(limit=limit)
+    get_intelligence_logs(limit=limit)
     
     # 2. Get v9.0 Ω₄ Reflexions (Lessons Learned)
-    reflexion_logs = get_reflexion_logs(limit=5)
+    get_reflexion_logs(limit=5)
     
     # 3. Get transient bridge activity
-    bridge_logs = query_bridge_responses(limit=5)
+    query_bridge_responses(limit=5)
     
     # 4. Get Ouroboros strikes
     strike_events = query_events_native("strike_engine", limit=5)
@@ -264,8 +269,9 @@ async def fetch_intelligence(category: Optional[str] = None, limit: int = 10):
 @app.get("/api/yield")
 async def fetch_yield():
     """Returns dynamic yield metrics for the dashboard."""
-    from db import get_total_yield_dynamic, query_events_native
     import json
+
+    from db import get_total_yield_dynamic, query_events_native
     
     total = get_total_yield_dynamic()
     
@@ -379,8 +385,9 @@ class AuthResponse(BaseModel):
 @app.post("/api/compliance/authorize")
 async def submit_authorization(resp: AuthResponse):
     """Record a human authorization response to the ledger."""
-    from db import record_memory_event
     import hashlib
+
+    from db import record_memory_event
     
     subject_hash = hashlib.sha256(resp.request_id.encode()).hexdigest()
     metadata = {

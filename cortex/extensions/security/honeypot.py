@@ -13,7 +13,7 @@ import logging
 import os
 import random
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Optional
 
@@ -41,7 +41,7 @@ class DecoyFact:
         self.project = project
         self.severity = severity
         self.created_at = (
-            created_at or datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+            created_at or datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
         )
         self.hash = h_hash or compute_fact_hash(content)
 

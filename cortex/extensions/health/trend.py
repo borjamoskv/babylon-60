@@ -15,7 +15,7 @@ import sqlite3
 import time
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 logger = logging.getLogger("cortex.extensions.health.trend")
 
@@ -120,9 +120,9 @@ class TrendDetector:
             try:
                 self._ensure_table(conn)
                 ts_str = (
-                    datetime.fromtimestamp(timestamp, tz=timezone.utc)
+                    datetime.fromtimestamp(timestamp, tz=UTC)
                     if timestamp
-                    else datetime.fromtimestamp(time.time(), tz=timezone.utc)
+                    else datetime.fromtimestamp(time.time(), tz=UTC)
                 ).isoformat()
                 conn.execute(
                     "INSERT INTO health_history (timestamp, score, grade) VALUES (?, ?, ?)",
@@ -146,7 +146,7 @@ class TrendDetector:
                 from datetime import timedelta
 
                 cutoff = (
-                    datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=keep_days)
+                    datetime.fromtimestamp(time.time(), tz=UTC) - timedelta(days=keep_days)
                 ).isoformat()
                 conn.execute(
                     "DELETE FROM health_history WHERE timestamp < ?",

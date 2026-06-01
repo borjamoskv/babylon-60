@@ -13,7 +13,7 @@ import subprocess
 import threading
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Optional
 
 from .errors import GateError, GateExpired, GateInvalidSignature, GateNotApproved
@@ -327,7 +327,7 @@ class SovereignGate:
         """Append to the in-memory audit log."""
         entry = {
             "event": event,
-            "timestamp": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            "timestamp": datetime.fromtimestamp(time.time(), tz=UTC).isoformat(),
             **action.to_dict(),
         }
         self._audit_log.append(entry)

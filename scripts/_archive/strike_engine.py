@@ -8,16 +8,17 @@ Cuando el scanner detecta exergia >= 5.0, Strike Engine:
   3. Persiste resultado en DB
 """
 
-import json
-import threading
-import time
 import argparse
-
-from native_paths import resolve_native_binary
+import json
 
 # Agente Kant-Ω Integration
 import sys
+import threading
+import time
 from pathlib import Path
+
+from native_paths import resolve_native_binary
+
 kant_path = Path("/Users/borjafernandezangulo/.gemini/antigravity/skills/Agente-Kant-Omega")
 if str(kant_path) not in sys.path:
     sys.path.append(str(kant_path))
@@ -41,9 +42,9 @@ C = {
 def _generate_foundry_STRIKE(title, html_url, code, hound_result, bounty_id=None):
     """Generate a Foundry STRIKE from a confirmed Hound exploit finding."""
     try:
+        from db import update_bounty_status
         from foundry_STRIKE_generator import HoundFinding, generate_and_verify
         from immunefi_report_generator import ReportInput, generate_report
-        from db import update_bounty_status
 
         exploit_plan = hound_result.get("exploit_plan", "")
         vuln_type = _infer_vuln_type(title, code)
@@ -82,6 +83,7 @@ def _generate_foundry_STRIKE(title, html_url, code, hound_result, bounty_id=None
                     print(f"  {C['V']}[NATIVE LEDGER] Target marked as 'submission_ready'{C['X']}")
                     
                     import hashlib
+
                     from db import record_memory_event
                     subj_h = hashlib.sha256(f"strike_{bounty_id}_{time.time()}".encode()).hexdigest()
                     meta = {"projected_yield_usd": 75000.0, "vulnerability": vuln_type, "bounty_id": bounty_id}

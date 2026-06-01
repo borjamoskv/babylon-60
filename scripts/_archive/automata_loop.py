@@ -14,8 +14,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(PROJECT_ROOT))
 
 try:
-    from scripts.db import get_bounties, update_bounty_status
     from scripts.agent_hound_omega import build_mythos_graph
+    from scripts.db import get_bounties, update_bounty_status
     from scripts.exergy_governor import ExergyGovernor
 except ImportError:
     print("[!] CORTEX-TERMINAL: Dependency failure. Check PYTHONPATH.")

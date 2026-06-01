@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -152,7 +152,7 @@ class QuotaEnforcer:
     @staticmethod
     def _next_reset() -> str:
         """Calculate the next monthly reset timestamp (1st of next month, 00:00 UTC)."""
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
+        now = datetime.fromtimestamp(time.time(), tz=UTC)
         if now.month == 12:
             reset = now.replace(year=now.year + 1, month=1, day=1, hour=0, minute=0, second=0)
         else:

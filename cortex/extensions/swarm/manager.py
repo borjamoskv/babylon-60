@@ -10,8 +10,8 @@ import time
 import uuid
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -34,7 +34,7 @@ class WorktreeState:
         self.id = worktree_id
         self.branch_name = branch_name
         self.path = path
-        self.created_at = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        self.created_at = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
         self.status = "provisioning"
         self.pid = os.getpid()
         self.task: asyncio.Task[Any] | None = None
@@ -101,7 +101,7 @@ class SwarmManager:
 
         try:
             await asyncio.wait_for(ready_event.wait(), timeout=10.0)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             state.status = "failed"
             logger.error("Worktree %s creation timed out", worktree_id)
 
@@ -136,7 +136,7 @@ class SwarmManager:
                 ),
                 "total_worktrees": len(self.worktrees),
                 "agent_pids": list({w.pid for w in self.worktrees.values()}),
-                "timestamp": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+                "timestamp": datetime.fromtimestamp(time.time(), tz=UTC).isoformat(),
             }
 
 
@@ -150,7 +150,7 @@ def get_swarm_manager() -> SwarmManager:
     return getattr(sys, _manager_key)
 
 
-class TaskStatus(str, Enum):
+class TaskStatus(StrEnum):
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -314,7 +314,7 @@ class CapatazOrchestrator:
                     ttl_s=lock_ttl_s,
                 )
                 if not lock_acquired:
-                    raise asyncio.TimeoutError(
+                    raise TimeoutError(
                         f"Agent {agent_name} failed to acquire lock on {lock_resource}"
                     )
 

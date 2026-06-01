@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 import math
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -420,7 +420,7 @@ class GenesisEngine:
                 "files_created": len(result.files_created),
                 "hours_saved": result.hours_saved,
                 "validation_passed": result.validation_passed,
-                "created_at": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+                "created_at": datetime.fromtimestamp(time.time(), tz=UTC).isoformat(),
             },
         )
         logger.info(

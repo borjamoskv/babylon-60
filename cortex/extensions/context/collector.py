@@ -12,7 +12,7 @@ import logging
 import sqlite3
 import subprocess
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
@@ -252,12 +252,12 @@ class ContextCollector:
                 reverse=True,
             )[:limit]
 
-            now_ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).timestamp()
+            now_ts = datetime.fromtimestamp(time.time(), tz=UTC).timestamp()
             for i, f in enumerate(py_files):
                 age_hours = (now_ts - f.stat().st_mtime) / 3600
                 if age_hours > 24:
                     continue
-                mod_time = datetime.fromtimestamp(f.stat().st_mtime, tz=timezone.utc).isoformat()
+                mod_time = datetime.fromtimestamp(f.stat().st_mtime, tz=UTC).isoformat()
                 signals.append(
                     Signal(
                         source="fs:recent",

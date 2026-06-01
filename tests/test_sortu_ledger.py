@@ -5,7 +5,7 @@ from __future__ import annotations
 import sqlite3
 import sys
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -140,7 +140,7 @@ class TestQuarantineCandidates:
     def test_expired_ttl_appears(self, ledger):
         record = SkillRecord.new("old-skill", "1.0", {"x": "1"}, ttl_days=0)
         # Manually set ttl to past
-        record.ttl_expiration = datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(
+        record.ttl_expiration = datetime.fromtimestamp(time.time(), tz=UTC) - timedelta(
             hours=1
         )
         ledger.register(record)

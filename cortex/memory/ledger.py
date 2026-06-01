@@ -17,7 +17,7 @@ from __future__ import annotations
 import json
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import aiosqlite
@@ -253,7 +253,7 @@ class EventLedgerL3:
             "events_audited": count,
             "integrity_score": integrity,
             "findings": audit_log or ["Memory event chain shows 100% integrity."],
-            "timestamp": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            "timestamp": datetime.fromtimestamp(time.time(), tz=UTC).isoformat(),
         }
 
 

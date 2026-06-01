@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: Qwen-3.5-Max-Omega
 Description: Sovereign Qwen Integration Layer — Routing, caching, and validation for Qwen 3.5 Max inference as a CORTEX frontier model endpoint.
 """
-import json
 import logging
+
 
 class Qwen35MaxOmegaSkill:
     def __init__(self):

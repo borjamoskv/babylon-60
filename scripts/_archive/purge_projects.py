@@ -5,7 +5,7 @@ Consolidates all projects with < 5 facts or older than 30 days into `ARCHIVE_MIS
 """
 
 import sqlite3
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 DB_PATH = Path("~/.cortex/cortex.db").expanduser()
@@ -31,7 +31,7 @@ def run_purge(dry_run: bool = True):
     """)
     projects = cursor.fetchall()
 
-    now = datetime.now(timezone.utc).timestamp()
+    now = datetime.now(UTC).timestamp()
     to_archive = []
 
     for p in projects:
@@ -46,7 +46,7 @@ def run_purge(dry_run: bool = True):
                 dt = datetime.fromisoformat(last_updated_str.replace("Z", "+00:00"))
             else:
                 dt = datetime.strptime(last_updated_str, "%Y-%m-%d %H:%M:%S").replace(
-                    tzinfo=timezone.utc
+                    tzinfo=UTC
                 )
             last_updated = dt.timestamp()
         except Exception:

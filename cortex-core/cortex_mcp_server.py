@@ -1,10 +1,8 @@
 import os
-import sys
-import json
-import logging
-import asyncio
-from mcp.server.fastmcp import FastMCP
 import sqlite3
+import sys
+
+from mcp.server.fastmcp import FastMCP
 
 # Maintain CORTEX-V3.0 Alignment
 current_dir = os.path.dirname(os.path.abspath(__file__))

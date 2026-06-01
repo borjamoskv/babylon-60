@@ -22,13 +22,13 @@ import logging
 import threading
 import time
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger("cortex.extensions.swarm.heartbeat")
 
 
-class NodeStatus(str, Enum):
+class NodeStatus(StrEnum):
     """Health status of a swarm node."""
 
     ALIVE = "ALIVE"

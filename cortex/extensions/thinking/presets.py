@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 
 from cortex.extensions.thinking.fusion import FusionStrategy
 
@@ -29,7 +29,7 @@ __all__ = [
 # ─── Thinking Modes ──────────────────────────────────────────────────
 
 
-class ThinkingMode(str, Enum):
+class ThinkingMode(StrEnum):
     """Modos de pensamiento que determinan qué modelos participan."""
 
     DEEP_REASONING = "deep_reasoning"

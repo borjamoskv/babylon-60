@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 import asyncio
-import os
 import json
+import os
+
+# Add current dir to path for imports
+import sys
 import time
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from sse_starlette.sse import EventSourceResponse
 
-# Add current dir to path for imports
-import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
@@ -75,14 +76,14 @@ class SageOrchestrator:
         await asyncio.sleep(2)
         
         if not api_key:
-            self.log(f"SILENT_MODE. Dreaming simulated logic.", sage_name)
+            self.log("SILENT_MODE. Dreaming simulated logic.", sage_name)
         else:
             self.log(f"Frontier Reasoning active for {sage_name}.", sage_name)
             await asyncio.sleep(3)
 
         # Success simulation
         if (self.cycle_count % 3 == 0) and (sage_name == "ULTRA-THINK"):
-            self.log(f"CRITICAL_FINDING: Potential Out-of-Bounds detected.", sage_name)
+            self.log("CRITICAL_FINDING: Potential Out-of-Bounds detected.", sage_name)
             self.global_yield += 25000.0
         
         if self.engine:
@@ -148,7 +149,7 @@ async def message_stream(request: Request):
                         "logs": [{"id": event["id"], "msg": f"[{event['data'].get('sage')}] {event['data'].get('msg')}", "val": ""}]
                     })
                 }
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 yield {"event": "ping", "data": "heartbeat"}
 
     return EventSourceResponse(event_generator())

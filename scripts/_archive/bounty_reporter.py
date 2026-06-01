@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 
+
 class BountyReporter:
     """
     CORTEX Bounty Reporter: Professional Evidence Synthesis.

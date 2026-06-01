@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 
-class ActionRisk(str, Enum):
+class ActionRisk(StrEnum):
     READ_ONLY = "read_only"
     MEMORY_WRITE = "memory_write"
     FILE_WRITE = "file_write"

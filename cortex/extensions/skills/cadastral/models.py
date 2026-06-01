@@ -10,14 +10,14 @@ from __future__ import annotations
 import hashlib
 import time
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # ENUMERATIONS
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
-class ZoneClassification(str, Enum):
+class ZoneClassification(StrEnum):
     """Legal classification of a cadastral zone.
 
     Ordered by decreasing operational freedom:
@@ -39,7 +39,7 @@ class ZoneClassification(str, Enum):
     UNKNOWN = "unknown"
 
 
-class RiskLevel(str, Enum):
+class RiskLevel(StrEnum):
     """Existential risk level for swarm operations in a zone."""
 
     SOVEREIGN = "sovereign"  # Full autonomy, no legal friction
@@ -49,7 +49,7 @@ class RiskLevel(str, Enum):
     FORBIDDEN = "forbidden"  # Absolute prohibition
 
 
-class OwnershipType(str, Enum):
+class OwnershipType(StrEnum):
     """Titularidad de la parcela."""
 
     PUBLIC_STATE = "public_state"
@@ -60,7 +60,7 @@ class OwnershipType(str, Enum):
     UNKNOWN = "unknown"
 
 
-class ExpropiationStatus(str, Enum):
+class ExpropiationStatus(StrEnum):
     """Estado de expropiación vigente sobre la parcela."""
 
     NONE = "none"

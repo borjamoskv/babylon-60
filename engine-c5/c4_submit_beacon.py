@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-import os
-import sys
 import json
+import os
 import time
 from datetime import datetime
+
 
 class Code4renaSubmitBeacon:
     def __init__(self, target, report_path, warden):
@@ -16,7 +16,7 @@ class Code4renaSubmitBeacon:
 
     def forge_payload(self):
         self.log(f"Leyendo informe crudo Sovereign desde: {self.report_path}", "L3-IO")
-        with open(self.report_path, "r") as f:
+        with open(self.report_path) as f:
             content = f.read()
 
         payload = {

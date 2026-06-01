@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: steve-jobs-omega
 Description: Sovereign Product & Aesthetic Visionary: Enforcing perfection, simplicity, and Industrial Noir aesthetics within CORTEX.
 """
-import json
 import logging
+
 
 class SteveJobsOmegaSkill:
     def __init__(self):

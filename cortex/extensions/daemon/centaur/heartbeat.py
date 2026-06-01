@@ -7,7 +7,7 @@ import asyncio
 import json
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from cortex.database.core import connect_async_ctx
@@ -213,7 +213,7 @@ class HeartbeatDaemon:
 
     def _deposit_to_iturria(self, task: dict, result: dict) -> None:
         """Save the swarm consensus to the Dream Layer for operator review."""
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y%m%d_%H%M%S")
+        now = datetime.fromtimestamp(time.time(), tz=UTC).strftime("%Y%m%d_%H%M%S")
         safe_id = task["id"][:8]
         filename = f"{task['type']}_{now}_{safe_id}.md"
 

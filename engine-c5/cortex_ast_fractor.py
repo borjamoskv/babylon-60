@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-import os
-import sys
-import re
-import json
-import urllib.request
-import urllib.error
-from typing import List, Dict, Any
-from datetime import datetime
 import concurrent.futures
+import json
+import os
+import re
+import sys
+import urllib.error
+import urllib.request
+from datetime import datetime
+
 
 def log(msg: str, tier: str = "INFO") -> None:
     print(f"[{datetime.now().time()}] [{tier}] [FRACTOR] {msg}")
 
-def extract_private_ast(target_path: str) -> List[Dict[str, str]]:
+def extract_private_ast(target_path: str) -> list[dict[str, str]]:
     log(f"Escaneando recursivamente el AST material de {target_path}...", "L2-EXTRACTOR")
     nodes = []
     
@@ -20,17 +20,17 @@ def extract_private_ast(target_path: str) -> List[Dict[str, str]]:
         log(f"Target path {target_path} no existe o no es carpeta.", "ERROR")
         return nodes
         
-    for root, dirs, files in os.walk(target_path):
+    for root, _dirs, files in os.walk(target_path):
         for file in files:
             if file.endswith('.sol'):
                 filepath = os.path.join(root, file)
                 try:
-                    with open(filepath, 'r', encoding='utf-8') as f:
+                    with open(filepath, encoding='utf-8') as f:
                         lines = f.readlines()
                 except (OSError, UnicodeDecodeError):
                     continue
                     
-                for i, line in enumerate(lines):
+                for _i, line in enumerate(lines):
                     match = re.search(r'function\s+(_\w+)\s*\([^)]*\)\s*(internal|private)', line)
                     if match:
                         fn_name = match.group(1)
@@ -39,9 +39,9 @@ def extract_private_ast(target_path: str) -> List[Dict[str, str]]:
                         
     return nodes
 
-import urllib.request
-import urllib.error
 import time
+import urllib.error
+import urllib.request
 
 SAGE_COUNCIL = [
     "Rol: ULTRA-THINK OMEGA. Eres un experto extremista en matemática de smart contracts. Usa una deducción formal implacable enfocada en el colapso matemático de índices. Tu Test forzará out of bounds mediante aritmética hostil en Solidity. Zero rhetoric.",
@@ -51,7 +51,7 @@ SAGE_COUNCIL = [
     "Rol: BYZANTINE-ASSAILANT. Manipulación asimétrica pura. Explotas desajustes de control de acceso o firmas huérfanas en el contrato de EntryPoint o Paymaster. Escribe exploits engañosos. Zero rhetoric."
 ]
 
-def call_qwen_mcts(target_functions: List[str], mutation_id: int, temperature: float) -> str:
+def call_qwen_mcts(target_functions: list[str], mutation_id: int, temperature: float) -> str:
     api_key = os.environ.get("QWEN_API_KEY")
     if not api_key:
         return None
@@ -87,7 +87,7 @@ def call_qwen_mcts(target_functions: List[str], mutation_id: int, temperature: f
         log(f"API Qwen falló en M{mutation_id}: {str(e)}", "ERROR")
         return None
 
-def process_single_mutation(mutation_id: int, target_functions: List[str], fuzz_dir: str):
+def process_single_mutation(mutation_id: int, target_functions: list[str], fuzz_dir: str):
     """
     Ejecuta un thread MCTS e IO atado a disco para una variante estocástica de harness.
     """
@@ -128,7 +128,7 @@ contract L2StochasticPoC_M{mutation_id} is Test {{
         log(f"Error I/O escribiendo POC (M{mutation_id}): {str(e)}", "ERROR")
         return False
 
-def generate_poc(target_nodes: List[Dict[str, str]], fuzz_dir: str) -> bool:
+def generate_poc(target_nodes: list[dict[str, str]], fuzz_dir: str) -> bool:
     """
     Genera fìsicamente los arneses PoC x18 concurrente con base ThreadPoolExecutor.
     """

@@ -11,8 +11,8 @@ Output: Markdown report ready for Immunefi submission
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 
 SCRIPTS_DIR = Path(__file__).resolve().parent
@@ -54,7 +54,7 @@ def generate_report(report_input: ReportInput) -> Path:
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
     severity_info = SEVERITY_MAP.get(report_input.severity.lower(), SEVERITY_MAP["critical"])
-    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    timestamp = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
     safe_name = report_input.target_name.replace(" ", "_").replace("/", "_")[:40]
     report_filename = f"report_{safe_name}_{report_input.vuln_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
     report_path = REPORTS_DIR / report_filename

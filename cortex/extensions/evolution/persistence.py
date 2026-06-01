@@ -8,7 +8,7 @@ import json
 import logging
 import shutil
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Final, Optional
 
@@ -84,7 +84,7 @@ def save_swarm(agents: list[SovereignAgent], cycle: int, path: Path = DEFAULT_ST
         state = {
             "version": SCHEMA_VERSION,
             "cycle": cycle,
-            "timestamp": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            "timestamp": datetime.fromtimestamp(time.time(), tz=UTC).isoformat(),
             "agents": [_serialize_agent(a) for a in agents],
         }
 

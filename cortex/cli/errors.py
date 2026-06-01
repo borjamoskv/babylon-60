@@ -12,7 +12,7 @@ import json
 import os
 import sys
 from dataclasses import asdict, dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import NoReturn, Optional
 
 from rich.panel import Panel
@@ -45,7 +45,7 @@ __all__ = [
 # ─── Data Structures ─────────────────────────────────────────────────
 
 
-class ErrorCode(str, Enum):
+class ErrorCode(StrEnum):
     DB_NOT_FOUND = "ERR_DB_NOT_FOUND"
     DB_LOCKED = "ERR_DB_LOCKED"
     DB_CORRUPTED = "ERR_DB_CORRUPTED"

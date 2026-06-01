@@ -5,11 +5,11 @@ from __future__ import annotations
 import time
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 
 
-class TaskStatus(str, Enum):
+class TaskStatus(StrEnum):
     PENDING = "pending"
     PLANNING = "planning"
     EXECUTING = "executing"
@@ -20,7 +20,7 @@ class TaskStatus(str, Enum):
     CANCELLED = "cancelled"
 
 
-class TaskSource(str, Enum):
+class TaskSource(StrEnum):
     CLI = "cli"
     GITHUB = "github"
     GHOST = "ghost"
@@ -37,10 +37,10 @@ class AgentTask:
     id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
     status: str = TaskStatus.PENDING
     created_at: str = field(
-        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
     )
     updated_at: str = field(
-        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
     )
     agent_id: str | None = None
     plan: str = ""

@@ -4,14 +4,14 @@ import json
 import time
 import uuid
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Literal
 
 SemanticStatus = Literal["pending", "processing", "indexed", "failed"]
 
 
 def utc_now_iso() -> str:
-    return datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+    return datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
 
 
 @dataclass(frozen=True)

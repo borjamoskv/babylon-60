@@ -55,7 +55,7 @@ _STALE_AGE_DAYS: Final[float] = 90.0
 # ─── Models ───────────────────────────────────────────────────────────
 
 
-class EpistemicState(str, enum.Enum):
+class EpistemicState(enum.StrEnum):
     """The agent's epistemic relationship to a query."""
 
     CONFIDENT = "confident"

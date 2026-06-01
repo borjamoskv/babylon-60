@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: cursor-omega
 Description: Cursor/Anysphere Vibe Coding Actuator — Integración del paradigma Composer + CORTEX como capa de gobernanza del código generado. Arvid Lunnemark et al: $1.3B+.
 """
-import json
 import logging
+
 
 class CursorOmegaSkill:
     def __init__(self):

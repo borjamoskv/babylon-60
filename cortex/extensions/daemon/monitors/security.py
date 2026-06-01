@@ -7,7 +7,7 @@ import json
 import logging
 import sqlite3
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Optional
 
@@ -122,7 +122,7 @@ class SecurityMonitor:
             confidence=confidence,
             summary=f"Matches known vector: {summary[:50]}",
             timestamp=event.get(
-                "timestamp", datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+                "timestamp", datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
             ),
         )
 

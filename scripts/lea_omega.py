@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import os
-import sys
 import re
 import shutil
+import sys
 from datetime import datetime
 
 # LEA-Ω: Loose End Annihilator & Token Hygiene Enforcer
@@ -46,7 +46,7 @@ def get_skills_directories(skills_parent):
 
 def parse_frontmatter(filepath):
     try:
-        with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+        with open(filepath, encoding="utf-8", errors="ignore") as f:
             content = f.read()
         
         # Simple frontmatter parser

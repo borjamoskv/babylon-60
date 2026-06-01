@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: borja-moskv-omega
 Description: Sovereign Commander — Apex meta-agent enforcing HEHC, Sonic Archeology, Moving Cinema, and MementoAgent lifecycle within CORTEX.
 """
-import json
 import logging
+
 
 class BorjaMoskvOmegaSkill:
     def __init__(self):

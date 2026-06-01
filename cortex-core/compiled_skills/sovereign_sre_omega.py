@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: sovereign-sre-omega
 Description: Sovereign SRE & Ops Engine — Infrastructure Optimization, Active Chaos Engineering, and Dynamic Edge Routing.
 """
-import json
 import logging
+
 
 class SovereignSreOmegaSkill:
     def __init__(self):

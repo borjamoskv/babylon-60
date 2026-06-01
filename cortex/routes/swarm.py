@@ -1,12 +1,12 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException
-from cortex.auth.models import AuthResult
 from pydantic import BaseModel, Field
 from starlette.requests import Request
 
 from cortex.api.deps import get_async_engine
 from cortex.auth import require_permission
+from cortex.auth.models import AuthResult
 from cortex.extensions.swarm.psychohistory import PsychohistoryOrchestrator
 
 

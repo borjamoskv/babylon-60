@@ -181,7 +181,7 @@ def sovereign_circuit_breaker(timeout: float = 10.0, max_retries: int = 2, thres
                     cb.record_success()
                     return {"status": "success", "data": result}
 
-                except (asyncio.TimeoutError, ConnectionError) as e:
+                except (TimeoutError, ConnectionError) as e:
                     logger.error(
                         "⚡ [PULMONES] Intento %s fallido en %s: %s",
                         attempt + 1,

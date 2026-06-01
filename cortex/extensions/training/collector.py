@@ -4,7 +4,7 @@ import json
 import logging
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from cortex.extensions.episodic.base import Episode
@@ -18,7 +18,7 @@ class Action:
     input: Any
     observation: str | None = None
     timestamp: datetime = field(
-        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc)
+        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=UTC)
     )
 
 

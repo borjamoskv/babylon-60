@@ -11,7 +11,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -49,7 +49,7 @@ class SovereignLock:
             priority: Higher priority intents take precedence in reduction.
         """
         expires_at = (
-            datetime.fromtimestamp(time.time(), tz=timezone.utc) + timedelta(seconds=ttl_s)
+            datetime.fromtimestamp(time.time(), tz=UTC) + timedelta(seconds=ttl_s)
         ).isoformat()
 
         # 1. Append Intent (Atomic operation in SQLite)
@@ -65,9 +65,9 @@ class SovereignLock:
             await self._reduce_resource(conn, resource)
 
             # 3. Wait for state collapse (polling projection)
-            start_time = datetime.fromtimestamp(time.time(), tz=timezone.utc)
+            start_time = datetime.fromtimestamp(time.time(), tz=UTC)
             while (
-                datetime.fromtimestamp(time.time(), tz=timezone.utc) - start_time
+                datetime.fromtimestamp(time.time(), tz=UTC) - start_time
             ).total_seconds() < timeout_s:
                 async with conn.execute(
                     "SELECT holder_agent, expires_at FROM lock_state WHERE resource = ?",
@@ -78,7 +78,7 @@ class SovereignLock:
                     holder, expiry = row
                     # Clean up if expired
                     if expiry and datetime.fromisoformat(expiry) < datetime.fromtimestamp(
-                        time.time(), tz=timezone.utc
+                        time.time(), tz=UTC
                     ):
                         await self._clear_expired(conn, resource)
                         continue  # Re-read after clear
@@ -117,7 +117,7 @@ class SovereignLock:
                 return False
             holder, expiry = row
             if expiry and datetime.fromisoformat(expiry) < datetime.fromtimestamp(
-                time.time(), tz=timezone.utc
+                time.time(), tz=UTC
             ):
                 return False
             return holder is not None
@@ -127,7 +127,7 @@ class SovereignLock:
     async def _reduce_resource(self, conn: aiosqlite.Connection, resource: str):
         """The 'Reduction' logic: flattens the intent history into current state."""
         # 1. Clear expired intents
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
         await conn.execute(
             "DELETE FROM lock_intents WHERE expires_at < ? AND action = 'request'", (now,)
         )
@@ -173,7 +173,7 @@ class SovereignLock:
                     (
                         resource,
                         new_holder,
-                        datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+                        datetime.fromtimestamp(time.time(), tz=UTC).isoformat(),
                         new_expiry,
                     ),
                 )

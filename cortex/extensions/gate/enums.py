@@ -1,11 +1,11 @@
 """Gate Enums."""
 
-from enum import Enum
+from enum import StrEnum
 
 __all__ = ["ActionLevel", "GatePolicy", "ActionStatus"]
 
 
-class ActionLevel(str, Enum):
+class ActionLevel(StrEnum):
     """Consciousness layer action levels."""
 
     L1_READ = "L1_READ"
@@ -14,7 +14,7 @@ class ActionLevel(str, Enum):
     L4_MUTATE = "L4_MUTATE"
 
 
-class GatePolicy(str, Enum):
+class GatePolicy(StrEnum):
     """Gate enforcement policy."""
 
     ENFORCE = "enforce"  # Block until approved
@@ -22,7 +22,7 @@ class GatePolicy(str, Enum):
     DISABLED = "disabled"  # Transparent passthrough
 
 
-class ActionStatus(str, Enum):
+class ActionStatus(StrEnum):
     """Status of a pending action."""
 
     PENDING = "pending"

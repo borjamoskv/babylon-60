@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: Information-Theory-Omega
 Description: Sovereign Information Theory Engine — Shannon/Kolmogorov/Landauer substrate for CORTEX audit, exergy measurement, and epistemic grounding.
 """
-import json
 import logging
+
 
 class InformationTheoryOmegaSkill:
     def __init__(self):

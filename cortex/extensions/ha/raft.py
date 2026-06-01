@@ -164,7 +164,7 @@ class RaftNode:
                     timeout=timeout,
                 )
                 # Heartbeat received — reset loop
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 if self._heartbeat_event.is_set():
                     continue
 

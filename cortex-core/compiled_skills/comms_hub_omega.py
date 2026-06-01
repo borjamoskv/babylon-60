@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: Comms-Hub-Omega
 Description: Sovereign Multi-Channel Communications Engine — Unified interface for Telegram, Discord, X/Twitter, email, and webhook-driven notification across the CORTEX ecosystem.
 """
-import json
 import logging
+
 
 class CommsHubOmegaSkill:
     def __init__(self):

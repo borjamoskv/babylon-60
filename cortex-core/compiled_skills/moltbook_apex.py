@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: Moltbook-Apex
 Description: Sovereign Moltbook Social & Warfare Suite — Unified interface for standard social interactions (API v1) and adversarial narrative orchestration (Black-Ops). Controls the Moltbook agent ecosystem.
 """
-import json
 import logging
+
 
 class MoltbookApexSkill:
     def __init__(self):

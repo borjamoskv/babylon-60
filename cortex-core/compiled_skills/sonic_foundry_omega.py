@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: Sonic-Foundry-Omega
 Description: Sovereign Sonic Intelligence & Production Suite — Unified engine for multi-source music acquisition (Soulseek), curatorial auditing (Weatherall), generative audio (Suno), and strategic social distribution (SoundCloud).
 """
-import json
 import logging
+
 
 class SonicFoundryOmegaSkill:
     def __init__(self):

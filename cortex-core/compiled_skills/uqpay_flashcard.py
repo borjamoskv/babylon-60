@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: uqpay-flashcard
 Description: UQPAY FlashCard — Agentic Payment Primitive & MCP Integration for task-bounded, lifecycle-controlled virtual card issuing.
 """
-import json
 import logging
+
 
 class UqpayFlashcardSkill:
     def __init__(self):

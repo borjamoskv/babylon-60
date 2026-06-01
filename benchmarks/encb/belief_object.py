@@ -9,11 +9,11 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class BeliefType(str, Enum):
+class BeliefType(StrEnum):
     """The four proposition types supported by the benchmark."""
 
     BOOLEAN = "boolean"

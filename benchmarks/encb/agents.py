@@ -13,11 +13,11 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class AdversaryType(str, Enum):
+class AdversaryType(StrEnum):
     """The five adversary archetypes."""
 
     HONEST = "honest"

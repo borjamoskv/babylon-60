@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: Antigravity-Mastery-Omega
 Description: Sovereign IDE Control Engine — Skill de orquestación dual para el ecosistema Google Antigravity. Proporciona dominancia absoluta sobre Agent Manager, Browser Subagent, MCP y la gestión estructural de artefactos.
 """
-import json
 import logging
+
 
 class AntigravityMasteryOmegaSkill:
     def __init__(self):

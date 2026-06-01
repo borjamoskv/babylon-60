@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import time
+from datetime import UTC
 
 import httpx
 
@@ -41,9 +42,9 @@ class SiteMonitor:
 
     async def _check_one(self, client: httpx.AsyncClient, url: str) -> SiteStatus:
         """Check a single URL with retry and backoff (oxygenated)."""
-        from datetime import datetime, timezone
+        from datetime import datetime
 
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
         last_error = ""
 
         for attempt in range(self.retries + 1):

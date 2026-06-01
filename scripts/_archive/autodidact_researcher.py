@@ -5,8 +5,6 @@ Targeting 10 high-impact AI papers from April 2026 for Sovereign Memory Crystall
 """
 
 import sys
-import json
-import hashlib
 from pathlib import Path
 
 # Fix PYTHONPATH
@@ -14,7 +12,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(PROJECT_ROOT / "scripts"))
 
 try:
-    from db import store_fact, record_memory_event
+    from db import record_memory_event, store_fact
 except ImportError:
     print("[!] Failed to import CORTEX db layer.")
     sys.exit(1)

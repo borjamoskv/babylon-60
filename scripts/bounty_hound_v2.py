@@ -11,10 +11,9 @@ import json
 import logging
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, List
 
 from cortex.engine import AsyncCortexEngine
-from cortex.engine.slashing import SlashingPenalty
+
 try:
     from langchain_community.chat_models import ChatOllama
     from langchain_core.messages import HumanMessage
@@ -53,7 +52,7 @@ class BountyHoundV2:
         hypotheses, commands = await self._reason_over_target(compressed)
         
         # 3. Formal Verification (Native Rust Scan)
-        verification_passed = await self._formal_verification(target_code)
+        await self._formal_verification(target_code)
         
         # 4. Persistence & Ledger Sync
         fact_id = await self.engine.store(
@@ -73,7 +72,7 @@ class BountyHoundV2:
         # Simulated compression for this version
         return code[:int(len(code) * 0.6)]
 
-    async def _reason_over_target(self, target: str) -> tuple[List[str], List[str]]:
+    async def _reason_over_target(self, target: str) -> tuple[list[str], list[str]]:
         if not LANGCHAIN_AVAILABLE:
             logger.warning("LangChain not available. Defaulting to heuristic reasoning.")
             return ["Potential logic flaw in access control"], ["ls -R"]

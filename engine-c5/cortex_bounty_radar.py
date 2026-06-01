@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-import urllib.request
-import urllib.error
 import json
-import time
 import os
-from typing import Any, Dict
+import time
+import urllib.error
+import urllib.request
 from datetime import datetime
+
 
 def log(msg: str, tier: str = "INFO") -> None:
     print(f"[{datetime.now().time()}] [{tier}] [BOUNTY-RADAR] {msg}")

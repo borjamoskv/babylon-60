@@ -5,11 +5,11 @@ Consolidated background process management for standard scanning,
 yield tracking, and high-exergy autonomous strikes.
 """
 
-import time
 import asyncio
 import logging
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 # Fix PYTHONPATH to include project root
@@ -21,9 +21,8 @@ try:
     # Ensure variables from the root .env file are injected
     load_dotenv(dotenv_path=str(PROJECT_ROOT / ".env"))
 
-    from db import record_memory_event
-    from automata_loop import process_target, build_mythos_graph
-    from db import get_bounties
+    from automata_loop import build_mythos_graph, process_target
+    from db import get_bounties, record_memory_event
 except ImportError as e:
     print(f"[!] CORTEX-ORCHESTRATOR: Dependency failure: {e}")
     sys.exit(1)

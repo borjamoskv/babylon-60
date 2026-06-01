@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 import os
-import sys
 import subprocess
 import time
-import json
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
 
 class SubmissionBridge:
     def __init__(self, watch_dir="./engine-c5/targets/active"):
@@ -89,7 +88,7 @@ Validate state transitions and enforce strict access control on internal functio
                     self.verified_pocs.append({"name": poc.name, "target": target.name, "success": success})
                     
                     if success:
-                        with open(poc, 'r') as f:
+                        with open(poc) as f:
                             poc_content = f.read()
                         self.generate_report(target.name, poc_content, logs)
             

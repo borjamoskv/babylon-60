@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import time
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from cortex.ledger.store import LedgerStore
 
 
 def utc_now_iso() -> str:
-    return datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+    return datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
 
 
 class EnrichmentQueue:
@@ -87,7 +87,7 @@ class EnrichmentQueue:
     def mark_failed(self, job_id: str, event_id: str, error: str, attempts: int) -> None:
         delay_minutes = min(60, 2 ** min(attempts, 5))
         next_attempt = (
-            datetime.fromtimestamp(time.time(), tz=timezone.utc) + timedelta(minutes=delay_minutes)
+            datetime.fromtimestamp(time.time(), tz=UTC) + timedelta(minutes=delay_minutes)
         ).isoformat()
         terminal = attempts >= 8
 

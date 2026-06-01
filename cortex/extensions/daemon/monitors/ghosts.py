@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from cortex.extensions.daemon.models import AGENT_DIR, DEFAULT_STALE_HOURS, GhostAlert
@@ -36,7 +36,7 @@ class GhostWatcher(BaseMonitor[GhostAlert]):
             logger.error("Failed to read ghosts.json: %s", e)
             return []
 
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
+        now = datetime.fromtimestamp(time.time(), tz=UTC)
         stale: list[GhostAlert] = []
 
         for project, data in ghosts.items():

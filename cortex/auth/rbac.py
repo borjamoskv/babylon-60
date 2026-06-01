@@ -8,14 +8,14 @@ multi-tenancy and agentic sovereignty.
 """
 
 import logging
-from enum import Enum
+from enum import StrEnum
 
 from cortex.utils.errors import PermissionDeniedError
 
 logger = logging.getLogger("cortex.auth.rbac")
 
 
-class Permission(str, Enum):
+class Permission(StrEnum):
     """Atomic permissions in CORTEX."""
 
     # Data Access
@@ -34,7 +34,7 @@ class Permission(str, Enum):
     SNAPSHOT_EXPORT = "snapshot:export"
 
 
-class Role(str, Enum):
+class Role(StrEnum):
     """Predefined roles in the CORTEX ecosystem."""
 
     ADMIN = "admin"

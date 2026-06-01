@@ -21,9 +21,9 @@ import re
 import shutil
 import subprocess
 import time
-from datetime import datetime, timezone
+from collections.abc import AsyncGenerator
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import AsyncGenerator
 from urllib.parse import urlparse
 
 # ── VSA Keyword Tensor (mirrors strike.rs) ────────────────────
@@ -50,7 +50,7 @@ C = {
 
 
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def _sse_event(event_type: str, data: dict) -> str:
@@ -184,8 +184,9 @@ def _dispatch_to_strike(finding: dict, target_url: str) -> dict:
 def _persist_finding(finding: dict, target_url: str) -> dict:
     """Persist finding to the native ledger."""
     try:
-        from db import upsert_bounty
         import hashlib
+
+        from db import upsert_bounty
         bounty_id = int(hashlib.sha256(
             f"{target_url}_{finding['contracts'][0]}".encode()
         ).hexdigest()[:8], 16)

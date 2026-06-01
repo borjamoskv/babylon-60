@@ -1,6 +1,6 @@
 import re
-import sys
 from pathlib import Path
+
 
 def resolve_file(path: Path) -> int:
     content = path.read_text(encoding="utf-8", errors="replace")

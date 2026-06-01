@@ -13,7 +13,7 @@ import logging
 import threading
 import time
 import traceback
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from cortex.cli.common import DEFAULT_DB, _detect_agent_source, _run_async, get_engine
@@ -297,7 +297,7 @@ class ExecutionLoop:
             content="\n".join(parts),
             fact_type=PersistenceType.KNOWLEDGE.value,
             session_start=self._session.started_at,
-            session_end=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            session_end=datetime.fromtimestamp(time.time(), tz=UTC).isoformat(),
             tasks_completed=self._session.tasks_completed,
             tasks_failed=self._session.tasks_failed,
             total_persisted=self._session.total_persisted,

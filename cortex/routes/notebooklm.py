@@ -9,6 +9,7 @@ Provides REST endpoints for NotebookLM Ouroboros memory loop operations:
 
 from __future__ import annotations
 
+from datetime import UTC
 from pathlib import Path
 from typing import Optional
 
@@ -26,7 +27,7 @@ async def notebooklm_status(
     """Get NotebookLM sync status — staleness, file inventory, cloud detection."""
     import os
     import time
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     from cortex.services.notebooklm import CLOUD_PROVIDERS, DIGEST_FILE, DOMAINS_DIR
 
@@ -39,7 +40,7 @@ async def notebooklm_status(
         result["digest"] = {
             "exists": True,
             "size_bytes": os.path.getsize(DIGEST_FILE),
-            "updated": datetime.fromtimestamp(mtime, tz=timezone.utc).isoformat(),
+            "updated": datetime.fromtimestamp(mtime, tz=UTC).isoformat(),
             "age_hours": round(age_h, 1),
         }
     else:
@@ -145,7 +146,7 @@ async def notebooklm_sync(
     import os
     import shutil
     import time
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     from cortex.services.notebooklm import CLOUD_PROVIDERS, DIGEST_FILE, DOMAINS_DIR
 
@@ -175,7 +176,7 @@ async def notebooklm_sync(
         return {"error": "No cloud sync provider detected. Specify drive_path."}
 
     target.mkdir(parents=True, exist_ok=True)
-    ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d")
+    ts = datetime.fromtimestamp(time.time(), tz=UTC).strftime("%Y-%m-%d")
     synced: list[str] = []
 
     if mode in ("digest", "both") and DIGEST_FILE.exists():

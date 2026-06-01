@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 import sqlite3
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from sortu_ledger import SkillLedger, TransitionEvent
@@ -12,7 +12,7 @@ from verify_sortu import VerificationError, verify_tripartite
 
 
 def _now_utc() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class SortuEngine:

@@ -8,6 +8,7 @@ __all__ = ["app"]
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
+
     from cortex.api.core import app as app
 
 

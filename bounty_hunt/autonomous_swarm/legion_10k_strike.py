@@ -24,10 +24,9 @@ import asyncio
 import hashlib
 import json
 import logging
-import os
 import time
 from dataclasses import asdict, dataclass, field
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(message)s")
@@ -36,7 +35,7 @@ logger = logging.getLogger("legion.10k.strike")
 
 # ─── Attack Surface Taxonomy ────────────────────────────────────────
 
-class Severity(str, Enum):
+class Severity(StrEnum):
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"

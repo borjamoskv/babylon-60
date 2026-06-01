@@ -8,7 +8,6 @@ for semantic similarity matching. HMAC-SHA256 verified feeds.
 
 from __future__ import annotations
 
-import asyncio
 import hashlib
 import hmac
 import json
@@ -17,7 +16,7 @@ import math
 import re
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Optional
 
@@ -145,7 +144,7 @@ class ThreatFeedEngine:
         payload = json.dumps(self._custom_signatures, sort_keys=True).encode()
         feed_hmac = hmac.new(self._hmac_key, payload, hashlib.sha256).hexdigest()
         data = {
-            "last_update": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            "last_update": datetime.fromtimestamp(time.time(), tz=UTC).isoformat(),
             "count": len(self._custom_signatures),
             "hmac": feed_hmac,
             "signatures": self._custom_signatures,
@@ -158,7 +157,7 @@ class ThreatFeedEngine:
         Returns a report of new signatures added.
         """
         report = ThreatFeedReport(
-            timestamp=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            timestamp=datetime.fromtimestamp(time.time(), tz=UTC).isoformat(),
         )
         start = time.monotonic()
         existing_ids = {s["id"] for s in self._custom_signatures}
@@ -192,7 +191,7 @@ class ThreatFeedEngine:
     ) -> list[dict[str, Any]]:
         try:
             return await self._execute_feed_request(feed_name, url, report)
-        except (ImportError, OSError, asyncio.TimeoutError, ValueError) as e:
+        except (TimeoutError, ImportError, OSError, ValueError) as e:
             report.errors.append(f"{feed_name}: {e!s}")
             logger.warning("Feed %s failed: %s", feed_name, e)
             return []

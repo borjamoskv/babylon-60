@@ -79,7 +79,7 @@ class TrustRegistry:
     ) -> None:
         """Record operational evidence for an agent."""
         if now is None:
-            now = datetime.datetime.fromtimestamp(time.time(), tz=datetime.timezone.utc)
+            now = datetime.datetime.fromtimestamp(time.time(), tz=datetime.UTC)
 
         profile = self.get_profile(agent_id)
         if success:
@@ -103,7 +103,7 @@ class TrustRegistry:
         Returns a normalized score in [0.0, 1.0].
         """
         if now is None:
-            now = datetime.datetime.fromtimestamp(time.time(), tz=datetime.timezone.utc)
+            now = datetime.datetime.fromtimestamp(time.time(), tz=datetime.UTC)
 
         # 1. Base Reliability (Laplace smoothing)
         # Using a simple beta distribution mean approximation: (alpha + successes) / (alpha + beta + total)

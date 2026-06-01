@@ -11,11 +11,11 @@ Category:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import Optional
 
 
-class AxiomCategory(str, Enum):
+class AxiomCategory(StrEnum):
     """Unified single-layer taxonomy."""
 
     SOVEREIGN = "sovereign"

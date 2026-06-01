@@ -1,7 +1,7 @@
-import time
-import json
 import hashlib
+import json
 import subprocess
+import time
 from datetime import datetime
 
 # CORTEX-PERSIST: Asynchronous HITL Handler
@@ -12,7 +12,7 @@ class HITLHandler:
         self.program_id = program_id
         self.poll_interval = poll_interval
         try:
-            from db import record_memory_event, query_events_native
+            from db import query_events_native, record_memory_event
             self.record_event = record_memory_event
             self.query_events = query_events_native
         except ImportError:

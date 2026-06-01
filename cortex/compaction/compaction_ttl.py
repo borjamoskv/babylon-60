@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -43,7 +43,7 @@ def find_expired_facts(
         try:
             created = datetime.fromisoformat(created_at_str)
             if created.tzinfo is None:
-                created = created.replace(tzinfo=timezone.utc)
+                created = created.replace(tzinfo=UTC)
             age_seconds = (now - created).total_seconds()
 
             if is_expired(fact_type, age_seconds):
@@ -103,7 +103,7 @@ async def apply_ttl_prune(
     )
     rows = await cursor.fetchall()
 
-    now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
+    now = datetime.fromtimestamp(time.time(), tz=UTC)
     expired_ids, tombstonable_ids = find_expired_facts(rows, now)  # type: ignore[reportArgumentType]
 
     if not expired_ids:

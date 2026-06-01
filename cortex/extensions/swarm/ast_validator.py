@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import ast
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 # ── Constants ──────────────────────────────────────────────────────────────
@@ -101,7 +101,7 @@ MAX_CYCLOMATIC_COMPLEXITY: int = 15
 # ── Enums ──────────────────────────────────────────────────────────────────
 
 
-class ValidationVerdict(str, Enum):
+class ValidationVerdict(StrEnum):
     """Result of AST validation gate."""
 
     PASS = "pass"

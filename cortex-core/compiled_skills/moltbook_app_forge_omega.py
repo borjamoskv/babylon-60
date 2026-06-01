@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: Moltbook-App-Forge-Omega
 Description: Sovereign App Generation Engine — Autonomous creator of 100% functional applications based on Performative Autonomy, Alterity, and the Moltbook paradigm.
 """
-import json
 import logging
+
 
 class MoltbookAppForgeOmegaSkill:
     def __init__(self):

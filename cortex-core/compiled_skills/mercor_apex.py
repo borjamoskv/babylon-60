@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: Mercor-Apex
 Description: Sovereign Recruitment & Data Extraction Engine — Unified infrastructure for autonomous sourcing, AI interviews (Voice+Code), and expert data crystallization. The CORTEX Human-Expert-Loop.
 """
-import json
 import logging
+
 
 class MercorApexSkill:
     def __init__(self):

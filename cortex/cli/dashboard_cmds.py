@@ -14,7 +14,7 @@ from __future__ import annotations
 import asyncio
 import sqlite3
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import click
 from rich.layout import Layout
@@ -105,7 +105,7 @@ async def _collect_all(engine) -> dict:
 
 def _build_header() -> Panel:
     """Build the header panel with logo and timestamp."""
-    now = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    now = datetime.fromtimestamp(time.time(), tz=UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
     header = Text()
     header.append("⚡ CORTEX PERSIST", style=f"bold {_CYBER}")
     header.append("  ·  ", style=_DIM)

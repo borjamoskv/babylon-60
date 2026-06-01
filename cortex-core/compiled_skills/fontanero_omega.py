@@ -2,8 +2,8 @@
 CORTEX JIT Compiled Skill: Fontanero-Omega
 Description: Sovereign Pipeline Forge — Construcción de Tuberías Zero-Entropy
 """
-import json
 import logging
+
 
 class FontaneroOmegaSkill:
     def __init__(self):

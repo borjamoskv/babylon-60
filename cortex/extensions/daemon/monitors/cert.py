@@ -6,7 +6,7 @@ import logging
 import socket
 import ssl
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Optional
 
 from cortex.extensions.daemon.models import DEFAULT_CERT_WARN_DAYS, DEFAULT_TIMEOUT, CertAlert
@@ -45,10 +45,10 @@ class CertMonitor:
                     cert = ssock.getpeercert()
                     not_after = cert.get("notAfter", "")  # type: ignore[reportOptionalMemberAccess]
                     expires = datetime.strptime(not_after, "%b %d %H:%M:%S %Y %Z").replace(  # type: ignore[reportArgumentType]
-                        tzinfo=timezone.utc
+                        tzinfo=UTC
                     )
                     days_left = (
-                        expires - datetime.fromtimestamp(time.time(), tz=timezone.utc)
+                        expires - datetime.fromtimestamp(time.time(), tz=UTC)
                     ).days
                     if days_left < self.warn_days:
                         return CertAlert(
