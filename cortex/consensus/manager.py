@@ -127,6 +127,7 @@ class ConsensusManager:
                 {
                     "fact_id": fact_id,
                     "agent_id": agent_id,
+                    "actor_id": agent_id,
                     "vote": value,
                     "rep": rep,
                     "reason": reason,
