@@ -10,6 +10,7 @@ app = FastAPI(title="CORTEX Analysis Pipeline (MOSKV-1)", version="1.0.0", docs_
 # Secret for JWT auth in CORTEX
 JWT_SECRET = os.getenv("CORTEX_JWT_SECRET", "default-exergy-secret")
 
+
 def verify_token(authorization: str = Header(None)):
     if not authorization:
         raise HTTPException(status_code=401, detail="Missing Authorization Header")
@@ -25,34 +26,41 @@ def verify_token(authorization: str = Header(None)):
             return {"user": "local-dev"}
         raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
 
+
 @app.get("/health")
 def health_check():
-    return {
-        "status": "C5-REAL",
-        "engine": "MOSKV-1",
-        "timestamp": datetime.utcnow().isoformat()
-    }
+    return {"status": "C5-REAL", "engine": "MOSKV-1", "timestamp": datetime.utcnow().isoformat()}
+
 
 @app.get("/facts")
-def get_facts(query: str = Query(..., description="Target keyword to search facts for"), user: dict = Depends(verify_token)):
+def get_facts(
+    query: str = Query(..., description="Target keyword to search facts for"),
+    user: dict = Depends(verify_token),
+):
     """
     Exposes CORTEX-Persist internal facts and analysis for the given query.
     Used by external AI agents for deterministic retrieval.
     """
     # Mocked facts for the pipeline architecture
     facts = [
-        {"id": "F-001", "level": "C5-REAL", "content": f"System confirmed operational for '{query}' analysis."},
-        {"id": "F-002", "level": "C5-REAL", "content": "Exergy levels are maintained above 95% threshold."},
+        {
+            "id": "F-001",
+            "level": "C5-REAL",
+            "content": f"System confirmed operational for '{query}' analysis.",
+        },
+        {
+            "id": "F-002",
+            "level": "C5-REAL",
+            "content": "Exergy levels are maintained above 95% threshold.",
+        },
     ]
-    return {
-        "query": query,
-        "results": facts,
-        "authorized_by": user.get("user", "unknown")
-    }
+    return {"query": query, "results": facts, "authorized_by": user.get("user", "unknown")}
+
 
 # Mount static for swagger theme
 os.makedirs("cortex/api/static", exist_ok=True)
 app.mount("/static", StaticFiles(directory="cortex/api/static"), name="static")
+
 
 @app.get("/docs", include_in_schema=False)
 async def custom_swagger_ui_html():

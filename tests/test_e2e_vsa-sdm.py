@@ -28,6 +28,7 @@ from cortex.delivery.manager import DeliveryManager
 
 # ── VSA-SDM Tests ──
 
+
 class TestVSAAlgebra:
     """Test MAP-B binary vector algebra."""
 

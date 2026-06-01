@@ -89,7 +89,10 @@ class ManifoldDaemon:
                 await asyncio.sleep(60)
         except asyncio.CancelledError:
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in reporterd.py')
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed in reporterd.py"
+            )
         finally:
             logger.info("SSE client detached.")
 
@@ -136,4 +139,7 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         import logging
-        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in reporterd.py')
+
+        logging.getLogger(__name__).error(
+            "DETECTIVE-OMEGA: Silent exception swallowed in reporterd.py"
+        )

@@ -213,7 +213,10 @@ class GatewayRouter:
                 await boundary._persist(exc)
             except Exception:
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in router.py')
+
+                logging.getLogger(__name__).error(
+                    "DETECTIVE-OMEGA: Silent exception swallowed in router.py"
+                )
             return GatewayResponse(
                 ok=False,
                 error=str(exc),

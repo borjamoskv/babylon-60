@@ -80,6 +80,8 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 )
 
         if conn:
+            if not conn.in_transaction:
+                await conn.execute("BEGIN IMMEDIATE")
             return await self._store_impl(
                 conn,
                 project=project,
@@ -97,6 +99,8 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             )
 
         async with self.session() as _conn:
+            if not _conn.in_transaction:
+                await _conn.execute("BEGIN IMMEDIATE")
             return await self._store_impl(
                 _conn,
                 project=project,
@@ -257,6 +261,8 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         if not facts:
             raise ValueError("facts list cannot be empty")
         async with self.session() as conn:
+            if not conn.in_transaction:
+                await conn.execute("BEGIN IMMEDIATE")
             ids = []
             try:
                 for fact in facts:

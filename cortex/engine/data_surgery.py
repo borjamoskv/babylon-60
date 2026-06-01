@@ -11,6 +11,7 @@ from dataclasses import dataclass
 
 logger = logging.getLogger("cortex.exergy.surgeon")
 
+
 @dataclass
 class MixtureAuditResult:
     entropy_score: float
@@ -18,10 +19,12 @@ class MixtureAuditResult:
     surgical_pruning_mask: list[int]
     is_safe: bool
 
+
 class DataSurgeon:
     """
     Executes real-time data mixture audits and surgical extractions on LLM prompts and datasets.
     """
+
     def __init__(self, sensitivity: float = 0.85):
         self.sensitivity = sensitivity
         logger.info("DataSurgeon initialized with sensitivity: %.2f", self.sensitivity)
@@ -34,12 +37,12 @@ class DataSurgeon:
         mask: list[int] = []
         toxic_count = 0
         total_entropy = 0.0
-        
+
         for chunk in dataset_chunks:
             # Deterministic hash-based pseudo-entropy for C5-REAL execution
             h = int(hashlib.sha256(chunk.encode()).hexdigest()[:8], 16)
             chunk_entropy = (h % 1000) / 1000.0
-            
+
             # Toxicity threshold based on sensitivity
             if chunk_entropy > self.sensitivity:
                 mask.append(0)
@@ -47,15 +50,15 @@ class DataSurgeon:
             else:
                 mask.append(1)
             total_entropy += chunk_entropy
-            
+
         avg_entropy = total_entropy / max(1, len(dataset_chunks))
         toxic_ratio = toxic_count / max(1, len(dataset_chunks))
-        
+
         return MixtureAuditResult(
             entropy_score=avg_entropy,
             toxic_ratio=toxic_ratio,
             surgical_pruning_mask=mask,
-            is_safe=(toxic_ratio < (1.0 - self.sensitivity))
+            is_safe=(toxic_ratio < (1.0 - self.sensitivity)),
         )
 
     def execute_surgery(self, dataset_chunks: list[str], audit: MixtureAuditResult) -> list[str]:
@@ -65,12 +68,16 @@ class DataSurgeon:
         if len(dataset_chunks) != len(audit.surgical_pruning_mask):
             logger.error("Mask dimension mismatch during surgery.")
             return dataset_chunks
-            
+
         pruned_chunks = [
-            chunk for chunk, keep in zip(dataset_chunks, audit.surgical_pruning_mask, strict=False)
+            chunk
+            for chunk, keep in zip(dataset_chunks, audit.surgical_pruning_mask, strict=False)
             if keep == 1
         ]
-        
-        logger.info("Surgery complete. Pruned %d chunks. Retained %d chunks.", 
-                    len(dataset_chunks) - len(pruned_chunks), len(pruned_chunks))
+
+        logger.info(
+            "Surgery complete. Pruned %d chunks. Retained %d chunks.",
+            len(dataset_chunks) - len(pruned_chunks),
+            len(pruned_chunks),
+        )
         return pruned_chunks

@@ -40,7 +40,10 @@ async def test_isolated_worktree_exception_cleanup(tmp_path):
             raise ValueError("LLM Hallucination Error")
     except ValueError:
         import logging
-        logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Catch the expected error
+
+        logging.getLogger(__name__).error(
+            "DETECTIVE-OMEGA: Silent exception swallowed"
+        )  # Catch the expected error
 
     # Aniquilación termodinámica confirmada
     assert worktree_ref is not None

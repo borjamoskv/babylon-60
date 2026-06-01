@@ -27,7 +27,10 @@ def _migration_021_solid_state(conn: sqlite3.Connection) -> None:
         """)
     except sqlite3.OperationalError:
         import logging
-        logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Table already exists
+
+        logging.getLogger(__name__).error(
+            "DETECTIVE-OMEGA: Silent exception swallowed"
+        )  # Table already exists
 
     conn.execute("CREATE INDEX IF NOT EXISTS idx_ee_entity ON entity_events(entity_id)")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_ee_tenant ON entity_events(tenant_id)")

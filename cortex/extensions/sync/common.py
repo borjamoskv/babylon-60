@@ -143,7 +143,10 @@ def atomic_write(path: Path, content: str) -> None:
             os.unlink(tmp_path)
         except OSError:
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in common.py')
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed in common.py"
+            )
         raise
 
 

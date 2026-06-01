@@ -28,12 +28,17 @@ def main():
 
     count = 0
     for key, data in milestones.items():
-        summary = f"HISTORY_MILESTONE_{key.upper()}: {data['title']}"
+        summary = f"HISTORY_MILESTONE_{key.upper()}: {data.get('id', key).upper()}"
         content = json.dumps(
             {
                 "year": data["year"],
                 "description": data["description"],
-                "thermodynamics": data["thermodynamics"],
+                "thermodynamics": {
+                    "impacto_exergia": data.get("impacto_exergia", ""),
+                    "impacto_senal": data.get("impacto_senal", ""),
+                    "reescritura_historica": data.get("reescritura_historica", ""),
+                    "mutacion_modelo_actual": data.get("mutacion_modelo_actual", ""),
+                },
             }
         )
         vsa.record(summary, content)

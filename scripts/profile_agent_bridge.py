@@ -257,13 +257,14 @@ async def get_db_metrics(conn, last_public_fact_id: int):
     """Retrieve all counting and hashing metrics from the DB."""
     try:
         from cortex.engine.causality import AsyncCausalGraph
+
         cg = AsyncCausalGraph(conn)
         await cg.ensure_table()
     except Exception:
         pass
 
     def _safe_fetch(query):
-        pass # Implemented internally via loop
+        pass  # Implemented internally via loop
 
     tx_count, le_count = 0, 0
     try:
@@ -280,10 +281,14 @@ async def get_db_metrics(conn, last_public_fact_id: int):
     try:
         async with conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1") as cursor:
             row = await cursor.fetchone()
-            if row: latest_tx_hash = row[0]
-        async with conn.execute("SELECT hash FROM ledger_events ORDER BY rowid DESC LIMIT 1") as cursor:
+            if row:
+                latest_tx_hash = row[0]
+        async with conn.execute(
+            "SELECT hash FROM ledger_events ORDER BY rowid DESC LIMIT 1"
+        ) as cursor:
             row = await cursor.fetchone()
-            if row: latest_le_hash = row[0]
+            if row:
+                latest_le_hash = row[0]
     except Exception:
         pass
 
@@ -309,8 +314,12 @@ async def get_db_metrics(conn, last_public_fact_id: int):
     except Exception:
         pass
 
-    latest_hash = latest_le_hash or latest_tx_hash or hashlib.sha256(f"fact-{last_public_fact_id}".encode()).hexdigest()
-    
+    latest_hash = (
+        latest_le_hash
+        or latest_tx_hash
+        or hashlib.sha256(f"fact-{last_public_fact_id}".encode()).hexdigest()
+    )
+
     return {
         "transactions_checked": tx_count + le_count,
         "latest_hash": latest_hash,
@@ -341,7 +350,7 @@ async def verify_ledger_integrity(engine):
     v_res, audit_res = await asyncio.gather(verify_le(), audit_tx())
     valid = v_res.get("valid", True) and audit_res.get("valid", True)
     violations = v_res.get("violations", []) + audit_res.get("violations", [])
-    
+
     return valid, violations
 
 
@@ -365,11 +374,17 @@ async def seed_genesis_fact(engine, project: str, agent_id: str) -> int:
     )
 
 
-def update_assets(profile_path: Path, status_data: dict, short_profile_commit: str, latest_hash_short: str, public_digest: str):
+def update_assets(
+    profile_path: Path,
+    status_data: dict,
+    short_profile_commit: str,
+    latest_hash_short: str,
+    public_digest: str,
+):
     """Write JSON, SVG and README files to disk."""
     assets_dir = profile_path / "assets"
     assets_dir.mkdir(parents=True, exist_ok=True)
-    
+
     json_path = assets_dir / "cortex-profile-agent.status.json"
     json_path.write_text(json.dumps(status_data, indent=2) + "\n")
     print(f"Status JSON written to {json_path}")
@@ -387,7 +402,9 @@ def update_assets(profile_path: Path, status_data: dict, short_profile_commit: s
         if start_marker in readme_content and end_marker in readme_content:
             before = readme_content.split(start_marker)[0]
             after = readme_content.split(end_marker)[1]
-            readme_block = generate_readme_block(status_data, short_profile_commit, latest_hash_short, public_digest)
+            readme_block = generate_readme_block(
+                status_data, short_profile_commit, latest_hash_short, public_digest
+            )
             readme_path.write_text(before + readme_block + after)
             print(f"README.md successfully updated at {readme_path}")
         else:
@@ -398,6 +415,7 @@ def update_assets(profile_path: Path, status_data: dict, short_profile_commit: s
 
 def _push_telemetry_sync(endpoint: str, api_key: str, status_data: dict):
     import urllib.request
+
     headers = {"Content-Type": "application/json"}
     if api_key:
         headers["Authorization"] = f"Bearer {api_key}"
@@ -426,18 +444,23 @@ async def main():
     parser.add_argument("--project", default="github-profile-agent")
     parser.add_argument("--agent-id", default="cortex-profile-agent")
     parser.add_argument("--json", action="store_true", help="Flag to produce JSON outputs")
-    parser.add_argument("--endpoint", help="Optional telemetry endpoint to POST status data (Control Plane)")
+    parser.add_argument(
+        "--endpoint", help="Optional telemetry endpoint to POST status data (Control Plane)"
+    )
     parser.add_argument("--api-key", help="API key for the telemetry endpoint")
     args = parser.parse_args()
 
     print("C5-REAL :: Starting CORTEX profile agent bridge projection.")
-    
+
     db_path = Path(args.db).resolve()
     db_path.parent.mkdir(parents=True, exist_ok=True)
 
     metrics = {
-        "transactions_checked": 1, "latest_hash": hashlib.sha256(b"genesis").hexdigest(),
-        "merkle_roots_checked": 0, "integrity_checks": 0, "signals_processed": 0
+        "transactions_checked": 1,
+        "latest_hash": hashlib.sha256(b"genesis").hexdigest(),
+        "merkle_roots_checked": 0,
+        "integrity_checks": 0,
+        "signals_processed": 0,
     }
     last_public_fact_id = 1
     valid, violations = True, []
@@ -462,6 +485,7 @@ async def main():
 
         except Exception as e:
             import traceback
+
             traceback.print_exc()
             print(f"CortexEngine query error: {e}. Falling back to default values.")
         finally:
@@ -474,22 +498,58 @@ async def main():
     generated_at = datetime.now(timezone.utc).isoformat()
 
     status_data = {
-        "agent": {"id": args.agent_id, "memory_admission": "CortexEngine.store", "runtime_boundary": args.agent_id},
-        "artifacts": {"readme_block_markers": ["<!-- CORTEX-PROFILE-AGENT:START -->", "<!-- CORTEX-PROFILE-AGENT:END -->"], "status_json": "assets/cortex-profile-agent.status.json", "status_svg": "assets/cortex-profile-agent.svg"},
-        "cortex": {"last_public_fact_id": last_public_fact_id, "project": args.project, "tenant_scope": args.tenant, "signals_processed": metrics["signals_processed"]},
+        "agent": {
+            "id": args.agent_id,
+            "memory_admission": "CortexEngine.store",
+            "runtime_boundary": args.agent_id,
+        },
+        "artifacts": {
+            "readme_block_markers": [
+                "<!-- CORTEX-PROFILE-AGENT:START -->",
+                "<!-- CORTEX-PROFILE-AGENT:END -->",
+            ],
+            "status_json": "assets/cortex-profile-agent.status.json",
+            "status_svg": "assets/cortex-profile-agent.svg",
+        },
+        "cortex": {
+            "last_public_fact_id": last_public_fact_id,
+            "project": args.project,
+            "tenant_scope": args.tenant,
+            "signals_processed": metrics["signals_processed"],
+        },
         "generated_at": generated_at,
         "ledger": {
-            "latest_hash": metrics["latest_hash"], "latest_hash_short": metrics["latest_hash"][:18],
-            "merkle_roots_checked": metrics["merkle_roots_checked"], "status": "VALID" if valid else "INVALID",
-            "transactions_checked": metrics["transactions_checked"], "valid": valid,
-            "violations_public": violations, "integrity_checks": metrics["integrity_checks"],
+            "latest_hash": metrics["latest_hash"],
+            "latest_hash_short": metrics["latest_hash"][:18],
+            "merkle_roots_checked": metrics["merkle_roots_checked"],
+            "status": "VALID" if valid else "INVALID",
+            "transactions_checked": metrics["transactions_checked"],
+            "valid": valid,
+            "violations_public": violations,
+            "integrity_checks": metrics["integrity_checks"],
         },
-        "privacy_boundary": {"prompts_published": False, "public_projection_only": True, "raw_memory_published": False, "secrets_published": False, "tenant_payloads_published": False},
-        "repositories": {"profile": args.profile_repo, "profile_commit": profile_commit, "source": args.source_repo},
+        "privacy_boundary": {
+            "prompts_published": False,
+            "public_projection_only": True,
+            "raw_memory_published": False,
+            "secrets_published": False,
+            "tenant_payloads_published": False,
+        },
+        "repositories": {
+            "profile": args.profile_repo,
+            "profile_commit": profile_commit,
+            "source": args.source_repo,
+        },
         "schema_version": 1,
     }
 
-    update_assets(profile_path, status_data, profile_commit[:12], metrics["latest_hash"][:18], hashlib.sha256(f"{metrics['latest_hash']}{profile_commit}".encode()).hexdigest()[:16])
+    update_assets(
+        profile_path,
+        status_data,
+        profile_commit[:12],
+        metrics["latest_hash"][:18],
+        hashlib.sha256(f"{metrics['latest_hash']}{profile_commit}".encode()).hexdigest()[:16],
+    )
 
     if args.endpoint:
         await push_telemetry(args.endpoint, args.api_key, status_data)

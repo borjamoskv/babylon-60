@@ -3,6 +3,7 @@ from enum import Enum
 from dataclasses import dataclass, field
 from typing import Any
 
+
 class EpistemicStatus(str, Enum):
     CONJECTURE = "conjecture"
     TEST_PASSED = "test_passed"
@@ -71,5 +72,3 @@ class LedgerEvent:
     created_at: str
     last_revalidated_at: str | None = None
     tainted: bool = False
-
-

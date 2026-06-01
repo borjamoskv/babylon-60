@@ -254,7 +254,10 @@ class SovereignScheduler:
                 break  # stop_event was set
             except asyncio.TimeoutError:
                 import logging
-                logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # normal tick timeout
+
+                logging.getLogger(__name__).error(
+                    "DETECTIVE-OMEGA: Silent exception swallowed"
+                )  # normal tick timeout
 
         logger.info("SovereignScheduler stopped")
 
@@ -329,7 +332,9 @@ class SovereignScheduler:
                         },
                     )
                 except Exception as e:
-                    logger.debug("Scheduler event bus publish failed: %s", e, exc_info=True)  # bus errors must not kill scheduler
+                    logger.debug(
+                        "Scheduler event bus publish failed: %s", e, exc_info=True
+                    )  # bus errors must not kill scheduler
 
             # Hot state update
             if self._hot_state is not None:

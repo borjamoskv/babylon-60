@@ -171,7 +171,10 @@ class CortexLLMRouter:
                             break
             except ImportError:
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in router.py')
+
+                logging.getLogger(__name__).error(
+                    "DETECTIVE-OMEGA: Silent exception swallowed in router.py"
+                )
 
         if not provider_hint or self._primary.provider_name == provider_hint:
             return await self.execute_resilient(prompt)

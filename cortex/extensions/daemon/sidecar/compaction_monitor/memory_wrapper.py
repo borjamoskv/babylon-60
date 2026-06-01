@@ -34,7 +34,10 @@ if _libc:
         HAS_MALLOC_TRIM = True
     except AttributeError:
         import logging
-        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in memory_wrapper.py')
+
+        logging.getLogger(__name__).error(
+            "DETECTIVE-OMEGA: Silent exception swallowed in memory_wrapper.py"
+        )
 
     try:
 
@@ -57,7 +60,10 @@ if _libc:
         HAS_MALLINFO2 = True
     except AttributeError:
         import logging
-        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in memory_wrapper.py')
+
+        logging.getLogger(__name__).error(
+            "DETECTIVE-OMEGA: Silent exception swallowed in memory_wrapper.py"
+        )
 
 
 def malloc_trim(pad: int = 0) -> int:

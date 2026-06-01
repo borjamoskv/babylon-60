@@ -29,6 +29,7 @@ Usage (async):
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 import sqlite3
@@ -237,6 +238,13 @@ async def connect_async(
         await apply_pragmas_async_readonly(conn)
     else:
         await apply_pragmas_async(conn)
+
+    conn._cortex_db_path = str(db_path)
+    try:
+        conn._cortex_loop = asyncio.get_running_loop()
+    except RuntimeError:
+        conn._cortex_loop = None
+
     return conn
 
 

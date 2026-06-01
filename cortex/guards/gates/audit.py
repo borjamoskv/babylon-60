@@ -38,7 +38,10 @@ async def check_gate_11_cobbler() -> GateResult:
                     v.append(f"print-call:{node.lineno}")
         except SyntaxError:
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in audit.py')
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed in audit.py"
+            )
         return v
 
     async def _audit_all() -> list[str]:

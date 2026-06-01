@@ -198,7 +198,10 @@ async def scan_all_crystals(
                     resonance = await calculate_resonance(embedding, axiom_embeddings)
                 except Exception:
                     import logging
-                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in crystal_thermometer.py')
+
+                    logging.getLogger(__name__).error(
+                        "DETECTIVE-OMEGA: Silent exception swallowed in crystal_thermometer.py"
+                    )
 
             vital = measure_crystal_sync(
                 fact_id=fact_id,

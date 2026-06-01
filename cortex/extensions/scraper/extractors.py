@@ -52,7 +52,7 @@ class _HtmlToMarkdown(HTMLParser):
         self._tag_stack: list[str] = []
         self._title = ""
         self._in_title = False
-        
+
         self._start_handlers = {
             "title": self._start_title,
             "br": lambda attrs: self._output.append("\n"),
@@ -64,7 +64,7 @@ class _HtmlToMarkdown(HTMLParser):
             "i": lambda attrs: self._output.append("*"),
             "code": lambda attrs: self._output.append("`"),
         }
-        
+
         self._end_handlers = {
             "title": self._end_title,
             "a": self._end_a,
@@ -77,7 +77,7 @@ class _HtmlToMarkdown(HTMLParser):
 
     def _start_title(self, attrs):
         self._in_title = True
-        
+
     def _start_a(self, attrs):
         href = dict(attrs).get("href", "")
         self._output.append("[")
@@ -85,7 +85,7 @@ class _HtmlToMarkdown(HTMLParser):
 
     def _end_title(self):
         self._in_title = False
-        
+
     def _end_a(self):
         href = ""
         while self._tag_stack and self._tag_stack[-1].startswith("__a_href:"):
@@ -100,9 +100,9 @@ class _HtmlToMarkdown(HTMLParser):
             return
         if self._skip_depth:
             return
-            
+
         self._tag_stack.append(tag)
-        
+
         if handler := self._start_handlers.get(tag):
             handler(attrs)
         elif tag in _HEADING_MAP:
@@ -118,12 +118,12 @@ class _HtmlToMarkdown(HTMLParser):
             return
         if self._skip_depth:
             return
-            
+
         if handler := self._end_handlers.get(tag):
             handler()
         elif tag in _BLOCK_TAGS:
             self._output.append("\n")
-            
+
         if self._tag_stack and self._tag_stack[-1] == tag:
             self._tag_stack.pop()
 

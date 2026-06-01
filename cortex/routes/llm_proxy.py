@@ -123,7 +123,10 @@ async def _stream_labyrinth_proxy(request: Request, payload: dict) -> AsyncGener
                             full_content += delta["content"]
                     except json.JSONDecodeError:
                         import logging
-                        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in llm_proxy.py')
+
+                        logging.getLogger(__name__).error(
+                            "DETECTIVE-OMEGA: Silent exception swallowed in llm_proxy.py"
+                        )
 
                 # Apply the Labyrinth Filter
                 purified_content = DeterministicLabyrinth.annihilate_entropy(full_content)

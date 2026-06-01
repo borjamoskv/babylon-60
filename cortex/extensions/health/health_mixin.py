@@ -65,12 +65,15 @@ class HealthMixin:
             "grade": hs.grade.letter,
         }
 
-    async def health_score(self, **kwargs: Any) -> HealthScore:
+    async def health_score(self, persist: bool = True, **kwargs: Any) -> HealthScore:
         """Compute the full health score, record trend, persist to DB."""
         collector = self._get_health_collector()
         metrics = collector.collect_all()
         weights = kwargs.get("weights")
         hs = HealthScorer.score(metrics, weights=weights)
+
+        if not persist:
+            return hs
 
         # Feed trend detector
         trend = self._get_trend_detector()
@@ -83,9 +86,15 @@ class HealthMixin:
 
         trend.push(hs.score)
 
-        # Persist to DB
+        # Persist to DB (throttled to once per 60 seconds to prevent lock contention)
         if db_path:
-            trend.persist_to_db(db_path, hs.score, hs.grade.letter)
+            import time
+
+            now = time.monotonic()
+            last_write = getattr(self, "_last_health_persist", 0.0)
+            if now - last_write > 60.0:
+                trend.persist_to_db(db_path, hs.score, hs.grade.letter)
+                self._last_health_persist = now
 
         return hs
 

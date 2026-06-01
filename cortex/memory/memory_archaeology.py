@@ -58,7 +58,11 @@ class MemoryArchaeologist:
             return {"condensed": 0, "tombstoned": 0}
 
         condensed, tombstoned = await self._synthesize_and_update(
-            project, tenant_id, clusters, facts, simulate  # pyright: ignore[reportArgumentType]
+            project,
+            tenant_id,
+            clusters,
+            facts,
+            simulate,  # pyright: ignore[reportArgumentType]
         )
         return {"condensed": condensed, "tombstoned": tombstoned}
 
@@ -76,7 +80,11 @@ class MemoryArchaeologist:
         conn = self.engine._get_sync_conn()
         cursor = conn.cursor()
         parent_col = self._sync_parent_column(conn)
-        parent_col_select = f", {parent_col} AS parent_decision_id" if parent_col else ", NULL AS parent_decision_id"
+        parent_col_select = (
+            f", {parent_col} AS parent_decision_id"
+            if parent_col
+            else ", NULL AS parent_decision_id"
+        )
         cursor.execute(
             f"""
             SELECT id, content{parent_col_select}, tenant_id
@@ -130,7 +138,10 @@ class MemoryArchaeologist:
         return facts, np.vstack(vecs)
 
     def _build_clusters(
-        self, facts: list[dict[str, Any]], vecs_matrix: np.ndarray, threshold: float  # pyright: ignore[reportInvalidTypeForm]
+        self,
+        facts: list[dict[str, Any]],
+        vecs_matrix: np.ndarray,
+        threshold: float,  # pyright: ignore[reportInvalidTypeForm]
     ) -> list[list[int]]:
         # O(N^2) dot product for cosine similarity is unavoidable here without approximate KNN.
         # But we can eliminate the O(N^2) nested python loops and use vectorization.

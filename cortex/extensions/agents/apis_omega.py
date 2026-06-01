@@ -64,7 +64,10 @@ class ApisOmegaAgent:
             self._agent_def = get_agent("apis_omega")
         except ImportError:
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in apis_omega.py')
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed in apis_omega.py"
+            )
 
     async def validate_key(self, provider: str, key: str, base_url: str) -> bool:
         """Lightweight check to verify if the key is actually functional."""

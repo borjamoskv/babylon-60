@@ -34,8 +34,15 @@ logger = logging.getLogger("cortex.engine")
 class HealthGuardAdapter:
     """AX-II Hook 1 → StoreGuard protocol."""
 
-    def __init__(self, db_path: str) -> None:
-        self._db_path = db_path
+    def __init__(self, engine_or_db_path: Any) -> None:
+        from pathlib import Path
+
+        if isinstance(engine_or_db_path, str) or isinstance(engine_or_db_path, Path):
+            self._engine = None
+            self._db_path = str(engine_or_db_path)
+        else:
+            self._engine = engine_or_db_path
+            self._db_path = str(engine_or_db_path._db_path)
 
     async def check(
         self,
@@ -47,10 +54,32 @@ class HealthGuardAdapter:
         *,
         tenant_id: str = "default",
     ) -> None:
+        import time
+
+        if self._engine is not None:
+            now = time.monotonic()
+            last_check = getattr(self._engine, "_last_health_check_time", 0.0)
+            if now - last_check < 10.0:
+                safety_ok = getattr(self._engine, "_last_health_safety_ok", True)
+                if not safety_ok:
+                    raise ValueError(
+                        "HealthGuard blocked write operation due to degraded health (cached)"
+                    )
+                return
+
         from cortex.guards.health_guard import HealthGuard
 
         guard = HealthGuard(db_path=self._db_path)
-        await guard.check_write_safety()
+        try:
+            await guard.check_write_safety()
+            if self._engine is not None:
+                self._engine._last_health_check_time = time.monotonic()
+                self._engine._last_health_safety_ok = True
+        except Exception:
+            if self._engine is not None:
+                self._engine._last_health_check_time = time.monotonic()
+                self._engine._last_health_safety_ok = False
+            raise
 
 
 class ContradictionGuardAdapter:
@@ -223,7 +252,7 @@ class LedgerCheckpointHook:
         ledger = getattr(self._engine, "_ledger", None)
         if ledger is not None and hasattr(ledger, "record_write"):
             ledger.record_write()
-            await ledger.create_checkpoint_async()
+            await ledger.create_checkpoint_async(conn)
 
 
 class SignalEmitHook:
@@ -240,17 +269,60 @@ class SignalEmitHook:
         source: str | None = None,
         db_path: str | None = None,
     ) -> None:
-        from cortex.extensions.signals.fact_hook import emit_fact_stored
+        from cortex.extensions.signals.bus import AsyncSignalBus
+        from cortex.extensions.signals.fact_hook import _compact_threshold
 
-        if db_path:
-            emit_fact_stored(
-                db_path=db_path,
-                fact_id=fact_id,
-                project=project,
-                fact_type=fact_type,
-                source=source or "engine:store",
-                tenant_id=tenant_id,
-            )
+        bus = AsyncSignalBus(conn)
+        payload = {
+            "fact_id": fact_id,
+            "project": project,
+            "fact_type": fact_type,
+            "source": source or "engine:store",
+            "tenant_id": tenant_id,
+        }
+        await bus.emit(
+            "fact:stored",
+            payload,
+            source=source or "engine:store",
+            project=project,
+            tenant_id=tenant_id,
+        )
+
+        threshold = _compact_threshold()
+        try:
+            async with conn.execute(
+                "SELECT COUNT(*) FROM signals "
+                "WHERE event_type = 'fact:stored' "
+                "AND project = ? "
+                "AND consumed_by = '[]'",
+                (project,),
+            ) as cursor:
+                row = await cursor.fetchone()
+                unconsumed = row[0] if row else 0
+
+            if unconsumed >= threshold:
+                await bus.emit(
+                    "compact:needed",
+                    {
+                        "project": project,
+                        "unconsumed_fact_signals": unconsumed,
+                        "threshold": threshold,
+                        "reason": (
+                            f"{unconsumed} un-consumed fact:stored signals "
+                            f"exceeded threshold ({threshold})"
+                        ),
+                    },
+                    source="fact-hook",
+                    project=project,
+                    tenant_id=tenant_id,
+                )
+                logger.info(
+                    "compact:needed emitted for project=%s (unconsumed=%d)",
+                    project,
+                    unconsumed,
+                )
+        except Exception as e:
+            logger.debug("compact:needed check failed: %s", e)
 
 
 class EpistemicBreakerHook:

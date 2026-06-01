@@ -305,7 +305,10 @@ def siege(db: str) -> None:
                 engine.vault = Vault(key.encode("utf-8"))  # pyright: ignore[reportAttributeAccessIssue]
         except (ValueError, KeyError, OSError, RuntimeError, AttributeError):
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in trust_cmds.py')
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed in trust_cmds.py"
+            )
 
         console.print(
             Panel(

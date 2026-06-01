@@ -28,6 +28,7 @@ from cortex.delivery.manager import DeliveryManager
 
 # ── Enhanced Async Tests ──
 
+
 class TestAsyncPipelineEnhanced:
     """Test native async pipeline improvements."""
 
@@ -62,7 +63,10 @@ class TestAsyncPipelineEnhanced:
                 assert result.status in (PipelineStatus.SUCCESS, PipelineStatus.CANCELLED)
             except asyncio.CancelledError:
                 import logging
-                logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Also valid
+
+                logging.getLogger(__name__).error(
+                    "DETECTIVE-OMEGA: Silent exception swallowed"
+                )  # Also valid
 
         asyncio.run(_test())
 

@@ -388,7 +388,10 @@ async def main():
             stream_kernel.flush()
         except Exception:
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in ouroboros_daily.py')
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed in ouroboros_daily.py"
+            )
 
     # 7. PERSIST (best-effort)
     try:
@@ -420,7 +423,10 @@ async def main():
             )
     except Exception:
         import logging
-        logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Best-effort persistence
+
+        logging.getLogger(__name__).error(
+            "DETECTIVE-OMEGA: Silent exception swallowed"
+        )  # Best-effort persistence
 
 
 if __name__ == "__main__":

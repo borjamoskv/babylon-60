@@ -28,6 +28,7 @@ from cortex.delivery.manager import DeliveryManager
 
 # ── Delivery Tests ──
 
+
 class TestDeliveryManager:
     """Test delivery to various targets."""
 

@@ -105,7 +105,10 @@ def _show_tip(engine=None) -> None:
         )
     except (ImportError, RuntimeError, OSError, ValueError):
         import logging
-        logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Tips are non-critical
+
+        logging.getLogger(__name__).error(
+            "DETECTIVE-OMEGA: Silent exception swallowed"
+        )  # Tips are non-critical
 
 
 def _get_tip_text(engine=None) -> str:

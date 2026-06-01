@@ -121,7 +121,10 @@ def detach_federated_dbs(
             conn.execute(f"DETACH DATABASE {alias}")
         except sqlite3.OperationalError:
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in federation.py')
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed in federation.py"
+            )
 
 
 async def detach_federated_dbs_async(
@@ -137,7 +140,10 @@ async def detach_federated_dbs_async(
             await conn.execute(f"DETACH DATABASE {alias}")
         except (aiosqlite.Error, sqlite3.Error):
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in federation.py')
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed in federation.py"
+            )
 
 
 def _search_attached_db(

@@ -28,6 +28,7 @@ from cortex.delivery.manager import DeliveryManager
 
 # ── MCP Pipeline Tools Tests ──
 
+
 class TestMCPPipelineTools:
     """Test MCP pipeline tool serialization."""
 

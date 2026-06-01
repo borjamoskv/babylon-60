@@ -114,7 +114,10 @@ class ResultCache:
                     return row[0]
         except sqlite3.OperationalError:
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in _result_cache.py')
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed in _result_cache.py"
+            )
         return None
 
     def set(

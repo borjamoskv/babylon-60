@@ -173,7 +173,10 @@ class EpistemicMembrane:
         }
 
     def commit(
-        self, proposal_hv: torch.Tensor, metadata: dict = None, source_llm_hash: str = None  # pyright: ignore[reportArgumentType]
+        self,
+        proposal_hv: torch.Tensor,
+        metadata: dict = None,
+        source_llm_hash: str = None,  # pyright: ignore[reportArgumentType]
     ) -> str:
         """
         Commits the proposal to the VSA memory and appends to the cryptographic ledger.

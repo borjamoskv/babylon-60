@@ -32,6 +32,8 @@ DB_PATH = Path(__file__).parent / "nexus.db"
 
 
 from .mixins.tasks import RegistryTasksMixin
+
+
 class AgentRegistry(RegistryTasksMixin):
     """Persistent agent directory with trust integration."""
 
@@ -114,7 +116,10 @@ class AgentRegistry(RegistryTasksMixin):
             conn.commit()
         except sqlite3.OperationalError:
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in registry.py')
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed in registry.py"
+            )
 
         self._load_trust_states()
 

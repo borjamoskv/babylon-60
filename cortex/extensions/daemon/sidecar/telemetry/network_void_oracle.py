@@ -34,7 +34,10 @@ class NetworkVoidOracle:
                 await self._ping_reality()
             except Exception:
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in network_void_oracle.py')
+
+                logging.getLogger(__name__).error(
+                    "DETECTIVE-OMEGA: Silent exception swallowed in network_void_oracle.py"
+                )
             await asyncio.sleep(self.poll_interval)
 
     async def stop(self) -> None:

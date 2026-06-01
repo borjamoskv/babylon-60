@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import threading
 from typing import TYPE_CHECKING, Any
 from pathlib import Path
 
@@ -96,6 +97,7 @@ class CortexEngine(
             self._pool = pool
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._conn: aiosqlite.Connection | None = None
+        self._thread_init_lock = threading.Lock()
         self._vec_available = False
         self._schema_ready = False
         self._ledger = None
@@ -228,7 +230,10 @@ class CortexEngine(
                                         c._connection.close()
                                     except Exception:
                                         import logging
-                                        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in __init__.py')
+
+                                        logging.getLogger(__name__).error(
+                                            "DETECTIVE-OMEGA: Silent exception swallowed in __init__.py"
+                                        )
                                     c._connection = None
                                 return _STOP_RUNNING_SENTINEL
 
@@ -245,13 +250,19 @@ class CortexEngine(
                         await conn.close()
                     except Exception:
                         import logging
-                        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in __init__.py')
+
+                        logging.getLogger(__name__).error(
+                            "DETECTIVE-OMEGA: Silent exception swallowed in __init__.py"
+                        )
                 else:
                     try:
                         asyncio.run_coroutine_threadsafe(conn.close(), conn_loop)
                     except Exception:
                         import logging
-                        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in __init__.py')
+
+                        logging.getLogger(__name__).error(
+                            "DETECTIVE-OMEGA: Silent exception swallowed in __init__.py"
+                        )
 
             self._conns_by_loop.clear()
         self.mac_maestro = None  # type: ignore

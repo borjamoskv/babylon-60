@@ -2,19 +2,18 @@
 import subprocess
 import sys
 
+
 def run_applescript(script):
     process = subprocess.Popen(
-        ["osascript", "-e", script],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
+        ["osascript", "-e", script], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
     )
     stdout, stderr = process.communicate()
     return process.returncode, stdout, stderr
 
+
 def try_unlock():
     # AppleScript con soporte bilingüe (Español / Inglés) para UI Scripting
-    script = '''
+    script = """
     tell application "Google Chrome" to activate
     delay 0.5
     
@@ -34,8 +33,8 @@ def try_unlock():
         end tell
     end tell
     error "Menu item not found or accessibility access denied."
-    '''
-    
+    """
+
     print("[+] Intentando desbloquear JavaScript desde Eventos de Apple vía UI Scripting...")
     code, out, err = run_applescript(script)
     if code == 0:
@@ -44,8 +43,12 @@ def try_unlock():
         return True
     else:
         print(f"[-] Falló el desbloqueo automático: {err.strip()}", file=sys.stderr)
-        print("[!] Nota: UI Scripting requiere permisos de Accesibilidad (System Settings > Privacy & Security > Accessibility para Terminal/IDE).", file=sys.stderr)
+        print(
+            "[!] Nota: UI Scripting requiere permisos de Accesibilidad (System Settings > Privacy & Security > Accessibility para Terminal/IDE).",
+            file=sys.stderr,
+        )
         return False
+
 
 if __name__ == "__main__":
     if try_unlock():

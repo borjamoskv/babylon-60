@@ -199,7 +199,8 @@ class RunnerMixin:
             yield self._traces[-1]
 
             context_packet = await self._run_stage_async(
-                PipelineStage.CONTEXT, lambda: self._assemble_context(request)  # pyright: ignore[reportAttributeAccessIssue]
+                PipelineStage.CONTEXT,
+                lambda: self._assemble_context(request),  # pyright: ignore[reportAttributeAccessIssue]
             )
             yield self._traces[-1]
 
@@ -217,12 +218,14 @@ class RunnerMixin:
             yield self._traces[-1]
 
             ledger_hash = await self._run_stage_async(
-                PipelineStage.PERSISTENCE, lambda: self._persist(request, output)  # pyright: ignore[reportAttributeAccessIssue]
+                PipelineStage.PERSISTENCE,
+                lambda: self._persist(request, output),  # pyright: ignore[reportAttributeAccessIssue]
             )
             yield self._traces[-1]
 
             await self._run_stage_async(
-                PipelineStage.EGRESS, lambda: self._deliver(request, output)  # pyright: ignore[reportAttributeAccessIssue]
+                PipelineStage.EGRESS,
+                lambda: self._deliver(request, output),  # pyright: ignore[reportAttributeAccessIssue]
             )
             yield self._traces[-1]
 

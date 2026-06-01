@@ -102,4 +102,7 @@ if __name__ == "__main__":
                 )
     except FileNotFoundError:
         import logging
-        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in interceptor.py')
+
+        logging.getLogger(__name__).error(
+            "DETECTIVE-OMEGA: Silent exception swallowed in interceptor.py"
+        )

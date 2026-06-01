@@ -207,7 +207,10 @@ class SystemAssembler:
                 created.append(str(test_init))
             except OSError:
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in assembler.py')
+
+                logging.getLogger(__name__).error(
+                    "DETECTIVE-OMEGA: Silent exception swallowed in assembler.py"
+                )
 
         for comp in spec.components:
             if comp.component_type == "test":
@@ -229,7 +232,10 @@ class SystemAssembler:
                         created.append(str(file_path))
                     except OSError:
                         import logging
-                        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in assembler.py')
+
+                        logging.getLogger(__name__).error(
+                            "DETECTIVE-OMEGA: Silent exception swallowed in assembler.py"
+                        )
 
         return created
 
@@ -259,6 +265,9 @@ class SystemAssembler:
                     created.append(str(file_path))
                 except OSError:
                     import logging
-                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in assembler.py')
+
+                    logging.getLogger(__name__).error(
+                        "DETECTIVE-OMEGA: Silent exception swallowed in assembler.py"
+                    )
 
         return created

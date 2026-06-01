@@ -192,7 +192,10 @@ class AutonomousTrainingDaemon:
                 await self._task
             except asyncio.CancelledError:
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in daemon.py')
+
+                logging.getLogger(__name__).error(
+                    "DETECTIVE-OMEGA: Silent exception swallowed in daemon.py"
+                )
         logger.info("🛑 Autonomous Training Daemon stopped.")
 
     async def _loop(self) -> None:

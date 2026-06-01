@@ -162,7 +162,7 @@ class ComponentsMixin:
         try:
             from cortex.engine.guard_adapters import HealthGuardAdapter
 
-            pipeline.add_guard(HealthGuardAdapter(db_path))
+            pipeline.add_guard(HealthGuardAdapter(self))
         except ImportError as e:
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: HealthGuardAdapter failed: {e}") from e

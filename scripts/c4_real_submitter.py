@@ -5,33 +5,40 @@ import argparse
 import subprocess
 import re
 
+
 def parse_report(report_path):
     if not os.path.exists(report_path):
         print(f"[-] Error: Report not found at {report_path}", file=sys.stderr)
         sys.exit(1)
-        
+
     with open(report_path, encoding="utf-8") as f:
         content = f.read()
-        
+
     # Extraer título y severidad
     title_match = re.search(r"# (.*)", content)
     severity_match = re.search(r"Severity:\s*(\w+)", content)
-    
+
     title = title_match.group(1).strip() if title_match else "Sovereign Audit Finding"
     severity = severity_match.group(1).strip() if severity_match else "HIGH"
-    
+
     # Limpiar título de sufijos molestos como "AUDIT REPORT"
     title = re.sub(r"(?i)\s*audit\s*report", "", title).strip()
-    
+
     return title, severity, content
+
 
 def build_applescript(contest_id, title, severity, description):
     # Escapar comillas y barras para JavaScript en AppleScript
     js_escaped_title = title.replace('"', '\\"').replace("'", "\\'")
-    js_escaped_desc = description.replace('\\', '\\\\').replace('"', '\\"').replace("'", "\\'").replace('\n', '\\n')
-    
+    js_escaped_desc = (
+        description.replace("\\", "\\\\")
+        .replace('"', '\\"')
+        .replace("'", "\\'")
+        .replace("\n", "\\n")
+    )
+
     target_url = f"https://code4rena.com/audits/{contest_id}/submit"
-    
+
     script = f'''
     tell application "Google Chrome"
         activate
@@ -100,35 +107,45 @@ def build_applescript(contest_id, title, severity, description):
     '''
     return script
 
+
 def main():
-    parser = argparse.ArgumentParser(description="C5-REAL Submitter: Envía hallazgos a Code4rena usando automatización nativa macOS.")
-    parser.add_argument("--target", required=True, help="Identificador del concurso en Code4rena (ej: c4-2026-04-layerzero-stellar)")
+    parser = argparse.ArgumentParser(
+        description="C5-REAL Submitter: Envía hallazgos a Code4rena usando automatización nativa macOS."
+    )
+    parser.add_argument(
+        "--target",
+        required=True,
+        help="Identificador del concurso en Code4rena (ej: c4-2026-04-layerzero-stellar)",
+    )
     parser.add_argument("--report", required=True, help="Ruta al archivo Markdown del reporte")
     args = parser.parse_args()
-    
+
     print(f"[+] Iniciando C5-REAL Submitter para target: {args.target}")
     title, severity, content = parse_report(args.report)
-    
+
     print(f"[+] Reporte cargado. Título: '{title}' | Severidad: {severity}")
-    
+
     # Generar AppleScript
     script_content = build_applescript(args.target, title, severity, content)
-    
+
     print("[+] Ejecutando AppleScript en Google Chrome...")
     process = subprocess.Popen(
         ["osascript", "-e", script_content],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True
+        text=True,
     )
     stdout, stderr = process.communicate()
-    
+
     if process.returncode == 0:
         print("[∴] C5-REAL: Formulario de Code4rena inyectado en Chrome con éxito.")
-        print("[!] Por seguridad termodinámica, revisa los datos y haz clic en 'Submit' manualmente en tu navegador.")
+        print(
+            "[!] Por seguridad termodinámica, revisa los datos y haz clic en 'Submit' manualmente en tu navegador."
+        )
     else:
         print(f"[-] Error ejecutando AppleScript: {stderr}", file=sys.stderr)
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

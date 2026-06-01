@@ -43,7 +43,9 @@ PEAK_CEILING = 0.99
 
 @njit
 def _fast_envelope_follower(
-    audio_data: np.ndarray, alpha_attack: float, alpha_release: float  # pyright: ignore[reportInvalidTypeForm]
+    audio_data: np.ndarray,
+    alpha_attack: float,
+    alpha_release: float,  # pyright: ignore[reportInvalidTypeForm]
 ) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
     n = len(audio_data)
     envelope = np.zeros(n)

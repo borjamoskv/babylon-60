@@ -28,6 +28,7 @@ from cortex.delivery.manager import DeliveryManager
 
 # ── MCP Outbound Skeleton Tests ──
 
+
 class TestMCPOutbound:
     """Test MCP outbound client skeleton."""
 

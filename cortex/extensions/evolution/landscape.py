@@ -174,5 +174,8 @@ class FitnessLandscape:
                         counts[key] += 1
         except OSError:
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in landscape.py')
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed in landscape.py"
+            )
         return counts

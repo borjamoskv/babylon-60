@@ -383,7 +383,10 @@ class P0VulnerabilityExtractor:
                         )
                     except json.JSONDecodeError:
                         import logging
-                        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in p0_extractor.py')
+
+                        logging.getLogger(__name__).error(
+                            "DETECTIVE-OMEGA: Silent exception swallowed in p0_extractor.py"
+                        )
                     start = -1
 
         return findings

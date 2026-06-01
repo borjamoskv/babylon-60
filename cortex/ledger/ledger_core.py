@@ -35,6 +35,8 @@ from .merkle import MerkleTree
 
 
 from .mixins.audit import LedgerAuditMixin
+
+
 class SovereignLedger(LedgerAuditMixin):
     """The Custodian of Immutable History (CORTEX Wave 5/8).
 
@@ -51,12 +53,25 @@ class SovereignLedger(LedgerAuditMixin):
 
         self.db = db
         self._write_timestamps: deque[float] = deque(maxlen=5000)
-        self._lock = asyncio.Lock()
         self._config = config
 
         # Schema is created synchronously on init if possible
         if self._is_sync_connection(db):
             self._ensure_schema_sync(cast(sqlite3.Connection, db))
+
+    @property
+    def _lock(self) -> asyncio.Lock:
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            if not hasattr(self, "_fallback_lock"):
+                self._fallback_lock = asyncio.Lock()
+            return self._fallback_lock
+        if not hasattr(self, "_locks_by_loop"):
+            self._locks_by_loop = {}
+        if loop not in self._locks_by_loop:
+            self._locks_by_loop[loop] = asyncio.Lock()
+        return self._locks_by_loop[loop]
 
     @staticmethod
     def _is_sync_connection(db: object) -> bool:
@@ -311,40 +326,47 @@ class SovereignLedger(LedgerAuditMixin):
         conn.commit()
         return root
 
-    async def create_checkpoint_async(self) -> str | None:
+    async def create_checkpoint_async(self, conn: aiosqlite.Connection | None = None) -> str | None:
         """Create a Merkle checkpoint asynchronously."""
-        batch_size = self.adaptive_batch_size
-
         async with self._lock:
-            async with self._get_conn_proxy() as conn:  # type: ignore[reportAttributeAccessIssue]
-                cursor = await conn.execute(
-                    "SELECT MAX(tx_end_id) FROM merkle_roots WHERE tenant_id = '__global__'"
-                )
-                row = await cursor.fetchone()
-                last_covered = row[0] or 0 if row else 0
+            if conn is not None:
+                return await self._create_checkpoint_async_impl(conn, commit=False)
+            async with self._get_conn_proxy() as proxy_conn:
+                return await self._create_checkpoint_async_impl(proxy_conn, commit=True)
 
-                cursor = await conn.execute(
-                    "SELECT id, hash FROM transactions WHERE id > ? ORDER BY id LIMIT ?",
-                    (last_covered, batch_size),
-                )
-                rows = list(await cursor.fetchall())
+    async def _create_checkpoint_async_impl(
+        self, conn: aiosqlite.Connection, commit: bool = True
+    ) -> str | None:
+        batch_size = self.adaptive_batch_size
+        cursor = await conn.execute(
+            "SELECT MAX(tx_end_id) FROM merkle_roots WHERE tenant_id = '__global__'"
+        )
+        row = await cursor.fetchone()
+        last_covered = row[0] or 0 if row else 0
 
-                if not rows or len(rows) < batch_size:
-                    return None
+        cursor = await conn.execute(
+            "SELECT id, hash FROM transactions WHERE id > ? ORDER BY id LIMIT ?",
+            (last_covered, batch_size),
+        )
+        rows = list(await cursor.fetchall())
 
-                hashes = [r[1] for r in rows]
-                tree = MerkleTree(hashes)
-                root = tree.root_hash
-                start_id, end_id = rows[0][0], rows[-1][0]
+        if not rows or len(rows) < batch_size:
+            return None
 
-                await conn.execute(
-                    "INSERT INTO merkle_roots "
-                    "(tenant_id, root_hash, tx_start_id, tx_end_id, tx_count) "
-                    "VALUES ('__global__', ?, ?, ?, ?)",
-                    (root, start_id, end_id, len(rows)),
-                )
-                await conn.commit()
-                return root
+        hashes = [r[1] for r in rows]
+        tree = MerkleTree(hashes)
+        root = tree.root_hash
+        start_id, end_id = rows[0][0], rows[-1][0]
+
+        await conn.execute(
+            "INSERT INTO merkle_roots "
+            "(tenant_id, root_hash, tx_start_id, tx_end_id, tx_count) "
+            "VALUES ('__global__', ?, ?, ?, ?)",
+            (root, start_id, end_id, len(rows)),
+        )
+        if commit:
+            await conn.commit()
+        return root
 
     @asynccontextmanager
     async def _get_conn_proxy(self) -> AsyncIterator[aiosqlite.Connection]:
@@ -352,6 +374,33 @@ class SovereignLedger(LedgerAuditMixin):
         supporting both Pool and raw Connection (Ω₁).
         """
         if isinstance(self.db, aiosqlite.Connection):
+            try:
+                current_loop = asyncio.get_running_loop()
+            except RuntimeError:
+                current_loop = None
+
+            conn_loop = getattr(self.db, "_cortex_loop", None)
+            if conn_loop is None or current_loop is None or conn_loop is current_loop:
+                yield self.db
+                return
+
+            db_path = getattr(self.db, "_cortex_db_path", None)
+            if not db_path:
+                try:
+                    db_path = self.db._connector.__closure__[0].cell_contents
+                except Exception:
+                    db_path = None
+
+            if db_path:
+                from cortex.database.core import connect_async
+
+                conn = await connect_async(str(db_path))
+                try:
+                    yield conn
+                finally:
+                    await conn.close()
+                return
+
             yield self.db
             return
 
@@ -361,4 +410,3 @@ class SovereignLedger(LedgerAuditMixin):
         pool = cast("CortexConnectionPool", self.db)
         async with pool.acquire() as conn:
             yield conn
-

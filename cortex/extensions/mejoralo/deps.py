@@ -49,7 +49,8 @@ def _extract_file_dependencies(file_path: Path, targets: set[str]) -> set[str]:
                 _match_module_to_targets(mod, targets, deps)
     except (SyntaxError, UnicodeDecodeError, OSError):
         import logging
-        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in deps.py')
+
+        logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed in deps.py")
     return deps
 
 

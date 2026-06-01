@@ -8,6 +8,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import sqlite3
+import threading
 import warnings
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -102,7 +103,10 @@ class ConnectionMixin:
                         await conn.close()
                     except Exception:
                         import logging
-                        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in _engine_connection.py')
+
+                        logging.getLogger(__name__).error(
+                            "DETECTIVE-OMEGA: Silent exception swallowed in _engine_connection.py"
+                        )
                     self._conns_by_loop.pop(current_loop, None)
                     conn = None
                 else:
@@ -121,14 +125,16 @@ class ConnectionMixin:
             self._vec_available = await load_sqlite_vec_async(conn)
             await self._ensure_schema_ready(conn)
             if not getattr(self, "_memory_ready", False):
-                await self._init_memory_subsystem(self._db_path, conn)  # pyright: ignore[reportAttributeAccessIssue]
+                with getattr(self, "_thread_init_lock", None) or threading.Lock():
+                    if not getattr(self, "_memory_ready", False):
+                        await self._init_memory_subsystem(self._db_path, conn)  # pyright: ignore[reportAttributeAccessIssue]
             return conn
 
     async def _ensure_schema_ready(self, conn: aiosqlite.Connection) -> None:
         """Bootstrap the base schema once per engine instance."""
         if self._schema_ready:
             return
-        async with self._schema_lock:
+        with getattr(self, "_thread_init_lock", None) or threading.Lock():
             if self._schema_ready:
                 return
             await run_migrations_async(conn)
@@ -175,7 +181,10 @@ class ConnectionMixin:
             conn.enable_load_extension(False)
         except (AttributeError, OSError):
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in _engine_connection.py')
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed in _engine_connection.py"
+            )
         return conn
 
     async def init_db(self) -> None:

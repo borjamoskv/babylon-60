@@ -65,7 +65,11 @@ class HealthGuard(HealthMixin):
             return True
 
         sla = custom_sla or self.DEFAULT_SLA
-        score = await self.health_score()
+        try:
+            score = await self.health_score(persist=False)
+        except TypeError:
+            score = await self.health_score()
+
         if not score:
             return True
 

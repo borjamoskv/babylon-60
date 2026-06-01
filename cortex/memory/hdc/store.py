@@ -268,7 +268,10 @@ class HDCVectorStoreL2:
         return toxic_hvs
 
     def _process_hdc_fact_row(
-        self, conn: sqlite3.Connection, row: sqlite3.Row, toxic_hvs: list[np.ndarray]  # pyright: ignore[reportInvalidTypeForm]
+        self,
+        conn: sqlite3.Connection,
+        row: sqlite3.Row,
+        toxic_hvs: list[np.ndarray],  # pyright: ignore[reportInvalidTypeForm]
     ) -> CortexFactModel:
         """Process a single row from the HDC recall query."""
         score = row["final_score"]

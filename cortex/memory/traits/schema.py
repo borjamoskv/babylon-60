@@ -21,24 +21,27 @@ def cortex_decay(is_diamond: int, timestamp: float, current_time: float, half_li
 
 class SchemaTrait:
     def _get_conn(self) -> sqlite3.Connection:
-        if self._conn is None:
-            if sqlite_vec is None:
-                err = "sqlite_vec module not installed. Run 'pip install sqlite-vec'"
-                raise RuntimeError(err)
+        if self._conn is not None:
+            return self._conn
 
-            self._conn = sqlite3.connect(
-                self._db_path,  # pyright: ignore[reportAttributeAccessIssue]
-                check_same_thread=False,
-                timeout=5.0,  # opening-policy: O(1) fail-fast
-            )
+        if sqlite_vec is None:
+            err = "sqlite_vec module not installed. Run 'pip install sqlite-vec'"
+            raise RuntimeError(err)
+
+        conn = sqlite3.connect(
+            self._db_path,  # pyright: ignore[reportAttributeAccessIssue]
+            check_same_thread=False,
+            timeout=5.0,  # opening-policy: O(1) fail-fast
+        )
+        try:
             # runtime-policy: wait up to 5s for WAL write-lock contention (Axiom Ω6)
-            self._conn.execute("PRAGMA journal_mode=WAL;")
-            self._conn.execute("PRAGMA synchronous=NORMAL;")
-            self._conn.execute("PRAGMA busy_timeout=5000")
+            conn.execute("PRAGMA journal_mode=WAL;")
+            conn.execute("PRAGMA synchronous=NORMAL;")
+            conn.execute("PRAGMA busy_timeout=5000")
 
             try:
-                self._conn.enable_load_extension(True)
-                sqlite_vec.load(self._conn)
+                conn.enable_load_extension(True)
+                sqlite_vec.load(conn)
                 self._vector_enabled = True
                 logger.info("✅ [VECTORS] sqlite-vec extension loaded successfully.")
             except (AttributeError, sqlite3.OperationalError, Exception) as e:
@@ -49,15 +52,15 @@ class SchemaTrait:
                 )
                 self._vector_enabled = False
 
-            self._conn.row_factory = sqlite3.Row
+            conn.row_factory = sqlite3.Row
 
             # Register Sovereign Functions
-            self._conn.create_function("cortex_decay", 4, cortex_decay)
-            self._conn.create_function("cortex_exergy", 1, calculate_exergy)
-            self._conn.create_function("void_dist", 2, void_vec.void_hamming_dist)
+            conn.create_function("cortex_decay", 4, cortex_decay)
+            conn.create_function("cortex_exergy", 1, calculate_exergy)
+            conn.create_function("void_dist", 2, void_vec.void_hamming_dist)
 
             # Initialization
-            self._conn.execute("""
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS facts_meta (
                     id TEXT PRIMARY KEY,
                     tenant_id TEXT NOT NULL,
@@ -81,7 +84,7 @@ class SchemaTrait:
             """)
             if self._vector_enabled:
                 # pyright: ignore[reportAttributeAccessIssue]
-                self._conn.executescript(
+                conn.executescript(
                     f"""
                     CREATE VIRTUAL TABLE IF NOT EXISTS vec_facts USING vec0(
                         embedding int8[{self._encoder.dimension}]
@@ -100,15 +103,15 @@ class SchemaTrait:
                     """
                 )
                 for i in range(16):
-                    self._conn.execute(
+                    conn.execute(
                         f"CREATE INDEX IF NOT EXISTS idx_void_mih_s{i} ON vec_void_mih(s{i})"
                     )
 
             # Indexes for Zero-Trust and Speed
-            self._conn.execute(
+            conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_tenant_proj ON facts_meta(tenant_id, project_id)"
             )
-            self._conn.execute("CREATE INDEX IF NOT EXISTS idx_bridge ON facts_meta(is_bridge)")
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_bridge ON facts_meta(is_bridge)")
 
             self._ready = True
 
@@ -123,14 +126,14 @@ class SchemaTrait:
                 ("exergy_score", "REAL DEFAULT 1.0"),
             ]
 
-            cursor = self._conn.execute(
+            cursor = conn.execute(
                 "SELECT name FROM sqlite_master "
                 "WHERE type='table' AND name LIKE 'facts_meta%' AND sql NOT LIKE '%VIRTUAL%'"
             )
             tables = [row[0] for row in cursor.fetchall()]
 
             for tb in tables:
-                info_cursor = self._conn.execute(f"PRAGMA table_info({tb})")  # nosec B608
+                info_cursor = conn.execute(f"PRAGMA table_info({tb})")  # nosec B608
                 existing_cols = {row[1] for row in info_cursor.fetchall()}
                 for col, col_type in migrations:
                     if col in existing_cols:
@@ -139,8 +142,15 @@ class SchemaTrait:
                     if not all(c.isalnum() or c == "_" for c in col):
                         continue
                     alter_query = f"ALTER TABLE {tb} ADD COLUMN {col} {col_type}"
-                    self._conn.execute(alter_query)  # nosec B608
-            self._conn.commit()
+                    conn.execute(alter_query)  # nosec B608
+            conn.commit()
+            self._conn = conn
+        except Exception:
+            try:
+                conn.close()
+            except Exception:
+                pass
+            raise
 
         # Initialize L2HybridSearch (FTS5 mirror) after conn is established
         if self._hybrid is None:
@@ -169,7 +179,10 @@ class SchemaTrait:
                 self._sanitizer = get_pii_sanitizer()
             except ImportError:
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in schema.py')
+
+                logging.getLogger(__name__).error(
+                    "DETECTIVE-OMEGA: Silent exception swallowed in schema.py"
+                )
         return self._sanitizer
 
     def _get_domain_tables(

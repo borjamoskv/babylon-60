@@ -28,6 +28,7 @@ from cortex.delivery.manager import DeliveryManager
 
 # ── Contract Tests ──
 
+
 class TestPipelineContracts:
     """Test that pipeline data contracts are well-formed."""
 

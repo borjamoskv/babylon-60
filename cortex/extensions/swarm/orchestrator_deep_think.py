@@ -21,7 +21,10 @@ try:
     from cortex.memory.hdc.item_memory import ItemMemory
 except ImportError:
     import logging
-    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in orchestrator_deep_think.py')
+
+    logging.getLogger(__name__).error(
+        "DETECTIVE-OMEGA: Silent exception swallowed in orchestrator_deep_think.py"
+    )
 
 logger = logging.getLogger("cortex.extensions.swarm.deep_think")
 
@@ -134,7 +137,11 @@ class DeepThinkOrchestrator:
         return {"agent_id": agent_id, "hv": hv, "text": text_response}
 
     async def _maradona_synthesis(
-        self, hvs: list[np.ndarray], text_context: str, diagnostics: Any, project: str  # pyright: ignore[reportInvalidTypeForm]
+        self,
+        hvs: list[np.ndarray],
+        text_context: str,
+        diagnostics: Any,
+        project: str,  # pyright: ignore[reportInvalidTypeForm]
     ) -> str:
         """Maradona ejecuta el bundle HDC y emite la decisión absoluta."""
         bus = await self.engine.get_bus()

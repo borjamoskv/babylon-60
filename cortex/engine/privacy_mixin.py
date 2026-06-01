@@ -52,5 +52,8 @@ class PrivacyMixin(EngineMixinBase):
                 return {**(meta or {}), **privacy_meta}
         except ImportError:
             import logging
-            logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Classifier not available - degrade gracefully
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed"
+            )  # Classifier not available - degrade gracefully
         return meta

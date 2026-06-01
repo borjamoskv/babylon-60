@@ -45,7 +45,10 @@ class PersistenceSupervisor:
                 logger.warning("PersistenceSupervisor: Heartbeat loop did not exit in time.")
             except asyncio.CancelledError:
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in durability.py')
+
+                logging.getLogger(__name__).error(
+                    "DETECTIVE-OMEGA: Silent exception swallowed in durability.py"
+                )
 
             await self.flush(reason="shutdown")
             self._task = None

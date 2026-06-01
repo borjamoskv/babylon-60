@@ -155,7 +155,8 @@ class TopologicalHealthMonitor:
         return anchor.model_hash != self._model_hash
 
     def _validate_and_prepare_array(
-        self, current_vectors: list[list[float]] | np.ndarray  # pyright: ignore[reportInvalidTypeForm]
+        self,
+        current_vectors: list[list[float]] | np.ndarray,  # pyright: ignore[reportInvalidTypeForm]
     ) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
         if isinstance(current_vectors, list):
             arr = np.array(current_vectors, dtype=np.float32)

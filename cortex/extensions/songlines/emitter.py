@@ -57,7 +57,10 @@ class ResonanceEmitter:
                 return
             except OSError:
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in emitter.py')
+
+                logging.getLogger(__name__).error(
+                    "DETECTIVE-OMEGA: Silent exception swallowed in emitter.py"
+                )
 
         # Primary Fallback: /usr/bin/xattr CLI (macOS)
         try:
@@ -73,7 +76,10 @@ class ResonanceEmitter:
             return
         except (subprocess.SubprocessError, FileNotFoundError):
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in emitter.py')
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed in emitter.py"
+            )
 
         # Final Fallback: .songlines manifest
         self._fallback_embed(target_file, attr_name, encoded_payload)
@@ -88,7 +94,10 @@ class ResonanceEmitter:
                     data = json.load(f)
             except (json.JSONDecodeError, OSError):
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in emitter.py')
+
+                logging.getLogger(__name__).error(
+                    "DETECTIVE-OMEGA: Silent exception swallowed in emitter.py"
+                )
 
         file_key = target_file.name
         if file_key not in data:

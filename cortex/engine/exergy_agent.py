@@ -38,7 +38,9 @@ class ExergyMaximizerAgent:
 
         # Cálculo O(1) de la Exergía
         exergy_score = ExergyOptimizer.calculate_node_exergy(
-            telemetry, latency_ms=telemetry.latency_ms, max_capacity=telemetry.max_capacity  # pyright: ignore[reportArgumentType]
+            telemetry,
+            latency_ms=telemetry.latency_ms,
+            max_capacity=telemetry.max_capacity,  # pyright: ignore[reportArgumentType]
         )
 
         # Variational Feedback Loop: Estimar Entropía Pagada

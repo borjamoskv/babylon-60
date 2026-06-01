@@ -75,7 +75,6 @@ class MaestroUI:
             error=f"Fallido tras {retries} intentos: {last_error}",
         )
 
-    
     def __getattr__(self, name: str):
         # Mapping for renamed methods in legacy facade
         aliases = {
@@ -90,7 +89,7 @@ class MaestroUI:
             "screenshot": (self.vision, "capture_screen"),
             "click_element": (self.accessibility, "perform_click"),
         }
-        
+
         if name in aliases:
             engine, real_name = aliases[name]
             method = getattr(engine, real_name)
@@ -109,9 +108,10 @@ class MaestroUI:
 
         # Applescript fallbacks
         import cortex.extensions.ui_control.applescript as applescript
+
         if hasattr(applescript, name):
             return getattr(applescript, name)
-            
+
         if name == "clipboard_set":
             return applescript.set_clipboard
         if name == "clipboard_get":

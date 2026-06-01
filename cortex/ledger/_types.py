@@ -1,5 +1,6 @@
 from typing import Any, Protocol
 
+
 class PublicVerifierProtocol(Protocol):
     errors: list[str]
     warnings: list[str]

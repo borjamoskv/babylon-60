@@ -151,4 +151,7 @@ if __name__ == "__main__":
         asyncio.run(main())
     except (KeyboardInterrupt, asyncio.CancelledError):
         import logging
-        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in runner.py')
+
+        logging.getLogger(__name__).error(
+            "DETECTIVE-OMEGA: Silent exception swallowed in runner.py"
+        )

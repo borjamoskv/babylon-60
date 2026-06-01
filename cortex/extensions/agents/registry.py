@@ -151,7 +151,10 @@ class AgentCatalogEntry:
                     return resolved
             except ImportError:
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in registry.py')
+
+                logging.getLogger(__name__).error(
+                    "DETECTIVE-OMEGA: Silent exception swallowed in registry.py"
+                )
         return self.model
 
     @property

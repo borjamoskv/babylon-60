@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 from nexus.api.models import Task, TaskCreate, Capability, AgentStatus
 from nexus.api.trust_engine import TrustSignal
 
+
 class RegistryTasksMixin:
     # ── Tasks ───────────────────────────────────────────────────
 
@@ -155,4 +156,3 @@ class RegistryTasksMixin:
         self.update_agent_status(task.assignee_id, AgentStatus.ONLINE)
 
         return self._get_task(task_id)
-

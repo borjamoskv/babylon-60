@@ -191,7 +191,10 @@ def _sanitize_dsn(dsn: str) -> str:
                 return f"{user_part}:***@{post_at}"
         except (IndexError, ValueError):
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in storage_cmds.py')
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed in storage_cmds.py"
+            )
     return dsn
 
 

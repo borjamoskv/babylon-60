@@ -82,6 +82,10 @@ class AsyncSignalBus:
     async def ensure_table(self) -> None:
         if self._ready:
             return
+        if getattr(self._conn, "_signals_ready", False):
+            self._ready = True
+            return
+
         await self._conn.executescript(_CREATE_TABLE + _CREATE_INDEXES)
 
         cursor = await self._conn.execute("PRAGMA table_info(signals)")
@@ -94,7 +98,13 @@ class AsyncSignalBus:
                 "CREATE INDEX IF NOT EXISTS idx_signals_tenant ON signals(tenant_id)"
             )
 
-        await self._conn.commit()
+        if not self._conn.in_transaction:
+            await self._conn.commit()
+
+        try:
+            self._conn._signals_ready = True
+        except AttributeError:
+            pass
         self._ready = True
 
     async def emit(
@@ -300,6 +310,10 @@ class SignalBus:
     def ensure_table(self) -> None:
         if self._ready:
             return
+        if getattr(self._conn, "_signals_ready", False):
+            self._ready = True
+            return
+
         self._conn.executescript(_CREATE_TABLE + _CREATE_INDEXES)
 
         cursor = self._conn.execute("PRAGMA table_info(signals)")
@@ -312,7 +326,13 @@ class SignalBus:
                 "CREATE INDEX IF NOT EXISTS idx_signals_tenant ON signals(tenant_id)"
             )
 
-        self._conn.commit()
+        if not self._conn.in_transaction:
+            self._conn.commit()
+
+        try:
+            self._conn._signals_ready = True
+        except AttributeError:
+            pass
         self._ready = True
 
     def emit(

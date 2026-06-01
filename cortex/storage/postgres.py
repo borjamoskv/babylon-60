@@ -205,7 +205,10 @@ class PostgresBackend:
                     return f"{user_part}:***@{post_at}"
             except (IndexError, ValueError):
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in postgres.py')
+
+                logging.getLogger(__name__).error(
+                    "DETECTIVE-OMEGA: Silent exception swallowed in postgres.py"
+                )
         return dsn
 
     async def execute(self, sql: str, params: tuple[Any, ...] = ()) -> list[dict[str, Any]]:

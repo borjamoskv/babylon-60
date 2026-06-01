@@ -101,9 +101,7 @@ def _verify_single_checkpoint(
                 verifier.errors.append(f"checkpoint_key_outside_validity:{index}")
                 return False
         except Exception as e:
-            verifier.errors.append(
-                f"checkpoint_validity_parse_error:{index}:{e}"
-            )
+            verifier.errors.append(f"checkpoint_validity_parse_error:{index}:{e}")
             return False
 
     permissions = _string_list(matching_key.get("permissions"))

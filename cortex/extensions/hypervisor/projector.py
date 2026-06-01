@@ -79,7 +79,10 @@ class EventProjector:
             await self._signal_endocrine("awareness", 0.1)
         except Exception:
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in projector.py')
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed in projector.py"
+            )
 
     # ── Private side-effect implementations ───────────────────────
 
@@ -105,7 +108,10 @@ class EventProjector:
             endocrine.signal(hormone, intensity=intensity)  # type: ignore[reportAttributeAccessIssue]
         except (ImportError, AttributeError, TypeError):
             import logging
-            logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Endocrine not installed - degrade gracefully
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed"
+            )  # Endocrine not installed - degrade gracefully
 
     async def _verify_songlines(self, project: str) -> None:
         """Trigger autopoiesis songline verification if available."""
@@ -116,4 +122,7 @@ class EventProjector:
             await ap.verify_songlines(project)  # type: ignore[reportAttributeAccessIssue]
         except (ImportError, AttributeError, TypeError):
             import logging
-            logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Autopoiesis not installed - degrade gracefully
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed"
+            )  # Autopoiesis not installed - degrade gracefully

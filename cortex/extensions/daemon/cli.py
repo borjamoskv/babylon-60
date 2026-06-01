@@ -246,7 +246,10 @@ def status(as_json: bool) -> None:
             }
         except ImportError:
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in cli.py')
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed in cli.py"
+            )
         click.echo(json.dumps(last, indent=2, ensure_ascii=False))
         sys.exit(0 if last.get("all_healthy") else 1)
 

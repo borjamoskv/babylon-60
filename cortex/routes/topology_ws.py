@@ -85,6 +85,9 @@ async def websocket_topology_endpoint(websocket: WebSocket):
                     # Implementation would trigger a re-consolidation with perturbation
             except json.JSONDecodeError:
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in topology_ws.py')
+
+                logging.getLogger(__name__).error(
+                    "DETECTIVE-OMEGA: Silent exception swallowed in topology_ws.py"
+                )
     except WebSocketDisconnect:
         topology_manager.disconnect(websocket)

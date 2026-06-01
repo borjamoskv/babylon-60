@@ -51,7 +51,10 @@ class TransactionMixin(EngineMixinBase):
                 # but for now we log it as an error to track entropy.
         except ImportError:
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in transaction_mixin.py')
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed in transaction_mixin.py"
+            )
 
         dj = canonical_json(detail)
         ts = now_iso()
@@ -85,7 +88,7 @@ class TransactionMixin(EngineMixinBase):
             try:
                 self._ledger.record_write()
                 if not getattr(self, "_closing", False):
-                    await self._ledger.create_checkpoint_async()
+                    await self._ledger.create_checkpoint_async(conn)
             except (sqlite3.Error, OSError, RuntimeError, AttributeError, ValueError) as e:
                 logger.warning("Auto-checkpoint failed: %s", e)
                 from cortex.telemetry.metrics import metrics

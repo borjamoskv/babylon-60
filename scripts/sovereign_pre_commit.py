@@ -114,7 +114,10 @@ def check_file_contents(files: list[str], *, source: str, untracked_files: set[s
                     break
         except (OSError, ValueError):
             import logging
-            logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")  # Binary files or access errors - skip
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed"
+            )  # Binary files or access errors - skip
     return violations
 
 

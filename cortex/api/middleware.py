@@ -271,7 +271,10 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
                         f.write("".join(data_lines))
                 except OSError:
                     import logging
-                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in middleware.py')
+
+                    logging.getLogger(__name__).error(
+                        "DETECTIVE-OMEGA: Silent exception swallowed in middleware.py"
+                    )
 
             # 1 thread spin-up per interval, not per attack request
             await asyncio.to_thread(_write_all, lines)
@@ -347,7 +350,10 @@ class ImmuneMiddleware(BaseHTTPMiddleware):
                         )
                 except ImportError:
                     import logging
-                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in middleware.py')
+
+                    logging.getLogger(__name__).error(
+                        "DETECTIVE-OMEGA: Silent exception swallowed in middleware.py"
+                    )
 
                 # Reconstruct stream since we consumed it
                 async def receive():

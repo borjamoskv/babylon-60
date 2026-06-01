@@ -1,6 +1,7 @@
 from __future__ import annotations
 import ast
 
+
 class _AstAnalyzer(ast.NodeVisitor):
     def __init__(self):
         self.loc = 0
@@ -296,5 +297,3 @@ class _BlockingPatternDetector(ast.NodeVisitor):
         elif isinstance(node.func, ast.Name) and node.func.id == "input":
             self.blocking_calls.append("input")
         self.generic_visit(node)
-
-

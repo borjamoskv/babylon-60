@@ -35,7 +35,10 @@ def clean_swarm_queue_db(monkeypatch, tmp_path):
             _local.conn.close()
         except Exception:
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in test_swarm_metrics.py')
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed in test_swarm_metrics.py"
+            )
         delattr(_local, "conn")
     if hasattr(_local, "db_path"):
         delattr(_local, "db_path")

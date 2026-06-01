@@ -35,24 +35,28 @@ from cortex.extensions.daemon.models import (
 
 try:
     from cortex.extensions.daemon.hot_state import HotStateDB
+
     _HOT_STATE_AVAILABLE = True
 except ImportError:
     _HOT_STATE_AVAILABLE = False
 
 try:
     from cortex.extensions.daemon.scheduler import SovereignScheduler
+
     _SCHEDULER_AVAILABLE = True
 except ImportError:
     _SCHEDULER_AVAILABLE = False
 
 try:
     from cortex.extensions.daemon.watchers import WatchdogHub
+
     _WATCHDOG_HUB_AVAILABLE = True
 except ImportError:
     _WATCHDOG_HUB_AVAILABLE = False
 
 try:
     from cortex.extensions.daemon.api import HumanCallbackAPI  # pyright: ignore[reportMissingImports]
+
     _API_AVAILABLE = True
 except ImportError:
     _API_AVAILABLE = False
@@ -61,30 +65,35 @@ try:
     from cortex.extensions.daemon.centaur.heartbeat import HeartbeatDaemon
     from cortex.extensions.daemon.centaur.entropic_queue import EntropicQueue  # pyright: ignore[reportMissingImports]
     from cortex.extensions.daemon.centaur.engine import CentauroEngine  # pyright: ignore[reportMissingImports]
+
     _CENTAUR_AVAILABLE = True
 except ImportError:
     _CENTAUR_AVAILABLE = False
 
 try:
     from cortex.extensions.daemon.entropic_wake import EntropicWakeDaemon
+
     _ENTROPIC_WAKE_AVAILABLE = True
 except ImportError:
     _ENTROPIC_WAKE_AVAILABLE = False
 
 try:
     from cortex.extensions.daemon.frontier import FrontierDaemon
+
     _FRONTIER_AVAILABLE = True
 except ImportError:
     _FRONTIER_AVAILABLE = False
 
 try:
     from cortex.extensions.daemon.zero_prompting import ZeroPromptingDaemon
+
     _ZERO_PROMPTING_AVAILABLE = True
 except ImportError:
     _ZERO_PROMPTING_AVAILABLE = False
 
 try:
     from cortex.extensions.daemon.epistemic_breaker import EpistemicBreakerDaemon
+
     _EPISTEMIC_BREAKER_AVAILABLE = True
 except ImportError:
     _EPISTEMIC_BREAKER_AVAILABLE = False
@@ -94,6 +103,7 @@ MAX_CONSECUTIVE_FAILURES = 3
 
 from cortex.extensions.daemon.resource_mgr import ResourceMgrMixin
 from cortex.extensions.daemon.event_loop import EventLoopMixin
+
 
 class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin, ResourceMgrMixin, EventLoopMixin):
     """MOSKV-1 persistent watchdog. Orchestrates monitors and sends alerts."""
@@ -171,12 +181,6 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin, ResourceMgrMixin,
         self._init_sovereign_subsystems(file_config)
         self._init_persistence_checkers(file_config)
 
-    
-
-    
-
-    
-
     def check(self) -> DaemonStatus:
         """Run all checks once. Returns DaemonStatus."""
         check_start = time.monotonic()
@@ -210,7 +214,10 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin, ResourceMgrMixin,
             self._run_monitor(status, "aether_alerts", self.aether_monitor, self._alert_aether)
             if hasattr(self, "auto_immune_monitor"):
                 self._run_monitor(
-                    status, "auto_immune_alerts", self.auto_immune_monitor, self._alert_auto_immune  # pyright: ignore[reportAttributeAccessIssue]
+                    status,
+                    "auto_immune_alerts",
+                    self.auto_immune_monitor,
+                    self._alert_auto_immune,  # pyright: ignore[reportAttributeAccessIssue]
                 )
         self._auto_sync(status)
         self._flush_timer()
@@ -226,8 +233,6 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin, ResourceMgrMixin,
             len(status.memory_alerts),
         )
         return status
-
-    
 
     def load_status() -> dict | None:
         """Load last daemon status from disk."""
@@ -276,10 +281,6 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin, ResourceMgrMixin,
                 self._heal_monitor(attr, monitor_name)
 
                 self._failure_counts.pop(monitor_name, None)
-
-    
-
-    
 
     def _save_status(self, status: DaemonStatus) -> None:
         """Persist status to disk."""

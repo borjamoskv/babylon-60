@@ -52,7 +52,8 @@ def _resolve_device() -> str:
             return "mps"
     except (ImportError, RuntimeError, AttributeError):
         import logging
-        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in local.py')
+
+        logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed in local.py")
 
     return "cpu"
 
@@ -82,9 +83,14 @@ class LocalEmbedder:
             logger.warning("CORTEX_NO_EMBED=1 set; using deterministic fallback embeddings")
             return None
 
+        if cls._using_fallback and cls._model_name == model_name:
+            return None
+
         with cls._model_lock:
             if cls._model is not None and cls._model_name == model_name:
                 return cls._model
+            if cls._using_fallback and cls._model_name == model_name:
+                return None
 
             try:
                 from sentence_transformers import SentenceTransformer  # pyright: ignore[reportMissingImports]

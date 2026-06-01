@@ -144,7 +144,10 @@ class ASTOracle:
                 self._cache[target_str] = self._extract_semantic_nodes(py_file)
             except (ValueError, KeyError, OSError, RuntimeError, AttributeError):
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in ast_oracle.py')
+
+                logging.getLogger(__name__).error(
+                    "DETECTIVE-OMEGA: Silent exception swallowed in ast_oracle.py"
+                )
 
     async def _process_events(self) -> None:
         """Drain the event queue and process changed files."""

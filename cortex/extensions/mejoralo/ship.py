@@ -116,7 +116,10 @@ def _seal_a11y(p: Path, stack: str) -> ShipSeal:
                 a11y_findings.append(f"{hf.name}: missing alt tags")
         except OSError:
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in ship.py')
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed in ship.py"
+            )
 
     return ShipSeal(
         name="A11y 100%",

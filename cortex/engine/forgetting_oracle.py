@@ -307,7 +307,10 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
 
         except (sqlite3.Error, AttributeError, OSError):
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in forgetting_oracle.py')
+
+            logging.getLogger(__name__).error(
+                "DETECTIVE-OMEGA: Silent exception swallowed in forgetting_oracle.py"
+            )
 
         return False
 

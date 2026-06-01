@@ -62,8 +62,15 @@ class CortexSwarmPrime:
         try:
             # Ejecutar el subidor autónomo nativo de Mac
             subprocess.run(
-                ["python3", "scripts/c4_real_submitter.py", "--target", self.target, "--report", report_path],
-                check=True
+                [
+                    "python3",
+                    "scripts/c4_real_submitter.py",
+                    "--target",
+                    self.target,
+                    "--report",
+                    report_path,
+                ],
+                check=True,
             )
         except Exception as e:
             print(f"[-] [C5-REAL ERROR] Falló la inyección en navegador: {e}")

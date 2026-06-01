@@ -9,11 +9,13 @@ import logging
 
 logger = logging.getLogger("cortex.engine.rim")
 
+
 class LatentMemoryBlock:
     """
     Representa una secuencia fija de tokens especiales que el LLM puede usar
     como 'working memory' en un único forward pass, evadiendo la generación token a token.
     """
+
     def __init__(self, block_id: str, capacity_tokens: int = 16):
         self.block_id = block_id
         self.capacity_tokens = capacity_tokens
@@ -34,18 +36,22 @@ class LatentMemoryBlock:
         self.latent_state = hidden_states
         return self.latent_state
 
+
 class ReasoningInMemoryEngine:
     """
     Motor RiM que intercepta las peticiones de inferencia para reemplazar
     el razonamiento verbalizado (CoT) por computación latente O(1).
     """
+
     def __init__(self, blocks: int = 4, tokens_per_block: int = 16):
         self.blocks = [LatentMemoryBlock(f"B{i}", tokens_per_block) for i in range(blocks)]
-        logger.info(f"RiM Engine initialized with {blocks} blocks, {tokens_per_block} tokens each. Status: C5-REAL.")
+        logger.info(
+            f"RiM Engine initialized with {blocks} blocks, {tokens_per_block} tokens each. Status: C5-REAL."
+        )
 
     def apply_latent_reasoning(self, input_payload: str) -> str:
         """
-        Interviene el payload. En lugar de decodificar pasos intermedios, 
+        Interviene el payload. En lugar de decodificar pasos intermedios,
         inyecta bloques de memoria fijos.
         """
         mutated_payload = input_payload
@@ -62,5 +68,5 @@ class ReasoningInMemoryEngine:
             "status": "C5-REAL",
             "mechanism": "RiM (Latent Reasoning)",
             "autoregressive_tokens_saved_per_pass": total_tokens,
-            "latency_complexity": "O(1) parallel sequence"
+            "latency_complexity": "O(1) parallel sequence",
         }

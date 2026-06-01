@@ -30,7 +30,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     await context.bot.send_message(
-        chat_id=update.effective_chat.id, text="🦅 CORTEX-Antigravity Enlace Establecido. (C5-REAL)"  # pyright: ignore[reportOptionalMemberAccess]
+        chat_id=update.effective_chat.id,
+        text="🦅 CORTEX-Antigravity Enlace Establecido. (C5-REAL)",  # pyright: ignore[reportOptionalMemberAccess]
     )
 
 
@@ -44,7 +45,8 @@ async def handle_instruction(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     # Send ack
     status_msg = await context.bot.send_message(
-        chat_id=update.effective_chat.id, text="⚙️ Procesando en matriz local..."  # pyright: ignore[reportOptionalMemberAccess]
+        chat_id=update.effective_chat.id,
+        text="⚙️ Procesando en matriz local...",  # pyright: ignore[reportOptionalMemberAccess]
     )
 
     try:

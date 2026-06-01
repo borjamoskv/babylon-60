@@ -16,6 +16,7 @@ from cortex.ledger.merkle import MerkleTree
 
 logger = logging.getLogger("cortex.ledger")
 
+
 class LedgerAuditMixin:
     async def audit_integrity_async(self, tenant_id: str | None = None) -> dict:
         """Perform a full integrity audit asynchronously (Ω₁)."""
@@ -69,7 +70,9 @@ class LedgerAuditMixin:
                     try:
                         detail = json.loads(det) if det else {}
                     except Exception as e:
-                        logger.debug("Failed to parse transaction detail json for tx %s: %s", tid, e)
+                        logger.debug(
+                            "Failed to parse transaction detail json for tx %s: %s", tid, e
+                        )
                         detail = {}
 
                     if act == "store":

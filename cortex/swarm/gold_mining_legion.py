@@ -25,7 +25,10 @@ def _cleanup_mmap(path: str):
         os.remove(path)
     except FileNotFoundError:
         import logging
-        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in gold_mining_legion.py')
+
+        logging.getLogger(__name__).error(
+            "DETECTIVE-OMEGA: Silent exception swallowed in gold_mining_legion.py"
+        )
 
 
 def extract_market_alpha(

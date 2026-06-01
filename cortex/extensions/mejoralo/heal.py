@@ -192,7 +192,8 @@ def _run_functional_inquisitor(
             return False
     except SyntaxError:
         import logging
-        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in heal.py')
+
+        logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed in heal.py")
     return True
 
 

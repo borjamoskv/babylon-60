@@ -28,7 +28,10 @@ class CortexVectorStore(BasePydanticVectorStore):
     _client: Any = None
 
     def __init__(
-        self, api_key: str = None, cortex_url: str = "http://localhost:8000", **kwargs: Any  # pyright: ignore[reportArgumentType]
+        self,
+        api_key: str = None,
+        cortex_url: str = "http://localhost:8000",
+        **kwargs: Any,  # pyright: ignore[reportArgumentType]
     ):
         super().__init__(**kwargs)
         if CortexClient is None:

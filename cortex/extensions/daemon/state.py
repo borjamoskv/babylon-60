@@ -106,7 +106,10 @@ class DaemonState:
                     return
             except (json.JSONDecodeError, OSError, KeyError):
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in state.py')
+
+                logging.getLogger(__name__).error(
+                    "DETECTIVE-OMEGA: Silent exception swallowed in state.py"
+                )
 
         try:
             path = CORTEX_ROOT / "handoff.json"

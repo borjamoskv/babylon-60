@@ -22,13 +22,19 @@ else:
         ReputationManager = _RM
     except ImportError:
         import logging
-        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in __init__.py')
+
+        logging.getLogger(__name__).error(
+            "DETECTIVE-OMEGA: Silent exception swallowed in __init__.py"
+        )
     try:
         from cortex.consensus.trust import TrustGraph as _TG
 
         TrustGraph = _TG
     except ImportError:
         import logging
-        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in __init__.py')
+
+        logging.getLogger(__name__).error(
+            "DETECTIVE-OMEGA: Silent exception swallowed in __init__.py"
+        )
 
 __all__ = ["ConsensusManager", "ReputationManager", "TrustGraph"]

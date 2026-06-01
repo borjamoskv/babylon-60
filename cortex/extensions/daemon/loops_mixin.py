@@ -24,8 +24,7 @@ class LoopsMixin:
     neural_monitor: Any
     _threads: list[threading.Thread]
 
-    def _alert_neural(self, alerts: list) -> None:
-        ...
+    def _alert_neural(self, alerts: list) -> None: ...
 
     cert_monitor: Any
     engine_health: Any
@@ -77,7 +76,9 @@ class LoopsMixin:
         await daemon.stop()
         await task
 
-    async def _run_loop_daemon_async(self, daemon: Any, name: str, emoji: str, run_method: str = "run_loop") -> None:
+    async def _run_loop_daemon_async(
+        self, daemon: Any, name: str, emoji: str, run_method: str = "run_loop"
+    ) -> None:
         """Runs a daemon's run_loop/run method as an async task."""
         if not daemon:
             return
@@ -89,15 +90,6 @@ class LoopsMixin:
                 await res
         except Exception as e:  # noqa: BLE001
             logger.error("%s loop error: %s", name, e)
-
-
-
-
-
-
-
-
-
 
     def _auto_sync(self, status: DaemonStatus) -> None:
         """Automatic memory JSON ↔ CORTEX DB synchronization."""
@@ -133,7 +125,10 @@ class LoopsMixin:
                 tracker.flush()
             except (ValueError, KeyError, OSError, RuntimeError, AttributeError):  # noqa: BLE001 — tracker flush is best-effort
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in loops_mixin.py')
+
+                logging.getLogger(__name__).error(
+                    "DETECTIVE-OMEGA: Silent exception swallowed in loops_mixin.py"
+                )
 
     def _should_alert(self, key: str) -> bool:
         """Rate-limit duplicate alerts."""
@@ -160,14 +155,6 @@ class LoopsMixin:
                 await asyncio.sleep(1.0)
             except asyncio.CancelledError:
                 break
-
-
-
-
-
-
-
-
 
     async def _run_health_loop_async(self) -> None:
         """Periodic health monitoring via Health Index (Async)."""

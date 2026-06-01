@@ -1,6 +1,7 @@
 import pytest
 import aiosqlite
 
+
 @pytest.fixture
 async def db():
     """In-memory SQLite with facts table."""
