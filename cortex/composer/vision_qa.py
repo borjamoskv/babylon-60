@@ -91,7 +91,7 @@ class AestheticAuditor:
             working_memory=[
                 {
                     "role": "user",
-                    "content": [  # type: ignore (Bypass standard str payload for multi-modal if supported)
+                    "content": [  # type: ignore
                         {"type": "text", "text": "Audita este render:"},
                         {
                             "type": "image_url",
