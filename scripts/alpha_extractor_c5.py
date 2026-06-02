@@ -1,56 +1,51 @@
 import csv
+import pandas as pd
 from pathlib import Path
 
 # ==========================================
 # CORTEX PERSIST: ALPHA SIGNAL EXTRACTOR 
 # Reality Level: C5-REAL
 # ==========================================
-# Objetivo: Encontrar asimetría de mercado (Alpha).
-# Identificar nodos con alto output termodinámico (código/realidad)
-# pero bajo reconocimiento en la red social (narrativa).
 
-SMOKE_INDEX_FILE = Path("data/reputation_graph/smoke_index_report.csv")
+TIER1_METRICS_FILE = Path("data/mafia_ai/tier1_node_metrics.csv")
 
 class AlphaExtractor:
     def __init__(self):
         self.alpha_nodes = []
         
     def extract_alpha(self):
-        if not SMOKE_INDEX_FILE.exists():
-            print("[!] Sin datos base. Ejecuta la calculadora de Humo primero.")
+        if not TIER1_METRICS_FILE.exists():
+            print(f"[!] Archivo {TIER1_METRICS_FILE} no encontrado. Ejecuta la Fase 1.")
             return
 
-        with open(SMOKE_INDEX_FILE, encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                node = row["Node"]
-                smoke = float(row["Smoke_Index"])
-                real_output = int(row["Real_Output_Repos"])
-                social_legit = float(row["Social_Legitimacy"])
-                
-                # Definición de Alpha:
-                # 1. Tienen output real demostrado (> 0)
-                # 2. Su humo térmico es excepcionalmente bajo (< 1.0)
-                # (Es decir, la relación entre lo que construyen y la atención que reciben es asimétrica a favor de la construcción).
-                if real_output > 0 and smoke < 1.0:
-                    self.alpha_nodes.append({
-                        "Node": node,
-                        "Real_Output": real_output,
-                        "Social_Legitimacy": social_legit,
-                        "Smoke_Index": smoke
-                    })
-
-        # Ordenar por Output Real descendente y Smoke Index ascendente
-        self.alpha_nodes.sort(key=lambda x: (-x["Real_Output"], x["Smoke_Index"]))
+        df = pd.read_csv(TIER1_METRICS_FILE)
         
-        print("\n--- CORTEX ALPHA TARGETS (ASYMMETRIC BUILDERS) ---")
-        print("Métrica: Alto Output Empírico + Baja Integración en la 'Mafia AI'")
-        print(f"{'Nodo (Builder)':<30} | {'Output Real':<15} | {'Smoke Index (Ruido)':<20}")
-        print("-" * 75)
-        for target in self.alpha_nodes:
-            print(f"{target['Node']:<30} | {target['Real_Output']:<15} | {target['Smoke_Index']:<20}")
+        # En ecosistemas de newsletters, aproximamos el "Output Real" 
+        # (trabajo de investigación original) a su Out_Degree (cuánto referencian)
+        # y la "Atención Cautiva" a su In_Degree y PageRank.
+        #
+        # Smoke Index = (Centralidad de Atención) / (Esfuerzo Topológico)
+        # Smoke_Index = (In_Degree * PageRank * 1000) / (Out_Degree + 1)
+        
+        # Calculamos el Smoke Index
+        df['Smoke_Index'] = (df['In_Degree'] * df['PageRank'] * 1000) / (df['Out_Degree'] + 1)
+        
+        # Definición de Alpha Asimétrico:
+        # Tienen output topológico demostrado (Out_Degree > 0)
+        # Pero bajo reconocimiento en el ecosistema (Smoke_Index bajo)
+        
+        alpha_df = df[(df['Out_Degree'] > 0) & (df['Smoke_Index'] < df['Smoke_Index'].median())].copy()
+        alpha_df = alpha_df.sort_values(by=['Smoke_Index', 'Out_Degree'], ascending=[True, False])
+        
+        print("\\n--- CORTEX ALPHA TARGETS (ASYMMETRIC BUILDERS) ---")
+        print("Métrica: Alta Investigación Estructural + Baja Centralidad de Atención")
+        print(f"{'Nodo (Builder)':<25} | {'Investigación (Out)':<20} | {'Atención (In)':<15} | {'Smoke Index':<15}")
+        print("-" * 80)
+        
+        for _, row in alpha_df.iterrows():
+            print(f"{row['Node']:<25} | {row['Out_Degree']:<20} | {row['In_Degree']:<15} | {row['Smoke_Index']:.4f}")
             
-        print("\n[*] Acción Recomendada: Priorizar ingesta de estos nodos en el flujo SOTA.")
+        print("\\n[*] Acción Recomendada: Priorizar ingesta de estos nodos en el flujo SOTA de MOSKV-1.")
 
 if __name__ == "__main__":
     extractor = AlphaExtractor()

@@ -1,4 +1,5 @@
 import json
+import pandas as pd
 from pathlib import Path
 import csv
 
@@ -8,7 +9,7 @@ import csv
 # Objetivo: Inmunizar la ingesta de conocimiento de MOSKV-1
 # frente a nodos con alto Smoke Index (Economía de la Mentira).
 
-SMOKE_INDEX_FILE = Path("data/reputation_graph/smoke_index_report.csv")
+METRICS_FILE = Path("data/mafia_ai/tier1_node_metrics.csv")
 THRESHOLD_SMOKE = 10.0  # Límite máximo de humo tolerado (Centralidad > 10x el Output Real)
 
 class CognitiveFirewall:
@@ -18,22 +19,25 @@ class CognitiveFirewall:
         self._load_matrix()
 
     def _load_matrix(self):
-        if not SMOKE_INDEX_FILE.exists():
-            print("[!] Advertencia: No se detecta Smoke Index previo. Firewall inactivo.")
+        if not METRICS_FILE.exists():
+            print("[!] Advertencia: No se detecta Topología (tier1_node_metrics.csv). Firewall inactivo.")
             return
 
-        with open(SMOKE_INDEX_FILE, encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                node = row["Node"]
-                smoke = float(row["Smoke_Index"])
+        df = pd.read_csv(METRICS_FILE)
+        
+        # Smoke Index = (In_Degree * PageRank * 1000) / (Out_Degree + 1)
+        df['Smoke_Index'] = (df['In_Degree'] * df['PageRank'] * 1000) / (df['Out_Degree'] + 1)
+
+        for _, row in df.iterrows():
+            node = row["Node"]
+            smoke = row["Smoke_Index"]
+            
+            # Regla Estructural: Si el humo térmico supera el umbral, censura absoluta.
+            if smoke > THRESHOLD_SMOKE:
+                self.blacklist.add(node)
+            else:
+                self.whitelist.add(node)
                 
-                # Regla Estructural: Si el humo térmico supera el umbral, censura absoluta.
-                if smoke > THRESHOLD_SMOKE:
-                    self.blacklist.add(node)
-                else:
-                    self.whitelist.add(node)
-                    
         print(f"[*] Firewall Inicializado. Nodos Bloqueados: {len(self.blacklist)} | Nodos Permitidos: {len(self.whitelist)}")
 
     def filter_payload(self, source_node: str, content: str) -> bool:
@@ -41,7 +45,6 @@ class CognitiveFirewall:
         Retorna True si el contenido está anclado a la realidad (Permitido).
         Retorna False si el contenido proviene de la Mafia AI (Censurado).
         """
-        # Normalizar nodo
         source_node = source_node.lower().strip()
         
         if source_node in self.blacklist:
@@ -55,11 +58,11 @@ if __name__ == "__main__":
     fw = CognitiveFirewall()
     
     # Simulacro de ingesta
-    print("\n--- TEST DE INGESTA DE SEÑALES ---")
+    print("\\n--- TEST DE INGESTA DE SEÑALES ---")
     mock_stream = [
-        {"origen": "aleximas", "payload": "10 ways AI will change B2B sales in 2027"},
-        {"origen": "forecastingresearch", "payload": "New empirical benchmark on LLM logic constraints"},
-        {"origen": "freesystems", "payload": "Why you need an AI strategy tomorrow"}
+        {"origen": "exponentialview", "payload": "SOTA Report on Battery Tech"},
+        {"origen": "garymarcus", "payload": "Why AGI is failing again"},
+        {"origen": "thezvi", "payload": "AI Policy Weekly Update"}
     ]
     
     for item in mock_stream:
