@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "CORTEX-Persist: Mafia AI Blocker",
+  "version": "1.0.0",
+  "description": "Filtro C5-REAL de la Economía de la Mentira. Bloquea nodos con alto Smoke Index (Ruido Termal).",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "*://*.twitter.com/*",
+    "*://*.x.com/*",
+    "*://*.substack.com/*",
+    "*://*.linkedin.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.twitter.com/*",
+        "*://*.x.com/*",
+        "*://*.substack.com/*",
+        "*://*.linkedin.com/*"
+      ],
+      "js": ["blacklist.js", "content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
