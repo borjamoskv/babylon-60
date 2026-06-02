@@ -8,6 +8,7 @@ import json
 import time
 import uuid
 import random
+import asyncio
 import logging
 import sys
 
@@ -26,7 +27,7 @@ def delivery_report(err, msg):
         logger.error(f"Fallo de entrega: {err}")
 
 
-def inject_synthetic_friction(broker="localhost:9092", num_events=500):
+async def inject_synthetic_friction(broker="localhost:9092", num_events=500):
     """Inyecta una carga de exergía y entropía en el bus system.friction."""
     producer = Producer({"bootstrap.servers": broker})
 
@@ -64,7 +65,7 @@ def inject_synthetic_friction(broker="localhost:9092", num_events=500):
 
         # Pausa ligera para emular streaming natural
         if i % 50 == 0:
-            time.sleep(0.05)
+            await asyncio.sleep(0.05)
 
     producer.flush()
     logger.info(
@@ -74,4 +75,4 @@ def inject_synthetic_friction(broker="localhost:9092", num_events=500):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    inject_synthetic_friction()
+    asyncio.run(inject_synthetic_friction())

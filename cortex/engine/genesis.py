@@ -8,7 +8,7 @@ This is the "generate new agents" capability of L7:
 3. SPAWN - Instantiate agents with evolved dispatch trees
 4. REGISTER - Add new agent types to the runtime registry
 
-The Genesis engine does NOT use exec() or eval() on raw strings.
+The Genesis engine does NOT use 'exec' function or 'eval' function on raw strings.
 All agent creation flows through the ISA builder's type-safe DSL,
 ensuring structural validity at construction time.
 
