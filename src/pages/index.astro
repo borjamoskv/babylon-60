@@ -6,25 +6,24 @@ import TelemetryWidget from '../components/TelemetryWidget.tsx';
 const navLinks = [
 	{ href: '#quickstart', label: 'Quickstart' },
 	{ href: '#features', label: 'Features' },
+	{ href: '#why-cortex', label: 'Why CORTEX?' },
 	{ href: '#sdks', label: 'SDKs' },
 	{ href: '#pricing', label: 'Pricing' },
-	{ href: 'https://agents.archi', label: 'Audit Registry' },
 	{ href: '/blog', label: 'Blog' },
-	{ href: '/taste', label: 'Taste' },
 ];
 
 const heroProofs = [
 	{
-		value: 'Event Ingestion',
-		label: 'Track any state change or AI decision in milliseconds.',
+		value: 'Agent Accountability',
+		label: 'Prove exactly what your agent knew when it made a decision.',
 	},
 	{
-		value: 'Provenance API',
-		label: 'Cryptographic hash-chains prove your event history is intact.',
+		value: 'Tamper-Evident',
+		label: 'Hash-chains guarantee the decision record is completely intact.',
 	},
 	{
-		value: 'State Replay',
-		label: 'Reconstruct exactly what happened at any point in time.',
+		value: 'Deterministic Replay',
+		label: 'Reconstruct agent state exactly as it was during the failure.',
 	},
 ];
 
@@ -33,67 +32,19 @@ const signalCards = [
 		index: '01',
 		label: 'Ingest',
 		title: 'Drop in and track',
-		body: 'Send events from any system. We handle the ledger, indexing, and storage.',
+		body: 'Send events from any agent or system. We handle the ledger, indexing, and storage.',
 	},
 	{
 		index: '02',
 		label: 'Prove',
 		title: 'Tamper-evident record',
-		body: 'Every event is cryptographically sealed. Detect silent mutation instantly.',
+		body: 'Every decision is cryptographically sealed. Detect silent mutation instantly.',
 	},
 	{
 		index: '03',
 		label: 'Replay',
 		title: 'Reconstruct state',
-		body: 'Query the API to rebuild system state and prove what happened.',
-	},
-];
-
-const capabilityCards = [
-	{
-		label: 'Capture',
-		title: 'Capture the moments that matter',
-		body: 'Record facts, decisions, and state transitions in a form that survives contact with real incident review.',
-		items: ['Decision events', 'Reviewable context', 'Workflow ownership'],
-	},
-	{
-		label: 'Seal',
-		title: 'Seal the record',
-		body: 'Protect the decision trail from silent edits and quiet drift so later review starts from a defensible source.',
-		items: ['Hash-linked lineage', 'Integrity checks', 'Tamper evidence'],
-	},
-	{
-		label: 'Verify',
-		title: 'Verify later',
-		body: 'When a workflow misfires, teams can validate the record instead of guessing from traces, screenshots, and memory.',
-		items: ['Reproducible checks', 'Clear record status', 'Faster investigations'],
-	},
-	{
-		label: 'Export',
-		title: 'Export proof',
-		body: 'Hand security, risk, or leadership something they can inspect quickly without turning the review into theater.',
-		items: ['Audit packs', 'Human-readable artifacts', 'Internal review support'],
-	},
-];
-
-const fitCards = [
-	{
-		label: 'Production',
-		title: 'Teams already shipping agents',
-		body: 'Best fit when the agent already touches a real workflow and the cost of failure is operational, not theoretical.',
-		items: ['Code and deploy actions', 'Support or approval flows'],
-	},
-	{
-		label: 'Risk',
-		title: 'Sensitive or scrutinized surfaces',
-		body: 'Useful when workflows involve pricing, finance, PII, approvals, or anything a human may have to defend later.',
-		items: ['Internal trust reviews', 'Customer or audit scrutiny'],
-	},
-	{
-		label: 'Adoption',
-		title: 'Stacks that cannot migrate cleanly',
-		body: 'CORTEX works best when replacing the full memory stack would be expensive, slow, or politically painful.',
-		items: ['Drop in on top', 'Start with one flow'],
+		body: 'Query the API to rebuild system state and prove exactly what happened when an agent failed.',
 	},
 ];
 
@@ -131,8 +82,8 @@ const docsUrl = 'https://github.com/borjamoskv/Cortex-Persist/tree/main/docs';
 ---
 
 <SiteLayout
-	title="CORTEX Persist | Verifiable Event Ledger for Software Systems"
-	description="Track, verify, and replay every event in your system with 2 lines of code."
+	title="CORTEX Persist | Know exactly what your AI agents did."
+	description="Track every decision, prove integrity, and replay failures without relying on logs, screenshots, or human memory."
 	canonical="https://cortexpersist.com/"
 >
 	<main class="landing-shell">
@@ -167,13 +118,13 @@ const docsUrl = 'https://github.com/borjamoskv/Cortex-Persist/tree/main/docs';
 
 		<section class="hero-section surface" id="quickstart">
 			<div class="hero-copy">
-				<p class="eyebrow">Developer SaaS / Zero-friction Integration</p>
-				<h1>A verifiable event ledger for modern software systems.</h1>
+				<p class="eyebrow">Developer SaaS / Built for AI Agent Teams</p>
+				<h1>Know exactly what your AI agents did.</h1>
 				<p class="hero-text">
-					Ingest events. Prove integrity. Replay system state. Track, verify, and replay every event in your system with 2 lines of code.
+					Track every decision, prove integrity, and replay failures without relying on logs, screenshots, or human memory. 
 				</p>
 				<p class="microcopy">
-					Plans start at $0. Start tracking your first events in less than 60 seconds.
+					A verifiable event ledger you can integrate in 2 lines of code. Plans start at $0.
 				</p>
 
 				<div class="action-row">
@@ -252,6 +203,40 @@ const docsUrl = 'https://github.com/borjamoskv/Cortex-Persist/tree/main/docs';
 
 		<CortexAuditLedger client:load />
 
+		<section class="section-frame surface" id="why-cortex">
+			<div class="section-heading">
+				<p class="section-kicker">The Gap</p>
+				<h2>Why not just use logs?</h2>
+				<p>
+					Traditional observability tells you something happened. CORTEX proves exactly what the agent knew when it made the decision, and guarantees nobody changed the story afterwards.
+				</p>
+			</div>
+
+			<div class="fit-layout">
+				<!-- Traditional Logs -->
+				<article class="fit-card surface-sunken">
+					<p class="surface-label">Traditional Logs (e.g. Datadog, Elastic)</p>
+					<ul class="surface-list">
+						<li style="color: var(--text-muted); text-decoration: line-through;">Mutable text strings that can be altered or deleted.</li>
+						<li style="color: var(--text-muted); text-decoration: line-through;">Fragmented context across different services.</li>
+						<li style="color: var(--text-muted); text-decoration: line-through;">Nearly impossible to replay the exact state.</li>
+						<li style="color: var(--text-muted); text-decoration: line-through;">Weak or non-existent provenance.</li>
+					</ul>
+				</article>
+
+				<!-- CORTEX -->
+				<article class="fit-card surface-sunken" style="border: 1px solid var(--accent);">
+					<p class="surface-label" style="color: var(--accent);">CORTEX Event Ledger</p>
+					<ul class="surface-list">
+						<li><strong>Cryptographically hash-linked</strong> events.</li>
+						<li><strong>Unified</strong> and structured event history.</li>
+						<li><strong>Deterministic state reconstruction</strong> API.</li>
+						<li><strong>Mathematical provenance</strong> you can show to an auditor.</li>
+					</ul>
+				</article>
+			</div>
+		</section>
+
 		<section class="section-frame surface" id="sdks">
 			<div class="section-heading">
 				<p class="section-kicker">Developer SDKs</p>
@@ -273,7 +258,7 @@ const docsUrl = 'https://github.com/borjamoskv/Cortex-Persist/tree/main/docs';
 						<br/><br/>
 						const cortex = new CortexClient(&#123; apiKey: process.env.CORTEX_API_KEY &#125;);
 						<br/>
-						await cortex.logEvent(&#123; type: 'user.login', userId: 'usr_123' &#125;);
+						await cortex.logEvent(&#123; type: 'agent.decision', actor: 'agent-1' &#125;);
 					</p>
 				</article>
 
@@ -333,7 +318,7 @@ const docsUrl = 'https://github.com/borjamoskv/Cortex-Persist/tree/main/docs';
 				<p class="section-kicker">Get Started</p>
 				<h2>Start logging events today.</h2>
 				<p>
-					Drop in the API key and get instant provenance for your most critical workflows.
+					Drop in the API key and get instant provenance for your most critical agent workflows.
 				</p>
 			</div>
 
