@@ -17,11 +17,15 @@ class Mutator(ast.NodeTransformer):
         self.mutations_applied = 0
         self.target_mutation = 0
         self.current_index = 0
+        self.last_mutation_type = None
+        self.last_mutation_lineno = -1
 
-    def try_mutate(self, action_fn):
+    def try_mutate(self, node, mutation_type, action_fn):
         if self.current_index == self.target_mutation:
             action_fn()
             self.mutations_applied += 1
+            self.last_mutation_type = mutation_type
+            self.last_mutation_lineno = getattr(node, 'lineno', -1)
         self.current_index += 1
 
     def visit_Compare(self, node):
@@ -42,7 +46,7 @@ class Mutator(ast.NodeTransformer):
         # We only consider mutable if the operator is in our list
         mutable = any(isinstance(op, (ast.Eq, ast.NotEq, ast.Is, ast.IsNot, ast.In, ast.NotIn, ast.Lt, ast.LtE, ast.Gt, ast.GtE)) for op in node.ops)
         if mutable:
-            self.try_mutate(action)
+            self.try_mutate(node, "CompareFlip", action)
         return node
 
     def visit_BoolOp(self, node):
@@ -52,7 +56,7 @@ class Mutator(ast.NodeTransformer):
             elif isinstance(node.op, ast.Or): node.op = ast.And()
         
         if isinstance(node.op, (ast.And, ast.Or)):
-            self.try_mutate(action)
+            self.try_mutate(node, "BooleanFlip", action)
         return node
 
     def visit_BinOp(self, node):
@@ -64,14 +68,14 @@ class Mutator(ast.NodeTransformer):
             elif isinstance(node.op, ast.Div): node.op = ast.Mult()
         
         if isinstance(node.op, (ast.Add, ast.Sub, ast.Mult, ast.Div)):
-            self.try_mutate(action)
+            self.try_mutate(node, "BinOpFlip", action)
         return node
 
     def visit_If(self, node):
         self.generic_visit(node)
         def action():
             node.test = ast.UnaryOp(op=ast.Not(), operand=node.test)
-        self.try_mutate(action)
+        self.try_mutate(node, "BranchInversion", action)
         return node
 
     def visit_Constant(self, node):
@@ -83,7 +87,7 @@ class Mutator(ast.NodeTransformer):
                 node.value = node.value + 1
         
         if isinstance(node.value, (bool, int)) and not isinstance(node.value, str):
-            self.try_mutate(action)
+            self.try_mutate(node, "ConstantReplacement", action)
         return node
 
     def visit_Return(self, node):
@@ -96,7 +100,7 @@ class Mutator(ast.NodeTransformer):
                 node.value = ast.Constant(value=None)
         
         if node.value:
-            self.try_mutate(action)
+            self.try_mutate(node, "ReturnValueMutation", action)
         return node
 
 
@@ -118,6 +122,7 @@ def mutate_and_test(target_dir):
     total_files_tested = 0
     total_killed = 0
     total_survived = 0
+    survivors = []
 
     logger.info(f"Scanning target: {target_dir}")
     
@@ -157,10 +162,20 @@ def mutate_and_test(target_dir):
                 cmd = f"./.venv/bin/pytest tests/ -k {target_file.stem} -n auto --disable-warnings"
                 result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
                 
-                if result.returncode != 0:
+                # Exit code 1 means tests failed (mutant killed)
+                # Exit code 0 means tests passed (mutant survived)
+                # Exit code 5 means no tests collected (mutant survived)
+                if result.returncode == 1:
                     file_killed += 1
                 else:
                     file_survived += 1
+                    survivors.append({
+                        "file": str(target_file),
+                        "mutation_index": i,
+                        "mutation_type": mutator.last_mutation_type,
+                        "lineno": mutator.last_mutation_lineno,
+                        "pytest_exit_code": result.returncode
+                    })
         except Exception as e:
             print(f"Error processing {target_file}: {e}")
         finally:
@@ -171,7 +186,7 @@ def mutate_and_test(target_dir):
         total_killed += file_killed
         total_survived += file_survived
 
-    return total_files_tested, total_killed, total_survived
+    return total_files_tested, total_killed, total_survived, survivors
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
@@ -181,12 +196,14 @@ if __name__ == '__main__':
     overall_files = 0
     overall_killed = 0
     overall_survived = 0
+    all_survivors = []
     
     for target in sys.argv[1:]:
-        f, k, s = mutate_and_test(target)
+        f, k, s, survs = mutate_and_test(target)
         overall_files += f
         overall_killed += k
         overall_survived += s
+        all_survivors.extend(survs)
         
     total_tested = overall_killed + overall_survived
     mutation_score = (overall_killed / total_tested * 100) if total_tested > 0 else 0.0
@@ -226,4 +243,9 @@ if __name__ == '__main__':
     with open("mutation_report.yaml", "w") as f:
         yaml.dump(report, f, default_flow_style=False)
         
+    import json
+    with open("survivors_matrix.json", "w") as f:
+        json.dump(all_survivors, f, indent=2)
+        
     logger.info(yaml.dump(report, default_flow_style=False))
+    logger.info(f"Exported {len(all_survivors)} survivor nodes to survivors_matrix.json")
