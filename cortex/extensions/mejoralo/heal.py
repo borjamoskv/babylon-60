@@ -346,7 +346,7 @@ def heal_project(
     engine: MejoraloEngine | None = None,  # type: ignore[reportGeneralTypeIssues]
 ) -> bool:
     """Orchestrate autonomous healing: detect, rewrite, test, commit - RELENTLESSLY."""
-    from cortex.cli import console  # pyright: ignore
+    from cortex.cli.common import console  # pyright: ignore
 
     current_result = scan_result
     iteration = 0

@@ -78,6 +78,15 @@ class MejoraloEngine:
         )
         return res if isinstance(res, list) else []
 
+    async def scars_async(self, project: str, file_path: str, limit: int = 10) -> list[dict[str, Any]]:
+        """Retrieve historical taints (scars) for a specific file asynchronously."""
+        res = await self.engine.recall(
+            project=project,
+            tags=["mejoralo", "taint"],
+            limit=limit,
+        )
+        return res if isinstance(res, list) else []
+
     def record_scar(self, project: str, file_path: str, reason: str) -> None:
         """Record a scar (failure/taint evidence) in the CORTEX ledger."""
         self.engine.store_sync(

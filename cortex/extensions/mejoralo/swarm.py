@@ -13,7 +13,7 @@ import textwrap
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from cortex.cli import console  # pyright: ignore
+from cortex.cli.common import console  # pyright: ignore
 from cortex.extensions.mejoralo.constants import (
     DEVILS_ADVOCATE_THRESHOLD,
     SWARM_BASE_TEMPERATURE,
@@ -118,7 +118,7 @@ class MejoraloSwarm:
             return None
 
         findings_str = "- " + "\n- ".join(findings)
-        scars_str = self._get_scars_prompt(engine, project, file_path.name)
+        scars_str = await self._get_scars_prompt(engine, project, file_path.name)
         swarm_system = self._build_swarm_system(self._select_specialists(findings_str), iteration)
         logger.info("🐝 Swarm (L%d) pensando en %s...", self.level, file_path.name)
 
@@ -133,7 +133,7 @@ class MejoraloSwarm:
             logger.info("⚠️ Modo quirúrgico fallido - fallback a archivo completo.")
 
         # 📦 Full-file fallback
-        base_prompt = self._build_prompt(file_path, content, findings_str, engine, project)
+        base_prompt = self._build_prompt(file_path, content, findings_str, scars_str)
         result_content = await self._run_orchestra(base_prompt, swarm_system)
         if result_content:
             logger.info("✨ Síntesis completada para %s", file_path.name)
@@ -314,9 +314,8 @@ class MejoraloSwarm:
             return None
 
     def _build_prompt(
-        self, file_path: Path, content: str, findings_str: str, engine: Any, project: str | None
+        self, file_path: Path, content: str, findings_str: str, scars_str: str
     ) -> str:
-        scars_str = self._get_scars_prompt(engine, project, file_path.name)
         return (
             f"REFAC-TASK: Fix findings in {file_path.name}. Maintain EXACT functionality.\n"
             f"Findings:\n{findings_str}{scars_str}\n\n"
@@ -339,11 +338,14 @@ class MejoraloSwarm:
                 logger.error("Swarm orchestration failed: %s", e)
                 return None
 
-    def _get_scars_prompt(self, engine: Any, project: str | None, filename: str) -> str:
+    async def _get_scars_prompt(self, engine: Any, project: str | None, filename: str) -> str:
         """Helper to format previous failure scars without bloating main flow."""
         if not engine or not project:
             return ""
-        scars = engine.scars(project, filename)
+        if hasattr(engine, "scars_async"):
+            scars = await engine.scars_async(project, filename)
+        else:
+            scars = engine.scars(project, filename)
         if not scars:
             return ""
 
