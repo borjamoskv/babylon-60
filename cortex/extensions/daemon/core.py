@@ -233,6 +233,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin, ResourceMgrMixin,
             len(status.memory_alerts),
         )
         return status
+    @staticmethod
 
     def load_status() -> dict | None:
         """Load last daemon status from disk."""
