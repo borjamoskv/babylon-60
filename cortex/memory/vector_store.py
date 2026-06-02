@@ -9,6 +9,7 @@ CAIR/SCL compatible. Ensures that core engine is backend-agnostic.
 """
 
 from __future__ import annotations
+
 from typing import Any, Protocol
 
 __all__ = ["VectorStore"]

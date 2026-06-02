@@ -18,8 +18,8 @@ if TYPE_CHECKING:
     from cortex.crypto import CortexEncrypter
 
 from cortex.memory.temporal import build_temporal_filter_params
-from cortex.search.models import SearchResult
 from cortex.memory.vector_store import VectorStore
+from cortex.search.models import SearchResult
 
 __all__ = ["semantic_search", "semantic_search_sync"]
 
