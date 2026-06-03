@@ -26,7 +26,7 @@ def register_apollo_tools(mcp: FastMCP) -> None:  # pyright: ignore[reportInvali
     """Register Apollo extraction tools on the MCP server."""
 
     @mcp.tool()
-    def cortex_apollo_extract_leads(
+    async def cortex_apollo_extract_leads(
         target_leads: int = 10, output_filename: str = "apollo_leads_c5.json"
     ) -> str:
         """C5-REAL deterministic extraction of B2B Web3 AI leads via Apollo API.
@@ -81,7 +81,8 @@ def register_apollo_tools(mcp: FastMCP) -> None:  # pyright: ignore[reportInvali
                     )
 
                 data["page"] += 1
-                time.sleep(1)  # Rate limit respect
+                import asyncio
+                await asyncio.sleep(1)  # Rate limit respect
 
             except Exception as e:
                 logger.error(f"[!] Apollo Extraction Error: {e}")
