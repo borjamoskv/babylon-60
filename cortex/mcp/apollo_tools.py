@@ -60,7 +60,7 @@ def register_apollo_tools(mcp: FastMCP) -> None:  # pyright: ignore[reportInvali
 
         while len(extracted_leads) < target_leads:
             try:
-                response = requests.post(url, headers=headers, json=data)
+                response = requests.post(url, headers=headers, json=data, timeout=10.0)
                 response.raise_for_status()
                 contacts = response.json().get("contacts", [])
 

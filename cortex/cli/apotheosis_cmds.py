@@ -126,8 +126,10 @@ def guard_cmd() -> None:
         progress.update(t_id, description="[dim]Ejecutando auto-fix de lint (ruff --fix)...[/]")
 
         # Real: Run ruff autofix
-        ruff_result = subprocess.run(
-            ["ruff", "check", "--fix", str(target)],
+        import shutil
+        ruff_path = shutil.which("ruff") or "ruff"
+        ruff_result = subprocess.run(  # noqa: S603
+            [ruff_path, "check", "--fix", str(target)],
             capture_output=True,
             text=True,
             timeout=60,
@@ -194,8 +196,10 @@ def nirvana_cmd(target_path: str) -> None:
         t_id = progress.add_task("[bold #f72585]Ejecutando ruff autofix agresivo...[/]", total=None)
 
         # Real: Aggressive ruff fix
-        subprocess.run(
-            ["ruff", "check", "--fix", "--unsafe-fixes", str(path_resolved)],
+        import shutil
+        ruff_path = shutil.which("ruff") or "ruff"
+        subprocess.run(  # noqa: S603
+            [ruff_path, "check", "--fix", "--unsafe-fixes", str(path_resolved)],
             capture_output=True,
             text=True,
             timeout=60,
@@ -204,8 +208,8 @@ def nirvana_cmd(target_path: str) -> None:
         progress.update(t_id, description="[bold #f72585]Aplicando formatting canónico...[/]")
 
         # Real: ruff format
-        subprocess.run(
-            ["ruff", "format", str(path_resolved)],
+        subprocess.run(  # noqa: S603
+            [ruff_path, "format", str(path_resolved)],
             capture_output=True,
             text=True,
             timeout=60,
