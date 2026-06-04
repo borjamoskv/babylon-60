@@ -16,12 +16,12 @@ async def radar_de_entropia_inicio():
     print("[AUTÓNOMO v2] Iniciando Radar de Entropía...")
     try:
         # Check Git status
-        result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
+        result = subprocess.run(["/usr/bin/git", "status", "--porcelain"], capture_output=True, text=True)
         if result.stdout.strip():
             print("[AUTÓNOMO v2] C5-REAL: Estado sucio detectado. Auto-Commit Zero-Ask.")
-            subprocess.run(["git", "add", "."])
+            subprocess.run(["/usr/bin/git", "add", "."])
             subprocess.run(
-                ["git", "commit", "-m", "chore(auto): purga y estabilización de entropía"]
+                ["/usr/bin/git", "commit", "-m", "chore(auto): purga y estabilización de entropía"]
             )
         else:
             print("[AUTÓNOMO v2] Homeostasis confirmada. Procediendo.")

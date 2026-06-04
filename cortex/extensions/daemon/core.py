@@ -216,7 +216,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin, ResourceMgrMixin,
                 self._run_monitor(
                     status,
                     "auto_immune_alerts",
-                    self.auto_immune_monitor,
+                    self.auto_immune_monitor,  # pyright: ignore[reportAttributeAccessIssue]
                     self._alert_auto_immune,  # pyright: ignore[reportAttributeAccessIssue]
                 )
         self._auto_sync(status)
