@@ -4,10 +4,9 @@ import statistics
 import random
 from dataclasses import dataclass, asdict
 from typing import List, Dict, Any, Tuple
-from cortex.observability.efel import (
-    SystemState, encode_state, encode_task, 
-    build_failure_centroids, embedding_risk, efel_priority
-)
+from cortex.observability.efel import SystemState, encode_state, encode_task
+from cortex.observability.fdf import FailureField, Particle, simulate_field, energy
+import numpy as np
 
 CRONOS_LOG = os.path.expanduser("~/.gemini/config/skills/_metrics/cronos_memory.jsonl")
 META_PARAMS_LOG = os.path.expanduser("~/.gemini/config/skills/_metrics/meta_params.json")
@@ -37,23 +36,29 @@ class ExergyEngine:
         self.history = self._load_cronos_history()
         self.genomes = self._extract_workflow_genomes()
         self.meta = self._load_meta_params()
-        self.failure_centroids = self._build_centroids()
+        self.failure_field = self._build_failure_field()
 
-    def _build_centroids(self):
-        # Extract bad runs (e.g. outcome_score < 0.3 or success == False)
+    def _build_failure_field(self):
         bad_runs = [r for r in self.history if r.get('outcome_score', 1.0) < 0.4 or not r.get('success', True)]
-        # We need a fake SystemState for historical runs to embed them. 
-        # In a real system, the state would be logged in cronos_memory.jsonl.
         embeddings = []
         for r in bad_runs:
+            wf_name = r.get('workflow')
+            stats = self.get_task_stats(wf_name)
             s = SystemState(
                 git_diff=r.get('git_diff', 'unknown'),
                 ast_hash=r.get('ast_hash', 'unknown'),
-                active_tasks=[r.get('workflow')],
+                active_tasks=[wf_name],
                 error_log=r.get('error_log', [])
             )
-            embeddings.append(encode_state(s))
-        return build_failure_centroids(embeddings)
+            state_vec = encode_state(s)
+            task_vec = encode_task(stats)
+            x = np.concatenate([task_vec, state_vec])
+            embeddings.append(x)
+            
+        field = FailureField()
+        if embeddings:
+            field.fit(np.array(embeddings))
+        return field
 
     def _load_meta_params(self) -> MetaParams:
         if os.path.exists(META_PARAMS_LOG):
@@ -157,38 +162,52 @@ class ExergyEngine:
         return TaskStats(workflow, exergy_mean, exergy_var, runtime_mean, runtime_var, confidence)
 
     def lyapunov_scheduler(self, candidate_workflows: List[str], state: SystemState = None) -> List[Dict[str, Any]]:
-        """Nivel 4: EFEL Meta-Lyapunov Scheduler. Risk-penalized Exergy Density in Embedding Space."""
-        ranked = []
+        """Nivel 8: Multi-Agent Field Physics. Descenso de energía global de partículas."""
+        if not candidate_workflows:
+            return []
+            
+        # 1. Create Particles
+        particles = []
+        state_vec = encode_state(state) if state else np.zeros(32) # Dummy state
+        
         for wf in candidate_workflows:
             stats = self.get_task_stats(wf)
+            task_vec = encode_task(stats)
             
-            if state and self.failure_centroids is not None and len(self.failure_centroids) > 0:
-                # EFEL context-aware priority
-                priority = efel_priority(stats, state, self.meta, self.failure_centroids)
-            else:
-                # Fallback flat statistical priority
-                risk_penalty = self.meta.alpha_risk * stats.exergy_var
-                base_score = (stats.exergy_mean - risk_penalty) / (stats.runtime_mean + 1e-6)
-                priority = base_score * stats.confidence
+            # Position is concatenated task and state
+            position = np.concatenate([task_vec, state_vec])
+            velocity = np.zeros_like(position)
+            mass = 1.0 / (stats.exergy_mean + 1e-6)
             
-            ranked.append({
-                "workflow": wf,
-                "expected_exergy": stats.exergy_mean,
-                "exergy_variance": stats.exergy_var,
-                "expected_runtime": stats.runtime_mean,
-                "priority_score": round(max(0.0, priority), 4)
+            particles.append(Particle(
+                task_name=wf, 
+                position=position, 
+                velocity=velocity, 
+                mass=mass,
+                original_stats=stats
+            ))
+            
+        # 2. Simulate Physics
+        if self.failure_field.fitted:
+            simulate_field(particles, self.failure_field, steps=30, dt=0.1)
+            
+        # 3. Collapse to final energy states
+        scored = []
+        for p in particles:
+            E = energy(p, state_vec, self.meta, self.failure_field)
+            
+            # El scheduler minimiza la energía global. Priority es inverso a la Energía.
+            scored.append({
+                "workflow": p.task_name,
+                "expected_exergy": p.original_stats.exergy_mean,
+                "exergy_variance": p.original_stats.exergy_var,
+                "expected_runtime": p.original_stats.runtime_mean,
+                "energy_state": round(E, 4),
+                "priority_score": round(-E, 4) # For CLI sorting compatibility
             })
             
-        ranked.sort(key=lambda x: x["priority_score"], reverse=True)
-        
-        # Epsilon-greedy forced exploration to prevent self-fulfilling bias
-        if candidate_workflows and random.random() < self.meta.epsilon:
-            exploring = random.choice(ranked)
-            exploring["priority_score"] = float('inf') # Force to top
-            exploring["is_exploration"] = True
-            ranked.sort(key=lambda x: x["priority_score"], reverse=True)
-            
-        return ranked
+        scored.sort(key=lambda x: x["energy_state"]) # Min energy wins
+        return scored
 
     def genome_analysis(self) -> Dict[str, Dict[str, float]]:
         """Nivel 5: Analyze exergy across isolated genes instead of monolithic workflows."""
