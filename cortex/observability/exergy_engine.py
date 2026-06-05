@@ -5,7 +5,8 @@ import random
 from dataclasses import dataclass, asdict
 from typing import List, Dict, Any, Tuple
 from cortex.observability.efel import SystemState, encode_state, encode_task
-from cortex.observability.fdf import FailureField, Particle, simulate_field, energy
+from cortex.observability.fdf import FailureField, Particle, simulate_field
+from cortex.observability.caf import select_next, lagrangian
 import numpy as np
 
 CRONOS_LOG = os.path.expanduser("~/.gemini/config/skills/_metrics/cronos_memory.jsonl")
@@ -187,26 +188,33 @@ class ExergyEngine:
                 original_stats=stats
             ))
             
-        # 2. Simulate Physics
+        # 2. Lagrangian Action Minimization (Variational Monte Carlo)
         if self.failure_field.fitted:
-            simulate_field(particles, self.failure_field, steps=30, dt=0.1)
+            # First, simulate field just briefly to acquire history/memory gravity
+            # then use CAF for global action minimization. Or we skip simulate_field
+            # and let CAF just use the static histories if we persist them.
+            # For now, simulate briefly to build the CTC 'history' curvature.
+            simulate_field(particles, self.failure_field, steps=10, dt=0.1)
             
-        # 3. Collapse to final energy states
+        ordered_particles = select_next(particles, state_vec, self.failure_field, self.meta)
+            
+        # 3. Collapse to final Lagrangian action states
         scored = []
-        for p in particles:
-            E = energy(p, state_vec, self.meta, self.failure_field)
+        for p in ordered_particles:
+            L = lagrangian(p, state_vec, self.meta, self.failure_field)
+            dt = p.original_stats.runtime_mean if getattr(p.original_stats, 'runtime_mean', 0) > 0 else 1.0
+            S = -L * dt
             
-            # El scheduler minimiza la energía global. Priority es inverso a la Energía.
             scored.append({
                 "workflow": p.task_name,
                 "expected_exergy": p.original_stats.exergy_mean,
                 "exergy_variance": p.original_stats.exergy_var,
                 "expected_runtime": p.original_stats.runtime_mean,
-                "energy_state": round(E, 4),
-                "priority_score": round(-E, 4) # For CLI sorting compatibility
+                "action_cost": round(S, 4),
+                "priority_score": round(-S, 4) # For CLI sorting compatibility (higher is better)
             })
             
-        scored.sort(key=lambda x: x["energy_state"]) # Min energy wins
+        # select_next already sorted them by action cost, so scored is in correct order
         return scored
 
     def genome_analysis(self) -> Dict[str, Dict[str, float]]:
