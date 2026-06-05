@@ -1,28 +1,46 @@
-from typing import Protocol, List
-from dataclasses import dataclass
+from typing import Protocol, List, Tuple, Any
+from dataclasses import dataclass, field
+import numpy as np
 
 @dataclass
-class MemoryRef:
+class IntentVector:
+    semantic_vector: np.ndarray | list[float]
+    task_vector: np.ndarray | list[float]
+    temporal_bias: float
+    abstraction_level: float
+
+@dataclass
+class MemoryNode:
     id: str
-    score: float
-    summary: str
-    fact_type: str = "knowledge"
+    embedding: np.ndarray | list[float]
+    fact_type: str
+    timestamp: float
+    causal_links: List[str] = field(default_factory=list)
+    semantic_tags: List[str] = field(default_factory=list)
+    content: str = ""  # Populated ONLY during late hydration phase
 
 @dataclass
-class MemoryResult:
-    ref: MemoryRef
-    content: str = ""
+class MemorySubgraph:
+    root_query: str
+    nodes: List[MemoryNode]
+    edges: List[Tuple[str, str, float]]
+    coherence_score: float
 
 class MemoryProvider(Protocol):
-    def search(self, query: str, limit: int = 10) -> List[MemoryRef]:
-        """
-        Searches the memory backend for facts/memories related to the query.
-        Returns a list of structured MemoryRef objects.
-        """
+    def embed(self, text: str) -> np.ndarray | list[float]:
         ...
-        
-    def hydrate(self, refs: List[MemoryRef]) -> List[MemoryResult]:
-        """
-        Hydrates a list of MemoryRefs with their full content.
-        """
+
+    def search(self, query: str, limit: int = 10) -> List[MemoryNode]:
+        ...
+
+    def vector_search(self, embedding: np.ndarray | list[float], limit: int = 50) -> List[MemoryNode]:
+        ...
+
+    def neighbors(self, node_id: str) -> List[MemoryNode]:
+        ...
+
+    def causal_edges(self, node_id: str) -> List[Tuple[str, str, float]]:
+        ...
+
+    def hydrate(self, nodes: List[MemoryNode]) -> List[MemoryNode]:
         ...
