@@ -54,10 +54,13 @@ class ExergyEngine:
     Core engine for CORTEX Adaptive Runtime.
     """
     def __init__(self):
+        from cortex.observability.ouroboros import OuroborosEngine
+        
         self.history = self._load_cronos_history()
         self.genomes = self._extract_workflow_genomes()
         self.meta = self._load_meta_params()
         self.failure_field = self._build_failure_field()
+        self.ouroboros = OuroborosEngine()
 
     def _build_failure_field(self):
         bad_runs = [r for r in self.history if r.get('outcome_score', 1.0) < 0.4 or not r.get('success', True)]
@@ -289,7 +292,15 @@ class ExergyEngine:
                 fdf_shift=np.abs(predicted_action - real_exergy)
             )
             
+            # Ouroboros Engine Injection
+            self.ouroboros.inject_telemetry(trace)
+            
             log.info(f"🪐 Telemetry Tracked: {trace}")
+            
+            safe_signals = self.ouroboros.get_safe_optimization_signal()
+            if safe_signals:
+                log.info(f"🧬 Delayed Economic Signals Active: {safe_signals}")
+                
             log.info("---")
             time.sleep(2)
             
