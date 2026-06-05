@@ -3,6 +3,7 @@ from cortex.interfaces.memory_provider import MemoryProvider, IntentVector, Memo
 from cortex.semantic.graph_engine import GraphExpansionEngine
 from cortex.semantic.coherence import CoherenceScorer
 import numpy as np
+import random
 
 class HybridRetriever:
     """
@@ -35,10 +36,7 @@ class HybridRetriever:
         )
         
         # Phase 3: Rerank (intent-aware)
-        # Rank by blending vector similarity and graph centrality
-        # Here we just use the temporal_bias and abstraction_level as a heuristic
         def rank_score(node: MemoryNode) -> float:
-            # We assume node.embedding is available
             base_score = 0.0
             if isinstance(node.embedding, (list, np.ndarray)) and isinstance(intent.semantic_vector, (list, np.ndarray)):
                 v1 = np.array(node.embedding)
@@ -58,20 +56,28 @@ class HybridRetriever:
             
         expanded_nodes.sort(key=rank_score, reverse=True)
         
-        # Phase 4: Coherence Filter
-        # Drop noise by taking top K and ensuring coherence > threshold
-        top_k_nodes = expanded_nodes[:k]
+        # Phase 4: Coherence Filter and ε-retrieval (Random exploration channel)
+        # Drop noise by taking top K, but inject 15% random nodes from the expanded frontier to avoid collapse
+        epsilon = 0.15
+        num_random = max(1, int(k * epsilon))
+        num_top = k - num_random
         
+        top_k_nodes = expanded_nodes[:num_top]
+        
+        # Inject random exploration nodes from the remaining pool
+        remaining_nodes = expanded_nodes[num_top:]
+        if remaining_nodes:
+            # sample without replacement if enough nodes
+            sample_size = min(num_random, len(remaining_nodes))
+            random_nodes = random.sample(remaining_nodes, sample_size)
+            top_k_nodes.extend(random_nodes)
+            
         # Filter edges to only those connecting top K nodes
         top_k_ids = {n.id for n in top_k_nodes}
         top_k_edges = [(s, t, w) for s, t, w in edges if s in top_k_ids and t in top_k_ids]
         
         coherence = CoherenceScorer.score(top_k_nodes, top_k_edges)
         
-        # Fallback tracking if coherence is very low
-        if coherence < 0.2:
-            pass # We could set a mode="degenerate-semantic-fallback", but we return it anyway
-            
         # Phase 5: Hydrate ONLY the final K nodes
         hydrated_nodes = self.provider.hydrate(top_k_nodes)
         
