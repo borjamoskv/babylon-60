@@ -40,8 +40,6 @@
     "Agent-Paper-RedTeam-OMEGA",
     "Alpha-Target-OMEGA",
     "Antigravity-Github-Omega",
-    "Apollo-Autodidact-OMEGA",
-    "Apollo-Extractor-OMEGA",
     "Autodidact-21EDO-OMEGA",
     "Autodidact-History-OMEGA",
     "Autodidact-Research-OMEGA",
@@ -69,7 +67,6 @@
     "agente-sota",
     "borja-moskv-ultrathink",
     "dios",
-    "filologa-de-combate",
     "managing-python-dependencies",
     "ouroboros-infinity",
     "scripts",
@@ -77,10 +74,8 @@
   ],
   "plugins": [
     "chrome-devtools-plugin",
-    "firebase",
     "google-antigravity-sdk",
-    "modern-web-guidance-plugin",
-    "science"
+    "modern-web-guidance-plugin"
   ],
   "subagents": [
     "research",
