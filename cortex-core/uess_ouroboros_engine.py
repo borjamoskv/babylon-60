@@ -3,7 +3,7 @@ import yaml
 import time
 import logging
 import hashlib
-from typing import Dict, Any
+from typing import Any
 
 from uess_cortex_runtime import UESSCortexRuntime
 from uess_sentinel_daemon import UESSSentinelDaemon
@@ -42,11 +42,11 @@ class UESSOuroborosEngine:
             yaml.dump(default_spec, f)
         logger.info("Initialized default UESS Ouroboros SPEC.")
 
-    def read_spec(self) -> Dict[str, Any]:
+    def read_spec(self) -> dict[str, Any]:
         with open(self.spec_path, "r") as f:
             return yaml.safe_load(f)
 
-    def write_spec(self, spec: Dict[str, Any]):
+    def write_spec(self, spec: dict[str, Any]):
         spec["generation"] = self.generation
         with open(self.spec_path, "w") as f:
             yaml.dump(spec, f)

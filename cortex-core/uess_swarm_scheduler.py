@@ -2,7 +2,7 @@ import os
 import time
 import logging
 import hashlib
-from typing import Dict, List, Optional
+from typing import Optional
 from dataclasses import dataclass
 from enum import Enum
 from ultramap import UltramapSubstrate
@@ -36,7 +36,7 @@ class UESSSwarmScheduler:
     def __init__(self, capacity: int = 1000):
         self.capacity = capacity
         self.umap = UltramapSubstrate(capacity=capacity)
-        self.nodes: Dict[int, AgentNode] = {}
+        self.nodes: dict[int, AgentNode] = {}
         
         # Initialize Queen node
         self._spawn_node(0, AgentRole.QUEEN, "SYSTEM_GENESIS")

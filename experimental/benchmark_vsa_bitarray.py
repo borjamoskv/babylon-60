@@ -125,7 +125,7 @@ print(f"{'Method':<30} | {'Bind (s)':<12} | {'Similarity (s)':<15} | {'Memory (b
 print("-" * 80)
 print(f"{'1. Bipolar np.int8 (Current)':<30} | {t_bip_bind:<12.5f} | {t_bip_sim:<15.5f} | {mem_bip:<15}")
 print(f"{'2. NumPy uint64 Bit Array':<30} | {t_np64_bind:<12.5f} | {t_np64_sim:<15.5f} | {mem_np64:<15}")
-print(f"{'3. Python List[uint64]':<30} | {t_pylist_bind:<12.5f} | {t_pylist_sim:<15.5f} | {mem_pylist:<15}")
+print(f"{'3. Python list[uint64]':<30} | {t_pylist_bind:<12.5f} | {t_pylist_sim:<15.5f} | {mem_pylist:<15}")
 print(f"{'4. Python Giant Int (8000-bit)':<30} | {t_giant_bind:<12.5f} | {t_giant_sim:<15.5f} | {mem_giant:<15}")
 print("=" * 80)
 

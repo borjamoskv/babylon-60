@@ -2,7 +2,7 @@ import ast
 import hashlib
 import time
 import logging
-from typing import Dict, Any, List
+from typing import Any
 from autopoiesis_ast import ASTAutopoiesisEngine
 from uess_swarm_scheduler import UESSSwarmScheduler, AgentRole
 
@@ -19,7 +19,7 @@ class UESSAstMutationEngine:
         self.target_file = target_file
         self.scheduler = scheduler
         self.autopoiesis = ASTAutopoiesisEngine(target_file)
-        self.semantic_graph: Dict[str, Any] = {}
+        self.semantic_graph: dict[str, Any] = {}
         self._build_semantic_graph()
         
     def _build_semantic_graph(self):

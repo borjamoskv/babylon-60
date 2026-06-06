@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Any
+from typing import Any
 from cortex.worker.issue_reader import IssueReader, IssueContext
 from cortex.interfaces.memory_provider import MemoryProvider, MemoryNode, MemorySubgraph
 from cortex.semantic.intent_encoder import IntentEncoder

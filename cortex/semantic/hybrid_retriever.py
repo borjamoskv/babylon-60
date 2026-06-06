@@ -1,4 +1,4 @@
-from typing import List
+
 from cortex.interfaces.memory_provider import (
     MemoryProvider,
     IntentVector,

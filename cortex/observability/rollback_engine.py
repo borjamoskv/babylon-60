@@ -1,7 +1,7 @@
 import logging
 import json
 from pathlib import Path
-from typing import List, Dict, Any, Set
+from typing import Any
 
 logger = logging.getLogger("cortex.rollback")
 

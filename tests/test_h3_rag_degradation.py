@@ -6,7 +6,7 @@ forcing TTL expiries and VSA Compaction.
 
 import time
 import uuid
-from typing import List
+
 import pytest
 
 

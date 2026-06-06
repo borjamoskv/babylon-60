@@ -5,7 +5,7 @@ import json
 import asyncio
 import subprocess
 from datetime import datetime
-from typing import List, Dict
+
 
 # Configuración Termodinámica
 BASE_DIR = os.path.expanduser("~/Cortex-Persist/engine-c5")

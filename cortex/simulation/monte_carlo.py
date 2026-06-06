@@ -1,6 +1,6 @@
 import numpy as np
 import random
-from typing import List, Dict
+
 from cortex.interfaces.memory_provider import MemoryProvider, MemoryNode, IntentVector
 from cortex.simulation.primitives import MemoryParticle, MemoryTrajectory
 from cortex.simulation.thermodynamics import MemoryFrictionEngine
