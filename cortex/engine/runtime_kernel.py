@@ -24,6 +24,13 @@ class CortexState:
     cost: Decimal = 0.0
     tick_count: int = 0
 
+    def __post_init__(self):
+        self.exergy = Decimal(str(self.exergy))
+        self.entropy = Decimal(str(self.entropy))
+        self.drift = Decimal(str(self.drift))
+        self.cost = Decimal(str(self.cost))
+
+
 
 class SnapshotManager:
     def __init__(self):
@@ -33,7 +40,7 @@ class SnapshotManager:
         snapshot_id = f"snapshot_{state.tick_count:08d}"
         path = os.path.join(SNAPSHOT_DIR, f"{snapshot_id}.json")
         with open(path, "w") as f:
-            json.dump(asdict(state), f)
+            json.dump(asdict(state), f, default=str)
         return path
 
     def get_latest(self) -> CortexState | None:
@@ -52,7 +59,7 @@ class WALManager:
     def write_event(self, state: CortexState):
         path = os.path.join(WAL_DIR, f"{state.tick_count:08d}.log")
         with open(path, "w") as f:
-            json.dump(asdict(state), f)
+            json.dump(asdict(state), f, default=str)
 
     def truncate_before(self, tick_count: int):
         files = glob.glob(os.path.join(WAL_DIR, "*.log"))
