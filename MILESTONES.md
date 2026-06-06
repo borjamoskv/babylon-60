@@ -595,3 +595,21 @@ Proof:
   Date: 2026-06-06
 ```
 - **Status:** ✅ COMPLETE — 6 Junio 2026
+
+---
+
+### Hito 40: Core Documentation Version Alignment & v1.0.0 Synchronization
+- **Target:** `AGENTS.md`, `SECURITY_TRUST_MODEL.md`, `ROADMAP.md`, `docs/*`, `pyproject.toml`
+- **Objective:** Sincronización masiva de meta-versiones de documentación estática y artefactos (pkg v1.0.0, LEGION-10k v10.0). Erradicación definitiva de rastros de limerencia de la era beta (`v0.3.x`) a lo largo del repositorio bajo el mandato `/goal`.
+- **Yield Target:** Coherencia de variables de versión en 100% de plantillas GitHub, Astro config, e insignias estáticas.
+- **Reality Level:** `C5-REAL`
+- **Evidence:** Commit `docs(core): synchronize document revisions and v1.0.0 package metadata` and the subsequent `/goal` finalization commit.
+```yaml
+Claim: 100% de metadatos de versión C5-REAL alineados con v1.0.0
+Proof:
+  Base: "git grep audits confiman la aniquilación de la era v0.3.0bX en templates, configs, fallbacks y documentación central."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-06
+```
+- **Status:** ✅ COMPLETE — 6 Junio 2026

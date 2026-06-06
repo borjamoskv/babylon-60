@@ -1,5 +1,6 @@
 import json
 import logging
+import sqlite3
 import time
 import uuid
 from typing import Any
@@ -35,7 +36,7 @@ class QuorumGateway:
                 )"""
             )
             conn.commit()
-        except Exception as e:
+        except sqlite3.Error as e:
             logger.error("Failed to ensure quorum_requests table: %s", e)
 
     async def request_override(self, hypothesis: str, state: dict[str, Any]) -> str:
@@ -59,7 +60,7 @@ class QuorumGateway:
                 self.threshold,
                 req_id,
             )
-        except Exception as e:
+        except sqlite3.Error as e:
             logger.error("[QuorumGateway] DB insert failed: %s", e)
 
         return req_id
@@ -79,7 +80,7 @@ class QuorumGateway:
             return False
 
         try:
-            from cortex.extensions.security.signatures import Ed25519Signer
+            from cortex.extensions.security.signatures import Ed25519Signer, SignatureVerificationError
 
             conn = self.engine.pool.get_connection()
             cursor = conn.cursor()
@@ -110,7 +111,7 @@ class QuorumGateway:
                     public_key_b64=public_key_b64,
                 )
                 logger.info("[QuorumGateway] Ed25519 Signature Verified for %s", req_id)
-            except Exception:
+            except (SignatureVerificationError, ValueError, TypeError, RuntimeError):
                 logger.error(
                     "[QuorumGateway] CRITICAL: Cryptographic Verification Failed for %s. Discarding vote.",
                     req_id,
@@ -154,7 +155,7 @@ class QuorumGateway:
 
             conn.commit()
             return True
-        except Exception as e:
+        except (sqlite3.Error, ValueError) as e:
             logger.error("[QuorumGateway] Failed to submit vote for request %s: %s", req_id, e)
             return False
 
@@ -169,7 +170,7 @@ class QuorumGateway:
             conn.commit()
             logger.info("[QuorumGateway] Request %s REJECTED.", req_id)
             return True
-        except Exception as e:
+        except sqlite3.Error as e:
             logger.error("[QuorumGateway] Failed to reject request %s: %s", req_id, e)
             return False
 
@@ -195,6 +196,6 @@ class QuorumGateway:
                 logger.warning("[QuorumGateway] Request %s failed due to timeout.", req_id)
                 return True
             return False
-        except Exception as e:
+        except sqlite3.Error as e:
             logger.error("[QuorumGateway] Failed checking timeout for %s: %s", req_id, e)
             return False

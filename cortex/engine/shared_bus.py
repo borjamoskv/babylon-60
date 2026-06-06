@@ -228,7 +228,7 @@ class SovereignSharedBus:
                 if end == -1:
                     end = len(raw_data)
                 payload = json.loads(raw_data[:end].tobytes().decode("utf-8"))
-            except Exception:
+            except (UnicodeDecodeError, json.JSONDecodeError):
                 payload = {"error": "malformed_payload"}
 
             results.append((current, {"timestamp": ts, "source": src_id, "payload": payload}))
@@ -245,7 +245,7 @@ class SovereignSharedBus:
         if shm is not None:
             try:
                 shm.close()
-            except Exception as e:
+            except (OSError, BufferError, ValueError) as e:
                 logger.debug("Failed to close shared memory: %s", e)
 
     def close(self):
@@ -256,7 +256,7 @@ class SovereignSharedBus:
         if shm is not None:
             try:
                 shm.close()
-            except Exception as e:
+            except (OSError, BufferError, ValueError) as e:
                 logger.debug("Failed to close shared memory: %s", e)
         self._local_buf = None
 
@@ -269,7 +269,7 @@ class SovereignSharedBus:
         if shm is not None:
             try:
                 shm.close()
-            except Exception as e:
+            except (OSError, BufferError, ValueError) as e:
                 logger.debug("Failed to close shared memory during unlink: %s", e)
             try:
                 shm.unlink()

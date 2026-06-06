@@ -271,7 +271,7 @@ def _parse_fact_metadata(v: dict, enc: Any, tenant_id: str) -> dict:
     if isinstance(m_raw, str) and m_raw and not m_raw.lstrip().startswith("{"):
         try:
             return enc.decrypt_json(m_raw, tenant_id=tenant_id)
-        except Exception:
+        except (ValueError, RuntimeError):
             return {"error": "decryption_failed", "fact_id": v["id"]}
     meta = _parse_json_blob(m_raw, {})
     return meta if isinstance(meta, dict) else {}
@@ -294,7 +294,7 @@ def row_to_fact(row: tuple) -> Fact:
             if v["content_encrypted"]
             else ""
         )
-    except Exception:
+    except (ValueError, RuntimeError):
         content = f"[ENCRYPTED - decryption failed] (fact #{v['id']})"
 
     tags = _parse_json_blob(v["tags_raw"], [])

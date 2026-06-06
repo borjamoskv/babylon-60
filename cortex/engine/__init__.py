@@ -185,13 +185,13 @@ class CortexEngine(
                 await asyncio.wait_for(
                     asyncio.gather(*self._post_commit_tasks, return_exceptions=True), timeout=5.0
                 )
-            except (asyncio.TimeoutError, Exception):
+            except (asyncio.TimeoutError, asyncio.CancelledError, RuntimeError, ValueError):
                 logger.debug("Post-commit task drain timed out - forcing close")
             self._post_commit_tasks.clear()
         if self._memory_manager:
             try:
                 await asyncio.wait_for(self._memory_manager.wait_for_background(), timeout=5.0)
-            except (asyncio.TimeoutError, Exception):
+            except (asyncio.TimeoutError, asyncio.CancelledError, RuntimeError, ValueError):
                 logger.debug("Memory manager background drain timed out - forcing close")
             self._memory_manager = None
         self._memory_l1 = None
@@ -217,7 +217,7 @@ class CortexEngine(
                                 if getattr(c, "_connection", None) is not None:
                                     try:
                                         c._connection.close()
-                                    except Exception:
+                                    except (RuntimeError, ValueError, AttributeError):
                                         import logging
 
                                         pass
@@ -225,7 +225,7 @@ class CortexEngine(
                                 return _STOP_RUNNING_SENTINEL
 
                             conn._tx.put_nowait((None, close_and_stop))
-                        except Exception:
+                        except (RuntimeError, ValueError, AttributeError):
                             if hasattr(conn, "stop"):
                                 conn.stop()
                     elif hasattr(conn, "stop"):
@@ -234,14 +234,14 @@ class CortexEngine(
                 if conn_loop is current_loop:
                     try:
                         await conn.close()
-                    except Exception:
+                    except (RuntimeError, ValueError, AttributeError):
                         import logging
 
                         pass
                 else:
                     try:
                         asyncio.run_coroutine_threadsafe(conn.close(), conn_loop)
-                    except Exception:
+                    except (RuntimeError, ValueError, AttributeError):
                         import logging
 
                         pass

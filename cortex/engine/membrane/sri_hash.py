@@ -2,6 +2,7 @@
 import base64
 import hashlib
 import re
+import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
@@ -48,7 +49,7 @@ def generate_sri_hash(url: str, algo: str = "sha384") -> str:
 
             b64_hash = base64.b64encode(digest).decode("utf-8")
             return f"{algo}-{b64_hash}"
-    except Exception:
+    except (urllib.error.URLError, ValueError, TimeoutError):
         # If fetch fails, we return an empty string. The sanitizer can decide whether to block or allow
         return ""
 

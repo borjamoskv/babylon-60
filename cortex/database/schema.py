@@ -124,6 +124,8 @@ CREATE TABLE IF NOT EXISTS facts (
     parent_id     INTEGER,
     relation_type TEXT,
     yield_score   REAL NOT NULL DEFAULT 1.0,
+    -- Temporal Knowledge Graph
+    decay_half_life REAL DEFAULT 30.0,
     -- Legacy/Compatibility
     tags          TEXT DEFAULT '[]'
 );

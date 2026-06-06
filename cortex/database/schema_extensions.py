@@ -426,6 +426,8 @@ CREATE TABLE IF NOT EXISTS causal_edges (
     parent_id       INTEGER,
     signal_id       INTEGER,
     edge_type       TEXT NOT NULL DEFAULT 'triggered_by',
+    confidence      REAL DEFAULT 1.0,
+    agent_id        TEXT,
     project         TEXT,
     tenant_id       TEXT NOT NULL DEFAULT 'default',
     created_at      TEXT NOT NULL DEFAULT (datetime('now')),
