@@ -753,3 +753,21 @@ Proof:
   Confidence: C5-REAL
   Date: 2026-06-06
 ```
+
+---
+
+### Hito 47: Dependency Hardening & FFI Re-compilation
+- **Target**: [pyproject.toml](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/pyproject.toml), [uv.lock](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/uv.lock)
+- **Objective**: Secure dependencies (`aiohttp` v3.14.0, `transformers` v5.10.2, `chromadb` v1.5.9) and re-compile the `cortex_rs` FFI bindings to resolve `AtmsGraph` attribute resolution.
+- **Yield Target**: 100% security coverage of flagged CVEs, zero regression over 2639 pytest cases.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Commits `5b0f0d8f` and `fd410138`.
+```yaml
+Claim: Dependency security vulnerability remediation & FFI compile validation
+Proof:
+  Base: "2639/2639 tests passed with optimum <2.0.0 and transformers 5.10.2"
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-06
+```
+
