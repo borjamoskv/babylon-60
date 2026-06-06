@@ -17,7 +17,6 @@ import aiosqlite
 from cortex.config import DEFAULT_DB_PATH
 from cortex.engine.agent_mixin import AgentMixin
 from cortex.engine.durability import PersistenceSupervisor
-from cortex.engine.legacy_mixin import LegacyMixin
 from cortex.engine.memory_mixin import MemoryMixin
 from cortex.engine.mixins.components import ComponentsMixin
 from cortex.engine.mixins.optimization import OptimizationMixin
@@ -71,7 +70,6 @@ class CortexEngine(
     HealthMixin,
     SyncMixin,
     AgentMixin,
-    LegacyMixin,
     ComponentsMixin,
 ):
     """The Sovereign Ledger for AI Agents (Composite Orchestrator)."""

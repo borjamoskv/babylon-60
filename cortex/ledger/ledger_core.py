@@ -60,17 +60,9 @@ class SovereignLedger(LedgerAuditMixin):
 
     @property
     def _lock(self) -> asyncio.Lock:
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            if not hasattr(self, "_fallback_lock"):
-                self._fallback_lock = asyncio.Lock()
-            return self._fallback_lock
-        if not hasattr(self, "_locks_by_loop"):
-            self._locks_by_loop = {}
-        if loop not in self._locks_by_loop:
-            self._locks_by_loop[loop] = asyncio.Lock()
-        return self._locks_by_loop[loop]
+        from cortex.utils.locks import get_loop_lock
+
+        return get_loop_lock(self, "ledger")
 
     @staticmethod
     def _is_sync_connection(db: object) -> bool:

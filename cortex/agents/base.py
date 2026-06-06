@@ -234,3 +234,51 @@ class BaseAgent:
             },
         )
         await self.bus.send(msg)
+
+
+class ReactiveTaskAgent(BaseAgent):
+    """Subclass of BaseAgent for reactive agents that process TASK_REQUEST messages.
+
+    Subclasses should define:
+        - `_SUPPORTED_OPS`: frozenset of supported operation strings
+        - `_dispatch(op, payload)`: async dispatcher for operations
+    """
+
+    _SUPPORTED_OPS: frozenset[str] = frozenset()
+
+    async def handle_message(self, message: AgentMessage) -> None:
+        if message.kind != MessageKind.TASK_REQUEST:
+            return
+
+        payload: dict[str, Any] = message.payload or {}
+        op: str = payload.get("op", "")
+
+        if op not in self._SUPPORTED_OPS:
+            await self._reply(
+                message,
+                {"error": f"unsupported op: {op!r}", "supported": sorted(self._SUPPORTED_OPS)},
+            )
+            return
+
+        try:
+            result = await self._dispatch(op, payload)
+            await self._reply(message, {"op": op, "result": result})
+        except Exception as exc:
+            logging.getLogger(self.__class__.__module__).exception(
+                "%s op=%s failed", self.__class__.__name__, op
+            )
+            await self._reply(message, {"op": op, "error": str(exc)})
+
+    async def _dispatch(self, op: str, payload: dict[str, Any]) -> Any:
+        raise NotImplementedError()
+
+    async def _reply(self, source: AgentMessage, payload: dict[str, Any]) -> None:
+        reply = new_message(
+            sender=self.manifest.agent_id,
+            recipient=source.sender,
+            kind=MessageKind.TASK_RESULT,
+            payload=payload,
+            correlation_id=source.message_id,
+        )
+        await self.bus.send(reply)
+

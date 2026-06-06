@@ -30,31 +30,15 @@ class ConnectionMixin:
 
     @property
     def _conn_lock(self) -> asyncio.Lock:
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            if not hasattr(self, "_fallback_conn_lock"):
-                self._fallback_conn_lock = asyncio.Lock()
-            return self._fallback_conn_lock
-        if not hasattr(self, "_conn_locks_by_loop"):
-            self._conn_locks_by_loop = {}
-        if loop not in self._conn_locks_by_loop:
-            self._conn_locks_by_loop[loop] = asyncio.Lock()
-        return self._conn_locks_by_loop[loop]
+        from cortex.utils.locks import get_loop_lock
+
+        return get_loop_lock(self, "conn")
 
     @property
     def _schema_lock(self) -> asyncio.Lock:
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            if not hasattr(self, "_fallback_schema_lock"):
-                self._fallback_schema_lock = asyncio.Lock()
-            return self._fallback_schema_lock
-        if not hasattr(self, "_schema_locks_by_loop"):
-            self._schema_locks_by_loop = {}
-        if loop not in self._schema_locks_by_loop:
-            self._schema_locks_by_loop[loop] = asyncio.Lock()
-        return self._schema_locks_by_loop[loop]
+        from cortex.utils.locks import get_loop_lock
+
+        return get_loop_lock(self, "schema")
 
     @asynccontextmanager
     async def session(self) -> AsyncIterator[aiosqlite.Connection]:

@@ -7,7 +7,7 @@ templates remain in ``cortex.extensions.agents``.
 
 from __future__ import annotations
 
-from cortex.agents.base import BaseAgent
+from cortex.agents.base import BaseAgent, ReactiveTaskAgent
 from cortex.agents.bus import MessageBus, SqliteMessageBus
 from cortex.agents.manifest import AgentManifest
 from cortex.agents.message_schema import (
@@ -24,6 +24,7 @@ from cortex.agents.tools import Tool, ToolRegistry
 __all__ = [
     # Core runtime
     "BaseAgent",
+    "ReactiveTaskAgent",
     "Supervisor",
     # Manifest & schema
     "AgentManifest",
