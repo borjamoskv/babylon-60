@@ -209,6 +209,8 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             conn, fact_id, project, content, fact_type, tags, source, tenant_id
         )
 
+        self._invalidate_l1_cache(tenant_id)
+
         if commit:
             await conn.commit()
 
@@ -414,13 +416,26 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             await _conn.commit()
             return res
 
+    def _invalidate_l1_cache(self, tenant_id: str) -> None:
+        """Invalidate search L1 cache for the tenant."""
+        try:
+            from cortex.cache import RedisL1Cache
+            cache = RedisL1Cache.singleton()
+            if cache.available:
+                cache.flush_namespace(f"search:{tenant_id}")
+        except Exception as exc:
+            logger.debug("[L1 Cache] Invalidation failed: %s", exc)
+
     async def _deprecate_impl(
         self, conn: aiosqlite.Connection, fact_id: int, reason: str | None, tenant_id: str
     ) -> bool:
         """Delegated deprecation logic."""
-        return await deprecate_impl_logic(
+        res = await deprecate_impl_logic(
             mixin_instance=self, conn=conn, fact_id=fact_id, reason=reason, tenant_id=tenant_id
         )
+        if res:
+            self._invalidate_l1_cache(tenant_id)
+        return res
 
     async def invalidate(
         self,
@@ -447,9 +462,12 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         self, conn: aiosqlite.Connection, fact_id: int, reason: str | None, tenant_id: str
     ) -> bool:
         """Delegated invalidation logic (tombstone + taint)."""
-        return await invalidate_impl_logic(
+        res = await invalidate_impl_logic(
             mixin_instance=self, conn=conn, fact_id=fact_id, reason=reason, tenant_id=tenant_id
         )
+        if res:
+            self._invalidate_l1_cache(tenant_id)
+        return res
 
     async def purge(
         self,
@@ -459,9 +477,12 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     ) -> bool:
         """Delegated purge logic (Ω₄: Bounded Demolition)."""
         tenant_id = self._resolve_tenant(tenant_id)
-        return await purge_logic(
+        res = await purge_logic(
             mixin_instance=self, fact_id=fact_id, tenant_id=tenant_id, force=force
         )
+        if res:
+            self._invalidate_l1_cache(tenant_id)
+        return res
 
     _validate_content = staticmethod(validate_content)
     _check_dedup = staticmethod(check_dedup)
