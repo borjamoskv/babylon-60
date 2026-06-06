@@ -590,15 +590,31 @@ Proof:
 ```
 - **Status:** ✅ COMPLETE — 6 Junio 2026
 
+### Hito 43: Gem Persona Activation via Sortu-APEX (Path C)
+- **Target:** `cortex/adk/agents.py`, `cortex/adk/runner.py`
+- **Objective:** Conectar la activación dinámica de "Gems" (Personas de Gemini) a la compilación JIT de Sortu-APEX. Se añade `create_gem_agent` capaz de parsear los artefactos `SKILL.md` forjados por Sortu-APEX, inyectándolos dinámicamente como Agentes C5-REAL soberanos bajo la CLI del ADK (`--gem`).
+- **Yield Target:** Universalización de Agentes. El sistema puede orquestar infinitos agentes dinámicos generados en runtime, sin necesidad de hardcodear clases.
+- **Reality Level:** `C5-REAL`
+- **Evidence:** Commit `feat(adk): wire Gem persona activation to Sortu-APEX compiled skills`.
+```yaml
+Claim: Sortu-APEX y Google ADK se acoplan en un flujo JIT continuo
+Proof:
+  Base: "Inyección del parser YAML frontmatter + Markdown parser en create_gem_agent() -> runner.py --gem."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-06
+```
+- **Status:** ✅ COMPLETE — 6 Junio 2026
+
 ---
 
 ## 🛡️ Thermodynamic Enforcement
 All milestone claims must map directly to a `Claim/Proof` matrix.
 ```yaml
-Claim: 42/42 Milestones Completed
+Claim: 43/43 Milestones Completed
 Proof:
   Base: Continuous Silicon Checkpoint Execution
-  Variables: [r=1, d=1, n=42, S=100]
+  Variables: [r=1, d=1, n=43, S=100]
   Range: [C6, C6]
   Confidence: C4 (audit based on evidence classification)
   Date: 2026-06-06
