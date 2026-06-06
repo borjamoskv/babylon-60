@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # SECURITY_TRUST_MODEL.md — CORTEX Persist
 
-Package: cortex-persist v10.0 · Engine: v10.0 (LEGION-10k)
+Package: cortex-persist v0.3.0b8 · Design target: LEGION-10k
 License: Apache-2.0 · Python: >=3.10 · Execution: C5-REAL
 
 This document describes trust boundaries, verification surfaces, and cognitive/state-mutation risks
@@ -62,7 +62,7 @@ If any required control fails, the write aborts.
 
 ---
 
-## Architectural Overview (v10.0 — LEGION-10k)
+## Architectural Overview (LEGION-10k Design Target)
 
 The persistence layer has been decomposed from a monolithic `persistence.py` into
 a modular subpackage under `cortex-core/persistence/`:
