@@ -2,7 +2,7 @@
 # CORTEX — EU AI Act Compliance Mapping
 
 **Document Version:** 1.0
-**Date:** February 20, 2026
+**Date:** 2026-06-06
 **System:** CORTEX Trust Engine v1.0.0 (Apache-2.0)
 
 ---

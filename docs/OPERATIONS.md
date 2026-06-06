@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# Operations — CORTEX Persist
+# Operations — CORTEX Persist v8.0
 
 Package: cortex-persist v1.0.0
 License: Apache-2.0 · Python: >=3.10

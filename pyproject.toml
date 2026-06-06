@@ -136,7 +136,7 @@ include = ["cortex", "cortex.*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["cortex-core", "."]
+pythonpath = ["."]
 addopts = "--timeout=30"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
@@ -148,7 +148,7 @@ markers = [
 [tool.ruff]
 target-version = "py310"
 line-length = 100
-exclude = ["experimental", "notebooks", "skills", "engine-c5", "bounty_hunt", "cortex-core", "cortex_mev_base"]
+exclude = ["experimental", "notebooks", "skills", "engine-c5", "bounty_hunt", "cortex_mev_base"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "G", "TID"]

@@ -64,35 +64,22 @@ If any required control fails, the write aborts.
 
 ## Architectural Overview (LEGION-10k Design Target)
 
-The persistence layer has been decomposed from a monolithic `persistence.py` into
-a modular subpackage under `cortex-core/persistence/`:
+The persistence and trust layer is organized into sovereign domains under the root `cortex/` package:
 
-| Module | Responsibility |
+| Domain | Responsibility |
 |---|---|
-| `base.py` | `SovereignResource` base class, thread-local SQLite pool, WAL pragmas, events |
-| `ledger.py` | `LedgerManager` — SHA-256 hash-chain, Ed25519 ZK-Seal, AOF binary ledger |
-| `vsa.py` | `VSAMemory` — Vector Symbolic Architecture memory substrate |
-| `cache.py` | `ContextCache` — thread-safe context caching |
-| `hybrid.py` | `HybridPersistenceManager` — unified orchestrator |
-| `ide_preserver.py` | `IdeStatePreserver` — IDE session state persistence |
-| `iteration_daemon.py` | Deterministic iteration loop daemon |
+| `cortex/engine/` | Core CRUD, Kinetic Engines (EntropyAnnihilator, AutoCrystallizer), fact store, causal scheduler |
+| `cortex/audit/` | Master Ledger — immutable hash-chain for all actions (`ledger.py`) |
+| `cortex/memory/` | Large public API surface for fact persistence and retrieval |
+| `cortex/guards/` | Admission, contradiction, dependency, and sovereign seal verification |
 
-Daemons (`cortex-core/daemons/`):
+**Execution & Delivery (`cortex/delivery/` & `cortex/swarm/`):**
+- `outbox.py` — Lock-free task dispatch integration.
+- `ZeroCopyRingBuffer` — O(1) lock-free execution (Rust-FFI integration).
 
-| Daemon | Responsibility |
-|---|---|
-| `outbox.py` | `OutboxDaemon` + `ZeroCopyRingBuffer` — O(1) lock-free task dispatch |
-| `security_recon.py` | `SecurityReconDaemon` — CVE scanning and vulnerability assimilation |
-
-Sovereign subsystems (`cortex-core/`):
-
-| Subsystem | Responsibility |
-|---|---|
-| `aeon_0_compiler.py` | `AEON0Compiler` — AST mutation with Z3 verification and ZK-Seal |
-| `ultramap.py` | `UltramapSubstrate` — O(1) mmap spatial-temporal swarm topology |
-| `k0_swarm_node.py` | `K0Metabolism`, `DarkPoolZK`, `HardwareAggressor` — sovereign swarm |
-| `exergy_sentinel.py` | `ExergySentinel` — continuous system health and exergy monitoring |
-| `exa_lisp_genesis.py` | EXA-LISP interpreter — exergy-bounded L0 computation |
+**Trust & Crypto (`cortex/crypto/`):**
+- AES-256-GCM encryption at rest.
+- Ed25519 Sovereign key vault management.
 
 ---
 
