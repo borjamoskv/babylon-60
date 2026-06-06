@@ -29,6 +29,7 @@ from cortex.agents.copilot_contracts import (
     SuggestionVerdict,
 )
 from cortex.agents.message_schema import MessageKind, new_message
+from cortex.guards import AntiLimerenceGuard
 
 logger = logging.getLogger("cortex.agents.copilot.server")
 
@@ -48,7 +49,14 @@ except ImportError:
 class _ClientSession:
     """Tracks a connected IDE client."""
 
-    __slots__ = ("connected_at", "messages_received", "messages_sent", "session_id", "websocket")
+    __slots__ = (
+        "connected_at",
+        "messages_received",
+        "messages_sent",
+        "session_id",
+        "websocket",
+        "limerence_guard",
+    )
 
     def __init__(self, websocket: Any) -> None:
         self.session_id = f"session-{uuid4().hex[:8]}"
@@ -56,6 +64,7 @@ class _ClientSession:
         self.connected_at = time.monotonic()
         self.messages_received = 0
         self.messages_sent = 0
+        self.limerence_guard = AntiLimerenceGuard()
 
 
 # ── In-Memory Bus for Server ─────────────────────────────────────
@@ -168,6 +177,13 @@ class CopilotServer:
     ) -> None:
         """Route an incoming JSON message."""
         session.messages_received += 1
+
+        try:
+            session.limerence_guard.check_iteration(raw, agent_id=session.session_id)
+        except RuntimeError as exc:
+            await self._send_error(session, str(exc))
+            await session.websocket.close(1008, "Limerence Kill Criteria Triggered")
+            return
 
         try:
             data = json.loads(raw)
