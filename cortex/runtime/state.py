@@ -15,9 +15,21 @@ class RuntimeState:
         return hashlib.sha256(f"{self.version}:{state_str}".encode()).hexdigest()
 
     def apply_event(self, event: Dict[str, Any]) -> "RuntimeState":
-        """Deterministic state evolution."""
+        """Deterministic state evolution with semantic physics validation."""
         action = event.get("action_type")
         payload = event.get("payload", {})
+        
+        # Physics Validation Layer
+        tick = payload.get("tick")
+        if tick is not None:
+            prev_tick = self.data.get("last_tick", -1)
+            if tick <= prev_tick:
+                raise ValueError(f"[PHYSICS VIOLATION] Causality inversion. Tick {tick} <= Previous {prev_tick}")
+            self.data["last_tick"] = tick
+            
+        entropy = payload.get("entropy")
+        if entropy is not None and entropy < 0:
+            raise ValueError("[PHYSICS VIOLATION] Negative entropy detected.")
         
         if action == "MEMORY_WRITE":
             self.data.update(payload)
