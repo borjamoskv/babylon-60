@@ -148,7 +148,7 @@ class SchemaTrait:
         except Exception:
             try:
                 conn.close()
-            except Exception:
+            except (ValueError, KeyError, OSError):
                 pass
             raise
 

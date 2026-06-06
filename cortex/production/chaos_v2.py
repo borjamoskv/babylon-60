@@ -28,7 +28,7 @@ class ChaosLayerV2:
             victim = random.choice(snapshots)
             try:
                 victim.unlink()
-            except Exception:
+            except (ValueError, KeyError, OSError):
                 pass
 
     def temporal_distortion_attack(self, event):

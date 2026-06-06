@@ -203,7 +203,7 @@ class DistributedSovereignCache:
                     await asyncio.wait_for(self._r.ping(), timeout=1.0)
                     self._is_available = True
                     logger.info("🐉 [HYDRA-LOG] Circuit Breaker reset. Cache is back online.")
-                except Exception:
+                except (ValueError, KeyError, OSError):
                     # Still dead, fail fast without waiting
                     pass
             return None

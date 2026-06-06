@@ -99,7 +99,7 @@ class ExergyEngine:
                 with open(META_PARAMS_LOG, encoding="utf-8") as f:
                     data = json.load(f)
                     return MetaParams(**data)
-            except Exception:
+            except (ValueError, KeyError, OSError):
                 pass
         return MetaParams()
 
