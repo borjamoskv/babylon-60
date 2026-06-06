@@ -60,7 +60,7 @@ class CortexSupervisor:
                 info.boot_time = (time.perf_counter() - boot_start) * 1000
                 info.status = AgentStatus.RUNNING
                 info.last_heartbeat = time.monotonic()
-            except Exception as e:
+            except (KeyError, ValueError, RuntimeError, TypeError) as e:
                 info.status = AgentStatus.FAILED
                 info.error_count += 1
                 logger.error("[SUPERVISOR] L%d %s FAILED: %s", info.level, info.name, e)
@@ -112,7 +112,7 @@ class CortexSupervisor:
             self._tracker.record_execution(subsystem, latency_ms, success=True)
             self._total_tasks_executed += 1
             return result
-        except Exception:
+        except (RuntimeError, ValueError, TypeError, KeyError, OSError, asyncio.TimeoutError):
             latency_ms = (time.perf_counter_ns() - start_ns) / 1e6
             self._tracker.record_execution(subsystem, latency_ms, success=False)
             self._predictor.record_error_event(subsystem)

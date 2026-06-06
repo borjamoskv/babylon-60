@@ -55,7 +55,7 @@ class EntropySensor:
                                 for line in f:
                                     if "TODO" in line or "FIX-ME" in line:
                                         todos += 1
-                        except Exception:
+                        except OSError:
                             pass
         
         # Run ruff check asynchronously
@@ -71,9 +71,9 @@ class EntropySensor:
                     data = json.loads(stdout)
                     if isinstance(data, list):
                         violations = len(data)
-                except Exception:
+                except json.JSONDecodeError:
                     pass
-        except Exception:
+        except OSError:
             pass
 
         self.last_scan_files = len(py_files)
@@ -142,7 +142,7 @@ class OmegaKernel:
                     if hasattr(ouroboros, "mutate"):
                         await ouroboros.mutate(target="entropy_resolution")
                         
-                except Exception as e:
+                except (ImportError, RuntimeError, ValueError) as e:
                     logger.exception("Fallo al desatar el Enjambre o Ouroboros: %s", e)
                     self.events.append(f"[{timestamp}] [bold red]✗ Fallo Swarm/Ouroboros:[/] {e}")
                 
@@ -168,7 +168,7 @@ class OmegaKernel:
             except asyncio.CancelledError:
                 logger.info("Omega Daemon terminating gracefully...")
                 break
-            except Exception as e:
+            except (OSError, RuntimeError, ValueError) as e:
                 # Evita que un error mate el daemon, pero no silencia la excepción
                 logger.exception("Error cataclísmico en el metabolismo: %s", e)
                 from datetime import datetime

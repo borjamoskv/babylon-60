@@ -9,6 +9,7 @@ the GuardPipeline without store_mixin.py importing them directly.
 from __future__ import annotations
 
 import logging
+import sqlite3
 from typing import Any
 
 import aiosqlite
@@ -77,7 +78,7 @@ class HealthGuardAdapter:
             if self._engine is not None:
                 self._engine._last_health_check_time = time.monotonic()
                 self._engine._last_health_safety_ok = True
-        except Exception:
+        except (ValueError, RuntimeError):
             if self._engine is not None:
                 self._engine._last_health_check_time = time.monotonic()
                 self._engine._last_health_safety_ok = False
@@ -353,7 +354,7 @@ class SignalEmitHook:
                     project,
                     unconsumed,
                 )
-        except Exception as e:
+        except (ValueError, RuntimeError, sqlite3.Error) as e:
             logger.debug("compact:needed check failed: %s", e)
 
 

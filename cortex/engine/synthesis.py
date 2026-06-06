@@ -27,12 +27,15 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+import httpx
+
 if TYPE_CHECKING:
     from cortex.extensions.llm.manager import LLMManager
 
 from cortex.engine.autopoiesis import AutopoiesisEngine
 from cortex.engine.crystallizer import AutoCrystallizer
 from cortex.engine.swarm_10k import SwarmCommander
+from cortex.utils.errors import CortexError
 
 logger = logging.getLogger("cortex.engine.synthesis")
 
@@ -214,7 +217,7 @@ class CortexAutoSynthesisEngine:
             # Exergy = compression ratio (smaller refined = higher density)
             exergy = min(1.0, max(0.0, 1.0 - len(refined) / max(len(raw), 1)))
             return SovereignFact(raw=raw, refined=refined, domain=domain, exergy=exergy)
-        except Exception:
+        except (ValueError, RuntimeError, CortexError, asyncio.TimeoutError, httpx.RequestError):
             logger.exception("⚠️ Crystallization failed for domain=%s", domain)
             return None
 

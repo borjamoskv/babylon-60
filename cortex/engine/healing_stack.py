@@ -170,7 +170,7 @@ class HealingStack:
 
             return result
 
-        except Exception:
+        except (ValueError, RuntimeError, TypeError, asyncio.TimeoutError):
             latency_ms = (time.perf_counter_ns() - start_ns) / 1e6
             self._tracker.record_execution(subsystem, latency_ms, success=False)
             self._predictor.record_error_event(subsystem)
@@ -223,7 +223,7 @@ class HealingStack:
                         if p.confidence >= self._config.preemptive_action_confidence:
                             await self._apply_preemptive_action(p)
 
-            except Exception as e:
+            except (ValueError, RuntimeError, TypeError) as e:
                 logger.error("[HEALING_STACK] Prediction error: %s", e)
 
             await asyncio.sleep(self._config.prediction_interval_s)
@@ -265,7 +265,7 @@ class HealingStack:
                     all_params = self._optimizer.get_all_tuned_params()
                     if all_params:
                         self._store.snapshot(all_params, self._optimizer.stats)
-            except Exception as e:
+            except (OSError, ValueError, TypeError) as e:
                 logger.error("[HEALING_STACK] Persist error: %s", e)
 
             await asyncio.sleep(self._config.persist_interval_s)
@@ -335,7 +335,7 @@ class HealingStack:
                 event = await self._optimizer.optimize()
                 if event.applied > 0:
                     await self._sync_parameters()
-            except Exception as e:
+            except (ValueError, RuntimeError, KeyError) as e:
                 logger.error("[HEALING_STACK] Optimizer error: %s", e)
             await asyncio.sleep(self._config.optimizer.optimization_interval_s)
 

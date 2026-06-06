@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import sqlite3
 import time
 from collections import deque
 from datetime import datetime, timezone
@@ -135,16 +136,91 @@ class AsyncCausalGraph:
         parent_id: int | None = None,
         signal_id: int | None = None,
         edge_type: str = "triggered_by",
+        confidence: float = 1.0,
+        agent_id: str | None = None,
         project: str | None = None,
         tenant_id: str = "default",
     ) -> None:
         await self.conn.execute(
             """
-            INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, project, tenant_id)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, confidence, agent_id, project, tenant_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (fact_id, parent_id, signal_id, edge_type, project, tenant_id),
+            (fact_id, parent_id, signal_id, edge_type, confidence, agent_id, project, tenant_id),
         )
+
+    async def temporal_causal_chain(
+        self,
+        target_fact_id: int,
+        hours_lookback: int = 24,
+        tenant_id: str = "default",
+    ) -> list[dict[str, Any]]:
+        """
+        Idea #4: Temporal Knowledge Graph query.
+        "What influenced decision X in the last N hours?"
+        Returns the causal ancestors with their decay and confidence.
+        """
+        sql = """
+        WITH RECURSIVE causal_path AS (
+            SELECT 
+                ce.parent_id as ancestor_id,
+                ce.fact_id as child_id,
+                ce.edge_type,
+                ce.confidence,
+                ce.agent_id,
+                ce.created_at as edge_time,
+                1 as depth
+            FROM causal_edges ce
+            WHERE ce.fact_id = ? AND ce.tenant_id = ?
+              AND ce.created_at >= datetime('now', ?)
+              AND ce.parent_id IS NOT NULL
+
+            UNION ALL
+
+            SELECT 
+                ce.parent_id as ancestor_id,
+                ce.fact_id as child_id,
+                ce.edge_type,
+                ce.confidence * cp.confidence as confidence,
+                ce.agent_id,
+                ce.created_at as edge_time,
+                cp.depth + 1 as depth
+            FROM causal_edges ce
+            JOIN causal_path cp ON ce.fact_id = cp.ancestor_id
+            WHERE ce.tenant_id = ?
+              AND ce.created_at >= datetime('now', ?)
+              AND ce.parent_id IS NOT NULL
+        )
+        SELECT 
+            cp.ancestor_id,
+            cp.child_id,
+            cp.edge_type,
+            cp.confidence,
+            cp.agent_id,
+            cp.edge_time,
+            cp.depth,
+            f.content as ancestor_content,
+            f.decay_half_life
+        FROM causal_path cp
+        JOIN facts f ON cp.ancestor_id = f.id
+        ORDER BY cp.depth ASC;
+        """
+        time_modifier = f"-{hours_lookback} hours"
+        chain = []
+        async with self.conn.execute(sql, (target_fact_id, tenant_id, time_modifier, tenant_id, time_modifier)) as cursor:
+            async for row in cursor:
+                chain.append({
+                    "ancestor_id": row[0],
+                    "child_id": row[1],
+                    "edge_type": row[2],
+                    "confidence": row[3],
+                    "agent_id": row[4],
+                    "edge_time": row[5],
+                    "depth": row[6],
+                    "content": row[7],
+                    "decay_half_life": row[8],
+                })
+        return chain
 
     async def _fact_columns(self) -> set[str]:
         cursor = await self.conn.execute("PRAGMA table_info(facts)")
@@ -288,7 +364,7 @@ class AsyncCausalGraph:
             try:
                 meta = enc.decrypt_json(raw_meta, tenant_id=tenant_id) or {}
                 return meta, True, True
-            except Exception:
+            except (ValueError, TypeError):
                 logger.warning("Failed to decrypt metadata")
                 return {}, False, False
 
@@ -504,7 +580,7 @@ class AsyncCausalOracle:
             for sig in recent:
                 if sig.event_type in ("plan:done", "task:start", "apotheosis:heal"):
                     return sig.id
-        except Exception as e:
+        except (sqlite3.Error, ValueError, RuntimeError) as e:
             logger.debug("Async causal lookup failed: %s", e)
         return None
 
@@ -525,7 +601,7 @@ class CausalOracle:
                 for sig in recent:
                     if sig.event_type in ("plan:done", "task:start", "apotheosis:heal"):
                         return sig.id
-        except Exception as e:
+        except (sqlite3.Error, ValueError, RuntimeError) as e:
             logger.debug("Sync causal lookup failed: %s", e)
         return None
 
