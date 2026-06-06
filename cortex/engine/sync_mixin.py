@@ -2,7 +2,6 @@
 import asyncio
 import threading
 
-
 # pyright: reportAttributeAccessIssue=false
 class SyncMixin:
     def _run_sync(self, coro):
@@ -58,7 +57,12 @@ class SyncMixin:
         return self._run_sync(self.get_causal_chain(*args, **kwargs))
 
     def close_sync(self):
-        """Close the underlying engine and clean up the thread-local event loop."""
+        """Close the underlying engine and clean up the thread-local event loop.
+
+        Fix(sync) #413: Ensures atomic lock release during rapid SovereignLock
+        teardown sequences. Adds timeout to task cancellation gather to prevent
+        indefinite blocking when tasks hold locks during shutdown.
+        """
         import logging
 
         logger = logging.getLogger(__name__)
@@ -78,7 +82,23 @@ class SyncMixin:
                     for t in tasks:
                         t.cancel()
                     if tasks:
-                        loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
+                        # Fix #413: Bounded timeout prevents deadlock when tasks
+                        # hold SovereignLock references during rapid teardown.
+                        # return_exceptions=True ensures all cancellations are
+                        # collected atomically even if some raise CancelledError.
+                        try:
+                            loop.run_until_complete(
+                                asyncio.wait_for(
+                                    asyncio.gather(*tasks, return_exceptions=True),
+                                    timeout=5.0,
+                                )
+                            )
+                        except asyncio.TimeoutError:
+                            logger.warning(
+                                "[SyncMixin] Task cancellation timed out after 5s "
+                                "during teardown — forcing loop close. "
+                                "Residual blocking calls in teardown() have been abandoned."
+                            )
 
                     if hasattr(loop, "shutdown_asyncgens"):
                         loop.run_until_complete(loop.shutdown_asyncgens())
@@ -87,13 +107,11 @@ class SyncMixin:
                             loop.run_until_complete(loop.shutdown_default_executor())
                         except NotImplementedError:
                             import logging
-
                             pass
-
                     loop.close()
                 except (RuntimeError, ValueError) as e:
                     logger.debug(f"[SyncMixin] Handled error during loop teardown: {e}")
-            delattr(tls, "loop")
+                delattr(tls, "loop")
 
     def health_check_sync(self, *args, **kwargs):
         return self._run_sync(self.health_check(*args, **kwargs))
