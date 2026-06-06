@@ -56,7 +56,7 @@ class ByzantineConsensus:
             if nid in self.nodes
         }
         results = await asyncio.gather(*tasks.values())
-        return dict(zip(tasks.keys(), results))
+        return dict(zip(tasks.keys(), results, strict=False))
 
     async def execute_consensus(self, proposals: dict[str, T]) -> T | None:
         """
