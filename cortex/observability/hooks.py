@@ -24,7 +24,7 @@ def _extract_skill_info(data) -> dict:
             server_name = data.arguments.get("ServerName", data.name.replace("mcp_", ""))
             return {"skill": f"MCP_{server_name.upper()}", "source": "mcp"}
 
-    except Exception:
+    except (ValueError, KeyError, OSError):
         pass
 
     return {"skill": data.name or "UNKNOWN", "source": "programmatic"}

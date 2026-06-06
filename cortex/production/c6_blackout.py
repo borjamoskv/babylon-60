@@ -82,6 +82,6 @@ class C6BlackoutAudit:
 
             if history_valid and single_truth:
                 return 1.0
-        except Exception:
+        except (ValueError, KeyError, OSError):
             pass
         return 0.0
