@@ -22,7 +22,7 @@ async def test_retry_exponential_backoff():
             "Retryable", request=MagicMock(), response=MagicMock(status_code=500)
         ),
         httpx.HTTPStatusError(
-            "Retryable", request=MagicMock(), response=MagicMock(status_code=429)
+            "Retryable", request=MagicMock(), response=MagicMock(status_code=503)
         ),
         "Success",
     ]
