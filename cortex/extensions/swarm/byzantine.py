@@ -4,8 +4,10 @@ Byzantine Consensus (LEGION-Ω)
 Byzantine Fault Tolerance / Zero-Trust Mathematics: Axiom 4.
 """
 
+import asyncio
 import hashlib
 import json
+import math
 from typing import Any, TypeVar
 
 T = TypeVar("T")
@@ -31,19 +33,30 @@ class ByzantineConsensus:
     def register_node(self, node_id: str, initial_reputation: float = 1.0) -> None:
         self.nodes[node_id] = ByzantineNode(node_id, initial_reputation)
 
+    @staticmethod
+    def _hash_proposal(proposal: Any) -> str:
+        """Deterministic SHA-256 hash for any serializable proposal."""
+        try:
+            serialized = json.dumps(proposal, sort_keys=True, default=str)
+        except (TypeError, ValueError):
+            serialized = str(proposal)
+        return hashlib.sha256(serialized.encode()).hexdigest()
+
     async def _get_proposal_hash(self, proposal: Any) -> str:
-        """Deterministic hashing for any generic type via background thread."""
-        import asyncio
+        """Hash a proposal in a background thread."""
+        return await asyncio.to_thread(self._hash_proposal, proposal)
 
-        def _sync_hash() -> str:
-            try:
-                # Handle dicts/lists deterministically
-                serialized = json.dumps(proposal, sort_keys=True, default=str)
-            except (TypeError, ValueError):
-                serialized = str(proposal)
-            return hashlib.sha256(serialized.encode()).hexdigest()
-
-        return await asyncio.to_thread(_sync_hash)
+    async def _batch_hash_proposals(
+        self, proposals: dict[str, Any]
+    ) -> dict[str, str]:
+        """Hash all proposals concurrently (O(1) thread dispatch vs O(n))."""
+        tasks = {
+            nid: asyncio.to_thread(self._hash_proposal, prop)
+            for nid, prop in proposals.items()
+            if nid in self.nodes
+        }
+        results = await asyncio.gather(*tasks.values())
+        return dict(zip(tasks.keys(), results))
 
     async def execute_consensus(self, proposals: dict[str, T]) -> T | None:
         """
@@ -57,19 +70,14 @@ class ByzantineConsensus:
         hash_to_proposal: dict[str, T] = {}
         total_reputation = 0.0
 
-        for node_id, proposal in proposals.items():
-            if node_id not in self.nodes:
-                continue
+        # Batch hash all proposals concurrently (Ω₂: no serial thread dispatch)
+        node_hashes = await self._batch_hash_proposals(proposals)
 
+        for node_id, proposal_hash in node_hashes.items():
             rep = self.nodes[node_id].reputation
             total_reputation += rep
-
-            proposal_hash = await self._get_proposal_hash(proposal)
-
             vote_tally[proposal_hash] = vote_tally.get(proposal_hash, 0.0) + rep
-            hash_to_proposal[proposal_hash] = proposal
-
-        import math
+            hash_to_proposal[proposal_hash] = proposals[node_id]
 
         if math.isclose(total_reputation, 0.0, abs_tol=1e-9):
             return None
@@ -78,9 +86,7 @@ class ByzantineConsensus:
         winning_hash = max(vote_tally.keys(), key=lambda k: vote_tally[k])
         winning_weight = vote_tally[winning_hash]
 
-        import math
-
-        # Check against Byantine tolerance threshold
+        # Check against Byzantine tolerance threshold
         ratio = winning_weight / total_reputation
         if ratio > self.tolerance_threshold or math.isclose(
             ratio, self.tolerance_threshold, rel_tol=1e-9
