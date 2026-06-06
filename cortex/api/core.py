@@ -77,8 +77,28 @@ async def lifespan(app: FastAPI):
     # 2. Connection Pool & Async Engine
     # IMPORTANT: The pool must allow writes (read_only=False) because AsyncCortexEngine uses it
     # for facts insertion.
-    pool = CortexConnectionPool(db_path, read_only=False)
-    await pool.initialize()
+    from cortex.storage import StorageMode, get_storage_config, get_storage_mode
+
+    if get_storage_mode() == StorageMode.POSTGRES:
+        from cortex.database.postgres_core import create_pool_async
+        from cortex.storage.postgres import PostgresBackend
+
+        storage_config = get_storage_config()
+        pg_dsn = storage_config["dsn"]
+
+        # 2a. Bootstrap schema on Postgres
+        pg_backend = PostgresBackend(pg_dsn)
+        await pg_backend.connect()
+        await pg_backend.close()
+
+        # 2b. Initialize pool
+        raw_pool = await create_pool_async(pg_dsn)
+        from cortex.database.postgres_adapter import PostgresPoolAdapter
+
+        pool = PostgresPoolAdapter(raw_pool)
+    else:
+        pool = CortexConnectionPool(db_path, read_only=False)
+        await pool.initialize()
     async_engine = AsyncCortexEngine(pool, db_path)
 
     app.state.swarm_manager = get_swarm_manager()
