@@ -15,14 +15,16 @@ def _migration_028_dual_identity(conn: sqlite3.Connection) -> None:
     
     # 1. Add columns (nullable to bypass SQLite ALTER constraints)
     try:
-        conn.execute("ALTER TABLE facts ADD COLUMN fact_hash TEXT UNIQUE;")
+        conn.execute("ALTER TABLE facts ADD COLUMN fact_hash TEXT;")
+        conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_facts_hash ON facts(fact_hash);")
         logger.info("Added fact_hash column to facts.")
     except sqlite3.OperationalError as e:
         if "duplicate column name" not in str(e):
             raise
             
     try:
-        conn.execute("ALTER TABLE causal_edges ADD COLUMN fact_hash TEXT UNIQUE;")
+        conn.execute("ALTER TABLE causal_edges ADD COLUMN fact_hash TEXT;")
+        conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_causal_edges_hash ON causal_edges(fact_hash);")
         logger.info("Added fact_hash column to causal_edges.")
     except sqlite3.OperationalError as e:
         if "duplicate column name" not in str(e):
