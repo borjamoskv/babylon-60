@@ -11,8 +11,8 @@ Ensures README.md, README.es.md, and README.zh.md are structurally aligned:
 DERIVATION: Ω₄ Structural Determinism.
 """
 
-import sys
 import re
+import sys
 from pathlib import Path
 
 # Color styling for Industrial Noir 2026 logs

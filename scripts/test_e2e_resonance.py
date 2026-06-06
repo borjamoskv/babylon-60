@@ -1,11 +1,13 @@
 import asyncio
 import logging
+
 import aiosqlite
-from cortex.memory.manager import CortexMemoryManager
-from cortex.memory.working import WorkingMemoryL1
-from cortex.memory.ledger import EventLedgerL3
-from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+
 from cortex.memory.encoder import AsyncEncoder
+from cortex.memory.ledger import EventLedgerL3
+from cortex.memory.manager import CortexMemoryManager
+from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+from cortex.memory.working import WorkingMemoryL1
 
 logging.basicConfig(level=logging.INFO)
 
@@ -32,7 +34,7 @@ async def run_resonance():
         await l2.ensure_table()
     except Exception as e:
         print(f"[E2E] SovereignVectorStoreL2 init failed ({e}), falling back to MagicMock.")
-        from unittest.mock import MagicMock, AsyncMock
+        from unittest.mock import AsyncMock, MagicMock
 
         l2 = MagicMock()
         l2._get_conn = MagicMock()

@@ -1,7 +1,7 @@
-import sqlite3
-import re
-import subprocess
 import os
+import re
+import sqlite3
+import subprocess
 import sys
 
 DB_PATH = "influencer_audit_v1.db"

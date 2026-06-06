@@ -9,9 +9,9 @@ onda de choque de CORTISOL y ADRENALINA en el Ultramap 3D,
 alertando (o estresando) a los agentes adyacentes.
 """
 
-import sys
-import os
 import logging
+import os
+import sys
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format="%(message)s")

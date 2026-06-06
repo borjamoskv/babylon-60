@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import asyncio
-import time
 import random
+import time
 
 
 async def execute_mcts_fuzzing(agent_id):

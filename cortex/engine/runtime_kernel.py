@@ -6,6 +6,7 @@ import os
 import time
 import uuid
 from dataclasses import asdict, dataclass, field
+from decimal import Decimal
 
 from cortex.observability.prometheus_exporter import CortexPrometheusExporter
 

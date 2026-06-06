@@ -38,7 +38,7 @@ def detect_stack(path: str | Path) -> str:
 def get_build_cmd(stack: str) -> list[str] | None:
     cmds = {
         "node": ["npm", "run", "build"],
-        "python": ["python3", "-m", "py_compile", "."],
+        "python": ["python3", "-m", "compileall", "."],
     }
     return cmds.get(stack)
 

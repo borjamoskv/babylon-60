@@ -1,10 +1,11 @@
 import time
-import requests
-import feedparser
-import pandas as pd
-import networkx as nx
 from pathlib import Path
 from urllib.parse import urlparse
+
+import feedparser
+import networkx as nx
+import pandas as pd
+import requests
 from bs4 import BeautifulSoup
 
 SEED_NODES = [

@@ -1,9 +1,10 @@
 # [C5-REAL] Exergy-Maximized
-import sys
+import logging
 import os
+import sys
+
 import torch  # pyright: ignore[reportMissingImports]
 import torchhd  # pyright: ignore[reportMissingImports]
-import logging
 
 # Adjust path to import cortex module
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

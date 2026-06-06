@@ -24,7 +24,7 @@ def _rule(intent: str, emotion: str, confidence: str):
     """Decorator to register an intent inference rule."""
 
     def decorator(fn: Callable[[dict], bool]):
-        """TODO: Document decorator"""
+        """PENDING: Document decorator"""
         _INTENT_RULES.append((fn, intent, emotion, confidence))
         return fn
 

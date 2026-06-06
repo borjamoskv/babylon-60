@@ -1,17 +1,17 @@
-import sys
 import asyncio
 import logging
+import random
 import signal
 import sqlite3
-import random
-from urllib.parse import urlparse, parse_qs
+import sys
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
 # Dependencias externas CORTEX (Mocked for safety si no están presentes, pero asume C5-REAL)
 try:
+    from comments_scraper_omega import scan_and_inject_comments
     from ingest_influencer_data import AuditIngestionEngine
     from nlp_martyr_loop import extract_vtt, parse_vtt_and_analyze
-    from comments_scraper_omega import scan_and_inject_comments
 
     MODULES_AVAILABLE = True
 except ImportError as e:

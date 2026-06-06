@@ -51,8 +51,10 @@ def _seal_tests(stack: str, cwd: str) -> ShipSeal:
     test_cmd = get_test_cmd(stack)
     if not test_cmd:
         return ShipSeal(name="Tests 100% Green", passed=False, detail="No test command for stack")
-    ret, _, _ = run_quiet(test_cmd, cwd=cwd)
+    ret, stdout, stderr = run_quiet(test_cmd, cwd=cwd)
     passed = ret == 0
+    if not passed:
+        logger.error(f"Tests failed with ret={ret}\nSTDOUT:\n{stdout}\nSTDERR:\n{stderr}")
     return ShipSeal(
         name="Tests 100% Green",
         passed=passed,

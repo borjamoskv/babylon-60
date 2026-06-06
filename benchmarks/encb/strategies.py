@@ -9,10 +9,12 @@ Four strategies implementing a common interface:
 """
 
 from __future__ import annotations
+
 import statistics
 from collections import defaultdict
 from enum import Enum
 from typing import Any
+
 from benchmarks.encb.agents import NodeProfile, update_reliability
 from benchmarks.encb.atms import ATMSLite
 from benchmarks.encb.belief_object import BeliefType

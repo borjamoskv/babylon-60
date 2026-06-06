@@ -11,7 +11,7 @@ core_dir = str(Path(__file__).resolve().parent.parent / "cortex-core")
 if core_dir not in sys.path:
     sys.path.insert(0, core_dir)
 
-from persistence import ZeroCopyRingBuffer, HAS_CORTEX_RS  # pyright: ignore[reportMissingImports]
+from persistence import HAS_CORTEX_RS, ZeroCopyRingBuffer  # pyright: ignore[reportMissingImports]
 
 
 def main():

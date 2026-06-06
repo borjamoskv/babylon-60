@@ -102,7 +102,8 @@ class ExergyEngine:
                     data = json.load(f)
                     return MetaParams(**data)
             except Exception as exc:
-                logger.warning("Suppressed exception: %s", exc)
+                import logging
+                logging.getLogger(__name__).warning("Suppressed exception: %s", exc)
         return MetaParams()
 
     def _save_meta_params(self):

@@ -32,7 +32,6 @@ async def main() -> None:
             try:
                 os.remove(path)
             except OSError:
-                import logging
 
                 pass
 
@@ -112,7 +111,6 @@ async def main() -> None:
             try:
                 os.remove(path)
             except OSError:
-                import logging
 
                 pass
 

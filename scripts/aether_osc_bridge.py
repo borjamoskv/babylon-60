@@ -11,8 +11,8 @@ import json
 import logging
 import socket
 import sys
-import urllib.request
 import urllib.error
+import urllib.request
 
 # Config
 SSE_URL = "http://127.0.0.1:8000/api/v1/events/stream"
@@ -71,7 +71,6 @@ def main():
                         logger.info(f"⚡ [OSC BLASTER] -> {osc_address}")
 
                     except json.JSONDecodeError:
-                        import logging
 
                         pass
                     current_event = None

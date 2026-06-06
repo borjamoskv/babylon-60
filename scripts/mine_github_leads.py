@@ -3,11 +3,10 @@
 import logging
 
 logger = logging.getLogger("script")
-import os
-import sys
-import json
-import subprocess
 import csv
+import json
+import os
+import subprocess
 
 # Queries to mine
 QUERIES = [

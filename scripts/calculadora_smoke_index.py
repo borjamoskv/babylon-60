@@ -1,6 +1,7 @@
-import networkx as nx
 import csv
 from pathlib import Path
+
+import networkx as nx
 
 # ==========================================
 # CORTEX PERSIST: SMOKE INDEX CALCULATOR

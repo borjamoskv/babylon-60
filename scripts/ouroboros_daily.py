@@ -11,10 +11,10 @@ import asyncio
 import datetime
 import json
 import logging
+import os
+import sys
 import time
 from pathlib import Path
-import sys
-import os
 
 # Ensure the root of cortex-persist is in PYTHONPATH
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
