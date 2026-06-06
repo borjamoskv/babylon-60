@@ -16,6 +16,8 @@ import random
 import time
 from typing import Any
 
+from cortex.extensions.swarm.swarm_heartbeat import SWARM_HEARTBEAT
+
 logger = logging.getLogger("cortex.federation.gossip")
 
 
@@ -133,6 +135,9 @@ class GossipNode:
         sender_addr = f"{addr[0]}:{sender_port or addr[1]}"
         await self.register_peer(sender_id, sender_addr)
 
+        if "vitals" in payload and sender_id in self.peers:
+            self.peers[sender_id]["vitals"] = payload["vitals"]
+
         # Merge known state
         sender_state = payload.get("known_state", {})
         sender_version = sender_state.get("version", 0)
@@ -167,6 +172,7 @@ class GossipNode:
             "bind_port": self.bind_port,
             "known_state": self.known_state,
             "peers": {p_id: p["address"] for p_id, p in self.peers.items()},
+            "vitals": SWARM_HEARTBEAT.status_summary(),
         }
         return json.dumps(payload).encode("utf-8")
 

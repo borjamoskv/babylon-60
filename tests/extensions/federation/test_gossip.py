@@ -38,6 +38,7 @@ async def test_gossip_node_communication_and_discovery() -> None:
         # 3. Check that Node B successfully merged Node A's newer state
         assert node_b.known_state["version"] == 42
         assert node_b.known_state["facts"] == 10
+        assert "vitals" in node_b.peers["node_a"]
 
         # Now check transit discovery: Initialize Node C, register only A in C
         node_c = GossipNode(node_id="node_c", bind_port=17337)
