@@ -208,7 +208,8 @@ class SchemaTrait:
             "SELECT count(1) FROM facts_meta WHERE tenant_id = ? AND project_id = ?",
             (tenant_id, project_id),
         )
-        count = cursor.fetchone()[0]
+        row = cursor.fetchone()
+        count = row[0] if row else 0
 
         if count >= self.MAX_DOMAIN_ENTROPY:  # pyright: ignore[reportAttributeAccessIssue]
             logger.warning(

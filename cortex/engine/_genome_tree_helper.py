@@ -58,17 +58,22 @@ def remove_target(tree: AgentOp, target: str) -> AgentOp:
             if not children:
                 return "Noop"  # pyright: ignore[reportReturnType]
             result[variant] = children
-        elif variant == "Cond" and isinstance(data, dict):
-            result[variant] = {
-                "predicate": data.get("predicate"),
-                "then_branch": remove_target(data.get("then_branch", {}), target),
-                "else_branch": remove_target(data.get("else_branch", "Noop"), target),
-            }
-        elif variant == "Loop" and isinstance(data, dict):
-            result[variant] = {
-                "count": data.get("count", 1),
-                "body": remove_target(data.get("body", {}), target),
-            }
+        elif variant in ("Cond", "Loop"):
+            result[variant] = _process_complex_node(variant, data, target)
         else:
             result[variant] = data
     return result
+
+def _process_complex_node(variant: str, data: dict, target: str) -> dict:
+    if variant == "Cond":
+        return {
+            "predicate": data.get("predicate"),
+            "then_branch": remove_target(data.get("then_branch", {}), target),
+            "else_branch": remove_target(data.get("else_branch", "Noop"), target),
+        }
+    elif variant == "Loop":
+        return {
+            "count": data.get("count", 1),
+            "body": remove_target(data.get("body", {}), target),
+        }
+    return data

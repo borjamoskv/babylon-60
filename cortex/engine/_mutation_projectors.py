@@ -297,6 +297,35 @@ async def proj_score_update(
         )
 
 
+async def _update_metadata(
+    conn: aiosqlite.Connection,
+    fact_id: int,
+    tenant_id: str,
+    metadata_column: str,
+    updates: dict,
+) -> str | None:
+    async with conn.execute(f"SELECT {metadata_column} FROM facts WHERE id = ?", (fact_id,)) as cursor:
+        row = await cursor.fetchone()
+    raw_meta = row[0] if row else None
+    if raw_meta:
+        encrypter = get_default_encrypter()
+        if isinstance(raw_meta, str) and raw_meta.startswith(encrypter.PREFIX):
+            meta = encrypter.decrypt_json(raw_meta, tenant_id=tenant_id) or {}
+            meta.update(updates)
+            return encrypter.encrypt_json(meta, tenant_id=tenant_id)
+        else:
+            try:
+                meta = json.loads(raw_meta)
+            except (TypeError, json.JSONDecodeError):
+                return None
+            else:
+                meta.update(updates)
+                return json.dumps(meta)
+    elif raw_meta in ("", None):
+        return json.dumps(updates)
+    return None
+
+
 async def proj_taint_update(
     engine: FactMutationEngine,
     conn: aiosqlite.Connection,
@@ -310,46 +339,12 @@ async def proj_taint_update(
     facts_columns = await engine._facts_columns(conn)
     metadata_value: str | None = None
     if metadata_column:
-        async with conn.execute(
-            f"SELECT {metadata_column} FROM facts WHERE id = ?",
-            (fact_id,),
-        ) as cursor:
-            row = await cursor.fetchone()
-        raw_meta = row[0] if row else None
-        if raw_meta:
-            encrypter = get_default_encrypter()
-            if isinstance(raw_meta, str) and raw_meta.startswith(encrypter.PREFIX):
-                meta = encrypter.decrypt_json(raw_meta, tenant_id=resolved_tenant_id) or {}
-                meta.update(
-                    {
-                        "taint_status": payload["taint_status"],
-                        "tainted_by": payload["tainted_by"],
-                        "taint_timestamp": payload["taint_timestamp"],
-                    }
-                )
-                metadata_value = encrypter.encrypt_json(meta, tenant_id=resolved_tenant_id)
-            else:
-                try:
-                    meta = json.loads(raw_meta)
-                except (TypeError, json.JSONDecodeError):
-                    metadata_value = None
-                else:
-                    meta.update(
-                        {
-                            "taint_status": payload["taint_status"],
-                            "tainted_by": payload["tainted_by"],
-                            "taint_timestamp": payload["taint_timestamp"],
-                        }
-                    )
-                    metadata_value = json.dumps(meta)
-        elif raw_meta in ("", None):
-            metadata_value = json.dumps(
-                {
-                    "taint_status": payload["taint_status"],
-                    "tainted_by": payload["tainted_by"],
-                    "taint_timestamp": payload["taint_timestamp"],
-                }
-            )
+        updates = {
+            "taint_status": payload["taint_status"],
+            "tainted_by": payload["tainted_by"],
+            "taint_timestamp": payload["taint_timestamp"],
+        }
+        metadata_value = await _update_metadata(conn, fact_id, resolved_tenant_id, metadata_column, updates)
     set_clauses: list[str] = []
     params: list[Any] = []
     if confidence is not None:
@@ -398,28 +393,7 @@ async def proj_reparent(
         and "parent_decision_id" not in facts_columns
         and "parent_id" not in facts_columns
     ):
-        async with conn.execute(
-            f"SELECT {metadata_column} FROM facts WHERE id = ?",
-            (fact_id,),
-        ) as cursor:
-            row = await cursor.fetchone()
-        raw_meta = row[0] if row else None
-        if raw_meta:
-            encrypter = get_default_encrypter()
-            if isinstance(raw_meta, str) and raw_meta.startswith(encrypter.PREFIX):
-                meta = encrypter.decrypt_json(raw_meta, tenant_id=resolved_tenant_id) or {}
-                meta["parent_decision_id"] = new_parent
-                metadata_value = encrypter.encrypt_json(meta, tenant_id=resolved_tenant_id)
-            else:
-                try:
-                    meta = json.loads(raw_meta)
-                except (TypeError, json.JSONDecodeError):
-                    metadata_value = None
-                else:
-                    meta["parent_decision_id"] = new_parent
-                    metadata_value = json.dumps(meta)
-        else:
-            metadata_value = json.dumps({"parent_decision_id": new_parent})
+        metadata_value = await _update_metadata(conn, fact_id, resolved_tenant_id, metadata_column, {"parent_decision_id": new_parent})
     if metadata_column and metadata_value is not None:
         set_clauses.append(f"{metadata_column} = ?")
         params.append(metadata_value)
