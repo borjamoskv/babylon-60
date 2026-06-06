@@ -137,10 +137,10 @@ async def resilient_call(
                 logger.error("LLM Call [CIRCUIT-OPEN] -> Provider: %s", provider_name)
                 raise
 
-            # Non-retryable errors (FATAL)
-            if isinstance(e, httpx.HTTPStatusError) and e.response.status_code in (400, 401, 403):
+            # Non-retryable errors (FATAL or FAIL-FAST)
+            if isinstance(e, httpx.HTTPStatusError) and e.response.status_code in (400, 401, 403, 429):
                 logger.error(
-                    "LLM Call [FATAL] -> Provider: %s | Status: %d | Latency: %.2fs",
+                    "LLM Call [FATAL/FAIL-FAST] -> Provider: %s | Status: %d | Latency: %.2fs",
                     provider_name,
                     e.response.status_code,
                     latency,
