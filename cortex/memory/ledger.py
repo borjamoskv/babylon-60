@@ -104,8 +104,9 @@ class EventLedgerL3:
     async def append_event(self, event: MemoryEvent) -> None:
         """Persist an event immutably. Fire-and-commit with SHA-3-256 integrity."""
         import hashlib
-        
+
         from cortex.engine.causal.taint_engine import enforce_taint_check
+
         token = event.metadata.get("cortex_taint") if event.metadata else None
         await enforce_taint_check(self._conn, token, event.content)
 

@@ -4,6 +4,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 
+
 def generate_adversarial_test_stub(target_file, survivors):
     """Generates pytest stub targeting surviving mutations."""
     file_path = Path(target_file)
@@ -35,6 +36,7 @@ def test_adversarial_kill_mutants_{module_name}():
         f.write(stub_content)
     print(f"[C5-REAL] Written: {test_file_path}")
 
+
 def run_adversarial_forge():
     print("[C5-REAL] INIT Adversarial Forge")
     if not os.path.exists("survivors_matrix.json"):
@@ -50,7 +52,7 @@ def run_adversarial_forge():
 
     print(f"[C5-REAL] LOADED: {len(survivors)} mutations")
     file_counts = Counter(s["file"] for s in survivors)
-    
+
     print("[C5-REAL] Top 3 Targets:")
     for file, count in file_counts.most_common(3):
         print(f"  - {file}: {count}")
@@ -60,6 +62,7 @@ def run_adversarial_forge():
 
     print(f"[C5-REAL] TARGET SELECTED: {top_target}")
     generate_adversarial_test_stub(top_target, target_survivors)
+
 
 if __name__ == "__main__":
     run_adversarial_forge()

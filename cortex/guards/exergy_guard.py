@@ -146,16 +146,30 @@ def _is_anomalous_word(w: str) -> bool:
     # If the word is a hexadecimal string or hash prefix, let it pass
     if re.fullmatch(r"[0-9a-f]{6,}", w):
         return False
-        
+
     # Check vowel/consonant distribution
     vowels = set("aeiouyáéíóú")
     has_vowel = any(c in vowels for c in w)
     if not has_vowel:
         # Allow common acronyms without vowels if short
-        if len(w) <= 3 and w in {"xml", "cnn", "ssh", "ssl", "svg", "csv", "pdf", "sql", "txt", "db", "sh", "fs", "git"}:
+        if len(w) <= 3 and w in {
+            "xml",
+            "cnn",
+            "ssh",
+            "ssl",
+            "svg",
+            "csv",
+            "pdf",
+            "sql",
+            "txt",
+            "db",
+            "sh",
+            "fs",
+            "git",
+        }:
             return False
         return True
-        
+
     # Check consecutive consonants
     consonants_run = 0
     max_consonants_run = 0
@@ -167,11 +181,11 @@ def _is_anomalous_word(w: str) -> bool:
             consonants_run = 0
     if max_consonants_run >= 5:
         return True
-        
+
     # Check random letter-number interleaving (e.g., I4Ox, 83rw)
     if re.search(r"[a-z][0-9][a-z]", w) or re.search(r"[0-9][a-z][0-9]", w):
         return True
-        
+
     return False
 
 
@@ -260,7 +274,6 @@ def calculate_exergy(content: str) -> float:
 
     # Reward high-crystallinity facts
     return min(exergy * 1.4, 1.0)
-
 
 
 class ExergyGuard:

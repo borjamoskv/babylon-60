@@ -7,6 +7,7 @@ from pathlib import Path
 
 TIER1_METRICS_FILE = Path("data/mafia_ai/tier1_node_metrics.csv")
 
+
 class AlphaExtractor:
     def __init__(self):
         self.alpha_nodes = []
@@ -28,8 +29,15 @@ class AlphaExtractor:
         alpha_df = alpha_df.sort_values(by=["Smoke_Index", "Out_Degree"], ascending=[True, False])
 
         print("Claim: ALPHA_TARGETS_EXTRACTED")
-        print(f"Proof: {{ Base: [Alpha Filter], Range: [{len(alpha_df)},{len(df)}], Confidence: [C5-REAL] }}")
-        print(alpha_df[['Node', 'Out_Degree', 'In_Degree', 'Smoke_Index']].to_csv(index=False, sep='|'))
+        print(
+            f"Proof: {{ Base: [Alpha Filter], Range: [{len(alpha_df)},{len(df)}], Confidence: [C5-REAL] }}"
+        )
+        print(
+            alpha_df[["Node", "Out_Degree", "In_Degree", "Smoke_Index"]].to_csv(
+                index=False, sep="|"
+            )
+        )
+
 
 if __name__ == "__main__":
     AlphaExtractor().extract_alpha()

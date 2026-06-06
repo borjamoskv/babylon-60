@@ -136,6 +136,7 @@ class HDCVectorStoreL2:
         """Encode and store a multi-tenant CortexFactModel as a Hypervector."""
         conn = self._get_conn()
         from cortex.engine.causal.taint_engine import enforce_taint_check
+
         token = fact.metadata.get("cortex_taint") if fact.metadata else None
         await enforce_taint_check(conn, token, fact.content)
 

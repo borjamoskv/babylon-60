@@ -14,8 +14,10 @@ EXCLUDE_DIRS = {".venv", ".venv-audit", "__pycache__", "node_modules", ".git", "
 
 PATTERN = re.compile(r"CORTEX\s+v[\d.]+\s*[-–\-]\s*", re.IGNORECASE)
 
+
 def should_skip(path: Path) -> bool:
     return any(part in EXCLUDE_DIRS for part in path.parts)
+
 
 def process_file(filepath: Path, dry_run: bool = False) -> bool:
     try:
@@ -36,11 +38,12 @@ def process_file(filepath: Path, dry_run: bool = False) -> bool:
     filepath.write_text(new_content, encoding="utf-8")
     return True
 
+
 def main() -> None:
     dry_run = "--dry-run" in sys.argv
     reality_level = "C4-SIM" if dry_run else "C5-REAL"
     print(f"REALITY_LEVEL: {reality_level}")
-    
+
     modified = []
     scanned = 0
 
@@ -61,6 +64,7 @@ def main() -> None:
             print(f"  - {f}")
     if not dry_run and modified:
         print("State: SSOT_ENFORCED")
+
 
 if __name__ == "__main__":
     main()

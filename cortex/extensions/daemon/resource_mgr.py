@@ -170,14 +170,12 @@ class ResourceMgrMixin:
                 from cortex.engine.causal.anomaly_bridge import AnomalyBridge
 
                 auth_gw = AuthGateway(self._shared_engine)
-                # ensure table is created, though we should probably run this asynchronously, 
+                # ensure table is created, though we should probably run this asynchronously,
                 # but it's safe to run create table in init or async start.
                 anomaly_br = AnomalyBridge()
 
                 self.sovereignty_runtime = EventSovereigntyRuntime(
-                    event_bus=self._event_bus,
-                    anomaly_bridge=anomaly_br,
-                    auth_gateway=auth_gw
+                    event_bus=self._event_bus, anomaly_bridge=anomaly_br, auth_gateway=auth_gw
                 )
                 logger.info("👑 EventSovereigntyRuntime ENABLED")
             except Exception as e:

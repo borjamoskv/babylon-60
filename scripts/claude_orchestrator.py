@@ -64,7 +64,6 @@ console = Console() if _RICH else None
 
 
 class ClaudeRequest(BaseModel):
-
     prompt: str = Field(..., min_length=1, description="User prompt text")
     system: str = Field(
         default=(
@@ -88,7 +87,6 @@ class ClaudeRequest(BaseModel):
 
 
 class ClaudeResponse(BaseModel):
-
     status: str  # "C5-REAL" | "error" | "retry_exhausted"
     model: str
     request_hash: str
@@ -102,7 +100,6 @@ class ClaudeResponse(BaseModel):
 
 @dataclass
 class OrchestratorStats:
-
     total: int = 0
     success: int = 0
     failed: int = 0
