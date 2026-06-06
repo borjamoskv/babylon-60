@@ -160,17 +160,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         tx_id: int | None,
         parent_decision_id: int | None = None,
     ) -> int:
-        # ═══ AX-II: Pre-store guards via GuardPipeline ═══
-        pipeline = getattr(self, "_guard_pipeline", None)
-        if pipeline is not None:
-            try:
-                await pipeline.run_guards(
-                    content, project, fact_type, meta or {}, conn, tenant_id=tenant_id
-                )
-            except ValueError:
-                raise  # Guard rejections must propagate
-            except Exception as _gp_err:  # noqa: BLE001
-                logger.debug("[AX-II] GuardPipeline pre-store skipped: %s", _gp_err)
+        await self._run_pre_store_guards(conn, content, project, fact_type, meta, tenant_id)
 
         dedupe_id, meta, content, fact_type = await self._run_store_validation(
             conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
@@ -178,20 +168,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         if dedupe_id is not None:
             return dedupe_id
 
-        from cortex.utils.canonical import compute_fact_hash
-
-        content_hash = compute_fact_hash(content)
-        tx_id = (
-            tx_id
-            if tx_id is not None
-            else await self._log_transaction(
-                conn,
-                project,
-                "store",
-                {"fact_type": fact_type, "content_hash": content_hash},
-                tenant_id=tenant_id,  # pyright: ignore
-            )
-        )
+        tx_id = await self._resolve_tx_id(tx_id, conn, project, content, fact_type, tenant_id)
         fact_id = await insert_fact_record(
             conn,
             tenant_id,
@@ -207,9 +184,67 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             parent_decision_id=parent_decision_id,
         )
 
-        # Dual-Write Bridge: handled in insert_fact_record
-        pass
+        await self._run_post_store_tasks(
+            conn, fact_id, project, content, fact_type, tags, source, tenant_id
+        )
 
+        if commit:
+            await conn.commit()
+
+        return fact_id
+
+    async def _run_pre_store_guards(
+        self,
+        conn: aiosqlite.Connection,
+        content: str,
+        project: str,
+        fact_type: str,
+        meta: dict[str, Any] | None,
+        tenant_id: str,
+    ) -> None:
+        pipeline = getattr(self, "_guard_pipeline", None)
+        if pipeline is not None:
+            try:
+                await pipeline.run_guards(
+                    content, project, fact_type, meta or {}, conn, tenant_id=tenant_id
+                )
+            except ValueError:
+                raise
+            except Exception as _gp_err:  # noqa: BLE001
+                logger.debug("[AX-II] GuardPipeline pre-store skipped: %s", _gp_err)
+
+    async def _resolve_tx_id(
+        self,
+        tx_id: int | None,
+        conn: aiosqlite.Connection,
+        project: str,
+        content: str,
+        fact_type: str,
+        tenant_id: str,
+    ) -> int:
+        if tx_id is not None:
+            return tx_id
+        from cortex.utils.canonical import compute_fact_hash
+        content_hash = compute_fact_hash(content)
+        return await self._log_transaction(
+            conn,
+            project,
+            "store",
+            {"fact_type": fact_type, "content_hash": content_hash},
+            tenant_id=tenant_id,  # pyright: ignore
+        )
+
+    async def _run_post_store_tasks(
+        self,
+        conn: aiosqlite.Connection,
+        fact_id: int,
+        project: str,
+        content: str,
+        fact_type: str,
+        tags: list[str] | None,
+        source: str | None,
+        tenant_id: str,
+    ) -> None:
         caps = CapabilityRegistry.get_instance().capabilities
         if (
             getattr(self, "_auto_embed", False)
@@ -226,12 +261,8 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 tenant_id,
             )
 
-        if commit:
-            await conn.commit()
-
-        # Ingest ambient signals into the Right-Brain heuristic engine (O(1))
-        if hasattr(self, "right_brain") and self.right_brain is not None:  # pyright: ignore[reportAttributeAccessIssue]
-            self.right_brain.ingest_ambient_signal(  # pyright: ignore[reportAttributeAccessIssue]
+        if hasattr(self, "right_brain") and self.right_brain is not None:  # pyright: ignore
+            self.right_brain.ingest_ambient_signal(  # pyright: ignore
                 {
                     "source": source or "unknown",
                     "fact_type": fact_type,
@@ -240,7 +271,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 }
             )
 
-        # ═══ AX-II: Post-store hooks via GuardPipeline ═══
+        pipeline = getattr(self, "_guard_pipeline", None)
         if pipeline is not None:
             db_path = str(getattr(self, "_db_path", "") or "")
             try:
@@ -255,8 +286,6 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 )
             except Exception as _ph_err:  # noqa: BLE001
                 logger.debug("[AX-II] GuardPipeline post-hooks skipped: %s", _ph_err)
-
-        return fact_id
 
     async def store_many(self, facts: list[dict[str, Any]]) -> list[int]:
         if not facts:
