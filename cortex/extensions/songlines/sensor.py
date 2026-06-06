@@ -94,9 +94,7 @@ class TopographicSensor:
             except OSError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in sensor.py"
-                )
+                pass
 
         # 1.5 Try native python xattr package (macOS mostly) if installed
         try:
@@ -108,15 +106,11 @@ class TopographicSensor:
             except OSError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in sensor.py"
-                )
+                pass
         except ImportError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in sensor.py"
-            )
+            pass
 
         # 2. Try xattr CLI (Chronos Sniper: added timeout)
         try:
@@ -140,9 +134,7 @@ class TopographicSensor:
             except OSError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in sensor.py"
-                )
+                pass
 
         # 1.5 Try native python xattr package (macOS mostly) if installed
         try:
@@ -153,15 +145,11 @@ class TopographicSensor:
             except OSError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in sensor.py"
-                )
+                pass
         except ImportError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in sensor.py"
-            )
+            pass
 
         # 2. Try xattr CLI -p (Chronos Sniper: added timeout)
         try:
@@ -206,18 +194,14 @@ class TopographicSensor:
             except OSError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in sensor.py"
-                )
+                pass
 
         try:
             subprocess.run(["xattr", "-d", attr_name, str(file_path)], capture_output=True)
         except (subprocess.SubprocessError, FileNotFoundError, OSError):
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in sensor.py"
-            )
+            pass
 
     def _scan_single_manifest(self, manifest: Path) -> list[GhostTrace]:
         """Read ghosts from a single .songlines fallback file."""
@@ -239,7 +223,5 @@ class TopographicSensor:
         except (json.JSONDecodeError, KeyError, OSError):
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in sensor.py"
-            )
+            pass
         return results

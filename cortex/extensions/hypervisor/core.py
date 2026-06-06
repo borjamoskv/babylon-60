@@ -132,9 +132,7 @@ class AgencyHypervisor:
         except Exception:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in core.py"
-            )
+            pass
 
         # Handle fuse mode returning a string instead of list
         if isinstance(results, str):

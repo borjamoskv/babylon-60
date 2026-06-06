@@ -53,7 +53,7 @@ def _resolve_device() -> str:
     except (ImportError, RuntimeError, AttributeError):
         import logging
 
-        logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed in local.py")
+        pass
 
     return "cpu"
 

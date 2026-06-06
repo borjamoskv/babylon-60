@@ -54,9 +54,7 @@ class ASTOracleMonitor(IntervalProjectMonitor[ASTAlert]):
             except json.JSONDecodeError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in ast_oracle.py"
-                )
+                pass
 
         except Exception as e:
             logger.error("ASTOracle failed to scan %s: %s", project, e)

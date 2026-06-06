@@ -83,9 +83,7 @@ class MacMaestroAgent:
         except json.JSONDecodeError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in mac_maestro.py"
-            )
+            pass
 
         match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
         if match:
@@ -94,9 +92,7 @@ class MacMaestroAgent:
             except json.JSONDecodeError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in mac_maestro.py"
-                )
+                pass
 
         match = re.search(r"(\{.*\})", text, re.DOTALL)
         if match:
@@ -105,8 +101,6 @@ class MacMaestroAgent:
             except json.JSONDecodeError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in mac_maestro.py"
-                )
+                pass
 
         return None

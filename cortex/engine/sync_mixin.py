@@ -84,9 +84,7 @@ class SyncMixin:
                         except NotImplementedError:
                             import logging
 
-                            logging.getLogger(__name__).error(
-                                "DETECTIVE-OMEGA: Silent exception swallowed in sync_mixin.py"
-                            )
+                            pass
 
                     loop.close()
                 except (RuntimeError, ValueError) as e:

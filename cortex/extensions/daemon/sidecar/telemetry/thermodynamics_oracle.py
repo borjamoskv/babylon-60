@@ -39,9 +39,7 @@ class ThermodynamicsOracle:
         except ImportError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in thermodynamics_oracle.py"
-            )
+            pass
 
     async def start(self) -> None:
         self._running = True
@@ -85,9 +83,7 @@ class ThermodynamicsOracle:
             except Exception:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in thermodynamics_oracle.py"
-                )
+                pass
 
         # Density factor of the Coroutine Swarm
         active_tasks = len(asyncio.all_tasks())

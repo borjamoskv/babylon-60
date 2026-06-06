@@ -202,9 +202,7 @@ def semantic_search_sync(
             except (ValueError, OSError):
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in vector.py"
-                )
+                pass
 
         score = 1.0 - (row[7] if row[7] else 0.0)
         results.append(

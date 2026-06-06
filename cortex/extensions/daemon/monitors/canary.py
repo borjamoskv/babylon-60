@@ -53,9 +53,7 @@ class CanaryMonitor:
             except OSError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in canary.py"
-                )
+                pass
 
     async def check_async(self) -> list[SecurityAlert]:
         """Check if any canary files have been accessed or modified."""

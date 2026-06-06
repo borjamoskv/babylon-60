@@ -64,9 +64,8 @@ class TestAsyncPipelineEnhanced:
             except asyncio.CancelledError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed"
-                )  # Also valid
+                pass
+# Also valid
 
         asyncio.run(_test())
 

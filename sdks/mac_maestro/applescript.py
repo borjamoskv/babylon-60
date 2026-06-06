@@ -26,7 +26,7 @@ _CTRL_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 class AppleScriptError(Exception):
     import logging
 
-    logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")
+    pass
 
 
 def sanitize_applescript_string(value: object) -> str:

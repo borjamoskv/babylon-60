@@ -68,9 +68,7 @@ class SovereignTLRUCache:
             except ValueError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in optimization.py"
-                )
+                pass
         elif len(self.cache) >= self.capacity:
             if self.order:
                 oldest_key = self.order.popleft()
@@ -88,9 +86,7 @@ class SovereignTLRUCache:
         except ValueError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in optimization.py"
-            )
+            pass
         self._generate_proof(key, value, reason)
 
     def _generate_proof(self, key: str, value: Any, reason: EvictionReason):
@@ -187,9 +183,7 @@ class OptimizationMixin:
             except Exception:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in optimization.py"
-                )
+                pass
             OptimizationMixin._executor.shutdown(wait=False, cancel_futures=True)
             OptimizationMixin._executor = None
 

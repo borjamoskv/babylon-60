@@ -214,9 +214,7 @@ class GatewayRouter:
             except Exception:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in router.py"
-                )
+                pass
             return GatewayResponse(
                 ok=False,
                 error=str(exc),

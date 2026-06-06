@@ -158,9 +158,7 @@ class TuningStore:
                 except json.JSONDecodeError:
                     import logging
 
-                    logging.getLogger(__name__).error(
-                        "DETECTIVE-OMEGA: Silent exception swallowed in tuning_store.py"
-                    )
+                    pass
         return None
 
     @property

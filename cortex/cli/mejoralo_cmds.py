@@ -178,9 +178,7 @@ def mejoralo_record(project, score_before, score_after, actions, db):
             except (OSError, ValueError):
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in mejoralo_cmds.py"
-                )
+                pass
 
         console.print(
             f"[green]✓[/] Sesión registrada [bold]#{fact_id}[/] - "

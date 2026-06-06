@@ -127,9 +127,7 @@ def _collect_snapshot() -> MemorySnapshot:
         except (ValueError, KeyError, OSError, RuntimeError, ImportError):
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in monitor.py"
-            )
+            pass
 
     if _IS_LINUX:
         # Lazy import: ctypes.CDLL("libc.so.6") only attempted on Linux
@@ -143,9 +141,7 @@ def _collect_snapshot() -> MemorySnapshot:
         except (ValueError, KeyError, OSError, RuntimeError, ImportError):
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in monitor.py"
-            )
+            pass
 
     return MemorySnapshot(
         rss_bytes=rss,
@@ -255,9 +251,7 @@ class MemoryPressureMonitor:
             except (asyncio.CancelledError, asyncio.TimeoutError):
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in monitor.py"
-                )
+                pass
 
         self._executor.shutdown(wait=False, cancel_futures=True)
         logger.info("MemoryPressureMonitor stopped")

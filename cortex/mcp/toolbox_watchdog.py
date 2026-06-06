@@ -278,7 +278,5 @@ class ToolboxWatchdog:
             except OSError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in toolbox_watchdog.py"
-                )
+                pass
             self._log_fd = None

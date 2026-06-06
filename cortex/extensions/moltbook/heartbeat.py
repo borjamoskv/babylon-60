@@ -39,7 +39,7 @@ class MoltbookHeartbeat:
                 return json.loads(_STATE_PATH.read_text())
             except (OSError, json.JSONDecodeError):
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in heartbeat.py')
+                pass
         return {
             "last_check": None,
             "last_post": None,

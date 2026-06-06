@@ -71,9 +71,7 @@ class NemesisProtocol:
         except FileNotFoundError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in nemesis.py"
-            )
+            pass
         return dynamic_rules
 
     def analyze(cls, content: str, db_path: str | None = None) -> str | None:  # pyright: ignore[reportSelfClsParameterName]

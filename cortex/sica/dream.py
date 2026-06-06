@@ -548,9 +548,7 @@ class DreamEngine:
                     except KeyError:
                         import logging
 
-                        logging.getLogger(__name__).error(
-                            "DETECTIVE-OMEGA: Silent exception swallowed in dream.py"
-                        )
+                        pass
 
         return applied
 

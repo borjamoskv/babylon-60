@@ -120,9 +120,7 @@ class FiatOracle:
                 except OSError:
                     import logging
 
-                    logging.getLogger(__name__).error(
-                        "DETECTIVE-OMEGA: Silent exception swallowed in fiat_oracle.py"
-                    )
+                    pass
             except (OSError, ValueError, CortexError, KeyError) as e:
                 logger.error("⚠️ [FIAT_ORACLE] Falla procesando %s: %s", tx_file.name, e)
 

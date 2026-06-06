@@ -107,7 +107,7 @@ def _run_functional_inquisitor(new_code: str, original_code: str, top_file_rel: 
             return False
     except SyntaxError:
         import logging
-        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in heal.py')
+        pass
     return True
 
 def _apply_aesthetic_formatting(abs_path: Path, console: Any) -> None:

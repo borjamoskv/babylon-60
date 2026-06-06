@@ -33,9 +33,7 @@ async def main() -> None:
             except OSError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in demo_canonical.py"
-                )
+                pass
 
     engine = CortexEngine(db_path=db_path)  # pyright: ignore[reportCallIssue]
 
@@ -115,9 +113,7 @@ async def main() -> None:
             except OSError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in demo_canonical.py"
-                )
+                pass
 
 
 if __name__ == "__main__":

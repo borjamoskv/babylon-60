@@ -59,9 +59,8 @@ def cortex_db() -> sqlite3.Connection:
         except sqlite3.OperationalError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed"
-            )  # Virtual tables (vec0) won't work in vanilla SQLite
+            pass
+# Virtual tables (vec0) won't work in vanilla SQLite
     return conn
 
 

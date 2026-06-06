@@ -87,9 +87,7 @@ async def test_tenant_isolation_update_and_deprecate(engine):
     except ValueError:
         import logging
 
-        logging.getLogger(__name__).error(
-            "DETECTIVE-OMEGA: Silent exception swallowed in test_tenant_isolation.py"
-        )
+        pass
 
     # Bob tries to deprecate Alice's fact
     deprecated = await engine.deprecate(fact_id=fact_id_alice)

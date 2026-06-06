@@ -115,9 +115,7 @@ async def notch_websocket(ws: WebSocket) -> None:
     except WebSocketDisconnect:
         import logging
 
-        logging.getLogger(__name__).error(
-            "DETECTIVE-OMEGA: Silent exception swallowed in notch_ws.py"
-        )
+        pass
     except (OSError, RuntimeError) as exc:
         logger.warning("Notch WS error: %s", exc)
     finally:

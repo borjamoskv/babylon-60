@@ -117,9 +117,7 @@ def _seal_a11y(p: Path, stack: str) -> ShipSeal:
         except OSError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in ship.py"
-            )
+            pass
 
     return ShipSeal(
         name="A11y 100%",

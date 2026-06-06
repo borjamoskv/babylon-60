@@ -73,9 +73,7 @@ def main():
                     except json.JSONDecodeError:
                         import logging
 
-                        logging.getLogger(__name__).error(
-                            "DETECTIVE-OMEGA: Silent exception swallowed in aether_osc_bridge.py"
-                        )
+                        pass
                     current_event = None
 
     except urllib.error.URLError as e:

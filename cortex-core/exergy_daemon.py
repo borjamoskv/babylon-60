@@ -367,7 +367,7 @@ class ExergyDaemon:
                 self.lock_file.close()
             except Exception:
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in exergy_daemon.py')
+                pass
         logging.info("Exergy Daemon: Stopped safely.")
 
 

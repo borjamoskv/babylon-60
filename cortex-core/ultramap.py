@@ -76,7 +76,7 @@ class UltramapSubstrate:
                 logger.debug("Error in ultramap _safe_close: %s", e)
             except Exception:
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in ultramap.py')
+                pass
 
     def close(self):
         if hasattr(self, "_finalizer") and self._finalizer.alive:
@@ -88,21 +88,21 @@ class UltramapSubstrate:
                 self._buffer.release()
             except ValueError:
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in ultramap.py')
+                pass
             self._buffer = None
         if hasattr(self, "_mmap") and self._mmap is not None:
             try:
                 self._mmap.close()
             except ValueError:
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in ultramap.py')
+                pass
             self._mmap = None
         if hasattr(self, "_f") and self._f is not None:
             try:
                 self._f.close()
             except OSError:
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in ultramap.py')
+                pass
             self._f = None
 
     def update_agent_position(self, agent_idx: int, x: float, y: float, z: float, target: str, entropy: float):

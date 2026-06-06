@@ -54,13 +54,13 @@ class SovereignResource:
                             res.release()
                         except ValueError:
                             import logging
-                            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in base.py')
+                            pass
                     elif hasattr(res, 'close'):
                         try:
                             res.close()
                         except ValueError:
                             import logging
-                            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in base.py')
+                            pass
             except Exception as e:
                 logger.warning("Silenced exception: %s", e)
 

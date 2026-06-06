@@ -131,7 +131,5 @@ def _get_db_path(request: Request) -> str:
     except Exception:
         import logging
 
-        logging.getLogger(__name__).error(
-            "DETECTIVE-OMEGA: Silent exception swallowed in health.py"
-        )
+        pass
     return ""

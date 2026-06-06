@@ -140,9 +140,8 @@ class RaftNode:
                 except asyncio.CancelledError:
                     import logging
 
-                    logging.getLogger(__name__).error(
-                        "DETECTIVE-OMEGA: Silent exception swallowed"
-                    )  # Expected - do NOT re-raise during shutdown
+                    pass
+# Expected - do NOT re-raise during shutdown
         self._election_task = None
         self._heartbeat_task = None
         NodeRegistry.deregister(self.node_id)
@@ -438,9 +437,7 @@ class RaftNode:
                 except asyncio.CancelledError:
                     import logging
 
-                    logging.getLogger(__name__).error(
-                        "DETECTIVE-OMEGA: Silent exception swallowed in raft.py"
-                    )
+                    pass
 
             self.role = NodeRole.LEADER
             self.leader_id = self.node_id

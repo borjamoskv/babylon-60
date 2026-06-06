@@ -308,9 +308,7 @@ def siege(db: str) -> None:
         except (ValueError, KeyError, OSError, RuntimeError, AttributeError):
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in trust_cmds.py"
-            )
+            pass
 
         console.print(
             Panel(

@@ -111,9 +111,7 @@ def semantic_search_sync(
             except (ValueError, OSError):
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in sync.py"
-                )
+                pass
 
         results.append(
             SyncSearchResult(
@@ -220,9 +218,7 @@ def _parse_row(row: tuple, has_rank: bool) -> SyncSearchResult:
         except (ValueError, OSError):
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in sync.py"
-            )
+            pass
 
     return SyncSearchResult(
         fact_id=row[0],  # type: ignore[reportGeneralTypeIssues]

@@ -104,9 +104,7 @@ class ConnectionMixin:
                     except Exception:
                         import logging
 
-                        logging.getLogger(__name__).error(
-                            "DETECTIVE-OMEGA: Silent exception swallowed in _engine_connection.py"
-                        )
+                        pass
                     self._conns_by_loop.pop(current_loop, None)
                     conn = None
                 else:
@@ -182,9 +180,7 @@ class ConnectionMixin:
         except (AttributeError, OSError):
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in _engine_connection.py"
-            )
+            pass
         return conn
 
     async def init_db(self) -> None:

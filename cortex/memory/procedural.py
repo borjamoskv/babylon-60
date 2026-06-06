@@ -140,9 +140,7 @@ class ProceduralMemory:
                 except ImportError:
                     import logging
 
-                    logging.getLogger(__name__).error(
-                        "DETECTIVE-OMEGA: Silent exception swallowed in procedural.py"
-                    )
+                    pass
         except Exception as e:
             import logging
 
@@ -158,9 +156,7 @@ class ProceduralMemory:
             except ImportError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in procedural.py"
-                )
+                pass
         finally:
             conn.close()
 

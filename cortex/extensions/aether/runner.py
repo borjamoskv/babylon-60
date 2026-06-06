@@ -271,6 +271,4 @@ class AetherAgent:
         except (asyncio.TimeoutError, OSError):
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in runner.py"
-            )
+            pass

@@ -157,9 +157,7 @@ class ToolboxBridge:
             except ConnectionError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in toolbox_bridge.py"
-                )
+                pass
         self._client = None
         self._tools = []
 

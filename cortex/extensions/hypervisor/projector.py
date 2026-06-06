@@ -80,9 +80,7 @@ class EventProjector:
         except Exception:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in projector.py"
-            )
+            pass
 
     # ── Private side-effect implementations ───────────────────────
 
@@ -109,9 +107,8 @@ class EventProjector:
         except (ImportError, AttributeError, TypeError):
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed"
-            )  # Endocrine not installed - degrade gracefully
+            pass
+# Endocrine not installed - degrade gracefully
 
     async def _verify_songlines(self, project: str) -> None:
         """Trigger autopoiesis songline verification if available."""
@@ -123,6 +120,5 @@ class EventProjector:
         except (ImportError, AttributeError, TypeError):
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed"
-            )  # Autopoiesis not installed - degrade gracefully
+            pass
+# Autopoiesis not installed - degrade gracefully

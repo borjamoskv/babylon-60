@@ -71,7 +71,7 @@ class PersistExecutor:
             self.memory_manager.store(agent_id, state_data)  # pyright: ignore[reportUnusedCoroutine]
         except AttributeError:
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in persist_executor.py')
+            pass
 
         return {
             "status": "CRYSTALLIZED",

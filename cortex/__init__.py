@@ -14,7 +14,7 @@ try:
 except ImportError:
     import logging
 
-    logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed in __init__.py")
+    pass
 
 __version__ = "0.3.0b8"
 __author__ = "by borjamoskv.com"

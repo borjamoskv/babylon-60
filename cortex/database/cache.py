@@ -208,6 +208,4 @@ class TieredCache(Generic[T]):
             except asyncio.QueueFull:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in cache.py"
-                )
+                pass
