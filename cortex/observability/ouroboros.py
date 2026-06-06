@@ -1,7 +1,7 @@
 import numpy as np
 import time
 from dataclasses import dataclass, field
-from typing import List, Dict, Any
+from typing import Any
 
 from cortex.observability.exergy_engine import ExecutionTrace
 

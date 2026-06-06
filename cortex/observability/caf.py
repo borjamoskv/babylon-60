@@ -1,6 +1,6 @@
 import numpy as np
 import random
-from typing import List, Any
+from typing import Any
 
 from cortex.observability.fdf import Particle, FailureField
 

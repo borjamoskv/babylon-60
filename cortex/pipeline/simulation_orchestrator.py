@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import Any
 from dataclasses import dataclass, field
 from cortex.interfaces.memory_provider import MemoryProvider, MemoryNode
 from cortex.semantic.intent_encoder import IntentEncoder

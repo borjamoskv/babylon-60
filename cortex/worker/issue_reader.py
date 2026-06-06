@@ -4,7 +4,7 @@ import re
 import urllib.request
 import urllib.error
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 

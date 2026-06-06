@@ -2,7 +2,7 @@
 import os
 import subprocess
 import re
-from typing import Optional, List, Tuple
+from typing import Optional
 from datetime import datetime
 
 def log(msg: str, tier: str = "INFO") -> None:

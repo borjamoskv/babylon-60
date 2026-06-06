@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List
+
 from cortex.simulation.primitives import MemoryTrajectory
 
 

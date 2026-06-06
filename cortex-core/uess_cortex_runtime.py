@@ -2,7 +2,7 @@ import os
 import time
 import json
 import logging
-from typing import Dict, Any, List
+from typing import Any
 from uess_swarm_scheduler import UESSSwarmScheduler, AgentRole
 from uess_ast_mutation_engine import UESSAstMutationEngine
 
@@ -14,7 +14,7 @@ class HybridLogicalClock:
         self.time = int(time.time() * 1000)
         self.count = 0
         
-    def tick(self) -> Dict[str, int]:
+    def tick(self) -> dict[str, int]:
         now = int(time.time() * 1000)
         if now > self.time:
             self.time = now
@@ -37,10 +37,10 @@ class UESSCortexRuntime:
         self.hlc = HybridLogicalClock()
         self.scheduler = UESSSwarmScheduler(capacity=500)
         self.ast_engine = UESSAstMutationEngine(target_file=target_ast_file, scheduler=self.scheduler)
-        self.event_log: List[Dict[str, Any]] = []
+        self.event_log: list[dict[str, Any]] = []
         self.log_file = "cortex_event_aof.jsonl"
         
-    def _emit_event(self, event_type: str, agent_id: int, payload: Dict[str, Any]):
+    def _emit_event(self, event_type: str, agent_id: int, payload: dict[str, Any]):
         event = {
             "hlc": self.hlc.to_string(),
             "type": event_type,

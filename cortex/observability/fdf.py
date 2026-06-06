@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.neighbors import KernelDensity
 from dataclasses import dataclass, field
-from typing import List, Any
+from typing import Any
 from collections.abc import Callable
 
 from cortex.observability.efel import SystemState, encode_state, encode_task

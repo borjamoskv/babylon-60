@@ -2,7 +2,7 @@ import os
 import json
 import time
 import logging
-from typing import Dict, Any, List
+from typing import Any
 
 logger = logging.getLogger("cortex.remotion")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -19,11 +19,11 @@ class UESSRemotionBridge:
     def __init__(self, log_path: str = "cortex_event_aof.jsonl", out_path: str = "remotion_scene_graph.json"):
         self.log_path = log_path
         self.out_path = out_path
-        self.frames: List[Dict[str, Any]] = []
+        self.frames: list[dict[str, Any]] = []
         self.current_frame = 0
         self.last_processed_line = 0
 
-    def event_to_frame_mutation(self, event: Dict[str, Any]) -> Dict[str, Any]:
+    def event_to_frame_mutation(self, event: dict[str, Any]) -> dict[str, Any]:
         """Maps an internal UESS Event into a Visual Scene Graph mutation."""
         event_type = event.get("type", "UNKNOWN")
         payload = event.get("payload", {})

@@ -4,7 +4,7 @@ import json
 import asyncio
 import urllib.request
 import urllib.error
-from typing import List, Dict, Optional
+from typing import Optional
 from datetime import datetime
 import subprocess
 

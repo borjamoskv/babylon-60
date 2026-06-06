@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List, Optional
+from typing import Optional
 from cortex.simulation.primitives import MemoryTrajectory, SimulationField
 from cortex.simulation.drift_detector import MemoryDriftDetector
 from cortex.simulation.thermodynamics import MemoryEnergyField

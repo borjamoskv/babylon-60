@@ -12,7 +12,7 @@ import math
 import os
 import re
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 from cortex.extensions.llm._models import CortexPrompt
 from cortex.extensions.llm.provider import LLMProvider
@@ -30,11 +30,11 @@ class GPTCanaryDetector:
 
     def __init__(self, router: CortexLLMRouter):
         self.router = router
-        self.detected_canaries: List[Dict[str, Any]] = []
+        self.detected_canaries: list[dict[str, Any]] = []
 
     async def benchmark_endpoint(
         self, test_payload: str, context_size: int = 120_000
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Runs a canary test payload with simulated context expansion.
 
         Measures TTFT, throughput, and detects signature shifts in the Codex backend.
@@ -102,7 +102,7 @@ class GlasswingVulnerabilityScanner:
         self.router = router
 
     @sovereign_circuit_breaker(timeout=60.0, max_retries=1)
-    async def scan_and_patch(self, code_block: str, language: str = "python") -> Dict[str, Any]:
+    async def scan_and_patch(self, code_block: str, language: str = "python") -> dict[str, Any]:
         """Scans a code block for zero-day vulnerabilities and generates a secure patch.
 
         Emulates Project Glasswing's defensive loop utilizing Claude Mythos capabilities.
@@ -154,7 +154,7 @@ class GlasswingVulnerabilityScanner:
             return {"status": "FAIL", "error": str(e)}
 
 
-async def execute_canary_audit(target_code: str) -> Dict[str, Any]:
+async def execute_canary_audit(target_code: str) -> dict[str, Any]:
     """Facilitates an end-to-end audit demonstrating reverse-engineered model capabilities."""
     from cortex.extensions.skills.autodidact.synthesis import _get_synthesis_router
 

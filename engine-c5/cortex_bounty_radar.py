@@ -4,7 +4,7 @@ import urllib.error
 import json
 import time
 import os
-from typing import Any, Dict
+from typing import Any
 from datetime import datetime
 
 def log(msg: str, tier: str = "INFO") -> None:

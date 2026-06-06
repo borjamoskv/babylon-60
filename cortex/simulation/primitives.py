@@ -1,6 +1,6 @@
 import numpy as np
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import Optional
 from cortex.interfaces.memory_provider import MemoryNode
 
 

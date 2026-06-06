@@ -161,6 +161,19 @@ class CausalGraph:
             # Construir DAG local
             local_dag = {r[0]: json.loads(r[1]) for r in active_traces}
 
+            def has_cycle(n, visited_set, stack_set):
+                if n in stack_set:
+                    return True
+                if n in visited_set:
+                    return False
+                visited_set.add(n)
+                stack_set.add(n)
+                for parent in local_dag.get(n, []):
+                    if has_cycle(parent, visited_set, stack_set):
+                        return True
+                stack_set.remove(n)
+                return False
+
             for node_id, lineage in local_dag.items():
                 is_contradiction = False
                 for p in lineage:
@@ -181,20 +194,7 @@ class CausalGraph:
                 visited = set()
                 stack = set()
 
-                def has_cycle(n):
-                    if n in stack:
-                        return True
-                    if n in visited:
-                        return False
-                    visited.add(n)
-                    stack.add(n)
-                    for parent in local_dag.get(n, []):
-                        if has_cycle(parent):
-                            return True
-                    stack.remove(n)
-                    return False
-
-                if has_cycle(node_id):
+                if has_cycle(node_id, visited, stack):
                     contradictions += 1
 
             normalized_contradiction = contradictions / len(active_traces)

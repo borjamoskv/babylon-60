@@ -2,7 +2,7 @@ import os
 import json
 import time
 import logging
-from typing import Dict, Any
+from typing import Any
 
 logger = logging.getLogger("cortex.sentinel_daemon")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -15,7 +15,7 @@ class DriftVectorField:
         self.contradiction_index = 0.0
         self.identity_coherence = 1.0
 
-    def as_dict(self) -> Dict[str, float]:
+    def as_dict(self) -> dict[str, float]:
         return {
             "semantic_drift": self.semantic_drift,
             "goal_deviation": self.goal_deviation,
@@ -37,7 +37,7 @@ class UESSSentinelDaemon:
         self.last_processed_line = 0
         self.last_entropy = 0.0
 
-    def parse_event(self, event: Dict[str, Any]):
+    def parse_event(self, event: dict[str, Any]):
         """Modulates the DVF based on event payloads."""
         event_type = event.get("type")
         payload = event.get("payload", {})

@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List, Tuple
+
 from cortex.interfaces.memory_provider import MemoryNode
 
 

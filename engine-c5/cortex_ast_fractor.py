@@ -5,7 +5,7 @@ import re
 import json
 import urllib.request
 import urllib.error
-from typing import List, Dict, Any
+from typing import Any
 from datetime import datetime
 import concurrent.futures
 
