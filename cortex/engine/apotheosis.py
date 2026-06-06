@@ -246,12 +246,10 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
 
     async def _process_workspace(self, _random: Any) -> bool:
         """Scan and heal workspace files (Ω₀/Ω₆) mapped from physical OS events."""
+        if self._file_event_queue is None:
+            return False
         entropy_found = False
         try:
-            # Consume filesystem events
-            if self._file_event_queue is None:
-                return False
-
             files_to_scan: set[Path] = set()
             while not self._file_event_queue.empty():
                 try:
@@ -262,10 +260,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
             if files_to_scan:
                 scan_tasks = [asyncio.to_thread(scan_file_entropy, f) for f in files_to_scan]
                 results = await asyncio.gather(*scan_tasks, return_exceptions=True)
-
-                scan_files_list = list(files_to_scan)
-
-                for py_file, entropy in zip(scan_files_list, results, strict=True):
+                for py_file, entropy in zip(files_to_scan, results, strict=True):
                     if isinstance(entropy, list) and entropy:
                         entropy_found = True
                         if self._healer_mode and self._apply_cognitive_dampening():
@@ -277,7 +272,6 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
                 for html_file in self.workspace.rglob("index.html"):
                     if await transfigure_ui(html_file, self._signal_bus):
                         entropy_found = True
-
         except (OSError, asyncio.CancelledError, RuntimeError) as e:
             logger.error("[APOTHEOSIS] Workspace scan failure: %s", e)
             ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.4)
@@ -309,22 +303,21 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
         else:
             try:
                 import ast
-
-                def _parse_ast(name: str, src: str) -> None:
-                    ast.parse(src, filename=name)
-
                 source_code = await asyncio.to_thread(py_file.read_text, "utf-8")
-                await asyncio.to_thread(_parse_ast, str(py_file), source_code)
+                try:
+                    ast.parse(source_code, filename=str(py_file))
+                except SyntaxError as se:
+                    logger.error("[APOTHEOSIS] AST Breach: %s. Skipping healing.", py_file.name)
+                    ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.2, reason="AST Breach detected")
+                    return
                 reasons = ", ".join(e["type"] for e in entropy)
                 intent = f"Refactor {py_file.name} to eliminate: {reasons}."
-
                 context = {
                     "reversibility_level": 2,
                     "confidence_level": 4,
                     "target_path": str(py_file),
-                    "complexity_removed": len(entropy) * 1.0,
+                    "complexity_removed": float(len(entropy)),
                 }
-
                 triage = await self._immune.intercept(intent, context)
                 if triage.verdict == Verdict.BLOCK:
                     logger.critical("🚫 [IMMUNE] Healing BLOCKED for %s", py_file.name)
@@ -332,11 +325,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
                 if triage.verdict == Verdict.HOLD:
                     logger.warning("⏸️ [IMMUNE] Healing HOLD for %s", py_file.name)
                     return
-
                 await keter.ignite(intent)
-            except SyntaxError:
-                logger.error("[APOTHEOSIS] AST Breach: %s. Skipping healing.", py_file.name)
-                ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.2, reason="AST Breach detected")
             except (OSError, ValueError, asyncio.CancelledError) as e:
                 logger.error("[APOTHEOSIS] Healing failed for %s: %s", py_file.name, e)
 
