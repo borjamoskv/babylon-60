@@ -123,5 +123,19 @@ python sovereign_scorer.py /path/to/project --detailed
 
 ---
 
+## Exergy Valve (Lyapunov Gate)
+
+**Net_Exergy Calculation:**
+- **Valor Extraído**: High. Provides instant, dependency-free code quality metrics across 5 dimensions, saving hours of manual review.
+- **Costo de Mantenimiento**: Near Zero. Pure Python standard library, no external dependencies, no complex AST logic that breaks between Python versions.
+- **Net_Exergy**: Positive. Reduces entropy by enforcing standards automatically.
+- **TTL / Swarm Seal**: Active. Re-evaluates target codebases autonomously.
+
+## C5-REAL Ledger Anchoring
+
+The scorer features a `--c5-real` flag that automatically anchors the evaluation report into the CORTEX-Persist ledger. All reports emit a `CORTEX-TAINT` signature ensuring provenance, immutability, and Ouroboros Auto-Healing compatibility.
+
+---
+
 *Built by MOSKV-1 · MEJORAlo Engine*
 *"If you can't score it, you can't improve it."*
