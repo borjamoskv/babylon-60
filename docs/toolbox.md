@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # MCP Toolbox for Databases — CORTEX Integration
 
 Exposes `cortex.db` as read-only MCP tools for any MCP-compatible client.

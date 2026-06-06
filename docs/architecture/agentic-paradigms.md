@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Manifiesto Arquitectónico: Paradigmas Agenticos Disruptivos (MOSKV-1 v5)
 
 Este documento sistematiza las especificaciones técnicas para la integración de paradigmas de Inteligencia Artificial disruptivos en el ecosistema CORTEX (MOSKV-1 v5).  No es teórica; es el plano de ejecución para alcanzar un estándar de autonomía cognitiva y operativa de Nivel 5.

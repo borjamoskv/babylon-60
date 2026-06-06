@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # How Does CORTEX Sit in My Stack?
 
 As an Enterprise Architect, your primary concern is scaling swarms of autonomous agents without ripping apart your existing infrastructure or introducing latency chokepoints.

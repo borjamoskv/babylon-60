@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ## ▀▄ CORTEX-PERSIST PULL REQUEST
 
 ### █ EPISTEMIC HUMILITY CHECKLIST

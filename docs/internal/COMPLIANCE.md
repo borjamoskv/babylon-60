@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX — EU AI Act Compliance Mapping
 
 **Document Version:** 1.0

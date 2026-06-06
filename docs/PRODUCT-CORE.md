@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX Persist — Product Core Definition
 
 This document defines the **supported core** of CORTEX Persist and distinguishes it from beta and experimental modules.

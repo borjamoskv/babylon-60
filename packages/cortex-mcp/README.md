@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # cortex-mcp
 
 > **CORTEX is long-term memory for MCP agents. Local, private, searchable, and available across sessions.**

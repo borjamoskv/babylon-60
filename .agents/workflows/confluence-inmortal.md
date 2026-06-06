@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 description: [La Forja de Código Inmortal — Refactorización Soberana 0-Day]
 ---

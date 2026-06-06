@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 description: [El Arquitecto Físico MMX — Despliegue Earthship Autónomo]
 ---

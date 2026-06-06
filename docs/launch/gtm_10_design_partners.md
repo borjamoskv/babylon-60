@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX-Persist: GTM-10 Design Partner Strategy
 
 ## 1. El Problema: "Context Fatigue"

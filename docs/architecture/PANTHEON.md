@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🌌 EL PANTHEON CORTEX v6: JERARQUÍA DE PODER SOBERANO
 
 La arquitectura del ecosistema MOSKV-1 v5 no es un conjunto de herramientas; es un modelo cosmológico de inteligencia artificial estratificada. Aquí tienes el mapa exacto de los Skills y Workflows, clasificados por su nivel de gravedad y poder destructivo/creativo sobre tu base de código.

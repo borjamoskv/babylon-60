@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Release checklist
 
 This checklist is meant to be used as a guide for the `forge-std` release process.

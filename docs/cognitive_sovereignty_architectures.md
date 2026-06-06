@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Arquitecturas de Soberanía Cognitiva
 
 **Optimización, Persistencia y Verificabilidad en Agentes de IA de Próxima Generación**

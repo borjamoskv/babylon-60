@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Appendix: Cortex-Persist CRDT Merge Semantics
 
 > **Status:** EXPERIMENTAL — Living Formal Appendix  

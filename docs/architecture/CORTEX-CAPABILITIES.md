@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX Capabilities — Structural Properties Enabled by Topology
 
 > Canonical reference for the structural properties CORTEX enables.

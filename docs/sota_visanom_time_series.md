@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Estado del Arte (SOTA): Tiny but Trusted (Vision-Language Anomaly Detection)
 
 **ID del Artefacto:** `SOTA-2605.30344v1`

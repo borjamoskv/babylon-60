@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX RUNTIME LOOP v1: THE EXECUTION HEART
 
 > **Reality Level:** `C5-REAL` (Executable Infrastructure Spec)

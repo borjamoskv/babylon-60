@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Developer Guide
 
 > Everything you need to contribute to CORTEX.

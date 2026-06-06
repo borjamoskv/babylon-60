@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Immunefi Bug Bounty Report: Stargate V2 Protocol
 
 **Vulnerability Tier:** High (Critical Cross-Chain Logic Error & Incentive Drainage)

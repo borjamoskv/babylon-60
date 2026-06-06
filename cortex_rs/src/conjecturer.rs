@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 //! CORTEX Evolutionary Conjecturer — AlphaProof Nexus Pattern
 //!
 //! Population-based conjecture discovery with Elo ranking.

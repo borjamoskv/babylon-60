@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🧵 X / Twitter Thread: The End of AI Amnesia
 
 **Tweet 1:**

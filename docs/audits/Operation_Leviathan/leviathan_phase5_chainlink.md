@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX Deep Research: Chainlink CCIP
 **Operación LEVIATHAN — Fase 5: UltraThink Synthesis**
 

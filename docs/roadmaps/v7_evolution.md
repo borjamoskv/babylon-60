@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🧬 CORTEX V7 — Digital Endocrine System
 
 This document describes the biological regulation layer of CORTEX v7.0, implementing the **Autopoietic Growth** and **Circadian Calibration** protocols.

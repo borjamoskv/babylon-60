@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Quickstart
 
 Get the CORTEX trust core running in 5 minutes.

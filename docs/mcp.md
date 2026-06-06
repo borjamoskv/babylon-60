@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # MCP Server
 
 CORTEX implements the **Model Context Protocol (MCP)** for IDE and agent integrations.

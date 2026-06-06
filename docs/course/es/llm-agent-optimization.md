@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Curso · Optimización de LLMs y Agentes IA
 
 ## Objetivo

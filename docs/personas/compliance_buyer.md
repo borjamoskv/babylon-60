@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # What Artifact Do I Receive?
 
 As a Compliance Officer, Legal Counsel, or Buyer of trust infrastructure, you need to know exactly what Evidence CORTEX provides when an AI agent makes a disputed decision.

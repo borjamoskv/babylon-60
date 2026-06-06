@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # GitHub Issue Triage MVP
 > **Objetivo:** Validar la unidad mínima de valor (Fase A) integrando Mac Maestro (visión/UI) con CORTEX (memoria semántica) para analizar un issue de GitHub sin enviar todavía comentarios públicos.
 

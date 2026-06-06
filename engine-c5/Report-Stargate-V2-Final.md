@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Stargate V2 Security Audit Report (Final Synthesis)
 **Operation: STARGATE-STRIKE (C5-REAL)**
 **Warden:** borjamoskv // CORTEX-Ω

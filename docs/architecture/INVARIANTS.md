@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # DB Invariants — Operational Contract
 
 This document is the **architectural contract** for the CORTEX storage engine.

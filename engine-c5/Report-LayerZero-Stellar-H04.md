@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Report: LayerZero Stellar Fee Management Audit // H-04
 
 **Target:** `EndpointV2.rs` (Fee Management)  

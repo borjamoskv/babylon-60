@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # ✨ Génesis Deca-Core: El Flujo Glorioso v2.0
 
 > *"De 0 a infinito. La sinfonía definitiva de IAs interconectadas."*

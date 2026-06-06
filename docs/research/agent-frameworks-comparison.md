@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Agent Frameworks — Competitive Analysis
 > Generado: 2026-02-23 · Contexto: MOSKV-1 / CORTEX v5
 

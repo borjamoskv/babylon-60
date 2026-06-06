@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Release Process
 
 This document describes the public release flow for CORTEX Persist.

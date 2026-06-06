@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # RFC 01: CORTEX-Native AI Architecture (The Trust Substrate)
 
 **Title:** CORTEX-Native AI: The Operating System for Deterministic Agent Swarms

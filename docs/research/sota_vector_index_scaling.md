@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 📑 ESTADO DEL ARTE (SOTA): Escalado y Optimización de Indexación Vectorial para Billones de Embeddings (PostgreSQL / AlloyDB / DiskANN)
 > **Estándar:** Industrial Noir 2026 (CORTEX-Apex)
 > **Nivel de Certeza/Realidad:** `C5-REAL` (Sintetizado y verificado mediante literatura científica y benchmarks de producción 2024-2026)

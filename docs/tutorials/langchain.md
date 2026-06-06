@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Tutorial: Memory for LangChain Agents
 
 Give your LangChain agent persistent, searchable memory backed by CORTEX.

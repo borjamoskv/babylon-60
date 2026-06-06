@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # SECURITY_TRUST_MODEL.md — CORTEX Persist
 
 Package: cortex-persist v10.0 · Engine: v10.0 (LEGION-10k)

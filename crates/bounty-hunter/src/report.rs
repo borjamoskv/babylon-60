@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 // ============================================================
 // REPORT MODULE — CORTEX-Persist Output + Terminal Summary
 // ============================================================

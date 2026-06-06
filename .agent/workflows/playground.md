@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 description: 🔓 PLAYGROUND MASTER KEY — Protocolo de Habilitación Total.
 ---

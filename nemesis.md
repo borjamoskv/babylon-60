@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 💀 NEMESIS-Ω: The Epistemological Kill Switch
 
 > **Status:** C5-REAL (Active Enforcement)

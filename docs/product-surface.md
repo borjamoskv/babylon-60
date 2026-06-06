@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Public Product Surface
 
 This document defines the recommended integration surface for CORTEX Persist.

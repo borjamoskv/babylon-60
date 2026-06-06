@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Report: LayerZero Stellar Storage Audit // M-04
 
 **Target:** Storage Management (Stellar/Soroban)  

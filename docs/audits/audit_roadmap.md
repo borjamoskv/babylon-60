@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 I've created a comprehensive **Strategic Roadmap** for CORTEX v6. Here's the executive summary:
 
 ---

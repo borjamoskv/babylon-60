@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # RFC: SORTU-Ω Public SDK Surface v0.2
 Status: Draft
 Program: ORTU-Ω Forge

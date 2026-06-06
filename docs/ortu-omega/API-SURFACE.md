@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # API-SURFACE.md — ORTU-Ω Phase 2
 
 > **Program**: ORTU-Ω Forge · **Codename**: SORTU-Ω  

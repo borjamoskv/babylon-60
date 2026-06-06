@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🔧 AGENTS.md — `cortex/engine/`
 
 > Scoped rules for the Engine domain. **Root `AGENTS.md` always takes precedence.**

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 description: [La Tríada Estética Awwwards — Dominio Perceptivo Múltiple]
 ---

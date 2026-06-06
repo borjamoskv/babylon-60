@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 #[no_mangle]
 pub extern "C" fn process_friction(friction: f64) -> f64 {
     // Pure thermodynamic reduction function

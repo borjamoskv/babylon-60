@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # HITO 12: MÁXIMA EXERGÍA (Formalización Operativa)
 
 ## 1. Topología del Sistema (Selección Dinámica de Grafos)

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Python API Reference
 
 This section is auto-generated from the CORTEX Python source code using `mkdocstrings`.

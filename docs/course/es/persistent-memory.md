@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Curso · Memoria Persistente en Agentes IA
 
 ## Objetivo

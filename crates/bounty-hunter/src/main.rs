@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 // ============================================================
 // BOUNTY-HUNTER — C5-REAL Rust Swarm Orchestrator
 // Reality: C5-REAL (network I/O bound, not CPU bound after dispatch)

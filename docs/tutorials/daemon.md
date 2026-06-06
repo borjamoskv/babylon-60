@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Tutorial: Site Monitoring Daemon
 
 Set up CORTEX's built-in daemon (MOSKV-1) to monitor your production sites.

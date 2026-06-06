@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX Persist Manifesto: The Open Trust Standard
 
 > **Status:** Canonical manifesto. This is a living narrative, not a frozen RFC.

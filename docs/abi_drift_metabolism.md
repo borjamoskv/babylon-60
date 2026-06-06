@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # ABI Drift Metabolism: C5-REAL Resolution
 
 > **Reality Level:** `C5-REAL`

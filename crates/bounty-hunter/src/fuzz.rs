@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 // ============================================================
 // FUZZ MODULE — Parameter + Path Fuzzing
 // Detects: SQLi, XSS, IDOR, path traversal, open redirects

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # COGITO: Introspección Mecánica (v1.0)
 
 > "El agente propone en probabilidad. La infraestructura dispone en matemáticas. La termodinámica cobra el peaje."

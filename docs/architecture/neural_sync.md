@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🧠 CORTEX v5.0 — Neural-Bandwidth Sync (Zero-Latency Intent Ingestion)
 
 > **Documento Soberano: Arquitectura de Ingesta Neural**

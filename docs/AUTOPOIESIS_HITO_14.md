@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # HITO 14: WASM SWARM TOPOLOGY (Latencia Cero y Purgado Ouroboros)
 
 ## 1. La Cristalización del Enjambre (Swarm)

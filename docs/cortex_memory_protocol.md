@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # MEMORY CONTROL PROTOCOL (MCP-2) — Protocol-Grade Specification
 
 **Reality Level:** C5-REAL  

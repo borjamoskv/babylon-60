@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Análisis de Convergencia: Bucle de Mutación Autopoiética (OUROBOROS-∞) en Arquitectura de Conflicto
 
 El bucle OUROBOROS-∞ no busca el consenso, sino la optimización termodinámica de la fricción. La convergencia en CORTEX-Persist no es la eliminación del conflicto, sino la maximización de la densidad de señal (SNR) dentro de un clúster de nodos en disputa.

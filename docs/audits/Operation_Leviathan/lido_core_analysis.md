@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Resumen de Análisis P0: Lido Core V2/V3
 **Operación LEVIATHAN — Modo UltraThink**
 **Fecha**: Q1 2026

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 description: RFC v0.1 Cortex-Persist Native AI Architecture — Frozen Normative Draft
 ---

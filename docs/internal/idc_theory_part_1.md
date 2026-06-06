@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # La Ciencia del Agente: Hacia una Unificación de Teoría de la Información, Decisión Bayesiana y Control Cibernético
 
 ## 1. El Triángulo Fundacional de la Ciencia del Agente

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # AGENTS.ARCHI — SELF-MODIFYING TOPOLOGY ENGINE (SMTE)
 
 > **STATUS:** C5-REAL++

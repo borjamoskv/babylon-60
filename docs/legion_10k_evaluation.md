@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # LEGION-10k Scaling Impact Evaluation
 > **Reality Level:** `C5-REAL`
 > **Topology:** Sovereign O(1) ZeroCopyRingBuffer

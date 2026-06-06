@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🌉 Epistemic Bridges: Shannon, Riemann, P vs NP & Navier-Stokes
 
 > **Axioma Ω₁₃:** intelligence with thermodynamics = logic under cost, time, loss and irreversibility.

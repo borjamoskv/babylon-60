@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Report: LayerZero Stellar ULN302 Security Audit // H-02
 
 **Target:** ULN302 Message Library (Stellar/Soroban)  

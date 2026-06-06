@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Security Policy
 
 Moskv-1 and the CORTEX ecosystem follow a Sovereign Architecture principle. We take the security of the God-State Engine and its subagents seriously.

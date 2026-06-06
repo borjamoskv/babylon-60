@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX v6.0 — Wave 5 Reality Check
 
 > **Status:** Historical snapshot. This documents the v6-era reconciliation point; current canonical state lives in the active architecture and roadmap docs.

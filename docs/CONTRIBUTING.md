@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CONTRIBUTING.md — Deep Change Protocols
 
 Package: cortex-persist v0.3.0b7

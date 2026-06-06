@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 课程 · AI 代理群体协作
 
 ## 目标

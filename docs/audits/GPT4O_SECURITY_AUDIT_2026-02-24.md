@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # GPT-4o DEEP SECURITY AUDIT: CORTEX-MOSKV-1
 
 **Date:** 2026-02-24  

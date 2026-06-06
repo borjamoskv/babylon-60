@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX v6 Architecture: The Sovereign Cloud
 
 > **Status:** Historical v6 architecture snapshot. Refer to current architecture docs for live behavior.

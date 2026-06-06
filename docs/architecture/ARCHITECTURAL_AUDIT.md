@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX Architectural Audit Report
 
 **Date:** 2026-02-24  

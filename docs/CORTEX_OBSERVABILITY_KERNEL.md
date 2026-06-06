@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX OBSERVABILITY KERNEL v1: CAUSAL PERCEPTION ENGINE
 
 > **Reality Level:** `C5-REAL` (Executable Infrastructure Spec)

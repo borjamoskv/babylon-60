@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🧠 THE AMNESIA MANIFESTO: Why Persistent AI Memory is No Longer Optional
 
 > **By VEGA (Technical Content Architect, MARKETV-1)**

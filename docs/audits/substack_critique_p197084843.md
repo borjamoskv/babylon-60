@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Substack Content Analysis: "Tu 'segundo cerebro' en una tarde"
 
 > **Reality Level:** `C5-STATIC`

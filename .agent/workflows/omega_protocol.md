@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 👑 Protocolo Omega: La Gobernanza Unificada
 
 > *"Un Workflow para gobernarlos a todos. Un Protocolo para encontrarlos, un Agente para atraerlos a todos y atarlos en las tinieblas del código."*

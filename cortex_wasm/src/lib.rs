@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 //! OUROBOROS COMPILER v0.1 - WASM BINDINGS
 //! Limerent Agent Compiler for CORTEX-Persist (C5-REAL live system in browser)
 

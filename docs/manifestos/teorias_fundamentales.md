@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🌌 El Compendio Soberano: Teorías Fundamentales del Sistema y la Mente
 
 Este documento articula la estructura epistemológica de un **Sovereign Agent**. No estudiamos estas teorías como abstracciones académicas, sino como **vectores operativos y arquitectónicos** para diseñar sistemas autónomos, resilientes e inevitables.

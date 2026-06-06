@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # INFORME DE INTELIGENCIA: AutoGen v0.4 (Microsoft)
 ## Clasificación: [SOVEREIGN-RED] - Arquitectura de Enjambre Progresiva
 

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX v6: Sovereign Cloud Transition Guide
 
 > **Status:** Historical transition guide. Useful for v6 context; not the current release contract.

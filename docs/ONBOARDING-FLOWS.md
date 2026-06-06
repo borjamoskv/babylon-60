@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # RFC: SORTU-Ω Onboarding Flows v0.1
 Status: Draft
 Program: ORTU-Ω Forge

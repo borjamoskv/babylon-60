@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX REST API Reference (LEGION-10k)
 
 CORTEX exposes a high-throughput, C5-REAL verified FastAPI application via `cortex.api:app`.

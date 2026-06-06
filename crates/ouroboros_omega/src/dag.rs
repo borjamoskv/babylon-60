@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;

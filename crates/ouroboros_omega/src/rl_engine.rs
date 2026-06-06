@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 use crate::exergy::SignalMetrics;
 
 pub struct RlEngine {

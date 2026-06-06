@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 //! MCP (Model Context Protocol) Native Implementation
 //!
 //! O(1) Stdio bridge for MCP client and sovereign host.

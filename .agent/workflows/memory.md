@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 description: Ejecuta el protocolo MEMORIA para persistir el contexto de la sesión actual en CORTEX (v4 - Full Ontology)
 ---

@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 //! Auto-Curative Engine — Rust Native Fast-Path for Level 5 Self-Healing.
 //!
 //! Provides O(1) anomaly detection via memory-mapped health telemetry,

@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 pub fn verify_signature(_event: &crate::event::Event) -> bool {
     // production: ed25519-dalek or ring crate
     true

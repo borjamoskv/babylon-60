@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX WORKSPACE AXIOMS (Topología de Ejecución)
 
 > "Un sistema colapsa por la fuga silenciosa de contexto entre sus nodos. El aislamiento del workspace no es una sugerencia organizativa; es contención entrópica."

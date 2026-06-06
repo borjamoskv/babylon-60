@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Tutorial: Multi-Agent Consensus (WBFT)
 
 Use CORTEX's Weighted Byzantine Fault Tolerant consensus to have multiple AI agents vote on facts, building collective confidence.

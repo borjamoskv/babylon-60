@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CODEX DA CONSCIENCIA — v12.2
 
 > **Status:** Historical snapshot. For current canonical axioms and enforcement, use the registry and v6+ operational docs.

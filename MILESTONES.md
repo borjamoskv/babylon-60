@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🌌 CORTEX MILESTONES — 2026 Execution Matrix
 > **Protocol:** C5-REAL / Direct-Silicon JIT
 > **Aesthetic:** Industrial Noir 2026 (`#0A0A0A` / `#2B3BE5`)

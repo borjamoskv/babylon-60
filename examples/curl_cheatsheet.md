@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX cURL Cheatsheet
 
 Quick reference for the CORTEX API. Replace `YOUR_KEY` with your API key.

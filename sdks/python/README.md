@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX Python SDK
 
 > ⚠️ **Not yet published.** This is an **experimental** thin-client SDK for the CORTEX Persist REST API. It is not published on PyPI and is not the same as `pip install cortex-persist` (the local-first engine).

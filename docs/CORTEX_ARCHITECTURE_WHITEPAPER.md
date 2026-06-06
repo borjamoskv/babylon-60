@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX-PERSIST: Infraestructura de Gobernanza Cognitiva y Resolución de Colisiones para Enjambres de Agentes Autónomos
 
 > **Documento Arquitectónico Canónico**  

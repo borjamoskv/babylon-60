@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 use crate::{event::Event, state::{State, AgentStatus}, crypto::hash, verify::verify_event};
 
 pub fn apply_event(state: State, event: Event) -> Result<State, String> {

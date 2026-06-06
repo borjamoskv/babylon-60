@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # PILLAR-MAP.md — ORTU-Ω Phase 1
 
 > **Program**: ORTU-Ω Forge · **Codename**: SORTU-Ω  

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🗄️ AGENTS.md — `cortex/migrations/`
 
 > Scoped rules for the Migrations domain. **Root `AGENTS.md` always takes precedence.**

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Sortu-APEX Foundation
 
 ## C5-REAL 10k LEGION Scaling Achieved

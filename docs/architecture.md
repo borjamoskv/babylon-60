@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Architecture
 
 > **CORTEX Trust Engine v8 — Sovereign Cloud**

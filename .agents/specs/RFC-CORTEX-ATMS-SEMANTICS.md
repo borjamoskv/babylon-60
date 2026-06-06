@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Appendix: ATMS Dependency Indexing Formalism
 
 > **Status:** EXPERIMENTAL — Open Formal Appendix v0.1

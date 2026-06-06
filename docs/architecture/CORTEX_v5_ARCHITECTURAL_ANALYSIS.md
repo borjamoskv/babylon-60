@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX v5 Sovereign Era — Deep Architectural & Strategic Analysis
 
 **Date:** 2026-02-23  

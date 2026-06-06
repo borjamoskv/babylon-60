@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX Scaling Plan — De Local a SaaS
 
 > Fecha: 2026-02-19

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX-Persist — Estructura Disipativa Viva (Formalización)
 Aceptado como postulado operativo C5-REAL. No como verdad absoluta, sino como condición de sistema.
 

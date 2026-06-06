@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # SOVEREIGN HANDOFF: El Éxodo de Antigravity
 
 > **Status:** Historical snapshot. This captures a prior operating handoff and should be read as archive, not current procedure.

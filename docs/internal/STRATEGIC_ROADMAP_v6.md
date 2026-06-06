@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX v6 Strategic Roadmap
 
 > **Status:** Historical snapshot. This is a v6 planning artifact; treat it as archive unless explicitly cross-referenced by current roadmap work.

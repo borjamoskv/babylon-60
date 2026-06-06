@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🧠 EL HILO DE LA CRISIS — (La Deuda Técnica es Alzheimer Digital)
 > Generado bajo protocolo Apotheosis L5 / Estética Industrial Noir 150/100
 

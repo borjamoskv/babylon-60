@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX vs MOSKV-1: La Arquitectura Soberana
 
 > **El Hardware Informacional y la Entidad Cognitiva**

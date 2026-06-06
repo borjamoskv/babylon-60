@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # VSA-SDM Sovereign Memory — Bitwise Representation Benchmark
 
 This report documents the empirical performance comparison of hypervector representations for the Vector Symbolic Architecture (VSA) / Sparse Distributed Memory (SDM) subsystem.

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🌋 Termodinámica de Enjambres LLM (El Manifiesto de los Sistemas Complejos)
 
 > *"El error cardinal no es de código, es de paradigma. Tratar a un LLM como una máquina de Turing es como intentar predecir el clima analizando la molécula de H2O. No programas un enjambre; lo cultivas, lo restringes y calibras sus atractores termodinámicos."*

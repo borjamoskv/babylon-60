@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # RFC: MEJORAlo Mac Telemetry (mac_control)
 
 **Status:** Concept / target-state RFC

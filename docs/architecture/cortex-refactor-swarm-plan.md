@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Plan de Implementación: Refactorización CORTEX Core via LEGIØN-1 (Swarm)
 
 ## Meta

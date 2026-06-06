@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🤖 AGENTS.md — CORTEX Persist
 
 **Trust infrastructure for autonomous AI: cryptographic verification, audit trails, epistemic containment, and LEGION-10k swarm memory.**

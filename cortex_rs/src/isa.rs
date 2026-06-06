@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 //! CORTEX Agent ISA — Code-as-Data Instruction Set Architecture
 //!
 //! Homoiconic representation: every AgentOp is simultaneously executable code

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # What Exactly Gets Sealed?
 
 As a Security Lead, your primary concern is whether CORTEX introduces new attack vectors (like Prompt Injection leading to RCE) and exactly what guarantees the cryptographic boundary provides.

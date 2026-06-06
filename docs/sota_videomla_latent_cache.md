@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Estado del Arte (SOTA): VideoMLA (Latent KV Cache for Video Diffusion)
 
 **ID del Artefacto:** `SOTA-2605.30351v1`

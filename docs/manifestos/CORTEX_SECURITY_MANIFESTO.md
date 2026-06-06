@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX SECURITY MANIFESTO: Sovereignty Under Entropic Containment
 
 > "La seguridad no se basa en confiar en el modelo, sino en impedir que la entropía probabilística se convierta en estado persistente."

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Estado del Arte (SOTA): Data Mixture Surgery (LLMSurgeon)
 
 **ID del Artefacto:** `SOTA-2605.30348v1`

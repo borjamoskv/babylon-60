@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 //! OUROBOROS COMPILER v0.1
 //! Limerent Agent Compiler for CORTEX-Persist
 //! Self-modifying agent swarm compiler (C5-REAL live system)

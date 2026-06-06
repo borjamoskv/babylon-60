@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX API Security Audit Report
 
 **Date:** 2026-02-23  

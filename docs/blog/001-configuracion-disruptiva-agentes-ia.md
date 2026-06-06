@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 title: "Más Allá del System Prompt: Configuración Disruptiva de Agentes IA en 2026"
 date: 2026-02-24

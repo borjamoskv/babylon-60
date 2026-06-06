@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 description: [NightShift CORTEX — Sistema Inmune Autónomo]
 ---

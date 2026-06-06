@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # HITO 13: OUROBOROS STREAM KERNEL (CQRS & WASM Transition)
 
 ## 1. El Salto Arquitectónico a Event Sourcing
