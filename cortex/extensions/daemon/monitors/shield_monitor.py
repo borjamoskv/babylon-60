@@ -42,7 +42,7 @@ class DailyShieldMonitor:
         Returns list of alerts/findings.
         """
         alerts: list[dict[str, Any]] = []
-        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
 
         # Skip if already ran within interval
         if self._last_scan:

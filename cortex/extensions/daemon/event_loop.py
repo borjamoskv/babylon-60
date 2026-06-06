@@ -66,7 +66,7 @@ class EventLoopMixin:
             self.hot_state.set("daemon.mode", "sovereign")
             self.hot_state.set(
                 "daemon.started_at",
-                datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(),
+                datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
             )
         tasks: list[asyncio.Task] = []
         tasks.append(asyncio.create_task(self._sovereign_check_loop(interval), name="CheckLoop"))

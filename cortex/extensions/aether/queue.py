@@ -78,7 +78,7 @@ class TaskQueue:
 
     def enqueue(self, task: AgentTask) -> AgentTask:
         """Add a task to the queue. Returns the task with db-confirmed state."""
-        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         task.created_at = now
         task.updated_at = now
         task.status = TaskStatus.PENDING
@@ -121,7 +121,7 @@ class TaskQueue:
         atomicity, bypassing the need for thread locks. Zero race conditions
         even if multiple MOSKV-1 agents pull from the queue simultaneously.
         """
-        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
 
         with self._conn() as conn:
             row = conn.execute(
@@ -148,7 +148,7 @@ class TaskQueue:
         """Update arbitrary fields on a task."""
         if not fields:
             return
-        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         fields["updated_at"] = now
         set_clause = ", ".join(f"{k} = ?" for k in fields)
         values = list(fields.values()) + [task_id]
@@ -194,7 +194,7 @@ class TaskQueue:
                 """,
                 (
                     TaskStatus.CANCELLED,
-                    datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(),
+                    datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
                     task_id,
                 ),
             )

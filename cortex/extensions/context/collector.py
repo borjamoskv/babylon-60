@@ -297,7 +297,7 @@ class ContextCollector:
                 reverse=True,
             )[:limit]
 
-            now_ts = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).timestamp()
+            now_ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).timestamp()
             for i, f in enumerate(py_files):
                 age_hours = (now_ts - f.stat().st_mtime) / 3600
                 if age_hours > 24:

@@ -47,7 +47,7 @@ class GhostReaper:
             Number of reaped ghosts.
         """
         cutoff = (
-            datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
+            datetime.fromtimestamp(time.time(), tz=timezone.utc)
             - timedelta(days=self._ttl_days)
         ).strftime("%Y-%m-%dT%H:%M:%S")
 

@@ -236,7 +236,7 @@ class RevenueEngine:
         Returns:
             Revenue report with breakdown by vector.
         """
-        period = period or datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime(
+        period = period or datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime(
             "%Y-%m-%d"
         )
 

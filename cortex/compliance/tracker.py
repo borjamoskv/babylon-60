@@ -99,7 +99,7 @@ class ComplianceTracker:
         self._ensure_init()
 
         proj = project or self._default_project
-        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
 
         eu_meta: dict[str, Any] = {
             "actor_id": agent_id,
@@ -144,7 +144,7 @@ class ComplianceTracker:
             self._initialized = True
 
         proj = project or self._default_project
-        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
 
         eu_meta: dict[str, Any] = {
             "actor_id": agent_id,
@@ -262,7 +262,7 @@ class ComplianceTracker:
             },
             "integrity": integrity,
             "facts_summary": facts_summary,
-            "generated_at": datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(),
+            "generated_at": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
             "project": proj,
         }
 

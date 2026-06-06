@@ -28,7 +28,7 @@ __all__ = [
 
 def _now_iso() -> str:
     """UTC ISO timestamp."""
-    return datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+    return datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
 
 
 def _sha256(data: str) -> str:

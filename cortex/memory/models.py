@@ -37,7 +37,7 @@ except ImportError:
 
 def now_iso() -> str:
     """Return current UTC timestamp in ISO 8601 format."""
-    return datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+    return datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
 
 
 @dataclass()
@@ -163,7 +163,7 @@ class MemoryEvent(BaseModel):
         description="Unique identifier for this event.",
     )
     timestamp: datetime = Field(
-        default_factory=lambda: datetime.fromtimestamp(time.monotonic(), tz=timezone.utc),
+        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc),
         description="UTC timestamp of event creation.",
     )
     role: str = Field(description="Interaction role (user, assistant, system, tool).")
@@ -201,7 +201,7 @@ class EpisodicSnapshot(BaseModel):
     session_id: str = Field(default="", description="Originating session.")
     tenant_id: str = Field(default="default", description="Tenant isolation identifier.")
     created_at: datetime = Field(
-        default_factory=lambda: datetime.fromtimestamp(time.monotonic(), tz=timezone.utc),
+        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc),
         description="UTC timestamp of snapshot creation.",
     )
 

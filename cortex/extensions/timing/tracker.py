@@ -133,13 +133,13 @@ class TimingTracker:
 
     def today(self, project: str | None = None) -> TimeSummary:
         """Get time summary for today."""
-        today_str = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime("%Y-%m-%d")
+        today_str = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d")
         return self._summarize(f"{today_str}%", project)
 
     def report(self, project: str | None = None, days: int = 7) -> TimeSummary:
         """Get time report for the last N days."""
         cutoff = (
-            datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) - timedelta(days=days)
+            datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=days)
         ).isoformat()
         where = ["start_time >= ?"]
         params: list = [cutoff]
@@ -150,7 +150,7 @@ class TimingTracker:
 
     def timeline(self, project: str | None = None, date: str | None = None) -> list[TimeEntry]:
         """Get detailed timeline for a date."""
-        date_str = date or datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime(
+        date_str = date or datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime(
             "%Y-%m-%d"
         )
         where = ["start_time LIKE ?"]
@@ -182,13 +182,13 @@ class TimingTracker:
 
     def daily(self, days: int = 7) -> list[dict]:
         """Get total seconds per day for the last N days."""
-        end_date = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).date()
+        end_date = datetime.fromtimestamp(time.time(), tz=timezone.utc).date()
         date_map = {}
         for i in range(days):
             d = (end_date - timedelta(days=i)).isoformat()
             date_map[d] = 0
         cutoff = (
-            datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) - timedelta(days=days)
+            datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=days)
         ).isoformat()
         rows = self._conn.execute(
             "SELECT substr(start_time, 1, 10) as date, SUM(duration_s) "

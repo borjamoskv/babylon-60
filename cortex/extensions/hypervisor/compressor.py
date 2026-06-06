@@ -110,4 +110,4 @@ def _parse_iso(iso_str: str | None) -> datetime:
 
 
 def _now() -> datetime:
-    return datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
+    return datetime.fromtimestamp(time.time(), tz=timezone.utc)

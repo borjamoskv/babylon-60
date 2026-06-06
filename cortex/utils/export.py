@@ -58,7 +58,7 @@ def _export_notebooklm(facts: list[Fact]) -> str:
             projects[f.project] = []
         projects[f.project].append(f)
 
-    now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    now = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     lines = ["# CORTEX Master Digest\n", f"> Snapshot Date: {now}\n", "---\n"]
 
     for project, p_facts in sorted(projects.items()):

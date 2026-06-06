@@ -107,7 +107,7 @@ class EntropicWakeDaemon:
         """Register the autonomous action into CORTEX-DB."""
         if not self.engine:
             return
-        now_str = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime("%H:%M %p")
+        now_str = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%H:%M %p")
         msg = (
             f"Anoche a las {now_str} disolví secciones entrópicas estancadas en {target}. "
             "Pasó los tests de inmunidad. Deuda saldada. PR en espera de merge."

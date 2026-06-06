@@ -108,7 +108,7 @@ async def _collect_all(engine) -> dict:
 
 def _build_header() -> Panel:
     """Build the header panel with logo and timestamp."""
-    now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime(
+    now = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime(
         "%Y-%m-%d %H:%M:%S UTC"
     )
     header = Text()

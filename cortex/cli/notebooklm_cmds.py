@@ -55,7 +55,7 @@ def digest_cmd(output: str) -> None:
 
     async def _digest() -> None:
         facts = await _get_engine_active_facts()
-        ts = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
         projects_data = defaultdict(list)
         for f in facts:
             projects_data[f.project].append(f)
@@ -118,7 +118,7 @@ def fragment_cmd(output_dir: str) -> None:
         out = Path(output_dir)
         out.mkdir(exist_ok=True)
         facts = await _get_engine_active_facts()
-        ts = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime("%Y-%m-%d")
+        ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d")
         domain_facts = defaultdict(list)
         for f in facts:
             domain = _PROJECT_DOMAIN.get(f.project, "cortex-misc")
@@ -185,7 +185,7 @@ def sync_cmd(drive_path: str | None, mode: str) -> None:
             return
         target, provider_name = detected
     target.mkdir(parents=True, exist_ok=True)
-    ts = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime("%Y-%m-%d")
+    ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d")
     synced_files = []
     if mode in ("digest", "both"):
         digest_path = Path(DIGEST_FILE)

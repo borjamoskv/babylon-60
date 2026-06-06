@@ -35,7 +35,7 @@ class MemorySyncer:
             if not ts:
                 return []
             last = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-            now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
+            now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
             hours = (now - last).total_seconds() / 3600
             if hours > self.stale_hours:
                 alerts.append(

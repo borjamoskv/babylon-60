@@ -104,7 +104,7 @@ async def apply_ttl_prune(
     )
     rows = await cursor.fetchall()
 
-    now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
+    now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
     expired_ids, tombstonable_ids = find_expired_facts(rows, now)  # type: ignore[reportArgumentType]
 
     if not expired_ids:

@@ -101,7 +101,7 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
         ledger = ImmutableLedger(ctx.pool)  # type: ignore[reportArgumentType]
         integrity = await ledger.audit_integrity_async()
 
-        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
 
         lines = [
             "╔══════════════════════════════════════════════════╗",

@@ -179,7 +179,7 @@ class CryptoShredder:
             )
 
         try:
-            ts = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+            ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
             self._conn.execute(
                 "INSERT INTO shredded_keys "
                 "(fact_id, tenant_id, reason, shredded_by, shredded_at) "
@@ -239,7 +239,7 @@ class CryptoShredder:
             )
 
         try:
-            ts = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+            ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
             await self._conn.execute(  # type: ignore[reportAttributeAccessIssue]
                 "INSERT INTO shredded_keys "
                 "(fact_id, tenant_id, reason, shredded_by, shredded_at) "

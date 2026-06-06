@@ -76,7 +76,7 @@ class UsageRecord:
         self.status_code = status_code
         self.tokens_used = tokens_used
         self.timestamp = (
-            timestamp or datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+            timestamp or datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         )
 
 
@@ -147,7 +147,7 @@ class UsageTracker:
         """
         conn = self._get_conn()
         if month_bucket is None:
-            month_bucket = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime(
+            month_bucket = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime(
                 "%Y-%m"
             )
 
@@ -203,7 +203,7 @@ class UsageTracker:
         """Get per-endpoint breakdown for a tenant in a month."""
         conn = self._get_conn()
         if month_bucket is None:
-            month_bucket = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime(
+            month_bucket = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime(
                 "%Y-%m"
             )
 
