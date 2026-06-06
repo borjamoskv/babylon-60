@@ -1,9 +1,9 @@
 <!-- [C5-REAL] Exergy-Maximized — Last verified: 2026-06-06 -->
-# 🤖 AGENTS.md — CORTEX Persist
+# 🤖 AGENTS.md — CORTEX Persist v10.0 (LEGION-10k)
 
 **Trust infrastructure for autonomous AI: cryptographic verification, audit trails, epistemic containment.**
 
-> **Package:** `cortex-persist v0.3.0b8` | **License:** `Apache-2.0` | **Python:** `>=3.10` | **Execution:** `C5-REAL`
+> **Package:** `cortex-persist v1.0.0` | **License:** `Apache-2.0` | **Python:** `>=3.10` | **Execution:** `C5-REAL`
 
 **Quick Navigation:** [System Directives](#-system-directives--priority-gate) · [Scope §1](#1--scope--epistemic-posture) · [Agent Manifest §1.1](#11-agent-manifest--roles--authority-boundaries) · [Axioms §2](#2--foundational-axioms-ω--ax-series) · [Invariants §3](#3-️-invariants-anti-patterns--failure-signatures) · [Write-Path §4](#4--the-write-path-contract-saga-pattern) · [Read-Path §4.1](#41-read-path-contract) · [Architecture §5](#5-️-architecture--module-map) · [Dev Protocol §6](#6-️-development--change-protocol) · [Navigation §7](#7--repository-navigation)
 

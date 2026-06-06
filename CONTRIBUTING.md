@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CONTRIBUTING.md — CORTEX Persist
+# CONTRIBUTING.md — CORTEX Persist v8.0
 
 Package: cortex-persist v1.0.0
 License: Apache-2.0
