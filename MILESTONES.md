@@ -611,10 +611,10 @@ Proof:
 ## 🛡️ Thermodynamic Enforcement
 All milestone claims must map directly to a `Claim/Proof` matrix.
 ```yaml
-Claim: 44/44 Milestones Completed
+Claim: 45/45 Milestones Completed
 Proof:
   Base: Continuous Silicon Checkpoint Execution
-  Variables: [r=1, d=1, n=44, S=100]
+  Variables: [r=1, d=1, n=45, S=100]
   Range: [C6, C6]
   Confidence: C4 (audit based on evidence classification)
   Date: 2026-06-06
@@ -724,4 +724,15 @@ Proof:
 - **Reality Level:** `C5-REAL`
 - **Status:** ✅ COMPLETE — 6 Junio 2026
 - **Evidence:** Commits `e95376cc`, `928939d8`, `aeb1f7ce`, `c6591583`, `df045ca4`, `d17e5969`
+
+---
+
+### Hito 45: Decentralized Gossip Federation
+- **Target:** `cortex/extensions/federation/gossip.py`, `tests/extensions/federation/test_gossip.py`
+- **Objective:** Implement a real UDP-based decentralized gossip protocol for independent node discovery, routing table propagation, and state version synchronization in a federated CORTEX cluster.
+- **Yield Target:** Zero-master network discovery and version convergence tested under real loopback datagram execution.
+- **Reality Level:** `C5-REAL`
+- **Status:** ✅ COMPLETE — 6 Junio 2026
+- **Evidence:** Commit `d70bd5e8`
+
 ```

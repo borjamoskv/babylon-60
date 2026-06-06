@@ -165,4 +165,4 @@ pip install "cortex-persist[api,mcp,daemon]" # Web Server & MCP endpoints
 *   [**API Reference**](docs/api.md) — SDK primitives and REST endpoints.
 
 ---
-> **LICENSE:** Apache-2.0 | **OPERATOR:** borjamoskv | [cortexpersist.com](https://cortexpersist.com) | [Sponsor the Engine](https://github.com/sponsors/borjamoskv)
+> **LICENSE:** Apache-2.0 | **OPERATOR:** borjamoskv | [CORTEX.ORG](https://cortexpersist.org) | [CORTEX.DEV](https://cortexpersist.dev) | [Sponsor the Engine](https://github.com/sponsors/borjamoskv)
