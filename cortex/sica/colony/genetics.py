@@ -133,28 +133,9 @@ class GenePool:
         strategy: SearchStrategy,
         max_adoptions: int = 3,
     ) -> list[GeneFragment]:
-        """Adopt the best fragments from the pool.
-
-        Selection criteria:
-        1. Don't adopt your own donations
-        2. Don't adopt heuristics you already have
-        3. Prefer high value_score fragments
-        4. Prefer fragments from different donors (diversity)
-
-        Returns the fragments that were adopted.
-        """
+        """Adopt the best fragments from the pool."""
         existing_names = {h.name for h in strategy.genome.heuristics}
-        candidates = [f for f in self._fragments.values() if f.donor_agent != agent_id]
-
-        # Filter heuristics we already have
-        candidates = [
-            f
-            for f in candidates
-            if f.fragment_type != "heuristic" or f.payload.get("name") not in existing_names
-        ]
-
-        # Sort by value score
-        candidates.sort(key=lambda f: f.value_score, reverse=True)
+        candidates = self._get_adoptable_candidates(agent_id, existing_names)
 
         adopted: list[GeneFragment] = []
         donors_seen: set[str] = set()
@@ -162,11 +143,8 @@ class GenePool:
         for frag in candidates:
             if len(adopted) >= max_adoptions:
                 break
-
-            # Prefer diversity: don't adopt too many from same donor
             if frag.donor_agent in donors_seen and len(adopted) > 1:
                 continue
-
             if self._apply_fragment(frag, strategy):
                 frag.adoption_count += 1
                 adopted.append(frag)
@@ -175,12 +153,19 @@ class GenePool:
         if adopted:
             logger.info(
                 "GenePool: %s adopted %d fragments: %s",
-                agent_id,
-                len(adopted),
-                [f.fragment_id for f in adopted],
+                agent_id, len(adopted), [f.fragment_id for f in adopted],
             )
-
         return adopted
+
+    def _get_adoptable_candidates(self, agent_id: str, existing_names: set[str]) -> list[GeneFragment]:
+        candidates = [
+            f for f in self._fragments.values() 
+            if f.donor_agent != agent_id and (
+                f.fragment_type != "heuristic" or f.payload.get("name") not in existing_names
+            )
+        ]
+        candidates.sort(key=lambda f: f.value_score, reverse=True)
+        return candidates
 
     def report_adoption_outcome(
         self,
@@ -260,26 +245,8 @@ class GenomeCrossover:
         parent_a: StrategyGenome,
         parent_b: StrategyGenome,
     ) -> StrategyGenome:
-        """Create a child genome from two parents.
-
-        Selection rule: for each heuristic present in either parent,
-        include it if its fitness > 0.5, using the higher-weight version.
-        """
-        # Collect all heuristics from both parents
-        all_heuristics: dict[str, Heuristic] = {}
-
-        for h in parent_a.heuristics:
-            if h.fitness > 0.4:
-                all_heuristics[h.name] = copy.deepcopy(h)
-
-        for h in parent_b.heuristics:
-            if h.fitness > 0.4:
-                if h.name in all_heuristics:
-                    # Take the one with higher fitness
-                    if h.fitness > all_heuristics[h.name].fitness:
-                        all_heuristics[h.name] = copy.deepcopy(h)
-                else:
-                    all_heuristics[h.name] = copy.deepcopy(h)
+        """Create a child genome from two parents."""
+        all_heuristics = self._merge_heuristics(parent_a, parent_b)
 
         # Apply structural drift to inherited heuristics
         for h in all_heuristics.values():
@@ -291,12 +258,7 @@ class GenomeCrossover:
         er = (parent_a.exploration_rate + parent_b.exploration_rate) / 2
 
         # Merge tool priorities (interleave, deduplicate)
-        tools: list[str] = []
-        seen: set[str] = set()
-        for t in _interleave(parent_a.tool_priority, parent_b.tool_priority):
-            if t not in seen:
-                tools.append(t)
-                seen.add(t)
+        tools = self._merge_tools(parent_a, parent_b)
 
         # Decomposition: take the average
         decomp = (parent_a.decomposition_depth + parent_b.decomposition_depth) // 2
@@ -313,13 +275,34 @@ class GenomeCrossover:
 
         logger.info(
             "Crossover: %s × %s → %s (heuristics=%d, er=%.2f)",
-            parent_a.genome_hash,
-            parent_b.genome_hash,
-            child.genome_hash,
-            len(child.heuristics),
-            child.exploration_rate,
+            parent_a.genome_hash, parent_b.genome_hash, child.genome_hash,
+            len(child.heuristics), child.exploration_rate,
         )
         return child
+
+    def _merge_heuristics(self, parent_a: StrategyGenome, parent_b: StrategyGenome) -> dict[str, Heuristic]:
+        all_heuristics: dict[str, Heuristic] = {}
+        for h in parent_a.heuristics:
+            if h.fitness > 0.4:
+                all_heuristics[h.name] = copy.deepcopy(h)
+
+        for h in parent_b.heuristics:
+            if h.fitness > 0.4:
+                if h.name in all_heuristics:
+                    if h.fitness > all_heuristics[h.name].fitness:
+                        all_heuristics[h.name] = copy.deepcopy(h)
+                else:
+                    all_heuristics[h.name] = copy.deepcopy(h)
+        return all_heuristics
+
+    def _merge_tools(self, parent_a: StrategyGenome, parent_b: StrategyGenome) -> list[str]:
+        tools: list[str] = []
+        seen: set[str] = set()
+        for t in _interleave(parent_a.tool_priority, parent_b.tool_priority):
+            if t not in seen:
+                tools.append(t)
+                seen.add(t)
+        return tools
 
 
 class GenomeMutator:
