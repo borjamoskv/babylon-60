@@ -13,7 +13,7 @@ body:
     id: cortex_version
     attributes:
       label: CORTEX-Persist Version
-      description: What version of the substrate are you running? (e.g., v0.3.0b3)
+      description: What version of the substrate are you running? (e.g., v1.0.0)
       placeholder: v0.3.x
     validations:
       required: true
