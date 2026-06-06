@@ -14,7 +14,6 @@ before it touches the database.
 from __future__ import annotations
 
 import logging
-import re
 
 from cortex.config import (
     MCP_MAX_CONTENT_LENGTH,
@@ -126,6 +125,7 @@ class MCPGuard:
         """
         try:
             import cortex_rs
+
             match = cortex_rs.detect_poisoning(content)
             if match:
                 logger.debug("Poison pattern matched in Rust core")
