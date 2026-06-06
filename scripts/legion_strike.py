@@ -18,7 +18,13 @@ async def main():
     args = parser.parse_args()
 
     # Despertar del Router (C5-REAL awakening)
-    router = CortexLLMRouter() if not args.sim else None
+    if not args.sim:
+        from cortex.extensions.llm.provider import LLMProvider
+        primary_provider = LLMProvider("gemini")
+        router = CortexLLMRouter(primary=primary_provider)
+    else:
+        router = None
+        
     engine = CentauroEngine(tolerance=args.tolerance, router=router)
     
     print(f"🔱 LEGIØN-1 ACTIVATED")
