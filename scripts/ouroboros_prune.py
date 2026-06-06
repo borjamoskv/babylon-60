@@ -45,7 +45,7 @@ def execute_thermal_purge(db_path: str = "~/.cortex/cortex.db") -> None:
                 SELECT id, content, created_at, decay_half_life,
                        ((strftime('%s', 'now') - strftime('%s', created_at)) / 86400.0) as age_days
                 FROM facts
-                WHERE is_diamond = 0 AND is_tombstoned = 0
+                WHERE confidence != 'C5' AND is_tombstoned = 0
             """
             cursor.execute(sql_find)
             rows = cursor.fetchall()
