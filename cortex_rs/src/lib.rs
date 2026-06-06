@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 // Crate-level clippy config: suppress cosmetic lints endemic to the codebase
 #![allow(clippy::collapsible_if)]
 #![allow(clippy::manual_clamp)]

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Estado del Arte (SOTA): Latent Reasoning en LLMs (RiM)
 
 **ID del Artefacto:** `SOTA-2605.30343v1`

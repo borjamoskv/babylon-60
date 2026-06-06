@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Final Audit Dossier: LayerZero Stellar (Soroban)  
 **Warden:** borjamoskv // CORTEX-Ω  
 **Date:** April 2, 2026  

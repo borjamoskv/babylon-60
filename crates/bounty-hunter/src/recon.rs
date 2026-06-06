@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 // ============================================================
 // RECON MODULE — Subdomain Enumeration + DNS Resolution
 // Throughput: ~2000 concurrent DNS resolvers (I/O bound)

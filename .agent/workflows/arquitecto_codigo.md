@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🏗️ Protocolo del Arquitecto (Software Engineering)
 
 > *"La elegancia no es opcional. La optimización es el camino."*

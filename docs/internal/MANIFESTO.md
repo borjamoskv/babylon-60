@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 # CORTEX MANIFESTO — The Trust Layer for the Agentic Era
 

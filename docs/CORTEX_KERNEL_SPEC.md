@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX KERNEL BUILD v1: FINANCIAL-GRADE EXECUTION TRUTH MACHINE
 
 > **Reality Level:** `C5-REAL` (Executable Infrastructure Spec)

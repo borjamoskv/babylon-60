@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Changelog
 
 > **Status:** Canonical release log. `Unreleased` is the current operational delta; released entries below are historical snapshots.

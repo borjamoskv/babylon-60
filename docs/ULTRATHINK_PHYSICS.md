@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # ULTRATHINK PHYSICS: FUNDAMENTOS Y AXIOMAS (P0)
 
 La *Física Termodinámica del Ultrathink* postula el marco riguroso que gobierna el comportamiento del Enjambre Soberano en el *Horizonte de Sucesos P0* (colapso arquitectónico, brechas críticas, corrupción criptográfica).

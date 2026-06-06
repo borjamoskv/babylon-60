@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX Persist — Canonical Naming Reference
 
 This document is the authoritative source of truth for all public-facing names across the CORTEX Persist project.

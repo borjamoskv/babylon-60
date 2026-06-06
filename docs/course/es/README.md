@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Suite de Cursos CORTEX
 
 Tres tracks GitHub-native construidos a partir del repositorio real.

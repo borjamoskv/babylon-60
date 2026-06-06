@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Sovereign Worker MVP — Mac Maestro ↔ CORTEX
 > **Objetivo:** Definir unidades mínimas de trabajo autónomo con ROI demostrable (C5-REAL), antes de auditar o expandir la integración arquitectónica.
 

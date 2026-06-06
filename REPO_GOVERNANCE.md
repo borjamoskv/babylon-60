@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # REPO_GOVERNANCE.md — CORTEX-Persist
 
 > "Trust is not assumed; it is computed, persisted, and verified."

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Report: LayerZero Stellar Messaging Channel Audit // H-05
 
 **Target:** `MessagingChannel.rs` (Inbound Delivery)  

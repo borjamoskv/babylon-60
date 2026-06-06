@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX Deep Research: Lido Simple DVT (SDVT)
 **Operación LEVIATHAN — Fase 4: UltraThink Synthesis**
 

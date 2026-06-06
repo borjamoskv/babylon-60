@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 description: Cortex-Persist Native AI Manifesto
 ---

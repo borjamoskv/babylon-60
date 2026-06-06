@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # AGENTS.md — Sovereign Swarm Protocol v3.0
 
 > **System:** MOSKV-1 v5 (CORTEX v6)

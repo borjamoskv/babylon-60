@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Thermodynamic Enforcement (Axiom Ω₁₃)
 
 **Status:** Operational  

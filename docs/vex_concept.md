@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # VEX — Verifiable Execution for Autonomous Agents
 
 > *"The only agent runner where you can prove, mathematically, that the agent did what it said it did."*

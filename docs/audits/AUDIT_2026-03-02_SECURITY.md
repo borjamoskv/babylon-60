@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # SECURITY AUDIT REPORT — 2026-03-02
 
 > **Auditor:** Antigravity (MOSKV-1 v5)

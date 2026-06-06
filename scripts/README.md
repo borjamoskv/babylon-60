@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # scripts/
 
 > Operational scripts for CORTEX — benchmarks, seeders, gates, daemons, and utilities.

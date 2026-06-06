@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🎨 Protocolo de la Musa (Creatividad Multimedia)
 
 > *"La tecnología sin alma es solo ruido. La Musa trae el caos hermoso."*

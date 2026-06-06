@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # SEMANTIC RAM: The 130/100 Memory Architecture
 
 > **[AETHER-OMEGA INITIATIVE: 2026]**

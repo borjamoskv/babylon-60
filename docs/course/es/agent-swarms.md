@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Curso · Enjambre de Agentes IA
 
 ## Objetivo

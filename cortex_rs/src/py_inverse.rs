@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 //! CORTEX PyO3 Bridge — Exposes Inverse AlphaProof Engine to Python
 //!
 //! Wraps the Rust-native inverse engine pipeline into Python-callable

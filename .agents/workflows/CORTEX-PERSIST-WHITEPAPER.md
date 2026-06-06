@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 description: Cortex-Persist Whitepaper v0.2.2 — Infraestructura de gobernanza cognitiva para enjambres de agentes
 ---

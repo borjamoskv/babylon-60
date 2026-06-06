@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Architecture Crystallization
 
 Last reviewed: 2026-04-21

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX: ATTACK SURFACE ECONOMICS LAYER
 
 > **Reality Level:** `C5-REAL` (Executable Infrastructure Spec)

@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 //! CORTEX Inverse Engine — Unified Self-Play Pipeline
 //!
 //! Orchestrates the three Embryogenesis subsystems into one loop:

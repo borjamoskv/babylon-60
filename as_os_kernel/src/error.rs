@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 #[derive(Debug)]
 #[allow(dead_code)]
 pub enum KernelError {

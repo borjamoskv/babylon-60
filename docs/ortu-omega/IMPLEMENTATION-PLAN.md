@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # IMPLEMENTATION-PLAN.md — ORTU-Ω Phase 3
 
 > **Program**: ORTU-Ω Forge · **Codename**: SORTU-Ω  

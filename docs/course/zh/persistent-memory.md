@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 课程 · AI 代理中的持久记忆
 
 ## 目标

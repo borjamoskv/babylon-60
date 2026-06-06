@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX Governance
 
 > How decisions are made, who maintains what, and how to become a contributor.

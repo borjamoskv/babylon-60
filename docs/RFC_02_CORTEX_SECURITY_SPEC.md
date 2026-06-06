@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # RFC 02: CORTEX Security Architecture & Epistemic Control Plane (Spec)
 
 **Title:** Verifiable State Transition Control under Uncertainty

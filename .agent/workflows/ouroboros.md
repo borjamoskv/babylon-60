@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 description: "OUROBOROS-∞ — El skill supremo. Inteligencia autónoma auto-evolutiva con razonamiento causal, War Council multi-modelo, arqueología temporal, adversarial testing, y meta-cognición recursiva."
 ---

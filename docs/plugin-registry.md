@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Plugin Registry Architecture
 
 > Specification for the CORTEX Plugin Registry — how plugins are discovered, verified, and distributed.

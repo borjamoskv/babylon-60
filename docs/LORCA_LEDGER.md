@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 📜 CORTEX LORCA-Ω NARRATIVE LEDGER
 
 > **Sovereign Chronicle of the Substrate** | **Reality Level:** `C5-REAL`

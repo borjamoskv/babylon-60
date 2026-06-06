@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 name: vsa-sdm-memory-omega
 description: "Sovereign Context Collapse — Vector Symbolic Architecture & Sparse Distributed Memory Binder"

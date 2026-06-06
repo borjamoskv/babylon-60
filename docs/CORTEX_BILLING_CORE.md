@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX BILLING CORE v2: CAUSAL METERING & ADVERSARIAL FRICTION
 
 > **Reality Level:** `C5-REAL` (Executable Infrastructure Spec)

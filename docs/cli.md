@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CLI Reference
 
 CORTEX exposes many CLI commands because the repository also contains operator and research

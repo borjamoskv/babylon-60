@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 title: CORTEX v8.0 Production Roadmap
 description: Plan de transición de MVP a sistema enterprise-grade (El camino a V8)

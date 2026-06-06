@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 name: Plugin Request
 about: Request or propose a new CORTEX plugin

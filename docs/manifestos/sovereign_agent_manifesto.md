@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🧠 The Sovereign Agent Manifesto (CORTEX V6+)
 
 > **From tools that execute commands to entities that accumulate wisdom.**

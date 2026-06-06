@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 description: Workflow maestro para browser_subagent — QA visual, investigación web, testing de flujos y scraping inteligente
 ---

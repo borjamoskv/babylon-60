@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🕵️ DETECTIVE-Ω FORENSIC REPORT
 **Target Ecosystem**: `cortex-persist`
 **Timestamp**: 2026-06-01T00:38:00+02:00

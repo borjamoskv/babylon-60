@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # RFC: SORTU-Ω Trust Semantics v0.1
 Status: Draft
 Program: ORTU-Ω Forge

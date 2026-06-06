@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🧬 SINTETOLOGÍA AGÉNTICA: ESTADO DEL ARTE
 
 > **Documento Fundacional · Actualización SOTA**

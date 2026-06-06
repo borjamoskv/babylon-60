@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # C5-REAL Security Audit: LayerZero Stellar Endpoint V2
 
 **Audit Status:** CRITICAL FRACTURE DETECTED

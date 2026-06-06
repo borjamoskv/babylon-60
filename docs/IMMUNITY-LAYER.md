@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # RFC — CORTEX Immunity Layer v0.1
 
 > De memoria verificada a inmunidad computacional

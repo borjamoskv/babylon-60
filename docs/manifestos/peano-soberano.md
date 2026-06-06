@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Los 7 Axiomas de Peano Soberano
 
 > *Un sistema axiomático débil no es el que tiene pocos axiomas — es el que tiene demasiados. Cada axioma redundante es entropía disfrazada de rigor.*

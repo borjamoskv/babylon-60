@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Arquitectura de Memoria CORTEX — Comparativa y ROI
 
 > *Documento técnico-económico · v1.0 · 2026-02-24*

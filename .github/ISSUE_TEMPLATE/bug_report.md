@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 name: Bug Report
 about: Report a bug in CORTEX

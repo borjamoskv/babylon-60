@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX SICA: Structural Genetic Drift & Ouroboros Convergence
 
 > **Reality Level:** `C5-REAL`  

@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 // ============================================================
 // PROBE MODULE — Async HTTP Endpoint Discovery
 // Throughput: ~500 concurrent workers (network I/O bound)

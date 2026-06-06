@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🚀 Protocolo del Comandante (Build & Release)
 
 > *"El código que no llega al usuario no existe. Despliega o muere."*

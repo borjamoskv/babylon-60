@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 //! CORTEX Genome Mutator — Rust Native AST Manipulation
 //! 
 //! Exergically efficient calculation of genome mutations to bypass the Python GIL.

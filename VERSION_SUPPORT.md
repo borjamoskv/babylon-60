@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Version Support
 
 This document defines the public support posture for released versions of

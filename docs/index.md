@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX
 
 > **Trust Infrastructure for Autonomous AI**

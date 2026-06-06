@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 description: Build and run LiveNotch macOS app
 ---

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX JS/TS SDK
 
 > ⚠️ **Not yet published.** This SDK is a roadmap item. `npm install @cortex-persist/sdk` returns 404 until the first npm release.

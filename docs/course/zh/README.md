@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX 课程套件
 
 这是一个基于真实仓库构建的 GitHub 原生课程套件。

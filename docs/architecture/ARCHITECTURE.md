@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX v7 — Evolución Autopoiética
 
 > This document is a deep architecture snapshot, not the recommended adoption surface.

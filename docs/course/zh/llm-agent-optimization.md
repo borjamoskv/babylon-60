@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 课程 · LLM 与 AI 代理优化
 
 ## 目标

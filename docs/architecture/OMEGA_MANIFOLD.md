@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🌌 EL MANIFOLD OMEGA (Ω-MANIFOLD) — CORTEX Persist v6
 
 > **The Sovereign Core: Percepción, Decisión, Creación y Validación colapsados en un solo evento de Voluntad.**

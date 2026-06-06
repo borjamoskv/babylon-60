@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX-Persist Workspace — Cognitive Routing Protocol
 
 > Workspace-level rules for CORTEX-Persist repository. Extends global GEMINI.md.

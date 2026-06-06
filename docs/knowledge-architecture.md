@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Knowledge Architecture: CORTEX ↔ NotebookLM
 
 > **Doctrine v1.0** — Established 2026-03-02

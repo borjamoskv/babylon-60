@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # ROADMAP
 
 > **Tamper-Evident Decision Lineage & Sovereign Swarm Orchestration**

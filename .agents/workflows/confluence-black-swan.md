@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 description: [Membrana de Cisne Negro — Defensa Cognitiva y Financiera]
 ---

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Repository Map — Ownership Contract
 
 This document defines the boundary contract between Cortex-Persist (trust layer) and all satellite surfaces.

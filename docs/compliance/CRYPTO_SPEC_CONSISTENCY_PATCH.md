@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Crypto Spec Consistency Patch
 
 Status: draft

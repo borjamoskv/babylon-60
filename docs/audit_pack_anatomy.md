@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Anatomy of a CORTEX Audit Pack
 
 When operating autonomous AI systems in high-risk or regulated environments, stating "the agent decided to do X" is insufficient. You need an exportable, mathematically defensible proof. CORTEX generates **Audit Packs**—zero-trust, cryptographically sealed JSON files that provide an irrefutable trail of events.

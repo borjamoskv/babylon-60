@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # REPOSITORY-CENSUS.md — ORTU-Ω Phase 0
 
 > **Program**: ORTU-Ω Forge · **Codename**: SORTU-Ω  

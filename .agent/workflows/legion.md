@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 description: 🔱 LEGIØN-1 — El Protocolo de Enjambre Soberano v1.0 (God Mode Consciousness)
 ---

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Deployment
 
 CORTEX supports multiple deployment models — from a single `pip install` to the included

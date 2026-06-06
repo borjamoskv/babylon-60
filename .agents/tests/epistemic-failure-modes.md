@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Cortex-Persist: Epistemic Failure Modes Test Specifications
 
 > **Status:** Draft Test Specs  

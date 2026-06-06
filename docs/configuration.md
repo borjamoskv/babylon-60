@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Configuration Reference
 
 All CORTEX settings are loaded from environment variables at import time via `cortex/config.py`. Call `config.reload()` to refresh at runtime.

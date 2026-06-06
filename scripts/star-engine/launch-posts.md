@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🚀 Launch Posts — CORTEX-Persist
 
 > **Timing:** Tuesday–Thursday, 9:00 AM PST (17:00 CET)

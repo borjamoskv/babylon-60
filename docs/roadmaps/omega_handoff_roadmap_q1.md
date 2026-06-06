@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # ΩΩ-HANDOFF: VÍA DE ESCALA (SEMANAS 1-12)
 
 A continuación se detalla el roadmap y los milestones para el escalado del Protocolo Soberano de Resurrección Agéntica (ΩΩ-Handoff) integrando Arweave.

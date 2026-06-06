@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🔧 GitHub Settings — Manual Configuration Checklist
 
 These settings must be configured manually in GitHub's web UI.

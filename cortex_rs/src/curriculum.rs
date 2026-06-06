@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 //! CORTEX Curriculum Generator — Test-Time RL (TTRL) Pattern
 //!
 //! Inverse AlphaProof architecture: Given a hard target problem,

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Bug Bounty High-Severity Report: LayerZero
 
 **Target Protocol:** LayerZero (April 2026 Day-0 Competition)

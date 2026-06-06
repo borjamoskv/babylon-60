@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🛡️ Protocolo del Centinela (Seguridad y Privacidad)
 
 > *"La confianza es buena, pero el control es mejor. La paranoia es una virtud en ciberseguridad."*

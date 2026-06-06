@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🗄️ LP ALPHA PROTOCOL: CORTEX-PERSIST CONVERGENCE
 
 > **Reality Level:** `C5-REAL` | **State:** `LOCKED`

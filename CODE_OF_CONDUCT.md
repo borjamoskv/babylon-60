@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Contributor Covenant Code of Conduct
 
 ## Our Pledge

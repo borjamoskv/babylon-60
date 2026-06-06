@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX-Persist
 
 **Tamper-evident memory and decision lineage for autonomous systems.**

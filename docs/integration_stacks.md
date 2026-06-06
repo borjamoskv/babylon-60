@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # How CORTEX Fits Existing Stacks
 
 Adopting cryptographic memory doesn't mean ripping out your existing infrastructure. CORTEX is designed to sit alongside your current vector databases and orchestration frameworks, wrapping your final state mutations in a **Verification Membrane**.

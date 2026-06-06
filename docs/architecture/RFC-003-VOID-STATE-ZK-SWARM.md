@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # RFC 003: Void-State Security Architecture & ZK-Swarm Consensus
 
 ## Abstract

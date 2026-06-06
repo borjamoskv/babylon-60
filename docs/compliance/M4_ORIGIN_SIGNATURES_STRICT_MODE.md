@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # M4 Origin Signatures Strict Mode
 
 Status: draft

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 description: Security sentinel — checklist for auditing and hardening CORTEX before any release
 ---

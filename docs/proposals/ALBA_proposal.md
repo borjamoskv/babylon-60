@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX Trust Engine — Propuesta para Financiera ALBA
 
 **Preparado para:** Javier Fernandez, CEO · Financiera ALBA

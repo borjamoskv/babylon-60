@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Hello World in 3 Minutes
 
 As an engineer or builder integrating CORTEX Persist, your goal is to seamlessly plug cryptographic memory into your existing agent loops without rewriting your architecture.

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 Analyze the CORTEX V4.0 architecture and the new Consensus Layer. Propose Wave 5
 (Persistence & Deployment) focusing on: 1. Immutable logging of votes. 2. 
 High-availability synchronization of the ledger. 3. Edge deployment via MCP 

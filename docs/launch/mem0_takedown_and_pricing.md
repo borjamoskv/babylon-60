@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🚀 CORTEX vs Mem0: The Reddit Takedown & Pricing Strategy
 
 ## 1. The Reddit Post (Target: r/LocalLLaMA, r/MachineLearning, r/LangChain)

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Axiom Registry — Canonical Source of Truth
 
 > *Los 7 Axiomas Soberanos. One numbering. One taxonomy. One source.*

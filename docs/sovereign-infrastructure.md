@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Sovereign Infrastructure (脉灵)
 
 CORTEX v7.8 "MAILING" introduces the 300/100 Sovereign Standard, specifically designed for high-security environments and international compliance (including TEE and Air-Gap simulations).

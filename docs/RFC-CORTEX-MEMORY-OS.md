@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # RFC: CORTEX Memory OS (Axiom Ω₁₃ Enforcement)
 
 **Status:** Draft / Active

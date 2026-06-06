@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Awesome List PR Template
 
 ## For adding CORTEX-Persist to awesome lists

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # cortex-persist — Cloud SDK
 
 > ⚠️ **Not yet published.** This SDK is for the **hosted CORTEX Persist cloud API** and is not yet deployed to PyPI or production. The install command below will not succeed until the first cloud release.

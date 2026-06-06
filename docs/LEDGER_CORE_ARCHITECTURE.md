@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX: THE LEDGER CORE ARCHITECTURE
 
 > **Reality Level:** `C5-REAL` (Financial-Grade Compute Infrastructure)

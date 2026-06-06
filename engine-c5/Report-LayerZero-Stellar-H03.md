@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Report: LayerZero Stellar Messaging Composer Audit // H-03
 
 **Target:** Messaging Composer (Stellar/Soroban)  

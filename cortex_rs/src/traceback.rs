@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 //! CORTEX Traceback Engine — Inverse AlphaGeometry Pattern
 //!
 //! DAG-based deduction with backward dependency extraction.

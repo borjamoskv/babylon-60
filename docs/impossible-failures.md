@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # The 5 Structurally Impossible Failures
 
 > *"The most valuable insight of a product rarely comes from what it does — it comes from what it guarantees cannot happen. Define the failure you make impossible and you have the most powerful sales message in your category."*

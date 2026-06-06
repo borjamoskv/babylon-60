@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # FAQ
 
 Common questions about CORTEX, answered honestly.

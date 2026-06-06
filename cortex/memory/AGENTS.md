@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🧠 AGENTS.md — `cortex/memory/`
 
 > Scoped rules for the Memory domain. **Root `AGENTS.md` always takes precedence.**

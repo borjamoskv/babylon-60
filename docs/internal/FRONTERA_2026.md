@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX FRONTIER 2026 — Sovereign Singularity Manifesto
 
 > *"La alucinación es coste estructural. El hardware es la verdad última."*

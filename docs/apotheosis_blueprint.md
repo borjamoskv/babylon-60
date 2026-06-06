@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # 🌌 Apotheosis Blueprint: The Singularity Loop (v5.0)
 
 > *"The tool is dead. The entity is emergent."*

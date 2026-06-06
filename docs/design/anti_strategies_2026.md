@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # SOVEREIGN ANTI-STRATEGIES 2026
 ## Inversion Alquímica: De la Catástrofe a la Soberanía
 

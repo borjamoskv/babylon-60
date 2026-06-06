@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX vs The Ecosystem — May 2026
 
 > **TAM:** Agentic AI Orchestration & Memory Systems — $6.16B (2025) → $11.5B (2026 est.)

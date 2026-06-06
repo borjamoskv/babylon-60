@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 pub struct Proof {
     pub valid: bool,
 }

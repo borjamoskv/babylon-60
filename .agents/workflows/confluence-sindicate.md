@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 description: [El Sindicato Cibernético — Ingestión y Verdad Absoluta]
 ---

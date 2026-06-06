@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Report: LayerZero Stellar Utility Audit // M-05
 
 **Target:** GUID Calculation Logic (Stellar/Soroban)  

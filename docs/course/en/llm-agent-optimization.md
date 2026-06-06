@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Course · LLM and AI Agent Optimization
 
 ## Goal

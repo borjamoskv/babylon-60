@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # C5-REAL Security Audit: Stargate V2 (LayerZero Protocol)
 
 **Audit Status:** CRITICAL VULNERABILITY IDENTIFIED

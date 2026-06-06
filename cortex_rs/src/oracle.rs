@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 //! CORTEX Fitness Oracle — Rust Native Evaluation
 //! 
 //! Exergically efficient calculation of composite fitness to bypass the Python GIL.

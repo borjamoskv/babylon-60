@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 Aquí está la estructura ósea para 'ROBALAS — The Great Extraction', diseñada por CORTEX.
 
 ---

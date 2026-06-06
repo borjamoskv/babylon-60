@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # GitHub Course Suite
 
 Repository-grounded courses for architects, builders, and operators working with AI agents.

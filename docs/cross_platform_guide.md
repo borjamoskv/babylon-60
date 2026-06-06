@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Cross-Platform Architecture
 
 CORTEX runs natively on **macOS, Linux, and Windows** without Docker. This guide covers the platform abstraction layer that makes this possible.

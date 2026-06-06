@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Incident Report: infra_ghost / torch_shm_manager missing
 
 ## Overview

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 ---
 description: Genera 3 caminos divergentes para resolver un problema usando el contexto de CORTEX.
 ---

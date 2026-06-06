@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Skill Taxonomy
 
 CORTEX uses "skill" for executable capability packages, not for agent authority.

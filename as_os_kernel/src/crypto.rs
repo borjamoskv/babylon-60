@@ -1,3 +1,4 @@
+// [C5-REAL] Exergy-Maximized
 use sha2::{Sha256, Digest};
 
 pub fn hash(data: &[u8]) -> String {

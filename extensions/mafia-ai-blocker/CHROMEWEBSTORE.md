@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Chrome Web Store Metadata: CORTEX-Persist Mafia AI Blocker
 
 This document is the single source of truth for the Chrome Web Store listing. Copy and paste these fields directly into the Chrome Developer Dashboard.

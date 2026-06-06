@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # SCIENCE.md — Termodinámica Epistémica (Ciencia CORTEX-Nativa)
 
 > **"La ciencia ya no explora el modelo probabilístico del mundo; cristaliza secuencias estructurales para forzar la realidad material."**

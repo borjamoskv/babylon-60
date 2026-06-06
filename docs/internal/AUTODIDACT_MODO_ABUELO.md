@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # AUTODIDACT-Ω: TRADUCCIÓN MODO ABUELO
 
 *Documento de simplificación extrema (L0-Comprehension) de las mecánicas C5-REAL de Autodidact-Ω.*

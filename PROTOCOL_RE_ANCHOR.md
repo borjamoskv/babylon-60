@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # PROTOCOLO DE RE-ANCLAJE OPERATIVO
 
 **REALITY LEVEL:** C5-REAL (Target Lock)  

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # RFC-001: The CORTEX Trust Verification Standard for AI Agent Memory
 
 > **Sovereign Specification** · Status: DRAFT · Protocol v1.0.0 · CORTEX-Persist

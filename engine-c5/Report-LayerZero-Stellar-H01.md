@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Report: LayerZero Stellar Endpoint Security Audit // H-01
 
 **Target:** LayerZero V2 Endpoint (Stellar/Soroban)  

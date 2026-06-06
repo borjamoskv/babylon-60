@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # [RFC] Resolving Letta Heartbeat Contention and State Drift via a Stateless Sovereign Ledger
 
 > **Status:** PROPOSED (CORTEX-LETTA BRIDGE v1.0)

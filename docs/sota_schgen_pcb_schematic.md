@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # Estado del Arte (SOTA): SchGen (PCB Schematic Generation)
 
 **ID del Artefacto:** `SOTA-2605.30345v1`

@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # HITO 15: SINTETOLOGÍA AGÉNTICA v4.0 (AST Sealing y Compilación Determinista)
 
 ## 1. La Integración de la Teoría al Código

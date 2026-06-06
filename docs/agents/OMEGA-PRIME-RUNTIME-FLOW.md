@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # OMEGA PRIME Runtime Flow
 
 > "El LLM nunca publica estado final arbitrario sin pasar por estructuras tipadas."

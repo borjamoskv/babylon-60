@@ -1,3 +1,4 @@
+<!-- [C5-REAL] Exergy-Maximized -->
 # CORTEX Persist Product Dashboard
 
 React/Vite prototype for the canonical product demo behind issue `#209`.
