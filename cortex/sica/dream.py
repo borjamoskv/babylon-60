@@ -198,45 +198,47 @@ class DreamEngine:
         for trace in traces:
             if trace.final_outcome != outcome_filter:
                 continue
-
-            # Extract consecutive successful/failed step sequences
-            current_run: list[ExecutionStep] = []
-            for step in trace.steps:
-                if step.outcome == outcome_filter:
-                    current_run.append(step)
-                else:
-                    if len(current_run) >= 2:
-                        fragments.append(
-                            _TraceFragment(
-                                steps=list(current_run),
-                                source_trace=trace.task_id,
-                                outcome=outcome_filter,
-                            )
-                        )
-                    current_run = []
-
-            if len(current_run) >= 2:
-                fragments.append(
-                    _TraceFragment(
-                        steps=list(current_run),
-                        source_trace=trace.task_id,
-                        outcome=outcome_filter,
-                    )
-                )
+            self._extract_sequence_fragments(trace, outcome_filter, fragments)
 
         # Also extract individual successful steps
         for trace in traces:
-            for step in trace.steps:
-                if step.outcome == outcome_filter and step.tool_used:
+            self._extract_individual_fragments(trace, outcome_filter, fragments)
+
+        return fragments[: self._max_fragments]
+
+    def _extract_sequence_fragments(
+        self, trace: ExecutionTrace, outcome_filter: StepOutcome, fragments: list[_TraceFragment]
+    ) -> None:
+        current_run: list[ExecutionStep] = []
+        for step in trace.steps:
+            if step.outcome == outcome_filter:
+                current_run.append(step)
+            else:
+                if len(current_run) >= 2:
                     fragments.append(
                         _TraceFragment(
-                            steps=[step],
+                            steps=list(current_run),
                             source_trace=trace.task_id,
                             outcome=outcome_filter,
                         )
                     )
+                current_run = []
 
-        return fragments[: self._max_fragments]
+        if len(current_run) >= 2:
+            fragments.append(
+                _TraceFragment(
+                    steps=list(current_run), source_trace=trace.task_id, outcome=outcome_filter
+                )
+            )
+
+    def _extract_individual_fragments(
+        self, trace: ExecutionTrace, outcome_filter: StepOutcome, fragments: list[_TraceFragment]
+    ) -> None:
+        for step in trace.steps:
+            if step.outcome == outcome_filter and step.tool_used:
+                fragments.append(
+                    _TraceFragment(steps=[step], source_trace=trace.task_id, outcome=outcome_filter)
+                )
 
     def _recombine_fragments(
         self,
@@ -274,14 +276,13 @@ class DreamEngine:
     # ── Pattern Abstraction ──────────────────────────────────────
 
     def _abstract_patterns(self, traces: list[ExecutionTrace]) -> int:
-        """Generalize specific experiences into abstract rules.
+        """Generalize specific experiences into abstract rules."""
+        new_count = self._abstract_tool_reliability(traces)
+        new_count += self._abstract_step_count_correlation(traces)
+        return new_count
 
-        Abstraction: when the same pattern appears N times across
-        different contexts, create a general rule.
-        """
+    def _abstract_tool_reliability(self, traces: list[ExecutionTrace]) -> int:
         new_count = 0
-
-        # Abstraction 1: Tool reliability per task type
         tool_task_outcomes: dict[str, list[bool]] = defaultdict(list)
         for trace in traces:
             task_type = (trace.objective or "").split()[0].lower() if trace.objective else "unknown"
@@ -295,15 +296,15 @@ class DreamEngine:
                 success_rate = sum(outcomes) / len(outcomes)
                 if key not in self._abstractions:
                     self._abstractions[key] = _Abstraction(
-                        pattern=key,
-                        success_rate=success_rate,
-                        observations=len(outcomes),
+                        pattern=key, success_rate=success_rate, observations=len(outcomes)
                     )
                     new_count += 1
                 else:
                     self._abstractions[key].update(success_rate, len(outcomes))
+        return new_count
 
-        # Abstraction 2: Step count → outcome correlation
+    def _abstract_step_count_correlation(self, traces: list[ExecutionTrace]) -> int:
+        new_count = 0
         step_outcomes: dict[int, list[bool]] = defaultdict(list)
         for trace in traces:
             step_outcomes[trace.step_count].append(trace.final_outcome == StepOutcome.SUCCESS)
@@ -314,12 +315,9 @@ class DreamEngine:
                 success_rate = sum(outcomes) / len(outcomes)
                 if key not in self._abstractions:
                     self._abstractions[key] = _Abstraction(
-                        pattern=key,
-                        success_rate=success_rate,
-                        observations=len(outcomes),
+                        pattern=key, success_rate=success_rate, observations=len(outcomes)
                     )
                     new_count += 1
-
         return new_count
 
     # ── Memory Pruning ───────────────────────────────────────────
@@ -347,9 +345,19 @@ class DreamEngine:
         traces: list[ExecutionTrace],
     ) -> list[DreamInsight]:
         """Discover which tools work best for which task types."""
+        task_tool_success = self._group_tool_outcomes(traces)
         insights: list[DreamInsight] = []
+        for task_type, tool_data in task_tool_success.items():
+            if len(tool_data) < 2:
+                continue
+            insight = self._evaluate_tool_specialization(task_type, tool_data)
+            if insight:
+                insights.append(insight)
+        return insights
 
-        # Group by task type → tool → success rate
+    def _group_tool_outcomes(
+        self, traces: list[ExecutionTrace]
+    ) -> dict[str, dict[str, list[bool]]]:
         task_tool_success: dict[str, dict[str, list[bool]]] = defaultdict(lambda: defaultdict(list))
         for trace in traces:
             task_type = (trace.objective or "").split()[0].lower() if trace.objective else "unknown"
@@ -358,41 +366,37 @@ class DreamEngine:
                     task_tool_success[task_type][step.tool_used].append(
                         step.outcome == StepOutcome.SUCCESS
                     )
+        return task_tool_success
 
-        for task_type, tool_data in task_tool_success.items():
-            if len(tool_data) < 2:
-                continue
+    def _evaluate_tool_specialization(
+        self, task_type: str, tool_data: dict[str, list[bool]]
+    ) -> DreamInsight | None:
+        tool_rates = {}
+        for tool, outcomes in tool_data.items():
+            if len(outcomes) >= 3:
+                tool_rates[tool] = sum(outcomes) / len(outcomes)
 
-            # Find the best tool for this task type
-            tool_rates = {}
-            for tool, outcomes in tool_data.items():
-                if len(outcomes) >= 3:
-                    tool_rates[tool] = sum(outcomes) / len(outcomes)
+        if len(tool_rates) >= 2:
+            best = max(tool_rates, key=tool_rates.get)  # type: ignore[arg-type]
+            worst = min(tool_rates, key=tool_rates.get)  # type: ignore[arg-type]
 
-            if len(tool_rates) >= 2:
-                best = max(tool_rates, key=tool_rates.get)  # type: ignore[arg-type]
-                worst = min(tool_rates, key=tool_rates.get)  # type: ignore[arg-type]
-
-                if tool_rates[best] - tool_rates[worst] > 0.3:
-                    insights.append(
-                        DreamInsight(
-                            insight_type="specialization",
-                            description=(
-                                f"For '{task_type}' tasks, '{best}' succeeds "
-                                f"{tool_rates[best]:.0%} vs '{worst}' at "
-                                f"{tool_rates[worst]:.0%}. Prefer '{best}'."
-                            ),
-                            confidence=min(0.9, 0.5 + len(tool_data[best]) * 0.05),
-                            evidence_count=len(tool_data[best]),
-                            proposed_heuristic=Heuristic(
-                                name=f"prefer_{best}_for_{task_type}",
-                                description=f"Use {best} for {task_type} tasks (dream-discovered)",
-                                weight=0.6,
-                            ),
-                        )
-                    )
-
-        return insights
+            if tool_rates[best] - tool_rates[worst] > 0.3:
+                return DreamInsight(
+                    insight_type="specialization",
+                    description=(
+                        f"For '{task_type}' tasks, '{best}' succeeds "
+                        f"{tool_rates[best]:.0%} vs '{worst}' at "
+                        f"{tool_rates[worst]:.0%}. Prefer '{best}'."
+                    ),
+                    confidence=min(0.9, 0.5 + len(tool_data[best]) * 0.05),
+                    evidence_count=len(tool_data[best]),
+                    proposed_heuristic=Heuristic(
+                        name=f"prefer_{best}_for_{task_type}",
+                        description=f"Use {best} for {task_type} tasks (dream-discovered)",
+                        weight=0.6,
+                    ),
+                )
+        return None
 
     def _discover_failure_precursors(
         self,
@@ -510,11 +514,7 @@ class DreamEngine:
         strategy: SearchStrategy,
         confidence_threshold: float = 0.6,
     ) -> int:
-        """Apply dream insights to the strategy genome.
-
-        Only applies insights with sufficient confidence.
-        Returns the number of insights applied.
-        """
+        """Apply dream insights to the strategy genome."""
         applied = 0
         existing_names = {h.name for h in strategy.genome.heuristics}
 
@@ -522,33 +522,42 @@ class DreamEngine:
             if insight.confidence < confidence_threshold:
                 continue
 
-            if insight.proposed_heuristic and insight.proposed_heuristic.name not in existing_names:
-                strategy.mutate_inject(
-                    insight.proposed_heuristic,
-                    reason=f"dream insight: {insight.description[:80]}",
-                )
-                existing_names.add(insight.proposed_heuristic.name)
+            if self._apply_proposed_heuristic(insight, strategy, existing_names):
                 applied += 1
 
-            if insight.proposed_weight_change:
-                for name, delta in insight.proposed_weight_change.items():
-                    try:
-                        if delta > 0:
-                            strategy.mutate_amplify(
-                                name,
-                                reason=f"dream: {insight.description[:60]}",
-                                factor=1 + delta,
-                            )
-                        elif delta < 0:
-                            strategy.mutate_attenuate(
-                                name,
-                                reason=f"dream: {insight.description[:60]}",
-                                factor=1 + delta,
-                            )
-                        applied += 1
-                    except Exception as exc:
-                        logger.warning("Suppressed exception: %s", exc)
+            if self._apply_proposed_weights(insight, strategy):
+                applied += 1
 
+        return applied
+
+    def _apply_proposed_heuristic(
+        self, insight: DreamInsight, strategy: SearchStrategy, existing_names: set[str]
+    ) -> bool:
+        if insight.proposed_heuristic and insight.proposed_heuristic.name not in existing_names:
+            strategy.mutate_inject(
+                insight.proposed_heuristic,
+                reason=f"dream insight: {insight.description[:80]}",
+            )
+            existing_names.add(insight.proposed_heuristic.name)
+            return True
+        return False
+
+    def _apply_proposed_weights(self, insight: DreamInsight, strategy: SearchStrategy) -> bool:
+        applied = False
+        if insight.proposed_weight_change:
+            for name, delta in insight.proposed_weight_change.items():
+                try:
+                    if delta > 0:
+                        strategy.mutate_amplify(
+                            name, reason=f"dream: {insight.description[:60]}", factor=1 + delta
+                        )
+                    elif delta < 0:
+                        strategy.mutate_attenuate(
+                            name, reason=f"dream: {insight.description[:60]}", factor=1 + delta
+                        )
+                    applied = True
+                except Exception as exc:
+                    logger.warning("Suppressed exception: %s", exc)
         return applied
 
 
