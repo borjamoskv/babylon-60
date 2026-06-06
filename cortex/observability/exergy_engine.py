@@ -77,13 +77,13 @@ class ExergyEngine:
         ]
         embeddings = []
         for r in bad_runs:
-            wf_name = r.get("workflow")
+            wf_name = str(r.get("workflow") or "unknown")
             stats = self.get_task_stats(wf_name)
             s = SystemState(
-                git_diff=r.get("git_diff", "unknown"),
-                ast_hash=r.get("ast_hash", "unknown"),
+                git_diff=str(r.get("git_diff") or "unknown"),
+                ast_hash=str(r.get("ast_hash") or "unknown"),
                 active_tasks=[wf_name],
-                error_log=r.get("error_log", []),
+                error_log=list(r.get("error_log") or []),
             )
             state_vec = encode_state(s)
             task_vec = encode_task(stats)
@@ -207,7 +207,7 @@ class ExergyEngine:
         return TaskStats(workflow, exergy_mean, exergy_var, runtime_mean, runtime_var, confidence)
 
     def lyapunov_scheduler(
-        self, candidate_workflows: list[str], state: SystemState = None
+        self, candidate_workflows: list[str], state: SystemState | None = None
     ) -> list[dict[str, Any]]:
         """Nivel 8: Multi-Agent Field Physics. Descenso de energía global de partículas."""
         if not candidate_workflows:
@@ -358,7 +358,9 @@ class ExergyEngine:
 
         for record in self.history:
             wf = record.get("workflow")
-            exergy = record.get("exergy_score", 0)
+            if not isinstance(wf, str):
+                continue
+            exergy = float(record.get("exergy_score") or 0.0)
             genes = self.genomes.get(wf, [])
 
             for gene in genes:
@@ -414,13 +416,15 @@ class ExergyEngine:
 
         # Generate counterfactuals from history simulating an evaluation context
         # (For simplicity, evaluate each past run against the other active candidates)
-        active_wfs = list(set([r.get("workflow") for r in self.history]))
+        active_wfs = list(set([str(r.get("workflow")) for r in self.history if r.get("workflow")]))
         recent_history = (
             self.history[-window_size:] if len(self.history) > window_size else self.history
         )
 
         for record in recent_history:
             wf = record.get("workflow")
+            if not isinstance(wf, str):
+                continue
             discarded = [w for w in active_wfs if w != wf]
             cf = self.evaluate_counterfactual(wf, discarded)
             ledger_events.append(cf)

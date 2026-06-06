@@ -20,23 +20,31 @@ def worker_group():
 
 
 @worker_group.command(name="start")
-@click.option("--db", default=DEFAULT_DB, help="Database path")
-@click.option("--poll", default=1.0, help="Polling interval in seconds")
+@click.option("--db", default=None, help="Database path override")
+@click.option("--poll", default=1.0, help="Poll interval in seconds")
 def start_worker(db: str, poll: float):
-    """Start the enrichment worker sidecar."""
+    """Start all background workers (Enrichment, Compaction)."""
+    import asyncio
+
     from cortex.worker.enrichment import EnrichmentWorker
+    from cortex.worker.telemetry_compaction import TelemetryCompactionWorker
 
-    worker = EnrichmentWorker(db_path=db, poll_interval=poll)
+    db_path = db or DEFAULT_DB
+    enrichment = EnrichmentWorker(db_path=db_path, poll_interval=poll)
+    compaction = TelemetryCompactionWorker(
+        db_path=db_path, poll_interval=30.0
+    )  # check telemetry every 30s
 
-    console.print("[bold noir.cyber]CORTEX Enrichment Worker[/] starting...")
-    console.print(f"  [dim]Database:[/] {db}")
-    console.print(f"  [dim]Interval:[/] {poll}s")
-    console.print()
+    console.print("[bold noir.cyber]CORTEX Workers[/] starting...")
+
+    async def run_workers():
+        await asyncio.gather(enrichment.start(), compaction.start())
 
     try:
-        _run_async(worker.start())
+        _run_async(run_workers())
     except KeyboardInterrupt:
-        console.print("\n[warning]Stopping worker...[/]")
-        _run_async(worker.stop())
+        console.print("\n[warning]Stopping workers...[/]")
+        _run_async(enrichment.stop())
+        _run_async(compaction.stop())
     except Exception as e:
         console.print(f"[danger]Worker crashed:[/] {e}")

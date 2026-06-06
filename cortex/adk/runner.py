@@ -35,6 +35,11 @@ def _parse_args() -> argparse.Namespace:
         help="Which agent to run (default: sovereign - full swarm)",
     )
     parser.add_argument(
+        "--gem",
+        default=None,
+        help="Name of the Sortu-APEX Gem (Skill) to load dynamically as an ADK Agent.",
+    )
+    parser.add_argument(
         "--model",
         default=None,
         help="LLM model override (default: gemini-2.0-flash)",
@@ -115,6 +120,7 @@ async def _connect_toolbox(
 
 def run_cli(
     agent_name: str = "sovereign",
+    gem_name: str | None = None,
     model: str | None = None,
     toolbox_url: str | None = None,
     toolbox_toolset: str = "",
@@ -132,6 +138,7 @@ def run_cli(
     from cortex.extensions.adk.agents import (
         create_analyst_agent,
         create_cortex_swarm,
+        create_gem_agent,
         create_google_one_agent,
         create_guardian_agent,
         create_memory_agent,
@@ -149,19 +156,22 @@ def run_cli(
     except ImportError:
         mcp_tools = []
 
-    agent_map = {
-        "memory": lambda: create_memory_agent(model=model, mcp_tools=mcp_tools),
-        "analyst": lambda: create_analyst_agent(
-            model=model, toolbox_tools=toolbox_tools or None, mcp_tools=mcp_tools
-        ),
-        "guardian": lambda: create_guardian_agent(model=model, mcp_tools=mcp_tools),
-        "google-one": lambda: create_google_one_agent(model=model, mcp_tools=mcp_tools),
-        "sovereign": lambda: create_cortex_swarm(
-            model=model, toolbox_tools=toolbox_tools or None, mcp_tools=mcp_tools
-        ),
-    }
-
-    agent = agent_map[agent_name]()
+    gem_name = None
+    if gem_name:
+        agent = create_gem_agent(gem_name=gem_name, model=model, mcp_tools=mcp_tools)
+    else:
+        agent_map = {
+            "memory": lambda: create_memory_agent(model=model, mcp_tools=mcp_tools),
+            "analyst": lambda: create_analyst_agent(
+                model=model, toolbox_tools=toolbox_tools or None, mcp_tools=mcp_tools
+            ),
+            "guardian": lambda: create_guardian_agent(model=model, mcp_tools=mcp_tools),
+            "google-one": lambda: create_google_one_agent(model=model, mcp_tools=mcp_tools),
+            "sovereign": lambda: create_cortex_swarm(
+                model=model, toolbox_tools=toolbox_tools or None, mcp_tools=mcp_tools
+            ),
+        }
+        agent = agent_map[agent_name]()
     session_service = InMemorySessionService()
     runner = Runner(agent=agent, app_name="cortex", session_service=session_service)
 
@@ -236,6 +246,7 @@ def main() -> None:
     else:
         run_cli(
             agent_name=args.agent,
+            gem_name=args.gem,
             model=args.model,
             toolbox_url=args.toolbox_url,
             toolbox_toolset=args.toolbox_toolset,

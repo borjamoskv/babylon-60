@@ -19,6 +19,7 @@ __all__ = [
     "create_google_one_agent",
     "create_guardian_agent",
     "create_memory_agent",
+    "create_gem_agent",
     "is_adk_available",
 ]
 
@@ -253,6 +254,66 @@ def create_google_one_agent(
             "- If sync fails, suggest checking the Google Drive for Desktop connection.\n"
             "- Treat backups as high-priority security events."
         ),
+        tools=tools,
+    )
+
+
+# ─── Dynamic Gem Persona (Sortu-APEX) ────────────────────────────────
+
+
+def create_gem_agent(
+    gem_name: str,
+    model: str | None = None,
+    mcp_tools: list | None = None,
+) -> Agent:  # type: ignore[reportInvalidTypeForm]
+    """Create a dynamically compiled ADK Agent from a Sortu-APEX Gem (Skill).
+
+    Args:
+        gem_name: The name of the Gem (e.g. 'Sortu-APEX').
+        model: LLM model to use.
+        mcp_tools: CORTEX MCP server tools to inherit dynamically.
+
+    Returns:
+        Configured ADK Agent instance.
+
+    Raises:
+        ValueError: If the Gem SKILL.md is not found.
+    """
+    if not _ADK_AVAILABLE:
+        raise ImportError(_ADK_INSTALL_MSG)
+
+    skill_path = os.path.expanduser(f"~/.gemini/config/skills/{gem_name}/SKILL.md")
+    if not os.path.exists(skill_path):
+        raise ValueError(
+            f"Gem Persona '{gem_name}' not found at {skill_path}. "
+            "Run Sortu-APEX JIT compilation to forge it."
+        )
+
+    with open(skill_path, encoding="utf-8") as f:
+        content = f.read()
+
+    description = f"Dynamically loaded Gem Persona: {gem_name}"
+    if content.startswith("---"):
+        parts = content.split("---", 2)
+        if len(parts) >= 3:
+            for line in parts[1].split("\n"):
+                if line.startswith("description:"):
+                    description = line.replace("description:", "").strip()
+            instruction = parts[2].strip()
+        else:
+            instruction = content
+    else:
+        instruction = content
+
+    tools = []
+    if mcp_tools:
+        tools.extend(mcp_tools)
+
+    return Agent(  # type: ignore[reportOptionalCall]
+        model=model or _DEFAULT_MODEL,
+        name=f"cortex_gem_{gem_name.lower().replace('-', '_')}",
+        description=description,
+        instruction=instruction,
         tools=tools,
     )
 
