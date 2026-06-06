@@ -420,7 +420,7 @@ async def add_mafia_node(
 async def telemetry_nodes_ws(
     websocket: WebSocket, engine: AsyncCortexEngine = Depends(get_async_engine)
 ):
-    """Realtime stream of Mafia Node additions/updates."""
+    """Realtime stream of Mafia Node additions/updates & Telemetry Ingestion."""
     await websocket.accept()
     _nodes_websockets.add(websocket)
     logger.info("Extension WebSocket connected to Mafia Nodes sync stream.")
@@ -431,9 +431,47 @@ async def telemetry_nodes_ws(
         full_list = list(set(BASE_MAFIA_NODES + dynamic_nodes))
         await websocket.send_json({"type": "INIT_NODES", "nodes": full_list})
 
+        import hashlib
+        import json
+
         while True:
-            # Maintain connection, listen for any client messages (ping/pongs)
-            await websocket.receive_text()
+            # Maintain connection, listen for any client messages (ping/pongs or telemetry)
+            raw_text = await websocket.receive_text()
+            try:
+                data = json.loads(raw_text)
+                if data.get("type") == "INGEST_TELEMETRY":
+                    req_data = data.get("data", {})
+                    agent_id = req_data.get("agent_id", "smoke-detector-extension")
+                    timestamp = req_data.get("timestamp", 0)
+                    payload = req_data.get("payload", {})
+
+                    content = f"Telemetry batch from {agent_id} at {timestamp}"
+                    project = "smoke-detector"
+                    logos_sig = hashlib.sha256(f"{content}{project}".encode()).hexdigest()
+
+                    meta = {
+                        "timestamp": timestamp,
+                        "agent_id": agent_id,
+                        "payload": payload,
+                        "logos_signature": logos_sig,
+                    }
+
+                    fact_id = await engine.store(
+                        project=project,
+                        content=content,
+                        fact_type="telemetry_batch",
+                        tags=["telemetry", "edge_sensor", agent_id, "websocket"],
+                        source="alpha-vs-smoke-edge-ws",
+                        meta=meta,
+                    )
+                    logger.info(
+                        "Ingested telemetry batch via WS from %s -> Fact ID %s", agent_id, fact_id
+                    )
+            except json.JSONDecodeError:
+                pass  # Ignore non-JSON messages
+            except Exception as e:
+                logger.error("Failed to ingest WS telemetry: %s", e)
+
     except WebSocketDisconnect:
         logger.info("Extension WebSocket disconnected.")
     finally:
