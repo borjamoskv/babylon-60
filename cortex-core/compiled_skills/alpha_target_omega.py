@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: Alpha-Target-OMEGA
 Description: C5-REAL Sovereign MEV Arbitrage Executor. Injected by Exergy-Cascade Phase 3.

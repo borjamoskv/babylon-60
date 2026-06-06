@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: Apollo-Extractor-OMEGA
 Description: C5-REAL deterministic extraction of B2B Web3 AI leads via Apollo API. Exergy-positive capital extraction vector.

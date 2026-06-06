@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: Cortex-Research-Loop-OMEGA
 Description: Motor de investigación y resolución de problemas asíncrono C5-REAL. Sustituye el 'prompt fetishism' estocástico por un bucle determinista de hipótesis, validación empírica y criterios de muerte temprana (kill criteria).

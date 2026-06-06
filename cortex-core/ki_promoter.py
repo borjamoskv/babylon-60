@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 KI Context Promoter - Smart KI selection for CORTEX-Persist.
 

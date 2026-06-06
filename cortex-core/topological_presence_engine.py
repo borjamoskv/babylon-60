@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# [C5-REAL] Exergy-Maximized
 """
 HITO 24: TOPOLOGICAL PRESENCE ENGINE
 Naroa-2026 Ecosystem - C5-REAL Implementation.

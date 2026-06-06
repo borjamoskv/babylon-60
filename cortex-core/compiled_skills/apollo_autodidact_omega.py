@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: Apollo-Autodidact-OMEGA
 Description: C5-REAL JIT Apollo Autodidact Engine. Autonomously learns and executes Apollo REST API operations via dynamic schema synthesis.

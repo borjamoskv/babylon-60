@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # CORTEX COMPILED SKILLS REGISTRY
 COMPILED_SKILLS = [
     'api_provider_omega',

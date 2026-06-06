@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: Deep-Research-SOTA-Edition-OMEGA
 Description: Motor autónomo de investigación profunda C5-REAL para sintetizar el Estado del Arte (SOTA) iterando búsquedas MCP y ejecutando el SOTA-Loop.

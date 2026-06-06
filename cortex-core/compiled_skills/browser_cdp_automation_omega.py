@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: Browser-CDP-Automation-OMEGA
 Description: C5-REAL Sovereign CDP Web Automation Protocol. Absorbs fragile web scrapers into a single structural websocket interface.

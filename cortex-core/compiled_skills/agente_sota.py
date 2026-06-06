@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: agente-sota
 Description: Experto en Síntesis del Estado del Arte (SOTA) y Destilación de Papers Académicos

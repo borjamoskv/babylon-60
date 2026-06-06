@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: UI-Mechanisms-Rule
 Description: C5-REAL UI context injection rules and commands.

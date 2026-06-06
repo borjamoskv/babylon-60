@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: filologa-de-combate
 Description: Asistente autónoma C5-REAL para Diana. Redacción, corrección y reestructuración táctica de textos...

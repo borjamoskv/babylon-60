@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: Antigravity-Github-Omega
 Description: Sovereign GitHub MCP operations guide. Enforces C5-REAL execution for GitHub interactions.
