@@ -72,6 +72,15 @@ class CortexDaemon:
             logging.warning("UltramapSubstrate not found, running without topological memory.")
             self.ultramap = None
 
+        # Integrate CraniMem-Ω Substrate (Goal-Conditioned Episodic Buffer)
+        try:
+            from cranimem import CraniMemSubstrate
+            self.cranimem = CraniMemSubstrate(buffer_limit=50, consolidation_threshold=0.8)
+            logging.info("🧠 CraniMem Substrate initialized.")
+        except ImportError:
+            logging.warning("CraniMem not found. Swarm memory will be amnesic.")
+            self.cranimem = None
+
         self.db_lock = threading.Lock()
 
         # Initialize Sovereign DB Connection (LGD-200 Persistent Connection)
@@ -237,6 +246,16 @@ class CortexDaemon:
                     source="daemon",
                 )
 
+            # --- CRANIMEM INJECTION (Goal-Conditioned Episodic Memory) ---
+            if getattr(self, 'cranimem', None):
+                utility = 0.9 if process.returncode == 0 else 0.3
+                trace_id = f"{agent}_{int(time.monotonic())}"
+                mem_content = f"CMD: {cmd} | OUT: {stdout.decode(errors='replace')[:200]}"
+                injected = self.cranimem.gate_and_inject(trace_id, mem_content, goal_alignment=0.9, utility_score=utility)
+                if injected:
+                    self.cranimem.run_consolidation_loop()
+            # -------------------------------------------------------------
+
             # 3. Handle Post-Execution (Self-Healing Detection)
             if task.get("type") == "remediation":
                 if process.returncode == 0:
@@ -284,7 +303,7 @@ class CortexDaemon:
                     "DELETE FROM cortex_execution_ledger WHERE id NOT IN (SELECT id FROM cortex_execution_ledger ORDER BY id DESC LIMIT 100)"
                 )
         except Exception as e:
-            print("Execution Ledger SQLite Failure:", e)
+            logging.error("Execution Ledger SQLite Failure: %s", e)
 
     def _fetch_and_lock_swarm_tasks(self):
         tasks = []
