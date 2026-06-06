@@ -415,15 +415,52 @@ def print_report(report: dict) -> None:
 # ── CLI ────────────────────────────────────────────────────────
 
 
+def persist_to_cortex(report: dict) -> None:
+    """Anchor the score to the CORTEX-Persist ledger with a CORTEX-TAINT signature."""
+    try:
+        from cortex.cli.common import DEFAULT_DB, _detect_agent_source, _run_async, get_engine
+        from cortex.cli.memory_cmds import _inject_cli_taint
+    except ImportError:
+        print("\n⚠️  CORTEX-Persist not found. Cannot emit C5-REAL ledger event.")
+        return
+
+    content = f"Sovereign Code Score for {report['path']}: {report['total_score']}/100. Verdict: {report['verdict']}."
+    source = _detect_agent_source()
+    meta = {"scorer_report": report}
+    
+    _inject_cli_taint(content, meta, source)
+    
+    engine = get_engine(DEFAULT_DB)
+    try:
+        fact_id = _run_async(
+            engine.store(
+                project="sovereign-scorer",
+                content=content,
+                fact_type="system_health",
+                tags=["code-quality", "c5-real"],
+                confidence="C5",
+                source=source,
+                meta=meta,
+                parent_decision_id=None,
+            )
+        )
+        print(f"\n🔐 [C5-REAL] Score anchored to ledger. Fact ID: #{fact_id}")
+    except Exception as e:
+        print(f"\n❌ [C5-REAL] Ledger emission failed: {e}")
+    finally:
+        _run_async(engine.close())
+
+
 def main() -> None:
     """CLI entry point."""
     if len(sys.argv) < 2:
-        print("Usage: python sovereign_scorer.py <path> [--detailed] [--json]")
+        print("Usage: python sovereign_scorer.py <path> [--detailed] [--json] [--c5-real]")
         sys.exit(1)
 
     path = sys.argv[1]
     detailed = "--detailed" in sys.argv
     as_json = "--json" in sys.argv
+    c5_real = "--c5-real" in sys.argv
 
     report = score(path, detailed=detailed)
 
@@ -431,6 +468,9 @@ def main() -> None:
         print(json.dumps(report, indent=2))
     else:
         print_report(report)
+
+    if c5_real and "error" not in report:
+        persist_to_cortex(report)
 
 
 if __name__ == "__main__":
