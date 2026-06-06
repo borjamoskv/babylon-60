@@ -2,7 +2,7 @@
 # ROADMAP
 
 > **Tamper-Evident Decision Lineage & Sovereign Swarm Orchestration**
-> *Updated: Spring 2026 · Package metadata in tree: `v10.0.0`*
+> *Updated: Spring 2026 · Published package: `v0.3.0b8` · Capability band labels below are planning targets.*
 > *Classification: Planning snapshot. This file tracks capability bands and LEGION-10k scaling logic.*
 > *Release truth lives in `pyproject.toml`; historical release notes live in `docs/changelog.md`.*
 
