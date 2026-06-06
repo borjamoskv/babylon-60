@@ -33,8 +33,10 @@ class UESSSwarmScheduler:
     adversarial consensus, and entropy regulation.
     """
     
-    def __init__(self, capacity: int = 1000):
+    def __init__(self, capacity: int = 100, max_builders: int = 5, max_auditors: int = 5):
         self.capacity = capacity
+        self.max_builders = max_builders
+        self.max_auditors = max_auditors
         self.umap = UltramapSubstrate(capacity=capacity)
         self.nodes: dict[int, AgentNode] = {}
         
@@ -76,6 +78,22 @@ class UESSSwarmScheduler:
             
         return total_entropy / active_count
 
+    def evaluate_swarm_cpu_load(self) -> float:
+        """Calculates global average CPU load across active swarm nodes."""
+        total_cpu = 0.0
+        active_count = 0
+        for agent_id, node in self.nodes.items():
+            if not node.active:
+                continue
+            state = self.umap.get_agent_state(agent_id)
+            if not state:
+                continue
+            total_cpu += state.get("cpu_load", 0.0)
+            active_count += 1
+        if active_count == 0:
+            return 0.0
+        return total_cpu / active_count
+
     def tick(self):
         """
         Main Event Loop Tick.
@@ -84,7 +102,11 @@ class UESSSwarmScheduler:
         3. Spawns/Kills nodes dynamically based on control vectors.
         """
         global_entropy = self.evaluate_swarm_entropy()
-        logger.info(f"[TICK] Global Swarm Entropy: {global_entropy:.4f} | Active Nodes: {len(self.nodes)}")
+        global_cpu = self.evaluate_swarm_cpu_load()
+        active_builders = sum(1 for n in self.nodes.values() if n.active and n.role == AgentRole.BUILDER)
+        active_auditors = sum(1 for n in self.nodes.values() if n.active and n.role == AgentRole.AUDITOR)
+        
+        logger.info(f"[TICK] Global Swarm Entropy: {global_entropy:.4f} | Avg CPU Load: {global_cpu:.2f} | Active Nodes: {len(self.nodes)}")
         
         for agent_id, node in list(self.nodes.items()):
             if not node.active:
@@ -104,23 +126,34 @@ class UESSSwarmScheduler:
                 node.active = False
                 continue
                 
+            # Gate spawning if system CPU load is critical
+            if global_cpu > 0.8:
+                logger.warning(f"Global CPU Load critical ({global_cpu:.2f}). Gating new spawns.")
+                continue
+
             if queue_depth > 10.0 and node.role == AgentRole.QUEEN:
-                # Queen spawns Builders under high load
-                new_id = len(self.nodes)
-                self._spawn_node(new_id, AgentRole.BUILDER, f"TASK_OFFLOAD_{new_id}")
-                logger.info(f"QUEEN spawned BUILDER [{new_id}] due to high queue depth.")
+                if active_builders < self.max_builders:
+                    new_id = len(self.nodes)
+                    self._spawn_node(new_id, AgentRole.BUILDER, f"TASK_OFFLOAD_{new_id}")
+                    active_builders += 1
+                    logger.info(f"QUEEN spawned BUILDER [{new_id}] due to high queue depth.")
+                else:
+                    logger.warning(f"QUEEN load high but maximum BUILDER threshold reached ({self.max_builders}). Gating spawn.")
                 
             if causal_entropy > 0.9 and node.role != AgentRole.AUDITOR:
-                # High entropy requires Auditors
-                new_id = len(self.nodes)
-                self._spawn_node(new_id, AgentRole.AUDITOR, f"AUDIT_TARGET_{agent_id}")
-                logger.info(f"High causal entropy detected on Node [{agent_id}]. Spawned AUDITOR [{new_id}].")
+                if active_auditors < self.max_auditors:
+                    new_id = len(self.nodes)
+                    self._spawn_node(new_id, AgentRole.AUDITOR, f"AUDIT_TARGET_{agent_id}")
+                    active_auditors += 1
+                    logger.info(f"High causal entropy detected on Node [{agent_id}]. Spawned AUDITOR [{new_id}].")
+                else:
+                    logger.warning(f"High entropy on Node [{agent_id}] but maximum AUDITOR threshold reached ({self.max_auditors}). Gating spawn.")
 
 if __name__ == "__main__":
     scheduler = UESSSwarmScheduler(capacity=100)
     
     # Simulate some ticks
-    for _ in range(5):
+    for _ in range(10):
         scheduler.tick()
         
         # Simulate state changes natively in the substrate
