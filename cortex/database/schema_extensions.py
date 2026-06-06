@@ -422,6 +422,7 @@ END;
 CREATE_CAUSAL_EDGES = """
 CREATE TABLE IF NOT EXISTS causal_edges (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    fact_hash       TEXT UNIQUE,
     fact_id         INTEGER NOT NULL,
     parent_id       INTEGER,
     signal_id       INTEGER,

@@ -12,6 +12,7 @@ from cortex.migrations.mig_consensus import (
     _migration_008_consensus_refinement,
     _migration_009_reputation_consensus,
 )
+from cortex.migrations.mig_dual_identity import _migration_028_dual_identity
 from cortex.migrations.mig_fts import _migration_017_fts_decouple
 from cortex.migrations.mig_graph import _migration_006_graph_memory
 from cortex.migrations.mig_ha import _migration_013_cluster_nodes
@@ -63,4 +64,5 @@ MIGRATIONS = [
     (25, "Tenant-bound Merkle checkpoints", _migration_025_tenant_bound_merkle_roots),
     (26, "Ledger replay admission reservations", _migration_026_ledger_replay_admission),
     (27, "Temporal Knowledge Graph columns", _migration_027_temporal_kg),
+    (28, "Dual Identity Paradigm (fact_hash)", _migration_028_dual_identity),
 ]

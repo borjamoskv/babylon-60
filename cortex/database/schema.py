@@ -93,6 +93,7 @@ SCHEMA_VERSION = "5.4.3"
 CREATE_FACTS = """
 CREATE TABLE IF NOT EXISTS facts (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    fact_hash   TEXT UNIQUE,
     tenant_id   TEXT NOT NULL DEFAULT 'default',
     project     TEXT NOT NULL,
     content     TEXT NOT NULL,

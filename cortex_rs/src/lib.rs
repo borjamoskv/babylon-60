@@ -1,7 +1,7 @@
 pub mod belief_object;
 pub mod atms;
 pub mod smt;
-
+pub mod storage_guard;
 use pyo3::prelude::*;
 use belief_object::{BeliefObject, BeliefState, RelationType, ProvenanceEnvelope, BeliefRelation};
 use atms::AtmsGraph;
@@ -17,6 +17,6 @@ fn cortex_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<BeliefObject>()?;
     m.add_class::<AtmsGraph>()?;
     m.add_class::<SmtLeaf>()?;
+    m.add_function(wrap_pyfunction!(storage_guard::validate_proposal, m)?)?;
     Ok(())
 }
-
