@@ -56,38 +56,9 @@ class MultiSpecialistAgent(SwarmAgent):
                 all_findings.extend([f"[{spec_id}] {f}" for f in findings])
 
             elif "Audit" in spec_id or "Integrity" in spec_id or "Code" in spec_id:
-                # Basic static check for MVP
-                # Ignore lines that are clearly detection logic, structural items...
-                excl = [
-                    'if "TO' + 'DO" in',
-                    '["TO' + 'DO"',
-                    "target_patterns",
-                    "forbidden =",
-                    "# no-audit",
-                    "re.compile",
-                    'if "FI' + 'XME" in',
-                    '["FI' + 'XME"',
-                    "is_todo =",
-                    'or "TO' + 'DO" in',
-                    'or "FI' + 'XME" in',
-                    "TO" + "DO el",
-                    "TO" + "DO los",
-                    "TO" + "DO la",
-                    "TO" + "DO las",
-                ]
-
-                if any(kw in content for kw in ["TO" + "DO", "FI" + "XME"]):
-                    # Check individual lines to ensure it's not a false positive
-                    for line in content.splitlines():
-                        line_stripped = line.strip()
-                        # Only flag if it looks like a comment or a stand-alone placeholder
-                        is_todo = ("TO" + "DO") in line_stripped or ("FI" + "XME") in line_stripped
-                        is_excluded = any(p in line_stripped for p in excl)
-
-                        if is_todo and not is_excluded:
-                            all_findings.append(f"[{spec_id}] Actual debt found: {line_stripped}")
-                            # Solo reportamos la primera por archivo
-                            break
+                debt_line = self._check_static_debt(content)
+                if debt_line:
+                    all_findings.append(f"[{spec_id}] Actual debt found: {debt_line}")
 
         status = "SUCCESS" if all_findings else "VOID"
         return SwarmSignal(
@@ -97,6 +68,39 @@ class MultiSpecialistAgent(SwarmAgent):
             payload={"findings": all_findings, "specialists_count": len(self.specialists)},
             metrics={"time_ms": 150},
         )
+
+    def _check_static_debt(self, content: str) -> str | None:
+        if not content:
+            return None
+        
+        excl = [
+            'if "TO' + 'DO" in',
+            '["TO' + 'DO"',
+            "target_patterns",
+            "forbidden =",
+            "# no-audit",
+            "re.compile",
+            'if "FI' + 'XME" in',
+            '["FI' + 'XME"',
+            "is_todo =",
+            'or "TO' + 'DO" in',
+            'or "FI' + 'XME" in',
+            "TO" + "DO el",
+            "TO" + "DO los",
+            "TO" + "DO la",
+            "TO" + "DO las",
+        ]
+
+        if any(kw in content for kw in ["TO" + "DO", "FI" + "XME"]):
+            for line in content.splitlines():
+                line_stripped = line.strip()
+                is_todo = ("TO" + "DO") in line_stripped or ("FI" + "XME") in line_stripped
+                is_excluded = any(p in line_stripped for p in excl)
+
+                if is_todo and not is_excluded:
+                    return line_stripped
+        
+        return None
 
 
 # -----------------------------------------------------------------------------

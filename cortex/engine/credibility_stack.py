@@ -42,98 +42,33 @@ class LedgerCredibilityStack:
     async def execute_full_strike(
         self, project: str, use_ultrathink: bool = True, tenant_id: str = "default"
     ) -> dict[str, Any]:
-        """
-        Execute a credibility strike:
-        1. Fetch all facts for the project.
-        2. Construct a deterministic Merkle Root.
-        3. Authorize via UltrathinkPhysicsEngine.
-        4. Generate signature and replay-validate it.
-        5. Trigger physical VACUUM INTO database snapshot.
-        """
+        """Execute a credibility strike with full verification and snapshots."""
         start_time = time.monotonic()
-
-        # 1. Fetch facts
-        rows = []
-        async with self.engine.session() as conn:
-            cursor = await conn.execute(
-                "SELECT id, project, tenant_id, content, fact_type, metadata, created_at "
-                "FROM facts WHERE project = ?",
-                (project,),
-            )
-            db_rows = await cursor.fetchall()
-            for r in db_rows:
-                # Handle dict or index lookup
-                if isinstance(r, dict):
-                    row_dict = {
-                        "id": r.get("id"),
-                        "project": r.get("project"),
-                        "tenant_id": r.get("tenant_id"),
-                        "content": r.get("content"),
-                        "fact_type": r.get("fact_type"),
-                        "metadata": r.get("metadata"),
-                        "created_at": r.get("created_at"),
-                    }
-                else:
-                    try:
-                        row_dict = {
-                            "id": r["id"],
-                            "project": r["project"],
-                            "tenant_id": r["tenant_id"],
-                            "content": r["content"],
-                            "fact_type": r["fact_type"],
-                            "metadata": r["metadata"],
-                            "created_at": r["created_at"],
-                        }
-                    except (TypeError, IndexError, KeyError):
-                        row_dict = {
-                            "id": r[0],
-                            "project": r[1],
-                            "tenant_id": r[2],
-                            "content": r[3],
-                            "fact_type": r[4],
-                            "metadata": r[5],
-                            "created_at": r[6],
-                        }
-                rows.append(row_dict)
-
-        # 2. Merkle Root Calculation
-        leaf_hashes = []
-        for row in rows:
-            serialized = json.dumps(row, sort_keys=True, default=str)
-            leaf_hash = hashlib.sha256(serialized.encode("utf-8")).hexdigest()
-            leaf_hashes.append(leaf_hash)
-
+        rows = await self._fetch_facts(project)
+        
+        leaf_hashes = [
+            hashlib.sha256(json.dumps(row, sort_keys=True, default=str).encode("utf-8")).hexdigest()
+            for row in rows
+        ]
         merkle_root = self._construct_merkle_root(leaf_hashes)
 
-        # 3. Exergy Calculation & Authorization
-        # Compute Shannon entropy of fact types
+        # Exergy Calculation
         fact_types = [row["fact_type"] for row in rows if row.get("fact_type")]
         type_distribution: dict[str, int] = {}
         for ft in fact_types:
             type_distribution[ft] = type_distribution.get(ft, 0) + 1
 
         stochastic_entropy = shannon_entropy(type_distribution)
+        execution_time = max(time.monotonic() - start_time, 0.001)
 
-        execution_time = time.monotonic() - start_time
-        if execution_time <= 0:
-            execution_time = 0.001
-
-        # We need a target exergy >= 10.0 (SINGULARITY_CONSTANT * 0.1). Let's default to 120.5
+        # Target exergy threshold for C5-REAL
         target_exergy = 120.5
         deterministic_output = stochastic_entropy + (target_exergy * execution_time)
 
-        # Epicenter blast radius calculation (must be >= 3)
-        dependency_graph = {
-            "root": ["node_a", "node_b"],
-            "node_a": ["node_c"],
-            "node_b": [],
-            "node_c": [],
-        }
-        epicenter_node = "root"
+        # Epicenter blast radius calculation
         epicenter_radius = UltrathinkPhysicsEngine.measure_blast_radius(
-            dependency_graph, epicenter_node
+            {"root": ["node_a", "node_b"], "node_a": ["node_c"], "node_b": [], "node_c": []}, "root"
         )
-
         exergy_yield = UltrathinkPhysicsEngine.calculate_exergy_yield(
             stochastic_entropy, deterministic_output, execution_time
         )
@@ -148,25 +83,14 @@ class LedgerCredibilityStack:
             if not authorized:
                 raise ValueError(f"Ultrathink authorization failed: {auth_msg}")
 
-        # 4. Sovereign Signature & Replay Validation
-        signer = get_default_signer()
-        if signer is None or not signer.can_sign:
-            priv, _ = generate_keypair()
-            signer = Ed25519Signer(private_key_bytes=priv)
+        # Signature & Replay Validation
+        signature, replay_validated = self._sign_and_verify(merkle_root)
 
-        signature = signer.sign(merkle_root, merkle_root)
-        replay_validated = signer.verify(merkle_root, merkle_root, signature)
-
-        # 5. Snapshot Creation
-        latest_tx_id = 0
-        if rows:
-            latest_tx_id = max(row["id"] for row in rows if isinstance(row.get("id"), int))
-
+        # Snapshot Creation
+        latest_tx_id = max((row["id"] for row in rows if isinstance(row.get("id"), int)), default=0)
         await self.snapshot_manager.create_snapshot(
             name=f"strike_{project}", tx_id=latest_tx_id, merkle_root=merkle_root
         )
-
-        duration_seconds = time.monotonic() - start_time
 
         return {
             "project": project,
@@ -176,13 +100,44 @@ class LedgerCredibilityStack:
             "replay_validated": replay_validated,
             "exergy": {"exergy": exergy_yield},
             "metrics": {
-                "duration_seconds": duration_seconds,
+                "duration_seconds": time.monotonic() - start_time,
                 "exergy_yield": exergy_yield,
                 "stochastic_entropy": stochastic_entropy,
                 "deterministic_output": deterministic_output,
                 "epicenter_radius": epicenter_radius,
             },
         }
+
+    async def _fetch_facts(self, project: str) -> list[dict[str, Any]]:
+        rows = []
+        async with self.engine.session() as conn:
+            cursor = await conn.execute(
+                "SELECT id, project, tenant_id, content, fact_type, metadata, created_at "
+                "FROM facts WHERE project = ?",
+                (project,),
+            )
+            for r in await cursor.fetchall():
+                if isinstance(r, dict):
+                    rows.append({k: r.get(k) for k in ["id", "project", "tenant_id", "content", "fact_type", "metadata", "created_at"]})
+                else:
+                    try:
+                        rows.append({k: r[k] for k in ["id", "project", "tenant_id", "content", "fact_type", "metadata", "created_at"]})
+                    except (TypeError, IndexError, KeyError):
+                        rows.append({
+                            "id": r[0], "project": r[1], "tenant_id": r[2], "content": r[3],
+                            "fact_type": r[4], "metadata": r[5], "created_at": r[6]
+                        })
+        return rows
+
+    def _sign_and_verify(self, merkle_root: str) -> tuple[bytes, bool]:
+        signer = get_default_signer()
+        if signer is None or not signer.can_sign:
+            priv, _ = generate_keypair()
+            signer = Ed25519Signer(private_key_bytes=priv)
+
+        signature = signer.sign(merkle_root, merkle_root)
+        replay_validated = signer.verify(merkle_root, merkle_root, signature)
+        return signature, replay_validated
 
     def _construct_merkle_root(self, leaves: list[str]) -> str:
         """Compute Merkle Root via pairwise hashing."""

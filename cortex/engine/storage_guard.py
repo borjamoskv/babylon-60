@@ -218,45 +218,60 @@ class StorageGuard:
                 meta=meta,
             )
         except ValidationError as e:
-            # We map Pydantic validation errors back to GuardViolation semantics
-            # to maintain backwards compatibility with the existing error catching
-            # in tests and API endpoints.
-            err = e.errors()[0]
-            loc = ".".join(str(part) for part in err["loc"])
-            msg = err["msg"]
+            cls._handle_validation_error(e)
 
-            # Try to infer the old rule names based on loc
-            if "project" in loc:
-                if "empty" in msg or "at least 1" in msg:
-                    raise GuardViolation("PROJECT_REQUIRED", "project cannot be empty") from e
-                raise GuardViolation("PROJECT_TOO_LONG", msg.replace("Value error, ", "")) from e
-            if "content" in loc:
-                if "empty" in msg or "at least 1" in msg:
-                    raise GuardViolation("CONTENT_REQUIRED", "content cannot be empty") from e
-                if "too short" in msg:
-                    raise GuardViolation(
-                        "CONTENT_TOO_SHORT", msg.replace("Value error, ", "")
-                    ) from e
-                if "poisoning" in msg:
-                    raise GuardViolation(
-                        "POISONING_DETECTED", msg.replace("Value error, ", "")
-                    ) from e
-                raise GuardViolation("CONTENT_TOO_LONG", msg.replace("Value error, ", "")) from e
-            if "fact_type" in loc:
-                raise GuardViolation("INVALID_FACT_TYPE", msg.replace("Value error, ", "")) from e
-            if "source" in loc:
-                raise GuardViolation("SOURCE_REQUIRED", msg.replace("Value error, ", "")) from e
-            if "confidence" in loc:
-                raise GuardViolation("INVALID_CONFIDENCE", msg.replace("Value error, ", "")) from e
-            if "tags" in loc:
-                if "str" in msg or "list" in msg:
-                    raise GuardViolation("TAGS_TYPE_ERROR", msg.replace("Value error, ", "")) from e
-                if "invalid tag" in msg:
-                    raise GuardViolation("INVALID_TAG", msg.replace("Value error, ", "")) from e
-                raise GuardViolation("TOO_MANY_TAGS", msg.replace("Value error, ", "")) from e
+        logger.debug(
+            "StorageGuard PASS: project=%s, type=%s, source=%s, len=%d",
+            project,
+            fact_type,
+            effective_source,
+            len(content),
+        )
 
-            # Fallback
-            raise GuardViolation("VALIDATION_ERROR", f"{loc}: {msg}") from e
+    @classmethod
+    def _handle_validation_error(cls, e: ValidationError) -> None:
+        err = e.errors()[0]
+        loc = ".".join(str(part) for part in err["loc"])
+        msg = err["msg"]
+
+        if "project" in loc:
+            if "empty" in msg or "at least 1" in msg:
+                raise GuardViolation("PROJECT_REQUIRED", "project cannot be empty") from e
+            raise GuardViolation("PROJECT_TOO_LONG", msg.replace("Value error, ", "")) from e
+        if "content" in loc:
+            cls._handle_content_error(msg, e)
+        if "fact_type" in loc:
+            raise GuardViolation("INVALID_FACT_TYPE", msg.replace("Value error, ", "")) from e
+        if "source" in loc:
+            raise GuardViolation("SOURCE_REQUIRED", msg.replace("Value error, ", "")) from e
+        if "confidence" in loc:
+            raise GuardViolation("INVALID_CONFIDENCE", msg.replace("Value error, ", "")) from e
+        if "tags" in loc:
+            cls._handle_tags_error(msg, e)
+
+        raise GuardViolation("VALIDATION_ERROR", f"{loc}: {msg}") from e
+
+    @classmethod
+    def _handle_content_error(cls, msg: str, e: ValidationError) -> None:
+        if "empty" in msg or "at least 1" in msg:
+            raise GuardViolation("CONTENT_REQUIRED", "content cannot be empty") from e
+        if "too short" in msg:
+            raise GuardViolation(
+                "CONTENT_TOO_SHORT", msg.replace("Value error, ", "")
+            ) from e
+        if "poisoning" in msg:
+            raise GuardViolation(
+                "POISONING_DETECTED", msg.replace("Value error, ", "")
+            ) from e
+        raise GuardViolation("CONTENT_TOO_LONG", msg.replace("Value error, ", "")) from e
+
+    @classmethod
+    def _handle_tags_error(cls, msg: str, e: ValidationError) -> None:
+        if "str" in msg or "list" in msg:
+            raise GuardViolation("TAGS_TYPE_ERROR", msg.replace("Value error, ", "")) from e
+        if "invalid tag" in msg:
+            raise GuardViolation("INVALID_TAG", msg.replace("Value error, ", "")) from e
+        raise GuardViolation("TOO_MANY_TAGS", msg.replace("Value error, ", "")) from e
 
         logger.debug(
             "StorageGuard PASS: project=%s, type=%s, source=%s, len=%d",

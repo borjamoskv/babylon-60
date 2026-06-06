@@ -35,17 +35,20 @@ class PolicyMixin:
             return PolicyRecommendation.OPTIMAL
 
         regretted = [v for v in verdicts if v.was_regrettable]
-        causal_errors = [v for v in regretted if v.causal_weight > 0.7]
-        root_errors = [v for v in regretted if v.causal_depth > 0]
-        ttl_errors = [v for v in regretted if v.reason == "ttl_expired"]
-        lru_errors = [v for v in regretted if v.reason == "lru_capacity"]
+        return self._analyze_regret_patterns(regretted)
+
+    def _analyze_regret_patterns(self, regretted: list[EvictionVerdict]) -> PolicyRecommendation:
+        causal_errors = sum(1 for v in regretted if v.causal_weight > 0.7)
+        root_errors = sum(1 for v in regretted if v.causal_depth > 0)
+        ttl_errors = sum(1 for v in regretted if v.reason == "ttl_expired")
+        lru_errors = sum(1 for v in regretted if v.reason == "lru_capacity")
 
         # Strongest signal: evicting causal chain roots
-        if root_errors and len(root_errors) > len(regretted) / 2:
+        if root_errors and root_errors > len(regretted) / 2:
             return PolicyRecommendation.PROTECT_CAUSAL_ROOTS
-        if causal_errors and len(causal_errors) > len(lru_errors):
+        if causal_errors and causal_errors > lru_errors:
             return PolicyRecommendation.PRIORITIZE_CAUSAL
-        if len(ttl_errors) > len(lru_errors):
+        if ttl_errors > lru_errors:
             return PolicyRecommendation.INCREASE_TTL
         return PolicyRecommendation.REDUCE_CAPACITY
 

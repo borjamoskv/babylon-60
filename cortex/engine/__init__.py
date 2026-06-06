@@ -180,6 +180,23 @@ class CortexEngine(
         """Shutdown the engine, optimizer, and database connections."""
         self._closing = True
         await self.stop_optimizer()
+        await self._drain_tasks()
+        
+        self._memory_l1 = None
+        self._memory_l3 = None
+        self._memory_ready = False
+        if self._persistence:
+            await self._persistence.stop()
+            
+        await self._close_connections()
+        
+        self.mac_maestro = None
+        self.ledger_writer = None
+        self.enrichment_queue = None
+        self.ledger_store = None
+        self._ledger = None
+
+    async def _drain_tasks(self):
         if self._post_commit_tasks:
             try:
                 await asyncio.wait_for(
@@ -194,63 +211,52 @@ class CortexEngine(
             except (asyncio.TimeoutError, asyncio.CancelledError, RuntimeError, ValueError):
                 logger.debug("Memory manager background drain timed out - forcing close")
             self._memory_manager = None
-        self._memory_l1 = None
-        self._memory_l3 = None
-        self._memory_ready = False
-        if self._persistence:
-            await self._persistence.stop()
-        if hasattr(self, "_conns_by_loop"):
-            conns = list(self._conns_by_loop.values())
+
+    async def _close_connections(self):
+        if not hasattr(self, "_conns_by_loop"):
+            return
+        conns = list(self._conns_by_loop.values())
+        try:
+            current_loop = asyncio.get_running_loop()
+        except RuntimeError:
+            current_loop = None
+        for conn in conns:
+            conn_loop = getattr(conn, "_cortex_loop", current_loop)
+            if conn_loop is None or conn_loop.is_closed():
+                self._stop_dead_connection(conn)
+                continue
+            if conn_loop is current_loop:
+                try:
+                    await conn.close()
+                except (RuntimeError, ValueError, AttributeError):
+                    pass
+            else:
+                try:
+                    asyncio.run_coroutine_threadsafe(conn.close(), conn_loop)
+                except (RuntimeError, ValueError, AttributeError):
+                    pass
+        self._conns_by_loop.clear()
+
+    def _stop_dead_connection(self, conn):
+        if hasattr(conn, "_tx"):
             try:
-                current_loop = asyncio.get_running_loop()
-            except RuntimeError:
-                current_loop = None
-            for conn in conns:
-                conn_loop = getattr(conn, "_cortex_loop", current_loop)
-                if conn_loop is None or conn_loop.is_closed():
-                    if hasattr(conn, "_tx"):
+                from aiosqlite.core import _STOP_RUNNING_SENTINEL
+
+                def close_and_stop(c=conn):
+                    if getattr(c, "_connection", None) is not None:
                         try:
-                            from aiosqlite.core import _STOP_RUNNING_SENTINEL
-
-                            def close_and_stop(c=conn):
-                                """Close connection and stop runner."""
-                                if getattr(c, "_connection", None) is not None:
-                                    try:
-                                        c._connection.close()
-                                    except (RuntimeError, ValueError, AttributeError):
-                                        import logging
-
-                                        pass
-                                    c._connection = None
-                                return _STOP_RUNNING_SENTINEL
-
-                            conn._tx.put_nowait((None, close_and_stop))
+                            c._connection.close()
                         except (RuntimeError, ValueError, AttributeError):
-                            if hasattr(conn, "stop"):
-                                conn.stop()
-                    elif hasattr(conn, "stop"):
-                        conn.stop()
-                    continue
-                if conn_loop is current_loop:
-                    try:
-                        await conn.close()
-                    except (RuntimeError, ValueError, AttributeError):
-                        import logging
+                            pass
+                        c._connection = None
+                    return _STOP_RUNNING_SENTINEL
 
-                        pass
-                else:
-                    try:
-                        asyncio.run_coroutine_threadsafe(conn.close(), conn_loop)
-                    except (RuntimeError, ValueError, AttributeError):
-                        import logging
-
-                        pass
-            self._conns_by_loop.clear()
-        self.mac_maestro = None
-        self.ledger_writer = None
-        self.enrichment_queue = None
-        self.ledger_store = None
-        self._ledger = None
+                conn._tx.put_nowait((None, close_and_stop))
+            except (RuntimeError, ValueError, AttributeError):
+                if hasattr(conn, "stop"):
+                    conn.stop()
+        elif hasattr(conn, "stop"):
+            conn.stop()
 
     async def __aenter__(self):
         return self

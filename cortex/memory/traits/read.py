@@ -124,18 +124,18 @@ class ReadTrait:
                 """
                 params_cand = [
                     *q_shards,
-                    limit * 10,  # limit for candidates
+                    int(limit * 10),  # limit for candidates
                     embedding_bytes,
                     void_query,
-                    self._encoder.dimension,  # pyright: ignore[reportAttributeAccessIssue]
+                    int(self._encoder.dimension),  # pyright: ignore[reportAttributeAccessIssue]
                     embedding_bytes,
                     void_query,
-                    self._encoder.dimension,  # pyright: ignore[reportAttributeAccessIssue]
-                    now,
-                    self._half_life,  # pyright: ignore[reportAttributeAccessIssue]
-                    tenant_id,
-                    project_id,
-                    limit,
+                    int(self._encoder.dimension),  # pyright: ignore[reportAttributeAccessIssue]
+                    float(now),
+                    float(self._half_life),  # pyright: ignore[reportAttributeAccessIssue]
+                    str(tenant_id),
+                    str(project_id),
+                    int(limit),
                 ]
                 cursor.execute(sql_cand, tuple(params_cand))
                 rows = cursor.fetchall()
@@ -161,11 +161,11 @@ class ReadTrait:
                 params_vec = [
                     embedding_bytes,
                     embedding_bytes,
-                    now,
-                    self._half_life,  # pyright: ignore[reportAttributeAccessIssue]
-                    tenant_id,
-                    project_id,
-                    limit,
+                    float(now),
+                    float(self._half_life),  # pyright: ignore[reportAttributeAccessIssue]
+                    str(tenant_id),
+                    str(project_id),
+                    int(limit),
                 ]
                 cursor.execute(sql, tuple(params_vec))
                 rows = cursor.fetchall()
