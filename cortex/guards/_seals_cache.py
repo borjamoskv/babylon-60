@@ -45,9 +45,7 @@ async def arun_cmd(cmd: list[str], timeout: float = 60.0) -> tuple[int, str]:
             except (ProcessLookupError, asyncio.TimeoutError):
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in _seals_cache.py"
-                )
+                pass
             return 124, f"Command timed out after {timeout}s: {' '.join(cmd)}"
     except FileNotFoundError:
         return 127, f"Command not found: {resolved[0]}"

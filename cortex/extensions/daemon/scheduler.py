@@ -255,9 +255,8 @@ class SovereignScheduler:
             except asyncio.TimeoutError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed"
-                )  # normal tick timeout
+                pass
+# normal tick timeout
 
         logger.info("SovereignScheduler stopped")
 

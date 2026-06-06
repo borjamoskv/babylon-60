@@ -56,9 +56,7 @@ async def protocolo_ship_omega(data: str):
     except Exception:
         import logging
 
-        logging.getLogger(__name__).error(
-            "DETECTIVE-OMEGA: Silent exception swallowed in sovereign_e2e_swarm.py"
-        )
+        pass
     print("[SHIP-Ω] Cristalización C5-REAL completada.\n")
 
 

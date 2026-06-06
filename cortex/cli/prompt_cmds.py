@@ -40,9 +40,7 @@ def _count_python_loc(root: Path) -> int:
         except OSError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in prompt_cmds.py"
-            )
+            pass
     return total
 
 
@@ -66,9 +64,7 @@ def _count_test_functions(root: Path) -> int:
         except OSError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in prompt_cmds.py"
-            )
+            pass
     return count
 
 
@@ -86,9 +82,7 @@ def _count_rest_endpoints(root: Path) -> int:
         except OSError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in prompt_cmds.py"
-            )
+            pass
     return count
 
 
@@ -106,9 +100,7 @@ def _count_cli_commands(root: Path) -> int:
         except OSError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in prompt_cmds.py"
-            )
+            pass
     return count
 
 

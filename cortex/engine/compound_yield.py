@@ -159,9 +159,7 @@ class CompoundYieldTracker:
         except (json.JSONDecodeError, TypeError, ValueError):
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in compound_yield.py"
-            )
+            pass
 
         # If no explicit hours, assign a default baseline value of 0.5 hours
         # This prevents 0 yield for chained structural facts that lack explicit tracking

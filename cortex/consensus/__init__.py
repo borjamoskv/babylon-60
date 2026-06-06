@@ -23,9 +23,7 @@ else:
     except ImportError:
         import logging
 
-        logging.getLogger(__name__).error(
-            "DETECTIVE-OMEGA: Silent exception swallowed in __init__.py"
-        )
+        pass
     try:
         from cortex.consensus.trust import TrustGraph as _TG
 
@@ -33,8 +31,6 @@ else:
     except ImportError:
         import logging
 
-        logging.getLogger(__name__).error(
-            "DETECTIVE-OMEGA: Silent exception swallowed in __init__.py"
-        )
+        pass
 
 __all__ = ["ConsensusManager", "ReputationManager", "TrustGraph"]

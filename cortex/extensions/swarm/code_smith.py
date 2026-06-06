@@ -403,9 +403,7 @@ class CodeSmith:
             except Exception:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in code_smith.py"
-                )
+                pass
 
         return result
 

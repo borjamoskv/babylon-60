@@ -41,9 +41,7 @@ class SpoofManager:
             except Exception:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in spoof.py"
-                )
+                pass
             return {"mappings": {}, "default_intent": "general"}
 
     # O(1) Zero-Latency Keyword Heuristics for Model Routing

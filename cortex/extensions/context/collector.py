@@ -65,9 +65,7 @@ def _parse_tx_detail(raw: str | dict | None) -> str:
     except (json.JSONDecodeError, TypeError):
         import logging
 
-        logging.getLogger(__name__).error(
-            "DETECTIVE-OMEGA: Silent exception swallowed in collector.py"
-        )
+        pass
     return ""
 
 
@@ -291,9 +289,7 @@ class ContextCollector:
                 except (OSError, PermissionError):
                     import logging
 
-                    logging.getLogger(__name__).error(
-                        "DETECTIVE-OMEGA: Silent exception swallowed in collector.py"
-                    )
+                    pass
 
             max_d = 2 if self.workspace_dir == Path.home() else 4
             _walk(self.workspace_dir, 1, max_d)

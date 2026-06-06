@@ -33,9 +33,7 @@ def temp_umap_env(tmp_path, monkeypatch):
         except Exception:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in test_ultramap.py"
-            )
+            pass
 
 
 def test_ultramap_initialization(temp_umap_env):

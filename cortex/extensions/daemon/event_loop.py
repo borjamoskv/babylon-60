@@ -61,9 +61,7 @@ class EventLoopMixin:
             except (NotImplementedError, RuntimeError):
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in core.py"
-                )
+                pass
         logger.info("🚀 MOSKV-1 Sovereign Daemon starting (interval=%ds)", interval)
         if self.hot_state is not None:
             self.hot_state.set("daemon.mode", "sovereign")
@@ -160,9 +158,7 @@ class EventLoopMixin:
         except asyncio.CancelledError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in core.py"
-            )
+            pass
         finally:
             await self._sovereign_shutdown()
 

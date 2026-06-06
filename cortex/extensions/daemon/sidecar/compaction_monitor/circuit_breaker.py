@@ -128,9 +128,7 @@ async def call_external_compact(
         except ImportError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in circuit_breaker.py"
-            )
+            pass
 
         # Fallback: direct SQLite WAL checkpoint
         if db_path:

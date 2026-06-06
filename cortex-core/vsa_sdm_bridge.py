@@ -76,7 +76,7 @@ def compress_and_index():
                     summary = meta.get("summary", "")
             except Exception:
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in vsa_sdm_bridge.py')
+                pass
 
         # Aggregate artifact contents
         if os.path.exists(artifacts_dir):
@@ -88,7 +88,7 @@ def compress_and_index():
                             full_content += f.read() + "\n"
                     except Exception:
                         import logging
-                        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in vsa_sdm_bridge.py')
+                        pass
 
         # Index in FTS5
         c.execute(

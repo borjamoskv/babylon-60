@@ -180,9 +180,7 @@ class SchemaTrait:
             except ImportError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in schema.py"
-                )
+                pass
         return self._sanitizer
 
     def _get_domain_tables(

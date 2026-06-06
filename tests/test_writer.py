@@ -146,9 +146,8 @@ class TestTransaction:
         except ValueError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed"
-            )  # Expected
+            pass
+# Expected
 
         conn = sqlite3.connect(writer._db_path)
         cursor = conn.execute("SELECT COUNT(*) FROM items WHERE name = 'rollback_me'")

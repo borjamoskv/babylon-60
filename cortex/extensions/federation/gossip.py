@@ -52,9 +52,7 @@ class GossipNode:
             except asyncio.CancelledError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in gossip.py"
-                )
+                pass
         logger.info(f"Gossip Protocol terminated on node {self.node_id}")
 
     async def register_peer(self, peer_id: str, address: str) -> None:

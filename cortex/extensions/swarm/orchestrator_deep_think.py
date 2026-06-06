@@ -22,9 +22,7 @@ try:
 except ImportError:
     import logging
 
-    logging.getLogger(__name__).error(
-        "DETECTIVE-OMEGA: Silent exception swallowed in orchestrator_deep_think.py"
-    )
+    pass
 
 logger = logging.getLogger("cortex.extensions.swarm.deep_think")
 

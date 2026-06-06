@@ -32,9 +32,7 @@ def extract_retry_delay(text: str) -> float | None:
     except (KeyError, TypeError, ValueError, AttributeError):
         import logging
 
-        logging.getLogger(__name__).error(
-            "DETECTIVE-OMEGA: Silent exception swallowed in _backoff.py"
-        )
+        pass
 
     match = re.search(r'"(?:quotaResetDelay|retryDelay)"\s*:\s*"([0-9\.]+)(m?s)"', text)
     if match:
@@ -44,9 +42,7 @@ def extract_retry_delay(text: str) -> float | None:
         except ValueError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in _backoff.py"
-            )
+            pass
     return None
 
 

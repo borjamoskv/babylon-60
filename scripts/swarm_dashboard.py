@@ -138,6 +138,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         import logging
 
-        logging.getLogger(__name__).error(
-            "DETECTIVE-OMEGA: Silent exception swallowed in swarm_dashboard.py"
-        )
+        pass

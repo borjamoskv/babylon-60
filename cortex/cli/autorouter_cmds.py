@@ -264,6 +264,4 @@ def logs():
     except KeyboardInterrupt:
         import logging
 
-        logging.getLogger(__name__).error(
-            "DETECTIVE-OMEGA: Silent exception swallowed in autorouter_cmds.py"
-        )
+        pass

@@ -172,9 +172,7 @@ class AsyncConnectionPool:
         except (OSError, ValueError, KeyError):
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in utils.py"
-            )
+            pass
 
     async def close(self):
         """Cleanly close all connections in the pool."""

@@ -117,9 +117,7 @@ class AgentRegistry(RegistryTasksMixin):
         except sqlite3.OperationalError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in registry.py"
-            )
+            pass
 
         self._load_trust_states()
 

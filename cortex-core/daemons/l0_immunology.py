@@ -33,7 +33,7 @@ class ImmunologyDaemon:
             conn.close()
         except Exception:
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in l0_immunology.py')
+            pass
 
     def close(self):
         if hasattr(self, "_finalizer") and self._finalizer.alive:
@@ -49,7 +49,7 @@ class ImmunologyDaemon:
                 self._last_checked_id = row[0]
         except sqlite3.OperationalError:
             import logging
-            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in l0_immunology.py')
+            pass
 
     def _synthesize_healing_payload(self, falsation_type: str, vector_id: str, context: str) -> dict:
         """

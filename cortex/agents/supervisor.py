@@ -198,9 +198,7 @@ class Supervisor:
             except asyncio.CancelledError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in supervisor.py"
-                )
+                pass
 
         for agent_id in list(self._agents.keys()):
             try:

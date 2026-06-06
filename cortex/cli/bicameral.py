@@ -59,9 +59,8 @@ class BicameralConsole:
         except OSError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed"
-            )  # Fail silently to avoid interrupting the agent loop
+            pass
+# Fail silently to avoid interrupting the agent loop
 
     def log_limbic(self, message: str, source: str = "LORE") -> None:
         """Logs emotional, historical, or allergy-driven reasoning."""

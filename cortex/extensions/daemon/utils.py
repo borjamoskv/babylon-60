@@ -40,7 +40,7 @@ async def play_ping(state):
     except OSError:
         import logging
 
-        logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed in utils.py")
+        pass
 
 
 async def run_osascript(script: str) -> str:

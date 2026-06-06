@@ -209,9 +209,7 @@ class SovereignLock:
                     except ValueError:
                         import logging
 
-                        logging.getLogger(__name__).error(
-                            "DETECTIVE-OMEGA: Silent exception swallowed in lock.py"
-                        )
+                        pass
 
                 new_expiry = (datetime.now(timezone.utc) + timedelta(seconds=ttl_s)).isoformat()
 

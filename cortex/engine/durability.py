@@ -46,9 +46,7 @@ class PersistenceSupervisor:
             except asyncio.CancelledError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in durability.py"
-                )
+                pass
 
             await self.flush(reason="shutdown")
             self._task = None

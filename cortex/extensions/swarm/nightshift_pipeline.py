@@ -61,9 +61,7 @@ class PlannerNode:
             except json.JSONDecodeError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in nightshift_pipeline.py"
-                )
+                pass
 
         # 3. Artifact header stripping
         clean = re.sub(r"═══.*?═══", "", target).strip()

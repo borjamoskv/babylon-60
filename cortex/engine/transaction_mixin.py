@@ -52,9 +52,7 @@ class TransactionMixin(EngineMixinBase):
         except ImportError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in transaction_mixin.py"
-            )
+            pass
 
         dj = canonical_json(detail)
         ts = now_iso()

@@ -282,9 +282,8 @@ async def compact_session(
     except (sqlite3.Error, AttributeError):
         import logging
 
-        logging.getLogger(__name__).error(
-            "DETECTIVE-OMEGA: Silent exception swallowed"
-        )  # Already registered or unsupported
+        pass
+# Already registered or unsupported
 
     now = time.monotonic()
     half_life = 7 * 24 * 3600  # 7 days in seconds

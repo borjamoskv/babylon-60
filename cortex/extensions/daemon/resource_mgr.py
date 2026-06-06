@@ -158,9 +158,7 @@ class ResourceMgrMixin:
         except ImportError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in core.py"
-            )
+            pass
 
         # 3. Scheduler — cron/interval task execution
         self.scheduler = None

@@ -70,9 +70,7 @@ async def _ingest_and_organize(path: Path) -> str:
                 except (UnicodeDecodeError, OSError):
                     import logging
 
-                    logging.getLogger(__name__).error(
-                        "DETECTIVE-OMEGA: Silent exception swallowed in bibliotecario_cmds.py"
-                    )
+                    pass
 
     # Truncate to avoid context window explosion
     if len(content) > 100000:

@@ -192,9 +192,7 @@ def _sanitize_dsn(dsn: str) -> str:
         except (IndexError, ValueError):
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in storage_cmds.py"
-            )
+            pass
     return dsn
 
 

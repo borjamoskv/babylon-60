@@ -171,9 +171,7 @@ class ThreatFeedEngine:
         except (json.JSONDecodeError, OSError, ValueError):
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in threat_feed.py"
-            )
+            pass
         return None
 
     @property

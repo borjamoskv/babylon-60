@@ -12,17 +12,15 @@ def _migration_020_tombstone(conn: sqlite3.Connection) -> None:
     except sqlite3.OperationalError:
         import logging
 
-        logging.getLogger(__name__).error(
-            "DETECTIVE-OMEGA: Silent exception swallowed"
-        )  # Column already exists
+        pass
+# Column already exists
 
     try:
         conn.execute("ALTER TABLE facts ADD COLUMN tombstoned_at TEXT")
     except sqlite3.OperationalError:
         import logging
 
-        logging.getLogger(__name__).error(
-            "DETECTIVE-OMEGA: Silent exception swallowed"
-        )  # Column already exists
+        pass
+# Column already exists
 
     conn.execute("CREATE INDEX IF NOT EXISTS idx_facts_tombstone ON facts(is_tombstoned)")

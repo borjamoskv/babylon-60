@@ -64,9 +64,7 @@ class OuroborosCompiler:
         except SyntaxError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in ouroboros_compiler.py"
-            )
+            pass
 
         cost = (llm_calls * 10) + complexity
 

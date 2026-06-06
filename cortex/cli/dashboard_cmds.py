@@ -81,9 +81,7 @@ async def _collect_recent(engine, limit: int = 8) -> list[dict]:
     except (sqlite3.Error, OSError, AttributeError, FileNotFoundError):
         import logging
 
-        logging.getLogger(__name__).error(
-            "DETECTIVE-OMEGA: Silent exception swallowed in dashboard_cmds.py"
-        )
+        pass
     return []
 
 
@@ -372,9 +370,7 @@ def dashboard(db: str, interval: float, once: bool) -> None:
             except KeyboardInterrupt:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed in dashboard_cmds.py"
-                )
+                pass
 
         console.print(f"\n[{_DIM}]Dashboard closed.[/]")
 

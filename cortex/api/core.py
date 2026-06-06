@@ -271,7 +271,7 @@ async def health_check(request: Request) -> dict:
     ):
         import logging
 
-        logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed")
+        pass
 
     # Health Index integration
     health_score = 0.0
@@ -291,7 +291,7 @@ async def health_check(request: Request) -> dict:
     except (ValueError, KeyError, OSError, RuntimeError, AttributeError):
         import logging
 
-        logging.getLogger(__name__).error("DETECTIVE-OMEGA: Silent exception swallowed in core.py")
+        pass
 
     return {
         "status": get_trans("system_healthy", lang),

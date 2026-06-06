@@ -245,9 +245,8 @@ class ObjectLevel:
             except KeyError:
                 import logging
 
-                logging.getLogger(__name__).error(
-                    "DETECTIVE-OMEGA: Silent exception swallowed"
-                )  # Heuristic may have been pruned mid-execution
+                pass
+# Heuristic may have been pruned mid-execution
 
         return step
 

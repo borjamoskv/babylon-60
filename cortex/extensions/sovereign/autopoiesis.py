@@ -89,6 +89,4 @@ class Autopoiesis:
         except FileNotFoundError:
             import logging
 
-            logging.getLogger(__name__).error(
-                "DETECTIVE-OMEGA: Silent exception swallowed in autopoiesis.py"
-            )
+            pass

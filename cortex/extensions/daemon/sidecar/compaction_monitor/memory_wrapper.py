@@ -35,9 +35,7 @@ if _libc:
     except AttributeError:
         import logging
 
-        logging.getLogger(__name__).error(
-            "DETECTIVE-OMEGA: Silent exception swallowed in memory_wrapper.py"
-        )
+        pass
 
     try:
 
@@ -61,9 +59,7 @@ if _libc:
     except AttributeError:
         import logging
 
-        logging.getLogger(__name__).error(
-            "DETECTIVE-OMEGA: Silent exception swallowed in memory_wrapper.py"
-        )
+        pass
 
 
 def malloc_trim(pad: int = 0) -> int:

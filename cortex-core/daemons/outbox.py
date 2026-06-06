@@ -83,21 +83,21 @@ class ZeroCopyRingBuffer(SovereignResource):
                 self._buffer.release()
             except ValueError:
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in outbox.py')
+                pass
             self._buffer = None
         if hasattr(self, '_mmap') and self._mmap is not None:
             try:
                 self._mmap.close()
             except ValueError:
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in outbox.py')
+                pass
             self._mmap = None
         if hasattr(self, '_f') and self._f is not None:
             try:
                 self._f.close()
             except OSError:
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in outbox.py')
+                pass
             self._f = None
         super().close()
 
@@ -177,7 +177,7 @@ class ZeroCopyRingBuffer(SovereignResource):
                 self._buffer[:] = b'\x00' * self.tensor_size
             except Exception:
                 import logging
-                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in outbox.py')
+                pass
 
     def process_all_native(self, num_threads=None):
         """Process all pending tasks natively in Rust using Rayon thread pool (releases the GIL)."""
