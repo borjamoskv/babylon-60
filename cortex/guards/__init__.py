@@ -1,4 +1,5 @@
 # [C5-REAL] Exergy-Maximized
+from cortex.guards.anti_limerence import AntiLimerenceGuard
 from cortex.guards.capabilities import AgentCredentials, Capability, RiskTier
 from cortex.guards.capability_guard import CapabilityGuard
 from cortex.guards.health_guard import HealthGuard
@@ -7,6 +8,7 @@ from cortex.guards.virgo import ContextPoisoningError, VirgoContextGuard, VirgoV
 
 __all__ = [
     "AgentCredentials",
+    "AntiLimerenceGuard",
     "Capability",
     "CapabilityGuard",
     "ContextPoisoningError",
