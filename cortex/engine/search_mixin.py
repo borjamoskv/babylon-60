@@ -35,8 +35,37 @@ class SearchMixin(EngineMixinBase):
     ) -> list[Any]:
         """Perform hybrid search (Vector + Text) with optional Graph-RAG context."""
         from cortex.search import hybrid_search, text_search
+        from cortex.cache import RedisL1Cache
+        from cortex.search.models import SearchResult
+        import json
+        from dataclasses import asdict
 
         tenant_id = self._resolve_tenant(tenant_id)
+        cache = RedisL1Cache.singleton()
+        cache_key = None
+
+        if cache.available:
+            try:
+                # Deterministic representation of search arguments
+                args_hash = cache.cache_key_hash(
+                    project or "",
+                    query,
+                    str(top_k),
+                    str(as_of or ""),
+                    str(graph_depth),
+                    str(include_graph),
+                    str(confidence or ""),
+                    json.dumps(kwargs, sort_keys=True)
+                )
+                cache_key = f"search:{tenant_id}:{args_hash}"
+                cached = cache.get(cache_key)
+                if cached is not None:
+                    data = json.loads(cached.decode("utf-8"))
+                    results = [SearchResult(**item) for item in data]
+                    logger.debug("[L1 Cache] Hit for tenant=%s, query='%s'", tenant_id, query[:30])
+                    return results
+            except Exception as e:
+                logger.warning("[L1 Cache] Lookup failed: %s", e)
 
         async with self.session() as conn:
             try:
@@ -88,6 +117,14 @@ class SearchMixin(EngineMixinBase):
                         original_content = getattr(r, "content", "")
                         r.content = f"[EPISTEMIC_WARNING: PROBABILISTIC_ORIGIN]\n{original_content}"
 
+                # Cache the results
+                if cache.available and cache_key is not None:
+                    try:
+                        serialized = json.dumps([asdict(r) for r in results]).encode("utf-8")
+                        cache.set(cache_key, serialized)
+                    except Exception as e:
+                        logger.warning("[L1 Cache] Set failed: %s", e)
+
                 return results
 
             except (sqlite3.Error, OSError, RuntimeError) as e:
@@ -114,6 +151,14 @@ class SearchMixin(EngineMixinBase):
                     if not is_c5 and not has_taint:
                         original_content = getattr(r, "content", "")
                         r.content = f"[EPISTEMIC_WARNING: PROBABILISTIC_ORIGIN]\n{original_content}"
+
+                # Cache the fallback results
+                if cache.available and cache_key is not None:
+                    try:
+                        serialized = json.dumps([asdict(r) for r in fallback_results]).encode("utf-8")
+                        cache.set(cache_key, serialized)
+                    except Exception as e:
+                        logger.warning("[L1 Cache] Set failed: %s", e)
 
                 return fallback_results
 
