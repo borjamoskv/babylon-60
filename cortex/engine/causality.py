@@ -28,6 +28,7 @@ from cortex.engine.causality_models import (
     _downgrade_confidence,
 )
 from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
+
 try:
     from cortex.engine.logic.atms import AtmsAdapter
 except ImportError:
@@ -146,6 +147,11 @@ class AsyncCausalGraph:
         )
         await self.conn.commit()
 
+    async def _causal_edge_columns(self) -> set[str]:
+        cursor = await self.conn.execute("PRAGMA table_info(causal_edges)")
+        rows = await cursor.fetchall()
+        return {str(row[1]) for row in rows}
+
     async def record_edge(
         self,
         fact_id: int,
@@ -159,21 +165,25 @@ class AsyncCausalGraph:
         fact_hash: str | None = None,
         parent_hash: str | None = None,
     ) -> None:
-        
+
         import sqlite3
 
         # 1. Look up missing hashes via DIP
         if not fact_hash:
             try:
-                async with self.conn.execute("SELECT fact_hash FROM facts WHERE id = ?", (fact_id,)) as cursor:
+                async with self.conn.execute(
+                    "SELECT fact_hash FROM facts WHERE id = ?", (fact_id,)
+                ) as cursor:
                     row = await cursor.fetchone()
                     fact_hash = row[0] if row else None
             except sqlite3.OperationalError:
                 pass
-        
+
         if parent_id and not parent_hash:
             try:
-                async with self.conn.execute("SELECT fact_hash FROM facts WHERE id = ?", (parent_id,)) as cursor:
+                async with self.conn.execute(
+                    "SELECT fact_hash FROM facts WHERE id = ?", (parent_id,)
+                ) as cursor:
                     row = await cursor.fetchone()
                     parent_hash = row[0] if row else None
             except sqlite3.OperationalError:
@@ -187,30 +197,40 @@ class AsyncCausalGraph:
                     self.atms.add_dependency(fact_hash, parent_hash)
             except Exception as e:
                 # SAGA Rollback: Reject contradictory or cycle edges
-                raise RuntimeError(f"ATMS Graph rejected edge {parent_hash} -> {fact_hash}: {e}") from e
+                raise RuntimeError(
+                    f"ATMS Graph rejected edge {parent_hash} -> {fact_hash}: {e}"
+                ) from e
 
-        # 3. L1 Persistence
-        import sqlite3
-        try:
-            await self.conn.execute(
-                """
-                INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, confidence, agent_id, project, tenant_id, fact_hash, parent_hash)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (fact_id, parent_id, signal_id, edge_type, confidence, agent_id, project, tenant_id, fact_hash, parent_hash),
-            )
-        except sqlite3.OperationalError as e:
-            if "no column" in str(e):
-                # Fallback for old/test mock schemas
-                await self.conn.execute(
-                    """
-                    INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, project, tenant_id)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                    """,
-                    (fact_id, parent_id, signal_id, edge_type, project, tenant_id),
-                )
-            else:
-                raise
+        # 3. L1 Persistence: Layout-aware query build to support old/test mock schemas
+        cols = await self._causal_edge_columns()
+        payload = []
+        payload.append(("fact_id", fact_id))
+        if parent_id is not None:
+            payload.append(("parent_id", parent_id))
+        if signal_id is not None:
+            payload.append(("signal_id", signal_id))
+        payload.append(("edge_type", edge_type))
+        if "confidence" in cols:
+            payload.append(("confidence", confidence))
+        if "agent_id" in cols and agent_id is not None:
+            payload.append(("agent_id", agent_id))
+        if "project" in cols and project is not None:
+            payload.append(("project", project))
+        if "tenant_id" in cols:
+            payload.append(("tenant_id", tenant_id))
+        if "fact_hash" in cols and fact_hash is not None:
+            payload.append(("fact_hash", fact_hash))
+        if "parent_hash" in cols and parent_hash is not None:
+            payload.append(("parent_hash", parent_hash))
+
+        columns_sql = ", ".join(col for col, _ in payload)
+        placeholders_sql = ", ".join("?" for _ in payload)
+        values = [val for _, val in payload]
+
+        await self.conn.execute(
+            f"INSERT INTO causal_edges ({columns_sql}) VALUES ({placeholders_sql})",
+            values,
+        )
 
     async def temporal_causal_chain(
         self,
