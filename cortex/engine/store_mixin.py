@@ -9,7 +9,7 @@ Quarantine       → cortex.engine.store_quarantine_mixin
 from __future__ import annotations
 
 import logging
-from typing import Any, ClassVar, Optional
+from typing import Any, ClassVar
 
 import aiosqlite
 
@@ -62,6 +62,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         tags: list[str] | None = None,
         confidence: str = "stated",
         source: str | None = None,
+        actor_id: str | None = None,
         meta: dict[str, Any] | None = None,
         valid_from: str | None = None,
         commit: bool = True,
@@ -71,6 +72,8 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     ) -> int:
         """Store a new fact with proper connection management."""
         tenant_id = self._resolve_tenant(tenant_id)
+        if source is None and actor_id:
+            source = actor_id if actor_id.startswith(("agent:", "cli", "api", "human")) else f"agent:{actor_id}"
 
         # ═══ SOVEREIGN LOCK (Axiom Ω_CB) ═══
         if getattr(self, "system_state", "ACTIVE") == "LOCKED_EPISTEMIC_HALT":
@@ -92,6 +95,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 tags=tags,
                 confidence=confidence,
                 source=source,
+                actor_id=actor_id,
                 meta=meta,
                 valid_from=valid_from,
                 commit=commit,
@@ -111,6 +115,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 tags=tags,
                 confidence=confidence,
                 source=source,
+                actor_id=actor_id,
                 meta=meta,
                 valid_from=valid_from,
                 commit=commit,
@@ -154,6 +159,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         tags: list[str] | None,
         confidence: str,
         source: str | None,
+        actor_id: str | None,
         meta: dict[str, Any] | None,
         valid_from: str | None,
         commit: bool,
@@ -162,9 +168,23 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     ) -> int:
         await self._run_pre_store_guards(conn, content, project, fact_type, meta, tenant_id)
 
-        dedupe_id, meta, content, fact_type = await self._run_store_validation(
-            conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
-        )
+        from cortex.guards.ctre_guard import CTRECollisionError
+        try:
+            dedupe_id, meta, content, fact_type = await self._run_store_validation(
+                conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
+            )
+        except CTRECollisionError as e:
+            # Emit cryptographic audit trail for the SAGA abort
+            await self._log_transaction(
+                conn,
+                project,
+                "saga_abort",
+                {"reason": "TOCTOU_COLLISION", "epsilon_us": e.epsilon, "expected_hash": e.expected_hash, "current_hash": e.current_hash},
+                tenant_id=tenant_id
+            )
+            # Propagate to the agent so it knows it must retry the perception loop
+            raise
+
         if dedupe_id is not None:
             return dedupe_id
 
@@ -182,6 +202,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             meta,
             tx_id,
             parent_decision_id=parent_decision_id,
+            taint_already_verified=True,
         )
 
         await self._run_post_store_tasks(
@@ -204,14 +225,9 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     ) -> None:
         pipeline = getattr(self, "_guard_pipeline", None)
         if pipeline is not None:
-            try:
-                await pipeline.run_guards(
-                    content, project, fact_type, meta or {}, conn, tenant_id=tenant_id
-                )
-            except ValueError:
-                raise
-            except Exception as _gp_err:  # noqa: BLE001
-                logger.debug("[AX-II] GuardPipeline pre-store skipped: %s", _gp_err)
+            await pipeline.run_guards(
+                content, project, fact_type, meta or {}, conn, tenant_id=tenant_id
+            )
 
     async def _resolve_tx_id(
         self,

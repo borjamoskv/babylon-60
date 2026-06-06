@@ -7,6 +7,14 @@ from typing import Tuple
 
 logger = logging.getLogger(__name__)
 
+class CTRECollisionError(RuntimeError):
+    """Raised when an atomic commit fails due to a TOCTOU collision."""
+    def __init__(self, expected: int, current: int, epsilon: int):
+        super().__init__(f"CTRE SAGA ABORT: UI TOCTOU Collision (Epsilon: {epsilon}µs). Expected {expected}, got {current}.")
+        self.epsilon = epsilon
+        self.expected_hash = expected
+        self.current_hash = current
+
 # Fallback in case cortex_rs is not compiled
 try:
     import cortex_rs
