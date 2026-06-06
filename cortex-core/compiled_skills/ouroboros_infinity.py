@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: ouroboros-infinity
 Description: OUROBOROS-∞ - Recursive Self-Improvement Engine. Daily autopoietic metabolism that reduces entropy across the CORTEX-Persist codebase via AST mutation, dead code purging, causal diagnosis, and meta-reflection.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: Autodidact-Research-OMEGA
 Description: C5-REAL Autonomous Synthesis Engine. Detects transferable ideas across disparate disciplines (e.g., homology -> software) by finding structural holes in knowledge graphs.

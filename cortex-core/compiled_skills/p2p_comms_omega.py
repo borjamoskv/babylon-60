@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: P2P-Comms-OMEGA
 Description: C5-REAL Autonomous Email Router. Anula la dependencia de clientes gráficos inyectando payloads di...

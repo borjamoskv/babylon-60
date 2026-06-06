@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: API-Sentinel-OMEGA
 Description: Sovereign Agent / Daemon for external API orchestration, rate-limit handling, and C5-REAL payload execution.

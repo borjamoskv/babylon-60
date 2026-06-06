@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: Sortu-APEX
 Description: JIT Skill Compiler - Sovereign x10000 Centuria Forge + Death Protocol + Registry Consolidation

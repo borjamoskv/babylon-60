@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: Autodidact-History-OMEGA
 Description: C5-REAL Retrieval Engine for the 10 Foundational Milestones of Artificial Intelligence. Fuses historical context with thermodynamic exergy analysis.

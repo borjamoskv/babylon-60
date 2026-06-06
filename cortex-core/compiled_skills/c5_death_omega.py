@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: C5-DEATH-OMEGA
 Description: Epistemological Kill Switch - Forceful, irreversible conversation termination protocol.

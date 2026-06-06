@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# [C5-REAL] Exergy-Maximized
 """
 C5-REAL DEATH PROTOCOL - Git Pre-Commit Entropy Sensor.
 Purges AI Slop and Software Rot. 

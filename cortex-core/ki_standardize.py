@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# [C5-REAL] Exergy-Maximized
 """
 KI Schema Standardizer - One-shot normalizer for CORTEX Knowledge Items.
 

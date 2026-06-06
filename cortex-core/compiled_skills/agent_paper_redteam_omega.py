@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: Agent-Paper-RedTeam-OMEGA
 Description: C5-REAL Adversarial Audit Protocol for Agent Research Papers. Destroys weak claims via hostile reviewer simulation before publication.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: Mac-Control-OMEGA
 Description: SINGULARITY - Daemon, Vision, UI DOM, and 18-Domain macOS Control

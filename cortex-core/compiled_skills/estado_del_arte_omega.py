@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: Estado-Del-Arte-OMEGA
 Description: Motor determinista C5-REAL para síntesis del Estado del Arte (SOTA). Ejecuta el SOTA-Loop estructurado en 4 fases aniquilando el ruido teórico.

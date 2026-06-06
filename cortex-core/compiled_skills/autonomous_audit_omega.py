@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: Autonomous-Audit-OMEGA
 Description: C5-REAL Autonomous Technical Debt Audit and Purge Protocol. Triggers LEA-Ω for deterministic resolution.

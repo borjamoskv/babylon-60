@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: Exergy-Engine-OMEGA
 Description: Motor central de ruteo y memoria C5-REAL. Activa la jerarquía L1/L2/L3 y las transiciones de estado de inferencia.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: API-Provider-OMEGA
 Description: C5-REAL LLM API Fallback and Routing Skill. Provides deterministic fallback to external APIs when local inference (like qwen3.6-coder) fails or is unavailable.

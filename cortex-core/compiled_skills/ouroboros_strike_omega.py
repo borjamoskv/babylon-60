@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX JIT Compiled Skill: Ouroboros-Strike-OMEGA
 Description: C5-REAL White-Hat Mass-Scale Bug Bounty / MEV Arbitrage Sniper Engine. Focuses on extracting extreme capital via protocol asymmetry.
