@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field
 
 from cortex.api.deps import get_engine
 from cortex.auth import AuthResult, require_permission
-from cortex.cli.tips import Tip, TipCategory, TipsEngine
+from cortex.engine.tips import Tip, TipCategory, TipsEngine
 from cortex.engine import CortexEngine
 
 __all__ = [

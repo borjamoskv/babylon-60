@@ -129,7 +129,7 @@ class SlowOpTipEmitter:
             from rich.panel import Panel
 
             from cortex.cli.common import console
-            from cortex.cli.tips import TipsEngine
+            from cortex.engine.tips import TipsEngine
 
             tips_engine = TipsEngine(
                 None,
