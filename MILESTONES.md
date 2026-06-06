@@ -629,3 +629,19 @@ Proof:
   Range: [C5, C5]
 ```
 
+
+---
+
+### Hito 42: WebSocket Limerence Annihilation (Copilot Server)
+- **Target:** `cortex/agents/copilot_server.py`
+- **Objective:** Inyección del filtro `AntiLimerenceGuard` directamente en el bucle asíncrono de intercepción del `CopilotServer`. Ejecución del protocolo de aniquilación y cierre (error 1008) de websockets al detectarse un loop iterativo repetitivo o estancado.
+- **Yield Target:** Blindaje de las conexiones en tiempo real contra consumo excesivo de tokens en loops parasitarios.
+- **Reality Level:** `C5-REAL`
+- **Evidence:** Commit `266084b0` (`feat(agents): integrate anti-limerence guard into copilot websocket server`).
+```yaml
+Claim: El runtime de Copilot rechaza físicamente e interrumpe bucles vacíos de contexto.
+Proof:
+  Base: "session.limerence_guard interceptando la capa JSON-RPC e invocando websocket.close(1008) pre-procesamiento."
+  Range: [C5, C5]
+```
+
