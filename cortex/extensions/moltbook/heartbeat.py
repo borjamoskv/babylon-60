@@ -40,6 +40,7 @@ class MoltbookHeartbeat:
                 return json.loads(_STATE_PATH.read_text())
             except (OSError, json.JSONDecodeError):
                 import logging
+
                 pass
         return {
             "last_check": None,

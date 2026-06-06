@@ -149,13 +149,17 @@ class EventLoopMixin:
         if getattr(self, "sovereignty_runtime", None):
             tasks.append(
                 asyncio.create_task(
-                    self.sovereignty_runtime.start(),
-                    name="EventSovereigntyRuntime"
+                    self.sovereignty_runtime.start(), name="EventSovereigntyRuntime"
                 )
             )
             # Ensure auth_requests table exists asynchronously at startup
-            if hasattr(self.sovereignty_runtime, "auth_gateway") and self.sovereignty_runtime.auth_gateway:
-                tasks.append(asyncio.create_task(self.sovereignty_runtime.auth_gateway.ensure_table()))
+            if (
+                hasattr(self.sovereignty_runtime, "auth_gateway")
+                and self.sovereignty_runtime.auth_gateway
+            ):
+                tasks.append(
+                    asyncio.create_task(self.sovereignty_runtime.auth_gateway.ensure_table())
+                )
         tasks.append(asyncio.create_task(self._run_health_loop_async(), name="HealthMonitor"))
         async_count = len(tasks)
         thread_count = len(self._threads)

@@ -6,8 +6,9 @@ import time
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
-logging.basicConfig(level=logging.INFO, format='%(message)s')
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger("void_max.bounty_hunter")
+
 
 class BountyHunter:
     def __init__(self):
@@ -31,7 +32,9 @@ class BountyHunter:
             )
             elapsed = (time.monotonic() - start) * 1000
 
-            logger.info(f"[C4-SIM] TARGET: {target} | LATENCY_MS: {elapsed:.2f} | MATCHES: {len(matches)}")
+            logger.info(
+                f"[C4-SIM] TARGET: {target} | LATENCY_MS: {elapsed:.2f} | MATCHES: {len(matches)}"
+            )
 
             for match in matches:
                 score = getattr(match, "_recall_score", 0.0)
@@ -39,6 +42,7 @@ class BountyHunter:
 
         logger.info("[C4-SIM] EVENT: SCAN_COMPLETE | STATE: CLEAN")
         logger.info("[C4-SIM] RECOMMENDATION: ZENOH_CORTEX_MAINNET_STATE_SYNC")
+
 
 if __name__ == "__main__":
     hunter = BountyHunter()

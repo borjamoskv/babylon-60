@@ -5,6 +5,7 @@ import time
 
 import yaml
 
+
 class ImmunefiSwarmPrime:
     def __init__(self, config_file):
         with open(config_file) as f:
@@ -21,7 +22,9 @@ class ImmunefiSwarmPrime:
         print(f"L1: {self.supervisor_id} | AGENTS: {self.config['supervisor']['agents_total']}")
 
         for squad in self.config["squads"]:
-            print(f"SQUAD: {squad['id']} | ROLE: {squad['role']} | AGENTS: {squad['agents']} | MODEL: {squad['model']}")
+            print(
+                f"SQUAD: {squad['id']} | ROLE: {squad['role']} | AGENTS: {squad['agents']} | MODEL: {squad['model']}"
+            )
             await asyncio.sleep(0.5)
 
     async def execute_immunefi_strike(self):
@@ -47,12 +50,14 @@ CONFIDENCE: 0.99
             f.write(report_content)
         print(f"REPORT_SAVED: reports/{self.target}_extraction.md\nSTATUS: SIMULATION_COMPLETE")
 
+
 async def main():
     target_path = "cortex/swarm/targets/immunefi_max.yaml"
     swarm = ImmunefiSwarmPrime(target_path)
     await swarm.spawn_squads()
     await swarm.execute_immunefi_strike()
     await swarm.consolidate_ledger()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

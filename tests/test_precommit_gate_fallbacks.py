@@ -63,7 +63,4 @@ def test_sovereign_pre_commit_reads_untracked_file_contents_when_no_diff(monkeyp
         untracked_files={str(secret_file)},
     )
 
-    assert violations == [
-        f"- CONTENT: {secret_file} | {module.CONTENT_PATTERNS[0].pattern}"
-    ]
-
+    assert violations == [f"- CONTENT: {secret_file} | {module.CONTENT_PATTERNS[0].pattern}"]

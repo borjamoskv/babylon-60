@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from cortex import config
 from cortex.extensions.signals.bus import SignalBus
 
+
 def main():
     parser = argparse.ArgumentParser(description="Emit C5-REAL")
     parser.add_argument("payload")
@@ -43,6 +44,7 @@ def main():
         sys.exit(0)
     except Exception as e:
         sys.exit(f"C5-REAL-FAIL: Emit -> {e}")
+
 
 if __name__ == "__main__":
     main()

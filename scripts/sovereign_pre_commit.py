@@ -123,7 +123,9 @@ def main() -> int:
     if violations:
         scope = "staged" if source == "staged" else "local"
         print("Claim: COMMIT_BLOCKED")
-        print(f"Proof: {{ Base: 'Credentials detected ({scope})', Range: [1, {len(violations)}], Confidence: C5-REAL }}")
+        print(
+            f"Proof: {{ Base: 'Credentials detected ({scope})', Range: [1, {len(violations)}], Confidence: C5-REAL }}"
+        )
         for v in violations:
             print(v)
         return 1

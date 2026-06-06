@@ -98,6 +98,7 @@ async def insert_fact_record(
     tags_json = json.dumps(tags or [])
 
     from cortex.engine.causal.taint_engine import enforce_taint_check
+
     token = meta.get("cortex_taint") if meta else None
     await enforce_taint_check(conn, token, content)
 

@@ -64,7 +64,9 @@ async def deep_audit_cortex():
     print("---")
     print("Report:")
     print(res["report_markdown"])
-    print(f"Metrics: {{ Status: {res['status']}, Provider: {res['provider']}, Latency_ms: {res['latency']:.1f} }}")
+    print(
+        f"Metrics: {{ Status: {res['status']}, Provider: {res['provider']}, Latency_ms: {res['latency']:.1f} }}"
+    )
 
     await commander.consolidate_and_annihilate()
     if test_bus_dir.exists():

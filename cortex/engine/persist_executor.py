@@ -72,6 +72,7 @@ class PersistExecutor:
             self.memory_manager.store(agent_id, state_data)  # pyright: ignore[reportUnusedCoroutine]
         except AttributeError:
             import logging
+
             pass
 
         return {
