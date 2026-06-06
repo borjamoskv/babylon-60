@@ -26,8 +26,8 @@ def test_fresh_schema_has_tenant_scoped_merkle_roots() -> None:
     conn = sqlite3.connect(":memory:")
     applied = run_migrations(conn)
 
-    assert applied == 0
-    assert get_current_version(conn) == 27
+    assert applied == len(MIGRATIONS)
+    assert get_current_version(conn) == MIGRATIONS[-1][0]
     assert "tenant_id" in _columns(conn, "merkle_roots")
     tenant_id = _column_info(conn, "merkle_roots", "tenant_id")
     assert tenant_id["notnull"] == 1
@@ -60,8 +60,8 @@ def test_migration_025_adds_merkle_tenant_scope_without_data_loss() -> None:
 
     applied = run_migrations(conn)
 
-    assert applied == 2
-    assert get_current_version(conn) == 26
+    assert applied == len(MIGRATIONS) - 24
+    assert get_current_version(conn) == MIGRATIONS[-1][0]
     assert "tenant_id" in _columns(conn, "merkle_roots")
     tenant_id = _column_info(conn, "merkle_roots", "tenant_id")
     assert tenant_id["notnull"] == 1
@@ -76,7 +76,7 @@ def test_migration_025_adds_merkle_tenant_scope_without_data_loss() -> None:
 
 def test_migration_registry_tracks_forensic_ledger_schema_version() -> None:
     versions = [version for version, _description, _func in MIGRATIONS]
-    assert versions[-1] == 27
+    assert versions[-1] == MIGRATIONS[-1][0]
     assert versions == sorted(versions)
     assert len(versions) == len(set(versions))
 
@@ -94,8 +94,8 @@ def test_migration_026_adds_replay_admission_table_and_tenant_scoped_uniques() -
 
     applied = run_migrations(conn)
 
-    assert applied == 1
-    assert get_current_version(conn) == 26
+    assert applied == len(MIGRATIONS) - 25
+    assert get_current_version(conn) == MIGRATIONS[-1][0]
     columns = _columns(conn, "ledger_replay_admissions")
     assert {
         "tenant_id",
