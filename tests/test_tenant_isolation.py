@@ -35,7 +35,7 @@ async def test_tenant_isolation_store_and_recall(engine):
     token_alice = tenant_id_var.set("tenant-alice")
     await engine.store(
         content="Alice's secret strategy",
-        fact_type="decision",
+        fact_type="knowledge",
         project="alpha",
         source="api",
     )
@@ -45,7 +45,7 @@ async def test_tenant_isolation_store_and_recall(engine):
     token_bob = tenant_id_var.set("tenant-bob")
     await engine.store(
         content="Bob's secret strategy",
-        fact_type="decision",
+        fact_type="knowledge",
         project="alpha",
         source="api",
     )

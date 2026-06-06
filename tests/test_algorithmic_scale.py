@@ -75,7 +75,7 @@ class TestFTS5Triggers:
         await engine.store(
             project="test-proj",
             content="sovereign memory system",
-            fact_type="decision",
+            fact_type="knowledge",
             source="test",
         )
 
@@ -100,7 +100,7 @@ class TestFTS5Triggers:
         fact_id = await engine.store(
             project="test-proj",
             content="old content here",
-            fact_type="decision",
+            fact_type="knowledge",
             source="test",
         )
 
@@ -133,7 +133,7 @@ class TestFTS5Triggers:
         fact_id = await engine.store(
             project="test-proj",
             content="ephemeral data",
-            fact_type="decision",
+            fact_type="knowledge",
             source="test",
         )
 
