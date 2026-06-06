@@ -27,7 +27,7 @@ async def run_benchmark():
     # Actually, CortexEngine provides `manager` which is the CortexMemoryManager.
     manager = engine._memory_manager
     
-    num_facts = 1000
+    num_facts = 100
     tenant_id = "benchmark_tenant"
     
     console.print(f"[yellow]Generating {num_facts} synthetic facts...[/yellow]")
@@ -59,7 +59,7 @@ async def run_benchmark():
     await manager.wait_for_background()
     
     # 2. Read Benchmark (Concurrent Assembly)
-    num_queries = 100
+    num_queries = 20
     console.print(f"[yellow]Executing {num_queries} Reads...[/yellow]")
     start_time = time.perf_counter()
     

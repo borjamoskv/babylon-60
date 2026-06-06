@@ -9,8 +9,8 @@ forces the conversation or iteration to close.
 from __future__ import annotations
 
 import logging
-from collections import deque
 import re
+from collections import deque
 
 logger = logging.getLogger("cortex.guards.anti_limerence")
 
