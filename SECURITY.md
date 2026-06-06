@@ -51,7 +51,7 @@ To verify a release:
 pip install sigstore
 sigstore verify identity \
   --cert-oidc-issuer https://token.actions.githubusercontent.com \
-  --cert-identity https://github.com/borjamoskv/Cortex-Persist/.github/workflows/release.yml@refs/tags/v0.3.0b2 \
+  --cert-identity https://github.com/borjamoskv/Cortex-Persist/.github/workflows/release.yml@refs/tags/v1.0.0 \
   cortex_persist-0.3.0b2.tar.gz
 ```
 
