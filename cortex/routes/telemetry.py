@@ -417,10 +417,9 @@ async def add_mafia_node(
 @router.websocket("/v1/telemetry/nodes/ws")
 @router.websocket("/api/v1/telemetry/nodes/ws")
 @router.websocket("/telemetry/nodes/ws")
-async def telemetry_nodes_ws(
-    websocket: WebSocket, engine: AsyncCortexEngine = Depends(get_async_engine)
-):
+async def telemetry_nodes_ws(websocket: WebSocket):
     """Realtime stream of Mafia Node additions/updates & Telemetry Ingestion."""
+    engine: AsyncCortexEngine = websocket.app.state.async_engine
     await websocket.accept()
     _nodes_websockets.add(websocket)
     logger.info("Extension WebSocket connected to Mafia Nodes sync stream.")
