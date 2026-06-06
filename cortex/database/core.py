@@ -115,6 +115,7 @@ def _apply_pragmas_sync(
     conn.execute(f"PRAGMA page_size={PAGE_SIZE}")
     conn.execute(f"PRAGMA cache_size={CACHE_SIZE_KB}")
     conn.execute("PRAGMA temp_store=MEMORY")
+    conn.execute("PRAGMA threads=4")  # Optimize sqlite-vec sorting/indexing
 
     if read_only:
         conn.execute("PRAGMA query_only=1")
@@ -287,6 +288,7 @@ async def apply_pragmas_async(conn: aiosqlite.Connection) -> None:
     await conn.execute(f"PRAGMA page_size={PAGE_SIZE};")
     await conn.execute(f"PRAGMA cache_size={CACHE_SIZE_KB};")
     await conn.execute("PRAGMA temp_store=MEMORY;")
+    await conn.execute("PRAGMA threads=4;")  # Optimize sqlite-vec sorting/indexing
     await conn.execute(f"PRAGMA wal_autocheckpoint={WAL_AUTOCHECKPOINT};")
     await conn.commit()
 

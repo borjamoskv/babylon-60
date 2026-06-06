@@ -108,6 +108,15 @@ async def insert_fact_record(
         token = meta.get("cortex_taint") if meta else None
         await enforce_taint_check(conn, token, content)
 
+    if fact_type == "UI_ACTION" and meta:
+        expected_hash = meta.get("expected_ui_hash")
+        current_hash = meta.get("current_ui_hash")
+        if expected_hash is not None and current_hash is not None:
+            from cortex.guards.ctre_guard import CTRECollisionError, CTREGuard
+            success, epsilon = CTREGuard.validate_commit(int(expected_hash), int(current_hash))
+            if not success:
+                raise CTRECollisionError(int(expected_hash), int(current_hash), epsilon)
+
     f_hash, encrypted_content, sig_b64, pub_b64 = await _prepare_fact_content(content, tenant_id)
 
     parent_decision_id = await _resolve_causal_parent(
