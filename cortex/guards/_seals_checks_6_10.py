@@ -22,51 +22,68 @@ async def _check_blocking_sleep(exclude_files: frozenset[str]) -> list[str]:
         try:
             tree = ast.parse(content, filename=str(py_file))
             for node in ast.walk(tree):
-                if isinstance(node, ast.Call):
-                    if (
-                        isinstance(node.func, ast.Attribute)
-                        and node.func.attr == "sleep"
-                        and isinstance(node.func.value, ast.Name)
-                        and (node.func.value.id == "time")
-                        or (isinstance(node.func, ast.Name) and node.func.id == "sleep")
-                    ):
-                        violations.append(f"{py_file.name}:{node.lineno}")
+                if _is_sleep_call(node):
+                    violations.append(f"{py_file.name}:{node.lineno}")
         except SyntaxError:
             continue
     return violations
+
+
+def _is_sleep_call(node: ast.AST) -> bool:
+    if not isinstance(node, ast.Call):
+        return False
+    if (
+        isinstance(node.func, ast.Attribute)
+        and node.func.attr == "sleep"
+        and isinstance(node.func.value, ast.Name)
+        and (node.func.value.id == "time")
+    ):
+        return True
+    if isinstance(node.func, ast.Name) and node.func.id == "sleep":
+        return True
+    return False
 
 
 async def _check_temperature_determinism(critical_files: list[Path]) -> list[str]:
     """Ensure LLM calls use temperature=0 for determinism."""
     violations = []
-    zero_values = (0, 0.0)
     for path in critical_files:
-        if path in GlobalSourceCache.files:
-            content = GlobalSourceCache.files[path]
-        elif path.exists():
-            content = await asyncio.to_thread(path.read_text, encoding="utf-8")
-        else:
+        content = _get_file_content(path)
+        if content is None:
             continue
         try:
             tree = ast.parse(content, filename=str(path))
-            has_temp = False
-            has_zero = False
-            for node in ast.walk(tree):
-                if isinstance(node, ast.keyword) and node.arg == "temperature":
-                    has_temp = True
-                    if isinstance(node.value, ast.Constant) and node.value.value in zero_values:
-                        has_zero = True
-                elif isinstance(node, ast.Dict):
-                    for k, v in zip(node.keys, node.values, strict=False):
-                        if isinstance(k, ast.Constant) and k.value == "temperature":
-                            has_temp = True
-                            if isinstance(v, ast.Constant) and v.value in zero_values:
-                                has_zero = True
-            if has_temp and (not has_zero):
+            if _has_temperature_drift(tree):
                 violations.append(path.name)
         except SyntaxError:
             continue
     return violations
+
+
+def _get_file_content(path: Path) -> str | None:
+    if path in GlobalSourceCache.files:
+        return GlobalSourceCache.files[path]
+    if path.exists():
+        return path.read_text(encoding="utf-8")
+    return None
+
+
+def _has_temperature_drift(tree: ast.AST) -> bool:
+    has_temp = False
+    has_zero = False
+    zero_values = (0, 0.0)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.keyword) and node.arg == "temperature":
+            has_temp = True
+            if isinstance(node.value, ast.Constant) and node.value.value in zero_values:
+                has_zero = True
+        elif isinstance(node, ast.Dict):
+            for k, v in zip(node.keys, node.values, strict=False):
+                if isinstance(k, ast.Constant) and k.value == "temperature":
+                    has_temp = True
+                    if isinstance(v, ast.Constant) and v.value in zero_values:
+                        has_zero = True
+    return has_temp and not has_zero
 
 
 async def _check_latency_telemetry() -> list[str]:
