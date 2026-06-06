@@ -9,11 +9,9 @@ logger = logging.getLogger("campaign")
 import ast
 import subprocess
 import sys
-import os
-import shutil
-import time
-import yaml
 from pathlib import Path
+
+import yaml
 
 
 class Mutator(ast.NodeTransformer):

@@ -1,5 +1,6 @@
-import time
 import random
+import time
+
 from authenticity_engine import AuthenticityDynamicsEngine, InterpretationLayer, RawFeatures
 
 

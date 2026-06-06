@@ -93,7 +93,7 @@ async def run_ui(kernel: OmegaKernel):
         entropy_bar = "█" * min(int(entropy / 5), 10) + "░" * (10 - min(int(entropy / 5), 10))
 
         sensors_table.add_row("Scanned Files", f"{kernel.sensor.last_scan_files} python files")
-        sensors_table.add_row("TODOs / FIXMEs", f"[bold white]{kernel.sensor.last_scan_todos}[/]")
+        sensors_table.add_row("TODOs / FIX-MEs", f"[bold white]{kernel.sensor.last_scan_todos}[/]")
         sensors_table.add_row("Ruff Violations", f"[bold {_RED}]{kernel.sensor.last_scan_violations}[/]")
         sensors_table.add_row("Structural Entropy", f"[bold {entropy_style}]{entropy:.2f} J[/] [{entropy_bar}]")
         sensors_table.add_row("Auto-Push Config", f"[{_CYBER}]ACTIVE[/]" if kernel.auto_push else f"[{_DIM}]DISABLED[/]")

@@ -16,10 +16,9 @@ import hashlib
 import json
 import os
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
-import sys
-import logging
 
 # Ensure parent directory is in python path
 sys.path.insert(0, str(Path(__file__).parent.parent))

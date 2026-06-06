@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import json
-import time
 import os
 import sys
+import time
 
 STATE_FILE = ".exergy_state.json"
 C5_PREFIX = "[CORTEX-SENTINEL: C5-REAL]"

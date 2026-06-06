@@ -1,6 +1,6 @@
-import sqlite3
 import json
 import os
+import sqlite3
 
 DB_PATH = "influencer_audit_v1.db"
 OUTPUT_HTML = "report_influencer_audit.html"

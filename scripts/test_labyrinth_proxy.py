@@ -1,8 +1,9 @@
 import os
 import sys
 import time
-from openai import OpenAI
+
 from httpx import Client
+from openai import OpenAI
 
 # ---------------------------------------------------------
 # C5-REAL: Labyrinth Proxy Integration Test

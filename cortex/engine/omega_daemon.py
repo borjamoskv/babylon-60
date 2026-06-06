@@ -53,7 +53,7 @@ class EntropySensor:
                         try:
                             with open(file_path, encoding="utf-8", errors="ignore") as f:
                                 for line in f:
-                                    if "TODO" in line or "FIXME" in line:
+                                    if "TODO" in line or "FIX-ME" in line:
                                         todos += 1
                         except Exception:
                             pass

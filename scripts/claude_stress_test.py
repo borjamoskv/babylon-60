@@ -2,10 +2,10 @@
 
 """[QWEN-OMEGA-MOCK] AST Transmuted via Deterministic Fallback."""
 #!/usr/bin/env python3
+import asyncio
+import json
 import sys
 import time
-import json
-import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 

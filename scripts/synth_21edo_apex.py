@@ -1,8 +1,8 @@
-import sys
-import os
 import math
-import wave
+import os
 import struct
+import sys
+import wave
 
 
 def generate_21edo_stem(output_path: str, exergy_yield: float = 0.85):

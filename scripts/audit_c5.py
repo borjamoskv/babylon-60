@@ -6,8 +6,8 @@ import sys
 sys.path.append(os.path.abspath("cortex-core"))
 
 try:
-    from persistence import _get_ring_buffer, HybridPersistenceManager
     from k0_swarm_node import K0Metabolism
+    from persistence import HybridPersistenceManager, _get_ring_buffer
 
     print("[+] Imports C5-REAL successful.")
 except ImportError as e:

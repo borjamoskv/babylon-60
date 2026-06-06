@@ -9,10 +9,10 @@ Simulation mode: "Consejo de Sabios" - 1000-agent breathing synchronization.
 
 import asyncio
 import json
-import time
-import random
 import logging
 import math
+import random
+import time
 
 try:
     import websockets

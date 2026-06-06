@@ -1,11 +1,11 @@
 import asyncio
-import time
 import shutil
 import subprocess
+import time
 from pathlib import Path
 
-from cortex.engine import CortexEngine
 from cortex.audit.frontier import FrontierAuditor
+from cortex.engine import CortexEngine
 from cortex.engine.swarm_10k import SwarmCommander
 
 

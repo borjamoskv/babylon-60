@@ -1,14 +1,14 @@
 import asyncio
 import email
-from email.message import EmailMessage
-from email.utils import parseaddr
 import imaplib
-import smtplib
-import ssl
-import os
 import json
 import logging
-from typing import Optional, Any
+import os
+import smtplib
+import ssl
+from email.message import EmailMessage
+from email.utils import parseaddr
+from typing import Any
 
 
 # C5-REAL: Clasificación estructural NLP

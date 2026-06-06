@@ -1,6 +1,6 @@
-import math
 import hashlib
 import json
+import math
 
 # 21-EDO constants
 ROOT_FREQ = 440.0  # Base frequency (A4)

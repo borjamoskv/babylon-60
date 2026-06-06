@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-import os
-import sys
 import argparse
-import subprocess
+import os
 import re
+import subprocess
+import sys
 
 
 def parse_report(report_path):

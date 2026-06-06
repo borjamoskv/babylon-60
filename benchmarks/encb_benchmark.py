@@ -185,8 +185,8 @@ async def run_encb(
     pool = None
 
     try:
-        from cortex.database.schema import ALL_SCHEMA  # pyright: ignore[reportMissingImports]
         from cortex.database.pool import CortexConnectionPool
+        from cortex.database.schema import ALL_SCHEMA  # pyright: ignore[reportMissingImports]
         from cortex.engine import CortexEngine as AsyncCortexEngine
 
         cortex_available = True

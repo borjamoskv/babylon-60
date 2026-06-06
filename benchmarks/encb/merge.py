@@ -139,7 +139,6 @@ def merge_scalar(local: BeliefObject, remote: BeliefObject) -> BeliefObject:
             try:
                 values.append(float(ev.value))
             except (ValueError, TypeError):
-                import logging
 
                 pass
         else:
@@ -148,7 +147,6 @@ def merge_scalar(local: BeliefObject, remote: BeliefObject) -> BeliefObject:
                 if len(parts) >= 2:
                     values.append(float(parts[1]))
             except (ValueError, IndexError):
-                import logging
 
                 pass
 

@@ -1,8 +1,9 @@
 # [C5-REAL] Exergy-Maximized
 import logging
-from cortex.extensions.evolution.free_energy import FreeEnergyState
-from cortex.extensions.evolution.agents import AgentDomain
+
 from cortex.engine.right_brain import HeuristicEngine
+from cortex.extensions.evolution.agents import AgentDomain
+from cortex.extensions.evolution.free_energy import FreeEnergyState
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

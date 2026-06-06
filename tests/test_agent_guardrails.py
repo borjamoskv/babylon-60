@@ -69,7 +69,7 @@ tools:
 
         assert role.name == "test-agent"
         assert role.model == "claude-sonnet"
-        assert role.memory.art_rho == 0.9
+        assert float(role.memory.art_rho) == 0.9
         assert role.memory.sparse_encoding is True
         assert role.guardrails.max_session_tokens == 50000
         assert role.guardrails.max_turns == 10

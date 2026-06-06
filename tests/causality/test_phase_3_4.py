@@ -40,7 +40,7 @@ class TestCLI:
         assert "parent_id" in params
 
     def test_trace_chain_exists(self):
-        from cortex.cli.memory_cmds import trace_chain
+        from cortex.cli.causal_cmds import trace_chain
 
         params = {p.name for p in trace_chain.params}
         assert "fact_id" in params

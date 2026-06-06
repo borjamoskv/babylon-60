@@ -124,7 +124,7 @@ class InlineCompletionStrategy(SuggestionStrategy):
                     suggestion_id=f"cpl-{uuid4().hex[:12]}",
                     kind=SuggestionKind.DOCUMENTATION,
                     confidence=Confidence.MEDIUM,
-                    inline_text='    """TODO: Document this function."""\n',
+                    inline_text='    """PENDING: Document this function."""\n',
                     explanation="Missing docstring detected",
                     source_context_hash=context_hash,
                     model_used=model,
@@ -181,7 +181,7 @@ class DiagnosticFixStrategy(SuggestionStrategy):
                             start_line=line,
                             end_line=line,
                             original_text="",
-                            replacement_text=f"# TODO: Fix - {message}",
+                            replacement_text=f"# PENDING: Fix - {message}",
                         )
                     ],
                     explanation=f"Fix for {severity}: {message}",

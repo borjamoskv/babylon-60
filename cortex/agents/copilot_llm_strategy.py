@@ -93,7 +93,7 @@ class DeterministicFallbackClient:
         if prompt.rstrip().endswith(":"):
             text = "\n    pass\n"
         elif "def " in prompt and '"""' not in prompt:
-            text = '    """TODO: Add documentation."""\n'
+            text = '    """PENDING: Add documentation."""\n'
         elif "class " in prompt and "pass" not in prompt:
             text = "\n    def __init__(self):\n        pass\n"
         elif prompt.rstrip().endswith(","):

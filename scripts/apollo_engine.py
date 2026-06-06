@@ -8,12 +8,13 @@ AESTHETIC: INDUSTRIAL_NOIR_2026
 Deterministic B2B Lead Extraction targeting Web3, zk, TEE, and AI Agent founders.
 """
 
+import json
+import logging
 import os
 import sys
-import json
-import httpx
-import logging
 from dataclasses import dataclass
+
+import httpx
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | CORTEX-OMEGA | %(message)s")
 logger = logging.getLogger("apollo_engine")

@@ -148,12 +148,12 @@ def error_boundary(
     """
 
     def decorator(func: F) -> F:
-        """TODO: Document decorator"""
+        """PENDING: Document decorator"""
         if inspect.iscoroutinefunction(func):
 
             @functools.wraps(func)
             async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
-                """TODO: Document async_wrapper"""
+                """PENDING: Document async_wrapper"""
                 boundary = ErrorBoundary(
                     source, project=project, reraise=reraise, extra_meta=extra_meta
                 )
@@ -164,7 +164,7 @@ def error_boundary(
 
         @functools.wraps(func)  # pyright: ignore[reportArgumentType]
         def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
-            """TODO: Document sync_wrapper"""
+            """PENDING: Document sync_wrapper"""
             boundary = ErrorBoundary(
                 source, project=project, reraise=reraise, extra_meta=extra_meta
             )

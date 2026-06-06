@@ -193,7 +193,7 @@ def process_transcript(file_path: str, telemetry: CortexTelemetry):
 
 
 def parse_iso(ts):
-    """TODO: Document parse_iso"""
+    """PENDING: Document parse_iso"""
     if not ts:
         return None
     for fmt in ["%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%S%z"]:

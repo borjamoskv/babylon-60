@@ -1,7 +1,8 @@
-import cortex_rs
-from functools import wraps
 import json
 import os
+from functools import wraps
+
+import cortex_rs
 
 
 def text_to_hv(text: str, dim: int = 1024) -> cortex_rs.HyperVector:
@@ -101,6 +102,5 @@ if __name__ == "__main__":
                     f"Merkle Root: {data['root_hash'][:16]}... | Leaf Hash: {data['hash'][:8]}... | Timestamp: {data['timestamp']}\n"
                 )
     except FileNotFoundError:
-        import logging
 
         pass

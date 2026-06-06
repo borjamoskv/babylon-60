@@ -1,5 +1,6 @@
-import httpx
 import sys
+
+import httpx
 
 
 def check_endpoints():

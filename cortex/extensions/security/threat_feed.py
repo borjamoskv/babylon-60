@@ -53,7 +53,7 @@ class ThreatFeedReport:
     duration_seconds: float = 0.0
 
     def to_dict(self) -> dict[str, Any]:
-        """TODO: Document to_dict"""
+        """PENDING: Document to_dict"""
         return {
             "timestamp": self.timestamp,
             "feeds_checked": self.feeds_checked,

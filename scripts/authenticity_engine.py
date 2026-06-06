@@ -1,5 +1,6 @@
 from typing import NamedTuple
 
+
 class RawFeatures(NamedTuple):
     creator_autonomy: float
     algorithmic_pressure: float

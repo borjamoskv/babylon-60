@@ -5,12 +5,12 @@ C5-REAL.
 AST-Validated Pre-commit & Diff-Context Commit Forge.
 """
 
-import sys
-import os
-import subprocess
-import re
 import ast
 import math
+import os
+import re
+import subprocess
+import sys
 from pathlib import Path
 
 # --- CONSTANTS & CONFIG ---

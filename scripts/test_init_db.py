@@ -1,6 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import asyncio
 import logging
+
 from cortex.engine import CortexEngine
 
 logging.basicConfig(level=logging.INFO)

@@ -8,9 +8,9 @@ against the target ontological Seed using OmegaAuditor.
 """
 
 import asyncio
-import sqlite3
-import os
 import logging
+import os
+import sqlite3
 
 from cortex.guards.omega_auditor import OmegaAuditor
 

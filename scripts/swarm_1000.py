@@ -1,8 +1,6 @@
 import asyncio
-import time
 import random
-import subprocess
-import os
+import time
 
 
 async def code4rena_fuzzer(agent_id):
