@@ -88,6 +88,18 @@ class VirtualAgent:
             # ── C5-REAL path ──────────────────────────────────────────
             try:
                 from cortex.extensions.llm._models import CortexPrompt, IntentProfile
+                
+                # War Council: Cognitive Diversity Mapping
+                intent_map = {
+                    "CODE": IntentProfile.CODE,
+                    "SECURITY": IntentProfile.ARCHITECT,
+                    "INFRA": IntentProfile.ARCHITECT,
+                    "INTEL": IntentProfile.REASONING,
+                    "DATA": IntentProfile.REASONING,
+                    "CREATIVE": IntentProfile.CREATIVE,
+                    "MARKETING": IntentProfile.CREATIVE,
+                }
+                agent_intent = intent_map.get(self.specialty, IntentProfile.GENERAL)
 
                 cortex_prompt = CortexPrompt(
                     system_instruction=(
@@ -96,7 +108,7 @@ class VirtualAgent:
                     ),
                     working_memory=[{"role": "user", "content": prompt}],
                     temperature=0.0,  # AX-I: determinismo estricto
-                    intent=IntentProfile.GENERAL,
+                    intent=agent_intent,
                 )
                 result = await self._router.execute_resilient(cortex_prompt)
                 # Result is Ok(str) | Err(str) - extract value regardless
