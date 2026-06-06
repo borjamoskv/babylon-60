@@ -287,18 +287,27 @@ def _extract_imports(source: str) -> set[str]:
     for line in source.splitlines():
         stripped = line.strip()
         if stripped.startswith("import "):
-            parts = stripped[7:].split(",")
-            for part in parts:
-                pkg = part.strip().split(".")[0].split(" ")[0]
-                if pkg:
-                    imports.add(pkg)
+            _extract_from_import_stmt(stripped, imports)
         elif stripped.startswith("from "):
-            match = re.match(r"from\s+(\S+)", stripped)
-            if match:
-                pkg = match.group(1).split(".")[0]
-                if pkg:
-                    imports.add(pkg)
+            _extract_from_from_stmt(stripped, imports)
     return imports
+
+
+def _extract_from_import_stmt(line: str, imports: set[str]) -> None:
+    parts = line[7:].split(",")
+    for part in parts:
+        pkg = part.strip().split(".")[0].split(" ")[0]
+        if pkg:
+            imports.add(pkg)
+
+
+def _extract_from_from_stmt(line: str, imports: set[str]) -> None:
+    match = re.match(r"from\s+(\S+)", line)
+    if not match:
+        return
+    pkg = match.group(1).split(".")[0]
+    if pkg:
+        imports.add(pkg)
 
 
 async def check_seal_8_dependency_impl(

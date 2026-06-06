@@ -63,24 +63,29 @@ def is_safe_url(url: str, allow_private: bool = False) -> bool:
             return False
 
         # 3. Private Network Protection (SSRF Mitigation)
-        if not allow_private:
-            try:
-                # Try parsing as IP first
-                ip = ipaddress.ip_address(host)
-                for network in _PRIVATE_NETWORKS:
-                    if ip in network:
-                        logger.error("URLGuard: Blocked private IP access: %s", host)
-                        return False
-            except ValueError:
-                # Not an IP, it's a hostname.
-                if host.lower() in {"localhost", "127.0.0.1", "::1", "metadata.google.internal"}:
-                    logger.error("URLGuard: Blocked loopback/metadata hostname access: %s", host)
-                    return False
+        if not allow_private and _is_private_host(host):
+            return False
 
         return True
     except Exception as e:
         logger.error("URLGuard: Validation error for %s: %s", url, e)
         return False
+
+
+def _is_private_host(host: str) -> bool:
+    try:
+        # Try parsing as IP first
+        ip = ipaddress.ip_address(host)
+        for network in _PRIVATE_NETWORKS:
+            if ip in network:
+                logger.error("URLGuard: Blocked private IP access: %s", host)
+                return True
+    except ValueError:
+        # Not an IP, it's a hostname.
+        if host.lower() in {"localhost", "127.0.0.1", "::1", "metadata.google.internal"}:
+            logger.error("URLGuard: Blocked loopback/metadata hostname access: %s", host)
+            return True
+    return False
 
 
 class SafeTransport:
