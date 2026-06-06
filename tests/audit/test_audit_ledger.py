@@ -42,7 +42,7 @@ async def ledger(audit_conn, tmp_path):
     ):
         from cortex.audit.ledger import EnterpriseAuditLedger
 
-        ledger = EnterpriseAuditLedger.__new__(EnterpriseAuditLedger)
+        ledger = object.__new__(EnterpriseAuditLedger)
         # Manually init to avoid writing PEM to test source tree
         from cryptography.hazmat.primitives.asymmetric import ed25519
 
@@ -280,8 +280,8 @@ class TestEnterpriseAuditLedger:
 
         from cortex.audit.ledger import EnterpriseAuditLedger
 
-        # Build ledger manually
-        l1 = EnterpriseAuditLedger.__new__(EnterpriseAuditLedger)
+        # Build first ledger manually
+        l1 = object.__new__(EnterpriseAuditLedger)
         l1._conn = audit_conn
         l1._ready = False
         l1._last_hash = "GENESIS"
@@ -300,7 +300,7 @@ class TestEnterpriseAuditLedger:
         saved_hash = l1._last_hash
 
         # Build second ledger pointing to same conn, verify it loads the last hash
-        l2 = EnterpriseAuditLedger.__new__(EnterpriseAuditLedger)
+        l2 = object.__new__(EnterpriseAuditLedger)
         l2._conn = audit_conn
         l2._ready = False
         l2._last_hash = "GENESIS"
