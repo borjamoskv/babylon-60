@@ -48,7 +48,7 @@ from cortex.sica.autonomy import (
 )
 from cortex.sica.constitution import Constitution
 from cortex.sica.meta_level import MetaAction, MetaJudgment, MetaLevel
-from cortex.sica.object_level import ObjectLevel, StepOutcome
+from cortex.sica.object_level import ExecutionTrace, ObjectLevel, StepOutcome
 from cortex.sica.persistence import load_or_default, save_genome
 from cortex.sica.strategy import SearchStrategy
 
@@ -201,142 +201,133 @@ class SICAAgent(BaseAgent):
         objective = message.payload.get("objective", "")
         task_input = message.payload.get("input", {})
 
-        logger.info(
-            "[%s] SICA task %s: %s",
-            self.agent_id,
-            task_id,
-            objective[:100],
-        )
+        logger.info("[%s] SICA task %s: %s", self.agent_id, task_id, objective[:100])
 
         retry_count = 0
         max_retries = self._max_retries
         last_judgment: MetaJudgment | None = None
 
         while retry_count <= max_retries:
-            # ── Phase 1: Object-Level Execution ──────────────────
-            trace = self._object_level.begin_task(task_id, objective)
-
-            try:
-                result = await self._run_object_level(task_input, objective)
-                outcome = StepOutcome.SUCCESS
-            except Exception as exc:
-                self._object_level.record_step(
-                    action="task_execution",
-                    outcome=StepOutcome.FAILURE,
-                    error=repr(exc),
-                )
-                result = {"error": repr(exc)}
-                outcome = StepOutcome.FAILURE
-
-            # Assess own confidence
-            # Update assessor with potentially new strategy reference
-            self._assessor._strategy = self._strategy
-            confidence = self._assessor.assess_confidence(outcome)
-            trace = self._object_level.end_task(outcome, confidence=confidence)
-
-            # ── Phase 2: Meta-Level MONITOR ──────────────────────
-            judgment = self._meta_level.monitor(trace)
-            last_judgment = judgment
-
-            self._lifetime_stats.record_judgment(judgment)
-
-            logger.info(
-                "[%s] Meta-judgment: class=%s meta_failure=%s confidence=%.2f",
-                self.agent_id,
-                judgment.failure_class.value if judgment.failure_class else "none",
-                judgment.is_meta_failure,
-                judgment.confidence,
+            trace, result, outcome, confidence = await self._run_phase_1_object_level(
+                task_id, objective, task_input
             )
 
-            # ── Phase 3: Meta-Level CONTROL ──────────────────────
-            if judgment.requires_strategy_mutation:
-                mutations = self._meta_level.control(judgment)
-                self._lifetime_stats.mutations += len(mutations)
+            judgment = self._run_phase_2_monitor(trace)
+            last_judgment = judgment
 
-                # Speculative forking on meta-failures
-                if (
-                    self._autonomy_enabled
-                    and judgment.is_meta_failure
-                    and len(self._object_level.trace_archive) >= 3
-                ):
-                    self._strategy = self._speculative_fork.speculate(
-                        self._strategy,
-                        judgment,
-                        self._object_level.trace_archive[-5:],
-                    )
-                    # Update references after potential fork adoption
-                    self._object_level.strategy = self._strategy
-                    self._meta_level._strategy = self._strategy
+            max_retries = self._run_phase_3_control(judgment, max_retries)
 
-                logger.info(
-                    "[%s] Applied %d strategy mutations (gen=%d)",
-                    self.agent_id,
-                    len(mutations),
-                    self._strategy.genome.generation,
-                )
-
-            # ── Phase 3b: Adaptive Retry Budget ──────────────────
-            if self._autonomy_enabled:
-                max_retries = self._adaptive_retry.compute_budget(judgment)
-
-            # ── Phase 4: Constitutional Gate ─────────────────────
             if judgment.constitutional_verdict and judgment.constitutional_verdict.abort_needed:
                 await self._emitter.emit_abort(message, task_id, judgment)
                 return
 
-            # ── Phase 5: Success or Retry Decision ───────────────
             if outcome == StepOutcome.SUCCESS:
-                # Check constitutional revision requirement
-                if (
-                    judgment.constitutional_verdict
-                    and judgment.constitutional_verdict.revision_needed
-                ):
-                    logger.warning(
-                        "[%s] Output requires constitutional revision",
-                        self.agent_id,
-                    )
-                    result = self._assessor.revise_output(result, judgment)
-
-                await self._emitter.emit_result(message, task_id, result, judgment)
+                await self._handle_success(message, task_id, result, judgment)
                 return
 
-            # Failure - should we retry?
-            if judgment.is_meta_failure:
-                # Meta-failure: strategy was mutated, retry with new genome
-                retry_count += 1
-                logger.info(
-                    "[%s] Meta-failure detected. Retrying with mutated strategy "
-                    "(attempt %d/%d, genome=%s)",
-                    self.agent_id,
-                    retry_count,
-                    max_retries,
-                    self._strategy.genome.genome_hash,
-                )
+            retry_count, should_continue = self._handle_failure_retry(
+                judgment, retry_count, max_retries
+            )
+            if should_continue:
                 continue
-            # Object-failure: simple retry without strategy change
-            retry_count += 1
-            if retry_count <= max_retries:
-                logger.info(
-                    "[%s] Object-level failure. Simple retry (%d/%d)",
-                    self.agent_id,
-                    retry_count,
-                    max_retries,
-                )
-                continue
+            break
 
-        # Exhausted retries
-        logger.error(
-            "[%s] Task %s exhausted %d retries",
-            self.agent_id,
-            task_id,
-            max_retries,
-        )
+        logger.error("[%s] Task %s exhausted %d retries", self.agent_id, task_id, max_retries)
 
-        # Check if we should escalate
         if last_judgment and MetaAction.ESCALATE_TO_HUMAN in last_judgment.recommended_actions:
             await self._emitter.emit_escalation(message, task_id, last_judgment)
         else:
             await self._emitter.emit_failure(message, task_id, last_judgment)
+
+    async def _run_phase_1_object_level(
+        self, task_id: str, objective: str, task_input: dict[str, Any]
+    ):
+        trace = self._object_level.begin_task(task_id, objective)
+        try:
+            result = await self._run_object_level(task_input, objective)
+            outcome = StepOutcome.SUCCESS
+        except Exception as exc:
+            self._object_level.record_step(
+                action="task_execution", outcome=StepOutcome.FAILURE, error=repr(exc)
+            )
+            result = {"error": repr(exc)}
+            outcome = StepOutcome.FAILURE
+
+        self._assessor._strategy = self._strategy
+        confidence = self._assessor.assess_confidence(outcome)
+        trace = self._object_level.end_task(outcome, confidence=confidence)
+        return trace, result, outcome, confidence
+
+    def _run_phase_2_monitor(self, trace: ExecutionTrace) -> MetaJudgment:
+        judgment = self._meta_level.monitor(trace)
+        self._lifetime_stats.record_judgment(judgment)
+        logger.info(
+            "[%s] Meta-judgment: class=%s meta_failure=%s confidence=%.2f",
+            self.agent_id,
+            judgment.failure_class.value if judgment.failure_class else "none",
+            judgment.is_meta_failure,
+            judgment.confidence,
+        )
+        return judgment
+
+    def _run_phase_3_control(self, judgment: MetaJudgment, max_retries: int) -> int:
+        if judgment.requires_strategy_mutation:
+            mutations = self._meta_level.control(judgment)
+            self._lifetime_stats.mutations += len(mutations)
+
+            if (
+                self._autonomy_enabled
+                and judgment.is_meta_failure
+                and len(self._object_level.trace_archive) >= 3
+            ):
+                self._strategy = self._speculative_fork.speculate(
+                    self._strategy, judgment, self._object_level.trace_archive[-5:]
+                )
+                self._object_level.strategy = self._strategy
+                self._meta_level._strategy = self._strategy
+
+            logger.info(
+                "[%s] Applied %d strategy mutations (gen=%d)",
+                self.agent_id,
+                len(mutations),
+                self._strategy.genome.generation,
+            )
+
+        if self._autonomy_enabled:
+            return self._adaptive_retry.compute_budget(judgment)
+        return max_retries
+
+    async def _handle_success(
+        self, message: AgentMessage, task_id: str, result: dict[str, Any], judgment: MetaJudgment
+    ) -> None:
+        if judgment.constitutional_verdict and judgment.constitutional_verdict.revision_needed:
+            logger.warning("[%s] Output requires constitutional revision", self.agent_id)
+            result = self._assessor.revise_output(result, judgment)
+        await self._emitter.emit_result(message, task_id, result, judgment)
+
+    def _handle_failure_retry(
+        self, judgment: MetaJudgment, retry_count: int, max_retries: int
+    ) -> tuple[int, bool]:
+        retry_count += 1
+        if judgment.is_meta_failure:
+            logger.info(
+                "[%s] Meta-failure detected. Retrying with mutated strategy "
+                "(attempt %d/%d, genome=%s)",
+                self.agent_id,
+                retry_count,
+                max_retries,
+                self._strategy.genome.genome_hash,
+            )
+            return retry_count, True
+        if retry_count <= max_retries:
+            logger.info(
+                "[%s] Object-level failure. Simple retry (%d/%d)",
+                self.agent_id,
+                retry_count,
+                max_retries,
+            )
+            return retry_count, True
+        return retry_count, False
 
     async def _run_object_level(
         self,
