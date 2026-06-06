@@ -152,7 +152,7 @@ class SovereignScheduler:
     ) -> ScheduleEntry:
         """Register a recurring interval task."""
         self._tasks[name] = coro_factory
-        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         entry = ScheduleEntry(
             name=name,
             kind="interval",
@@ -175,7 +175,7 @@ class SovereignScheduler:
     ) -> ScheduleEntry:
         """Register a cron-expression task (requires croniter)."""
         self._tasks[name] = coro_factory
-        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         next_run = self._next_cron_time(cron_expr)
         entry = ScheduleEntry(
             name=name,
@@ -200,7 +200,7 @@ class SovereignScheduler:
     ) -> ScheduleEntry:
         """Register a one-shot task."""
         self._tasks[name] = coro_factory
-        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         entry = ScheduleEntry(
             name=name,
             kind="oneshot",
@@ -219,7 +219,7 @@ class SovereignScheduler:
         with self._conn() as conn:
             result = conn.execute(
                 "UPDATE schedules SET enabled = 0, updated_at = ? WHERE name = ?",
-                (datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(), name),
+                (datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), name),
             )
         cancelled = result.rowcount > 0
         if cancelled:
@@ -266,7 +266,7 @@ class SovereignScheduler:
 
     async def _tick(self) -> None:
         """Evaluate all schedules and fire due tasks."""
-        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
         now_iso = now.isoformat()
 
         with self._conn() as conn:
@@ -394,7 +394,7 @@ class SovereignScheduler:
             )
 
     def _compute_next_run(self, entry: ScheduleEntry) -> str | None:
-        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
         if entry.kind == "interval" and entry.interval_s:
             from datetime import timedelta
 
@@ -410,7 +410,7 @@ class SovereignScheduler:
             from croniter import croniter
 
             return (
-                croniter(cron_expr, datetime.fromtimestamp(time.monotonic(), tz=timezone.utc))
+                croniter(cron_expr, datetime.fromtimestamp(time.time(), tz=timezone.utc))
                 .get_next(datetime)
                 .isoformat()
             )
@@ -418,7 +418,7 @@ class SovereignScheduler:
             from datetime import timedelta
 
             return (
-                datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) + timedelta(hours=1)
+                datetime.fromtimestamp(time.time(), tz=timezone.utc) + timedelta(hours=1)
             ).isoformat()
 
     @staticmethod

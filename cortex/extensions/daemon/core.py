@@ -152,7 +152,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin, ResourceMgrMixin,
     def check(self) -> DaemonStatus:
         """Run all checks once. Returns DaemonStatus."""
         check_start = time.monotonic()
-        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         status = DaemonStatus(checked_at=now)
         self._run_monitor(status, "sites", self.site_monitor, self._alert_sites, method="check_all")
         self._run_monitor(status, "stale_ghosts", self.ghost_watcher, self._alert_ghosts)

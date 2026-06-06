@@ -164,7 +164,7 @@ class SnapshotAgeCollector:
                     if ts.tzinfo is None:
                         ts = ts.replace(tzinfo=timezone.utc)
                     age_hours = (
-                        datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) - ts
+                        datetime.fromtimestamp(time.time(), tz=timezone.utc) - ts
                     ).total_seconds() / 3600
                     if age_hours < 1:
                         val = 1.0

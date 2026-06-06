@@ -47,7 +47,7 @@ class CertMonitor:
                         tzinfo=timezone.utc
                     )
                     days_left = (
-                        expires - datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
+                        expires - datetime.fromtimestamp(time.time(), tz=timezone.utc)
                     ).days
                     if days_left < self.warn_days:
                         return CertAlert(

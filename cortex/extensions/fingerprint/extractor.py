@@ -191,7 +191,7 @@ class FingerprintExtractor:
         return CognitiveFingerprint(
             tenant_id="default",
             project_filter=project,
-            extracted_at=datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(),
+            extracted_at=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
             pattern=pattern,
             domain_preferences=domain_prefs,
             archetype=archetype,
@@ -207,7 +207,7 @@ def _empty_fingerprint(project: str | None) -> CognitiveFingerprint:
     return CognitiveFingerprint(
         tenant_id="default",
         project_filter=project,
-        extracted_at=datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(),
+        extracted_at=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
         archetype="null_state",
         archetype_confidence=0.0,
         total_facts_analyzed=0,

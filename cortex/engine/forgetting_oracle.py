@@ -252,7 +252,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
                 await conn.execute(
                     "UPDATE facts SET fact_type = 'ghost', updated_at = ? WHERE id = ?",
                     (
-                        datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(),
+                        datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
                         fact_id,
                     ),
                 )

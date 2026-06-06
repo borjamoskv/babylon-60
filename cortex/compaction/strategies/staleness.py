@@ -51,7 +51,7 @@ async def find_stale_facts(
     """Find facts older than max_age_days with consensus below min_consensus."""
     conn = await engine.get_conn()
     cutoff = (
-        datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) - timedelta(days=max_age_days)
+        datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=max_age_days)
     ).isoformat()
 
     cursor = await conn.execute(

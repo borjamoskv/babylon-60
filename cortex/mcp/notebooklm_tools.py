@@ -122,7 +122,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
             return {"error": "No cloud sync provider detected. Specify drive_path."}
 
         target.mkdir(parents=True, exist_ok=True)
-        ts = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime("%Y-%m-%d")
+        ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d")
         synced: list[str] = []
 
         if mode in ("digest", "both") and DIGEST_FILE.exists():

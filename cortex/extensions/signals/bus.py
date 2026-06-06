@@ -276,7 +276,7 @@ class AsyncSignalBus:
     async def gc(self, max_age_days: int = 30, tenant_id: str | None = None) -> int:
         await self.ensure_table()
         cutoff = (
-            datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) - timedelta(days=max_age_days)
+            datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=max_age_days)
         ).isoformat()
 
         sql = "DELETE FROM signals WHERE consumed_by != '[]' AND created_at < ?"
@@ -492,7 +492,7 @@ class SignalBus:
     def gc(self, max_age_days: int = 30, tenant_id: str | None = None) -> int:
         self.ensure_table()
         cutoff = (
-            datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) - timedelta(days=max_age_days)
+            datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=max_age_days)
         ).isoformat()
 
         sql = "DELETE FROM signals WHERE consumed_by != '[]' AND created_at < ?"

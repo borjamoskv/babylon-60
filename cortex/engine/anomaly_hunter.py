@@ -74,7 +74,7 @@ class AnomalyHunterEngine:
 
     async def run_full_scan(self) -> dict:
         """Entry point NightShift: escaneo completo en paralelo."""
-        threshold = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) - self.window
+        threshold = datetime.fromtimestamp(time.time(), tz=timezone.utc) - self.window
         # Fetching facts from the last 24h
         time_filter = threshold.isoformat()
 
@@ -263,7 +263,7 @@ class AnomalyHunterEngine:
                     "facts_involved": anomaly.facts_involved,
                     "suggested_action": anomaly.suggested_action,
                     "auto_generated": True,
-                    "nightshift_session": datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
+                    "nightshift_session": datetime.fromtimestamp(time.time(), tz=timezone.utc)
                     .date()
                     .isoformat(),
                 },

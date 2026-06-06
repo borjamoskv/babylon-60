@@ -37,7 +37,7 @@ class CuatridaOrchestrator:
         """
         Dimension B: Seals a decision into the immutable ledger.
         """
-        timestamp = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+        timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         metadata = metadata or {}
 
         # Dimension B: Hook into CORTEX ledger.
@@ -145,7 +145,7 @@ class CuatridaOrchestrator:
         status = "unknown"
 
         if ghost_path.exists():
-            start = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
+            start = datetime.fromtimestamp(time.time(), tz=timezone.utc)
             try:
                 subprocess.run(
                     ["python3", str(ghost_path), "status"],
@@ -154,7 +154,7 @@ class CuatridaOrchestrator:
                     check=False,
                 )
                 latency = (
-                    datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) - start
+                    datetime.fromtimestamp(time.time(), tz=timezone.utc) - start
                 ).total_seconds() * 1000
                 status = "active"
             except (subprocess.SubprocessError, OSError):

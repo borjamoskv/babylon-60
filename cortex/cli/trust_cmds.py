@@ -116,7 +116,7 @@ def compliance_report(db: str) -> None:
 
         chain_ok, violations = _check_chain_integrity(conn)
 
-        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime(
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime(
             "%Y-%m-%d %H:%M UTC"
         )
 

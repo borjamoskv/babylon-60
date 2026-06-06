@@ -98,7 +98,7 @@ class ThreatFeedEngine:
         Returns a report of new signatures added.
         """
         report = ThreatFeedReport(
-            timestamp=datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+            timestamp=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         )
         start = time.monotonic()
         existing_ids = {s["id"] for s in self._custom_signatures}

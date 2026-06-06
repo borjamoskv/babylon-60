@@ -421,7 +421,7 @@ class GenesisEngine:
                 "files_created": len(result.files_created),
                 "hours_saved": result.hours_saved,
                 "validation_passed": result.validation_passed,
-                "created_at": datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(),
+                "created_at": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
             },
         )
         logger.info(
