@@ -136,7 +136,6 @@ class TestWorkingMemoryL1:
         assert len(flushed) == 2
         assert len(l1) == 0
 
-
     def test_utilization_ratio(self):
         l1 = WorkingMemoryL1(max_tokens=200)
         l1.add_event(_make_event(token_count=100))

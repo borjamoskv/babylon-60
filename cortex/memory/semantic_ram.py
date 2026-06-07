@@ -384,4 +384,3 @@ class DynamicSemanticSpace:
             )
 
         return facts
-
