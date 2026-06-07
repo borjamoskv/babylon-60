@@ -50,10 +50,18 @@ class CascadeTelemetry:
         try:
             conn = db_connect(self._db_path)  # type: ignore[type-error]
             try:
+                # Add columns dynamically if they do not exist
+                try:
+                    conn.execute("ALTER TABLE llm_telemetry ADD COLUMN prompt_tokens INTEGER")
+                    conn.execute("ALTER TABLE llm_telemetry ADD COLUMN completion_tokens INTEGER")
+                    conn.commit()
+                except sqlite3.OperationalError:
+                    pass
+
                 conn.execute(
                     "INSERT INTO llm_telemetry "
-                    "(intent, resolved_by, project, tier, depth, latency_ms, errors, timestamp) "
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    "(intent, resolved_by, project, tier, depth, latency_ms, errors, timestamp, prompt_tokens, completion_tokens) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     (
                         event.intent.value,
                         event.resolved_by,
@@ -63,6 +71,8 @@ class CascadeTelemetry:
                         event.latency_ms,
                         json.dumps(event.errors),
                         event.timestamp,
+                        event.prompt_tokens,
+                        event.completion_tokens,
                     ),
                 )
                 conn.commit()

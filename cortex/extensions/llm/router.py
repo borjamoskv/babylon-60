@@ -226,6 +226,8 @@ class CortexLLMRouter:
                         tier=CascadeTier.PRIMARY,
                         depth=1,
                         latency_ms=latency,
+                        prompt_tokens=prompt.prompt_tokens,
+                        completion_tokens=prompt.completion_tokens,
                     )
                 )
                 return res_primary
@@ -266,6 +268,8 @@ class CortexLLMRouter:
                         depth=i,
                         latency_ms=fb_latency,
                         errors=errors,
+                        prompt_tokens=prompt.prompt_tokens,
+                        completion_tokens=prompt.completion_tokens,
                     )
                 )
                 return res_fb
