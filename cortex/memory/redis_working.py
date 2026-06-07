@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 import logging
 import time
-from typing import Any, Final
+from typing import Final
 
 import redis
 
@@ -223,7 +223,6 @@ class RedisWorkingMemoryL1:
                 self._redis.delete(bkey, tkey)
         return flushed
 
-
     @property
     def current_tokens(self) -> int:
         tenant_id = get_tenant_id()
@@ -240,7 +239,6 @@ class RedisWorkingMemoryL1:
             return 0.0
         tkey = self._tokens_key(tenant_id)
         return int(self._redis.get(tkey) or 0) / self._max_tokens
-
 
     def __len__(self) -> int:
         keys = self._redis.keys(f"{self._prefix}buffer:*")

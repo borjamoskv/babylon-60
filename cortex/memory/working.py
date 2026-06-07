@@ -18,7 +18,7 @@ from __future__ import annotations
 import logging
 import time
 from collections import deque
-from typing import Any, Final
+from typing import Final
 
 from cortex.memory.guardrails import SessionGuardrail
 from cortex.memory.models import MemoryEvent
@@ -202,7 +202,6 @@ class WorkingMemoryL1:
             self._tenant_tokens.clear()
         return flushed
 
-
     # ─── Introspection ────────────────────────────────────────────
 
     @property
@@ -222,7 +221,6 @@ class WorkingMemoryL1:
         if self._max_tokens == 0:
             return 0.0
         return self._tenant_tokens.get(tenant_id, 0) / self._max_tokens
-
 
     def __len__(self) -> int:
         """Total event count across all tenants."""
