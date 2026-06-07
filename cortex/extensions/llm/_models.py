@@ -111,6 +111,8 @@ class CascadeEvent:
     latency_ms: float = 0.0
     errors: list[str] = field(default_factory=list)
     timestamp: float = field(default_factory=time.time)
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
 
 
 @dataclass(frozen=True)
@@ -150,6 +152,8 @@ class CortexPrompt(BaseModel):
         default_factory=list,
         description="Historial reciente o contexto de trabajo (rol/contenido).",
     )
+    prompt_tokens: int | None = Field(default=None, exclude=True)
+    completion_tokens: int | None = Field(default=None, exclude=True)
     episodic_context: list[dict[str, str | None]] = Field(
         default_factory=list,
         description="Recuerdos comprimidos o contexto a largo plazo recuperado.",

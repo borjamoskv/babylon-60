@@ -195,11 +195,11 @@ class LLMProvider(BaseProvider):
         return response_text
 
     async def _execute_completion(
-        self, url: str, headers: dict[str, str], payload: dict[str, Any], wrap_errors: bool
+        self, url: str, headers: dict[str, str], payload: dict[str, Any], wrap_errors: bool, prompt: CortexPrompt | None = None
     ) -> str:
         try:
             return await resilient_call(
-                lambda: self._execute_completion_raw(url, headers, payload),
+                lambda: self._execute_completion_raw(url, headers, payload, prompt),
                 self._provider,
                 self._circuit_breaker,
             )
@@ -224,7 +224,7 @@ class LLMProvider(BaseProvider):
             raise ValueError(f"Unexpected response format from {self._provider}") from e
 
     async def _execute_completion_raw(
-        self, url: str, headers: dict[str, str], payload: dict[str, Any]
+        self, url: str, headers: dict[str, str], payload: dict[str, Any], prompt: CortexPrompt | None = None
     ) -> str:
         await apply_causal_jitter(tokens_estimate=len(payload.get("messages", [])) * 50)
         async with self._semaphore:
@@ -232,6 +232,13 @@ class LLMProvider(BaseProvider):
         response.raise_for_status()
         data = response.json()
         self._log_resolved_model(payload, data)
+        if prompt is not None and "usage" in data:
+            try:
+                usage = data["usage"]
+                prompt.prompt_tokens = usage.get("prompt_tokens")
+                prompt.completion_tokens = usage.get("completion_tokens")
+            except Exception as e:
+                logger.warning("Failed to extract usage metrics from response: %s", e)
         return sanitize_response(data["choices"][0]["message"]["content"])
 
     def _log_resolved_model(self, payload: dict[str, Any], response_data: dict[str, Any]) -> None:
@@ -375,7 +382,7 @@ class LLMProvider(BaseProvider):
         else:
             payload["max_tokens"] = prompt.max_tokens
 
-        result = await self._execute_completion(url, headers, payload, wrap_errors=True)
+        result = await self._execute_completion(url, headers, payload, wrap_errors=True, prompt=prompt)
         cache.set(payload, result, provider=self._provider, model=model_name)
         return result
 

@@ -103,6 +103,7 @@ class ChronosROI:
             )
             added = 0
             deleted = 0
+            files_changed = set()
             for line in out.splitlines():
                 if not line.strip():
                     continue
@@ -110,6 +111,8 @@ class ChronosROI:
                 if len(parts) >= 2:
                     added += int(parts[0]) if parts[0].isdigit() else 0
                     deleted += int(parts[1]) if parts[1].isdigit() else 0
+                if len(parts) >= 3:
+                    files_changed.add(parts[2])
 
             commit_count_cmd = ["git", "rev-list", "--count", "HEAD", "--since=24 hours ago"]
             commit_count = int(
@@ -119,14 +122,20 @@ class ChronosROI:
                     timeout=10,
                 )
             )
-            return {"added": added, "deleted": deleted, "commits": commit_count}
+            return {
+                "added": added,
+                "deleted": deleted,
+                "commits": commit_count,
+                "files_changed": len(files_changed),
+            }
         except (subprocess.SubprocessError, OSError, ValueError):
-            return {"added": 0, "deleted": 0, "commits": 0}
+            return {"added": 0, "deleted": 0, "commits": 0, "files_changed": 0}
 
     def audit_project(
         self,
         project_path: str,
-        tokens_used: int = 25000,
+        tokens_used: int | None = None,
+        db_path: str | None = None,
     ) -> ChronosReport:
         """Scan project with Git-archaeology to calculate real-world value.
 
@@ -150,10 +159,45 @@ class ChronosROI:
         if git["added"] > 1000:
             base_complexity += 1.0
 
-        hours = self.calculate_hours_saved(file_count, base_complexity)
+        # Use files actually affected by commits instead of total project files
+        affected_count = git.get("files_changed", 0)
+        if affected_count == 0:
+            # Baseline interaction size if no commits/files changed in the git log
+            affected_count = 1
+
+        hours = self.calculate_hours_saved(affected_count, base_complexity)
         monetary_value = round(hours * self.hourly_rate, 2)
 
-        cost = (tokens_used / 1000.0) * self.token_cost_per_m
+        # Dynamic token estimation from DB if available
+        actual_tokens = 0
+        if db_path and os.path.exists(db_path):
+            try:
+                with sqlite3.connect(db_path) as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("PRAGMA table_info(llm_telemetry)")
+                    columns = {row[1] for row in cursor.fetchall()}
+                    if "prompt_tokens" in columns and "completion_tokens" in columns:
+                        # Query tokens consumed in the last 24 hours (86400s)
+                        cursor.execute(
+                            "SELECT SUM(COALESCE(prompt_tokens, 0) + COALESCE(completion_tokens, 0)) "
+                            "FROM llm_telemetry "
+                            "WHERE timestamp >= (strftime('%s', 'now') - 86400)"
+                        )
+                        row = cursor.fetchone()
+                        if row and row[0] is not None:
+                            actual_tokens = int(row[0])
+            except Exception as e:
+                logger.warning("Dynamic token query failed: %s", e)
+
+        # Fallback logic
+        if actual_tokens > 0:
+            final_tokens = actual_tokens
+        elif tokens_used is not None:
+            final_tokens = tokens_used
+        else:
+            final_tokens = 25000 if git["commits"] > 0 else 0
+
+        cost = (final_tokens / 1000.0) * self.token_cost_per_m
         roi_ratio = monetary_value / max(0.001, cost)
 
         return ChronosReport(
@@ -232,13 +276,13 @@ class ChronosROI:
         project_path: str,
         db_path: str,
         project: str = "system",
-        tokens_used: int = 25000,
+        tokens_used: int | None = None,
     ) -> ChronosReport:
         """Full audit cycle: scan → calculate → persist → signal.
 
         This is the recommended entry point for the observability loop.
         """
-        report = self.audit_project(project_path, tokens_used)
+        report = self.audit_project(project_path, tokens_used, db_path=db_path)
         self.persist_report(report, db_path, project)
         return report
 

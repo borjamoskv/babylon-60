@@ -298,6 +298,8 @@ CREATE TABLE IF NOT EXISTS llm_telemetry (
     latency_ms      REAL,
     errors          TEXT DEFAULT '[]',
     timestamp       REAL NOT NULL,
+    prompt_tokens   INTEGER,
+    completion_tokens INTEGER,
     created_at      TEXT NOT NULL DEFAULT (datetime('now'))
 );
 """
