@@ -281,4 +281,3 @@ class ReactiveTaskAgent(BaseAgent):
             correlation_id=source.message_id,
         )
         await self.bus.send(reply)
-
