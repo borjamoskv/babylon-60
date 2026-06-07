@@ -7,6 +7,7 @@ Reality Level: C5-REAL
 import asyncio
 from typing import Any
 
+
 def get_loop_lock(instance: Any, attr_prefix: str) -> asyncio.Lock:
     """Get or create an asyncio.Lock tied to the current running event loop.
 
