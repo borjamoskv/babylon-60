@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import asyncio
-import subprocess
 import logging
+import subprocess
 
 from google.antigravity import Agent, types
 from google.antigravity.connections.local import LocalAgentConfig
@@ -31,7 +31,6 @@ async def radar_de_entropia_inicio():
             logger.info("[AUTÓNOMO v2] Homeostasis confirmada. Procediendo.")
     except Exception as e:
         logger.error(f"[AUTÓNOMO v2] Falla en radar: {e}")
-
 
 
 @hooks.pre_turn
