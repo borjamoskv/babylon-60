@@ -67,7 +67,7 @@ class HodgeMemoryRouter:
         Computes the potential field V(x) for each node based on the targets.
         V(x) = sum_{y in targets} (exergy(y) / (shortest_path_distance(x, y) + 1.0))
         """
-        potential = {n_id: 0.0 for n_id in nodes}
+        potential = dict.fromkeys(nodes, 0.0)
 
         # Simple BFS-based shortest path distance computation
         for target in target_ids:
