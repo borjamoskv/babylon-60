@@ -8,11 +8,12 @@ if TYPE_CHECKING:
     from cortex.graph.backends.base import GraphBackend
     from cortex.graph.backends.sqlite import SQLiteBackend
 
-__all__ = ["GraphBackend", "SQLiteBackend"]
+__all__ = ["GraphBackend", "SQLiteBackend", "Neo4jBackend"]
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "GraphBackend": ("cortex.graph.backends.base", "GraphBackend"),
     "SQLiteBackend": ("cortex.graph.backends.sqlite", "SQLiteBackend"),
+    "Neo4jBackend": ("cortex.graph.backends.neo4j_backend", "Neo4jBackend"),
 }
 
 

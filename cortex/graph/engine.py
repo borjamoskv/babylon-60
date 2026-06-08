@@ -7,7 +7,8 @@ Extraction, relationship detection, and backend orchestration.
 import logging
 import sqlite3
 
-from cortex.graph.backends import GraphBackend, SQLiteBackend
+import os
+from cortex.graph.backends import GraphBackend, SQLiteBackend, Neo4jBackend
 from cortex.graph.patterns import COMMON_WORDS, ENTITY_PATTERNS, RELATION_SIGNALS
 
 __all__ = [
@@ -29,6 +30,9 @@ logger = logging.getLogger("cortex.graph")
 
 def get_backend(conn=None) -> GraphBackend:
     """Get the appropriate graph backend."""
+    backend_type = os.environ.get("CORTEX_GRAPH_BACKEND", "sqlite").lower()
+    if backend_type == "neo4j":
+        return Neo4jBackend()  # type: ignore[abstract]
     return SQLiteBackend(conn)  # type: ignore[arg-type]
 
 
