@@ -1,7 +1,7 @@
 use pyo3::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SmtLeaf {
     #[pyo3(get, set)]

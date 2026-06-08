@@ -2,7 +2,7 @@ use pyo3::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum BeliefState {
     Active,
@@ -12,7 +12,7 @@ pub enum BeliefState {
     Archived,
 }
 
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum RelationType {
     Entails,
@@ -21,7 +21,7 @@ pub enum RelationType {
     Supersedes,
 }
 
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProvenanceEnvelope {
     #[pyo3(get, set)]
@@ -60,7 +60,7 @@ impl ProvenanceEnvelope {
     }
 }
 
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BeliefRelation {
     #[pyo3(get, set)]
@@ -97,7 +97,7 @@ pub enum PropositionPayload {
     Reference { uri: String, kind: String },
 }
 
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone)]
 pub struct BeliefObject {
     pub id: Uuid,
@@ -128,6 +128,7 @@ pub struct BeliefObject {
 impl BeliefObject {
     #[new]
     #[pyo3(signature = (proposition_key, confidence_score, uncertainty, decay_rate, state, provenance, timestamp_created, timestamp_last_verified, semantic_version))]
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         proposition_key: String,
         confidence_score: f32,

@@ -1,13 +1,19 @@
 use std::collections::{HashMap, HashSet};
 use pyo3::prelude::*;
 
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone)]
 pub struct AtmsGraph {
     pub nodes: HashSet<String>,
     pub dependencies: HashMap<String, Vec<String>>, // Child -> Parents (DependsOn)
     pub entails: HashMap<String, Vec<String>>,      // Parent -> Children (Entails)
     pub conflicts: HashMap<String, Vec<String>>,    // Node -> Conflicting nodes
+}
+
+impl Default for AtmsGraph {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 #[pymethods]
@@ -31,8 +37,8 @@ impl AtmsGraph {
         let child = child_str.to_string();
         let parent = parent_str.to_string();
         
-        self.dependencies.entry(child.clone()).or_insert_with(Vec::new).push(parent.clone());
-        self.entails.entry(parent).or_insert_with(Vec::new).push(child);
+        self.dependencies.entry(child.clone()).or_default().push(parent.clone());
+        self.entails.entry(parent).or_default().push(child);
         Ok(())
     }
 }
