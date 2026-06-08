@@ -84,6 +84,8 @@ async def hybrid_search(
     confidence: str | None = None,
     causal_gap: CausalGap | None = None,
     recency_weight: float = 0.1,
+    include_graph: bool = False,
+    graph_depth: int = 0,
     **kwargs,
 ) -> list[SearchResult]:
     """
@@ -159,6 +161,14 @@ async def hybrid_search(
     # Ω₁₃: Causal gap re-ranking - similarity alone is insufficient
     if causal_gap is not None and merged:
         merged = _rerank_by_causal_gap(merged, causal_gap)
+
+    # 🕸️ GraphRAG Native Expansion (SOTA Alignment)
+    if include_graph and graph_depth > 0 and merged:
+        fact_ids = [r.fact_id for r in merged]
+        contexts = await _expand_graph_context(conn, fact_ids, graph_depth)
+        for r in merged:
+            if str(r.fact_id) in contexts:
+                r.context = {"edges": contexts[str(r.fact_id)]}
 
     logger.debug(
         "Hybrid search executed. query='%s' results=%d top_score=%.4f",
@@ -258,3 +268,38 @@ def _rerank_by_causal_gap(
 
     candidates.sort(key=lambda x: x[1], reverse=True)
     return [c[0] for c in candidates]
+
+
+async def _expand_graph_context(
+    conn: aiosqlite.Connection, fact_ids: list[str], depth: int = 1
+) -> dict[str, list[dict]]:
+    """Native GraphRAG: Traverse causal_edges to fetch structural context."""
+    context: dict[str, list[dict]] = {}
+    if not fact_ids or depth < 1:
+        return context
+
+    # 1-hop traversal to align with AtmsGraph logic
+    placeholders = ",".join(["?"] * len(fact_ids))
+    try:
+        query = f\"\"\"
+            SELECT parent_id, child_id, relationship_type 
+            FROM causal_edges 
+            WHERE parent_id IN ({placeholders}) OR child_id IN ({placeholders})
+        \"\"\"
+        cursor = await conn.execute(query, fact_ids + fact_ids)
+        edges = await cursor.fetchall()
+
+        for p_id, c_id, rel in edges:
+            p_id, c_id = str(p_id), str(c_id)
+            if p_id in fact_ids:
+                if p_id not in context:
+                    context[p_id] = []
+                context[p_id].append({"entails": c_id, "type": rel})
+            if c_id in fact_ids:
+                if c_id not in context:
+                    context[c_id] = []
+                context[c_id].append({"depends_on": p_id, "type": rel})
+    except sqlite3.OperationalError as e:
+        logger.warning("GraphRAG expansion skipped (table missing or error): %s", e)
+
+    return context

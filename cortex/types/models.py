@@ -61,8 +61,7 @@ __all__ = [
 
 # ─── SDK Surface v0.2 Protocol Types ─────────────────────────────────
 
-QueryIntent = Literal["lookup", "explore", "audit"]
-QueryStrategy = Literal["auto", "text", "vector", "hybrid", "temporal", "graph"]
+QueryStrategy = Literal["auto", "bayesian", "hybrid", "text", "vector", "temporal", "graph"]
 
 
 class QueryInput(TypedDict, total=False):
@@ -153,7 +152,7 @@ class StoreRequest(BaseModel):
 
 
 class StoreResponse(BaseModel):
-    fact_id: int
+    fact_id: str
     project: str
     message: str
 
@@ -181,7 +180,7 @@ class SearchRequest(BaseModel):
 
 
 class SearchResult(BaseModel):
-    fact_id: int
+    fact_id: str
     project: str
     content: str
     fact_type: str
@@ -208,7 +207,7 @@ class VoteRequest(BaseModel):
 
 
 class VoteResponse(BaseModel):
-    fact_id: int
+    fact_id: str
     agent: str
     vote: int
     new_consensus_score: float
@@ -238,7 +237,7 @@ class VoteV2Request(BaseModel):
 
 
 class FactResponse(BaseModel):
-    id: int
+    id: str
     project: str
     content: str
     fact_type: str
@@ -370,7 +369,7 @@ class TimeSummaryResponse(BaseModel):
     by_project: dict[str, int]
     entries: int
     heartbeats: int
-    top_entities: list[list]  # [[entity, count], ...]
+    top_entities: list[tuple[str, int]]  # [(entity, count), ...]
 
 
 # ─── Mission Models ──────────────────────────────────────────────────
@@ -430,7 +429,7 @@ class MejoraloScanResponse(BaseModel):
     dead_code: bool
     total_files: int = 0
     total_loc: int = 0
-    fact_id: int | None = None
+    fact_id: str | None = None
 
 
 class MejoraloSessionRequest(BaseModel):
@@ -441,7 +440,7 @@ class MejoraloSessionRequest(BaseModel):
 
 
 class MejoraloSessionResponse(BaseModel):
-    fact_id: int
+    fact_id: str
     project: str
     delta: int
     status: str = "recorded"
