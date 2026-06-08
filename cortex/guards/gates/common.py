@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Protocol, TypeAlias
 
 from cortex.guards._seal_printer import SealPrinter
+from cortex.guards._seals_cache import GlobalSourceCache  # noqa: F401
 
 # ── Type Definitions ──
 # Result: (Success, Reason/Status)
@@ -52,6 +53,3 @@ async def arun_cmd(cmd: list[str], cwd: Path = ROOT_DIR) -> tuple[int, str]:
         return proc.returncode or 0, stdout.decode(errors="replace")
     except FileNotFoundError:
         return 127, f"Command not found: {resolved[0]}"
-
-
-from cortex.guards._seals_cache import GlobalSourceCache
