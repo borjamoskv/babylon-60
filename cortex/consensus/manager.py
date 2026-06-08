@@ -33,18 +33,6 @@ class ConsensusManager:
         self.engine = engine
         self._signal_bus = signal_bus or getattr(engine, "_signal_bus", None)
 
-    async def vote(
-        self,
-        fact_id: int,
-        agent: str,
-        value: int,
-        agent_id: str | None = None,
-    ) -> float:
-        """Legacy v1 vote path. DEPRECATED. Redirects to vote_v2()."""
-        # Purge: Redirect to v2 logic
-        target_agent = agent_id or agent
-        return await self.vote_v2(fact_id, target_agent, value)
-
     async def register_agent(
         self,
         name: str,
@@ -141,7 +129,9 @@ class ConsensusManager:
         )
         votes = await cursor.fetchall()
         if not votes:
-            return await self._recalculate_consensus(fact_id, conn)
+            score = 1.0
+            await self._update_fact_score(fact_id, score, conn)
+            return score
 
         # Logarithmic Opinion Pool (LogOP) consensus calculation
         score_sum = 0.0
@@ -166,31 +156,6 @@ class ConsensusManager:
         # 🛡️ Aplicar Penalización de Entropía (Alignment Drift)
         await self._update_agent_entropy(fact_id, score, conn)
 
-        return score
-
-    async def _recalculate_consensus(self, fact_id: int, conn) -> float:
-        cursor = await conn.execute(
-            "SELECT vote FROM consensus_votes WHERE fact_id = ?",
-            (fact_id,),
-        )
-        votes = await cursor.fetchall()
-        if not votes:
-            score = 1.0
-            await self._update_fact_score(fact_id, score, conn)
-            return score
-
-        score_sum = 0.0
-        for (vote_val,) in votes:
-            if vote_val == 0:
-                continue
-            p = 0.99 if vote_val > 0 else 0.01
-            w = 1.0  # Legacy votes have equal weight
-            score_sum += w * _logit(p)
-
-        prob_true = _sigmoid(score_sum)
-        score = prob_true * 2.0
-
-        await self._update_fact_score(fact_id, score, conn)
         return score
 
     async def _update_fact_score(self, fact_id: int, score: float, conn) -> None:

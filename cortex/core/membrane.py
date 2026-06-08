@@ -24,7 +24,7 @@ class EpistemicEvent:
 
 # Z3 for logical guards
 try:
-    from z3 import Solver, Int, Bool, And, sat, unsat, unknown
+    from z3 import Solver, Int, Real, Bool, And, sat, unsat
     Z3_AVAILABLE = True
 except ImportError:
     Z3_AVAILABLE = False

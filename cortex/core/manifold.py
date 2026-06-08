@@ -1,6 +1,6 @@
 import hashlib
 from dataclasses import dataclass
-from typing import List, Dict, Any, Optional
+from typing import List, Any, Optional
 
 # Expected to import EpistemicState, EpistemicEvent from membrane
 # from .membrane import EpistemicEvent, EpistemicState
