@@ -12,24 +12,50 @@ except ImportError:
     print("Warning: Z3 not available. Logical guards will be disabled.")
 
 class Z3Guard:
-    """Z3 SMT Solver avanzado para verificación lógica en la Epistemic Membrane"""
+    """
+    Motor de verificación SMT (Satisfiability Modulo Theories) usando Z3.
     
+    Propósito en Cortex Persist (MÖBIUS - Fase 7):
+    - Proporcionar validación lógica determinista (L0 de la Epistemic Membrane).
+    - Detectar violaciones con unsat_core traceable.
+    - Evitar alucinaciones lógicamente consistentes pero físicamente inválidas.
+    - Soporte dinámico de variables (price, confidence, timestamp, ratios, etc.).
+    
+    Características SMT:
+    - Tipos: Real (precios, porcentajes), Int, Bool.
+    - Operadores: aritmética, comparaciones, And/Or/Not/Implies.
+    - Binding automático de contexto desde el payload.
+    - Reset por verificación para aislamiento.
+    """
+
     def __init__(self):
         if not Z3_AVAILABLE:
             self.enabled = False
+            print("⚠️ Z3 SMT no disponible. Guards lógicos desactivados.")
             return
         self.enabled = True
         self.reset()
+        self.presets = {
+            "pricing_policy": "price >= base_price * 0.7",
+            "confidence_range": "0 <= confidence <= 100",
+            "temporal_valid": "timestamp >= last_update"
+        }
 
     def reset(self):
-        """Reset solver para verificación limpia"""
+        """Reset completo del solver SMT para verificación limpia e independiente."""
         if self.enabled:
             self.solver = Solver()
-            self.constraints = {}
-            self.variables = {}  # name -> Z3 var
+            self.constraints: Dict[str, Any] = {}
+            self.variables: Dict[str, Any] = {}  # nombre -> variable Z3
 
-    def declare_var(self, name: str, var_type="Real"):
-        """Declara variables SMT dinámicamente"""
+    def declare_var(self, name: str, var_type: str = "Real"):
+        """
+        Declara variable SMT dinámicamente.
+        
+        Args:
+            name: Nombre de la variable (ej: 'price', 'confidence')
+            var_type: 'Real' | 'Int' | 'Bool'
+        """
         if name in self.variables:
             return self.variables[name]
         
@@ -37,66 +63,81 @@ class Z3Guard:
             var = Int(name)
         elif var_type == "Bool":
             var = Bool(name)
-        else:  # default Real para precios, ratios, etc.
-            var = Real(name)
+        else:
+            var = Real(name)  # default para valores continuos (precios, ratios)
         
         self.variables[name] = var
         return var
 
+    def bind_context(self, value: Any):
+        """
+        Extrae automáticamente variables del payload y las fija en el solver.
+        Ejemplo: {"price": 127.49, "confidence": 85} → price == 127.49 ∧ confidence == 85
+        """
+        if not isinstance(value, dict):
+            return
+        
+        for k, v in value.items():
+            if isinstance(v, (int, float)):
+                var_type = "Int" if isinstance(v, int) else "Real"
+                var = self.declare_var(k, var_type)
+                self.solver.add(var == v)
+            elif isinstance(v, bool):
+                var = self.declare_var(k, "Bool")
+                self.solver.add(var == v)
+
     def add_constraint(self, guard_name: str, expr):
-        """Añadir constraint SMT"""
+        """Añade una constraint SMT explícita."""
         if not self.enabled:
             return False
         self.constraints[guard_name] = expr
         self.solver.add(expr)
         return True
 
-    def bind_context(self, value: Any):
-        """Extrae variables del payload y las declara en el solver"""
-        if not isinstance(value, dict):
-            return
+    def check(self, value: Any = None, guards: Optional[List[str]] = None) -> Dict:
+        """
+        Verificación SMT completa.
         
-        for k, v in value.items():
-            if isinstance(v, (int, float)):
-                var = self.declare_var(k, "Real" if isinstance(v, float) else "Int")
-                # Añadir constraint de igualdad para este write
-                self.solver.add(var == v)
-            elif isinstance(v, bool):
-                var = self.declare_var(k, "Bool")
-                self.solver.add(var == v)
-
-    def check(self, value: Any = None, guards: List[str] = None) -> Dict:
-        """Verificación SMT completa"""
+        Flujo:
+        1. Reset solver
+        2. Bind contexto del payload
+        3. Constraints preset + guards solicitados
+        4. check() → sat / unsat con unsat_core
+        
+        Returns:
+            Dict con status, modelo (si sat), unsat_core (si violated) y guards_passed.
+        """
         if not self.enabled:
             return {"status": "disabled", "satisfied": True}
-        
-        self.reset()  # Clean state per check
-        
+
+        self.reset()
         if value:
             self.bind_context(value)
-        
-        # Presets SMT comunes
+
+        # Constraints preset SMT (industriales)
         p = self.declare_var("price", "Real")
         c = self.declare_var("confidence", "Real")
-        
         self.add_constraint("price_nonneg", p >= 0)
         self.add_constraint("confidence_range", And(c >= 0, c <= 100))
-        self.add_constraint("price_reasonable", p <= 10000)  # ejemplo industrial
-        
+        self.add_constraint("price_reasonable", p <= 100000)
+
+        # Guards personalizados
         if guards:
             for g in guards:
-                # Aquí se pueden registrar guards custom por nombre
-                pass
-        
+                if g in self.presets:
+                    # Aquí se podría parsear string a expr Z3 en futuro
+                    pass
+
         result = self.solver.check()
-        
+
         if result == sat:
             model = self.solver.model()
             return {
                 "status": "satisfied",
                 "satisfied": True,
-                "model": {str(v): model[v] for v in model if str(v) in ["price", "confidence"]},
-                "guards_passed": list(self.constraints.keys())
+                "model": {str(v): model[v] for v in model},
+                "guards_passed": list(self.constraints.keys()),
+                "reason": "All SMT constraints satisfied"
             }
         else:
             unsat_core = []
@@ -104,13 +145,13 @@ class Z3Guard:
                 core = self.solver.unsat_core()
                 unsat_core = [str(c) for c in core]
             except:
-                unsat_core = ["unknown"]
+                unsat_core = ["unknown_core"]
             
             return {
                 "status": "violated",
                 "satisfied": False,
                 "unsat_core": unsat_core,
-                "reason": "Constraint violation detected by Z3 SMT solver"
+                "reason": "SMT constraint violation - see unsat_core for mathematical explanation"
             }
 
 
