@@ -1,6 +1,7 @@
 import random
 import time
 
+
 class ProbabilisticEventStore:
     def __init__(self):
         self.superposed_events = []
@@ -63,6 +64,6 @@ if __name__ == "__main__":
     # Read triggers collapse
     observed_state = db.observe("Billing_Aggregator_Cron")
     
-    print(f"\n[✓] Wavefunction Collapsed. Deterministic Reality Resolved:")
+    print("\n[✓] Wavefunction Collapsed. Deterministic Reality Resolved:")
     for tx_id, state in observed_state:
         print(f"  -> {tx_id}: {state}")

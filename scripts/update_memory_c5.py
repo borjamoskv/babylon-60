@@ -11,10 +11,10 @@ Características:
 3. Rollback selectivo + Conciencia de estado.
 """
 
-import os
-import json
-import hashlib
 import datetime
+import hashlib
+import json
+import os
 import sys
 from pathlib import Path
 
@@ -31,13 +31,13 @@ class MemoryLedger:
 
     def _load_ledger(self):
         if LEDGER_FILE.exists():
-            with open(LEDGER_FILE, 'r') as f:
+            with open(LEDGER_FILE) as f:
                 return json.load(f)
         return []
 
     def _load_state(self):
         if STATE_FILE.exists():
-            with open(STATE_FILE, 'r') as f:
+            with open(STATE_FILE) as f:
                 return json.load(f)
         return {}
 
@@ -64,7 +64,7 @@ class MemoryLedger:
         keys_old = set(self.state.keys())
         keys_new = set(new_payload.keys())
         
-        intersection = keys_old.intersection(keys_new)
+        keys_old.intersection(keys_new)
         difference = keys_old.symmetric_difference(keys_new)
         
         # Drift rudimentario: % de campos nuevos/borrados
