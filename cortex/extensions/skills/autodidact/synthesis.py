@@ -47,6 +47,7 @@ RETRIES_DISTILL = 1
 
 # Providers ordered by synthesis affinity (reasoning-heavy tasks)
 _SYNTHESIS_PROVIDERS: tuple[str, ...] = (
+    "ollama",
     "kimi",
     "perplexity",
     "openai",
