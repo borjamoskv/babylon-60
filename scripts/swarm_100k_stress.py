@@ -6,12 +6,13 @@ to execute a global narrative consensus audit on Chapter 102.
 """
 
 import asyncio
-import time
-import os
-import sys
 import json
+import os
+import time
 from pathlib import Path
+
 from cortex.engine.swarm_10k import SwarmCommander
+
 
 async def run_stress_test():
     print("🔱 LEGIØN-1 ACTIVATED: 100,000-AGENT HYPER-SCALE STRESS TEST")
@@ -25,7 +26,7 @@ async def run_stress_test():
     
     # Load chapters to obtain context
     chapters_json_path = "/Users/borjafernandezangulo/10_PROJECTS/remotion_saga_video/src/chapters.json"
-    with open(chapters_json_path, 'r', encoding='utf-8') as f:
+    with open(chapters_json_path, encoding='utf-8') as f:
         chapters = json.load(f)
         
     num_chapters = len(chapters)

@@ -10,7 +10,9 @@ import json
 import os
 import sys
 from pathlib import Path
+
 from cortex.engine.swarm_10k import SwarmCommander
+
 
 async def verify_pacing():
     print("🔱 LEGIØN-1 ACTIVATED: 1,000-AGENT PACING VERIFICATION")
@@ -24,10 +26,10 @@ async def verify_pacing():
     # Load dynamically paced chapters
     chapters_json_path = "/Users/borjafernandezangulo/10_PROJECTS/remotion_saga_video/src/chapters.json"
     if not os.path.exists(chapters_json_path):
-        print(f"Error: chapters.json not found.")
+        print("Error: chapters.json not found.")
         sys.exit(1)
         
-    with open(chapters_json_path, 'r', encoding='utf-8') as f:
+    with open(chapters_json_path, encoding='utf-8') as f:
         chapters = json.load(f)
         
     num_chapters = len(chapters)
@@ -44,7 +46,7 @@ async def verify_pacing():
             "duration_frames": chap["duration_frames"]
         })
         
-    print(f"Dispatching 1,000 agents in parallel...")
+    print("Dispatching 1,000 agents in parallel...")
     import time
     t0 = time.perf_counter()
     async with commander.strike_mode("verification"):

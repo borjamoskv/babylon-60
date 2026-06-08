@@ -7,9 +7,10 @@ chapter, computing the mathematically optimal reading duration in frames.
 
 import asyncio
 import json
-import os
 from pathlib import Path
+
 from cortex.engine.swarm_10k import SwarmCommander
+
 
 async def optimize_durations():
     print("🔱 LEGIØN-1 ACTIVATED: SWARM PACING OPTIMIZATION")
@@ -22,7 +23,7 @@ async def optimize_durations():
     
     # Load raw chapters text to analyze exact word counts
     chapters_json_path = "/Users/borjafernandezangulo/10_PROJECTS/remotion_saga_video/src/chapters.json"
-    with open(chapters_json_path, 'r', encoding='utf-8') as f:
+    with open(chapters_json_path, encoding='utf-8') as f:
         chapters = json.load(f)
         
     num_chapters = len(chapters)
@@ -82,7 +83,7 @@ async def optimize_durations():
     total_frames = sum(c["duration_frames"] for c in updated_chapters)
     total_seconds = total_frames / 30
     
-    print(f"✓ Swarm optimization complete.")
+    print("✓ Swarm optimization complete.")
     print(f"Total Composition Duration: {total_frames} frames ({total_seconds:.2f} seconds / {total_seconds/60:.2f} minutes)")
     
     # Cleanup
