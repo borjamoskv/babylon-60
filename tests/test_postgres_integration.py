@@ -246,7 +246,7 @@ async def test_postgres_api_endpoints(mock_postgres_env: None) -> None:
             }
             resp = client.post("/v1/facts", json=store_payload)
             assert resp.status_code == 200
-            assert resp.json()["fact_id"] == 123
+            assert resp.json()["fact_id"] == "123"
             assert resp.json()["message"] == "Fact stored"
 
             # Check that query translations occurred (translated to $ placeholders and contains ON CONFLICT)
@@ -290,7 +290,7 @@ async def test_postgres_api_endpoints(mock_postgres_env: None) -> None:
             assert resp.status_code == 200
             results = resp.json()
             assert len(results) == 1
-            assert results[0]["id"] == 999
+            assert results[0]["id"] == "999"
             assert results[0]["content"] == "Mocked fact content"
 
             search_queries = [q for q, _ in mock_conn.queries]
