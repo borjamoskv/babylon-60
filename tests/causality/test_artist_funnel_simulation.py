@@ -41,7 +41,7 @@ def test_funnel_correlation_range() -> None:
     results = simulate_artist_cohort()
     correlation = results["correlation"]
     
-    print(f"\n[C5-REAL] Simulating L1/L2 Artist Funnel:")
+    print("\n[C5-REAL] Simulating L1/L2 Artist Funnel:")
     print(f"  - Correlation: {correlation:.4f}")
     print(f"  - Mean L2 Attention (MAL): {results['l2_mean']:.2f}")
     print(f"  - Mean L1 Revenue ($): {results['l1_mean']:.2f}")

@@ -7,12 +7,14 @@ Calculates thermodynamic entropy, friction levels, and visualizes the results.
 """
 
 import asyncio
-import time
-import sys
 import json
 import os
+import sys
+import time
 from pathlib import Path
+
 from cortex.engine.swarm_10k import SwarmCommander
+
 
 async def run_audit():
     print("🔱 LEGIØN-1 ACTIVATED: 10,000-AGENT PARALLEL AUDIT")
@@ -32,7 +34,7 @@ async def run_audit():
         print(f"Error: Chapters JSON not found at {chapters_json_path}")
         sys.exit(1)
         
-    with open(chapters_json_path, 'r', encoding='utf-8') as f:
+    with open(chapters_json_path, encoding='utf-8') as f:
         chapters = json.load(f)
     
     num_chapters = len(chapters)
