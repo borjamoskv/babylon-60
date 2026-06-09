@@ -8,9 +8,15 @@ conflicts so the agent can disambiguate before persisting.
 
 from __future__ import annotations
 
+from cortex.guards.contradiction_guard.core import (
+    EMBEDDING_BOOST_WEIGHT,
+    _embedding_cosine_similarity,
+)
+from cortex.guards.contradiction_guard.detector import (
+    detect_contradictions,
+    scan_all_contradictions,
+)
 from cortex.guards.contradiction_guard.models import ConflictCandidate, ConflictReport
-from cortex.guards.contradiction_guard.detector import detect_contradictions, scan_all_contradictions
-from cortex.guards.contradiction_guard.core import _embedding_cosine_similarity, EMBEDDING_BOOST_WEIGHT
 
 __all__ = [
     "ConflictCandidate",

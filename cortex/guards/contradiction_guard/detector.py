@@ -11,18 +11,18 @@ import aiosqlite
 
 from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
 from cortex.database.core import connect_async_ctx
-from cortex.guards.contradiction_guard.models import ConflictCandidate, ConflictReport
 from cortex.guards.contradiction_guard.core import (
-    _embedding_cosine_similarity,
-    _tokenize,
-    _is_noise,
-    _decrypt_content,
-    _jaccard,
+    EMBEDDING_BOOST_WEIGHT,
     _classify_conflict,
+    _decrypt_content,
     _detect_negation,
     _detect_supersession,
-    EMBEDDING_BOOST_WEIGHT,
+    _embedding_cosine_similarity,
+    _is_noise,
+    _jaccard,
+    _tokenize,
 )
+from cortex.guards.contradiction_guard.models import ConflictCandidate, ConflictReport
 
 logger = logging.getLogger("cortex.guards.contradiction")
 
