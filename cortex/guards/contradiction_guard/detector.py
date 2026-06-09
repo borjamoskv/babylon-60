@@ -1,284 +1,33 @@
-# [C5-REAL] Exergy-Maximized
-"""
-CORTEX - Contradiction Guard (Axiom 20: Epistemic Consistency).
-
-Every new decision must explicitly invalidate its predecessors or confirm
-compatibility. This guard runs at store-time and returns potential
-conflicts so the agent can disambiguate before persisting.
-
-Strategy (4-layer, O(N) bounded):
-  1. FTS5 keyword overlap - fast, coarse.
-  2. Project+topic co-occurrence - medium precision.
-  3. Negation / supersession detection - high precision.
-  4. Embedding cosine similarity - semantic precision (graceful degradation).
-
-Returns a ConflictReport with scored candidates.
-"""
+"""Contradiction detection logic."""
 
 from __future__ import annotations
 
 import logging
-import re
 from collections import defaultdict
 from collections.abc import Callable
-from dataclasses import dataclass, field
 from pathlib import Path
 
 import aiosqlite
 
 from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
 from cortex.database.core import connect_async_ctx
-from cortex.utils.void_vec import cosine_similarity
+from cortex.guards.contradiction_guard.models import ConflictCandidate, ConflictReport
+from cortex.guards.contradiction_guard.core import (
+    _embedding_cosine_similarity,
+    _tokenize,
+    _is_noise,
+    _decrypt_content,
+    _jaccard,
+    _classify_conflict,
+    _detect_negation,
+    _detect_supersession,
+    EMBEDDING_BOOST_WEIGHT,
+)
 
 logger = logging.getLogger("cortex.guards.contradiction")
 
 MAX_CANDIDATES = 10
 MIN_OVERLAP_SCORE = 0.10  # Jaccard threshold for keyword overlap
-
-
-# ── Data classes ────────────────────────────────────────────────────
-@dataclass(frozen=True)
-class ConflictCandidate:
-    """A single potentially contradicting decision."""
-
-    fact_id: int
-    project: str
-    content: str
-    date: str
-    overlap_score: float
-    conflict_type: (
-        str  # 'keyword_overlap' | 'negation' | 'version_supersede' | 'semantic_similarity'
-    )
-
-    def __str__(self) -> str:
-        return (
-            f"[#{self.fact_id}|{self.project}|{self.date}] "
-            f"({self.conflict_type}, score={self.overlap_score:.2f}) "
-            f"{self.content[:120]}"
-        )
-
-
-@dataclass()
-class ConflictReport:
-    """Result of a contradiction scan."""
-
-    new_content: str
-    new_project: str
-    candidates: list[ConflictCandidate] = field(default_factory=list)
-
-    @property
-    def has_conflicts(self) -> bool:
-        return len(self.candidates) > 0
-
-    @property
-    def severity(self) -> str:
-        if not self.candidates:
-            return "clean"
-        max_score = max(c.overlap_score for c in self.candidates)
-        if max_score >= 0.6:
-            return "high"
-        if max_score >= 0.4:
-            return "medium"
-        return "low"
-
-    def format(self) -> str:
-        if not self.has_conflicts:
-            return "✅ No contradictions detected."
-        lines = [
-            f"⚠️ {len(self.candidates)} potential contradiction(s) (severity: {self.severity}):",
-        ]
-        for c in sorted(self.candidates, key=lambda x: -x.overlap_score):
-            lines.append(f"  {c}")
-        lines.append("")
-        lines.append(
-            "ACTION REQUIRED: Add 'Supersedes #ID' or "
-            "'Compatible with #ID' to your decision content."
-        )
-        return "\n".join(lines)
-
-
-# ── Noise filter ────────────────────────────────────────────────────
-_NOISE_PREFIXES = ("MAILTV-1: ARCHIVE",)
-_STOP_WORDS = frozenset(
-    {
-        "a",
-        "an",
-        "the",
-        "is",
-        "are",
-        "was",
-        "were",
-        "be",
-        "been",
-        "being",
-        "have",
-        "has",
-        "had",
-        "do",
-        "does",
-        "did",
-        "will",
-        "would",
-        "could",
-        "should",
-        "may",
-        "might",
-        "shall",
-        "can",
-        "de",
-        "del",
-        "la",
-        "el",
-        "los",
-        "las",
-        "en",
-        "un",
-        "una",
-        "y",
-        "o",
-        "que",
-        "con",
-        "por",
-        "para",
-        "se",
-        "es",
-        "no",
-        "al",
-        "su",
-        "más",
-        "como",
-        "pero",
-        "sin",
-        "sobre",
-        "to",
-        "of",
-        "in",
-        "for",
-        "on",
-        "with",
-        "at",
-        "by",
-        "from",
-        "and",
-        "or",
-        "not",
-        "but",
-        "this",
-        "that",
-        "it",
-        "its",
-    }
-)
-
-_NEGATION_MARKERS = frozenset(
-    {
-        "no usar",
-        "never use",
-        "prohibido",
-        "eliminado",
-        "forbidden",
-        "deprecated",
-        "removed",
-        "replaced",
-        "reemplazado",
-        "obsolete",
-        "no utilizar",
-        "don't use",
-        "do not use",
-        "eliminamos",
-        "matado",
-        "killed",
-        "purged",
-        "deleted",
-    }
-)
-
-_SUPERSESSION_MARKERS = re.compile(
-    r"supersed|replac|obsolet|invalidat|deprecat|eliminad|reemplaz|upgrade|migrat|refactor",
-    re.IGNORECASE,
-)
-
-_VERSION_PATTERN = re.compile(r"\b[vV](\d+(?:\.\d+)*)\b")
-
-
-# ── Core functions ──────────────────────────────────────────────────
-def _tokenize(text: str) -> set[str]:
-    """Extract meaningful tokens from content."""
-    tokens = set(re.findall(r"[a-záéíóúñ]{3,}", text.lower()))
-    return tokens - _STOP_WORDS
-
-
-def _jaccard(a: set[str], b: set[str]) -> float:
-    """Jaccard similarity coefficient."""
-    if not a or not b:
-        return 0.0
-    union = a | b
-    return len(a & b) / len(union) if union else 0.0
-
-
-def _detect_negation(content: str) -> bool:
-    """Check if content contains negation/prohibition language."""
-    content_lower = content.lower()
-    return any(marker in content_lower for marker in _NEGATION_MARKERS)
-
-
-def _detect_supersession(content: str) -> bool:
-    """Check if content contains supersession language."""
-    return bool(_SUPERSESSION_MARKERS.search(content))
-
-
-def _extract_versions(content: str) -> list[str]:
-    """Extract version numbers from content."""
-    return _VERSION_PATTERN.findall(content)
-
-
-def _is_noise(content: str) -> bool:
-    """Filter out noise decisions like MAILTV archives."""
-    return any(content.startswith(prefix) for prefix in _NOISE_PREFIXES)
-
-
-def _decrypt_content(content: str, decrypt_fn: Callable | None) -> str | None:
-    """Decrypt content if needed, returning None on failure."""
-    if not decrypt_fn or not content.startswith("v6_aesgcm:"):
-        return content
-    try:
-        return decrypt_fn(content)
-    except (ValueError, TypeError, OSError):
-        return None
-
-
-def _classify_conflict(
-    new_content: str,
-    existing_content: str,
-    new_tokens: set[str],
-    existing_tokens: set[str],
-    base_score: float,
-) -> tuple[str, float]:
-    """Classify conflict type and apply score multipliers."""
-    conflict_type = "keyword_overlap"
-
-    if _detect_negation(new_content) or _detect_negation(existing_content):
-        conflict_type = "negation"
-        base_score *= 1.5
-
-    if _detect_supersession(new_content) or _detect_supersession(existing_content):
-        conflict_type = "version_supersede"
-        base_score *= 1.2
-
-    new_versions = _extract_versions(new_content)
-    old_versions = _extract_versions(existing_content)
-    if new_versions and old_versions and len(new_tokens & existing_tokens) > 5:
-        conflict_type = "version_supersede"
-        base_score *= 1.4
-
-    return conflict_type, base_score
-
-
-_embedding_cosine_similarity = cosine_similarity
-
-
-EMBEDDING_BOOST_WEIGHT = 0.3  # Max boost from embedding similarity
-
 
 def _score_candidate(
     row: aiosqlite.Row,
@@ -303,7 +52,7 @@ def _score_candidate(
         score *= 1.3
 
     # Layer 4: Embedding cosine similarity boost (Ω₁₃ upgrade)
-    cosine_sim = cosine_similarity(new_embedding, existing_embedding)
+    cosine_sim = _embedding_cosine_similarity(new_embedding, existing_embedding)
     if cosine_sim > 0.5:
         score += EMBEDDING_BOOST_WEIGHT * cosine_sim
 
@@ -330,7 +79,6 @@ def _score_candidate(
         overlap_score=min(score, 1.0),
         conflict_type=conflict_type,
     )
-
 
 async def _fetch_decision_rows(
     conn: aiosqlite.Connection,
@@ -366,7 +114,6 @@ async def _fetch_decision_rows(
             (fts_terms,),
         )
     return await cursor.fetchall()  # type: ignore[type-error]
-
 
 # ── Main detector ───────────────────────────────────────────────────
 async def detect_contradictions(
@@ -420,7 +167,6 @@ async def detect_contradictions(
 
     return report
 
-
 # ── CLI-friendly batch scanner ──────────────────────────────────────
 async def scan_all_contradictions(
     *,
@@ -465,7 +211,6 @@ async def scan_all_contradictions(
             logger.warning("Batch contradiction scan failed", exc_info=True)
             return []
 
-
 def _process_token_bucket(
     indices: list[int],
     group: list[dict],
@@ -491,7 +236,6 @@ def _process_token_bucket(
             pair = _compare_decisions(group[i], group[j], min_score)
             if pair:
                 pairs.append(pair)
-
 
 def _compare_decisions(
     a: dict,
@@ -530,7 +274,6 @@ def _compare_decisions(
     )
     return (score, ca, cb)
 
-
 def _prepare_decisions(rows: list, decrypt_fn: Callable | None) -> list[dict]:
     """Decrypt and tokenize raw database rows."""
     decisions = []
@@ -551,7 +294,6 @@ def _prepare_decisions(rows: list, decrypt_fn: Callable | None) -> list[dict]:
             }
         )
     return decisions
-
 
 def _build_token_index(group: list[dict]) -> dict[str, list[int]]:
     """Build inverted index: token -> list of decision indices in the group."""
