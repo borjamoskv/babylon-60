@@ -9,6 +9,7 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 	bodyClass="ultramap-body"
 >
 	<div id="ultramap-stage">
+		<video class="sota-video-bg" src="/assets/ultramap_bg.mp4" autoplay loop muted playsinline></video>
 		<div id="ultramap-canvas-container"></div>
 
 		<div id="ultramap-overlay">
@@ -674,10 +675,21 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 			background: #050505;
 		}
 
+		.sota-video-bg {
+			position: absolute;
+			top: 0; left: 0;
+			width: 100%; height: 100%;
+			object-fit: cover;
+			z-index: 0;
+			opacity: 0.95;
+			mix-blend-mode: screen;
+			pointer-events: none;
+		}
+
 		#ultramap-canvas-container {
 			inset: 0;
 			position: fixed;
-			z-index: 0;
+			z-index: 1;
 		}
 
 		#ultramap-overlay {
