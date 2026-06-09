@@ -189,6 +189,69 @@ def _is_anomalous_word(w: str) -> bool:
     return False
 
 
+def _analyze_letters(letters: list[str]) -> tuple[float, float]:
+    """Calculate vowel and rare letter fractions."""
+    if not letters:
+        return 0.0, 0.0
+    vowels_set = set("aeiouyáéíóú")
+    rare_set = set("qwkxjz")
+    vowel_count = sum(1 for c in letters if c in vowels_set)
+    rare_count = sum(1 for c in letters if c in rare_set)
+    n = len(letters)
+    return vowel_count / n, rare_count / n
+
+
+def _check_short_phrase(
+    words: list[str],
+    lower_content: str,
+    letters: list[str],
+    vowel_fraction: float,
+    rare_fraction: float,
+) -> float | None:
+    """Evaluate short phrases with fewer than 5 words."""
+    if len(words) >= 5:
+        return None
+    if any(_is_anomalous_word(w) for w in words):
+        return 0.0
+    if letters and vowel_fraction < 0.25:
+        return 0.0
+    if letters and rare_fraction > 0.15:
+        return 0.0
+    if any(marker in lower_content for marker in _DECORATIVE_MARKERS):
+        return 0.0
+    return 1.0
+
+
+def _check_noise_heuristics(
+    content: str,
+    letters: list[str],
+    vowel_fraction: float,
+    rare_fraction: float,
+    anomaly_fraction: float,
+) -> bool:
+    """Evaluate heuristics to filter out random consonant noise, gibberish, or malformed words."""
+    if letters and vowel_fraction < 0.25:
+        return True
+    if letters and rare_fraction > 0.08 and len(content) > 30:
+        return True
+    if anomaly_fraction > 0.15:
+        return True
+    return False
+
+
+def _calculate_semantic_density(words: list[str]) -> float:
+    """Calculate the fraction of non-stop-word tokens."""
+    if not words:
+        return 0.0
+    semantic_tokens = {w for w in words if w not in _STOP_WORDS and len(w) > 2}
+    return len(semantic_tokens) / float(len(words))
+
+
+def _calculate_decorative_penalty(lower_content: str) -> float:
+    """Sum penalties for decorative conversational markers."""
+    return sum(0.35 for marker in _DECORATIVE_MARKERS if marker in lower_content)
+
+
 def calculate_exergy(content: str) -> float:
     """
     Calculate the thermodynamic exergy (useful work) density of a string.
@@ -208,60 +271,31 @@ def calculate_exergy(content: str) -> float:
 
     # Character-level validation
     letters = [c for c in lower_content if c.isalpha()]
-    vowels_set = set("aeiouyáéíóú")
-    vowel_count = sum(1 for c in letters if c in vowels_set)
-    vowel_fraction = vowel_count / len(letters) if letters else 0.0
-
-    rare_set = set("qwkxjz")
-    rare_count = sum(1 for c in letters if c in rare_set)
-    rare_fraction = rare_count / len(letters) if letters else 0.0
+    vowel_fraction, rare_fraction = _analyze_letters(letters)
 
     # Short phrases guard: extremely short valid facts pass with 1.0
-    if total_words < 5:
-        if any(_is_anomalous_word(w) for w in words):
-            return 0.0
-        if letters and vowel_fraction < 0.25:
-            return 0.0
-        if letters and rare_fraction > 0.15:
-            return 0.0
-        return 0.0 if any(marker in lower_content for marker in _DECORATIVE_MARKERS) else 1.0
+    short_phrase_score = _check_short_phrase(words, lower_content, letters, vowel_fraction, rare_fraction)
+    if short_phrase_score is not None:
+        return short_phrase_score
 
-    # Heuristic 1: Natural language vowel fraction check (usually between 0.35 and 0.50)
-    # Extremely low vowel fraction indicates random consonant noise (e.g. bcsjfdx)
-    if letters and vowel_fraction < 0.25:
-        return 0.0
-
-    # Heuristic 2: Rare character distribution check (q, w, k, x, j, z)
-    if letters and rare_fraction > 0.08:
-        # If it's a longer text, it's highly likely to be gibberish
-        if len(content) > 30:
-            return 0.0
-
-    # Heuristic 3: Anomalous words count
+    # Heuristic Checks
     anomalous_words = sum(1 for w in words if _is_anomalous_word(w))
     anomaly_fraction = anomalous_words / float(total_words)
 
-    # If more than 15% of words are anomalous, it's noise
-    if anomaly_fraction > 0.15:
+    if _check_noise_heuristics(content, letters, vowel_fraction, rare_fraction, anomaly_fraction):
         return 0.0
 
-    # 1. Semantic Density (Legacy Logic)
-    # Stop words now include more common Spanish/English filler.
-    semantic_tokens = {w for w in words if w not in _STOP_WORDS and len(w) > 2}
-    base_density = len(semantic_tokens) / float(total_words)
+    # 1. Semantic Density
+    base_density = _calculate_semantic_density(words)
 
     # 2. Shannon Factor: Measures complexity
-    # Healthy language has entropy ~3.5 to 5.0.
     entropy = calculate_shannon_entropy(content)
-    # Aura-Omega Tuning: Only reward entropy if semantic density is already decent.
-    # High entropy with low semantic density = wordy nonsense.
     shannon_factor = min(entropy / 4.0, 1.2) if base_density > 0.4 else 0.7
 
-    # 3. Decorative Penalty (Aesthetic Annihilation)
-    # Each marker now subtracts 0.35. We are ruthless vs fluff.
-    decorative_penalty = sum(0.35 for marker in _DECORATIVE_MARKERS if marker in lower_content)
+    # 3. Decorative Penalty
+    decorative_penalty = _calculate_decorative_penalty(lower_content)
 
-    # 4. Repetition Penalty (Aura-Omega)
+    # 4. Repetition Penalty
     rep_penalty = calculate_repetition_penalty(words)
 
     # Final Composite Score
