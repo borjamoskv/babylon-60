@@ -52,6 +52,7 @@ if TYPE_CHECKING:
         SiteMonitor,
     )
     from cortex.extensions.daemon.notifier import Notifier
+    from cortex.extensions.daemon.translator import ShardedTranslationDaemon
 
 __all__ = [
     # core
@@ -84,6 +85,8 @@ __all__ = [
     "SiteMonitor",
     # notifier
     "Notifier",
+    # translator
+    "ShardedTranslationDaemon",
 ]
 
 # Lazy-load map: attribute name → (module_path, attr_name)
@@ -118,6 +121,8 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "SiteMonitor": ("cortex.extensions.daemon.monitors", "SiteMonitor"),
     # notifier
     "Notifier": ("cortex.extensions.daemon.notifier", "Notifier"),
+    # translator
+    "ShardedTranslationDaemon": ("cortex.extensions.daemon.translator", "ShardedTranslationDaemon"),
 }
 
 
