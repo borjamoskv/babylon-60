@@ -139,6 +139,12 @@ class VirgoContextGuard:
                     now_iso(),
                 ),
             )
+        except aiosqlite.IntegrityError as integrity_err:
+            await self._trigger_ledger_rollback(
+                conn,
+                f"Replay attack detected: nonce '{nonce}' already exists (integrity collision).",
+                error_class=VirgoValidationError,
+            )
         except aiosqlite.Error as db_err:
             logger.debug("ledger_replay_admissions write failed during Virgo check: %s", db_err)
 
