@@ -73,7 +73,11 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         """Store a new fact with proper connection management."""
         tenant_id = self._resolve_tenant(tenant_id)
         if source is None and actor_id:
-            source = actor_id if actor_id.startswith(("agent:", "cli", "api", "human")) else f"agent:{actor_id}"
+            source = (
+                actor_id
+                if actor_id.startswith(("agent:", "cli", "api", "human"))
+                else f"agent:{actor_id}"
+            )
 
         # ═══ SOVEREIGN LOCK (Axiom Ω_CB) ═══
         if getattr(self, "system_state", "ACTIVE") == "LOCKED_EPISTEMIC_HALT":
@@ -169,6 +173,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         await self._run_pre_store_guards(conn, content, project, fact_type, meta, tenant_id)
 
         from cortex.guards.ctre_guard import CTRECollisionError
+
         try:
             dedupe_id, meta, content, fact_type = await self._run_store_validation(
                 conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
@@ -179,8 +184,13 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 conn,
                 project,
                 "saga_abort",
-                {"reason": "TOCTOU_COLLISION", "epsilon_us": e.epsilon, "expected_hash": e.expected_hash, "current_hash": e.current_hash},
-                tenant_id=tenant_id
+                {
+                    "reason": "TOCTOU_COLLISION",
+                    "epsilon_us": e.epsilon,
+                    "expected_hash": e.expected_hash,
+                    "current_hash": e.current_hash,
+                },
+                tenant_id=tenant_id,
             )
             # Propagate to the agent so it knows it must retry the perception loop
             raise
@@ -243,6 +253,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         if tx_id is not None:
             return tx_id
         from cortex.utils.canonical import compute_fact_hash
+
         content_hash = compute_fact_hash(content)
         return await self._log_transaction(
             conn,
@@ -420,6 +431,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         """Invalidate search L1 cache for the tenant."""
         try:
             from cortex.cache import RedisL1Cache
+
             cache = RedisL1Cache.singleton()
             if cache.available:
                 cache.flush_namespace(f"search:{tenant_id}")
