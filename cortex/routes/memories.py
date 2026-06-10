@@ -45,36 +45,12 @@ logger = logging.getLogger(__name__)
 # ─── Request / Response Models ───────────────────────────────────────
 
 
-def _fact_data(fact: object) -> dict[str, Any]:
-    """Normalize Fact-like values to a mutable mapping."""
-    if isinstance(fact, Mapping):
-        return dict(fact)
-
-    to_dict = getattr(fact, "to_dict", None)
-    if callable(to_dict):
-        data = to_dict()
-        if isinstance(data, Mapping):
-            return dict(data)
-
-    raise HTTPException(
-        status_code=500,
-        detail=f"Unsupported fact payload type: {type(fact).__name__}",
-    )
-
-
-class StoreMemoryRequest(BaseModel):
-    """Request to store a memory."""
-
-    project: str = Field(..., min_length=1, max_length=128)
-    content: str = Field(..., min_length=1, max_length=32_768)
-    type: str = Field("knowledge", description="knowledge, decision, error, etc.")
-    tags: list[str] = Field(default_factory=list, max_length=20)
-    source: str | None = Field(None, description="Origin (e.g., 'agent:my-bot')")
-    metadata: dict[str, Any] | None = Field(None)
-    parent_decision_id: int | None = Field(
-        None,
-        description="Causal parent fact ID for chain tracking",
-    )
+from cortex.routes.facts import (
+    _fact_data,
+    StoreMemoryRequest,
+    SearchMemoryRequest,
+    BatchStoreRequest,
+)
 
 
 class MemoryResponse(BaseModel):
@@ -92,22 +68,6 @@ class MemoryResponse(BaseModel):
     updated_at: str
     hash: str | None = None
     score: float | None = None
-
-
-class SearchMemoryRequest(BaseModel):
-    """Semantic search request."""
-
-    query: str = Field(..., min_length=1, max_length=1024, description="Natural language query")
-    k: int = Field(5, ge=1, le=50, description="Number of results to return")
-    project: str | None = Field(None, description="Filter by project")
-    tags: list[str] | None = Field(None, description="Filter by tags")
-    as_of: str | None = Field(None, description="Temporal filter (ISO timestamp)")
-
-
-class BatchStoreRequest(BaseModel):
-    """Batch store request."""
-
-    memories: list[StoreMemoryRequest] = Field(..., min_length=1, max_length=100)
 
 
 # ─── Endpoints ───────────────────────────────────────────────────────
