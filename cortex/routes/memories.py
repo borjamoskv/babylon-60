@@ -18,11 +18,9 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-from collections.abc import Mapping
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
@@ -46,10 +44,10 @@ logger = logging.getLogger(__name__)
 
 
 from cortex.routes.facts import (
-    _fact_data,
-    StoreMemoryRequest,
-    SearchMemoryRequest,
     BatchStoreRequest,
+    SearchMemoryRequest,
+    StoreMemoryRequest,
+    _fact_data,
 )
 
 

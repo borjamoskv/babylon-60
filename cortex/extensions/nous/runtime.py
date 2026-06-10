@@ -5,12 +5,11 @@ Reality Level: C5-REAL
 """
 
 import logging
-from typing import Any
 
 from cortex.engine import CortexEngine
-from cortex.extensions.nous.models import NousAST, DryRunResult
-from cortex.extensions.nous.sql_synthesizer import SQLSynthesizer
 from cortex.extensions.nous.dry_run import DryRunEngine
+from cortex.extensions.nous.models import DryRunResult, NousAST
+from cortex.extensions.nous.sql_synthesizer import SQLSynthesizer
 
 logger = logging.getLogger(__name__)
 

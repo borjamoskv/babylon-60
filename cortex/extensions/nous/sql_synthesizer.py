@@ -4,12 +4,13 @@
 Reality Level: C5-REAL
 """
 
-from typing import List
-from .models import NousAST, MigrationOperation
+
+from .models import MigrationOperation, NousAST
+
 
 class SQLSynthesizer:
     @staticmethod
-    def synthesize(ast: NousAST) -> List[MigrationOperation]:
+    def synthesize(ast: NousAST) -> list[MigrationOperation]:
         """
         Maps a declarative NousAST into an ordered list of MigrationOperations
         ready for the DryRun engine.

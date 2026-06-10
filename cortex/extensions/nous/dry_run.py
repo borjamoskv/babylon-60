@@ -5,20 +5,21 @@ Reality Level: C5-REAL
 """
 
 import uuid
-from typing import List, Dict, Any
-from .models import MigrationOperation, DryRunResult, GuardResult
+
+from .models import DryRunResult, GuardResult, MigrationOperation
+
 
 class DryRunEngine:
     def __init__(self, dsn: str | None = None):
         self.dsn = dsn
         
-    async def simulate(self, operations: List[MigrationOperation]) -> DryRunResult:
+    async def simulate(self, operations: list[MigrationOperation]) -> DryRunResult:
         """
         Simulates the migration plan without committing changes.
         Validates syntax, constraints, and estimates risks.
         """
-        guards: Dict[str, GuardResult] = {}
-        warnings: List[str] = []
+        guards: dict[str, GuardResult] = {}
+        warnings: list[str] = []
         estimated_data_loss_risk = "none"
         
         # Basic structural guards
