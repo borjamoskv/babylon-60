@@ -115,14 +115,11 @@ embeddings = [
     "onnxruntime>=1.17",
     "optimum[onnxruntime]>=1.17,<2.0.0",
 ]
-knowledge = [
-    "chromadb>=1.5.5",
-]
 acceleration = [
     "numba>=0.65.0",
 ]
 all = [
-    "cortex-persist[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,knowledge,acceleration]",
+    "cortex-persist[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,acceleration]",
 ]
 
 [project.scripts]

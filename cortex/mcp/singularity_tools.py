@@ -20,17 +20,11 @@ try:
 except ImportError:
     vsa = None
 
-try:
-    import chromadb  # pyright: ignore[reportMissingImports]
-except ImportError:
-    chromadb = None
-
 # Core Paths Configuration (V3 OMEGA)
 SKILLS_DIR = os.path.expanduser("~/.gemini/antigravity/skills")
 KNOWLEDGE_DIR = os.path.expanduser("~/.gemini/antigravity/knowledge")
 STATE_FILE = "/tmp/cortex_state.json"
 SWARM_QUEUE_FILE = "/tmp/cortex_swarm_queue.json"
-CHROMA_DB_PATH = os.path.expanduser("~/.cortex/chroma_db")
 
 # In-memory state for O(1) Ledger append
 _LEDGER_STATE = None
@@ -85,39 +79,43 @@ def register_singularity_tools(mcp) -> None:
         )
 
     @mcp.tool()
-    def cortex_query_memory(query: str, top_k: int = 3) -> str:
+    async def cortex_query_memory(query: str, top_k: int = 3) -> str:
         """
-        Semantic vector search over Knowledge Items (KI) using ChromaDB.
+        Semantic vector search over Knowledge Items (KI) using SQLite-Vec.
 
         Args:
             query: The semantic search query phrase.
             top_k: Top limit of items to return based on distance.
         """
-        if not chromadb:
-            return "CORTEX-MCP: ChromaDB is missing. Run `uv add chromadb`."
         try:
-            client = chromadb.PersistentClient(path=CHROMA_DB_PATH)
-            collection = client.get_collection("cortex_knowledge_base")
-            res = collection.query(query_texts=[query], n_results=top_k)
+            from cortex.memory.encoder import AsyncEncoder
+            from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
-            ids = res["ids"][0] if res["ids"] else []
-            docs = res["documents"][0] if res["documents"] else []
-            dists = res["distances"][0] if "distances" in res else []
+            encoder = AsyncEncoder()
+            store = SovereignVectorStoreL2(encoder=encoder)
 
-            if not ids:
+            results = await store.recall_secure(
+                tenant_id="default",
+                project_id="knowledge",
+                query=query,
+                limit=top_k,
+            )
+
+            if not results:
                 return f"CORTEX-MCP: No memories (KIs) found matching query '{query}'"
 
-            out = [f"Found {len(ids)} relevant Tensor matches on CORTEX:"]
-            for i, doc_id in enumerate(ids):
-                dist_str = f"{dists[i]:.4f}" if i < len(dists) else "N/A"
-                preview = docs[i][:600]
+            out = [f"Found {len(results)} relevant Tensor matches on CORTEX:"]
+            for i, fact in enumerate(results):
+                dist_str = f"{fact._recall_score:.4f}" if hasattr(fact, "_recall_score") else "N/A"
+                preview = fact.content[:600]
+                ki_name = fact.id[3:] if fact.id.startswith("ki_") else fact.id
                 out.append(
-                    f"\n[KI Tensor: {doc_id}] (Cosine Distance: {dist_str})\n"
+                    f"\n[KI Tensor: {ki_name}] (Confidence Score: {dist_str})\n"
                     f"Preview: {preview}...\n"
                 )
             return "\n".join(out)
         except Exception as e:
-            return f"CORTEX-MCP ChromaDB Engine Error: {e!s}"
+            return f"CORTEX-MCP SQLite-Vec Engine Error: {e!s}"
 
     @mcp.tool()
     def cortex_ledger_append(action: str, vector_id: str, yield_amount: float) -> str:

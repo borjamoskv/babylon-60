@@ -42,7 +42,6 @@ def test_heavy_dependencies_live_in_optional_extras() -> None:
         "onnxruntime",
         "optimum",
     }
-    assert _dependency_names(extras["knowledge"]) == {"chromadb"}
     assert _dependency_names(extras["acceleration"]) == {"numba"}
     assert _dependency_names(extras["api"]) >= {
         "fastapi",
@@ -62,7 +61,7 @@ def test_heavy_dependencies_live_in_optional_extras() -> None:
     assert _dependency_names(extras["platform"]) >= {"pyobjc-core", "pyobjc-framework-Cocoa"}
     assert _dependency_names(extras["authoring"]) == {"PyYAML"}
     assert extras["all"] == [
-        "cortex-persist[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,knowledge,acceleration]"
+        "cortex-persist[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,acceleration]"
     ]
 
     assert (

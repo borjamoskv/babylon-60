@@ -34,7 +34,7 @@ class CortexPipelineBridge:
 
     Creates a fully connected CortexOrchestrator with:
     - CortexEngine for memory/facts (async)
-    - ContextAssembler with real ChromaDB + FactStore
+    - ContextAssembler with real SQLite-Vec + FactStore
     - AgentRouter with budget integration
     - DeliveryManager for real egress
     - SwarmBudgetManager for Ω₃ enforcement

@@ -2,35 +2,34 @@
 """CORTEX Knowledge Watcher - VSA Sync Daemon.
 
 Continuously monitors the knowledge directory for any changes and automatically
-compiles semantic vectors into the Persistent ChromaDB instance.
+compiles semantic vectors into the Persistent SQLite-Vec instance.
 """
 
 import logging
 import os
-
+import asyncio
+import time
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
-try:
-    import chromadb  # pyright: ignore[reportMissingImports]
-except ImportError:
-    chromadb = None
+from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+from cortex.memory.encoder import AsyncEncoder
+from cortex.memory.models import CortexFactModel
 
 logger = logging.getLogger("cortex.mcp.knowledge_watcher")
 
 KNOWLEDGE_DIR = os.path.expanduser("~/.gemini/antigravity/knowledge")
-CHROMA_DB_PATH = os.path.expanduser("~/.cortex/chroma_db")
 
 
 class KnowledgeItemHandler(FileSystemEventHandler):
     """Handles filesystem events for Knowledge Items."""
 
-    def __init__(self, client, collection):
-        self.client = client
-        self.collection = collection
+    def __init__(self, store: SovereignVectorStoreL2, encoder: AsyncEncoder):
+        self.store = store
+        self.encoder = encoder
 
     def _sync_file(self, file_path: str) -> None:
-        """Syncs an individual file to ChromaDB."""
+        """Syncs an individual file to SQLite-Vec."""
         if not file_path.endswith("overview.md"):
             return
 
@@ -38,7 +37,6 @@ class KnowledgeItemHandler(FileSystemEventHandler):
         try:
             parts = file_path.split(os.sep)
             # Expected: .../knowledge/<KI_NAME>/artifacts/overview.md
-            # So index of <KI_NAME> is -3
             ki_name = parts[-3]
         except IndexError:
             ki_name = "unknown_ki"
@@ -50,36 +48,60 @@ class KnowledgeItemHandler(FileSystemEventHandler):
             if content.strip():
                 # Store up to 8k tokens for semantic grounding
                 reduced_content = content[:8000]
-                self.collection.upsert(
-                    documents=[reduced_content], metadatas=[{"source": ki_name}], ids=[ki_name]
-                )
-                logger.info("👁️ [KNOWLEDGE] Synced Tensor for KI [%s]", ki_name)
+
+                async def _async_save():
+                    # Generate embedding
+                    embedding = await self.encoder.encode(reduced_content)
+                    fact = CortexFactModel(
+                        id=f"ki_{ki_name}",
+                        tenant_id="default",
+                        project_id="knowledge",
+                        content=reduced_content,
+                        embedding=embedding,
+                        timestamp=time.time(),
+                        is_diamond=True,
+                        is_bridge=False,
+                        confidence="high",
+                        cognitive_layer="semantic",
+                        parent_decision_id=None,
+                        metadata={"source": ki_name},
+                    )
+                    await self.store.memorize(fact)
+
+                # Execute async save safely from OS thread
+                try:
+                    loop = asyncio.get_running_loop()
+                    loop.create_task(_async_save())
+                except RuntimeError:
+                    # No running event loop in this thread (expected for watchdog thread)
+                    asyncio.run(_async_save())
+
+                logger.info("👁️ [KNOWLEDGE] Synced Tensor for KI [%s] into SQLite-Vec", ki_name)
         except Exception as e:
             logger.error("Failed to sync KI %s: %s", ki_name, e)
 
     def on_modified(self, event):
         if not event.is_directory:
-            self._sync_file(event.src_path)  # pyright: ignore[reportArgumentType]
+            self._sync_file(event.src_path)
 
     def on_created(self, event):
         if not event.is_directory:
-            self._sync_file(event.src_path)  # pyright: ignore[reportArgumentType]
+            self._sync_file(event.src_path)
 
 
 def start_knowledge_daemon():
-    """Starts background watchdog daemon to keep ChromaDB synced."""
-    if not chromadb or not os.path.exists(KNOWLEDGE_DIR):
-        msg = "Skipping Knowledge Watcher (ChromaDB or KNOWLEDGE_DIR missing)"
+    """Starts background watchdog daemon to keep SQLite-Vec synced."""
+    if not os.path.exists(KNOWLEDGE_DIR):
+        msg = "Skipping Knowledge Watcher (KNOWLEDGE_DIR missing)"
         logger.warning(msg)
         return None
 
     try:
-        client = chromadb.PersistentClient(path=CHROMA_DB_PATH)
-        collection = client.get_or_create_collection(
-            "cortex_knowledge_base", metadata={"hnsw:space": "cosine"}
-        )
+        # Initialize the encoder and store
+        encoder = AsyncEncoder()
+        store = SovereignVectorStoreL2(encoder=encoder)
 
-        event_handler = KnowledgeItemHandler(client, collection)
+        event_handler = KnowledgeItemHandler(store, encoder)
         observer = Observer()
         observer.schedule(event_handler, KNOWLEDGE_DIR, recursive=True)
         observer.start()

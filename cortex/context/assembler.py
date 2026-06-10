@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 """CORTEX Context Assembler - Unified Knowledge Retrieval.
 
-Fuses VSA, ChromaDB, FactStore, and Knowledge Items into a single
+Fuses VSA, SQLite-Vec, FactStore, and Knowledge Items into a single
 ContextPacket ranked by semantic relevance.
 
 Law Ω₂: Measure exergy (useful work), not volume.
@@ -27,7 +27,7 @@ class ContextAssembler:
 
     Sources (checked in priority order):
     1. Explicit hints (pre-specified KI names or fact IDs)
-    2. Semantic search via VSA/ChromaDB embeddings
+    2. Semantic search via VSA/SQLite-Vec embeddings
     3. FactStore temporal queries
     4. Knowledge Item file system scan
     """

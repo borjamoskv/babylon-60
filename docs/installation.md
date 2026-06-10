@@ -45,12 +45,6 @@ pip install "cortex-persist[platform]"
     ```
     Adds `sentence-transformers` and `onnxruntime` for local semantic embeddings and reranking instead of deterministic fallback vectors.
 
-=== "Knowledge Watcher"
-    ```bash
-    pip install "cortex-persist[knowledge]"
-    ```
-    Adds ChromaDB-backed knowledge sync components used by the MCP knowledge watcher.
-
 === "Acceleration"
     ```bash
     pip install "cortex-persist[acceleration]"
