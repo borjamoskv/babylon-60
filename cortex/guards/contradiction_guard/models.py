@@ -12,7 +12,9 @@ class ConflictCandidate:
     content: str
     date: str
     overlap_score: float
-    conflict_type: str  # 'keyword_overlap' | 'negation' | 'version_supersede' | 'semantic_similarity'
+    conflict_type: (
+        str  # 'keyword_overlap' | 'negation' | 'version_supersede' | 'semantic_similarity'
+    )
 
     def __str__(self) -> str:
         return (

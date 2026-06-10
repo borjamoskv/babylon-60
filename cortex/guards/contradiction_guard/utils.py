@@ -17,6 +17,7 @@ from .constants import (
 
 _embedding_cosine_similarity = cosine_similarity
 
+
 @functools.lru_cache(maxsize=1024)
 def _tokenize(text: str) -> TokenSet:
     """Extract meaningful tokens from content."""
@@ -26,12 +27,14 @@ def _tokenize(text: str) -> TokenSet:
     except (TypeError, ValueError):
         return set()
 
+
 def _jaccard(a: TokenSet, b: TokenSet) -> float:
     """Jaccard similarity coefficient."""
     if not a or not b:
         return 0.0
     union = a | b
     return len(a & b) / len(union) if union else 0.0
+
 
 def _detect_negation(content: str) -> bool:
     """Check if content contains negation/prohibition language."""
@@ -41,12 +44,14 @@ def _detect_negation(content: str) -> bool:
     except (AttributeError, TypeError):
         return False
 
+
 def _detect_supersession(content: str) -> bool:
     """Check if content contains supersession language."""
     try:
         return bool(_SUPERSESSION_MARKERS.search(content))
     except TypeError:
         return False
+
 
 @functools.lru_cache(maxsize=1024)
 def _extract_versions(content: str) -> list[str]:
@@ -56,12 +61,14 @@ def _extract_versions(content: str) -> list[str]:
     except TypeError:
         return []
 
+
 def _is_noise(content: str) -> bool:
     """Filter out noise decisions like MAILTV archives."""
     try:
         return any(content.startswith(prefix) for prefix in _NOISE_PREFIXES)
     except AttributeError:
         return True
+
 
 def _decrypt_content(content: str, decrypt_fn: Callable[[str], str] | None) -> str | None:
     """Decrypt content if needed, returning None on failure."""
@@ -73,6 +80,7 @@ def _decrypt_content(content: str, decrypt_fn: Callable[[str], str] | None) -> s
         return decrypt_fn(content)
     except (ValueError, TypeError, OSError):
         return None
+
 
 def _classify_conflict(
     new_content: str,

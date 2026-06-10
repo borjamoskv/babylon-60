@@ -26,7 +26,9 @@ logger = logging.getLogger("cortex.guards.contradiction")
 PathLike: TypeAlias = str | Path
 
 
-def _prepare_decisions(rows: list[aiosqlite.Row], decrypt_fn: Callable[[str], str] | None) -> list[dict[str, Any]]:
+def _prepare_decisions(
+    rows: list[aiosqlite.Row], decrypt_fn: Callable[[str], str] | None
+) -> list[dict[str, Any]]:
     """Decrypt and tokenize raw database rows."""
     decisions = []
     for row in rows:

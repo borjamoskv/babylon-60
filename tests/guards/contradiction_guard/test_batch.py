@@ -7,6 +7,7 @@ import contextlib
 
 pytestmark = pytest.mark.asyncio
 
+
 async def test_scan_all_contradictions_happy_path(fts5_db_path, caplog):
     """Happy Path: scan over database returns correct pairs."""
     async with aiosqlite.connect(fts5_db_path) as db:
@@ -25,8 +26,10 @@ async def test_scan_all_contradictions_happy_path(fts5_db_path, caplog):
     assert found
     assert "Batch contradiction scan failed" not in caplog.text
 
+
 async def test_scan_all_contradictions_rejection(fts5_db_path, caplog, monkeypatch):
     """Rejection/Warning test: Handle database failure properly."""
+
     async def mock_execute(*args, **kwargs):
         raise aiosqlite.OperationalError("Mocked DB error")
 
@@ -34,8 +37,10 @@ async def test_scan_all_contradictions_rejection(fts5_db_path, caplog, monkeypat
     async def mock_connect(*args, **kwargs):
         class MockConn:
             row_factory = None
+
             async def execute(self, *a, **k):
                 return await mock_execute(*a, **k)
+
         yield MockConn()
 
     monkeypatch.setattr("cortex.guards.contradiction_guard.batch.connect_async_ctx", mock_connect)
@@ -46,13 +51,14 @@ async def test_scan_all_contradictions_rejection(fts5_db_path, caplog, monkeypat
     assert pairs == []
     assert "Batch contradiction scan failed" in caplog.text
 
+
 async def test_scan_all_contradictions_boundary(fts5_db_path, caplog):
     """Boundary Condition: Small limit returns exact number of elements."""
     async with aiosqlite.connect(fts5_db_path) as db:
         for i in range(10):
             await db.execute(
                 "INSERT INTO facts (project, content, fact_type, created_at) VALUES (?, ?, ?, ?)",
-                ('projLimit', f'We must adopt Docker for deployment {i}', 'decision', '2023-11-01')
+                ("projLimit", f"We must adopt Docker for deployment {i}", "decision", "2023-11-01"),
             )
         await db.commit()
 

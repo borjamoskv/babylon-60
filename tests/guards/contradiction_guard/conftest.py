@@ -3,6 +3,7 @@ import aiosqlite
 import tempfile
 import os
 
+
 @pytest.fixture
 async def fts5_db_path():
     """Provides a temporary FTS5-enabled SQLite database path."""
