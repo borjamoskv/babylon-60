@@ -71,7 +71,6 @@ class PersistExecutor:
         try:
             self.memory_manager.store(agent_id, state_data)  # pyright: ignore[reportUnusedCoroutine]
         except AttributeError:
-
             pass
 
         return {

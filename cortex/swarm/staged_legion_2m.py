@@ -35,7 +35,6 @@ def _cleanup_mmap(path: str) -> None:
     try:
         os.remove(path)
     except FileNotFoundError:
-
         pass
 
 
