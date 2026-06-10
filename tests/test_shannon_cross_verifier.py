@@ -46,8 +46,9 @@ def sample_episode_trace() -> EpisodeTrace:
 
 @pytest.fixture
 def sample_ledger_replay() -> list[dict]:
+    import copy
     # Correct format matching the trace
-    return [
+    data = [
         {"env_id": "genesis-v1", "seed": 42},  # Config header
         {
             "action": "SHANNON_STEP",
@@ -70,6 +71,7 @@ def sample_ledger_replay() -> list[dict]:
             }
         }
     ]
+    return copy.deepcopy(data)
 
 
 def test_verifier_perfect_consistency(sample_ledger_replay, sample_episode_trace):
