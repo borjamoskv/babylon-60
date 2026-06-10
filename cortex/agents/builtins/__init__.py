@@ -8,8 +8,10 @@ from cortex.agents.builtins.omega_prime import OmegaPrimeAgent
 from cortex.agents.builtins.security_agent import SecurityAgent
 from cortex.agents.builtins.supervisor_agent import SupervisorAgent
 from cortex.agents.builtins.verification_agent import VerificationAgent
+from cortex.agents.builtins.cassandra_agent import CassandraAgent
 
 __all__ = [
+    "CassandraAgent",
     "CopilotAgent",
     "HandoffAgent",
     "MemoryAgent",

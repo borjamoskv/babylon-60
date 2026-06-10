@@ -13,7 +13,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, console
+from cortex.cli.common import DEFAULT_DB, console, cli
 
 
 def check_python() -> dict:
@@ -140,3 +140,6 @@ def doctor(db: str, as_json: bool) -> None:
         console.print("\n[bold #06d6a0]🚀 SISTEMA NOMINAL. CORTEX ESTÁ LISTO PARA OPERAR.[/]")
     else:
         console.print("\n[bold yellow]⚠️ SE DETECTARON PROBLEMAS. REVISA EL INFORME SUPERIOR.[/]")
+
+
+cli.add_command(doctor)
