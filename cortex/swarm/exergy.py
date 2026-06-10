@@ -2,10 +2,12 @@
 [C5-REAL] Exergy Tokenomics & Staking Mechanism for OUROBOROS.
 Manages agent exergy (vitality) inside the Byzantine Swarm.
 """
+
 import logging
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class AgentWallet:
@@ -16,10 +18,12 @@ class AgentWallet:
     failed_commits: int = 0
     is_alive: bool = True
 
+
 class ExergyBank:
     """
     Central Ledger for tracking the vitality (Exergy) of agents in the swarm.
     """
+
     INITIAL_EXERGY = 1000.0  # Tokens fiat (Virtual representation of API Cost limits)
     STAKE_REQUIRED_PER_PROPOSAL = 50.0
     REWARD_MULTIPLIER = 1.5
@@ -58,7 +62,9 @@ class ExergyBank:
         if wallet and wallet.staked >= self.STAKE_REQUIRED_PER_PROPOSAL:
             wallet.staked -= self.STAKE_REQUIRED_PER_PROPOSAL
             wallet.failed_commits += 1
-            logger.info(f"Agent {agent_id} SLASHED (Lost {self.STAKE_REQUIRED_PER_PROPOSAL} exergy).")
+            logger.info(
+                f"Agent {agent_id} SLASHED (Lost {self.STAKE_REQUIRED_PER_PROPOSAL} exergy)."
+            )
 
     def reward(self, agent_id: str) -> None:
         """
@@ -78,6 +84,7 @@ class ExergyBank:
                 "balance": w.balance,
                 "staked": w.staked,
                 "alive": w.is_alive,
-                "win_rate": w.successful_commits / max(1, w.successful_commits + w.failed_commits)
-            } for aid, w in self.wallets.items()
+                "win_rate": w.successful_commits / max(1, w.successful_commits + w.failed_commits),
+            }
+            for aid, w in self.wallets.items()
         }

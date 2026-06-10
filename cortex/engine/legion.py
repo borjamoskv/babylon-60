@@ -143,11 +143,11 @@ class Squadron(ABC):
         }
 
         # ─── AX-VIII: CAUSAL CLOSURE GUARD ───
-        from cortex.guards import CausalClosureGuard, SwarmProposal
-        
         # Produce a real LedgerPayload to satisfy structural condensation
         import json
         from datetime import datetime
+
+        from cortex.guards import CausalClosureGuard, SwarmProposal
 
         ledger_payload = {
             "type": "LedgerPayload",
@@ -162,7 +162,7 @@ class Squadron(ABC):
             agent_id=f"Squadron-{self.SQUAD_NAME}",
             mission_statement="Crystallization Phase",
             content=content,
-            token_cost=50000  # Enforce strictly for Squadron deployment
+            token_cost=50000,  # Enforce strictly for Squadron deployment
         )
         guard = CausalClosureGuard()
         guard.verify_closure(proposal)

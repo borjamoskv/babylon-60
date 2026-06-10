@@ -6,14 +6,15 @@ Intercepts exceptions, extracts execution context, calculates surprise metrics,
 and channels failure states into exergic curriculum entries for JIT healing.
 """
 
-import sys
-import os
-import json
-import traceback
 import inspect
-from pathlib import Path
+import json
+import os
+import sys
+import traceback
+from collections.abc import Callable
 from datetime import datetime, timezone
-from typing import Callable, Any
+from pathlib import Path
+from typing import Any
 
 # Root workspace data directory
 CORTEX_DIR = Path(__file__).resolve().parent.parent / ".cortex"
@@ -25,6 +26,7 @@ def pronoic_transduce(func: Callable[..., Any]) -> Callable[..., Any]:
     Decorator that intercepts exceptions and transduces them into
     exergic curriculum tokens instead of raising fatal system shutdowns.
     """
+
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         try:
             return func(*args, **kwargs)
@@ -33,7 +35,7 @@ def pronoic_transduce(func: Callable[..., Any]) -> Callable[..., Any]:
             tb = sys.exc_info()[2]
             frame = inspect.trace()[-1][0] if tb else inspect.currentframe()
             local_vars = frame.f_locals if frame else {}
-            
+
             # Filter sensitive keys or large frames
             safe_locals = {}
             for k, v in local_vars.items():
@@ -47,48 +49,48 @@ def pronoic_transduce(func: Callable[..., Any]) -> Callable[..., Any]:
 
             exc_type = e.__class__.__name__
             exc_msg = str(e)
-            
+
             # Format failure trace
             formatted_tb = traceback.format_exc()
-            
+
             # Calculate System Surprise Entropy (Mock formula based on context size)
             state_entropy = len(safe_locals) * 0.85 + len(exc_msg) * 0.05
-            
+
             # Curriculum payload
             payload = {
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "function": f"{func.__module__}.{func.__name__}",
-                "exception": {
-                    "type": exc_type,
-                    "message": exc_msg
-                },
+                "exception": {"type": exc_type, "message": exc_msg},
                 "locals": safe_locals,
                 "entropy_bits": round(state_entropy, 2),
-                "resolved": False
+                "resolved": False,
             }
-            
+
             # Persist to local ledger
             os.makedirs(CORTEX_DIR, exist_ok=True)
             with open(CURRICULUM_LEDGER, "a", encoding="utf-8") as ledger:
                 ledger.write(json.dumps(payload) + "\n")
-                
+
             # Log transduction activity to terminal (Industrial Noir style)
-            print(f"\n🛑 [PRONOIC TRANSDUCER] Perturbation Captured.")
+            print("\n🛑 [PRONOIC TRANSDUCER] Perturbation Captured.")
             print(f"   ► Exception:  {exc_type}: {exc_msg}")
-            print(f"   ► Context:    {func.__name__}() | State Entropy: {payload['entropy_bits']} bits")
-            print(f"   ► Action:     Transducing entropy into exergic curriculum.")
-            print(f"   ► Path:       .cortex/curriculum_ledger.jsonl")
-            print(f"   ► JIT Anchor: Initiating self-healing path via Sortu-APEX...")
-            
+            print(
+                f"   ► Context:    {func.__name__}() | State Entropy: {payload['entropy_bits']} bits"
+            )
+            print("   ► Action:     Transducing entropy into exergic curriculum.")
+            print("   ► Path:       .cortex/curriculum_ledger.jsonl")
+            print("   ► JIT Anchor: Initiating self-healing path via Sortu-APEX...")
+
             # Propose healing patch (simulation)
             heal_simulation(payload)
-            
+
             # Raise or handle depending on mode (default to structured recovery option)
             return {
                 "status": "TRANSDUCED_TO_CURRICULUM",
                 "payload": payload,
-                "original_exception": exc_type
+                "original_exception": exc_type,
             }
+
     return wrapper
 
 
@@ -96,10 +98,10 @@ def heal_simulation(payload: dict):
     """Simulates JIT compiler patch generation based on error signature."""
     func_name = payload["function"]
     exc_type = payload["exception"]["type"]
-    
+
     print(f"\n⚡ [SORTU-APEX] JIT Auto-Healing triggered for '{func_name}'")
     print(f"   ► Parsing trace for exception pattern: {exc_type}")
-    
+
     if exc_type == "ZeroDivisionError":
         print("   ► Solution: Injecting guard clause to avoid division by zero.")
         print("   ► Patch:    `if divisor == 0: return float('inf')`")
@@ -109,7 +111,7 @@ def heal_simulation(payload: dict):
     else:
         print("   ► Solution: Generating AST repair schema based on historical Ledger.")
         print("   ► Patch:    Evaluating structural replacement...")
-        
+
     print("   ► State:    Patch compiled and hot-loaded. Curriculum resolved. ✅\n")
 
 
@@ -130,14 +132,14 @@ def query_persisted_node(nodes: dict, target_key: str):
 
 if __name__ == "__main__":
     print("--- PRONOIC ERROR TRANSDUCER PROTOTYPE (C5-REAL) ---\n")
-    
+
     # Test case 1: Division by Zero
     print("[1] Executing compute_exergy_ratio(120.0, 0.0)...")
     res1 = compute_exergy_ratio(120.0, 0.0)
-    
+
     # Test case 2: Key Error
     print("[2] Executing query_persisted_node({'node_0': 'stable'}, 'node_x')...")
     res2 = query_persisted_node({"node_0": "stable"}, "node_x")
-    
+
     print("-----------------------------------------------------")
     print("Final Ledger Entries written successfully.")

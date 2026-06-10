@@ -116,9 +116,15 @@ class AutopoieticAgent:
 
         # ── 2. Evaluate current genome baseline ────────────────
         current_fitness = await evaluate_genome(self, self._genome)
-        
-        last_fitness_record = self._genome.lineage.fitness_history[-1] if self._genome.lineage.fitness_history else None
-        failure_trace = last_fitness_record.metadata.get("failure_trace") if last_fitness_record else None
+
+        last_fitness_record = (
+            self._genome.lineage.fitness_history[-1]
+            if self._genome.lineage.fitness_history
+            else None
+        )
+        failure_trace = (
+            last_fitness_record.metadata.get("failure_trace") if last_fitness_record else None
+        )
 
         # ── 3. Generate variants ───────────────────────────────
         variants = []

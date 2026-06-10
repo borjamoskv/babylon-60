@@ -69,8 +69,6 @@ class DSPApotheosis:
     Evita la manipulación no predictible de la IA mediante matemática acústica estricta.
     """
 
-
-
     def calculate_lufs(self, audio_data: np.ndarray, sample_rate: int) -> float:  # pyright: ignore[reportInvalidTypeForm]
         """Calcula Integrated LUFS usando pyloudnorm (EBU R128 / ITU-R BS.1770)."""
         if len(audio_data) == 0:

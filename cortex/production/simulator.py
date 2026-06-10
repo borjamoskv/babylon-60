@@ -34,7 +34,6 @@ class LedgerCorruptionSim(Exception):
     """Simulated ledger corruption exception."""
 
 
-
 def inject_faults(request=None):
     if random.random() < 0.1:
         raise TimeoutError("Simulated Timeout")

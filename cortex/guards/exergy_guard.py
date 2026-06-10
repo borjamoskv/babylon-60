@@ -274,7 +274,9 @@ def calculate_exergy(content: str) -> float:
     vowel_fraction, rare_fraction = _analyze_letters(letters)
 
     # Short phrases guard: extremely short valid facts pass with 1.0
-    short_phrase_score = _check_short_phrase(words, lower_content, letters, vowel_fraction, rare_fraction)
+    short_phrase_score = _check_short_phrase(
+        words, lower_content, letters, vowel_fraction, rare_fraction
+    )
     if short_phrase_score is not None:
         return short_phrase_score
 

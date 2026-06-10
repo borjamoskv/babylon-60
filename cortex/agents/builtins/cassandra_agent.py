@@ -3,7 +3,7 @@
 cassandra_agent.py - CassandraAgent
 
 Daemon/Task agent that maps "todos los problemas habidos y por haber".
-It scans the Cortex-Persist architecture for systemic bottlenecks, 
+It scans the Cortex-Persist architecture for systemic bottlenecks,
 anergy sources, vulnerabilities in the swarm-agent lifecycle, and stochastic noise.
 """
 
@@ -50,11 +50,13 @@ class CassandraAgent(BaseAgent):
             logger.exception("CassandraAgent failed to process message")
             await self._fail_task(message, task, f"Internal failure: {exc}")
 
-    async def _map_vulnerabilities(self, original_msg: AgentMessage, task: TaskRequestPayload) -> None:
+    async def _map_vulnerabilities(
+        self, original_msg: AgentMessage, task: TaskRequestPayload
+    ) -> None:
         # Generate the map of "problemas habidos y por haber"
         # 1. Habidos (Past): Ledger failures, broken hashes, rejected proposals
         # 2. Por haber (Future): Scale bottlenecks (2M agents), stochastic noise injection, anergy leaks
-        
+
         vulnerability_map = {
             "problemas_habidos": [
                 {
@@ -71,7 +73,7 @@ class CassandraAgent(BaseAgent):
                     "id": "PAST-03",
                     "type": "Entropy Spike",
                     "description": "Retención de engramas estocásticos sin podado termodinámico.",
-                }
+                },
             ],
             "problemas_por_haber": [
                 {
@@ -88,13 +90,13 @@ class CassandraAgent(BaseAgent):
                     "id": "FUT-03",
                     "type": "Thermodynamic Death",
                     "description": "Over-allocation of agent capacity to P0 inference loops without deterministic kill criteria.",
-                }
+                },
             ],
             "recommendations": [
                 "Strict adherence to Write-Path Contract (SAGA-1 to 7).",
                 "Execute Thermodynamic Pruning proactively using `EntropyPruner`.",
-                "Enforce Ouroboros-Infinity kill criteria for infinite loops."
-            ]
+                "Enforce Ouroboros-Infinity kill criteria for infinite loops.",
+            ],
         }
 
         # Send response
@@ -109,13 +111,15 @@ class CassandraAgent(BaseAgent):
                     task_id=task.task_id,
                     output={
                         "vulnerability_map": vulnerability_map,
-                        "status": "C5-REAL_MAP_GENERATED"
-                    }
-                ).model_dump()
+                        "status": "C5-REAL_MAP_GENERATED",
+                    },
+                ).model_dump(),
             )
         )
 
-    async def _fail_task(self, original_msg: AgentMessage, task: TaskRequestPayload, error: str) -> None:
+    async def _fail_task(
+        self, original_msg: AgentMessage, task: TaskRequestPayload, error: str
+    ) -> None:
         await self.bus.send(
             AgentMessage(
                 correlation_id=original_msg.correlation_id,
@@ -124,9 +128,7 @@ class CassandraAgent(BaseAgent):
                 recipient=original_msg.sender,
                 kind=MessageKind.TASK_FAILED,
                 payload=TaskFailedPayload(
-                    task_id=task.task_id,
-                    error=error,
-                    retryable=False
-                ).model_dump()
+                    task_id=task.task_id, error=error, retryable=False
+                ).model_dump(),
             )
         )

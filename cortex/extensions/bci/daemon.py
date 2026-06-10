@@ -19,7 +19,6 @@ class SovereignIntentError(Exception):
     """Raised when a BCI intent fails integrity verification."""
 
 
-
 class BCI_Daemon:
     """
     The Bytecode Intent Receiver.

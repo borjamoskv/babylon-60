@@ -3,7 +3,7 @@ import json
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 
 class EpistemicState(Enum):
@@ -14,33 +14,37 @@ class EpistemicState(Enum):
     MODEL_LIMITED = "model-limited"
     SOLVER_SILENT = "solver-silent"
 
+
 @dataclass
 class EpistemicEvent:
     payload: dict
     state: EpistemicState
     confidence: float
-    z3_trace: Optional[dict]
+    z3_trace: dict | None
     entropy_signature: float
     reality_level: str
+
 
 # Z3 for logical guards
 try:
     from z3 import And, Bool, Int, Real, Solver, sat, unsat
+
     Z3_AVAILABLE = True
 except ImportError:
     Z3_AVAILABLE = False
     print("Warning: Z3 not available. Logical guards will be disabled.")
 
+
 class Z3Guard:
     """
     Motor de verificación SMT (Satisfiability Modulo Theories) usando Z3.
-    
+
     Propósito en Cortex Persist (MÖBIUS - Fase 7):
     - Proporcionar validación lógica determinista (L0 de la Epistemic Membrane).
     - Detectar violaciones con unsat_core traceable.
     - Evitar alucinaciones lógicamente consistentes pero físicamente inválidas.
     - Soporte dinámico de variables (price, confidence, timestamp, ratios, etc.).
-    
+
     Características SMT:
     - Tipos: Real (precios, porcentajes), Int, Bool.
     - Operadores: aritmética, comparaciones, And/Or/Not/Implies.
@@ -58,7 +62,7 @@ class Z3Guard:
         self.presets = {
             "pricing_policy": "price >= base_price * 0.7",
             "confidence_range": "0 <= confidence <= 100",
-            "temporal_valid": "timestamp >= last_update"
+            "temporal_valid": "timestamp >= last_update",
         }
 
     def reset(self):
@@ -71,21 +75,21 @@ class Z3Guard:
     def declare_var(self, name: str, var_type: str = "Real"):
         """
         Declara variable SMT dinámicamente.
-        
+
         Args:
             name: Nombre de la variable (ej: 'price', 'confidence')
             var_type: 'Real' | 'Int' | 'Bool'
         """
         if name in self.variables:
             return self.variables[name]
-        
+
         if var_type == "Int":
             var = Int(name)
         elif var_type == "Bool":
             var = Bool(name)
         else:
             var = Real(name)  # default para valores continuos (precios, ratios)
-        
+
         self.variables[name] = var
         return var
 
@@ -96,7 +100,7 @@ class Z3Guard:
         """
         if not isinstance(value, dict):
             return
-        
+
         for k, v in value.items():
             if isinstance(v, (int, float)):
                 var_type = "Int" if isinstance(v, int) else "Real"
@@ -114,16 +118,16 @@ class Z3Guard:
         self.solver.add(expr)
         return True
 
-    def check(self, value: Any = None, guards: Optional[list[str]] = None) -> dict:
+    def check(self, value: Any = None, guards: list[str] | None = None) -> dict:
         """
         Verificación SMT completa.
-        
+
         Flujo:
         1. Reset solver
         2. Bind contexto del payload
         3. Constraints preset + guards solicitados
         4. check() → sat / unsat con unsat_core
-        
+
         Returns:
             Dict con status, modelo (si sat), unsat_core (si violated) y guards_passed.
         """
@@ -158,7 +162,7 @@ class Z3Guard:
                 "model": {str(v): model[v] for v in model},
                 "guards_passed": list(self.constraints.keys()),
                 "reason": "All SMT constraints satisfied",
-                "z3_trace": {"result": "sat"}
+                "z3_trace": {"result": "sat"},
             }
         elif result == unsat:
             unsat_core = []
@@ -167,20 +171,20 @@ class Z3Guard:
                 unsat_core = [str(c) for c in core]
             except Exception:
                 unsat_core = ["unknown_core"]
-            
+
             return {
                 "status": "violated",
                 "satisfied": False,
                 "unsat_core": unsat_core,
                 "reason": "SMT constraint violation - see unsat_core for mathematical explanation",
-                "z3_trace": {"result": "unsat", "core": unsat_core}
+                "z3_trace": {"result": "unsat", "core": unsat_core},
             }
         else:
             return {
                 "status": "unknown",
                 "satisfied": False,
                 "reason": "SMT solver returned unknown (undecidable space)",
-                "z3_trace": {"result": "unknown"}
+                "z3_trace": {"result": "unknown"},
             }
 
 
@@ -191,6 +195,7 @@ class EpistemicMembrane:
     L1: Entropy Gate (fricción termodinámica)
     L2: Reality Anchor (C5-REAL enforcer)
     """
+
     def __init__(self, z3_guard: Z3Guard):
         self.z3_guard = z3_guard
         self.last_write_time = time.time()
@@ -209,7 +214,14 @@ class EpistemicMembrane:
         ).hexdigest()[:16]
         return f"sim:{fallback}"
 
-    def generate_marker(self, payload: dict, z3_status: Optional[str], solver_trace: Optional[dict], delta: float, reality: str) -> EpistemicEvent:
+    def generate_marker(
+        self,
+        payload: dict,
+        z3_status: str | None,
+        solver_trace: dict | None,
+        delta: float,
+        reality: str,
+    ) -> EpistemicEvent:
         if z3_status is None or z3_status == "disabled":
             return EpistemicEvent(
                 payload=payload,
@@ -217,7 +229,7 @@ class EpistemicMembrane:
                 confidence=0.0,
                 z3_trace=solver_trace,
                 entropy_signature=delta,
-                reality_level=reality
+                reality_level=reality,
             )
 
         if z3_status == "unknown":
@@ -227,9 +239,9 @@ class EpistemicMembrane:
                 confidence=0.3,
                 z3_trace=solver_trace,
                 entropy_signature=delta * 1.5,
-                reality_level=reality
+                reality_level=reality,
             )
-            
+
         if z3_status == "satisfied":
             return EpistemicEvent(
                 payload=payload,
@@ -237,23 +249,25 @@ class EpistemicMembrane:
                 confidence=0.95,
                 z3_trace=solver_trace,
                 entropy_signature=delta,
-                reality_level=reality
+                reality_level=reality,
             )
-            
+
         return EpistemicEvent(
             payload=payload,
             state=EpistemicState.REJECTED,
             confidence=0.99,  # High confidence that it's rejected
             z3_trace=solver_trace,
             entropy_signature=delta,
-            reality_level=reality
+            reality_level=reality,
         )
 
-    def check(self, key: str, value: Any, metadata: dict = None, guards: list[str] = None) -> EpistemicEvent:
+    def check(
+        self, key: str, value: Any, metadata: dict = None, guards: list[str] = None
+    ) -> EpistemicEvent:
         metadata = metadata or {}
         reality_level = "C4-SIM"
         causal_anchor = self._get_causal_anchor(metadata)
-        
+
         # L2 - Reality Anchor
         if not causal_anchor.startswith("sim:"):
             reality_level = "C5-REAL"
@@ -269,7 +283,7 @@ class EpistemicMembrane:
                 confidence=0.99,
                 z3_trace={"reason": "High frequency entropy violation"},
                 entropy_signature=delta,
-                reality_level=reality_level
+                reality_level=reality_level,
             )
         self.last_write_time = now
         self.entropy_used += delta
@@ -283,20 +297,20 @@ class EpistemicMembrane:
                 # Dynamic constraints
                 if isinstance(value, dict):
                     if "price" in str(value).lower() or "confidence" in str(value).lower():
-                        p = Int('price')
-                        c = Int('confidence')
+                        p = Int("price")
+                        c = Int("confidence")
                         self.z3_guard.add_constraint("price_nonneg", p >= 0)
                         self.z3_guard.add_constraint("confidence_range", And(c >= 0, c <= 100))
-                
+
                 check_res = self.z3_guard.check()
                 guard_results[g] = check_res
-                
+
                 # Capture the first non-satisfied status
                 if check_res.get("status") != "satisfied":
                     z3_status = check_res.get("status")
                     solver_trace = check_res.get("z3_trace")
                     break
-            
+
             if z3_status is None:
                 z3_status = "satisfied"
                 solver_trace = {"result": "sat"}
@@ -306,5 +320,5 @@ class EpistemicMembrane:
             z3_status=z3_status,
             solver_trace=solver_trace,
             delta=delta,
-            reality=reality_level
+            reality=reality_level,
         )

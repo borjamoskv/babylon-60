@@ -23,6 +23,7 @@ CORTEX_MEM_DIR = Path.home() / ".cortex" / "memory_ledger"
 LEDGER_FILE = CORTEX_MEM_DIR / "ledger.json"
 STATE_FILE = CORTEX_MEM_DIR / "current_state.json"
 
+
 class MemoryLedger:
     def __init__(self):
         CORTEX_MEM_DIR.mkdir(parents=True, exist_ok=True)
@@ -42,15 +43,15 @@ class MemoryLedger:
         return {}
 
     def _save(self):
-        with open(LEDGER_FILE, 'w') as f:
+        with open(LEDGER_FILE, "w") as f:
             json.dump(self.ledger, f, indent=2)
-        with open(STATE_FILE, 'w') as f:
+        with open(STATE_FILE, "w") as f:
             json.dump(self.state, f, indent=2)
 
     def compute_hash(self, payload: dict, previous_hash: str) -> str:
         """Prueba de integridad C5-REAL (Merkle-like)"""
         block = f"{json.dumps(payload, sort_keys=True)}{previous_hash}"
-        return hashlib.sha256(block.encode('utf-8')).hexdigest()
+        return hashlib.sha256(block.encode("utf-8")).hexdigest()
 
     def detect_epistemic_drift(self, new_payload: dict) -> float:
         """
@@ -60,13 +61,13 @@ class MemoryLedger:
         """
         if not self.state:
             return 0.0
-            
+
         keys_old = set(self.state.keys())
         keys_new = set(new_payload.keys())
-        
+
         keys_old.intersection(keys_new)
         difference = keys_old.symmetric_difference(keys_new)
-        
+
         # Drift rudimentario: % de campos nuevos/borrados
         drift_score = len(difference) / (len(keys_old) + len(keys_new))
         return round(drift_score, 4)
@@ -74,7 +75,7 @@ class MemoryLedger:
     def commit(self, payload: dict, metadata: dict):
         """Aplica mutación y sella el Merkle Hash"""
         drift = self.detect_epistemic_drift(payload)
-        
+
         previous_hash = "0000000000000000000000000000000000000000000000000000000000000000"
         if self.ledger:
             previous_hash = self.ledger[-1]["hash"]
@@ -87,17 +88,17 @@ class MemoryLedger:
             "metadata": metadata,
             "payload": payload,
             "hash": new_hash,
-            "previous_hash": previous_hash
+            "previous_hash": previous_hash,
         }
 
         self.ledger.append(entry)
-        
+
         # Conciencia de estado: Actualizar
         self.state.update(payload)
         self.state["_last_hash"] = new_hash
-        
+
         self._save()
-        
+
         print(f"✅ COMMIT C5-REAL. Hash: {new_hash[:8]}... Drift: {drift}")
 
     def verify_chain(self):
@@ -116,7 +117,7 @@ class MemoryLedger:
         """Rollback selectivo (tipo git)"""
         for i, block in enumerate(self.ledger):
             if block["hash"].startswith(target_hash):
-                self.ledger = self.ledger[:i+1]
+                self.ledger = self.ledger[: i + 1]
                 # Reconstruir estado desde 0
                 self.state = {}
                 for b in self.ledger:
@@ -126,6 +127,7 @@ class MemoryLedger:
                 print(f"⏪ ROLLBACK EJECUTADO al hash {target_hash}")
                 return
         print("❌ HASH NO ENCONTRADO")
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

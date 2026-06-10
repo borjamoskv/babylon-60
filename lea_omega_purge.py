@@ -7,18 +7,19 @@ from pathlib import Path
 BRAIN_DIR = Path("/Users/borjafernandezangulo/.gemini/antigravity/brain")
 CURRENT_CONVERSATION_ID = "7c918ed1-b2aa-4349-b2fb-343e2e235ea0"
 
+
 def purge_scratch_entropy():
     print(f"[LEA-Ω] Initiating strict entropy purge in {BRAIN_DIR}...")
     scratch_dirs = list(BRAIN_DIR.rglob("scratch"))
-    
+
     total_files_deleted = 0
     total_bytes_freed = 0
-    
+
     for scratch_dir in scratch_dirs:
         if CURRENT_CONVERSATION_ID in str(scratch_dir):
             print(f"[SKIP] Bypassing active session: {scratch_dir}")
             continue
-            
+
         for item in scratch_dir.iterdir():
             if item.is_file() or item.is_symlink():
                 size = item.stat().st_size
@@ -27,7 +28,7 @@ def purge_scratch_entropy():
                 item.unlink()
             elif item.is_dir():
                 # calculate size
-                for subitem in item.rglob('*'):
+                for subitem in item.rglob("*"):
                     if subitem.is_file() or subitem.is_symlink():
                         total_bytes_freed += subitem.stat().st_size
                         total_files_deleted += 1
@@ -38,6 +39,7 @@ def purge_scratch_entropy():
     print("Status: C5-REAL (Annihilation Confirmed)")
     print(f"Tokens/Files Destroyed: {total_files_deleted}")
     print(f"Entropy Cleared: {freed_mb:.2f} MB")
+
 
 if __name__ == "__main__":
     purge_scratch_entropy()
