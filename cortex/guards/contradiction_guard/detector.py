@@ -11,14 +11,14 @@ from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
 from cortex.database.core import connect_async_ctx
 from cortex.utils.void_vec import cosine_similarity
 
+from .constants import EMBEDDING_BOOST_WEIGHT, MAX_CANDIDATES, MIN_OVERLAP_SCORE, TokenSet
 from .models import ConflictCandidate, ConflictReport
-from .constants import MAX_CANDIDATES, MIN_OVERLAP_SCORE, EMBEDDING_BOOST_WEIGHT, TokenSet
 from .utils import (
+    _classify_conflict,
     _decrypt_content,
     _is_noise,
-    _tokenize,
     _jaccard,
-    _classify_conflict,
+    _tokenize,
 )
 
 logger = logging.getLogger("cortex.guards.contradiction")

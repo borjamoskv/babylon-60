@@ -16,39 +16,39 @@ Returns a ConflictReport with scored candidates.
 
 from __future__ import annotations
 
+from .batch import (
+    _build_token_index,
+    _compare_decisions,
+    _prepare_decisions,
+    _process_token_bucket,
+    scan_all_contradictions,
+)
 from .constants import (
-    MAX_CANDIDATES,
-    MIN_OVERLAP_SCORE,
-    EMBEDDING_BOOST_WEIGHT,
+    _NEGATION_MARKERS,
     _NOISE_PREFIXES,
     _STOP_WORDS,
-    _NEGATION_MARKERS,
     _SUPERSESSION_MARKERS,
     _VERSION_PATTERN,
+    EMBEDDING_BOOST_WEIGHT,
+    MAX_CANDIDATES,
+    MIN_OVERLAP_SCORE,
+)
+from .detector import (
+    _fetch_decision_rows,
+    _score_candidate,
+    detect_contradictions,
 )
 from .models import ConflictCandidate, ConflictReport
 from .utils import (
-    _embedding_cosine_similarity,
-    _tokenize,
-    _jaccard,
+    _classify_conflict,
+    _decrypt_content,
     _detect_negation,
     _detect_supersession,
+    _embedding_cosine_similarity,
     _extract_versions,
     _is_noise,
-    _decrypt_content,
-    _classify_conflict,
-)
-from .detector import (
-    detect_contradictions,
-    _score_candidate,
-    _fetch_decision_rows,
-)
-from .batch import (
-    scan_all_contradictions,
-    _process_token_bucket,
-    _compare_decisions,
-    _prepare_decisions,
-    _build_token_index,
+    _jaccard,
+    _tokenize,
 )
 
 __all__ = [

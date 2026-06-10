@@ -14,11 +14,11 @@ from cortex.database.core import connect_async_ctx
 from .models import ConflictCandidate
 from .utils import (
     _decrypt_content,
-    _is_noise,
-    _tokenize,
-    _jaccard,
     _detect_negation,
     _detect_supersession,
+    _is_noise,
+    _jaccard,
+    _tokenize,
 )
 
 logger = logging.getLogger("cortex.guards.contradiction")
@@ -142,7 +142,7 @@ async def scan_all_contradictions(
                 ORDER BY id
                 """
             )
-            rows = await cursor.fetchall()
+            rows = list(await cursor.fetchall())
             decisions = _prepare_decisions(rows, decrypt_fn)
 
             by_project: dict[str, list[dict[str, Any]]] = defaultdict(list)

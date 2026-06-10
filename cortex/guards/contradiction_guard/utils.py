@@ -1,16 +1,17 @@
 from __future__ import annotations
 
-import re
 import functools
+import re
 from collections.abc import Callable
 
 from cortex.utils.void_vec import cosine_similarity
+
 from .constants import (
-    _STOP_WORDS,
     _NEGATION_MARKERS,
+    _NOISE_PREFIXES,
+    _STOP_WORDS,
     _SUPERSESSION_MARKERS,
     _VERSION_PATTERN,
-    _NOISE_PREFIXES,
     TokenSet,
 )
 
