@@ -19,6 +19,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from cortex.agents.builtins import (
+    CassandraAgent,
     HandoffAgent,
     MemoryAgent,
     NightshiftAgent,
@@ -582,3 +583,58 @@ class TestSupervisorAgent:
 
         mock_supervisor.health_check.assert_called()
         mock_supervisor.status.assert_called()
+
+
+# ── CassandraAgent ──────────────────────────────────────────────────
+
+
+class TestCassandraAgent:
+    @pytest.fixture
+    async def bus(self):
+        b = SqliteMessageBus(db_path=_uid())
+        yield b
+        await b.close()
+
+    def _agent(self, bus):
+        return CassandraAgent(_manifest("cas-1"), bus, MagicMock())
+
+    @pytest.mark.asyncio
+    async def test_map_op(self, bus):
+        agent = self._agent(bus)
+        await bus.send(
+            new_message(
+                "caller",
+                "cas-1",
+                MessageKind.TASK_REQUEST,
+                {"task_id": "t-1", "objective": "map all problems", "input": {}},
+            )
+        )
+        await bus.send(new_message("caller", "cas-1", MessageKind.SHUTDOWN, {}))
+        await agent.run()
+
+        replies = await _drain(bus, "caller")
+        task_results = [r for r in replies if r.kind == MessageKind.TASK_COMPLETED]
+        assert len(task_results) == 1
+        assert task_results[0].payload["task_id"] == "t-1"
+        assert "vulnerability_map" in task_results[0].payload["output"]
+        assert task_results[0].payload["output"]["status"] == "C5-REAL_MAP_GENERATED"
+
+    @pytest.mark.asyncio
+    async def test_unsupported_op(self, bus):
+        agent = self._agent(bus)
+        await bus.send(
+            new_message(
+                "caller",
+                "cas-1",
+                MessageKind.TASK_REQUEST,
+                {"task_id": "t-2", "objective": "do nothing", "input": {}},
+            )
+        )
+        await bus.send(new_message("caller", "cas-1", MessageKind.SHUTDOWN, {}))
+        await agent.run()
+
+        replies = await _drain(bus, "caller")
+        task_failures = [r for r in replies if r.kind == MessageKind.TASK_FAILED]
+        assert len(task_failures) == 1
+        assert "Objective not supported" in task_failures[0].payload["error"]
+
