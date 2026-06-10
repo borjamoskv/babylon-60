@@ -2,6 +2,7 @@
 from cortex.runtime.replay.ledger import EventLedger
 from cortex.runtime.replay.engine import ReplayEngine, DivergenceException
 from cortex.runtime.replay.ci_gate import ReplayCIGate, ReplayCIResult
+from cortex.runtime.replay.divergence import DivergenceMap, DivergenceReport
 
 __all__ = [
     "EventLedger",
@@ -9,4 +10,6 @@ __all__ = [
     "DivergenceException",
     "ReplayCIGate",
     "ReplayCIResult",
+    "DivergenceMap",
+    "DivergenceReport",
 ]
