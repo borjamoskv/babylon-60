@@ -29,11 +29,11 @@ import asyncio
 import logging
 import time
 from collections.abc import Callable, Coroutine
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from cortex.agents.bus import MessageBus
-from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
+from cortex.agents.message_schema import MessageKind, new_message
 from cortex.agents.supervisor import Supervisor
 from cortex.events.bus import DistributedEventBus
 from cortex.runtime.system_state import SystemPhase, SystemStateVector
@@ -177,7 +177,7 @@ class Orchestrator:
         source = payload.get("source", "unknown")
 
         # 1. Mutate state
-        state_event = self.state.apply(event_type, source, payload)
+        self.state.apply(event_type, source, payload)
 
         # 2. Evaluate rules against new state
         await self._evaluate_rules()
