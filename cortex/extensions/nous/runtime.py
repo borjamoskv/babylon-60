@@ -8,7 +8,7 @@ import logging
 from typing import Any
 
 from cortex.engine import CortexEngine
-from cortex.extensions.nous.compiler_v2 import NousAST
+from cortex.extensions.nous.models import NousAST
 
 logger = logging.getLogger(__name__)
 

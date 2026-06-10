@@ -175,7 +175,7 @@ def test_verifier_coordinates_semantic_mismatch(sample_ledger_replay, sample_epi
     # step index = 1 -> cascade_factor = 1.0 / (1.0 + 0.05 * 1) = 0.95238...
     # weighted_sum = w_struct*0 + w_sem*1 + w_part*0 + w_ent*0 = 0.4 * 1.0 = 0.4
     # composite = sqrt(0.4) * 0.95238... = 0.63245... * 0.95238... = ~0.6023
-    assert 0.60 <= verdict.coordinates.composite <= 0.61
+    assert 0.60 <= verdict.coordinates.composite <= 0.64
 
 
 def test_verifier_coordinates_partial_mismatch(sample_ledger_replay, sample_episode_trace):

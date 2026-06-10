@@ -5,7 +5,7 @@ Reality Level: C5-REAL
 """
 
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -77,7 +77,7 @@ class NousOperation(BaseModel):
     type: str  # e.g., "create_table", "add_column", "drop_table"
     target: str
     sql: str
-    rollback_sql: Optional[str] = None
+    rollback_sql: str | None = None
 
 
 class NousMetadata(BaseModel):
