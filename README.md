@@ -20,6 +20,7 @@
   <a href="https://pypi.org/project/cortex-persist/"><img src="https://img.shields.io/pypi/v/cortex-persist.svg?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5" alt="PyPI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-0A0A0A.svg?style=for-the-badge&labelColor=2B3BE5" alt="License"></a>
   <a href="https://github.com/sponsors/borjamoskv"><img src="https://img.shields.io/badge/sponsor-github-0A0A0A.svg?style=for-the-badge&labelColor=2B3BE5&logo=github" alt="Sponsor"></a>
+  <a href="docs/mcp.md"><img src="https://img.shields.io/badge/MCP-compatible-0A0A0A.svg?style=for-the-badge&labelColor=2B3BE5&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMnM0LjQ4IDEwIDEwIDEwIDEwLTQuNDggMTAtMTBTMTcuNTIgMiAxMiAyem0tMSAxNXYtNEg3bDUtOXY0aDRsLTUgOXoiLz48L3N2Zz4=" alt="MCP Compatible"></a>
 </p>
 
 ```yaml
@@ -27,6 +28,7 @@ AESTHETIC: INDUSTRIAL NOIR 2026 (#0A0A0A / #2B3BE5)
 EPISTEMOLOGY: C5-REAL (Cryptographically Verified Reality)
 CORE TENET: EPISTEMIC HUMILITY (Generative output is conjecture; Evidence is absolute)
 ARCHITECTURE: ZERO-UI / O(1) DETERMINISTIC SUBSTRATE
+UPDATED: June 2026 — MCP Integration · Perplexity Agent Support · LEGION-10k
 ```
 
 ---
@@ -64,6 +66,7 @@ CORTEX-PERSIST intercepts stochastic text, enforces a deterministic shield via Z
 | **Agent Liability** | Ambiguous reconstruction | **Mathematically Defensible Lineage** |
 | **Verification** | Manual log diving | **O(1) Portable JSON Audit Packs** |
 | **Performance** | Blocked by I/O and GIL | **Rust-FFI Core (~390k Agents/Sec)** |
+| **MCP Protocol** | Not supported | **Native MCP Server + Perplexity Agent** |
 
 ### ZERO-FRICTION SOVEREIGN INTEGRATION
 Inject the CORTEX memory substrate into any existing agent pipeline via our magic decorator.
@@ -79,6 +82,27 @@ async def my_agent_chain(user_prompt: str):
     return response
 ```
 
+### MCP (MODEL CONTEXT PROTOCOL) INTEGRATION
+CORTEX-PERSIST exposes a native MCP server, enabling direct integration with Perplexity, Claude, and any MCP-compatible agent orchestrator.
+
+```bash
+# Start the MCP endpoint
+pip install "cortex-persist[api,mcp,daemon]"
+cortex mcp serve --port 8765
+```
+
+```json
+// Add to your MCP client config (e.g. Perplexity, Claude Desktop)
+{
+  "mcpServers": {
+    "cortex-persist": {
+      "command": "cortex",
+      "args": ["mcp", "serve"]
+    }
+  }
+}
+```
+
 ---
 
 ## ▀▄ ARCHITECTURE & DATA FLOW
@@ -88,9 +112,11 @@ graph TD
     classDef default fill:#0A0A0A,stroke:#2B3BE5,stroke-width:1px,color:#F0F0F0;
     classDef highlight fill:#2B3BE5,stroke:#CCFF00,stroke-width:1.5px,color:#FFFFFF;
     classDef guard fill:#1A1A1A,stroke:#FF0055,stroke-width:1px,color:#F0F0F0;
+    classDef mcp fill:#0A0A2A,stroke:#00FFCC,stroke-width:1.5px,color:#F0F0F0;
 
     subgraph Stochastic Space
         LLM[Agent Stochastic Output]:::default
+        MCP[MCP Client / Perplexity]:::mcp
     end
 
     subgraph Epistemic Membrane [CORTEX-Persist Containment Shield]
@@ -108,6 +134,7 @@ graph TD
     end
 
     LLM -->|Decision / Observation| G1
+    MCP -->|Tool Call via MCP Protocol| G1
     G1 -->|Passed Asserts| VSA
     VSA -->|Zero I/O Overhead| mmap
     VSA -->|Batch Commit| Hash
@@ -128,6 +155,7 @@ Check out the `examples/` directory for ready-to-run scenarios:
 1. **[Automated Pricing Agent (`demo_pricing_agent.py`)](examples/demo_pricing_agent.py)**: Watch an AI modify enterprise pricing while CORTEX records a cryptographic audit trail ensuring the discount logic was sound.
 2. **[Customer Support Escalation (`demo_support_approval.py`)](examples/demo_support_approval.py)**: A support bot grants a refund. CORTEX seals the decision lineage so the supervisor has mathematical proof of why the AI approved it.
 3. **[Canonical Loop (`demo_canonical.py`)](examples/demo_canonical.py)**: A showcase of the full C5-REAL execution, demonstrating how the ledger reacts to malicious state tampering attempts.
+4. **[MCP Agent Memory (`demo_mcp_memory.py`)](examples/demo_mcp_memory.py)**: Perplexity or Claude connects via MCP and CORTEX seals every tool call with a cryptographic proof chain.
 
 ---
 
@@ -156,6 +184,7 @@ pip install "cortex-persist[cloud]"          # PostgreSQL, Redis, & Qdrant scali
 *   **VSA Memory (Zero-Copy):** O(1) Ring Buffer (mmap). OS I/O overhead bypassed.
 *   **ZK-STARK Ledger Seals:** Cryptographic transaction proofs. Inter-nodal mesh trust.
 *   **Live Telemetry:** Industrial Noir 20Hz WebSocket daemon. Real-time exergy metrics on `agents.archi`.
+*   **MCP Native Server:** Expose the full CORTEX substrate as an MCP tool suite — compatible with Perplexity, Claude, and any A2A orchestrator.
 
 ---
 
@@ -165,6 +194,7 @@ pip install "cortex-persist[cloud]"          # PostgreSQL, Redis, & Qdrant scali
 *   [**AGENTS.md**](AGENTS.md) — Substrate directives for autonomous orchestration.
 *   [**ROADMAP.md**](ROADMAP.md) — Deployment phases and LEGION-10k scaling logic.
 *   [**API Reference**](docs/api.md) — SDK primitives and REST endpoints.
+*   [**MCP Integration**](docs/mcp.md) — Model Context Protocol server setup and tool catalog.
 
 ---
 > **LICENSE:** Apache-2.0 | **OPERATOR:** borjamoskv | [CORTEX.ORG](https://cortexpersist.org) | [CORTEX.DEV](https://cortexpersist.dev) | [Sponsor the Engine](https://github.com/sponsors/borjamoskv)
