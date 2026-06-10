@@ -15,6 +15,7 @@ Propiedad:
   Si DivergenceMap.max_distance == 0 → sistema determinista demostrado
   Si DivergenceMap.max_distance > threshold → CI gate falla
 """
+
 from __future__ import annotations
 
 import math
@@ -29,14 +30,16 @@ HashChain = tuple[str, ...]
 
 # ── State Distance ──────────────────────────────────────────────────
 
+
 @dataclass(frozen=True)
 class StateDistance:
     """Distancia métrica entre dos snapshots."""
+
     version: int
     hash_equal: bool
-    key_jaccard: float        # 0.0 = identical keys, 1.0 = disjoint
-    value_diff_ratio: float   # fraction of shared keys with different values
-    composite: float          # single scalar distance
+    key_jaccard: float  # 0.0 = identical keys, 1.0 = disjoint
+    value_diff_ratio: float  # fraction of shared keys with different values
+    composite: float  # single scalar distance
 
     @classmethod
     def compute(cls, snap_a: dict[str, Any], snap_b: dict[str, Any]) -> StateDistance:
@@ -76,32 +79,38 @@ class StateDistance:
 
 # ── Fork Point ──────────────────────────────────────────────────────
 
+
 @dataclass(frozen=True)
 class ForkPoint:
     """Punto exacto donde dos trayectorias divergen."""
+
     trajectory_a: int  # index
     trajectory_b: int  # index
-    version: int       # version where divergence starts
+    version: int  # version where divergence starts
     distance: StateDistance
 
 
 # ── Entropy Drift ───────────────────────────────────────────────────
 
+
 @dataclass(frozen=True)
 class EntropyDrift:
     """Gradiente de complejidad del estado a lo largo de una trayectoria."""
+
     trajectory_index: int
-    complexity_curve: tuple[int, ...]   # state size at each version
-    gradient: tuple[float, ...]         # delta per step
+    complexity_curve: tuple[int, ...]  # state size at each version
+    gradient: tuple[float, ...]  # delta per step
     mean_gradient: float
-    direction: str   # "expanding" | "stable" | "contracting"
+    direction: str  # "expanding" | "stable" | "contracting"
 
 
 # ── Equivalence Class ──────────────────────────────────────────────
 
+
 @dataclass(frozen=True)
 class EquivalenceClass:
     """Grupo de trayectorias con hash chains idénticas."""
+
     hash_chain: HashChain
     member_indices: tuple[int, ...]
     size: int
@@ -109,14 +118,16 @@ class EquivalenceClass:
 
 # ── Divergence Report ──────────────────────────────────────────────
 
+
 @dataclass
 class DivergenceReport:
     """Resultado completo del análisis de divergencia."""
+
     num_trajectories: int
     num_equivalence_classes: int
     equivalence_classes: list[EquivalenceClass]
     fork_points: list[ForkPoint]
-    distance_matrix: list[list[float]]   # NxN symmetric
+    distance_matrix: list[list[float]]  # NxN symmetric
     entropy_drifts: list[EntropyDrift]
     max_distance: float
     is_deterministic: bool  # True iff all trajectories identical
@@ -152,6 +163,7 @@ class DivergenceReport:
 
 
 # ── Divergence Map ──────────────────────────────────────────────────
+
 
 class DivergenceMap:
     """
@@ -261,8 +273,11 @@ class DivergenceMap:
                         trajectory_b=j,
                         version=v,
                         distance=StateDistance(
-                            version=v, hash_equal=False,
-                            key_jaccard=1.0, value_diff_ratio=1.0, composite=1.0,
+                            version=v,
+                            hash_equal=False,
+                            key_jaccard=1.0,
+                            value_diff_ratio=1.0,
+                            composite=1.0,
                         ),
                     )
                 continue
@@ -272,8 +287,10 @@ class DivergenceMap:
 
             if not sd.hash_equal and first_fork is None:
                 first_fork = ForkPoint(
-                    trajectory_a=i, trajectory_b=j,
-                    version=sd.version, distance=sd,
+                    trajectory_a=i,
+                    trajectory_b=j,
+                    version=sd.version,
+                    distance=sd,
                 )
 
         # Trajectory distance = max state distance (L∞ norm on execution manifold)
@@ -293,8 +310,7 @@ class DivergenceMap:
             )
 
         gradient = tuple(
-            float(complexity[i] - complexity[i - 1])
-            for i in range(1, len(complexity))
+            float(complexity[i] - complexity[i - 1]) for i in range(1, len(complexity))
         )
         mean_grad = sum(gradient) / len(gradient) if gradient else 0.0
 
@@ -320,6 +336,7 @@ class DivergenceCoordinates:
     Representación vectorial (coordenadas) de la divergencia de ejecución.
     Mapea la taxonomía cualitativa a un espacio métrico continuo [0.0, 1.0].
     """
+
     structural: float
     semantic: float
     partial: float
@@ -339,9 +356,7 @@ class DivergenceMetricEngine:
 
     @staticmethod
     def compute_step_distance(
-        trace_step: Any,
-        cortex_step: dict[str, Any],
-        step_idx: int
+        trace_step: Any, cortex_step: dict[str, Any], step_idx: int
     ) -> DivergenceCoordinates:
         """
         Calcula las coordenadas de divergencia a nivel de paso individual.
@@ -359,7 +374,7 @@ class DivergenceMetricEngine:
         trace_obs = getattr(trace_step, "observation_hex", "").lower()
         cortex_obs = str(cortex_step.get("observation_hex", "")).lower()
         obs_diff = 1.0 if trace_obs != cortex_obs else 0.0
-        
+
         semantic = max(action_diff, obs_diff)
 
         # 3. Partial (recompensas continuas y banderas done)
@@ -367,11 +382,11 @@ class DivergenceMetricEngine:
         cortex_reward = float(cortex_step.get("reward", 0.0))
         reward_magnitude = abs(trace_reward - cortex_reward)
         reward_norm = reward_magnitude / (1.0 + abs(trace_reward) + abs(cortex_reward))
-        
+
         trace_done = bool(getattr(trace_step, "done", False))
         cortex_done = bool(cortex_step.get("done", False))
         done_diff = 1.0 if trace_done != cortex_done else 0.0
-        
+
         partial = max(reward_norm, done_diff)
 
         # 4. Entropy (derivación de la complejidad del metadata/info si está presente en cortex_step)
@@ -389,10 +404,10 @@ class DivergenceMetricEngine:
         cascade_factor = 1.0 / (1.0 + 0.05 * step_idx)
         w_struct, w_sem, w_part, w_ent = 0.4, 0.4, 0.1, 0.1
         weighted_sum = (
-            w_struct * (structural ** 2) +
-            w_sem * (semantic ** 2) +
-            w_part * (partial ** 2) +
-            w_ent * (entropy ** 2)
+            w_struct * (structural**2)
+            + w_sem * (semantic**2)
+            + w_part * (partial**2)
+            + w_ent * (entropy**2)
         )
         composite = math.sqrt(weighted_sum) * cascade_factor
 
@@ -401,14 +416,12 @@ class DivergenceMetricEngine:
             semantic=semantic,
             partial=partial,
             entropy=entropy,
-            composite=composite
+            composite=composite,
         )
 
     @classmethod
     def compute_trajectory_distance(
-        cls,
-        trace_steps: list[Any],
-        cortex_steps: list[dict[str, Any]]
+        cls, trace_steps: list[Any], cortex_steps: list[dict[str, Any]]
     ) -> DivergenceCoordinates:
         """
         Calcula las coordenadas métricas globales entre dos trayectorias de ejecución.
@@ -438,14 +451,14 @@ class DivergenceMetricEngine:
         semantic = max(c.semantic for c in step_coords)
         partial = max(c.partial for c in step_coords)
         entropy = max(c.entropy for c in step_coords)
-        
+
         # Calcular composite global como la L2 norm pesada de las métricas agregadas
         w_struct, w_sem, w_part, w_ent = 0.4, 0.4, 0.1, 0.1
         weighted_sum = (
-            w_struct * (structural ** 2) +
-            w_sem * (semantic ** 2) +
-            w_part * (partial ** 2) +
-            w_ent * (entropy ** 2)
+            w_struct * (structural**2)
+            + w_sem * (semantic**2)
+            + w_part * (partial**2)
+            + w_ent * (entropy**2)
         )
         composite = math.sqrt(weighted_sum)
 
@@ -468,5 +481,5 @@ class DivergenceMetricEngine:
             semantic=semantic,
             partial=partial,
             entropy=entropy,
-            composite=composite
+            composite=composite,
         )
