@@ -47,7 +47,11 @@ class GenomeMutator:
     }
 
     def mutate(
-        self, genome: StrategyGenome, *, force_type: MutationType | None = None, failure_trace: dict[str, Any] | None = None
+        self,
+        genome: StrategyGenome,
+        *,
+        force_type: MutationType | None = None,
+        failure_trace: dict[str, Any] | None = None,
     ) -> StrategyGenome:
         """Apply a single mutation to a cloned genome."""
         child = genome.clone()
@@ -55,12 +59,20 @@ class GenomeMutator:
 
         if force_type:
             mutation_type = force_type
-        elif failure_trace and failure_trace.get("failed_target") and random.random() < genome.mutation_rates.get(MutationType.CAUSAL_PATCH, 0.20):
+        elif (
+            failure_trace
+            and failure_trace.get("failed_target")
+            and random.random() < genome.mutation_rates.get(MutationType.CAUSAL_PATCH, 0.20)
+        ):
             mutation_type = MutationType.CAUSAL_PATCH
         else:
             mutation_type = self._select_mutation_type(child)
 
-        if mutation_type == MutationType.CAUSAL_PATCH and failure_trace and failure_trace.get("failed_target"):
+        if (
+            mutation_type == MutationType.CAUSAL_PATCH
+            and failure_trace
+            and failure_trace.get("failed_target")
+        ):
             child.parameters["_causal_target"] = failure_trace["failed_target"]
 
         ast_mutation_types = {

@@ -25,7 +25,7 @@ def canonicalize_content(content: str | bytes | memoryview) -> bytes:
         content = content.tobytes()
     elif isinstance(content, str):
         content = content.encode("utf-8")
-        
+
     try:
         data = json.loads(content)
         if isinstance(data, dict | list):
@@ -33,9 +33,10 @@ def canonicalize_content(content: str | bytes | memoryview) -> bytes:
             return json.dumps(data, sort_keys=True, separators=(",", ":")).encode("utf-8")
     except Exception:
         pass
-    
+
     # Fast path for non-JSON or invalid JSON
     return b"\n".join(line.strip() for line in content.strip().splitlines())
+
 
 def _fast_sha3(buffer: bytes | memoryview) -> str:
     """Zero-copy / Tier 2 JIT Hot-Path for SHA3-256."""
@@ -59,7 +60,6 @@ def generate_secure_taint_token(
     content_hash = _fast_sha3(canonical_content)
 
     canonical_payload = f"agent_id={agent_id}&session_id={session_id}&timestamp={timestamp}&nonce={nonce}&content_hash={content_hash}"
-
 
     priv_bytes = base64.b64decode(private_key_b64)
     priv_key = Ed25519PrivateKey.from_private_bytes(priv_bytes)
@@ -207,7 +207,6 @@ async def verify_taint_token(conn, token: str | None, content: str) -> bool:
     content_hash = _fast_sha3(canonical_content)
     canonical_payload = f"agent_id={agent_id}&session_id={session_id}&timestamp={timestamp_str}&nonce={nonce}&content_hash={content_hash}"
 
-
     try:
         pub_bytes = base64.b64decode(public_key_b64)
         pub_key = Ed25519PublicKey.from_public_bytes(pub_bytes)
@@ -236,6 +235,7 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
             "SAGA-1 Rejection: Valid cryptographically signed CORTEX-TAINT token is required."
         )
 
+
 # =====================================================================
 # NATIVE SAGA-1: OS Sockets & AST Guards (cortex_native)
 # =====================================================================
@@ -243,24 +243,29 @@ import socket
 
 try:
     import cortex_native
+
     HAS_NATIVE_GUARDS = True
 except ImportError:
     HAS_NATIVE_GUARDS = False
-    logger.warning("[TaintEngine] cortex_native C-extension not loaded. Falling back to Python GC bounds.")
+    logger.warning(
+        "[TaintEngine] cortex_native C-extension not loaded. Falling back to Python GC bounds."
+    )
+
 
 class C5NativeSocketIngestor:
     """
     Ingests Swarm payloads using the native C extension,
     bypassing Python's memory allocation for invalid data.
     """
+
     def __init__(self, sock: socket.socket):
         self.sock = sock
         self.fd = sock.fileno()
-    
+
     def recv_and_validate(self, max_size: int = 1048576) -> bytes:
         if not HAS_NATIVE_GUARDS:
             raise RuntimeError("cortex_native is required for C5NativeSocketIngestor")
-            
+
         try:
             # The heavy lifting and validation happens in C
             valid_payload = cortex_native.read_socket_direct(self.fd, max_size)
@@ -283,14 +288,15 @@ class MHCAntigenRouter:
     Bypasses LLM coordinator completely by matching deterministic
     SHA3 signatures and Regex Antigens to specific T-Cell Daemons.
     """
+
     def __init__(self):
-        self._t_cells = {} # Daemon registry mapping antigen signatures to agent IDs
-        
+        self._t_cells = {}  # Daemon registry mapping antigen signatures to agent IDs
+
     def register_t_cell(self, agent_id: str, antigen_regex: str):
         """Registers a specific daemon to awaken ONLY upon antigen detection."""
         self._t_cells[agent_id] = re.compile(antigen_regex, re.IGNORECASE)
         logger.info(f"[MHC] T-Cell {agent_id} bound to antigen pattern: {antigen_regex}")
-        
+
     def present_antigen(self, payload: str) -> str | None:
         """
         Phagocytizes the raw payload and attempts MHC presentation.
@@ -298,11 +304,11 @@ class MHCAntigenRouter:
         """
         canonical = canonicalize_content(payload)
         payload_hash = _fast_sha3(canonical)[:12]
-        
+
         for agent_id, antigen_pattern in self._t_cells.items():
             if antigen_pattern.search(payload):
                 logger.info(f"[MHC] Antigen match! Signature {payload_hash} triggers {agent_id}")
                 return agent_id
-                
+
         logger.warning(f"[MHC] No T-Cell match for antigen signature {payload_hash}")
         return None

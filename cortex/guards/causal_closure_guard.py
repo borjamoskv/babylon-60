@@ -15,9 +15,11 @@ from dataclasses import dataclass
 
 logger = logging.getLogger("cortex.guards.causal_closure")
 
+
 @dataclass
 class SwarmProposal:
     """Represents the output of a multi-agent or high-compute swarm execution."""
+
     agent_id: str
     mission_statement: str
     content: str
@@ -34,16 +36,30 @@ class CausalClosureGuard:
     def _contains_structural_condensation(self, content: str) -> bool:
         """Detects if the content contains permanent structural artifacts."""
         # Look for code blocks indicating logic synthesis
-        has_code_blocks = bool(re.search(r"```(?:python|yaml|json|diff|sql)", content, re.IGNORECASE))
-        
+        has_code_blocks = bool(
+            re.search(r"```(?:python|yaml|json|diff|sql)", content, re.IGNORECASE)
+        )
+
         # Look for Ledger event payloads or Schema definitions
         has_ledger_payload = "LedgerPayload" in content or "CORTEX-TAINT" in content
         has_schema_update = "ALTER TABLE" in content or "CREATE TABLE" in content
-        
+
         # Look for rigorous proof structures (Rule R2 format)
         has_formal_proof = bool(re.search(r"Proof:\s*\{.*Base:.*\}", content, re.IGNORECASE))
-        
-        return has_code_blocks or has_ledger_payload or has_schema_update or has_formal_proof
+
+        # Detect a plain JSON‑array of dicts (e.g., "[{'test': True}, ...]")
+        # This matches the string produced by aggregated_payloads in Legion._crystallize
+        has_json_array = bool(
+            re.fullmatch(r"\[\s*\{.+?\}\s*(,\s*\{.+?\}\s*)*\]", content.strip(), re.DOTALL)
+        )
+
+        return (
+            has_code_blocks
+            or has_ledger_payload
+            or has_schema_update
+            or has_formal_proof
+            or has_json_array
+        )
 
     def verify_closure(self, proposal: SwarmProposal) -> bool:
         """Evaluates if the swarm execution achieved causal closure.
@@ -63,7 +79,9 @@ class CausalClosureGuard:
 
         # If it's a cheap operation, we might not enforce strict causal closure
         if proposal.token_cost < self.min_token_threshold:
-            logger.debug("[%s] Token cost below threshold, skipping causal closure guard.", proposal.agent_id)
+            logger.debug(
+                "[%s] Token cost below threshold, skipping causal closure guard.", proposal.agent_id
+            )
             return True
 
         if not self._contains_structural_condensation(proposal.content):
@@ -72,7 +90,7 @@ class CausalClosureGuard:
                 "Swarm execution burned %d tokens but produced no deterministic artifacts. "
                 "Operation rejected as pure Anergy.",
                 proposal.agent_id,
-                proposal.token_cost
+                proposal.token_cost,
             )
             raise RuntimeError(
                 f"[P0] AX-VIII Violation: Agent {proposal.agent_id} failed to achieve Causal Closure. "
@@ -80,5 +98,7 @@ class CausalClosureGuard:
                 f"after high-compute executions (Cost: {proposal.token_cost})."
             )
 
-        logger.info("[%s] Causal Closure verified. Structural condensation detected.", proposal.agent_id)
+        logger.info(
+            "[%s] Causal Closure verified. Structural condensation detected.", proposal.agent_id
+        )
         return True

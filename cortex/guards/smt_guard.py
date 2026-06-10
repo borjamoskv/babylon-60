@@ -212,7 +212,7 @@ class SMTConstraintGuard:
         for idx in range(len(valid_ts) - 1):
             if valid_ts[idx][1] > valid_ts[idx + 1][1]:
                 unsat_reasons.append(
-                    f"Temporal ordering violation: fact_{valid_ts[idx][0]} (ts={valid_ts[idx][1]}) > fact_{valid_ts[idx+1][0]} (ts={valid_ts[idx+1][1]})"
+                    f"Temporal ordering violation: fact_{valid_ts[idx][0]} (ts={valid_ts[idx][1]}) > fact_{valid_ts[idx + 1][0]} (ts={valid_ts[idx + 1][1]})"
                 )
         # Check subject consistency
         by_subject = {}
@@ -232,7 +232,9 @@ class SMTConstraintGuard:
                         )
         return unsat_reasons
 
-    def _assert_z3_temporal_constraints(self, s: Any, valid_ts: list[float], tracking_vars: list[Any]) -> None:
+    def _assert_z3_temporal_constraints(
+        self, s: Any, valid_ts: list[float], tracking_vars: list[Any]
+    ) -> None:
         """Add temporal constraint variables to the Z3 solver with tracking."""
         if len(valid_ts) >= 2:
             ts_vars = [Real(f"ts_{i}") for i in range(len(valid_ts))]
@@ -246,11 +248,13 @@ class SMTConstraintGuard:
                 tracking_vars.append(bounds_track)
 
             for i in range(len(ts_vars) - 1):
-                order_track = Bool(f"track_ts_order_{i}_{i+1}")
+                order_track = Bool(f"track_ts_order_{i}_{i + 1}")
                 s.assert_and_track(ts_vars[i] <= ts_vars[i + 1], order_track)
                 tracking_vars.append(order_track)
 
-    def _assert_z3_subject_constraints(self, s: Any, by_subject: dict[str, list[tuple[int, float]]], tracking_vars: list[Any]) -> None:
+    def _assert_z3_subject_constraints(
+        self, s: Any, by_subject: dict[str, list[tuple[int, float]]], tracking_vars: list[Any]
+    ) -> None:
         """Add subject consistency constraints to the Z3 solver with tracking."""
         for subj, items in by_subject.items():
             if len(items) >= 2:
@@ -276,13 +280,15 @@ class SMTConstraintGuard:
         reasons = []
         for track in unsat_core:
             name = str(track)
-            
+
             # Format to human readable format
             match_order = re.match(r"track_ts_order_(\d+)_(\d+)", name)
             match_val = re.match(r"track_ts_val_(\d+)", name)
             match_bounds = re.match(r"track_ts_bounds_(\d+)", name)
             match_conf = re.match(r"track_conf_val_(.+)_(?P<idx>\d+)", name)
-            match_consistency = re.match(r"track_consistency_(.+)_(?P<idx_a>\d+)_(?P<idx_b>\d+)", name)
+            match_consistency = re.match(
+                r"track_consistency_(.+)_(?P<idx_a>\d+)_(?P<idx_b>\d+)", name
+            )
 
             if match_order:
                 a, b = match_order.groups()
@@ -301,10 +307,12 @@ class SMTConstraintGuard:
                 subj = match_consistency.group(1)
                 idx_a = match_consistency.group("idx_a")
                 idx_b = match_consistency.group("idx_b")
-                reasons.append(f"Confidence consistency violation on subject '{subj}' between fact_{idx_a} and fact_{idx_b}")
+                reasons.append(
+                    f"Confidence consistency violation on subject '{subj}' between fact_{idx_a} and fact_{idx_b}"
+                )
             else:
                 reasons.append(name)
-                
+
         return sorted(reasons)
 
     def isolate_unsat_core(self, facts: list[dict[str, Any]]) -> list[str]:

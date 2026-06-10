@@ -39,7 +39,6 @@ class ThermodynamicWasteError(RuntimeError):
     """Raised when the calculated exergy score falls below the required threshold."""
 
 
-
 def calculate_exergy(inp: ExergyInput, threshold_min_work: float) -> ExergyResult:
     if inp.tokens_consumed <= 0:
         raise ValueError("tokens_consumed must be > 0")

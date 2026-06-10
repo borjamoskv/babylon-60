@@ -10,6 +10,7 @@ from pathlib import Path
 
 BLOG_DIR = Path(__file__).resolve().parents[1] / "src" / "pages" / "blog"
 
+
 def main() -> int:
     if not BLOG_DIR.exists():
         print(f"Error: Blog directory {BLOG_DIR} does not exist.")
@@ -29,22 +30,17 @@ def main() -> int:
         except OSError as e:
             print(f"Error reading {f.name}: {e}")
             continue
-        
+
         # Extract title from <h1>
         h1_match = re.search(r"<h1[^>]*>(.*?)</h1>", content, re.DOTALL)
         title = h1_match.group(1).strip() if h1_match else f.stem.replace("_", " ").title()
-        
+
         # Clean title from HTML tags and extra whitespaces
         title = re.sub(r"<[^>]+>", "", title)
         title = " ".join(title.split())
-        
+
         url = f"/blog/{f.stem}"
-        articles.append({
-            "path": f,
-            "title": title,
-            "url": url,
-            "content": content
-        })
+        articles.append({"path": f, "title": title, "url": url, "content": content})
 
     # Sort articles so order is deterministic
     articles.sort(key=lambda x: x["title"])
@@ -60,7 +56,7 @@ def main() -> int:
                 continue
             link_html = f"""                <div style="margin: 0; padding: 0 0 0 16px; font-size: 0.95rem; position: relative; line-height: 1.5;">
                     <span style="position: absolute; left: 0; color: var(--yinmn-blue); font-family: var(--font-mono);">►</span>
-                    <a href="{other['url']}" style="color: var(--parchment-white); text-decoration: none; border-bottom: 1px dotted rgba(243, 244, 246, 0.3); transition: var(--transition-smooth);">{other['title']}</a>
+                    <a href="{other["url"]}" style="color: var(--parchment-white); text-decoration: none; border-bottom: 1px dotted rgba(243, 244, 246, 0.3); transition: var(--transition-smooth);">{other["title"]}</a>
                 </div>"""
             other_links.append(link_html)
 
@@ -79,16 +75,22 @@ def main() -> int:
         <!-- CORTEX-SIGNATURE-END -->"""
 
         content = current["content"]
-        
+
         # Ensure placeholders exist
         if "<!-- CORTEX-SIGNATURE-START -->" not in content:
             # Inject placeholders right before <div class="footer-terminal">
             terminal_div = '<div class="footer-terminal">'
             if terminal_div in content:
-                content = content.replace(terminal_div, f"<!-- CORTEX-SIGNATURE-START -->\n<!-- CORTEX-SIGNATURE-END -->\n\n        {terminal_div}")
+                content = content.replace(
+                    terminal_div,
+                    f"<!-- CORTEX-SIGNATURE-START -->\n<!-- CORTEX-SIGNATURE-END -->\n\n        {terminal_div}",
+                )
             else:
                 # Fallback: right before </body>
-                content = content.replace("</body>", f"<!-- CORTEX-SIGNATURE-START -->\n<!-- CORTEX-SIGNATURE-END -->\n</body>")
+                content = content.replace(
+                    "</body>",
+                    "<!-- CORTEX-SIGNATURE-START -->\n<!-- CORTEX-SIGNATURE-END -->\n</body>",
+                )
 
         # Replace signature between placeholders
         pattern = r"<!-- CORTEX-SIGNATURE-START -->.*?<!-- CORTEX-SIGNATURE-END -->"
@@ -105,6 +107,7 @@ def main() -> int:
             print(f"Signature already up-to-date in: {current['path'].name}")
 
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

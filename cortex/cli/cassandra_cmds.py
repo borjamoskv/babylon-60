@@ -19,37 +19,36 @@ def cassandra(db_path: str | None) -> None:
     console.print(
         Panel(
             "[bold #CCFF00]🔮 CASSANDRA AGENT - MAPA DE PROBLEMAS HABIDOS Y POR HABER[/]",
-            border_style="#6600FF"
+            border_style="#6600FF",
         )
     )
 
     # 1. Past Problems (Habidos)
-    past_table = Table(title="[bold #6600FF]Problemas Habidos (Past Vulnerabilities & Anergy)[/]", show_lines=True)
+    past_table = Table(
+        title="[bold #6600FF]Problemas Habidos (Past Vulnerabilities & Anergy)[/]", show_lines=True
+    )
     past_table.add_column("ID", style="bold cyan")
     past_table.add_column("Tipo", style="bold magenta")
     past_table.add_column("Descripción", style="white")
 
     past_table.add_row(
-        "PAST-01",
-        "Anergy Leak",
-        "Limerencia epistémica sin mutar el estado (violación AX-047)."
+        "PAST-01", "Anergy Leak", "Limerencia epistémica sin mutar el estado (violación AX-047)."
     )
     past_table.add_row(
-        "PAST-02",
-        "Ledger Break",
-        "Modificación de estado sin token criptográfico CORTEX-TAINT."
+        "PAST-02", "Ledger Break", "Modificación de estado sin token criptográfico CORTEX-TAINT."
     )
     past_table.add_row(
-        "PAST-03",
-        "Entropy Spike",
-        "Retención de engramas estocásticos sin podado termodinámico."
+        "PAST-03", "Entropy Spike", "Retención de engramas estocásticos sin podado termodinámico."
     )
     console.print(past_table)
 
     console.print()
 
     # 2. Future Problems (Por haber)
-    future_table = Table(title="[bold #CCFF00]Problemas Por Haber (Future Scale & Entropy Bottlenecks)[/]", show_lines=True)
+    future_table = Table(
+        title="[bold #CCFF00]Problemas Por Haber (Future Scale & Entropy Bottlenecks)[/]",
+        show_lines=True,
+    )
     future_table.add_column("ID", style="bold cyan")
     future_table.add_column("Tipo", style="bold red")
     future_table.add_column("Descripción", style="white")
@@ -57,17 +56,17 @@ def cassandra(db_path: str | None) -> None:
     future_table.add_row(
         "FUT-01",
         "Scale Bottleneck",
-        "Latencia de sincronización en enjambres > 2M de agentes debido a bloqueo de SQLite."
+        "Latencia de sincronización en enjambres > 2M de agentes debido a bloqueo de SQLite.",
     )
     future_table.add_row(
         "FUT-02",
         "Stochastic Noise",
-        "Desviación generativa en traspasos multi-sesión sin límites deterministas estrictos."
+        "Desviación generativa en traspasos multi-sesión sin límites deterministas estrictos.",
     )
     future_table.add_row(
         "FUT-03",
         "Thermodynamic Death",
-        "Asignación excesiva de capacidad a bucles de inferencia P0 sin criterios de finalización."
+        "Asignación excesiva de capacidad a bucles de inferencia P0 sin criterios de finalización.",
     )
     console.print(future_table)
 

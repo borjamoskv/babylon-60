@@ -24,7 +24,7 @@ def test_low_token_cost_bypasses_strict_checks(closure_guard: CausalClosureGuard
         agent_id="test",
         mission_statement="test",
         content="This is just some narrative text without code.",
-        token_cost=500  # Below 1000
+        token_cost=500,  # Below 1000
     )
     # Should pass because it's cheap
     assert closure_guard.verify_closure(proposal)
@@ -32,50 +32,43 @@ def test_low_token_cost_bypasses_strict_checks(closure_guard: CausalClosureGuard
 
 def test_high_token_cost_with_code_block_passes(closure_guard: CausalClosureGuard) -> None:
     """A costly operation that outputs python code achieves causal closure."""
-    content = '''We evaluated the logic and synthesized this code:
+    content = """We evaluated the logic and synthesized this code:
 ```python
 def my_invariant(): return True
 ```
-'''
+"""
     proposal = SwarmProposal(
-        agent_id="test",
-        mission_statement="test",
-        content=content,
-        token_cost=5000
+        agent_id="test", mission_statement="test", content=content, token_cost=5000
     )
     assert closure_guard.verify_closure(proposal)
 
 
 def test_high_token_cost_with_ledger_payload_passes(closure_guard: CausalClosureGuard) -> None:
     """A costly operation that outputs a LedgerPayload achieves causal closure."""
-    content = '''Emitting to the audit trail:
+    content = """Emitting to the audit trail:
 LedgerPayload: { "tx": 123, "CORTEX-TAINT": "v1" }
-'''
+"""
     proposal = SwarmProposal(
-        agent_id="test",
-        mission_statement="test",
-        content=content,
-        token_cost=5000
+        agent_id="test", mission_statement="test", content=content, token_cost=5000
     )
     assert closure_guard.verify_closure(proposal)
 
 
-def test_high_token_cost_without_structure_throws_saga_abort(closure_guard: CausalClosureGuard) -> None:
+def test_high_token_cost_without_structure_throws_saga_abort(
+    closure_guard: CausalClosureGuard,
+) -> None:
     """A costly operation that outputs only prose must be aborted as pure Anergy."""
-    content = '''I have thought deeply about this problem. 
+    content = """I have thought deeply about this problem. 
 The swarm has concluded that the best approach is to be careful and modular.
 We should probably use a database to store things.
-No code is needed at this time.'''
-    
+No code is needed at this time."""
+
     proposal = SwarmProposal(
-        agent_id="test",
-        mission_statement="test",
-        content=content,
-        token_cost=5000
+        agent_id="test", mission_statement="test", content=content, token_cost=5000
     )
-    
+
     with pytest.raises(RuntimeError) as exc_info:
         closure_guard.verify_closure(proposal)
-        
+
     assert "Causal Closure" in str(exc_info.value)
     assert "AX-VIII Violation" in str(exc_info.value)

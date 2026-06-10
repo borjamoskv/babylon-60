@@ -637,4 +637,3 @@ class TestCassandraAgent:
         task_failures = [r for r in replies if r.kind == MessageKind.TASK_FAILED]
         assert len(task_failures) == 1
         assert "Objective not supported" in task_failures[0].payload["error"]
-

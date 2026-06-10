@@ -33,6 +33,7 @@ def get_backend(conn=None) -> GraphBackend:
     backend_type = os.environ.get("CORTEX_GRAPH_BACKEND", "sqlite").lower()
     if backend_type == "neo4j":
         from cortex.graph.backends import Neo4jBackend
+
         return Neo4jBackend()  # type: ignore[abstract]
     return SQLiteBackend(conn)  # type: ignore[arg-type]
 

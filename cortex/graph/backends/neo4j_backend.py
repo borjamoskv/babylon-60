@@ -26,11 +26,15 @@ class Neo4jBackend(GraphBackend):
         RETURN e.name as id
         """
         async with self.driver.session() as session:
-            result = await session.run(query, name=name, entity_type=entity_type, project=project, timestamp=timestamp)
+            result = await session.run(
+                query, name=name, entity_type=entity_type, project=project, timestamp=timestamp
+            )
             record = await result.single()
             return record["id"] if record else name
 
-    async def upsert_relationship(self, source_id: str, target_id: str, relation_type: str, fact_id: int, timestamp: str) -> str:
+    async def upsert_relationship(
+        self, source_id: str, target_id: str, relation_type: str, fact_id: int, timestamp: str
+    ) -> str:
         # Dynamic relationship types in Cypher require apoc or direct string formatting (dangerous if unvalidated).
         # We will map it to a generic RELATED_TO and store the relation_type as property, or sanitize it.
         sanitized_rel = relation_type.replace(" ", "_").upper()
@@ -45,7 +49,13 @@ class Neo4jBackend(GraphBackend):
         RETURN id(r) as id
         """
         async with self.driver.session() as session:
-            result = await session.run(query, source_id=source_id, target_id=target_id, fact_id=fact_id, timestamp=timestamp)
+            result = await session.run(
+                query,
+                source_id=source_id,
+                target_id=target_id,
+                fact_id=fact_id,
+                timestamp=timestamp,
+            )
             record = await result.single()
             return str(record["id"]) if record else ""
 
@@ -60,12 +70,14 @@ class Neo4jBackend(GraphBackend):
             result = await session.run(query, project=project, limit=limit)
             edges = []
             async for record in result:
-                edges.append({
-                    "source": record["source"],
-                    "target": record["target"],
-                    "relation_type": record["relation"],
-                    "weight": record["weight"]
-                })
+                edges.append(
+                    {
+                        "source": record["source"],
+                        "target": record["target"],
+                        "relation_type": record["relation"],
+                        "weight": record["weight"],
+                    }
+                )
             return {"edges": edges}
 
     async def query_entity(self, name: str, project: str | None = None) -> dict | None:
@@ -82,11 +94,15 @@ class Neo4jBackend(GraphBackend):
         RETURN g.reference as id
         """
         async with self.driver.session() as session:
-            result = await session.run(query, reference=reference, context=context, project=project, timestamp=timestamp)
+            result = await session.run(
+                query, reference=reference, context=context, project=project, timestamp=timestamp
+            )
             record = await result.single()
             return record["id"] if record else reference
 
-    async def resolve_ghost(self, ghost_id: str, target_id: str, confidence: float, timestamp: str) -> bool:
+    async def resolve_ghost(
+        self, ghost_id: str, target_id: str, confidence: float, timestamp: str
+    ) -> bool:
         query = """
         MATCH (g:Ghost {reference: $ghost_id}), (e:Entity {name: $target_id})
         MERGE (g)-[r:RESOLVED_TO]->(e)
@@ -94,7 +110,13 @@ class Neo4jBackend(GraphBackend):
         RETURN r
         """
         async with self.driver.session() as session:
-            result = await session.run(query, ghost_id=ghost_id, target_id=target_id, confidence=confidence, timestamp=timestamp)
+            result = await session.run(
+                query,
+                ghost_id=ghost_id,
+                target_id=target_id,
+                confidence=confidence,
+                timestamp=timestamp,
+            )
             record = await result.single()
             return record is not None
 
@@ -114,7 +136,9 @@ class Neo4jBackend(GraphBackend):
             record = await result.single()
             return record["path"] if record else []
 
-    async def find_context_subgraph(self, seed_entities: list[str], depth: int = 2, max_nodes: int = 50) -> dict:
+    async def find_context_subgraph(
+        self, seed_entities: list[str], depth: int = 2, max_nodes: int = 50
+    ) -> dict:
         query = """
         MATCH (s:Entity)-[r]-(t:Entity)
         WHERE s.name IN $seed_entities
@@ -125,9 +149,11 @@ class Neo4jBackend(GraphBackend):
             result = await session.run(query, seed_entities=seed_entities, max_nodes=max_nodes)
             edges = []
             async for record in result:
-                edges.append({
-                    "source": record["source"],
-                    "target": record["target"],
-                    "relation_type": record["relation"]
-                })
+                edges.append(
+                    {
+                        "source": record["source"],
+                        "target": record["target"],
+                        "relation_type": record["relation"],
+                    }
+                )
             return {"edges": edges}

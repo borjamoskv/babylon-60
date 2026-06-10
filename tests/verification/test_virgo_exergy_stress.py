@@ -5,6 +5,7 @@ Concurrency and Adversarial Stress Test for VirgoContextGuard and ExergyGuard.
 Validates that high-concurrency dispatching of inputs with varying exergy yields
 and cryptographic signatures executes correctly without deadlocks or state leakage.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -56,14 +57,14 @@ async def test_virgo_guard_concurrency(temp_db):
     content = "Structural crystallized fact about the repository architecture."
     project = "cortex"
     nonces = [f"stress_nonce_{i}" for i in range(100)]
-    
+
     # 50 valid requests with unique nonces, 50 invalid signatures, and 50 duplicate nonces
     async def run_check(nonce: str, signature: str, expect_success: bool):
         meta = {
             "source": "agent:swarm",
             "agent_id": "test_agent_01",
             "logos_signature": signature,
-            "nonce": nonce
+            "nonce": nonce,
         }
         try:
             await guard.check(content, project, "decision", meta, temp_db)
@@ -76,7 +77,7 @@ async def test_virgo_guard_concurrency(temp_db):
     for nonce in nonces[:50]:
         sig = hashlib.sha256(f"{content}{nonce}{project}".encode()).hexdigest()
         tasks.append(run_check(nonce, sig, expect_success=True))
-        
+
     # 2. 50 Duplicate nonces (replay)
     for nonce in nonces[:50]:
         sig = hashlib.sha256(f"{content}{nonce}{project}".encode()).hexdigest()
@@ -98,9 +99,11 @@ async def test_exergy_guard_concurrency():
     Sends a burst of concurrent payloads to ExergyGuard to test throughput and evaluation safety.
     """
     guard = ExergyGuard()
-    
+
     valid_content = "This establishes a deterministic validation boundary for memory writes using cryptographic seals."
-    invalid_content = "por supuesto aquí tienes el código espero que te sea muy de utilidad amigo mio"
+    invalid_content = (
+        "por supuesto aquí tienes el código espero que te sea muy de utilidad amigo mio"
+    )
 
     async def check_exergy(content: str, is_valid: bool):
         try:
@@ -115,7 +118,7 @@ async def test_exergy_guard_concurrency():
         tasks.append(check_exergy(invalid_content, is_valid=False))
 
     results = await asyncio.gather(*tasks)
-    
+
     # We ran 100 valid and 100 invalid checks
     assert len(results) == 200
     # Exactly 100 valid ones must have passed, and exactly 100 invalid ones must have failed

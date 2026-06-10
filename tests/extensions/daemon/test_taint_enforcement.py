@@ -563,15 +563,14 @@ async def test_verification_oracle_invariants(agent_keys):
 def test_mhc_antigen_router_integration():
     """Verifies that MHCAntigenRouter correctly routes payloads to T-Cells based on antigens."""
     from cortex.engine.causal.taint_engine import MHCAntigenRouter
-    
+
     router = MHCAntigenRouter()
     router.register_t_cell("Jules-Secretario", r"github\s+(pull|issue|commit)")
     router.register_t_cell("LEA-Omega", r"purge\s+(dead\s+code|stale)")
-    
+
     # Jules match
     assert router.present_antigen("Let's create a github pull request") == "Jules-Secretario"
     # LEA match
     assert router.present_antigen("Trigger purge dead code in workspace") == "LEA-Omega"
     # No match
     assert router.present_antigen("Hello simple world") is None
-

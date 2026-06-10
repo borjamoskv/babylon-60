@@ -15,7 +15,6 @@ def seal_ledger():
     """Seals the execution ledger to prevent updates during freeze."""
 
 
-
 def freeze_system():
     disable_mutations()
     flush_queues()

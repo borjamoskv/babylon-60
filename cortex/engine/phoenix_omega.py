@@ -98,7 +98,6 @@ class BaseEngine(ABC):
         """Execute the atomic transition phase."""
 
 
-
 class AnalysisEngine(BaseEngine):
     """
     Fase 1: Inteligencia estructural y deuda técnica.
