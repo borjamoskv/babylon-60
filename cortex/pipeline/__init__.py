@@ -105,7 +105,7 @@ class ContextPacket:
     """Assembled context from all knowledge sources."""
 
     facts: list[dict[str, Any]] = field(default_factory=list)  # From FactStore
-    knowledge_items: list[dict[str, Any]] = field(default_factory=list)  # From KI/ChromaDB
+    knowledge_items: list[dict[str, Any]] = field(default_factory=list)  # From KI/SQLite-Vec
     embeddings_used: list[str] = field(default_factory=list)  # IDs of vectors consumed
     relevance_scores: dict[str, float] = field(default_factory=dict)
     total_tokens: int = 0

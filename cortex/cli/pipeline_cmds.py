@@ -158,10 +158,10 @@ def pipeline_status() -> None:
 
     click.echo("═══ CORTEX E2E Pipeline Status ═══\n")
 
-    # Check ChromaDB
-    chroma_path = os.path.expanduser("~/.cortex/chroma_db")
-    chroma_ok = os.path.exists(chroma_path)
-    click.echo(f"  ChromaDB:        {'✅ ' + chroma_path if chroma_ok else '❌ not initialized'}")
+    # Check SQLite-Vec Vectors DB
+    vectors_path = os.path.expanduser("~/.cortex/vectors.db")
+    vectors_ok = os.path.exists(vectors_path)
+    click.echo(f"  SQLite-Vec DB:   {'✅ ' + vectors_path if vectors_ok else '❌ not initialized'}")
 
     # Check Budget DB
     budget_path = os.path.expanduser("~/.cortex/budget.db")
