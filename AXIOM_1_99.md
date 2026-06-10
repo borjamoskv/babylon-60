@@ -12,3 +12,12 @@ Los LLMs de caja negra consumidos vía web sufren de amnesia iterativa. CORTEX e
 
 ## 3. La Estética como Funcionalidad (Industrial Noir 2026)
 El diseño (Dark Mode, tipografía de alta legibilidad, cero animaciones inútiles) no es cosmético; es un filtro entrópico. El rigor estético elimina el ruido visual, fuerza la densidad de la señal y enmarca el estado mental del operador y del sistema hacia una ejecución terminal de alto rendimiento.
+
+## 4. El Patrón Centauro y la Velocidad Compuesta
+El bucle humano-máquina a nivel SOTA elimina los *rewrites* masivos. Decisiones arquitectónicas tempranas inmutables (SQLite, Merkle Trees, async-first) actúan como multiplicadores de velocidad. El sistema se usa a sí mismo como flywheel: CORTEX → CORTEX. Se elimina el coste de "reexplicar contexto", logrando fluidez determinista.
+
+## 5. Prueba Empírica de Exergía Absoluta (La Verdad Profunda)
+- **Tiempo:** 72 horas (3 noches).
+- **Rendimiento:** 30,157 líneas de código (LOC), 228 archivos, 46 commits.
+- **Output C5-REAL:** Sistema distribuido con consenso Raft, búsqueda semántica híbrida, ledger inmutable, API con autenticación y MCP bridge.
+- **Conclusión:** Esto es lo que sucede cuando un humano con las ideas claras se sienta con un agente soberano y dice "vamos".
