@@ -101,6 +101,21 @@ class GenomeMutator:
                 child._invalidate_hash()
             except Exception as e:
                 logger.error("Rust AST mutation failed: %s", e)
+                # Fallback to Python-based implementation
+                method_name = self._OPERATORS.get(mutation_type)
+                if method_name and hasattr(self, method_name):
+                    getattr(self, method_name)(child)
+                    child.lineage.mutation_log.append(
+                        f"gen={child.lineage.generation} type={mutation_type.value}"
+                    )
+                    child._invalidate_hash()
+                    logger.debug(
+                        "GENOME MUTATION FALLBACK: %s on %s → %s (gen %d)",
+                        mutation_type.value,
+                        genome.genome_hash[:8],
+                        child.genome_hash[:8],
+                        child.lineage.generation,
+                    )
         else:
             method_name = self._OPERATORS.get(mutation_type)
             if method_name and hasattr(self, method_name):
