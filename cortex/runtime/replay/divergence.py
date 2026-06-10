@@ -438,7 +438,16 @@ class DivergenceMetricEngine:
         semantic = max(c.semantic for c in step_coords)
         partial = max(c.partial for c in step_coords)
         entropy = max(c.entropy for c in step_coords)
-        composite = max(c.composite for c in step_coords)
+        
+        # Calcular composite global como la L2 norm pesada de las métricas agregadas
+        w_struct, w_sem, w_part, w_ent = 0.4, 0.4, 0.1, 0.1
+        weighted_sum = (
+            w_struct * (structural ** 2) +
+            w_sem * (semantic ** 2) +
+            w_part * (partial ** 2) +
+            w_ent * (entropy ** 2)
+        )
+        composite = math.sqrt(weighted_sum)
 
         return DivergenceCoordinates(
             structural=structural,
