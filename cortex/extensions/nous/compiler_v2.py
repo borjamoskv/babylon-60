@@ -4,38 +4,10 @@
 Reality Level: C5-REAL
 """
 
-from typing import Optional
-
 import instructor
-import pydantic
 from openai import AsyncOpenAI
-
-
-class NousInvariant(pydantic.BaseModel):
-    name: str
-    condition: str
-    action: str = "halt"
-
-
-class NousOperation(pydantic.BaseModel):
-    type: str  # e.g., "create_table", "add_column", "drop_table"
-    target: str
-    sql: str
-    rollback_sql: Optional[str] = None
-
-
-class NousMetadata(pydantic.BaseModel):
-    version: str
-    author: str
-    description: str
-    requires_lock: bool = True
-
-
-class NousAST(pydantic.BaseModel):
-    metadata: NousMetadata
-    ensures: list[str]
-    operations: list[NousOperation]
-    invariants: list[NousInvariant]
+from typing import List, Optional, Any
+from .models import NousAST, NousMetadata, NousOperation, NousInvariant
 
 
 class NousCompilerV2:
