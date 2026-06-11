@@ -156,7 +156,25 @@ class TestCassandraMythos:
         r1 = await cassandra.run_adversarial_audit()
         r2 = await cassandra.run_adversarial_audit()
         
-        assert r2["prev_hash"] == r1["signature"]
+        # Verify signatures of r1 and r2 are valid
+        assert cassandra.verify_entry(r1, cassandra.ledger.public_key) is True
+        assert cassandra.verify_entry(r2, cassandra.ledger.public_key) is True
+        
+        # Verify that r2's prev_hash matches the computed entry_hash of r1
+        import json
+        import hashlib
+        payload_obj = {
+            "timestamp": r1["timestamp"],
+            "risk_score": round(r1["risk_score"], 6),
+            "findings": r1["findings"],
+            "exploit_chains": r1["exploit_chains"],
+            "prev_hash": r1["prev_hash"]
+        }
+        payload_bytes = json.dumps(payload_obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        expected_entry_hash = hashlib.sha256(payload_bytes).hexdigest()
+        
+        assert r2["prev_hash"] == expected_entry_hash
+        assert r2["prev_hash"] != r1["signature"]
         
         # Verify from database order
         cursor = await cassandra._conn.execute(
@@ -165,4 +183,4 @@ class TestCassandraMythos:
         rows = await cursor.fetchall()
         assert len(rows) == 2
         assert rows[0][0] == "GENESIS"
-        assert rows[1][0] == rows[0][1]
+        assert rows[1][0] == expected_entry_hash

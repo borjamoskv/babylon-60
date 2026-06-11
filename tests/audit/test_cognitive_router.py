@@ -123,6 +123,9 @@ class TestCognitiveRouter:
     @pytest.mark.asyncio
     async def test_cryptographic_chaining(self, router):
         """Verify routing decisions are chained sequentially in the database."""
+        import json
+        import hashlib
+        
         d1 = await router.route("Safe prompt 1", user_tier="General-Public")
         d2 = await router.route("Safe prompt 2", user_tier="General-Public")
 
@@ -132,6 +135,38 @@ class TestCognitiveRouter:
         rows = await cursor.fetchall()
         assert len(rows) == 2
         assert rows[0][0] == "GENESIS"
-        assert rows[1][0] == rows[0][1]
+        
+        # Verify using verify_entry
+        cursor2 = await router._conn.execute(
+            "SELECT timestamp, prompt_hash, detected_sensitivity, user_tier, assigned_model, data_retention_flag, prev_hash, signature FROM cognitive_router_log ORDER BY rowid ASC LIMIT 1"
+        )
+        row1 = await cursor2.fetchone()
+        entry1 = {
+            "timestamp": row1[0],
+            "prompt_hash": row1[1],
+            "detected_sensitivity": json.loads(row1[2]),
+            "user_tier": row1[3],
+            "assigned_model": row1[4],
+            "data_retention_flag": row1[5],
+            "prev_hash": row1[6],
+            "signature": row1[7]
+        }
+        assert router.verify_entry(entry1, router.ledger.public_key) is True
+        
+        # Recompute entry_hash of first entry to verify the chain linkage
+        payload_obj = {
+            "timestamp": entry1["timestamp"],
+            "prompt_hash": entry1["prompt_hash"],
+            "detected_sensitivity": entry1["detected_sensitivity"],
+            "user_tier": entry1["user_tier"],
+            "assigned_model": entry1["assigned_model"],
+            "data_retention_flag": entry1["data_retention_flag"],
+            "prev_hash": entry1["prev_hash"]
+        }
+        expected_entry_hash = hashlib.sha256(
+            json.dumps(payload_obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()
+        
+        assert rows[1][0] == expected_entry_hash
         assert rows[0][1] == d1.signature
         assert rows[1][1] == d2.signature

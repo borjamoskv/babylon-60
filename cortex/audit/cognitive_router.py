@@ -104,11 +104,25 @@ class CognitiveRouter:
             await self._conn.execute(_CREATE_ROUTER_LOG_SQL)
             await self._conn.commit()
             cursor = await self._conn.execute(
-                "SELECT signature FROM cognitive_router_log ORDER BY rowid DESC LIMIT 1"
+                "SELECT timestamp, prompt_hash, detected_sensitivity, user_tier, assigned_model, data_retention_flag, prev_hash FROM cognitive_router_log ORDER BY rowid DESC LIMIT 1"
             )
             row = await cursor.fetchone()
             if row:
-                self._last_hash = row[0]
+                timestamp, prompt_hash, sensitivity_json, user_tier, assigned_model, retention_flag, prev_hash = row
+                # Reconstruct payload to compute entry_hash
+                payload_obj = {
+                    "timestamp": timestamp,
+                    "prompt_hash": prompt_hash,
+                    "detected_sensitivity": json.loads(sensitivity_json),
+                    "user_tier": user_tier,
+                    "assigned_model": assigned_model,
+                    "data_retention_flag": retention_flag,
+                    "prev_hash": prev_hash
+                }
+                payload_bytes = json.dumps(payload_obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
+                self._last_hash = hashlib.sha256(payload_bytes).hexdigest()
+            else:
+                self._last_hash = "GENESIS"
             self._ready = True
 
     async def route(self, prompt: str, user_tier: str) -> RoutingDecision:
@@ -143,12 +157,20 @@ class CognitiveRouter:
         sensitivity_json = json.dumps(sensitivity)
         retention_flag = 1 if retention_required else 0
 
-        # Sign routing sequence
-        payload = (
-            f"{timestamp}:{prompt_hash}:{sensitivity_json}:{user_tier}:"
-            f"{assigned_model}:{retention_flag}:{self._last_hash}"
-        )
-        signature = self.ledger.private_key.sign(payload.encode("utf-8")).hex()
+        # Sign routing sequence (canonical JSON)
+        payload_obj = {
+            "timestamp": timestamp,
+            "prompt_hash": prompt_hash,
+            "detected_sensitivity": sensitivity,
+            "user_tier": user_tier,
+            "assigned_model": assigned_model,
+            "data_retention_flag": retention_flag,
+            "prev_hash": self._last_hash
+        }
+        payload_bytes = json.dumps(payload_obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        entry_hash = hashlib.sha256(payload_bytes).hexdigest()
+        
+        signature = self.ledger.private_key.sign(entry_hash.encode("utf-8")).hex()
 
         # Persist transaction
         await self._conn.execute(
@@ -170,8 +192,9 @@ class CognitiveRouter:
         )
         await self._conn.commit()
 
+        old_last_hash = self._last_hash
         # Update last hash chain pointer
-        self._last_hash = signature
+        self._last_hash = entry_hash
 
         return RoutingDecision(
             routing_id=routing_id,
@@ -181,3 +204,26 @@ class CognitiveRouter:
             retention_required=retention_required,
             signature=signature,
         )
+
+    def verify_entry(self, entry: Dict[str, Any], public_key: Any) -> bool:
+        """Verifies a cognitive router log entry externally."""
+        try:
+            payload_obj = {
+                "timestamp": entry["timestamp"],
+                "prompt_hash": entry["prompt_hash"],
+                "detected_sensitivity": entry["detected_sensitivity"],
+                "user_tier": entry["user_tier"],
+                "assigned_model": entry["assigned_model"],
+                "data_retention_flag": entry["data_retention_flag"],
+                "prev_hash": entry["prev_hash"]
+            }
+            payload_bytes = json.dumps(payload_obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
+            entry_hash = hashlib.sha256(payload_bytes).hexdigest()
+            
+            public_key.verify(
+                bytes.fromhex(entry["signature"]),
+                entry_hash.encode("utf-8")
+            )
+            return True
+        except Exception:
+            return False
