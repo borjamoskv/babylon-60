@@ -3,6 +3,7 @@
 All tests are self-contained: no live engine, no database, no network.
 Traces are built from TraceBuilder fixtures.
 """
+
 from __future__ import annotations
 
 import json
@@ -19,6 +20,7 @@ from cortex.tools.trace_builder import TraceBuilder
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def make_trace(trace_id: str, n_writes: int = 0, n_reads: int = 0, n_mutations: int = 0):
     b = TraceBuilder(tenant_id="t", model_version="test", op_kind="write", trace_id=trace_id)
     for _ in range(n_writes):
@@ -33,6 +35,7 @@ def make_trace(trace_id: str, n_writes: int = 0, n_reads: int = 0, n_mutations: 
 # ---------------------------------------------------------------------------
 # ComponentStats
 # ---------------------------------------------------------------------------
+
 
 class TestComponentStats:
     def test_empty(self):
@@ -54,6 +57,7 @@ class TestComponentStats:
 # ---------------------------------------------------------------------------
 # E1Profiler
 # ---------------------------------------------------------------------------
+
 
 class TestE1Profiler:
     def setup_method(self):
@@ -108,13 +112,28 @@ class TestE1Profiler:
 # load_jsonl
 # ---------------------------------------------------------------------------
 
+
 class TestLoadJsonl:
     def test_loads_from_file(self):
         records = [
-            {"id": "a", "tenant_id": "t1", "model_version": "v1", "op_kind": "write",
-             "writes": 3, "reads": 1, "mutations": 0},
-            {"id": "b", "tenant_id": "t2", "model_version": "v1", "op_kind": "query",
-             "writes": 0, "reads": 5, "mutations": 0},
+            {
+                "id": "a",
+                "tenant_id": "t1",
+                "model_version": "v1",
+                "op_kind": "write",
+                "writes": 3,
+                "reads": 1,
+                "mutations": 0,
+            },
+            {
+                "id": "b",
+                "tenant_id": "t2",
+                "model_version": "v1",
+                "op_kind": "query",
+                "writes": 0,
+                "reads": 5,
+                "mutations": 0,
+            },
         ]
         with tempfile.NamedTemporaryFile(mode="w", suffix=".jsonl", delete=False) as f:
             for r in records:

@@ -3,6 +3,7 @@
 Uses only deterministic fixtures — no live engine, no DB, no network.
 Designed to run in CI without any external dependencies.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -15,10 +16,13 @@ from cortex.tools.trace_builder import TraceBuilder
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def minimal_trace() -> ExecutionTrace:
     """Single-event trace: one write followed by a commit."""
-    b = TraceBuilder(tenant_id="t1", model_version="test-0.1", op_kind="write", trace_id="trace-001")
+    b = TraceBuilder(
+        tenant_id="t1", model_version="test-0.1", op_kind="write", trace_id="trace-001"
+    )
     b.record("write", fact_id="f1", ledger_height=100, payload_hash="aabbcc")
     b.record("commit", ledger_height=101)
     return b.build()
@@ -27,7 +31,9 @@ def minimal_trace() -> ExecutionTrace:
 @pytest.fixture()
 def mixed_trace() -> ExecutionTrace:
     """Multi-event trace with reads, writes and mutations."""
-    b = TraceBuilder(tenant_id="t2", model_version="test-0.2", op_kind="mutation", trace_id="trace-002")
+    b = TraceBuilder(
+        tenant_id="t2", model_version="test-0.2", op_kind="mutation", trace_id="trace-002"
+    )
     b.record("read", fact_id="f10", ledger_height=200)
     b.record("write", fact_id="f11", ledger_height=201, payload_hash="deadbeef")
     b.record("mutation", fact_id="f12", ledger_height=202)
@@ -39,13 +45,16 @@ def mixed_trace() -> ExecutionTrace:
 @pytest.fixture()
 def empty_trace() -> ExecutionTrace:
     """Zero-event trace — edge case for all counters."""
-    b = TraceBuilder(tenant_id=None, model_version="test-0.0", op_kind="query", trace_id="trace-000")
+    b = TraceBuilder(
+        tenant_id=None, model_version="test-0.0", op_kind="query", trace_id="trace-000"
+    )
     return b.build()
 
 
 # ---------------------------------------------------------------------------
 # TraceBuilder tests
 # ---------------------------------------------------------------------------
+
 
 class TestTraceBuilder:
     def test_trace_id_preserved(self, minimal_trace):
@@ -71,6 +80,7 @@ class TestTraceBuilder:
 # ---------------------------------------------------------------------------
 # ExecutionTrace interface (Trajectory Protocol)
 # ---------------------------------------------------------------------------
+
 
 class TestExecutionTraceProtocol:
     def test_events_iterator(self, minimal_trace):
@@ -98,9 +108,20 @@ class TestExecutionTraceProtocol:
 
     def test_as_dict_keys(self, minimal_trace):
         d = minimal_trace.as_dict()
-        required = {"id", "tenant_id", "model_version", "op_kind",
-                    "start_time", "end_time", "length", "ledger_snapshot",
-                    "wall_time", "writes", "reads", "mutations"}
+        required = {
+            "id",
+            "tenant_id",
+            "model_version",
+            "op_kind",
+            "start_time",
+            "end_time",
+            "length",
+            "ledger_snapshot",
+            "wall_time",
+            "writes",
+            "reads",
+            "mutations",
+        }
         assert required.issubset(d.keys())
 
     def test_as_dict_values(self, minimal_trace):
@@ -116,6 +137,7 @@ class TestExecutionTraceProtocol:
 # ---------------------------------------------------------------------------
 # TraceEvent field correctness
 # ---------------------------------------------------------------------------
+
 
 class TestTraceEventFlags:
     def test_write_flags(self):
