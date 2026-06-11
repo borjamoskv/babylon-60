@@ -139,8 +139,8 @@ class RiskManager:
         if ratio > self.MAX_POSITION_PCT:
             log.warning(
                 "Position size %.2f%% > max %.2f%%",
-                float(ratio * 100),
-                float(self.MAX_POSITION_PCT * 100),
+                ratio * 100,
+                self.MAX_POSITION_PCT * 100,
             )
             return False
         return True
@@ -153,8 +153,8 @@ class RiskManager:
         if loss_pct < -self.MAX_DAILY_LOSS_PCT:
             log.warning(
                 "Daily loss %.2f%% > max -%.2f%%",
-                float(loss_pct * 100),
-                float(self.MAX_DAILY_LOSS_PCT * 100),
+                loss_pct * 100,
+                self.MAX_DAILY_LOSS_PCT * 100,
             )
             return False
         return True
@@ -165,8 +165,8 @@ class RiskManager:
         if dd > self.MAX_DRAWDOWN_PCT:
             log.warning(
                 "Drawdown %.2f%% > max %.2f%%",
-                float(dd * 100),
-                float(self.MAX_DRAWDOWN_PCT * 100),
+                dd * 100,
+                self.MAX_DRAWDOWN_PCT * 100,
             )
             return False
         return True
@@ -201,8 +201,8 @@ class RiskManager:
         if effective_leverage > self.MAX_LEVERAGE:
             log.warning(
                 "Leverage efectivo %.1fx > max %.1fx",
-                float(effective_leverage),
-                float(self.MAX_LEVERAGE),
+                effective_leverage,
+                self.MAX_LEVERAGE,
             )
             return False
         return True
