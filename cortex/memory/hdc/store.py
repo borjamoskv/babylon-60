@@ -51,6 +51,7 @@ class HDCVectorStoreL2:
         "_item_memory",
         "_lock",
         "_ready",
+        "_vec_loaded",
     )
 
     def __init__(
@@ -68,6 +69,7 @@ class HDCVectorStoreL2:
         self._lock = asyncio.Lock()
         self._ready = False
         self._half_life = half_life_days * 24 * 3600
+        self._vec_loaded = False
 
     def _get_conn(self) -> sqlite3.Connection:
         if self._conn is None:
@@ -82,8 +84,13 @@ class HDCVectorStoreL2:
             )
             # runtime-policy: wait up to 5s for WAL write-lock contention (Axiom Ω6)
             self._conn.execute("PRAGMA busy_timeout=5000")
-            self._conn.enable_load_extension(True)
-            sqlite_vec.load(self._conn)
+            try:
+                self._conn.enable_load_extension(True)
+                sqlite_vec.load(self._conn)
+                self._vec_loaded = True
+            except (AttributeError, OSError, sqlite3.Error) as exc:
+                logger.debug("sqlite-vec not available: %s", exc)
+                self._vec_loaded = False
             self._conn.row_factory = sqlite3.Row
 
             # Register Sovereign Functions
@@ -108,18 +115,34 @@ class HDCVectorStoreL2:
 
             # Vector Table (sqlite-vec uses float[N])
             dim = self._encoder.dimension
-            self._conn.execute(f"""
-                CREATE VIRTUAL TABLE IF NOT EXISTS hdc_vec_facts USING vec0(
-                    embedding float[{dim}]
-                )
-            """)
+            if getattr(self, "_vec_loaded", False):
+                self._conn.execute(f"""
+                    CREATE VIRTUAL TABLE IF NOT EXISTS hdc_vec_facts USING vec0(
+                        embedding float[{dim}]
+                    )
+                """)
 
-            # Specular Vector Table (G10 Intent Alignment)
-            self._conn.execute(f"""
-                CREATE VIRTUAL TABLE IF NOT EXISTS hdc_specular_vec_facts USING vec0(
-                    embedding float[{dim}]
-                )
-            """)
+                # Specular Vector Table (G10 Intent Alignment)
+                self._conn.execute(f"""
+                    CREATE VIRTUAL TABLE IF NOT EXISTS hdc_specular_vec_facts USING vec0(
+                        embedding float[{dim}]
+                    )
+                """)
+            else:
+                self._conn.execute(f"""
+                    CREATE TABLE IF NOT EXISTS hdc_vec_facts (
+                        rowid INTEGER PRIMARY KEY,
+                        embedding BLOB
+                    )
+                """)
+
+                # Specular Vector Table (G10 Intent Alignment)
+                self._conn.execute(f"""
+                    CREATE TABLE IF NOT EXISTS hdc_specular_vec_facts (
+                        rowid INTEGER PRIMARY KEY,
+                        embedding BLOB
+                    )
+                """)
 
             # Indexes
             self._conn.execute(
@@ -227,24 +250,66 @@ class HDCVectorStoreL2:
         toxic_hvs = self._fetch_toxic_hvs(conn, inhibit_ids)
 
         cursor = conn.cursor()
-        cursor.execute(
-            """
-            SELECT
-                m.rowid, m.id, m.tenant_id, m.project_id, m.content, m.timestamp,
-                m.is_diamond, m.is_bridge, m.confidence, m.success_rate, m.metadata, m.fact_type,
-                ((1.0 - vec_distance_cosine(v.embedding, ?) / 2.0) *
-                 cortex_decay(m.is_diamond, m.timestamp, ?, ?) *
-                 m.success_rate) as final_score
-            FROM hdc_facts_meta m
-            JOIN hdc_vec_facts v ON m.rowid = v.rowid
-            WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
-            ORDER BY final_score DESC
-            LIMIT ?
-            """,
-            (embedding_bytes, now, self._half_life, tenant_id, project_id, limit * 2),
-        )
 
-        rows = cursor.fetchall()
+        if getattr(self, "_vec_loaded", False):
+            cursor.execute(
+                """
+                SELECT
+                    m.rowid, m.id, m.tenant_id, m.project_id, m.content, m.timestamp,
+                    m.is_diamond, m.is_bridge, m.confidence, m.success_rate, m.metadata, m.fact_type,
+                    ((1.0 - vec_distance_cosine(v.embedding, ?) / 2.0) *
+                     cortex_decay(m.is_diamond, m.timestamp, ?, ?) *
+                     m.success_rate) as final_score
+                FROM hdc_facts_meta m
+                JOIN hdc_vec_facts v ON m.rowid = v.rowid
+                WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
+                ORDER BY final_score DESC
+                LIMIT ?
+                """,
+                (embedding_bytes, now, self._half_life, tenant_id, project_id, limit * 2),
+            )
+            rows = cursor.fetchall()
+        else:
+            # Fallback when vec0 is not available: retrieve all matching rows and calculate distance in Python
+            cursor.execute(
+                """
+                SELECT
+                    m.rowid, m.id, m.tenant_id, m.project_id, m.content, m.timestamp,
+                    m.is_diamond, m.is_bridge, m.confidence, m.success_rate, m.metadata, m.fact_type,
+                    v.embedding,
+                    cortex_decay(m.is_diamond, m.timestamp, ?, ?) as decay
+                FROM hdc_facts_meta m
+                JOIN hdc_vec_facts v ON m.rowid = v.rowid
+                WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
+                """,
+                (now, self._half_life, tenant_id, project_id),
+            )
+            all_rows = cursor.fetchall()
+
+            # Simple cosine distance calculation
+            def cosine_distance(vec1_bytes, vec2_bytes):
+                v1 = np.frombuffer(vec1_bytes, dtype=np.float32)
+                v2 = np.frombuffer(vec2_bytes, dtype=np.float32)
+                norm1 = np.linalg.norm(v1)
+                norm2 = np.linalg.norm(v2)
+                if norm1 == 0 or norm2 == 0:
+                    return 1.0
+                return 1.0 - np.dot(v1, v2) / (norm1 * norm2)
+
+            scored_rows = []
+            for row in all_rows:
+                dist = cosine_distance(row["embedding"], embedding_bytes)
+                decay = row["decay"]
+
+                final_score = (1.0 - dist / 2.0) * decay * row["success_rate"]
+
+                # Create a dict-like object or mutable row. We can just store a dict
+                r = dict(row)
+                r["final_score"] = final_score
+                scored_rows.append(r)
+
+            scored_rows.sort(key=lambda x: x["final_score"], reverse=True)
+            rows = scored_rows[:limit * 2]
         final_facts = []
 
         for row in rows:
@@ -263,13 +328,18 @@ class HDCVectorStoreL2:
         if inhibit_ids:
             cursor = conn.cursor()
             placeholders = ",".join(["?"] * len(inhibit_ids))
-            cursor.execute(
-                f"SELECT embedding FROM hdc_vec_facts WHERE rowid IN "  # nosec B608 - parameterized query
-                f"(SELECT rowid FROM hdc_facts_meta WHERE id IN ({placeholders}))",
-                inhibit_ids,
-            )
-            for v_row in cursor.fetchall():
-                toxic_hvs.append(np.frombuffer(v_row["embedding"], dtype=np.float32))
+            try:
+                cursor.execute(
+                    f"SELECT embedding FROM hdc_vec_facts WHERE rowid IN "  # nosec B608 - parameterized query
+                    f"(SELECT rowid FROM hdc_facts_meta WHERE id IN ({placeholders}))",
+                    inhibit_ids,
+                )
+                for v_row in cursor.fetchall():
+                    toxic_hvs.append(np.frombuffer(v_row["embedding"], dtype=np.float32))
+            except sqlite3.OperationalError as exc:
+                # If database was created with sqlite_vec but it's not loaded now,
+                # the virtual table query will fail with "no such module: vec0"
+                logger.debug("Could not fetch toxic vectors (possibly missing vec0 module): %s", exc)
         return toxic_hvs
 
     def _process_hdc_fact_row(
@@ -284,10 +354,18 @@ class HDCVectorStoreL2:
 
         # Fetch embedding for inhibition check and models
         v_cursor = conn.cursor()
-        v_cursor.execute("SELECT embedding FROM hdc_vec_facts WHERE rowid = ?", (row["rowid"],))
-        v_row = v_cursor.fetchone()
-        if v_row:
-            emb_f32 = np.frombuffer(v_row["embedding"], dtype=np.float32)
+
+        # If we already got the embedding from the fallback query, use it
+        if "embedding" in row.keys() and row["embedding"] is not None:
+            emb_f32 = np.frombuffer(row["embedding"], dtype=np.float32)
+        else:
+            try:
+                v_cursor.execute("SELECT embedding FROM hdc_vec_facts WHERE rowid = ?", (row["rowid"],))
+                v_row = v_cursor.fetchone()
+                if v_row:
+                    emb_f32 = np.frombuffer(v_row["embedding"], dtype=np.float32)
+            except sqlite3.OperationalError as exc:
+                logger.debug("Could not fetch embedding (possibly missing vec0 module): %s", exc)
 
         # APPLY INHIBITION (Vector Gamma)
         if toxic_hvs and emb_f32 is not None:
@@ -312,15 +390,18 @@ class HDCVectorStoreL2:
         # Retrieve specular embedding
         specular_emb = None
         s_cursor = conn.cursor()
-        s_cursor.execute(
-            "SELECT embedding FROM hdc_specular_vec_facts WHERE rowid = ?", (row["rowid"],)
-        )
-        s_row = s_cursor.fetchone()
-        if s_row:
-            s_emb_f32 = np.frombuffer(s_row["embedding"], dtype=np.float32)
-            s_emb_int8 = np.sign(s_emb_f32).astype(np.int8)
-            s_emb_int8[s_emb_int8 == 0] = 1
-            specular_emb = s_emb_int8.tolist()
+        try:
+            s_cursor.execute(
+                "SELECT embedding FROM hdc_specular_vec_facts WHERE rowid = ?", (row["rowid"],)
+            )
+            s_row = s_cursor.fetchone()
+            if s_row:
+                s_emb_f32 = np.frombuffer(s_row["embedding"], dtype=np.float32)
+                s_emb_int8 = np.sign(s_emb_f32).astype(np.int8)
+                s_emb_int8[s_emb_int8 == 0] = 1
+                specular_emb = s_emb_int8.tolist()
+        except sqlite3.OperationalError as exc:
+            logger.debug("Could not fetch specular embedding (possibly missing vec0 module): %s", exc)
 
         fact = CortexFactModel(
             id=row["id"],
