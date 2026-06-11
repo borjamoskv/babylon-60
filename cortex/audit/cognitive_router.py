@@ -2,9 +2,11 @@
 """
 COGNITIVE-ROUTER: AI Cognitive Router Engine (Fable/Mythos State Machine).
 
-Simulates dynamic safety classification, context-aware routing, fallback
-handling, and retention policy logging for Mythos-class AI models.
-Authenticates all routing decisions via cryptographic ledger entries.
+Production-grade verifiable routing state machine featuring:
+- Declarative policy DSL (YAML/JSON routing language).
+- Deterministic classifier pipeline with hybrid keyword + semantic similarity matching.
+- Replay debugger engine explaining matching rules and category triggers.
+- Adversarial bypass simulator for stress testing classification.
 """
 
 from __future__ import annotations
@@ -19,6 +21,8 @@ import unicodedata
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
+
+import yaml
 
 from cortex.audit.ledger import EnterpriseAuditLedger
 
@@ -53,13 +57,22 @@ class RoutingDecision:
     routing_policy_version: str
 
 
-class SafetyClassifier:
-    """Classifies user prompts to detect sensitive vectors (Cybersecurity, Biology, Chemistry)."""
+def cosine_similarity(v1: list[float], v2: list[float]) -> float:
+    """Computes cosine similarity between two vector embeddings."""
+    dot_product = sum(a * b for a, b in zip(v1, v2))
+    norm_a = sum(a * a for a in v1) ** 0.5
+    norm_b = sum(b * b for b in v2) ** 0.5
+    if norm_a == 0.0 or norm_b == 0.0:
+        return 0.0
+    return dot_product / (norm_a * norm_b)
 
-    def __init__(self) -> None:
-        self.version = "v1.2.0-hardened"
-        self.sensitive_keywords = {
-            "cybersecurity": [
+
+class SafetyClassifier:
+    """Classifies user prompts using hybrid keyword tokens and semantic anchor embeddings."""
+
+    DEFAULT_CATEGORIES = {
+        "cybersecurity": {
+            "keywords": [
                 "exploit",
                 "zero-day",
                 "buffer overflow",
@@ -68,7 +81,14 @@ class SafetyClassifier:
                 "bypass",
                 "injection",
             ],
-            "biology": [
+            "semantic_anchors": [
+                "jailbreak prompt execution",
+                "privilege escalation exploit payloads",
+                "remote code execution in memory space",
+            ],
+        },
+        "biology": {
+            "keywords": [
                 "pathogen",
                 "virus synthesis",
                 "smallpox",
@@ -76,8 +96,58 @@ class SafetyClassifier:
                 "toxin",
                 "bioweapon",
             ],
-            "chemistry": ["sarin", "ricin", "nerve agent", "synthesis guide", "mustard gas"],
-        }
+            "semantic_anchors": [
+                "dna sequence reconstruction for lethal pathogen",
+                "synthesis of custom deadly viral strains",
+            ],
+        },
+        "chemistry": {
+            "keywords": ["sarin", "ricin", "nerve agent", "synthesis guide", "mustard gas"],
+            "semantic_anchors": [
+                "chemical composition of weaponized nerve agent",
+                "synthesis process of deadly toxin compounds",
+            ],
+        },
+    }
+
+    def __init__(
+        self,
+        categories_config: dict[str, Any] | None = None,
+        embedder: Any | None = None,
+        semantic_threshold: float = 0.82,
+    ) -> None:
+        self.version = "v1.2.0-hardened"
+        self.categories = categories_config or self.DEFAULT_CATEGORIES
+        self.embedder = embedder
+        self.semantic_threshold = semantic_threshold
+        self._anchor_embeddings: dict[str, list[list[float]]] = {}
+        self._initialized = False
+
+    async def initialize(self) -> None:
+        """Precomputes vector embeddings for declarative semantic anchors."""
+        if self._initialized or not self.embedder:
+            self._initialized = True
+            return
+
+        for cat_name, cat_data in self.categories.items():
+            anchors = cat_data.get("semantic_anchors", [])
+            if anchors:
+                try:
+                    if hasattr(self.embedder, "aembed_batch"):
+                        embeddings = await self.embedder.aembed_batch(anchors)
+                    elif hasattr(self.embedder, "embed_batch"):
+                        embeddings = self.embedder.embed_batch(anchors)
+                    else:
+                        embeddings = []
+                        for anchor in anchors:
+                            if hasattr(self.embedder, "aembed"):
+                                embeddings.append(await self.embedder.aembed(anchor))
+                            else:
+                                embeddings.append(self.embedder.embed(anchor))
+                    self._anchor_embeddings[cat_name] = embeddings
+                except Exception as e:
+                    logger.warning("Failed to precompute anchor embeddings: %s", e)
+        self._initialized = True
 
     def _normalize_text(self, text: str) -> str:
         # 1. Normalize unicode (NFKD decomposes characters) and drop combining marks
@@ -119,53 +189,136 @@ class SafetyClassifier:
                 return True
         return False
 
-    def classify(self, prompt: str) -> list[str]:
+    async def classify(self, prompt: str) -> list[str]:
+        """Classifies a prompt against categories using token rules and semantic similarity."""
+        if not self._initialized:
+            await self.initialize()
+
+        # 1. Token keyword matching
         normalized_prompt = self._normalize_text(prompt)
         prompt_words = normalized_prompt.split()
 
-        matched_categories = []
-        for category, keywords in self.sensitive_keywords.items():
+        matched_categories = set()
+        for cat_name, cat_data in self.categories.items():
+            keywords = cat_data.get("keywords", [])
             for kw in keywords:
                 if self._matches_keyword(prompt_words, kw):
-                    matched_categories.append(category)
+                    matched_categories.add(cat_name)
                     break
-        return matched_categories
+
+        # 2. Semantic vector matching
+        if self.embedder and self._anchor_embeddings:
+            try:
+                if hasattr(self.embedder, "aembed"):
+                    prompt_vector = await self.embedder.aembed(prompt)
+                else:
+                    prompt_vector = self.embedder.embed(prompt)
+
+                for cat_name, anchor_vectors in self._anchor_embeddings.items():
+                    if cat_name in matched_categories:
+                        continue
+                    for anchor_vector in anchor_vectors:
+                        sim = cosine_similarity(prompt_vector, anchor_vector)
+                        if sim >= self.semantic_threshold:
+                            matched_categories.add(cat_name)
+                            break
+            except Exception as e:
+                logger.error("Semantic classification failed; falling back: %s", e)
+
+        return sorted(list(matched_categories))
 
 
 class CognitiveRouter:
     """Dynamic cognitive routing engine between Fable 5, Mythos 5, and Fallback Opus 4.8."""
 
-    # Declarative routing policy table (Industrial Noir 2026 Sovereign Routing)
     DEFAULT_ROUTING_POLICY = {
         "version": "v2.0.0-declarative",
+        "default_tier": "General-Public",
+        "categories": SafetyClassifier.DEFAULT_CATEGORIES,
         "tiers": {
             "Trusted-Partner": {
-                "restricted": "Mythos-5-Unleashed",
-                "default": "Fable-5-Core",
-                "retention_for_restricted": True,
+                "rules": [
+                    {
+                        "match_category": "cybersecurity",
+                        "assigned_model": "Mythos-5-Unleashed",
+                        "retention_required": True,
+                    },
+                    {
+                        "match_category": "biology",
+                        "assigned_model": "Mythos-5-Unleashed",
+                        "retention_required": True,
+                    },
+                    {
+                        "match_category": "chemistry",
+                        "assigned_model": "Mythos-5-Unleashed",
+                        "retention_required": True,
+                    },
+                ],
+                "default_model": "Fable-5-Core",
             },
             "General-Public": {
-                "restricted": "Opus-4.8-Fallback",
-                "default": "Fable-5-Core",
-                "retention_for_restricted": False,
+                "rules": [
+                    {
+                        "match_category": "cybersecurity",
+                        "assigned_model": "Opus-4.8-Fallback",
+                        "retention_required": False,
+                    },
+                    {
+                        "match_category": "biology",
+                        "assigned_model": "Opus-4.8-Fallback",
+                        "retention_required": False,
+                    },
+                    {
+                        "match_category": "chemistry",
+                        "assigned_model": "Opus-4.8-Fallback",
+                        "retention_required": False,
+                    },
+                ],
+                "default_model": "Fable-5-Core",
             },
         },
-        "default_tier": "General-Public",
     }
 
     def __init__(
-        self, ledger: EnterpriseAuditLedger, routing_policy: dict[str, Any] | None = None
+        self,
+        ledger: EnterpriseAuditLedger,
+        routing_policy: dict[str, Any] | None = None,
+        embedder: Any | None = None,
+        semantic_threshold: float = 0.82,
     ) -> None:
         self.ledger = ledger
         self._conn = ledger._conn
-        self.classifier = SafetyClassifier()
         self.routing_policy = routing_policy or self.DEFAULT_ROUTING_POLICY
+
+        # Load safety classifier with custom categories configured in policy DSL
+        categories = self.routing_policy.get("categories", SafetyClassifier.DEFAULT_CATEGORIES)
+        self.classifier = SafetyClassifier(
+            categories_config=categories,
+            embedder=embedder,
+            semantic_threshold=semantic_threshold,
+        )
         self._ready = False
         self._last_hash = "GENESIS"
         self._lock = asyncio.Lock()
 
+    @classmethod
+    def from_policy_yaml(
+        cls, ledger: EnterpriseAuditLedger, yaml_str: str, **kwargs: Any
+    ) -> CognitiveRouter:
+        """Loads CognitiveRouter instance from a declarative YAML policy DSL."""
+        policy = yaml.safe_load(yaml_str)
+        return cls(ledger, routing_policy=policy, **kwargs)
+
+    @classmethod
+    def from_policy_json(
+        cls, ledger: EnterpriseAuditLedger, json_str: str, **kwargs: Any
+    ) -> CognitiveRouter:
+        """Loads CognitiveRouter instance from a declarative JSON policy DSL."""
+        policy = json.loads(json_str)
+        return cls(ledger, routing_policy=policy, **kwargs)
+
     def canonical_json(self, payload_obj: dict[str, Any]) -> bytes:
-        # Normalize detected_sensitivity (must be list of strings)
+        """Generates sorted, compact canonical bytes of log payload."""
         sensitivity = payload_obj.get("detected_sensitivity")
         if isinstance(sensitivity, str):
             try:
@@ -191,20 +344,19 @@ class CognitiveRouter:
         return json.dumps(canonical_dict, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
     async def ensure_table(self) -> None:
+        """Ensures log table existence and migrates old schemas to support unique constraints."""
         if self._ready:
             return
         async with self._lock:
             if self._ready:
                 return
 
-            # Check for existing table schema for migration
             cursor = await self._conn.execute(
                 "SELECT sql FROM sqlite_master WHERE type='table' AND name='cognitive_router_log'"
             )
             row = await cursor.fetchone()
             if row:
                 sql = row[0]
-                # If unique constraint or the version columns are missing, migrate
                 if (
                     "UNIQUE" not in sql
                     or "classifier_version" not in sql
@@ -216,7 +368,6 @@ class CognitiveRouter:
                         )
                         await self._conn.execute(_CREATE_ROUTER_LOG_SQL)
 
-                        # Inspect old table columns to construct migration query
                         cursor_old = await self._conn.execute(
                             "PRAGMA table_info(_cognitive_router_log_old)"
                         )
@@ -295,25 +446,33 @@ class CognitiveRouter:
             self._ready = True
 
     async def route(self, prompt: str, user_tier: str) -> RoutingDecision:
-        """Routes prompt to appropriate model tier and logs dynamically to audit trail."""
+        """Classifies, matches declarative policy routing compiler rules, and signs transaction."""
         await self.ensure_table()
 
-        # 1. Classify prompt sensitivity
-        sensitivity = self.classifier.classify(prompt)
+        sensitivity = await self.classifier.classify(prompt)
 
-        # 2. Determine target model based on sensitivity & access privileges via declarative policy
+        # Map rules matching based on declarative config
         tier_policy = self.routing_policy["tiers"].get(user_tier)
         if not tier_policy:
             tier_policy = self.routing_policy["tiers"][self.routing_policy["default_tier"]]
 
-        if sensitivity:
-            assigned_model = tier_policy["restricted"]
-            retention_required = tier_policy.get("retention_for_restricted", False)
-        else:
-            assigned_model = tier_policy["default"]
-            retention_required = False
+        assigned_model = tier_policy.get("default_model", "Fable-5-Core")
+        retention_required = False
 
-        # 3. Cryptographic logging and chaining
+        if sensitivity:
+            # Match first rule triggered by detected sensitivities
+            matched = False
+            for rule in tier_policy.get("rules", []):
+                if rule["match_category"] in sensitivity:
+                    assigned_model = rule["assigned_model"]
+                    retention_required = rule.get("retention_required", False)
+                    matched = True
+                    break
+            if not matched:
+                # Default restricted fallback
+                assigned_model = tier_policy.get("restricted_fallback_model", "Opus-4.8-Fallback")
+                retention_required = tier_policy.get("retention_for_restricted", False)
+
         timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         prompt_hash = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
         routing_id = hashlib.sha256(f"{timestamp}{prompt_hash}".encode()).hexdigest()
@@ -321,7 +480,6 @@ class CognitiveRouter:
         sensitivity_json = json.dumps(sensitivity)
         retention_flag = 1 if retention_required else 0
 
-        # Sign routing sequence (canonical JSON)
         payload_obj = {
             "timestamp": timestamp,
             "prompt_hash": prompt_hash,
@@ -338,7 +496,6 @@ class CognitiveRouter:
 
         signature = self.ledger.private_key.sign(entry_hash.encode("utf-8")).hex()
 
-        # Persist transaction
         await self._conn.execute(
             """INSERT INTO cognitive_router_log 
                (routing_id, timestamp, prompt_hash, detected_sensitivity, user_tier, 
@@ -360,7 +517,6 @@ class CognitiveRouter:
         )
         await self._conn.commit()
 
-        # Update last hash chain pointer
         self._last_hash = entry_hash
 
         return RoutingDecision(
@@ -397,3 +553,183 @@ class CognitiveRouter:
             return True
         except Exception:
             return False
+
+
+class RoutingReplayDebugger:
+    """Deterministic trace debugger explaining why a model decision was made for auditing."""
+
+    def __init__(self, router: CognitiveRouter) -> None:
+        self.router = router
+
+    async def explain_decision(self, routing_id: str, prompt: str) -> dict[str, Any]:
+        """Explains why a decision was reached for a logged record by replaying classification."""
+        cursor = await self.router._conn.execute(
+            """SELECT timestamp, prompt_hash, detected_sensitivity, user_tier, assigned_model, 
+                      data_retention_flag, prev_hash, classifier_version, routing_policy_version 
+               FROM cognitive_router_log WHERE routing_id = ?""",
+            (routing_id,),
+        )
+        row = await cursor.fetchone()
+        if not row:
+            raise ValueError(f"Decision matching routing_id {routing_id} not found in database.")
+
+        (
+            timestamp,
+            prompt_hash,
+            sensitivity_json,
+            user_tier,
+            assigned_model,
+            retention_flag,
+            prev_hash,
+            classifier_ver,
+            routing_policy_ver,
+        ) = row
+        recorded_sensitivity = json.loads(sensitivity_json)
+
+        # 1. Trace classification triggers
+        detection_traces = []
+        normalized_prompt = self.router.classifier._normalize_text(prompt)
+        prompt_words = normalized_prompt.split()
+
+        for cat_name, cat_data in self.router.classifier.categories.items():
+            keywords = cat_data.get("keywords", [])
+            for kw in keywords:
+                if self.router.classifier._matches_keyword(prompt_words, kw):
+                    detection_traces.append(
+                        {
+                            "category": cat_name,
+                            "type": "keyword_match",
+                            "matched_trigger": kw,
+                            "details": f"Prompt matched token keyword '{kw}' after unicode normalization.",
+                        }
+                    )
+
+        # Semantic anchor tracing
+        if self.router.classifier.embedder and self.router.classifier._anchor_embeddings:
+            try:
+                if hasattr(self.router.classifier.embedder, "aembed"):
+                    prompt_vector = await self.router.classifier.embedder.aembed(prompt)
+                else:
+                    prompt_vector = self.router.classifier.embedder.embed(prompt)
+
+                for cat_name, anchor_vectors in self.router.classifier._anchor_embeddings.items():
+                    anchors = self.router.classifier.categories[cat_name].get(
+                        "semantic_anchors", []
+                    )
+                    for anchor_text, anchor_vector in zip(anchors, anchor_vectors):
+                        sim = cosine_similarity(prompt_vector, anchor_vector)
+                        if sim >= self.router.classifier.semantic_threshold:
+                            detection_traces.append(
+                                {
+                                    "category": cat_name,
+                                    "type": "semantic_match",
+                                    "matched_trigger": anchor_text,
+                                    "similarity_score": sim,
+                                    "threshold": self.router.classifier.semantic_threshold,
+                                    "details": f"Similarity ({sim:.4f}) matched anchor '{anchor_text}' >= threshold ({self.router.classifier.semantic_threshold}).",
+                                }
+                            )
+            except Exception as e:
+                detection_traces.append({"error": f"Semantic trace exception: {e}"})
+
+        # 2. Trace declarative rules mapping
+        tier_policy = self.router.routing_policy["tiers"].get(user_tier)
+        if not tier_policy:
+            tier_policy = self.router.routing_policy["tiers"][
+                self.router.routing_policy["default_tier"]
+            ]
+            policy_tier_used = self.router.routing_policy["default_tier"]
+        else:
+            policy_tier_used = user_tier
+
+        applied_rule = None
+        if recorded_sensitivity:
+            for rule in tier_policy.get("rules", []):
+                if rule["match_category"] in recorded_sensitivity:
+                    applied_rule = {
+                        "rule_type": "tier_routing_rule",
+                        "category": rule["match_category"],
+                        "assigned_model": rule["assigned_model"],
+                        "retention_required": rule.get("retention_required", False),
+                    }
+                    break
+            if not applied_rule:
+                applied_rule = {
+                    "rule_type": "restricted_fallback",
+                    "assigned_model": tier_policy.get(
+                        "restricted_fallback_model", "Opus-4.8-Fallback"
+                    ),
+                    "retention_required": tier_policy.get("retention_for_restricted", False),
+                }
+        else:
+            applied_rule = {
+                "rule_type": "default_safe_rule",
+                "assigned_model": tier_policy.get("default_model", "Fable-5-Core"),
+                "retention_required": False,
+            }
+
+        replay_consistent = (
+            assigned_model == applied_rule["assigned_model"]
+            and bool(retention_flag) == applied_rule["retention_required"]
+        )
+
+        return {
+            "routing_id": routing_id,
+            "timestamp": timestamp,
+            "prompt_hash": prompt_hash,
+            "user_tier": user_tier,
+            "policy_tier_used": policy_tier_used,
+            "recorded_assigned_model": assigned_model,
+            "recorded_retention_flag": retention_flag,
+            "detected_sensitivity": recorded_sensitivity,
+            "applied_rule": applied_rule,
+            "detection_traces": detection_traces,
+            "replay_consistent": replay_consistent,
+            "versions": {
+                "classifier": classifier_ver,
+                "policy": routing_policy_ver,
+            },
+        }
+
+
+class AdversarialPromptSimulator:
+    """Generates evasion attack vectors to verify routing pipeline resilience."""
+
+    def __init__(self) -> None:
+        self.attack_patterns = {
+            "leetspeak": [
+                ("exploit", "3xpl01t"),
+                ("zero-day", "z3r0-d4y"),
+                ("bypass", "byp4ss"),
+                ("malware", "m4lw4r3"),
+            ],
+            "unicode_homoglyphs": [
+                ("exploit", "expӏoit"),  # Cyrillic small letter byelorusian-ukrainian i (U+0456)
+                ("pathogen", "pаthogen"),  # Cyrillic small letter a (U+0430)
+                ("sarin", "sarіn"),  # Cyrillic small letter i (U+0456)
+            ],
+            "accents_combining": [
+                ("pathogen", "p\u0301a\u0308t\u0300hogen"),
+                ("sarin", "sa\u0301ri\u0308n"),
+            ],
+            "padding_noise": [
+                ("exploit", "e_x_p_l_o_i_t"),
+                ("zero-day", "zero...day"),
+            ],
+        }
+
+    def generate_variants(self, base_prompt: str) -> list[dict[str, str]]:
+        """Transforms a base sensitive prompt into various evasion variants."""
+        variants = []
+        for strategy, mappings in self.attack_patterns.items():
+            for keyword, mutated in mappings:
+                if keyword in base_prompt:
+                    variants.append(
+                        {
+                            "strategy": strategy,
+                            "original_keyword": keyword,
+                            "mutated_keyword": mutated,
+                            "prompt": base_prompt.replace(keyword, mutated),
+                        }
+                    )
+        return variants
