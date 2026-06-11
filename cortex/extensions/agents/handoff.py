@@ -56,14 +56,19 @@ async def generate_handoff(
         Handoff dictionary ready for serialization.
     """
     async with engine.session() as conn:
+        # Detect the correct parent column name in facts schema
+        cursor = await conn.execute("PRAGMA table_info(facts)")
+        columns = {row[1] for row in await cursor.fetchall()}
+        parent_col = "parent_decision_id" if "parent_decision_id" in columns else "parent_id"
+
         # ── Hot Decisions (last N, ordered by recency) ────────────────────
         async with conn.execute(
-            "SELECT id, project, content, created_at, "
-            "tenant_id, parent_decision_id "
-            "FROM facts "
-            "WHERE fact_type = 'decision' "
-            "AND valid_until IS NULL "
-            "ORDER BY id DESC LIMIT ?",
+            f"SELECT id, project, content, created_at, "
+            f"tenant_id, {parent_col} "
+            f"FROM facts "
+            f"WHERE fact_type = 'decision' "
+            f"AND valid_until IS NULL "
+            f"ORDER BY id DESC LIMIT ?",
             (MAX_DECISIONS,),
         ) as cursor:
             decision_rows = await cursor.fetchall()
@@ -99,12 +104,12 @@ async def generate_handoff(
 
         # ── Recent Errors ─────────────────────────────────────────────────
         async with conn.execute(
-            "SELECT id, project, content, created_at, "
-            "tenant_id, parent_decision_id "
-            "FROM facts "
-            "WHERE fact_type IN ('error', 'mistake') "
-            "AND valid_until IS NULL "
-            "ORDER BY id DESC LIMIT ?",
+            f"SELECT id, project, content, created_at, "
+            f"tenant_id, {parent_col} "
+            f"FROM facts "
+            f"WHERE fact_type IN ('error', 'mistake') "
+            f"AND valid_until IS NULL "
+            f"ORDER BY id DESC LIMIT ?",
             (MAX_ERRORS,),
         ) as cursor:
             error_rows = await cursor.fetchall()

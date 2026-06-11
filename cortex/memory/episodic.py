@@ -150,35 +150,6 @@ class TemporalAbstractor:
 # ─── Causal Episode Tracer ───────────────────────────────────────────
 
 
-_TRACE_DOWN_SQL = """\
-WITH RECURSIVE causal_chain(id, content, fact_type, parent_decision_id, depth) AS (
-    SELECT id, content, fact_type, parent_decision_id, 0
-    FROM facts WHERE id = ?
-    UNION ALL
-    SELECT f.id, f.content, f.fact_type, f.parent_decision_id, cc.depth + 1
-    FROM facts f
-    JOIN causal_chain cc ON f.parent_decision_id = cc.id
-    WHERE cc.depth < ?
-)
-SELECT id, content, fact_type, parent_decision_id, depth
-FROM causal_chain ORDER BY depth ASC;
-"""
-
-_TRACE_UP_SQL = """\
-WITH RECURSIVE ancestor_chain(id, content, fact_type, parent_decision_id, depth) AS (
-    SELECT id, content, fact_type, parent_decision_id, 0
-    FROM facts WHERE id = ?
-    UNION ALL
-    SELECT f.id, f.content, f.fact_type, f.parent_decision_id, ac.depth + 1
-    FROM facts f
-    JOIN ancestor_chain ac ON ac.parent_decision_id = f.id
-    WHERE ac.depth < ?
-)
-SELECT id, content, fact_type, parent_decision_id, depth
-FROM ancestor_chain ORDER BY depth DESC;
-"""
-
-
 class CausalTracer:
     """Reconstructs causal DAGs from parent_decision_id chains.
 
@@ -193,6 +164,38 @@ class CausalTracer:
     def __init__(self, conn) -> None:
         self._conn = conn
 
+    @staticmethod
+    def _get_trace_sql(parent_col: str, up: bool = False) -> str:
+        col = parent_col
+        if up:
+            return f"""\
+WITH RECURSIVE ancestor_chain(id, content, fact_type, {col}, depth) AS (
+    SELECT id, content, fact_type, {col}, 0
+    FROM facts WHERE id = ?
+    UNION ALL
+    SELECT f.id, f.content, f.fact_type, f.{col}, ac.depth + 1
+    FROM facts f
+    JOIN ancestor_chain ac ON ac.{col} = f.id
+    WHERE ac.depth < ?
+)
+SELECT id, content, fact_type, {col}, depth
+FROM ancestor_chain ORDER BY depth DESC;
+"""
+        else:
+            return f"""\
+WITH RECURSIVE causal_chain(id, content, fact_type, {col}, depth) AS (
+    SELECT id, content, fact_type, {col}, 0
+    FROM facts WHERE id = ?
+    UNION ALL
+    SELECT f.id, f.content, f.fact_type, f.{col}, cc.depth + 1
+    FROM facts f
+    JOIN causal_chain cc ON f.{col} = cc.id
+    WHERE cc.depth < ?
+)
+SELECT id, content, fact_type, {col}, depth
+FROM causal_chain ORDER BY depth ASC;
+"""
+
     async def trace_episode(
         self,
         fact_id: int,
@@ -206,15 +209,23 @@ class CausalTracer:
         """
         depth = max_depth or self.MAX_DEPTH
 
+        # Detect correct parent column
+        cursor = await self._conn.execute("PRAGMA table_info(facts)")
+        columns = {row[1] for row in await cursor.fetchall()}
+        parent_col = "parent_decision_id" if "parent_decision_id" in columns else "parent_id"
+
+        trace_up_sql = self._get_trace_sql(parent_col, up=True)
+        trace_down_sql = self._get_trace_sql(parent_col, up=False)
+
         # 1. Walk UP to find the root ancestor
         root_id = fact_id
-        cursor = await self._conn.execute(_TRACE_UP_SQL, (fact_id, depth))
+        cursor = await self._conn.execute(trace_up_sql, (fact_id, depth))
         ancestors = await cursor.fetchall()
         if ancestors:
             root_id = ancestors[0][0]  # First row = deepest ancestor
 
         # 2. Walk DOWN from root to get full tree
-        cursor = await self._conn.execute(_TRACE_DOWN_SQL, (root_id, depth))
+        cursor = await self._conn.execute(trace_down_sql, (root_id, depth))
         rows = await cursor.fetchall()
 
         chain: list[dict] = []
