@@ -8,6 +8,7 @@ BRAIN_DIR = Path("/Users/borjafernandezangulo/.gemini/antigravity/brain")
 EXCLUDED_CONVERSATION_IDS = {
     "d1cf3b0e-795d-431e-9b1b-16a850263b53",  # Active Antigravity session
     "d3c86edd-a327-4422-8b1c-6fcf4beb7f29",  # User-specified active session
+    "17abd324-6ef0-46f6-aede-7b5ecad6276f",  # Current active session
 }
 
 
