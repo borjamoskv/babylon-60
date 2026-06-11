@@ -78,27 +78,44 @@ def _get_router(request: Request) -> GatewayRouter:
 # ─── Routes ──────────────────────────────────────────────────────────
 
 
+async def _dispatch_gateway(
+    gateway: GatewayRouter,
+    intent: GatewayIntent,
+    project: str,
+    payload: dict[str, Any],
+    error_status: int = 422,
+) -> dict[str, Any]:
+    """Normalize and handle a Gateway request, returning the response dict."""
+    req = GatewayRequest(
+        intent=intent,
+        project=project,
+        payload=payload,
+        source="rest",
+    )
+    resp = await gateway.handle(req)
+    if not resp.ok:
+        raise HTTPException(status_code=error_status, detail=resp.error)
+    return resp.to_dict()
+
+
 @router.post("/store")
 async def gateway_store(
     body: StoreBody,
     gateway: GatewayRouter = Depends(_get_router),
 ) -> dict:
     """Store a fact through the Gateway."""
-    req = GatewayRequest(
-        intent=GatewayIntent.STORE,
-        project=body.project,
-        payload={
+    return await _dispatch_gateway(
+        gateway,
+        GatewayIntent.STORE,
+        body.project,
+        {
             "content": body.content,
             "type": body.fact_type,
             "tags": body.tags,
             "source": body.source,
         },
-        source="rest",
+        error_status=422,
     )
-    resp = await gateway.handle(req)
-    if not resp.ok:
-        raise HTTPException(status_code=422, detail=resp.error)
-    return resp.to_dict()
 
 
 @router.post("/search")
@@ -107,16 +124,13 @@ async def gateway_search(
     gateway: GatewayRouter = Depends(_get_router),
 ) -> dict:
     """Semantic search through the Gateway."""
-    req = GatewayRequest(
-        intent=GatewayIntent.SEARCH,
-        project=body.project,
-        payload={"query": body.query, "top_k": body.top_k},
-        source="rest",
+    return await _dispatch_gateway(
+        gateway,
+        GatewayIntent.SEARCH,
+        body.project,
+        {"query": body.query, "top_k": body.top_k},
+        error_status=422,
     )
-    resp = await gateway.handle(req)
-    if not resp.ok:
-        raise HTTPException(status_code=422, detail=resp.error)
-    return resp.to_dict()
 
 
 @router.post("/recall")
@@ -125,16 +139,13 @@ async def gateway_recall(
     gateway: GatewayRouter = Depends(_get_router),
 ) -> dict:
     """Recall project facts through the Gateway."""
-    req = GatewayRequest(
-        intent=GatewayIntent.RECALL,
-        project=body.project,
-        payload={},
-        source="rest",
+    return await _dispatch_gateway(
+        gateway,
+        GatewayIntent.RECALL,
+        body.project,
+        {},
+        error_status=422,
     )
-    resp = await gateway.handle(req)
-    if not resp.ok:
-        raise HTTPException(status_code=422, detail=resp.error)
-    return resp.to_dict()
 
 
 @router.get("/status")
@@ -142,11 +153,13 @@ async def gateway_status(
     gateway: GatewayRouter = Depends(_get_router),
 ) -> dict:
     """System status through the Gateway."""
-    req = GatewayRequest(intent=GatewayIntent.STATUS, payload={}, source="rest")
-    resp = await gateway.handle(req)
-    if not resp.ok:
-        raise HTTPException(status_code=500, detail=resp.error)
-    return resp.to_dict()
+    return await _dispatch_gateway(
+        gateway,
+        GatewayIntent.STATUS,
+        "",
+        {},
+        error_status=500,
+    )
 
 
 @router.post("/emit")
@@ -155,18 +168,15 @@ async def gateway_emit(
     gateway: GatewayRouter = Depends(_get_router),
 ) -> dict:
     """Fire a notification event through the Gateway."""
-    req = GatewayRequest(
-        intent=GatewayIntent.EMIT,
-        project=body.project,
-        payload={
+    return await _dispatch_gateway(
+        gateway,
+        GatewayIntent.EMIT,
+        body.project,
+        {
             "severity": body.severity,
             "title": body.title,
             "body": body.body,
             "metadata": body.metadata,
         },
-        source="rest",
+        error_status=500,
     )
-    resp = await gateway.handle(req)
-    if not resp.ok:
-        raise HTTPException(status_code=500, detail=resp.error)
-    return resp.to_dict()

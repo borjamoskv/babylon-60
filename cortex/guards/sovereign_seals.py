@@ -427,15 +427,12 @@ async def check_seal_9_compliance_impl() -> tuple[bool, str]:
     except (ImportError, RuntimeError, ValueError, TypeError, OSError):
         printer.warn("EU AI Act audit check skipped (engine not available).")
 
-    # ── SSRF URLGuard Verification (CodeQL #95) ──
     try:
         from cortex.guards.url_guard import is_safe_url
-
-        if is_safe_url("https://sunoapi.org/api/v1"):
-            printer.success("SSRF URLGuard: Logic active and functional.")
-        else:
+        if not is_safe_url("https://sunoapi.org/api/v1"):
             printer.fail("SSRF URLGuard: Misconfigured or non-functional.")
             return False, "URLGuard failure"
+        printer.success("SSRF URLGuard: Logic active and functional.")
     except ImportError:
         printer.fail("SSRF URLGuard: Module missing - CodeQL #95 vulnerability risk.")
         return False, "URLGuard missing"
@@ -446,39 +443,28 @@ async def check_seal_9_compliance_impl() -> tuple[bool, str]:
 async def check_gate_21_preservation(
     cached_files: dict[Path, str] | None = None,
 ) -> tuple[bool, str]:
-    """Seal 10 (was 21): Sovereign Self-Preservation.
-
-    Verifies structural integrity of the defense system:
-    1. Pre-push hook exists and is executable
-    2. seals.py exists in source tree
-    3. HEAD has a parent commit (not orphan/detached)
-    """
+    """Seal 10 (was 21): Sovereign Self-Preservation."""
     passed = True
     checks: list[str] = []
 
-    # 1. Pre-push hook - skip in CI (hook is a local dev-machine invariant)
+    # 1. Pre-push hook - skip in CI
     _in_ci = os.environ.get("CI", "").lower() in ("true", "1", "yes")
     hook = _resolve_git_hook_path("pre-push")
     if _in_ci:
         printer.warn("CI env detected - pre-push hook check skipped (local invariant).")
         checks.append("pre-push hook (CI skip)")
     elif hook.exists():
-        if os.access(hook, os.X_OK):
-            checks.append("pre-push hook ✓")
-        else:
+        is_x = os.access(hook, os.X_OK)
+        checks.append("pre-push hook ✓" if is_x else "pre-push hook (not executable)")
+        if not is_x:
             printer.warn("pre-push hook exists but is not executable.")
-            checks.append("pre-push hook (not executable)")
     else:
         printer.fail("pre-push hook missing - defense perimeter breached.")
         passed = False
 
     # 2. seals.py self-reference
     seals_path = ROOT_DIR / "cortex" / "guards" / "seals.py"
-    if cached_files:
-        seals_exists = any(p.name == "seals.py" and "guards" in p.parts for p in cached_files)
-    else:
-        seals_exists = seals_path.exists()
-
+    seals_exists = any(p.name == "seals.py" and "guards" in p.parts for p in cached_files) if cached_files else seals_path.exists()
     if seals_exists:
         checks.append("seals.py ✓")
     else:
@@ -492,14 +478,8 @@ async def check_gate_21_preservation(
         checks.append("HEAD lineage (unchecked)")
     else:
         try:
-            result = subprocess.run(
-                [git_executable, "rev-parse", "HEAD~1"],
-                cwd=str(ROOT_DIR),
-                capture_output=True,
-                text=True,
-                timeout=5,
-            )
-            if result.returncode == 0:
+            res = subprocess.run([git_executable, "rev-parse", "HEAD~1"], cwd=str(ROOT_DIR), capture_output=True, text=True, timeout=5)
+            if res.returncode == 0:
                 checks.append("HEAD lineage ✓")
             else:
                 printer.warn("HEAD has no parent (initial or orphan commit).")

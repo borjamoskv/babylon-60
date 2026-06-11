@@ -215,4 +215,8 @@ SKIP_DIRS = {
     "site",
     "worktrees",
     "cortex-core",
+    "benchmarks",
+    "quarantine",
+    ".quarantine",
 }
+

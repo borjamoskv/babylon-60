@@ -406,72 +406,24 @@ class CheckpointResponse(BaseModel):
     status: str = "success"
 
 
-# ─── MEJORAlo Models ────────────────────────────────────────────────
-
-
-class MejoraloScanRequest(BaseModel):
-    project: str = Field(..., max_length=100)
-    path: str = Field(..., description="Ruta al directorio del proyecto")
-    deep: bool = Field(False, description="Activa dimensión Psi + análisis profundo")
-
-
-class DimensionResultModel(BaseModel):
-    name: str
-    score: int = Field(..., ge=0, le=100)
-    weight: str
-    findings: list[str] = Field(default_factory=list)
-
-
-class MejoraloScanResponse(BaseModel):
-    project: str
-    score: int
-    stack: str
-    dimensions: list[DimensionResultModel]
-    dead_code: bool
-    total_files: int = 0
-    total_loc: int = 0
-    fact_id: int | None = None
-
-
-class MejoraloSessionRequest(BaseModel):
-    project: str = Field(..., max_length=100)
-    score_before: int = Field(..., ge=0, le=100)
-    score_after: int = Field(..., ge=0, le=100)
-    actions: list[str] = Field(default_factory=list)
-
-
-class MejoraloSessionResponse(BaseModel):
-    fact_id: int
-    project: str
-    delta: int
-    status: str = "recorded"
-
-
-class MejoraloShipRequest(BaseModel):
-    project: str = Field(..., max_length=100)
-    path: str = Field(..., description="Ruta al directorio del proyecto")
-
-
-class ShipSealModel(BaseModel):
-    name: str
-    passed: bool
-    detail: str = ""
-
-
-class MejoraloShipResponse(BaseModel):
-    project: str
-    ready: bool
-    seals: list[ShipSealModel]
-    passed: int
-    total: int = 7
+from cortex.types.mejoralo import (
+    MejoraloScanRequest,
+    DimensionResultModel,
+    MejoraloScanResponse,
+    MejoraloSessionRequest,
+    MejoraloSessionResponse,
+    MejoraloShipRequest,
+    ShipSealModel,
+    MejoraloShipResponse,
+)
 
 
 # ─── SovereignGate Models ────────────────────────────────────────────
 
 
 class GateApprovalRequest(BaseModel):
-    signature: str = Field(..., description="HMAC-SHA256 signature of the challenge")
-    operator_id: str | None = Field(None, description="Operator identifier")
+    signature: str
+    operator_id: str | None = None
 
 
 class GateActionResponse(BaseModel):
@@ -523,47 +475,11 @@ class ContextSnapshotResponse(BaseModel):
     projects_ranked: list[ProjectScoreModel] = Field(default_factory=list)
 
 
-# ─── Universal Memory Schema (UMS) Models ────────────────────────────
-
-
-class UmsHeader(BaseModel):
-    agent_did: str = Field(..., description="Decentralized Identifier of the agent")
-    owner_did: str = Field(..., description="Decentralized Identifier of the owner")
-    transaction_id: str = Field(..., description="Unique transaction hash")
-    timestamp: int = Field(..., description="Unix epoch timestamp")
-
-
-class UmsVectorReference(BaseModel):
-    hash: str = Field(..., description="Hash identifier of the raw vector payload")
-    dimensions: int = Field(1536, description="Embedding dimensional count")
-
-
-class UmsThermodynamics(BaseModel):
-    stochastic_entropy_in: float = Field(
-        ..., description="Entropy calculated during input sensory phase"
-    )
-    deterministic_exergy_out: float = Field(
-        ..., description="Exergy yielded during JIT output state phase"
-    )
-    half_life_seconds: int = Field(2592000, description="Memory decay half-life threshold")
-
-
-class UmsPayload(BaseModel):
-    block_id: str = Field(..., description="Deterministic block reference id")
-    type: str = Field(..., description="Classification category of the memory block")
-    content: str = Field(..., description="Text content payload of the memory")
-    confidence: float = Field(..., description="Cognitive confidence scale (0.0 to 1.0)")
-    vector_reference: UmsVectorReference
-    thermodynamics: UmsThermodynamics
-
-
-class UmsProof(BaseModel):
-    zk_merkle_root: str = Field(..., description="Cryptographic root reference verification")
-    signature: str = Field(..., description="Ed25519 signature validation block")
-
-
-class UniversalMemorySchema(BaseModel):
-    ums_version: str = Field("1.0.0", description="UMS semantic specification version")
-    header: UmsHeader
-    payload: UmsPayload
-    proof: UmsProof
+from cortex.types.ums import (
+    UniversalMemorySchema,
+    UmsHeader,
+    UmsPayload,
+    UmsProof,
+    UmsThermodynamics,
+    UmsVectorReference,
+)

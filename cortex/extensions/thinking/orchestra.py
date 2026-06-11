@@ -463,7 +463,6 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
             strategy=fusion_strategy,
         )
 
-        # Metadatos del orchestra
         result.meta.update(
             {
                 "mode": mode,
@@ -474,7 +473,6 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
             }
         )
 
-        # Registrar en historial
         self._history.append(
             ThinkingRecord(
                 mode=mode,
@@ -487,15 +485,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
                 winner=result.meta.get("winner"),
             )
         )
-
         return result
 
-    # ── Cleanup ───────────────────────────────────────────────────
-
     async def close(self) -> None:
-        """Cerrar todas las conexiones del pool."""
         await self._pool.close_all()
-
-    # Convenience and introspection methods provided by OrchestraIntrospectionMixin:
-    #   quick_think, deep_think, code_think, creative_think, consensus_think,
-    #   available_modes (property), history (property), status(), stats()

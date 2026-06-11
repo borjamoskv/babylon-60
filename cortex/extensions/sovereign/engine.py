@@ -102,23 +102,28 @@ async def _phase_fabrication(ctx: SovereignContext) -> PipelineResult:
         )
 
 
-async def _phase_orchestration(ctx: SovereignContext) -> PipelineResult:
-    """Phase 2 - Keter-omega for multi-cloud readiness."""
+async def _run_bridge_phase(ctx: SovereignContext, phase: Phase, skill_name: str) -> PipelineResult:
+    """Execute a bridge skill and return a PipelineResult."""
     t0 = time.monotonic()
     try:
-        await asyncio.to_thread(ctx.bridge.execute, "keter-omega")
+        await asyncio.to_thread(ctx.bridge.execute, skill_name)
         return PipelineResult(
-            phase=Phase.ORCHESTRATION,
+            phase=phase,
             success=True,
             duration_ms=(time.monotonic() - t0) * 1000,
         )
     except (RuntimeError, ValueError, OSError, ImportError) as e:
         return PipelineResult(
-            phase=Phase.ORCHESTRATION,
+            phase=phase,
             success=False,
             duration_ms=(time.monotonic() - t0) * 1000,
             details={"error": str(e)},
         )
+
+
+async def _phase_orchestration(ctx: SovereignContext) -> PipelineResult:
+    """Phase 2 - Keter-omega for multi-cloud readiness."""
+    return await _run_bridge_phase(ctx, Phase.ORCHESTRATION, "keter-omega")
 
 
 async def _phase_swarm(ctx: SovereignContext) -> PipelineResult:
@@ -188,21 +193,8 @@ async def _phase_observability(ctx: SovereignContext) -> PipelineResult:
 
 async def _phase_experience(ctx: SovereignContext) -> PipelineResult:
     """Phase 7 - Impactv-1 for UI/UX excellence."""
-    t0 = time.monotonic()
-    try:
-        await asyncio.to_thread(ctx.bridge.execute, "impactv-1")
-        return PipelineResult(
-            phase=Phase.EXPERIENCE,
-            success=True,
-            duration_ms=(time.monotonic() - t0) * 1000,
-        )
-    except (RuntimeError, ValueError, OSError, ImportError) as e:
-        return PipelineResult(
-            phase=Phase.EXPERIENCE,
-            success=False,
-            duration_ms=(time.monotonic() - t0) * 1000,
-            details={"error": str(e)},
-        )
+    return await _run_bridge_phase(ctx, Phase.EXPERIENCE, "impactv-1")
+
 
 
 async def _phase_arbitration(ctx: SovereignContext) -> PipelineResult:

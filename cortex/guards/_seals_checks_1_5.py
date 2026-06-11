@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 from cortex.guards._seals_cache import GlobalSourceCache, arun_cmd, printer
+from cortex.guards.heuristic_seals import audit_file_cobbler
 
 GateResult = tuple[bool, str]
 
@@ -128,14 +129,11 @@ async def check_seal_3_security() -> GateResult:
     }
 
     async def _audit(py_file: Path, source: str) -> None:
-        cleaned = "\n".join(
-            line for line in source.splitlines() if not any(m in line for m in _NOQA_MARKERS)
+        fragility, intruder_hits = await audit_file_cobbler(
+            py_file, source, demon, intruder, _NOQA_MARKERS
         )
-        demon_hits = await demon.attack(cleaned, context={})
-        fragility = [h for h in demon_hits if "Bare `except`" in h]
         if fragility:
             demon_violations.append(f"{py_file.name}: {fragility}")
-        intruder_hits = await intruder.attack(source, context={})
         if intruder_hits:
             intruder_violations.append(f"{py_file.name}: {intruder_hits}")
 

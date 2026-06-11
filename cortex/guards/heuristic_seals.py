@@ -19,6 +19,24 @@ ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 printer = SealPrinter()
 
 
+async def audit_file_cobbler(
+    py_file: Path,
+    source: str,
+    demon,
+    intruder,
+    noqa_markers: tuple[str, ...] = ("# noqa: BLE001", "# noqa:BLE001", "# deliberate boundary")
+) -> tuple[list[str], list[str]]:
+    """Audit a single file using EntropyDemon and Intruder."""
+    cleaned = "\n".join(
+        line for line in source.splitlines() if not any(m in line for m in noqa_markers)
+    )
+    demon_hits = await demon.attack(cleaned, context={})
+    fragility = [h for h in demon_hits if "Bare `except`" in h]
+
+    intruder_hits = await intruder.attack(source, context={})
+    return fragility, intruder_hits
+
+
 async def check_gate_10_prompt_size() -> GateResult:
     printer.seal(10, "Heuristic", "Prompt Size Check")
     prompt_file = ROOT_DIR / "SYSTEM_PROMPT.md"
@@ -66,15 +84,11 @@ async def check_gate_11_cobbler(cached_files: dict[Path, str]) -> GateResult:
     }
 
     async def _audit(py_file: Path, source: str) -> None:
-        cleaned = "\n".join(
-            line for line in source.splitlines() if not any(m in line for m in _NOQA_MARKERS)
+        fragility, intruder_hits = await audit_file_cobbler(
+            py_file, source, demon, intruder, _NOQA_MARKERS
         )
-        demon_hits = await demon.attack(cleaned, context={})
-        fragility = [h for h in demon_hits if "Bare `except`" in h]
         if fragility:
             demon_violations.append(f"{py_file.name}: {fragility}")
-
-        intruder_hits = await intruder.attack(source, context={})
         if intruder_hits:
             intruder_violations.append(f"{py_file.name}: {intruder_hits}")
 

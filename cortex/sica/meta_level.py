@@ -16,104 +16,15 @@ analysis of the agent's own cognitive processes.
 from __future__ import annotations
 
 import logging
-import time
-from dataclasses import dataclass, field
-from enum import Enum
 from typing import Any
 
-from cortex.sica.constitution import Constitution, ConstitutionalVerdict
+from cortex.sica.constitution import Constitution
 from cortex.sica.object_level import ExecutionTrace, StepOutcome
-from cortex.sica.strategy import (
-    Heuristic,
-    SearchStrategy,
-    StrategyMutation,
-)
+from cortex.sica.strategy import Heuristic, SearchStrategy, StrategyMutation
+from cortex.sica.meta_types import FailureClass, MetaAction, MetaJudgment
+from cortex.sica.meta_helpers import run_failure_checks, create_templated_heuristic
 
 logger = logging.getLogger("cortex.sica.meta_level")
-
-
-class FailureClass(str, Enum):
-    """Classification of WHY something failed.
-
-    The meta-level's primary job is to classify failures into
-    these categories - each triggers a different control response.
-    """
-
-    # Object-level failures (fix the task)
-    TOOL_ERROR = "tool_error"  # Tool returned error
-    INPUT_MALFORMED = "input_malformed"  # Bad input to tool
-    RESOURCE_MISSING = "resource_missing"  # Required resource unavailable
-    TIMEOUT = "timeout"  # Ran out of time
-
-    # Meta-level failures (fix the thinking)
-    WRONG_DECOMPOSITION = "wrong_decomposition"  # Problem split incorrectly
-    WRONG_TOOL_CHOICE = "wrong_tool_choice"  # Used wrong tool for the job
-    WRONG_HEURISTIC = "wrong_heuristic"  # Applied wrong heuristic
-    STALE_PATTERN = "stale_pattern"  # Used outdated solution pattern
-    EXPLORATION_DEFICIT = "exploration_deficit"  # Stuck in local optimum
-    CASCADE_BLINDNESS = "cascade_blindness"  # Kept going after clear failure signal
-    CONFIDENCE_MISCALIBRATION = "confidence_miscalibration"  # Over/under-confident
-
-
-class MetaAction(str, Enum):
-    """Control actions the meta-level can take."""
-
-    AMPLIFY_HEURISTIC = "amplify_heuristic"
-    ATTENUATE_HEURISTIC = "attenuate_heuristic"
-    INJECT_HEURISTIC = "inject_heuristic"
-    PRUNE_HEURISTIC = "prune_heuristic"
-    ADJUST_EXPLORATION = "adjust_exploration"
-    ADJUST_DECOMPOSITION = "adjust_decomposition"
-    FORCE_TOOL_SWITCH = "force_tool_switch"
-    ESCALATE_TO_HUMAN = "escalate_to_human"
-    NO_ACTION = "no_action"
-
-
-@dataclass
-class MetaJudgment:
-    """A meta-level judgment about an execution trace.
-
-    This is the output of the MONITOR function - a structured
-    diagnosis of what happened and why.
-    """
-
-    trace_id: str
-    failure_class: FailureClass | None = None
-    is_meta_failure: bool = False  # True = thinking failed, not just the task
-    diagnosis: str = ""
-    recommended_actions: list[MetaAction] = field(default_factory=list)
-    constitutional_verdict: ConstitutionalVerdict | None = None
-    confidence: float = 0.5
-    timestamp: float = field(default_factory=time.monotonic)
-
-    # Causal chain: why did the meta-level reach this judgment?
-    reasoning_chain: list[str] = field(default_factory=list)
-
-    @property
-    def requires_strategy_mutation(self) -> bool:
-        """True if this judgment calls for strategy evolution."""
-        return self.is_meta_failure or any(
-            a
-            in (
-                MetaAction.AMPLIFY_HEURISTIC,
-                MetaAction.ATTENUATE_HEURISTIC,
-                MetaAction.INJECT_HEURISTIC,
-                MetaAction.PRUNE_HEURISTIC,
-                MetaAction.ADJUST_EXPLORATION,
-            )
-            for a in self.recommended_actions
-        )
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "trace_id": self.trace_id,
-            "failure_class": self.failure_class.value if self.failure_class else None,
-            "is_meta_failure": self.is_meta_failure,
-            "diagnosis": self.diagnosis,
-            "actions": [a.value for a in self.recommended_actions],
-            "confidence": round(self.confidence, 3),
-            "reasoning": self.reasoning_chain,
-        }
 
 
 class MetaLevel:
@@ -245,17 +156,11 @@ class MetaLevel:
     ) -> MetaJudgment:
         """Classify a failure as object-level or meta-level."""
         pattern = trace.error_pattern
+        exploration_rate = self._strategy.genome.exploration_rate
 
-        for check in (
-            self._check_cascade_blindness,
-            self._check_wrong_tool_choice,
-            self._check_stale_pattern,
-            self._check_confidence_miscalibration,
-            self._check_exploration_deficit,
-        ):
-            res = check(trace, pattern, judgment, reasoning)
-            if res:
-                return res
+        res = run_failure_checks(trace, pattern, judgment, reasoning, exploration_rate)
+        if res:
+            return res
 
         # Default: object-level failure (not a thinking error)
         failures = trace.failure_steps
@@ -281,89 +186,6 @@ class MetaLevel:
         judgment.confidence = 0.6
         reasoning.append(f"OBJECT-LEVEL failure: {judgment.failure_class.value}")
         return judgment
-
-    def _check_cascade_blindness(self, trace, pattern, judgment, reasoning):
-        if pattern == "cascade_failure":
-            judgment.failure_class = FailureClass.CASCADE_BLINDNESS
-            judgment.is_meta_failure = True
-            judgment.diagnosis = (
-                "Cascade failure detected: the agent continued executing after "
-                "a clear failure signal. The STOP heuristic is too weak."
-            )
-            judgment.recommended_actions = [
-                MetaAction.INJECT_HEURISTIC,
-                MetaAction.ATTENUATE_HEURISTIC,
-            ]
-            judgment.confidence = 0.85
-            reasoning.append("CASCADE BLINDNESS → meta-failure: thinking process deficient")
-            return judgment
-
-    def _check_wrong_tool_choice(self, trace, pattern, judgment, reasoning):
-        if pattern and pattern.startswith("repeated_tool_failure:"):
-            tool_name = pattern.split(":", 1)[1]
-            judgment.failure_class = FailureClass.WRONG_TOOL_CHOICE
-            judgment.is_meta_failure = True
-            judgment.diagnosis = (
-                f"Repeated failure with tool '{tool_name}'. The agent's tool selection "
-                f"heuristic is miscalibrated - it keeps choosing a tool that doesn't work "
-                f"for this problem class."
-            )
-            judgment.recommended_actions = [
-                MetaAction.FORCE_TOOL_SWITCH,
-                MetaAction.ATTENUATE_HEURISTIC,
-                MetaAction.ADJUST_EXPLORATION,
-            ]
-            judgment.confidence = 0.8
-            reasoning.append(
-                f"WRONG TOOL CHOICE → meta-failure: tool '{tool_name}' repeatedly fails"
-            )
-            return judgment
-
-    def _check_stale_pattern(self, trace, pattern, judgment, reasoning):
-        if pattern and pattern.startswith("repeated_error:"):
-            judgment.failure_class = FailureClass.STALE_PATTERN
-            judgment.is_meta_failure = True
-            judgment.diagnosis = (
-                "Same error repeated across steps. The agent is applying a stale "
-                "solution pattern that doesn't fit this problem."
-            )
-            judgment.recommended_actions = [
-                MetaAction.PRUNE_HEURISTIC,
-                MetaAction.ADJUST_EXPLORATION,
-            ]
-            judgment.confidence = 0.75
-            reasoning.append("STALE PATTERN → meta-failure: outdated solution approach")
-            return judgment
-
-    def _check_confidence_miscalibration(self, trace, pattern, judgment, reasoning):
-        if trace.self_assessed_confidence > 0.7:
-            judgment.failure_class = FailureClass.CONFIDENCE_MISCALIBRATION
-            judgment.is_meta_failure = True
-            judgment.diagnosis = (
-                f"Agent was {trace.self_assessed_confidence:.0%} confident but failed. "
-                f"Confidence calibration is broken - the meta-monitoring itself "
-                f"is unreliable."
-            )
-            judgment.recommended_actions = [
-                MetaAction.ATTENUATE_HEURISTIC,
-                MetaAction.INJECT_HEURISTIC,
-            ]
-            judgment.confidence = 0.7
-            reasoning.append("CONFIDENCE MISCALIBRATION → meta-failure: broken self-assessment")
-            return judgment
-
-    def _check_exploration_deficit(self, trace, pattern, judgment, reasoning):
-        if self._strategy.genome.exploration_rate < 0.2:
-            judgment.failure_class = FailureClass.EXPLORATION_DEFICIT
-            judgment.is_meta_failure = True
-            judgment.diagnosis = (
-                "Exploration rate is very low and the agent is failing. "
-                "Likely stuck in a local optimum - needs more diverse search."
-            )
-            judgment.recommended_actions = [MetaAction.ADJUST_EXPLORATION]
-            judgment.confidence = 0.65
-            reasoning.append("EXPLORATION DEFICIT → meta-failure: stuck in local optimum")
-            return judgment
 
     # ── CONTROL (top-down) ───────────────────────────────────────
 
@@ -482,48 +304,16 @@ class MetaLevel:
         if fc is None:
             return None
 
-        HEURISTIC_TEMPLATES: dict[FailureClass, tuple[str, str]] = {
-            FailureClass.CASCADE_BLINDNESS: (
-                "early_stop_on_cascade",
-                "Halt execution after 2 consecutive failures on the same sub-problem. "
-                "Do not continue blindly.",
-            ),
-            FailureClass.WRONG_TOOL_CHOICE: (
-                "tool_diversity_forced",
-                "After a tool fails twice, MUST switch to a different tool. "
-                "Never retry the same tool more than twice.",
-            ),
-            FailureClass.STALE_PATTERN: (
-                "novelty_seeking",
-                "When a previously successful pattern fails, try a fundamentally "
-                "different approach rather than minor variations.",
-            ),
-            FailureClass.CONFIDENCE_MISCALIBRATION: (
-                "confidence_anchoring",
-                "Reduce initial confidence by 30%. Only increase confidence after "
-                "verification step succeeds.",
-            ),
-            FailureClass.EXPLORATION_DEFICIT: (
-                "random_probe",
-                "Periodically try a random tool/approach to escape local optima.",
-            ),
-        }
-
-        template = HEURISTIC_TEMPLATES.get(fc)
-        if template is None:
+        new_h = create_templated_heuristic(fc)
+        if new_h is None:
             return None
 
-        name, description = template
         # Check if this heuristic already exists
         existing_names = {h.name for h in self._strategy.genome.heuristics}
-        if name in existing_names:
+        if new_h.name in existing_names:
             return None  # Don't duplicate
 
-        return Heuristic(
-            name=name,
-            description=description,
-            weight=0.6,  # Start at moderate weight
-        )
+        return new_h
 
     # ── Meta-Meta Analysis ───────────────────────────────────────
 

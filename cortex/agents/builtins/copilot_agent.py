@@ -444,14 +444,13 @@ class CopilotAgent(BaseAgent):
 
     async def _reply(self, source: AgentMessage, payload: dict[str, Any]) -> None:
         """Send a reply message back to the context source."""
-        reply = new_message(
+        await self.bus.send(new_message(
             sender=self.agent_id,
             recipient=source.sender,
             kind=MessageKind.TASK_RESULT,
             payload=payload,
             correlation_id=source.message_id,
-        )
-        await self.bus.send(reply)
+        ))
 
     # ── Public API (for IDE integration) ──────────────────────────
 
@@ -460,17 +459,14 @@ class CopilotAgent(BaseAgent):
         return self.telemetry.model_dump()
 
     def get_pending_count(self) -> int:
-        """Return number of suggestions awaiting human verdict."""
         return len(self._pending)
 
     def register_strategy(self, trigger: str, strategy: SuggestionStrategy) -> None:
-        """Register a custom suggestion strategy for a trigger type."""
         self._strategies[trigger] = strategy
         logger.info("[%s] Registered strategy for trigger=%s", self.agent_id, trigger)
 
 
 # ── Factory ───────────────────────────────────────────────────────
-
 
 def create_copilot_agent(
     bus: Any,
@@ -479,30 +475,18 @@ def create_copilot_agent(
     model: str = "gemini-2.5-pro",
     tool_registry: ToolRegistry | None = None,
 ) -> CopilotAgent:
-    """Factory: create a CopilotAgent with sensible defaults.
-
-    The manifest is configured with:
-    - No delegation (can_delegate=False)
-    - No daemon mode (daemon=False, purely reactive)
-    - Empty tools_allowed (copilot observes, never mutates)
-    - High error tolerance (5 consecutive before quarantine)
-    """
+    """Factory: create a CopilotAgent with sensible defaults."""
     manifest = AgentManifest(
         agent_id=agent_id,
         purpose=model,
-        tools_allowed=[],  # Level 3: NO autonomous tool use
-        can_delegate=False,  # Level 3: cannot spawn sub-agents
-        daemon=False,  # Purely reactive
+        tools_allowed=[],
+        can_delegate=False,
+        daemon=False,
         max_consecutive_errors=5,
         confidence_floor="C3",
         trust_level="C3",
     )
-
-    return CopilotAgent(
-        manifest=manifest,
-        bus=bus,
-        tool_registry=tool_registry,
-    )
+    return CopilotAgent(manifest=manifest, bus=bus, tool_registry=tool_registry)
 
 
 # ── Utilities ─────────────────────────────────────────────────────
@@ -510,11 +494,6 @@ def create_copilot_agent(
 
 def _hash_context(context: CopilotContextPayload) -> str:
     """Deterministic hash of context payload for correlation tracking."""
-    raw = (
-        f"{context.cursor.file_path}:"
-        f"{context.cursor.cursor_line}:"
-        f"{context.cursor.cursor_column}:"
-        f"{context.cursor.prefix[:128]}:"
-        f"{context.trigger}"
-    )
+    c = context.cursor
+    raw = f"{c.file_path}:{c.cursor_line}:{c.cursor_column}:{c.prefix[:128]}:{context.trigger}"
     return hashlib.sha256(raw.encode()).hexdigest()[:16]

@@ -258,19 +258,27 @@ class SearchStrategy:
 
     # ── Mutation API ─────────────────────────────────────────────
 
-    def mutate_amplify(
-        self, heuristic_name: str, reason: str, factor: float = 1.3
+    def _mutate_weight(
+        self,
+        heuristic_name: str,
+        reason: str,
+        factor: float,
+        mutation_type: MutationType,
+        is_amplify: bool,
     ) -> StrategyMutation:
-        """Strengthen a heuristic by multiplying its weight."""
         h = self._find_heuristic(heuristic_name)
         before_hash = self._genome.genome_hash
 
-        h.weight = min(1.0, h.weight * factor)
+        if is_amplify:
+            h.weight = min(1.0, h.weight * factor)
+        else:
+            h.weight = max(0.0, h.weight * factor)
+
         self._genome.generation += 1
         self._genome.parent_hash = before_hash
 
         mutation = StrategyMutation(
-            mutation_type=MutationType.AMPLIFY,
+            mutation_type=mutation_type,
             target_heuristic=heuristic_name,
             reason=reason,
             genome_before_hash=before_hash,
@@ -278,35 +286,24 @@ class SearchStrategy:
             generation=self._genome.generation,
         )
         self._mutation_log.append(mutation)
+        op_label = "AMPLIFY" if is_amplify else "ATTENUATE"
         logger.info(
-            "SICA mutation [AMPLIFY] %s: %s (weight=%.3f)", heuristic_name, reason, h.weight
+            "SICA mutation [%s] %s: %s (weight=%.3f)", op_label, heuristic_name, reason, h.weight
         )
         return mutation
+
+    def mutate_amplify(
+        self, heuristic_name: str, reason: str, factor: float = 1.3
+    ) -> StrategyMutation:
+        """Strengthen a heuristic by multiplying its weight."""
+        return self._mutate_weight(heuristic_name, reason, factor, MutationType.AMPLIFY, True)
 
     def mutate_attenuate(
         self, heuristic_name: str, reason: str, factor: float = 0.7
     ) -> StrategyMutation:
         """Weaken a heuristic by reducing its weight."""
-        h = self._find_heuristic(heuristic_name)
-        before_hash = self._genome.genome_hash
+        return self._mutate_weight(heuristic_name, reason, factor, MutationType.ATTENUATE, False)
 
-        h.weight = max(0.0, h.weight * factor)
-        self._genome.generation += 1
-        self._genome.parent_hash = before_hash
-
-        mutation = StrategyMutation(
-            mutation_type=MutationType.ATTENUATE,
-            target_heuristic=heuristic_name,
-            reason=reason,
-            genome_before_hash=before_hash,
-            genome_after_hash=self._genome.genome_hash,
-            generation=self._genome.generation,
-        )
-        self._mutation_log.append(mutation)
-        logger.info(
-            "SICA mutation [ATTENUATE] %s: %s (weight=%.3f)", heuristic_name, reason, h.weight
-        )
-        return mutation
 
     def mutate_inject(self, heuristic: Heuristic, reason: str) -> StrategyMutation:
         """Inject a new heuristic into the genome."""

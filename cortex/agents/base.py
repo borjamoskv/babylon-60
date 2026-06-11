@@ -234,3 +234,42 @@ class BaseAgent:
             },
         )
         await self.bus.send(msg)
+
+
+    async def _reply(self, source: AgentMessage, payload: dict[str, Any]) -> None:
+        """Reply to a source message with a payload, preserving correlation ID."""
+        reply = new_message(
+            sender=self.manifest.agent_id,
+            recipient=source.sender,
+            kind=MessageKind.TASK_RESULT,
+            payload=payload,
+            correlation_id=source.message_id,
+        )
+        await self.bus.send(reply)
+
+    async def dispatch_task_message(
+        self,
+        message: AgentMessage,
+        allowed_ops: frozenset[str],
+        logger: logging.Logger,
+    ) -> None:
+        """Utility for dispatching TASK_REQUEST messages to subclass _dispatch."""
+        if message.kind != MessageKind.TASK_REQUEST:
+            return
+
+        payload: dict[str, Any] = message.payload or {}
+        op: str = payload.get("op", "")
+
+        if op not in allowed_ops:
+            await self._reply(
+                message,
+                {"error": f"unsupported op: {op!r}", "supported": sorted(allowed_ops)},
+            )
+            return
+
+        try:
+            result = await self._dispatch(op, payload)
+            await self._reply(message, {"op": op, "result": result})
+        except Exception as exc:
+            logger.exception("%s op=%s failed", self.__class__.__name__, op)
+            await self._reply(message, {"op": op, "error": str(exc)})

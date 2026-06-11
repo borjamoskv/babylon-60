@@ -405,22 +405,14 @@ class SwarmMemory:
         return pruned
 
     def persist(self) -> str:
-        """Save memory state to disk with SHA-256 integrity hash.
-
-        Returns the integrity hash.
-        """
+        """Save memory state to disk with SHA-256 integrity hash."""
         self._persistence_path.parent.mkdir(parents=True, exist_ok=True)
 
-        # Serialize records (without vectors - too large)
         data = {
             "agent_id": self._agent_id,
             "dimension": self._dim,
             "records": {
-                rid: {
-                    "content": rec.content,
-                    "timestamp": rec.timestamp,
-                    "tags": rec.tags,
-                }
+                rid: {"content": rec.content, "timestamp": rec.timestamp, "tags": rec.tags}
                 for rid, rec in self._records.items()
             },
             "sdm_stats": self._sdm.stats,
@@ -443,10 +435,7 @@ class SwarmMemory:
         return integrity_hash
 
     def load(self) -> int:
-        """Load memory state from disk and re-encode vectors.
-
-        Returns number of records loaded.
-        """
+        """Load memory state from disk and re-encode vectors."""
         if not self._persistence_path.exists():
             return 0
 
@@ -484,28 +473,21 @@ class SwarmMemory:
 
 
 class VSAPipelineBridge:
-    """Bridges VSA-SDM to the ContextAssembler.
-
-    Implements the interface expected by ContextAssembler._search_vsa():
-    - query(intent, top_k) → list[dict] with id, content
-    """
+    """Bridges VSA-SDM to the ContextAssembler."""
 
     def __init__(self, agent_id: str = "cortex"):
         self._memory = SwarmMemory(agent_id=agent_id)
         self._memory.load()  # Load persisted state
 
     def query(self, intent: str, top_k: int = 3) -> list[dict[str, Any]]:
-        """Query VSA memory for relevant context."""
         return self._memory.recall(query=intent, top_k=top_k)
 
     def ingest(
         self, content: str, record_id: str | None = None, tags: list[str] | None = None
     ) -> str:
-        """Ingest new knowledge into VSA memory."""
         return self._memory.record(content=content, record_id=record_id, tags=tags)
 
     def persist(self) -> str:
-        """Persist VSA state to disk."""
         return self._memory.persist()
 
     @property

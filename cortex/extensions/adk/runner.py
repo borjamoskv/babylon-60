@@ -3,12 +3,6 @@
 
 Provides commands to run CORTEX agents interactively via CLI or
 launch the ADK web dev UI.
-
-Usage:
-    python -m cortex.adk                        # Interactive CLI
-    python -m cortex.adk --web                  # Web dev UI
-    python -m cortex.adk --agent analyst        # Specific agent
-    python -m cortex.adk --toolbox-url http://127.0.0.1:5000  # With Toolbox
 """
 
 from __future__ import annotations
@@ -33,6 +27,11 @@ def _parse_args() -> argparse.Namespace:
         choices=["memory", "analyst", "guardian", "google-one", "sovereign"],
         default="sovereign",
         help="Which agent to run (default: sovereign - full swarm)",
+    )
+    parser.add_argument(
+        "--gem",
+        default=None,
+        help="Name of the Sortu-APEX Gem (Skill) to load dynamically as an ADK Agent.",
     )
     parser.add_argument(
         "--model",
@@ -115,6 +114,7 @@ async def _connect_toolbox(
 
 def run_cli(
     agent_name: str = "sovereign",
+    gem_name: str | None = None,
     model: str | None = None,
     toolbox_url: str | None = None,
     toolbox_toolset: str = "",
@@ -132,6 +132,7 @@ def run_cli(
     from cortex.extensions.adk.agents import (
         create_analyst_agent,
         create_cortex_swarm,
+        create_gem_agent,
         create_google_one_agent,
         create_guardian_agent,
         create_memory_agent,
@@ -140,15 +141,30 @@ def run_cli(
     # Connect to Toolbox if configured
     toolbox_tools = asyncio.run(_connect_toolbox(toolbox_url, toolbox_toolset))
 
-    agent_map = {
-        "memory": lambda: create_memory_agent(model=model),
-        "analyst": lambda: create_analyst_agent(model=model, toolbox_tools=toolbox_tools or None),
-        "guardian": lambda: create_guardian_agent(model=model),
-        "google-one": lambda: create_google_one_agent(model=model),
-        "sovereign": lambda: create_cortex_swarm(model=model, toolbox_tools=toolbox_tools or None),
-    }
+    # Connect to local CORTEX MCP Server for native tool inheritance
+    from cortex.mcp.toolbox_bridge import cortex_self_bridge
 
-    agent = agent_map[agent_name]()
+    try:
+        cortex_bridge = asyncio.run(cortex_self_bridge())
+        mcp_tools = cortex_bridge.tools if cortex_bridge else []
+    except ImportError:
+        mcp_tools = []
+
+    if gem_name:
+        agent = create_gem_agent(gem_name=gem_name, model=model, mcp_tools=mcp_tools)
+    else:
+        agent_map = {
+            "memory": lambda: create_memory_agent(model=model, mcp_tools=mcp_tools),
+            "analyst": lambda: create_analyst_agent(
+                model=model, toolbox_tools=toolbox_tools or None, mcp_tools=mcp_tools
+            ),
+            "guardian": lambda: create_guardian_agent(model=model, mcp_tools=mcp_tools),
+            "google-one": lambda: create_google_one_agent(model=model, mcp_tools=mcp_tools),
+            "sovereign": lambda: create_cortex_swarm(
+                model=model, toolbox_tools=toolbox_tools or None, mcp_tools=mcp_tools
+            ),
+        }
+        agent = agent_map[agent_name]()
     session_service = InMemorySessionService()
     runner = Runner(agent=agent, app_name="cortex", session_service=session_service)
 
@@ -223,6 +239,7 @@ def main() -> None:
     else:
         run_cli(
             agent_name=args.agent,
+            gem_name=args.gem,
             model=args.model,
             toolbox_url=args.toolbox_url,
             toolbox_toolset=args.toolbox_toolset,

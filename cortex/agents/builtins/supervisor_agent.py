@@ -43,22 +43,8 @@ class SupervisorAgent(BaseAgent):
     # ------------------------------------------------------------------
 
     async def handle_message(self, message: AgentMessage) -> None:  # type: ignore[override]
-        if message.kind != MessageKind.TASK_REQUEST:
-            return
+        await self.dispatch_task_message(message, _OPS, logger)
 
-        payload: dict[str, Any] = message.payload or {}
-        op: str = payload.get("op", "")
-
-        if op not in _OPS:
-            await self._reply(message, {"error": f"unknown op: {op!r}", "supported": sorted(_OPS)})
-            return
-
-        try:
-            result = await self._dispatch(op, payload)
-            await self._reply(message, {"op": op, "result": result})
-        except Exception as exc:
-            logger.exception("SupervisorAgent op=%s failed", op)
-            await self._reply(message, {"op": op, "error": str(exc)})
 
     async def tick(self) -> None:
         """Periodic health-check tick - detects stale agents."""
@@ -102,12 +88,4 @@ class SupervisorAgent(BaseAgent):
     # Helpers
     # ------------------------------------------------------------------
 
-    async def _reply(self, source: AgentMessage, payload: dict[str, Any]) -> None:
-        reply = new_message(
-            sender=self.manifest.agent_id,
-            recipient=source.sender,
-            kind=MessageKind.TASK_RESULT,
-            payload=payload,
-            correlation_id=source.message_id,
-        )
-        await self.bus.send(reply)
+

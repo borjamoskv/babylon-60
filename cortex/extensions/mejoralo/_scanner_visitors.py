@@ -12,7 +12,7 @@ import ast
 
 from cortex.extensions.mejoralo.models import AntipatternFinding
 
-__all__ = ["_AsyncIntegrityVisitor", "_BroadExceptionVisitor"]
+__all__ = ["_AsyncIntegrityVisitor", "_BroadExceptionVisitor", "McCabeVisitor", "NestingVisitor"]
 
 # Mirrors the constant in antipatterns.py - kept in sync manually.
 _BLOCKING_CALLS: dict[str, str] = {
@@ -140,3 +140,80 @@ class _AsyncIntegrityVisitor(ast.NodeVisitor):
             parts.reverse()
             return ".".join(parts)
         return None
+
+
+from cortex.extensions.mejoralo.constants import MCCABE_THRESHOLD, NESTING_DEPTH_LIMIT
+
+_COMPLEXITY_NODES = (
+    ast.If,
+    ast.For,
+    ast.While,
+    ast.AsyncFor,
+    ast.And,
+    ast.Or,
+    ast.ExceptHandler,
+    ast.With,
+    ast.AsyncWith,
+    ast.Try,
+)
+
+_NESTING_NODES = (
+    ast.If,
+    ast.For,
+    ast.While,
+    ast.Try,
+    ast.With,
+    ast.AsyncFor,
+    ast.AsyncWith,
+    ast.FunctionDef,
+    ast.AsyncFunctionDef,
+    ast.ClassDef,
+    ast.ExceptHandler,
+)
+
+
+class McCabeVisitor(ast.NodeVisitor):
+    def __init__(self, rel: str, findings: list[str]) -> None:
+        self.complexity = 1  # Base complexity per function/module
+        self.rel = rel
+        self.findings = findings
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        self._check_complexity(node)
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        self._check_complexity(node)
+
+    def _check_complexity(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
+        # Calculate McCabe for this scope
+        comp = 1
+        for child in ast.walk(node):
+            if isinstance(child, _COMPLEXITY_NODES):
+                comp += 1
+
+        if comp > MCCABE_THRESHOLD:
+            self.findings.append(
+                f"{self.rel}:{node.lineno} -> High Complexity ({comp}) in '{node.name}'"
+            )
+
+
+class NestingVisitor(ast.NodeVisitor):
+    def __init__(self, rel: str, findings: list[str]) -> None:
+        self.depth = 0
+        self.rel = rel
+        self.findings = findings
+
+    def visit(self, node: ast.AST) -> None:
+        inc = isinstance(node, _NESTING_NODES)
+        if inc:
+            self.depth += 1
+            if self.depth >= NESTING_DEPTH_LIMIT:
+                line_no = getattr(node, "lineno", "?")
+                self.findings.append(
+                    f"{self.rel}:{line_no} -> Severe structural nesting (depth {self.depth})"
+                )
+
+        self.generic_visit(node)
+
+        if inc:
+            self.depth -= 1

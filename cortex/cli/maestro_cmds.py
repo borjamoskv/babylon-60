@@ -212,23 +212,41 @@ def list_windows_cmd(app_name: str):
     asyncio.run(_run())
 
 
+def _run_window_op(app_name: str, op_name: str, val1: int, val2: int, success_msg: str) -> None:
+    async def _run():
+        m = MaestroUI(engine=get_engine())
+        target = AppTarget(name=app_name)
+        method = getattr(m, op_name)
+        res = await method(target, val1, val2)
+        if res.success:
+            console.print(f"[green]✔ {success_msg}[/green]")
+        else:
+            console.print(f"[red]✘ Error: {res.error}[/red]")
+
+    asyncio.run(_run())
+
+
+def _run_window_action(app_name: str, op_name: str, success_msg: str) -> None:
+    async def _run():
+        m = MaestroUI(engine=get_engine())
+        target = AppTarget(name=app_name)
+        method = getattr(m, op_name)
+        res = await method(target)
+        if res.success:
+            console.print(f"[green]✔ {success_msg}[/green]")
+        else:
+            console.print(f"[red]✘ Error: {res.error}[/red]")
+
+    asyncio.run(_run())
+
+
 @maestro.command("move")
 @click.argument("app_name")
 @click.argument("x", type=int)
 @click.argument("y", type=int)
 def move_cmd(app_name: str, x: int, y: int):
     """Mueve la ventana principal de una app."""
-
-    async def _run():
-        m = MaestroUI(engine=get_engine())
-        target = AppTarget(name=app_name)
-        res = await m.move_window(target, x, y)
-        if res.success:
-            console.print(f"[green]✔ Ventana movida a ({x}, {y})[/green]")
-        else:
-            console.print(f"[red]✘ Error: {res.error}[/red]")
-
-    asyncio.run(_run())
+    _run_window_op(app_name, "move_window", x, y, f"Ventana movida a ({x}, {y})")
 
 
 @maestro.command("resize")
@@ -237,49 +255,22 @@ def move_cmd(app_name: str, x: int, y: int):
 @click.argument("height", type=int)
 def resize_cmd(app_name: str, width: int, height: int):
     """Redimensiona la ventana principal de una app."""
-
-    async def _run():
-        m = MaestroUI(engine=get_engine())
-        target = AppTarget(name=app_name)
-        res = await m.resize_window(target, width, height)
-        if res.success:
-            console.print(f"[green]✔ Ventana redimensionada a {width}×{height}[/green]")
-        else:
-            console.print(f"[red]✘ Error: {res.error}[/red]")
-
-    asyncio.run(_run())
+    _run_window_op(app_name, "resize_window", width, height, f"Ventana redimensionada a {width}×{height}")
 
 
 @maestro.command("minimize")
 @click.argument("app_name")
 def minimize_cmd(app_name: str):
     """Minimiza la ventana principal de una app."""
-
-    async def _run():
-        m = MaestroUI(engine=get_engine())
-        res = await m.minimize_window(AppTarget(name=app_name))
-        if res.success:
-            console.print(f"[green]✔ {app_name} minimizado[/green]")
-        else:
-            console.print(f"[red]✘ Error: {res.error}[/red]")
-
-    asyncio.run(_run())
+    _run_window_action(app_name, "minimize_window", f"{app_name} minimizado")
 
 
 @maestro.command("fullscreen")
 @click.argument("app_name")
 def fullscreen_cmd(app_name: str):
     """Alterna pantalla completa para una app."""
+    _run_window_action(app_name, "fullscreen_window", f"{app_name} pantalla completa alternada")
 
-    async def _run():
-        m = MaestroUI(engine=get_engine())
-        res = await m.fullscreen_window(AppTarget(name=app_name))
-        if res.success:
-            console.print(f"[green]✔ {app_name} pantalla completa alternada[/green]")
-        else:
-            console.print(f"[red]✘ Error: {res.error}[/red]")
-
-    asyncio.run(_run())
 
 
 # ─── Captura ────────────────────────────────────────────────────

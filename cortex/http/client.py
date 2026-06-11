@@ -160,23 +160,12 @@ class SovereignHTTPClient:
 
     async def get(self, url: str, **kwargs) -> object:  # type: ignore
         """SSRF-safe GET request."""
-        validate_url(url)
-        if self._backend == "httpx":
-            return await self._client.get(url, **kwargs)  # type: ignore
-        if self._backend == "aiohttp":
-            async with self._client.get(url, **kwargs) as resp:  # type: ignore
-                return resp
-        raise RuntimeError("Client not initialized - use async with")
+        return await self.request("GET", url, **kwargs)
 
     async def post(self, url: str, **kwargs) -> object:  # type: ignore
         """SSRF-safe POST request."""
-        validate_url(url)
-        if self._backend == "httpx":
-            return await self._client.post(url, **kwargs)  # type: ignore
-        if self._backend == "aiohttp":
-            async with self._client.post(url, **kwargs) as resp:  # type: ignore
-                return resp
-        raise RuntimeError("Client not initialized - use async with")
+        return await self.request("POST", url, **kwargs)
+
 
     async def request(self, method: str, url: str, **kwargs) -> object:  # type: ignore
         """SSRF-safe arbitrary method request."""

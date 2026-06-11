@@ -48,25 +48,8 @@ class MemoryAgent(BaseAgent):
     # ------------------------------------------------------------------
 
     async def handle_message(self, message: AgentMessage) -> None:  # type: ignore[override]
-        if message.kind != MessageKind.TASK_REQUEST:
-            return
+        await self.dispatch_task_message(message, _SUPPORTED_OPS, logger)
 
-        payload: dict[str, Any] = message.payload or {}
-        op: str = payload.get("op", "")
-
-        if op not in _SUPPORTED_OPS:
-            await self._reply(
-                message,
-                {"error": f"unsupported op: {op!r}", "supported": sorted(_SUPPORTED_OPS)},
-            )
-            return
-
-        try:
-            result = await self._dispatch(op, payload)
-            await self._reply(message, {"op": op, "result": result})
-        except Exception as exc:
-            logger.exception("MemoryAgent op=%s failed", op)
-            await self._reply(message, {"op": op, "error": str(exc)})
 
     async def tick(self) -> None:
         logger.debug("MemoryAgent tick - idle")
@@ -94,12 +77,4 @@ class MemoryAgent(BaseAgent):
             return {"agent": self.manifest.agent_id, "status": "ok"}
         raise ValueError(f"unknown op: {op!r}")
 
-    async def _reply(self, source: AgentMessage, payload: dict[str, Any]) -> None:
-        reply = new_message(
-            sender=self.manifest.agent_id,
-            recipient=source.sender,
-            kind=MessageKind.TASK_RESULT,
-            payload=payload,
-            correlation_id=source.message_id,
-        )
-        await self.bus.send(reply)
+

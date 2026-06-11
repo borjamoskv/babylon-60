@@ -468,26 +468,7 @@ def create_autonomous_agent(
     budget_tokens: int = 100_000,
     max_consecutive_errors: int = 5,
 ) -> AutonomousAgent:
-    """Factory function to create a fully configured AutonomousAgent.
-
-    Usage:
-        agent = create_autonomous_agent(
-            agent_id="bounty-hunter-01",
-            bus=message_bus,
-            tool_registry=registry,
-            tools_allowed=["filesystem", "http", "shell", "database"],
-        )
-
-        result = await agent.execute_objective(
-            "Clone repo, run tests, fix failures, open PR",
-            steps_def=[
-                {"tool_name": "shell", "arguments": {"cmd": "git clone ..."}, "exergy_estimate": 0.9},
-                {"tool_name": "shell", "arguments": {"cmd": "pytest"}, "exergy_estimate": 0.8},
-                {"tool_name": "filesystem", "arguments": {"action": "edit", ...}, "exergy_estimate": 0.7},
-                {"tool_name": "shell", "arguments": {"cmd": "git push ..."}, "exergy_estimate": 0.6},
-            ]
-        )
-    """
+    """Factory function to create a fully configured AutonomousAgent."""
     manifest = AgentManifest(
         agent_id=agent_id,
         purpose=purpose,
