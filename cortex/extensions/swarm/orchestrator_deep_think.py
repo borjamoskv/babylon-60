@@ -23,7 +23,6 @@ try:
 except ImportError:
     import logging
 
-    pass
 
 logger = logging.getLogger("cortex.extensions.swarm.deep_think")
 

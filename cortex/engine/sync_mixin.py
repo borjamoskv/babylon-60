@@ -88,8 +88,6 @@ class SyncMixin:
                         except NotImplementedError:
                             import logging
 
-                            pass
-
                     loop.close()
                 except (RuntimeError, ValueError) as e:
                     logger.debug(f"[SyncMixin] Handled error during loop teardown: {e}")

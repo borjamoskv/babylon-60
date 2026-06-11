@@ -152,7 +152,6 @@ async def run_ui(kernel: OmegaKernel):
 @cli.group("omega")
 def omega_cmds():
     """Mega Hito 38: Omega Singularity (CORTEX v10.0 Metabolism)."""
-    pass
 
 
 @omega_cmds.command("start")

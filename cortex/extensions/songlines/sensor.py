@@ -95,8 +95,6 @@ class TopographicSensor:
             except OSError:
                 import logging
 
-                pass
-
         # 1.5 Try native python xattr package (macOS mostly) if installed
         try:
             import xattr  # pyright: ignore[reportMissingImports]
@@ -107,7 +105,6 @@ class TopographicSensor:
             except OSError:
                 import logging  # noqa: F401
 
-                pass
         except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
 
@@ -133,8 +130,6 @@ class TopographicSensor:
             except OSError:
                 import logging
 
-                pass
-
         # 1.5 Try native python xattr package (macOS mostly) if installed
         try:
             import xattr  # pyright: ignore[reportMissingImports]
@@ -144,7 +139,6 @@ class TopographicSensor:
             except OSError:
                 import logging  # noqa: F401
 
-                pass
         except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
 

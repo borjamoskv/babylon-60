@@ -141,7 +141,6 @@ class ProceduralMemory:
                 except ImportError:
                     import logging
 
-                    pass
         except Exception as e:
             import logging
 
@@ -157,7 +156,6 @@ class ProceduralMemory:
             except ImportError:
                 import logging
 
-                pass
         finally:
             conn.close()
 

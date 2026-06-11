@@ -55,9 +55,12 @@ def audit_correlation(num_sessions=20):
 
                         expected_type = TAXONOMY_MAP.get(expected_tool, expected_tool)
 
-                        if actual_type == expected_type or actual_type == expected_tool:
-                            matched_calls += 1
-                        elif expected_tool.startswith("mcp_") or actual_type == "call_mcp_tool":
+                        if (
+                            actual_type == expected_type
+                            or actual_type == expected_tool
+                            or expected_tool.startswith("mcp_")
+                            or actual_type == "call_mcp_tool"
+                        ):
                             matched_calls += 1
                         else:
                             mismatches.append(

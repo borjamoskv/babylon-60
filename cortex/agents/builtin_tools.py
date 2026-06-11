@@ -191,21 +191,23 @@ class HttpTool:
         import aiohttp
 
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.request(
+            async with (
+                aiohttp.ClientSession() as session,
+                session.request(
                     method=method.upper(),
                     url=url,
                     headers=headers or {},
                     data=body,
                     timeout=aiohttp.ClientTimeout(total=timeout),
-                ) as response:
-                    response_body = await response.text()
-                    return {
-                        "ok": True,
-                        "status": response.status,
-                        "headers": dict(response.headers),
-                        "body": response_body[:20_000],
-                    }
+                ) as response,
+            ):
+                response_body = await response.text()
+                return {
+                    "ok": True,
+                    "status": response.status,
+                    "headers": dict(response.headers),
+                    "body": response_body[:20_000],
+                }
 
         except aiohttp.ClientResponseError as exc:
             return {

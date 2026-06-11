@@ -137,8 +137,6 @@ class MutationRecord:
 class ReplayVerificationError(Exception):
     """Hash chain integrity violation during replay."""
 
-    pass
-
 
 # ─── Canonical Hash ───────────────────────────────────────────────
 

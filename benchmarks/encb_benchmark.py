@@ -120,13 +120,13 @@ class CortexResolver(Resolver):
     async def detect_byzantine(self) -> set[str]:
         byzantines = set(self._detected_byzantine)
         try:
-            async with self.engine.session() as conn:
-                async with conn.execute(
-                    "SELECT id FROM agents WHERE reputation_score < 0.2"
-                ) as cursor:
-                    rows = await cursor.fetchall()
-                    for row in rows:
-                        byzantines.add(row[0])
+            async with (
+                self.engine.session() as conn,
+                conn.execute("SELECT id FROM agents WHERE reputation_score < 0.2") as cursor,
+            ):
+                rows = await cursor.fetchall()
+                for row in rows:
+                    byzantines.add(row[0])
         except Exception:
             pass
         return byzantines

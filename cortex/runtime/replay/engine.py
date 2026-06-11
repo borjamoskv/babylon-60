@@ -5,8 +5,6 @@ from typing import Any
 class DivergenceException(Exception):
     """Lanzada cuando el hash del estado actual diverge del histórico esperado."""
 
-    pass
-
 
 class ReplayEngine:
     """Motor determinista. Reproduce eventos pasados para reconstruir el estado."""

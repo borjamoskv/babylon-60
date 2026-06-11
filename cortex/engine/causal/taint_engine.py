@@ -14,8 +14,6 @@ logger = logging.getLogger("cortex.engine.causal.taint_engine")
 class TaintValidationError(ValueError):
     """Raised when a proposal lacks a valid CORTEX-TAINT token or fails cryptographic verification."""
 
-    pass
-
 
 def canonicalize_content(content: str | bytes | memoryview) -> bytes:
     """Normalizes content to bytes to ensure consistent zero-copy hashing.

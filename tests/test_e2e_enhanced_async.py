@@ -65,8 +65,6 @@ class TestAsyncPipelineEnhanced:
             except asyncio.CancelledError:
                 import logging
 
-                pass
-
         # Also valid
 
         asyncio.run(_test())

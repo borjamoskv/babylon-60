@@ -146,7 +146,6 @@ class TestTransaction:
         except ValueError:
             import logging
 
-            pass
         # Expected
 
         conn = sqlite3.connect(writer._db_path)

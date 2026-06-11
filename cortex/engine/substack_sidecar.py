@@ -46,7 +46,7 @@ def evaluate_retention(dry_run=True):
             logger.warning(f"DISPARANDO TRANSSACCIÓN A: {node['email']}")
 
             # Conexión resuelta a cortex.services.email
-            send_reengagement_email(node['email'], node['cluster'])
+            send_reengagement_email(node["email"], node["cluster"])
 
             # Actualizar estado para no bombardear
             cursor.execute(

@@ -252,16 +252,16 @@ class TriggerEngine:
         with self._lock:
             # 1. Gather matching triggers preserving original insertion order
             matched: dict[str, TriggerCondition] = {}
-            
+
             # Exact match lookup
             for trigger in self._exact_routes.get(signal.event_type, []):
                 matched[trigger.id] = trigger
-                
+
             # Wildcard match lookup
             for pattern, trigger in self._wildcard_routes:
                 if fnmatch.fnmatch(signal.event_type, pattern):
                     matched[trigger.id] = trigger
-                    
+
             # Preserve registration order (order of keys in self._triggers)
             trigger_ids_order = {tid: idx for idx, tid in enumerate(self._triggers.keys())}
             triggers = sorted(matched.values(), key=lambda t: trigger_ids_order[t.id])
