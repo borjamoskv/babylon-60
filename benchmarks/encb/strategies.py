@@ -209,10 +209,7 @@ def resolve_cortex(
             for node, val, conf in observations
         ]
         logop_val, logop_prob = weighted_logop_binary(obs_tuples)
-        if alpha >= 1.0:
-            state.current_value = logop_val
-            state.confidence = logop_prob
-        elif logop_val == fallback_val:
+        if alpha >= 1.0 or logop_val == fallback_val:
             state.current_value = logop_val
             state.confidence = logop_prob
         else:
@@ -230,10 +227,7 @@ def resolve_cortex(
             for node, val, conf in observations
         ]
         logop_val, logop_conf = weighted_logop_categorical(obs_tuples, state.categories)
-        if alpha >= 1.0:
-            state.current_value = logop_val
-            state.confidence = logop_conf
-        elif logop_val == fallback_val:
+        if alpha >= 1.0 or logop_val == fallback_val:
             state.current_value = logop_val
             state.confidence = logop_conf
         else:

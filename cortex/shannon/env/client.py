@@ -17,7 +17,6 @@ class BinaryAgent(ABC):
         """
         Process the observation bytes and return action bytes.
         """
-        pass
 
 
 class HeuristicGenesisAgent(BinaryAgent):

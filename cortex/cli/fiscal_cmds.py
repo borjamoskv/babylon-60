@@ -8,7 +8,6 @@ from cortex.cli.common import cli, console
 @cli.group(name="fiscal")
 def fiscal_group():
     """Audit-ready commands for the fiscal beachhead."""
-    pass
 
 
 @fiscal_group.command(name="snapshot")

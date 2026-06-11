@@ -87,8 +87,6 @@ async def test_tenant_isolation_update_and_deprecate(engine):
     except ValueError:
         import logging
 
-        pass
-
     # Bob tries to deprecate Alice's fact
     deprecated = await engine.deprecate(fact_id=fact_id_alice)
     assert not deprecated, "Bob should not be able to deprecate Alice's fact"

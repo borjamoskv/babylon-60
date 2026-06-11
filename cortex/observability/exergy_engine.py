@@ -173,9 +173,7 @@ class ExergyEngine:
 
         # If recent is > 1.5 standard deviations below the mean, it's degraded
         status = "NOMINAL"
-        if std > 0 and recent < avg - (1.5 * std):
-            status = "DEGRADED"
-        elif deviation_pct < -30:
+        if std > 0 and recent < avg - (1.5 * std) or deviation_pct < -30:
             status = "DEGRADED"
 
         return {

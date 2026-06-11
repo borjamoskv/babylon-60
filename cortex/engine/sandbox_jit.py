@@ -13,8 +13,6 @@ logger = logging.getLogger(__name__)
 class JITSandboxViolation(Exception):
     """Raised when an agent attempts to execute an illegal AST node."""
 
-    pass
-
 
 class ASTSecurityScanner(ast.NodeVisitor):
     """

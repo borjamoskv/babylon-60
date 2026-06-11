@@ -52,8 +52,12 @@ class PlanStep:
     description: str = ""
 
     # Thermodynamic metadata
-    exergy_estimate: Decimal = field(default_factory=lambda: Decimal("0.5"))  # Expected work yield [0.0, 1.0]
-    entropy_cost: Decimal = field(default_factory=lambda: Decimal("0.1"))  # Expected entropy paid [0.0, 1.0]
+    exergy_estimate: Decimal = field(
+        default_factory=lambda: Decimal("0.5")
+    )  # Expected work yield [0.0, 1.0]
+    entropy_cost: Decimal = field(
+        default_factory=lambda: Decimal("0.1")
+    )  # Expected entropy paid [0.0, 1.0]
 
     # Execution state
     status: StepStatus = StepStatus.PENDING
@@ -70,7 +74,7 @@ class PlanStep:
     @property
     def net_exergy(self) -> float:
         """Predicted net exergy: work_yield - entropy_cost."""
-        return float(max(Decimal('0.0'), self.exergy_estimate - self.entropy_cost))
+        return float(max(Decimal("0.0"), self.exergy_estimate - self.entropy_cost))
 
     @property
     def elapsed_s(self) -> float | None:

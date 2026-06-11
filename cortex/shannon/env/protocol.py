@@ -17,14 +17,12 @@ class BinaryProtocol(ABC):
     @abstractmethod
     def get_challenge(self) -> bytes:
         """Generate the initial challenge handshake bytes."""
-        pass
 
     @abstractmethod
     def handle_message(self, data: bytes) -> tuple[bytes, float, bool, dict[str, Any]]:
         """
         Processes a client message and returns the response, reward, done flag, and info dict.
         """
-        pass
 
 
 class GenesisProtocol(BinaryProtocol):

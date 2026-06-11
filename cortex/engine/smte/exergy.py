@@ -14,8 +14,6 @@ LIMERENCE_PENALTY_MULTIPLIER: float = 10.0
 class CircuitBreakerTripped(Exception):
     """Raised when the limerence penalty trips the exergy circuit breaker."""
 
-    pass
-
 
 class ExergyMonitor:
     """

@@ -26,7 +26,6 @@ else:
     except ImportError:
         import logging
 
-        pass
     try:
         from cortex.consensus.trust import TrustGraph as _TG
 
@@ -34,6 +33,5 @@ else:
     except ImportError:
         import logging
 
-        pass
 
 __all__ = ["ConsensusManager", "ReputationManager", "TrustGraph"]

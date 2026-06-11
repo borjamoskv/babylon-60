@@ -16,7 +16,6 @@ from cortex.extensions.nous.runtime import NousRuntime
 @cli.group("nous")
 def nous():
     """NOUS Database Migrator and AST Compiler."""
-    pass
 
 
 @nous.command("compile")

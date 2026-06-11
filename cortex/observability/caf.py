@@ -84,7 +84,7 @@ def select_next(
         S = action(path, state_vec, meta, field)
         scored_paths.append((S, path))
 
-        if S < best_score:
+        if best_score > S:
             best_score = S
 
     # Epsilon Path Noise: Evitar Global Path Bias Collapse

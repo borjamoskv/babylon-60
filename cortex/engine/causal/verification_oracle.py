@@ -10,8 +10,6 @@ logger = logging.getLogger("cortex.engine.causal.verification_oracle")
 class InvariantViolationError(ValueError):
     """Raised when a formal system invariant is violated."""
 
-    pass
-
 
 async def verify_ledger_continuity(conn) -> bool:
     """Inv-1 & Inv-2: Re-verifies the event ledger chain cryptographic continuity."""

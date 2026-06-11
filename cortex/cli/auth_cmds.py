@@ -13,7 +13,6 @@ console = Console()
 @cli.group()
 def auth() -> None:
     """Manage BFT Consensus Quorum requests."""
-    pass
 
 
 @auth.command("vote")

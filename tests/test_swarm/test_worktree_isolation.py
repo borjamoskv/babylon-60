@@ -42,7 +42,6 @@ async def test_isolated_worktree_exception_cleanup(tmp_path):
     except ValueError:
         import logging
 
-        pass
     # Catch the expected error
 
     # Aniquilación termodinámica confirmada

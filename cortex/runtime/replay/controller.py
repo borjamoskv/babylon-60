@@ -19,13 +19,9 @@ from cortex.runtime.replay.divergence import DivergenceMap, DivergenceReport
 class EntropyViolation(Exception):
     """Lanzada cuando el gradiente de entropía excede el límite permitido."""
 
-    pass
-
 
 class AttractorViolation(Exception):
     """Lanzada cuando la distancia a la trayectoria base excede el límite permitido."""
-
-    pass
 
 
 class TemporalConsistencyController:
