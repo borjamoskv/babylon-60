@@ -36,28 +36,21 @@ class OmegaConflict:
 class OmegaAuditor:
     """Sovereign Auditor for deep semantic health."""
 
-    def __init__(self, provider: str = "gemini"):
+    def __init__(self, provider: str = "ollama"):
         import os
 
         if LLMProvider is not None:
             self._llm = LLMProvider(provider=provider)
-            # Dynamic fallback selector based on active environment keys
+            # Dynamic fallback selector enforced to Local Autarchy (Ollama / MLX)
             self._fallbacks = []
-            if os.environ.get("OPENAI_API_KEY"):
-                self._fallbacks.append(LLMProvider(provider="openai"))
-            if os.environ.get("DEEPSEEK_API_KEY"):
-                self._fallbacks.append(LLMProvider(provider="deepseek"))
-            if os.environ.get("OPENROUTER_API_KEY"):
-                self._fallbacks.append(LLMProvider(provider="openrouter"))
-            if os.environ.get("DASHSCOPE_API_KEY"):
-                self._fallbacks.append(
-                    LLMProvider(
-                        provider="custom",
-                        model="qwen3.6-27b",
-                        base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
-                        api_key=os.environ.get("DASHSCOPE_API_KEY"),
-                    )
+            self._fallbacks.append(
+                LLMProvider(
+                    provider="custom",
+                    model="qwen2.5:32b",
+                    base_url="http://127.0.0.1:11434/v1",
+                    api_key="local-autarchy-key",
                 )
+            )
         else:
             self._llm = None
             self._fallbacks = []
@@ -168,6 +161,6 @@ async def run_omega_audit(content: str, project: str) -> list[OmegaConflict]:
     """Convenience entry point for the Omega Auditor."""
     import os
 
-    provider = os.environ.get("CORTEX_PRIMARY_LLM", "gemini")
+    provider = os.environ.get("CORTEX_PRIMARY_LLM", "ollama")
     auditor = OmegaAuditor(provider=provider)
     return await auditor.audit_decision(content, project)

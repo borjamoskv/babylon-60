@@ -1,18 +1,14 @@
 # [C5-REAL] Exergy-Maximized
 import json
 import logging
+import os
 from typing import Any, Final
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from cortex.auth import AuthResult, require_permission
-
-try:
-    from google import genai  # type: ignore[attr-defined]
-    from google.genai import types
-except ImportError:
-    genai = None
 
 __all__ = ["TranslateRequest", "TranslateResponse", "router", "translate_texts"]
 
@@ -20,7 +16,9 @@ router = APIRouter(prefix="/v1/translate", tags=["translate"])
 logger = logging.getLogger("uvicorn.error")
 
 MAX_TEXTS_PER_REQUEST: Final[int] = 100
-MODEL_NAME: Final[str] = "gemini-2.0-flash"
+# Enforced Local Autarchy model
+MODEL_NAME: Final[str] = os.getenv("CORTEX_PRIMARY_LLM", "qwen2.5:32b")
+LOCAL_API_URL: Final[str] = os.getenv("EXERGY_UPSTREAM_URL", "http://127.0.0.1:11434/v1")
 
 
 class TranslateRequest(BaseModel):
@@ -39,18 +37,6 @@ class TranslateResponse(BaseModel):
         ..., description="A dictionary mapping language codes to their translated key-value pairs."
     )
     usage: dict[str, int] = Field(default_factory=dict)
-
-
-def _get_genai_client() -> Any:
-    """Initialize and return the Gemini 2.0 client securely."""
-    if genai is None:
-        raise HTTPException(status_code=500, detail="google-genai package is not installed.")
-
-    try:
-        return genai.Client()
-    except (ValueError, OSError, RuntimeError) as e:
-        logger.error("Failed to initialize Gemini Client: %s", e)
-        raise HTTPException(status_code=500, detail="LLM configuration error.") from e
 
 
 def _build_system_instruction(context: str | None) -> str:
@@ -72,10 +58,20 @@ def _parse_llm_response(
     if not text_output:
         raise ValueError("Empty response received from LLM.")
 
+    # Remove markdown code blocks if present
+    clean_text = text_output.strip()
+    if clean_text.startswith("```json"):
+        clean_text = clean_text[7:]
+    if clean_text.startswith("```"):
+        clean_text = clean_text[3:]
+    if clean_text.endswith("```"):
+        clean_text = clean_text[:-3]
+    clean_text = clean_text.strip()
+
     try:
-        translated_data = json.loads(text_output)
+        translated_data = json.loads(clean_text)
     except json.JSONDecodeError as e:
-        logger.error("JSON Decode Error: %s. Output: %s", e, text_output)
+        logger.error("JSON Decode Error: %s. Output: %s", e, clean_text)
         raise ValueError("Invalid JSON format from LLM.") from e
 
     formatted_translations: dict[str, dict[str, str]] = {}
@@ -89,37 +85,35 @@ def _parse_llm_response(
     return formatted_translations
 
 
-def _extract_usage(response) -> dict[str, int]:
-    """Helper to safely extract usage metadata if available."""
-    if not response.usage_metadata:
-        return {}
-
-    return {
-        "prompt_tokens": response.usage_metadata.prompt_token_count,
-        "candidates_tokens": response.usage_metadata.candidates_token_count,
-        "total_tokens": response.usage_metadata.total_token_count,
-    }
-
-
-def _execute_translation(request: TranslateRequest, client: Any) -> TranslateResponse:
-    """Core translation execute logic isolated from router wrapper."""
+def _execute_translation(request: TranslateRequest) -> TranslateResponse:
+    """Core translation execute logic utilizing local Autarchy."""
     system_instruction = _build_system_instruction(request.context)
     prompt = f"Target languages: {request.target_languages}\n\nTexts to translate:\n{json.dumps(request.texts, ensure_ascii=False, indent=2)}"
 
-    response = client.models.generate_content(
-        model=MODEL_NAME,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            system_instruction=system_instruction,
-            temperature=0.1,  # Low temp for high determinism
-            response_mime_type="application/json",
-        ),
-    )
+    payload = {
+        "model": MODEL_NAME,
+        "messages": [
+            {"role": "system", "content": system_instruction},
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": 0.1,
+        "response_format": {"type": "json_object"}
+    }
+    
+    headers = {"Content-Type": "application/json"}
+    try:
+        with httpx.Client() as client:
+            resp = client.post(f"{LOCAL_API_URL}/chat/completions", json=payload, headers=headers, timeout=120.0)
+            resp.raise_for_status()
+            data = resp.json()
+            content = data["choices"][0]["message"]["content"]
+            usage = data.get("usage", {})
+    except Exception as e:
+        logger.error("Local inference failed: %s", e)
+        raise ValueError("Local inference failure") from e
 
-    formatted_translations = _parse_llm_response(response.text, request.target_languages)
-    usage_metadata = _extract_usage(response)
-
-    return TranslateResponse(translations=formatted_translations, usage=usage_metadata)
+    formatted_translations = _parse_llm_response(content, request.target_languages)
+    return TranslateResponse(translations=formatted_translations, usage=usage)
 
 
 @router.post("", response_model=TranslateResponse)
@@ -131,7 +125,7 @@ def translate_texts(
     OMNI-TRANSLATE: Sovereign Core translation endpoint.
 
     Translates a dictionary of texts into multiple target languages simultaneously
-    using Gemini 2.0 Flash for optimal speed and cost.
+    using Local Autarchy model (e.g. qwen2.5-coder).
     Ensures that the output strictly matches the input schema.
     """
     if not request.texts or not request.target_languages:
@@ -144,10 +138,8 @@ def translate_texts(
             status_code=400, detail=f"Maximum {MAX_TEXTS_PER_REQUEST} texts allowed per request."
         )
 
-    client = _get_genai_client()
-
     try:
-        return _execute_translation(request, client)
+        return _execute_translation(request)
     except ValueError as e:
         raise HTTPException(
             status_code=502, detail="Error generating translation or invalid upstream response."

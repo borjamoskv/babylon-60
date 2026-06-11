@@ -27,9 +27,9 @@ logger = logging.getLogger("cortex.exergy.middleware")
 
 router = APIRouter(prefix="/llm-proxy/v1", tags=["Exergy Proxy"])
 
-# The actual target LLM API (can be OpenAI, vLLM, Ollama, etc.)
-UPSTREAM_API_URL = os.getenv("EXERGY_UPSTREAM_URL", "https://api.openai.com/v1")
-UPSTREAM_API_KEY = os.getenv("EXERGY_UPSTREAM_KEY", os.getenv("OPENAI_API_KEY", ""))
+# The actual target LLM API (Defaulting to Local Autarchy / Ollama)
+UPSTREAM_API_URL = os.getenv("EXERGY_UPSTREAM_URL", "http://127.0.0.1:11434/v1")
+UPSTREAM_API_KEY = os.getenv("EXERGY_UPSTREAM_KEY", "local-autarchy-key")
 
 
 class DeterministicLabyrinth:
