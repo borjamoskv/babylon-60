@@ -36,6 +36,33 @@ CREATE TABLE IF NOT EXISTS security_audit_log (
 """
 
 
+import fcntl
+import asyncio
+
+class AsyncFileLock:
+    """Non-blocking asynchronous cross-process file lock using fcntl."""
+    def __init__(self, lock_path: str = "/tmp/cortex_audit_ledger.lock") -> None:
+        self.lock_path = lock_path
+        self.fp = None
+
+    async def __aenter__(self) -> AsyncFileLock:
+        self.fp = open(self.lock_path, "w")
+        while True:
+            try:
+                fcntl.flock(self.fp.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                return self
+            except BlockingIOError:
+                await asyncio.sleep(0.01)
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+        if self.fp:
+            try:
+                fcntl.flock(self.fp.fileno(), fcntl.LOCK_UN)
+            finally:
+                self.fp.close()
+                self.fp = None
+
+
 class EnterpriseAuditLedger:
     """Immutable Audit Ledger for enterprise-grade SOC 2 compliance (Merkle Micro-Batched)."""
 
@@ -90,17 +117,32 @@ class EnterpriseAuditLedger:
         if self._ready:
             return
         async with self._lock:
-            if self._ready:
-                return
-            await self._conn.execute(_CREATE_AUDIT_SQL)
-            await self._conn.commit()
-            cursor = await self._conn.execute(
-                "SELECT signature FROM security_audit_log ORDER BY rowid DESC LIMIT 1"
-            )
-            row = await cursor.fetchone()
-            if row:
-                self._last_hash = row[0]
-            self._ready = True
+            async with AsyncFileLock():
+                if self._ready:
+                    return
+                await self._conn.execute(_CREATE_AUDIT_SQL)
+                await self._conn.commit()
+                cursor = await self._conn.execute(
+                    "SELECT prev_hash, signature FROM security_audit_log ORDER BY rowid DESC LIMIT 1"
+                )
+                row = await cursor.fetchone()
+                if row:
+                    prev_hash, sig = row[0], row[1]
+                    # Reconstruct the last batch using its signature to compute its entry_hash
+                    cursor2 = await self._conn.execute(
+                        "SELECT audit_id FROM security_audit_log WHERE signature = ? ORDER BY rowid ASC",
+                        (sig,)
+                    )
+                    rows2 = await cursor2.fetchall()
+                    batch_audit_ids = [r[0] for r in rows2]
+                    merkle_payload = "".join(batch_audit_ids) + prev_hash
+                    merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
+                    self._last_hash = hashlib.sha256(
+                        f"merkle_batch:{merkle_root}:{prev_hash}".encode()
+                    ).hexdigest()
+                else:
+                    self._last_hash = "GENESIS"
+                self._ready = True
 
     async def run_scan(self) -> dict[str, Any]:
         return {"status": "scan_not_implemented"}
@@ -112,60 +154,64 @@ class EnterpriseAuditLedger:
         while True:
             await asyncio.sleep(self.batch_window_ms / 1000.0)
             async with self._lock:
-                if not self._batch_queue:
-                    self._batch_task = None
-                    break
+                async with AsyncFileLock():
+                    if not self._batch_queue:
+                        self._batch_task = None
+                        break
 
-                batch = self._batch_queue[: self.max_batch_size]
-                self._batch_queue = self._batch_queue[self.max_batch_size :]
+                    batch = self._batch_queue[: self.max_batch_size]
+                    self._batch_queue = self._batch_queue[self.max_batch_size :]
 
-                # Compute Merkle Root for the batch
-                batch_audit_ids = [item["audit_id"] for item, _ in batch]
-                merkle_payload = "".join(batch_audit_ids) + self._last_hash
-                merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
+                    # Compute Merkle Root for the batch
+                    batch_audit_ids = [item["audit_id"] for item, _ in batch]
+                    merkle_payload = "".join(batch_audit_ids) + self._last_hash
+                    merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
 
-                # Sign the Merkle Root
-                payload_to_sign = f"merkle_batch:{merkle_root}:{self._last_hash}"
-                signature = self.private_key.sign(payload_to_sign.encode()).hex()
+                    # Separate hash from signature: entry_hash represents the batch deterministically
+                    entry_hash_payload = f"merkle_batch:{merkle_root}:{self._last_hash}"
+                    entry_hash = hashlib.sha256(entry_hash_payload.encode()).hexdigest()
 
-                # Prepare SQLite bulk insert
-                insert_rows = []
-                for item, _ in batch:
-                    insert_rows.append(
-                        (
-                            item["audit_id"],
-                            item["timestamp"],
-                            item["tenant_id"],
-                            item["actor_role"],
-                            item["actor_id"],
-                            item["action"],
-                            item["resource"],
-                            item["status"],
-                            self._last_hash,
-                            signature,
+                    # Sign the entry_hash
+                    signature = self.private_key.sign(entry_hash.encode()).hex()
+
+                    # Prepare SQLite bulk insert
+                    insert_rows = []
+                    for item, _ in batch:
+                        insert_rows.append(
+                            (
+                                item["audit_id"],
+                                item["timestamp"],
+                                item["tenant_id"],
+                                item["actor_role"],
+                                item["actor_id"],
+                                item["action"],
+                                item["resource"],
+                                item["status"],
+                                self._last_hash,
+                                signature,
+                            )
                         )
-                    )
 
-                try:
-                    await self._conn.executemany(
-                        """INSERT INTO security_audit_log
-                           (audit_id, timestamp, tenant_id, actor_role, actor_id, action,
-                            resource, status, prev_hash, signature)
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                        insert_rows,
-                    )
-                    await self._conn.commit()
-                    self._last_hash = signature
+                    try:
+                        await self._conn.executemany(
+                            """INSERT INTO security_audit_log
+                               (audit_id, timestamp, tenant_id, actor_role, actor_id, action,
+                                resource, status, prev_hash, signature)
+                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                            insert_rows,
+                        )
+                        await self._conn.commit()
+                        self._last_hash = entry_hash
 
-                    # Resolve futures
-                    for item, fut in batch:
-                        if not fut.done():
-                            fut.set_result(item["audit_id"])
-                except (OSError, ValueError, RuntimeError) as e:
-                    logger.error("[AuditLedger] Batch insert failed: %s", e)
-                    for _, fut in batch:
-                        if not fut.done():
-                            fut.set_exception(e)
+                        # Resolve futures
+                        for item, fut in batch:
+                            if not fut.done():
+                                fut.set_result(item["audit_id"])
+                    except (OSError, ValueError, RuntimeError) as e:
+                        logger.error("[AuditLedger] Batch insert failed: %s", e)
+                        for _, fut in batch:
+                            if not fut.done():
+                                fut.set_exception(e)
 
     async def log_action(
         self,
@@ -209,6 +255,24 @@ class EnterpriseAuditLedger:
         """Verifies a cryptographic seal against the Audit Sovereign public key."""
         try:
             self.public_key.verify(bytes.fromhex(signature_hex), payload.encode("utf-8"))
+            return True
+        except (InvalidSignature, ValueError):
+            return False
+
+    def verify_batch(self, batch_audit_ids: list[str], prev_hash: str, signature_hex: str) -> bool:
+        """Verifies the cryptographic seal of a batch against the public key using entry_hash."""
+        try:
+            # Reconstruct batch entry_hash
+            merkle_payload = "".join(batch_audit_ids) + prev_hash
+            merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
+            entry_hash = hashlib.sha256(
+                f"merkle_batch:{merkle_root}:{prev_hash}".encode()
+            ).hexdigest()
+            
+            self.public_key.verify(
+                bytes.fromhex(signature_hex),
+                entry_hash.encode("utf-8")
+            )
             return True
         except (InvalidSignature, ValueError):
             return False

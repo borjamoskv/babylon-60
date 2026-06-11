@@ -132,6 +132,8 @@ class TestEnterpriseAuditLedger:
             action="act1",
             resource="r1",
         )
+        # Sleep to let the first batch flush separately
+        await asyncio.sleep(0.05)
         await ledger.log_action(
             tenant_id="t1",
             actor_role="admin",
@@ -139,6 +141,8 @@ class TestEnterpriseAuditLedger:
             action="act2",
             resource="r2",
         )
+        # Sleep to let the second batch flush
+        await asyncio.sleep(0.05)
 
         cursor = await ledger._conn.execute(
             "SELECT prev_hash, signature FROM security_audit_log ORDER BY rowid ASC"
@@ -149,9 +153,21 @@ class TestEnterpriseAuditLedger:
         # First entry's prev_hash must be GENESIS
         assert rows[0][0] == "GENESIS"
 
-        # If batch flushed as two separate batches, second should chain
+        # If batch flushed as two separate batches, second should chain to the entry_hash of the first
         if len(rows) == 2:
-            assert rows[1][0] == rows[0][1]  # prev_hash[1] == signature[0]
+            cursor2 = await ledger._conn.execute(
+                "SELECT audit_id FROM security_audit_log WHERE signature = ?",
+                (rows[0][1],)
+            )
+            batch1_rows = await cursor2.fetchall()
+            batch1_ids = [r[0] for r in batch1_rows]
+            merkle_payload = "".join(batch1_ids) + "GENESIS"
+            merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
+            expected_entry_hash = hashlib.sha256(
+                f"merkle_batch:{merkle_root}:GENESIS".encode()
+            ).hexdigest()
+            assert rows[1][0] == expected_entry_hash
+            assert ledger.verify_batch(batch1_ids, "GENESIS", rows[0][1]) is True
 
     @pytest.mark.asyncio
     async def test_multiple_actions_batch_flush(self, ledger):
