@@ -5,6 +5,7 @@ the live runtime (CortexEngine) and the observability layer (E1, phase detector)
 
 Does NOT import from cortex.engine to avoid circular dependencies.
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterator

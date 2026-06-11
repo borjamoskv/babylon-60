@@ -10,6 +10,7 @@ Usage (shadow mode — does not touch hot-path):
 The resulting ExecutionTrace satisfies the Trajectory Protocol used by
 MetaArbiterKernel and energy_fn components.
 """
+
 from __future__ import annotations
 
 import time

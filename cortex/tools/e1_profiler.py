@@ -20,6 +20,7 @@ statistics into a ProfileReport.
 
 It does NOT touch the live engine, ledger, or database.
 """
+
 from __future__ import annotations
 
 import json
@@ -36,9 +37,11 @@ from cortex.tools.trace_builder import TraceBuilder
 # Report types
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ComponentStats:
     """Descriptive statistics for a single E1 component."""
+
     mean: float
     variance: float
     minimum: float
@@ -104,6 +107,7 @@ class ProfileReport:
 # ---------------------------------------------------------------------------
 # Profiler
 # ---------------------------------------------------------------------------
+
 
 class E1Profiler:
     """Offline E1 energy profiler over ExecutionTrace corpora.
@@ -176,9 +180,7 @@ class E1Profiler:
 
         # positive dE rate: fraction of steps where energy increases
         positive_dE = sum(
-            1
-            for a, b in zip(energies, energies[1:], strict=False)
-            if b > a + self._kernel.eps
+            1 for a, b in zip(energies, energies[1:], strict=False) if b > a + self._kernel.eps
         )
         positive_dE_rate = positive_dE / max(1, n - 1)
 
@@ -254,6 +256,7 @@ class E1Profiler:
 # ---------------------------------------------------------------------------
 # CLI entrypoint
 # ---------------------------------------------------------------------------
+
 
 def _parse_weights(args: list[str]) -> dict[str, float]:
     weights: dict[str, float] = {}

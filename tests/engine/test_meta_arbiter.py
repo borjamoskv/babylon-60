@@ -10,6 +10,7 @@ They verify that the MetaArbiterKernel can:
 - Distinguish traces by a simple H_branch proxy
 - Select the lowest-energy trajectory as the winner
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -21,6 +22,7 @@ from cortex.tools.trace_builder import TraceBuilder
 # ---------------------------------------------------------------------------
 # Dummy state containers
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class DummyState:
