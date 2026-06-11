@@ -19,7 +19,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from cortex.agents.builtins import (
-    CassandraAgent,
+    MoskvVidentiaAgent,
     HandoffAgent,
     MemoryAgent,
     NightshiftAgent,
@@ -585,10 +585,10 @@ class TestSupervisorAgent:
         mock_supervisor.status.assert_called()
 
 
-# ── CassandraAgent ──────────────────────────────────────────────────
+# ── MoskvVidentiaAgent ───────────────────────────────────────────────
 
 
-class TestCassandraAgent:
+class TestMoskvVidentiaAgent:
     @pytest.fixture
     async def bus(self):
         b = SqliteMessageBus(db_path=_uid())
@@ -596,7 +596,7 @@ class TestCassandraAgent:
         await b.close()
 
     def _agent(self, bus):
-        return CassandraAgent(_manifest("cas-1"), bus, MagicMock())
+        return MoskvVidentiaAgent(_manifest("cas-1"), bus, MagicMock())
 
     @pytest.mark.asyncio
     async def test_map_op(self, bus):

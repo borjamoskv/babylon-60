@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 """
-cassandra_agent.py - CassandraAgent
+moskv_videntia_agent.py - MoskvVidentiaAgent
 
 Daemon/Task agent that maps "todos los problemas habidos y por haber".
 It scans the Cortex-Persist architecture for systemic bottlenecks,
@@ -21,7 +21,7 @@ from cortex.agents.tools import ToolRegistry
 logger = logging.getLogger(__name__)
 
 
-class CassandraAgent(BaseAgent):
+class MoskvVidentiaAgent(BaseAgent):
     """
     Agent that maps past and future systemic problems, vulnerabilities, and anergy.
     Enforces high-density scaling, thermodynamic cognition constraints, and deterministic boundaries.
@@ -45,9 +45,9 @@ class CassandraAgent(BaseAgent):
             if "map" in objective_lower or "problem" in objective_lower:
                 await self._map_vulnerabilities(message, task)
             else:
-                await self._fail_task(message, task, "Objective not supported by CassandraAgent")
+                await self._fail_task(message, task, "Objective not supported by MoskvVidentiaAgent")
         except Exception as exc:
-            logger.exception("CassandraAgent failed to process message")
+            logger.exception("MoskvVidentiaAgent failed to process message")
             await self._fail_task(message, task, f"Internal failure: {exc}")
 
     async def _map_vulnerabilities(
@@ -84,17 +84,17 @@ class CassandraAgent(BaseAgent):
                 {
                     "id": "FUT-02",
                     "type": "Stochastic Noise",
-                    "description": "Generative drift in multi-session handoffs without strict deterministic bounds.",
+                    "description": "Desviación generativa en traspasos multi-sesión sin límites deterministas estrictos.",
                 },
                 {
                     "id": "FUT-03",
                     "type": "Thermodynamic Death",
-                    "description": "Over-allocation of agent capacity to P0 inference loops without deterministic kill criteria.",
+                    "description": "Asignación excesiva de capacidad a bucles de inferencia P0 sin criterios de finalización.",
                 },
             ],
             "recommendations": [
                 "Strict adherence to Write-Path Contract (SAGA-1 to 7).",
-                "Execute Thermodynamic Pruning proactively using `EntropyPruner`.",
+                "Execute Thermodynamic Pruning proactively usando `EntropyPruner`.",
                 "Enforce Ouroboros-Infinity kill criteria for infinite loops.",
             ],
         }

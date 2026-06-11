@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 
-from cortex.agents.builtins.cassandra_agent import CassandraAgent
+from cortex.agents.builtins.moskv_videntia_agent import MoskvVidentiaAgent
 from cortex.agents.builtins.copilot_agent import CopilotAgent
 from cortex.agents.builtins.handoff_agent import HandoffAgent
 from cortex.agents.builtins.memory_agent import MemoryAgent
@@ -11,7 +11,7 @@ from cortex.agents.builtins.supervisor_agent import SupervisorAgent
 from cortex.agents.builtins.verification_agent import VerificationAgent
 
 __all__ = [
-    "CassandraAgent",
+    "MoskvVidentiaAgent",
     "CopilotAgent",
     "HandoffAgent",
     "MemoryAgent",

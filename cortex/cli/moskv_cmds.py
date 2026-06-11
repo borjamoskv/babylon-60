@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 """
-cassandra_cmds.py - CLI command for Cassandra Agent (Vulnerability & Problem Mapping).
+moskv_cmds.py - CLI command for Moskv-Videntia Agent (Vulnerability & Problem Mapping).
 """
 
 from __future__ import annotations
@@ -12,13 +12,13 @@ from rich.table import Table
 from cortex.cli.common import cli, console
 
 
-@click.command("cassandra")
+@click.command("moskv-videntia")
 @click.option("--db", "db_path", help="Database path for audit analysis.")
-def cassandra(db_path: str | None) -> None:
-    """🔮 Cassandra - Maps all past and future problems (vulnerabilities & anergy)."""
+def moskv_videntia(db_path: str | None) -> None:
+    """🔮 Moskv-Videntia - Maps all past and future problems (vulnerabilities & anergy)."""
     console.print(
         Panel(
-            "[bold #CCFF00]🔮 CASSANDRA AGENT - MAPA DE PROBLEMAS HABIDOS Y POR HABER[/]",
+            "[bold #CCFF00]🔮 MOSKV-VIDENTIA AGENT - MAPA DE PROBLEMAS HABIDOS Y POR HABER[/]",
             border_style="#6600FF",
         )
     )
@@ -81,4 +81,4 @@ def cassandra(db_path: str | None) -> None:
     console.print(rec_table)
 
 
-cli.add_command(cassandra)
+cli.add_command(moskv_videntia)
