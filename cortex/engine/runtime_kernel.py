@@ -3,7 +3,8 @@ import glob
 import json
 import logging
 import os
-import time
+import os
+import asyncio
 import uuid
 from dataclasses import asdict, dataclass, field
 from decimal import Decimal
@@ -130,7 +131,7 @@ class CortexRuntime:
             self.state = CortexState()
 
     def execute_cycle(self, state: CortexState) -> CortexState:
-        start_time = time.time()
+        start_time = asyncio.get_event_loop().time()
 
         # Simulate execution physics
         state.tick_count += 1
@@ -166,7 +167,7 @@ class CortexRuntime:
             }
         )
 
-    def run_forever(self, tick_delay: float = 1.0):
+    async def run_forever(self, tick_delay: float = 1.0):
         self.load_state()
         self.running = True
         logger.info(
@@ -181,7 +182,7 @@ class CortexRuntime:
                 logger.info(
                     f"[TICK {self.state.tick_count}] Exergy: {self.state.exergy:.3f} | Entropy: {self.state.entropy:.3f}"
                 )
-                time.sleep(tick_delay)
+                await asyncio.sleep(tick_delay)
 
             except Exception as e:
                 # In a normal crash, process dies. Here we catch internally to simulate rapid self-healing supervisor.
@@ -189,4 +190,4 @@ class CortexRuntime:
                 # Dampen entropy to break crash loop
                 self.state.entropy *= Decimal("0.5")
                 self.persist(self.state)  # Force WAL entry of the dampened state
-                time.sleep(tick_delay)
+                await asyncio.sleep(tick_delay)

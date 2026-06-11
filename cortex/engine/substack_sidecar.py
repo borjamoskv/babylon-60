@@ -3,6 +3,8 @@ import logging
 import sqlite3
 from pathlib import Path
 
+from cortex.services.email import send_reengagement_email
+
 # Configuración de Logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("CausalScheduler")
@@ -43,8 +45,8 @@ def evaluate_retention(dry_run=True):
             # Aquí irá la integración de Mailgun / SMTP local
             logger.warning(f"DISPARANDO TRANSSACCIÓN A: {node['email']}")
 
-            # TODO: Conectar a cortex.services.email
-            # send_reengagement_email(node['email'], node['cluster'])
+            # Conexión resuelta a cortex.services.email
+            send_reengagement_email(node['email'], node['cluster'])
 
             # Actualizar estado para no bombardear
             cursor.execute(

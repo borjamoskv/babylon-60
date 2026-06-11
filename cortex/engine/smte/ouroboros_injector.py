@@ -72,7 +72,7 @@ def inject_synthetic_friction(broker="localhost:9092", num_events=500):
 
         # Pausa ligera para emular streaming natural
         if i % 50 == 0:
-            time.sleep(0.05)
+            time.sleep(0.05)  # noqa: TID251
 
     producer.flush()
     logger.info(
