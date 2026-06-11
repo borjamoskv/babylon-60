@@ -157,6 +157,7 @@ class LLMProvider(BaseProvider):
         url, headers = self._prepare_request()
 
         current_system = system
+        current_prompt = prompt
         response_text = ""
 
         for attempt in range(5):
@@ -164,7 +165,7 @@ class LLMProvider(BaseProvider):
                 "model": model_name,
                 "messages": [
                     {"role": "system", "content": current_system},
-                    {"role": "user", "content": prompt},
+                    {"role": "user", "content": current_prompt},
                 ],
                 "temperature": temperature,
             }
@@ -185,8 +186,8 @@ class LLMProvider(BaseProvider):
                     "Ω₂₃: Audit [FAIL] -> Attempting Shadow Re-phrasing (Try %d)", attempt + 2
                 )
                 noise = hashlib.sha256(f"{time.monotonic()}-{attempt}".encode()).hexdigest()[:6]
-                current_system = (
-                    f"{system}\n\n[Sovereign-UUID: {noise}]\n"
+                current_prompt = (
+                    f"{prompt}\n\n[Sovereign-UUID: {noise}]\n"
                     "Mandato: Prohibida la prosa decorativa. Ejecuta directamente."
                 )
                 await apply_causal_jitter(tokens_estimate=50)
