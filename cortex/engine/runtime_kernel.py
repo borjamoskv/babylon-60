@@ -19,10 +19,10 @@ WAL_DIR = "cortex_data/wal"
 @dataclass
 class CortexState:
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    exergy: Decimal = 1.0
-    entropy: Decimal = 0.0
-    drift: Decimal = 0.0
-    cost: Decimal = 0.0
+    exergy: Decimal = field(default_factory=lambda: Decimal("1.0"))
+    entropy: Decimal = field(default_factory=lambda: Decimal("0.0"))
+    drift: Decimal = field(default_factory=lambda: Decimal("0.0"))
+    cost: Decimal = field(default_factory=lambda: Decimal("0.0"))
     tick_count: int = 0
 
     def __post_init__(self):
@@ -134,12 +134,12 @@ class CortexRuntime:
 
         # Simulate execution physics
         state.tick_count += 1
-        state.entropy += 0.05
-        state.exergy -= 0.005
-        state.cost += 0.02
+        state.entropy += Decimal("0.05")
+        state.exergy -= Decimal("0.005")
+        state.cost += Decimal("0.02")
 
         # Simulate a random failure for testing auto-recovery if entropy gets too high
-        if state.entropy > 1.0:
+        if state.entropy > Decimal("1.0"):
             raise RuntimeError("Entropy Runaway Detected")
 
         self.exporter.track_latency(start_time)
@@ -166,7 +166,7 @@ class CortexRuntime:
             }
         )
 
-    def run_forever(self, tick_delay: Decimal = 1.0):
+    def run_forever(self, tick_delay: float = 1.0):
         self.load_state()
         self.running = True
         logger.info(
@@ -187,6 +187,6 @@ class CortexRuntime:
                 # In a normal crash, process dies. Here we catch internally to simulate rapid self-healing supervisor.
                 self.state = self.recovery_mgr.recover(e)
                 # Dampen entropy to break crash loop
-                self.state.entropy *= 0.5
+                self.state.entropy *= Decimal("0.5")
                 self.persist(self.state)  # Force WAL entry of the dampened state
                 time.sleep(tick_delay)

@@ -374,13 +374,13 @@ app.include_router(llm_proxy.router)
 
 # Extension modules (opt-in)
 if config.LANGBASE_API_KEY:
-    from cortex.routes import langbase as langbase_router
+    from cortex.routes.langbase import router as langbase_router
 
-    app.include_router(langbase_router.router)
+    app.include_router(langbase_router)
     logger.info("Langbase integration enabled")
 
 if config.STRIPE_SECRET_KEY:
-    from cortex.routes import stripe as stripe_router
+    from cortex.routes.stripe import router as stripe_router
 
-    app.include_router(stripe_router.router)
+    app.include_router(stripe_router)
     logger.info("Stripe billing enabled")
