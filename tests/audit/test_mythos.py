@@ -1,12 +1,12 @@
 # [C5-REAL] Exergy-Maximized
 """
-Comprehensive tests for cortex.audit.cassandra_mythos.
+Comprehensive tests for cortex.audit.mythos and cortex.audit.cassandra.
 
 Covers:
-  - ConstraintModeler: rule building, default ruleset fallback
-  - SymbolicAttackGenerator: threat pattern generation
-  - ExploitChainConstructor: attack chaining
-  - CassandraMythos: ensure_table, run_adversarial_audit, cryptographic signature and hash chaining
+  - MythosModeler: rule building, default ruleset fallback
+  - CassandraOracle: threat pattern generation
+  - CassandraChainBuilder: attack chaining
+  - MythosEngine: ensure_table, run_adversarial_audit, cryptographic signature and hash chaining
 """
 
 from __future__ import annotations
@@ -56,43 +56,44 @@ async def ledger(audit_conn):
 
 
 @pytest.fixture
-async def cassandra(ledger):
-    """Creates a CassandraMythos auditor instance."""
-    from cortex.audit.cassandra_mythos import CassandraMythos
+async def mythos(ledger):
+    """Creates a MythosEngine auditor instance."""
+    from cortex.audit.mythos import MythosEngine
 
-    return CassandraMythos(ledger)
+    return MythosEngine(ledger)
 
 
-class TestCassandraMythos:
-    """Test suite for the CASSANDRA-MYTHOS adversarial C4-SIM audit engine."""
+class TestMythosEngine:
+    """Test suite for the MYTHOS adversarial C4-SIM audit engine and CASSANDRA oracle."""
 
     def test_constraint_modeler_fallback(self):
-        """ConstraintModeler should fallback to default ruleset if file does not exist."""
-        from cortex.audit.cassandra_mythos import ConstraintModeler
+        """MythosModeler should fallback to default ruleset if file does not exist."""
+        from cortex.audit.mythos import MythosModeler
 
-        modeler = ConstraintModeler(agents_md_path="/nonexistent/path/AGENTS.md")
+        modeler = MythosModeler(agents_md_path="/nonexistent/path/AGENTS.md")
         ruleset = modeler.build_from_agents_md()
         assert "constraints" in ruleset
         assert "Treat Generative Output as Conjecture" in ruleset["constraints"]
         assert ruleset["constraints"]["Treat Generative Output as Conjecture"]["priority"] == "P0"
 
     def test_constraint_modeler_default(self):
-        """ConstraintModeler.get_default_ruleset returns expected dictionary."""
-        from cortex.audit.cassandra_mythos import ConstraintModeler
+        """MythosModeler.get_default_ruleset returns expected dictionary."""
+        from cortex.audit.mythos import MythosModeler
 
-        modeler = ConstraintModeler()
+        modeler = MythosModeler()
         ruleset = modeler.get_default_ruleset()
         assert "constraints" in ruleset
         assert "Never Bypass Guards" in ruleset["constraints"]
 
     def test_symbolic_attack_generator(self):
-        """SymbolicAttackGenerator should generate specific attacks based on constraints."""
-        from cortex.audit.cassandra_mythos import ConstraintModeler, SymbolicAttackGenerator
+        """CassandraOracle should generate specific attacks based on constraints."""
+        from cortex.audit.mythos import MythosModeler
+        from cortex.audit.cassandra import CassandraOracle
 
-        modeler = ConstraintModeler()
+        modeler = MythosModeler()
         constraints = modeler.get_default_ruleset()
         
-        generator = SymbolicAttackGenerator()
+        generator = CassandraOracle()
         attacks = generator.generate(constraints)
         
         assert len(attacks) > 0
@@ -102,14 +103,14 @@ class TestCassandraMythos:
         assert "context_poisoning" in attack_names
 
     def test_exploit_chain_constructor(self):
-        """ExploitChainConstructor chains generated attacks into paths."""
-        from cortex.audit.cassandra_mythos import ExploitChainConstructor
+        """CassandraChainBuilder chains generated attacks into paths."""
+        from cortex.audit.cassandra import CassandraChainBuilder
 
         attacks = [
             {"attack": "A", "target": "T1"},
             {"attack": "B", "target": "T2"}
         ]
-        constructor = ExploitChainConstructor()
+        constructor = CassandraChainBuilder()
         chains = constructor.chain(attacks)
         
         assert len(chains) == 2
@@ -117,20 +118,20 @@ class TestCassandraMythos:
         assert "CHAIN::B@T2 -> A@T1" in chains
 
     @pytest.mark.asyncio
-    async def test_ensure_table_creates_schema(self, cassandra):
-        """ensure_table should create the cassandra_mythos_log table."""
-        await cassandra.ensure_table()
-        cursor = await cassandra._conn.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name='cassandra_mythos_log'"
+    async def test_ensure_table_creates_schema(self, mythos):
+        """ensure_table should create the mythos_ledger_log table."""
+        await mythos.ensure_table()
+        cursor = await mythos._conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='mythos_ledger_log'"
         )
         row = await cursor.fetchone()
         assert row is not None
-        assert row[0] == "cassandra_mythos_log"
+        assert row[0] == "mythos_ledger_log"
 
     @pytest.mark.asyncio
-    async def test_run_adversarial_audit_persists(self, cassandra):
+    async def test_run_adversarial_audit_persists(self, mythos):
         """run_adversarial_audit should persist findings, chains, and signatures in SQLite."""
-        report = await cassandra.run_adversarial_audit()
+        report = await mythos.run_adversarial_audit()
         
         assert "audit_id" in report
         assert "timestamp" in report
@@ -141,8 +142,8 @@ class TestCassandraMythos:
         assert "prev_hash" in report
         
         # Verify db persistence
-        cursor = await cassandra._conn.execute(
-            "SELECT risk_score, prev_hash, signature FROM cassandra_mythos_log"
+        cursor = await mythos._conn.execute(
+            "SELECT risk_score, prev_hash, signature FROM mythos_ledger_log"
         )
         rows = await cursor.fetchall()
         assert len(rows) == 1
@@ -151,14 +152,14 @@ class TestCassandraMythos:
         assert rows[0][2] == report["signature"]
 
     @pytest.mark.asyncio
-    async def test_cryptographic_chaining(self, cassandra):
+    async def test_cryptographic_chaining(self, mythos):
         """Successive runs should form a cryptographically chained prev_hash sequence."""
-        r1 = await cassandra.run_adversarial_audit()
-        r2 = await cassandra.run_adversarial_audit()
+        r1 = await mythos.run_adversarial_audit()
+        r2 = await mythos.run_adversarial_audit()
         
         # Verify signatures of r1 and r2 are valid
-        assert cassandra.verify_entry(r1, cassandra.ledger.public_key) is True
-        assert cassandra.verify_entry(r2, cassandra.ledger.public_key) is True
+        assert mythos.verify_entry(r1, mythos.ledger.public_key) is True
+        assert mythos.verify_entry(r2, mythos.ledger.public_key) is True
         
         # Verify that r2's prev_hash matches the computed entry_hash of r1
         import json
@@ -177,8 +178,8 @@ class TestCassandraMythos:
         assert r2["prev_hash"] != r1["signature"]
         
         # Verify from database order
-        cursor = await cassandra._conn.execute(
-            "SELECT prev_hash, signature FROM cassandra_mythos_log ORDER BY rowid ASC"
+        cursor = await mythos._conn.execute(
+            "SELECT prev_hash, signature FROM mythos_ledger_log ORDER BY rowid ASC"
         )
         rows = await cursor.fetchall()
         assert len(rows) == 2
