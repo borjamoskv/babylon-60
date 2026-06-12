@@ -51,6 +51,7 @@ class HDCVectorStoreL2:
         "_item_memory",
         "_lock",
         "_ready",
+        "_vec_loaded",
     )
 
     def __init__(
@@ -72,8 +73,7 @@ class HDCVectorStoreL2:
     def _get_conn(self) -> sqlite3.Connection:
         if self._conn is None:
             if sqlite_vec is None:
-                err = "sqlite_vec module not installed. Run 'pip install sqlite-vec'"
-                raise RuntimeError(err)
+                pass # Continue with degradation
 
             self._conn = sqlite3.connect(
                 self._db_path,
@@ -82,8 +82,15 @@ class HDCVectorStoreL2:
             )
             # runtime-policy: wait up to 5s for WAL write-lock contention (Axiom Ω6)
             self._conn.execute("PRAGMA busy_timeout=5000")
-            self._conn.enable_load_extension(True)
-            sqlite_vec.load(self._conn)
+
+            self._vec_loaded = False
+            try:
+                self._conn.enable_load_extension(True)
+                sqlite_vec.load(self._conn)
+                self._vec_loaded = True
+            except (AttributeError, OSError, sqlite3.Error):
+                pass
+
             self._conn.row_factory = sqlite3.Row
 
             # Register Sovereign Functions
@@ -108,18 +115,26 @@ class HDCVectorStoreL2:
 
             # Vector Table (sqlite-vec uses float[N])
             dim = self._encoder.dimension
-            self._conn.execute(f"""
-                CREATE VIRTUAL TABLE IF NOT EXISTS hdc_vec_facts USING vec0(
-                    embedding float[{dim}]
-                )
-            """)
+            if self._vec_loaded:
+                try:
+                    self._conn.execute(f"""
+                        CREATE VIRTUAL TABLE IF NOT EXISTS hdc_vec_facts USING vec0(
+                            embedding float[{dim}]
+                        )
+                    """)
+                except sqlite3.OperationalError:
+                    pass
 
-            # Specular Vector Table (G10 Intent Alignment)
-            self._conn.execute(f"""
-                CREATE VIRTUAL TABLE IF NOT EXISTS hdc_specular_vec_facts USING vec0(
-                    embedding float[{dim}]
-                )
-            """)
+                # Specular Vector Table (G10 Intent Alignment)
+                try:
+                    self._conn.execute(f"""
+                        CREATE VIRTUAL TABLE IF NOT EXISTS hdc_specular_vec_facts USING vec0(
+                            embedding float[{dim}]
+                        )
+                    """)
+                except sqlite3.OperationalError:
+                    pass
+
 
             # Indexes
             self._conn.execute(
@@ -177,18 +192,25 @@ class HDCVectorStoreL2:
             )
             rowid = cursor.lastrowid
 
-            cursor.execute(
-                "INSERT INTO hdc_vec_facts(rowid, embedding) VALUES (?, ?)",
-                (rowid, embedding_bytes),
-            )
+            if self._vec_loaded:
+                try:
+                    cursor.execute(
+                        "INSERT INTO hdc_vec_facts(rowid, embedding) VALUES (?, ?)",
+                        (rowid, embedding_bytes),
+                    )
+                except sqlite3.OperationalError:
+                    pass
 
             # 3. Store Specular Trace if available
-            if getattr(fact, "specular_embedding", None):
+            if getattr(fact, "specular_embedding", None) and self._vec_loaded:
                 spec_bytes = np.array(fact.specular_embedding, dtype=np.float32).tobytes()
-                cursor.execute(
-                    "INSERT INTO hdc_specular_vec_facts(rowid, embedding) VALUES (?, ?)",
-                    (rowid, spec_bytes),
-                )
+                try:
+                    cursor.execute(
+                        "INSERT INTO hdc_specular_vec_facts(rowid, embedding) VALUES (?, ?)",
+                        (rowid, spec_bytes),
+                    )
+                except sqlite3.OperationalError:
+                    pass
 
             conn.commit()
 
@@ -227,22 +249,53 @@ class HDCVectorStoreL2:
         toxic_hvs = self._fetch_toxic_hvs(conn, inhibit_ids)
 
         cursor = conn.cursor()
-        cursor.execute(
-            """
-            SELECT
-                m.rowid, m.id, m.tenant_id, m.project_id, m.content, m.timestamp,
-                m.is_diamond, m.is_bridge, m.confidence, m.success_rate, m.metadata, m.fact_type,
-                ((1.0 - vec_distance_cosine(v.embedding, ?) / 2.0) *
-                 cortex_decay(m.is_diamond, m.timestamp, ?, ?) *
-                 m.success_rate) as final_score
-            FROM hdc_facts_meta m
-            JOIN hdc_vec_facts v ON m.rowid = v.rowid
-            WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
-            ORDER BY final_score DESC
-            LIMIT ?
-            """,
-            (embedding_bytes, now, self._half_life, tenant_id, project_id, limit * 2),
-        )
+
+        if self._vec_loaded:
+            try:
+                cursor.execute(
+                    """
+                    SELECT
+                        m.rowid, m.id, m.tenant_id, m.project_id, m.content, m.timestamp,
+                        m.is_diamond, m.is_bridge, m.confidence, m.success_rate, m.metadata, m.fact_type,
+                        ((1.0 - vec_distance_cosine(v.embedding, ?) / 2.0) *
+                         cortex_decay(m.is_diamond, m.timestamp, ?, ?) *
+                         m.success_rate) as final_score
+                    FROM hdc_facts_meta m
+                    JOIN hdc_vec_facts v ON m.rowid = v.rowid
+                    WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
+                    ORDER BY final_score DESC
+                    LIMIT ?
+                    """,
+                    (embedding_bytes, now, self._half_life, tenant_id, project_id, limit * 2),
+                )
+            except sqlite3.OperationalError:
+                cursor.execute(
+                    """
+                    SELECT
+                        m.rowid, m.id, m.tenant_id, m.project_id, m.content, m.timestamp,
+                        m.is_diamond, m.is_bridge, m.confidence, m.success_rate, m.metadata, m.fact_type,
+                        (cortex_decay(m.is_diamond, m.timestamp, ?, ?) * m.success_rate) as final_score
+                    FROM hdc_facts_meta m
+                    WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
+                    ORDER BY final_score DESC
+                    LIMIT ?
+                    """,
+                    (now, self._half_life, tenant_id, project_id, limit * 2),
+                )
+        else:
+            cursor.execute(
+                """
+                SELECT
+                    m.rowid, m.id, m.tenant_id, m.project_id, m.content, m.timestamp,
+                    m.is_diamond, m.is_bridge, m.confidence, m.success_rate, m.metadata, m.fact_type,
+                    (cortex_decay(m.is_diamond, m.timestamp, ?, ?) * m.success_rate) as final_score
+                FROM hdc_facts_meta m
+                WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
+                ORDER BY final_score DESC
+                LIMIT ?
+                """,
+                (now, self._half_life, tenant_id, project_id, limit * 2),
+            )
 
         rows = cursor.fetchall()
         final_facts = []
