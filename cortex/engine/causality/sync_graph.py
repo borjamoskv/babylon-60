@@ -9,6 +9,7 @@ from cortex.engine.causality_models import (
     LedgerEvent,
 )
 
+
 class CausalGraph:
     def __init__(self) -> None:
         self._events: dict[str, LedgerEvent] = {}

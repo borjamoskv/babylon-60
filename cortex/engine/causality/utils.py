@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
+
 def link_causality(
     meta: dict[str, Any] | None,
     signal_id: int | None,

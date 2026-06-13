@@ -1,5 +1,9 @@
 # [C5-REAL] Exergy-Maximized
 
+from cortex.engine.causality.async_graph import AsyncCausalGraph
+from cortex.engine.causality.oracles import AsyncCausalOracle, CausalOracle
+from cortex.engine.causality.sync_graph import CausalGraph, propagate_refutation
+from cortex.engine.causality.utils import link_causality
 from cortex.engine.causality_models import (
     CONFIDENCE_LEVELS,
     EDGE_DERIVED_FROM,
@@ -13,11 +17,6 @@ from cortex.engine.causality_models import (
     TaintStatus,
     _downgrade_confidence,
 )
-
-from cortex.engine.causality.async_graph import AsyncCausalGraph
-from cortex.engine.causality.sync_graph import CausalGraph, propagate_refutation
-from cortex.engine.causality.oracles import AsyncCausalOracle, CausalOracle
-from cortex.engine.causality.utils import link_causality
 
 __all__ = [
     "EDGE_DERIVED_FROM",
