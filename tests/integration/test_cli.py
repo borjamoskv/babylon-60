@@ -1,8 +1,18 @@
 import sys
 import subprocess
+import os
+
+def run_cli(args, cwd=None):
+    env = os.environ.copy()
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+    if "PYTHONPATH" in env:
+        env["PYTHONPATH"] = f"{repo_root}{os.path.pathsep}{env['PYTHONPATH']}"
+    else:
+        env["PYTHONPATH"] = repo_root
+    return subprocess.run([sys.executable, "-m", "cortex.integration.cli"] + args, cwd=cwd, env=env, capture_output=True, text=True)
 
 def test_cli_help():
-    result = subprocess.run([sys.executable, "-m", "cortex.integration.cli", "--help"], capture_output=True, text=True)
+    result = run_cli(["--help"])
     assert "emit" in result.stdout
     assert "snapshot" in result.stdout
     assert "bridge" in result.stdout
@@ -12,12 +22,12 @@ def test_cli_emit(tmp_path):
     caps_file = tmp_path / "caps.json"
     caps_file.write_text('{"schema_version": "1.0", "routes": {}}')
     
-    result = subprocess.run([
-        sys.executable, "-m", "cortex.integration.cli", "emit",
+    result = run_cli([
+        "emit",
         "--agent-id", "agent-x",
         "--modules-dir", str(tmp_path),
         "--capabilities", str(caps_file)
-    ], cwd=tmp_path, capture_output=True, text=True)
+    ], cwd=tmp_path)
     
     assert result.returncode == 0
     event_file = tmp_path / "output" / "telemetry_event.json"
@@ -30,11 +40,11 @@ def test_cli_snapshot(tmp_path):
     contracts = tmp_path / "contracts.json"
     contracts.write_text('{"main": "v1"}')
     
-    result = subprocess.run([
-        sys.executable, "-m", "cortex.integration.cli", "snapshot",
+    result = run_cli([
+        "snapshot",
         "--agents-md", str(agents_md),
         "--contracts", str(contracts)
-    ], cwd=tmp_path, capture_output=True, text=True)
+    ], cwd=tmp_path)
     
     assert result.returncode == 0
     snapshot_file = tmp_path / "output" / "morph_snapshot.json"
@@ -47,12 +57,12 @@ def test_cli_bridge(tmp_path):
     act = tmp_path / "act.json"
     act.write_text('{"route": "cmd", "params": []}')
     
-    result = subprocess.run([
-        sys.executable, "-m", "cortex.integration.cli", "bridge",
+    result = run_cli([
+        "bridge",
         "--agent-id", "agent-x",
         "--expected", str(exp),
         "--actual", str(act)
-    ], cwd=tmp_path, capture_output=True, text=True)
+    ], cwd=tmp_path)
     
     assert result.returncode == 0
     bridge_file = tmp_path / "output" / "bridge_artifact.json"
@@ -63,11 +73,12 @@ def test_cli_verify(tmp_path):
     bundle = tmp_path / "bundle.json"
     bundle.write_text('{"agent_id": "x", "fingerprint": "y", "timestamp": 1.0, "capabilities": {}, "schema_version": "1.0"}')
     
-    result = subprocess.run([
-        sys.executable, "-m", "cortex.integration.cli", "verify",
+    result = run_cli([
+        "verify",
         "--bundle", str(bundle)
-    ], cwd=tmp_path, capture_output=True, text=True)
+    ], cwd=tmp_path)
     
     assert result.returncode == 0
     assert '"valid": true' in result.stdout
+
 
