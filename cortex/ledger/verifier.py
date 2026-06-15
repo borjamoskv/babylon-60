@@ -75,10 +75,11 @@ class LedgerVerifier:
         }
 
     def _get_mldsa_private_key(self):
-        import os
-        import stat
         import base64
+        import os
+
         from cryptography.hazmat.primitives.asymmetric import mldsa
+
         from cortex.crypto.aes import get_default_encrypter
         from cortex.crypto.keyring import keyring
 
@@ -94,10 +95,10 @@ class LedgerVerifier:
         if os.path.exists(key_path):
             # Enforce chmod 600 permissions
             os.chmod(key_path, 0o600)
-            
+
             with open(key_path, "rb") as key_file:
                 content = key_file.read()
-            
+
             if content.startswith(b"v6_aesgcm:"):
                 decrypted_str = encrypter.decrypt_str(content.decode("utf-8"), tenant_id="default")
                 if decrypted_str:
@@ -105,7 +106,7 @@ class LedgerVerifier:
             else:
                 # Legacy raw format
                 seed = content
-                
+
                 # If master key is active, migrate to encrypted format
                 if encrypter.is_active:
                     seed_b64 = base64.b64encode(seed).decode("utf-8")
@@ -141,7 +142,7 @@ class LedgerVerifier:
         if seed is None:
             private_key = mldsa.MLDSA44PrivateKey.generate()
             seed = private_key.private_bytes_raw()
-            
+
             # Vault in keyring if available
             if keyring is not None and not os.environ.get("CORTEX_TESTING"):
                 try:
@@ -149,7 +150,7 @@ class LedgerVerifier:
                     keyring.set_password("cortex_v6", "mldsa_sovereign_seed", seed_b64)
                 except Exception:
                     pass
-            
+
             # Write to disk
             os.makedirs(db_dir, exist_ok=True)
             if encrypter.is_active:
@@ -165,7 +166,6 @@ class LedgerVerifier:
             return private_key
 
         return mldsa.MLDSA44PrivateKey.from_seed_bytes(seed)
-
 
     def create_checkpoint(self, batch_size: int = 10) -> int | None:
         from cortex.consensus.merkle import MerkleTree
