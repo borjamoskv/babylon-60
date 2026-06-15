@@ -219,6 +219,8 @@ class AgentRegisterRequest(BaseModel):
     name: str = Field(..., max_length=100)
     agent_type: str = Field("ai", description="ai, human, oracle, system")
     public_key: str = Field("", description="Optional Ed25519 public key")
+    capabilities: list[str] = Field(default_factory=list)
+    meta: dict[str, Any] = Field(default_factory=dict)
 
 
 class AgentResponse(BaseModel):

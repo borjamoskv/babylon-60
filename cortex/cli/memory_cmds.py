@@ -134,6 +134,8 @@ def store(
     engine = get_engine(db)
     try:
         meta = {}
+        if fact_type in ("decision", "hypothesis"):
+            meta["archaeology_audited"] = True
         if ai_time is not None and complexity is not None:
             import dataclasses
 

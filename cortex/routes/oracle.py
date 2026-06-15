@@ -24,6 +24,7 @@ from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine as AsyncCortexEngine
 from cortex.extensions.llm.manager import LLMManager
 from cortex.extensions.llm.router import IntentProfile
+from cortex.swarm.runtime import SubagentRequest
 
 __all__ = [
     "OracleRequest",
@@ -80,64 +81,62 @@ Scavenger for supply). You are performing a remote heuristic audit of the provid
 # ─── Endpoints ───────────────────────────────────────────────────────
 
 
-@router.post(
-    "/v1/oracle/audit",
-    response_model=OracleResponse,
-    responses={
-        500: {"description": "Oracle yielded no insights."},
-        502: {"description": "Oracle Engine Error: LLM provider is failing."},
-        503: {"description": "The Oracle is currently disconnected from the LLM core."},
-    },
-)
+
+from starlette.requests import Request
+
+
+@router.post("/v1/oracle/audit", response_model=OracleResponse, responses={500: {"description": "Oracle yielded no insights."}, 502: {"description": "Oracle Engine Error: Subagent failed."}, 503: {"description": "The Oracle is currently disconnected from the Swarm core."}})
 async def audit_target(
     req: OracleRequest,
+    request: Request,
     auth: Annotated[AuthResult, Depends(require_permission("read"))],
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ):
-    """
-    The Oracle: Run a Sovereign Agent audit.
-    Requires a valid CORTEX API Key (provisioned via Stripe subscription).
-    """
-    if not _llm_manager.available:
-        return JSONResponse(
-            status_code=503,
-            content={"detail": "The Oracle is currently disconnected from the LLM core."},
+    swarm_runner = getattr(request.app.state, "swarm_runner", None)
+
+    if swarm_runner is not None:
+        subreq = SubagentRequest(
+            task_id=f"oracle:{auth.tenant_id}:{req.target_url}",
+            kind="audit",
+            target_agent=req.agent_type,
+            prompt="audit",
+            context={
+                "target_url": str(req.target_url),
+                "depth": req.depth,
+                "tenant_id": auth.tenant_id,
+                "agent_type": req.agent_type,
+            },
+            timeout_ms=30_000,
+            max_retries=1,
         )
-
-    logger.info(
-        "Oracle Audit requested by %s for %s via %s",
-        auth.tenant_id,
-        req.target_url,
-        req.agent_type,
-    )
-
-    prompt = (
-        f"## Target URL: {req.target_url}\n"
-        f"## Requested Agent: {req.agent_type.upper()}\n"
-        f"## Audit Depth: {req.depth}/3\n\n"
-        "Generate a critical audit report for this target. Identify at least "
-        "3 critical vulnerabilities or massive performance/growth bottlenecks. "
-        "Provide actionable solutions."
-    )
-
-    try:
-        report = await _llm_manager.complete(
-            prompt=prompt,
-            system=ORACLE_SYSTEM_PROMPT,
-            temperature=0.2,
-            max_tokens=2048,
-            intent=IntentProfile.REASONING,
+        resp = await swarm_runner.invoke_subagent(subreq)
+        if not resp.ok:
+            raise HTTPException(status_code=502, detail=resp.error or "oracle_failed")
+        report = str(resp.output)
+    else:
+        if not _llm_manager.available:
+            return JSONResponse(status_code=503, content={"detail": "The Oracle is currently disconnected from the LLM core."})
+        prompt = (
+            f"## Target URL: {req.target_url}\n"
+            f"## Requested Agent: {req.agent_type.upper()}\n"
+            f"## Audit Depth: {req.depth}/3\n\n"
+            "Generate a critical audit report for this target. Identify at least "
+            "3 critical vulnerabilities or massive performance/growth bottlenecks. "
+            "Provide actionable solutions."
         )
-    except (OSError, RuntimeError) as e:
-        logger.error("Oracle execution failed: %s", e)
-        raise HTTPException(status_code=502, detail=f"Oracle Engine Error: {e!s}") from e
-
-    if not report:
-        raise HTTPException(status_code=500, detail="Oracle yielded no insights.")
+        try:
+            report = await _llm_manager.complete(
+                prompt=prompt,
+                system=ORACLE_SYSTEM_PROMPT,
+                temperature=0.2,
+                max_tokens=2048,
+                intent=IntentProfile.REASONING,
+            )
+        except (OSError, RuntimeError) as e:
+            raise HTTPException(status_code=502, detail=f"Oracle Engine Error: {e!s}") from e
 
     confidence = 0.89 + (req.depth * 0.03)
 
-    # Vector Alpha: Persist the audit findings in the immutable ledger
     try:
         await engine.store(
             project="the_oracle",
@@ -146,11 +145,7 @@ async def audit_target(
             fact_type="oracle_audit",
             tags=["oracle", req.agent_type, str(req.target_url)],
             source=f"agent:{req.agent_type}",
-            meta={
-                "confidence": confidence,
-                "target_url": str(req.target_url),
-                "depth": req.depth,
-            },
+            meta={"confidence": confidence, "target_url": str(req.target_url), "depth": req.depth},
         )
     except Exception as e:
         logger.warning("Failed to persist Oracle audit to ledger: %s", e)

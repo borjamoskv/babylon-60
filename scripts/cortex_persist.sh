@@ -1,6 +1,7 @@
 #!/bin/bash
 # [C5-REAL] Exergy-Maximized
-cd ~/cortex
+cd "$(dirname "$0")/.."
+export CORTEX_TESTING=1
 
 echo "Persistiendo decisión arquitectónica en CORTEX..."
 .venv/bin/python -m cortex.cli store --type decision cortex "UBERMIND-OMEGA: Erradicó bare exceptions genéricas y transmuto a excepciones arquitectónicas (sqlite3.Error, OSError, ValueError) en scripts de terminal y comandos CLI (tips, reflect, launchpad, trust, vote) para elevar higiene a 130/100."

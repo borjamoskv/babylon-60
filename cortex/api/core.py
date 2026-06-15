@@ -135,7 +135,39 @@ async def lifespan(app: FastAPI):
     notification_bus = setup_notifications(config)
     api_state.notification_bus = notification_bus  # type: ignore[reportAttributeAccessIssue]
 
-    # 7. V4 Singularity Daemons (Execution Plane Only)
+    from cortex.routes.oracle import ORACLE_SYSTEM_PROMPT, _llm_manager
+    from cortex.swarm.handlers import MemoryHandler, OracleHandler
+    from cortex.swarm.runtime import AgentCapability, AgentRegistry, SubagentRunner
+
+    swarm_registry = AgentRegistry()
+    swarm_runner = SubagentRunner(swarm_registry)
+    swarm_registry.register(
+        AgentCapability(
+            name="oracle",
+            kinds=["audit", "reason"],
+            tags=["remote", "llm"],
+            priority=10,
+            max_concurrent=4,
+        )
+    )
+    swarm_registry.register(
+        AgentCapability(
+            name="memory",
+            kinds=["store", "retrieve", "summarize", "memory"],
+            tags=["local", "persistent"],
+            priority=8,
+            max_concurrent=2,
+        )
+    )
+    swarm_runner.register_handler(
+        "oracle", OracleHandler(_llm_manager, ORACLE_SYSTEM_PROMPT), max_concurrent=4
+    )
+    swarm_runner.register_handler(
+        "memory", MemoryHandler(engine=async_engine), max_concurrent=2
+    )
+    app.state.swarm_registry = swarm_registry
+    app.state.swarm_runner = swarm_runner
+
     if config.DEPLOY_MODE != "cloud":
         watcher = start_knowledge_daemon()
         swarm_daemon = start_swarm_daemon()

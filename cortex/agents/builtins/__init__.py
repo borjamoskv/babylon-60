@@ -2,6 +2,7 @@
 
 from cortex.agents.builtins.copilot_agent import CopilotAgent
 from cortex.agents.builtins.handoff_agent import HandoffAgent
+from cortex.agents.builtins.materializer_agent import MaterializerAgent
 from cortex.agents.builtins.memory_agent import MemoryAgent
 from cortex.agents.builtins.moskv_videntia_agent import MoskvVidentiaAgent
 from cortex.agents.builtins.nightshift_agent import NightshiftAgent
@@ -14,6 +15,7 @@ __all__ = [
     "MoskvVidentiaAgent",
     "CopilotAgent",
     "HandoffAgent",
+    "MaterializerAgent",
     "MemoryAgent",
     "NightshiftAgent",
     "OmegaPrimeAgent",

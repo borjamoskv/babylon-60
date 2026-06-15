@@ -279,3 +279,37 @@ def build_telemetry_js_source(api_endpoint: str) -> str:
     }}
     return new Uint8Array([0]);
     """
+
+from cortex.swarm.runtime import SubagentRequest
+
+
+class Web3OracleWorker:
+    """Worker node that conforms to the Swarm AgentHandler protocol."""
+    
+    def __init__(self, oracle_client: CortexOracleClient):
+        self.client = oracle_client
+        self.worker_id = "worker_web3_oracle_01"
+
+    async def run(self, req: SubagentRequest) -> Any:
+        request_id_hex = req.context.get("request_id")
+        if not request_id_hex:
+            raise ValueError("No request_id provided in context")
+            
+        try:
+            # We need to convert hex string back to bytes for the client if needed, 
+            # assuming client handles hex or we do it here. Let's assume bytes are required.
+            if isinstance(request_id_hex, str) and request_id_hex.startswith("0x"):
+                request_id_bytes = bytes.fromhex(request_id_hex[2:])
+            elif isinstance(request_id_hex, bytes):
+                request_id_bytes = request_id_hex
+            else:
+                request_id_bytes = request_id_hex.encode("utf-8")
+                
+            success = await self.client.async_wait_for_completion(request_id_bytes)
+            if not success:
+                raise RuntimeError("CortexOracleClient wait for completion failed")
+                
+            return {"status": "completed"}
+        except Exception as e:
+            raise RuntimeError(f"Web3OracleWorker execution failed: {e}")
+
