@@ -9,7 +9,6 @@ Implements multi-turn trajectory-aware input classification and semantic output 
 import logging
 import hashlib
 import string
-import numpy as np
 from collections import deque
 from typing import Dict, Any, List, Tuple
 
@@ -132,7 +131,8 @@ class PromptSecurityGuard:
         semantic = max(0.0, self._calculate_semantic_similarity(response_text))
         
         # Bounded score
-        current_score = float(np.clip((0.3 * overlap) + (0.7 * semantic), 0.0, 1.0))
+        raw_score = (0.3 * overlap) + (0.7 * semantic)
+        current_score = float(max(0.0, min(1.0, raw_score)))
         self.history_scores.append(current_score)
         
         rolling_avg = sum(self.history_scores) / len(self.history_scores)
