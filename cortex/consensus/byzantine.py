@@ -430,3 +430,35 @@ class WBFTConsensus:
         quorum_bonus = 0.15 if quorum_met else 0.0
 
         return min(1.0, (trust_ratio * 0.4) + (avg_trust * 0.45) + quorum_bonus)
+
+    # ── Morphogenetic Quorum (Bootstrap Paradox Mitigation) ────────
+
+class MorphogeneticQuorum:
+    """
+    [C5-REAL] Resolves the Bootstrap Paradox for H-MORPH-01.
+    Requires a validator quorum to approve a state repair or AST peer adapter.
+    """
+    
+    def __init__(self, target_validator_hash: str):
+        self.target_validator_hash = target_validator_hash
+        self.active_validators: dict[str, str] = {}  # node_id -> ast_hash
+        
+    def register_validator(self, node_id: str, ast_hash: str) -> None:
+        self.active_validators[node_id] = ast_hash
+        
+    def get_quorum_size(self) -> int:
+        n = len(self.active_validators)
+        return (n + 1) // 2
+        
+    def is_repair_approved(self, node_id: str) -> bool:
+        """
+        A state repair or peer adapter is approved only if a quorum 
+        of valid peers asserts validity.
+        """
+        valid_peers = [
+            vid for vid, vhash in self.active_validators.items()
+            if vhash == self.target_validator_hash and vid != node_id
+        ]
+        
+        return len(valid_peers) >= self.get_quorum_size()
+
