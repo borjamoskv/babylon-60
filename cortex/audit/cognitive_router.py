@@ -397,5 +397,3 @@ class CognitiveRouter:
             return True
         except Exception:
             return False
-
-

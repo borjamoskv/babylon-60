@@ -29,8 +29,6 @@ except ImportError:
 logger = logging.getLogger("cortex.engine.causality")
 
 
-
-
 class AsyncCausalGraph:
     def __init__(self, conn: aiosqlite.Connection) -> None:
         self.conn = conn
@@ -97,7 +95,6 @@ class AsyncCausalGraph:
         parent_hash: str | None = None,
     ) -> None:
         await self.ensure_table(commit=False)
-
 
         # 1. Look up missing hashes via DIP
         if not fact_hash:
@@ -581,5 +578,3 @@ class AsyncCausalGraph:
         async with self.conn.execute(sql, (fact_id, tenant_id, tenant_id)) as cursor:
             row = await cursor.fetchone()
         return int(row[0]) if row and row[0] is not None else 0
-
-

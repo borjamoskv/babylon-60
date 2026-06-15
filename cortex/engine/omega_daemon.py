@@ -3,6 +3,7 @@
 C5-REAL OmegaDaemon — Macro-organismo que reside en memoria y evalúa termodinámica del sistema.
 Claim: Zero-Prompt Operation mediante ExergyGuard + EntropySensor.
 """
+
 import asyncio
 import logging
 import os
@@ -48,29 +49,25 @@ class ExergyGuard:
     def check_ram_free_mb(self) -> float:
         """RAM libre en MB (macOS vm_stat)."""
         try:
-            result = subprocess.run(
-                ["vm_stat"], capture_output=True, text=True, timeout=5
-            )
+            result = subprocess.run(["vm_stat"], capture_output=True, text=True, timeout=5)
             pages_free = 0
             for line in result.stdout.splitlines():
                 if "Pages free" in line:
                     pages_free = int(line.split(":")[1].strip().rstrip("."))
                     break
             return pages_free * 16384 / (1024 * 1024)  # MB
-        except Exception:
+        except (OSError, subprocess.SubprocessError, ValueError, IndexError):
             return 0.0
 
     def get_ram_pressure(self) -> str:
         """RAM pressure de macOS (memory_pressure)."""
         try:
-            result = subprocess.run(
-                ["memory_pressure"], capture_output=True, text=True, timeout=5
-            )
+            result = subprocess.run(["memory_pressure"], capture_output=True, text=True, timeout=5)
             for line in result.stdout.splitlines():
                 if "RAM pressure" in line:
                     return line.split(":")[1].strip()
             return "unknown"
-        except Exception:
+        except (OSError, subprocess.SubprocessError, ValueError, IndexError):
             return "unknown"
 
     def check(self) -> dict:
@@ -169,8 +166,7 @@ class EntropySensor:
         """CPU load promedio (top -l 1)."""
         try:
             result = subprocess.run(
-                ["top", "-l", "1", "-o", "cpu"],
-                capture_output=True, text=True, timeout=5
+                ["top", "-l", "1", "-o", "cpu"], capture_output=True, text=True, timeout=5
             )
             for line in result.stdout.splitlines():
                 if "CPU usage" in line:
@@ -178,7 +174,7 @@ class EntropySensor:
                     if match:
                         return (float(match.group(1)) + float(match.group(2))) / 100.0
             return 0.0
-        except Exception:
+        except (OSError, subprocess.SubprocessError, ValueError, IndexError):
             return 0.0
 
     def check_swap_mb(self) -> float:
@@ -193,7 +189,7 @@ class EntropySensor:
                     if match:
                         return float(match.group(1))
             return 0.0
-        except Exception:
+        except (OSError, subprocess.SubprocessError, ValueError, IndexError):
             return 0.0
 
     def sense(self) -> dict:
@@ -260,9 +256,7 @@ class OmegaDaemon:
         self.last_entropy = entropy
         timestamp = datetime.now().strftime("%H:%M:%S")
 
-        self.events.append(
-            f"[{timestamp}] Iniciando ciclo... Entropía código: {entropy:.2f} J"
-        )
+        self.events.append(f"[{timestamp}] Iniciando ciclo... Entropía código: {entropy:.2f} J")
 
         # Monitor physical telemetry
         ex = self.guard.check()

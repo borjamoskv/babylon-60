@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from decimal import Decimal
 from enum import Enum
 from typing import Any
 
@@ -28,7 +29,7 @@ class PathogenProfile:
     entropy_score: float
     contradiction_density: float
     provenance_confidence: float
-    mutation_risk: float
+    mutation_risk: Decimal
     replication_potential: float
     causal_reach: float
     reversibility: float
@@ -39,7 +40,7 @@ class PathogenProfile:
             self.entropy_score * 0.16
             + self.contradiction_density * 0.18
             + (1.0 - self.provenance_confidence) * 0.18
-            + self.mutation_risk * 0.16
+            + float(self.mutation_risk) * 0.16
             + self.replication_potential * 0.20
             + self.causal_reach * 0.07
             + (1.0 - self.reversibility) * 0.03

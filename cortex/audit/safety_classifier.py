@@ -9,6 +9,7 @@ from cortex.audit.cognitive_router import cosine_similarity
 
 logger = logging.getLogger("cortex.audit.safety_classifier")
 
+
 class SafetyClassifier:
     """Classifies user prompts using hybrid keyword tokens and semantic anchor embeddings."""
 
@@ -168,5 +169,3 @@ class SafetyClassifier:
                 logger.error("Semantic classification failed; falling back: %s", e)
 
         return sorted(list(matched_categories))
-
-

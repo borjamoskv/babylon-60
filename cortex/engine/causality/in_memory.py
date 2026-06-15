@@ -18,8 +18,6 @@ except ImportError:
 logger = logging.getLogger("cortex.engine.causality")
 
 
-
-
 class CausalGraph:
     def __init__(self) -> None:
         self._events: dict[str, LedgerEvent] = {}
@@ -66,5 +64,3 @@ def propagate_refutation(graph: CausalGraph, refuted_event_id: str, decay: float
         for child_id in graph.get_descendants(node_id):
             if child_id not in visited:
                 queue.append((child_id, depth + 1))
-
-

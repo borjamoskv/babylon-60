@@ -11,6 +11,7 @@ from __future__ import annotations
 import logging
 import statistics
 from dataclasses import dataclass, field
+from decimal import Decimal
 from typing import Any
 
 from cortex.engine import CortexEngine
@@ -34,7 +35,7 @@ class TrendReport:
     avg_delta: float
     positive_rate: float  # % of heals that actually improved score
     score_trend: str  # "improving", "stable", "declining", "insufficient_data"
-    decay_risk: float  # 0.0 = no risk, 1.0 = critical
+    decay_risk: Decimal  # 0.0 = no risk, 1.0 = critical
     stagnant: bool  # True if last N heals had delta <= 0
     scores: list[int] = field(default_factory=list)
     deltas: list[int] = field(default_factory=list)
@@ -47,7 +48,7 @@ class TrendReport:
             "avg_delta": round(self.avg_delta, 2),
             "positive_rate": round(self.positive_rate, 2),
             "score_trend": self.score_trend,
-            "decay_risk": round(self.decay_risk, 3),
+            "decay_risk": float(round(self.decay_risk, 3)),
             "stagnant": self.stagnant,
         }
 
@@ -59,7 +60,7 @@ class TrendReport:
             f"{icon} {self.project}: {self.score_trend} "
             f"(avg Δ{self.avg_delta:+.1f}, "
             f"{self.positive_rate:.0%} positive, "
-            f"decay={self.decay_risk:.1%})"
+            f"decay={float(self.decay_risk):.1%})"
         )
 
 
@@ -89,7 +90,7 @@ class EffectivenessTracker:
                 avg_delta=0.0,
                 positive_rate=0.0,
                 score_trend="insufficient_data",
-                decay_risk=0.0,
+                decay_risk=Decimal("0.0"),
                 stagnant=False,
             )
 
@@ -129,7 +130,7 @@ class EffectivenessTracker:
         self,
         project: str,
         sessions: list[dict[str, Any]] | None = None,
-    ) -> float:
+    ) -> Decimal:
         """Probability of score degradation (0.0 to 1.0).
 
         Based on:
@@ -141,13 +142,13 @@ class EffectivenessTracker:
             sessions = get_history(self.engine, project, limit=20)
 
         if len(sessions) < _MIN_SESSIONS_FOR_TREND:
-            return 0.0
+            return Decimal("0.0")
 
         deltas = [s["delta"] for s in sessions if s["delta"] is not None]
         scores = [s["score_after"] for s in sessions if s["score_after"] is not None]
 
         if not deltas:
-            return 0.0
+            return Decimal("0.0")
 
         # Factor 1: Recent negative delta ratio (last 5 sessions)
         recent = deltas[-_STAGNATION_WINDOW:]
@@ -170,8 +171,12 @@ class EffectivenessTracker:
         positive_rate = sum(1 for d in deltas if d > 0) / len(deltas)
         low_positive_penalty = max(0.0, 1.0 - positive_rate * 2)
 
-        risk = 0.4 * negative_ratio + 0.3 * min(trajectory_decay, 1.0) + 0.3 * low_positive_penalty
-        return min(risk, 1.0)
+        risk = Decimal(
+            str(
+                0.4 * negative_ratio + 0.3 * min(trajectory_decay, 1.0) + 0.3 * low_positive_penalty
+            )
+        )
+        return min(risk, Decimal("1.0"))
 
     def stagnation_alert(
         self,

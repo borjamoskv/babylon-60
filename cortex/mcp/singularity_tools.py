@@ -6,6 +6,7 @@ import logging
 import os
 import sys
 import time
+from decimal import Decimal
 
 from cortex.config import DB_PATH
 from cortex.database.core import connect
@@ -118,7 +119,7 @@ def register_singularity_tools(mcp) -> None:
             return f"CORTEX-MCP SQLite-Vec Engine Error: {e!s}"
 
     @mcp.tool()
-    def cortex_ledger_append(action: str, vector_id: str, yield_amount: float) -> str:
+    def cortex_ledger_append(action: str, vector_id: str, yield_amount: Decimal) -> str:
         """
         Cryptographic write to the CORTEX-Persist ledger. Secures Exergy via
         SHA-256 Merkle chain.
@@ -126,7 +127,7 @@ def register_singularity_tools(mcp) -> None:
         Args:
             action: Standard action name.
             vector_id: Execution target identifier (bounty, code hunt, etc).
-            yield_amount: Generated value or exergy unit delta (numeric float).
+            yield_amount: Generated value or exergy unit delta (numeric Decimal).
         """
         global _LEDGER_STATE
         if _LEDGER_STATE is None:
@@ -154,7 +155,7 @@ def register_singularity_tools(mcp) -> None:
                 "timestamp": timestamp,
                 "action": action,
                 "vector_id": vector_id,
-                "yield_amount": yield_amount,
+                "yield_amount": str(yield_amount),
                 "hash": block_hash,
             }
         )
@@ -173,7 +174,7 @@ def register_singularity_tools(mcp) -> None:
                     "hash": block_hash,
                     "action": action,
                     "vector_id": vector_id,
-                    "yield_amount": yield_amount,
+                    "yield_amount": str(yield_amount),
                 },
                 source="mcp",
             )

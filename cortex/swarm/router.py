@@ -28,23 +28,22 @@ class SwarmRouter:
     # Public API
     # ------------------------------------------------------------------
 
-
     def route(self, request: dict) -> dict:
         if self.graph_source is not None:
             raw_candidates = self.graph_source.get_candidates(request["task"])
             candidates = [c.to_dict() for c in raw_candidates]
             registry_snapshot = self._frozen_snapshot()
         else:
-            if hasattr(self.registry, '_frozen') and not self.registry._frozen:
+            if hasattr(self.registry, "_frozen") and not self.registry._frozen:
                 self.registry.freeze()
             raw_candidates = sorted(
                 self.registry.get_candidates(request.get("task", "")),
-                key=lambda a: getattr(a, 'agent_id', getattr(a, 'name', str(a)))
+                key=lambda a: getattr(a, "agent_id", getattr(a, "name", str(a))),
             )
             # Ensure agent_id is populated from name if missing
             candidates = []
             for a in raw_candidates:
-                if hasattr(a, '__dict__'):
+                if hasattr(a, "__dict__"):
                     d = dict(a.__dict__)
                     d.setdefault("agent_id", d.get("name", str(a)))
                     candidates.append(d)
@@ -52,12 +51,15 @@ class SwarmRouter:
                     candidates.append(a)
                 else:
                     candidates.append({"agent_id": str(a)})
-                    
+
             if not candidates:
                 # Fallback to all agents sorted
-                all_agents = sorted(self.registry.all(), key=lambda a: getattr(a, 'agent_id', getattr(a, 'name', str(a))))
+                all_agents = sorted(
+                    self.registry.all(),
+                    key=lambda a: getattr(a, "agent_id", getattr(a, "name", str(a))),
+                )
                 for a in all_agents:
-                    if hasattr(a, '__dict__'):
+                    if hasattr(a, "__dict__"):
                         d = dict(a.__dict__)
                         d.setdefault("agent_id", d.get("name", str(a)))
                         candidates.append(d)
@@ -105,9 +107,9 @@ class SwarmRouter:
 
     def _frozen_snapshot(self) -> dict:
         """Deep-frozen, sorted snapshot of registry state."""
-        if hasattr(self.registry, 'snapshot'):
+        if hasattr(self.registry, "snapshot"):
             raw = self.registry.snapshot()
-        elif hasattr(self.registry, 'to_dict'):
+        elif hasattr(self.registry, "to_dict"):
             raw = self.registry.to_dict()
         else:
             raw = {}
@@ -118,13 +120,14 @@ class SwarmRouter:
 # Pure functions  (no self, no side-effects)
 # ------------------------------------------------------------------
 
+
 def _dispatch(candidates: list[dict], request: dict) -> dict:
     """Pure selection: scores candidates based on capability overlap, ties broken by agent_id."""
     if not candidates:
         raise ValueError(f"No candidates for task: {request.get('task', '')}")
-    
+
     task_lower = request.get("task", "").lower()
-    
+
     def score_candidate(c: dict) -> tuple[float, int, str]:
         # Priority 1: Salience (from SN graph, if present)
         salience = c.get("salience", 0.0)
@@ -133,15 +136,15 @@ def _dispatch(candidates: list[dict], request: dict) -> dict:
         cap_score = sum(1 for cap in caps if isinstance(cap, str) and cap.lower() in task_lower)
         # Priority 3: Alphabetical tie-breaker
         return (-float(salience), -cap_score, str(c.get("agent_id", "unknown")))
-    
+
     ranked_candidates = sorted(candidates, key=score_candidate)
     selected_agents = [c.get("agent_id") for c in ranked_candidates if "agent_id" in c]
-    
+
     best_candidate = ranked_candidates[0]
     payload = {
         "agent_id": best_candidate.get("agent_id", "unknown"),
         "selected_agents": selected_agents,
-        "match_score": -score_candidate(best_candidate)[0]
+        "match_score": -score_candidate(best_candidate)[0],
     }
     payload.update(best_candidate)
     return payload
@@ -156,6 +159,7 @@ def _deep_sorted(obj):
     if isinstance(obj, set) or isinstance(obj, frozenset):
         return sorted([_deep_sorted(i) for i in obj])
     return obj
+
 
 def _is_json_serializable(v):
     try:

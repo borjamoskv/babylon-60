@@ -24,6 +24,7 @@ import logging
 import time
 from collections.abc import Iterable
 from dataclasses import dataclass, field
+from decimal import Decimal
 from enum import Enum, auto
 from typing import Any, Final
 
@@ -74,13 +75,13 @@ class LayerSignal:
     """A normalized signal from one cognitive layer."""
 
     layer: LayerID
-    score: float  # Normalized [0.0, 1.0] confidence/relevance
+    score: Decimal  # Normalized [0.0, 1.0] confidence/relevance
     raw_value: Any  # Original value from the layer (for audit)
     metadata: dict[str, Any] = field(default_factory=dict)
     timestamp_ns: int = field(default_factory=lambda: time.time_ns())
 
     def __post_init__(self) -> None:
-        if not (0.0 <= self.score <= 1.0):
+        if not (Decimal("0.0") <= self.score <= Decimal("1.0")):
             raise ValueError(
                 f"[META-ARBITER] LayerSignal score must be in [0,1], got {self.score} "
                 f"from {self.layer.value}"
@@ -102,10 +103,10 @@ class ArbiterVerdict:
     """The canonical output of the Meta-Arbiter."""
 
     resolution: Resolution
-    fused_score: float  # Final arbitrated confidence [0,1]
+    fused_score: Decimal  # Final arbitrated confidence [0,1]
     winning_layer: LayerID | None  # Which layer dominated (if applicable)
     conflicts: list[ConflictPair]
-    layer_signals: dict[str, float]  # Snapshot of all input scores
+    layer_signals: dict[str, Decimal]  # Snapshot of all input scores
     audit_hash: str  # SHA-256 of the verdict for ledger tracing
     reasoning: str  # Human-readable justification
     timestamp_ns: int = field(default_factory=lambda: time.time_ns())
@@ -176,7 +177,7 @@ class MetaArbiter:
         if not signals:
             return ArbiterVerdict(
                 resolution=Resolution.ABSTAIN,
-                fused_score=0.0,
+                fused_score=Decimal("0.0"),
                 winning_layer=None,
                 conflicts=[],
                 layer_signals=score_map,
@@ -186,7 +187,7 @@ class MetaArbiter:
 
         # ── Phase 1: Ledger Veto Check ────────────────────────────
         l3 = signal_map.get(LayerID.L3_LEDGER)
-        if self._ledger_veto and l3 is not None and l3.score < 0.5:
+        if self._ledger_veto and l3 is not None and l3.score < Decimal("0.5"):
             logger.warning(
                 "🛡️ META-ARBITER: LEDGER VETO — L3 score %.2f < 0.5. "
                 "Immutable truth overrides all probabilistic layers.",
@@ -209,14 +210,14 @@ class MetaArbiter:
 
         # ── Phase 2: Confidence Floor Check ───────────────────────
         probabilistic = [s for s in signals if s.layer != LayerID.L3_LEDGER]
-        if probabilistic and all(s.score < self._confidence_floor for s in probabilistic):
+        if probabilistic and all(float(s.score) < self._confidence_floor for s in probabilistic):
             logger.warning(
                 "⚠️ META-ARBITER: ABSTAIN — All probabilistic layers below confidence floor (%.2f).",
                 self._confidence_floor,
             )
             return ArbiterVerdict(
                 resolution=Resolution.ABSTAIN,
-                fused_score=0.0,
+                fused_score=Decimal("0.0"),
                 winning_layer=None,
                 conflicts=[],
                 layer_signals=score_map,
@@ -301,7 +302,7 @@ class MetaArbiter:
         conflicts: list[ConflictPair] = []
         for i, a in enumerate(signals):
             for b in signals[i + 1 :]:
-                divergence = abs(a.score - b.score)
+                divergence = float(abs(a.score - b.score))
                 if divergence > self._conflict_threshold:
                     conflicts.append(
                         ConflictPair(
@@ -315,13 +316,13 @@ class MetaArbiter:
                     )
         return conflicts
 
-    def _weighted_fusion(self, signals: list[LayerSignal]) -> float:
+    def _weighted_fusion(self, signals: list[LayerSignal]) -> Decimal:
         """Compute the weighted average score across all layers."""
-        total_weight = 0.0
-        weighted_sum = 0.0
+        total_weight = Decimal("0.0")
+        weighted_sum = Decimal("0.0")
 
         for signal in signals:
-            w = self._weights.get(signal.layer.value, 0.0)
+            w = Decimal(str(self._weights.get(signal.layer.value, 0.0)))
             # L3 contributes as a binary gate if present
             if signal.layer == LayerID.L3_LEDGER:
                 # Ledger acts as a multiplier, not a weighted term
@@ -329,8 +330,8 @@ class MetaArbiter:
             weighted_sum += signal.score * w
             total_weight += w
 
-        if total_weight == 0.0:
-            return 0.0
+        if total_weight == Decimal("0.0"):
+            return Decimal("0.0")
 
         fused = weighted_sum / total_weight
 
@@ -341,24 +342,24 @@ class MetaArbiter:
         )
         if l3 is not None:
             # L3 acts as a confidence multiplier [0.5, 1.0] → [0.5x, 1.0x]
-            gate = 0.5 + (l3.score * 0.5)
+            gate = Decimal("0.5") + (l3.score * Decimal("0.5"))
             fused *= gate
 
-        return min(1.0, max(0.0, fused))
+        return min(Decimal("1.0"), max(Decimal("0.0"), fused))
 
     def _dominant_layer(self, signals: list[LayerSignal]) -> LayerID | None:
         """Find the layer with highest weighted contribution."""
         if not signals:
             return None
         best_layer = signals[0].layer
-        best_score = -1.0
+        best_score = Decimal("-1.0")
 
         for signal in signals:
-            w = self._weights.get(signal.layer.value, 0.0)
+            w = Decimal(str(self._weights.get(signal.layer.value, 0.0)))
             effective = signal.score * w
             if signal.layer == LayerID.L3_LEDGER:
                 # Ledger dominance is handled via veto, not weight
-                effective = signal.score * 0.5
+                effective = signal.score * Decimal("0.5")
             if effective > best_score:
                 best_score = effective
                 best_layer = signal.layer
@@ -367,12 +368,13 @@ class MetaArbiter:
 
     @staticmethod
     def _compute_audit_hash(
-        score_map: dict[str, float],
+        score_map: dict[str, Decimal],
         context: str,
     ) -> str:
         """Deterministic hash for ledger tracing of this verdict."""
+        serializable_scores = {k: float(v) for k, v in score_map.items()}
         payload = json.dumps(
-            {"scores": score_map, "context": context},
+            {"scores": serializable_scores, "context": context},
             sort_keys=True,
         )
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
@@ -521,7 +523,7 @@ class MetaArbiterKernel:
             return state.height
         try:
             return hash(state)
-        except Exception:
+        except TypeError:
             return repr(state)
 
     # ------------------------------------------------------------------

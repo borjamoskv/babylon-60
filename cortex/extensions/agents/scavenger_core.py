@@ -13,6 +13,7 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from decimal import Decimal
 from typing import Any
 
 from cortex.events.bus import DistributedEventBus
@@ -91,9 +92,9 @@ def valve_cadastral_radar(lat: float, lon: float) -> dict[str, Any]:
     return {"clear": False, "reason": "Unknown zone classification"}
 
 
-def valve_scrap_negotiator(item: str, owner: str | None, ask_price: float) -> float:
+def valve_scrap_negotiator(item: str, owner: str | None, ask_price: Decimal) -> Decimal:
     """Válvula 3: Scrap Negotiator."""
-    return 0.0
+    return Decimal("0.0")
 
 
 @dataclass(frozen=True)
@@ -162,7 +163,11 @@ class ScavengerAgent:
         # 3. Handle negotiation
         req_nego = legal_status.get("requires_negotiation", False)
         owner = legal_status.get("owner")
-        final_price = valve_scrap_negotiator(obs.raw_text, owner, 0.0) if req_nego else 0.0
+        final_price = (
+            valve_scrap_negotiator(obs.raw_text, owner, Decimal("0.0"))
+            if req_nego
+            else Decimal("0.0")
+        )
 
         # 4. Dispatch Logistics (Dummy mass)
         plan = valve_geo_logistics(item_mass_tons=1.5, lat=0.0, lon=0.0)

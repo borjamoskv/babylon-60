@@ -177,7 +177,7 @@ async def _phase_observability(ctx: SovereignContext) -> PipelineResult:
     init_telemetry()
 
     # Seed initial scores and apply the 130/100 sovereign multiplier
-         # Seed initial scores and apply the 130/100 sovereign multiplier
+    # Seed initial scores and apply the 130/100 sovereign multiplier
     scores = {dim.value: 100.0 for dim in Dimension}
     power = compute_power(scores, multiplier=1.3)
     ctx.power = power

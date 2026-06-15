@@ -20,6 +20,7 @@ import math
 import time
 from collections import deque
 from dataclasses import dataclass, field
+from decimal import Decimal
 from typing import Any
 
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
@@ -52,7 +53,7 @@ class Prediction:
 
     type: str
     subsystem: str
-    confidence: float  # 0.0–1.0
+    confidence: Decimal  # 0.0–1.0
     estimated_time_to_failure_s: float
     current_value: float
     threshold: float
@@ -64,7 +65,7 @@ class Prediction:
         return {
             "type": self.type,
             "subsystem": self.subsystem,
-            "confidence": round(self.confidence, 3),
+            "confidence": float(round(self.confidence, 3)),
             "estimated_ttf_s": round(self.estimated_time_to_failure_s, 1),
             "current_value": round(self.current_value, 4),
             "threshold": round(self.threshold, 4),
@@ -75,7 +76,7 @@ class Prediction:
 
     @property
     def is_critical(self) -> bool:
-        return self.confidence > 0.8 and self.estimated_time_to_failure_s < 60
+        return self.confidence > Decimal("0.8") and self.estimated_time_to_failure_s < 60
 
 
 # ─── Trend Analysis ──────────────────────────────────────────────
@@ -322,7 +323,7 @@ class PredictiveHealer:
         if ttf is None or ttf > 3600:  # Don't predict beyond 1 hour
             return None
 
-        confidence = min(1.0, r_sq * (1.0 - (ttf / 3600)))
+        confidence = min(Decimal("1.0"), Decimal(str(r_sq * (1.0 - (ttf / 3600)))))
 
         return Prediction(
             type=PredictionType.ERROR_RATE_RISING,
@@ -357,7 +358,7 @@ class PredictiveHealer:
         if ttf is None or ttf > 1800:
             return None
 
-        confidence = min(1.0, r_sq * 0.9)
+        confidence = min(Decimal("1.0"), Decimal(str(r_sq * 0.9)))
 
         return Prediction(
             type=PredictionType.LATENCY_DRIFT,
@@ -394,7 +395,7 @@ class PredictiveHealer:
             next_predicted = mean_interval - time_since_last
 
             if next_predicted > 0:
-                confidence = max(0.0, min(1.0, 1.0 - cv))
+                confidence = max(Decimal("0.0"), min(Decimal("1.0"), Decimal(str(1.0 - cv))))
                 return Prediction(
                     type=PredictionType.RECURRING_PATTERN,
                     subsystem=subsystem,
@@ -422,7 +423,7 @@ class PredictiveHealer:
         if ttf is None or ttf > 600:  # 10 min horizon
             return None
 
-        confidence = min(1.0, r_sq * 0.85)
+        confidence = min(Decimal("1.0"), Decimal(str(r_sq * 0.85)))
 
         return Prediction(
             type=PredictionType.CORTISOL_MOMENTUM,

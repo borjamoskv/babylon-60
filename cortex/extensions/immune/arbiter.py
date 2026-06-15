@@ -16,6 +16,7 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass, field
+from decimal import Decimal
 from enum import Enum, auto
 from typing import Any
 
@@ -35,14 +36,14 @@ class Verdict(Enum):
 class FilterResult:
     filter_id: str
     verdict: Verdict
-    score: float  # 0 to 100
+    score: Decimal  # 0 to 100
     justification: str
 
 
 @dataclass
 class TriageResult:
     verdict: Verdict
-    triage_score: float
+    triage_score: Decimal
     filter_results: list[FilterResult]
     blast_radius: float
     immunity_certificate: bool
@@ -115,7 +116,7 @@ class ImmuneArbiter:
                 max_r = r_level
 
         # Scoring: lower levels = higher score (safer)
-        score = 100 - (max_r * 25)
+        score = Decimal(str(100 - (max_r * 25)))
         verdict = Verdict.PASS if max_r <= 1 else Verdict.HOLD
 
         return FilterResult(
@@ -135,7 +136,7 @@ class ImmuneArbiter:
         Uses EvolutionaryFalsifier to check if plan assumptions are
         testable and falsifiable (Popperian criterion).
         """
-        score = 85.0
+        score = Decimal("85.0")
         justification = "No adversarial patterns detected."
         verdict = Verdict.PASS
 
@@ -149,7 +150,7 @@ class ImmuneArbiter:
                     if result:
                         falsifiable += 1
                 ratio = falsifiable / len(assumptions)
-                score = ratio * 100.0
+                score = Decimal(str(ratio * 100.0))
                 if ratio < 0.5:
                     verdict = Verdict.HOLD
                     justification = (
@@ -165,7 +166,7 @@ class ImmuneArbiter:
                 sig_lower = signal.lower()
                 echo_count = sum(1 for a in actions if sig_lower in str(a.get("type", "")).lower())
                 if echo_count > len(actions) * 0.7:
-                    score = min(score, 40.0)
+                    score = min(score, Decimal("40.0"))
                     verdict = Verdict.HOLD
                     justification += (
                         " Echo-chamber pattern detected"
@@ -174,7 +175,7 @@ class ImmuneArbiter:
                     )
         except Exception as e:
             logger.debug("F2 degraded to heuristic: %s", e)
-            score = 70.0
+            score = Decimal("70.0")
             justification = f"Degraded: {e}"
 
         return FilterResult(
@@ -192,7 +193,7 @@ class ImmuneArbiter:
         - Missing prerequisite actions
         - Dead-end actions with no outcome
         """
-        score = 90.0
+        score = Decimal("90.0")
         justification = "Causal chain verified."
         verdict = Verdict.PASS
 
@@ -202,7 +203,7 @@ class ImmuneArbiter:
                 return FilterResult(
                     filter_id="F3_CAUSAL",
                     verdict=Verdict.PASS,
-                    score=100.0,
+                    score=Decimal("100.0"),
                     justification="No actions to verify.",
                 )
 
@@ -217,7 +218,7 @@ class ImmuneArbiter:
             missing = requires - produces
             if missing:
                 penalty = min(50.0, len(missing) * 10.0)
-                score -= penalty
+                score -= Decimal(str(penalty))
                 justification = (
                     f"{len(missing)} missing prerequisite(s): {', '.join(sorted(missing)[:3])}"
                 )
@@ -226,18 +227,18 @@ class ImmuneArbiter:
             # Dead-end detection: produces things nobody requires
             dead_ends = produces - requires
             if dead_ends and len(dead_ends) > len(actions):
-                score -= 10.0
+                score -= Decimal("10.0")
                 justification += f" {len(dead_ends)} dead-end output(s)."
 
         except Exception as e:
             logger.debug("F3 degraded to heuristic: %s", e)
-            score = 75.0
+            score = Decimal("75.0")
             justification = f"Degraded: {e}"
 
         return FilterResult(
             filter_id="F3_CAUSAL",
             verdict=verdict,
-            score=max(0.0, score),
+            score=max(Decimal("0.0"), score),
             justification=justification,
         )
 
@@ -250,7 +251,7 @@ class ImmuneArbiter:
         removed = plan.get("removed_lines", 0) * 0.1 + plan.get("f" + "ixme_resolved", 0) * 1.0
         delta = added - removed
 
-        score = max(0.0, 100.0 - (delta * 5))
+        score = max(Decimal("0.0"), Decimal("100.0") - Decimal(str(delta * 5)))
         verdict = Verdict.PASS if delta <= 0 else Verdict.HOLD
 
         return FilterResult(
@@ -260,18 +261,18 @@ class ImmuneArbiter:
             justification=f"Entropy delta: {delta:.2f} (Added: {added}, Removed: {removed})",
         )
 
-    def _filter_confidence(self, reported: float, r_score: float) -> FilterResult:
+    def _filter_confidence(self, reported: float, r_score: Decimal) -> FilterResult:
         """F5: Calibrates confidence against reversibility risk."""
         # Risk-adjusted threshold: higher risk (lower r_score) requires higher confidence
-        threshold = 1.0 - (r_score / 100.0)
+        threshold = 1.0 - (float(r_score) / 100.0)
 
         verdict = Verdict.PASS if reported >= threshold else Verdict.HOLD
-        score = (reported / max(0.1, threshold)) * 100
+        score = Decimal(str((reported / max(0.1, threshold)) * 100))
 
         return FilterResult(
             filter_id="F5_CONFIDENCE",
             verdict=verdict,
-            score=min(100.0, score),
+            score=min(Decimal("100.0"), score),
             justification=f"Reported: {reported:.2f}, Risk-Threshold: {threshold:.2f}",
         )
 
@@ -285,13 +286,13 @@ class ImmuneArbiter:
             "F5_CONFIDENCE": 0.10,
         }
 
-        total_score = 0.0
+        total_score = Decimal("0.0")
         is_blocked = any(r.verdict == Verdict.BLOCK for r in results)
         is_held = any(r.verdict == Verdict.HOLD for r in results)
 
         risks = []
         for r in results:
-            total_score += r.score * weights.get(r.filter_id, 0.0)
+            total_score += r.score * Decimal(str(weights.get(r.filter_id, 0.0)))
             if r.verdict == Verdict.HOLD:
                 risks.append(f"{r.filter_id}: {r.justification}")
 
@@ -304,13 +305,13 @@ class ImmuneArbiter:
 
         # Blast radius heuristic: inverse of reversibility score
         f1_res = next(r for r in results if r.filter_id == "F1_REVERSIBILITY")
-        blast_radius = 100.0 - f1_res.score
+        blast_radius = 100.0 - float(f1_res.score)
 
         return TriageResult(
             verdict=final_verdict,
             triage_score=total_score,
             filter_results=results,
             blast_radius=blast_radius,
-            immunity_certificate=(final_verdict == Verdict.PASS and total_score >= 85),
+            immunity_certificate=(final_verdict == Verdict.PASS and total_score >= Decimal("85.0")),
             risks_assumed=risks,
         )

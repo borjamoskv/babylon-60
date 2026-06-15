@@ -8,6 +8,7 @@ from cortex.audit.cognitive_router import CognitiveRouter, cosine_similarity
 
 logger = logging.getLogger("cortex.audit.router_debug")
 
+
 class RoutingReplayDebugger:
     """Deterministic trace debugger explaining why a model decision was made for auditing."""
 

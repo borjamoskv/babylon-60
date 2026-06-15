@@ -9,7 +9,6 @@ for semantic similarity matching. HMAC-SHA256 verified feeds.
 
 import json
 import logging
-import math
 import re
 import time
 from dataclasses import dataclass, field
@@ -185,4 +184,5 @@ class ThreatFeedEngine:
         High entropy (>4.5) suggests encoded/encrypted payloads.
         """
         from cortex.shannon.entropy import compute_character_entropy
+
         return compute_character_entropy(content)

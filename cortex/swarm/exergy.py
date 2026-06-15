@@ -5,6 +5,7 @@ Manages agent exergy (vitality) inside the Byzantine Swarm.
 
 import logging
 from dataclasses import dataclass
+from decimal import Decimal
 
 logger = logging.getLogger(__name__)
 
@@ -12,8 +13,8 @@ logger = logging.getLogger(__name__)
 @dataclass
 class AgentWallet:
     agent_id: str
-    balance: float
-    staked: float = 0.0
+    balance: Decimal
+    staked: Decimal = Decimal("0.0")
     successful_commits: int = 0
     failed_commits: int = 0
     is_alive: bool = True
@@ -24,9 +25,9 @@ class ExergyBank:
     Central Ledger for tracking the vitality (Exergy) of agents in the swarm.
     """
 
-    INITIAL_EXERGY = 1000.0  # Tokens fiat (Virtual representation of API Cost limits)
-    STAKE_REQUIRED_PER_PROPOSAL = 50.0
-    REWARD_MULTIPLIER = 1.5
+    INITIAL_EXERGY = Decimal("1000.0")  # Tokens fiat (Virtual representation of API Cost limits)
+    STAKE_REQUIRED_PER_PROPOSAL = Decimal("50.0")
+    REWARD_MULTIPLIER = Decimal("1.5")
 
     def __init__(self):
         self.wallets: dict[str, AgentWallet] = {}

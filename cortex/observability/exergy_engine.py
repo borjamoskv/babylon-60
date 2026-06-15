@@ -4,6 +4,7 @@ import os
 import statistics
 import time
 from dataclasses import asdict, dataclass
+from decimal import Decimal
 from typing import Any
 
 import numpy as np
@@ -19,7 +20,7 @@ WORKFLOWS_DIR = os.path.expanduser("~/.agents/workflows")
 
 @dataclass
 class MetaParams:
-    alpha_risk: float = 0.15
+    alpha_risk: Decimal = Decimal("0.15")
     learning_rate: float = 0.02
     epsilon: float = 0.05
     semantic_risk_weight: float = 0.2
@@ -100,6 +101,8 @@ class ExergyEngine:
             try:
                 with open(META_PARAMS_LOG, encoding="utf-8") as f:
                     data = json.load(f)
+                    if "alpha_risk" in data:
+                        data["alpha_risk"] = Decimal(str(data["alpha_risk"]))
                     return MetaParams(**data)
             except Exception as exc:
                 import logging
@@ -110,7 +113,9 @@ class ExergyEngine:
     def _save_meta_params(self):
         os.makedirs(os.path.dirname(META_PARAMS_LOG), exist_ok=True)
         with open(META_PARAMS_LOG, "w", encoding="utf-8") as f:
-            json.dump(asdict(self.meta), f, indent=2)
+            data = asdict(self.meta)
+            data["alpha_risk"] = float(data["alpha_risk"])
+            json.dump(data, f, indent=2)
 
     def _load_cronos_history(self) -> list[dict[str, Any]]:
         records = []
@@ -446,9 +451,9 @@ class ExergyEngine:
         old_alpha = self.meta.alpha_risk
 
         # Gradient update
-        self.meta.alpha_risk += self.meta.learning_rate * grad
-        self.meta.alpha_risk *= 0.999  # Entropy bleed
-        self.meta.alpha_risk = max(0.0, min(self.meta.alpha_risk, 1.0))
+        self.meta.alpha_risk += Decimal(str(self.meta.learning_rate * grad))
+        self.meta.alpha_risk *= Decimal("0.999")  # Entropy bleed
+        self.meta.alpha_risk = max(Decimal("0.0"), min(self.meta.alpha_risk, Decimal("1.0")))
 
         self._save_meta_params()
 

@@ -17,6 +17,7 @@ Coverage:
 
 from __future__ import annotations
 
+import asyncio
 import time
 from datetime import datetime, timezone
 from typing import Any
@@ -275,7 +276,7 @@ class TestAccumulator:
         )
         await engine.evaluate(_fake_signal())
         await engine.evaluate(_fake_signal())
-        time.sleep(0.15)
+        await asyncio.sleep(0.15)
         results = await engine.evaluate(_fake_signal())
         # Only 1 in window, threshold=3 not met
         assert not any(r.fired for r in results)
@@ -310,7 +311,7 @@ class TestCooldown:
             )
         )
         await engine.evaluate(_fake_signal())
-        time.sleep(0.15)
+        await asyncio.sleep(0.15)
         results = await engine.evaluate(_fake_signal())
         assert any(r.fired for r in results)
 

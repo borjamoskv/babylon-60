@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from decimal import Decimal
 from typing import Any
 
 from fastapi import Depends, Header, HTTPException, Request
@@ -96,7 +97,7 @@ def require_permission(permission: str | Permission):
 
 async def require_consensus(
     claim: str,
-    min_score: float = 1.6,
+    min_score: Decimal = Decimal("1.6"),
     engine: Any = Depends(lambda: None),
 ) -> bool:
     """Verify a claim has reached sufficient consensus with KV-Aware Caching (Ω₂)."""
@@ -120,11 +121,12 @@ async def require_consensus(
         return False
 
     res = results[0]
-    score = (
+    score_raw = (
         res.meta.get("consensus_score", 0.0)
         if hasattr(res, "meta")
         else res.get("consensus_score", 0.0)
     )
+    score = Decimal(str(score_raw))
 
     # Store in cache for future high-speed retrieval
     AUTH_CACHE.set(claim, tenant_id, score)
@@ -142,7 +144,7 @@ async def require_consensus(
 
 def require_verified_permission(
     permission: str,
-    min_consensus: float = 1.6,
+    min_consensus: Decimal = Decimal("1.6"),
 ):
     """Sovereign Gate: Requires both permission AND verified claim."""
 

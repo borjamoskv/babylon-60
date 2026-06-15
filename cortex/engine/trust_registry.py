@@ -13,6 +13,7 @@ import datetime
 import logging
 import time
 from collections.abc import Sequence
+from decimal import Decimal
 
 logger = logging.getLogger("cortex.engine.trust")
 
@@ -43,10 +44,10 @@ class WeightedProposal:
     proposal_id: str
     action: str
     domain: str
-    raw_confidence: float
-    trust_score: float = 0.0
-    influence_weight: float = 0.0
-    final_score: float = 0.0
+    raw_confidence: Decimal
+    trust_score: Decimal = Decimal("0.0")
+    influence_weight: Decimal = Decimal("0.0")
+    final_score: Decimal = Decimal("0.0")
     reasoning_ref: str | None = None
 
 
@@ -150,12 +151,12 @@ class TrustRegistry:
         # Normalize to [0, 1]
         return max(0.0, min(1.0, raw_score))
 
-    def compute_influence_weight(self, trust_score: float) -> float:
+    def compute_influence_weight(self, trust_score: Decimal) -> Decimal:
         """
         inf_weight = trust_score ^ gamma
         gamma > 1 heavily penalizes mediocre agents and zeroes out tainted ones.
         """
-        return trust_score**self.gamma
+        return trust_score ** Decimal(str(self.gamma))
 
     def rank_proposals(
         self,
@@ -170,13 +171,13 @@ class TrustRegistry:
         for prop in proposals:
             profile = self.get_profile(prop.agent_id)
             score = self.compute_trust_score(profile, domain_risk_modifier, now)
-            weight = self.compute_influence_weight(score)
+            weight = self.compute_influence_weight(Decimal(str(score)))
 
             # The final score is a combination of the agent's influence weight and their raw confidence for this specific proposal
             final_score = weight * prop.raw_confidence
 
             # Mutate the dataclass (or create a new one)
-            prop.trust_score = score
+            prop.trust_score = Decimal(str(score))
             prop.influence_weight = weight
             prop.final_score = final_score
             ranked.append(prop)
@@ -205,7 +206,7 @@ class TrustRegistry:
         runner_up = ranked[1]
 
         # Tie break handling (AXIOM: determinism)
-        if abs(top.final_score - runner_up.final_score) < 0.001:
+        if abs(top.final_score - runner_up.final_score) < Decimal("0.001"):
             # Deterministic fallback: Highest prior wins
             top_prior = self.get_profile(top.agent_id).prior
             runner_prior = self.get_profile(runner_up.agent_id).prior

@@ -3,6 +3,7 @@ import functools
 import inspect
 import logging
 from collections.abc import Callable
+from decimal import Decimal
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -48,7 +49,7 @@ def seal_decision(fact_type: str, client_id_kwarg: str = "client_id"):
                 # In a real integration, result would be typed or mapped to TaxFactPayload
                 payload = TaxFactPayload(
                     action=func.__name__,
-                    amount_eur=0.0,  # Placeholder, should be mapped from result
+                    amount_eur=Decimal("0.0"),  # Placeholder, should be mapped from result
                     tax_category="auto_extracted",
                     rationale=str(result)[:200],  # First 200 chars as rationale
                 )

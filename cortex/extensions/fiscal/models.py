@@ -1,12 +1,13 @@
 # [C5-REAL] Exergy-Maximized
 from dataclasses import asdict, dataclass
+from decimal import Decimal
 from typing import Any
 
 
 @dataclass(frozen=True)
 class TaxFactPayload:
     action: str
-    amount_eur: float
+    amount_eur: Decimal
     tax_category: str
     rationale: str
 

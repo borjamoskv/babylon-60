@@ -16,7 +16,6 @@ Defense Layers:
 from __future__ import annotations
 
 import logging
-import math
 import re
 from dataclasses import dataclass, field
 from typing import Any
@@ -384,6 +383,7 @@ class InjectionGuard:
     def _entropy(text: str) -> float:
         """Shannon entropy of text. High = possibly encoded/encrypted."""
         from cortex.shannon.entropy import compute_character_entropy
+
         return compute_character_entropy(text)
 
 

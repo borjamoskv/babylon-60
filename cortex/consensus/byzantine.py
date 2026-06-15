@@ -38,6 +38,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
+from decimal import Decimal
 
 from cortex.extensions.thinking.fusion_models import (
     ModelResponse,
@@ -59,7 +60,7 @@ class ResponseTrust:
     """Trust assessment for a single model response."""
 
     response: ModelResponse
-    trust_score: float  # 0.0-1.0 (agreement with consensus)
+    trust_score: Decimal  # 0.0-1.0 (agreement with consensus)
     reputation: float  # Historical win rate of this model
     vote_multiplier: float  # Based on domain relevance
     is_trusted: bool  # Passed Byzantine threshold
@@ -78,7 +79,7 @@ class ByzantineVerdict:
     trusted_responses: list[ResponseTrust] = field(default_factory=list)
     outliers: list[ResponseTrust] = field(default_factory=list)
     all_assessments: list[ResponseTrust] = field(default_factory=list)
-    confidence: float = 0.0  # Overall consensus confidence
+    confidence: Decimal = Decimal("0.0")  # Overall consensus confidence
     agreement_matrix: dict = field(default_factory=dict)
     byzantine_threshold: float = 0.0
     quorum_met: bool = False
@@ -103,7 +104,7 @@ class ByzantineVerdict:
             return None
         best = max(
             self.trusted_responses,
-            key=lambda rt: rt.trust_score * (0.5 + rt.reputation),
+            key=lambda rt: float(rt.trust_score) * (0.5 + rt.reputation),
         )
         return best.response
 
@@ -198,7 +199,7 @@ class WBFTConsensus:
             trusted_responses=trusted,
             outliers=outliers,
             all_assessments=assessments,
-            confidence=round(confidence, 3),
+            confidence=Decimal(str(round(confidence, 3))),
             agreement_matrix=agreement_matrix,
             byzantine_threshold=round(threshold, 3),
             quorum_met=quorum_met,
@@ -227,7 +228,7 @@ class WBFTConsensus:
         assessments = [
             ResponseTrust(
                 response=r,
-                trust_score=1.0 if r.ok else 0.0,
+                trust_score=Decimal("1.0") if r.ok else Decimal("0.0"),
                 reputation=rep_weights.get(r.label, 0.5),
                 vote_multiplier=mults.get(r.label, 1.0),
                 is_trusted=r.ok,
@@ -240,7 +241,7 @@ class WBFTConsensus:
             trusted_responses=[a for a in assessments if a.is_trusted],
             outliers=[],
             all_assessments=assessments,
-            confidence=0.5 if valid else 0.0,
+            confidence=Decimal("0.5") if valid else Decimal("0.0"),
             quorum_met=False,
         )
 
@@ -269,7 +270,7 @@ class WBFTConsensus:
 
             trust = ResponseTrust(
                 response=response,
-                trust_score=round(w_agreement, 3),
+                trust_score=Decimal(str(round(w_agreement, 3))),
                 reputation=round(reputation, 3),
                 vote_multiplier=round(mults.get(response.label, 1.0), 3),
                 is_trusted=is_trusted,
@@ -298,7 +299,7 @@ class WBFTConsensus:
                 assessments.append(
                     ResponseTrust(
                         response=r,
-                        trust_score=0.0,
+                        trust_score=Decimal("0.0"),
                         reputation=rep_weights.get(r.label, 0.5),
                         vote_multiplier=mults.get(r.label, 1.0),
                         is_trusted=False,

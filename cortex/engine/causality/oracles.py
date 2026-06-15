@@ -20,8 +20,6 @@ except ImportError:
 logger = logging.getLogger("cortex.engine.causality")
 
 
-
-
 class AsyncCausalOracle:
     """Interprets the Signal Bus to find the parent of a fact asynchronously."""
 
