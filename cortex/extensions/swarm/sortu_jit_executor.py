@@ -17,6 +17,10 @@ class JITTimeoutException(Exception):
     pass
 
 
+class SemanticContractViolation(Exception):
+    pass
+
+
 class SovereignASTVisitor(ast.NodeVisitor):
     def visit_Import(self, node):
         for name in node.names:
@@ -79,6 +83,7 @@ def _execute_sync(source_code: str, global_ctx: dict) -> dict:
         "TypeError": TypeError,
         "KeyError": KeyError,
         "IndexError": IndexError,
+        "AssertionError": AssertionError,
         # SECURITY: __import__ deliberately excluded - CRIT-02 remediation.
         # Allowing __import__ in safe_builtins defeats the SovereignASTVisitor
         # blocklist and enables arbitrary code execution.
@@ -91,11 +96,20 @@ def _execute_sync(source_code: str, global_ctx: dict) -> dict:
     return local_env
 
 
-def _worker(source_code: str, global_ctx: dict, result_dict: dict):
+def _worker(source_code: str, contract_code: str | None, global_ctx: dict, result_dict: dict):
     t0 = time.perf_counter()
     result_dict["started_at"] = t0
     try:
         res = _execute_sync(source_code, global_ctx)
+        
+        if contract_code:
+            try:
+                contract_ctx = dict(global_ctx)
+                contract_ctx.update(res)
+                _execute_sync(contract_code, contract_ctx)
+            except AssertionError as contract_err:
+                raise SemanticContractViolation(f"Behavioral contract assertion failed: {contract_err}") from contract_err
+
         # Avoid passing complex objects back via IPC
         result_dict["locals"] = list(res.keys())
         result_dict["status"] = "success"
@@ -105,10 +119,16 @@ def _worker(source_code: str, global_ctx: dict, result_dict: dict):
         result_dict["error"] = str(e)
 
 
-async def run_jit_sandbox(source_code: str, timeout_ms: int = 500, global_ctx: dict = None) -> Any:  # pyright: ignore[reportArgumentType]
+async def run_jit_sandbox(
+    source_code: str, 
+    contract_code: str | None = None, 
+    timeout_ms: int = 500, 
+    global_ctx: dict = None
+) -> Any:  # pyright: ignore[reportArgumentType]
     """
     Executes Python AST in a bounded memory-only sandbox.
     Uses multiprocessing to guarantee true OS-level termination and bypass GIL deadlocks.
+    Includes Semantic Behavioral Contract enforcement to prevent morphological collapse.
     """
     ctx = global_ctx or {}
     start_time = time.perf_counter()
@@ -119,7 +139,7 @@ async def run_jit_sandbox(source_code: str, timeout_ms: int = 500, global_ctx: d
     result_dict = manager.dict()
 
     # Run in a completely separate process to protect the main node
-    p = multiprocessing.Process(target=_worker, args=(source_code, ctx, result_dict))
+    p = multiprocessing.Process(target=_worker, args=(source_code, contract_code, ctx, result_dict))
     p.start()
 
     # Await in a non-blocking way to keep event loop alive
