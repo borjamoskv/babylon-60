@@ -1,33 +1,47 @@
+from __future__ import annotations
+
+import copy
+
 from cortex.swarm.ledger.engine import SwarmLedger
 from cortex.swarm.ledger.models import SwarmEvent
+from cortex.swarm.graph_source import GraphSource, SalienceCandidate
 
 
 class SwarmRouter:
-    def __init__(self, registry):
+    """
+    Routes requests using either:
+      1. SNGraphSource  — SN subgraph drives candidate selection (neural mode)
+      2. registry       — classic registry fallback
+
+    In both cases every decision is appended to SwarmLedger.
+    _dispatch() is a pure function: no side effects, no self state reads.
+    """
+
+    def __init__(self, registry, graph_source: GraphSource | None = None):
         self.registry = registry
+        self.graph_source = graph_source
         self.ledger = SwarmLedger()
 
-    def registry_checksum(self) -> str:
-        """Stable hash of the registry configuration."""
-        import hashlib
-        import json
-        state_str = json.dumps(self.registry.to_dict(), sort_keys=True)
-        return hashlib.sha256(state_str.encode()).hexdigest()
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
 
-    def route(self, request: dict):
-        # In V2, registry is naturally deterministic via sorted keys and frozen specs.
-        # We find candidates by matching words in task to capabilities, or fallback to all.
-        task = request.get("task", "").lower()
-        candidates = []
-        for agent in self.registry.all():
-            if any(cap in task for cap in agent.capabilities):
-                candidates.append(agent)
-        
-        if not candidates:
-            # Deterministic fallback: all agents sorted
-            candidates = self.registry.all()
+    def route(self, request: dict) -> dict:
+        if self.graph_source is not None:
+            raw_candidates = self.graph_source.get_candidates(request["task"])
+            candidates = [c.to_dict() for c in raw_candidates]
+            registry_snapshot = self._frozen_snapshot()
+        else:
+            if not self.registry._frozen:
+                self.registry.freeze()
+            raw_candidates = sorted(
+                self.registry.get_candidates(request["task"]),
+                key=lambda a: a.agent_id,
+            )
+            candidates = [getattr(a, '__dict__', {"agent_id": a.agent_id}) for a in raw_candidates]
+            registry_snapshot = self._frozen_snapshot()
 
-        selected = self._dispatch(candidates, request)
+        selected = _dispatch(candidates, request)
 
         # Serialize capabilities to sorted list for JSON stability
         for k, v in selected.items():
@@ -45,26 +59,44 @@ class SwarmRouter:
         self.ledger.append(
             SwarmEvent(
                 task=request["task"],
-                input=request,
-                registry_state=self.registry.to_dict(),
-                selected_agent=selected_agent,
+                input=copy.deepcopy(request),
+                registry_state=registry_snapshot,
+                selected_agent=selected["agent_id"],
                 routing_payload=selected,
             )
         )
 
         return selected
 
-    def _dispatch(self, candidates: list, request: dict) -> dict:
-        """Pure function: deterministic selection from sorted candidates."""
-        if not candidates:
-            raise ValueError(f"No candidates for task: {request['task']}")
-        
-        selected_agents = [c.agent_id for c in candidates]
-        # Deterministic: first by agent_id (already sorted)
-        payload = {
-            "agent_id": candidates[0].agent_id,
-            "selected_agents": selected_agents
-        }
-        # Include agent attributes (like capabilities)
-        payload.update(getattr(candidates[0], '__dict__', {}))
-        return payload
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+
+    def _frozen_snapshot(self) -> dict:
+        """Deep-frozen, sorted snapshot of registry state."""
+        raw = (
+            self.registry.snapshot()
+            if hasattr(self.registry, 'snapshot')
+            else {}
+        )
+        return _deep_sorted(copy.deepcopy(raw))
+
+
+# ------------------------------------------------------------------
+# Pure functions  (no self, no side-effects)
+# ------------------------------------------------------------------
+
+def _dispatch(candidates: list[dict], request: dict) -> dict:
+    """Pure selection: first candidate after deterministic sort."""
+    if not candidates:
+        raise ValueError(f"No candidates for task: {request['task']}")
+    return candidates[0]
+
+
+def _deep_sorted(obj):
+    """Recursively sort dict keys for deterministic hashing."""
+    if isinstance(obj, dict):
+        return {k: _deep_sorted(v) for k, v in sorted(obj.items())}
+    if isinstance(obj, list):
+        return [_deep_sorted(i) for i in obj]
+    return obj

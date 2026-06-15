@@ -174,11 +174,9 @@ async def test_seal_4_timeout():
 @pytest.mark.asyncio
 async def test_seal_5_happy():
     with (
-        patch("cortex.engine.CortexEngine") as mock_engine,
+        patch("cortex.engine.CortexEngine", autospec=True) as mock_engine,
         patch("cortex.guards._seals_checks_1_5.arun_cmd", new_callable=AsyncMock) as mock_run,
     ):
-        mock_engine.return_value.init_db = AsyncMock()
-        mock_engine.return_value.close = AsyncMock()
         mock_run.return_value = (0, "Passed")
         passed, _ = await check_seal_5_ledger()
         assert passed is True
@@ -198,11 +196,9 @@ async def test_seal_5_init_rejection():
 @pytest.mark.asyncio
 async def test_seal_5_guard_rejection():
     with (
-        patch("cortex.engine.CortexEngine") as mock_engine,
+        patch("cortex.engine.CortexEngine", autospec=True) as mock_engine,
         patch("cortex.guards._seals_checks_1_5.arun_cmd", new_callable=AsyncMock) as mock_run,
     ):
-        mock_engine.return_value.init_db = AsyncMock()
-        mock_engine.return_value.close = AsyncMock()
         mock_run.return_value = (1, "Guard failed")
         passed, _ = await check_seal_5_ledger()
         assert passed is False
