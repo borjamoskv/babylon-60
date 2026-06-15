@@ -32,17 +32,28 @@ if [ ! -f "vercel.json" ]; then
 fi
 echo "✓ vercel.json detected."
 
-echo "[2.5/4] Validating Custom Domain DNS Binding..."
-DOMAIN="cortexpersist.dev"
-DOMAIN_STATUS=$(vercel domains inspect $DOMAIN 2>&1 || true)
+echo "[2.5/4] Validating Dynamic DNS Binding..."
+DOMAINS=$(jq -r '.rewrites[].has[].value, .redirects[].has[].value' vercel.json 2>/dev/null | grep -v 'null' | sort -u || echo "cortexpersist.dev")
 
-if echo "$DOMAIN_STATUS" | grep -q "WARN! This Domain is not configured properly"; then
-    echo "[!] Anergy Detectada: El dominio $DOMAIN no está resolviendo hacia Vercel."
-    echo ">> Nameservers actuales apuntando incorrectamente o Registros A/CNAME ausentes."
-    echo "$DOMAIN_STATUS" | grep -A 4 "Current Nameservers"
-    exit 1
+if [ -z "$DOMAINS" ]; then
+    DOMAINS="cortexpersist.dev"
 fi
-echo "✓ DNS Binding Confirmado para $DOMAIN."
+
+for DOMAIN in $DOMAINS; do
+    echo "  -> Inspecting $DOMAIN..."
+    DOMAIN_STATUS=$(vercel domains inspect "$DOMAIN" 2>&1 || true)
+
+    if echo "$DOMAIN_STATUS" | grep -q "WARN! This Domain is not configured properly"; then
+        echo "[!] Anergy Detectada: El dominio $DOMAIN no está resolviendo hacia Vercel."
+        
+        # Extraer instrucciones dinámicas de Vercel (Registros A/CNAME requeridos)
+        echo "$DOMAIN_STATUS" | grep -E "((Set the following record|Change your Domains's nameservers)|A |CNAME )" -A 1 | sed 's/^/    >> /'
+        
+        echo "[X] Abortando despliegue para evitar falsos positivos."
+        exit 1
+    fi
+    echo "  ✓ $DOMAIN validado."
+done
 
 echo "[3/4] Validating API Dependencies..."
 if [ ! -f "api/requirements.txt" ]; then
