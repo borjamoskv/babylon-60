@@ -1,0 +1,9 @@
+{
+  "*.py": [
+    "ruff check --fix",
+    "ruff format"
+  ],
+  "*.{js,jsx,ts,tsx,css,json,md}": [
+    "npx prettier --write"
+  ]
+}
