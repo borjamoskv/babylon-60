@@ -74,6 +74,9 @@ async def lifespan(app: FastAPI):
     auth_manager = AuthManager()  # Use dynamic backend selection based on config
     await auth_manager.initialize()
 
+    from cortex.ledger.billing_gateway import get_billing_gateway
+    await get_billing_gateway().initialize()
+
     # 2. Connection Pool & Async Engine
     # IMPORTANT: The pool must allow writes (read_only=False) because AsyncCortexEngine uses it
     # for facts insertion.
