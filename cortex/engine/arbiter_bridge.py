@@ -265,13 +265,13 @@ class ArbiterBridge:
         """Convert routing outcome into a CausalTrajectory for RL feedback."""
 
         # Build SignalVector from layer signals
-        l1_score = verdict.layer_signals.get(LayerID.L1_EMBEDDING.value, 0.5)
-        l2_score = verdict.layer_signals.get(LayerID.L2_TOPOLOGY.value, 0.5)
-        l4_score = verdict.layer_signals.get(LayerID.L4_RL.value, 0.5)
+        l1_score = float(verdict.layer_signals.get(LayerID.L1_EMBEDDING.value, 0.5))
+        l2_score = float(verdict.layer_signals.get(LayerID.L2_TOPOLOGY.value, 0.5))
+        l4_score = float(verdict.layer_signals.get(LayerID.L4_RL.value, 0.5))
 
         signal_vec = SignalVector(
             ast_complexity=l2_score * 100,  # Topology as complexity proxy
-            kl_instability=1.0 - verdict.fused_score,  # Inverse fused = instability
+            kl_instability=1.0 - float(verdict.fused_score),  # Inverse fused = instability
             entropy_score=1.0 - l1_score,  # Inverse embedding = entropy
             cyclomatic_depth=len(verdict.conflicts) * 10.0,
             event_rate=l4_score,
@@ -286,7 +286,7 @@ class ArbiterBridge:
         )
 
         # KL divergence post = inverse of fused confidence
-        kl_post = 1.0 - verdict.fused_score
+        kl_post = 1.0 - float(verdict.fused_score)
 
         # Hazard rate = number of conflicts normalized
         hazard = len(verdict.conflicts) / max(len(signals), 1)

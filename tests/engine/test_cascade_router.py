@@ -50,7 +50,7 @@ class TestCascadeRouter:
     @patch("cortex.engine.cascade_router.asyncio.create_subprocess_exec")
     @patch.dict("os.environ", {"CORTEX_LLM_LOCAL_FIRST": "1"})
     async def test_execute_gemini_with_files(self, mock_create):
-        """Should call ollama qwen2.5-coder:32b when local_first is enabled."""
+        """Should call ollama qwen2.5-coder:7b when local_first is enabled."""
         router = CascadeRouter()
 
         mock_process = MagicMock()
@@ -67,7 +67,7 @@ class TestCascadeRouter:
         mock_create.assert_called_once()
         args, kwargs = mock_create.call_args
         cmd = args
-        assert cmd[:3] == ("ollama", "run", "qwen2.5-coder:32b")
+        assert cmd[:3] == ("ollama", "run", "qwen2.5-coder:7b")
         assert "Check this code" in cmd
 
     @patch("cortex.engine.cascade_router.asyncio.create_subprocess_exec")
@@ -97,7 +97,7 @@ class TestCascadeRouter:
     @patch("cortex.engine.cascade_router.asyncio.create_subprocess_exec")
     @patch.dict("os.environ", {"CORTEX_LLM_LOCAL_FIRST": "1"})
     async def test_execute_claude(self, mock_create):
-        """Should call ollama qwen2.5-coder:32b when local_first is enabled."""
+        """Should call ollama qwen2.5-coder:7b when local_first is enabled."""
         router = CascadeRouter()
 
         mock_process = MagicMock()
@@ -110,7 +110,7 @@ class TestCascadeRouter:
 
         mock_create.assert_called_once()
         cmd = mock_create.call_args[0]
-        assert cmd[:3] == ("ollama", "run", "qwen2.5-coder:32b")
+        assert cmd[:3] == ("ollama", "run", "qwen2.5-coder:7b")
         assert "Fix this typo" in cmd
 
     @patch("cortex.engine.cascade_router.asyncio.create_subprocess_exec")

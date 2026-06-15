@@ -860,9 +860,9 @@ Proof:
 
 ---
 
-### Hito 53: Web-Diagnostics-OMEGA & C5-REAL Frontend Crystallization
+### Hito 53: Awwwards-Level Frontend Crystallization & LCP Singularity
 - **Target**: `CortexVisualizer.tsx`, `CoxCinematicRuntime.tsx`, `index.astro`
-- **Objective**: Aniquilación de limerencia en la capa cliente local. Eliminación de bloqueos LCP (hydration stutters) en animaciones estructurales y sellado absoluto de fugas de memoria en WebGL/WebAudio (Arrays huérfanos y nodos sin desconectar).
-- **Yield Target**: 60fps constantes en render espacial, 0 bytes de memoria perdida por ciclo, accesibilidad 100% determinista sin colisiones semánticas.
+- **Objective**: Erradicación absoluta de la limerencia en la capa cliente. Supresión de bloqueos de hilo principal (hydration stutters) mediante directivas `client:idle` para WebGL. Sellado matemático de fugas de memoria (array splice isolation y recolección de AudioNodes). Extirpación de anti-patrones `any` en TypeScript.
+- **Yield Target**: 60fps constantes en render espacial O(1). 0 bytes de fuga de memoria por frame. First Contentful Paint (FCP) sin fricción JavaScript.
 - **Reality Level**: `C5-REAL`
-- **Evidence**: Commits `6cd1f87` (fix ui leaks) y `b2e0758` (purge ts limerence).
+- **Evidence**: Commits `6cd1f87` (fix ui leaks), `b2e0758` (purge ts limerence) y refactor a `client:idle`.

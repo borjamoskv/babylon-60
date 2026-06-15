@@ -81,6 +81,8 @@ class LayerSignal:
     timestamp_ns: int = field(default_factory=lambda: time.time_ns())
 
     def __post_init__(self) -> None:
+        if not isinstance(self.score, Decimal):
+            object.__setattr__(self, "score", Decimal(str(self.score)))
         if not (Decimal("0.0") <= self.score <= Decimal("1.0")):
             raise ValueError(
                 f"[META-ARBITER] LayerSignal score must be in [0,1], got {self.score} "

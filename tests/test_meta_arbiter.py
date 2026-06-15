@@ -88,7 +88,7 @@ class TestLedgerOverride:
 
         assert verdict.resolution == Resolution.LEDGER_OVERRIDE
         assert verdict.winning_layer == LayerID.L3_LEDGER
-        assert verdict.fused_score == 0.10
+        assert float(verdict.fused_score) == 0.10
         assert "Ledger" in verdict.reasoning
         assert "sovereign" in verdict.reasoning.lower()
 
