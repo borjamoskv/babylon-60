@@ -1,25 +1,19 @@
 import pytest
-import subprocess
-import time
+import asyncio
+import cortex.engine.omega_daemon as omega
 
-def test_omega_daemon_start_stop():
-    """OmegaDaemon inicia y se detiene sin crash."""
-    try:
-        proc = subprocess.run(
-            ["python3", "-u", "cortex/engine/omega_daemon.py"],
-            capture_output=True, text=True, timeout=3
-        )
-        # If it somehow exited quickly, verify stdout
-        assert "OmegaDaemon started" in proc.stdout or "C5-REAL" in proc.stdout
-    except subprocess.TimeoutExpired as e:
-        # Check if daemon initialized correctly before timeout
-        stdout_bytes = e.stdout or b""
-        stdout = stdout_bytes.decode("utf-8") if isinstance(stdout_bytes, bytes) else stdout_bytes
-        assert "OmegaDaemon started" in stdout or "C5-REAL" in stdout
+@pytest.mark.asyncio
+async def test_omega_daemon_start_stop():
+    """OmegaDaemon inicia y se detiene sin crash usando asyncio."""
+    daemon = omega.OmegaDaemon(reclaim_on_critical=False)
+    task = asyncio.create_task(daemon.start(interval_s=0.05))
+    await asyncio.sleep(0.1)
+    daemon.stop()
+    await task
+    assert daemon.loop_count >= 1
 
 def test_exergy_guard_check():
     """ExergyGuard.check() devuelve dict con RAM + critical."""
-    import cortex.engine.omega_daemon as omega
     guard = omega.ExergyGuard(ram_threshold_mb=200.0)
     result = guard.check()
     assert "ram_free_mb" in result
@@ -28,7 +22,6 @@ def test_exergy_guard_check():
 
 def test_entropy_sensor_sense():
     """EntropySensor.sense() devuelve dict con CPU + swap."""
-    import cortex.engine.omega_daemon as omega
     sensor = omega.EntropySensor()
     result = sensor.sense()
     assert "cpu_load" in result
