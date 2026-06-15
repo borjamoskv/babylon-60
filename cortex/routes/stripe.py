@@ -95,49 +95,6 @@ def _generate_api_key(email: str, plan: str) -> str:
     return "ctx_" + hashlib.sha256(seed.encode()).hexdigest()[:48]
 
 
-async def _provision_api_key(email: str, plan: str) -> str | None:
-    """Create an API key in CORTEX AuthManager. Returns raw key or None."""
-    raw_key = _generate_api_key(email, plan)
-    plan_cfg = PLAN_CONFIG.get(plan, PLAN_CONFIG["pro"])
-
-    try:
-        import cortex.api.state as api_state
-
-        if api_state.auth_manager:
-            await api_state.auth_manager.create_key(
-                name=f"stripe-{email}",
-                tenant_id=email,
-                permissions=plan_cfg["permissions"],
-                rate_limit=plan_cfg["rate_limit"],
-            )
-            logger.info(
-                "API key provisioned: %s → %s plan (prefix: %s...)",
-                email,
-                plan,
-                raw_key[:12],
-            )
-            return raw_key
-    except (RuntimeError, ValueError, OSError):
-        logger.exception("Failed to provision API key for %s", email)
-
-    return None
-
-
-async def _revoke_keys_for_email(email: str) -> None:
-    """Find and revoke Stripe API keys for an email."""
-    try:
-        import cortex.api.state as api_state
-
-        if api_state.auth_manager:
-            keys = await api_state.auth_manager.list_keys(tenant_id=email)
-            for key in keys:
-                if key.name.startswith("stripe-"):
-                    await api_state.auth_manager.revoke_key(key.id)
-                    logger.info("Revoked key %s for cancelled subscription", key.name)
-    except (RuntimeError, ValueError, OSError):
-        logger.exception("Failed to revoke keys for email %s", email)
-
-
 # ─── Routes ──────────────────────────────────────────────────────────
 
 
@@ -205,44 +162,11 @@ async def stripe_webhook(
 
     event_type = event["type"]
 
-    # ── Checkout completed → provision API key ──
-    if event_type == "checkout.session.completed":
-        session = event["data"]["object"]
-        customer_email = session.get("customer_email") or session.get("customer_details", {}).get(
-            "email", "unknown"
-        )
-        plan = session.get("metadata", {}).get("plan", "pro")
+    # ── Enqueue event into Immutable Ledger ──
+    from cortex.ledger.billing_gateway import get_billing_gateway
+    await get_billing_gateway().append_billing_event(event_type, event)
 
-        raw_key = await _provision_api_key(customer_email, plan)
-
-        return {
-            "status": "provisioned",
-            "email": customer_email,
-            "plan": plan,
-            "key_provisioned": raw_key is not None,
-        }
-
-    # ── Subscription cancelled → revoke API key ──
-    if event_type == "customer.subscription.deleted":
-        subscription = event["data"]["object"]
-        customer_id = subscription.get("customer", "")
-
-        try:
-            stripe_obj = _get_stripe()
-            # type: ignore[reportAttributeAccessIssue]
-            customer = stripe_obj.Customer.retrieve(customer_id)  # type: ignore[reportAttributeAccessIssue]
-            email = customer.get("email", "")
-
-            if email:
-                await _revoke_keys_for_email(email)
-        except (RuntimeError, ValueError, OSError):
-            logger.exception("Failed to process revoked subscription for customer %s", customer_id)
-
-        return {"status": "revoked", "customer": customer_id}
-
-    # ── Unhandled event type ──
-    logger.debug("Ignoring Stripe event: %s", event_type)
-    return {"status": "ignored", "type": event_type}
+    return {"status": "enqueued", "type": event_type}
 
 
 @router.post("/portal", include_in_schema=False)

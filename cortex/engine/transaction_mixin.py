@@ -55,6 +55,10 @@ class TransactionMixin(EngineMixinBase):
         dj = canonical_json(detail)
         ts = now_iso()
 
+        # Enforce write lock promotion to prevent read-modify-write race
+        if not conn.in_transaction:
+            await conn.execute("BEGIN IMMEDIATE")
+
         cursor = await conn.execute(
             "SELECT hash FROM transactions WHERE tenant_id = ? ORDER BY id DESC LIMIT 1",
             (tenant_id,),
@@ -67,19 +71,13 @@ class TransactionMixin(EngineMixinBase):
         c = await conn.execute(
             "INSERT INTO transactions "
             "(tenant_id, project, action, detail, prev_hash, hash, timestamp) "
-            "VALUES (?, ?, ?, ?, COALESCE((SELECT hash FROM transactions "
-            "WHERE tenant_id = ? ORDER BY id DESC LIMIT 1), 'GENESIS'), ?, ?)",
-            (tenant_id, project, action, dj, tenant_id, th, ts),
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (tenant_id, project, action, dj, ph, th, ts),
         )
         tx_id = c.lastrowid
 
-        # Re-verify and update hash if prev_hash was different from our lookup
-        async with conn.execute("SELECT prev_hash FROM transactions WHERE id = ?", (tx_id,)) as cur:
-            row = await cur.fetchone()
-            actual_ph = row[0] if row else ph
-            if actual_ph != ph:
-                th = compute_tx_hash(actual_ph, project, action, dj, ts, tenant_id=tenant_id)
-                await conn.execute("UPDATE transactions SET hash = ? WHERE id = ?", (th, tx_id))
+
+
 
 
         if getattr(self, "_ledger", None):
