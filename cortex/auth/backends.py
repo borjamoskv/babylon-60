@@ -90,7 +90,9 @@ class SQLiteAuthBackend(BaseAuthBackend):
             # Migration
             try:
                 await conn.execute("ALTER TABLE api_keys ADD COLUMN key_hash_argon2 TEXT")
-                await conn.execute("ALTER TABLE api_keys ADD COLUMN hash_algo TEXT NOT NULL DEFAULT 'sha256'")
+                await conn.execute(
+                    "ALTER TABLE api_keys ADD COLUMN hash_algo TEXT NOT NULL DEFAULT 'sha256'"
+                )
                 await conn.execute("ALTER TABLE api_keys ADD COLUMN migrated_at TEXT")
             except aiosqlite.OperationalError:
                 pass  # Columns already exist
@@ -130,7 +132,17 @@ class SQLiteAuthBackend(BaseAuthBackend):
     ) -> int:
         from cortex.auth import SQL_INSERT_KEY
 
-        args = (name, key_hash, key_prefix, tenant_id, role, json.dumps(permissions), rate_limit, key_hash_argon2, hash_algo)
+        args = (
+            name,
+            key_hash,
+            key_prefix,
+            tenant_id,
+            role,
+            json.dumps(permissions),
+            rate_limit,
+            key_hash_argon2,
+            hash_algo,
+        )
         conn = await self._get_conn_async()
         try:
             cursor = await conn.execute(SQL_INSERT_KEY, args)
@@ -199,7 +211,11 @@ class SQLiteAuthBackend(BaseAuthBackend):
         try:
             await conn.execute(
                 "UPDATE api_keys SET key_hash_argon2 = ?, hash_algo = 'argon2id', migrated_at = ? WHERE id = ?",
-                (key_hash_argon2, datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), key_id),
+                (
+                    key_hash_argon2,
+                    datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+                    key_id,
+                ),
             )
             await conn.commit()
         except (aiosqlite.Error, OSError) as e:
@@ -238,8 +254,12 @@ class AlloyDBAuthBackend(BaseAuthBackend):
             await conn.execute(pg_schema)
             # Migration
             try:
-                await conn.execute("ALTER TABLE api_keys ADD COLUMN IF NOT EXISTS key_hash_argon2 TEXT")
-                await conn.execute("ALTER TABLE api_keys ADD COLUMN IF NOT EXISTS hash_algo TEXT NOT NULL DEFAULT 'sha256'")
+                await conn.execute(
+                    "ALTER TABLE api_keys ADD COLUMN IF NOT EXISTS key_hash_argon2 TEXT"
+                )
+                await conn.execute(
+                    "ALTER TABLE api_keys ADD COLUMN IF NOT EXISTS hash_algo TEXT NOT NULL DEFAULT 'sha256'"
+                )
                 await conn.execute("ALTER TABLE api_keys ADD COLUMN IF NOT EXISTS migrated_at TEXT")
             except Exception as e:
                 logger.debug("AlloyDB columns already exist or error: %s", e)
@@ -370,13 +390,15 @@ class TursoAuthBackend(BaseAuthBackend):
         statements = [s.strip() for s in AUTH_SCHEMA.split(";") if s.strip()]
         for stmt in statements:
             await client.execute(stmt)
-            
+
         try:
             await client.execute("ALTER TABLE api_keys ADD COLUMN key_hash_argon2 TEXT")
-            await client.execute("ALTER TABLE api_keys ADD COLUMN hash_algo TEXT NOT NULL DEFAULT 'sha256'")
+            await client.execute(
+                "ALTER TABLE api_keys ADD COLUMN hash_algo TEXT NOT NULL DEFAULT 'sha256'"
+            )
             await client.execute("ALTER TABLE api_keys ADD COLUMN migrated_at TEXT")
         except Exception:
-            pass # Columns already exist
+            pass  # Columns already exist
 
     async def get_key_by_hash(self, key_hash: str) -> KeyData | None:
         client = await self._get_client()
@@ -402,7 +424,17 @@ class TursoAuthBackend(BaseAuthBackend):
         from cortex.auth import SQL_INSERT_KEY
 
         client = await self._get_client()
-        args = [name, key_hash, key_prefix, tenant_id, role, json.dumps(permissions), rate_limit, key_hash_argon2, hash_algo]
+        args = [
+            name,
+            key_hash,
+            key_prefix,
+            tenant_id,
+            role,
+            json.dumps(permissions),
+            rate_limit,
+            key_hash_argon2,
+            hash_algo,
+        ]
         res = await client.execute(SQL_INSERT_KEY, args)
         return res.last_insert_rowid
 
@@ -453,7 +485,11 @@ class TursoAuthBackend(BaseAuthBackend):
         try:
             await client.execute(
                 "UPDATE api_keys SET key_hash_argon2 = ?, hash_algo = 'argon2id', migrated_at = ? WHERE id = ?",
-                [key_hash_argon2, datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), key_id],
+                [
+                    key_hash_argon2,
+                    datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+                    key_id,
+                ],
             )
         except Exception as e:
             logger.debug("Could not migrate key in Turso: %s", e)

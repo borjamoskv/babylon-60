@@ -27,8 +27,10 @@ from pathlib import Path
 from typing import Any
 
 from cortex.core import config as cortex_config
-
-from stripe_config import StripeBillingConfig, load_stripe_billing_config, validate_stripe_billing_config
+from stripe_config import (
+    load_stripe_billing_config,
+    validate_stripe_billing_config,
+)
 
 ROOT = Path(__file__).resolve().parent
 SCHEMA_PATH = ROOT / "schema" / "events_log.sql"
@@ -120,7 +122,7 @@ def validate_environment(strict: bool | None = None) -> list[DeploymentIssue]:
             "STRIPE_PRICE_TABLE": json.dumps(cortex_config.STRIPE_PRICE_TABLE),
         }
         for key, value in required.items():
-            if not value or value in {"{}", "{\"pro\": \"\", \"team\": \"\"}"}:
+            if not value or value in {"{}", '{"pro": "", "team": ""}'}:
                 issues.append(
                     DeploymentIssue(
                         severity="error",
@@ -226,10 +228,16 @@ def serve(host: str, port: int, reload: bool = False) -> int:
 
 
 def _print_report(report: DeploymentReport, issues: list[DeploymentIssue]) -> None:
-    print(json.dumps({
-        "report": asdict(report),
-        "issues": [asdict(issue) for issue in issues],
-    }, indent=2, sort_keys=True))
+    print(
+        json.dumps(
+            {
+                "report": asdict(report),
+                "issues": [asdict(issue) for issue in issues],
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
 
 
 def main() -> int:
@@ -269,7 +277,9 @@ def main() -> int:
         return 0
 
     if command == "manifest":
-        manifest_path = write_manifest(report, target="production" if cortex_config.PROD else "local")
+        manifest_path = write_manifest(
+            report, target="production" if cortex_config.PROD else "local"
+        )
         print(json.dumps({"status": "written", "manifest": str(manifest_path)}, indent=2))
         return 0
 

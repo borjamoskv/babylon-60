@@ -49,6 +49,41 @@ class EventLoopMixin:
                 priority=8,
             )
 
+        # CABLE-04a: daily pruning of the Ouroboros graph
+        import sys
+        from pathlib import Path
+
+        scripts_path = str(Path(__file__).resolve().parents[3] / "scripts")
+        if scripts_path not in sys.path:
+            sys.path.append(scripts_path)
+
+        async def run_ouroboros_prune():
+            from ouroboros_prune import execute_thermal_purge
+
+            from cortex.core.paths import CORTEX_DB
+
+            await asyncio.to_thread(execute_thermal_purge, db_path=str(CORTEX_DB))
+
+        self.scheduler.add_recurring(
+            "ouroboros_prune",
+            lambda: run_ouroboros_prune(),
+            interval_s=86400,
+            priority=6,
+        )
+
+        # CABLE-04b: LLM absorption of reflections.md -> SKILL.md every 12h
+        async def run_ouroboros_absorb():
+            from ouroboros_absorb_runner import main as absorb_main
+
+            await absorb_main()
+
+        self.scheduler.add_recurring(
+            "ouroboros_absorb",
+            lambda: run_ouroboros_absorb(),
+            interval_s=43200,
+            priority=5,
+        )
+
     async def run_sovereign(self, interval: int = DEFAULT_INTERVAL) -> None:
         """Sovereign async execution - single event loop, all subsystems as tasks.
 
