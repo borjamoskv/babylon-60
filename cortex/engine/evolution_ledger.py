@@ -30,6 +30,7 @@ import struct
 import time
 from collections.abc import Iterator
 from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
 from typing import Any
 
@@ -141,6 +142,12 @@ class ReplayVerificationError(Exception):
     """Hash chain integrity violation during replay."""
 
 
+class ReplayMode(Enum):
+    """Modes for replaying the ledger."""
+    STRICT = "strict"
+    BEST_EFFORT = "best_effort"
+
+
 # ─── Canonical Hash ───────────────────────────────────────────────
 
 
@@ -221,6 +228,7 @@ class EvolutionLedger:
         self._sequence: int = 0
         self._head_hash: str = self.GENESIS_HASH
         self._record_count: int = 0
+        self._last_write_latency_ms: float = 0.0
 
         # Recover state from existing log
         self._recover_head()
@@ -304,6 +312,7 @@ class EvolutionLedger:
 
         # Atomic append
         payload_line = _canonical_json(record.to_payload()) + "\n"
+        start_write = time.perf_counter()
         try:
             with open(self._log_path, "a") as f:
                 f.write(payload_line)
@@ -313,24 +322,26 @@ class EvolutionLedger:
             self._sequence -= 1  # rollback sequence
             logger.error("Evolution ledger write failed: %s", e)
             raise
-
+        
+        self._last_write_latency_ms = (time.perf_counter() - start_write) * 1000.0
         self._head_hash = new_hash
         self._record_count += 1
 
         logger.debug(
-            "EVO-LEDGER seq=%d agent=%d hash=%s…%s",
+            "EVO-LEDGER seq=%d agent=%d hash=%s…%s (write: %.2fms)",
             self._sequence,
             agent_idx,
             new_hash[:8],
             new_hash[-4:],
+            self._last_write_latency_ms,
         )
         return record
 
-    def replay(self, verify: bool = True) -> Iterator[MutationRecord]:
-        """Replay the entire ledger, optionally verifying hash chain integrity.
-
-        Yields MutationRecord objects in chronological order.
-        Raises ReplayVerificationError if chain is broken.
+    def replay(self, mode: ReplayMode = ReplayMode.STRICT) -> Iterator[MutationRecord]:
+        """Replay the entire ledger.
+        
+        - STRICT: Raises ReplayVerificationError if chain is broken.
+        - BEST_EFFORT: Yields records ignoring hashes/gaps and continues.
         """
         if not self._log_path.exists():
             return
@@ -348,10 +359,14 @@ class EvolutionLedger:
                     payload = json.loads(line)
                     record = MutationRecord.from_payload(payload)
                 except (json.JSONDecodeError, KeyError, TypeError) as e:
-                    raise ReplayVerificationError(f"Line {line_num}: corrupt record: {e}") from e
+                    if mode == ReplayMode.STRICT:
+                        raise ReplayVerificationError(f"Line {line_num}: corrupt record: {e}") from e
+                    else:
+                        logger.warning(f"Line {line_num}: skipping corrupt record ({e})")
+                        continue
 
-                if verify:
-                    expected_seq += 1
+                expected_seq += 1
+                if mode == ReplayMode.STRICT:
                     if record.sequence != expected_seq:
                         raise ReplayVerificationError(
                             f"Line {line_num}: sequence gap "
@@ -376,7 +391,9 @@ class EvolutionLedger:
                             f"Line {line_num}: hash mismatch "
                             f"(computed {recomputed[:12]}…, stored {record.hash[:12]}…)"
                         )
-                    expected_prev = record.hash
+                        
+                expected_prev = record.hash
+                expected_seq = record.sequence
 
                 yield record
 
@@ -387,7 +404,7 @@ class EvolutionLedger:
         errors: list[str] = []
 
         try:
-            for _record in self.replay(verify=True):
+            for _record in self.replay(mode=ReplayMode.STRICT):
                 count += 1
         except ReplayVerificationError as e:
             errors.append(str(e))
@@ -404,12 +421,25 @@ class EvolutionLedger:
 
     def get_agent_history(self, agent_idx: int) -> list[MutationRecord]:
         """Extract mutation history for a specific agent."""
-        return [r for r in self.replay(verify=False) if r.agent_idx == agent_idx]
+        return [r for r in self.replay(mode=ReplayMode.BEST_EFFORT) if r.agent_idx == agent_idx]
+
+    def fork_agent_trajectory(self, agent_idx: int, max_sequence: int) -> list[MutationRecord]:
+        """Extract a deterministic fork for an agent up to a specific sequence.
+        
+        Useful for rolling back an agent to a previous known state and spawning a sandboxed variant.
+        """
+        trajectory = []
+        for record in self.replay(mode=ReplayMode.STRICT):
+            if record.sequence > max_sequence:
+                break
+            if record.agent_idx == agent_idx:
+                trajectory.append(record)
+        return trajectory
 
     def get_performance_trajectory(self) -> list[dict[str, Any]]:
         """Extract performance delta timeline for trend analysis."""
         trajectory = []
-        for record in self.replay(verify=False):
+        for record in self.replay(mode=ReplayMode.BEST_EFFORT):
             if record.performance_delta is not None:
                 trajectory.append(
                     {
@@ -431,7 +461,7 @@ class EvolutionLedger:
         from cortex.ledger.merkle import MerkleTree
 
         hashes: list[str] = []
-        for record in self.replay(verify=True):
+        for record in self.replay(mode=ReplayMode.STRICT):
             hashes.append(record.hash)
 
         tree = MerkleTree(hashes) if hashes else None
