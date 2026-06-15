@@ -771,3 +771,20 @@ Proof:
   Date: 2026-06-06
 ```
 
+---
+
+### Hito 48: Cryptographic Migration & Auth Hardening (AUTH-01)
+- **Target**: [cortex/auth/manager.py](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/auth/manager.py), [cortex/auth/backends.py](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/auth/backends.py), [cortex/auth/schema.py](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/auth/schema.py)
+- **Objective**: Implement progressive dual-stack Argon2id hashing with cryptographic pepper `AUTH_PEPPER`, mitigating static salt deterministic weaknesses and offline dictionary attacks without rotating existing active API keys.
+- **Yield Target**: 100% legacy login compatibility with background rehashing. Zero downtime.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Commit `3ff77080a`.
+```yaml
+Claim: Migración dual-stack SHA-256 a Argon2id completada
+Proof:
+  Base: "Esquema, AuthManager y Backends actualizados"
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-15
+```
+
