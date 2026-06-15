@@ -21,6 +21,17 @@ class CascadeRouter:
     def __init__(self):
         pass
 
+    def fallback_response(self, engine: str, prompt: str) -> str:
+        """Fallback response when engine is unavailable."""
+        try:
+            from cortex.engine.circuit_breaker import CircuitBreaker
+
+            cb = CircuitBreaker(f"cascade_router_{engine}")
+            cb._on_failure()
+        except Exception as cb_err:
+            logger.debug(f"Could not update circuit breaker: {cb_err}")
+        return f"Error: CLI tool '{engine}' not found in PATH. Subprocess execution failed."
+
     def route_task(
         self,
         prompt: str,
@@ -91,8 +102,9 @@ class CascadeRouter:
                         digest = hashlib.sha256(stdout.encode("utf-8")).hexdigest()[:16]
                         # Escribir en la tabla de episodios/BM25
                         conn.execute(
-                            "INSERT INTO episodes (event_type, project, content) VALUES (?, ?, ?)",
+                            "INSERT INTO episodes (session_id, event_type, project, content) VALUES (?, ?, ?, ?)",
                             (
+                                "cascade-sys",
                                 "llm_task_result",
                                 "cortex-engine",
                                 f"task_id:{task_id} engine:{engine} digest:{digest}\n{stdout[:500]}",
@@ -114,15 +126,9 @@ class CascadeRouter:
 
         except FileNotFoundError:
             logger.error(
-                f"🔌 [ROUTER] CLI no encontrado en PATH: {cmd[0]}. Activando circuit breaker..."
+                "🔌 [ROUTER] CLI no encontrado en PATH. Activando fallback..."
             )
-            try:
-                from cortex.engine.circuit_breaker import CircuitBreaker
-
-                cb = CircuitBreaker()
-                return cb.fallback_response(engine, prompt)
-            except ImportError:
-                return f"Error: {cmd[0]} not found and circuit breaker unavailable."
+            return self.fallback_response(engine, prompt)
         except subprocess.TimeoutExpired:
             logger.error(f"⏱️ [ROUTER] {engine} execution timed out (300s).")
             return f"Error: {engine} timed out."
