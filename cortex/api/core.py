@@ -36,7 +36,6 @@ from cortex.extensions.swarm.manager import get_swarm_manager
 from cortex.extensions.timing import TimingTracker
 from cortex.mcp.knowledge_watcher import start_knowledge_daemon
 from cortex.routes import api_router
-from cortex.swarm import start_swarm_daemon
 from cortex.telemetry.metrics import MetricsMiddleware, metrics
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 
@@ -137,6 +136,8 @@ async def lifespan(app: FastAPI):
 
     # 7. V4 Singularity Daemons (Execution Plane Only)
     if config.DEPLOY_MODE != "cloud":
+        from cortex.swarm import start_swarm_daemon
+
         watcher = start_knowledge_daemon()
         swarm_daemon = start_swarm_daemon()
         app.state.watcher = watcher
