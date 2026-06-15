@@ -74,7 +74,7 @@ class WorkingMemoryL1:
         """Lightweight heuristic to determine event retention priority."""
         score = 1.0
         # 1. Recency (base priority)
-        age_seconds = time.monotonic() - event.timestamp.timestamp()
+        age_seconds = time.time() - event.timestamp.timestamp()
         score += max(0.0, 1.0 - (age_seconds / 3600))  # higher if < 1 hour old
 
         # 2. Emotion/Valence
@@ -165,7 +165,7 @@ class WorkingMemoryL1:
                 seen.add(pid)
         return [{"role": e.role, "content": e.content} for e in buffer]
 
-    def get_access_frequency(self, project_id: str, window_seconds: float = 3600.0) -> float:
+    def get_access_frequency(self, project_id: str, window_seconds: float = 3600.0, tenant_id: str | None = None) -> float:
         """Return normalised access frequency for a project_id in the last window_seconds.
 
         Reads directly from the in-memory rolling log - zero I/O, O(n) with
@@ -175,6 +175,7 @@ class WorkingMemoryL1:
         Args:
             project_id: The project whose access frequency to measure.
             window_seconds: Rolling observation window (default 1 hour).
+            tenant_id: Explicit tenant override (defaults to ambient context).
 
         Returns:
             Float in [0.0, 1.0] where 1.0 means ≥ 100 accesses in window.
@@ -182,7 +183,15 @@ class WorkingMemoryL1:
         if not self._access_log:
             return 0.0
         cutoff = time.monotonic() - window_seconds
-        count = sum(1 for ts, pid in self._access_log if ts > cutoff and pid == project_id)
+        
+        # Support legacy callers/tests that pass the composite key directly
+        if ":" in project_id:
+            expected_pid = project_id
+        else:
+            t_id = tenant_id or get_tenant_id()
+            expected_pid = f"{t_id}:{project_id}"
+            
+        count = sum(1 for ts, pid in self._access_log if ts > cutoff and pid == expected_pid)
         # Normalise: 100+ accesses in window → 1.0  (Ω₁: right scale matters)
         return min(1.0, count / 100.0)
 

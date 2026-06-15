@@ -35,7 +35,7 @@ class SessionGuardrail:
     # Internal state
     _consumed: int = field(default=0, init=False, repr=False)
     _turns: int = field(default=0, init=False, repr=False)
-    _started_at: float = field(default_factory=time.time, init=False, repr=False)
+    _started_at: float = field(default_factory=time.monotonic, init=False, repr=False)
     _warned: bool = field(default=False, init=False, repr=False)
 
     def consume(self, tokens: int) -> bool:
