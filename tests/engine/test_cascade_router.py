@@ -109,3 +109,14 @@ class TestCascadeRouter:
         response = router.route_task("Run unauthorized command", "snippet")
         assert "Error" in response
         assert "Permission Denied" in response
+
+    @patch("cortex.engine.cascade_router.subprocess.run")
+    def test_execute_file_not_found(self, mock_run):
+        """Should handle FileNotFoundError gracefully."""
+        router = CascadeRouter()
+        mock_run.side_effect = FileNotFoundError()
+
+        # Let's see what happens when the executable is not found
+        response = router.route_task("Check this code", "snippet")
+        assert "not found in PATH" in response
+
