@@ -219,9 +219,13 @@ class LedgerStore:
 
     def _ensure_compat_columns(self, conn: sqlite3.Connection, table_name: str) -> None:
         """Backfill compatibility columns for legacy ledger job tables."""
+        from cortex.utils.sql_identifiers import validate_sql_identifier
+
+        validate_sql_identifier(table_name)
         existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table_name})").fetchall()}
         for column in ("next_attempt_ts", "next_attempt_at"):
             if column not in existing:
+                validate_sql_identifier(column)
                 conn.execute(f"ALTER TABLE {table_name} ADD COLUMN {column} TEXT")
 
     def _ensure_checkpoint_mldsa_columns(self, conn: sqlite3.Connection) -> None:

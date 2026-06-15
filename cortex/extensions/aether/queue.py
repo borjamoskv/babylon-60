@@ -148,8 +148,32 @@ class TaskQueue:
         """Update arbitrary fields on a task."""
         if not fields:
             return
+        from cortex.utils.sql_identifiers import validate_sql_identifier
+
+        allowed_fields = {
+            "title",
+            "description",
+            "repo_path",
+            "source",
+            "status",
+            "created_at",
+            "updated_at",
+            "plan",
+            "result",
+            "branch",
+            "pr_url",
+            "error",
+            "github_issue_number",
+            "github_repo",
+        }
+
         now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         fields["updated_at"] = now
+        for k in fields:
+            validate_sql_identifier(k)
+            if k not in allowed_fields:
+                raise ValueError(f"Unauthorized field update rejected: {k!r}")
+
         set_clause = ", ".join(f"{k} = ?" for k in fields)
         values = list(fields.values()) + [task_id]
         with self._conn() as conn:

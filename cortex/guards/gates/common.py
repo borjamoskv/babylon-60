@@ -8,7 +8,16 @@ from pathlib import Path
 from typing import Protocol, TypeAlias
 
 from cortex.guards._seal_printer import SealPrinter
-from cortex.guards._seals_cache import GlobalSourceCache  # noqa: F401
+from cortex.guards._seals_cache import GlobalSourceCache
+
+__all__ = [
+    "GateResult",
+    "GateCallable",
+    "printer",
+    "ROOT_DIR",
+    "arun_cmd",
+    "GlobalSourceCache",
+]
 
 # ── Type Definitions ──
 # Result: (Success, Reason/Status)

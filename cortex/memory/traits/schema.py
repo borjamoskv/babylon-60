@@ -128,6 +128,8 @@ class SchemaTrait:
                 ("exergy_score", "REAL DEFAULT 1.0"),
             ]
 
+            from cortex.utils.sql_identifiers import validate_sql_identifier
+
             cursor = conn.execute(
                 "SELECT name FROM sqlite_master "
                 "WHERE type='table' AND name LIKE 'facts_meta%' AND sql NOT LIKE '%VIRTUAL%'"
@@ -135,14 +137,13 @@ class SchemaTrait:
             tables = [row[0] for row in cursor.fetchall()]
 
             for tb in tables:
+                validate_sql_identifier(tb)
                 info_cursor = conn.execute(f"PRAGMA table_info({tb})")  # nosec B608
                 existing_cols = {row[1] for row in info_cursor.fetchall()}
                 for col, col_type in migrations:
                     if col in existing_cols:
                         continue
-                    # Validate col strictly to prevent SQL injection.
-                    if not all(c.isalnum() or c == "_" for c in col):
-                        continue
+                    validate_sql_identifier(col)
                     alter_query = f"ALTER TABLE {tb} ADD COLUMN {col} {col_type}"
                     conn.execute(alter_query)  # nosec B608
             conn.commit()
@@ -189,15 +190,23 @@ class SchemaTrait:
         """Axiom Ω8: Vertical Domain Cut.
         If a corpus weighs too much, we split the universe and migrate only distilled axioms.
         """
+        from cortex.utils.sql_identifiers import validate_sql_identifier
+
         safe_tenant = "".join(c for c in tenant_id if c.isalnum() or c == "_")
         safe_proj = "".join(c for c in project_id if c.isalnum() or c == "_")
         if not safe_tenant or not safe_proj:
-            return "facts_meta", "vec_facts", "vec_void", "vec_void_mih"
+            # Prevent silent fallback and potential tenant data leakage
+            raise ValueError(
+                f"Unsafe or empty tenant/project ID rejected: tenant={tenant_id!r}, project={project_id!r}"
+            )
 
-        meta_tb = f"facts_meta_{safe_tenant}_{safe_proj}"
-        vec_tb = f"vec_facts_{safe_tenant}_{safe_proj}"
-        vec_void_tb = f"vec_void_{safe_tenant}_{safe_proj}"
-        mih_tb = f"vec_void_mih_{safe_tenant}_{safe_proj}"
+        validate_sql_identifier(safe_tenant)
+        validate_sql_identifier(safe_proj)
+
+        meta_tb = validate_sql_identifier(f"facts_meta_{safe_tenant}_{safe_proj}")
+        vec_tb = validate_sql_identifier(f"vec_facts_{safe_tenant}_{safe_proj}")
+        vec_void_tb = validate_sql_identifier(f"vec_void_{safe_tenant}_{safe_proj}")
+        mih_tb = validate_sql_identifier(f"vec_void_mih_{safe_tenant}_{safe_proj}")
 
         cursor = conn.cursor()
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (meta_tb,))
