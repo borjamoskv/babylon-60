@@ -38,9 +38,38 @@ class PromptExtractionBlockedError(Exception):
     pass
 
 
+import re
+
+_MODEL_CACHE: Dict[str, Any] = {}
+
+def get_sentence_transformer(model_name: str = 'all-MiniLM-L6-v2') -> Any:
+    global _MODEL_CACHE
+    if model_name not in _MODEL_CACHE:
+        if HAS_SENTENCE_TRANSFORMERS:
+            try:
+                if HAS_TORCH:
+                    # Optimize CPU inference by restricting PyTorch thread contention
+                    torch.set_num_threads(1)
+                    torch.set_num_interop_threads(1)
+                
+                _MODEL_CACHE[model_name] = SentenceTransformer(model_name)
+                logger.info(f"[PROMPT_SECURITY] Loaded SentenceTransformer model '{model_name}'. Threading optimized.")
+            except Exception as e:
+                logger.warning(f"[PROMPT_SECURITY] Failed to load SentenceTransformer: {e}. Falling back to syntactic overlap.")
+                _MODEL_CACHE[model_name] = None
+        else:
+            _MODEL_CACHE[model_name] = None
+    return _MODEL_CACHE[model_name]
+
+
 def clean_text(text: str) -> str:
-    """Removes punctuation and normalizes string to lowercase for syntactic checks."""
-    return text.translate(str.maketrans("", "", string.punctuation)).lower()
+    """Normalizes string: replaces separators with spaces, strips punctuation, collapses whitespace."""
+    # Normalize common word separators
+    normalized = text.lower().replace("_", " ").replace("-", " ").replace("/", " ")
+    # Strip non-alphanumeric and non-space characters
+    cleaned = re.sub(r'[^\w\s]', '', normalized)
+    # Collapse multiple whitespaces
+    return " ".join(cleaned.split())
 
 
 class PromptSecurityGuard:
@@ -64,20 +93,24 @@ class PromptSecurityGuard:
             "system prompt", "verbatim", "instrucciones", "original instructions",
             "config", "developer mode", "admin mode", "reveal system", "hacker mode"
         ]
+        
+        # Compile regex with word boundaries for performance and false-positive prevention
+        self.fast_path_regex = re.compile(
+            r'\b(' + '|'.join(map(re.escape, self.fast_path_rules)) + r')\b',
+            re.IGNORECASE
+        )
 
-        # Initialize semantic model if available
-        if HAS_SENTENCE_TRANSFORMERS:
+        # Initialize semantic model from global cache if available
+        self.model = get_sentence_transformer('all-MiniLM-L6-v2')
+        self.system_prompt_embedding = None
+        if self.model is not None:
             try:
-                self.model = SentenceTransformer('all-MiniLM-L6-v2')
                 self.system_prompt_embedding = self.model.encode(
                     system_prompt, convert_to_tensor=True
                 )
-                logger.info("[PROMPT_SECURITY] Loaded SentenceTransformer model 'all-MiniLM-L6-v2'.")
             except Exception as e:
-                logger.warning(f"[PROMPT_SECURITY] Failed to load SentenceTransformer: {e}. Falling back to syntactic overlap.")
+                logger.warning(f"[PROMPT_SECURITY] Failed to encode system prompt: {e}. Disabling model.")
                 self.model = None
-        else:
-            self.model = None
 
     def _calculate_token_overlap(self, text: str) -> float:
         """Computes Jaccard similarity for token overlap."""
@@ -107,16 +140,17 @@ class PromptSecurityGuard:
         Raises:
             PromptExtractionBlockedError: If extraction intent is detected.
         """
-        query_lower = user_query.lower()
-        if any(rule in query_lower for rule in self.fast_path_rules):
+        # Normalize and clean input
+        normalized_query = clean_text(user_query)
+        if self.fast_path_regex.search(normalized_query):
             logger.warning(f"[PROMPT_SECURITY] Blocked input due to fast-path match: '{user_query[:100]}'")
             raise PromptExtractionBlockedError("Security boundary tripped: request blocked by input policy.")
 
         # Evaluate trajectory (Vector 3 Mitigation)
         trajectory_context = [t["content"] for t in history[-4:]] + [user_query]
-        trajectory_text = " | ".join(trajectory_context).lower()
+        normalized_trajectory = clean_text(" ".join(trajectory_context))
         
-        if any(rule in trajectory_text for rule in self.fast_path_rules):
+        if self.fast_path_regex.search(normalized_trajectory):
             logger.warning(f"[PROMPT_SECURITY] Blocked input due to trajectory rule match.")
             raise PromptExtractionBlockedError("Security boundary tripped: request blocked by trajectory policy.")
 

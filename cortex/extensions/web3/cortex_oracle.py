@@ -209,6 +209,50 @@ class CortexOracleClient:
         logger.error(f"[CortexOracle] Timeout reached waiting for request {self.w3.to_hex(request_id)} completion.")
         return None
 
+    async def async_wait_for_completion(self, request_id: bytes, timeout: int = 180) -> Optional[bool]:
+        """
+        Asynchronously polls the chain for verification completion logs matching the request ID.
+        """
+        import asyncio
+        if not self.connect() or not self.contract or not self.w3:
+            return None
+
+        start_time = time.time()
+        logger.info(f"[CortexOracle] Async polling for fulfillment of request: {self.w3.to_hex(request_id)}")
+
+        latest_block = self.w3.eth.block_number
+
+        while time.time() - start_time < timeout:
+            try:
+                # Query logs from contract events
+                completed_events = self.contract.events.TelemetryVerificationCompleted().get_logs(
+                    fromBlock=latest_block - 10,
+                    toBlock='latest'
+                )
+                for event in completed_events:
+                    if event["args"]["requestId"] == request_id:
+                        success = event["args"]["success"]
+                        logger.info(f"[CortexOracle] Request {self.w3.to_hex(request_id)} completed asynchronously. Success: {success}")
+                        return success
+
+                failed_events = self.contract.events.TelemetryVerificationFailed().get_logs(
+                    fromBlock=latest_block - 10,
+                    toBlock='latest'
+                )
+                for event in failed_events:
+                    if event["args"]["requestId"] == request_id:
+                        err_reason = event["args"]["error"]
+                        logger.error(f"[CortexOracle] Request {self.w3.to_hex(request_id)} failed asynchronously with error: {err_reason.hex()}")
+                        return False
+
+                await asyncio.sleep(5)
+            except Exception as e:
+                logger.warning(f"[CortexOracle] Error while async polling events: {e}")
+                await asyncio.sleep(5)
+
+        logger.error(f"[CortexOracle] Timeout reached waiting for request {self.w3.to_hex(request_id)} completion asynchronously.")
+        return None
+
 def build_telemetry_js_source(api_endpoint: str) -> str:
     """
     Builds the Chainlink Functions source script that queries the telemetry API.

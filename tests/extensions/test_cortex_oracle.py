@@ -110,3 +110,36 @@ def test_build_telemetry_js_source():
     assert "https://api.cortex.com/telemetry" in source
     assert "Functions.makeHttpRequest" in source
     assert "Uint8Array" in source
+
+@pytest.mark.asyncio
+async def test_async_wait_for_completion_success(mock_web3):
+    client = CortexOracleClient(
+        rpc_url="http://localhost:8545",
+        contract_address="0x" + "1" * 40,
+        private_key="0x" + "2" * 64
+    )
+    client.w3 = mock_web3
+    
+    mock_contract = MagicMock()
+    client.contract = mock_contract
+    
+    # Mock log event matching request ID
+    mock_event_completed = MagicMock()
+    mock_event_completed.get_logs.return_value = [
+        {
+            "args": {
+                "requestId": b"target_request_id",
+                "success": True
+            }
+        }
+    ]
+    mock_contract.events.TelemetryVerificationCompleted.return_value = mock_event_completed
+    
+    # Mock failed events (empty list)
+    mock_event_failed = MagicMock()
+    mock_event_failed.get_logs.return_value = []
+    mock_contract.events.TelemetryVerificationFailed.return_value = mock_event_failed
+    
+    with patch("asyncio.sleep", return_value=None):
+        success = await client.async_wait_for_completion(b"target_request_id", timeout=5)
+    assert success is True

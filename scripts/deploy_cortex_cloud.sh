@@ -5,10 +5,24 @@
 
 set -e
 
+# Parse arguments
+SKIP_DNS=false
+for arg in "$@"; do
+    case $arg in
+        --skip-dns|--force)
+            SKIP_DNS=true
+            shift
+            ;;
+    esac
+done
+
 echo "============================================================"
 echo "⚡ CORTEX CLOUD TOPOLOGY INIT (Managed API + Stripe)"
 echo "============================================================"
 echo "Reality Level: C5-REAL"
+if [ "$SKIP_DNS" = true ]; then
+    echo "Mode: DNS Binding Verification Bypass Enabled (--skip-dns/--force)"
+fi
 
 if ! command -v vercel &> /dev/null
 then
@@ -49,10 +63,15 @@ for DOMAIN in $DOMAINS; do
         # Extraer instrucciones dinámicas de Vercel (Registros A/CNAME requeridos)
         echo "$DOMAIN_STATUS" | grep -E "((Set the following record|Change your Domains's nameservers)|A |CNAME )" -A 1 | sed 's/^/    >> /'
         
-        echo "[X] Abortando despliegue para evitar falsos positivos."
-        exit 1
+        if [ "$SKIP_DNS" = true ]; then
+            echo "  ⚠️ Warning: DNS config invalid, but continuing deployment due to --skip-dns/--force."
+        else
+            echo "[X] Abortando despliegue para evitar falsos positivos."
+            exit 1
+        fi
+    else
+        echo "  ✓ $DOMAIN validado."
     fi
-    echo "  ✓ $DOMAIN validado."
 done
 
 echo "[3/4] Validating API Dependencies..."

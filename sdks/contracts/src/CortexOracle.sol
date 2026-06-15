@@ -23,8 +23,12 @@ contract CortexOracle is ICortexMemoryVerifier, FunctionsClient {
     event RegistryUpdated(address indexed oldRegistry, address indexed newRegistry);
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "CortexOracle: Only owner");
+        _onlyOwner();
         _;
+    }
+
+    function _onlyOwner() internal view {
+        require(msg.sender == owner, "CortexOracle: Only owner");
     }
 
     constructor(address _functionsRouter, bytes32 _donId, address _registry) FunctionsClient(_functionsRouter) {

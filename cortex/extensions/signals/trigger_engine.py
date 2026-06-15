@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import fnmatch
 import logging
+import re
 import threading
 import time
 from collections import defaultdict
@@ -193,21 +194,29 @@ class TriggerEngine:
         self._accumulators: dict[str, _AccumulatorEntry] = defaultdict(_AccumulatorEntry)
         self._handler = handler or TriggerActionHandler()
         self._exact_routes: dict[str, list[TriggerCondition]] = defaultdict(list)
-        self._wildcard_routes: list[tuple[str, TriggerCondition]] = []
+        self._wildcard_routes: list[tuple[re.Pattern, TriggerCondition]] = []
+        self._trigger_order: dict[str, int] = {}
 
     def _rebuild_routing_indexes(self) -> None:
         """Rebuild exact and wildcard matching indexes for fast routing.
 
         Must be called under self._lock.
         """
-        self._exact_routes = defaultdict(list)
-        self._wildcard_routes = []
+        exact_routes = defaultdict(list)
+        wildcard_routes = []
         for trigger in self._triggers.values():
             for pattern in trigger.event_types:
                 if any(char in pattern for char in "*?["):
-                    self._wildcard_routes.append((pattern, trigger))
+                    # Pre-compile fnmatch glob to regex pattern for maximum performance
+                    regex = re.compile(fnmatch.translate(pattern))
+                    wildcard_routes.append((regex, trigger))
                 else:
-                    self._exact_routes[pattern].append(trigger)
+                    exact_routes[pattern].append(trigger)
+
+        # Atomic updates to allow lock-free reads during evaluate()
+        self._exact_routes = exact_routes
+        self._wildcard_routes = wildcard_routes
+        self._trigger_order = {tid: idx for idx, tid in enumerate(self._triggers.keys())}
 
     # ── Registration ───────────────────────────────────────────────
 
@@ -249,22 +258,24 @@ class TriggerEngine:
         results: list[TriggerResult] = []
         now = time.monotonic()
 
-        with self._lock:
-            # 1. Gather matching triggers preserving original insertion order
-            matched: dict[str, TriggerCondition] = {}
+        # Gather matching triggers lock-free (uses consistent snapshot references)
+        exact_routes = self._exact_routes
+        wildcard_routes = self._wildcard_routes
+        trigger_order = self._trigger_order
 
-            # Exact match lookup
-            for trigger in self._exact_routes.get(signal.event_type, []):
+        matched: dict[str, TriggerCondition] = {}
+
+        # O(1) Exact match lookup
+        for trigger in exact_routes.get(signal.event_type, []):
+            matched[trigger.id] = trigger
+
+        # Pre-compiled regex lookup for wildcards
+        for regex, trigger in wildcard_routes:
+            if regex.match(signal.event_type):
                 matched[trigger.id] = trigger
 
-            # Wildcard match lookup
-            for pattern, trigger in self._wildcard_routes:
-                if fnmatch.fnmatch(signal.event_type, pattern):
-                    matched[trigger.id] = trigger
-
-            # Preserve registration order (order of keys in self._triggers)
-            trigger_ids_order = {tid: idx for idx, tid in enumerate(self._triggers.keys())}
-            triggers = sorted(matched.values(), key=lambda t: trigger_ids_order[t.id])
+        # Preserve registration order
+        triggers = sorted(matched.values(), key=lambda t: trigger_order.get(t.id, 0))
 
         for trigger in triggers:
             if not trigger.enabled:

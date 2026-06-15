@@ -35,13 +35,21 @@ contract CortexLineageRegistry {
     event VerificationOverridden(bytes32 indexed telemetryHash, bool verified, address indexed overriddenBy);
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "CortexRegistry: Only owner");
+        _onlyOwner();
         _;
     }
 
     modifier onlyAuthorized() {
-        require(msg.sender == oracle || msg.sender == owner, "CortexRegistry: Not authorized");
+        _onlyAuthorized();
         _;
+    }
+
+    function _onlyOwner() internal view {
+        require(msg.sender == owner, "CortexRegistry: Only owner");
+    }
+
+    function _onlyAuthorized() internal view {
+        require(msg.sender == oracle || msg.sender == owner, "CortexRegistry: Not authorized");
     }
 
     constructor() {

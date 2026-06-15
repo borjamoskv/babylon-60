@@ -21,7 +21,7 @@ contract CortexOracleTest is Test {
     CortexOracle public oracle;
     CortexLineageRegistry public registry;
     MockFunctionsRouter public mockRouter;
-    bytes32 public dummyDonId = bytes32("fun-ethereum-mainnet-1");
+    bytes32 public dummyDonId = keccak256("fun-ethereum-mainnet-1");
 
     function setUp() public {
         mockRouter = new MockFunctionsRouter();

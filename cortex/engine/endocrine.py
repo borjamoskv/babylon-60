@@ -75,27 +75,28 @@ class EndocrineRegistry:
 
         return new_val
 
-    def sync_with_calcification(self, index: float) -> None:
-        """Ω₅-H: Sync systemic Cortisol with project Calcification Index."""
-        calc_stress = min(1.0, index / 100.0)
+    def _sync_cortisol_stress(self, stress_val: float, scale: float, reason: str) -> None:
+        """Helper to modify cortisol according to a stress metric."""
+        stress = min(1.0, stress_val / scale)
         current = self._hormones.get(HormoneType.CORTISOL, 0.0)  # type: ignore[reportAttributeAccessIssue]
-        if calc_stress > current:
+        if stress > current:
             self.pulse(
                 HormoneType.CORTISOL,
-                (calc_stress - current) * 0.5,
-                reason=f"Calcification Stress (Index: {index:.2f})",
+                (stress - current) * 0.5,
+                reason=reason,
             )
+
+    def sync_with_calcification(self, index: float) -> None:
+        """Ω₅-H: Sync systemic Cortisol with project Calcification Index."""
+        self._sync_cortisol_stress(
+            index, 100.0, f"Calcification Stress (Index: {index:.2f})"
+        )
 
     def sync_with_free_energy(self, total_f: float) -> None:
         """Ω₅-F: Sync systemic Cortisol with Variational Free Energy."""
-        f_stress = min(1.0, total_f / 10.0)
-        current = self._hormones.get(HormoneType.CORTISOL, 0.0)  # type: ignore[reportAttributeAccessIssue]
-        if f_stress > current:
-            self.pulse(
-                HormoneType.CORTISOL,
-                (f_stress - current) * 0.5,
-                reason=f"High Free Energy Stress (F: {total_f:.2f})",
-            )
+        self._sync_cortisol_stress(
+            total_f, 10.0, f"High Free Energy Stress (F: {total_f:.2f})"
+        )
 
     def prune(self) -> int:
         """
