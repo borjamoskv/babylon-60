@@ -17,6 +17,8 @@ import time
 from pathlib import Path
 from typing import Any
 
+from cortex.database.core import connect
+
 
 class SovereignOutbox:
     """Atomic task outbox using SQLite WAL mode.
@@ -47,10 +49,7 @@ class SovereignOutbox:
     def _get_conn(self) -> sqlite3.Connection:
         conn = getattr(self._local, "conn", None)
         if conn is None:
-            conn = sqlite3.connect(self._db_path, timeout=10.0)
-            conn.execute("PRAGMA journal_mode=WAL")
-            conn.execute("PRAGMA synchronous=NORMAL")
-            conn.row_factory = sqlite3.Row
+            conn = connect(self._db_path, timeout=10, row_factory=sqlite3.Row)
             self._local.conn = conn
         return conn
 

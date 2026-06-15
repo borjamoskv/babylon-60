@@ -9,9 +9,10 @@ Reality Level: C5-REAL
 
 from __future__ import annotations
 
-import sqlite3
 from pathlib import Path
 from typing import Any, Final
+
+from cortex.database.core import connect
 
 DB_PATH: Final[Path] = Path("/Users/borjafernandezangulo/.cortex/cortex.db")
 
@@ -32,7 +33,7 @@ class HodgeMemoryRouter:
             nodes: map from fact_id -> fact_dict
             edges: adjacency list mapping node_id -> list of child_ids
         """
-        conn = sqlite3.connect(self.db_path)
+        conn = connect(str(self.db_path))
         cursor = conn.cursor()
 
         # Load nodes

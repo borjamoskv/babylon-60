@@ -2,6 +2,7 @@
 import logging
 import sqlite3
 
+from cortex.database.core import connect
 from cortex.guards.exergy_guard import calculate_exergy
 from cortex.utils import void_vec
 
@@ -30,17 +31,13 @@ class SchemaTrait:
             err = "sqlite_vec module not installed. Run 'pip install sqlite-vec'"
             raise RuntimeError(err)
 
-        conn = sqlite3.connect(
+        conn = connect(
             self._db_path,  # pyright: ignore[reportAttributeAccessIssue]
             check_same_thread=False,
-            timeout=5.0,  # opening-policy: O(1) fail-fast
+            timeout=5,
+            row_factory=sqlite3.Row,
         )
         try:
-            # runtime-policy: wait up to 5s for WAL write-lock contention (Axiom Ω6)
-            conn.execute("PRAGMA journal_mode=WAL;")
-            conn.execute("PRAGMA synchronous=NORMAL;")
-            conn.execute("PRAGMA busy_timeout=5000")
-
             try:
                 conn.enable_load_extension(True)
                 sqlite_vec.load(conn)
@@ -53,8 +50,6 @@ class SchemaTrait:
                     e,
                 )
                 self._vector_enabled = False
-
-            conn.row_factory = sqlite3.Row
 
             # Register Sovereign Functions
             conn.create_function("cortex_decay", 4, cortex_decay)
