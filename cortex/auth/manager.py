@@ -12,6 +12,8 @@ import time
 from datetime import datetime, timezone
 from typing import Any
 
+from argon2 import PasswordHasher
+
 from cortex.auth.backends import BaseAuthBackend
 from cortex.auth.models import APIKey, AuthResult
 
@@ -71,6 +73,12 @@ class AuthManager:
                 logger.info("AuthManager: Using Local Sovereign (SQLite) backend")
                 backend = SQLiteAuthBackend(DB_PATH)
         self.backend = backend
+        self.ph = PasswordHasher(
+            time_cost=2,
+            memory_cost=65536,
+            parallelism=1,
+            hash_len=32,
+        )
         self._background_tasks: set[asyncio.Task[Any]] = set()
 
     async def initialize(self) -> None:
@@ -96,8 +104,12 @@ class AuthManager:
             asyncio.run(coro)
 
     @staticmethod
-    def _hash_key(key: str) -> str:
+    def hash_key_legacy_sha256(key: str) -> str:
         return hashlib.sha256(key.encode()).hexdigest()
+
+    def hash_key_argon2id(self, key: str) -> str:
+        from cortex.config import AUTH_PEPPER
+        return self.ph.hash(key + AUTH_PEPPER)
 
     async def close(self) -> None:
         """Close the backend connections."""
@@ -117,7 +129,8 @@ class AuthManager:
             permissions = ["read", "write"]
 
         raw_key = f"ctx_{secrets.token_hex(self.KEY_LENGTH)}"
-        key_hash = self._hash_key(raw_key)
+        key_hash = self.hash_key_legacy_sha256(raw_key)
+        key_hash_argon2 = self.hash_key_argon2id(raw_key)
         key_prefix = raw_key[:12]
 
         key_id = await self.backend.store_key(
@@ -128,6 +141,8 @@ class AuthManager:
             role=role,
             permissions=permissions,
             rate_limit=rate_limit,
+            key_hash_argon2=key_hash_argon2,
+            hash_algo="argon2id",
         )
 
         new_api_key = APIKey(
@@ -229,17 +244,48 @@ class AuthManager:
         return res[0]
 
     async def authenticate_async(self, raw_key: str) -> AuthResult:
-        """Fully async authentication."""
+        """Fully async authentication with dual-stack Argon2id support."""
+        from cortex.config import AUTH_PEPPER
+
         is_valid_format = bool(raw_key and raw_key.startswith("ctx_"))
-        dummy_hash = self._hash_key("ctx_invalid_dummy_key_to_waste_time")
-        key_hash = self._hash_key(raw_key) if is_valid_format else dummy_hash
+        dummy_hash = self.hash_key_legacy_sha256("ctx_invalid_dummy_key_to_waste_time")
+        key_hash = self.hash_key_legacy_sha256(raw_key) if is_valid_format else dummy_hash
 
         if not is_valid_format:
             return AuthResult(authenticated=False, error="Invalid key format")
 
-        row = await self.backend.get_key_by_hash(key_hash)
+        row = None
+        needs_migration = False
+
+        # 1. Try legacy SHA-256 (fast, uses index)
+        legacy_row = await self.backend.get_key_by_hash(key_hash)
+        if legacy_row and legacy_row.get("hash_algo", "sha256") == "sha256":
+            row = legacy_row
+            needs_migration = True
+        else:
+            # 2. Try Argon2id candidates by prefix
+            key_prefix = raw_key[:12]
+            candidates = await self.backend.get_key_candidates(key_prefix)
+            for cand in candidates:
+                if cand.get("hash_algo") == "argon2id" and cand.get("key_hash_argon2"):
+                    try:
+                        if self.ph.verify(cand["key_hash_argon2"], raw_key + AUTH_PEPPER):
+                            row = cand
+                            if self.ph.check_needs_rehash(cand["key_hash_argon2"]):
+                                needs_migration = True
+                            break
+                    except Exception:
+                        pass
+        
         if not row:
             return AuthResult(authenticated=False, error="Invalid or revoked key")
+
+        # 3. Migrate if needed
+        if needs_migration:
+            new_hash_argon2 = self.hash_key_argon2id(raw_key)
+            task_mig = asyncio.create_task(self.backend.migrate_key_to_argon2(row["id"], new_hash_argon2))
+            self._background_tasks.add(task_mig)
+            task_mig.add_done_callback(self._background_tasks.discard)
 
         # Background update of last_used
         task = asyncio.create_task(self.backend.update_last_used(row["id"]))

@@ -46,6 +46,8 @@ class BaseAuthBackend(ABC):
         role: str,
         permissions: list[str],
         rate_limit: int,
+        key_hash_argon2: str | None = None,
+        hash_algo: str = "sha256",
     ) -> int:
         """Store a new API key. Returns the backend-specific unique ID."""
 
@@ -60,6 +62,14 @@ class BaseAuthBackend(ABC):
     @abstractmethod
     async def update_last_used(self, key_id: KeyID) -> None:
         """Update the last_used timestamp for a key."""
+
+    @abstractmethod
+    async def get_key_candidates(self, key_prefix: str) -> list[KeyData]:
+        """Retrieve active API keys matching a prefix (for Argon2id validation)."""
+
+    @abstractmethod
+    async def migrate_key_to_argon2(self, key_id: KeyID, key_hash_argon2: str) -> None:
+        """Migrate a key hash to Argon2id and update hash_algo."""
 
 
 class SQLiteAuthBackend(BaseAuthBackend):
@@ -77,6 +87,13 @@ class SQLiteAuthBackend(BaseAuthBackend):
         conn = await self._get_conn_async()
         try:
             await conn.executescript(AUTH_SCHEMA)
+            # Migration
+            try:
+                await conn.execute("ALTER TABLE api_keys ADD COLUMN key_hash_argon2 TEXT")
+                await conn.execute("ALTER TABLE api_keys ADD COLUMN hash_algo TEXT NOT NULL DEFAULT 'sha256'")
+                await conn.execute("ALTER TABLE api_keys ADD COLUMN migrated_at TEXT")
+            except aiosqlite.OperationalError:
+                pass  # Columns already exist
             await conn.commit()
         finally:
             await conn.close()
@@ -108,10 +125,12 @@ class SQLiteAuthBackend(BaseAuthBackend):
         role: str,
         permissions: list[str],
         rate_limit: int,
+        key_hash_argon2: str | None = None,
+        hash_algo: str = "sha256",
     ) -> int:
         from cortex.auth import SQL_INSERT_KEY
 
-        args = (name, key_hash, key_prefix, tenant_id, role, json.dumps(permissions), rate_limit)
+        args = (name, key_hash, key_prefix, tenant_id, role, json.dumps(permissions), rate_limit, key_hash_argon2, hash_algo)
         conn = await self._get_conn_async()
         try:
             cursor = await conn.execute(SQL_INSERT_KEY, args)
@@ -160,6 +179,34 @@ class SQLiteAuthBackend(BaseAuthBackend):
         finally:
             await conn.close()
 
+    async def get_key_candidates(self, key_prefix: str) -> list[KeyData]:
+        conn = await self._get_conn_async()
+        try:
+            conn.row_factory = aiosqlite.Row
+            cursor = await conn.execute(
+                "SELECT * FROM api_keys WHERE key_prefix = ? AND is_active = 1",
+                (key_prefix,),
+            )
+            rows = await cursor.fetchall()
+            return [dict(r) for r in rows]
+        finally:
+            await conn.close()
+
+    async def migrate_key_to_argon2(self, key_id: KeyID, key_hash_argon2: str) -> None:
+        from datetime import datetime, timezone
+
+        conn = await self._get_conn_async()
+        try:
+            await conn.execute(
+                "UPDATE api_keys SET key_hash_argon2 = ?, hash_algo = 'argon2id', migrated_at = ? WHERE id = ?",
+                (key_hash_argon2, datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), key_id),
+            )
+            await conn.commit()
+        except (aiosqlite.Error, OSError) as e:
+            logger.debug("Could not migrate key (async): %s", e)
+        finally:
+            await conn.close()
+
 
 class AlloyDBAuthBackend(BaseAuthBackend):
     """Distributed authentication backend for AlloyDB / PostgreSQL.
@@ -189,6 +236,13 @@ class AlloyDBAuthBackend(BaseAuthBackend):
         pool = await self._get_pool()
         async with pool.acquire() as conn:
             await conn.execute(pg_schema)
+            # Migration
+            try:
+                await conn.execute("ALTER TABLE api_keys ADD COLUMN IF NOT EXISTS key_hash_argon2 TEXT")
+                await conn.execute("ALTER TABLE api_keys ADD COLUMN IF NOT EXISTS hash_algo TEXT NOT NULL DEFAULT 'sha256'")
+                await conn.execute("ALTER TABLE api_keys ADD COLUMN IF NOT EXISTS migrated_at TEXT")
+            except Exception as e:
+                logger.debug("AlloyDB columns already exist or error: %s", e)
 
     async def get_key_by_hash(self, key_hash: str) -> KeyData | None:
         pool = await self._get_pool()
@@ -208,14 +262,16 @@ class AlloyDBAuthBackend(BaseAuthBackend):
         role: str,
         permissions: list[str],
         rate_limit: int,
+        key_hash_argon2: str | None = None,
+        hash_algo: str = "sha256",
     ) -> int:
         pool = await self._get_pool()
         async with pool.acquire() as conn:
             key_id = await conn.fetchval(
                 """
                 INSERT INTO api_keys
-                    (name, key_hash, key_prefix, tenant_id, role, permissions, rate_limit)
-                VALUES ($1, $2, $3, $4, $5, $6, $7)
+                    (name, key_hash, key_prefix, tenant_id, role, permissions, rate_limit, key_hash_argon2, hash_algo)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                 RETURNING id
                 """,
                 name,
@@ -225,6 +281,8 @@ class AlloyDBAuthBackend(BaseAuthBackend):
                 role,
                 json.dumps(permissions),
                 rate_limit,
+                key_hash_argon2,
+                hash_algo,
             )
             return key_id  # type: ignore[no-any-return]
 
@@ -264,6 +322,27 @@ class AlloyDBAuthBackend(BaseAuthBackend):
             await self._pool.close()
             self._pool = None
 
+    async def get_key_candidates(self, key_prefix: str) -> list[KeyData]:
+        pool = await self._get_pool()
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(
+                "SELECT * FROM api_keys WHERE key_prefix = $1 AND is_active = 1",
+                key_prefix,
+            )
+            return [dict(r) for r in rows]
+
+    async def migrate_key_to_argon2(self, key_id: KeyID, key_hash_argon2: str) -> None:
+        from datetime import datetime, timezone
+
+        pool = await self._get_pool()
+        async with pool.acquire() as conn:
+            await conn.execute(
+                "UPDATE api_keys SET key_hash_argon2 = $1, hash_algo = 'argon2id', migrated_at = $2 WHERE id = $3",
+                key_hash_argon2,
+                datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+                key_id,
+            )
+
 
 class TursoAuthBackend(BaseAuthBackend):
     """Distributed authentication backend for Turso / libSQL over HTTP/WebSockets.
@@ -291,6 +370,13 @@ class TursoAuthBackend(BaseAuthBackend):
         statements = [s.strip() for s in AUTH_SCHEMA.split(";") if s.strip()]
         for stmt in statements:
             await client.execute(stmt)
+            
+        try:
+            await client.execute("ALTER TABLE api_keys ADD COLUMN key_hash_argon2 TEXT")
+            await client.execute("ALTER TABLE api_keys ADD COLUMN hash_algo TEXT NOT NULL DEFAULT 'sha256'")
+            await client.execute("ALTER TABLE api_keys ADD COLUMN migrated_at TEXT")
+        except Exception:
+            pass # Columns already exist
 
     async def get_key_by_hash(self, key_hash: str) -> KeyData | None:
         client = await self._get_client()
@@ -310,11 +396,13 @@ class TursoAuthBackend(BaseAuthBackend):
         role: str,
         permissions: list[str],
         rate_limit: int,
+        key_hash_argon2: str | None = None,
+        hash_algo: str = "sha256",
     ) -> int:
         from cortex.auth import SQL_INSERT_KEY
 
         client = await self._get_client()
-        args = [name, key_hash, key_prefix, tenant_id, role, json.dumps(permissions), rate_limit]
+        args = [name, key_hash, key_prefix, tenant_id, role, json.dumps(permissions), rate_limit, key_hash_argon2, hash_algo]
         res = await client.execute(SQL_INSERT_KEY, args)
         return res.last_insert_rowid
 
@@ -350,3 +438,22 @@ class TursoAuthBackend(BaseAuthBackend):
         if self._client:
             await self._client.close()
             self._client = None
+
+    async def get_key_candidates(self, key_prefix: str) -> list[KeyData]:
+        client = await self._get_client()
+        res = await client.execute(
+            "SELECT * FROM api_keys WHERE key_prefix = ? AND is_active = 1", [key_prefix]
+        )
+        return [dict(zip(res.columns, row, strict=False)) for row in res.rows]
+
+    async def migrate_key_to_argon2(self, key_id: KeyID, key_hash_argon2: str) -> None:
+        from datetime import datetime, timezone
+
+        client = await self._get_client()
+        try:
+            await client.execute(
+                "UPDATE api_keys SET key_hash_argon2 = ?, hash_algo = 'argon2id', migrated_at = ? WHERE id = ?",
+                [key_hash_argon2, datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), key_id],
+            )
+        except Exception as e:
+            logger.debug("Could not migrate key in Turso: %s", e)
