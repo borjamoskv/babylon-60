@@ -129,3 +129,21 @@ class AutopoiesisEngine:
 
         except (TypeError, OSError):
             logger.error("Function source unavailable for mutation of '%s'.", func_name)
+
+    def mutate(self, target: str = "default") -> dict:
+        """
+        Public trigger for OmegaDaemon compatibility.
+        Dispatches an AST mutation cycle via OuroborosCompiler.
+        """
+        logger.info(f"[AutopoiesisEngine] mutate() triggered — target={target!r}")
+        try:
+            # Delegate to the internal compiler if available
+            if hasattr(self, "_compiler") and self._compiler:
+                return self._compiler.run_cycle(target=target)
+            # Fallback: mark target for next observe_and_mutate pass
+            self._pending_targets = getattr(self, "_pending_targets", [])
+            self._pending_targets.append(target)
+            return {"status": "queued", "target": target}
+        except Exception as exc:
+            logger.exception(f"[AutopoiesisEngine] mutate() failed: {exc}")
+            return {"status": "error", "error": str(exc)}

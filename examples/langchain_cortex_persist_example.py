@@ -5,10 +5,11 @@ Requires:
 
 Set OPENAI_API_KEY before running.
 """
+
 from __future__ import annotations
 
 import os
-from typing import Any, Dict, List
+from typing import Any
 
 from langchain.chains import LLMChain
 from langchain.memory import BaseMemory
@@ -29,6 +30,7 @@ except ImportError as exc:
 # Memory wrapper
 # ---------------------------------------------------------------------------
 
+
 class CortexPersistMemory(BaseMemory):
     """LangChain BaseMemory backed by Cortex-Persist.
 
@@ -42,11 +44,11 @@ class CortexPersistMemory(BaseMemory):
         self._buffer: list[dict] = []
 
     @property
-    def memory_variables(self) -> List[str]:
+    def memory_variables(self) -> list[str]:
         return ["history"]
 
-    def load_memory_variables(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
-        lines: List[str] = []
+    def load_memory_variables(self, inputs: dict[str, Any]) -> dict[str, Any]:
+        lines: list[str] = []
         for item in self._buffer[-self.limit :]:
             user_text = item.get("inputs", {}).get("input", "")
             ai_text = item.get("outputs", {}).get("output", "")
@@ -56,7 +58,7 @@ class CortexPersistMemory(BaseMemory):
                 lines.append(f"Assistant: {ai_text}")
         return {"history": "\n".join(lines)}
 
-    def save_context(self, inputs: Dict[str, Any], outputs: Dict[str, Any]) -> None:
+    def save_context(self, inputs: dict[str, Any], outputs: dict[str, Any]) -> None:
         entry = {"inputs": inputs, "outputs": outputs, "source": "langchain-example"}
         self._buffer.append(entry)
         # Seal every interaction into the Cortex-Persist ledger
@@ -70,6 +72,7 @@ class CortexPersistMemory(BaseMemory):
 # ---------------------------------------------------------------------------
 # Chain builder
 # ---------------------------------------------------------------------------
+
 
 def build_chain(engine: CortexEngine) -> LLMChain:
     api_key = os.getenv("OPENAI_API_KEY")
@@ -97,6 +100,7 @@ def build_chain(engine: CortexEngine) -> LLMChain:
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def main() -> None:
     engine = CortexEngine()

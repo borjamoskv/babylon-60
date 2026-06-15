@@ -41,7 +41,6 @@ class CortexConfig:
     HKDF_SALT: str = "cortex_v6_tenant_isolation_salt"
     AUTH_PEPPER: str = ""
 
-
     # Boot Mode (v6)
     RUNBOOT_MODE: str = "local"  # local | cloud
 
@@ -146,7 +145,6 @@ class CortexConfig:
             STRICT_CRYPTO_MODE=os.environ.get("CORTEX_STRICT_CRYPTO", "0") == "1",
             HKDF_SALT=os.environ.get("CORTEX_HKDF_SALT", "cortex_v6_tenant_isolation_salt"),
             AUTH_PEPPER=os.environ.get("CORTEX_AUTH_PEPPER", ""),
-
             RUNBOOT_MODE=os.environ.get("CORTEX_RUNBOOT", "local"),
             ALLOWED_ORIGINS=[
                 o.strip()

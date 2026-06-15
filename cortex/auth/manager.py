@@ -109,6 +109,7 @@ class AuthManager:
 
     def hash_key_argon2id(self, key: str) -> str:
         from cortex.config import AUTH_PEPPER
+
         return self.ph.hash(key + AUTH_PEPPER)
 
     async def close(self) -> None:
@@ -276,14 +277,16 @@ class AuthManager:
                             break
                     except Exception:
                         pass
-        
+
         if not row:
             return AuthResult(authenticated=False, error="Invalid or revoked key")
 
         # 3. Migrate if needed
         if needs_migration:
             new_hash_argon2 = self.hash_key_argon2id(raw_key)
-            task_mig = asyncio.create_task(self.backend.migrate_key_to_argon2(row["id"], new_hash_argon2))
+            task_mig = asyncio.create_task(
+                self.backend.migrate_key_to_argon2(row["id"], new_hash_argon2)
+            )
             self._background_tasks.add(task_mig)
             task_mig.add_done_callback(self._background_tasks.discard)
 
