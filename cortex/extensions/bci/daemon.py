@@ -156,9 +156,11 @@ async def mock_handler(instruction: str, payload: str):
 
 
 async def test_bci():
+    from cortex.extensions.bci.maestro_bridge import get_bci_maestro_handlers
     handlers = {
         1: mock_handler,  # 1: EDIT_FILE
         2: mock_handler,  # 2: RUN_COMMAND
+        **get_bci_maestro_handlers()
     }
 
     daemon = BCI_Daemon(handlers)

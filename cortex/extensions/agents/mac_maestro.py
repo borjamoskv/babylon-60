@@ -13,7 +13,7 @@ from typing import Any
 
 from cortex.extensions.llm.manager import LLMManager
 from cortex.extensions.llm.router import IntentProfile
-from cortex.utils.applescript import run_applescript
+from cortex.extensions.ui_control.maestro import MaestroUI
 
 logger = logging.getLogger("cortex.extensions.agents.mac_maestro")
 
@@ -35,6 +35,7 @@ class MacMaestroAgent:
 
     def __init__(self) -> None:
         self.llm = LLMManager()
+        self.maestro = MaestroUI()
 
     async def execute(self, instruction: str) -> dict[str, Any]:
         """
@@ -67,8 +68,15 @@ class MacMaestroAgent:
         explanation = script_data.get("explanation", "Extracted AppleScript.")
         logger.info("Generated AppleScript: %s", explanation)
 
-        # Execute
-        success, stdout, stderr = await run_applescript(script_code)
+        # Execute via sovereign MaestroUI stack
+        try:
+            stdout = await self.maestro.run_applescript(script_code, require_success=True)
+            success = True
+            stderr = ""
+        except Exception as e:
+            success = False
+            stdout = ""
+            stderr = str(e)
 
         return {
             "success": success,

@@ -16,6 +16,7 @@ message SovereignIntent {
     RUN_COMMAND = 2;     // Spawns shell command
     STORE_MEMORY = 3;    // Writes to DB
     VALIDATE_STATE = 4;  // Red Team verification trigger
+    DESKTOP_ACTION = 5;  // Executes desktop/automation action via MaestroUI
   }
   
   ActionType action = 2;
