@@ -11,6 +11,12 @@ Verifies:
 import json
 import pytest
 
+import sys
+from pathlib import Path
+
+# Ensure root is in sys.path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from schema.event_v1 import EventV1
 from skills.registry import resolve, list_skills, RegistryLockError
 
