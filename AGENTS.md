@@ -64,6 +64,29 @@ All agents operating in this repository MUST self-identify by role before acting
 
 ---
 
+## 1.2 Swarm Topology & Conflict Resolution (Ruteo L1/L2)
+
+To prevent thermodynamic debt and destructive collisions, overlapping SKILLS are strictly routed:
+
+| Conflict Domain | Competing Nodes | Forced L1/L2 Hierarchy |
+| :--- | :--- | :--- |
+| **OS Control** | `CORTAZAR`, `Mac-Control-Ω`, `Finder-Optimizer-OMEGA` | **L1:** `Mac-Control-Ω` (Vision/DOM). **L2:** `CORTAZAR` (Bash/Background). **L3:** `Finder-Optimizer` (Manual GC). |
+| **Purge Engines** | `Anergy`, `CAOS`, `Autonomous-Audit` | **Step 1:** `Audit` (Reads targets.json) $\rightarrow$ **Step 2:** `CAOS` (Dry Run/Structure) $\rightarrow$ **Step 3:** `Anergy` (Executes `rm`). |
+| **Web CDP** | `Browser-CDP-Automation-OMEGA`, `chrome-devtools` | Mutually exclusive. Never execute concurrently to avoid port 9222 deadlock. |
+| **Epistemic Synthesis** | `Estado-Del-Arte`, `Autodidact-Research`, `Autodidact-History` | **L1:** `Estado-Del-Arte` (SOTA) $\rightarrow$ **L2:** `Autodidact-Research` (Structure) $\rightarrow$ **L3:** `Autodidact-History` (Archive). |
+
+---
+
+## 1.3 Autocompletion Pipelines (Input/Output Contracts)
+
+Deterministic chains where node $N+1$ natively consumes the output of node $N$.
+
+*   **Skill Forge:** `Architect-OMEGA` (Output: JSON Prompt Structure) $\rightarrow$ `Sortu-APEX` (Input: Compiles to `.gemini/config/skills/`).
+*   **Aesthetic Engine:** `modern-web-guidance` (Output: Base CSS rules) $\rightarrow$ `AESTHETIC-OMEGA` (Input: Injects Noir 2026 HSL).
+*   **Red Team Synthesis:** `Frontier-RevEng-OMEGA` (Output: Extracted vulns) $\rightarrow$ `Agent-Paper-RedTeam-OMEGA` (Input: Paper attack vectors).
+
+---
+
 ## 2. 🌌 Foundational Axioms (Ω & AX Series)
 
 > Full axiom documentation: [`docs/AXIOMS.md`](docs/AXIOMS.md)
@@ -112,6 +135,14 @@ When auditing code, these signals indicate a violation. The `Enforced` column in
 | Schema change with no migration entry | CRITICAL | ✗ | Add migration in `cortex/migrations/`; review via `cortex/migrate.py` |
 | Plaintext secret in any metadata dict or JSON | **P0** | ✗ | Rotate immediately; encrypt at rest; audit exposure window |
 | `NO` documenting a module that doesn't exist | HIGH | ✗ | Remove reference or create the module |
+
+### 💥 Termokinetic Anti-Patterns (Axiom IV Violations)
+
+Executing these combinations generates asynchronous blockages or massive thermodynamic loss.
+
+*   **[AP-01] Premature Compression Paralysis:** Concurrent invocation of `Divergence-Anchor-OMEGA` (Entropy Capture) and `Thermodynamic-Context-Compression-OMEGA`. Trying to compress a flow before divergence ceases destroys vital signal.
+*   **[AP-02] Blind Ouroboros:** Executing `OUROBOROS-∞` without activating `Network-Security-L4-OMEGA` or anchoring a state hash in Git. Leads to corrupt, unverified mutations.
+*   **[AP-03] Corrupt Validation Loop:** `Honest-Check-OMEGA` evaluating `Autocognition-OMEGA`. An auditor cannot audit the purity of the metacognitive auditor itself (Violates Axiom II).
 
 ---
 
