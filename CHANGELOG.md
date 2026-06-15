@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🐝 Swarm V2 Routing Topology
+- **feat(swarm):** Implementación del Enrutador de Enjambre Asíncrono (Swarm Runner) y el Registro de Capacidades (AgentRegistry).
+- **feat(api):** Separación de la validación de capabilities entre legacy V1 y V2 Agents en `cortex/routes/agents.py`. Integración nativa del `SubagentRunner` en el lifespan del motor `cortex/api/core.py`.
+- **feat(handlers):** Integración delegada segura (`lazy init`) de `MemoryHandler` y `OracleHandler` contra las interfaces de memoria subyacentes.
+
+### 🧬 Exergía de Motor Central
+- **refactor(engine):** Desacoplamiento estructural del `_genome_mutator.py` eliminando el monolito lógico (Complexity 14 -> 4) logrando el Score Inmejorable (100/100) en las métricas MEJORAlo.
+
 ## [1.0.0-rc.1] — 2026-06-15
 
 ### 🦀 Direct-Silicon Core — Argon2id via Rust/PyO3

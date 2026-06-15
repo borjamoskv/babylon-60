@@ -6,7 +6,6 @@ Isolates autonomous structural mutations into ephemeral git branches.
 Executes the full test suite. If successful, merges to main. If failed, violently destroys the branch.
 """
 
-import asyncio
 import logging
 import subprocess
 import uuid

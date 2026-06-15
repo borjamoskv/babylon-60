@@ -1,10 +1,6 @@
 import asyncio
 import time
-import uuid
-from typing import Any
 
-from cortex.api.deps import get_async_engine
-from cortex.auth import AuthResult
 from cortex.engine import CortexEngine
 
 # Payload estresor: Alta densidad de tokens con variabilidad nula (pura redundancia)

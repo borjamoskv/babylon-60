@@ -14,14 +14,14 @@ def test_current_snapshot_returns_latest(registry):
     assert registry.current_snapshot() is not None
 
 def test_registry_handler_registration(registry):
-    handler = lambda x: x * 2
+    def handler(x): return x * 2
     registry.register_handler("double", handler)
     assert registry.get_handler("double") == handler
 
 def test_registry_duplicate_handler_raises_exception(registry):
     import pytest
-    handler1 = lambda x: x * 2
-    handler2 = lambda x: x * 3
+    def handler1(x): return x * 2
+    def handler2(x): return x * 3
     registry.register_handler("op", handler1)
     with pytest.raises(ValueError, match="Handler 'op' already registered"):
         registry.register_handler("op", handler2)

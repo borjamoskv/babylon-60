@@ -12,9 +12,10 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
+import time
+
 from repo_health import changed_files, run_git
 
-import time
 try:
     from cortex.ledger.models import LedgerEvent
     from cortex.ledger.queue import EnrichmentQueue

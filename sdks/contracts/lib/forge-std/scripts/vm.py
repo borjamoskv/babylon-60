@@ -5,9 +5,10 @@ import copy
 import json
 import re
 import subprocess
+from collections.abc import Callable
 from enum import Enum as PyEnum
 from pathlib import Path
-from typing import Callable, Optional, Union
+from typing import Optional
 from urllib import request
 
 VoidFn = Callable[[], None]
@@ -368,7 +369,7 @@ class Cheatcodes:
 
     @staticmethod
     def from_json_file(file_path: str) -> "Cheatcodes":
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             return Cheatcodes.from_dict(json.load(f))
 
 
@@ -429,7 +430,7 @@ class CheatcodesPrinter:
         solidity_requirement: str = "",
         block_doc_style: bool = False,
         indent_level: int = 0,
-        indent_with: Union[int, str] = 4,
+        indent_with: int | str = 4,
         nl_str: str = "\n",
         items_order: ItemOrder = ItemOrder.default(),
     ):

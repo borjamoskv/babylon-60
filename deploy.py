@@ -26,11 +26,12 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from cortex.core import config as cortex_config
 from stripe_config import (
     load_stripe_billing_config,
     validate_stripe_billing_config,
 )
+
+from cortex.core import config as cortex_config
 
 ROOT = Path(__file__).resolve().parent
 SCHEMA_PATH = ROOT / "schema" / "events_log.sql"

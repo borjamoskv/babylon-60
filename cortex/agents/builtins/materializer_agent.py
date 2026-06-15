@@ -10,11 +10,11 @@ import logging
 from typing import Any
 
 from cortex.agents.base import ReactiveTaskAgent
+from cortex.engine.causal.taint_engine import MHCAntigenRouter
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
 from cortex.engine.keter import KeterEngine
+from cortex.engine.saga_protocol import SagaContext, build_core_write_path_saga
 from cortex.engine.sandbox_jit import SandboxJIT
-from cortex.engine.saga_protocol import build_core_write_path_saga, SagaContext
-from cortex.engine.causal.taint_engine import MHCAntigenRouter
 from cortex.utils.errors import CortexError
 from cortex.verification.verifier import SovereignVerifier
 

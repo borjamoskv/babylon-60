@@ -226,6 +226,13 @@ Paths below are relative to the `cortex/` package root unless noted otherwise.
 | `compliance/` | EU AI Act compliance report generation |
 | `audit/` | Audit trail generation |
 
+### Swarm & Agents
+
+| Module | Purpose |
+|:---|:---|
+| `swarm/` | V2 Agent Routing, SubagentRunner, and Capability-based Registry |
+| `agents/` | Built-in agents (Memory, Oracle) and Swarm runtime integration |
+
 ### Infrastructure
 
 | Module | Purpose |

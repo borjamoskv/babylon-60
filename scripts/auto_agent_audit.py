@@ -10,12 +10,11 @@ Automates the complete audit cycle of the agentic trust substrate.
 5. Saves a consolidated audit report markdown artifact in the session folder.
 """
 
-import os
-import sys
-import sqlite3
-import json
-import hashlib
 import datetime
+import hashlib
+import json
+import sqlite3
+import sys
 from pathlib import Path
 
 # Paths
@@ -62,7 +61,7 @@ def verify_file_ledger():
     
     try:
         entries = []
-        with open(FILE_LEDGER_PATH, "r", encoding="utf-8") as f:
+        with open(FILE_LEDGER_PATH, encoding="utf-8") as f:
             for line in f:
                 if line.strip():
                     entries.append(json.loads(line.strip()))
@@ -216,7 +215,7 @@ def main():
     report_file = SESSION_DIR / "agent_audit_report.md"
     report_file.write_text(report_content, encoding="utf-8")
     
-    print(f"\n✅ Audit completed successfully! Consolidated report written to:")
+    print("\n✅ Audit completed successfully! Consolidated report written to:")
     print(f"   file://{report_file}")
     
 if __name__ == "__main__":

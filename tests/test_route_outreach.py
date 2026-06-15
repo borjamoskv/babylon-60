@@ -85,14 +85,14 @@ def test_get_outreach_leads(temp_outreach_files) -> None:
     assert len(leads) == 2
     
     # Check lead 1 details
-    lead1 = next(l for l in leads if l["username"] == "testuser1")
+    lead1 = next(lead for lead in leads if lead["username"] == "testuser1")
     assert lead1["name"] == "Test User 1"
     assert lead1["email"] == "user1@example.com"
     assert lead1["language"] == "es"
     assert lead1["status"] == "Sent"
 
     # Check lead 2 details
-    lead2 = next(l for l in leads if l["username"] == "testuser2")
+    lead2 = next(lead for lead in leads if lead["username"] == "testuser2")
     assert lead2["name"] == "Test User 2"
     assert lead2["email"] == "user2@example.com"
     assert lead2["language"] == "en"
@@ -110,6 +110,6 @@ def test_reset_sent_log(temp_outreach_files) -> None:
     assert response.json()["status"] == "Sent log reset successfully"
 
     # Verify that the sent log file has indeed been cleared
-    with open(log_path, "r") as f:
+    with open(log_path) as f:
         sent_emails = json.load(f)
     assert len(sent_emails) == 0
