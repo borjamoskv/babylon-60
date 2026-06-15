@@ -9,7 +9,6 @@ for semantic similarity matching. HMAC-SHA256 verified feeds.
 
 import json
 import logging
-import math
 import re
 import time
 from dataclasses import dataclass, field

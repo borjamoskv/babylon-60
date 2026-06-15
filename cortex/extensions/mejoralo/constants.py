@@ -172,6 +172,7 @@ SKIP_DIRS = {
     "venv",
     "dist",
     "build",
+    "out",
     ".next",
     ".svelte-kit",
     ".vercel",

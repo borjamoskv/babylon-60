@@ -9,19 +9,20 @@ from __future__ import annotations
 
 import base64
 import logging
+import os
 import re
 import unicodedata
 from collections import deque
-from typing import Any, Callable, Dict, List, Tuple
+from collections.abc import Callable
+from typing import Any
 
-import os
 _HAS_SENTENCE_TRANSFORMERS = False
 
 if os.environ.get("CORTEX_NO_EMBED") != "1":
     _HAS_SENTENCE_TRANSFORMERS = True
 
-from cortex.extensions.security.injection_guard import GUARD
 from cortex.extensions.security.anomaly_detector import DETECTOR, SecurityEvent
+from cortex.extensions.security.injection_guard import GUARD
 
 logger = logging.getLogger("cortex.security.guarded_runtime")
 
@@ -78,7 +79,7 @@ class SemanticLeakDetector:
     def __init__(self, system_prompt: str, threshold: float = 0.55, window_size: int = 5):
         self.threshold = threshold
         self.window_size = window_size
-        self.history_scores: Dict[str, deque[float]] = {}
+        self.history_scores: dict[str, deque[float]] = {}
         self.system_prompt = system_prompt
         self.system_prompt_tokens = set(system_prompt.lower().split())
 
@@ -122,7 +123,7 @@ class SemanticLeakDetector:
             logger.warning("Cosine similarity calc failed, falling back: %s", e)
             return self._calculate_token_overlap(text) * 1.5
 
-    def audit_response(self, session_id: str, response_text: str) -> Tuple[bool, float]:
+    def audit_response(self, session_id: str, response_text: str) -> tuple[bool, float]:
         """Audits output against system prompt and updates session-scoped trajectory score."""
         if session_id not in self.history_scores:
             self.history_scores[session_id] = deque(maxlen=self.window_size)
@@ -153,11 +154,11 @@ class TrajectoryTracker:
         self.drift_threshold = drift_threshold
         self.detector = detector
         # Stores user queries per session
-        self.session_queries: Dict[str, List[str]] = {}
+        self.session_queries: dict[str, list[str]] = {}
         # Cumulative threat counter
-        self.session_threat_scores: Dict[str, float] = {}
+        self.session_threat_scores: dict[str, float] = {}
 
-    def analyze_query(self, session_id: str, query: str) -> Tuple[bool, float]:
+    def analyze_query(self, session_id: str, query: str) -> tuple[bool, float]:
         """Analyzes query context drift and accumulation. Returns (is_blocked, current_score)."""
         if session_id not in self.session_queries:
             self.session_queries[session_id] = []
@@ -234,13 +235,13 @@ class GuardedRuntime:
         self.system_prompt = system_prompt
         self.detector = SemanticLeakDetector(system_prompt=system_prompt, threshold=threshold)
         self.tracker = TrajectoryTracker(detector=self.detector)
-        self.conversation_history: Dict[str, List[Dict[str, str]]] = {}
+        self.conversation_history: dict[str, list[dict[str, str]]] = {}
 
     def handle_turn(
         self,
         session_id: str,
         user_query: str,
-        core_agent_fn: Callable[[str, List[Dict[str, str]]], str]
+        core_agent_fn: Callable[[str, list[dict[str, str]]], str]
     ) -> str:
         """Processes a single interaction turn through the stateful defensive pipeline."""
         if session_id not in self.conversation_history:

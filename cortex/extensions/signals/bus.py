@@ -16,6 +16,8 @@ __all__ = ["AsyncSignalBus", "SignalBus"]
 
 logger = logging.getLogger("cortex.extensions.signals.bus")
 
+_PREPARED_CONNECTIONS: set[int] = set()
+
 _CREATE_TABLE = """\
 CREATE TABLE IF NOT EXISTS signals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -82,7 +84,8 @@ class AsyncSignalBus:
     async def ensure_table(self) -> None:
         if self._ready:
             return
-        if getattr(self._conn, "_signals_ready", False):
+        conn_id = id(self._conn)
+        if conn_id in _PREPARED_CONNECTIONS:
             self._ready = True
             return
 
@@ -101,10 +104,7 @@ class AsyncSignalBus:
         if not self._conn.in_transaction:
             await self._conn.commit()
 
-        try:
-            self._conn._signals_ready = True
-        except Exception as exc:
-            logger.warning("Suppressed exception: %s", exc)
+        _PREPARED_CONNECTIONS.add(conn_id)
         self._ready = True
 
     async def emit(
@@ -310,7 +310,8 @@ class SignalBus:
     def ensure_table(self) -> None:
         if self._ready:
             return
-        if getattr(self._conn, "_signals_ready", False):
+        conn_id = id(self._conn)
+        if conn_id in _PREPARED_CONNECTIONS:
             self._ready = True
             return
 
@@ -329,10 +330,7 @@ class SignalBus:
         if not self._conn.in_transaction:
             self._conn.commit()
 
-        try:
-            self._conn._signals_ready = True
-        except Exception as exc:
-            logger.warning("Suppressed exception: %s", exc)
+        _PREPARED_CONNECTIONS.add(conn_id)
         self._ready = True
 
     def emit(

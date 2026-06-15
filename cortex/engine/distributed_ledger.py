@@ -6,8 +6,8 @@ Extends the EvolutionLedger to broadcast and consume mutations across an L6 Swar
 
 import json
 import logging
-import threading
-from typing import Any, Iterator
+from collections.abc import Iterator
+from typing import Any
 
 logger = logging.getLogger("cortex.distributed_ledger")
 
@@ -22,8 +22,6 @@ from cortex.engine.evolution_ledger import (
     ControlVector,
     EvolutionLedger,
     MutationRecord,
-    ReplayMode,
-    ReplayVerificationError,
     _canonical_json,
 )
 

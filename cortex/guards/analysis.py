@@ -75,15 +75,20 @@ def scan_list(node: ast.List) -> list[str]:
     return found
 
 
-def scan_fstring(node: ast.JoinedStr) -> list[str]:
-    """Scan f-string for oracle references in constant parts."""
+def _scan_constants_for_oracles(values: list[ast.AST]) -> list[str]:
+    """Helper to scan constant string parts for oracle references."""
     found: list[str] = []
-    for val in node.values:
+    for val in values:
         if isinstance(val, ast.Constant) and isinstance(val.value, str):
             hit = oracle_in_str(val.value)
             if hit:
                 found.append(hit)
     return found
+
+
+def scan_fstring(node: ast.JoinedStr) -> list[str]:
+    """Scan f-string for oracle references in constant parts."""
+    return _scan_constants_for_oracles(node.values)
 
 
 def scan_variable_name(node: ast.Name) -> list[str]:
@@ -142,13 +147,7 @@ def find_violations(tree: ast.Module) -> list[tuple[int, str, str]]:
 
 def scan_exec_args(node: ast.Call) -> list[str]:
     """Scan exec/eval string args for oracle references."""
-    found: list[str] = []
-    for arg in node.args:
-        if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
-            hit = oracle_in_str(arg.value)
-            if hit:
-                found.append(hit)
-    return found
+    return _scan_constants_for_oracles(node.args)
 
 
 def check_getattr_evasion(

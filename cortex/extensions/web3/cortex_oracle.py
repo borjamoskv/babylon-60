@@ -1,9 +1,8 @@
 # [C5-REAL] Exergy-Maximized
-import json
 import logging
 import os
 import time
-from typing import Dict, Any, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger("cortex.web3.oracle")
 
@@ -180,10 +179,13 @@ class CortexOracleClient:
 
         while time.time() - start_time < timeout:
             try:
+                current_block = self.w3.eth.block_number
+                from_block = max(0, latest_block - 5)
+
                 # Query logs from contract events
                 completed_events = self.contract.events.TelemetryVerificationCompleted().get_logs(
-                    fromBlock=latest_block - 10,
-                    toBlock='latest'
+                    fromBlock=from_block,
+                    toBlock=current_block
                 )
                 for event in completed_events:
                     if event["args"]["requestId"] == request_id:
@@ -192,8 +194,8 @@ class CortexOracleClient:
                         return success
 
                 failed_events = self.contract.events.TelemetryVerificationFailed().get_logs(
-                    fromBlock=latest_block - 10,
-                    toBlock='latest'
+                    fromBlock=from_block,
+                    toBlock=current_block
                 )
                 for event in failed_events:
                     if event["args"]["requestId"] == request_id:
@@ -201,6 +203,7 @@ class CortexOracleClient:
                         logger.error(f"[CortexOracle] Request {self.w3.to_hex(request_id)} failed with error: {err_reason.hex()}")
                         return False
 
+                latest_block = current_block
                 time.sleep(5)
             except Exception as e:
                 logger.warning(f"[CortexOracle] Error while polling events: {e}")
@@ -220,14 +223,18 @@ class CortexOracleClient:
         start_time = time.time()
         logger.info(f"[CortexOracle] Async polling for fulfillment of request: {self.w3.to_hex(request_id)}")
 
-        latest_block = self.w3.eth.block_number
+        latest_block = await asyncio.to_thread(lambda: self.w3.eth.block_number)
 
         while time.time() - start_time < timeout:
             try:
-                # Query logs from contract events
-                completed_events = self.contract.events.TelemetryVerificationCompleted().get_logs(
-                    fromBlock=latest_block - 10,
-                    toBlock='latest'
+                current_block = await asyncio.to_thread(lambda: self.w3.eth.block_number)
+                from_block = max(0, latest_block - 5)
+
+                # Query logs from contract events non-blockingly
+                completed_events = await asyncio.to_thread(
+                    self.contract.events.TelemetryVerificationCompleted().get_logs,
+                    fromBlock=from_block,
+                    toBlock=current_block
                 )
                 for event in completed_events:
                     if event["args"]["requestId"] == request_id:
@@ -235,9 +242,10 @@ class CortexOracleClient:
                         logger.info(f"[CortexOracle] Request {self.w3.to_hex(request_id)} completed asynchronously. Success: {success}")
                         return success
 
-                failed_events = self.contract.events.TelemetryVerificationFailed().get_logs(
-                    fromBlock=latest_block - 10,
-                    toBlock='latest'
+                failed_events = await asyncio.to_thread(
+                    self.contract.events.TelemetryVerificationFailed().get_logs,
+                    fromBlock=from_block,
+                    toBlock=current_block
                 )
                 for event in failed_events:
                     if event["args"]["requestId"] == request_id:
@@ -245,6 +253,7 @@ class CortexOracleClient:
                         logger.error(f"[CortexOracle] Request {self.w3.to_hex(request_id)} failed asynchronously with error: {err_reason.hex()}")
                         return False
 
+                latest_block = current_block
                 await asyncio.sleep(5)
             except Exception as e:
                 logger.warning(f"[CortexOracle] Error while async polling events: {e}")

@@ -1,7 +1,9 @@
 # [C5-REAL] Exergy-Maximized
+import asyncio
 import logging
 import os
 import shutil
+from decimal import Decimal
 
 from cortex.audit.ledger import EnterpriseAuditLedger
 
@@ -18,7 +20,7 @@ class GeneticHistoryManager:
         self.ledger = ledger
 
     async def propose_mutation(
-        self, skill_path: str, new_content: str, exergy_delta: float, topology_snapshot: str
+        self, skill_path: str, new_content: str, exergy_delta: Decimal, topology_snapshot: str
     ) -> str:
         """
         Proposes and applies a mutation, logging it to the Sovereign Ledger.
@@ -30,8 +32,11 @@ class GeneticHistoryManager:
         skill_name = os.path.basename(os.path.dirname(skill_path))
         
         # Read old content to compute diff or store for backup
-        with open(skill_path, encoding="utf-8") as f:
-            old_content = f.read()
+        def _read_content():
+            with open(skill_path, encoding="utf-8") as f:
+                return f.read()
+
+        old_content = await asyncio.to_thread(_read_content)
 
         # Simple diff generation (could use difflib)
         import difflib
@@ -46,7 +51,7 @@ class GeneticHistoryManager:
 
         # 1. Create backup
         backup_path = f"{skill_path}.bak"
-        shutil.copy2(skill_path, backup_path)
+        await asyncio.to_thread(shutil.copy2, skill_path, backup_path)
 
         # 2. Log to Ledger
         mutation_id = await self.ledger.log_mutation(
@@ -57,8 +62,11 @@ class GeneticHistoryManager:
         )
 
         # 3. Apply mutation
-        with open(skill_path, "w", encoding="utf-8") as f:
-            f.write(new_content)
+        def _write_content():
+            with open(skill_path, "w", encoding="utf-8") as f:
+                f.write(new_content)
+                
+        await asyncio.to_thread(_write_content)
 
         logger.info(f"[GeneticHistory] Mutation {mutation_id} applied to {skill_name} (exergy_delta: {exergy_delta})")
         return mutation_id
@@ -75,12 +83,27 @@ class GeneticHistoryManager:
             logger.error(f"[GeneticHistory] Cannot rollback {skill_name}: Backup not found.")
             return False
 
-        # In a full C5-REAL implementation, we would query the ledger to verify the mutation_id
-        # and ensure we are rolling back exactly what we expect.
+        # 1. Verify against Ledger
+        cursor = await self.ledger._conn.execute(
+            "SELECT skill_name FROM genetic_mutation_log WHERE mutation_id = ?",
+            (mutation_id,)
+        )
+        row = await cursor.fetchone()
         
-        # 1. Restore backup
-        shutil.copy2(backup_path, skill_path)
-        os.remove(backup_path)
+        if not row:
+            logger.error(f"[GeneticHistory] Cannot rollback: Mutation {mutation_id} not found in Ledger.")
+            return False
+            
+        if row[0] != skill_name:
+            logger.error(f"[GeneticHistory] Cannot rollback: Skill name mismatch for {mutation_id}.")
+            return False
+        
+        # 2. Restore backup via async thread
+        def _do_rollback():
+            shutil.copy2(backup_path, skill_path)
+            os.remove(backup_path)
+            
+        await asyncio.to_thread(_do_rollback)
 
         # 2. Log rollback event to Ledger
         await self.ledger.log_action(

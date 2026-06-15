@@ -46,7 +46,7 @@ def generate_secure_taint_token(
 ) -> str:
     """Generates a secure cryptographically signed CORTEX-TAINT token.
 
-    Format: taint:{agent_id}:{session_id}:{timestamp_iso8601}:{nonce}:{signature}
+    Format: taint:{agent_id}:{session_id}:{timestamp_iso8601}:{nonce}:{content_hash}:{signature}
     """
     timestamp = datetime.now(timezone.utc).isoformat()
     if not nonce:
@@ -64,7 +64,7 @@ def generate_secure_taint_token(
     sig_bytes = priv_key.sign(canonical_payload.encode("utf-8"))
     signature = base64.b64encode(sig_bytes).decode("ascii")
 
-    return f"taint:{agent_id}:{session_id}:{timestamp}:{nonce}:{signature}"
+    return f"taint:{agent_id}:{session_id}:{timestamp}:{nonce}:{content_hash}:{signature}"
 
 
 def parse_utc_timestamp(ts_str: str) -> datetime:
@@ -139,6 +139,7 @@ async def verify_taint_token(conn, token: str | None, content: str) -> bool:
     3. Expiration window (5 minutes).
     4. Replay attack prevention (nonce tracking).
     5. Ed25519 signature validity.
+    6. Content Hash validity.
     """
     if not token:
         logger.error(
@@ -147,23 +148,24 @@ async def verify_taint_token(conn, token: str | None, content: str) -> bool:
         return False
 
     parts = token.split(":")
-    if len(parts) < 6:
+    if len(parts) < 7:
         logger.error("[TaintEngine] SAGA-1: Invalid token structure: %s", token)
         return False
 
     prefix = parts[0]
     agent_id = parts[1]
     session_id = parts[2]
-    # Timestamp, nonce, and signature
+    # Timestamp, nonce, content_hash and signature
     signature = parts[-1]
-    nonce = parts[-2]
-    timestamp_str = ":".join(parts[3:-2])
+    content_hash_in_token = parts[-2]
+    nonce = parts[-3]
+    timestamp_str = ":".join(parts[3:-3])
 
     if prefix != "taint":
         logger.error("[TaintEngine] SAGA-1: Token prefix must be 'taint': %s", prefix)
         return False
 
-    if not agent_id or not session_id or not nonce or not signature:
+    if not agent_id or not session_id or not nonce or not signature or not content_hash_in_token:
         logger.error("[TaintEngine] SAGA-1: Missing vital fields in taint token.")
         return False
 
@@ -200,9 +202,14 @@ async def verify_taint_token(conn, token: str | None, content: str) -> bool:
         logger.error("[TaintEngine] SAGA-1: Agent %s is not registered or inactive.", agent_id)
         return False
 
-    # 4. Verify Signature (Zero-copy aware)
+    # 4. Verify Signature & Content Hash
     canonical_content = canonicalize_content(content)
     content_hash = _fast_sha3(canonical_content)
+    
+    if content_hash != content_hash_in_token:
+        logger.error("[TaintEngine] SAGA-1: Content Hash mismatch! Payload has been altered.")
+        return False
+        
     canonical_payload = f"agent_id={agent_id}&session_id={session_id}&timestamp={timestamp_str}&nonce={nonce}&content_hash={content_hash}"
 
     try:

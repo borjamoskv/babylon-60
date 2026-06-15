@@ -11,6 +11,7 @@ import logging
 import os
 import time
 from datetime import datetime, timezone
+from decimal import Decimal
 from typing import Any
 
 import aiosqlite
@@ -267,7 +268,7 @@ class EnterpriseAuditLedger:
         self,
         skill_name: str,
         mutation_diff: str,
-        exergy_delta: float,
+        exergy_delta: Decimal,
         topology_snapshot: str,
     ) -> str:
         """Securely logs a structural mutation (L5 Autopoiesis) to the genetic history."""
@@ -293,7 +294,7 @@ class EnterpriseAuditLedger:
                             topology_snapshot, prev_hash, signature)
                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
                         (
-                            mutation_id, timestamp, skill_name, mutation_diff, exergy_delta,
+                            mutation_id, timestamp, skill_name, mutation_diff, float(exergy_delta),
                             topology_snapshot, self._last_hash, signature
                         )
                     )
@@ -326,3 +327,19 @@ class EnterpriseAuditLedger:
             return True
         except (InvalidSignature, ValueError):
             return False
+
+    async def verify_merkle_lock(self, payload: str, taint_token: str) -> bool:
+        """
+        P0 Gate: Merkle-Lock Verifier.
+        Validates the cryptographically signed taint token against the proposed payload.
+        Any generative write without a valid token must be rejected in O(1).
+        """
+        from cortex.engine.causal.taint_engine import verify_taint_token
+        
+        is_valid = await verify_taint_token(self._conn, taint_token, payload)
+        if not is_valid:
+            logger.error("[Merkle-Lock] FATAL REJECTION: Taint signature invalid or missing. Write path blocked.")
+            return False
+            
+        logger.info("[Merkle-Lock] Payload verified. Write path authorized.")
+        return True

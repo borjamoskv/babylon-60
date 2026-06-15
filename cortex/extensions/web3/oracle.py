@@ -3,8 +3,11 @@ import json
 import os
 
 from web3 import Web3  # type: ignore[reportAttributeAccessIssue,reportMissingImports]
+
 try:
-    from web3.middleware import ExtraDataToPOAMiddleware as geth_poa_middleware  # type: ignore[reportMissingImports]
+    from web3.middleware import (
+        ExtraDataToPOAMiddleware as geth_poa_middleware,  # type: ignore[reportMissingImports]
+    )
 except ImportError:
     from web3.middleware import geth_poa_middleware  # type: ignore[reportMissingImports]
 

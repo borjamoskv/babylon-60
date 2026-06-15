@@ -3,6 +3,7 @@ import asyncio
 import logging
 import time
 import uuid
+from decimal import Decimal
 from typing import Any
 
 logger = logging.getLogger("cortex.sandbox.asi1")
@@ -26,33 +27,41 @@ class ThermodynamicSandbox:
         sandbox_id = f"asi1-{uuid.uuid4().hex[:8]}"
         logger.info(f"[ASI-1 Lab] Spinning up thermodynamic container {sandbox_id} for {skill_name}")
 
-        # Simulate container setup latency
-        await asyncio.sleep(0.5)
+        try:
+            # Simulate container setup latency
+            await asyncio.sleep(0.1)
 
-        # Simulated execution metrics
-        start_time = time.perf_counter()
-        
-        # Simulate LLM reasoning step with the mutated prompt
-        await asyncio.sleep(0.1 + (hash(mutation_content) % 10) / 100.0) 
-        
-        end_time = time.perf_counter()
-        execution_time_ms = (end_time - start_time) * 1000
+            # Simulated execution metrics
+            start_time = time.perf_counter()
+            
+            # Simulate LLM reasoning step with the mutated prompt
+            await asyncio.sleep(0.05 + (hash(mutation_content) % 10) / 100.0) 
+            
+            end_time = time.perf_counter()
+            execution_time_ms = Decimal(str((end_time - start_time) * 1000))
 
-        # Simulate thermodynamic extraction
-        # Mocking values for demonstration: in a real ASI-1 Lab, we'd hook into the LLM observability stack
-        llm_calls = 1 + (hash(mutation_content) % 3)
-        memory_blocks = hash(mutation_content) % 2
-        
-        metrics = {
-            "execution_time_ms": execution_time_ms,
-            "llm_redundancy": llm_calls - 1,
-            "memory_blocks": memory_blocks
-        }
+            # Simulate thermodynamic extraction
+            llm_calls = Decimal(str(1 + (hash(mutation_content) % 3)))
+            memory_blocks = Decimal(str(hash(mutation_content) % 2))
+            
+            metrics = {
+                "execution_time_ms": execution_time_ms,
+                "llm_redundancy": llm_calls - Decimal('1'),
+                "memory_blocks": memory_blocks
+            }
 
-        logger.info(f"[ASI-1 Lab] Container {sandbox_id} simulation complete. Metrics: {metrics}")
-        return metrics
+            logger.info(f"[ASI-1 Lab] Container {sandbox_id} simulation complete. Metrics: {metrics}")
+            return metrics
+        except Exception as e:
+            logger.error(f"[ASI-1 Lab] Container {sandbox_id} failed: {e}")
+            # Return worst-case thermodynamic scenario to force rejection
+            return {
+                "execution_time_ms": Decimal('99999.0'),
+                "llm_redundancy": Decimal('999.0'),
+                "memory_blocks": Decimal('999.0')
+            }
 
-    def calculate_exergy(self, old_metrics: dict[str, Any], new_metrics: dict[str, Any]) -> float:
+    def calculate_exergy(self, old_metrics: dict[str, Any], new_metrics: dict[str, Any]) -> Decimal:
         """
         Calculates Exergy Delta.
         Exergy increases if execution time, redundancy, and memory blocks decrease.
@@ -60,14 +69,13 @@ class ThermodynamicSandbox:
         Negative Delta = Bad (Entropic).
         """
         # Exergy formula (simplified for CORTEX ASI-1)
-        # We weigh different frictions:
-        time_weight = 0.5
-        redundancy_weight = 5.0
-        memory_weight = 10.0
+        time_weight = Decimal('0.5')
+        redundancy_weight = Decimal('5.0')
+        memory_weight = Decimal('10.0')
 
-        time_delta = old_metrics.get("execution_time_ms", 100) - new_metrics.get("execution_time_ms", 100)
-        redundancy_delta = old_metrics.get("llm_redundancy", 0) - new_metrics.get("llm_redundancy", 0)
-        memory_delta = old_metrics.get("memory_blocks", 0) - new_metrics.get("memory_blocks", 0)
+        time_delta = old_metrics.get("execution_time_ms", Decimal('100.0')) - new_metrics.get("execution_time_ms", Decimal('100.0'))
+        redundancy_delta = old_metrics.get("llm_redundancy", Decimal('0.0')) - new_metrics.get("llm_redundancy", Decimal('0.0'))
+        memory_delta = old_metrics.get("memory_blocks", Decimal('0.0')) - new_metrics.get("memory_blocks", Decimal('0.0'))
 
         exergy_delta = (time_delta * time_weight) + (redundancy_delta * redundancy_weight) + (memory_delta * memory_weight)
         
@@ -87,7 +95,7 @@ class ThermodynamicSandbox:
         
         exergy_delta = self.calculate_exergy(old_metrics, new_metrics)
         
-        if exergy_delta > 0:
+        if exergy_delta > Decimal('0'):
             logger.info(f"[ASI-1 Lab] Transcendence APPROVED. Exergy Delta: +{exergy_delta:.2f}")
             return True
         else:

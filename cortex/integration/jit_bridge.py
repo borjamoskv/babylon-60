@@ -3,7 +3,7 @@ from __future__ import annotations
 import ast
 import hashlib
 import time
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -70,7 +70,6 @@ class JITBridgeCompiler:
     ) -> str:
         expected_params = expected_signature.get("params", [])
         actual_params = actual_signature.get("params", [])
-        route = expected_signature.get("route", "unknown_route")
 
         mappings = []
         for p in expected_params:

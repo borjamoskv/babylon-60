@@ -4,9 +4,10 @@ import asyncio
 import hashlib
 import json
 import time
-from dataclasses import dataclass, asdict
+from collections.abc import Awaitable, Callable
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Callable, Awaitable
+from typing import Any
 
 
 def _sha256_bytes(data: bytes) -> str:

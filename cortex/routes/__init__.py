@@ -23,6 +23,7 @@ _ROUTE_MODULES = {
     "ledger",
     "mejoralo",
     "oracle",
+    "outreach",
     "runtime",
     "search",
     "swarm",
@@ -59,6 +60,7 @@ _API_ROUTE_SPECS: tuple[tuple[str, str], ...] = (
     ("trust", "router"),
     ("taas", "router"),
     ("benchmark", "router"),
+    ("outreach", "router"),
 )
 
 

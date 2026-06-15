@@ -72,3 +72,24 @@ class AutoCrystallizer:
 
         logger.info("✅ Fact crystallized: %d chars -> %d chars", len(content), len(refined))
         return refined
+
+    async def purge_thermal_noise(self, conn) -> int:
+        """
+        O(1) TTL Purging (Axiom Ω₁₃).
+        Automatically destroys any stochastic vectors in L1 memory that have not
+        been cryptographically sealed (verified) within their time horizon (72h).
+        No async daemons needed; invoked deterministically during the core loop.
+        """
+        try:
+            cursor = await conn.execute(
+                "DELETE FROM facts WHERE (taint_verified = 0 OR taint_verified IS NULL) AND "
+                "(julianday('now') - julianday(created_at)) > 3.0"
+            )
+            await conn.commit()
+            purged = cursor.rowcount
+            if purged > 0:
+                logger.warning("🧹 [AURA-OMEGA] Purged %d unverified stochastic vectors from L1 memory (O(1) TTL elapsed).", purged)
+            return purged
+        except Exception as e:
+            logger.error("[AURA-OMEGA] O(1) Purge failed: %s", e)
+            return 0

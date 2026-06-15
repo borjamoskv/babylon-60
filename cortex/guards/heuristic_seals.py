@@ -13,6 +13,7 @@ from .gates.common import GlobalSourceCache
 
 GateResult = tuple[bool, str]
 _EXCLUDE = frozenset(["legion_vectors.py", "legion.py"])
+from cortex.guards._seals_cache import run_cobbler_audit_on_file
 
 # Heuristic to find root
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
@@ -66,17 +67,11 @@ async def check_gate_11_cobbler(cached_files: dict[Path, str]) -> GateResult:
     }
 
     async def _audit(py_file: Path, source: str) -> None:
-        cleaned = "\n".join(
-            line for line in source.splitlines() if not any(m in line for m in _NOQA_MARKERS)
+        dem_viols, int_viols = await run_cobbler_audit_on_file(
+            py_file, source, demon, intruder, _NOQA_MARKERS
         )
-        demon_hits = await demon.attack(cleaned, context={})
-        fragility = [h for h in demon_hits if "Bare `except`" in h]
-        if fragility:
-            demon_violations.append(f"{py_file.name}: {fragility}")
-
-        intruder_hits = await intruder.attack(source, context={})
-        if intruder_hits:
-            intruder_violations.append(f"{py_file.name}: {intruder_hits}")
+        demon_violations.extend(dem_viols)
+        intruder_violations.extend(int_viols)
 
     await asyncio.gather(*(_audit(p, c) for p, c in engine_files.items()))
 

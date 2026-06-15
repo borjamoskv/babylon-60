@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import os
-from typing import Any, Dict
+from typing import Any
 
 # Usamos AsyncLedgerClient, asumiendo que existe o simulamos un fallback
 try:
@@ -29,7 +29,7 @@ class StructuralIsolationGuard:
         self.strict_mode = strict_mode
         self._max_entropy_threshold = 25.0 
 
-    async def validate_payload(self, agent_id: str, payload: Dict[str, Any]) -> bool:
+    async def validate_payload(self, agent_id: str, payload: dict[str, Any]) -> bool:
         """
         Evalúa el payload. Si viola el aislamiento, ejecuta SAGA-1 de forma no bloqueante.
         """
@@ -43,12 +43,12 @@ class StructuralIsolationGuard:
             logger.error(f"[GUARD FAILURE] Excepción no controlada: {e}")
             return False if self.strict_mode else True
 
-    def _check_structural_integrity(self, payload: Dict[str, Any]) -> bool:
+    def _check_structural_integrity(self, payload: dict[str, Any]) -> bool:
         if "entropy_score" in payload and payload["entropy_score"] > self._max_entropy_threshold:
             return False
         return True
 
-    async def _trigger_saga_1_rejection(self, agent_id: str, payload: Dict[str, Any], reason: str):
+    async def _trigger_saga_1_rejection(self, agent_id: str, payload: dict[str, Any], reason: str):
         event_data = {
             "agent_id": agent_id,
             "event_type": "ISOLATION_BREACH",

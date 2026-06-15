@@ -167,32 +167,9 @@ async def batch_store(
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> dict:
     """Batch store up to 100 memories in a single request."""
-    ids: list[int] = []
-    errors: list[dict] = []
+    from cortex.services.batch_store import execute_batch_store
 
-    for i, mem in enumerate(req.memories):
-        try:
-            fact_id = await engine.store(
-                project=mem.project,
-                content=mem.content,
-                tenant_id=auth.tenant_id,
-                fact_type=mem.type,
-                tags=mem.tags,
-                source=mem.source,
-                meta=mem.metadata or {},
-                parent_decision_id=mem.parent_decision_id,
-            )
-            ids.append(fact_id)
-        except (sqlite3.Error, ValueError, OSError):
-            logger.exception("Failed to batch store memory at index %d", i)
-            errors.append({"index": i, "error": "Failed to store memory"})
-
-    return {
-        "stored": len(ids),
-        "ids": ids,
-        "errors": errors,
-        "total_requested": len(req.memories),
-    }
+    return await execute_batch_store(req, auth, engine, "memory")
 
 
 @router.get("/verify", response_model=dict)

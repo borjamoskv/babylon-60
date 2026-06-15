@@ -7,10 +7,8 @@ Implements multi-turn trajectory-aware input classification and semantic output 
 """
 
 import logging
-import hashlib
-import string
 from collections import deque
-from typing import Dict, Any, List, Tuple
+from typing import Any
 
 logger = logging.getLogger("cortex.guards.prompt_security")
 
@@ -40,7 +38,7 @@ class PromptExtractionBlockedError(Exception):
 
 import re
 
-_MODEL_CACHE: Dict[str, Any] = {}
+_MODEL_CACHE: dict[str, Any] = {}
 
 def get_sentence_transformer(model_name: str = 'all-MiniLM-L6-v2') -> Any:
     global _MODEL_CACHE
@@ -133,7 +131,7 @@ class PromptSecurityGuard:
         overlap = self._calculate_token_overlap(text)
         return min(0.95, overlap * 1.5)
 
-    def verify_input(self, user_query: str, history: List[Dict[str, str]]) -> None:
+    def verify_input(self, user_query: str, history: list[dict[str, str]]) -> None:
         """
         Audits query trajectory and individual input query for extraction intent.
         
@@ -151,7 +149,7 @@ class PromptSecurityGuard:
         normalized_trajectory = clean_text(" ".join(trajectory_context))
         
         if self.fast_path_regex.search(normalized_trajectory):
-            logger.warning(f"[PROMPT_SECURITY] Blocked input due to trajectory rule match.")
+            logger.warning("[PROMPT_SECURITY] Blocked input due to trajectory rule match.")
             raise PromptExtractionBlockedError("Security boundary tripped: request blocked by trajectory policy.")
 
     def verify_output(self, response_text: str) -> None:
