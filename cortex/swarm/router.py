@@ -119,17 +119,31 @@ class SwarmRouter:
 # ------------------------------------------------------------------
 
 def _dispatch(candidates: list[dict], request: dict) -> dict:
-    """Pure selection: first candidate after deterministic sort."""
+    """Pure selection: scores candidates based on capability overlap, ties broken by agent_id."""
     if not candidates:
         raise ValueError(f"No candidates for task: {request.get('task', '')}")
     
-    selected_agents = sorted([c.get("agent_id") for c in candidates if "agent_id" in c])
+    task_lower = request.get("task", "").lower()
     
+    def score_candidate(c: dict) -> tuple[float, int, str]:
+        # Priority 1: Salience (from SN graph, if present)
+        salience = c.get("salience", 0.0)
+        # Priority 2: Capability match count
+        caps = c.get("capabilities", [])
+        cap_score = sum(1 for cap in caps if isinstance(cap, str) and cap.lower() in task_lower)
+        # Priority 3: Alphabetical tie-breaker
+        return (-float(salience), -cap_score, str(c.get("agent_id", "unknown")))
+    
+    ranked_candidates = sorted(candidates, key=score_candidate)
+    selected_agents = [c.get("agent_id") for c in ranked_candidates if "agent_id" in c]
+    
+    best_candidate = ranked_candidates[0]
     payload = {
-        "agent_id": candidates[0].get("agent_id", "unknown"),
-        "selected_agents": selected_agents
+        "agent_id": best_candidate.get("agent_id", "unknown"),
+        "selected_agents": selected_agents,
+        "match_score": -score_candidate(best_candidate)[0]
     }
-    payload.update(candidates[0])
+    payload.update(best_candidate)
     return payload
 
 
