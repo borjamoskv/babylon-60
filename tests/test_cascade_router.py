@@ -25,11 +25,12 @@ def test_fallback_response():
 
 from unittest.mock import patch
 
-@patch("cortex.engine.cascade_router.subprocess.run")
-def test_route_task_fallback(mock_run):
-    mock_run.side_effect = FileNotFoundError()
+@patch("cortex.engine.cascade_router.asyncio.create_subprocess_exec")
+def test_route_task_fallback(mock_create_exec):
+    import asyncio
+    mock_create_exec.side_effect = FileNotFoundError()
     router = CascadeRouter()
     # Since we mocked FileNotFoundError, this will trigger fallback_response
-    response = router.route_task("test prompt", task_type="snippet")
+    response = asyncio.run(router.route_task("test prompt", task_type="snippet"))
     assert "not found in PATH" in response
     assert "codex" in response
