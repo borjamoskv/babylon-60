@@ -202,12 +202,12 @@ class TestAuthManager:
 
     @pytest.mark.asyncio
     async def test_hash_key_is_sha256(self, auth_manager):
-        """_hash_key must produce a SHA-256 hex digest."""
+        """hash_key_legacy_sha256 must produce a SHA-256 hex digest."""
         import hashlib
 
         test_key = "ctx_test123"
         expected = hashlib.sha256(test_key.encode()).hexdigest()
-        assert AuthManager._hash_key(test_key) == expected
+        assert AuthManager.hash_key_legacy_sha256(test_key) == expected
 
     @pytest.mark.asyncio
     async def test_multiple_keys_unique_ids(self, auth_manager):

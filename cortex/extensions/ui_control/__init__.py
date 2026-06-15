@@ -36,6 +36,8 @@ from cortex.extensions.ui_control.models import (
 from cortex.extensions.ui_control.mouse import MouseEngine
 from cortex.extensions.ui_control.vision import VisionEngine
 from cortex.extensions.ui_control.window import WindowEngine
+from cortex.extensions.ui_control.feedback_loop import UIFeedbackLoop
+from cortex.extensions.ui_control.bootstrapper import PermsBootstrapper
 
 __all__ = [
     "AXElement",
@@ -51,6 +53,8 @@ __all__ = [
     "VisionEngine",
     "WindowEngine",
     "WindowInfo",
+    "UIFeedbackLoop",
+    "PermsBootstrapper",
     "get_clipboard",
     "get_frontmost_app",
     "is_app_running",
