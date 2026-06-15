@@ -12,7 +12,7 @@ contract MockFunctionsRouter {
         uint16 dataVersion,
         uint32 callbackGasLimit,
         bytes32 donId
-    ) external returns (bytes32) {
+    ) external pure returns (bytes32) {
         return keccak256(abi.encodePacked(subscriptionId, data, dataVersion, callbackGasLimit, donId));
     }
 }

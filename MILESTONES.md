@@ -830,3 +830,21 @@ Proof:
   Date: 2026-06-15
 ```
 
+---
+
+### Hito 50: C5-REAL Integration MVP & Chainlink Functions Lineage Ledger
+- **Target**: [cortex/integration/](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/integration/), [sdks/contracts/](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/sdks/contracts/)
+- **Objective**: Implementación y verificación del middleware C5-REAL (monotonía temporal, pruebas de divergencia, cadenas de Merkle, aislamiento JIT) junto con contratos inteligentes EVM para verificar registros y linajes mediante oráculos Chainlink Functions.
+- **Yield Target**: 100% de éxito en 38 tests de integración y 3 tests de Solidity de Foundry; cero regresiones en la suite general de 3,366 casos de prueba.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Commits `a21a86d0`, `797acf4c`, `f0054c0e`, y `6996e572`.
+```yaml
+Claim: Middleware de integración C5-REAL y ledger de linaje en EVM completamente operativos
+Proof:
+  Base: "38/38 integration tests y 3/3 Solidity forge tests passing sin regresiones"
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-15
+```
+
+

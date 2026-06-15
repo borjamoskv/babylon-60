@@ -42,12 +42,22 @@ def lineage_group():
 @click.argument("fact_id", type=int)
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 @click.option("--depth", default=5, help="Max recursion depth")
-def trace_lineage(fact_id: int, db: str, depth: int):
+@click.option("--on-chain", is_flag=True, help="Verify lineage hashes on-chain via EVM contract")
+def trace_lineage(fact_id: int, db: str, depth: int, on_chain: bool):
     """Trace the heredity tree of a fact back to L0 sources."""
 
     async def _trace():
         engine = CortexEngine(db)
-        verifier = LineageVerifier(engine)
+
+        on_chain_verifier = None
+        if on_chain:
+            from cortex.extensions.web3.cortex_oracle import CortexOracleClient
+            on_chain_verifier = CortexOracleClient()
+            if not on_chain_verifier.connect():
+                console.print("[yellow]Warning: Could not connect to EVM L2 network. Proceeding with local checks.[/yellow]")
+                on_chain_verifier = None
+
+        verifier = LineageVerifier(engine, on_chain_verifier=on_chain_verifier)
         root = await verifier.get_lineage(fact_id, max_depth=depth)
 
         def build_rich_tree(node: LineageNode, tree_obj: Tree | None = None) -> Tree:

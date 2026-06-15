@@ -33,8 +33,9 @@ class LineageNode:
 class LineageVerifier:
     """Verifier for Epistemic Isolation (Ω₃-V)."""
 
-    def __init__(self, engine: Any):
+    def __init__(self, engine: Any, on_chain_verifier: Any | None = None):
         self.engine = engine
+        self.on_chain_verifier = on_chain_verifier
 
     async def get_lineage(
         self, fact_id: int, max_depth: int = 5, _cache: dict[int, LineageNode] | None = None
@@ -121,6 +122,27 @@ class LineageVerifier:
         # In a real scenario, we'd verify hashes here.
         # For now, we assume if it's in the DB and has a tx_id, it's valid L0.
         is_valid = fact.tx_id is not None
+        error = None
+
+        if is_valid and self.on_chain_verifier and fact.hash:
+            try:
+                hash_str = fact.hash
+                if hash_str.startswith("0x"):
+                    hash_str = hash_str[2:]
+                hash_bytes = bytes.fromhex(hash_str)
+                if len(hash_bytes) == 32:
+                    if self.on_chain_verifier.connect() and self.on_chain_verifier.contract:
+                        verified = self.on_chain_verifier.contract.functions.verifyTelemetry(hash_bytes, b"").call()
+                        if not verified:
+                            is_valid = False
+                            error = "Fact telemetry hash not verified on-chain."
+                else:
+                    is_valid = False
+                    error = "Invalid hash length for on-chain verification."
+            except Exception as e:
+                logger.warning("On-chain verification error for fact %s: %s", fact_id, e)
+                is_valid = False
+                error = f"On-chain verification error: {e}"
 
         return LineageNode(
             fact_id=fact.id,
@@ -131,6 +153,7 @@ class LineageVerifier:
             timestamp=fact.created_at,
             parents=parents,
             is_valid=is_valid,
+            error=error,
         )
 
     def print_tree(self, node: LineageNode, indent: int = 0):
