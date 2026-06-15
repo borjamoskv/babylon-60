@@ -1,0 +1,827 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+---
+
+<SiteLayout
+	title="CORTEX Persist | Outreach Control Panel"
+	description="Verify, extract, and automate B2B developer outreach for CORTEX Persist."
+>
+	<main class="outreach-dashboard container">
+		<header class="outreach-header">
+			<div class="header-main">
+				<a class="back-link" href="/dev">&larr; Dev Portal</a>
+				<p class="eyebrow">#C5-REAL Outreach Console</p>
+				<h1>CORTEX Developer Outreach</h1>
+			</div>
+			
+			<div class="status-indicator">
+				<span class="pulse-dot" id="global-pulse"></span>
+				<span class="status-label" id="global-status">SYSTEM STANDBY</span>
+			</div>
+		</header>
+
+		<!-- Stats Grid -->
+		<section class="stats-grid">
+			<div class="stat-card">
+				<span class="stat-label">Total Leads Extracted</span>
+				<strong id="stat-total">0</strong>
+				<span class="stat-meta">Verified GitHub contributors</span>
+			</div>
+			
+			<div class="stat-card highlight">
+				<span class="stat-label">Outreach Emails Sent</span>
+				<strong id="stat-sent">0</strong>
+				<span class="stat-meta">Delivered via SMTP relay</span>
+			</div>
+
+			<div class="stat-card">
+				<span class="stat-label font-mono">Pending Contacts</span>
+				<strong id="stat-pending">0</strong>
+				<span class="stat-meta">Queue ready for dispatch</span>
+			</div>
+
+			<div class="stat-card">
+				<span class="stat-label">Language Segments</span>
+				<div class="lang-split">
+					<div><span class="badge badge-es">ES</span> <strong id="stat-es">0</strong></div>
+					<div><span class="badge badge-en">EN</span> <strong id="stat-en">0</strong></div>
+				</div>
+				<span class="stat-meta">Bilingual templates auto-routed</span>
+			</div>
+		</section>
+
+		<!-- Control Board -->
+		<section class="control-board surface">
+			<div class="board-header">
+				<h2>Outreach Operations</h2>
+				<span class="hint font-mono">Rate limits: 15–30s delay per send</span>
+			</div>
+			
+			<div class="controls-grid">
+				<div class="control-card">
+					<h3>Lead Generation</h3>
+					<p>Scan GitHub for active contributors on target AI, TEE, and Web3 topics.</p>
+					
+					<div class="form-group">
+						<label for="extract-count">Target new leads:</label>
+						<input type="number" id="extract-count" value="10" min="1" max="100" />
+					</div>
+					
+					<button id="btn-extract" class="btn btn-primary">
+						<span class="btn-text">Extract Leads</span>
+						<span class="spinner" hidden></span>
+					</button>
+				</div>
+
+				<div class="control-card highlight-border">
+					<h3>SMTP Campaign Dispatch</h3>
+					<p>Send personalized bilingual emails mentioning their specific contributions.</p>
+					
+					<div class="form-group">
+						<label for="send-count">Batch send limit:</label>
+						<input type="number" id="send-count" value="5" min="1" max="50" />
+					</div>
+					
+					<button id="btn-send" class="btn btn-accent">
+						<span class="btn-text">Run Outreach Batch</span>
+						<span class="spinner" hidden></span>
+					</button>
+				</div>
+
+				<div class="control-card danger-zone">
+					<h3>Developer Utilities</h3>
+					<p>Manage logs and reset state. Use with caution in production.</p>
+					
+					<button id="btn-reset" class="btn btn-danger">Reset Sent Log</button>
+					<button id="btn-refresh" class="btn btn-secondary">Refresh Dashboard</button>
+				</div>
+			</div>
+			
+			<div id="operation-logs" class="logs-container" hidden>
+				<div class="logs-header">
+					<span>Operation Feed</span>
+					<button id="btn-clear-logs" class="btn-text">Clear</button>
+				</div>
+				<pre id="log-output" class="font-mono"></pre>
+			</div>
+		</section>
+
+		<!-- Leads Table -->
+		<section class="leads-section surface">
+			<div class="section-header">
+				<h2>Extracted Leads Registry</h2>
+				<div class="filters">
+					<select id="filter-lang">
+						<option value="">All Languages</option>
+						<option value="es">Spanish (ES)</option>
+						<option value="en">English (EN)</option>
+					</select>
+					<select id="filter-status">
+						<option value="">All Statuses</option>
+						<option value="pending">Pending</option>
+						<option value="sent">Sent</option>
+					</select>
+				</div>
+			</div>
+			
+			<div class="table-wrapper">
+				<table id="leads-table">
+					<thead>
+						<tr>
+							<th>Name / Username</th>
+							<th>Email</th>
+							<th>Location</th>
+							<th>Language</th>
+							<th>Repository Focus</th>
+							<th>Status</th>
+						</tr>
+					</thead>
+					<tbody id="leads-tbody">
+						<tr>
+							<td colspan="6" class="loading-row">Connecting to CORTEX Persist Outreach Engine...</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</main>
+	</main>
+</SiteLayout>
+
+<style>
+	:root {
+		--bg-color: #050505;
+		--surface-color: #0b0b0f;
+		--surface-border: rgba(255, 255, 255, 0.08);
+		--accent-color: #2b3be5;
+		--accent-glow: rgba(43, 59, 229, 0.35);
+		--text-primary: #f5f5f7;
+		--text-secondary: #8e8e93;
+		--text-muted: #48484a;
+		--color-es: #ff9f0a;
+		--color-en: #0a84ff;
+		--color-sent: #30d158;
+		--color-pending: #bf5af2;
+	}
+
+	.outreach-dashboard {
+		padding: 3rem 1.5rem;
+		max-width: 1200px;
+		margin: 0 auto;
+		color: var(--text-primary);
+	}
+
+	.outreach-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-end;
+		border-bottom: 1px solid var(--surface-border);
+		padding-bottom: 2rem;
+		margin-bottom: 2.5rem;
+	}
+
+	.back-link {
+		color: var(--text-secondary);
+		text-decoration: none;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.85rem;
+		margin-bottom: 0.75rem;
+		display: inline-block;
+		transition: color 0.2s;
+	}
+	.back-link:hover {
+		color: var(--text-primary);
+	}
+
+	.eyebrow {
+		font-family: 'IBM Plex Mono', monospace;
+		color: var(--accent-color);
+		font-size: 0.85rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		margin: 0 0 0.5rem 0;
+	}
+
+	h1 {
+		font-family: 'Orbitron', sans-serif;
+		font-size: 2.25rem;
+		font-weight: 800;
+		margin: 0;
+		letter-spacing: -0.02em;
+	}
+
+	.status-indicator {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		background: rgba(255, 255, 255, 0.03);
+		border: 1px solid var(--surface-border);
+		padding: 0.5rem 1rem;
+		border-radius: 4px;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.8rem;
+	}
+
+	.pulse-dot {
+		width: 8px;
+		height: 8px;
+		background-color: var(--color-sent);
+		border-radius: 50%;
+		box-shadow: 0 0 8px var(--color-sent);
+	}
+
+	.pulse-dot.active {
+		animation: pulse 1.5s infinite;
+		background-color: var(--color-pending);
+		box-shadow: 0 0 8px var(--color-pending);
+	}
+
+	.pulse-dot.error {
+		background-color: #ff453a;
+		box-shadow: 0 0 8px #ff453a;
+	}
+
+	@keyframes pulse {
+		0% { transform: scale(0.9); opacity: 0.6; }
+		50% { transform: scale(1.1); opacity: 1; }
+		100% { transform: scale(0.9); opacity: 0.6; }
+	}
+
+	/* Stats Grid */
+	.stats-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+		gap: 1.5rem;
+		margin-bottom: 2.5rem;
+	}
+
+	.stat-card {
+		background: var(--surface-color);
+		border: 1px solid var(--surface-border);
+		padding: 1.5rem;
+		border-radius: 6px;
+		display: flex;
+		flex-direction: column;
+		position: relative;
+		overflow: hidden;
+		transition: border-color 0.3s;
+	}
+
+	.stat-card:hover {
+		border-color: rgba(255, 255, 255, 0.15);
+	}
+
+	.stat-card.highlight {
+		border-color: var(--accent-color);
+		box-shadow: inset 0 0 15px rgba(43, 59, 229, 0.05);
+	}
+
+	.stat-label {
+		font-family: 'Manrope', sans-serif;
+		font-size: 0.85rem;
+		font-weight: 500;
+		color: var(--text-secondary);
+		margin-bottom: 0.5rem;
+	}
+
+	.stat-card strong {
+		font-family: 'Orbitron', sans-serif;
+		font-size: 2.5rem;
+		font-weight: 700;
+		margin-bottom: 0.5rem;
+	}
+
+	.stat-meta {
+		font-size: 0.75rem;
+		color: var(--text-muted);
+	}
+
+	.lang-split {
+		display: flex;
+		gap: 1.5rem;
+		margin-bottom: 0.5rem;
+	}
+	.lang-split div {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+	.lang-split strong {
+		font-size: 1.75rem;
+		margin-bottom: 0;
+	}
+
+	/* Surface Panels */
+	.surface {
+		background: var(--surface-color);
+		border: 1px solid var(--surface-border);
+		border-radius: 8px;
+		padding: 2rem;
+		margin-bottom: 2.5rem;
+	}
+
+	.board-header, .section-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		border-bottom: 1px solid var(--surface-border);
+		padding-bottom: 1.25rem;
+		margin-bottom: 2rem;
+	}
+
+	.board-header h2, .section-header h2 {
+		font-family: 'Orbitron', sans-serif;
+		font-size: 1.25rem;
+		font-weight: 700;
+		margin: 0;
+		letter-spacing: -0.01em;
+	}
+
+	.hint {
+		font-size: 0.75rem;
+		color: var(--text-secondary);
+	}
+
+	/* Controls Board */
+	.controls-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 2rem;
+	}
+
+	.control-card {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		padding: 1.5rem;
+		background: rgba(255, 255, 255, 0.01);
+		border: 1px solid var(--surface-border);
+		border-radius: 6px;
+	}
+
+	.control-card.highlight-border {
+		border-color: var(--accent-color);
+		box-shadow: 0 0 10px rgba(43, 59, 229, 0.05);
+	}
+
+	.control-card h3 {
+		font-family: 'Manrope', sans-serif;
+		font-size: 1.05rem;
+		margin: 0;
+	}
+
+	.control-card p {
+		font-size: 0.85rem;
+		color: var(--text-secondary);
+		margin: 0;
+		line-height: 1.5;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.form-group label {
+		font-size: 0.75rem;
+		color: var(--text-secondary);
+		font-family: 'IBM Plex Mono', monospace;
+	}
+
+	input[type="number"], select {
+		background: #121217;
+		border: 1px solid var(--surface-border);
+		color: var(--text-primary);
+		padding: 0.6rem 0.8rem;
+		border-radius: 4px;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.9rem;
+		outline: none;
+		transition: border-color 0.2s;
+	}
+
+	input[type="number"]:focus, select:focus {
+		border-color: var(--accent-color);
+	}
+
+	.btn {
+		cursor: pointer;
+		padding: 0.75rem 1.25rem;
+		border-radius: 4px;
+		font-weight: 600;
+		font-size: 0.85rem;
+		text-align: center;
+		border: 1px solid transparent;
+		transition: all 0.2s;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.btn-primary {
+		background: var(--accent-color);
+		color: var(--text-primary);
+		box-shadow: 0 4px 12px var(--accent-glow);
+	}
+	.btn-primary:hover:not(:disabled) {
+		background: #3e4df6;
+		transform: translateY(-1px);
+	}
+
+	.btn-accent {
+		background: var(--color-pending);
+		color: var(--text-primary);
+		box-shadow: 0 4px 12px rgba(191, 90, 242, 0.2);
+	}
+	.btn-accent:hover:not(:disabled) {
+		background: #ca7df5;
+		transform: translateY(-1px);
+	}
+
+	.btn-secondary {
+		background: transparent;
+		border-color: var(--surface-border);
+		color: var(--text-primary);
+	}
+	.btn-secondary:hover {
+		background: rgba(255, 255, 255, 0.05);
+	}
+
+	.btn-danger {
+		background: rgba(255, 69, 58, 0.1);
+		border-color: rgba(255, 69, 58, 0.3);
+		color: #ff453a;
+	}
+	.btn-danger:hover {
+		background: rgba(255, 69, 58, 0.25);
+	}
+
+	.btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.btn-text {
+		background: none;
+		border: none;
+		color: var(--text-secondary);
+		cursor: pointer;
+		font-size: 0.75rem;
+		font-family: 'IBM Plex Mono', monospace;
+	}
+	.btn-text:hover {
+		color: var(--text-primary);
+	}
+
+	.spinner {
+		width: 14px;
+		height: 14px;
+		border: 2px solid rgba(255, 255, 255, 0.2);
+		border-top-color: #ffffff;
+		border-radius: 50%;
+		animation: spin 0.8s linear infinite;
+	}
+
+	@keyframes spin {
+		to { transform: rotate(360deg); }
+	}
+
+	/* Operation logs */
+	.logs-container {
+		margin-top: 2rem;
+		border: 1px solid var(--surface-border);
+		border-radius: 6px;
+		background: #050508;
+		overflow: hidden;
+	}
+
+	.logs-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.5rem 1rem;
+		background: rgba(255, 255, 255, 0.02);
+		border-bottom: 1px solid var(--surface-border);
+		font-size: 0.75rem;
+		color: var(--text-secondary);
+	}
+
+	#log-output {
+		margin: 0;
+		padding: 1rem;
+		max-height: 200px;
+		overflow-y: auto;
+		font-size: 0.8rem;
+		line-height: 1.4;
+		color: #a9a9b3;
+		white-space: pre-wrap;
+	}
+
+	/* Table Section */
+	.table-wrapper {
+		width: 100%;
+		overflow-x: auto;
+		border: 1px solid var(--surface-border);
+		border-radius: 6px;
+	}
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		text-align: left;
+		font-size: 0.85rem;
+	}
+
+	th {
+		background: rgba(255, 255, 255, 0.02);
+		padding: 1rem;
+		font-family: 'Manrope', sans-serif;
+		font-weight: 600;
+		color: var(--text-secondary);
+		border-bottom: 1px solid var(--surface-border);
+	}
+
+	td {
+		padding: 1rem;
+		border-bottom: 1px solid var(--surface-border);
+		vertical-align: middle;
+	}
+
+	tr:last-child td {
+		border-bottom: none;
+	}
+
+	tr:hover td {
+		background: rgba(255, 255, 255, 0.01);
+	}
+
+	.lead-name {
+		font-weight: 600;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.lead-uname {
+		font-size: 0.75rem;
+		font-family: 'IBM Plex Mono', monospace;
+		color: var(--accent-color);
+	}
+
+	.lead-email {
+		font-family: 'IBM Plex Mono', monospace;
+		color: var(--text-primary);
+	}
+
+	.lead-repo {
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.8rem;
+		color: var(--text-secondary);
+	}
+
+	.badge {
+		display: inline-block;
+		padding: 0.2rem 0.5rem;
+		border-radius: 4px;
+		font-size: 0.7rem;
+		font-weight: 700;
+		font-family: 'IBM Plex Mono', monospace;
+		text-transform: uppercase;
+	}
+
+	.badge-es { background: rgba(255, 159, 10, 0.15); color: var(--color-es); }
+	.badge-en { background: rgba(10, 132, 255, 0.15); color: var(--color-en); }
+	.badge-sent { background: rgba(48, 209, 88, 0.15); color: var(--color-sent); }
+	.badge-pending { background: rgba(191, 90, 242, 0.15); color: var(--color-pending); }
+
+	.loading-row {
+		text-align: center;
+		padding: 3rem;
+		color: var(--text-secondary);
+		font-style: italic;
+	}
+
+	.filters {
+		display: flex;
+		gap: 1rem;
+	}
+</style>
+
+<script>
+	const API_BASE = 'http://localhost:8000/v1/outreach';
+	let pollingInterval = null;
+
+	// Elements
+	const globalPulse = document.getElementById('global-pulse');
+	const globalStatus = document.getElementById('global-status');
+	const statTotal = document.getElementById('stat-total');
+	const statSent = document.getElementById('stat-sent');
+	const statPending = document.getElementById('stat-pending');
+	const statEs = document.getElementById('stat-es');
+	const statEn = document.getElementById('stat-en');
+
+	const btnExtract = document.getElementById('btn-extract');
+	const btnSend = document.getElementById('btn-send');
+	const btnReset = document.getElementById('btn-reset');
+	const btnRefresh = document.getElementById('btn-refresh');
+	const btnClearLogs = document.getElementById('btn-clear-logs');
+	
+	const extractCount = document.getElementById('extract-count');
+	const sendCount = document.getElementById('send-count');
+	
+	const operationLogs = document.getElementById('operation-logs');
+	const logOutput = document.getElementById('log-output');
+	
+	const leadsTbody = document.getElementById('leads-tbody');
+	const filterLang = document.getElementById('filter-lang');
+	const filterStatus = document.getElementById('filter-status');
+
+	// Log function
+	function addLog(message) {
+		operationLogs.hidden = false;
+		const timestamp = new Date().toLocaleTimeString();
+		logOutput.textContent += `[${timestamp}] ${message}\n`;
+		logOutput.scrollTop = logOutput.scrollHeight;
+	}
+
+	// Fetch Stats
+	async function updateStats() {
+		try {
+			const res = await fetch(`${API_BASE}/stats`);
+			if (!res.ok) throw new Error('Failed to fetch stats');
+			const data = await res.json();
+			
+			// Update stats display
+			statTotal.textContent = data.stats.total_leads;
+			statSent.textContent = data.stats.sent_emails;
+			statPending.textContent = data.stats.pending_emails;
+			statEs.textContent = data.stats.languages.es || 0;
+			statEn.textContent = data.stats.languages.en || 0;
+
+			// Update operational state
+			const activeExtract = data.status.is_extracting;
+			const activeSend = data.status.is_sending;
+
+			if (activeExtract) {
+				globalPulse.className = 'pulse-dot active';
+				globalStatus.textContent = 'EXTRACTING LEADS...';
+				btnExtract.disabled = true;
+				btnExtract.querySelector('.spinner').hidden = false;
+			} else if (activeSend) {
+				globalPulse.className = 'pulse-dot active';
+				globalStatus.textContent = 'TRANSMITTING EMAILS...';
+				btnSend.disabled = true;
+				btnSend.querySelector('.spinner').hidden = false;
+			} else {
+				globalPulse.className = 'pulse-dot';
+				globalStatus.textContent = 'SYSTEM STANDBY';
+				btnExtract.disabled = false;
+				btnSend.disabled = false;
+				btnExtract.querySelector('.spinner').hidden = true;
+				btnSend.querySelector('.spinner').hidden = true;
+			}
+
+			// Handle last run summary or errors
+			if (data.status.last_error) {
+				globalPulse.className = 'pulse-dot error';
+				globalStatus.textContent = 'ERROR DETECTED';
+				addLog(`Error: ${data.status.last_error}`);
+			}
+			
+			if (data.status.last_run_summary && !activeSend) {
+				const s = data.status.last_run_summary;
+				if (s.status === 'Success' && s.sent_count > 0) {
+					addLog(`Successfully sent outreach to: ${s.details.sent.join(', ')}`);
+					// Reset so we don't spam logs
+					fetch(`${API_BASE}/stats`);
+				}
+			}
+
+			// Start or stop polling
+			if (activeExtract || activeSend) {
+				if (!pollingInterval) {
+					pollingInterval = setInterval(() => {
+						updateStats();
+						loadLeads();
+					}, 2000);
+				}
+			} else {
+				if (pollingInterval) {
+					clearInterval(pollingInterval);
+					pollingInterval = null;
+				}
+			}
+
+		} catch (err) {
+			console.error(err);
+			globalPulse.className = 'pulse-dot error';
+			globalStatus.textContent = 'OFFLINE';
+		}
+	}
+
+	// Fetch and render Leads Registry
+	async function loadLeads() {
+		try {
+			const lang = filterLang.value;
+			const status = filterStatus.value;
+			let query = '?limit=200';
+			if (lang) query += `&language=${lang}`;
+			if (status) query += `&status=${status}`;
+
+			const res = await fetch(`${API_BASE}/leads${query}`);
+			if (!res.ok) throw new Error('Failed to fetch leads');
+			const leads = await res.json();
+
+			if (leads.length === 0) {
+				leadsTbody.innerHTML = `<tr><td colspan="6" class="loading-row">No leads match the selected filters.</td></tr>`;
+				return;
+			}
+
+			leadsTbody.innerHTML = leads.map(lead => `
+				<tr>
+					<td>
+						<div class="lead-name">
+							<span>${lead.name || 'Anonymous'}</span>
+							<a href="${lead.github_url}" target="_blank" class="lead-uname">@${lead.username}</a>
+						</div>
+					</td>
+					<td><span class="lead-email">${lead.email}</span></td>
+					<td><span>${lead.location || '—'}</span></td>
+					<td><span class="badge badge-${lead.language}">${lead.language}</span></td>
+					<td><span class="lead-repo">${lead.repo || 'General'}</span></td>
+					<td><span class="badge badge-${lead.status.toLowerCase()}">${lead.status}</span></td>
+				</tr>
+			`).join('');
+
+		} catch (err) {
+			leadsTbody.innerHTML = `<tr><td colspan="6" class="loading-row" style="color: #ff453a;">Failed to load leads registry. Ensure backend is running.</td></tr>`;
+		}
+	}
+
+	// Button Actions
+	btnExtract.addEventListener('click', async () => {
+		const target = parseInt(extractCount.value) || 10;
+		addLog(`Triggering lead extraction for ${target} records...`);
+		try {
+			const res = await fetch(`${API_BASE}/extract`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ target_leads: target })
+			});
+			if (!res.ok) throw new Error('Extraction reject');
+			addLog('Extraction process successfully queued.');
+			updateStats();
+		} catch (err) {
+			addLog(`Extraction trigger failed: ${err.message}`);
+		}
+	});
+
+	btnSend.addEventListener('click', async () => {
+		const limit = parseInt(sendCount.value) || 5;
+		addLog(`Triggering B2B outreach run for up to ${limit} emails...`);
+		try {
+			const res = await fetch(`${API_BASE}/send`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ limit: limit })
+			});
+			if (!res.ok) throw new Error('Outreach send reject');
+			addLog('SMTP dispatch batch started. Pacing rate limits...');
+			updateStats();
+		} catch (err) {
+			addLog(`Outreach launch failed: ${err.message}`);
+		}
+	});
+
+	btnReset.addEventListener('click', async () => {
+		if (!confirm('Are you sure you want to clear the logs of sent emails? This will allow re-contacting previously emailed leads.')) return;
+		addLog('Resetting sent emails log...');
+		try {
+			const res = await fetch(`${API_BASE}/reset`, { method: 'POST' });
+			if (!res.ok) throw new Error('Reset failed');
+			addLog('Sent log cleared successfully.');
+			updateStats();
+			loadLeads();
+		} catch (err) {
+			addLog(`Reset failed: ${err.message}`);
+		}
+	});
+
+	btnRefresh.addEventListener('click', () => {
+		addLog('Refreshing data registry...');
+		updateStats();
+		loadLeads();
+	});
+
+	btnClearLogs.addEventListener('click', () => {
+		logOutput.textContent = '';
+		operationLogs.hidden = true;
+	});
+
+	filterLang.addEventListener('change', loadLeads);
+	filterStatus.addEventListener('change', loadLeads);
+
+	// Startup Init
+	updateStats();
+	loadLeads();
+</script>

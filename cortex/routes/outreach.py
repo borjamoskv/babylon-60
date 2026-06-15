@@ -6,19 +6,18 @@ API endpoints for B2B developer outreach pipeline of CORTEX Persist.
 Allows viewing leads, monitoring stats, and triggering extraction/outreach batches.
 """
 
-import os
 import csv
 import json
 import logging
-from typing import List, Dict, Any, Optional
+import os
+from typing import Optional
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from pydantic import BaseModel
-from fastapi import APIRouter, Depends, Query, BackgroundTasks, HTTPException, Request
-from fastapi.responses import JSONResponse
 
 from cortex import config
-from cortex.api.deps import get_engine
 from cortex.auth import require_permission
-from cortex.engine import CortexEngine
+
 
 # Helper dependency to bypass authentication on localhost/developer local mode
 def require_local_or_permission(permission: str):
@@ -50,12 +49,12 @@ LOG_PATH = "scratch/sent_leads_log.json"
 
 class ExtractRequest(BaseModel):
     target_leads: int = 10
-    queries: Optional[List[str]] = None
+    queries: Optional[list[str]] = None
 
 class OutreachRequest(BaseModel):
     limit: int = 5
 
-def background_extract(target: int, queries: Optional[List[str]]):
+def background_extract(target: int, queries: Optional[list[str]]):
     global _status_state
     _status_state["is_extracting"] = True
     _status_state["last_error"] = None
@@ -92,7 +91,7 @@ async def get_stats(
     # Read leads CSV
     if os.path.exists(CSV_PATH):
         try:
-            with open(CSV_PATH, mode="r", encoding="utf-8") as f:
+            with open(CSV_PATH, encoding="utf-8") as f:
                 reader = csv.DictReader(f)
                 for row in reader:
                     total_leads += 1
@@ -107,7 +106,7 @@ async def get_stats(
     sent_emails = []
     if os.path.exists(LOG_PATH):
         try:
-            with open(LOG_PATH, "r") as f:
+            with open(LOG_PATH) as f:
                 sent_emails = json.load(f)
         except Exception as e:
             logger.warning(f"Error reading sent log stats: {e}")
@@ -145,7 +144,7 @@ async def get_leads(
     sent_emails = set()
     if os.path.exists(LOG_PATH):
         try:
-            with open(LOG_PATH, "r") as f:
+            with open(LOG_PATH) as f:
                 sent_emails = set(json.load(f))
         except Exception as e:
             logger.warning(f"Error loading sent log: {e}")
@@ -154,7 +153,7 @@ async def get_leads(
         return []
 
     try:
-        with open(CSV_PATH, mode="r", encoding="utf-8") as f:
+        with open(CSV_PATH, encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 email = row.get("Email", "").strip()

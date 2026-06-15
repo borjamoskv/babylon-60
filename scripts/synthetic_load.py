@@ -32,15 +32,14 @@ async def main():
     
     # Instanciamos el motor asíncrono
     try:
-        engine = CortexEngine(db_path=":memory:", auto_embed=False)
-        
-        start_time = time.time()
-        
-        # Inyectar 1000 memorias concurrentemente
-        tasks = [inject_redundant_memory(engine, i) for i in range(1000)]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        
-        end_time = time.time()
+        async with CortexEngine(db_path=":memory:", auto_embed=False) as engine:
+            start_time = time.time()
+            
+            # Inyectar 1000 memorias concurrentemente
+            tasks = [inject_redundant_memory(engine, i) for i in range(1000)]
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            
+            end_time = time.time()
         
         success_count = sum(1 for r in results if isinstance(r, int))
         error_count = len(results) - success_count

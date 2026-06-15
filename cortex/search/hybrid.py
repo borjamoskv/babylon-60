@@ -209,8 +209,8 @@ def hybrid_search_sync(
     w_vec = vector_weight / total_w
     w_txt = text_weight / total_w
 
-    rrf_scores: dict[int, float] = {}
-    result_map: dict[int, SearchResult] = {}
+    rrf_scores: dict[int | str, float] = {}
+    result_map: dict[int | str, SearchResult] = {}
 
     for rank, res in enumerate(sem_results):
         score = w_vec / (RRF_K + rank + 1)

@@ -1,3 +1,159 @@
 ---
+import SiteLayout from '../../layouts/SiteLayout.astro';
 ---
-<h1>CortexPersist DEV Portal</h1>
+
+<SiteLayout
+	title="CORTEX | Dev Portal"
+	description="Internal developer tools and governance dashboard."
+>
+	<main class="dev-portal container">
+		<header class="portal-header">
+			<p class="eyebrow">Internal Substrate Management</p>
+			<h1>CORTEX PERSIST DEV PORTAL</h1>
+		</header>
+
+		<section class="tools-grid">
+			<a class="tool-card" href="/dev/outreach">
+				<div class="card-glow"></div>
+				<span class="card-icon font-mono">#C5-REAL</span>
+				<h2>B2B Developer Outreach</h2>
+				<p>Manage, extract, and auto-route personalized outreach to GitHub contributors in Spain, LatAm, and globally.</p>
+				<span class="card-link">Open Outreach Console &rarr;</span>
+			</a>
+
+			<a class="tool-card" href="/vsa">
+				<div class="card-glow"></div>
+				<span class="card-icon font-mono">#VSA-400</span>
+				<h2>VSA Sovereign Explorer</h2>
+				<p>Visualise vector spaces and hyperdimensional embeddings of persistent facts locally.</p>
+				<span class="card-link">Open VSA Shell &rarr;</span>
+			</a>
+
+			<a class="tool-card" href="/ultramap">
+				<div class="card-glow"></div>
+				<span class="card-icon font-mono">#LEDGER</span>
+				<h2>Ultramap-Ω</h2>
+				<p>Trace ledger cryptographic hash-chain continuity and fact timeline mutations.</p>
+				<span class="card-link">View Cryptographic Ledger &rarr;</span>
+			</a>
+		</section>
+	</main>
+</SiteLayout>
+
+<style>
+	:root {
+		--bg-color: #050505;
+		--surface-color: #0b0b0f;
+		--surface-border: rgba(255, 255, 255, 0.08);
+		--accent-color: #2b3be5;
+		--accent-glow: rgba(43, 59, 229, 0.35);
+		--text-primary: #f5f5f7;
+		--text-secondary: #8e8e93;
+	}
+
+	.dev-portal {
+		padding: 4rem 1.5rem;
+		max-width: 1000px;
+		margin: 0 auto;
+		color: var(--text-primary);
+	}
+
+	.portal-header {
+		text-align: center;
+		margin-bottom: 4rem;
+	}
+
+	.eyebrow {
+		font-family: 'IBM Plex Mono', monospace;
+		color: var(--accent-color);
+		font-size: 0.85rem;
+		letter-spacing: 0.15em;
+		text-transform: uppercase;
+		margin-bottom: 0.75rem;
+	}
+
+	h1 {
+		font-family: 'Orbitron', sans-serif;
+		font-size: 2.5rem;
+		font-weight: 800;
+		letter-spacing: -0.02em;
+		margin: 0;
+	}
+
+	.tools-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 2rem;
+	}
+
+	.tool-card {
+		background: var(--surface-color);
+		border: 1px solid var(--surface-border);
+		padding: 2.25rem;
+		border-radius: 8px;
+		text-decoration: none;
+		color: inherit;
+		display: flex;
+		flex-direction: column;
+		position: relative;
+		overflow: hidden;
+		transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	.tool-card:hover {
+		border-color: var(--accent-color);
+		transform: translateY(-2px);
+		box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(43, 59, 229, 0.1);
+	}
+
+	.card-glow {
+		position: absolute;
+		top: -50%;
+		left: -50%;
+		width: 200%;
+		height: 200%;
+		background: radial-gradient(circle, var(--accent-glow) 0%, transparent 60%);
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.4s;
+	}
+
+	.tool-card:hover .card-glow {
+		opacity: 0.3;
+	}
+
+	.card-icon {
+		font-size: 0.8rem;
+		color: var(--accent-color);
+		letter-spacing: 0.05em;
+		margin-bottom: 1.5rem;
+	}
+
+	.tool-card h2 {
+		font-family: 'Orbitron', sans-serif;
+		font-size: 1.35rem;
+		font-weight: 700;
+		margin: 0 0 0.75rem 0;
+		letter-spacing: -0.01em;
+	}
+
+	.tool-card p {
+		font-size: 0.88rem;
+		color: var(--text-secondary);
+		line-height: 1.6;
+		margin: 0 0 2rem 0;
+		flex-grow: 1;
+	}
+
+	.card-link {
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.85rem;
+		color: var(--accent-color);
+		font-weight: 500;
+		transition: color 0.2s;
+	}
+
+	.tool-card:hover .card-link {
+		color: var(--text-primary);
+	}
+</style>

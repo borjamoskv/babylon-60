@@ -147,7 +147,7 @@ class HttpRetryMixin:
                 return result
 
             last_exc = result
-            if not isinstance(result, httpx.HTTPStatusError) or result.response.status_code != 429:
+            if not isinstance(result, httpx.HTTPStatusError) or getattr(getattr(result, "response", None), "status_code", None) != 429:
                 raise result
 
             if attempt >= self._max_retries - 1:
@@ -232,7 +232,7 @@ async def post_with_retry(
             return result
 
         last_exc = result
-        if not isinstance(result, httpx.HTTPStatusError) or result.response.status_code != 429:
+        if not isinstance(result, httpx.HTTPStatusError) or getattr(getattr(result, "response", None), "status_code", None) != 429:
             raise result
 
         if attempt >= max_retries - 1:
