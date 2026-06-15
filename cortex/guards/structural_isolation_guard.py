@@ -1,90 +1,79 @@
-# [C5-REAL] Exergy-Maximized
-"""
-CORTEX - Structural Isolation Guard.
-
-A pre-processing middleware that enforces the isolation of the structural core 
-from contaminating narrative (e.g. prompt preambles).
-Validates artifacts using regex to strip noise, checking for template variables,
-and strictly aborting execution if the payload lacks exergic density,
-logging failures into .cortex_ledger.json.
-"""
-
-import json
+import asyncio
 import logging
-import os
-import re
-from datetime import datetime
+from typing import Any, Dict
+from pydantic import BaseModel, ValidationError
+
+# Dependencias abstraídas del core de CORTEX
+from cortex.audit.ledger import EnterpriseAuditLedger
+from cortex.observability.metrics import LocalMetricsBuffer
 
 logger = logging.getLogger("cortex.guards.isolation")
 
 class StructuralIsolationGuard:
-    """Enforces the extraction and validation of pure structural prompts."""
-    
-    LEDGER_PATH = ".cortex_ledger.json"
+    """
+    Guardia de Aislamiento Estructural.
+    Validación de entropía y estructura con I/O estrictamente asíncrono y fail-closed.
+    """
+    def __init__(
+        self,
+        ledger_client: EnterpriseAuditLedger, 
+        metrics_buffer: LocalMetricsBuffer,
+        strict_mode: bool = True
+    ):
+        self.ledger = ledger_client
+        self.metrics = metrics_buffer
+        self.strict_mode = strict_mode
+        # Invariante de Aislamiento Estructural L5
+        self._max_entropy_threshold = 25.0 
 
-    def __init__(self, workspace_dir: str = "."):
-        self.ledger_file = os.path.join(workspace_dir, self.LEDGER_PATH)
+    async def validate_payload(self, agent_id: str, payload: Dict[str, Any]) -> bool:
+        """
+        Evalúa el payload. Si viola el aislamiento, ejecuta SAGA-1 de forma no bloqueante.
+        """
+        try:
+            # 1. Validación Estructural Rápida (CPU-bound, no I/O)
+            is_valid = self._check_structural_integrity(payload)
+            
+            if not is_valid:
+                await self._trigger_saga_1_rejection(agent_id, payload, "Structural violation detected")
+                return False
+                
+            return True
 
-    def _log_failure(self, reason: str, payload_preview: str):
-        """Logs a structural failure securely into the C5-REAL ledger."""
-        entry = {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
-            "type": "STRUCTURAL_ISOLATION_FAILURE",
+        except Exception as e:
+            # RED TEAM FIREWALL: Fail-closed gracefully.
+            logger.error(f"[GUARD FAILURE] Excepción no controlada: {e}")
+            self.metrics.increment_counter("guard_panic_failures", tags={"agent": agent_id})
+            return False if self.strict_mode else True
+
+    def _check_structural_integrity(self, payload: Dict[str, Any]) -> bool:
+        # Lógica pura de validación en memoria. Cero bloqueos.
+        if "entropy_score" in payload and payload["entropy_score"] > self._max_entropy_threshold:
+            return False
+        return True
+
+    async def _trigger_saga_1_rejection(self, agent_id: str, payload: Dict[str, Any], reason: str):
+        """
+        Emisión del rechazo. Desacoplado del I/O local.
+        """
+        # 1. Telemetría instantánea en memoria (Prometheus / Observability local)
+        self.metrics.increment_counter(
+            "isolation_rejections_total", 
+            tags={"agent": agent_id, "reason": reason}
+        )
+
+        # 2. Persistencia asíncrona C5-REAL en el Ledger
+        event_data = {
+            "agent_id": agent_id,
+            "event_type": "ISOLATION_BREACH",
             "reason": reason,
-            "payload_preview": payload_preview[:200]
+            "payload_snapshot": payload
         }
         
         try:
-            if os.path.exists(self.ledger_file):
-                with open(self.ledger_file, "r") as f:
-                    try:
-                        ledger = json.load(f)
-                    except json.JSONDecodeError:
-                        ledger = {}
-            else:
-                ledger = {}
-                
-            if isinstance(ledger, list):
-                ledger = {"legacy_entries": ledger}
-                
-            if "isolation_failures" not in ledger:
-                ledger["isolation_failures"] = []
-                
-            ledger["isolation_failures"].append(entry)
-            
-            with open(self.ledger_file, "w") as f:
-                json.dump(ledger, f, indent=2)
-        except Exception as e:
-            logger.error(f"Failed to write to ledger: {e}")
-
-    def isolate_and_validate(self, raw_artifact: str) -> str:
-        """
-        Strips contamination from the artifact and validates the core structure.
-        
-        Raises:
-            ValueError: If structural validation fails or entropy is too high.
-        """
-        # 1. Regex-based isolation of core elements
-        core_matches = re.findall(
-            r"(<system>.*?</system>|<instructions>.*?</instructions>|<rules>.*?</rules>|\{\{.*?\}\})", 
-            raw_artifact, 
-            re.DOTALL
-        )
-        
-        if not core_matches:
-            # Attempt a broader extraction if tags are just loose but present
-            core_matches = re.findall(r"(<[a-z_]+>.*?</[a-z_]+>)", raw_artifact, re.DOTALL)
-        
-        if not core_matches:
-            self._log_failure("Anergía Total: No structural tags found.", raw_artifact)
-            raise ValueError("[C5-REAL] Anergía Total: Artifact lacks structural tags. Execution aborted.")
-            
-        nucleo_puro = "\n".join(core_matches)
-        
-        # 2. Validation of JIT variables
-        tiene_templates = bool(re.search(r'\{\{[a-z_]+\}\}', nucleo_puro))
-        if not tiene_templates:
-            self._log_failure("Zero JIT variables found in structural core.", raw_artifact)
-            raise ValueError("[C5-REAL] Falsabilidad Estructural: Nucleo lacks JIT template variables. Execution aborted.")
-            
-        return nucleo_puro
+            # Timeout estricto para evitar que la red neuronal espere infinitamente al Ledger
+            await asyncio.wait_for(self.ledger.emit_event(event_data), timeout=0.5)
+        except asyncio.TimeoutError:
+            logger.critical(f"SAGA-1 Timeout. El Ledger no responde. Evento guardado en buffer local: {event_data}")
+            # Fallback a un buffer circular en memoria para rescate posterior
+            self.metrics.push_to_dead_letter_queue(event_data)

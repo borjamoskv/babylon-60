@@ -132,7 +132,7 @@ class EnterpriseAuditLedger:
             async with AsyncFileLock():
                 if self._ready:
                     return
-                await self._conn.execute(_CREATE_AUDIT_SQL)
+                await self._conn.executescript(_CREATE_AUDIT_SQL)
                 await self._conn.commit()
                 cursor = await self._conn.execute(
                     "SELECT prev_hash, signature FROM security_audit_log ORDER BY rowid DESC LIMIT 1"
