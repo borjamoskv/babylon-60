@@ -22,8 +22,10 @@ logger = logging.getLogger("cortex.facts")
 
 try:
     from cortex.security.haiku import HaikuGuard
+    from cortex.security.homoglyph import HomoglyphGuard
 except Exception:
     HaikuGuard = None
+    HomoglyphGuard = None
 
 
 class FactManager:
@@ -119,6 +121,9 @@ class FactManager:
         # Optional guard: do not block engine startup if the immunity stack is mid-repair.
         if HaikuGuard is not None:
             HaikuGuard.enforce(content, {"fact_type": fact_type, "tags": tags or []})
+
+        if HomoglyphGuard is not None:
+            HomoglyphGuard.enforce(content)
 
         # Sovereign Pre-filtering Gate: Active Forgetting (#350/100)
 

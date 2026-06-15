@@ -9,6 +9,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from cortex.security.haiku import HaikuGuard
+from cortex.security.homoglyph import HomoglyphGuard
 from cortex.security.types import (
     ImmuneArtifact,
     ImmunityState,
@@ -87,6 +88,10 @@ def run_guard_checks(payload: Mapping[str, Any]) -> list[str]:
     if "source" not in payload:
         violations.append("missing_provenance_source")
 
+    content = payload.get("content")
+    if content and not HomoglyphGuard.validate(content):
+        violations.append("homoglyph_detected")
+
     return violations
 
 
@@ -146,10 +151,13 @@ def profile_artifact(payload: Mapping[str, Any]) -> PathogenProfile:
 
 def classify_artifact(profile: PathogenProfile, payload: Mapping[str, Any]) -> ImmunityState:
     """Classifies artifact state. Promotes to SEALED if it passes HaikuGuard (Ω₄)."""
+    content = payload.get("content", "")
+    HomoglyphGuard.enforce(content)
+
     state = next_state_from_profile(profile)
 
     # Inmunidad Haiku (Ω₄): Sacred facts that are aesthetic are SEALED immediately.
-    if HaikuGuard.validate(payload.get("content", "")):
+    if HaikuGuard.validate(content):
         if payload.get("fact_type") == "axiom" or "sacred" in payload.get("tags", []):
             return ImmunityState.SEALED
 
