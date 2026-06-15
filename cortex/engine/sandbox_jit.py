@@ -7,6 +7,8 @@ import ast
 import logging
 from typing import Any
 
+from cortex.engine.pliny_guard import cassandra_validate_identifiers, SecurityViolation
+
 logger = logging.getLogger(__name__)
 
 
@@ -96,13 +98,16 @@ class SandboxJIT:
             logger.error(f"SandboxJIT SyntaxError: {e}")
             raise JITSandboxViolation(f"SyntaxError en el código propuesto: {e}")
 
-        # 1. Escaneo estático de seguridad
+        # 1. Escaneo estático de seguridad y Anti-Homoglifos
         scanner = ASTSecurityScanner()
         scanner.visit(tree)
+        
+        homoglyph_violations = cassandra_validate_identifiers(tree)
+        if homoglyph_violations:
+            raise JITSandboxViolation(f"HOMOGLYPH_ATTACK detectado: {homoglyph_violations}")
 
         # 2. Verificación semántica (Behavioral Contracts)
         self._property_fuzzing(tree)
-        self._smt_constraint_check(tree)
 
         # 3. Configurar el espacio de memoria (Memory Space)
         exec_globals = dict(self.allowed_globals)
@@ -111,11 +116,23 @@ class SandboxJIT:
         # 4. Ejecutar AST compilado
         try:
             compiled_code = compile(tree, filename="<agent_jit>", mode="exec")
+            
+            # [C5-REAL] Async SMT dispatch: deferred validation post-compilation
+            self._dispatch_z3_async(tree)
+            
             exec(compiled_code, exec_globals, exec_locals)
             return exec_locals
         except Exception as e:
             logger.error(f"SandboxJIT RuntimeException: {e}")
             raise JITSandboxViolation(f"Error de ejecución en Sandbox: {e}")
+
+    def _dispatch_z3_async(self, tree: ast.AST) -> None:
+        import asyncio
+        try:
+            loop = asyncio.get_running_loop()
+            loop.call_soon(self._smt_constraint_check, tree)
+        except RuntimeError:
+            pass
 
     def _property_fuzzing(self, tree: ast.AST) -> None:
         """

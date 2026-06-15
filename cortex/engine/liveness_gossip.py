@@ -88,10 +88,14 @@ class LivenessGossipLayer:
                 # Check for dead peers
                 now = loop.time()
                 for peer_id, state in list(self.protocol.peers.items()):
-                    if state.status == "GREEN" and (now - state.last_seen) > 0.5:
+                    elapsed = now - state.last_seen
+                    if state.status == "GREEN" and elapsed > 0.1:
                         logger.warning(f"[LivenessGossipLayer] Peer {peer_id} timed out. Marking RED.")
                         state.status = "RED"
                         self._on_peer_red(peer_id)
+                    if state.status == "RED" and elapsed > 0.3:
+                        logger.info(f"[LivenessGossipLayer] Evicting stale peer {peer_id} (TTL exceeded).")
+                        del self.protocol.peers[peer_id]
             except asyncio.CancelledError:
                 break
             except Exception as e:
