@@ -16,7 +16,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import Any
 
-from cortex.engine.evolution_ledger import EvolutionLedger
+from cortex.engine.evolution_ledger import EvolutionLedger, ReplayMode
 from cortex.ledger.merkle import MerkleTree
 
 logger = logging.getLogger("cortex.checkpoint")
@@ -78,7 +78,7 @@ class CheckpointManager:
 
         try:
             with open(self._index_path, mode) as out_f:
-                for record in self.ledger.replay(verify=False):
+                for record in self.ledger.replay(mode=ReplayMode.BEST_EFFORT):
                     if record.sequence <= start_seq:
                         continue
 
@@ -158,7 +158,7 @@ class CheckpointManager:
         records_read = 0
 
         # We assume the user wants full read to verify hashes match the roots
-        for record in self.ledger.replay(verify=True):
+        for record in self.ledger.replay(mode=ReplayMode.STRICT):
             records_read += 1
             if record.sequence < current_cp.sequence_start:
                 continue

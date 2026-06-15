@@ -24,6 +24,7 @@ from cortex.engine.evolution_ledger import (
     EvolutionLedger,
     MutationRecord,
     ReplayVerificationError,
+    ReplayMode,
     _compute_mutation_hash,
 )
 
@@ -120,7 +121,7 @@ def test_replay_integrity():
             )
 
         # Replay with verification
-        replayed = list(ledger.replay(verify=True))
+        replayed = list(ledger.replay(mode=ReplayMode.STRICT))
         assert len(replayed) == 5
         for i, r in enumerate(replayed):
             assert r.sequence == i + 1
@@ -160,7 +161,7 @@ def test_replay_detects_corruption():
         # Replay should detect corruption
         corrupted_ledger = EvolutionLedger(log_path)
         try:
-            list(corrupted_ledger.replay(verify=True))
+            list(corrupted_ledger.replay(mode=ReplayMode.STRICT))
             raise AssertionError("Should have raised ReplayVerificationError")
         except ReplayVerificationError as e:
             assert "hash mismatch" in str(e)
