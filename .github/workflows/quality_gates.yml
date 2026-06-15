@@ -129,7 +129,7 @@ jobs:
       - name: Build cortex_rs (Rust extension)
         run: |
           pip install maturin
-          maturin develop --release -m cortex_rs/Cargo.toml
+          uv tool run maturin build --release -m cortex_rs/Cargo.toml && uv pip install target/wheels/*.whl --reinstall
 
       - name: Install CORTEX + dev deps
         run: |
