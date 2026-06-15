@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from cortex.agents.base import BaseAgent, ReactiveTaskAgent
 from cortex.agents.bus import MessageBus, SqliteMessageBus
+from cortex.agents.consolidator import ConsolidatorAgent
 from cortex.agents.manifest import AgentManifest
 from cortex.agents.message_schema import (
     AgentMessage,
@@ -25,6 +26,7 @@ __all__ = [
     # Core runtime
     "BaseAgent",
     "ReactiveTaskAgent",
+    "ConsolidatorAgent",
     "Supervisor",
     # Manifest & schema
     "AgentManifest",
