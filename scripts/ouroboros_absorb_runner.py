@@ -132,7 +132,7 @@ def stage_3_and_4_weismann_and_inject(patch_data: dict) -> bool:
             logger.error(
                 f"[WEISMANN REJECTED] Entropy bounds exceeded: {diff_lines} lines. Reverting."
             )
-            subprocess.run(["git", "checkout", "--", str(SKILL_PATH)], check=False)
+            subprocess.run(["git", "checkout", "--", str(SKILL_PATH)], check=False, timeout=30)
             with open("/tmp/cortex-ouroboros-error.log", "a") as ef:
                 ef.write(
                     f"[{time.time()}] WEISMANN REJECT: Mutation too large ({diff_lines} lines).\n"
@@ -143,7 +143,7 @@ def stage_3_and_4_weismann_and_inject(patch_data: dict) -> bool:
         return True
     except Exception as e:
         logger.error(f"Failed to inject: {e}")
-        subprocess.run(["git", "checkout", "--", str(SKILL_PATH)], check=False)
+        subprocess.run(["git", "checkout", "--", str(SKILL_PATH)], check=False, timeout=30)
         return False
 
 
@@ -152,20 +152,23 @@ def commit_and_persist(patch_data: dict):
     # Git commit
     subprocess.run(["git", "add", str(SKILL_PATH)], check=False, timeout=30)
     commit_msg = f"ouro-absorb: inject heuristic from friction (C5-REAL autopoiesis)\n\nRoot Cause: {patch_data.get('root_cause')}"
-    subprocess.run(["git", "commit", "-m", commit_msg], check=False, timeout=30)
-    logger.info("Git commit executed.")
+    commit_result = subprocess.run(["git", "commit", "-m", commit_msg], check=False, timeout=30)
 
-    # Git push
-    try:
-        result = subprocess.run(
-            ["git", "push", "origin", "main"], capture_output=True, text=True, timeout=30
-        )
-        if result.returncode != 0:
-            logger.error(f"Push failed: {result.stderr}")
-        else:
-            logger.info("Git push successful.")
-    except subprocess.TimeoutExpired:
-        logger.error("Git push timed out.")
+    if commit_result.returncode == 0:
+        logger.info("Git commit executed. Proceeding to push.")
+        # Git push (condicional al éxito del commit)
+        try:
+            push_result = subprocess.run(
+                ["git", "push", "origin", "main"], capture_output=True, text=True, timeout=30
+            )
+            if push_result.returncode != 0:
+                logger.error(f"Push failed: {push_result.stderr}")
+            else:
+                logger.info("Git push successful.")
+        except subprocess.TimeoutExpired:
+            logger.error("Git push timed out.")
+    else:
+        logger.warning("Git commit failed or nothing to commit. Skipping push.")
 
     # Ledger persistence
     if LedgerStore and EnrichmentQueue:
@@ -205,18 +208,27 @@ async def main():
         logger.info("Another cycle running. Skipping.")
         return
 
-    friction_log = ingest_reflections()
-    if not friction_log:
-        return
+    try:
+        friction_log = ingest_reflections()
+        if not friction_log:
+            return
 
-    patch_data = await semantic_parse(friction_log)
-    if not patch_data:
-        return
-
-    success = stage_3_and_4_weismann_and_inject(patch_data)
-    if success:
-        commit_and_persist(patch_data)
-        logger.info("Cycle complete. Ouroboros has evolved.")
+        patch_data = await semantic_parse(friction_log)
+        if patch_data:
+            success = stage_3_and_4_weismann_and_inject(patch_data)
+            if success:
+                commit_and_persist(patch_data)
+            else:
+                logger.info("Injection failed or Weismann barrier rejected. Skipping commit.")
+        else:
+            logger.info("No patch generated.")
+    finally:
+        # FCNTL Lock Release
+        try:
+            fcntl.flock(lock_file, fcntl.LOCK_UN)
+            lock_file.close()
+        except Exception as e:
+            logger.error(f"Failed to release lock: {e}")
 
 
 if __name__ == "__main__":
