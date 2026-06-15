@@ -179,12 +179,5 @@ class ThreatFeedEngine:
         """Total number of threat signatures (built-in + custom)."""
         return len(BUILT_IN_SIGNATURES) + len(self._custom_signatures)
 
-    def entropy_score(self, content: str) -> float:
-        """Calculate Shannon entropy of content.
 
-        High entropy (>4.5) suggests encoded/encrypted payloads.
-        """
-        from cortex.utils.entropy import shannon_entropy
-
-        return shannon_entropy(content)
 

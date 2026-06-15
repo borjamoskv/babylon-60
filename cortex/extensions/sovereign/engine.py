@@ -81,44 +81,35 @@ class SovereignContext:
 # ---------------------------------------------------------------------------
 
 
-async def _phase_fabrication(ctx: SovereignContext) -> PipelineResult:
-    """Phase 1 - Invoke aether-1 to materialize artifacts."""
-    t0 = time.monotonic()
-    try:
-        await asyncio.to_thread(ctx.bridge.execute, "aether-1")
-        return PipelineResult(
-            phase=Phase.FABRICATION,
-            success=True,
-            duration_ms=(time.monotonic() - t0) * 1000,
-            details={"status": "Aether-1 materialized artifacts successfully"},
-        )
-    except (RuntimeError, ValueError, OSError, ImportError) as e:
-        logger.error("Fabrication phase failed: %s", e)
-        return PipelineResult(
-            phase=Phase.FABRICATION,
-            success=False,
-            duration_ms=(time.monotonic() - t0) * 1000,
-            details={"error": str(e)},
-        )
-
-
-async def _run_bridge_phase(ctx: SovereignContext, phase: Phase, skill_name: str) -> PipelineResult:
-    """Execute a bridge skill and return a PipelineResult."""
+async def _run_bridge_phase(
+    ctx: SovereignContext, phase: Phase, skill_name: str, success_status: str | None = None
+) -> PipelineResult:
+    """Helper to execute a bridge skill phase with timing and error handling."""
     t0 = time.monotonic()
     try:
         await asyncio.to_thread(ctx.bridge.execute, skill_name)
+        details = {"status": success_status} if success_status else None
         return PipelineResult(
             phase=phase,
             success=True,
             duration_ms=(time.monotonic() - t0) * 1000,
+            details=details,
         )
     except (RuntimeError, ValueError, OSError, ImportError) as e:
+        logger.error("%s phase failed: %s", phase.name.title(), e)
         return PipelineResult(
             phase=phase,
             success=False,
             duration_ms=(time.monotonic() - t0) * 1000,
             details={"error": str(e)},
         )
+
+
+async def _phase_fabrication(ctx: SovereignContext) -> PipelineResult:
+    """Phase 1 - Invoke aether-1 to materialize artifacts."""
+    return await _run_bridge_phase(
+        ctx, Phase.FABRICATION, "aether-1", "Aether-1 materialized artifacts successfully"
+    )
 
 
 async def _phase_orchestration(ctx: SovereignContext) -> PipelineResult:

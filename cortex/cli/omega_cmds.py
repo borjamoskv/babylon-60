@@ -162,17 +162,24 @@ def cmd_omega_start(tick_rate: int, auto_push: bool):
     """
     Inicia el metabolismo de CORTEX (Omega Singularity).
     """
-    # Mute default logs to stdout if running UI, to avoid visual corruption
-    logging.getLogger().handlers = [
-        h for h in logging.getLogger().handlers if not isinstance(h, logging.StreamHandler)
-    ]
+    import sys
+    is_tty = sys.stdout.isatty()
+
+    if is_tty:
+        # Mute default logs to stdout if running UI, to avoid visual corruption
+        logging.getLogger().handlers = [
+            h for h in logging.getLogger().handlers if not isinstance(h, logging.StreamHandler)
+        ]
 
     kernel = OmegaKernel(tick_rate_seconds=tick_rate, auto_push=auto_push)
 
     async def main():
-        ui_task = asyncio.create_task(run_ui(kernel))
-        kernel_task = asyncio.create_task(kernel.run_forever())
-        await asyncio.gather(ui_task, kernel_task)
+        if is_tty:
+            ui_task = asyncio.create_task(run_ui(kernel))
+            kernel_task = asyncio.create_task(kernel.run_forever())
+            await asyncio.gather(ui_task, kernel_task)
+        else:
+            await kernel.run_forever()
 
     try:
         asyncio.run(main())
