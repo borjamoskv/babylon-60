@@ -15,20 +15,23 @@ from typing import Dict, Any, List, Tuple
 
 logger = logging.getLogger("cortex.guards.prompt_security")
 
+import os
+
 HAS_TORCH = False
 HAS_SENTENCE_TRANSFORMERS = False
 
-try:
-    import torch
-    HAS_TORCH = True
-except ImportError:
-    pass
+if os.environ.get("CORTEX_NO_EMBED") != "1":
+    try:
+        import torch
+        HAS_TORCH = True
+    except ImportError:
+        pass
 
-try:
-    from sentence_transformers import SentenceTransformer, util
-    HAS_SENTENCE_TRANSFORMERS = True
-except ImportError:
-    pass
+    try:
+        from sentence_transformers import SentenceTransformer, util
+        HAS_SENTENCE_TRANSFORMERS = True
+    except ImportError:
+        pass
 
 
 class PromptExtractionBlockedError(Exception):

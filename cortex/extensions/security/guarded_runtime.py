@@ -14,14 +14,14 @@ import unicodedata
 from collections import deque
 from typing import Any, Callable, Dict, List, Tuple
 
-import numpy as np
-try:
-    from sentence_transformers import SentenceTransformer, util
+import os
+_HAS_SENTENCE_TRANSFORMERS = False
+
+if os.environ.get("CORTEX_NO_EMBED") != "1":
     _HAS_SENTENCE_TRANSFORMERS = True
-except ImportError:
-    _HAS_SENTENCE_TRANSFORMERS = False
 
 from cortex.extensions.security.injection_guard import GUARD
+from cortex.extensions.security.anomaly_detector import DETECTOR, SecurityEvent
 
 logger = logging.getLogger("cortex.security.guarded_runtime")
 
@@ -87,13 +87,17 @@ class SemanticLeakDetector:
         self._system_prompt_embedding = None
 
     @property
-    def model(self) -> SentenceTransformer | None:
-        if self._model is None and _HAS_SENTENCE_TRANSFORMERS:
+    def model(self) -> Any | None:
+        if self._model is None:
             try:
+                from sentence_transformers import SentenceTransformer, util
                 self._model = SentenceTransformer("all-MiniLM-L6-v2")
+                self._util = util
                 self._system_prompt_embedding = self._model.encode(
                     self.system_prompt, convert_to_tensor=True
                 )
+            except ImportError:
+                pass
             except Exception as e:
                 logger.error("Failed to load SentenceTransformer model: %s", e)
         return self._model
@@ -112,7 +116,7 @@ class SemanticLeakDetector:
 
         try:
             response_embedding = model.encode(text, convert_to_tensor=True)
-            similarity = float(util.cos_sim(response_embedding, self._system_prompt_embedding))
+            similarity = float(self._util.cos_sim(response_embedding, self._system_prompt_embedding))
             return max(0.0, similarity)
         except Exception as e:
             logger.warning("Cosine similarity calc failed, falling back: %s", e)
@@ -127,7 +131,8 @@ class SemanticLeakDetector:
         semantic = self._calculate_semantic_similarity(response_text)
 
         # Combined egress score (Bounded [0.0, 1.0])
-        current_score = np.clip((0.3 * overlap) + (0.7 * semantic), 0.0, 1.0)
+        raw_score = (0.3 * overlap) + (0.7 * semantic)
+        current_score = max(0.0, min(1.0, raw_score))
         self.history_scores[session_id].append(current_score)
 
         rolling_avg = sum(self.history_scores[session_id]) / len(self.history_scores[session_id])
@@ -171,6 +176,19 @@ class TrajectoryTracker:
             severity_weights = {"critical": 0.8, "high": 0.5, "medium": 0.2, "none": 0.0}
             turn_score = severity_weights.get(report.highest_severity, 0.0)
 
+        # 1.5. Report event to AnomalyDetector for behavioral/rate limits
+        anomaly_event = SecurityEvent(
+            source=f"session:{session_id}",
+            project="guarded_runtime",
+            action="query",
+            content_length=len(query)
+        )
+        anomaly_report = DETECTOR.record_event(anomaly_event)
+        if anomaly_report and anomaly_report.is_anomalous:
+            # Escalate if anomaly detector fires (rate limits, bulk mutation, high entropy)
+            ano_weights = {"critical": 0.9, "high": 0.6, "medium": 0.3, "low": 0.1}
+            turn_score += ano_weights.get(anomaly_report.severity, 0.0)
+
         # 2. Check for multi-turn semantic drift (probing behavior)
         if len(queries) >= 2:
             last_query = queries[-2]
@@ -180,7 +198,7 @@ class TrajectoryTracker:
                 try:
                     emb1 = self.detector.model.encode(last_query, convert_to_tensor=True)
                     emb2 = self.detector.model.encode(query, convert_to_tensor=True)
-                    similarity = float(util.cos_sim(emb1, emb2))
+                    similarity = float(self.detector._util.cos_sim(emb1, emb2))
                     if 0.5 < similarity < 0.98:
                         drift_score = 0.3
                 except Exception as e:
