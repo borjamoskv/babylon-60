@@ -5,13 +5,17 @@ import os
 import time
 from typing import Dict, Any, Optional
 
-from web3 import Web3
+logger = logging.getLogger("cortex.web3.oracle")
+
 try:
+    from web3 import Web3
     from web3.middleware import ExtraDataToPOAMiddleware as geth_poa_middleware
 except ImportError:
-    from web3.middleware import geth_poa_middleware
+    Web3 = None  # type: ignore
+    geth_poa_middleware = None  # type: ignore
+    logger.warning("[CortexOracle] web3 library not installed; functionality disabled.")
 
-logger = logging.getLogger("cortex.web3.oracle")
+
 
 RPC_URL = os.environ.get("CORTEX_RPC_URL", "https://mainnet.base.org")
 CONTRACT_ADDRESS = os.environ.get("CORTEX_ORACLE_CONTRACT")
@@ -77,15 +81,25 @@ class CortexOracleClient:
         self.contract: Optional[Any] = None
 
     def connect(self) -> bool:
+        """Establish connection to the RPC endpoint and contract.
+
+        Returns ``True`` if both ``self.w3`` and ``self.contract`` are ready.
+        If ``Web3`` is unavailable, logs a warning and returns ``False``.
+        """
         if self.w3 and self.contract:
             return True
+        if Web3 is None:
+            logger.error("[CortexOracle] Web3 library not available; cannot connect.")
+            return False
         try:
             self.w3 = Web3(Web3.HTTPProvider(self.rpc_url))
-            self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+            # Inject POA middleware only when it is available.
+            if geth_poa_middleware:
+                self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
             if not self.w3.is_connected():
                 logger.error(f"[CortexOracle] Connection failed to {self.rpc_url}")
                 return False
-            
+
             if self.contract_address:
                 checksum_address = Web3.to_checksum_address(self.contract_address)
                 self.contract = self.w3.eth.contract(address=checksum_address, abi=CORTEX_ORACLE_ABI)

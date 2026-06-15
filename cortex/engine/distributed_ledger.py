@@ -9,7 +9,14 @@ import logging
 import threading
 from typing import Any, Iterator
 
-from confluent_kafka import Consumer, Producer
+logger = logging.getLogger("cortex.distributed_ledger")
+
+try:
+    from confluent_kafka import Consumer, Producer
+except ImportError:
+    Consumer = None  # type: ignore
+    Producer = None  # type: ignore
+    logger.warning("confluent_kafka not installed. DistributedEvolutionLedger will run in fallback/simulation mode.")
 
 from cortex.engine.evolution_ledger import (
     ControlVector,
@@ -19,8 +26,6 @@ from cortex.engine.evolution_ledger import (
     ReplayVerificationError,
     _canonical_json,
 )
-
-logger = logging.getLogger("cortex.distributed_ledger")
 
 
 class DistributedEvolutionLedger(EvolutionLedger):
@@ -34,13 +39,17 @@ class DistributedEvolutionLedger(EvolutionLedger):
         super().__init__(log_path=log_path)
         self.topic = topic
         self.kafka_brokers = kafka_brokers
-        self._producer = Producer({
-            "bootstrap.servers": self.kafka_brokers,
-            "client.id": "cortex-node-producer",
-            "acks": "all",
-            "linger.ms": 5,
-        })
-        logger.info(f"DistributedEvolutionLedger connected to {self.kafka_brokers} [topic: {self.topic}]")
+        if Producer is not None:
+            self._producer = Producer({
+                "bootstrap.servers": self.kafka_brokers,
+                "client.id": "cortex-node-producer",
+                "acks": "all",
+                "linger.ms": 5,
+            })
+            logger.info(f"DistributedEvolutionLedger connected to {self.kafka_brokers} [topic: {self.topic}]")
+        else:
+            self._producer = None
+            logger.warning("Producer is not initialized because confluent_kafka is missing. Running in local-only mode.")
 
     def _delivery_report(self, err: Any, msg: Any) -> None:
         if err is not None:
@@ -69,39 +78,48 @@ class DistributedEvolutionLedger(EvolutionLedger):
             metadata=metadata,
         )
 
-        # 2. Async broadcast to Redpanda
-        payload_line = _canonical_json(record.to_payload())
-        try:
-            self._producer.produce(
-                self.topic,
-                key=str(agent_idx).encode("utf-8"),
-                value=payload_line.encode("utf-8"),
-                callback=self._delivery_report
-            )
-            self._producer.poll(0)
-        except Exception as e:
-            logger.error(f"Failed to produce mutation to Redpanda: {e}")
+        # 2. Async broadcast to Redpanda if producer is available
+        if self._producer is not None:
+            payload_line = _canonical_json(record.to_payload())
+            try:
+                self._producer.produce(
+                    self.topic,
+                    key=str(agent_idx).encode("utf-8"),
+                    value=payload_line.encode("utf-8"),
+                    callback=self._delivery_report
+                )
+                self._producer.poll(0)
+            except Exception as e:
+                logger.error(f"Failed to produce mutation to Redpanda: {e}")
 
         return record
 
     def flush(self, timeout: float = 5.0) -> None:
         """Ensure all messages are delivered before shutdown."""
-        self._producer.flush(timeout)
+        if self._producer is not None:
+            self._producer.flush(timeout)
 
 class LedgerConsumer:
     """Consumes the distributed ledger and reconstructs state on replica nodes."""
     def __init__(self, kafka_brokers: str = "localhost:9092", topic: str = "cortex-evolution-ledger", group_id: str = "cortex-replica-group"):
         self.topic = topic
-        self._consumer = Consumer({
-            "bootstrap.servers": kafka_brokers,
-            "group.id": group_id,
-            "auto.offset.reset": "earliest",
-        })
-        self._consumer.subscribe([self.topic])
-        logger.info(f"LedgerConsumer subscribed to {topic} at {kafka_brokers}")
+        if Consumer is not None:
+            self._consumer = Consumer({
+                "bootstrap.servers": kafka_brokers,
+                "group.id": group_id,
+                "auto.offset.reset": "earliest",
+            })
+            self._consumer.subscribe([self.topic])
+            logger.info(f"LedgerConsumer subscribed to {topic} at {kafka_brokers}")
+        else:
+            self._consumer = None
+            logger.warning("Consumer is not initialized because confluent_kafka is missing.")
 
     def consume_stream(self, timeout: float = 1.0) -> Iterator[MutationRecord]:
         """Yields MutationRecords as they arrive over the network."""
+        if self._consumer is None:
+            logger.error("confluent_kafka is not installed. consume_stream() will not yield any records.")
+            return
         while True:
             msg = self._consumer.poll(timeout)
             if msg is None:
@@ -118,4 +136,5 @@ class LedgerConsumer:
                 logger.error(f"Corrupt message received over network: {e}")
 
     def close(self):
-        self._consumer.close()
+        if self._consumer is not None:
+            self._consumer.close()

@@ -164,7 +164,7 @@ class AnalyzerMixin:
                     SELECT f.id, COUNT(c.id) as children
                     FROM facts f
                     LEFT JOIN facts c
-                      ON c.parent_decision_id = f.id
+                      ON c.parent_id = f.id
                     WHERE f.project = ?
                     GROUP BY f.id
                     HAVING children > 0
