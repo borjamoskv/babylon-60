@@ -81,44 +81,48 @@ class SovereignContext:
 # ---------------------------------------------------------------------------
 
 
-async def _phase_fabrication(ctx: SovereignContext) -> PipelineResult:
-    """Phase 1 - Invoke aether-1 to materialize artifacts."""
+async def _run_bridge_phase(
+    ctx: SovereignContext,
+    phase: Phase,
+    command: str,
+    success_status: str | None = None,
+) -> PipelineResult:
+    """Helper to run bridge commands in a worker thread and build PipelineResult."""
     t0 = time.monotonic()
     try:
-        await asyncio.to_thread(ctx.bridge.execute, "aether-1")
+        await asyncio.to_thread(ctx.bridge.execute, command)
+        details = {"status": success_status} if success_status else {}
         return PipelineResult(
-            phase=Phase.FABRICATION,
+            phase=phase,
             success=True,
             duration_ms=(time.monotonic() - t0) * 1000,
-            details={"status": "Aether-1 materialized artifacts successfully"},
+            details=details,
         )
     except (RuntimeError, ValueError, OSError, ImportError) as e:
-        logger.error("Fabrication phase failed: %s", e)
         return PipelineResult(
-            phase=Phase.FABRICATION,
+            phase=phase,
             success=False,
             duration_ms=(time.monotonic() - t0) * 1000,
             details={"error": str(e)},
         )
+
+
+async def _phase_fabrication(ctx: SovereignContext) -> PipelineResult:
+    """Phase 1 - Invoke aether-1 to materialize artifacts."""
+    res = await _run_bridge_phase(
+        ctx,
+        Phase.FABRICATION,
+        "aether-1",
+        "Aether-1 materialized artifacts successfully",
+    )
+    if not res.success:
+        logger.error("Fabrication phase failed: %s", res.details.get("error"))
+    return res
 
 
 async def _phase_orchestration(ctx: SovereignContext) -> PipelineResult:
     """Phase 2 - Keter-omega for multi-cloud readiness."""
-    t0 = time.monotonic()
-    try:
-        await asyncio.to_thread(ctx.bridge.execute, "keter-omega")
-        return PipelineResult(
-            phase=Phase.ORCHESTRATION,
-            success=True,
-            duration_ms=(time.monotonic() - t0) * 1000,
-        )
-    except (RuntimeError, ValueError, OSError, ImportError) as e:
-        return PipelineResult(
-            phase=Phase.ORCHESTRATION,
-            success=False,
-            duration_ms=(time.monotonic() - t0) * 1000,
-            details={"error": str(e)},
-        )
+    return await _run_bridge_phase(ctx, Phase.ORCHESTRATION, "keter-omega")
 
 
 async def _phase_swarm(ctx: SovereignContext) -> PipelineResult:
@@ -173,6 +177,7 @@ async def _phase_observability(ctx: SovereignContext) -> PipelineResult:
     init_telemetry()
 
     # Seed initial scores and apply the 130/100 sovereign multiplier
+         # Seed initial scores and apply the 130/100 sovereign multiplier
     scores = {dim.value: 100.0 for dim in Dimension}
     power = compute_power(scores, multiplier=1.3)
     ctx.power = power
@@ -188,21 +193,7 @@ async def _phase_observability(ctx: SovereignContext) -> PipelineResult:
 
 async def _phase_experience(ctx: SovereignContext) -> PipelineResult:
     """Phase 7 - Impactv-1 for UI/UX excellence."""
-    t0 = time.monotonic()
-    try:
-        await asyncio.to_thread(ctx.bridge.execute, "impactv-1")
-        return PipelineResult(
-            phase=Phase.EXPERIENCE,
-            success=True,
-            duration_ms=(time.monotonic() - t0) * 1000,
-        )
-    except (RuntimeError, ValueError, OSError, ImportError) as e:
-        return PipelineResult(
-            phase=Phase.EXPERIENCE,
-            success=False,
-            duration_ms=(time.monotonic() - t0) * 1000,
-            details={"error": str(e)},
-        )
+    return await _run_bridge_phase(ctx, Phase.EXPERIENCE, "impactv-1")
 
 
 async def _phase_arbitration(ctx: SovereignContext) -> PipelineResult:
