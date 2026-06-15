@@ -124,32 +124,37 @@ async def batch_store(
     auth: AuthResult = Depends(require_permission("write")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> dict:
-    """Batch store up to 100 facts in a single request."""
-    ids: list[int] = []
-    errors: list[dict] = []
-    for i, mem in enumerate(req.memories):
-        try:
-            fact_id = await engine.store(
-                project=mem.project,
-                content=mem.content,
-                tenant_id=auth.tenant_id,
-                fact_type=mem.type,
-                tags=mem.tags,
-                source=mem.source,
-                meta=mem.metadata or {},
-                parent_decision_id=mem.parent_decision_id,
-            )
-            ids.append(fact_id)
-        except (sqlite3.Error, ValueError, OSError):
-            logger.exception("Failed to batch store fact at index %d", i)
-            errors.append({"index": i, "error": "Failed to store fact"})
-
-    return {
-        "stored": len(ids),
-        "ids": ids,
-        "errors": errors,
-        "total_requested": len(req.memories),
-    }
+    """Batch store up to 100 facts in a single request transactionally."""
+    facts_payload = [
+        {
+            "project": mem.project,
+            "content": mem.content,
+            "tenant_id": auth.tenant_id,
+            "fact_type": mem.type,
+            "tags": mem.tags,
+            "source": mem.source,
+            "meta": mem.metadata or {},
+            "parent_decision_id": mem.parent_decision_id,
+        }
+        for mem in req.memories
+    ]
+    try:
+        ids = await engine.store_many(facts_payload)
+        return {
+            "stored": len(ids),
+            "ids": ids,
+            "errors": [],
+            "total_requested": len(req.memories),
+        }
+    except Exception as e:
+        logger.exception("Batch store failed and was rolled back")
+        # In case of failure, atomic rollback happened.
+        return {
+            "stored": 0,
+            "ids": [],
+            "errors": [{"index": -1, "error": str(e)}],
+            "total_requested": len(req.memories),
+        }
 
 
 @router.get("/v1/projects/{project}/facts", response_model=list[FactResponse])

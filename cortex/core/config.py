@@ -82,11 +82,11 @@ class CortexConfig:
     VECTOR_STORE_MODE: str = "local"  # local exclusively (SQLite-vec)
 
     # LLM Provider
-    LLM_PROVIDER: str = "deepseek"
-    LLM_MODEL: str = "deepseek-v4"
-    LLM_BASE_URL: str = ""
+    LLM_PROVIDER: str = "ollama"
+    LLM_MODEL: str = "olafangensan-glm-4.7-flash-heretic"
+    LLM_BASE_URL: str = "http://localhost:11434/v1"
     LLM_API_KEY: str = ""
-    LLM_LOCAL_FIRST: bool = False
+    LLM_LOCAL_FIRST: bool = True
     LLM_STEALTH_MODE: bool = True
 
     # Langbase
@@ -179,11 +179,11 @@ class CortexConfig:
                 "CORTEX_VECTOR_STORE_PATH", str(CORTEX_DIR / "vectors")
             ),
             VECTOR_STORE_MODE=os.environ.get("CORTEX_VECTOR_STORE_MODE", "local"),
-            LLM_PROVIDER=os.environ.get("CORTEX_LLM_PROVIDER", "deepseek"),
-            LLM_MODEL=os.environ.get("CORTEX_LLM_MODEL", "deepseek-v4"),
-            LLM_BASE_URL=os.environ.get("CORTEX_LLM_BASE_URL", ""),
+            LLM_PROVIDER=os.environ.get("CORTEX_LLM_PROVIDER", "ollama"),
+            LLM_MODEL=os.environ.get("CORTEX_LLM_MODEL", "olafangensan-glm-4.7-flash-heretic"),
+            LLM_BASE_URL=os.environ.get("CORTEX_LLM_BASE_URL", "http://localhost:11434/v1"),
             LLM_API_KEY=os.environ.get("CORTEX_LLM_API_KEY", ""),
-            LLM_LOCAL_FIRST=os.environ.get("CORTEX_LLM_LOCAL_FIRST", "0") == "1",
+            LLM_LOCAL_FIRST=os.environ.get("CORTEX_LLM_LOCAL_FIRST", "1") == "1",
             LLM_STEALTH_MODE=os.environ.get("CORTEX_LLM_STEALTH", "1") == "1",
             LANGBASE_API_KEY=os.environ.get("LANGBASE_API_KEY", ""),
             LANGBASE_BASE_URL=os.environ.get("LANGBASE_BASE_URL", "https://api.langbase.com/v1"),
