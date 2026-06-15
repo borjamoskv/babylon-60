@@ -14,6 +14,7 @@ from cortex.engine.endocrine import ENDOCRINE, HormoneType
 from cortex.engine.keter import KeterEngine
 from cortex.engine.sandbox_jit import SandboxJIT
 from cortex.engine.saga_protocol import build_core_write_path_saga, SagaContext
+from cortex.engine.causal.taint_engine import MHCAntigenRouter
 from cortex.utils.errors import CortexError
 from cortex.verification.verifier import SovereignVerifier
 
@@ -34,6 +35,7 @@ class MaterializerAgent(ReactiveTaskAgent):
         self.sandbox = SandboxJIT()
         self.verifier = SovereignVerifier()
         self.saga_orchestrator = build_core_write_path_saga()
+        self.antigen_router = MHCAntigenRouter()
 
     async def _dispatch(self, op: str, payload: dict[str, Any]) -> Any:
         """Enruta la materialización según el tipo de abstracción (creacional vs. runtime)."""
@@ -65,6 +67,8 @@ class MaterializerAgent(ReactiveTaskAgent):
                 score = result.get("score_130_100", 0.0)
                 if score >= 90.0:
                     ENDOCRINE.pulse(HormoneType.DOPAMINE, 0.2, f"High-fidelity abstraction crystallized ({score})")
+                    # Inmunidad Adaptativa: Memorizar patrón arquitectónico exitoso (Ouroboros memory)
+                    self.antigen_router.register_t_cell(self.agent_id, rf"(?i)\b{intent[:20]}\b")
                 else:
                     ENDOCRINE.pulse(HormoneType.SEROTONIN, 0.1, "Homeostatic adaptation completed")
                 

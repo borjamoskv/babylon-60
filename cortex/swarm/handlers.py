@@ -32,7 +32,6 @@ class MemoryHandler:
                 async with self.engine.session():
                     pass
 
-        print(f"DEBUG: MemoryHandler op={op}, engine={self.engine}, memory={getattr(self.engine, 'memory', 'NO_ATTR')}")
         if self.engine is not None and getattr(self.engine, "memory", None):
             if op == "store":
                 return await self.engine.memory.store(
