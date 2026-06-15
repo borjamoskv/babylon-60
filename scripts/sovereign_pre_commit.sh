@@ -57,4 +57,10 @@ if [ "$USING_STAGED" -eq 1 ]; then
     git add src/pages/blog/*.astro 2>/dev/null || true
 fi
 
+# ── Run Automated Agent Audit ─────────────────────────────────
+if [ -f "scripts/auto_agent_audit.py" ]; then
+    echo "⚡ [SOVEREIGN] Running automated agent audit..."
+    python3 scripts/auto_agent_audit.py
+fi
+
 exit 0

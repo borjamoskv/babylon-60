@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {Test, console} from "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {CortexOracle} from "../src/CortexOracle.sol";
 import {CortexLineageRegistry} from "../src/CortexLineageRegistry.sol";
 
@@ -33,20 +33,27 @@ contract CortexOracleTest is Test {
     function test_RequestTelemetryVerification() public {
         bytes32 mockHash = keccak256("c5-real-telemetry");
         string memory source = "return Functions.encodeString('verified');";
+        address mockAgent = address(0x123);
+        bytes memory mockPubKey = hex"abcd";
+        
+        registry.setAgentPublicKey(mockAgent, mockPubKey);
+        assertEq(registry.getAgentPublicKey(mockAgent), mockPubKey);
         
         // Ensure it emits
         vm.expectEmit(false, true, false, true);
         emit CortexOracle.TelemetryVerificationRequested(bytes32(0), mockHash);
         
-        bytes32 reqId = oracle.requestTelemetryVerification(source, mockHash, 1, 300000);
+        bytes32 reqId = oracle.requestTelemetryVerification(mockAgent, source, mockHash, 1, 300000);
         
         assertEq(oracle.lastTelemetryHash(), mockHash);
         assertTrue(reqId != bytes32(0));
+        assertEq(registry.requestTimestamps(mockHash), block.timestamp);
     }
 
     function test_FulfillRequestSuccess() public {
         bytes32 mockHash = keccak256("c5-real-telemetry-success");
-        oracle.requestTelemetryVerification("source", mockHash, 1, 300000);
+        address mockAgent = address(0x123);
+        oracle.requestTelemetryVerification(mockAgent, "source", mockHash, 1, 300000);
 
         bytes32 reqId = keccak256("req1");
         
@@ -61,7 +68,8 @@ contract CortexOracleTest is Test {
 
     function test_FulfillRequestFailure() public {
         bytes32 mockHash = keccak256("c5-real-telemetry-failure");
-        oracle.requestTelemetryVerification("source", mockHash, 1, 300000);
+        address mockAgent = address(0x123);
+        oracle.requestTelemetryVerification(mockAgent, "source", mockHash, 1, 300000);
 
         bytes32 reqId = keccak256("req2");
         
@@ -71,6 +79,33 @@ contract CortexOracleTest is Test {
         
         assertFalse(oracle.lastVerificationResult());
         assertFalse(registry.isVerified(mockHash));
+    }
+
+    function test_OverrideVerification_FailBeforeCooldown() public {
+        bytes32 mockHash = keccak256("c5-real-telemetry-override");
+        address mockAgent = address(0x123);
+        oracle.requestTelemetryVerification(mockAgent, "source", mockHash, 1, 300000);
+
+        vm.expectRevert("Registry: Cooldown active");
+        registry.overrideVerification(mockHash, true);
+    }
+
+    function test_OverrideVerification_SuccessAfterCooldown() public {
+        bytes32 mockHash = keccak256("c5-real-telemetry-override-success");
+        address mockAgent = address(0x123);
+        oracle.requestTelemetryVerification(mockAgent, "source", mockHash, 1, 300000);
+
+        // Warp time by 24 hours + 1 second
+        vm.warp(block.timestamp + 24 hours + 1);
+
+        registry.overrideVerification(mockHash, true);
+        assertTrue(registry.isVerified(mockHash));
+    }
+
+    function test_OverrideVerification_FailNoRequest() public {
+        bytes32 mockHash = keccak256("non-existent-request");
+        vm.expectRevert("Registry: Request not found");
+        registry.overrideVerification(mockHash, true);
     }
 }
 

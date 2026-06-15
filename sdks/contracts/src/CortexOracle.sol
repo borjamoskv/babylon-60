@@ -10,7 +10,7 @@ import {CortexLineageRegistry} from "./CortexLineageRegistry.sol";
 contract CortexOracle is ICortexMemoryVerifier, FunctionsClient {
     using FunctionsRequest for FunctionsRequest.Request;
 
-    bytes32 public immutable donId;
+    bytes32 public immutable DON_ID;
     bytes32 public lastTelemetryHash;
     bool public lastVerificationResult;
     
@@ -28,7 +28,7 @@ contract CortexOracle is ICortexMemoryVerifier, FunctionsClient {
     }
 
     constructor(address _functionsRouter, bytes32 _donId, address _registry) FunctionsClient(_functionsRouter) {
-        donId = _donId;
+        DON_ID = _donId;
         owner = msg.sender;
         registry = _registry;
     }
@@ -40,23 +40,31 @@ contract CortexOracle is ICortexMemoryVerifier, FunctionsClient {
 
     // Function to trigger off-chain C5-REAL telemetry verification
     function requestTelemetryVerification(
+        address agent,
         string calldata source,
         bytes32 telemetryHash,
         uint64 subscriptionId,
         uint32 gasLimit
     ) external returns (bytes32 requestId) {
+        bytes memory pubKey = "";
+        if (registry != address(0)) {
+            pubKey = CortexLineageRegistry(registry).getAgentPublicKey(agent);
+            CortexLineageRegistry(registry).registerRequest(telemetryHash);
+        }
+
         FunctionsRequest.Request memory req;
         req.initializeRequestForInlineJavaScript(source);
         
-        string[] memory args = new string[](1);
-        args[0] = "telemetry_hash"; 
-        if (args.length > 0) req.setArgs(args);
+        string[] memory args = new string[](2);
+        args[0] = bytes32ToHexString(telemetryHash); 
+        args[1] = bytesToHexString(pubKey);
+        req.setArgs(args);
 
         requestId = _sendRequest(
             req.encodeCBOR(),
             subscriptionId,
             gasLimit,
-            donId
+            DON_ID
         );
 
         lastTelemetryHash = telemetryHash;
@@ -101,6 +109,27 @@ contract CortexOracle is ICortexMemoryVerifier, FunctionsClient {
             return CortexLineageRegistry(registry).isVerified(rootHash);
         }
         return rootHash == keccak256(proof);
+    }
+
+    // Helper functions for hex conversion
+    function bytes32ToHexString(bytes32 value) public pure returns (string memory) {
+        bytes memory alphabet = "0123456789abcdef";
+        bytes memory str = new bytes(64);
+        for (uint256 i = 0; i < 32; i++) {
+            str[i*2] = alphabet[uint8(value[i] >> 4)];
+            str[i*2 + 1] = alphabet[uint8(value[i] & 0x0f)];
+        }
+        return string(str);
+    }
+
+    function bytesToHexString(bytes memory data) public pure returns (string memory) {
+        bytes memory alphabet = "0123456789abcdef";
+        bytes memory str = new bytes(data.length * 2);
+        for (uint256 i = 0; i < data.length; i++) {
+            str[i*2] = alphabet[uint8(data[i] >> 4)];
+            str[i*2 + 1] = alphabet[uint8(data[i] & 0x0f)];
+        }
+        return string(str);
     }
 }
 
