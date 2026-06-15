@@ -219,4 +219,3 @@ SKIP_DIRS = {
     "quarantine",
     ".quarantine",
 }
-

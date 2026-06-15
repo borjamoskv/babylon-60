@@ -9,7 +9,6 @@ for semantic similarity matching. HMAC-SHA256 verified feeds.
 
 import json
 import logging
-import math
 import re
 import time
 from dataclasses import dataclass, field
@@ -178,6 +177,3 @@ class ThreatFeedEngine:
     def total_signatures(self) -> int:
         """Total number of threat signatures (built-in + custom)."""
         return len(BUILT_IN_SIGNATURES) + len(self._custom_signatures)
-
-
-

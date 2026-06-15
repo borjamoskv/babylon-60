@@ -50,6 +50,7 @@ class OrchestratorRule:
     name:      human-readable rule identifier
     cooldown:  minimum seconds between firings
     """
+
     name: str
     condition: Callable[[SystemStateVector], bool]
     action: Callable[..., Coroutine[Any, Any, None]]
@@ -107,28 +108,34 @@ class Orchestrator:
 
     def _register_builtin_rules(self) -> None:
         """Built-in safety and operational rules."""
-        self.register_rule(OrchestratorRule(
-            name="critical_entropy_alert",
-            condition=lambda s: s.phase == SystemPhase.CRITICAL,
-            action=self._action_critical_alert,
-            cooldown=30.0,
-        ))
-        self.register_rule(OrchestratorRule(
-            name="high_entropy_throttle",
-            condition=lambda s: s.phase == SystemPhase.HIGH_ENTROPY,
-            action=self._action_high_entropy_throttle,
-            cooldown=15.0,
-        ))
-        self.register_rule(OrchestratorRule(
-            name="recovery_complete",
-            condition=lambda s: (
-                s.phase == SystemPhase.NOMINAL
-                and s.error_pressure == 0.0
-                and s.agents_active > 0
-            ),
-            action=self._action_recovery_complete,
-            cooldown=60.0,
-        ))
+        self.register_rule(
+            OrchestratorRule(
+                name="critical_entropy_alert",
+                condition=lambda s: s.phase == SystemPhase.CRITICAL,
+                action=self._action_critical_alert,
+                cooldown=30.0,
+            )
+        )
+        self.register_rule(
+            OrchestratorRule(
+                name="high_entropy_throttle",
+                condition=lambda s: s.phase == SystemPhase.HIGH_ENTROPY,
+                action=self._action_high_entropy_throttle,
+                cooldown=15.0,
+            )
+        )
+        self.register_rule(
+            OrchestratorRule(
+                name="recovery_complete",
+                condition=lambda s: (
+                    s.phase == SystemPhase.NOMINAL
+                    and s.error_pressure == 0.0
+                    and s.agents_active > 0
+                ),
+                action=self._action_recovery_complete,
+                cooldown=60.0,
+            )
+        )
 
     # ── Lifecycle ────────────────────────────────────────────────
 
@@ -185,7 +192,10 @@ class Orchestrator:
         # 3. Log state transition
         logger.debug(
             "Orchestrator: processed event '%s' from '%s' → tick=%d phase=%s",
-            event_type, source, self.state.tick, self.state.phase.value,
+            event_type,
+            source,
+            self.state.tick,
+            self.state.phase.value,
         )
 
     async def _evaluate_rules(self) -> None:
@@ -201,14 +211,17 @@ class Orchestrator:
                 if rule.condition(self.state):
                     logger.info(
                         "Orchestrator: Rule '%s' FIRED (phase=%s, entropy=%.3f)",
-                        rule.name, self.state.phase.value, self.state.entropy,
+                        rule.name,
+                        self.state.phase.value,
+                        self.state.entropy,
                     )
                     rule.last_fired = now
                     await rule.action(self)
             except Exception as exc:
                 logger.error(
                     "Orchestrator: Rule '%s' evaluation failed: %s",
-                    rule.name, exc,
+                    rule.name,
+                    exc,
                 )
 
     # ── Agent Lifecycle Integration ──────────────────────────────
@@ -216,29 +229,38 @@ class Orchestrator:
     async def register_agent(self, agent: Any, max_restarts: int = 3) -> None:
         """Register an agent with both Supervisor and StateVector."""
         self.supervisor.register(agent, max_restarts=max_restarts)
-        await self.event_bus.publish("agent.lifecycle", {
-            "event_type": "agent.registered",
-            "source": "orchestrator",
-            "agent_id": agent.agent_id,
-        })
+        await self.event_bus.publish(
+            "agent.lifecycle",
+            {
+                "event_type": "agent.registered",
+                "source": "orchestrator",
+                "agent_id": agent.agent_id,
+            },
+        )
 
     async def start_agent(self, agent_id: str) -> None:
         """Start an agent and record in state."""
         await self.supervisor.start_agent(agent_id)
-        await self.event_bus.publish("agent.lifecycle", {
-            "event_type": "agent.started",
-            "source": "orchestrator",
-            "agent_id": agent_id,
-        })
+        await self.event_bus.publish(
+            "agent.lifecycle",
+            {
+                "event_type": "agent.started",
+                "source": "orchestrator",
+                "agent_id": agent_id,
+            },
+        )
 
     async def stop_agent(self, agent_id: str) -> None:
         """Stop an agent and record in state."""
         await self.supervisor.stop_agent(agent_id)
-        await self.event_bus.publish("agent.lifecycle", {
-            "event_type": "agent.stopped",
-            "source": "orchestrator",
-            "agent_id": agent_id,
-        })
+        await self.event_bus.publish(
+            "agent.lifecycle",
+            {
+                "event_type": "agent.stopped",
+                "source": "orchestrator",
+                "agent_id": agent_id,
+            },
+        )
 
     async def submit_task(
         self,
@@ -261,48 +283,59 @@ class Orchestrator:
         await self.message_bus.send(msg)
 
         # Record in state
-        await self.event_bus.publish("task.lifecycle", {
-            "event_type": "task.submitted",
-            "source": "orchestrator",
-            "task_id": task_id,
-            "agent_id": agent_id,
-        })
+        await self.event_bus.publish(
+            "task.lifecycle",
+            {
+                "event_type": "task.submitted",
+                "source": "orchestrator",
+                "task_id": task_id,
+                "agent_id": agent_id,
+            },
+        )
 
-    async def report_task_completed(self, task_id: str, agent_id: str,
-                                     output: dict[str, Any] | None = None) -> None:
+    async def report_task_completed(
+        self, task_id: str, agent_id: str, output: dict[str, Any] | None = None
+    ) -> None:
         """Record task completion in state."""
-        await self.event_bus.publish("task.lifecycle", {
-            "event_type": "task.completed",
-            "source": agent_id,
-            "task_id": task_id,
-            "output": output or {},
-        })
+        await self.event_bus.publish(
+            "task.lifecycle",
+            {
+                "event_type": "task.completed",
+                "source": agent_id,
+                "task_id": task_id,
+                "output": output or {},
+            },
+        )
 
-    async def report_task_failed(self, task_id: str, agent_id: str,
-                                  error: str) -> None:
+    async def report_task_failed(self, task_id: str, agent_id: str, error: str) -> None:
         """Record task failure in state."""
-        await self.event_bus.publish("task.lifecycle", {
-            "event_type": "task.failed",
-            "source": agent_id,
-            "task_id": task_id,
-            "error": error,
-        })
+        await self.event_bus.publish(
+            "task.lifecycle",
+            {
+                "event_type": "task.failed",
+                "source": agent_id,
+                "task_id": task_id,
+                "error": error,
+            },
+        )
 
     async def report_error(self, source: str, error: str) -> None:
         """Record a system error."""
-        await self.event_bus.publish("system.error", {
-            "event_type": "system.error",
-            "source": source,
-            "error": error,
-        })
+        await self.event_bus.publish(
+            "system.error",
+            {
+                "event_type": "system.error",
+                "source": source,
+                "error": error,
+            },
+        )
 
     # ── Built-in Actions ─────────────────────────────────────────
 
     async def _action_critical_alert(self, _: Any = None) -> None:
         """CRITICAL phase: system is near failure. Log and throttle."""
         logger.critical(
-            "🔴 CRITICAL ENTROPY — error_pressure=%.3f entropy=%.3f "
-            "agents=%d/%d tasks_failed=%d",
+            "🔴 CRITICAL ENTROPY — error_pressure=%.3f entropy=%.3f agents=%d/%d tasks_failed=%d",
             self.state.error_pressure,
             self.state.entropy,
             self.state.agents_active,
@@ -336,9 +369,6 @@ class Orchestrator:
             "running": self._running,
             "uptime_s": round(time.monotonic() - self._start_time, 1) if self._running else 0,
             "state": self.state.snapshot(),
-            "rules": [
-                {"name": r.name, "cooldown": r.cooldown}
-                for r in self._rules
-            ],
+            "rules": [{"name": r.name, "cooldown": r.cooldown} for r in self._rules],
             "supervisor": self.supervisor.status(),
         }

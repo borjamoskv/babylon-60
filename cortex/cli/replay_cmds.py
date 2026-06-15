@@ -35,13 +35,15 @@ def replay_group():
 
 @replay_group.command("run")
 @click.option(
-    "--trace", "-t",
+    "--trace",
+    "-t",
     type=click.Path(exists=True, path_type=Path),
     required=True,
     help="Path to the event trace JSON file.",
 )
 @click.option(
-    "--from", "from_hash",
+    "--from",
+    "from_hash",
     type=str,
     default=None,
     help="Start replay from a specific hash checkpoint.",
@@ -53,13 +55,15 @@ def replay_group():
     help="Expected final hash to verify against.",
 )
 @click.option(
-    "--runs", "-n",
+    "--runs",
+    "-n",
     type=int,
     default=1,
     help="Number of replay runs for determinism verification (default: 1).",
 )
 @click.option(
-    "--verbose", "-v",
+    "--verbose",
+    "-v",
     is_flag=True,
     default=False,
     help="Show detailed replay output.",
@@ -113,7 +117,9 @@ def replay_run(
 
     # Single run
     if from_hash:
-        result = engine.replay_from_hash(events, start_hash=from_hash, expected_final_hash=verify_hash)
+        result = engine.replay_from_hash(
+            events, start_hash=from_hash, expected_final_hash=verify_hash
+        )
     else:
         result = engine.replay(events, expected_final_hash=verify_hash)
 
@@ -125,7 +131,8 @@ def replay_run(
 
 @replay_group.command("generate-trace")
 @click.option(
-    "--output", "-o",
+    "--output",
+    "-o",
     type=click.Path(path_type=Path),
     default=Path("trace.json"),
     help="Output path for the generated trace (default: trace.json).",
@@ -144,21 +151,49 @@ def replay_generate_trace(output: Path, tag: str):
     Example:
         cortex replay generate-trace --output baseline.json --tag cortex-runtime-v1
     """
-    from cortex.runtime.system_state import SystemStateVector
     from cortex.runtime.event_schema import save_trace
+    from cortex.runtime.system_state import SystemStateVector
 
     # Canonical trace (same as test suite)
     canonical = [
-        {"event_type": "agent.registered", "source": "agent:health-monitor", "payload": {"agent_id": "health-monitor"}},
-        {"event_type": "agent.registered", "source": "agent:task-worker", "payload": {"agent_id": "task-worker"}},
+        {
+            "event_type": "agent.registered",
+            "source": "agent:health-monitor",
+            "payload": {"agent_id": "health-monitor"},
+        },
+        {
+            "event_type": "agent.registered",
+            "source": "agent:task-worker",
+            "payload": {"agent_id": "task-worker"},
+        },
         {"event_type": "agent.started", "source": "agent:health-monitor", "payload": {}},
         {"event_type": "agent.started", "source": "agent:task-worker", "payload": {}},
-        {"event_type": "task.submitted", "source": "system", "payload": {"task_id": "t-001", "description": "determinism proof"}},
-        {"event_type": "task.completed", "source": "agent:task-worker", "payload": {"task_id": "t-001", "result": "ok"}},
-        {"event_type": "system.error", "source": "agent:health-monitor", "payload": {"error": "synthetic-fault"}},
+        {
+            "event_type": "task.submitted",
+            "source": "system",
+            "payload": {"task_id": "t-001", "description": "determinism proof"},
+        },
+        {
+            "event_type": "task.completed",
+            "source": "agent:task-worker",
+            "payload": {"task_id": "t-001", "result": "ok"},
+        },
+        {
+            "event_type": "system.error",
+            "source": "agent:health-monitor",
+            "payload": {"error": "synthetic-fault"},
+        },
         {"event_type": "system.recovery", "source": "system", "payload": {}},
-        {"event_type": "task.submitted", "source": "system", "payload": {"task_id": "t-002", "description": "post-recovery task"}},
-        {"event_type": "task.completed", "source": "agent:task-worker", "payload": {"task_id": "t-002", "result": "ok"}},
+        {
+            "event_type": "task.submitted",
+            "source": "system",
+            "payload": {"task_id": "t-002", "description": "post-recovery task"},
+        },
+        {
+            "event_type": "task.completed",
+            "source": "agent:task-worker",
+            "payload": {"task_id": "t-002", "result": "ok"},
+        },
         {"event_type": "agent.stopped", "source": "agent:task-worker", "payload": {}},
         {"event_type": "agent.stopped", "source": "agent:health-monitor", "payload": {}},
     ]

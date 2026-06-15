@@ -19,8 +19,6 @@ from cortex.extensions.mejoralo.constants import (
     MAX_FINDINGS_ARCH,
     MAX_FINDINGS_COMPLEXITY,
     MAX_LOC,
-    MCCABE_THRESHOLD,
-    NESTING_DEPTH_LIMIT,
     PSI_PATTERNS,
     PSI_PENALTY_BRUTAL,
     PSI_PENALTY_NORMAL,

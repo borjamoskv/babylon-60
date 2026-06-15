@@ -80,7 +80,8 @@ class AsyncSignalBus:
         self.session_errors = 0
 
     async def ensure_table(self) -> None:
-        if self._ready: return
+        if self._ready:
+            return
         if getattr(self._conn, "_signals_ready", False):
             self._ready = True
             return
@@ -88,8 +89,12 @@ class AsyncSignalBus:
         cursor = await self._conn.execute("PRAGMA table_info(signals)")
         columns = [row[1] for row in await cursor.fetchall()]
         if "tenant_id" not in columns:
-            await self._conn.execute("ALTER TABLE signals ADD COLUMN tenant_id TEXT NOT NULL DEFAULT 'default'")
-            await self._conn.execute("CREATE INDEX IF NOT EXISTS idx_signals_tenant ON signals(tenant_id)")
+            await self._conn.execute(
+                "ALTER TABLE signals ADD COLUMN tenant_id TEXT NOT NULL DEFAULT 'default'"
+            )
+            await self._conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_signals_tenant ON signals(tenant_id)"
+            )
         if not self._conn.in_transaction:
             await self._conn.commit()
         try:
@@ -99,8 +104,13 @@ class AsyncSignalBus:
         self._ready = True
 
     async def emit(
-        self, event_type: str, payload: dict | None = None, *,
-        source: str = "cli", project: str | None = None, tenant_id: str = "default",
+        self,
+        event_type: str,
+        payload: dict | None = None,
+        *,
+        source: str = "cli",
+        project: str | None = None,
+        tenant_id: str = "default",
     ) -> int:
         try:
             await self.ensure_table()
@@ -287,15 +297,20 @@ class SignalBus:
         self.session_errors = 0
 
     def ensure_table(self) -> None:
-        if self._ready: return
+        if self._ready:
+            return
         if getattr(self._conn, "_signals_ready", False):
             self._ready = True
             return
         self._conn.executescript(_CREATE_TABLE + _CREATE_INDEXES)
         columns = [row[1] for row in self._conn.execute("PRAGMA table_info(signals)").fetchall()]
         if "tenant_id" not in columns:
-            self._conn.execute("ALTER TABLE signals ADD COLUMN tenant_id TEXT NOT NULL DEFAULT 'default'")
-            self._conn.execute("CREATE INDEX IF NOT EXISTS idx_signals_tenant ON signals(tenant_id)")
+            self._conn.execute(
+                "ALTER TABLE signals ADD COLUMN tenant_id TEXT NOT NULL DEFAULT 'default'"
+            )
+            self._conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_signals_tenant ON signals(tenant_id)"
+            )
         if not self._conn.in_transaction:
             self._conn.commit()
         try:
@@ -305,8 +320,13 @@ class SignalBus:
         self._ready = True
 
     def emit(
-        self, event_type: str, payload: dict | None = None, *,
-        source: str = "cli", project: str | None = None, tenant_id: str = "default",
+        self,
+        event_type: str,
+        payload: dict | None = None,
+        *,
+        source: str = "cli",
+        project: str | None = None,
+        tenant_id: str = "default",
     ) -> int:
         try:
             self.ensure_table()
@@ -316,7 +336,13 @@ class SignalBus:
             )
             self._conn.commit()
             signal_id = cursor.lastrowid
-            logger.info("Signal emitted: %s (#%d) from %s (tenant: %s)", event_type, signal_id, source, tenant_id)
+            logger.info(
+                "Signal emitted: %s (#%d) from %s (tenant: %s)",
+                event_type,
+                signal_id,
+                source,
+                tenant_id,
+            )
             self.session_emitted += 1
             return signal_id or 0
         except Exception:

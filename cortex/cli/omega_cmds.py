@@ -163,6 +163,7 @@ def cmd_omega_start(tick_rate: int, auto_push: bool):
     Inicia el metabolismo de CORTEX (Omega Singularity).
     """
     import sys
+
     is_tty = sys.stdout.isatty()
 
     if is_tty:

@@ -19,10 +19,10 @@ import logging
 from typing import Any
 
 from cortex.sica.constitution import Constitution
+from cortex.sica.meta_helpers import create_templated_heuristic, run_failure_checks
+from cortex.sica.meta_types import FailureClass, MetaAction, MetaJudgment
 from cortex.sica.object_level import ExecutionTrace, StepOutcome
 from cortex.sica.strategy import Heuristic, SearchStrategy, StrategyMutation
-from cortex.sica.meta_types import FailureClass, MetaAction, MetaJudgment
-from cortex.sica.meta_helpers import run_failure_checks, create_templated_heuristic
 
 logger = logging.getLogger("cortex.sica.meta_level")
 

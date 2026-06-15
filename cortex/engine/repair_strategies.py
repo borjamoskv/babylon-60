@@ -12,10 +12,7 @@ Reality Level: C5-REAL
 
 from __future__ import annotations
 
-import asyncio
-import gc
 import logging
-import time
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any, Protocol
@@ -85,19 +82,17 @@ class RepairStrategy(Protocol):
 # ─── Concrete Strategies ──────────────────────────────────────────
 
 from cortex.engine._repair_concrete import (
-    InjectTimeoutGuard,
-    ForceGcAndReduceBatch,
-    ResetPoolAndRetry,
     ExponentialBackoff,
-    ProbeAndResetBreaker,
-    RestartHeartbeatEmitter,
-    TriggerConsolidation,
-    SnapshotAndRollback,
+    ForceGcAndReduceBatch,
+    InjectTimeoutGuard,
     LogAndEscalate,
+    ProbeAndResetBreaker,
     ReserializeWithValidation,
+    ResetPoolAndRetry,
+    RestartHeartbeatEmitter,
+    SnapshotAndRollback,
+    TriggerConsolidation,
 )
-
-
 
 # ─── Registry ─────────────────────────────────────────────────────
 

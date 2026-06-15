@@ -100,13 +100,12 @@ class ConflictReport:
 # ── Noise filter ────────────────────────────────────────────────────
 # Import constants from contradiction_constants
 from cortex.guards.contradiction_constants import (
+    _NEGATION_MARKERS,
     _NOISE_PREFIXES,
     _STOP_WORDS,
-    _NEGATION_MARKERS,
     _SUPERSESSION_MARKERS,
     _VERSION_PATTERN,
 )
-
 
 
 # ── Core functions ──────────────────────────────────────────────────

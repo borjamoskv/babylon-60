@@ -166,7 +166,6 @@ class SovereignHTTPClient:
         """SSRF-safe POST request."""
         return await self.request("POST", url, **kwargs)
 
-
     async def request(self, method: str, url: str, **kwargs) -> object:  # type: ignore
         """SSRF-safe arbitrary method request."""
         validate_url(url)

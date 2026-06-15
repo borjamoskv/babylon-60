@@ -429,6 +429,7 @@ async def check_seal_9_compliance_impl() -> tuple[bool, str]:
 
     try:
         from cortex.guards.url_guard import is_safe_url
+
         if not is_safe_url("https://sunoapi.org/api/v1"):
             printer.fail("SSRF URLGuard: Misconfigured or non-functional.")
             return False, "URLGuard failure"
@@ -464,7 +465,11 @@ async def check_gate_21_preservation(
 
     # 2. seals.py self-reference
     seals_path = ROOT_DIR / "cortex" / "guards" / "seals.py"
-    seals_exists = any(p.name == "seals.py" and "guards" in p.parts for p in cached_files) if cached_files else seals_path.exists()
+    seals_exists = (
+        any(p.name == "seals.py" and "guards" in p.parts for p in cached_files)
+        if cached_files
+        else seals_path.exists()
+    )
     if seals_exists:
         checks.append("seals.py ✓")
     else:
@@ -478,7 +483,13 @@ async def check_gate_21_preservation(
         checks.append("HEAD lineage (unchecked)")
     else:
         try:
-            res = subprocess.run([git_executable, "rev-parse", "HEAD~1"], cwd=str(ROOT_DIR), capture_output=True, text=True, timeout=5)
+            res = subprocess.run(
+                [git_executable, "rev-parse", "HEAD~1"],
+                cwd=str(ROOT_DIR),
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
             if res.returncode == 0:
                 checks.append("HEAD lineage ✓")
             else:

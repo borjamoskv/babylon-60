@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import logging
 import re
+
 from cortex.utils.errors import CortexError
 
 logger = logging.getLogger("cortex.guards.structural_isolation_guard")
@@ -83,9 +84,7 @@ class StructuralIsolationGuard:
         # 3. Protected Paths Check (R5 Protection)
         for path in self.PROTECTED_PATHS:
             if path in content:
-                raise StructuralIsolationViolation(
-                    f"Attempted access to protected path: '{path}'."
-                )
+                raise StructuralIsolationViolation(f"Attempted access to protected path: '{path}'.")
 
         # 4. Markdown Link Formatting Check
         if self.BAD_LINK_PATTERN.search(content):

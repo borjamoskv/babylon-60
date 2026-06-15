@@ -27,11 +27,6 @@ from typing import Any
 
 from cortex.engine.genome import FitnessRecord, GenomeMutator, StrategyGenome
 from cortex.isa.builder import (
-    Predicate,
-    bind,
-    cond,
-    dispatch,
-    halt,
     par,
     seq,
 )
@@ -119,8 +114,6 @@ class SpawnedAgent:
 # ─── Agent Species Templates ────────────────────────────────────
 
 from cortex.engine._genesis_templates import AgentSpecies
-
-
 
 # ─── Genesis Engine ──────────────────────────────────────────────
 

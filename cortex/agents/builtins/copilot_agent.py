@@ -444,13 +444,15 @@ class CopilotAgent(BaseAgent):
 
     async def _reply(self, source: AgentMessage, payload: dict[str, Any]) -> None:
         """Send a reply message back to the context source."""
-        await self.bus.send(new_message(
-            sender=self.agent_id,
-            recipient=source.sender,
-            kind=MessageKind.TASK_RESULT,
-            payload=payload,
-            correlation_id=source.message_id,
-        ))
+        await self.bus.send(
+            new_message(
+                sender=self.agent_id,
+                recipient=source.sender,
+                kind=MessageKind.TASK_RESULT,
+                payload=payload,
+                correlation_id=source.message_id,
+            )
+        )
 
     # ── Public API (for IDE integration) ──────────────────────────
 
@@ -467,6 +469,7 @@ class CopilotAgent(BaseAgent):
 
 
 # ── Factory ───────────────────────────────────────────────────────
+
 
 def create_copilot_agent(
     bus: Any,

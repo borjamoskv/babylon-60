@@ -16,13 +16,6 @@ import time
 from typing import Any
 
 from cortex.extensions.alma.types import (
-    GRADE_DEAD,
-    GRADE_FUNCTIONAL,
-    GRADE_GOAT,
-    GRADE_MEDIOCRE,
-    GRADE_STRONG,
-    TasteDimension,
-    TasteVerdict,
     _ACTIONABLE_MARKERS,
     _DEFAULT_WEIGHTS,
     _DEPTH_MARKERS,
@@ -31,6 +24,13 @@ from cortex.extensions.alma.types import (
     _GRADE_THRESHOLDS,
     _REUSE_MARKERS,
     _ROBUSTNESS_MARKERS,
+    GRADE_DEAD,
+    GRADE_FUNCTIONAL,
+    GRADE_GOAT,
+    GRADE_MEDIOCRE,
+    GRADE_STRONG,
+    TasteDimension,
+    TasteVerdict,
 )
 
 

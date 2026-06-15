@@ -1,6 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-"""Shannon entropy calculation utility.
-"""
+"""Shannon entropy calculation utility."""
 
 from __future__ import annotations
 

@@ -59,6 +59,4 @@ class HomoglyphGuard:
     def enforce(content: str, metadata: Mapping[str, Any] | None = None) -> None:
         """Enforces that input content does not contain homoglyph/mixed-script bypasses."""
         if not HomoglyphGuard.validate(content):
-            raise GuardViolation(
-                "Input rejected: Homoglyph/Mixed-script bypass attempt detected."
-            )
+            raise GuardViolation("Input rejected: Homoglyph/Mixed-script bypass attempt detected.")

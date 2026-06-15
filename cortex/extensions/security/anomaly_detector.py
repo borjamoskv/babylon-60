@@ -159,7 +159,6 @@ class AnomalyDetector:
 
         return shannon_entropy(content)
 
-
     def get_baseline(self, project: str) -> ProjectBaseline:
         """Get or compute behavioral baseline for a project."""
         if project in self._baselines:

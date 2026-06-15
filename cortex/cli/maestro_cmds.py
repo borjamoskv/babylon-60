@@ -255,7 +255,9 @@ def move_cmd(app_name: str, x: int, y: int):
 @click.argument("height", type=int)
 def resize_cmd(app_name: str, width: int, height: int):
     """Redimensiona la ventana principal de una app."""
-    _run_window_op(app_name, "resize_window", width, height, f"Ventana redimensionada a {width}×{height}")
+    _run_window_op(
+        app_name, "resize_window", width, height, f"Ventana redimensionada a {width}×{height}"
+    )
 
 
 @maestro.command("minimize")
@@ -270,7 +272,6 @@ def minimize_cmd(app_name: str):
 def fullscreen_cmd(app_name: str):
     """Alterna pantalla completa para una app."""
     _run_window_action(app_name, "fullscreen_window", f"{app_name} pantalla completa alternada")
-
 
 
 # ─── Captura ────────────────────────────────────────────────────

@@ -24,7 +24,7 @@ async def audit_file_cobbler(
     source: str,
     demon,
     intruder,
-    noqa_markers: tuple[str, ...] = ("# noqa: BLE001", "# noqa:BLE001", "# deliberate boundary")
+    noqa_markers: tuple[str, ...] = ("# noqa: BLE001", "# noqa:BLE001", "# deliberate boundary"),
 ) -> tuple[list[str], list[str]]:
     """Audit a single file using EntropyDemon and Intruder."""
     cleaned = "\n".join(

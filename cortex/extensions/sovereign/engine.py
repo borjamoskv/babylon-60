@@ -187,7 +187,6 @@ async def _phase_experience(ctx: SovereignContext) -> PipelineResult:
     return await _run_bridge_phase(ctx, Phase.EXPERIENCE, "impactv-1")
 
 
-
 async def _phase_arbitration(ctx: SovereignContext) -> PipelineResult:
     """Phase - Calibrate the arbiter state."""
     t0 = time.monotonic()

@@ -31,15 +31,15 @@ import time
 from collections import defaultdict
 from typing import Any
 
-from cortex.sica.object_level import ExecutionStep, ExecutionTrace, StepOutcome
-from cortex.sica.strategy import Heuristic, SearchStrategy
-from cortex.sica.dream_types import DreamInsight, DreamReport, _TraceFragment, _Abstraction
 from cortex.sica.dream_helpers import (
-    discover_tool_specializations,
     discover_failure_precursors,
     discover_optimal_sequences,
     discover_temporal_patterns,
+    discover_tool_specializations,
 )
+from cortex.sica.dream_types import DreamInsight, DreamReport, _Abstraction, _TraceFragment
+from cortex.sica.object_level import ExecutionStep, ExecutionTrace, StepOutcome
+from cortex.sica.strategy import SearchStrategy
 
 logger = logging.getLogger("cortex.sica.dream")
 
@@ -400,4 +400,3 @@ class DreamEngine:
 
 
 # Helper types/classes imported from dream_types
-

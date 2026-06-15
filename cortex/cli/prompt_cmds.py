@@ -72,6 +72,7 @@ def _count_test_functions(root: Path) -> int:
 def _count_regex_matches_in_files(root: Path, regex_pattern: str) -> int:
     """Count occurrences of a regex pattern in Python files, excluding tests and venv."""
     import re
+
     pattern = re.compile(regex_pattern)
     count = 0
     for p in root.rglob("*.py"):
@@ -88,13 +89,14 @@ def _count_regex_matches_in_files(root: Path, regex_pattern: str) -> int:
 
 def _count_rest_endpoints(root: Path) -> int:
     """Count FastAPI route decorators (@router.get/post/put/delete/patch)."""
-    return _count_regex_matches_in_files(root, r"@\w*router\.(get|post|put|delete|patch|head|options)\(")
+    return _count_regex_matches_in_files(
+        root, r"@\w*router\.(get|post|put|delete|patch|head|options)\("
+    )
 
 
 def _count_cli_commands(root: Path) -> int:
     """Count @cli.command() and @<group>.command() decorators."""
     return _count_regex_matches_in_files(root, r"@\w+\.command\(")
-
 
 
 def _count_secret_patterns() -> int:

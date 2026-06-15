@@ -162,7 +162,6 @@ async def batch_store(
     return await execute_batch_store(req, auth, engine, "fact")
 
 
-
 @router.get("/v1/projects/{project}/facts", response_model=list[FactResponse])
 async def recall_facts(
     project: str,
@@ -357,13 +356,18 @@ async def cast_vote(
     try:
         fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
         if not fact:
-            raise HTTPException(status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id))
+            raise HTTPException(
+                status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
+            )
         agent_id = auth.key_name or "api_agent"
         score = await engine.vote_v2(fact_id, agent_id, req.value)
         updated_fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
         updated_fact_data = _fact_data(updated_fact) if updated_fact else None
         return VoteResponse(
-            fact_id=fact_id, agent=agent_id, vote=req.value, new_consensus_score=score,
+            fact_id=fact_id,
+            agent=agent_id,
+            vote=req.value,
+            new_consensus_score=score,
             confidence=updated_fact_data["confidence"] if updated_fact_data else "unknown",
         )
     except HTTPException:
@@ -372,7 +376,9 @@ async def cast_vote(
         raise HTTPException(status_code=400, detail=str(e)) from None
     except (sqlite3.Error, OSError, RuntimeError):
         logger.exception("Unexpected error during voting for fact #%d", fact_id)
-        raise HTTPException(status_code=500, detail=get_trans("error_internal_server", lang)) from None
+        raise HTTPException(
+            status_code=500, detail=get_trans("error_internal_server", lang)
+        ) from None
 
 
 @router.post("/v1/facts/{fact_id}/vote-v2", response_model=VoteResponse)
@@ -388,12 +394,17 @@ async def cast_vote_v2(
     try:
         fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
         if not fact:
-            raise HTTPException(status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id))
+            raise HTTPException(
+                status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
+            )
         score = await engine.vote_v2(fact_id=fact_id, agent=req.agent_id, value=req.vote)
         updated_fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
         updated_fact_data = _fact_data(updated_fact) if updated_fact else None
         return VoteResponse(
-            fact_id=fact_id, agent=req.agent_id, vote=req.vote, new_consensus_score=score,
+            fact_id=fact_id,
+            agent=req.agent_id,
+            vote=req.vote,
+            new_consensus_score=score,
             confidence=updated_fact_data["confidence"] if updated_fact_data else "unknown",
         )
     except HTTPException:
@@ -402,7 +413,9 @@ async def cast_vote_v2(
         raise HTTPException(status_code=400, detail=str(e)) from None
     except (sqlite3.Error, OSError, RuntimeError):
         logger.exception("RWC Vote failed")
-        raise HTTPException(status_code=500, detail=get_trans("error_internal_voting", lang)) from None
+        raise HTTPException(
+            status_code=500, detail=get_trans("error_internal_voting", lang)
+        ) from None
 
 
 @router.get("/v1/facts/{fact_id}/votes", response_model=list[dict])
@@ -420,7 +433,9 @@ async def list_votes(
             status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
         )
     votes = await cast(_VotesEngine, engine).get_votes(fact_id, tenant_id=auth.tenant_id)
-    return [{"agent": v["agent"], "vote": v["vote"], "timestamp": v.get("created_at")} for v in votes]
+    return [
+        {"agent": v["agent"], "vote": v["vote"], "timestamp": v.get("created_at")} for v in votes
+    ]
 
 
 @router.delete("/v1/facts/{fact_id}", response_model=dict)
@@ -438,7 +453,10 @@ async def deprecate_fact(
             status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
         )
     fact_data = _fact_data(fact)
-    if fact_data.get("tenant_id", fact_data.get("project")) != auth.tenant_id and "tenant_id" in fact_data:
+    if (
+        fact_data.get("tenant_id", fact_data.get("project")) != auth.tenant_id
+        and "tenant_id" in fact_data
+    ):
         raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
     if not await engine.deprecate(fact_id, reason="api deprecated"):
         raise HTTPException(status_code=500, detail=get_trans("error_deprecation_failed", lang))
@@ -457,11 +475,21 @@ async def get_fact_by_id(
         raise HTTPException(status_code=404, detail=f"Fact #{fact_id} not found")
     fact_data = _fact_data(fact)
     return FactResponse(
-        id=fact_data["id"], project=fact_data["project"], content=fact_data["content"],
-        fact_type=fact_data["fact_type"], tags=fact_data["tags"], confidence=fact_data.get("confidence", "C3"),
-        valid_from=fact_data.get("valid_from"), valid_until=fact_data.get("valid_until"), source=fact_data.get("source"),
-        meta=fact_data.get("meta"), created_at=str(fact_data.get("created_at", "")), updated_at=str(fact_data.get("updated_at", "")),
-        tx_id=fact_data.get("tx_id"), hash=fact_data.get("hash"), consensus_score=float(fact_data.get("consensus_score", 1.0)),
+        id=fact_data["id"],
+        project=fact_data["project"],
+        content=fact_data["content"],
+        fact_type=fact_data["fact_type"],
+        tags=fact_data["tags"],
+        confidence=fact_data.get("confidence", "C3"),
+        valid_from=fact_data.get("valid_from"),
+        valid_until=fact_data.get("valid_until"),
+        source=fact_data.get("source"),
+        meta=fact_data.get("meta"),
+        created_at=str(fact_data.get("created_at", "")),
+        updated_at=str(fact_data.get("updated_at", "")),
+        tx_id=fact_data.get("tx_id"),
+        hash=fact_data.get("hash"),
+        consensus_score=float(fact_data.get("consensus_score", 1.0)),
     )
 
 
@@ -475,8 +503,12 @@ async def get_causal_chain(
 ) -> list[dict]:
     """Get the causal chain for a fact (up=ancestors, down=descendants)."""
     try:
-        chain = await engine.get_causal_chain(fact_id=fact_id, direction=direction, max_depth=max_depth)
-        return [{**_fact_data(f), "causal_depth": _fact_data(f).get("causal_depth", 0)} for f in chain]
+        chain = await engine.get_causal_chain(
+            fact_id=fact_id, direction=direction, max_depth=max_depth
+        )
+        return [
+            {**_fact_data(f), "causal_depth": _fact_data(f).get("causal_depth", 0)} for f in chain
+        ]
     except (sqlite3.Error, OSError, RuntimeError):
         logger.exception("Causal chain query failed for #%d", fact_id)
         raise HTTPException(status_code=500, detail="Causal chain query failed") from None

@@ -478,9 +478,15 @@ def save_sequence_as_midi(sequence: MIDISequence, output_path: str) -> str:
         for event in track.events:
             delta = max(0, event.tick - last_tick)
             msg_type = "note_on" if event.event_type == "on" else "note_off"
-            midi_track.append(mido.Message(
-                msg_type, note=event.note, velocity=event.velocity, time=delta, channel=event.channel
-            ))
+            midi_track.append(
+                mido.Message(
+                    msg_type,
+                    note=event.note,
+                    velocity=event.velocity,
+                    time=delta,
+                    channel=event.channel,
+                )
+            )
             last_tick = event.tick
 
     os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)

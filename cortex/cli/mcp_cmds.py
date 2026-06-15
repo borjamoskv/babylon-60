@@ -66,11 +66,16 @@ def sovereign_mcp() -> None:
 
     from cortex.extensions.policy.jis_auditor import JISAuditor
     from cortex.memory.vsa import VSAPipelineBridge
+
     try:
         from cortex_rs import McpSovereignHost
     except ImportError:
-        console.print("[yellow]⚠️ Warning: Rust-native McpSovereignHost is not compiled in your current cortex_rs binary.[/yellow]")
-        console.print("[dim]Use 'cortex mcp trust' or 'cortex mcp aether' for active python-based MCP servers.[/dim]")
+        console.print(
+            "[yellow]⚠️ Warning: Rust-native McpSovereignHost is not compiled in your current cortex_rs binary.[/yellow]"
+        )
+        console.print(
+            "[dim]Use 'cortex mcp trust' or 'cortex mcp aether' for active python-based MCP servers.[/dim]"
+        )
         return
 
     sys.stderr.write("🚀 Booting CORTEX Sovereign MCP Server (Rust-native, Transport: stdio)...\n")

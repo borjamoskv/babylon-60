@@ -10,9 +10,8 @@ Schema version: 1.0
 
 from __future__ import annotations
 
-import json
 import hashlib
-from dataclasses import asdict
+import json
 from pathlib import Path
 from typing import Any
 

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from typing import Any
+
 from cortex.sica.meta_types import FailureClass, MetaAction, MetaJudgment
 from cortex.sica.strategy import Heuristic
 
@@ -46,9 +47,7 @@ def run_failure_checks(
             MetaAction.ADJUST_EXPLORATION,
         ]
         judgment.confidence = 0.8
-        reasoning.append(
-            f"WRONG TOOL CHOICE → meta-failure: tool '{tool_name}' repeatedly fails"
-        )
+        reasoning.append(f"WRONG TOOL CHOICE → meta-failure: tool '{tool_name}' repeatedly fails")
         return judgment
 
     if pattern and pattern.startswith("repeated_error:"):

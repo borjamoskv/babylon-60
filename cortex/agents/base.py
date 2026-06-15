@@ -235,7 +235,6 @@ class BaseAgent:
         )
         await self.bus.send(msg)
 
-
     async def _reply(self, source: AgentMessage, payload: dict[str, Any]) -> None:
         """Reply to a source message with a payload, preserving correlation ID."""
         reply = new_message(

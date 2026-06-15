@@ -304,7 +304,6 @@ class SearchStrategy:
         """Weaken a heuristic by reducing its weight."""
         return self._mutate_weight(heuristic_name, reason, factor, MutationType.ATTENUATE, False)
 
-
     def mutate_inject(self, heuristic: Heuristic, reason: str) -> StrategyMutation:
         """Inject a new heuristic into the genome."""
         before_hash = self._genome.genome_hash

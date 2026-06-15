@@ -17,7 +17,7 @@ from typing import Any
 from cortex.agents.base import BaseAgent
 from cortex.agents.bus import MessageBus
 from cortex.agents.manifest import AgentManifest
-from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
+from cortex.agents.message_schema import AgentMessage
 from cortex.agents.tools import ToolRegistry
 from cortex.memory.manager import CortexMemoryManager
 
@@ -50,7 +50,6 @@ class MemoryAgent(BaseAgent):
     async def handle_message(self, message: AgentMessage) -> None:  # type: ignore[override]
         await self.dispatch_task_message(message, _SUPPORTED_OPS, logger)
 
-
     async def tick(self) -> None:
         logger.debug("MemoryAgent tick - idle")
 
@@ -76,5 +75,3 @@ class MemoryAgent(BaseAgent):
         if op == "status":
             return {"agent": self.manifest.agent_id, "status": "ok"}
         raise ValueError(f"unknown op: {op!r}")
-
-

@@ -406,22 +406,33 @@ def _validate_public_events(
         if missing:
             raise ValueError(f"event missing public-v1 fields at {index}: {','.join(missing)}")
         event_id, nonce = str(event["event_id"]), str(event["nonce"])
-        if event_id in seen_event_ids: raise ValueError(f"duplicate event_id before export: {event_id}")
-        if nonce in seen_nonces: raise ValueError(f"duplicate nonce before export: {nonce}")
+        if event_id in seen_event_ids:
+            raise ValueError(f"duplicate event_id before export: {event_id}")
+        if nonce in seen_nonces:
+            raise ValueError(f"duplicate nonce before export: {nonce}")
         seen_event_ids.add(event_id)
         seen_nonces.add(nonce)
-        if event.get("tenant_id") != tenant_id: raise ValueError(f"event tenant mismatch: {event_id}")
-        if event.get("stream_id") != stream_id: raise ValueError(f"event stream mismatch: {event_id}")
-        if event.get("prev_hash") != previous_hash: raise ValueError(f"event chain break before export: {event_id}")
+        if event.get("tenant_id") != tenant_id:
+            raise ValueError(f"event tenant mismatch: {event_id}")
+        if event.get("stream_id") != stream_id:
+            raise ValueError(f"event stream mismatch: {event_id}")
+        if event.get("prev_hash") != previous_hash:
+            raise ValueError(f"event chain break before export: {event_id}")
         sequence = event.get("sequence")
-        if isinstance(sequence, bool) or not isinstance(sequence, int): raise ValueError(f"event sequence invalid: {event_id}")
-        if previous_sequence is None and sequence != 1: raise ValueError(f"event sequence must start at 1: {event_id}")
-        if previous_sequence is not None and sequence != previous_sequence + 1: raise ValueError(f"event sequence gap: {event_id}")
+        if isinstance(sequence, bool) or not isinstance(sequence, int):
+            raise ValueError(f"event sequence invalid: {event_id}")
+        if previous_sequence is None and sequence != 1:
+            raise ValueError(f"event sequence must start at 1: {event_id}")
+        if previous_sequence is not None and sequence != previous_sequence + 1:
+            raise ValueError(f"event sequence gap: {event_id}")
         detail = event.get("detail")
-        if isinstance(detail, Mapping) and any(field in detail for field in ("content", "payload", "plaintext", "fact_content")):
+        if isinstance(detail, Mapping) and any(
+            field in detail for field in ("content", "payload", "plaintext", "fact_content")
+        ):
             raise ValueError(f"event contains inline fact payload: {event_id}")
         actual_hash = _event_hash(event)
-        if actual_hash != event.get("hash"): raise ValueError(f"event hash mismatch before export: {event_id}")
+        if actual_hash != event.get("hash"):
+            raise ValueError(f"event hash mismatch before export: {event_id}")
         event_hashes.append(actual_hash)
         previous_sequence, previous_hash = sequence, actual_hash
     return event_hashes
@@ -431,16 +442,28 @@ def _validate_public_key_records(keys: Sequence[Mapping[str, Any]]) -> None:
     seen: set[str] = set()
     for key in keys:
         key_id = key.get("key_id")
-        if not isinstance(key_id, str) or not key_id: raise ValueError("public key record missing key_id")
-        if key_id in seen: raise ValueError(f"duplicate public key id: {key_id}")
+        if not isinstance(key_id, str) or not key_id:
+            raise ValueError("public key record missing key_id")
+        if key_id in seen:
+            raise ValueError(f"duplicate public key id: {key_id}")
         seen.add(key_id)
-        if key.get("algorithm") not in ("ed25519", "mldsa44", "mldsa65", "mldsa87"): raise ValueError(f"public key algorithm unsupported: {key_id}")
-        if not isinstance(key.get("public_key"), str): raise ValueError(f"public key missing material: {key_id}")
-        if not isinstance(key.get("permissions"), list): raise ValueError(f"public key permissions missing: {key_id}")
+        if key.get("algorithm") not in ("ed25519", "mldsa44", "mldsa65", "mldsa87"):
+            raise ValueError(f"public key algorithm unsupported: {key_id}")
+        if not isinstance(key.get("public_key"), str):
+            raise ValueError(f"public key missing material: {key_id}")
+        if not isinstance(key.get("permissions"), list):
+            raise ValueError(f"public key permissions missing: {key_id}")
 
 
 def _validate_public_checkpoints(checkpoints: Sequence[Mapping[str, Any]]) -> None:
-    required = ("root_hash", "start_event_id", "end_event_id", "event_count", "mldsa_signature", "mldsa_public_key")
+    required = (
+        "root_hash",
+        "start_event_id",
+        "end_event_id",
+        "event_count",
+        "mldsa_signature",
+        "mldsa_public_key",
+    )
     for cp in checkpoints:
         for field in required:
             if field not in cp:
@@ -463,10 +486,14 @@ def _assert_no_private_material(value: Any) -> None:
 def _scan_export_safety(root: Path, *, allowed_files: set[str] | None = None) -> None:
     allowed = allowed_files or set(PUBLIC_EXPORT_FILES)
     for path in root.iterdir():
-        if not path.is_file(): raise ValueError(f"export contains non-file entry: {path.name}")
-        if path.name not in allowed: raise ValueError(f"export contains unexpected file: {path.name}")
-        if path.suffix in EXECUTABLE_SUFFIXES: raise ValueError(f"export contains executable-like file: {path.name}")
-        if path.stat().st_mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH): raise ValueError(f"export contains executable file: {path.name}")
+        if not path.is_file():
+            raise ValueError(f"export contains non-file entry: {path.name}")
+        if path.name not in allowed:
+            raise ValueError(f"export contains unexpected file: {path.name}")
+        if path.suffix in EXECUTABLE_SUFFIXES:
+            raise ValueError(f"export contains executable-like file: {path.name}")
+        if path.stat().st_mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH):
+            raise ValueError(f"export contains executable file: {path.name}")
         _assert_no_private_material(path.read_text(encoding="utf-8"))
 
 
@@ -485,7 +512,11 @@ def _b64url_encode(value: bytes) -> str:
 
 
 def _public_key_b64url(public_key: Any) -> str:
-    raw = public_key.public_bytes_raw() if hasattr(public_key, "public_bytes_raw") else public_key.public_bytes(Encoding.Raw, PublicFormat.Raw)
+    raw = (
+        public_key.public_bytes_raw()
+        if hasattr(public_key, "public_bytes_raw")
+        else public_key.public_bytes(Encoding.Raw, PublicFormat.Raw)
+    )
     return _b64url_encode(raw)
 
 

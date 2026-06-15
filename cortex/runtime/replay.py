@@ -45,9 +45,11 @@ logger = logging.getLogger("cortex.runtime.replay")
 # 1. EVENT REPLAY ENGINE
 # ═══════════════════════════════════════════════════════════════════
 
+
 @dataclass
 class ReplayResult:
     """Result of a replay operation."""
+
     success: bool
     ticks_replayed: int
     final_hash: str
@@ -109,9 +111,7 @@ class ReplayEngine:
 
         final_hash = sv.hash
         hash_match = (
-            final_hash == expected_final_hash
-            if expected_final_hash
-            else divergence_tick is None
+            final_hash == expected_final_hash if expected_final_hash else divergence_tick is None
         )
 
         result = ReplayResult(
@@ -161,9 +161,7 @@ class ReplayEngine:
 
         return self.replay(events[start_idx:], expected_final_hash)
 
-    def verify_determinism(
-        self, events: list[StateEvent], runs: int = 3
-    ) -> bool:
+    def verify_determinism(self, events: list[StateEvent], runs: int = 3) -> bool:
         """Replay the same ledger N times and verify all produce identical hashes.
 
         This proves the runtime is fully deterministic.
@@ -188,9 +186,11 @@ class ReplayEngine:
 # 2. STATE DIFF
 # ═══════════════════════════════════════════════════════════════════
 
+
 @dataclass
 class FieldDelta:
     """A single field difference between two state snapshots."""
+
     field: str
     value_a: Any
     value_b: Any
@@ -204,6 +204,7 @@ class FieldDelta:
 @dataclass
 class StateDiffResult:
     """Result of comparing two state snapshots."""
+
     identical: bool
     deltas: list[FieldDelta]
     hash_a: str
@@ -229,9 +230,16 @@ class StateDiff:
     """Compares two SystemStateVector snapshots."""
 
     NUMERIC_FIELDS = {
-        "tick", "entropy", "exergy", "agents_active", "agents_total",
-        "tasks_pending", "tasks_completed", "tasks_failed",
-        "error_pressure", "throughput",
+        "tick",
+        "entropy",
+        "exergy",
+        "agents_active",
+        "agents_total",
+        "tasks_pending",
+        "tasks_completed",
+        "tasks_failed",
+        "error_pressure",
+        "throughput",
     }
 
     @classmethod
@@ -257,14 +265,20 @@ class StateDiff:
             val_b = snapshot_b.get(fld)
             if val_a != val_b:
                 delta = None
-                if fld in cls.NUMERIC_FIELDS and isinstance(val_a, (int, float)) and isinstance(val_b, (int, float)):
+                if (
+                    fld in cls.NUMERIC_FIELDS
+                    and isinstance(val_a, int | float)
+                    and isinstance(val_b, int | float)
+                ):
                     delta = val_b - val_a
-                deltas.append(FieldDelta(
-                    field=fld,
-                    value_a=val_a,
-                    value_b=val_b,
-                    delta=delta,
-                ))
+                deltas.append(
+                    FieldDelta(
+                        field=fld,
+                        value_a=val_a,
+                        value_b=val_b,
+                        delta=delta,
+                    )
+                )
 
         hash_a = snapshot_a.get("hash", "")
         hash_b = snapshot_b.get("hash", "")
@@ -291,9 +305,11 @@ class StateDiff:
 # 3. DETERMINISTIC FUZZ HARNESS
 # ═══════════════════════════════════════════════════════════════════
 
+
 @dataclass
 class InvariantViolation:
     """A detected invariant violation during fuzzing."""
+
     tick: int
     invariant: str
     details: str
@@ -305,6 +321,7 @@ class InvariantViolation:
 @dataclass
 class FuzzResult:
     """Result of a fuzz run."""
+
     events_generated: int
     events_replayed: int
     violations: list[InvariantViolation]
@@ -378,14 +395,16 @@ class FuzzHarness:
                 sv.apply(event_type, source)
                 replayed += 1
             except Exception as exc:
-                violations.append(InvariantViolation(
-                    tick=sv.tick,
-                    invariant="apply_exception",
-                    details=f"{type(exc).__name__}: {exc}",
-                    snapshot=sv.snapshot(),
-                    event_type=event_type,
-                    event_source=source,
-                ))
+                violations.append(
+                    InvariantViolation(
+                        tick=sv.tick,
+                        invariant="apply_exception",
+                        details=f"{type(exc).__name__}: {exc}",
+                        snapshot=sv.snapshot(),
+                        event_type=event_type,
+                        event_source=source,
+                    )
+                )
                 continue
 
             # Check all invariants
@@ -405,12 +424,16 @@ class FuzzHarness:
         if violations:
             logger.warning(
                 "Fuzz run (seed=%d): %d violations in %d events",
-                self.seed, len(violations), n_events,
+                self.seed,
+                len(violations),
+                n_events,
             )
         else:
             logger.info(
                 "Fuzz run (seed=%d): CLEAN — %d events, final entropy=%.3f",
-                self.seed, n_events, sv.entropy,
+                self.seed,
+                n_events,
+                sv.entropy,
             )
         return result
 
@@ -425,25 +448,51 @@ class FuzzHarness:
 
         # Check bounds and basic constraints
         checks = [
-            (abs(snap["entropy"] + snap["exergy"] - 1.0) > 1e-10, "exergy_conservation", f"entropy={snap['entropy']} + exergy={snap['exergy']} != 1.0"),
-            (not (0.0 <= snap["entropy"] <= 1.0), "entropy_domain", f"entropy={snap['entropy']} outside [0, 1]"),
-            (not (0.0 <= snap["error_pressure"] <= 1.0), "error_pressure_domain", f"error_pressure={snap['error_pressure']} outside [0, 1]"),
+            (
+                abs(snap["entropy"] + snap["exergy"] - 1.0) > 1e-10,
+                "exergy_conservation",
+                f"entropy={snap['entropy']} + exergy={snap['exergy']} != 1.0",
+            ),
+            (
+                not (0.0 <= snap["entropy"] <= 1.0),
+                "entropy_domain",
+                f"entropy={snap['entropy']} outside [0, 1]",
+            ),
+            (
+                not (0.0 <= snap["error_pressure"] <= 1.0),
+                "error_pressure_domain",
+                f"error_pressure={snap['error_pressure']} outside [0, 1]",
+            ),
             (snap["tick"] < 1, "monotonic_tick", f"tick={snap['tick']} after event"),
             (not snap["hash"], "hash_present", "Empty hash after event"),
         ]
         for cond, inv, details in checks:
             if cond:
                 return InvariantViolation(
-                    tick=snap["tick"], invariant=inv, details=details,
-                    snapshot=snap, event_type=event_type, event_source=source
+                    tick=snap["tick"],
+                    invariant=inv,
+                    details=details,
+                    snapshot=snap,
+                    event_type=event_type,
+                    event_source=source,
                 )
 
         # Check non-negative counters
-        for counter in ("agents_active", "agents_total", "tasks_pending", "tasks_completed", "tasks_failed"):
+        for counter in (
+            "agents_active",
+            "agents_total",
+            "tasks_pending",
+            "tasks_completed",
+            "tasks_failed",
+        ):
             if snap[counter] < 0:
                 return InvariantViolation(
-                    tick=snap["tick"], invariant=f"non_negative_{counter}", details=f"{counter}={snap[counter]} < 0",
-                    snapshot=snap, event_type=event_type, event_source=source
+                    tick=snap["tick"],
+                    invariant=f"non_negative_{counter}",
+                    details=f"{counter}={snap[counter]} < 0",
+                    snapshot=snap,
+                    event_type=event_type,
+                    event_source=source,
                 )
 
         # Check system phase validity
@@ -451,8 +500,12 @@ class FuzzHarness:
             SystemPhase(snap["phase"])
         except ValueError:
             return InvariantViolation(
-                tick=snap["tick"], invariant="valid_phase", details=f"Invalid phase: {snap['phase']}",
-                snapshot=snap, event_type=event_type, event_source=source
+                tick=snap["tick"],
+                invariant="valid_phase",
+                details=f"Invalid phase: {snap['phase']}",
+                snapshot=snap,
+                event_type=event_type,
+                event_source=source,
             )
 
         return None  # All invariants hold

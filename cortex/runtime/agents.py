@@ -30,6 +30,7 @@ logger = logging.getLogger("cortex.runtime.agents")
 
 # ─── Agent 1: Health Monitor (Daemon) ─────────────────────────────
 
+
 class HealthMonitorAgent(BaseAgent):
     """Daemon agent that monitors system health.
 
@@ -73,7 +74,9 @@ class HealthMonitorAgent(BaseAgent):
             if cmd == "force_check":
                 await self._run_health_check()
             elif cmd == "set_interval":
-                new_interval = message.payload.get("input", {}).get("interval", self._check_interval)
+                new_interval = message.payload.get("input", {}).get(
+                    "interval", self._check_interval
+                )
                 self._check_interval = float(new_interval)
                 logger.info("[health-monitor] Interval updated to %.1fs", self._check_interval)
 
@@ -115,7 +118,8 @@ class HealthMonitorAgent(BaseAgent):
         if anomalies:
             self._anomalies_detected += len(anomalies)
             logger.warning(
-                "[health-monitor] Anomalies detected: %s", anomalies,
+                "[health-monitor] Anomalies detected: %s",
+                anomalies,
             )
             # Emit to EventBus for the orchestrator to process
             await self.orchestrator.event_bus.publish(
@@ -146,6 +150,7 @@ class HealthMonitorAgent(BaseAgent):
 
 
 # ─── Agent 2: Task Worker (Reactive) ──────────────────────────────
+
 
 class TaskWorkerAgent(BaseAgent):
     """Reactive agent that processes task requests.
@@ -185,22 +190,19 @@ class TaskWorkerAgent(BaseAgent):
         logger.info("[%s] Registered handler for '%s'", self.agent_id, prefix)
 
     async def on_start(self) -> None:
-        logger.info("[%s] Task worker ready (handlers=%d)",
-                     self.agent_id, len(self._handlers))
+        logger.info("[%s] Task worker ready (handlers=%d)", self.agent_id, len(self._handlers))
 
     async def handle_message(self, message: AgentMessage) -> None:
         """Process incoming task requests."""
         if message.kind != MessageKind.TASK_REQUEST:
-            logger.debug("[%s] Ignoring message kind: %s",
-                         self.agent_id, message.kind.value)
+            logger.debug("[%s] Ignoring message kind: %s", self.agent_id, message.kind.value)
             return
 
         task_id = message.payload.get("task_id", "unknown")
         objective = message.payload.get("objective", "")
         input_data = message.payload.get("input", {})
 
-        logger.info("[%s] Processing task '%s': %s",
-                     self.agent_id, task_id, objective)
+        logger.info("[%s] Processing task '%s': %s", self.agent_id, task_id, objective)
 
         self.memory.active_tasks.append(task_id)
 
@@ -240,8 +242,7 @@ class TaskWorkerAgent(BaseAgent):
                     error=error_msg,
                 )
 
-            logger.error("[%s] Task '%s' failed: %s",
-                         self.agent_id, task_id, error_msg)
+            logger.error("[%s] Task '%s' failed: %s", self.agent_id, task_id, error_msg)
         finally:
             if task_id in self.memory.active_tasks:
                 self.memory.active_tasks.remove(task_id)

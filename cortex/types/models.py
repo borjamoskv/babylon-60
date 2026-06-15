@@ -408,15 +408,13 @@ class CheckpointResponse(BaseModel):
 
 from cortex.types.mejoralo import (
     MejoraloScanRequest,
-    DimensionResultModel,
     MejoraloScanResponse,
     MejoraloSessionRequest,
     MejoraloSessionResponse,
     MejoraloShipRequest,
-    ShipSealModel,
     MejoraloShipResponse,
+    ShipSealModel,
 )
-
 
 # ─── SovereignGate Models ────────────────────────────────────────────
 
@@ -477,9 +475,4 @@ class ContextSnapshotResponse(BaseModel):
 
 from cortex.types.ums import (
     UniversalMemorySchema,
-    UmsHeader,
-    UmsPayload,
-    UmsProof,
-    UmsThermodynamics,
-    UmsVectorReference,
 )

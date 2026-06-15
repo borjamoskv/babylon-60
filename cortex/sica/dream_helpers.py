@@ -4,9 +4,10 @@
 from __future__ import annotations
 
 from collections import Counter, defaultdict
+
+from cortex.sica.dream_types import DreamInsight, _TraceFragment
 from cortex.sica.object_level import ExecutionTrace, StepOutcome
 from cortex.sica.strategy import Heuristic
-from cortex.sica.dream_types import DreamInsight, _TraceFragment
 
 
 def discover_tool_specializations(

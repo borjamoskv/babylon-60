@@ -33,18 +33,20 @@ logger = logging.getLogger("cortex.runtime.system_state")
 
 class SystemPhase(str, Enum):
     """Thermodynamic phase of the system."""
-    COLD_START = "cold_start"       # Booting, no agents running
-    WARMING = "warming"             # Agents starting, state loading
-    NOMINAL = "nominal"             # Normal operation
-    HIGH_ENTROPY = "high_entropy"   # Error pressure rising
-    CRITICAL = "critical"           # Near failure threshold
-    RECOVERY = "recovery"           # Self-healing in progress
-    SHUTDOWN = "shutdown"           # Graceful termination
+
+    COLD_START = "cold_start"  # Booting, no agents running
+    WARMING = "warming"  # Agents starting, state loading
+    NOMINAL = "nominal"  # Normal operation
+    HIGH_ENTROPY = "high_entropy"  # Error pressure rising
+    CRITICAL = "critical"  # Near failure threshold
+    RECOVERY = "recovery"  # Self-healing in progress
+    SHUTDOWN = "shutdown"  # Graceful termination
 
 
 @dataclass
 class StateEvent:
     """A single causal event that mutates the SystemStateVector."""
+
     tick: int
     timestamp: float
     event_type: str
@@ -55,9 +57,13 @@ class StateEvent:
 
     def compute_hash(self, prev_hash: str) -> str:
         blob = json.dumps(
-            {"tick": self.tick, "type": self.event_type,
-             "source": self.source, "payload": self.payload,
-             "prev": prev_hash},
+            {
+                "tick": self.tick,
+                "type": self.event_type,
+                "source": self.source,
+                "payload": self.payload,
+                "prev": prev_hash,
+            },
             sort_keys=True,
         )
         return hashlib.sha256(blob.encode()).hexdigest()
@@ -124,13 +130,15 @@ class SystemStateVector:
         """Bootstrap a new SystemStateVector instance."""
         return cls()
 
-    def apply_event(self, event_type: str, source: str,
-                    payload: dict[str, Any] | None = None) -> StateEvent:
+    def apply_event(
+        self, event_type: str, source: str, payload: dict[str, Any] | None = None
+    ) -> StateEvent:
         """Alias for apply to maintain API compatibility."""
         return self.apply(event_type, source, payload)
 
-    def apply(self, event_type: str, source: str,
-              payload: dict[str, Any] | None = None) -> StateEvent:
+    def apply(
+        self, event_type: str, source: str, payload: dict[str, Any] | None = None
+    ) -> StateEvent:
         """Apply a causal event to the state vector.
 
         This is the ONLY way to mutate the state.
@@ -166,7 +174,10 @@ class SystemStateVector:
 
         logger.debug(
             "[StateVector] tick=%d phase=%s entropy=%.3f exergy=%.3f hash=%s...",
-            self.tick, self.phase.value, self.entropy, self.exergy,
+            self.tick,
+            self.phase.value,
+            self.entropy,
+            self.exergy,
             self.hash[:12],
         )
         return event
@@ -205,17 +216,13 @@ class SystemStateVector:
     def _handle_generic(self, payload: dict, source: str) -> None:
         pass  # Unknown event types are recorded but don't mutate numeric state
 
-
-
     # ── Thermodynamic derivation ─────────────────────────────────
 
     def _recompute_thermodynamics(self, now: float) -> None:
         """Derive entropy, exergy, throughput, phase from raw counters."""
         # Throughput: events in the last window
         cutoff = now - self._throughput_window
-        self._event_timestamps = [
-            t for t in self._event_timestamps if t > cutoff
-        ]
+        self._event_timestamps = [t for t in self._event_timestamps if t > cutoff]
         self.throughput = len(self._event_timestamps) / self._throughput_window
 
         # Entropy: weighted combination of error pressure + task failure ratio
@@ -296,14 +303,18 @@ class SystemStateVector:
             if event.prev_hash != expected_prev:
                 logger.error(
                     "Hash chain break at tick %d: expected prev=%s, got=%s",
-                    event.tick, expected_prev[:16], event.prev_hash[:16],
+                    event.tick,
+                    expected_prev[:16],
+                    event.prev_hash[:16],
                 )
                 return False
             recomputed = event.compute_hash(event.prev_hash)
             if event.hash != recomputed:
                 logger.error(
                     "Hash mismatch at tick %d: stored=%s, recomputed=%s",
-                    event.tick, event.hash[:16], recomputed[:16],
+                    event.tick,
+                    event.hash[:16],
+                    recomputed[:16],
                 )
                 return False
             expected_prev = event.hash
@@ -311,7 +322,8 @@ class SystemStateVector:
         if self.hash != expected_prev:
             logger.error(
                 "Final hash mismatch: state=%s, chain_tail=%s",
-                self.hash[:16], expected_prev[:16],
+                self.hash[:16],
+                expected_prev[:16],
             )
             return False
         return True
