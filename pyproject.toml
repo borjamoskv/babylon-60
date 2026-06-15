@@ -236,3 +236,8 @@ replace = "version = \"{new_version}\""
 filename = "cortex/__init__.py"
 search = "__version__ = \"{current_version}\""
 replace = "__version__ = \"{new_version}\""
+
+[dependency-groups]
+dev = [
+    "argon2-cffi>=25.1.0",
+]
