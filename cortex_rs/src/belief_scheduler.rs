@@ -8,11 +8,11 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MemoryScheduler {
     #[pyo3(get, set)]
-    pub weight_rel: f32,  // Relevance weight
+    pub weight_rel: f32, // Relevance weight
     #[pyo3(get, set)]
     pub weight_conf: f32, // Confidence weight
     #[pyo3(get, set)]
-    pub weight_rec: f32,  // Recency weight
+    pub weight_rec: f32, // Recency weight
 }
 
 #[pymethods]
@@ -47,11 +47,11 @@ impl MemoryScheduler {
         let numerator = (relevance * self.weight_rel)
             + (confidence * self.weight_conf)
             + (recency * self.weight_rec);
-        
+
         // Prevent division by zero or negative costs
         let safe_cost = if cost_tokens <= 0.0 { 1.0 } else { cost_tokens };
         let denominator = safe_cost + risk_contam;
-        
+
         numerator / denominator
     }
 }

@@ -23,7 +23,8 @@ async def _check_blocking_sleep(exclude_files: frozenset[str]) -> list[str]:
             tree = ast.parse(content, filename=str(py_file))
             for node in ast.walk(tree):
                 if _is_sleep_call(node):
-                    violations.append(f"{py_file.name}:{node.lineno}")
+                    lineno = getattr(node, "lineno", 0)
+                    violations.append(f"{py_file.name}:{lineno}")
         except SyntaxError:
             continue
     return violations

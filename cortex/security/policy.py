@@ -6,6 +6,7 @@ import hashlib
 import json
 import time
 from collections.abc import Mapping
+from decimal import Decimal
 from typing import Any
 
 from cortex.security.haiku import HaikuGuard
@@ -136,7 +137,7 @@ def profile_artifact(payload: Mapping[str, Any]) -> PathogenProfile:
         entropy_score=entropy,
         contradiction_density=contradiction,
         provenance_confidence=provenance,
-        mutation_risk=0.5,
+        mutation_risk=Decimal("0.5"),
         replication_potential=0.5,
         causal_reach=0.5,
         reversibility=0.8,

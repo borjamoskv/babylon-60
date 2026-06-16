@@ -47,6 +47,7 @@ class ZKSwarmGuard:
         if taint:
             # SAGA-1: Validate Vesicular Taint
             from cortex.guards.sovereign_seals import verify_vesicular_taint
+
             proposal = {"cortex_taint": taint, "content": content}
             agent_id = meta.get("agent_id", "")
             if not verify_vesicular_taint(proposal, expected_agent_id=agent_id):

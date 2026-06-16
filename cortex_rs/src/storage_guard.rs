@@ -50,7 +50,10 @@ pub fn validate_proposal(
     if project.len() > MAX_PROJECT_LENGTH {
         return Ok(Some((
             "PROJECT_TOO_LONG".to_string(),
-            format!("String should have at most {} characters", MAX_PROJECT_LENGTH),
+            format!(
+                "String should have at most {} characters",
+                MAX_PROJECT_LENGTH
+            ),
         )));
     }
 
@@ -58,13 +61,20 @@ pub fn validate_proposal(
     if content.len() < MIN_CONTENT_LENGTH {
         return Ok(Some((
             "CONTENT_TOO_SHORT".to_string(),
-            format!("content too short ({} chars, min {})", content.len(), MIN_CONTENT_LENGTH),
+            format!(
+                "content too short ({} chars, min {})",
+                content.len(),
+                MIN_CONTENT_LENGTH
+            ),
         )));
     }
     if content.len() > MAX_CONTENT_LENGTH {
         return Ok(Some((
             "CONTENT_TOO_LONG".to_string(),
-            format!("String should have at most {} characters", MAX_CONTENT_LENGTH),
+            format!(
+                "String should have at most {} characters",
+                MAX_CONTENT_LENGTH
+            ),
         )));
     }
 
@@ -78,9 +88,26 @@ pub fn validate_proposal(
     }
 
     let allowed_types = [
-        "knowledge", "decision", "error", "ghost", "bridge", "preference", "identity", "issue",
-        "world-model", "counterfactual", "rule", "axiom", "schema", "idea", "evolution", "test",
-        "system_health", "discovery", "mafia_node", "telemetry_batch",
+        "knowledge",
+        "decision",
+        "error",
+        "ghost",
+        "bridge",
+        "preference",
+        "identity",
+        "issue",
+        "world-model",
+        "counterfactual",
+        "rule",
+        "axiom",
+        "schema",
+        "idea",
+        "evolution",
+        "test",
+        "system_health",
+        "discovery",
+        "mafia_node",
+        "telemetry_batch",
     ];
     if !allowed_types.contains(&fact_type) {
         return Ok(Some((
@@ -111,7 +138,10 @@ pub fn validate_proposal(
         if t.len() > MAX_TAGS {
             return Ok(Some((
                 "TOO_MANY_TAGS".to_string(),
-                format!("List should have at most {} items after validation", MAX_TAGS),
+                format!(
+                    "List should have at most {} items after validation",
+                    MAX_TAGS
+                ),
             )));
         }
         for tag in t {

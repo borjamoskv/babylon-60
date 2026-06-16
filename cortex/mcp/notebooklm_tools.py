@@ -14,14 +14,7 @@ from typing import Any
 logger = logging.getLogger("cortex.mcp.notebooklm")
 
 
-def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
-    """Register NotebookLM tools on the MCP server.
-
-    Args:
-        mcp: FastMCP server instance.
-        ctx: MCPContext with engine reference.
-    """
-
+def _register_notebooklm_digest(mcp: Any, ctx: Any) -> None:
     @mcp.tool()
     async def notebooklm_digest(
         output: str = "cortex_notebooklm_digest.md",
@@ -56,6 +49,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
             "status": "safe" if word_count < 500_000 else "OVER_LIMIT",
         }
 
+def _register_notebooklm_fragment(mcp: Any, ctx: Any) -> None:
     @mcp.tool()
     async def notebooklm_fragment(
         output_dir: str = "notebooklm_domains",
@@ -79,6 +73,62 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
 
         return {"domains": counts, "total_facts": sum(counts.values())}
 
+def _detect_cloud_target(drive_path: str | None) -> tuple[Path | None, str]:
+    from cortex.services.notebooklm import CLOUD_PROVIDERS
+    if drive_path:
+        return Path(drive_path), "Custom"
+    for provider, paths in CLOUD_PROVIDERS.items():
+        for p in paths:
+            if p.parent.exists():
+                return p, provider
+    return None, "Custom"
+
+def _perform_sync(target: Path, mode: str) -> tuple[list[str], int]:
+    import os
+    import shutil
+    import time
+    from datetime import datetime, timezone
+
+    from cortex.services.notebooklm import DIGEST_FILE, DOMAINS_DIR
+    
+    target.mkdir(parents=True, exist_ok=True)
+    ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d")
+    synced: list[str] = []
+
+    if mode in ("digest", "both") and DIGEST_FILE.exists():
+        dest = target / f"cortex-master-{ts}.md"
+        shutil.copy2(DIGEST_FILE, dest)
+        synced.append(str(dest))
+
+    if mode in ("domains", "both") and DOMAINS_DIR.exists():
+        for f in DOMAINS_DIR.glob("*.md"):
+            dest = target / f.name
+            shutil.copy2(f, dest)
+            synced.append(str(dest))
+
+    cutoff = time.monotonic() - (7 * 86400)
+    cleaned = 0
+    synced_names = {Path(s).name for s in synced}
+    for f in target.glob("*.md"):
+        if os.path.getmtime(f) < cutoff and f.name not in synced_names:
+            f.unlink()
+            cleaned += 1
+            
+    return synced, cleaned
+
+def _notebooklm_sync_impl(drive_path: str | None, mode: str) -> dict:
+    target, provider_name = _detect_cloud_target(drive_path)
+    if not target:
+        return {"error": "No cloud sync provider detected. Specify drive_path."}
+    synced, cleaned = _perform_sync(target, mode)
+    return {
+        "provider": provider_name,
+        "destination": str(target),
+        "files_synced": len(synced),
+        "files_cleaned": cleaned,
+    }
+
+def _register_notebooklm_sync(mcp: Any, ctx: Any) -> None:
     @mcp.tool()
     async def notebooklm_sync(
         drive_path: str | None = None,
@@ -96,62 +146,63 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
         Returns:
             dict with keys: provider, destination, files_synced, files_cleaned.
         """
-        import os
-        import shutil
-        import time
-        from datetime import datetime, timezone
+        return _notebooklm_sync_impl(drive_path, mode)
 
-        from cortex.services.notebooklm import CLOUD_PROVIDERS, DIGEST_FILE, DOMAINS_DIR
+def _get_notebooklm_digest_status() -> dict:
+    import os
+    import time
+    from datetime import datetime, timezone
 
-        # Detect provider
-        target = None
-        provider_name = "Custom"
-        if drive_path:
-            target = Path(drive_path)
-        else:
-            for provider, paths in CLOUD_PROVIDERS.items():
-                for p in paths:
-                    if p.parent.exists():
-                        target = p
-                        provider_name = provider
-                        break
-                if target:
-                    break
-
-        if not target:
-            return {"error": "No cloud sync provider detected. Specify drive_path."}
-
-        target.mkdir(parents=True, exist_ok=True)
-        ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d")
-        synced: list[str] = []
-
-        if mode in ("digest", "both") and DIGEST_FILE.exists():
-            dest = target / f"cortex-master-{ts}.md"
-            shutil.copy2(DIGEST_FILE, dest)
-            synced.append(str(dest))
-
-        if mode in ("domains", "both") and DOMAINS_DIR.exists():
-            for f in DOMAINS_DIR.glob("*.md"):
-                dest = target / f.name
-                shutil.copy2(f, dest)
-                synced.append(str(dest))
-
-        # Clean old files
-        cutoff = time.monotonic() - (7 * 86400)
-        cleaned = 0
-        synced_names = {Path(s).name for s in synced}
-        for f in target.glob("*.md"):
-            if os.path.getmtime(f) < cutoff and f.name not in synced_names:
-                f.unlink()
-                cleaned += 1
-
+    from cortex.services.notebooklm import DIGEST_FILE
+    if DIGEST_FILE.exists():
+        mtime = os.path.getmtime(DIGEST_FILE)
+        age_h = (time.monotonic() - mtime) / 3600
         return {
-            "provider": provider_name,
-            "destination": str(target),
-            "files_synced": len(synced),
-            "files_cleaned": cleaned,
+            "exists": True,
+            "size_bytes": os.path.getsize(DIGEST_FILE),
+            "updated": datetime.fromtimestamp(mtime, tz=timezone.utc).isoformat(),
+            "age_hours": round(age_h, 1),
         }
+    return {"exists": False}
 
+def _get_notebooklm_domains_status() -> dict:
+    import os
+
+    from cortex.services.notebooklm import DOMAINS_DIR
+    if DOMAINS_DIR.exists():
+        files = list(DOMAINS_DIR.glob("*.md"))
+        return {
+            "exists": True,
+            "file_count": len(files),
+            "total_bytes": sum(os.path.getsize(f) for f in files),
+        }
+    return {"exists": False}
+
+def _notebooklm_status_impl() -> dict:
+    target, provider_name = _detect_cloud_target(None)
+    cloud_info = {"provider": provider_name, "path": str(target) if target else None}
+    
+    digest_status = _get_notebooklm_digest_status()
+    domains_status = _get_notebooklm_domains_status()
+    
+    staleness = "no_digest"
+    if digest_status.get("exists"):
+        age = digest_status["age_hours"]
+        if age > 48:
+            staleness = "critical"
+        elif age > 24:
+            staleness = "warning"
+        else:
+            staleness = "fresh"
+            
+    return {
+        "digest": digest_status,
+        "domains": domains_status,
+        "cloud": cloud_info,
+        "staleness": staleness
+    }
+
+def _register_notebooklm_status(mcp: Any, ctx: Any) -> None:
     @mcp.tool()
     async def notebooklm_status() -> dict:
         """Check NotebookLM sync status - staleness, file inventory, cloud detection.
@@ -162,61 +213,18 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
         Returns:
             dict with keys: digest, domains, cloud, staleness.
         """
-        import os
-        import time
-        from datetime import datetime, timezone
+        return _notebooklm_status_impl()
 
-        from cortex.services.notebooklm import CLOUD_PROVIDERS, DIGEST_FILE, DOMAINS_DIR
+def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
+    """Register NotebookLM tools on the MCP server.
 
-        result: dict[str, Any] = {}
-
-        # Digest status
-        if DIGEST_FILE.exists():
-            mtime = os.path.getmtime(DIGEST_FILE)
-            age_h = (time.monotonic() - mtime) / 3600
-            result["digest"] = {
-                "exists": True,
-                "size_bytes": os.path.getsize(DIGEST_FILE),
-                "updated": datetime.fromtimestamp(mtime, tz=timezone.utc).isoformat(),
-                "age_hours": round(age_h, 1),
-            }
-        else:
-            result["digest"] = {"exists": False}
-
-        # Domain fragments
-        if DOMAINS_DIR.exists():
-            files = list(DOMAINS_DIR.glob("*.md"))
-            result["domains"] = {
-                "exists": True,
-                "file_count": len(files),
-                "total_bytes": sum(os.path.getsize(f) for f in files),
-            }
-        else:
-            result["domains"] = {"exists": False}
-
-        # Cloud detection
-        cloud_detected = None
-        for provider, paths in CLOUD_PROVIDERS.items():
-            for p in paths:
-                if p.parent.exists():
-                    cloud_detected = {"provider": provider, "path": str(p)}
-                    break
-            if cloud_detected:
-                break
-        result["cloud"] = cloud_detected or {"provider": "none", "path": None}
-
-        # Staleness
-        if result["digest"].get("exists"):
-            age = result["digest"]["age_hours"]
-            if age > 48:
-                result["staleness"] = "critical"
-            elif age > 24:
-                result["staleness"] = "warning"
-            else:
-                result["staleness"] = "fresh"
-        else:
-            result["staleness"] = "no_digest"
-
-        return result
-
+    Args:
+        mcp: FastMCP server instance.
+        ctx: MCPContext with engine reference.
+    """
+    _register_notebooklm_digest(mcp, ctx)
+    _register_notebooklm_fragment(mcp, ctx)
+    _register_notebooklm_sync(mcp, ctx)
+    _register_notebooklm_status(mcp, ctx)
+    
     logger.debug("Registered NotebookLM MCP tools")

@@ -275,7 +275,7 @@ class SMTConstraintGuard:
                         s.assert_and_track(And(diff >= -0.5, diff <= 0.5), consistency_track)
                         tracking_vars.append(consistency_track)
 
-    def _parse_unsat_core_reasons(self, unsat_core: list[Any]) -> list[str]:
+    def _parse_unsat_core_reasons(self, unsat_core: Any) -> list[str]:
         """Parse Z3 unsat_core reasons into human-readable string descriptions."""
         reasons = []
         for track in unsat_core:

@@ -1,21 +1,20 @@
-
-pub mod belief_object;
 pub mod atms;
-pub mod smt;
-pub mod storage_guard;
-pub mod ctre_guardian;
 pub mod auth;
-pub mod ultramap;
+pub mod belief_object;
 pub mod belief_scheduler;
 pub mod crdt_logop;
+pub mod ctre_guardian;
+pub mod smt;
+pub mod storage_guard;
+pub mod ultramap;
 pub mod zenoh_orchestrator;
-use pyo3::prelude::*;
-use belief_object::{BeliefObject, BeliefState, RelationType, ProvenanceEnvelope, BeliefRelation};
 use atms::AtmsGraph;
-use smt::{SmtLeaf, SparseMerkleTree};
-use ultramap::UltramapSubstrate;
+use belief_object::{BeliefObject, BeliefRelation, BeliefState, ProvenanceEnvelope, RelationType};
 use belief_scheduler::MemoryScheduler;
 use crdt_logop::LogOpinionPool;
+use pyo3::prelude::*;
+use smt::{SmtLeaf, SparseMerkleTree};
+use ultramap::UltramapSubstrate;
 use zenoh_orchestrator::ZenohOrchestrator;
 
 /// CORTEX-Persist Cognitive Core Rust Extension

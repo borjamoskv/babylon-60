@@ -338,6 +338,7 @@ def _run_dependency_ghost_check(cached_files: dict[Path, str]) -> None:
     else:
         printer.success(f"Dependency Ghost Check: {len(external_imports)} externals verified.")
 
+
 def _run_shannon_entropy_budget(cached_files: dict[Path, str]) -> None:
     import math
     from collections import Counter
@@ -364,6 +365,7 @@ def _run_shannon_entropy_budget(cached_files: dict[Path, str]) -> None:
     else:
         printer.success("Shannon Entropy Budget intact (<6.5 bits/char).")
 
+
 async def check_seal_8_dependency_impl(
     cached_files: dict[Path, str],
 ) -> tuple[bool, str]:
@@ -375,8 +377,10 @@ async def check_seal_8_dependency_impl(
     _run_shannon_entropy_budget(cached_files)
     return True, "verified"
 
+
 async def _run_aesthetic_gate() -> None:
     import asyncio
+
     forbidden = [
         "FI" + "XME",
         "TO" + "DO: placeholder",
@@ -402,6 +406,7 @@ async def _run_aesthetic_gate() -> None:
     else:
         printer.success("Aesthetic Gate intact - no placeholders.")
 
+
 async def _run_eu_ai_act_audit_trail() -> None:
     try:
         from cortex.engine import CortexEngine
@@ -421,6 +426,7 @@ async def _run_eu_ai_act_audit_trail() -> None:
     except (ImportError, RuntimeError, ValueError, TypeError, OSError):
         printer.warn("EU AI Act audit check skipped (engine not available).")
 
+
 def _run_ssrf_urlguard() -> tuple[bool, str]:
     try:
         from cortex.guards.url_guard import is_safe_url
@@ -435,6 +441,7 @@ def _run_ssrf_urlguard() -> tuple[bool, str]:
         printer.fail("SSRF URLGuard: Module missing - CodeQL #95 vulnerability risk.")
         return False, "URLGuard missing"
 
+
 async def check_seal_9_compliance_impl() -> tuple[bool, str]:
     """Aesthetic Gate + EU AI Act Audit Trail.
 
@@ -442,7 +449,7 @@ async def check_seal_9_compliance_impl() -> tuple[bool, str]:
     """
     await _run_aesthetic_gate()
     await _run_eu_ai_act_audit_trail()
-    
+
     ok, msg = _run_ssrf_urlguard()
     if not ok:
         return False, msg
@@ -523,6 +530,7 @@ async def check_gate_21_preservation(
 def verify_vesicular_taint(proposal: dict, expected_agent_id: str) -> bool:
     """Validates taint:{agent_id}:{session_id}:{timestamp}:{sha3_256_of_payload}"""
     import hashlib
+
     taint = proposal.get("cortex_taint")
     if not taint or not taint.startswith("taint:"):
         return False
@@ -535,4 +543,3 @@ def verify_vesicular_taint(proposal: dict, expected_agent_id: str) -> bool:
     content = proposal.get("content", "")
     expected_hash = hashlib.sha3_256(content.encode("utf-8")).hexdigest()
     return expected_hash == payload_hash
-

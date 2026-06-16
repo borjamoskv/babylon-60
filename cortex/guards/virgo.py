@@ -197,24 +197,17 @@ class VirgoContextGuard:
         logos_signature = meta.get("logos_signature")
         await self._check_replay_prevention(nonce, logos_signature, agent_id, tenant_id, conn)
 
-    def _detect_context_poisoning(self, content: str) -> str | None:
-        """
-        Scans for heuristic context poisoning patterns.
-        """
-        if not content:
-            return "Empty payload content."
-
-        # A. Infinite loops/extreme repetition
+    def _detect_repetition_poisoning(self, content: str) -> str | None:
         words = content.split()
         if len(words) > 30:
-            # Check for excessive n-gram repetition (e.g. agent repeating the same phrase over and over)
             for n in (3, 4, 5):
                 ngrams = [" ".join(words[i : i + n]) for i in range(len(words) - n + 1)]
                 for ng in set(ngrams):
                     if ngrams.count(ng) > 8:
                         return f"Extreme phrase repetition detected (phrase: '{ng[:30]}...'). Potential cognitive loop/hallucination."
+        return None
 
-        # B. Prompt Injection & State hijacking patterns
+    def _detect_injection_poisoning(self, content: str) -> str | None:
         lower_content = content.lower()
         injection_keywords = [
             "system override",
@@ -226,14 +219,35 @@ class VirgoContextGuard:
         for kw in injection_keywords:
             if kw in lower_content:
                 return f"Forbidden adversarial/state-hijack keywords detected ('{kw}')."
+        return None
 
-        # C. Shannon Entropy anomalies (extreme uniform randomness or near-zero variance)
+    def _detect_entropy_poisoning(self, content: str) -> str | None:
         if len(content) > 100:
             entropy = self._calculate_shannon_entropy(content)
             if entropy < 1.5:
                 return f"Abnormally low Shannon entropy ({entropy:.4f}) detected. Potential loop or repetitive garbage content."
             if entropy > 7.5:
                 return f"Abnormally high Shannon entropy ({entropy:.4f}) detected. Potential noise or binary payload injection."
+        return None
+
+    def _detect_context_poisoning(self, content: str) -> str | None:
+        """
+        Scans for heuristic context poisoning patterns.
+        """
+        if not content:
+            return "Empty payload content."
+
+        rep_err = self._detect_repetition_poisoning(content)
+        if rep_err:
+            return rep_err
+
+        inj_err = self._detect_injection_poisoning(content)
+        if inj_err:
+            return inj_err
+
+        ent_err = self._detect_entropy_poisoning(content)
+        if ent_err:
+            return ent_err
 
         return None
 

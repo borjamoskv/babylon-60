@@ -1,11 +1,11 @@
-use pyo3::prelude::*;
-use pyo3::exceptions::PyRuntimeError;
-use pyo3::types::PyDict;
-use std::fs::OpenOptions;
-use std::sync::{Arc, Mutex};
 use memmap2::{MmapMut, MmapOptions};
-use sha2::{Sha256, Digest};
+use pyo3::exceptions::PyRuntimeError;
+use pyo3::prelude::*;
+use pyo3::types::PyDict;
+use sha2::{Digest, Sha256};
+use std::fs::OpenOptions;
 use std::panic;
+use std::sync::{Arc, Mutex};
 
 fn strip_trailing_nulls(bytes: &[u8]) -> &[u8] {
     let mut len = bytes.len();
@@ -36,12 +36,19 @@ impl UltramapSubstrate {
             .read(true)
             .write(true)
             .create(true)
+            .truncate(false)
             .open(bin_path)
             .map_err(|e| PyRuntimeError::new_err(format!("Failed to open ultramap file: {}", e)))?;
 
-        if file.metadata().map_err(|e| PyRuntimeError::new_err(format!("Failed to read metadata: {}", e)))?.len() < tensor_size as u64 {
-            file.set_len(tensor_size as u64)
-                .map_err(|e| PyRuntimeError::new_err(format!("Failed to allocate ultramap file: {}", e)))?;
+        if file
+            .metadata()
+            .map_err(|e| PyRuntimeError::new_err(format!("Failed to read metadata: {}", e)))?
+            .len()
+            < tensor_size as u64
+        {
+            file.set_len(tensor_size as u64).map_err(|e| {
+                PyRuntimeError::new_err(format!("Failed to allocate ultramap file: {}", e))
+            })?;
         }
 
         let mmap = unsafe {
@@ -58,7 +65,15 @@ impl UltramapSubstrate {
         })
     }
 
-    pub fn update_agent_position(&self, agent_idx: usize, x: f64, y: f64, z: f64, target: &str, entropy: f64) -> PyResult<bool> {
+    pub fn update_agent_position(
+        &self,
+        agent_idx: usize,
+        x: f64,
+        y: f64,
+        z: f64,
+        target: &str,
+        entropy: f64,
+    ) -> PyResult<bool> {
         if agent_idx >= self.capacity {
             return Ok(false);
         }
@@ -154,7 +169,11 @@ impl UltramapSubstrate {
         Ok(joules)
     }
 
-    pub fn get_agent_state<'py>(&self, py: Python<'py>, agent_idx: usize) -> PyResult<Bound<'py, PyDict>> {
+    pub fn get_agent_state<'py>(
+        &self,
+        py: Python<'py>,
+        agent_idx: usize,
+    ) -> PyResult<Bound<'py, PyDict>> {
         let dict = PyDict::new(py);
         if agent_idx >= self.capacity {
             return Ok(dict);
@@ -225,17 +244,22 @@ impl UltramapSubstrate {
         Ok(dict)
     }
 
-    pub fn update_control_vector(&self, agent_idx: usize, queue_depth: f64, error_rate: f64, causal_entropy: f64, cpu_load: f64) -> PyResult<bool> {
+    pub fn update_control_vector(
+        &self,
+        agent_idx: usize,
+        queue_depth: f64,
+        error_rate: f64,
+        causal_entropy: f64,
+        cpu_load: f64,
+    ) -> PyResult<bool> {
         if agent_idx >= self.capacity {
             return Ok(false);
         }
 
         let mut mmap = self.mmap.lock().unwrap();
         let offset = agent_idx * self.node_size;
-        let write_result = panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            unsafe {
-                std::slice::from_raw_parts_mut(mmap.as_mut_ptr(), self.capacity * self.node_size)
-            }
+        let write_result = panic::catch_unwind(std::panic::AssertUnwindSafe(|| unsafe {
+            std::slice::from_raw_parts_mut(mmap.as_mut_ptr(), self.capacity * self.node_size)
         }));
         let buffer: &mut [u8] = match write_result {
             Ok(buf) => buf,

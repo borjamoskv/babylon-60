@@ -67,7 +67,8 @@ class HealthGuard(HealthMixin):
 
         sla = custom_sla or self.DEFAULT_SLA
         try:
-            score = await self.health_score(persist=False)
+            kwargs: dict[str, bool] = {"persist": False}
+            score = await self.health_score(**kwargs)  # type: ignore
         except TypeError:
             score = await self.health_score()
 

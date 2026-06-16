@@ -1,5 +1,5 @@
-use std::collections::{HashMap, HashSet};
 use pyo3::prelude::*;
+use std::collections::{HashMap, HashSet};
 
 #[pyclass(from_py_object)]
 #[derive(Debug, Clone)]
@@ -36,8 +36,11 @@ impl AtmsGraph {
     pub fn add_dependency(&mut self, child_str: &str, parent_str: &str) -> PyResult<()> {
         let child = child_str.to_string();
         let parent = parent_str.to_string();
-        
-        self.dependencies.entry(child.clone()).or_default().push(parent.clone());
+
+        self.dependencies
+            .entry(child.clone())
+            .or_default()
+            .push(parent.clone());
         self.entails.entry(parent).or_default().push(child);
         Ok(())
     }

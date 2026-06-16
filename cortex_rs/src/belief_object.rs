@@ -79,7 +79,7 @@ impl BeliefRelation {
             target_id,
         })
     }
-    
+
     #[getter]
     pub fn target_id(&self) -> String {
         self.target_id.to_string()

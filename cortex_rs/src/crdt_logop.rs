@@ -27,9 +27,11 @@ impl LogOpinionPool {
     /// Add an opinion (vector of probabilities) with a given structural weight
     pub fn add_opinion(&mut self, opinion: Vec<f64>, weight: f64) -> PyResult<bool> {
         if opinion.len() != self.dimensions {
-            return Err(pyo3::exceptions::PyValueError::new_err("Dimension mismatch in LogOP"));
+            return Err(pyo3::exceptions::PyValueError::new_err(
+                "Dimension mismatch in LogOP",
+            ));
         }
-        
+
         self.opinions.extend(opinion);
         self.weights.push(weight);
         Ok(true)
@@ -46,21 +48,21 @@ impl LogOpinionPool {
         let mut aggregated = vec![0.0; self.dimensions];
         let mut sum = 0.0;
 
-        for d in 0..self.dimensions {
+        for (d, agg) in aggregated.iter_mut().enumerate() {
             let mut prod = 1.0;
             for i in 0..num_opinions {
                 let p = self.opinions[i * self.dimensions + d];
                 let w = self.weights[i];
                 prod *= p.powf(w);
             }
-            aggregated[d] = prod;
+            *agg = prod;
             sum += prod;
         }
 
         // Normalize probability distribution
         if sum > 0.0 {
-            for d in 0..self.dimensions {
-                aggregated[d] /= sum;
+            for agg in aggregated.iter_mut() {
+                *agg /= sum;
             }
         }
 
