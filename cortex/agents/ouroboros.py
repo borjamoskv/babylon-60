@@ -1,13 +1,13 @@
 # [C5-REAL] Exergy-Maximized
 """Ouroboros Infinity Orchestrator (LEGIØN-1)"""
 
-import uuid
 import logging
+import uuid
 from typing import Any
 
-from cortex.runtime.vesicular import VesicularRuntime
+from cortex.engine.storage_guard import GuardViolation, StorageGuard
 from cortex.engine.zenoh_daemon import ZenohSwarmDaemon
-from cortex.engine.storage_guard import StorageGuard, GuardViolation
+from cortex.runtime.vesicular import VesicularRuntime
 
 logger = logging.getLogger(__name__)
 

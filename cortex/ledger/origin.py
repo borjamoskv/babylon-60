@@ -154,10 +154,7 @@ def sign_event_origin(
     return dataclasses.replace(unsigned_event, origin=signed_origin)
 
 
-def verify_event_origin(event: LedgerEvent, registry: OriginKeyRegistry) -> None:
-    origin = event.origin
-    if origin is None or not origin.origin_signature:
-        raise OriginSignatureError("origin_signature_missing")
+def _verify_origin_fields(event: LedgerEvent, origin: LedgerOriginSignature) -> None:
     if origin.signature_alg != "ed25519":
         raise OriginSignatureError(f"origin_signature_alg_unsupported:{origin.signature_alg}")
     if origin.hash_alg != "sha256":
@@ -171,6 +168,7 @@ def verify_event_origin(event: LedgerEvent, registry: OriginKeyRegistry) -> None
     if origin.payload_hash != origin_payload_hash(event):
         raise OriginSignatureError("origin_payload_hash_mismatch")
 
+def _verify_origin_key(event: LedgerEvent, origin: LedgerOriginSignature, registry: OriginKeyRegistry) -> None:
     key = registry.get(origin.actor_key_id)
     if key is None:
         raise OriginSignatureError(f"origin_key_missing:{origin.actor_key_id}")
@@ -189,6 +187,14 @@ def verify_event_origin(event: LedgerEvent, registry: OriginKeyRegistry) -> None
         )
     except (InvalidSignature, ValueError) as exc:
         raise OriginSignatureError("origin_signature_invalid") from exc
+
+def verify_event_origin(event: LedgerEvent, registry: OriginKeyRegistry) -> None:
+    origin = event.origin
+    if origin is None or not origin.origin_signature:
+        raise OriginSignatureError("origin_signature_missing")
+        
+    _verify_origin_fields(event, origin)
+    _verify_origin_key(event, origin, registry)
 
 
 def origin_payload_hash(event: LedgerEvent) -> str:
