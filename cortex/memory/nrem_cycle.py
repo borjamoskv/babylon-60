@@ -144,43 +144,13 @@ class NREMConsolidationCycle:
             await asyncio.gather(*concurrent_tasks)
 
         # Phase 3: Synaptic Decay (STDP edge weakening)
-        edges_decayed = edges_pruned = 0
-        if self._stdp is not None:
-            try:
-                edges_pruned = self._stdp.decay_all(factor=self._decay_factor)
-                edges_decayed = self._stdp.edge_count()
-                logger.info(
-                    "NREM Phase 3 (Synaptic Decay): edges_remaining=%d pruned=%d",
-                    edges_decayed,
-                    edges_pruned,
-                )
-            except (RuntimeError, ValueError) as exc:
-                msg = f"Phase 3 (Synaptic Decay) failed: {exc}"
-                logger.error(msg)
-                errors.append(msg)
+        edges_decayed, edges_pruned = self._run_phase3(errors)
 
         # Phase 4: Homeostatic Scaling (Turrigiano normalization)
-        engrams_scaled = 0
-        scaling_factor = 1.0
-        if self._scaler is not None:
-            try:
-                result = await self._scaler.scale(
-                    tenant_id=tenant_id,
-                    project_id=project_id,
-                )
-                engrams_scaled = result.get("scaled", 0)
-                scaling_factor = result.get("factor", 1.0)
-                logger.info(
-                    "NREM Phase 4 (Homeostatic Scaling): scaled=%d factor=%.4f",
-                    engrams_scaled,
-                    scaling_factor,
-                )
-            except (RuntimeError, ValueError, OSError) as exc:
-                msg = f"Phase 4 (Homeostatic Scaling) failed: {exc}"
-                logger.error(msg)
-                errors.append(msg)
+        engrams_scaled, scaling_factor = await self._run_phase4(tenant_id, project_id, errors)
 
         duration_ms = (time.perf_counter() - t0) * 1000.0
+
 
         report = NREMReport(
             matured=matured,
@@ -202,3 +172,42 @@ class NREMConsolidationCycle:
             len(errors),
         )
         return report
+
+    def _run_phase3(self, errors: list[str]) -> tuple[int, int]:
+        edges_decayed = edges_pruned = 0
+        if self._stdp is not None:
+            try:
+                edges_pruned = self._stdp.decay_all(factor=self._decay_factor)
+                edges_decayed = self._stdp.edge_count()
+                logger.info(
+                    "NREM Phase 3 (Synaptic Decay): edges_remaining=%d pruned=%d",
+                    edges_decayed,
+                    edges_pruned,
+                )
+            except (RuntimeError, ValueError) as exc:
+                msg = f"Phase 3 (Synaptic Decay) failed: {exc}"
+                logger.error(msg)
+                errors.append(msg)
+        return edges_decayed, edges_pruned
+
+    async def _run_phase4(self, tenant_id: str, project_id: str | None, errors: list[str]) -> tuple[int, float]:
+        engrams_scaled = 0
+        scaling_factor = 1.0
+        if self._scaler is not None:
+            try:
+                result = await self._scaler.scale(
+                    tenant_id=tenant_id,
+                    project_id=project_id,
+                )
+                engrams_scaled = result.get("scaled", 0)
+                scaling_factor = result.get("factor", 1.0)
+                logger.info(
+                    "NREM Phase 4 (Homeostatic Scaling): scaled=%d factor=%.4f",
+                    engrams_scaled,
+                    scaling_factor,
+                )
+            except (RuntimeError, ValueError, OSError) as exc:
+                msg = f"Phase 4 (Homeostatic Scaling) failed: {exc}"
+                logger.error(msg)
+                errors.append(msg)
+        return engrams_scaled, scaling_factor
