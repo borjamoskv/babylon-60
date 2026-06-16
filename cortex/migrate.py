@@ -82,65 +82,12 @@ def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
         return
 
     project = "__system__"
-
     facts_to_store = []
-
-    # Preferences
-    prefs = data.get("preferences", {})
-    if prefs:
-        facts_to_store.append(
-            {
-                "project": project,
-                "content": json.dumps(prefs, ensure_ascii=False),
-                "fact_type": "preference",
-                "tags": ["system", "preferences"],
-                "confidence": "verified",
-                "source": "migration-v3.1",
-            }
-        )
-
-    # Operator info
-    operator = data.get("operator", {})
-    if operator:
-        facts_to_store.append(
-            {
-                "project": project,
-                "content": json.dumps(operator, ensure_ascii=False),
-                "fact_type": "identity",
-                "tags": ["system", "operator"],
-                "confidence": "verified",
-                "source": "migration-v3.1",
-            }
-        )
-
-    # Global decisions
-    for decision in data.get("global_decisions", []):
-        facts_to_store.append(
-            {
-                "project": project,
-                "content": decision.get("decision", str(decision)),
-                "fact_type": "decision",
-                "tags": ["system", "global"],
-                "confidence": "verified",
-                "source": "migration-v3.1",
-                "meta": decision,
-            }
-        )
-
-    # Knowledge items
-    for ki in data.get("knowledge", []):
-        facts_to_store.append(
-            {
-                "project": project,
-                "content": ki.get("content", str(ki)),
-                "fact_type": "knowledge",
-                "tags": ["system", ki.get("topic", "general")],
-                "confidence": ki.get("confidence", "stated"),
-                "source": "migration-v3.1",
-                "valid_from": ki.get("added", None),
-                "meta": ki,
-            }
-        )
+    
+    facts_to_store.extend(_extract_preferences(data, project))
+    facts_to_store.extend(_extract_operator(data, project))
+    facts_to_store.extend(_extract_global_decisions(data, project))
+    facts_to_store.extend(_extract_knowledge(data, project))
 
     if facts_to_store:
         try:
@@ -149,9 +96,70 @@ def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
         except Exception as e:
             stats["errors"].append(f"System facts import failed: {e}")
 
-    # Sessions
-    conn = engine._get_sync_conn()
-    for session in data.get("sessions_log", []):
+    _migrate_sessions(engine._get_sync_conn(), data.get("sessions_log", []), stats)
+
+
+def _extract_preferences(data: dict, project: str) -> list[dict]:
+    prefs = data.get("preferences", {})
+    if not prefs:
+        return []
+    return [{
+        "project": project,
+        "content": json.dumps(prefs, ensure_ascii=False),
+        "fact_type": "preference",
+        "tags": ["system", "preferences"],
+        "confidence": "verified",
+        "source": "migration-v3.1",
+    }]
+
+
+def _extract_operator(data: dict, project: str) -> list[dict]:
+    operator = data.get("operator", {})
+    if not operator:
+        return []
+    return [{
+        "project": project,
+        "content": json.dumps(operator, ensure_ascii=False),
+        "fact_type": "identity",
+        "tags": ["system", "operator"],
+        "confidence": "verified",
+        "source": "migration-v3.1",
+    }]
+
+
+def _extract_global_decisions(data: dict, project: str) -> list[dict]:
+    facts = []
+    for decision in data.get("global_decisions", []):
+        facts.append({
+            "project": project,
+            "content": decision.get("decision", str(decision)),
+            "fact_type": "decision",
+            "tags": ["system", "global"],
+            "confidence": "verified",
+            "source": "migration-v3.1",
+            "meta": decision,
+        })
+    return facts
+
+
+def _extract_knowledge(data: dict, project: str) -> list[dict]:
+    facts = []
+    for ki in data.get("knowledge", []):
+        facts.append({
+            "project": project,
+            "content": ki.get("content", str(ki)),
+            "fact_type": "knowledge",
+            "tags": ["system", ki.get("topic", "general")],
+            "confidence": ki.get("confidence", "stated"),
+            "source": "migration-v3.1",
+            "valid_from": ki.get("added", None),
+            "meta": ki,
+        })
+    return facts
+
+
+def _migrate_sessions(conn: sqlite3.Connection, sessions_log: list, stats: dict) -> None:
+    for session in sessions_log:
         try:
             conn.execute(
                 """
@@ -169,7 +177,6 @@ def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
             stats["sessions_imported"] += 1
         except sqlite3.Error as e:
             stats["errors"].append(f"Session import failed: {e}")
-
     conn.commit()
 
 

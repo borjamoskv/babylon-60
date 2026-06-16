@@ -43,6 +43,19 @@ class ZKSwarmGuard:
             # Low exergy topological type -> standard stochastic heuristic handling
             return
 
+        taint = meta.get("cortex_taint")
+        if taint:
+            # SAGA-1: Validate Vesicular Taint
+            from cortex.guards.sovereign_seals import verify_vesicular_taint
+            proposal = {"cortex_taint": taint, "content": content}
+            agent_id = meta.get("agent_id", "")
+            if not verify_vesicular_taint(proposal, expected_agent_id=agent_id):
+                raise VoidStateSecurityError(
+                    f"[ZK-SWARM] Vesicular Taint invalid for payload '{fact_type}'. "
+                    "Death protocol constraint violated."
+                )
+            return  # Taint is valid, bypass Ed25519 check
+
         public_key_b64 = meta.get("agent_public_key")
         signature_b64 = meta.get("zk_proof_signature")
 

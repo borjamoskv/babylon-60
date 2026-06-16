@@ -73,7 +73,19 @@ __all__ = [
     "EpisodicSnapshot",
     "MemoryEntry",
     "MemoryEvent",
+    "BeliefState",
+    "BeliefRelation",
+    "ProvenanceEnvelope",
+    "BeliefObject",
 ]
+
+# Epistemic Ontology Core
+from cortex.memory.epistemic_ontology import (
+    BeliefObject,
+    BeliefRelation,
+    BeliefState,
+    ProvenanceEnvelope,
+)
 
 
 # ─── Cognitive Stratification Configuration ──────────────────────────

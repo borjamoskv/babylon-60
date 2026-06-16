@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDVI-RAG | Zero-Employee Orchestrator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="grid-overlay"></div>
+    <div class="container">
+        <header>
+            <h1>MEDVI<span class="accent">-RAG</span></h1>
+            <p class="subtitle">Zero-Employee Operational Orchestrator</p>
+            <div class="status-bar">
+                <span class="dot"></span> C5-REAL STATE ACTIVE
+            </div>
+        </header>
+
+        <main>
+            <div class="input-section glass-panel">
+                <label for="intentInput">Sovereign Intent Injection</label>
+                <textarea id="intentInput" placeholder="Ej: Necesito un equipo de customer support urgente con budget de 5000..." rows="3"></textarea>
+                <button id="executeBtn" class="btn-neon">EXECUTE INTENT <span>&rarr;</span></button>
+            </div>
+
+            <div class="output-section glass-panel">
+                <div class="output-header">
+                    <h2>Master Ledger Output</h2>
+                    <span id="loadingIndicator" class="loading hidden">Processing...</span>
+                </div>
+                <div class="terminal-window">
+                    <pre><code id="jsonOutput">// Awaiting intent...</code></pre>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

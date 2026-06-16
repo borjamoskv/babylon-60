@@ -511,3 +511,21 @@ async def check_gate_21_preservation(
     if passed:
         printer.success(f"Self-Preservation intact ({', '.join(checks)}).")
     return passed, "verified"
+
+
+def verify_vesicular_taint(proposal: dict, expected_agent_id: str) -> bool:
+    """Validates taint:{agent_id}:{session_id}:{timestamp}:{sha3_256_of_payload}"""
+    import hashlib
+    taint = proposal.get("cortex_taint")
+    if not taint or not taint.startswith("taint:"):
+        return False
+    parts = taint.split(":")
+    if len(parts) != 5:
+        return False
+    _, agent_id, session_id, timestamp, payload_hash = parts
+    if agent_id != expected_agent_id:
+        return False
+    content = proposal.get("content", "")
+    expected_hash = hashlib.sha3_256(content.encode("utf-8")).hexdigest()
+    return expected_hash == payload_hash
+

@@ -55,3 +55,35 @@ def calculate_recall_precision(engine, limit: int = 20, top_k: int = 5) -> dict[
 
     recall = (hits / total) if total > 0 else 0.0
     return {"recall_at_k": round(recall, 4), "total": total, "hits": hits, "top_k": top_k}
+
+
+def evaluate_belief_score(
+    relevance: float,
+    confidence: float,
+    recency: float,
+    token_cost: int,
+    risk_contam: float,
+    w_r: float = 0.5,
+    w_c: float = 0.3,
+    w_t: float = 0.2
+) -> float:
+    """
+    Belief Plane (Memory Scheduler) Equation.
+    Determines if a belief should be injected into context or rejected.
+
+    Score(m) = ((Rel * w_r) + (Conf * w_c) + (Rec * w_t)) / (Cost_tokens + Risk_contam)
+
+    If Risk_contam approaches infinity (cascading structural contradictions),
+    the score asymptotes to 0, rejecting the memory payload.
+    """
+    if risk_contam >= 1e6:
+        # Hard fault / Absolute contradiction
+        return 0.0
+
+    numerator = (relevance * w_r) + (confidence * w_c) + (recency * w_t)
+    
+    # Avoid division by zero
+    denominator = max(1.0, float(token_cost)) + risk_contam
+
+    score = numerator / denominator
+    return score
