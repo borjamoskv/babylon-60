@@ -205,7 +205,7 @@ class PromptSecurityGuard:
                 response_embedding = self.model.encode(text, convert_to_tensor=True)
                 similarity = util.cos_sim(response_embedding, self.system_prompt_embedding)
                 return float(similarity)
-            except Exception as e:
+            except (RuntimeError, ValueError, TypeError) as e:
                 logger.error(f"[PROMPT_SECURITY] Error calculating cosine similarity: {e}")
 
         # Fallback syntactic-derived similarity

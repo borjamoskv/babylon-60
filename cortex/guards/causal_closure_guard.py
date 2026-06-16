@@ -54,7 +54,7 @@ class CausalClosureGuard:
                             inner_contents.extend(str(v) for v in p.values() if isinstance(v, str))
                         elif isinstance(p, str):
                             inner_contents.append(p)
-        except Exception:
+        except (json.JSONDecodeError, TypeError, ValueError):
             pass
 
         for c in inner_contents:

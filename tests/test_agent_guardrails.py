@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 # [C5-REAL] Exergy-Maximized
 
 import tempfile
@@ -34,8 +36,8 @@ class TestAgentSchema:
 
     def test_memory_config_defaults(self):
         mc = MemoryConfig()
-        assert mc.art_rho == 0.85
-        assert mc.pruning_threshold == 0.2
+        assert mc.art_rho == Decimal("0.85")
+        assert mc.pruning_threshold == Decimal("0.2")
         assert mc.retrieval_band == "beta"
         assert mc.sparse_encoding is False
         assert mc.silent_engrams is True
@@ -43,7 +45,7 @@ class TestAgentSchema:
     def test_guardrail_config_defaults(self):
         gc = GuardrailConfig()
         assert gc.max_session_tokens == 100_000
-        assert gc.warn_threshold == 0.8
+        assert gc.warn_threshold == Decimal("0.8")
         assert gc.max_turns == 0
 
     def test_custom_yaml(self):
@@ -105,7 +107,7 @@ class TestAgentLoader:
         status = agent.status()
         assert "name" in status
         assert "guardrail" in status
-        assert status["art_rho"] == 0.85
+        assert status["art_rho"] == Decimal("0.85")
 
 
 # ─── Session Guardrail Tests ────────────────────────────────────────
