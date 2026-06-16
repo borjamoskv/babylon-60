@@ -47,6 +47,125 @@ def register_mega_tools(mcp: FastMCP, ctx: _MCPContext) -> None:
 # ─── Reality Weaver ──────────────────────────────────────────────────
 
 
+async def _fetch_reality_weaver_stats(conn, project: str, cutoff_30d: str):
+    cursor = await conn.execute(
+        """
+        SELECT fact_type, count(*) as cnt
+        FROM facts
+        WHERE (project = ? OR ? = '')
+          AND is_tombstoned = 0
+        GROUP BY fact_type
+        ORDER BY cnt DESC
+        """,
+        (project, project),
+    )
+    type_rows = await cursor.fetchall()
+
+    cursor = await conn.execute(
+        """
+        SELECT content FROM facts
+        WHERE project = ? AND fact_type = 'decision'
+          AND is_tombstoned = 0 AND created_at > ?
+        ORDER BY id DESC LIMIT 5
+        """,
+        (project, cutoff_30d),
+    )
+    decisions = list(await cursor.fetchall())
+
+    cursor = await conn.execute(
+        """
+        SELECT content FROM facts
+        WHERE project = ? AND fact_type = 'ghost'
+          AND is_tombstoned = 0
+        ORDER BY id DESC LIMIT 5
+        """,
+        (project,),
+    )
+    ghosts = list(await cursor.fetchall())
+
+    cursor = await conn.execute(
+        """
+        SELECT content FROM facts
+        WHERE project = ? AND fact_type = 'bridge'
+          AND is_tombstoned = 0
+        ORDER BY id DESC LIMIT 3
+        """,
+        (project,),
+    )
+    bridges = list(await cursor.fetchall())
+
+    return type_rows, decisions, ghosts, bridges
+
+def _format_reality_weaver_report(intent: str, project: str, type_rows, decisions, ghosts, bridges) -> str:
+    lines = [f"═══ REALITY WEAVING: {intent.upper()} ═══", ""]
+
+    total = 0
+    if type_rows:
+        lines.append("### Knowledge Base")
+        lines.append("")
+        lines.append("| Fact Type | Count |")
+        lines.append("| :--- | ---: |")
+        for ftype, cnt in type_rows:
+            lines.append(f"| {ftype} | {cnt} |")
+            total += cnt
+        lines.append(f"| **TOTAL** | **{total}** |")
+        lines.append("")
+    else:
+        lines.append(f"> No facts found for project '{project}'. Virgin territory.")
+        lines.append("")
+
+    if decisions:
+        lines.append("### Recent Decisions")
+        lines.append("")
+        for (content,) in decisions:
+            lines.append(f"- {content[:120]}")
+        lines.append("")
+
+    if ghosts:
+        lines.append("### ⚠️ Active Ghosts (Unfinished Work)")
+        lines.append("")
+        for (content,) in ghosts:
+            lines.append(f"- 👻 {content[:120]}")
+        lines.append("")
+
+    if bridges:
+        lines.append("### 🌉 Cross-Project Bridges")
+        lines.append("")
+        for (content,) in bridges:
+            lines.append(f"- {content[:120]}")
+        lines.append("")
+
+    lines.append("### Proposed Structure")
+    lines.append("")
+    lines.append("| Path | Type | Purpose | Priority |")
+    lines.append("| :--- | :--- | :--- | :--- |")
+    lines.append(f"| `{project}/core/` | [DIR] | Orchestration Layer | HIGH |")
+    lines.append(f"| `{project}/api/` | [DIR] | External Interface | HIGH |")
+
+    if ghosts:
+        lines.append(
+            f"| `{project}/debt/` | [DIR] | "
+            f"Ghost Resolution ({len(ghosts)} pending) | CRITICAL |"
+        )
+    if bridges:
+        lines.append(
+            f"| `{project}/bridges/` | [DIR] | "
+            f"Bridge Integration ({len(bridges)} active) | MEDIUM |"
+        )
+
+    lines.append(f"| `{project}/README.md` | [FILE] | Reality Manifest | HIGH |")
+    lines.append("")
+
+    ghost_warning = f" ⚠️ {len(ghosts)} ghost(s) need resolution first." if ghosts else ""
+    lines.append(
+        f"> [!IMPORTANT]\n"
+        f"> Reality Weaver grounded this intent in "
+        f"{total} existing facts.{ghost_warning}"
+    )
+
+    return "\n".join(lines)
+
+
 def _register_reality_weaver(mcp: FastMCP, ctx: _MCPContext) -> None:
     """Register the ``cortex_reality_weaver`` tool."""
 
@@ -64,131 +183,16 @@ def _register_reality_weaver(mcp: FastMCP, ctx: _MCPContext) -> None:
         """
         await ctx.ensure_ready()
 
-        lines = [f"═══ REALITY WEAVING: {intent.upper()} ═══", ""]
+        cutoff_30d = (
+            datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=30)
+        ).isoformat()
 
-        # 1. Query existing facts for this project
         async with ctx.pool.acquire() as conn:
-            # Fact distribution by type
-            cursor = await conn.execute(
-                """
-                SELECT fact_type, count(*) as cnt
-                FROM facts
-                WHERE (project = ? OR ? = '')
-                  AND is_tombstoned = 0
-                GROUP BY fact_type
-                ORDER BY cnt DESC
-                """,
-                (project, project),
-            )
-            type_rows = await cursor.fetchall()
+            stats = await _fetch_reality_weaver_stats(conn, project, cutoff_30d)
 
-            # Recent decisions (last 30 days)
-            cutoff_30d = (
-                datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=30)
-            ).isoformat()
-            cursor = await conn.execute(
-                """
-                SELECT content FROM facts
-                WHERE project = ? AND fact_type = 'decision'
-                  AND is_tombstoned = 0 AND created_at > ?
-                ORDER BY id DESC LIMIT 5
-                """,
-                (project, cutoff_30d),
-            )
-            decisions = list(await cursor.fetchall())
-
-            # Active ghosts (unfinished work)
-            cursor = await conn.execute(
-                """
-                SELECT content FROM facts
-                WHERE project = ? AND fact_type = 'ghost'
-                  AND is_tombstoned = 0
-                ORDER BY id DESC LIMIT 5
-                """,
-                (project,),
-            )
-            ghosts = list(await cursor.fetchall())
-
-            # Bridges (cross-project patterns)
-            cursor = await conn.execute(
-                """
-                SELECT content FROM facts
-                WHERE project = ? AND fact_type = 'bridge'
-                  AND is_tombstoned = 0
-                ORDER BY id DESC LIMIT 3
-                """,
-                (project,),
-            )
-            bridges = list(await cursor.fetchall())
-
-        # 2. Build report from real data
-        if type_rows:
-            lines.append("### Knowledge Base")
-            lines.append("")
-            lines.append("| Fact Type | Count |")
-            lines.append("| :--- | ---: |")
-            total = 0
-            for ftype, cnt in type_rows:
-                lines.append(f"| {ftype} | {cnt} |")
-                total += cnt
-            lines.append(f"| **TOTAL** | **{total}** |")
-            lines.append("")
-        else:
-            lines.append(f"> No facts found for project '{project}'. Virgin territory.")
-            lines.append("")
-
-        if decisions:
-            lines.append("### Recent Decisions")
-            lines.append("")
-            for (content,) in decisions:
-                lines.append(f"- {content[:120]}")
-            lines.append("")
-
-        if ghosts:
-            lines.append("### ⚠️ Active Ghosts (Unfinished Work)")
-            lines.append("")
-            for (content,) in ghosts:
-                lines.append(f"- 👻 {content[:120]}")
-            lines.append("")
-
-        if bridges:
-            lines.append("### 🌉 Cross-Project Bridges")
-            lines.append("")
-            for (content,) in bridges:
-                lines.append(f"- {content[:120]}")
-            lines.append("")
-
-        # 3. Architectural recommendation
-        lines.append("### Proposed Structure")
-        lines.append("")
-        lines.append("| Path | Type | Purpose | Priority |")
-        lines.append("| :--- | :--- | :--- | :--- |")
-        lines.append(f"| `{project}/core/` | [DIR] | Orchestration Layer | HIGH |")
-        lines.append(f"| `{project}/api/` | [DIR] | External Interface | HIGH |")
-
-        if ghosts:
-            lines.append(
-                f"| `{project}/debt/` | [DIR] | "
-                f"Ghost Resolution ({len(ghosts)} pending) | CRITICAL |"
-            )
-        if bridges:
-            lines.append(
-                f"| `{project}/bridges/` | [DIR] | "
-                f"Bridge Integration ({len(bridges)} active) | MEDIUM |"
-            )
-
-        lines.append(f"| `{project}/README.md` | [FILE] | Reality Manifest | HIGH |")
-        lines.append("")
-
-        ghost_warning = f" ⚠️ {len(ghosts)} ghost(s) need resolution first." if ghosts else ""
-        lines.append(
-            f"> [!IMPORTANT]\n"
-            f"> Reality Weaver grounded this intent in "
-            f"{total if type_rows else 0} existing facts.{ghost_warning}"
-        )
-
+        report = _format_reality_weaver_report(intent, project, *stats)
         ctx.metrics.record_request()
-        return "\n".join(lines)
+        return report
 
 
 # ─── Entropy Cracker ─────────────────────────────────────────────────
@@ -299,6 +303,178 @@ def _register_entropy_cracker(mcp: FastMCP, ctx: _MCPContext) -> None:
 # ─── Temporal Nexus ──────────────────────────────────────────────────
 
 
+async def _fetch_nexus_stats(conn, project: str, cutoff_7d: str, cutoff_14d: str):
+    try:
+        cursor = await conn.execute(
+            """
+            SELECT count(*) as tx_count,
+                   min(timestamp) as start_date,
+                   max(timestamp) as last_date
+            FROM transactions
+            WHERE project = ? OR ? = ''
+            """,
+            (project, project),
+        )
+        tx_stats = await cursor.fetchone()
+    except Exception as e:
+        logger.debug("Failed to query transaction stats: %s", e)
+        tx_stats = (0, "N/A", "N/A")
+
+    cursor = await conn.execute(
+        """
+        SELECT count(*) FROM facts
+        WHERE fact_type = 'ghost'
+          AND is_tombstoned = 0
+          AND (project = ? OR ? = '')
+        """,
+        (project, project),
+    )
+    row = await cursor.fetchone()
+    ghost_count = row[0] if row else 0
+
+    cursor = await conn.execute(
+        """
+        SELECT count(*) FROM facts
+        WHERE is_tombstoned = 0
+          AND (project = ? OR ? = '')
+        """,
+        (project, project),
+    )
+    row = await cursor.fetchone()
+    total_facts = row[0] if row else 0
+
+    cursor = await conn.execute(
+        """
+        SELECT count(*) FROM facts
+        WHERE fact_type = 'decision'
+          AND is_tombstoned = 0
+          AND created_at > ?
+          AND (project = ? OR ? = '')
+        """,
+        (cutoff_7d, project, project),
+    )
+    row = await cursor.fetchone()
+    recent_decisions = row[0] if row else 0
+
+    cursor = await conn.execute(
+        """
+        SELECT count(*) FROM facts
+        WHERE fact_type = 'decision'
+          AND is_tombstoned = 0
+          AND created_at > ? AND created_at <= ?
+          AND (project = ? OR ? = '')
+        """,
+        (cutoff_14d, cutoff_7d, project, project),
+    )
+    row = await cursor.fetchone()
+    prev_decisions = row[0] if row else 0
+
+    cursor = await conn.execute(
+        """
+        SELECT count(*) FROM facts
+        WHERE fact_type = 'bridge'
+          AND is_tombstoned = 0
+          AND (project = ? OR ? = '')
+        """,
+        (project, project),
+    )
+    row = await cursor.fetchone()
+    bridge_count = row[0] if row else 0
+
+    cursor = await conn.execute(
+        """
+        SELECT count(*) FROM facts
+        WHERE fact_type = 'error'
+          AND is_tombstoned = 0
+          AND created_at > ?
+          AND (project = ? OR ? = '')
+        """,
+        (cutoff_7d, project, project),
+    )
+    error_row = await cursor.fetchone()
+    recent_errors = error_row[0] if error_row else 0
+
+    return (
+        tx_stats, ghost_count, total_facts, recent_decisions,
+        prev_decisions, bridge_count, recent_errors
+    )
+
+def _format_nexus_report(
+    project: str, tx_stats, ghost_count, total_facts, recent_decisions,
+    prev_decisions, bridge_count, recent_errors
+) -> str:
+    tx_count, start, last = tx_stats if tx_stats else (0, "N/A", "N/A")
+    ghost_density = (ghost_count / max(total_facts, 1)) * 100
+    drift = ((recent_decisions - prev_decisions) / max(prev_decisions, 1)) * 100
+
+    if ghost_density > 20:
+        ghost_level = "🔴 CRITICAL"
+    elif ghost_density > 10:
+        ghost_level = "🟡 ELEVATED"
+    elif ghost_density > 5:
+        ghost_level = "🟢 MODERATE"
+    else:
+        ghost_level = "🟢 LOW"
+
+    if drift > 20:
+        drift_label = f"+{drift:.1f}% (Accelerating)"
+    elif drift < -20:
+        drift_label = f"{drift:.1f}% (Decelerating)"
+    else:
+        drift_label = f"{drift:+.1f}% (Stable)"
+
+    label = project or "GLOBAL"
+    lines = [
+        f"═══ TEMPORAL NEXUS: {label} ═══",
+        "",
+        "### Ledger",
+        f"Total Mutations:  {tx_count}",
+        f"First Pulse:      {start}",
+        f"Last Evolution:   {last}",
+        "",
+        "### Vitals",
+        f"Active Facts:     {total_facts}",
+        f"Active Ghosts:    {ghost_count}",
+        f"Ghost Density:    {ghost_density:.1f}% - {ghost_level}",
+        f"Active Bridges:   {bridge_count}",
+        f"Recent Errors:    {recent_errors} (7d)",
+        "",
+        "### Temporal Drift",
+        f"Decisions (7d):   {recent_decisions}",
+        f"Decisions (prev): {prev_decisions}",
+        f"Drift:            {drift_label}",
+        "",
+    ]
+
+    recs: list[str] = []
+    if ghost_density > 15:
+        recs.append("- 👻 Ghost density critical. Run `/ghost-control` to triage.")
+    if recent_errors > 5:
+        recs.append("- 🔴 High error rate. Investigate with `cortex search type:error`.")
+    if drift < -30:
+        recs.append("- 📉 Decision velocity dropping. Team may be blocked.")
+    if bridge_count == 0:
+        recs.append("- 🌉 No bridges detected. Cross-project learning stalled.")
+
+    if recs:
+        lines.append("### Recommendations")
+        lines.append("")
+        lines.extend(recs)
+        lines.append("")
+
+    if ghost_density < 10 and recent_errors < 3:
+        lines.append("> [!NOTE]")
+        lines.append("> System evolving toward higher purity. No temporal paradoxes detected.")
+    elif ghost_density > 20:
+        lines.append("> [!WARNING]")
+        lines.append(f"> Ghost accumulation detected ({ghost_count} active). Entropy rising.")
+    else:
+        lines.append("> [!NOTE]")
+        lines.append(f"> System health: moderate. {ghost_count} ghost(s) pending resolution.")
+
+    return "\n".join(lines)
+
+
 def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
     """Register the ``cortex_temporal_nexus`` tool."""
 
@@ -319,175 +495,8 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
         cutoff_14d = (now - timedelta(days=14)).isoformat()
 
         async with ctx.pool.acquire() as conn:
-            # 1. Transaction history (ledger)
-            try:
-                cursor = await conn.execute(
-                    """
-                    SELECT count(*) as tx_count,
-                           min(timestamp) as start_date,
-                           max(timestamp) as last_date
-                    FROM transactions
-                    WHERE project = ? OR ? = ''
-                    """,
-                    (project, project),
-                )
-                tx_stats = await cursor.fetchone()
-            except Exception as e:
-                logger.debug("Failed to query transaction stats: %s", e)
-                tx_stats = (0, "N/A", "N/A")
+            stats = await _fetch_nexus_stats(conn, project, cutoff_7d, cutoff_14d)
 
-            # 2. Ghost density (active unresolved work)
-            cursor = await conn.execute(
-                """
-                SELECT count(*) FROM facts
-                WHERE fact_type = 'ghost'
-                  AND is_tombstoned = 0
-                  AND (project = ? OR ? = '')
-                """,
-                (project, project),
-            )
-            row = await cursor.fetchone()
-            ghost_count = row[0] if row else 0
-
-            # 3. Total active facts
-            cursor = await conn.execute(
-                """
-                SELECT count(*) FROM facts
-                WHERE is_tombstoned = 0
-                  AND (project = ? OR ? = '')
-                """,
-                (project, project),
-            )
-            row = await cursor.fetchone()
-            total_facts = row[0] if row else 0
-
-            # 4. Temporal drift: recent vs previous 7-day window
-            cursor = await conn.execute(
-                """
-                SELECT count(*) FROM facts
-                WHERE fact_type = 'decision'
-                  AND is_tombstoned = 0
-                  AND created_at > ?
-                  AND (project = ? OR ? = '')
-                """,
-                (cutoff_7d, project, project),
-            )
-            row = await cursor.fetchone()
-            recent_decisions = row[0] if row else 0
-
-            cursor = await conn.execute(
-                """
-                SELECT count(*) FROM facts
-                WHERE fact_type = 'decision'
-                  AND is_tombstoned = 0
-                  AND created_at > ? AND created_at <= ?
-                  AND (project = ? OR ? = '')
-                """,
-                (cutoff_14d, cutoff_7d, project, project),
-            )
-            row = await cursor.fetchone()
-            prev_decisions = row[0] if row else 0
-
-            # 5. Bridge count (cross-project patterns)
-            cursor = await conn.execute(
-                """
-                SELECT count(*) FROM facts
-                WHERE fact_type = 'bridge'
-                  AND is_tombstoned = 0
-                  AND (project = ? OR ? = '')
-                """,
-                (project, project),
-            )
-            row = await cursor.fetchone()
-            bridge_count = row[0] if row else 0
-
-            # 6. Error rate (recent errors)
-            cursor = await conn.execute(
-                """
-                SELECT count(*) FROM facts
-                WHERE fact_type = 'error'
-                  AND is_tombstoned = 0
-                  AND created_at > ?
-                  AND (project = ? OR ? = '')
-                """,
-                (cutoff_7d, project, project),
-            )
-            error_row = await cursor.fetchone()
-            recent_errors = error_row[0] if error_row else 0
-
-        # Calculate real metrics
-        tx_count, start, last = tx_stats if tx_stats else (0, "N/A", "N/A")
-        ghost_density = (ghost_count / max(total_facts, 1)) * 100
-        drift = ((recent_decisions - prev_decisions) / max(prev_decisions, 1)) * 100
-
-        # Classify ghost density
-        if ghost_density > 20:
-            ghost_level = "🔴 CRITICAL"
-        elif ghost_density > 10:
-            ghost_level = "🟡 ELEVATED"
-        elif ghost_density > 5:
-            ghost_level = "🟢 MODERATE"
-        else:
-            ghost_level = "🟢 LOW"
-
-        # Classify drift direction
-        if drift > 20:
-            drift_label = f"+{drift:.1f}% (Accelerating)"
-        elif drift < -20:
-            drift_label = f"{drift:.1f}% (Decelerating)"
-        else:
-            drift_label = f"{drift:+.1f}% (Stable)"
-
-        label = project or "GLOBAL"
-        lines = [
-            f"═══ TEMPORAL NEXUS: {label} ═══",
-            "",
-            "### Ledger",
-            f"Total Mutations:  {tx_count}",
-            f"First Pulse:      {start}",
-            f"Last Evolution:   {last}",
-            "",
-            "### Vitals",
-            f"Active Facts:     {total_facts}",
-            f"Active Ghosts:    {ghost_count}",
-            f"Ghost Density:    {ghost_density:.1f}% - {ghost_level}",
-            f"Active Bridges:   {bridge_count}",
-            f"Recent Errors:    {recent_errors} (7d)",
-            "",
-            "### Temporal Drift",
-            f"Decisions (7d):   {recent_decisions}",
-            f"Decisions (prev): {prev_decisions}",
-            f"Drift:            {drift_label}",
-            "",
-        ]
-
-        # Recommendations
-        recs: list[str] = []
-        if ghost_density > 15:
-            recs.append("- 👻 Ghost density critical. Run `/ghost-control` to triage.")
-        if recent_errors > 5:
-            recs.append("- 🔴 High error rate. Investigate with `cortex search type:error`.")
-        if drift < -30:
-            recs.append("- 📉 Decision velocity dropping. Team may be blocked.")
-        if bridge_count == 0:
-            recs.append("- 🌉 No bridges detected. Cross-project learning stalled.")
-
-        if recs:
-            lines.append("### Recommendations")
-            lines.append("")
-            lines.extend(recs)
-            lines.append("")
-
-        # Summary note
-        if ghost_density < 10 and recent_errors < 3:
-            lines.append("> [!NOTE]")
-            lines.append("> System evolving toward higher purity. No temporal paradoxes detected.")
-        elif ghost_density > 20:
-            lines.append("> [!WARNING]")
-            lines.append(f"> Ghost accumulation detected ({ghost_count} active). Entropy rising.")
-        else:
-            lines.append("> [!NOTE]")
-            lines.append(f"> System health: moderate. {ghost_count} ghost(s) pending resolution.")
-
+        report = _format_nexus_report(project, *stats)
         ctx.metrics.record_request()
-        return "\n".join(lines)
+        return report
