@@ -141,45 +141,44 @@ class CircuitBreaker:
         return True  # HALF_OPEN permite 1 intento
 
 
-def sovereign_circuit_breaker(timeout: float = 10.0, max_retries: int = 2, threshold: int = 3):
-    """
-    Decorador Mágico:
-    1. Limita el tiempo de ejecución (asyncio.wait_for).
-    2. Corta el circuito si la API destino está caída.
-    3. Si falla tras `max_retries`, cae graciosamente a la cola SQLite (PulmonesQueue).
-    """
-    cb = CircuitBreaker(failure_threshold=threshold)
-    queue: PulmonesQueue | None = None
+class SovereignCircuitBreaker:
+    def __init__(self, timeout: float = 10.0, max_retries: int = 2, threshold: int = 3):
+        self.timeout = timeout
+        self.max_retries = max_retries
+        self.cb = CircuitBreaker(failure_threshold=threshold)
+        self.queue: PulmonesQueue | None = None
 
-    def _get_queue() -> PulmonesQueue | None:
-        nonlocal queue
-        if queue is not None:
-            return queue
+    def _get_queue(self) -> PulmonesQueue | None:
+        if self.queue is not None:
+            return self.queue
         try:
-            queue = PulmonesQueue()
+            self.queue = PulmonesQueue()
         except OSError as exc:
             logger.warning("🫁 [PULMONES] Queue unavailable, dropping fallback enqueue: %s", exc)
-            queue = None
-        return queue
+            self.queue = None
+        return self.queue
 
-    def decorator(func: Callable[..., Awaitable[Any]]):
+    def _enqueue_fallback(self, target_name: str, args: tuple, kwargs: dict, reason: str) -> dict:
+        q = self._get_queue()
+        if q is not None:
+            q.enqueue(target_name, args, kwargs)
+        return {"status": "queued", "reason": reason}
+
+    def __call__(self, func: Callable[..., Awaitable[Any]]):
         @wraps(func)
         async def wrapper(*args, **kwargs):
             target_name = f"{func.__module__}.{func.__name__}"
-            if not cb.can_execute():
+            if not self.cb.can_execute():
                 logger.warning(
                     "🛡️ [PULMONES] Circuito Abierto. Bloqueando llamada a %s", func.__name__
                 )
-                q = _get_queue()
-                if q is not None:
-                    q.enqueue(target_name, args, kwargs)
-                return {"status": "queued", "reason": "circuit_open"}
+                return self._enqueue_fallback(target_name, args, kwargs, "circuit_open")
 
-            for attempt in range(max_retries + 1):
+            for attempt in range(self.max_retries + 1):
                 try:
                     # Timeout estricto para no bloquear el agente
-                    result = await asyncio.wait_for(func(*args, **kwargs), timeout=timeout)
-                    cb.record_success()
+                    result = await asyncio.wait_for(func(*args, **kwargs), timeout=self.timeout)
+                    self.cb.record_success()
                     return {"status": "success", "data": result}
 
                 except (asyncio.TimeoutError, ConnectionError) as e:
@@ -189,12 +188,9 @@ def sovereign_circuit_breaker(timeout: float = 10.0, max_retries: int = 2, thres
                         func.__name__,
                         str(e),
                     )
-                    if attempt == max_retries:
-                        cb.record_failure()
-                        q = _get_queue()
-                        if q is not None:
-                            q.enqueue(target_name, args, kwargs)
-                        return {"status": "queued", "reason": "max_retries_exceeded"}
+                    if attempt == self.max_retries:
+                        self.cb.record_failure()
+                        return self._enqueue_fallback(target_name, args, kwargs, "max_retries_exceeded")
                     await asyncio.sleep(2**attempt)  # Exponential backoff
 
                 except Exception as e:
@@ -208,4 +204,12 @@ def sovereign_circuit_breaker(timeout: float = 10.0, max_retries: int = 2, thres
 
         return wrapper
 
-    return decorator
+
+def sovereign_circuit_breaker(timeout: float = 10.0, max_retries: int = 2, threshold: int = 3):
+    """
+    Decorador Mágico:
+    1. Limita el tiempo de ejecución (asyncio.wait_for).
+    2. Corta el circuito si la API destino está caída.
+    3. Si falla tras `max_retries`, cae graciosamente a la cola SQLite (PulmonesQueue).
+    """
+    return SovereignCircuitBreaker(timeout, max_retries, threshold)
