@@ -2,11 +2,12 @@
 """Vesicular Runtime for Ouroboros Infinity.
 Provides total IPC isolation using multiprocessing for JIT compiled ephemeral agents.
 """
-import multiprocessing
 import asyncio
 import hashlib
+import multiprocessing
 import time
-from typing import Dict, Any
+from typing import Any
+
 
 def _vesicular_worker(agent_id: str, executable_payload: str, result_queue: multiprocessing.Queue):
     """Isolated process worker. SAGA constraints apply here."""
@@ -46,7 +47,7 @@ class VesicularRuntime:
     def __init__(self, agent_id: str):
         self.agent_id = agent_id
 
-    async def execute_and_die(self, executable_payload: str) -> Dict[str, Any]:
+    async def execute_and_die(self, executable_payload: str) -> dict[str, Any]:
         """Runs the JIT agent in an isolated process and waits for the proposal."""
         queue = multiprocessing.Queue()
         process = multiprocessing.Process(

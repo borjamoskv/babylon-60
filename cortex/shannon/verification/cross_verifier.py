@@ -132,6 +132,84 @@ class CrossVerifier:
         return extracted
 
     @classmethod
+    def _verify_stepwise(cls, episode_trace: EpisodeTrace, cortex_steps: list[dict], details: list[DivergenceDetail]) -> None:
+        """Helper to verify semantic and partial correctness stepwise."""
+        for idx, (trace_step, cortex_step) in enumerate(
+            zip(episode_trace.steps, cortex_steps, strict=False)
+        ):
+            # Symmetry: Verify sequence indices
+            if trace_step.step_idx != idx or int(cortex_step.get("step_idx", -1)) != idx:
+                details.append(
+                    DivergenceDetail(
+                        type=DivergenceType.STRUCTURAL,
+                        step_idx=idx,
+                        field="step_idx",
+                        expected=idx,
+                        actual=cortex_step.get("step_idx"),
+                        message=f"Out of order step indexing detected at step {idx}",
+                    )
+                )
+
+            # Semantic Validation: Action/Observation equivalence
+            trace_action = trace_step.action_hex.lower()
+            cortex_action = str(cortex_step.get("action_hex", "")).lower()
+            if trace_action != cortex_action:
+                details.append(
+                    DivergenceDetail(
+                        type=DivergenceType.SEMANTIC,
+                        step_idx=idx,
+                        field="action_hex",
+                        expected=trace_action,
+                        actual=cortex_action,
+                        message=f"Semantic action mismatch at step {idx}: Trace took {trace_action}, Ledger recorded {cortex_action}",
+                    )
+                )
+
+            trace_obs = trace_step.observation_hex.lower()
+            cortex_obs = str(cortex_step.get("observation_hex", "")).lower()
+            if trace_obs != cortex_obs:
+                details.append(
+                    DivergenceDetail(
+                        type=DivergenceType.SEMANTIC,
+                        step_idx=idx,
+                        field="observation_hex",
+                        expected=trace_obs,
+                        actual=cortex_obs,
+                        message=f"Semantic observation mismatch at step {idx}: Trace saw {trace_obs}, Ledger recorded {cortex_obs}",
+                    )
+                )
+
+            # Partial Validation: Rewards & Done flags
+            trace_reward = float(trace_step.reward)
+            cortex_reward = float(cortex_step.get("reward", 0.0))
+            if abs(trace_reward - cortex_reward) > 1e-9:
+                details.append(
+                    DivergenceDetail(
+                        type=DivergenceType.PARTIAL,
+                        step_idx=idx,
+                        field="reward",
+                        expected=trace_reward,
+                        actual=cortex_reward,
+                        message=f"Reward discrepancy at step {idx}: Shannon got {trace_reward}, Cortex got {cortex_reward}",
+                    )
+                )
+
+            trace_done = bool(trace_step.done)
+            cortex_done = bool(cortex_step.get("done", False))
+            if trace_done != cortex_done:
+                details.append(
+                    DivergenceDetail(
+                        type=DivergenceType.PARTIAL,
+                        step_idx=idx,
+                        field="done",
+                        expected=trace_done,
+                        actual=cortex_done,
+                        message=f"Done flag discrepancy at step {idx}: Shannon={trace_done}, Cortex={cortex_done}",
+                    )
+                )
+
+
+    @classmethod
     def verify_cross_system(
         cls,
         ledger_replay: list[dict[str, Any]],
@@ -239,79 +317,7 @@ class CrossVerifier:
             )
 
         # 2. Stepwise & Symmetry Verification
-        for idx, (trace_step, cortex_step) in enumerate(
-            zip(episode_trace.steps, cortex_steps, strict=False)
-        ):
-            # Symmetry: Verify sequence indices
-            if trace_step.step_idx != idx or int(cortex_step.get("step_idx", -1)) != idx:
-                details.append(
-                    DivergenceDetail(
-                        type=DivergenceType.STRUCTURAL,
-                        step_idx=idx,
-                        field="step_idx",
-                        expected=idx,
-                        actual=cortex_step.get("step_idx"),
-                        message=f"Out of order step indexing detected at step {idx}",
-                    )
-                )
-
-            # Semantic Validation: Action/Observation equivalence
-            trace_action = trace_step.action_hex.lower()
-            cortex_action = str(cortex_step.get("action_hex", "")).lower()
-            if trace_action != cortex_action:
-                details.append(
-                    DivergenceDetail(
-                        type=DivergenceType.SEMANTIC,
-                        step_idx=idx,
-                        field="action_hex",
-                        expected=trace_action,
-                        actual=cortex_action,
-                        message=f"Semantic action mismatch at step {idx}: Trace took {trace_action}, Ledger recorded {cortex_action}",
-                    )
-                )
-
-            trace_obs = trace_step.observation_hex.lower()
-            cortex_obs = str(cortex_step.get("observation_hex", "")).lower()
-            if trace_obs != cortex_obs:
-                details.append(
-                    DivergenceDetail(
-                        type=DivergenceType.SEMANTIC,
-                        step_idx=idx,
-                        field="observation_hex",
-                        expected=trace_obs,
-                        actual=cortex_obs,
-                        message=f"Semantic observation mismatch at step {idx}: Trace saw {trace_obs}, Ledger recorded {cortex_obs}",
-                    )
-                )
-
-            # Partial Validation: Rewards & Done flags
-            trace_reward = float(trace_step.reward)
-            cortex_reward = float(cortex_step.get("reward", 0.0))
-            if abs(trace_reward - cortex_reward) > 1e-9:
-                details.append(
-                    DivergenceDetail(
-                        type=DivergenceType.PARTIAL,
-                        step_idx=idx,
-                        field="reward",
-                        expected=trace_reward,
-                        actual=cortex_reward,
-                        message=f"Reward discrepancy at step {idx}: Shannon got {trace_reward}, Cortex got {cortex_reward}",
-                    )
-                )
-
-            trace_done = bool(trace_step.done)
-            cortex_done = bool(cortex_step.get("done", False))
-            if trace_done != cortex_done:
-                details.append(
-                    DivergenceDetail(
-                        type=DivergenceType.PARTIAL,
-                        step_idx=idx,
-                        field="done",
-                        expected=trace_done,
-                        actual=cortex_done,
-                        message=f"Done flag discrepancy at step {idx}: Shannon={trace_done}, Cortex={cortex_done}",
-                    )
-                )
+        cls._verify_stepwise(episode_trace, cortex_steps, details)
 
         # Determine overall verdict consistency
         consistent = len(details) == 0

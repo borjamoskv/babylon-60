@@ -6,7 +6,7 @@ Aggregates belief probabilities across distributed swarm agents
 without succumbing to single-node veto annihilation or probability flattening.
 """
 
-from typing import Sequence
+from collections.abc import Sequence
 
 from cortex.memory.epistemic_ontology import BeliefObject
 

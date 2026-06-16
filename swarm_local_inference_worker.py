@@ -20,8 +20,8 @@ async def worker_loop():
     bus_path = Path("./cortex_swarm_1000_bus")
     shm_name = f"ctx_bus_{hash(str(bus_path)) % 10**8}"
 
-    bus = SovereignSharedBus(name=shm_name, create=False)
-    router = CascadeRouter()
+    SovereignSharedBus(name=shm_name, create=False)
+    CascadeRouter()
 
     logger.info("Local Inference Worker is active. Awaiting Swarm Tasks on Bus: %s", shm_name)
     logger.info("Hardware Arbitration: Apple Silicon Unified Memory (C5-REAL)")

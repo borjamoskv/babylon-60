@@ -10,9 +10,8 @@ Enforces the Ouroboros-∞ Synthesis rule:
 from __future__ import annotations
 
 import hashlib
-from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from cortex.memory.epistemic_ontology import BeliefObject, BeliefState
 

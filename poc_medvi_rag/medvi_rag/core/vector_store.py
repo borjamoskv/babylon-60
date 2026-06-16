@@ -1,8 +1,8 @@
-import sqlite3
 import json
 import logging
+import sqlite3
 import uuid
-from typing import List, Dict, Any
+from typing import Any
 
 logger = logging.getLogger("medvi_rag.vector_store")
 
@@ -34,7 +34,7 @@ class MedviVectorStore:
             )
         logger.info(f"Protocol inserted for vendor: {vendor_name}")
 
-    def semantic_search(self, query: str, limit: int = 1) -> List[Dict[str, Any]]:
+    def semantic_search(self, query: str, limit: int = 1) -> list[dict[str, Any]]:
         """Mock de búsqueda semántica. En producción usa sqlite-vec."""
         query_words = query.lower().split()
         results = []

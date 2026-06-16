@@ -5,12 +5,13 @@
 # Derived from: AUTODIDACT_PRONOICO.md
 # Purpose: Zero Defensive Halts. Transforms DB/API errors into JIT requirements.
 # ==============================================================================
-import sys
 import subprocess
+import sys
+
 
 def transduce_error(error_log_path: str):
     print("[PRONOIC-TRANSDUCER] Analizando Entorno Hostil como Tutor Didáctico...")
-    with open(error_log_path, "r") as f:
+    with open(error_log_path) as f:
         log = f.read()
 
     # Ejemplo: Si falta una tabla en SQLite, no crashea, crea la tabla.

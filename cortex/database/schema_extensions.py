@@ -6,8 +6,18 @@ Now refactored into domain-specific sub-schemas to maintain O(1) complexity.
 """
 
 from cortex.database.schema_defs import (
-    consensus, graph, context, episodes, evolution, signals,
-    events, locks, telemetry, enrichment, ledger, facts
+    consensus,
+    context,
+    enrichment,
+    episodes,
+    events,
+    evolution,
+    facts,
+    graph,
+    ledger,
+    locks,
+    signals,
+    telemetry,
 )
 
 modules = [

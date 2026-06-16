@@ -2,13 +2,15 @@
 """Ouroboros Infinity Orchestrator (LEGIØN-1)"""
 
 import uuid
-from typing import Dict, Any
+from typing import Any
+
 from cortex.runtime.vesicular import VesicularRuntime
+
 
 class LegionOrchestrator:
     """JIT ephemeral agent compiler and coordinator."""
     
-    async def spawn_ephemeral_agent(self, task_prompt: str, context_hash: str) -> Dict[str, Any]:
+    async def spawn_ephemeral_agent(self, task_prompt: str, context_hash: str) -> dict[str, Any]:
         """
         AX-046: JIT Concept formation. 
         Compiles an agent strictly for `task_prompt`, runs it in a VesicularRuntime,

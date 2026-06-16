@@ -87,7 +87,6 @@ from cortex.memory.epistemic_ontology import (
     ProvenanceEnvelope,
 )
 
-
 # ─── Cognitive Stratification Configuration ──────────────────────────
 
 COGNITIVE_LAYER = Literal[

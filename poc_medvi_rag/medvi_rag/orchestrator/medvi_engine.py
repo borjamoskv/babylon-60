@@ -1,6 +1,7 @@
 import logging
-from medvi_rag.core.vector_store import MedviVectorStore
+
 from medvi_rag.core.llm_client import LocalLLMClient
+from medvi_rag.core.vector_store import MedviVectorStore
 from medvi_rag.guards.json_guard import CORTEXJSONGuard
 
 logger = logging.getLogger("medvi_rag.engine")
@@ -44,7 +45,7 @@ class MedviEngine:
         
     def _execute_api(self, vendor: str, payload: dict):
         # En el mundo real, aquí iría el request POST HTTP al vendor
-        logger.info(f"🚀 [C5-REAL] MEDVI API CALL EXECUTED")
+        logger.info("🚀 [C5-REAL] MEDVI API CALL EXECUTED")
         logger.info(f"Target Vendor: {vendor}")
         logger.info(f"Payload: {payload}")
         logger.info("✅ Operation Outsourced Successfully.")

@@ -63,7 +63,7 @@ class LedgerVerifier:
                             f"Hash mismatch at {event_id}: stored {c_hash}, recomputed {recomputed}"
                         )
                 except (KeyError, ValueError, TypeError, AttributeError) as e:
-                    logger.error("Error parsing event %s", event_id, exc_info=True)
+                    logger.exception("Error parsing event %s", event_id)
                     violations.append(f"Error parsing event {event_id}: {e}")
 
                 current_prev = c_hash
@@ -323,7 +323,7 @@ class LedgerVerifier:
                 except InvalidSignature:
                     violations.append(f"Invalid ML-DSA signature for checkpoint {c_id}.")
                 except (ValueError, TypeError) as e:
-                    logger.error("Error validating checkpoint %s", c_id, exc_info=True)
+                    logger.exception("Error validating checkpoint %s", c_id)
                     violations.append(f"Error validating checkpoint {c_id}: {e}")
 
         return {

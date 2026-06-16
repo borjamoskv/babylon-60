@@ -33,7 +33,7 @@ def test_flake_backward_clock_drift():
     # Simulate an NTP sync backwards
     gen = SovereignFlake(node_id=1)
 
-    curr_time = int(time.monotonic() * 1000)
+    curr_time = int(time.monotonic() * 1000) + gen.epoch_offset
     gen.last_timestamp = curr_time + 5000  # "Future" timestamp
 
     id1 = gen.next_id()

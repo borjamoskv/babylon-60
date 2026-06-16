@@ -1,7 +1,7 @@
 import json
 import logging
-import urllib.request
 import urllib.error
+import urllib.request
 
 logger = logging.getLogger("medvi_rag.llm")
 

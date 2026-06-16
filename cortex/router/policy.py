@@ -111,6 +111,20 @@ class EpistemicPolicyNetwork:
         self._last_action = 1
         return self.models[1]
 
+    def _compute_gradients(self, reward: float, probs: list[float], action: int, x: list[float], h: list[float]) -> tuple:
+        d_logits = [reward * (1.0 - probs[i]) if i == action else -reward * probs[i] for i in range(2)]
+        
+        dW2 = [[d_logits[i] * h[j] for j in range(4)] for i in range(2)]
+        db2 = d_logits[:]
+        dh = [sum(d_logits[i] * self.W2[i][j] for i in range(2)) for j in range(4)]
+        
+        d_h_logits = [dh[j] if h[j] > 0.0 else 0.0 for j in range(4)]
+        
+        dW1 = [[d_h_logits[j] * x[k] for k in range(5)] for j in range(4)]
+        db1 = d_h_logits[:]
+        
+        return dW1, db1, dW2, db2
+
     def update_policy(self, reward: float, learning_rate: float = 0.01):
         """
         Policy Gradient update step (REINFORCE).
@@ -127,50 +141,10 @@ class EpistemicPolicyNetwork:
             )
             return
 
-        probs = self._last_probs
-        action = self._last_action
-        x = self._last_x
-        h = self._last_h
+        dW1, db1, dW2, db2 = self._compute_gradients(
+            reward, self._last_probs, self._last_action, self._last_x, self._last_h
+        )
 
-        # Logits gradients: dL/dlogits_i = reward * (1 - probs[i]) if i == action else -reward * probs[i]
-        d_logits = [0.0] * 2
-        for i in range(2):
-            if i == action:
-                d_logits[i] = reward * (1.0 - probs[i])
-            else:
-                d_logits[i] = reward * (0.0 - probs[i])
-
-        # Backpropagation:
-        # W2 (2 experts x 4 hidden): dW2[i][j] = d_logits[i] * h[j]
-        # b2 (2 biases): db2[i] = d_logits[i]
-        # h (4 hidden): dh[j] = sum(d_logits[i] * W2[i][j] for i in range(2))
-        dW2 = [[0.0] * 4 for _ in range(2)]
-        db2 = [0.0] * 2
-        dh = [0.0] * 4
-
-        for i in range(2):
-            db2[i] = d_logits[i]
-            for j in range(4):
-                dW2[i][j] = d_logits[i] * h[j]
-                dh[j] += d_logits[i] * self.W2[i][j]
-
-        # ReLU backprop: d_h_logits[j] = dh[j] if h[j] > 0 else 0
-        d_h_logits = [0.0] * 4
-        for j in range(4):
-            if h[j] > 0.0:
-                d_h_logits[j] = dh[j]
-
-        # W1 (4 hidden x 5 inputs): dW1[j][k] = d_h_logits[j] * x[k]
-        # b1 (4 biases): db1[j] = d_h_logits[j]
-        dW1 = [[0.0] * 5 for _ in range(4)]
-        db1 = [0.0] * 4
-
-        for j in range(4):
-            db1[j] = d_h_logits[j]
-            for k in range(5):
-                dW1[j][k] = d_h_logits[j] * x[k]
-
-        # Parameter updates (Gradient Ascent for REINFORCE)
         for i in range(2):
             self.b2[i] += learning_rate * db2[i]
             for j in range(4):
