@@ -186,10 +186,10 @@ class CortexEngine(
 
         await self._close_connections()
 
-        self.mac_maestro = None
-        self.ledger_writer = None
-        self.enrichment_queue = None
-        self.ledger_store = None
+        self._mac_maestro = None
+        self._ledger_writer = None
+        self._enrichment_queue = None
+        self._ledger_store = None
         self._ledger = None
 
     async def _drain_tasks(self):

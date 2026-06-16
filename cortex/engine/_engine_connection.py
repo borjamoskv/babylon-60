@@ -146,14 +146,14 @@ class ConnectionMixin:
             if row:
                 import cortex.core.config as config
 
-                config.HKDF_SALT = row[0]
+                setattr(config, "HKDF_SALT", row[0])
             else:
                 import cortex.core.config as config
 
                 # Store the default config salt in the DB if not present
                 await conn.execute(
                     "INSERT INTO cortex_meta (key, value) VALUES ('tenant_isolation_salt', ?)",
-                    (config.HKDF_SALT,),
+                    (config._cfg.HKDF_SALT,),
                 )
                 await conn.commit()
 
@@ -166,7 +166,7 @@ class ConnectionMixin:
                     if row:
                         import cortex.core.config as config
 
-                        config.HKDF_SALT = row[0]
+                        setattr(config, "HKDF_SALT", row[0])
                         config._cfg.HKDF_SALT = row[0]
             except Exception as e:
                 logger.warning("Failed to load tenant_isolation_salt: %s", e)

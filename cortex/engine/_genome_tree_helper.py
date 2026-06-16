@@ -9,7 +9,7 @@ from __future__ import annotations
 from cortex.isa.builder import AgentOp
 
 
-def replace_target(tree: AgentOp, old_target: str, new_target: str) -> AgentOp:
+def replace_target(tree: AgentOp, old_target: str, new_target: str | AgentOp) -> AgentOp:
     """Replace a dispatch target in the tree."""
     if isinstance(tree, str) or not isinstance(tree, dict):
         return tree

@@ -158,7 +158,7 @@ class ArbiterBridge:
                 f"[BRIDGE] {verdict.resolution.name} → {decision.rationale} "
                 f"| arbiter_hash={verdict.audit_hash[:12]}"
             ),
-            confidence=verdict.fused_score if verdict.is_actionable else decision.confidence,
+            confidence=float(verdict.fused_score) if verdict.is_actionable else decision.confidence,
             source="arbiter_bridge",
         )
 
@@ -220,7 +220,7 @@ class ArbiterBridge:
         if override_severity is not None:
             severity = override_severity
         else:
-            severity = self._score_to_severity(verdict.fused_score)
+            severity = self._score_to_severity(float(verdict.fused_score))
 
         # Blast radius from resolution type
         blast_radius = RESOLUTION_BLAST_RADIUS.get(verdict.resolution, 1)

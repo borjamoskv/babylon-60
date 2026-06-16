@@ -21,6 +21,7 @@ import click
 import dotenv
 from rich.console import Console
 
+from cortex.cli.common import cli
 from cortex.extensions.llm.provider import LLMProvider
 from cortex.extensions.llm.router import CortexPrompt
 
@@ -113,9 +114,9 @@ async def auto_heal(filepath: Path) -> None:
         await provider.close()
 
 
-@click.command(name="heal", short_help="Auto-sanación de entropía (Complejidad Ciclomática)")
+@cli.command(name="heal", short_help="Auto-sanación de entropía (Complejidad Ciclomática)")
 @click.argument("filepath", type=click.Path(exists=True, path_type=Path))
-def cli(filepath: Path) -> None:
+def heal_command(filepath: Path) -> None:
     """Invoca al cirujano LLM para reducir estática (Axioma 14).
 
     Utiliza el CORTEX_LLM_PROVIDER actual para refactorizar la estructura

@@ -203,6 +203,8 @@ class CascadeRouter:
                     await asyncio.sleep(delay)
                     continue
                 return f"Error: {e}"
+        return "Error: Execution failed."
+
 
 
 if __name__ == "__main__":

@@ -162,7 +162,7 @@ class LedgerCredibilityStack:
                         )
         return rows
 
-    def _sign_and_verify(self, merkle_root: str) -> tuple[bytes, bool]:
+    def _sign_and_verify(self, merkle_root: str) -> tuple[str, bool]:
         signer = get_default_signer()
         if signer is None or not signer.can_sign:
             priv, _ = generate_keypair()

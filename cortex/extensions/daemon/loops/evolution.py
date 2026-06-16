@@ -33,7 +33,11 @@ async def evolution_loop(state, cortex_root, speak_func):
                     if len(files) >= 2:
                         for f1, f2 in itertools.combinations(files, 2):
                             overlap = calculate_module_overlap(f1, f2)
-                            overlap_val = overlap.get("score", 0.0) if isinstance(overlap, dict) else float(overlap)
+                            overlap_val = (
+                                overlap.get("score", 0.0)
+                                if isinstance(overlap, dict)
+                                else float(overlap)
+                            )
                             if overlap_val > 0.4:
                                 ghost_id = f"REF-{int(time.monotonic()) % 1000}"
                                 state.daemons["ghost_field"]["resonances"].append(
