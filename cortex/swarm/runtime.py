@@ -142,10 +142,10 @@ class SubagentRunner:
         self._handlers[name] = handler
         self._locks[name] = asyncio.Semaphore(max(1, max_concurrent))
 
-    async def invoke_subagent(self, req: SubagentRequest) -> SubagentResponse:
+    def _resolve_target(self, req: SubagentRequest) -> str:
         if req.target_agent:
-            target = req.target_agent
-        elif self.router:
+            return req.target_agent
+        if self.router:
             req_dict = {
                 "task": req.prompt or req.kind,
                 "context": {
@@ -156,20 +156,21 @@ class SubagentRunner:
             }
             decision = self.router.route(req_dict)
             selected_agents = decision.get("selected_agents", [])
-            if not selected_agents:
-                try:
-                    target = self.registry.resolve(req.kind, req.require_capability)
-                except LookupError as e:
-                    return SubagentResponse(
-                        task_id=req.task_id,
-                        ok=False,
-                        target_agent="",
-                        error=str(e),
-                    )
-            else:
-                target = selected_agents[0]
-        else:
-            target = self.registry.resolve(req.kind, req.require_capability)
+            if selected_agents:
+                return selected_agents[0]
+        
+        return self.registry.resolve(req.kind, req.require_capability)
+
+    async def invoke_subagent(self, req: SubagentRequest) -> SubagentResponse:
+        try:
+            target = self._resolve_target(req)
+        except LookupError as e:
+            return SubagentResponse(
+                task_id=req.task_id,
+                ok=False,
+                target_agent="",
+                error=str(e),
+            )
 
         with tracer.start_as_current_span("swarm.dispatch") as span:
             span.set_attribute("swarm.task_id", req.task_id)
