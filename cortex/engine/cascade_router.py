@@ -61,6 +61,65 @@ class CascadeRouter:
         else:
             return "claude"  # default fallback
 
+    def _build_cmd(
+        self, engine: str, prompt: str, files: list[str] | None, local_first: bool
+    ) -> list[str]:
+        if local_first:
+            if engine in ("gemini", "claude"):
+                return ["ollama", "run", "qwen2.5-coder:7b", prompt]
+            elif engine == "codex":
+                return ["ollama", "run", "llama3.1:8b", prompt]
+            else:
+                raise ValueError(f"Unknown engine: {engine}")
+
+        if engine == "gemini":
+            cmd = ["npx", "-y", "@google/gemini-cli"]
+            if files:
+                for f in files:
+                    cmd.extend(["--file", f])
+            cmd.append(prompt)
+            return cmd
+        elif engine == "claude":
+            return ["npx", "-y", "@anthropic-ai/claude-code", prompt]
+        elif engine == "codex":
+            return ["npx", "-y", "@google/gemini-cli", prompt]
+        else:
+            raise ValueError(f"Unknown engine: {engine}")
+
+    def _log_to_db(
+        self, task_id: str, engine: str, process_returncode: int, output_content: str
+    ) -> None:
+        try:
+            db_path = Path(
+                os.environ.get("CORTEX_DB_PATH", "~/.cortex/cortex.db")
+            ).expanduser()
+            if not db_path.exists():
+                return
+            conn = sqlite3.connect(db_path)
+            digest = hashlib.sha256(output_content.encode("utf-8")).hexdigest()[:16]
+            conn.execute(
+                "INSERT INTO episodes (session_id, event_type, project, content) VALUES (?, ?, ?, ?)",
+                (
+                    "cascade-sys",
+                    "llm_task_result",
+                    "cortex-engine",
+                    f"task_id:{task_id} engine:{engine} digest:{digest}\n{output_content[:500]}",
+                ),
+            )
+            try:
+                status = "completed" if process_returncode == 0 else "failed"
+                conn.execute(
+                    "UPDATE tasks SET status=? WHERE id=?", (status, task_id)
+                )
+            except sqlite3.OperationalError:
+                pass
+            conn.commit()
+            conn.close()
+        except Exception as db_e:
+            logger.error(
+                f"⚠️ [ROUTER] Falló la persistencia en BD para indexación: {db_e}"
+            )
+
     async def _execute(
         self, engine: str, prompt: str, files: list[str] | None, task_id: str | None
     ) -> str:
@@ -71,44 +130,14 @@ class CascadeRouter:
 
         for attempt in range(1, max_retries + 1):
             try:
-                # LOCAL-INFERENCE-OMEGA OVERRIDES
-                # Force local execution via Ollama instead of external hyperscalers if requested
                 local_first = os.environ.get("CORTEX_LLM_LOCAL_FIRST", "0") == "1"
+                cmd = self._build_cmd(engine, prompt, files, local_first)
 
-                if local_first:
-                    if engine == "gemini":
-                        # Architecture/Heavy tasks -> Qwen 2.5 Coder 7b
-                        cmd = ["ollama", "run", "qwen2.5-coder:7b", prompt]
-                    elif engine == "claude":
-                        # Refactor/General tasks -> Qwen 2.5 Coder 7b
-                        cmd = ["ollama", "run", "qwen2.5-coder:7b", prompt]
-                    elif engine == "codex":
-                        # Snippet tasks -> Llama 3.1 8b
-                        cmd = ["ollama", "run", "llama3.1:8b", prompt]
-                    else:
-                        raise ValueError(f"Unknown engine: {engine}")
-                    logger.info(
-                        f"🚀 [ROUTER] Local-Inference-OMEGA Active. Dispatching to local {engine} equivalent (Attempt {attempt}/{max_retries})..."
-                    )
-                else:
-                    # Standard API/CLI execution via npx
-                    if engine == "gemini":
-                        cmd = ["npx", "-y", "@google/gemini-cli"]
-                        if files:
-                            for f in files:
-                                cmd.extend(["--file", f])
-                        cmd.append(prompt)
-                    elif engine == "claude":
-                        cmd = ["npx", "-y", "@anthropic-ai/claude-code", prompt]
-                    elif engine == "codex":
-                        cmd = ["npx", "-y", "@google/gemini-cli", prompt]
-                    else:
-                        raise ValueError(f"Unknown engine: {engine}")
-                    logger.info(
-                        f"🚀 [ROUTER] Standard CLI Active. Dispatching to {engine} via npx (Attempt {attempt}/{max_retries})..."
-                    )
+                mode_str = "Local-Inference-OMEGA" if local_first else "Standard CLI"
+                logger.info(
+                    f"🚀 [ROUTER] {mode_str} Active. Dispatching to {engine} (Attempt {attempt}/{max_retries})..."
+                )
 
-                # Selectively pass API keys from parent environment
                 child_env = {
                     **os.environ,
                     "ANTHROPIC_API_KEY": os.environ.get("ANTHROPIC_API_KEY", "sk-ant-fallback"),
@@ -132,15 +161,12 @@ class CascadeRouter:
                     await process.communicate()
                     logger.error(f"⏱️ [ROUTER] {engine} execution timed out (300s).")
                     if attempt < max_retries:
-                        delay = base_delay**attempt
-                        logger.info(f"⏳ [ROUTER] Retrying in {delay} seconds...")
-                        await asyncio.sleep(delay)
+                        await asyncio.sleep(base_delay**attempt)
                         continue
                     return f"Error: {engine} timed out."
 
                 stdout = stdout_bytes.decode("utf-8").strip()
                 stderr = stderr_bytes.decode("utf-8").strip()
-
                 output_content = (
                     stdout if process.returncode == 0 else f"ERROR:\n{stderr}\n{stdout}"
                 )
@@ -148,44 +174,11 @@ class CascadeRouter:
                 if process.returncode != 0:
                     logger.error(f"❌ [ROUTER] {engine} failed. STDERR: {stderr}")
                     if attempt < max_retries:
-                        delay = base_delay**attempt
-                        logger.info(f"⏳ [ROUTER] Retrying in {delay} seconds...")
-                        await asyncio.sleep(delay)
+                        await asyncio.sleep(base_delay**attempt)
                         continue
 
-                # Log to DB for BM25 indexing (done only on success or exhaustion of retries)
                 if task_id:
-                    try:
-                        db_path = Path(
-                            os.environ.get("CORTEX_DB_PATH", "~/.cortex/cortex.db")
-                        ).expanduser()
-                        if db_path.exists():
-                            conn = sqlite3.connect(db_path)
-                            digest = hashlib.sha256(output_content.encode("utf-8")).hexdigest()[:16]
-                            # Escribir en la tabla de episodios/BM25
-                            conn.execute(
-                                "INSERT INTO episodes (session_id, event_type, project, content) VALUES (?, ?, ?, ?)",
-                                (
-                                    "cascade-sys",
-                                    "llm_task_result",
-                                    "cortex-engine",
-                                    f"task_id:{task_id} engine:{engine} digest:{digest}\n{output_content[:500]}",
-                                ),
-                            )
-                            # Opcional: Actualizar la tarea original
-                            try:
-                                status = "completed" if process.returncode == 0 else "failed"
-                                conn.execute(
-                                    "UPDATE tasks SET status=? WHERE id=?", (status, task_id)
-                                )
-                            except sqlite3.OperationalError:
-                                pass  # Ignorar si la tabla tasks no tiene esa estructura
-                            conn.commit()
-                            conn.close()
-                    except Exception as db_e:
-                        logger.error(
-                            f"⚠️ [ROUTER] Falló la persistencia en BD para indexación: {db_e}"
-                        )
+                    self._log_to_db(task_id, engine, process.returncode, output_content)
 
                 if process.returncode != 0:
                     return f"Error ({engine}): {stderr}"
@@ -198,11 +191,10 @@ class CascadeRouter:
             except Exception as e:
                 logger.error(f"🔥 [ROUTER] Subprocess execution exception: {e}")
                 if attempt < max_retries:
-                    delay = base_delay**attempt
-                    logger.info(f"⏳ [ROUTER] Retrying in {delay} seconds due to exception...")
-                    await asyncio.sleep(delay)
+                    await asyncio.sleep(base_delay**attempt)
                     continue
                 return f"Error: {e}"
+        return "Error: Execution failed."
         return "Error: Execution failed."
 
 

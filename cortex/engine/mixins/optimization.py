@@ -245,6 +245,7 @@ class OptimizationMixin:
         project: str,
         action: str,
         detail: dict[str, Any],
+        tenant_id: str = "default",
     ) -> int:
         """Unified transaction logging with caching and batching."""
         dj = canonical_json(detail)
@@ -264,10 +265,10 @@ class OptimizationMixin:
         )
 
         sql = (
-            "INSERT INTO transactions (project, action, detail, prev_hash, hash, timestamp) "
+            "INSERT INTO transactions (tenant_id, project, action, detail, prev_hash, hash, timestamp) "
             "VALUES (?, ?, ?, ?, ?, ?)"
         )
-        params = (project, action, dj, last_hash, th, ts)
+        params = (tenant_id, project, action, dj, last_hash, th, ts)
 
         res = await self.write_optimized(sql, params)
         if res.is_ok():

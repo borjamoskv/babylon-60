@@ -29,7 +29,7 @@ def canonicalize_content(content: str | bytes | memoryview) -> bytes:
         if isinstance(data, dict | list):
             # Sort keys for deterministic hashing, minimal whitespaces
             return json.dumps(data, sort_keys=True, separators=(",", ":")).encode("utf-8")
-    except Exception:
+    except (json.JSONDecodeError, TypeError, ValueError, UnicodeDecodeError):
         pass
 
     # Fast path for non-JSON or invalid JSON

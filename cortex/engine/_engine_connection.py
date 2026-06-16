@@ -174,7 +174,7 @@ class ConnectionMixin:
             # Ensure we do not leave a read transaction open on the connection
             try:
                 await conn.commit()
-            except Exception:
+            except BaseException:
                 pass
 
             if self._ledger is None:

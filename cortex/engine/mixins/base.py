@@ -54,7 +54,7 @@ class EngineMixinBase:
         raise NotImplementedError
 
     async def _log_transaction(
-        self, conn: aiosqlite.Connection, project: str, action: str, details: dict[str, Any]
+        self, conn: aiosqlite.Connection, project: str, action: str, detail: dict[str, Any], tenant_id: str = "default"
     ) -> int:
         """Log a transaction to the ledger."""
         raise NotImplementedError
