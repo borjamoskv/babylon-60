@@ -20,19 +20,7 @@ __all__ = ["register_genesis_tools"]
 logger = logging.getLogger("cortex.mcp.genesis_tools")
 
 
-def register_genesis_tools(
-    mcp: FastMCP,  # type: ignore[reportInvalidTypeForm]
-    ctx: Any,
-) -> None:
-    """Register Genesis Engine tools on the MCP server.
-
-    Tools registered:
-      - cortex_genesis_create: Create a system from a spec dict
-      - cortex_genesis_preview: Preview what files would be created
-      - cortex_genesis_templates: List available templates
-      - cortex_genesis_specs: List available YAML specs
-    """
-
+def _register_cortex_genesis_create(mcp: FastMCP, ctx: Any) -> None:
     @mcp.tool()
     async def cortex_genesis_create(
         name: str,
@@ -108,6 +96,8 @@ def register_genesis_tools(
 
         return "\n".join(lines)
 
+
+def _register_cortex_genesis_preview(mcp: FastMCP, ctx: Any) -> None:
     @mcp.tool()
     async def cortex_genesis_preview(
         name: str,
@@ -138,6 +128,8 @@ def register_genesis_tools(
                 lines.append(f"  {comp_name}/{f}")
         return "\n".join(lines)
 
+
+def _register_cortex_genesis_templates(mcp: FastMCP, ctx: Any) -> None:
     @mcp.tool()
     async def cortex_genesis_templates() -> str:
         """List all available Genesis templates."""
@@ -151,6 +143,8 @@ def register_genesis_tools(
             lines.append(f"  {t['name']:15s} {t['description']}")
         return "\n".join(lines)
 
+
+def _register_cortex_genesis_specs(mcp: FastMCP, ctx: Any) -> None:
     @mcp.tool()
     async def cortex_genesis_specs() -> str:
         """List available YAML specification templates."""
@@ -163,6 +157,24 @@ def register_genesis_tools(
         for f in yamls:
             lines.append(f"  {f.stem}: {f}")
         return "\n".join(lines)
+
+
+def register_genesis_tools(
+    mcp: FastMCP,  # type: ignore[reportInvalidTypeForm]
+    ctx: Any,
+) -> None:
+    """Register Genesis Engine tools on the MCP server.
+
+    Tools registered:
+      - cortex_genesis_create: Create a system from a spec dict
+      - cortex_genesis_preview: Preview what files would be created
+      - cortex_genesis_templates: List available templates
+      - cortex_genesis_specs: List available YAML specs
+    """
+    _register_cortex_genesis_create(mcp, ctx)
+    _register_cortex_genesis_preview(mcp, ctx)
+    _register_cortex_genesis_templates(mcp, ctx)
+    _register_cortex_genesis_specs(mcp, ctx)
 
 
 def _default_comps_for_type(

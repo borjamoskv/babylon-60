@@ -103,12 +103,7 @@ def build_evidence_manifest(
     return manifest
 
 
-def verify_evidence_manifest(
-    manifest: Mapping[str, Any],
-    artifacts: Mapping[str, bytes | bytearray | memoryview],
-) -> dict[str, Any]:
-    """Verify a manifest against supplied artifact bytes without source access."""
-    violations: list[dict[str, Any]] = []
+def _verify_manifest_header(manifest: Mapping[str, Any], violations: list[dict[str, Any]]) -> None:
     if manifest.get("schema") != EVIDENCE_MANIFEST_SCHEMA:
         violations.append(
             {
@@ -128,16 +123,11 @@ def verify_evidence_manifest(
             }
         )
 
-    manifest_entries = manifest.get("artifacts")
-    if not isinstance(manifest_entries, list):
-        return {
-            "valid": False,
-            "violations": violations + [{"type": "MANIFEST_ARTIFACTS_INVALID"}],
-            "checked": {"artifacts": 0, "bytes": 0},
-        }
 
+def _parse_expected_artifacts(
+    manifest_entries: list[Any], violations: list[dict[str, Any]]
+) -> dict[str, Mapping[str, Any]]:
     expected_by_path: dict[str, Mapping[str, Any]] = {}
-    checked_bytes = 0
     for entry in manifest_entries:
         if not isinstance(entry, Mapping):
             violations.append({"type": "MANIFEST_ARTIFACT_INVALID", "path": None})
@@ -158,7 +148,12 @@ def verify_evidence_manifest(
             violations.append({"type": "MANIFEST_ARTIFACT_DUPLICATE", "path": path})
             continue
         expected_by_path[path] = entry
+    return expected_by_path
 
+
+def _parse_actual_artifacts(
+    artifacts: Mapping[str, bytes | bytearray | memoryview], violations: list[dict[str, Any]]
+) -> dict[str, bytes]:
     actual_by_path: dict[str, bytes] = {}
     for raw_path, raw_bytes in artifacts.items():
         try:
@@ -172,7 +167,15 @@ def verify_evidence_manifest(
                     "error": str(exc),
                 }
             )
+    return actual_by_path
 
+
+def _verify_artifact_matches(
+    expected_by_path: dict[str, Mapping[str, Any]],
+    actual_by_path: dict[str, bytes],
+    violations: list[dict[str, Any]],
+) -> int:
+    checked_bytes = 0
     for path in sorted(expected_by_path):
         entry = expected_by_path[path]
         artifact_bytes = actual_by_path.get(path)
@@ -203,10 +206,15 @@ def verify_evidence_manifest(
                     "actual": actual_sha256,
                 }
             )
+    return checked_bytes
 
-    for path in sorted(set(actual_by_path) - set(expected_by_path)):
-        violations.append({"type": "ARTIFACT_UNEXPECTED", "path": path})
 
+def _verify_manifest_totals(
+    manifest: Mapping[str, Any],
+    expected_by_path: dict[str, Mapping[str, Any]],
+    checked_bytes: int,
+    violations: list[dict[str, Any]],
+) -> None:
     expected_count = manifest.get("artifact_count")
     if expected_count != len(expected_by_path):
         violations.append(
@@ -226,6 +234,34 @@ def verify_evidence_manifest(
                 "actual": checked_bytes,
             }
         )
+
+
+def verify_evidence_manifest(
+    manifest: Mapping[str, Any],
+    artifacts: Mapping[str, bytes | bytearray | memoryview],
+) -> dict[str, Any]:
+    """Verify a manifest against supplied artifact bytes without source access."""
+    violations: list[dict[str, Any]] = []
+    
+    _verify_manifest_header(manifest, violations)
+
+    manifest_entries = manifest.get("artifacts")
+    if not isinstance(manifest_entries, list):
+        return {
+            "valid": False,
+            "violations": violations + [{"type": "MANIFEST_ARTIFACTS_INVALID"}],
+            "checked": {"artifacts": 0, "bytes": 0},
+        }
+
+    expected_by_path = _parse_expected_artifacts(manifest_entries, violations)
+    actual_by_path = _parse_actual_artifacts(artifacts, violations)
+
+    checked_bytes = _verify_artifact_matches(expected_by_path, actual_by_path, violations)
+
+    for path in sorted(set(actual_by_path) - set(expected_by_path)):
+        violations.append({"type": "ARTIFACT_UNEXPECTED", "path": path})
+
+    _verify_manifest_totals(manifest, expected_by_path, checked_bytes, violations)
 
     return {
         "valid": not violations,
