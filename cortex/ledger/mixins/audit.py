@@ -56,6 +56,58 @@ class LedgerAuditMixin:
             await conn.commit()
         return {"valid": not violations, "violations": violations, "tx_count": tx_count}
 
+    def _verify_single_tx(
+        self,
+        row: tuple,
+        tenant_id: str | None,
+        expected_prev_by_tenant: dict[str, str],
+        expected_prev_global: str,
+        store_txs_to_verify: dict[int, str],
+        purged_store_tx_ids: set[int],
+    ) -> tuple[int, list[dict], str]:
+        tid, tx_tenant_id, proj, act, det, prev, h, ts = row
+        expected_prev = expected_prev_by_tenant.get(tx_tenant_id, "GENESIS")
+        violations = []
+        tx_increment = 0
+
+        if tenant_id is None or tx_tenant_id == tenant_id:
+            tx_increment = 1
+            computed_v3 = compute_tx_hash(prev, proj, act, det, ts, tenant_id=tx_tenant_id)
+            computed_v2 = compute_tx_hash(prev, proj, act, det, ts)
+            computed_v1 = compute_tx_hash_v1(prev, proj, act, det, ts)
+
+            if computed_v3 == h and prev != expected_prev:
+                violations.append({"id": tid, "type": "CHAIN_BREAK", "expected": expected_prev})
+            elif h in {computed_v2, computed_v1} and prev != expected_prev_global:
+                violations.append(
+                    {
+                        "id": tid,
+                        "type": "CHAIN_BREAK",
+                        "expected": expected_prev,
+                        "legacy_expected": expected_prev_global,
+                    }
+                )
+            elif computed_v3 != h and h not in {computed_v2, computed_v1}:
+                violations.append({"id": tid, "type": "TAMPER_DETECTED", "stored": h})
+
+            try:
+                detail = json.loads(det) if det else {}
+            except Exception as e:
+                logger.debug("Failed to parse transaction detail json for tx %s: %s", tid, e)
+                detail = {}
+
+            if act == "store":
+                c_hash = detail.get("content_hash")
+                if c_hash:
+                    store_txs_to_verify[tid] = c_hash
+            elif act == "purge":
+                p_store_tx_id = detail.get("store_tx_id")
+                if p_store_tx_id is not None:
+                    purged_store_tx_ids.add(int(p_store_tx_id))
+
+        expected_prev_by_tenant[tx_tenant_id] = h
+        return tx_increment, violations, h
+
     async def _verify_chain(
         self, conn, tenant_id: str | None
     ) -> tuple[list[dict], int, dict[int, str], set[int]]:
@@ -73,52 +125,73 @@ class LedgerAuditMixin:
             row = await cursor.fetchone()
             if not row:
                 break
-            tid, tx_tenant_id, proj, act, det, prev, h, ts = row
-            expected_prev = expected_prev_by_tenant.get(tx_tenant_id, "GENESIS")
-
-            if tenant_id is None or tx_tenant_id == tenant_id:
-                tx_count += 1
-                computed_v3 = compute_tx_hash(prev, proj, act, det, ts, tenant_id=tx_tenant_id)
-                computed_v2 = compute_tx_hash(prev, proj, act, det, ts)
-                computed_v1 = compute_tx_hash_v1(prev, proj, act, det, ts)
-
-                if computed_v3 == h and prev != expected_prev:
-                    violations.append({"id": tid, "type": "CHAIN_BREAK", "expected": expected_prev})
-                elif h in {computed_v2, computed_v1} and prev != expected_prev_global:
-                    violations.append(
-                        {
-                            "id": tid,
-                            "type": "CHAIN_BREAK",
-                            "expected": expected_prev,
-                            "legacy_expected": expected_prev_global,
-                        }
-                    )
-                elif computed_v3 != h and h not in {computed_v2, computed_v1}:
-                    violations.append({"id": tid, "type": "TAMPER_DETECTED", "stored": h})
-
-                try:
-                    detail = json.loads(det) if det else {}
-                except Exception as e:
-                    logger.debug("Failed to parse transaction detail json for tx %s: %s", tid, e)
-                    detail = {}
-
-                if act == "store":
-                    c_hash = detail.get("content_hash")
-                    if c_hash:
-                        store_txs_to_verify[tid] = c_hash
-                elif act == "purge":
-                    p_store_tx_id = detail.get("store_tx_id")
-                    if p_store_tx_id is not None:
-                        purged_store_tx_ids.add(int(p_store_tx_id))
-
-            # Update running expectations at the END of the loop
-            expected_prev_by_tenant[tx_tenant_id] = h
+            
+            tx_inc, tx_violations, h = self._verify_single_tx(
+                row,
+                tenant_id,
+                expected_prev_by_tenant,
+                expected_prev_global,
+                store_txs_to_verify,
+                purged_store_tx_ids
+            )
+            
+            tx_count += tx_inc
+            violations.extend(tx_violations)
             expected_prev_global = h
 
-            if tid % 100 == 0:
+            if row[0] % 100 == 0:
                 await asyncio.sleep(0)
 
         return violations, tx_count, store_txs_to_verify, purged_store_tx_ids
+
+    def _verify_fact_hashes(self, active_facts_by_tx: dict[int, dict[str, Any]]) -> list[dict]:
+        from cortex.crypto.aes import get_default_encrypter
+        from cortex.utils.canonical import compute_fact_hash
+        violations = []
+        enc = get_default_encrypter()
+        for f_tx_id, info in list(active_facts_by_tx.items()):
+            try:
+                decrypted = enc.decrypt_str(info["content"], tenant_id=info["tenant_id"])
+                computed_hash = compute_fact_hash(decrypted)
+                if computed_hash != info["hash"]:
+                    violations.append(
+                        {
+                            "id": f_tx_id,
+                            "type": "FACT_HASH_MISMATCH",
+                            "stored_hash": info["hash"],
+                            "computed_hash": computed_hash,
+                        }
+                    )
+            except Exception as e:
+                violations.append(
+                    {"id": f_tx_id, "type": "FACT_DECRYPTION_FAILED", "error": str(e)}
+                )
+        return violations
+
+    def _verify_fact_references(
+        self,
+        active_facts_by_tx: dict[int, dict[str, Any]],
+        store_txs_to_verify: dict[int, str],
+        purged_store_tx_ids: set[int]
+    ) -> list[dict]:
+        violations = []
+        for store_tid, expected_hash in store_txs_to_verify.items():
+            if store_tid in active_facts_by_tx:
+                fact_hash = active_facts_by_tx[store_tid]["hash"]
+                if fact_hash != expected_hash:
+                    violations.append(
+                        {
+                            "id": store_tid,
+                            "type": "FACT_MUTATION_DETECTED",
+                            "expected_hash": expected_hash,
+                            "fact_hash": fact_hash,
+                        }
+                    )
+            elif store_tid not in purged_store_tx_ids:
+                violations.append(
+                    {"id": store_tid, "type": "FACT_MISSING", "expected_hash": expected_hash}
+                )
+        return violations
 
     async def _verify_facts(
         self,
@@ -161,45 +234,12 @@ class LedgerAuditMixin:
                 }
         await fact_cursor.close()
 
-        from cortex.crypto import get_default_encrypter
-        from cortex.utils.canonical import compute_fact_hash
-
-        enc = get_default_encrypter()
-        for f_tx_id, info in list(active_facts_by_tx.items()):
-            try:
-                decrypted = enc.decrypt_str(info["content"], tenant_id=info["tenant_id"])
-                computed_hash = compute_fact_hash(decrypted)
-                if computed_hash != info["hash"]:
-                    violations.append(
-                        {
-                            "id": f_tx_id,
-                            "type": "FACT_HASH_MISMATCH",
-                            "stored_hash": info["hash"],
-                            "computed_hash": computed_hash,
-                        }
-                    )
-            except Exception as e:
-                violations.append(
-                    {"id": f_tx_id, "type": "FACT_DECRYPTION_FAILED", "error": str(e)}
-                )
-
-        for store_tid, expected_hash in store_txs_to_verify.items():
-            if store_tid in active_facts_by_tx:
-                fact_hash = active_facts_by_tx[store_tid]["hash"]
-                if fact_hash != expected_hash:
-                    violations.append(
-                        {
-                            "id": store_tid,
-                            "type": "FACT_MUTATION_DETECTED",
-                            "expected_hash": expected_hash,
-                            "fact_hash": fact_hash,
-                        }
-                    )
-            elif store_tid not in purged_store_tx_ids:
-                violations.append(
-                    {"id": store_tid, "type": "FACT_MISSING", "expected_hash": expected_hash}
-                )
-
+        violations.extend(self._verify_fact_hashes(active_facts_by_tx))
+        violations.extend(
+            self._verify_fact_references(
+                active_facts_by_tx, store_txs_to_verify, purged_store_tx_ids
+            )
+        )
         return violations
 
     async def _verify_merkle_roots(self, conn, tenant_id: str | None) -> list[dict]:
