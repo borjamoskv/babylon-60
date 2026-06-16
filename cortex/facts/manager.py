@@ -26,6 +26,73 @@ except ImportError:
     HaikuGuard = None
 
 
+async def _check_thalamus_filter(
+    engine: Any, content: str, project: str, tenant_id: str, fact_type: str
+) -> None:
+    if (
+        hasattr(engine, "memory")
+        and engine.memory
+        and hasattr(engine.memory, "thalamus")
+    ):
+        should_process, action, _ = await engine.memory.thalamus.filter(
+            content=content, project_id=project, tenant_id=tenant_id, fact_type=fact_type
+        )
+        if not should_process:
+            from cortex.routes.notch_ws import notify_notch_pruning
+
+            await notify_notch_pruning()
+            raise ValueError(f"Thalamus: Fact rejected ({action})")
+
+
+async def _check_exact_duplicate(
+    conn: Any, content: str, project: str, tenant_id: str
+) -> int | None:
+    cursor = await conn.execute(
+        "SELECT id FROM facts WHERE content = ? AND project = ? AND tenant_id = ?",
+        (content, project, tenant_id),
+    )
+    row = await cursor.fetchone()
+    if row:
+        fact_id = row[0]
+        logger.info("V8 Guardrail: Fact discarded - P0 Exact Duplicate of #%s", fact_id)
+        await conn.execute(
+            "UPDATE facts SET updated_at = ? WHERE id = ?", (now_iso(), fact_id)
+        )
+        await conn.commit()
+        return fact_id
+    return None
+
+
+async def _check_semantic_duplicate(
+    engine: Any, conn: Any, content: str, project: str, tenant_id: str, fact_type: str
+) -> int | None:
+    if (
+        fact_type not in ("mafia_node", "telemetry_batch")
+        and hasattr(engine, "embeddings")
+        and engine.embeddings
+    ):
+        if hasattr(engine.embeddings, "embed_text"):
+            vec = await engine.embeddings.embed_text(content)
+            if vec:
+                results = await engine.search(
+                    query=content, tenant_id=tenant_id, project=project, top_k=1
+                )
+                if results and results[0].score > 0.90:  # type: ignore[reportAttributeAccessIssue]
+                    logger.info(
+                        "V8 Guardrail: Fact discarded - Semantic Duplicate of #%s (Score: %.2f)",
+                        results[0].fact_id,  # type: ignore[reportAttributeAccessIssue]
+                        results[0].score,  # type: ignore[reportAttributeAccessIssue]
+                    )
+                    await conn.execute(  # type: ignore[reportOptionalMemberAccess]
+                        "UPDATE facts SET updated_at = ? WHERE id = ?",
+                        (now_iso(), results[0].fact_id),
+                    )
+                    await conn.commit()  # type: ignore[reportOptionalMemberAccess]
+                    return results[0].fact_id  # type: ignore[reportAttributeAccessIssue]
+    return None
+
+
+
 class FactManager:
     """Manages the full lifecycle and retrieval of facts."""
 
@@ -128,68 +195,20 @@ class FactManager:
         if HaikuGuard is not None:
             HaikuGuard.enforce(content, {"fact_type": fact_type, "tags": tags or []})
 
-        # Sovereign Pre-filtering Gate: Active Forgetting (#350/100)
+        await _check_thalamus_filter(self.engine, content, project, tenant_id, fact_type)
 
-        if (
-            hasattr(self.engine, "memory")
-            and self.engine.memory
-            and hasattr(self.engine.memory, "thalamus")
-        ):
-            should_process, action, _ = await self.engine.memory.thalamus.filter(
-                content=content, project_id=project, tenant_id=tenant_id, fact_type=fact_type
-            )
-            if not should_process:
-                from cortex.routes.notch_ws import notify_notch_pruning
-
-                await notify_notch_pruning()
-                raise ValueError(f"Thalamus: Fact rejected ({action})")
-
-        # V8 Validation Layer (Sovereign Gate)
         try:
             content = validate_content(project, content, fact_type)
 
-            # P0 Thermodynamic Gate: O(1) Exact Match (Axiom Ω₂)
-            cursor = await conn.execute(
-                "SELECT id FROM facts WHERE content = ? AND project = ? AND tenant_id = ?",
-                (content, project, tenant_id),
-            )
-            row = await cursor.fetchone()
-            if row:
-                fact_id = row[0]
-                logger.info("V8 Guardrail: Fact discarded - P0 Exact Duplicate of #%s", fact_id)
-                await conn.execute(
-                    "UPDATE facts SET updated_at = ? WHERE id = ?", (now_iso(), fact_id)
-                )
-                await conn.commit()
-                return fact_id
+            exact_dup = await _check_exact_duplicate(conn, content, project, tenant_id)
+            if exact_dup is not None:
+                return exact_dup
 
-            # V8 Semantic Deduplication
-            if (
-                fact_type not in ("mafia_node", "telemetry_batch")
-                and hasattr(self.engine, "embeddings")
-                and self.engine.embeddings
-            ):
-                # 1. Generate text embedding
-                if hasattr(self.engine.embeddings, "embed_text"):
-                    vec = await self.engine.embeddings.embed_text(content)
-                    if vec:
-                        # 2. Check for Similarity > 0.90 in sqlite-vec facts or embeddings
-                        results = await self.engine.search(
-                            query=content, tenant_id=tenant_id, project=project, top_k=1
-                        )
-                        if results and results[0].score > 0.90:  # type: ignore[reportAttributeAccessIssue]
-                            logger.info(
-                                "V8 Guardrail: Fact discarded - Semantic Duplicate of #%s (Score: %.2f)",
-                                results[0].fact_id,  # type: ignore[reportAttributeAccessIssue]
-                                results[0].score,  # type: ignore[reportAttributeAccessIssue]
-                            )
-                            # We update updated_at / last_accessed
-                            await conn.execute(  # type: ignore[reportOptionalMemberAccess]
-                                "UPDATE facts SET updated_at = ? WHERE id = ?",
-                                (now_iso(), results[0].fact_id),
-                            )
-                            await conn.commit()  # type: ignore[reportOptionalMemberAccess]
-                            return results[0].fact_id  # type: ignore[reportAttributeAccessIssue]
+            semantic_dup = await _check_semantic_duplicate(
+                self.engine, conn, content, project, tenant_id, fact_type
+            )
+            if semantic_dup is not None:
+                return semantic_dup
         except ValidationError as e:
             raise ValueError(f"Ingestion Validation Failed: {e}") from e
         except (OSError, RuntimeError, ValueError) as e:
