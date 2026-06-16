@@ -96,9 +96,7 @@ async def _fetch_reality_weaver_stats(conn, project: str, cutoff_30d: str):
 
     return type_rows, decisions, ghosts, bridges
 
-def _format_reality_weaver_report(intent: str, project: str, type_rows, decisions, ghosts, bridges) -> str:
-    lines = [f"═══ REALITY WEAVING: {intent.upper()} ═══", ""]
-
+def _weaver_build_kb_lines(project: str, type_rows, lines: list[str]) -> int:
     total = 0
     if type_rows:
         lines.append("### Knowledge Base")
@@ -113,6 +111,12 @@ def _format_reality_weaver_report(intent: str, project: str, type_rows, decision
     else:
         lines.append(f"> No facts found for project '{project}'. Virgin territory.")
         lines.append("")
+    return total
+
+def _format_reality_weaver_report(intent: str, project: str, type_rows, decisions, ghosts, bridges) -> str:
+    lines = [f"═══ REALITY WEAVING: {intent.upper()} ═══", ""]
+
+    total = _weaver_build_kb_lines(project, type_rows, lines)
 
     if decisions:
         lines.append("### Recent Decisions")
@@ -399,14 +403,7 @@ async def _fetch_nexus_stats(conn, project: str, cutoff_7d: str, cutoff_14d: str
         prev_decisions, bridge_count, recent_errors
     )
 
-def _format_nexus_report(
-    project: str, tx_stats, ghost_count, total_facts, recent_decisions,
-    prev_decisions, bridge_count, recent_errors
-) -> str:
-    tx_count, start, last = tx_stats if tx_stats else (0, "N/A", "N/A")
-    ghost_density = (ghost_count / max(total_facts, 1)) * 100
-    drift = ((recent_decisions - prev_decisions) / max(prev_decisions, 1)) * 100
-
+def _nexus_get_health_levels(ghost_density: float, drift: float) -> tuple[str, str]:
     if ghost_density > 20:
         ghost_level = "🔴 CRITICAL"
     elif ghost_density > 10:
@@ -422,30 +419,10 @@ def _format_nexus_report(
         drift_label = f"{drift:.1f}% (Decelerating)"
     else:
         drift_label = f"{drift:+.1f}% (Stable)"
+    
+    return ghost_level, drift_label
 
-    label = project or "GLOBAL"
-    lines = [
-        f"═══ TEMPORAL NEXUS: {label} ═══",
-        "",
-        "### Ledger",
-        f"Total Mutations:  {tx_count}",
-        f"First Pulse:      {start}",
-        f"Last Evolution:   {last}",
-        "",
-        "### Vitals",
-        f"Active Facts:     {total_facts}",
-        f"Active Ghosts:    {ghost_count}",
-        f"Ghost Density:    {ghost_density:.1f}% - {ghost_level}",
-        f"Active Bridges:   {bridge_count}",
-        f"Recent Errors:    {recent_errors} (7d)",
-        "",
-        "### Temporal Drift",
-        f"Decisions (7d):   {recent_decisions}",
-        f"Decisions (prev): {prev_decisions}",
-        f"Drift:            {drift_label}",
-        "",
-    ]
-
+def _nexus_build_recs(ghost_density: float, recent_errors: int, drift: float, bridge_count: int, lines: list[str], ghost_count: int) -> None:
     recs: list[str] = []
     if ghost_density > 15:
         recs.append("- 👻 Ghost density critical. Run `/ghost-control` to triage.")
@@ -471,6 +448,41 @@ def _format_nexus_report(
     else:
         lines.append("> [!NOTE]")
         lines.append(f"> System health: moderate. {ghost_count} ghost(s) pending resolution.")
+
+def _format_nexus_report(
+    project: str, tx_stats, ghost_count, total_facts, recent_decisions,
+    prev_decisions, bridge_count, recent_errors
+) -> str:
+    tx_count, start, last = tx_stats if tx_stats else (0, "N/A", "N/A")
+    ghost_density = (ghost_count / max(total_facts, 1)) * 100
+    drift = ((recent_decisions - prev_decisions) / max(prev_decisions, 1)) * 100
+
+    ghost_level, drift_label = _nexus_get_health_levels(ghost_density, drift)
+
+    label = project or "GLOBAL"
+    lines = [
+        f"═══ TEMPORAL NEXUS: {label} ═══",
+        "",
+        "### Ledger",
+        f"Total Mutations:  {tx_count}",
+        f"First Pulse:      {start}",
+        f"Last Evolution:   {last}",
+        "",
+        "### Vitals",
+        f"Active Facts:     {total_facts}",
+        f"Active Ghosts:    {ghost_count}",
+        f"Ghost Density:    {ghost_density:.1f}% - {ghost_level}",
+        f"Active Bridges:   {bridge_count}",
+        f"Recent Errors:    {recent_errors} (7d)",
+        "",
+        "### Temporal Drift",
+        f"Decisions (7d):   {recent_decisions}",
+        f"Decisions (prev): {prev_decisions}",
+        f"Drift:            {drift_label}",
+        "",
+    ]
+
+    _nexus_build_recs(ghost_density, recent_errors, drift, bridge_count, lines, ghost_count)
 
     return "\n".join(lines)
 
