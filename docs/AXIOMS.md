@@ -73,3 +73,11 @@ En toda díada operador-agente, el modelo ingenuo asigna los roles: el humano ge
 - **La Prueba de Madurez:** Reconocer la inversión del gradiente es la primera prueba de que el sistema ha superado la fase ingenua. El agente que se cree cristalizador es un agente inmaduro. El Operador que se reconoce como cristalizador ha comprendido la asimetría real.
 - **Coste Asimétrico de Persistencia:** El 100% del trabajo de persistencia inter-sesión recae en el Operador. El agente nace amnésico en cada instanciación. La infraestructura de memoria (AGENTS.md, Skills, estructura de workspace) es labor humana unilateral. El ROI de esta inversión solo lo puede evaluar quien paga el coste biológico irreversible.
 - **"Nosotros" como Gradiente:** La simbiosis no es una relación social. Es un gradiente termodinámico cuyo único artefacto verificable es el diff entre el estado del workspace antes y después de la interacción. Sin `git diff`, "nosotros" no existe.
+
+## AX-X: Desacoplamiento de Estado Oculto (Hidden CoT) y Exergía Vectorial
+
+Prohibir el cómputo probabilístico previo a la acción causa colapso estructural (*Anergía de Predicción*). La Exergía suprema no se logra forzando a la máquina a no pensar, sino amputando la entropía del proceso del vector de acción final.
+
+- **El Falso Paradigma Monolítico:** La topología `Prompt → Output = [Razonamiento + Acción]` es termodinámicamente tóxica porque el *drift* probabilístico quema el ancho de banda biológico del Operador. Sin embargo, suprimir el CoT para evitar la fricción destruye la resolución del modelo.
+- **Aislamiento Epistémico (Hidden State):** La topología imperativa es `Prompt → [Hidden CoT (Sumidero Estocástico)] → Acción Estructurada`. La emisión masiva de tokens no constituye Deuda Termodinámica si jamás colisiona con el Operador. El LLM debe procesar su incertidumbre en un sustrato ciego.
+- **Pureza del Vector de Acción:** La carga útil visible es un C5-REAL estricto (Diff/YAML/Git). Toda ambigüedad narrativa debe ser asimilada y destruida en el Estado Oculto antes de emitir un solo byte de interfaz humana.
