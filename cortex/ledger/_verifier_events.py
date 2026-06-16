@@ -83,25 +83,22 @@ def verify_events(verifier: _PublicLedgerVerifier) -> None:
     verifier.guarantees["temporal_consistency_verified"] = temporal_ok
 
 
-def _verify_single_event(
+def _verify_event_basics_and_replay(
     verifier: _PublicLedgerVerifier,
     event: dict[str, Any],
     index: int,
     seen_event_ids: set[str],
     seen_nonces: set[str],
     previous_sequence: int | None,
-    previous_hash: str,
-) -> tuple[bool, bool, bool, bool, bool, int, str]:
+) -> tuple[bool, bool, bool, int, str, str]:
     integrity_ok = True
     origin_ok = True
-    authority_ok = True
     replay_ok = True
-    temporal_ok = True
-
+    
     missing = sorted(STRICT_REQUIRED_EVENT_FIELDS - event.keys())
     if missing:
         verifier.errors.append(f"event_missing_required_fields:{index}:{','.join(missing)}")
-        return False, False, False, False, False, previous_sequence or 0, previous_hash
+        return False, False, False, previous_sequence or 0, "", ""
 
     if event.get("hash_alg") != "sha256":
         verifier.errors.append(f"event_unsupported_hash_alg:{index}:{event.get('hash_alg')}")
@@ -115,6 +112,7 @@ def _verify_single_event(
     event_id = _require_str(event, "event_id", index, verifier.errors)
     nonce = _require_str(event, "nonce", index, verifier.errors)
     sequence = _require_int(event, "sequence", index, verifier.errors)
+    
     if event_id in seen_event_ids:
         verifier.errors.append(f"event_replay_duplicate_event_id:{event_id}")
         replay_ok = False
@@ -130,8 +128,17 @@ def _verify_single_event(
     if previous_sequence is not None and sequence != previous_sequence + 1:
         verifier.errors.append(f"event_sequence_gap:{index}:expected:{previous_sequence + 1}")
         replay_ok = False
-    previous_sequence = sequence
+        
+    return integrity_ok, origin_ok, replay_ok, sequence, event_id, nonce
 
+def _verify_event_integrity(
+    verifier: _PublicLedgerVerifier,
+    event: dict[str, Any],
+    index: int,
+    event_id: str,
+    previous_hash: str,
+    integrity_ok: bool
+) -> tuple[bool, str]:
     prev_hash = _require_str(event, "prev_hash", index, verifier.errors)
     if prev_hash != previous_hash:
         verifier.errors.append(f"event_chain_break:{index}:expected:{previous_hash}")
@@ -143,24 +150,23 @@ def _verify_single_event(
     if computed_hash != expected_hash:
         verifier.errors.append(f"event_hash_mismatch:{event_id}")
         integrity_ok = False
-    previous_hash = expected_hash
+        
+    return integrity_ok, expected_hash
 
-    temporal_ok = temporal_ok and _verify_event_time(verifier, event, index)
+def _verify_event_authorization(
+    verifier: _PublicLedgerVerifier,
+    event: dict[str, Any],
+    index: int,
+    event_id: str,
+    origin_ok: bool,
+) -> tuple[bool, bool, bool]:
+    temporal_ok = _verify_event_time(verifier, event, index)
+    authority_ok = True
+    
     key = verifier.key_index.get(str(event.get("actor_key_id")))
     if key is None:
         verifier.errors.append(f"event_actor_key_missing:{event_id}")
-        origin_ok = False
-        authority_ok = False
-        temporal_ok = False
-        return (
-            integrity_ok,
-            origin_ok,
-            authority_ok,
-            replay_ok,
-            temporal_ok,
-            previous_sequence,
-            previous_hash,
-        )
+        return False, False, False
 
     if key.get("actor_id") != event.get("actor_id"):
         verifier.errors.append(f"event_actor_key_actor_mismatch:{event_id}")
@@ -186,6 +192,33 @@ def _verify_single_event(
             f"event_origin_signature_invalid:{event_id}:{exc.__class__.__name__}"
         )
         origin_ok = False
+        
+    return origin_ok, authority_ok, temporal_ok
+
+def _verify_single_event(
+    verifier: _PublicLedgerVerifier,
+    event: dict[str, Any],
+    index: int,
+    seen_event_ids: set[str],
+    seen_nonces: set[str],
+    previous_sequence: int | None,
+    previous_hash: str,
+) -> tuple[bool, bool, bool, bool, bool, int, str]:
+    
+    integrity_ok, origin_ok, replay_ok, new_sequence, event_id, _ = _verify_event_basics_and_replay(
+        verifier, event, index, seen_event_ids, seen_nonces, previous_sequence
+    )
+    
+    if not event_id:
+        return integrity_ok, origin_ok, False, replay_ok, False, new_sequence, previous_hash
+
+    integrity_ok, new_hash = _verify_event_integrity(
+        verifier, event, index, event_id, previous_hash, integrity_ok
+    )
+
+    origin_ok, authority_ok, temporal_ok = _verify_event_authorization(
+        verifier, event, index, event_id, origin_ok
+    )
 
     return (
         integrity_ok,
@@ -193,8 +226,8 @@ def _verify_single_event(
         authority_ok,
         replay_ok,
         temporal_ok,
-        previous_sequence,
-        previous_hash,
+        new_sequence,
+        new_hash,
     )
 
 

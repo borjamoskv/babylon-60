@@ -121,6 +121,49 @@ class ExecutionTraceGraph:
 
             return risk_map
 
+    def _has_cycle(self, n: str, local_dag: dict, visited_set: set, stack_set: set) -> bool:
+        if n in stack_set:
+            return True
+        if n in visited_set:
+            return False
+        visited_set.add(n)
+        stack_set.add(n)
+        for parent in local_dag.get(n, []):
+            if self._has_cycle(parent, local_dag, visited_set, stack_set):
+                return True
+        stack_set.remove(n)
+        return False
+
+    def _compute_graph_coherence(self, active_traces: list[tuple], rolled_back_set: set[str], global_active_set: set[str]) -> float:
+        import json
+        if not active_traces:
+            return 1.0
+
+        contradictions = 0
+        local_dag = {r[0]: json.loads(r[1]) for r in active_traces}
+
+        for node_id, lineage in local_dag.items():
+            is_contradiction = False
+            for p in lineage:
+                if p in rolled_back_set:
+                    is_contradiction = True
+                    break
+                if p not in global_active_set:
+                    is_contradiction = True
+                    break
+
+            if is_contradiction:
+                contradictions += 1
+                continue
+
+            visited = set()
+            stack = set()
+            if self._has_cycle(node_id, local_dag, visited, stack):
+                contradictions += 1
+
+        normalized_contradiction = contradictions / len(active_traces)
+        return max(0.0, 1.0 - normalized_contradiction)
+
     async def compute_coherence_field(
         self, window_seconds: int, tenant_id: str = "default"
     ) -> float:
@@ -155,48 +198,4 @@ class ExecutionTraceGraph:
             )
             global_active_set = {r[0] for r in await cursor.fetchall()}
 
-            import json
-
-            contradictions = 0
-
-            # Construir DAG local
-            local_dag = {r[0]: json.loads(r[1]) for r in active_traces}
-
-            def has_cycle(n, visited_set, stack_set):
-                if n in stack_set:
-                    return True
-                if n in visited_set:
-                    return False
-                visited_set.add(n)
-                stack_set.add(n)
-                for parent in local_dag.get(n, []):
-                    if has_cycle(parent, visited_set, stack_set):
-                        return True
-                stack_set.remove(n)
-                return False
-
-            for node_id, lineage in local_dag.items():
-                is_contradiction = False
-                for p in lineage:
-                    # 1. Dependencia en muerto
-                    if p in rolled_back_set:
-                        is_contradiction = True
-                        break
-                    # 2. Dependencia en el vacío (nunca existió)
-                    if p not in global_active_set:
-                        is_contradiction = True
-                        break
-
-                if is_contradiction:
-                    contradictions += 1
-                    continue
-
-                # 3. Detección de ciclos (DFS recursivo acotado al DAG local)
-                visited = set()
-                stack = set()
-
-                if has_cycle(node_id, visited, stack):
-                    contradictions += 1
-
-            normalized_contradiction = contradictions / len(active_traces)
-            return max(0.0, 1.0 - normalized_contradiction)
+            return self._compute_graph_coherence(active_traces, rolled_back_set, global_active_set)

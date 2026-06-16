@@ -390,16 +390,14 @@ def _verification_profile_document() -> dict[str, str]:
     }
 
 
-def _validate_single_public_event(
+def _validate_event_basics(
     event: Mapping[str, Any],
     index: int,
     tenant_id: str,
     stream_id: str,
     seen_event_ids: set[str],
     seen_nonces: set[str],
-    previous_sequence: int | None,
-    previous_hash: str,
-) -> str:
+) -> tuple[str, str, int]:
     missing = sorted(STRICT_REQUIRED_EVENT_FIELDS - event.keys())
     if missing:
         raise ValueError(f"event missing public-v1 fields at {index}: {','.join(missing)}")
@@ -415,24 +413,54 @@ def _validate_single_public_event(
         raise ValueError(f"event tenant mismatch: {event_id}")
     if event.get("stream_id") != stream_id:
         raise ValueError(f"event stream mismatch: {event_id}")
-    if event.get("prev_hash") != previous_hash:
-        raise ValueError(f"event chain break before export: {event_id}")
+        
     sequence = event.get("sequence")
     if isinstance(sequence, bool) or not isinstance(sequence, int):
         raise ValueError(f"event sequence invalid: {event_id}")
-    if previous_sequence is None and sequence != 1:
-        raise ValueError(f"event sequence must start at 1: {event_id}")
-    if previous_sequence is not None and sequence != previous_sequence + 1:
-        raise ValueError(f"event sequence gap: {event_id}")
+        
     detail = event.get("detail")
     if isinstance(detail, Mapping) and any(
         field in detail for field in ("content", "payload", "plaintext", "fact_content")
     ):
         raise ValueError(f"event contains inline fact payload: {event_id}")
+        
+    return event_id, nonce, sequence
+
+def _validate_event_chaining(
+    event: Mapping[str, Any],
+    event_id: str,
+    sequence: int,
+    previous_sequence: int | None,
+    previous_hash: str,
+) -> str:
+    if event.get("prev_hash") != previous_hash:
+        raise ValueError(f"event chain break before export: {event_id}")
+    if previous_sequence is None and sequence != 1:
+        raise ValueError(f"event sequence must start at 1: {event_id}")
+    if previous_sequence is not None and sequence != previous_sequence + 1:
+        raise ValueError(f"event sequence gap: {event_id}")
+        
     actual_hash = _event_hash(event)
     if actual_hash != event.get("hash"):
         raise ValueError(f"event hash mismatch before export: {event_id}")
     return actual_hash
+
+def _validate_single_public_event(
+    event: Mapping[str, Any],
+    index: int,
+    tenant_id: str,
+    stream_id: str,
+    seen_event_ids: set[str],
+    seen_nonces: set[str],
+    previous_sequence: int | None,
+    previous_hash: str,
+) -> str:
+    event_id, nonce, sequence = _validate_event_basics(
+        event, index, tenant_id, stream_id, seen_event_ids, seen_nonces
+    )
+    return _validate_event_chaining(
+        event, event_id, sequence, previous_sequence, previous_hash
+    )
 
 def _validate_public_events(
     events: Sequence[Mapping[str, Any]],
