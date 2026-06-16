@@ -43,15 +43,7 @@ class HDCVectorStoreL2:
     The storage penalty is accepted for phase 1 of Vector Alpha to reuse sqlite-vec ranking.
     """
 
-    __slots__ = (
-        "_conn",
-        "_db_path",
-        "_encoder",
-        "_half_life",
-        "_item_memory",
-        "_lock",
-        "_ready",
-    )
+    __slots__ = ("_encoder", "_item_memory", "_db_path", "_conn", "_lock", "_ready", "_half_life", "_vec_loaded")
 
     def __init__(
         self,
@@ -82,8 +74,12 @@ class HDCVectorStoreL2:
             )
             # runtime-policy: wait up to 5s for WAL write-lock contention (Axiom Ω6)
             self._conn.execute("PRAGMA busy_timeout=5000")
-            self._conn.enable_load_extension(True)
-            sqlite_vec.load(self._conn)
+            try:
+                self._conn.enable_load_extension(True)
+                sqlite_vec.load(self._conn)
+                self._vec_loaded = True
+            except (AttributeError, OSError, sqlite3.Error):
+                self._vec_loaded = False
             self._conn.row_factory = sqlite3.Row
 
             # Register Sovereign Functions
@@ -107,19 +103,21 @@ class HDCVectorStoreL2:
             """)
 
             # Vector Table (sqlite-vec uses float[N])
-            dim = self._encoder.dimension
-            self._conn.execute(f"""
-                CREATE VIRTUAL TABLE IF NOT EXISTS hdc_vec_facts USING vec0(
-                    embedding float[{dim}]
-                )
-            """)
+            if getattr(self, '_vec_loaded', False):
+                dim = self._encoder.dimension
+                self._conn.execute(f"""
+                    CREATE VIRTUAL TABLE IF NOT EXISTS hdc_vec_facts USING vec0(
+                        embedding float[{dim}]
+                    )
+                """)
 
             # Specular Vector Table (G10 Intent Alignment)
-            self._conn.execute(f"""
-                CREATE VIRTUAL TABLE IF NOT EXISTS hdc_specular_vec_facts USING vec0(
-                    embedding float[{dim}]
-                )
-            """)
+            if getattr(self, '_vec_loaded', False):
+                self._conn.execute(f"""
+                    CREATE VIRTUAL TABLE IF NOT EXISTS hdc_specular_vec_facts USING vec0(
+                        embedding float[{dim}]
+                    )
+                """)
 
             # Indexes
             self._conn.execute(
@@ -177,10 +175,11 @@ class HDCVectorStoreL2:
             )
             rowid = cursor.lastrowid
 
-            cursor.execute(
-                "INSERT INTO hdc_vec_facts(rowid, embedding) VALUES (?, ?)",
-                (rowid, embedding_bytes),
-            )
+            if getattr(self, '_vec_loaded', False):
+                cursor.execute(
+                    "INSERT INTO hdc_vec_facts(rowid, embedding) VALUES (?, ?)",
+                    (rowid, embedding_bytes),
+                )
 
             # 3. Store Specular Trace if available
             if getattr(fact, "specular_embedding", None):
