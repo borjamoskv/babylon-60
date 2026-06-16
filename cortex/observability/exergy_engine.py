@@ -132,6 +132,17 @@ class ExergyEngine:
         if not os.path.exists(WORKFLOWS_DIR):
             return genomes
 
+        gene_mapping = {
+            "python": ("python", "script"),
+            "sql": ("sql", "database", "sqlite"),
+            "mcp": ("mcp",),
+            "search": ("search", "brave"),
+            "browser": ("browser", "scraping"),
+            "github": ("github", "pr"),
+            "frontend": ("visual", "ui", "css"),
+            "planning": ("plan", "architecture"),
+        }
+
         for file in os.listdir(WORKFLOWS_DIR):
             if not file.endswith(".md"):
                 continue
@@ -140,23 +151,10 @@ class ExergyEngine:
             with open(os.path.join(WORKFLOWS_DIR, file), encoding="utf-8") as f:
                 content = f.read().lower()
 
-                # Gene extraction heuristics
-                if "python" in content or "script" in content:
-                    genes.add("python")
-                if "sql" in content or "database" in content or "sqlite" in content:
-                    genes.add("sql")
-                if "mcp" in content:
-                    genes.add("mcp")
-                if "search" in content or "brave" in content:
-                    genes.add("search")
-                if "browser" in content or "scraping" in content:
-                    genes.add("browser")
-                if "github" in content or "pr" in content:
-                    genes.add("github")
-                if "visual" in content or "ui" in content or "css" in content:
-                    genes.add("frontend")
-                if "plan" in content or "architecture" in content:
-                    genes.add("planning")
+                # Gene extraction via data-driven mapping
+                for gene, keywords in gene_mapping.items():
+                    if any(kw in content for kw in keywords):
+                        genes.add(gene)
 
             genomes[wf_name] = list(genes)
         return genomes

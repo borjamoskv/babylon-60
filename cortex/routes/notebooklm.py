@@ -135,6 +135,25 @@ async def notebooklm_fragment(
     return {"domains": counts, "total_facts": sum(counts.values())}
 
 
+def _resolve_sync_target(drive_path: str | None) -> tuple[Path | None, str]:
+    from cortex.services.notebooklm import CLOUD_PROVIDERS
+    if drive_path:
+        home = Path.home().resolve()
+        requested = Path(drive_path).expanduser().resolve()
+        if not str(requested).startswith(str(home)):
+            from fastapi import HTTPException
+            raise HTTPException(
+                status_code=400, detail="Invalid drive_path. Must be within the home directory."
+            )
+        return requested, "Custom"
+
+    for provider, paths in CLOUD_PROVIDERS.items():
+        for p in paths:
+            if p.parent.exists():
+                return p, provider
+    return None, "none"
+
+
 @router.post("/v1/notebooklm/sync")
 async def notebooklm_sync(
     drive_path: str | None = Query(None, description="Explicit cloud folder path"),
@@ -147,29 +166,9 @@ async def notebooklm_sync(
     import time
     from datetime import datetime, timezone
 
-    from cortex.services.notebooklm import CLOUD_PROVIDERS, DIGEST_FILE, DOMAINS_DIR
+    from cortex.services.notebooklm import DIGEST_FILE, DOMAINS_DIR
 
-    target = None
-    provider_name = "Custom"
-    if drive_path:
-        home = Path.home().resolve()
-        requested = Path(drive_path).expanduser().resolve()
-        if not str(requested).startswith(str(home)):
-            from fastapi import HTTPException
-
-            raise HTTPException(
-                status_code=400, detail="Invalid drive_path. Must be within the home directory."
-            )
-        target = requested
-    else:
-        for provider, paths in CLOUD_PROVIDERS.items():
-            for p in paths:
-                if p.parent.exists():
-                    target = p
-                    provider_name = provider
-                    break
-            if target:
-                break
+    target, provider_name = _resolve_sync_target(drive_path)
 
     if not target:
         return {"error": "No cloud sync provider detected. Specify drive_path."}
