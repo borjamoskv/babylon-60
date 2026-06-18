@@ -77,6 +77,8 @@ async function demo() {
     intensity: 0.91,
   });
 
+  await new Promise((r) => setTimeout(r, 700));
+
   console.log(JSON.stringify({
     demo: true,
     routedTo: [resultA.node.id, resultB.node.id],
