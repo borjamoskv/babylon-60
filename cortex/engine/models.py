@@ -3,22 +3,25 @@ import json
 from dataclasses import dataclass, field
 from typing import Any
 
-__all__ = ["Fact", "row_to_fact"]
+__all__ = ["Fact", "row_to_fact", "KnowledgeObject", "row_to_knowledge_object"]
 
 
 @dataclass
-class Fact:
+class KnowledgeObject:
     id: int | str
     tenant_id: str
     project: str
-    content: str
+    claim: str
     fact_type: str
+    justification: str = ""
+    verification_status: str = "UNVERIFIED"
+    evidence_links: list[str] = field(default_factory=list)
+    provenance: str | None = None
+    acceptance_certificate: dict = field(default_factory=dict)
     tags: list[str] = field(default_factory=list)
     meta: dict = field(default_factory=dict)
     created_at: str | None = None
     updated_at: str | None = None
-    is_tombstoned: bool = False
-    is_quarantined: bool = False
     hash: str | None = None
     valid_from: str | None = None
     valid_until: str | None = None
@@ -38,6 +41,22 @@ class Fact:
     semantic_error: str | None = None
     causal_depth: int | str = 0
 
+    @property
+    def content(self) -> str:
+        return self.claim
+
+    @content.setter
+    def content(self, value: str):
+        self.claim = value
+
+    @property
+    def is_tombstoned(self) -> bool:
+        return self.verification_status == "FALSIFIED"
+
+    @property
+    def is_quarantined(self) -> bool:
+        return self.verification_status == "UNVERIFIED"
+
     def __post_init__(self) -> None:
         if self.parent_id is None and self.parent_decision_id is not None:
             self.parent_id = self.parent_decision_id
@@ -46,14 +65,20 @@ class Fact:
 
     def is_active(self) -> bool:
         """Evaluate logical validity using valid_until and physical state."""
-        return not self.is_tombstoned and self.valid_until is None
+        return self.verification_status != "FALSIFIED" and self.valid_until is None
 
     def to_dict(self) -> dict:
         return {
             "id": self.id,
             "tenant_id": self.tenant_id,
             "project": self.project,
-            "content": self.content,
+            "claim": self.claim,
+            "content": self.claim,
+            "justification": self.justification,
+            "verification_status": self.verification_status,
+            "evidence_links": self.evidence_links,
+            "provenance": self.provenance,
+            "acceptance_certificate": self.acceptance_certificate,
             "type": self.fact_type,
             "fact_type": self.fact_type,
             "category": self.category,
@@ -81,6 +106,8 @@ class Fact:
             "semantic_status": self.semantic_status,
             "semantic_error": self.semantic_error,
         }
+
+Fact = KnowledgeObject
 
 
 def _parse_json_blob(raw: object, fallback: object) -> object:
@@ -277,7 +304,7 @@ def _parse_fact_metadata(v: dict, enc: Any, tenant_id: str) -> dict:
     return meta if isinstance(meta, dict) else {}
 
 
-def row_to_fact(row: tuple) -> Fact:
+def row_to_knowledge_object(row: tuple) -> KnowledgeObject:
     from cortex.crypto import get_default_encrypter
 
     enc = get_default_encrypter()
@@ -303,19 +330,26 @@ def row_to_fact(row: tuple) -> Fact:
 
     meta = _parse_fact_metadata(v, enc, tenant_id)
     pid = v["parent_id"] or meta.get("parent_id") or meta.get("parent_decision_id")
+    
+    is_falsified = v["is_tombstoned"]
+    is_unverified = v["is_quarantined"]
+    v_status = "FALSIFIED" if is_falsified else ("UNVERIFIED" if is_unverified else "ACCEPTED")
 
-    return Fact(
+    return KnowledgeObject(
         id=v["id"],
         tenant_id=tenant_id,
         project=v["project"],
-        content=content if content is not None else "",
+        claim=content if content is not None else "",
         fact_type=v["fact_type"],
+        justification=meta.get("justification", ""),
+        verification_status=meta.get("verification_status", v_status),
+        evidence_links=meta.get("evidence_links", []),
+        provenance=meta.get("provenance"),
+        acceptance_certificate=meta.get("acceptance_certificate", {}),
         tags=tags,
         meta=meta,
         created_at=v["created_at"],
         updated_at=v["updated_at"],
-        is_tombstoned=v["is_tombstoned"],
-        is_quarantined=v["is_quarantined"],
         hash=v["hash"],
         valid_from=v["valid_from"],
         valid_until=v["valid_until"],
@@ -334,3 +368,5 @@ def row_to_fact(row: tuple) -> Fact:
         semantic_status=meta.get("semantic_status", v["semantic_status"]),
         semantic_error=meta.get("semantic_error", v["semantic_error"]),
     )
+
+row_to_fact = row_to_knowledge_object
