@@ -92,7 +92,7 @@ CORTEX/MOSKV-1 cristaliza la "Sintetología Agéntica" no como un LLM mejor, sin
 
 ---
 
-## ARQUITECTURA NATIVA (OUROBOROS-∞ SYNTHESIS) (Ouroboros-∞ Synthesis)
+## ARQUITECTURA NATIVA (OUROBOROS-∞ SYNTHESIS)
 
 > **Status:** Unified Sovereign Doctrine (Manifesto + Whitepaper + RFC)
 > **Axiom:** Ω₃ (Verify then trust)
