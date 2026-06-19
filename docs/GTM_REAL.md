@@ -44,9 +44,9 @@ graph TD
 
 | Tier | Cost | Target | SLA / Commitments | Value Prop / Transitions |
 | :--- | :---: | :--- | :--- | :--- |
-| **0. Core (Local)** | $0 (Apache-2.0) | Indie devs, local R&D | None; community support | Single-binary, local SQLite (WAL), CLI-first, offline traces, basic replay |
+| **0. Core (Local)** | $0 (Apache-2.0) | Indie devs, local R&D | None; community support | Single-binary, local SQLite (WAL), CLI-first, iceoryx2 POSIX SHM (Hot Resume), offline traces, basic replay |
 | **1. Pro SaaS** | $49/mo base + usage | Scaling teams | 99.9% uptime, email support | Multi-tenant cloud, managed ingestion, 30-day retention, `/replay` orchestration, eval dashboards |
-| **2. Enterprise Sovereign** | $25k–$120k/yr | B2B, fintech, health, regulated ops | 99.99% uptime, 24/7 pager, 15m response | On-prem/VPC deployment, Helm charts, Kafka event routing, SSO/SAML, RBAC, audit logs, data residency, dedicated support |
+| **2. Enterprise Sovereign** | $25k–$120k/yr | B2B, fintech, health, regulated ops | 99.99% uptime, 24/7 pager, 15m response | On-prem/VPC deployment, Helm charts, Zenoh-native L3/L4 pub/sub, SSO/SAML, RBAC, audit logs, data residency, dedicated support |
 | **3. Strategic / Regulated** | Custom | Large enterprise, highly regulated, platform consolidations | Bespoke SLA, named TAM, security review, legal/procurement support | Private control plane, custom retention, bring-your-own-KMS, customer-managed keys, custom integrations, migration services, co-design roadmap |
 
 ### 2.1.1 Landing Page Pricing Grid & Copy
@@ -54,7 +54,7 @@ graph TD
 #### Tier 0: Core (Local-First)
 - **Positioning Headline:** *Zero-latency local diagnostics for the sovereign engineer.*
 - **Usage Limits:** Unlimited local tracing; 1 local tenant database.
-- **Copy:** Run the complete CORTEX memory and tracing engine on your local workstation. Fully offline, zero data leakage, zero latency.
+- **Copy:** Run the complete CORTEX memory and tracing engine on your local workstation with sub-10ms Hot Resume powered by iceoryx2 lock-free POSIX Shared Memory (SHM). Fully offline, zero data leakage.
 - **Call-To-Action (CTA):** `npx cortex-persist init`
 
 #### Tier 1: Pro SaaS (Team Scale)
@@ -227,7 +227,7 @@ To prevent data leakage or safety violations, policy enforcement must act inline
    - **`allow`**: The payload is passed through to the storage buffer.
    - **`redact`**: Sensitive strings (e.g., credit cards matching regex) are replaced with `[REDACTED_CORTEX]`.
    - **`warn`**: The event is processed, but a `PolicyViolation` is appended to the Ledger and sent to the client in the telemetry header.
-   - **`block`**: Ingestion is terminated immediately, returning a `422 Unprocessable Entity` containing the `violation_id`.
+   - **`block`**: Evaluates as an Epistemic Veto. Instead of unilateral deletion, it assigns a saturating penalty to the belief state, requiring either L3 Auditor confirmation or a 2/3 swarm quorum to collapse the probability state to P -> 0. In transactional REST APIs, this is represented by returning a `422 Unprocessable Entity` with audit trail payload.
 
 ---
 
