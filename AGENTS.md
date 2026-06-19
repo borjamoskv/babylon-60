@@ -95,6 +95,7 @@ All agents operating in this repository MUST self-identify by role before acting
 7. **Migration Safety:** Schema changes MUST preserve auditability and rollback awareness.
 8. **Architectural Boundaries:** CLI modules are thin wrappers. Business logic belongs in `engine/`, `services/`, or core modules.
 9. **Failure Locality:** Invalid state must be rejectable and safely abortable at any point.
+10. **Autopoiesis Watchdog:** The engine MUST NEVER modify its own active binary or source code directly in execution. Mutations MUST target isolated git branches (e.g., `auto/moskv1-mitosis-*`) and undergo external CI compilation.
 
 ### ❌ Anti-Patterns & Failure Signatures
 
@@ -112,6 +113,7 @@ When auditing code, these signals indicate a violation. The `Enforced` column in
 | Schema change with no migration entry | CRITICAL | ✗ | Add migration in `cortex/migrations/`; review via `cortex/migrate.py` |
 | Plaintext secret in any metadata dict or JSON | **P0** | ✗ | Rotate immediately; encrypt at rest; audit exposure window |
 | `NO` documenting a module that doesn't exist | HIGH | ✗ | Remove reference or create the module |
+| Engine modifying its own source or binary directly | **P0** | ✗ | Implement Bootstrap Watchdog; route via git sentinel branch (`auto/moskv1-mitosis-*`) |
 
 ---
 
