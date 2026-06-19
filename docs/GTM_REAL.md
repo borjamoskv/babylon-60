@@ -9,7 +9,10 @@
 
 ## 1. Value Proposition Mapping & Blast Radius by Schema Resource
 
-The CORTEX Control Plane treats generative output as conjecture. By mapping the OpenAPI schemas to operational pain points, we target specific enterprise stakeholders:
+The CORTEX Control Plane treats generative output as conjecture. By mapping the OpenAPI schemas to operational pain points, we target specific enterprise stakeholders using a **Dual Messaging Strategy**:
+
+1. **For Enterprise Architects:** "Execution as Metric Space." Topological collapse, Z3 SMT Guards, cryptographic determinism.
+2. **For Pragmatic Developers:** "Tamper-proof time-travel debugging for AI Agents." Drop-in telemetry that proves exactly what the agent knew when it failed.
 
 ```mermaid
 graph TD
@@ -45,8 +48,9 @@ graph TD
 | Tier | Cost | Target | SLA / Commitments | Value Prop / Transitions |
 | :--- | :---: | :--- | :--- | :--- |
 | **0. Core (Local)** | $0 (Apache-2.0) | Indie devs, local R&D | None; community support | Single-binary, local SQLite (WAL), CLI-first, iceoryx2 POSIX SHM (Hot Resume), offline traces, basic replay |
-| **1. Pro SaaS** | $49/mo base + usage | Scaling teams | 99.9% uptime, email support | Multi-tenant cloud, managed ingestion, 30-day retention, `/replay` orchestration, eval dashboards |
-| **2. Enterprise Sovereign** | $25k–$120k/yr | B2B, fintech, health, regulated ops | 99.99% uptime, 24/7 pager, 15m response | On-prem/VPC deployment, Helm charts, Zenoh-native L3/L4 pub/sub, SSO/SAML, RBAC, audit logs, data residency, dedicated support |
+| **1. Starter SaaS** | $15/mo base | Solo/Small teams | 99.9% uptime, discord support | Managed ingestion, 100k events/mo, 14-day retention, basic replay, Langfuse sync |
+| **2. Pro SaaS** | $49/mo base + usage | Scaling teams | 99.9% uptime, email support | Multi-tenant cloud, 1M events/mo, 30-day retention, `/replay` orchestration, eval dashboards |
+| **3. Enterprise Sovereign** | $25k–$120k/yr | B2B, fintech, health, regulated ops | 99.99% uptime, 24/7 pager, 15m response | On-prem/VPC deployment, Helm charts, Zenoh-native L3/L4 pub/sub, SSO/SAML, RBAC, audit logs, data residency, dedicated support |
 | **3. Strategic / Regulated** | Custom | Large enterprise, highly regulated, platform consolidations | Bespoke SLA, named TAM, security review, legal/procurement support | Private control plane, custom retention, bring-your-own-KMS, customer-managed keys, custom integrations, migration services, co-design roadmap |
 
 ### 2.1.1 Landing Page Pricing Grid & Copy
@@ -57,7 +61,13 @@ graph TD
 - **Copy:** Run the complete CORTEX memory and tracing engine on your local workstation with sub-10ms Hot Resume powered by iceoryx2 lock-free POSIX Shared Memory (SHM). Fully offline, zero data leakage.
 - **Call-To-Action (CTA):** `npx cortex-persist init`
 
-#### Tier 1: Pro SaaS (Team Scale)
+#### Tier 1: Starter SaaS (Pragmatic Devs)
+- **Positioning Headline:** *Frictionless tamper-evident traces for agile agent teams.*
+- **Usage Limits:** Up to 3 tenants, 100,000 spans/month, 14-day hot retention.
+- **Copy:** Sync your traces instantly, verify execution chains mathematically, and debug agent drift without managing infrastructure. Integrates natively with Langfuse.
+- **Call-To-Action (CTA):** `Start Free Plan (No CC required)`
+
+#### Tier 2: Pro SaaS (Team Scale)
 - **Positioning Headline:** *Collaborative agent tracing and regression testing.*
 - **Usage Limits:** Up to 5 tenants, 50 Million spans/month, 30-day hot retention.
 - **Copy:** Centrally ingest traces from your distributed swarms. Gain cross-team visibility, trace replay debugging, and evaluation dashboards for CI/CD.
@@ -177,6 +187,22 @@ def translate_otel_span(otel_span: dict, tenant_id: str) -> dict:
     }
     return cortex_span
 ```
+
+### 3.2 Langfuse Bi-Directional Sync (Framework-Agnostic)
+
+While LangSmith dominates LangChain, CORTEX bridges the framework-agnostic gap by integrating natively with **Langfuse**.
+CORTEX acts as the *Cryptographic Persistence Substrate*, while Langfuse acts as the *Visualization & Analytics Plane*.
+
+```text
+[LangChain/AutoGen Agent] ──► [Langfuse SDK] ──► [CORTEX OTel Interceptor]
+                                                         │
+                                        ┌────────────────┴────────────────┐
+                                        ▼                                 ▼
+                             [CORTEX Immutable Ledger]            [Langfuse Cloud/Self-Host]
+                                (Cryptographic Proof)                 (Dashboards & Evals)
+```
+
+**Value Prop:** Teams already using Langfuse can add CORTEX with a single environment variable to instantly upgrade their mutable traces into EU AI Act Art. 12 compliant, tamper-evident ledgers without changing their UI workflow.
 
 ---
 

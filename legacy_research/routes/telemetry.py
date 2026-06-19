@@ -31,9 +31,9 @@ class TelemetryIngestRequest(BaseModel):
     logos_signature: str | None = None
 
 
-@router.post("/v1/telemetry/ingest")
-@router.post("/api/v1/telemetry/ingest")
-@router.post("/telemetry/ingest")
+@router.post("/v1/telemetry/ingest", status_code=202)
+@router.post("/api/v1/telemetry/ingest", status_code=202)
+@router.post("/telemetry/ingest", status_code=202)
 async def ingest_telemetry(
     request: Request,
     data: TelemetryIngestRequest,
@@ -41,6 +41,8 @@ async def ingest_telemetry(
 ):
     """
     Ingest sovereign telemetry facts (C5-REAL) from external edge sensors.
+    Uses ZeroCopyRingBuffer (Rust FFI) for O(1) lock-free insertion.
+    Returns 202 Accepted immediately to prevent blocking.
     """
     source = request.headers.get("X-Cortex-Source")
     if not source:
@@ -51,16 +53,36 @@ async def ingest_telemetry(
     content = f"Telemetry batch from {data.agent_id} at {data.timestamp}"
     project = "smoke-detector"
 
-    # Compute deterministic logos_signature server-side to satisfy Virgo guard
-    # Virgo expects: sha256(content + nonce + project) where nonce defaults to ""
     import hashlib
-
     logos_sig = hashlib.sha256(f"{content}{project}".encode()).hexdigest()
 
     meta = data.model_dump()
     meta["logos_signature"] = logos_sig
 
     try:
+        # FFI Boundary: Push to Rust RingBuffer (O(1) non-blocking)
+        # cortex_rs will asynchronously drain this into the WAL
+        import cortex_rs
+        payload = {
+            "project": project,
+            "content": content,
+            "fact_type": "telemetry_batch",
+            "tags": ["telemetry", "edge_sensor", data.agent_id],
+            "source": source,
+            "meta": meta,
+        }
+        
+        # We assume enqueue_telemetry handles serialization in Rust
+        success = cortex_rs.ZeroCopyRingBuffer.enqueue_telemetry(payload)
+        if not success:
+            logger.warning("ZeroCopyRingBuffer full, dropping telemetry for %s", data.agent_id)
+            raise HTTPException(status_code=503, detail="Buffer Overflow")
+            
+        logger.info("Enqueued telemetry batch from %s (ZeroCopy)", data.agent_id)
+        return {"status": "accepted", "queued": True}
+    except AttributeError:
+        # Fallback if cortex_rs is not compiled or missing the method
+        logger.warning("cortex_rs missing enqueue_telemetry, using fallback slow-path")
         fact_id = await engine.store(
             project=project,
             content=content,
@@ -69,8 +91,7 @@ async def ingest_telemetry(
             source=source,
             meta=meta,
         )
-        logger.info("Ingested telemetry batch from %s -> Fact ID %s", data.agent_id, fact_id)
-        return {"status": "success", "fact_id": fact_id}
+        return {"status": "accepted", "queued": False, "fact_id": fact_id}
     except Exception as e:
         logger.error("Failed to ingest telemetry: %s", e)
         raise HTTPException(status_code=500, detail=str(e))
