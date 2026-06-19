@@ -1,0 +1,576 @@
+openapi: 3.1.0
+info:
+  title: AI Control Plane API
+  version: 1.0.0
+  description: |
+    Unified AI observability, evaluation, and governance platform API.
+    Provides tracing, execution replay, policy enforcement, and eval pipelines.
+
+servers:
+  - url: https://api.cortex.example.com/v1
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+  headers:
+    IdempotencyKey:
+      description: Idempotency key for write operations
+      required: false
+      schema:
+        type: string
+
+  schemas:
+
+    Trace:
+      type: object
+      required: [id, tenant_id, run_id, status, started_at]
+      properties:
+        id:
+          type: string
+        tenant_id:
+          type: string
+        run_id:
+          type: string
+        status:
+          type: string
+          enum: [started, completed, failed]
+        started_at:
+          type: string
+          format: date-time
+        ended_at:
+          type: string
+          format: date-time
+          nullable: true
+        root_span_id:
+          type: string
+          nullable: true
+        metadata:
+          type: object
+          additionalProperties: true
+
+    Span:
+      type: object
+      required: [trace_id, kind, name, status, started_at]
+      properties:
+        id:
+          type: string
+        trace_id:
+          type: string
+        parent_span_id:
+          type: string
+          nullable: true
+        kind:
+          type: string
+          enum: [llm, tool, retrieval, policy, memory, router, custom]
+        name:
+          type: string
+        status:
+          type: string
+          enum: [ok, error, blocked]
+        started_at:
+          type: string
+          format: date-time
+        ended_at:
+          type: string
+          format: date-time
+          nullable: true
+
+        input:
+          type: object
+          additionalProperties: true
+        output:
+          type: object
+          additionalProperties: true
+
+        metrics:
+          type: object
+          properties:
+            latency_ms:
+              type: number
+            input_tokens:
+              type: number
+            output_tokens:
+              type: number
+            cost_usd:
+              type: number
+
+        attributes:
+          type: object
+          additionalProperties: true
+
+    Run:
+      type: object
+      required: [id, tenant_id, app_id, status, input, trace_id]
+      properties:
+        id:
+          type: string
+        tenant_id:
+          type: string
+        app_id:
+          type: string
+        status:
+          type: string
+          enum: [started, completed, failed]
+        input:
+          type: object
+          additionalProperties: true
+        output:
+          type: object
+          nullable: true
+        trace_id:
+          type: string
+        policy_result:
+          type: string
+          enum: [allow, redact, warn, block]
+        started_at:
+          type: string
+          format: date-time
+        ended_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    Policy:
+      type: object
+      required: [id, name, scope, definition, action, enabled]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        scope:
+          type: string
+          enum: [input, output, tool_call]
+        definition:
+          type: object
+          additionalProperties: true
+        action:
+          type: string
+          enum: [allow, redact, warn, block]
+        enabled:
+          type: boolean
+
+    PolicyViolation:
+      type: object
+      required: [id, policy_id, run_id, severity, decision]
+      properties:
+        id:
+          type: string
+        tenant_id:
+          type: string
+        policy_id:
+          type: string
+        run_id:
+          type: string
+        trace_id:
+          type: string
+        severity:
+          type: string
+          enum: [low, medium, high, critical]
+        decision:
+          type: string
+          enum: [allow, redact, warn, block]
+        subject_type:
+          type: string
+        subject_path:
+          type: string
+        evidence:
+          type: object
+          additionalProperties: true
+        created_at:
+          type: string
+          format: date-time
+
+    EvalJob:
+      type: object
+      required: [id, name, dataset_id, mode, judge]
+      properties:
+        id:
+          type: string
+        tenant_id:
+          type: string
+        name:
+          type: string
+        dataset_id:
+          type: string
+        status:
+          type: string
+          enum: [queued, running, completed, failed]
+        mode:
+          type: string
+          enum: [offline, online]
+        judge:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [llm_judge, rule_based]
+            model:
+              type: string
+
+    EvalResult:
+      type: object
+      required: [eval_job_id, case_id, trace_id, scores, pass]
+      properties:
+        eval_job_id:
+          type: string
+        case_id:
+          type: string
+        trace_id:
+          type: string
+        scores:
+          type: object
+          additionalProperties:
+            type: number
+        pass:
+          type: boolean
+        notes:
+          type: string
+
+    Dataset:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+
+    Event:
+      type: object
+      required: [event_id, event_type, tenant_id, occurred_at, payload]
+      properties:
+        event_id:
+          type: string
+        event_type:
+          type: string
+        tenant_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        trace_id:
+          type: string
+          nullable: true
+        run_id:
+          type: string
+          nullable: true
+        schema_version:
+          type: string
+        payload:
+          type: object
+          additionalProperties: true
+
+paths:
+
+  /traces:
+    post:
+      summary: Create trace
+      operationId: createTrace
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Trace'
+      responses:
+        "201":
+          description: Trace created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trace'
+
+    get:
+      summary: List traces
+      operationId: listTraces
+      parameters:
+        - name: app_id
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: cursor
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of traces
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Trace'
+
+  /traces/{trace_id}:
+    get:
+      summary: Get trace
+      operationId: getTrace
+      parameters:
+        - name: trace_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Trace details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trace'
+
+  /traces/{trace_id}/spans:
+    get:
+      summary: Get spans for trace
+      operationId: getTraceSpans
+      parameters:
+        - name: trace_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Spans list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Span'
+
+  /spans:
+    post:
+      summary: Ingest span
+      operationId: ingestSpan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Span'
+      responses:
+        "201":
+          description: Span ingested
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Span'
+
+  /spans/bulk:
+    post:
+      summary: Bulk ingest spans
+      operationId: bulkIngestSpans
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Span'
+      responses:
+        "201":
+          description: Bulk ingestion accepted
+
+  /runs:
+    post:
+      summary: Create run
+      operationId: createRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Run'
+      responses:
+        "201":
+          description: Run created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Run'
+
+  /runs/{run_id}:
+    get:
+      summary: Get run
+      operationId: getRun
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Run details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Run'
+
+  /runs/{run_id}/replay:
+    post:
+      summary: Replay run
+      operationId: replayRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mode:
+                  type: string
+                  enum: [deterministic, probabilistic]
+                seed:
+                  type: integer
+                use_recorded_tools:
+                  type: boolean
+      responses:
+        "202":
+          description: Replay queued
+
+  /policies:
+    post:
+      summary: Create policy
+      operationId: createPolicy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Policy'
+      responses:
+        "201":
+          description: Policy created
+
+    get:
+      summary: List policies
+      operationId: listPolicies
+      responses:
+        "200":
+          description: Policies list
+
+  /policies/{policy_id}/evaluate:
+    post:
+      summary: Evaluate policy
+      operationId: evaluatePolicy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Evaluation result
+
+  /evals:
+    post:
+      summary: Create eval job
+      operationId: createEval
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvalJob'
+      responses:
+        "201":
+          description: Eval job created
+
+  /evals/{eval_id}/execute:
+    post:
+      summary: Execute eval job
+      operationId: executeEval
+      responses:
+        "202":
+          description: Eval execution started
+
+  /evals/{eval_id}/results:
+    get:
+      summary: Get eval results
+      operationId: getEvalResults
+      responses:
+        "200":
+          description: Eval results list
+
+  /datasets:
+    post:
+      summary: Create dataset
+      operationId: createDataset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dataset'
+      responses:
+        "201":
+          description: Dataset created
+
+  /datasets/{dataset_id}/cases:
+    get:
+      summary: Get dataset cases
+      operationId: listDatasetCases
+      responses:
+        "200":
+          description: Dataset cases
+
+  /datasets/{dataset_id}/cases/import:
+    post:
+      summary: Import dataset cases
+      operationId: importDatasetCases
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+      responses:
+        "201":
+          description: Cases imported
+
+  /events:
+    post:
+      summary: Ingest event stream
+      operationId: ingestEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        "202":
+          description: Event accepted
