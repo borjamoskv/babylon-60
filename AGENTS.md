@@ -41,11 +41,11 @@ New session on this repo?            → Execute Multi-Session Handoff (§6.4) f
 
 ## 1. 🎯 Scope & Epistemic Posture
 
-**CORTEX Persist** is a local-first trust substrate for autonomous, tool-using, and multi-agent AI systems. It persists facts, enforces deterministic validation boundaries, maintains cryptographic auditability, and treats generative output as conjecture until externally verified.
+**CORTEX Persist** is the **CI/CD Firewall for LLM-Generated Code**. It is formally defined as a distributed system for managing the formal lifecycle of verifiable claims via an **Epistemic Dependency Graph (EDG)**. It does not blindly store "facts"; it tracks Epistemic State Transitions, enforcing deterministic validation boundaries, maintaining cryptographic auditability, and treating generative output as conjecture until externally verified.
 
-- **Epistemic Containment:** Generative output is a probabilistic proposal — useful, invalid, partial, or dangerous. System state may only be mutated after crossing deterministic validation boundaries: guards, typed interfaces, schemas, tests, cryptographic logging, and external verification when required.
-- **The Python Paradox (🛑):** CORTEX is built in Python to maximize *Shipping Velocity* and *Developer Adoption*. Mitigation is the **Byzantine Boundary**: Python as orchestration glue, SQLite-Vec and ONNX as immutable cores. We prioritize **Tamper-Evidence** over language-level safety. Trust model: `f < n/3` faulty nodes tolerated; cryptographic primitives are Ed25519 (signatures), SHA-256 (ledger hash-chain), and SHA3-256 (taint engine, guard seals).
-- **Audit Trails vs. Authorization (📜):** CORTEX is a **Forensic Audit Sidecar** for MCP — not "Tamper-Proof" (an architectural illusion), but **Tamper-Evident**. The Master Ledger commits every action to an immutable hash chain.
+- **Epistemic Invalidation Propagation:** Generative output is a probabilistic proposal. If an AI mutates a foundational node, CORTEX traverses the EDG to compute the blast radius. If Epistemic Consistency is violated (an accepted node depends on an invalidated chain), the PR is blocked.
+- **The Python/Rust Boundary (🛑):** CORTEX orchestration is built in Python to maximize *Shipping Velocity*. Mitigation is the **Byzantine Boundary**: Python handles routing, while the causal engine (EDG) and concurrent graphs are managed natively in Rust via PyO3 to bypass the GIL and achieve zero-latency.
+- **Audit Trails vs. Authorization (📜):** CORTEX is a **Forensic Audit Sidecar** for CI/CD pipelines. The Master Ledger commits every policy decision and Epistemic Transition to an immutable hash chain.
 
 ---
 
