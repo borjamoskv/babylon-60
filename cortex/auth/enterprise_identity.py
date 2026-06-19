@@ -28,6 +28,7 @@ class TenantRBAC:
         "CRDT_ORCHESTRATOR": {"crdt:compact", "crdt:merge", "ledger:append"},
         "AGENT_WORKER": {"crdt:read", "crdt:write_volatile"},
         "AUDITOR": {"ledger:read", "crdt:read"},
+        "CI_GATEWAY": {"gateway:evaluate_pr", "ledger:append"},
         "ADMIN": {"admin:all"}
     }
 
