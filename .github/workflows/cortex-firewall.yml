@@ -60,9 +60,20 @@ jobs:
             echo "exit_status=passed" >> $GITHUB_OUTPUT
           fi
 
-      - name: 💬 Comment PR with CORTEX Report
-        if: always()
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
         run: |
-          gh pr comment ${{ github.event.pull_request.number }} -F cortex_report.md
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Execute CORTEX Action Worker
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Points to the production or staging CORTEX API
+          CORTEX_API_URL: "https://api.cortexpersist.org/api/v1/audit"
+        run: |
+          python cortex/integrations/github_action_worker.py
