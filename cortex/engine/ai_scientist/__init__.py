@@ -6,10 +6,10 @@ Fully autonomous research generation loop:
 Idea -> Code -> Execute -> Analyze -> Write -> Review.
 """
 
-from .orchestrator import AIScientistOrchestrator
-from .idea_generator import IdeaGenerator
-from .coder_executor import CoderExecutor
 from .analyst_writer import AnalystWriter
+from .coder_executor import CoderExecutor
+from .idea_generator import IdeaGenerator
+from .orchestrator import AIScientistOrchestrator
 from .reviewer import AdversarialReviewer
 
 __all__ = [

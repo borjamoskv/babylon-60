@@ -1,6 +1,5 @@
 import logging
-import json
-from typing import Dict, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +12,7 @@ class AnalystWriter:
     def __init__(self, inference_engine):
         self.inference = inference_engine
 
-    async def write_paper(self, idea: Dict[str, Any], results: Dict[str, Any], feedback: str = None) -> Dict[str, Any]:
+    async def write_paper(self, idea: dict[str, Any], results: dict[str, Any], feedback: str = None) -> dict[str, Any]:
         """
         Compiles the results into a fully-fledged LaTeX document.
         """

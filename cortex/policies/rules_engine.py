@@ -4,9 +4,10 @@ Intercepts operations to ensure they possess a valid SovereignIdentity
 and the required scopes before allowing state mutation or persistence.
 """
 
-from typing import Any, Dict
+from typing import Any
 
 from cortex.auth.enterprise_identity import SovereignIdentity, TenantRBAC
+
 
 class EnterpriseRBACGuard:
     """
@@ -17,7 +18,7 @@ class EnterpriseRBACGuard:
     def __init__(self, require_explicit_identity: bool = True):
         self.require_explicit_identity = require_explicit_identity
 
-    def validate_proposal(self, identity: SovereignIdentity, action: str, resource: str, payload: Dict[str, Any]) -> bool:
+    def validate_proposal(self, identity: SovereignIdentity, action: str, resource: str, payload: dict[str, Any]) -> bool:
         """
         Validates if the provided identity can execute the proposed action on the resource.
         

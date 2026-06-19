@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Request, HTTPException, BackgroundTasks
-import hmac
 import hashlib
-import os
+import hmac
 import logging
-from typing import Dict, Any
+import os
+from typing import Any
+
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,8 @@ def verify_signature(payload_body: bytes, signature_header: str) -> bool:
 
 from cortex.llm.evaluator import SemanticRiskEvaluator
 
-async def process_pull_request(payload: Dict[str, Any]):
+
+async def process_pull_request(payload: dict[str, Any]):
     """Background task to process the PR risk scoring."""
     action = payload.get("action")
     if action not in ["opened", "synchronize", "reopened"]:
@@ -39,7 +41,7 @@ async def process_pull_request(payload: Dict[str, Any]):
     # Extract structural metrics
     additions = pr.get("additions", 0)
     deletions = pr.get("deletions", 0)
-    changed_files = pr.get("changed_files", 0)
+    _ = pr.get("changed_files", 0)
     
     churn = additions + deletions
     structural_entropy = min(1.0, churn / 1000.0) # Dummy proxy

@@ -4,13 +4,13 @@ Entropy Core v0 - CORTEX v1.0 Middleware
 Calculates system entropy in 3 dimensions: Structural, Semantic, Operational.
 """
 
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-import os
-import xml.etree.ElementTree as ET
 
 from cortex.engine.entropy import EntropyAnnihilator
+
 
 class SystemRegime(str, Enum):
     STABLE = "STABLE"

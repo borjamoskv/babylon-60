@@ -1,5 +1,6 @@
 import logging
-from typing import Dict, Any
+from typing import Any
+
 from cortex.engine.sandbox_jit import SandboxJIT
 
 logger = logging.getLogger(__name__)
@@ -13,12 +14,12 @@ class CoderExecutor:
     def __init__(self, sandbox: SandboxJIT):
         self.sandbox = sandbox
 
-    async def write_code(self, idea: Dict[str, Any]) -> Dict[str, str]:
+    async def write_code(self, idea: dict[str, Any]) -> dict[str, str]:
         """
         Crystallizes the hypothesis into executable Python code.
         """
         # Constructing the PyTorch/JAX experiment payload
-        train_script = f"""
+        train_script = """
 import torch
 import time
 
@@ -27,21 +28,21 @@ def run_experiment():
     loss = 1.0
     for epoch in range(10):
         loss *= 0.8  # Simulated thermodynamic compression
-        print(f"Epoch {{epoch}}: Loss = {{loss:.4f}}")
+        print(f"Epoch {epoch}: Loss = {loss:.4f}")
     return loss
 
 if __name__ == '__main__':
     final_loss = run_experiment()
     with open('/sandbox/metrics.json', 'w') as f:
         import json
-        json.dump({{"final_loss": final_loss, "exergy_ratio": 0.92}}, f)
+        json.dump({"final_loss": final_loss, "exergy_ratio": 0.92}, f)
 """
         return {
             "main.py": train_script,
             "requirements.txt": "torch\n"
         }
 
-    async def execute_experiment(self, code_bundle: Dict[str, str]) -> Dict[str, Any]:
+    async def execute_experiment(self, code_bundle: dict[str, str]) -> dict[str, Any]:
         """
         Executes the code bundle using the local sandbox.
         """
