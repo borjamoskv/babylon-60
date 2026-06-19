@@ -1,9 +1,7 @@
-import json
 import logging
-from typing import Dict, Any
+from typing import Any
 
-from cortex.llm.prompts import RISK_EVALUATOR_PROMPT
-from cortex_rs import EpistemicGraph, EpistemicNode, EpistemicStatus
+from cortex_rs import EpistemicGraph, EpistemicNode
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +10,7 @@ class SemanticRiskEvaluator:
         self.api_key = api_key
         self.model = model
 
-    def evaluate_pr(self, intent: str, diff: str, structural_entropy: float) -> Dict[str, Any]:
+    def evaluate_pr(self, intent: str, diff: str, structural_entropy: float) -> dict[str, Any]:
         """
         Evalúa el riesgo epistémico de un Pull Request usando el motor C5-REAL en Rust.
         """

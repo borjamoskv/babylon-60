@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -12,12 +12,12 @@ class AdversarialReviewer:
     def __init__(self, consensus_engine):
         self.consensus = consensus_engine
 
-    async def conduct_review(self, paper_draft: Dict[str, Any]) -> Dict[str, Any]:
+    async def conduct_review(self, paper_draft: dict[str, Any]) -> dict[str, Any]:
         """
         Subjects the paper to 3 distinct adversarial models. 
         Requires Quorum (2/3) to pass.
         """
-        latex = paper_draft.get("latex_source", "")
+        _ = paper_draft.get("latex_source", "")
         
         # Simulated Reviewer Quorum (BFT N=3)
         # R1: Focuses on mathematical soundness

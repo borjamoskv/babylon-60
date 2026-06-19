@@ -1,8 +1,9 @@
+import logging
 import os
 import sys
-import logging
+from typing import Any
+
 import requests
-from typing import Dict, Any
 
 # Configure structured logging for CI/CD
 logging.basicConfig(
@@ -17,14 +18,14 @@ GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 GITHUB_EVENT_PATH = os.environ.get("GITHUB_EVENT_PATH")
 GITHUB_REPOSITORY = os.environ.get("GITHUB_REPOSITORY")
 
-def load_github_event() -> Dict[str, Any]:
+def load_github_event() -> dict[str, Any]:
     """Loads the GitHub Actions event payload."""
     if not GITHUB_EVENT_PATH or not os.path.exists(GITHUB_EVENT_PATH):
         logger.error("GITHUB_EVENT_PATH not found. Are we running in GitHub Actions?")
         sys.exit(1)
         
     import json
-    with open(GITHUB_EVENT_PATH, "r") as f:
+    with open(GITHUB_EVENT_PATH) as f:
         return json.load(f)
 
 def post_pr_comment(pr_number: int, markdown_body: str):

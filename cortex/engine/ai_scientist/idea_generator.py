@@ -1,6 +1,5 @@
 import logging
-import json
-from typing import Dict, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +13,7 @@ class IdeaGenerator:
         self.scheduler = causal_scheduler
         self.embedding = embedding_engine
 
-    async def generate_novel_idea(self, topic: str) -> Dict[str, Any]:
+    async def generate_novel_idea(self, topic: str) -> dict[str, Any]:
         """
         Synthesizes a novel research idea with guaranteed thermodynamic variance.
         """

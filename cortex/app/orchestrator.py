@@ -7,12 +7,13 @@ for CI/CD pipelines, scoring risk/entropy and cryptographically signing approval
 
 import logging
 from dataclasses import dataclass
-from typing import Dict, Any
+from typing import Any
+
+from cortex.engine.chronos_roi import CHRONOS, ChronosReport
+from cortex.guards.enterprise_guard import EnterpriseRBACGuard
 
 from cortex.audit.ledger import EnterpriseAuditLedger
 from cortex.auth.enterprise_identity import SovereignIdentity
-from cortex.guards.enterprise_guard import EnterpriseRBACGuard
-from cortex.engine.chronos_roi import CHRONOS, ChronosReport
 
 logger = logging.getLogger("cortex.gateway.code_governance")
 
@@ -34,7 +35,7 @@ class CodeGovernanceGateway:
         # Thresholds
         self.max_entropy_threshold = 0.75
 
-    def _calculate_risk(self, pr_payload: Dict[str, Any]) -> RiskProfile:
+    def _calculate_risk(self, pr_payload: dict[str, Any]) -> RiskProfile:
         """
         Calculates the thermodynamic entropy (risk) of a PR.
         This is a deterministic proxy for 'semantic drift' and 'blast radius'.
@@ -68,7 +69,7 @@ class CodeGovernanceGateway:
 
         return RiskProfile(entropy_score=round(entropy, 2), risk_level=level, reasons=reasons, approved=approved)
 
-    async def evaluate_pull_request(self, identity: SovereignIdentity, pr_id: str, pr_payload: Dict[str, Any]) -> Dict[str, Any]:
+    async def evaluate_pull_request(self, identity: SovereignIdentity, pr_id: str, pr_payload: dict[str, Any]) -> dict[str, Any]:
         """
         Entrypoint for CI/CD pipelines (e.g., GitHub Actions).
         1. Validates Identity (RBAC).

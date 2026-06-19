@@ -1,8 +1,9 @@
 from __future__ import annotations
-import json
+
 import enum
+import json
 from dataclasses import dataclass, field
-from typing import Any, Union, List
+from typing import Any
 
 __all__ = ["Fact", "row_to_fact", "KnowledgeObject", "row_to_knowledge_object", "EvidenceType", "Justification"]
 
@@ -17,9 +18,9 @@ class EvidenceType(str, enum.Enum):
 @dataclass
 class Justification:
     evidence_type: EvidenceType
-    evidence_links: List[str] = field(default_factory=list)
+    evidence_links: list[str] = field(default_factory=list)
     confidence_score: float = 1.0
-    falsification_conditions: List[str] = field(default_factory=list)
+    falsification_conditions: list[str] = field(default_factory=list)
     description: str = ""
 
     def to_dict(self) -> dict:
@@ -95,7 +96,7 @@ class KnowledgeObject:
         project: str,
         claim: str = "",
         fact_type: str = "knowledge",
-        justification: Union[Justification, str] = "",
+        justification: Justification | str = "",
         verification_status: str = "UNVERIFIED",
         evidence_links: list[str] = None,
         provenance: str | None = None,

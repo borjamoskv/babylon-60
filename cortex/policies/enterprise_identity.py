@@ -2,7 +2,7 @@
 Enterprise Identity and RBAC Definitions.
 """
 from dataclasses import dataclass, field
-from typing import Set
+
 
 @dataclass(frozen=True)
 class SovereignIdentity:
@@ -13,7 +13,7 @@ class SovereignIdentity:
     tenant_id: str
     actor_id: str
     role: str
-    scopes: Set[str] = field(default_factory=set)
+    scopes: set[str] = field(default_factory=set)
 
     def has_scope(self, scope: str) -> bool:
         return scope in self.scopes or "admin:all" in self.scopes

@@ -4,12 +4,11 @@ Decision Engine - CORTEX v1.0 Middleware
 Resolves conflicts between LLM Intent, Guard Constraints, and System Entropy.
 """
 
-from typing import Optional
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
 
 from cortex.engine.entropy_core import EntropyState, SystemRegime
-from cortex.guards.entropy_guard import GuardDecision, GuardAction
+from cortex.guards.entropy_guard import GuardAction, GuardDecision
 
 logger = logging.getLogger(__name__)
 

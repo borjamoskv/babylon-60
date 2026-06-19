@@ -3,17 +3,12 @@
 from __future__ import annotations
 
 import json
-import subprocess
 import os
+import subprocess
 
 import click
-from rich.panel import Panel
-from rich.table import Table
 
 from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
-from cortex.engine.entropy_core import EntropyCore
-from cortex.guards.entropy_guard import EntropyGuardEngine, GuardAction
-from cortex.engine.decision_engine import DecisionEngine
 
 
 @click.group("gateway")
@@ -66,11 +61,13 @@ cli.add_command(gateway_cmds)
 def audit(pr_id: str, tenant: str, additions: int | None, deletions: int | None, files_changed: int | None, commits: int | None, includes_tests: bool, target_branch: str, db: str) -> None:
     """Audits an AI-generated Pull Request for entropy and issues a cryptographic seal."""
     import asyncio
+
     import aiosqlite
+
     from cortex.audit.ledger import EnterpriseAuditLedger
     from cortex.auth.enterprise_identity import SovereignIdentity
-    from cortex.guards.enterprise_guard import EnterpriseRBACGuard
     from cortex.gateway.code_governance import CodeGovernanceGateway
+    from cortex.guards.enterprise_guard import EnterpriseRBACGuard
 
     workspace_root = os.getcwd()
     
@@ -85,7 +82,7 @@ def audit(pr_id: str, tenant: str, additions: int | None, deletions: int | None,
             cmd = ["git", "diff", "--numstat", target_branch]
             out = subprocess.check_output(cmd, cwd=workspace_root, text=True, stderr=subprocess.DEVNULL)
             lines = out.strip().split("\n")
-            auto_files = len([l for l in lines if l.strip()])
+            auto_files = len([line_str for line_str in lines if line_str.strip()])
             for line in lines:
                 parts = line.split()
                 if len(parts) >= 2:
@@ -123,16 +120,16 @@ def audit(pr_id: str, tenant: str, additions: int | None, deletions: int | None,
     
     # 2. MARKDOWN GENERATION
     md = [
-        f"## 🧯 CORTEX CI/CD Firewall Report",
+        "## 🧯 CORTEX CI/CD Firewall Report",
         f"**PR ID:** `{result['pr_id']}` | **Status:** `{'✅ APPROVED' if result['status'] == 'APPROVED' else '❌ REJECTED'}`",
         f"**Entropy Score:** `{result['risk_profile']['score']} ({result['risk_profile']['level']})`",
-        f"",
-        f"### Cryptographic Audit Seal",
-        f"```",
+        "",
+        "### Cryptographic Audit Seal",
+        "```",
         f"SHA-256: {result['audit_proof']}",
-        f"```",
-        f"",
-        f"### Risk Diagnostics"
+        "```",
+        "",
+        "### Risk Diagnostics"
     ]
     
     if result["risk_profile"]["reasons"]:
@@ -142,8 +139,8 @@ def audit(pr_id: str, tenant: str, additions: int | None, deletions: int | None,
         md.append("- 🟢 No critical risk vectors detected.")
         
     md.extend([
-        f"",
-        f"### CHRONOS-1 ROI Receipt",
+        "",
+        "### CHRONOS-1 ROI Receipt",
         f"- **Autonomous Audit Saved:** {result['roi_receipt']['hours_saved']} human hours.",
         f"- **Equivalent Dollar Value:** ${result['roi_receipt']['money_saved']:.2f} USD.",
         f"- **Stats:** Mutated {result['roi_receipt']['file_count']} files across {result['roi_receipt']['git_commits']} commits."

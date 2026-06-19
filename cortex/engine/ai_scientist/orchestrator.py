@@ -1,13 +1,13 @@
 import logging
-from typing import Dict, Any
 from datetime import datetime, timezone
+from typing import Any
 
 from cortex.audit.ledger import EnterpriseAuditLedger
 from cortex.auth.enterprise_identity import SovereignIdentity
 
-from .idea_generator import IdeaGenerator
-from .coder_executor import CoderExecutor
 from .analyst_writer import AnalystWriter
+from .coder_executor import CoderExecutor
+from .idea_generator import IdeaGenerator
 from .reviewer import AdversarialReviewer
 
 logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ class AIScientistOrchestrator:
             metadata=metadata
         )
 
-    async def run(self, topic: str, max_iterations: int = 3) -> Dict[str, Any]:
+    async def run(self, topic: str, max_iterations: int = 3) -> dict[str, Any]:
         """Executes the pipeline as a deterministic forward-only DAG."""
         project_id = f"rsch_{datetime.now(timezone.utc).strftime('%y%m%d%H%M')}"
         await self._seal("START", project_id, {"topic": topic})
