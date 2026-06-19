@@ -26,6 +26,7 @@ __all__ = [
     "VirgoGuardAdapter",
     "ZKGuardAdapter",
     "ArchaeologyGuardAdapter",
+    "EFTVerificationGuardAdapter",
 ]
 
 logger = logging.getLogger("cortex.engine")
@@ -262,6 +263,39 @@ class ArchaeologyGuardAdapter:
             raise ValueError(
                 f"[AX-II] Archaeology Guard blocked mutation: {result['reason']} "
                 f"(trace_depth={result['trace_depth']}). Lineage/provenance gap detected."
+            )
+
+
+class EFTVerificationGuardAdapter:
+    """EFT Protocol -> StoreGuard protocol.
+
+    Rejects naked claims (KnowledgeObjects) without justification or evidence.
+    Implements the Epistemic Fault Tolerance (EFT) pipeline requirement.
+    """
+
+    async def check(
+        self,
+        content: str,
+        project: str,
+        fact_type: str,
+        meta: dict[str, Any],
+        conn: aiosqlite.Connection,
+        *,
+        tenant_id: str = "default",
+    ) -> None:
+        justification = meta.get("justification", "").strip()
+        provenance = meta.get("provenance")
+
+        if not justification:
+            raise ValueError(
+                "[EFT] Epistemic Fault: Rejecting naked claim. "
+                "KnowledgeObject requires explicit 'justification' to pass verification."
+            )
+            
+        if fact_type == "code" and not provenance:
+            raise ValueError(
+                "[EFT] Epistemic Fault: Critical KnowledgeObject (code) lacks 'provenance'. "
+                "SAGA aborted to prevent Context Rot."
             )
 
 

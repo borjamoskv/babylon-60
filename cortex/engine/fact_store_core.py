@@ -186,13 +186,13 @@ async def _build_fact_payload(
 ) -> list[tuple[str, Any]]:
     """Construct the SQL payload with layout-aware column detection."""
     from cortex.engine.metadata_engine import MetadataEngine
-    from cortex.engine.models import Fact
+    from cortex.engine.models import KnowledgeObject
 
-    temp_fact = Fact(
+    temp_fact = KnowledgeObject(
         id=0,
         tenant_id=tenant_id,
         project=project,
-        content="",
+        claim="",
         fact_type=fact_type,
         tags=[],
         parent_id=parent_decision_id,
