@@ -299,6 +299,11 @@ class DynamicSemanticSpace:
         self.manager = manager
         self.semantic_mutator = SemanticMutator(store, health_monitor=health_monitor, anchor=anchor)
         self.autonomic_buffer = AutonomicMemoryBuffer(capacity=buffer_capacity)
+        
+        # RiM / NF-CoT Integration
+        from cortex.engine.rim_latent_blocks import ReasoningInMemoryEngine
+        self.rim_engine = ReasoningInMemoryEngine()
+
         self._active_flushes: set[asyncio.Task[Any]] = set()
         self._heartbeat_task: asyncio.Task[None] | None = None
 
@@ -384,3 +389,28 @@ class DynamicSemanticSpace:
             )
 
         return facts
+
+    async def latent_thought_flow(
+        self,
+        base_hidden_state: Any,
+        session_fact_id: str = "active_session",
+        pulse_excitation: float = 40.0,
+    ) -> Any:
+        """
+        Ejecuta el razonamiento en memoria (RiM) de forma continua (NF-CoT).
+        En lugar de emitir [THINK], muta el grafo base-60 con el flujo latente.
+        
+        La lógica nunca toca la superficie léxica. Retorna el tensor latente
+        listo para ser sometido a consenso BFT por el enjambre.
+        """
+        # 1. Procesa el razonamiento en el espacio latente
+        latent_vector = self.rim_engine.apply_latent_reasoning(base_hidden_state)
+        
+        # 2. Muta la topología del "active_session" vector con gravedad semántica
+        if isinstance(latent_vector, np.ndarray):
+            query_vector = latent_vector.tolist()
+            self.semantic_mutator.emit_pulse(
+                query_vector, session_fact_id, excitation_delta=pulse_excitation
+            )
+            
+        return latent_vector
