@@ -15,7 +15,8 @@ import time
 from pathlib import Path
 from typing import Any
 
-from cortex.cli import get_engine  # pyright: ignore
+from cortex import CortexEngine
+
 from cortex.extensions.daemon.monitors.canary import CanaryMonitor
 from cortex.extensions.mejoralo.constants import (
     DAEMON_DEFAULT_SCAN_INTERVAL,
@@ -52,9 +53,9 @@ class MejoraloDaemon:
         # 🛡️ Sovereign Security & Context
         from cortex.config import DEFAULT_DB_PATH
 
-        self.cortex_engine = get_engine(
+        self.cortex_engine = CortexEngine(
             db_path or DEFAULT_DB_PATH,  # type: ignore[type-error]
-        )  # type: ignore[reportArgumentType]
+        )
         self.engine = MejoraloEngine(engine=self.cortex_engine)
         self.canary = CanaryMonitor()  # type: ignore[reportCallIssue]
         self.fusion = ContextFusion(self.cortex_engine)
@@ -107,7 +108,6 @@ class MejoraloDaemon:
     async def _execute_cycle(self):
         """A single scan + heal + verify cycle with Sovereign Security."""
         logger.info("⚡ Starting MEJORAlo evolutionary wave...")
-        self.canary.capture_baselines()  # type: ignore[reportAttributeAccessIssue]
 
         # 1. Pre-scan: capture baseline score
         result = await self.engine.scan(  # type: ignore[reportGeneralTypeIssues]
@@ -200,7 +200,7 @@ class MejoraloDaemon:
             self.metrics.inc("mejoralo_heals_total")
             await self._ouroboros_absorb()
 
-            violations = self.canary.verify()  # type: ignore[reportAttributeAccessIssue]
+            violations = self.canary.check()  # type: ignore[reportAttributeAccessIssue]
             if violations:
                 for v in violations:
                     logger.error("🛑 SECURITY REGRESSION DETECTED: %s", v)
