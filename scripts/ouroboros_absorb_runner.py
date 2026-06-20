@@ -178,28 +178,27 @@ def commit_and_persist(patch_data: dict):
                 text=True,
                 timeout=10,
             )
-            if remote_check.returncode != 0:
-                logger.info("No 'origin' remote configured. Preserving local commit.")
-                return
+            if remote_check.returncode == 0:
+                branch_result = subprocess.run(
+                    ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                    cwd=GIT_CWD,
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+                branch = branch_result.stdout.strip() if branch_result.returncode == 0 else "master"
 
-            branch_result = subprocess.run(
-                ["git", "rev-parse", "--abbrev-ref", "HEAD"],
-                cwd=GIT_CWD,
-                capture_output=True,
-                text=True,
-                timeout=10,
-            )
-            branch = branch_result.stdout.strip() if branch_result.returncode == 0 else "master"
-
-            push_result = subprocess.run(
-                ["git", "push", "origin", branch], cwd=GIT_CWD, capture_output=True, text=True, timeout=30
-            )
-            if push_result.returncode != 0:
-                logger.error(f"Push failed: {push_result.stderr}. Rolling back local commit.")
-                subprocess.run(["git", "reset", "--hard", "HEAD~1"], cwd=GIT_CWD, check=False)
-                return
+                push_result = subprocess.run(
+                    ["git", "push", "origin", branch], cwd=GIT_CWD, capture_output=True, text=True, timeout=30
+                )
+                if push_result.returncode != 0:
+                    logger.error(f"Push failed: {push_result.stderr}. Rolling back local commit.")
+                    subprocess.run(["git", "reset", "--hard", "HEAD~1"], cwd=GIT_CWD, check=False)
+                    return
+                else:
+                    logger.info("Git push successful.")
             else:
-                logger.info("Git push successful.")
+                logger.info("No 'origin' remote configured. Preserving local commit.")
         except subprocess.TimeoutExpired:
             logger.error("Git push timed out. Rolling back local commit.")
             subprocess.run(["git", "reset", "--hard", "HEAD~1"], cwd=GIT_CWD, check=False)
