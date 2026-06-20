@@ -171,8 +171,17 @@ def commit_and_persist(patch_data: dict):
         logger.info("Git commit executed. Proceeding to push.")
         # Git push (condicional al éxito del commit)
         try:
+            branch_result = subprocess.run(
+                ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                cwd=GIT_CWD,
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+            branch = branch_result.stdout.strip() if branch_result.returncode == 0 else "master"
+
             push_result = subprocess.run(
-                ["git", "push", "origin", "main"], cwd=GIT_CWD, capture_output=True, text=True, timeout=30
+                ["git", "push", "origin", branch], cwd=GIT_CWD, capture_output=True, text=True, timeout=30
             )
             if push_result.returncode != 0:
                 logger.error(f"Push failed: {push_result.stderr}. Rolling back local commit.")
