@@ -2,6 +2,7 @@ use dashmap::DashMap;
 use pyo3::prelude::*;
 use std::collections::HashSet;
 use std::sync::Arc;
+use crate::bft::exergy::{ExergyMutation, ExergyGuard, ExergyError};
 
 #[pyclass]
 #[derive(Clone, Debug, PartialEq)]
@@ -25,6 +26,10 @@ pub struct EpistemicNode {
     pub supported_by: HashSet<String>,
     // supports: Nodes that support this node
     pub supports: HashSet<String>,
+    #[pyo3(get, set)]
+    pub exergy: f64,
+    #[pyo3(get, set)]
+    pub rul_claim_id: Option<String>,
 }
 
 #[pymethods]
@@ -37,6 +42,8 @@ impl EpistemicNode {
             confidence,
             supported_by: HashSet::new(),
             supports: HashSet::new(),
+            exergy: 0.0,
+            rul_claim_id: None,
         }
     }
 
@@ -116,5 +123,26 @@ impl EpistemicGraph {
         }
 
         affected
+    }
+}
+
+impl EpistemicGraph {
+    pub fn apply_exergy_mutation(
+        &self,
+        mutation: &ExergyMutation,
+        guard: &ExergyGuard,
+    ) -> Result<(), ExergyError> {
+        guard.validate(mutation)?;
+        if let Some(mut node) = self.nodes.get_mut(&mutation.node_id) {
+            node.exergy += mutation.delta;
+            if mutation.rul_claim_id.is_some() {
+                node.rul_claim_id = mutation.rul_claim_id.clone();
+            }
+            Ok(())
+        } else {
+            Err(ExergyError::NodeNotFound {
+                id: mutation.node_id.clone(),
+            })
+        }
     }
 }
