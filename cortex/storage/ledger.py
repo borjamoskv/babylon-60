@@ -264,12 +264,13 @@ class EnterpriseAuditLedger:
         actor_id: str,
         axiom_hash: str,
         proof_signature: str,
-        topology_distance: float,
+        topology_distance: int,
         trace_id: str = None
     ) -> str:
         """
         [C5-REAL] Registra la asimilación de un axioma de Homotopy Type Theory.
         Garantiza que la matemática asimilada contiene prueba constructiva.
+        BABYLON-60 Enforced: topology_distance MUST be int.
         """
         ident = generate_event_identity(trace_id=trace_id)
         
@@ -299,6 +300,60 @@ class EnterpriseAuditLedger:
             "trace_id": ident.trace_id,
             "span_id": ident.span_id,
             "type": "HOTT_AXIOM_ASSIMILATED",
+            "payload": payload,
+            "parent_hash": self._last_hash,
+            "event_hash": event_hash,
+            "signature": signature
+        }
+
+        async with self._lock:
+            self._batch_queue.append(event)
+            if self._batch_task is None:
+                self._batch_task = asyncio.create_task(self._batch_worker())
+
+        return event_hash
+
+    async def log_inference_distance(
+        self,
+        tenant_id: str,
+        actor_id: str,
+        query_hash: str,
+        target_hash: str,
+        distance_int: int,
+        trace_id: str = None
+    ) -> str:
+        """
+        [C5-REAL] Merkle Cognition Tree transition.
+        Records an absolute deterministic integer distance between two states.
+        """
+        ident = generate_event_identity(trace_id=trace_id)
+        
+        payload = {
+            "tenant_id": tenant_id,
+            "actor_id": actor_id,
+            "mutation_type": "MCT_DISTANCE_CALCULATION",
+            "query_hash": query_hash,
+            "target_hash": target_hash,
+            "distance_int": distance_int
+        }
+
+        payload_str = json.dumps(payload, sort_keys=True, separators=(',', ':'))
+        
+        m = hashlib.sha3_256()
+        m.update(payload_str.encode("utf-8"))
+        m.update(self._last_hash.encode("utf-8"))
+        event_hash = m.hexdigest()
+
+        signature = self.private_key.sign(payload_str.encode("utf-8")).hex()
+
+        event = {
+            "ts": ident.wall_time,
+            "monotonic_ts": ident.monotonic_time,
+            "lamport_time": ident.lamport_time,
+            "event_id": ident.event_id,
+            "trace_id": ident.trace_id,
+            "span_id": ident.span_id,
+            "type": "MCT_DISTANCE_CALCULATION",
             "payload": payload,
             "parent_hash": self._last_hash,
             "event_hash": event_hash,
