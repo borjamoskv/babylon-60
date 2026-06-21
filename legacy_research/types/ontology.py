@@ -6,8 +6,10 @@ Transubstantiated from legacy narrative manifestos:
 - sovereign-audit-pipeline.md
 """
 
-from typing import List, Optional
+from typing import Optional
+
 from pydantic import BaseModel, Field
+
 
 class EpistemicNode(BaseModel):
     """
@@ -24,7 +26,7 @@ class SovereignAuditPipeline(BaseModel):
     Replaces 'sovereign-audit-pipeline.md'.
     """
     pipeline_id: str
-    target_nodes: List[EpistemicNode]
+    target_nodes: list[EpistemicNode]
     mtk_enforced: bool = True
     z3_verified: bool = False
 

@@ -1,6 +1,8 @@
-import os
 import glob
+import os
+
 from grpc_tools import protoc
+
 
 def compile_protos():
     os.makedirs("pb", exist_ok=True)

@@ -1,10 +1,11 @@
-import ast
 import argparse
-import sys
-import os
+import ast
 import asyncio
-import aiosqlite
+import sys
 from pathlib import Path
+
+import aiosqlite
+
 
 class ASTProjector(ast.NodeTransformer):
     """
@@ -80,7 +81,7 @@ async def main():
         if not filepath.exists():
             print(f"Error: {filepath} not found.")
             sys.exit(1)
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             source = f.read()
         source_label = f"FILE: {args.file}"
     else:

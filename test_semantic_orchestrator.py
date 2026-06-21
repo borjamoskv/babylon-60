@@ -1,10 +1,13 @@
 import asyncio
-import aiosqlite
 import os
 import uuid
-from cortex.audit.ledger import EnterpriseAuditLedger
+
+import aiosqlite
 from cortex.engine.logic.semantic_crdt import SemanticOrchestrator
+
+from cortex.audit.ledger import EnterpriseAuditLedger
 from cortex.auth.enterprise_identity import SovereignIdentity
+
 
 async def test_orchestrator():
     db_path = "/tmp/test_cortex_audit.db"
@@ -27,7 +30,7 @@ async def test_orchestrator():
         )
         
         print("Inserting 32 supports...")
-        for i in range(32):
+        for _i in range(32):
             await orchestrator.add_active_support(str(uuid.uuid4()))
             
         print(f"Current active supports count: {len(orchestrator.state.active_supports)}")

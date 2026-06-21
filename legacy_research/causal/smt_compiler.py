@@ -1,6 +1,7 @@
 import logging
-from typing import List, Optional, Any
-from pydantic import BaseModel, Field
+from typing import Any, Optional
+
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +57,7 @@ class SMTCompiler:
         else:
             raise ValueError(f"Unknown rule type: {rule_str}")
 
-    def validate_transition(self, from_state: PySceneState, to_state: PySceneState, rules: List[PyEdgeRule]) -> dict:
+    def validate_transition(self, from_state: PySceneState, to_state: PySceneState, rules: list[PyEdgeRule]) -> dict:
         """
         Takes Python Pydantic models, converts to Rust structs, and validates via Z3 SMT solver.
         Returns the Verdict as a dictionary.

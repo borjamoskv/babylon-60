@@ -14,8 +14,7 @@ Metrics measured:
 """
 
 import time
-import os
-import json
+
 
 def simulate_guardclaw_throughput(iterations: int = 1000):
     """
@@ -56,7 +55,7 @@ def run_benchmark():
     print(f"CORTEX Persist: {cx_ops:,.0f} ops/sec")
     
     factor = cx_ops / gc_ops
-    print(f"\n[CONCLUSION]")
+    print("\n[CONCLUSION]")
     print(f"CORTEX Persist is {factor:,.1f}x faster due to GIL-free Rust architecture.")
     print("=================================================")
 

@@ -1,5 +1,6 @@
 from pathlib import Path
 
+
 class AnalystAgent:
     def run(self, state):
         for file in state.files[:100]:  # limit for speed

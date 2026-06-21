@@ -1,6 +1,7 @@
-import mmap
 import ctypes
+import mmap
 import os
+
 
 class SegmentHeader(ctypes.Structure):
     _pack_ = 1

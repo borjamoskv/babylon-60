@@ -1,4 +1,6 @@
 import sqlite3
+
+
 def cb(*args): return sqlite3.SQLITE_DENY
 db = sqlite3.connect(":memory:")
 db.set_authorizer(cb)

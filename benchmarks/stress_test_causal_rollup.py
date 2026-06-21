@@ -1,10 +1,12 @@
+import random
 import time
 import uuid
-import random
+
 from cortex.math.babylon import causal_distance, hash_distance_rollup
 
+
 def run_causal_stress_test(num_nodes=50000, batch_size=5000):
-    print(f"🪐 BABYLON-60 Singularidad: Inicando Prueba de Estrés (Causal Distance + Rollup)")
+    print("🪐 BABYLON-60 Singularidad: Inicando Prueba de Estrés (Causal Distance + Rollup)")
     print(f"Generando {num_nodes} nodos cognitivos simulados en C5-REAL...")
     
     # Simulate a DAG traversal
@@ -14,7 +16,7 @@ def run_causal_stress_test(num_nodes=50000, batch_size=5000):
     current_batch = []
     
     # 1. Distances computation (no float, purely discrete)
-    for i in range(num_nodes):
+    for _i in range(num_nodes):
         ancestry = random.randint(0, 10)
         witness = random.randint(0, 5)
         ledger = random.randint(0, 5)
@@ -41,7 +43,7 @@ def run_causal_stress_test(num_nodes=50000, batch_size=5000):
     # 2. Rollup Hashing
     root_hash = "GENESIS_ROOT_00000000000000000000000000000000000000000000000000000000"
     
-    for idx, batch in enumerate(batches):
+    for _idx, batch in enumerate(batches):
         root_hash = hash_distance_rollup(root_hash, batch)
         
     end_time = time.time()

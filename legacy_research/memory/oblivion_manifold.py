@@ -3,6 +3,7 @@
 
 import numpy as np
 
+
 class VectorAstrologyBreach(Exception):
     """
     Excepción letal. Lanzada cuando un vector intenta justificar 

@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 class ValueNet(nn.Module):
     def __init__(self, dim: int):
         super().__init__()

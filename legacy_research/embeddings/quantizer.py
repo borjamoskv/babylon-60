@@ -1,5 +1,6 @@
-from typing import List
+
 from cortex.math.babylon import Babylon60Vector
+
 
 class AutocrystallizerQuantizationEdge:
     """
@@ -13,7 +14,7 @@ class AutocrystallizerQuantizationEdge:
     def __init__(self, scaling_factor: int = 10000):
         self.scaling_factor = scaling_factor
 
-    def quantize(self, stochastic_embedding: List[float]) -> Babylon60Vector:
+    def quantize(self, stochastic_embedding: list[float]) -> Babylon60Vector:
         """
         Collapses a continuous float embedding into a discrete integer vector.
         """

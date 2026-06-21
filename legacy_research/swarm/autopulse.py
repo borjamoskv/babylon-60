@@ -8,9 +8,8 @@ import time
 
 from cortex.config import DB_PATH
 from cortex.extensions.signals.bus import AsyncSignalBus
-from cortex.swarm.tensor_glial import TensorGlialLegion
-
 from cortex.observability.jsonl_logger import setup_cortex_logging
+from cortex.swarm.tensor_glial import TensorGlialLegion
 
 setup_cortex_logging()
 logger = logging.getLogger("cortex.swarm.autopulse")

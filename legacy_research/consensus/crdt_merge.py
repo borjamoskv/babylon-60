@@ -1,6 +1,4 @@
-import json
 import logging
-from typing import Dict, List, Set
 
 import cortex_rs
 
@@ -30,7 +28,7 @@ class CRDTMergeEngine:
     def get_state_json(self) -> str:
         return self._rs_engine.get_state_json()
         
-    def get_active_models(self) -> List[str]:
+    def get_active_models(self) -> list[str]:
         return self._rs_engine.get_active_models()
         
     def get_merkle_hash(self) -> str:

@@ -4,13 +4,16 @@ OUROBOROS-∞ Loop: Autonomous Evolution & Entropy Purge
 """
 
 import asyncio
-from typing import Dict, Any
-from cortex.engine.mtk_core import mtk_authorizer_callback, ClosurePayload
-from cortex.core.thermodynamics import EntropyAnnihilator
-from cortex.audit.ledger import inject_ledger_event
-from cortex.swarm.dispatcher import invoke_subagent
-from cortex.consensus.merkle_vote import MerkleVote
+from typing import Any
+
 from cortex.causal.edg_graph import EpistemicDependencyGraph
+from cortex.consensus.merkle_vote import MerkleVote
+from cortex.swarm.dispatcher import invoke_subagent
+
+from cortex.audit.ledger import inject_ledger_event
+from cortex.core.thermodynamics import EntropyAnnihilator
+from cortex.engine.mtk_core import ClosurePayload, mtk_authorizer_callback
+
 
 class OuroborosLoop:
     """
@@ -23,7 +26,7 @@ class OuroborosLoop:
         self.edg = EpistemicDependencyGraph()
         self.entropy_annihilator = EntropyAnnihilator()
 
-    async def scan_environment(self) -> Dict[str, Any]:
+    async def scan_environment(self) -> dict[str, Any]:
         """
         AX-041: Extract deterministic context directly from the Git DAG.
         No narrative log scraping allowed.
@@ -36,7 +39,7 @@ class OuroborosLoop:
             
         return {"dag_hash": git_state.hash, "entropy": entropy_score}
 
-    async def war_council(self, context: Dict[str, Any]) -> ClosurePayload:
+    async def war_council(self, context: dict[str, Any]) -> ClosurePayload:
         """
         Dispatch the LEGION-10k swarm for BFT consensus on the target node refactor.
         """

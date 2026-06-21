@@ -1,9 +1,9 @@
-import time
+import logging
 import os
 import shutil
+import time
 import uuid
-import logging
-from typing import Optional
+
 from .metrics_db import MetricsDB
 from .verification import VerificationLayer
 

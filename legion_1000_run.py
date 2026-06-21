@@ -1,9 +1,9 @@
 import asyncio
 import time
 from pathlib import Path
-import sys
 
 from cortex.engine.swarm_10k import SwarmCommander
+
 
 async def run_dispatch():
     bus_path = Path("./cortex_swarm_1000_bus")

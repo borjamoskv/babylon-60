@@ -1,7 +1,7 @@
-import time
 import json
-import random
 import logging
+import random
+import time
 from concurrent.futures import ThreadPoolExecutor
 
 from cortex_rs import validate_exergy_mutation

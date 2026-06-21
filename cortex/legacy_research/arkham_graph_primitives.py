@@ -17,7 +17,7 @@ class ArkhamGraphPrimitives:
         """
         # Node format: (address, is_entity)
         total_in = sum(inp['amount'] for inp in inputs)
-        total_out = sum(out['amount'] for out in outputs)
+        sum(out['amount'] for out in outputs)
         
         # Enforce thermodynamic conservation (basic)
         # Fees are ignored for simplicity in this pure primitive
@@ -38,7 +38,6 @@ class ArkhamGraphPrimitives:
         Si múltiples direcciones son inputs de una misma TX, pertenecen a la misma entidad.
         """
         clusters = []
-        visited = set()
         
         # Iterar sobre las transacciones
         tx_nodes = [n for n, attr in self.graph.nodes(data=True) if attr.get('type') == 'tx']

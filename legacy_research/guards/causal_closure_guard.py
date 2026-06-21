@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import ast
 import json
-from dataclasses import is_dataclass, asdict
+from dataclasses import asdict, is_dataclass
 from typing import Any
 
 from cortex.types.evidence import ClosurePayload
@@ -48,7 +48,7 @@ class CausalClosureGuard:
 
         # Proposal-like object with content field.
         if hasattr(proposal, "content"):
-            proposal = getattr(proposal, "content")
+            proposal = proposal.content
 
         # Raw string content.
         if isinstance(proposal, str):

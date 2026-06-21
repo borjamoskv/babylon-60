@@ -43,7 +43,7 @@ class PolicyEngine:
     def _load_policies(self) -> dict[str, Any]:
         if self.policy_path.exists():
             try:
-                with open(self.policy_path, "r", encoding="utf-8") as f:
+                with open(self.policy_path, encoding="utf-8") as f:
                     return json.load(f)
             except Exception as e:
                 logger.error(f"Failed to load policy file {self.policy_path}: {e}. Using defaults.")

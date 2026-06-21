@@ -77,10 +77,10 @@ class TestArchitectureClaims:
     def test_shannon_semantic_collapse(self):
         """13.2 Informational Entropy Layer (Shannon)"""
         # Debe colapsar si NCD < 0.15 y diferencia de masa < 15%
-        assert ShannonEngine.should_collapse(ncd=0.10, mass_a=1.0, mass_b=1.1) == True
+        assert ShannonEngine.should_collapse(ncd=0.10, mass_a=1.0, mass_b=1.1)
         
         # No debe colapsar si NCD > 0.15 (I6: Protección de Ortogonalidad)
-        assert ShannonEngine.should_collapse(ncd=0.20, mass_a=1.0, mass_b=1.1) == False
+        assert not ShannonEngine.should_collapse(ncd=0.20, mass_a=1.0, mass_b=1.1)
         
         # No debe colapsar si diferencia de masa >= 15%
-        assert ShannonEngine.should_collapse(ncd=0.10, mass_a=1.0, mass_b=1.2) == False
+        assert not ShannonEngine.should_collapse(ncd=0.10, mass_a=1.0, mass_b=1.2)

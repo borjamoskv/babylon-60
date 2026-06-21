@@ -1,7 +1,8 @@
-import sqlite3
 import contextlib
 import logging
-from typing import Generator, Any
+import sqlite3
+from collections.abc import Generator
+from typing import Any
 
 logger = logging.getLogger(__name__)
 

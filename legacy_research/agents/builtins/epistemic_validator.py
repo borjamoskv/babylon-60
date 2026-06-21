@@ -11,8 +11,7 @@ import re
 from typing import Any
 
 from cortex.agents.base import ReactiveTaskAgent
-from cortex.agents.copilot_llm_strategy import LLMCompletionStrategy, DeterministicFallbackClient
-from cortex.types.epistemics import ObservationNode, InferenceNode, HypothesisNode, EpistemicNode
+from cortex.agents.copilot_llm_strategy import DeterministicFallbackClient
 
 logger = logging.getLogger("cortex.agents.epistemic_validator")
 

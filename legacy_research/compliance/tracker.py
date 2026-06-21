@@ -12,16 +12,16 @@ Usage:
 
 from __future__ import annotations
 
+import json
 import logging
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-import json
 from typing import Any
 
-from cortex.config import DEFAULT_DB_PATH
 from cortex.compliance.comply_signer import ComplySigner
 from cortex.compliance.policy_engine import PolicyEngine
+from cortex.config import DEFAULT_DB_PATH
 
 __all__ = ["ComplianceTracker"]
 

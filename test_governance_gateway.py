@@ -1,12 +1,14 @@
 import asyncio
-import aiosqlite
-import os
 import json
+import os
+
+import aiosqlite
+from cortex.gateway.code_governance import CodeGovernanceGateway
+from cortex.guards.enterprise_guard import EnterpriseRBACGuard
 
 from cortex.audit.ledger import EnterpriseAuditLedger
 from cortex.auth.enterprise_identity import SovereignIdentity
-from cortex.guards.enterprise_guard import EnterpriseRBACGuard
-from cortex.gateway.code_governance import CodeGovernanceGateway
+
 
 async def simulate_github_action():
     db_path = "/tmp/cortex_gateway.db"

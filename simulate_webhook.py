@@ -1,8 +1,10 @@
-import hmac
 import hashlib
+import hmac
 import json
 import os
+
 from fastapi.testclient import TestClient
+
 from main import app
 
 client = TestClient(app)
@@ -34,7 +36,7 @@ headers = {
 }
 
 print("=== SIMULATING GITHUB WEBHOOK PAYLOAD ===")
-print(f"Target: /api/v1/webhook/github")
+print("Target: /api/v1/webhook/github")
 print(f"Payload Size: {len(payload_bytes)} bytes")
 print(f"Signature: {signature}")
 

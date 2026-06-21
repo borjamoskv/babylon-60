@@ -23,7 +23,6 @@ async def test_osc():
 
 if __name__ == "__main__":
     # Ensure logs show up
-    import logging
 
     setup_cortex_logging()
     asyncio.run(test_osc())

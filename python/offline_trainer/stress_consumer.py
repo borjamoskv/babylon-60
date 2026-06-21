@@ -1,6 +1,8 @@
-import time
 import os
-from ingestor import scan_sealed_segments, load_segment
+import time
+
+from ingestor import load_segment, scan_sealed_segments
+
 
 def main():
     print("C5-REAL CONSUMER: Despertando. Esperando señal del Productor...")

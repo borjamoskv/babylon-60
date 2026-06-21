@@ -1,37 +1,36 @@
 # [C5-REAL] Exergy-Maximized
-import pytest
+import asyncio
+import base64
 import hashlib
 import os
 import sqlite3
+from datetime import datetime, timedelta, timezone
+
 import aiosqlite
-import asyncio
-import base64
-import time
-from datetime import datetime, timezone, timedelta
+import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.serialization import (
     Encoding,
-    PrivateFormat,
     NoEncryption,
+    PrivateFormat,
     PublicFormat,
 )
 
 from cortex.engine.causal.taint_engine import (
-    generate_secure_taint_token,
     TaintValidationError,
-    verify_taint_token,
     canonicalize_content,
+    generate_secure_taint_token,
 )
 from cortex.engine.causal.verification_oracle import (
-    verify_c5_state_machine,
     InvariantViolationError,
+    verify_c5_state_machine,
 )
 from cortex.engine.fact_store_core import insert_fact_record
-from cortex.memory.ledger import EventLedgerL3
-from cortex.memory.models import MemoryEvent, CortexFactModel
-from cortex.memory.hdc.store import HDCVectorStoreL2
 from cortex.memory.hdc.codec import HDCEncoder
 from cortex.memory.hdc.item_memory import ItemMemory
+from cortex.memory.hdc.store import HDCVectorStoreL2
+from cortex.memory.ledger import EventLedgerL3
+from cortex.memory.models import CortexFactModel, MemoryEvent
 from cortex.memory.traits.write import WriteTrait
 
 

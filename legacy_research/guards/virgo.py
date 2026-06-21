@@ -16,8 +16,8 @@ import aiosqlite
 
 from cortex.crypto.keys import ZKSwarmIdentity
 from cortex.guards.i10_consensus import (
-    RetrievalConsensusError,
     I10ConsensusGuard,
+    RetrievalConsensusError,
     TriadOutputs,
 )
 from cortex.utils.errors import CortexError

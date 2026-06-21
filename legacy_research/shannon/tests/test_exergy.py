@@ -1,5 +1,7 @@
 import pytest
+
 from cortex.shannon.exergy import calculate_informational_exergy
+
 
 def test_calculate_informational_exergy():
     # C_v = 5 verifiable transformations, T_u = 1000 tokens

@@ -1,16 +1,17 @@
 # [C5-REAL] Exergy-Maximized
-import pytest
 import asyncio
-import time
 import json
 import sqlite3
-import numpy as np
+import time
 from unittest.mock import AsyncMock, MagicMock
+
+import numpy as np
+import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
-from cortex.engine.event_sovereignty import EventSovereigntyRuntime
 from cortex.engine.auth_gateway import QuorumGateway
 from cortex.engine.causal.anomaly_bridge import AnomalyBridge
+from cortex.engine.event_sovereignty import EventSovereigntyRuntime
 from cortex.extensions.security.signatures import Ed25519Signer
 
 
@@ -112,7 +113,7 @@ async def test_signature_forgery(auth_gateway, keys):
     state = {"cpu": 99}
     req_id = await gw.request_override("Test", state)
 
-    sig = fake_signer.sign(json.dumps(state), req_id)
+    fake_signer.sign(json.dumps(state), req_id)
 
     # System expects the signature to be mathematically sound.
     # Actually, the public key of the fake signer will mathematically verify,

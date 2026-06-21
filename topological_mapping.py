@@ -5,6 +5,7 @@ sys.path.insert(0, os.path.abspath('.'))
 
 from cortex.engine.ultramap import UltramapSubstrate
 
+
 def export_topological_map():
     print("Iniciando Mapeo Topológico C5-REAL...")
     umap = UltramapSubstrate(capacity=10000)
@@ -21,7 +22,7 @@ def export_topological_map():
         except Exception:
             pass
             
-    print(f"\\n--- GRAFO TOPOLÓGICO O(1) ---")
+    print("\\n--- GRAFO TOPOLÓGICO O(1) ---")
     print(f"Total Nodos Activos Detectados: {len(active_nodes)}")
     
     for idx, state in active_nodes:

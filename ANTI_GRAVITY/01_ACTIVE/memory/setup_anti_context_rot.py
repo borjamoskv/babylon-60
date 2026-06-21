@@ -7,7 +7,6 @@ and triggers launchctl to start the service.
 """
 
 import os
-import sys
 from pathlib import Path
 
 PLIST_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>

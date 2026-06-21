@@ -12,11 +12,11 @@ def test_rls_gateway_matrix():
     
     # Positive case: in tenant, and status is sealed (or staging + same agent)
     fact = {"validation_status": "sealed", "agent_id": "agent_a"}
-    assert RLSGateway.evaluate_read_access("tenant_1", "agent_a", fact) == True
+    assert RLSGateway.evaluate_read_access("tenant_1", "agent_a", fact)
     
     # Negative case: wrong tenant
-    assert RLSGateway.evaluate_read_access("tenant_2", "agent_a", fact) == False
+    assert not RLSGateway.evaluate_read_access("tenant_2", "agent_a", fact)
     
     # Negative case: staging fact of another agent
     staging_fact = {"validation_status": "staging", "agent_id": "agent_b"}
-    assert RLSGateway.evaluate_read_access("tenant_1", "agent_a", staging_fact) == False
+    assert not RLSGateway.evaluate_read_access("tenant_1", "agent_a", staging_fact)

@@ -3,9 +3,9 @@
 Integrates Rust CRDTMergeEngine topological order with PyTorch state_dict tensors.
 """
 
-import time
 import logging
-from typing import Dict, List, Any, Tuple
+import time
+from typing import Any
 
 # In a pure C5-REAL execution, we use torch for direct silicon-level tensor fusion.
 # We encapsulate to avoid module-level crashes if torch is absent during generic test suites.
@@ -27,7 +27,7 @@ class ZeroCopyTensorBridge:
         if not TORCH_AVAILABLE:
             logger.warning("PyTorch not found. TensorBridge will operate in Mock Mode.")
             
-    def merge_in_place(self, base_model_state: Dict[str, Any], sibling_states: List[Dict[str, Any]]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    def merge_in_place(self, base_model_state: dict[str, Any], sibling_states: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, Any]]:
         """
         Executes an entropy-weighted Average Merge in-place on the base_model_state.
         This operation simulates `BABYLON-60` constraints and scales natively under PyTorch C++.

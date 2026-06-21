@@ -1,7 +1,7 @@
+import os
 import sqlite3
 import time
-from typing import Dict, Any, Optional
-import os
+from typing import Any
 
 # C5-REAL: Metrics Database for Benchmark Suite
 
@@ -36,7 +36,7 @@ class MetricsDB:
         ''')
         self.conn.commit()
 
-    def record_run(self, run_data: Dict[str, Any]):
+    def record_run(self, run_data: dict[str, Any]):
         """Registra una ejecución completa del benchmark."""
         # Calculamos eficiencia de exergía: (verified_actions / tokens_used) * 1000
         # verified_actions = tests_passed + commits_created

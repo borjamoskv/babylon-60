@@ -1,6 +1,8 @@
+from collections.abc import Callable
+from typing import Any
+
 import torch
-import random
-from typing import Any, Callable
+
 
 def simulate(state: torch.Tensor, action: Any) -> torch.Tensor:
     """Mock physics simulator for the MCTS rollout."""

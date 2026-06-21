@@ -4,9 +4,9 @@ Triple Identity and Clock Engine for CORTEX Audit System.
 Generates cryptographically robust, time-ordered identities for execution events.
 """
 
+import threading
 import time
 import uuid
-import threading
 from typing import NamedTuple, Optional
 
 # Lamport Clock state

@@ -3,7 +3,7 @@ import asyncio
 import logging
 import time
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.engine.causal.exergy_scheduler")
 
@@ -28,7 +28,7 @@ class ExergyScheduler:
         self.tenant_id = tenant_id
         # BABYLON-60 epoch base (using int logic, no float)
         self._genesis_b60 = int(time.time() * 60)
-        self.active_jobs: Dict[str, Any] = {}
+        self.active_jobs: dict[str, Any] = {}
 
     def _calculate_entropy(self, payload: str | bytes) -> int:
         """
@@ -61,7 +61,7 @@ class ExergyScheduler:
 
         return ExergyLane.STANDARD
 
-    async def execute_in_lane(self, lane: ExergyLane, query_id: str, payload: Any) -> Dict[str, Any]:
+    async def execute_in_lane(self, lane: ExergyLane, query_id: str, payload: Any) -> dict[str, Any]:
         """
         Async non-blocking execution in the designated thermodynamic lane.
         """

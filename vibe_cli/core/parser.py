@@ -1,6 +1,7 @@
 import ast
 import re
 
+
 class CodeParser:
     # ---------- PYTHON (AST REAL) ----------
     def parse_python(self, code: str):

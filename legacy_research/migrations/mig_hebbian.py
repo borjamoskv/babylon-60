@@ -10,6 +10,7 @@ DOWNGRADE TARGET: 28
 
 import sqlite3
 
+
 def _migration_029_hebbian_multiplier(conn: sqlite3.Connection) -> None:
     """Add access_count and last_accessed_at columns."""
     try:

@@ -5,7 +5,7 @@ import_stmt = "from cortex.observability.jsonl_logger import setup_cortex_loggin
 replace_stmt = "setup_cortex_logging()"
 
 def process_file(filepath):
-    with open(filepath, 'r', encoding='utf-8') as f:
+    with open(filepath, encoding='utf-8') as f:
         content = f.read()
 
     # Regex to match logging.basicConfig(...) spanning multiple lines
@@ -33,7 +33,7 @@ def process_file(filepath):
         f.write(new_content)
     print(f"Updated {filepath}")
 
-for root, dirs, files in os.walk('.'):
+for root, _dirs, files in os.walk('.'):
     if '.venv' in root or '.git' in root or 'docs' in root:
         continue
     for file in files:

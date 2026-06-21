@@ -1,14 +1,12 @@
 # [C5-REAL] Exergy-Maximized
 
 import hashlib
-import json
 from dataclasses import dataclass
 from typing import Any
 
 from cortex.engine.causality_models import (
-    Confidence,
-    ValidationStatus,
     KRGSE_DERIVED_FROM,
+    ValidationStatus,
 )
 
 # BABYLON-60 Scale: 60 represents 100% certainty, 0 represents 0%.

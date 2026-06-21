@@ -27,7 +27,7 @@ def manhattan_distance(a: Babylon60Vector, b: Babylon60Vector) -> int:
     """
     if len(a) != len(b):
         raise ValueError("Vector dimension mismatch.")
-    return sum(abs(x - y) for x, y in zip(a.data, b.data))
+    return sum(abs(x - y) for x, y in zip(a.data, b.data, strict=False))
 
 class EpistemicTrajectory:
     """

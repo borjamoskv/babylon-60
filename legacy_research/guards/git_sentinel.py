@@ -8,7 +8,6 @@ Enforces thermodynamic rigor on the human operator.
 """
 
 import sys
-import os
 from pathlib import Path
 
 # Add project root to sys.path
@@ -26,7 +25,7 @@ def main():
         
     commit_msg_file = sys.argv[1]
     
-    with open(commit_msg_file, "r", encoding="utf-8") as f:
+    with open(commit_msg_file, encoding="utf-8") as f:
         lines = f.readlines()
         
     # Strip git comments and empty lines
@@ -42,11 +41,11 @@ def main():
         "fixed bug", "minor change", "refactor"
     ]
     
-    msg_lower = raw_msg.lower()
+    raw_msg.lower()
     
     # 1. Brutal Strictness for vague messages
     if raw_msg in low_exergy_words or len(raw_msg.split()) < 3:
-        print(f"\n[C5-REAL] 🛑 RECHAZO TERMODINÁMICO.")
+        print("\n[C5-REAL] 🛑 RECHAZO TERMODINÁMICO.")
         print(f"El mensaje de commit '{raw_msg}' carece de exergía causal.")
         print("Axioma L2: La memoria es frágil, el estado es sagrado. Describe QUÉ y POR QUÉ mutó el estado.")
         sys.exit(1)

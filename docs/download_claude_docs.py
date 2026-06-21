@@ -1,7 +1,8 @@
-import os
-import aiohttp
 import asyncio
+import os
 import xml.etree.ElementTree as ET
+
+import aiohttp
 
 SITEMAP_URL = "https://docs.anthropic.com/sitemap.xml"
 OUTPUT_DIR = "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/docs/claude_docs"

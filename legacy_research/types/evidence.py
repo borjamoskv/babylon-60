@@ -6,9 +6,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Mapping
+from typing import Any
 
 
 def _canonical_dt(value: datetime) -> str:
@@ -57,7 +58,7 @@ class EvidenceBundle:
     evidence_hash: str
 
     @classmethod
-    def forge(cls, query: str, sources: list[Source], retrieved_at: datetime) -> "EvidenceBundle":
+    def forge(cls, query: str, sources: list[Source], retrieved_at: datetime) -> EvidenceBundle:
         payload = {
             "query": query,
             "sources": [s.canonical() for s in sources],
@@ -103,7 +104,7 @@ class ClosurePayload:
         schema_version: str = "v1",
         proof_kind: str = "sealed-claim-set",
         info_exergy: float | None = None,
-    ) -> "ClosurePayload":
+    ) -> ClosurePayload:
         normalized_claims = tuple(_normalize_value(c) for c in claims)
         
         # [C5-REAL] Dynamic Thermodynamic Calculation (E-INFO-01)

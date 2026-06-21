@@ -11,16 +11,13 @@ Executes a 5-step concrete metric-driven flow, rigorously enforcing causality.
 
 import asyncio
 import contextvars
-import json
 import logging
 import os
 from datetime import datetime, timezone
 from decimal import Decimal
-from enum import Enum
-from uuid import UUID
 
 from cortex.telemetry.pipeline_metrics import PipelineMetrics
-from cortex.types.evidence import EvidenceBundle, Source, ClosurePayload
+from cortex.types.evidence import ClosurePayload, EvidenceBundle, Source
 
 logger = logging.getLogger("cortex.pipeline.cve_orchestrator")
 

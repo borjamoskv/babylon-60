@@ -24,6 +24,7 @@ from typing import Any
 # Registry import
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from skills.registry import register
+
 from schema.event_v1 import EventV1
 
 # Re-use existing repo_health logic (no duplication)

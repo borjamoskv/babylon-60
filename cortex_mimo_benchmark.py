@@ -2,10 +2,12 @@
 CORTEX-Persist - MiMo-V2.5-Pro Swarm Benchmarking (C5-REAL)
 Validates latency and throughput (Information Exergy dynamics) of the vLLM local deployment.
 """
+import argparse
 import asyncio
 import time
-import argparse
+
 import httpx
+
 
 async def fetch_completion(client: httpx.AsyncClient, url: str, payload: dict, agent_id: int) -> dict:
     start_time = time.perf_counter()
@@ -48,7 +50,7 @@ async def run_swarm_benchmark(url: str, concurrency: int, prompt_len: int, max_t
         "stream": True
     }
 
-    print(f"=== [C5-REAL] SWARM BENCHMARK START ===")
+    print("=== [C5-REAL] SWARM BENCHMARK START ===")
     print(f"vLLM Target: {url}")
     print(f"Concurrency: {concurrency} agents | AST Context Skeleton Size: {len(dummy_prompt)} chars")
 

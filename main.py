@@ -1,7 +1,8 @@
-from fastapi import FastAPI, Request
-from pydantic import BaseModel
-import uvicorn
 import logging
+
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 setup_cortex_logging()
 logger = logging.getLogger(__name__)

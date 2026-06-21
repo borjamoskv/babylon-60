@@ -1,14 +1,14 @@
 import asyncio
-import os
-import sys
-import re
 import logging
+import os
+import re
+import sys
 
 sys.path.insert(0, os.path.abspath('.'))
 
 from cortex.audit.ledger import EnterpriseAuditLedger
-from cortex.engine.ultramap import UltramapSubstrate
 from cortex.engine.autodidact_hott_engine import AutodidactHottEngine
+from cortex.engine.ultramap import UltramapSubstrate
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("inject_goat_math")
@@ -25,7 +25,7 @@ async def inject_primitives():
         logger.error(f"Falta el manifiesto: {md_path}")
         return
 
-    with open(md_path, "r", encoding="utf-8") as f:
+    with open(md_path, encoding="utf-8") as f:
         content = f.read()
 
     # Extraer ID, Primitiva, Aplicación (Omitimos cabeceras)

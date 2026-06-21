@@ -4,9 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import os
-import sys
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
@@ -95,15 +93,15 @@ def main() -> int:
     # Init manifest lookup
     load_manifest(root)
 
-    active_dir = (root / args.active_dir).resolve()
-    systems_dir = (root / args.systems_dir).resolve()
+    (root / args.active_dir).resolve()
+    (root / args.systems_dir).resolve()
 
     findings: list[Finding] = []
     hashes: dict[str, list[Path]] = {}
     
     for path in iter_artifacts(root):
         try:
-            rel = path.resolve()
+            path.resolve()
             meta = load_metadata(path)
             raw_score = parse_score(meta)
             score = as_float_score(raw_score)

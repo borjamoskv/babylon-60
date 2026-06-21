@@ -1,6 +1,8 @@
-import aiosqlite
 import asyncio
 import sqlite3
+
+import aiosqlite
+
 
 class SovereignConnection(sqlite3.Connection):
     def set_authorizer(self, cb):

@@ -8,8 +8,9 @@ import traceback
 from dataclasses import dataclass
 from typing import Any
 
-from schema.event_v1 import EventV1
 from skills.registry import SkillResolutionError, resolve
+
+from schema.event_v1 import EventV1
 
 logger = logging.getLogger(__name__)
 

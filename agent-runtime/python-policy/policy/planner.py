@@ -1,5 +1,7 @@
 import torch
+
 from .mcts import rollout
+
 
 def generate_actions(state: torch.Tensor) -> list[str]:
     """Action space generator. To be synced with Rust Action Enum."""

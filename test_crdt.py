@@ -1,5 +1,7 @@
-import cortex_rs
 import uuid
+
+import cortex_rs
+
 
 def test_semantic_state():
     print("Creating state 1")
@@ -72,7 +74,7 @@ def test_semantic_state():
         
     try:
         s_overflow.add_active_support(str(uuid.uuid4()))
-        assert False, "Should have thrown a BufferError on overflow"
+        raise AssertionError("Should have thrown a BufferError on overflow")
     except Exception as e:
         assert "buffer full" in str(e)
         

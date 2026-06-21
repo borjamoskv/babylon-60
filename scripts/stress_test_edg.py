@@ -17,7 +17,7 @@ def build_poc_graph():
         "api": ["api.graphql", "api.rest", "api.webhooks"],
         "ui": ["ui.dashboard", "ui.checkout", "ui.settings"]
     }
-    for tier, nodes in tiers.items():
+    for _tier, nodes in tiers.items():
         for node in nodes:
             graph.add_node(RetrievalNode(node, 1.0))
             

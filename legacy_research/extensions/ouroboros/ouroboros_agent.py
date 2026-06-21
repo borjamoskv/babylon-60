@@ -4,13 +4,15 @@ C5-REAL MVP
 """
 import asyncio
 import logging
-from fastapi import FastAPI
+
 import uvicorn
-from .monitor import collect_metrics
+from fastapi import FastAPI
+
 from .evaluator import evaluate_health
-from .planner import detect_anomalies, generate_plan
 from .executor import execute_plan
 from .memory import save_heartbeat, save_memory
+from .monitor import collect_metrics
+from .planner import detect_anomalies, generate_plan
 from .telegram_bot import notify_human
 
 app = FastAPI(title="Ouroboros Node Keeper")

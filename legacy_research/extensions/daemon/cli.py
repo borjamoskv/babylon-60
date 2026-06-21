@@ -66,7 +66,6 @@ def _get_systemd_unit() -> Path:
 
 
 def setup_logging(verbose: bool = False) -> None:
-    level = logging.DEBUG if verbose else logging.INFO
     setup_cortex_logging()
 
 

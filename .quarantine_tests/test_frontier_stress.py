@@ -10,7 +10,6 @@ import asyncio
 import hashlib
 import os
 import time
-from datetime import datetime, timezone
 from pathlib import Path
 
 import aiosqlite
@@ -20,11 +19,10 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cortex.audit.ledger import EnterpriseAuditLedger
 from cortex.engine.causal.taint_engine import (
     TaintValidationError,
-    generate_secure_taint_token,
     enforce_taint_check,
+    generate_secure_taint_token,
 )
 from cortex.guards.contradiction_guard import detect_contradictions
-
 
 # Configure tests
 pytestmark = [pytest.mark.asyncio, pytest.mark.slow]

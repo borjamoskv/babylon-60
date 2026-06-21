@@ -4,11 +4,9 @@ Tests for CortexAutoSynthesisEngine.
 Validates the Ω-Phase: Forge, Siege, Evolve loops.
 """
 
-import asyncio
 from pathlib import Path
 
 import pytest
-
 from cortex.engine.synthesis import CortexAutoSynthesisEngine
 
 

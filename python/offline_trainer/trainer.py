@@ -1,6 +1,8 @@
+import time
+
 import torch
 import torch.optim as optim
-import time
+
 
 def trigger_hot_swap(model):
     # Dummy trigger, in reality writes current_model.json or signals Rust

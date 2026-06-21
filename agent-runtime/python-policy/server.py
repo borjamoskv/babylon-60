@@ -1,14 +1,13 @@
-from concurrent import futures
-import grpc
-import torch
 import logging
+from concurrent import futures
 
+import grpc
 import pb.agent_pb2 as agent_pb2
 import pb.agent_pb2_grpc as agent_pb2_grpc
-
+import torch
 from policy.model import PolicyNet
-from policy.value import ValueNet
 from policy.planner import plan
+from policy.value import ValueNet
 
 setup_cortex_logging()
 

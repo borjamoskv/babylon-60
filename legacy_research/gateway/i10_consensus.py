@@ -17,7 +17,7 @@ from cortex import config
 from cortex.database.core import connect_async_ctx
 from cortex.embeddings.local import LocalEmbedder
 from cortex.extensions.llm.provider import LLMProvider
-from cortex.guards.i10_consensus import RetrievalConsensusError, I10ConsensusGuard, TriadOutputs
+from cortex.guards.i10_consensus import I10ConsensusGuard, RetrievalConsensusError, TriadOutputs
 
 logger = logging.getLogger("cortex.gateway.i10")
 

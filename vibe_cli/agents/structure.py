@@ -1,5 +1,7 @@
 from pathlib import Path
+
 from core.parser import CodeParser
+
 
 class StructureAgent:
     def __init__(self):

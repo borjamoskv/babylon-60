@@ -31,6 +31,7 @@ Usage (async):
 from __future__ import annotations
 
 import asyncio
+import contextvars
 import logging
 import os
 import sqlite3
@@ -39,7 +40,6 @@ from contextlib import asynccontextmanager
 from typing import Any, Final
 
 import aiosqlite
-import contextvars
 
 # -- Monkey-patch aiosqlite to propagate ContextVars to worker threads --
 # This is mathematically required so that MTK capabilities (which use ContextVars)

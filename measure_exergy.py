@@ -1,4 +1,3 @@
-import asyncio
 import os
 import sys
 
@@ -6,6 +5,7 @@ sys.path.insert(0, os.path.abspath('.'))
 
 from cortex.engine.ultramap import UltramapSubstrate
 from cortex.engine.ultrathink_physics import UltrathinkPhysicsEngine
+
 
 def main():
     print("Iniciando Escaneo Termodinámico y Cálculo Exergético (C5-REAL)...")
@@ -38,7 +38,7 @@ def main():
         execution_time=execution_time
     )
     
-    print(f"\\n--- RESULTADOS FÍSICOS C5-REAL ---")
+    print("\\n--- RESULTADOS FÍSICOS C5-REAL ---")
     print(f"S_in (Entropía Estocástica): {stochastic_entropy:.2f}")
     print(f"S_out (Salida Determinista): {deterministic_output:.2f}")
     print(f"ΔT (Tiempo Ejecución): {execution_time}s")

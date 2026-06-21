@@ -51,7 +51,7 @@ async def test_full_cortex_v2_pipeline(tmp_path):
     
     # Verify JSONL log contains the batch root
     assert os.path.exists(log_file)
-    with open(log_file, "r") as f:
+    with open(log_file) as f:
         lines = f.readlines()
         
     assert len(lines) == 3 # 2 events + 1 BATCH_ROOT

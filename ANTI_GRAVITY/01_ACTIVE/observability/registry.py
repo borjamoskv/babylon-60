@@ -1,7 +1,8 @@
 # [C5-REAL] Exergy-Maximized
 import logging
 import threading
-from typing import Any, Callable, Dict, Protocol, Type
+from collections.abc import Callable
+from typing import Any, Protocol
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ class SkillProtocol(Protocol):
     """C5-REAL strict IO contract for any sovereign skill."""
     def execute(self, event: Any) -> dict[str, Any]: ...
 
-_REGISTRY: Dict[str, Type[SkillProtocol]] = {}
+_REGISTRY: dict[str, type[SkillProtocol]] = {}
 _REGISTRY_LOCK = threading.RLock()
 _FROZEN = False
 
@@ -29,7 +30,7 @@ def freeze_registry() -> None:
         logger.info("Skill Registry frozen. Further mutations rejected.")
 
 def register(skill_id: str, trigger_type: str = "command_received") -> Callable:
-    def decorator(cls: Type[SkillProtocol]) -> Type[SkillProtocol]:
+    def decorator(cls: type[SkillProtocol]) -> type[SkillProtocol]:
         with _REGISTRY_LOCK:
             if _FROZEN:
                 raise RegistryLockError(f"Cannot register '{skill_id}': registry is frozen.")
@@ -44,7 +45,7 @@ def list_skills() -> list[str]:
     with _REGISTRY_LOCK:
         return sorted(_REGISTRY.keys())
 
-def resolve(event: Any) -> Type[SkillProtocol]:
+def resolve(event: Any) -> type[SkillProtocol]:
     with _REGISTRY_LOCK:
         skill_class = _REGISTRY.get(event.skill_id)
         if not skill_class:

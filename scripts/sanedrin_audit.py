@@ -5,8 +5,10 @@ Audits recent ledger entries using WBFTConsensus.
 """
 import asyncio
 import logging
+
 from cortex.consensus.byzantine import WBFTConsensus
 from cortex.extensions.thinking.fusion_models import ModelResponse
+
 # MOCK: In a real environment, this fetches the last entries and queries 3 models.
 
 logging.basicConfig(level=logging.INFO)

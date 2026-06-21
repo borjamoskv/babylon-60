@@ -1,6 +1,8 @@
-from pydantic import BaseModel, Field, field_validator, model_validator
-from enum import Enum
 import hashlib
+from enum import Enum
+
+from pydantic import BaseModel, Field, field_validator, model_validator
+
 
 class ConfidenceLevel(str, Enum):
     C5_REAL = "C5-REAL"

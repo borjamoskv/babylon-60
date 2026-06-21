@@ -65,10 +65,8 @@ def semantic_collapse(id_a: str, content_a: str, mass_a: float,
     # Determine the winner
     if mass_a >= mass_b:
         winner_id, winner_content, winner_mass = id_a, content_a, mass_a
-        loser_id = id_b
     else:
         winner_id, winner_content, winner_mass = id_b, content_b, mass_b
-        loser_id = id_a
         
     # Recalculate properties
     merged_content = winner_content

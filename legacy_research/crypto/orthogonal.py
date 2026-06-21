@@ -6,8 +6,10 @@ Genera una matriz ortogonal Q en RAM para multiplicar los embeddings.
 Preserva la similitud del coseno y destruye ataques de inversión (vec2text).
 """
 
-import numpy as np
 from typing import Optional
+
+import numpy as np
+
 
 class OrthogonalObfuscator:
     _instance: Optional['OrthogonalObfuscator'] = None

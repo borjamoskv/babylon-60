@@ -1,6 +1,7 @@
 import asyncio
 import time
 
+
 class RingAllReduceSimulation:
     """
     [C5-REAL] Exergy-Maximized Ring AllReduce Benchmark.

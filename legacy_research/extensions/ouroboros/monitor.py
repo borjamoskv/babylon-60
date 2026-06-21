@@ -1,5 +1,7 @@
-import psutil
 import time
+
+import psutil
+
 
 async def collect_metrics() -> dict:
     return {

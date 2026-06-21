@@ -1,12 +1,12 @@
-import pytest
-import asyncio
-from datetime import datetime, timezone
-import copy
 from dataclasses import dataclass
+from datetime import datetime, timezone
 
-from cortex.types.evidence import EvidenceBundle, Source, ClosurePayload
+import pytest
+
 from cortex.guards.causal_closure_guard import CausalClosureGuard, ClosureContractError
+from cortex.types.evidence import ClosurePayload, EvidenceBundle, Source
 from legacy_research.pipeline.cve_orchestrator import CVEOrchestrator
+
 
 @pytest.fixture
 def valid_evidence():

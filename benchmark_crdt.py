@@ -1,12 +1,13 @@
-import time
 import asyncio
-import uuid
-import aiosqlite
 import os
+import time
+import uuid
+
+import aiosqlite
+from cortex.engine.logic.semantic_crdt import SemanticOrchestrator
 
 import cortex_rs
 from cortex.audit.ledger import EnterpriseAuditLedger
-from cortex.engine.logic.semantic_crdt import SemanticOrchestrator
 from cortex.auth.enterprise_identity import SovereignIdentity
 
 ITERATIONS = 10_000
@@ -14,7 +15,7 @@ ITERATIONS = 10_000
 def bench_rust_init():
     start = time.perf_counter()
     for _ in range(ITERATIONS):
-        s = cortex_rs.SemanticState()
+        cortex_rs.SemanticState()
     end = time.perf_counter()
     return (end - start) / ITERATIONS
 

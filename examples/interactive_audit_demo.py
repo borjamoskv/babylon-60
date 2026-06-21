@@ -1,6 +1,7 @@
-import time
 import hashlib
 import json
+import time
+
 
 def generate_hash(data: str, prev_hash: str) -> str:
     return hashlib.sha256(f"{data}{prev_hash}".encode()).hexdigest()

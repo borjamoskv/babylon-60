@@ -9,13 +9,13 @@ def generate_mock_trajectory() -> str:
     return hashlib.sha256(uuid.uuid4().bytes).hexdigest()
 
 def run_stress_test(num_inferences: int = 100_000, batch_size: int = 1_000):
-    print(f"[C5-REAL] Iniciando PoC de Estrés - BABYLON-60")
+    print("[C5-REAL] Iniciando PoC de Estrés - BABYLON-60")
     print(f"-> Ingestando {num_inferences:,} inferencias cognitivas.")
     print(f"-> Merkle Rollups de a {batch_size:,} nodos.\n")
     
     start_time = time.perf_counter()
     
-    distances: List[Tuple[str, str, int]] = []
+    distances: list[tuple[str, str, int]] = []
     
     # 1. Simulación de Inferencia (Distancia Causal)
     dist_start = time.perf_counter()
@@ -58,7 +58,7 @@ def run_stress_test(num_inferences: int = 100_000, batch_size: int = 1_000):
     print(f"    -> {(rollup_time_ms / num_batches):.4f} ms por batch de {batch_size}.")
     
     total_time = time.perf_counter() - start_time
-    print(f"\n[!] RESULTADO FINAL: Estado Invariante")
+    print("\n[!] RESULTADO FINAL: Estado Invariante")
     print(f"-> Raíz Merkle (Causal Root): {root_hash}")
     print(f"-> Tiempo Total: {total_time:.4f} s")
     

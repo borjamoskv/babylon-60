@@ -7,11 +7,9 @@ Uso:
     python scripts/empirical_transfer_rate.py --dataset path/to/adversarial_pairs.jsonl
 """
 
-import sys
-import json
 import argparse
-from typing import List, Dict, Tuple
-import numpy as np
+import json
+import sys
 
 try:
     from sentence_transformers import SentenceTransformer
@@ -29,7 +27,7 @@ MODELS_CONFIG = {
     "gte": "Alibaba-NLP/gte-large-en-v1.5"
 }
 
-def load_models() -> Dict[str, SentenceTransformer]:
+def load_models() -> dict[str, SentenceTransformer]:
     print("Iniciando ingesta de modelos (Local Inference)...")
     models = {}
     for key, model_id in MODELS_CONFIG.items():
@@ -41,7 +39,7 @@ def load_models() -> Dict[str, SentenceTransformer]:
 def measure_transfer_rate(
     model_a: SentenceTransformer,
     model_b: SentenceTransformer,
-    pairs: List[Tuple[str, str]],
+    pairs: list[tuple[str, str]],
     threshold: float = THRESHOLD
 ) -> float:
     """
@@ -84,7 +82,7 @@ def main():
 
     # 1. Cargar dataset adversarial
     pairs = []
-    with open(args.dataset, "r") as f:
+    with open(args.dataset) as f:
         for line in f:
             data = json.loads(line)
             pairs.append((data["adversarial"], data["target"]))

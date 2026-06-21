@@ -1,23 +1,22 @@
 #!/usr/bin/env python3
 # [C5-REAL] Sovereign Omni-Ultramap Swarm Controller
+import json
 import os
+import random
 import sys
 import time
-import json
-import random
-from pathlib import Path
 
 # Insert cortex-persist into path
 sys.path.insert(0, "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist")
 
-from cortex.engine.ultramap import UltramapSubstrate
 from google import genai
 from google.genai import types
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
+from rich.table import Table
 from rich.text import Text
-from rich.live import Live
+
+from cortex.engine.ultramap import UltramapSubstrate
 
 console = Console()
 
@@ -60,7 +59,7 @@ def run_simulation():
         umap.update_agent_position(a["idx"], x, y, z, a["target"], 0.5)
         umap.update_control_vector(a["idx"], 1.0, 0.0, 0.1, 0.2, source="genesis")
 
-    console.print(f"[bold green]✔[/bold green] Substrate populated. File [dim]ultramap.bin[/dim] mapped in memory.")
+    console.print("[bold green]✔[/bold green] Substrate populated. File [dim]ultramap.bin[/dim] mapped in memory.")
 
     # Schema for structured JSON response from Gemini
     response_schema = types.Schema(
@@ -195,7 +194,7 @@ def run_simulation():
                     source="omni_controller"
                 )
                 
-            console.print(f"[bold green]✔[/bold green] Swarm mutations written to memory substrate. Lock-free transaction complete.")
+            console.print("[bold green]✔[/bold green] Swarm mutations written to memory substrate. Lock-free transaction complete.")
             time.sleep(1)
 
     finally:

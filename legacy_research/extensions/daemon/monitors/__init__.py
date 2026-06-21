@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from cortex.extensions.daemon.monitors.compaction import CompactionMonitor
     from cortex.extensions.daemon.monitors.disk import DiskMonitor
     from cortex.extensions.daemon.monitors.engine import EngineHealthCheck
-    from cortex.extensions.daemon.monitors.retrieval import RetrievalMonitor
     from cortex.extensions.daemon.monitors.evaluation import EvaluationMonitor
     from cortex.extensions.daemon.monitors.ghosts import GhostWatcher
     from cortex.extensions.daemon.monitors.mejoralo import UnifiedMejoraloMonitor
@@ -20,6 +19,7 @@ if TYPE_CHECKING:
     from cortex.extensions.daemon.monitors.network import SiteMonitor
     from cortex.extensions.daemon.monitors.neural import NeuralIntentMonitor
     from cortex.extensions.daemon.monitors.perception import PerceptionMonitor
+    from cortex.extensions.daemon.monitors.retrieval import RetrievalMonitor
     from cortex.extensions.daemon.monitors.security import SecurityMonitor
     from cortex.extensions.daemon.monitors.signals import SignalMonitor
     from cortex.extensions.daemon.monitors.tombstone import TombstoneMonitor

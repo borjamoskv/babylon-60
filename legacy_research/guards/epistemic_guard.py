@@ -8,13 +8,10 @@ Ensures no agent can forge an epistemic certainty level it is not entitled to.
 from typing import Any
 
 from cortex.types.epistemics import (
-    BeliefNode,
     ConsensusNode,
-    CounterfactualNode,
     EpistemicNode,
     InferenceNode,
     ObservationNode,
-    SimulationNode,
 )
 from cortex.types.models import RejectionResult
 

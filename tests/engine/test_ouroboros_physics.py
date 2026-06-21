@@ -18,8 +18,8 @@ from scripts.ouroboros_prune import (
 
 class MockGraphDB:
     def __init__(self):
-        self.nodes: Dict[str, FactNode] = {}
-        self.edges: Dict[str, List[str]] = {}
+        self.nodes: dict[str, FactNode] = {}
+        self.edges: dict[str, list[str]] = {}
 
     def get_node(self, node_id: str) -> FactNode:
         return self.nodes[node_id]
@@ -27,10 +27,10 @@ class MockGraphDB:
     def update_node(self, node: FactNode) -> None:
         self.nodes[node.node_id] = node
 
-    def get_ancestors(self, node_id: str) -> List[str]:
+    def get_ancestors(self, node_id: str) -> list[str]:
         return self.edges.get(node_id, [])
 
-    def add_node(self, node: FactNode, ancestors: List[str] = None):
+    def add_node(self, node: FactNode, ancestors: list[str] = None):
         self.nodes[node.node_id] = node
         self.edges[node.node_id] = ancestors or []
 
@@ -113,7 +113,7 @@ def test_commutativity_of_independent_injections():
     """
     now = time.time()
     
-    def run_sequence(order: List[str]) -> Dict[str, float]:
+    def run_sequence(order: list[str]) -> dict[str, float]:
         db = MockGraphDB()
         node_c = FactNode(node_id="C", created_at=now, last_accessed_at=now, origin_type="verified_commit")
         node_a = FactNode(node_id="A", created_at=now, last_accessed_at=now, origin_type="verified_commit")

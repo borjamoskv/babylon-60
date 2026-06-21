@@ -6,9 +6,8 @@ Compares 'Traditional Observability' (Logs) vs 'AI Trust Infrastructure' (CORTEX
 """
 
 import time
-import os
-import random
 from pathlib import Path
+
 
 def run_benchmark():
     print("🔱 LEGIØN-1 ACTIVATED: Executing 400-node simulated audit benchmark...")

@@ -1,19 +1,20 @@
 import asyncio
-import time
+import base64
+import hashlib
 import json
 import os
 import sqlite3
 import subprocess
-import hashlib
 import sys
-import base64
-from datetime import datetime, timezone
+import time
 from pathlib import Path
 
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
 from cortex import CortexEngine
 from cortex.engine.causal.taint_engine import generate_secure_taint_token
+
 
 async def main():
     db_path = "cortex_runtime_evidence.db"
@@ -177,7 +178,7 @@ async def main():
     with open("runtime_evidence.json.sha256", "w") as f:
         f.write(hashlib.sha256(canonical_json.encode('utf-8')).hexdigest())
         
-    print(f"[+] Evidencia sellada en runtime_evidence.json y su firma en runtime_evidence.json.sha256")
+    print("[+] Evidencia sellada en runtime_evidence.json y su firma en runtime_evidence.json.sha256")
     
     await engine.close()
 

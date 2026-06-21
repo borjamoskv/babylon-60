@@ -1,5 +1,6 @@
 from pathlib import Path
 
+
 class ScoutAgent:
     def run(self, state):
         root = Path(state.root_path)

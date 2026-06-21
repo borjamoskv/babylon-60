@@ -5,8 +5,9 @@ import sys
 sys.path.insert(0, os.path.abspath('.'))
 
 from cortex.audit.ledger import EnterpriseAuditLedger
-from cortex.engine.ultramap import UltramapSubstrate
 from cortex.engine.autodidact_hott_engine import AutodidactHottEngine
+from cortex.engine.ultramap import UltramapSubstrate
+
 
 async def main():
     print("Iniciando inyección de Teoría de Categorías en CORTEX-Persist (C5-REAL)...")

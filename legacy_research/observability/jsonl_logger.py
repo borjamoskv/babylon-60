@@ -10,6 +10,7 @@ import json
 import logging
 import time
 
+
 class JsonlFormatter(logging.Formatter):
     """Formats log records as flat, single-line JSON objects."""
     

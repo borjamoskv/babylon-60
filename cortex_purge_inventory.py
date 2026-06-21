@@ -1,8 +1,9 @@
 import os
 import shutil
-import yaml
 import time
 from pathlib import Path
+
+import yaml
 
 # Config
 DRY_RUN = False
@@ -44,10 +45,8 @@ def determine_yield_score(filepath):
     try:
         stat = filepath.stat()
         age_days = (time.time() - stat.st_mtime) / (24 * 3600)
-        size = stat.st_size
     except:
         age_days = 100
-        size = 0
     name = filepath.name.lower()
     
     score = 5 # default
@@ -97,7 +96,7 @@ for src_dir in SOURCE_DIRS:
             filepath = Path(root) / file
             
             try:
-                with open(filepath, 'r', encoding='utf-8') as f:
+                with open(filepath, encoding='utf-8') as f:
                     content = f.read(1000)
             except:
                 content = ""

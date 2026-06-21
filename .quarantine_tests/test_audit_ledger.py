@@ -18,7 +18,6 @@ from unittest.mock import patch
 import aiosqlite
 import pytest
 
-
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
 
@@ -207,7 +206,7 @@ class TestEnterpriseAuditLedger:
             "SELECT prev_hash, signature FROM security_audit_log LIMIT 1"
         )
         row = await cursor.fetchone()
-        prev_hash, signature_hex = row[0], row[1]
+        _prev_hash, signature_hex = row[0], row[1]
         assert len(signature_hex) == 128  # Ed25519 signature = 64 bytes = 128 hex chars
 
     @pytest.mark.asyncio

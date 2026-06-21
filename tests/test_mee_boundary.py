@@ -18,5 +18,5 @@ def test_mee_boundary_stochastic_collapse():
     assert "transition_hash" in proof
     assert len(proof["transition_hash"]) == 64  # SHA-256 es 64 hex chars
     
-    print(f"\n[C5-REAL] Stochastic Collapse Successful:")
+    print("\n[C5-REAL] Stochastic Collapse Successful:")
     print(f"Proof Hash: {proof['transition_hash']}")

@@ -39,7 +39,7 @@ def test_no_raw_sqlite_connect():
                 if filepath == allowed_file:
                     continue
                 
-                with open(filepath, "r", encoding="utf-8") as f:
+                with open(filepath, encoding="utf-8") as f:
                     try:
                         tree = ast.parse(f.read(), filename=str(filepath))
                         finder = ConnectionFinder(filepath)
@@ -49,4 +49,4 @@ def test_no_raw_sqlite_connect():
 
     if violations:
         violation_str = "\n".join(violations)
-        assert False, f"Architecture violation: Raw connection calls found outside factory!\n{violation_str}"
+        raise AssertionError(f"Architecture violation: Raw connection calls found outside factory!\n{violation_str}")

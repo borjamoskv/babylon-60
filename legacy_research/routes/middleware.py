@@ -155,6 +155,7 @@ _HEAL_COUNTER: dict[str, int] = {}
 
 from starlette.middleware.base import BaseHTTPMiddleware
 
+
 class Babylon60TranslationMiddleware(BaseHTTPMiddleware):
     """
     Physical Shim for Babylon-60 (Int64) <-> IEEE 754 (Float64) conversion.

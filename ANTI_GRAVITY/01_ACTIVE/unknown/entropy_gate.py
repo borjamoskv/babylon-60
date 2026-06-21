@@ -6,8 +6,8 @@ Bloquea commits de archivos Python si su Complejidad Ciclomática (CC) supera
 el estándar Soberano (15).
 """
 
-import sys
 import random
+import sys
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent

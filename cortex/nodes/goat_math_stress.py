@@ -38,7 +38,7 @@ def worker_task(worker_id: int, iterations: int):
                 "SELECT validation_status FROM goat_math_nodes WHERE id = ?",
                 (node_id,)
             )
-            row = cursor.fetchone()
+            cursor.fetchone()
             
             # Escritura agresiva
             new_status = 'VALIDATED' if random.random() > 0.5 else 'PENDING'

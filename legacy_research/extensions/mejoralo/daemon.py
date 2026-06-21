@@ -16,7 +16,6 @@ from pathlib import Path
 from typing import Any
 
 from cortex import CortexEngine
-
 from cortex.extensions.daemon.monitors.canary import CanaryMonitor
 from cortex.extensions.mejoralo.constants import (
     DAEMON_DEFAULT_SCAN_INTERVAL,

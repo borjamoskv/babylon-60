@@ -1,5 +1,6 @@
 import logging
-from typing import Dict, Any, Callable, TypeVar, Generic
+from collections.abc import Callable
+from typing import Any, Generic, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +11,7 @@ T = TypeVar('T')
 U = TypeVar('U')
 
 class Domain(Generic[T]):
-    def __init__(self, name: str, state: Dict[str, T], transition_rules: Dict[str, Callable[[Dict[str, T]], T]]):
+    def __init__(self, name: str, state: dict[str, T], transition_rules: dict[str, Callable[[dict[str, T]], T]]):
         self.name = name
         self.state = state
         self.transition_rules = transition_rules
@@ -33,7 +34,7 @@ class IsomorphismEngine:
     def assert_isomorphism(
         domain_a: Domain[Any], 
         domain_b: Domain[Any], 
-        mapping_ab: Dict[str, str],
+        mapping_ab: dict[str, str],
         rule_a: str,
         rule_b: str
     ) -> bool:
@@ -55,7 +56,7 @@ class IsomorphismEngine:
         if is_isomorphic:
             logger.info(f"[C5-REAL] ISOMORPHISM CONFIRMED: {domain_a.name} -> {domain_b.name} via {rule_a} <-> {rule_b}")
         else:
-            logger.error(f"[C4-SIM] ENTROPY DETECTED: Mismatch in mapping.")
+            logger.error("[C4-SIM] ENTROPY DETECTED: Mismatch in mapping.")
             
         return is_isomorphic
 

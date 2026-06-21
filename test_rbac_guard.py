@@ -1,6 +1,8 @@
 import pytest
-from cortex.auth.enterprise_identity import SovereignIdentity
 from cortex.guards.enterprise_guard import EnterpriseRBACGuard
+
+from cortex.auth.enterprise_identity import SovereignIdentity
+
 
 def test_rbac_guard_allow():
     identity = SovereignIdentity(
@@ -11,7 +13,7 @@ def test_rbac_guard_allow():
     guard = EnterpriseRBACGuard()
     
     # CRDT_ORCHESTRATOR role implicitly has "crdt:compact"
-    assert guard.validate_proposal(identity, "crdt:compact", "resource:x", {}) == True
+    assert guard.validate_proposal(identity, "crdt:compact", "resource:x", {})
 
 def test_rbac_guard_deny():
     identity = SovereignIdentity(
@@ -35,4 +37,4 @@ def test_rbac_guard_admin():
     guard = EnterpriseRBACGuard()
     
     # ADMIN should have access to anything
-    assert guard.validate_proposal(identity, "super:destructive:action", "db:main", {}) == True
+    assert guard.validate_proposal(identity, "super:destructive:action", "db:main", {})
