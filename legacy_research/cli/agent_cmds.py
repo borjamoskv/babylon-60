@@ -66,8 +66,8 @@ def agent_validate(config: str):
     table.add_column("Value", style="white")
 
     table.add_row("Model", role.model)
-    table.add_row("Tenant", role.tenant_id)
-    table.add_row("Project", role.project_id)
+    table.add_row("Tenant", getattr(role, "tenant_id", "default"))
+    table.add_row("Project", getattr(role, "project_id", "system"))
     table.add_row("L1 Tokens", str(role.memory.working_memory_tokens))
     table.add_row("Session Budget", str(role.guardrails.max_session_tokens))
     table.add_row("ART ρ", f"{role.memory.art_rho:.2f}")
