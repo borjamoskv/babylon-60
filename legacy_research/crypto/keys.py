@@ -65,6 +65,15 @@ class ZKSwarmIdentity:
         return base64.b64encode(signature_bytes).decode("utf-8")
 
     @staticmethod
+    def sign_canonical(payload: dict, private_key_b64: str) -> str:
+        """Signs a canonical JSON representation of a payload dictionary.
+        This prevents key ordering or whitespace from breaking signature verification.
+        """
+        import json
+        canonical_content = json.dumps(payload, sort_keys=True, separators=(',', ':'))
+        return ZKSwarmIdentity.sign_payload(canonical_content, private_key_b64)
+
+    @staticmethod
     def verify_payload(content: str, public_key_b64: str, signature_b64: str) -> bool:
         """Verifies an incoming agent signature against the raw payload.
 

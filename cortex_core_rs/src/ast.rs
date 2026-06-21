@@ -24,3 +24,13 @@ pub fn hash_ast(py: Python, source_code: &str, compiler_version: &str) -> PyResu
     let result = hasher.finalize();
     Ok(hex::encode(result))
 }
+
+#[pyfunction]
+pub fn generate_evidence_hash(commit_hash: &str, ast_fingerprint: &str) -> PyResult<String> {
+    let mut hasher = Sha3_256::new();
+    hasher.update(commit_hash.as_bytes());
+    hasher.update(ast_fingerprint.as_bytes());
+    
+    let result = hasher.finalize();
+    Ok(hex::encode(result))
+}
