@@ -10,7 +10,7 @@ members = [
     "crates/cortex_replay",
     "crates/cortex_ffi",
     "crates/cortex_wasm"
-]
+, "crates/cortex_gateway"]
 
 [workspace.package]
 version = "0.1.0"
