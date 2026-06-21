@@ -1,28 +1,26 @@
 const http = require('node:http');
 const { createEnvelope, MESSAGE_TYPES } = require('./protocol');
 const { SwarmNeo4jStore } = require('./neo4j');
-
-async function postJSON(url, body) {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  return response.json();
-}
+const { createSwarmBus, makeEnvelope } = require('./bus');
 
 class SwarmCoordinator {
-  constructor({ port, neo4j }) {
+  constructor({ port, neo4j, natsUrl }) {
     this.port = port;
     this.store = new SwarmNeo4jStore(neo4j || {});
     this.server = null;
     this.nodes = new Map();
     this.eventLog = [];
     this.prevHash = 'GENESIS';
+    this.bus = null;
+    this.natsUrl = natsUrl || process.env.NATS_URL || null;
+    this.subscriptions = [];
   }
 
   async init() {
     await this.store.ensureSchema();
+    this.bus = await createSwarmBus({ natsUrl: this.natsUrl });
+    this.subscriptions.push(await this.bus.subscribe('brain.telemetry', (msg) => this.observeTelemetry(msg)));
+    this.subscriptions.push(await this.bus.subscribe('brain.events', (msg) => this.observeEvent(msg)));
     return this;
   }
 
@@ -58,6 +56,7 @@ class SwarmCoordinator {
       url: node.url || `http://localhost:${node.port}`,
       status: 'online',
       load: 0,
+      queueDepth: 0,
       lastHeartbeatAt: new Date().toISOString(),
     });
     return this.nodes.get(node.id);
@@ -71,6 +70,47 @@ class SwarmCoordinator {
     return node;
   }
 
+  observeTelemetry(message) {
+    if (!message) return;
+    const payload = message.payload || message;
+    if (message.type === MESSAGE_TYPES.REGISTER || message.type === 'REGISTER') {
+      const node = this.registerNode({
+        id: payload.id,
+        role: payload.role,
+        port: payload.port,
+        url: payload.url,
+      });
+      this.persistNode(node).catch(() => null);
+      return;
+    }
+
+    if (message.type === MESSAGE_TYPES.HEARTBEAT || message.type === 'HEARTBEAT') {
+      const node = this.heartbeat({
+        id: payload.id,
+        role: payload.role,
+        port: payload.port,
+        load: payload.load ?? 0,
+        queueDepth: payload.queueDepth ?? 0,
+        status: payload.status || 'online',
+      });
+      if (node) this.persistNode(node).catch(() => null);
+    }
+  }
+
+  observeEvent(event) {
+    if (!event || !event.type) return;
+    this.eventLog.push(event);
+    if (event.type === MESSAGE_TYPES.ROUTE_DECISION) {
+      const p = event.payload || {};
+      const node = p.nodeId ? this.nodes.get(p.nodeId) : null;
+      if (node) {
+        node.load = Math.min(1, Math.max(0, (node.load || 0) * 0.92 + 0.04));
+        node.lastHeartbeatAt = event.timestamp;
+        this.persistNode(node).catch(() => null);
+      }
+    }
+  }
+
   selectNode(type, payload = {}) {
     const candidates = [...this.nodes.values()].filter((n) => n.status !== 'offline');
     if (!candidates.length) return null;
@@ -82,12 +122,13 @@ class SwarmCoordinator {
         : 'DMN';
 
     const scored = candidates.map((node) => {
-      const roleBoost = node.role === desiredRole ? 1 : node.role === 'CEN' && desiredRole === 'CEN' ? 1 : 0;
+      const roleBoost = node.role === desiredRole ? 1 : 0;
       const loadPenalty = node.load || 0;
       const latencyHint = payload.latency ?? 0;
+      const queuePenalty = (node.queueDepth || 0) * 0.1;
       return {
         node,
-        score: roleBoost * 2 - loadPenalty - latencyHint * 0.1,
+        score: roleBoost * 2 - loadPenalty - latencyHint * 0.1 - queuePenalty,
       };
     });
 
@@ -104,10 +145,30 @@ class SwarmCoordinator {
     const event = this.record(type, payload, 'coordinator', node.id);
     await this.store.writeEvent(event);
 
-    const result = await postJSON(`${node.url}/message`, {
-      ...event,
+    const command = makeEnvelope({
+      nodeId: 'coordinator',
+      type: 'COMMAND',
+      payload: {
+        action: type,
+        ...payload,
+        targetNodeId: node.id,
+        targetRole: node.role,
+      },
       meta: { ...meta, routedBy: 'coordinator', targetNode: node.id },
+      prevHash: this.prevHash,
     });
+    this.prevHash = command.hash;
+    await this.store.writeEvent(command);
+    this.eventLog.push(command);
+
+    if (this.bus) {
+      await this.bus.publish('brain.commands', command.payload);
+    } else if (node.url) {
+      await postJSON(`${node.url}/message`, {
+        ...event,
+        meta: { ...meta, routedBy: 'coordinator', targetNode: node.id },
+      });
+    }
 
     const updated = this.nodes.get(node.id);
     if (updated) {
@@ -115,12 +176,7 @@ class SwarmCoordinator {
       await this.persistNode(updated);
     }
 
-    if (result && result.derived) {
-      await this.store.writeEvent(result.derived);
-      this.record(MESSAGE_TYPES.ROUTE_DECISION, result.derived.payload, node.id, 'swarm');
-    }
-
-    return { node, result };
+    return { node, event, command };
   }
 
   snapshot() {
@@ -128,6 +184,7 @@ class SwarmCoordinator {
       nodes: [...this.nodes.values()],
       eventCount: this.eventLog.length,
       lastHash: this.prevHash,
+      bus: Boolean(this.bus),
     };
   }
 
@@ -201,11 +258,27 @@ class SwarmCoordinator {
       node.status = 'offline';
       await this.persistNode(node);
     }
+    for (const sub of this.subscriptions) {
+      try { sub.unsubscribe(); } catch {}
+    }
+    this.subscriptions = [];
     await this.store.close();
+    if (this.bus) {
+      await this.bus.close().catch(() => null);
+    }
     if (this.server) {
       await new Promise((resolve) => this.server.close(resolve));
     }
   }
+}
+
+async function postJSON(url, body) {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return response.json();
 }
 
 module.exports = { SwarmCoordinator };
