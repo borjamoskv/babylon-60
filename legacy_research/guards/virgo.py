@@ -15,6 +15,11 @@ from typing import Any
 import aiosqlite
 
 from cortex.crypto.keys import ZKSwarmIdentity
+from cortex.guards.i10_consensus import (
+    EpistemicConsensusError,
+    I10ConsensusGuard,
+    TriadOutputs,
+)
 from cortex.utils.errors import CortexError
 
 logger = logging.getLogger("cortex.security.virgo")
@@ -40,9 +45,15 @@ class VirgoContextGuard:
          the integrity of the Sovereign Ledger.
     """
 
-    def __init__(self, engine: Any = None, trust_penalty: float = 5.0) -> None:
+    def __init__(
+        self,
+        engine: Any = None,
+        trust_penalty: float = 5.0,
+        i10_guard: I10ConsensusGuard | None = None,
+    ) -> None:
         self.engine = engine
         self.trust_penalty = trust_penalty
+        self.i10_guard = i10_guard
 
     async def _check_agent_validation_signature(
         self,
@@ -188,6 +199,26 @@ class VirgoContextGuard:
                 f"Context poisoning detected: {poison_reasons}",
                 error_class=ContextPoisoningError,
             )
+
+        # 1.5. I10 Epistemic Consensus Evaluation (Cross-Model Triad)
+        if self.i10_guard is not None:
+            triad = meta.get("triad")
+            if triad and "alpha" in triad and "beta" in triad and "gamma" in triad:
+                try:
+                    outputs = TriadOutputs(
+                        alpha_llama=triad["alpha"],
+                        beta_mixtral=triad["beta"],
+                        gamma_qwen=triad["gamma"]
+                    )
+                    prompt = meta.get("prompt", "")
+                    await self.i10_guard.evaluate_epistemic_consensus(prompt, outputs)
+                except EpistemicConsensusError as e:
+                    self._apply_trust_penalty(agent_id, taint_severity=1.0)
+                    await self._trigger_ledger_rollback(
+                        conn,
+                        f"I10 Epistemic Consensus Interception: {e}",
+                        error_class=ContextPoisoningError,
+                    )
 
         # 2. Deterministic Validation Signature Verification
         await self._check_agent_validation_signature(content, project, meta, agent_id, conn)
