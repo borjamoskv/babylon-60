@@ -55,9 +55,11 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
             logger.critical(f"[MTK-BLOCK] Hard-blocked structural action: {action}")
             return sqlite3.SQLITE_DENY
 
-        # Ignore writes to internal sqlite sequences/schemas
-        if arg1:
-            if arg1.startswith("sqlite_") or arg1 == "schema_version":
+        # Ignore writes to internal sqlite sequences/schemas or agent_messages transport table
+        if arg1 or arg2:
+            is_internal = (arg1 and (arg1.startswith("sqlite_") or arg1 == "schema_version" or "agent_messages" in arg1 or "agent_msg" in arg1)) or \
+                          (arg2 and ("agent_messages" in arg2 or "agent_msg" in arg2))
+            if is_internal:
                 return sqlite3.SQLITE_OK
 
         token = mtk_active_token.get()

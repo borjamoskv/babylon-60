@@ -9,7 +9,7 @@ import requests
 setup_cortex_logging()
 logger = logging.getLogger("cortex-action-worker")
 
-CORTEX_API_URL = os.environ.get("CORTEX_API_URL", "https://api.cortexpersist.org/api/v1/audit")
+CORTEX_API_URL = os.environ.get("CORTEX_API_URL", "https://api.cortexpersist.com/api/v1/audit")
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 GITHUB_EVENT_PATH = os.environ.get("GITHUB_EVENT_PATH")
 GITHUB_REPOSITORY = os.environ.get("GITHUB_REPOSITORY")

@@ -6,11 +6,15 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 
+from uuid import uuid4
+
 class TaskRequestPayload(BaseModel):
-    task_id: str
-    objective: str
+    task_id: str = Field(default_factory=lambda: str(uuid4()))
+    objective: str = ""
     input: dict[str, Any] = Field(default_factory=dict)
     constraints: dict[str, Any] = Field(default_factory=dict)
+    op: str | None = None
+    code: str | None = None
 
 
 class ToolCallPayload(BaseModel):
@@ -37,10 +41,11 @@ class VerificationResultPayload(BaseModel):
 
 
 class HandoffRequestPayload(BaseModel):
-    reason: str
-    causal_gap: str
-    required_capability: str
-    confidence: float
+    reason: str = ""
+    causal_gap: str = ""
+    required_capability: str = ""
+    confidence: float = 1.0
+    handoff: dict[str, Any] | None = None
 
 
 class TaskCompletedPayload(BaseModel):

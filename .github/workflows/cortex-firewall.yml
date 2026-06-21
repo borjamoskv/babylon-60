@@ -74,6 +74,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Points to the production or staging CORTEX API
-          CORTEX_API_URL: "https://api.cortexpersist.org/api/v1/audit"
+          CORTEX_API_URL: "https://api.cortexpersist.com/api/v1/audit"
         run: |
           python cortex/integrations/github_action_worker.py
