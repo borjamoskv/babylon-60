@@ -1,3 +1,6 @@
+"""
+Barrera de aislamiento de side effects. Realiza la ejecución de reinicio/recuperación.
+"""
 import asyncio
 import logging
 

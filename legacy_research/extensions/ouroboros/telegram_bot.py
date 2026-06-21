@@ -1,3 +1,6 @@
+"""
+Notificador B2C en caso de que una intervención agrave el problema en vez de solucionarlo.
+"""
 import logging
 import os
 

@@ -1,5 +1,8 @@
 import time
 
+"""
+Capa sensora (CPU, RAM, Disco) vía psutil. Aquí se inyectarían las llamadas directas a las APIs del nodo Inmunify/Grass.
+"""
 import psutil
 
 

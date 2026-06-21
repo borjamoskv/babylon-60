@@ -1,6 +1,6 @@
 """
-CORTEX-PERSIST: Ouroboros Node Keeper
-C5-REAL MVP
+CORTEX-PERSIST: Ouroboros Node Keeper MVP
+Loop asíncrono y exposición del API REST de salud. Orquesta el ciclo de vida continuo cada 60s.
 """
 import asyncio
 import logging

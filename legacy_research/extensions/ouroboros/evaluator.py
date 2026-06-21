@@ -1,3 +1,7 @@
+"""
+Conversión termodinámica de métricas crudas a un Health Score unificado.
+"""
+
 def evaluate_health(state: dict) -> dict:
     cpu_score = max(0, 100 - state["cpu_pct"]) / 100
     ram_score = max(0, 100 - state["ram_pct"]) / 100

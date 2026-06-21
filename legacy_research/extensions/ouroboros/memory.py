@@ -1,3 +1,6 @@
+"""
+Bitácora JSONL física. Evita las pérdidas estocásticas de estado post-reinicio guardando heartbeats y resultados de acciones.
+"""
 import json
 import logging
 from pathlib import Path

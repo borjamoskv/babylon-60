@@ -1,3 +1,7 @@
+"""
+Matriz de decisión basada en anomalías detectadas. Convierte el health_score y métricas aisladas en Playbooks accionables.
+"""
+
 def detect_anomalies(state: dict, health: dict) -> list:
     anomalies = []
     if state["cpu_pct"] > 90:
