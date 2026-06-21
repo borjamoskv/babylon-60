@@ -1,5 +1,5 @@
-use crate::event_schema::{LedgerEvent, Hash};
-use sha2::{Sha256, Digest};
+use crate::event_schema::{Hash, LedgerEvent};
+use sha2::{Digest, Sha256};
 
 /// Computes the cryptographic SHA-256 hash of a LedgerEvent.
 /// The `hash` field itself is cleared during serialization to ensure
@@ -7,12 +7,12 @@ use sha2::{Sha256, Digest};
 pub fn compute_event_hash(event: &LedgerEvent) -> Result<Hash, serde_json::Error> {
     let mut canonical = event.clone();
     canonical.hash = String::new();
-    
-    // serde_json::to_value followed by serialization of that Value 
+
+    // serde_json::to_value followed by serialization of that Value
     // guarantees sorted keys because Value's Map is a BTreeMap.
     let value = serde_json::to_value(&canonical)?;
     let canonical_json = serde_json::to_string(&value)?;
-    
+
     let mut hasher = Sha256::new();
     hasher.update(canonical_json.as_bytes());
     let digest = hasher.finalize();
@@ -21,7 +21,10 @@ pub fn compute_event_hash(event: &LedgerEvent) -> Result<Hash, serde_json::Error
 
 /// Verifies that the event is cryptographically valid and correctly linked
 /// to the previous event in the chain.
-pub fn verify_event(event: &LedgerEvent, previous: Option<&LedgerEvent>) -> Result<bool, serde_json::Error> {
+pub fn verify_event(
+    event: &LedgerEvent,
+    previous: Option<&LedgerEvent>,
+) -> Result<bool, serde_json::Error> {
     // 1. Verify hash linkage
     match previous {
         Some(prev) => {
@@ -35,7 +38,7 @@ pub fn verify_event(event: &LedgerEvent, previous: Option<&LedgerEvent>) -> Resu
             }
         }
     }
-    
+
     // 2. Verify own hash matches content digest
     let expected = compute_event_hash(event)?;
     Ok(event.hash == expected)
@@ -56,10 +59,10 @@ impl HashChain {
     pub fn append_event(&mut self, mut event: LedgerEvent) -> Result<Hash, serde_json::Error> {
         let prev_hash = self.events.last().map(|e| e.hash.clone());
         event.previous_hash = prev_hash;
-        
+
         let hash = compute_event_hash(&event)?;
         event.hash = hash.clone();
-        
+
         self.events.push(event);
         Ok(hash)
     }
@@ -67,7 +70,11 @@ impl HashChain {
     /// Verifies the cryptographic integrity of the entire chain.
     pub fn verify_chain(&self) -> Result<bool, serde_json::Error> {
         for i in 0..self.events.len() {
-            let prev = if i > 0 { Some(&self.events[i - 1]) } else { None };
+            let prev = if i > 0 {
+                Some(&self.events[i - 1])
+            } else {
+                None
+            };
             if !verify_event(&self.events[i], prev)? {
                 return Ok(false);
             }

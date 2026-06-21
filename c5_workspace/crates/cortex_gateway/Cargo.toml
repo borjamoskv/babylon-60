@@ -12,3 +12,4 @@ rand = "0.8"
 rusqlite = { version = "0.31", features = ["load_extension"] }
 tract-onnx = "0.21"
 ndarray = "0.15"
+rand_distr = "0.4"

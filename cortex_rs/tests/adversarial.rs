@@ -167,7 +167,11 @@ fn hard_fail_matrix_maps_to_death_criteria() {
     ];
 
     for (criterion, accepted) in cases {
-        assert!(!accepted, "death criterion {:?} must be impossible", criterion);
+        assert!(
+            !accepted,
+            "death criterion {:?} must be impossible",
+            criterion
+        );
     }
 }
 

@@ -2,7 +2,7 @@
 //! Reproduces deterministic adversarial event streams bit-for-bit from a seed.
 //! Generates attestations and calculates divergence between universe traces.
 
-use sha2::{Sha256, Digest};
+use sha2::{Digest, Sha256};
 use std::convert::TryInto;
 
 /// State space for the Black Swan deterministic engine
@@ -71,14 +71,28 @@ pub struct SurvivalAttestation {
 /// A score > 0 means the system diverged.
 pub fn calculate_divergence(a: &UniverseTrace, b: &UniverseTrace) -> u64 {
     let mut divergence = 0;
-    
-    if a.event_count != b.event_count { divergence += 1; }
-    if a.accepted_transitions != b.accepted_transitions { divergence += 10; }
-    if a.rejected_transitions != b.rejected_transitions { divergence += 10; }
-    if a.ledger_commits != b.ledger_commits { divergence += 50; }
-    if a.throttle_activations != b.throttle_activations { divergence += 20; }
-    if a.collapse_detections != b.collapse_detections { divergence += 100; }
-    if a.root_hash != b.root_hash { divergence += 1000; }
+
+    if a.event_count != b.event_count {
+        divergence += 1;
+    }
+    if a.accepted_transitions != b.accepted_transitions {
+        divergence += 10;
+    }
+    if a.rejected_transitions != b.rejected_transitions {
+        divergence += 10;
+    }
+    if a.ledger_commits != b.ledger_commits {
+        divergence += 50;
+    }
+    if a.throttle_activations != b.throttle_activations {
+        divergence += 20;
+    }
+    if a.collapse_detections != b.collapse_detections {
+        divergence += 100;
+    }
+    if a.root_hash != b.root_hash {
+        divergence += 1000;
+    }
 
     divergence
 }
@@ -96,8 +110,13 @@ pub fn simulate_universe(seed: u64, kernel_variant: &str) -> UniverseTrace {
     };
 
     for epoch in 0..10 {
-        for entropy_index in 0..10_000 { // Search space for rare events
-            let state = SwanState { seed, epoch, entropy_index };
+        for entropy_index in 0..10_000 {
+            // Search space for rare events
+            let state = SwanState {
+                seed,
+                epoch,
+                entropy_index,
+            };
             if let Some(event) = generate_event(&state) {
                 trace.event_count += 1;
 
@@ -138,10 +157,22 @@ mod tests {
 
     #[test]
     fn test_deterministic_event_generation() {
-        let state1 = SwanState { seed: 42, epoch: 1, entropy_index: 500 };
-        let state2 = SwanState { seed: 42, epoch: 1, entropy_index: 500 };
-        
-        assert_eq!(generate_event(&state1), generate_event(&state2), "Must be bit-for-bit reproducible");
+        let state1 = SwanState {
+            seed: 42,
+            epoch: 1,
+            entropy_index: 500,
+        };
+        let state2 = SwanState {
+            seed: 42,
+            epoch: 1,
+            entropy_index: 500,
+        };
+
+        assert_eq!(
+            generate_event(&state1),
+            generate_event(&state2),
+            "Must be bit-for-bit reproducible"
+        );
     }
 
     #[test]
@@ -159,11 +190,14 @@ mod tests {
     fn test_multiverse_divergence_metrics() {
         // Baseline universe
         let trace_base = simulate_universe(1337, "baseline");
-        
+
         // Universe with a weakened collapse gate
         let trace_weak = simulate_universe(1337, "weak_collapse_gate");
 
         let divergence = calculate_divergence(&trace_base, &trace_weak);
-        assert!(divergence > 0, "Altered kernel policy must yield measurable divergence > 0");
+        assert!(
+            divergence > 0,
+            "Altered kernel policy must yield measurable divergence > 0"
+        );
     }
 }

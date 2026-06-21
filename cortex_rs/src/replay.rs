@@ -1,5 +1,5 @@
-use crate::event_schema::{LedgerEvent, EventType};
 use crate::edg::{EpistemicGraph, EpistemicNode, EpistemicStatus};
+use crate::event_schema::{EventType, LedgerEvent};
 use crate::hash_chain::verify_event;
 
 /// Replays a sequence of LedgerEvents onto the EpistemicGraph.
@@ -10,7 +10,12 @@ pub fn replay_state(graph: &EpistemicGraph, events: &[LedgerEvent]) -> Result<()
         let prev = if i > 0 { Some(&events[i - 1]) } else { None };
         match verify_event(&events[i], prev) {
             Ok(true) => {}
-            Ok(false) => return Err(format!("Cryptographic verification failed for event at index {}", i)),
+            Ok(false) => {
+                return Err(format!(
+                    "Cryptographic verification failed for event at index {}",
+                    i
+                ))
+            }
             Err(e) => return Err(format!("Error verifying event at index {}: {:?}", i, e)),
         }
     }
@@ -19,11 +24,17 @@ pub fn replay_state(graph: &EpistemicGraph, events: &[LedgerEvent]) -> Result<()
     for event in events {
         match event.event_type {
             EventType::MemoryCreated => {
-                let node_id = event.metadata.get("node_id")
+                let node_id = event
+                    .metadata
+                    .get("node_id")
                     .and_then(|v| v.as_str())
-                    .ok_or_else(|| "MemoryCreated event missing 'node_id' in metadata".to_string())?;
-                
-                let confidence = event.metadata.get("confidence")
+                    .ok_or_else(|| {
+                        "MemoryCreated event missing 'node_id' in metadata".to_string()
+                    })?;
+
+                let confidence = event
+                    .metadata
+                    .get("confidence")
                     .and_then(|v| v.as_f64())
                     .unwrap_or(1.0);
 
@@ -38,7 +49,11 @@ pub fn replay_state(graph: &EpistemicGraph, events: &[LedgerEvent]) -> Result<()
                         }
                     }
                 }
-                if let Some(supported_by) = event.metadata.get("supported_by").and_then(|v| v.as_array()) {
+                if let Some(supported_by) = event
+                    .metadata
+                    .get("supported_by")
+                    .and_then(|v| v.as_array())
+                {
                     for sup in supported_by {
                         if let Some(sup_id) = sup.as_str() {
                             let _ = graph.add_dependency(sup_id, node_id);
@@ -47,11 +62,16 @@ pub fn replay_state(graph: &EpistemicGraph, events: &[LedgerEvent]) -> Result<()
                 }
             }
             EventType::BeliefUpdated => {
-                let node_id = event.metadata.get("node_id")
+                let node_id = event
+                    .metadata
+                    .get("node_id")
                     .and_then(|v| v.as_str())
-                    .ok_or_else(|| "BeliefUpdated event missing 'node_id' in metadata".to_string())?;
+                    .ok_or_else(|| {
+                        "BeliefUpdated event missing 'node_id' in metadata".to_string()
+                    })?;
 
-                if let Some(confidence) = event.metadata.get("confidence").and_then(|v| v.as_f64()) {
+                if let Some(confidence) = event.metadata.get("confidence").and_then(|v| v.as_f64())
+                {
                     if let Some(mut node) = graph.nodes.get_mut(node_id) {
                         node.confidence = confidence;
                     }
@@ -75,7 +95,11 @@ pub fn replay_state(graph: &EpistemicGraph, events: &[LedgerEvent]) -> Result<()
                     for node_id in &impact.invalidated_nodes {
                         graph.invalidate_node(node_id);
                     }
-                } else if let Some(invalidated_array) = event.metadata.get("invalidated_nodes").and_then(|v| v.as_array()) {
+                } else if let Some(invalidated_array) = event
+                    .metadata
+                    .get("invalidated_nodes")
+                    .and_then(|v| v.as_array())
+                {
                     for val in invalidated_array {
                         if let Some(node_id) = val.as_str() {
                             graph.invalidate_node(node_id);
