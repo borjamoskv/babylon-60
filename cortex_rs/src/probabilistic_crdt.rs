@@ -34,7 +34,7 @@ impl ProbabilisticState {
         }
     }
 
-    /// Consumes error as an exploration gradient. 
+    /// Consumes error as an exploration gradient.
     /// If EB -> 0 => epistemic collapse.
     pub fn consume_error_as_gradient(&mut self, error_magnitude: f32) -> Result<(), &'static str> {
         if self.exploration_budget >= error_magnitude {

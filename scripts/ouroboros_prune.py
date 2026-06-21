@@ -23,6 +23,7 @@ Axioms: Ω2 (Entropic Asymmetry), AX-047 (Anti-Limerence)
 import argparse
 import json
 import logging
+import math
 import sqlite3
 import sys
 from dataclasses import dataclass, field

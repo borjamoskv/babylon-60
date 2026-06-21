@@ -78,13 +78,19 @@ impl EpistemicGraph {
         if let Some(mut supporter) = self.nodes.get_mut(supporter_id) {
             supporter.supports.insert(supported_id.to_string());
         } else {
-            return Err(pyo3::exceptions::PyKeyError::new_err(format!("Node not found: {}", supporter_id)));
+            return Err(pyo3::exceptions::PyKeyError::new_err(format!(
+                "Node not found: {}",
+                supporter_id
+            )));
         }
 
         if let Some(mut supported) = self.nodes.get_mut(supported_id) {
             supported.supported_by.insert(supporter_id.to_string());
         } else {
-            return Err(pyo3::exceptions::PyKeyError::new_err(format!("Node not found: {}", supported_id)));
+            return Err(pyo3::exceptions::PyKeyError::new_err(format!(
+                "Node not found: {}",
+                supported_id
+            )));
         }
 
         Ok(())
@@ -100,7 +106,7 @@ impl EpistemicGraph {
                     node.status = EpistemicStatus::Invalid;
                     node.confidence = 0.0;
                     affected.push(current_id.clone());
-                    
+
                     // Propagate invalidation to all nodes that this node supports
                     for supported_id in &node.supports {
                         stack.push(supported_id.clone());
@@ -108,7 +114,7 @@ impl EpistemicGraph {
                 }
             }
         }
-        
+
         affected
     }
 }

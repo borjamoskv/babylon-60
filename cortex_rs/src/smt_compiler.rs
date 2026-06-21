@@ -1,6 +1,6 @@
+use crate::scene_model::{ContinuityRuleType, EdgeRule, SceneState};
 use pyo3::prelude::*;
-use z3::{Solver, SatResult};
-use crate::scene_model::{SceneState, EdgeRule, ContinuityRuleType};
+use z3::{SatResult, Solver};
 
 #[pyclass]
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -26,7 +26,12 @@ pub struct Verdict {
 #[pymethods]
 impl Verdict {
     #[new]
-    pub fn new(status: GateStatus, proof_trace: Vec<String>, unsat_core: Option<Vec<String>>, entropy_hash: Option<String>) -> Self {
+    pub fn new(
+        status: GateStatus,
+        proof_trace: Vec<String>,
+        unsat_core: Option<Vec<String>>,
+        entropy_hash: Option<String>,
+    ) -> Self {
         Verdict {
             status,
             proof_trace,
@@ -46,34 +51,50 @@ pub fn continuity_rule_to_z3(
             let from_geo = from.geography_id.as_deref().unwrap_or("");
             let to_geo = to.geography_id.as_deref().unwrap_or("");
             let is_match = !from_geo.is_empty() && from_geo == to_geo;
-            
+
             let constraint = z3::ast::Bool::from_bool(is_match);
-            (constraint, format!("HardGeographyLock({}->{})", rule.from_id, rule.to_id))
-        },
+            (
+                constraint,
+                format!("HardGeographyLock({}->{})", rule.from_id, rule.to_id),
+            )
+        }
         ContinuityRuleType::PaletteArcPosition => {
             let is_valid = !from.palette_state.is_empty() && !to.palette_state.is_empty();
             let constraint = z3::ast::Bool::from_bool(is_valid);
-            (constraint, format!("PaletteArcPosition({}->{})", rule.from_id, rule.to_id))
-        },
+            (
+                constraint,
+                format!("PaletteArcPosition({}->{})", rule.from_id, rule.to_id),
+            )
+        }
         ContinuityRuleType::EmotionalCausality => {
             let from_emo = from.emotional_state.as_deref().unwrap_or("");
             let to_emo = to.emotional_state.as_deref().unwrap_or("");
             let is_valid = !from_emo.is_empty() && !to_emo.is_empty();
             let constraint = z3::ast::Bool::from_bool(is_valid);
-            (constraint, format!("EmotionalCausality({}->{})", rule.from_id, rule.to_id))
-        },
+            (
+                constraint,
+                format!("EmotionalCausality({}->{})", rule.from_id, rule.to_id),
+            )
+        }
         ContinuityRuleType::LineageIntegrity => {
             let from_lin = from.lineage_state.as_deref().unwrap_or("");
             let to_lin = to.lineage_state.as_deref().unwrap_or("");
             let is_valid = from_lin == to_lin && !from_lin.is_empty();
             let constraint = z3::ast::Bool::from_bool(is_valid);
-            (constraint, format!("LineageIntegrity({}->{})", rule.from_id, rule.to_id))
+            (
+                constraint,
+                format!("LineageIntegrity({}->{})", rule.from_id, rule.to_id),
+            )
         }
     }
 }
 
 #[pyfunction]
-pub fn validate_scene_transition(from_state: &SceneState, to_state: &SceneState, rules: Vec<EdgeRule>) -> Verdict {
+pub fn validate_scene_transition(
+    from_state: &SceneState,
+    to_state: &SceneState,
+    rules: Vec<EdgeRule>,
+) -> Verdict {
     if rules.is_empty() {
         return Verdict {
             status: GateStatus::Unspecified,
@@ -85,7 +106,7 @@ pub fn validate_scene_transition(from_state: &SceneState, to_state: &SceneState,
 
     // z3 0.20 uses a thread-local context, so we just instantiate a solver directly
     let solver = Solver::new();
-    
+
     let mut trace = Vec::new();
 
     for rule in rules {
@@ -105,20 +126,23 @@ pub fn validate_scene_transition(from_state: &SceneState, to_state: &SceneState,
         },
         SatResult::Unsat => {
             let core = solver.get_unsat_core();
-            let core_names: Vec<String> = core.iter().map(|ast| ast.to_string().replace('|', "")).collect();
+            let core_names: Vec<String> = core
+                .iter()
+                .map(|ast| ast.to_string().replace('|', ""))
+                .collect();
             Verdict {
                 status: GateStatus::Violated,
                 proof_trace: trace,
                 unsat_core: Some(core_names),
                 entropy_hash: None,
             }
-        },
+        }
         SatResult::Unknown => Verdict {
             status: GateStatus::Violated,
             proof_trace: trace,
             unsat_core: Some(vec!["Z3 Unknown result".to_string()]),
             entropy_hash: None,
-        }
+        },
     }
 }
 
@@ -138,7 +162,11 @@ mod tests {
     fn test_satisfied_spec() {
         let from = SceneState::new("1".into(), Some("geo_a".into()), "warm".into(), None, None);
         let to = SceneState::new("2".into(), Some("geo_a".into()), "cold".into(), None, None);
-        let rule = EdgeRule::new("1".into(), "2".into(), ContinuityRuleType::HardGeographyLock);
+        let rule = EdgeRule::new(
+            "1".into(),
+            "2".into(),
+            ContinuityRuleType::HardGeographyLock,
+        );
         let verdict = validate_scene_transition(&from, &to, vec![rule]);
         assert_eq!(verdict.status, GateStatus::Satisfied);
     }
@@ -147,7 +175,11 @@ mod tests {
     fn test_violated_spec() {
         let from = SceneState::new("1".into(), Some("geo_a".into()), "warm".into(), None, None);
         let to = SceneState::new("2".into(), Some("geo_b".into()), "cold".into(), None, None);
-        let rule = EdgeRule::new("1".into(), "2".into(), ContinuityRuleType::HardGeographyLock);
+        let rule = EdgeRule::new(
+            "1".into(),
+            "2".into(),
+            ContinuityRuleType::HardGeographyLock,
+        );
         let verdict = validate_scene_transition(&from, &to, vec![rule]);
         assert_eq!(verdict.status, GateStatus::Violated);
         assert!(verdict.unsat_core.is_some());
