@@ -169,8 +169,7 @@ interface ChallengeMessage {
 }
 ```
 
-A `ChallengeMessage` introduces a saturating epistemic penalty validated by cryptographic proof, and
-can only collapse a proposal to total exclusion ($P \to 0$) after one of:
+A `ChallengeMessage` introduces a saturating epistemic penalty validated by cryptographic proof. The penalty is applied via logit decay: $\text{logit}(P') = \text{logit}(P) - \lambda(c)$, where $\lambda(c)$ is a function of the challenge's confidence and evidence weight. It can only collapse a proposal to total exclusion ($P \to 0$) after one of:
 
 1. **L3 Auditor review** confirming structural justification.
 2. **Reinforced quorum** (≥ 2/3 of active swarm nodes concurring).
@@ -209,6 +208,7 @@ If $Risk_{\text{contam}}$ detects cascading structural contradictions unmitigate
 3. `resolve_context(query_params)`: Evaluates the Memory Equation tensor to yield the active Context Package.
 4. `attest_lineage(artifact_id)`: Generates ZK-ready cryptographic proofs of inferential origin tracing back to raw telemetry episodes.
 5. `fork_memory(agent_id, context_delta)`: Instantiates isolated semantic sandboxes permitting complex Monte Carlo counterfactual simulations.
+6. `merge_counterfactual(branch_id, target_context)`: Reintegrates a `SIMULATED` branch into the `ACTIVE` main timeline, subject to ATMS reconciliation and precondition drift checks.
 
 ## 12. Resume Semantics & IPC
 
@@ -289,6 +289,12 @@ The system MUST NOT execute probabilistic LLM generations directly against the p
 - **Pipeline Contract:** All complex actions MUST pass through the cycle: `Proposal -> Simulation -> Validated Transition -> Execution`.
 - **Predicted State Deltas:** The simulation MUST emit a `PredictedStateDelta` that can be cryptographically compared against the `ActualStateDelta` post-execution.
 
+### Simulation Verification Metric
+
+The distance between `PredictedStateDelta` ($D_p$) and `ActualStateDelta` ($D_a$) is measured structurally. If the topological distance exceeds the allowed threshold $\Delta_{\text{max}}$:
+1. The system MUST trigger an `INFERRED -> CONTESTED` regression loop.
+2. An autopsy of the `SIMULATED` branch MUST be executed to recalibrate the World Model.
+
 ## 17. Adaptive Metacontrol
 
 > **Classification: MUST (Normative)**
@@ -319,6 +325,12 @@ The architecture MUST enforce explicit rules determining what constitutes valid 
 2. **Consensus Outcome:** Multi-agent convergence validated via LogOP. Supersedes single-agent inferences.
 3. **Agent Opinion:** Probabilistic assertions (`INFERRED`). Must always include variance and uncertainty metrics.
 4. **Simulated Possibility:** Branches created via `fork_memory`. MUST NOT leak into the `ACTIVE` main context without an explicit merge commit integrating the counterfactual context.
+
+### Factuality Transition Rules (MUST)
+
+- `SIMULATED` $\to$ `OBSERVED`: STRICTLY FORBIDDEN without an intermediate empirical validation phase via Execution.
+- `INFERRED` $\to$ `OBSERVED`: REQUIRES multi-agent LogOP consensus or direct cryptographic telemetry replacement.
+- `SIMULATED` $\to$ `INFERRED`: ALLOWED if the simulation yields a structural hypothesis, but MUST retain uncertainty variance.
 
 ## 19. Epistemic Integration of AUTODIDACT Nodes
 
