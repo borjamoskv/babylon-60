@@ -2,6 +2,7 @@ import json
 import os
 import yaml
 from typing import List, Dict, Any
+from datetime import datetime, timezone
 
 from .database import get_connection, init_db
 from .engine import calculate_hash, generate_10k_events, audit_chain
@@ -109,10 +110,18 @@ def generate_golden_artifacts():
     print(f"Golden Artifacts generated in {artifacts_dir}. Merkle Root: {merkle_root}")
     return merkle_root
 
+def get_git_commit() -> str:
+    import subprocess
+    try:
+        return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("utf-8").strip()
+    except Exception:
+        return "unknown"
+
 def test_replay_invariance():
     artifacts_dir = os.path.join(os.path.dirname(__file__), "artifacts")
     merkle_path = os.path.join(artifacts_dir, "merkle_root.txt")
     jsonl_path = os.path.join(artifacts_dir, "events.jsonl")
+    evidence_path = os.path.join(artifacts_dir, "runtime_evidence.json")
     
     # Read the golden merkle root
     with open(merkle_path, "r") as f:
@@ -120,11 +129,12 @@ def test_replay_invariance():
         
     # Replay from JSONL
     print("Replaying from JSONL...")
-    replay_from_jsonl(jsonl_path)
+    replay_count = replay_from_jsonl(jsonl_path)
     
     # Re-audit
     audit_res = audit_chain()
-    assert audit_res["integrity"] == "valid", "Integrity failed after replay"
+    is_valid = audit_res["integrity"] == "valid"
+    assert is_valid, "Integrity failed after replay"
     
     conn = get_connection()
     cursor = conn.cursor()
@@ -132,8 +142,26 @@ def test_replay_invariance():
     new_root = cursor.fetchone()[0]
     conn.close()
     
-    assert original_root == new_root, f"Merkle root mismatch! {original_root} != {new_root}"
+    hash_match = (original_root == new_root)
+    assert hash_match, f"Merkle root mismatch! {original_root} != {new_root}"
     print("Replay Invariance Test: PASSED. Merkle Root is identical.")
+    
+    # Generate runtime_evidence.json
+    evidence = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "events_count": audit_res["events"],
+        "replay_count": replay_count,
+        "initial_hash": original_root,
+        "final_hash": new_root,
+        "integrity_result": audit_res["integrity"],
+        "git_commit": get_git_commit(),
+        "hash_match": hash_match
+    }
+    
+    with open(evidence_path, "w") as f:
+        json.dump(evidence, f, indent=2)
+        
+    print(f"Runtime Evidence generated at {evidence_path}")
 
 if __name__ == "__main__":
     generate_golden_artifacts()
