@@ -34,7 +34,7 @@ for extra_path in (
     _REPO_ROOT / "ANTI_GRAVITY" / "01_ACTIVE" / "unknown" / "sortu",
 ):
     if extra_path.exists() and str(extra_path) not in sys.path:
-        sys.path.insert(0, str(extra_path))
+        sys.path.append(str(extra_path))
 
 
 @pytest.fixture(autouse=True)

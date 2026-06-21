@@ -4,15 +4,14 @@
 Audits recent ledger entries using WBFTConsensus.
 """
 import asyncio
-import logging
-import json
-import os
 import hashlib
-from cryptography.hazmat.primitives.asymmetric import ed25519
+import json
+import logging
+import os
 
+from cortex.audit.ledger import EnterpriseAuditLedger
 from cortex.consensus.byzantine import WBFTConsensus
 from cortex.extensions.thinking.fusion_models import ModelResponse
-from cortex.audit.ledger import EnterpriseAuditLedger
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("sanedrin")
@@ -24,7 +23,7 @@ def verify_ledger_cryptography(log_path: str, public_key) -> bool:
         return False
 
     try:
-        with open(log_path, "r") as f:
+        with open(log_path) as f:
             lines = f.readlines()
             
         if not lines:

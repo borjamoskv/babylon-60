@@ -21,7 +21,6 @@ Formalization of 11 Calculus Primitives:
 from collections.abc import Callable
 from typing import Any
 
-import numpy as np
 import sympy as sp
 import torch
 
@@ -37,28 +36,28 @@ class CalculusPrimitives:
         self.n = sp.Symbol('n', integer=True, positive=True)
 
     # 1. Sucesión (Sequence)
-    def sucesion_term(self, expr: sp.Expr, index: int) -> float:
+    def sucesion_term(self, expr: sp.Expr, index: int) -> int:
         """
-        Calculates the n-th term of a sequence a_n.
+        Calculates the n-th term of a sequence a_n. (Scaled by 1000)
         """
-        return float(expr.subs(self.n, index).evalf())
+        return int(expr.subs(self.n, index).evalf() * 1000)
 
     # 2. Serie (Series)
-    def serie_sum(self, expr: sp.Expr, lower: int, upper: int) -> float:
+    def serie_sum(self, expr: sp.Expr, lower: int, upper: int) -> int:
         """
-        Calculates the partial sum of a series from n=lower to n=upper.
+        Calculates the partial sum of a series from n=lower to n=upper. (Scaled by 1000)
         """
-        return float(sp.Sum(expr, (self.n, lower, upper)).doit().evalf())
+        return int(sp.Sum(expr, (self.n, lower, upper)).doit().evalf() * 1000)
 
     # 3. Límite (Limit)
-    def limite(self, expr: sp.Expr, point: float, direction: str = '+-') -> Any:
+    def limite(self, expr: sp.Expr, point: int, direction: str = '+-') -> Any:
         """
         Evaluates the limit of a function as x approaches a point.
         """
-        return sp.limit(expr, self.x, point, dir=direction)
+        return sp.limit(expr, self.x, point / 1000.0, dir=direction)
 
     # 4. Continuidad (Continuity)
-    def es_continua(self, expr: sp.Expr, point: float) -> bool:
+    def es_continua(self, expr: sp.Expr, point: int) -> bool:
         """
         Checks if a function is continuous at a given point:
         f(a) is defined, lim x->a f(x) exists, and lim x->a f(x) == f(a).
@@ -80,24 +79,24 @@ class CalculusPrimitives:
         return sp.diff(expr, self.x, order)
 
     # 6. Tasa de cambio (Rate of Change - Autograd)
-    def tasa_de_cambio(self, func: Callable[[torch.Tensor], torch.Tensor], point: float) -> float:
+    def tasa_de_cambio(self, func: Callable[[torch.Tensor], torch.Tensor], point: int) -> int:
         """
-        Computes the instantaneous rate of change using PyTorch Autograd.
+        Computes the instantaneous rate of change using PyTorch Autograd. (Scaled)
         """
-        t_point = torch.tensor([point], dtype=torch.float64, requires_grad=True)
+        t_point = torch.tensor([point / 1000.0], dtype=torch.float64, requires_grad=True)
         y = func(t_point)
         y.backward()
-        return float(t_point.grad.item())
+        return int(t_point.grad.item() * 1000)
 
     # 7. Pendiente (Slope - Secant / Average Rate of Change)
-    def pendiente_secante(self, func: Callable[[float], float], x1: float, x2: float) -> float:
+    def pendiente_secante(self, func: Callable[[int], int], x1: int, x2: int) -> int:
         """
         Computes the slope of the secant line between two points.
-        m = (f(x2) - f(x1)) / (x2 - x1)
+        m = (f(x2) - f(x1)) / (x2 - x1) (Scaled)
         """
-        if np.isclose(x1, x2):
+        if x1 == x2:
             raise ValueError("C5-REAL Guard: x1 and x2 must be distinct to compute secant slope.")
-        return (func(x2) - func(x1)) / (x2 - x1)
+        return int(((func(x2) - func(x1)) / (x2 - x1)) * 1000)
 
     # 8. Integral indefinida (Indefinite Integral)
     def integral_indefinida(self, expr: sp.Expr) -> sp.Expr:
@@ -107,20 +106,20 @@ class CalculusPrimitives:
         return sp.integrate(expr, self.x)
 
     # 9. Integral definida (Definite Integral)
-    def integral_definida(self, expr: sp.Expr, a: float, b: float) -> float:
+    def integral_definida(self, expr: sp.Expr, a: int, b: int) -> int:
         """
-        Computes the definite integral over [a, b].
+        Computes the definite integral over [a, b]. (Scaled)
         """
-        return float(sp.integrate(expr, (self.x, a, b)).evalf())
+        return int(sp.integrate(expr, (self.x, a / 1000.0, b / 1000.0)).evalf() * 1000)
 
     # 10. Integral (Numerical Approximation via PyTorch/Trapezoidal)
-    def integral_numerica(self, func: Callable[[torch.Tensor], torch.Tensor], a: float, b: float, steps: int = 10000) -> float:
+    def integral_numerica(self, func: Callable[[torch.Tensor], torch.Tensor], a: int, b: int, steps: int = 10000) -> int:
         """
-        Computes numerical integral using the trapezoidal rule over tensors.
+        Computes numerical integral using the trapezoidal rule over tensors. (Scaled)
         """
-        t = torch.linspace(a, b, steps, dtype=torch.float64)
+        t = torch.linspace(a / 1000.0, b / 1000.0, steps, dtype=torch.float64)
         y = func(t)
-        return float(torch.trapz(y, t).item())
+        return int(torch.trapz(y, t).item() * 1000)
 
 # 11. Orchestration: Verification Kernel
 def execute_calculus_verification():
@@ -153,14 +152,14 @@ def execute_calculus_verification():
     def py_func(x_t): return x_t**3
     def raw_func(x_val): return x_val**3
     
-    rate = calc.tasa_de_cambio(py_func, 2.0)
-    slope = calc.pendiente_secante(raw_func, 2.0, 2.001)
+    rate = calc.tasa_de_cambio(py_func, 2000)
+    slope = calc.pendiente_secante(raw_func, 2000, 2001)
     print(f"[+] Tasa de cambio (Autograd) en x=2: {rate}")
     print(f"[+] Pendiente secante [2, 2.001]: {slope}")
 
     # Definite & Numerical Integral
-    def_int = calc.integral_definida(poly, 0.0, 2.0)
-    num_int = calc.integral_numerica(py_func, 0.0, 2.0)
+    def_int = calc.integral_definida(poly, 0, 2000)
+    num_int = calc.integral_numerica(py_func, 0, 2000)
     print(f"[+] Integral definida [0, 2] de x^3: {def_int}")
     print(f"[+] Integral numérica [0, 2]: {num_int}")
 

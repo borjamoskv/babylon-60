@@ -101,13 +101,13 @@ class DataSensitivity:
 
     __slots__ = ("matches", "score")
 
-    def __init__(self, score: float, matches: list[str]):
-        self.score = score  # 0.0 (Public) → 1.0 (Critical)
+    def __init__(self, score: int, matches: list[str]):
+        self.score = score  # 0 (Public) → 100 (Critical)
         self.matches = matches
 
     @property
     def is_sensitive(self) -> bool:
-        return self.score > 0.3
+        return self.score > 30
 
     def __repr__(self) -> str:
         return f"DataSensitivity(score={self.score}, matches={self.matches})"
@@ -117,24 +117,24 @@ def classify_content(content: str) -> DataSensitivity:
     """Analyze content for sensitive patterns.
 
     Returns a DataSensitivity with tiered scoring:
-      - Tier 1 (Critical): score=1.0 - private keys, DB strings, SSH
-      - Tier 2 (PII):      score=0.9 - email, phone, SSN, credit card
-      - Tier 3 (Platform): score=0.8 - GitHub/GitLab/JWT/cloud tokens
-      - Tier 4 (Standard): score=0.7 - generic API keys, infra tokens
+      - Tier 1 (Critical): score=100 - private keys, DB strings, SSH
+      - Tier 2 (PII):      score=90 - email, phone, SSN, credit card
+      - Tier 3 (Platform): score=80 - GitHub/GitLab/JWT/cloud tokens
+      - Tier 4 (Standard): score=70 - generic API keys, infra tokens
     """
     matches: list[str] = []
-    score = 0.0
+    score = 0
 
     for name, pattern in SECRET_PATTERNS.items():
         if re.search(pattern, content):
             matches.append(name)
             if name in CRITICAL_PATTERNS:
-                score = 1.0
+                score = 100
             elif name in PII_PATTERNS:
-                score = max(score, 0.9)
+                score = max(score, 90)
             elif name in PLATFORM_PATTERNS:
-                score = max(score, 0.8)
+                score = max(score, 80)
             else:
-                score = max(score, 0.7)
+                score = max(score, 70)
 
     return DataSensitivity(score, matches)

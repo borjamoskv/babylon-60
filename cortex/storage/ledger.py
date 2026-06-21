@@ -209,7 +209,7 @@ class EnterpriseAuditLedger:
         actor_id: str,
         g_phi_weights_hash: str,
         hyperparameters: dict,
-        previous_fitness: float,
+        previous_fitness: int,
         trace_id: str = None,
         **kwargs
     ) -> str:

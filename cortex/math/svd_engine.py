@@ -20,12 +20,12 @@ class SVDEngine:
     """
 
     @staticmethod
-    def _assert_invariants(A: np.ndarray, U: np.ndarray, S: np.ndarray, Vt: np.ndarray, rtol: float = 1e-5):
+    def _assert_invariants(A: np.ndarray, U: np.ndarray, S: np.ndarray, Vt: np.ndarray, rtol_scaled: int = 1):
         """Verificación C5: A ≈ U * S * V^T"""
         S_matrix = np.zeros(A.shape)
         np.fill_diagonal(S_matrix, S)
         A_reconstructed = U @ S_matrix @ Vt
-        if not np.allclose(A, A_reconstructed, rtol=rtol):
+        if not np.allclose(A, A_reconstructed, rtol=rtol_scaled / 100000.0):
             raise ValueError("Violación de Invariante SVD: Falla de reconstrucción estructural.")
 
     @classmethod
