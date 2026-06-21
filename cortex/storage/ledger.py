@@ -202,3 +202,59 @@ class EnterpriseAuditLedger:
                 self._batch_task = asyncio.create_task(self._batch_worker())
 
         return ident.event_id
+
+    async def log_epoch_mutation(
+        self,
+        tenant_id: str,
+        actor_id: str,
+        g_phi_weights_hash: str,
+        hyperparameters: dict,
+        previous_fitness: float,
+        trace_id: str = None
+    ) -> str:
+        """
+        Hard Fork epistémico: Registra mutaciones en la red de proyección dinámica g_phi.
+        Genera un nuevo Epoch Hash forzando el recalculo causal.
+        """
+        ident = generate_event_identity(trace_id=trace_id)
+        
+        payload = {
+            "tenant_id": tenant_id,
+            "actor_id": actor_id,
+            "mutation_type": "G_PHI_EPOCH",
+            "g_phi_weights_hash": g_phi_weights_hash,
+            "hyperparameters": hyperparameters,
+            "previous_fitness": previous_fitness
+        }
+
+        payload_str = json.dumps(payload, sort_keys=True, separators=(',', ':'))
+        
+        m = hashlib.sha3_256()
+        m.update(payload_str.encode("utf-8"))
+        m.update(self._last_hash.encode("utf-8"))
+        epoch_hash = m.hexdigest()
+
+        signature = self.private_key.sign(payload_str.encode("utf-8")).hex()
+
+        event = {
+            "ts": ident.wall_time,
+            "monotonic_ts": ident.monotonic_time,
+            "lamport_time": ident.lamport_time,
+            "event_id": ident.event_id,
+            "trace_id": ident.trace_id,
+            "span_id": ident.span_id,
+            "type": "EPOCH_MUTATION",
+            "payload": payload,
+            "parent_hash": self._last_hash,
+            "event_hash": epoch_hash,
+            "signature": signature
+        }
+
+        async with self._lock:
+            self._batch_queue.append(event)
+            if self._batch_task is None:
+                self._batch_task = asyncio.create_task(self._batch_worker())
+
+        # The epoch_hash becomes the causal root for subsequent states
+        return epoch_hash
+

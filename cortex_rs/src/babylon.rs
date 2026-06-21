@@ -147,4 +147,23 @@ impl Babylon60 {
         let value = secs.saturating_mul(SCALE).saturating_add((nanos as i128 * SCALE as i128 / 1_000_000_000) as i64);
         Babylon60 { value }
     }
+
+    pub fn distance(&self, other: &Babylon60) -> Babylon60 {
+        Babylon60 {
+            value: (self.value - other.value).abs(),
+        }
+    }
+
+    #[staticmethod]
+    pub fn pseudo_random(seed: u64, min_bound: f64, max_bound: f64) -> Babylon60 {
+        let mut hasher = std::collections::hash_map::DefaultHasher::new();
+        seed.hash(&mut hasher);
+        let hash_val = hasher.finish();
+        
+        let range = max_bound - min_bound;
+        // Simple linear congruential distribution
+        let normalized = (hash_val as f64) / (u64::MAX as f64);
+        let result_f = min_bound + normalized * range;
+        Babylon60::from_float(result_f)
+    }
 }

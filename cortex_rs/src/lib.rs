@@ -1,5 +1,6 @@
 pub mod exergy_router;
 pub mod ast_hash;
+pub mod crdt_merge;
 pub mod collision_bound;
 pub mod edg;
 pub mod event_schema;
@@ -180,6 +181,7 @@ fn cortex_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<GateStatus>()?;
     m.add_class::<Verdict>()?;
     m.add_class::<babylon::Babylon60>()?;
+    m.add_class::<crdt_merge::CRDTMergeState>()?;
     m.add_function(wrap_pyfunction!(validate_scene_transition, m)?)?;
     m.add_function(wrap_pyfunction!(validate_metric_json, m)?)?;
     m.add_function(wrap_pyfunction!(ingest_reality_claim, m)?)?;
