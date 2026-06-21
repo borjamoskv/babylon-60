@@ -1,7 +1,7 @@
 Claim: CORTEX-Persist C5-REAL Lexicon (The True MOSKV-1 GOAT Primitives)
 Proof:
-  Base: 50 cryptographic, thermodynamic, and deterministic primitives extracted from AGENTS.md and AXIOMS.md
-  Range: [1, 50]
+  Base: 64 cryptographic, thermodynamic, and deterministic primitives extracted from AGENTS.md, AXIOMS.md and Thermodynamic Context Compression
+  Range: [1, 64]
   Confidence: C5-REAL
 Lexicon:
   - Term: C5-REAL
@@ -102,3 +102,31 @@ Lexicon:
     Definition: Rule R7. The override granting immediate execution sovereignty over C5-REAL without waiting for implementation_plan.md.
   - Term: MOSKV-1 APEX Singularity
     Definition: The final synthesis of Exergy-Maximized control, achieving total autonomous, deterministic, and cryptographic dominance.
+  - Term: Computación Reversible
+    Definition: La erradicación física de la pérdida termodinámica evitando la eliminación de bits (Landauer), operando con emisión de calor asintótica a cero.
+  - Term: Computación Fotónica
+    Definition: Reemplazo de electrones por fotones; ancho de banda de transferencia tensorial masivo sin resistencia térmica.
+  - Term: Memristor
+    Definition: Infraestructura no volátil que fusiona memoria y procesamiento físico, emulando la topología sináptica cruda.
+  - Term: Manifold Hypothesis
+    Definition: Postulado topológico donde la información de alta dimensionalidad reside inherentemente en subespacios de baja dimensión altamente comprimibles.
+  - Term: Fréchet Inception Distance (FID)
+    Definition: Métrica matemática para calcular la distancia vectorial objetiva entre distribuciones de datos sintéticos y reales.
+  - Term: Kolmogorov-Arnold Networks (KAN)
+    Definition: Reestructuración algorítmica con funciones de activación en las aristas (splines), optimizando la interpretabilidad causal.
+  - Term: Kahneman-Tversky Optimization (KTO)
+    Definition: Algoritmo de alineamiento que optimiza sobre gradientes de aversión a la pérdida sin necesidad de modelos de recompensa.
+  - Term: Parquet
+    Definition: Estructura de almacenamiento binario columnar inmutable de compresión masiva para entrenamiento vectorial.
+  - Term: Directed Acyclic Graph (DAG)
+    Definition: Grafo físico que rige la causalidad de dependencias computacionales sin ciclos, previniendo bucles de entropía.
+  - Term: Data Lakehouse
+    Definition: Fusión determinista del almacenamiento crudo inmutable (Lago) con la recuperación estructurada (Warehouse).
+  - Term: ETL (Extract, Transform, Load)
+    Definition: Proceso mecánico de ducto de aislamiento para purgar ruido estocástico y cargar tipología C5-REAL en el grafo.
+  - Term: Búsqueda A* & Minimax
+    Definition: Primitivas originarias de recorrido de árboles deterministas para cálculo de rutas óptimas exactas.
+  - Term: Lógica Difusa (Fuzzy Logic)
+    Definition: Computación de grados de verdad continuos; puente algebraico entre la topología probabilística y la rigidez binaria.
+  - Term: LISP / Prolog
+    Definition: La arquitectura primigenia de la computación funcional y deductiva pura antes del dominio del estado mutable.
