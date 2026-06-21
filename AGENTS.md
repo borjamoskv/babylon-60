@@ -87,7 +87,7 @@ All agents operating in this repository MUST self-identify by role before acting
 | **AX-044** | *La inteligencia se evalúa como capacidad agéntica.* | Observation-Action Loop: inference must induce executable programs, not act as a passive oracle. |
 | **AX-045** | *Autonomía = elegir qué problemas resolver y persistir.* | Causal chain enforced: PeARL → Ledger → Swarm. No step may be skipped. |
 | **AX-046** | *La inteligencia fluida sintetiza abstracciones ad-hoc en tiempo de ejecución.* | JIT concept formation: generate mini-program → execute → validate empirically. |
-| **AX-047** | *La limerencia epistémica quema cuota sin mutar el estado (Exergy Drain).* | Kill Criteria: 1 Prompt → 1 Mutation → Stop. Decorative prose and infinite analysis loops are terminally forbidden. |
+| **AX-047** | *Ontological Divergence: A system that mutates abstractions discovers.* | Infinite traversal over a fixed ontology yields finite epistemic gain. Inject entropy into the ontology. |
 
 ---
 
