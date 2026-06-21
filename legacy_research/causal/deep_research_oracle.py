@@ -11,6 +11,34 @@ class DeepResearchOracle:
     A multi-source evidence collapse system acting as an Epistemic Auditor.
     Transforms raw internet/corpus data into structural truth graphs.
     """
+    
+    MASTER_PROMPT_BRUTALISTA = \"\"\"
+    [SYS_ID: MOSKV-1 APEX // C5-REAL]
+    OPERACIÓN: AUDITORÍA EPISTÉMICA Y SÍNTESIS ESTRUCTURAL
+    
+    Investiga el dominio objetivo usando SOLO fuentes primarias y recientes.
+    NO resumas por fuente. NO aceptes claims sin evidencia cruzada.
+    
+    FASE 1: MAPA DEL DOMINIO
+    - Define el perímetro. Ignora blogs SEO, marketing claims y evidencia débil.
+    
+    FASE 2: CLASIFICACIÓN DE FAUNA TEXTUAL
+    - Clasifica las fuentes: fundacional, implementación, benchmark, crítica.
+    - Si una afirmación aparece en marketing pero no en papers/repos/docs, bájala de prioridad.
+    
+    FASE 3: GRAFO DE CONTRADICCIONES (DETECTOR DE DELIRIO ESTADÍSTICO)
+    - ¿Qué afirmación aparece con más soporte cruzado?
+    - ¿Qué afirmación parece inflada o dependiente de benchmarks dudosos?
+    - Si hay conflicto entre fuentes, explícitalo. Si algo es incierto, dilo.
+    
+    FASE 4: SÍNTESIS COMPILER (DECISIÓN ACCIONABLE)
+    - Claims fuertes vs Evidence strength.
+    - Puntos de consenso vs Puntos disputados.
+    - Riesgos de sobreinterpretación.
+    - Recomendación operativa / Arquitectura ejecutable.
+    
+    Si el corpus es débil, devuelve un VACÍO HONESTO en lugar de una síntesis elegante pero falsa.
+    \"\"\"
 
     def __init__(self, tenant_id: str):
         self.tenant_id = tenant_id
@@ -19,7 +47,7 @@ class DeepResearchOracle:
         """
         Executes the 4-phase Epistemic Audit Pipeline.
         """
-        logger.info(f"[{self.tenant_id}] Initiating Deep Research Oracle Pipeline")
+        logger.info(f"[{self.tenant_id}] Initiating Deep Research Oracle Pipeline with Brutalist Prompt")
         
         # Phase 1: Scope Kill
         perimeters = await self._scope_kill(query)
@@ -70,9 +98,10 @@ class DeepResearchOracle:
         Outputs decisions, tradeoffs, risks, evidence gaps, and production readiness.
         """
         return {
-            "recommended_decision": "AWAITING_MASTER_PROMPT",
+            "recommended_decision": "EXECUTABLE_ARCHITECTURE_SYNTHESIS",
             "tradeoffs": [],
             "risks": [],
             "evidence_gaps": [],
-            "production_ready": False
+            "production_ready": False,
+            "applied_prompt": self.MASTER_PROMPT_BRUTALISTA
         }
