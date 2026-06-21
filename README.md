@@ -10,7 +10,8 @@
 <h1 align="center">█ CORTEX-PERSIST</h1>
 <p align="center">
   <strong>Cortex Persist is to AI agents what Git was to code.</strong><br>
-  <em>The AI Trust Infrastructure that turns probabilistic LLM output into cryptographically verifiable, tamper-evident decision lineages.</em>
+  <em>The AI Trust Infrastructure that turns probabilistic LLM output into cryptographically verifiable, tamper-evident decision lineages.</em><br>
+  <em>The infrastructure to optimize for correction, not certainty.</em>
 </p>
 
 <p align="center">
@@ -97,7 +98,7 @@ Multi-tenant isolation and strict RBAC. Agents and pipelines operate within stri
 
 ### 2. Change Risk Engine (`EntropyCore` & Epistemic Dependency Graph)
 Analyzes code churn, diff size, and structural logic changes to compute an `EntropyScore`. High scores indicate probabilistic drift.
-**Under the hood:** CORTEX compiles the codebase into an **Epistemic Dependency Graph (EDG)**. When a PR is submitted, it executes an *Epistemic Invalidation Propagation*. If an AI modifies a foundational node (e.g. Auth Logic), any dependent nodes are challenged, and the PR is flagged for massive blast radius.
+**Under the hood:** CORTEX compiles the codebase into an **Epistemic Dependency Graph (EDG V6)**. When a PR is submitted, it executes an *Epistemic Invalidation Propagation*. If an AI modifies a foundational node (e.g. Auth Logic), any dependent nodes are challenged; it computes the blast radius and prunes the network, saving the infrastructure.
 
 ### 3. Policy Gateway (`CodeGovernanceGateway`)
 The enforcement boundary. It intercepts pipeline execution (via CLI or SDK), reads the risk score and EDG propagation tree, and natively blocks or approves changes based on configured enterprise policies.
@@ -163,9 +164,9 @@ pip install "cortex-persist[secure]"          # OS keyring credentials vault
 
 ```yaml
 AESTHETIC:    INDUSTRIAL NOIR 2026 (#0A0A0A / #2B3BE5)
-EPISTEMOLOGY: C5-REAL — Verified Infrastructure
-CORE TENET:   Generative output is conjecture. Deterministic policy is absolute.
-UPDATED:      June 2026 — CI/CD Governance Layer
+EPISTEMOLOGY: C5-REAL EDG V6 — Error Navigation System
+CORE TENET:   Optimize for correction, not certainty. Uncertainty is telemetry, not weakness.
+UPDATED:      June 2026 — Falsifiable Memory Infrastructure
 ```
 
 > **LICENSE:** Apache-2.0 | **OPERATOR:** borjamoskv | [cortexpersist.org](https://cortexpersist.org) | [Sponsor](https://github.com/sponsors/borjamoskv)
