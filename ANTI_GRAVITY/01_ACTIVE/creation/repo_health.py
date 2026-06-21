@@ -28,10 +28,13 @@ from skills.registry import register
 from schema.event_v1 import EventV1
 
 # Re-use existing repo_health logic (no duplication)
-# The original script is in `scripts/`
-scripts_dir = Path(__file__).resolve().parent.parent / "scripts"
-if str(scripts_dir) not in sys.path:
-    sys.path.insert(0, str(scripts_dir))
+# The original script has been relocated to `ANTI_GRAVITY/01_ACTIVE/memory/`
+memory_dir = Path(__file__).resolve().parents[1] / "memory"
+unknown_dir = Path(__file__).resolve().parents[1] / "unknown"
+if str(memory_dir) not in sys.path:
+    sys.path.insert(0, str(memory_dir))
+if str(unknown_dir) not in sys.path:
+    sys.path.insert(0, str(unknown_dir))
 
 try:
     import repo_health_changed as _rh_module

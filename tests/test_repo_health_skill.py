@@ -2,6 +2,9 @@
 
 import json
 from dataclasses import asdict
+import pytest
+
+pytestmark = pytest.mark.timeout(120)
 
 from schema.event_v1 import EventV1
 from skills.registry import list_skills, resolve

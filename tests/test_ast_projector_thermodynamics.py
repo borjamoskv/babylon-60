@@ -17,7 +17,7 @@ def test_ast_projector_reduces_entropy_h_info_01():
                     for j in range(100):
                         row.append(i * j)
                         # más ruido
-                        print(f"Calculando {i} x {j}")
+                        pass
                     self.matrix.append(row)
                 return self.matrix
                 
@@ -30,12 +30,17 @@ def test_ast_projector_reduces_entropy_h_info_01():
                 a = 1
                 b = 2
                 c = 3
+                # extra noise to increase exergy reduction
+                d = 4
+                e = 5
+                f = 6
+                g = 7
                 # Simulando 100 líneas de código
                 for x in range(500):
                     a += b
                     b += c
                     c += a
-                return a + b + c
+                return a + b + c + d + e + f + g
                 
             async def sync_with_ledger(self, hash_val: str):
                 """Sincronización BFT."""

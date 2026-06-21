@@ -1,7 +1,10 @@
 from collections.abc import Callable
+import logging
 
 import jax
 import jax.numpy as jnp
+
+logger = logging.getLogger(__name__)
 
 # ==============================================================================
 # C5-REAL: AUTODIDACT VECTOR CALCULUS PRIMITIVES (GOAT-MATH 011-020)
@@ -131,7 +134,7 @@ def compute_fft(x: jnp.ndarray) -> jnp.ndarray:
 # EXECUTION & DIAGNOSTICS (C5-REAL VALIDATION)
 # ==============================================================================
 if __name__ == "__main__":
-    print(">> MOSKV-1 APEX: INITIALIZING C5-REAL VECTOR CALCULUS PRIMITIVES <<\n")
+    logger.info(">> MOSKV-1 APEX: INITIALIZING C5-REAL VECTOR CALCULUS PRIMITIVES <<\n")
 
     # [011, 013, 016, 018] Scalar Field f(x, y) = x^2 + 3y^2 + xy
     def f_scalar(v: jnp.ndarray) -> float:
@@ -139,28 +142,28 @@ if __name__ == "__main__":
         return x**2 + 3.0*y**2 + x*y
     
     v0 = jnp.array([1.0, 2.0])
-    print(f"[011] Gradient of f at (1,2): {compute_gradient(f_scalar)(v0)}")
-    print(f"[013] Hessian of f at (1,2):\n{compute_hessian(f_scalar)(v0)}")
-    print(f"[016] Laplacian of f at (1,2): {compute_laplacian(f_scalar, v0)}")
+    logger.info(f"[011] Gradient of f at (1,2): {compute_gradient(f_scalar)(v0)}")
+    logger.info(f"[013] Hessian of f at (1,2):\n{compute_hessian(f_scalar)(v0)}")
+    logger.info(f"[016] Laplacian of f at (1,2): {compute_laplacian(f_scalar, v0)}")
     
     approx = taylor_approximation_2nd_order(f_scalar, jnp.array([1.0, 2.0]), jnp.array([1.1, 2.1]))
     actual = f_scalar(jnp.array([1.1, 2.1]))
-    print(f"[018] Taylor 2nd Order approx at (1.1, 2.1): {approx:.4f} (Actual: {actual:.4f})\n")
+    logger.info(f"[018] Taylor 2nd Order approx at (1.1, 2.1): {approx:.4f} (Actual: {actual:.4f})\n")
 
     # [012] Vector Field f(x, y) = [x^2y, 5x + sin(y)]
     def f_vector(v: jnp.ndarray) -> jnp.ndarray:
         x, y = v[0], v[1]
         return jnp.array([x**2 * y, 5.0*x + jnp.sin(y)])
 
-    print(f"[012] Jacobian of vector field at (1,0):\n{compute_jacobian(f_vector)(jnp.array([1.0, 0.0]))}\n")
+    logger.info(f"[012] Jacobian of vector field at (1,0):\n{compute_jacobian(f_vector)(jnp.array([1.0, 0.0]))}\n")
 
     # [015, 017] Directional Derivative & JVP
     direction = jnp.array([1.0, 1.0])
     dir_deriv = directional_derivative(f_scalar, v0, direction)
-    print(f"[015] Directional Deriv of f at (1,2) in dir (1,1): {dir_deriv:.4f}")
+    logger.info(f"[015] Directional Deriv of f at (1,2) in dir (1,1): {dir_deriv:.4f}")
     
     val, jvp_val = auto_diff_jvp(f_vector, jnp.array([1.0, 0.0]), jnp.array([1.0, 1.0]))
-    print(f"[017] JVP of vector field at (1,0) along (1,1): {jvp_val}\n")
+    logger.info(f"[017] JVP of vector field at (1,0) along (1,1): {jvp_val}\n")
 
     # [019] Line Integral
     # Field F(x, y) = [y, x]. Curve r(t) = [cos(t), sin(t)] from 0 to pi.
@@ -170,11 +173,11 @@ if __name__ == "__main__":
         return jnp.array([jnp.cos(t), jnp.sin(t)])
     
     line_int = line_integral(F_field, r_curve, 0.0, jnp.pi)
-    print(f"[019] Line integral of F=[y,x] along semi-circle: {line_int:.5f}\n")
+    logger.info(f"[019] Line integral of F=[y,x] along semi-circle: {line_int:.5f}\n")
 
     # [020] FFT
     signal = jnp.array([1.0, 0.0, -1.0, 0.0])
     fft_res = compute_fft(signal)
-    print(f"[020] FFT of [1, 0, -1, 0]: {fft_res}")
+    logger.info(f"[020] FFT of [1, 0, -1, 0]: {fft_res}")
 
-    print("\n>> C5-REAL DIAGNOSTICS COMPLETE: VECTOR PRIMITIVES INSTANTIATED. <<")
+    logger.info("\n>> C5-REAL DIAGNOSTICS COMPLETE: VECTOR PRIMITIVES INSTANTIATED. <<")

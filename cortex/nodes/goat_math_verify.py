@@ -8,9 +8,10 @@ de primitivas matemáticas en PyTorch/SciPy.
 ═══════════════════════════════════════════════════════════════
 """
 
-import sqlite3
 import sys
 from pathlib import Path
+
+from cortex.database.core import connect as db_connect
 
 
 def verify_dag_integrity(db_path: str = "../../cortex.db"):
@@ -23,7 +24,7 @@ def verify_dag_integrity(db_path: str = "../../cortex.db"):
         print(f"❌ ERROR: No se encuentra la base de datos en {db_file.resolve()}")
         return False
 
-    conn = sqlite3.connect(str(db_file))
+    conn = db_connect(str(db_file))
     
     # Check nodes
     try:

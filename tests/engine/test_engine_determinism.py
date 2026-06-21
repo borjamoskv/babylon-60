@@ -72,18 +72,38 @@ import ast as _ast
 
 
 def _find_bare_prints_in_file(filepath: Path) -> list[int]:
-    """Return line numbers of bare print() calls in *filepath*."""
+    """Return line numbers of bare print() calls in *filepath*, ignoring __main__ blocks."""
     try:
         source = filepath.read_text(encoding="utf-8")
         tree = _ast.parse(source, filename=str(filepath))
     except SyntaxError:
         return []
     violations: list[int] = []
-    for node in _ast.walk(tree):
-        if isinstance(node, _ast.Expr) and isinstance(node.value, _ast.Call):
-            func = node.value.func
-            if isinstance(func, _ast.Name) and func.id == "print":
-                violations.append(node.lineno)
+
+    def is_main_block(node) -> bool:
+        if isinstance(node, _ast.If):
+            if isinstance(node.test, _ast.Compare):
+                left = node.test.left
+                if isinstance(left, _ast.Name) and left.id == "__name__":
+                    for comparator in node.test.comparators:
+                        if (isinstance(comparator, _ast.Constant) and comparator.value == "__main__") or (isinstance(comparator, _ast.Constant) and comparator.value == "__main__"):
+                            return True
+        return False
+
+    def visit(node, in_main=False):
+        if is_main_block(node):
+            in_main = True
+        
+        if not in_main:
+            if isinstance(node, _ast.Expr) and isinstance(node.value, _ast.Call):
+                func = node.value.func
+                if isinstance(func, _ast.Name) and func.id == "print":
+                    violations.append(node.lineno)
+                    
+        for child in _ast.iter_child_nodes(node):
+            visit(child, in_main)
+            
+    visit(tree)
     return violations
 
 

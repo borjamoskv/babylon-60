@@ -1,7 +1,10 @@
 from collections.abc import Callable
+import logging
 
 import jax
 import jax.numpy as jnp
+
+logger = logging.getLogger(__name__)
 
 # ==============================================================================
 # C5-REAL: AUTODIDACT CALCULUS PRIMITIVES
@@ -105,7 +108,7 @@ def compute_series(f: Callable[[jnp.ndarray], jnp.ndarray], n_terms: int) -> jnp
 # EXECUTION & DIAGNOSTICS (C5-REAL VALIDATION)
 # ==============================================================================
 if __name__ == "__main__":
-    print(">> MOSKV-1 APEX: INITIALIZING C5-REAL CALCULUS PRIMITIVES <<\n")
+    logger.info(">> MOSKV-1 APEX: INITIALIZING C5-REAL CALCULUS PRIMITIVES <<\n")
 
     # Define a test function: f(x) = x^2
     def f_x2(x):
@@ -115,17 +118,17 @@ if __name__ == "__main__":
     x_val = 3.0
     lim_l, lim_r = compute_limit(f_x2, x_val)
     is_cont = check_continuity(f_x2, x_val)
-    print(f"[1,2] Limit of x^2 at x={x_val}: Left={lim_l:.5f}, Right={lim_r:.5f}")
-    print(f"      Continuous at x={x_val}? {is_cont}\n")
+    logger.info(f"[1,2] Limit of x^2 at x={x_val}: Left={lim_l:.5f}, Right={lim_r:.5f}")
+    logger.info(f"      Continuous at x={x_val}? {is_cont}\n")
 
     # 3, 4, 5: Derivative, Rate of Change, Slope
     slope = rate_of_change(f_x2, x_val)
-    print(f"[3,4,5] Derivative (Slope/Rate of change) of x^2 at x={x_val}: {slope:.5f} (Expected: 6.0)\n")
+    logger.info(f"[3,4,5] Derivative (Slope/Rate of change) of x^2 at x={x_val}: {slope:.5f} (Expected: 6.0)\n")
 
     # 6: Definite Integral
     # Integral of x^2 from 0 to 3 should be 3^3/3 = 9
     area = definite_integral(f_x2, 0.0, 3.0)
-    print(f"[6] Definite Integral of x^2 from 0 to 3: {area:.5f} (Expected: ~9.0)\n")
+    logger.info(f"[6] Definite Integral of x^2 from 0 to 3: {area:.5f} (Expected: ~9.0)\n")
 
     # 8 & 9: Sequence & Series
     # Let's use the sequence 1/n^2 (Basel problem converges to pi^2/6 ~ 1.64493)
@@ -135,7 +138,7 @@ if __name__ == "__main__":
     seq = generate_sequence(f_basel, 5)
     series_sum = compute_series(f_basel, 10000)[-1]
     
-    print(f"[8] Sequence (first 5 terms of 1/n^2): {seq}")
-    print(f"[9] Series (Sum of 10000 terms of 1/n^2): {series_sum:.5f} (Expected: ~1.64493)\n")
+    logger.info(f"[8] Sequence (first 5 terms of 1/n^2): {seq}")
+    logger.info(f"[9] Series (Sum of 10000 terms of 1/n^2): {series_sum:.5f} (Expected: ~1.64493)\n")
 
-    print(">> C5-REAL DIAGNOSTICS COMPLETE: ZERO ANERGIA. <<")
+    logger.info(">> C5-REAL DIAGNOSTICS COMPLETE: ZERO ANERGIA. <<")

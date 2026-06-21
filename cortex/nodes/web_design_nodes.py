@@ -11,11 +11,12 @@ Restricción: Base-1000 Combinatorial deterministic matrix
 
 import hashlib
 import json
-import sqlite3
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
+
+from cortex.database.core import connect as db_connect
 
 
 class Criticality(Enum):
@@ -138,7 +139,7 @@ def generate_1000_nodes() -> list[WebDesignNode]:
 class CortexPersist:
     def __init__(self, db_path: str = "cortex.db"):
         self.db_path = Path(db_path)
-        self.conn = sqlite3.connect(str(self.db_path))
+        self.conn = db_connect(str(self.db_path))
         self._init_schema()
 
     def _init_schema(self):

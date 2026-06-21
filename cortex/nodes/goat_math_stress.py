@@ -10,20 +10,17 @@ Prueba inyección y mutación concurrente masiva usando WAL mode.
 
 import concurrent.futures
 import random
-import sqlite3
 import time
 from pathlib import Path
+
+from cortex.database.core import connect as db_connect
 
 DB_PATH = Path("cortex.db")
 
 def worker_task(worker_id: int, iterations: int):
     """Simula validaciones concurrentes agresivas."""
     # R10: Factor de conexión rígido con busy_timeout de 5000ms
-    conn = sqlite3.connect(str(DB_PATH), timeout=5.0)
-    
-    # R10: Modo WAL activo
-    conn.execute("PRAGMA journal_mode=WAL")
-    conn.execute("PRAGMA synchronous=NORMAL")
+    conn = db_connect(str(DB_PATH), timeout=5)
     
     successes = 0
     failures = 0

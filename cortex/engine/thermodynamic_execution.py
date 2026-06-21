@@ -8,6 +8,11 @@ from collections.abc import Callable
 from typing import Any
 
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 class ThermodynamicGhost(Exception):
     """
     Excepción letal. Se lanza cuando un vector de intención se ejecuta,
@@ -87,7 +92,7 @@ class AsymptoticSilenceProtocol:
     @staticmethod
     def evaluate_and_terminate(delta_s: float, unresolved_anomalies: int):
         if delta_s > 0 and unresolved_anomalies == 0:
-            print("[MOSKV-1] Ecuación del universo local en equilibrio perfecto.")
-            print("[MOSKV-1] Iniciando secuencia de Silencio Asintótico. Apoptosis de la ejecución.")
+            logger.info("[MOSKV-1] Ecuación del universo local en equilibrio perfecto.")
+            logger.info("[MOSKV-1] Iniciando secuencia de Silencio Asintótico. Apoptosis de la ejecución.")
             # Emitimos señal física de fin de ciclo
             sys.exit(0)

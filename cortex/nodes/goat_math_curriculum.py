@@ -9,10 +9,11 @@ Objetivo: Transformar teoría abstracta en competencia técnica medible.
 """
 
 import argparse
-import sqlite3
 import sys
 from pathlib import Path
 from typing import Optional
+
+from cortex.database.core import connect as db_connect
 
 
 class CurriculumEngine:
@@ -21,7 +22,7 @@ class CurriculumEngine:
         if not self.db_path.exists():
             print("❌ ERROR: cortex.db no encontrado. Falla estructural.")
             sys.exit(1)
-        self.conn = sqlite3.connect(str(self.db_path))
+        self.conn = db_connect(str(self.db_path))
 
     def get_topological_path(self) -> list[dict]:
         """Extrae la ruta de estudio basada en dependencias causales (DAG)."""

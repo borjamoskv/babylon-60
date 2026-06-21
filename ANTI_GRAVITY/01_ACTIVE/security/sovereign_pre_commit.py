@@ -9,8 +9,23 @@ import sys
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+
+# Find repo root containing .git directory
+REPO_ROOT = None
+for parent in Path(__file__).resolve().parents:
+    if (parent / ".git").exists():
+        REPO_ROOT = parent
+        break
+if REPO_ROOT is None:
+    # fallback to assuming it is scripts/..
+    REPO_ROOT = SCRIPT_DIR.parent if SCRIPT_DIR.name == "scripts" else SCRIPT_DIR.parent.parent.parent
+
+UNKNOWN_DIR = REPO_ROOT / "ANTI_GRAVITY" / "01_ACTIVE" / "unknown"
+
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
+if str(UNKNOWN_DIR) not in sys.path:
+    sys.path.insert(0, str(UNKNOWN_DIR))
 
 from _changed_files import changed_files, run_git
 

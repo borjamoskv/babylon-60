@@ -1,8 +1,11 @@
 from typing import Any
+import logging
 
 import sympy
 from sympy.logic.boolalg import And, Boolean, Implies, Not, Or
 from sympy.logic.inference import satisfiable
+
+logger = logging.getLogger(__name__)
 
 # ==============================================================================
 # C5-REAL: AUTODIDACT LOGIC & FOUNDATIONS PRIMITIVES
@@ -128,29 +131,29 @@ def formal_proof(axioms: list[Boolean], theorem: Boolean) -> bool:
 # EXECUTION & DIAGNOSTICS (C5-REAL VALIDATION)
 # ==============================================================================
 if __name__ == "__main__":
-    print(">> MOSKV-1 APEX: INITIALIZING C5-REAL LOGIC & FOUNDATION PRIMITIVES <<\n")
+    logger.info(">> MOSKV-1 APEX: INITIALIZING C5-REAL LOGIC & FOUNDATION PRIMITIVES <<\n")
 
     # --- SET THEORY VALIDATION ---
-    print("--- 1. SET THEORY ---")
+    logger.info("--- 1. SET THEORY ---")
     A = create_set((1, 2, 3))
     B = create_set((3, 4, 5))
     E = empty_set()
     
-    print(f"[1] Conjunto A: {set(A)}")
-    print(f"[2] Elemento (¿2 ∈ A?): {is_element(2, A)}")
-    print(f"[3] Unión (A ∪ B): {set(compute_union(A, B))}")
-    print(f"[4] Intersección (A ∩ B): {set(compute_intersection(A, B))}")
-    print(f"[5] Subconjunto (¿{{1,2}} ⊆ A?): {is_subset(create_set((1,2)), A)}")
-    print(f"[6] Conjunto vacío (∅): {set(E)} (¿∅ ⊆ A? {is_subset(E, A)})\n")
+    logger.info(f"[1] Conjunto A: {set(A)}")
+    logger.info(f"[2] Elemento (¿2 ∈ A?): {is_element(2, A)}")
+    logger.info(f"[3] Unión (A ∪ B): {set(compute_union(A, B))}")
+    logger.info(f"[4] Intersección (A ∩ B): {set(compute_intersection(A, B))}")
+    logger.info(f"[5] Subconjunto (¿{{1,2}} ⊆ A?): {is_subset(create_set((1,2)), A)}")
+    logger.info(f"[6] Conjunto vacío (∅): {set(E)} (¿∅ ⊆ A? {is_subset(E, A)})\n")
 
     # --- PROPOSITIONAL LOGIC VALIDATION ---
-    print("--- 2. PROPOSITIONAL LOGIC & EPISTEMOLOGY ---")
+    logger.info("--- 2. PROPOSITIONAL LOGIC & EPISTEMOLOGY ---")
     
     P = PropositionalLogic.symbol('P')
     Q = PropositionalLogic.symbol('Q')
     
     # Modus Ponens Simulation
-    print("[7] Lógica Proposicional: Símbolos P, Q")
+    logger.info("[7] Lógica Proposicional: Símbolos P, Q")
     
     # Axioms
     ax1 = define_axiom(P)                    # Axiom 1: P is True
@@ -162,14 +165,14 @@ if __name__ == "__main__":
     # Proof
     is_proven = formal_proof([ax1, ax2], thm)
     
-    print(f"[8] Axiomas: A1: {ax1}, A2: {ax2}")
-    print(f"[9] Teorema: {thm}")
-    print(f"[10] Demostración (¿A1 ∧ A2 => Teorema?): {'VÁLIDA (C5-REAL)' if is_proven else 'INVÁLIDA'}\n")
+    logger.info(f"[8] Axiomas: A1: {ax1}, A2: {ax2}")
+    logger.info(f"[9] Teorema: {thm}")
+    logger.info(f"[10] Demostración (¿A1 ∧ A2 => Teorema?): {'VÁLIDA (C5-REAL)' if is_proven else 'INVÁLIDA'}\n")
 
     # Modus Tollens Simulation
     ax3 = define_axiom(Not(Q))
     thm2 = define_theorem(Not(P))
     is_proven2 = formal_proof([ax2, ax3], thm2)
-    print(f"Demostración Modus Tollens (¿(P=>Q) ∧ ~Q => ~P?): {'VÁLIDA (C5-REAL)' if is_proven2 else 'INVÁLIDA'}\n")
+    logger.info(f"Demostración Modus Tollens (¿(P=>Q) ∧ ~Q => ~P?): {'VÁLIDA (C5-REAL)' if is_proven2 else 'INVÁLIDA'}\n")
 
-    print(">> C5-REAL DIAGNOSTICS COMPLETE: ZERO ANERGIA. <<")
+    logger.info(">> C5-REAL DIAGNOSTICS COMPLETE: ZERO ANERGIA. <<")
