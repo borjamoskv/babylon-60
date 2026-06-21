@@ -78,13 +78,7 @@ pub fn replay_state(graph: &RetrievalGraph, events: &[LedgerEvent]) -> Result<()
                 }
 
                 if let Some(status_str) = event.metadata.get("status").and_then(|v| v.as_str()) {
-                    let status = match status_str {
-                        "Accepted" => ValidationStatus::Accepted,
-                        "Challenged" => ValidationStatus::Challenged,
-                        "Deprecated" => ValidationStatus::Deprecated,
-                        "Invalid" => ValidationStatus::Invalid,
-                        _ => return Err(format!("Unknown ValidationStatus: {}", status_str)),
-                    };
+                    let status = ValidationStatus::from_legacy(status_str);
                     if let Some(mut node) = graph.nodes.get_mut(node_id) {
                         node.status = status;
                     }
