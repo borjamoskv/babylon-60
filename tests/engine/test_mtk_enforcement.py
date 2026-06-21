@@ -4,6 +4,9 @@ MTK Physical Enforcement Test.
 Validates that the MTK acts as an absolute physical boundary against state mutation.
 """
 
+import os
+os.environ["CORTEX_FORCE_MTK_TESTS"] = "1"
+
 import sqlite3
 import pytest
 import datetime
