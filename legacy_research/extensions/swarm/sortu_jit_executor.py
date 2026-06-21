@@ -6,7 +6,7 @@ import time
 from typing import Any
 
 logger = logging.getLogger("cortex.autodidact.sandbox")
-logging.basicConfig(level=logging.INFO)
+setup_cortex_logging()
 
 
 class SecurityViolationException(Exception):

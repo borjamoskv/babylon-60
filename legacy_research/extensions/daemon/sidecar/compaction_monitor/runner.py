@@ -36,7 +36,7 @@ from .memory_wrapper import get_mallinfo2, malloc_trim
 from .monitor import MemoryPressureMonitor
 
 LOGGER = logging.getLogger("compaction_sidecar")
-logging.basicConfig(level=logging.INFO)
+setup_cortex_logging()
 
 
 async def compaction_job(ctx: Any = None) -> None:

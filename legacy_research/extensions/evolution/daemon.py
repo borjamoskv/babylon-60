@@ -20,11 +20,7 @@ import sys
 
 from cortex.extensions.evolution.engine import EvolutionEngine
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
-    datefmt="%H:%M:%S",
-)
+setup_cortex_logging()
 logger = logging.getLogger(__name__)
 
 

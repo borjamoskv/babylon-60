@@ -33,10 +33,9 @@ MIN_EXERGY_THRESHOLD = 0.125  # 3 half-lives → tombstone
 WARM_THRESHOLD = 0.50  # 1 half-life  → HOT → WARM
 COLD_THRESHOLD = 0.25  # 2 half-lives → WARM → COLD
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-)
+from cortex.observability.jsonl_logger import setup_cortex_logging
+
+setup_cortex_logging()
 logger = logging.getLogger("ouroboros_prune")
 
 

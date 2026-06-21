@@ -429,5 +429,5 @@ def run_resilient_gateway(
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    setup_cortex_logging()
     run_resilient_gateway()

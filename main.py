@@ -3,7 +3,7 @@ from pydantic import BaseModel
 import uvicorn
 import logging
 
-logging.basicConfig(level=logging.INFO)
+setup_cortex_logging()
 logger = logging.getLogger(__name__)
 
 app = FastAPI(

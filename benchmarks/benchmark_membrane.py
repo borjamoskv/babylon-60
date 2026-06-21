@@ -12,7 +12,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from cortex.memory.epistemic_membrane import EpistemicMembrane
 
 # Configure logging to write to stdout
-logging.basicConfig(level=logging.INFO, format="%(message)s")
+setup_cortex_logging()
 
 
 def run_stress_test():

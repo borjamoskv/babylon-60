@@ -24,7 +24,7 @@ import time
 from cortex.compat.optional import np
 from cortex.swarm.tensor_glial import TensorGlialLegion
 
-logging.basicConfig(level=logging.INFO)
+setup_cortex_logging()
 logger = logging.getLogger("cortex.swarm.staged_legion")
 
 MMAP_FILE = "staged_wave.vsa_mmap"

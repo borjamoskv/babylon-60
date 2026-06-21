@@ -14,9 +14,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, Messa
 from cortex.cli.common import get_engine
 
 # Configure logging (C5-REAL Zero Noise)
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-)
+setup_cortex_logging()
 logger = logging.getLogger("Antigravity-Telegram")
 
 # Identity Hygiene: ONLY allow specific Telegram User IDs

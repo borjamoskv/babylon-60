@@ -336,9 +336,9 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.debug:
-        logging.basicConfig(level=logging.DEBUG)
+        setup_cortex_logging()
     else:
-        logging.basicConfig(level=logging.INFO, format="%(name)s | %(message)s")
+        setup_cortex_logging()
 
     from dotenv import load_dotenv
 

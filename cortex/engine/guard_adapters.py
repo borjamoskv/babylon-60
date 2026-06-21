@@ -317,14 +317,21 @@ class EFTCryptographerGuard:
 
     async def verify(self, content: str, project: str, fact_type: str, meta: dict[str, Any]) -> None:
         provenance = meta.get("provenance")
-        if fact_type == "code" and not provenance:
-            raise ValueError(
-                "[EFT-Cryptographer] Critical KnowledgeObject (code) lacks 'provenance'."
-            )
-        if provenance and not (provenance.startswith("taint:") or provenance.startswith("sig:") or len(provenance) > 10):
-            raise ValueError(
-                "[EFT-Cryptographer] Provenance format is invalid."
-            )
+        if fact_type == "code":
+            if not provenance:
+                raise ValueError(
+                    "[EFT-Cryptographer] Critical KnowledgeObject (code) lacks 'provenance'."
+                )
+            if not (provenance.startswith("ast_sha3_256:") or provenance.startswith("raw_sha3_256:")):
+                raise ValueError(
+                    "[EFT-Cryptographer] Code provenance must be a deterministic AST signature (ast_sha3_256: or raw_sha3_256:)."
+                )
+        
+        if provenance and fact_type != "code":
+            if not (provenance.startswith("taint:") or provenance.startswith("sig:") or len(provenance) > 10):
+                raise ValueError(
+                    "[EFT-Cryptographer] Provenance format is invalid."
+                )
 
 
 class EFTVerificationGuardAdapter:

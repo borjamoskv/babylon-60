@@ -6,7 +6,7 @@ from pathlib import Path
 from cortex.services.email import send_reengagement_email
 
 # Configuración de Logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+setup_cortex_logging()
 logger = logging.getLogger("CausalScheduler")
 
 CORTEX_DB_PATH = Path("/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex_data.db")
