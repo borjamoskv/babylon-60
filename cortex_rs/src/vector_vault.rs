@@ -3,7 +3,7 @@ use aes_gcm::{
     Aes256Gcm, Nonce,
 };
 use anyhow::Result;
-use rand::{SeedableRng, Rng, RngExt};
+use rand::{SeedableRng, RngExt};
 use rand::rngs::StdRng;
 
 pub struct VectorVault {
@@ -147,7 +147,7 @@ fn generate_orthogonal_matrix(key: &[u8; 32], dim: usize) -> Vec<f32> {
     let mut rng = StdRng::from_seed(*key);
     
     // Box-Muller transform helper to sample standard normal distribution in f64
-    let mut standard_normal = |rng: &mut StdRng| -> f64 {
+    let standard_normal = |rng: &mut StdRng| -> f64 {
         let u1: f64 = rng.random();
         let u2: f64 = rng.random();
         let ln_u1: f64 = u1.ln();

@@ -78,7 +78,7 @@ pub fn ingest_reality_claim(
 }
 
 #[pyfunction]
-pub fn validate_exergy_mutation(mutation_json: &str) -> PyResult<()> {
+pub fn validate_exergy_mutation(mutation_json: &str, valid_nodes: Vec<String>) -> PyResult<()> {
     let mutation: ExergyMutation = serde_json::from_str(mutation_json)
         .map_err(|e| PyValueError::new_err(format!("Invalid mutation JSON: {}", e)))?;
     
@@ -91,7 +91,7 @@ pub fn validate_exergy_mutation(mutation_json: &str) -> PyResult<()> {
         max_delta_per_epoch: 100.0,
     };
     
-    guard.validate(&mutation)
+    guard.validate(&mutation, &valid_nodes)
         .map_err(|e| PyValueError::new_err(e.to_string()))
 }
 
