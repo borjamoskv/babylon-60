@@ -38,6 +38,10 @@ class ASTProjector(ast.NodeTransformer):
         return node
 
 def project_ast(source_code, target_nodes):
+    from cortex.engine.ast_validator import enforce_strict_types
+    # [C5-REAL] Strict structural invariant validation before projection
+    enforce_strict_types(source_code, filename="<ast_projector>")
+    
     tree = ast.parse(source_code)
     projector = ASTProjector(target_nodes)
     projected_tree = projector.visit(tree)
