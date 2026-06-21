@@ -26,7 +26,13 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
         sqlite3.SQLITE_DELETE,
         sqlite3.SQLITE_DROP_TABLE,
         sqlite3.SQLITE_DROP_INDEX,
+        sqlite3.SQLITE_DROP_VIEW,
+        sqlite3.SQLITE_DROP_TRIGGER,
         sqlite3.SQLITE_ALTER_TABLE,
+        sqlite3.SQLITE_CREATE_TABLE,
+        sqlite3.SQLITE_CREATE_INDEX,
+        sqlite3.SQLITE_CREATE_VIEW,
+        sqlite3.SQLITE_CREATE_TRIGGER,
     }
     
     if action in MUTATION_ACTIONS:
