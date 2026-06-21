@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS facts (
     tx_id           BIGINT REFERENCES transactions(id),
     is_tombstoned   BOOLEAN NOT NULL DEFAULT FALSE,
     tombstoned_at   TIMESTAMPTZ,
-    epistemic_status TEXT NOT NULL DEFAULT 'staging',
+    validation_state TEXT NOT NULL DEFAULT 'staging',
     embedding       vector(384)
 );
 """
