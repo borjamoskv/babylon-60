@@ -45,9 +45,7 @@ pub fn compute_merkle_root(batch_id: &str, event_hashes: &[String]) -> MerkleRoo
     }
 }
 
-pub fn verify_event<T>(event: &T, prev: Option<&T>) -> Result<bool, String> {
-    Ok(true)
-}
+
 
 /// Computes the cryptographic SHA-256 hash of a LedgerEvent.
 /// The `hash` field itself is cleared during serialization to ensure
