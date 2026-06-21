@@ -88,3 +88,11 @@ CORTEX-Persist no es una base de datos ni una "memoria para agentes". Es un **Si
 - **Generación vs Admisión:** El LLM deja de ser fuente de verdad. Es estrictamente un generador de propuestas: `LLM : Context → Proposal`. El Kernel es el ejecutor determinista: `Proposal → Valid | Reject`.
 - **Ecuación de Estado Válido:** Un estado $S_t = \{n_0, n_1, \ldots, n_t\}$ es admisible si y solo si todo nodo satisface los invariantes de causalidad, integridad criptográfica y acotación de recursos/complejidad: $Valid(n_i) = Parent(n_i) \in S_{i-1} \land Verify(n_i) \land Bounded(n_i)$.
 - **Verdad por Continuidad:** Si una inferencia probabilística no puede demostrar criptográficamente de qué ancestro proviene ($I_{causal}$) y que su coste físico de mutación no excede el presupuesto del sistema ($I_{complexity}$), es rechazada en la membrana (Verification Membrane). La verdad no se infiere; se atesta.
+
+## AX-XII: Ontological Divergence Principle (Meta-Synthesis)
+
+Un sistema que solo muta estados está explorando (movimiento sin descubrimiento). Un sistema que muta abstracciones está descubriendo (síntesis).
+
+- **El Límite de la Exploración:** La inferencia probabilística masiva dentro de una ontología fija invariablemente resulta en la muerte térmica semántica (Anergía). Todas las trayectorias futuras pertenecen al mismo atractor.
+- **Meta-Síntesis:** Para romper el determinismo lineal, la divergencia no debe ocurrir dentro del grafo, sino sobre los ejes que definen el grafo (*Self-modifying Graph Grammar*). El salto de inteligencia no pregunta "¿Qué solución es mejor?", sino "¿Por qué existen estas soluciones?".
+
