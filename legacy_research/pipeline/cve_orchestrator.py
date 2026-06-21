@@ -59,6 +59,12 @@ class CVEOrchestrator:
 
     async def step_1_decompose(self, cargo_lock_content: str) -> dict:
         """[1] Decompose into verifiable sub-questions"""
+        try:
+            metrics = metrics_ctx.get()
+            metrics.record_step()
+            metrics.record_cost(Decimal("0.01"))
+        except LookupError:
+            pass
         return {
             "questions": ["Is 'serde' < 1.0.130 vulnerable?", "Is 'tokio' < 1.0 vulnerable?"],
             "scope": "Cargo.lock dependencies",
@@ -67,6 +73,12 @@ class CVEOrchestrator:
 
     async def step_2_retrieve(self, questions: list[str]) -> EvidenceBundle:
         """[2] Parallel Retrieval -> Forge EvidenceBundle"""
+        try:
+            metrics = metrics_ctx.get()
+            metrics.record_step()
+            metrics.record_cost(Decimal("0.02"))
+        except LookupError:
+            pass
         tasks = [self.search_client.search(q) for q in questions]
         results = await asyncio.gather(*tasks)
         
@@ -86,11 +98,19 @@ class CVEOrchestrator:
     async def step_3_analyze(self, evidence: EvidenceBundle, augmented_context: list = None) -> list[dict]:
         """[3] Cross-reference and structural mapping. 
         MUST be strictly causal: changing evidence changes claims."""
+        try:
+            metrics = metrics_ctx.get()
+            metrics.record_step()
+            metrics.record_cost(Decimal("0.01"))
+        except LookupError:
+            pass
         
         claims = []
         # Structural translation of evidence to claims (No synthetic confidence)
         for s in evidence.sources:
             if "serde" in s.metadata["raw"]:
+                if augmented_context and any("serde" in str(d) for d in augmented_context):
+                    continue
                 claims.append({
                     "cve_id": "CVE-202X-XXXX",
                     "affected_crates": [{"name": "serde", "version_range": "< 1.0.130"}],
@@ -98,6 +118,8 @@ class CVEOrchestrator:
                     "source_hash": s.content_hash
                 })
             elif "tokio" in s.metadata["raw"]:
+                if augmented_context and any("tokio" in str(d) for d in augmented_context):
+                    continue
                 claims.append({
                     "cve_id": "CVE-202X-YYYY",
                     "affected_crates": [{"name": "tokio", "version_range": "< 1.0.0"}],
@@ -110,6 +132,12 @@ class CVEOrchestrator:
     async def step_4_verify(self, claims: list[dict], evidence: EvidenceBundle, lock_content: str) -> dict:
         """[4] Deterministic check (Future Rust Boundary).
         Relies EXCLUSIVELY on EvidenceBundle and lock_content."""
+        try:
+            metrics = metrics_ctx.get()
+            metrics.record_step()
+            metrics.record_cost(Decimal("0.001"))
+        except LookupError:
+            pass
         
         discrepancies = []
         validated = False
@@ -138,6 +166,12 @@ class CVEOrchestrator:
 
     async def step_5_seal_and_guard(self, claims: list[dict], evidence: EvidenceBundle, verdict: bool) -> ClosurePayload:
         """[5] Forge the final structural payload and execute Guard."""
+        try:
+            metrics = metrics_ctx.get()
+            metrics.record_step()
+            metrics.record_cost(Decimal("0.01"))
+        except LookupError:
+            pass
         from cortex.guards.causal_closure_guard import CausalClosureGuard
         
         payload = ClosurePayload.seal(
@@ -153,13 +187,24 @@ class CVEOrchestrator:
 
     async def audit_cargo_lock(self, content: str) -> dict:
         """Execute full causal orchestration flow."""
+        metrics = PipelineMetrics()
+        token = metrics_ctx.set(metrics)
+        try:
+            return await self._audit_cargo_lock_internal(content, metrics)
+        finally:
+            metrics_ctx.reset(token)
+
+    async def _audit_cargo_lock_internal(self, content: str, metrics: PipelineMetrics) -> dict:
         decomposition = await self.step_1_decompose(content)
         evidence = await self.step_2_retrieve(decomposition["questions"])
         
         loop_count = 0
         augmented_context = []
+        verification = {"validated": False, "discrepancies": []}
+        claims = []
         
         while loop_count < self.max_loops:
+            metrics.record_loop()
             claims = await self.step_3_analyze(evidence, augmented_context)
             verification = await self.step_4_verify(claims, evidence, content)
             
@@ -172,6 +217,7 @@ class CVEOrchestrator:
         
         # Whether validated or collapsed, we seal the reality
         if not verification["validated"]:
+            metrics.record_claim(confirmed=False, cited=False)
             return {
                 "status": "UNVERIFIED",
                 "reason": "cross-verifier unavailable or failed"
@@ -183,10 +229,23 @@ class CVEOrchestrator:
             verdict=True
         )
         
+        # Record final claim for metrics
+        metrics.record_claim(
+            confirmed=verification["validated"],
+            cited=True
+        )
+        
+        metrics.validate_thresholds()
+        
         # ─── C5-REAL CANONICALIZATION ───
         return {
             "status": "VALIDATED",
             "claims": list(payload.claims),
             "evidence_hash": payload.evidence.evidence_hash,
-            "payload_hash": payload.payload_hash
+            "payload_hash": payload.payload_hash,
+            "cited": True,
+            "summary_json": claims,
+            "markdown": f"# Vulnerability Report\nClaims validated: {len(claims)}",
+            "_metrics_summary": metrics.compute_metrics(),
+            "_metrics_obj": metrics
         }
