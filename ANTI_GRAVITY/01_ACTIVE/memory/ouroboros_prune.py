@@ -165,9 +165,13 @@ def execute_thermal_purge(
             columns = {r["name"] for r in cursor.fetchall()}
             meta_col = "metadata" if "metadata" in columns else ("meta" if "meta" in columns else None)
 
-            select_cols = "id, content, confidence, parent_id, created_at, decay_half_life, quadrant, storage_tier, exergy_score, access_count"
+            cols_to_select = ["id", "content", "confidence", "parent_id", "created_at", "decay_half_life", "quadrant", "storage_tier", "exergy_score"]
+            if "access_count" in columns:
+                cols_to_select.append("access_count")
             if meta_col:
-                select_cols += f", {meta_col}"
+                cols_to_select.append(meta_col)
+                
+            select_cols = ", ".join(cols_to_select)
 
             sql_find = f"""
                 SELECT {select_cols},
@@ -193,7 +197,7 @@ def execute_thermal_purge(
                     float(row["decay_half_life"]) if row["decay_half_life"] is not None else 30.0
                 )
                 current_tier = row["storage_tier"] or "HOT"
-                access_count = int(row["access_count"]) if "access_count" in row.keys() and row["access_count"] is not None else 0
+                access_count = int(row["access_count"]) if "access_count" in columns and row["access_count"] is not None else 0
 
                 origin_type = "agent_scratchpad"
                 locked_floor = 0.0

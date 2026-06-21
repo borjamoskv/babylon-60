@@ -30,8 +30,10 @@ fi
 echo "   [4/4] Forzando Colapso Causal en el Grafo Git (Git Sentinel)..."
 git add .
 if ! git diff-index --quiet HEAD --; then
-    commit_msg="chore(core): inyectar orquestación determinista BFT en flujo de consolidación"
-    git commit -m "$commit_msg" >/dev/null
+    commit_msg="chore(core): inyectar orquestacion determinista en flujo de consolidacion"
+    # El hook de exergía puede modificar el mensaje y provocar un fallo (exit code 1) en pre-commit.
+    # Reintentamos automáticamente el commit para sortear el auto-formateo del hook.
+    git commit -m "$commit_msg" >/dev/null || (git add . && git commit -m "$commit_msg" >/dev/null)
     HASH=$(git rev-parse HEAD)
     echo "✅ Colapso Semántico completado. Hash Sentinel: $HASH"
 else
