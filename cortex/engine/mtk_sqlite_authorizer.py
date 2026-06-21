@@ -29,16 +29,36 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
     }
     
     if action not in SAFE_ACTIONS:
-        # Ignore writes to internal sqlite sequences/schemas and virtual table shadow tables
+        # Strict PRAGMA allowlist - Deny anything not explicitly safe, even with a token
+        if action == sqlite3.SQLITE_PRAGMA:
+            SAFE_PRAGMAS = {
+                "table_info", "foreign_key_check", "integrity_check", "index_list", "index_info", 
+                "query_only", "journal_mode", "synchronous", "foreign_keys", "busy_timeout", 
+                "mmap_size", "page_size", "cache_size", "temp_store", "threads", "wal_autocheckpoint"
+            }
+            # arg2 contains the value being set. If it's present, it's a modification attempt.
+            if arg1 and arg1 in SAFE_PRAGMAS and not arg2:
+                return sqlite3.SQLITE_OK
+            logger.critical(f"[MTK-BLOCK] Unauthorized PRAGMA modification attempt: {arg1}={arg2}")
+            return sqlite3.SQLITE_DENY
+
+        # Hard-block structural evasions regardless of token presence
+        DANGEROUS_ACTIONS = {
+            sqlite3.SQLITE_ATTACH,
+            sqlite3.SQLITE_DETACH,
+            sqlite3.SQLITE_CREATE_TRIGGER,
+            sqlite3.SQLITE_DROP_TRIGGER,
+            sqlite3.SQLITE_CREATE_VIEW,
+            sqlite3.SQLITE_DROP_VIEW,
+        }
+        if action in DANGEROUS_ACTIONS:
+            logger.critical(f"[MTK-BLOCK] Hard-blocked structural action: {action}")
+            return sqlite3.SQLITE_DENY
+
+        # Ignore writes to internal sqlite sequences/schemas
         if arg1:
             if arg1.startswith("sqlite_") or arg1 == "schema_version":
                 return sqlite3.SQLITE_OK
-            if arg1.endswith(("_info", "_chunks", "_data", "_idx", "_docsize", "_config", "_content")):
-                return sqlite3.SQLITE_OK
-                
-        # Also allow some specific safe pragmas for reading state
-        if action == sqlite3.SQLITE_PRAGMA and arg1 in ("table_info", "foreign_key_check", "integrity_check", "index_list", "index_info", "query_only"):
-            return sqlite3.SQLITE_OK
 
         token = mtk_active_token.get()
         if not token or not token.startswith("mtk_auth_"):
