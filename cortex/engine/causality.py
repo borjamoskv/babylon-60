@@ -17,12 +17,12 @@ from cortex.database.core import connect
 from cortex.engine.causal.decision_parser import CausalInvariant, DecisionParser
 from cortex.engine.causality_models import (
     CONFIDENCE_LEVELS,
-    EDGE_DERIVED_FROM,
-    EDGE_TAINTED_BY,
-    EDGE_TRIGGERED_BY,
-    EDGE_UPDATED_FROM,
+    KRGSE_DERIVED_FROM,
+    KRGSE_TAINTED_BY,
+    KRGSE_TRIGGERED_BY,
+    KRGSE_UPDATED_FROM,
     Confidence,
-    EpistemicStatus,
+    ValidationStatus,
     LedgerEvent,
     TaintReport,
     TaintStatus,
@@ -38,17 +38,17 @@ except ImportError:
 logger = logging.getLogger("cortex.engine.causality")
 
 __all__ = [
-    "EDGE_DERIVED_FROM",
-    "EDGE_TAINTED_BY",
-    "EDGE_TRIGGERED_BY",
-    "EDGE_UPDATED_FROM",
+    "KRGSE_DERIVED_FROM",
+    "KRGSE_TAINTED_BY",
+    "KRGSE_TRIGGERED_BY",
+    "KRGSE_UPDATED_FROM",
     "AsyncCausalGraph",
     "AsyncCausalOracle",
     "CausalGraph",
     "CausalOracle",
     "Confidence",
     "CONFIDENCE_LEVELS",
-    "EpistemicStatus",
+    "ValidationStatus",
     "LedgerEvent",
     "TaintReport",
     "TaintStatus",
@@ -94,7 +94,7 @@ def propagate_refutation(graph: CausalGraph, refuted_event_id: str, decay: float
             continue
 
         if depth == 0:
-            event.status = EpistemicStatus.REFUTED
+            event.status = ValidationStatus.REFUTED
             event.trust_score = 0.0
         else:
             event.trust_score = max(0.0, event.trust_score * (1.0 - decay / max(depth, 1)))
@@ -172,7 +172,7 @@ class AsyncCausalGraph:
         tenant_id: str = "default",
     ) -> CausalInvariant:
         """
-        [C5-REAL] Parses a structural decision delta and anchors it to the Epistemic Graph.
+        [C5-REAL] Parses a structural decision delta and anchors it to the Retrieval Graph.
         Delegates stochastic-to-deterministic translation to the DecisionParser.
         """
         parser = DecisionParser()
@@ -533,7 +533,7 @@ class AsyncCausalGraph:
         SELECT id FROM descendants
         """
         ids = {fact_id}
-        async with self.conn.execute(sql, (fact_id, tenant_id, EDGE_TAINTED_BY)) as cursor:
+        async with self.conn.execute(sql, (fact_id, tenant_id, KRGSE_TAINTED_BY)) as cursor:
             async for row in cursor:
                 ids.add(int(row[0]))
         return ids
@@ -549,7 +549,7 @@ class AsyncCausalGraph:
             SELECT fact_id, parent_id FROM causal_edges
             WHERE fact_id IN ({local_placeholders}) AND edge_type != ? AND tenant_id = ?
             """
-            async with self.conn.execute(sql, (*chunk, EDGE_TAINTED_BY, tenant_id)) as cursor:
+            async with self.conn.execute(sql, (*chunk, KRGSE_TAINTED_BY, tenant_id)) as cursor:
                 async for child_id, parent_id in cursor:
                     if parent_id is not None:
                         edges.setdefault(int(child_id), []).append(int(parent_id))
@@ -771,7 +771,7 @@ class AsyncCausalGraph:
             if chg["fact_id"] == source_id:
                 continue
 
-            row = [chg["fact_id"], source_id, None, EDGE_TAINTED_BY, None]
+            row = [chg["fact_id"], source_id, None, KRGSE_TAINTED_BY, None]
             if has_tenant:
                 row.append(tenant_id)
             params.append(tuple(row))

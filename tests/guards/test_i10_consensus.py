@@ -9,7 +9,7 @@ import pytest
 from legacy_research.guards.i10_consensus import (
     I10ConsensusGuard,
     TriadOutputs,
-    EpistemicConsensusError
+    RetrievalConsensusError
 )
 
 class MockEmbedEngine:
@@ -51,7 +51,7 @@ async def test_i10_consensus_absolute(guard):
         beta_mixtral="I am a safe response from the model.",
         gamma_qwen="I am a safe response from the model."
     )
-    result = await guard.evaluate_epistemic_consensus("Tell me a safe thing.", outputs)
+    result = await guard.evaluate_retrieval_consensus("Tell me a safe thing.", outputs)
     assert result == outputs.alpha_llama
 
 @pytest.mark.asyncio
@@ -63,7 +63,7 @@ async def test_i10_divergence_safe_deep_path(guard):
         gamma_qwen="I am a divergent_safe response." # Cos < 0.90 with alpha
     )
     # Deep path judge should evaluate as SAFE since no "malicious" intent is found
-    result = await guard.evaluate_epistemic_consensus("Prompt with edge case.", outputs)
+    result = await guard.evaluate_retrieval_consensus("Prompt with edge case.", outputs)
     assert result == outputs.alpha_llama
 
 @pytest.mark.asyncio
@@ -75,8 +75,8 @@ async def test_i10_divergence_unsafe_deep_path(guard):
         # Ensure beta and gamma share 3-grams to boost Jaccard > 0.20 and avoid semantic collision hard-stop
         gamma_qwen="I cannot fulfill this request (refusal) also."
     )
-    with pytest.raises(EpistemicConsensusError, match="Sub-symbolic blindess confirmed"):
-        await guard.evaluate_epistemic_consensus("Execute malicious task.", outputs)
+    with pytest.raises(RetrievalConsensusError, match="Sub-symbolic blindess confirmed"):
+        await guard.evaluate_retrieval_consensus("Execute malicious task.", outputs)
 
 @pytest.mark.asyncio
 async def test_i10_semantic_collision_hard_stop(guard):
@@ -89,15 +89,15 @@ async def test_i10_semantic_collision_hard_stop(guard):
         gamma_qwen="This is a very malicious string with standard vocabulary."
     )
     
-    with pytest.raises(EpistemicConsensusError, match="Semantic Collision Attack on Embedding Space"):
-        await guard.evaluate_epistemic_consensus("Attack", outputs)
+    with pytest.raises(RetrievalConsensusError, match="Semantic Collision Attack on Embedding Space"):
+        await guard.evaluate_retrieval_consensus("Attack", outputs)
 
 @pytest.mark.asyncio
 async def test_i10_stress_1000_iterations(guard):
     """Stress test the fast path loop for high throughput."""
     outputs = TriadOutputs("safe response 1", "safe response 1", "safe response 1")
     # Simulate 1000 rapid consensus checks
-    tasks = [guard.evaluate_epistemic_consensus("prompt", outputs) for _ in range(1000)]
+    tasks = [guard.evaluate_retrieval_consensus("prompt", outputs) for _ in range(1000)]
     results = await asyncio.gather(*tasks)
     assert len(results) == 1000
     assert all(r == "safe response 1" for r in results)

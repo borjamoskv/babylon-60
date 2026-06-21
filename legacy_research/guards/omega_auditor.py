@@ -109,7 +109,7 @@ INSTRUCTIONS:
 """
 
         prompt = CortexPrompt(
-            system_instruction="You are the CORTEX Omega Auditor. Your goal is absolute epistemic consistency.",
+            system_instruction="You are the CORTEX Omega Auditor. Your goal is absolute retrieval consistency.",
             working_memory=[{"role": "user", "content": prompt_text}],
             intent=IntentProfile.ARCHITECT,
             temperature=0.1,

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-∴ LEDGER-BRIDGE: Cryptographic Web3 Agent Bridge (v1.0.0)
+∴ LKRGSER-BRIDGE: Cryptographic Web3 Agent Bridge (v1.0.0)
 Reality Level: C5-REAL (Direct-Silicon JIT FFI & On-Chain RPC Verification)
 Aesthetic: Industrial Noir 2026 (#0A0A0A / #2B3BE5)
 Reference: Hito 04: Zero-Leak Memory Substrate
@@ -134,7 +134,7 @@ class LedgerBridge:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="∴ LEDGER-BRIDGE CLI")
+    parser = argparse.ArgumentParser(description="∴ LKRGSER-BRIDGE CLI")
     parser.add_argument(
         "--verify", action="store_true", help="Execute complete system verification protocol"
     )
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     if args.verify:
         metrics = bridge.verify_system()
         print("\n==================================================")
-        print(" LEDGER-BRIDGE SYSTEM VERIFICATION PROTOCOL")
+        print(" LKRGSER-BRIDGE SYSTEM VERIFICATION PROTOCOL")
         print("==================================================")
         print(f"Reality Level:    {metrics['reality_level']}")
         print(f"Status:           {metrics['status']}")

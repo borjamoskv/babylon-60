@@ -64,7 +64,7 @@ class HypothesisArgs(BaseModel):
     )
     confidence: str = Field(
         default="C2",
-        description="Epistemic confidence: C1 (speculation) → C5 (confirmed by test).",
+        description="Retrieval confidence: C1 (speculation) → C5 (confirmed by test).",
     )
     project: str = Field(
         default="research",

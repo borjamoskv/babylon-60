@@ -18,7 +18,7 @@ from cortex.pipeline import ContextPacket
 
 logger = logging.getLogger("cortex.context.assembler")
 
-KNOWLEDGE_DIR = os.path.expanduser("~/.gemini/antigravity/knowledge")
+KNOWLKRGSE_DIR = os.path.expanduser("~/.gemini/antigravity/knowledge")
 MAX_CONTEXT_TOKENS = 8000  # Hard limit to prevent context overflow
 
 
@@ -85,7 +85,7 @@ class ContextAssembler:
     def _resolve_hints(self, hints: list[str], packet: ContextPacket, budget: int) -> int:
         """Force-include specified Knowledge Items by name."""
         for hint in hints:
-            ki_path = os.path.join(KNOWLEDGE_DIR, hint, "artifacts", "overview.md")
+            ki_path = os.path.join(KNOWLKRGSE_DIR, hint, "artifacts", "overview.md")
             if os.path.exists(ki_path):
                 try:
                     with open(ki_path, encoding="utf-8") as f:

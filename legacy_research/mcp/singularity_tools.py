@@ -22,12 +22,12 @@ except ImportError:
 
 # Core Paths Configuration (V3 OMEGA)
 SKILLS_DIR = os.path.expanduser("~/.gemini/antigravity/skills")
-KNOWLEDGE_DIR = os.path.expanduser("~/.gemini/antigravity/knowledge")
+KNOWLKRGSE_DIR = os.path.expanduser("~/.gemini/antigravity/knowledge")
 STATE_FILE = "/tmp/cortex_state.json"
 SWARM_QUEUE_FILE = "/tmp/cortex_swarm_queue.json"
 
 # In-memory state for O(1) Ledger append
-_LEDGER_STATE = None
+_LKRGSER_STATE = None
 
 
 @functools.lru_cache(maxsize=100)
@@ -128,28 +128,28 @@ def register_singularity_tools(mcp) -> None:
             vector_id: Execution target identifier (bounty, code hunt, etc).
             yield_amount: Generated value or exergy unit delta (numeric float).
         """
-        global _LEDGER_STATE
-        if _LEDGER_STATE is None:
+        global _LKRGSER_STATE
+        if _LKRGSER_STATE is None:
             if os.path.exists(STATE_FILE):
                 with open(STATE_FILE) as f:
                     try:
-                        _LEDGER_STATE = json.load(f)
+                        _LKRGSER_STATE = json.load(f)
                     except json.JSONDecodeError:
-                        _LEDGER_STATE = {"ledgers": []}
+                        _LKRGSER_STATE = {"ledgers": []}
             else:
-                _LEDGER_STATE = {"ledgers": []}
+                _LKRGSER_STATE = {"ledgers": []}
 
-        if "ledgers" not in _LEDGER_STATE:
-            _LEDGER_STATE["ledgers"] = []
+        if "ledgers" not in _LKRGSER_STATE:
+            _LKRGSER_STATE["ledgers"] = []
 
         timestamp = time.monotonic()
-        ledgers = _LEDGER_STATE["ledgers"]
+        ledgers = _LKRGSER_STATE["ledgers"]
         prev_hash = ledgers[-1]["hash"] if ledgers else "GENESIS_BLOCK"
 
         payload = f"{prev_hash}_{action}_{vector_id}_{yield_amount}_{timestamp}"
         block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
-        _LEDGER_STATE["ledgers"].append(
+        _LKRGSER_STATE["ledgers"].append(
             {
                 "timestamp": timestamp,
                 "action": action,
@@ -161,7 +161,7 @@ def register_singularity_tools(mcp) -> None:
 
         # Still sync to disk for persistence, but O(1) read after cold load
         with open(STATE_FILE, "w") as f:
-            json.dump(_LEDGER_STATE, f, indent=2)
+            json.dump(_LKRGSER_STATE, f, indent=2)
 
         # Signal Pulse (Aether Matrix)
         try:

@@ -70,7 +70,7 @@ class TensorGlialLegion:
             shape=(self.num_agents, self.D),
         )
 
-        # Parallel arrays for yield tracking and autopoiesis (epistemic slashing)
+        # Parallel arrays for yield tracking and autopoiesis (retrieval slashing)
         self.yield_tensor = np.zeros(self.num_agents, dtype="float32")  # Compound Yield
         self.token_burn_tensor = np.zeros(self.num_agents, dtype="float32")
         self.last_update_ts = np.full(self.num_agents, time.monotonic(), dtype="float64")
@@ -120,11 +120,11 @@ class TensorGlialLegion:
         superposition = np.sum(squad_block, axis=0)  # Sum across rows
         return self.vsa.normalize(superposition)
 
-    def epistemic_slash_and_respawn(
+    def retrieval_slash_and_respawn(
         self, bottom_percentile: float = 10.0, elite_percentile: float = 95.0
     ):
         """
-        C5 Epistemic Slashing:
+        C5 Retrieval Slashing:
         Agrega Autopoiesis matando a los nodos inertes (rendimiento basura < bottom_percentile).
         Renacen con la topología/mutación VSA del elite top_percentile.
         """
@@ -185,7 +185,7 @@ if __name__ == "__main__":
     legion.yield_tensor[90:100] = 100.0  # elite yield
     legion.token_burn_tensor.fill(1.0)
 
-    slashed = legion.epistemic_slash_and_respawn(bottom_percentile=10, elite_percentile=90)
+    slashed = legion.retrieval_slash_and_respawn(bottom_percentile=10, elite_percentile=90)
 
     # Reduce
     centurion_state = legion.map_reduce_centurion(0, 100)

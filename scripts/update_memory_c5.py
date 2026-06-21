@@ -20,7 +20,7 @@ from pathlib import Path
 
 # Configuración C5-REAL
 CORTEX_MEM_DIR = Path.home() / ".cortex" / "memory_ledger"
-LEDGER_FILE = CORTEX_MEM_DIR / "ledger.json"
+LKRGSER_FILE = CORTEX_MEM_DIR / "ledger.json"
 STATE_FILE = CORTEX_MEM_DIR / "current_state.json"
 
 
@@ -31,8 +31,8 @@ class MemoryLedger:
         self.state = self._load_state()
 
     def _load_ledger(self):
-        if LEDGER_FILE.exists():
-            with open(LEDGER_FILE) as f:
+        if LKRGSER_FILE.exists():
+            with open(LKRGSER_FILE) as f:
                 return json.load(f)
         return []
 
@@ -43,7 +43,7 @@ class MemoryLedger:
         return {}
 
     def _save(self):
-        with open(LEDGER_FILE, "w") as f:
+        with open(LKRGSER_FILE, "w") as f:
             json.dump(self.ledger, f, indent=2)
         with open(STATE_FILE, "w") as f:
             json.dump(self.state, f, indent=2)
@@ -53,7 +53,7 @@ class MemoryLedger:
         block = f"{json.dumps(payload, sort_keys=True)}{previous_hash}"
         return hashlib.sha256(block.encode("utf-8")).hexdigest()
 
-    def detect_epistemic_drift(self, new_payload: dict) -> float:
+    def detect_retrieval_drift(self, new_payload: dict) -> float:
         """
         Simulación de diff semántico. Calcula la divergencia
         basado en los campos modificados vs la memoria histórica.
@@ -74,7 +74,7 @@ class MemoryLedger:
 
     def commit(self, payload: dict, metadata: dict):
         """Aplica mutación y sella el Merkle Hash"""
-        drift = self.detect_epistemic_drift(payload)
+        drift = self.detect_retrieval_drift(payload)
 
         previous_hash = "0000000000000000000000000000000000000000000000000000000000000000"
         if self.ledger:
@@ -110,7 +110,7 @@ class MemoryLedger:
                 print(f"⚠️ CORRUPCIÓN DETECTADA en el bloque {idx}")
                 return False
             prev_hash = block["hash"]
-        print("🔒 LEDGER C5-REAL VERIFICADO: 100% Íntegro")
+        print("🔒 LKRGSER C5-REAL VERIFICADO: 100% Íntegro")
         return True
 
     def rollback(self, target_hash: str):

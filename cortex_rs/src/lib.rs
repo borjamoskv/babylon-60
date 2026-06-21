@@ -12,7 +12,7 @@ pub mod vector_vault;
 pub mod reality;
 pub mod bft;
 pub mod causal;
-pub mod epistemic;
+pub mod retrieval;
 
 use serde::{Deserialize, Serialize};
 
@@ -40,7 +40,7 @@ pub enum SystemLayer {
     Playground,
 }
 
-use edg::{EpistemicGraph, EpistemicNode, EpistemicStatus};
+use edg::{RetrievalGraph, RetrievalNode, ValidationStatus};
 use pyo3::prelude::*;
 use pyo3::exceptions::PyValueError;
 use scene_model::{ContinuityRuleType, EdgeRule, SceneState};
@@ -48,7 +48,7 @@ use smt_compiler::{validate_scene_transition, GateStatus, Verdict};
 use telemetry::validate_metric_json;
 use bft::exergy::{ExergyGuard, ExergyMutation};
 use causal::solver::{CausalCompiler, ConsensusVerdict};
-use epistemic::vaccine::{EpistemicFact, EpistemicStatus as VacStatus, VaccineGuard};
+use retrieval::vaccine::{RetrievalFact, ValidationStatus as VacStatus, VaccineGuard};
 
 /// Valida y registra un claim desde Python.
 /// Retorna el status final como string.
@@ -109,11 +109,11 @@ pub fn verify_causal_assertion(assertion: &str) -> PyResult<String> {
 
 #[pyfunction]
 pub fn create_staging_fact(agent_id: &str, hypothesis: &str) -> PyResult<String> {
-    let fact = EpistemicFact {
+    let fact = RetrievalFact {
         fact_id: "fact_test".into(),
         agent_id: agent_id.to_string(),
         hypothesis: hypothesis.to_string(),
-        epistemic_status: VacStatus::Staging,
+        validation_status: VacStatus::Staging,
         zk_proof: Some("test_proof".into()),
         created_at_epoch_ms: 1717027200000,
         sealed_at_epoch_ms: None,
@@ -125,14 +125,14 @@ pub fn create_staging_fact(agent_id: &str, hypothesis: &str) -> PyResult<String>
 
 #[pyfunction]
 pub fn can_read_fact(fact_json: &str, agent_id: &str) -> PyResult<bool> {
-    let fact: EpistemicFact = serde_json::from_str(fact_json)
+    let fact: RetrievalFact = serde_json::from_str(fact_json)
         .map_err(|e| PyValueError::new_err(e.to_string()))?;
     Ok(VaccineGuard::can_read(&fact, agent_id))
 }
 
 #[pyfunction]
 pub fn try_seal_fact(fact_json: &str, wal_event_hash: &str, valid: bool) -> PyResult<String> {
-    let mut fact: EpistemicFact = serde_json::from_str(fact_json)
+    let mut fact: RetrievalFact = serde_json::from_str(fact_json)
         .map_err(|e| PyValueError::new_err(e.to_string()))?;
     
     let validator = |_proof: &str| valid;
@@ -143,12 +143,12 @@ pub fn try_seal_fact(fact_json: &str, wal_event_hash: &str, valid: bool) -> PyRe
         .map_err(|e| PyValueError::new_err(e.to_string()))
 }
 
-/// CORTEX-Persist Cognitive Core Rust Extension (Enterprise EDG)
+/// CORTEX-Persist Cognitive Core Rust Extension (Enterprise KRGS)
 #[pymodule]
 fn cortex_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add_class::<EpistemicStatus>()?;
-    m.add_class::<EpistemicNode>()?;
-    m.add_class::<EpistemicGraph>()?;
+    m.add_class::<ValidationStatus>()?;
+    m.add_class::<RetrievalNode>()?;
+    m.add_class::<RetrievalGraph>()?;
     m.add_class::<SceneState>()?;
     m.add_class::<EdgeRule>()?;
     m.add_class::<ContinuityRuleType>()?;
@@ -168,7 +168,7 @@ fn cortex_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::edg::{EpistemicGraph, EpistemicStatus};
+    use super::edg::{RetrievalGraph, ValidationStatus};
     use super::event_schema::{
         EventType, EvidenceLevel, IntegrityStatus, LedgerEvent, Provenance, TaintStatus,
     };
@@ -245,19 +245,19 @@ mod tests {
         // Verify the entire chain
         assert!(chain.verify_chain().unwrap());
 
-        // Replay onto EpistemicGraph
-        let graph = EpistemicGraph::new();
+        // Replay onto RetrievalGraph
+        let graph = RetrievalGraph::new();
         replay_state(&graph, &chain.events).unwrap();
 
         // Check node 1
         assert_eq!(
             graph.get_node_status("mem_node_1").unwrap(),
-            EpistemicStatus::Accepted
+            ValidationStatus::Accepted
         );
         // Check node 2
         assert_eq!(
             graph.get_node_status("mem_node_2").unwrap(),
-            EpistemicStatus::Accepted
+            ValidationStatus::Accepted
         );
 
         // Modify belief
@@ -292,7 +292,7 @@ mod tests {
 
         assert_eq!(
             graph.get_node_status("mem_node_1").unwrap(),
-            EpistemicStatus::Challenged
+            ValidationStatus::Challenged
         );
     }
 }

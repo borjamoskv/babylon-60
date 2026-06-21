@@ -4,10 +4,11 @@ Informational Entropy and Semantic Collapse.
 Implements Zlib Normalized Compression Distance (NCD) as a proxy for Shannon Entropy / KL Divergence.
 """
 import zlib
+import zlib
 import time
 from typing import Optional, Dict, Any
 
-from scripts.ouroboros_prune import MAX_KINETIC_MULTIPLIER
+MAX_KINETIC_MULTIPLIER = 2.0
 
 def kolmogorov_approx(content: str) -> float:
     """

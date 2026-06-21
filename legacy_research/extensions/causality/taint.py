@@ -4,7 +4,7 @@
 When a fact_node is invalidated or loses confidence, propagate impact
 to descendants and recalculate effective_confidence. Without this,
 derived facts float on cadáveres perfumados - structurally elegant,
-epistemically corrupt.
+retrievalally corrupt.
 
 Algorithm: BFS from invalidated node.
 - Invalidated node → TAINTED, effective_confidence = C1

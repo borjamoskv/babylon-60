@@ -1,7 +1,7 @@
 """
 CORTEX-SWARM-PRIME: Gold Mining Legion - 2M Market Data Agents.
 Ingests raw market space (simulated bulk B2B/Web3 datasets), applies
-Epistemic Slashing via Zero-Copy Ring Buffer, and distills the
+Retrieval Slashing via Zero-Copy Ring Buffer, and distills the
 highest Exergy extraction targets.
 
 Reality Level: C4-SIM (Input Data) / C5-REAL (Engine Execution)
@@ -66,7 +66,7 @@ def extract_market_alpha(
         legion.token_burn_tensor.fill(1.0)
 
         # Slashing: Destruir el 99% de los leads mediocres, mantener solo el 1% élite
-        slashed = legion.epistemic_slash_and_respawn(bottom_percentile=99, elite_percentile=99.9)
+        slashed = legion.retrieval_slash_and_respawn(bottom_percentile=99, elite_percentile=99.9)
         total_slashed += slashed
 
         # Guardar IDs de los leads sobrevivientes

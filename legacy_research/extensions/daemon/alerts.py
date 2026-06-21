@@ -44,7 +44,7 @@ class AlertHandlerMixin:
     cloud_sync_monitor: Any
     tombstone_monitor: Any
     workflow_monitor: Any
-    epistemic_monitor: Any
+    retrieval_monitor: Any
     aether_monitor: Any
     _aether_daemon: Any
     fiat_oracle: Any
@@ -55,7 +55,7 @@ class AlertHandlerMixin:
     frontier_daemon: Any
     iot_oracle: Any
     zero_prompting_daemon: Any
-    epistemic_breaker_daemon: Any
+    retrieval_breaker_daemon: Any
     notify_enabled: bool
     _last_alerts: dict[str, float]
     _cooldown: float
@@ -333,7 +333,7 @@ class AlertHandlerMixin:
                 )
 
                 if a.workflow == "/autodidact":
-                    logger.info("🔮 Epistemic degradation detected. Auto-triggering Ouroboros Absorb actuator.")
+                    logger.info("🔮 Retrieval degradation detected. Auto-triggering Ouroboros Absorb actuator.")
                     self._dispatch_ouroboros_absorb()
 
     def _dispatch_ouroboros_absorb(self) -> None:

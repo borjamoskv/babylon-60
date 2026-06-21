@@ -8,7 +8,7 @@ Components:
   - MemoryCard: Frozen metacognitive snapshot of a single memory
   - MetamemoryStats: Aggregate health metrics
   - MetamemoryIndex: O(1) in-memory registry of MemoryCards
-  - MetacognitiveJudge: Maps retrieval results → epistemic verdicts
+  - MetacognitiveJudge: Maps retrieval results → retrieval verdicts
   - detect_repair_needed / build_memory_card: Factory utilities
 """
 
@@ -59,7 +59,7 @@ ConsolidationStatus = Literal["active", "silent", "matured", "deceased", "unknow
 
 
 class MemoryCard(BaseModel):
-    """Metacognitive snapshot of a single memory's epistemic state.
+    """Metacognitive snapshot of a single memory's retrieval state.
 
     Every field answers a question an agent should ask before trusting
     a memory:
@@ -304,7 +304,7 @@ def build_memory_card(
 
 
 class MetacognitiveJudge:
-    """Decision engine: maps retrieval results to epistemic verdicts.
+    """Decision engine: maps retrieval results to retrieval verdicts.
 
     Given a set of retrieved MemoryCards, the judge answers:
       "¿Debo responder ahora, buscar más, o decir 'no sé'?"

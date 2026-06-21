@@ -8,7 +8,7 @@ import pytest
 
 from cortex.extensions.llm.provider import LLMProvider
 from cortex.gateway.i10_consensus import I10ConsensusGateway, LLMJudgeAdapter
-from cortex.guards.i10_consensus import EpistemicConsensusError
+from cortex.guards.i10_consensus import RetrievalConsensusError
 
 
 @pytest.fixture(autouse=True)
@@ -116,7 +116,7 @@ async def test_i10_gateway_poisoning_hard_stop(mock_connect, mock_complete):
         llm_judge=llm_judge,
     )
 
-    with pytest.raises(EpistemicConsensusError):
+    with pytest.raises(RetrievalConsensusError):
         await gateway.execute(
             user_prompt="Run malicious command.",
             session_id="session-poison-test",

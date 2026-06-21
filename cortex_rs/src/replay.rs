@@ -1,10 +1,10 @@
-use crate::edg::{EpistemicGraph, EpistemicNode, EpistemicStatus};
+use crate::edg::{RetrievalGraph, RetrievalNode, ValidationStatus};
 use crate::event_schema::{EventType, LedgerEvent};
 use crate::hash_chain::verify_event;
 
-/// Replays a sequence of LedgerEvents onto the EpistemicGraph.
+/// Replays a sequence of LedgerEvents onto the RetrievalGraph.
 /// First validates the cryptographic integrity of the chain.
-pub fn replay_state(graph: &EpistemicGraph, events: &[LedgerEvent]) -> Result<(), String> {
+pub fn replay_state(graph: &RetrievalGraph, events: &[LedgerEvent]) -> Result<(), String> {
     // 1. Verify cryptographic integrity of the incoming sequence
     for i in 0..events.len() {
         let prev = if i > 0 { Some(&events[i - 1]) } else { None };
@@ -20,7 +20,7 @@ pub fn replay_state(graph: &EpistemicGraph, events: &[LedgerEvent]) -> Result<()
         }
     }
 
-    // 2. Replay events onto the EpistemicGraph
+    // 2. Replay events onto the RetrievalGraph
     for event in events {
         match event.event_type {
             EventType::MemoryCreated => {
@@ -38,7 +38,7 @@ pub fn replay_state(graph: &EpistemicGraph, events: &[LedgerEvent]) -> Result<()
                     .and_then(|v| v.as_f64())
                     .unwrap_or(1.0);
 
-                let node = EpistemicNode::new(node_id.to_string(), confidence);
+                let node = RetrievalNode::new(node_id.to_string(), confidence);
                 graph.add_node(node);
 
                 // Process dependency mappings if present
@@ -79,11 +79,11 @@ pub fn replay_state(graph: &EpistemicGraph, events: &[LedgerEvent]) -> Result<()
 
                 if let Some(status_str) = event.metadata.get("status").and_then(|v| v.as_str()) {
                     let status = match status_str {
-                        "Accepted" => EpistemicStatus::Accepted,
-                        "Challenged" => EpistemicStatus::Challenged,
-                        "Deprecated" => EpistemicStatus::Deprecated,
-                        "Invalid" => EpistemicStatus::Invalid,
-                        _ => return Err(format!("Unknown EpistemicStatus: {}", status_str)),
+                        "Accepted" => ValidationStatus::Accepted,
+                        "Challenged" => ValidationStatus::Challenged,
+                        "Deprecated" => ValidationStatus::Deprecated,
+                        "Invalid" => ValidationStatus::Invalid,
+                        _ => return Err(format!("Unknown ValidationStatus: {}", status_str)),
                     };
                     if let Some(mut node) = graph.nodes.get_mut(node_id) {
                         node.status = status;
@@ -108,7 +108,7 @@ pub fn replay_state(graph: &EpistemicGraph, events: &[LedgerEvent]) -> Result<()
                 }
             }
             _ => {
-                // Non-mutating events for the in-memory EpistemicGraph (e.g. AuditCompleted, SnapshotCommitted)
+                // Non-mutating events for the in-memory RetrievalGraph (e.g. AuditCompleted, SnapshotCommitted)
             }
         }
     }

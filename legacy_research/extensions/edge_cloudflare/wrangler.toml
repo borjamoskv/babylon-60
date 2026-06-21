@@ -7,7 +7,7 @@ compatibility_flags = ["nodejs_als"]
 mode = "smart"
 
 [[d1_databases]]
-binding = "CORTEX_LEDGER"
+binding = "CORTEX_LKRGSER"
 database_name = "cortex-ledger-prod"
 database_id = "00000000-0000-0000-0000-000000000000"
 

@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 """Cortex Router v2 - Differentiable Policy Network.
 
-Implements a trainable MoE-style router evaluating the epistemic state vector
+Implements a trainable MoE-style router evaluating the retrieval state vector
 (AST complexity, KL instability, entropy, cyclomatic depth, event rate)
 to output a stochastic routing distribution via softmax.
 """
@@ -21,7 +21,7 @@ ModelType = Literal["gemini-3.5-flash", "gemini-3.1-pro"]
 
 @dataclass
 class SignalVector:
-    """Epistemic state vector (s_t)"""
+    """Retrieval state vector (s_t)"""
 
     ast_complexity: float
     kl_instability: float
@@ -39,9 +39,9 @@ class SignalVector:
         ]
 
 
-class EpistemicPolicyNetwork:
+class RetrievalPolicyNetwork:
     """
-    2-Expert MoE router with epistemic state-conditioned routing.
+    2-Expert MoE router with retrieval state-conditioned routing.
     Outputs a probability distribution over the model layer.
     """
 

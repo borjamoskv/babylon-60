@@ -37,7 +37,7 @@ class SovereignASTVisitor(ast.NodeVisitor):
 
 
 def _execute_sync(source_code: str, global_ctx: dict) -> dict:
-    # Epistemic Filter (AST Parse)
+    # Retrieval Filter (AST Parse)
     try:
         tree = ast.parse(source_code)
         SovereignASTVisitor().visit(tree)
@@ -173,6 +173,6 @@ async def run_jit_sandbox(source_code: str, timeout_ms: int = 500, global_ctx: d
             "result": {"locals": res_dict["locals"]},
             "time_ms": exec_time,
         }
-    err = res_dict.get("error", "Unknown Epistemic Failure")
-    logger.error("⚡ [SORTU-JIT] Epistemic failure: %s", err)
+    err = res_dict.get("error", "Unknown Retrieval Failure")
+    logger.error("⚡ [SORTU-JIT] Retrieval failure: %s", err)
     return {"status": "failed", "error": err}

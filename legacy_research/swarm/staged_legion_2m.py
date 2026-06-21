@@ -91,8 +91,8 @@ def execute_staged_reverse_engineering(
         )
         legion.token_burn_tensor.fill(1.0)
 
-        # --- Phase 2: Epistemic Slashing ---
-        slashed = legion.epistemic_slash_and_respawn(bottom_percentile=20, elite_percentile=98)
+        # --- Phase 2: Retrieval Slashing ---
+        slashed = legion.retrieval_slash_and_respawn(bottom_percentile=20, elite_percentile=98)
         total_slashed += slashed
 
         # --- Phase 3: Centurion collapse (entire wave → 1 vector) ---

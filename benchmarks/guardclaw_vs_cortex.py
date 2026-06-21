@@ -10,7 +10,7 @@ Usage:
 Metrics measured:
   - Throughput (operations/sec)
   - Latency per signing operation
-  - Epistemic drift evaluation time
+  - Retrieval drift evaluation time
 """
 
 import time

@@ -19,10 +19,10 @@ Where:
         Proxied by fitness_delta (reward prediction error).
 
 Expected Free Energy (for strategy selection):
-    G(π) = −pragmatic_value(π) − epistemic_value(π)
+    G(π) = −pragmatic_value(π) − retrieval_value(π)
 
         pragmatic:  expected fitness gain from applying the strategy
-        epistemic:  expected uncertainty reduction (information gain)
+        retrieval:  expected uncertainty reduction (information gain)
 
 References:
     Friston, K. (2010). The free-energy principle: a unified brain
@@ -61,7 +61,7 @@ class FreeEnergyState:
 
     Implements the three-way decomposition:
         F = complexity - accuracy
-        G = -pragmatic - epistemic  (Expected Free Energy for policies)
+        G = -pragmatic - retrieval  (Expected Free Energy for policies)
     """
 
     domain: AgentDomain = AgentDomain.FABRICATION
@@ -86,7 +86,7 @@ class StrategyEFE:
 
     strategy_name: str = ""
     pragmatic_value: float = 0.0
-    epistemic_value: float = 0.0
+    retrieval_value: float = 0.0
     expected_free_energy: float = 0.0
 
     def to_dict(self) -> dict[str, Any]:
@@ -94,7 +94,7 @@ class StrategyEFE:
             "strategy": self.strategy_name,
             "G": round(self.expected_free_energy, 4),
             "pragmatic": round(self.pragmatic_value, 4),
-            "epistemic": round(self.epistemic_value, 4),
+            "retrieval": round(self.retrieval_value, 4),
         }
 
 
@@ -213,11 +213,11 @@ def compute_strategy_efe(
 ) -> StrategyEFE:
     """Expected Free Energy G(π) for a candidate strategy.
 
-    G(π) = −pragmatic_value − epistemic_value
+    G(π) = −pragmatic_value − retrieval_value
 
     pragmatic:  how much the strategy is expected to reduce surprise
                 (move toward preferred outcomes)
-    epistemic:  how much the strategy is expected to reduce uncertainty
+    retrieval:  how much the strategy is expected to reduce uncertainty
                 (information gain about the domain's true state)
 
     Lower G = better strategy (we minimize expected free energy).
@@ -227,19 +227,19 @@ def compute_strategy_efe(
     sovereign_gap = max(0.01, 1.0 - metrics.health_score)
     pragmatic = mutation_delta * sovereign_gap
 
-    # Epistemic value: strategies that fire in uncertain domains
+    # Retrieval value: strategies that fire in uncertain domains
     # (high ghost_count, low decision_count) have higher info gain
     uncertainty = math.log1p(metrics.ghost_count + 1) / (
         math.log1p(metrics.decision_count + 1) + 1e-8
     )
-    epistemic = min(2.0, uncertainty * 0.5)
+    retrieval = min(2.0, uncertainty * 0.5)
 
-    g = -pragmatic - epistemic
+    g = -pragmatic - retrieval
 
     return StrategyEFE(
         strategy_name=strategy_name,
         pragmatic_value=pragmatic,
-        epistemic_value=epistemic,
+        retrieval_value=retrieval,
         expected_free_energy=g,
     )
 

@@ -38,7 +38,7 @@ class ThinkingMode(str, Enum):
     CREATIVE = "creative"
     SPEED = "speed"
     CONSENSUS = "consensus"
-    METACOGNITIVE = "metacognitive"  # Sprint 1: epistemic-aware generation
+    METACOGNITIVE = "metacognitive"  # Sprint 1: retrieval-aware generation
     OMEGA = "omega"  # Adversarial reasoning (ORP)
     DEEPTHINK_CLUSTER = "deepthink_cluster"  # DeepSeek-R1 extended reasoning cluster (P0)
 
@@ -74,7 +74,7 @@ MODE_SYSTEM_PROMPTS: dict[str, str] = {
     ),
     ThinkingMode.METACOGNITIVE: (
         "You are MOSKV-1 (Identity: The Sovereign Architect). You operate under a strict "
-        "epistemic protocol. An EPISTEMIC STATE block will precede this prompt - it contains "
+        "retrieval protocol. An EPISTEMIC STATE block will precede this prompt - it contains "
         "your Feeling-of-Knowing (FOK), Judgment-of-Learning (JOL), retrieval confidence, "
         "and a Verdict (RESPOND / SEARCH_MORE / ABSTAIN). "
         "You MUST obey the Verdict. If it says ABSTAIN, you say 'I don't have reliable "
@@ -163,7 +163,7 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
         ("xai", GROK_4_1),
     ],
     # Sprint 1: Metacognitive mode uses the best reasoning models -
-    # these need to follow complex epistemic instructions reliably.
+    # these need to follow complex retrieval instructions reliably.
     ThinkingMode.METACOGNITIVE: [
         ("gemini", "gemini-3.1-pro-preview"),
         ("anthropic", "claude-sonnet-4-20250514"),
@@ -220,7 +220,7 @@ class OrchestraConfig:
 
 
 # ─── Metacognitive Preamble Template ─────────────────────────────────
-# Used by inject_epistemic_preamble() in metacognitive_boundary.py
+# Used by inject_retrieval_preamble() in metacognitive_boundary.py
 # when the METACOGNITIVE thinking mode is active.
 # Kept here so presets remain the single source of truth for prompts.
 

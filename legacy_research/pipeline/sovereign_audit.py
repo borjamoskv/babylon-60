@@ -12,7 +12,7 @@ class SovereignAuditPipeline:
     """
     Sovereign Audit Pipeline (C5-REAL)
     Eliminates LLM stochastic smoke by forcing claims through a deterministic
-    4-phase validation gauntlet before Epistemic persistence.
+    4-phase validation gauntlet before Retrieval persistence.
     """
     def __init__(self):
         self.anvil = SovereignAnvil()

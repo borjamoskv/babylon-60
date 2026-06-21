@@ -8,8 +8,8 @@ This is a pure data contract. It does NOT execute routing.
 It does NOT import runtime modules.
 It does NOT read YAML files.
 
-Any component that makes routing decisions (AgentRouter, EpistemicArbitrator,
-EpistemicPolicyNetwork, ExergyConfigAdapter) MUST produce outputs that
+Any component that makes routing decisions (AgentRouter, RetrievalArbitrator,
+RetrievalPolicyNetwork, ExergyConfigAdapter) MUST produce outputs that
 conform to RoutingDecision and respect the precedence defined here.
 
 Architecture Invariant:

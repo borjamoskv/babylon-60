@@ -46,7 +46,7 @@ class Opportunity:
         title: Human-readable title.
         description: Detailed description of the opportunity.
         estimated_value: Estimated revenue in EUR.
-        confidence: C1-C5 epistemic confidence.
+        confidence: C1-C5 retrieval confidence.
         effort_hours: Estimated effort to execute.
         status: Current lifecycle status.
         source_url: Where the opportunity was found.

@@ -42,7 +42,7 @@ class TestSagaRollback:
         
         # Verificar estado final en FactStore
         fact = await orchestrator.fact_store.get(fact_id)
-        assert fact.epistemic_status == "rejected"
+        assert fact.validation_status == "rejected"
         
         # Verificar estado en WAL DB
         conn = sqlite3.connect(WAL_PATH)
@@ -70,4 +70,4 @@ class TestSagaRollback:
         assert sealed is False
         
         fact = await orchestrator.fact_store.get(fact_id)
-        assert fact.epistemic_status == "rejected"
+        assert fact.validation_status == "rejected"

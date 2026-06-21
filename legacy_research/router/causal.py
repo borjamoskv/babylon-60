@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 """Cortex Router v3 - Causal Policy Gradient System.
 
-Optimizes routing decisions over future epistemic stability trajectories.
+Optimizes routing decisions over future retrieval stability trajectories.
 Updates policy weights via causal advantage (expected KL reduction).
 """
 
@@ -11,7 +11,7 @@ import logging
 from dataclasses import dataclass
 from typing import Literal
 
-from cortex.router.policy import EpistemicPolicyNetwork, SignalVector
+from cortex.router.policy import RetrievalPolicyNetwork, SignalVector
 
 logger = logging.getLogger("cortex.router.causal")
 
@@ -28,7 +28,7 @@ class CausalTrajectory:
     hazard_rate_impact: float
 
 
-class CausalPolicyGradientRouter(EpistemicPolicyNetwork):
+class CausalPolicyGradientRouter(RetrievalPolicyNetwork):
     """
     Learns 'which model reduces future KL divergence trajectories'.
     Implements a stability-optimal objective via policy gradient.

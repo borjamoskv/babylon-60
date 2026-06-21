@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-"""CORTEX Core - Epistemic Lineage & Audit Engine.
+"""CORTEX Core - Retrieval Lineage & Audit Engine.
 
 Ensures Ω₃-V compliance: All synthesized insights (L2) must be traceble
 to ground truth facts (L0).
@@ -17,7 +17,7 @@ logger = logging.getLogger("cortex.lineage")
 
 @dataclass
 class LineageNode:
-    """A node in the epistemic lineage tree."""
+    """A node in the retrieval lineage tree."""
 
     fact_id: int
     project: str
@@ -31,7 +31,7 @@ class LineageNode:
 
 
 class LineageVerifier:
-    """Verifier for Epistemic Isolation (Ω₃-V)."""
+    """Verifier for Retrieval Isolation (Ω₃-V)."""
 
     def __init__(self, engine: Any):
         self.engine = engine

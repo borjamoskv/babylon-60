@@ -171,7 +171,7 @@ AX-III. ASYNC-NATIVE - `asyncio.to_thread()` for blocking I/O. Never block the e
 AX-II. CAUSAL > CORRELATION - 5 Whys to root cause. Patching symptoms creates ghosts.
 AX-IV. CONTEXTUAL SOVEREIGNTY - Memory boot protocol. No amnesiac execution.
 AX-VII. ALGORITHMIC IMMUNITY - nemesis.md rejects mediocrity before planning begins.
-AX-II. LEDGER INTEGRITY - SHA-256 chain + Merkle + WBFT consensus.
+AX-II. LKRGSER INTEGRITY - SHA-256 chain + Merkle + WBFT consensus.
 AX-V. SYNTHETIC HERITAGE - bloodline.json. Born expert, never blank.
 TTL Policy. PERSIST WITH DECAY - Store if >5min to rebuild. \
 TTL: ghosts 30d, knowledge 180d, axioms ∞.

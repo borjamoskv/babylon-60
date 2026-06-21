@@ -13,7 +13,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class MerkleLedger:
     """
-    Append-only cryptographic ledger to track Epistemic Membrane validations.
+    Append-only cryptographic ledger to track Retrieval Membrane validations.
     Ensures that every hypervector commit is tamper-evident.
     """
 
@@ -53,9 +53,9 @@ class MerkleLedger:
         return hasher.hexdigest()
 
 
-class EpistemicMembrane:
+class SemanticBoundary:
     """
-    Active epistemic containment and self-maintenance using VSA/HDC.
+    Active retrieval containment and self-maintenance using VSA/HDC.
     Transforms memory into a membrane that validates, protects, and autopoietically evolves.
     """
 
@@ -73,7 +73,7 @@ class EpistemicMembrane:
             "graph_edge": torchhd.random(1, dim, device=device)[0],
         }
 
-        # Epistemic Boundaries
+        # Retrieval Boundaries
         self.threshold_consistency = 0.68
         self.threshold_novelty = 0.88  # Below this implies it is novel enough
         self.noise_tolerance = 0.25  # Maximum acceptable noise/flip percentage
@@ -130,7 +130,7 @@ class EpistemicMembrane:
 
     def check_proposal(self, proposal_hv: torch.Tensor) -> dict:
         """
-        Validates if a new proposal respects the epistemic boundary.
+        Validates if a new proposal respects the retrieval boundary.
         Checks for consistency, novelty, and tamper/noise levels.
         """
         if not self.history:
@@ -197,7 +197,7 @@ class EpistemicMembrane:
         self, recent_proposals: list[torch.Tensor], generations: int = 3
     ) -> tuple[torch.Tensor | None, dict | None]:
         """
-        Autopoietic Mutation: Adjusts the epistemic membrane if global coherence drops.
+        Autopoietic Mutation: Adjusts the retrieval membrane if global coherence drops.
         Generates a controlled mutant that anchors back to historical memory.
         """
         if not recent_proposals:
@@ -212,7 +212,7 @@ class EpistemicMembrane:
         recent_stack = torch.stack(recent_proposals)
         coherence = F.cosine_similarity(global_hv.unsqueeze(0), recent_stack).mean().item()
 
-        if coherence < 0.55:  # Epistemic crisis threshold
+        if coherence < 0.55:  # Retrieval crisis threshold
             # Mutate: controlled superposition + noise
             mutation = global_hv
             for _ in range(generations):

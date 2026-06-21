@@ -10,7 +10,7 @@ class CacheEntry:
 
     value: Any
     timestamp: float
-    ttl: float = 60.0  # 60 seconds of epistemic stability
+    ttl: float = 60.0  # 60 seconds of retrieval stability
 
 
 class PermissionCache:

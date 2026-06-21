@@ -42,7 +42,7 @@ __all__ = [
 
 
 class BeliefConfidence(str, Enum):
-    """Epistemic confidence level - maps to CORTEX C1→C5 scale."""
+    """Retrieval confidence level - maps to CORTEX C1→C5 scale."""
 
     C1_HYPOTHESIS = "C1"
     """Unverified conjecture - single source, no corroboration."""
@@ -184,7 +184,7 @@ class BeliefObject:
     """Time-sortable unique identifier."""
 
     confidence: BeliefConfidence = BeliefConfidence.C2_TENTATIVE
-    """Epistemic confidence level (C1→C5)."""
+    """Retrieval confidence level (C1→C5)."""
 
     status: BeliefStatus = BeliefStatus.ACTIVE
     """Lifecycle state in the cognitive layer."""

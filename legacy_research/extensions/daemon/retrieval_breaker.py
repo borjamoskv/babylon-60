@@ -7,9 +7,9 @@ from datetime import datetime, timezone
 logger = logging.getLogger(__name__)
 
 
-class EpistemicBreakerDaemon:
+class RetrievalBreakerDaemon:
     """
-    Sovereign Epistemic Circuit Breaker (Axiom Ω₂ & Ω₃).
+    Sovereign Retrieval Circuit Breaker (Axiom Ω₂ & Ω₃).
 
     Acts as the cognitive immune system for the Moskv-1 Daemon.
     Monitors the 'thermal noise' (semantic entropy, database growth, error rates).
@@ -92,11 +92,11 @@ class EpistemicBreakerDaemon:
         try:
             await self.engine.store(
                 "cortex-core",
-                content="Epistemic limit crossed. Initiating cognitive shutdown and compression.",
+                content="Retrieval limit crossed. Initiating cognitive shutdown and compression.",
                 fact_type="decision",
                 tags=["system", "immune", "circuit-breaker"],
                 confidence="C5",
-                source="agent:epistemic-breaker",
+                source="agent:retrieval-breaker",
             )
         except Exception as e:
             logger.error("Failed to record breaker trip: %s", e)
@@ -123,7 +123,7 @@ class EpistemicBreakerDaemon:
                 fact_type="decision",
                 tags=["system", "immune", "circuit-breaker", "wakeup"],
                 confidence="C5",
-                source="agent:epistemic-breaker",
+                source="agent:retrieval-breaker",
             )
         except Exception as e:
             logger.error("Failed to record breaker wakeup: %s", e)
@@ -131,7 +131,7 @@ class EpistemicBreakerDaemon:
     async def run(self):
         """Main evaluation loop."""
         logger.info(
-            "🛡️ Epistemic Breaker Daemon Initialized. Scanning every %ss. Max Entropy limit: %s",
+            "🛡️ Retrieval Breaker Daemon Initialized. Scanning every %ss. Max Entropy limit: %s",
             self.check_interval_seconds,
             self.max_entropy_threshold,
         )
@@ -151,10 +151,10 @@ class EpistemicBreakerDaemon:
                     # 2. If it exceeds limits, trip the breaker.
                     await self._trigger_sleep_cycle()
                 else:
-                    logger.debug("Epistemic load nominal: %.3f", entropy)
+                    logger.debug("Retrieval load nominal: %.3f", entropy)
 
             except Exception as e:
-                logger.error("Error in Epistemic Breaker loop: %s", e)
+                logger.error("Error in Retrieval Breaker loop: %s", e)
 
             # Wait for next scan, adjust if circuit is currently open
             if self.is_running:
@@ -162,5 +162,5 @@ class EpistemicBreakerDaemon:
 
     def stop(self):
         """Signals the daemon to shut down cleanly."""
-        logger.info("Stopping Epistemic Breaker Daemon...")
+        logger.info("Stopping Retrieval Breaker Daemon...")
         self.is_running = False

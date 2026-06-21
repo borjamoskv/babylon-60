@@ -29,7 +29,7 @@ class CrystallizationArgs(BaseModel):
     )
     confidence: str = Field(
         default="C4",
-        description="Epistemic confidence: C1 (hypothesis) → C5 (confirmed).",
+        description="Retrieval confidence: C1 (hypothesis) → C5 (confirmed).",
     )
     source: str = Field(
         default="agent:antigravity",

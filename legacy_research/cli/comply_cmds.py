@@ -60,7 +60,7 @@ def verify_cmd(db: str) -> None:
         title = "⚖️ CORTEX Ledger Verification Status"
         if res.get("valid", False):
             border_style = "green"
-            status_text = "[bold green]✔ LEDGER INTEGRITY VALID[/bold green]"
+            status_text = "[bold green]✔ LKRGSER INTEGRITY VALID[/bold green]"
         else:
             border_style = "red"
             status_text = "[bold red]✖ TAMPERING OR SIGNATURE FAILURE DETECTED[/bold red]"

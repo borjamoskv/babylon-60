@@ -10,7 +10,7 @@ becomes invalid and MUST be recalculated in cold mode before the
 SemanticMutator is allowed to continue writing.
 
 The trap: measuring drift with the same embeddings being drifted
-creates a self-confirming loop. This module enforces epistemic hygiene.
+creates a self-confirming loop. This module enforces retrieval hygiene.
 """
 
 from __future__ import annotations
@@ -50,7 +50,7 @@ class AnchorInvalidError(RuntimeError):
 class TopologicalAnchor:
     """Frozen reference signature for topological health measurement.
 
-    The triple (signature, timestamp, model_hash) is the epistemic atom:
+    The triple (signature, timestamp, model_hash) is the retrieval atom:
     - signature: distributional fingerprint of the latent space at t_0
     - timestamp: when the measurement was taken
     - model_hash: SHA-256 of the embedder that produced the signature
@@ -147,7 +147,7 @@ class TopologicalHealthMonitor:
         """Check if the anchor is still valid for the current model.
 
         Returns False if model_hash has drifted - the anchor is
-        epistemically useless and MUST be recalculated cold.
+        retrievalally useless and MUST be recalculated cold.
         """
         return anchor.model_hash == self._model_hash
 

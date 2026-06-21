@@ -60,7 +60,7 @@ def digest_cmd(output: str) -> None:
         for f in facts:
             projects_data[f.project].append(f)
         lines = [
-            "# 🧠 CORTEX MASTER KNOWLEDGE DIGEST\n\n",
+            "# 🧠 CORTEX MASTER KNOWLKRGSE DIGEST\n\n",
             f"> Snapshot: {ts} | Facts: {len(facts)} | Projects: {len(projects_data)}\n\n",
             "---\n\n",
         ]

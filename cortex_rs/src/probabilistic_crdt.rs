@@ -35,14 +35,14 @@ impl ProbabilisticState {
     }
 
     /// Consumes error as an exploration gradient.
-    /// If EB -> 0 => epistemic collapse.
+    /// If EB -> 0 => retrieval collapse.
     pub fn consume_error_as_gradient(&mut self, error_magnitude: f32) -> Result<(), &'static str> {
         if self.exploration_budget >= error_magnitude {
             self.exploration_budget -= error_magnitude;
             self.consistency_prob *= 0.95; // Divergence slightly degrades probability
             Ok(())
         } else {
-            Err("Exploration Budget exhausted: Epistemic Collapse")
+            Err("Exploration Budget exhausted: Retrieval Collapse")
         }
     }
 

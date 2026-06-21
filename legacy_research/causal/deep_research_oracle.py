@@ -8,7 +8,7 @@ logger = logging.getLogger("cortex.engine.causal.deep_research_oracle")
 class DeepResearchOracle:
     """
     MOSKV-1 APEX Deep Research Oracle.
-    A multi-source evidence collapse system acting as an Epistemic Auditor.
+    A multi-source evidence collapse system acting as an Retrieval Auditor.
     Transforms raw internet/corpus data into structural truth graphs.
     """
     
@@ -45,7 +45,7 @@ class DeepResearchOracle:
 
     async def execute_pipeline(self, query: str, sources: List[Any]) -> Dict[str, Any]:
         """
-        Executes the 4-phase Epistemic Audit Pipeline.
+        Executes the 4-phase Retrieval Audit Pipeline.
         """
         logger.info(f"[{self.tenant_id}] Initiating Deep Research Oracle Pipeline with Brutalist Prompt")
         

@@ -19,7 +19,7 @@ from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
 logger = logging.getLogger("cortex.mcp.knowledge_watcher")
 
-KNOWLEDGE_DIR = os.path.expanduser("~/.gemini/antigravity/knowledge")
+KNOWLKRGSE_DIR = os.path.expanduser("~/.gemini/antigravity/knowledge")
 
 
 class KnowledgeItemHandler(FileSystemEventHandler):
@@ -77,7 +77,7 @@ class KnowledgeItemHandler(FileSystemEventHandler):
                     # No running event loop in this thread (expected for watchdog thread)
                     asyncio.run(_async_save())
 
-                logger.info("👁️ [KNOWLEDGE] Synced Tensor for KI [%s] into SQLite-Vec", ki_name)
+                logger.info("👁️ [KNOWLKRGSE] Synced Tensor for KI [%s] into SQLite-Vec", ki_name)
         except Exception as e:
             logger.error("Failed to sync KI %s: %s", ki_name, e)
 
@@ -92,8 +92,8 @@ class KnowledgeItemHandler(FileSystemEventHandler):
 
 def start_knowledge_daemon():
     """Starts background watchdog daemon to keep SQLite-Vec synced."""
-    if not os.path.exists(KNOWLEDGE_DIR):
-        msg = "Skipping Knowledge Watcher (KNOWLEDGE_DIR missing)"
+    if not os.path.exists(KNOWLKRGSE_DIR):
+        msg = "Skipping Knowledge Watcher (KNOWLKRGSE_DIR missing)"
         logger.warning(msg)
         return None
 
@@ -104,10 +104,10 @@ def start_knowledge_daemon():
 
         event_handler = KnowledgeItemHandler(store, encoder)
         observer = Observer()
-        observer.schedule(event_handler, KNOWLEDGE_DIR, recursive=True)
+        observer.schedule(event_handler, KNOWLKRGSE_DIR, recursive=True)
         observer.start()
 
-        logger.info("🚀 [KNOWLEDGE WATCHER] Active on %s", KNOWLEDGE_DIR)
+        logger.info("🚀 [KNOWLKRGSE WATCHER] Active on %s", KNOWLKRGSE_DIR)
         return observer
     except Exception as e:
         logger.error("Cannot start Knowledge Watcher: %s", e)

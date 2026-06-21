@@ -6,7 +6,7 @@ use crate::bft::exergy::{ExergyMutation, ExergyGuard, ExergyError};
 
 #[pyclass]
 #[derive(Clone, Debug, PartialEq)]
-pub enum EpistemicStatus {
+pub enum ValidationStatus {
     Accepted,
     Challenged,
     Deprecated,
@@ -15,11 +15,11 @@ pub enum EpistemicStatus {
 
 #[pyclass]
 #[derive(Clone)]
-pub struct EpistemicNode {
+pub struct RetrievalNode {
     #[pyo3(get)]
     pub id: String,
     #[pyo3(get, set)]
-    pub status: EpistemicStatus,
+    pub status: ValidationStatus,
     #[pyo3(get, set)]
     pub confidence: f64,
     // dependencies: Nodes this node supports
@@ -33,12 +33,12 @@ pub struct EpistemicNode {
 }
 
 #[pymethods]
-impl EpistemicNode {
+impl RetrievalNode {
     #[new]
     pub fn new(id: String, confidence: f64) -> Self {
-        EpistemicNode {
+        RetrievalNode {
             id,
-            status: EpistemicStatus::Accepted,
+            status: ValidationStatus::Accepted,
             confidence,
             supported_by: HashSet::new(),
             supports: HashSet::new(),
@@ -59,24 +59,24 @@ impl EpistemicNode {
 }
 
 #[pyclass]
-pub struct EpistemicGraph {
-    pub(crate) nodes: Arc<DashMap<String, EpistemicNode>>,
+pub struct RetrievalGraph {
+    pub(crate) nodes: Arc<DashMap<String, RetrievalNode>>,
 }
 
 #[pymethods]
-impl EpistemicGraph {
+impl RetrievalGraph {
     #[new]
     pub fn new() -> Self {
-        EpistemicGraph {
+        RetrievalGraph {
             nodes: Arc::new(DashMap::new()),
         }
     }
 
-    pub fn add_node(&self, node: EpistemicNode) {
+    pub fn add_node(&self, node: RetrievalNode) {
         self.nodes.insert(node.id.clone(), node);
     }
 
-    pub fn get_node_status(&self, node_id: &str) -> Option<EpistemicStatus> {
+    pub fn get_node_status(&self, node_id: &str) -> Option<ValidationStatus> {
         self.nodes.get(node_id).map(|n| n.status.clone())
     }
 
@@ -109,8 +109,8 @@ impl EpistemicGraph {
 
         while let Some(current_id) = stack.pop() {
             if let Some(mut node) = self.nodes.get_mut(&current_id) {
-                if node.status != EpistemicStatus::Invalid {
-                    node.status = EpistemicStatus::Invalid;
+                if node.status != ValidationStatus::Invalid {
+                    node.status = ValidationStatus::Invalid;
                     node.confidence = 0.0;
                     affected.push(current_id.clone());
 
@@ -126,7 +126,7 @@ impl EpistemicGraph {
     }
 }
 
-impl EpistemicGraph {
+impl RetrievalGraph {
     pub fn apply_exergy_mutation(
         &self,
         mutation: &ExergyMutation,

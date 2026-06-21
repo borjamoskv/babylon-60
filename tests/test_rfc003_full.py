@@ -7,7 +7,7 @@ from cortex_rs import validate_exergy_mutation, can_read_fact
 
 class TestFullStackHardening:
     """
-    Prueba end-to-end: RUL → EDG → BFT → WAL → Staging
+    Prueba end-to-end: RUL → KRGS → BFT → WAL → Staging
     """
     
     @pytest.mark.asyncio
@@ -35,7 +35,7 @@ class TestFullStackHardening:
         
         # 3. Verificar que está en staging (no legible)
         fact = await orchestrator.fact_store.get(fact_id)
-        assert fact.epistemic_status == "staging"
+        assert fact.validation_status == "staging"
         
         # 4. ZK-Guard valida y sella, requiriendo el hash del WAL
         sealed = await orchestrator.zk_guard.validate_and_seal(fact_id, wal_event_hash, is_valid=True)
@@ -43,10 +43,10 @@ class TestFullStackHardening:
         
         # 5. Ahora está sealed y disponible
         fact = await orchestrator.fact_store.get(fact_id)
-        assert fact.epistemic_status == "sealed"
+        assert fact.validation_status == "sealed"
         assert can_read_fact(fact.fact_json, "any_agent") is True
         
-        # 6. EDG puede consumir
+        # 6. KRGS puede consumir
         await orchestrator.edg.inject_node(fact_id)
         node = await orchestrator.edg.get_node(fact_id)
         assert node is not None

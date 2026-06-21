@@ -4,9 +4,9 @@ from cortex.engine.semantic_collapse import (
     kolmogorov_approx,
     compute_ncd,
     collapse_eligible,
-    semantic_collapse
+    semantic_collapse,
+    MAX_KINETIC_MULTIPLIER
 )
-from scripts.ouroboros_prune import MAX_KINETIC_MULTIPLIER
 
 def test_kolmogorov_approximation():
     content_redundant = "A" * 1000

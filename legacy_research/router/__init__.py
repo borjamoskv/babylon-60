@@ -6,7 +6,7 @@ intent classification and capability matching.
 """
 
 from cortex.router.adapter import ExergyConfigAdapter
-from cortex.router.arbitrator import EpistemicArbitrator, ExecutionContext, ModelType
+from cortex.router.arbitrator import RetrievalArbitrator, ExecutionContext, ModelType
 from cortex.router.causal import CausalPolicyGradientRouter, CausalTrajectory
 from cortex.router.contract import (
     CognitiveMode,
@@ -16,18 +16,18 @@ from cortex.router.contract import (
     Severity,
 )
 from cortex.router.nash import NashCausalRouter, RoutingUtilities
-from cortex.router.policy import EpistemicPolicyNetwork, SignalVector
+from cortex.router.policy import RetrievalPolicyNetwork, SignalVector
 from cortex.router.router import AgentRouter
 
 __all__ = [
     "AgentRouter",
     "CognitiveMode",
-    "EpistemicArbitrator",
+    "RetrievalArbitrator",
     "ExergyConfigAdapter",
     "ExecutionContext",
     "InformationState",
     "ModelType",
-    "EpistemicPolicyNetwork",
+    "RetrievalPolicyNetwork",
     "RoutingContext",
     "RoutingDecision",
     "Severity",

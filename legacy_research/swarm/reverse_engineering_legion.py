@@ -35,11 +35,11 @@ def execute_reverse_engineering(target: str, nodes: int = 100000):
     legion.yield_tensor = np.random.lognormal(mean=0.5, sigma=1.0, size=nodes).astype(np.float32)
     legion.token_burn_tensor.fill(1.0)
 
-    # 2. Epistemic Slash
+    # 2. Retrieval Slash
     logger.info(
-        "🔪 Phase 3: Epistemic Slashing (Culling weak decompilers, respawning from elites)..."
+        "🔪 Phase 3: Retrieval Slashing (Culling weak decompilers, respawning from elites)..."
     )
-    slashed = legion.epistemic_slash_and_respawn(bottom_percentile=20, elite_percentile=98)
+    slashed = legion.retrieval_slash_and_respawn(bottom_percentile=20, elite_percentile=98)
     logger.info(f"💀 Respawned {slashed} low-yield nodes from elite patterns.")
 
     # 3. Collapse & Centurion Reduction
@@ -69,7 +69,7 @@ def execute_reverse_engineering(target: str, nodes: int = 100000):
     # Here we simulate the top-k highest similarity concepts extracted from the consensus hypervector.
     extracted_concepts = [
         "1. Cryptographic routines bypass standard syscalls (Direct kernel memory writes detected).",
-        "2. Anomaly: Loop unrolling at offset 0x40A2 is masking an epistemic drift mechanism.",
+        "2. Anomaly: Loop unrolling at offset 0x40A2 is masking an retrieval drift mechanism.",
         "3. Consensus: The target binary employs a Merkle-DAG state channel for persistence.",
         "4. Heuristic Confidence: C4-SIM (98.3% coherence across 80,000 elite nodes).",
     ]

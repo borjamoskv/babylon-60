@@ -4,11 +4,11 @@ Neuromorphic Pipeline (Pre-Query & Pre-Store Cognitive Gateway).
 
 Orchestrates the cognitive assessment layer that wraps every memory operation:
 
-  Query path:  SchemaEngine → EpistemicVoidDetector → MetamemoryMonitor → QueryResult
+  Query path:  SchemaEngine → RetrievalVoidDetector → MetamemoryMonitor → QueryResult
   Store path:  SchemaEngine → ValenceClassifier → STDPEngine → StoreResult
 
 The pipeline is the single entry-point for all memory I/O that requires
-epistemic evaluation, emotional tagging, or synaptic reinforcement.
+retrieval evaluation, emotional tagging, or synaptic reinforcement.
 
 Derivation: Ω₃ (Byzantine Default) + Ω₂ (Entropic Asymmetry)
 """
@@ -30,8 +30,8 @@ from cortex.memory.schemas import SchemaEngine
 from cortex.memory.stdp import STDPEngine
 from cortex.memory.valence import ValenceRecord, classify_valence
 from cortex.memory.void_detector import (
-    EpistemicAnalysis,
-    EpistemicVoidDetector,
+    RetrievalAnalysis,
+    RetrievalVoidDetector,
 )
 
 logger = logging.getLogger("cortex.memory.pipeline")
@@ -39,7 +39,7 @@ logger = logging.getLogger("cortex.memory.pipeline")
 
 @dataclass(frozen=True)
 class QueryResult:
-    epistemic: EpistemicAnalysis
+    retrieval: RetrievalAnalysis
     judgment: MetaJudgment
     fok_directive: FOKDirective
     schema_applied: str | None = None
@@ -49,7 +49,7 @@ class QueryResult:
     @property
     def safe_to_respond(self) -> bool:
         return (
-            self.epistemic.is_safe_to_respond and self.fok_directive != FOKDirective.EXTERNAL_SEARCH
+            self.retrieval.is_safe_to_respond and self.fok_directive != FOKDirective.EXTERNAL_SEARCH
         )
 
     @property
@@ -72,12 +72,12 @@ class NeuromorphicPipeline:
     def __init__(
         self,
         metamemory: MetamemoryMonitor | None = None,
-        void_detector: EpistemicVoidDetector | None = None,
+        void_detector: RetrievalVoidDetector | None = None,
         schema_engine: SchemaEngine | None = None,
         stdp: STDPEngine | None = None,
     ) -> None:
         self._metamemory = metamemory or MetamemoryMonitor()
-        self._void_detector = void_detector or EpistemicVoidDetector()
+        self._void_detector = void_detector or RetrievalVoidDetector()
         self._schema_engine = schema_engine or SchemaEngine()
         self._stdp = stdp or STDPEngine()
 
@@ -95,13 +95,13 @@ class NeuromorphicPipeline:
         augmented = self._schema_engine.apply_retrieval_schema(schema, query) if schema else query
         schema_name = schema.name if schema else None
 
-        epistemic = self._void_detector.analyze(candidates)
+        retrieval = self._void_detector.analyze(candidates)
 
         engram_list = engrams or []
         judgment = self._metamemory.introspect(
             query_embedding=query_embedding,
             candidate_engrams=engram_list,
-            retrieval_score=epistemic.top_similarity,
+            retrieval_score=retrieval.top_similarity,
         )
 
         directive = self._metamemory.fok_recommendation(judgment.fok_score)
@@ -109,7 +109,7 @@ class NeuromorphicPipeline:
         elapsed = (time.monotonic() - t0) * 1000
 
         return QueryResult(
-            epistemic=epistemic,
+            retrieval=retrieval,
             judgment=judgment,
             fok_directive=directive,
             schema_applied=schema_name,

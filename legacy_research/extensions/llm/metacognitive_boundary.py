@@ -46,7 +46,7 @@ logger = logging.getLogger("cortex.extensions.llm.metacognitive_boundary")
 # Confidence threshold below which we hard-block an overconfident response
 _ABSTAIN_CONFIDENCE_CAP: float = 0.2
 
-# Max characters of epistemic preamble injected into the system prompt
+# Max characters of retrieval preamble injected into the system prompt
 _MAX_PREAMBLE_CHARS: int = 1200
 
 # Minimum verdict confidence to allow a RESPOND verdict through
@@ -56,8 +56,8 @@ _RESPOND_CONFIDENCE_FLOOR: float = 0.5
 # ─── Calibration Signal ───────────────────────────────────────────────
 
 
-class EpistemicSignal(str, Enum):
-    """Human-readable epistemic state passed to the LLM."""
+class RetrievalSignal(str, Enum):
+    """Human-readable retrieval state passed to the LLM."""
 
     CONFIDENT = "confident"  # FOK high, Verdict=RESPOND
     PARTIAL = "partial"  # FOK moderate, Verdict=SEARCH_MORE
@@ -70,19 +70,19 @@ class EpistemicSignal(str, Enum):
 
 @dataclass(frozen=True)
 class MetacognitiveContext:
-    """Epistemic snapshot passed from memory layer to LLM layer.
+    """Retrieval snapshot passed from memory layer to LLM layer.
 
     All the signals the LLM needs to calibrate its response:
       - verdict: The metacognitive judge's decision
       - judgment: Full FOK/JOL/confidence breakdown
       - memory_cards: The actual memory evidence
-      - signal: Plain-English epistemic state label
+      - signal: Plain-English retrieval state label
     """
 
     verdict: Verdict
     judgment: MetaJudgment
     memory_cards: list[MemoryCard]
-    signal: EpistemicSignal
+    signal: RetrievalSignal
     knowledge_gaps: list[str]
     domain_calibration: float = -1.0  # Ω₁: Segmented Brier Score
 
@@ -126,7 +126,7 @@ def build_metacognitive_context(
 ) -> MetacognitiveContext:
     """Compose a MetacognitiveContext from metamemory outputs.
 
-    Derives the EpistemicSignal automatically:
+    Derives the RetrievalSignal automatically:
       - TOT if tip_of_tongue is flagged
       - CONFIDENT if verdict=RESPOND and confidence high
       - PARTIAL if verdict=SEARCH_MORE
@@ -136,13 +136,13 @@ def build_metacognitive_context(
     gaps = knowledge_gaps or []
 
     if judgment.tip_of_tongue:
-        signal = EpistemicSignal.TOT
+        signal = RetrievalSignal.TOT
     elif verdict == Verdict.RESPOND and judgment.confidence >= _RESPOND_CONFIDENCE_FLOOR:
-        signal = EpistemicSignal.CONFIDENT
+        signal = RetrievalSignal.CONFIDENT
     elif verdict == Verdict.SEARCH_MORE:
-        signal = EpistemicSignal.PARTIAL
+        signal = RetrievalSignal.PARTIAL
     else:
-        signal = EpistemicSignal.UNCERTAIN
+        signal = RetrievalSignal.UNCERTAIN
 
     return MetacognitiveContext(
         verdict=verdict,
@@ -157,10 +157,10 @@ def build_metacognitive_context(
 # ─── Preamble Generator ──────────────────────────────────────────────
 
 
-def build_epistemic_preamble(ctx: MetacognitiveContext) -> str:
+def build_retrieval_preamble(ctx: MetacognitiveContext) -> str:
     """Generate the metacognitive preamble injected into the system prompt.
 
-    This gives the LLM its "epistemic situation" before it generates:
+    This gives the LLM its "retrieval situation" before it generates:
       - What the memory system found
       - How confident it is
       - What action it should take
@@ -252,17 +252,17 @@ def build_epistemic_preamble(ctx: MetacognitiveContext) -> str:
 # ─── System Prompt Injector ──────────────────────────────────────────
 
 
-def inject_epistemic_preamble(
+def inject_retrieval_preamble(
     system_prompt: str,
     ctx: MetacognitiveContext,
 ) -> str:
-    """Prepend the epistemic preamble to an existing system prompt.
+    """Prepend the retrieval preamble to an existing system prompt.
 
-    Placement: BEFORE the main prompt so the LLM sees its epistemic
+    Placement: BEFORE the main prompt so the LLM sees its retrieval
     state before its role/instructions. This mirrors human metacognition:
     you assess your knowledge state before you decide what to say.
     """
-    preamble = build_epistemic_preamble(ctx)
+    preamble = build_retrieval_preamble(ctx)
     if system_prompt:
         return f"{preamble}\n\n{system_prompt}"
     return preamble
@@ -371,13 +371,13 @@ def check_confidence_consistency(
 # ─── Public API ──────────────────────────────────────────────────────
 
 __all__ = [
-    "EpistemicSignal",
+    "RetrievalSignal",
     "MetacognitiveContext",
     "append_retrieval_plan_request",
-    "build_epistemic_preamble",
+    "build_retrieval_preamble",
     "build_metacognitive_context",
     "check_confidence_consistency",
     "extract_declared_confidence",
-    "inject_epistemic_preamble",
+    "inject_retrieval_preamble",
     "verify_retrieval_plan_declared",
 ]

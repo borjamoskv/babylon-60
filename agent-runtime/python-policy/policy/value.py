@@ -11,5 +11,5 @@ class ValueNet(nn.Module):
         )
 
     def forward(self, state: torch.Tensor) -> torch.Tensor:
-        """Evaluates epistemic/exergic value of a given state."""
+        """Evaluates retrieval/exergic value of a given state."""
         return self.net(state)

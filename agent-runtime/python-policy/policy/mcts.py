@@ -27,7 +27,7 @@ def rollout(state: torch.Tensor, policy_fn: Callable, value_fn: Callable, depth:
             # Predict next state (World Model / Simulator)
             current = simulate(current, action)
             
-            # Evaluate epistemic state
+            # Evaluate retrieval state
             val = value_fn(current)
             total_value += val.item()
 

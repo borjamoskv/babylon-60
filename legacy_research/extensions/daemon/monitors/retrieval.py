@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
-"""Epistemic Membrane Monitor - autonomous self-healing based on certainty derivative.
+"""Retrieval Membrane Monitor - autonomous self-healing based on certainty derivative.
 
-Monitors the degradation of epistemic confidence across the knowledge base.
+Monitors the degradation of retrieval confidence across the knowledge base.
 Connects the Metamemory index to the Workflow layer, triggering /autodidact,
 /josu, or /immune when entropy reaches critical thresholds (Axiom Ω₂, Ω₁₁).
 """
@@ -15,13 +15,13 @@ from typing import Any
 from cortex.extensions.daemon.models import WorkflowAlert
 from cortex.extensions.daemon.monitors.base import BaseMonitor
 
-__all__ = ["EpistemicMonitor"]
+__all__ = ["RetrievalMonitor"]
 
 logger = logging.getLogger("moskv-daemon")
 
 
-class EpistemicMonitor(BaseMonitor[WorkflowAlert]):
-    """Monitors the mathematical decay of epistemic certainty.
+class RetrievalMonitor(BaseMonitor[WorkflowAlert]):
+    """Monitors the mathematical decay of retrieval certainty.
 
     Acts as the knowledge immune system. Instead of waiting for time-based
     heuristics, this monitor analyzes the actual confidence derived from the
@@ -49,7 +49,7 @@ class EpistemicMonitor(BaseMonitor[WorkflowAlert]):
         self._last_suggestions: list[WorkflowAlert] = []
 
     def check(self) -> list[WorkflowAlert]:
-        """Evaluate epistemic state and trigger self-healing workflows."""
+        """Evaluate retrieval state and trigger self-healing workflows."""
         now = time.monotonic()
         if now - self._last_eval < self._eval_interval_seconds and self._last_suggestions:
             return self._last_suggestions
@@ -73,7 +73,7 @@ class EpistemicMonitor(BaseMonitor[WorkflowAlert]):
                         ),
                         confidence="C4🔵",
                         priority=1,
-                        tags=["epistemic", "ghosts", "repair"],
+                        tags=["retrieval", "ghosts", "repair"],
                     )
                 )
 
@@ -91,7 +91,7 @@ class EpistemicMonitor(BaseMonitor[WorkflowAlert]):
                             ),
                             confidence="C3🟡",
                             priority=2,
-                            tags=["epistemic", "decay", "learning"],
+                            tags=["retrieval", "decay", "learning"],
                         )
                     )
             # 3. Staleness Ratio -> /nightshift
@@ -110,7 +110,7 @@ class EpistemicMonitor(BaseMonitor[WorkflowAlert]):
                         ),
                         confidence="C4🔵",
                         priority=3,
-                        tags=["epistemic", "stale", "crystallize"],
+                        tags=["retrieval", "stale", "crystallize"],
                     )
                 )
 
@@ -118,7 +118,7 @@ class EpistemicMonitor(BaseMonitor[WorkflowAlert]):
             self._last_mean_confidence = stats.mean_retrieval_confidence
 
         except Exception as e:
-            logger.error("Failed to evaluate epistemic certainty: %s", e)
+            logger.error("Failed to evaluate retrieval certainty: %s", e)
 
         # Sort by priority
         suggestions.sort(key=lambda a: a.priority)

@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-"""CORTEX CLI - Lineage & Epistemic Audit Commands.
+"""CORTEX CLI - Lineage & Retrieval Audit Commands.
 
 Provides verification of Ω₃-V: Verifiable Lineage.
 """
@@ -35,7 +35,7 @@ def _run_async(coro):
 
 @cli.group("lineage")
 def lineage_group():
-    """Epistemic lineage (Ω₃-V) commands."""
+    """Retrieval lineage (Ω₃-V) commands."""
 
 
 @lineage_group.command("trace")
@@ -78,7 +78,7 @@ def trace_lineage(fact_id: int, db: str, depth: int):
 @click.argument("file_path", type=click.Path(exists=True))
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def audit_file(file_path: str, db: str):
-    """Scan a file for fact IDs and verify their epistemic lineage."""
+    """Scan a file for fact IDs and verify their retrieval lineage."""
     with open(file_path) as f:
         content = f.read()
 

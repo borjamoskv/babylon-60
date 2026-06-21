@@ -7,8 +7,8 @@ from typing import Any
 
 from cortex.engine.causality_models import (
     Confidence,
-    EpistemicStatus,
-    EDGE_DERIVED_FROM,
+    ValidationStatus,
+    KRGSE_DERIVED_FROM,
 )
 
 # BABYLON-60 Scale: 60 represents 100% certainty, 0 represents 0%.
@@ -19,7 +19,7 @@ BABYLON_60_MIN = 0
 class CausalInvariant:
     delta_hash: str
     edge_type: str
-    epistemic_status: EpistemicStatus
+    validation_status: ValidationStatus
     confidence_b60: int  # Enforcing BABYLON-60 integer structures
     metadata: dict[str, Any]
 
@@ -55,13 +55,13 @@ class DecisionParser:
         # Cryptographic anchor
         delta_hash = compute_delta_hash(delta_payload)
         
-        # Analyze payload for structural hints to assign epistemic status
+        # Analyze payload for structural hints to assign retrieval status
         if "TODO" in delta_payload or "FIXME" in delta_payload:
             # Lower confidence for tentative changes
-            epistemic_status = EpistemicStatus.CONJECTURE
+            validation_status = ValidationStatus.CONJECTURE
             confidence_b60 = BABYLON_60_MAX // 2  # 30 out of 60
         else:
-            epistemic_status = EpistemicStatus.TEST_PASSED
+            validation_status = ValidationStatus.TEST_PASSED
             confidence_b60 = BABYLON_60_MAX
 
         # Extract contextual claims
@@ -76,8 +76,8 @@ class DecisionParser:
 
         return CausalInvariant(
             delta_hash=delta_hash,
-            edge_type=EDGE_DERIVED_FROM,
-            epistemic_status=epistemic_status,
+            edge_type=KRGSE_DERIVED_FROM,
+            validation_status=validation_status,
             confidence_b60=confidence_b60,
             metadata=metadata
         )

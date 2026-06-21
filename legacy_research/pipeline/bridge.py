@@ -227,6 +227,6 @@ class LedgerAdapter:
             with open(ledger_path, "a", encoding="utf-8") as f:
                 f.write(entry + "\n")
 
-            logger.debug("[LEDGER] Appended mission %s hash %s", mission_id, result_hash[:16])
+            logger.debug("[LKRGSER] Appended mission %s hash %s", mission_id, result_hash[:16])
         except Exception as e:
-            logger.warning("[LEDGER] Append failed: %s", e)
+            logger.warning("[LKRGSER] Append failed: %s", e)

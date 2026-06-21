@@ -28,7 +28,7 @@ logger = logging.getLogger("cortex.audit.decision_ledger")
 
 # ─── Schema Setup ────────────────────────────────────────────────────────────
 
-_CREATE_DECISION_LEDGER_SQL = """
+_CREATE_DECISION_LKRGSER_SQL = """
 CREATE TABLE IF NOT EXISTS decision_ledger (
     trace_id TEXT PRIMARY KEY,
     parent_id TEXT,
@@ -182,7 +182,7 @@ class DecisionLedger:
             async with AsyncFileLock():
                 if self._ready:
                     return
-                await self._conn.execute(_CREATE_DECISION_LEDGER_SQL)
+                await self._conn.execute(_CREATE_DECISION_LKRGSER_SQL)
                 await self._conn.commit()
                 cursor = await self._conn.execute(
                     "SELECT signature FROM decision_ledger ORDER BY rowid DESC LIMIT 1"

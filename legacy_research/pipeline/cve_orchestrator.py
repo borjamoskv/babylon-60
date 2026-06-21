@@ -22,7 +22,7 @@ from cortex.telemetry.pipeline_metrics import PipelineMetrics
 
 logger = logging.getLogger("cortex.pipeline.cve_orchestrator")
 
-class EpistemicCollapseError(RuntimeError):
+class RetrievalCollapseError(RuntimeError):
     """Raised when the orchestrator fails to reach structural consensus within the causal loop bound."""
 
 class MockSearchClient:
@@ -139,7 +139,7 @@ class CVEOrchestrator:
         
         if not verification["validated"]:
             self.metrics.record_claim(confirmed=False, cited=False)
-            logger.warning(f"[CVEOrchestrator] SAGA Record. Epistemic Collapse. Max loops ({self.max_loops}) exhausted without validation.")
+            logger.warning(f"[CVEOrchestrator] SAGA Record. Retrieval Collapse. Max loops ({self.max_loops}) exhausted without validation.")
             final_synthesis = {
                 "cve_id": analysis.get("cve_id", "UNKNOWN"),
                 "status": "COLLAPSED",

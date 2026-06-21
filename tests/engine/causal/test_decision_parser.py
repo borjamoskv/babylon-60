@@ -1,6 +1,6 @@
 import pytest
 from cortex.engine.causal.decision_parser import DecisionParser, CausalInvariant
-from cortex.engine.causality_models import EpistemicStatus, EDGE_DERIVED_FROM
+from cortex.engine.causality_models import ValidationStatus, KRGSE_DERIVED_FROM
 
 def test_parse_decision_valid():
     parser = DecisionParser()
@@ -10,8 +10,8 @@ def test_parse_decision_valid():
     invariant = parser.parse_decision(payload, context)
     
     assert isinstance(invariant, CausalInvariant)
-    assert invariant.edge_type == EDGE_DERIVED_FROM
-    assert invariant.epistemic_status == EpistemicStatus.TEST_PASSED
+    assert invariant.edge_type == KRGSE_DERIVED_FROM
+    assert invariant.validation_status == ValidationStatus.TEST_PASSED
     assert invariant.confidence_b60 == 60
     assert invariant.metadata["agent_id"] == "test_agent"
     assert "taint:test_agent:session_123:" in invariant.metadata["cortex_taint"]
@@ -23,7 +23,7 @@ def test_parse_decision_tentative():
     
     invariant = parser.parse_decision(payload, context)
     
-    assert invariant.epistemic_status == EpistemicStatus.CONJECTURE
+    assert invariant.validation_status == ValidationStatus.CONJECTURE
     assert invariant.confidence_b60 == 30
 
 def test_parse_decision_empty_payload():

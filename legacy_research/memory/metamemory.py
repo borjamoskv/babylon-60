@@ -300,7 +300,7 @@ class MetamemoryMonitor:
             source="introspect",
         )
 
-    # ─── Epistemic Collapse Tracking (Metamemory) ─────────────────────────
+    # ─── Retrieval Collapse Tracking (Metamemory) ─────────────────────────
 
     def calculate_structural_weight(self, delta_h: float, cost_of_falsification: float) -> float:
         """Calculate W_h (Structural Weight) for hypothesis falsification.

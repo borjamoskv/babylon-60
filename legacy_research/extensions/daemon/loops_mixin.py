@@ -39,7 +39,7 @@ class LoopsMixin:
     cloud_sync_monitor: Any
     tombstone_monitor: Any
     workflow_monitor: Any
-    epistemic_monitor: Any
+    retrieval_monitor: Any
     aether_monitor: Any
     _aether_daemon: Any
     fiat_oracle: Any
@@ -50,7 +50,7 @@ class LoopsMixin:
     frontier_daemon: Any
     iot_oracle: Any
     zero_prompting_daemon: Any
-    epistemic_breaker_daemon: Any
+    retrieval_breaker_daemon: Any
     notify_enabled: bool
     _last_alerts: dict[str, float]
     _cooldown: float

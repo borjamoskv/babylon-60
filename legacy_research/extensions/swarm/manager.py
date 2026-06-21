@@ -327,7 +327,7 @@ class CapatazOrchestrator:
                     task.status = TaskStatus.FAILED
                     task.error = f"Elder rejection: {v_res.reason}"
 
-                    # EMIT NEGATIVE KNOWLEDGE SIGNAL
+                    # EMIT NEGATIVE KNOWLKRGSE SIGNAL
                     await self._execute_completion_with_tracking(
                         url="",
                         headers={},

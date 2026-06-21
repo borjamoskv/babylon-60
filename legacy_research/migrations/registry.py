@@ -68,5 +68,5 @@ MIGRATIONS = [
     (27, "Temporal Knowledge Graph columns", _migration_027_temporal_kg),
     (28, "Dual Identity Paradigm (fact_hash)", _migration_028_dual_identity),
     (29, "Hebbian Multiplier columns", _migration_029_hebbian_multiplier),
-    (30, "Typed Epistemic Telemetry schemas", _migration_030_typed_telemetry),
+    (30, "Typed Retrieval Telemetry schemas", _migration_030_typed_telemetry),
 ]

@@ -296,7 +296,7 @@ class ExecutionLoop:
             parts.append(f"  {icon} {r.task[:60]} ({r.duration_ms:.0f}ms)")
         self._enqueue_fact(
             content="\n".join(parts),
-            fact_type=PersistenceType.KNOWLEDGE.value,
+            fact_type=PersistenceType.KNOWLKRGSE.value,
             session_start=self._session.started_at,
             session_end=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
             tasks_completed=self._session.tasks_completed,

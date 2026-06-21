@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 """
 Sovereign Guard Runtime (Fail-Closed Stub).
-Defined per RFC-CORTEX-NATIVE-AI §9 Epistemic Veto.
+Defined per RFC-CORTEX-NATIVE-AI §9 Retrieval Veto.
 """
 
 from __future__ import annotations

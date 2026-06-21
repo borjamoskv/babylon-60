@@ -1,15 +1,15 @@
 # [C5-REAL] Exergy-Maximized
-"""CORTEX v7+ - Epistemic Void Detector.
+"""CORTEX v7+ - Retrieval Void Detector.
 
 Strategy #12: Before the agent responds, analyze the *topology* of
 the retrieval results to determine whether it truly knows the answer,
-lives in a fog zone, or faces an absolute epistemic void.
+lives in a fog zone, or faces an absolute retrieval void.
 
 Taxonomy of Not-Knowing:
   CONFIDENT        → Dense cluster, high similarity, fresh data
   FOG_ZONE         → Sparse region, low candidate density
   VOID_ABSOLUTE    → No candidates above minimum similarity
-  STALE_KNOWLEDGE  → Candidates present but energy/age indicates decay
+  STALE_KNOWLKRGSE  → Candidates present but energy/age indicates decay
   CONTRADICTION    → Two+ high-similarity engrams with opposing content
 
 Biological analogy: the prefrontal cortex inhibits response when the
@@ -30,9 +30,9 @@ from cortex.utils.void_vec import cosine_similarity
 logger = logging.getLogger("cortex.memory.void_detector")
 
 __all__ = [
-    "EpistemicAnalysis",
-    "EpistemicState",
-    "EpistemicVoidDetector",
+    "RetrievalAnalysis",
+    "RetrievalState",
+    "RetrievalVoidDetector",
 ]
 
 # ─── Constants ────────────────────────────────────────────────────────
@@ -57,13 +57,13 @@ _STALE_AGE_DAYS: Final[float] = 90.0
 # ─── Models ───────────────────────────────────────────────────────────
 
 
-class EpistemicState(str, enum.Enum):
-    """The agent's epistemic relationship to a query."""
+class RetrievalState(str, enum.Enum):
+    """The agent's retrieval relationship to a query."""
 
     CONFIDENT = "confident"
     FOG_ZONE = "fog_zone"
     VOID_ABSOLUTE = "void_absolute"
-    STALE_KNOWLEDGE = "stale_knowledge"
+    STALE_KNOWLKRGSE = "stale_knowledge"
     CONTRADICTION = "contradiction"
 
 
@@ -79,10 +79,10 @@ class ConflictPair:
 
 
 @dataclass(frozen=True)
-class EpistemicAnalysis:
-    """Result of the epistemic void analysis for a query."""
+class RetrievalAnalysis:
+    """Result of the retrieval void analysis for a query."""
 
-    state: EpistemicState
+    state: RetrievalState
     confidence: float = 1.0
     top_similarity: float = 0.0
     candidate_count: int = 0
@@ -94,17 +94,17 @@ class EpistemicAnalysis:
     @property
     def is_safe_to_respond(self) -> bool:
         """Can the agent confidently respond based on this analysis?"""
-        return self.state == EpistemicState.CONFIDENT
+        return self.state == RetrievalState.CONFIDENT
 
     @property
     def badge(self) -> str:
         """Human-readable badge for CLI display."""
-        _BADGES: dict[EpistemicState, str] = {
-            EpistemicState.CONFIDENT: "🟢 CONFIDENT",
-            EpistemicState.FOG_ZONE: "🟡 FOG ZONE",
-            EpistemicState.VOID_ABSOLUTE: "🔴 VOID",
-            EpistemicState.STALE_KNOWLEDGE: "🟠 STALE",
-            EpistemicState.CONTRADICTION: "⚡ CONFLICT",
+        _BADGES: dict[RetrievalState, str] = {
+            RetrievalState.CONFIDENT: "🟢 CONFIDENT",
+            RetrievalState.FOG_ZONE: "🟡 FOG ZONE",
+            RetrievalState.VOID_ABSOLUTE: "🔴 VOID",
+            RetrievalState.STALE_KNOWLKRGSE: "🟠 STALE",
+            RetrievalState.CONTRADICTION: "⚡ CONFLICT",
         }
         return _BADGES.get(self.state, "❓ UNKNOWN")
 
@@ -112,11 +112,11 @@ class EpistemicAnalysis:
 # ─── Core Engine ──────────────────────────────────────────────────────
 
 
-class EpistemicVoidDetector:
-    """Detects epistemic voids, fog zones, contradictions, and staleness.
+class RetrievalVoidDetector:
+    """Detects retrieval voids, fog zones, contradictions, and staleness.
 
     Call ``analyze()`` with the raw search results to get a typed
-    EpistemicAnalysis before the agent formulates its response.
+    RetrievalAnalysis before the agent formulates its response.
 
     Pure logic - no I/O, no DB, no async. Fits into any pipeline.
     """
@@ -142,8 +142,8 @@ class EpistemicVoidDetector:
     def analyze(
         self,
         candidates: list[dict[str, Any]],
-    ) -> EpistemicAnalysis:
-        """Run the full epistemic analysis on search results.
+    ) -> RetrievalAnalysis:
+        """Run the full retrieval analysis on search results.
 
         Each candidate dict should have at minimum:
           - ``score`` (float): similarity/RRF score
@@ -157,8 +157,8 @@ class EpistemicVoidDetector:
           - ``timestamp`` (float): unix timestamp
         """
         if not candidates:
-            return EpistemicAnalysis(
-                state=EpistemicState.VOID_ABSOLUTE,
+            return RetrievalAnalysis(
+                state=RetrievalState.VOID_ABSOLUTE,
                 confidence=0.0,
                 top_similarity=0.0,
                 candidate_count=0,
@@ -170,8 +170,8 @@ class EpistemicVoidDetector:
 
         # 1. Absolute void: best result is too distant
         if top_score < self._void_threshold:
-            return EpistemicAnalysis(
-                state=EpistemicState.VOID_ABSOLUTE,
+            return RetrievalAnalysis(
+                state=RetrievalState.VOID_ABSOLUTE,
                 confidence=top_score * 0.3,
                 top_similarity=top_score,
                 candidate_count=count,
@@ -184,8 +184,8 @@ class EpistemicVoidDetector:
         # 2. Contradiction detection (if embeddings available)
         contradictions = self._detect_contradictions(candidates)
         if contradictions:
-            return EpistemicAnalysis(
-                state=EpistemicState.CONTRADICTION,
+            return RetrievalAnalysis(
+                state=RetrievalState.CONTRADICTION,
                 confidence=top_score * 0.4,
                 top_similarity=top_score,
                 candidate_count=count,
@@ -199,8 +199,8 @@ class EpistemicVoidDetector:
         # 3. Stale knowledge check
         stale_info = self._check_staleness(candidates)
         if stale_info["is_stale"]:
-            return EpistemicAnalysis(
-                state=EpistemicState.STALE_KNOWLEDGE,
+            return RetrievalAnalysis(
+                state=RetrievalState.STALE_KNOWLKRGSE,
                 confidence=top_score * 0.5,
                 top_similarity=top_score,
                 candidate_count=count,
@@ -215,8 +215,8 @@ class EpistemicVoidDetector:
 
         # 4. Fog zone: too few results
         if count < self._fog_density:
-            return EpistemicAnalysis(
-                state=EpistemicState.FOG_ZONE,
+            return RetrievalAnalysis(
+                state=RetrievalState.FOG_ZONE,
                 confidence=top_score * 0.6,
                 top_similarity=top_score,
                 candidate_count=count,
@@ -227,8 +227,8 @@ class EpistemicVoidDetector:
             )
 
         # 5. Confident
-        return EpistemicAnalysis(
-            state=EpistemicState.CONFIDENT,
+        return RetrievalAnalysis(
+            state=RetrievalState.CONFIDENT,
             confidence=min(1.0, top_score),
             top_similarity=top_score,
             candidate_count=count,
@@ -328,7 +328,7 @@ class EpistemicVoidDetector:
 
     def __repr__(self) -> str:
         return (
-            f"EpistemicVoidDetector("
+            f"RetrievalVoidDetector("
             f"void={self._void_threshold}, "
             f"fog={self._fog_density}, "
             f"stale={self._stale_energy})"

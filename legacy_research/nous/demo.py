@@ -61,7 +61,7 @@ def run_demo():
             return
 
         # Phase 4: Ledger Crystallization
-        print("\n[4] STATE CRYSTALLIZATION (LEDGER)")
+        print("\n[4] STATE CRYSTALLIZATION (LKRGSER)")
         ledger = MutationLedger()
         ast_dict = [a.model_dump() for a in intent.actions]
         new_hash = ledger.record_mutation(intent.description, ast_dict)

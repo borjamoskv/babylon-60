@@ -53,7 +53,7 @@ use cortex_rs::probabilistic_crdt::ProbabilisticState;
 
 fn near_collapse(energy: f32) -> bool {
     let mut state = ProbabilisticState::new(100.0, 50.0, 50.0); // Default Exploration Budget = 100.0
-    // Returns Err if epistemic collapse occurs
+    // Returns Err if retrieval collapse occurs
     state.consume_error_as_gradient(energy).is_err()
 }
 

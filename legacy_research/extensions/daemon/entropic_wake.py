@@ -56,16 +56,16 @@ class EntropicWakeDaemon:
             # Normalize physical resonance impact (e.g., 0.1 per full point of resonance)
             entropy_score += physical_resonance * 0.1
 
-            # 2. Epistemic Entropy (Banda E) - Low confidence facts in the database
+            # 2. Retrieval Entropy (Banda E) - Low confidence facts in the database
             conn = self.engine.pool.get_connection()
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT count(*) FROM facts "
                 "WHERE confidence IN ('stated', 'C3', 'C2', 'C1') AND is_tombstoned = 0"
             )
-            epistemic_ghosts = cursor.fetchone()[0]
-            # Normalize epistemic weight (e.g., 0.05 per low confidence fact)
-            entropy_score += epistemic_ghosts * 0.05
+            retrieval_ghosts = cursor.fetchone()[0]
+            # Normalize retrieval weight (e.g., 0.05 per low confidence fact)
+            entropy_score += retrieval_ghosts * 0.05
 
             # 3. DB Type Ghosts
             cursor.execute(

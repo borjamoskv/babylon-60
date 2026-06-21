@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-"""Cortex Router v1 - Epistemic Model Arbitrator.
+"""Cortex Router v1 - Retrieval Model Arbitrator.
 
 Routes tasks dynamically between Gemini 3.5 Flash (Physical Layer)
 and Gemini 3.1 Pro (Semantic Layer) based on deterministic thresholds
@@ -27,7 +27,7 @@ class ExecutionContext:
     kl_instability: float = 0.0
 
 
-class EpistemicArbitrator:
+class RetrievalArbitrator:
     """
     Arbitrates routing between execution/physical layer and semantic/reasoning layer.
     """
