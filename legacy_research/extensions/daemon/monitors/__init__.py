@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from cortex.extensions.daemon.monitors.compaction import CompactionMonitor
     from cortex.extensions.daemon.monitors.disk import DiskMonitor
     from cortex.extensions.daemon.monitors.engine import EngineHealthCheck
-    from cortex.extensions.daemon.monitors.epistemic import EpistemicMonitor
+    from cortex.extensions.daemon.monitors.retrieval import RetrievalMonitor
     from cortex.extensions.daemon.monitors.evaluation import EvaluationMonitor
     from cortex.extensions.daemon.monitors.ghosts import GhostWatcher
     from cortex.extensions.daemon.monitors.mejoralo import UnifiedMejoraloMonitor
@@ -41,7 +41,7 @@ __all__ = [
     "DiskMonitor",
     "EngineHealthCheck",
     "EntropyMonitor",  # pyright: ignore[reportUnsupportedDunderAll]
-    "EpistemicMonitor",
+    "RetrievalMonitor",
     "EvaluationMonitor",
     "GhostWatcher",
     "MemorySyncer",
@@ -78,7 +78,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "UnifiedMejoraloMonitor",
     ),
     "WorkflowMonitor": ("cortex.extensions.daemon.monitors.workflow", "WorkflowMonitor"),
-    "EpistemicMonitor": ("cortex.extensions.daemon.monitors.epistemic", "EpistemicMonitor"),
+    "RetrievalMonitor": ("cortex.extensions.daemon.monitors.retrieval", "RetrievalMonitor"),
 }
 
 

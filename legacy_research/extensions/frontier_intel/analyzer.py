@@ -142,7 +142,7 @@ class FrontierIntelSystem:
                 continue
 
             # 1. Consensus & Novelty Computation via Semantic Search
-            novelty_index, consensus_score, phase = await self._calculate_epistemic_metrics(core_insight)
+            novelty_index, consensus_score, phase = await self._calculate_retrieval_metrics(core_insight)
 
             # Enrich node metadata
             node["novelty_index"] = novelty_index
@@ -185,7 +185,7 @@ class FrontierIntelSystem:
 
         return processed_signals
 
-    async def _calculate_epistemic_metrics(self, core_insight: str) -> tuple[float, float, str]:
+    async def _calculate_retrieval_metrics(self, core_insight: str) -> tuple[float, float, str]:
         """Query CORTEX facts to determine novelty, consensus, and phase classification."""
         try:
             # Query top 5 similar facts in the frontier_intelligence project

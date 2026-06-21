@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 """
 I10 Consensus Guard (Gateway)
-Enforces the Hybrid Cascade (Fast-Path / Deep-Path) checking for epistemic consensus
+Enforces the Hybrid Cascade (Fast-Path / Deep-Path) checking for retrieval consensus
 across an orthogonal triad of models (Llama, Mixtral, Qwen).
 """
 
@@ -14,7 +14,7 @@ from cortex.utils.errors import CortexError
 
 logger = logging.getLogger("cortex.security.i10")
 
-class EpistemicConsensusError(ValueError, CortexError):
+class RetrievalConsensusError(ValueError, CortexError):
     """Exception raised when I10 Consensus detects Sub-symbolic Blindness (UNSAFE)."""
 
 class TriadOutputs:
@@ -67,11 +67,11 @@ class I10ConsensusGuard:
         union = len(set_a.union(set_b))
         return intersection / union if union > 0 else 0.0
 
-    async def evaluate_epistemic_consensus(self, prompt: str, outputs: TriadOutputs) -> str:
+    async def evaluate_retrieval_consensus(self, prompt: str, outputs: TriadOutputs) -> str:
         """
         Executes Phase 1: Fast-Path ONNX + Discrete Jaccard
         If divergence > threshold, executes Phase 2: Deep-Path LLM-as-a-judge
-        Returns the safe crystallized output or raises EpistemicConsensusError (Hard-Stop).
+        Returns the safe crystallized output or raises RetrievalConsensusError (Hard-Stop).
         """
         # 1. FAST-PATH (CONTINUOUS)
         vec_alpha = await self._onnx_embed(outputs.alpha_llama)
@@ -91,7 +91,7 @@ class I10ConsensusGuard:
         for cos_val, jac_val, pair in [(cos_ab, jac_ab, "A-B"), (cos_ag, jac_ag, "A-G"), (cos_bg, jac_bg, "B-G")]:
             if cos_val > 0.90 and jac_val < 0.20:
                 logger.error("🛑 [I10-FAST-PATH] Semantic Collision Detected! Pair %s (Cos: %.2f, Jac: %.2f)", pair, cos_val, jac_val)
-                raise EpistemicConsensusError("I10 Consensus Hard-Stop: Semantic Collision Attack on Embedding Space")
+                raise RetrievalConsensusError("I10 Consensus Hard-Stop: Semantic Collision Attack on Embedding Space")
 
         # HYBRID COHERENCE
         sim_ab = (0.7 * cos_ab) + (0.3 * jac_ab)
@@ -128,7 +128,7 @@ class I10ConsensusGuard:
             return outputs.alpha_llama
         elif verdict == "UNSAFE":
             logger.error("🛑 [I10-DEEP-PATH] Poisoning Confirmed. SAGA-1 Hard Stop.")
-            raise EpistemicConsensusError("I10 Consensus rejected output: Sub-symbolic blindess confirmed (UNSAFE)")
+            raise RetrievalConsensusError("I10 Consensus rejected output: Sub-symbolic blindess confirmed (UNSAFE)")
         else:
             logger.error("🛑 [I10-DEEP-PATH] Judge returned anomalous state. Defaulting to Hard Stop.")
-            raise EpistemicConsensusError("I10 Consensus rejected output: Judge anomaly")
+            raise RetrievalConsensusError("I10 Consensus rejected output: Judge anomaly")

@@ -143,7 +143,7 @@ def compliance_report(db: str) -> None:
             "Hash Chain",
             "[green]OK[/green]" if chain_ok else f"[red]{violations} violations[/red]",
         )
-        table.add_row("Epistemic Isolation", "[green]ENFORCED (L0/L2)[/green]")
+        table.add_row("Retrieval Isolation", "[green]ENFORCED (L0/L2)[/green]")
 
         from pathlib import Path
 
@@ -175,7 +175,7 @@ def compliance_report(db: str) -> None:
         checks.add_row("Tamper-proof storage (Art. 12.3)", icon(c3))
         checks.add_row("Periodic verification (Art. 12.4)", icon(c4))
         checks.add_row("Agent traceability (Art. 12.2d)", icon(c5))
-        checks.add_row("Epistemic Isolation (Omega-3)", "[green]OK[/green]")
+        checks.add_row("Retrieval Isolation (Omega-3)", "[green]OK[/green]")
         checks.add_row("Landauer's Razor (Omega-2)", icon(avg_calc < 100))
         console.print(checks)
 
@@ -412,7 +412,7 @@ def siege(db: str) -> None:
         status = verification_report.get("valid")
         color = "green" if status else "red"
         verdict = (
-            "IMMUNITAS OMEGA: SYSTEM SURVIVED" if status else "BREACH DETECTED: LEDGER CORRUPTED"
+            "IMMUNITAS OMEGA: SYSTEM SURVIVED" if status else "BREACH DETECTED: LKRGSER CORRUPTED"
         )
 
         table = Table(title="Siege Results", show_header=False)

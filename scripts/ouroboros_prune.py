@@ -27,9 +27,12 @@ import math
 import sqlite3
 import sys
 import time
+from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, Protocol, runtime_checkable
+
+from cortex.engine.semantic_collapse import collapse_eligible, kolmogorov_approx, semantic_collapse
 
 # ─── Thermodynamic Constants ─────────────────────────────────────────
 MIN_EXERGY_THRESHOLD = 0.125  # 3 half-lives → tombstone
@@ -55,6 +58,7 @@ class PurgeCycleStats:
     transitioned_cold: int = 0
     protected_by_topology: int = 0
     exergy_scores_updated: int = 0
+    semantic_collapses: int = 0
     errors: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict:
@@ -65,6 +69,7 @@ class PurgeCycleStats:
             "transitioned_cold": self.transitioned_cold,
             "protected_by_topology": self.protected_by_topology,
             "exergy_scores_updated": self.exergy_scores_updated,
+            "semantic_collapses": self.semantic_collapses,
             "errors": self.errors,
         }
 
@@ -119,6 +124,7 @@ def execute_thermal_purge(
     *,
     dry_run: bool = False,
     json_output: bool = False,
+    enable_semantic_collapse: bool = False,
 ) -> PurgeCycleStats:
     """Execute the Ouroboros thermodynamic pruning cycle.
 
@@ -282,7 +288,66 @@ def execute_thermal_purge(
             stats.transitioned_cold = len(cold_ids)
             stats.exergy_scores_updated = len(exergy_updates)
 
-            # Phase 3: Report
+            # Phase 3: Semantic Pruning (Zlib NCD)
+            if enable_semantic_collapse:
+                cursor.execute("""
+                    SELECT id, content, exergy_score 
+                    FROM facts 
+                    WHERE is_tombstoned = 0 AND content IS NOT NULL
+                """)
+                live_facts = cursor.fetchall()
+                
+                # Compute Kolmogorov Approximation and bucket
+                # Using a 10% sliding window over sorted z_sizes
+                z_facts = []
+                for f in live_facts:
+                    content = f["content"]
+                    if not content: continue
+                    exergy = float(f["exergy_score"] or 1.0)
+                    z_size = kolmogorov_approx(content)
+                    if z_size > 0.0:
+                        z_facts.append((f["id"], content, exergy, z_size))
+                        
+                z_facts.sort(key=lambda x: x[3])
+                collapsed_losers = set()
+                
+                for i in range(len(z_facts)):
+                    id_a, content_a, exergy_a, z_a = z_facts[i]
+                    if id_a in collapsed_losers: continue
+                    
+                    # Scan forward within 10% z_size tolerance
+                    for j in range(i + 1, len(z_facts)):
+                        id_b, content_b, exergy_b, z_b = z_facts[j]
+                        if id_b in collapsed_losers: continue
+                        
+                        if (z_b - z_a) / z_a > 0.10: 
+                            break # Exceeded 10% size difference bucket
+                            
+                        # NCD and mass tolerance check
+                        if collapse_eligible(content_a, content_b, exergy_a, exergy_b, threshold=0.15, mass_tolerance=0.15):
+                            res = semantic_collapse(str(id_a), content_a, exergy_a, str(id_b), content_b, exergy_b)
+                            winner_id = int(res["winner"])
+                            loser_id = id_b if winner_id == id_a else id_a
+                            
+                            collapsed_losers.add(loser_id)
+                            stats.semantic_collapses += 1
+                            
+                            if not dry_run:
+                                cursor.execute(
+                                    "UPDATE facts SET is_tombstoned = 1, quadrant = 'VOID', storage_tier = 'VOID', updated_at = datetime('now') WHERE id = ?",
+                                    (loser_id,)
+                                )
+                                cursor.execute(
+                                    "UPDATE facts SET exergy_score = ? WHERE id = ?",
+                                    (res["kinetic_mass"], winner_id)
+                                )
+                                logger.info("Semantic Collapse: Fact %d absorbed by Fact %d (NCD Redundancy)", loser_id, winner_id)
+                            break # Move to next outer node
+                
+                if not dry_run and stats.semantic_collapses > 0:
+                    conn.commit()
+
+            # Phase 4: Report
             if json_output:
                 print(json.dumps(stats.to_dict(), indent=2))
             else:
@@ -291,6 +356,7 @@ def execute_thermal_purge(
                 logger.info("  Tombstoned (VOID):    %d", stats.tombstoned)
                 logger.info("  Transitioned → WARM:  %d", stats.transitioned_warm)
                 logger.info("  Transitioned → COLD:  %d", stats.transitioned_cold)
+                logger.info("  Semantic Collapses:   %d", stats.semantic_collapses)
                 logger.info("  Protected (Topology): %d", stats.protected_by_topology)
                 logger.info("  Exergy Scores Updated:%d", stats.exergy_scores_updated)
 
@@ -372,7 +438,7 @@ def hebbian_reinforce(node: FactNode, now: Optional[float] = None, depth: int = 
     E(d) = E0 * (0.85 ** d)
     This enforces locality and prevents semantic inflation.
 
-    LTP: invoked ONLY from consolidate_epistemic_graph.
+    LTP: invoked ONLY from consolidate_retrieval_graph.
     Never from semantic router — prevents latent space poisoning.
     """
     from cortex.engine.immunity.origin_policy import get_policy
@@ -400,14 +466,14 @@ def hebbian_reinforce(node: FactNode, now: Optional[float] = None, depth: int = 
 
 # ── Causal BFS Consolidation ──────────────────────────────────────────────────
 
-def consolidate_epistemic_graph(
+def consolidate_retrieval_graph(
     target_node: FactNode,
     graph_db: GraphDB,
     now: Optional[float] = None,
     max_depth: int = 32,        # Circuit breaker: strict CORTEX depth limit
 ) -> dict[str, float]:
     """
-    Traverses the EDG upward from a validated mutation target.
+    Traverses the KRGS upward from a validated mutation target.
     Applies Hebbian LTP to every causal ancestor.
 
     Returns: {node_id: new_exergy} for audit trail.
@@ -445,7 +511,7 @@ def consolidate_epistemic_graph(
         node = graph_db.get_node(current_id)
         if node.is_tombstoned:
             # P0 Invariant: A live mutation cannot inherit from a tombstoned ancestor.
-            msg = f"Causal Breach: Encountered TOMBSTONED ancestor '{current_id}'. Epistemic Consistency violated."
+            msg = f"Causal Breach: Encountered TOMBSTONED ancestor '{current_id}'. Retrieval Consistency violated."
             logger.error(msg)
             raise ValueError(msg)
 
@@ -499,12 +565,18 @@ def main() -> None:
         action="store_true",
         help="Output results as machine-readable JSON",
     )
+    parser.add_argument(
+        "--semantic-collapse",
+        action="store_true",
+        help="Execute Phase 3: Zlib NCD Semantic Pruning to collapse redundant facts",
+    )
     args = parser.parse_args()
 
     stats = execute_thermal_purge(
         db_path=args.db,
         dry_run=args.dry_run,
         json_output=args.json,
+        enable_semantic_collapse=args.semantic_collapse,
     )
 
     if stats.errors:

@@ -3,7 +3,7 @@ from .mcts import rollout
 
 def generate_actions(state: torch.Tensor) -> list[str]:
     """Action space generator. To be synced with Rust Action Enum."""
-    return ["OBSERVE", "MUTATE_DOM", "WRITE_LEDGER", "EXEC_BASH", "AWAIT"]
+    return ["OBSERVE", "MUTATE_DOM", "WRITE_LKRGSER", "EXEC_BASH", "AWAIT"]
 
 def apply_mock(state: torch.Tensor, action: str) -> torch.Tensor:
     """Mock state transition for planning."""

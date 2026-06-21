@@ -67,9 +67,9 @@ if TYPE_CHECKING:
         TemporalHealthScheduler,
     )
     from cortex.memory.void_detector import (
-        EpistemicAnalysis,
-        EpistemicState,
-        EpistemicVoidDetector,
+        RetrievalAnalysis,
+        RetrievalState,
+        RetrievalVoidDetector,
     )
     from cortex.memory.working import WorkingMemoryL1
 
@@ -86,9 +86,9 @@ __all__ = [  # type: ignore[reportUnsupportedDunderAll]
     "DynamicSynapseUpdate",
     "EntropyPruner",
     "EpisodicSnapshot",
-    "EpistemicAnalysis",
-    "EpistemicState",
-    "EpistemicVoidDetector",
+    "RetrievalAnalysis",
+    "RetrievalState",
+    "RetrievalVoidDetector",
     "EventLedgerL3",
     "HealthReport",
     "KnowledgeMap",
@@ -181,9 +181,9 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "SchedulerConfig": ("cortex.memory.temporal_health", "SchedulerConfig"),
     "TemporalHealthScheduler": ("cortex.memory.temporal_health", "TemporalHealthScheduler"),
     # void_detector
-    "EpistemicAnalysis": ("cortex.memory.void_detector", "EpistemicAnalysis"),
-    "EpistemicState": ("cortex.memory.void_detector", "EpistemicState"),
-    "EpistemicVoidDetector": ("cortex.memory.void_detector", "EpistemicVoidDetector"),
+    "RetrievalAnalysis": ("cortex.memory.void_detector", "RetrievalAnalysis"),
+    "RetrievalState": ("cortex.memory.void_detector", "RetrievalState"),
+    "RetrievalVoidDetector": ("cortex.memory.void_detector", "RetrievalVoidDetector"),
     # working
     "WorkingMemoryL1": ("cortex.memory.working", "WorkingMemoryL1"),
 }

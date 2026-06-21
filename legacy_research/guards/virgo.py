@@ -16,7 +16,7 @@ import aiosqlite
 
 from cortex.crypto.keys import ZKSwarmIdentity
 from cortex.guards.i10_consensus import (
-    EpistemicConsensusError,
+    RetrievalConsensusError,
     I10ConsensusGuard,
     TriadOutputs,
 )
@@ -188,7 +188,7 @@ class VirgoContextGuard:
             # Low-risk system/user inputs can bypass strict agent signatures
             return
 
-        # 1. Context Poisoning Scans (Epistemic Drift & Recursive loops)
+        # 1. Context Poisoning Scans (Retrieval Drift & Recursive loops)
         # Scan for context poisoning patterns BEFORE signature verification to identify adversarial signals
         poison_reasons = self._detect_context_poisoning(content)
         if poison_reasons:
@@ -200,7 +200,7 @@ class VirgoContextGuard:
                 error_class=ContextPoisoningError,
             )
 
-        # 1.5. I10 Epistemic Consensus Evaluation (Cross-Model Triad)
+        # 1.5. I10 Retrieval Consensus Evaluation (Cross-Model Triad)
         if self.i10_guard is not None:
             triad = meta.get("triad")
             if triad and "alpha" in triad and "beta" in triad and "gamma" in triad:
@@ -211,12 +211,12 @@ class VirgoContextGuard:
                         gamma_qwen=triad["gamma"]
                     )
                     prompt = meta.get("prompt", "")
-                    await self.i10_guard.evaluate_epistemic_consensus(prompt, outputs)
-                except EpistemicConsensusError as e:
+                    await self.i10_guard.evaluate_retrieval_consensus(prompt, outputs)
+                except RetrievalConsensusError as e:
                     self._apply_trust_penalty(agent_id, taint_severity=1.0)
                     await self._trigger_ledger_rollback(
                         conn,
-                        f"I10 Epistemic Consensus Interception: {e}",
+                        f"I10 Retrieval Consensus Interception: {e}",
                         error_class=ContextPoisoningError,
                     )
 

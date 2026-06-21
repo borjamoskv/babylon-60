@@ -12,7 +12,7 @@ Distinguishes between:
   - "I failed at HOW I THINK about the task" → meta-level strategy mutation
 
 Constitutional evaluation layer inspired by Anthropic Constitutional AI:
-  each output is judged against immutable epistemic principles before emission.
+  each output is judged against immutable retrieval principles before emission.
 """
 
 from __future__ import annotations

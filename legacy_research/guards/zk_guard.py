@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 """
-The ZK-Swarm Epistemic Guard (RFC-003 Phase 1)
+The ZK-Swarm Retrieval Guard (RFC-003 Phase 1)
 
 Enforces cryptographic integrity over agent inference outputs before they mutate
 the Sovereign Ledger. Limits hallucination ('stochastic entropy') by verifying

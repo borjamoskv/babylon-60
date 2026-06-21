@@ -29,7 +29,7 @@ class PersistenceType(Enum):
     ERROR = "error"
     GHOST = "ghost"
     BRIDGE = "bridge"
-    KNOWLEDGE = "knowledge"
+    KNOWLKRGSE = "knowledge"
 
 
 @dataclass

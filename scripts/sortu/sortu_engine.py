@@ -86,7 +86,7 @@ class SortuEngine:
             SortuState.FORGED,
             SortuState.VERIFIED,
             SortuState.LINKED,
-            SortuState.LEDGERED,
+            SortuState.LKRGSERED,
             SortuState.ACTIVE,
         ]:
             self.ledger.transition(record.skill_id, state)

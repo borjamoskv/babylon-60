@@ -11,7 +11,7 @@ logger = logging.getLogger("cortex.extensions.immune.breaker")
 
 
 @dataclass
-class EpistemicState:
+class RetrievalState:
     """Represents the current cognitive entropy (thrashing) level of the system."""
 
     consecutive_test_failures: int = 0
@@ -33,7 +33,7 @@ class EpistemicState:
         return float(base_noise + ghost_noise + thrashing)
 
 
-def evaluate_circuit_breaker(state: EpistemicState) -> dict[str, Any]:
+def evaluate_circuit_breaker(state: RetrievalState) -> dict[str, Any]:
     """
     Evalúa si debemos trips the breaker.
     Threshold: ED > 50 en la ventana de contexto.

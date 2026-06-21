@@ -150,10 +150,10 @@ async def index_comp(ctx: SagaContext):
 
 
 async def bfs_exec(ctx: SagaContext):
-    # SAGA-8: Epistemic BFS Hebbian Reinforcement (only executed if AST/Z3 passed)
+    # SAGA-8: Retrieval BFS Hebbian Reinforcement (only executed if AST/Z3 passed)
     # The actual execution happens via an external sub-process or imported logic
     # depending on the context, but the hook must exist in the Saga orchestrator.
-    # We call consolidate_epistemic_graph here via a subprocess or import.
+    # We call consolidate_retrieval_graph here via a subprocess or import.
     import subprocess
     import os
     script_path = os.path.join(os.path.dirname(__file__), "..", "..", "scripts", "ouroboros_prune.py")
@@ -175,6 +175,6 @@ def build_core_write_path_saga() -> SagaOrchestrator:
             SagaStep("SAGA-5: Ledger", ledger_exec, ledger_comp),
             SagaStep("SAGA-6: Persistence", db_exec, db_comp),
             SagaStep("SAGA-7: Index", index_exec, index_comp),
-            SagaStep("SAGA-8: Epistemic BFS", bfs_exec, bfs_comp),
+            SagaStep("SAGA-8: Retrieval BFS", bfs_exec, bfs_comp),
         ]
     )

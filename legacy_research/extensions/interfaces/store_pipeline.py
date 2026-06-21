@@ -71,7 +71,7 @@ class PostStoreHook(Protocol):
     """Post-store side-effect hook.
 
     Runs after successful fact insertion. Failure is non-fatal (best-effort).
-    Examples: signal emission, ledger checkpointing, epistemic breaker.
+    Examples: signal emission, ledger checkpointing, retrieval breaker.
     """
 
     async def on_stored(

@@ -20,7 +20,7 @@ from pathlib import Path
 
 MEMORY_ROOT = Path(os.environ.get('CORTEX_PERSIST_ROOT', Path.home() / '.cortex-persist'))
 SESSIONS_DIR = MEMORY_ROOT / 'sessions'
-KNOWLEDGE_DIR = MEMORY_ROOT / 'knowledge'
+KNOWLKRGSE_DIR = MEMORY_ROOT / 'knowledge'
 SHARED_DIR = MEMORY_ROOT / 'shared'
 SOUL_PATH = MEMORY_ROOT / 'SOUL.md'
 MAX_RECALL_RESULTS = 20
@@ -50,12 +50,12 @@ def _encrypt(data: str) -> str:
 def init() -> dict[str, bool]:
     """Initialize memory directory structure. Idempotent."""
     created: dict[str, bool] = {}
-    for d in (SESSIONS_DIR, KNOWLEDGE_DIR, SHARED_DIR):
+    for d in (SESSIONS_DIR, KNOWLKRGSE_DIR, SHARED_DIR):
         existed = d.exists()
         d.mkdir(parents=True, exist_ok=True)
         created[str(d)] = not existed
     for fname in ('decisions.md', 'errors.md', 'patterns.md', 'relationships.md'):
-        fpath = KNOWLEDGE_DIR / fname
+        fpath = KNOWLKRGSE_DIR / fname
         if not fpath.exists():
             fpath.write_text(f"# {fname.replace('.md', '').title()}\n\n")
             created[str(fpath)] = True
@@ -76,7 +76,7 @@ def session_boot() -> dict[str, str]:
     if SOUL_PATH.exists():
         loaded['soul'] = SOUL_PATH.read_text()
     for fname in ('decisions.md', 'errors.md', 'patterns.md'):
-        fpath = KNOWLEDGE_DIR / fname
+        fpath = KNOWLKRGSE_DIR / fname
         if fpath.exists():
             content = fpath.read_text()
             lines = content.strip().split('\n')
@@ -123,7 +123,7 @@ def store(content: str, category: str='decisions', tags: list[str] | None=None, 
     if category not in valid_categories:
         msg = f"Invalid category '{category}'. Must be one of: {valid_categories}"
         raise ValueError(msg)
-    fpath = KNOWLEDGE_DIR / f'{category}.md'
+    fpath = KNOWLKRGSE_DIR / f'{category}.md'
     now = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
     fact_id = hashlib.sha256(f'{now}:{content}'.encode()).hexdigest()[:12]
     tag_str = f" [{', '.join(tags)}]" if tags else ''
@@ -140,7 +140,7 @@ def recall(query: str, categories: list[str] | None=None, limit: int=MAX_RECALL_
     query_lower = query.lower()
     search_categories = categories or ['decisions', 'errors', 'patterns', 'relationships']
     for cat in search_categories:
-        fpath = KNOWLEDGE_DIR / f'{cat}.md'
+        fpath = KNOWLKRGSE_DIR / f'{cat}.md'
         if not fpath.exists():
             continue
         for i, line in enumerate(fpath.read_text().split('\n')):
@@ -160,7 +160,7 @@ def forget(fact_id: str) -> bool:
     """Mark a fact as deprecated. Never truly deletes."""
     init()
     for fname in ('decisions.md', 'errors.md', 'patterns.md', 'relationships.md'):
-        fpath = KNOWLEDGE_DIR / fname
+        fpath = KNOWLKRGSE_DIR / fname
         if not fpath.exists():
             continue
         content = fpath.read_text()
@@ -209,7 +209,7 @@ def status() -> dict[str, object]:
     init()
     st: dict[str, object] = {'memory_root': str(MEMORY_ROOT), 'initialized': MEMORY_ROOT.exists(), 'soul_exists': SOUL_PATH.exists()}
     for fname in ('decisions.md', 'errors.md', 'patterns.md', 'relationships.md'):
-        fpath = KNOWLEDGE_DIR / fname
+        fpath = KNOWLKRGSE_DIR / fname
         if fpath.exists():
             entries = sum(1 for line in fpath.read_text().split('\n') if line.strip().startswith('- '))
             st[f"{fname.replace('.md', '')}_count"] = entries

@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
-"""Cortex Router v4 - Nash-Equilibrium Epistemic Router.
+"""Cortex Router v4 - Nash-Equilibrium Retrieval Router.
 
 Implements a game-theoretic mixture-of-experts routing system where
-Flash (execution optimizer) and Pro (epistemic stability optimizer)
+Flash (execution optimizer) and Pro (retrieval stability optimizer)
 act as players in a Bayesian routing game.
 """
 

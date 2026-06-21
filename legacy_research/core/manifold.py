@@ -2,12 +2,12 @@ import hashlib
 from dataclasses import dataclass
 from typing import Any
 
-# Expected to import EpistemicState, EpistemicEvent from membrane
-# from .membrane import EpistemicEvent, EpistemicState
+# Expected to import RetrievalState, RetrievalEvent from membrane
+# from .membrane import RetrievalEvent, RetrievalState
 
 
 @dataclass
-class EpistemicField:
+class RetrievalField:
     curvature: float
     direction: list[float]
     uncertainty_density: float
@@ -22,8 +22,8 @@ def _hash_to_vector(trace: dict | None, dim: int = 64) -> list[float]:
     return [(b / 255.0) - 0.5 for b in h[:dim]]
 
 
-def epistemic_projection(event: Any) -> EpistemicField:
-    """Transforms an EpistemicEvent into an attractive tensor field."""
+def retrieval_projection(event: Any) -> RetrievalField:
+    """Transforms an RetrievalEvent into an attractive tensor field."""
     k = 0.1
     state_val = event.state.value if hasattr(event.state, "value") else str(event.state)
 
@@ -34,23 +34,23 @@ def epistemic_projection(event: Any) -> EpistemicField:
     elif state_val == "solver-silent":
         k = 2.0
 
-    return EpistemicField(
+    return RetrievalField(
         curvature=k * event.entropy_signature,
         direction=_hash_to_vector(event.z3_trace),
         uncertainty_density=1.0 - event.confidence,
     )
 
 
-def update_metric(g: list[list[float]], epistemic_field: EpistemicField) -> list[list[float]]:
-    """Deforms the g_ij Riemannian metric based on the epistemic field."""
+def update_metric(g: list[list[float]], retrieval_field: RetrievalField) -> list[list[float]]:
+    """Deforms the g_ij Riemannian metric based on the retrieval field."""
     dim = len(g)
-    direction = epistemic_field.direction
+    direction = retrieval_field.direction
     if len(direction) < dim:
         direction = direction + [0.0] * (dim - len(direction))
 
     for i in range(dim):
         for j in range(len(g[i])):
-            g[i][j] += epistemic_field.curvature * direction[i] * direction[j]
+            g[i][j] += retrieval_field.curvature * direction[i] * direction[j]
     return g
 
 
@@ -84,7 +84,7 @@ def apply_mutation(ast: Any, vector: list[float], event: Any | None = None) -> A
 
 
 def autodidact_step(
-    ast: Any, g_static: list[list[float]], g_dynamic: list[list[float]], epistemic_events: list[Any]
+    ast: Any, g_static: list[list[float]], g_dynamic: list[list[float]], retrieval_events: list[Any]
 ) -> Any:
     """
     The Autodidact Drift Operator.
@@ -98,9 +98,9 @@ def autodidact_step(
     # 1. Apply passive background deformation from Ghost Manifold
     g_dynamic = ghost_manifold_engine.propagate(g_dynamic)
 
-    # 2. Process active epistemic events
-    for event in epistemic_events:
-        field = epistemic_projection(event)
+    # 2. Process active retrieval events
+    for event in retrieval_events:
+        field = retrieval_projection(event)
         g_dynamic = update_metric(g_dynamic, field)
 
         for i in range(dim):
@@ -112,6 +112,6 @@ def autodidact_step(
     final_vector = [geodesic[i] + drift_vector[i] for i in range(dim)]
 
     # Track dominant unknown state for UAO
-    dominant_event = epistemic_events[-1] if epistemic_events else None
+    dominant_event = retrieval_events[-1] if retrieval_events else None
 
     return apply_mutation(ast, final_vector, dominant_event)

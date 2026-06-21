@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any
 
-from .manifold import EpistemicField, update_metric
+from .manifold import RetrievalField, update_metric
 
 
 @dataclass
@@ -49,7 +49,7 @@ class GhostManifold:
         El manifold se deforma por la mera existencia de esta arquitectura fallida.
         """
         for ghost in self.ghost_structures:
-            field = EpistemicField(
+            field = RetrievalField(
                 curvature=ghost.weight * 0.25,  # Decaimiento pasivo de fondo
                 direction=ghost.collapse_vector,
                 uncertainty_density=1.0,

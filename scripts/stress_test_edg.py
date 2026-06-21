@@ -3,13 +3,13 @@ import random
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-from cortex_rs import EpistemicGraph, EpistemicNode
+from cortex_rs import RetrievalGraph, RetrievalNode
 
 setup_cortex_logging()
-logger = logging.getLogger("EDG_StressTest")
+logger = logging.getLogger("KRGS_StressTest")
 
 def build_poc_graph():
-    graph = EpistemicGraph()
+    graph = RetrievalGraph()
     tiers = {
         "db": ["db.users", "db.ledger", "db.auth"],
         "core": ["core.crypto", "core.validation", "core.engine"],
@@ -19,7 +19,7 @@ def build_poc_graph():
     }
     for tier, nodes in tiers.items():
         for node in nodes:
-            graph.add_node(EpistemicNode(node, 1.0))
+            graph.add_node(RetrievalNode(node, 1.0))
             
     graph.add_dependency("db.users", "core.validation")
     graph.add_dependency("db.ledger", "core.engine")
@@ -65,13 +65,13 @@ def run_proof_of_concept():
 def run_stress_test(num_nodes=10000, num_edges=50000, num_concurrent_evals=1000):
     logger.info(f"--- RUNNING STRESS TEST ({num_nodes} nodes, {num_edges} edges, {num_concurrent_evals} parallel evaluations) ---")
     
-    graph = EpistemicGraph()
+    graph = RetrievalGraph()
     node_ids = [f"node_{i}" for i in range(num_nodes)]
     
     logger.info("1. Generating Nodes...")
     start_time = time.time()
     for n_id in node_ids:
-        graph.add_node(EpistemicNode(n_id, 1.0))
+        graph.add_node(RetrievalNode(n_id, 1.0))
     logger.info(f"Nodes generated in {time.time() - start_time:.4f}s")
     
     logger.info("2. Generating Dependencies...")
@@ -88,7 +88,7 @@ def run_stress_test(num_nodes=10000, num_edges=50000, num_concurrent_evals=1000)
             pass
     logger.info(f"Dependencies generated in {time.time() - start_time:.4f}s")
     
-    logger.info("3. Running Concurrent EDG Traversals (Thread Pool to test PyO3 GIL Release)...")
+    logger.info("3. Running Concurrent KRGS Traversals (Thread Pool to test PyO3 GIL Release)...")
     
     def evaluate_pr():
         # Pick a random node in the top 20% (more likely to be a root) to invalidate

@@ -163,13 +163,13 @@ class EventLoopMixin:
                     name="ZeroPromptingDaemon",
                 )
             )
-        if getattr(self, "epistemic_breaker_daemon", None):
+        if getattr(self, "retrieval_breaker_daemon", None):
             tasks.append(
                 asyncio.create_task(
                     self._run_loop_daemon_async(
-                        self.epistemic_breaker_daemon, "Epistemic Breaker", "🛡️", run_method="run"
+                        self.retrieval_breaker_daemon, "Retrieval Breaker", "🛡️", run_method="run"
                     ),
-                    name="EpistemicBreakerDaemon",
+                    name="RetrievalBreakerDaemon",
                 )
             )
         if getattr(self, "sentinel_oracle", None):
@@ -251,8 +251,8 @@ class EventLoopMixin:
             self.frontier_daemon.stop()
         if getattr(self, "zero_prompting_daemon", None):
             self.zero_prompting_daemon.stop()  # type: ignore[union-attr]
-        if getattr(self, "epistemic_breaker_daemon", None):
-            self.epistemic_breaker_daemon.stop()  # type: ignore[union-attr]
+        if getattr(self, "retrieval_breaker_daemon", None):
+            self.retrieval_breaker_daemon.stop()  # type: ignore[union-attr]
         if getattr(self, "sovereignty_runtime", None):
             await self.sovereignty_runtime.stop()
 

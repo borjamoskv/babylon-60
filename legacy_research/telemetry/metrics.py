@@ -40,7 +40,7 @@ CRITICAL_METRICS: set[str] = {
 def validate_typed_metric(payload: dict[str, Any]) -> str:
     """
     Validate a telemetry payload against the Rust-side
-    EpistemicMetric enum schema.
+    RetrievalMetric enum schema.
 
     Returns the kind string ("Raw", "Derived", "Narrative").
     Raises ValueError if the payload does not conform.
@@ -94,7 +94,7 @@ class MetricsRegistry:
     # ─── Core metric operations ───────────────────────────────────
     
     def validate_typed_metric(self, payload: dict[str, Any]) -> str:
-        """Enforce strict validation of epistemic metrics using PyO3 Rust extension.
+        """Enforce strict validation of retrieval metrics using PyO3 Rust extension.
         
         Throws ValueError if the format does not conform to Raw, Derived, or Narrative enums.
         """
@@ -153,7 +153,7 @@ class MetricsRegistry:
             kind = self.validate_typed_metric(real_payload)
             self._metadata[name] = {
                 "last_payload": real_payload,
-                "epistemic_kind": kind,
+                "retrieval_kind": kind,
             }
             # For legacy/critical telemetry persistence
             if name in CRITICAL_METRICS and self._engine is not None:

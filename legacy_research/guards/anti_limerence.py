@@ -30,7 +30,7 @@ def _jaccard_similarity(text1: str, text2: str) -> float:
 
 
 class AntiLimerenceGuard:
-    """Monitors conversations/iterations to prevent epistemic limerence.
+    """Monitors conversations/iterations to prevent retrieval limerence.
 
     Rule [P0] Anti-Limerence (Kill Criteria) — 1 Prompt → 1 Execution → Stop.
     No infinite generation loops.

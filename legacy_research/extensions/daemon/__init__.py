@@ -6,7 +6,7 @@ Re-exports from sub-modules for backward compatibility.
 Uses __getattr__ to avoid eager loading of heavyweight dependencies
 (e.g., watchdog via core.py → ast_oracle.py). This prevents
 ModuleNotFoundError cascades when importing lightweight daemon
-submodules like epistemic_breaker or models.
+submodules like retrieval_breaker or models.
 
 Ghost #4731: The previous eager init caused cortex.cli store to crash
 because any `from cortex.extensions.daemon.X import Y` triggered the full import

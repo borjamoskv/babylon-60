@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 """
-CORTEX - Contradiction Guard (Axiom 20: Epistemic Consistency).
+CORTEX - Contradiction Guard (Axiom 20: Retrieval Consistency).
 
 Every new decision must explicitly invalidate its predecessors or confirm
 compatibility. This guard runs at store-time and returns potential

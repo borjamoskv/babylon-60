@@ -91,7 +91,7 @@ class ComplianceTracker:
             agent_id: Identifier for the agent making the decision.
             decision_type: Category of the decision (e.g. ``"approval"``,
                 ``"rejection"``, ``"escalation"``).
-            confidence: Epistemic confidence level (``C1``–``C5``).
+            confidence: Retrieval confidence level (``C1``–``C5``).
             meta: Additional metadata to attach. Merged with EU compliance fields.
             tags: Optional tags for categorization.
 

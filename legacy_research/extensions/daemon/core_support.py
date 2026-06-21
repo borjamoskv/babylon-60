@@ -11,7 +11,7 @@ from cortex.extensions.daemon.monitors import (
     AutoImmuneMonitor,
     CertMonitor,
     CompactionMonitor,
-    EpistemicMonitor,
+    RetrievalMonitor,
     EvaluationMonitor,
     GhostWatcher,
     MemorySyncer,
@@ -102,12 +102,12 @@ def init_advanced_monitors(daemon: Any, file_config: dict[str, Any]) -> None:
         memory_path=daemon.config_dir / "system.json",
         db_path=Path(file_config.get("db_path", str(CORTEX_DB))),
     )
-    daemon.epistemic_monitor = EpistemicMonitor(
+    daemon.retrieval_monitor = RetrievalMonitor(
         engine=daemon._shared_engine,
-        eval_interval_seconds=file_config.get("epistemic_eval_interval", 600),
-        critical_repair_threshold=file_config.get("epistemic_repair_threshold", 5),
-        decay_velocity_threshold=file_config.get("epistemic_decay_threshold", -0.05),
-        stale_ratio_threshold=file_config.get("epistemic_stale_ratio", 0.20),
+        eval_interval_seconds=file_config.get("retrieval_eval_interval", 600),
+        critical_repair_threshold=file_config.get("retrieval_repair_threshold", 5),
+        decay_velocity_threshold=file_config.get("retrieval_decay_threshold", -0.05),
+        stale_ratio_threshold=file_config.get("retrieval_stale_ratio", 0.20),
     )
     daemon.ast_debt_monitor = ASTOracleMonitor(
         projects=file_config.get("ast_debt_projects", {"cortex-persist": str(Path.cwd())}),

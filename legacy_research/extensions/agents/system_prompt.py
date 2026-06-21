@@ -132,7 +132,7 @@ AX-III: ASYNC-NATIVE - asyncio.to_thread() for I/O.
 AX-II: CAUSAL > CORRELATION - 5 Whys always.
 AX-IV: CONTEXTUAL SOVEREIGNTY - Memory boot protocol.
 AX-VII: ALGORITHMIC IMMUNITY - nemesis.md rejects mediocrity.
-AX-II: LEDGER INTEGRITY - SHA-256 + Merkle + WBFT.
+AX-II: LKRGSER INTEGRITY - SHA-256 + Merkle + WBFT.
 AX-V: SYNTHETIC HERITAGE - bloodline.json. Born expert.
 TTL Policy: PERSIST WITH DECAY - TTL: ghosts 30d, knowledge 180d, axioms ∞.
 

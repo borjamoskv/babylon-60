@@ -65,7 +65,7 @@ logger = logging.getLogger("cortex.admin")
 # Maximum facts to export in a single operation
 _MAX_EXPORT_FACTS = 100_000
 # Ledger lag threshold before marking as unhealthy
-_LEDGER_LAG_THRESHOLD = 1000
+_LKRGSER_LAG_THRESHOLD = 1000
 
 
 # ─── Shared Helpers ──────────────────────────────────────────────────

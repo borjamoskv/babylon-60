@@ -43,14 +43,14 @@ def synthesize_ast_from_collapse(core: UnknownCore) -> list[dict[str, Any]]:
     return ast
 
 
-def unknown_as_operator(epistemic_event: Any) -> list[dict[str, Any]] | None:
+def unknown_as_operator(retrieval_event: Any) -> list[dict[str, Any]] | None:
     state_val = (
-        epistemic_event.state.value
-        if hasattr(epistemic_event.state, "value")
-        else str(epistemic_event.state)
+        retrieval_event.state.value
+        if hasattr(retrieval_event.state, "value")
+        else str(retrieval_event.state)
     )
     if state_val not in ["unknown", "undecidable", "solver-silent"]:
         return None
 
-    core = extract_unknown_core(epistemic_event)
+    core = extract_unknown_core(retrieval_event)
     return synthesize_ast_from_collapse(core)

@@ -160,7 +160,7 @@ class SOTAVectorEngine:
 
     async def build_knowledge_map(self, signal: dict[str, Any]) -> dict[str, Any]:
         """
-        [4] Epistemic Knowledge Graph builder.
+        [4] Retrieval Knowledge Graph builder.
         Maps the signal from Paper to Repo to Benchmark to API to Product to Market.
         """
         title = signal.get("title", "")
@@ -196,7 +196,7 @@ class SOTAVectorEngine:
             ]
             
         return {
-            "graph_type": "Epistemic Chain",
+            "graph_type": "Retrieval Chain",
             "chain": flow,
             "string_representation": " → ".join(node["node"] for node in flow)
         }
@@ -342,7 +342,7 @@ We believe the verification of {title} signals an imminent collapse in tradition
 
     async def track_historical_performance(self, signal_id: str, predicted_score: float, actual_score: float) -> dict[str, Any]:
         """
-        [8] Historical Memory & Epistemic Accountability.
+        [8] Historical Memory & Retrieval Accountability.
         Tracks how well previous predictions match real outcomes to compute reliability scores.
         """
         if self.engine:

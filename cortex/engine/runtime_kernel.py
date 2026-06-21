@@ -5,9 +5,9 @@ from typing import Any, Dict
 
 logger = logging.getLogger("cortex.engine.runtime_kernel")
 
-class EpistemicEventBus:
+class RetrievalEventBus:
     """
-    MOSKV-1 APEX Epistemic Event Bus.
+    MOSKV-1 APEX Retrieval Event Bus.
     Causal graph stream connecting the Python Orchestration layer 
     with the Rust Core (Ledger + Taint + SAGA Engine).
     """
@@ -25,14 +25,14 @@ class EpistemicEventBus:
         await self.stream.put(event)
         logger.info(f"[EventBus] Emitted {event_type} | Hash: {taint_hash[:8]}")
 
-class EpistemicKernel:
+class RetrievalKernel:
     """
-    1000/1000. CORTEX as an Epistemic Kernel for LLM Agents.
+    1000/1000. CORTEX as an Retrieval Kernel for LLM Agents.
     Binds the Deterministic Replay Engine, WASM Guard Sandbox, and SAGA Rust Runtime.
     """
     def __init__(self, tenant_id: str):
         self.tenant_id = tenant_id
-        self.event_bus = EpistemicEventBus()
+        self.event_bus = RetrievalEventBus()
         self._bootstrap_rust_core()
         
     def _bootstrap_rust_core(self):
@@ -53,7 +53,7 @@ class EpistemicKernel:
 
     async def deterministic_replay(self, target_hash: str):
         """
-        Time-travel debugging of epistemic decisions.
+        Time-travel debugging of retrieval decisions.
         """
         logger.info(f"[{self.tenant_id}] Rewinding causal graph to {target_hash}")
         # Rust replay engine invocation goes here

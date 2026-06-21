@@ -216,14 +216,14 @@ class ComponentsMixin:
 
             return SignalEmitHook()
 
-        def _epistemic():
-            from cortex.engine.guard_adapters import EpistemicBreakerHook
+        def _retrieval():
+            from cortex.engine.guard_adapters import RetrievalBreakerHook
 
-            return EpistemicBreakerHook()
+            return RetrievalBreakerHook()
 
         self._try_add(pipeline, "LedgerCheckpointHook", _ledger, is_hook=True)
         self._try_add(pipeline, "SignalEmitHook", _signal, is_hook=True)
-        self._try_add(pipeline, "EpistemicBreakerHook", _epistemic, is_hook=True)
+        self._try_add(pipeline, "RetrievalBreakerHook", _retrieval, is_hook=True)
 
         logger.debug(
             "GuardPipeline: %d guards, %d hooks registered",

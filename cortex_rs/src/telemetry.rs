@@ -18,7 +18,7 @@ pub struct CortexLogEnvelope {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "kind")]
-pub enum EpistemicMetric {
+pub enum RetrievalMetric {
     Raw(RawMetric),
     Derived(DerivedMetric),
     Narrative(NarrativeClaim),
@@ -98,15 +98,15 @@ impl TelemetryEngine {
 
 #[pyfunction]
 pub fn validate_metric_json(json_str: &str) -> PyResult<String> {
-    let parsed: EpistemicMetric = serde_json::from_str(json_str)
+    let parsed: RetrievalMetric = serde_json::from_str(json_str)
         .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!(
             "Telemetry validation failed: {e}"
         )))?;
 
     let kind = match parsed {
-        EpistemicMetric::Raw(_) => "Raw",
-        EpistemicMetric::Derived(_) => "Derived",
-        EpistemicMetric::Narrative(_) => "Narrative",
+        RetrievalMetric::Raw(_) => "Raw",
+        RetrievalMetric::Derived(_) => "Derived",
+        RetrievalMetric::Narrative(_) => "Narrative",
     };
 
     Ok(kind.to_string())

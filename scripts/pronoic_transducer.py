@@ -17,7 +17,7 @@ from typing import Any
 
 # Root workspace data directory
 CORTEX_DIR = Path(__file__).resolve().parent.parent / ".cortex"
-CURRICULUM_LEDGER = CORTEX_DIR / "curriculum_ledger.jsonl"
+CURRICULUM_LKRGSER = CORTEX_DIR / "curriculum_ledger.jsonl"
 
 
 def pronoic_transduce(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -66,7 +66,7 @@ def pronoic_transduce(func: Callable[..., Any]) -> Callable[..., Any]:
 
             # Persist to local ledger
             os.makedirs(CORTEX_DIR, exist_ok=True)
-            with open(CURRICULUM_LEDGER, "a", encoding="utf-8") as ledger:
+            with open(CURRICULUM_LKRGSER, "a", encoding="utf-8") as ledger:
                 ledger.write(json.dumps(payload) + "\n")
 
             # Log transduction activity to terminal (Industrial Noir style)

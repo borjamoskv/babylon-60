@@ -1,14 +1,14 @@
 # [C5-REAL] Exergy-Maximized
 """
 IMMUNE-SYSTEM-v1 Arbiter.
-The Epistemic Arbitrator (Ωv3) - "Justice between perceptions."
+The Retrieval Arbitrator (Ωv3) - "Justice between perceptions."
 
 This module implements the unified 5-filter membrane logic:
 F1: Reversibility (R-Level Analysis)
 F2: Adversarial (Falsification & Context poisoning)
 F3: Causal (Formal Verification & Logic)
 F4: Entropy (Complexity vs Utility)
-F5: Confidence (Epistemic Trust)
+F5: Confidence (Retrieval Trust)
 """
 
 from __future__ import annotations

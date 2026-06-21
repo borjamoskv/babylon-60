@@ -229,7 +229,7 @@ CREATE TABLE IF NOT EXISTS consensus_votes_v2 (
 """
 
 # ─── Trust Edges ──────────────────────────────────────────────────────
-PG_CREATE_TRUST_EDGES = """
+PG_CREATE_TRUST_KRGSES = """
 CREATE TABLE IF NOT EXISTS trust_edges (
     id              BIGSERIAL PRIMARY KEY,
     source_agent    TEXT NOT NULL REFERENCES agents(id),
@@ -452,7 +452,7 @@ PG_ALL_SCHEMA = [
     PG_CREATE_VOTES,
     PG_CREATE_AGENTS,
     PG_CREATE_VOTES_V2,
-    PG_CREATE_TRUST_EDGES,
+    PG_CREATE_TRUST_KRGSES,
     PG_CREATE_OUTCOMES,
     PG_CREATE_RWC_INDEXES,
     PG_CREATE_GHOSTS,

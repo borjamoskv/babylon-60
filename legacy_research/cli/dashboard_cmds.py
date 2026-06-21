@@ -233,7 +233,7 @@ def _build_ledger(ledger: dict) -> Panel:
 
     return Panel(
         table,
-        title=f"[bold {_CYBER}]⛓ LEDGER[/]",
+        title=f"[bold {_CYBER}]⛓ LKRGSER[/]",
         border_style=_VIOLET,
         padding=(0, 1),
     )

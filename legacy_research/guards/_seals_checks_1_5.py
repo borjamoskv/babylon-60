@@ -182,7 +182,7 @@ async def check_seal_4_tests() -> GateResult:
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# SEAL 5: LEDGER INTEGRITY - Schema Init + Connection Guard
+# SEAL 5: LKRGSER INTEGRITY - Schema Init + Connection Guard
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_5_ledger() -> GateResult:
     printer.seal(5, "AX-II Paradoja Epistémica", "Schema Init + Connection Guard")

@@ -244,12 +244,12 @@ def store_batch(file_path, db) -> None:
 )
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 @click.option(
-    "--epistemic",
+    "--retrieval",
     is_flag=True,
     default=False,
-    help="Show epistemic analysis (void/fog/stale detection)",
+    help="Show retrieval analysis (void/fog/stale detection)",
 )
-def search(query, project, top, scope, db, epistemic) -> None:
+def search(query, project, top, scope, db, retrieval) -> None:
     """Semantic search across CORTEX memory.
 
     Use --scope to search federated databases:
@@ -317,11 +317,11 @@ def search(query, project, top, scope, db, epistemic) -> None:
 
         console.print(table)
 
-        # Epistemic analysis overlay
-        if epistemic:
-            from cortex.memory.void_detector import EpistemicVoidDetector
+        # Retrieval analysis overlay
+        if retrieval:
+            from cortex.memory.void_detector import RetrievalVoidDetector
 
-            detector = EpistemicVoidDetector()
+            detector = RetrievalVoidDetector()
             candidates = [
                 {
                     "id": r.fact_id,
@@ -338,7 +338,7 @@ def search(query, project, top, scope, db, epistemic) -> None:
                     f"{analysis.recommendation}"
                     if analysis.recommendation
                     else f"{analysis.badge}",
-                    title="🧠 Epistemic Analysis",
+                    title="🧠 Retrieval Analysis",
                     border_style="cyan" if analysis.is_safe_to_respond else "yellow",
                 )
             )

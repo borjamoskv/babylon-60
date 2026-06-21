@@ -2,8 +2,8 @@
 """
 Migration 030: Typed telemetry tables.
 
-Separates telemetry storage by epistemic kind,
-matching the Rust-side EpistemicMetric enum.
+Separates telemetry storage by retrieval kind,
+matching the Rust-side RetrievalMetric enum.
 """
 
 import logging
@@ -60,4 +60,4 @@ DROP TABLE IF EXISTS cortex_raw_metrics;
 def _migration_030_typed_telemetry(conn: sqlite3.Connection):
     """Create structured schemas for Raw, Derived, and Narrative telemetry data."""
     conn.executescript(UP)
-    logger.info("Migration 030: Created typed epistemic telemetry schemas")
+    logger.info("Migration 030: Created typed retrieval telemetry schemas")

@@ -5,24 +5,24 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
-pub enum EpistemicStatus {
+pub enum ValidationStatus {
     Staging,   // Agent's hypothesis, invisible to others
     Sealed,    // ZK-validated, visible to swarm
     Rejected,  // Failed validation, never visible
 }
 
-impl EpistemicStatus {
+impl ValidationStatus {
     pub fn is_consumable(&self) -> bool {
-        matches!(self, EpistemicStatus::Sealed)
+        matches!(self, ValidationStatus::Sealed)
     }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct EpistemicFact {
+pub struct RetrievalFact {
     pub fact_id: String,
     pub agent_id: String,
     pub hypothesis: String,
-    pub epistemic_status: EpistemicStatus,
+    pub validation_status: ValidationStatus,
     pub zk_proof: Option<String>,
     pub created_at_epoch_ms: u64,
     pub sealed_at_epoch_ms: Option<u64>,
@@ -35,16 +35,16 @@ impl VaccineGuard {
     /// Validate hypothesis → try to seal.
     /// If ZK proof fails, mark as rejected.
     pub fn try_seal(
-        fact: &mut EpistemicFact,
+        fact: &mut RetrievalFact,
         wal_event_hash: &str,
         zk_validator: &dyn Fn(&str) -> bool,
-    ) -> Result<EpistemicStatus, String> {
+    ) -> Result<ValidationStatus, String> {
         if wal_event_hash.is_empty() {
             return Err("Missing wal_event_hash: Cannot seal fact without WAL provenance".into());
         }
 
-        match fact.epistemic_status {
-            EpistemicStatus::Staging => {
+        match fact.validation_status {
+            ValidationStatus::Staging => {
                 // Mock test env check
                 let proof_valid = if cfg!(test) {
                     true
@@ -55,7 +55,7 @@ impl VaccineGuard {
                 };
 
                 if proof_valid {
-                    fact.epistemic_status = EpistemicStatus::Sealed;
+                    fact.validation_status = ValidationStatus::Sealed;
                     fact.sealed_at_epoch_ms = Some(
                         std::time::SystemTime::now()
                             .duration_since(std::time::UNIX_EPOCH)
@@ -63,23 +63,23 @@ impl VaccineGuard {
                             .as_millis() as u64
                     );
                     fact.wal_event_hash = Some(wal_event_hash.to_string());
-                    Ok(EpistemicStatus::Sealed)
+                    Ok(ValidationStatus::Sealed)
                 } else {
-                    fact.epistemic_status = EpistemicStatus::Rejected;
-                    Ok(EpistemicStatus::Rejected)
+                    fact.validation_status = ValidationStatus::Rejected;
+                    Ok(ValidationStatus::Rejected)
                 }
             }
-            _ => Ok(fact.epistemic_status.clone()),
+            _ => Ok(fact.validation_status.clone()),
         }
     }
 
     /// Agents can only read sealed facts.
     /// This is enforced at the DB query level, but also here.
-    pub fn can_read(fact: &EpistemicFact, agent_id: &str) -> bool {
-        match fact.epistemic_status {
-            EpistemicStatus::Sealed => true,
-            EpistemicStatus::Staging => fact.agent_id == agent_id,
-            EpistemicStatus::Rejected => false,
+    pub fn can_read(fact: &RetrievalFact, agent_id: &str) -> bool {
+        match fact.validation_status {
+            ValidationStatus::Sealed => true,
+            ValidationStatus::Staging => fact.agent_id == agent_id,
+            ValidationStatus::Rejected => false,
         }
     }
 }
@@ -90,11 +90,11 @@ mod tests {
 
     #[test]
     fn test_staging_fact_invisible_to_other_agents() {
-        let fact = EpistemicFact {
+        let fact = RetrievalFact {
             fact_id: "fact_001".into(),
             agent_id: "agent_a".into(),
             hypothesis: "latency correlates with cache hit".into(),
-            epistemic_status: EpistemicStatus::Staging,
+            validation_status: ValidationStatus::Staging,
             zk_proof: Some("proof_abc".into()),
             created_at_epoch_ms: 1717027200000,
             sealed_at_epoch_ms: None,
@@ -109,11 +109,11 @@ mod tests {
 
     #[test]
     fn test_rejected_fact_never_visible() {
-        let fact = EpistemicFact {
+        let fact = RetrievalFact {
             fact_id: "fact_002".into(),
             agent_id: "agent_a".into(),
             hypothesis: "fake correlation".into(),
-            epistemic_status: EpistemicStatus::Rejected,
+            validation_status: ValidationStatus::Rejected,
             zk_proof: None,
             created_at_epoch_ms: 1717027200000,
             sealed_at_epoch_ms: None,

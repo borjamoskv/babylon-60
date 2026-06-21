@@ -27,7 +27,7 @@ except ImportError:
     _ZERO_PROMPTING_AVAILABLE = False
 
 try:
-    from cortex.extensions.daemon.epistemic_breaker import EpistemicBreakerDaemon
+    from cortex.extensions.daemon.retrieval_breaker import RetrievalBreakerDaemon
 
     _EPISTEMIC_BREAKER_AVAILABLE = True
 except ImportError:
@@ -123,21 +123,21 @@ class ResourceMgrMixin:
             except Exception as e:  # noqa: BLE001
                 logger.warning("Failed to init Zero-Prompting Daemon: %s", e)
 
-        self.epistemic_breaker_daemon = None
+        self.retrieval_breaker_daemon = None
         if _EPISTEMIC_BREAKER_AVAILABLE:
             try:
-                self.epistemic_breaker_daemon = EpistemicBreakerDaemon(
+                self.retrieval_breaker_daemon = RetrievalBreakerDaemon(
                     engine=self._shared_engine,
                     check_interval_seconds=int(
-                        file_config.get("epistemic_breaker_interval_seconds", 300)
+                        file_config.get("retrieval_breaker_interval_seconds", 300)
                     ),
                     max_entropy_threshold=float(
-                        file_config.get("epistemic_breaker_max_entropy", 0.85)
+                        file_config.get("retrieval_breaker_max_entropy", 0.85)
                     ),
                 )
-                logger.info("🛡️ Sovereign Epistemic Circuit Breaker (Axioma Ω₂, Ω₃) ENABLED")
+                logger.info("🛡️ Sovereign Retrieval Circuit Breaker (Axioma Ω₂, Ω₃) ENABLED")
             except Exception as e:  # noqa: BLE001
-                logger.warning("Failed to init Epistemic Breaker Daemon: %s", e)
+                logger.warning("Failed to init Retrieval Breaker Daemon: %s", e)
 
     def _init_sovereign_subsystems(self, file_config: dict) -> None:
         """Initialize the v2.0 sovereign async subsystems."""

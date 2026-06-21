@@ -11,7 +11,7 @@ class GeminiIngestNode:
     """
     MOSKV-1 APEX Gemini Ingest Node.
     Optimized for 'Context Abyss Mining' (1M-2M tokens), long-range anomaly detection,
-    and multimodal fusion reasoning. Acts as the primary epistemic ingestion gate before
+    and multimodal fusion reasoning. Acts as the primary retrieval ingestion gate before
     the Rust streaming parser and CRDT memory layer.
     """
     
@@ -30,7 +30,7 @@ class GeminiIngestNode:
         if not payload_streams:
             raise ValueError("Payload stream cannot be empty. Zero Anergia enforced.")
             
-        # 2. Epistemic Ingestion 
+        # 2. Retrieval Ingestion 
         # In a real environment, this routes to the Gemini 1.5 Pro API 
         # using the full 2M context window.
         await asyncio.sleep(0) # Non-blocking mock

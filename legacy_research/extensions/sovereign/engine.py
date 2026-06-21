@@ -44,7 +44,7 @@ class Phase(Enum):
     EVOLUTION = auto()  # continuous improvement engine
     SECURITY = auto()  # boveda-1, vault integration
     OBSERVABILITY = auto()  # telemetry, dashboards
-    ARBITRATION = auto()  # IMMUNE-SYSTEM-v1, epistemic justice
+    ARBITRATION = auto()  # IMMUNE-SYSTEM-v1, retrieval justice
     EXPERIENCE = auto()  # impactv-1, stitch, AR/VR
     DEPLOYMENT = auto()  # multi-cloud terraform
     VERIFICATION = auto()  # mejoralo, qa, smoke tests
@@ -213,7 +213,7 @@ async def _phase_arbitration(ctx: SovereignContext) -> PipelineResult:
         phase=Phase.ARBITRATION,
         success=True,
         duration_ms=(time.monotonic() - t0) * 1000,
-        details={"status": "Epistemic arbiter calibrated and active"},
+        details={"status": "Retrieval arbiter calibrated and active"},
     )
 
 

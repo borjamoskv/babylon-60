@@ -21,9 +21,9 @@ try:
     from cortex.engine.checkpoint import CheckpointManager
     from cortex.engine.evolution_ledger import ControlVector, EvolutionLedger
 
-    HAS_EVOLUTION_LEDGER = True
+    HAS_EVOLUTION_LKRGSER = True
 except ImportError:
-    HAS_EVOLUTION_LEDGER = False
+    HAS_EVOLUTION_LKRGSER = False
     ControlVector = None  # type: ignore[assignment,misc]
     EvolutionLedger = None  # type: ignore[assignment,misc]
     CheckpointManager = None  # type: ignore[assignment,misc]
@@ -84,16 +84,16 @@ class UltramapSubstrate:
         # Evolution Ledger — hash-chained mutation log
         self._evolution_ledger = None
         self._checkpoint_manager = None
-        if HAS_EVOLUTION_LEDGER:
+        if HAS_EVOLUTION_LKRGSER:
             ledger_path = os.path.join(os.path.dirname(self.bin_path), "evolution_ledger.jsonl")
             try:
                 self._evolution_ledger = EvolutionLedger(ledger_path)
                 self._checkpoint_manager = CheckpointManager(self._evolution_ledger, chunk_size=1000)
                 logger.info(
-                    f"EVO-LEDGER Active. Head: {self._evolution_ledger.head_hash[:12]}… Seq: {self._evolution_ledger.sequence}"
+                    f"EVO-LKRGSER Active. Head: {self._evolution_ledger.head_hash[:12]}… Seq: {self._evolution_ledger.sequence}"
                 )
             except Exception as e:
-                logger.warning(f"EVO-LEDGER init failed (non-fatal): {e}")
+                logger.warning(f"EVO-LKRGSER init failed (non-fatal): {e}")
 
         logger.info(
             f"ULTRAMAP-Ω Initialized. Capacity: {self.capacity} agents. O(1) Memory Active. (Rust: {HAS_RUST})"
@@ -122,9 +122,9 @@ class UltramapSubstrate:
         if hasattr(self, "_checkpoint_manager") and self._checkpoint_manager is not None:
             try:
                 self._checkpoint_manager.generate_index()
-                logger.info("EVO-LEDGER Checkpoints synced on shutdown.")
+                logger.info("EVO-LKRGSER Checkpoints synced on shutdown.")
             except Exception as e:
-                logger.warning(f"EVO-LEDGER Checkpoint sync failed: {e}")
+                logger.warning(f"EVO-LKRGSER Checkpoint sync failed: {e}")
             self._checkpoint_manager = None
 
         if hasattr(self, "_finalizer") and self._finalizer.alive:
@@ -309,7 +309,7 @@ class UltramapSubstrate:
                 source=source,
             )
         except Exception as e:
-            logger.warning(f"EVO-LEDGER write failed (non-fatal): {e}")
+            logger.warning(f"EVO-LKRGSER write failed (non-fatal): {e}")
 
 
 if __name__ == "__main__":

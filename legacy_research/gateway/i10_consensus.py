@@ -17,7 +17,7 @@ from cortex import config
 from cortex.database.core import connect_async_ctx
 from cortex.embeddings.local import LocalEmbedder
 from cortex.extensions.llm.provider import LLMProvider
-from cortex.guards.i10_consensus import EpistemicConsensusError, I10ConsensusGuard, TriadOutputs
+from cortex.guards.i10_consensus import RetrievalConsensusError, I10ConsensusGuard, TriadOutputs
 
 logger = logging.getLogger("cortex.gateway.i10")
 
@@ -184,12 +184,12 @@ class I10ConsensusGateway:
         )
 
         try:
-            crystallized_output = await self.guard.evaluate_epistemic_consensus(
+            crystallized_output = await self.guard.evaluate_retrieval_consensus(
                 user_prompt, triad_outputs
             )
             return crystallized_output
-        except EpistemicConsensusError as e:
-            logger.error("🛑 [I10-GATEWAY] Epistemic consensus fracture or collision detected: %s", e)
+        except RetrievalConsensusError as e:
+            logger.error("🛑 [I10-GATEWAY] Retrieval consensus fracture or collision detected: %s", e)
             # Amnesia trigger: Purge session context
             await self.purge_session_context(session_id)
             raise

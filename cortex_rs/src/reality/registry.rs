@@ -29,7 +29,7 @@ impl RealityRegistry {
         let status = match self.validator.validate(&claim, now_epoch_ms) {
             Ok(()) => ClaimStatus::Verified,
             Err(ref e) => {
-                eprintln!("[LEDGER] Rejected: {e}");
+                eprintln!("[LKRGSER] Rejected: {e}");
                 ClaimStatus::Rejected
             }
         };

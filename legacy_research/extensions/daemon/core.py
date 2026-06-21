@@ -91,7 +91,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin, ResourceMgrMixin,
     cloud_sync_monitor: Any
     tombstone_monitor: Any
     workflow_monitor: Any
-    epistemic_monitor: Any
+    retrieval_monitor: Any
     aether_monitor: Any
     _aether_daemon: Any
     fiat_oracle: Any
@@ -102,7 +102,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin, ResourceMgrMixin,
     frontier_daemon: Any
     iot_oracle: Any
     zero_prompting_daemon: Any
-    epistemic_breaker_daemon: Any
+    retrieval_breaker_daemon: Any
     notify_enabled: bool
     _last_alerts: dict[str, float]
     _cooldown: float
@@ -177,7 +177,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin, ResourceMgrMixin,
         )
         self._run_monitor(status, "tombstone_alerts", self.tombstone_monitor, self._alert_tombstone)
         self._run_monitor(status, "workflow_alerts", self.workflow_monitor, self._alert_workflows)
-        self._run_monitor(status, "epistemic_alerts", self.epistemic_monitor, self._alert_workflows)
+        self._run_monitor(status, "retrieval_alerts", self.retrieval_monitor, self._alert_workflows)
         if hasattr(self, "ast_debt_monitor"):
             self._run_monitor(status, "ast_alerts", self.ast_debt_monitor, self._alert_ast)
         if self.aether_monitor is not None:

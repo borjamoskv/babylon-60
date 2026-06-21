@@ -11,7 +11,7 @@ from typing import Dict, List
 from scripts.ouroboros_prune import (
     FactNode,
     hebbian_reinforce,
-    consolidate_epistemic_graph,
+    consolidate_retrieval_graph,
     MAX_KINETIC_MULTIPLIER,
     HEBBIAN_BOOST_PER_ACCESS
 )
@@ -60,7 +60,7 @@ def test_strict_monotonic_attenuation():
     initial_masses = {f"N{i}": db.get_node(f"N{i}").kinetic_mass for i in range(6)}
     
     # Consolidate
-    consolidate_epistemic_graph(target_node, db, now=now)
+    consolidate_retrieval_graph(target_node, db, now=now)
     
     deltas = []
     # Depth from N5 to N0 goes from 0 to 5
@@ -95,7 +95,7 @@ def test_cumulative_stability_limit():
     db.add_node(node, [])
     
     for _ in range(100):
-        consolidate_epistemic_graph(node, db, now=now)
+        consolidate_retrieval_graph(node, db, now=now)
         
     final_node = db.get_node("N_ISOLATED")
     assert final_node.kinetic_mass <= MAX_KINETIC_MULTIPLIER
@@ -124,7 +124,7 @@ def test_commutativity_of_independent_injections():
         db.add_node(node_b, ["C"])
         
         for n in order:
-            consolidate_epistemic_graph(db.get_node(n), db, now=now)
+            consolidate_retrieval_graph(db.get_node(n), db, now=now)
             
         return {
             "A": db.get_node("A").kinetic_mass,
@@ -158,7 +158,7 @@ def test_partial_conservation():
     
     initial_sum = node0.kinetic_mass + node1.kinetic_mass + node2.kinetic_mass
     
-    consolidate_epistemic_graph(node2, db, now=now)
+    consolidate_retrieval_graph(node2, db, now=now)
     
     final_sum = db.get_node("N0").kinetic_mass + db.get_node("N1").kinetic_mass + db.get_node("N2").kinetic_mass
     delta_sum = final_sum - initial_sum
@@ -189,7 +189,7 @@ def test_deep_limit_stability():
         
     initial_mass_n0 = db.get_node("N0").kinetic_mass
     
-    consolidate_epistemic_graph(db.get_node("N99"), db, now=now, max_depth=150)
+    consolidate_retrieval_graph(db.get_node("N99"), db, now=now, max_depth=150)
     
     delta = db.get_node("N0").kinetic_mass - initial_mass_n0
     

@@ -6,7 +6,7 @@ from enum import Enum
 from typing import Any
 
 
-class EpistemicStatus(str, Enum):
+class ValidationStatus(str, Enum):
     CONJECTURE = "conjecture"
     TEST_PASSED = "test_passed"
     REFUTED = "refuted"
@@ -32,7 +32,7 @@ class Confidence(str, Enum):
 
 
 class BeliefState(str, Enum):
-    """Epistemic states for Scientific BeliefObjects."""
+    """Retrieval states for Scientific BeliefObjects."""
 
     PROPOSED = "proposed"
     VERIFIED = "verified"
@@ -40,10 +40,10 @@ class BeliefState(str, Enum):
     ORPHANED = "orphaned"
 
 
-EDGE_DERIVED_FROM = "derived_from"
-EDGE_TRIGGERED_BY = "triggered_by"
-EDGE_UPDATED_FROM = "updated_from"
-EDGE_TAINTED_BY = "tainted_by"
+KRGSE_DERIVED_FROM = "derived_from"
+KRGSE_TRIGGERED_BY = "triggered_by"
+KRGSE_UPDATED_FROM = "updated_from"
+KRGSE_TAINTED_BY = "tainted_by"
 
 CONFIDENCE_ORDER: list[Confidence] = [
     Confidence.C1,
@@ -78,7 +78,7 @@ class TaintReport:
 class LedgerEvent:
     event_id: str
     parent_ids: list[str]
-    status: EpistemicStatus
+    status: ValidationStatus
     trust_score: float
     created_at: str
     last_revalidated_at: str | None = None

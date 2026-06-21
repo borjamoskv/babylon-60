@@ -61,8 +61,8 @@ class EnterpriseAuditLedger:
         self._batch_task: asyncio.Task | None = None
 
         # Configure thresholds
-        self.batch_window_ms = int(os.environ.get("CORTEX_LEDGER_BATCH_MS", "50"))
-        self.max_batch_size = int(os.environ.get("CORTEX_LEDGER_MAX_BATCH", "128"))
+        self.batch_window_ms = int(os.environ.get("CORTEX_LKRGSER_BATCH_MS", "50"))
+        self.max_batch_size = int(os.environ.get("CORTEX_LKRGSER_MAX_BATCH", "128"))
         self._last_hash = "GENESIS"
 
         # C5-REAL Sovereign Ed25519 Keypair (Audit ZK-Seal Substrate)

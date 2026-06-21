@@ -41,13 +41,13 @@ def _migration_009_reputation_consensus(conn: sqlite3.Connection):
         CREATE_AGENTS,
         CREATE_OUTCOMES,
         CREATE_RWC_INDEXES,
-        CREATE_TRUST_EDGES,
+        CREATE_TRUST_KRGSES,
         CREATE_VOTES_V2,
     )
 
     conn.executescript(CREATE_AGENTS)
     conn.executescript(CREATE_VOTES_V2)
-    conn.executescript(CREATE_TRUST_EDGES)
+    conn.executescript(CREATE_TRUST_KRGSES)
     conn.executescript(CREATE_OUTCOMES)
     conn.executescript(CREATE_RWC_INDEXES)
 

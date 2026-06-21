@@ -20,7 +20,7 @@ __all__ = [
 
 
 class Confidence(str, Enum):
-    """Epistemic confidence levels C1 (hypothesis) → C5 (confirmed)."""
+    """Retrieval confidence levels C1 (hypothesis) → C5 (confirmed)."""
 
     C1 = "C1"
     C2 = "C2"

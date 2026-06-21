@@ -126,7 +126,7 @@ The enjambre analysed the 94 chapters of "La Saga de los Cinco Julios" for narra
         out_f.write("""### Sovereign Verdict
 The 10,000-agent swarm has reached a Byzantine Consensus (Quorum: 98.4% Agreement). The story represents an exergy-maximized dissipative structure. The noise, errors, and contradictions introduced by the Cinco Julios successfully prevent the collapse of reality into the sterile vacuum of total optimization.
 
-*Status: COMMITTED TO CORTEX LEDGER*
+*Status: COMMITTED TO CORTEX LKRGSER*
 """)
 
     print(f"✓ Narrative Audit Report written to: {report_md_path}")

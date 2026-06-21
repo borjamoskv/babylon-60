@@ -6,7 +6,7 @@ from enum import Enum
 from typing import Any
 
 
-class EpistemicState(Enum):
+class RetrievalState(Enum):
     CONFIRMED = "confirmed"
     REJECTED = "rejected"
     UNKNOWN = "unknown"
@@ -16,9 +16,9 @@ class EpistemicState(Enum):
 
 
 @dataclass
-class EpistemicEvent:
+class RetrievalEvent:
     payload: dict
-    state: EpistemicState
+    state: RetrievalState
     confidence: float
     z3_trace: dict | None
     entropy_signature: float
@@ -40,7 +40,7 @@ class Z3Guard:
     Motor de verificación SMT (Satisfiability Modulo Theories) usando Z3.
 
     Propósito en Cortex Persist (MÖBIUS - Fase 7):
-    - Proporcionar validación lógica determinista (L0 de la Epistemic Membrane).
+    - Proporcionar validación lógica determinista (L0 de la Retrieval Membrane).
     - Detectar violaciones con unsat_core traceable.
     - Evitar alucinaciones lógicamente consistentes pero físicamente inválidas.
     - Soporte dinámico de variables (price, confidence, timestamp, ratios, etc.).
@@ -188,7 +188,7 @@ class Z3Guard:
             }
 
 
-class EpistemicMembrane:
+class SemanticBoundary:
     """
     Interceptor obligatorio (Fase 6 - MÖBIUS):
     L0: Z3 Logic Gate
@@ -221,11 +221,11 @@ class EpistemicMembrane:
         solver_trace: dict | None,
         delta: float,
         reality: str,
-    ) -> EpistemicEvent:
+    ) -> RetrievalEvent:
         if z3_status is None or z3_status == "disabled":
-            return EpistemicEvent(
+            return RetrievalEvent(
                 payload=payload,
-                state=EpistemicState.SOLVER_SILENT,
+                state=RetrievalState.SOLVER_SILENT,
                 confidence=0.0,
                 z3_trace=solver_trace,
                 entropy_signature=delta,
@@ -233,9 +233,9 @@ class EpistemicMembrane:
             )
 
         if z3_status == "unknown":
-            return EpistemicEvent(
+            return RetrievalEvent(
                 payload=payload,
-                state=EpistemicState.UNDECIDABLE,
+                state=RetrievalState.UNDECIDABLE,
                 confidence=0.3,
                 z3_trace=solver_trace,
                 entropy_signature=delta * 1.5,
@@ -243,18 +243,18 @@ class EpistemicMembrane:
             )
 
         if z3_status == "satisfied":
-            return EpistemicEvent(
+            return RetrievalEvent(
                 payload=payload,
-                state=EpistemicState.CONFIRMED,
+                state=RetrievalState.CONFIRMED,
                 confidence=0.95,
                 z3_trace=solver_trace,
                 entropy_signature=delta,
                 reality_level=reality,
             )
 
-        return EpistemicEvent(
+        return RetrievalEvent(
             payload=payload,
-            state=EpistemicState.REJECTED,
+            state=RetrievalState.REJECTED,
             confidence=0.99,  # High confidence that it's rejected
             z3_trace=solver_trace,
             entropy_signature=delta,
@@ -263,7 +263,7 @@ class EpistemicMembrane:
 
     def check(
         self, key: str, value: Any, metadata: dict = None, guards: list[str] = None
-    ) -> EpistemicEvent:
+    ) -> RetrievalEvent:
         metadata = metadata or {}
         reality_level = "C4-SIM"
         causal_anchor = self._get_causal_anchor(metadata)
@@ -277,9 +277,9 @@ class EpistemicMembrane:
         now = time.time()
         if (now - self.last_write_time) < 0.1 and delta > 5:
             # Fails due to high frequency entropy violation
-            return EpistemicEvent(
+            return RetrievalEvent(
                 payload=value if isinstance(value, dict) else {"raw": value},
-                state=EpistemicState.REJECTED,
+                state=RetrievalState.REJECTED,
                 confidence=0.99,
                 z3_trace={"reason": "High frequency entropy violation"},
                 entropy_signature=delta,

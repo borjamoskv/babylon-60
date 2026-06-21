@@ -17,7 +17,7 @@ class SortuState(str, Enum):
     FORGED = "FORGED"
     VERIFIED = "VERIFIED"
     LINKED = "LINKED"
-    LEDGERED = "LEDGERED"
+    LKRGSERED = "LKRGSERED"
     ACTIVE = "ACTIVE"
     ABORTED = "ABORTED"
     QUARANTINED = "QUARANTINED"
@@ -30,8 +30,8 @@ TRANSITIONS: dict[SortuState, list[SortuState]] = {
     SortuState.AUDITED: [SortuState.FORGED, SortuState.ABORTED],
     SortuState.FORGED: [SortuState.VERIFIED, SortuState.ABORTED],
     SortuState.VERIFIED: [SortuState.LINKED, SortuState.ABORTED],
-    SortuState.LINKED: [SortuState.LEDGERED, SortuState.ABORTED],
-    SortuState.LEDGERED: [SortuState.ACTIVE, SortuState.ABORTED],
+    SortuState.LINKED: [SortuState.LKRGSERED, SortuState.ABORTED],
+    SortuState.LKRGSERED: [SortuState.ACTIVE, SortuState.ABORTED],
     SortuState.ACTIVE: [SortuState.QUARANTINED],
     SortuState.ABORTED: [],
     SortuState.QUARANTINED: [SortuState.ACTIVE, SortuState.TOMBSTONED],

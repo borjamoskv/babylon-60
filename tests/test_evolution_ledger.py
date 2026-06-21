@@ -335,7 +335,7 @@ def test_substrate_integration():
             substrate._buffer = memoryview(substrate._mmap)
 
             # Initialize evolution ledger manually for tmpdir
-            if um_module.HAS_EVOLUTION_LEDGER:
+            if um_module.HAS_EVOLUTION_LKRGSER:
                 ledger_path = os.path.join(tmpdir, "evolution_ledger.jsonl")
                 substrate._evolution_ledger = um_module.EvolutionLedger(ledger_path)
 
@@ -369,7 +369,7 @@ def test_substrate_integration():
 
 def main():
     print("=" * 60)
-    print("EVOLUTION LEDGER — C5-REAL Integration Test Suite")
+    print("EVOLUTION LKRGSER — C5-REAL Integration Test Suite")
     print("=" * 60)
     start = time.monotonic()
 

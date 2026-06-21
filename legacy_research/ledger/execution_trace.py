@@ -2,7 +2,7 @@
 """Execution Trace Ledger - The Memory Thermodynamics Graph (v19).
 
 Records the flow of energy between hypotheses, tracking cost, lineage,
-and outcome without inferring epistemic validity.
+and outcome without inferring retrieval validity.
 """
 
 from __future__ import annotations

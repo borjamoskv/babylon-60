@@ -48,7 +48,7 @@ class PolicyServiceServicer(agent_pb2_grpc.PolicyServiceServicer):
         return agent_pb2.ActionDistribution(candidates=candidates)
 
     def EvalValue(self, request, context):
-        """gRPC handler for Rust requesting epistemic value of a state."""
+        """gRPC handler for Rust requesting retrieval value of a state."""
         obs = request.obs_vector
         vec = obs[:self.dim] + [0.0] * max(0, self.dim - len(obs))
         state_tensor = torch.tensor(vec, dtype=torch.float32)

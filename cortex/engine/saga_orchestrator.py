@@ -13,12 +13,12 @@ class FactStore:
     async def get(self, fact_id):
         return self.facts.get(fact_id)
         
-    async def insert(self, statement, evidence, epistemic_status, fact_json=None):
+    async def insert(self, statement, evidence, validation_status, fact_json=None):
         fact_id = uuid.uuid4().hex
         class Fact:
             pass
         f = Fact()
-        f.epistemic_status = epistemic_status
+        f.validation_status = validation_status
         f.statement = statement
         f.evidence = evidence
         f.fact_json = fact_json
@@ -27,7 +27,7 @@ class FactStore:
         
     async def update_status(self, fact_id, status, fact_json=None):
         if fact_id in self.facts:
-            self.facts[fact_id].epistemic_status = status
+            self.facts[fact_id].validation_status = status
             if fact_json:
                 self.facts[fact_id].fact_json = fact_json
             
@@ -50,7 +50,7 @@ class ZKGuard:
             new_fact_json = try_seal_fact(fact.fact_json, wal_event_hash, is_valid)
             new_fact = json.loads(new_fact_json)
             
-            if new_fact.get('epistemic_status') == 'rejected':
+            if new_fact.get('validation_status') == 'rejected':
                 raise ValueError("Fact rejected by Rust validation layer")
                 
             await self.fact_store.update_status(fact_id, 'sealed', new_fact_json)
@@ -63,7 +63,7 @@ class ZKGuard:
             self.wal.mark_rejected([fact_id])
             return False
 
-class EDG:
+class KRGS:
     def __init__(self):
         self.nodes = set()
         
@@ -78,7 +78,7 @@ class SagaOrchestrator:
         self.wal = WriteAheadLog()
         self.fact_store = FactStore()
         self.zk_guard = ZKGuard(self.fact_store, self.wal)
-        self.edg = EDG()
+        self.edg = KRGS()
         
     async def generate_hypothesis(self, claim, evidence, agent_id="agent_1"):
         # 1. Rust generates staging JSON
@@ -93,7 +93,7 @@ class SagaOrchestrator:
         fact_id = await self.fact_store.insert(
             statement=claim,
             evidence=evidence,
-            epistemic_status='staging',
+            validation_status='staging',
             fact_json=fact_json
         )
         

@@ -15,7 +15,7 @@ Zero external dependencies beyond stdlib. All functions are pure.
 Theorem references:
     Ξ-KA  → compression_intelligence (Kolmogorov ↔ Assembly Index)
     Ξ-FG  → free_energy_divergence (Active Inference ↔ Guard)
-    T1    → entropy_rate (Conservation of Epistemic Exergy)
+    T1    → entropy_rate (Conservation of Retrieval Exergy)
     T2    → compression_intelligence (Computational Irreducibility proxy)
     T5    → phi_proxy (Consciousness Ceiling)
     T6    → dpi_verify (Exergetic Data Processing Inequality)

@@ -26,7 +26,7 @@ class ArchaeologyGuard:
         conn: aiosqlite.Connection,
         tenant_id: str = "default",
     ) -> dict[str, Any]:
-        """Strict provenance and lineage check. No epistemic inference."""
+        """Strict provenance and lineage check. No retrieval inference."""
         if fact_type not in ("decision", "hypothesis"):
             return {"allow_mutation": True, "reason": "ok", "trace_depth": 0}
 

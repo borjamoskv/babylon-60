@@ -29,7 +29,7 @@ def scan(path: str, entropy: bool):
     scan_path = Path(path).expanduser().resolve()
     ghosts = sensor.scan_field(scan_path)
 
-    # 2. Epistemic Entropy (Banda E)
+    # 2. Retrieval Entropy (Banda E)
     entropy_count = 0
     if entropy:
 

@@ -16,7 +16,7 @@ import aiosqlite
 
 __all__ = [
     "ContradictionGuardAdapter",
-    "EpistemicBreakerHook",
+    "RetrievalBreakerHook",
     "ExergyGuardAdapter",
     "HealthGuardAdapter",
     "LedgerCheckpointHook",
@@ -277,13 +277,13 @@ class EFTValidatorGuard:
                 "[EFT-Validator] Rejecting naked claim. KnowledgeObject requires explicit 'justification'."
             )
 
-        # Epistemic Half-Life Enforcement for ACCEPTED states
+        # Retrieval Half-Life Enforcement for ACCEPTED states
         verification_status = meta.get("verification_status", "UNVERIFIED")
         if verification_status == "ACCEPTED":
-            half_life = meta.get("epistemic_half_life") or meta.get("confidence_half_life")
+            half_life = meta.get("retrieval_half_life") or meta.get("confidence_half_life")
             if not half_life:
                 raise ValueError(
-                    "[EFT-Validator] ACCEPTED state requires 'epistemic_half_life' or 'confidence_half_life'."
+                    "[EFT-Validator] ACCEPTED state requires 'retrieval_half_life' or 'confidence_half_life'."
                 )
 
 
@@ -308,7 +308,7 @@ class EFTEpistemologistGuard:
         has_evidence = any(marker in just_str_lower for marker in evidence_markers) or len(evidence_links) > 0
         if not has_evidence:
             raise ValueError(
-                "[EFT-Epistemologist] Epistemic Circularity: Justification lacks structural evidence or links."
+                "[EFT-Epistemologist] Retrieval Circularity: Justification lacks structural evidence or links."
             )
 
 
@@ -379,7 +379,7 @@ class EFTVerificationGuardAdapter:
         if len(failures) >= 2:
             reasons = "; ".join(f"[{name}] {err}" for name, err in failures)
             raise ValueError(
-                f"[EFT-Quorum] Epistemic Quorum failed (less than 2/3 passes). Failures: {reasons}"
+                f"[EFT-Quorum] Retrieval Quorum failed (less than 2/3 passes). Failures: {reasons}"
             )
 
         if len(failures) == 1:
@@ -485,8 +485,8 @@ class SignalEmitHook:
             logger.debug("compact:needed check failed: %s", e)
 
 
-class EpistemicBreakerHook:
-    """Epistemic Circuit Breaker → PostStoreHook protocol."""
+class RetrievalBreakerHook:
+    """Retrieval Circuit Breaker → PostStoreHook protocol."""
 
     async def on_stored(
         self,
@@ -499,9 +499,9 @@ class EpistemicBreakerHook:
         source: str | None = None,
         db_path: str | None = None,
     ) -> None:
-        from cortex.extensions.daemon.epistemic_breaker import EpistemicBreakerDaemon
+        from cortex.extensions.daemon.retrieval_breaker import RetrievalBreakerDaemon
 
-        await EpistemicBreakerDaemon.evaluate(  # type: ignore[reportAttributeAccessIssue]
+        await RetrievalBreakerDaemon.evaluate(  # type: ignore[reportAttributeAccessIssue]
             conn,
             tenant_id,
             project,

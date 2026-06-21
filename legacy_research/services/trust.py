@@ -453,7 +453,7 @@ class TrustVerifier:
     async def calculate_trust_score(
         self, source_actor: str, confidence_marker: str | None = None
     ) -> float:
-        """Admission score for an actor, potentially modified by epistemic markers."""
+        """Admission score for an actor, potentially modified by retrieval markers."""
         profile = self.get_profile(source_actor)
         score = profile.score
 

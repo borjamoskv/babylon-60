@@ -5,7 +5,7 @@ from rich.panel import Panel
 
 from cortex.cli.common import cli, get_engine
 from cortex.extensions.immune.breaker import (
-    EpistemicState,
+    RetrievalState,
     evaluate_circuit_breaker,
     execute_circuit_trip,
 )
@@ -15,7 +15,7 @@ console = Console()
 
 @cli.group("immune")
 def immune_group():
-    """Immune system and epistemic membrane commands."""
+    """Immune system and retrieval membrane commands."""
 
 
 @immune_group.command("circuit-breaker")
@@ -30,7 +30,7 @@ def circuit_breaker_cmd(
     Evaluate the cognitive entropy density and trip the Sovereign Lock if it exceeds the threshold.
     Also aliased as `/circuit-breaker`.
     """
-    state = EpistemicState(
+    state = RetrievalState(
         consecutive_test_failures=test_failures,
         unresolved_ghosts=unresolved_ghosts,
         recent_linting_mutations=linting_mutations,
@@ -65,7 +65,7 @@ def circuit_breaker_cmd(
                 f"[bold green]SYSTEM NOMINAL[/bold green]\n"
                 f"Entropy Density: {ed_score:.1f} (Threshold: 50.0)\n"
                 f"Reason: System is not thrashing.",
-                title="Epistemic State",
+                title="Retrieval State",
                 border_style="green",
             )
         )

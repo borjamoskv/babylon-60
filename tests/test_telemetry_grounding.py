@@ -77,7 +77,7 @@ class TestPythonTelemetryIntegration:
         registry.inc("request.count", 1.0, payload=payload)
         assert registry.get("request.count") == 1.0
         meta = registry.get_metadata("request.count")
-        assert meta["epistemic_kind"] == "Raw"
+        assert meta["retrieval_kind"] == "Raw"
 
     def test_inc_without_payload_still_works(self):
         registry = MetricsRegistry()

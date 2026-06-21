@@ -18,7 +18,7 @@ logger = logging.getLogger("cortex.extensions.agents.friction_annihilator")
 
 
 class FrictionAnnihilatorAgent:
-    """Sovereign Agent that annihilates epistemic friction."""
+    """Sovereign Agent that annihilates retrieval friction."""
 
     def __init__(self, db_path: str | Path | None = None):
         self._db_path = db_path
@@ -49,7 +49,7 @@ class FrictionAnnihilatorAgent:
             code_content = f.read()
 
         prompt = (
-            "SYSTEM: You are the Friction Annihilator Agent. Your task is to eliminate epistemic friction.\n"
+            "SYSTEM: You are the Friction Annihilator Agent. Your task is to eliminate retrieval friction.\n"
             f"CONTEXT: {context}\n"
             f"ERROR TRACE (Friction Source):\n{error_trace}\n\n"
             "Analyze the failure. Rewrite the provided code to resolve the error and align with C5-REAL execution.\n"

@@ -313,7 +313,7 @@ class DaemonStatus:
     trends_alerts: list[TrendsAlert] = field(default_factory=list)
     aether_alerts: list[AetherAlert] = field(default_factory=list)
     workflow_alerts: list[WorkflowAlert] = field(default_factory=list)
-    epistemic_alerts: list[WorkflowAlert] = field(default_factory=list)
+    retrieval_alerts: list[WorkflowAlert] = field(default_factory=list)
     auto_immune_alerts: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
@@ -339,7 +339,7 @@ class DaemonStatus:
                 self.trends_alerts,
                 self.aether_alerts,
                 self.workflow_alerts,
-                self.epistemic_alerts,
+                self.retrieval_alerts,
                 self.ast_alerts,
                 self.auto_immune_alerts,
                 self.errors,

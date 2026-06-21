@@ -22,10 +22,10 @@ impl RealityWriter {
 
             for (msg, ack_tx) in receiver {
                 if let Err(e) = writeln!(writer, "{}", msg) {
-                    eprintln!("Failed to write to epistemic ledger: {}", e);
+                    eprintln!("Failed to write to retrieval ledger: {}", e);
                 }
                 if let Err(e) = writer.flush() {
-                    eprintln!("Failed to flush epistemic ledger: {}", e);
+                    eprintln!("Failed to flush retrieval ledger: {}", e);
                 }
                 // Send durability ACK back to the ingest thread
                 let _ = ack_tx.send(());
