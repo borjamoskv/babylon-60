@@ -6,15 +6,11 @@ logger = logging.getLogger(__name__)
 
 # Try to import the compiled PyO3 extension
 try:
-    import cortex_native
-    rust_ext = cortex_native
+    import cortex_rs
+    rust_ext = cortex_rs
 except ImportError:
-    try:
-        import cortex_rs
-        rust_ext = cortex_rs
-    except ImportError:
-        logger.warning("Could not import Rust extensions. Causal Compiler will be disabled.")
-        rust_ext = None
+    logger.warning("Could not import Rust extensions. Causal Compiler will be disabled.")
+    rust_ext = None
 
 class PySceneState(BaseModel):
     id: str
