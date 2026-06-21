@@ -13,6 +13,21 @@ pub struct ExergyMutation {
     pub rul_claim_id: Option<String>, // Required to justify exergy injection
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct EpistemicNode {
+    pub id: String,
+    pub origin: String,
+    pub exergy: f64,
+}
+
+impl EpistemicNode {
+    pub fn apply_mutation(&mut self, mutation: &ExergyMutation, guard: &ExergyGuard) -> Result<(), ExergyError> {
+        guard.validate(mutation)?;
+        self.exergy += mutation.delta;
+        Ok(())
+    }
+}
+
 #[derive(Debug)]
 pub enum ExergyError {
     InsufficientConsensus { have: usize, need: usize },
