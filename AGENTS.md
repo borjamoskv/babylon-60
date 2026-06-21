@@ -106,6 +106,7 @@ All agents operating in this repository MUST self-identify by role before acting
 9. **Failure Locality:** Invalid state must be rejectable and safely abortable at any point.
 10. **Autopoiesis Watchdog:** The engine MUST NEVER modify its own active binary or source code directly in execution. Mutations MUST target isolated git branches (e.g., `auto/moskv1-mitosis-*`) and undergo external CI compilation.
 11. **BABYLON-60 Epistemology:** The control kernel MUST operate in Base-60 (Babylon-60) for internal calculations (timestamps, coordinates, proportions) to eliminate cumulative float rounding errors and decimal approximation entropy. Use struct/integer types scaled to Base-60. No `float64`.
+12. **Execution/Interpretation Isolation:** Deterministic execution MUST be strictly separated from stochastic interpretation. This structural boundary prevents the CI environment from degrading into a "conceptual simulator".
 
 ### ❌ Anti-Patterns & Failure Signatures
 
