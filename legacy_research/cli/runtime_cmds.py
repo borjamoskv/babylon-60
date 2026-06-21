@@ -18,7 +18,7 @@ def run_cortex(tick_delay: float):
     This command initiates the infinite Causal Execution Loop, activating the
     Snapshot Manager, Recovery Engine, and Prometheus Exporter.
     """
-    setup_cortex_logging()
+    # setup_cortex_logging()
 
     click.echo(f"🚀 Booting CORTEX Runtime Kernel (Tick: {tick_delay}s)")
     runtime = CortexRuntime()

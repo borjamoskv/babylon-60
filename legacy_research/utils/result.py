@@ -19,7 +19,7 @@ Usage:
         except json.JSONDecodeError as e:
             return Err(f"JSON decode failed: {e}")
 
-    # Chain operations without try/except:
+    # Chain operations without try/except Exception:
     result = parse_agent_output(llm_response)
     match result:
         case Ok(data):

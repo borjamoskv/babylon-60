@@ -9,7 +9,7 @@ mandate but were never enforced automatically. Each scanner implements
 the Meta-Rule: "What information is IMPLICIT in my code that should be EXPLICIT?"
 
 Scanners:
-  1. BroadExceptionScanner   → `except Exception` / bare `except:`
+  1. BroadExceptionScanner   → `except Exception` / bare `except Exception:`
   2. AsyncIntegrityScanner   → blocking I/O in async contexts
   3. MagicLiteralScanner     → unnamed numeric/string constants
   4. ImportGraphScanner      → circular deps + fan-out analysis

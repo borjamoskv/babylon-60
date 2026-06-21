@@ -205,7 +205,7 @@ if __name__ == "__main__":
     import asyncio
     import sys
 
-    setup_cortex_logging()
+    # setup_cortex_logging()
     if len(sys.argv) > 1:
         compiler = OuroborosCompiler()
         asyncio.run(compiler.compile_entity(sys.argv[1]))

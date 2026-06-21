@@ -71,7 +71,7 @@ async def test_ouroboros_physical_transition_cycle(tmp_path):
         
         # Verify ledger file content
         assert log_file.exists()
-        with open(log_file, "r") as f:
+        with open(log_file) as f:
             lines = f.readlines()
             assert len(lines) > 0
             first_event = json.loads(lines[0])

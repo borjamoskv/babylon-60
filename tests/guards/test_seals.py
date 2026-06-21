@@ -125,7 +125,7 @@ async def test_seal_3_bandit_rejection(mock_cache):
 
 @pytest.mark.asyncio
 async def test_seal_3_demon_rejection(mock_cache):
-    mock_cache.files = {Path("cortex/engine/bad.py"): "try: pass\nexcept: pass"}
+    mock_cache.files = {Path("cortex/engine/bad.py"): "try: pass\nexcept Exception: pass"}
     with (
         patch("cortex.guards._seals_checks_1_5.arun_cmd", new_callable=AsyncMock) as mock_run,
         patch("cortex.engine.legion_vectors.EntropyDemon") as mock_demon,

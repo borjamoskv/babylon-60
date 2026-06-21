@@ -4,7 +4,7 @@ import random
 
 from playwright.async_api import async_playwright
 
-setup_cortex_logging()
+# setup_cortex_logging()
 logger = logging.getLogger("CDP-Automata")
 
 

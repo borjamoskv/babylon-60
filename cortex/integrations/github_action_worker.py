@@ -5,10 +5,8 @@ from typing import Any
 
 import requests
 
-from cortex.observability.jsonl_logger import setup_cortex_logging
-
 # Configure structured logging for CI/CD
-setup_cortex_logging()
+# setup_cortex_logging()
 logger = logging.getLogger("cortex-action-worker")
 
 CORTEX_API_URL = os.environ.get("CORTEX_API_URL", "https://api.cortexpersist.com/api/v1/audit")

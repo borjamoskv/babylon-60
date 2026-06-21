@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from cortex_rs import RetrievalGraph, RetrievalNode
 
-setup_cortex_logging()
+# setup_cortex_logging()
 logger = logging.getLogger("KRGS_StressTest")
 
 def build_poc_graph():

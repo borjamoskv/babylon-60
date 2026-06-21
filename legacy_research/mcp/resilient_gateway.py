@@ -429,5 +429,5 @@ def run_resilient_gateway(
 
 
 if __name__ == "__main__":
-    setup_cortex_logging()
+    # setup_cortex_logging()
     run_resilient_gateway()

@@ -14,7 +14,7 @@ import time
 from cortex.compat.optional import np
 from cortex.swarm.tensor_glial import TensorGlialLegion
 
-setup_cortex_logging()
+# setup_cortex_logging()
 logger = logging.getLogger("cortex.gold_miner")
 
 MMAP_FILE = "market_wave.vsa_mmap"

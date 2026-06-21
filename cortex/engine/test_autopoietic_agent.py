@@ -18,9 +18,7 @@ import asyncio
 import json
 import logging
 
-from cortex.observability.jsonl_logger import setup_cortex_logging
-
-setup_cortex_logging()
+# setup_cortex_logging()
 import os
 import random
 import sys

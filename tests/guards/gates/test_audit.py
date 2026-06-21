@@ -18,7 +18,7 @@ async def test_gate_11_audit_happy():
 @pytest.mark.asyncio
 async def test_gate_11_audit_bare_except_rejection():
     # It logs but still returns True, verified (non-blocking)
-    cached_files = {Path("bad_except.py"): "try:\n    do_something()\nexcept:\n    pass"}
+    cached_files = {Path("bad_except.py"): "try:\n    do_something()\nexcept Exception:\n    pass"}
     with patch("cortex.guards.gates.common.GlobalSourceCache.files", cached_files):
         passed, status = await check_gate_11_cobbler()
         assert passed is True
@@ -55,7 +55,7 @@ async def test_gate_11_audit_whitelist_boundary():
 
 @pytest.mark.asyncio
 async def test_gate_11_audit_combined_violations():
-    cached_files = {Path("messy.py"): "print(1)\ntry:\n  f()\nexcept:\n  pass"}
+    cached_files = {Path("messy.py"): "print(1)\ntry:\n  f()\nexcept Exception:\n  pass"}
     with patch("cortex.guards.gates.common.GlobalSourceCache.files", cached_files):
         passed, status = await check_gate_11_cobbler()
         assert passed is True

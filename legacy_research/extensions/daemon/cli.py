@@ -66,7 +66,7 @@ def _get_systemd_unit() -> Path:
 
 
 def setup_logging(verbose: bool = False) -> None:
-    setup_cortex_logging()
+    # setup_cortex_logging()
 
 
 # ─── Click Group ────────────────────────────────────────────────────────

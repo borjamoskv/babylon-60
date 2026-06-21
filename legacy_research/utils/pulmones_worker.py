@@ -7,7 +7,7 @@ import time
 from importlib import import_module
 from pathlib import Path
 
-setup_cortex_logging()
+# setup_cortex_logging()
 logger = logging.getLogger("CORTEX.PULMONES.WORKER")
 
 

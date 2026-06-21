@@ -9,7 +9,7 @@ def calculate_hash(timestamp: str, type: str, actor: str, payload: str, parent_e
     content = f"{timestamp}{type}{actor}{payload}{parent_event}{prev_hash}"
     return hashlib.sha256(content.encode('utf-8')).hexdigest()
 
-def log_event(type: str, actor: str, payload: Dict[str, Any], parent_event: Optional[int] = None) -> int:
+def log_event(type: str, actor: str, payload: dict[str, Any], parent_event: Optional[int] = None) -> int:
     conn = get_connection()
     cursor = conn.cursor()
     
@@ -87,7 +87,7 @@ def generate_10k_events():
     print("Generated 10000 events.")
     return len(events_to_insert)
 
-def audit_chain() -> Dict[str, Any]:
+def audit_chain() -> dict[str, Any]:
     conn = get_connection()
     cursor = conn.cursor()
     
@@ -121,7 +121,7 @@ def audit_chain() -> Dict[str, Any]:
         "tampering": broken_hashes > 0
     }
 
-def get_causal_chain(event_id: int) -> Dict[str, Any]:
+def get_causal_chain(event_id: int) -> dict[str, Any]:
     conn = get_connection()
     cursor = conn.cursor()
     

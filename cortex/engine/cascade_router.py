@@ -194,7 +194,7 @@ class CascadeRouter:
 if __name__ == "__main__":
     import asyncio
     # Test stub
-    setup_cortex_logging()
+    # setup_cortex_logging()
     router = CascadeRouter()
     
     async def run_tests():

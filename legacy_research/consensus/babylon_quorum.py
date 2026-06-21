@@ -33,7 +33,7 @@ class BabylonQuorum:
         Requires N >= required_signatures to commit.
         
         Returns:
-            Tuple[bool, Optional[str]]: (Consensus Reached, Ledger Commit Hash)
+            tuple[bool, Optional[str]]: (Consensus Reached, Ledger Commit Hash)
         """
         logger.info(f"Initiating Babylon-60 Consensus for Proof: {proof_hash}")
         

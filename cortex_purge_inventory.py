@@ -45,7 +45,7 @@ def determine_yield_score(filepath):
     try:
         stat = filepath.stat()
         age_days = (time.time() - stat.st_mtime) / (24 * 3600)
-    except:
+    except Exception:
         age_days = 100
     name = filepath.name.lower()
     
@@ -98,7 +98,7 @@ for src_dir in SOURCE_DIRS:
             try:
                 with open(filepath, encoding='utf-8') as f:
                     content = f.read(1000)
-            except:
+            except Exception:
                 content = ""
                 
             cap = determine_capability(file, content)

@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 # Configuración de Logging
-setup_cortex_logging()
+# setup_cortex_logging()
 logger = logging.getLogger(__name__)
 
 # Rutas

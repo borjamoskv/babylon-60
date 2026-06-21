@@ -35,7 +35,7 @@ class StrictASTValidator(ast.NodeVisitor):
     def visit_ExceptHandler(self, node: ast.ExceptHandler):
         # Rule: No bare except Exception:
         if node.type is None:
-            self._record_error(node, "[MEDIUM] Bare `except:` clause detected. Narrow exception scoping required.")
+            self._record_error(node, "[MEDIUM] Bare `except Exception:` clause detected. Narrow exception scoping required.")
         elif isinstance(node.type, ast.Name) and node.type.id == "Exception":
             self._record_error(node, "[MEDIUM] Catching base `Exception` detected. Narrow exception scoping required.")
             

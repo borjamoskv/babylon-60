@@ -1,20 +1,15 @@
 # [C5-REAL] Exergy-Maximized Stress Test for Fable Kernel
 import asyncio
-import time
-import sys
+import gc
 import os
 import random
-import gc
-from typing import List, Tuple
+import sys
+import time
 
 # Ensure project root is in python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from cortex.engine.fable_out import (
-    CausalMaxwellDemon,
-    causal_distance,
-    hash_distance_rollup
-)
+from cortex.engine.fable_out import CausalMaxwellDemon, causal_distance, hash_distance_rollup
 
 # Try to import resource for RSS memory tracking on Unix
 try:
@@ -106,7 +101,7 @@ async def run_concurrent_stress(concurrency: int = 10, ops_per_task: int = 10000
     async def task_worker(task_id: int):
         task_start = time.time()
         for i in range(ops_per_task):
-            res = demon.cosine_similarity(task_id * 1000 + i, task_id * 5000 - i)
+            demon.cosine_similarity(task_id * 1000 + i, task_id * 5000 - i)
             # Yield to event loop occasionally
             if i % 1000 == 0:
                 await asyncio.sleep(0)

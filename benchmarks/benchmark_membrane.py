@@ -12,7 +12,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from cortex.memory.semantic_boundary import SemanticBoundary
 
 # Configure logging to write to stdout
-setup_cortex_logging()
+# setup_cortex_logging()
 
 
 def run_stress_test():

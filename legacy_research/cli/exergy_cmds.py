@@ -141,7 +141,7 @@ def run_aefm(horizon: int, epsilon_path: float, max_cycles: int) -> None:
     engine = ExergyEngine()
 
 
-    setup_cortex_logging()
+    # setup_cortex_logging()
 
     engine.autonomous_field_daemon(
         horizon=horizon, epsilon_path=epsilon_path, recompute_fdf_min=10, max_cycles=max_cycles

@@ -21,8 +21,9 @@ class ExergyMonitor:
         self._last_cpu_time = self._get_process_cpu_time_ms()
 
     def _get_process_cpu_time_ms(self) -> int:
-        import psutil
         import os
+
+        import psutil
         try:
             p = psutil.Process(os.getpid())
             cpu_times = p.cpu_times()
@@ -79,6 +80,7 @@ class ExergyMonitor:
     def _read_temperature_mc(self) -> int:
         """Reads CPU temperature in milli-Celsius."""
         import subprocess
+
         import psutil
         try:
             output = subprocess.check_output(["sysctl", "-n", "machdep.xcpm.cpu_thermal_level"], stderr=subprocess.DEVNULL)

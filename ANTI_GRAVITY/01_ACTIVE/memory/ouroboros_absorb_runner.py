@@ -28,7 +28,7 @@ except ImportError:
     LedgerStore = None
     EnrichmentQueue = None
 
-setup_cortex_logging()
+# setup_cortex_logging()
 logger = logging.getLogger("ouroboros_absorb_runner")
 
 REFLECTIONS_PATH = Path(

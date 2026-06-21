@@ -1,9 +1,8 @@
 """
 Barrera de aislamiento de side effects. Realiza la ejecución de reinicio/recuperación.
 """
-import asyncio
-import logging
 import gc
+import logging
 import os
 
 logger = logging.getLogger("ouroboros.executor")

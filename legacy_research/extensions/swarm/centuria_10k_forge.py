@@ -9,7 +9,7 @@ import hashlib
 import logging
 import time
 
-setup_cortex_logging()
+# setup_cortex_logging()
 logger = logging.getLogger("cortex.centuria.10k")
 
 SQUADS = [

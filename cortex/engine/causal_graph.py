@@ -28,7 +28,7 @@ class CausalDAG:
     """In-memory reconstruction of the event DAG for replay tracking."""
     def __init__(self):
         self.nodes: dict[str, CausalNode] = {}
-        self.edges: dict[str, list[str]] = {} # parent_event_id -> List[event_id]
+        self.edges: dict[str, list[str]] = {} # parent_event_id -> list[event_id]
         
     def add_node(self, node: CausalNode):
         self.nodes[node.event_id] = node

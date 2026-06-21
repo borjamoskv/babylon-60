@@ -16,6 +16,6 @@ class AnalystAgent:
                     state.features.append({"feature": "agent_system", "source": file})
                 if "todo" in lc:
                     state.technical_debt.append({"type": "TODO_found", "file": file})
-            except:
+            except Exception:
                 continue
         return state

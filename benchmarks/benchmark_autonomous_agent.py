@@ -30,7 +30,7 @@ from cortex.agents.message_schema import AgentMessage
 from cortex.agents.tools import ToolRegistry
 
 # Configure logging
-setup_cortex_logging()
+# setup_cortex_logging()
 logger = logging.getLogger("cortex.benchmark")
 
 

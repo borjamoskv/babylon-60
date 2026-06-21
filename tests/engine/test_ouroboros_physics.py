@@ -6,7 +6,6 @@ Validates strict monotonic attenuation and cumulative stability of Hebbian Reinf
 
 import time
 import pytest
-from typing import Dict, List
 
 from scripts.ouroboros_prune import (
     FactNode,

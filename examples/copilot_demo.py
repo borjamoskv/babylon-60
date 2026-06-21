@@ -38,7 +38,7 @@ from cortex.agents.copilot_contracts import (
 )
 from cortex.agents.message_schema import MessageKind, new_message
 
-setup_cortex_logging()
+# setup_cortex_logging()
 logger = logging.getLogger("copilot.demo")
 
 

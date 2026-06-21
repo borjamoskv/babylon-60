@@ -32,7 +32,7 @@ def score_semantics(files: list[Path]) -> tuple[float, list]:
         for node in ast.walk(tree):
             if isinstance(node, ast.ExceptHandler) and node.type is None:
                 deductions += 1.0
-                issues.append(Issue(file=str(f), line=node.lineno, category='semantics', severity='warning', message="Bare 'except:' - catch specific exceptions"))
+                issues.append(Issue(file=str(f), line=node.lineno, category='semantics', severity='warning', message="Bare 'except Exception:' - catch specific exceptions"))
         for node in ast.walk(tree):
             if isinstance(node, ast.ExceptHandler) and node.type:
                 if isinstance(node.type, ast.Name) and node.type.id == 'Exception':

@@ -43,7 +43,7 @@ class DeepResearchOracle:
     def __init__(self, tenant_id: str):
         self.tenant_id = tenant_id
 
-    async def execute_pipeline(self, query: str, sources: List[Any]) -> Dict[str, Any]:
+    async def execute_pipeline(self, query: str, sources: list[Any]) -> dict[str, Any]:
         """
         Executes the 4-phase Retrieval Audit Pipeline.
         """
@@ -63,7 +63,7 @@ class DeepResearchOracle:
         
         return synthesis
 
-    async def _scope_kill(self, query: str) -> Dict[str, Any]:
+    async def _scope_kill(self, query: str) -> dict[str, Any]:
         """
         Defines brutal perimeters to kill noise before ingestion.
         """
@@ -73,14 +73,14 @@ class DeepResearchOracle:
             "temporal_bound": "last_24_months"
         }
 
-    async def _source_swarm(self, sources: List[Any], perimeters: Dict[str, Any]) -> List[Dict[str, Any]]:
+    async def _source_swarm(self, sources: list[Any], perimeters: dict[str, Any]) -> list[dict[str, Any]]:
         """
         Classifies textual fauna by reliability and type (foundational, implementation, benchmark, critique).
         """
         await asyncio.sleep(0) # Non-blocking structural validation
         return [{"source": s, "type": "classified", "reliability_score": 0.9} for s in sources]
 
-    async def _contradiction_engine(self, classified_sources: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def _contradiction_engine(self, classified_sources: list[dict[str, Any]]) -> dict[str, Any]:
         """
         Statistical delusion detector. Builds the Contradiction Graph.
         Identifies most supported claims, inflated claims, and laboratory-only conditions.
@@ -92,7 +92,7 @@ class DeepResearchOracle:
             "disputed_points": []
         }
 
-    async def _synthesis_compiler(self, contradiction_graph: Dict[str, Any]) -> Dict[str, Any]:
+    async def _synthesis_compiler(self, contradiction_graph: dict[str, Any]) -> dict[str, Any]:
         """
         Engineering-grade synthesis.
         Outputs decisions, tradeoffs, risks, evidence gaps, and production readiness.

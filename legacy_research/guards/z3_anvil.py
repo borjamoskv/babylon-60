@@ -37,7 +37,7 @@ class SovereignAnvil:
                         For the MVP, we parse predefined patterns.
         
         Returns:
-            Tuple[bool, Optional[str], str]: (Success, ProofHash, Reason)
+            tuple[bool, Optional[str], str]: (Success, ProofHash, Reason)
         """
         if not HAS_Z3:
             # Fallback for CI environments without z3

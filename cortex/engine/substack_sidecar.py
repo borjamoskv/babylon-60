@@ -3,11 +3,10 @@ import logging
 from pathlib import Path
 
 from cortex.database.core import connect
-from cortex.observability.jsonl_logger import setup_cortex_logging
 from cortex.services.email import send_reengagement_email
 
 # Configuración de Logging
-setup_cortex_logging()
+# setup_cortex_logging()
 logger = logging.getLogger("CausalScheduler")
 
 CORTEX_DB_PATH = Path("/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex_data.db")

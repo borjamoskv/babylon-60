@@ -24,13 +24,13 @@ async def check_gate_11_cobbler() -> GateResult:
     ]
 
     def _audit_code(path: Path, content: str) -> list[str]:
-        # Perform self-audit using AST to find bare 'except:' and 'print()' calls
+        # Perform self-audit using AST to find bare 'except Exception:' and 'print()' calls
         v = []
         try:
             tree = ast.parse(content)
             for node in ast.walk(tree):
                 if isinstance(node, ast.ExceptHandler) and node.type is None:
-                    v.append(f"bare-except:{node.lineno}")
+                    v.append(f"bare-except Exception:{node.lineno}")
                 if (
                     isinstance(node, ast.Call)
                     and isinstance(node.func, ast.Name)

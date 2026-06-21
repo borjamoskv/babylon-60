@@ -49,7 +49,7 @@ class CTREGuard:
             target_y: Coordenada Y (para UI agents).
 
         Returns:
-            Tuple[bool, int]: (True si el commit es exitoso / False si hay divergencia TOCTOU, tiempo en microsegundos epsilon)
+            tuple[bool, int]: (True si el commit es exitoso / False si hay divergencia TOCTOU, tiempo en microsegundos epsilon)
         """
         if HAS_RUST_CTRE and hasattr(cortex_rs, "ctre_atomic_commit"):
             # Ejecución C5-REAL vía FFI

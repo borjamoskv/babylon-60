@@ -4,6 +4,7 @@ Loop asíncrono y exposición del API REST de salud. Orquesta el ciclo de vida c
 """
 import asyncio
 import logging
+
 import uvicorn
 from fastapi import FastAPI
 
@@ -45,7 +46,7 @@ def read_ledger():
     import os
     if os.path.exists(log_path):
         try:
-            with open(log_path, "r") as f:
+            with open(log_path) as f:
                 lines = f.readlines()
                 for line in lines[-10:]:
                     if line.strip():

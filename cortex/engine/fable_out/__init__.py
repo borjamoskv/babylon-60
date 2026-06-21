@@ -3,20 +3,17 @@
 This exposes the strictly typed integer F# logic to the Python engine.
 """
 
-from typing import Tuple, List
+from fable_library.core import uint16, uint32
 
+from .src.babylon import Babylon_causalDistance, Babylon_hashDistanceRollup
 from .src.maxwell_demon import (
     MaxwellDemon,
-    MaxwellDemon__ctor_6C4BA866,
-    MaxwellDemon__SetState_Z721C83C5,
     MaxwellDemon__CosineSimilarity_23050560,
-    MaxwellDemon__PurgeRedundant_Z115D9F2A
+    MaxwellDemon__ctor_6C4BA866,
+    MaxwellDemon__PurgeRedundant_Z115D9F2A,
+    MaxwellDemon__SetState_Z721C83C5,
 )
-from .src.babylon import (
-    Babylon_causalDistance,
-    Babylon_hashDistanceRollup
-)
-from fable_library.core import uint16, uint32
+
 
 class CausalMaxwellDemon:
     def __init__(self, threshold: int = 85):
@@ -28,15 +25,19 @@ class CausalMaxwellDemon:
     def cosine_similarity(self, id1: int, id2: int) -> int:
         return int(MaxwellDemon__CosineSimilarity_23050560(self._demon, uint32(id1), uint32(id2)))
 
-    def purge_redundant(self, chunks: List[Tuple[int, str]]) -> Tuple[List[str], int]:
+    def purge_redundant(self, chunks: list[tuple[int, str]]) -> tuple[list[str], int]:
         # Convert python list to array for Fable
         fable_array = [(uint32(h), chunk) for h, chunk in chunks]
         retained, purged = MaxwellDemon__PurgeRedundant_Z115D9F2A(self._demon, fable_array)
         return list(retained), int(purged)
 
-def causal_distance(ancestry: int, ledger: int, witness: int, temporal: int) -> int:
-    return int(Babylon_causalDistance(uint16(ancestry), uint16(ledger), uint16(witness), uint16(temporal)))
 
-def hash_distance_rollup(root_hash: int, distances: List[int]) -> int:
+def causal_distance(ancestry: int, ledger: int, witness: int, temporal: int) -> int:
+    return int(
+        Babylon_causalDistance(uint16(ancestry), uint16(ledger), uint16(witness), uint16(temporal))
+    )
+
+
+def hash_distance_rollup(root_hash: int, distances: list[int]) -> int:
     fable_distances = [uint16(d) for d in distances]
     return int(Babylon_hashDistanceRollup(uint32(root_hash), fable_distances))

@@ -111,7 +111,7 @@ class EntropyDemon:
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         # Checks for missing null-safety and generic exception handling
-        if "except Exception:  # noqa: BLE001" in code or "except:" in code:
+        if "except Exception:  # noqa: BLE001" in code or "except Exception:" in code:
             findings.append(
                 "Fragility: Bare `except` detected. System cannot tolerate undetected entropy."
             )

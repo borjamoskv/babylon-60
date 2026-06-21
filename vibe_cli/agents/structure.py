@@ -16,6 +16,6 @@ class StructureAgent:
                     state.code_structure[file] = self.parser.parse_python(content)
                 elif file.endswith((".js", ".ts", ".tsx", ".jsx")):
                     state.code_structure[file] = self.parser.parse_js(content)
-            except:
+            except Exception:
                 continue
         return state

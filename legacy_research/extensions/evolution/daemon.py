@@ -20,7 +20,7 @@ import sys
 
 from cortex.extensions.evolution.engine import EvolutionEngine
 
-setup_cortex_logging()
+# setup_cortex_logging()
 logger = logging.getLogger(__name__)
 
 

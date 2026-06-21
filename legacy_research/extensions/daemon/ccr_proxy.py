@@ -27,7 +27,7 @@ app.add_middleware(
 )
 
 logger = logging.getLogger("ccr_proxy")
-setup_cortex_logging()
+# setup_cortex_logging()
 
 LOCAL_OPENAI_URL = os.getenv("CCR_OPENAI_URL", "http://localhost:11434/v1/chat/completions")
 LOCAL_MODEL = os.getenv("CCR_LOCAL_MODEL", "qwen2.5-coder:32b")

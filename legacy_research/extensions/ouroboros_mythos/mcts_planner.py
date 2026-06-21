@@ -4,9 +4,8 @@ MCTS Planner Module.
 Implements integer-based structural trajectory planning.
 """
 
-import logging
-import struct
 import hashlib
+import logging
 
 logger = logging.getLogger(__name__)
 

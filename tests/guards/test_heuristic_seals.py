@@ -70,7 +70,7 @@ async def test_check_gate_11_cobbler_demon_violation():
     mock_intruder = MagicMock()
     mock_intruder.attack = AsyncMock(return_value=[])
 
-    cached_files = {Path("cortex/engine/fail.py"): "try: pass\nexcept: pass"}
+    cached_files = {Path("cortex/engine/fail.py"): "try: pass\nexcept Exception: pass"}
 
     with (
         patch("cortex.engine.legion_vectors.EntropyDemon", return_value=mock_demon),

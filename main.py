@@ -4,7 +4,7 @@ import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-setup_cortex_logging()
+# setup_cortex_logging()
 logger = logging.getLogger(__name__)
 
 app = FastAPI(

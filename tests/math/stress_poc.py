@@ -1,7 +1,6 @@
 import time
 import uuid
 import hashlib
-from typing import List, Tuple
 from cortex.math.babylon import causal_distance, hash_distance_rollup
 
 def generate_mock_trajectory() -> str:

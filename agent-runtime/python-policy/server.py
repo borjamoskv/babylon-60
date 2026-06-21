@@ -9,7 +9,7 @@ from policy.model import PolicyNet
 from policy.planner import plan
 from policy.value import ValueNet
 
-setup_cortex_logging()
+# setup_cortex_logging()
 
 class PolicyServiceServicer(agent_pb2_grpc.PolicyServiceServicer):
     def __init__(self):

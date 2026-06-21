@@ -27,7 +27,7 @@ _BLOCKING_CALLS: dict[str, str] = {
 
 
 class _BroadExceptionVisitor(ast.NodeVisitor):
-    """Detect `except Exception`, `except BaseException`, and bare `except:`."""
+    """Detect `except Exception`, `except BaseException`, and bare `except Exception:`."""
 
     def __init__(self, rel: str, findings: list[AntipatternFinding]) -> None:
         self.rel = rel
@@ -35,7 +35,7 @@ class _BroadExceptionVisitor(ast.NodeVisitor):
 
     def visit_ExceptHandler(self, node: ast.ExceptHandler) -> None:
         if node.type is None:
-            # Bare `except:`
+            # Bare `except Exception:`
             self.findings.append(
                 AntipatternFinding(
                     scanner="BroadException",
@@ -43,7 +43,7 @@ class _BroadExceptionVisitor(ast.NodeVisitor):
                     file=self.rel,
                     line=node.lineno,
                     message=(
-                        "Bare `except:` catches all exceptions"
+                        "Bare `except Exception:` catches all exceptions"
                         " including SystemExit/KeyboardInterrupt"
                     ),
                     fix_hint=(

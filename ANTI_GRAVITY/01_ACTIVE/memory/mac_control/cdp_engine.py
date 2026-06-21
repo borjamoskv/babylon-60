@@ -7,7 +7,7 @@ from typing import Any
 import httpx
 import websockets
 
-setup_cortex_logging()
+# setup_cortex_logging()
 logger = logging.getLogger("mac-control-omega")
 
 
