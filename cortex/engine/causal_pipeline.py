@@ -53,6 +53,9 @@ class CausalFFIDomain(abc.ABC):
         
     @abc.abstractmethod
     def guard(self, payload: ClosurePayload) -> bool:
-        """Enforce Axiom VIII: Reject payload if structural hash integrity fails."""
+        """
+        Enforce Axiom VIII: Reject payload if structural hash integrity fails.
+        At runtime, this is strictly coerced by the Minimal Trusted Kernel (MTKGuard).
+        """
         pass
 
