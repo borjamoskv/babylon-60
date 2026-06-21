@@ -18,6 +18,7 @@ pub mod retrieval;
 pub mod babylon;
 pub mod mee;
 pub mod kv_gds;
+pub mod tensors;
 
 use serde::{Deserialize, Serialize};
 
@@ -194,6 +195,8 @@ fn cortex_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(reality::reader::load_verified_reality, m)?)?;
     m.add_function(wrap_pyfunction!(mee::ffi::execute_mee_transfer, m)?)?;
     m.add_class::<kv_gds::CufileGdsBridge>()?;
+    m.add_function(wrap_pyfunction!(tensors::calculate_jacobian_determinant, m)?)?;
+    m.add_function(wrap_pyfunction!(tensors::calculate_log_jacobian_determinant, m)?)?;
     Ok(())
 }
 
