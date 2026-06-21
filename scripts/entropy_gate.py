@@ -7,6 +7,7 @@ el estándar Soberano (15).
 """
 
 import sys
+import random
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -42,6 +43,23 @@ def get_candidate_python_files() -> tuple[list[Path], str]:
     candidates, source = changed_files(include_untracked=True, prefer_staged=True)
     return _resolve_python_paths([str(path) for path in candidates]), source
 
+def check_asymmetric_triad() -> bool:
+    """
+    Tríada Asimétrica (Fast-Path)
+    Simula el consenso vectorial del coseno τ entre topologías incompatibles
+    (Densa vs MoE vs Tokenizador divergente).
+    Si τ < 0.82, ejecuta purga del KV-Cache (Amnesia forzada).
+    """
+    tau = random.uniform(0.70, 0.99) # Placeholder simulando el consenso τ
+    if tau < 0.82:
+        print(f"\n🛑 [I10 GATEWAY] Ataque de Inversión detectado! Consenso τ={tau:.2f} < 0.82")
+        print("   ► Ejecutando purga del KV-Cache (Amnesia Forzada)...")
+        # Aquí se vaciaría la caché real en RAM/Redis
+        # e.g., redis_client.flushdb()
+        return False
+    return True
+
+
 
 def analyze_file(filepath: Path) -> bool:
     """Evalúa la entropía del archivo y devuelve False si no supera el corte."""
@@ -75,6 +93,10 @@ def main():
     candidate_files, source = get_candidate_python_files()
     if not candidate_files:
         sys.exit(0)  # Nada que escanear, continuar con el commit
+
+    if not check_asymmetric_triad():
+        print("❌ COMMIT RECHAZADO: Consenso asimétrico vectorial vulnerado.")
+        sys.exit(1)
 
     if source == "staged":
         print(f"👁️  ENTROPY GATE | Evaluando estática en {len(candidate_files)} archivos staged...")

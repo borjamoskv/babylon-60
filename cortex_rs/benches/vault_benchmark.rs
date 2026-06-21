@@ -8,7 +8,7 @@ fn generate_random_f32(i: usize) -> f32 {
 
 fn benchmark_encrypt(c: &mut Criterion) {
     let key = VectorVault::generate_key();
-    let vault = VectorVault::new(&key);
+    let vault = VectorVault::new(&key, 1024);
     
     let vec_1024: Vec<f32> = (0..1024).map(|i| generate_random_f32(i)).collect();
     
@@ -19,7 +19,7 @@ fn benchmark_encrypt(c: &mut Criterion) {
 
 fn benchmark_decrypt(c: &mut Criterion) {
     let key = VectorVault::generate_key();
-    let vault = VectorVault::new(&key);
+    let vault = VectorVault::new(&key, 1024);
     
     let vec_1024: Vec<f32> = (0..1024).map(|i| generate_random_f32(i)).collect();
     let encrypted = vault.encrypt(&vec_1024).unwrap();
@@ -31,7 +31,7 @@ fn benchmark_decrypt(c: &mut Criterion) {
 
 fn benchmark_search_encrypted(c: &mut Criterion) {
     let key = VectorVault::generate_key();
-    let vault = VectorVault::new(&key);
+    let vault = VectorVault::new(&key, 1024);
     
     let query: Vec<f32> = (0..1024).map(|i| generate_random_f32(i)).collect();
     

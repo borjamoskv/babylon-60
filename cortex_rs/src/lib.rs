@@ -10,6 +10,35 @@ pub mod smt_compiler;
 pub mod telemetry;
 pub mod vector_vault;
 pub mod reality;
+pub mod bft;
+pub mod causal;
+pub mod epistemic;
+
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum CortexEvent {
+    ClaimSubmitted,
+    ClaimVerified,
+    ClaimRejected,
+    StateMutated,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum OriginType {
+    FrontierRevEng,
+    SotaVectorEngine,
+    HumanMosaic,
+    LLMInference,
+    SystemDaemon,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum SystemLayer {
+    C5Real,
+    C4Sim,
+    Playground,
+}
 
 use edg::{EpistemicGraph, EpistemicNode, EpistemicStatus};
 use pyo3::prelude::*;
@@ -17,32 +46,101 @@ use pyo3::exceptions::PyValueError;
 use scene_model::{ContinuityRuleType, EdgeRule, SceneState};
 use smt_compiler::{validate_scene_transition, GateStatus, Verdict};
 use telemetry::validate_metric_json;
+use bft::exergy::{ExergyGuard, ExergyMutation};
+use causal::solver::{CausalCompiler, ConsensusVerdict};
+use epistemic::vaccine::{EpistemicFact, EpistemicStatus as VacStatus, VaccineGuard};
 
 /// Valida y registra un claim desde Python.
 /// Retorna el status final como string.
 #[pyfunction]
-pub fn ingest_verifiable_claim(
+pub fn ingest_reality_claim(
     ledger_path: &str,
     claim_json: &str,
     now_epoch_ms: u64,
 ) -> PyResult<String> {
-    let claim_input: reality::claim::VerifiableClaimInput = serde_json::from_str(claim_json)
-        .map_err(|e| PyValueError::new_err(format!("Invalid claim JSON schema: {e}")))?;
+    let claim: reality::claim::RealityClaim = serde_json::from_str(claim_json)
+        .map_err(|e| PyValueError::new_err(format!("Invalid claim JSON: {e}")))?;
 
-    let ledger = reality::registry::ClaimsLedger::new(ledger_path);
+    let registry = reality::registry::RealityRegistry::new(ledger_path);
 
-    let status = ledger
-        .ingest(claim_input, now_epoch_ms)
+    let status = registry
+        .ingest(claim, now_epoch_ms)
         .map_err(|e| PyValueError::new_err(format!("Ingestion failed: {e}")))?;
 
     let status_str = match status {
-        reality::claim::ClaimStatus::Accepted => "accepted",
+        reality::claim::ClaimStatus::Verified => "verified",
         reality::claim::ClaimStatus::Rejected => "rejected",
-        reality::claim::ClaimStatus::Unverified => "unverified",
-        reality::claim::ClaimStatus::Auditable => "auditable",
+        reality::claim::ClaimStatus::Pending  => "pending",
+        reality::claim::ClaimStatus::Unknown  => "unknown",
     };
 
     Ok(status_str.to_string())
+}
+
+#[pyfunction]
+pub fn validate_exergy_mutation(mutation_json: &str) -> PyResult<()> {
+    let mutation: ExergyMutation = serde_json::from_str(mutation_json)
+        .map_err(|e| PyValueError::new_err(format!("Invalid mutation JSON: {}", e)))?;
+    
+    if mutation.rul_claim_id.is_none() {
+        return Err(PyValueError::new_err("MissingRULClaim"));
+    }
+
+    let guard = ExergyGuard {
+        cluster_size: 9,
+        max_delta_per_epoch: 100.0,
+    };
+    
+    guard.validate(&mutation)
+        .map_err(|e| PyValueError::new_err(e.to_string()))
+}
+
+#[pyfunction]
+pub fn verify_causal_assertion(assertion: &str) -> PyResult<String> {
+    let compiler = CausalCompiler::new();
+    let verdict = compiler.verify(assertion);
+    let s = match verdict {
+        ConsensusVerdict::Valid => "valid",
+        ConsensusVerdict::Invalid => "invalid",
+        ConsensusVerdict::Undetermined => "undetermined",
+    };
+    Ok(s.to_string())
+}
+
+#[pyfunction]
+pub fn create_staging_fact(agent_id: &str, hypothesis: &str) -> PyResult<String> {
+    let fact = EpistemicFact {
+        fact_id: "fact_test".into(),
+        agent_id: agent_id.to_string(),
+        hypothesis: hypothesis.to_string(),
+        epistemic_status: VacStatus::Staging,
+        zk_proof: Some("test_proof".into()),
+        created_at_epoch_ms: 1717027200000,
+        sealed_at_epoch_ms: None,
+        wal_event_hash: None,
+    };
+    serde_json::to_string(&fact)
+        .map_err(|e| PyValueError::new_err(e.to_string()))
+}
+
+#[pyfunction]
+pub fn can_read_fact(fact_json: &str, agent_id: &str) -> PyResult<bool> {
+    let fact: EpistemicFact = serde_json::from_str(fact_json)
+        .map_err(|e| PyValueError::new_err(e.to_string()))?;
+    Ok(VaccineGuard::can_read(&fact, agent_id))
+}
+
+#[pyfunction]
+pub fn try_seal_fact(fact_json: &str, wal_event_hash: &str, valid: bool) -> PyResult<String> {
+    let mut fact: EpistemicFact = serde_json::from_str(fact_json)
+        .map_err(|e| PyValueError::new_err(e.to_string()))?;
+    
+    let validator = |_proof: &str| valid;
+    VaccineGuard::try_seal(&mut fact, wal_event_hash, &validator)
+        .map_err(|e| PyValueError::new_err(e))?;
+    
+    serde_json::to_string(&fact)
+        .map_err(|e| PyValueError::new_err(e.to_string()))
 }
 
 /// CORTEX-Persist Cognitive Core Rust Extension (Enterprise EDG)
@@ -58,7 +156,13 @@ fn cortex_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Verdict>()?;
     m.add_function(wrap_pyfunction!(validate_scene_transition, m)?)?;
     m.add_function(wrap_pyfunction!(validate_metric_json, m)?)?;
-    m.add_function(wrap_pyfunction!(ingest_verifiable_claim, m)?)?;
+    m.add_function(wrap_pyfunction!(ingest_reality_claim, m)?)?;
+    m.add_function(wrap_pyfunction!(validate_exergy_mutation, m)?)?;
+    m.add_function(wrap_pyfunction!(verify_causal_assertion, m)?)?;
+    m.add_function(wrap_pyfunction!(create_staging_fact, m)?)?;
+    m.add_function(wrap_pyfunction!(can_read_fact, m)?)?;
+    m.add_function(wrap_pyfunction!(try_seal_fact, m)?)?;
+    m.add_function(wrap_pyfunction!(reality::reader::load_verified_reality, m)?)?;
     Ok(())
 }
 

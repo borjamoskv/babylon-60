@@ -13,16 +13,16 @@ pub enum ClaimDomain {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum ClaimStatus {
-    Accepted,
+    Pending,
+    Verified,
     Rejected,
-    Unverified,
-    Auditable,
+    Unknown,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Source {
     pub url: String,
-    pub fetch_hash: String,         // SHA256 of content at fetch time
+    pub fetch_hash: String,         // SHA256 del contenido en fetch time
     pub fetched_at_epoch_ms: u64,
 }
 
@@ -51,3 +51,22 @@ pub struct VerifiableClaimRecord {
     pub status: ClaimStatus,
     pub frozen_at: u64,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RealityClaim {
+    pub claim_id: String,
+    pub statement: String,
+    pub domain: ClaimDomain,
+    pub created_at_epoch_ms: u64,
+    pub sources: Vec<Source>,
+    pub trust_score: f32,
+    pub status: ClaimStatus,
+    pub evidence_hashes: Vec<String>,
+}
+
+impl RealityClaim {
+    pub fn is_sourceless(&self) -> bool {
+        self.sources.is_empty()
+    }
+}
+

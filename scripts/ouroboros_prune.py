@@ -365,7 +365,7 @@ def classify_thermal(exergy: float) -> str:
 
 # ── Hebbian Reinforcement ─────────────────────────────────────────────────────
 
-def hebbian_reinforce(node: FactNode, now: Optional[float] = None) -> FactNode:
+def hebbian_reinforce(node: FactNode, now: Optional[float] = None, depth: int = 0) -> FactNode:
     """
     LTP: invoked ONLY from consolidate_epistemic_graph.
     Never from semantic router — prevents latent space poisoning.
@@ -379,8 +379,9 @@ def hebbian_reinforce(node: FactNode, now: Optional[float] = None) -> FactNode:
     policy = get_policy(node.origin_type)
     if policy.hebbiano_eligible:
         node.last_boosted_at = t
+        attenuation_factor = 0.85 ** depth
         node.kinetic_mass = min(
-            node.kinetic_mass + HEBBIAN_BOOST_PER_ACCESS,
+            node.kinetic_mass + (HEBBIAN_BOOST_PER_ACCESS * attenuation_factor),
             MAX_KINETIC_MULTIPLIER
         )
     return node
@@ -432,7 +433,7 @@ def consolidate_epistemic_graph(
             logger.error(msg)
             raise ValueError(msg)
 
-        node = hebbian_reinforce(node, t)
+        node = hebbian_reinforce(node, t, depth)
         graph_db.update_node(node)
         audit[current_id] = compute_exergy(node, t)
 
