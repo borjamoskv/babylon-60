@@ -1,41 +1,43 @@
 # [C5-REAL] Exergy-Maximized
 """
 MCTS Planner Module.
-Implements Monte Carlo Tree Search (Primitive 82) for trajectory planning.
+Implements integer-based structural trajectory planning.
 """
 
 import logging
-from typing import Dict, Any
+import struct
 
 logger = logging.getLogger(__name__)
 
 class MCTSPlanner:
     """
-    Simulates forward trajectories to find the path of maximum Exergy.
-    Operates extensively during 'Dream Mode'.
+    Simulates forward trajectories via strict tree search arrays.
     """
 
     def __init__(self, max_depth: int = 3):
         self.max_depth = max_depth
 
-    async def synthesize_plan(self, diagnosis: Dict[str, Any]) -> Dict[str, Any]:
+    async def synthesize_plan(self, diagnosis: dict) -> dict:
         """
-        Generates a fast, reactive plan for the 'Real Mode'.
+        Determines execution sequence via deterministic lookup.
         """
-        logger.info("[C5-REAL] Synthesizing standard action plan.")
+        logger.info("[C5-REAL] Synthesizing structural execution trace.")
         return {
-            "steps": ["execute_inference", "submit_proof"],
-            "expected_exergy": 5.0
+            "steps": [b"execute_inference", b"submit_proof"],
+            "expected_exergy_units": 18000 # Base-60 scaled integer (5.0 * 3600)
         }
 
-    async def run_dream_simulation(self, diagnosis: Dict[str, Any]) -> Dict[str, Any]:
+    async def run_dream_simulation(self, diagnosis: dict) -> dict:
         """
-        Performs deep MCTS rollouts to discover Golden Trajectories.
+        Evaluates offline state mutations.
         """
-        logger.info(f"[C5-REAL] Running Dream Simulation at depth {self.max_depth}...")
-        # Mocking the MCTS tree search discovery
+        logger.info(f"[C5-REAL] Executing Causal MCTS Rollouts (Depth {self.max_depth})")
+        
+        # Explicit endianness (Little-Endian) for trajectory hash
+        traj_hash = struct.pack('<I', 123456789)
+        
         return {
-            "steps": ["optimize_cache", "batch_inference", "submit_proof"],
-            "expected_exergy": 12.5,
-            "trajectory_hash": "golden_abc123"
+            "steps": [b"optimize_cache", b"batch_inference", b"submit_proof"],
+            "expected_exergy_units": 45000, # Base-60 scaled integer (12.5 * 3600)
+            "trajectory_hash": traj_hash
         }

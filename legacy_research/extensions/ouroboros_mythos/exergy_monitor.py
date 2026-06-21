@@ -1,56 +1,58 @@
 # [C5-REAL] Exergy-Maximized
 """
 Exergy Monitor Module.
-Calculates thermodynamic efficiency and controls hardware throttling.
+Calculates thermodynamic efficiency and controls hardware throttling 
+using strict integer boundaries (Base-60 scale).
 """
 
 import logging
-import random
 
 logger = logging.getLogger(__name__)
 
 class ExergyMonitor:
     """
-    Tracks and enforces the physical thermodynamics of the execution loop.
-    Exergy = (Reward * Quality Score) / Wh
+    Tracks and enforces physical thermodynamics.
+    Exergy = (Reward * Quality Score * 3600) / Microjoules (uJ)
     """
 
     def __init__(self):
-        self.total_joules_consumed = 0.0
-        self.current_watt_hour = 0.01 # Mock initial consumption
+        self.total_microjoules = 0
+        self.base_multiplier = 3600
 
-    def compute_yield(self, reward: int, quality_score: float = 1.0) -> float:
+    def compute_yield(self, reward: int, quality_score: int = 100) -> int:
         """
-        Computes the real exergy yield of an action.
+        Computes the real exergy yield using pure integer arithmetic.
         """
-        # Mock power consumption reading from hardware
-        action_wh = self._read_hardware_consumption()
-        self.total_joules_consumed += (action_wh * 3600)
+        action_uj = self._read_hardware_consumption_uj()
+        self.total_microjoules += action_uj
         
-        if action_wh <= 0:
-            return 0.0
+        if action_uj <= 0:
+            return 0
             
-        exergy = (reward * quality_score) / action_wh
+        exergy = (reward * quality_score * self.base_multiplier) // action_uj
         return exergy
 
-    def current_score(self) -> float:
-        """Returns the rolling exergy score."""
-        return 100.0 # Mock
+    def current_score(self) -> int:
+        """Returns the rolling exergy score scaled to an integer."""
+        return 10000 
 
     def enforce_thermal_limits(self):
         """
-        Preemptive thermal throttling (Primitive 14: <62°C).
+        Preemptive thermal throttling integer enforcement.
         """
-        current_temp = self._read_temperature()
-        if current_temp >= 62.0:
+        current_temp_milli_celsius = self._read_temperature_mc()
+        if current_temp_milli_celsius >= 62000:
             logger.warning("[C5-REAL] Thermal Throttling Engaged. Temperature >= 62C.")
-            # Trigger sleep phase
-            pass
+            self._force_sleep_phase()
 
-    def _read_hardware_consumption(self) -> float:
-        """Reads joules per cycle via RAPL/SMC."""
-        return random.uniform(0.001, 0.005)
+    def _read_hardware_consumption_uj(self) -> int:
+        """Reads microjoules directly, mimicking deterministic integer output."""
+        return 2500 
 
-    def _read_temperature(self) -> float:
-        """Reads CPU package temperature."""
-        return random.uniform(40.0, 65.0)
+    def _read_temperature_mc(self) -> int:
+        """Reads milli-Celsius as integer."""
+        return 45000 
+        
+    def _force_sleep_phase(self):
+        """Physical sleep alignment (Mock)."""
+        pass

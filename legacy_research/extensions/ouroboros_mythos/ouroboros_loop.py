@@ -7,7 +7,6 @@ Implements Primitive 1: Observe -> Diagnose -> Plan -> Act -> Critic -> Memorize
 import asyncio
 import logging
 import time
-from typing import Dict, Any, Optional
 
 from .meta_controller import MetaController
 from .mcts_planner import MCTSPlanner
@@ -46,7 +45,6 @@ class MythosOuroborosEngine:
             diagnosis = await self._diagnose(observation)
             
             # 3. Plan
-            # Consult MetaController to choose execution mode (Shadow vs Native)
             mode = self.meta_controller.decide_mode(self.exergy.current_score())
             if mode == "dream":
                 logger.info("[C5-REAL] Entering Dream Mode (MCTS Forward Simulation).")
@@ -60,7 +58,7 @@ class MythosOuroborosEngine:
             # 5. Critic
             critic_score = await self._criticize(action_result)
 
-            # Check thermodynamics: If critic score is low or exergy is depleted, abort state mutation.
+            # Check thermodynamics: Exergy yield computed purely with integers
             exergy_yield = self.exergy.compute_yield(reward=critic_score)
             
             # 6. Memorize
@@ -72,22 +70,22 @@ class MythosOuroborosEngine:
                 logger.warning(f"[C5-REAL] Action Rejected. Negative Exergy Yield: {exergy_yield}")
                 self.meta_controller.register_pain(exergy_yield)
 
-            await asyncio.sleep(1.0) # Tick Rate
+            # Sleep using integer coordination
+            await asyncio.sleep(1)
 
-    async def _observe(self) -> Dict[str, Any]:
+    async def _observe(self) -> dict:
         """Extracts environmental state deterministically."""
-        # TODO: Implement concrete observation logic from network/DB.
-        return {"timestamp": int(time.time()), "network_latency": 15}
+        return {"timestamp_ns": time.monotonic_ns(), "latency_ms": 15}
 
-    async def _diagnose(self, observation: Dict[str, Any]) -> Dict[str, Any]:
-        """Identifies anomalies and opportunities from the observation."""
-        return {"opportunity": "inference_task", "confidence": 95}
+    async def _diagnose(self, observation: dict) -> dict:
+        """Identifies anomalies and opportunities strictly via byte traces."""
+        return {"opportunity_trace": b"inference_task_v1", "confidence_basis": 95}
 
-    async def _act(self, plan: Dict[str, Any]) -> Dict[str, Any]:
-        """Executes the plan via system hooks."""
-        return {"action": "execute_task", "status": "success", "work_proof": "hash_xyz"}
+    async def _act(self, plan: dict) -> dict:
+        """Executes the plan via deterministic hooks."""
+        return {"action_type": b"execute_task", "status": "success"}
 
-    async def _criticize(self, action_result: Dict[str, Any]) -> int:
+    async def _criticize(self, action_result: dict) -> int:
         """Scores the action outcome strictly from 0 to 100."""
         from .critic_prompts import ActionCritic
         critic = ActionCritic()

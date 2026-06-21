@@ -1,28 +1,27 @@
 # [C5-REAL] Exergy-Maximized
 """
 Memory Palace Module.
-Manages Episodic and Semantic memory with HNSW+PQ simulation and Retrosynthesis.
+Manages Episodic array and Semantic graph using strict hashing.
 """
 
+import hashlib
 import logging
-from typing import Dict, Any, List
 
 logger = logging.getLogger(__name__)
 
 class MemoryPalace:
     """
-    Dual-layered memory system.
-    Episodic for short-term trace, Semantic for compressed HNSW graph representation.
+    Enforces deterministic memory persistence.
     """
 
     def __init__(self):
-        self.episodic_buffer: List[Dict[str, Any]] = []
-        self.semantic_index = {} # Mock vector store
-        self.max_episodic_size = 50 # Compress after 50 cycles (Primitive 32)
+        self.episodic_buffer: list[dict] = []
+        self.semantic_index: dict[bytes, dict] = {} 
+        self.max_episodic_size = 50 
 
-    async def store_episodic(self, action_result: Dict[str, Any], critic_score: int):
+    async def store_episodic(self, action_result: dict, critic_score: int):
         """
-        Stores an event in short-term memory.
+        Caches structural event.
         """
         self.episodic_buffer.append({
             "action": action_result,
@@ -34,15 +33,18 @@ class MemoryPalace:
 
     async def _compress_to_semantic(self):
         """
-        Retrosynthesis: Compresses the episodic buffer into a semantic invariant.
+        Retrosynthesis via deterministic SHA-256 fingerprinting.
         """
         logger.info("[C5-REAL] Executing Retrosynthesis: Episodic -> Semantic compression.")
-        # Identify highest score actions (Success Fingerprints)
+        
         successes = [e for e in self.episodic_buffer if e["score"] >= 90]
         
         for success in successes:
-            fingerprint = f"hash_{hash(str(success))}"
+            action_bytes = success["action"].get("action_type", b"unknown")
+            sha = hashlib.sha256()
+            sha.update(action_bytes)
+            fingerprint = sha.digest()
             self.semantic_index[fingerprint] = success
             
-        # Forgetting policy (Primitive 28)
+        # Pain/Exergy forgetting policy integration
         self.episodic_buffer.clear()

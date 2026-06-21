@@ -5,7 +5,7 @@ Implements the Critic Module (Primitive 4) scoring actions from 0 to 100.
 """
 
 import logging
-from typing import Dict, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ SCORE: <0-100>
 REASON: <Structural justification>
 """
 
-    def evaluate_action(self, action_result: Dict[str, Any]) -> int:
+    def evaluate_action(self, action_result: dict[str, Any]) -> int:
         """
         Calculates the critic score deterministically without full LLM invocation 
         unless required for complex heuristics.
