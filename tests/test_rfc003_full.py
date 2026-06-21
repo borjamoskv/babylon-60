@@ -65,4 +65,4 @@ class TestFullStackHardening:
         }
         
         with pytest.raises(ValueError, match="MissingRULClaim"):
-            validate_exergy_mutation(json.dumps(mutation))
+            validate_exergy_mutation(json.dumps(mutation), ["exergy_node"])
