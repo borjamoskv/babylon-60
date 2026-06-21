@@ -99,3 +99,35 @@ def enforce_exergy(result: ExergyResult) -> None:
             f"signal_gain={result.signal_gain:.6f}, "
             f"penalty={result.reversibility_penalty:.6f}"
         )
+
+
+@dataclass(frozen=True)
+class InformationalExergyResult:
+    info_exergy: float
+    verifiable_transformations: int
+    context_useful_tokens: int
+
+
+def calculate_informational_exergy(
+    verifiable_transformations: int,
+    context_useful_tokens: int,
+) -> InformationalExergyResult:
+    """
+    Calculates Informational Exergy (InfoEx) as defined in E-INFO-01.
+    
+    InfoEx = C_v / T_u
+    
+    Where:
+      - C_v (verifiable_transformations): Verifiable transformations produced (e.g., successful commits, passing tests).
+      - T_u (context_useful_tokens): Useful context tokens consumed.
+    """
+    if context_useful_tokens <= 0:
+        raise ValueError("context_useful_tokens must be > 0 to calculate Informational Exergy")
+
+    info_exergy = verifiable_transformations / context_useful_tokens
+
+    return InformationalExergyResult(
+        info_exergy=info_exergy,
+        verifiable_transformations=verifiable_transformations,
+        context_useful_tokens=context_useful_tokens,
+    )
