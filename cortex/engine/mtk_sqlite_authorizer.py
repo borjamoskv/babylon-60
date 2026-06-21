@@ -19,29 +19,26 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
     Physical constraint on the SQLite engine.
     Actions like INSERT (9), UPDATE (23), DELETE (9) mapped to sqlite3 constants.
     """
-    # Actions that mutate state
-    MUTATION_ACTIONS = {
-        sqlite3.SQLITE_INSERT,
-        sqlite3.SQLITE_UPDATE,
-        sqlite3.SQLITE_DELETE,
-        sqlite3.SQLITE_DROP_TABLE,
-        sqlite3.SQLITE_DROP_INDEX,
-        sqlite3.SQLITE_DROP_VIEW,
-        sqlite3.SQLITE_DROP_TRIGGER,
-        sqlite3.SQLITE_ALTER_TABLE,
-        sqlite3.SQLITE_CREATE_TABLE,
-        sqlite3.SQLITE_CREATE_INDEX,
-        sqlite3.SQLITE_CREATE_VIEW,
-        sqlite3.SQLITE_CREATE_TRIGGER,
+    # Default Deny: List of safe read-only and transaction-control actions
+    SAFE_ACTIONS = {
+        sqlite3.SQLITE_READ,
+        sqlite3.SQLITE_SELECT,
+        sqlite3.SQLITE_FUNCTION,
+        sqlite3.SQLITE_TRANSACTION,
+        sqlite3.SQLITE_SAVEPOINT,
     }
     
-    if action in MUTATION_ACTIONS:
+    if action not in SAFE_ACTIONS:
         # Ignore writes to internal sqlite sequences/schemas and virtual table shadow tables
         if arg1:
-            if arg1.startswith("sqlite_") or arg1 in ("schema_version", "cortex_meta", "agent_messages"):
+            if arg1.startswith("sqlite_") or arg1 == "schema_version":
                 return sqlite3.SQLITE_OK
             if arg1.endswith(("_info", "_chunks", "_data", "_idx", "_docsize", "_config", "_content")):
                 return sqlite3.SQLITE_OK
+                
+        # Also allow some specific safe pragmas for reading state
+        if action == sqlite3.SQLITE_PRAGMA and arg1 in ("table_info", "foreign_key_check", "integrity_check", "index_list", "index_info", "query_only"):
+            return sqlite3.SQLITE_OK
 
         token = mtk_active_token.get()
         if not token or not token.startswith("mtk_auth_"):
