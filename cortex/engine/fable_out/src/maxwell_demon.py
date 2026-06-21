@@ -41,12 +41,16 @@ def MaxwellDemon__SetState_Z721C83C5(this: MaxwellDemon, state: str) -> None:
 
 
 def MaxwellDemon__CosineSimilarity_23050560(this: MaxwellDemon, id1: uint32, id2: uint32) -> uint16:
-    return Babylon_causalDistance(
-        uint16(((id1 ^ id2) >> int32.ZERO) % uint32.FIVE),
-        uint16(id1 % uint32.THREE),
-        uint16.ZERO,
-        uint16.FIVE,
-    )
+    if id1 == id2:
+        return uint16.ZERO
+
+    else:
+        return Babylon_causalDistance(
+            uint16(((id1 ^ id2) >> int32.ZERO) % uint32.FIVE),
+            uint16(id1 % uint32.THREE),
+            uint16.ZERO,
+            uint16.FIVE,
+        )
 
 
 def MaxwellDemon__PurgeRedundant_Z115D9F2A(

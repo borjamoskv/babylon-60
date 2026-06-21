@@ -8,8 +8,8 @@ from fable_library.core import int32, uint16, uint32
 from fable_library.string_ import printf, to_console
 from fable_library.util import range
 
-from .babylon import Babylon_hashDistanceRollup
-from .maxwell_demon import (
+from .src.babylon import Babylon_hashDistanceRollup
+from .src.maxwell_demon import (
     MaxwellDemon,
     MaxwellDemon__ctor_6C4BA866,
     MaxwellDemon__PurgeRedundant_Z115D9F2A,

@@ -23,7 +23,11 @@ def post_build():
                 content = f.read()
                 
             # 1. Replace relative/absolute module imports from Fable's 'src' directory
-            new_content = re.sub(r"from src\.", "from .", content)
+            rel_dir = os.path.relpath(root, out_dir)
+            if rel_dir == ".":
+                new_content = re.sub(r"from src\.", "from .src.", content)
+            else:
+                new_content = re.sub(r"from src\.", "from .", content)
             
             # 2. Replace Python 3.12 type alias statements 'type X = Y' with Python 3.10 compatible 'X = Y'
             # Look for lines starting with 'type ' followed by an identifier and ' = '

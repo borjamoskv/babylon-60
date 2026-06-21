@@ -2,7 +2,7 @@ import pytest
 import sqlite3
 from cortex.engine.mtk_sqlite_authorizer import install_mtk_authorizer, mtk_active_token
 
-def test_mtk_memory_taint_blocks_stochastic_module():
+def test_mtk_memory_taint_blocks_stochastic_module(monkeypatch):
     """Test that MTK blocks DB writes if executed from a stochastic module, even with token."""
     
     conn = sqlite3.connect(":memory:")
@@ -10,9 +10,8 @@ def test_mtk_memory_taint_blocks_stochastic_module():
     
     # We create a dummy table. Schema changes are hard-blocked by MTK if not in SAFE_ACTIONS
     # wait, we need to bypass MTK to create the table or use the testing override.
-    import os
-    os.environ["CORTEX_TESTING"] = "1"
-    os.environ["CORTEX_FORCE_MTK_TESTS"] = "1"
+    monkeypatch.setenv("CORTEX_TESTING", "1")
+    monkeypatch.setenv("CORTEX_FORCE_MTK_TESTS", "1")
     
     # Temporarily disable authorizer to setup
     conn.set_authorizer(None)
@@ -50,9 +49,12 @@ def test_mtk_memory_taint_blocks_stochastic_module():
     mtk_active_token.reset(token_id)
 
 
-def test_mtk_memory_taint_blocks_tainted_variable():
+def test_mtk_memory_taint_blocks_tainted_variable(monkeypatch):
     """Test that MTK blocks DB writes if any variable in the stack has __taint__ attribute."""
     
+    monkeypatch.setenv("CORTEX_TESTING", "1")
+    monkeypatch.setenv("CORTEX_FORCE_MTK_TESTS", "1")
+
     conn = sqlite3.connect(":memory:")
     install_mtk_authorizer(conn)
     

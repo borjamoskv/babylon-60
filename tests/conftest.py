@@ -14,6 +14,32 @@ os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 os.environ["CORTEX_SKIP_EXERGY_VALIDATION"] = "1"
 
+# Dynamically inject legacy skill modules moved to ANTI_GRAVITY/01_ACTIVE during reorganization
+import importlib.util
+import types
+def _inject_legacy_skill_modules():
+    _REPO_ROOT = Path(__file__).resolve().parents[1]
+    
+    # Create dummy skills module
+    skills = types.ModuleType("skills")
+    sys.modules["skills"] = skills
+    
+    mappings = {
+        "skills.registry": _REPO_ROOT / "ANTI_GRAVITY" / "01_ACTIVE" / "observability" / "registry.py",
+        "skills.deploy": _REPO_ROOT / "ANTI_GRAVITY" / "01_ACTIVE" / "memory" / "deploy.py",
+        "skills.repo_health": _REPO_ROOT / "ANTI_GRAVITY" / "01_ACTIVE" / "creation" / "repo_health.py",
+    }
+    
+    for mod_name, filepath in mappings.items():
+        if filepath.exists():
+            spec = importlib.util.spec_from_file_location(mod_name, str(filepath))
+            if spec and spec.loader:
+                module = importlib.util.module_from_spec(spec)
+                sys.modules[mod_name] = module
+                spec.loader.exec_module(module)
+
+_inject_legacy_skill_modules()
+
 import pytest
 
 # ── Repo-local import resolution ──────────────────────────────────────────────
@@ -21,8 +47,11 @@ import pytest
 # surface. Resolve them relative to the checkout so CI doesn't depend on a
 # developer-specific home directory layout.
 _REPO_ROOT = Path(__file__).resolve().parents[1]
+# Prepend repo root to ensure local code takes priority over installed package
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
 for extra_path in (
-    _REPO_ROOT,
     _REPO_ROOT / "cortex-core",
     _REPO_ROOT / "scripts" / "sortu",
     _REPO_ROOT / "legacy_research" / "extensions",

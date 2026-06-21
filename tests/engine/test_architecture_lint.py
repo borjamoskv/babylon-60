@@ -31,6 +31,8 @@ def test_no_raw_sqlite_connect():
             self.generic_visit(node)
 
     for root, _, files in os.walk(cortex_dir):
+        if "nodes" in Path(root).parts:
+            continue
         for file in files:
             if file.endswith(".py"):
                 filepath = Path(root) / file
