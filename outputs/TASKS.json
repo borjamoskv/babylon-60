@@ -1,0 +1,18 @@
+[
+  {
+    "title": "Resolve TODO in cortex/engine/mtk_core.py",
+    "priority": "medium"
+  },
+  {
+    "title": "Resolve TODO in cortex/engine/risk_scoring.py",
+    "priority": "medium"
+  },
+  {
+    "title": "Resolve TODO in cortex/engine/squadrons.py",
+    "priority": "medium"
+  },
+  {
+    "title": "Generate clean canonical README",
+    "priority": "high"
+  }
+]

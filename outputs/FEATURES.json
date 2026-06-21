@@ -1,0 +1,130 @@
+[
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/_autocurative_state.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/swarm_10k.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/sandbox_jit.py"
+  },
+  {
+    "feature": "authentication",
+    "source": "cortex/engine/auth.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/test_autopoietic_agent.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/healing_stack.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/runtime_kernel.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/forensic_strike_config.py"
+  },
+  {
+    "feature": "authentication",
+    "source": "cortex/engine/auth_gateway.py"
+  },
+  {
+    "feature": "authentication",
+    "source": "cortex/engine/mtk_core.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/compound_yield.py"
+  },
+  {
+    "feature": "authentication",
+    "source": "cortex/engine/models.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/legion.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/_autocurative_helper.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/shared_bus.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/repair_strategies.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/_genome_types.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/evolution_ledger.py"
+  },
+  {
+    "feature": "authentication",
+    "source": "cortex/engine/metadata_engine.py"
+  },
+  {
+    "feature": "authentication",
+    "source": "cortex/engine/__init__.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/__init__.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/pathogen.py"
+  },
+  {
+    "feature": "authentication",
+    "source": "cortex/engine/event_sovereignty.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/psychology.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/tips.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/squadrons.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/distributed_ledger.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/evolution_types.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/agent_mixin.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/autopoietic_agent.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/consensus.py"
+  },
+  {
+    "feature": "agent_system",
+    "source": "cortex/engine/zero_prompting.py"
+  }
+]

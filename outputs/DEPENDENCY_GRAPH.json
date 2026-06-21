@@ -1,0 +1,1940 @@
+{
+  "cortex/engine/_genome_mutator.py": [
+    "__future__",
+    "copy",
+    "json",
+    "logging",
+    "random",
+    "typing",
+    "cortex.engine._genome_tree_helper",
+    "cortex.engine._genome_types",
+    "cortex.isa.builder",
+    "cortex_rs"
+  ],
+  "cortex/engine/bridge_guard.py": [
+    "__future__",
+    "logging",
+    "re",
+    "aiosqlite",
+    "cortex.utils.canonical"
+  ],
+  "cortex/engine/_autocurative_state.py": [
+    "__future__",
+    "dataclasses",
+    "enum",
+    "typing",
+    "cortex.engine.repair_strategies"
+  ],
+  "cortex/engine/swarm_10k.py": [
+    "__future__",
+    "asyncio",
+    "collections",
+    "logging",
+    "time",
+    "contextlib",
+    "dataclasses",
+    "pathlib",
+    "typing",
+    "cortex.engine.exergy_optimizer",
+    "cortex.engine.shared_bus",
+    "cortex.engine.slashing",
+    "cortex.engine.ultrathink_physics",
+    "cortex.extensions.signals.sharded_bus",
+    "cortex.compat.optional"
+  ],
+  "cortex/engine/predictive_healer.py": [
+    "__future__",
+    "logging",
+    "math",
+    "time",
+    "collections",
+    "dataclasses",
+    "typing",
+    "cortex.engine.endocrine",
+    "cortex.engine.performance_tracker"
+  ],
+  "cortex/engine/meta_arbiter.py": [
+    "__future__",
+    "hashlib",
+    "json",
+    "logging",
+    "time",
+    "collections.abc",
+    "dataclasses",
+    "enum",
+    "typing",
+    "cortex.tools.trace_adapter"
+  ],
+  "cortex/engine/_engine_delegates.py": [
+    "__future__",
+    "logging",
+    "pathlib",
+    "aiosqlite",
+    "cortex.engine.mixins.base",
+    "cortex.engine.models",
+    "cortex.memory.episodic",
+    "cortex.memory.episodic",
+    "cortex.engine.models",
+    "cortex.utils.errors",
+    "cortex.engine.causality",
+    "cortex.engine.models",
+    "cortex.engine.models",
+    "cortex.engine.models",
+    "cortex.extensions.shannon.report",
+    "cortex.extensions.fingerprint.extractor",
+    "cortex.extensions.shannon.immortality",
+    "cortex.extensions.policy",
+    "cortex.extensions.sync.snapshot",
+    "cortex.engine.trust_registry"
+  ],
+  "cortex/engine/sandbox_jit.py": [
+    "ast",
+    "logging",
+    "typing"
+  ],
+  "cortex/engine/autopoiesis.py": [
+    "ast",
+    "collections",
+    "inspect",
+    "logging",
+    "time",
+    "collections.abc",
+    "typing",
+    "cortex.engine.endocrine",
+    "subprocess",
+    "uuid",
+    "os"
+  ],
+  "cortex/engine/auth.py": [
+    "__future__",
+    "asyncio",
+    "hashlib",
+    "json",
+    "logging",
+    "time",
+    "datetime",
+    "pathlib"
+  ],
+  "cortex/engine/encb_router.py": [
+    "dataclasses",
+    "enum",
+    "typing"
+  ],
+  "cortex/engine/test_autopoietic_agent.py": [
+    "asyncio",
+    "json",
+    "logging",
+    "cortex.observability.jsonl_logger",
+    "os",
+    "random",
+    "sys",
+    "time",
+    "cortex.engine.autopoietic_agent",
+    "cortex.engine.genesis",
+    "cortex.engine.genome",
+    "cortex.isa.builder"
+  ],
+  "cortex/engine/healing_stack.py": [
+    "__future__",
+    "asyncio",
+    "logging",
+    "time",
+    "pathlib",
+    "typing",
+    "cortex.engine._autocurative_config",
+    "cortex.engine.autocurative_agent",
+    "cortex.engine.endocrine",
+    "cortex.engine.performance_tracker",
+    "cortex.engine.predictive_healer",
+    "cortex.engine.self_optimizer",
+    "cortex.engine.tuning_store"
+  ],
+  "cortex/engine/runtime_kernel.py": [
+    "asyncio",
+    "logging",
+    "typing"
+  ],
+  "cortex/engine/snapshots.py": [
+    "asyncio",
+    "json",
+    "logging",
+    "re",
+    "shutil",
+    "sqlite3",
+    "time",
+    "dataclasses",
+    "datetime",
+    "pathlib",
+    "cortex.config",
+    "cortex.database.core"
+  ],
+  "cortex/engine/forensic_strike_config.py": [
+    "dataclasses"
+  ],
+  "cortex/engine/bifurcation_engine.py": [
+    "json",
+    "logging",
+    "uuid",
+    "typing",
+    "cortex.database.core"
+  ],
+  "cortex/engine/auth_gateway.py": [
+    "json",
+    "logging",
+    "sqlite3",
+    "time",
+    "uuid",
+    "typing",
+    "cortex.extensions.security.signatures"
+  ],
+  "cortex/engine/mutation_engine.py": [
+    "__future__",
+    "hashlib",
+    "json",
+    "logging",
+    "datetime",
+    "typing",
+    "aiosqlite",
+    "cortex.engine._mutation_projectors",
+    "cortex.extensions.axioms.topological_id"
+  ],
+  "cortex/engine/semantic_collapse.py": [
+    "time",
+    "zlib",
+    "typing"
+  ],
+  "cortex/engine/mee_boundary.py": [
+    "json",
+    "re",
+    "cortex_rs"
+  ],
+  "cortex/engine/manifestation.py": [
+    "__future__",
+    "asyncio",
+    "logging",
+    "pathlib",
+    "typing",
+    "cortex.engine.endocrine",
+    "cortex.extensions.signals.bus",
+    "cortex.cli.bicameral"
+  ],
+  "cortex/engine/mtk_core.py": [
+    "hashlib",
+    "time",
+    "collections.abc",
+    "contextlib",
+    "cortex.engine.mtk_sqlite_authorizer",
+    "cortex.types.evidence"
+  ],
+  "cortex/engine/compound_yield.py": [
+    "__future__",
+    "logging",
+    "sqlite3",
+    "dataclasses",
+    "typing",
+    "cortex.database.core",
+    "cortex.extensions.signals.bus",
+    "cortex.memory.temporal",
+    "json",
+    "json"
+  ],
+  "cortex/engine/apotheosis.py": [
+    "__future__",
+    "asyncio",
+    "logging",
+    "sqlite3",
+    "pathlib",
+    "typing",
+    "cortex.engine.apotheosis_audits_mixin",
+    "cortex.engine.cognitive",
+    "cortex.engine.endocrine",
+    "cortex.engine.manifestation",
+    "cortex.engine.reflex",
+    "cortex.engine.rem_cycle",
+    "cortex.extensions.immune.membrane",
+    "cortex.extensions.signals.bus",
+    "cortex.services.notebooklm",
+    "cortex.services.trust",
+    "watchdog.events",
+    "watchdog.events",
+    "watchdog.observers",
+    "cortex.engine",
+    "watchdog.events",
+    "watchdog.observers",
+    "random",
+    "cortex.engine.keter",
+    "cortex.cli.bicameral",
+    "cortex.extensions.policy",
+    "cortex.cli.bicameral",
+    "ast",
+    "cortex.engine.keter"
+  ],
+  "cortex/engine/arbiter_bridge.py": [
+    "__future__",
+    "logging",
+    "dataclasses",
+    "typing",
+    "cortex.engine.meta_arbiter",
+    "cortex.router.causal",
+    "cortex.router.contract",
+    "cortex.router.policy"
+  ],
+  "cortex/engine/checkpoint.py": [
+    "json",
+    "logging",
+    "collections.abc",
+    "dataclasses",
+    "typing",
+    "cortex.engine.evolution_ledger",
+    "cortex.ledger.merkle",
+    "time"
+  ],
+  "cortex/engine/sota_vector_engine.py": [
+    "__future__",
+    "json",
+    "logging",
+    "time",
+    "typing",
+    "cortex.utils.canonical"
+  ],
+  "cortex/engine/models.py": [
+    "__future__",
+    "enum",
+    "json",
+    "dataclasses",
+    "typing",
+    "cortex.crypto",
+    "datetime"
+  ],
+  "cortex/engine/watchdog.py": [
+    "cortex.storage.wal"
+  ],
+  "cortex/engine/causal_graph.py": [
+    "json",
+    "dataclasses",
+    "typing"
+  ],
+  "cortex/engine/mcts_sanhedrin.py": [
+    "asyncio",
+    "logging",
+    "typing"
+  ],
+  "cortex/engine/reflex.py": [
+    "asyncio",
+    "logging",
+    "pathlib",
+    "typing",
+    "aiosqlite",
+    "cortex.engine.endocrine",
+    "cortex.extensions.signals.bus",
+    "cortex.engine.keter",
+    "cortex.database.core",
+    "cortex.engine.keter"
+  ],
+  "cortex/engine/omega_daemon.py": [
+    "asyncio",
+    "logging",
+    "os",
+    "re",
+    "subprocess",
+    "decimal",
+    "json",
+    "datetime",
+    "pathlib",
+    "cortex.engine.autopoiesis",
+    "cortex.engine.swarm_10k",
+    "datetime"
+  ],
+  "cortex/engine/_mutation_projectors.py": [
+    "__future__",
+    "json",
+    "logging",
+    "datetime",
+    "typing",
+    "aiosqlite",
+    "cortex.crypto",
+    "cortex.engine.causality",
+    "cortex.engine.mutation_engine"
+  ],
+  "cortex/engine/semantic_hash.py": [
+    "__future__",
+    "hashlib",
+    "logging",
+    "struct",
+    "typing",
+    "cortex.embeddings",
+    "cortex.embeddings"
+  ],
+  "cortex/engine/legion.py": [
+    "__future__",
+    "asyncio",
+    "logging",
+    "abc",
+    "collections.abc",
+    "dataclasses",
+    "typing",
+    "cortex.engine.legion_vectors",
+    "cortex.cli.bicameral",
+    "hashlib",
+    "datetime",
+    "cortex.types.evidence",
+    "cortex.runtime.invariants.cross_system"
+  ],
+  "cortex/engine/risk_math.py": [
+    "math",
+    "collections.abc"
+  ],
+  "cortex/engine/ipc_bridge.py": [
+    "asyncio",
+    "json",
+    "logging",
+    "mmap",
+    "os",
+    "struct",
+    "typing"
+  ],
+  "cortex/engine/_autocurative_helper.py": [
+    "__future__",
+    "asyncio",
+    "inspect",
+    "logging",
+    "time",
+    "typing",
+    "cortex.engine._autocurative_state",
+    "cortex.engine.circuit_breaker",
+    "cortex.engine.endocrine",
+    "cortex.engine.repair_strategies",
+    "cortex.engine.autocurative_agent"
+  ],
+  "cortex/engine/data_surgery.py": [
+    "__future__",
+    "hashlib",
+    "logging",
+    "dataclasses"
+  ],
+  "cortex/engine/privacy_mixin.py": [
+    "__future__",
+    "logging",
+    "typing",
+    "cortex.engine.mixins.base",
+    "cortex.storage.classifier"
+  ],
+  "cortex/engine/forgetting_oracle.py": [
+    "__future__",
+    "asyncio",
+    "logging",
+    "math",
+    "time",
+    "datetime",
+    "typing",
+    "cortex.database.core",
+    "cortex.engine.forgetting_models",
+    "cortex.engine.oracle.analyzer_mixin",
+    "cortex.engine.oracle.evidence_mixin",
+    "cortex.engine.oracle.policy_mixin",
+    "cortex.services.notebooklm",
+    "cortex.services.trust",
+    "cortex.engine",
+    "cortex.memory.working",
+    "cortex.extensions.signals.bus"
+  ],
+  "cortex/engine/shared_bus.py": [
+    "__future__",
+    "json",
+    "logging",
+    "struct",
+    "time",
+    "weakref",
+    "multiprocessing.shared_memory",
+    "typing"
+  ],
+  "cortex/engine/store_validators.py": [
+    "__future__",
+    "typing",
+    "aiosqlite",
+    "cortex.utils.canonical"
+  ],
+  "cortex/engine/query_mixin.py": [
+    "__future__",
+    "logging",
+    "sqlite3",
+    "typing",
+    "cortex.engine.mixins.base",
+    "cortex.memory.temporal",
+    "cortex.search",
+    "cortex.graph",
+    "cortex.graph",
+    "cortex.graph",
+    "cortex.graph",
+    "asyncio",
+    "asyncio"
+  ],
+  "cortex/engine/search_mixin.py": [
+    "__future__",
+    "logging",
+    "sqlite3",
+    "typing",
+    "cortex.engine.mixins.base",
+    "cortex.search.causal_gap",
+    "json",
+    "dataclasses",
+    "cortex.cache",
+    "cortex.search",
+    "cortex.search.models",
+    "asyncio",
+    "cortex.graph"
+  ],
+  "cortex/engine/causality_models.py": [
+    "__future__",
+    "dataclasses",
+    "enum",
+    "typing",
+    "datetime",
+    "cortex.engine.risk_math"
+  ],
+  "cortex/engine/state_diff.py": [
+    "hashlib",
+    "json",
+    "typing",
+    "copy"
+  ],
+  "cortex/engine/memory_mixin.py": [
+    "__future__",
+    "logging",
+    "pathlib",
+    "aiosqlite",
+    "cortex.engine.mixins.base",
+    "os",
+    "os",
+    "cortex.memory.ledger",
+    "cortex.extensions.signals.bus",
+    "numpy",
+    "cortex.memory.encoder",
+    "cortex.memory.sqlite_vec_store",
+    "cortex.memory.hdc",
+    "cortex.memory.manager",
+    "cortex.memory.redis_working",
+    "cortex.memory.working"
+  ],
+  "cortex/engine/causal_pipeline.py": [
+    "abc",
+    "typing",
+    "cortex.types.evidence"
+  ],
+  "cortex/engine/repair_strategies.py": [
+    "__future__",
+    "asyncio",
+    "gc",
+    "logging",
+    "time",
+    "dataclasses",
+    "enum",
+    "typing",
+    "random",
+    "cortex.engine.reflexion",
+    "cortex.engine.circuit_breaker",
+    "json"
+  ],
+  "cortex/engine/_engine_connection.py": [
+    "__future__",
+    "asyncio",
+    "logging",
+    "sqlite3",
+    "threading",
+    "warnings",
+    "collections.abc",
+    "contextlib",
+    "aiosqlite",
+    "sqlite_vec",
+    "cortex.database.core",
+    "cortex.database.schema",
+    "cortex.migrations.core",
+    "cortex.telemetry.metrics",
+    "cortex.utils.locks",
+    "cortex.utils.locks",
+    "cortex.database.core",
+    "cortex.ledger",
+    "cortex.core.config",
+    "cortex.core.config",
+    "cortex.ledger",
+    "cortex.core.config"
+  ],
+  "cortex/engine/_genome_types.py": [
+    "__future__",
+    "copy",
+    "hashlib",
+    "json",
+    "logging",
+    "time",
+    "dataclasses",
+    "enum",
+    "typing",
+    "cortex.isa.builder"
+  ],
+  "cortex/engine/maxwell_demon.py": [
+    "logging",
+    "math",
+    "cortex.embeddings.local"
+  ],
+  "cortex/engine/risk_scoring.py": [
+    "xml.etree.ElementTree",
+    "dataclasses",
+    "enum",
+    "pathlib",
+    "cortex_rs",
+    "cortex.engine.entropy"
+  ],
+  "cortex/engine/reporter.py": [
+    "asyncio",
+    "json",
+    "logging",
+    "os",
+    "sqlite3",
+    "sys",
+    "time",
+    "dataclasses",
+    "datetime",
+    "typing",
+    "aiosqlite",
+    "cortex.database.core"
+  ],
+  "cortex/engine/evolution_ledger.py": [
+    "__future__",
+    "hashlib",
+    "json",
+    "logging",
+    "os",
+    "struct",
+    "threading",
+    "time",
+    "collections.abc",
+    "dataclasses",
+    "enum",
+    "pathlib",
+    "typing",
+    "cortex.ledger.merkle"
+  ],
+  "cortex/engine/entropy_daemon.py": [
+    "asyncio",
+    "logging",
+    "os",
+    "cortex.database.core"
+  ],
+  "cortex/engine/keter.py": [
+    "asyncio",
+    "logging",
+    "os",
+    "typing",
+    "abc",
+    "typing",
+    "cortex.utils.errors",
+    "cortex.engine.legion",
+    "cortex.verification.counterexample",
+    "cortex.verification.verifier",
+    "cortex.database.core",
+    "json",
+    "sqlite3",
+    "json",
+    "sqlite3",
+    "cortex.extensions.skills.router",
+    "hashlib",
+    "secrets",
+    "secrets"
+  ],
+  "cortex/engine/metadata_engine.py": [
+    "__future__",
+    "logging",
+    "typing",
+    "cortex.engine.models"
+  ],
+  "cortex/engine/sync_mixin.py": [
+    "asyncio",
+    "threading",
+    "logging",
+    "logging"
+  ],
+  "cortex/engine/__init__.py": [
+    "__future__",
+    "asyncio",
+    "logging",
+    "threading",
+    "pathlib",
+    "typing",
+    "aiosqlite",
+    "cortex.config",
+    "cortex.engine._engine_connection",
+    "cortex.engine._engine_delegates",
+    "cortex.engine.agent_mixin",
+    "cortex.engine.durability",
+    "cortex.engine.memory_mixin",
+    "cortex.engine.mixins.components",
+    "cortex.engine.mixins.optimization",
+    "cortex.engine.query_mixin",
+    "cortex.engine.search_mixin",
+    "cortex.engine.store_mixin",
+    "cortex.engine.sync_mixin",
+    "cortex.engine.transaction_mixin",
+    "cortex.consensus.manager",
+    "cortex.embeddings",
+    "cortex.embeddings.manager",
+    "cortex.engine.auth",
+    "cortex.engine.lock",
+    "cortex.engine.trust_registry",
+    "cortex.facts.manager",
+    "cortex.ledger",
+    "cortex.mac_maestro.executor",
+    "cortex.extensions.health.health_mixin",
+    "cortex.embeddings",
+    "aiosqlite.core"
+  ],
+  "cortex/engine/endocrine.py": [
+    "__future__",
+    "logging",
+    "time",
+    "enum"
+  ],
+  "cortex/engine/growth.py": [
+    "__future__",
+    "json",
+    "logging",
+    "typing",
+    "aiosqlite",
+    "cortex.engine.endocrine",
+    "cortex.engine.mutation_engine",
+    "cortex.memory.temporal"
+  ],
+  "cortex/engine/exergy_optimizer.py": [
+    "__future__",
+    "math",
+    "typing",
+    "cortex.engine.swarm_10k"
+  ],
+  "cortex/engine/pathogen.py": [
+    "__future__",
+    "asyncio",
+    "json",
+    "logging",
+    "time",
+    "datetime",
+    "typing",
+    "cortex.cli.common",
+    "cortex.extensions.agents.llm",
+    "cortex.extensions.moltbook.client",
+    "cortex.utils.errors"
+  ],
+  "cortex/engine/decision_engine.py": [
+    "logging",
+    "dataclasses",
+    "cortex.engine.entropy_core",
+    "cortex.guards.entropy_guard"
+  ],
+  "cortex/engine/event_sovereignty.py": [
+    "asyncio",
+    "logging",
+    "typing"
+  ],
+  "cortex/engine/psychology.py": [
+    "__future__",
+    "logging",
+    "dataclasses",
+    "enum",
+    "typing"
+  ],
+  "cortex/engine/ghost_mixin.py": [
+    "__future__",
+    "hashlib",
+    "json",
+    "logging",
+    "pathlib",
+    "typing",
+    "aiosqlite",
+    "cortex.engine.mixins.base",
+    "cortex.extensions.songlines.sensor",
+    "asyncio",
+    "asyncio",
+    "asyncio",
+    "cortex.extensions.songlines.economy",
+    "cortex.extensions.songlines.emitter",
+    "cortex.extensions.songlines.sensor"
+  ],
+  "cortex/engine/fact_store_core.py": [
+    "__future__",
+    "json",
+    "logging",
+    "sqlite3",
+    "typing",
+    "aiosqlite",
+    "cortex.memory.temporal",
+    "cortex.utils.canonical",
+    "cortex.crypto",
+    "cortex.extensions.security.signatures",
+    "cortex.engine.causal.taint_engine",
+    "cortex.engine.metadata_engine",
+    "cortex.engine.models",
+    "cortex.engine.causality",
+    "cortex.engine.causality",
+    "cortex.engine.causality",
+    "cortex.graph",
+    "cortex.guards.ctre_guard"
+  ],
+  "cortex/engine/causality.py": [
+    "__future__",
+    "json",
+    "logging",
+    "sqlite3",
+    "time",
+    "collections",
+    "datetime",
+    "typing",
+    "aiosqlite",
+    "cortex.crypto",
+    "cortex.database.core",
+    "cortex.engine.causal.decision_parser",
+    "cortex.engine.causality_models",
+    "cortex.extensions.signals.bus",
+    "cortex.engine.logic.atms",
+    "sqlite3",
+    "time",
+    "datetime",
+    "time",
+    "datetime",
+    "cortex.engine.immunity.origin_policy"
+  ],
+  "cortex/engine/conscious_recurrence.py": [
+    "asyncio",
+    "logging",
+    "math",
+    "time",
+    "collections.abc",
+    "dataclasses",
+    "typing",
+    "cortex.extensions.training.ttt_engine"
+  ],
+  "cortex/engine/tuning_store.py": [
+    "__future__",
+    "json",
+    "logging",
+    "time",
+    "pathlib",
+    "typing",
+    "cortex.database.core"
+  ],
+  "cortex/engine/vision_reasoner.py": [
+    "__future__",
+    "logging",
+    "collections",
+    "dataclasses"
+  ],
+  "cortex/engine/replay_verifier.py": [
+    "json",
+    "typing",
+    "cortex.engine.causal_graph",
+    "cortex.engine.state_diff",
+    "os",
+    "hashlib"
+  ],
+  "cortex/engine/cascade_router.py": [
+    "asyncio",
+    "hashlib",
+    "logging",
+    "os",
+    "subprocess",
+    "pathlib",
+    "cortex.database.core",
+    "asyncio",
+    "asyncio",
+    "cortex.engine.circuit_breaker"
+  ],
+  "cortex/engine/store_mutation.py": [
+    "__future__",
+    "logging",
+    "sqlite3",
+    "typing",
+    "aiosqlite",
+    "cortex.engine.causality",
+    "cortex.utils.canonical"
+  ],
+  "cortex/engine/sovereign_arbiter.py": [
+    "ast",
+    "logging",
+    "pathlib"
+  ],
+  "cortex/engine/tips.py": [
+    "__future__",
+    "hashlib",
+    "json",
+    "logging",
+    "random",
+    "sqlite3",
+    "threading",
+    "time",
+    "dataclasses",
+    "enum",
+    "pathlib",
+    "typing",
+    "aiosqlite",
+    "cortex.engine",
+    "cortex.storage.classifier"
+  ],
+  "cortex/engine/physics.py": [
+    "__future__",
+    "dataclasses"
+  ],
+  "cortex/engine/squadrons.py": [
+    "json",
+    "logging",
+    "re",
+    "pathlib",
+    "typing",
+    "cortex.engine.legion",
+    "cortex.engine.legion_vectors",
+    "cortex.engine.nemesis_agent",
+    "cortex.engine.exergy_agent"
+  ],
+  "cortex/engine/durability.py": [
+    "asyncio",
+    "atexit",
+    "logging",
+    "sys",
+    "typing"
+  ],
+  "cortex/engine/apotheosis_audits_mixin.py": [
+    "asyncio",
+    "logging",
+    "sqlite3",
+    "pathlib",
+    "typing",
+    "cortex.engine.endocrine",
+    "cortex.engine.manifestation",
+    "cortex.engine.forgetting_oracle",
+    "cortex.engine.forgetting_models"
+  ],
+  "cortex/engine/distributed_ledger.py": [
+    "json",
+    "logging",
+    "collections.abc",
+    "typing",
+    "cortex.engine.evolution_ledger",
+    "confluent_kafka"
+  ],
+  "cortex/engine/engine.py": [
+    "logging",
+    "time",
+    "typing",
+    "cortex.engine",
+    "cortex.engine.cost_scheduler"
+  ],
+  "cortex/engine/substack_sidecar.py": [
+    "argparse",
+    "logging",
+    "pathlib",
+    "cortex.database.core",
+    "cortex.observability.jsonl_logger",
+    "cortex.services.email"
+  ],
+  "cortex/engine/ultramap.py": [
+    "atexit",
+    "hashlib",
+    "logging",
+    "mmap",
+    "os",
+    "struct",
+    "weakref",
+    "cortex_rs",
+    "cortex.engine.checkpoint",
+    "cortex.engine.evolution_ledger",
+    "logging",
+    "logging",
+    "logging",
+    "logging"
+  ],
+  "cortex/engine/video_mla_cache.py": [
+    "__future__",
+    "hashlib",
+    "logging",
+    "dataclasses"
+  ],
+  "cortex/engine/evolution_types.py": [
+    "__future__",
+    "time",
+    "dataclasses",
+    "typing"
+  ],
+  "cortex/engine/circuit_breaker.py": [
+    "__future__",
+    "logging",
+    "time",
+    "collections.abc",
+    "enum",
+    "typing"
+  ],
+  "cortex/engine/agent_mixin.py": [
+    "logging",
+    "sqlite3",
+    "uuid",
+    "collections.abc",
+    "typing",
+    "aiosqlite",
+    "cortex.engine.mixins.base",
+    "random",
+    "cortex.extensions.moltbook.client"
+  ],
+  "cortex/engine/autopoietic_agent.py": [
+    "__future__",
+    "logging",
+    "random",
+    "time",
+    "collections",
+    "collections.abc",
+    "typing",
+    "cortex.engine._autopoietic_helper",
+    "cortex.engine._autopoietic_oracle",
+    "cortex.engine._autopoietic_state",
+    "cortex.engine.genesis",
+    "cortex.engine.genome",
+    "cortex.isa.builder"
+  ],
+  "cortex/engine/consensus.py": [
+    "__future__",
+    "logging",
+    "sqlite3",
+    "typing",
+    "aiosqlite",
+    "cortex.consensus.vote_ledger",
+    "cortex.engine.mixins.base",
+    "cortex.engine.slashing",
+    "cortex.engine_async",
+    "cortex.engine.mutation_engine"
+  ],
+  "cortex/engine/capabilities.py": [
+    "__future__",
+    "logging",
+    "os",
+    "dataclasses",
+    "importlib.util",
+    "cortex.database.core"
+  ],
+  "cortex/engine/enrichment_worker.py": [
+    "__future__",
+    "asyncio",
+    "logging",
+    "typing",
+    "cortex.engine.capabilities"
+  ],
+  "cortex/engine/guard_adapters.py": [
+    "__future__",
+    "logging",
+    "sqlite3",
+    "typing",
+    "aiosqlite",
+    "pathlib",
+    "time",
+    "cortex.guards.health_guard",
+    "cortex.guards.contradiction_guard",
+    "cortex.verification.verifier",
+    "cortex.guards.exergy_guard",
+    "os",
+    "cortex.guards.zk_guard",
+    "cortex.guards.virgo",
+    "os",
+    "cortex.guards.omega_auditor",
+    "cortex.guards.archaeology_guard",
+    "os",
+    "cortex.extensions.signals.bus",
+    "cortex.extensions.signals.fact_hook",
+    "cortex.extensions.daemon.retrieval_breaker"
+  ],
+  "cortex/engine/rollback_engine.py": [
+    "__future__",
+    "logging",
+    "typing",
+    "cortex.database.core",
+    "cortex.ledger.causal_graph",
+    "cortex.ledger.cost_field",
+    "cortex.ledger.execution_trace"
+  ],
+  "cortex/engine/zero_prompting.py": [
+    "__future__",
+    "hashlib",
+    "logging",
+    "time",
+    "dataclasses",
+    "typing",
+    "cortex.engine.evolution_metrics",
+    "cortex.engine.evolution_types"
+  ],
+  "cortex/engine/slashing.py": [
+    "__future__",
+    "logging",
+    "dataclasses",
+    "typing",
+    "aiosqlite"
+  ],
+  "cortex/engine/evolution_engine.py": [
+    "__future__",
+    "random",
+    "time",
+    "typing",
+    "cortex.engine.evolution_metrics",
+    "cortex.engine.evolution_types",
+    "cortex.engine.zero_prompting"
+  ],
+  "cortex/engine/persist_executor.py": [
+    "logging",
+    "typing",
+    "cortex.memory.manager",
+    "cortex.memory.vsa"
+  ],
+  "cortex/engine/causal_scheduler.py": [
+    "__future__",
+    "logging",
+    "typing",
+    "cortex.engine.rollback_engine",
+    "cortex.ledger.causal_graph",
+    "cortex.ledger.execution_trace",
+    "cortex.database.core",
+    "cortex.database.core",
+    "cortex_native"
+  ],
+  "cortex/engine/rem_cycle.py": [
+    "__future__",
+    "asyncio",
+    "logging",
+    "collections.abc",
+    "typing",
+    "cortex.engine.decalcifier",
+    "cortex.engine.growth",
+    "cortex.engine.reaper",
+    "cortex.engine.evaporator"
+  ],
+  "cortex/engine/lock.py": [
+    "__future__",
+    "asyncio",
+    "logging",
+    "datetime",
+    "typing",
+    "aiosqlite"
+  ],
+  "cortex/engine/enrichment_queue.py": [
+    "__future__",
+    "logging",
+    "aiosqlite"
+  ],
+  "cortex/engine/nemesis_agent.py": [
+    "logging",
+    "collections.abc",
+    "typing",
+    "cortex.engine.endocrine",
+    "cortex.engine.legion",
+    "cortex.engine.mixins.deterministic_induction_mixin"
+  ],
+  "cortex/engine/anomaly_hunter.py": [
+    "__future__",
+    "asyncio",
+    "logging",
+    "time",
+    "dataclasses",
+    "datetime",
+    "typing",
+    "cortex.engine.models"
+  ],
+  "cortex/engine/rim_latent_blocks.py": [
+    "logging",
+    "typing",
+    "cortex.compat.optional"
+  ],
+  "cortex/engine/transaction_mixin.py": [
+    "__future__",
+    "logging",
+    "sqlite3",
+    "typing",
+    "aiosqlite",
+    "cortex.engine.mixins.base",
+    "cortex.memory.temporal",
+    "cortex.utils.canonical",
+    "cortex.utils.locks",
+    "cortex.extensions.policy.jis_auditor",
+    "cortex.ledger",
+    "cortex.telemetry.metrics"
+  ],
+  "cortex/engine/legion_vectors.py": [
+    "__future__",
+    "ast",
+    "logging",
+    "re",
+    "collections.abc",
+    "typing",
+    "cortex.utils.respiration"
+  ],
+  "cortex/engine/autocurative_agent.py": [
+    "__future__",
+    "asyncio",
+    "logging",
+    "time",
+    "collections",
+    "typing",
+    "cortex.engine._autocurative_config",
+    "cortex.engine._autocurative_helper",
+    "cortex.engine._autocurative_state",
+    "cortex.engine.circuit_breaker",
+    "cortex.engine.endocrine",
+    "cortex.engine.repair_strategies",
+    "cortex_rs"
+  ],
+  "cortex/engine/context_cache.py": [
+    "__future__",
+    "logging",
+    "time",
+    "dataclasses",
+    "enum",
+    "typing",
+    "hashlib",
+    "asyncio",
+    "os",
+    "time",
+    "numpy",
+    "cortex.memory.encoder",
+    "cortex.memory.models",
+    "cortex.memory.sqlite_vec_store",
+    "cortex.utils.turboquant",
+    "mmap",
+    "os"
+  ],
+  "cortex/engine/_autopoietic_helper.py": [
+    "__future__",
+    "logging",
+    "random",
+    "typing",
+    "cortex.engine.genesis",
+    "cortex.engine.genome",
+    "cortex.engine.autopoietic_agent"
+  ],
+  "cortex/engine/reaper.py": [
+    "__future__",
+    "json",
+    "logging",
+    "time",
+    "datetime",
+    "pathlib",
+    "typing"
+  ],
+  "cortex/engine/_autocurative_config.py": [
+    "__future__",
+    "dataclasses"
+  ],
+  "cortex/engine/inference.py": [
+    "__future__",
+    "logging",
+    "sqlite3",
+    "dataclasses",
+    "typing",
+    "aiosqlite",
+    "cortex.engine.causality",
+    "cortex.memory.temporal",
+    "cortex.config",
+    "cortex.guards.contradiction_guard"
+  ],
+  "cortex/engine/entropy_core.py": [
+    "xml.etree.ElementTree",
+    "dataclasses",
+    "enum",
+    "pathlib",
+    "cortex_rs",
+    "cortex.engine.entropy"
+  ],
+  "cortex/engine/forgetting_models.py": [
+    "__future__",
+    "dataclasses",
+    "enum",
+    "typing"
+  ],
+  "cortex/engine/metabolism.py": [
+    "__future__",
+    "hashlib",
+    "dataclasses",
+    "typing"
+  ],
+  "cortex/engine/store_quarantine_mixin.py": [
+    "__future__",
+    "logging",
+    "aiosqlite",
+    "cortex.engine.mixins.base",
+    "cortex.memory.temporal",
+    "cortex.engine.mutation_engine",
+    "cortex.engine.mutation_engine"
+  ],
+  "cortex/engine/legion_vectors_plan.py": [],
+  "cortex/engine/reflexion.py": [
+    "__future__",
+    "logging",
+    "time",
+    "collections.abc",
+    "dataclasses",
+    "enum",
+    "typing",
+    "cortex.isa.builder",
+    "cortex.isa.builder",
+    "cortex.engine.endocrine",
+    "asyncio"
+  ],
+  "cortex/engine/heartbeat.py": [
+    "__future__",
+    "asyncio",
+    "logging",
+    "time",
+    "typing",
+    "cortex.nexus_v8",
+    "cortex.utils",
+    "cortex.utils.semantic_heartbeat",
+    "cortex.engine",
+    "cortex.memory.sleep"
+  ],
+  "cortex/engine/watcher.py": [
+    "__future__",
+    "logging",
+    "typing",
+    "cortex.nexus_v8",
+    "cortex.engine"
+  ],
+  "cortex/engine/ultrathink_physics.py": [
+    "logging",
+    "typing"
+  ],
+  "cortex/engine/execution_ledger.py": [
+    "json",
+    "time",
+    "pathlib"
+  ],
+  "cortex/engine/performance_tracker.py": [
+    "__future__",
+    "logging",
+    "math",
+    "time",
+    "collections",
+    "dataclasses",
+    "typing"
+  ],
+  "cortex/engine/mtk_sqlite_authorizer.py": [
+    "logging",
+    "sqlite3",
+    "contextvars",
+    "os",
+    "sys"
+  ],
+  "cortex/engine/cost_scheduler.py": [
+    "__future__",
+    "logging",
+    "dataclasses",
+    "pathlib",
+    "typing",
+    "yaml"
+  ],
+  "cortex/engine/storage_guard.py": [
+    "__future__",
+    "logging",
+    "typing"
+  ],
+  "cortex/engine/exergy_agent.py": [
+    "logging",
+    "collections.abc",
+    "typing",
+    "cortex.engine.endocrine",
+    "cortex.engine.exergy_optimizer",
+    "cortex.engine.legion",
+    "os",
+    "sys",
+    "persistence"
+  ],
+  "cortex/engine/evolution_metrics.py": [
+    "__future__",
+    "hashlib",
+    "json",
+    "logging",
+    "sqlite3",
+    "cortex.database.core",
+    "cortex.engine.evolution_types"
+  ],
+  "cortex/engine/credibility_stack.py": [
+    "__future__",
+    "hashlib",
+    "json",
+    "time",
+    "datetime",
+    "typing",
+    "cortex.engine.snapshots",
+    "cortex.engine.ultrathink_physics",
+    "cortex.extensions.security.signatures",
+    "cortex.extensions.shannon.analyzer",
+    "cortex.engine"
+  ],
+  "cortex/engine/reporterd.py": [
+    "asyncio",
+    "json",
+    "logging",
+    "os",
+    "weakref",
+    "aiohttp",
+    "aiohttp.web_request",
+    "aiohttp.web_response",
+    "cortex.engine.reporter",
+    "logging"
+  ],
+  "cortex/engine/trust_registry.py": [
+    "__future__",
+    "dataclasses",
+    "datetime",
+    "logging",
+    "time",
+    "collections.abc"
+  ],
+  "cortex/engine/evaporator.py": [
+    "__future__",
+    "logging",
+    "time",
+    "datetime",
+    "aiosqlite",
+    "cortex.engine.mutation_engine",
+    "cortex.memory.temporal"
+  ],
+  "cortex/engine/_genome_tree_helper.py": [
+    "__future__",
+    "cortex.isa.builder"
+  ],
+  "cortex/engine/autodidact_hott_engine.py": [
+    "hashlib",
+    "logging",
+    "uuid",
+    "typing",
+    "cortex.audit.ledger",
+    "cortex.engine.ultramap"
+  ],
+  "cortex/engine/_autopoietic_oracle.py": [
+    "__future__",
+    "asyncio",
+    "time",
+    "collections.abc",
+    "dataclasses",
+    "typing",
+    "cortex.engine.genome",
+    "cortex.isa.builder",
+    "cortex_rs"
+  ],
+  "cortex/engine/store_validation.py": [
+    "__future__",
+    "logging",
+    "os",
+    "typing",
+    "cortex.guards.thermodynamic",
+    "cortex.engine.storage_guard",
+    "cortex.engine.store_validators",
+    "cortex.engine.fact_store_core",
+    "cortex.engine.guard_integration_patch",
+    "cortex.guards.thermodynamic",
+    "cortex.shannon.exergy",
+    "cortex.engine.membrane.sanitizer",
+    "cortex.engine.causal.taint_engine",
+    "cortex.engine.bridge_guard",
+    "cortex.guards.ctre_guard",
+    "cortex.engine.nemesis",
+    "cortex.engine.bridge_guard",
+    "cortex.engine.guard_integration_patch",
+    "cortex.engine.membrane.sanitizer",
+    "cortex.engine.nemesis",
+    "cortex.engine.storage_guard",
+    "cortex.guards.thermodynamic",
+    "cortex.shannon.exergy"
+  ],
+  "cortex/engine/genome.py": [
+    "__future__",
+    "cortex.engine._genome_mutator",
+    "cortex.engine._genome_types"
+  ],
+  "cortex/engine/ast_validator.py": [
+    "ast",
+    "logging"
+  ],
+  "cortex/engine/phoenix_omega.py": [
+    "ast",
+    "asyncio",
+    "hashlib",
+    "logging",
+    "abc",
+    "dataclasses",
+    "enum",
+    "pathlib",
+    "typing",
+    "cortex.observability.jsonl_logger"
+  ],
+  "cortex/engine/kv_bridge.py": [
+    "asyncio",
+    "hashlib",
+    "os",
+    "typing",
+    "numpy",
+    "safetensors.numpy",
+    "logging"
+  ],
+  "cortex/engine/forensic_commander.py": [
+    "logging",
+    "cortex.engine.forensic_strike_config",
+    "cortex.engine.swarm_10k"
+  ],
+  "cortex/engine/embedding_engine.py": [
+    "__future__",
+    "asyncio",
+    "json",
+    "logging",
+    "sqlite3",
+    "typing",
+    "aiosqlite",
+    "inspect",
+    "numpy",
+    "cortex.memory.hdc.algebra",
+    "cortex.memory.models"
+  ],
+  "cortex/engine/decalcifier.py": [
+    "logging",
+    "time",
+    "typing",
+    "aiosqlite",
+    "cortex.engine.endocrine",
+    "cortex.core.paths",
+    "cortex.database.core",
+    "asyncio"
+  ],
+  "cortex/engine/_autopoietic_state.py": [
+    "__future__",
+    "dataclasses",
+    "typing"
+  ],
+  "cortex/engine/right_brain.py": [
+    "logging",
+    "random",
+    "typing",
+    "cortex.extensions.evolution.free_energy"
+  ],
+  "cortex/engine/entropy.py": [
+    "ast",
+    "hashlib",
+    "json",
+    "logging",
+    "os",
+    "typing"
+  ],
+  "cortex/engine/cognitive.py": [
+    "ast",
+    "logging",
+    "pathlib",
+    "typing",
+    "cortex.utils.landauer"
+  ],
+  "cortex/engine/exergy_daemon.py": [
+    "asyncio",
+    "logging",
+    "bifurcation_engine"
+  ],
+  "cortex/engine/blast_radius.py": [
+    "__future__",
+    "logging",
+    "os",
+    "sqlite3",
+    "subprocess",
+    "dataclasses",
+    "typing",
+    "cortex.database.core",
+    "cortex.memory.temporal",
+    "cortex.extensions.signals.bus"
+  ],
+  "cortex/engine/store_mixin.py": [
+    "__future__",
+    "logging",
+    "typing",
+    "aiosqlite",
+    "cortex.crypto",
+    "cortex.engine.capabilities",
+    "cortex.engine.embedding_engine",
+    "cortex.engine.fact_store_core",
+    "cortex.engine.ghost_mixin",
+    "cortex.engine.privacy_mixin",
+    "cortex.engine.store_mutation",
+    "cortex.engine.store_quarantine_mixin",
+    "cortex.engine.store_validation",
+    "cortex.engine.store_validators",
+    "cortex.guards.thermodynamic",
+    "cortex.guards.ctre_guard",
+    "cortex.utils.canonical",
+    "typing",
+    "typing",
+    "cortex.cache"
+  ],
+  "cortex/engine/nemesis.py": [
+    "__future__",
+    "datetime",
+    "logging",
+    "re",
+    "aiosqlite",
+    "cortex.database.core",
+    "cortex.engine.endocrine",
+    "cortex.extensions.signals.bus"
+  ],
+  "cortex/engine/aleph_omega.py": [
+    "asyncio",
+    "logging",
+    "random",
+    "typing"
+  ],
+  "cortex/engine/guard_integration_patch.py": [
+    "logging",
+    "typing",
+    "os",
+    "cortex.extensions.security.guard_runtime"
+  ],
+  "cortex/engine/metacognition.py": [
+    "__future__",
+    "typing",
+    "pydantic",
+    "cortex.utils.void_vec"
+  ],
+  "cortex/engine/history.py": [
+    "__future__",
+    "logging",
+    "typing",
+    "aiosqlite",
+    "cortex.engine.mixins.base",
+    "cortex.extensions.security.tenant",
+    "cortex.memory.temporal"
+  ],
+  "cortex/engine/guard_pipeline.py": [
+    "__future__",
+    "logging",
+    "typing",
+    "aiosqlite",
+    "cortex.extensions.interfaces.store_pipeline"
+  ],
+  "cortex/engine/genesis.py": [
+    "__future__",
+    "logging",
+    "random",
+    "time",
+    "collections.abc",
+    "dataclasses",
+    "typing",
+    "cortex.engine.genome",
+    "cortex.isa.builder"
+  ],
+  "cortex/engine/immunity/rls_policy.py": [
+    "logging",
+    "cortex_rs",
+    "json"
+  ],
+  "cortex/engine/immunity/origin_policy.py": [
+    "dataclasses",
+    "enum"
+  ],
+  "cortex/engine/immunity/__init__.py": [
+    "origin_policy"
+  ],
+  "cortex/engine/mixins/optimization.py": [
+    "__future__",
+    "asyncio",
+    "hashlib",
+    "logging",
+    "os",
+    "time",
+    "collections",
+    "concurrent.futures",
+    "enum",
+    "typing",
+    "aiosqlite",
+    "cortex.utils.canonical",
+    "cortex.utils.result"
+  ],
+  "cortex/engine/mixins/deterministic_induction_mixin.py": [
+    "__future__",
+    "ast",
+    "logging"
+  ],
+  "cortex/engine/mixins/components.py": [
+    "__future__",
+    "logging",
+    "os",
+    "typing",
+    "pathlib",
+    "cortex.consensus.manager",
+    "cortex.embeddings.manager",
+    "cortex.engine.auth",
+    "cortex.engine.guard_pipeline",
+    "cortex.engine.lock",
+    "cortex.facts.manager",
+    "cortex.ledger",
+    "cortex.mac_maestro.executor",
+    "cortex.engine.guard_pipeline",
+    "cortex.facts.manager",
+    "cortex.embeddings.manager",
+    "cortex.consensus.manager",
+    "cortex.engine.lock",
+    "cortex.engine.auth",
+    "cortex.ledger",
+    "cortex.ledger",
+    "cortex.ledger",
+    "cortex.mac_maestro.executor",
+    "cortex.engine.guard_adapters",
+    "cortex.engine.guard_adapters",
+    "cortex.engine.guard_adapters",
+    "cortex.engine.guard_adapters",
+    "cortex.engine.guard_adapters",
+    "cortex.engine.guard_adapters",
+    "cortex.engine.guard_adapters",
+    "cortex.engine.guard_adapters",
+    "cortex.engine.guard_adapters",
+    "cortex.engine.guard_adapters",
+    "cortex.engine.guard_adapters"
+  ],
+  "cortex/engine/mixins/base.py": [
+    "__future__",
+    "logging",
+    "collections.abc",
+    "contextlib",
+    "typing",
+    "aiosqlite",
+    "cortex.engine.models",
+    "cortex.extensions.security.tenant"
+  ],
+  "cortex/engine/ingest/gemini_ingest.py": [
+    "asyncio",
+    "logging",
+    "typing",
+    "cortex.engine.causal.taint_engine"
+  ],
+  "cortex/engine/oracle/evidence_mixin.py": [
+    "__future__",
+    "logging",
+    "typing",
+    "cortex.services.trust"
+  ],
+  "cortex/engine/oracle/ast_signer.py": [
+    "ast",
+    "hashlib"
+  ],
+  "cortex/engine/oracle/policy_mixin.py": [
+    "__future__",
+    "logging",
+    "typing",
+    "cortex.engine.forgetting_models"
+  ],
+  "cortex/engine/oracle/__init__.py": [],
+  "cortex/engine/oracle/core.py": [],
+  "cortex/engine/oracle/analyzer_mixin.py": [
+    "__future__",
+    "json",
+    "logging",
+    "sqlite3",
+    "typing",
+    "cortex.engine.forgetting_models",
+    "cortex.engine",
+    "cortex.memory.working"
+  ],
+  "cortex/engine/self_optimizer/__init__.py": [
+    "core",
+    "types"
+  ],
+  "cortex/engine/self_optimizer/core.py": [
+    "__future__",
+    "asyncio",
+    "logging",
+    "time",
+    "collections",
+    "typing",
+    "cortex.engine.endocrine",
+    "cortex.engine.performance_tracker",
+    "tuners",
+    "types"
+  ],
+  "cortex/engine/self_optimizer/types.py": [
+    "__future__",
+    "dataclasses",
+    "enum",
+    "typing"
+  ],
+  "cortex/engine/self_optimizer/tuners.py": [
+    "__future__",
+    "typing",
+    "types"
+  ],
+  "cortex/engine/feedback/ley2_loop.py": [
+    "__future__",
+    "logging",
+    "typing",
+    "cortex.ledger.execution_trace",
+    "statistics"
+  ],
+  "cortex/engine/smte/analyzer.py": [
+    "ast"
+  ],
+  "cortex/engine/smte/__init__.py": [
+    "parser",
+    "utm"
+  ],
+  "cortex/engine/smte/weismann_barrier.py": [
+    "logging",
+    "shutil",
+    "subprocess",
+    "tempfile",
+    "pathlib",
+    "sys"
+  ],
+  "cortex/engine/smte/parser.py": [
+    "ast",
+    "logging",
+    "typing"
+  ],
+  "cortex/engine/smte/utm.py": [
+    "logging",
+    "math",
+    "typing"
+  ],
+  "cortex/engine/smte/ouroboros_injector.py": [
+    "json",
+    "logging",
+    "random",
+    "sys",
+    "time",
+    "uuid",
+    "confluent_kafka"
+  ],
+  "cortex/engine/smte/exergy.py": [
+    "logging",
+    "time",
+    "typing"
+  ],
+  "cortex/engine/smte/trigger_mutation.py": [
+    "logging",
+    "cortex.engine.smte.llm_mutator",
+    "cortex.engine.smte.parser",
+    "cortex.engine.smte.weismann_barrier",
+    "cortex.guards.exergy_guard",
+    "cortex.observability.jsonl_logger"
+  ],
+  "cortex/engine/smte/ouroboros_compiler.py": [
+    "__future__",
+    "ast",
+    "logging",
+    "pathlib",
+    "typing",
+    "cortex.engine.smte.llm_mutator",
+    "cortex.engine.smte.weismann_barrier",
+    "asyncio",
+    "sys",
+    "cortex.config",
+    "cortex.engine",
+    "cortex.engine.smte.analyzer",
+    "hashlib",
+    "hashlib"
+  ],
+  "cortex/engine/smte/llm_mutator.py": [
+    "ast",
+    "json",
+    "logging",
+    "os",
+    "urllib.request"
+  ],
+  "cortex/engine/ai_scientist/analyst_writer.py": [
+    "logging",
+    "typing"
+  ],
+  "cortex/engine/ai_scientist/__init__.py": [
+    "analyst_writer",
+    "coder_executor",
+    "idea_generator",
+    "orchestrator",
+    "reviewer"
+  ],
+  "cortex/engine/ai_scientist/idea_generator.py": [
+    "logging",
+    "typing"
+  ],
+  "cortex/engine/ai_scientist/coder_executor.py": [
+    "logging",
+    "typing",
+    "cortex.engine.sandbox_jit"
+  ],
+  "cortex/engine/ai_scientist/reviewer.py": [
+    "logging",
+    "typing"
+  ],
+  "cortex/engine/ai_scientist/orchestrator.py": [
+    "logging",
+    "datetime",
+    "typing",
+    "cortex.audit.ledger",
+    "cortex.auth.enterprise_identity",
+    "analyst_writer",
+    "coder_executor",
+    "idea_generator",
+    "reviewer"
+  ],
+  "cortex/engine/membrane/sanitizer.py": [
+    "__future__",
+    "hashlib",
+    "re",
+    "typing",
+    "pydantic",
+    "models",
+    "sri_hash"
+  ],
+  "cortex/engine/membrane/models.py": [
+    "time",
+    "enum",
+    "typing",
+    "pydantic"
+  ],
+  "cortex/engine/membrane/__init__.py": [],
+  "cortex/engine/membrane/sri_hash.py": [
+    "base64",
+    "hashlib",
+    "re",
+    "urllib.error",
+    "urllib.request",
+    "concurrent.futures",
+    "functools",
+    "urllib.parse",
+    "cortex.guards.url_guard"
+  ],
+  "cortex/engine/supervisor/__init__.py": [
+    "core",
+    "types"
+  ],
+  "cortex/engine/supervisor/core.py": [
+    "__future__",
+    "asyncio",
+    "logging",
+    "time",
+    "typing",
+    "cortex.engine.autocurative_agent",
+    "cortex.engine.endocrine",
+    "cortex.engine.performance_tracker",
+    "cortex.engine.predictive_healer",
+    "cortex.engine.self_optimizer",
+    "cortex.engine.tuning_store",
+    "daemon",
+    "types"
+  ],
+  "cortex/engine/supervisor/types.py": [
+    "__future__",
+    "dataclasses",
+    "enum",
+    "typing",
+    "cortex.engine._autocurative_config",
+    "cortex.engine.self_optimizer"
+  ],
+  "cortex/engine/supervisor/daemon.py": [
+    "__future__",
+    "asyncio",
+    "logging",
+    "time",
+    "typing",
+    "cortex.engine.endocrine",
+    "cortex.engine.predictive_healer",
+    "types"
+  ]
+}

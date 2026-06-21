@@ -1,0 +1,14 @@
+[
+  {
+    "title": "Resolve TODO in agents/planner.py",
+    "priority": "medium"
+  },
+  {
+    "title": "Resolve TODO in agents/analyst.py",
+    "priority": "medium"
+  },
+  {
+    "title": "Generate clean canonical README",
+    "priority": "high"
+  }
+]

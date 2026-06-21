@@ -1,0 +1,38 @@
+{
+  "conductor.py": [
+    "agents.scout",
+    "agents.structure",
+    "agents.analyst",
+    "agents.architect",
+    "agents.planner"
+  ],
+  "main.py": [
+    "sys",
+    "json",
+    "pathlib",
+    "core.state",
+    "conductor"
+  ],
+  "core/__init__.py": [],
+  "core/parser.py": [
+    "ast",
+    "re"
+  ],
+  "core/state.py": [
+    "dataclasses",
+    "typing"
+  ],
+  "agents/planner.py": [],
+  "agents/__init__.py": [],
+  "agents/scout.py": [
+    "pathlib"
+  ],
+  "agents/architect.py": [],
+  "agents/analyst.py": [
+    "pathlib"
+  ],
+  "agents/structure.py": [
+    "pathlib",
+    "core.parser"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "modules_detected": [
+    "agents",
+    "core"
+  ],
+  "total_classes": 8,
+  "total_functions": 12,
+  "files_analyzed": 11,
+  "high_coupling_files": {},
+  "possible_orphans": [
+    "core/__init__.py",
+    "agents/planner.py",
+    "agents/__init__.py",
+    "agents/architect.py"
+  ]
+}
