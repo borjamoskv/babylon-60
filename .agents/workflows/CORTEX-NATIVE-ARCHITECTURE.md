@@ -12,6 +12,9 @@ This document is the mathematical, philosophical, and normative ground truth for
 
 **Core Fallacy:** RAG (Retrieval-Augmented Generation) is not memory; it is a stochastic search engine. Without epistemic governance, AI swarms succumb to Information Entropy. **Cortex-Persist replaces passive retrieval with cryptographic governance.**
 
+> **Terminal Definition:**
+> BABYLON-60 is a sovereign memory platform for AI swarms; CORTEX-Persist is the deterministic kernel that transforms probabilistic inferences into verifiable state via cryptographic and causal governance.
+
 ---
 
 ## 0. SYSTEM ONTOLOGY & BRAND TAXONOMY
@@ -41,6 +44,13 @@ The architecture is strictly stratified into three conceptual tiers. This is not
 3. **Mutable belief overwrite**: Direct overwrites destroy the hash chain. Revisions MUST be signed patches.
 4. **LWW (Last-Writer-Wins)**: Wall-clock ordering is not causal. LWW is STRICTLY PROHIBITED.
 5. **Single-node veto annihilation**: A lone node MUST NOT collapse swarm consensus to $P=0$ without quorum.
+
+### Maturity Labels
+To prevent conceptual overload and clarify implementation status, all architectural components are tagged with a maturity level:
+- `[PRODUCTION]` - Implemented, tested, and actively governing state.
+- `[EXPERIMENTAL]` - In active development or running in shadow mode.
+- `[RESEARCH]` - Theoretical model undergoing adversarial validation.
+- `[SPECIFICATION]` - Normative target; not yet implemented in the critical path.
 
 ---
 
@@ -81,23 +91,23 @@ pub struct BeliefObject {
 }
 ```
 
-### State Transitions & ATMS
-If a root dependency becomes invalid or refuted (via `discards`), dependent beliefs **MUST** transition to `ORPHANED`. The invalidation of the root reference is executed in $O(1)$ via precomputed dependency indices.
+### State Transitions & ATMS `[EXPERIMENTAL]`
+If a root dependency becomes invalid or refuted (via `discards`), dependent beliefs **MUST** transition to `ORPHANED`. The invalidation of the root reference is targeted to execute in $O(1)$ via precomputed dependency indices.
 
 ---
 
 ## 3. THE PLANES OF COGNITION
 
-### A. Integrity Plane (Cryptographic)
+### A. Integrity Plane (Cryptographic) `[SPECIFICATION]`
 - Every memory is born with a mathematical shadow. A Sparse Merkle Tree (SMT) binds semantic content to the originating agent.
-- `attest_lineage(artifact_id)` MUST mathematically resolve execution proofs in $O(\log N)$ time.
+- `attest_lineage(artifact_id)` targets resolving execution proofs in $O(\log N)$ time (dependent on structural backend scaling).
 
-### B. Coordination Plane (Swarm Consensus)
+### B. Coordination Plane (Swarm Consensus) `[RESEARCH]`
 - Transport MUST be orchestrated via **Zenoh** (L3/L4) (no central broker).
-- Merge operations MUST be executed using the Semantic CRDTs. 
+- Merge operations MUST be executed using Semantic CRDTs. 
 - Conflict aggregation MUST use **Logarithmic Opinion Pools (LogOP)** to prevent probability flattening.
 
-### C. Belief Plane (Memory Scheduler)
+### C. Belief Plane (Memory Scheduler) `[EXPERIMENTAL]`
 Context injection is dictated by a multivariable tensor equation. If $Risk_{\text{contam}}$ detects cascading structural contradictions, the score asymptotes to 0, rejecting the memory payload.
 
 $$ \text{Score}(m) = \frac{(\text{Rel} \cdot w_r) + (\text{Conf} \cdot w_c) + (\text{Rec} \cdot w_t)}{\text{Cost}_{\text{tokens}} + \text{Risk}_{\text{contam}}} $$
