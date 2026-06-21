@@ -79,18 +79,28 @@ class CausalScheduler:
         self, window_seconds: int = 3600, tenant_id: str = "default"
     ) -> dict[str, Any]:
         """Evalúa el estado del sistema y la continuidad ontológica global (GCC)."""
+        try:
+            import cortex_native
+            has_rust_compiler = True
+        except ImportError:
+            has_rust_compiler = False
+
         drift = await self.graph.compute_global_drift(window_seconds, tenant_id)
         cf = await self.graph.compute_coherence_field(window_seconds, tenant_id)
         eb = await self._get_entropy_budget(tenant_id)
 
         risk_map = await self.graph.compute_node_risk_scores(window_seconds, tenant_id)
 
-        candidates = [
-            n
-            for n in risk_map
-            if n["risk_score"] > self.rollback_threshold
-            or n["permission_to_exist_score"] < self.permission_kill_threshold
-        ]
+        candidates = []
+        for n in risk_map:
+            # [C5-REAL] Fase 2: Compilador Causal Rust (Bypass de validación termodinámica)
+            if has_rust_compiler:
+                verdict = cortex_native.verify_causal_assertion(f"CLAIM:{n['id']}")
+                if verdict == "invalid":
+                    n["permission_to_exist_score"] = 0.0  # Falsación absoluta
+
+            if n["risk_score"] > self.rollback_threshold or n["permission_to_exist_score"] < self.permission_kill_threshold:
+                candidates.append(n)
 
         # GCC Core Decision Matrix
         # 1. Entropy Exhaustion (Chaos breakdown)
