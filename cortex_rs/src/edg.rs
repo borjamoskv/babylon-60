@@ -4,15 +4,58 @@ use std::collections::HashSet;
 use std::sync::Arc;
 use crate::bft::exergy::{ExergyMutation, ExergyGuard, ExergyError};
 
+/// ValidationStatus measures the epistemic certainty of a fact or node.
+/// Formerly known as "EpistemicStatus", it was expanded back to its core thermodynamic roots
+/// to prevent ontological flattening and preserve the certainty spectrum.
 #[pyclass]
 #[derive(Clone, Debug, PartialEq)]
 pub enum ValidationStatus {
-    Accepted,
+    /// Deterministic, hard-coded, or cryptographically verified facts (formerly Accepted).
+    Proven,
+    /// High probability facts derived causally from the graph.
+    Inferred,
+    /// Speculative or unverified hypotheses, subject to pruning or BFT consensus.
+    Speculative,
+    /// Active conflicting evidence or consensus dispute (formerly Challenged).
     Challenged,
-    Deprecated,
-    Invalid,
+    /// Assertions that have collided with BFT consensus or invariants (formerly Invalid).
+    Contradicted,
 }
 
+impl ValidationStatus {
+    pub fn from_legacy(value: &str) -> Self {
+        match value {
+            // Legacy fallbacks
+            "Accepted" => {
+                println!(r#"{{"event":"legacy_validation_status","received":"Accepted","mapped":"Proven"}}"#);
+                Self::Proven
+            }
+            "Invalid" => {
+                println!(r#"{{"event":"legacy_validation_status","received":"Invalid","mapped":"Contradicted"}}"#);
+                Self::Contradicted
+            }
+            "Deprecated" => {
+                println!(r#"{{"event":"legacy_validation_status","received":"Deprecated","mapped":"Contradicted"}}"#);
+                Self::Contradicted
+            }
+
+            // Direct maps
+            "Proven" => Self::Proven,
+            "Inferred" => Self::Inferred,
+            "Speculative" => Self::Speculative,
+            "Challenged" => Self::Challenged,
+            "Contradicted" => Self::Contradicted,
+
+            _ => {
+                println!(r#"{{"event":"legacy_validation_status","received":"{}","mapped":"Speculative"}}"#, value);
+                Self::Speculative
+            }
+        }
+    }
+}
+
+/// Canonical Retrieval Graph Node.
+/// Derived directly from the original Epistemic Node model.
 #[pyclass]
 #[derive(Clone)]
 pub struct RetrievalNode {
@@ -38,7 +81,7 @@ impl RetrievalNode {
     pub fn new(id: String, confidence: f64) -> Self {
         RetrievalNode {
             id,
-            status: ValidationStatus::Accepted,
+            status: ValidationStatus::Proven,
             confidence,
             supported_by: HashSet::new(),
             supports: HashSet::new(),
@@ -58,6 +101,13 @@ impl RetrievalNode {
     }
 }
 
+/// Canonical Retrieval Graph.
+///
+/// Public OSS abstraction.
+///
+/// Derived from the original Epistemic Dependency Graph (EDG)
+/// formulation used for causal evidence propagation and
+/// cryptographic validation routing.
 #[pyclass]
 pub struct RetrievalGraph {
     pub(crate) nodes: Arc<DashMap<String, RetrievalNode>>,
@@ -109,8 +159,8 @@ impl RetrievalGraph {
 
         while let Some(current_id) = stack.pop() {
             if let Some(mut node) = self.nodes.get_mut(&current_id) {
-                if node.status != ValidationStatus::Invalid {
-                    node.status = ValidationStatus::Invalid;
+                if node.status != ValidationStatus::Contradicted {
+                    node.status = ValidationStatus::Contradicted;
                     node.confidence = 0.0;
                     affected.push(current_id.clone());
 

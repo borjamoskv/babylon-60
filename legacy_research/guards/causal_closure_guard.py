@@ -1,27 +1,25 @@
 # [C5-REAL] Exergy-Maximized
 """CORTEX - Causal Closure Guard (Axiom VIII: Stochastic Obsolescence).
 
-Enforces the thermodynamic rule that massive probabilistic execution (e.g., Swarms)
-MUST result in permanent structural condensation (C5-REAL invariants, code, schemas).
-If a Swarm operation produces only prose/narrative without a deterministic artifact,
-it is considered pure debt (Anergy) and is aborted via SAGA-1.
+Enforces strict thermodynamic causality across the execution boundary.
+Eliminates synthetic token-cost thresholds and regex-based artifact heuristics 
+in favor of deterministic cryptographic verification of `ClosurePayload`.
 """
 
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
-import re
 from dataclasses import dataclass
 
-from cortex.guards.structural_certifier import StructuralCertifier, StructuralGrade
+from cortex.types.evidence import ClosurePayload
 
 logger = logging.getLogger("cortex.guards.causal_closure")
 
-
+# Retained strictly for legacy pipeline migrations. Must be deprecated.
 @dataclass
 class SwarmProposal:
-    """Represents the output of a multi-agent or high-compute swarm execution."""
-
     agent_id: str
     mission_statement: str
     content: str
@@ -29,129 +27,64 @@ class SwarmProposal:
 
 
 class CausalClosureGuard:
-    """Enforces Axiom VIII: Massive execution must yield deterministic artifacts."""
+    """Enforces Axiom VIII: Massive execution must yield verifiable causal condensation."""
 
-    def __init__(self, min_token_threshold: int = 50000):
-        # Only enforce strictly if the swarm burned significant exergy
-        self.min_token_threshold = min_token_threshold
+    def __init__(self) -> None:
+        # min_token_threshold is permanently eradicated. Causality is absolute.
+        pass
 
-    def _contains_structural_condensation(self, content: str) -> bool:
-        """Detects if the content contains permanent structural artifacts."""
-        # Check if the content is a serialized LedgerPayload
-        inner_contents = [content]
-
-        try:
-            import json
-
-            parsed = json.loads(content)
-            if isinstance(parsed, dict):
-                # If it's a LedgerPayload wrapper, inspect the actual inner payloads
-                if parsed.get("type") == "LedgerPayload" and "payloads" in parsed:
-                    inner_contents = []
-                    for p in parsed["payloads"]:
-                        if isinstance(p, dict):
-                            # Extract all string values from the dictionary payload
-                            inner_contents.extend(str(v) for v in p.values() if isinstance(v, str))
-                            # Include keys and serialized dictionary representation
-                            inner_contents.extend(str(k) for k in p.keys())
-                            inner_contents.append(json.dumps(p))
-                        elif isinstance(p, str):
-                            inner_contents.append(p)
-        except Exception:
-            pass
-
-        for c in inner_contents:
-            # Look for code blocks indicating logic synthesis
-            has_code_blocks = bool(re.search(r"```\w*", c, re.IGNORECASE))
-
-            # Look for Ledger event payloads or Schema definitions
-            # Check for CORTEX-TAINT in the payload, or LedgerPayload in actual payload text
-            has_ledger_payload = "CORTEX-TAINT" in c or ("LedgerPayload" in c and c != content)
-            has_schema_update = "ALTER TABLE" in c or "CREATE TABLE" in c
-
-            # Look for rigorous proof structures (Rule R2 format)
-            has_formal_proof = bool(re.search(r"Proof:\s*\{.*Base:.*\}", c, re.IGNORECASE))
-
-            # Detect a plain JSON-array of dicts
-            has_json_array = False
-            stripped_c = c.strip()
-            if stripped_c.startswith("[") and stripped_c.endswith("]"):
-                import ast
-
-                try:
-                    parsed_arr = json.loads(stripped_c)
-                    if (
-                        isinstance(parsed_arr, list)
-                        and all(isinstance(x, dict) for x in parsed_arr)
-                        and len(parsed_arr) > 0
-                    ):
-                        has_json_array = True
-                except Exception:
-                    try:
-                        parsed_arr = ast.literal_eval(stripped_c)
-                        if (
-                            isinstance(parsed_arr, list)
-                            and all(isinstance(x, dict) for x in parsed_arr)
-                            and len(parsed_arr) > 0
-                        ):
-                            has_json_array = True
-                    except Exception:
-                        pass
-
-            # Use StructuralCertifier to validate formal JSON structure
-            grade = StructuralCertifier.certify_structure(c)
-            has_valid_structure = grade == StructuralGrade.ACCEPTED
-
-            if (
-                has_code_blocks
-                or has_ledger_payload
-                or has_schema_update
-                or has_formal_proof
-                or has_json_array
-                or has_valid_structure
-            ):
-                return True
-
-        return False
-
-    def verify_closure(self, proposal: SwarmProposal) -> bool:
-        """Evaluates if the swarm execution achieved causal closure.
+    def verify_closure(self, payload: ClosurePayload) -> bool:
+        """Evaluates if the execution achieved causal closure.
 
         Args:
-            proposal: The generated output from the swarm.
+            payload: The explicitly structured analytical output tied to evidence.
 
         Raises:
-            RuntimeError: SAGA-1 Abort if the swarm failed to produce an invariant.
+            RuntimeError: SAGA-1 Abort if the evidence payload is inconsistent.
 
         Returns:
             bool: True if safe to persist.
         """
-        if not proposal.content.strip():
-            logger.warning("[%s] Empty proposal submitted.", proposal.agent_id)
-            return False
+        expected_dict = {
+            "claims": payload.claims,
+            "evidence_hash": payload.evidence.evidence_hash,
+            "verdict": payload.verdict
+        }
+        encoded = json.dumps(expected_dict, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        computed_hash = hashlib.sha3_256(encoded).hexdigest()
 
-        # If it's a cheap operation, we might not enforce strict causal closure
-        if proposal.token_cost < self.min_token_threshold:
-            logger.debug(
-                "[%s] Token cost below threshold, skipping causal closure guard.", proposal.agent_id
-            )
-            return True
-
-        if not self._contains_structural_condensation(proposal.content):
+        if computed_hash != payload.payload_hash:
             logger.error(
-                "[%s] 🛑 [P0] Causal Closure Failure! "
-                "Swarm execution burned %d tokens but produced no deterministic artifacts. "
-                "Operation rejected as pure Anergy.",
-                proposal.agent_id,
-                proposal.token_cost,
+                "🛑 [P0] Causal Closure Failure! "
+                "The computed payload hash does not match the sealed payload_hash. "
+                "Evidence tampering or semantic drift detected."
             )
             raise RuntimeError(
-                f"[P0] AX-VIII Violation: Agent {proposal.agent_id} failed to achieve Causal Closure. "
-                f"Swarm output must contain permanent invariants (code, ledger events, schemas) "
-                f"after high-compute executions (Cost: {proposal.token_cost})."
+                "[P0] AX-VIII Violation: Failed to achieve Causal Closure. "
+                "Structural payload hash mismatch."
             )
 
-        logger.info(
-            "[%s] Causal Closure verified. Structural condensation detected.", proposal.agent_id
-        )
+        # Validate that the evidence bundle has actually been populated
+        if not payload.evidence.sources and not payload.claims:
+            logger.error("🛑 [P0] Causal Closure Failure! Empty claims and evidence.")
+            raise RuntimeError(
+                "[P0] AX-VIII Violation: Payload contains no observable evidence or claims."
+            )
+
+        logger.info("Causal Closure verified. Epistemic chain intact.")
+        return True
+
+    def verify_legacy_closure(self, proposal: SwarmProposal) -> bool:
+        """Bridge for legacy swarm pipelines. Fails instantly if content is pure prose."""
+        if not proposal.content.strip():
+            logger.warning("[%s] Empty legacy proposal.", proposal.agent_id)
+            return False
+            
+        has_ledger = "CORTEX-TAINT" in proposal.content or "LedgerPayload" in proposal.content
+        if not has_ledger:
+            raise RuntimeError(
+                f"[P0] AX-VIII Violation: Agent {proposal.agent_id} failed to achieve Causal Closure. "
+                f"Legacy Swarm output must contain permanent invariants."
+            )
+             
         return True

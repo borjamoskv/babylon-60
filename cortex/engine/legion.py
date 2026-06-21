@@ -228,7 +228,7 @@ class Squadron(ABC):
             token_cost=50000,  # Enforce strictly for Squadron deployment
         )
         guard = CausalClosureGuard()
-        guard.verify_closure(proposal)
+        guard.verify_legacy_closure(proposal)
 
         return report
 

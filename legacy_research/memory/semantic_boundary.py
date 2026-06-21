@@ -55,8 +55,12 @@ class MerkleLedger:
 
 class SemanticBoundary:
     """
-    Active retrieval containment and self-maintenance using VSA/HDC.
-    Transforms memory into a membrane that validates, protects, and autopoietically evolves.
+    Semantic Boundary constraints.
+
+    Derived from the original Epistemic Membrane model.
+
+    Defines containment limits for semantic propagation,
+    retrieval contamination control and causal isolation.
     """
 
     def __init__(self, dim: int = D, max_history: int = 10000):

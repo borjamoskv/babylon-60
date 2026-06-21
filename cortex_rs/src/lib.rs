@@ -252,12 +252,12 @@ mod tests {
         // Check node 1
         assert_eq!(
             graph.get_node_status("mem_node_1").unwrap(),
-            ValidationStatus::Accepted
+            ValidationStatus::Proven
         );
         // Check node 2
         assert_eq!(
             graph.get_node_status("mem_node_2").unwrap(),
-            ValidationStatus::Accepted
+            ValidationStatus::Proven
         );
 
         // Modify belief
