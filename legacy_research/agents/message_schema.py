@@ -7,7 +7,18 @@ from enum import Enum
 from typing import Any
 from uuid import uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+
+from cortex.agents.contracts import (
+    HandoffRequestPayload,
+    TaskCompletedPayload,
+    TaskFailedPayload,
+    TaskRequestPayload,
+    ToolCallPayload,
+    ToolResultPayload,
+    VerificationRequestPayload,
+    VerificationResultPayload,
+)
 
 
 class MessageState(str, Enum):
@@ -59,6 +70,37 @@ class AgentMessage(BaseModel):
         default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc)
     )
     trace_context: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def validate_payload_and_causality(self) -> AgentMessage:
+        # 1. Axiom Ω₁₁: Causation DAG Verification
+        # Root events (like initial task requests) may have None, but any propagated message should
+        # maintain causal linkage.
+        if self.message_id == self.causation_id:
+            raise ValueError("Axiom Ω₁₁ Violation: A message cannot be its own cause (Cycle detected).")
+
+        # 2. Envelope Rule: Strict Payload Validation
+        try:
+            if self.kind == MessageKind.TASK_REQUEST:
+                TaskRequestPayload.model_validate(self.payload)
+            elif self.kind == MessageKind.TOOL_CALL:
+                ToolCallPayload.model_validate(self.payload)
+            elif self.kind == MessageKind.TOOL_RESULT:
+                ToolResultPayload.model_validate(self.payload)
+            elif self.kind == MessageKind.VERIFICATION_REQUEST:
+                VerificationRequestPayload.model_validate(self.payload)
+            elif self.kind == MessageKind.VERIFICATION_RESULT:
+                VerificationResultPayload.model_validate(self.payload)
+            elif self.kind == MessageKind.HANDOFF_REQUEST:
+                HandoffRequestPayload.model_validate(self.payload)
+            elif self.kind == MessageKind.TASK_COMPLETED:
+                TaskCompletedPayload.model_validate(self.payload)
+            elif self.kind == MessageKind.TASK_FAILED:
+                TaskFailedPayload.model_validate(self.payload)
+        except Exception as e:
+            raise ValueError(f"Envelope Rule Violation: Invalid payload for {self.kind}. Details: {e}")
+
+        return self
 
     def to_json(self) -> str:
         return self.model_dump_json()

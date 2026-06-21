@@ -169,4 +169,4 @@ CORE TENET:   Optimize for correction, not certainty. Uncertainty is telemetry, 
 UPDATED:      June 2026 — Falsifiable Memory Infrastructure
 ```
 
-> **LICENSE:** Apache-2.0 | **OPERATOR:** borjamoskv | [cortexpersist.org](https://cortexpersist.org) | [Sponsor](https://github.com/sponsors/borjamoskv)
+> **LICENSE:** Apache-2.0 | **OPERATOR:** borjamoskv | [cortexpersist.com](https://cortexpersist.com) | [Sponsor](https://github.com/sponsors/borjamoskv)

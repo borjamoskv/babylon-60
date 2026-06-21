@@ -1,11 +1,11 @@
 {
   "name": "CORTEX Code Governance Gateway",
-  "url": "https://cortexpersist.org",
+  "url": "https://cortexpersist.com",
   "hook_attributes": {
-    "url": "https://api.cortexpersist.org/api/v1/webhook/github",
+    "url": "https://api.cortexpersist.com/api/v1/webhook/github",
     "active": true
   },
-  "redirect_url": "https://cortexpersist.org/setup",
+  "redirect_url": "https://cortexpersist.com/setup",
   "public": false,
   "default_permissions": {
     "pull_requests": "write",
