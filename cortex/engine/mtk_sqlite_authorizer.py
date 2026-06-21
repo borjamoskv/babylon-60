@@ -71,6 +71,31 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
             logger.critical(f"[MTK-BLOCK] Unauthorized physical mutation attempt: Action {action} on {arg1}")
             return sqlite3.SQLITE_DENY
             
+        # Memory Taint Tracking: Bloquear inyección estocástica directa
+        import sys
+        STOCHASTIC_MODULES = (
+            "cortex.engine.inference",
+            "cortex.engine.models",
+            "cortex.extensions.llm",
+            "cortex.engine.synthesis",
+            "cortex.engine.generation"
+        )
+        try:
+            frame = sys._getframe(1)
+            while frame:
+                module_name = frame.f_globals.get("__name__", "")
+                if module_name and any(module_name.startswith(sm) for sm in STOCHASTIC_MODULES):
+                    logger.critical(f"[MTK-BLOCK] Stochastic memory injection detected from {module_name}. Action {action} on {arg1}")
+                    return sqlite3.SQLITE_DENY
+                # Check for explicit taint flags in locals
+                for var_name, var_value in frame.f_locals.items():
+                    if hasattr(var_value, "__taint__") or var_name == "tainted_payload":
+                        logger.critical(f"[MTK-BLOCK] Tainted memory object '{var_name}' detected in stack. Action {action}")
+                        return sqlite3.SQLITE_DENY
+                frame = frame.f_back
+        except (ValueError, AttributeError):
+            pass
+            
     return sqlite3.SQLITE_OK
 
 def install_mtk_authorizer(conn: sqlite3.Connection):
