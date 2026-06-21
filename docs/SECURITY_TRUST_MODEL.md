@@ -396,6 +396,29 @@ It is a trust event.
 
 ---
 
+## State Semantics Security
+
+The most critical architectural distinction in CORTEX-Persist is the formal demarcation between integrity, authenticity, and semantic validity.
+
+Given that CORTEX is evolving into a sovereign memory substrate, an adversary (or a hallucinating LLM) may attempt to insert facts that are syntactically valid and cryptographically sound, but **semantically false**. 
+
+CORTEX enforces strict boundaries to address this:
+1. **Cryptographic Integrity (SHA-256):** Proves the datum has not been altered since inscription.
+2. **Authenticity (Ed25519 ZK-Seals):** Proves the datum was originated by an authorized tenant or agent.
+3. **Semantic Validity (The Verification Membrane):** Proves the datum is logically and physically coherent before it enters the ledger.
+
+### The Semantic Vulnerability
+A cryptographically chained, Ed25519-signed record of a lie is still a lie. The hash chain proves it wasn't modified, not that it was true.
+
+To prevent the **Semantic-State Security** failure mode, CORTEX routes all generative outputs through deterministic logical gates prior to persistence:
+- **`contradiction_guard.py`**: Detects insertions that conflict with previously asserted topological facts.
+- **`dependency_guard.py`**: Prevents the ingestion of facts whose causal prerequisites are unproven.
+- **`virgo.py`**: Bridges the gap to formal verification, ensuring propositions meet defined invariants.
+
+The objective is not to guarantee absolute universal truth, but to maintain **Epistemic Consistency**: ensuring that accepted nodes do not introduce contradictions into the Epistemic Dependency Graph (EDG).
+
+---
+
 ## Encryption Model
 
 Fact content and meta are encrypted at rest via `cortex/crypto/`.
