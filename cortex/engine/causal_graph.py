@@ -54,3 +54,27 @@ class CausalDAG:
                 payload_hash=evt["event_hash"]
             )
             self.add_node(node)
+
+    def compute_merkle_rollup(self, root_event_id: str) -> int:
+        from cortex.engine.fable_out import hash_distance_rollup
+
+        # Simplified deterministic distances based on topological depth
+        distances = []
+        queue = [(root_event_id, 0)]
+        visited = set()
+        
+        while queue:
+            node_id, depth = queue.pop(0)
+            if node_id in visited:
+                continue
+            visited.add(node_id)
+            
+            distances.append(depth * 10)  # Convert topological depth to causal distance
+            
+            for child_id in self.get_children(node_id):
+                if child_id not in visited:
+                    queue.append((child_id, depth + 1))
+        
+        # We need an integer representation of the root hash to seed the Fable Rollup
+        root_int = int(root_event_id, 16) % (2**32 - 1)
+        return hash_distance_rollup(root_int, distances)

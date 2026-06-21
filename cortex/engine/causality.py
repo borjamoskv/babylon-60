@@ -113,6 +113,19 @@ class AsyncCausalGraph:
         except RuntimeError as e:
             logger.warning(f"Rust ATMS disabled: {e}")
             self.atms = None
+            
+        try:
+            from cortex.engine.fable_out import CausalMaxwellDemon
+            self.maxwell_demon = CausalMaxwellDemon(threshold=85)
+            self.maxwell_demon.set_state("CONSTRUCT")
+        except ImportError as e:
+            logger.warning(f"Fable BABYLON-60 Kernel missing: {e}")
+            self.maxwell_demon = None
+
+    def evaluate_causal_divergence(self, hash1: int, hash2: int) -> int:
+        if not self.maxwell_demon:
+            return 0
+        return self.maxwell_demon.cosine_similarity(hash1, hash2)
 
     async def ensure_table(self, *, commit: bool = True) -> None:
         await self.conn.execute(

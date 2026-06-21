@@ -1,0 +1,13 @@
+{
+  "name": "cortex_kernel_fable",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:py": "dotnet fable . --lang python --outDir ../cortex/engine/fable_out"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
