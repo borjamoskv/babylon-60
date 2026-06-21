@@ -37,6 +37,22 @@ class ImmutableVoteLedger:
         row = await cursor.fetchone()
         return row[0] if row else None
 
+    async def ensure_tables(self) -> None:
+        """Inicializa las tablas necesarias para 2PC y sellado criptográfico."""
+        await self.conn.execute('''
+            CREATE TABLE IF NOT EXISTS epoch_checkpoints (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id   TEXT NOT NULL,
+                status      TEXT NOT NULL,  -- 'pending', 'computing', 'sealed', 'failed'
+                started_at  TEXT NOT NULL,
+                sealed_at   TEXT,
+                merkle_root TEXT,
+                vote_count  INTEGER,
+                last_vote_id INTEGER
+            )
+        ''')
+        await self.conn.commit()
+
     def _compute_hash(
         self,
         tenant_id: str,
@@ -160,33 +176,76 @@ class ImmutableVoteLedger:
         row = await cursor.fetchone()
         return row[0] if row else None
 
-    async def checkpoint_merkle_root(self, tenant_id: str) -> str:
+    async def checkpoint_merkle_root(
+        self, tenant_id: str, start_vote_id: int | None = None, end_vote_id: int | None = None, prev_root: str | None = None
+    ) -> tuple[str, int, int]:
         """
-        Calcula y persiste una raíz de Merkle de todos los votos actuales del tenant.
-        Esto permite verificaciones rápidas de 'estado global' del ledger.
+        Calcula una raíz de Merkle incremental (arquitectura de Merkle Chain). 
+        En lugar de procesar toda la historia, procesa solo los votos desde 
+        start_vote_id hasta end_vote_id (exclusivo) formando un sub-árbol, 
+        y encadena su raíz linealmente con la raíz del epoch anterior.
+        Retorna (root_hash, vote_count, last_vote_id).
         """
-        cursor = await self.conn.execute(
-            "SELECT hash FROM vote_ledger WHERE tenant_id = ? ORDER BY id ASC",
-            (tenant_id,),
-        )
-        hashes = [row[0] for row in await cursor.fetchall()]
+        query = "SELECT id, hash FROM vote_ledger WHERE tenant_id = ?"
+        params: list[Any] = [tenant_id]
+        
+        if start_vote_id is not None:
+            query += " AND id > ?"
+            params.append(start_vote_id)
+        if end_vote_id is not None:
+            query += " AND id <= ?"
+            params.append(end_vote_id)
+            
+        query += " ORDER BY id ASC"
+        
+        # Procesamiento en Chunks (Evitar OOM)
+        CHUNK_SIZE = 10000
+        cursor = await self.conn.execute(query, params)
+        
+        current_hashes = []
+        vote_count = 0
+        last_id = start_vote_id or 0
+        
+        while True:
+            rows = await cursor.fetchmany(CHUNK_SIZE)
+            if not rows:
+                break
+            for r in rows:
+                last_id = r[0]
+                current_hashes.append(r[1])
+                vote_count += 1
+                
+            # Si acumulamos demasiados hashes, pre-computamos el sub-árbol
+            if len(current_hashes) >= CHUNK_SIZE * 2:
+                sub_root = self._build_merkle_tree(current_hashes)
+                current_hashes = [sub_root]
 
-        if not hashes:
-            return ""
+        if not current_hashes and not prev_root:
+            return "", 0, last_id
+            
+        new_sub_root = self._build_merkle_tree(current_hashes) if current_hashes else prev_root
+        
+        # Combinar incrementalmente con el root anterior si existe
+        if prev_root and current_hashes:
+            final_root = hashlib.sha256((prev_root + new_sub_root).encode()).hexdigest()
+        else:
+            final_root = new_sub_root or ""
 
-        root = self._build_merkle_tree(hashes)
         timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
-
+        
+        # La persistencia se delega a 2PC (EpochsEngine) o se hace aquí si no es 2PC
+        # Por compatibilidad, mantenemos el insert en vote_merkle_roots
         await self.conn.execute(
             "INSERT INTO vote_merkle_roots (tenant_id, root_hash, timestamp) VALUES (?, ?, ?)",
-            (tenant_id, root, timestamp),
+            (tenant_id, final_root, timestamp),
         )
         await self.conn.commit()
-        return root
+        return final_root, vote_count, last_id
 
     async def create_checkpoint(self, tenant_id: str = "default") -> str:
         """Alias for checkpoint_merkle_root (CLI compatibility)."""
-        return await self.checkpoint_merkle_root(tenant_id)
+        root, _, _ = await self.checkpoint_merkle_root(tenant_id)
+        return root
 
     async def verify_chain_integrity(self, tenant_id: str = "default") -> dict:
         """Verifica la cadena de hashes y retorna un informe detallado (CLI)."""

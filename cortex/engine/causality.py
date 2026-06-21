@@ -140,6 +140,17 @@ class AsyncCausalGraph:
         await self.conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_causal_parent ON causal_edges(parent_id)"
         )
+        await self.conn.execute('''
+            CREATE TABLE IF NOT EXISTS taint_jobs (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                fact_id     INTEGER NOT NULL,
+                tenant_id   TEXT NOT NULL,
+                status      TEXT DEFAULT 'pending',
+                attempts    INTEGER DEFAULT 0,
+                created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+                updated_at  TEXT
+            )
+        ''')
         if "tenant_id" in cols:
             await self.conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_causal_tenant ON causal_edges(tenant_id)"
@@ -366,6 +377,73 @@ class AsyncCausalGraph:
             affected_count=len(changes),
             confidence_changes=changes,
         )
+
+    async def propagate_taint_background(
+        self,
+        fact_id: int,
+        tenant_id: str = "default",
+        floor_to_c1: bool = True,
+    ) -> None:
+        """
+        [R10] Encola la propagación de taint/orphaning en la tabla transaccional.
+        Evita bloqueos en el hilo principal y elimina fallos silenciosos (sin create_task ciego).
+        """
+        import time
+        from datetime import datetime, timezone
+        now_iso = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        
+        await self.ensure_table(commit=False)
+        await self.conn.execute(
+            """INSERT INTO taint_jobs (fact_id, tenant_id, status, created_at)
+               VALUES (?, ?, 'pending', ?)""",
+            (fact_id, tenant_id, now_iso)
+        )
+        await self.conn.commit()
+        logger.info(f"Taint propagation job queued for fact {fact_id}")
+
+    async def process_taint_jobs_daemon(self, max_jobs: int = 50) -> int:
+        """
+        Worker que corre en background (ej. invocable cada N segundos).
+        Extrae trabajos pendientes o fallidos y los procesa con reintentos.
+        """
+        import time
+        from datetime import datetime, timezone
+        
+        cursor = await self.conn.execute(
+            """SELECT id, fact_id, tenant_id, attempts FROM taint_jobs 
+               WHERE status = 'pending' OR (status = 'failed' AND attempts < 3)
+               ORDER BY created_at ASC LIMIT ?""",
+            (max_jobs,)
+        )
+        jobs = await cursor.fetchall()
+        
+        processed = 0
+        for job_id, fact_id, tenant_id, attempts in jobs:
+            now_iso = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+            await self.conn.execute(
+                "UPDATE taint_jobs SET status = 'running', updated_at = ? WHERE id = ?",
+                (now_iso, job_id)
+            )
+            await self.conn.commit()
+            
+            try:
+                await self.propagate_taint(fact_id, tenant_id, floor_to_c1=True)
+                now_iso = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+                await self.conn.execute(
+                    "UPDATE taint_jobs SET status = 'done', updated_at = ? WHERE id = ?",
+                    (now_iso, job_id)
+                )
+            except Exception as e:
+                logger.error(f"Taint job {job_id} failed for fact {fact_id}: {e}")
+                now_iso = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+                await self.conn.execute(
+                    "UPDATE taint_jobs SET status = 'failed', attempts = ?, updated_at = ? WHERE id = ?",
+                    (attempts + 1, now_iso, job_id)
+                )
+            await self.conn.commit()
+            processed += 1
+            
+        return processed
 
     async def _get_descendant_ids(self, fact_id: int, tenant_id: str) -> set[int]:
         """Fetch all descendants using a recursive CTE."""

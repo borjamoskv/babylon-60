@@ -96,3 +96,24 @@ class BeliefObject:
     state: BeliefState
     cortex_taint: str
     parent_id: str | None = None
+    
+    # Mathematical Closure (Plano Creencia)
+    decay_rate: float = 0.0001
+    last_asserted_at: str | None = None
+    risk_contam: float = 0.0
+    
+    def current_weight(self, current_time_iso: str) -> float:
+        """Calcula el peso actual basado en el decaimiento de Ebbinghaus."""
+        from datetime import datetime
+        if not self.last_asserted_at:
+            return self.confidence_score
+            
+        try:
+            last_dt = datetime.fromisoformat(self.last_asserted_at)
+            curr_dt = datetime.fromisoformat(current_time_iso)
+            delta_seconds = max(0.0, (curr_dt - last_dt).total_seconds())
+            
+            from cortex.engine.risk_math import calculate_decay_weight
+            return calculate_decay_weight(self.confidence_score, delta_seconds, self.decay_rate)
+        except Exception:
+            return self.confidence_score
