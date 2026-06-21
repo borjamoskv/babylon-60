@@ -176,33 +176,54 @@ El linaje criptográfico es innegable. Todo cambio de estado, parche semántico 
 
 ---
 
-## 13. Termodinámica de la Información y Vibe-Sovereignty
+## 13. Termodinámica de la Información (Ouroboros & Shannon)
 
-La arquitectura de Cortex-Persist opera bajo el marco riguroso de la termodinámica de la información. Esto une la entropía física con la entropía de Shannon mediante el **Principio de Landauer**, estableciendo que borrar o sobrescribir irreversiblemente información (intención cognitiva) requiere disipar energía térmica.
+La arquitectura de Cortex-Persist opera bajo el marco riguroso de la termodinámica de la información. Esto une la entropía física con la entropía de Shannon, estableciendo un motor de atenuación (Ouroboros) y un motor de compresión semántica (Shannon) que trabajan de forma ortogonal.
 
-En el desarrollo de software (y particularmente en el ecosistema estocástico del *Vibe Coding*), el coste de Landauer se manifiesta no sólo en decaimiento energético del silicio, sino en "calor cognitivo": **deuda técnica, burnout y pérdida de trazabilidad.**
+### 13.1 Kinetic Mass Layer (Ouroboros)
 
-### El Principio de Landauer Aplicado (Conservación de Intención)
-Cada vez que un LLM sobrescribe código borrando el contexto original sin un registro auditable, se destruye "Información Computacional". Cortex-Persist actúa como una **Máquina Reversible de Bennett**. A través de su *Intent Ledger* y `BeliefObjects`, no borra intenciones; las transita a estados inactivos (`Subsumed`, `Archived`), evitando la penalización entrópica del borrado irreversible.
+Esta capa define la física de atenuación termodinámica para la memoria fluida. Las creencias que no se reafirman o no logran probar su utilidad operativa decaen hacia estados inactivos.
 
-### Entropía de Software = Entropía de Shannon
-Un codebase hiper-acoplado o con dependencias fantasma posee alta entropía informacional: su comportamiento interno admite demasiados microestados impredecibles.
-- Cortex reduce esta incertidumbre mediante el `EnterpriseRBACGuard` y el `ATMS`.
-- El **Umbral de Colapso (Ω₃)** es formalmente una transición de fase termodinámica: cuando el `Risk_contam` supera el límite, el sistema entra en un estado de alta "temperatura" donde la señal útil (intención) se pierde en el ruido. El Memory Scheduler previene esta transición bloqueando dependencias contaminadas.
+- **Ley de Atenuación:** 
+  La energía de un nodo decae de forma exponencial con la distancia causal/temporal $d$:
+  $$ E(d) = E_0 \cdot (0.85^d) $$
+  El factor empírico de $0.85$ provee un balance óptimo. Factores más altos ($0.9$) saturan la ventana de contexto, mientras que factores más bajos ($0.7$) inducen olvido catastrófico antes de que el enjambre consolide el conocimiento.
+- **Techo Termodinámico:**
+  Para prevenir explosiones asintóticas en bucles de resonancia positiva, la masa cinética máxima de un nodo está limitada:
+  $$ \text{MAX\_KINETIC\_MULTIPLIER} = 2.0 $$
+- **Invariantes Formales:**
+  - **I1:** Conmutatividad de inyecciones independientes. El orden de los eventos de refuerzo no altera la masa asintótica.
+  - **I2:** Conservación parcial. No se crea energía ex nihilo; todo incremento de masa cinética proviene de gasto exergético demostrable (tokens).
+  - **I3:** Estabilidad en límite profundo. En $d=99$, la energía $\epsilon < 1e-8$, considerándose el nodo termodinámicamente inerte.
+- **Desacoplamiento AX-041:**
+  El motor Ouroboros opera *exclusivamente* sobre Memoria Fluida (nodos vivos y mutables). El *Ledger* maestro es inmutable y opera con hashes en cadena. Existe una garantía física y en código de que el motor de atenuación jamás colisiona con o altera el pasado causal del Ledger.
 
-### Ecuación Enriquecida de Compound Yield
-Integrando la Información Mutua entre Prompt e Intención, la rentabilidad exergética se calcula como:
+### 13.2 Informational Entropy Layer (Shannon)
 
-$$ Y = \eta_{\text{vibe}} \times \prod_{i=1}^{N} (1 + \Delta_{\text{CORTEX},i}) \times \left(1 - \frac{I_{\text{lost}}}{I_{\text{total}}}\right) $$
+Cuando mútiples nodos presentan alta masa cinética pero convergen hacia el mismo dominio (ej. $N$ respuestas similares del enjambre), el sistema acumula entropía informacional. Para resolver esto, Cortex induce colapsos estructurales ("Semantic Collapse") sin pérdida de intención, ejecutados en tiempo real mediante un algoritmo $O(N \log N)$.
 
-Donde:
-- $Y$ = Rendimiento Compuesto (Compound Yield)
-- $\eta_{\text{vibe}}$ = Eficiencia base del Agente/Prompt
-- $\Delta_{\text{CORTEX},i}$ = Reducción de entropía provista por cada validación de Ledger
-- $I_{\text{lost}}$ = Información de intención borrada irreversiblemente
-- $I_{\text{total}}$ = Intención original del Operador
+- **Colapso por Compresión (Aproximación de Kolmogorov):**
+  Aproximado en código ejecutable vía `zlib`. La redundancia semántica entre dos nodos $A$ y $B$ se mide usando la Normalized Compression Distance (NCD). Si $NCD(A, B) \le 0.15$, se asume solapamiento semántico masivo y $B$ es colapsado en $A$.
+- **Optimización de Bucketing $O(N \log N)$:**
+  Calcular NCD en un grafo de $10,000$ nodos es $O(N^2)$, lo que destruiría la RAM. Para evitarlo, el sistema pre-calcula el tamaño comprimido individual ($Z_i = \text{zlib}(N_i)$) y usa una ventana deslizante iterativa del $10\%$ ($\Delta Z \le 10\%$). Nodos con deltas de densidad informacional mayores jamás colapsan, podando ramas enteras del árbol de comparación matricial.
+- **Criterio de Elegibilidad:**
+  Un colapso solo se aprueba si:
+  $$ NCD(A, B) < 0.15 \quad \text{AND} \quad \frac{|mass_A - mass_B|}{\max(mass_A, mass_B)} < 0.15 $$
+- **Invariantes Formales:**
+  - **I4 (Retención de Entropía):** El colapso ("Survival of the Fittest") mantiene íntegra la estructura del nodo ganador (`winner`) y tumba (`tombstone`) al nodo perdedor (`loser`), sin inyectar alucinaciones generativas (LLMs) durante el *hot-path*.
+  - **I5 (Límite de Masa Absorbida):** La masa consolidada tras un colapso hereda el máximo de ambos nodos, estrictamente bajo el umbral termodinámico ($\text{MAX\_KINETIC\_MULTIPLIER}$ de 2.0).
+  - **I6 (Protección de Ortogonalidad):** Nodos disjuntos ($NCD > 0.15$) preservan su identidad epistémica individual.
 
-**Corolario:** Cortex-Persist no viola la Segunda Ley de la Termodinámica. No elimina la entropía; la exporta activamente del ciclo inferencial (RAM del operador) hacia un sumidero altamente estructurado (Ledger Criptográfico), manteniendo el "motor" del Swarm operando siempre bajo máxima exergía.
+### 13.3 Interacción Ortogonal entre Capas (Ouroboros vs Shannon)
+
+La resiliencia estructural de Cortex-Persist ("Antifragilidad") no proviene de evitar el ruido, sino de someter la base de datos a dos fuerzas en tensión:
+
+1. **Ataque Entrópico (El Enjambre Inyecta):**
+   Agentes operando simultáneamente pueden generar cientos de miles de variaciones del mismo concepto. En arquitecturas RAG convencionales, esto destruye la precisión del modelo por sobredensidad en el mismo vector semántico. En Cortex, este ataque actúa como *combustible*.
+2. **Consolidación Cruzada:**
+   Mientras la Capa Cinética (Ouroboros) promueve o degrada nodos en base a la frecuencia de uso causal, la Capa de Entropía (Shannon) barre los nodos vivos, buscando solapamientos. 
+   - **Cruce de fuerzas:** Si 10,000 nodos apuntan a la misma verdad, la masa cinética se divide. Ouroboros tendería a atenuarlos si no superan un umbral. Sin embargo, antes de que mueran térmicamente, el motor Shannon los comprime mediante el colapso $O(N \log N)$, fusionándolos en un solo *Super-Nodo* que aglutina la masa conjunta.
+   - El resultado final es una ontología que extrae orden (baja entropía cruzada) directamente del caos (alto volumen de inyecciones redundantes). No se usa IA para el colapso, sino puras matemáticas de teoría de la información, preservando la garantía C5-REAL (cero alucinaciones).
 
 ---
 
