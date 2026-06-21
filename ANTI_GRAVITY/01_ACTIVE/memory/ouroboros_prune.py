@@ -31,7 +31,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, Protocol, runtime_checkable
 
-from cortex.engine.semantic_collapse import collapse_eligible, kolmogorov_approx, semantic_collapse
+from cortex.engine.semantic_collapse import collapse_eligible, kolmogorov_approx, semantic_collapse, compute_ncd
 
 # ─── Thermodynamic Constants ─────────────────────────────────────────
 MIN_EXERGY_THRESHOLD = 0.125  # 3 half-lives → tombstone
@@ -57,6 +57,7 @@ class PurgeCycleStats:
     protected_by_topology: int = 0
     exergy_scores_updated: int = 0
     semantic_collapses: int = 0
+    distilled_facts: int = 0
     errors: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict:
@@ -68,6 +69,7 @@ class PurgeCycleStats:
             "protected_by_topology": self.protected_by_topology,
             "exergy_scores_updated": self.exergy_scores_updated,
             "semantic_collapses": self.semantic_collapses,
+            "distilled_facts": self.distilled_facts,
             "errors": self.errors,
         }
 
@@ -163,7 +165,7 @@ def execute_thermal_purge(
             columns = {r["name"] for r in cursor.fetchall()}
             meta_col = "metadata" if "metadata" in columns else ("meta" if "meta" in columns else None)
 
-            select_cols = "id, content, created_at, decay_half_life, quadrant, storage_tier, exergy_score, access_count"
+            select_cols = "id, content, confidence, parent_id, created_at, decay_half_life, quadrant, storage_tier, exergy_score, access_count"
             if meta_col:
                 select_cols += f", {meta_col}"
 
@@ -179,6 +181,7 @@ def execute_thermal_purge(
             stats.total_scanned = len(rows)
 
             tombstone_ids: list[int] = []
+            tombstone_rows: list[sqlite3.Row] = []
             warm_ids: list[int] = []
             cold_ids: list[int] = []
             exergy_updates: list[tuple[float, int]] = []
@@ -227,6 +230,7 @@ def execute_thermal_purge(
                 # Classify by thermodynamic tier
                 if exergy < MIN_EXERGY_THRESHOLD:
                     tombstone_ids.append(fact_id)
+                    tombstone_rows.append(row)
                     if not json_output:
                         logger.info(
                             "☠ Thermal Death: Fact %d (Age: %.1fd, T½: %.1fd, Exergy: %.4f)",
@@ -242,6 +246,141 @@ def execute_thermal_purge(
 
             # Phase 2: Apply mutations (unless dry-run)
             if not dry_run:
+                # Phase 1.5: Kolmogorov Semantic Collapse / AST Distillation for C4-SIM tombstone candidates
+                if tombstone_rows:
+                    python_candidates = []
+                    text_candidates = []
+                    
+                    for r in tombstone_rows:
+                        # Ignore already C5 facts
+                        if r["confidence"] == "C5":
+                            continue
+                        
+                        content = r["content"]
+                        if not content or not content.strip():
+                            continue
+                            
+                        # Determine if content is Python
+                        is_python = False
+                        try:
+                            import ast
+                            ast.parse(content)
+                            is_python = True
+                        except Exception:
+                            pass
+                            
+                        if is_python:
+                            python_candidates.append(r)
+                        else:
+                            text_candidates.append(r)
+                    
+                    # 1. Distill Python code using AST Projector
+                    try:
+                        import sys
+                        from pathlib import Path as DistillPath
+                        root_path = DistillPath(__file__).resolve().parent.parent
+                        if str(root_path) not in sys.path:
+                            sys.path.insert(0, str(root_path))
+                        from cortex_ast_projector import project_ast
+                    except Exception as e:
+                        logger.warning("Failed to import project_ast: %s. Falling back to text distillation.", e)
+                        project_ast = None
+                        
+                    for rc in python_candidates:
+                        p_content = rc["content"]
+                        parent_id = rc["parent_id"]
+                        
+                        projected_code = None
+                        if project_ast:
+                            try:
+                                projected_code = project_ast(p_content, targets=[])
+                            except Exception as e:
+                                logger.info("AST validation failed for fact %d (falling back to text): %s", rc["id"], e)
+                        
+                        if projected_code and len(projected_code.strip()) > 0:
+                            distilled_content = projected_code
+                            z_size = kolmogorov_approx(distilled_content)
+                            meta_dict = {
+                                "origin_type": "saga_decision",
+                                "distilled_from": [rc["id"]],
+                                "kolmogorov_complexity": z_size,
+                                "distillation_method": "ast_projector",
+                                "reality_level": "C5-REAL"
+                            }
+                            
+                            meta_json = json.dumps(meta_dict) if meta_col else None
+                            insert_cols = "content, confidence, parent_id, quadrant, storage_tier, exergy_score, kinetic_mass"
+                            insert_vals = [distilled_content, "C5", parent_id, "ACTIVE", "HOT", 1.0, 1.0]
+                            if meta_col:
+                                insert_cols += f", {meta_col}"
+                                insert_vals.append(meta_json)
+                                
+                            placeholders = ",".join("?" for _ in insert_vals)
+                            cursor.execute(
+                                f"INSERT INTO facts ({insert_cols}) VALUES ({placeholders})",
+                                insert_vals
+                            )
+                            stats.distilled_facts += 1
+                            logger.info("Distilled Python Fact %d to structural C5-REAL skeleton.", rc["id"])
+                        else:
+                            text_candidates.append(rc)
+                    
+                    # 2. Distill and Fuse Text candidates using Zlib NCD
+                    fused_groups = []
+                    for tc in text_candidates:
+                        added_to_group = False
+                        for group in fused_groups:
+                            lead = group[0]
+                            ncd = compute_ncd(tc["content"], lead["content"])
+                            if ncd < 0.15:
+                                group.append(tc)
+                                added_to_group = True
+                                break
+                        if not added_to_group:
+                            fused_groups.append([tc])
+                    
+                    for group in fused_groups:
+                        if len(group) == 1:
+                            tc = group[0]
+                            z_size = kolmogorov_approx(tc["content"])
+                            distilled_content = f"# Distilled Primitive [Kolmogorov: {z_size:.1f}]\n# Source Fact: {tc['id']}\n{tc['content']}"
+                            parent_id = tc["parent_id"]
+                            source_ids = [tc["id"]]
+                        else:
+                            sorted_group = sorted(group, key=lambda x: float(x["exergy_score"] or 0.0), reverse=True)
+                            winner = sorted_group[0]
+                            source_ids = [x["id"] for x in group]
+                            
+                            merged_lines = [f"# Fused Semantic Primitive [Group Size: {len(group)}]"]
+                            merged_lines.append(f"# Winner Fact ID: {winner['id']}")
+                            merged_lines.append(f"# Subsumed IDs: {', '.join(str(x['id']) for x in sorted_group[1:])}")
+                            merged_lines.append(winner["content"])
+                            distilled_content = "\n".join(merged_lines)
+                            z_size = kolmogorov_approx(distilled_content)
+                            parent_id = winner["parent_id"]
+                            
+                        meta_dict = {
+                            "origin_type": "saga_decision",
+                            "distilled_from": source_ids,
+                            "kolmogorov_complexity": z_size,
+                            "distillation_method": "kolmogorov_semantic_collapse",
+                            "reality_level": "C5-REAL"
+                        }
+                        meta_json = json.dumps(meta_dict) if meta_col else None
+                        insert_cols = "content, confidence, parent_id, quadrant, storage_tier, exergy_score, kinetic_mass"
+                        insert_vals = [distilled_content, "C5", parent_id, "ACTIVE", "HOT", 1.0, 1.0]
+                        if meta_col:
+                            insert_cols += f", {meta_col}"
+                            insert_vals.append(meta_json)
+                            
+                        placeholders = ",".join("?" for _ in insert_vals)
+                        cursor.execute(
+                            f"INSERT INTO facts ({insert_cols}) VALUES ({placeholders})",
+                            insert_vals
+                        )
+                        stats.distilled_facts += 1
+                        logger.info("Fused/Distilled text group %s into C5-REAL primitive.", source_ids)
+
                 # Tombstone
                 if tombstone_ids:
                     placeholders = ",".join("?" for _ in tombstone_ids)
@@ -355,6 +494,7 @@ def execute_thermal_purge(
                 logger.info("  Transitioned → WARM:  %d", stats.transitioned_warm)
                 logger.info("  Transitioned → COLD:  %d", stats.transitioned_cold)
                 logger.info("  Semantic Collapses:   %d", stats.semantic_collapses)
+                logger.info("  Distilled (C5-REAL):  %d", stats.distilled_facts)
                 logger.info("  Protected (Topology): %d", stats.protected_by_topology)
                 logger.info("  Exergy Scores Updated:%d", stats.exergy_scores_updated)
 

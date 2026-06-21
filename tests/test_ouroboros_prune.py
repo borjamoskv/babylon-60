@@ -575,6 +575,7 @@ class TestPurgeCycleStats:
             transitioned_cold=1,
             protected_by_topology=4,
             exergy_scores_updated=10,
+            distilled_facts=5,
             errors=["test error"],
         )
         d = stats.to_dict()
@@ -585,6 +586,7 @@ class TestPurgeCycleStats:
         assert d["transitioned_cold"] == 1
         assert d["protected_by_topology"] == 4
         assert d["exergy_scores_updated"] == 10
+        assert d["distilled_facts"] == 5
         assert d["errors"] == ["test error"]
 
     def test_default_stats_all_zero(self):
@@ -593,3 +595,82 @@ class TestPurgeCycleStats:
 
         assert all(v == 0 for k, v in d.items() if k != "errors")
         assert d["errors"] == []
+
+
+class TestOuroborosDistillation:
+    """Tests Phase 1.5: Kolmogorov Semantic Collapse & AST Distillation."""
+
+    def test_python_code_distillation(self, tmp_db):
+        """A decayed C3 Python fact is distilled to structural skeleton and saved as C5."""
+        source_code = (
+            "def calculate_exergy(node):\n"
+            "    # Core logic\n"
+            "    value = 42\n"
+            "    return value\n"
+        )
+        fact_id = _insert_fact(
+            tmp_db,
+            content=source_code,
+            confidence="C3",
+            created_at="datetime('now', '-100 days')",
+            decay_half_life=30.0,
+            storage_tier="HOT",
+        )
+
+        stats = execute_thermal_purge(tmp_db, dry_run=False)
+
+        assert stats.tombstoned == 1
+        assert stats.distilled_facts >= 1
+
+        # Original fact should be tombstoned
+        orig = _get_fact(tmp_db, fact_id)
+        assert orig["is_tombstoned"] == 1
+
+        # Check if there is a new C5 fact
+        conn = sqlite3.connect(tmp_db)
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute("SELECT * FROM facts WHERE confidence = 'C5' AND is_tombstoned = 0").fetchall()
+        conn.close()
+
+        assert len(rows) == 1
+        new_fact = dict(rows[0])
+        assert new_fact["confidence"] == "C5"
+        assert "def calculate_exergy(node):" in new_fact["content"]
+        assert "value = 42" not in new_fact["content"] # Body should be pruned!
+
+    def test_text_semantic_fusion(self, tmp_db):
+        """Two redundant text facts are fused into a single C5 primitive."""
+        fact1_id = _insert_fact(
+            tmp_db,
+            content="This is the first fact containing sovereign proof logic",
+            confidence="C3",
+            created_at="datetime('now', '-100 days')",
+            decay_half_life=30.0,
+        )
+        # Redundant content (high similarity)
+        fact2_id = _insert_fact(
+            tmp_db,
+            content="This is the first fact containing sovereign proof logics",
+            confidence="C4",
+            created_at="datetime('now', '-100 days')",
+            decay_half_life=30.0,
+        )
+
+        stats = execute_thermal_purge(tmp_db, dry_run=False)
+
+        assert stats.tombstoned == 2
+        # Fused group becomes 1 fact
+        assert stats.distilled_facts >= 1
+
+        # Check if there is a new C5 fact representing the fusion
+        conn = sqlite3.connect(tmp_db)
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute("SELECT * FROM facts WHERE confidence = 'C5' AND is_tombstoned = 0").fetchall()
+        conn.close()
+
+        assert len(rows) == 1
+        new_fact = dict(rows[0])
+        assert new_fact["confidence"] == "C5"
+        assert "Fused Semantic Primitive" in new_fact["content"]
+        assert str(fact1_id) in new_fact["content"]
+        assert str(fact2_id) in new_fact["content"]

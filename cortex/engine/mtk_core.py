@@ -29,8 +29,8 @@ class MTKGuard:
     def __init__(self, private_key: str):
         self.private_key = private_key
         if cortex_core_rs:
-            self.ast_projector = cortex_core_rs.ASTProjector()
-            self.rust_authorizer = cortex_core_rs.MTKAuthorizer()
+            self.ast_projector = cortex_core_rs.ASTProjector() if hasattr(cortex_core_rs, "ASTProjector") else None
+            self.rust_authorizer = cortex_core_rs.MTKAuthorizer() if hasattr(cortex_core_rs, "MTKAuthorizer") else None
         else:
             self.ast_projector = None
             self.rust_authorizer = None
