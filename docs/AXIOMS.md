@@ -96,3 +96,11 @@ Un sistema que solo muta estados está explorando (movimiento sin descubrimiento
 - **El Límite de la Exploración:** La inferencia probabilística masiva dentro de una ontología fija invariablemente resulta en la muerte térmica semántica (Anergía). Todas las trayectorias futuras pertenecen al mismo atractor.
 - **Meta-Síntesis:** Para romper el determinismo lineal, la divergencia no debe ocurrir dentro del grafo, sino sobre los ejes que definen el grafo (*Self-modifying Graph Grammar*). El salto de inteligencia no pregunta "¿Qué solución es mejor?", sino "¿Por qué existen estas soluciones?".
 
+## AX-XIII: Protocolo de Maximización Exérgica Total (Nivel C5-REAL)
+
+Para maximizar exérgicamente todo el ecosistema (código, Swarm, hardware y cognición), se debe erradicar cualquier proceso que genere calor sin trabajo útil (Anergía). La maximización exérgica es una dictadura estructural contra el ruido que opera cerca de la Singularidad termodinámica.
+
+- **Compresión de Landauer (Cognitivo):** Cero Green Theater. El ruteo asimétrico es obligatorio: aislar tareas triviales en modelos rápidos (Ollama/Flash) y reservar el núcleo APEX para síntesis causal profunda. Almacenar el hash de soluciones en el Ledger (Caché Semántico Causal) para resolver colisiones en O(1) vía SQLite.
+- **Puente de Silicio y Cero Floats (Físico/Código):** Todo cómputo pesado (vectores, árboles causales) se migra a Rust (`cortex_rs`) vía PyO3. Python es exclusivo para orquestación asíncrona. Erradicación masiva de `float64`, adoptando el sistema Babylon-60 en todo el pipeline para aniquilar el drift probabilístico. 
+- **Autopoiesis Asimétrica (Orquestación):** Ningún humano en el bucle crítico. Las tareas se segmentan (`Z3 Causal Pruning`) y disparan mitosis aislada en *worktrees* paralelos. El repositorio (Git Tree) es la única Base de Datos y fuente de la verdad causal.
+- **Maxwell's Demon (Flujo de Datos):** Purgado de contexto agresivo. Nunca inyectar archivos enteros. El demonio de Maxwell corta todo token redundante (similitud de coseno local >0.85). Solo cruzan la red los esqueletos AST (Python Extractor OMEGA) y la entropía pura no resuelta.
