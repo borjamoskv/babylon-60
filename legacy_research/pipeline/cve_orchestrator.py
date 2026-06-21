@@ -13,7 +13,10 @@ import asyncio
 import json
 import logging
 import os
+from datetime import datetime, timezone
 from decimal import Decimal
+from enum import Enum
+from uuid import UUID
 
 from cortex.telemetry.pipeline_metrics import PipelineMetrics
 
@@ -141,6 +144,10 @@ class CVEOrchestrator:
                 "cve_id": analysis.get("cve_id", "UNKNOWN"),
                 "status": "COLLAPSED",
                 "reason": f"Max verification loops ({self.max_loops}) exhausted without consensus.",
+                "cycles_exhausted": self.max_loops,
+                "last_valid_state": analysis,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "irreconcilable": True,
                 "cited": False
             }
         else:
@@ -152,7 +159,13 @@ class CVEOrchestrator:
             def default(self, obj):
                 if isinstance(obj, Decimal):
                     return str(obj)
-                return super().default(obj)
+                if isinstance(obj, datetime):
+                    return obj.isoformat()
+                if isinstance(obj, UUID):
+                    return str(obj)
+                if isinstance(obj, Enum):
+                    return obj.value
+                raise TypeError(f"C5: Tipo no serializable {type(obj)}")
                 
         encoded_synthesis = json.dumps(final_synthesis, cls=C5CanonicalEncoder, sort_keys=True, separators=(",", ":"))
         
@@ -172,7 +185,7 @@ class CVEOrchestrator:
         
         structural_payload = json.dumps({
             "type": "LedgerPayload",
-            "timestamp": "2026-06-21T00:00:00Z", # Deterministic placeholder, in production use isoformat
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "payloads": [
                 {
                     "cve_id": analysis.get("cve_id", "UNKNOWN"),
