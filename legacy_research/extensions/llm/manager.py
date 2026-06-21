@@ -95,6 +95,14 @@ class LLMManager:
         p = self._get_provider()
         if p is None:
             return None
+            
+        try:
+            from cortex.guards.exergy_compiler import ExergyCompilerGuard
+            exergy_lvl = int(os.environ.get("CORTEX_EXERGY_LEVEL", "0"))
+            prompt = ExergyCompilerGuard.compile_payload(prompt, level=exergy_lvl)
+        except ImportError:
+            pass
+            
         return await p.complete(
             prompt=prompt,
             system=system,
@@ -115,6 +123,14 @@ class LLMManager:
         p = self._get_provider()
         if p is None:
             return
+            
+        try:
+            from cortex.guards.exergy_compiler import ExergyCompilerGuard
+            exergy_lvl = int(os.environ.get("CORTEX_EXERGY_LEVEL", "0"))
+            prompt = ExergyCompilerGuard.compile_payload(prompt, level=exergy_lvl)
+        except ImportError:
+            pass
+            
         async for chunk in p.stream(
             prompt=prompt,
             system=system,

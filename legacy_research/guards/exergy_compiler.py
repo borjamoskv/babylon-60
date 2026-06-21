@@ -15,6 +15,7 @@ logger = logging.getLogger("cortex.guards.exergy_compiler")
 
 # The V10.0 OMEGA Exergic Lexicon Vectors by intensity level
 VECTORS = {
+    0: [], # Level 0: Only purges Limerence, no format override
     1: ["[C5-REAL]", "JSON_ONLY", "NO_PROSE"],
     2: ["[C5-REAL]", "JSON_ONLY", "NO_PROSE", "Idempotent", "Prove", "Causal Trace"],
     3: [
@@ -58,6 +59,9 @@ class ExergyCompilerGuard:
         
         # 2. Resolución de Nivel (por defecto: Singularidad Nivel 3)
         vectors = VECTORS.get(level, VECTORS[3])
+        if not vectors:
+            return cleaned
+            
         vectors_block = " ".join(vectors)
         
         # 3. Ensamblaje del Payload Determinista
