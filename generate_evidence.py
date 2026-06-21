@@ -60,6 +60,28 @@ async def main():
     if isinstance(ledger_result, dict) and "last_hash" in ledger_result:
         final_hash = ledger_result["last_hash"]
 
+    import sys
+    import subprocess
+    import hashlib
+
+    # Compute runtime lineage
+    try:
+        git_commit = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
+    except Exception:
+        git_commit = "unknown"
+        
+    def hash_file(filepath):
+        h = hashlib.sha256()
+        try:
+            with open(filepath, "rb") as f:
+                h.update(f.read())
+            return h.hexdigest()
+        except Exception:
+            return "unknown"
+            
+    binary_hash = hash_file(sys.executable)
+    script_hash = hash_file(__file__)
+
     # Generate JSON
     output = {
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -68,7 +90,13 @@ async def main():
         "audit_result": "PASS" if ledger_ok else "FAIL",
         "execution_time_ms": execution_time_ms,
         "verification_method": "C5-REAL EDG V6",
-        "manifest_reference": "deployment_manifest.yaml"
+        "manifest_reference": "deployment_manifest.yaml",
+        "runtime_lineage": {
+            "git_commit": git_commit,
+            "python_binary_hash": binary_hash,
+            "script_hash": script_hash,
+            "executed_by": "agent:moskv-1"
+        }
     }
     
     with open("runtime_evidence.json", "w") as f:
