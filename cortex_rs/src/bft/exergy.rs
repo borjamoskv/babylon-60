@@ -47,7 +47,14 @@ impl ExergyGuard {
     pub fn validate(
         &self,
         mutation: &ExergyMutation,
+        valid_nodes: &[String],
     ) -> Result<(), ExergyError> {
+        // Topological consistency: node must exist in reality
+        if !valid_nodes.contains(&mutation.node_id) {
+            return Err(ExergyError::NodeNotFound {
+                id: mutation.node_id.clone(),
+            });
+        }
         // BFT: require 2/3 signatures
         let threshold = (2 * self.cluster_size) / 3;
         if mutation.signatures.len() < threshold {
@@ -103,7 +110,7 @@ mod tests {
             rul_claim_id: None,
         };
 
-        let result = guard.validate(&mutation);
+        let result = guard.validate(&mutation, &["metadata_engine".into()]);
         assert!(result.is_err());
     }
 
@@ -125,7 +132,29 @@ mod tests {
             rul_claim_id: None,
         };
 
-        let result = guard.validate(&mutation);
+        let result = guard.validate(&mutation, &["swarm_agent_7".into()]);
         assert!(matches!(result, Err(ExergyError::DeltaOutOfBounds { .. })));
+    }
+
+    #[test]
+    fn test_node_not_found() {
+        let guard = ExergyGuard {
+            cluster_size: 9,
+            max_delta_per_epoch: 100.0,
+        };
+
+        let mutation = ExergyMutation {
+            node_id: "ghost_node".into(),
+            delta: 10.0,
+            reason: "test".into(),
+            epoch_ms: 1717027200000,
+            signatures: vec!["n1".into(), "n2".into(), "n3".into(),
+                             "n4".into(), "n5".into(), "n6".into()],
+            zk_proof: None,
+            rul_claim_id: None,
+        };
+
+        let result = guard.validate(&mutation, &["real_node".into()]);
+        assert!(matches!(result, Err(ExergyError::NodeNotFound { .. })));
     }
 }

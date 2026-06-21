@@ -132,7 +132,8 @@ impl EpistemicGraph {
         mutation: &ExergyMutation,
         guard: &ExergyGuard,
     ) -> Result<(), ExergyError> {
-        guard.validate(mutation)?;
+        let valid_nodes: Vec<String> = self.nodes.iter().map(|kv| kv.key().clone()).collect();
+        guard.validate(mutation, &valid_nodes)?;
         if let Some(mut node) = self.nodes.get_mut(&mutation.node_id) {
             node.exergy += mutation.delta;
             if mutation.rul_claim_id.is_some() {

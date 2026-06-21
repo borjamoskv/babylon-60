@@ -1,4 +1,4 @@
-use std::time::{SystemTime, UNIX_EPOCH};
+
 use crate::reality::claim::{ClaimStatus, RealityClaim};
 use crate::reality::scorer::TrustScorer;
 use crate::reality::validator::{ValidationError, Validator};
@@ -36,7 +36,7 @@ impl RealityRegistry {
         claim.status = status.clone();
 
         let line = serde_json::to_string(&claim).map_err(|e| ValidationError::StorageFailure { reason: format!("Serialization error: {e}") })?;
-        self.writer.write_claim(&line);
+        self.writer.write_claim(&line).map_err(|e| ValidationError::StorageFailure { reason: format!("WAL flush error: {e}") })?;
 
         Ok(status)
     }

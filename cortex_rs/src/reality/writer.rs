@@ -1,15 +1,15 @@
-use crossbeam_channel::{unbounded, Sender};
+use crossbeam_channel::{unbounded, Sender, bounded};
 use std::fs::OpenOptions;
 use std::io::{BufWriter, Write};
 use std::thread;
 
 pub struct RealityWriter {
-    sender: Sender<String>,
+    sender: Sender<(String, Sender<()>)>,
 }
 
 impl RealityWriter {
     pub fn new(ledger_path: &str) -> Self {
-        let (sender, receiver) = unbounded::<String>();
+        let (sender, receiver) = unbounded::<(String, Sender<()>)>();
         let path = ledger_path.to_string();
 
         thread::spawn(move || {
@@ -20,22 +20,27 @@ impl RealityWriter {
                 .expect("Failed to open ledger file for append");
             let mut writer = BufWriter::new(file);
 
-            for msg in receiver {
+            for (msg, ack_tx) in receiver {
                 if let Err(e) = writeln!(writer, "{}", msg) {
                     eprintln!("Failed to write to epistemic ledger: {}", e);
                 }
                 if let Err(e) = writer.flush() {
                     eprintln!("Failed to flush epistemic ledger: {}", e);
                 }
+                // Send durability ACK back to the ingest thread
+                let _ = ack_tx.send(());
             }
         });
 
         Self { sender }
     }
 
-    pub fn write_claim(&self, claim_json: &str) {
-        if let Err(e) = self.sender.send(claim_json.to_string()) {
-            eprintln!("Failed to send claim to async writer: {}", e);
+    pub fn write_claim(&self, claim_json: &str) -> Result<(), String> {
+        let (ack_tx, ack_rx) = bounded(1);
+        if let Err(e) = self.sender.send((claim_json.to_string(), ack_tx)) {
+            return Err(format!("Failed to send claim to async writer: {}", e));
         }
+        ack_rx.recv().map_err(|_| "Failed to receive durability ACK from WAL flush. Potential data loss.".to_string())?;
+        Ok(())
     }
 }
