@@ -4,54 +4,60 @@ Loop asíncrono y exposición del API REST de salud. Orquesta el ciclo de vida c
 """
 import asyncio
 import logging
-
 import uvicorn
 from fastapi import FastAPI
 
-from .evaluator import evaluate_health
-from .executor import execute_plan
-from .memory import save_heartbeat, save_memory
-from .monitor import collect_metrics
-from .planner import detect_anomalies, generate_plan
-from .telegram_bot import notify_human
+from cortex.extensions.ouroboros_mythos.ouroboros_loop import MythosOuroborosEngine
 
 app = FastAPI(title="Ouroboros Node Keeper")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ouroboros")
 
+# Sovereign Mythos Engine Instance
+engine = MythosOuroborosEngine()
+
 @app.get("/health")
 def read_health():
-    return {"status": "active", "ouroboros": "eating_tail"}
+    health_score = engine.meta_controller.health_score
+    status = "healthy" if health_score >= 9850 else "degraded"
+    return {
+        "status": status,
+        "health_score": health_score,
+        "active_version": engine.meta_controller.active_version,
+        "cycle_count": engine.state.cycle_count,
+        "state_hash": hex(engine.state.state_hash),
+        "identity_anchor": engine.state.identity_anchor.decode("utf-8")
+    }
 
-async def ouroboros_loop():
-    logger.info("Starting Ouroboros Loop...")
-    while True:
+@app.get("/metrics")
+def read_metrics():
+    return {
+        "total_microjoules": engine.exergy.total_microjoules,
+        "current_exergy_score": engine.exergy.current_score(),
+        "temperature_mc": engine.exergy._read_temperature_mc(),
+    }
+
+@app.get("/ledger")
+def read_ledger():
+    log_path = engine.ledger.log_path
+    events = []
+    import json
+    import os
+    if os.path.exists(log_path):
         try:
-            state = await collect_metrics()
-            health = evaluate_health(state)
-            anomalies = detect_anomalies(state, health)
-
-            if anomalies:
-                plan = generate_plan(anomalies, state)
-                if plan:
-                    result = await execute_plan(plan)
-                    new_state = await collect_metrics()
-                    outcome = "improved" if evaluate_health(new_state)["health_score"] > health["health_score"] else "worse"
-                    save_memory(state, plan, result, outcome)
-
-                    if outcome == "worse":
-                        await notify_human(f"⚠️ Action {plan['name']} made things worse. Requires attention.")
-            else:
-                save_heartbeat(state)
-
-            await asyncio.sleep(60)
+            with open(log_path, "r") as f:
+                lines = f.readlines()
+                for line in lines[-10:]:
+                    if line.strip():
+                        events.append(json.loads(line))
         except Exception as e:
-            logger.error(f"Ouroboros loop error: {e}")
-            await asyncio.sleep(60)
+            logger.error(f"Failed to read ledger: {e}")
+    return {"log_path": log_path, "events": events}
 
 @app.on_event("startup")
 async def startup_event():
-    asyncio.create_task(ouroboros_loop())
+    logger.info("Starting Ouroboros Mythos Engine background task...")
+    asyncio.create_task(engine.run_loop())
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8080)

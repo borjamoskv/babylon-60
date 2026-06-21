@@ -136,17 +136,14 @@ class MythosOuroborosEngine:
             return {"action_type": b"noop", "status": "success"}
 
         primary_action = steps[0]
+        action_name = primary_action.decode("utf-8")
         
-        if primary_action == b"flush_cache":
-            logger.info("[C5-REAL] Flushing system cache.")
-        elif primary_action == b"restart_node":
-            logger.warning("[C5-REAL] Restarting node process.")
-        elif primary_action == b"throttle_cpu":
-            logger.info("[C5-REAL] Throttling CPU power limit.")
+        from cortex.extensions.ouroboros.executor import execute_plan
+        status = await execute_plan({"name": action_name})
 
         return {
             "action_type": primary_action,
-            "status": "success"
+            "status": status
         }
 
     async def _criticize(self, action_result: dict) -> int:
