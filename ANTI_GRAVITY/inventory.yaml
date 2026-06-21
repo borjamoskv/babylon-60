@@ -46,6 +46,7 @@ capabilities:
   - cdp_engine.py
   - lido_warden.py
   - sky_stalker.py
+  - k2_slayer.py
   - claude_manifest.yaml
   - sortu_engine.py
   - sortu_models.py
@@ -800,3 +801,10 @@ artifacts:
   yield_score: 8
   original_path: skills/repo_health.py
   new_path: ANTI_GRAVITY/01_ACTIVE/creation/repo_health.py
+- id: artifact_101
+  name: k2_slayer.py
+  status: active
+  domain: memory
+  yield_score: 8
+  original_path: scripts/forensic_hunters/k2_slayer.py
+  new_path: ANTI_GRAVITY/01_ACTIVE/memory/forensic_hunters/k2_slayer.py
