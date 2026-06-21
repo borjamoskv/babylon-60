@@ -20,14 +20,9 @@ HAS_SENTENCE_TRANSFORMERS = False
 
 if os.environ.get("CORTEX_NO_EMBED") != "1":
     try:
-        import torch
-        HAS_TORCH = True
-    except ImportError:
-        pass
-
-    try:
-        from sentence_transformers import SentenceTransformer, util
-        HAS_SENTENCE_TRANSFORMERS = True
+        import importlib.util
+        HAS_TORCH = importlib.util.find_spec('torch') is not None
+        HAS_SENTENCE_TRANSFORMERS = importlib.util.find_spec('sentence_transformers') is not None
     except ImportError:
         pass
 
@@ -44,7 +39,9 @@ def get_sentence_transformer(model_name: str = 'all-MiniLM-L6-v2') -> Any:
     if model_name not in _MODEL_CACHE:
         if HAS_SENTENCE_TRANSFORMERS:
             try:
+                from sentence_transformers import SentenceTransformer
                 if HAS_TORCH:
+                    import torch
                     # Optimize CPU inference by restricting PyTorch thread contention
                     torch.set_num_threads(1)
                     torch.set_num_interop_threads(1)
@@ -167,6 +164,7 @@ class PromptSecurityGuard:
         """Computes cosine embedding similarity or returns Jaccard heuristic fallback."""
         if HAS_SENTENCE_TRANSFORMERS and self.model is not None:
             try:
+                from sentence_transformers import util
                 response_embedding = self.model.encode(text, convert_to_tensor=True)
                 similarity = util.cos_sim(response_embedding, self.system_prompt_embedding)
                 return float(similarity)
