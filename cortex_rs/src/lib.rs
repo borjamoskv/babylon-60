@@ -3,6 +3,7 @@ pub mod edg;
 pub mod event_schema;
 pub mod hash_chain;
 pub mod replay;
+pub mod probabilistic_crdt;
 
 use pyo3::prelude::*;
 use edg::{EpistemicGraph, EpistemicNode, EpistemicStatus};
