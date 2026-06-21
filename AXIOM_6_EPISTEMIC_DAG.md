@@ -4,39 +4,60 @@
 
 La ontología epistémica de CORTEX impone un Grafo Acíclico Dirigido (DAG) estricto para la cristalización de conocimiento y la mutación de estado.
 
-## Estructura Causal Formal
+## 1. Definición Formal de Nodos y Estados
 
-- **`Observation`**: Nodo raíz verificable derivado de evidencia física, determinista y reproducible (ej. un estado del AST, un código de error de SQLite, un hash criptográfico).
-- **`Inference`**: Nodo derivado que debe poseer al menos un ancestro `Observation` alcanzable en el DAG.
-- **`Task`**: Nodo de acción que debe poseer al menos un ancestro `Inference` alcanzable en el DAG.
+### Observation (Evidencia Empírica)
+Nodo raíz verificable derivado de evidencia física y determinista.
+**Estados Epistémicos (Temporalidad):**
+- `valid`: Empíricamente vigente.
+- `stale`: Desfasado por la flecha del tiempo (ej. dependencia obsoleta), requiriendo validación, pero no intrínsecamente falso.
+- `invalid`: Demostrado lógicamente o físicamente falso mediante un nuevo experimento.
 
-## Validación Topológica
+### Inference (Derivación Causal)
+Nodo derivado que conecta evidencia con acción o nueva lógica.
 
-El **Epistemic Validator** evaluará las siguientes propiedades mecánicas sobre el DAG sin necesidad de interpretar semántica compleja:
+### Task (Mutación Físicamente Evaluable)
+Nodo de acción y mutación de estado sobre el ecosistema.
 
-### 1. Epistemic Reachability (Alcanzabilidad)
-Existencia obligatoria de un camino dirigido hasta una evidencia física.
-- `Observation`: `reachable_observation = self`
-- `Inference`: `reachable_observation >= 1`
-- `Task`: `reachable_observation >= 1` AND `reachable_inference >= 1`
+## 2. Invariantes Matemáticas (Automaton Validator)
 
-### 2. Epistemic Depth (Profundidad Epistémica)
-Distancia desde el anclaje físico. Cada salto inferencial incrementa el riesgo de error estocástico acumulado.
-- `Observation`: `depth = 0`
-- `Inference`: `depth(parent) + 1`
-- `Task`: `max(parent_depth) + 1`
+El **Epistemic Validator** evalúa el DAG exclusivamente bajo lógica proposicional de grafos, erradicando la evaluación semántica:
 
-**Políticas de Tolerancia de Profundidad:**
-- `depth > 5`: *Requires Review* (Alerta por derivación excesiva).
-- `depth > 10`: *Requires Re-Observation* (Obligación de anclar el razonamiento a un nuevo experimento físico o `Observation`).
+```text
+∀ Inference I:
+    ∃ Observation O:
+        reachable(O, I)
 
-## Transiciones de Estado y Prohibiciones (Forbidden)
+∀ Task T:
+    ∃ Inference I:
+        reachable(I, T)
 
-El sistema bloqueará las siguientes topologías:
-1. `Task` o `Inference` que fallen la aserción de *Epistemic Reachability*.
-2. Ciclos epistemológicos.
-3. Autojustificación recursiva infinita.
+Graph(G) must be acyclic.
+```
 
-## Corolario (Falsación Local y Propagación Mecánica)
+## 3. Topología de Precisión y Desgaste
 
-Si una `Observation` fundacional (ej. `O1`) es invalidada o muta su estado, todos los nodos descendientes (tanto `Inference` como `Task`) en su sub-grafo `closure(descendants(O1))` se marcan de manera determinista y automática como `epistemically_stale`. Este mecanismo local previene la corrupción silente del conocimiento de dominio y no requiere intervención humana.
+El sistema de memoria no asume herencia implícita de certeza. Implementa métricas de degradación y distancia.
+
+### Epistemic Depth (Deriva Estocástica)
+Mide la distancia respecto a la evidencia física.
+```text
+depth(n) = 
+    0                         if Observation
+    1 + max(depth(parent))    otherwise
+```
+- **Intervención:** `depth > 5` → Requiere auditoría (Review). `depth > 10` → Ruptura estocástica (Requires Re-Observation).
+
+### Epistemic Confidence (Fuerza Causativa)
+Cada salto inferencial degrada la probabilidad de certeza, previniendo herencia estricta en sub-grafos especulativos.
+`epistemic_confidence ∈ [0,1]` debe ser asignado y auditado por salto.
+
+## 4. Apoptosis Celular y Propagación (Falsación Local)
+
+Si el estado temporal o físico de una `Observation` fundacional (`O1`) muta a `stale` o `invalid`:
+
+```text
+status(closure(descendants(O1))) = status(O1)
+```
+
+Todos los nodos descendientes (tanto `Inference` como `Task`) en su sub-grafo se marcan mecánica y automáticamente. La propagación es local e incremental, eliminando la necesidad de reconstrucción total del modelo.
