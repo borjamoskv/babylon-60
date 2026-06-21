@@ -5,8 +5,9 @@ Maintains the Keyed Retrieval Graph System (KRGS) and causal linkages for determ
 """
 
 import json
-from typing import Dict, List, Optional
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
+from typing import Optional
+
 
 @dataclass
 class CausalNode:
@@ -15,8 +16,8 @@ class CausalNode:
     span_id: str
     parent_event_id: Optional[str]
     type: str # "execution" | "state_change" | "io" | "error"
-    side_effects: List[str]
-    derived_state_hashes: List[str]
+    side_effects: list[str]
+    derived_state_hashes: list[str]
     payload_hash: str
     
     def canonical_json(self) -> str:
@@ -26,8 +27,8 @@ class CausalNode:
 class CausalDAG:
     """In-memory reconstruction of the event DAG for replay tracking."""
     def __init__(self):
-        self.nodes: Dict[str, CausalNode] = {}
-        self.edges: Dict[str, List[str]] = {} # parent_event_id -> List[event_id]
+        self.nodes: dict[str, CausalNode] = {}
+        self.edges: dict[str, list[str]] = {} # parent_event_id -> List[event_id]
         
     def add_node(self, node: CausalNode):
         self.nodes[node.event_id] = node
@@ -36,10 +37,10 @@ class CausalDAG:
                 self.edges[node.parent_event_id] = []
             self.edges[node.parent_event_id].append(node.event_id)
             
-    def get_children(self, event_id: str) -> List[str]:
+    def get_children(self, event_id: str) -> list[str]:
         return self.edges.get(event_id, [])
         
-    def rebuild_from_stream(self, event_stream: List[dict]):
+    def rebuild_from_stream(self, event_stream: list[dict]):
         """Reconstructs the DAG from a JSONL event stream."""
         for evt in event_stream:
             node = CausalNode(

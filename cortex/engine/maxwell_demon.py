@@ -7,7 +7,6 @@ Relies on LocalEmbedder (MiniLM) to compute semantic similarity and filter noise
 
 import logging
 import math
-from typing import List
 
 from cortex.embeddings.local import LocalEmbedder
 
@@ -29,7 +28,7 @@ class MaxwellDemon:
         self.threshold = similarity_threshold
         self.embedder = LocalEmbedder()
 
-    def _cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
+    def _cosine_similarity(self, vec1: list[float], vec2: list[float]) -> float:
         """Compute cosine similarity between two vectors."""
         dot = sum(a * b for a, b in zip(vec1, vec2))
         norm1 = math.sqrt(sum(a * a for a in vec1))
@@ -38,7 +37,7 @@ class MaxwellDemon:
             return 0.0
         return dot / (norm1 * norm2)
 
-    def purge_redundant(self, chunks: List[str]) -> List[str]:
+    def purge_redundant(self, chunks: list[str]) -> list[str]:
         """
         Evaluates a sequence of text chunks and removes those that are semantically
         redundant with respect to the chunks already accepted.
@@ -57,8 +56,8 @@ class MaxwellDemon:
         # Embed all chunks in a single batch for efficiency
         embeddings = self.embedder.embed_batch(chunks)
 
-        accepted_chunks: List[str] = []
-        accepted_embeddings: List[List[float]] = []
+        accepted_chunks: list[str] = []
+        accepted_embeddings: list[list[float]] = []
 
         purged_count = 0
 

@@ -5,7 +5,7 @@ import logging
 import mmap
 import os
 import struct
-from typing import Any, Dict, List
+from typing import Any
 
 logger = logging.getLogger("cortex.engine.ipc_bridge")
 
@@ -33,7 +33,7 @@ class ZeroCopyIPCBridge:
         self.mm = mmap.mmap(self.fd, self.size)
         logger.info(f"[{self.tenant_id}] Zero-Copy IPC Bridge established at {self.mmap_file}")
 
-    async def propose_hypotheses(self, hypotheses: List[Dict[str, Any]]) -> str:
+    async def propose_hypotheses(self, hypotheses: list[dict[str, Any]]) -> str:
         """
         Python (The Brain) proposes a list of actions (hypotheses) to Rust (The Body).
         Example: [{'action': 'buy', 'asset': 'BTC', 'amount': 10, 'confidence': 0.95}]

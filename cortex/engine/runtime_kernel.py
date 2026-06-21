@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import asyncio
 import logging
-from typing import Any, Dict
+from typing import Any
 
 logger = logging.getLogger("cortex.engine.runtime_kernel")
 
@@ -15,7 +15,7 @@ class RetrievalEventBus:
         self.stream = asyncio.Queue()
         self.subscribers = []
 
-    async def emit_causal_event(self, event_type: str, payload: Dict[str, Any], taint_hash: str):
+    async def emit_causal_event(self, event_type: str, payload: dict[str, Any], taint_hash: str):
         event = {
             "type": event_type,
             "payload": payload,
@@ -43,7 +43,7 @@ class RetrievalKernel:
         logger.info(f"[{self.tenant_id}] Bootstrapping Rust Core: Ledger + Taint + SAGA")
         self.rust_runtime_active = True
         
-    async def run_wasm_guard_sandbox(self, state_proposal: Dict[str, Any]) -> bool:
+    async def run_wasm_guard_sandbox(self, state_proposal: dict[str, Any]) -> bool:
         """
         Routes the proposal through the isolated WASM sandbox for ontological validation.
         """

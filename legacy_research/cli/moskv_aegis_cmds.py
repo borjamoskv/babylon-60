@@ -8,16 +8,14 @@ from __future__ import annotations
 import asyncio
 import logging
 
-import aiosqlite
 import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.database.core import connect_async_ctx
-
 from cortex.audit.ledger import EnterpriseAuditLedger
 from cortex.audit.moskv_aegis import MoskvAegisEngine
 from cortex.cli.common import DEFAULT_DB, cli, console
+from cortex.database.core import connect_async_ctx
 
 logger = logging.getLogger(__name__)
 

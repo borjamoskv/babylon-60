@@ -290,8 +290,9 @@ def audit(ctx, calcification: bool, frontend: bool, demo: bool, project: str, li
 
         if demo or is_demo_db:
             # Run CORTEX-PERSIST DEMO v0 audit
-            from cortex.database.core import connect
             import hashlib
+
+            from cortex.database.core import connect
             conn = None
             try:
                 conn = connect(db)

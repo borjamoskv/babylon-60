@@ -15,9 +15,10 @@ from __future__ import annotations
 import json
 import logging
 import time
-from cortex.database.core import connect
 from pathlib import Path
 from typing import Any
+
+from cortex.database.core import connect
 
 __all__ = ["TuningStore"]
 

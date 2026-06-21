@@ -1,10 +1,10 @@
 import json
 import time
 import uuid
-from typing import List, Dict, Optional
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 
 import cortex_rs
+
 
 @dataclass
 class Source:
@@ -16,12 +16,12 @@ class Source:
 class RealityClaim:
     statement: str
     domain: str
-    sources: List[Source]
+    sources: list[Source]
     claim_id: str = ""
     created_at_epoch_ms: int = 0
     trust_score: float = 0.0
     status: str = "pending"
-    evidence_hashes: List[str] = None
+    evidence_hashes: list[str] = None
     
     def __post_init__(self):
         if not self.claim_id:

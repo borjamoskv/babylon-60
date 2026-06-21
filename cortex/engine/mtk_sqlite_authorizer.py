@@ -4,8 +4,8 @@ Minimal Trusted Kernel (MTK) - SQLite Authorizer Hook.
 Physical runtime coercion that prevents state mutation unless explicitly authorized by MTK.
 """
 
-import sqlite3
 import logging
+import sqlite3
 from contextvars import ContextVar
 
 logger = logging.getLogger(__name__)

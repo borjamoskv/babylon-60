@@ -1,9 +1,7 @@
-import sqlite3
 import json
-import time
 import threading
-from pathlib import Path
-from typing import Optional
+import time
+
 from cortex.database.core import connect
 
 WAL_PATH = "cortex/data/batch_wal.db"

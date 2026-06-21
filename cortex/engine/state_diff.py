@@ -5,12 +5,13 @@ Computes deep differences between JSON-serializable state representations
 to generate JSON Patch format deltas. Reversible and hashable.
 """
 
-import json
 import hashlib
-from typing import Any, Dict, List
+import json
+from typing import Any
+
 
 # Basic recursive diff implementation for JSON patch
-def generate_json_patch(prev_state: Dict[str, Any], new_state: Dict[str, Any], path: str = "") -> List[Dict[str, Any]]:
+def generate_json_patch(prev_state: dict[str, Any], new_state: dict[str, Any], path: str = "") -> list[dict[str, Any]]:
     patches = []
     
     # Check for removed or modified keys
@@ -34,7 +35,7 @@ def generate_json_patch(prev_state: Dict[str, Any], new_state: Dict[str, Any], p
             
     return patches
 
-def apply_patch(state: Dict[str, Any], patches: List[Dict[str, Any]]) -> Dict[str, Any]:
+def apply_patch(state: dict[str, Any], patches: list[dict[str, Any]]) -> dict[str, Any]:
     """Applies a json patch to a state dictionary."""
     import copy
     new_state = copy.deepcopy(state)
@@ -57,7 +58,7 @@ def apply_patch(state: Dict[str, Any], patches: List[Dict[str, Any]]) -> Dict[st
                 
     return new_state
 
-def reverse_patch(patches: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def reverse_patch(patches: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Reverses a patch sequence (Saga compensation)."""
     reversed_patches = []
     for patch in reversed(patches):
@@ -71,7 +72,7 @@ def reverse_patch(patches: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
 class StateDiffEngine:
     @staticmethod
-    def compute_diff(prev_state: Dict[str, Any], new_state: Dict[str, Any]) -> str:
+    def compute_diff(prev_state: dict[str, Any], new_state: dict[str, Any]) -> str:
         """Returns JSON serialized patch."""
         patches = generate_json_patch(prev_state, new_state)
         # canonical representation

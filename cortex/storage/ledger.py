@@ -6,21 +6,18 @@ Secures the `tenant_id` and the identity of the operator, creating
 a hash-chain to prove immutability of the audit logs.
 """
 
-import os
-import json
-import time
+import ast
 import asyncio
 import fcntl
-import ast
 import hashlib
-from typing import Any, List
+import json
+import os
 
-from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
-from cortex.crypto.identity import generate_event_identity
 import cortex_core_rs
+from cortex.crypto.identity import generate_event_identity
 
 
 class AsyncFileLock:
@@ -57,7 +54,7 @@ class EnterpriseAuditLedger:
     def __init__(self, log_path: str = "security_audit_log.jsonl") -> None:
         self.log_path = log_path
         self._lock = asyncio.Lock()
-        self._batch_queue: List[dict] = []
+        self._batch_queue: list[dict] = []
         self._batch_task: asyncio.Task | None = None
 
         # Configure thresholds
@@ -92,7 +89,7 @@ class EnterpriseAuditLedger:
                 pass
         else:
             # Recover last hash from tail
-            with open(self.log_path, "r") as f:
+            with open(self.log_path) as f:
                 lines = f.readlines()
                 if lines:
                     last_line = json.loads(lines[-1])
@@ -176,7 +173,6 @@ class EnterpriseAuditLedger:
         payload_str = json.dumps(payload, sort_keys=True, separators=(',', ':'))
         
         # event_hash = SHA3-256(canonical_json(payload + parent_hash))
-        import hashlib
         # We can also use sha3 from hashlib in newer pythons, but hashlib.sha3_256 is available since 3.6
         m = hashlib.sha3_256()
         m.update(payload_str.encode("utf-8"))

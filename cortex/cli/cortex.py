@@ -61,10 +61,10 @@ cli.add_command(gateway_cmds)
 def audit(pr_id: str, tenant: str, additions: int | None, deletions: int | None, files_changed: int | None, commits: int | None, includes_tests: bool, target_branch: str, db: str) -> None:
     """Audits an AI-generated Pull Request for entropy and issues a cryptographic seal."""
     import asyncio
-    from cortex.database.core import connect_async_ctx
 
     from cortex.audit.ledger import EnterpriseAuditLedger
     from cortex.auth.enterprise_identity import SovereignIdentity
+    from cortex.database.core import connect_async_ctx
     from cortex.gateway.code_governance import CodeGovernanceGateway
     from cortex.guards.enterprise_guard import EnterpriseRBACGuard
 

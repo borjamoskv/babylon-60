@@ -14,11 +14,9 @@ import sys
 from pathlib import Path
 
 import click
-from rich.console import Console
 from rich.table import Table
 
 from cortex.cli.common import cli, console
-from rich.table import Table
 
 
 @click.group("agent")

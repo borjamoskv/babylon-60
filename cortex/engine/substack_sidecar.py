@@ -1,8 +1,8 @@
 import argparse
 import logging
 from pathlib import Path
-from cortex.database.core import connect
 
+from cortex.database.core import connect
 from cortex.observability.jsonl_logger import setup_cortex_logging
 from cortex.services.email import send_reengagement_email
 

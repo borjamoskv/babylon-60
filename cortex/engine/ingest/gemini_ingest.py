@@ -1,9 +1,9 @@
 # [C5-REAL] Exergy-Maximized
 import asyncio
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
-from cortex.engine.causal.taint_engine import canonicalize_content, _fast_sha3
+from cortex.engine.causal.taint_engine import _fast_sha3, canonicalize_content
 
 logger = logging.getLogger("cortex.engine.ingest.gemini_ingest")
 
@@ -19,7 +19,7 @@ class GeminiIngestNode:
         self.agent_id = agent_id
         self.session_id = session_id
 
-    async def ingest_abyss(self, payload_streams: List[Any], modality: str = "multimodal") -> Dict[str, Any]:
+    async def ingest_abyss(self, payload_streams: list[Any], modality: str = "multimodal") -> dict[str, Any]:
         """
         Ingests massive payloads (10-50 PDFs, codebases > 100k LOC) without chunking.
         Returns a global semantic map and latent consensus structure.
@@ -46,7 +46,7 @@ class GeminiIngestNode:
             "structural_nodes_extracted": len(payload_streams) * 42 # Abstract structural yield
         }
 
-    async def narrative_collapse_reconstruction(self, logs: List[str], streams: List[bytes]) -> Dict[str, Any]:
+    async def narrative_collapse_reconstruction(self, logs: list[str], streams: list[bytes]) -> dict[str, Any]:
         """
         Transforms chaotic datasets (12h streams + commits) into a structured glitch opera timeline.
         Detects drift invisible to standard models.

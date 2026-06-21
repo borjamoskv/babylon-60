@@ -154,8 +154,8 @@ class Squadron(ABC):
         # ─── AX-VIII: CAUSAL CLOSURE GUARD ───
         import hashlib
         from datetime import datetime, timezone
-        from cortex.guards.causal_closure_guard import CausalClosureGuard
-        from cortex.types.evidence import EvidenceBundle, Source, ClosurePayload
+
+        from cortex.types.evidence import ClosurePayload, EvidenceBundle, Source
 
         # Forge verifiable sources from signal payloads
         sources = [

@@ -5,9 +5,11 @@ Verifies the Keyed Retrieval Graph System deterministically.
 """
 
 import json
-from typing import List, Dict, Any
-from cortex.engine.state_diff import apply_patch
+from typing import Any
+
 from cortex.engine.causal_graph import CausalDAG
+from cortex.engine.state_diff import apply_patch
+
 
 class DivergenceError(Exception):
     pass
@@ -16,7 +18,7 @@ class ReplayVerifier:
     def __init__(self, log_path: str = "security_audit_log.jsonl"):
         self.log_path = log_path
         self.dag = CausalDAG()
-        self.events: List[Dict[str, Any]] = []
+        self.events: list[dict[str, Any]] = []
         self._load_log()
         
     def _load_log(self):
@@ -24,7 +26,7 @@ class ReplayVerifier:
         if not os.path.exists(self.log_path):
             return
             
-        with open(self.log_path, "r") as f:
+        with open(self.log_path) as f:
             for line in f:
                 if not line.strip():
                     continue

@@ -22,10 +22,10 @@ from cortex.engine.causality_models import (
     KRGSE_TRIGGERED_BY,
     KRGSE_UPDATED_FROM,
     Confidence,
-    ValidationStatus,
     LedgerEvent,
     TaintReport,
     TaintStatus,
+    ValidationStatus,
     _downgrade_confidence,
 )
 from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus

@@ -140,10 +140,30 @@ def run_aefm(horizon: int, epsilon_path: float, max_cycles: int) -> None:
     console.print("[bold #2B3BE5]🌌 Starting AEFM Daemon...[/bold #2B3BE5]")
     engine = ExergyEngine()
 
-    import logging
 
     setup_cortex_logging()
 
     engine.autonomous_field_daemon(
         horizon=horizon, epsilon_path=epsilon_path, recompute_fdf_min=10, max_cycles=max_cycles
     )
+
+
+@exergy_cmds.command("compile")
+@click.argument("prompt", type=str)
+@click.option("--level", default=3, type=int, help="Nivel de exergía a inyectar (1-3). Por defecto 3 (Singularidad).")
+def compile_prompt(prompt: str, level: int) -> None:
+    """Nivel 10: Compila un prompt estocástico en un payload C5-REAL."""
+    import sys
+    from pathlib import Path
+    
+    # Asegurar que cortex es accesible
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from cortex.guards.exergy_compiler import ExergyCompilerGuard
+    
+    console.print(f"[bold #2B3BE5]⚡ COMPILADOR DE EXERGÍA (Nivel {level})[/bold #2B3BE5]")
+    compiled = ExergyCompilerGuard.compile_payload(prompt, level=level)
+    
+    console.print("[dim]Original Payload:[/dim]")
+    console.print(prompt)
+    console.print("\n[bold green]C5-REAL Compiled Payload:[/bold green]")
+    console.print(compiled)

@@ -3,10 +3,9 @@
 Informational Entropy and Semantic Collapse.
 Implements Zlib Normalized Compression Distance (NCD) as a proxy for Shannon Entropy / KL Divergence.
 """
-import zlib
-import zlib
 import time
-from typing import Optional, Dict, Any
+import zlib
+from typing import Any, Optional
 
 MAX_KINETIC_MULTIPLIER = 2.0
 
@@ -55,7 +54,7 @@ def collapse_eligible(content_a: str, content_b: str, mass_a: float, mass_b: flo
     return (ncd < threshold) and (mass_delta < mass_tolerance)
 
 def semantic_collapse(id_a: str, content_a: str, mass_a: float, 
-                      id_b: str, content_b: str, mass_b: float, now: Optional[float] = None) -> Dict[str, Any]:
+                      id_b: str, content_b: str, mass_b: float, now: Optional[float] = None) -> dict[str, Any]:
     """
     Executes a physical semantic collapse.
     Strict Merge Strategy (Survival of the Fittest):

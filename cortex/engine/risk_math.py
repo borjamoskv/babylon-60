@@ -6,7 +6,8 @@ la divergencia semántica (Riesgo de Contaminación).
 """
 
 import math
-from typing import Sequence
+from collections.abc import Sequence
+
 
 def calculate_decay_weight(w0: float, time_delta_seconds: float, lambda_factor: float) -> float:
     """

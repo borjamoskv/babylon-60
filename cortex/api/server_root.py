@@ -6,13 +6,13 @@ import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
-import aiosqlite
-from cortex.database.core import connect_async_ctx
+
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from cortex import __version__
+from cortex.database.core import connect_async_ctx
 from cortex.engine.bifurcation_engine import ExergyBifurcationEngine
 from cortex.engine.causal_scheduler import CausalScheduler
 from cortex.engine.entropy_daemon import EntropyDaemon

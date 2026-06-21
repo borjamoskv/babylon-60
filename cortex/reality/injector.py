@@ -4,9 +4,9 @@ Inyector de Realidad. Construye el bloque de contexto deduplicado desde claims v
 """
 
 import json
-from typing import List
 
 import cortex_core_rs
+
 
 def build_verified_reality_context(ledger_path: str, max_claims: int = 50) -> str:
     """

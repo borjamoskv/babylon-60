@@ -9,6 +9,7 @@ Abstract Syntax Tree (AST), ignoring comments, formatting, and docstrings.
 import ast
 import hashlib
 
+
 class _DocstringRemover(ast.NodeTransformer):
     """Removes docstrings from AST nodes to ensure semantic-only hashing."""
     def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.FunctionDef:

@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import math
-from cortex.database.core import connect
 import time
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
+from cortex.database.core import connect
 from cortex.engine.forgetting_models import (
     EvictionVerdict,
     OracleReport,

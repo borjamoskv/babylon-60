@@ -1,6 +1,8 @@
 import json
 import re
+
 import cortex_rs
+
 
 def extract_event_from_text(text: str) -> dict:
     """

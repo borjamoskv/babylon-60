@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-from typing import Any, cast
+from typing import Any
 
 import aiosqlite
 
@@ -96,7 +96,7 @@ class TransactionMixin(EngineMixinBase):
 
     async def verify_ledger(self) -> dict[str, Any]:
         """Verify the integrity of the sovereign ledger (Operation Void)."""
-        async with getattr(self, "session")() as conn:
+        async with self.session() as conn:
             from cortex.ledger import ImmutableLedger
             ledger = ImmutableLedger(conn)
             return await ledger.audit_integrity_async()

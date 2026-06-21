@@ -7,11 +7,12 @@ with a single, hard-enforced physical checkpoint.
 
 import hashlib
 import time
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from cortex.types.evidence import ClosurePayload
 from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
+from cortex.types.evidence import ClosurePayload
+
 
 class MTKGuard:
     """

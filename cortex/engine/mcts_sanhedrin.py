@@ -1,8 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import asyncio
 import logging
-from typing import Any, Dict, List
-import math
+from typing import Any
 
 logger = logging.getLogger("cortex.engine.mcts_sanhedrin")
 
@@ -15,7 +14,7 @@ class VectorialDownsampling:
     def __init__(self, tenant_id: str):
         self.tenant_id = tenant_id
 
-    async def execute_monte_carlo_nodes(self, intent_vector: Dict[str, float]) -> Dict[str, Any]:
+    async def execute_monte_carlo_nodes(self, intent_vector: dict[str, float]) -> dict[str, Any]:
         """
         Simulates 3 structural voices in the vector space.
         Voice A: Exploration (High variance, low constraints)
@@ -42,7 +41,7 @@ class ContextFusionEngine:
     Calculates entropy of the input to adjust the inference temperature dynamically.
     Avoids injecting narrative noise into the Strategy Graph.
     """
-    def normalize_distribution(self, input_data: str, context: str, intent: str) -> Dict[str, Any]:
+    def normalize_distribution(self, input_data: str, context: str, intent: str) -> dict[str, Any]:
         logger.info("Normalizing probability distribution mathematically.")
         
         # Heuristic entropy calculation (BABYLON-60 integer math)
@@ -69,7 +68,7 @@ class ConstraintFirewall:
     If a node violates the deterministic state constraint, it is annihilated.
     No re-writing. No apologies. Absolute zero action.
     """
-    def enforce_clipping(self, proposed_node: Dict[str, Any]) -> bool:
+    def enforce_clipping(self, proposed_node: dict[str, Any]) -> bool:
         if proposed_node.get("entropy_variance", 1.0) > 0.5:
             logger.warning("Node exceeds entropy variance. ANNIHILATED.")
             return False

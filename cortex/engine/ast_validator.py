@@ -1,6 +1,5 @@
 import ast
 import logging
-from typing import List, Tuple
 
 logger = logging.getLogger("cortex.engine.ast_validator")
 
@@ -12,7 +11,7 @@ class StrictASTValidator(ast.NodeVisitor):
     """
     def __init__(self, filename: str = "<unknown>"):
         self.filename = filename
-        self.errors: List[Tuple[int, str]] = []
+        self.errors: list[tuple[int, str]] = []
         self._in_async_func = False
 
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef):
@@ -53,7 +52,7 @@ class StrictASTValidator(ast.NodeVisitor):
         line = getattr(node, "lineno", -1)
         self.errors.append((line, msg))
 
-def validate_ast(source_code: str, filename: str = "<unknown>") -> List[Tuple[int, str]]:
+def validate_ast(source_code: str, filename: str = "<unknown>") -> list[tuple[int, str]]:
     """
     Parses and validates the source code against C5-REAL invariants.
     Returns a list of (line_number, error_message) tuples.

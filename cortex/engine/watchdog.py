@@ -1,5 +1,6 @@
 from cortex.storage.wal import WriteAheadLog
 
+
 class SafeEventBatcher:
     async def ingest_event(self, event: dict):
         pass

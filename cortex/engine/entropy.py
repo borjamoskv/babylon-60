@@ -45,7 +45,7 @@ class EntropyInjector:
         if self.epsilon == 0:
             return 0
             
-        raw_material = f"{self.seed}:{step}:{self.mode}".encode("utf-8")
+        raw_material = f"{self.seed}:{step}:{self.mode}".encode()
         h = int(hashlib.sha256(raw_material).hexdigest()[:8], 16)
         
         # Map hash to uniform distribution [-epsilon, +epsilon]
