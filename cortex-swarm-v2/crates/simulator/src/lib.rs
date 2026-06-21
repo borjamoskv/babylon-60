@@ -212,7 +212,7 @@ mod tests {
             BranchOutcome::Create("noise2".into(), 5),
         ]).unwrap();
         
-        if let Ok(MetabolicState::Supercritical(k_gained)) = state {
+        if let MetabolicState::Supercritical(k_gained) = state {
             assert!(k_gained > 0.0);
             // Noise should be cleared, genesis kept
             assert!(membrane.active_branches.contains_key("genesis"));
