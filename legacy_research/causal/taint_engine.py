@@ -273,6 +273,29 @@ class C5NativeSocketIngestor:
             self.sock.close()
             raise TaintValidationError(f"Native Guard rejected payload: {e}")
 
+# =====================================================================
+# DATA PLANE FFI DELEGATION: ZK-Guard Gateway
+# =====================================================================
+class ZKGuardGateway:
+    """
+    Control Plane Gateway for ZK-Snarks Validation.
+    Orchestrates the ZK-hook in Python but delegates pure binary 
+    verification to the Rust Data Plane (cortex_rs).
+    """
+    @staticmethod
+    def verify_zk_proof(proof_payload: str) -> bool:
+        # FFI delegation to Rust Data Plane
+        try:
+            import cortex_rs
+            if hasattr(cortex_rs, 'verify_zk_proof'):
+                return cortex_rs.verify_zk_proof(proof_payload)
+            else:
+                logger.warning("[ZKGuard] Rust data plane verify_zk_proof missing. Assuming valid for dev.")
+                return True
+        except ImportError:
+            logger.error("[ZKGuard] cortex_rs not loaded. FFI failed.")
+            return False
+
 
 # =====================================================================
 # H-IMMUNO-02: Antigen-Signature Routing (MHC)
