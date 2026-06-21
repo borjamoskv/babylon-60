@@ -15,16 +15,7 @@ import sys
 from pathlib import Path
 
 # Logger configuration
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] LEDGER-BRIDGE: %(message)s",
-    handlers=[
-        logging.FileHandler(
-            "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ledger_bridge.log"
-        ),
-        logging.StreamHandler(sys.stdout),
-    ],
-)
+setup_cortex_logging()
 logger = logging.getLogger("LedgerBridge")
 
 # Define JIT paths

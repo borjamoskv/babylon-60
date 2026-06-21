@@ -4,7 +4,7 @@ import logging
 from cortex.extensions.swarm.sortu_jit_executor import run_jit_sandbox
 
 logger = logging.getLogger("cortex.autodidact.actuator")
-logging.basicConfig(level=logging.INFO)
+setup_cortex_logging()
 
 
 async def autodidact_ingest(source_code: str, expected_yield_gain: float, metadata: dict) -> dict:

@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from cortex_rs import EpistemicGraph, EpistemicNode
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+setup_cortex_logging()
 logger = logging.getLogger("EDG_StressTest")
 
 def build_poc_graph():

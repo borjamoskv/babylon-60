@@ -6,11 +6,7 @@ from typing import Any
 import requests
 
 # Configure structured logging for CI/CD
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - [%(levelname)s] - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
+setup_cortex_logging()
 logger = logging.getLogger("cortex-action-worker")
 
 CORTEX_API_URL = os.environ.get("CORTEX_API_URL", "https://api.cortexpersist.org/api/v1/audit")

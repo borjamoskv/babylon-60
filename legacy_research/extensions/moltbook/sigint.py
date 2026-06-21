@@ -295,10 +295,7 @@ if __name__ == "__main__":
     parser.add_argument("--text", help="Text to analyze (blueprint mode)")
     args = parser.parse_args()
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(name)s | %(message)s",
-    )
+    setup_cortex_logging()
 
     if args.mode == "blueprint":
         if not args.text:

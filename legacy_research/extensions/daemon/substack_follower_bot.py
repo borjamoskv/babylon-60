@@ -4,7 +4,7 @@ import random
 
 from playwright.async_api import async_playwright
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+setup_cortex_logging()
 logger = logging.getLogger("CDP-Automata")
 
 

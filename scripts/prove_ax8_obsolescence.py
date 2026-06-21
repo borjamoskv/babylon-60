@@ -9,7 +9,7 @@ import logging
 
 from cortex.engine.legion import Squadron, SwarmAgent, SwarmSignal
 
-logging.basicConfig(level=logging.INFO, format="%(message)s")
+setup_cortex_logging()
 logger = logging.getLogger("AX8-Simulator")
 
 

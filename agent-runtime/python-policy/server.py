@@ -10,7 +10,7 @@ from policy.model import PolicyNet
 from policy.value import ValueNet
 from policy.planner import plan
 
-logging.basicConfig(level=logging.INFO)
+setup_cortex_logging()
 
 class PolicyServiceServicer(agent_pb2_grpc.PolicyServiceServicer):
     def __init__(self):

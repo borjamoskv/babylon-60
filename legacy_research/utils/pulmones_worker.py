@@ -7,7 +7,7 @@ import time
 from importlib import import_module
 from pathlib import Path
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+setup_cortex_logging()
 logger = logging.getLogger("CORTEX.PULMONES.WORKER")
 
 

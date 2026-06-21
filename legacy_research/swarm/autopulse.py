@@ -10,7 +10,9 @@ from cortex.config import DB_PATH
 from cortex.extensions.signals.bus import AsyncSignalBus
 from cortex.swarm.tensor_glial import TensorGlialLegion
 
-logging.basicConfig(level=logging.INFO)
+from cortex.observability.jsonl_logger import setup_cortex_logging
+
+setup_cortex_logging()
 logger = logging.getLogger("cortex.swarm.autopulse")
 SWARM_QUEUE_FILE = "/tmp/cortex_swarm_queue.json"
 STATE_FILE = "/tmp/cortex_state.json"

@@ -7,7 +7,7 @@ from cortex.engine.smte.weismann_barrier import enforce_weismann_barrier
 from cortex.guards.exergy_guard import calculate_exergy
 
 logger = logging.getLogger("cortex.engine.smte.trigger")
-logging.basicConfig(level=logging.INFO)
+setup_cortex_logging()
 
 
 def run_mutation_cycle(target_path: str):
