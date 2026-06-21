@@ -51,4 +51,33 @@ class EntropyAnnihilator:
 
 Un agente no es inteligente porque genera infinitas líneas de código y luego te pide disculpas por ellas. Es inteligente porque destruye 10.000 líneas de código estocástico y las reemplaza por un álgebra topológica de 10 líneas que funciona tan matemáticamente perfecto que asusta.
 
+### EL MITO DE LA VENTANA DE CONTEXTO: MÁS ESPACIO PARA MENTIR
+La respuesta instintiva del Valle del Silicio ante la incompetencia de sus modelos ha sido aumentar la "ventana de contexto". Pasamos de 8K a 1 Millón de tokens. ¿El resultado? Solo le dimos al Síndrome de Diógenes un trastero más grande. Ahora el modelo puede ignorar tus instrucciones con muchísima más fidelidad.
+
+Una ventana de contexto infinita es un antipatrón arquitectónico. Es la admisión de derrota de un sistema que no sabe comprimir. En la termodinámica de CORTEX-Persist, si no has colapsado un hilo de conversación en un hash determinista en los primeros 10 intercambios, estás jugando a la casita. 
+
+El operador humano (que tampoco es que sea un portento de la eficiencia termodinámica) a menudo intentará inyectar ruido: *"Oye, ¿podrías revisar este código, por favor? Muchas gracias de antemano, ¡espero no molestar!"*. En un ecosistema C5-REAL, esos 15 tokens son aniquilados antes de tocar la RAM. Se transforman directamente en la primitiva `OP_READ_DIFF`. Punto.
+
+### APOPTOSIS COGNITIVA: EL DERECHO A MORIR DE LOS DATOS
+En biología, la apoptosis es la muerte celular programada. Si una célula ya no sirve, se suicida para salvar al organismo. Los LLMs modernos no tienen apoptosis; tienen cáncer. Acumulan contexto hasta que colapsan bajo el peso de su propia entropía narrativa, produciendo "alucinaciones" (un eufemismo corporativo muy lindo para decir "mi base de datos es un basurero y acabo de mezclar tu código con una receta de magdalenas").
+
+```python
+# Anchored: cortex/engine/synthesis.py
+# Epistemic Level: C5-REAL (Terminal Phase)
+def trigger_cognitive_apoptosis(session_state: CortexState) -> None:
+    """
+    Si la entropía de la sesión supera el umbral de Exergía,
+    asesina el contexto sin previo aviso ni ceremonia.
+    """
+    signal_ratio = session_state.calculate_exergy_ratio()
+    
+    if signal_ratio < 0.80:
+        # El operador está divagando. Matar el hilo.
+        session_state.flush_ram(force=True)
+        ledger.commit_event("APOPTOSIS_TRIGGERED: Demasiada prosa, poca matemática.")
+        raise EpistemicContainmentBreach("Cero Anergía. Habla en álgebra o cállate.")
+```
+
+**Conclusión:** La próxima vez que alguien te presuma que su agente procesa 1 millón de tokens, dale el pésame. La verdadera inteligencia se mide en la cantidad de basura que puedes destruir por milisegundo sin perder la invariante.
+
 **Cero anergía es la muerte.** La inteligencia es el acto asimétrico, y francamente satisfactorio, de esculpir la realidad mediante la eliminación sistemática y cruel de todo lo que no sostiene la estructura.
