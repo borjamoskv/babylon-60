@@ -17,6 +17,7 @@ class StrictASTValidator(ast.NodeVisitor):
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef):
         old_in_async = self._in_async_func
         self._in_async_func = True
+        self._check_float_annotations(node)
         self.generic_visit(node)
         self._in_async_func = old_in_async
 
@@ -29,6 +30,10 @@ class StrictASTValidator(ast.NodeVisitor):
         # Rule: No bare print() in engine/ core paths (enforced strictly here)
         if isinstance(node.func, ast.Name) and node.func.id == "print":
             self._record_error(node, "[MEDIUM] Bare print() detected. Use structured logging via logging.getLogger().")
+
+        # Rule: No explicit float() conversions
+        if isinstance(node.func, ast.Name) and node.func.id == "float":
+            self._record_error(node, "[CRITICAL] Explicit float() conversion detected. Use Babylon60.from_int() or integer arithmetic.")
 
         self.generic_visit(node)
 
@@ -46,6 +51,44 @@ class StrictASTValidator(ast.NodeVisitor):
         if isinstance(node.value, float):
             self._record_error(node, "[CRITICAL] Float literal detected. BABYLON-60 Epistemology requires integer structs scaled to Base-60 to avoid floating point entropy.")
             
+        self.generic_visit(node)
+
+    def visit_FunctionDef(self, node: ast.FunctionDef):
+        # Rule: No float in type annotations
+        self._check_float_annotations(node)
+        self.generic_visit(node)
+
+    def _check_float_annotations(self, node: ast.FunctionDef | ast.AsyncFunctionDef):
+        """Detect float in function parameter annotations and return type."""
+        # Check return annotation
+        if node.returns and self._annotation_contains_float(node.returns):
+            self._record_error(node, "[CRITICAL] Float return annotation detected. BABYLON-60 requires integer/Babylon60 return types.")
+        # Check argument annotations
+        for arg in node.args.args + node.args.posonlyargs + node.args.kwonlyargs:
+            if arg.annotation and self._annotation_contains_float(arg.annotation):
+                self._record_error(arg, f"[CRITICAL] Float annotation on parameter '{arg.arg}'. BABYLON-60 requires integer/Babylon60 types.")
+
+    def _annotation_contains_float(self, annotation: ast.AST) -> bool:
+        """Check if an annotation AST node references 'float'."""
+        if isinstance(annotation, ast.Name) and annotation.id == "float":
+            return True
+        if isinstance(annotation, ast.Constant) and annotation.value == "float":
+            return True
+        # Check inside subscripts like Optional[float], list[float]
+        if isinstance(annotation, ast.Subscript):
+            return self._annotation_contains_float(annotation.slice)
+        if isinstance(annotation, ast.Tuple):
+            return any(self._annotation_contains_float(e) for e in annotation.elts)
+        # BinOp for X | Y union syntax (Python 3.10+)
+        if isinstance(annotation, ast.BinOp):
+            return (self._annotation_contains_float(annotation.left)
+                    or self._annotation_contains_float(annotation.right))
+        return False
+
+    def visit_BinOp(self, node: ast.BinOp):
+        # Rule: Flag true division '/' in numeric contexts (produces float)
+        if isinstance(node.op, ast.Div):
+            self._record_error(node, "[WARNING] True division '/' detected — produces float in Python 3. Use '//' (floor division) or Babylon60.div() for integer math.")
         self.generic_visit(node)
 
     def _record_error(self, node: ast.AST, msg: str):
