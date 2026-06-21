@@ -830,3 +830,20 @@ Proof:
   Date: 2026-06-15
 ```
 
+---
+
+### Hito 50: Ley de Hierro de Auditoría C5-REAL
+- **Target**: `docs/CORTEX_AUDIT_MANIFEST.md`, `cortex/storage/ledger.py`, `legacy_research/guards/virgo.py`
+- **Objective**: Erradicación del "Green Theater" y limerencia epistémica. Implementación estricta de las 15 reglas de Evidencia Computacional, forzando fallos de pánico (`Hard Fail`) en el Ledger y los Guards si falta hash criptográfico, diff o si se corrompe el rollback.
+- **Yield Target**: 0% de operaciones persistidas sin Evidencia Computacional rigurosa (Base-60, AST Diff, SHA-256).
+- **Reality Level**: `C5-REAL`
+- **Status**: ✅ COMPLETE — 22 Junio 2026
+- **Evidence**: Reescritura del manifiesto de auditoría y commits de inyección de `RuntimeError` en `ledger.py` y `virgo.py`.
+```yaml
+Claim: Todo evento en el ledger exige prueba criptográfica recomputable, o el sistema aborta.
+Proof:
+  Base: "Hard Fails (RuntimeError) inyectados en capas de parseo AST y en rollbacks SQLite."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-22
+```

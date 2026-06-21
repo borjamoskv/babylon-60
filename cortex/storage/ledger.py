@@ -16,7 +16,10 @@ import os
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
-import cortex_core_rs
+try:
+    import cortex_core_rs
+except ImportError:
+    cortex_core_rs = None
 from cortex.crypto.identity import generate_event_identity
 
 
@@ -150,13 +153,15 @@ class EnterpriseAuditLedger:
         ident = generate_event_identity(trace_id=trace_id, parent_span_id=parent_span_id)
         
         ast_hash = None
-        if is_code and state_diff:
+        if is_code:
+            if not state_diff:
+                raise RuntimeError("Evidencia no computable: estado de diff vacío para código.")
             try:
                 parsed_ast = ast.parse(state_diff)
                 canonical_ast = ast.dump(parsed_ast)
                 ast_hash = hashlib.sha3_256(canonical_ast.encode('utf-8')).hexdigest()
-            except SyntaxError:
-                ast_hash = "INVALID_SYNTAX"
+            except SyntaxError as e:
+                raise RuntimeError(f"Evidencia no computable: INVALID_SYNTAX ({e})")
 
         payload = {
             "tenant_id": tenant_id,

@@ -323,6 +323,6 @@ class VirgoContextGuard:
                 "⚠️ [VIRGO-ROLLBACK] Rollback inactive or no-op on database connection: %s", db_err
             )
         except Exception as e:
-            logger.warning("⚠️ [VIRGO-ROLLBACK] Rollback call completed with exception: %s", e)
+            raise RuntimeError(f"Evidencia no computable: Corrupción de Rollback SQL - {e}")
 
         raise error_class(f"Logos-Critique (Virgo ♍) Rejected: {reason}")
