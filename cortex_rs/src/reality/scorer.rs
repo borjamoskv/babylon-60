@@ -1,12 +1,5 @@
 use crate::reality::claim::Source;
 
-pub enum SourceClass {
-    Official,
-    TechnicalDocs,
-    Community,
-    Unknown,
-}
-
 pub struct TrustScorer;
 
 impl TrustScorer {
@@ -17,7 +10,6 @@ impl TrustScorer {
 
         let base = Self::base_score(sources);
 
-        // Bonus por múltiples fuentes independientes
         let multi_bonus = if multi_source && sources.len() >= 2 {
             0.10
         } else {
@@ -34,7 +26,7 @@ impl TrustScorer {
             .fold(0.0_f32, f32::max)
     }
 
-    fn classify_url(url: &str) -> SourceClass {
+    fn score_url(url: &str) -> f32 {
         let official = [
             "ai.google.dev",
             "platform.openai.com",
@@ -58,29 +50,18 @@ impl TrustScorer {
         ];
 
         if official.iter().any(|d| url.contains(d)) {
-            return SourceClass::Official;
+            return 0.90;
         }
 
         if technical_docs.iter().any(|d| url.contains(d)) {
-            return SourceClass::TechnicalDocs;
+            return 0.70;
         }
 
         if weak_sources.iter().any(|d| url.contains(d)) {
-            return SourceClass::Community;
+            return 0.20;
         }
 
-        SourceClass::Unknown
-    }
-
-    fn score_url(url: &str) -> f32 {
-        let class = Self::classify_url(url);
-        // Map to heuristic lower-bound ranges to prevent fake precision
-        match class {
-            SourceClass::Official => 0.90,       // Deterministic lower bound for official
-            SourceClass::TechnicalDocs => 0.75,  // Documentation
-            SourceClass::Community => 0.30,      // Weak signals
-            SourceClass::Unknown => 0.40,        // Unknown baseline
-        }
+        0.40
     }
 }
 

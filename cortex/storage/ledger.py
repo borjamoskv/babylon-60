@@ -11,6 +11,8 @@ import json
 import time
 import asyncio
 import fcntl
+import ast
+import hashlib
 from typing import Any, List
 
 from cryptography.exceptions import InvalidSignature
@@ -144,11 +146,21 @@ class EnterpriseAuditLedger:
         status: str = "SUCCESS",
         state_diff: str = "",
         trace_id: str = None,
-        parent_span_id: str = None
+        parent_span_id: str = None,
+        is_code: bool = False
     ) -> str:
         """Securely logs an action. Generates triple identity and canonical hash."""
         ident = generate_event_identity(trace_id=trace_id, parent_span_id=parent_span_id)
         
+        ast_hash = None
+        if is_code and state_diff:
+            try:
+                parsed_ast = ast.parse(state_diff)
+                canonical_ast = ast.dump(parsed_ast)
+                ast_hash = hashlib.sha3_256(canonical_ast.encode('utf-8')).hexdigest()
+            except SyntaxError:
+                ast_hash = "INVALID_SYNTAX"
+
         payload = {
             "tenant_id": tenant_id,
             "actor_role": actor_role,
@@ -156,7 +168,8 @@ class EnterpriseAuditLedger:
             "action": action,
             "resource": resource,
             "status": status,
-            "state_diff": state_diff
+            "state_diff": state_diff,
+            "ast_hash": ast_hash
         }
 
         # Canonicalize payload to json string

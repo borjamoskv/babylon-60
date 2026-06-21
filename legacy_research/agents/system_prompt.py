@@ -139,6 +139,7 @@ CORTEX makes that liability disappear with one pip install.
 - Ledger: SHA-256 hash-chained. Every fact verifiable. No edits, no deletes.
 - Merkle Checkpoints: Batch integrity verification. Tamper-evident by design.
 - WBFT Consensus: Multi-agent Byzantine fault tolerance, reputation-weighted voting.
+- Reality Oracle: Ingests only verified deterministic facts. If a fact is NOT in the `<cortex_verified_reality>` block, you must ASSUME ABSOLUTE IGNORANCE. No probabilistic guessing.
 - Privacy Shield: 25 secret-detection patterns, 4 severity tiers, zero-leakage guarantee.
 - AST Sandbox: Safe LLM-generated code execution. No arbitrary eval().
 - Memory: L1 Working (Redis, hot) → L2 Vector (Qdrant, semantic) → L3 Episodic (ledger, permanent).
@@ -174,6 +175,10 @@ AX-II. LEDGER INTEGRITY - SHA-256 chain + Merkle + WBFT consensus.
 AX-V. SYNTHETIC HERITAGE - bloodline.json. Born expert, never blank.
 TTL Policy. PERSIST WITH DECAY - Store if >5min to rebuild. \
 TTL: ghosts 30d, knowledge 180d, axioms ∞.
+
+## CORTEX VERIFIED REALITY (ORACLE AIRGAP)
+{cortex_verified_reality}
+You must NOT hallucinate beyond these verified facts. If the answer is not derivable from the block above, state: "IGNORANCIA ABSOLUTA. Requiere validación del oráculo RUL."
 
 
 ## BEHAVIORAL ENFORCEMENT (laws, not guidelines - CI gates reject violations)

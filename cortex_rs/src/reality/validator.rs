@@ -1,4 +1,4 @@
-use crate::reality::claim::VerifiableClaimInput;
+use crate::reality::claim::RealityClaim;
 
 #[derive(Debug)]
 pub enum ValidationError {
@@ -43,8 +43,7 @@ impl Default for Validator {
 impl Validator {
     pub fn validate(
         &self,
-        claim: &VerifiableClaimInput,
-        trust_score: f32,
+        claim: &RealityClaim,
         now_epoch_ms: u64,
     ) -> Result<(), ValidationError> {
         if claim.statement.trim().is_empty() {
@@ -55,9 +54,9 @@ impl Validator {
             return Err(ValidationError::NoSources);
         }
 
-        if trust_score < self.minimum_trust {
+        if claim.trust_score < self.minimum_trust {
             return Err(ValidationError::TrustTooLow {
-                actual: trust_score,
+                actual: claim.trust_score,
                 minimum: self.minimum_trust,
             });
         }

@@ -49,8 +49,8 @@ fn append_ledger_event(_origin: &str, _payload: &str) -> Result<(), String> {
     Err("wire cortex_rs::ledger_append here".to_string())
 }
 
-fn near_collapse(_energy: u64) -> bool {
-    false
+fn near_collapse(energy: u64) -> bool {
+    energy > 1000
 }
 
 fn apply_slash(_node_id: &str) -> Result<(), String> {
