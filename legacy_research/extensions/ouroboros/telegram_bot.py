@@ -25,3 +25,14 @@ async def notify_human(message: str):
                     logger.error(f"Failed to send telegram: {text}")
     except Exception as e:
         logger.error(f"Telegram error: {e}")
+
+async def notify_daily_summary(stats: dict):
+    """Phase 4: Emit thermodynamic summary report"""
+    msg = (
+        f"📊 *Ouroboros Daily Report*\n"
+        f"Node: {stats.get('node_id', 'Unknown')}\n"
+        f"Avg Health: {stats.get('avg_health', 'N/A')}\n"
+        f"Total Actions Taken: {stats.get('actions_taken', 0)}\n"
+        f"Stability Score: {stats.get('stability_score', 'N/A')}"
+    )
+    await notify_human(msg)
