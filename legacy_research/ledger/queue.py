@@ -22,7 +22,7 @@ class EnrichmentQueue:
 
     def enqueue(self, event_id: str) -> str:
         job_id = str(uuid.uuid4())
-        with self.store.tx() as conn:
+        with self.store.tx(mode="EXCLUSIVE") as conn:
             conn.execute(
                 """
                 INSERT INTO enrichment_jobs (
@@ -40,7 +40,7 @@ class EnrichmentQueue:
         Uses SQLite's RETURNING clause (3.35.0+) to ensure only one worker
         claims each job, even under high concurrency.
         """
-        with self.store.tx() as conn:
+        with self.store.tx(mode="EXCLUSIVE") as conn:
             # We must use a subquery to find the candidate ID, then update it.
             # RETURNING gives us the row values after the update.
             row = conn.execute(
@@ -70,7 +70,7 @@ class EnrichmentQueue:
             return dict(row)
 
     def mark_done(self, job_id: str, event_id: str) -> None:
-        with self.store.tx() as conn:
+        with self.store.tx(mode="EXCLUSIVE") as conn:
             conn.execute(
                 """
                 UPDATE enrichment_jobs
@@ -95,7 +95,7 @@ class EnrichmentQueue:
         ).isoformat()
         terminal = attempts >= 8
 
-        with self.store.tx() as conn:
+        with self.store.tx(mode="EXCLUSIVE") as conn:
             conn.execute(
                 """
                 UPDATE enrichment_jobs

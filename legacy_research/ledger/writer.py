@@ -47,7 +47,7 @@ class LedgerWriter:
         if self.replay_policy is not None:
             self.replay_policy.validate_event(event)
 
-        with self.store.tx() as conn:
+        with self.store.tx(mode="EXCLUSIVE") as conn:
             if self.replay_policy is not None:
                 admission = self.replay_policy.admit_event(conn, event)
                 if admission.status == "idempotent":

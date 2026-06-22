@@ -22,13 +22,28 @@ class LedgerStore:
         return connect(self.db_path, row_factory=sqlite3.Row)
 
     @contextmanager
-    def tx(self) -> Iterator[sqlite3.Connection]:
+    def tx(self, mode: str | None = None) -> Iterator[sqlite3.Connection]:
         conn = self._connect()
+        if mode is not None:
+            conn.isolation_level = None
+            conn.execute(f"BEGIN {mode}")
         try:
             yield conn
-            conn.commit()
+            if mode is not None:
+                conn.execute("COMMIT")
+            else:
+                conn.commit()
         except Exception as exc:
-            conn.rollback()
+            if mode is not None:
+                try:
+                    conn.execute("ROLLBACK")
+                except sqlite3.OperationalError:
+                    pass
+            else:
+                try:
+                    conn.rollback()
+                except sqlite3.OperationalError:
+                    pass
             if getattr(exc, "preserve_ledger_error", False):
                 raise
             raise LedgerStoreError(str(exc)) from exc
