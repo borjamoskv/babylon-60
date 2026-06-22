@@ -103,6 +103,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin, ResourceMgrMixin,
     iot_oracle: Any
     zero_prompting_daemon: Any
     retrieval_breaker_daemon: Any
+    primitive_synthesis_daemon: Any
     notify_enabled: bool
     _last_alerts: dict[str, float]
     _cooldown: float

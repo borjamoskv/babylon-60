@@ -100,7 +100,7 @@ class PrimitiveSynthesisDaemon:
             conn = self.engine.pool.get_connection()
             # Generate random 16-byte id using SQLite randomblob
             conn.execute(
-                "INSERT INTO facts (id, type, topic, content, timestamp) "
+                "INSERT INTO facts (id, fact_type, topic, content, timestamp) "
                 "VALUES (lower(hex(randomblob(16))), 'hypothesis', 'Primitive_Crossover', ?, ?)",
                 (content, time.monotonic()),
             )

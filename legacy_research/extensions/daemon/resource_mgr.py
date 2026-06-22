@@ -68,6 +68,14 @@ try:
 except ImportError:
     _ENTROPIC_WAKE_AVAILABLE = False
 
+try:
+    from cortex.extensions.daemon.primitive_synthesis import PrimitiveSynthesisDaemon
+
+    _PRIMITIVE_SYNTHESIS_AVAILABLE = True
+except ImportError:
+    _PRIMITIVE_SYNTHESIS_AVAILABLE = False
+
+
 from cortex.extensions.daemon.models import CORTEX_DB, CORTEX_DIR
 from cortex.extensions.daemon.monitors import CloudSyncMonitor, DiskMonitor, EngineHealthCheck
 
@@ -254,6 +262,18 @@ class ResourceMgrMixin:
                 logger.info("🌌 Entropic Wake Daemon (VOID DAEMON) ENABLED")
             except Exception as e:  # noqa: BLE001
                 logger.warning("Failed to init Entropic Wake Daemon: %s", e)
+
+        self.primitive_synthesis_daemon = None
+        if _PRIMITIVE_SYNTHESIS_AVAILABLE:
+            try:
+                self.primitive_synthesis_daemon = PrimitiveSynthesisDaemon(
+                    engine=self._shared_engine,
+                    interval_hours=int(file_config.get("primitive_synthesis_interval_hours", 12)),
+                )
+                logger.info("🧬 Primitive Synthesis Daemon (OUROBOROS) ENABLED")
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to init Primitive Synthesis Daemon: %s", e)
+
         # Time Tracker
         try:
             import sqlite3

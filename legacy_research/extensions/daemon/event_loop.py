@@ -163,6 +163,14 @@ class EventLoopMixin:
                     name="ZeroPromptingDaemon",
                 )
             )
+        if getattr(self, "primitive_synthesis_daemon", None):
+            tasks.append(
+                asyncio.create_task(
+                    self._run_loop_daemon_async(self.primitive_synthesis_daemon, "Primitive Synthesis", "🧬"),
+                    name="PrimitiveSynthesisDaemon",
+                )
+            )
+
         if getattr(self, "retrieval_breaker_daemon", None):
             tasks.append(
                 asyncio.create_task(
@@ -253,6 +261,8 @@ class EventLoopMixin:
             self.zero_prompting_daemon.stop()  # type: ignore[union-attr]
         if getattr(self, "retrieval_breaker_daemon", None):
             self.retrieval_breaker_daemon.stop()  # type: ignore[union-attr]
+        if getattr(self, "primitive_synthesis_daemon", None):
+            self.primitive_synthesis_daemon.stop()  # type: ignore[union-attr]
         if getattr(self, "sovereignty_runtime", None):
             await self.sovereignty_runtime.stop()
 
