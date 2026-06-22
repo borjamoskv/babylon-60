@@ -144,7 +144,7 @@ const articles = [
 
 	.noir-blog-shell {
 		min-height: 100vh;
-		background: #0A0A0A; /* Deep Noir Base */
+		background: transparent;
 		color: #F3F4F6;
 		font-family: 'Inter', sans-serif;
 	}
@@ -157,15 +157,7 @@ const articles = [
 		overflow: hidden;
 	}
 
-	.noir-hero::before {
-		content: '';
-		position: absolute;
-		inset: 0;
-		background:
-			radial-gradient(ellipse at 25% 60%, rgba(43, 59, 229, 0.15) 0%, transparent 55%),
-			radial-gradient(ellipse at 75% 20%, rgba(255, 0, 85, 0.08) 0%, transparent 45%);
-		pointer-events: none;
-	}
+
 
 	.noir-hero-label {
 		font-family: 'Orbitron', sans-serif;
@@ -187,7 +179,7 @@ const articles = [
 	}
 
 	.noir-hero-title span {
-		background: linear-gradient(135deg, #FF0055, #2B3BE5);
+		background: linear-gradient(135deg, #F59E0B, #2B3BE5);
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
 		background-clip: text;
@@ -264,7 +256,7 @@ const articles = [
 
 	.noir-card-featured::before {
 		height: 4px;
-		background: linear-gradient(90deg, #FF0055, #2B3BE5 50%, transparent);
+		background: linear-gradient(90deg, #F59E0B, #2B3BE5 50%, transparent);
 		transform: scaleX(1);
 	}
 
@@ -303,9 +295,9 @@ const articles = [
 	}
 
     .noir-card-featured .noir-card-tag {
-        border-color: rgba(255, 0, 85, 0.5);
-		color: #FF0055;
-		background: rgba(255, 0, 85, 0.1);
+        border-color: rgba(245, 158, 11, 0.5);
+		color: #F59E0B;
+		background: rgba(245, 158, 11, 0.1);
     }
 
 	.noir-card-date {

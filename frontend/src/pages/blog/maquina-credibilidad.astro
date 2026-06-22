@@ -1,80 +1,38 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Máquina de Credibilidad: Consenso, Exergía y la Muerte del Vibe Coding | CORTEX Persist</title>
-    <meta name="description" content="Cómo escapar del caos probabilístico de los LLMs. La arquitectura de la Máquina de Credibilidad en CORTEX-Persist: firmas Ed25519, snapshots atómicos y replay determinista.">
-
-    <!-- Google Fonts: Outfit & JetBrains Mono -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+---
+<SiteLayout
+	title="La Máquina de Credibilidad | CORTEX Persist"
+	description="Cómo escapar del caos probabilístico de los LLMs. La arquitectura de la Máquina de Credibilidad en CORTEX-Persist: firmas Ed25519, snapshots atómicos y replay determinista."
+>
 
     <style>
         :root {
             /* Industrial Noir 2026 Tokens */
             --ember-void: #0A0A0A;
             --yinmn-blue: #2B3BE5;
-            --sovereign-amber: #FF9F1C;
+            --sovereign-amber: #F59E0B;
             --oxide-gold: #FFD700;
             --parchment-white: #F3F4F6;
-            --crimson-accent: #FF0055;
+            --crimson-accent: #F59E0B;
             --mica-dust: rgba(43, 59, 229, 0.05);
             --mica-border: rgba(43, 59, 229, 0.15);
             --glass-bg: rgba(10, 10, 10, 0.7);
 
             /* Typography */
-            --font-primary: 'Outfit', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
+            --font-primary: 'Inter', sans-serif;
+            --font-mono: 'IBM Plex Mono', monospace;
 
             /* Physics */
-            --transition-smooth: all 600ms cubic-bezier(0.16, 1, 0.3, 1);
-            --radius-soft: 12px;
+            --transition-smooth: all 200ms ease;
+            --radius-soft: 0px;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background-color: var(--ember-void);
+        .blog-article {
+            background-color: transparent;
             color: var(--parchment-white);
             font-family: var(--font-primary);
             line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        /* Analog Grain Texture */
-        body::before {
-            content: "";
-            position: fixed;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 9999;
-            opacity: 0.6;
-        }
-
-        /* YInMn Ambient Glow */
-        .ambient-glow {
-            position: fixed;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 800px;
-            height: 400px;
-            background: radial-gradient(ellipse at top, rgba(43, 59, 229, 0.15) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: -1;
         }
 
         .container {
@@ -299,11 +257,7 @@
             color: #FFFFFF;
         }
     </style>
-</head>
-<body>
-    <div class="ambient-glow"></div>
-
-    <div class="container">
+    <div class="container blog-article">
         <div class="back-nav">
             <a href="/blog">← Intelligence Log</a>
         </div>
@@ -473,5 +427,4 @@ await conn.execute(f"VACUUM INTO '{safe_path}'")</code></pre>
     <script type="text/javascript" id="MathJax-script" async
       src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
     </script>
-</body>
-</html>
+</SiteLayout>
