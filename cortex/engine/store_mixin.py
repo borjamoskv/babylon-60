@@ -204,13 +204,13 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         from cortex.types.evidence import ClosurePayload, EvidenceBundle
         from datetime import datetime, timezone
         
-        evidence = EvidenceBundle.create(
+        evidence = EvidenceBundle.forge(
             query=project,
             sources=[],
             retrieved_at=datetime.now(timezone.utc)
         )
         
-        payload = ClosurePayload.create(
+        payload = ClosurePayload.seal(
             claims=[{"content": content, "fact_type": fact_type, "meta": meta, "tags": tags}],
             evidence=evidence,
             verdict=True
