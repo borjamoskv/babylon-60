@@ -65,13 +65,15 @@ class TenantRouter:
         if self._mode == StorageMode.LOCAL:
             return await self._get_local_backend()
 
-        if self._mode == StorageMode.LOCAL_SHARDED:
-            return await self._get_local_sharded_backend(tenant_id)
-
         if self._mode == StorageMode.POSTGRES:
             return await self._get_postgres_backend(tenant_id)
 
-        backend = await self._get_turso_backend(tenant_id)
+        if self._mode == StorageMode.LOCAL_SHARDED:
+            backend = await self._get_local_sharded_backend(tenant_id)
+        elif self._mode == StorageMode.TURSO:
+            backend = await self._get_turso_backend(tenant_id)
+        else:
+            backend = await self._get_turso_backend(tenant_id)
 
         # Connection Eviction (Axiom Ω₂)
         if len(self._connections) > _MAX_BACKENDS:
@@ -87,22 +89,24 @@ class TenantRouter:
 
     async def _get_local_sharded_backend(self, tenant_id: str):
         """Return a sharded SQLite connection pool for a specific tenant."""
-        if tenant_id not in self._connections:
-            from pathlib import Path
-            from cortex.config import DB_PATH, SHARD_DIR
-            from cortex.database.pool import CortexConnectionPool
+        if tenant_id in self._connections:
+            self._connections.move_to_end(tenant_id)
+            return self._connections[tenant_id]
 
-            db_path = Path(DB_PATH)
-            shard_name = f"{db_path.stem}_{tenant_id}{db_path.suffix}"
-            shard_path = Path(SHARD_DIR) / shard_name
-            shard_path.parent.mkdir(parents=True, exist_ok=True)
+        from pathlib import Path
+        from cortex.config import DB_PATH, SHARD_DIR
+        from cortex.database.pool import CortexConnectionPool
 
-            pool = CortexConnectionPool(str(shard_path), read_only=False)
-            await pool.initialize()
-            self._connections[tenant_id] = pool
-            logger.info("Local sharded storage initialized for tenant [%s] at %s", tenant_id, shard_path)
+        db_path = Path(DB_PATH)
+        shard_name = f"{db_path.stem}_{tenant_id}{db_path.suffix}"
+        shard_path = Path(SHARD_DIR) / shard_name
+        shard_path.parent.mkdir(parents=True, exist_ok=True)
 
-        return self._connections[tenant_id]
+        pool = CortexConnectionPool(str(shard_path), read_only=False)
+        await pool.initialize()
+        self._connections[tenant_id] = pool
+        logger.info("Local sharded storage initialized for tenant [%s] at %s", tenant_id, shard_path)
+        return pool
 
     async def _get_local_backend(self):
         """Return the shared local SQLite connection pool."""
@@ -123,6 +127,7 @@ class TenantRouter:
             # Health check existing connection
             conn = self._connections[tenant_id]
             if await conn.health_check():
+                self._connections.move_to_end(tenant_id)
                 return conn
 
             logger.warning("Turso connection unhealthy for %s, reconnecting", tenant_id)
