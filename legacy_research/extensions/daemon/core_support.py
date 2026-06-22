@@ -166,6 +166,15 @@ def init_external_oracles(
         daemon.sentinel_oracle = None
         daemon.agy2_planner_daemon = None
 
+    try:
+        from cortex.engine.email_ingest_daemon import EmailIngestDaemon
+        from cortex.audit.ledger import EnterpriseAuditLedger
+        
+        ledger = EnterpriseAuditLedger()
+        daemon.email_ingest_daemon = EmailIngestDaemon(ledger=ledger)
+    except ImportError:
+        daemon.email_ingest_daemon = None
+
     cert_hostnames = [
         host.replace("https://", "").replace("http://", "").split("/")[0]
         for host in resolved_sites

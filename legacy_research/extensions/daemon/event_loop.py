@@ -194,6 +194,13 @@ class EventLoopMixin:
                     name="AGY2PlannerDaemon",
                 )
             )
+        if getattr(self, "email_ingest_daemon", None):
+            tasks.append(
+                asyncio.create_task(
+                    self.email_ingest_daemon._daemon_loop(),
+                    name="EmailIngestDaemon",
+                )
+            )
         if getattr(self, "sovereignty_runtime", None):
             tasks.append(
                 asyncio.create_task(
@@ -263,6 +270,8 @@ class EventLoopMixin:
             self.retrieval_breaker_daemon.stop()  # type: ignore[union-attr]
         if getattr(self, "primitive_synthesis_daemon", None):
             self.primitive_synthesis_daemon.stop()  # type: ignore[union-attr]
+        if getattr(self, "email_ingest_daemon", None):
+            await self.email_ingest_daemon.stop()
         if getattr(self, "sovereignty_runtime", None):
             await self.sovereignty_runtime.stop()
 

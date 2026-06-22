@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.3.2b1",
   "scripts": {
-    "dev": "python3 scripts/update_signatures.py && astro dev",
+    "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",

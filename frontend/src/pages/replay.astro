@@ -1,0 +1,113 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { EDGReplayPlayground } from '../components/landing/EDGReplayPlayground';
+---
+
+<SiteLayout
+	title="CORTEX Persist | EDG Replay & Deterministic Rollback"
+	description="Interactive demonstration of the Epistemic Dependency Graph (EDG) detecting hallucinations, triggering rollbacks, and replaying deterministically."
+	canonical="https://cortexpersist.com/replay"
+	bodyClass="replay-demo-body"
+>
+	<div id="demo-stage">
+		<header class="demo-topbar surface mb-8">
+			<div class="demo-brand">
+				<a class="brand" href="/" aria-label="Return to landing">
+					<span class="brand-mark">CP</span>
+					<span class="brand-copy">
+						<strong>CORTEX Persist</strong>
+						<span>EDG Causal Rollback / Demo v1</span>
+					</span>
+				</a>
+			</div>
+
+			<div class="demo-heading text-center">
+				<p class="eyebrow text-[#CCFF00] font-mono text-xs tracking-widest mb-1">INTERACTIVE PLAYGROUND</p>
+				<h1 class="font-orbitron text-xl uppercase tracking-wider m-0 text-white">EDG Colisión & Replay</h1>
+			</div>
+
+			<div class="demo-actions">
+				<div class="status-badge bg-white/5 border border-white/10 px-3 py-1 rounded font-mono text-xs text-gray-400">
+					MODE: SIMULATION
+				</div>
+			</div>
+		</header>
+
+		<main class="mb-16">
+			<div class="max-w-3xl mx-auto text-center mb-10">
+				<p class="text-gray-400 leading-relaxed">
+					Watch the <strong>Epistemic Dependency Graph (EDG)</strong> in action. When an agent hallucinates or makes a speculative claim without empirical backing, the EDG invalidates the node and propagates a <em>Contradicted</em> state downstream. CORTEX-Persist then executes a deterministic rollback to the last <strong>Proven</strong> hash, and replays the causal chain securely.
+				</p>
+			</div>
+
+			<EDGReplayPlayground client:only="react" />
+		</main>
+	</div>
+</SiteLayout>
+
+<style is:global>
+	.replay-demo-body {
+		background: #0A0A0A;
+		color: #E2E8F0;
+		font-family: 'Manrope', sans-serif;
+	}
+
+	#demo-stage {
+		max-width: 1280px;
+		margin: 0 auto;
+		padding: 2rem 1rem;
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.demo-topbar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 1.25rem 1.5rem;
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		border-radius: 12px;
+		background: rgba(26, 26, 26, 0.4);
+		backdrop-filter: blur(12px);
+	}
+
+	.demo-brand {
+		display: flex;
+		align-items: center;
+	}
+
+	.brand {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		text-decoration: none;
+		color: inherit;
+	}
+
+	.brand-mark {
+		background: #2B3BE5;
+		color: white;
+		font-family: 'Orbitron', sans-serif;
+		font-weight: 700;
+		padding: 0.25rem 0.5rem;
+		border-radius: 4px;
+		font-size: 0.9rem;
+	}
+
+	.brand-copy {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.brand-copy strong {
+		font-size: 0.95rem;
+		letter-spacing: 0.05em;
+	}
+
+	.brand-copy span {
+		font-size: 0.7rem;
+		color: #94A3B8;
+		font-family: 'IBM Plex Mono', monospace;
+	}
+</style>

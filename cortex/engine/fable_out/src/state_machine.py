@@ -59,7 +59,7 @@ EpistemicPhase = (
 EpistemicPhase_reflection = _expr3
 
 
-def _expr4() -> TypeInfo:
+def _expr5() -> TypeInfo:
     return union_type(
         "Cortex.Kernel.StateMachine.TransitionResult",
         Array([]),
@@ -96,10 +96,10 @@ class TransitionResult_Halted(_TransitionResult): ...
 
 TransitionResult = (TransitionResult_Advanced | TransitionResult_Blocked) | TransitionResult_Halted
 
-TransitionResult_reflection = _expr4
+TransitionResult_reflection = _expr5
 
 
-def _expr5() -> TypeInfo:
+def _expr6() -> TypeInfo:
     return record_type(
         "Cortex.Kernel.StateMachine.MachineState",
         Array([]),
@@ -124,7 +124,7 @@ class MachineState(Record):
         return int(self.GetHashCode())
 
 
-MachineState_reflection = _expr5
+MachineState_reflection = _expr6
 
 
 def phase_to_tag(phase: EpistemicPhase) -> uint32:
