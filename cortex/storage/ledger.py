@@ -147,11 +147,14 @@ class EnterpriseAuditLedger:
                     "size": len(batch)
                 }
 
-                # Write to JSONL WORM
-                with open(self.log_path, "a") as f:
-                    for evt in batch:
-                        f.write(json.dumps(evt) + "\n")
-                    f.write(json.dumps(batch_event) + "\n")
+                # [C5-REAL] Cross-process file lock (Issue #464 mitigation)
+                # Prevents JSONL corruption when multiple OS processes flush
+                # to the same audit ledger file concurrently.
+                async with AsyncFileLock():
+                    with open(self.log_path, "a") as f:
+                        for evt in batch:
+                            f.write(json.dumps(evt) + "\n")
+                        f.write(json.dumps(batch_event) + "\n")
 
                 self._last_hash = merkle_root
 

@@ -27,6 +27,14 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
     """
     import os
     if os.environ.get("CORTEX_TESTING") == "1" and not os.environ.get("CORTEX_FORCE_MTK_TESTS") == "1":
+        # [C5-REAL] Production leak detection: if CORTEX_TESTING is set
+        # but no test runner is active, the MTK boundary is compromised.
+        if not os.environ.get("PYTEST_CURRENT_TEST"):
+            import logging as _log
+            _log.getLogger("cortex.mtk").critical(
+                "MTK-BYPASS-ALERT: CORTEX_TESTING=1 active without test runner. "
+                "MTK authorizer is DISABLED. If this is production, rotate credentials immediately."
+            )
         return sqlite3.SQLITE_OK
 
     # Default Deny: List of safe read-only and transaction-control actions

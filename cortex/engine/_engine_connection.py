@@ -52,10 +52,15 @@ class ConnectionMixin:
 
     @asynccontextmanager
     async def transaction(self) -> AsyncIterator[aiosqlite.Connection]:
-        """Provides a transactional context, committing on success or rolling back on error."""
+        """Provides a transactional context, committing on success or rolling back on error.
+
+        Uses BEGIN IMMEDIATE to acquire the RESERVED lock at transaction start,
+        preventing the read-modify-write race (Issue #464) if callers perform
+        hash-chain or ledger mutations through this context manager.
+        """
         async with self.session() as conn:
             try:
-                await conn.execute("BEGIN")
+                await conn.execute("BEGIN IMMEDIATE")
                 yield conn
                 await conn.commit()
             except Exception:
