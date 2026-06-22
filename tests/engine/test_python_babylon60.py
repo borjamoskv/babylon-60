@@ -39,14 +39,24 @@ def test_python_babylon60_arithmetic():
     assert f._value == 7200
     assert f.to_float() == 2.0
 
+    # Reflected arithmetic
+    assert 1.5 + b == Babylon60(2.0)
+    assert 1.0 - b == Babylon60(0.5)
+    assert 2.0 * b == Babylon60(1.0)
+    assert 1.0 / b == Babylon60(2.0)
+
 
 def test_python_babylon60_errors():
     a = Babylon60(1.0)
     with pytest.raises(ZeroDivisionError):
         _ = a / Babylon60(0.0)
 
+    # Coercion succeeds for int
+    assert a + 5 == Babylon60(6.0)
+
+    # Invalid type raises TypeError
     with pytest.raises(TypeError):
-        _ = a + 5
+        _ = a + "invalid"
 
 
 def test_python_babylon60_comparisons():
