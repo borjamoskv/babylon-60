@@ -324,3 +324,4 @@ demo_causal/backend/artifacts/*
 demo_causal/backend/*.db
 frontend/.wrangler/
 .wrangler/
+target_maturin/
