@@ -109,6 +109,7 @@ All agents operating in this repository MUST self-identify by role before acting
 12. **Execution/Interpretation Isolation:** Deterministic execution MUST be strictly separated from stochastic interpretation. This structural boundary prevents the CI environment from degrading into a "conceptual simulator".
 13. **Epistemic Containment (L3.5):** Agents MUST explicitly declare the epistemic type of their output using `EpistemicNode` structures. Stating an inference, simulation, or counterfactual as an observation is a P0 failure.
 14. **CLI Sandbox Isolation:** CLI commands that write to the database for testing or demonstration purposes MUST use an isolated temporary database (e.g., `/tmp/cortex_test_*.db`) to prevent inter-process SQLite contention with the production database. The temporary DB must be initialized with `PRAGMA journal_mode=WAL;` and `PRAGMA busy_timeout=5000;` before any operation.
+15. **Variational Free Energy Guard (AUTO-8):** The MTK must penalize generative claims when complexity exceeds empirical backing. Net exergy after Friston penalty deduction (\(Exergy_{base} - \text{Complexity} / (\text{Accuracy} + 1) \times 0.05\)) must be \(\ge 0.1\) to permit DB writes.
 
 ### ❌ Anti-Patterns & Failure Signatures
 
