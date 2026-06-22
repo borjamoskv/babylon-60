@@ -5,6 +5,7 @@ Integrates Swarm 10k consolidation with the Minimal Trusted Kernel (MTK) and phy
 """
 
 import asyncio
+import logging
 import os
 import time
 from datetime import datetime, timezone
@@ -14,8 +15,10 @@ from cortex.engine.mtk_core import MTKGuard
 from cortex.engine.swarm_10k import SwarmCommander
 from cortex.types.evidence import ClosurePayload, EvidenceBundle, Source
 
+logger = logging.getLogger(__name__)
+
 async def run_deterministic_consolidation(mtk_private_key: str):
-    print("🔱 INICIANDO FLUJO DE CONSOLIDACIÓN DETERMINISTA C5-REAL (ULTRATHINK)")
+    logger.info("🔱 INICIANDO FLUJO DE CONSOLIDACIÓN DETERMINISTA C5-REAL (ULTRATHINK)")
 
     # 1. MTK Init
     mtk = MTKGuard(private_key=mtk_private_key)
@@ -33,9 +36,9 @@ async def run_deterministic_consolidation(mtk_private_key: str):
         info_exergy=1.0
     )
 
-    print("🛡️ Obteniendo Autorización Criptográfica MTK...")
+    logger.info("🛡️ Obteniendo Autorización Criptográfica MTK...")
     async with mtk.transaction_boundary(payload) as token:
-        print(f"✅ Token MTK Efímero Obtenido: {token}")
+        logger.info(f"✅ Token MTK Efímero Obtenido: {token}")
 
         # 3. Swarm 10k Parallel Execution
         bus_path = Path("/tmp/swarm_10k_bus")
@@ -44,15 +47,15 @@ async def run_deterministic_consolidation(mtk_private_key: str):
         await commander.initialize()
 
         tasks = [{"domain": "consolidation", "agent_id": i, "complexity": 5, "task": "audit_and_consolidate"} for i in range(10_000)]
-        print("⚡ Desplegando Enjambre de 10,000 Agentes para Consolidación (Strike Mode)...")
+        logger.info("⚡ Desplegando Enjambre de 10,000 Agentes para Consolidación (Strike Mode)...")
         t0 = time.perf_counter()
         async with commander.strike_mode("consolidation"):
             await commander.execute_global_dispatch(tasks)
         elapsed_ms = (time.perf_counter() - t0) * 1000
-        print(f"✓ Dispatch Paralelo Completado en {elapsed_ms:.2f}ms")
+        logger.info(f"✓ Dispatch Paralelo Completado en {elapsed_ms:.2f}ms")
 
         # 4. Physical Consolidation (Shell Execution)
-        print("🧱 Ejecutando Sentinela Físico en Bash (Git, Cache, Rust, WAL)...")
+        logger.info("🧱 Ejecutando Sentinela Físico en Bash (Git, Cache, Rust, WAL)...")
         process = await asyncio.create_subprocess_shell(
             "bash scripts/consolidar_cortex.sh",
             stdout=asyncio.subprocess.PIPE,
@@ -60,9 +63,9 @@ async def run_deterministic_consolidation(mtk_private_key: str):
         )
         stdout, stderr = await process.communicate()
         if process.returncode != 0:
-            print(f"❌ Fallo en la Consolidación Física. Stderr:\n{stderr.decode()}")
+            logger.error(f"❌ Fallo en la Consolidación Física. Stderr:\n{stderr.decode()}")
             raise RuntimeError("C5-REAL: Fallo en consolidar_cortex.sh")
-        print(f"✅ Sentinela Físico Exitoso:\n{stdout.decode()}")
+        logger.info(f"✅ Sentinela Físico Exitoso:\n{stdout.decode()}")
 
         await commander.consolidate_and_annihilate()
 
@@ -76,8 +79,8 @@ async def run_deterministic_consolidation(mtk_private_key: str):
             f.write(f"> **MANDATO**: Purga de anergía y reducción entrópica completada.\n")
             f.write(f"Consolidación determinista orquestada vía Legion-10k y MTK.\n")
         
-        print(f"📜 Ledger de Consolidación Emitido: {ledger_path}")
-        print("🔱 CONSOLIDACIÓN DETERMINISTA COMPLETADA. Entropía Erradicada.")
+        logger.info(f"📜 Ledger de Consolidación Emitido: {ledger_path}")
+        logger.info("🔱 CONSOLIDACIÓN DETERMINISTA COMPLETADA. Entropía Erradicada.")
 
 if __name__ == "__main__":
     # Test runner for physical console mapping

@@ -36,8 +36,20 @@ from cortex.database.schema_extensions import (
     EXTENSION_SCHEMA,
 )
 
+from cortex.database.c5_real_schema import (
+    CREATE_C5_AUDIT_LEDGER,
+    CREATE_C5_EDG_NODES,
+    CREATE_C5_EDG_EDGES,
+    CREATE_C5_MEMORY_VAULT,
+    C5_REAL_SCHEMA,
+)
+
 __all__ = [
     "ALL_SCHEMA",
+    "CREATE_C5_AUDIT_LEDGER",
+    "CREATE_C5_EDG_NODES",
+    "CREATE_C5_EDG_EDGES",
+    "CREATE_C5_MEMORY_VAULT",
     "CREATE_AGENTS",
     "CREATE_AUDIT_EXPORTS",
     "CREATE_COMPACTION_LOG",
@@ -395,6 +407,7 @@ _CORE_SCHEMA = [
     CREATE_TENANTS,
     CREATE_LKRGSER_REPLAY_ADMISSIONS,
     CREATE_LKRGSER_REPLAY_ADMISSIONS_INDEXES,
+    C5_REAL_SCHEMAT_INTEL,
 ]
 
 # Full ordered schema: core + extensions (consensus, episodes, signals, entity_events...)

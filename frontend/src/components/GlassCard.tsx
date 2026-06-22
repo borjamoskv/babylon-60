@@ -12,20 +12,19 @@ export default function GlassCard({ children, className, glowColor = 'rgba(43,59
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-md border border-white/10 bg-black/40 backdrop-blur-xl p-8 group transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:-translate-y-1.5 hover:scale-[1.01]",
+        "relative overflow-hidden border border-white/5 bg-[#050505]/80 backdrop-blur-md p-8 group transition-colors duration-200 hover:border-[#2B3BE5] hover:bg-[#0a0a0a]",
         className
       )}
     >
-      {/* Dynamic Glow Effect */}
+      {/* Kintsugi Gold micro-border glow on hover */}
       <div 
-        className="absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-md pointer-events-none"
-        style={{
-          background: `radial-gradient(circle at 50% 0%, ${glowColor}, transparent 70%)`
-        }}
+        className="absolute bottom-0 left-0 h-[1px] w-0 bg-[#F59E0B] group-hover:w-full transition-all duration-300 ease-out"
       />
       
       {/* Noise Texture inside card */}
-      <div className="absolute inset-0 z-0 opacity-[0.02] mix-blend-overlay pointer-events-none noise-texture" />
+      <div className="absolute inset-0 z-0 opacity-[0.05] mix-blend-screen pointer-events-none" 
+           style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} 
+      />
 
       <div className="relative z-10">
         {children}

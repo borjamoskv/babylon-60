@@ -1,5 +1,6 @@
 ---
 import '../styles/site.css';
+import CortexShaderCanvas from '../components/landing/CortexShaderCanvas.tsx';
 
 interface Props {
 	title: string;
@@ -41,11 +42,7 @@ const {
 		<slot name="head" />
 	</head>
 	<body class:list={['site-body', bodyClass]}>
-		<div class="site-ambience" aria-hidden="true">
-			<div class="site-glow site-glow-a"></div>
-			<div class="site-glow site-glow-b"></div>
-			<div class="site-grid"></div>
-		</div>
+		<CortexShaderCanvas client:load />
 		<slot />
 	</body>
 </html>

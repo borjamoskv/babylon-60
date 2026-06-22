@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 # Context variable to hold the ephemeral cryptographic token.
 # If this is empty or invalid, ALL writes are physically rejected at the DB engine layer.
 mtk_active_token: ContextVar[str | None] = ContextVar("mtk_active_token", default=None)
+mtk_payload_hash: ContextVar[str | None] = ContextVar("mtk_payload_hash", default=None)
 
 def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbname: str | None, source: str | None) -> int:
     """
@@ -69,9 +70,23 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
                 return sqlite3.SQLITE_OK
 
         token = mtk_active_token.get()
+        payload = mtk_payload_hash.get() or ""
+        
         if not token or (not token.startswith("mtk_auth_") and not token.startswith("zk_seal_rs_")):
             logger.critical(f"[MTK-BLOCK] Unauthorized physical mutation attempt: Action {action} on {arg1}")
             return sqlite3.SQLITE_DENY
+            
+        if token.startswith("mtk_auth_"):
+            try:
+                import cortex_rs
+                kernel_key = os.environ.get("CORTEX_KERNEL_KEY", "dev_sovereign_key_v1")
+                is_valid = cortex_rs.verify_ephemeral_token(token, payload, kernel_key)
+                if not is_valid:
+                    logger.critical("[MTK-BLOCK] Cryptographic MTK verification failed. Forgery or expiration detected.")
+                    return sqlite3.SQLITE_DENY
+            except Exception as e:
+                logger.critical(f"[MTK-BLOCK] FFI verification error: {e}")
+                return sqlite3.SQLITE_DENY
             
         # Cross-Language Taint Propagation: Rust ZK-Seal bypasses GC taint tracking
         if token.startswith("zk_seal_rs_"):
