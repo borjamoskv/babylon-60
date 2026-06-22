@@ -116,12 +116,13 @@ async def generate_cortex_embedding(text: str) -> list[float]:
 
 async def check_semantic_redundancy(text_snippet: str) -> tuple[bool, str | None]:
     """Axioma Ω₂: Si ya sabemos esto, aniquilamos la operación."""
+    from cortex.extensions.security.tenant import get_tenant_id
     try:
         nearest = await vector_db.recall(
             query=text_snippet[:1000],
             limit=1,
             project="autodidact_knowledge",
-            tenant_id="sovereign",
+            tenant_id=get_tenant_id(),
         )
         if nearest:
             similitud = getattr(nearest[0], "_recall_score", 0.0)
@@ -279,10 +280,11 @@ async def execute_cognitive_synthesis(
     # Inyección Axioma Ω₂ + TurboQuant (arXiv:2504.19874)
     final_embedding = optimize_vector_qjl(base_embedding, bits=3.5)
 
+    from cortex.extensions.security.tenant import get_tenant_id
     memo_id = f"MEMO_{os.urandom(4).hex().upper()}"
     fact = CortexFactModel(
         id=memo_id,
-        tenant_id="sovereign",
+        tenant_id=get_tenant_id(),
         project_id="autodidact_knowledge",
         content=memo_content,
         embedding=final_embedding,
