@@ -4,6 +4,7 @@ import logging
 from typing import Any
 
 from cortex.engine.causal.taint_engine import _fast_sha3, canonicalize_content
+from cortex.engine.ingest.landauer_compression import LandauerCompressor
 
 logger = logging.getLogger("cortex.engine.ingest.gemini_ingest")
 
@@ -30,7 +31,16 @@ class GeminiIngestNode:
         if not payload_streams:
             raise ValueError("Payload stream cannot be empty. Zero Anergia enforced.")
             
-        # 2. Retrieval Ingestion 
+        # 2. Thermodynamic Context Compression (Landauer API)
+        compressed_streams = []
+        for stream in payload_streams:
+            if isinstance(stream, str):
+                compressed = LandauerCompressor.apply_compression(stream, modality="python_code" if "def " in stream else "text")
+                compressed_streams.append(compressed)
+            else:
+                compressed_streams.append(stream)
+                
+        # 3. Retrieval Ingestion 
         # In a real environment, this routes to the Gemini 1.5 Pro API 
         # using the full 2M context window.
         await asyncio.sleep(0) # Non-blocking mock
