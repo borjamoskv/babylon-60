@@ -26,6 +26,9 @@ graph TD
 All state mutations are routed through the Minimal Trusted Kernel (`mtk_core.py` and `mtk_sqlite_authorizer.py`). 
 * **Physical DB Rejection:** SQLite hooks intercept database operations via `mtk_authorizer_callback`. Mutations without an active ephemeral cryptographic token (Ed25519 signed closure) in the execution thread's context are immediately blocked with `SQLITE_DENY`.
 * **Zero SAGA Complexities:** Atomicity is handled by SQLite WAL transactions. SAGA logical rollback cascades are completely deprecated.
+* **Variational Free Energy Penalty (Friston Principle - AUTO-8):** To prevent hallucinations (anergy) from entering the persistent state, the MTK evaluates the complexity (number of claims) relative to the empirical precision (sources of evidence):
+  \[F_{var} = \frac{\text{Complexity}}{\text{Accuracy} + 1.0} \times 0.05\]
+  Transactions where the net exergy (\(Exergy_{base} - F_{var}\)) falls below \(0.1\) are rejected at the thread gate.
 
 ### 2.2 Epistemic Dependency Graph (EDG) & Causal Scheduling
 CORTEX tracks facts as nodes in an EDG. 
@@ -59,6 +62,7 @@ To avoid transactional deadlocks and hash chain bifurcations:
   ```
 * **Tenant Isolation:** All reads and writes must include a `tenant_id` scope. Cross-tenant reads are treated as **P0 security incidents**.
 * **CLI Sandbox Isolation:** Any CLI command writing to the database for demo/testing purposes (e.g. `latticework daemon --real`) MUST use an isolated database located at `/tmp/cortex_test_*.db`.
+* **Babylon-60 Epistemology:** All internal metric, exergy, latency, and coordinate computations utilize Base-60 scaled integer types (`Babylon60`, where \(1.0 = 3600\) units) instead of `float64` to eliminate floating-point rounding errors and cognitive approximation entropy.
 
 ---
 
