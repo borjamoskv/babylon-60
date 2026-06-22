@@ -23,6 +23,12 @@ def verify_ledger_cryptography(log_path: str, public_key) -> bool:
         return False
 
     try:
+        import cortex_core_rs
+    except ImportError:
+        logger.error("cortex_core_rs extension not available for Merkle verification.")
+        return False
+
+    try:
         with open(log_path) as f:
             lines = f.readlines()
             
@@ -30,6 +36,7 @@ def verify_ledger_cryptography(log_path: str, public_key) -> bool:
             return True # Empty ledger is technically consistent (genesis state)
 
         prev_hash = "GENESIS"
+        current_batch_hashes = []
         for line_num, line in enumerate(lines, 1):
             if not line.strip():
                 continue
@@ -40,14 +47,26 @@ def verify_ledger_cryptography(log_path: str, public_key) -> bool:
                 if event.get("prev_hash") != prev_hash:
                     logger.error(f"Line {line_num}: prev_hash mismatch: expected {prev_hash}, got {event.get('prev_hash')}")
                     return False
+                
                 batch_root = event.get("batch_root")
+                if not current_batch_hashes:
+                    logger.error(f"Line {line_num}: BATCH_ROOT found with empty batch.")
+                    return False
+                
+                computed_root = cortex_core_rs.batch_merkle_root(current_batch_hashes)
+                if batch_root != computed_root:
+                    logger.error(f"Line {line_num}: Merkle root mismatch: expected {computed_root}, got {batch_root}")
+                    return False
+
                 signature = event.get("signature")
                 try:
                     public_key.verify(bytes.fromhex(signature), batch_root.encode("utf-8"))
                 except Exception as e:
                     logger.error(f"Line {line_num}: BATCH_ROOT signature verification failed: {e}")
                     return False
+                
                 prev_hash = batch_root
+                current_batch_hashes.clear()
                 
             else:
                 # Check standard event
@@ -76,7 +95,7 @@ def verify_ledger_cryptography(log_path: str, public_key) -> bool:
                     logger.error(f"Line {line_num}: event signature verification failed: {e}")
                     return False
                 
-                prev_hash = event.get("event_hash")
+                current_batch_hashes.append(event.get("event_hash"))
                 
         return True
     except Exception as e:
