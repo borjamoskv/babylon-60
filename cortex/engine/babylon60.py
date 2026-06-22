@@ -1,4 +1,4 @@
-# [C5-REAL] Exergy-Maximized
+# [C5-REAL] Exergy-Maximized — Creator/Autor: Borja Moskv (borjamoskv)
 from __future__ import annotations
 
 
@@ -31,59 +31,52 @@ class Babylon60:
         obj._value = raw_value
         return obj
 
+    def _get_raw(self, other: int | float | Babylon60) -> int:
+        """Helper O(1) de alto rendimiento para extraer el valor escalado sin instanciar."""
+        if isinstance(other, Babylon60):
+            return other._value
+        if isinstance(other, int):
+            return other * self.SCALE
+        if isinstance(other, float):
+            return int(other * self.SCALE)
+        raise TypeError("Anergía detectada: Tipo incomputable para Babylon-60.")
+
     def to_float(self) -> float:
         """Solo para interfaces externas (Legacy C4-SIM)."""
         return self._value / self.SCALE
 
     def __add__(self, other: int | float | Babylon60) -> Babylon60:
-        if not isinstance(other, Babylon60):
-            other = Babylon60(other)
-        return Babylon60.from_raw(self._value + other._value)
+        return Babylon60.from_raw(self._value + self._get_raw(other))
 
     def __sub__(self, other: int | float | Babylon60) -> Babylon60:
-        if not isinstance(other, Babylon60):
-            other = Babylon60(other)
-        return Babylon60.from_raw(self._value - other._value)
+        return Babylon60.from_raw(self._value - self._get_raw(other))
 
     def __mul__(self, other: int | float | Babylon60) -> Babylon60:
-        if not isinstance(other, Babylon60):
-            other = Babylon60(other)
-        return Babylon60.from_raw((self._value * other._value) // self.SCALE)
+        return Babylon60.from_raw((self._value * self._get_raw(other)) // self.SCALE)
 
     def __truediv__(self, other: int | float | Babylon60) -> Babylon60:
-        if not isinstance(other, Babylon60):
-            other = Babylon60(other)
-        if other._value == 0:
+        other_raw = self._get_raw(other)
+        if other_raw == 0:
             raise ZeroDivisionError("C5-REAL: Colapso matemático por división entre cero.")
-        return Babylon60.from_raw((self._value * self.SCALE) // other._value)
+        return Babylon60.from_raw((self._value * self.SCALE) // other_raw)
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Babylon60):
-            try:
-                other = Babylon60(other)  # type: ignore
-            except (TypeError, ValueError):
-                return False
-        return self._value == other._value
+        try:
+            return self._value == self._get_raw(other) # type: ignore
+        except TypeError:
+            return False
 
     def __lt__(self, other: int | float | Babylon60) -> bool:
-        if not isinstance(other, Babylon60):
-            other = Babylon60(other)
-        return self._value < other._value
+        return self._value < self._get_raw(other)
 
     def __le__(self, other: int | float | Babylon60) -> bool:
-        if not isinstance(other, Babylon60):
-            other = Babylon60(other)
-        return self._value <= other._value
+        return self._value <= self._get_raw(other)
 
     def __gt__(self, other: int | float | Babylon60) -> bool:
-        if not isinstance(other, Babylon60):
-            other = Babylon60(other)
-        return self._value > other._value
+        return self._value > self._get_raw(other)
 
     def __ge__(self, other: int | float | Babylon60) -> bool:
-        if not isinstance(other, Babylon60):
-            other = Babylon60(other)
-        return self._value >= other._value
+        return self._value >= self._get_raw(other)
 
     def __radd__(self, other: int | float) -> Babylon60:
         return Babylon60(other) + self
