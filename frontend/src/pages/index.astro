@@ -3,6 +3,7 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 import AwwwardsHero from '../components/landing/AwwwardsHero.tsx';
 import PreloadScreen from '../components/landing/PreloadScreen.tsx';
 import TelemetryWidget from '../components/TelemetryWidget.tsx';
+import CortexShaderCanvas from '../components/landing/CortexShaderCanvas.tsx';
 
 const navLinks = [
 	{ href: '#quickstart', label: 'Quickstart' },
@@ -101,6 +102,7 @@ const country = Astro.request.headers.get('cf-ipcountry') || 'Unknown';
 	canonical="https://cortexpersist.com/"
 >
 	<main class="landing-shell">
+		<CortexShaderCanvas client:load />
 		<PreloadScreen client:load />
 		<header class="masthead">
 			<a class="brand" href="/" aria-label="CORTEX Persist home">

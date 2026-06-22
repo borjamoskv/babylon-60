@@ -14,11 +14,8 @@
   "dependencies": {
     "@astrojs/cloudflare": "^13.7.0",
     "@astrojs/react": "^4.2.0",
-    "@react-three/drei": "^10.7.7",
-    "@react-three/fiber": "^9.6.1",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
-    "@types/three": "^0.183.1",
     "astro": "^6.2.2",
     "clsx": "^2.1.1",
     "framer-motion": "^12.40.0",
@@ -27,7 +24,6 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^3.0.1",
-    "three": "^0.183.2",
     "wrangler": "^4.100.0"
   },
   "devDependencies": {
