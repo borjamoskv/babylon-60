@@ -305,6 +305,7 @@ To prevent PR review rejection and build failures:
 2. **Do Not Leave Blocking Debug Statements:** Avoid leaving synchronous blocks or loop stalls like `import time; time.sleep(0)` or `time.sleep(1)` inside production hot-paths or async event loops.
 3. **Log Safely:** Do not replace `logger.info`, `logger.error`, or other structured loggers with bare `print()` statements in core modules.
 4. **Preserve Language & Logic Verbatim:** During refactors, do not rewrite regexes, string formats, stop-word lists, or validation structures (such as Spanish character support `[a-záéíóúñ]` or crypto prefixes like `v6_aesgcm:`) unless explicitly prompted.
+5. **Always Target the Local Virtual Environment:** When executing Python commands, scripts, or test suites (e.g. `pytest`), you MUST explicitly use the interpreter inside the local virtual environment (`./.venv/bin/...`) or run under `uv run`. Running python commands globally can cause compatibility failures with compiled native bindings (`cortex_rs`) targeting other Python minor versions.
 
 ### 6.3 PR & Change Acceptance Gate
 
