@@ -48,9 +48,12 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
                 "query_only", "journal_mode", "synchronous", "foreign_keys", "busy_timeout", 
                 "mmap_size", "page_size", "cache_size", "temp_store", "threads", "wal_autocheckpoint"
             }
-            # arg2 contains the value being set. If it's present, it's a modification attempt.
-            if arg1 and arg1 in SAFE_PRAGMAS and not arg2:
-                return sqlite3.SQLITE_OK
+            # Purely query PRAGMAs that take arguments but do not modify state
+            QUERY_ONLY_PRAGMAS = {"table_info", "foreign_key_check", "integrity_check", "index_list", "index_info"}
+            # arg2 contains the value being set. If it's present, it's a modification attempt, except for QUERY_ONLY_PRAGMAS.
+            if arg1 and arg1 in SAFE_PRAGMAS:
+                if not arg2 or arg1 in QUERY_ONLY_PRAGMAS:
+                    return sqlite3.SQLITE_OK
             logger.critical(f"[MTK-BLOCK] Unauthorized PRAGMA modification attempt: {arg1}={arg2}")
             return sqlite3.SQLITE_DENY
 
