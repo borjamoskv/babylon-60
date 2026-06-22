@@ -229,7 +229,23 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             agent_id=actor_id or "unknown",
             mtk_guard=mtk_guard
         )
-        fact_id = int(fact_id_str[:8], 16)
+        
+        from cortex.engine.fact_store_core import insert_fact_record
+        fact_id = await insert_fact_record(
+            conn,
+            tenant_id,
+            project,
+            content,
+            fact_type,
+            tags,
+            confidence,
+            valid_from,
+            source,
+            meta,
+            tx_id,
+            parent_decision_id=parent_decision_id,
+            taint_already_verified=True,
+        )
 
         await self._run_post_store_tasks(
             conn, fact_id, project, content, fact_type, tags, source, tenant_id

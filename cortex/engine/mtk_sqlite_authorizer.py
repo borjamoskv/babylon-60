@@ -80,18 +80,17 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
             # Bypass FFI verification for dummy/testing/bounty tokens.
             # Cryptographic tokens have the form: mtk_auth_<timestamp_ms>_<signature_hex> (4 parts).
             parts = token.split("_")
-            if len(parts) != 4 or not parts[2].isdigit():
-                return sqlite3.SQLITE_OK
-            try:
-                import cortex_rs
-                kernel_key = os.environ.get("CORTEX_KERNEL_KEY", "dev_sovereign_key_v1")
-                is_valid = cortex_rs.verify_ephemeral_token(token, payload, kernel_key)
-                if not is_valid:
-                    logger.critical("[MTK-BLOCK] Cryptographic MTK verification failed. Forgery or expiration detected.")
+            if len(parts) == 4 and parts[2].isdigit():
+                try:
+                    import cortex_rs
+                    kernel_key = os.environ.get("CORTEX_KERNEL_KEY", "dev_sovereign_key_v1")
+                    is_valid = cortex_rs.verify_ephemeral_token(token, payload, kernel_key)
+                    if not is_valid:
+                        logger.critical("[MTK-BLOCK] Cryptographic MTK verification failed. Forgery or expiration detected.")
+                        return sqlite3.SQLITE_DENY
+                except Exception as e:
+                    logger.critical(f"[MTK-BLOCK] FFI verification error: {e}")
                     return sqlite3.SQLITE_DENY
-            except Exception as e:
-                logger.critical(f"[MTK-BLOCK] FFI verification error: {e}")
-                return sqlite3.SQLITE_DENY
             
         # Cross-Language Taint Propagation: Rust ZK-Seal bypasses GC taint tracking
         if token.startswith("zk_seal_rs_"):
