@@ -1,4 +1,4 @@
-<!-- [C5-REAL] Exergy-Maximized — Last verified: 2026-06-06 -->
+<!-- [C5-REAL] Exergy-Maximized — Last verified: 2026-06-22 -->
 # 🤖 AGENTS.md — CORTEX Persist v10.0 (LEGION-10k)
 
 **Trust infrastructure for autonomous AI: cryptographic verification, audit trails, epistemic containment.**
@@ -65,7 +65,7 @@ All agents operating in this repository MUST self-identify by role before acting
 | Role | Responsibilities | Capabilities | Constraints | Escalation Trigger |
 | :--- | :--- | :--- | :--- | :--- |
 | **Persist-Validator** | Schema validation, guard enforcement, taint verification | Read state, emit Ledger events, reject proposals | Cannot write to persistence layer or mutate schema | Any guard failure → halt + P0 alert |
-| **Persist-Executor** | Execute approved write operations, manage Saga steps | Full Write-Path execution, snapshot management | Cannot skip Saga steps or downgrade errors | SAGA abort → reverse to SAGA-1 |
+| **Persist-Executor** | Execute approved write operations via MTK boundary | Full Write-Path execution, snapshot management | Cannot bypass MTK token or downgrade errors | MTK rejection → abort + P0 alert |
 | **Persist-Auditor** | Forensic review, hash-chain verification | Read-only across all surfaces, Ledger access | Cannot mutate any state, ever | Hash chain break → immediate P0 alert |
 | **Persist-Guardian** | Guard admission, tenant isolation, encryption key governance | Intercept write proposals before SAGA-1 | Cannot approve its own proposals | Cross-tenant access → P0 abort |
 
@@ -108,6 +108,7 @@ All agents operating in this repository MUST self-identify by role before acting
 11. **BABYLON-60 Epistemology:** The control kernel MUST operate in Base-60 (Babylon-60) for internal calculations (timestamps, coordinates, proportions) to eliminate cumulative float rounding errors and decimal approximation entropy. Use struct/integer types scaled to Base-60. No `float64`.
 12. **Execution/Interpretation Isolation:** Deterministic execution MUST be strictly separated from stochastic interpretation. This structural boundary prevents the CI environment from degrading into a "conceptual simulator".
 13. **Epistemic Containment (L3.5):** Agents MUST explicitly declare the epistemic type of their output using `EpistemicNode` structures. Stating an inference, simulation, or counterfactual as an observation is a P0 failure.
+14. **CLI Sandbox Isolation:** CLI commands that write to the database for testing or demonstration purposes MUST use an isolated temporary database (e.g., `/tmp/cortex_test_*.db`) to prevent inter-process SQLite contention with the production database. The temporary DB must be initialized with `PRAGMA journal_mode=WAL;` and `PRAGMA busy_timeout=5000;` before any operation.
 
 ### ❌ Anti-Patterns & Failure Signatures
 
@@ -127,6 +128,8 @@ When auditing code, these signals indicate a violation. The `Enforced` column in
 | Plaintext secret in any metadata dict or JSON | **P0** | ✗ | Rotate immediately; encrypt at rest; audit exposure window |
 | `NO` documenting a module that doesn't exist | HIGH | ✗ | Remove reference or create the module |
 | Engine modifying its own source or binary directly | **P0** | ✗ | Implement Bootstrap Watchdog; route via git sentinel branch (`auto/moskv1-mitosis-*`) |
+| `re.DOTALL` + `.*?` on files > 1KB | CRITICAL | ✗ | Replace → line-by-line O(N) parser; regex solo para patrones single-line |
+| `task.cancel()` + `await task` without explicit `except asyncio.CancelledError` | HIGH | ✗ | Add `except asyncio.CancelledError: pass` BEFORE `except Exception` in all daemon/task stop methods |
 
 ---
 
@@ -187,7 +190,7 @@ We have eradicated "distributed systems cosplay" (SAGAs, logical rollbacks, idem
 | **Lint / Type** | Ruff (`E,F,W,I,UP,B,G,TID`, len=100) / Pyright (basic) |
 | **Testing** | `pytest` + `pytest-asyncio` + `pytest-cov` + `pytest-xdist` |
 
-### Module Map — `cortex/` (58 subdirectories)
+### Module Map — `cortex/` (75 subdirectories)
 
 Grouped by domain. Risk level governs the care required before modification.
 
@@ -195,7 +198,7 @@ Grouped by domain. Risk level governs the care required before modification.
 
 | Module | Purpose | Key Files |
 | :--- | :--- | :--- |
-| `engine/` | Core CRUD, Kinetic Engines (EntropyAnnihilator, AutoCrystallizer), fact store, causal scheduler | `crystallizer.py`, `entropy.py`, `synthesis.py`, `causal/taint_engine.py` |
+| `engine/` | Core CRUD, Kinetic Engines (EntropyAnnihilator), fact store, causal scheduler, MTK enforcement, daemons (Exergy, Entropy, Latticework, Omega) | `entropy.py`, `mtk_core.py`, `mtk_sqlite_authorizer.py`, `causal/taint_engine.py`, `latticework_daemon.py` |
 | `audit/` | Master Ledger — immutable hash-chain for all actions | `ledger.py` |
 | `ledger/` | Ledger origin tracking, public export, verifier utilities | `origin.py`, `public_export.py`, `public_verifier_utils.py` |
 | `guards/` | Admission, contradiction, dependency, sovereign seals, ZK guard | `sovereign_seals.py`, `virgo.py`, `zk_guard.py` |
@@ -280,11 +283,11 @@ Grouped by domain. Risk level governs the care required before modification.
 ### 6.1 Environment Setup
 
 ```bash
-pip install -e ".[all]"
-pytest tests/ -v --cov=cortex
-ruff check cortex/
-pyright cortex/
-uvicorn cortex.api:app --reload  # optional: API server
+uv pip install -e ".[all]"  # or: .venv/bin/pip install -e ".[all]"
+.venv/bin/pytest tests/ -v --cov=cortex
+.venv/bin/ruff check cortex/
+.venv/bin/pyright cortex/
+.venv/bin/uvicorn cortex.api:app --reload  # optional: API server
 ```
 
 **Core Env Vars:** `GEMINI_API_KEY`, `CORTEX_DB_PATH`, `CORTEX_LOG_LEVEL`, `CORTEX_ENCRYPTION_KEY`, `HF_TOKEN`, `STRIPE_SECRET_KEY`, `REDIS_URL`, `DATABASE_URL`.
@@ -363,8 +366,8 @@ Domain-specific agent rules without inflating this root file:
 
 | Path | Status | Scope |
 | :--- | :---: | :--- |
-| `cortex/engine/AGENTS.md` | ✅ Exists | Engine mutation rules (Annihilator/Crystallizer safety gates) |
-| `cortex/memory/AGENTS.md` | 📋 Planned | Memory surface constraints (tenant isolation, fact aging) |
-| `cortex/migrations/AGENTS.md` | 📋 Planned | Migration safety protocol |
+| `cortex/engine/AGENTS.md` | ✅ Exists | Engine mutation rules (Annihilator safety gates, daemon lifecycle) |
+| `cortex/memory/AGENTS.md` | ✅ Exists | Memory surface constraints (tenant isolation, fact aging) |
+| `cortex/migrations/AGENTS.md` | ✅ Exists | Migration safety protocol |
 
 **Rule:** Root AGENTS.md always takes precedence. Sub-files **augment** — never contradict.
