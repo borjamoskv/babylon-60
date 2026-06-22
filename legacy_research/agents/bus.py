@@ -101,9 +101,18 @@ class SqliteMessageBus:
 
     async def _fetch_one(self, conn: Any, agent_id: str) -> AgentMessage | None:
         """Fetch and consume one message atomically."""
-        row = None
         async with self._lock:
-            # Atomic update with RETURNING clause to prevent multi-process race conditions
+            # 1. Quick check using SELECT to avoid starting an implicit write transaction if no messages exist
+            async with conn.execute(
+                "SELECT id FROM agent_messages WHERE recipient = ? AND consumed = 0 LIMIT 1",
+                (agent_id,),
+            ) as cursor:
+                has_msg = await cursor.fetchone()
+
+            if has_msg is None:
+                return None
+
+            # 2. Consume the message atomically
             async with conn.execute(
                 "UPDATE agent_messages SET consumed = 1 "
                 "WHERE id = (SELECT id FROM agent_messages WHERE recipient = ? AND consumed = 0 ORDER BY id ASC LIMIT 1) "
@@ -113,6 +122,8 @@ class SqliteMessageBus:
                 row = await cursor.fetchone()
 
             if row is None:
+                # If UPDATE executed, we must commit to close the implicit transaction
+                await conn.commit()
                 return None
 
             row_id, raw_payload = row
