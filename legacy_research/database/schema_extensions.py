@@ -92,6 +92,25 @@ CREATE INDEX IF NOT EXISTS idx_trust_source ON trust_edges(source_agent);
 CREATE INDEX IF NOT EXISTS idx_trust_target ON trust_edges(target_agent);
 """
 
+# --- Subagent EROI tracking ---
+CREATE_AGENT_TASKS_EROI = """
+CREATE TABLE IF NOT EXISTS agent_tasks_eroi (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    agent_id        TEXT NOT NULL REFERENCES agents(id),
+    task_type       TEXT NOT NULL,
+    exergy_yield    REAL NOT NULL,
+    entropy_paid    REAL NOT NULL,
+    tokens_spent    INTEGER NOT NULL DEFAULT 0,
+    eroi_score      REAL NOT NULL,
+    status          TEXT NOT NULL,
+    created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);
+"""
+
+CREATE_AGENT_TASKS_EROI_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_eroi_agent_task ON agent_tasks_eroi(agent_id, task_type);
+"""
+
 # ─── Graph Memory (Knowledge Graph) ──────────────────────────────────
 CREATE_ENTITIES = """
 CREATE TABLE IF NOT EXISTS entities (
@@ -512,4 +531,6 @@ EXTENSION_SCHEMA = [
     CREATE_ENTITIES,
     CREATE_ENTITY_RELATIONS,
     CREATE_EXECUTION_TRACE_LKRGSER,
+    CREATE_AGENT_TASKS_EROI,
+    CREATE_AGENT_TASKS_EROI_INDEXES,
 ]

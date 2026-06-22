@@ -238,7 +238,7 @@ class CapatazOrchestrator:
     async def run_task(
         self,
         name: str,
-        agent_name: str,
+        agent_name: Any,
         coro_func: Callable[..., Any],
         role: AgentRole = AgentRole.WORKER,
         changed_files: list[str] | None = None,
@@ -251,7 +251,29 @@ class CapatazOrchestrator:
         engine: Any | None = None,
     ) -> Any:
         """Run a single task under the mission context."""
-        task = SwarmTask(name=name, agent_name=agent_name, role=role, status=TaskStatus.RUNNING)
+        # Resolve task type
+        task_type = "default_task"
+        if kwargs and "task_type" in kwargs:
+            task_type = kwargs["task_type"]
+        elif changed_files:
+            task_type = "code_refactor"
+
+        # Resolve JIT best agent selection if candidate pool is provided
+        if engine and hasattr(engine, "select_best_agent_for_task"):
+            if isinstance(agent_name, list):
+                selected = await engine.select_best_agent_for_task(task_type, agent_name)
+                if selected:
+                    agent_name = selected
+            elif isinstance(agent_name, str) and agent_name.startswith("pool:"):
+                candidates = agent_name.split(":", 1)[1].split(",")
+                selected = await engine.select_best_agent_for_task(task_type, candidates)
+                if selected:
+                    agent_name = selected
+
+        # Safeguard agent_name to string
+        agent_name_str = str(agent_name)
+
+        task = SwarmTask(name=name, agent_name=agent_name_str, role=role, status=TaskStatus.RUNNING)
         self.tasks[task.id] = task
 
         # Ω₁: RISK DETECTION
@@ -263,12 +285,19 @@ class CapatazOrchestrator:
         logger.info(
             "[%s] Capataz: Deploying %s (%s) to task: %s (Risk: %s)",
             self.mission_id,
-            agent_name,
+            agent_name_str,
             role.value,
             name,
             risk.value,
         )
 
+        # Track tokens/effort via budget manager request delta
+        reqs_before = 0
+        if self.budget:
+            b_info = self.budget.get_mission_budget(self.mission_id)
+            reqs_before = b_info.request_count if b_info else 0
+
+        t_start = time.perf_counter()
         lock_acquired = False
         try:
             kwargs = kwargs or {}
@@ -294,7 +323,7 @@ class CapatazOrchestrator:
                 headers={},
                 payload={},
                 engine=engine,
-                agent_name=agent_name,
+                agent_name=agent_name_str,
                 role=role,
             )
 
@@ -302,18 +331,18 @@ class CapatazOrchestrator:
                 logger.debug(
                     "[%s] Capataz: Agent %s attempting to acquire lock on %s",
                     self.mission_id,
-                    agent_name,
+                    agent_name_str,
                     lock_resource,
                 )
                 lock_acquired = await lock_manager.acquire(
                     resource=lock_resource,
-                    agent_id=agent_name,
+                    agent_id=agent_name_str,
                     timeout_s=lock_timeout_s,
                     ttl_s=lock_ttl_s,
                 )
                 if not lock_acquired:
                     raise asyncio.TimeoutError(
-                        f"Agent {agent_name} failed to acquire lock on {lock_resource}"
+                        f"Agent {agent_name_str} failed to acquire lock on {lock_resource}"
                     )
 
             result = await coro_func(*args, **kwargs)
@@ -339,23 +368,66 @@ class CapatazOrchestrator:
                     )
                     raise RuntimeError(f"Elder rejection: {v_res.reason}")
 
+            duration = time.perf_counter() - t_start
+            reqs_after = 0
+            if self.budget:
+                b_info = self.budget.get_mission_budget(self.mission_id)
+                reqs_after = b_info.request_count if b_info else 0
+            tokens_spent = max(0, reqs_after - reqs_before)
+
+            # Record SUCCESS EROI
+            exergy_yield = 1.0
+            entropy_paid = max(0.05, duration * 0.05)
+            if engine and hasattr(engine, "record_task_eroi"):
+                await engine.record_task_eroi(
+                    agent_id=agent_name_str,
+                    task_type=task_type,
+                    exergy_yield=exergy_yield,
+                    entropy_paid=entropy_paid,
+                    tokens_spent=tokens_spent,
+                    status="SUCCESS",
+                )
+
             task.status = TaskStatus.COMPLETED
             task.result = result
             return result
         except Exception as exc:
+            duration = time.perf_counter() - t_start
+            reqs_after = 0
+            if self.budget:
+                b_info = self.budget.get_mission_budget(self.mission_id)
+                reqs_after = b_info.request_count if b_info else 0
+            tokens_spent = max(0, reqs_after - reqs_before)
+
+            # Record FAILED EROI
+            exergy_yield = 0.0
+            entropy_paid = max(1.0, duration * 0.1)
+            if engine and hasattr(engine, "record_task_eroi"):
+                try:
+                    await engine.record_task_eroi(
+                        agent_id=agent_name_str,
+                        task_type=task_type,
+                        exergy_yield=exergy_yield,
+                        entropy_paid=entropy_paid,
+                        tokens_spent=tokens_spent,
+                        status="FAILED",
+                    )
+                except Exception as db_err:
+                    logger.warning("Failed to record failed task EROI: %s", db_err)
+
             task.status = TaskStatus.FAILED
             task.error = str(exc)
-            logger.error("[%s] Capataz: Agent %s failed: %s", self.mission_id, agent_name, exc)
+            logger.error("[%s] Capataz: Agent %s failed: %s", self.mission_id, agent_name_str, exc)
             raise
         finally:
             if lock_acquired and lock_resource and lock_manager:
                 logger.debug(
                     "[%s] Capataz: Agent %s releasing lock on %s",
                     self.mission_id,
-                    agent_name,
+                    agent_name_str,
                     lock_resource,
                 )
-                await lock_manager.release(lock_resource, agent_name)
+                await lock_manager.release(lock_resource, agent_name_str)
             self._print_summary()
 
     async def preheat_prefix(self, system_prompt: str, tenant_id: str) -> None:
