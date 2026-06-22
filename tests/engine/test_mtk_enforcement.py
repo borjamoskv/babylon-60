@@ -11,6 +11,7 @@ import datetime
 @pytest.fixture(autouse=True)
 def force_mtk_enforcement(monkeypatch):
     monkeypatch.setenv("CORTEX_FORCE_MTK_TESTS", "1")
+    monkeypatch.setenv("CORTEX_KERNEL_KEY", "test_key_123")
 from cortex.engine.mtk_sqlite_authorizer import install_mtk_authorizer
 from cortex.engine.mtk_core import MTKGuard
 from cortex.types.evidence import ClosurePayload, EvidenceBundle
@@ -159,6 +160,8 @@ async def test_mtk_nested_contexts_isolation(mtk_db, dummy_payload):
         mtk_db.execute("INSERT INTO records (data) VALUES ('outer')")
         
         # Inner context
+        import asyncio
+        await asyncio.sleep(0.01)
         async with guard.transaction_boundary(dummy_payload) as token_inner:
             assert token_inner != token_outer # Assuming tokens are unique
             mtk_db.execute("INSERT INTO records (data) VALUES ('inner')")

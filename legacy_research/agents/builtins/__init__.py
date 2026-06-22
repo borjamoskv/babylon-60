@@ -4,6 +4,7 @@ from cortex.agents.builtins.copilot_agent import CopilotAgent
 from cortex.agents.builtins.epistemic_validator import EpistemicValidatorAgent
 from cortex.agents.builtins.github_telemetry_agent import GithubTelemetryAgent
 from cortex.agents.builtins.handoff_agent import HandoffAgent
+from cortex.agents.builtins.kapi_agent import KapiAgent
 from cortex.agents.builtins.memory_agent import MemoryAgent
 from cortex.agents.builtins.moskv_videntia_agent import MoskvVidentiaAgent
 from cortex.agents.builtins.nightshift_agent import NightshiftAgent
@@ -16,6 +17,7 @@ __all__ = [
     "MoskvVidentiaAgent",
     "CopilotAgent",
     "HandoffAgent",
+    "KapiAgent",
     "MemoryAgent",
     "NightshiftAgent",
     "OmegaPrimeAgent",

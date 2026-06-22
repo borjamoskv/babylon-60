@@ -3,11 +3,9 @@ import pytest
 import os
 from cortex.engine.mtk_sqlite_authorizer import install_mtk_authorizer, mtk_active_token, mtk_payload_hash
 
-# Force MTK authorizer to be active even in tests
-os.environ["CORTEX_FORCE_MTK_TESTS"] = "1"
-os.environ["CORTEX_KERNEL_KEY"] = "test_key_xyz"
-
-def test_mtk_physical_barrier():
+def test_mtk_physical_barrier(monkeypatch):
+    monkeypatch.setenv("CORTEX_FORCE_MTK_TESTS", "1")
+    monkeypatch.setenv("CORTEX_KERNEL_KEY", "test_key_xyz")
     conn = sqlite3.connect(":memory:")
     
     # 1. Without authorizer, everything works
@@ -46,7 +44,8 @@ def test_mtk_physical_barrier():
         mtk_active_token.reset(token_id)
         mtk_payload_hash.reset(payload_id)
         
-    print("MTK Physical Barrier Test: PASSED")
-
 if __name__ == "__main__":
-    test_mtk_physical_barrier()
+    import unittest.mock
+    mock_mp = unittest.mock.MagicMock()
+    mock_mp.setenv = lambda k, v: os.environ.update({k: v})
+    test_mtk_physical_barrier(mock_mp)

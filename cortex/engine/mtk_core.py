@@ -1,4 +1,4 @@
-# [C5-REAL] Exergy-Maximized
+# [C5-REAL] Exergy-Maximized — Author: Borja Moskv
 """
 Minimal Trusted Kernel (MTK) Core.
 The ONLY authorized entry point for state mutation. Replaces 'distributed systems cosplay'
@@ -43,13 +43,13 @@ class MTKGuard:
         """Generate a short-lived cryptographic capability token via Rust FFI."""
         try:
             import cortex_rs
-            return cortex_rs.mint_ephemeral_token(payload.canonical(), self.private_key)
+            return cortex_rs.mint_ephemeral_token(payload.payload_hash, self.private_key)
         except ImportError:
             logger.warning("[MTK] Rust FFI not available. Falling back to Python simulation.")
             import hashlib
             import time
             babylon_time = time.time_ns()
-            raw = f"{payload.canonical()}:{babylon_time}:{self.private_key}"
+            raw = f"{payload.payload_hash}:{babylon_time}:{self.private_key}"
             return f"mtk_auth_{hashlib.sha3_256(raw.encode()).hexdigest()}"
 
     @asynccontextmanager
@@ -86,7 +86,7 @@ class MTKGuard:
         
         # Step 3: Open Physical DB Boundary
         token_id = mtk_active_token.set(token)
-        payload_id = mtk_payload_hash.set(payload.canonical())
+        payload_id = mtk_payload_hash.set(payload.payload_hash)
         if self.rust_authorizer:
             self.rust_authorizer.set_ephemeral_token(token)
         
