@@ -865,3 +865,21 @@ Proof:
   Confidence: C5-REAL
   Date: 2026-06-22
 ```
+
+---
+
+### Hito 52: Thermodynamic Context Compression (Landauer API)
+- **Target**: `cortex/engine/ingest/landauer_compression.py`, `tests/test_landauer_compression.py`
+- **Objective**: AST pruning pre-ingestion to slash LLM TTFT latency by stripping "Green Theater" como llamadas a `print` y `logger`.
+- **Yield Target**: Anergía eliminada del payload. Reducción sustancial del consumo de tokens (TTFT) sin afectar a las invariantes estructurales.
+- **Reality Level**: `C5-REAL`
+- **Status**: ✅ COMPLETE — 22 Junio 2026
+- **Evidence**: Commits inyectados y test suite pasando.
+```yaml
+Claim: "La guillotina de Landauer purga prints y loggers."
+Proof:
+  Base: "Pytest passing on test_landauer_compression.py"
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-22
+```

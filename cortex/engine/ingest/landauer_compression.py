@@ -30,6 +30,16 @@ class LandauerCompressor:
                 # Remove top-level strings (usually docstrings)
                 if isinstance(node.value, ast.Constant) and isinstance(node.value.value, str):
                     return None
+
+                # Remove print() and logger.*() / logging.*() calls
+                if isinstance(node.value, ast.Call):
+                    func = node.value.func
+                    if isinstance(func, ast.Name) and func.id == 'print':
+                        return None
+                    if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
+                        if func.value.id in ['logger', 'logging']:
+                            return None
+
                 return self.generic_visit(node)
 
             def visit_FunctionDef(self, node: ast.FunctionDef) -> Any:
