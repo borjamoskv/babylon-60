@@ -205,6 +205,12 @@ Grouped by domain. Risk level governs the care required before modification.
 | `memory/` | Large public API surface for fact persistence and retrieval | — |
 | `migrations/` | Schema evolution — irreversible production impact | — |
 | `crypto/` | Key management (Ed25519), AES encryption, OS keyring integration | `keys.py`, `aes.py` |
+| `causal/` | Causal scheduling and verification engine components | `exergy_scheduler.py`, `deep_research_oracle.py`, `verification_oracle.py` |
+| `logic/` | Logical ATMS engines and semantic CRDT structures | `atms.py`, `semantic_crdt.py` |
+| `nodes/` | Ontological nodes (math curriculums, web design nodes, git exergy nodes) | `goat_math_nodes.py`, `git_exergy_nodes.py` |
+| `nous/` | Cognitive core, parse and judge logic | `ledger.py`, `judge.py`, `parser.py` |
+| `policies/` | Sovereign policy definitions and rules engine | `rules_engine.py`, `enterprise_identity.py` |
+| `reality/` | Reality injection and validation boundary | `injector.py`, `rul.py` |
 
 #### 🟠 HIGH — External Contracts & Validation
 
@@ -230,13 +236,22 @@ Grouped by domain. Risk level governs the care required before modification.
 | `cache/` | Redis L1 cache integration |
 | `embeddings/` | Local embedding generation (ONNX) |
 | `search/` | Search index and query execution |
-| `semantic/` | Semantic analysis and matching |
+| `semantic/` | Semantic analysis and matching (Note: hollow module, shim only) |
 | `telemetry/` | Metrics, tracing, observability |
 | `observability/` | Prometheus, structured logging |
 | `types/` | Shared type definitions and models |
 | `core/` | Core utilities and base classes |
 | `utils/` | General-purpose helpers |
 | `config.py` | Configuration loading |
+| `app/` | Top-level agent/orchestrator entry point |
+| `benchmark/` | Benchmarking scripts for core operations |
+| `bin/` | CLI executables and entrypoints (e.g. c5-pytest) |
+| `composer/` | Composer and manifest generation engine |
+| `data/` | Local data storage and JSONL logs |
+| `hooks/` | Git and execution lifecycle hooks (e.g. zero-debt.py) |
+| `integrations/` | Workers and scripts for external platforms (e.g., GitHub Action worker) |
+| `math/` | Custom algebraic and calculus mathematical utilities |
+| `tools/` | Instrumentation and developer helper tools |
 
 #### 🔵 EXTENSIONS & AGENTS — Modular Capabilities
 
@@ -252,6 +267,8 @@ Grouped by domain. Risk level governs the care required before modification.
 | `pipeline/` | Data processing pipelines |
 | `events/` | Event bus and pub/sub |
 | `context/` | Context window management |
+| `legacy_research/` | Legacy research workspace and symlink targets (Backup area) |
+| `offensive/` | Adversarial testing and red-teaming utilities |
 
 #### ⚪ SPECIALIZED — Domain-Specific
 

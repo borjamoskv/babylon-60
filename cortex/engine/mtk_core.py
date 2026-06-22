@@ -80,8 +80,9 @@ class MTKGuard:
         _signature = getattr(payload, "signature", None)
         if _signature:
             try:
-                from cortex.crypto.keys import ZKSwarmIdentity
                 import base64
+
+                from cortex.crypto.keys import ZKSwarmIdentity
                 # Derive public key from MTK private key for self-verification
                 _priv_bytes = self.private_key.encode() if isinstance(self.private_key, str) else self.private_key
                 _pub_b64 = base64.b64encode(

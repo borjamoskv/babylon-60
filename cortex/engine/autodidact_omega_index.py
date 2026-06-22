@@ -123,7 +123,6 @@ class AutodidactOmegaIndex:
 
         content = path.read_text(encoding="utf-8")
 
-        current_section = "Unknown"
         section_re = re.compile(r"^### ([IVXLC]+\.\s+.+)$", re.MULTILINE)
         row_re = re.compile(
             r"\|\s*`(C5-REAL-(\d+))`\s*\|\s*(\w+)\s*\|\s*(.+?)\s*\|"
