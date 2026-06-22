@@ -36,7 +36,6 @@ class MTKGuard:
         
     def _generate_ephemeral_token(self, payload: ClosurePayload) -> str:
         """Generate a short-lived cryptographic capability token STRICTLY via Rust FFI."""
-        import cortex_rs
         return cortex_rs.mint_ephemeral_token(payload.payload_hash, self.private_key)
 
     @asynccontextmanager
@@ -84,11 +83,27 @@ class MTKGuard:
         else:
             logger.debug("[MTK] No signature on payload — I_crypto verification deferred (grace period).")
         
-        # 1.3 Invariante Termodinámico/Complejidad (I_complexity) (Ω₁₃)
+        # 1.3 Invariante Termodinámico/Complejidad (I_complexity) (Ω₁₃ & AUTO-8)
         # The MTK physically rejects transactions whose Informational Exergy is too low (Anergy).
-        # This acts as the Szilard Engine gate: no capability token is minted for pure entropy.
-        if hasattr(payload, "info_exergy") and payload.info_exergy < 0.1:
-            raise ValueError(f"MTK-REJECT: Informational Exergy too low ({payload.info_exergy} < 0.1). Entropy purge required before DB write.")
+        # Implementación AUTODIDACT-8 (Minimización de Energía Libre de Friston):
+        # F_var ≈ Costo de Complejidad - Precisión Empírica
+        net_exergy = getattr(payload, "info_exergy", 1.0)
+        
+        if payload.evidence and payload.claims:
+            # Precisión: Cuántas fuentes empíricas respaldan el payload
+            accuracy = len(payload.evidence.sources)
+            # Complejidad: Volumen de aserciones (claims) inyectadas
+            complexity = len(payload.claims)
+            
+            # Penalización por Energía Libre Variacional
+            # F_var penaliza cuando la complejidad de la afirmación excede el respaldo empírico
+            friston_free_energy = (complexity) / (accuracy + 1.0) * 0.05
+            
+            # La Exergía Neta disponible decae ante una alta Energía Libre
+            net_exergy -= friston_free_energy
+            
+        if net_exergy < 0.1:
+            raise ValueError(f"MTK-REJECT: Variational Free Energy too high / Net Exergy too low ({net_exergy:.3f} < 0.1). Structural precision required.")
             
         # 1.4 Invariante Cognitivo (I_cognitive): Advance the pure FSM state via Rust
         exergy_input = int(getattr(payload, "info_exergy", 1.0) * 100) # Simple scaling for FSM input
