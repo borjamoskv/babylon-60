@@ -2,6 +2,11 @@
 """
 Minimal Trusted Kernel (MTK) - SQLite Authorizer Hook.
 Physical runtime coercion that prevents state mutation unless explicitly authorized by MTK.
+
+[PHYSICS ISOMORPHISM - SAKTHIVADIVEL (2024)]
+This module implements Bayesian Mechanics at the database level. The SQLite authorizer
+acts as a physical Gauge Constraint on the dynamical system's state space. The system
+infers the validity of state transitions by enforcing this boundary.
 """
 
 import logging
@@ -17,7 +22,7 @@ mtk_payload_hash: ContextVar[str | None] = ContextVar("mtk_payload_hash", defaul
 
 def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbname: str | None, source: str | None) -> int:
     """
-    Physical constraint on the SQLite engine.
+    Physical constraint on the SQLite engine (Gauge Constraint).
     Actions like INSERT (9), UPDATE (23), DELETE (9) mapped to sqlite3 constants.
     """
     import os

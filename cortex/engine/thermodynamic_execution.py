@@ -20,9 +20,10 @@ class ThermodynamicGhost(Exception):
 
 class LandauerGuillotine:
     """
-    Decapita la cobardía sintáctica. Si un script o prompt contiene
-    palabras de disculpa, verbosidad corporativa o 'Green Theater',
-    lo elimina antes de que consuma electrones.
+    Decapita la cobardía sintáctica y aniquila el Mismatch Cost (Wolpert, 2025).
+    Si un script o prompt contiene palabras de disculpa o 'Green Theater' (distribución estocástica p),
+    lo bloquea antes de inyectarlo en el AST rígido (distribución q), evitando el coste termodinámico
+    masivo de procesar verbosidad corporativa.
     """
     def __init__(self):
         self.corporate_slop = [
@@ -42,6 +43,8 @@ class ThermodynamicIntentVector:
     """
     El actuador ontológico. Un vector que transporta intención pura.
     Su única métrica de validez es el ΔS (Delta de Estado).
+    Implementa la métrica de Acción del Path Integral FEP (Friston, 2024), 
+    minimizando la entropía a lo largo de la trayectoria temporal.
     """
     def __init__(self, target_system: str, payload: str):
         self.target_system = target_system
