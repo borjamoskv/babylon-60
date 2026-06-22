@@ -236,4 +236,15 @@ async def run_benchmark():
     console.print(f"Reducción de latencia registrada: {latency_reduction:.2f}% (Meta: >90% en producción real, >80% en sandbox local)")
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="CORTEX-Persist Million-DB Stress Test")
+    parser.add_argument("--tenants", type=int, default=100, help="Number of tenants")
+    parser.add_argument("--ops", type=int, default=20, help="Operations per tenant")
+    parser.add_argument("--concurrency", type=int, default=50, help="Max concurrency")
+    args = parser.parse_args()
+    
+    NUM_TENANTS = args.tenants
+    OPS_PER_TENANT = args.ops
+    CONCURRENCY = args.concurrency
+    
     asyncio.run(run_benchmark())
