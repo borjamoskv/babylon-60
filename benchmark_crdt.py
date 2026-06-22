@@ -1,8 +1,7 @@
 import asyncio
-import os
 import time
 import uuid
-import aiosqlite
+
 import cortex_rs
 
 ITERATIONS = 10_000

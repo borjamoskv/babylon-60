@@ -1,7 +1,7 @@
 import uuid
-import time
+
 import cortex_rs
-import json
+
 
 def test_crdt_merge_state():
     print("Creating state 1")
