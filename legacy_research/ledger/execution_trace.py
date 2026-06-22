@@ -62,6 +62,8 @@ class ExecutionTraceLedger:
 
         try:
             async with aiosqlite.connect(self.db_path) as conn:
+                await conn.execute("PRAGMA busy_timeout = 5000;")
+                await conn.execute("PRAGMA journal_mode = WAL;")
                 await conn.execute(
                     query,
                     (
@@ -94,6 +96,7 @@ class ExecutionTraceLedger:
         """Retrieves a trace from the ledger."""
         query = "SELECT * FROM execution_trace_ledger WHERE id = ? AND tenant_id = ?"
         async with aiosqlite.connect(self.db_path) as conn:
+            await conn.execute("PRAGMA busy_timeout = 5000;")
             conn.row_factory = aiosqlite.Row
             cursor = await conn.execute(query, (trace_id, tenant_id))
             row = await cursor.fetchone()
@@ -117,6 +120,7 @@ class ExecutionTraceLedger:
         """Retrieves recent execution traces for feedback mapping."""
         query = "SELECT * FROM execution_trace_ledger WHERE tenant_id = ? ORDER BY id DESC LIMIT ?"
         async with aiosqlite.connect(self.db_path) as conn:
+            await conn.execute("PRAGMA busy_timeout = 5000;")
             conn.row_factory = aiosqlite.Row
             cursor = await conn.execute(query, (tenant_id, limit))
             rows = await cursor.fetchall()
@@ -142,6 +146,7 @@ class ExecutionTraceLedger:
         # Se busca el lineage_hash dentro del array JSON
         query = "SELECT * FROM execution_trace_ledger WHERE tenant_id = ? AND lineage LIKE ?"
         async with aiosqlite.connect(self.db_path) as conn:
+            await conn.execute("PRAGMA busy_timeout = 5000;")
             conn.row_factory = aiosqlite.Row
             cursor = await conn.execute(query, (tenant_id, f"%{lineage_hash}%"))
             rows = await cursor.fetchall()

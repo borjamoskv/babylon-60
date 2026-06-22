@@ -7,8 +7,10 @@ Enables interaction with LatticeworkDaemon and Cognitive Primitives store.
 from __future__ import annotations
 
 import asyncio
+import os
 import uuid
 
+import aiosqlite
 import click
 from rich.table import Table
 
@@ -59,10 +61,10 @@ def primitives_cmd(query: str | None):
     console.print(table)
 
 
-@latticework_cmds.command("daemon")
 @click.option("--seconds", "-s", default=10, help="Duration to run the daemon loop in foreground.")
 @click.option("--interval", "-i", default=2, help="Interval between ticks in seconds.")
 @click.option("--real", is_flag=True, help="Read real anomalies from the Execution Trace Ledger.")
+@latticework_cmds.command("daemon")
 def daemon_cmd(seconds: int, interval: int, real: bool):
     """Start LatticeworkDaemon in foreground to monitor and mitigate ledger anomalies."""
     console.print(f"[bold magenta]🌀 Starting LatticeworkDaemon in Foreground for {seconds}s (interval={interval}s)...[/bold magenta]")
@@ -74,16 +76,47 @@ def daemon_cmd(seconds: int, interval: int, real: bool):
     from cortex.ledger.causal_graph import CausalGraph
     from cortex.ledger.execution_trace import ExecutionTraceLedger
     
-    ledger = ExecutionTraceLedger(DEFAULT_DB)
-    graph = CausalGraph(DEFAULT_DB)
-    rollback = CausalRollbackEngine(DEFAULT_DB, ledger, None)
+    db_path = DEFAULT_DB
+    
+    if real:
+        db_path = "/tmp/cortex_test_latticework.db"
+        console.print(f"[cyan]ℹ Isolation Mode: Initializing isolated test database at: {db_path}[/cyan]")
+        
+        if os.path.exists(db_path):
+            try:
+                os.remove(db_path)
+            except Exception:
+                pass
+                
+        async def init_db():
+            async with aiosqlite.connect(db_path) as conn:
+                await conn.execute("PRAGMA journal_mode=WAL;")
+                await conn.execute("PRAGMA busy_timeout=5000;")
+                await conn.execute("""
+                    CREATE TABLE IF NOT EXISTS execution_trace_ledger (
+                        id              TEXT PRIMARY KEY,
+                        tenant_id       TEXT NOT NULL DEFAULT 'default',
+                        origin          TEXT NOT NULL,
+                        cost            REAL NOT NULL,
+                        lineage         TEXT NOT NULL DEFAULT '[]',
+                        outcome         TEXT NOT NULL,
+                        rollback_possible BOOLEAN NOT NULL DEFAULT FALSE,
+                        created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+                    )
+                """)
+                await conn.commit()
+                
+        _run_async(init_db())
+        console.print("[cyan]ℹ Real Ledger Mode Active. Scanning isolated execution traces database...[/cyan]")
+        
+    ledger = ExecutionTraceLedger(db_path)
+    graph = CausalGraph(db_path)
+    rollback = CausalRollbackEngine(db_path, ledger, None)
     scheduler = CausalScheduler(graph, rollback, ledger)
     
     daemon = LatticeworkDaemon(ledger, scheduler, scan_interval=interval)
     
     if real:
-        console.print("[cyan]ℹ Real Ledger Mode Active. Scanning execution traces database...[/cyan]")
-        
         async def custom_loop():
             # Inyectamos una traza de entropía real para la demo
             trace_id = f"tx_err_{uuid.uuid4().hex[:6]}"

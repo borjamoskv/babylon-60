@@ -3,8 +3,8 @@ import asyncio
 import logging
 from typing import Any
 
-from cortex.engine.latticework_store import LatticeworkStore
 from cortex.engine.babylon60 import Babylon60
+from cortex.engine.latticework_store import LatticeworkStore
 
 logger = logging.getLogger(__name__)
 
@@ -90,6 +90,8 @@ class LatticeworkDaemon:
             self._task.cancel()
             try:
                 await self._task
+            except asyncio.CancelledError:
+                pass
             except Exception as exc:
                 logger.warning("Suppressed exception: %s", exc)
             logger.info("[LatticeworkDaemon] Terminado. Ouroboros Infinity en reposo termodinámico.")
