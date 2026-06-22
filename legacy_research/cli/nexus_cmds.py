@@ -7,6 +7,7 @@ from pathlib import Path
 import click
 from rich.console import Console
 
+from cortex.cli.common import cli
 from cortex.cli.errors import err_execution_failed, err_skill_not_found
 
 __all__ = [
@@ -16,6 +17,7 @@ __all__ = [
     "nexus_cmds",
     "pulse",
     "run_nexus_skill",
+    "register",
     "sync",
 ]
 
@@ -87,3 +89,18 @@ def sync():
     code = run_nexus_skill(["sync"])
     if code != 0:
         sys.exit(code)
+
+
+@nexus_cmds.command()
+@click.option("--name", required=True, help="Service name")
+@click.option("--url", required=True, help="OpenAPI JSON URL")
+@click.option("--auth", default="jwt", help="Auth type")
+def register(name, url, auth):
+    """Register a service in the CORTEX registry."""
+    code = run_nexus_skill(["register", "--name", name, "--url", url, "--auth", auth])
+    if code != 0:
+        sys.exit(code)
+
+
+# Register the subcommands group back to click CLI bootstrap
+cli.add_command(nexus_cmds)
