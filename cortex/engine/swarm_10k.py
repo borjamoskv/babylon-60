@@ -28,6 +28,12 @@ logger = logging.getLogger("cortex.engine.swarm_10k")
 from cortex.engine.babylon60 import Babylon60
 
 
+def _to_float(v: int | float | Babylon60) -> float:
+    if isinstance(v, Babylon60):
+        return v.to_float()
+    return float(v)
+
+
 @dataclass
 class NodeMetrics:
     exergy: Babylon60
@@ -57,11 +63,11 @@ class CenturionSuperv:
         # O(1) Bit-Parallel Telemetry update (Ω₀)
         if hasattr(self.bus, "update_metrics"):
             self.bus.update_metrics(
-                self.metrics.exergy.to_float(), self.last_latency_ms.to_float(), self.metrics.uncertainty.to_float()
+                _to_float(self.metrics.exergy), _to_float(self.last_latency_ms), _to_float(self.metrics.uncertainty)
             )
 
         if self.last_latency_ms > Babylon60(32.0):
-            logger.warning("VOID BREACH: %.2fms on node %s", self.last_latency_ms.to_float(), self.id)
+            logger.warning("VOID BREACH: %.2fms on node %s", _to_float(self.last_latency_ms), self.id)
 
             # Adaptive Slashing: Penalty scales with breach magnitude
             sixteen_b60 = Babylon60(16.0)
@@ -78,9 +84,9 @@ class CenturionSuperv:
                 event_type="governance:slashing",
                 payload={
                     "node_id": self.id,
-                    "latency_ms": self.last_latency_ms.to_float(),
-                    "penalty": dynamic_penalty.to_float(),
-                    "reason": f"LATENCY_BREACH ({self.last_latency_ms.to_float():.1f}ms)",
+                    "latency_ms": _to_float(self.last_latency_ms),
+                    "penalty": _to_float(dynamic_penalty),
+                    "reason": f"LATENCY_BREACH ({_to_float(self.last_latency_ms):.1f}ms)",
                 },
                 source=self.id,
                 tenant_id=self.tenant_id,
@@ -110,7 +116,7 @@ class CenturionSuperv:
             self.metrics, self.last_latency_ms, self.CAPACITY
         )
         # Mirror to SHM for L1/L0 visibility
-        self.bus.update_metrics(self.metrics.exergy.to_float(), self.last_latency_ms.to_float(), self.metrics.uncertainty.to_float())
+        self.bus.update_metrics(_to_float(self.metrics.exergy), _to_float(self.last_latency_ms), _to_float(self.metrics.uncertainty))
         return self.metrics.exergy
 
     async def intercept_and_latent_compute(self, task: dict, semantic_space: Any) -> Any:

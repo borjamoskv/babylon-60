@@ -26,9 +26,9 @@ async def test_exergy_calculation_o1(tmp_path):
 
     ex = await node.get_exergy()
     # Density factor = 0.5
-    # Latency factor = exp(-(32-16)/32) = exp(-0.5) approx 0.606
-    # Expected approx 0.303
-    assert 0.30 <= ex <= 0.31
+    # Latency factor = 1.0 - (32-16)/32 = 0.5 (Linear decay for Babylon60)
+    # Expected exergy = 0.25
+    assert 0.24 <= ex <= 0.26
 
     await bus.close()
 
