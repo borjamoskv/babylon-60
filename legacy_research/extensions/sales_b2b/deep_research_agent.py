@@ -64,6 +64,7 @@ class B2BDeepResearchAgent(AutonomousAgent):
         lead_id = payload.get("lead_id", "unknown")
         history = payload.get("interaction_history", [])
         current_stage_str = payload.get("current_stage", "PROSPECTING")
+        mtk_token = payload.get("mtk_token")  # Required for MTK transition
         
         try:
             current_stage = MessagingStage(current_stage_str)
@@ -76,14 +77,14 @@ class B2BDeepResearchAgent(AutonomousAgent):
         history_str = str(history)
         if self.compressor.is_degraded(history_str):
             logger.warning("[%s] Context limits exceeded for lead %s. Triggering compression.", self.agent_id, lead_id)
-            compressed_invariants = self.compressor.compress_history(history)
+            compressed_invariants = self.compressor.compress_history(history, agent_id=self.agent_id)
             payload["compressed_context"] = compressed_invariants
             # Purge raw narrative history
             payload.pop("interaction_history", None)
             
-        # 2. Advance FSM deterministically
+        # 2. Advance FSM deterministically (Enforce MTK Boundary)
         event_data = payload.get("event_data", {})
-        next_stage = self.fsm.advance_stage(current_stage, event_data)
+        next_stage = self.fsm.advance_stage(current_stage, event_data, mtk_token=mtk_token)
         
         if next_stage != current_stage:
             logger.info("[%s] Transitioning %s: %s -> %s", self.agent_id, lead_id, current_stage.value, next_stage.value)
@@ -91,8 +92,8 @@ class B2BDeepResearchAgent(AutonomousAgent):
         # 3. If in DEEP_RESEARCH, execute specialized plan
         if next_stage == MessagingStage.DEEP_RESEARCH:
             await self._execute_deep_research(lead_id, payload)
-            # Auto-advance assuming research completed successfully
-            next_stage = MessagingStage.OUTREACH_DAY_1
+            # FSM will advance in the callback of the research result
+            return
             
         # 4. Return outcome
         result = {
@@ -104,16 +105,28 @@ class B2BDeepResearchAgent(AutonomousAgent):
         
         if "compressed_context" in payload:
             result["compression_hash"] = payload["compressed_context"].get("compression_hash")
+            result["taint_signature"] = payload["compressed_context"].get("taint_signature")
 
         await self._reply(message, result)
 
     async def _execute_deep_research(self, lead_id: str, payload: dict[str, Any]) -> None:
-        """Simulate a deep research routine against external tools."""
-        logger.info("[%s] Executing DEEP_RESEARCH for lead %s", self.agent_id, lead_id)
-        # This is where we would invoke self.use_tool("web_search", ...)
-        # or dispatch a subagent, but for architecture validation we mock the delay.
-        # Strict deterministic behavior without blocking the loop.
-        pass
+        """
+        Emits an async TASK_REQUEST to the swarm for deep research.
+        Complies with AX-044 (Active Inference).
+        """
+        logger.info("[%s] Emitting DEEP_RESEARCH request for lead %s", self.agent_id, lead_id)
+        
+        research_payload = {
+            "op": "EXECUTE_RESEARCH",
+            "target": lead_id,
+            "context": payload.get("compressed_context", {}),
+        }
+        
+        # Route to the SOTA Vector Engine or Search Worker
+        await self.request_task(
+            recipient="swarm_research_worker",
+            task_payload=research_payload,
+        )
 
     async def _reply(self, source: AgentMessage, payload: dict[str, Any]) -> None:
         """Helper to send result back to sender."""

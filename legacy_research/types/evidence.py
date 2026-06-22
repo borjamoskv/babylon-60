@@ -19,6 +19,10 @@ def _canonical_dt(value: datetime) -> str:
 
 
 def _normalize_value(value: Any) -> Any:
+    from enum import Enum
+
+    if isinstance(value, Enum):
+        return _normalize_value(value.value)
     if isinstance(value, dict):
         return {str(k): _normalize_value(v) for k, v in sorted(value.items(), key=lambda kv: str(kv[0]))}
     if isinstance(value, (list, tuple)):

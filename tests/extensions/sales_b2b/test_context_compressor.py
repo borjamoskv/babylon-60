@@ -15,7 +15,7 @@ def test_compressor_degradation_threshold():
 
 
 def test_compressor_extracts_invariants():
-    """Verify that the compressor extracts structural invariants from narrative fluff."""
+    """Verify that the compressor extracts structural invariants and CORTEX-TAINT."""
     compressor = ContextCompressor()
     
     history = [
@@ -23,10 +23,11 @@ def test_compressor_extracts_invariants():
         {"timestamp": "2026-06-22T10:00:00Z", "content": "Also, does it have an API integration?"}
     ]
     
-    invariants = compressor.compress_history(history)
+    invariants = compressor.compress_history(history, agent_id="test_agent")
     
     assert invariants["total_interactions"] == 2
     assert invariants["last_contact_date"] == "2026-06-22T10:00:00Z"
-    assert "BUDGET" in invariants["extracted_objections"]
-    assert "INTEGRATION" in invariants["extracted_needs"]
+    assert "BUDGET_OBJECTION" in invariants["extracted_topics"]
+    assert "API_INTEGRATION" in invariants["extracted_topics"]
     assert len(invariants["compression_hash"]) == 16
+    assert "[CORTEX-TAINT: test_agent]" in invariants["taint_signature"]

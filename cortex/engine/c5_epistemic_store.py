@@ -63,6 +63,9 @@ async def ingest_c5_node(
         ledger_seq = cursor.lastrowid
 
         # INSERT into EDG Nodes
+        import dataclasses
+        serialized_payload = json.dumps(dataclasses.asdict(payload), default=str)
+
         await conn.execute(
             """
             INSERT INTO c5_edg_nodes
@@ -76,14 +79,15 @@ async def ingest_c5_node(
                 confidence_b60,
                 exergy_cost,
                 payload.schema_hash if hasattr(payload, "schema_hash") else "v1.0",
-                payload.model_dump_json() if hasattr(payload, "model_dump_json") else json.dumps(payload.__dict__)
+                serialized_payload
             )
         )
 
         # INSERT into Memory Vault
-        # Encrypt the payload here
-        from cortex.crypto.aes import encrypt_str
-        encrypted_blob = encrypt_str(json.dumps(payload.__dict__), tenant_id=tenant_id)
+        # Encrypt the payload here (Author: Borja Moskv)
+        from cortex.crypto import get_default_encrypter
+        encrypter = get_default_encrypter()
+        encrypted_blob = encrypter.encrypt_str(serialized_payload, tenant_id=tenant_id)
         
         await conn.execute(
             """

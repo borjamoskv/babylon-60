@@ -8,6 +8,7 @@ historical context into strict structural invariants (JSON/YAML).
 
 This prevents the LLM from processing zero-yield narrative "fluff"
 and maximizes exergy by retaining only causal state transitions.
+Emits [CORTEX-TAINT] to track the Epistemic Dependency Graph (EDG).
 """
 
 from __future__ import annotations
@@ -36,44 +37,48 @@ class ContextCompressor:
         """Evaluate if the text entropy exceeds the thermodynamic threshold."""
         return len(text) > self.entropy_threshold
 
-    def compress_history(self, history: list[dict[str, Any]]) -> dict[str, Any]:
+    def compress_history(self, history: list[dict[str, Any]], agent_id: str) -> dict[str, Any]:
         """
         Applies Landauer compression to an entire history array.
         Extracts structural facts and purges narrative fluff.
         
         Returns:
             A dictionary containing the state machine representation
-            of the interaction, which can be safely injected into
-            the Deep Research prompt.
+            of the interaction with CORTEX-TAINT hash injection.
         """
         logger.info("Applying thermodynamic context compression to %d messages.", len(history))
         
-        # Simplified baseline for deterministic parsing
+        # Ouroboros Exergy Hash calculation for TAINT
+        raw_dump = json.dumps(history, sort_keys=True).encode("utf-8")
+        compression_hash = hashlib.sha256(raw_dump).hexdigest()[:16]
+        
+        tainted_signature = f"[CORTEX-TAINT: {agent_id}] {compression_hash}"
+
         invariants: dict[str, Any] = {
             "total_interactions": len(history),
             "last_contact_date": None,
-            "extracted_objections": [],
-            "extracted_needs": [],
-            "current_stage": "UNKNOWN",
-            "compression_hash": "",
+            "compression_hash": compression_hash,
+            "taint_signature": tainted_signature,
+            "extracted_topics": [],
         }
         
-        # Ouroboros Exergy Hash calculation
-        raw_dump = json.dumps(history, sort_keys=True).encode("utf-8")
-        invariants["compression_hash"] = hashlib.sha256(raw_dump).hexdigest()[:16]
-
         if history:
             invariants["last_contact_date"] = history[-1].get("timestamp")
             
-            # Simulated naive extraction for the causal baseline
-            for msg in history:
-                content = str(msg.get("content", "")).lower()
-                if "budget" in content or "expensive" in content:
-                    invariants["extracted_objections"].append("BUDGET")
-                if "integration" in content or "api" in content:
-                    invariants["extracted_needs"].append("INTEGRATION")
+            # Use deterministic heuristic synthesis (Simulating SynthesisEngine)
+            text_dump = " ".join([str(msg.get("content", "")) for msg in history]).lower()
+            
+            # Deterministic topic classification mapping (no ad-hoc strings)
+            classification_matrix = {
+                "BUDGET_OBJECTION": ["budget", "expensive", "cost"],
+                "API_INTEGRATION": ["integration", "api", "webhooks"],
+                "SECURITY_REVIEW": ["security", "compliance", "iso27001", "soc2"],
+            }
+            
+            for topic, markers in classification_matrix.items():
+                if any(marker in text_dump for marker in markers):
+                    invariants["extracted_topics"].append(topic)
                     
-        invariants["extracted_objections"] = sorted(list(set(invariants["extracted_objections"])))
-        invariants["extracted_needs"] = sorted(list(set(invariants["extracted_needs"])))
+        invariants["extracted_topics"] = sorted(list(set(invariants["extracted_topics"])))
         
         return invariants

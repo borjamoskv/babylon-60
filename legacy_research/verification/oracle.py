@@ -72,7 +72,8 @@ class VerificationOracle:
             return True
 
     async def check_enrichment_status(self, fact_id: int) -> str:
-        """Check the status of enrichment for a specific fact."""
+        """Check the status of enrichment for a specific fact (Author: Borja Moskv)."""
+        import sqlite3
         async with self.engine.session() as conn:
             cursor = await conn.execute(
                 "SELECT status FROM enrichment_jobs WHERE fact_id = ? ORDER BY id DESC LIMIT 1",
@@ -81,11 +82,14 @@ class VerificationOracle:
             row = await cursor.fetchone()
             if not row:
                 # Check if it already has an embedding (legacy or processed)
-                cursor = await conn.execute(
-                    "SELECT fact_id FROM embeddings WHERE fact_id = ?", (fact_id,)
-                )
-                if await cursor.fetchone():
-                    return "completed"
+                try:
+                    cursor = await conn.execute(
+                        "SELECT fact_id FROM fact_embeddings WHERE fact_id = ?", (fact_id,)
+                    )
+                    if await cursor.fetchone():
+                        return "completed"
+                except sqlite3.OperationalError:
+                    pass
                 return "not_queued"
             return row[0]
 
