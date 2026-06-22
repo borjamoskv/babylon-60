@@ -25,6 +25,7 @@ class StorageMode(str, Enum):
     LOCAL = "local"
     TURSO = "turso"
     POSTGRES = "postgres"
+    LOCAL_SHARDED = "local_sharded"
 
 
 @runtime_checkable

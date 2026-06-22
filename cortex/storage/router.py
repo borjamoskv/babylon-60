@@ -65,6 +65,9 @@ class TenantRouter:
         if self._mode == StorageMode.LOCAL:
             return await self._get_local_backend()
 
+        if self._mode == StorageMode.LOCAL_SHARDED:
+            return await self._get_local_sharded_backend(tenant_id)
+
         if self._mode == StorageMode.POSTGRES:
             return await self._get_postgres_backend(tenant_id)
 
@@ -81,6 +84,25 @@ class TenantRouter:
                 logger.warning("Error closing evicted tenant %s: %s", old_tenant, e)
 
         return backend
+
+    async def _get_local_sharded_backend(self, tenant_id: str):
+        """Return a sharded SQLite connection pool for a specific tenant."""
+        if tenant_id not in self._connections:
+            from pathlib import Path
+            from cortex.config import DB_PATH, SHARD_DIR
+            from cortex.database.pool import CortexConnectionPool
+
+            db_path = Path(DB_PATH)
+            shard_name = f"{db_path.stem}_{tenant_id}{db_path.suffix}"
+            shard_path = Path(SHARD_DIR) / shard_name
+            shard_path.parent.mkdir(parents=True, exist_ok=True)
+
+            pool = CortexConnectionPool(str(shard_path), read_only=False)
+            await pool.initialize()
+            self._connections[tenant_id] = pool
+            logger.info("Local sharded storage initialized for tenant [%s] at %s", tenant_id, shard_path)
+
+        return self._connections[tenant_id]
 
     async def _get_local_backend(self):
         """Return the shared local SQLite connection pool."""
