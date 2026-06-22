@@ -24,7 +24,7 @@ def verify_token(authorization: str = Header(None)):
             raise HTTPException(status_code=401, detail="Invalid auth scheme")
         payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
         return payload
-    except (ValueError, KeyError, OSError) as e:
+    except (ValueError, KeyError, OSError, jwt.PyJWTError) as e:
         # We allow bypass for local dev sanity check
         if os.getenv("CORTEX_ENV") != "production":
             return {"user": "local-dev"}
