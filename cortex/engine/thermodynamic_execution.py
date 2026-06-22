@@ -2,13 +2,11 @@
 # Epistemic Level: C5-REAL (Asymptotic Silence Protocol)
 
 import hashlib
+import logging
 import os
 import sys
 from collections.abc import Callable
 from typing import Any
-
-
-import logging
 
 logger = logging.getLogger(__name__)
 

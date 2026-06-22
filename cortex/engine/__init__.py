@@ -22,6 +22,7 @@ from cortex.engine.durability import PersistenceSupervisor
 from cortex.engine.memory_mixin import MemoryMixin
 from cortex.engine.mixins.components import ComponentsMixin
 from cortex.engine.mixins.optimization import OptimizationMixin
+
 try:
     from cortex.engine.primitive_exergy_agent import PrimitiveExergyMaximizerAgent
 except (ImportError, AttributeError, NameError):

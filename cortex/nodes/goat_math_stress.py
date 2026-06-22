@@ -10,6 +10,7 @@ Prueba inyección y mutación concurrente masiva usando WAL mode.
 
 import concurrent.futures
 import random
+import sqlite3
 import time
 from pathlib import Path
 

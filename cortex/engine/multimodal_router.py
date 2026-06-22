@@ -186,12 +186,6 @@ class AudioProcessor:
                 mean_sq = sum(b * b for b in chunk) / len(chunk)
                 rms_values.append(mean_sq**0.5 / 255.0)
 
-        # Deterministic embedding from spectral fingerprint
-        spectral_digest = hashlib.sha256(
-            b"".join(v.hex().encode() for v in [float(r) for r in rms_values][:64]
-                     if isinstance(v, str))
-            if rms_values else b"silence"
-        ).digest()
         # Simpler: hash the raw audio
         digest = hashlib.sha256(raw).digest()
         embedding = TextProcessor._hash_to_embedding(digest, self.EMBED_DIM)
@@ -436,7 +430,7 @@ class MultimodalFusionRouter:
             return self._fuse_weighted_average(insights)
 
         result = [0.0] * self.target_dim
-        for insight, gate in zip(insights, gates):
+        for insight, gate in zip(insights, gates, strict=True):
             weight = gate / gate_sum
             emb = insight.embedding
             for j in range(min(len(emb), self.target_dim)):

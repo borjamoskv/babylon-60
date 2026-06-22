@@ -9,13 +9,13 @@ Delegates purely to the Fable 5.0 (F# -> Python) C5-REAL kernel.
 import hashlib
 import logging
 
-from fable_library.core import uint16, uint32
 from fable_library.array_ import Array
+from fable_library.core import uint16, uint32
 
 from cortex.engine.fable_out.src.maxwell_demon import (
     MaxwellDemon__ctor_6C4BA866,
-    MaxwellDemon__SetState_Z721C83C5,
     MaxwellDemon__PurgeRedundant_Z115D9F2A,
+    MaxwellDemon__SetState_Z721C83C5,
 )
 
 logger = logging.getLogger(__name__)

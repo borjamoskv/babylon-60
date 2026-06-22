@@ -6,7 +6,6 @@ Integrates Swarm 10k consolidation with the Minimal Trusted Kernel (MTK) and phy
 
 import asyncio
 import logging
-import os
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -74,10 +73,10 @@ async def run_deterministic_consolidation(mtk_private_key: str):
         ledger_path = Path(f"docs/EXERGY_CONSOLIDATION_{ledger_date}.md")
         ledger_path.parent.mkdir(exist_ok=True)
         with open(ledger_path, "w") as f:
-            f.write(f"# █ HOLISTIC EXERGY CONSOLIDATION LEDGER (C5-REAL)\n")
+            f.write("# █ HOLISTIC EXERGY CONSOLIDATION LEDGER (C5-REAL)\n")
             f.write(f"> **FECHA DE CONSOLIDACIÓN**: {ledger_date}\n")
-            f.write(f"> **MANDATO**: Purga de anergía y reducción entrópica completada.\n")
-            f.write(f"Consolidación determinista orquestada vía Legion-10k y MTK.\n")
+            f.write("> **MANDATO**: Purga de anergía y reducción entrópica completada.\n")
+            f.write("Consolidación determinista orquestada vía Legion-10k y MTK.\n")
         
         logger.info(f"📜 Ledger de Consolidación Emitido: {ledger_path}")
         logger.info("🔱 CONSOLIDACIÓN DETERMINISTA COMPLETADA. Entropía Erradicada.")

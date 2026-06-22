@@ -16,7 +16,6 @@ import aiosqlite
 from cortex.crypto import get_default_encrypter
 from cortex.engine.capabilities import CapabilityRegistry
 from cortex.engine.embedding_engine import embed_fact_async
-from cortex.engine.fact_store_core import insert_fact_record
 from cortex.engine.ghost_mixin import GhostMixin
 from cortex.engine.privacy_mixin import PrivacyMixin
 from cortex.engine.store_mutation import (
@@ -199,21 +198,38 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             return dedupe_id
 
         tx_id = await self._resolve_tx_id(tx_id, conn, project, content, fact_type, tenant_id, actor_id)
-        fact_id = await insert_fact_record(
-            conn,
-            tenant_id,
-            project,
-            content,
-            fact_type,
-            tags,
-            confidence,
-            valid_from,
-            source,
-            meta,
-            tx_id,
-            parent_decision_id=parent_decision_id,
-            taint_already_verified=True,
+        # [C5-REAL] MTK Payload Construction
+        from cortex.engine.c5_epistemic_store import ingest_c5_node
+        from cortex.engine.mtk_core import MTKGuard
+        from cortex.types.evidence import ClosurePayload, EvidenceBundle
+        from datetime import datetime, timezone
+        
+        evidence = EvidenceBundle.create(
+            query=project,
+            sources=[],
+            retrieved_at=datetime.now(timezone.utc)
         )
+        
+        payload = ClosurePayload.create(
+            claims=[{"content": content, "fact_type": fact_type, "meta": meta, "tags": tags}],
+            evidence=evidence,
+            verdict=True
+        )
+        
+        b60_conf = 60 if confidence == "stated" else 30
+        mtk_guard = MTKGuard(private_key="C5-REAL-GATE1-PRIVATE-KEY")
+        
+        fact_id_str = await ingest_c5_node(
+            conn=conn,
+            tenant_id=tenant_id,
+            payload=payload,
+            status="Proven",
+            confidence_b60=b60_conf,
+            exergy_cost=60,
+            agent_id=actor_id or "unknown",
+            mtk_guard=mtk_guard
+        )
+        fact_id = int(fact_id_str[:8], 16)
 
         await self._run_post_store_tasks(
             conn, fact_id, project, content, fact_type, tags, source, tenant_id

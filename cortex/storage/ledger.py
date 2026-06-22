@@ -12,11 +12,10 @@ import fcntl
 import hashlib
 import json
 import os
+from typing import Any
 
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
-
-from typing import Any
 
 try:
     import cortex_core_rs
@@ -57,8 +56,9 @@ class EnterpriseAuditLedger:
     """Immutable Audit Ledger for enterprise-grade SOC 2 compliance (WORM JSONL)."""
 
     def __init__(self, log_path: Any = "security_audit_log.jsonl") -> None:
-        import aiosqlite
         import sqlite3
+
+        import aiosqlite
         if isinstance(log_path, (aiosqlite.Connection, sqlite3.Connection)) or hasattr(log_path, "execute"):
             self._conn = log_path
             self.log_path = "security_audit_log.jsonl"

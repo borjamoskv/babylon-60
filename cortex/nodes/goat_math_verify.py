@@ -8,6 +8,7 @@ de primitivas matemáticas en PyTorch/SciPy.
 ═══════════════════════════════════════════════════════════════
 """
 
+import sqlite3
 import sys
 from pathlib import Path
 

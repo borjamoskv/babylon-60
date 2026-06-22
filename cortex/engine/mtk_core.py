@@ -5,9 +5,7 @@ The ONLY authorized entry point for state mutation. Replaces 'distributed system
 with a single, hard-enforced physical checkpoint.
 """
 
-import hashlib
 import logging
-import time
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
@@ -48,7 +46,8 @@ class MTKGuard:
             return cortex_rs.mint_ephemeral_token(payload.canonical(), self.private_key)
         except ImportError:
             logger.warning("[MTK] Rust FFI not available. Falling back to Python simulation.")
-            import hashlib, time
+            import hashlib
+            import time
             babylon_time = time.time_ns()
             raw = f"{payload.canonical()}:{babylon_time}:{self.private_key}"
             return f"mtk_auth_{hashlib.sha3_256(raw.encode()).hexdigest()}"

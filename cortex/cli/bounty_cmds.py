@@ -22,11 +22,11 @@ from cortex.cli.common import (
     console,
     get_engine,
 )
-from cortex.guards.z3_anvil import SovereignAnvil
 from cortex.consensus.babylon_quorum import BabylonQuorum
 from cortex.crypto.keys import ZKSwarmIdentity
 from cortex.engine.causal.taint_engine import generate_secure_taint_token
 from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
+from cortex.guards.z3_anvil import SovereignAnvil
 from cortex.types.evidence import ClosurePayload, EvidenceBundle, Source
 
 logger = logging.getLogger("cortex.cli.bounty")
