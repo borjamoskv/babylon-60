@@ -1,0 +1,4 @@
+node_id,semantic_role,selector_1,selector_2,selector_3,confidence,events_required
+sales_nav_name,lead_profile_link,a[data-anonymize="person-name"],,,C5,read
+linkedin_search_name,lead_profile_link,span.entity-result__title-text a,a.app-aware-link,,C5,read
+twitter_user_name,lead_profile_link,[data-testid="User-Name"] a,,,C5,read

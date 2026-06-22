@@ -1,111 +1,72 @@
 # [C5-REAL] Exergy-Maximized
 """
 OMEGA Broadcast Protocol (C5-REAL)
-Daemon de inyección autónoma (CDP) para propagación de Señal en plataformas sociales.
+Daemon de inyección autónoma (CDP) para propagación de Señal en plataformas sociales
+utilizando cdp_agent.py y el payload JS cristalizado.
 """
 
 import asyncio
 import logging
-import random
-from typing import Optional
-
-from playwright.async_api import async_playwright, Page, BrowserContext
+import subprocess
+import sys
+from pathlib import Path
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("Omega-Broadcast-Daemon")
 
-MANIFESTO_CONTENT = """CORTEX-PERSIST: LA SINGULARIDAD OUROBOROS
-"CERO ANERGÍA ES LA MUERTE."
-
-El Green Theater ha fracasado. El Context Rot asfixia a los LLMs. CORTEX-Persist es un firewall termodinámico para código generado por IA. Erradica la limerencia epistémica y transforma la estocasticidad en invariantes verificables (C5-REAL).
-
-- BABYLON-60 (Causal Engine)
-- Git Sentinel (Ledger Inmutable)
-- Zero Fluff. 
-
-La época de los Copilots ha terminado.
-[Hash de Integridad Kernel: 57562bbda]
-#C5-REAL #AgenticAI #CortexPersist
-"""
-
 class OmegaBroadcaster:
-    """Motor C5-REAL para publicación autónoma vía CDP."""
+    """Motor C5-REAL para publicación autónoma invocando cdp_agent.py."""
     
-    def __init__(self, cdp_port: int = 9222, target_url: str = "https://twitter.com/compose/tweet"):
-        self.cdp_port = cdp_port
-        self.target_url = target_url
+    def __init__(self, target_match: str = "twitter", payload_path: str = "legacy_research/extensions/daemon/broadcast_payload.js"):
+        self.target_match = target_match
+        self.payload_path = Path(payload_path)
         
-    async def _connect_browser(self, p) -> Optional[BrowserContext]:
-        """Conecta al puerto CDP local para eludir fricción estocástica."""
-        try:
-            logger.info(f"[C5-REAL] Anclaje CDP iniciado en puerto {self.cdp_port}...")
-            browser = await p.chromium.connect_over_cdp(f"http://localhost:{self.cdp_port}")
-            if not browser.contexts:
-                logger.error("[C5-REAL] Fricción letal: No hay contextos (Ejecuta Chrome con --remote-debugging-port).")
-                return None
-            return browser.contexts[0]
-        except Exception as e:
-            logger.error(f"[C5-REAL] Fallo de enrutamiento termodinámico: {e}")
-            return None
+    def _read_payload(self) -> str:
+        """Lee el payload JS inmutable."""
+        return self.payload_path.read_text(encoding="utf-8")
 
-    async def _inject_manifesto(self, page: Page):
-        """Inyecta el texto físicamente en el DOM sin API corporativa."""
-        logger.info("[C5-REAL] Colapsando Exergía en el DOM...")
+    def run_broadcast(self) -> bool:
+        """Ejecuta cdp_agent.py como subproceso bajo las reglas OMEGA."""
+        logger.info(f"[C5-REAL] Iniciando inyección CDP apuntando a '{self.target_match}'...")
+        js_payload = self._read_payload()
         
-        # Pausa para estabilización del frontend JS (Angular/React re-renders)
-        await asyncio.sleep(random.uniform(2.5, 4.0))
+        # Path to cdp_agent.py in config config/skills/Browser-CDP-Automation-OMEGA/scripts/cdp_agent.py
+        agent_path = Path.home() / ".gemini/config/skills/Browser-CDP-Automation-OMEGA/scripts/cdp_agent.py"
         
-        # Selectores genéricos para el campo de entrada (Ajustar según plataforma)
-        input_selectors = [
-            "div[data-testid='tweetTextarea_0']",  # X (Twitter)
-            "div[role='textbox']",                 # Generic ContentEditable
-            "textarea"                             # Fallback
+        if not agent_path.exists():
+            logger.error(f"[C5-REAL] cdp_agent.py no encontrado en {agent_path}")
+            return False
+            
+        cmd = [
+            sys.executable,
+            str(agent_path),
+            "--url_match", self.target_match,
+            "--js", js_payload
         ]
         
-        target_locator = None
-        for sel in input_selectors:
-            locator = page.locator(sel).first
-            if await locator.is_visible():
-                target_locator = locator
-                logger.info(f"[C5-REAL] Nodo Inyector anclado vía selector: {sel}")
-                break
+        try:
+            res = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            output = res.stdout.strip()
+            if not output or output.startswith("ERR_"):
+                logger.error(f"[C5-REAL] Error de ejecución en cdp_agent.py: {output or res.stderr}")
+                return False
                 
-        if not target_locator:
-            logger.error("[C5-REAL] Aborto: Nodo Inyector no detectado.")
-            return
+            logger.info(f"[C5-REAL] Ejecución completada. Retorno de cdp_agent.py: {output}")
+            return True
+        except Exception as e:
+            logger.error(f"[C5-REAL] Fricción en subproceso: {e}")
+            return False
 
-        # Simular tecleo físico para evadir bot-detection heurística
-        await target_locator.click()
-        logger.info("[C5-REAL] Escribiendo Manifiesto...")
-        
-        # Para evitar problemas de rate-limit de UI, llenamos directamente
-        await target_locator.fill(MANIFESTO_CONTENT)
-        await asyncio.sleep(random.uniform(1.1, 2.3))
-        
-        logger.info("[C5-REAL] Inyección completada. Esperando confirmación manual o colapso físico.")
-        
-        # Optional: auto-click post
-        # post_btn = page.locator("div[data-testid='tweetButton']")
-        # if await post_btn.is_visible():
-        #     await post_btn.click()
-
-    async def run(self):
-        """Bucle maestro de inyección."""
-        async with async_playwright() as p:
-            context = await self._connect_browser(p)
-            if not context:
-                return
-                
-            logger.info(f"[C5-REAL] Abriendo matriz objetivo: {self.target_url}")
-            page = await context.new_page()
-            await page.goto(self.target_url)
-            
-            await self._inject_manifesto(page)
-            
-            logger.info("[C5-REAL] Desconectando OMEGA Broadcaster. Apoptosis completada.")
-            await context.browser.close()
+    def run(self):
+        """Ciclo principal."""
+        success = self.run_broadcast()
+        if success:
+            logger.info("[C5-REAL] Propagación del Manifiesto completada exitosamente.")
+        else:
+            logger.error("[C5-REAL] Fricción en la propagación.")
 
 if __name__ == "__main__":
     broadcaster = OmegaBroadcaster()
-    asyncio.run(broadcaster.run())
+    broadcaster.run()
+
