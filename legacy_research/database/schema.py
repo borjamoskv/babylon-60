@@ -407,11 +407,10 @@ _CORE_SCHEMA = [
     CREATE_TENANTS,
     CREATE_LKRGSER_REPLAY_ADMISSIONS,
     CREATE_LKRGSER_REPLAY_ADMISSIONS_INDEXES,
-    C5_REAL_SCHEMAT_INTEL,
 ]
 
-# Full ordered schema: core + extensions (consensus, episodes, signals, entity_events...)
-ALL_SCHEMA = _CORE_SCHEMA + EXTENSION_SCHEMA
+# Full ordered schema: core + extensions (consensus, episodes, signals, entity_events...) + C5_REAL
+ALL_SCHEMA = _CORE_SCHEMA + EXTENSION_SCHEMA + C5_REAL_SCHEMA
 
 
 # Late import to avoid circular dependency (auth imports from config)

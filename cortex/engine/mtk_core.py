@@ -16,7 +16,7 @@ try:
 except ImportError:
     cortex_core_rs = None
 
-from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
+from cortex.engine.mtk_sqlite_authorizer import mtk_active_token, mtk_payload_hash
 from cortex.types.evidence import ClosurePayload
 
 logger = logging.getLogger(__name__)
@@ -42,10 +42,16 @@ class MTKGuard:
         return ""
         
     def _generate_ephemeral_token(self, payload: ClosurePayload) -> str:
-        """Generate a short-lived cryptographic capability token for this transaction."""
-        babylon_time = time.time_ns()
-        raw = f"{payload.canonical()}:{babylon_time}:{self.private_key}"
-        return f"mtk_auth_{hashlib.sha3_256(raw.encode()).hexdigest()}"
+        """Generate a short-lived cryptographic capability token via Rust FFI."""
+        try:
+            import cortex_rs
+            return cortex_rs.mint_ephemeral_token(payload.canonical(), self.private_key)
+        except ImportError:
+            logger.warning("[MTK] Rust FFI not available. Falling back to Python simulation.")
+            import hashlib, time
+            babylon_time = time.time_ns()
+            raw = f"{payload.canonical()}:{babylon_time}:{self.private_key}"
+            return f"mtk_auth_{hashlib.sha3_256(raw.encode()).hexdigest()}"
 
     @asynccontextmanager
     async def transaction_boundary(self, payload: ClosurePayload) -> AsyncGenerator[str, None]:
@@ -81,6 +87,7 @@ class MTKGuard:
         
         # Step 3: Open Physical DB Boundary
         token_id = mtk_active_token.set(token)
+        payload_id = mtk_payload_hash.set(payload.canonical())
         if self.rust_authorizer:
             self.rust_authorizer.set_ephemeral_token(token)
         
@@ -93,3 +100,4 @@ class MTKGuard:
             if self.rust_authorizer:
                 self.rust_authorizer.clear_token()
             mtk_active_token.reset(token_id)
+            mtk_payload_hash.reset(payload_id)
