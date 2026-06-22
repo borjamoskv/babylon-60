@@ -90,7 +90,7 @@ async def test_legion_10k_exergy_report(tmp_path: Path):
         exergies.append(ex)
 
     assert len(exergies) == 10  # 1000 agents / 100 per centurion
-    assert all(0.0 <= e <= 1.0 for e in exergies), f"Exergy out of bounds: {exergies}"
+    assert all(0.0 <= e.to_float() <= 1.0 for e in exergies), f"Exergy out of bounds: {exergies}"
 
     await commander.consolidate_and_annihilate()
 

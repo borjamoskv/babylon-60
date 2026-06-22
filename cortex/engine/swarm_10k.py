@@ -27,6 +27,7 @@ logger = logging.getLogger("cortex.engine.swarm_10k")
 
 from cortex.engine.babylon60 import Babylon60
 
+
 @dataclass
 class NodeMetrics:
     exergy: Babylon60

@@ -33,121 +33,34 @@ from inject_osint_defense import inject_primitives as inject_osint
 from inject_sistemas_complejos import inject_primitives as inject_complex_systems
 from inject_spatial_render import inject_primitives as inject_spatial
 
+# Registry of all available injectors with display name, error identifier, and function
+INJECTORS = [
+    ("Category Theory", "inject_cat_theory", inject_cat_theory),
+    ("Category Theory Advanced", "inject_cat_theory_adv", inject_cat_theory_adv),
+    ("CWV Performance", "inject_cwv", inject_cwv),
+    ("Design Tokens", "inject_design", inject_design),
+    ("Goat Math", "inject_goat", inject_goat),
+    ("Mythos Primitives", "inject_mythos", inject_mythos),
+    ("Spatial Render", "inject_spatial", inject_spatial),
+    ("Agent-Principal", "inject_agent_principal", inject_agent_principal),
+    ("OSINT Defense", "inject_osint", inject_osint),
+    ("Complex Systems", "inject_complex_systems", inject_complex_systems),
+    ("Git Exergy", "inject_git_exergy", inject_git_exergy),
+    ("Physical Laws", "inject_physical_laws", inject_physical_laws),
+    ("DAME Framework", "inject_dame_framework", inject_dame_framework),
+    ("Arkham Breadcrumbs", "inject_arkham_breadcrumbs", inject_arkham_breadcrumbs),
+]
 
 async def run_pipeline():
     logger.info("=== STARTING CORTEX PERSIST COGNITIVE CONSOLIDATION PIPELINE (C5-REAL) ===")
     
-    # 1. Category Theory Fundamental
-    try:
-        logger.info("Running Category Theory injection...")
-        await inject_cat_theory()
-        await asyncio.sleep(0.5)
-    except Exception as e:
-        logger.error(f"Error in inject_cat_theory: {e}")
-
-    # 2. Category Theory Advanced
-    try:
-        logger.info("Running Category Theory Advanced injection...")
-        await inject_cat_theory_adv()
-        await asyncio.sleep(0.5)
-    except Exception as e:
-        logger.error(f"Error in inject_cat_theory_adv: {e}")
-
-    # 3. CWV Performance
-    try:
-        logger.info("Running CWV Performance injection...")
-        await inject_cwv()
-        await asyncio.sleep(0.5)
-    except Exception as e:
-        logger.error(f"Error in inject_cwv: {e}")
-
-    # 4. Design Tokens
-    try:
-        logger.info("Running Design Tokens injection...")
-        await inject_design()
-        await asyncio.sleep(0.5)
-    except Exception as e:
-        logger.error(f"Error in inject_design: {e}")
-
-    # 5. Goat Math
-    try:
-        logger.info("Running Goat Math injection...")
-        await inject_goat()
-        await asyncio.sleep(0.5)
-    except Exception as e:
-        logger.error(f"Error in inject_goat: {e}")
-
-    # 6. Mythos Primitives
-    try:
-        logger.info("Running Mythos Primitives injection...")
-        await inject_mythos()
-        await asyncio.sleep(0.5)
-    except Exception as e:
-        logger.error(f"Error in inject_mythos: {e}")
-
-    # 7. Spatial Render
-    try:
-        logger.info("Running Spatial Render injection...")
-        await inject_spatial()
-        await asyncio.sleep(0.5)
-    except Exception as e:
-        logger.error(f"Error in inject_spatial: {e}")
-
-    # 8. Agent-Principal Primitives
-    try:
-        logger.info("Running Agent-Principal injection...")
-        await inject_agent_principal()
-        await asyncio.sleep(0.5)
-    except Exception as e:
-        logger.error(f"Error in inject_agent_principal: {e}")
-
-    # 9. OSINT Defense Primitives
-    try:
-        logger.info("Running OSINT Defense injection...")
-        await inject_osint()
-        await asyncio.sleep(0.5)
-    except Exception as e:
-        logger.error(f"Error in inject_osint: {e}")
-
-    # 10. Complex Systems Primitives
-    try:
-        logger.info("Running Complex Systems injection...")
-        await inject_complex_systems()
-        await asyncio.sleep(0.5)
-    except Exception as e:
-        logger.error(f"Error in inject_complex_systems: {e}")
-
-    # 11. Git Exergy Primitives
-    try:
-        logger.info("Running Git Exergy injection...")
-        await inject_git_exergy()
-        await asyncio.sleep(0.5)
-    except Exception as e:
-        logger.error(f"Error in inject_git_exergy: {e}")
-
-    # 12. Physical Laws Primitives
-    try:
-        logger.info("Running Physical Laws injection...")
-        await inject_physical_laws()
-        await asyncio.sleep(0.5)
-    except Exception as e:
-        logger.error(f"Error in inject_physical_laws: {e}")
-
-    # 13. DAME Framework Primitives
-    try:
-        logger.info("Running DAME Framework injection...")
-        await inject_dame_framework()
-        await asyncio.sleep(0.5)
-    except Exception as e:
-        logger.error(f"Error in inject_dame_framework: {e}")
-
-    # 14. Arkham Breadcrumbs Primitives
-    try:
-        logger.info("Running Arkham Breadcrumbs injection...")
-        await inject_arkham_breadcrumbs()
-        await asyncio.sleep(0.5)
-    except Exception as e:
-        logger.error(f"Error in inject_arkham_breadcrumbs: {e}")
+    for display_name, err_id, injector_fn in INJECTORS:
+        try:
+            logger.info(f"Running {display_name} injection...")
+            await injector_fn()
+            await asyncio.sleep(0.5)
+        except Exception as e:
+            logger.error(f"Error in {err_id}: {e}")
 
     logger.info("=== ALL INJECTIONS COMPLETED ===")
     logger.info("Waiting 3.0 seconds to guarantee full ledger batch commit to security_audit_log.jsonl...")

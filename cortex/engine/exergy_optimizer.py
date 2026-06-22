@@ -7,6 +7,7 @@ O(1) Heuristic Engine for Thermal utility and Swarm density.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+
 from cortex.engine.babylon60 import Babylon60
 
 if TYPE_CHECKING:
