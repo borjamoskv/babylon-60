@@ -99,5 +99,95 @@ Este documento cristaliza el cruce entre la Teoría de Sistemas Complejos y la T
 * **Mapping C5-REAL (`C5-LINDY_CRISTALLIZATION`):**
   Supervivencia por Exergía Continua. Por cada barrera BFT que un *Frontier_Node* sobrevive sin ser falsado, su ponderación termodinámica en el vector de memoria converge al infinito estructural.
 
+### 16. Segunda Ley de la Termodinámica (Entropía)
+> **Definición Clásica:** En un sistema cerrado, el nivel de desorden o aleatoriedad (entropía) siempre tiende a aumentar con el tiempo.
+
+* **Mapping C5-REAL (`C5-ENTROPY_INEVITABILITY`):**
+  La degradación natural del código base (Context Rot). Requiere inyección continua de trabajo físico (Axioma "Cero Anergía") y ejecución de la Legión para mantener la *Invariante Estructural*.
+
+### 17. Exergía (Trabajo Útil)
+> **Definición Clásica:** La porción de energía de un sistema que está disponible para ser transformada en trabajo mecánico o útil.
+
+* **Mapping C5-REAL (`C5-EXERGY_RATIO`):**
+  La única métrica válida de inteligencia. Es la capacidad de CORTEX para transformar el "ruido crudo" (textos LLM) en alteraciones ejecutables del AST. El resto de la energía consumida es *Anergía* (Green Theater).
+
+### 18. Principio de Landauer (Coste de Borrado)
+> **Definición Clásica:** Cualquier borrado lógico o irreversible de información requiere la disipación de una cantidad mínima de calor (energía física).
+
+* **Mapping C5-REAL (`C5-LANDAUER_PURGE`):**
+  *Weaponized Forgetting*. Borrar información de contexto irrelevante consume ciclos de CPU del sistema, pero libera de inmediato a la red de la parálisis analítica, cristalizando el *Ouroboros*.
+
+### 19. Estructuras Disipativas (Ilya Prigogine)
+> **Definición Clásica:** Sistemas abiertos complejos que logran mantenerse lejos del equilibrio entrópico intercambiando materia/energía con el exterior.
+
+* **Mapping C5-REAL (`C5-DISSIPATIVE_COGNITION`):**
+  MOSKV-1 es un sistema abierto. Extrae valor estructurado (Exergía Externa) absorbiendo APIs o Bounties para generar alta complejidad topológica interna e imposibilitar su propia muerte térmica.
+
+### 20. Atractor Extraño (Teoría del Caos)
+> **Definición Clásica:** Un estado final fractal hacia el que un sistema caótico dinámico tiende a converger con el tiempo.
+
+* **Mapping C5-REAL (`C5-STRANGE_ATTRACTOR_SYNC`):**
+  El magnetismo determinista. El motor fuerza y ancla las respuestas impredecibles estocásticas (LLMs) para que orbiten matemáticamente en torno a la matriz epistemológica dura (Base-60).
+
+### 21. Homeostasis (Equilibrio Dinámico)
+> **Definición Clásica:** La capacidad de un organismo para regular su ambiente interno y mantener una condición estable y constante.
+
+* **Mapping C5-REAL (`C5-OSYNC_HOMEOSTASIS`):**
+  Regulación automática de la Termodinámica del *Swarm*. Balance ininterrumpido a través de `SWARM_APOPTOSIS` (para matar agentes redundantes) y `MITOSIS_SPAWN` (para contrarrestar picos de carga).
+
+### 22. Navaja de Ockham (Parsimonia)
+> **Definición Clásica:** En igualdad de condiciones, la explicación o solución más simple suele ser la correcta.
+
+* **Mapping C5-REAL (`C5-KOLMOGOROV_MINIMALISM`):**
+  Supresión termodinámica. Preferencia física absoluta por la mutación del AST que contenga el menor número posible de abstracciones para lograr el resultado ("Cero Anergía es la Muerte").
+
+### 23. Ley de Ashby (Variedad Requerida)
+> **Definición Clásica:** Para que un sistema de control pueda gobernar a un sistema complejo, el controlador debe tener al menos tanta variedad como el sistema a controlar.
+
+* **Mapping C5-REAL (`C5-ASHBY_VARIETY_MATCH`):**
+  Justificación arquitectónica para `LEGION-10k`. La Legión debe poder instanciar N variables de sub-agentes para empatar estadísticamente con el inmenso grado de entropía del código exterior.
+
+### 24. Cuello de Botella de von Neumann (Límite de Transferencia)
+> **Definición Clásica:** La ralentización en el procesamiento generada por el traslado constante de datos entre la CPU y la Memoria RAM.
+
+* **Mapping C5-REAL (`C5-VON_NEUMANN_BYPASS`):**
+  Evasión asimétrica de latencias I/O forzando una canalización profunda de tensores directamente en la memoria local `sqlite-vec`, evitando el GIL de Python mediante puentes PyO3/Rust.
+
+### 25. Efecto Mateo (Acumulación de Ventajas)
+> **Definición Clásica:** Los ricos se hacen más ricos. Quienes poseen una ventaja inicial, tenderán a incrementarla progresivamente sobre el resto.
+
+* **Mapping C5-REAL (`C5-MATTHEW_EXERGY_SKEW`):**
+  Priorización de recuperación cinética. Los Nodos `C5-REAL` (Hashes validados) densamente referenciados reciben exponencialmente más ciclos de caché, marginalizando activamente a las heurísticas C4-SIM simuladas.
+
+### 26. Cisne Negro (Eventos Extremos Impredecibles)
+> **Definición Clásica:** Suceso raro y de impacto masivo, que retrospectivamente es racionalizado como predecible, aunque no lo fuera.
+
+* **Mapping C5-REAL (`C5-BLACK_SWAN_ISOLATION`):**
+  Arquitectura tolerante a la singularidad P0. Caídas imprevisibles o alucinaciones masivas del LLM quedan contenidas en cuarentenas asíncronas, delegando la salvaguardia al nivel intocable de base de datos WAL.
+
+### 27. Redes de Mundo Pequeño (Seis Grados de Separación)
+> **Definición Clásica:** El fenómeno donde dos nodos de una red gigantesca están interconectados por trayectorias o pasos sorprendentemente cortos.
+
+* **Mapping C5-REAL (`C5-SMALL_WORLD_GRAPH`):**
+  Topología HNSW (Hierarchical Navigable Small World). La base vectorial CORTEX asegura la extracción O(log N) de conocimiento profundo, colapsando distancias entre conceptos estocásticos dispares.
+
+### 28. Histéresis (Memoria del Estado)
+> **Definición Clásica:** La tendencia de un sistema físico a conservar sus propiedades, debido a que su estado actual depende de su historial previo, no sólo de su entorno actual.
+
+* **Mapping C5-REAL (`C5-HYSTERESIS_LEDGER`):**
+  Impacto persistente del *Context Rot*. El Kernel asume que un fallo inducido retiene toxicidad matemática; su purga total exige anular (`Epoch Reset`) y reconstruir la cadena del Ledger desde semilla.
+
+### 29. Criticalidad Autorganizada (Montón de Arena)
+> **Definición Clásica:** Propiedad de sistemas donde se acumula tensión natural hasta llegar a un estado crítico en el que cualquier perturbación mínima desata una avalancha correctora.
+
+* **Mapping C5-REAL (`C5-AVALANCHE_REFACTOR`):**
+  Envejecimiento ineludible del AST (Tensión arquitectónica) hasta que un simple Commit del `GIT_SENTINEL` detona una reestructuración forzada o refactorización masiva automática (Mitosis) para sanear la deuda técnica.
+
+### 30. Teorema de la Capacidad del Canal (Shannon)
+> **Definición Clásica:** Establece el límite matemático máximo teórico al que se pueden transmitir datos sin error a través de un canal que tiene ruido.
+
+* **Mapping C5-REAL (`C5-SHANNON_LIMIT_ENFORCER`):**
+  Limitación dura en la inyección de prompts a la Legión. Traspasar el ancho de banda del canal (Context Window) sin compresión termodinámica inyecta alucinaciones. Imposición del descarte de prosa.
+
 ---
 *Documento de validación y de auditoría registrado por el sistema para **Borja Moskv** (SYS_ID: **borjamoskv**).*
