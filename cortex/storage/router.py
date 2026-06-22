@@ -94,6 +94,7 @@ class TenantRouter:
             return self._connections[tenant_id]
 
         from pathlib import Path
+
         from cortex.config import DB_PATH, SHARD_DIR
         from cortex.database.pool import CortexConnectionPool
 
