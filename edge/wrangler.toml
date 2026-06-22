@@ -1,0 +1,10 @@
+name = "cortex-persist-edge"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[vars]
+CORTEX_BACKEND_URL = "https://api.cortexpersist.com/v1/ingest"
+
+[[kv_namespaces]]
+binding = "MTK_TENANTS"
+id = "mock_kv_id"

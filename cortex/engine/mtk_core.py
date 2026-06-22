@@ -29,9 +29,11 @@ class MTKGuard:
         if cortex_core_rs:
             self.ast_projector = cortex_core_rs.ASTProjector() if hasattr(cortex_core_rs, "ASTProjector") else None
             self.rust_authorizer = cortex_core_rs.MTKAuthorizer() if hasattr(cortex_core_rs, "MTKAuthorizer") else None
+            self.cognitive_state = cortex_core_rs.CognitiveState(1000) if hasattr(cortex_core_rs, "CognitiveState") else None
         else:
             self.ast_projector = None
             self.rust_authorizer = None
+            self.cognitive_state = None
             
     def validate_c5_ast(self, source_code: str) -> str:
         """Invokes the Rust AST Projector to validate C5-REAL constraints."""
@@ -80,6 +82,11 @@ class MTKGuard:
         # This acts as the Szilard Engine gate: no capability token is minted for pure entropy.
         if hasattr(payload, "info_exergy") and payload.info_exergy < 0.1:
             raise ValueError(f"MTK-REJECT: Informational Exergy too low ({payload.info_exergy} < 0.1). Entropy purge required before DB write.")
+            
+        # 1.4 Invariante Cognitivo (I_cognitive): Advance the pure FSM state if Rust module loaded
+        if self.cognitive_state:
+            exergy_input = int(getattr(payload, "info_exergy", 1.0) * 100) # Simple scaling for FSM input
+            self.cognitive_state = self.cognitive_state.apply_tick(exergy_input)
             
         # Step 2: Mint Ephemeral Token
         token = self._generate_ephemeral_token(payload)

@@ -1,0 +1,27 @@
+{
+  "name": "cortex-persist-langchain",
+  "version": "1.0.0",
+  "description": "CORTEX Persist Integration for LangChain JS/TS",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "cortex",
+    "c5-real",
+    "langchain",
+    "llm"
+  ],
+  "author": "borjamoskv",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "cortex-persist": "file:../node"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "@langchain/core": "^0.1.0"
+  }
+}

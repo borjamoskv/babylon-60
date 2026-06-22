@@ -15,7 +15,7 @@ class BootstrapWatchdog:
         Arranque seguro: recuperar eventos no sellados del WAL
         y re-inyectar en el batcher.
         """
-        pending = self.wal.recover_unsealed()
+        pending = await self.wal.recover_unsealed()
         for event in pending:
             await self.batcher.ingest_event(event)
         return pending
