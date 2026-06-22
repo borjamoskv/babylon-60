@@ -121,9 +121,9 @@ async def create_checkout_session(body: CheckoutRequest) -> dict:
     try:
         session_kwargs = {
             "mode": "subscription",
-            "ui_mode": "embedded",
             "line_items": [{"price": price_id, "quantity": 1}],
-            "return_url": body.success_url + "?session_id={CHECKOUT_SESSION_ID}",
+            "success_url": body.success_url + "?session_id={CHECKOUT_SESSION_ID}",
+            "cancel_url": body.cancel_url,
             "metadata": {"plan": body.plan},
         }
         if body.customer_email:
