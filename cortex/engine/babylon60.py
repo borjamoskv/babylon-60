@@ -35,45 +35,67 @@ class Babylon60:
         """Solo para interfaces externas (Legacy C4-SIM)."""
         return self._value / self.SCALE
 
-    def __add__(self, other: Babylon60) -> Babylon60:
+    def __add__(self, other: int | float | Babylon60) -> Babylon60:
         if not isinstance(other, Babylon60):
-            raise TypeError("Anergía detectada: Imposible sumar Babylon-60 con tipos mixtos.")
+            other = Babylon60(other)
         return Babylon60.from_raw(self._value + other._value)
 
-    def __sub__(self, other: Babylon60) -> Babylon60:
+    def __sub__(self, other: int | float | Babylon60) -> Babylon60:
         if not isinstance(other, Babylon60):
-            raise TypeError("Anergía detectada.")
+            other = Babylon60(other)
         return Babylon60.from_raw(self._value - other._value)
 
-    def __mul__(self, other: Babylon60) -> Babylon60:
+    def __mul__(self, other: int | float | Babylon60) -> Babylon60:
         if not isinstance(other, Babylon60):
-            raise TypeError("Anergía detectada.")
-        # Se divide entre SCALE para mantener la proporcionalidad Base-60
+            other = Babylon60(other)
         return Babylon60.from_raw((self._value * other._value) // self.SCALE)
 
-    def __truediv__(self, other: Babylon60) -> Babylon60:
+    def __truediv__(self, other: int | float | Babylon60) -> Babylon60:
         if not isinstance(other, Babylon60):
-            raise TypeError("Anergía detectada.")
+            other = Babylon60(other)
         if other._value == 0:
             raise ZeroDivisionError("C5-REAL: Colapso matemático por división entre cero.")
         return Babylon60.from_raw((self._value * self.SCALE) // other._value)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Babylon60):
-            return False
+            try:
+                other = Babylon60(other)  # type: ignore
+            except (TypeError, ValueError):
+                return False
         return self._value == other._value
 
-    def __lt__(self, other: Babylon60) -> bool:
+    def __lt__(self, other: int | float | Babylon60) -> bool:
+        if not isinstance(other, Babylon60):
+            other = Babylon60(other)
         return self._value < other._value
 
-    def __le__(self, other: Babylon60) -> bool:
+    def __le__(self, other: int | float | Babylon60) -> bool:
+        if not isinstance(other, Babylon60):
+            other = Babylon60(other)
         return self._value <= other._value
 
-    def __gt__(self, other: Babylon60) -> bool:
+    def __gt__(self, other: int | float | Babylon60) -> bool:
+        if not isinstance(other, Babylon60):
+            other = Babylon60(other)
         return self._value > other._value
 
-    def __ge__(self, other: Babylon60) -> bool:
+    def __ge__(self, other: int | float | Babylon60) -> bool:
+        if not isinstance(other, Babylon60):
+            other = Babylon60(other)
         return self._value >= other._value
+
+    def __radd__(self, other: int | float) -> Babylon60:
+        return Babylon60(other) + self
+
+    def __rsub__(self, other: int | float) -> Babylon60:
+        return Babylon60(other) - self
+
+    def __rmul__(self, other: int | float) -> Babylon60:
+        return Babylon60(other) * self
+
+    def __rtruediv__(self, other: int | float) -> Babylon60:
+        return Babylon60(other) / self
 
     def __repr__(self) -> str:
         return f"B60({self._value})"
