@@ -7,6 +7,7 @@ import logging
 import os
 
 from cortex.audit.ledger import EnterpriseAuditLedger
+from cortex.engine.zipf_exergy_extractor import ZipfExergyExtractor
 
 logger = logging.getLogger(__name__)
 
@@ -85,25 +86,47 @@ class EmailIngestDaemon:
                 # 1. Ejecutar lectura en hilo para no bloquear el event loop (C5-REAL anti-entropía)
                 emails = await asyncio.to_thread(self._sync_fetch_emails)
 
-                # 2. Registrar en Master Ledger (Filtro Termodinámico de Exergía)
+                # 2. Enrutamiento Causal
                 for mail in emails:
                     sender = mail["sender"]
                     subject = mail["subject"]
                     body = mail["body"]
                     
-                    logger.info(f"[EmailIngestDaemon] Ingestando correo de {sender}: {subject}")
-                    
-                    # Colapso en LedgerFact
-                    await self.ledger.log_action(
-                        tenant_id=self.tenant_id,
-                        actor_role="EXTERNAL_ORACLE",
-                        actor_id=sender,
-                        action="IMAP_INGESTION",
-                        resource=subject,
-                        status="SUCCESS",
-                        state_diff=body,
-                        is_code=False
-                    )
+                    # Vector 1: Zero-Trust CLI (Sovereign Operator)
+                    if "borjabilbo84@gmail.com" in sender or "info@cortexpersist.com" in sender:
+                        logger.info(f"[EmailIngestDaemon] Ingestando Directiva de Autoridad {sender}: {subject}")
+                        await self.ledger.log_action(
+                            tenant_id=self.tenant_id,
+                            actor_role="SOVEREIGN_OPERATOR",
+                            actor_id=sender,
+                            action="IMAP_DIRECTIVE",
+                            resource=subject,
+                            status="SUCCESS",
+                            state_diff=body,
+                            is_code=False
+                        )
+                    # Vector 2: Zipf Exergy Extractor (External Agents)
+                    else:
+                        logger.info(f"[EmailIngestDaemon] Evaluando entropía de tercero {sender}: {subject}")
+                        # Extraer Primitivas (Fase 1)
+                        nodes = ZipfExergyExtractor.extract_exergy_primitives(body, max_nodes=50)
+                        # Evaluar Limerencia (Fase 2)
+                        evaluation = ZipfExergyExtractor.evaluate_epistemic_limerence(nodes)
+                        
+                        action_type = "IMAP_REJECTED_ANERGY"
+                        if evaluation["ExergyConfidence"] == "C5-REAL":
+                            action_type = "IMAP_BOUNTY_LEAD"
+                        
+                        await self.ledger.log_action(
+                            tenant_id=self.tenant_id,
+                            actor_role="EXTERNAL_AGENT",
+                            actor_id=sender,
+                            action=action_type,
+                            resource=subject,
+                            status="SUCCESS",
+                            state_diff=f"{evaluation}\n\nORIGINAL_BODY:\n{body}",
+                            is_code=False
+                        )
 
             except asyncio.CancelledError:
                 break
