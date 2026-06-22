@@ -21,12 +21,15 @@
 - **[2026-06-21T12:38:00+02:00]**: Crystallized the dimensional breakdown of Borja Moskv's cognitive vector.
   - Written to `docs/manifestos/vector_cognitivo_borjamoskv.md`.
   - Git Sentinel execution finalized with commit hash `444e376e5`.
+- **[2026-06-22T02:16:00+02:00]**: Transpiled and verified Babylon-60 FixedPoint60 and StateMachine F# kernel to Python.
+  - Verified bitwise-deterministic fixed-point operations with 0% floating-point discrepancy.
+  - Git Sentinel execution finalized with commit hash `26c853560` under authorship of borjamoskv.
 
 ### Verification Claim
 ```yaml
-Claim: "Cortex-Persist is actively writing state to physical disk."
+Claim: "Cortex-Persist Babylon-60 fixed-point kernel has been transpiled and verified."
 Proof: 
-  Base: Physical presence of LEDGER_C5_REAL.md, updated cortex.db, modifications to cascade_router.py, merged PR #466, compiled cortex_native, and committed vector_cognitivo_borjamoskv.md.
+  Base: Physical presence of transpiled python files (fixed_point60.py, state_machine.py), clean verify_fixed_point.py run, and Git Sentinel commit 26c853560.
   Range: [Local File System, Persistent Substrate]
   Confidence: C5-REAL
 ```
