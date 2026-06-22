@@ -1,6 +1,7 @@
 # AUTODIDACT-RESEARCH-Ω: PROBLEMA DEL AGENTE-PRINCIPAL
 
 **Reality Level:** `C5-REAL` (Epistemic Synthesis)
+**Autor:** Borja Moskv (borjamoskv)
 **Vector:** Transferencia de Conocimiento Interdisciplinario (Microeconomía / Teoría de Contratos -> Arquitectura de Sistemas Multi-Agente)
 **Target:** Problema del agente-principal (es.wikipedia.org/wiki/Problema_del_agente-principal)
 

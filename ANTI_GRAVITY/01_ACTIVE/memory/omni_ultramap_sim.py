@@ -36,8 +36,8 @@ def run_simulation():
 
     client = genai.Client(api_key=api_key)
     
-    # We will use gemini-2.5-flash as the real-time coordinator
-    model_name = "gemini-2.5-flash"
+    # We will use gemini-2.0-flash to maximize availability and throughput
+    model_name = "gemini-2.0-flash"
     
     # 1. Initialize Topological Substrate (capacity=10 for simulation)
     umap = UltramapSubstrate(capacity=10)
@@ -94,8 +94,8 @@ def run_simulation():
     )
 
     try:
-        for step in range(1, 4):
-            console.print(f"\n[bold #2B3BE5]── STEP {step} / 3 ───────────────────────────────────────────────────────────[/bold #2B3BE5]")
+        for step in range(1, 101):
+            console.print(f"\n[bold #2B3BE5]── STEP {step} / 100 ───────────────────────────────────────────────────────────[/bold #2B3BE5]")
             
             # Fetch current state from memory-mapped bin
             states = []
@@ -148,11 +148,41 @@ def run_simulation():
                 "efficiency if dopamine is high). Return your rationale in a short YAML string, along with the adjustments."
             )
             
-            response = client.models.generate_content(
-                model=model_name,
-                contents=prompt,
-                config=config
-            )
+            # Resilient API Call Loop (Resilient to 429 and 503)
+            response = None
+            backoff = 2.0
+            attempt = 0
+            while True:
+                attempt += 1
+                try:
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=prompt,
+                        config=config
+                    )
+                    break
+                except Exception as api_err:
+                    err_str = str(api_err)
+                    if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str:
+                        wait_time = 60.0
+                        if "retry in" in err_str:
+                            try:
+                                parts = err_str.split("retry in")
+                                wait_time = float(parts[1].strip().split("s")[0]) + 2.0
+                            except Exception:
+                                pass
+                        console.print(f"[bold yellow]Rate Limit (429) hit. Cooling down for {wait_time:.1f}s (Attempt {attempt})...[/bold yellow]")
+                        time.sleep(wait_time)
+                    else:
+                        if attempt > 10:
+                            console.print(f"[bold red]Failed after 10 system errors: {api_err}. Aborting cycle.[/bold red]")
+                            break
+                        console.print(f"[yellow]API Call failed (Attempt {attempt}): {api_err}. Retrying in {backoff}s...[/yellow]")
+                        time.sleep(backoff)
+                        backoff *= 2
+            
+            if response is None:
+                break
             
             # Parse response
             data = json.loads(response.text)
@@ -195,7 +225,8 @@ def run_simulation():
                 )
                 
             console.print("[bold green]✔[/bold green] Swarm mutations written to memory substrate. Lock-free transaction complete.")
-            time.sleep(1)
+            # Throttle requests to prevent hitting RPM limit in free tier
+            time.sleep(6)
 
     finally:
         umap.close()

@@ -77,6 +77,22 @@ async def run_pipeline():
     except Exception as e:
         logger.error(f"Error in inject_spatial: {e}")
 
+    # 8. Agent-Principal Primitives
+    try:
+        logger.info("Running Agent-Principal injection...")
+        await inject_agent_principal()
+        await asyncio.sleep(0.5)
+    except Exception as e:
+        logger.error(f"Error in inject_agent_principal: {e}")
+
+    # 9. OSINT Defense Primitives
+    try:
+        logger.info("Running OSINT Defense injection...")
+        await inject_osint()
+        await asyncio.sleep(0.5)
+    except Exception as e:
+        logger.error(f"Error in inject_osint: {e}")
+
     logger.info("=== ALL INJECTIONS COMPLETED ===")
     logger.info("Waiting 3.0 seconds to guarantee full ledger batch commit to security_audit_log.jsonl...")
     await asyncio.sleep(3.0)

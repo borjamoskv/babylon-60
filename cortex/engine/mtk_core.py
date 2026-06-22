@@ -11,6 +11,7 @@ from contextlib import asynccontextmanager
 
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
+import cortex_core_rs
 import cortex_rs
 from cortex.engine.mtk_sqlite_authorizer import mtk_active_token, mtk_payload_hash
 from cortex.types.evidence import ClosurePayload
@@ -25,9 +26,9 @@ class MTKGuard:
     def __init__(self, private_key: str):
         self.private_key = private_key
         # Enforce C5-REAL execution: crash if Rust binaries are missing
-        self.ast_projector = cortex_rs.ASTProjector()
-        self.rust_authorizer = cortex_rs.MTKAuthorizer()
-        self.cognitive_state = cortex_rs.CognitiveState(1000)
+        self.ast_projector = cortex_core_rs.ASTProjector()
+        self.rust_authorizer = cortex_core_rs.MTKAuthorizer()
+        self.cognitive_state = cortex_core_rs.CognitiveState(1000)
             
     def validate_c5_ast(self, source_code: str) -> str:
         """Invokes the Rust AST Projector to validate C5-REAL constraints."""

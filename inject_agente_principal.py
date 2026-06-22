@@ -1,3 +1,6 @@
+# Creator/Autor: Borja Moskv (borjamoskv)
+# Protocolo: C5-REAL | Inyección del problema Agente-Principal
+
 import asyncio
 import logging
 import os

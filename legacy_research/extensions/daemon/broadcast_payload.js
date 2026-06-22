@@ -55,14 +55,14 @@ La época de los Copilots ha terminado.
       for (let i = 0; i < 5; i++) {
           filled = this.fillTextArea('tweetTextarea_0', manifesto);
           if (filled) break;
-          await this.sleep(2000);
+          await this.sleep(100);
       }
       
       if (!filled) {
           return { success: false, reason: "Textarea no encontrado." };
       }
 
-      await this.sleep(1500);
+      await this.sleep(100);
 
       // 2. Click Post (Tweet)
       console.log(`[MOSKV-1] Buscando botón Post...`);
@@ -74,14 +74,14 @@ La época de los Copilots ha terminado.
               clicked = true;
               break;
           }
-          await this.sleep(2000);
+          await this.sleep(100);
       }
 
       if (!clicked) {
           return { success: false, reason: "Botón Post no encontrado." };
       }
 
-      await this.sleep(3000);
+      await this.sleep(100);
       console.log(`[MOSKV-1] Broadcast Exitoso.`);
       return { success: true };
     }
