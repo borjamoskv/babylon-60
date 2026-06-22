@@ -43,22 +43,22 @@ export default function AwwwardsHero() {
             <p className="eyebrow" style={{ marginBottom: '1.5rem', display: 'inline-block', padding: '0.5rem 1rem', background: '#0a0a0a', border: '1px solid #2B3BE5', color: '#f3f4f6' }}>
               PROTOCOL C5-REAL / SOVEREIGN TRACE
             </p>
-            <h1 style={{ fontSize: 'clamp(3.5rem, 8vw, 6.5rem)', lineHeight: 0.95, marginBottom: '2rem', textWrap: 'balance', fontFamily: '"Inter", sans-serif', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '-0.03em' }}>
-              KNOW EXACTLY WHAT YOUR <span style={{ color: '#F59E0B' }}>AI AGENTS</span> DID.
+            <h1 style={{ fontSize: 'clamp(3.5rem, 8vw, 6.5rem)', lineHeight: 0.95, marginBottom: '2rem', textWrap: 'balance', fontFamily: '"Orbitron", sans-serif', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.02em', textShadow: '0 0 35px rgba(43, 59, 229, 0.25)' }}>
+              KNOW EXACTLY WHAT YOUR <span style={{ color: '#F59E0B', textShadow: '0 0 25px rgba(245, 158, 11, 0.3)' }}>AI AGENTS</span> DID.
             </h1>
-            <p className="hero-text" style={{ fontSize: '1.15rem', maxWidth: '640px', margin: '0 auto 2.5rem', color: '#6b7280', fontFamily: '"IBM Plex Mono", monospace' }}>
+            <p className="hero-text" style={{ fontSize: '1.15rem', maxWidth: '640px', margin: '0 auto 2.5rem', color: '#8892b0', fontFamily: '"IBM Plex Mono", monospace' }}>
               Track every decision, prove integrity, and replay failures without relying on logs, screenshots, or human memory.
             </p>
             <div className="action-row" style={{ justifyContent: 'center' }}>
-              <a className="button-primary" href="/api-key" style={{ padding: '1rem 2rem', fontSize: '1.1rem', borderRadius: 0, border: '1px solid #2B3BE5' }}>START LOGGING</a>
-              <a className="button-secondary" href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noreferrer" style={{ padding: '1rem 2rem', fontSize: '1.1rem', borderRadius: 0, border: '1px solid #333' }}>
+              <a className="button-primary" href="/api-key" style={{ padding: '1rem 2.5rem', fontSize: '1.1rem', borderRadius: 0, border: '1px solid #2B3BE5', background: 'linear-gradient(135deg, #2B3BE5, #00e5a3)', color: '#050505', fontWeight: 700, letterSpacing: '0.05em', transition: 'all 0.3s ease', boxShadow: '0 0 20px rgba(43, 59, 229, 0.4)' }}>START LOGGING</a>
+              <a className="button-secondary" href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noreferrer" style={{ padding: '1rem 2.5rem', fontSize: '1.1rem', borderRadius: 0, border: '1px solid #333', color: '#fff', fontWeight: 600, letterSpacing: '0.05em', background: 'rgba(255,255,255,0.02)', transition: 'all 0.3s ease' }}>
                 VIEW DOCS
               </a>
             </div>
             
-            <div style={{ marginTop: '3rem', opacity: 1 }}>
-              <p className="eyebrow" style={{ marginBottom: '1rem', fontSize: '0.7rem', color: '#F59E0B' }}>SCROLL TO INITIATE LEDGER</p>
-              <div style={{ width: '1px', height: '60px', background: '#2B3BE5', margin: '0 auto' }} />
+            <div style={{ marginTop: '3.5rem', opacity: 0.9 }}>
+              <p className="eyebrow" style={{ marginBottom: '1rem', fontSize: '0.75rem', color: '#F59E0B', letterSpacing: '0.2em' }}>SCROLL TO INITIATE LEDGER</p>
+              <div style={{ width: '1px', height: '60px', background: 'linear-gradient(180deg, #2B3BE5, transparent)', margin: '0 auto' }} />
             </div>
           </div>
         </motion.div>

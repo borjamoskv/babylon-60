@@ -43,6 +43,11 @@ const {
 	</head>
 	<body class:list={['site-body', bodyClass]}>
 		<CortexShaderCanvas client:load />
+		<div class="site-ambience" aria-hidden="true">
+			<div class="site-glow site-glow-a"></div>
+			<div class="site-glow site-glow-b"></div>
+			<div class="site-grid"></div>
+		</div>
 		<slot />
 	</body>
 </html>

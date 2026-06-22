@@ -36,7 +36,7 @@ body.site-body {
 	min-height: 100vh;
 	background-color: var(--bg-0);
 	color: var(--text);
-	font-family: 'Inter', sans-serif;
+	font-family: 'Manrope', 'Inter', sans-serif;
 	overflow-x: hidden;
 }
 
@@ -173,7 +173,7 @@ img {
 .button-secondary,
 .button-tertiary {
 	align-items: center;
-	border-radius: 999px;
+	border-radius: var(--radius-md, 0px);
 	display: inline-flex;
 	font-weight: 700;
 	gap: 0.55rem;
@@ -534,6 +534,13 @@ img {
 
 .signal-card {
 	overflow: hidden;
+	transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.signal-card:hover {
+	border-color: rgba(43, 59, 229, 0.65);
+	transform: translateY(-4px);
+	box-shadow: 0 14px 38px rgba(43, 59, 229, 0.16);
 }
 
 .signal-card::after {
