@@ -19,6 +19,7 @@ pub mod babylon;
 pub mod mee;
 pub mod kv_gds;
 pub mod tensors;
+pub mod mtk_core;
 
 use serde::{Deserialize, Serialize};
 
@@ -197,6 +198,8 @@ fn cortex_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<kv_gds::CufileGdsBridge>()?;
     m.add_function(wrap_pyfunction!(tensors::calculate_jacobian_determinant, m)?)?;
     m.add_function(wrap_pyfunction!(tensors::calculate_log_jacobian_determinant, m)?)?;
+    m.add_function(wrap_pyfunction!(mtk_core::mint_ephemeral_token, m)?)?;
+    m.add_function(wrap_pyfunction!(mtk_core::verify_ephemeral_token, m)?)?;
     Ok(())
 }
 
