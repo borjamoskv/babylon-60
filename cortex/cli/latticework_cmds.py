@@ -10,7 +10,6 @@ import asyncio
 import os
 import uuid
 
-import aiosqlite
 import click
 from rich.table import Table
 
