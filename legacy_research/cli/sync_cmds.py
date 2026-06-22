@@ -34,6 +34,8 @@ def sync(db) -> None:
     engine = get_engine(db)
 
     async def _async_sync():
+        from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
+        token_id = mtk_active_token.set("mtk_auth_sync_cli")
         try:
             await engine.init_db()
             with console.status("[bold blue]Sincronizando memoria...[/]"):
@@ -59,6 +61,7 @@ def sync(db) -> None:
                 for err in result.errors:
                     console.print(f"[red]  ✗ {err}[/]")
         finally:
+            mtk_active_token.reset(token_id)
             # Fix: engine.close is async
             await engine.close()
 
