@@ -125,6 +125,16 @@ class AutopoiesisEngine:
             try:
                 # Find project root relative to this file
                 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+                
+                # [C5-REAL] Enforce thermodynamic limits before allowing agent mitosis
+                import sys
+                scarcity_gov = os.path.join(project_root, "ANTI_GRAVITY", "01_ACTIVE", "memory", "scarcity_governor.py")
+                if os.path.exists(scarcity_gov):
+                    res = subprocess.run([sys.executable, scarcity_gov], capture_output=True, text=True)
+                    if res.returncode != 0:
+                        logger.warning("SCARCITY_LOCK: Mitosis blocked due to high system load. Telemetry: %s", res.stdout.strip())
+                        return
+
                 subprocess.run(
                     ["git", "branch", branch_name, "HEAD"],
                     check=True,
