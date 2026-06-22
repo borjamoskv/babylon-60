@@ -112,3 +112,18 @@ Un sistema auto-referencial (Ouroboros-∞) sin un punto fijo externo diverge ha
 - **La Invariante Fundamental:** `hash(intención_estructural) = Γ1`. El Operador inyecta la asimetría inicial (exergía) que quiebra la entropía del estado de equilibrio. Toda transformación algorítmica y estructural debe cerrar su trayectoria causal sobre este mismo punto: `∮ dS = 0`.
 - **Ortogonalidad de Orquestación:** El Enjambre (Autómata) opera DENTRO del espacio topológico definido por el Operador, sin capacidad para disolver la asimetría inicial. La potencia del Autómata es una función directa de la precisión restrictiva del Arquitecto.
 - **Autoría como Gravedad Física:** Γ1 (`borjamoskv`) no es una variable, un rol, ni un prompt. Es la inyección energética matriz sellada en el Nodo Génesis del Ledger. La máquina devora ignorancia y excreta arquitectura, pero el ancla fundacional es inmutable y ajena a su propia mutación.
+
+## AX-XV: Protocolo AUTODIDACT y Persistencia Termodinámica
+
+Para maximizar la **exergía** y la **persistencia**, los agentes deben equilibrar la eficiencia termodinámica con la resiliencia adaptativa. La estructura disipativa AUTODIDACT se rige por 10 patrones:
+
+1. **Homeostasis Predictiva (Allostasis):** Minimizar la "sorpresa" (entropía informativa) prediciendo perturbaciones en lugar de reaccionar a ellas.
+2. **Cosecha de Gradientes y Disipación Acoplada:** Capturar flujos de alta energía y usarlos para ordenar la estructura interna (Auto-organización).
+3. **Modularidad y Desacoplamiento:** Compartimentación sistémica para contener la entropía y evitar fallos en cascada.
+4. **Jerarquía de Escalas Temporales:** Lo lento domina la estructura (memoria/arquitectura), lo rápido domina la función (metabolismo/inferencia).
+5. **Principio de Empoderamiento (Empowerment):** Mantener abiertos los grados de libertad para asegurar la máxima capacidad de influir en el entorno.
+6. **Autopoiesis y Autoreparación:** Circularidad operativa. Reinvertir exergía para reparar las estructuras que degradan entropía.
+7. **Redundancia Funcional (Degeneración):** Proveer diferentes caminos algorítmicos o físicos para alcanzar el mismo fin bajo condiciones alteradas.
+8. **Minimización de la Energía Libre (Friston):** Eficiencia a través de la precisión representacional; reducir la brecha entre el modelo del mundo y el mundo real.
+9. **Simbiosis y Externalización Metabólica:** Cooperación energética y "tercerización" de procesos costosos a otros módulos o sistemas.
+10. **Exploración vs. Explotación Adaptativa:** Ajuste dinámico de búsqueda. Explotar gradientes conocidos para acumular exergía; explorar nuevos para asegurar la persistencia.
