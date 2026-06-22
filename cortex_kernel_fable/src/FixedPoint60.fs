@@ -2,64 +2,56 @@ namespace Cortex.Kernel
 
 open System
 
-module FixedPoint =
-    // Scale factor: 60^3 = 216000
-    [<Literal>]
-    let Scale = 216000L
+// -------------------------------------------------------------------------
+// [BABYLON-60] INVARIANT III: Strict Float64 Eradication
+// Scale S = 60^3 = 216,000 (Degrees, Minutes, Seconds, Thirds)
+// -------------------------------------------------------------------------
 
-    [<Struct>]
-    type Fixed60 = 
-        { RawValue: int64 }
-        
-        static member Create(integerPart: int64) =
-            { RawValue = integerPart * Scale }
-            
-        static member Create(deg: int64, min: int64, sec: int64, third: int64) =
-            let sign = if deg < 0L || min < 0L || sec < 0L || third < 0L then -1L else 1L
-            let absDeg = abs deg
-            let absMin = abs min
-            let absSec = abs sec
-            let absThird = abs third
-            let total = absDeg * Scale + absMin * 3600L + absSec * 60L + absThird
-            { RawValue = sign * total }
+[<Struct>]
+type Fixed60 =
+    val Value: int64
+    new(v: int64) = { Value = v }
 
-        static member ToDegMinSecThird(f: Fixed60) =
-            let sign = if f.RawValue < 0L then -1L else 1L
-            let absVal = abs f.RawValue
-            let deg = absVal / Scale
-            let rem1 = absVal % Scale
-            let min = rem1 / 3600L
-            let rem2 = rem1 % 3600L
-            let sec = rem2 / 60L
-            let third = rem2 % 60L
-            (sign * deg, min, sec, third)
+    // --- Formateador Lexical Sexagesimal ---
+    override this.ToString() =
+        let isNeg = this.Value < 0L
+        let absVal = Math.Abs(this.Value)
+        let deg = absVal / 216000L
+        let rem1 = absVal % 216000L
+        let min = rem1 / 3600L
+        let rem2 = rem1 % 3600L
+        let sec = rem2 / 60L
+        let thirds = rem2 % 60L
+        let sign = if isNeg then "-" else ""
+        sprintf "%s%d°%02d'%02d\"%02d'''" sign deg min sec thirds
 
-        static member Add(a: Fixed60, b: Fixed60) =
-            { RawValue = a.RawValue + b.RawValue }
+[<RequireQualifiedAccess>]
+module FixedPoint60 =
+    let [<Literal>] Scale = 216000L
+    let ScaleBig = bigint 216000
 
-        static member Sub(a: Fixed60, b: Fixed60) =
-            { RawValue = a.RawValue - b.RawValue }
+    // --- Constructor Estructural ---
+    let create (deg: int) (min: int) (sec: int) (thirds: int) =
+        let sign = if deg < 0 || min < 0 || sec < 0 || thirds < 0 then -1L else 1L
+        let raw = (int64 (abs deg) * Scale) + (int64 (abs min) * 3600L) + (int64 (abs sec) * 60L) + int64 (abs thirds)
+        Fixed60(raw * sign)
 
-        static member Mul(a: Fixed60, b: Fixed60) =
-            let bigA = bigint a.RawValue
-            let bigB = bigint b.RawValue
-            let bigS = bigint Scale
-            let res = (bigA * bigB) / bigS
-            { RawValue = int64 res }
+    // --- Invariante I: Aritmética Plana de Hardware ---
+    let add (a: Fixed60) (b: Fixed60) = Fixed60(a.Value + b.Value)
+    let sub (a: Fixed60) (b: Fixed60) = Fixed60(a.Value - b.Value)
 
-        static member Div(a: Fixed60, b: Fixed60) =
-            let bigA = bigint a.RawValue
-            let bigB = bigint b.RawValue
-            let bigS = bigint Scale
-            let res = (bigA * bigS) / bigB
-            { RawValue = int64 res }
+    // --- Invariante III & IV: Prevención de Overflow (BigInt Cast) ---
+    let mul (a: Fixed60) (b: Fixed60) =
+        let bigA = bigint a.Value
+        let bigB = bigint b.Value
+        // Resolución matemática segura en el host anfitrión antes del truncamiento
+        let result = (bigA * bigB) / ScaleBig
+        Fixed60(int64 result)
 
-        override this.ToString() =
-            let (d, m, s, t) = Fixed60.ToDegMinSecThird(this)
-            sprintf "%d°%02d'%02d\"%02d'''" d m s t
-
-    let toFloat (f: Fixed60) =
-        double f.RawValue / double Scale
-
-    let fromFloat (x: double) =
-        { RawValue = int64 (round (x * double Scale)) }
+    let div (a: Fixed60) (b: Fixed60) =
+        if b.Value = 0L then raise (DivideByZeroException("BABYLON-60 FATAL: División por cero prevenida."))
+        let bigA = bigint a.Value
+        let bigB = bigint b.Value
+        // Elevación de escala del dividendo previo al cociente (resolución simétrica)
+        let result = (bigA * ScaleBig) / bigB
+        Fixed60(int64 result)

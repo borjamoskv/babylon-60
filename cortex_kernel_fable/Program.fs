@@ -3,7 +3,7 @@ module Program
 open Cortex.Kernel
 open Cortex.Kernel.Babylon
 open Cortex.Kernel.StateMachine
-open Cortex.Kernel.FixedPoint
+
 open Cortex.Kernel.MemoryTopology
 
 [<EntryPoint>]
@@ -60,8 +60,8 @@ let main argv =
 
     let mutable currentState = initialCognitiveState
 
-    printfn "--> INITIAL TICK: %d | TraceHash: %u | GlobalConfidence: %A | Graph Nodes: %d" 
-        currentState.Tick currentState.Machine.TraceHash (Fixed60.ToDegMinSecThird currentState.GlobalConfidence) currentState.Graph.Count
+    printfn "--> INITIAL TICK: %d | TraceHash: %u | GlobalConfidence: %O | Graph Nodes: %d" 
+        currentState.Tick currentState.Machine.TraceHash currentState.GlobalConfidence currentState.Graph.Count
 
     for (exergy, stimulus) in stimulusVectors do
         let stimStr = if stimulus.IsSome then "Some(Node)" else "None"
@@ -72,7 +72,7 @@ let main argv =
         printfn "--> TICK: %d" currentState.Tick
         printfn "    Phase:            %A" currentState.Machine.Phase
         printfn "    TraceHash:        %u" currentState.Machine.TraceHash
-        printfn "    GlobalConfidence: %A" (Fixed60.ToDegMinSecThird currentState.GlobalConfidence)
+        printfn "    GlobalConfidence: %O" currentState.GlobalConfidence
         printfn "    Graph Nodes:      %d" currentState.Graph.Count
         
     printfn "\n[MOSKV-1] Test completed. Epistemic graph is immutable. TraceHash perfectly tracked."

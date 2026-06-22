@@ -6,7 +6,7 @@ from fable_library.reflection import TypeInfo, string_type, uint16_type, uint32_
 from fable_library.union import Union, tagged_union
 
 
-def _expr0() -> TypeInfo:
+def _expr1() -> TypeInfo:
     return union_type(
         "Cortex.Kernel.Origin",
         Array([]),
@@ -38,10 +38,10 @@ class Origin_SystemDaemon(_Origin): ...
 
 Origin = (Origin_HumanOperator | Origin_AutonomousSwarm) | Origin_SystemDaemon
 
-Origin_reflection = _expr0
+Origin_reflection = _expr1
 
 
-def _expr1() -> TypeInfo:
+def _expr3() -> TypeInfo:
     return union_type(
         "Cortex.Kernel.EpistemicNode",
         Array([]),
@@ -81,7 +81,7 @@ EpistemicNode = (
     EpistemicNode_VerifiedHash | EpistemicNode_StochasticConjecture
 ) | EpistemicNode_VoidAnergy
 
-EpistemicNode_reflection = _expr1
+EpistemicNode_reflection = _expr3
 
 
 def Validation_isCausallyValid(node: EpistemicNode) -> bool:

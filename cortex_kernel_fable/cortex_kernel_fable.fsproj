@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="src/EpistemicNodes.fs" />
     <Compile Include="src/FixedPoint60.fs" />
+    <Compile Include="src/EpistemicNodes.fs" />
     <Compile Include="src/Babylon.fs" />
     <Compile Include="src/CausalEngine.fs" />
     <Compile Include="src/MaxwellDemon.fs" />

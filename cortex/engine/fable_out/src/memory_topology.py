@@ -22,10 +22,10 @@ from .causal_engine import CausalEngine_causalDistance, CausalEngine_popCount
 from .epistemic_nodes import EpistemicNode, EpistemicNode_reflection
 from .fixed_point60 import (
     Fixed60,
-    Fixed60_Add_146016E0,
-    Fixed60_Create_Z524259C1,
-    Fixed60_Div_146016E0,
+    Fixed60__ctor_Z524259C1,
     Fixed60_reflection,
+    FixedPoint60_add,
+    FixedPoint60_div,
 )
 from .state_machine import (
     EpistemicPhase_Observation,
@@ -88,7 +88,7 @@ def genesis(initial_threshold: uint16) -> CognitiveState:
         MachineState(EpistemicPhase_Observation(), uint32.ZERO, uint32.ZERO, uint32.ZERO),
         initial_threshold,
         empty(ObjectExpr8()),
-        Fixed60_Create_Z524259C1(int64.ZERO),
+        Fixed60__ctor_Z524259C1(int64.ZERO),
     )
 
 
@@ -100,7 +100,7 @@ def apply_tick(
     next_machine: MachineState = step_machine(state.machine, exergy_input)
     pattern_input: tuple[Any, Fixed60]
     if stimulus is None:
-        pattern_input = (state.graph, Fixed60(int64.ZERO))
+        pattern_input = (state.graph, Fixed60__ctor_Z524259C1(int64.ZERO))
 
     else:
         node: EpistemicNode = stimulus[1]
@@ -121,21 +121,21 @@ def apply_tick(
             )
 
         pattern_input = (
-            ((state.graph, Fixed60(int64.ZERO)))
+            ((state.graph, Fixed60__ctor_Z524259C1(int64.ZERO)))
             if exists(predicate, state.graph)
             else (
                 (
                     add(hash_1, node, state.graph),
-                    Fixed60_Create_Z524259C1(int64.ONE)
+                    Fixed60__ctor_Z524259C1(int64.ONE)
                     if (node.tag == int32(0))
                     else (
-                        Fixed60(int64.ZERO)
+                        Fixed60__ctor_Z524259C1(int64.ZERO)
                         if (node.tag == int32(2))
-                        else Fixed60_Div_146016E0(
-                            Fixed60_Create_Z524259C1(
+                        else FixedPoint60_div(
+                            Fixed60__ctor_Z524259C1(
                                 from_integer(node.fields[1], False, int32.FIVE)
                             ),
-                            Fixed60_Create_Z524259C1(int64(100)),
+                            Fixed60__ctor_Z524259C1(int64(100)),
                         )
                     ),
                 )
@@ -147,5 +147,5 @@ def apply_tick(
         next_machine,
         state.entropy_threshold,
         pattern_input[0],
-        Fixed60_Add_146016E0(state.global_confidence, pattern_input[1]),
+        FixedPoint60_add(state.global_confidence, pattern_input[1]),
     )

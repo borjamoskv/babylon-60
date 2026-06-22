@@ -4,7 +4,7 @@ import sys
 from typing import Any
 
 from fable_library.array_ import Array
-from fable_library.core import int32, int64, uint16, uint32, uint64
+from fable_library.core import int32, uint16, uint32, uint64
 from fable_library.map import FSharpMap__get_Count
 from fable_library.string_ import printf, to_console
 from fable_library.util import range
@@ -16,7 +16,7 @@ from .src.epistemic_nodes import (
     EpistemicNode_VerifiedHash,
     Origin_SystemDaemon,
 )
-from .src.fixed_point60 import Fixed60_ToDegMinSecThird_Z60A0FF53
+from .src.fixed_point60 import Fixed60
 from .src.maxwell_demon import (
     MaxwellDemon,
     MaxwellDemon__ctor_6C4BA866,
@@ -121,13 +121,11 @@ def main(argv: Array[str]) -> int32:
     current_state: CognitiveState = genesis(uint16.TEN)
     arg_9: uint64 = current_state.tick
     arg_10: uint32 = current_state.machine.trace_hash
-    tupled_arg: tuple[int64, int64, int64, int64] = Fixed60_ToDegMinSecThird_Z60A0FF53(
-        current_state.global_confidence
-    )
-    arg_15: int32 = FSharpMap__get_Count(current_state.graph)
+    arg_11: Fixed60 = current_state.global_confidence
+    arg_12: int32 = FSharpMap__get_Count(current_state.graph)
     to_console(
-        printf("--> INITIAL TICK: %d | TraceHash: %u | GlobalConfidence: %A | Graph Nodes: %d")
-    )(arg_9)(arg_10)((tupled_arg[0], tupled_arg[1], tupled_arg[2], tupled_arg[3]))(arg_15)
+        printf("--> INITIAL TICK: %d | TraceHash: %u | GlobalConfidence: %O | Graph Nodes: %d")
+    )(arg_9)(arg_10)(arg_11)(arg_12)
     for idx_1 in range(int32.ZERO, int32(len(stimulus_vectors)) - int32.ONE, 1):
         for_loop_var = stimulus_vectors[idx_1]
         stimulus: tuple[tuple[uint64, uint64, uint64, uint64], EpistemicNode] | None = for_loop_var[
@@ -137,20 +135,16 @@ def main(argv: Array[str]) -> int32:
         stim_str: str = "Some(Node)" if (stimulus is not None) else "None"
         to_console(printf("\n[+] Injecting Stimulus... Exergy: %u, Node: %s"))(exergy)(stim_str)
         current_state = apply_tick(current_state, stimulus, exergy)
-        arg_18: uint64 = current_state.tick
-        to_console(printf("--> TICK: %d"))(arg_18)
-        arg_19: EpistemicPhase = current_state.machine.phase
-        to_console(printf("    Phase:            %A"))(arg_19)
-        arg_20: uint32 = current_state.machine.trace_hash
-        to_console(printf("    TraceHash:        %u"))(arg_20)
-        tupled_arg_1: tuple[int64, int64, int64, int64] = Fixed60_ToDegMinSecThird_Z60A0FF53(
-            current_state.global_confidence
-        )
-        to_console(printf("    GlobalConfidence: %A"))(
-            (tupled_arg_1[0], tupled_arg_1[1], tupled_arg_1[2], tupled_arg_1[3])
-        )
-        arg_25: int32 = FSharpMap__get_Count(current_state.graph)
-        to_console(printf("    Graph Nodes:      %d"))(arg_25)
+        arg_15: uint64 = current_state.tick
+        to_console(printf("--> TICK: %d"))(arg_15)
+        arg_16: EpistemicPhase = current_state.machine.phase
+        to_console(printf("    Phase:            %A"))(arg_16)
+        arg_17: uint32 = current_state.machine.trace_hash
+        to_console(printf("    TraceHash:        %u"))(arg_17)
+        arg_18: Fixed60 = current_state.global_confidence
+        to_console(printf("    GlobalConfidence: %O"))(arg_18)
+        arg_19: int32 = FSharpMap__get_Count(current_state.graph)
+        to_console(printf("    Graph Nodes:      %d"))(arg_19)
     to_console(
         printf(
             "\n[MOSKV-1] Test completed. Epistemic graph is immutable. TraceHash perfectly tracked."

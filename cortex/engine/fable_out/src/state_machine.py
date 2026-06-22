@@ -9,7 +9,7 @@ from fable_library.reflection import TypeInfo, record_type, string_type, uint32_
 from fable_library.union import Union, tagged_union
 
 
-def _expr3() -> TypeInfo:
+def _expr0() -> TypeInfo:
     return union_type(
         "Cortex.Kernel.StateMachine.EpistemicPhase",
         Array([]),
@@ -56,10 +56,10 @@ EpistemicPhase = (
     | EpistemicPhase_Execution
 ) | EpistemicPhase_Verification
 
-EpistemicPhase_reflection = _expr3
+EpistemicPhase_reflection = _expr0
 
 
-def _expr5() -> TypeInfo:
+def _expr2() -> TypeInfo:
     return union_type(
         "Cortex.Kernel.StateMachine.TransitionResult",
         Array([]),
@@ -96,10 +96,10 @@ class TransitionResult_Halted(_TransitionResult): ...
 
 TransitionResult = (TransitionResult_Advanced | TransitionResult_Blocked) | TransitionResult_Halted
 
-TransitionResult_reflection = _expr5
+TransitionResult_reflection = _expr2
 
 
-def _expr6() -> TypeInfo:
+def _expr5() -> TypeInfo:
     return record_type(
         "Cortex.Kernel.StateMachine.MachineState",
         Array([]),
@@ -124,7 +124,7 @@ class MachineState(Record):
         return int(self.GetHashCode())
 
 
-MachineState_reflection = _expr6
+MachineState_reflection = _expr5
 
 
 def phase_to_tag(phase: EpistemicPhase) -> uint32:

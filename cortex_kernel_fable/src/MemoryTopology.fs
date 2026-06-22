@@ -8,7 +8,7 @@
 namespace Cortex.Kernel
 
 open System
-open Cortex.Kernel.FixedPoint
+open System
 open Cortex.Kernel.StateMachine
 open Cortex.Kernel.CausalEngine
 
@@ -38,7 +38,7 @@ module MemoryTopology =
             }
             EntropyThreshold = initialThreshold
             Graph = Map.empty
-            GlobalConfidence = Fixed60.Create(0L)
+            GlobalConfidence = Fixed60(0L)
         }
 
     // Pure Transition Engine: F(State, Stimulus, Exergy) -> State'
@@ -63,7 +63,7 @@ module MemoryTopology =
 
                 if isRedundant then
                     // Redundancy detected: state.Graph remains unchanged, zero confidence delta
-                    (state.Graph, { RawValue = 0L })
+                    (state.Graph, Fixed60(0L))
                 else
                     // Integrate new knowledge into a new AVL Map node
                     let newGraph = Map.add hash node state.Graph
@@ -72,18 +72,18 @@ module MemoryTopology =
                     let delta =
                         match node with
                         | StochasticConjecture (_, conf) ->
-                            let confFixed = Fixed60.Create(int64 conf)
-                            let hundred = Fixed60.Create(100L)
-                            Fixed60.Div(confFixed, hundred)
+                            let confFixed = Fixed60(int64 conf)
+                            let hundred = Fixed60(100L)
+                            FixedPoint60.div confFixed hundred
                         | VerifiedHash _ ->
-                            Fixed60.Create(1L)
+                            Fixed60(1L)
                         | VoidAnergy ->
-                            { RawValue = 0L }
+                            Fixed60(0L)
 
                     (newGraph, delta)
 
             | None ->
-                (state.Graph, { RawValue = 0L })
+                (state.Graph, Fixed60(0L))
 
         // 3. Construct the new immutable universe state
         {
@@ -91,5 +91,5 @@ module MemoryTopology =
             Machine = nextMachine
             EntropyThreshold = state.EntropyThreshold
             Graph = nextGraph
-            GlobalConfidence = Fixed60.Add(state.GlobalConfidence, confidenceDelta)
+            GlobalConfidence = FixedPoint60.add state.GlobalConfidence confidenceDelta
         }
