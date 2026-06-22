@@ -1,0 +1,3 @@
+node_id,semantic_role,selector_1,selector_2,selector_3,confidence,events_required
+textarea,input_layer,div[data-testid="tweetTextarea_0"],div[role="textbox"],textarea,C5,focus;insertText;input
+post_button,action_trigger,div[data-testid="tweetButtonInline"],div[data-testid="tweetButton"],[role="button"]:has-text("Post"),C5,mousedown;mouseup;click
