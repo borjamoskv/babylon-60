@@ -1,0 +1,43 @@
+{
+  "S0_AXIOMS": [
+    {
+      "node_id": "genesis_axiom_001",
+      "tenant_id": "cortex_sys",
+      "genesis_timestamp": 0,
+      "ontology_type": "AXIOM",
+      "payload": {
+        "rule": "ZERO_ENTROPY_TRUST",
+        "description": "All facts require a valid MTK cryptographic taint. Missing taint equals immediate SQLITE_DENY."
+      },
+      "confidence_level": 5,
+      "cryptographic_taint": "v6_aesgcm:genesis_bootstrap_seal",
+      "is_invalidated": 0
+    },
+    {
+      "node_id": "genesis_axiom_002",
+      "tenant_id": "cortex_sys",
+      "genesis_timestamp": 0,
+      "ontology_type": "AXIOM",
+      "payload": {
+        "rule": "NO_DELETE_ONLY_INVALIDATE",
+        "description": "Epistemic nodes are immutable. Mutations are append-only state transitions. Falsified nodes are marked is_invalidated=1."
+      },
+      "confidence_level": 5,
+      "cryptographic_taint": "v6_aesgcm:genesis_bootstrap_seal",
+      "is_invalidated": 0
+    },
+    {
+      "node_id": "genesis_axiom_003",
+      "tenant_id": "cortex_sys",
+      "genesis_timestamp": 0,
+      "ontology_type": "AXIOM",
+      "payload": {
+        "rule": "CAUSAL_ACTUATION",
+        "description": "Only intent_queue items with status='COMMITTED' and an unbroken validation path back to S0 may mutate the physical universe."
+      },
+      "confidence_level": 5,
+      "cryptographic_taint": "v6_aesgcm:genesis_bootstrap_seal",
+      "is_invalidated": 0
+    }
+  ]
+}

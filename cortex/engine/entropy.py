@@ -128,9 +128,9 @@ class EntropyAnnihilator:
 
     def __init__(self, target_directory: str):
         self.target = target_directory
-        self._entropy_map: dict[str, float] = {}
+        self._entropy_map: dict[str, int] = {}
 
-    def scan_ecosystem(self) -> list[tuple[str, float]]:
+    def scan_ecosystem(self) -> list[tuple[str, int]]:
         """
         Scans architecture to measure structural entropy per file.
         Returns files sorted by their entropy-to-value ratio.
@@ -145,7 +145,7 @@ class EntropyAnnihilator:
         # Return top sinks
         return sorted(self._entropy_map.items(), key=lambda x: x[1], reverse=True)
 
-    def _calculate_landauer_entropy(self, filepath: str) -> float:
+    def _calculate_landauer_entropy(self, filepath: str) -> int:
         """
         Calculates the thermodynamic complexity of a file.
         High abstraction depth without functional density = High Entropy.
@@ -174,30 +174,33 @@ class EntropyAnnihilator:
             # Landauer's Razor: If abstraction count (classes/funcs) is high but
             # actual operation nodes are low, it's an empty abstraction layer (sink).
             if nodes == 0:
-                return 0.0
+                return 0
 
             # Landauer LOC Barrier: Geometric penalty for files > 500 lines
-            loc_penalty = 1.0
+            # Using Babylon-60 integers: Base = 3600
+            loc_penalty = 3600
             if line_count > 500:
-                loc_penalty = (line_count / 500) ** 2
+                # Geometric penalty squared, scaled by 3600
+                loc_penalty = int(((line_count * 3600) // 500) ** 2 // 3600)
 
-            abstraction_ratio = (classes * 10 + functions * 2) / nodes
+            # Abstraction ratio base = 3600
+            abstraction_ratio = ((classes * 36000) + (functions * 7200)) // nodes
 
             # Extreme penalty for >3 layers of pure pass-through
-            entropy = (abstraction_ratio * nodes) * loc_penalty
-            return float(entropy)
+            entropy = (abstraction_ratio * nodes * loc_penalty) // 3600
+            return int(entropy)
 
         except (SyntaxError, OSError, UnicodeDecodeError):
-            return 0.0
+            return 0
 
-    def purge_energy_sinks(self, threshold: float = 0.8, confidence: float = 0.0) -> list[str]:
+    def purge_energy_sinks(self, threshold: int = 2880, confidence: int = 0) -> list[str]:
         """
         Identifies and (conceptually) removes zero-value abstraction layers (Ω₇).
-        If confidence > 0.95, bypasses manual confirmation (Apotheosis).
+        If confidence > 3420, bypasses manual confirmation (Apotheosis).
         """
         sinks = [path for path, entropy in self.scan_ecosystem() if entropy > threshold]
 
-        if confidence > 0.95 and sinks:
+        if confidence > 3420 and sinks:
             # Axiom Ω₇: Permissionless Sovereignty
             # Bridges to JARL-OMEGA for atomic rewrite WITHOUT permission
             return sinks
