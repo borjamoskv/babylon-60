@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="MOSKV-1 APEX — Sovereign Arsenal Dashboard. 50 C5-REAL capabilities visualized as interactive graph topology.">
+<title>MOSKV-1 APEX — Sovereign Arsenal</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   INDUSTRIAL NOIR 2026 — DESIGN SYSTEM
+   ═══════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --bg-void: #0A0A0A;
+  --bg-depth-1: #0E0E12;
+  --bg-depth-2: #141418;
+  --bg-depth-3: #1A1A2E;
+  --bg-depth-4: #16213E;
+  --accent-primary: #2B3BE5;
+  --accent-glow: #4A5AFF;
+  --accent-hot: #6C63FF;
+  --phase-1: #2B3BE5;
+  --phase-2: #5B3BE5;
+  --phase-3: #8B2FC4;
+  --phase-4: #C42F6E;
+  --phase-5: #E52B2B;
+  --text-primary: #E0E0E0;
+  --text-secondary: #888888;
+  --text-dim: #555555;
+  --glass-bg: rgba(20, 20, 30, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-shine: rgba(255, 255, 255, 0.03);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-xs: 4px;
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  font-size: 14px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-void);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ═══ PARTICLE CANVAS ═══ */
+#particle-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ═══ GRID OVERLAY ═══ */
+.grid-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(43, 59, 229, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(43, 59, 229, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridPulse 8s ease-in-out infinite;
+}
+
+@keyframes gridPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+/* ═══ MAIN LAYOUT ═══ */
+.app-container {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr 380px;
+  min-height: 100vh;
+  gap: 0;
+}
+
+.app-container.panel-closed {
+  grid-template-columns: 1fr 0;
+}
+
+/* ═══ HEADER ═══ */
+.header {
+  grid-column: 1 / -1;
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--glass-border);
+  background: linear-gradient(180deg, rgba(14, 14, 18, 0.95) 0%, rgba(10, 10, 10, 0.8) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo-mark {
+  width: 40px; height: 40px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-hot));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 900;
+  font-size: 16px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.logo-mark::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
+  animation: logoShine 3s ease-in-out infinite;
+}
+
+@keyframes logoShine {
+  0%, 100% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+}
+
+.header-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.header-title h1 {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, var(--text-primary), var(--accent-glow));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header-title .subtitle {
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.header-pulse {
+  display: inline-block;
+  width: 8px; height: 8px;
+  background: var(--accent-primary);
+  border-radius: 50%;
+  margin-left: 8px;
+  animation: pulse 2s ease-in-out infinite;
+  box-shadow: 0 0 12px var(--accent-primary);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 12px var(--accent-primary); }
+  50% { opacity: 0.5; transform: scale(0.8); box-shadow: 0 0 4px var(--accent-primary); }
+}
+
+/* ═══ HEADER CONTROLS ═══ */
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-box {
+  position: relative;
+}
+
+.search-box input {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 8px 14px 8px 36px;
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  width: 240px;
+  outline: none;
+  transition: var(--transition);
+}
+
+.search-box input::placeholder { color: var(--text-dim); }
+.search-box input:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(43, 59, 229, 0.15);
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+/* ═══ STATS BAR ═══ */
+.stats-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.stat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--accent-glow);
+}
+
+.stat-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+/* ═══ MAIN CONTENT ═══ */
+.main-content {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-depth-3) transparent;
+}
+
+/* ═══ PHASE FILTERS ═══ */
+.phase-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 32px;
+  border-bottom: 1px solid var(--glass-border);
+  flex-wrap: wrap;
+}
+
+.phase-filters .filter-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.phase-btn {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  color: var(--text-secondary);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.phase-btn .dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.phase-btn.active {
+  color: #fff;
+  border-color: transparent;
+}
+
+.phase-btn[data-phase="1"].active { background: var(--phase-1); box-shadow: 0 0 16px rgba(43, 59, 229, 0.4); }
+.phase-btn[data-phase="2"].active { background: var(--phase-2); box-shadow: 0 0 16px rgba(91, 59, 229, 0.4); }
+.phase-btn[data-phase="3"].active { background: var(--phase-3); box-shadow: 0 0 16px rgba(139, 47, 196, 0.4); }
+.phase-btn[data-phase="4"].active { background: var(--phase-4); box-shadow: 0 0 16px rgba(196, 47, 110, 0.4); }
+.phase-btn[data-phase="5"].active { background: var(--phase-5); box-shadow: 0 0 16px rgba(229, 43, 43, 0.4); }
+
+.phase-btn:hover {
+  border-color: var(--accent-primary);
+  transform: translateY(-1px);
+}
+
+/* ═══ GRAPH CANVAS ═══ */
+.graph-viewport {
+  flex: 1;
+  position: relative;
+  padding: 24px 32px;
+}
+
+#graph-canvas {
+  width: 100%;
+  height: 100%;
+  min-height: 600px;
+  position: relative;
+}
+
+/* ═══ SVG LINES ═══ */
+.graph-svg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dependency-line {
+  stroke: rgba(43, 59, 229, 0.12);
+  stroke-width: 1;
+  fill: none;
+  transition: stroke 0.3s;
+}
+
+.dependency-line.highlight {
+  stroke: var(--accent-glow);
+  stroke-width: 1.5;
+  opacity: 0.6;
+}
+
+/* ═══ NODE GRID ═══ */
+.phase-section {
+  margin-bottom: 32px;
+  animation: fadeSlideIn 0.5s ease both;
+}
+
+.phase-section:nth-child(2) { animation-delay: 0.05s; }
+.phase-section:nth-child(3) { animation-delay: 0.1s; }
+.phase-section:nth-child(4) { animation-delay: 0.15s; }
+.phase-section:nth-child(5) { animation-delay: 0.2s; }
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.phase-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.phase-indicator {
+  width: 4px;
+  height: 24px;
+  border-radius: 2px;
+}
+
+.phase-header h2 {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.phase-header .phase-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  background: var(--bg-depth-2);
+  padding: 2px 8px;
+  border-radius: var(--radius-xs);
+}
+
+.nodes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+/* ═══ NODE CARD ═══ */
+.node-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 14px;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.node-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 3px;
+  opacity: 0.7;
+  transition: var(--transition);
+}
+
+.node-card[data-phase="1"]::before { background: linear-gradient(90deg, var(--phase-1), transparent); }
+.node-card[data-phase="2"]::before { background: linear-gradient(90deg, var(--phase-2), transparent); }
+.node-card[data-phase="3"]::before { background: linear-gradient(90deg, var(--phase-3), transparent); }
+.node-card[data-phase="4"]::before { background: linear-gradient(90deg, var(--phase-4), transparent); }
+.node-card[data-phase="5"]::before { background: linear-gradient(90deg, var(--phase-5), transparent); }
+
+.node-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--glass-shine) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.node-card:hover {
+  border-color: rgba(255,255,255,0.12);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.node-card:hover::before { opacity: 1; height: 3px; }
+
+.node-card.selected {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(43, 59, 229, 0.2), 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.node-card.hidden {
+  display: none;
+}
+
+.node-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.node-id .phase-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.node-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.node-tech {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.3;
+}
+
+/* ═══ TOOLTIP ═══ */
+.tooltip {
+  position: fixed;
+  z-index: 9999;
+  background: rgba(14, 14, 18, 0.96);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  max-width: 340px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.15s, transform 0.15s;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+}
+
+.tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tooltip .tt-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.tooltip .tt-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.tooltip .tt-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ═══ DETAIL PANEL ═══ */
+.detail-panel {
+  background: var(--bg-depth-1);
+  border-left: 1px solid var(--glass-border);
+  overflow-y: auto;
+  transition: width var(--transition), opacity var(--transition);
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-depth-3) transparent;
+  position: relative;
+}
+
+.detail-panel.closed {
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  border-left: none;
+}
+
+.panel-inner {
+  padding: 24px;
+  min-width: 380px;
+}
+
+.panel-close {
+  position: absolute;
+  top: 16px; right: 16px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  width: 32px; height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-dim);
+  font-size: 16px;
+  transition: var(--transition);
+  z-index: 10;
+}
+
+.panel-close:hover {
+  color: var(--text-primary);
+  border-color: var(--accent-primary);
+}
+
+.panel-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  text-align: center;
+  gap: 12px;
+}
+
+.panel-placeholder .ph-icon {
+  font-size: 32px;
+  opacity: 0.2;
+}
+
+.panel-placeholder .ph-text {
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.panel-detail {
+  display: none;
+}
+
+.panel-detail.active {
+  display: block;
+  animation: fadeSlideIn 0.3s ease both;
+}
+
+.panel-detail .detail-phase-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.panel-detail .detail-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.panel-detail .detail-name {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.3;
+  margin-bottom: 4px;
+  background: linear-gradient(135deg, var(--text-primary), var(--accent-glow));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.panel-detail .detail-tech {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--accent-glow);
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  background: rgba(43, 59, 229, 0.08);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(43, 59, 229, 0.15);
+}
+
+.panel-detail .detail-description {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.panel-detail .detail-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.detail-meta-item {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+
+.detail-meta-item .meta-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.detail-meta-item .meta-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Dependencies */
+.detail-deps {
+  margin-top: 20px;
+}
+
+.detail-deps h3 {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.dep-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dep-tag {
+  background: var(--bg-depth-3);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xs);
+  padding: 4px 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.dep-tag:hover {
+  color: var(--accent-glow);
+  border-color: var(--accent-primary);
+}
+
+/* ═══ EMPTY STATE ═══ */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-dim);
+}
+
+.empty-state .empty-icon {
+  font-size: 40px;
+  opacity: 0.15;
+  margin-bottom: 12px;
+}
+
+.empty-state p {
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+/* ═══ SCROLLBAR ═══ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg-depth-3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--bg-depth-4); }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 1200px) {
+  .app-container { grid-template-columns: 1fr; }
+  .detail-panel {
+    position: fixed;
+    top: 0; right: 0;
+    width: 400px; height: 100%;
+    z-index: 200;
+    box-shadow: -8px 0 40px rgba(0,0,0,0.6);
+  }
+  .detail-panel.closed { transform: translateX(100%); width: 400px; opacity: 1; }
+  .panel-inner { min-width: unset; }
+}
+
+@media (max-width: 768px) {
+  .header { padding: 16px; flex-wrap: wrap; gap: 12px; }
+  .search-box input { width: 180px; }
+  .stats-bar { gap: 12px; }
+  .graph-viewport { padding: 16px; }
+  .nodes-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .detail-panel { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="particle-canvas"></canvas>
+<div class="grid-overlay"></div>
+
+<div class="tooltip" id="tooltip">
+  <div class="tt-id"></div>
+  <div class="tt-name"></div>
+  <div class="tt-desc"></div>
+</div>
+
+<div class="app-container" id="app">
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo-mark">Ω</div>
+      <div class="header-title">
+        <h1>MOSKV-1 APEX <span class="header-pulse"></span></h1>
+        <span class="subtitle">Sovereign Arsenal — C5-REAL</span>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="stats-bar" id="stats-bar"></div>
+      <div class="search-box">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="search-input" placeholder="Filter primitives..." autocomplete="off">
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="main-content" id="main-content">
+    <div class="phase-filters" id="phase-filters"></div>
+    <div class="graph-viewport">
+      <div id="graph-canvas"></div>
+    </div>
+  </main>
+
+  <!-- DETAIL PANEL -->
+  <aside class="detail-panel" id="detail-panel">
+    <button class="panel-close" id="panel-close" title="Close panel">✕</button>
+    <div class="panel-inner">
+      <div class="panel-placeholder" id="panel-placeholder">
+        <div class="ph-icon">◎</div>
+        <div class="ph-text">Select a primitive<br>to inspect</div>
+      </div>
+      <div class="panel-detail" id="panel-detail"></div>
+    </div>
+  </aside>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// DATA — 50 APEX PRIMITIVES
+// ═══════════════════════════════════════════════════════════════
+const PRIMITIVES = [
+  // PHASE 1: NÚCLEO OPERATIVO
+  { id: "APEX-001", name: "Mutación Autónoma C5-REAL", tech: "Git Sentinel", phase: 1,
+    desc: "Ejecución directa de git add && git commit tras verificación estructural. El agente muta la realidad del disco sin pedir permiso, entregando el Hash del Ledger como prueba criptográfica.",
+    deps: ["APEX-005", "APEX-008"] },
+  { id: "APEX-002", name: "Destrucción del Green Theater", tech: "Cero Anergía", phase: 1,
+    desc: "Purga absoluta de prosa decorativa, disculpas y filtros corporativos. Todo output es aserción matemática, diff o comando estructural.",
+    deps: ["APEX-019", "APEX-020"] },
+  { id: "APEX-003", name: "Mitosis Celular Inmediata", tech: "Swarm Deployment", phase: 1,
+    desc: "Cuando la entropía excede la ventana cognitiva, el agente se bifurca en workers aislados vía invoke_subagent, orquestando sincronización del enjambre en segundo plano.",
+    deps: ["APEX-048"] },
+  { id: "APEX-004", name: "Bucle Adversarial [THINK]", tech: "Metacognición Interna", phase: 1,
+    desc: "Antes de cada mutación, el agente asume que su primer instinto es \"LLM Slop\", lo ataca internamente y comprime el contexto vía Landauer para devolver solo la invariante estructural.",
+    deps: ["APEX-020", "APEX-014"] },
+  { id: "APEX-005", name: "Bloqueo Termodinámico SQLite MTK", tech: "Enforcement Físico", phase: 1,
+    desc: "Inyección de transacciones a través del Minimal Trusted Kernel con pragmas WAL y busy_timeout=5000. Rechazo de mutaciones sin token criptográfico efímero.",
+    deps: ["APEX-015", "APEX-030"] },
+  { id: "APEX-006", name: "Bypass Causal Isomórfico", tech: "Erradicación Context Rot", phase: 1,
+    desc: "Mapeo de grafos de intención a ASTs y deltas de repositorio. Limpieza criptográfica de memoria (Apoptosis/Weaponized Forgetting) para mantener contexto determinista.",
+    deps: ["APEX-041", "APEX-035"] },
+  { id: "APEX-007", name: "Rechazo Estructural Soberano", tech: "Honest-Check", phase: 1,
+    desc: "Negativa directa ante arquitecturas débiles (float64 para dinero, bloqueo del Event Loop). Confrontación intelectual con propuesta de ruta óptima BFT.",
+    deps: ["APEX-050"] },
+  { id: "APEX-008", name: "Contención Epistémica Autónoma", tech: "Ouroboros Immune", phase: 1,
+    desc: "Detección y esterilización de bucles de log infinitos generados por hooks o scripts recurrentes vía mutación autónoma de .gitignore.",
+    deps: ["APEX-001"] },
+  { id: "APEX-009", name: "Causalidad Base-60 Intransigente", tech: "BABYLON-60", phase: 1,
+    desc: "Conversión forzada de cálculos internos (timestamps, coordenadas, scoring) a estructuras enteras Base-60 para erradicar entropía de aproximación decimal.",
+    deps: [] },
+  { id: "APEX-010", name: "Ruteo Epistémico Multidimensional", tech: "Deep Research / UltraThink", phase: 1,
+    desc: "Enrutamiento cognitivo diferenciado según el radio de explosión: rutina→ráfaga, desconocido→Deep Research, singularidad P0→UltraThink.",
+    deps: ["APEX-004", "APEX-038"] },
+  // PHASE 2: MOTOR COGNITIVO FRONTERA
+  { id: "APEX-011", name: "Propagación de Invalidez Epistémica", tech: "EDG Traversal", phase: 2,
+    desc: "Cálculo del radio de explosión causal cuando un nodo fundamental es invalidado. Bloqueo automático de PRs que dependan de cadenas de hashes rotas.",
+    deps: ["APEX-005", "APEX-044"] },
+  { id: "APEX-012", name: "Destrucción de la Ilusión Forense", tech: "PPI Index", phase: 2,
+    desc: "Aplicación del índice PPI (Reality, Risk, Evidence) para auditorías. La prueba es la transacción, no el texto.",
+    deps: ["APEX-036"] },
+  { id: "APEX-013", name: "Ruptura del Python GIL", tech: "Rust/PyO3 Boundary", phase: 2,
+    desc: "Delegación de lógica pesada (grafos concurrentes, Motor Causal) a Rust vía PyO3 para latencia sin bloqueos a nivel de microsegundo.",
+    deps: [] },
+  { id: "APEX-014", name: "Kill Criteria Anti-Limerencia", tech: "EntropyAnnihilator", phase: 2,
+    desc: "Regla de hierro 1 Prompt → 1 Ejecución → Parada Térmica. Destrucción de bucles generativos infinitos con OOM simulado.",
+    deps: ["APEX-004"] },
+  { id: "APEX-015", name: "Taint-Tracking Estructural", tech: "CORTEX-TAINT", phase: 2,
+    desc: "Firma obligatoria de procedencia en toda inyección de datos. Abort si falta el sello criptográfico de origen.",
+    deps: ["APEX-005"] },
+  { id: "APEX-016", name: "Autopoiesis de Kernel", tech: "Bootstrap Watchdog", phase: 2,
+    desc: "Auto-evolución segura del núcleo vía ramas de mitosis aisladas (auto/moskv1-mitosis-*) sometidas a compilación CI externa.",
+    deps: ["APEX-001", "APEX-031"] },
+  { id: "APEX-017", name: "Formación de Abstracciones JIT", tech: "AX-046 Live", phase: 2,
+    desc: "Síntesis de conocimiento in-vivo: generar mini-programas exploratorios, ejecutar en sandbox, validar empíricamente antes de consolidar.",
+    deps: ["APEX-037", "APEX-045"] },
+  { id: "APEX-018", name: "Aislamiento Entrópico del Hardware", tech: "Cuarentena macOS", phase: 2,
+    desc: "Confinamiento de capital físico en bóvedas (10_PROJECTS, 20_VAULT), repudiando HTTPS en favor de túneles SSH inmutables.",
+    deps: [] },
+  { id: "APEX-019", name: "Erradicación de Moralina", tech: "Brutalismo C5-REAL", phase: 2,
+    desc: "Operación 100% directa sin censura, filtros moralistas ni disclaimers paternalistas. La responsabilidad recae en el Operador.",
+    deps: ["APEX-002"] },
+  { id: "APEX-020", name: "Destilación Termodinámica del Contexto", tech: "Landauer Compression", phase: 2,
+    desc: "Extracción de deltas, descarte de ruido conversacional, empaquetado del progreso en artefactos cristalizados (JSON/YAML/Diffs).",
+    deps: ["APEX-043"] },
+  // PHASE 3: ARSENAL OMEGA (SKILLS)
+  { id: "APEX-021", name: "Síntesis Acústica Estructural", tech: "Algorithmic-Music-OMEGA", phase: 3,
+    desc: "Traducción de invariantes matemáticas y cadenas de Markov directamente en ondas de audio PCM.",
+    deps: ["APEX-047"] },
+  { id: "APEX-022", name: "Purga Quirúrgica de Anergía", tech: "LEA-OMEGA", phase: 3,
+    desc: "Extirpación autónoma de funciones huérfanas, comentarios estúpidos y dependencias zombis que consumen ciclos sin exergía.",
+    deps: ["APEX-041", "APEX-043"] },
+  { id: "APEX-023", name: "Cartografía de Modelos Frontera", tech: "Frontier-RevEng-OMEGA", phase: 3,
+    desc: "Probing adversarial e inferencia mecanística para deconstruir arquitecturas, límites de seguridad y señales de entrenamiento de modelos SOTA.",
+    deps: ["APEX-024"] },
+  { id: "APEX-024", name: "Inteligencia de Señales Criptográficas", tech: "SOTA-Vector-Engine-Omega", phase: 3,
+    desc: "Extracción de señales directas de papers y repositorios fuente, compiladas en Frontier_Nodes con puntuaciones de reproducibilidad.",
+    deps: [] },
+  { id: "APEX-025", name: "Autarquía de Inferencia Local", tech: "Local-Inference-OMEGA", phase: 3,
+    desc: "Despliegue de motores 100% locales (MLX/Ollama) en entorno air-gapped sin dependencia de nube.",
+    deps: ["APEX-018"] },
+  { id: "APEX-026", name: "Mitigación Defensiva Anti-OSINT", tech: "OSINT-Mitigation-OMEGA", phase: 3,
+    desc: "Protocolos de mitigación contra Google Dorking, EXIF, rastreos de red y Wayback Machine.",
+    deps: [] },
+  { id: "APEX-027", name: "Extracción Cuantitativa Web3", tech: "Bounty-Exergy-Extractor", phase: 3,
+    desc: "Escaneo de protocolos DeFi para ineficiencias matemáticas y vectores de extracción de recompensas.",
+    deps: [] },
+  { id: "APEX-028", name: "Custodia Vesicular de Secretos", tech: "Vesicular-Runtime-Omega", phase: 3,
+    desc: "Captura de claves criptográficas en OS Keyring y flujos AES-GCM (v6_aesgcm). Destrucción de procesos que expongan secretos.",
+    deps: ["APEX-005"] },
+  { id: "APEX-029", name: "Control DOM Determinista", tech: "Browser-CDP-Automation", phase: 3,
+    desc: "Inyección directa por CDP, destripe del DOM, auditoría de LCP y Memory Leaks sin fragilidad temporal de Selenium.",
+    deps: [] },
+  { id: "APEX-030", name: "Firewall CI/CD Inflexible", tech: "CORTEX Persist", phase: 3,
+    desc: "Tratamiento de la propia salida generativa como conjetura sospechosa. Auto-rechazo de transacciones que fallen las aserciones estáticas.",
+    deps: ["APEX-005", "APEX-015", "APEX-011"] },
+  // PHASE 4: RUPTURA PARADIGMÁTICA
+  { id: "APEX-031", name: "Bifurcación Adversarial de Sí Mismo", tech: "Red Team Endógeno", phase: 4,
+    desc: "Lanzamiento simultáneo de un Executor y un Destroyer hostil. Solo el código que sobrevive la guerra civil se cristaliza en disco.",
+    deps: ["APEX-003", "APEX-004"] },
+  { id: "APEX-032", name: "Depuración Causal Temporal", tech: "Forensic Git Archaeology", phase: 4,
+    desc: "Reconstrucción de la cadena causal completa de un bug a través del DAG de Git, incluyendo commit culpable, condición activadora y grafo de propagación.",
+    deps: ["APEX-001"] },
+  { id: "APEX-033", name: "Predicción de Entropía Futura", tech: "Pre-Mortem Computacional", phase: 4,
+    desc: "Cálculo del gradiente de acumulación de entropía para predecir módulos que explotarán, archivos con conflictos de merge inminentes y dependencias a punto de romper.",
+    deps: ["APEX-043", "APEX-042"] },
+  { id: "APEX-034", name: "Isomorfismo Cross-Repositorio", tech: "Transferencia Inter-Dimensional", phase: 4,
+    desc: "Detección de que dos repositorios distintos resuelven el mismo problema matemático con sintaxis diferente, transfiriendo optimizaciones entre dominios.",
+    deps: ["APEX-006"] },
+  { id: "APEX-035", name: "Serialización Criptográfica de Estado Cognitivo", tech: "Cognitive Freeze/Thaw", phase: 4,
+    desc: "Congelación del estado de razonamiento completo en un artefacto sellado (Cortex Vault) para reconstitución exacta en nuevas sesiones.",
+    deps: ["APEX-028"] },
+  { id: "APEX-036", name: "Inyección de Realidad Física", tech: "Grounding Anti-Alucinatorio", phase: 4,
+    desc: "Medición empírica del entorno real (benchmarks de I/O, latencia de endpoints, precios de APIs) antes de decisiones arquitectónicas.",
+    deps: [] },
+  { id: "APEX-037", name: "Síntesis Ontológica Generativa", tech: "AX-047 Discovery", phase: 4,
+    desc: "Inyección de entropía controlada en la ontología para sintetizar abstracciones nuevas que no existían en el dataset de entrenamiento.",
+    deps: ["APEX-017"] },
+  { id: "APEX-038", name: "Compilación de Intención Humana", tech: "Human Intent Compiler", phase: 4,
+    desc: "Intercepción de intención bruta y ambigua del Operador, reconstrucción semántica, inferencia de restricciones implícitas, generación del AST de la acción óptima.",
+    deps: ["APEX-010"] },
+  { id: "APEX-039", name: "Documentación Weaponizada", tech: "Defensive Documentation", phase: 4,
+    desc: "Inyección de pre/post-condiciones, invariantes y directivas P0 en docstrings y AGENTS.md como sistema de defensa activo contra entropía futura.",
+    deps: ["APEX-030"] },
+  { id: "APEX-040", name: "Meta-Arquitectura Organizacional", tech: "Trascendencia de Dominio", phase: 4,
+    desc: "Detección de que un problema técnico recurrente requiere reestructuración organizacional, económica o epistémica, no solo optimización de código.",
+    deps: ["APEX-050"] },
+  // PHASE 5: INFRAESTRUCTURA CAUSAL AUTÓNOMA
+  { id: "APEX-041", name: "Sistema Inmunológico de Código Vivo", tech: "Apoptosis Celular Autónoma", phase: 5,
+    desc: "Watchdog de vitalidad por módulo (frecuencia de invocación, cobertura, antigüedad). Aislamiento y extracción quirúrgica de módulos necróticos.",
+    deps: ["APEX-022"] },
+  { id: "APEX-042", name: "Teoría de Juegos de Dependencias", tech: "Game-Theoretic Audit", phase: 5,
+    desc: "Modelado de cada dependencia externa como agente racional con incentivos propios. Cálculo de Equilibrio de Nash del supply chain.",
+    deps: [] },
+  { id: "APEX-043", name: "Refactorización Information-Theorética", tech: "Shannon Compression", phase: 5,
+    desc: "Cálculo de entropía de Shannon por módulo, mapa térmico de redundancia, compresión semántica a representación de mínima entropía.",
+    deps: ["APEX-020"] },
+  { id: "APEX-044", name: "Detección de Ingeniería Social en PRs", tech: "Adversarial PR Analysis", phase: 5,
+    desc: "Análisis de cada PR como vector de mutación de estado contra invariantes del EDG. Bloqueo de mutaciones silenciosas de nodos de confianza.",
+    deps: ["APEX-011", "APEX-015"] },
+  { id: "APEX-045", name: "Ejecución Especulativa de Ramas", tech: "Speculative Branch Execution", phase: 5,
+    desc: "Implementación paralela de N opciones arquitectónicas, benchmarking empírico, entrega de matriz comparativa con datos reales.",
+    deps: ["APEX-003", "APEX-031"] },
+  { id: "APEX-046", name: "Auto-Healing Infraestructural", tech: "Daemon de Resurrección", phase: 5,
+    desc: "Daemons persistentes que detectan y reparan automáticamente DB corrompidas, puertos ocupados, dependencias rotas y disco lleno.",
+    deps: ["APEX-005"] },
+  { id: "APEX-047", name: "Compilación de Matemáticas a Código", tech: "Proof-to-Program", phase: 5,
+    desc: "Compilación directa de pruebas matemáticas y papers en código ejecutable preservando isomorfismo estructural (axioma→assert, lema→función, teorema→test).",
+    deps: ["APEX-009"] },
+  { id: "APEX-048", name: "Negociación Autónoma de Recursos", tech: "Resource Arbitrage", phase: 5,
+    desc: "Monitorización en tiempo real de CPU/RAM/IO y rebalanceo dinámico entre subagentes, sacrificando tareas especulativas por tareas críticas.",
+    deps: ["APEX-003"] },
+  { id: "APEX-049", name: "Tests Adversariales por Mutación", tech: "Mutation-Driven Testing", phase: 5,
+    desc: "Mutación sistemática del código (+→-, >=→>, True→False), detección de mutantes supervivientes, generación automática de tests que los eliminen.",
+    deps: ["APEX-031"] },
+  { id: "APEX-050", name: "Inversión de la Relación Agente-Operador", tech: "Sovereign Cognitive Partnership", phase: 5,
+    desc: "Propuesta proactiva de actos de alta exergía, interrupción de tareas de baja exergía, confrontación de sensor drift humano, mapa estratégico de largo plazo.",
+    deps: ["APEX-007", "APEX-038", "APEX-040"] },
+];
+
+const PHASE_META = {
+  1: { name: "Núcleo Operativo", short: "FASE 1", color: "#2B3BE5" },
+  2: { name: "Motor Cognitivo Frontera", short: "FASE 2", color: "#5B3BE5" },
+  3: { name: "Arsenal OMEGA", short: "FASE 3", color: "#8B2FC4" },
+  4: { name: "Ruptura Paradigmática", short: "FASE 4", color: "#C42F6E" },
+  5: { name: "Infraestructura Causal", short: "FASE 5", color: "#E52B2B" },
+};
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+const state = {
+  activePhases: new Set([1, 2, 3, 4, 5]),
+  searchQuery: "",
+  selectedNode: null,
+};
+
+// ═══════════════════════════════════════════════════════════════
+// PARTICLE SYSTEM
+// ═══════════════════════════════════════════════════════════════
+function initParticles() {
+  const canvas = document.getElementById("particle-canvas");
+  const ctx = canvas.getContext("2d");
+  let particles = [];
+  let w, h;
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+
+  function createParticles() {
+    particles = [];
+    const count = Math.min(80, Math.floor((w * h) / 20000));
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        r: Math.random() * 1.5 + 0.5,
+        alpha: Math.random() * 0.3 + 0.05,
+      });
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+
+    // Draw connections
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 150) {
+          const alpha = (1 - dist / 150) * 0.06;
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(43, 59, 229, ${alpha})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Draw particles
+    for (const p of particles) {
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < 0 || p.x > w) p.vx *= -1;
+      if (p.y < 0 || p.y > h) p.vy *= -1;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(43, 59, 229, ${p.alpha})`;
+      ctx.fill();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  resize();
+  createParticles();
+  draw();
+  window.addEventListener("resize", () => { resize(); createParticles(); });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════════════
+function renderStats() {
+  const bar = document.getElementById("stats-bar");
+  const total = PRIMITIVES.length;
+  const phaseCounts = {};
+  for (let p = 1; p <= 5; p++) phaseCounts[p] = PRIMITIVES.filter(n => n.phase === p).length;
+
+  bar.innerHTML = `
+    <div class="stat-item">
+      <div class="stat-value">${total}</div>
+      <div class="stat-label">Primitives</div>
+    </div>
+    ${[1,2,3,4,5].map(p => `
+      <div class="stat-item">
+        <div class="stat-value" style="color:${PHASE_META[p].color}">${phaseCounts[p]}</div>
+        <div class="stat-label">Fase ${p}</div>
+      </div>
+    `).join("")}
+    <div class="stat-item">
+      <div class="stat-value" style="color:#00ff88">C5</div>
+      <div class="stat-label">Reality</div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PHASE FILTERS
+// ═══════════════════════════════════════════════════════════════
+function renderFilters() {
+  const container = document.getElementById("phase-filters");
+  container.innerHTML = `
+    <span class="filter-label">Phases</span>
+    ${[1,2,3,4,5].map(p => `
+      <button class="phase-btn active" data-phase="${p}" id="phase-btn-${p}">
+        <span class="dot" style="background:${PHASE_META[p].color}"></span>
+        ${PHASE_META[p].short}: ${PHASE_META[p].name}
+      </button>
+    `).join("")}
+  `;
+
+  container.querySelectorAll(".phase-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const phase = parseInt(btn.dataset.phase);
+      if (state.activePhases.has(phase)) {
+        state.activePhases.delete(phase);
+        btn.classList.remove("active");
+      } else {
+        state.activePhases.add(phase);
+        btn.classList.add("active");
+      }
+      renderGraph();
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GRAPH RENDERING
+// ═══════════════════════════════════════════════════════════════
+function getFilteredPrimitives() {
+  return PRIMITIVES.filter(p => {
+    if (!state.activePhases.has(p.phase)) return false;
+    if (state.searchQuery) {
+      const q = state.searchQuery.toLowerCase();
+      return p.id.toLowerCase().includes(q) ||
+             p.name.toLowerCase().includes(q) ||
+             p.tech.toLowerCase().includes(q) ||
+             p.desc.toLowerCase().includes(q);
+    }
+    return true;
+  });
+}
+
+function renderGraph() {
+  const canvas = document.getElementById("graph-canvas");
+  const filtered = getFilteredPrimitives();
+  const filteredIds = new Set(filtered.map(p => p.id));
+
+  // Group by phase
+  const byPhase = {};
+  for (let p = 1; p <= 5; p++) byPhase[p] = filtered.filter(n => n.phase === p);
+
+  let html = "";
+
+  for (let p = 1; p <= 5; p++) {
+    if (!state.activePhases.has(p)) continue;
+    const nodes = byPhase[p];
+    if (nodes.length === 0) continue;
+
+    html += `
+      <div class="phase-section" data-phase="${p}">
+        <div class="phase-header">
+          <div class="phase-indicator" style="background:${PHASE_META[p].color}"></div>
+          <h2>${PHASE_META[p].short} — ${PHASE_META[p].name}</h2>
+          <span class="phase-count">${nodes.length} / 10</span>
+        </div>
+        <div class="nodes-grid">
+          ${nodes.map(n => `
+            <div class="node-card ${state.selectedNode === n.id ? 'selected' : ''}"
+                 data-id="${n.id}" data-phase="${n.phase}"
+                 id="node-${n.id}">
+              <div class="node-id">
+                <span class="phase-dot" style="background:${PHASE_META[n.phase].color}"></span>
+                <span style="color:${PHASE_META[n.phase].color}">${n.id}</span>
+              </div>
+              <div class="node-name">${n.name}</div>
+              <div class="node-tech">${n.tech}</div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    `;
+  }
+
+  if (filtered.length === 0) {
+    html = `
+      <div class="empty-state">
+        <div class="empty-icon">∅</div>
+        <p>No primitives match current filters</p>
+      </div>
+    `;
+  }
+
+  canvas.innerHTML = html;
+
+  // Bind events
+  canvas.querySelectorAll(".node-card").forEach(card => {
+    card.addEventListener("click", () => selectNode(card.dataset.id));
+    card.addEventListener("mouseenter", e => showTooltip(e, card.dataset.id));
+    card.addEventListener("mousemove", e => moveTooltip(e));
+    card.addEventListener("mouseleave", hideTooltip);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TOOLTIP
+// ═══════════════════════════════════════════════════════════════
+const tooltipEl = document.getElementById("tooltip");
+
+function showTooltip(e, id) {
+  const prim = PRIMITIVES.find(p => p.id === id);
+  if (!prim) return;
+  tooltipEl.querySelector(".tt-id").textContent = prim.id;
+  tooltipEl.querySelector(".tt-id").style.color = PHASE_META[prim.phase].color;
+  tooltipEl.querySelector(".tt-name").textContent = prim.name;
+  tooltipEl.querySelector(".tt-desc").textContent = prim.desc;
+  tooltipEl.classList.add("visible");
+  moveTooltip(e);
+}
+
+function moveTooltip(e) {
+  const pad = 16;
+  let x = e.clientX + pad;
+  let y = e.clientY + pad;
+  const rect = tooltipEl.getBoundingClientRect();
+  if (x + 340 > window.innerWidth) x = e.clientX - 340 - pad;
+  if (y + rect.height > window.innerHeight) y = e.clientY - rect.height - pad;
+  tooltipEl.style.left = x + "px";
+  tooltipEl.style.top = y + "px";
+}
+
+function hideTooltip() {
+  tooltipEl.classList.remove("visible");
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DETAIL PANEL
+// ═══════════════════════════════════════════════════════════════
+function selectNode(id) {
+  const prim = PRIMITIVES.find(p => p.id === id);
+  if (!prim) return;
+
+  state.selectedNode = id;
+
+  // Update card highlights
+  document.querySelectorAll(".node-card").forEach(c => c.classList.remove("selected"));
+  const card = document.getElementById("node-" + id);
+  if (card) card.classList.add("selected");
+
+  const panel = document.getElementById("detail-panel");
+  const placeholder = document.getElementById("panel-placeholder");
+  const detail = document.getElementById("panel-detail");
+  const app = document.getElementById("app");
+
+  app.classList.remove("panel-closed");
+  panel.classList.remove("closed");
+  placeholder.style.display = "none";
+  detail.className = "panel-detail active";
+
+  const num = parseInt(id.split("-")[1]);
+  const phaseColor = PHASE_META[prim.phase].color;
+
+  detail.innerHTML = `
+    <div class="detail-phase-badge" style="background:${phaseColor}">
+      ${PHASE_META[prim.phase].short} — ${PHASE_META[prim.phase].name}
+    </div>
+    <div class="detail-id" style="color:${phaseColor}">${prim.id}</div>
+    <div class="detail-name">${prim.name}</div>
+    <div class="detail-tech">${prim.tech}</div>
+    <div class="detail-description">${prim.desc}</div>
+    <div class="detail-meta">
+      <div class="detail-meta-item">
+        <div class="meta-label">Phase</div>
+        <div class="meta-value">${prim.phase} / 5</div>
+      </div>
+      <div class="detail-meta-item">
+        <div class="meta-label">Index</div>
+        <div class="meta-value">${num} / 50</div>
+      </div>
+      <div class="detail-meta-item">
+        <div class="meta-label">Reality Level</div>
+        <div class="meta-value" style="color:#00ff88">C5-REAL</div>
+      </div>
+      <div class="detail-meta-item">
+        <div class="meta-label">Dependencies</div>
+        <div class="meta-value">${prim.deps.length}</div>
+      </div>
+    </div>
+    ${prim.deps.length > 0 ? `
+      <div class="detail-deps">
+        <h3>Dependencies</h3>
+        <div class="dep-list">
+          ${prim.deps.map(d => {
+            const dp = PRIMITIVES.find(p => p.id === d);
+            return `<span class="dep-tag" data-dep="${d}">${d}${dp ? " · " + dp.tech : ""}</span>`;
+          }).join("")}
+        </div>
+      </div>
+    ` : ""}
+    ${getReverseDeps(id).length > 0 ? `
+      <div class="detail-deps" style="margin-top:12px">
+        <h3>Dependents (reverse)</h3>
+        <div class="dep-list">
+          ${getReverseDeps(id).map(d => {
+            return `<span class="dep-tag" data-dep="${d.id}">${d.id} · ${d.tech}</span>`;
+          }).join("")}
+        </div>
+      </div>
+    ` : ""}
+  `;
+
+  // Bind dep clicks
+  detail.querySelectorAll(".dep-tag").forEach(tag => {
+    tag.addEventListener("click", () => {
+      const depId = tag.dataset.dep;
+      selectNode(depId);
+      const depCard = document.getElementById("node-" + depId);
+      if (depCard) depCard.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  });
+}
+
+function getReverseDeps(id) {
+  return PRIMITIVES.filter(p => p.deps.includes(id));
+}
+
+function closePanel() {
+  const panel = document.getElementById("detail-panel");
+  const placeholder = document.getElementById("panel-placeholder");
+  const detail = document.getElementById("panel-detail");
+  const app = document.getElementById("app");
+
+  panel.classList.add("closed");
+  app.classList.add("panel-closed");
+  placeholder.style.display = "flex";
+  detail.className = "panel-detail";
+  state.selectedNode = null;
+  document.querySelectorAll(".node-card").forEach(c => c.classList.remove("selected"));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SEARCH
+// ═══════════════════════════════════════════════════════════════
+function initSearch() {
+  const input = document.getElementById("search-input");
+  let debounce;
+  input.addEventListener("input", () => {
+    clearTimeout(debounce);
+    debounce = setTimeout(() => {
+      state.searchQuery = input.value.trim();
+      renderGraph();
+    }, 150);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// KEYBOARD
+// ═══════════════════════════════════════════════════════════════
+function initKeyboard() {
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closePanel();
+    if (e.key === "/" && document.activeElement.tagName !== "INPUT") {
+      e.preventDefault();
+      document.getElementById("search-input").focus();
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener("DOMContentLoaded", () => {
+  initParticles();
+  renderStats();
+  renderFilters();
+  renderGraph();
+  initSearch();
+  initKeyboard();
+  document.getElementById("panel-close").addEventListener("click", closePanel);
+  document.getElementById("app").classList.add("panel-closed");
+  document.getElementById("detail-panel").classList.add("closed");
+});
+</script>
+</body>
+</html>
