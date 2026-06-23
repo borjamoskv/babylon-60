@@ -71,7 +71,6 @@ def daemon_cmd(seconds: int, interval: int, real: bool):
     from cortex.cli.common import DEFAULT_DB
     from cortex.engine.causal_scheduler import CausalScheduler
     from cortex.engine.latticework_daemon import LatticeworkDaemon
-    from cortex.engine.rollback_engine import CausalRollbackEngine
     from cortex.ledger.causal_graph import CausalGraph
     from cortex.ledger.execution_trace import ExecutionTraceLedger
     
@@ -115,8 +114,7 @@ def daemon_cmd(seconds: int, interval: int, real: bool):
         
     ledger = ExecutionTraceLedger(db_path)
     graph = CausalGraph(db_path)
-    rollback = CausalRollbackEngine(db_path, ledger, None)
-    scheduler = CausalScheduler(graph, rollback, ledger)
+    scheduler = CausalScheduler(graph, ledger)
     
     daemon = LatticeworkDaemon(ledger, scheduler, scan_interval=interval)
     

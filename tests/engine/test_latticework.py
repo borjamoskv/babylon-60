@@ -10,7 +10,6 @@ from cortex.engine.latticework_daemon import LatticeworkDaemon
 from cortex.engine.babylon60 import Babylon60
 from cortex.ledger.execution_trace import ExecutionTraceLedger
 from cortex.ledger.causal_graph import CausalGraph
-from cortex.engine.rollback_engine import CausalRollbackEngine
 from cortex.engine.causal_scheduler import CausalScheduler
 
 def test_latticework_store_initialization():
@@ -84,11 +83,10 @@ async def test_latticework_real_scheduler_injection():
             """)
             await conn.commit()
 
-        # Initialize ledger, graph, rollback engine, and scheduler
+        # Initialize ledger, graph, and scheduler
         ledger = ExecutionTraceLedger(db_path)
         graph = CausalGraph(db_path)
-        rollback = CausalRollbackEngine(db_path, ledger, None)
-        scheduler = CausalScheduler(graph, rollback, ledger)
+        scheduler = CausalScheduler(graph, ledger)
         
         # Verify initial budget
         initial_budget = await scheduler._get_entropy_budget("default")

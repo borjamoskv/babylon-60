@@ -18,7 +18,6 @@ from cortex.engine.causal_scheduler import CausalScheduler
 from cortex.engine.entropy_daemon import EntropyDaemon
 from cortex.engine.exergy_daemon import ExergyDaemon
 from cortex.engine.latticework_daemon import LatticeworkDaemon
-from cortex.engine.rollback_engine import CausalRollbackEngine
 from cortex.ledger.causal_graph import CausalGraph
 from cortex.ledger.execution_trace import ExecutionTraceLedger
 
@@ -39,8 +38,7 @@ async def lifespan(app: FastAPI):
 
     ledger = ExecutionTraceLedger(CORTEX_DB_PATH)
     graph = CausalGraph(CORTEX_DB_PATH)
-    rollback = CausalRollbackEngine(CORTEX_DB_PATH, ledger, None)
-    scheduler = CausalScheduler(graph, rollback, ledger)
+    scheduler = CausalScheduler(graph, ledger)
     bifurcation = ExergyBifurcationEngine(ledger, scheduler)
     async with connect_async_ctx(CORTEX_DB_PATH) as conn:
         await conn.execute("PRAGMA journal_mode=WAL;")
