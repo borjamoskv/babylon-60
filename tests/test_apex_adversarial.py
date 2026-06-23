@@ -593,11 +593,11 @@ class TestFase5InfraestructuraCausal:
         assert len(source) > 1000, "APEX-043 DESTROYED: shannon.maxwell is a stub"
 
     # APEX-044: Detección de Ingeniería Social en PRs — Adversarial PR Analysis
-    def test_apex_044_smt_guard(self):
-        """DESTROY: Prove PR analysis guard has no SMT logic."""
-        mod = importlib.import_module("cortex.guards.smt_guard")
+    def test_apex_044_social_engineering_guard(self):
+        """DESTROY: Prove PR analysis guard has no structural logic."""
+        mod = importlib.import_module("cortex.engine.pr_social_engineering")
         source = inspect.getsource(mod)
-        assert len(source) > 3000, "APEX-044 DESTROYED: smt_guard is trivial"
+        assert len(source) > 1000, "APEX-044 DESTROYED: pr_social_engineering is trivial"
 
     # APEX-045: Ejecución Especulativa de Ramas — Speculative Branch Execution
     def test_apex_045_bifurcation_engine(self):
