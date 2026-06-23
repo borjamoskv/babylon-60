@@ -189,3 +189,17 @@ Low-level abstractions, platform telemetry, migrations, and extensions.
                               ▼
                      [memory/vector_providers] (Flush to sqlite-vec / Qdrant)
 ```
+
+---
+
+## 4. Glosario Oficial y Taxonomía Semántica (Namespace Audit)
+
+Para resolver las colisiones semánticas y alinear la ejecución, el siguiente glosario establece la jerarquía oficial:
+
+*   **CORTEX-Persist**: El sistema base y la fortaleza inmutable.
+*   **MOSKV-1 APEX**: La identidad activa y el operador lógico (Kernel).
+*   **ULTRAMAP**: Estrictamente el sustrato espacial interno O(1) de coordenadas de los agentes y este mismo mapa arquitectónico. Nunca se usa para estrategias externas.
+*   **CAUSAL-SIEGE**: La campaña y estrategia de infiltración de repositorios externos (Gatekeepers, SDKs de adopción viral).
+*   **MOSKV-Sentinel**: El Gatekeeper Físico en CI/CD (GitHub Action) que rechaza la entropía estocástica externa.
+*   **Sanedrín**: El demonio interno (`verify_sanedrin.py`) que audita el consenso BFT y la integridad del Ledger dentro de CORTEX.
+*   **Estética C5-REAL**: Se mantiene el léxico brutalista ("Apoptosis", "Infección Estructural", "Troyano", "Cero Anergía") como ley física de comunicación, erradicando el "Green Theater" corporativo.
