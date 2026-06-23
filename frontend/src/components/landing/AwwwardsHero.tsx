@@ -50,7 +50,7 @@ export default function AwwwardsHero() {
               Track every decision, prove integrity, and replay failures without relying on logs, screenshots, or human memory.
             </p>
             <div className="action-row" style={{ justifyContent: 'center' }}>
-              <a className="button-primary" href="/api-key" style={{ padding: '1rem 2.5rem', fontSize: '1.1rem', borderRadius: 0, border: '1px solid #2B3BE5', background: 'linear-gradient(135deg, #2B3BE5, #00e5a3)', color: '#050505', fontWeight: 700, letterSpacing: '0.05em', transition: 'all 0.3s ease', boxShadow: '0 0 20px rgba(43, 59, 229, 0.4)' }}>START LOGGING</a>
+              <a className="button-primary" href="/activation" style={{ padding: '1rem 2.5rem', fontSize: '1.1rem', borderRadius: 0, border: '1px solid #2B3BE5', background: 'linear-gradient(135deg, #2B3BE5, #00e5a3)', color: '#050505', fontWeight: 700, letterSpacing: '0.05em', transition: 'all 0.3s ease', boxShadow: '0 0 20px rgba(43, 59, 229, 0.4)' }}>START LOGGING</a>
               <a className="button-secondary" href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noreferrer" style={{ padding: '1rem 2.5rem', fontSize: '1.1rem', borderRadius: 0, border: '1px solid #333', color: '#fff', fontWeight: 600, letterSpacing: '0.05em', background: 'rgba(255,255,255,0.02)', transition: 'all 0.3s ease' }}>
                 VIEW DOCS
               </a>
