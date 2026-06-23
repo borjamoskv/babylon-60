@@ -58,17 +58,6 @@ def apply_patch(state: dict[str, Any], patches: list[dict[str, Any]]) -> dict[st
                 
     return new_state
 
-def reverse_patch(patches: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Reverses a patch sequence (Saga compensation)."""
-    reversed_patches = []
-    for patch in reversed(patches):
-        if patch["op"] == "add":
-            reversed_patches.append({"op": "remove", "path": patch["path"], "old_value": patch["value"]})
-        elif patch["op"] == "remove":
-            reversed_patches.append({"op": "add", "path": patch["path"], "value": patch["old_value"]})
-        elif patch["op"] == "replace":
-            reversed_patches.append({"op": "replace", "path": patch["path"], "value": patch["old_value"], "old_value": patch["value"]})
-    return reversed_patches
 
 class StateDiffEngine:
     @staticmethod

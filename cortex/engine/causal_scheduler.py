@@ -12,7 +12,6 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cortex.engine.rollback_engine import CausalRollbackEngine
     from cortex.ledger.causal_graph import CausalGraph
     from cortex.ledger.execution_trace import ExecutionTraceLedger
 
@@ -25,13 +24,11 @@ class CausalScheduler:
     def __init__(
         self,
         causal_graph: CausalGraph,
-        rollback_engine: CausalRollbackEngine,
         ledger: ExecutionTraceLedger,
         rollback_threshold: float = 100.0,
         permission_kill_threshold: float = 0.05,
     ):
         self.graph = causal_graph
-        self.rollback = rollback_engine
         self.ledger = ledger
 
         # Risk threshold (impact * propagation) > 100 defaults to trigger
@@ -165,26 +162,15 @@ class CausalScheduler:
             )
 
         elif mode == "collapse_prevent":
-            # P0: Macro-rewind for all critical candidates to save the system DAG
-            candidates = tick_state["rollback_candidates"]
-            candidates.sort(key=lambda x: x["risk_score"], reverse=True)
+            # P0: Sistema en colapso. Debido a la erradicación de SAGA,
+            # el macro-rewind ya no existe en la capa aplicativa.
+            # Se delega la atomicidad directamente al MTK / SQLite WAL.
+            logger.critical(
+                "[Causal Scheduler] COLLAPSE PREVENT ACTIVATED. SAGA Erradicado. "
+                "Corte físico forzado en el límite MTK. Dependiendo de WAL isolation."
+            )
+            # Ya no se descuenta costo de rollback pues no hay rollback lógico.
 
-            total_rollback_cost = 0.0
-            for c in candidates:
-                logger.warning(
-                    f"[Causal Scheduler] Macro-Rewind defensivo para {c['id']} "
-                    f"(permission_to_exist={c['permission_to_exist_score']:.3f})"
-                )
-                res = await self.rollback.apply_rollback(c["id"], tenant_id=tenant_id)
-                actions_taken.append({"target": c["id"], "result": res})
-
-                if res.get("status") == "success":
-                    total_rollback_cost += res.get("freed_energy", 0.0)
-
-            # Restar costo de rollback del Entropy Budget
-            if total_rollback_cost > 0:
-                eb = tick_state["eb"]
-                await self._update_entropy_budget(tenant_id, eb - total_rollback_cost)
 
         elif mode == "pressure":
             # Micro-repair / Logging / Allow Ley2Loop to handle it via future bias

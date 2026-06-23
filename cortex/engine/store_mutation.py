@@ -41,25 +41,44 @@ async def deprecate_impl_logic(
         return False
 
     ts = now_iso()
-    await conn.execute(
-        """
-        UPDATE facts
-        SET valid_until = ?, updated_at = ?,
-            metadata = CASE
-                WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata
-                ELSE json_set(COALESCE(metadata, '{}'), '$.deprecation_reason', ?)
-            END
-        WHERE id = ? AND tenant_id = ?
-        """,
-        (ts, ts, reason or "deprecated", fact_id, tenant_id),
+    
+    from datetime import datetime, timezone
+
+    from cortex.engine.mtk_core import MTKGuard
+    from cortex.types.evidence import ClosurePayload, EvidenceBundle
+    
+    evidence = EvidenceBundle.forge(
+        query=f"deprecate_fact_{fact_id}",
+        sources=[],
+        retrieved_at=datetime.now(timezone.utc)
     )
-    await mixin_instance._log_transaction(
-        conn,
-        "system",
-        "deprecate",
-        {"fact_id": fact_id, "reason": reason or "deprecated", "timestamp": ts},
-        tenant_id=tenant_id,
+    payload = ClosurePayload.seal(
+        claims=[{"fact_id": fact_id, "action": "deprecate", "reason": reason}],
+        evidence=evidence,
+        verdict=True
     )
+    mtk_guard = MTKGuard(private_key="C5-REAL-GATE1-PRIVATE-KEY")
+    
+    async with mtk_guard.transaction_boundary(payload) as _token:
+        await conn.execute(
+            """
+            UPDATE facts
+            SET valid_until = ?, updated_at = ?,
+                metadata = CASE
+                    WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata
+                    ELSE json_set(COALESCE(metadata, '{}'), '$.deprecation_reason', ?)
+                END
+            WHERE id = ? AND tenant_id = ?
+            """,
+            (ts, ts, reason or "deprecated", fact_id, tenant_id),
+        )
+        await mixin_instance._log_transaction(
+            conn,
+            "system",
+            "deprecate",
+            {"fact_id": fact_id, "reason": reason or "deprecated", "timestamp": ts},
+            tenant_id=tenant_id,
+        )
 
     # Ω₁₃: Deprecation should degrade descendants just like invalidation.
     graph = AsyncCausalGraph(conn)
@@ -80,29 +99,48 @@ async def invalidate_impl_logic(
         return False
 
     ts = now_iso()
-    await conn.execute(
-        """
-        UPDATE facts
-        SET valid_until = ?, is_tombstoned = 1, confidence = 'C1', updated_at = ?,
-            metadata = CASE
-                WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata
-                ELSE json_set(
-                    COALESCE(metadata, '{}'),
-                    '$.tombstoned_at', ?,
-                    '$.tombstone_reason', ?
-                )
-            END
-        WHERE id = ? AND tenant_id = ?
-        """,
-        (ts, ts, ts, reason or "invalidated", fact_id, tenant_id),
+    
+    from datetime import datetime, timezone
+
+    from cortex.engine.mtk_core import MTKGuard
+    from cortex.types.evidence import ClosurePayload, EvidenceBundle
+    
+    evidence = EvidenceBundle.forge(
+        query=f"invalidate_fact_{fact_id}",
+        sources=[],
+        retrieved_at=datetime.now(timezone.utc)
     )
-    await mixin_instance._log_transaction(
-        conn,
-        "system",
-        "invalidate",
-        {"fact_id": fact_id, "reason": reason or "invalidated", "timestamp": ts},
-        tenant_id=tenant_id,
+    payload = ClosurePayload.seal(
+        claims=[{"fact_id": fact_id, "action": "invalidate", "reason": reason}],
+        evidence=evidence,
+        verdict=True
     )
+    mtk_guard = MTKGuard(private_key="C5-REAL-GATE1-PRIVATE-KEY")
+    
+    async with mtk_guard.transaction_boundary(payload) as _token:
+        await conn.execute(
+            """
+            UPDATE facts
+            SET valid_until = ?, is_tombstoned = 1, confidence = 'C1', updated_at = ?,
+                metadata = CASE
+                    WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata
+                    ELSE json_set(
+                        COALESCE(metadata, '{}'),
+                        '$.tombstoned_at', ?,
+                        '$.tombstone_reason', ?
+                    )
+                END
+            WHERE id = ? AND tenant_id = ?
+            """,
+            (ts, ts, ts, reason or "invalidated", fact_id, tenant_id),
+        )
+        await mixin_instance._log_transaction(
+            conn,
+            "system",
+            "invalidate",
+            {"fact_id": fact_id, "reason": reason or "invalidated", "timestamp": ts},
+            tenant_id=tenant_id,
+        )
 
     # Ω₁₃: Invalidation must cascade taint to descendants.
     graph = AsyncCausalGraph(conn)
@@ -164,43 +202,61 @@ async def purge_logic(
         fact_hash = fact_info[0] if fact_info else None
         store_tx_id = fact_info[1] if fact_info else None
 
-        await mixin_instance._log_transaction(
-            conn,
-            "system",
-            "purge",
-            {
-                "fact_id": fact_id,
-                "force": force,
-                "timestamp": now_iso(),
-                "content_hash": fact_hash,
-                "store_tx_id": store_tx_id,
-            },
-            tenant_id=tenant_id,
-        )
+        from datetime import datetime, timezone
 
-        delete_specs = [
-            ("DELETE FROM fact_tags WHERE fact_id = ? AND tenant_id = ?", (fact_id, tenant_id)),
-            ("DELETE FROM fact_embeddings WHERE fact_id = ?", (fact_id,)),
-            ("DELETE FROM specular_embeddings WHERE fact_id = ?", (fact_id,)),
-            ("DELETE FROM enrichment_jobs WHERE fact_id = ?", (fact_id,)),
-            (
-                "DELETE FROM entity_events WHERE entity_id = ? AND tenant_id = ?",
+        from cortex.engine.mtk_core import MTKGuard
+        from cortex.types.evidence import ClosurePayload, EvidenceBundle
+        
+        evidence = EvidenceBundle.forge(
+            query=f"purge_fact_{fact_id}",
+            sources=[],
+            retrieved_at=datetime.now(timezone.utc)
+        )
+        payload = ClosurePayload.seal(
+            claims=[{"fact_id": fact_id, "action": "purge", "force": force}],
+            evidence=evidence,
+            verdict=True
+        )
+        mtk_guard = MTKGuard(private_key="C5-REAL-GATE1-PRIVATE-KEY")
+        
+        async with mtk_guard.transaction_boundary(payload) as _token:
+            await mixin_instance._log_transaction(
+                conn,
+                "system",
+                "purge",
+                {
+                    "fact_id": fact_id,
+                    "force": force,
+                    "timestamp": now_iso(),
+                    "content_hash": fact_hash,
+                    "store_tx_id": store_tx_id,
+                },
+                tenant_id=tenant_id,
+            )
+
+            delete_specs = [
+                ("DELETE FROM fact_tags WHERE fact_id = ? AND tenant_id = ?", (fact_id, tenant_id)),
+                ("DELETE FROM fact_embeddings WHERE fact_id = ?", (fact_id,)),
+                ("DELETE FROM specular_embeddings WHERE fact_id = ?", (fact_id,)),
+                ("DELETE FROM enrichment_jobs WHERE fact_id = ?", (fact_id,)),
+                (
+                    "DELETE FROM entity_events WHERE entity_id = ? AND tenant_id = ?",
+                    (fact_id, tenant_id),
+                ),
+                (
+                    "DELETE FROM causal_edges WHERE (fact_id = ? OR parent_id = ?) AND tenant_id = ?",
+                    (fact_id, fact_id, tenant_id),
+                ),
+                # FTS cleanup is explicit because facts.content is encrypted in the
+                # primary table and trigger-driven sync is not reliable for writes.
+                ("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,)),
+            ]
+            for statement, params in delete_specs:
+                await _delete_best_effort(conn, statement, params)
+
+            cursor = await conn.execute(
+                "DELETE FROM facts WHERE id = ? AND tenant_id = ?",
                 (fact_id, tenant_id),
-            ),
-            (
-                "DELETE FROM causal_edges WHERE (fact_id = ? OR parent_id = ?) AND tenant_id = ?",
-                (fact_id, fact_id, tenant_id),
-            ),
-            # FTS cleanup is explicit because facts.content is encrypted in the
-            # primary table and trigger-driven sync is not reliable for writes.
-            ("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,)),
-        ]
-        for statement, params in delete_specs:
-            await _delete_best_effort(conn, statement, params)
-
-        cursor = await conn.execute(
-            "DELETE FROM facts WHERE id = ? AND tenant_id = ?",
-            (fact_id, tenant_id),
-        )
-        await conn.commit()
-        return cursor.rowcount > 0
+            )
+            await conn.commit()
+            return cursor.rowcount > 0

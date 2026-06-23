@@ -15,6 +15,8 @@ import logging
 import os
 from typing import Any
 
+from cortex.engine.babylon60 import Babylon60
+
 logger = logging.getLogger(__name__)
 
 class EntropyInjector:
@@ -206,4 +208,81 @@ class EntropyAnnihilator:
             return sinks
 
         return sinks
+
+
+class ThermodynamicContextCompressor:
+    """
+    [C5-REAL] Thermodynamic Context Compressor.
+    Compresses text/prompt context by removing high-entropy (redundant) narrative noise
+    and enforcing constraints to maximize Information Exergy before model ingestion.
+    """
+
+    def __init__(self, target_tokens_limit: int):
+        self.limit = target_tokens_limit
+
+    @staticmethod
+    def calculate_shannon_entropy(text: str) -> float:
+        """Calculates Shannon entropy of the given text sequence (C4-SIM fallback)."""
+        import math
+        if not text:
+            return 0.0
+        entropy = 0.0
+        length = len(text)
+        frequencies = {}
+        for char in text:
+            frequencies[char] = frequencies.get(char, 0) + 1
+        for count in frequencies.values():
+            p = count / length
+            entropy -= p * math.log2(p)
+        return entropy
+
+    @staticmethod
+    def calculate_shannon_entropy_b60(text: str) -> Babylon60:
+        """Calculates Shannon entropy scaled to Babylon-60 units (C5-REAL)."""
+        e = ThermodynamicContextCompressor.calculate_shannon_entropy(text)
+        return Babylon60(e)
+
+    def compress_prompt(self, prompt: str) -> tuple[str, Babylon60]:
+        """
+        Compresses a prompt by stripping Green Theater and structural redundancy.
+        Returns the compressed prompt and the Exergy Retained Multiplier in Base-60.
+        """
+        original_len = len(prompt)
+        if original_len == 0:
+            return "", Babylon60(0.0)
+
+        # Purge conversational fluff (Green Theater / Anergia)
+        conversational_fluff = [
+            "please", "could you", "would you", "thank you", "i think", "maybe",
+            "as an ai", "helpful assistant", "here is the", "hope this helps",
+            "por favor", "gracias", "espero que", "aquí tienes"
+        ]
+
+        lines = prompt.split("\n")
+        filtered_lines = []
+        for line in lines:
+            cleaned = line.lower().strip()
+            if any(fluff in cleaned for fluff in conversational_fluff):
+                # If the line contains fluff but seems to be actual code, keep it
+                if "=" in cleaned or "(" in cleaned or "def " in cleaned or "class " in cleaned:
+                    filtered_lines.append(line)
+                else:
+                    continue
+            else:
+                filtered_lines.append(line)
+
+        compressed = "\n".join(filtered_lines)
+
+        # Collapse consecutive blank lines and spaces
+        import re
+        compressed = re.sub(r"\n\s*\n+", "\n", compressed)
+        compressed = re.sub(r"[ \t]+", " ", compressed)
+        compressed = compressed.strip()
+
+        compressed_len = len(compressed)
+
+        ratio = (compressed_len / original_len) if original_len > 0 else 0.0
+        exergy_retained = Babylon60(ratio)
+
+        return compressed, exergy_retained
 
