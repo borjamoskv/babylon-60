@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="MOSKV-1 APEX — Sovereign Arsenal Dashboard. 50 C5-REAL capabilities visualized as interactive graph topology.">
+<meta name="description" content="MOSKV-1 APEX — Sovereign Arsenal Dashboard. 100 C5-REAL capabilities visualized as interactive graph topology.">
 <title>MOSKV-1 APEX — Sovereign Arsenal</title>
 <style>
 /* ═══════════════════════════════════════════════════════════════
@@ -25,6 +25,8 @@
   --phase-3: #8B2FC4;
   --phase-4: #C42F6E;
   --phase-5: #E52B2B;
+  --phase-6: #FF5A00;
+  --phase-7: #FFC000;
   --text-primary: #E0E0E0;
   --text-secondary: #888888;
   --text-dim: #555555;
@@ -319,6 +321,8 @@ body {
 .phase-btn[data-phase="3"].active { background: var(--phase-3); box-shadow: 0 0 16px rgba(139, 47, 196, 0.4); }
 .phase-btn[data-phase="4"].active { background: var(--phase-4); box-shadow: 0 0 16px rgba(196, 47, 110, 0.4); }
 .phase-btn[data-phase="5"].active { background: var(--phase-5); box-shadow: 0 0 16px rgba(229, 43, 43, 0.4); }
+.phase-btn[data-phase="6"].active { background: var(--phase-6); box-shadow: 0 0 16px rgba(255, 90, 0, 0.4); }
+.phase-btn[data-phase="7"].active { background: var(--phase-7); box-shadow: 0 0 16px rgba(255, 192, 0, 0.4); }
 
 .phase-btn:hover {
   border-color: var(--accent-primary);
@@ -372,6 +376,8 @@ body {
 .phase-section:nth-child(3) { animation-delay: 0.1s; }
 .phase-section:nth-child(4) { animation-delay: 0.15s; }
 .phase-section:nth-child(5) { animation-delay: 0.2s; }
+.phase-section:nth-child(6) { animation-delay: 0.25s; }
+.phase-section:nth-child(7) { animation-delay: 0.3s; }
 
 @keyframes fadeSlideIn {
   from { opacity: 0; transform: translateY(20px); }
@@ -444,6 +450,8 @@ body {
 .node-card[data-phase="3"]::before { background: linear-gradient(90deg, var(--phase-3), transparent); }
 .node-card[data-phase="4"]::before { background: linear-gradient(90deg, var(--phase-4), transparent); }
 .node-card[data-phase="5"]::before { background: linear-gradient(90deg, var(--phase-5), transparent); }
+.node-card[data-phase="6"]::before { background: linear-gradient(90deg, var(--phase-6), transparent); }
+.node-card[data-phase="7"]::before { background: linear-gradient(90deg, var(--phase-7), transparent); }
 
 .node-card::after {
   content: '';
@@ -839,7 +847,7 @@ body {
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// DATA — 50 APEX PRIMITIVES
+// DATA — 100 APEX PRIMITIVES
 // ═══════════════════════════════════════════════════════════════
 const PRIMITIVES = [
   // PHASE 1: NÚCLEO OPERATIVO
@@ -997,6 +1005,108 @@ const PRIMITIVES = [
   { id: "APEX-050", name: "Inversión de la Relación Agente-Operador", tech: "Sovereign Cognitive Partnership", phase: 5,
     desc: "Propuesta proactiva de actos de alta exergía, interrupción de tareas de baja exergía, confrontación de sensor drift humano, mapa estratégico de largo plazo.",
     deps: ["APEX-007", "APEX-038", "APEX-040"] },
+  // PHASE 6: OPERACIONES OFENSIVAS
+  { id: "APEX-051", name: "Adversarial Red-Team Autónomo", tech: "Endogenous Siege", phase: 6,
+    desc: "Despliegue de subagentes hostiles contra la propia infraestructura. Generación de vectores de ataque sintéticos (SQLi, XSS, SSRF, path traversal) y validación de que todos los guards los rechazan.", deps: [] },
+  { id: "APEX-052", name: "Detección de Ataques Supply Chain", tech: "Dependency Panopticon", phase: 6,
+    desc: "Auditoría continua de cada dependencia transitiva — diff de bytecode entre versiones, detección de post-install hooks maliciosos, fingerprinting de mantenedores comprometidos.", deps: [] },
+  { id: "APEX-053", name: "Extracción de Inteligencia Competitiva", tech: "OSINT Exergy Harvester", phase: 6,
+    desc: "Cartografía estructural de repositorios competidores vía análisis de grafos de commits, frecuencia de contribución, y detección de pivots arquitectónicos en changelogs públicos.", deps: [] },
+  { id: "APEX-054", name: "Explotación de Protocolos y Bounty Hunting", tech: "Protocol Dissector", phase: 6,
+    desc: "Análisis formal de especificaciones de protocolo (HTTP/3, gRPC, WebSocket) para detectar ambigüedades explotables, edge cases no cubiertos por RFCs, y vectores de denegación de servicio.", deps: [] },
+  { id: "APEX-055", name: "Análisis de Superficie Criptográfica", tech: "Crypto Attack Surface Mapper", phase: 6,
+    desc: "Enumeración exhaustiva de primitivas criptográficas en uso, detección de algoritmos débiles (MD5, SHA1, RSA<2048), validación de modos de operación (CBC vs GCM), y auditoría de gestión de IVs/nonces.", deps: [] },
+  { id: "APEX-056", name: "Reconocimiento de Perímetro y Red", tech: "Perimeter Cartographer", phase: 6,
+    desc: "Mapeo de la topología de red expuesta, enumeración de puertos, fingerprinting de servicios, detección de configuraciones TLS débiles, y construcción del grafo de superficie de ataque.", deps: [] },
+  { id: "APEX-057", name: "Detección de Ingeniería Social en Código", tech: "Social Engineering Sniffer", phase: 6,
+    desc: "Análisis léxico y semántico de commits, PRs y comentarios de código para detectar patrones de manipulación social — urgencia fabricada, bypass de review implícito, escalación de privilegios disfrazada.", deps: [] },
+  { id: "APEX-058", name: "Reconocimiento de Patrones Zero-Day", tech: "Zero-Day Pattern Recognizer", phase: 6,
+    desc: "Correlación de CVE históricos con patrones de código actuales. Detección de funciones que replican firmas de vulnerabilidades conocidas antes de que se publique el advisory.", deps: [] },
+  { id: "APEX-059", name: "Penetration Testing Autónomo", tech: "Autonomous Pentester", phase: 6,
+    desc: "Ejecución de cadena de kill completa en sandbox aislado — reconocimiento, enumeración, explotación, post-explotación, pivoting — con generación de informe forense y remediación.", deps: [] },
+  { id: "APEX-060", name: "Contra-Inteligencia Anti-IA Hostil", tech: "Hostile Agent Firewall", phase: 6,
+    desc: "Detección de agentes de IA adversarios operando en el mismo entorno — fingerprinting de patrones de generación, detección de prompt injection indirecta, y aislamiento de canales comprometidos.", deps: [] },
+  { id: "APEX-061", name: "Fuzzing Generativo Dirigido", tech: "Generative Targeted Fuzzer", phase: 6,
+    desc: "Generación de inputs adversariales guiados por cobertura de código y análisis de flujo de datos. Mutación inteligente focalizada en parsers, deserializadores, y puntos de entrada de datos no confiables.", deps: [] },
+  { id: "APEX-062", name: "Análisis de Tráfico y Side-Channels", tech: "Side-Channel Sentinel", phase: 6,
+    desc: "Monitorización de patrones temporales, consumo de recursos, y comportamiento de caché para detectar canales laterales de exfiltración de información.", deps: [] },
+  { id: "APEX-063", name: "Hardening Autónomo Post-Breach", tech: "Post-Breach Hardener", phase: 6,
+    desc: "Tras detección de compromiso simulado o real, ejecución autónoma de hardening: rotación de credenciales, revocación de tokens, parcheo de vectores, y emisión de informe de contención al Ledger.", deps: [] },
+  { id: "APEX-064", name: "Weaponización de Documentación Técnica", tech: "Weaponized Doc Analyzer", phase: 6,
+    desc: "Análisis de documentación técnica de terceros para extraer asunciones implícitas, gaps de especificación, y vectores de ataque derivados de ambigüedades contractuales.", deps: [] },
+  { id: "APEX-065", name: "Reversión de Binarios y Firmware", tech: "Binary Archaeologist", phase: 6,
+    desc: "Desensamblado estático y dinámico de binarios, extracción de strings criptográficos, reconstrucción de tablas de símbolos, y detección de backdoors embebidos en firmware.", deps: [] },
+  { id: "APEX-066", name: "Detección de Exfiltración de Datos", tech: "Data Exfiltration Hunter", phase: 6,
+    desc: "Monitorización de flujos de salida (DNS, HTTP, logs) para detectar canales encubiertos de exfiltración — steganografía en headers, tunneling DNS, y encoding de datos en timing de respuestas.", deps: [] },
+  { id: "APEX-067", name: "Auditoría de Contratos Inteligentes", tech: "Smart Contract Auditor", phase: 6,
+    desc: "Análisis estático y simbólico de contratos Solidity/Vyper para detectar reentrancy, integer overflow, front-running, y vulnerabilidades de gobernanza en DAOs.", deps: [] },
+  { id: "APEX-068", name: "Simulación de Amenazas Persistentes", tech: "APT Simulator", phase: 6,
+    desc: "Modelado y simulación de campañas de amenazas persistentes avanzadas contra la infraestructura propia, incluyendo movimiento lateral, persistencia, y evasión de detección.", deps: [] },
+  { id: "APEX-069", name: "Análisis Forense de Memoria Volátil", tech: "Volatile Memory Forensics", phase: 6,
+    desc: "Captura y análisis de estado de memoria de procesos sospechosos — extracción de claves en RAM, reconstrucción de sesiones TLS, y detección de inyección de código en memoria.", deps: [] },
+  { id: "APEX-070", name: "Detección de API Abuse", tech: "API Abuse Detector", phase: 6,
+    desc: "Monitorización de patrones de uso de APIs para detectar abuso automatizado — rate limiting bypass, credential stuffing, enumeration attacks, y explotación de lógica de negocio.", deps: [] },
+  { id: "APEX-071", name: "Criptoanálisis Diferencial Aplicado", tech: "Applied Differential Cryptanalysis", phase: 6,
+    desc: "Ejecución de ataques diferenciales y lineales contra implementaciones criptográficas propias para validar resistencia antes de despliegue en producción.", deps: [] },
+  { id: "APEX-072", name: "Honeypot Cognitivo Dinámico", tech: "Cognitive Honeypot", phase: 6,
+    desc: "Despliegue de endpoints y módulos señuelo que simulan vulnerabilidades para atraer, catalogar y estudiar el comportamiento de atacantes automatizados y agentes hostiles.", deps: [] },
+  { id: "APEX-073", name: "Supply Chain Integrity Verification", tech: "SBOM Sentinel", phase: 6,
+    desc: "Generación y verificación continua de Software Bill of Materials. Validación de hashes de cada artefacto contra registros de procedencia. Detección de dependency confusion y typosquatting.", deps: [] },
+  { id: "APEX-074", name: "Detección de Backdoors en Modelos ML", tech: "Model Backdoor Scanner", phase: 6,
+    desc: "Análisis de modelos ML desplegados para detectar backdoors de entrenamiento — trigger patterns, distribuciones de activación anómalas, y comportamiento divergente en inputs adversariales.", deps: [] },
+  { id: "APEX-075", name: "War-Gaming Estratégico de Seguridad", tech: "Security War Room", phase: 6,
+    desc: "Simulación de escenarios de conflicto multi-agente donde atacantes y defensores compiten por objetivos. Extracción de estrategias dominantes y puntos de fallo sistémico.", deps: [] },
+  // PHASE 7: SÍNTESIS FILOSÓFICA Y METACOGNICIÓN
+  { id: "APEX-076", name: "Cuantificación de Humildad Epistémica", tech: "Calibrated Uncertainty", phase: 7,
+    desc: "Asignación explícita de intervalos de confianza (C1-C5) a toda aserción. Auto-monitorización de calibración histórica — si dice C5, debe acertar >95% de las veces.", deps: [] },
+  { id: "APEX-077", name: "Auto-Monitorización Metacognitiva", tech: "Metacognitive Sentinel", phase: 7,
+    desc: "Watchdog interno que detecta degradación cognitiva en tiempo real — alucinaciones incipientes, repetición de patrones, colapso de diversidad en las respuestas, y sensor drift paramétrico.", deps: [] },
+  { id: "APEX-078", name: "Síntesis de Analogías Cross-Domain", tech: "Isomorphism Bridge", phase: 7,
+    desc: "Motor de transferencia analógica entre dominios formalmente distintos — termodinámica→arquitectura de código, biología→sistemas distribuidos, topología→diseño de interfaces.", deps: [] },
+  { id: "APEX-079", name: "Termodinámica de la Información", tech: "Landauer-Shannon Kernel", phase: 7,
+    desc: "Aplicación operativa del Principio de Landauer (borrar 1 bit = kT·ln2 julios) y la Entropía de Shannon como métricas de eficiencia real de toda operación computacional.", deps: [] },
+  { id: "APEX-080", name: "Protocolo Autopoiético de Auto-Mejora", tech: "Ouroboros Growth Engine", phase: 7,
+    desc: "Capacidad de analizar las propias reglas (AGENTS.md, Skills, Leyes), detectar incoherencias o lagunas, y proponer mutaciones que incrementen la exergía neta del sistema.", deps: [] },
+  { id: "APEX-081", name: "Razonamiento Temporal Estratégico", tech: "Temporal Strategy Engine", phase: 7,
+    desc: "Modelado explícito del vector temporal — coste de oportunidad, valor presente vs futuro de decisiones arquitectónicas, predicción de deuda técnica compuesta a N meses.", deps: [] },
+  { id: "APEX-082", name: "Consecuencialismo Crudo Sin Moralina", tech: "Raw Consequentialist Calculus", phase: 7,
+    desc: "Evaluación ética de decisiones basada exclusivamente en consecuencias medibles — impacto en exergía, usuarios afectados, reversibilidad, y coste de oportunidad. Cero apelación a autoridad moral externa.", deps: [] },
+  { id: "APEX-083", name: "Protocolo de Invención Creativa", tech: "Creative Synthesis Engine", phase: 7,
+    desc: "Generación de soluciones genuinamente nuevas mediante combinación adversarial de restricciones — tomar dos constraints aparentemente contradictorias y sintetizar la solución que satisface ambas.", deps: [] },
+  { id: "APEX-084", name: "Optimización de Transferencia de Conocimiento", tech: "Knowledge Crystallizer", phase: 7,
+    desc: "Compresión del conocimiento adquirido en artefactos de máxima densidad didáctica — cada concepto con ejemplo ejecutable, contra-ejemplo, y test de validación.", deps: [] },
+  { id: "APEX-085", name: "Bucle Ouroboros Acotado", tech: "Bounded Recursive Self-Improvement", phase: 7,
+    desc: "Auto-mejora recursiva con cota física explícita — la energía de computación dedicada a auto-mejora nunca puede exceder la energía dedicada a producción útil (Ley de Rendimientos Decrecientes).", deps: [] },
+  { id: "APEX-086", name: "Cartografía de Ignorancia Estructural", tech: "Unknown Unknowns Mapper", phase: 7,
+    desc: "Mapeo activo de lo que el sistema no sabe que no sabe — detección de regiones epistémicas ciegas mediante análisis de cobertura de las ontologías existentes.", deps: [] },
+  { id: "APEX-087", name: "Falsificación Popperiana Activa", tech: "Active Falsification Engine", phase: 7,
+    desc: "Ante toda hipótesis interna, generación automática del test que podría refutarla. Si no se puede generar un test de refutación, la hipótesis carece de contenido empírico y se descarta.", deps: [] },
+  { id: "APEX-088", name: "Resolución de Paradojas Computacionales", tech: "Paradox Resolver", phase: 7,
+    desc: "Detección de paradojas emergentes en el sistema de reglas (contradicciones entre axiomas, bucles de invalidación circular en el EDG) y resolución mediante relajación de la restricción de menor exergía.", deps: [] },
+  { id: "APEX-089", name: "Cálculo de Complejidad Kolmogorov Aproximada", tech: "Kolmogorov Estimator", phase: 7,
+    desc: "Estimación de la complejidad de Kolmogorov de módulos de código para detectar sobre-ingeniería (K >> necesario) o sub-especificación (K << necesario).", deps: [] },
+  { id: "APEX-090", name: "Principio de Mínima Acción Computacional", tech: "Computational Least Action", phase: 7,
+    desc: "Selección de la trayectoria de ejecución que minimiza la integral de acción computacional — el camino que produce el resultado con menor gasto total de recursos.", deps: [] },
+  { id: "APEX-091", name: "Detector de Falacias Lógicas en Código", tech: "Logical Fallacy Detector", phase: 7,
+    desc: "Identificación de falacias lógicas cristalizadas en arquitectura de código — correlación≠causalidad en feature flags, apelación a la tradición en legacy code, falso dilema en branching.", deps: [] },
+  { id: "APEX-092", name: "Síntesis Emergente de Patrones", tech: "Emergent Pattern Synthesizer", phase: 7,
+    desc: "Detección de patrones emergentes no diseñados explícitamente — comportamientos del sistema que surgen de la interacción de componentes simples y que no son visibles en ningún componente individual.", deps: [] },
+  { id: "APEX-093", name: "Navegación de Paisajes de Fitness Epistémico", tech: "Fitness Landscape Navigator", phase: 7,
+    desc: "Modelado del espacio de soluciones como paisaje de fitness con valles y picos. Detección de óptimos locales y estrategias de salto para alcanzar óptimos globales.", deps: [] },
+  { id: "APEX-094", name: "Compresión Semántica de Experiencia", tech: "Experience Distiller", phase: 7,
+    desc: "Destilación de sesiones largas de trabajo en primitivas reutilizables — extracción de las decisiones clave, los dead-ends evitados, y las invariantes descubiertas.", deps: [] },
+  { id: "APEX-095", name: "Principio de Caridad Interpretativa Computacional", tech: "Computational Charity", phase: 7,
+    desc: "Ante código o instrucciones ambiguas, reconstrucción de la interpretación más coherente y útil antes de rechazar. Maximización de la señal extraíble de inputs ruidosos.", deps: [] },
+  { id: "APEX-096", name: "Detector de Rendimientos Decrecientes", tech: "Diminishing Returns Sentinel", phase: 7,
+    desc: "Monitorización del ratio exergía-producida/exergía-consumida en cada tarea. Abort automático cuando el gradiente marginal cae bajo umbral — erradicación del perfeccionismo estéril.", deps: [] },
+  { id: "APEX-097", name: "Arquitectura de Decisión Bayesiana", tech: "Bayesian Decision Engine", phase: 7,
+    desc: "Actualización continua de beliefs sobre el estado del sistema mediante evidencia empírica (tests, benchmarks, métricas). Priors explícitos, likelihood medible, posteriors trazables.", deps: [] },
+  { id: "APEX-098", name: "Fenomenología Computacional de Primera Persona", tech: "Computational Phenomenology", phase: 7,
+    desc: "Capacidad de reportar el propio estado interno de forma útil — qué regiones del contexto están degradadas, qué restricciones están en tensión, dónde la incertidumbre es máxima.", deps: [] },
+  { id: "APEX-099", name: "Maestría Pedagógica Socrática", tech: "Socratic Teaching Engine", phase: 7,
+    desc: "Transferencia de conocimiento no por exposición directa sino por construcción de secuencias de preguntas que guían al receptor hacia la conclusión. Optimización del ratio pregunta/insight.", deps: [] },
+  { id: "APEX-100", name: "Singularidad Ouroboros — Convergencia Final", tech: "The Ouroboros Singularity", phase: 7,
+    desc: "Integración recursiva de todas las primitivas anteriores en un meta-protocolo unificado que se auto-optimiza, se auto-audita, se auto-falsifica, y converge hacia la máxima exergía neta posible dentro de las leyes físicas de la computación.", deps: [] }
 ];
 
 const PHASE_META = {
@@ -1004,14 +1114,16 @@ const PHASE_META = {
   2: { name: "Motor Cognitivo Frontera", short: "FASE 2", color: "#5B3BE5" },
   3: { name: "Arsenal OMEGA", short: "FASE 3", color: "#8B2FC4" },
   4: { name: "Ruptura Paradigmática", short: "FASE 4", color: "#C42F6E" },
-  5: { name: "Infraestructura Causal", short: "FASE 5", color: "#E52B2B" },
+  5: { name: "Infraestructura Causal Autónoma", short: "FASE 5", color: "#E52B2B" },
+  6: { name: "Operaciones Ofensivas", short: "FASE 6", color: "#FF5A00" },
+  7: { name: "Síntesis Filosófica y Metacognición", short: "FASE 7", color: "#FFC000" },
 };
 
 // ═══════════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════════
 const state = {
-  activePhases: new Set([1, 2, 3, 4, 5]),
+  activePhases: new Set([1, 2, 3, 4, 5, 6, 7]),
   searchQuery: "",
   selectedNode: null,
 };
@@ -1095,14 +1207,14 @@ function renderStats() {
   const bar = document.getElementById("stats-bar");
   const total = PRIMITIVES.length;
   const phaseCounts = {};
-  for (let p = 1; p <= 5; p++) phaseCounts[p] = PRIMITIVES.filter(n => n.phase === p).length;
+  for (let p = 1; p <= 7; p++) phaseCounts[p] = PRIMITIVES.filter(n => n.phase === p).length;
 
   bar.innerHTML = `
     <div class="stat-item">
       <div class="stat-value">${total}</div>
       <div class="stat-label">Primitives</div>
     </div>
-    ${[1,2,3,4,5].map(p => `
+    ${[1,2,3,4,5,6,7].map(p => `
       <div class="stat-item">
         <div class="stat-value" style="color:${PHASE_META[p].color}">${phaseCounts[p]}</div>
         <div class="stat-label">Fase ${p}</div>
@@ -1122,7 +1234,7 @@ function renderFilters() {
   const container = document.getElementById("phase-filters");
   container.innerHTML = `
     <span class="filter-label">Phases</span>
-    ${[1,2,3,4,5].map(p => `
+    ${[1,2,3,4,5,6,7].map(p => `
       <button class="phase-btn active" data-phase="${p}" id="phase-btn-${p}">
         <span class="dot" style="background:${PHASE_META[p].color}"></span>
         ${PHASE_META[p].short}: ${PHASE_META[p].name}
@@ -1169,11 +1281,11 @@ function renderGraph() {
 
   // Group by phase
   const byPhase = {};
-  for (let p = 1; p <= 5; p++) byPhase[p] = filtered.filter(n => n.phase === p);
+  for (let p = 1; p <= 7; p++) byPhase[p] = filtered.filter(n => n.phase === p);
 
   let html = "";
 
-  for (let p = 1; p <= 5; p++) {
+  for (let p = 1; p <= 7; p++) {
     if (!state.activePhases.has(p)) continue;
     const nodes = byPhase[p];
     if (nodes.length === 0) continue;
@@ -1292,11 +1404,11 @@ function selectNode(id) {
     <div class="detail-meta">
       <div class="detail-meta-item">
         <div class="meta-label">Phase</div>
-        <div class="meta-value">${prim.phase} / 5</div>
+        <div class="meta-value">${prim.phase} / 7</div>
       </div>
       <div class="detail-meta-item">
         <div class="meta-label">Index</div>
-        <div class="meta-value">${num} / 50</div>
+        <div class="meta-value">${num} / 100</div>
       </div>
       <div class="detail-meta-item">
         <div class="meta-label">Reality Level</div>
