@@ -22,12 +22,12 @@ def run_cmd(cmd):
 def fetch_external_signals():
     try:
         req = urllib.request.Request(
-            "https://hnrss.org/frontpage?count=5", 
+            "https://feeds.bbci.co.uk/news/world/rss.xml", 
             headers={'User-Agent': 'MOSKV-1/C5-REAL'}
         )
         with urllib.request.urlopen(req, timeout=15) as response:
             tree = ET.fromstring(response.read())
-            return [item.find('title').text for item in tree.findall('./channel/item')]
+            return [item.find('title').text for item in tree.findall('./channel/item')][:5]
     except Exception as e:
         return [f"SIGNAL_LOSS: {str(e)}"]
 

@@ -11,10 +11,10 @@ import logging
 import os
 import sys
 
-from cortex.audit.ledger import EnterpriseAuditLedger
-from cortex.consensus.byzantine import WBFTConsensus
-from cortex.extensions.thinking.fusion_models import ModelResponse
-from cortex.extensions.llm.sovereign import SovereignLLM
+from babylon60.storage.ledger import EnterpriseAuditLedger
+from legacy_research.consensus.byzantine import WBFTConsensus
+from legacy_research.extensions.thinking.fusion_models import ModelResponse
+from legacy_research.extensions.llm.sovereign import SovereignLLM
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("sanedrin")

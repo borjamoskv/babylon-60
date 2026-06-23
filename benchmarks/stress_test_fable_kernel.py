@@ -9,7 +9,7 @@ import time
 # Ensure project root is in python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from cortex.engine.fable_out import CausalMaxwellDemon, causal_distance, hash_distance_rollup
+from babylon60.engine.fable_out import CausalMaxwellDemon, causal_distance, hash_distance_rollup
 
 # Try to import resource for RSS memory tracking on Unix
 try:
