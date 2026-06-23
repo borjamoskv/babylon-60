@@ -1,14 +1,13 @@
-import re
 import logging
+import re
 from dataclasses import dataclass
-from typing import List
 
 logger = logging.getLogger(__name__)
 
 @dataclass
 class PREvaluation:
     social_engineering_score: float  # 0.0 to 1.0 (1.0 = highly manipulated)
-    detected_markers: List[str]
+    detected_markers: list[str]
     urgency_detected: bool
     manipulation_detected: bool
     is_safe: bool

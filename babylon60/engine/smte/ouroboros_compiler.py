@@ -39,7 +39,10 @@ class OuroborosCompiler:
 
         Calculates AST Complexity and Dead Code Ratio to enforce the Ouroboros-Omega L-EPI Guard.
         """
-        from babylon60.engine.smte.analyzer import calculate_ast_complexity, estimate_dead_code_ratio
+        from babylon60.engine.smte.analyzer import (
+            calculate_ast_complexity,
+            estimate_dead_code_ratio,
+        )
 
         complexity = calculate_ast_complexity(source_code)
         dead_code_ratio = estimate_dead_code_ratio(source_code)

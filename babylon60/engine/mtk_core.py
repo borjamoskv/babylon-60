@@ -13,7 +13,11 @@ from contextlib import asynccontextmanager
 
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
-from babylon60.engine.mtk_python import mint_ephemeral_token, set_ephemeral_token, clear_ephemeral_token
+from babylon60.engine.mtk_python import (
+    clear_ephemeral_token,
+    mint_ephemeral_token,
+    set_ephemeral_token,
+)
 from babylon60.types.evidence import ClosurePayload
 
 logger = logging.getLogger(__name__)
@@ -70,6 +74,7 @@ class MTKGuard:
         if _signature:
             try:
                 import base64
+
                 from babylon60.crypto.keys import ZKSwarmIdentity
                 _priv_bytes = self.private_key.encode() if isinstance(self.private_key, str) else self.private_key
                 _pub_b64 = base64.b64encode(

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-import sqlite3
 import json
+import sqlite3
 from pathlib import Path
 
 db_path = Path("/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/moskv1_skills.db")

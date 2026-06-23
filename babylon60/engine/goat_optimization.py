@@ -1,9 +1,8 @@
 import logging
 from collections.abc import Callable
 
-import torch
-import torch.nn.functional as F
 import numpy as np
+import torch
 from scipy.optimize import linprog, minimize
 
 logger = logging.getLogger(__name__)

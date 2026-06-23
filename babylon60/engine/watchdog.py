@@ -1,7 +1,7 @@
-from babylon60.storage.wal import WriteAheadLog
-import os
-import subprocess
 import logging
+import subprocess
+
+from babylon60.storage.wal import WriteAheadLog
 
 logger = logging.getLogger("babylon60.watchdog")
 

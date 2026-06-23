@@ -1,8 +1,7 @@
 import ast
-import os
-import subprocess
 import logging
-from typing import List, Tuple, Dict, Any
+import subprocess
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -46,8 +45,8 @@ class MutationTester:
     def __init__(self, test_cmd: str = "pytest"):
         self.test_cmd = test_cmd
 
-    def mutate_and_test(self, file_path: str, target_lines: List[int]) -> Dict[str, Any]:
-        with open(file_path, "r", encoding="utf-8") as f:
+    def mutate_and_test(self, file_path: str, target_lines: list[int]) -> dict[str, Any]:
+        with open(file_path, encoding="utf-8") as f:
             original_source = f.read()
 
         results = {

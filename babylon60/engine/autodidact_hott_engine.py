@@ -6,9 +6,9 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-from babylon60.storage.ledger import EnterpriseAuditLedger
 from babylon60.engine.mtk_core import MTKGuard
 from babylon60.engine.ultramap import UltramapSubstrate
+from babylon60.storage.ledger import EnterpriseAuditLedger
 from babylon60.types.evidence import ClosurePayload, EvidenceBundle, Source
 
 logger = logging.getLogger("babylon60.autodidact.hott")

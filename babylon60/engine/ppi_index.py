@@ -1,8 +1,8 @@
 import json
-from dataclasses import dataclass
-from typing import Dict, Any, Tuple, List
 import logging
+from dataclasses import dataclass
 from enum import IntEnum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ class PPIIndex:
             PPILevel.ZERO: ["ilusión", "teatro", "simulación", "brochure", "marketing"]
         }
 
-    def evaluate_claim(self, claim_text: str, evidence_payload: Dict[str, Any]) -> PPIScore:
+    def evaluate_claim(self, claim_text: str, evidence_payload: dict[str, Any]) -> PPIScore:
         """
         Evalúa una afirmación y su evidencia adjunta.
         """
@@ -83,7 +83,7 @@ class PPIIndex:
         logger.info(f"PPI Evaluation: {score.total_score:.2f} (R:{score.reality.value} Rk:{score.risk.value} E:{score.evidence.value})")
         return score
         
-    def enforce_reality(self, claim_text: str, evidence_payload: Dict[str, Any], min_score: float = 0.6) -> bool:
+    def enforce_reality(self, claim_text: str, evidence_payload: dict[str, Any], min_score: float = 0.6) -> bool:
         """
         Destruye la ilusión forense: o pasas el threshold de PPI o la afirmación es descartada.
         """
