@@ -25,6 +25,13 @@ async def evaluate_genome(agent: AutopoieticAgent, genome: StrategyGenome) -> fl
 
 def adopt(agent: AutopoieticAgent, new_genome: StrategyGenome) -> None:
     """Replace the current genome with the winning variant."""
+    from babylon60.engine.watchdog import MitosisGatekeeper
+    
+    # [C5-REAL] Intercepción Termodinámica: Bloquear mutación directa en main
+    # Si adoptamos un nuevo genoma que altera la lógica core, el Watchdog
+    # nos forzará a saltar a una rama de mitosis antes de persistir.
+    MitosisGatekeeper.enforce_branching("babylon60/engine/autopoietic_agent.py")
+    
     agent._best_genome = agent._genome.clone()
     agent._genome = new_genome
     agent._genome.lineage.adopted_count += 1
