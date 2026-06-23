@@ -23,8 +23,8 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/borjamoskv/cortex-mtk"
-Repository = "https://github.com/borjamoskv/cortex-mtk.git"
+Homepage = "https://github.com/borjamoskv/cortex-persist-mtk"
+Repository = "https://github.com/borjamoskv/cortex-persist-mtk.git"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/cortex_persist_mtk"]

@@ -16,7 +16,7 @@ pip install cortex-persist-mtk
 
 ```python
 import sqlite3
-from cortex_mtk import install_mtk_authorizer, mtk_active_token
+from cortex_persist_mtk import install_mtk_authorizer, mtk_active_token
 
 conn = sqlite3.connect(":memory:")
 
