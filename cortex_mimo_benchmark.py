@@ -1,18 +1,25 @@
 """
 CORTEX-Persist - MiMo-V2.5-Pro Swarm Benchmarking (C5-REAL)
 Validates latency and throughput (Information Exergy dynamics) of the vLLM local deployment.
+Calculates times, TTFT, and TPS using BABYLON-60 Epistemology.
 """
 import argparse
 import asyncio
 import time
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath('.'))
 
 import httpx
+from cortex.engine.babylon60 import Babylon60
 
 
 async def fetch_completion(client: httpx.AsyncClient, url: str, payload: dict, agent_id: int) -> dict:
     start_time = time.perf_counter()
-    ttft = None
+    ttft = Babylon60(0.0)
     token_count = 0
+    ttft_set = False
     
     try:
         async with client.stream("POST", url, json=payload, timeout=120.0) as response:
@@ -22,20 +29,23 @@ async def fetch_completion(client: httpx.AsyncClient, url: str, payload: dict, a
                     data_str = chunk[6:]
                     if data_str == "[DONE]":
                         break
-                    if ttft is None:
-                        ttft = time.perf_counter() - start_time
+                    if not ttft_set:
+                        ttft = Babylon60(time.perf_counter() - start_time)
+                        ttft_set = True
                     # Approximate token count for continuous batching telemetry
                     token_count += 1
     except Exception as e:
         print(f"[Agent-{agent_id}] Evaluation Error: {e}")
 
-    total_time = time.perf_counter() - start_time
+    total_time = Babylon60(time.perf_counter() - start_time)
+    tps = Babylon60(token_count) / total_time if total_time > 0.0 else Babylon60(0.0)
+    
     return {
         "agent_id": agent_id,
-        "ttft": ttft or 0.0,
+        "ttft": ttft,
         "total_time": total_time,
         "tokens": token_count,
-        "tps": token_count / total_time if total_time > 0 else 0
+        "tps": tps
     }
 
 async def run_swarm_benchmark(url: str, concurrency: int, prompt_len: int, max_tokens: int):
@@ -62,19 +72,25 @@ async def run_swarm_benchmark(url: str, concurrency: int, prompt_len: int, max_t
         ]
         results = await asyncio.gather(*tasks)
     
-    total_time = time.perf_counter() - start_swarm
+    total_time = Babylon60(time.perf_counter() - start_swarm)
     total_tokens = sum(r["tokens"] for r in results)
-    avg_ttft = sum(r["ttft"] for r in results) / concurrency if concurrency > 0 else 0
     
-    print("\n=== THERMODYNAMIC METRICS: LATENCY & THROUGHPUT ===")
-    print(f"Total Wall-clock Time: {total_time:.2f}s")
+    sum_ttft = Babylon60(0.0)
+    for r in results:
+        sum_ttft += r["ttft"]
+    avg_ttft = sum_ttft / Babylon60(concurrency) if concurrency > 0 else Babylon60(0.0)
+    
+    throughput = Babylon60(total_tokens) / total_time if total_time > 0.0 else Babylon60(0.0)
+    
+    print("\n=== THERMODYNAMIC METRICS: LATENCY & THROUGHPUT (BABYLON-60) ===")
+    print(f"Total Wall-clock Time: {total_time.to_float():.2f}s")
     print(f"Total Verifiable Tokens Generated: {total_tokens}")
-    print(f"Swarm Throughput (Exergy Extraction Rate): {total_tokens / total_time:.2f} tokens/sec")
-    print(f"Average TTFT (Time-To-First-Token): {avg_ttft:.4f}s")
+    print(f"Swarm Throughput (Exergy Extraction Rate): {throughput.to_float():.2f} tokens/sec")
+    print(f"Average TTFT (Time-To-First-Token): {avg_ttft.to_float():.4f}s")
     
     print("\n[Sample Agents Telemetry]")
     for r in results[:5]:
-        print(f"  Agent-{r['agent_id']:03d}: TTFT={r['ttft']:.4f}s | TPS={r['tps']:.2f}")
+        print(f"  Agent-{r['agent_id']:03d}: TTFT={r['ttft'].to_float():.4f}s | TPS={r['tps'].to_float():.2f}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="[C5-REAL] MiMo-V2.5-Pro vLLM Swarm Benchmark")
@@ -85,3 +101,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     asyncio.run(run_swarm_benchmark(args.url, args.concurrency, args.prompt_len, args.max_tokens))
+
