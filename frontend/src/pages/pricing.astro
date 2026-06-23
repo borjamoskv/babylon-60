@@ -1,11 +1,11 @@
 ---
-import SiteLayout from '../layouts/SiteLayout.astro';
+import SiteLayout from '../layouts/NoirLayout.astro';
 
 // C5-REAL Edge Personalization
 const country = Astro.request.headers.get('cf-ipcountry') || 'Unknown';
 ---
 
-<SiteLayout
+<NoirLayout
 	title="CORTEX Persist | Planes y Precios"
 	description="Control plane de IA escalable desde el nivel de desarrollador hasta entornos empresariales regulados."
 	canonical="https://cortexpersist.com/pricing"
@@ -314,7 +314,7 @@ proof:
 			</div>
 		</footer>
 	</main>
-</SiteLayout>
+</NoirLayout>
 
 <style>
 /* Responsive grid */

@@ -3,7 +3,7 @@
 // ASTRO PAGE: /taste
 // Fuses Industrial Noir 2026 aesthetics with the complete GOLD ALBUMS ledger.
 
-import SiteLayout from '../layouts/SiteLayout.astro';
+import SiteLayout from '../layouts/NoirLayout.astro';
 import { Music, Search, Disc, Clock, Calendar, ExternalLink, SlidersHorizontal, Youtube } from 'lucide-react';
 import { CortexFriction } from '../lib/CortexFriction';
 
@@ -58,7 +58,7 @@ const maxYear = Math.max(...years);
 const yearsRangeStr = `${minYear} - ${maxYear}`;
 ---
 
-<SiteLayout 
+<NoirLayout 
   title="GOLD ALBUMS · Sovereign Curation Ledger"
   description="The sonic vault and concentration repository for deep work behind Cortex Persist. 151 manually curated blocks."
   canonical="https://cortexpersist.com/taste"
@@ -364,7 +364,7 @@ Mission: Deep Work Focus</code></pre>
     </section>
 
   </main>
-</SiteLayout>
+</NoirLayout>
 
 <style>
   /* Scoped styles for the Gold Albums taste page */

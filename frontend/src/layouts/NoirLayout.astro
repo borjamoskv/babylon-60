@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import CortexShaderCanvas from '../components/CortexShaderCanvas.astro';
 
 interface Props {
   title: string;
@@ -26,6 +27,7 @@ const { title, description = "Sovereign execution kernel and memetic hub." } = A
     <title>{title} | BABYLON-60</title>
   </head>
   <body>
+    <CortexShaderCanvas />
     <div class="site-wrapper">
       <header class="glass-panel site-header">
         <div class="container header-container">

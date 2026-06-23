@@ -1,0 +1,28 @@
+---
+---
+
+<canvas id="causal-graph-canvas"></canvas>
+
+<script>
+  import { CausalGraphEngine } from '../lib/webgl-engine.js';
+
+  // Initialize only on client side
+  if (typeof window !== 'undefined') {
+    const canvas = document.getElementById('causal-graph-canvas');
+    if (canvas) {
+      new CausalGraphEngine(canvas);
+    }
+  }
+</script>
+
+<style>
+  #causal-graph-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    background-color: var(--bg-deep);
+  }
+</style>

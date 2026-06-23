@@ -9,4 +9,9 @@ export default defineConfig({
   integrations: [
     react(),
   ],
+  vite: {
+    optimizeDeps: {
+      exclude: ['@cloudflare/unenv-preset']
+    }
+  }
 });

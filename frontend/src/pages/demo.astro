@@ -1,8 +1,8 @@
 ---
-import SiteLayout from '../layouts/SiteLayout.astro';
+import SiteLayout from '../layouts/NoirLayout.astro';
 ---
 
-<SiteLayout
+<NoirLayout
 	title="CORTEX Persist | Causal Persistence Demo"
 	description="CORTEX-PERSIST DEMO v0. Causal persistence, hash-chain auditing, and recursive origin recovery."
 	canonical="https://cortexpersist.com/demo"
@@ -434,7 +434,7 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 		// Initial load
 		updateAuditorUI(simEvents, simIntegrity, simRestarts, simCorruption);
 	</script>
-</SiteLayout>
+</NoirLayout>
 
 <style is:global>
 	.demo-body {

@@ -1,6 +1,6 @@
 ---
 import IntakeFormScript from '../components/IntakeFormScript.astro';
-import SiteLayout from '../layouts/SiteLayout.astro';
+import SiteLayout from '../layouts/NoirLayout.astro';
 import { SUPPORT_EMAIL } from '../lib/intake';
 
 const subject = 'CORTEX Pilot Scope';
@@ -95,7 +95,7 @@ const faqItems = [
 ];
 ---
 
-<SiteLayout
+<NoirLayout
 	title="Get Pilot Scope | CORTEX Persist"
 	description="Send your workflow, stack, and constraints to scope a CORTEX pilot asynchronously. Free scope, async reply, no call required."
 	canonical="https://cortexpersist.com/pilot-scope"
@@ -400,4 +400,4 @@ const faqItems = [
 	</main>
 
 	<IntakeFormScript requestTitle="CORTEX pilot scope request" lines={intakeLines} />
-</SiteLayout>
+</NoirLayout>

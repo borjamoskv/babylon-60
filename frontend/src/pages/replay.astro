@@ -1,9 +1,9 @@
 ---
-import SiteLayout from '../layouts/SiteLayout.astro';
+import SiteLayout from '../layouts/NoirLayout.astro';
 import { EDGReplayPlayground } from '../components/landing/EDGReplayPlayground';
 ---
 
-<SiteLayout
+<NoirLayout
 	title="CORTEX Persist | EDG Replay & Deterministic Rollback"
 	description="Interactive demonstration of the Epistemic Dependency Graph (EDG) detecting hallucinations, triggering rollbacks, and replaying deterministically."
 	canonical="https://cortexpersist.com/replay"
@@ -43,7 +43,7 @@ import { EDGReplayPlayground } from '../components/landing/EDGReplayPlayground';
 			<EDGReplayPlayground client:only="react" />
 		</main>
 	</div>
-</SiteLayout>
+</NoirLayout>
 
 <style is:global>
 	.replay-demo-body {
