@@ -6,8 +6,8 @@ Enforces taint checks, anomalies tracking, and verification within CORTEX.
 
 from __future__ import annotations
 
-from cortex.engine.causal.anomaly_bridge import AnomalyBridge
-from cortex.engine.causal.taint_engine import (
+from babylon60.engine.causal.anomaly_bridge import AnomalyBridge
+from babylon60.engine.causal.taint_engine import (
     C5NativeSocketIngestor,
     MHCAntigenRouter,
     TaintValidationError,
@@ -16,7 +16,7 @@ from cortex.engine.causal.taint_engine import (
     generate_secure_taint_token,
     verify_taint_token,
 )
-from cortex.engine.causal.verification_oracle import (
+from babylon60.engine.causal.verification_oracle import (
     InvariantViolationError,
     verify_approved_auth_signatures,
     verify_c5_state_machine,

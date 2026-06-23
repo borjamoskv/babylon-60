@@ -1,0 +1,218 @@
+# AUTODIDACT-RESEARCH-Ω: BOUNTY EXERGY PRIMITIVES
+
+**Reality Level:** `C5-REAL` (Epistemic Synthesis)
+**Autor:** Borja Moskv (borjamoskv)
+**Vector:** Bug Bounty / Offensive Security / Web3 & Web2 Extraction
+**Target:** CORTEX-Persist & Ouroboros-∞
+
+---
+
+## 1. Extracción Isomórfica (Desmitificación)
+Mapeo de la ontología ofensiva a la métrica termodinámica del Kernel.
+"Exergía" se define como vulnerabilidades explotables con validación de Payout o severidad crítica demostrada.
+"Anergía" se define como vectores Out-of-Scope (OOS), informativos sin impacto directo o teóricos.
+
+---
+
+## 1.5 Las 10 Primitivas de Máxima Exergía para la Mitigación / Ejecución
+- **BAP-001**: `RCE Deserialización` - [Ejecución]: Ejecución Remota de Código (RCE) vía Deserialización Insegura.
+- **BAP-002**: `RCE WebShell` - [Ejecución]: RCE vía subida de archivos sin validación de extensión.
+- **BAP-003**: `RCE OS Command` - [Ejecución]: Inyección de Comandos OS vía parámetros de red.
+- **BAP-004**: `RCE SSTI` - [Ejecución]: RCE vía Server-Side Template Injection.
+- **BAP-005**: `Supply Chain 0-Day` - [Ejecución]: Explotación de vulnerabilidades Zero-Day en dependencias.
+- **BAP-006**: `LD_PRELOAD` - [Ejecución]: Ejecución de código vía manipulación de variables de entorno.
+- **BAP-007**: `Sandbox Escape` - [Ejecución]: Bypass de sandboxes de ejecución (Node.js vm escape).
+- **BAP-008**: `Pipeline Poisoning` - [Ejecución]: Inyección de código en procesos de compilación CI/CD.
+- **BAP-009**: `Memory Corruption` - [Ejecución]: RCE vía Buffer Overflow o Use-After-Free en binarios.
+- **BAP-010**: `XXE to RCE` - [Ejecución]: Inyección XML External Entity escalada a RCE.
+- **BAP-011**: `YAML RCE` - [Ejecución]: RCE vía manipulación de configuraciones YAML.
+- **BAP-012**: `SQLi xp_cmdshell` - [Ejecución]: Inyección SQL que permite ejecución de comandos.
+- **BAP-013**: `Format String RCE` - [Ejecución]: RCE vía vulnerabilidades de Format String.
+- **BAP-014**: `JNDI Log4Shell` - [Ejecución]: Explotación de JNDI en aplicaciones Java.
+- **BAP-015**: `Local Agent RCE` - [Ejecución]: Ejecución de código en agentes locales (Electron).
+- **BAP-016**: `SSRF to RCE` - [Ejecución]: RCE vía SSRF a servicios internos no autenticados.
+- **BAP-017**: `Wasm Exploit` - [Ejecución]: Ejecución de código vía explotación de WebAssembly.
+- **BAP-018**: `ImageMagick RCE` - [Ejecución]: Inyección de comandos en parsers de imágenes.
+- **BAP-019**: `Cache Deserialization` - [Ejecución]: RCE vía deserialización de objetos en cachés distribuidas.
+- **BAP-020**: `Serverless RCE` - [Ejecución]: Ejecución de código en entornos serverless vía manipulación de eventos.
+- **BAP-021**: `OAuth ATO` - [Autorización]: Account Takeover (ATO) vía filtración de tokens OAuth/OIDC.
+- **BAP-022**: `Host Header ATO` - [Autorización]: ATO vía manipulación del flujo de reseteo de contraseña.
+- **BAP-023**: `IDOR PII` - [Autorización]: Insecure Direct Object Reference mutando IDs para acceso a PII.
+- **BAP-024**: `IDOR Privilege Escalation` - [Autorización]: IDOR escalado a modificación de roles.
+- **BAP-025**: `MFA Bypass` - [Autorización]: Bypass de 2FA/MFA vía reutilización de tokens.
+- **BAP-026**: `JWT Forgery` - [Autorización]: Falsificación de firmas JWT (None/RSA-HMAC).
+- **BAP-027**: `Session Fixation ATO` - [Autorización]: ATO vía vulnerabilidades de Session Fixation.
+- **BAP-028**: `NoSQL Auth Bypass` - [Autorización]: Bypass de autenticación vía inyección NoSQL.
+- **BAP-029**: `Open Redirect ATO` - [Autorización]: Acceso a cuentas ajenas mediante Open Redirect que roba tokens.
+- **BAP-030**: `Mass Assignment PrivEsc` - [Autorización]: Elevación de privilegios editando parámetros en registro.
+- **BAP-031**: `SAML Bypass` - [Autorización]: Bypass de SAML (XML Signature Wrapping).
+- **BAP-032**: `CSWSH ATO` - [Autorización]: ATO vía Cross-Site WebSockets Hijacking.
+- **BAP-033**: `IDOR Billing` - [Autorización]: IDOR en endpoints de facturación/pagos.
+- **BAP-034**: `Memory Dump Passwords` - [Autorización]: Extracción de contraseñas en texto claro de volcados de memoria.
+- **BAP-035**: `CAPTCHA Bypass` - [Autorización]: Bypass de CAPTCHA en flujos críticos de login.
+- **BAP-036**: `Token Race Condition` - [Autorización]: ATO vía explotación de Race Conditions en generación de tokens.
+- **BAP-037**: `Auth Header Injection` - [Autorización]: Inyección de cabeceras de autorización.
+- **BAP-038**: `JWT Claim Manipulation` - [Autorización]: Manipulación de claims en tokens de acceso.
+- **BAP-039**: `Biometric Bypass` - [Autorización]: Bypass de autenticación biométrica simulada.
+- **BAP-040**: `Repo Credential Leak` - [Autorización]: ATO vía filtración de credenciales en repositorios públicos.
+- **BAP-041**: `Blind SQLi` - [Inyección]: Inyección SQL ciega en endpoints autenticados.
+- **BAP-042**: `Error SQLi` - [Inyección]: Inyección SQL basada en errores que expone esquemas.
+- **BAP-043**: `UNION SQLi Dump` - [Inyección]: Extracción de DB vía Inyección SQL basada en UNION.
+- **BAP-044**: `Cart Manipulation` - [Lógica]: Manipulación de precios/montos en carritos de compra.
+- **BAP-045**: `XPath Injection` - [Inyección]: Inyección de XPath que revela datos sensibles.
+- **BAP-046**: `LDAP Injection` - [Inyección]: Inyección de LDAP que permite bypass de login.
+- **BAP-047**: `Web3 Dest Address Mod` - [Lógica]: Desvío de fondos alterando direcciones en Web3.
+- **BAP-048**: `Double Spending` - [Lógica]: Race Condition en funciones de retiro de saldo.
+- **BAP-049**: `DeFi Exchange Rate Mod` - [Lógica]: Manipulación de tasas de cambio en plataformas DeFi.
+- **BAP-050**: `Smart Contract Reentrancy` - [Lógica]: Reentrancy en Ethereum/Solidity.
+- **BAP-051**: `Integer Overflow` - [Lógica]: Integer Overflow/Underflow crítico en lógica financiera.
+- **BAP-052**: `Discount Limit Bypass` - [Lógica]: Bypass de límites de descuento.
+- **BAP-053**: `Payment Forgery` - [Lógica]: Falsificación de pagos mediante callbacks.
+- **BAP-054**: `NoSQL Dump` - [Inyección]: Inyección NoSQL (MongoDB) que extrae colecciones enteras.
+- **BAP-055**: `State Machine Bypass` - [Lógica]: Omisión de validaciones de estado en máquinas de negocio.
+- **BAP-056**: `Flash Loan Oracle Manip` - [Lógica]: Flash Loan Attacks explotando oráculos débiles.
+- **BAP-057**: `GraphQL Introspection` - [Lógica]: Inyección de comandos GraphQL.
+- **BAP-058**: `Crypto Signature Bypass` - [Lógica]: Omisión de verificaciones de firmas criptográficas.
+- **BAP-059**: `Smart Contract Logic` - [Lógica]: Explotación de lógica de contratos inteligentes (selfdestruct).
+- **BAP-060**: `Timestamp Manipulation` - [Lógica]: Manipulación de timestamps para desbloquear fondos.
+- **BAP-061**: `AWS Metadata SSRF` - [SSRF]: SSRF a endpoints de AWS (169.254.169.254).
+- **BAP-062**: `Intranet Port Discovery` - [SSRF]: SSRF para descubrimiento de puertos internos.
+- **BAP-063**: `Internal SSRF RCE` - [SSRF]: SSRF escalado a RCE en servicios internos.
+- **BAP-064**: `Subdomain Takeover` - [Infraestructura]: Takeover de subdominios con impacto comprobable.
+- **BAP-065**: `Git Credential Leak` - [Infraestructura]: Exposición de secretos en /.git/ con credenciales activas.
+- **BAP-066**: `API Token Leak` - [Infraestructura]: Fuga de tokens críticos (Stripe, AWS) en código de cliente.
+- **BAP-067**: `S3 Write Compromise` - [Infraestructura]: Compromiso de buckets S3 públicos con permisos de escritura.
+- **BAP-068**: `Env Public Exploit` - [Infraestructura]: Explotación de credenciales expuestas en archivos .env públicos.
+- **BAP-069**: `PDF SSRF EC2 Takeover` - [SSRF]: Toma de control de instancias EC2 vía SSRF en parsers PDF.
+- **BAP-070**: `DB Unauth Exposure` - [Infraestructura]: Exposición de base de datos no autenticadas con PII.
+- **BAP-071**: `IAM Role Theft` - [Infraestructura]: Escalada de privilegios en IAM vía robo de roles.
+- **BAP-072**: `CI/CD Unauth Access` - [Infraestructura]: Acceso no autorizado a dashboards de Jenkins/GitLab.
+- **BAP-073**: `Docker Misconfig RCE` - [Infraestructura]: Ejecución de comandos en Docker mal configurados.
+- **BAP-074**: `Container Breakout` - [Infraestructura]: Escape de contenedor a Kubernetes (Kubelet API).
+- **BAP-075**: `Vault Weak Config` - [Infraestructura]: Robo de secretos en HashiCorp Vault por configuraciones débiles.
+- **BAP-076**: `Kafka/Rabbit Unauth` - [Infraestructura]: Exposición de paneles administrativos de Kafka/RabbitMQ.
+- **BAP-077**: `HTTP Request Smuggling` - [Infraestructura]: Explotación de vulnerabilidades de desincronización HTTP.
+- **BAP-078**: `Web Cache Poisoning` - [Infraestructura]: Envenenamiento de caché web para distribuir payloads.
+- **BAP-079**: `Spring Actuator Exploit` - [Infraestructura]: Exposición de endpoints de Actuator de Spring Boot.
+- **BAP-080**: `Third-party Domain Takeover` - [Infraestructura]: Takeover de dominios en servicios de terceros (Heroku).
+- **BAP-081**: `Blind XSS Admin` - [XSS]: Stored XSS en flujos que afectan a administradores.
+- **BAP-082**: `DOM XSS Cookie Leak` - [XSS]: DOM XSS que permite exfiltración de tokens de sesión.
+- **BAP-083**: `Reflected XSS Admin` - [XSS]: Reflected XSS para realizar acciones como administrador.
+- **BAP-084**: `CSRF Account Hijack` - [CSRF]: CSRF para cambio de correo o contraseña.
+- **BAP-085**: `CSRF Fund Transfer` - [CSRF]: CSRF para transferencia de fondos en plataformas de pago.
+- **BAP-086**: `Mobile WebView XSS` - [XSS]: Ejecución de scripts en apps móviles vía WebViews mal configurados.
+- **BAP-087**: `Electron XSS RCE` - [XSS]: XSS a RCE en clientes de escritorio (Electron).
+- **BAP-088**: `Universal XSS UXSS` - [XSS]: UXSS en navegadores embebidos o plataformas móviles.
+- **BAP-089**: `Server-Side PDF XSS` - [XSS]: Generación de PDFs maliciosos que ejecutan JS en el servidor.
+- **BAP-090**: `CSV Macro Injection` - [XSS]: Inyección de fórmulas CSV que resulta en RCE de cliente.
+- **BAP-091**: `CORS Account Hijack` - [XSS]: Secuestro de cuentas vía vulnerabilidades de CORS.
+- **BAP-092**: `postMessage Exploit` - [XSS]: Explotación de vulnerabilidades postMessage para robo de datos.
+- **BAP-093**: `JS Dependency Injection` - [XSS]: Inyección de dependencias JavaScript (Angular).
+- **BAP-094**: `High-Trust XSS` - [XSS]: XSS en entornos de alta confianza (paneles financieros).
+- **BAP-095**: `DOM Filter Bypass` - [XSS]: Manipulación del DOM para evadir filtros de pago.
+- **BAP-096**: `Custom Protocol Exploit` - [XSS]: Explotación de protocolos personalizados en apps móviles.
+- **BAP-097**: `Extension API PII Leak` - [XSS]: Extracción de PII vía API de extensiones comprometidas.
+- **BAP-098**: `WebRTC IP Leak` - [XSS]: Manipulación de WebRTC para filtración de IP interna.
+- **BAP-099**: `Global Metadata XSS` - [XSS]: XSS en nombres de archivos o metadatos reflejados globalmente.
+- **BAP-100**: `Absolute CSP Bypass` - [XSS]: Bypass absoluto de CSP que habilita explotación de XSS.
+
+- **ANERG-001**: `Missing DMARC/SPF` - [Informativo]: Falta de registros DNS DMARC, SPF, o DKIM.
+- **ANERG-002**: `Missing HSTS` - [Informativo]: Ausencia de la cabecera HTTP Strict-Transport-Security.
+- **ANERG-003**: `Missing X-Frame-Options` - [Informativo]: Falta de cabecera X-Frame-Options (Clickjacking sin impacto).
+- **ANERG-004**: `Missing X-XSS-Protection` - [Informativo]: Ausencia de cabecera X-XSS-Protection.
+- **ANERG-005**: `Missing MIME Sniffing` - [Informativo]: Ausencia de cabecera X-Content-Type-Options.
+- **ANERG-006**: `Weak CSP` - [Informativo]: CSP ausente o demasiado permisiva sin prueba de XSS.
+- **ANERG-007**: `Missing Cookie Flags` - [Informativo]: Falta de atributos Secure o HttpOnly en cookies no de sesión.
+- **ANERG-008**: `Banner Grabbing` - [Informativo]: Divulgación de versiones de software.
+- **ANERG-009**: `Weak TLS` - [Informativo]: Uso de protocolos TLS obsoletos o cifrados débiles.
+- **ANERG-010**: `SSL Certificate Errors` - [Informativo]: Fallos en el certificado SSL/TLS.
+- **ANERG-011**: `Exposed Ping Endpoint` - [Informativo]: Endpoints de ping que no exponen información crítica.
+- **ANERG-012**: `Permissive CORS No Auth` - [Informativo]: Configuración permisiva de CORS sin impacto.
+- **ANERG-013**: `Public Robots/Sitemap` - [Informativo]: Archivos robots.txt exponiendo rutas públicas.
+- **ANERG-014**: `EXIF Metadata` - [Informativo]: Exposición de metadatos de imágenes sin geolocalización sensible.
+- **ANERG-015**: `Missing BREACH/CRIME Mitigation` - [Informativo]: Falta de mitigación teórica para BREACH/CRIME.
+- **ANERG-016**: `Stack Trace Disclosure` - [Informativo]: Revelación de stack traces sin datos secundarios críticos.
+- **ANERG-017**: `Path Disclosure` - [Informativo]: Divulgación de rutas del sistema de archivos.
+- **ANERG-018**: `GET instead of POST` - [Informativo]: Uso de GET para peticiones POST sin CSRF comprobado.
+- **ANERG-019**: `Weak Password Policy` - [Informativo]: Políticas de contraseñas débiles.
+- **ANERG-020**: `Public OpenAPI/Swagger` - [Informativo]: Exposición de OpenAPI sin acceso no autorizado a datos.
+- **ANERG-021**: `Self-XSS` - [Teórico]: Requiere que la víctima pegue el payload.
+- **ANERG-022**: `HTML Injection` - [Teórico]: Text Injection puro sin capacidad de ejecutar JavaScript.
+- **ANERG-023**: `Logout CSRF` - [Teórico]: CSRF en formularios de Cerrar sesión.
+- **ANERG-024**: `Harmless Open Redirect` - [Teórico]: Open Redirect sin robo de tokens (phishing simple).
+- **ANERG-025**: `Homograph Attacks` - [Teórico]: Uso de caracteres similares en dominios.
+- **ANERG-026**: `Tabnabbing` - [Teórico]: Enlaces con target=_blank sin rel=noopener noreferrer.
+- **ANERG-027**: `Layer 7 DoS OOS` - [OOS]: Denegación de servicio a nivel de aplicación excluida.
+- **ANERG-028**: `Minor DoS` - [OOS]: DoS con agotamiento de recursos a pequeña escala no demostrable.
+- **ANERG-029**: `Missing Rate Limit Public` - [OOS]: Rate Limiting ausente en endpoints públicos.
+- **ANERG-030**: `Email Enum Login` - [Teórico]: Enumeración de correos vía formulario de login.
+- **ANERG-031**: `Email Enum Password Reset` - [Teórico]: Enumeración de correos vía formulario de recuperación.
+- **ANERG-032**: `Brute Force No PoC` - [Teórico]: Ataques de fuerza bruta sin vector demostrable.
+- **ANERG-033**: `XSS Unsupported Browser` - [OOS]: XSS en navegadores obsoletos.
+- **ANERG-034**: `CSV Injection Client App` - [OOS]: Inyección CSV cuando el riesgo recae en el cliente y está excluido.
+- **ANERG-035**: `Local DOM Manip` - [Teórico]: Manipulación de datos visuales en cliente sin impacto backend.
+- **ANERG-036**: `Known Plugin Vuln Covered` - [OOS]: Vulnerabilidad de terceros ya cubierta por el vendor.
+- **ANERG-037**: `Missing FLAG_SECURE` - [OOS]: Captura de pantalla habilitada en Android/iOS.
+- **ANERG-038**: `Missing Obfuscation` - [OOS]: Ausencia de ofuscación de código móvil.
+- **ANERG-039**: `Missing Certificate Pinning` - [OOS]: Certificados Pinning ausentes.
+- **ANERG-040**: `Client Request Reject` - [Teórico]: Modificación de peticiones cliente rechazadas por servidor.
+- **ANERG-041**: `Grammar Errors` - [OOS]: Errores gramaticales u ortográficos.
+- **ANERG-042**: `UX/UI Issues` - [OOS]: Problemas de diseño o UX.
+- **ANERG-043**: `Emoji Display Fail` - [OOS]: Fallos en renderización de caracteres especiales.
+- **ANERG-044**: `Physical Access Attack` - [OOS]: Acciones que requieren acceso físico al dispositivo.
+- **ANERG-045**: `Jailbroken Device Required` - [OOS]: Ataques que exigen dispositivo rooteado/jailbroken.
+- **ANERG-046**: `Mass Social Engineering` - [OOS]: Requiere ingeniería social inusual.
+- **ANERG-047**: `Third-party Data Leak` - [OOS]: Fugas en servicios de terceros no controlados.
+- **ANERG-048**: `Theoretical Vuln No PoC` - [Teórico]: Vulnerabilidad hipotética sin PoC.
+- **ANERG-049**: `Raw Scanner Output` - [OOS]: Reportes automatizados sin triaje manual.
+- **ANERG-050**: `Obsolete Version Patched` - [OOS]: Basado en software obsoleto ya parcheado internamente.
+- **ANERG-051**: `Sandbox Only Vuln` - [OOS]: Afecta únicamente a cuentas Sandbox sin conexión a prod.
+- **ANERG-052**: `Voluntary Session Handover` - [OOS]: Secuestro tras entrega voluntaria de sesión.
+- **ANERG-053**: `Third-party Password Dump` - [OOS]: Uso de credenciales de dumps de bases de datos de terceros.
+- **ANERG-054**: `Temporal Sync Issues` - [OOS]: Problemas resueltos al recargar la página.
+- **ANERG-055**: `Duplicate Report` - [OOS]: Reporte duplicado.
+- **ANERG-056**: `Mass Account Spam` - [OOS]: Creación de cuentas masivas no mitigada.
+- **ANERG-057**: `Local Network MITM` - [OOS]: Requiere comprometer red local (MITM).
+- **ANERG-058**: `Harmless Hardcoded Keys` - [OOS]: Credenciales hardcodeadas sin acceso útil.
+- **ANERG-059**: `Public UUID IDOR` - [OOS]: Exposición de UUIDs de lectura para datos públicos.
+- **ANERG-060**: `Counter Manipulation` - [OOS]: Manipulación de contadores (likes) sin impacto.
+- **ANERG-061**: `By Design Feature` - [OOS]: Funciones que operan como fueron diseñadas.
+- **ANERG-062**: `Profanity Filter Bypass` - [OOS]: Bypass de filtros de palabras malsonantes.
+- **ANERG-063**: `Cart Quantity Limit Bypass` - [OOS]: Evadir límite de cantidad de carrito sin impacto de precio.
+- **ANERG-064**: `404 Broken Links` - [OOS]: Enlaces rotos o contenido ausente.
+- **ANERG-065**: `Reflected File Download` - [Teórico]: Inyección estática sin vector de ejecución directa.
+- **ANERG-066**: `X-Forwarded-For Spoofing` - [OOS]: Falsificación de IP en cabeceras sin impacto.
+- **ANERG-067**: `Harmless File Upload` - [OOS]: Evasión de extensión de carga sin impacto (subir MP4 en vez de JPG).
+- **ANERG-068**: `Intentional Credential Email` - [OOS]: Exposición temporal de credencial en correo diseñada así.
+- **ANERG-069**: `Concurrent Sessions Allowed` - [OOS]: Sesiones concurrentes múltiples permitidas.
+- **ANERG-070**: `Missing Suspicious Activity Notif` - [OOS]: Ausencia de notificaciones de actividad sospechosa al correo.
+- **ANERG-071**: `No Session Invalid On Change` - [OOS]: No invalidación de sesión al cambiar datos si la política lo permite.
+- **ANERG-072**: `Shared Browser Cache` - [OOS]: Cacheo de contenido en navegadores compartidos.
+- **ANERG-073**: `Safe Sandbox Execution` - [OOS]: Ejecución de scripts en entornos seguros intencionales.
+- **ANERG-074**: `Inconclusive Timing Attack` - [Teórico]: Errores de análisis temporal sin información para explotación.
+- **ANERG-075**: `Browser Quirks` - [OOS]: Comportamientos extraños del navegador sin mediación de plataforma.
+- **ANERG-076**: `Plugin Incompatibility` - [OOS]: Incompatibilidad con AdBlockers o NoScript.
+- **ANERG-077**: `External DNS Issues` - [OOS]: Problemas de DNS fuera del alcance de la empresa.
+- **ANERG-078**: `401 Test Endpoints` - [OOS]: Rutas de test expuestas devolviendo 401.
+- **ANERG-079**: `Long Token Expiration` - [OOS]: Expiración prolongada de tokens (por diseño).
+- **ANERG-080**: `Empty Directory Listing` - [OOS]: Directory Listing en carpetas sin archivos confidenciales.
+- **ANERG-081**: `Blind SSRF Pingback Only` - [OOS]: SSRF ciego que solo permite pingback sin impacto.
+- **ANERG-082**: `Extreme Assumption Vuln` - [Teórico]: Vulnerabilidad que requiere supuestos extremos.
+- **ANERG-083**: `Harmless Google Dork` - [OOS]: Dorking que revela info no sensible.
+- **ANERG-084**: `Unreachable Internal IP Exposure` - [OOS]: Falta de ofuscación de IP interna inalcanzable.
+- **ANERG-085**: `Slow Response Time` - [OOS]: Tiempos de respuesta lentos (rendimiento).
+- **ANERG-086**: `Visible package.json No CVE` - [OOS]: package.json visible sin vulnerabilidades conocidas.
+- **ANERG-087**: `EOL OS Behavior` - [OOS]: Comportamiento anómalo en sistemas obsoletos.
+- **ANERG-088**: `Shoulder Surfing` - [OOS]: Amenazas físicas de "mirar por encima del hombro".
+- **ANERG-089**: `Discontinued Portal OOS` - [OOS]: Acceso a portales descontinuados fuera de scope.
+- **ANERG-090**: `Office Macro Injection` - [OOS]: Inyección de macro reportada a web app no responsable.
+- **ANERG-091**: `Zip Bomb Excluded` - [OOS]: Bomba de descompresión sin DoS o explícitamente excluida.
+- **ANERG-092**: `Harmless CC Validation` - [OOS]: Errores locales de validación de CC rechazados por backend.
+- **ANERG-093**: `Missing security.txt` - [OOS]: Inexistencia del archivo security.txt.
+- **ANERG-094**: `Referer Manipulation` - [OOS]: Manipulación de Referer sin impacto.
+- **ANERG-095**: `Analytics Manipulation` - [OOS]: Errores en encuestas de satisfacción.
+- **ANERG-096**: `Visual Theme Bypass` - [OOS]: Bypass de Dark/Light mode.
+- **ANERG-097**: `Max Length Truncation` - [OOS]: Truncamiento inofensivo por validación de longitud.
+- **ANERG-098**: `ISP Level DoS` - [OOS]: DoS a nivel de operador/ISP.
+- **ANERG-099**: `Self-Hack Local DB` - [OOS]: Acceso no autorizado a DB local en dispositivo propio.
+- **ANERG-100**: `Zero Impact C5-REAL Required` - [Teórico]: Vulnerabilidad sin impacto cuyo PoC requeriría acceso C5-REAL al source.
