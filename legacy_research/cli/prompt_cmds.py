@@ -224,7 +224,10 @@ def prompt_generate(variant: str, out: str | None) -> None:
         text = _generate_live_prompt(project_root)
     else:
         # short/medium don't embed stats yet - but show accurate pattern count
-        from babylon60.extensions.agents.system_prompt import SYSTEM_PROMPT_MEDIUM, SYSTEM_PROMPT_SHORT
+        from babylon60.extensions.agents.system_prompt import (
+            SYSTEM_PROMPT_MEDIUM,
+            SYSTEM_PROMPT_SHORT,
+        )
 
         patterns = _count_secret_patterns()
         base = SYSTEM_PROMPT_SHORT if variant == "short" else SYSTEM_PROMPT_MEDIUM

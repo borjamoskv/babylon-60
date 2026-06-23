@@ -9,7 +9,11 @@ from __future__ import annotations
 
 import click
 
-from babylon60.cli.common import DEFAULT_DB, cli, console  # type: ignore[reportAttributeAccessIssue]
+from babylon60.cli.common import (  # type: ignore[reportAttributeAccessIssue]
+    DEFAULT_DB,
+    cli,
+    console,
+)
 from babylon60.cli.health_dashboard import dashboard
 
 

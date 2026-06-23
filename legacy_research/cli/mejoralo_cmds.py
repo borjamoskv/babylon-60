@@ -342,7 +342,9 @@ def mejoralo_awwwards_fix(project, path, db):
 @mejoralo.command("daemon")
 def mejoralo_daemon():
     """♾️  Ouroboros - Inicia el bucle infinito de mejora soberana."""
-    from babylon60.extensions.mejoralo.daemon import main  # type: ignore[reportAttributeAccessIssue]
+    from babylon60.extensions.mejoralo.daemon import (
+        main,  # type: ignore[reportAttributeAccessIssue]
+    )
 
     main()
 

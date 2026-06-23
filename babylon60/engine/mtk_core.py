@@ -42,6 +42,9 @@ class MTKGuard:
         # Enforce C5-REAL execution in Python
         self.ast_projector = ASTProjectorPython()
         self.cognitive_state = CognitiveStatePython(1000)
+        
+        from babylon60.policies.mythos_guard import MythosInvariantGuard
+        self.mythos_guard = MythosInvariantGuard()
             
     def validate_c5_ast(self, source_code: str) -> str:
         """Invokes the AST Projector to validate C5-REAL constraints."""
@@ -68,6 +71,14 @@ class MTKGuard:
             raise ValueError("MTK-REJECT: Missing evidence or claims in payload. Causal continuity broken.")
         if not payload.verdict:
             raise ValueError("MTK-REJECT: Payload verdict is negative. Causal DAG evaluation failed.")
+            
+        # 1.1.5 Invariante Epistémico (Anti-Metamodeling)
+        try:
+            self.mythos_guard.evaluate_payload(payload.claims)
+        except PermissionError as e:
+            # Silent Drop / Hard Reject
+            logger.critical(str(e))
+            raise ValueError(f"MTK-REJECT: {str(e)}")
             
         # 1.2 Invariante Criptográfico (I_crypto)
         _signature = getattr(payload, "signature", None)

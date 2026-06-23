@@ -8,7 +8,7 @@ import logging
 import os
 import sys
 
-from cortex.engine.forensic_commander import ForensicCommander
+from babylon60.engine.forensic_commander import ForensicCommander
 
 logger = logging.getLogger("immunefi_radar")
 logging.basicConfig(
