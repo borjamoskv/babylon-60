@@ -45,7 +45,7 @@ jobs:
 
       - name: Attach results to GitHub Release
         if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: benchmark_results.txt
           body: |
