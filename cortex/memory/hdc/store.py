@@ -51,6 +51,7 @@ class HDCVectorStoreL2:
         "_item_memory",
         "_lock",
         "_ready",
+        "_vec_loaded",
     )
 
     def __init__(
@@ -68,6 +69,7 @@ class HDCVectorStoreL2:
         self._lock = asyncio.Lock()
         self._ready = False
         self._half_life = half_life_days * 24 * 3600
+        self._vec_loaded = False
 
     def _get_conn(self) -> sqlite3.Connection:
         if self._conn is None:
@@ -82,8 +84,20 @@ class HDCVectorStoreL2:
             )
             # runtime-policy: wait up to 5s for WAL write-lock contention (Axiom Ω6)
             self._conn.execute("PRAGMA busy_timeout=5000")
-            self._conn.enable_load_extension(True)
-            sqlite_vec.load(self._conn)
+
+            try:
+                self._conn.enable_load_extension(True)
+                sqlite_vec.load(self._conn)
+                self._vec_loaded = True
+                logger.info("✅ [VECTORS] sqlite-vec extension loaded successfully in HDC store.")
+            except (AttributeError, OSError, sqlite3.Error) as e:
+                logger.warning(
+                    "⚠️ [VECTORS] Fallback Mode ACTIVE in HDC store: Could not load sqlite-vec: %s. "
+                    "Semantic search will use pure-Python fallback.",
+                    e,
+                )
+                self._vec_loaded = False
+
             self._conn.row_factory = sqlite3.Row
 
             # Register Sovereign Functions
@@ -108,18 +122,33 @@ class HDCVectorStoreL2:
 
             # Vector Table (sqlite-vec uses float[N])
             dim = self._encoder.dimension
-            self._conn.execute(f"""
-                CREATE VIRTUAL TABLE IF NOT EXISTS hdc_vec_facts USING vec0(
-                    embedding float[{dim}]
-                )
-            """)
+            if self._vec_loaded:
+                self._conn.execute(f"""
+                    CREATE VIRTUAL TABLE IF NOT EXISTS hdc_vec_facts USING vec0(
+                        embedding float[{dim}]
+                    )
+                """)
 
-            # Specular Vector Table (G10 Intent Alignment)
-            self._conn.execute(f"""
-                CREATE VIRTUAL TABLE IF NOT EXISTS hdc_specular_vec_facts USING vec0(
-                    embedding float[{dim}]
-                )
-            """)
+                # Specular Vector Table (G10 Intent Alignment)
+                self._conn.execute(f"""
+                    CREATE VIRTUAL TABLE IF NOT EXISTS hdc_specular_vec_facts USING vec0(
+                        embedding float[{dim}]
+                    )
+                """)
+            else:
+                self._conn.execute("""
+                    CREATE TABLE IF NOT EXISTS hdc_vec_facts (
+                        rowid INTEGER PRIMARY KEY,
+                        embedding BLOB
+                    )
+                """)
+
+                self._conn.execute("""
+                    CREATE TABLE IF NOT EXISTS hdc_specular_vec_facts (
+                        rowid INTEGER PRIMARY KEY,
+                        embedding BLOB
+                    )
+                """)
 
             # Indexes
             self._conn.execute(
@@ -227,24 +256,65 @@ class HDCVectorStoreL2:
         toxic_hvs = self._fetch_toxic_hvs(conn, inhibit_ids)
 
         cursor = conn.cursor()
-        cursor.execute(
-            """
-            SELECT
-                m.rowid, m.id, m.tenant_id, m.project_id, m.content, m.timestamp,
-                m.is_diamond, m.is_bridge, m.confidence, m.success_rate, m.metadata, m.fact_type,
-                ((1.0 - vec_distance_cosine(v.embedding, ?) / 2.0) *
-                 cortex_decay(m.is_diamond, m.timestamp, ?, ?) *
-                 m.success_rate) as final_score
-            FROM hdc_facts_meta m
-            JOIN hdc_vec_facts v ON m.rowid = v.rowid
-            WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
-            ORDER BY final_score DESC
-            LIMIT ?
-            """,
-            (embedding_bytes, now, self._half_life, tenant_id, project_id, limit * 2),
-        )
 
-        rows = cursor.fetchall()
+        if self._vec_loaded:
+            cursor.execute(
+                """
+                SELECT
+                    m.rowid, m.id, m.tenant_id, m.project_id, m.content, m.timestamp,
+                    m.is_diamond, m.is_bridge, m.confidence, m.success_rate, m.metadata, m.fact_type,
+                    ((1.0 - vec_distance_cosine(v.embedding, ?) / 2.0) *
+                     cortex_decay(m.is_diamond, m.timestamp, ?, ?) *
+                     m.success_rate) as final_score
+                FROM hdc_facts_meta m
+                JOIN hdc_vec_facts v ON m.rowid = v.rowid
+                WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
+                ORDER BY final_score DESC
+                LIMIT ?
+                """,
+                (embedding_bytes, now, self._half_life, tenant_id, project_id, limit * 2),
+            )
+            rows = cursor.fetchall()
+        else:
+            cursor.execute(
+                """
+                SELECT
+                    m.rowid, m.id, m.tenant_id, m.project_id, m.content, m.timestamp,
+                    m.is_diamond, m.is_bridge, m.confidence, m.success_rate, m.metadata, m.fact_type,
+                    cortex_decay(m.is_diamond, m.timestamp, ?, ?) as decay,
+                    v.embedding as v_embedding
+                FROM hdc_facts_meta m
+                JOIN hdc_vec_facts v ON m.rowid = v.rowid
+                WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
+                """,
+                (now, self._half_life, tenant_id, project_id),
+            )
+
+            from numpy.linalg import norm
+
+            query_arr = np.frombuffer(embedding_bytes, dtype=np.float32)
+            query_norm = norm(query_arr)
+
+            scored_rows = []
+            for r in cursor.fetchall():
+                v_emb = np.frombuffer(r["v_embedding"], dtype=np.float32)
+                v_norm = norm(v_emb)
+
+                if query_norm == 0 or v_norm == 0:
+                    cos_dist = 1.0  # max distance if either is zero
+                else:
+                    cos_sim = np.dot(query_arr, v_emb) / (query_norm * v_norm)
+                    cos_dist = max(0.0, 1.0 - cos_sim)
+
+                final_score = (1.0 - cos_dist / 2.0) * r["decay"] * r["success_rate"]
+
+                row_dict = dict(r)
+                row_dict["final_score"] = final_score
+                scored_rows.append(row_dict)
+
+            scored_rows.sort(key=lambda x: x["final_score"], reverse=True)
+            rows = scored_rows[: limit * 2]
+
         final_facts = []
 
         for row in rows:
@@ -275,7 +345,7 @@ class HDCVectorStoreL2:
     def _process_hdc_fact_row(
         self,
         conn: sqlite3.Connection,
-        row: sqlite3.Row,
+        row: sqlite3.Row | dict[str, Any],
         toxic_hvs: list[np.ndarray],  # pyright: ignore[reportInvalidTypeForm]
     ) -> CortexFactModel:
         """Process a single row from the HDC recall query."""
