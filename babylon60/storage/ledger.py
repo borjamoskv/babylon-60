@@ -59,6 +59,7 @@ class EnterpriseAuditLedger:
         import sqlite3
 
         import aiosqlite
+
         if isinstance(log_path, (aiosqlite.Connection, sqlite3.Connection)) or hasattr(log_path, "execute"):
             self._conn = log_path
             self.log_path = "security_audit_log.jsonl"

@@ -9,11 +9,13 @@ from .authorizer import (
     mtk_payload_hash,
     set_token_verifier
 )
+from .watchdog import install_bootstrap_watchdog
 
 __all__ = [
     "mtk_authorizer_callback",
     "install_mtk_authorizer",
     "mtk_active_token",
     "mtk_payload_hash",
-    "set_token_verifier"
+    "set_token_verifier",
+    "install_bootstrap_watchdog"
 ]

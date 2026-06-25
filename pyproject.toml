@@ -151,6 +151,7 @@ build-backend = "maturin"
 features = ["pyo3/extension-module"]
 module-name = "cortex_core_rs"
 manifest-path = "cortex_core_rs/Cargo.toml"
+python-source = "."
 
 [tool.setuptools.packages.find]
 include = ["cortex", "cortex.*"]
