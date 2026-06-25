@@ -240,7 +240,7 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
 import socket
 
 try:
-    import cortex_native
+    import cortex_native  # type: ignore
 
     HAS_NATIVE_GUARDS = True
 except ImportError:

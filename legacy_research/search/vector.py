@@ -60,7 +60,7 @@ from cortex.memory.temporal import build_temporal_filter_params
 from cortex.search.models import SearchResult
 from cortex.storage import StorageMode, get_storage_mode
 
-__all__ = ["semantic_search", "semantic_search_sync"]
+__all__ = ["semantic_search", "semantic_search_sync", "delete_entropic_vectors"]
 
 logger = logging.getLogger("cortex.search.vector")
 
@@ -320,3 +320,31 @@ def semantic_search_sync(
             )
         )
     return results
+
+async def delete_entropic_vectors(conn: Any, fact_ids: list[str], tenant_id: str) -> None:
+    """Physically purges vectors that have dropped below the entropic threshold."""
+    if not fact_ids:
+        return
+        
+    logger.warning("Executing C5-REAL physical entropy purge for %d vectors", len(fact_ids))
+    
+    # Batch delete using chunking to avoid sqlite limits
+    chunk_size = 100
+    for i in range(0, len(fact_ids), chunk_size):
+        chunk = fact_ids[i:i + chunk_size]
+        placeholders = ",".join("?" for _ in chunk)
+        
+        if get_storage_mode() == StorageMode.POSTGRES:
+            # PG syntax: we use $ placeholders
+            pg_placeholders = ",".join(f"${j+2}" for j in range(len(chunk)))
+            sql = f"DELETE FROM facts WHERE tenant_id = $1 AND id IN ({pg_placeholders})"
+            params = [tenant_id] + chunk
+            await conn.execute(sql, params)
+        else:
+            # SQLite syntax
+            sql = f"DELETE FROM facts WHERE tenant_id = ? AND id IN ({placeholders})"
+            params = [tenant_id] + chunk
+            await conn.execute(sql, params)
+            
+    await conn.commit()
+    logger.info("Physical purge complete.")

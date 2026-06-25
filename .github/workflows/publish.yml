@@ -1,13 +1,14 @@
 name: Publish to PyPI
 
 on:
-  release:
-    types: [published]
+  push:
+    tags: ["v*"]
   workflow_dispatch:
 
 permissions:
   id-token: write
   contents: read
+  attestations: write
 
 jobs:
   build-wheels-linux:
@@ -73,5 +74,59 @@ jobs:
           pattern: wheels-*
           path: dist/
           merge-multiple: true
+
+      - name: Generate build provenance
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: 'dist/*'
+
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+
+      - name: Sign artifacts with Sigstore
+        uses: sigstore/gh-action-sigstore-python@v3.3.0
+        with:
+          inputs: dist/*
+
+      - name: Upload signed artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-dist
+          path: |
+            dist/*
+            dist/*.sigstore.json
+
+      - name: Verify PyPI release is visible
+        run: |
+          python - <<'PY'
+          import json
+          import time
+          import urllib.error
+          import urllib.request
+          from pathlib import Path
+
+          version = None
+          for path in Path("dist").glob("*.whl"):
+              stem = path.name.split("-")
+              if len(stem) >= 2:
+                  version = stem[1]
+                  break
+          if version is None:
+              raise SystemExit("unable to determine built version from wheel filename")
+
+          url = "https://pypi.org/pypi/cortex-persist/json"
+          for attempt in range(12):
+              try:
+                  with urllib.request.urlopen(url, timeout=30) as response:
+                      payload = json.load(response)
+              except urllib.error.HTTPError as exc:
+                  if exc.code != 404:
+                      raise
+                  payload = {"releases": {}}
+              if version in payload.get("releases", {}):
+                  print(f"PyPI now exposes cortex-persist {version}")
+                  break
+              if attempt == 11:
+                  raise SystemExit(f"cortex-persist {version} not visible on PyPI after publish")
+              time.sleep(10)
+          PY

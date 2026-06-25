@@ -63,7 +63,7 @@ class GenomeMutator:
         elif (
             failure_trace
             and failure_trace.get("failed_target")
-            and random.random() < float(genome.mutation_rates.get(MutationType.CAUSAL_PATCH, Babylon60.from_float(0.20)))  # type: ignore
+            and random.randint(0, 216000) < genome.mutation_rates.get(MutationType.CAUSAL_PATCH, Babylon60(43200)).value
         ):
             mutation_type = MutationType.CAUSAL_PATCH
         else:
@@ -163,33 +163,42 @@ class GenomeMutator:
         for mt in MutationType:
             rate_a = fitter.mutation_rates.get(mt, Babylon60.from_int(0))
             rate_b = weaker.mutation_rates.get(mt, Babylon60.from_int(0))
-            child.mutation_rates[mt] = (rate_a + rate_b) / Babylon60.from_float(2.0)
+            child.mutation_rates[mt] = (rate_a + rate_b) / Babylon60(432000)
 
         child._invalidate_hash()
         child.lineage.mutation_log.append("crossover")
         return child
 
     def _select_mutation_type(self, genome: StrategyGenome) -> MutationType:
-        """Roulette wheel selection weighted by genome's own mutation_rates."""
+        """Roulette wheel selection weighted by genome's own mutation_rates using Babylon60."""
         types = list(MutationType)
-        weights = [float(genome.mutation_rates.get(mt, Babylon60.from_float(0.01))) for mt in types]  # type: ignore
+        weights = [genome.mutation_rates.get(mt, Babylon60(2160)).value for mt in types]
         total = sum(weights)
         if total <= 0:
             return random.choice(types)
-        normalized = [w / total for w in weights]
-        return random.choices(types, weights=normalized, k=1)[0]
+        
+        pick = random.randint(0, total - 1)
+        current = 0
+        for mt, w in zip(types, weights):
+            current += w
+            if pick < current:
+                return mt
+        return types[-1]
 
     def _mutate_parameter_drift(self, genome: StrategyGenome) -> None:
-        """Gaussian drift on numeric parameters."""
+        """Integer drift on numeric parameters."""
         if not genome.parameters:
-            genome.parameters["drift_seed"] = random.gauss(0.5, 0.1)
+            genome.parameters["drift_seed"] = random.randint(0, 216000)
             return
 
         key = random.choice(list(genome.parameters))
         val = genome.parameters[key]
-        if isinstance(val, int | float):
-            sigma = abs(val) * 0.1 + 0.01
-            genome.parameters[key] = val + random.gauss(0, sigma)
+        if isinstance(val, int):
+            drift_amt = max(1, int(abs(val) * 0.1))
+            genome.parameters[key] = val + random.randint(-drift_amt, drift_amt)
+        elif isinstance(val, Babylon60):
+            drift_amt = max(216, int(abs(val.value) * 0.1))
+            genome.parameters[key] = Babylon60(val.value + random.randint(-drift_amt, drift_amt))
         elif isinstance(val, bool):
             genome.parameters[key] = not val
         elif isinstance(val, str):
@@ -294,36 +303,39 @@ class GenomeMutator:
         genome.parameters["synthesis_epoch"] = genome.lineage.generation
 
     def _mutate_meta(self, genome: StrategyGenome) -> None:
-        """META-MUTATION: Adaptively modify the genome's mutation rates.
-
-        * Weighted selection uses sqrt of current rates to avoid "rich get richer".
-        * Delta is proportional to the current rate (5 % of the rate, min σ=0.001).
-        * Global budget (max_total=0.7) is enforced by only reducing the mutated
-          rate if the total exceeds the budget, preserving other rates.
-        * Logging records the final rate after any budget adjustment.
-        """
+        """META-MUTATION: Adaptively modify the genome's mutation rates."""
         rates = genome.mutation_rates
-        # Weighted selection: dampened by sqrt to limit dominance of high rates
         types = list(MutationType)
-        weights = [max(0.001, float(rates.get(mt, Babylon60.from_float(0.05))) ** 0.5) for mt in types]  # type: ignore
-        selected_mt = random.choices(types, weights=weights, k=1)[0]
+        # Integers fallback (no sqrt to avoid float, linear selection instead)
+        weights = [rates.get(mt, Babylon60(10800)).value for mt in types]
+        total_w = sum(weights)
+        
+        selected_mt = types[-1]
+        if total_w > 0:
+            pick = random.randint(0, total_w - 1)
+            current = 0
+            for mt, w in zip(types, weights):
+                current += w
+                if pick < current:
+                    selected_mt = mt
+                    break
 
-        current_rate = float(rates.get(selected_mt, Babylon60.from_float(0.05)))  # type: ignore
-        sigma = max(0.001, current_rate * 0.05)
-        delta = random.gauss(0, sigma)
-        new_rate = max(0.001, min(0.5, current_rate + delta))
-        rates[selected_mt] = Babylon60.from_float(new_rate)
+        current_rate_val = rates.get(selected_mt, Babylon60(10800)).value
+        # drift by +/- 5% max
+        delta_val = random.randint(-current_rate_val // 20, current_rate_val // 20)
+        new_val = max(216, min(108000, current_rate_val + delta_val))
+        rates[selected_mt] = Babylon60(new_val)
 
-        # Normalize back to sum=1.0 (approx)
+        # Normalize to total SCALE (216000)
         rates = genome.mutation_rates
-        total_float = sum(float(r) for r in rates.values())  # type: ignore
-        if total_float > 0:
+        total_val = sum(r.value for r in rates.values())
+        if total_val > 0:
             for mt in list(rates.keys()):
-                rates[mt] = Babylon60.from_float(float(rates[mt]) / total_float)  # type: ignore
+                rates[mt] = Babylon60((rates[mt].value * 216000) // total_val)
 
-        final_rate = float(rates[selected_mt])  # type: ignore
+        final_val = rates[selected_mt].value
         genome.lineage.mutation_log.append(
-            f"META: {selected_mt.value} rate {current_rate:.3f} → {final_rate:.3f}"
+            f"META: {selected_mt.value} rate {current_rate_val} → {final_val}"
         )
 
     def _mutate_causal_patch(self, genome: StrategyGenome) -> None:

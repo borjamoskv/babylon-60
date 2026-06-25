@@ -35,17 +35,18 @@ class FitnessRecord:
     success: bool
     error_rate: Babylon60
     throughput: Babylon60  # ops/sec
-    timestamp: Babylon60 = field(default_factory=lambda: Babylon60.from_float(time.monotonic()))
+    timestamp: Babylon60 = field(default_factory=lambda: Babylon60.from_int(time.monotonic_ns() // 1_000_000))
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        # BOUNDARY: Serialización a floats para trazabilidad visual (MongoDB/JSON)
         return {
-            "score": float(self.score),  # type: ignore
-            "latency_ms": float(self.latency_ms),  # type: ignore
+            "score": self.score.to_float(),
+            "latency_ms": self.latency_ms.to_float(),
             "success": self.success,
-            "error_rate": float(self.error_rate),  # type: ignore
-            "throughput": float(self.throughput),  # type: ignore
-            "timestamp": float(self.timestamp),  # type: ignore
+            "error_rate": self.error_rate.to_float(),
+            "throughput": self.throughput.to_float(),
+            "timestamp": self.timestamp.to_float(),
             "metadata": self.metadata,
         }
 
@@ -81,7 +82,7 @@ class Lineage:
             return Babylon60.from_int(0)
         recent = self.fitness_history[-5:]
         n = len(recent)
-        x_mean = Babylon60.from_float((n - 1) / 2.0)
+        x_mean = Babylon60.from_int(n - 1) / Babylon60.from_int(2)
         y_mean = sum((r.score for r in recent), start=Babylon60.from_int(0)) / Babylon60.from_int(n)
         
         numerator = sum(
@@ -92,15 +93,16 @@ class Lineage:
             ((Babylon60.from_int(i) - x_mean) * (Babylon60.from_int(i) - x_mean) for i in range(n)), 
             start=Babylon60.from_int(0)
         )
-        return numerator / denominator if float(denominator) > 0 else Babylon60.from_int(0)  # type: ignore
+        return numerator / denominator if denominator.value > 0 else Babylon60.from_int(0)
 
     def to_dict(self) -> dict[str, Any]:
+        # BOUNDARY: Serialización a floats para representación visual
         return {
             "generation": self.generation,
             "parent_hash": self.parent_hash,
-            "avg_fitness": float(self.avg_fitness),  # type: ignore
-            "best_fitness": float(self.best_fitness),  # type: ignore
-            "fitness_trend": float(self.fitness_trend),  # type: ignore
+            "avg_fitness": self.avg_fitness.to_float(),
+            "best_fitness": self.best_fitness.to_float(),
+            "fitness_trend": self.fitness_trend.to_float(),
             "adopted_count": self.adopted_count,
             "discarded_count": self.discarded_count,
             "children_spawned": self.children_spawned,
@@ -140,17 +142,17 @@ class StrategyGenome:
         self.dispatch_tree: AgentOp = dispatch_tree or noop()
         self.parameters: dict[str, Any] = parameters or {}
         self.mutation_rates: dict[str, Babylon60] = mutation_rates or {
-            MutationType.CAUSAL_PATCH: Babylon60.from_float(0.20),
-            MutationType.PARAMETER_DRIFT: Babylon60.from_float(0.30),
-            MutationType.SUBTREE_SWAP: Babylon60.from_float(0.10),
-            MutationType.NODE_INSERT: Babylon60.from_float(0.10),
-            MutationType.NODE_DELETE: Babylon60.from_float(0.03),
-            MutationType.PARALLELIZE: Babylon60.from_float(0.05),
-            MutationType.SEQUENTIALIZE: Babylon60.from_float(0.05),
-            MutationType.LOOP_UNROLL: Babylon60.from_float(0.03),
-            MutationType.CONDITIONAL_INJECT: Babylon60.from_float(0.05),
-            MutationType.STRATEGY_SYNTHESIS: Babylon60.from_float(0.04),
-            MutationType.META_MUTATION: Babylon60.from_float(0.05),
+            MutationType.CAUSAL_PATCH: Babylon60(43200),
+            MutationType.PARAMETER_DRIFT: Babylon60(64800),
+            MutationType.SUBTREE_SWAP: Babylon60(21600),
+            MutationType.NODE_INSERT: Babylon60(21600),
+            MutationType.NODE_DELETE: Babylon60(6480),
+            MutationType.PARALLELIZE: Babylon60(10800),
+            MutationType.SEQUENTIALIZE: Babylon60(10800),
+            MutationType.LOOP_UNROLL: Babylon60(6480),
+            MutationType.CONDITIONAL_INJECT: Babylon60(10800),
+            MutationType.STRATEGY_SYNTHESIS: Babylon60(8640),
+            MutationType.META_MUTATION: Babylon60(10800),
         }
         self.constraints: list[str] = constraints or []
         self.lineage = Lineage()

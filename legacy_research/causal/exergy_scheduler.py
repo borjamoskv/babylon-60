@@ -112,7 +112,7 @@ class ExergyScheduler:
             logger.info(f"[{self.tenant_id}] Resolving multi-variable constraints (Byzantine Boundary).")
             # Simulate intense computation
             await asyncio.sleep(0.01)
-            execution_trace["confidence_ranking"] = {"C5": 0.98, "C4": 0.02}
+            execution_trace["confidence_ranking"] = {"C5": 0.98, "C4": 0.02}  # type: ignore
             execution_trace["status"] = "TRADE_OFF_RESOLVED"
             
         elif lane == ExergyLane.DEEP_RESEARCH:
@@ -120,7 +120,7 @@ class ExergyScheduler:
             logger.info(f"[{self.tenant_id}] Spawning Epistemic Spiders for SOTA discovery.")
             # Simulate I/O bound network scan
             await asyncio.sleep(0.05)
-            execution_trace["frontier_nodes_emitted"] = True
+            execution_trace["frontier_nodes_emitted"] = True  # type: ignore
             execution_trace["status"] = "SOTA_MAPPED"
             
         elif lane == ExergyLane.ULTRA_THINK:
@@ -128,7 +128,7 @@ class ExergyScheduler:
             logger.critical(f"[{self.tenant_id}] P0 Isolation Active. Tracing Blast Radius Map.")
             # Simulate extreme containment protocols
             await asyncio.sleep(0.1)
-            execution_trace["blast_radius_map"] = {"affected_nodes": 7, "critical_path": True}
+            execution_trace["blast_radius_map"] = {"affected_nodes": 7, "critical_path": True}  # type: ignore
             execution_trace["remediation_plan"] = "FORCED_ROLLBACK"
             execution_trace["status"] = "CONTAINMENT_ACHIEVED"
             
@@ -139,7 +139,7 @@ class ExergyScheduler:
 
         end_b60 = int(time.time() * 60)
         latency_b60 = end_b60 - start_b60
-        execution_trace["latency_b60"] = latency_b60
+        execution_trace["latency_b60"] = latency_b60  # type: ignore
         
         return execution_trace
 

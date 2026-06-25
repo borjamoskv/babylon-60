@@ -1,6 +1,6 @@
 [project]
 name = "cortex-persist"
-version = "1.0.0"
+version = "1.1.0"
 description = "Cryptographic memory integrity, audit trails, and verifiable lineage for AI agents."
 readme = "README.md"
 license = "Apache-2.0"

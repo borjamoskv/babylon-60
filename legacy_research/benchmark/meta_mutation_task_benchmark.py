@@ -41,13 +41,13 @@ def create_random_genome() -> StrategyGenome:
     total = 0.0
     for mt in MutationType:
         rate = random.uniform(0.02, 0.15)
-        genome.mutation_rates[mt] = rate
+        genome.mutation_rates[mt] = rate  # type: ignore
         total += rate
     # Normalise to respect the global budget (0.7)
     if total > 0.7:
         scale = 0.7 / total
         for mt in genome.mutation_rates:
-            genome.mutation_rates[mt] *= scale
+            genome.mutation_rates[mt] = float(genome.mutation_rates[mt]) * scale  # type: ignore
     # Simple arithmetic tree: (x * a) + b
     a = random.randint(1, 5)
     b = random.randint(0, 10)
@@ -155,7 +155,7 @@ def run_adaptive(
         meta_counts.append(
             1 if "type=meta_mutation" in latest_log or latest_log.startswith("META:") else 0
         )
-        drift = max(abs(child.mutation_rates[mt] - pre_rates.get(mt, 0.0)) for mt in MutationType)
+        drift = max(abs(float(child.mutation_rates[mt]) - float(pre_rates.get(mt, 0.0))) for mt in MutationType)  # type: ignore
         rate_drifts.append(drift)
     return fitness_history, meta_counts, rate_drifts
 
