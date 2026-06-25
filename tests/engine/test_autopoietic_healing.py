@@ -54,7 +54,7 @@ def test_autopoietic_healing_flow(setup_dummy_module):
         dummy_target.calculate_exergy(0)
         
     # We provide the patch
-    patch = "try:\n    return 10.0 / x\nexcept ZeroDivisionError:\n    return 0.0"
+    patch = "def calculate_exergy(x: int) -> float:\n    try:\n        return 10.0 / x\n    except ZeroDivisionError:\n        return 0.0"
     
     # Trigger healing
     success = ASTHealer.heal_exception(
