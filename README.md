@@ -9,9 +9,9 @@
 
 <h1 align="center">█ BABYLON-60-PERSIST</h1>
 <p align="center">
-  <strong>Cortex Persist is to AI agents what Git was to code.</strong><br>
-  <em>The AI Trust Infrastructure that turns probabilistic LLM output into cryptographically verifiable, tamper-evident decision lineages.</em><br>
-  <em>The infrastructure to optimize for correction, not certainty.</em>
+  <strong>Firewall Termodinámico C5-REAL para Ejecución Agéntica.</strong><br>
+  <em>Infraestructura determinista que colapsa ondas probabilísticas generadas por LLMs en invariantes criptográficamente verificables.</em><br>
+  <em>Diseñado para optimizar la corrección, erradicando la entropía.</em>
 </p>
 
 <p align="center">
@@ -22,9 +22,9 @@
 </p>
 
 ```
-Copilot/LLM    →  generates probabilistic code mutations
-PR Pipeline    →  runs standard tests (checks syntax)
-BABYLON-60         →  enforces governance, scores entropy, and seals audits
+LLM (Estocástico)   →  Inyecta Entropía probabilística (Anergía)
+CI/CD Tradicional   →  Ignora entropía; valida únicamente AST y Sintaxis
+BABYLON-60 (C5-REAL)→  Bloqueo físico, Supresión de Anergía, Sello Criptográfico
 ```
 
 ---
