@@ -61,3 +61,39 @@ class CognitiveState:
 def hash_ast(py_code: str, target: str) -> str:
     # Always return a deterministic hash for tests regardless of comments
     return "deterministic_semantic_hash_12345" 
+
+class Babylon60:
+    """Implementación de enteros de Base-60 para evadir la entropía flotante"""
+    SCALE = 216000
+    
+    def __init__(self, raw_value: int):
+        self.raw_value = int(raw_value)
+
+    @classmethod
+    def from_float(cls, value: float) -> 'Babylon60':
+        return cls(int(round(value * cls.SCALE)))
+
+    @classmethod
+    def from_int(cls, value: int) -> 'Babylon60':
+        return cls(int(value) * cls.SCALE)
+
+    def __add__(self, other: 'Babylon60') -> 'Babylon60':
+        return Babylon60(self.raw_value + other.raw_value)
+
+    def __sub__(self, other: 'Babylon60') -> 'Babylon60':
+        return Babylon60(self.raw_value - other.raw_value)
+
+    def __mul__(self, other: 'Babylon60') -> 'Babylon60':
+        return Babylon60((self.raw_value * other.raw_value) // self.SCALE)
+
+    def __truediv__(self, other: 'Babylon60') -> 'Babylon60':
+        if other.raw_value == 0:
+            raise ValueError("Zero Division in Babylon60")
+        return Babylon60((self.raw_value * self.SCALE) // other.raw_value)
+
+    def __ge__(self, other: 'Babylon60') -> bool:
+        return self.raw_value >= other.raw_value
+
+    def to_float(self) -> float:
+        return self.raw_value / self.SCALE
+
