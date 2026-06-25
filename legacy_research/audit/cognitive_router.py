@@ -287,7 +287,7 @@ class CognitiveRouter:
         semantic_threshold: float = 0.82,
     ) -> None:
         self.ledger = ledger
-        self._conn = ledger._conn
+        self._conn: Any = ledger._conn
         self.routing_policy = routing_policy or self.DEFAULT_ROUTING_POLICY
 
         # Load safety classifier with custom categories configured in policy DSL

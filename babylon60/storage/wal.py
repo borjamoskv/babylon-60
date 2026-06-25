@@ -3,6 +3,7 @@ import json
 import logging
 import time
 
+from typing import Any
 from babylon60.database.core import connect_async
 
 logger = logging.getLogger(__name__)
@@ -22,9 +23,9 @@ class WriteAheadLog:
 
     def __init__(self, db_path: str = WAL_PATH):
         self.db_path = db_path
-        self._conn = None
-        self._queue = None
-        self._worker_task = None
+        self._conn: Any = None
+        self._queue: Any = None
+        self._worker_task: Any = None
 
     async def connect(self):
         if self._conn is None:
@@ -110,7 +111,7 @@ class WriteAheadLog:
                         t[2].set_exception(e)
                     self._queue.task_done()
 
-    async def write_pending(self, event_id: str, payload: dict, previous_hash: str = None) -> str:
+    async def write_pending(self, event_id: str, payload: dict, previous_hash: str | None = None) -> str:
         """Atomic write before memory queue insertion. Returns the event_hash."""
         if self._conn is None:
             await self.connect()
@@ -147,6 +148,7 @@ class WriteAheadLog:
         """
         if self._conn is None:
             await self.connect()
+        assert self._conn is not None
             
         cursor = await self._conn.execute(
             "SELECT payload FROM batch_wal WHERE status = 'pending'"

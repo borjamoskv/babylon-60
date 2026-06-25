@@ -2,8 +2,6 @@ import logging
 import os
 from typing import Any
 
-import yaml
-
 logger = logging.getLogger(__name__)
 
 class MythosInvariantGuard:
@@ -21,6 +19,7 @@ class MythosInvariantGuard:
         self._load_policy()
 
     def _load_policy(self):
+        import yaml
         if not os.path.exists(self.policy_path):
             logger.warning(f"[MythosGuard] Policy file not found: {self.policy_path}")
             return

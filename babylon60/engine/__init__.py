@@ -182,6 +182,13 @@ class CortexEngine(
         await self._persistence.start()
         logger.info("🚀 [CORTEX] Sovereign Engine ignited (Ω₀-Ω₆).")
 
+    async def __aenter__(self) -> "CortexEngine":
+        await self.start()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+        await self.close()
+
     async def close(self):
         """Shutdown the engine, optimizer, and database connections."""
         self._closing = True

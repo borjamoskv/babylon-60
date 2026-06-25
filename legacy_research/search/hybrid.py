@@ -29,7 +29,7 @@ def _bft_sqlite_connect(*args, **kwargs):
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
 from datetime import datetime, timezone
-from typing import Final
+from typing import Final, Any
 
 import aiosqlite
 
@@ -98,8 +98,10 @@ def _apply_temporal_decay(results: list[SearchResult], recency_weight: float) ->
             else:
                 # Parse created_at (ISO format from SQLite)
                 created = datetime.fromisoformat(str(r.created_at).replace("Z", "+00:00"))
+            
+            assert isinstance(created, datetime)
             if created.tzinfo is None:
-                created = created.replace(tzinfo=timezone.utc)
+                created = created.replace(tzinfo=timezone.utc) # type: ignore
             age_days = (now - created).total_seconds() / 86400.0
         except (ValueError, TypeError, AttributeError):
             age_days = 0.0  # Unknown age = no penalty
@@ -173,8 +175,8 @@ async def hybrid_search(
     w_vec = vector_weight / total_w
     w_txt = text_weight / total_w
 
-    rrf_scores: dict[int, float] = {}
-    result_map: dict[int, SearchResult] = {}
+    rrf_scores: dict[Any, float] = {}
+    result_map: dict[Any, SearchResult] = {}
 
     # Standardize Semantic Results
     for rank, res in enumerate(sem_results):
@@ -212,7 +214,7 @@ async def hybrid_search(
         contexts = await _expand_graph_context(conn, fact_ids, graph_depth)
         for r in merged:
             if str(r.fact_id) in contexts:
-                r.context = {"edges": contexts[str(r.fact_id)]}
+                setattr(r, "context", {"edges": contexts[str(r.fact_id)]})
 
     # 🔥 Fire-and-forget BM25 feedback loop
     if merged:
@@ -253,8 +255,8 @@ def hybrid_search_sync(
     w_vec = vector_weight / total_w
     w_txt = text_weight / total_w
 
-    rrf_scores: dict[int, float] = {}
-    result_map: dict[int, SearchResult] = {}
+    rrf_scores: dict[Any, float] = {}
+    result_map: dict[Any, SearchResult] = {}
 
     for rank, res in enumerate(sem_results):
         score = w_vec / (RRF_K + rank + 1)

@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 import logging
 import time
-from typing import Final
+from typing import Final, Any
 
 import redis
 
@@ -40,6 +40,8 @@ class RedisWorkingMemoryL1:
     """Token-budgeted FIFO sliding window for short-term context backed by Redis."""
 
     __slots__ = ("_guardrail", "_max_tokens", "_prefix", "_redis")
+
+    _redis: Any
 
     def __init__(
         self,

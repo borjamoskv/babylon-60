@@ -15,6 +15,9 @@ import copy
 import math
 import random
 import statistics
+import sys
+
+sys.setrecursionlimit(100000)
 
 # Engine imports – these are part of the CORTEX-Persist codebase
 from cortex.engine._genome_mutator import GenomeMutator

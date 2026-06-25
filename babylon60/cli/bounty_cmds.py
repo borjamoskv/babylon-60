@@ -330,6 +330,19 @@ def bounty_evm_hunt_cmd(chain_id: int, db: str) -> None:
     try:
         with console.status("[bold magenta]Scanning MEV mempool & DeFi bounties...[/]"):
             results = _run_async(_run())
+    except Exception as e:
+        import traceback
+        tb = traceback.format_exc()
+        console.print(f"[bold red]Systemic Failure Detected:[/] {e}")
+        from babylon60.extensions.evolution.ouroboros import OuroborosKernel
+        ouroboros = OuroborosKernel(engine)
+        # Run the healing synchronously
+        healed = _run_async(ouroboros.heal_system(tb, context="evm-hunt"))
+        if healed:
+            console.print("[bold green]🐍 Ouroboros applied a structural mutation. Please retry the extraction.[/]")
+        else:
+            console.print("[bold red]Ouroboros failed to heal the system.[/]")
+        results = []
 
         console.print()
         if results:

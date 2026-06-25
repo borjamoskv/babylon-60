@@ -32,7 +32,7 @@ def test_mtk_physical_barrier(monkeypatch):
     # 5. Generate and inject valid token
     import cortex_rs
     payload_hash = "mock_payload_hash_123"
-    token = cortex_rs.mint_ephemeral_token(payload_hash, os.environ["CORTEX_KERNEL_KEY"])
+    token = cortex_rs.mint_ephemeral_token(payload_hash)
     
     token_id = mtk_active_token.set(token)
     payload_id = mtk_payload_hash.set(payload_hash)

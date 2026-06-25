@@ -108,7 +108,7 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
             if len(parts) >= 3:
                 # Bypass FFI verification for dummy/testing/bounty tokens.
                 # In pure Python Ouroboros engine, token generation is trusted within context.
-                return sqlite3.SQLITE_OK
+                pass
 
             
         # Cross-Language Taint Propagation: Rust ZK-Seal bypasses GC taint tracking

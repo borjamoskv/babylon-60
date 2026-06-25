@@ -69,7 +69,7 @@ class AnomalyHunterEngine:
     async def _trace_causal_chain(self, fact: Fact) -> list[Fact]:
         """Extrae la cadena causal usando la abstracción de hierarchy."""
         # Delegamos en el método del engine (que ya devuelve list[Fact])
-        chain = await self.babylon60.get_causal_chain(fact.id)
+        chain = await self.cortex.get_causal_chain(fact.id)
         return chain if chain else []
 
     async def run_full_scan(self) -> dict:
@@ -82,7 +82,7 @@ class AnomalyHunterEngine:
         # Aquí usamos history para tener todos los estados y luego filtramos
 
         # Recall relevant facts from history across tracked projects
-        recent_raw_facts = await self.babylon60.history(project="anomaly-hunter")
+        recent_raw_facts = await self.cortex.history(project="anomaly-hunter")
         # recent_raw_facts is now list[Fact] thanks to the update in CortexEngine
         recent_facts = [f for f in recent_raw_facts if (f.created_at or "") > time_filter]
 
@@ -252,7 +252,7 @@ class AnomalyHunterEngine:
         """
         high_severity = [a for a in self.anomalies if a.severity == "HIGH"]
         for anomaly in high_severity:
-            await self.babylon60.store(
+            await self.cortex.store(
                 type="ghost",
                 project="anomaly-hunter",
                 source="daemon:anomaly-hunter-v2",

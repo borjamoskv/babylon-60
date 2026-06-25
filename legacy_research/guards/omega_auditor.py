@@ -134,6 +134,26 @@ INSTRUCTIONS:
                     )
             if response is None:
                 logger.error("OmegaAuditor: Deep audit failed and no fallback available.")
+                logger.warning("🐍 [OUROBOROS-MUTATION] Bypassing deep audit due to missing LLM.")
+                # Trigger Ouroboros Autopoiesis
+                try:
+                    from babylon60.extensions.evolution.ouroboros import OuroborosKernel
+                    import traceback
+                    tb = traceback.format_exc()
+                    if not tb or tb.strip() == "NoneType: None":
+                        tb = "Exception: LLM API Failure: OmegaAuditor: Deep audit failed and no fallback available."
+                    
+                    # Ouroboros L5 execution
+                    ouroboros = OuroborosKernel(engine=None)
+                    import asyncio
+                    # Run synchronously since we are inside an async function
+                    healed = await ouroboros.heal_system(tb, context="OmegaAuditor.deep_audit")
+                    if healed:
+                        logger.info("OmegaAuditor: Ouroboros healed the system dynamically. Bypassing audit.")
+                        return []
+                except Exception as ex:
+                    logger.error(f"OmegaAuditor: Ouroboros invocation failed: {ex}")
+                
                 return []
 
         if "CLEAN" in response.upper() and "[" not in response:

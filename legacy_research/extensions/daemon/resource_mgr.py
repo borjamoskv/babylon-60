@@ -79,10 +79,14 @@ except ImportError:
 from cortex.extensions.daemon.models import CORTEX_DB, CORTEX_DIR
 from cortex.extensions.daemon.monitors import CloudSyncMonitor, DiskMonitor, EngineHealthCheck
 
+from typing import TYPE_CHECKING, Any
+
 logger = logging.getLogger("moskv-daemon")
 
 
 class ResourceMgrMixin:
+    if TYPE_CHECKING:
+        _shared_engine: Any
     def _init_autopoiesis(self, file_config: dict) -> None:
         """Initialize Heartbeat and metabolism engines."""
         self.heartbeat_daemon = None
@@ -172,11 +176,11 @@ class ResourceMgrMixin:
         self.sovereignty_runtime = None
         if self._event_bus:
             try:
-                from cortex.engine.auth_gateway import AuthGateway
+                from cortex.engine.auth_gateway import QuorumGateway
                 from cortex.engine.causal.anomaly_bridge import AnomalyBridge
                 from cortex.engine.event_sovereignty import EventSovereigntyRuntime
 
-                auth_gw = AuthGateway(self._shared_engine)
+                auth_gw = QuorumGateway(self._shared_engine)
                 # ensure table is created, though we should probably run this asynchronously,
                 # but it's safe to run create table in init or async start.
                 anomaly_br = AnomalyBridge()
@@ -278,21 +282,21 @@ class ResourceMgrMixin:
         try:
             import sqlite3
 
-# --- C5-REAL BFT PATCH (R10) ---
-import sqlite3 as _sqlite3_bft_orig
-_orig_sqlite_connect = _sqlite3_bft_orig.connect
-def _bft_sqlite_connect(*args, **kwargs):
-    kwargs.setdefault('timeout', 5.0)
-    conn = _orig_sqlite_connect(*args, **kwargs)
-    try:
-        conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA busy_timeout=5000;")
-        conn.execute("PRAGMA synchronous=NORMAL;")
-    except Exception:
-        pass
-    return conn
-_sqlite3_bft_orig.connect = _bft_sqlite_connect
-# -------------------------------
+            # --- C5-REAL BFT PATCH (R10) ---
+            import sqlite3 as _sqlite3_bft_orig
+            _orig_sqlite_connect = _sqlite3_bft_orig.connect
+            def _bft_sqlite_connect(*args, **kwargs):
+                kwargs.setdefault('timeout', 5.0)
+                conn = _orig_sqlite_connect(*args, **kwargs)
+                try:
+                    conn.execute("PRAGMA journal_mode=WAL;")
+                    conn.execute("PRAGMA busy_timeout=5000;")
+                    conn.execute("PRAGMA synchronous=NORMAL;")
+                except Exception:
+                    pass
+                return conn
+            _sqlite3_bft_orig.connect = _bft_sqlite_connect
+            # -------------------------------
 
             from cortex.database.core import connect
             from cortex.extensions.timing import TimingTracker

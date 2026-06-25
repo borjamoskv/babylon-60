@@ -151,7 +151,12 @@ class _PurePythonBabylon60:
 # Resolve implementation: Rust-native or pure Python
 # --------------------------------------------------------------------------- #
 
-Babylon60 = _NativeBabylon60 if HAS_NATIVE else _PurePythonBabylon60
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    Babylon60 = _PurePythonBabylon60
+else:
+    Babylon60 = _NativeBabylon60 if HAS_NATIVE else _PurePythonBabylon60
 
 
 # --------------------------------------------------------------------------- #
