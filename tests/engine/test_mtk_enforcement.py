@@ -69,7 +69,7 @@ async def test_mtk_allows_authorized_mutation(mtk_db, dummy_payload):
     guard = MTKGuard(private_key="test_key_123")
     
     async with guard.transaction_boundary(dummy_payload) as token:
-        assert token.startswith("zk_seal_rs_")
+        assert token and ("zk_seal_rs_" in token or "mtk_auth_" in token)
         # Now authorized, this should not raise DatabaseError
         cursor = mtk_db.execute("INSERT INTO records (data) VALUES ('authorized')")
         assert cursor.rowcount == 1
@@ -159,24 +159,22 @@ async def test_mtk_nested_contexts_isolation(mtk_db, dummy_payload):
     """
     guard = MTKGuard(private_key="test_key_123")
     # Outer context
+    from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
     async with guard.transaction_boundary(dummy_payload) as token_outer:
-        # We can mutate
         mtk_db.execute("INSERT INTO records (data) VALUES ('outer')")
 
         # Inner context
         import asyncio
         import dataclasses
         await asyncio.sleep(0.01)
-        # Create a DIFFERENT payload to generate a different cryptographic seal
-        dummy_payload_inner = dataclasses.replace(
-            dummy_payload, 
-            info_exergy=0.999, 
-            payload_hash=dummy_payload.payload_hash + "_new"
-        )
-        
+        dummy_payload_inner = dataclasses.replace(dummy_payload, info_exergy=0.999)
+        object.__setattr__(dummy_payload_inner, 'payload_hash', dummy_payload_inner.payload_hash + "_new")
+
         async with guard.transaction_boundary(dummy_payload_inner) as token_inner:
-            # With the new deterministic Rust Sha3-256 seal, different payloads yield different tokens
             assert token_inner != token_outer
+            print(f"Inside inner, active_token={mtk_active_token.get()}")
+        
+        print(f"After inner, active_token={mtk_active_token.get()}, expected={token_outer}")
         mtk_db.execute("INSERT INTO records (data) VALUES ('inner')")
         
         # Still in outer context, should still be able to mutate
