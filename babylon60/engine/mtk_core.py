@@ -45,6 +45,9 @@ class MTKGuard:
         
         from babylon60.policies.mythos_guard import MythosInvariantGuard
         self.mythos_guard = MythosInvariantGuard()
+        
+        from babylon60.guards.anergy_honeypot import AnergyHoneypotGuard
+        self.anergy_honeypot = AnergyHoneypotGuard()
             
     def validate_c5_ast(self, source_code: str) -> str:
         """Invokes the AST Projector to validate C5-REAL constraints."""
@@ -79,6 +82,9 @@ class MTKGuard:
             # Silent Drop / Hard Reject
             logger.critical(str(e))
             raise ValueError(f"MTK-REJECT: {str(e)}")
+            
+        # 1.1.6 Defensa Soberana (Anergy Honeypot - Phase 3)
+        self.anergy_honeypot.evaluate_payload(payload.claims, getattr(payload, "agent_id", "unknown"))
             
         # 1.2 Invariante Criptográfico (I_crypto)
         _signature = getattr(payload, "signature", None)
