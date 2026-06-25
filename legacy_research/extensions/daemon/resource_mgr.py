@@ -3,10 +3,10 @@ import logging
 from pathlib import Path
 
 try:
-    from cortex.extensions.daemon.centaur.engine import CentauroEngine
-    from cortex.extensions.daemon.centaur.entropic_queue import EntropicQueue
+    from cortex.extensions.daemon.centaur.engine import CentauroEngine  # type: ignore
+    from cortex.extensions.daemon.centaur.entropic_queue import EntropicQueue  # type: ignore
 
-    from cortex.extensions.daemon.centaur.heartbeat import HeartbeatDaemon
+    from cortex.extensions.daemon.centaur.heartbeat import HeartbeatDaemon  # type: ignore
 
     _CENTAUR_AVAILABLE = True
 except ImportError:
@@ -55,7 +55,7 @@ except ImportError:
     _WATCHDOG_HUB_AVAILABLE = False
 
 try:
-    from cortex.extensions.daemon.api import HumanCallbackAPI
+    from cortex.extensions.daemon.api import HumanCallbackAPI  # type: ignore
 
     _API_AVAILABLE = True
 except ImportError:

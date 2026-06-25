@@ -5,7 +5,7 @@ from pathlib import Path
 scripts_dir = Path(__file__).parent / "scripts"
 sys.path.insert(0, str(scripts_dir))
 
-from sovereign_scorer import score
+from sovereign_scorer import score  # type: ignore
 
 
 def test_sovereign_scorer():

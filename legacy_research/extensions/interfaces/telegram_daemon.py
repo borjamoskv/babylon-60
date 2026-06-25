@@ -8,8 +8,8 @@ Enforces Identity Hygiene via Whitelist.
 import logging
 import os
 
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters
+from telegram import Update  # type: ignore
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters  # type: ignore
 
 from cortex.cli.common import get_engine
 

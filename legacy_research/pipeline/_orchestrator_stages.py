@@ -123,8 +123,8 @@ class StagesMixin:
             try:
                 import asyncio
 
-                from cortex.utils.time_utils import (
-                    get_utc_timestamp,  # pyright: ignore[reportMissingImports]
+                from cortex.utils.time_utils import (  # type: ignore
+                    get_utc_timestamp,
                 )
 
                 async def persist_to_engine():

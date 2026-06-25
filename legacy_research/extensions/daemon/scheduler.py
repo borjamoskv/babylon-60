@@ -423,7 +423,7 @@ class SovereignScheduler:
     def _next_cron_time(cron_expr: str) -> str:
         """Compute next cron fire time. Falls back to 1h if croniter missing."""
         try:
-            from croniter import croniter
+            from croniter import croniter  # type: ignore
 
             return (
                 croniter(cron_expr, datetime.fromtimestamp(time.time(), tz=timezone.utc))

@@ -19,7 +19,6 @@ __all__ = [
     "GatewayResponse",
     "GatewayRouter",
     "SignalBus",
-    "I10ConsensusGateway",
 ]
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {

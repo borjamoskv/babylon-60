@@ -1,12 +1,12 @@
 import logging
 from typing import Any
 
-from cortex_rs import RetrievalGraph, RetrievalNode
+from cortex_rs import RetrievalGraph, RetrievalNode  # type: ignore
 
 logger = logging.getLogger(__name__)
 
 class SemanticRiskEvaluator:
-    def __init__(self, api_key: str = None, model: str = "gpt-4o"):
+    def __init__(self, api_key: str | None = None, model: str = "gpt-4o"):
         self.api_key = api_key
         self.model = model
 

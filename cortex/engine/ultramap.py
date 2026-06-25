@@ -63,7 +63,7 @@ class UltramapSubstrate:
                 f.write(b"\x00" * self.tensor_size)
 
         if HAS_RUST:
-            self._rs = cortex_rs.UltramapSubstrate(self.bin_path, self.capacity)
+            self._rs = cortex_rs.UltramapSubstrate(self.bin_path, self.capacity)  # type: ignore
             self._buffer = None
             self._mmap = None
             self._f = None
@@ -88,8 +88,8 @@ class UltramapSubstrate:
         if HAS_EVOLUTION_LKRGSER:
             ledger_path = os.path.join(os.path.dirname(self.bin_path), "evolution_ledger.jsonl")
             try:
-                self._evolution_ledger = EvolutionLedger(ledger_path)
-                self._checkpoint_manager = CheckpointManager(self._evolution_ledger, chunk_size=1000)
+                self._evolution_ledger = EvolutionLedger(ledger_path)  # type: ignore
+                self._checkpoint_manager = CheckpointManager(self._evolution_ledger, chunk_size=1000)  # type: ignore
                 logger.info(
                     f"EVO-LKRGSER Active. Head: {self._evolution_ledger.head_hash[:12]}… Seq: {self._evolution_ledger.sequence}"
                 )
@@ -287,15 +287,15 @@ class UltramapSubstrate:
         vector_before = None
         if self._evolution_ledger is not None:
             try:
-                qd_b, er_b, ce_b, cl_b = struct.unpack_from("dddd", self._buffer, offset + 96)  # pyright: ignore[reportArgumentType]
-                vector_before = ControlVector(qd_b, er_b, ce_b, cl_b)
+                qd_b, er_b, ce_b, cl_b = struct.unpack_from("dddd", self._buffer, offset + 96)  # type: ignore
+                vector_before = ControlVector(qd_b, er_b, ce_b, cl_b)  # type: ignore
             except (struct.error, TypeError):
                 pass
 
         # Write to substrate
         struct.pack_into(
             "dddd", self._buffer, offset + 96, queue_depth, error_rate, causal_entropy, cpu_load
-        )  # pyright: ignore[reportArgumentType]
+        )  # type: ignore
 
         # Emit to Evolution Ledger
         if self._evolution_ledger is not None:
@@ -317,8 +317,8 @@ class UltramapSubstrate:
     ) -> None:
         """Emit a mutation record to the Evolution Ledger. Non-fatal on error."""
         try:
-            vector_after = ControlVector(queue_depth, error_rate, causal_entropy, cpu_load)
-            self._evolution_ledger.record_mutation(
+            vector_after = ControlVector(queue_depth, error_rate, causal_entropy, cpu_load)  # type: ignore
+            self._evolution_ledger.record_mutation(  # type: ignore
                 agent_idx=agent_idx,
                 vector_before=vector_before,
                 vector_after=vector_after,

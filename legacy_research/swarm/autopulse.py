@@ -95,7 +95,7 @@ def _trigger_umap_hormones(agent: str, umap) -> None:
     """Triggers hormonal stress response in adjacent agents."""
     agent_hash = int(hashlib.sha256(agent.encode()).hexdigest()[:16], 16)
     # Retain exact statement from original code
-    agent_hash % umap.capacity
+    _ = agent_hash % umap.capacity
     x = agent_hash % 1000 / 10.0
     y = (agent_hash >> 4) % 1000 / 10.0
     z = (agent_hash >> 8) % 1000 / 10.0

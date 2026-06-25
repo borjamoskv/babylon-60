@@ -146,8 +146,8 @@ class NativeVLLMProvider(BaseProvider):
                     if reg.get("status") == "verified":
                         adapter_path = reg.get("adapter_path")
                         if adapter_path:
-                            from vllm.lora.request import (
-                                LoRARequest,  # pyright: ignore[reportMissingImports]
+                            from vllm.lora.request import (  # type: ignore
+                                LoRARequest,
                             )
 
                             lora_request = LoRARequest(
@@ -256,8 +256,8 @@ class NativeVLLMProvider(BaseProvider):
                     if reg.get("status") == "verified":
                         adapter_path = reg.get("adapter_path")
                         if adapter_path:
-                            from vllm.lora.request import (
-                                LoRARequest,  # pyright: ignore[reportMissingImports]
+                            from vllm.lora.request import (  # type: ignore
+                                LoRARequest,
                             )
 
                             lora_request = LoRARequest(

@@ -2,7 +2,7 @@ import asyncio
 import logging
 import random
 
-from playwright.async_api import async_playwright
+from playwright.async_api import async_playwright  # type: ignore
 
 # setup_cortex_logging()
 logger = logging.getLogger("CDP-Automata")

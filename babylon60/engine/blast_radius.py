@@ -14,6 +14,7 @@ from __future__ import annotations
 from babylon60.math.babylon import Babylon60
 
 import subprocess
+from decimal import Decimal
 from dataclasses import dataclass
 from typing import Any
 from babylon60.database.core import connect as db_connect
@@ -85,14 +86,14 @@ class ChronosROI:
 
     __slots__ = ("hourly_rate", "token_cost_per_m")
 
-    def __init__(self, hourly_rate: float = 150.0) -> None:
-        self.hourly_rate = hourly_rate
-        self.token_cost_per_m = 0.015
+    def __init__(self, hourly_rate: 'Babylon60 | None' = None) -> None:
+        self.hourly_rate = hourly_rate or Babylon60(32400000)  # 150 * 216000
+        self.token_cost_per_m = Babylon60(3240)  # 0.015 * 216000
 
-    def calculate_hours_saved(self, commits: int, lines_added: int, lines_deleted: int) -> Babylon60:
+    def calculate_hours_saved(self, commits: int, lines_added: int, lines_deleted: int) -> 'Babylon60':
         """Calculate hours saved based strictly on physical git mutations (Ω₂)."""
-        minutes = (commits * 15.0) + (lines_added * 2.0) + (lines_deleted * 1.0)
-        return round(minutes / 60.0, 2)
+        minutes = (commits * 15) + (lines_added * 2) + (lines_deleted * 1)
+        return Babylon60(minutes * 3600)
 
     def get_git_stats(self, project_path: str) -> dict[str, int]:
         """Extract 'Sovereign Proof of Work' from Git history."""
@@ -149,7 +150,7 @@ class ChronosROI:
 
         # C5-REAL: Exergy is measured directly from physical mutations, not arbitrary complexity.
         hours = self.calculate_hours_saved(git["commits"], git["added"], git["deleted"])
-        monetary_value = round(hours * self.hourly_rate, 2)
+        monetary_value = hours * self.hourly_rate
 
         # Dynamic token estimation from DB if available
         actual_tokens = 0
@@ -178,8 +179,11 @@ class ChronosROI:
         else:
             final_tokens = tokens_used or 0
 
-        cost = (final_tokens / 1000.0) * self.token_cost_per_m
-        roi_ratio = monetary_value / max(0.001, cost)
+        cost_value = (final_tokens * self.token_cost_per_m.value) // 1000
+        cost = Babylon60(cost_value)
+        if cost.value <= 216:
+            cost = Babylon60(216)
+        roi_ratio = monetary_value / cost
 
         return ChronosReport(
             file_count=file_count,

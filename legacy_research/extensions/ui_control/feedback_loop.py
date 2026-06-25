@@ -20,7 +20,7 @@ from cortex.extensions.ui_control.maestro import MaestroUI
 from cortex.extensions.ui_control.models import AppTarget, InteractionResult
 
 try:
-    import Vision
+    import Vision  # type: ignore
     from Foundation import NSURL # type: ignore
 except ImportError:
     Vision = None

@@ -4,8 +4,8 @@
 Reality Level: C5-REAL
 """
 
-import instructor
-from openai import AsyncOpenAI
+import instructor  # type: ignore
+from openai import AsyncOpenAI  # type: ignore
 
 from cortex.extensions.nous.models import NousAST
 

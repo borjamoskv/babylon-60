@@ -16,6 +16,7 @@ import logging
 import os
 import sqlite3
 import subprocess
+from decimal import Decimal
 from dataclasses import dataclass
 from typing import Any
 
@@ -37,10 +38,10 @@ class ChronosReport:
     git_commits: int
     git_added: int
     git_deleted: int
-    hours_saved: float
-    money_saved: float
-    roi_ratio: float
-    cost: float
+    hours_saved: Decimal
+    money_saved: Decimal
+    roi_ratio: Decimal
+    cost: Decimal
     currency: str = "USD"
 
     def to_dict(self) -> dict[str, Any]:
@@ -80,14 +81,14 @@ class ChronosROI:
 
     __slots__ = ("hourly_rate", "token_cost_per_m")
 
-    def __init__(self, hourly_rate: float = 150.0) -> None:
-        self.hourly_rate = hourly_rate
-        self.token_cost_per_m = 0.015
+    def __init__(self, hourly_rate: Decimal | None = None) -> None:
+        self.hourly_rate = hourly_rate or Decimal("150.0")
+        self.token_cost_per_m = Decimal("0.015")
 
-    def calculate_hours_saved(self, commits: int, lines_added: int, lines_deleted: int) -> float:
+    def calculate_hours_saved(self, commits: int, lines_added: int, lines_deleted: int) -> Decimal:
         """Calculate hours saved based strictly on physical git mutations (Ω₂)."""
-        minutes = (commits * 15.0) + (lines_added * 2.0) + (lines_deleted * 1.0)
-        return round(minutes / 60.0, 2)
+        minutes = (commits * 15) + (lines_added * 2) + (lines_deleted * 1)
+        return round(Decimal(minutes) / Decimal(60), 2)
 
     def get_git_stats(self, project_path: str) -> dict[str, int]:
         """Extract 'Sovereign Proof of Work' from Git history."""
@@ -173,8 +174,10 @@ class ChronosROI:
         else:
             final_tokens = tokens_used or 0
 
-        cost = (final_tokens / 1000.0) * self.token_cost_per_m
-        roi_ratio = monetary_value / max(0.001, cost)
+        cost = (Decimal(final_tokens) / Decimal(1000)) * self.token_cost_per_m
+        min_cost = Decimal("0.001")
+        actual_cost = cost if cost > min_cost else min_cost
+        roi_ratio = round(monetary_value / actual_cost, 2)
 
         return ChronosReport(
             file_count=file_count,

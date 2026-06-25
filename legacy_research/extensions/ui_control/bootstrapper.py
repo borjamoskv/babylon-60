@@ -12,8 +12,8 @@ import logging
 import sys
 
 try:
-    import ApplicationServices
-    import Quartz
+    import ApplicationServices  # type: ignore
+    import Quartz  # type: ignore
 except ImportError:
     ApplicationServices = None
     Quartz = None

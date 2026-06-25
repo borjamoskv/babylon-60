@@ -116,7 +116,7 @@ class AGY2PlannerMonitor:
         logger.info("Detected AGY2 Planning Mode. Extracting context for goal: %s...", goal[:50])
 
         try:
-            from cortex.memory.memory_manager import MemoryManager
+            from cortex.memory.memory_manager import MemoryManager  # type: ignore
 
             # We use the internal synchronous / async MemoryManager
             # Since MemoryManager is typically synchronous or has async variants,

@@ -127,8 +127,8 @@ def init_telemetry(service_name: str = "cortex-sovereign") -> None:
 
     try:
         from opentelemetry import metrics, trace  # pyright: ignore[reportMissingImports]
-        from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import (
-            OTLPMetricExporter,  # pyright: ignore[reportMissingImports]
+        from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import (  # type: ignore
+            OTLPMetricExporter,
         )
         from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
             OTLPSpanExporter,  # pyright: ignore[reportMissingImports]

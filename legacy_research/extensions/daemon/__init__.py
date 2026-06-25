@@ -84,9 +84,7 @@ __all__ = [
     "SiteMonitor",
     # notifier
     "Notifier",
-    # extractors
-    "LeadExergyExtractor",
-    "PrimitiveSynthesisDaemon",
+    "Notifier",
 ]
 
 # Lazy-load map: attribute name → (module_path, attr_name)
