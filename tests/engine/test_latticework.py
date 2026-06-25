@@ -1,11 +1,3 @@
-# [C5-REAL] Exergy-Maximized
-# Author: Borja Moskv (borjamoskv)
-import os
-import asyncio
-import tempfile
-import pytest
-import aiosqlite
-
 # --- C5-REAL BFT PATCH AIOSQLITE (R10) ---
 import aiosqlite as _aiosqlite_bft_orig
 _orig_aiosqlite_connect = _aiosqlite_bft_orig.connect
@@ -33,12 +25,23 @@ def _bft_aiosqlite_connect(*args, **kwargs):
     return BFTConnectionContext(*args, **kwargs)
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
+
+# [C5-REAL] Exergy-Maximized
+# Author: Borja Moskv (borjamoskv)
+import os
+import asyncio
+import tempfile
+import pytest
+import aiosqlite
+
 from babylon60.engine.latticework_store import LatticeworkStore
 from babylon60.engine.latticework_daemon import LatticeworkDaemon
 from babylon60.engine.babylon60 import Babylon60
 from babylon60.ledger.execution_trace import ExecutionTraceLedger
 from babylon60.ledger.causal_graph import CausalGraph
 from babylon60.engine.causal_scheduler import CausalScheduler
+
+
 
 def test_latticework_store_initialization():
     store = LatticeworkStore()

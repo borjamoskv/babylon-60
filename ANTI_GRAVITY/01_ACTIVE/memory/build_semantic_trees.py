@@ -1,9 +1,3 @@
-import asyncio
-import os
-import sys
-
-import aiosqlite
-
 # --- C5-REAL BFT PATCH AIOSQLITE (R10) ---
 import aiosqlite as _aiosqlite_bft_orig
 _orig_aiosqlite_connect = _aiosqlite_bft_orig.connect
@@ -32,10 +26,19 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
+import asyncio
+import os
+import sys
+
+import aiosqlite
+
+
 # Ensure we can import cortex
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from cortex.engine.logic.atms import AtmsAdapter
+
+
 
 
 async def build_semantic_trees():

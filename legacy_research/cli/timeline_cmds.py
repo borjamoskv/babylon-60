@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
-import asyncio
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
+
+import click
+from rich.table import Table
+
+from babylon60.cli.common import DEFAULT_DB, cli, console, get_engine
+from babylon60.cli.errors import err_empty_results, handle_cli_error
+
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
 def _bft_sqlite_connect(*args, **kwargs):
     kwargs.setdefault('timeout', 5.0)
@@ -21,11 +25,12 @@ def _bft_sqlite_connect(*args, **kwargs):
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
 
-import click
-from rich.table import Table
 
-from babylon60.cli.common import DEFAULT_DB, cli, console, get_engine
-from babylon60.cli.errors import err_empty_results, handle_cli_error
+
+import asyncio
+import sqlite3
+
+
 
 __all__ = [
     "snapshot_create",
@@ -169,22 +174,6 @@ def snapshot_list(db):
 
     async def _snapshot_list_async():
         import sqlite3
-
-# --- C5-REAL BFT PATCH (R10) ---
-import sqlite3 as _sqlite3_bft_orig
-_orig_sqlite_connect = _sqlite3_bft_orig.connect
-def _bft_sqlite_connect(*args, **kwargs):
-    kwargs.setdefault('timeout', 5.0)
-    conn = _orig_sqlite_connect(*args, **kwargs)
-    try:
-        conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA busy_timeout=5000;")
-        conn.execute("PRAGMA synchronous=NORMAL;")
-    except Exception:
-        pass
-    return conn
-_sqlite3_bft_orig.connect = _bft_sqlite_connect
-# -------------------------------
 
         from babylon60.engine.snapshots import SnapshotManager
 

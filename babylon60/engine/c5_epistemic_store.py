@@ -1,18 +1,9 @@
-# [C5-REAL] Exergy-Maximized
-"""
-C5-REAL Epistemic Store.
-Replaces the stochastic `fact_store_core` with deterministic EDG insertions.
-All mutations are routed through the MTKGuard. No raw SQLite inserts allowed.
-"""
-
-import json
-import logging
-import time
-
-import aiosqlite
-
 # --- C5-REAL BFT PATCH AIOSQLITE (R10) ---
 import aiosqlite as _aiosqlite_bft_orig
+
+from babylon60.engine.mtk_core import MTKGuard
+from babylon60.types.evidence import ClosurePayload
+
 _orig_aiosqlite_connect = _aiosqlite_bft_orig.connect
 def _bft_aiosqlite_connect(*args, **kwargs):
     kwargs.setdefault('timeout', 5.0)
@@ -39,8 +30,20 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from babylon60.engine.mtk_core import MTKGuard
-from babylon60.types.evidence import ClosurePayload
+# [C5-REAL] Exergy-Maximized
+"""
+C5-REAL Epistemic Store.
+Replaces the stochastic `fact_store_core` with deterministic EDG insertions.
+All mutations are routed through the MTKGuard. No raw SQLite inserts allowed.
+"""
+
+import json
+import logging
+import time
+
+import aiosqlite
+
+
 
 logger = logging.getLogger(__name__)
 

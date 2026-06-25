@@ -1,17 +1,3 @@
-#!/usr/bin/env python3
-# [C5-REAL] Exergy-Maximized
-"""Tests for Ouroboros Thermodynamic Pruning Engine v2.0.
-
-Covers:
-    - _build_topological_barrier() recursive ancestor protection
-    - execute_thermal_purge() dry-run, tier transitions, C5 immunity, JSON output
-    - Edge cases: empty DB, all-C5, circular parents, missing DB
-"""
-
-import json
-import os
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
@@ -27,6 +13,21 @@ def _bft_sqlite_connect(*args, **kwargs):
     return conn
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
+
+#!/usr/bin/env python3
+# [C5-REAL] Exergy-Maximized
+"""Tests for Ouroboros Thermodynamic Pruning Engine v2.0.
+
+Covers:
+    - _build_topological_barrier() recursive ancestor protection
+    - execute_thermal_purge() dry-run, tier transitions, C5 immunity, JSON output
+    - Edge cases: empty DB, all-C5, circular parents, missing DB
+"""
+
+import json
+import os
+import sqlite3
+
 import tempfile
 
 import pytest
@@ -36,6 +37,8 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 from ouroboros_prune import (
+
+
     COLD_THRESHOLD,
     MIN_EXERGY_THRESHOLD,
     WARM_THRESHOLD,

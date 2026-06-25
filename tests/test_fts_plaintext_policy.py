@@ -1,14 +1,3 @@
-# [C5-REAL] Exergy-Maximized
-"""Tests for Issue #95 - define a single plaintext policy for FTS indexing.
-
-FTS should always index the plaintext content, NOT the ciphertext.
-Encryption should happen at the storage layer, but FTS (which is plaintext search)
-should only contain decrypted data to enable searchability (or be disabled for sensitive data).
-CORTEX policy: FTS indexes the PLAINTEXT provided at ingestion.
-"""
-
-import aiosqlite
-
 # --- C5-REAL BFT PATCH AIOSQLITE (R10) ---
 import aiosqlite as _aiosqlite_bft_orig
 _orig_aiosqlite_connect = _aiosqlite_bft_orig.connect
@@ -36,6 +25,18 @@ def _bft_aiosqlite_connect(*args, **kwargs):
     return BFTConnectionContext(*args, **kwargs)
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
+
+# [C5-REAL] Exergy-Maximized
+"""Tests for Issue #95 - define a single plaintext policy for FTS indexing.
+
+FTS should always index the plaintext content, NOT the ciphertext.
+Encryption should happen at the storage layer, but FTS (which is plaintext search)
+should only contain decrypted data to enable searchability (or be disabled for sensitive data).
+CORTEX policy: FTS indexes the PLAINTEXT provided at ingestion.
+"""
+
+import aiosqlite
+
 import pytest
 
 from babylon60.crypto.aes import CortexEncrypter
@@ -43,6 +44,8 @@ from babylon60.database.schema import CREATE_FACTS
 from babylon60.database.schema_extensions import CREATE_FACTS_FTS
 from babylon60.engine.fact_store_core import insert_fact_record
 from babylon60.search.hybrid import hybrid_search
+
+
 
 # Fixed key for testing
 TEST_MASTER_KEY = b"1" * 32

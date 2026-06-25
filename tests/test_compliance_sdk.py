@@ -7,9 +7,29 @@ log_decision(), verify_chain(), export_audit().
 
 from __future__ import annotations
 
+# --- C5-REAL BFT PATCH (R10) ---
+import sqlite3 as _sqlite3_bft_orig
+_orig_sqlite_connect = _sqlite3_bft_orig.connect
+def _bft_sqlite_connect(*args, **kwargs):
+    kwargs.setdefault('timeout', 5.0)
+    conn = _orig_sqlite_connect(*args, **kwargs)
+    try:
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA busy_timeout=5000;")
+        conn.execute("PRAGMA synchronous=NORMAL;")
+    except Exception:
+        pass
+    return conn
+_sqlite3_bft_orig.connect = _bft_sqlite_connect
+# -------------------------------
+
+
+
 from pathlib import Path
 
 import pytest
+
+
 
 pytestmark = [
     pytest.mark.slow,
@@ -60,21 +80,6 @@ class TestLogDecision:
         # Retrieve the fact and check meta
         import sqlite3
 
-# --- C5-REAL BFT PATCH (R10) ---
-import sqlite3 as _sqlite3_bft_orig
-_orig_sqlite_connect = _sqlite3_bft_orig.connect
-def _bft_sqlite_connect(*args, **kwargs):
-    kwargs.setdefault('timeout', 5.0)
-    conn = _orig_sqlite_connect(*args, **kwargs)
-    try:
-        conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA busy_timeout=5000;")
-        conn.execute("PRAGMA synchronous=NORMAL;")
-    except Exception:
-        pass
-    return conn
-_sqlite3_bft_orig.connect = _bft_sqlite_connect
-# -------------------------------
 
         conn = sqlite3.connect(tracker._engine._db_path)
         cursor = conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id,))
@@ -99,21 +104,6 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
         )
         import sqlite3
 
-# --- C5-REAL BFT PATCH (R10) ---
-import sqlite3 as _sqlite3_bft_orig
-_orig_sqlite_connect = _sqlite3_bft_orig.connect
-def _bft_sqlite_connect(*args, **kwargs):
-    kwargs.setdefault('timeout', 5.0)
-    conn = _orig_sqlite_connect(*args, **kwargs)
-    try:
-        conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA busy_timeout=5000;")
-        conn.execute("PRAGMA synchronous=NORMAL;")
-    except Exception:
-        pass
-    return conn
-_sqlite3_bft_orig.connect = _bft_sqlite_connect
-# -------------------------------
 
         conn = sqlite3.connect(tracker._engine._db_path)
         cursor = conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id,))
@@ -135,21 +125,6 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
         )
         import sqlite3
 
-# --- C5-REAL BFT PATCH (R10) ---
-import sqlite3 as _sqlite3_bft_orig
-_orig_sqlite_connect = _sqlite3_bft_orig.connect
-def _bft_sqlite_connect(*args, **kwargs):
-    kwargs.setdefault('timeout', 5.0)
-    conn = _orig_sqlite_connect(*args, **kwargs)
-    try:
-        conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA busy_timeout=5000;")
-        conn.execute("PRAGMA synchronous=NORMAL;")
-    except Exception:
-        pass
-    return conn
-_sqlite3_bft_orig.connect = _bft_sqlite_connect
-# -------------------------------
 
         conn = sqlite3.connect(tracker._engine._db_path)
         cursor = conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,))
@@ -165,21 +140,6 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
         )
         import sqlite3
 
-# --- C5-REAL BFT PATCH (R10) ---
-import sqlite3 as _sqlite3_bft_orig
-_orig_sqlite_connect = _sqlite3_bft_orig.connect
-def _bft_sqlite_connect(*args, **kwargs):
-    kwargs.setdefault('timeout', 5.0)
-    conn = _orig_sqlite_connect(*args, **kwargs)
-    try:
-        conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA busy_timeout=5000;")
-        conn.execute("PRAGMA synchronous=NORMAL;")
-    except Exception:
-        pass
-    return conn
-_sqlite3_bft_orig.connect = _bft_sqlite_connect
-# -------------------------------
 
         conn = sqlite3.connect(tracker._engine._db_path)
         cursor = conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,))

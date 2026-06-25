@@ -1,15 +1,9 @@
-# [C5-REAL] Exergy-Maximized
-"""
-MTK (Minimal Trusted Kernel) - Python Boundary
-Enforces the Write-Path Contract (SAGA-less).
-SQLite is hooked via `mtk_authorizer_callback`.
-"""
-
-import hashlib
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
+import time
+from contextvars import ContextVar
+from typing import Optional
+
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
 def _bft_sqlite_connect(*args, **kwargs):
     kwargs.setdefault('timeout', 5.0)
@@ -23,9 +17,18 @@ def _bft_sqlite_connect(*args, **kwargs):
     return conn
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
-import time
-from contextvars import ContextVar
-from typing import Optional
+
+# [C5-REAL] Exergy-Maximized
+"""
+MTK (Minimal Trusted Kernel) - Python Boundary
+Enforces the Write-Path Contract (SAGA-less).
+SQLite is hooked via `mtk_authorizer_callback`.
+"""
+
+import hashlib
+import sqlite3
+
+
 
 # Context variable to hold the ephemeral token
 mtk_ephemeral_token: ContextVar[Optional[str]] = ContextVar("mtk_ephemeral_token", default=None)

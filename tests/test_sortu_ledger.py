@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
@@ -19,6 +17,11 @@ def _bft_sqlite_connect(*args, **kwargs):
     return conn
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
+
+
+
+import sqlite3
+
 import sys
 import time
 from datetime import datetime, timedelta, timezone
@@ -32,6 +35,8 @@ if _SCRIPTS_DIR.exists() and str(_SCRIPTS_DIR) not in sys.path:
 
 from sortu_ledger import SkillLedger
 from sortu_models import (
+
+
     AbortReason,
     SkillRecord,
     SortuState,

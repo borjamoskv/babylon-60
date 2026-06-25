@@ -1,9 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
-import re
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
@@ -19,6 +16,12 @@ def _bft_sqlite_connect(*args, **kwargs):
     return conn
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
+
+
+
+import re
+import sqlite3
+
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -26,6 +29,8 @@ from sortu_ledger import SkillLedger, TransitionEvent
 from sortu_models import AbortReason, ForgeAbortError, ForgeInvocation, SkillRecord, SortuState
 from sortu_overlap import OverlapDetector
 from verify_sortu import VerificationError, verify_tripartite
+
+
 
 
 def _now_utc() -> datetime:

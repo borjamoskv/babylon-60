@@ -6,10 +6,12 @@ Prevent circular imports by centralizing base CLI objects.
 
 from __future__ import annotations
 
-import asyncio
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
+
+from babylon60 import __version__
+from babylon60.config import DEFAULT_DB_PATH
+
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
 def _bft_sqlite_connect(*args, **kwargs):
     kwargs.setdefault('timeout', 5.0)
@@ -24,6 +26,9 @@ def _bft_sqlite_connect(*args, **kwargs):
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
 
+
+
+import asyncio
 from typing import TYPE_CHECKING
 
 import click
@@ -35,8 +40,7 @@ if TYPE_CHECKING:
     from babylon60.engine import CortexEngine
     from babylon60.extensions.timing import TimingTracker
 
-from babylon60 import __version__
-from babylon60.config import DEFAULT_DB_PATH
+
 
 # Theme and Console
 cortex_theme = Theme(

@@ -1,10 +1,3 @@
-import asyncio
-import base64
-import hashlib
-import json
-import os
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
@@ -20,6 +13,14 @@ def _bft_sqlite_connect(*args, **kwargs):
     return conn
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
+
+import asyncio
+import base64
+import hashlib
+import json
+import os
+import sqlite3
+
 import subprocess
 import sys
 import time
@@ -30,6 +31,8 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from cortex import CortexEngine
 from cortex.engine.causal.taint_engine import generate_secure_taint_token
+
+
 
 
 async def main():

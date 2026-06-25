@@ -1,13 +1,3 @@
-# [C5-REAL] Exergy-Maximized
-"""
-Tests for HodgeMemoryRouter in CORTEX memory routing.
-
-Reality Level: C5-REAL
-"""
-
-import pytest
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
@@ -23,8 +13,21 @@ def _bft_sqlite_connect(*args, **kwargs):
     return conn
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
+
+# [C5-REAL] Exergy-Maximized
+"""
+Tests for HodgeMemoryRouter in CORTEX memory routing.
+
+Reality Level: C5-REAL
+"""
+
+import pytest
+import sqlite3
+
 from pathlib import Path
 from babylon60.utils.tda_routing import HodgeMemoryRouter
+
+
 
 
 def test_memory_routing_discrete(tmp_path):

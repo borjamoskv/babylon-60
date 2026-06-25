@@ -1,3 +1,21 @@
+# --- C5-REAL BFT PATCH (R10) ---
+import sqlite3 as _sqlite3_bft_orig
+from contextvars import ContextVar
+
+_orig_sqlite_connect = _sqlite3_bft_orig.connect
+def _bft_sqlite_connect(*args, **kwargs):
+    kwargs.setdefault('timeout', 5.0)
+    conn = _orig_sqlite_connect(*args, **kwargs)
+    try:
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA busy_timeout=5000;")
+        conn.execute("PRAGMA synchronous=NORMAL;")
+    except Exception:
+        pass
+    return conn
+_sqlite3_bft_orig.connect = _bft_sqlite_connect
+# -------------------------------
+
 # [C5-REAL] Exergy-Maximized — Author: Borja Moskv
 """
 Minimal Trusted Kernel (MTK) - SQLite Authorizer Hook.
@@ -12,22 +30,7 @@ infers the validity of state transitions by enforcing this boundary.
 import logging
 import sqlite3
 
-# --- C5-REAL BFT PATCH (R10) ---
-import sqlite3 as _sqlite3_bft_orig
-_orig_sqlite_connect = _sqlite3_bft_orig.connect
-def _bft_sqlite_connect(*args, **kwargs):
-    kwargs.setdefault('timeout', 5.0)
-    conn = _orig_sqlite_connect(*args, **kwargs)
-    try:
-        conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA busy_timeout=5000;")
-        conn.execute("PRAGMA synchronous=NORMAL;")
-    except Exception:
-        pass
-    return conn
-_sqlite3_bft_orig.connect = _bft_sqlite_connect
-# -------------------------------
-from contextvars import ContextVar
+
 
 logger = logging.getLogger(__name__)
 
@@ -96,8 +99,8 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
 
         # Ignore writes to internal sqlite sequences/schemas or agent_messages transport table
         if arg1 or arg2:
-            is_internal = (arg1 and (arg1.startswith("sqlite_") or arg1 == "schema_version" or "agent_messages" in arg1 or "agent_msg" in arg1)) or \
-                          (arg2 and ("agent_messages" in arg2 or "agent_msg" in arg2))
+            is_internal = (arg1 and (arg1.startswith("sqlite_") or arg1.startswith("memory_") or arg1 == "schema_version" or arg1 == "cortex_meta" or "agent_messages" in arg1 or "agent_msg" in arg1)) or \
+                          (arg2 and ("agent_messages" in arg2 or "agent_msg" in arg2 or arg2 == "cortex_meta" or arg2.startswith("memory_")))
             if is_internal:
                 return sqlite3.SQLITE_OK
 

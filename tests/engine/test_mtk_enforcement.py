@@ -1,11 +1,3 @@
-# [C5-REAL] Exergy-Maximized
-"""
-MTK Physical Enforcement Test.
-Validates that the MTK acts as an absolute physical boundary against state mutation.
-"""
-
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
@@ -21,6 +13,15 @@ def _bft_sqlite_connect(*args, **kwargs):
     return conn
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
+
+# [C5-REAL] Exergy-Maximized
+"""
+MTK Physical Enforcement Test.
+Validates that the MTK acts as an absolute physical boundary against state mutation.
+"""
+
+import sqlite3
+
 import pytest
 import datetime
 
@@ -31,6 +32,8 @@ def force_mtk_enforcement(monkeypatch):
 from babylon60.engine.mtk_sqlite_authorizer import install_mtk_authorizer
 from babylon60.engine.mtk_core import MTKGuard
 from babylon60.types.evidence import ClosurePayload, EvidenceBundle
+
+
 
 @pytest.fixture
 def mtk_db():

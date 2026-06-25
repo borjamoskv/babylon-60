@@ -1,13 +1,13 @@
-# [C5-REAL] Exergy-Maximized
-import asyncio
-import json
-import logging
-import re
-import shutil
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
+import time
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
+
+from babylon60.config import DEFAULT_DB_PATH
+from babylon60.database.core import connect_async_ctx
+
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
 def _bft_sqlite_connect(*args, **kwargs):
     kwargs.setdefault('timeout', 5.0)
@@ -21,13 +21,16 @@ def _bft_sqlite_connect(*args, **kwargs):
     return conn
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
-import time
-from dataclasses import dataclass
-from datetime import datetime, timezone
-from pathlib import Path
 
-from babylon60.config import DEFAULT_DB_PATH
-from babylon60.database.core import connect_async_ctx
+# [C5-REAL] Exergy-Maximized
+import asyncio
+import json
+import logging
+import re
+import shutil
+import sqlite3
+
+
 
 __all__ = ["SnapshotManager", "SnapshotRecord"]
 

@@ -1,18 +1,9 @@
-# [C5-REAL] Exergy-Maximized
-"""
-Reflex Engine - Autonomic Responses and Immune Defense.
-Ω₅: High adrenaline triggers diagnostic healing.
-"""
-
-import asyncio
-import logging
-from pathlib import Path
-from typing import Any
-
-import aiosqlite
-
 # --- C5-REAL BFT PATCH AIOSQLITE (R10) ---
 import aiosqlite as _aiosqlite_bft_orig
+
+from babylon60.engine.endocrine import ENDOCRINE, HormoneType
+from babylon60.extensions.signals.bus import SignalBus
+
 _orig_aiosqlite_connect = _aiosqlite_bft_orig.connect
 def _bft_aiosqlite_connect(*args, **kwargs):
     kwargs.setdefault('timeout', 5.0)
@@ -39,8 +30,20 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from babylon60.engine.endocrine import ENDOCRINE, HormoneType
-from babylon60.extensions.signals.bus import SignalBus
+# [C5-REAL] Exergy-Maximized
+"""
+Reflex Engine - Autonomic Responses and Immune Defense.
+Ω₅: High adrenaline triggers diagnostic healing.
+"""
+
+import asyncio
+import logging
+from pathlib import Path
+from typing import Any
+
+import aiosqlite
+
+
 
 logger = logging.getLogger(__name__)
 

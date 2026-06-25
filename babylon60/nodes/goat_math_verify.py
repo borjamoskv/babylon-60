@@ -1,17 +1,10 @@
-#!/usr/bin/env python3
-"""
-cortex/nodes/goat_math_verify.py
-═══════════════════════════════════════════════════════════════
-GOAT-MATH: Script de Verificación Rápida C5-REAL
-Comprueba la integridad del DAG en la DB y lanza la validación
-de primitivas matemáticas en PyTorch/SciPy.
-═══════════════════════════════════════════════════════════════
-"""
-
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
+import sys
+from pathlib import Path
+
+from babylon60.database.core import connect as db_connect
+
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
 def _bft_sqlite_connect(*args, **kwargs):
     kwargs.setdefault('timeout', 5.0)
@@ -25,10 +18,20 @@ def _bft_sqlite_connect(*args, **kwargs):
     return conn
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
-import sys
-from pathlib import Path
 
-from babylon60.database.core import connect as db_connect
+#!/usr/bin/env python3
+"""
+cortex/nodes/goat_math_verify.py
+═══════════════════════════════════════════════════════════════
+GOAT-MATH: Script de Verificación Rápida C5-REAL
+Comprueba la integridad del DAG en la DB y lanza la validación
+de primitivas matemáticas en PyTorch/SciPy.
+═══════════════════════════════════════════════════════════════
+"""
+
+import sqlite3
+
+
 
 
 def verify_dag_integrity(db_path: str = "../../babylon60.db"):

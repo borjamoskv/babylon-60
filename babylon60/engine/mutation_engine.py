@@ -8,16 +8,12 @@ Reality Level: C5-REAL
 
 from __future__ import annotations
 
-import hashlib
-import json
-import logging
-from datetime import datetime, timezone
-from typing import Any
-
-import aiosqlite
-
 # --- C5-REAL BFT PATCH AIOSQLITE (R10) ---
 import aiosqlite as _aiosqlite_bft_orig
+
+from babylon60.engine._mutation_projectors import project
+from babylon60.extensions.axioms.topological_id import flake_gen
+
 _orig_aiosqlite_connect = _aiosqlite_bft_orig.connect
 def _bft_aiosqlite_connect(*args, **kwargs):
     kwargs.setdefault('timeout', 5.0)
@@ -44,8 +40,17 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from babylon60.engine._mutation_projectors import project
-from babylon60.extensions.axioms.topological_id import flake_gen
+
+
+import hashlib
+import json
+import logging
+from datetime import datetime, timezone
+from typing import Any
+
+import aiosqlite
+
+
 
 __all__ = ["FactMutationEngine"]
 logger = logging.getLogger("babylon60.mutation_engine")

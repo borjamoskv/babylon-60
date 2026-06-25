@@ -7,14 +7,12 @@ low-value, unverified, and non-causal facts to reduce system heat.
 
 from __future__ import annotations
 
-import logging
-import time
-from datetime import datetime, timedelta, timezone
-
-import aiosqlite
-
 # --- C5-REAL BFT PATCH AIOSQLITE (R10) ---
 import aiosqlite as _aiosqlite_bft_orig
+
+from babylon60.engine.mutation_engine import MUTATION_ENGINE
+from babylon60.memory.temporal import now_iso
+
 _orig_aiosqlite_connect = _aiosqlite_bft_orig.connect
 def _bft_aiosqlite_connect(*args, **kwargs):
     kwargs.setdefault('timeout', 5.0)
@@ -41,8 +39,15 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from babylon60.engine.mutation_engine import MUTATION_ENGINE
-from babylon60.memory.temporal import now_iso
+
+
+import logging
+import time
+from datetime import datetime, timedelta, timezone
+
+import aiosqlite
+
+
 
 logger = logging.getLogger("babylon60.evaporator")
 

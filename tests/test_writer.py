@@ -2,19 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
-import pytest
-
-from babylon60.database.writer import SqliteWriteWorker
-from babylon60.utils.result import Err, Ok
-
-
-@pytest.fixture
-def db_path(tmp_path: Path) -> str:
-    """Create a temp SQLite database with a test table."""
-    import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
@@ -30,6 +17,24 @@ def _bft_sqlite_connect(*args, **kwargs):
     return conn
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
+
+
+
+from pathlib import Path
+
+import pytest
+
+from babylon60.database.writer import SqliteWriteWorker
+from babylon60.utils.result import Err, Ok
+
+
+
+
+@pytest.fixture
+def db_path(tmp_path: Path) -> str:
+    """Create a temp SQLite database with a test table."""
+    import sqlite3
+
 
     db = str(tmp_path / "test_writer.db")
     conn = sqlite3.connect(db)
@@ -144,21 +149,6 @@ class TestTransaction:
         # Should have committed - verify via read
         import sqlite3
 
-# --- C5-REAL BFT PATCH (R10) ---
-import sqlite3 as _sqlite3_bft_orig
-_orig_sqlite_connect = _sqlite3_bft_orig.connect
-def _bft_sqlite_connect(*args, **kwargs):
-    kwargs.setdefault('timeout', 5.0)
-    conn = _orig_sqlite_connect(*args, **kwargs)
-    try:
-        conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA busy_timeout=5000;")
-        conn.execute("PRAGMA synchronous=NORMAL;")
-    except Exception:
-        pass
-    return conn
-_sqlite3_bft_orig.connect = _bft_sqlite_connect
-# -------------------------------
 
         conn = sqlite3.connect(writer._db_path)
         cursor = conn.execute("SELECT COUNT(*) FROM items WHERE name LIKE 'tx_%'")
@@ -169,21 +159,6 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
     async def test_transaction_rollback_on_exception(self, writer: SqliteWriteWorker):
         import sqlite3
 
-# --- C5-REAL BFT PATCH (R10) ---
-import sqlite3 as _sqlite3_bft_orig
-_orig_sqlite_connect = _sqlite3_bft_orig.connect
-def _bft_sqlite_connect(*args, **kwargs):
-    kwargs.setdefault('timeout', 5.0)
-    conn = _orig_sqlite_connect(*args, **kwargs)
-    try:
-        conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA busy_timeout=5000;")
-        conn.execute("PRAGMA synchronous=NORMAL;")
-    except Exception:
-        pass
-    return conn
-_sqlite3_bft_orig.connect = _bft_sqlite_connect
-# -------------------------------
 
         try:
             async with writer.transaction() as tx:

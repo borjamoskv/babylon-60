@@ -1,16 +1,13 @@
-# [C5-REAL] Exergy-Maximized
-"""
-Context Engine CLI Commands.
-
-CLI interface for ambient context inference and signal inspection.
-"""
-
-import asyncio
-import json
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
+
+import click
+from rich.panel import Panel
+from rich.table import Table
+
+from babylon60.cli.common import DEFAULT_DB, cli, console, get_engine
+from babylon60.cli.errors import err_empty_results, handle_cli_error
+
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
 def _bft_sqlite_connect(*args, **kwargs):
     kwargs.setdefault('timeout', 5.0)
@@ -25,12 +22,18 @@ def _bft_sqlite_connect(*args, **kwargs):
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
 
-import click
-from rich.panel import Panel
-from rich.table import Table
+# [C5-REAL] Exergy-Maximized
+"""
+Context Engine CLI Commands.
 
-from babylon60.cli.common import DEFAULT_DB, cli, console, get_engine
-from babylon60.cli.errors import err_empty_results, handle_cli_error
+CLI interface for ambient context inference and signal inspection.
+"""
+
+import asyncio
+import json
+import sqlite3
+
+
 
 __all__ = [
     "context",

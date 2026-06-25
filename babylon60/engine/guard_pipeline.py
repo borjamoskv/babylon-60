@@ -9,13 +9,9 @@ Guards that fail to import at registration time are silently skipped.
 
 from __future__ import annotations
 
-import logging
-from typing import TYPE_CHECKING, Any
-
-import aiosqlite
-
 # --- C5-REAL BFT PATCH AIOSQLITE (R10) ---
 import aiosqlite as _aiosqlite_bft_orig
+
 _orig_aiosqlite_connect = _aiosqlite_bft_orig.connect
 def _bft_aiosqlite_connect(*args, **kwargs):
     kwargs.setdefault('timeout', 5.0)
@@ -41,6 +37,16 @@ def _bft_aiosqlite_connect(*args, **kwargs):
     return BFTConnectionContext(*args, **kwargs)
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
+
+
+
+import logging
+from typing import TYPE_CHECKING, Any
+
+import aiosqlite
+
+
+
 
 if TYPE_CHECKING:
     from babylon60.extensions.interfaces.store_pipeline import (

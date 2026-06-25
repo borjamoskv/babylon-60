@@ -1,11 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
-import dataclasses
-import json
-import shutil
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
@@ -21,6 +16,14 @@ def _bft_sqlite_connect(*args, **kwargs):
     return conn
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
+
+
+
+import dataclasses
+import json
+import shutil
+import sqlite3
+
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
@@ -38,6 +41,8 @@ from babylon60.ledger.replay import (
 )
 from babylon60.ledger.store import LedgerStore
 from babylon60.ledger.writer import LedgerWriter
+
+
 
 ACTOR_ID = "agent-risk-01"
 TENANT_ID = "tenant-acme"

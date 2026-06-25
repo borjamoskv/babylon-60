@@ -1,19 +1,3 @@
-# [C5-REAL] Exergy-Maximized
-"""
-Red Team Stress Testing Suite for Causal Graph and Audit Ledger.
-
-Simulates Byzantine failures, state collisions, and high-concurrency race conditions.
-Ensures production-level load stability and determinism under pressure.
-"""
-
-import asyncio
-import hashlib
-import os
-import time
-from pathlib import Path
-
-import aiosqlite
-
 # --- C5-REAL BFT PATCH AIOSQLITE (R10) ---
 import aiosqlite as _aiosqlite_bft_orig
 _orig_aiosqlite_connect = _aiosqlite_bft_orig.connect
@@ -41,6 +25,23 @@ def _bft_aiosqlite_connect(*args, **kwargs):
     return BFTConnectionContext(*args, **kwargs)
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
+
+# [C5-REAL] Exergy-Maximized
+"""
+Red Team Stress Testing Suite for Causal Graph and Audit Ledger.
+
+Simulates Byzantine failures, state collisions, and high-concurrency race conditions.
+Ensures production-level load stability and determinism under pressure.
+"""
+
+import asyncio
+import hashlib
+import os
+import time
+from pathlib import Path
+
+import aiosqlite
+
 import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
@@ -51,6 +52,8 @@ from cortex.engine.causal.taint_engine import (
     generate_secure_taint_token,
 )
 from cortex.guards.contradiction_guard import detect_contradictions
+
+
 
 # Configure tests
 pytestmark = [pytest.mark.asyncio, pytest.mark.slow]

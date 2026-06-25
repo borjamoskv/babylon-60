@@ -10,19 +10,6 @@ Covers:
 
 from __future__ import annotations
 
-import base64
-import os
-
-os.environ.setdefault("CORTEX_TESTING", "1")
-os.environ.setdefault(
-    "CORTEX_MASTER_KEY",
-    base64.b64encode(os.urandom(32)).decode(),
-)
-
-import inspect
-
-import aiosqlite
-
 # --- C5-REAL BFT PATCH AIOSQLITE (R10) ---
 import aiosqlite as _aiosqlite_bft_orig
 _orig_aiosqlite_connect = _aiosqlite_bft_orig.connect
@@ -50,12 +37,30 @@ def _bft_aiosqlite_connect(*args, **kwargs):
     return BFTConnectionContext(*args, **kwargs)
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
+
+
+
+import base64
+import os
+
+os.environ.setdefault("CORTEX_TESTING", "1")
+os.environ.setdefault(
+    "CORTEX_MASTER_KEY",
+    base64.b64encode(os.urandom(32)).decode(),
+)
+
+import inspect
+
+import aiosqlite
+
 import pytest
 
 from babylon60.engine.fact_store_core import insert_fact_record
 from babylon60.engine.mixins.base import FACT_COLUMNS
 from babylon60.engine.models import Fact
 from babylon60.engine.query_mixin import QueryMixin
+
+
 
 
 @pytest.fixture

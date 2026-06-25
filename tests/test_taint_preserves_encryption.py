@@ -1,14 +1,3 @@
-# [C5-REAL] Exergy-Maximized
-"""Tests for Issue #96 - preserve encrypted metadata during taint propagation.
-
-Causality taint propagation must not corrupt encrypted metadata columns
-or leak tenant-specific ciphertext across boundaries.
-"""
-
-import json
-
-import aiosqlite
-
 # --- C5-REAL BFT PATCH AIOSQLITE (R10) ---
 import aiosqlite as _aiosqlite_bft_orig
 _orig_aiosqlite_connect = _aiosqlite_bft_orig.connect
@@ -36,10 +25,24 @@ def _bft_aiosqlite_connect(*args, **kwargs):
     return BFTConnectionContext(*args, **kwargs)
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
+
+# [C5-REAL] Exergy-Maximized
+"""Tests for Issue #96 - preserve encrypted metadata during taint propagation.
+
+Causality taint propagation must not corrupt encrypted metadata columns
+or leak tenant-specific ciphertext across boundaries.
+"""
+
+import json
+
+import aiosqlite
+
 import pytest
 
 from babylon60.crypto.aes import CortexEncrypter
 from babylon60.engine.causality import KRGSE_DERIVED_FROM, AsyncCausalGraph, TaintStatus
+
+
 
 # Use a fixed 32-byte master key for deterministic testing
 TEST_MASTER_KEY = b"0" * 32

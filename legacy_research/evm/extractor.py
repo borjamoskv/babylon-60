@@ -86,6 +86,12 @@ class OuroborosExtractor:
         """Lock the claim into the Master Ledger using MTK."""
         claim_content = f"Ouroboros EVM Extraction: Claimed {yield_eth} ETH on chain {chain_id} at block {block}. TX: {tx_hash}"
         
+        import hashlib
+        import time
+        nonce = str(time.time_ns())
+        project = "ouroboros_fund"
+        logos_signature = hashlib.sha256(f"{claim_content}{nonce}{project}".encode()).hexdigest()
+        
         taint_token = generate_secure_taint_token(
             agent_id=self.agent_id,
             session_id="ouroboros_run",
@@ -96,7 +102,7 @@ class OuroborosExtractor:
         token_id = mtk_active_token.set(f"mtk_auth_ouroboros_{tx_hash[-16:]}")
         try:
             fact_id = await self.engine.store(
-                project="ouroboros_fund",
+                project=project,
                 content=claim_content,
                 fact_type="bounty_claim",
                 confidence="C5",
@@ -106,7 +112,9 @@ class OuroborosExtractor:
                     "chain_id": chain_id,
                     "yield_eth": yield_eth,
                     "tx_hash": tx_hash,
-                    "eu_ai_act_exempt": True  # Automated trading exemption
+                    "eu_ai_act_exempt": True,
+                    "nonce": nonce,
+                    "logos_signature": logos_signature
                 }
             )
             return fact_id

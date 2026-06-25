@@ -1,8 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
@@ -19,9 +17,16 @@ def _bft_sqlite_connect(*args, **kwargs):
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
 
+
+
+import sqlite3
+
+
 from babylon60.database.schema import SCHEMA_VERSION
 from babylon60.migrations import get_current_version, run_migrations
 from babylon60.migrations.registry import MIGRATIONS
+
+
 
 
 def _columns(conn: sqlite3.Connection, table: str) -> set[str]:

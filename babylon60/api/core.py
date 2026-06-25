@@ -9,11 +9,11 @@ Optimized for high-concurrency memory lookups and secure agentic access.
 
 from __future__ import annotations
 
-import logging
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
+
+from babylon60.routes import llm_proxy
+
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
 def _bft_sqlite_connect(*args, **kwargs):
     kwargs.setdefault('timeout', 5.0)
@@ -27,6 +27,11 @@ def _bft_sqlite_connect(*args, **kwargs):
     return conn
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
+
+
+
+import logging
+import sqlite3
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -402,7 +407,7 @@ from babylon60.api import events as events_router
 app.include_router(events_router.router)
 
 # V5 LLM Proxy Middleware (Exergy Labyrinth)
-from babylon60.routes import llm_proxy
+
 
 app.include_router(llm_proxy.router)
 

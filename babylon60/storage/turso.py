@@ -9,12 +9,11 @@ resilient connection management.
 
 from __future__ import annotations
 
-import asyncio
-import logging
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
+import time
+from typing import Any, Final
+
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
 def _bft_sqlite_connect(*args, **kwargs):
     kwargs.setdefault('timeout', 5.0)
@@ -28,8 +27,14 @@ def _bft_sqlite_connect(*args, **kwargs):
     return conn
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
-import time
-from typing import Any, Final
+
+
+
+import asyncio
+import logging
+import sqlite3
+
+
 
 __all__ = ["TursoBackend"]
 

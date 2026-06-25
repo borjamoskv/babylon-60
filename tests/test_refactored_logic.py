@@ -1,10 +1,3 @@
-# [C5-REAL] Exergy-Maximized
-import pytest
-
-pytest.importorskip("numpy")
-import asyncio
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
@@ -20,6 +13,14 @@ def _bft_sqlite_connect(*args, **kwargs):
     return conn
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
+
+# [C5-REAL] Exergy-Maximized
+import pytest
+
+pytest.importorskip("numpy")
+import asyncio
+import sqlite3
+
 import numpy as np
 from babylon60.core.lineage import LineageVerifier
 from babylon60.memory.memory_archaeology import MemoryArchaeologist
@@ -27,6 +28,8 @@ from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import Any
 from unittest.mock import AsyncMock
+
+
 
 
 @dataclass

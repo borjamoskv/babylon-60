@@ -2,12 +2,20 @@
 
 from __future__ import annotations
 
-import asyncio
-import logging
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
+
+from babylon60.engine.apotheosis_audits_mixin import ApotheosisAuditsMixin
+from babylon60.engine.cognitive import scan_file_entropy
+from babylon60.engine.endocrine import ENDOCRINE, HormoneType
+from babylon60.engine.manifestation import transfigure_ui
+from babylon60.engine.reflex import trigger_autonomic_reflex
+from babylon60.engine.rem_cycle import REMCoordinator
+from babylon60.extensions.immune.membrane import ImmuneMembrane, Verdict
+from babylon60.extensions.signals.bus import SignalBus
+from babylon60.services.notebooklm import NotebookLMService
+from babylon60.services.trust import TrustService
+
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
 def _bft_sqlite_connect(*args, **kwargs):
     kwargs.setdefault('timeout', 5.0)
@@ -21,6 +29,12 @@ def _bft_sqlite_connect(*args, **kwargs):
     return conn
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
+
+
+
+import asyncio
+import logging
+import sqlite3
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -51,16 +65,7 @@ else:
             """Fallback class when watchdog is not installed."""
 
 
-from babylon60.engine.apotheosis_audits_mixin import ApotheosisAuditsMixin
-from babylon60.engine.cognitive import scan_file_entropy
-from babylon60.engine.endocrine import ENDOCRINE, HormoneType
-from babylon60.engine.manifestation import transfigure_ui
-from babylon60.engine.reflex import trigger_autonomic_reflex
-from babylon60.engine.rem_cycle import REMCoordinator
-from babylon60.extensions.immune.membrane import ImmuneMembrane, Verdict
-from babylon60.extensions.signals.bus import SignalBus
-from babylon60.services.notebooklm import NotebookLMService
-from babylon60.services.trust import TrustService
+
 
 logger = logging.getLogger(__name__)
 

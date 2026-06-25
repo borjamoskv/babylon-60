@@ -1,3 +1,20 @@
+# --- C5-REAL BFT PATCH (R10) ---
+import sqlite3 as _sqlite3_bft_orig
+_orig_sqlite_connect = _sqlite3_bft_orig.connect
+def _bft_sqlite_connect(*args, **kwargs):
+    kwargs.setdefault('timeout', 5.0)
+    conn = _orig_sqlite_connect(*args, **kwargs)
+    try:
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA busy_timeout=5000;")
+        conn.execute("PRAGMA synchronous=NORMAL;")
+    except Exception:
+        pass
+    return conn
+_sqlite3_bft_orig.connect = _bft_sqlite_connect
+# -------------------------------
+
+
 #!/usr/bin/env python3
 # [C5-REAL] Exergy-Maximized
 """
@@ -26,21 +43,6 @@ import logging
 import math
 import sqlite3
 
-# --- C5-REAL BFT PATCH (R10) ---
-import sqlite3 as _sqlite3_bft_orig
-_orig_sqlite_connect = _sqlite3_bft_orig.connect
-def _bft_sqlite_connect(*args, **kwargs):
-    kwargs.setdefault('timeout', 5.0)
-    conn = _orig_sqlite_connect(*args, **kwargs)
-    try:
-        conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA busy_timeout=5000;")
-        conn.execute("PRAGMA synchronous=NORMAL;")
-    except Exception:
-        pass
-    return conn
-_sqlite3_bft_orig.connect = _bft_sqlite_connect
-# -------------------------------
 import sys
 import time
 from dataclasses import dataclass, field
@@ -48,6 +50,10 @@ from pathlib import Path
 from typing import Optional, Protocol, runtime_checkable
 
 from cortex.engine.semantic_collapse import collapse_eligible, kolmogorov_approx, semantic_collapse, compute_ncd
+
+
+
+
 
 # ─── Thermodynamic Constants ─────────────────────────────────────────
 MIN_EXERGY_THRESHOLD = 0.125  # 3 half-lives → tombstone

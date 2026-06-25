@@ -1,7 +1,3 @@
-# [C5-REAL] Exergy-Maximized
-import pytest
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
@@ -17,10 +13,17 @@ def _bft_sqlite_connect(*args, **kwargs):
     return conn
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
+
+# [C5-REAL] Exergy-Maximized
+import pytest
+import sqlite3
+
 import time
 from pathlib import Path
 from unittest.mock import patch
 from babylon60.extensions.swarm.budget import SwarmBudgetManager, HARD_LIMIT_USD, get_budget_manager
+
+
 
 
 @pytest.fixture

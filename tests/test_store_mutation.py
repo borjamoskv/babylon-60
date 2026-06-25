@@ -1,14 +1,3 @@
-# [C5-REAL] Exergy-Maximized
-import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
-from babylon60.engine.store_mutation import (
-    deprecate_impl_logic,
-    invalidate_impl_logic,
-    purge_logic,
-    _fetch_fact_state,
-)
-import aiosqlite
-
 # --- C5-REAL BFT PATCH AIOSQLITE (R10) ---
 import aiosqlite as _aiosqlite_bft_orig
 _orig_aiosqlite_connect = _aiosqlite_bft_orig.connect
@@ -36,6 +25,20 @@ def _bft_aiosqlite_connect(*args, **kwargs):
     return BFTConnectionContext(*args, **kwargs)
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
+
+# [C5-REAL] Exergy-Maximized
+import pytest
+from unittest.mock import AsyncMock, patch, MagicMock
+from babylon60.engine.store_mutation import (
+    deprecate_impl_logic,
+    invalidate_impl_logic,
+    purge_logic,
+    _fetch_fact_state,
+)
+import aiosqlite
+
+
+
 
 
 @pytest.mark.asyncio

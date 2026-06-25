@@ -8,12 +8,6 @@
 
 from __future__ import annotations
 
-import hashlib
-import importlib
-import inspect
-import os
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
@@ -29,12 +23,23 @@ def _bft_sqlite_connect(*args, **kwargs):
     return conn
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
+
+
+
+import hashlib
+import importlib
+import inspect
+import os
+import sqlite3
+
 import sys
 import types
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SKILLS_ROOT = Path.home() / ".gemini" / "config" / "skills"

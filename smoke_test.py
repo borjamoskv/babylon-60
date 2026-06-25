@@ -1,8 +1,3 @@
-import asyncio
-import json
-import os
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
@@ -18,7 +13,15 @@ def _bft_sqlite_connect(*args, **kwargs):
     return conn
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
+
+import asyncio
+import json
+import os
+import sqlite3
+
 import time
+
+
 
 
 async def main():

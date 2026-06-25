@@ -1,8 +1,3 @@
-# [C5-REAL] Exergy-Maximized
-import asyncio
-import json
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
@@ -18,6 +13,12 @@ def _bft_sqlite_connect(*args, **kwargs):
     return conn
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
+
+# [C5-REAL] Exergy-Maximized
+import asyncio
+import json
+import sqlite3
+
 import time
 from unittest.mock import AsyncMock, MagicMock
 
@@ -29,6 +30,8 @@ from cortex.engine.auth_gateway import QuorumGateway
 from cortex.engine.causal.anomaly_bridge import AnomalyBridge
 from cortex.engine.event_sovereignty import EventSovereigntyRuntime
 from cortex.extensions.security.signatures import Ed25519Signer
+
+
 
 
 # Fixtures for crypto

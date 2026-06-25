@@ -3,13 +3,6 @@ CORTEX-Persist - Million-Database / Many-Database Agent Persistence Benchmark (C
 Validates H-MILLION-DB-01 hypothesis: Isolated SQLite-per-Tenant vs Central Monolithic DB.
 Author: Borja Moskv (borjamoskv)
 """
-import asyncio
-import os
-import shutil
-import time
-import uuid
-import random
-import aiosqlite
 
 # --- C5-REAL BFT PATCH AIOSQLITE (R10) ---
 import aiosqlite as _aiosqlite_bft_orig
@@ -38,8 +31,20 @@ def _bft_aiosqlite_connect(*args, **kwargs):
     return BFTConnectionContext(*args, **kwargs)
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
+
+
+import asyncio
+import os
+import shutil
+import time
+import uuid
+import random
+import aiosqlite
+
 from rich.console import Console
 from rich.table import Table
+
+
 
 console = Console()
 

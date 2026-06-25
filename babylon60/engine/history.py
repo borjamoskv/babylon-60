@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-import logging
-from typing import Any
-
-import aiosqlite
-
 # --- C5-REAL BFT PATCH AIOSQLITE (R10) ---
 import aiosqlite as _aiosqlite_bft_orig
+
+from babylon60.engine.mixins.base import FACT_COLUMNS, FACT_JOIN, EngineMixinBase
+from babylon60.extensions.security.tenant import get_tenant_id
+from babylon60.memory.temporal import time_travel_filter
+
 _orig_aiosqlite_connect = _aiosqlite_bft_orig.connect
 def _bft_aiosqlite_connect(*args, **kwargs):
     kwargs.setdefault('timeout', 5.0)
@@ -35,9 +35,14 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from babylon60.engine.mixins.base import FACT_COLUMNS, FACT_JOIN, EngineMixinBase
-from babylon60.extensions.security.tenant import get_tenant_id
-from babylon60.memory.temporal import time_travel_filter
+
+
+import logging
+from typing import Any
+
+import aiosqlite
+
+
 
 logger = logging.getLogger("babylon60.engine.history")
 

@@ -6,11 +6,15 @@ Detects causal chains and projects exponential returns of sovereign agent work.
 
 from __future__ import annotations
 
-import logging
-import sqlite3
-
 # --- C5-REAL BFT PATCH (R10) ---
 import sqlite3 as _sqlite3_bft_orig
+from dataclasses import dataclass, field
+from typing import Any
+
+from babylon60.database.core import connect as db_connect
+from babylon60.extensions.signals.bus import SignalBus
+from babylon60.memory.temporal import now_iso
+
 _orig_sqlite_connect = _sqlite3_bft_orig.connect
 def _bft_sqlite_connect(*args, **kwargs):
     kwargs.setdefault('timeout', 5.0)
@@ -24,12 +28,13 @@ def _bft_sqlite_connect(*args, **kwargs):
     return conn
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
-from dataclasses import dataclass, field
-from typing import Any
 
-from babylon60.database.core import connect as db_connect
-from babylon60.extensions.signals.bus import SignalBus
-from babylon60.memory.temporal import now_iso
+
+
+import logging
+import sqlite3
+
+
 
 logger = logging.getLogger("babylon60.chronos.compound")
 

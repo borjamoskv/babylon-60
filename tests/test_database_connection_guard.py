@@ -1,3 +1,19 @@
+# --- C5-REAL BFT PATCH (R10) ---
+import sqlite3 as _sqlite3_bft_orig
+_orig_sqlite_connect = _sqlite3_bft_orig.connect
+def _bft_sqlite_connect(*args, **kwargs):
+    kwargs.setdefault('timeout', 5.0)
+    conn = _orig_sqlite_connect(*args, **kwargs)
+    try:
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA busy_timeout=5000;")
+        conn.execute("PRAGMA synchronous=NORMAL;")
+    except Exception:
+        pass
+    return conn
+_sqlite3_bft_orig.connect = _bft_sqlite_connect
+# -------------------------------
+
 # [C5-REAL] Exergy-Maximized
 """Tests for babylon60.database.connection_guard - CI/lint scanner for raw sqlite3 usage.
 
@@ -10,6 +26,8 @@ from pathlib import Path
 import pytest
 
 from babylon60.database.connection_guard import (
+
+
     ConnectionViolation,
     _scan_file_lines,
     scan_raw_connects,
@@ -40,21 +58,6 @@ class TestScanFileLines:
             textwrap.dedent("""\
             import sqlite3
 
-# --- C5-REAL BFT PATCH (R10) ---
-import sqlite3 as _sqlite3_bft_orig
-_orig_sqlite_connect = _sqlite3_bft_orig.connect
-def _bft_sqlite_connect(*args, **kwargs):
-    kwargs.setdefault('timeout', 5.0)
-    conn = _orig_sqlite_connect(*args, **kwargs)
-    try:
-        conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA busy_timeout=5000;")
-        conn.execute("PRAGMA synchronous=NORMAL;")
-    except Exception:
-        pass
-    return conn
-_sqlite3_bft_orig.connect = _bft_sqlite_connect
-# -------------------------------
             conn = sqlite3.connect("test.db")
         """)
         )
@@ -91,21 +94,6 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
             textwrap.dedent("""\
             import sqlite3
 
-# --- C5-REAL BFT PATCH (R10) ---
-import sqlite3 as _sqlite3_bft_orig
-_orig_sqlite_connect = _sqlite3_bft_orig.connect
-def _bft_sqlite_connect(*args, **kwargs):
-    kwargs.setdefault('timeout', 5.0)
-    conn = _orig_sqlite_connect(*args, **kwargs)
-    try:
-        conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA busy_timeout=5000;")
-        conn.execute("PRAGMA synchronous=NORMAL;")
-    except Exception:
-        pass
-    return conn
-_sqlite3_bft_orig.connect = _bft_sqlite_connect
-# -------------------------------
             conn1 = sqlite3.connect("a.db")
             conn2 = sqlite3.connect("b.db")
         """)

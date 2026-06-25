@@ -6,16 +6,15 @@ Reality Level: C5-REAL
 
 from __future__ import annotations
 
-import asyncio
-import logging
-import threading
-from pathlib import Path
-from typing import TYPE_CHECKING, Any
-
-import aiosqlite
-
 # --- C5-REAL BFT PATCH AIOSQLITE (R10) ---
 import aiosqlite as _aiosqlite_bft_orig
+
+from babylon60.engine.query_mixin import QueryMixin
+from babylon60.engine.search_mixin import SearchMixin
+from babylon60.engine.store_mixin import StoreMixin
+from babylon60.engine.sync_mixin import SyncMixin
+from babylon60.engine.transaction_mixin import TransactionMixin
+
 _orig_aiosqlite_connect = _aiosqlite_bft_orig.connect
 def _bft_aiosqlite_connect(*args, **kwargs):
     kwargs.setdefault('timeout', 5.0)
@@ -42,6 +41,16 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
+
+
+import asyncio
+import logging
+import threading
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+import aiosqlite
+
 from babylon60.config import DEFAULT_DB_PATH
 from babylon60.engine._engine_connection import ConnectionMixin
 from babylon60.engine._engine_delegates import DelegatesMixin
@@ -55,11 +64,7 @@ try:
     from babylon60.engine.primitive_exergy_agent import PrimitiveExergyMaximizerAgent
 except (ImportError, AttributeError, NameError):
     PrimitiveExergyMaximizerAgent = None
-from babylon60.engine.query_mixin import QueryMixin
-from babylon60.engine.search_mixin import SearchMixin
-from babylon60.engine.store_mixin import StoreMixin
-from babylon60.engine.sync_mixin import SyncMixin
-from babylon60.engine.transaction_mixin import TransactionMixin
+
 
 if TYPE_CHECKING:
     from babylon60.consensus.manager import ConsensusManager
@@ -108,6 +113,7 @@ class CortexEngine(
     def __init__(
         self, db_path: str | Path | Any = DEFAULT_DB_PATH, auto_embed: bool = True, pool: Any = None
     ):
+        OptimizationMixin.__init__(self)
         self._skills_verified: set[str] = set()
         if not isinstance(db_path, str | Path) and (not hasattr(db_path, "acquire")):
             raise TypeError(

@@ -314,8 +314,8 @@ def bounty_daemon_cmd(interval: int, db: str) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def bounty_evm_hunt_cmd(chain_id: int, db: str) -> None:
     """Ouroboros EVM micro-bounty extraction swarm."""
-    from babylon60.evm.extractor import OuroborosExtractor
     from babylon60.crypto.keys import ZKSwarmIdentity
+    from babylon60.evm.extractor import OuroborosExtractor
     
     console.print(f"[bold cyan]Igniting Ouroboros EVM Extractor on Chain {chain_id}...[/]")
     engine = get_engine(db)
@@ -328,7 +328,7 @@ def bounty_evm_hunt_cmd(chain_id: int, db: str) -> None:
         return await extractor.scan_and_extract(chain_id)
 
     try:
-        with console.status(f"[bold magenta]Scanning MEV mempool & DeFi bounties...[/]"):
+        with console.status("[bold magenta]Scanning MEV mempool & DeFi bounties...[/]"):
             results = _run_async(_run())
 
         console.print()
@@ -347,7 +347,7 @@ def bounty_evm_hunt_cmd(chain_id: int, db: str) -> None:
                     str(r["fact_id"])
                 )
             console.print(table)
-            console.print(f"\\n[bold green] Extraction complete. Yield secured.[/]\\n")
+            console.print("\\n[bold green] Extraction complete. Yield secured.[/]\\n")
         else:
             console.print("[dim]No micro-bounties or MEV extracted in this window.[/]")
 
