@@ -28,9 +28,9 @@ except ImportError:
     mtk_active_token: ContextVar[str | None] = ContextVar("mtk_active_token", default=None)
 
 # Fallback si no existe db_connect en path estándar
+import typing
 try:
     from cortex.database.core import connect as _db_connect
-    import typing
     db_connect: typing.Any = _db_connect
 except ImportError:
     # Shim para standalone execution
@@ -40,7 +40,7 @@ except ImportError:
         conn.execute("PRAGMA journal_mode=WAL;")
         conn.execute("PRAGMA busy_timeout=5000;")
         return conn
-    db_connect: typing.Any = _fallback_db_connect
+    db_connect = _fallback_db_connect  # pyright: ignore[reportRedeclaration]
 
 
 class Criticality(Enum):
