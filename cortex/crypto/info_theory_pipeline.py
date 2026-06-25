@@ -4,17 +4,13 @@ import secrets
 import logging
 from typing import Tuple
 
-try:
-    from legacy_research.crypto.obfuscation_mac import InformationTheoreticSecurity
-    from legacy_research.crypto.ephemeral_burn import ApoptosisBurner
-    from legacy_research.crypto.shamir_trng import CortexShamirTRNG
-except ImportError:
-    # Fallback paths if executed outside main context
-    import sys
-    sys.path.insert(0, os.path.abspath('.'))
-    from legacy_research.crypto.obfuscation_mac import InformationTheoreticSecurity
-    from legacy_research.crypto.ephemeral_burn import ApoptosisBurner
-    from legacy_research.crypto.shamir_trng import CortexShamirTRNG
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from obfuscation_mac import InformationTheoreticSecurity
+from ephemeral_burn import ApoptosisBurner
+from shamir_trng import CortexShamirTRNG
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [C5-REAL] %(message)s")
 logger = logging.getLogger("info_theory_pipeline")
