@@ -153,15 +153,30 @@ pub fn compute_friston_penalty(exergy: f64, complexity: f64, accuracy: f64) -> P
 #[pyclass]
 #[derive(Clone)]
 pub struct RetrievalNode {
+    #[pyo3(get, set)]
     pub fact_id: String,
-    pub score: f64,
+    #[pyo3(get, set)]
+    pub ancestry_overlap: u16,
+    #[pyo3(get, set)]
+    pub ledger_overlap: u16,
+    #[pyo3(get, set)]
+    pub witness_overlap: u16,
+    #[pyo3(get, set)]
+    pub temporal_overlap: u16,
 }
 
 #[pymethods]
 impl RetrievalNode {
     #[new]
-    pub fn new(fact_id: String, score: f64) -> Self {
-        RetrievalNode { fact_id, score }
+    #[pyo3(signature = (fact_id, ancestry_overlap, ledger_overlap, witness_overlap, temporal_overlap=0))]
+    pub fn new(fact_id: String, ancestry_overlap: u16, ledger_overlap: u16, witness_overlap: u16, temporal_overlap: u16) -> Self {
+        RetrievalNode {
+            fact_id,
+            ancestry_overlap,
+            ledger_overlap,
+            witness_overlap,
+            temporal_overlap,
+        }
     }
 }
 

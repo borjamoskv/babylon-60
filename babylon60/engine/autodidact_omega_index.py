@@ -20,6 +20,7 @@ from babylon60.math.babylon import Babylon60
 import logging
 import re
 from dataclasses import dataclass
+from typing import Any
 from pathlib import Path
 
 logger = logging.getLogger("babylon60.autodidact.omega")
@@ -87,31 +88,48 @@ class AutodidactOmegaIndex:
 
         content = path.read_text(encoding="utf-8")
 
-        # Match blocks: ### N. Name\n  * **Topología Algebraica:** `...`  (or LaTeX \[...\])
-        # then  * **Mapping C5-REAL (`C5-KEY`):** description
-        block_pattern = re.compile(
-            r"### (\d+)\.\s+(.+?)\n"          # id + name
-            r".*?Topología Algebraica:\*\*\s*"
-            r"(?:`([^`]+)`|\\\[(.+?)\\\])"    # backtick OR \[...\]
-            r".*?Mapping C5-REAL \(`([^`]+)`\):\s*\**\s*(.+?)(?=\n### |\n---|\Z)",
-            re.DOTALL | re.IGNORECASE,
-        )
+        # Parse O(N) line by line to avoid re.DOTALL entropy
+        nid, name, algebra, c5_map = None, "", "", ""
+        desc_lines = []
+        state = "SEARCH"
 
-        for m in block_pattern.finditer(content):
-            nid      = int(m.group(1))
-            name     = m.group(2).strip()
-            alg_bt   = m.group(3)   # backtick form
-            alg_ltx  = m.group(4)   # LaTeX form
-            algebra  = (alg_bt or alg_ltx or "").strip()
-            c5_map   = m.group(5).strip()
-            desc     = re.sub(r"\s+", " ", m.group(6)).strip()
-
+        for line in content.splitlines():
+            line_s = line.strip()
+            if line.startswith("### "):
+                if state == "DESC" and nid is not None:
+                    self._exergy_nodes[nid] = SystemExergyNode(
+                        id=nid, name=name, algebraic_topology=algebra,
+                        c5_real_mapping=c5_map, description=" ".join(desc_lines).strip()
+                    )
+                m = re.match(r"^###\s+(\d+)\.\s+(.+)$", line)
+                if m:
+                    nid, name = int(m.group(1)), m.group(2).strip()
+                    state, algebra, c5_map, desc_lines = "TOPOLOGY", "", "", []
+            elif state == "TOPOLOGY" and "Topología Algebraica:**" in line:
+                m = re.search(r"(?:`([^`]+)`|\\\[(.+?)\\\])", line)
+                if m: algebra = (m.group(1) or m.group(2) or "").strip()
+                state = "MAPPING"
+            elif state == "MAPPING" and "Mapping C5-REAL" in line:
+                m = re.search(r"Mapping C5-REAL \(`([^`]+)`\):\s*\**\s*(.+)$", line)
+                if m:
+                    c5_map = m.group(1).strip()
+                    if m.group(2): desc_lines.append(m.group(2).strip())
+                state = "DESC"
+            elif state == "DESC":
+                if line.startswith("---"):
+                    if nid is not None:
+                        self._exergy_nodes[nid] = SystemExergyNode(
+                            id=nid, name=name, algebraic_topology=algebra,
+                            c5_real_mapping=c5_map, description=" ".join(desc_lines).strip()
+                        )
+                    state = "SEARCH"
+                elif line_s:
+                    desc_lines.append(line_s)
+                    
+        if state == "DESC" and nid is not None:
             self._exergy_nodes[nid] = SystemExergyNode(
-                id=nid,
-                name=name,
-                algebraic_topology=algebra,
-                c5_real_mapping=c5_map,
-                description=desc,
+                id=nid, name=name, algebraic_topology=algebra,
+                c5_real_mapping=c5_map, description=" ".join(desc_lines).strip()
             )
 
         logger.info("[AutodidactΩ] Exergy Mapping loaded: %d nodes", len(self._exergy_nodes))
@@ -124,39 +142,24 @@ class AutodidactOmegaIndex:
 
         content = path.read_text(encoding="utf-8")
 
-        section_re = re.compile(r"^### ([IVXLC]+\.\s+.+)$", re.MULTILINE)
-        row_re = re.compile(
-            r"\|\s*`(C5-REAL-(\d+))`\s*\|\s*(\w+)\s*\|\s*(.+?)\s*\|"
-        )
+        current_section = "Unknown"
+        row_re = re.compile(r"\|\s*`(C5-REAL-(\d+))`\s*\|\s*(\w+)\s*\|\s*(.+?)\s*\|")
 
-        # Build section start positions
-        section_positions: list[tuple[int, str]] = []
-        for sm in section_re.finditer(content):
-            section_positions.append((sm.start(), sm.group(1).strip()))
-
-        def section_for_pos(pos: int) -> str:
-            result = "Unknown"
-            for sp, sn in section_positions:
-                if sp <= pos:
-                    result = sn
-                else:
-                    break
-            return result
-
-        for rm in row_re.finditer(content):
-            c5_id   = rm.group(1)           # "C5-REAL-001"
-            nid     = int(rm.group(2))       # 1
-            const   = rm.group(3).strip()    # "WAL_ATOMIC_LOCK"
-            desc    = rm.group(4).strip()    # description text
-            section = section_for_pos(rm.start())
-
-            self._c5_primitives[nid] = C5RealPrimitive(
-                id=nid,
-                c5_real_id=c5_id,
-                kernel_constant=const,
-                description=desc,
-                section=section,
-            )
+        for line in content.splitlines():
+            if line.startswith("### "):
+                m = re.match(r"^###\s+([IVXLC]+\.\s+.+)$", line)
+                if m:
+                    current_section = m.group(1).strip()
+            elif line.startswith("|"):
+                rm = row_re.search(line)
+                if rm:
+                    self._c5_primitives[int(rm.group(2))] = C5RealPrimitive(
+                        id=int(rm.group(2)),
+                        c5_real_id=rm.group(1),
+                        kernel_constant=rm.group(3).strip(),
+                        description=rm.group(4).strip(),
+                        section=current_section,
+                    )
 
         logger.info("[AutodidactΩ] C5-REAL Primitives loaded: %d primitives", len(self._c5_primitives))
 
@@ -219,7 +222,7 @@ class AutodidactOmegaIndex:
             if kw in n.name.lower() or kw in n.description.lower() or kw in n.kernel_constant.lower()
         ]
 
-    def coverage_report(self) -> dict[str, int | Babylon60]:
+    def coverage_report(self) -> dict[str, Any]:
         exergy_count = sum(1 for n in self.index.values() if n.algebraic_topology)
         c5_count     = sum(1 for n in self.index.values() if n.c5_real_id)
         unified      = sum(1 for n in self.index.values() if n.algebraic_topology and n.c5_real_id)
