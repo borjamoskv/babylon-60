@@ -16,8 +16,8 @@ import logging
 import os
 import sqlite3
 import subprocess
-from decimal import Decimal
 from dataclasses import dataclass
+from decimal import Decimal
 from typing import Any
 
 from cortex.database.core import connect as db_connect

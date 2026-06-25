@@ -51,7 +51,7 @@ class BountyHunterRunner:
         if not await cursor.fetchone():
             await conn.execute(
                 "INSERT INTO agents (id, public_key, name, agent_type, is_active) VALUES (?, ?, ?, ?, 1)",
-                (self.agent_id, self.keypair.public_key_b64, "Sovereign Bounty Hunter v2", "ai")
+                (self.agent_id, self.keypair.public_key, "Sovereign Bounty Hunter v2", "ai")  # type: ignore
             )
             await conn.commit()
 
@@ -145,7 +145,7 @@ class BountyHunterRunner:
                 agent_id=self.agent_id,
                 session_id=self.session_id,
                 content=claim_content,
-                private_key_b64=self.keypair.private_key_b64
+                private_key_b64=self.keypair.private_key  # type: ignore
             )
             source = Source(uri=f"cortex://bounty/{rule_name}", content_hash=proof_hash or "EXPLOIT")
             evidence = EvidenceBundle.forge(
@@ -241,7 +241,7 @@ def bounty_hunt_cmd(project: Optional[str], rule_name: Optional[str], logic: Opt
 
     engine = get_engine(db)
     keypair = ZKSwarmIdentity.generate_keypair()
-    runner = BountyHunterRunner(engine, keypair)
+    runner = BountyHunterRunner(engine, keypair)  # type: ignore
 
     async def _run():
         await engine.start()
@@ -282,7 +282,7 @@ def bounty_daemon_cmd(interval: int, db: str) -> None:
     console.print(f"[bold cyan]Starting Bounty Hunter Daemon (Interval: {interval}s)...[/]")
     engine = get_engine(db)
     keypair = ZKSwarmIdentity.generate_keypair()
-    runner = BountyHunterRunner(engine, keypair)
+    runner = BountyHunterRunner(engine, keypair)  # type: ignore
 
     async def _run_loop():
         await engine.start()

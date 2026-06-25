@@ -3,8 +3,10 @@ import subprocess
 import time
 
 try:
-    from cortex_merkle_rewrite import RewriteEngine  # type: ignore
-    from cortex_merkle_rewrite import AuditTrail  # type: ignore
+    from cortex_merkle_rewrite import (
+        AuditTrail,  # type: ignore
+        RewriteEngine,  # type: ignore
+    )
 except ImportError:
     RewriteEngine = None
     AuditTrail = None

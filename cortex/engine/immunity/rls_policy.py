@@ -59,6 +59,7 @@ class RLSGateway:
                 # Call Rust native guardrail
                 # Assuming FFI mapping: cortex_rs.retrieval_can_read(fact_json_string, agent_id)
                 import json
+
                 from cortex_rs import retrieval_can_read  # type: ignore
                 return retrieval_can_read(json.dumps(fact_payload), agent_id)
             else:

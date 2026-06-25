@@ -11,7 +11,8 @@ from __future__ import annotations
 
 import functools
 import logging
-from typing import Any, Callable, TypeVar, cast
+from collections.abc import Callable
+from typing import Any, TypeVar, cast
 
 logger = logging.getLogger("cortex.math.fpu_interceptor")
 

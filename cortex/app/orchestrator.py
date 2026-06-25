@@ -110,8 +110,8 @@ class CodeGovernanceGateway:
             git_deleted=pr_payload.get("deletions", 0),
             hours_saved=hours_saved,
             money_saved=money_saved,
-            roi_ratio=999.0, # Infinite ROI for purely autonomous operations (cost=0)
-            cost=0.0
+            roi_ratio=999.0, # type: ignore
+            cost=0.0  # type: ignore
         )
 
         return {

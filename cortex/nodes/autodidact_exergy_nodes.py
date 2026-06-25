@@ -29,6 +29,7 @@ except ImportError:
 
 # Fallback si no existe db_connect en path estándar
 import typing
+
 try:
     from cortex.database.core import connect as _db_connect
     db_connect: typing.Any = _db_connect

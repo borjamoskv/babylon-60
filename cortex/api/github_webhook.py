@@ -64,7 +64,7 @@ async def github_webhook(request: Request, background_tasks: BackgroundTasks):
     signature = request.headers.get("x-hub-signature-256")
     body = await request.body()
     
-    if not verify_signature(body, signature):
+    if not verify_signature(body, signature or ""):
         raise HTTPException(status_code=401, detail="Invalid GitHub signature")
         
     event_type = request.headers.get("x-github-event")
