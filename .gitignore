@@ -341,3 +341,4 @@ cortex/nodes/moskv1_skills.db
 cortex/nodes/autodidact_exergy.db-journal
 cortex/nodes/moskv1_skills.db-journal
 
+frontend/node_modules/
