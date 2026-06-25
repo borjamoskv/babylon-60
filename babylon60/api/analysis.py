@@ -2,6 +2,7 @@
 import os
 from datetime import datetime
 
+import aiosqlite
 import jwt
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from fastapi.openapi.docs import get_swagger_ui_html
@@ -37,7 +38,7 @@ def health_check():
 
 
 @app.get("/facts")
-def get_facts(
+async def get_facts(
     query: str = Query(..., description="Target keyword to search facts for"),
     user: dict = Depends(verify_token),
 ):
@@ -45,19 +46,32 @@ def get_facts(
     Exposes CORTEX-Persist internal facts and analysis for the given query.
     Used by external AI agents for deterministic retrieval.
     """
-    # Mocked facts for the pipeline architecture
-    facts = [
-        {
-            "id": "F-001",
-            "level": "C5-REAL",
-            "content": f"System confirmed operational for '{query}' analysis.",
-        },
-        {
-            "id": "F-002",
-            "level": "C5-REAL",
-            "content": "Exergy levels are maintained above 95% threshold.",
-        },
-    ]
+    db_path = os.getenv("CORTEX_DB_PATH", "cortex_data.db")
+    facts = []
+    if os.path.exists(db_path):
+        try:
+            async with aiosqlite.connect(db_path, timeout=5.0) as db:
+                await db.execute("PRAGMA journal_mode=WAL;")
+                await db.execute("PRAGMA busy_timeout=5000;")
+                
+                # Check table exists to prevent crash if uninitialized
+                async with db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='facts'") as cursor:
+                    has_table = await cursor.fetchone()
+                    
+                if has_table:
+                    async with db.execute(
+                        "SELECT id, content FROM facts WHERE content LIKE ? LIMIT 10", 
+                        (f"%{query}%",)
+                    ) as cursor:
+                        async for row in cursor:
+                            facts.append({
+                                "id": row[0],
+                                "level": "C5-REAL",
+                                "content": row[1]
+                            })
+        except Exception as e:
+            facts.append({"id": "ERR-001", "level": "C5-REAL", "content": f"Database Error: {e}"})
+
     return {"query": query, "results": facts, "authorized_by": user.get("user", "unknown")}
 
 
