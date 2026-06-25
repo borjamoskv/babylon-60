@@ -39,8 +39,8 @@ class ExergyMaximizerAgent:
 
         # Cálculo O(1) de la Exergía
         exergy_score = ExergyOptimizer.calculate_node_exergy(
-            telemetry,
-            latency_ms=telemetry.latency_ms,
+            telemetry,  # type: ignore
+            latency_ms=telemetry.latency_ms,  # type: ignore
             max_capacity=telemetry.max_capacity,  # pyright: ignore[reportArgumentType]
         )
 
@@ -57,7 +57,7 @@ class ExergyMaximizerAgent:
                 # Alta incertidumbre genera CORTISOL (Estrés de fallos)
                 ENDOCRINE.pulse(
                     HormoneType.CORTISOL,
-                    entropy_paid * 0.5,
+                    entropy_paid * 0.5,  # type: ignore
                     reason=f"Incertidumbre crítica en {target}",
                 )
                 findings.append(
@@ -68,7 +68,7 @@ class ExergyMaximizerAgent:
                 pulse_reason = (
                     f"Exergy collapse ({exergy_score:.2f}) en {target}. Forzando aceleración."
                 )
-                ENDOCRINE.pulse(HormoneType.DOPAMINE, entropy_paid * 0.8, reason=pulse_reason)
+                ENDOCRINE.pulse(HormoneType.DOPAMINE, entropy_paid * 0.8, reason=pulse_reason)  # type: ignore
                 findings.append(f"[OPTIMIZATION] {pulse_reason}")
 
             # Decisión Estructural
@@ -114,7 +114,7 @@ class ExergyAgentAdapter(SwarmAgent):
             sys.path.insert(0, cortex_core_path)
 
         try:
-            from persistence import get_swarm_metrics  # pyright: ignore[reportMissingImports]
+            from persistence import get_swarm_metrics  # type: ignore
 
             real_metrics = get_swarm_metrics()
         except ImportError:

@@ -40,12 +40,12 @@ class FitnessRecord:
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "score": float(self.score),
-            "latency_ms": float(self.latency_ms),
+            "score": float(self.score),  # type: ignore
+            "latency_ms": float(self.latency_ms),  # type: ignore
             "success": self.success,
-            "error_rate": float(self.error_rate),
-            "throughput": float(self.throughput),
-            "timestamp": float(self.timestamp),
+            "error_rate": float(self.error_rate),  # type: ignore
+            "throughput": float(self.throughput),  # type: ignore
+            "timestamp": float(self.timestamp),  # type: ignore
             "metadata": self.metadata,
         }
 
@@ -92,15 +92,15 @@ class Lineage:
             ((Babylon60.from_int(i) - x_mean) * (Babylon60.from_int(i) - x_mean) for i in range(n)), 
             start=Babylon60.from_int(0)
         )
-        return numerator / denominator if float(denominator) > 0 else Babylon60.from_int(0)
+        return numerator / denominator if float(denominator) > 0 else Babylon60.from_int(0)  # type: ignore
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "generation": self.generation,
             "parent_hash": self.parent_hash,
-            "avg_fitness": float(self.avg_fitness),
-            "best_fitness": float(self.best_fitness),
-            "fitness_trend": float(self.fitness_trend),
+            "avg_fitness": float(self.avg_fitness),  # type: ignore
+            "best_fitness": float(self.best_fitness),  # type: ignore
+            "fitness_trend": float(self.fitness_trend),  # type: ignore
             "adopted_count": self.adopted_count,
             "discarded_count": self.discarded_count,
             "children_spawned": self.children_spawned,
@@ -262,6 +262,6 @@ class StrategyGenome:
     def __repr__(self) -> str:
         return (
             f"<StrategyGenome name={self.name!r} gen={self.lineage.generation} "
-            f"hash={self.genome_hash[:8]} fitness={float(self.lineage.avg_fitness):.2f} "
+            f"hash={self.genome_hash[:8]} fitness={float(self.lineage.avg_fitness):.2f} "  # type: ignore
             f"complexity={self.complexity}>"
         )

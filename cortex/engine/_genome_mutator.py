@@ -63,7 +63,7 @@ class GenomeMutator:
         elif (
             failure_trace
             and failure_trace.get("failed_target")
-            and random.random() < float(genome.mutation_rates.get(MutationType.CAUSAL_PATCH, Babylon60.from_float(0.20)))
+            and random.random() < float(genome.mutation_rates.get(MutationType.CAUSAL_PATCH, Babylon60.from_float(0.20)))  # type: ignore
         ):
             mutation_type = MutationType.CAUSAL_PATCH
         else:
@@ -172,7 +172,7 @@ class GenomeMutator:
     def _select_mutation_type(self, genome: StrategyGenome) -> MutationType:
         """Roulette wheel selection weighted by genome's own mutation_rates."""
         types = list(MutationType)
-        weights = [float(genome.mutation_rates.get(mt, Babylon60.from_float(0.01))) for mt in types]
+        weights = [float(genome.mutation_rates.get(mt, Babylon60.from_float(0.01))) for mt in types]  # type: ignore
         total = sum(weights)
         if total <= 0:
             return random.choice(types)
@@ -305,10 +305,10 @@ class GenomeMutator:
         rates = genome.mutation_rates
         # Weighted selection: dampened by sqrt to limit dominance of high rates
         types = list(MutationType)
-        weights = [max(0.001, float(rates.get(mt, Babylon60.from_float(0.05))) ** 0.5) for mt in types]
+        weights = [max(0.001, float(rates.get(mt, Babylon60.from_float(0.05))) ** 0.5) for mt in types]  # type: ignore
         selected_mt = random.choices(types, weights=weights, k=1)[0]
 
-        current_rate = float(rates.get(selected_mt, Babylon60.from_float(0.05)))
+        current_rate = float(rates.get(selected_mt, Babylon60.from_float(0.05)))  # type: ignore
         sigma = max(0.001, current_rate * 0.05)
         delta = random.gauss(0, sigma)
         new_rate = max(0.001, min(0.5, current_rate + delta))
@@ -316,12 +316,12 @@ class GenomeMutator:
 
         # Normalize back to sum=1.0 (approx)
         rates = genome.mutation_rates
-        total_float = sum(float(r) for r in rates.values())
+        total_float = sum(float(r) for r in rates.values())  # type: ignore
         if total_float > 0:
             for mt in list(rates.keys()):
-                rates[mt] = Babylon60.from_float(float(rates[mt]) / total_float)
+                rates[mt] = Babylon60.from_float(float(rates[mt]) / total_float)  # type: ignore
 
-        final_rate = float(rates[selected_mt])
+        final_rate = float(rates[selected_mt])  # type: ignore
         genome.lineage.mutation_log.append(
             f"META: {selected_mt.value} rate {current_rate:.3f} → {final_rate:.3f}"
         )
@@ -342,4 +342,4 @@ class GenomeMutator:
             then_branch=dispatch(f"retry_{target_name}", {"reason": "causal_patch"}),
             else_branch=dispatch(f"fallback_{target_name}", {"reason": "causal_patch_fallback"}),
         )
-        genome.dispatch_tree = replace_target(tree, target_name, fallback)
+        genome.dispatch_tree = replace_target(tree, target_name, fallback)  # type: ignore

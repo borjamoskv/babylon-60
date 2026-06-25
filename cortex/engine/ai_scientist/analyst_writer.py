@@ -12,7 +12,7 @@ class AnalystWriter:
     def __init__(self, inference_engine):
         self.inference = inference_engine
 
-    async def write_paper(self, idea: dict[str, Any], results: dict[str, Any], feedback: str = None) -> dict[str, Any]:
+    async def write_paper(self, idea: dict[str, Any], results: dict[str, Any], feedback: str | None = None) -> dict[str, Any]:
         """
         Compiles the results into a fully-fledged LaTeX document.
         """

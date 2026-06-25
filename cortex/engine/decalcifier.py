@@ -60,7 +60,7 @@ class SovereignDecalcifier:
             from cortex.database.core import connect
 
             def _run_vacuum():
-                with connect(CORTEX_DB, isolation_level=None) as vconn:
+                with connect(str(CORTEX_DB), isolation_level=None) as vconn:
                     vconn.execute("VACUUM")
 
             # Run vacuum asynchronously to avoid blocking

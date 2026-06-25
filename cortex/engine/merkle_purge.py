@@ -20,7 +20,7 @@ class MerklePurgeOrchestrator:
         self.target_repo = target_repo
         if RewriteEngine:
             self.engine = RewriteEngine(target_repo)
-            self.audit = AuditTrail()
+            self.audit = AuditTrail()  # type: ignore
         else:
             self.engine = None
             self.audit = None

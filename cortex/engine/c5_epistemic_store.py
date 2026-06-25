@@ -40,7 +40,7 @@ async def ingest_c5_node(
 
     async with mtk_guard.transaction_boundary(payload) as _token:
         # Generate strict ledger entry
-        ledger_hash = payload.canonical_hash() if hasattr(payload, "canonical_hash") else payload.payload_hash
+        ledger_hash = payload.canonical_hash() if hasattr(payload, "canonical_hash") else payload.payload_hash  # type: ignore
         
         # INSERT into Master Ledger
         cursor = await conn.execute(
@@ -54,7 +54,7 @@ async def ingest_c5_node(
                 "GENESIS",  # In a real system, fetch latest hash from ledger
                 agent_id,
                 "EDG_MUTATION",
-                payload.signature if hasattr(payload, "signature") else "unsigned",
+                payload.signature if hasattr(payload, "signature") else "unsigned",  # type: ignore
                 b60_timestamp,
                 exergy_cost,
                 1
@@ -78,7 +78,7 @@ async def ingest_c5_node(
                 status,
                 confidence_b60,
                 exergy_cost,
-                payload.schema_hash if hasattr(payload, "schema_hash") else "v1.0",
+                payload.schema_hash if hasattr(payload, "schema_hash") else "v1.0",  # type: ignore
                 serialized_payload
             )
         )

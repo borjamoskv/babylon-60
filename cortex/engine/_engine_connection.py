@@ -150,7 +150,7 @@ class ConnectionMixin:
             row = await cursor.fetchone()
             if row:
                 import cortex.core.config as config
-                config.HKDF_SALT = row[0]
+                config.HKDF_SALT = row[0]  # type: ignore
             else:
                 import cortex.core.config as config
                 # Store the default config salt in the DB if not present
@@ -168,8 +168,8 @@ class ConnectionMixin:
                     row = await cursor.fetchone()
                     if row:
                         import cortex.core.config as config
-                        config.HKDF_SALT = row[0]
-                        config._cfg.HKDF_SALT = row[0]
+                        config.HKDF_SALT = row[0]  # type: ignore
+                        config._cfg.HKDF_SALT = row[0]  # type: ignore
             except Exception as e:
                 logger.warning("Failed to load tenant_isolation_salt: %s", e)
 

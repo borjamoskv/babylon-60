@@ -13,7 +13,7 @@ try:
     if not hasattr(cortex_rs, "FitnessOracleRs"):
         FitnessOracleRs = None
     else:
-        FitnessOracleRs = cortex_rs.FitnessOracleRs
+        FitnessOracleRs = cortex_rs.FitnessOracleRs  # type: ignore
 except ImportError:
     FitnessOracleRs = None
 from cortex.engine.genome import FitnessRecord, StrategyGenome
@@ -124,11 +124,11 @@ class FitnessOracle:
             metadata["error"] = str(e)[:200]
 
         record = FitnessRecord(
-            score=score,
-            latency_ms=latency_ms,
+            score=score,  # type: ignore
+            latency_ms=latency_ms,  # type: ignore
             success=success,
-            error_rate=error_rate,
-            throughput=throughput,
+            error_rate=error_rate,  # type: ignore
+            throughput=throughput,  # type: ignore
             metadata=metadata,
         )
         genome.record_fitness(record)

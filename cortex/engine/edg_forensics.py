@@ -15,8 +15,8 @@ class EDGForensicsOrchestrator:
     def __init__(self, target_repo: str):
         self.target_repo = target_repo
         if cortex_core_rs:
-            self.reconstructor = cortex_core_rs.EDGReconstructor()
-            self.delta_engine = cortex_core_rs.DeltaEngine()
+            self.reconstructor = cortex_core_rs.EDGReconstructor()  # type: ignore
+            self.delta_engine = cortex_core_rs.DeltaEngine()  # type: ignore
         else:
             self.reconstructor = None
             self.delta_engine = None

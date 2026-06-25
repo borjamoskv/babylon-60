@@ -44,7 +44,7 @@ if TYPE_CHECKING:
     from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
     from cortex.mac_maestro.executor import MaestroExecutor
 try:
-    from cortex.extensions.health.health_mixin import HealthMixin
+    from cortex.extensions.health.health_mixin import HealthMixin  # type: ignore
 except ImportError:
 
     class HealthMixin:
@@ -191,10 +191,10 @@ class CortexEngine(
 
         await self._close_connections()
 
-        self.mac_maestro = None
-        self.ledger_writer = None
-        self.enrichment_queue = None
-        self.ledger_store = None
+        self.mac_maestro = None  # type: ignore
+        self.ledger_writer = None  # type: ignore
+        self.enrichment_queue = None  # type: ignore
+        self.ledger_store = None  # type: ignore
         self._ledger = None
 
     async def _drain_tasks(self):

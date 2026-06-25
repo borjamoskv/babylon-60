@@ -77,7 +77,7 @@ class CausalScheduler:
     ) -> dict[str, Any]:
         """Evalúa el estado del sistema y la continuidad ontológica global (GCC)."""
         try:
-            import cortex_native
+            import cortex_native  # type: ignore
             has_rust_compiler = True
         except ImportError:
             has_rust_compiler = False

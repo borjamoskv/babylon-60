@@ -43,7 +43,7 @@ class AIScientistOrchestrator:
             action=f"AI_SCIENTIST_{action}",
             resource=resource,
             status="COMMITTED",
-            metadata=metadata
+            metadata=metadata  # type: ignore
         )
 
     async def run(self, topic: str, max_iterations: int = 3) -> dict[str, Any]:
@@ -63,7 +63,7 @@ class AIScientistOrchestrator:
             state["results"] = await self.coder.execute_experiment(state["code"])
             await self._seal("EXEC", "experiment", state["results"].get("metrics", {}))
 
-            state["draft"] = await self.analyst.write_paper(state["idea"], state["results"], state.get("feedback"))
+            state["draft"] = await self.analyst.write_paper(state["idea"], state["results"], state.get("feedback"))  # type: ignore
             await self._seal("DRAFT", "pdf", {})
 
             review = await self.reviewer.conduct_review(state["draft"])

@@ -38,7 +38,7 @@ class DistributedEvolutionLedger(EvolutionLedger):
         super().__init__(log_path=log_path)
         self.topic = topic
         self.kafka_brokers = kafka_brokers
-        self._producer = Producer({
+        self._producer = Producer({  # type: ignore
             "bootstrap.servers": self.kafka_brokers,
             "client.id": "cortex-node-producer",
             "acks": "all",
@@ -96,7 +96,7 @@ class LedgerConsumer:
     """Consumes the distributed ledger and reconstructs state on replica nodes."""
     def __init__(self, kafka_brokers: str = "localhost:9092", topic: str = "cortex-evolution-ledger", group_id: str = "cortex-replica-group"):
         self.topic = topic
-        self._consumer = Consumer({
+        self._consumer = Consumer({  # type: ignore
             "bootstrap.servers": kafka_brokers,
             "group.id": group_id,
             "auto.offset.reset": "earliest",
@@ -115,7 +115,7 @@ class LedgerConsumer:
                 continue
                 
             try:
-                payload = json.loads(msg.value().decode("utf-8"))
+                payload = json.loads(msg.value().decode("utf-8"))  # type: ignore
                 record = MutationRecord.from_payload(payload)
                 yield record
             except (json.JSONDecodeError, ValueError, TypeError) as e:

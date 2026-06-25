@@ -157,7 +157,7 @@ class CascadeRouter:
                     try:
                         db_path = Path(os.environ.get("CORTEX_DB_PATH", "~/.cortex/cortex.db")).expanduser()
                         if db_path.exists():
-                            conn = connect(db_path)
+                            conn = connect(str(db_path))
                             digest = hashlib.sha256(output_content.encode("utf-8")).hexdigest()[:16]
                             # Escribir en la tabla de episodios/BM25
                             conn.execute(
@@ -196,6 +196,8 @@ class CascadeRouter:
                     await asyncio.sleep(delay)
                     continue
                 return f"Error: {e}"
+
+        return ""
 
 
 if __name__ == "__main__":

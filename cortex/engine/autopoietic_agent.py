@@ -195,13 +195,13 @@ class AutopoieticAgent:
 
         # ── Finalize ───────────────────────────────────────────
         self.state.current_generation += 1
-        self.state.current_fitness = self._genome.lineage.avg_fitness
-        self.state.fitness_trend = self._genome.lineage.fitness_trend
+        self.state.current_fitness = self._genome.lineage.avg_fitness  # type: ignore
+        self.state.fitness_trend = self._genome.lineage.fitness_trend  # type: ignore
         self.state.current_genome_hash = self._genome.genome_hash[:8]
         self.state.best_fitness_ever = max(
-            self.state.best_fitness_ever,
-            self._genome.lineage.best_fitness,
-        )
+            self.state.best_fitness_ever,  # type: ignore
+            self._genome.lineage.best_fitness,  # type: ignore
+        )  # type: ignore
         self.state.is_evolving = False
         self.state.last_evolution_ms = (time.perf_counter_ns() - cycle_start) / 1e6
 

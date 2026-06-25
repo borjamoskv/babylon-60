@@ -114,6 +114,8 @@ class ApoptosisDaemon:
             await conn.rollback()
             return 0
 
+        return 0
+
     async def _apoptosis_loop(self) -> None:
         try:
             while self._running:

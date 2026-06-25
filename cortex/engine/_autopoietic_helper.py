@@ -19,7 +19,7 @@ async def evaluate_genome(agent: AutopoieticAgent, genome: StrategyGenome) -> fl
     scores: list[float] = []
     for _ in range(agent.config.min_evaluations):
         record = await agent._oracle.evaluate(genome, agent._executor)
-        scores.append(record.score)
+        scores.append(record.score)  # type: ignore
     return sum(scores) / len(scores) if scores else 0.0
 
 
@@ -54,7 +54,7 @@ def validate_genome(agent: AutopoieticAgent, genome: StrategyGenome) -> bool:
     # Check mutation rates are within bounds
     for mt, rate in genome.mutation_rates.items():
         if rate > agent.config.max_mutation_rate:
-            genome.mutation_rates[mt] = agent.config.max_mutation_rate
+            genome.mutation_rates[mt] = agent.config.max_mutation_rate  # type: ignore
 
     return True
 
@@ -85,12 +85,12 @@ def escalate_mutation_pressure(agent: AutopoieticAgent) -> None:
     """Increase mutation rates when stagnation is detected."""
     for mt in MutationType:
         current = agent._genome.mutation_rates.get(mt, 0.05)
-        agent._genome.mutation_rates[mt] = min(
+        agent._genome.mutation_rates[mt] = min(  # type: ignore
             agent.config.max_mutation_rate,
             current * 1.3,
         )
     # Boost radical mutations specifically
-    agent._genome.mutation_rates[MutationType.STRATEGY_SYNTHESIS] = min(
+    agent._genome.mutation_rates[MutationType.STRATEGY_SYNTHESIS] = min(  # type: ignore
         0.5,
         agent._genome.mutation_rates.get(MutationType.STRATEGY_SYNTHESIS, 0.05) * 2.0,
     )
@@ -106,7 +106,7 @@ def apply_meta_mutation(agent: AutopoieticAgent) -> None:
     current = agent._genome.mutation_rates.get(mt, 0.05)
     delta = random.gauss(0, 0.03)
     new_rate = max(0.001, min(agent.config.max_mutation_rate, current + delta))
-    agent._genome.mutation_rates[mt] = new_rate
+    agent._genome.mutation_rates[mt] = new_rate  # type: ignore
     agent._genome._invalidate_hash()
     logger.debug(
         "META-MUTATION: %s rate %.3f → %.3f",

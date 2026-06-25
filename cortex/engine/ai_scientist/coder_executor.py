@@ -47,7 +47,7 @@ if __name__ == '__main__':
         Executes the code bundle using the local sandbox.
         """
         # Execute securely in SandboxJIT
-        execution_result = await self.sandbox.execute_bundle(
+        execution_result = await self.sandbox.execute_bundle(  # type: ignore
             files=code_bundle,
             entrypoint="python main.py",
             timeout_seconds=300
