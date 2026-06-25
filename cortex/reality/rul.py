@@ -21,7 +21,7 @@ class RealityClaim:
     created_at_epoch_ms: int = 0
     trust_score: float = 0.0
     status: str = "pending"
-    evidence_hashes: list[str] = None
+    evidence_hashes: list[str] | None = None
     
     def __post_init__(self):
         if not self.claim_id:

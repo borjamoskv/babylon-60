@@ -15,11 +15,15 @@ from enum import Enum
 
 # Asegurar que importamos cortex_core_rs.py desde el root
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
-try:
-    from cortex_core_rs import Babylon60
-except ImportError:
-    class Babylon60:
-        pass # Fallback no utilizado
+import typing
+
+if typing.TYPE_CHECKING:
+    from cortex.engine.babylon60 import Babylon60
+else:
+    try:
+        from cortex_core_rs import Babylon60
+    except ImportError:
+        from cortex.engine.babylon60 import Babylon60
 
 class ExergyLevel(Enum):
     ZERO_YIELD = "ZERO_YIELD"
@@ -40,27 +44,29 @@ class DeterministicCausalPrimitive:
     operation: str
     output_state: str
     exergy_level: ExergyLevel = ExergyLevel.C5_REAL
-    cost_complexity: Babylon60 = None
-    empirical_accuracy: Babylon60 = None
+    cost_complexity: Babylon60 | None = None
+    empirical_accuracy: Babylon60 | None = None
 
     def compute_friston_penalty(self) -> Babylon60:
         """AUTO-8: Penalización de Energía Libre Variacional."""
         # Friston penalty deduction: Complexity / (Accuracy + 1) * 0.05
+        acc = self.empirical_accuracy if self.empirical_accuracy is not None else Babylon60(0)
+        cost = self.cost_complexity if self.cost_complexity is not None else Babylon60(0)
         # BABYLON-60 Integer Math
-        acc_plus_one = self.empirical_accuracy + Babylon60.from_int(1)
+        acc_plus_one = acc + Babylon60(1)
         # Factor = 0.05 (1/20 -> 0.05 en Babylon60)
-        factor = Babylon60.from_float(0.05)
+        factor = Babylon60(0.05)
         
         # penalty = (cost_complexity / acc_plus_one) * factor
         # En Babylon60 (cost / acc) devuelve Babylon60 escalado
-        division = self.cost_complexity / acc_plus_one
+        division = cost / acc_plus_one
         penalty = division * factor
         return penalty
 
     def validate_exergy(self, base_exergy: Babylon60) -> bool:
         """Net exergy must be >= 0.1 to permit DB writes (AUTO-8)."""
         net_exergy = base_exergy - self.compute_friston_penalty()
-        threshold = Babylon60.from_float(0.1)
+        threshold = Babylon60(0.1)
         return net_exergy >= threshold
 
 

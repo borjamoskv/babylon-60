@@ -82,7 +82,9 @@ class CausalGraph:
         return self.get_event(node_id)
 
 
-def propagate_refutation(graph: CausalGraph, refuted_event_id: str, decay: float = 0.35) -> None:
+def propagate_refutation(graph: CausalGraph, refuted_event_id: str, decay_factor: 'Babylon60 | None' = None) -> None:
+    if decay_factor is None:
+        decay_factor = Babylon60(75600)  # 0.35 * 216000
     queue = deque([(refuted_event_id, 0)])
     visited: set[str] = set()
 
@@ -99,9 +101,15 @@ def propagate_refutation(graph: CausalGraph, refuted_event_id: str, decay: float
 
         if depth == 0:
             event.status = ValidationStatus.REFUTED
-            event.trust_score = 0.0
+            event.trust_score = Babylon60(0)
         else:
-            event.trust_score = max(0.0, event.trust_score * (1.0 - decay / max(depth, 1)))
+            depth_factor = Babylon60(max(depth, 1) * 216000)
+            retention = Babylon60(216000) - (decay_factor / depth_factor)
+            if retention.value < 0:
+                retention = Babylon60(0)
+            event.trust_score = event.trust_score * retention
+            if event.trust_score.value < 0:
+                event.trust_score = Babylon60(0)
             event.tainted = True
 
         for child_id in graph.get_descendants(node_id):
@@ -217,7 +225,7 @@ class AsyncCausalGraph:
         parent_id: int | None = None,
         signal_id: int | None = None,
         edge_type: str = "triggered_by",
-        confidence: Babylon60 = Babylon60.from_float(1.0) ,
+        confidence: 'Babylon60' = Babylon60(216000) ,
         agent_id: str | None = None,
         project: str | None = None,
         tenant_id: str = "default",

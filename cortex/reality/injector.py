@@ -5,7 +5,7 @@ Inyector de Realidad. Construye el bloque de contexto deduplicado desde claims v
 
 import json
 
-import cortex_core_rs
+import cortex_core_rs  # type: ignore
 
 
 def build_verified_reality_context(ledger_path: str, max_claims: int = 50) -> str:
@@ -15,7 +15,7 @@ def build_verified_reality_context(ledger_path: str, max_claims: int = 50) -> st
     """
     try:
         # Llama a load_verified_reality, que ya devuelve los claims ordenados y filtrados.
-        verified_lines = cortex_core_rs.load_verified_reality(ledger_path)
+        verified_lines = cortex_core_rs.load_verified_reality(ledger_path)  # pyright: ignore[reportAttributeAccessIssue]
     except Exception as e:
         return f"<cortex_verified_reality>\nERROR_LOADING_REALITY: {str(e)}\n</cortex_verified_reality>"
     

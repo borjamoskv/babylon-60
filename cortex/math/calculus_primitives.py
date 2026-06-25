@@ -40,14 +40,14 @@ class CalculusPrimitives:
         """
         Calculates the n-th term of a sequence a_n. (Scaled by 1000)
         """
-        return int(expr.subs(self.n, index).evalf() * 1000)
+        return int(expr.subs(self.n, index).evalf() * 1000)  # type: ignore
 
     # 2. Serie (Series)
     def serie_sum(self, expr: sp.Expr, lower: int, upper: int) -> int:
         """
         Calculates the partial sum of a series from n=lower to n=upper. (Scaled by 1000)
         """
-        return int(sp.Sum(expr, (self.n, lower, upper)).doit().evalf() * 1000)
+        return int(sp.Sum(expr, (self.n, lower, upper)).doit().evalf() * 1000)  # type: ignore
 
     # 3. Límite (Limit)
     def limite(self, expr: sp.Expr, point: int, direction: str = '+-') -> Any:
@@ -86,6 +86,7 @@ class CalculusPrimitives:
         t_point = torch.tensor([point / 1000.0], dtype=torch.float64, requires_grad=True)
         y = func(t_point)
         y.backward()
+        assert t_point.grad is not None
         return int(t_point.grad.item() * 1000)
 
     # 7. Pendiente (Slope - Secant / Average Rate of Change)

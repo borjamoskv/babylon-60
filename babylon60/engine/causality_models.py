@@ -93,17 +93,17 @@ class BeliefObject:
     id: str
     proposition_key: str
     payload: dict[str, Any]
-    confidence_score: Babylon60
+    confidence_score: 'Babylon60'
     state: BeliefState
     cortex_taint: str
     parent_id: str | None = None
     
     # Mathematical Closure (Plano Creencia)
-    decay_rate: Babylon60 = Babylon60.from_float(0.0001)
+    decay_rate: 'Babylon60' = Babylon60(22)
     last_asserted_at: str | None = None
-    risk_contam: Babylon60 = Babylon60.from_float(0.0)
+    risk_contam: 'Babylon60' = Babylon60(0)
     
-    def current_weight(self, current_time_iso: str) -> Babylon60:
+    def current_weight(self, current_time_iso: str) -> 'Babylon60':
         """Calcula el peso actual basado en el decaimiento de Ebbinghaus."""
         from datetime import datetime
         if not self.last_asserted_at:
@@ -112,9 +112,9 @@ class BeliefObject:
         try:
             last_dt = datetime.fromisoformat(self.last_asserted_at)
             curr_dt = datetime.fromisoformat(current_time_iso)
-            delta_seconds = max(0.0, (curr_dt - last_dt).total_seconds())
+            delta_seconds = max(0, int((curr_dt - last_dt).total_seconds()))
             
             from babylon60.engine.risk_math import calculate_decay_weight
-            return calculate_decay_weight(self.confidence_score, delta_seconds, self.decay_rate)
+            return Babylon60(calculate_decay_weight(self.confidence_score.value, delta_seconds, 10000))
         except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError):  # P0-PURGED
             return self.confidence_score

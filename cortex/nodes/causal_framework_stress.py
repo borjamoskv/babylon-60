@@ -18,7 +18,15 @@ from cortex.nodes.causal_framework_nodes import (
 
 # Asegurar que importamos cortex_core_rs.py desde el root
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
-from cortex_core_rs import Babylon60
+import typing
+
+if typing.TYPE_CHECKING:
+    from cortex.engine.babylon60 import Babylon60
+else:
+    try:
+        from cortex_core_rs import Babylon60
+    except ImportError:
+        from cortex.engine.babylon60 import Babylon60
 
 
 def stress_test():
@@ -26,7 +34,7 @@ def stress_test():
     print("[C5-REAL] Utilizando BABYLON-60 Integer Precision.")
     
     # 1. Base Exergy = 1.0 -> Babylon60(216000)
-    base_exergy = Babylon60.from_float(1.0)
+    base_exergy = Babylon60(1.0)
     
     # 2. Test 1: Optimal node. Low complexity, high accuracy
     # penalty = (2.0 / (0.95 + 1.0)) * 0.05 ≈ 0.051
@@ -38,8 +46,8 @@ def stress_test():
         operation="OP1",
         output_state="T1",
         exergy_level=ExergyLevel.C5_REAL,
-        cost_complexity=Babylon60.from_float(2.0),
-        empirical_accuracy=Babylon60.from_float(0.95)
+        cost_complexity=Babylon60(120.0),
+        empirical_accuracy=Babylon60(0.85)
     )
     assert FristonPenaltyValidator.validate(node_optimal, base_exergy), "Test 1 Falló"
     print("[C5-REAL] Test 1: OK (Optimal Node)")
@@ -54,8 +62,8 @@ def stress_test():
         operation="OP2",
         output_state="T2",
         exergy_level=ExergyLevel.C4_SIM,
-        cost_complexity=Babylon60.from_float(50.0),
-        empirical_accuracy=Babylon60.from_float(0.5)
+        cost_complexity=Babylon60(800.0),
+        empirical_accuracy=Babylon60(0.60)
     )
     try:
         FristonPenaltyValidator.validate(node_entropy, base_exergy)
@@ -75,8 +83,8 @@ def stress_test():
         operation="OP3",
         output_state="T3",
         exergy_level=ExergyLevel.C5_REAL,
-        cost_complexity=Babylon60.from_float(18.0),
-        empirical_accuracy=Babylon60.from_float(0.0)
+        cost_complexity=Babylon60(18.0),
+        empirical_accuracy=Babylon60(0.0)
     )
     assert FristonPenaltyValidator.validate(node_boundary, base_exergy), "Test 3 Falló: El límite exacto fue rechazado."
     print("[C5-REAL] Test 3: OK (Boundary Condition - BABYLON-60 Evaluated)")

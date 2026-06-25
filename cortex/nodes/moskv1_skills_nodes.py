@@ -25,19 +25,22 @@ try:
 except ImportError:
     # Shim
     from contextvars import ContextVar
-    mtk_active_token = ContextVar("mtk_active_token", default=None)
+    mtk_active_token: ContextVar[str | None] = ContextVar("mtk_active_token", default=None)
 
 # Fallback si no existe db_connect en path estándar
 try:
-    from cortex.database.core import connect as db_connect
+    from cortex.database.core import connect as _db_connect
+    import typing
+    db_connect: typing.Any = _db_connect
 except ImportError:
     # Shim para standalone execution
-    def db_connect(db_path: str = "moskv1_skills.db"):
+    def _fallback_db_connect(db_path: str = "moskv1_skills.db") -> sqlite3.Connection:
         conn = sqlite3.connect(db_path)
         # Modo WAL obligatorio (Regla R10)
         conn.execute("PRAGMA journal_mode=WAL;")
         conn.execute("PRAGMA busy_timeout=5000;")
         return conn
+    db_connect: typing.Any = _fallback_db_connect
 
 
 class Criticality(Enum):

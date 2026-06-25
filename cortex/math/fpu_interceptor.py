@@ -11,13 +11,13 @@ from __future__ import annotations
 
 import functools
 import logging
-from typing import Any, TypeVar
+from typing import Any, Callable, TypeVar, cast
 
 logger = logging.getLogger("cortex.math.fpu_interceptor")
 
 __all__ = ["FPUFirewall", "no_float", "FPUViolationError"]
 
-F = TypeVar("F")
+F = TypeVar("F", bound=Callable[..., Any])
 
 
 class FPUViolationError(TypeError):
@@ -76,7 +76,7 @@ def no_float(func: F) -> F:
     Raises FPUViolationError on any float detection.
     """
 
-    @functools.wraps(func)
+    @functools.wraps(cast(Callable[..., Any], func))
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         # Guard entry
         FPUFirewall.guard_positional(func.__qualname__, args)
