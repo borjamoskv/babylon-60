@@ -241,7 +241,9 @@ def history(db_path: str | None, limit: int) -> None:
 @click.option("--dry-run", is_flag=True, default=False, help="Show what would be fixed.")
 def fix(db_path: str | None, dry_run: bool) -> None:
     """Auto-remediation for degraded metrics."""
-    from legacy_research.extensions.health.fix import FixRegistry  # pyright: ignore[reportMissingImports]
+    from legacy_research.extensions.health.fix import (
+        FixRegistry,  # pyright: ignore[reportMissingImports]
+    )
 
     from legacy_research.extensions.health import HealthCollector, HealthScorer
 

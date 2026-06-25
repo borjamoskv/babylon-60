@@ -63,29 +63,63 @@ class Cortex:
     def from_float(cls, value):
         return cls(int(round(value * 216000)))
         
+    def _get_val(self, other):
+        if hasattr(other, 'value'):
+            return other.value
+        elif isinstance(other, (int, float)):
+            return int(round(other * 216000))
+        raise TypeError(f"unsupported operand type(s) for Cortex: {type(other)}")
+
     def __add__(self, other):
-        return Cortex(self.value + other.value)
+        return Cortex(self.value + self._get_val(other))
+        
+    def __radd__(self, other):
+        return Cortex(self._get_val(other) + self.value)
         
     def __sub__(self, other):
-        return Cortex(self.value - other.value)
+        return Cortex(self.value - self._get_val(other))
+        
+    def __rsub__(self, other):
+        return Cortex(self._get_val(other) - self.value)
         
     def __mul__(self, other):
-        return Cortex(int((self.value * other.value) / 216000))
+        return Cortex(int((self.value * self._get_val(other)) / 216000))
+        
+    def __rmul__(self, other):
+        return Cortex(int((self._get_val(other) * self.value) / 216000))
         
     def mul(self, other):
         return self * other
         
     def __truediv__(self, other):
-        return Cortex(int((self.value * 216000) / other.value))
+        return Cortex(int((self.value * 216000) / self._get_val(other)))
+        
+    def __rtruediv__(self, other):
+        return Cortex(int((self._get_val(other) * 216000) / self.value))
         
     def __eq__(self, other):
-        return self.value == getattr(other, "value", other)
+        try:
+            return self.value == self._get_val(other)
+        except TypeError:
+            return False
         
     def __lt__(self, other):
-        return self.value < other.value
+        return self.value < self._get_val(other)
         
     def __le__(self, other):
-        return self.value <= other.value
+        return self.value <= self._get_val(other)
+        
+    def __gt__(self, other):
+        return self.value > self._get_val(other)
+        
+    def __ge__(self, other):
+        return self.value >= self._get_val(other)
+        
+    def __format__(self, format_spec):
+        return format(float(self), format_spec)
+        
+    def __round__(self, ndigits=None):
+        return round(float(self), ndigits)
         
     def __hash__(self):
         return hash(self.value)

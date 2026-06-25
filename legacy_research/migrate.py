@@ -8,16 +8,12 @@ and imports them into the v4.0 database. Non-destructive: never modifies source 
 
 from __future__ import annotations
 
-from pathlib import Path
-from cortex.engine import CortexEngine
-
-
-
 import json
 import logging
 import sqlite3
+from pathlib import Path
 
-
+from cortex.engine import CortexEngine
 
 __all__ = ["migrate_v31_to_v40"]
 

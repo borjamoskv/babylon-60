@@ -364,10 +364,10 @@ def audit(ctx, calcification: bool, frontend: bool, demo: bool, project: str, li
 def siege(db: str) -> None:
     """Run an autonomous Red Team swarm to test Ledger and Vault BFT compliance."""
     from cortex.cli.errors import handle_cli_error
-    from legacy_research.crypto.vault import Vault
     from cortex.database.pool import CortexConnectionPool
     from cortex.engine import CortexEngine as AsyncCortexEngine
     from cortex.engine.legion_vectors import COMPLIANCE_SIEGE_SWARM
+    from legacy_research.crypto.vault import Vault
 
     async def _run_siege():
         pool = CortexConnectionPool(db, min_connections=2, max_connections=10, read_only=False)

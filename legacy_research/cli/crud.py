@@ -2,21 +2,18 @@
 
 from __future__ import annotations
 
-from collections.abc import Coroutine
-from typing import Any, TypeVar, cast
-import click
-from rich.table import Table
-from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
-from cortex.cli.errors import err_empty_results, err_fact_not_found
-from legacy_research.extensions.sync import export_to_json
-
-
-
 import asyncio
 import json
 import sqlite3
+from collections.abc import Coroutine
+from typing import Any, TypeVar, cast
 
+import click
+from rich.table import Table
 
+from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.errors import err_empty_results, err_fact_not_found
+from legacy_research.extensions.sync import export_to_json
 
 __all__ = ["delete", "edit", "list_facts"]
 

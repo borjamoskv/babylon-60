@@ -1,15 +1,13 @@
+# [C5-REAL] Exergy-Maximized
+import sqlite3
 import subprocess
 import sys
 import time
+
 import click
 from rich.panel import Panel
+
 from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
-
-# [C5-REAL] Exergy-Maximized
-
-import sqlite3
-
-
 
 
 def _get_uncommitted_changes() -> list[str]:

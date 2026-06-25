@@ -12,23 +12,20 @@ Usage:
 
 from __future__ import annotations
 
+import asyncio
+import sqlite3
 import time
 from datetime import datetime, timezone
+
 import click
 from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
+
 from cortex.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
 from cortex.cli.errors import handle_cli_error
-
-
-
-import asyncio
-import sqlite3
-
-
 
 # ─── Industrial Noir Palette ────────────────────────────────────────
 _CYBER = "#CCFF00"

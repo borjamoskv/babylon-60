@@ -12,6 +12,7 @@ import logging
 import random
 from typing import Any
 
+from cortex.math.babylon import Babylon60
 from cortex.engine._genome_tree_helper import remove_target, replace_target
 from cortex.engine._genome_types import MutationType, StrategyGenome
 from cortex.isa.builder import (
@@ -62,7 +63,7 @@ class GenomeMutator:
         elif (
             failure_trace
             and failure_trace.get("failed_target")
-            and random.random() < genome.mutation_rates.get(MutationType.CAUSAL_PATCH, 0.20)
+            and random.random() < float(genome.mutation_rates.get(MutationType.CAUSAL_PATCH, Babylon60.from_float(0.20)))
         ):
             mutation_type = MutationType.CAUSAL_PATCH
         else:
@@ -160,9 +161,9 @@ class GenomeMutator:
 
         # Blend mutation rates
         for mt in MutationType:
-            rate_a = fitter.mutation_rates.get(mt, 0.0)
-            rate_b = weaker.mutation_rates.get(mt, 0.0)
-            child.mutation_rates[mt] = (rate_a + rate_b) / 2.0
+            rate_a = fitter.mutation_rates.get(mt, Babylon60.from_int(0))
+            rate_b = weaker.mutation_rates.get(mt, Babylon60.from_int(0))
+            child.mutation_rates[mt] = (rate_a + rate_b) / Babylon60.from_float(2.0)
 
         child._invalidate_hash()
         child.lineage.mutation_log.append("crossover")
@@ -171,7 +172,7 @@ class GenomeMutator:
     def _select_mutation_type(self, genome: StrategyGenome) -> MutationType:
         """Roulette wheel selection weighted by genome's own mutation_rates."""
         types = list(MutationType)
-        weights = [genome.mutation_rates.get(mt, 0.01) for mt in types]
+        weights = [float(genome.mutation_rates.get(mt, Babylon60.from_float(0.01))) for mt in types]
         total = sum(weights)
         if total <= 0:
             return random.choice(types)
@@ -304,24 +305,23 @@ class GenomeMutator:
         rates = genome.mutation_rates
         # Weighted selection: dampened by sqrt to limit dominance of high rates
         types = list(MutationType)
-        weights = [max(0.001, (rates.get(mt, 0.05)) ** 0.5) for mt in types]
+        weights = [max(0.001, float(rates.get(mt, Babylon60.from_float(0.05))) ** 0.5) for mt in types]
         selected_mt = random.choices(types, weights=weights, k=1)[0]
 
-        current_rate = rates.get(selected_mt, 0.05)
+        current_rate = float(rates.get(selected_mt, Babylon60.from_float(0.05)))
         sigma = max(0.001, current_rate * 0.05)
         delta = random.gauss(0, sigma)
         new_rate = max(0.001, min(0.5, current_rate + delta))
-        rates[selected_mt] = new_rate
+        rates[selected_mt] = Babylon60.from_float(new_rate)
 
-        # Enforce global budget: only adjust the mutated rate if total exceeds limit
-        max_total = 0.7
-        total = sum(rates.values())
-        if total > max_total:
-            excess = total - max_total
-            adjusted_rate = max(0.001, rates[selected_mt] - excess)
-            rates[selected_mt] = adjusted_rate
+        # Normalize back to sum=1.0 (approx)
+        rates = genome.mutation_rates
+        total_float = sum(float(r) for r in rates.values())
+        if total_float > 0:
+            for mt in list(rates.keys()):
+                rates[mt] = Babylon60.from_float(float(rates[mt]) / total_float)
 
-        final_rate = rates[selected_mt]
+        final_rate = float(rates[selected_mt])
         genome.lineage.mutation_log.append(
             f"META: {selected_mt.value} rate {current_rate:.3f} → {final_rate:.3f}"
         )

@@ -25,6 +25,8 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
+from cortex.math.babylon import Babylon60
+
 from cortex.engine.genome import FitnessRecord, GenomeMutator, StrategyGenome
 from cortex.isa.builder import (
     Predicate,
@@ -452,10 +454,11 @@ class GenesisEngine:
             merged_params.update(g.parameters)
 
         # Average mutation rates
-        merged_rates: dict[str, float] = {}
+        merged_rates: dict[str, Babylon60] = {}
         for mt_key in genomes[0].mutation_rates:
-            rates = [g.mutation_rates.get(mt_key, 0.05) for g in genomes]
-            merged_rates[mt_key] = sum(rates) / len(rates)
+            rates = [g.mutation_rates.get(mt_key, Babylon60.from_float(0.05)) for g in genomes]
+            total = sum(rates, start=Babylon60.from_int(0))
+            merged_rates[mt_key] = total / Babylon60.from_int(len(rates))
 
         hybrid = StrategyGenome(
             name=name,

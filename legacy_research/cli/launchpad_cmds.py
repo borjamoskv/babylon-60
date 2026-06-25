@@ -2,19 +2,16 @@
 
 from __future__ import annotations
 
+import sqlite3
 from pathlib import Path
+
 import click
 from rich.panel import Panel
 from rich.table import Table
+
 from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
 from cortex.cli.errors import err_empty_results, err_validation, handle_cli_error
 from legacy_research.extensions.launchpad.main import MissionOrchestrator
-
-
-
-import sqlite3
-
-
 
 __all__ = ["launchpad", "mission_launch", "mission_list"]
 

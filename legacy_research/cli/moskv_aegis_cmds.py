@@ -12,10 +12,10 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from legacy_research.audit.ledger import EnterpriseAuditLedger
-from legacy_research.audit.moskv_aegis import MoskvAegisEngine
 from cortex.cli.common import DEFAULT_DB, cli, console
 from cortex.database.core import connect_async_ctx
+from legacy_research.audit.ledger import EnterpriseAuditLedger
+from legacy_research.audit.moskv_aegis import MoskvAegisEngine
 
 logger = logging.getLogger(__name__)
 

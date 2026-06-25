@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
+from cortex.math.babylon import Babylon60
 from cortex.isa.builder import (
     AgentOp,
     dispatch_targets,
@@ -29,22 +30,22 @@ logger = logging.getLogger("cortex.engine.genome")
 class FitnessRecord:
     """Single fitness measurement from an evaluation run."""
 
-    score: float
-    latency_ms: float
+    score: Babylon60
+    latency_ms: Babylon60
     success: bool
-    error_rate: float
-    throughput: float  # ops/sec
-    timestamp: float = field(default_factory=time.monotonic)
+    error_rate: Babylon60
+    throughput: Babylon60  # ops/sec
+    timestamp: Babylon60 = field(default_factory=lambda: Babylon60.from_float(time.monotonic()))
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "score": self.score,
-            "latency_ms": self.latency_ms,
+            "score": float(self.score),
+            "latency_ms": float(self.latency_ms),
             "success": self.success,
-            "error_rate": self.error_rate,
-            "throughput": self.throughput,
-            "timestamp": self.timestamp,
+            "error_rate": float(self.error_rate),
+            "throughput": float(self.throughput),
+            "timestamp": float(self.timestamp),
             "metadata": self.metadata,
         }
 
@@ -62,37 +63,44 @@ class Lineage:
     children_spawned: int = 0
 
     @property
-    def avg_fitness(self) -> float:
+    def avg_fitness(self) -> Babylon60:
         if not self.fitness_history:
-            return 0.0
-        return sum(r.score for r in self.fitness_history) / len(self.fitness_history)
+            return Babylon60.from_int(0)
+        return sum((r.score for r in self.fitness_history), start=Babylon60.from_int(0)) / Babylon60.from_int(len(self.fitness_history))
 
     @property
-    def best_fitness(self) -> float:
+    def best_fitness(self) -> Babylon60:
         if not self.fitness_history:
-            return 0.0
+            return Babylon60.from_int(0)
         return max(r.score for r in self.fitness_history)
 
     @property
-    def fitness_trend(self) -> float:
+    def fitness_trend(self) -> Babylon60:
         """Slope of fitness over recent history. Positive = improving."""
         if len(self.fitness_history) < 3:
-            return 0.0
+            return Babylon60.from_int(0)
         recent = self.fitness_history[-5:]
         n = len(recent)
-        x_mean = (n - 1) / 2.0
-        y_mean = sum(r.score for r in recent) / n
-        numerator = sum((i - x_mean) * (r.score - y_mean) for i, r in enumerate(recent))
-        denominator = sum((i - x_mean) ** 2 for i in range(n))
-        return numerator / denominator if denominator > 0 else 0.0
+        x_mean = Babylon60.from_float((n - 1) / 2.0)
+        y_mean = sum((r.score for r in recent), start=Babylon60.from_int(0)) / Babylon60.from_int(n)
+        
+        numerator = sum(
+            ((Babylon60.from_int(i) - x_mean) * (r.score - y_mean) for i, r in enumerate(recent)), 
+            start=Babylon60.from_int(0)
+        )
+        denominator = sum(
+            ((Babylon60.from_int(i) - x_mean) * (Babylon60.from_int(i) - x_mean) for i in range(n)), 
+            start=Babylon60.from_int(0)
+        )
+        return numerator / denominator if float(denominator) > 0 else Babylon60.from_int(0)
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "generation": self.generation,
             "parent_hash": self.parent_hash,
-            "avg_fitness": self.avg_fitness,
-            "best_fitness": self.best_fitness,
-            "fitness_trend": self.fitness_trend,
+            "avg_fitness": float(self.avg_fitness),
+            "best_fitness": float(self.best_fitness),
+            "fitness_trend": float(self.fitness_trend),
             "adopted_count": self.adopted_count,
             "discarded_count": self.discarded_count,
             "children_spawned": self.children_spawned,
@@ -125,24 +133,24 @@ class StrategyGenome:
         name: str = "unnamed",
         dispatch_tree: AgentOp | None = None,
         parameters: dict[str, Any] | None = None,
-        mutation_rates: dict[str, float] | None = None,
+        mutation_rates: dict[str, Babylon60] | None = None,
         constraints: list[str] | None = None,
     ) -> None:
         self.name = name
         self.dispatch_tree: AgentOp = dispatch_tree or noop()
         self.parameters: dict[str, Any] = parameters or {}
-        self.mutation_rates: dict[str, float] = mutation_rates or {
-            MutationType.CAUSAL_PATCH: 0.20,
-            MutationType.PARAMETER_DRIFT: 0.30,
-            MutationType.SUBTREE_SWAP: 0.10,
-            MutationType.NODE_INSERT: 0.10,
-            MutationType.NODE_DELETE: 0.03,
-            MutationType.PARALLELIZE: 0.05,
-            MutationType.SEQUENTIALIZE: 0.05,
-            MutationType.LOOP_UNROLL: 0.03,
-            MutationType.CONDITIONAL_INJECT: 0.05,
-            MutationType.STRATEGY_SYNTHESIS: 0.04,
-            MutationType.META_MUTATION: 0.05,
+        self.mutation_rates: dict[str, Babylon60] = mutation_rates or {
+            MutationType.CAUSAL_PATCH: Babylon60.from_float(0.20),
+            MutationType.PARAMETER_DRIFT: Babylon60.from_float(0.30),
+            MutationType.SUBTREE_SWAP: Babylon60.from_float(0.10),
+            MutationType.NODE_INSERT: Babylon60.from_float(0.10),
+            MutationType.NODE_DELETE: Babylon60.from_float(0.03),
+            MutationType.PARALLELIZE: Babylon60.from_float(0.05),
+            MutationType.SEQUENTIALIZE: Babylon60.from_float(0.05),
+            MutationType.LOOP_UNROLL: Babylon60.from_float(0.03),
+            MutationType.CONDITIONAL_INJECT: Babylon60.from_float(0.05),
+            MutationType.STRATEGY_SYNTHESIS: Babylon60.from_float(0.04),
+            MutationType.META_MUTATION: Babylon60.from_float(0.05),
         }
         self.constraints: list[str] = constraints or []
         self.lineage = Lineage()
@@ -254,6 +262,6 @@ class StrategyGenome:
     def __repr__(self) -> str:
         return (
             f"<StrategyGenome name={self.name!r} gen={self.lineage.generation} "
-            f"hash={self.genome_hash[:8]} fitness={self.lineage.avg_fitness:.2f} "
+            f"hash={self.genome_hash[:8]} fitness={float(self.lineage.avg_fitness):.2f} "
             f"complexity={self.complexity}>"
         )

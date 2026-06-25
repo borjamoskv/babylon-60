@@ -1,5 +1,6 @@
 import time
 from typing import TYPE_CHECKING, Any
+
 from legacy_research.extensions.gate import ActionStatus, GateNotApproved, GatePolicy
 
 # [C5-REAL] Exergy-Maximized
@@ -9,8 +10,6 @@ Interactive CLI approval logic for SovereignGate.
 
 import logging
 import sqlite3
-
-
 
 __all__ = ["approve_interactive"]
 

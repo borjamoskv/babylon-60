@@ -81,58 +81,90 @@ class _PurePythonBabylon60:
 
     # -- arithmetic ---------------------------------------------------------- #
 
-    def add(self, other: _PurePythonBabylon60) -> _PurePythonBabylon60:
+    def add(self, other: int | float | _PurePythonBabylon60) -> _PurePythonBabylon60:
+        if isinstance(other, (int, float)):
+            other = _PurePythonBabylon60.from_float(float(other))
         return _PurePythonBabylon60(_check_i64(self.value + other.value, "add"))
 
-    def sub(self, other: _PurePythonBabylon60) -> _PurePythonBabylon60:
+    def sub(self, other: int | float | _PurePythonBabylon60) -> _PurePythonBabylon60:
+        if isinstance(other, (int, float)):
+            other = _PurePythonBabylon60.from_float(float(other))
         return _PurePythonBabylon60(_check_i64(self.value - other.value, "sub"))
 
-    def mul(self, other: _PurePythonBabylon60) -> _PurePythonBabylon60:
+    def mul(self, other: int | float | _PurePythonBabylon60) -> _PurePythonBabylon60:
+        if isinstance(other, (int, float)):
+            other = _PurePythonBabylon60.from_float(float(other))
         return _PurePythonBabylon60(
             _check_i64((self.value * other.value) // SCALE, "mul")
         )
 
-    def div(self, other: _PurePythonBabylon60) -> _PurePythonBabylon60:
+    def div(self, other: int | float | _PurePythonBabylon60) -> _PurePythonBabylon60:
+        if isinstance(other, (int, float)):
+            other = _PurePythonBabylon60.from_float(float(other))
         if other.value == 0:
             raise ZeroDivisionError("Babylon60 division by zero")
         return _PurePythonBabylon60(
             _check_i64((self.value * SCALE) // other.value, "div")
         )
 
-    def distance(self, other: _PurePythonBabylon60) -> _PurePythonBabylon60:
+    def distance(self, other: int | float | _PurePythonBabylon60) -> _PurePythonBabylon60:
+        if isinstance(other, (int, float)):
+            other = _PurePythonBabylon60.from_float(float(other))
         return _PurePythonBabylon60(abs(self.value - other.value))
 
     # -- operators ----------------------------------------------------------- #
 
-    def __add__(self, other: _PurePythonBabylon60) -> _PurePythonBabylon60:
+    def __add__(self, other: int | float | _PurePythonBabylon60) -> _PurePythonBabylon60:
         return self.add(other)
 
-    def __sub__(self, other: _PurePythonBabylon60) -> _PurePythonBabylon60:
+    def __sub__(self, other: int | float | _PurePythonBabylon60) -> _PurePythonBabylon60:
         return self.sub(other)
 
-    def __mul__(self, other: _PurePythonBabylon60) -> _PurePythonBabylon60:
+    def __mul__(self, other: int | float | _PurePythonBabylon60) -> _PurePythonBabylon60:
         return self.mul(other)
 
-    def __truediv__(self, other: _PurePythonBabylon60) -> _PurePythonBabylon60:
+    def __truediv__(self, other: int | float | _PurePythonBabylon60) -> _PurePythonBabylon60:
         return self.div(other)
+
+    def __radd__(self, other: int | float) -> _PurePythonBabylon60:
+        return self.add(other)
+
+    def __rsub__(self, other: int | float) -> _PurePythonBabylon60:
+        return _PurePythonBabylon60.from_float(float(other)).sub(self)
+
+    def __rmul__(self, other: int | float) -> _PurePythonBabylon60:
+        return self.mul(other)
+
+    def __rtruediv__(self, other: int | float) -> _PurePythonBabylon60:
+        return _PurePythonBabylon60.from_float(float(other)).div(self)
 
     # -- comparison ---------------------------------------------------------- #
 
     def __eq__(self, other: object) -> bool:
+        if isinstance(other, (int, float)):
+            other = _PurePythonBabylon60.from_float(float(other))
         if not isinstance(other, _PurePythonBabylon60):
             return NotImplemented
         return self.value == other.value
 
-    def __lt__(self, other: _PurePythonBabylon60) -> bool:
+    def __lt__(self, other: int | float | _PurePythonBabylon60) -> bool:
+        if isinstance(other, (int, float)):
+            other = _PurePythonBabylon60.from_float(float(other))
         return self.value < other.value
 
-    def __le__(self, other: _PurePythonBabylon60) -> bool:
+    def __le__(self, other: int | float | _PurePythonBabylon60) -> bool:
+        if isinstance(other, (int, float)):
+            other = _PurePythonBabylon60.from_float(float(other))
         return self.value <= other.value
 
-    def __gt__(self, other: _PurePythonBabylon60) -> bool:
+    def __gt__(self, other: int | float | _PurePythonBabylon60) -> bool:
+        if isinstance(other, (int, float)):
+            other = _PurePythonBabylon60.from_float(float(other))
         return self.value > other.value
 
-    def __ge__(self, other: _PurePythonBabylon60) -> bool:
+    def __ge__(self, other: int | float | _PurePythonBabylon60) -> bool:
+        if isinstance(other, (int, float)):
+            other = _PurePythonBabylon60.from_float(float(other))
         return self.value >= other.value
 
     def __hash__(self) -> int:

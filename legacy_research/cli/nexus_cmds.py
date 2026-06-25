@@ -1,15 +1,14 @@
+# [C5-REAL] Exergy-Maximized
+import sqlite3
 import subprocess
 import sys
 from pathlib import Path
+
 import click
 from rich.console import Console
+
 from cortex.cli.common import cli
 from cortex.cli.errors import err_execution_failed, err_skill_not_found
-
-# [C5-REAL] Exergy-Maximized
-import sqlite3
-
-
 
 __all__ = [
     "NEXUS_SKILL_PATH",

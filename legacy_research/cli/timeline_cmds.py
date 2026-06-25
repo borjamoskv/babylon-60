@@ -2,17 +2,14 @@
 
 from __future__ import annotations
 
-import click
-from rich.table import Table
-from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
-from cortex.cli.errors import err_empty_results, handle_cli_error
-
-
-
 import asyncio
 import sqlite3
 
+import click
+from rich.table import Table
 
+from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.errors import err_empty_results, handle_cli_error
 
 __all__ = [
     "snapshot_create",

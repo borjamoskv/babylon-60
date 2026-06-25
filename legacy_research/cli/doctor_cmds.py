@@ -2,21 +2,18 @@
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-import click
-from rich.panel import Panel
-from rich.table import Table
-from cortex.cli.common import DEFAULT_DB, cli, console
-
-
-
 import json
 import os
 import platform
 import sqlite3
+import sys
+from pathlib import Path
 
+import click
+from rich.panel import Panel
+from rich.table import Table
 
+from cortex.cli.common import DEFAULT_DB, cli, console
 
 
 def check_python() -> dict:

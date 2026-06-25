@@ -9,9 +9,9 @@ desde la terminal.
 from __future__ import annotations
 
 import asyncio
+from typing import Any
 
 import click
-from typing import Any
 
 from cortex.cli.common import console, get_engine
 from legacy_research.extensions.ui_control.maestro import MaestroUI

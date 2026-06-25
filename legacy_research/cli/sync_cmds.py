@@ -11,7 +11,12 @@ from rich.panel import Panel
 
 from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
 from cortex.cli.slow_tip import tip_on_slow
-from legacy_research.extensions.sync import export_obsidian, export_snapshot, export_to_json, sync_memory
+from legacy_research.extensions.sync import (
+    export_obsidian,
+    export_snapshot,
+    export_to_json,
+    sync_memory,
+)
 
 __all__ = [
     "export",

@@ -7,19 +7,16 @@ Designed to display during agent thinking pauses.
 
 from __future__ import annotations
 
-import click
-from rich.panel import Panel
-from rich.table import Table
-from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
-from cortex.cli.errors import err_empty_results, handle_cli_error
-from cortex.engine.tips import Tip, TipCategory, TipsEngine
-
-
-
 import asyncio
 import sqlite3
 
+import click
+from rich.panel import Panel
+from rich.table import Table
 
+from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.errors import err_empty_results, handle_cli_error
+from cortex.engine.tips import Tip, TipCategory, TipsEngine
 
 
 def _run_async(coro):
