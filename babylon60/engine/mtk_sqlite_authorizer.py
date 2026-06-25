@@ -100,21 +100,7 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
         if not token or (not token.startswith("mtk_auth_") and not token.startswith("zk_seal_rs_")):
             logger.critical(f"[MTK-BLOCK] Unauthorized physical mutation attempt: Action {action} on {arg1}")
             return sqlite3.SQLITE_DENY
-            
-        if token.startswith("mtk_auth_"):
-            # Bypass FFI verification for dummy/testing/bounty tokens.
-            # Cryptographic tokens have the form: mtk_auth_<timestamp_ms>_<signature_hex> (4 parts).
-            parts = token.split("_")
-            if len(parts) >= 3:
-                # Bypass FFI verification for dummy/testing/bounty tokens.
-                # In pure Python Ouroboros engine, token generation is trusted within context.
-                return sqlite3.SQLITE_OK
 
-            
-        # Cross-Language Taint Propagation: Rust ZK-Seal bypasses GC taint tracking
-        if token.startswith("zk_seal_rs_"):
-            return sqlite3.SQLITE_OK
-            
         # Memory Taint Tracking: Bloquear inyección estocástica directa
         import sys
         STOCHASTIC_MODULES = (
@@ -122,7 +108,12 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
             "babylon60.engine.models",
             "babylon60.extensions.llm",
             "babylon60.engine.synthesis",
-            "babylon60.engine.generation"
+            "babylon60.engine.generation",
+            "cortex.engine.inference",
+            "cortex.engine.models",
+            "cortex.extensions.llm",
+            "cortex.engine.synthesis",
+            "cortex.engine.generation"
         )
         try:
             frame = sys._getframe(1)
@@ -139,6 +130,19 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
                 frame = frame.f_back
         except (ValueError, AttributeError):
             pass
+
+        if token.startswith("mtk_auth_"):
+            # Bypass FFI verification for dummy/testing/bounty tokens.
+            # Cryptographic tokens have the form: mtk_auth_<timestamp_ms>_<signature_hex> (4 parts).
+            parts = token.split("_")
+            if len(parts) >= 3:
+                # Bypass FFI verification for dummy/testing/bounty tokens.
+                # In pure Python Ouroboros engine, token generation is trusted within context.
+                return sqlite3.SQLITE_OK
+
+        # Cross-Language Taint Propagation: Rust ZK-Seal bypasses GC taint tracking
+        if token.startswith("zk_seal_rs_"):
+            return sqlite3.SQLITE_OK
             
     return sqlite3.SQLITE_OK
 
