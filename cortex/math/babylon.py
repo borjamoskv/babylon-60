@@ -147,11 +147,16 @@ class _PurePythonBabylon60:
         return f"B60({self.to_float():.6f})"
 
 
+from typing import TYPE_CHECKING
+
 # --------------------------------------------------------------------------- #
 # Resolve implementation: Rust-native or pure Python
 # --------------------------------------------------------------------------- #
 
-Babylon60 = _NativeBabylon60 if HAS_NATIVE else _PurePythonBabylon60
+if TYPE_CHECKING:
+    Babylon60 = _PurePythonBabylon60
+else:
+    Babylon60 = _NativeBabylon60 if HAS_NATIVE else _PurePythonBabylon60
 
 
 # --------------------------------------------------------------------------- #

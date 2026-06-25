@@ -7,13 +7,14 @@ Aserción de BABYLON-60 Epistemology.
 ═══════════════════════════════════════════════════════════════
 """
 
-from cortex.nodes.causal_framework_nodes import (
-    DeterministicCausalPrimitive, 
-    FristonPenaltyValidator,
-    ExergyLevel
-)
-import sys
 import os
+import sys
+
+from cortex.nodes.causal_framework_nodes import (
+    DeterministicCausalPrimitive,
+    ExergyLevel,
+    FristonPenaltyValidator,
+)
 
 # Asegurar que importamos cortex_core_rs.py desde el root
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))

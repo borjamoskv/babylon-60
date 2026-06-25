@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 
 # Append paths
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
@@ -8,13 +8,14 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 from babylon60_mtk import install_bootstrap_watchdog
 from babylon60_mtk.watchdog import _is_mitosis_branch
 
+
 def run_tests():
     print("[TEST] Instalando MTK Bootstrap Watchdog...")
     install_bootstrap_watchdog()
     
     # 1. Test read operation (should always pass)
     try:
-        with open("cortex/nodes/causal_framework_nodes.py", "r") as f:
+        with open("cortex/nodes/causal_framework_nodes.py") as f:
             pass
         print("[OK] Leer archivos del core está permitido.")
     except PermissionError:

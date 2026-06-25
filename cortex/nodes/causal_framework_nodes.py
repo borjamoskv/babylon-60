@@ -8,10 +8,10 @@ Migración LEY 11 (BABYLON-60 Epistemology): Erradicación de float64.
 ═══════════════════════════════════════════════════════════════
 """
 
+import os
+import sys
 from dataclasses import dataclass
 from enum import Enum
-import sys
-import os
 
 # Asegurar que importamos cortex_core_rs.py desde el root
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))

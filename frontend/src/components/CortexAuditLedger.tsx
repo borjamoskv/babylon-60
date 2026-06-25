@@ -13,17 +13,13 @@ interface AuditEvent {
 
 export default function CortexAuditLedger() {
   const [events, setEvents] = useState<AuditEvent[]>([]);
-  const [isLive, setIsLive] = useState(true);
-  const [realityLevel, setRealityLevel] = useState('C4-SIM');
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    if (!isLive) return;
-
     connectTelemetry();
+    // Simulate connection for UI purposes if real telemetry connects
     const unsubscribe = onTelemetryData((data: TelemetryData) => {
-      if (data && data.reality_level) {
-        setRealityLevel(data.reality_level);
-      }
+      setIsConnected(true);
       if (data && data.logs && Array.isArray(data.logs)) {
         const mappedEvents: AuditEvent[] = data.logs.map((log: TelemetryLog) => {
           const logTime = log.id ? new Date(log.id * 1000) : new Date();
@@ -41,7 +37,7 @@ export default function CortexAuditLedger() {
     });
 
     return () => unsubscribe();
-  }, [isLive]);
+  }, []);
 
   function hashString(str: string) {
     let hash = 0;
@@ -52,26 +48,21 @@ export default function CortexAuditLedger() {
     return Math.abs(hash).toString(16).padEnd(8, 'f').substring(0, 8);
   }
 
-  const isReal = realityLevel === 'C5-REAL';
-
   return (
     <div className="audit-ledger-container">
       <div className="audit-ledger-header">
         <div className="audit-ledger-title-group">
           <div className="audit-ledger-eyebrow">
-            <span>Real-Time Telemetry Stream</span>
-            <span className={`telemetry-badge ${isReal ? 'real' : 'sim'}`}>
-              {realityLevel}
+            <span>C5-REAL Telemetry Stream</span>
+            <span className="telemetry-badge real">
+              C5-REAL
             </span>
           </div>
           <h3 className="audit-ledger-heading">Cryptographic Memory Ledger</h3>
         </div>
         <div className="audit-ledger-actions">
-           <button 
-             onClick={() => setIsLive(!isLive)}
-             className={`ledger-stream-btn ${isLive ? 'active' : ''}`}
-           >
-             {isLive ? '● STREAM ENGAGED' : 'STREAM HALTED'}
+           <button className={`ledger-stream-btn ${isConnected ? 'active' : 'error'}`}>
+             {isConnected ? '● STREAM ENGAGED' : '[OFFLINE / NO-EXERGY]'}
            </button>
         </div>
       </div>

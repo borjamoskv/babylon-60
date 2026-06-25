@@ -122,8 +122,8 @@ import SiteLayout from '../layouts/NoirLayout.astro';
 					<p class="surface-label">Operator notes</p>
 					<ul class="hint-list">
 						<li>Pan is disabled. Rotate and zoom only.</li>
-						<li>Public mode runs synthetic telemetry with deterministic cadence.</li>
-						<li>Use <code>?live=1</code> on localhost to attach the daemon stream.</li>
+						<li>Strict C5-REAL execution. Zero anergy telemetry.</li>
+						<li></li>
 					</ul>
 				</article>
 			</section>
@@ -271,82 +271,8 @@ import SiteLayout from '../layouts/NoirLayout.astro';
 			}
 		}
 
-		function startSimulation() {
-			if (simulationInterval) {
-				return;
-			}
-
-			let simulatedCycle = 0;
-			const phases = [
-				'Entropy shaping',
-				'Context compaction',
-				'Lineage sealing',
-				'Drift dampening',
-				'Recall rehearsal',
-			];
-			const messages = [
-				'Synthetic swarm pulse.',
-				'Checkpoint lattice sealed.',
-				'Recall window tuned.',
-				'Public shell holding steady.',
-				'Operational trace compacted.',
-			];
-
-			setStatus('demo', 'DEMO', {
-				source: 'Synthetic',
-				phase: phases[0],
-			});
-			appendLog('SIM', 'Public shell running synthetic telemetry.');
-
-			simulationInterval = window.setInterval(() => {
-				simulatedCycle += 1;
-
-				const cursorA = (simulatedCycle * 7) % DIMENSIONS;
-				const cursorB = (simulatedCycle * 13 + 57) % DIMENSIONS;
-				const states = simulationStates;
-				states.fill(0);
-
-				for (let i = 0; i < DIMENSIONS; i += 1) {
-					const distanceA = Math.abs(i - cursorA);
-					const distanceB = Math.abs(i - cursorB);
-					const wrappedA = Math.min(distanceA, DIMENSIONS - distanceA);
-					const wrappedB = Math.min(distanceB, DIMENSIONS - distanceB);
-					const waveA = Math.max(0, 1 - wrappedA / 22);
-					const waveB = Math.max(0, 1 - wrappedB / 34);
-					const harmonic = 0.5 + 0.5 * Math.sin(simulatedCycle * 0.28 + i * 0.09);
-					const micro = 0.5 + 0.5 * Math.sin(simulatedCycle * 0.51 + i * 0.21);
-
-					states[i] = clamp01(waveA * 0.56 + waveB * 0.3 + harmonic * 0.16 + micro * 0.05 - 0.19);
-				}
-
-				setStatus('demo', 'DEMO', {
-					source: 'Synthetic',
-					phase: phases[simulatedCycle % phases.length],
-				});
-
-				applyState({
-					global_yield: 0.37 + (Math.sin(simulatedCycle / 3.6) + 1) * 0.16,
-					cycle_count: simulatedCycle,
-					logs: [
-						{
-							msg: `CYCLE_${String(simulatedCycle).padStart(3, '0')}`,
-							val: messages[simulatedCycle % messages.length],
-						},
-					],
-					agent_states: states,
-				});
-			}, 920);
-		}
-
-		function stopSimulation() {
-			if (!simulationInterval) {
-				return;
-			}
-
-			window.clearInterval(simulationInterval);
-			simulationInterval = undefined;
-		}
-
+		
+		
 		function initScene() {
 			scene = new THREE.Scene();
 			scene.fog = new THREE.FogExp2(0x070910, 0.014);
@@ -462,16 +388,8 @@ import SiteLayout from '../layouts/NoirLayout.astro';
 		}
 
 		function connectSSE() {
-			const shouldConnect =
-				LIVE_MODE &&
-				LOCAL_HOSTS.has(window.location.hostname) &&
-				window.location.protocol !== 'https:' &&
-				typeof EventSource !== 'undefined';
-
-			if (!shouldConnect) {
-				startSimulation();
-				return;
-			}
+			const shouldConnect = typeof EventSource !== 'undefined';
+			if (!shouldConnect) return;
 
 			setStatus('connecting', 'CONNECTING', {
 				source: 'Localhost',
@@ -482,7 +400,7 @@ import SiteLayout from '../layouts/NoirLayout.astro';
 			eventSource = new EventSource(LOCAL_SSE_URL);
 
 			eventSource.onopen = () => {
-				stopSimulation();
+				
 				setStatus('live', 'LIVE', {
 					source: 'Localhost',
 					phase: 'Daemon synchronized',
@@ -506,10 +424,10 @@ import SiteLayout from '../layouts/NoirLayout.astro';
 
 				setStatus('demo', 'DEMO', {
 					source: 'Synthetic',
-					phase: 'Fallback telemetry engaged',
+					phase: 'Telemetry Offline',
 				});
-				appendLog('STREAM', 'Daemon unavailable. Falling back to demo mode.');
-				startSimulation();
+				appendLog('STREAM', 'Daemon unavailable. Telemetry offline.');
+				
 			};
 		}
 
@@ -571,7 +489,7 @@ import SiteLayout from '../layouts/NoirLayout.astro';
 				eventSource.close();
 			}
 
-			stopSimulation();
+			
 			controls?.dispose();
 			shellGeometry?.dispose();
 			shellMaterial?.dispose();

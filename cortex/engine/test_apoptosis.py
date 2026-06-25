@@ -14,7 +14,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 from cortex.engine.apoptosis_daemon import ApoptosisDaemon
 from cortex.engine.mtk_core import MTKGuard
-from cortex.storage.pg_schema import PG_CREATE_FACTS
 from cortex.storage.sqlite_adapter import SQLiteAdapter
 
 
@@ -69,9 +68,9 @@ async def run_test():
     
     # 3. Configurar MTK Guard (mock key de 32 bytes en base64 o raw, MTKGuard usa string o raw key)
     # Import ed25519 to generate key
+
     from cryptography.hazmat.primitives import serialization
     from cryptography.hazmat.primitives.asymmetric import ed25519
-    import base64
     priv_key = ed25519.Ed25519PrivateKey.generate()
     # mt_guard will extract private bytes if passed correctly.
     mtk_guard = MTKGuard(private_key=priv_key.private_bytes(
