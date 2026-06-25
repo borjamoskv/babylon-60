@@ -1,6 +1,7 @@
 ---
 import NoirLayout from '../layouts/NoirLayout.astro';
 import AwwwardsHero from '../components/landing/AwwwardsHero';
+import MTKBoundaryVisual from '../components/landing/MTKBoundaryVisual';
 ---
 
 <NoirLayout title="CORTEX Persist | Know exactly what your AI agents did.">
@@ -22,10 +23,7 @@ import AwwwardsHero from '../components/landing/AwwwardsHero';
           </ul>
         </div>
         <div class="arch-visual glass-panel">
-          <!-- WebGL Canvas or SVG diagram goes here in future phases -->
-          <div class="placeholder-box">
-             <span class="mono text-glow">[ ART_ANIMATOR_OMEGA_CANVAS ]</span>
-          </div>
+          <MTKBoundaryVisual client:visible />
         </div>
       </div>
     </div>
