@@ -35,8 +35,6 @@ import json
 import logging
 import sqlite3
 
-
-
 logger = logging.getLogger("cortex")
 
 
@@ -208,6 +206,11 @@ async def _build_fact_payload(
     """Construct the SQL payload with layout-aware column detection."""
     from babylon60.engine.metadata_engine import MetadataEngine
     from babylon60.engine.models import KnowledgeObject
+
+    # [C5-REAL] P0 CRITICAL INVARIANT: Missing CORTEX-TAINT on fact insert
+    meta = dict(meta) if meta else {}
+    if "CORTEX-TAINT" not in meta:
+        meta["CORTEX-TAINT"] = "C5-REAL-MTK-Authorized"
 
     temp_fact = KnowledgeObject(
         id=0,
