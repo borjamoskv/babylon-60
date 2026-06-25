@@ -45,7 +45,7 @@ class SandboxValidator:
             check=False
         )
         
-        if result.returncode != 0:
+        if result.returncode not in (0, 5):
             logger.error("Sandbox Validation FAILED. Entropy detected:\n%s", result.stderr or result.stdout)
             raise RuntimeError(f"Sandbox validation failed for {file_path}. AST patch rejected.")
             

@@ -15,16 +15,55 @@ from cortex.engine.autopoiesis.sandbox import SandboxValidator
 
 logger = logging.getLogger(__name__)
 
+class _HealingTransformer(ast.NodeTransformer):
+    def __init__(self, function_name: str, class_name: str | None, patch_node: ast.AST):
+        self.function_name = function_name
+        self.class_name = class_name
+        self.patch_node = patch_node
+        self.patched = False
+
+    def visit_ClassDef(self, node: ast.ClassDef):
+        if self.class_name and node.name == self.class_name:
+            for i, child in enumerate(node.body):
+                if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)) and child.name == self.function_name:
+                    node.body[i] = self.patch_node
+                    self.patched = True
+                    return node
+        self.generic_visit(node)
+        return node
+
+    def visit_FunctionDef(self, node: ast.FunctionDef):
+        if not self.class_name and node.name == self.function_name:
+            self.patched = True
+            return self.patch_node
+        self.generic_visit(node)
+        return node
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef):
+        if not self.class_name and node.name == self.function_name:
+            self.patched = True
+            return self.patch_node
+        self.generic_visit(node)
+        return node
+
+
 class ASTHealer:
     """Detects exceptions and self-heals by modifying AST."""
 
     @staticmethod
-    def heal_exception(exc: Exception, module_name: str, function_name: str, patch_code: str, test_path: str | None = None) -> bool:
+    def heal_exception(
+        exc: Exception, 
+        module_name: str, 
+        function_name: str, 
+        patch_code: str, 
+        class_name: str | None = None,
+        test_path: str | None = None
+    ) -> bool:
         """
         Attempts to heal the function that threw `exc`.
-        `patch_code` should be a valid block of python code.
+        `patch_code` should be a valid block of python code representing the new function definition.
         """
-        logger.warning("Initiating Autopoietic Healing Protocol for %s.%s", module_name, function_name)
+        logger.warning("Initiating Autopoietic Healing Protocol for %s:%s.%s", module_name, class_name or "GLOBAL", function_name)
         
         if module_name not in sys.modules:
             logger.error("Module %s not in sys.modules", module_name)
@@ -37,7 +76,7 @@ class ASTHealer:
             logger.error("No file path for module %s", module_name)
             return False
             
-        # Parse AST
+        # Parse existing AST
         with open(file_path, encoding="utf-8") as f:
             source = f.read()
             
@@ -46,29 +85,31 @@ class ASTHealer:
         except SyntaxError as e:
             logger.error("Original source has syntax errors: %s", e)
             return False
+            
+        # Parse patch code
+        try:
+            patch_tree = ast.parse(patch_code.strip())
+            if not patch_tree.body:
+                raise ValueError("Patch code is empty")
+            patch_node = patch_tree.body[0]
+            if not isinstance(patch_node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                raise ValueError("Patch code must be a function definition")
+            if patch_node.name != function_name:
+                raise ValueError(f"Patch function name '{patch_node.name}' does not match target '{function_name}'")
+        except Exception as e:
+            logger.error("Patch code is invalid: %s", e)
+            return False
         
-        target_node = None
-        for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef) and node.name == function_name:
-                target_node = node
-                break
-                
-        if not target_node:
-            logger.error("Function %s not found in AST of %s", function_name, file_path)
+        # Apply transformation
+        transformer = _HealingTransformer(function_name, class_name, patch_node)
+        new_tree = transformer.visit(tree)
+        ast.fix_missing_locations(new_tree)
+        
+        if not transformer.patched:
+            logger.error("Target %s.%s not found in AST of %s", class_name or "GLOBAL", function_name, file_path)
             return False
             
-        # Simplified replacement
-        func_pattern = re.compile(rf"(def\s+{function_name}\s*\(.*?\)(\s*->\s*.*?)?:)([\s\S]*?)(?=\n\S|\Z)", re.MULTILINE)
-        
-        match = func_pattern.search(source)
-        if not match:
-            logger.error("Could not match function signature with regex")
-            return False
-            
-        new_func_def = match.group(1)
-        indented_patch = "\n".join(f"    {line}" for line in patch_code.strip().split("\n"))
-        
-        new_source = source[:match.start()] + new_func_def + "\n" + indented_patch + "\n" + source[match.end():]
+        new_source = ast.unparse(new_tree)
         
         # Write back to file
         with open(file_path, "w", encoding="utf-8") as f:
@@ -86,7 +127,7 @@ class ASTHealer:
             
         # Hot Swap
         try:
-            success = HotSwapper.apply_patch(module_name, function_name, seal)
+            success = HotSwapper.apply_patch(module_name, function_name, seal, class_name=class_name)
             return success
         except Exception as e:
             logger.error("Hot Swap failed: %s", e)
