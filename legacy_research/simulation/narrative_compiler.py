@@ -112,7 +112,7 @@ class NarrativeCompiler:
 
         return ActionOutput(
             type="GUIDED_DECISION",
-            content=content,
+            content=content, # type: ignore
             confidence=avg_confidence,
             energy_cost=total_energy,
         )

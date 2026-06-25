@@ -18,7 +18,7 @@ from cortex.math.babylon import Babylon60
 logger = logging.getLogger("cortex.extensions.sales_b2b.messaging_flow")
 
 # Babylon-60 constants for exact temporal arithmetic
-DAY_B60 = Babylon60.from_int(86400)
+DAY_B60 = Babylon60.from_int(86400) # type: ignore
 
 
 class MessagingStage(str, Enum):
@@ -85,7 +85,7 @@ class MessagingFSM:
         
         # Calculate time passed using Babylon-60 primitives (assuming input is in seconds)
         seconds_passed = event_data.get("seconds_since_last_contact", 0)
-        time_passed_b60 = Babylon60.from_int(seconds_passed)
+        time_passed_b60 = Babylon60.from_int(seconds_passed) # type: ignore
         
         if is_reply_positive:
             return MessagingStage.MEETING_BOOKED
@@ -101,17 +101,17 @@ class MessagingFSM:
             return current
             
         # 3 Days = 3 * 86400 seconds
-        three_days_b60 = DAY_B60.mul(Babylon60.from_int(3))
-        if current == MessagingStage.OUTREACH_DAY_1 and time_passed_b60 >= three_days_b60:
+        three_days_b60 = DAY_B60.mul(Babylon60.from_int(3)) # type: ignore
+        if current == MessagingStage.OUTREACH_DAY_1 and time_passed_b60 >= three_days_b60: # type: ignore
             return MessagingStage.FOLLOW_UP_DAY_3
             
         # 4 Days (7 days total)
-        four_days_b60 = DAY_B60.mul(Babylon60.from_int(4))
-        if current == MessagingStage.FOLLOW_UP_DAY_3 and time_passed_b60 >= four_days_b60:
+        four_days_b60 = DAY_B60.mul(Babylon60.from_int(4)) # type: ignore
+        if current == MessagingStage.FOLLOW_UP_DAY_3 and time_passed_b60 >= four_days_b60: # type: ignore
             return MessagingStage.FOLLOW_UP_DAY_7
             
-        seven_days_b60 = DAY_B60.mul(Babylon60.from_int(7))
-        if current == MessagingStage.FOLLOW_UP_DAY_7 and time_passed_b60 >= seven_days_b60:
+        seven_days_b60 = DAY_B60.mul(Babylon60.from_int(7)) # type: ignore
+        if current == MessagingStage.FOLLOW_UP_DAY_7 and time_passed_b60 >= seven_days_b60: # type: ignore
             return MessagingStage.UNRESPONSIVE
 
         # No transition conditions met

@@ -76,7 +76,7 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-    from cortex.engine import CortexEngine
+from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.compactor")
 

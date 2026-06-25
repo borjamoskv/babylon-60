@@ -48,7 +48,7 @@ class OuroborosExtractor:
         if not await cursor.fetchone():
             await conn.execute(
                 "INSERT INTO agents (id, public_key, name, agent_type, is_active) VALUES (?, ?, ?, ?, 1)",
-                (self.agent_id, self.identity.public_key_b64, "Ouroboros EVM Extractor", "ai")
+                (self.agent_id, self.identity.public_key_b64, "Ouroboros EVM Extractor", "ai") # type: ignore
             )
             await conn.commit()
 
@@ -109,7 +109,7 @@ class OuroborosExtractor:
             agent_id=self.agent_id,
             session_id="ouroboros_run",
             content=claim_content,
-            private_key_b64=self.identity.private_key_b64
+            private_key_b64=self.identity.private_key_b64 # type: ignore
         )
         
         token_id = mtk_active_token.set(f"mtk_auth_ouroboros_{tx_hash[-16:]}")

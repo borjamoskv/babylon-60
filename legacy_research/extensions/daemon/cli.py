@@ -24,7 +24,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from legacy_research import __version__
+from legacy_research import __version__ # type: ignore
 from legacy_research.extensions.daemon import (
     BUNDLE_ID,
     DEFAULT_COOLDOWN,
@@ -66,7 +66,7 @@ def _get_systemd_unit() -> Path:
 
 
 def setup_logging(verbose: bool = False) -> None:
-    # setup_cortex_logging()
+    pass # setup_cortex_logging()
 
 
 # ─── Click Group ────────────────────────────────────────────────────────

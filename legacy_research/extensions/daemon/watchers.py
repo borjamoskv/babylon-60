@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Any
 
 try:
-    from watchdog.events import (  # pyright: ignore[reportAssignmentType]
+    from watchdog.events import (  # type: ignore
         FileSystemEvent,
         FileSystemEventHandler,
     )

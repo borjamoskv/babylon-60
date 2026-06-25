@@ -259,9 +259,9 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.debug:
-        # setup_cortex_logging()
+        pass # setup_cortex_logging()
     else:
-        # setup_cortex_logging()
+        pass # setup_cortex_logging()
 
     from dotenv import load_dotenv
 

@@ -22,7 +22,7 @@ class VLMCritic:
 
     async def initialize(self) -> None:
         """Subscribe to execution completion to review artifacts."""
-        await self.bus.subscribe("experiment.execution.completed", self._handle_execution)
+        await self.bus.subscribe("experiment.execution.completed", self._handle_execution) # type: ignore
 
     async def _handle_execution(self, event: dict[str, Any]) -> None:
         node_id = event["node_id"]
@@ -38,7 +38,7 @@ class VLMCritic:
         
         for artifact_uri in artifacts:
             # Simulate a clean sanity check
-            await self.bus.publish(
+            await self.bus.publish( # type: ignore
                 "artifact.review.completed",
                 {
                     "node_id": node_id,

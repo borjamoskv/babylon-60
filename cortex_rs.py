@@ -5,21 +5,45 @@ Strict Native Bridge to cortex_core_rs.
 C4-SIM is strictly prohibited. If Rust bindings fail to load, the system hard-fails.
 """
 
-import sys
 
-import cortex_core_rs
 from cortex_core_rs import (
-    verify_ephemeral_token,
-    ingest_reality_claim,
-    validate_metric_json,
-    validate_exergy_mutation,
-    init_c5_gate_1_schema,
-    verify_causal_assertion,
+    ASTProjector,
+    CognitiveState,
     ExergyRouter,
-    execute_mee_transfer,
-    calculate_entropy_b60 as _calc_entropy_rust,
     Fixed60,
+    MTKAuthorizer,
+    batch_merkle_root,
+    execute_mee_transfer,
+    hash_ast,
+    ingest_reality_claim,
+    init_c5_gate_1_schema,
+    validate_exergy_mutation,
+    validate_metric_json,
+    verify_causal_assertion,
+    verify_ephemeral_token,
 )
+from cortex_core_rs import (
+    calculate_entropy_b60 as _calc_entropy_rust,
+)
+
+__all__ = [
+    "ASTProjector",
+    "CognitiveState",
+    "ExergyRouter",
+    "Fixed60",
+    "MTKAuthorizer",
+    "batch_merkle_root",
+    "execute_mee_transfer",
+    "hash_ast",
+    "ingest_reality_claim",
+    "init_c5_gate_1_schema",
+    "validate_exergy_mutation",
+    "validate_metric_json",
+    "verify_causal_assertion",
+    "verify_ephemeral_token",
+    "calculate_entropy_b60",
+    "Babylon60",
+]
 
 
 # Keep the Python wrapper for Cortex/Babylon60 to provide Pythonic dunder methods
@@ -81,36 +105,5 @@ def calculate_entropy_b60(data: bytes) -> Cortex:
 
 Babylon60 = Cortex
 
-def load_verified_reality(ledger_path: str) -> list[str]:
-    # Dummy implementation for injector.py
-    try:
-        with open(ledger_path, "r") as f:
-            lines = f.readlines()
-        return [line for line in lines if '"trust_score"' in line]
-    except Exception:
-        return []
 
-class EDGReconstructor:
-    def __init__(self):
-        self._nodes = set()
-    def add_epistemic_node(self, node_hash: str):
-        self._nodes.add(node_hash)
-    def add_causal_transition(self, prev_hash: str, commit_hash: str, delta: float):
-        pass
-    def is_orphan(self, commit_hash: str) -> bool:
-        return False
-    def node_count(self) -> int:
-        return len(self._nodes)
-
-class DeltaEngine:
-    def compute_delta(self, ast1: str, ast2: str) -> float:
-        return float(len(ast1) - len(ast2))
-
-from cortex_core_rs import (
-    ASTProjector,
-    MTKAuthorizer,
-    CognitiveState,
-    hash_ast,
-    batch_merkle_root,
-)
 

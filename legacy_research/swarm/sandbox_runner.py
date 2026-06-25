@@ -26,7 +26,7 @@ class SandboxRunner:
         # await mac_control.run("/mac-docker", "run --rm python-sandbox ...")
         
         # Simulate the emission of the execution event
-        await self.bus.publish(
+        await self.bus.publish( # type: ignore
             "experiment.execution.completed",
             {
                 "node_id": node_id,

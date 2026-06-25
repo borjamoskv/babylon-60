@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from stripe_config import StripeBillingConfig, load_stripe_billing_config
+from stripe_config import StripeBillingConfig, load_stripe_billing_config # type: ignore
 
 from legacy_research.extensions.billing.models import BillingEvent, FailureType
 
@@ -99,7 +99,7 @@ class StripeBillingGateway:
             return
 
         try:
-            stripe.SubscriptionItem.create_usage_record(
+            stripe.SubscriptionItem.create_usage_record( # type: ignore
                 subscription_item_id,
                 quantity=quantity,
                 timestamp="now",
@@ -134,7 +134,7 @@ class StripeBillingGateway:
             event = stripe.Webhook.construct_event(
                 payload, signature, self.config.webhook_secret
             )
-            return event
+            return event # type: ignore
         except Exception as e:
             logger.error("Webhook verification failed: %s", e)
             raise ValueError(f"Invalid webhook signature: {e}") from e

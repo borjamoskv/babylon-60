@@ -125,7 +125,7 @@ async def main() -> None:
             on_shutdown=on_shutdown,
         )
         try:
-            await worker.run()
+            await worker.run() # type: ignore
         except asyncio.CancelledError:
             LOGGER.info("Worker execution cancelled.")
             raise

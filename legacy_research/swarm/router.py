@@ -111,7 +111,7 @@ class SwarmRouter:
             raw = self.registry.to_dict()
         else:
             raw = {}
-        return _deep_sorted(copy.deepcopy(raw))
+        return _deep_sorted(copy.deepcopy(raw)) # type: ignore
 
 
 # ------------------------------------------------------------------

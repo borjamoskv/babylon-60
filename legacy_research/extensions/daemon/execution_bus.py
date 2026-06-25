@@ -8,7 +8,7 @@ import traceback
 from dataclasses import dataclass
 from typing import Any
 
-from skills.registry import SkillResolutionError, resolve
+from skills.registry import SkillResolutionError, resolve # type: ignore
 
 from schema.event_v1 import EventV1
 

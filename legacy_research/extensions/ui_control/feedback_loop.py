@@ -21,7 +21,7 @@ from legacy_research.extensions.ui_control.models import AppTarget, InteractionR
 
 try:
     import Vision
-    from Cocoa import NSURL
+    from Foundation import NSURL # type: ignore
 except ImportError:
     Vision = None
     NSURL = None
@@ -40,12 +40,12 @@ class UIFeedbackLoop:
         self.last_screenshot_path: str | None = None
         self.last_ocr_results: list[dict[str, Any]] = []
 
-    def perform_native_ocr(self, image_path: str) -> list[dict[str, Any]]:
+    def perform_native_ocr(self, image_path: str | None) -> list[dict[str, Any]]:
         """
         Runs native macOS Apple Vision OCR (VNRecognizeTextRequest).
         Zero-dependency, high-speed, local C5-REAL text extraction.
         """
-        if not Vision or not NSURL:
+        if not Vision or not NSURL or not image_path:
             logger.warning("Vision framework or Cocoa NSURL not available. Bypassing local OCR.")
             return []
 

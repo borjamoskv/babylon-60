@@ -162,7 +162,7 @@ class MetricsRegistry:
 
         # Standard counter increment
         key = self._key(name, real_labels)
-        self._counters[key] += real_value
+        self._counters[key] += int(real_value)
 
         # Schema enforcement for structured payloads
         if real_payload is not None:

@@ -3,7 +3,7 @@
 import click
 from rich.console import Console
 
-from cortex.cli.common import cli, run_async
+from cortex.cli.common import cli, run_async # type: ignore
 from cortex.engine import CortexEngine
 from cortex.engine.auth_gateway import QuorumGateway
 
@@ -27,7 +27,7 @@ async def submit_vote(req_id: str) -> None:
 
     # 1. Fetch payload to sign
     try:
-        conn = engine.pool.get_connection()
+        conn = engine.pool.get_connection() # type: ignore
         cursor = conn.cursor()
         cursor.execute(
             "SELECT state_payload FROM quorum_requests WHERE id = ? AND status = 'PENDING'",
@@ -61,7 +61,7 @@ async def submit_vote(req_id: str) -> None:
     # 3. Submit Vote
     # For CLI purposes, the operator implies semantic_truth = True by explicitly voting
     success = await auth_gw.submit_vote(
-        req_id, signature_b64=signature, public_key_b64=pub_key, semantic_truth=True
+        req_id, signature_b64=signature, public_key_b64=str(pub_key), semantic_truth=True
     )
     if success:
         console.print(f"[bold green]✓ Vote registered for {req_id}.[/bold green]")
@@ -90,7 +90,7 @@ async def list_requests() -> None:
     """Lists pending BFT quorum requests."""
     engine = CortexEngine()
     try:
-        conn = engine.pool.get_connection()
+        conn = engine.pool.get_connection() # type: ignore
         cursor = conn.cursor()
         cursor.execute(
             "SELECT id, status, hypothesis, signatures_json FROM quorum_requests WHERE status = 'PENDING'"

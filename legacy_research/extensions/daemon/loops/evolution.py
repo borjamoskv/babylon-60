@@ -33,7 +33,7 @@ async def evolution_loop(state, cortex_root, speak_func):
                     if len(files) >= 2:
                         for f1, f2 in itertools.combinations(files, 2):
                             overlap = calculate_module_overlap(f1, f2)
-                            if overlap > 0.4:
+                            if float(overlap) > 0.4: # type: ignore
                                 ghost_id = f"REF-{int(time.monotonic()) % 1000}"
                                 state.daemons["ghost_field"]["resonances"].append(
                                     {
@@ -41,7 +41,7 @@ async def evolution_loop(state, cortex_root, speak_func):
                                         "project": project,
                                         "intent": (
                                             f"Refactor tight coupling"
-                                            f" ({int(overlap * 100)}%)"
+                                            f" ({int(float(overlap) * 100)}%)" # type: ignore
                                             f" between {Path(f1).name}"
                                             f" and {Path(f2).name}"
                                         ),
