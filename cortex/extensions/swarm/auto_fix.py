@@ -47,7 +47,7 @@ _CLASS_PATTERNS: dict[GhostClass, list[str]] = {
     ],
     GhostClass.IMPORT_ERROR: ["ImportError", "ModuleNotFoundError", "circular"],
     GhostClass.TEST_FAILURE: ["AssertionError", "FAILED", "pytest", "test_"],
-    GhostClass.DOC_GAP: ["TO" + "DO", "FI" + "XME", "HA" + "CK", "docstring", "undocumented"],
+    GhostClass.DOC_GAP: ["TO-DO", "FI" + "XME", "HA" + "CK", "docstring", "undocumented"],
 }
 
 
@@ -407,7 +407,7 @@ _FIX_STRATEGIES: dict[GhostClass, str] = {
         "Address this documentation gap:\n\n"
         "{description}\n\n"
         "Ghost ID: {ghost_id} | Project: {project}\n"
-        "Strategy: Add missing docstrings, resolve TO" + "DOs, "
+        "Strategy: Add missing docstrings, resolve TO-DOs, "
         "update stale comments. Keep it concise."
     ),
 }

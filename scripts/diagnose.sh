@@ -13,7 +13,7 @@ echo "Bare Excepts: $(grep -rnE 'except:\s*$|except:\s*pass' --include='*.py' . 
 
 echo "--- DEAD CODE ---"
 echo "Print: $(grep -rn 'print(' --include='*.py' . | grep -vE 'def |#|f\"' | wc -l)"
-echo "TO" + "DOs: $(grep -rnE 'TO-DO|F_IXME|H_ACK' . | wc -l)"
+echo "TO-DOs: $(grep -rnE 'TO-DO|F_IXME|H_ACK' . | wc -l)"
 
 echo "--- DUPLICATION ---"
 echo "Sync Dupe: $(sort cortex/sync.py | uniq -d | wc -l)"
