@@ -307,7 +307,7 @@ class EnterpriseAuditLedger:
         axiom_hash: str,
         proof_signature: str,
         topology_distance: int,
-        trace_id: str = None
+        trace_id: str | None = None
     ) -> str:
         """
         [C5-REAL] Registra la asimilación de un axioma de Homotopy Type Theory.
@@ -360,7 +360,7 @@ class EnterpriseAuditLedger:
         tenant_id: str,
         actor_id: str,
         distance_batch_root: str,
-        snapshot_payload: str,
+        batch_size: int,
         trace_id: str | None = None,
     ) -> str:
         """

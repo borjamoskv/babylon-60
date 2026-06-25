@@ -65,6 +65,7 @@ class WriteAheadLog:
 
     async def _worker_loop(self):
         assert self._conn is not None
+        assert self._queue is not None
         while True:
             try:
                 batch = []
@@ -116,6 +117,7 @@ class WriteAheadLog:
         """Atomic write before memory queue insertion. Returns the event_hash."""
         if self._conn is None:
             await self.connect()
+        assert self._queue is not None
             
         import hashlib
         payload_str = json.dumps(payload)
@@ -137,6 +139,7 @@ class WriteAheadLog:
             return
         if self._conn is None:
             await self.connect()
+        assert self._queue is not None
             
         future = asyncio.get_running_loop().create_future()
         await self._queue.put(("seal", event_ids, future))
@@ -163,6 +166,7 @@ class WriteAheadLog:
             return
         if self._conn is None:
             await self.connect()
+        assert self._queue is not None
             
         future = asyncio.get_running_loop().create_future()
         await self._queue.put(("reject", event_ids, future))
