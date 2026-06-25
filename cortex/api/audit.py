@@ -15,7 +15,7 @@ from typing import Any
 
 from fastapi import Request, Response
 
-logger = logging.getLogger("babylon60.api_audit")
+logger = logging.getLogger("cortex.api_audit")
 
 
 class SecurityAuditMiddleware:

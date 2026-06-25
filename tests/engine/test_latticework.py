@@ -9,7 +9,7 @@ import aiosqlite
 
 from cortex.engine.latticework_store import LatticeworkStore
 from cortex.engine.latticework_daemon import LatticeworkDaemon
-from cortex.engine.cortex import Cortex
+from cortex.engine.babylon60 import Babylon60
 from legacy_research.ledger.execution_trace import ExecutionTraceLedger
 from legacy_research.ledger.causal_graph import CausalGraph
 from cortex.engine.causal_scheduler import CausalScheduler

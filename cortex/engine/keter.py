@@ -12,7 +12,7 @@ import typing
 from abc import ABC, abstractmethod
 from typing import Any, Final, TypedDict
 
-from babylon60.utils.errors import CortexError
+from cortex.utils.errors import CortexError
 
 logger = logging.getLogger(__name__)
 
@@ -90,7 +90,7 @@ class LegionSwarm(SovereignPhase):
     """
 
     async def execute(self, payload: KeterPayload) -> KeterPayload:
-        from babylon60.engine.legion import LEGION_OMEGA
+        from cortex.engine.legion import LEGION_OMEGA
 
         intent = payload.get("intent", "Refactor")
         logger.info("🐝 [KETER] Desplegando Enjambre HYDRA (Legion-Omega)...")
@@ -124,8 +124,8 @@ class FormalVerificationGate(SovereignPhase):
             logger.debug("🛡️ [KETER] Phase 3.5 skipped (CORTEX_FV=0)")
             return payload
 
-        from babylon60.verification.counterexample import learn_from_failure
-        from babylon60.verification.verifier import SovereignVerifier
+        from cortex.verification.counterexample import learn_from_failure
+        from cortex.verification.verifier import SovereignVerifier
 
         logger.info("🛡️ [KETER] Validando Invariantes Soberanos (Z3)...")
 
@@ -189,7 +189,7 @@ class KeterReservoir:
     """
 
     def __init__(self, db_path: str):
-        from babylon60.database.core import connect
+        from cortex.database.core import connect
 
         self.db_path = db_path
         # Use centralized factory
@@ -238,7 +238,7 @@ class KeterEngine:
     """
 
     def __init__(self) -> None:
-        from babylon60.extensions.skills.router import SkillRouter
+        from cortex.extensions.skills.router import SkillRouter
 
         self.router = SkillRouter()
         self.phases: list[SovereignPhase] = [

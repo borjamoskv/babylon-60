@@ -10,9 +10,9 @@ from datetime import datetime, timezone
 
 import numpy as np
 
-from babylon60.types.evidence import ClosurePayload, EvidenceBundle, Source
+from cortex.types.evidence import ClosurePayload, EvidenceBundle, Source
 
-logger = logging.getLogger("babylon60.math.svd")
+logger = logging.getLogger("cortex.math.svd")
 
 class SVDEngine:
     """

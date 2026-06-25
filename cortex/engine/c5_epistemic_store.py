@@ -11,8 +11,8 @@ import time
 
 import aiosqlite
 
-from babylon60.engine.mtk_core import MTKGuard
-from babylon60.types.evidence import ClosurePayload
+from cortex.engine.mtk_core import MTKGuard
+from cortex.types.evidence import ClosurePayload
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +85,7 @@ async def ingest_c5_node(
 
         # INSERT into Memory Vault
         # Encrypt the payload here (Author: Borja Moskv)
-        from babylon60.crypto import get_default_encrypter
+        from cortex.crypto import get_default_encrypter
         encrypter = get_default_encrypter()
         encrypted_blob = encrypter.encrypt_str(serialized_payload, tenant_id=tenant_id)
         

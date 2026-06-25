@@ -24,8 +24,8 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
-from babylon60.engine.evolution_metrics import CortexMetrics
-from babylon60.engine.evolution_types import (
+from cortex.engine.evolution_metrics import CortexMetrics
+from cortex.engine.evolution_types import (
     DomainMetrics,
     SovereignAgent,
     SubAgent,

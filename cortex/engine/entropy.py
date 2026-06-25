@@ -15,7 +15,7 @@ import logging
 import os
 from typing import Any
 
-from babylon60.engine.babylon60 import Babylon60
+from cortex.engine.babylon60 import Babylon60
 
 logger = logging.getLogger(__name__)
 

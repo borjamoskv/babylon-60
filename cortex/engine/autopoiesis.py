@@ -12,7 +12,7 @@ import time
 from collections.abc import Callable
 from typing import Any, ParamSpec, TypedDict, TypeVar
 
-from babylon60.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.endocrine import ENDOCRINE, HormoneType
 
 P = ParamSpec("P")
 R = TypeVar("R")
@@ -23,7 +23,7 @@ class MutationHistory(TypedDict):
     failures: int
 
 
-logger = logging.getLogger("babylon60.autopoiesis")
+logger = logging.getLogger("cortex.autopoiesis")
 
 
 class AutopoiesisEngine:

@@ -9,9 +9,9 @@ Based on arXiv:2605.30343v1 (LatentRAG / NF-CoT).
 import logging
 from typing import Any
 
-from babylon60.compat.optional import np
+from cortex.compat.optional import np
 
-logger = logging.getLogger("babylon60.engine.rim")
+logger = logging.getLogger("cortex.engine.rim")
 
 
 class ContinuousLatentFlow:

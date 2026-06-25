@@ -16,7 +16,7 @@ from typing import Final
 
 __all__ = ["SECRET_PATTERNS", "DataSensitivity", "classify_content"]
 
-logger = logging.getLogger("babylon60.storage.classifier")
+logger = logging.getLogger("cortex.storage.classifier")
 
 # ── Pattern Registry ──────────────────────────────────────────────────
 # Tier 1 (Critical, score=1.0): private keys, connection strings, SSH

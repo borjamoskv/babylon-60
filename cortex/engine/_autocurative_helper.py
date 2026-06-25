@@ -7,15 +7,15 @@ import logging
 import time
 from typing import TYPE_CHECKING, Any
 
-from babylon60.engine._autocurative_state import HealingEvent, HealingPhase
-from babylon60.engine.circuit_breaker import CircuitState
-from babylon60.engine.endocrine import ENDOCRINE, HormoneType
-from babylon60.engine.repair_strategies import RepairResult
+from cortex.engine._autocurative_state import HealingEvent, HealingPhase
+from cortex.engine.circuit_breaker import CircuitState
+from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.repair_strategies import RepairResult
 
 if TYPE_CHECKING:
-    from babylon60.engine.autocurative_agent import AutoCurativeAgent
+    from cortex.engine.autocurative_agent import AutoCurativeAgent
 
-logger = logging.getLogger("babylon60.engine.autocurative")
+logger = logging.getLogger("cortex.engine.autocurative")
 
 
 async def execute_with_healing(

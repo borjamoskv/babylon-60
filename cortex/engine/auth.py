@@ -18,7 +18,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-logger = logging.getLogger("babylon60.engine.auth")
+logger = logging.getLogger("cortex.engine.auth")
 
 AUTH_DIR = Path.home() / ".cortex" / "auth_queue"
 AUTH_DIR.mkdir(parents=True, exist_ok=True)

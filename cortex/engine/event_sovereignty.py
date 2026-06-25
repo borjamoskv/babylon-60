@@ -3,7 +3,7 @@ import asyncio
 import logging
 from typing import Any
 
-logger = logging.getLogger("babylon60.engine.event_sovereignty")
+logger = logging.getLogger("cortex.engine.event_sovereignty")
 
 
 class EventSovereigntyRuntime:

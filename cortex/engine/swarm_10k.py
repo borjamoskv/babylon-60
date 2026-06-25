@@ -16,16 +16,16 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from babylon60.engine.exergy_optimizer import ExergyOptimizer
-from babylon60.engine.shared_bus import SovereignSharedBus
-from babylon60.engine.slashing import SlashingPenalty
-from babylon60.engine.ultrathink_physics import UltrathinkPhysicsEngine
-from babylon60.extensions.signals.sharded_bus import ShardedAsyncSignalBus
+from cortex.engine.exergy_optimizer import ExergyOptimizer
+from cortex.engine.shared_bus import SovereignSharedBus
+from cortex.engine.slashing import SlashingPenalty
+from cortex.engine.ultrathink_physics import UltrathinkPhysicsEngine
+from cortex.extensions.signals.sharded_bus import ShardedAsyncSignalBus
 
-logger = logging.getLogger("babylon60.engine.swarm_10k")
+logger = logging.getLogger("cortex.engine.swarm_10k")
 
 
-from babylon60.engine.babylon60 import Babylon60
+from cortex.engine.babylon60 import Babylon60
 
 
 def _to_float(v: int | float | Babylon60) -> float:
@@ -126,7 +126,7 @@ class CenturionSuperv:
         Se previene la generación de trazas `[THINK]` al operar directamente
         en el grafo base-60 hasta alcanzar el consenso BFT.
         """
-        from babylon60.compat.optional import np
+        from cortex.compat.optional import np
 
         # Dummy inicial (en producción, vendría de la capa L1_EMBEDDING del encoder)
         base_vector = np.zeros(4096, dtype=np.float32)

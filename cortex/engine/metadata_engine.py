@@ -9,9 +9,9 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from babylon60.engine.models import Fact
+from cortex.engine.models import Fact
 
-logger = logging.getLogger("babylon60.metadata")
+logger = logging.getLogger("cortex.metadata")
 
 
 class MetadataEngine:

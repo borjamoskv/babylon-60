@@ -17,12 +17,12 @@ from contextlib import asynccontextmanager
 import aiosqlite
 import sqlite_vec
 
-from babylon60.database.core import connect, load_sqlite_vec_async
-from babylon60.database.schema import get_init_meta
-from babylon60.migrations.core import run_migrations_async
-from babylon60.telemetry.metrics import metrics
+from cortex.database.core import connect, load_sqlite_vec_async
+from cortex.database.schema import get_init_meta
+from cortex.migrations.core import run_migrations_async
+from cortex.telemetry.metrics import metrics
 
-logger = logging.getLogger("babylon60.engine.guards")
+logger = logging.getLogger("cortex.engine.guards")
 
 
 class ConnectionMixin:
@@ -30,13 +30,13 @@ class ConnectionMixin:
 
     @property
     def _conn_lock(self) -> asyncio.Lock:
-        from babylon60.utils.locks import get_loop_lock
+        from cortex.utils.locks import get_loop_lock
 
         return get_loop_lock(self, "conn")
 
     @property
     def _schema_lock(self) -> asyncio.Lock:
-        from babylon60.utils.locks import get_loop_lock
+        from cortex.utils.locks import get_loop_lock
 
         return get_loop_lock(self, "schema")
 
@@ -110,7 +110,7 @@ class ConnectionMixin:
                 else:
                     return conn
 
-            from babylon60.database.core import connect_async
+            from cortex.database.core import connect_async
 
             conn = await connect_async(str(self._db_path))  # pyright: ignore[reportAttributeAccessIssue]
             try:
@@ -149,10 +149,10 @@ class ConnectionMixin:
             )
             row = await cursor.fetchone()
             if row:
-                import babylon60.core.config as config
+                import cortex.core.config as config
                 config.HKDF_SALT = row[0]
             else:
-                import babylon60.core.config as config
+                import cortex.core.config as config
                 # Store the default config salt in the DB if not present
                 await conn.execute(
                     "INSERT INTO cortex_meta (key, value) VALUES ('tenant_isolation_salt', ?)",
@@ -167,7 +167,7 @@ class ConnectionMixin:
                 ) as cursor:
                     row = await cursor.fetchone()
                     if row:
-                        import babylon60.core.config as config
+                        import cortex.core.config as config
                         config.HKDF_SALT = row[0]
                         config._cfg.HKDF_SALT = row[0]
             except Exception as e:
@@ -180,7 +180,7 @@ class ConnectionMixin:
                 pass
 
             if self._ledger is None:
-                from babylon60.ledger import ImmutableLedger
+                from cortex.ledger import ImmutableLedger
 
                 self._ledger = ImmutableLedger(conn)  # type: ignore[reportArgumentType]
             self._schema_ready = True
@@ -191,7 +191,7 @@ class ConnectionMixin:
         conn = await self._get_or_create_conn()
         await self._ensure_schema_ready(conn)
         if self._ledger is None:
-            from babylon60.ledger import ImmutableLedger
+            from cortex.ledger import ImmutableLedger
 
             self._ledger = ImmutableLedger(conn)  # type: ignore[reportArgumentType]
         return self._ledger

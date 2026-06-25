@@ -21,7 +21,7 @@ try:
     import cortex_core_rs
 except ImportError:
     cortex_core_rs = None
-from babylon60.crypto.identity import generate_event_identity
+from cortex.crypto.identity import generate_event_identity
 
 
 class AsyncFileLock:
@@ -404,7 +404,7 @@ class EnterpriseAuditLedger:
         import logging
         import os
 
-        logger = logging.getLogger("babylon60.audit.ledger")
+        logger = logging.getLogger("cortex.audit.ledger")
         
         if not os.path.exists(self.log_path):
             logger.warning(f"Ledger file not found: {self.log_path}")

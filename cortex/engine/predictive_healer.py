@@ -22,8 +22,8 @@ from collections import deque
 from dataclasses import dataclass, field
 from typing import Any
 
-from babylon60.engine.endocrine import ENDOCRINE, HormoneType
-from babylon60.engine.performance_tracker import PerformanceTracker
+from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.performance_tracker import PerformanceTracker
 
 __all__ = [
     "Prediction",
@@ -31,7 +31,7 @@ __all__ = [
     "PredictiveHealer",
 ]
 
-logger = logging.getLogger("babylon60.engine.predictive")
+logger = logging.getLogger("cortex.engine.predictive")
 
 
 # ─── Types ────────────────────────────────────────────────────────

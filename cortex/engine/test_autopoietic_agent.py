@@ -27,22 +27,22 @@ import time
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from babylon60.engine.autopoietic_agent import (
+from cortex.engine.autopoietic_agent import (
     AutopoieticAgent,
     EvolutionConfig,
 )
-from babylon60.engine.genesis import (
+from cortex.engine.genesis import (
     AgentBlueprint,
     AgentSpecies,
     GenesisEngine,
 )
-from babylon60.engine.genome import (
+from cortex.engine.genome import (
     FitnessRecord,
     GenomeMutator,
     MutationType,
     StrategyGenome,
 )
-from babylon60.isa.builder import (
+from cortex.isa.builder import (
     dispatch_targets,
     node_count,
 )

@@ -24,7 +24,7 @@ class CortexKVBridge:
         self.lock = asyncio.Lock()
         
         import logging
-        self.logger = logging.getLogger("babylon60.kv_bridge")
+        self.logger = logging.getLogger("cortex.kv_bridge")
         self.logger.info(f"CortexKVBridge initialized (C5-REAL). Config: {config_path}")
 
     def _generate_ast_hash(self, token_ids: np.ndarray) -> str:

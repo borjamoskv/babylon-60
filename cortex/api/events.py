@@ -7,10 +7,10 @@ from collections.abc import AsyncGenerator
 from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
 
-from babylon60.extensions.signals.bus import AsyncSignalBus
+from cortex.extensions.signals.bus import AsyncSignalBus
 
 router = APIRouter(prefix="/v1/public/events", tags=["events"])
-logger = logging.getLogger("babylon60.api.events")
+logger = logging.getLogger("cortex.api.events")
 
 
 async def event_generator(request: Request) -> AsyncGenerator[str, None]:

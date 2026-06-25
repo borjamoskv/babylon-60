@@ -9,7 +9,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("babylon60.engine.cognitive")
+logger = logging.getLogger("cortex.engine.cognitive")
 
 # Known web3 libraries that indicate crypto-related entropy.
 _WEB3_LIBS = frozenset(("web3", "eth_account", "solcx", "brownie", "ape", "moralis"))
@@ -48,7 +48,7 @@ class PredictorAST(ast.NodeVisitor):
 
 def scan_file_entropy(file_path: Path) -> list[dict[str, Any]]:
     """Deep analysis for entropy detection (Ω₂)."""
-    from babylon60.utils.landauer import calculate_calcification
+    from cortex.utils.landauer import calculate_calcification
 
     findings = []
     try:

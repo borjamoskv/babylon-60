@@ -9,9 +9,9 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from babylon60.engine.forgetting_models import EvictionVerdict, OracleReport, PolicyRecommendation
+from cortex.engine.forgetting_models import EvictionVerdict, OracleReport, PolicyRecommendation
 
-logger = logging.getLogger("babylon60.oracle.policy")
+logger = logging.getLogger("cortex.oracle.policy")
 
 
 class PolicyMixin:

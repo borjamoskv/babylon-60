@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
-from babylon60.engine.repair_strategies import RepairResult
+from cortex.engine.repair_strategies import RepairResult
 
 
 class HealingPhase(str, Enum):

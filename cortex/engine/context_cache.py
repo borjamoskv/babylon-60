@@ -33,7 +33,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-logger = logging.getLogger("babylon60.context_cache")
+logger = logging.getLogger("cortex.context_cache")
 
 __all__ = [
     "CacheEntry",
@@ -210,10 +210,10 @@ class ContextCacheManager:
 
             import numpy as np
 
-            from babylon60.memory.encoder import AsyncEncoder
-            from babylon60.memory.models import CortexFactModel
-            from babylon60.memory.sqlite_vec_store import SovereignVectorStoreL2
-            from babylon60.utils.turboquant import optimize_vector_qjl
+            from cortex.memory.encoder import AsyncEncoder
+            from cortex.memory.models import CortexFactModel
+            from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+            from cortex.utils.turboquant import optimize_vector_qjl
 
             # Aplicamos cuantización asimétrica TurboQuant 3.5b -> 1.0b
             quantized_int8_list = optimize_vector_qjl(

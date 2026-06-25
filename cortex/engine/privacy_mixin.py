@@ -5,14 +5,14 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from babylon60.engine.mixins.base import EngineMixinBase
+from cortex.engine.mixins.base import EngineMixinBase
 
 __all__ = ["PrivacyMixin"]
 
 
 __all__ = ["PrivacyMixin"]
 
-logger = logging.getLogger("babylon60.privacy")
+logger = logging.getLogger("cortex.privacy")
 
 
 class PrivacyMixin(EngineMixinBase):
@@ -34,7 +34,7 @@ class PrivacyMixin(EngineMixinBase):
         Degrades gracefully if classifier is not available.
         """
         try:
-            from babylon60.storage.classifier import classify_content
+            from cortex.storage.classifier import classify_content
 
             sensitivity = classify_content(content)
             if sensitivity.is_sensitive:

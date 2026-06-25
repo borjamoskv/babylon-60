@@ -18,7 +18,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-logger = logging.getLogger("babylon60.engine.multimodal")
+logger = logging.getLogger("cortex.engine.multimodal")
 
 
 # ---------------------------------------------------------------------------

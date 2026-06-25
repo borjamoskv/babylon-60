@@ -507,7 +507,7 @@ def _parse_fact_metadata(v: dict, enc: Any, tenant_id: str) -> dict:
 
 
 def row_to_knowledge_object(row: tuple) -> KnowledgeObject:
-    from babylon60.crypto import get_default_encrypter
+    from cortex.crypto import get_default_encrypter
 
     enc = get_default_encrypter()
     r = list(row)

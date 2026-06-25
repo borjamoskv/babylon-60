@@ -12,10 +12,10 @@ import sqlite3
 import sys
 from pathlib import Path
 
-from babylon60.database.core import connect as db_connect
+from cortex.database.core import connect as db_connect
 
 
-def verify_dag_integrity(db_path: str = "../../babylon60.db"):
+def verify_dag_integrity(db_path: str = "../../cortex.db"):
     print("=" * 70)
     print("🐐 GOAT-MATH: Verificación C5-REAL DAG Integrity")
     print("=" * 70)

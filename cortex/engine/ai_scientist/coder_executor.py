@@ -1,7 +1,7 @@
 import logging
 from typing import Any
 
-from babylon60.engine.sandbox_jit import SandboxJIT
+from cortex.engine.sandbox_jit import SandboxJIT
 
 logger = logging.getLogger(__name__)
 

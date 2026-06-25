@@ -6,17 +6,17 @@ import logging
 import time
 from typing import Any
 
-from babylon60.engine.autocurative_agent import AutoCurativeAgent
-from babylon60.engine.endocrine import ENDOCRINE, HormoneType
-from babylon60.engine.performance_tracker import PerformanceTracker
-from babylon60.engine.predictive_healer import PredictiveHealer
-from babylon60.engine.self_optimizer import SelfOptimizer
-from babylon60.engine.tuning_store import TuningStore
+from cortex.engine.autocurative_agent import AutoCurativeAgent
+from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.performance_tracker import PerformanceTracker
+from cortex.engine.predictive_healer import PredictiveHealer
+from cortex.engine.self_optimizer import SelfOptimizer
+from cortex.engine.tuning_store import TuningStore
 
 from .daemon import SupervisorDaemon
 from .types import AgentInfo, AgentStatus, SupervisorConfig
 
-logger = logging.getLogger("babylon60.supervisor")
+logger = logging.getLogger("cortex.supervisor")
 
 
 class CortexSupervisor:

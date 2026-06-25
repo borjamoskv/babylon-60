@@ -5,7 +5,7 @@ import json
 import logging
 from typing import Any
 
-logger = logging.getLogger("babylon60.engine.mcts_sanhedrin")
+logger = logging.getLogger("cortex.engine.mcts_sanhedrin")
 
 class VectorialDownsampling:
     """

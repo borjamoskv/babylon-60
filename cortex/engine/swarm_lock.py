@@ -4,7 +4,7 @@ import os
 import time
 from contextlib import contextmanager
 
-logger = logging.getLogger("babylon60.engine.swarm_lock")
+logger = logging.getLogger("cortex.engine.swarm_lock")
 
 # Ubicación del cerrojo termodinámico
 LOCK_FILE = ".cortex_swarm.lock"

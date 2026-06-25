@@ -23,7 +23,7 @@ import logging
 import struct
 from typing import Any
 
-logger = logging.getLogger("babylon60.semantic_hash")
+logger = logging.getLogger("cortex.semantic_hash")
 
 __all__ = [
     "SemanticFingerprint",
@@ -138,7 +138,7 @@ def semantic_fingerprint(
         raise ValueError("Cannot fingerprint empty text")
 
     if embedder is None:
-        from babylon60.embeddings import LocalEmbedder
+        from cortex.embeddings import LocalEmbedder
 
         embedder = LocalEmbedder()
 
@@ -223,7 +223,7 @@ def batch_fingerprint(
         return []
 
     if embedder is None:
-        from babylon60.embeddings import LocalEmbedder
+        from cortex.embeddings import LocalEmbedder
 
         embedder = LocalEmbedder()
 

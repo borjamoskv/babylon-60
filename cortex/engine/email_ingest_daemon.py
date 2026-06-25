@@ -6,8 +6,8 @@ import imaplib
 import logging
 import os
 
-from babylon60.audit.ledger import EnterpriseAuditLedger
-from babylon60.engine.zipf_exergy_extractor import ZipfExergyExtractor
+from cortex.audit.ledger import EnterpriseAuditLedger
+from cortex.engine.zipf_exergy_extractor import ZipfExergyExtractor
 
 logger = logging.getLogger(__name__)
 

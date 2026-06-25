@@ -12,9 +12,9 @@ import logging
 import time
 from typing import Any, Optional
 
-from babylon60.utils.canonical import compute_fact_hash
+from cortex.utils.canonical import compute_fact_hash
 
-logger = logging.getLogger("babylon60.engine.sota_vector_engine")
+logger = logging.getLogger("cortex.engine.sota_vector_engine")
 
 class SOTAVectorEngine:
     """

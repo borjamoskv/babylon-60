@@ -7,7 +7,7 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.staticfiles import StaticFiles
 
-from babylon60 import __version__
+from cortex import __version__
 
 app = FastAPI(title="CORTEX Analysis Pipeline (MOSKV-1)", version=__version__, docs_url=None)
 

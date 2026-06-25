@@ -12,9 +12,9 @@ import logging
 import random
 from typing import Any
 
-from babylon60.extensions.evolution.free_energy import FreeEnergyState
+from cortex.extensions.evolution.free_energy import FreeEnergyState
 
-logger = logging.getLogger("babylon60.engine.right_brain")
+logger = logging.getLogger("cortex.engine.right_brain")
 
 
 class HeuristicEngine:

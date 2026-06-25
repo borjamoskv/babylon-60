@@ -10,12 +10,12 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from babylon60.nexus_v8 import DomainOrigin, IntentType, NexusWorldModel, WorldMutation
+from cortex.nexus_v8 import DomainOrigin, IntentType, NexusWorldModel, WorldMutation
 
 if TYPE_CHECKING:
-    from babylon60.engine import CortexEngine as AsyncCortexEngine
+    from cortex.engine import CortexEngine as AsyncCortexEngine
 
-logger = logging.getLogger("babylon60.watcher")
+logger = logging.getLogger("cortex.watcher")
 
 
 class GhostWatcher:

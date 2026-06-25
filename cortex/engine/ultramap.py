@@ -6,7 +6,7 @@ import os
 import struct
 import weakref
 
-logger = logging.getLogger("babylon60.ultramap")
+logger = logging.getLogger("cortex.ultramap")
 
 try:
     import cortex_rs
@@ -18,8 +18,8 @@ except ImportError as e:
 
 # Evolution Ledger — replay-safe mutation tracking
 try:
-    from babylon60.engine.checkpoint import CheckpointManager
-    from babylon60.engine.evolution_ledger import ControlVector, EvolutionLedger
+    from cortex.engine.checkpoint import CheckpointManager
+    from cortex.engine.evolution_ledger import ControlVector, EvolutionLedger
 
     HAS_EVOLUTION_LKRGSER = True
 except ImportError:

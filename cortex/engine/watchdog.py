@@ -1,9 +1,9 @@
 import logging
 import subprocess
 
-from babylon60.storage.wal import WriteAheadLog
+from cortex.storage.wal import WriteAheadLog
 
-logger = logging.getLogger("babylon60.watchdog")
+logger = logging.getLogger("cortex.watchdog")
 
 class SafeEventBatcher:
     async def ingest_event(self, event: dict):
@@ -15,7 +15,7 @@ class MitosisGatekeeper:
     Impide la modificación del motor base sobre la rama principal activa.
     Fuerza a la inteligencia (MOSKV-1) a crear una rama 'auto/moskv1-mitosis-*'.
     """
-    CORE_PATHS = ["babylon60/engine/", "cortex_core_rs/", ".so", ".db"]
+    CORE_PATHS = ["cortex/engine/", "cortex_core_rs/", ".so", ".db"]
 
     @classmethod
     def is_core_mutation(cls, filepath: str) -> bool:

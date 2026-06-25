@@ -35,7 +35,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("babylon60.evolution_ledger")
+logger = logging.getLogger("cortex.evolution_ledger")
 
 __all__ = [
     "EvolutionLedger",
@@ -153,7 +153,7 @@ class ReplayMode(Enum):
 
 
 def _canonical_json(obj: Any) -> str:
-    """Deterministic JSON — matches babylon60.utils.canonical.canonical_json."""
+    """Deterministic JSON — matches cortex.utils.canonical.canonical_json."""
     return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
 
 
@@ -461,7 +461,7 @@ class EvolutionLedger:
         Returns a snapshot that can be used to validate future replays
         without re-reading the entire log.
         """
-        from babylon60.ledger.merkle import MerkleTree
+        from cortex.ledger.merkle import MerkleTree
 
         hashes: list[str] = []
         for record in self.replay(mode=ReplayMode.STRICT):

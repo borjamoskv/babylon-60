@@ -2,8 +2,8 @@ import argparse
 import logging
 from pathlib import Path
 
-from babylon60.database.core import connect
-from babylon60.services.email import send_reengagement_email
+from cortex.database.core import connect
+from cortex.services.email import send_reengagement_email
 
 # Configuración de Logging
 # setup_cortex_logging()
@@ -46,7 +46,7 @@ def evaluate_retention(dry_run=True):
             # Aquí irá la integración de Mailgun / SMTP local
             logger.warning(f"DISPARANDO TRANSSACCIÓN A: {node['email']}")
 
-            # Conexión resuelta a babylon60.services.email
+            # Conexión resuelta a cortex.services.email
             send_reengagement_email(node["email"], node["cluster"])
 
             # Actualizar estado para no bombardear

@@ -17,10 +17,10 @@ from typing import Any, ClassVar, final
 
 import aiosqlite
 
-from babylon60.utils.canonical import canonical_json, compute_tx_hash, now_iso
-from babylon60.utils.result import Err, Ok, Result
+from cortex.utils.canonical import canonical_json, compute_tx_hash, now_iso
+from cortex.utils.result import Err, Ok, Result
 
-logger = logging.getLogger("babylon60.engine.optimized")
+logger = logging.getLogger("cortex.engine.optimized")
 
 
 class EvictionReason(Enum):

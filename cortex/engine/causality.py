@@ -12,10 +12,10 @@ from typing import Any
 
 import aiosqlite
 
-from babylon60.crypto import get_default_encrypter
-from babylon60.database.core import connect
-from babylon60.engine.causal.decision_parser import CausalInvariant, DecisionParser
-from babylon60.engine.causality_models import (
+from cortex.crypto import get_default_encrypter
+from cortex.database.core import connect
+from cortex.engine.causal.decision_parser import CausalInvariant, DecisionParser
+from cortex.engine.causality_models import (
     CONFIDENCE_LEVELS,
     KRGSE_DERIVED_FROM,
     KRGSE_TAINTED_BY,
@@ -28,14 +28,14 @@ from babylon60.engine.causality_models import (
     ValidationStatus,
     _downgrade_confidence,
 )
-from babylon60.extensions.signals.bus import AsyncSignalBus, SignalBus
+from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
 
 try:
-    from babylon60.engine.logic.atms import AtmsAdapter
+    from cortex.engine.logic.atms import AtmsAdapter
 except ImportError:
     AtmsAdapter = None  # type: ignore
 
-logger = logging.getLogger("babylon60.engine.causality")
+logger = logging.getLogger("cortex.engine.causality")
 
 __all__ = [
     "KRGSE_DERIVED_FROM",
@@ -115,7 +115,7 @@ class AsyncCausalGraph:
             self.atms = None
             
         try:
-            from babylon60.engine.fable_out import CausalMaxwellDemon
+            from cortex.engine.fable_out import CausalMaxwellDemon
             self.maxwell_demon = CausalMaxwellDemon(threshold=85)
             self.maxwell_demon.set_state("CONSTRUCT")
         except ImportError as e:
@@ -295,7 +295,7 @@ class AsyncCausalGraph:
     async def _apply_topological_lock(self, child_id: int, parent_id: int, tenant_id: str) -> None:
         """Applies synchronous topological protection if a child node is more stable than its parent."""
         try:
-            from babylon60.engine.immunity.origin_policy import get_policy
+            from cortex.engine.immunity.origin_policy import get_policy
             meta_col = await self._metadata_column()
             if not meta_col:
                 return

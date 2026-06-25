@@ -18,7 +18,7 @@ import aiosqlite
 
 __all__ = ["BridgeGuard"]
 
-logger = logging.getLogger("babylon60.bridge_guard")
+logger = logging.getLogger("cortex.bridge_guard")
 
 # Maximum quarantine ratio before bridge is auto-blocked
 _QUARANTINE_THRESHOLD = 0.15  # 15% of facts quarantined = contaminated project
@@ -156,7 +156,7 @@ class BridgeGuard:
         Used for prescriptive bridge elevation to prevent code duplication.
         Returns the source project name if a duplicate is found outside current_project.
         """
-        from babylon60.utils.canonical import compute_fact_hash
+        from cortex.utils.canonical import compute_fact_hash
 
         f_hash = compute_fact_hash(content)
 

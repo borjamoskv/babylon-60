@@ -8,13 +8,13 @@ from typing import TYPE_CHECKING, Any
 
 import aiosqlite
 
-from babylon60.crypto import get_default_encrypter
-from babylon60.engine.causality import AsyncCausalGraph
+from cortex.crypto import get_default_encrypter
+from cortex.engine.causality import AsyncCausalGraph
 
 if TYPE_CHECKING:
-    from babylon60.engine.mutation_engine import FactMutationEngine
+    from cortex.engine.mutation_engine import FactMutationEngine
 
-logger = logging.getLogger("babylon60.mutation_engine")
+logger = logging.getLogger("cortex.mutation_engine")
 
 
 async def project(

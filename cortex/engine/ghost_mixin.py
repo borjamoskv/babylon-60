@@ -9,15 +9,15 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from babylon60.extensions.songlines.sensor import GhostTrace
+    from cortex.extensions.songlines.sensor import GhostTrace
 
 import aiosqlite
 
-from babylon60.engine.mixins.base import EngineMixinBase
+from cortex.engine.mixins.base import EngineMixinBase
 
 __all__ = ["GhostMixin"]
 
-logger = logging.getLogger("babylon60.ghosts")
+logger = logging.getLogger("cortex.ghosts")
 
 
 class GhostMixin(EngineMixinBase):
@@ -39,9 +39,9 @@ class GhostMixin(EngineMixinBase):
 
     def _ensure_songlines(self) -> tuple[Any, Any, Any]:
         if self._emitter is None or self._sensor is None or self._economy is None:
-            from babylon60.extensions.songlines.economy import ThermalEconomy
-            from babylon60.extensions.songlines.emitter import ResonanceEmitter
-            from babylon60.extensions.songlines.sensor import TopographicSensor
+            from cortex.extensions.songlines.economy import ThermalEconomy
+            from cortex.extensions.songlines.emitter import ResonanceEmitter
+            from cortex.extensions.songlines.sensor import TopographicSensor
 
             self._emitter = ResonanceEmitter()
             self._sensor = TopographicSensor()
@@ -123,7 +123,7 @@ class GhostMixin(EngineMixinBase):
             for ghost in active:
                 if ghost["id"] == ghost_id:
                     source = Path(ghost["source_file"])
-                    attr_name = f"user.babylon60.ghost.{ghost_id}"
+                    attr_name = f"user.cortex.ghost.{ghost_id}"
                     sensor._delete_xattr(source, attr_name)
                     # Also check manifest fallback if needed
                     self._resolve_manifest_fallback(source, attr_name)

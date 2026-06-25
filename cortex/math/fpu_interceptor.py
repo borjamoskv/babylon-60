@@ -13,7 +13,7 @@ import functools
 import logging
 from typing import Any, TypeVar
 
-logger = logging.getLogger("babylon60.math.fpu_interceptor")
+logger = logging.getLogger("cortex.math.fpu_interceptor")
 
 __all__ = ["FPUFirewall", "no_float", "FPUViolationError"]
 

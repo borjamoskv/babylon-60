@@ -6,15 +6,15 @@ import logging
 import sqlite3
 from typing import TYPE_CHECKING, Any
 
-from babylon60.engine.mixins.base import EngineMixinBase
+from cortex.engine.mixins.base import EngineMixinBase
 
 if TYPE_CHECKING:
-    from babylon60.search.causal_gap import CausalGap
+    from cortex.search.causal_gap import CausalGap
 
 
 __all__ = ["SearchMixin"]
 
-logger = logging.getLogger("babylon60.engine.search")
+logger = logging.getLogger("cortex.engine.search")
 
 
 class SearchMixin(EngineMixinBase):
@@ -37,9 +37,9 @@ class SearchMixin(EngineMixinBase):
         import json
         from dataclasses import asdict
 
-        from babylon60.cache import RedisL1Cache
-        from babylon60.search import hybrid_search, text_search
-        from babylon60.search.models import SearchResult
+        from cortex.cache import RedisL1Cache
+        from cortex.search import hybrid_search, text_search
+        from cortex.search.models import SearchResult
 
         tenant_id = self._resolve_tenant(tenant_id)
         cache = RedisL1Cache.singleton()
@@ -170,7 +170,7 @@ class SearchMixin(EngineMixinBase):
     ) -> None:
         """Helper to enrich search results with graph context."""
         try:
-            from babylon60.graph import extract_entities, get_context_subgraph
+            from cortex.graph import extract_entities, get_context_subgraph
         except Exception as exc:
             logger.debug("Graph context enrichment unavailable: %s", exc)
             return
@@ -201,7 +201,7 @@ class SearchMixin(EngineMixinBase):
             try:
                 # Inyectar logica de retroalimentacion BM25 (ej. tabla FTS o tabla de tracking)
                 async with self.session() as conn:
-                    # Ejemplo asumiendo esquema FTS5 genérico en babylon60.db
+                    # Ejemplo asumiendo esquema FTS5 genérico en cortex.db
                     await conn.execute(
                         "INSERT INTO llm_telemetry (engine_used, response_digest, tenant_id) VALUES (?, ?, ?)",
                         (engine_used, response_digest, tenant_id)

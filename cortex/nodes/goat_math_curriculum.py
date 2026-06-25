@@ -13,14 +13,14 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from babylon60.database.core import connect as db_connect
+from cortex.database.core import connect as db_connect
 
 
 class CurriculumEngine:
-    def __init__(self, db_path: str = "babylon60.db"):
+    def __init__(self, db_path: str = "cortex.db"):
         self.db_path = Path(db_path)
         if not self.db_path.exists():
-            print("❌ ERROR: babylon60.db no encontrado. Falla estructural.")
+            print("❌ ERROR: cortex.db no encontrado. Falla estructural.")
             sys.exit(1)
         self.conn = db_connect(str(self.db_path))
 

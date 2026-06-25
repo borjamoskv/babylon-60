@@ -12,7 +12,7 @@ import logging
 from fable_library.array_ import Array
 from fable_library.core import uint16, uint32
 
-from babylon60.engine.fable_out.src.maxwell_demon import (
+from cortex.engine.fable_out.src.maxwell_demon import (
     MaxwellDemon__ctor_6C4BA866,
     MaxwellDemon__PurgeRedundant_Z115D9F2A,
     MaxwellDemon__SetState_Z721C83C5,

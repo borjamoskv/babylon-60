@@ -7,7 +7,7 @@ Calcula la exergía cognitiva y el Blast Radius para autorizar bifurcaciones mas
 import logging
 from typing import Any
 
-logger = logging.getLogger("babylon60.engine.exergy_physics")
+logger = logging.getLogger("cortex.engine.exergy_physics")
 
 
 class UltrathinkPhysicsEngine:

@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
 import logging
 
-from babylon60.engine.forensic_strike_config import STRIKE_V1, MissionProfile
-from babylon60.engine.swarm_10k import SwarmCommander
+from cortex.engine.forensic_strike_config import STRIKE_V1, MissionProfile
+from cortex.engine.swarm_10k import SwarmCommander
 
 logger = logging.getLogger("forensic_commander")
 
@@ -10,7 +10,7 @@ logger = logging.getLogger("forensic_commander")
 class ForensicCommander(SwarmCommander):
     """Sovereign Auditor: Executes multi-protocol DeFi forensics."""
 
-    def __init__(self, bus_path: str = "babylon60.db", strike_id: str = STRIKE_V1.STRIKE_ID):
+    def __init__(self, bus_path: str = "cortex.db", strike_id: str = STRIKE_V1.STRIKE_ID):
         super().__init__(bus_path=bus_path)
         self.strike_id = strike_id
         self.missions: dict[str, MissionProfile] = {m.name: m for m in STRIKE_V1.MISSIONS}

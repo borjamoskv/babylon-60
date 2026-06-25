@@ -5,13 +5,13 @@ import logging
 import random
 from typing import TYPE_CHECKING
 
-from babylon60.engine.genesis import AgentBlueprint
-from babylon60.engine.genome import MutationType, StrategyGenome
+from cortex.engine.genesis import AgentBlueprint
+from cortex.engine.genome import MutationType, StrategyGenome
 
 if TYPE_CHECKING:
-    from babylon60.engine.autopoietic_agent import AutopoieticAgent
+    from cortex.engine.autopoietic_agent import AutopoieticAgent
 
-logger = logging.getLogger("babylon60.engine.autopoietic_agent")
+logger = logging.getLogger("cortex.engine.autopoietic_agent")
 
 
 async def evaluate_genome(agent: AutopoieticAgent, genome: StrategyGenome) -> float:
@@ -25,12 +25,12 @@ async def evaluate_genome(agent: AutopoieticAgent, genome: StrategyGenome) -> fl
 
 def adopt(agent: AutopoieticAgent, new_genome: StrategyGenome) -> None:
     """Replace the current genome with the winning variant."""
-    from babylon60.engine.watchdog import MitosisGatekeeper
+    from cortex.engine.watchdog import MitosisGatekeeper
     
     # [C5-REAL] Intercepción Termodinámica: Bloquear mutación directa en main
     # Si adoptamos un nuevo genoma que altera la lógica core, el Watchdog
     # nos forzará a saltar a una rama de mitosis antes de persistir.
-    MitosisGatekeeper.enforce_branching("babylon60/engine/autopoietic_agent.py")
+    MitosisGatekeeper.enforce_branching("cortex/engine/autopoietic_agent.py")
     
     agent._best_genome = agent._genome.clone()
     agent._genome = new_genome

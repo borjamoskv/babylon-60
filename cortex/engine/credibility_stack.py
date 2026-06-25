@@ -14,16 +14,16 @@ from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from babylon60.engine import CortexEngine
+    from cortex.engine import CortexEngine
 
-from babylon60.engine.snapshots import SnapshotManager
-from babylon60.engine.ultrathink_physics import UltrathinkPhysicsEngine
-from babylon60.extensions.security.signatures import (
+from cortex.engine.snapshots import SnapshotManager
+from cortex.engine.ultrathink_physics import UltrathinkPhysicsEngine
+from cortex.extensions.security.signatures import (
     Ed25519Signer,
     generate_keypair,
     get_default_signer,
 )
-from babylon60.extensions.shannon.analyzer import shannon_entropy
+from cortex.extensions.shannon.analyzer import shannon_entropy
 
 
 class LedgerCredibilityStack:

@@ -10,7 +10,7 @@ import asyncio
 import logging
 from pathlib import Path
 
-logger = logging.getLogger("babylon60.engine.swarm_mapper_100")
+logger = logging.getLogger("cortex.engine.swarm_mapper_100")
 
 # CORTEX constraints
 MAX_THREADS = 100

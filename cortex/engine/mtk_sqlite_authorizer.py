@@ -31,7 +31,7 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
         # but no test runner is active, the MTK boundary is compromised.
         if not os.environ.get("PYTEST_CURRENT_TEST"):
             import logging as _log
-            _log.getLogger("babylon60.mtk").critical(
+            _log.getLogger("cortex.mtk").critical(
                 "MTK-BYPASS-ALERT: CORTEX_TESTING=1 active without test runner. "
                 "MTK authorizer is DISABLED. If this is production, rotate credentials immediately."
             )
@@ -109,11 +109,11 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
         # Memory Taint Tracking: Bloquear inyección estocástica directa
         import sys
         STOCHASTIC_MODULES = (
-            "babylon60.engine.inference",
-            "babylon60.engine.models",
-            "babylon60.extensions.llm",
-            "babylon60.engine.synthesis",
-            "babylon60.engine.generation"
+            "cortex.engine.inference",
+            "cortex.engine.models",
+            "cortex.extensions.llm",
+            "cortex.engine.synthesis",
+            "cortex.engine.generation"
         )
         try:
             frame = sys._getframe(1)

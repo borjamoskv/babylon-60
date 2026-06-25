@@ -14,37 +14,37 @@ from typing import TYPE_CHECKING, Any
 
 import aiosqlite
 
-from babylon60.config import DEFAULT_DB_PATH
-from babylon60.engine._engine_connection import ConnectionMixin
-from babylon60.engine._engine_delegates import DelegatesMixin
-from babylon60.engine.agent_mixin import AgentMixin
-from babylon60.engine.durability import PersistenceSupervisor
-from babylon60.engine.memory_mixin import MemoryMixin
-from babylon60.engine.mixins.components import ComponentsMixin
-from babylon60.engine.mixins.optimization import OptimizationMixin
+from cortex.config import DEFAULT_DB_PATH
+from cortex.engine._engine_connection import ConnectionMixin
+from cortex.engine._engine_delegates import DelegatesMixin
+from cortex.engine.agent_mixin import AgentMixin
+from cortex.engine.durability import PersistenceSupervisor
+from cortex.engine.memory_mixin import MemoryMixin
+from cortex.engine.mixins.components import ComponentsMixin
+from cortex.engine.mixins.optimization import OptimizationMixin
 
 try:
-    from babylon60.engine.primitive_exergy_agent import PrimitiveExergyMaximizerAgent
+    from cortex.engine.primitive_exergy_agent import PrimitiveExergyMaximizerAgent
 except (ImportError, AttributeError, NameError):
     PrimitiveExergyMaximizerAgent = None
-from babylon60.engine.query_mixin import QueryMixin
-from babylon60.engine.search_mixin import SearchMixin
-from babylon60.engine.store_mixin import StoreMixin
-from babylon60.engine.sync_mixin import SyncMixin
-from babylon60.engine.transaction_mixin import TransactionMixin
+from cortex.engine.query_mixin import QueryMixin
+from cortex.engine.search_mixin import SearchMixin
+from cortex.engine.store_mixin import StoreMixin
+from cortex.engine.sync_mixin import SyncMixin
+from cortex.engine.transaction_mixin import TransactionMixin
 
 if TYPE_CHECKING:
-    from babylon60.consensus.manager import ConsensusManager
-    from babylon60.embeddings import LocalEmbedder
-    from babylon60.embeddings.manager import EmbeddingManager
-    from babylon60.engine.auth import ByzantineAuthLayer
-    from babylon60.engine.lock import SovereignLock
-    from babylon60.engine.trust_registry import TrustRegistry
-    from babylon60.facts.manager import FactManager
-    from babylon60.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
-    from babylon60.mac_maestro.executor import MaestroExecutor
+    from cortex.consensus.manager import ConsensusManager
+    from cortex.embeddings import LocalEmbedder
+    from cortex.embeddings.manager import EmbeddingManager
+    from cortex.engine.auth import ByzantineAuthLayer
+    from cortex.engine.lock import SovereignLock
+    from cortex.engine.trust_registry import TrustRegistry
+    from cortex.facts.manager import FactManager
+    from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
+    from cortex.mac_maestro.executor import MaestroExecutor
 try:
-    from babylon60.extensions.health.health_mixin import HealthMixin
+    from cortex.extensions.health.health_mixin import HealthMixin
 except ImportError:
 
     class HealthMixin:
@@ -57,7 +57,7 @@ except ImportError:
             return {"status": "unhealthy", "reason": "No Health extension"}
 
 
-logger = logging.getLogger("babylon60.engine.guards")
+logger = logging.getLogger("cortex.engine.guards")
 MAX_TAGS_PER_FACT = 20
 
 
@@ -154,7 +154,7 @@ class CortexEngine(
         action: str, fact_type: str = "", project: str = "", tenant_id: str = "default"
     ) -> None:
         """Append-only audit log for CLI/SDK access to CORTEX memory."""
-        audit_logger = logging.getLogger("babylon60.audit")
+        audit_logger = logging.getLogger("cortex.audit")
         audit_logger.info(
             "AUDIT: action=%s fact_type=%s project=%s tenant=%s",
             action,
@@ -166,7 +166,7 @@ class CortexEngine(
     def _get_embedder(self) -> LocalEmbedder:
         """Protocol requirement for SearchMixin."""
         if self._embedder is None:
-            from babylon60.embeddings import LocalEmbedder
+            from cortex.embeddings import LocalEmbedder
 
             self._embedder = LocalEmbedder()
         return self._embedder

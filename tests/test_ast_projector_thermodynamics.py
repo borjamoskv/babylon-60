@@ -1,5 +1,7 @@
 import pytest
 import textwrap
+import sys
+sys.path.append("scripts")
 from cortex_ast_projector import project_ast, calculate_exergy_metrics
 
 def test_ast_projector_reduces_entropy_h_info_01():

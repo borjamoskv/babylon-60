@@ -7,7 +7,7 @@ import os
 import struct
 from typing import Any
 
-logger = logging.getLogger("babylon60.engine.ipc_bridge")
+logger = logging.getLogger("cortex.engine.ipc_bridge")
 
 class ZeroCopyIPCBridge:
     """

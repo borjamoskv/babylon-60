@@ -11,15 +11,15 @@ from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from babylon60 import __version__
-from babylon60.database.core import connect_async_ctx
-from babylon60.engine.bifurcation_engine import ExergyBifurcationEngine
-from babylon60.engine.causal_scheduler import CausalScheduler
-from babylon60.engine.entropy_daemon import EntropyDaemon
-from babylon60.engine.exergy_daemon import ExergyDaemon
-from babylon60.engine.latticework_daemon import LatticeworkDaemon
-from babylon60.ledger.causal_graph import CausalGraph
-from babylon60.ledger.execution_trace import ExecutionTraceLedger
+from cortex import __version__
+from cortex.database.core import connect_async_ctx
+from cortex.engine.bifurcation_engine import ExergyBifurcationEngine
+from cortex.engine.causal_scheduler import CausalScheduler
+from cortex.engine.entropy_daemon import EntropyDaemon
+from cortex.engine.exergy_daemon import ExergyDaemon
+from cortex.engine.latticework_daemon import LatticeworkDaemon
+from cortex.ledger.causal_graph import CausalGraph
+from cortex.ledger.execution_trace import ExecutionTraceLedger
 
 CORTEX_DB_PATH = os.getenv(
     "CORTEX_DB_PATH",

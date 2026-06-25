@@ -2,7 +2,7 @@ import logging
 from collections.abc import Callable
 from typing import Any
 
-logger = logging.getLogger("babylon60.engine.pronoic_transducer")
+logger = logging.getLogger("cortex.engine.pronoic_transducer")
 
 class PronoicErrorTransducer:
     """

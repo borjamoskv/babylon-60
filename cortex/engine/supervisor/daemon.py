@@ -6,12 +6,12 @@ import logging
 import time
 from typing import Any
 
-from babylon60.engine.endocrine import ENDOCRINE, HormoneType
-from babylon60.engine.predictive_healer import Prediction
+from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.predictive_healer import Prediction
 
 from .types import AgentStatus
 
-logger = logging.getLogger("babylon60.supervisor")
+logger = logging.getLogger("cortex.supervisor")
 
 
 class SupervisorDaemon:

@@ -9,7 +9,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Optional
 
-logger = logging.getLogger("babylon60.engine.dame")
+logger = logging.getLogger("cortex.engine.dame")
 
 class DAMEError(Exception):
     """Excepción base del Framework DAME."""

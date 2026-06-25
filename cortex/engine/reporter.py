@@ -20,9 +20,9 @@ from typing import Any
 
 import aiosqlite
 
-from babylon60.database.core import connect_async_ctx
+from cortex.database.core import connect_async_ctx
 
-logger = logging.getLogger("babylon60.reporter")
+logger = logging.getLogger("cortex.reporter")
 
 
 @dataclass
@@ -182,7 +182,7 @@ class SovereignReporter:
 
 
 if __name__ == "__main__":
-    db = os.path.expanduser("~/.cortex/babylon60.db")
+    db = os.path.expanduser("~/.cortex/cortex.db")
     if not os.path.exists(db):
         sys.stderr.write(f"Error: Database not found at {db}\n")
         sys.exit(1)

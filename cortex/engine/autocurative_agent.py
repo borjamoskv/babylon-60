@@ -14,16 +14,16 @@ import time
 from collections import deque
 from typing import Any
 
-from babylon60.engine._autocurative_config import AutoCurativeConfig
-from babylon60.engine._autocurative_helper import (
+from cortex.engine._autocurative_config import AutoCurativeConfig
+from cortex.engine._autocurative_helper import (
     execute_with_healing,
     handle_error,
     start_daemon,
 )
-from babylon60.engine._autocurative_state import AgentHealth, HealingEvent, HealingPhase
-from babylon60.engine.circuit_breaker import CircuitBreaker
-from babylon60.engine.endocrine import ENDOCRINE, HormoneType
-from babylon60.engine.repair_strategies import (
+from cortex.engine._autocurative_state import AgentHealth, HealingEvent, HealingPhase
+from cortex.engine.circuit_breaker import CircuitBreaker
+from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.repair_strategies import (
     REPAIR_REGISTRY,
 )
 
@@ -34,7 +34,7 @@ __all__ = [
     "HealingEvent",
 ]
 
-logger = logging.getLogger("babylon60.engine.autocurative")
+logger = logging.getLogger("cortex.engine.autocurative")
 
 
 class AutoCurativeAgent:

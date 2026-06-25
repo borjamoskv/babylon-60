@@ -9,7 +9,7 @@ import ast
 import logging
 from typing import Any
 
-logger = logging.getLogger("babylon60.engine.smte.parser")
+logger = logging.getLogger("cortex.engine.smte.parser")
 
 
 class AgentASTParser:

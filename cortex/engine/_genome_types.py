@@ -15,14 +15,14 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-from babylon60.isa.builder import (
+from cortex.isa.builder import (
     AgentOp,
     dispatch_targets,
     node_count,
     noop,
 )
 
-logger = logging.getLogger("babylon60.engine.genome")
+logger = logging.getLogger("cortex.engine.genome")
 
 
 @dataclass

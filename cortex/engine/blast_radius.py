@@ -19,9 +19,9 @@ import subprocess
 from dataclasses import dataclass
 from typing import Any
 
-from babylon60.database.core import connect as db_connect
+from cortex.database.core import connect as db_connect
 
-logger = logging.getLogger("babylon60.chronos")
+logger = logging.getLogger("cortex.chronos")
 
 __all__ = ["CHRONOS", "ChronosROI", "ChronosReport"]
 
@@ -203,7 +203,7 @@ class ChronosROI:
         try:
             with db_connect(db_path) as conn:
                 # 1. Store as fact (sync path for simplicity)
-                from babylon60.memory.temporal import now_iso
+                from cortex.memory.temporal import now_iso
 
                 ts = now_iso()
                 content = report.summary()
@@ -230,7 +230,7 @@ class ChronosROI:
                 fact_id: int = cursor.lastrowid  # type: ignore[assignment]
 
                 # 2. Emit signal to bus
-                from babylon60.extensions.signals.bus import SignalBus
+                from cortex.extensions.signals.bus import SignalBus
 
                 bus = SignalBus(conn)
                 bus.emit(

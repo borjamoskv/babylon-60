@@ -1,27 +1,27 @@
 # [C5-REAL] Exergy-Maximized Test Suite
 import pytest
-from cortex.engine.cortex import Cortex
+from cortex.engine.babylon60 import Babylon60
 from cortex.engine.exergy_optimizer import ExergyOptimizer
 from cortex.engine.swarm_10k import NodeMetrics
 
 
 def test_python_cortex_init():
-    a = Cortex(1)
+    a = Babylon60(1)
     assert a._value == 3600
 
-    b = Cortex(0.5)
+    b = Babylon60(0.5)
     assert b._value == 1800
 
-    c = Cortex(a)
+    c = Babylon60(a)
     assert c._value == 3600
 
     with pytest.raises(TypeError):
-        Cortex("anergy")
+        Babylon60("anergy")
 
 
 def test_python_cortex_arithmetic():
-    a = Cortex(1.0)
-    b = Cortex(0.5)
+    a = Babylon60(1.0)
+    b = Babylon60(0.5)
 
     c = a + b
     assert c._value == 5400
@@ -40,19 +40,19 @@ def test_python_cortex_arithmetic():
     assert f.to_float() == 2.0
 
     # Reflected arithmetic
-    assert 1.5 + b == Cortex(2.0)
-    assert 1.0 - b == Cortex(0.5)
-    assert 2.0 * b == Cortex(1.0)
-    assert 1.0 / b == Cortex(2.0)
+    assert 1.5 + b == Babylon60(2.0)
+    assert 1.0 - b == Babylon60(0.5)
+    assert 2.0 * b == Babylon60(1.0)
+    assert 1.0 / b == Babylon60(2.0)
 
 
 def test_python_cortex_errors():
-    a = Cortex(1.0)
+    a = Babylon60(1.0)
     with pytest.raises(ZeroDivisionError):
-        _ = a / Cortex(0.0)
+        _ = a / Babylon60(0.0)
 
     # Coercion succeeds for int
-    assert a + 5 == Cortex(6.0)
+    assert a + 5 == Babylon60(6.0)
 
     # Invalid type raises TypeError
     with pytest.raises(TypeError):
@@ -60,9 +60,9 @@ def test_python_cortex_errors():
 
 
 def test_python_cortex_comparisons():
-    a = Cortex(1.0)
-    b = Cortex(2.0)
-    c = Cortex(1.0)
+    a = Babylon60(1.0)
+    b = Babylon60(2.0)
+    c = Babylon60(1.0)
 
     assert a < b
     assert a <= b
@@ -74,30 +74,30 @@ def test_python_cortex_comparisons():
 
 def test_exergy_optimizer_cortex():
     metrics = NodeMetrics(
-        exergy=Cortex(1.0),
-        uncertainty=Cortex(0.0),
+        exergy=Babylon60(1.0),
+        uncertainty=Babylon60(0.0),
         active_children=0
     )
 
     # Optimum condition: active=0, latency=0
     exergy = ExergyOptimizer.calculate_node_exergy(
-        metrics, latency_ms=Cortex(0.0), max_capacity=100
+        metrics, latency_ms=Babylon60(0.0), max_capacity=100
     )
-    assert exergy == Cortex(1.0)
+    assert exergy == Babylon60(1.0)
 
     # Degraded condition: latency=20ms (exceeds threshold 16ms), active=50
     metrics_degraded = NodeMetrics(
-        exergy=Cortex(1.0),
-        uncertainty=Cortex(0.1),
+        exergy=Babylon60(1.0),
+        uncertainty=Babylon60(0.1),
         active_children=50
     )
     exergy_degraded = ExergyOptimizer.calculate_node_exergy(
-        metrics_degraded, latency_ms=Cortex(20.0), max_capacity=100
+        metrics_degraded, latency_ms=Babylon60(20.0), max_capacity=100
     )
     # density_factor = 1 - 50/100 = 0.5
     # latency_factor = 1 - (20 - 16)/32 = 1 - 4/32 = 0.875
     # uncertainty_penalty = 1 - 0.1 = 0.9
-    # expected exergy = 0.5 * 0.875 * 0.9 = 0.39375 -> Cortex(0.39375)
+    # expected exergy = 0.5 * 0.875 * 0.9 = 0.39375 -> Babylon60(0.39375)
     # raw value: 3600 * 0.5 = 1800
     # 1800 * 0.875 = 1575
     # 1575 * 0.9 = 1417.5 -> 1417 raw value

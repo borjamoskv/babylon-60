@@ -3,7 +3,7 @@ import logging
 import time
 from typing import Any
 
-logger = logging.getLogger("babylon60.exergetic_diagnostic")
+logger = logging.getLogger("cortex.exergetic_diagnostic")
 
 META_PRIMITIVAS = {
     "INCENTIVOS": "Motor predictivo (61) - Explica el 90% del comportamiento",

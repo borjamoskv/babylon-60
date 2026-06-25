@@ -15,11 +15,11 @@ from rich.panel import Panel
 from rich.theme import Theme
 
 if TYPE_CHECKING:
-    from babylon60.engine import CortexEngine
-    from babylon60.extensions.timing import TimingTracker
+    from cortex.engine import CortexEngine
+    from cortex.extensions.timing import TimingTracker
 
-from babylon60 import __version__
-from babylon60.config import DEFAULT_DB_PATH
+from cortex import __version__
+from cortex.config import DEFAULT_DB_PATH
 
 # Theme and Console
 cortex_theme = Theme(
@@ -58,7 +58,7 @@ def get_engine(db: str = DEFAULT_DB) -> CortexEngine:
         db = os.path.join(tempfile.gettempdir(), "cortex_test_sandbox.db")
         # Pre-initialize with WAL and busy_timeout=5000 via factory connection
         try:
-            from babylon60.database.core import connect as db_connect
+            from cortex.database.core import connect as db_connect
             conn = db_connect(db)
             conn.close()
         except sqlite3.OperationalError as e:
@@ -66,7 +66,7 @@ def get_engine(db: str = DEFAULT_DB) -> CortexEngine:
             logging.warning("Sandbox DB pre-initialization warning: %s", e)
 
     try:
-        from babylon60.engine import CortexEngine
+        from cortex.engine import CortexEngine
 
         return CortexEngine(db_path=db)
     except Exception as err:
@@ -84,21 +84,21 @@ def get_engine(db: str = DEFAULT_DB) -> CortexEngine:
 
 def get_tracker(engine: CortexEngine) -> TimingTracker:
     """Create a timing tracker from an engine (lazy import)."""
-    from babylon60.extensions.timing import TimingTracker
+    from cortex.extensions.timing import TimingTracker
 
     return TimingTracker(engine._get_conn())  # type: ignore[reportArgumentType]
 
 
 def close_engine_sync(engine: CortexEngine) -> None:
     """Close the engine synchronously."""
-    from babylon60.events.loop import sovereign_run
+    from cortex.events.loop import sovereign_run
 
     sovereign_run(engine.close())
 
 
 def _run_async(coro):
     """Helper to run async coroutines from sync CLI (sovereign uvloop)."""
-    from babylon60.events.loop import sovereign_run
+    from cortex.events.loop import sovereign_run
 
     # Chronos Sniper: Apply strict timeout to CLI commands to prevent deadlocks
     return sovereign_run(asyncio.wait_for(coro, timeout=GLOBAL_CLI_TIMEOUT))
@@ -107,7 +107,7 @@ def _run_async(coro):
 def _show_tip(engine=None) -> None:
     """Show a random contextual tip after CLI operations."""
     try:
-        from babylon60.cli.tips_cmds import TipsEngine
+        from cortex.cli.tips_cmds import TipsEngine
 
         tips_engine = TipsEngine(engine, include_dynamic=engine is not None, lang="es")
 
@@ -137,7 +137,7 @@ def _show_tip(engine=None) -> None:
 def _get_tip_text(engine=None) -> str:
     """Get a short tip string for inline display."""
     try:
-        from babylon60.cli.tips_cmds import TipsEngine
+        from cortex.cli.tips_cmds import TipsEngine
 
         tips_engine = TipsEngine(engine, include_dynamic=False, lang="es")
 

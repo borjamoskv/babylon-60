@@ -12,9 +12,9 @@ import logging
 import random
 from typing import Any
 
-from babylon60.engine._genome_tree_helper import remove_target, replace_target
-from babylon60.engine._genome_types import MutationType, StrategyGenome
-from babylon60.isa.builder import (
+from cortex.engine._genome_tree_helper import remove_target, replace_target
+from cortex.engine._genome_types import MutationType, StrategyGenome
+from cortex.isa.builder import (
     Predicate,
     cond,
     dispatch,
@@ -26,7 +26,7 @@ from babylon60.isa.builder import (
     seq,
 )
 
-logger = logging.getLogger("babylon60.engine.genome")
+logger = logging.getLogger("cortex.engine.genome")
 
 
 class GenomeMutator:

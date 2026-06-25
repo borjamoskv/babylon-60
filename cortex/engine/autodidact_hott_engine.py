@@ -6,12 +6,12 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-from babylon60.engine.mtk_core import MTKGuard
-from babylon60.engine.ultramap import UltramapSubstrate
-from babylon60.storage.ledger import EnterpriseAuditLedger
-from babylon60.types.evidence import ClosurePayload, EvidenceBundle, Source
+from cortex.engine.mtk_core import MTKGuard
+from cortex.engine.ultramap import UltramapSubstrate
+from cortex.storage.ledger import EnterpriseAuditLedger
+from cortex.types.evidence import ClosurePayload, EvidenceBundle, Source
 
-logger = logging.getLogger("babylon60.autodidact.hott")
+logger = logging.getLogger("cortex.autodidact.hott")
 
 class EntropyRejectionError(Exception):
     """Raised when Green Theater or narrative mathematics noise is detected."""

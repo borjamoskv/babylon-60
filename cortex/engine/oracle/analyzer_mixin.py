@@ -11,13 +11,13 @@ import logging
 import sqlite3
 from typing import TYPE_CHECKING, Any
 
-from babylon60.engine.forgetting_models import EvictionVerdict
+from cortex.engine.forgetting_models import EvictionVerdict
 
 if TYPE_CHECKING:
-    from babylon60.engine import CortexEngine as AsyncCortexEngine
-    from babylon60.memory.working import WorkingMemoryL1
+    from cortex.engine import CortexEngine as AsyncCortexEngine
+    from cortex.memory.working import WorkingMemoryL1
 
-logger = logging.getLogger("babylon60.oracle.analyzer")
+logger = logging.getLogger("cortex.oracle.analyzer")
 
 
 class AnalyzerMixin:

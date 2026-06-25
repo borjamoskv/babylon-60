@@ -14,9 +14,9 @@ from typing import Any
 
 import aiosqlite
 
-from babylon60.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.endocrine import ENDOCRINE, HormoneType
 
-logger = logging.getLogger("babylon60.engine.decalcifier")
+logger = logging.getLogger("cortex.engine.decalcifier")
 
 
 class SovereignDecalcifier:
@@ -56,8 +56,8 @@ class SovereignDecalcifier:
             # Biological defragmentation (VACUUM cannot run in transaction)
             # In aiosqlite, accessing conn.isolation_level triggers cross-thread errors.
             # So we create an ephemeral connection with isolation_level=None to execute VACUUM.
-            from babylon60.core.paths import CORTEX_DB
-            from babylon60.database.core import connect
+            from cortex.core.paths import CORTEX_DB
+            from cortex.database.core import connect
 
             def _run_vacuum():
                 with connect(CORTEX_DB, isolation_level=None) as vconn:

@@ -21,7 +21,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-logger = logging.getLogger("babylon60.autodidact.omega")
+logger = logging.getLogger("cortex.autodidact.omega")
 
 
 @dataclass(frozen=True)

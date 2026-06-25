@@ -4,7 +4,7 @@ import logging
 import uuid
 from typing import Any
 
-from babylon60.database.core import connect_async_ctx
+from cortex.database.core import connect_async_ctx
 
 logger = logging.getLogger(__name__)
 

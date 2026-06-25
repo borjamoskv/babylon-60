@@ -13,10 +13,10 @@ from datetime import datetime, timedelta, timezone
 
 import aiosqlite
 
-from babylon60.engine.mutation_engine import MUTATION_ENGINE
-from babylon60.memory.temporal import now_iso
+from cortex.engine.mutation_engine import MUTATION_ENGINE
+from cortex.memory.temporal import now_iso
 
-logger = logging.getLogger("babylon60.evaporator")
+logger = logging.getLogger("cortex.evaporator")
 
 
 class EntropicEvaporator:

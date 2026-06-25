@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 
-from babylon60.database.core import connect as db_connect
+from cortex.database.core import connect as db_connect
 
 # ═══════════════════════════════════════════════════════════════
 # ENUMS Y TIPOS
@@ -333,13 +333,13 @@ class DAGValidator:
 
 
 # ═══════════════════════════════════════════════════════════════
-# PERSISTENCIA SQLite (babylon60.db)
+# PERSISTENCIA SQLite (cortex.db)
 # ═══════════════════════════════════════════════════════════════
 
 class CortexPersist:
     """Persistencia BFT-compliant en SQLite."""
 
-    def __init__(self, db_path: str = "babylon60.db"):
+    def __init__(self, db_path: str = "cortex.db"):
         self.db_path = Path(db_path)
         self.conn = db_connect(str(self.db_path))
         self._init_schema()
@@ -611,8 +611,8 @@ def main():
         return
 
     # 3. Persistir en SQLite
-    print("\n[3/4] Inyectando en babylon60.db...")
-    db = CortexPersist("../../babylon60.db")
+    print("\n[3/4] Inyectando en cortex.db...")
+    db = CortexPersist("../../cortex.db")
     inject_result = db.inject_nodes(nodes)
     print(f"      Nuevos: {inject_result['injected']}")
     print(f"      Actualizados: {inject_result['updated']}")

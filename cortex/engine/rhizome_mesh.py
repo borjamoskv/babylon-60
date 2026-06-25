@@ -3,7 +3,7 @@ import logging
 from collections.abc import Awaitable, Callable
 from typing import Any
 
-logger = logging.getLogger("babylon60.engine.rhizome_mesh")
+logger = logging.getLogger("cortex.engine.rhizome_mesh")
 
 class RhizomeMesh:
     """

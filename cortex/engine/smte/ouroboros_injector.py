@@ -12,7 +12,7 @@ import sys
 import time
 import uuid
 
-logger = logging.getLogger("babylon60.engine.smte.ouroboros_injector")
+logger = logging.getLogger("cortex.engine.smte.ouroboros_injector")
 
 Producer = None
 try:

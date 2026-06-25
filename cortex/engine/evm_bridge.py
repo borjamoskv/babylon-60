@@ -6,7 +6,7 @@ Allows the swarm to self-fund by extracting value from on-chain bounties.
 
 import logging
 
-logger = logging.getLogger("babylon60.engine.evm_bridge")
+logger = logging.getLogger("cortex.engine.evm_bridge")
 
 
 class EVMBountyBridge:

@@ -6,7 +6,7 @@ import logging
 import os
 from dataclasses import dataclass
 
-logger = logging.getLogger("babylon60.engine.capabilities")
+logger = logging.getLogger("cortex.engine.capabilities")
 
 
 @dataclass(frozen=True)
@@ -59,7 +59,7 @@ class CapabilityRegistry:
         has_vector = True
         try:
             # This is a light check
-            from babylon60.database.core import connect
+            from cortex.database.core import connect
 
             connect(":memory:")
             # We don't load the extension yet, just check if we want to

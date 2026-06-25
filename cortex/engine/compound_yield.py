@@ -11,11 +11,11 @@ import sqlite3
 from dataclasses import dataclass, field
 from typing import Any
 
-from babylon60.database.core import connect as db_connect
-from babylon60.extensions.signals.bus import SignalBus
-from babylon60.memory.temporal import now_iso
+from cortex.database.core import connect as db_connect
+from cortex.extensions.signals.bus import SignalBus
+from cortex.memory.temporal import now_iso
 
-logger = logging.getLogger("babylon60.chronos.compound")
+logger = logging.getLogger("cortex.chronos.compound")
 
 __all__ = ["CompoundChain", "CompoundProjector", "CompoundReport", "CompoundYieldTracker"]
 

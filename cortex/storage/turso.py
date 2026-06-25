@@ -17,7 +17,7 @@ from typing import Any, Final
 
 __all__ = ["TursoBackend"]
 
-logger = logging.getLogger("babylon60.storage.turso")
+logger = logging.getLogger("cortex.storage.turso")
 
 # Threshold for "slow" queries in milliseconds
 SLOW_QUERY_THRESHOLD_MS: Final[int] = 500
@@ -178,7 +178,7 @@ class TursoBackend:
     def tenant_db_url(base_url: str, tenant_id: str) -> str:
         """
         Generate a per-tenant database URL.
-        Example: libsql://babylon60.turso.io + alice -> libsql://cortex-alice.turso.io
+        Example: libsql://cortex.turso.io + alice -> libsql://cortex-alice.turso.io
         """
         if "://" in base_url:
             protocol, rest = base_url.split("://", 1)

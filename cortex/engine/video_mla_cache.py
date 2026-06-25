@@ -9,7 +9,7 @@ import hashlib
 import logging
 from dataclasses import dataclass
 
-logger = logging.getLogger("babylon60.exergy.video")
+logger = logging.getLogger("cortex.exergy.video")
 
 
 @dataclass

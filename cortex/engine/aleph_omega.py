@@ -13,7 +13,7 @@ import logging
 import random
 from typing import TypedDict
 
-logger = logging.getLogger("babylon60.engine.aleph_omega")
+logger = logging.getLogger("cortex.engine.aleph_omega")
 
 
 class AlephLeapResult(TypedDict):

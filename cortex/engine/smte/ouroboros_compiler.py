@@ -12,10 +12,10 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from babylon60.engine.smte.llm_mutator import call_qwen_mutator
-from babylon60.engine.smte.weismann_barrier import enforce_weismann_barrier
+from cortex.engine.smte.llm_mutator import call_qwen_mutator
+from cortex.engine.smte.weismann_barrier import enforce_weismann_barrier
 
-logger = logging.getLogger("babylon60.engine.smte.ouroboros_compiler")
+logger = logging.getLogger("cortex.engine.smte.ouroboros_compiler")
 
 
 class OuroborosCompiler:
@@ -28,8 +28,8 @@ class OuroborosCompiler:
     def _ensure_engine(self) -> None:
         if self._engine is not None:
             return
-        from babylon60.config import DEFAULT_DB_PATH
-        from babylon60.engine import CortexEngine
+        from cortex.config import DEFAULT_DB_PATH
+        from cortex.engine import CortexEngine
 
         db_val = str(self._db_path) if self._db_path else DEFAULT_DB_PATH
         self._engine = CortexEngine(db_path=db_val)
@@ -39,7 +39,7 @@ class OuroborosCompiler:
 
         Calculates AST Complexity and Dead Code Ratio to enforce the Ouroboros-Omega L-EPI Guard.
         """
-        from babylon60.engine.smte.analyzer import (
+        from cortex.engine.smte.analyzer import (
             calculate_ast_complexity,
             estimate_dead_code_ratio,
         )

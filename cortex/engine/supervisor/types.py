@@ -5,8 +5,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-from babylon60.engine._autocurative_config import AutoCurativeConfig
-from babylon60.engine.self_optimizer import OptimizerConfig
+from cortex.engine._autocurative_config import AutoCurativeConfig
+from cortex.engine.self_optimizer import OptimizerConfig
 
 
 class AgentStatus(str, Enum):

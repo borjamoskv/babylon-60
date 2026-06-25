@@ -2,7 +2,7 @@
 import logging
 from typing import Any
 
-logger = logging.getLogger("babylon60.engine.guards")
+logger = logging.getLogger("cortex.engine.guards")
 
 
 async def enforce_store_guards(
@@ -25,7 +25,7 @@ async def enforce_store_guards(
         return
 
     try:
-        from babylon60.extensions.security.guard_runtime import (
+        from cortex.extensions.security.guard_runtime import (
             AnomalyGuardWrapper,
             BridgeConflictGuard,
             ContradictionSignalGuard,

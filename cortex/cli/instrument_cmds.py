@@ -2,8 +2,8 @@ from pathlib import Path
 
 import click
 
-from babylon60.cli.common import cli
-from babylon60.engine.auto_instrumentor import instrument_directory
+from cortex.cli.common import cli
+from cortex.engine.auto_instrumentor import instrument_directory
 
 
 @cli.command("instrument")

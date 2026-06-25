@@ -14,12 +14,12 @@ from pathlib import Path
 
 __all__ = ["export_openapi_spec", "get_openapi_spec"]
 
-logger = logging.getLogger("babylon60.openapi")
+logger = logging.getLogger("cortex.openapi")
 
 
 def get_openapi_spec() -> dict:
     """Return the OpenAPI spec dict from the FastAPI app."""
-    from babylon60.api.core import app
+    from cortex.api.core import app
 
     return app.openapi()
 

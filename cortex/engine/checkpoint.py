@@ -16,10 +16,10 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import Any
 
-from babylon60.engine.evolution_ledger import EvolutionLedger, ReplayMode
-from babylon60.ledger.merkle import MerkleTree
+from cortex.engine.evolution_ledger import EvolutionLedger, ReplayMode
+from cortex.ledger.merkle import MerkleTree
 
-logger = logging.getLogger("babylon60.checkpoint")
+logger = logging.getLogger("cortex.checkpoint")
 
 
 @dataclass

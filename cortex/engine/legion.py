@@ -14,19 +14,19 @@ from dataclasses import dataclass, field
 from typing import Any, ClassVar
 
 try:
-    from babylon60.cli.bicameral import bicameral
+    from cortex.cli.bicameral import bicameral
 except ImportError:
     # Axiom Ω₃: Zero-Trust Logging - providing a stub if CLI is unavailable
     class BicameralStub:
         def log_limbic(self, msg: str, **kwargs) -> None:
-            logging.getLogger("babylon60.limbic").info(msg)
+            logging.getLogger("cortex.limbic").info(msg)
 
         def log_motor(self, msg: str, **kwargs) -> None:
-            logging.getLogger("babylon60.motor").info(msg)
+            logging.getLogger("cortex.motor").info(msg)
 
     bicameral = BicameralStub()
 
-from babylon60.engine.legion_vectors import RED_TEAM_SWARM, AttackVector
+from cortex.engine.legion_vectors import RED_TEAM_SWARM, AttackVector
 
 logger = logging.getLogger(__name__)
 
@@ -155,7 +155,7 @@ class Squadron(ABC):
         import hashlib
         from datetime import datetime, timezone
 
-        from babylon60.types.evidence import ClosurePayload, EvidenceBundle, Source
+        from cortex.types.evidence import ClosurePayload, EvidenceBundle, Source
 
         # Forge verifiable sources from signal payloads
         sources = [
@@ -181,7 +181,7 @@ class Squadron(ABC):
         # ─── Cross-System Invariance Verification ───
         global_verdict = True
         try:
-            from babylon60.runtime.invariants.cross_system import CrossSystemInvariantCompiler
+            from cortex.runtime.invariants.cross_system import CrossSystemInvariantCompiler
 
             shannon_trace = getattr(self.engine, "shannon_trace", None)
             substrate_ledger = getattr(self.engine, "substrate_ledger", None)

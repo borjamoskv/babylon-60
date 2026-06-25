@@ -17,7 +17,7 @@ from typing import Any
 
 import aiosqlite
 
-from babylon60.engine.causality import (
+from cortex.engine.causality import (
     KRGSE_DERIVED_FROM,
     AsyncCausalGraph,
 )
@@ -29,7 +29,7 @@ __all__ = [
     "derive_facts",
 ]
 
-logger = logging.getLogger("babylon60.engine.inference")
+logger = logging.getLogger("cortex.engine.inference")
 
 # Maximum derivations per cycle to bound compute cost
 MAX_DERIVATIONS_PER_CYCLE = 50
@@ -340,7 +340,7 @@ class InferenceEngine:
         tenant_id: str,
     ) -> None:
         """Persist derivations as facts with causal edges."""
-        from babylon60.memory.temporal import now_iso
+        from cortex.memory.temporal import now_iso
 
         graph = AsyncCausalGraph(conn)
         await graph.ensure_table()
@@ -358,8 +358,8 @@ class InferenceEngine:
             if existing:
                 continue
 
-            from babylon60.config import DB_PATH
-            from babylon60.guards.contradiction_guard import detect_contradictions
+            from cortex.config import DB_PATH
+            from cortex.guards.contradiction_guard import detect_contradictions
 
             # FALSATION PROTOCOL (L7): Prevent entropy leaks by culling contradictory derivations
             conflict_report = await detect_contradictions(

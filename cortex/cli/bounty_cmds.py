@@ -14,7 +14,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from babylon60.cli.common import (
+from cortex.cli.common import (
     DEFAULT_DB,
     _run_async,
     cli,
@@ -22,14 +22,14 @@ from babylon60.cli.common import (
     console,
     get_engine,
 )
-from babylon60.consensus.babylon_quorum import BabylonQuorum
-from babylon60.crypto.keys import ZKSwarmIdentity
-from babylon60.engine.causal.taint_engine import generate_secure_taint_token
-from babylon60.engine.mtk_sqlite_authorizer import mtk_active_token
-from babylon60.guards.z3_anvil import SovereignAnvil
-from babylon60.types.evidence import ClosurePayload, EvidenceBundle, Source
+from cortex.consensus.babylon_quorum import BabylonQuorum
+from cortex.crypto.keys import ZKSwarmIdentity
+from cortex.engine.causal.taint_engine import generate_secure_taint_token
+from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
+from cortex.guards.z3_anvil import SovereignAnvil
+from cortex.types.evidence import ClosurePayload, EvidenceBundle, Source
 
-logger = logging.getLogger("babylon60.cli.bounty")
+logger = logging.getLogger("cortex.cli.bounty")
 
 class BountyHunterRunner:
     """Orchestrator for hunting contradictions in rules stored in CORTEX database."""
@@ -126,7 +126,7 @@ class BountyHunterRunner:
             claim_content_raw = f"Vulnerability verified in {rule_name}. Reason: Z3 solver proved UNSAT. Proof: {reason}."
             
             # Pre-sanitize to prevent hash mismatch due to SovereignSanitizer mutations
-            from babylon60.engine.membrane.sanitizer import SovereignSanitizer
+            from cortex.engine.membrane.sanitizer import SovereignSanitizer
             raw_engram = {
                 "type": "decision",
                 "source": f"agent:{self.agent_id}",

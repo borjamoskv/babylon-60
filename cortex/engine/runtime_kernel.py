@@ -3,7 +3,7 @@ import asyncio
 import logging
 from typing import Any
 
-logger = logging.getLogger("babylon60.engine.runtime_kernel")
+logger = logging.getLogger("cortex.engine.runtime_kernel")
 
 class RetrievalEventBus:
     """

@@ -30,7 +30,7 @@ __all__ = [
     "SubsystemMetrics",
 ]
 
-logger = logging.getLogger("babylon60.engine.performance_tracker")
+logger = logging.getLogger("cortex.engine.performance_tracker")
 
 # ─── Types ────────────────────────────────────────────────────────
 

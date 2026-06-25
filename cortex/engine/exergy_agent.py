@@ -3,11 +3,11 @@ import logging
 from collections.abc import Mapping
 from typing import Any
 
-from babylon60.engine.endocrine import ENDOCRINE, HormoneType
-from babylon60.engine.exergy_optimizer import ExergyOptimizer
-from babylon60.engine.legion import AsyncSignalBus, SwarmAgent, SwarmSignal
+from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.exergy_optimizer import ExergyOptimizer
+from cortex.engine.legion import AsyncSignalBus, SwarmAgent, SwarmSignal
 
-logger = logging.getLogger("babylon60.exergy_agent")
+logger = logging.getLogger("cortex.exergy_agent")
 
 
 class NodeTelemetry:

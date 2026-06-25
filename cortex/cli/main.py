@@ -12,7 +12,7 @@ import logging
 import pkgutil
 from pathlib import Path
 
-from babylon60.cli.common import cli
+from cortex.cli.common import cli
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ def _load_command_modules() -> tuple[list[str], dict[str, str]]:
     failed: dict[str, str] = {}
 
     for module_name in _discover_command_modules():
-        full_name = f"babylon60.cli.{module_name}"
+        full_name = f"cortex.cli.{module_name}"
         try:
             importlib.import_module(full_name)
             loaded.append(module_name)

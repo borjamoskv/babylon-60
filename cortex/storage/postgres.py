@@ -25,7 +25,7 @@ from typing import Any, Final
 
 __all__ = ["PostgresBackend"]
 
-logger = logging.getLogger("babylon60.storage.postgres")
+logger = logging.getLogger("cortex.storage.postgres")
 
 # Threshold for "slow" queries in milliseconds
 SLOW_QUERY_THRESHOLD_MS: Final[int] = 500
@@ -137,7 +137,7 @@ class PostgresBackend:
         Raises:
             RuntimeError: If the backend is not connected.
         """
-        from babylon60.storage.pg_schema import PG_ALL_SCHEMA, PG_EXTENSIONS
+        from cortex.storage.pg_schema import PG_ALL_SCHEMA, PG_EXTENSIONS
 
         self._ensure_pool()
         logger.info("PostgreSQL: Applying schema (idempotent)...")

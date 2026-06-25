@@ -1,7 +1,7 @@
 import ast
 import logging
 
-logger = logging.getLogger("babylon60.engine.ast_validator")
+logger = logging.getLogger("cortex.engine.ast_validator")
 
 class StrictASTValidator(ast.NodeVisitor):
     """

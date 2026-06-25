@@ -57,6 +57,7 @@ if str(_REPO_ROOT) not in sys.path:
 
 for extra_path in (
     _REPO_ROOT / "cortex-core",
+    _REPO_ROOT / "scripts",
     _REPO_ROOT / "scripts" / "sortu",
     _REPO_ROOT / "legacy_research" / "extensions",
     _REPO_ROOT / "ANTI_GRAVITY" / "02_SYSTEMS",

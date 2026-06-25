@@ -5,7 +5,7 @@ import time
 import uuid
 from typing import Any
 
-logger = logging.getLogger("babylon60.engine.auth_gateway")
+logger = logging.getLogger("cortex.engine.auth_gateway")
 
 
 class QuorumGateway:
@@ -80,7 +80,7 @@ class QuorumGateway:
             return False
 
         try:
-            from babylon60.extensions.security.signatures import (
+            from cortex.extensions.security.signatures import (
                 Ed25519Signer,
                 SignatureVerificationError,
             )

@@ -21,7 +21,7 @@ from pathlib import Path
 
 # Load MTK Token ContextVar
 try:
-    from babylon60.engine.mtk_sqlite_authorizer import mtk_active_token
+    from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
 except ImportError:
     # Shim
     from contextvars import ContextVar
@@ -29,7 +29,7 @@ except ImportError:
 
 # Fallback si no existe db_connect en path estándar
 try:
-    from babylon60.database.core import connect as db_connect
+    from cortex.database.core import connect as db_connect
 except ImportError:
     # Shim para standalone execution
     def db_connect(db_path: str = "moskv1_skills.db"):

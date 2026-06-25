@@ -6,13 +6,13 @@ import sqlite3
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from babylon60.engine.endocrine import ENDOCRINE, HormoneType
-from babylon60.engine.manifestation import manifest_singularity
+from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.manifestation import manifest_singularity
 
 if TYPE_CHECKING:
     pass
 
-logger = logging.getLogger("babylon60.engine.apotheosis.audits")
+logger = logging.getLogger("cortex.engine.apotheosis.audits")
 
 
 class ApotheosisAuditsMixin:
@@ -96,7 +96,7 @@ class ApotheosisAuditsMixin:
         if not getattr(self, "_cortex", None):
             return
         try:
-            from babylon60.engine.forgetting_oracle import ForgettingOracle
+            from cortex.engine.forgetting_oracle import ForgettingOracle
 
             if getattr(self, "_oracle", None) is None:
                 # Obtener referencia al caché del motor optimizado si existe
@@ -111,7 +111,7 @@ class ApotheosisAuditsMixin:
 
             report = await self._oracle.evaluate(window=100)
             if report.regret_rate > ForgettingOracle.REGRET_THRESHOLD:
-                from babylon60.engine.forgetting_models import PolicyRecommendation
+                from cortex.engine.forgetting_models import PolicyRecommendation
 
                 if report.recommendation == PolicyRecommendation.PROTECT_CAUSAL_ROOTS:
                     ENDOCRINE.pulse(

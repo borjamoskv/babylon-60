@@ -6,7 +6,7 @@ and the required scopes before allowing state mutation or persistence.
 
 from typing import Any
 
-from babylon60.auth.enterprise_identity import SovereignIdentity, TenantRBAC
+from cortex.auth.enterprise_identity import SovereignIdentity, TenantRBAC
 
 
 class EnterpriseRBACGuard:

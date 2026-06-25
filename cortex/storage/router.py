@@ -13,11 +13,11 @@ import sqlite3
 from collections import OrderedDict
 from typing import Any, Final
 
-from babylon60.storage import StorageMode, get_storage_mode
+from cortex.storage import StorageMode, get_storage_mode
 
 __all__ = ["TenantRouter", "get_router"]
 
-logger = logging.getLogger("babylon60.storage.router")
+logger = logging.getLogger("cortex.storage.router")
 
 _MAX_BACKENDS: Final[int] = 500
 
@@ -50,7 +50,7 @@ class TenantRouter:
         """
         # Zero-Trust Check: Force local if secrets detected
         if content:
-            from babylon60.storage.classifier import classify_content
+            from cortex.storage.classifier import classify_content
 
             sensitivity = classify_content(content)
             if sensitivity.is_sensitive:
@@ -95,8 +95,8 @@ class TenantRouter:
 
         from pathlib import Path
 
-        from babylon60.config import DB_PATH, SHARD_DIR
-        from babylon60.database.pool import CortexConnectionPool
+        from cortex.config import DB_PATH, SHARD_DIR
+        from cortex.database.pool import CortexConnectionPool
 
         db_path = Path(DB_PATH)
         shard_name = f"{db_path.stem}_{tenant_id}{db_path.suffix}"
@@ -112,8 +112,8 @@ class TenantRouter:
     async def _get_local_backend(self):
         """Return the shared local SQLite connection pool."""
         if "local" not in self._connections:
-            from babylon60.config import DB_PATH
-            from babylon60.database.pool import CortexConnectionPool
+            from cortex.config import DB_PATH
+            from cortex.database.pool import CortexConnectionPool
 
             pool = CortexConnectionPool(str(DB_PATH))
             await pool.initialize()
@@ -134,7 +134,7 @@ class TenantRouter:
             logger.warning("Turso connection unhealthy for %s, reconnecting", tenant_id)
             await conn.close()
 
-        from babylon60.storage.turso import TursoBackend
+        from cortex.storage.turso import TursoBackend
 
         url = TursoBackend.tenant_db_url(self._base_url, tenant_id)
         backend = TursoBackend(url=url, auth_token=self._auth_token)
@@ -159,7 +159,7 @@ class TenantRouter:
             logger.warning("PostgreSQL pool unhealthy, reconnecting")
             await conn.close()
 
-        from babylon60.storage.postgres import PostgresBackend
+        from cortex.storage.postgres import PostgresBackend
 
         if not self._postgres_dsn:
             raise RuntimeError(

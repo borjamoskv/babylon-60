@@ -7,7 +7,7 @@ Shadow schemas designed to trap unauthorized agents and burn their compute.
 import asyncio
 import logging
 
-logger = logging.getLogger("babylon60.engine.honeypot")
+logger = logging.getLogger("cortex.engine.honeypot")
 
 
 class ThermodynamicTarpit:

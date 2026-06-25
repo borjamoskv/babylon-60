@@ -1,4 +1,4 @@
-from babylon60.math.babylon import (
+from cortex.math.babylon import (
     SCALE,
     Babylon60,
     Babylon60Vector,
@@ -8,7 +8,7 @@ from babylon60.math.babylon import (
     hash_distance_rollup,
     manhattan_distance,
 )
-from babylon60.math.svd_engine import SVDEngine
+from cortex.math.svd_engine import SVDEngine
 
 __all__ = [
     "SCALE",

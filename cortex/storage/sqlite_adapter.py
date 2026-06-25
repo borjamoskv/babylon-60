@@ -21,7 +21,7 @@ __all__ = ["SQLiteAdapter"]
 if TYPE_CHECKING:
     import aiosqlite
 
-logger = logging.getLogger("babylon60.storage.sqlite_adapter")
+logger = logging.getLogger("cortex.storage.sqlite_adapter")
 
 
 class SQLiteAdapter:

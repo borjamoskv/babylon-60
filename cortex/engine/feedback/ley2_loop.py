@@ -11,9 +11,9 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from babylon60.ledger.execution_trace import ExecutionTraceLedger
+    from cortex.ledger.execution_trace import ExecutionTraceLedger
 
-logger = logging.getLogger("babylon60.engine.feedback.ley2_loop")
+logger = logging.getLogger("cortex.engine.feedback.ley2_loop")
 
 
 class DummyScheduler:

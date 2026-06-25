@@ -7,8 +7,8 @@ Verifies the Keyed Retrieval Graph System deterministically.
 import json
 from typing import Any
 
-from babylon60.engine.causal_graph import CausalDAG
-from babylon60.engine.state_diff import apply_patch
+from cortex.engine.causal_graph import CausalDAG
+from cortex.engine.state_diff import apply_patch
 
 
 class DivergenceError(Exception):

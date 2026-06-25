@@ -12,7 +12,7 @@ import logging
 import sys
 from typing import Any
 
-logger = logging.getLogger("babylon60.durability")
+logger = logging.getLogger("cortex.durability")
 
 
 class PersistenceSupervisor:

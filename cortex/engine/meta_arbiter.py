@@ -27,9 +27,9 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any, Final
 
-from babylon60.tools.trace_adapter import ExecutionTrace
+from cortex.tools.trace_adapter import ExecutionTrace
 
-logger = logging.getLogger("babylon60.engine.meta_arbiter")
+logger = logging.getLogger("cortex.engine.meta_arbiter")
 
 
 # ─── Constants for Cognitive Arbitration ─────────────────────────────

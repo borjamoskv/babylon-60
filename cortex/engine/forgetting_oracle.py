@@ -9,25 +9,25 @@ import time
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
-from babylon60.database.core import connect
-from babylon60.engine.forgetting_models import (
+from cortex.database.core import connect
+from cortex.engine.forgetting_models import (
     EvictionVerdict,
     OracleReport,
     PolicyRecommendation,
 )
-from babylon60.engine.oracle.analyzer_mixin import AnalyzerMixin
-from babylon60.engine.oracle.evidence_mixin import EvidenceMixin
-from babylon60.engine.oracle.policy_mixin import PolicyMixin
-from babylon60.services.notebooklm import NotebookLMService
-from babylon60.services.trust import TrustService
+from cortex.engine.oracle.analyzer_mixin import AnalyzerMixin
+from cortex.engine.oracle.evidence_mixin import EvidenceMixin
+from cortex.engine.oracle.policy_mixin import PolicyMixin
+from cortex.services.notebooklm import NotebookLMService
+from cortex.services.trust import TrustService
 
 if TYPE_CHECKING:
-    from babylon60.engine import CortexEngine as AsyncCortexEngine
-    from babylon60.memory.working import WorkingMemoryL1
+    from cortex.engine import CortexEngine as AsyncCortexEngine
+    from cortex.memory.working import WorkingMemoryL1
 
 __all__ = ["ForgettingOracle"]
 
-logger = logging.getLogger("babylon60.oracle.forgetting")
+logger = logging.getLogger("cortex.oracle.forgetting")
 
 
 # ─── The Oracle ───────────────────────────────────────────────────────────────
@@ -145,7 +145,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
             db_path = str(getattr(self._engine, "_db_path", ""))
             if not db_path:
                 return
-            from babylon60.extensions.signals.bus import SignalBus
+            from cortex.extensions.signals.bus import SignalBus
 
             conn = connect(db_path)
             try:

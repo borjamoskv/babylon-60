@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-babylon60/nodes/causal_framework_stress.py
+cortex/nodes/causal_framework_stress.py
 ═══════════════════════════════════════════════════════════════
 MOSKV-1 APEX: Thermodynamic Stress Test
 Aserción de BABYLON-60 Epistemology.
 ═══════════════════════════════════════════════════════════════
 """
 
-from babylon60.nodes.causal_framework_nodes import (
+from cortex.nodes.causal_framework_nodes import (
     DeterministicCausalPrimitive, 
     FristonPenaltyValidator,
     ExergyLevel

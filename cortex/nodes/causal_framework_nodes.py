@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-babylon60/nodes/causal_framework_nodes.py
+cortex/nodes/causal_framework_nodes.py
 ═══════════════════════════════════════════════════════════════
 MOSKV-1 APEX: Deterministic Causal Primitive Framework
 Cristalización de Primitivas Causales para CORTEX-Persist.

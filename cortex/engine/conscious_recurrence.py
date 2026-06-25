@@ -7,9 +7,9 @@ from collections.abc import Callable, Coroutine
 from dataclasses import dataclass, field
 from typing import Any, TypeVar
 
-from babylon60.extensions.training.ttt_engine import TTTEngine
+from cortex.extensions.training.ttt_engine import TTTEngine
 
-logger = logging.getLogger("babylon60.conscious_recurrence")
+logger = logging.getLogger("cortex.conscious_recurrence")
 
 R = TypeVar("R")
 

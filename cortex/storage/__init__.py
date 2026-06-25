@@ -18,7 +18,7 @@ import os
 from enum import Enum
 from typing import Protocol, runtime_checkable
 
-logger = logging.getLogger("babylon60.storage")
+logger = logging.getLogger("cortex.storage")
 
 
 class StorageMode(str, Enum):

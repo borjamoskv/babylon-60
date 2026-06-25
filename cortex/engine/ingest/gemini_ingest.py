@@ -3,10 +3,10 @@ import asyncio
 import logging
 from typing import Any
 
-from babylon60.engine.causal.taint_engine import _fast_sha3, canonicalize_content
-from babylon60.engine.ingest.landauer_compression import LandauerCompressor
+from cortex.engine.causal.taint_engine import _fast_sha3, canonicalize_content
+from cortex.engine.ingest.landauer_compression import LandauerCompressor
 
-logger = logging.getLogger("babylon60.engine.ingest.gemini_ingest")
+logger = logging.getLogger("cortex.engine.ingest.gemini_ingest")
 
 class GeminiIngestNode:
     """

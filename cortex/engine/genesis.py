@@ -25,8 +25,8 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
-from babylon60.engine.genome import FitnessRecord, GenomeMutator, StrategyGenome
-from babylon60.isa.builder import (
+from cortex.engine.genome import FitnessRecord, GenomeMutator, StrategyGenome
+from cortex.isa.builder import (
     Predicate,
     bind,
     cond,
@@ -43,7 +43,7 @@ __all__ = [
     "SpawnedAgent",
 ]
 
-logger = logging.getLogger("babylon60.engine.genesis")
+logger = logging.getLogger("cortex.engine.genesis")
 
 
 # ─── Agent Blueprint ─────────────────────────────────────────────

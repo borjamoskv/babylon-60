@@ -7,15 +7,15 @@ from typing import Any
 import jax
 import jax.numpy as jnp
 
-from babylon60.engine.goat_calculus import (
+from cortex.engine.goat_calculus import (
     compute_derivative,
     compute_limit,
     definite_integral,
     rate_of_change,
 )
-from babylon60.engine.legion import AsyncSignalBus, SwarmAgent, SwarmSignal
+from cortex.engine.legion import AsyncSignalBus, SwarmAgent, SwarmSignal
 
-logger = logging.getLogger("babylon60.primitive_exergy_agent")
+logger = logging.getLogger("cortex.primitive_exergy_agent")
 
 
 class PrimitiveExergyMaximizerAgent:

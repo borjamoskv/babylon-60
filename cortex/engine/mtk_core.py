@@ -13,12 +13,12 @@ from contextlib import asynccontextmanager
 
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
-from babylon60.engine.mtk_python import (
+from cortex.engine.mtk_python import (
     clear_ephemeral_token,
     mint_ephemeral_token,
     set_ephemeral_token,
 )
-from babylon60.types.evidence import ClosurePayload
+from cortex.types.evidence import ClosurePayload
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ class MTKGuard:
         self.ast_projector = ASTProjectorPython()
         self.cognitive_state = CognitiveStatePython(1000)
         
-        from babylon60.policies.mythos_guard import MythosInvariantGuard
+        from cortex.policies.mythos_guard import MythosInvariantGuard
         self.mythos_guard = MythosInvariantGuard()
             
     def validate_c5_ast(self, source_code: str) -> str:
@@ -86,7 +86,7 @@ class MTKGuard:
             try:
                 import base64
 
-                from babylon60.crypto.keys import ZKSwarmIdentity
+                from cortex.crypto.keys import ZKSwarmIdentity
                 _priv_bytes = self.private_key.encode() if isinstance(self.private_key, str) else self.private_key
                 _pub_b64 = base64.b64encode(
                     ed25519.Ed25519PrivateKey.from_private_bytes(

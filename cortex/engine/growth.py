@@ -13,10 +13,10 @@ from typing import Any
 
 import aiosqlite
 
-from babylon60.engine.endocrine import ENDOCRINE, HormoneType
-from babylon60.engine.mutation_engine import MUTATION_ENGINE
+from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.mutation_engine import MUTATION_ENGINE
 
-logger = logging.getLogger("babylon60.growth")
+logger = logging.getLogger("cortex.growth")
 
 # Threshold for bridge promotion (Neural-Growth level)
 _PROMOTION_THRESHOLD = 0.8
@@ -114,7 +114,7 @@ class NeuralGrowthEngine:
                     commit=False,
                 )
             else:
-                from babylon60.memory.temporal import now_iso
+                from cortex.memory.temporal import now_iso
 
                 ts = now_iso()
                 # Ω₈: Morphic Resonance. Promoción a Axioma Global.

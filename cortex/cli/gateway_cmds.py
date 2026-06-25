@@ -8,7 +8,7 @@ import subprocess
 
 import click
 
-from babylon60.cli.common import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
 
 
 @click.group("gateway")
@@ -22,7 +22,7 @@ def gateway_cmds() -> None:
 def health(db: str, as_json: bool) -> None:
     """Check gateway resonance and health."""
     # For now, it mirrors global health or specific gateway metrics if available
-    from babylon60.extensions.health import HealthCollector, HealthScorer
+    from cortex.extensions.health import HealthCollector, HealthScorer
 
     engine = get_engine(db)
     collector = HealthCollector(db_path=db)
@@ -62,11 +62,11 @@ def audit(pr_id: str, tenant: str, additions: int | None, deletions: int | None,
     """Audits an AI-generated Pull Request for entropy and issues a cryptographic seal."""
     import asyncio
 
-    from babylon60.audit.ledger import EnterpriseAuditLedger
-    from babylon60.auth.enterprise_identity import SovereignIdentity
-    from babylon60.database.core import connect_async_ctx
-    from babylon60.gateway.code_governance import CodeGovernanceGateway
-    from babylon60.guards.enterprise_guard import EnterpriseRBACGuard
+    from cortex.audit.ledger import EnterpriseAuditLedger
+    from cortex.auth.enterprise_identity import SovereignIdentity
+    from cortex.database.core import connect_async_ctx
+    from cortex.gateway.code_governance import CodeGovernanceGateway
+    from cortex.guards.enterprise_guard import EnterpriseRBACGuard
 
     workspace_root = os.getcwd()
     

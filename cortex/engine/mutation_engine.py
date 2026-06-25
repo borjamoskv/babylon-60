@@ -16,11 +16,11 @@ from typing import Any
 
 import aiosqlite
 
-from babylon60.engine._mutation_projectors import project
-from babylon60.extensions.axioms.topological_id import flake_gen
+from cortex.engine._mutation_projectors import project
+from cortex.extensions.axioms.topological_id import flake_gen
 
 __all__ = ["FactMutationEngine"]
-logger = logging.getLogger("babylon60.mutation_engine")
+logger = logging.getLogger("cortex.mutation_engine")
 
 _PAYLOAD_SCHEMA_VERSION = "1"
 _FACT_COLUMNS_CACHE: dict[int, set[str]] = {}

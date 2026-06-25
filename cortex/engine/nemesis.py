@@ -8,16 +8,16 @@ from pathlib import Path
 
 import aiosqlite
 
-from babylon60.database.core import connect as db_connect
-from babylon60.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.database.core import connect as db_connect
+from cortex.engine.endocrine import ENDOCRINE, HormoneType
 
 try:
-    from babylon60.extensions.signals.bus import AsyncSignalBus, SignalBus
+    from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
 except ImportError:
     AsyncSignalBus = None  # type: ignore[assignment]
     SignalBus = None  # type: ignore[assignment]
 
-logger = logging.getLogger("babylon60.nemesis")
+logger = logging.getLogger("cortex.nemesis")
 
 
 class NemesisRejection(Exception):

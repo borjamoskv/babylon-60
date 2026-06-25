@@ -10,9 +10,9 @@ import asyncio
 import logging
 from typing import Any
 
-from babylon60.engine.capabilities import CapabilityRegistry
+from cortex.engine.capabilities import CapabilityRegistry
 
-logger = logging.getLogger("babylon60.enrichment")
+logger = logging.getLogger("cortex.enrichment")
 
 
 async def run_enrichment_worker(engine: Any, poll_interval: float = 1.0):

@@ -14,12 +14,12 @@ import time
 from datetime import datetime, timezone
 from typing import Any
 
-from babylon60.cli.common import console
-from babylon60.extensions.agents.llm import get_ai_client
-from babylon60.extensions.moltbook.client import MoltbookClient
-from babylon60.utils.errors import CortexError
+from cortex.cli.common import console
+from cortex.extensions.agents.llm import get_ai_client
+from cortex.extensions.moltbook.client import MoltbookClient
+from cortex.utils.errors import CortexError
 
-logger = logging.getLogger("babylon60.engine.pathogen")
+logger = logging.getLogger("cortex.engine.pathogen")
 
 
 class PathogenEngine:

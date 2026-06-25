@@ -7,13 +7,13 @@ import time
 from collections import deque
 from typing import Any
 
-from babylon60.engine.endocrine import ENDOCRINE, HormoneType
-from babylon60.engine.performance_tracker import PerformanceSnapshot, PerformanceTracker
+from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.performance_tracker import PerformanceSnapshot, PerformanceTracker
 
 from .tuners import OptimizationTuners
 from .types import OptimizationEvent, OptimizerConfig, TuningDecision
 
-logger = logging.getLogger("babylon60.engine.self_optimizer")
+logger = logging.getLogger("cortex.engine.self_optimizer")
 
 
 class SelfOptimizer:

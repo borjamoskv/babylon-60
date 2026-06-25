@@ -12,7 +12,7 @@ import os
 import subprocess
 from pathlib import Path
 
-from babylon60.database.core import connect
+from cortex.database.core import connect
 
 logger = logging.getLogger("cortex_cascade.router")
 
@@ -26,7 +26,7 @@ class CascadeRouter:
     def fallback_response(self, engine: str, prompt: str) -> str:
         """Fallback response when engine is unavailable."""
         try:
-            from babylon60.engine.circuit_breaker import CircuitBreaker
+            from cortex.engine.circuit_breaker import CircuitBreaker
 
             cb = CircuitBreaker(f"cascade_router_{engine}")
             cb._on_failure()
@@ -148,7 +148,7 @@ class CascadeRouter:
                 # Log to DB for BM25 indexing (done only on success or exhaustion of retries)
                 if task_id:
                     try:
-                        db_path = Path(os.environ.get("CORTEX_DB_PATH", "~/.cortex/babylon60.db")).expanduser()
+                        db_path = Path(os.environ.get("CORTEX_DB_PATH", "~/.cortex/cortex.db")).expanduser()
                         if db_path.exists():
                             conn = connect(db_path)
                             digest = hashlib.sha256(output_content.encode("utf-8")).hexdigest()[:16]

@@ -6,10 +6,10 @@ import json
 import logging
 import sqlite3
 
-from babylon60.database.core import connect as db_connect
-from babylon60.engine.evolution_types import DomainMetrics, Mutation
+from cortex.database.core import connect as db_connect
+from cortex.engine.evolution_types import DomainMetrics, Mutation
 
-logger = logging.getLogger("babylon60.extensions.evolution.metrics")
+logger = logging.getLogger("cortex.extensions.evolution.metrics")
 
 
 class CortexMetrics:

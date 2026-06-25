@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     import aiosqlite
 
-logger = logging.getLogger("babylon60.lock")
+logger = logging.getLogger("cortex.lock")
 
 _REDUCE_LOCKS: dict[tuple[str, int], asyncio.Lock] = {}
 

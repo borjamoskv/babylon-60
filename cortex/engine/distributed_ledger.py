@@ -17,14 +17,14 @@ except ImportError:
     Producer = Any
     KAFKA_AVAILABLE = False
 
-from babylon60.engine.evolution_ledger import (
+from cortex.engine.evolution_ledger import (
     ControlVector,
     EvolutionLedger,
     MutationRecord,
     _canonical_json,
 )
 
-logger = logging.getLogger("babylon60.distributed_ledger")
+logger = logging.getLogger("cortex.distributed_ledger")
 
 
 class DistributedEvolutionLedger(EvolutionLedger):

@@ -3,10 +3,10 @@ import logging
 import time
 from typing import Any
 
-from babylon60.engine import execution_ledger as ledger
-from babylon60.engine.cost_scheduler import ExergyCostScheduler
+from cortex.engine import execution_ledger as ledger
+from cortex.engine.cost_scheduler import ExergyCostScheduler
 
-logger = logging.getLogger("babylon60.engine.engine")
+logger = logging.getLogger("cortex.engine.engine")
 
 cost_scheduler = ExergyCostScheduler()
 

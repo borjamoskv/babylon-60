@@ -3,7 +3,7 @@ import logging
 import time
 from typing import Any
 
-logger = logging.getLogger("babylon60.engine.smte.exergy")
+logger = logging.getLogger("cortex.engine.smte.exergy")
 
 # Configurable thresholds (AX-047 enforcement)
 LIMERENCE_CIRCUIT_BREAKER_THRESHOLD: float = 20.0

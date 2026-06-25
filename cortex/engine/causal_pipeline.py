@@ -19,7 +19,7 @@ Rust (FFI) Domain / Strict PyO3 Core:
 import abc
 from typing import Protocol
 
-from babylon60.types.evidence import ClosurePayload, EvidenceBundle
+from cortex.types.evidence import ClosurePayload, EvidenceBundle
 
 
 class CausalPythonDomain(Protocol):

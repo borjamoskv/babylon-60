@@ -15,7 +15,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("babylon60.reaper")
+logger = logging.getLogger("cortex.reaper")
 
 __all__ = ["GhostReaper"]
 
@@ -112,7 +112,7 @@ class GhostReaper:
         for filename, attrs in data.items():
             keys_to_remove: list[str] = []
             for key, value in attrs.items():
-                if not key.startswith("user.babylon60.ghost."):
+                if not key.startswith("user.cortex.ghost."):
                     continue
                 # Check if the ghost trace is older than cutoff
                 if isinstance(value, dict) and "timestamp" in value:

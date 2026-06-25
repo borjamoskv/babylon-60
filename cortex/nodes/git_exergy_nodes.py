@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 
-from babylon60.database.core import connect as db_connect
+from cortex.database.core import connect as db_connect
 
 
 class Criticality(Enum):
@@ -213,7 +213,7 @@ def build_all_nodes() -> list[GitExergyNode]:
     return nodes
 
 class CortexPersist:
-    def __init__(self, db_path: str = "babylon60.db"):
+    def __init__(self, db_path: str = "cortex.db"):
         self.db_path = Path(db_path)
         self.conn = db_connect(str(self.db_path))
         self._init_schema()
@@ -287,7 +287,7 @@ def main():
     nodes = build_all_nodes()
     print(f"[1/2] Construidas {len(nodes)} primitivas de Git Exergy.")
 
-    db = CortexPersist("babylon60.db")
+    db = CortexPersist("cortex.db")
     result = db.inject_nodes(nodes)
     print(f"[2/2] Inyección DB completada: Nuevos={result['injected']} | Actualizados={result['updated']}")
     db.close()

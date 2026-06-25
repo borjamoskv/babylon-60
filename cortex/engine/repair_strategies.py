@@ -28,7 +28,7 @@ __all__ = [
     "RepairStrategy",
 ]
 
-logger = logging.getLogger("babylon60.engine.repair")
+logger = logging.getLogger("cortex.engine.repair")
 
 
 # ─── Types ────────────────────────────────────────────────────────
@@ -101,7 +101,7 @@ class InjectTimeoutGuard:
             # Apply timeout guard via ISA rewrite if tree is available
             tree = context.get("dispatch_tree")
             if tree is not None:
-                from babylon60.engine.reflexion import TreeRewriter
+                from cortex.engine.reflexion import TreeRewriter
 
                 new_tree = TreeRewriter.add_timeout_guard(tree, timeout_ms=timeout_ms)
                 context["dispatch_tree"] = new_tree
@@ -270,7 +270,7 @@ class ProbeAndResetBreaker:
         try:
             breaker = context.get("circuit_breaker")
             if breaker is not None:
-                from babylon60.engine.circuit_breaker import CircuitState
+                from cortex.engine.circuit_breaker import CircuitState
 
                 if breaker.state == CircuitState.OPEN:
                     # Force half-open for probe

@@ -56,7 +56,7 @@ class CausalDAG:
             self.add_node(node)
 
     def compute_merkle_rollup(self, root_event_id: str) -> int:
-        from babylon60.engine.fable_out import hash_distance_rollup
+        from cortex.engine.fable_out import hash_distance_rollup
 
         # Simplified deterministic distances based on topological depth
         distances = []

@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from watchdog.events import FileSystemEventHandler as FileSystemEventHandler
     from watchdog.observers import Observer as Observer
 
-    from babylon60.engine import CortexEngine
+    from cortex.engine import CortexEngine
 
     _HAS_WATCHDOG = True
 else:
@@ -35,16 +35,16 @@ else:
             """Fallback class when watchdog is not installed."""
 
 
-from babylon60.engine.apotheosis_audits_mixin import ApotheosisAuditsMixin
-from babylon60.engine.cognitive import scan_file_entropy
-from babylon60.engine.endocrine import ENDOCRINE, HormoneType
-from babylon60.engine.manifestation import transfigure_ui
-from babylon60.engine.reflex import trigger_autonomic_reflex
-from babylon60.engine.rem_cycle import REMCoordinator
-from babylon60.extensions.immune.membrane import ImmuneMembrane, Verdict
-from babylon60.extensions.signals.bus import SignalBus
-from babylon60.services.notebooklm import NotebookLMService
-from babylon60.services.trust import TrustService
+from cortex.engine.apotheosis_audits_mixin import ApotheosisAuditsMixin
+from cortex.engine.cognitive import scan_file_entropy
+from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.manifestation import transfigure_ui
+from cortex.engine.reflex import trigger_autonomic_reflex
+from cortex.engine.rem_cycle import REMCoordinator
+from cortex.extensions.immune.membrane import ImmuneMembrane, Verdict
+from cortex.extensions.signals.bus import SignalBus
+from cortex.services.notebooklm import NotebookLMService
+from cortex.services.trust import TrustService
 
 logger = logging.getLogger(__name__)
 
@@ -168,7 +168,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
 
             duration = self._calc_duration(derived_sleep, adrenaline, _random)
 
-            from babylon60.cli.bicameral import bicameral
+            from cortex.cli.bicameral import bicameral
 
             bicameral.log_bio(
                 f"Ciclo Ω. Entropía={entropy_found}. Sueño: {duration:.1f}s", signal="Ω"
@@ -186,7 +186,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
         if not self._cortex:
             return
         try:
-            from babylon60.extensions.policy import PolicyConfig, PolicyEngine
+            from cortex.extensions.policy import PolicyConfig, PolicyEngine
 
             config = PolicyConfig(max_actions=5)
             policy = PolicyEngine(self._cortex, config)
@@ -199,7 +199,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
 
                 critical_actions = [a for a in actions if a.value > 0.9]
                 if critical_actions and self.is_active:
-                    from babylon60.engine.keter import KeterEngine
+                    from cortex.engine.keter import KeterEngine
 
                     keter = KeterEngine(self.workspace)  # type: ignore[reportCallIssue]
                     for action in critical_actions:
@@ -279,13 +279,13 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
 
     async def _heal_file_or_prune(self, py_file: Path, entropy: list[dict]) -> None:
         """Autonomic healing for high-entropy nodes (Ω₅)."""
-        from babylon60.engine.keter import KeterEngine
+        from cortex.engine.keter import KeterEngine
 
         keter = KeterEngine(self.workspace)  # type: ignore[reportCallIssue]
 
         parasites = [f for f in entropy if f["type"] == "THERMAL_PARASITE"]
         if parasites:
-            from babylon60.cli.bicameral import bicameral
+            from cortex.cli.bicameral import bicameral
 
             for p in parasites:
                 node_name = p["name"]

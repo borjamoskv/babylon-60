@@ -16,11 +16,11 @@ import asyncio
 import logging
 from typing import Any
 
-from babylon60.engine.autodidact_omega_index import AutodidactOmegaIndex, UnifiedPrimitiveNode
-from babylon60.engine.babylon60 import Babylon60
-from babylon60.engine.latticework_store import LatticeworkStore
+from cortex.engine.autodidact_omega_index import AutodidactOmegaIndex, UnifiedPrimitiveNode
+from cortex.engine.babylon60 import Babylon60
+from cortex.engine.latticework_store import LatticeworkStore
 
-logger = logging.getLogger("babylon60.latticework.daemon")
+logger = logging.getLogger("cortex.latticework.daemon")
 
 # Mapa heurístico: tag de anomalía ──► kernel_constant prioritario
 _ANOMALY_DISPATCH: dict[str, str] = {

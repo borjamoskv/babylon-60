@@ -8,10 +8,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from babylon60.engine.babylon60 import Babylon60
+from cortex.engine.babylon60 import Babylon60
 
 if TYPE_CHECKING:
-    from babylon60.engine.swarm_10k import NodeMetrics
+    from cortex.engine.swarm_10k import NodeMetrics
 
 
 class ExergyOptimizer:

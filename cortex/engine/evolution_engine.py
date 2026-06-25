@@ -10,14 +10,14 @@ import random
 import time
 from typing import Any
 
-from babylon60.engine.evolution_metrics import CortexMetrics
-from babylon60.engine.evolution_types import (
+from cortex.engine.evolution_metrics import CortexMetrics
+from cortex.engine.evolution_types import (
     DomainMetrics,
     ImprovementStrategy,
     SovereignAgent,
     SubAgent,
 )
-from babylon60.engine.zero_prompting import ZeroPromptingEvolutionStrategy
+from cortex.engine.zero_prompting import ZeroPromptingEvolutionStrategy
 
 # ==============================================================================
 # EVOLUTIONARY STRATEGIES

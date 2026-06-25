@@ -3,11 +3,11 @@ import logging
 from collections.abc import Mapping
 from typing import Any
 
-from babylon60.engine.endocrine import ENDOCRINE, HormoneType
-from babylon60.engine.legion import AsyncSignalBus, SwarmAgent, SwarmSignal
-from babylon60.engine.mixins.deterministic_induction_mixin import DeterministicInductionMixin
+from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.legion import AsyncSignalBus, SwarmAgent, SwarmSignal
+from cortex.engine.mixins.deterministic_induction_mixin import DeterministicInductionMixin
 
-logger = logging.getLogger("babylon60.nemesis_agent")
+logger = logging.getLogger("cortex.nemesis_agent")
 
 
 class NemesisL4Agent(DeterministicInductionMixin):

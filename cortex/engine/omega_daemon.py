@@ -294,8 +294,8 @@ class OmegaDaemon:
                 try:
                     from pathlib import Path
 
-                    from babylon60.engine.autopoiesis import AutopoiesisEngine
-                    from babylon60.engine.swarm_10k import SwarmCommander
+                    from cortex.engine.autopoiesis import AutopoiesisEngine
+                    from cortex.engine.swarm_10k import SwarmCommander
 
                     bus_path = Path("~/.cortex/10k_shards").expanduser()
                     commander = SwarmCommander(bus_path=bus_path, tenant_id="omega_daemon")

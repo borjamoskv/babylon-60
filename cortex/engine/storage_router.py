@@ -6,7 +6,7 @@ Routes requests based on payload size and swarm concurrency heuristics.
 
 from typing import Optional
 
-from babylon60.engine.gaad.kv_dag import GaaDKVDAG
+from cortex.engine.gaad.kv_dag import GaaDKVDAG
 
 
 class StorageRouter:

@@ -3,7 +3,7 @@ import logging
 import math
 from typing import Any
 
-logger = logging.getLogger("babylon60.engine.smte.utm")
+logger = logging.getLogger("cortex.engine.smte.utm")
 
 
 class UnifiedThermodynamicManifold:

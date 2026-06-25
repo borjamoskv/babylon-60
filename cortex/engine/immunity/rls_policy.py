@@ -8,7 +8,7 @@ can_read() guardrail in Rust.
 
 import logging
 
-logger = logging.getLogger("babylon60.engine.immunity.rls")
+logger = logging.getLogger("cortex.engine.immunity.rls")
 
 class RLSPermissionMatrix:
     """

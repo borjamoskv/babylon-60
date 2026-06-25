@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Any
 import aiosqlite
 
 if TYPE_CHECKING:
-    from babylon60.extensions.interfaces.store_pipeline import (
+    from cortex.extensions.interfaces.store_pipeline import (
         ContentMutator,
         PostStoreHook,
         StoreGuard,
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 __all__ = ["GuardPipeline"]
 
-logger = logging.getLogger("babylon60.engine")
+logger = logging.getLogger("cortex.engine")
 
 
 class GuardPipeline:

@@ -18,11 +18,11 @@ import time
 from pathlib import Path
 from typing import Any
 
-from babylon60.database.core import connect
+from cortex.database.core import connect
 
 __all__ = ["TuningStore"]
 
-logger = logging.getLogger("babylon60.engine.tuning_store")
+logger = logging.getLogger("cortex.engine.tuning_store")
 
 _DEFAULT_DB = ".cortex/tunings.db"
 

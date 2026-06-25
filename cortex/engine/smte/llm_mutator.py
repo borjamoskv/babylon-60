@@ -9,7 +9,7 @@ import logging
 import os
 import urllib.request
 
-logger = logging.getLogger("babylon60.engine.smte.llm_mutator")
+logger = logging.getLogger("cortex.engine.smte.llm_mutator")
 
 
 def call_qwen_mutator(source_code: str, topology_info: dict, temperature: float = 0.3) -> str:

@@ -113,7 +113,7 @@ class BeliefObject:
             curr_dt = datetime.fromisoformat(current_time_iso)
             delta_seconds = max(0.0, (curr_dt - last_dt).total_seconds())
             
-            from babylon60.engine.risk_math import calculate_decay_weight
+            from cortex.engine.risk_math import calculate_decay_weight
             return calculate_decay_weight(self.confidence_score, delta_seconds, self.decay_rate)
         except Exception:
             return self.confidence_score

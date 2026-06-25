@@ -3,7 +3,7 @@ import json
 import logging
 import time
 
-from babylon60.database.core import connect_async
+from cortex.database.core import connect_async
 
 logger = logging.getLogger(__name__)
 

@@ -18,7 +18,7 @@ from typing import Any, TypeVar
 
 __all__ = ["CircuitBreaker", "CircuitState"]
 
-logger = logging.getLogger("babylon60.circuit_breaker")
+logger = logging.getLogger("cortex.circuit_breaker")
 
 T = TypeVar("T")
 

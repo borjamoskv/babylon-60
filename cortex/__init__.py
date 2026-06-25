@@ -21,9 +21,9 @@ __author__ = "by borjamoskv.com"
 
 # Lazy imports - CortexEngine and experimental modules load on first access
 _LAZY_IMPORTS = {
-    "CortexEngine": "babylon60.engine",
-    "api": "babylon60.api",
-    "routes": "babylon60.routes",
+    "CortexEngine": "cortex.engine",
+    "api": "cortex.api",
+    "routes": "cortex.routes",
 }
 
 _EXPERIMENTAL_MODULES = (
@@ -48,7 +48,7 @@ def __getattr__(name: str):
         try:
             import importlib
 
-            mod = importlib.import_module(f"babylon60.experimental.{name}")
+            mod = importlib.import_module(f"cortex.experimental.{name}")
             globals()[name] = mod
             return mod
         except ImportError as err:

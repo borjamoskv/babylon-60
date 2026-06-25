@@ -30,7 +30,7 @@ def generate_sri_hash(url: str, algo: str = "sha384") -> str:
         if parsed.hostname not in trusted_domains:
             return ""
 
-        from babylon60.guards.url_guard import is_safe_url
+        from cortex.guards.url_guard import is_safe_url
 
         if not is_safe_url(url):
             return ""

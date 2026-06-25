@@ -10,7 +10,7 @@ from enum import Enum
 from pathlib import Path
 
 import cortex_rs
-from babylon60.engine.entropy import EntropyAnnihilator
+from cortex.engine.entropy import EntropyAnnihilator
 
 
 def calculate_entropy_b60(data: bytes) -> "cortex_rs.Babylon60":

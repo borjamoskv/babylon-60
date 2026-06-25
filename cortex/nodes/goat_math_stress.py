@@ -14,9 +14,9 @@ import sqlite3
 import time
 from pathlib import Path
 
-from babylon60.database.core import connect as db_connect
+from cortex.database.core import connect as db_connect
 
-DB_PATH = Path("babylon60.db")
+DB_PATH = Path("cortex.db")
 
 def worker_task(worker_id: int, iterations: int):
     """Simula validaciones concurrentes agresivas."""

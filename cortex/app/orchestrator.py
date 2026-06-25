@@ -9,13 +9,13 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from babylon60.audit.ledger import EnterpriseAuditLedger
-from babylon60.auth.enterprise_identity import SovereignIdentity
+from cortex.audit.ledger import EnterpriseAuditLedger
+from cortex.auth.enterprise_identity import SovereignIdentity
 
-from babylon60.engine.chronos_roi import CHRONOS, ChronosReport
-from babylon60.guards.enterprise_guard import EnterpriseRBACGuard
+from cortex.engine.chronos_roi import CHRONOS, ChronosReport
+from cortex.guards.enterprise_guard import EnterpriseRBACGuard
 
-logger = logging.getLogger("babylon60.gateway.code_governance")
+logger = logging.getLogger("cortex.gateway.code_governance")
 
 @dataclass
 class RiskProfile:

@@ -12,10 +12,10 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from babylon60.ledger.causal_graph import CausalGraph
-    from babylon60.ledger.execution_trace import ExecutionTraceLedger
+    from cortex.ledger.causal_graph import CausalGraph
+    from cortex.ledger.execution_trace import ExecutionTraceLedger
 
-logger = logging.getLogger("babylon60.engine.causal_scheduler")
+logger = logging.getLogger("cortex.engine.causal_scheduler")
 
 
 class CausalScheduler:
@@ -43,7 +43,7 @@ class CausalScheduler:
 
     async def _get_entropy_budget(self, tenant_id: str) -> float:
         """Obtiene el EB histórico. Si no existe, lo inicializa."""
-        from babylon60.database.core import connect_async_ctx
+        from cortex.database.core import connect_async_ctx
 
         # Se almacena en la db de trazas por conveniencia de este MVP
         init_query = "CREATE TABLE IF NOT EXISTS thermodynamics_state (tenant_id TEXT PRIMARY KEY, entropy_budget REAL)"
@@ -63,7 +63,7 @@ class CausalScheduler:
             return float(row[0])
 
     async def _update_entropy_budget(self, tenant_id: str, new_budget: float) -> None:
-        from babylon60.database.core import connect_async_ctx
+        from cortex.database.core import connect_async_ctx
 
         async with connect_async_ctx(self.ledger.db_path) as conn:
             await conn.execute(

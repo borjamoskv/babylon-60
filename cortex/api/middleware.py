@@ -23,7 +23,7 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from babylon60.utils.i18n import DEFAULT_LANGUAGE, get_trans
+from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -322,7 +322,7 @@ class ImmuneMiddleware(BaseHTTPMiddleware):
     """
 
     async def dispatch(self, request: Request, call_next):
-        from babylon60.extensions.security.tenant import tenant_id_var
+        from cortex.extensions.security.tenant import tenant_id_var
 
         # 1. Establish Tenant Context for Database RLS
         # In full production, this is validated by AuthManager from the JWT.
@@ -335,7 +335,7 @@ class ImmuneMiddleware(BaseHTTPMiddleware):
                 body = await request.body()
 
                 try:
-                    from babylon60.mcp.guard import MCPGuard
+                    from cortex.mcp.guard import MCPGuard
 
                     if MCPGuard.detect_poisoning(body.decode(errors="ignore")):
                         logger.warning(
@@ -389,7 +389,7 @@ class CortexBillingMiddleware(BaseHTTPMiddleware):
         try:
             import stripe  # pyright: ignore[reportMissingImports]
 
-            from babylon60 import config
+            from cortex import config
 
             stripe.api_key = getattr(config, "STRIPE_SECRET_KEY", None)
             if not stripe.api_key:

@@ -16,15 +16,15 @@ import logging
 import time
 from typing import TYPE_CHECKING
 
-from babylon60.nexus_v8 import DomainOrigin, IntentType, NexusWorldModel, Priority, WorldMutation
-from babylon60.utils import hygiene
-from babylon60.utils.semantic_heartbeat import SemanticHeartbeat
+from cortex.nexus_v8 import DomainOrigin, IntentType, NexusWorldModel, Priority, WorldMutation
+from cortex.utils import hygiene
+from cortex.utils.semantic_heartbeat import SemanticHeartbeat
 
 if TYPE_CHECKING:
-    from babylon60.engine import CortexEngine as AsyncCortexEngine
-    from babylon60.memory.sleep import SleepOrchestrator
+    from cortex.engine import CortexEngine as AsyncCortexEngine
+    from cortex.memory.sleep import SleepOrchestrator
 
-logger = logging.getLogger("babylon60.heartbeat")
+logger = logging.getLogger("cortex.heartbeat")
 
 # ─── Defaults ──────────────────────────────────────────────────────────
 

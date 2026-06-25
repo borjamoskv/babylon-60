@@ -13,7 +13,7 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
-logger = logging.getLogger("babylon60.zipf_exergy_extractor")
+logger = logging.getLogger("cortex.zipf_exergy_extractor")
 
 @dataclass(frozen=True)
 class ExergyNode:

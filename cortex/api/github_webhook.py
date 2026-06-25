@@ -21,7 +21,7 @@ def verify_signature(payload_body: bytes, signature_header: str) -> bool:
     expected_signature = "sha256=" + hash_object.hexdigest()
     return hmac.compare_digest(expected_signature, signature_header)
 
-from babylon60.llm.evaluator import SemanticRiskEvaluator
+from cortex.llm.evaluator import SemanticRiskEvaluator
 
 
 async def process_pull_request(payload: dict[str, Any]):

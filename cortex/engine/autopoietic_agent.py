@@ -22,7 +22,7 @@ from collections import deque
 from collections.abc import Awaitable, Callable
 from typing import Any
 
-from babylon60.engine._autopoietic_helper import (
+from cortex.engine._autopoietic_helper import (
     adopt,
     apply_meta_mutation,
     checkpoint,
@@ -32,16 +32,16 @@ from babylon60.engine._autopoietic_helper import (
     spawn_from_evolved,
     validate_genome,
 )
-from babylon60.engine._autopoietic_oracle import EvolutionConfig, FitnessOracle
-from babylon60.engine._autopoietic_state import AutopoieticState
-from babylon60.engine.genesis import (
+from cortex.engine._autopoietic_oracle import EvolutionConfig, FitnessOracle
+from cortex.engine._autopoietic_state import AutopoieticState
+from cortex.engine.genesis import (
     GenesisEngine,
 )
-from babylon60.engine.genome import (
+from cortex.engine.genome import (
     GenomeMutator,
     StrategyGenome,
 )
-from babylon60.isa.builder import AgentOp
+from cortex.isa.builder import AgentOp
 
 __all__ = [
     "AutopoieticAgent",
@@ -49,7 +49,7 @@ __all__ = [
     "EvolutionConfig",
 ]
 
-logger = logging.getLogger("babylon60.engine.autopoietic_agent")
+logger = logging.getLogger("cortex.engine.autopoietic_agent")
 
 
 class AutopoieticAgent:

@@ -13,7 +13,7 @@ import uuid
 import click
 from rich.table import Table
 
-from babylon60.cli.common import _run_async, cli, console
+from cortex.cli.common import _run_async, cli, console
 
 
 @click.group("latticework")
@@ -28,7 +28,7 @@ def primitives_cmd(query: str | None):
     """List and search the 100 Cognitive Primitives of Systems Theory & Info Exergy."""
     console.print("[bold cyan]🌐 Querying Cognitive Primitives from LatticeworkStore...[/bold cyan]")
     
-    from babylon60.engine.latticework_store import LatticeworkStore
+    from cortex.engine.latticework_store import LatticeworkStore
     store = LatticeworkStore()
     
     if query:
@@ -68,11 +68,11 @@ def daemon_cmd(seconds: int, interval: int, real: bool):
     """Start LatticeworkDaemon in foreground to monitor and mitigate ledger anomalies."""
     console.print(f"[bold magenta]🌀 Starting LatticeworkDaemon in Foreground for {seconds}s (interval={interval}s)...[/bold magenta]")
     
-    from babylon60.cli.common import DEFAULT_DB
-    from babylon60.engine.causal_scheduler import CausalScheduler
-    from babylon60.engine.latticework_daemon import LatticeworkDaemon
-    from babylon60.ledger.causal_graph import CausalGraph
-    from babylon60.ledger.execution_trace import ExecutionTraceLedger
+    from cortex.cli.common import DEFAULT_DB
+    from cortex.engine.causal_scheduler import CausalScheduler
+    from cortex.engine.latticework_daemon import LatticeworkDaemon
+    from cortex.ledger.causal_graph import CausalGraph
+    from cortex.ledger.execution_trace import ExecutionTraceLedger
     
     db_path = DEFAULT_DB
     
@@ -86,8 +86,8 @@ def daemon_cmd(seconds: int, interval: int, real: bool):
             except Exception:
                 pass
                 
-        from babylon60.database.core import connect_async_ctx
-        from babylon60.engine.mtk_sqlite_authorizer import mtk_active_token
+        from cortex.database.core import connect_async_ctx
+        from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
         
         async def init_db():
             token_token = mtk_active_token.set("mtk_auth_cli_init")

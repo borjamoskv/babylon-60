@@ -13,16 +13,16 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from babylon60.consensus.manager import ConsensusManager
-    from babylon60.embeddings.manager import EmbeddingManager
-    from babylon60.engine.auth import ByzantineAuthLayer
-    from babylon60.engine.guard_pipeline import GuardPipeline
-    from babylon60.engine.lock import SovereignLock
-    from babylon60.facts.manager import FactManager
-    from babylon60.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
-    from babylon60.mac_maestro.executor import MaestroExecutor
+    from cortex.consensus.manager import ConsensusManager
+    from cortex.embeddings.manager import EmbeddingManager
+    from cortex.engine.auth import ByzantineAuthLayer
+    from cortex.engine.guard_pipeline import GuardPipeline
+    from cortex.engine.lock import SovereignLock
+    from cortex.facts.manager import FactManager
+    from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
+    from cortex.mac_maestro.executor import MaestroExecutor
 
-logger = logging.getLogger("babylon60.engine.guards")
+logger = logging.getLogger("cortex.engine.guards")
 
 
 class ComponentsMixin:
@@ -43,7 +43,7 @@ class ComponentsMixin:
     @property
     def facts(self) -> FactManager:
         if self._facts is None:
-            from babylon60.facts.manager import FactManager
+            from cortex.facts.manager import FactManager
 
             self._facts = FactManager(self)  # type: ignore
         return self._facts
@@ -55,7 +55,7 @@ class ComponentsMixin:
     @property
     def embeddings(self) -> EmbeddingManager:
         if self._embeddings is None:
-            from babylon60.embeddings.manager import EmbeddingManager
+            from cortex.embeddings.manager import EmbeddingManager
 
             self._embeddings = EmbeddingManager(self)
         return self._embeddings
@@ -67,7 +67,7 @@ class ComponentsMixin:
     @property
     def consensus(self) -> ConsensusManager:
         if self._consensus is None:
-            from babylon60.consensus.manager import ConsensusManager
+            from cortex.consensus.manager import ConsensusManager
 
             self._consensus = ConsensusManager(self)
         return self._consensus
@@ -79,7 +79,7 @@ class ComponentsMixin:
     @property
     def lock_sovereign(self) -> SovereignLock:
         if self._lock_sovereign is None:
-            from babylon60.engine.lock import SovereignLock
+            from cortex.engine.lock import SovereignLock
 
             self._lock_sovereign = SovereignLock(self)
         return self._lock_sovereign
@@ -91,7 +91,7 @@ class ComponentsMixin:
     @property
     def auth(self) -> ByzantineAuthLayer:
         if self._auth is None:
-            from babylon60.engine.auth import ByzantineAuthLayer
+            from cortex.engine.auth import ByzantineAuthLayer
 
             self._auth = ByzantineAuthLayer()
         return self._auth
@@ -103,7 +103,7 @@ class ComponentsMixin:
     @property
     def ledger_store(self) -> LedgerStore:
         if self._ledger_store is None:
-            from babylon60.ledger import LedgerStore
+            from cortex.ledger import LedgerStore
 
             self._ledger_store = LedgerStore(self._db_path)
         return self._ledger_store
@@ -115,7 +115,7 @@ class ComponentsMixin:
     @property
     def enrichment_queue(self) -> EnrichmentQueue:
         if self._enrichment_queue is None:
-            from babylon60.ledger import EnrichmentQueue
+            from cortex.ledger import EnrichmentQueue
 
             self._enrichment_queue = EnrichmentQueue(self.ledger_store)
         return self._enrichment_queue
@@ -127,7 +127,7 @@ class ComponentsMixin:
     @property
     def ledger_writer(self) -> LedgerWriter:
         if self._ledger_writer is None:
-            from babylon60.ledger import LedgerWriter
+            from cortex.ledger import LedgerWriter
 
             self._ledger_writer = LedgerWriter(self.ledger_store, self.enrichment_queue)
         return self._ledger_writer
@@ -139,7 +139,7 @@ class ComponentsMixin:
     @property
     def mac_maestro(self) -> MaestroExecutor:
         if self._mac_maestro is None:
-            from babylon60.mac_maestro.executor import MaestroExecutor
+            from cortex.mac_maestro.executor import MaestroExecutor
 
             self._mac_maestro = MaestroExecutor(self.ledger_writer)
         return self._mac_maestro
@@ -150,50 +150,50 @@ class ComponentsMixin:
 
     def _register_default_guards(self) -> GuardPipeline:
         """Build the GuardPipeline with all available guard adapters."""
-        from babylon60.engine.guard_pipeline import GuardPipeline
+        from cortex.engine.guard_pipeline import GuardPipeline
 
         pipeline = GuardPipeline()
         db_path = str(self._db_path)
 
         def _health():
-            from babylon60.engine.guard_adapters import HealthGuardAdapter
+            from cortex.engine.guard_adapters import HealthGuardAdapter
 
             return HealthGuardAdapter(self)
 
         def _contradiction():
-            from babylon60.engine.guard_adapters import ContradictionGuardAdapter
+            from cortex.engine.guard_adapters import ContradictionGuardAdapter
 
             return ContradictionGuardAdapter(db_path)
 
         def _verifier():
-            from babylon60.engine.guard_adapters import VerifierGuardAdapter
+            from cortex.engine.guard_adapters import VerifierGuardAdapter
 
             return VerifierGuardAdapter()
 
         def _zk():
-            from babylon60.engine.guard_adapters import ZKGuardAdapter
+            from cortex.engine.guard_adapters import ZKGuardAdapter
 
             return ZKGuardAdapter()
 
         def _virgo():
-            from babylon60.engine.guard_adapters import VirgoGuardAdapter
+            from cortex.engine.guard_adapters import VirgoGuardAdapter
 
             return VirgoGuardAdapter(self)  # type: ignore
 
         def _omega():
-            from babylon60.engine.guard_adapters import OmegaGuardAdapter
+            from cortex.engine.guard_adapters import OmegaGuardAdapter
 
             return OmegaGuardAdapter()
 
         def _arch():
-            from babylon60.engine.guard_adapters import ArchaeologyGuardAdapter
+            from cortex.engine.guard_adapters import ArchaeologyGuardAdapter
 
             return ArchaeologyGuardAdapter()
 
         def _eft():
             if os.environ.get("CORTEX_TESTING") == "1" and os.environ.get("CORTEX_FORCE_EFT") != "1":
                 return None
-            from babylon60.engine.guard_adapters import EFTVerificationGuardAdapter
+            from cortex.engine.guard_adapters import EFTVerificationGuardAdapter
 
             return EFTVerificationGuardAdapter()
 
@@ -207,17 +207,17 @@ class ComponentsMixin:
         self._try_add(pipeline, "EFTVerificationGuardAdapter", _eft, is_hook=False)
 
         def _ledger():
-            from babylon60.engine.guard_adapters import LedgerCheckpointHook
+            from cortex.engine.guard_adapters import LedgerCheckpointHook
 
             return LedgerCheckpointHook(self)  # type: ignore
 
         def _signal():
-            from babylon60.engine.guard_adapters import SignalEmitHook
+            from cortex.engine.guard_adapters import SignalEmitHook
 
             return SignalEmitHook()
 
         def _retrieval():
-            from babylon60.engine.guard_adapters import RetrievalBreakerHook
+            from cortex.engine.guard_adapters import RetrievalBreakerHook
 
             return RetrievalBreakerHook()
 

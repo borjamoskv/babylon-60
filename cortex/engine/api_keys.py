@@ -2,7 +2,7 @@ import logging
 import time
 from typing import Any
 
-logger = logging.getLogger("babylon60.engine.api_keys")
+logger = logging.getLogger("cortex.engine.api_keys")
 
 # C5-REAL: Base-60 rate limit evaluation
 BABYLON_BASE = 60

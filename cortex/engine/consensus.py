@@ -8,11 +8,11 @@ from typing import Any
 
 import aiosqlite
 
-from babylon60.consensus.vote_ledger import ImmutableVoteLedger
-from babylon60.engine.mixins.base import EngineMixinBase
-from babylon60.engine.slashing import SlashingEngine
+from cortex.consensus.vote_ledger import ImmutableVoteLedger
+from cortex.engine.mixins.base import EngineMixinBase
+from cortex.engine.slashing import SlashingEngine
 
-logger = logging.getLogger("babylon60.engine.consensus")
+logger = logging.getLogger("cortex.engine.consensus")
 
 
 class ConsensusMixin(EngineMixinBase):
@@ -75,7 +75,7 @@ class ConsensusMixin(EngineMixinBase):
             raise ValueError("Vote must be -1, 0, or 1")
 
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
-            from babylon60.engine_async import (
+            from cortex.engine_async import (
                 TX_BEGIN_IMMEDIATE,  # pyright: ignore[reportMissingImports]
             )
 
@@ -117,7 +117,7 @@ class ConsensusMixin(EngineMixinBase):
                 score = await self._update_vote_score(conn, fact_id, tenant_id)
                 conf = self._resolve_confidence(score)
 
-                from babylon60.engine.mutation_engine import MUTATION_ENGINE
+                from cortex.engine.mutation_engine import MUTATION_ENGINE
 
                 await MUTATION_ENGINE.apply(
                     conn,

@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from legacy_research import __version__ as CORTEX_VERSION
+from cortex import __version__ as CORTEX_VERSION
 from cortex.database.core import connect_async, load_sqlite_vec_async
 
 

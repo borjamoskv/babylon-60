@@ -7,8 +7,8 @@ Resolves conflicts between LLM Intent, Guard Constraints, and System Entropy.
 import logging
 from dataclasses import dataclass
 
-from babylon60.engine.entropy_core import EntropyState, SystemRegime
-from babylon60.guards.entropy_guard import GuardAction, GuardDecision
+from cortex.engine.entropy_core import EntropyState, SystemRegime
+from cortex.guards.entropy_guard import GuardAction, GuardDecision
 
 logger = logging.getLogger(__name__)
 

@@ -16,9 +16,9 @@ from aiohttp import web
 from aiohttp.web_request import Request
 from aiohttp.web_response import StreamResponse
 
-from babylon60.engine.reporter import SovereignReporter
+from cortex.engine.reporter import SovereignReporter
 
-logger = logging.getLogger("babylon60.reporterd")
+logger = logging.getLogger("cortex.reporterd")
 
 
 class ManifoldDaemon:
@@ -120,7 +120,7 @@ class ManifoldDaemon:
 
 async def main():
     # setup_cortex_logging()
-    db_path = os.path.expanduser("~/.cortex/babylon60.db")
+    db_path = os.path.expanduser("~/.cortex/cortex.db")
     daemon = ManifoldDaemon(db_path)
     await daemon.start()
 

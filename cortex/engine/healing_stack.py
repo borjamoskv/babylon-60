@@ -26,17 +26,17 @@ import time
 from pathlib import Path
 from typing import Any
 
-from babylon60.engine._autocurative_config import AutoCurativeConfig
-from babylon60.engine.autocurative_agent import AutoCurativeAgent
-from babylon60.engine.endocrine import ENDOCRINE, HormoneType
-from babylon60.engine.performance_tracker import PerformanceTracker
-from babylon60.engine.predictive_healer import Prediction, PredictiveHealer
-from babylon60.engine.self_optimizer import OptimizerConfig, SelfOptimizer
-from babylon60.engine.tuning_store import TuningStore
+from cortex.engine._autocurative_config import AutoCurativeConfig
+from cortex.engine.autocurative_agent import AutoCurativeAgent
+from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.performance_tracker import PerformanceTracker
+from cortex.engine.predictive_healer import Prediction, PredictiveHealer
+from cortex.engine.self_optimizer import OptimizerConfig, SelfOptimizer
+from cortex.engine.tuning_store import TuningStore
 
 __all__ = ["HealingStack", "HealingStackConfig"]
 
-logger = logging.getLogger("babylon60.engine.healing_stack")
+logger = logging.getLogger("cortex.engine.healing_stack")
 
 
 class HealingStackConfig:
