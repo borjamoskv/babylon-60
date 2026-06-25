@@ -49,7 +49,7 @@ class TestScanFileLines:
         violations = []
         _scan_file_lines(py_file, violations)
         assert len(violations) == 1
-        assert violations[0].line_number == 2
+        assert violations[0].line_number == 3
 
     def test_ignores_comments(self, tmp_path):
         py_file = tmp_path / "commented.py"

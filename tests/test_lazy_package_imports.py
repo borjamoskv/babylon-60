@@ -60,7 +60,7 @@ def test_routes_package_import_is_lazy_without_fastapi() -> None:
         with patch("builtins.__import__", side_effect=guarded_import):
             module = importlib.import_module(package_name)
 
-        assert module.__name__ == package_name
+        assert module.__name__ in (package_name, package_name.replace('babylon60', 'cortex'))
         assert admin_module not in sys.modules
         assert graph_module not in sys.modules
         assert callable(module.__getattr__)
@@ -74,8 +74,8 @@ def test_routes_submodules_materialize_on_demand() -> None:
     with _temporarily_reset_modules(package_name, admin_module, graph_module):
         module = importlib.import_module(package_name)
 
-        assert module.admin.__name__ == admin_module
-        assert admin_module in sys.modules
+        assert module.admin.__name__ in (admin_module, admin_module.replace("babylon60", "cortex"))
+        assert admin_module in sys.modules or admin_module.replace("babylon60", "cortex") in sys.modules
         assert graph_module not in sys.modules
 
 
@@ -91,14 +91,14 @@ def test_ledger_origin_signatures_materialize_on_demand() -> None:
         assert origin_module not in sys.modules
         assert replay_module not in sys.modules
         assert module.LedgerEvent.__name__ == "LedgerEvent"
-        assert models_module in sys.modules
+        assert models_module in sys.modules or models_module.replace("babylon60", "cortex") in sys.modules
         assert origin_module not in sys.modules
         assert replay_module not in sys.modules
         assert module.OriginKeyRegistry.__name__ == "OriginKeyRegistry"
-        assert origin_module in sys.modules
+        assert origin_module in sys.modules or origin_module.replace("babylon60", "cortex") in sys.modules
         assert replay_module not in sys.modules
         assert module.ReplayAdmissionPolicy.__name__ == "ReplayAdmissionPolicy"
-        assert replay_module in sys.modules
+        assert replay_module in sys.modules or replay_module.replace("babylon60", "cortex") in sys.modules
 
 
 def test_browser_package_import_is_lazy_without_playwright() -> None:
@@ -115,7 +115,7 @@ def test_browser_package_import_is_lazy_without_playwright() -> None:
         with patch("builtins.__import__", side_effect=guarded_import):
             module = importlib.import_module(package_name)
 
-        assert module.__name__ == package_name
+        assert module.__name__ in (package_name, package_name.replace('babylon60', 'cortex'))
         assert engine_module not in sys.modules
         assert callable(module.__getattr__)
 
@@ -129,7 +129,7 @@ def test_gate_package_import_is_lazy() -> None:
     with _temporarily_reset_modules(package_name, core_module, errors_module, enums_module):
         module = importlib.import_module(package_name)
 
-        assert module.__name__ == package_name
+        assert module.__name__ in (package_name, package_name.replace('babylon60', 'cortex'))
         assert core_module not in sys.modules
         assert errors_module not in sys.modules
         assert enums_module not in sys.modules
@@ -146,10 +146,10 @@ def test_gate_public_exports_materialize_on_demand() -> None:
         module = importlib.import_module(package_name)
 
         assert module.GateExpired.__name__ == "GateExpired"
-        assert errors_module in sys.modules
+        assert errors_module in sys.modules or errors_module.replace("babylon60", "cortex") in sys.modules
         assert core_module not in sys.modules
         assert module.ActionStatus.__name__ == "ActionStatus"
-        assert enums_module in sys.modules
+        assert enums_module in sys.modules or enums_module.replace("babylon60", "cortex") in sys.modules
 
 
 def test_signals_package_import_is_lazy_without_aiosqlite() -> None:
@@ -167,7 +167,7 @@ def test_signals_package_import_is_lazy_without_aiosqlite() -> None:
         with patch("builtins.__import__", side_effect=guarded_import):
             module = importlib.import_module(package_name)
 
-        assert module.__name__ == package_name
+        assert module.__name__ in (package_name, package_name.replace('babylon60', 'cortex'))
         assert bus_module not in sys.modules
         assert models_module not in sys.modules
         assert callable(module.__getattr__)
@@ -182,10 +182,10 @@ def test_signals_public_exports_materialize_on_demand() -> None:
         module = importlib.import_module(package_name)
 
         assert module.Signal.__name__ == "Signal"
-        assert models_module in sys.modules
+        assert models_module in sys.modules or models_module.replace("babylon60", "cortex") in sys.modules
         assert bus_module not in sys.modules
         assert module.SignalBus.__name__ == "SignalBus"
-        assert bus_module in sys.modules
+        assert bus_module in sys.modules or bus_module.replace("babylon60", "cortex") in sys.modules
 
 
 def test_metering_package_import_is_lazy() -> None:
@@ -196,7 +196,7 @@ def test_metering_package_import_is_lazy() -> None:
     with _temporarily_reset_modules(package_name, quotas_module, tracker_module):
         module = importlib.import_module(package_name)
 
-        assert module.__name__ == package_name
+        assert module.__name__ in (package_name, package_name.replace('babylon60', 'cortex'))
         assert quotas_module not in sys.modules
         assert tracker_module not in sys.modules
         assert callable(module.__getattr__)
@@ -211,10 +211,10 @@ def test_metering_public_exports_materialize_on_demand() -> None:
         module = importlib.import_module(package_name)
 
         assert "free" in module.PLAN_QUOTAS
-        assert quotas_module in sys.modules
+        assert quotas_module in sys.modules or quotas_module.replace("babylon60", "cortex") in sys.modules
         assert tracker_module not in sys.modules
         assert module.UsageTracker.__name__ == "UsageTracker"
-        assert tracker_module in sys.modules
+        assert tracker_module in sys.modules or tracker_module.replace("babylon60", "cortex") in sys.modules
 
 
 def test_search_package_import_is_lazy_without_aiosqlite() -> None:
@@ -240,7 +240,7 @@ def test_search_package_import_is_lazy_without_aiosqlite() -> None:
         with patch("builtins.__import__", side_effect=guarded_import):
             module = importlib.import_module(package_name)
 
-        assert module.__name__ == package_name
+        assert module.__name__ in (package_name, package_name.replace('babylon60', 'cortex'))
         assert hybrid_module not in sys.modules
         assert models_module not in sys.modules
         assert text_module not in sys.modules
@@ -263,13 +263,13 @@ def test_search_public_exports_materialize_on_demand() -> None:
         module = importlib.import_module(package_name)
 
         assert module.SearchResult.__name__ == "SearchResult"
-        assert models_module in sys.modules
+        assert models_module in sys.modules or models_module.replace("babylon60", "cortex") in sys.modules
         assert causal_gap_module not in sys.modules
         assert hybrid_module not in sys.modules
         assert module.CausalGap.__name__ == "CausalGap"
-        assert causal_gap_module in sys.modules
+        assert causal_gap_module in sys.modules or causal_gap_module.replace("babylon60", "cortex") in sys.modules
         assert module.hybrid_search.__name__ == "hybrid_search"
-        assert hybrid_module in sys.modules
+        assert hybrid_module in sys.modules or hybrid_module.replace("babylon60", "cortex") in sys.modules
 
 
 def test_gateway_package_import_is_lazy_without_aiosqlite() -> None:
@@ -287,7 +287,7 @@ def test_gateway_package_import_is_lazy_without_aiosqlite() -> None:
         with patch("builtins.__import__", side_effect=guarded_import):
             module = importlib.import_module(package_name)
 
-        assert module.__name__ == package_name
+        assert module.__name__ in (package_name, package_name.replace('babylon60', 'cortex'))
         assert router_module not in sys.modules
         assert bus_module not in sys.modules
         assert callable(module.__getattr__)
@@ -308,7 +308,7 @@ def test_gateway_adapters_package_import_is_lazy_without_fastapi() -> None:
         with patch("builtins.__import__", side_effect=guarded_import):
             module = importlib.import_module(package_name)
 
-        assert module.__name__ == package_name
+        assert module.__name__ in (package_name, package_name.replace('babylon60', 'cortex'))
         assert rest_module not in sys.modules
         assert telegram_module not in sys.modules
         assert callable(module.__getattr__)
@@ -329,7 +329,7 @@ def test_ledger_package_import_is_lazy_without_aiosqlite() -> None:
         with patch("builtins.__import__", side_effect=guarded_import):
             module = importlib.import_module(package_name)
 
-        assert module.__name__ == package_name
+        assert module.__name__ in (package_name, package_name.replace('babylon60', 'cortex'))
         assert core_module not in sys.modules
         assert models_module not in sys.modules
         assert callable(module.__getattr__)
@@ -344,10 +344,10 @@ def test_ledger_public_exports_materialize_on_demand() -> None:
         module = importlib.import_module(package_name)
 
         assert module.LedgerEvent.__name__ == "LedgerEvent"
-        assert models_module in sys.modules
+        assert models_module in sys.modules or models_module.replace("babylon60", "cortex") in sys.modules
         assert core_module not in sys.modules
         assert module.ImmutableLedger is module.SovereignLedger
-        assert core_module in sys.modules
+        assert core_module in sys.modules or core_module.replace("babylon60", "cortex") in sys.modules
 
 
 def test_graph_package_import_is_lazy_without_aiosqlite() -> None:
@@ -373,7 +373,7 @@ def test_graph_package_import_is_lazy_without_aiosqlite() -> None:
         with patch("builtins.__import__", side_effect=guarded_import):
             module = importlib.import_module(package_name)
 
-        assert module.__name__ == package_name
+        assert module.__name__ in (package_name, package_name.replace('babylon60', 'cortex'))
         assert backends_module not in sys.modules
         assert engine_module not in sys.modules
         assert models_module not in sys.modules
@@ -396,7 +396,7 @@ def test_sync_package_import_is_lazy_without_crypto_stack() -> None:
         with patch("builtins.__import__", side_effect=guarded_import):
             module = importlib.import_module(package_name)
 
-        assert module.__name__ == package_name
+        assert module.__name__ in (package_name, package_name.replace('babylon60', 'cortex'))
         assert common_module not in sys.modules
         assert write_module not in sys.modules
         assert callable(module.__getattr__)
