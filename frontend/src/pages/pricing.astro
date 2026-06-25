@@ -72,7 +72,7 @@ proof:
 				<h2>Elige tu edición</h2>
 			</div>
 
-			<div class="pricing-grid-4">
+			<div class="pricing-grid-3">
 				<!-- Core (Local) -->
 				<article class="pricing-card-custom">
 					<h3 class="pricing-card-title">Core (Local)</h3>
@@ -81,60 +81,39 @@ proof:
 					<ul class="pricing-card-features">
 						<li><strong>CLI & SQLite</strong> locales</li>
 						<li>Retención local ilimitada</li>
-						<li><strong>1 seat</strong> individual</li>
-						<li>5 runs de evaluación / mes</li>
+						<li><strong>0 anergía</strong> (Autarquía total)</li>
 						<li>Soporte comunitario</li>
 					</ul>
 					<a href="https://github.com/borjamoskv/Cortex-Persist" class="pricing-card-cta pricing-card-cta-secondary">Descarga OSS</a>
 				</article>
 
-				<!-- Pro (SaaS) -->
+				<!-- Metered (SaaS) -->
 				<article class="pricing-card-custom pricing-card-featured-custom">
-					<span class="pricing-card-tag">Recomendado</span>
-					<h3 class="pricing-card-title">Pro (SaaS)</h3>
-					<div class="pricing-card-price">$99 <span>/ mes + compute</span></div>
-					<p class="pricing-card-desc">Plataforma multiusuario en la nube con orquestación y retención histórica.</p>
+					<span class="pricing-card-tag">CAUSAL METERING</span>
+					<h3 class="pricing-card-title">Ejecución Asimétrica</h3>
+					<div class="pricing-card-price">Friston Penalty <span>(Variable)</span></div>
+					<p class="pricing-card-desc">Cero coste fijo mensual. Pagas exclusivamente por el coste termodinámico de procesar entropía (Metered Billing).</p>
 					<ul class="pricing-card-features">
-						<li><strong>1M spans/mes</strong> incluidos</li>
-						<li>$0.10 por cada 10k spans extra</li>
-						<li>Retención de <strong>30 días</strong></li>
-						<li>Hasta <strong>10 seats</strong> de equipo</li>
-						<li>50 runs de evaluación / mes</li>
-						<li>SLA de 99.9% y soporte prioritario</li>
+						<li><strong>$0 Base Fee</strong> (No subscripciones pasivas)</li>
+						<li>Pagas por O(1) Memory Writes validos</li>
+						<li>Penalización automática en transacciones adversariales</li>
+						<li>SLA de 99.9%</li>
 					</ul>
-					<a href="/api-key" class="pricing-card-cta pricing-card-cta-primary">Regístrate Gratis</a>
+					<a href="/api-key" class="pricing-card-cta pricing-card-cta-primary">Generar Token MTK</a>
 				</article>
 
 				<!-- Enterprise (Sovereign) -->
 				<article class="pricing-card-custom">
-					<h3 class="pricing-card-title">Enterprise</h3>
-					<div class="pricing-card-price">$45k - 150k <span>/ año</span></div>
+					<h3 class="pricing-card-title">Soberanía Total</h3>
+					<div class="pricing-card-price">Custom</div>
 					<p class="pricing-card-desc">Despliegue privado en VPC u On-Premises para industrias reguladas.</p>
 					<ul class="pricing-card-features">
-						<li><strong>5M spans/mes</strong> incluidos</li>
-						<li>Retención de <strong>90 días</strong></li>
-						<li>Hasta <strong>50 seats</strong> (expandibles)</li>
-						<li>500 runs de evaluación / mes</li>
-						<li>SLA de 99.99% y respuesta &lt;15 min</li>
-						<li>Soporte 24/7 con Pager y TAM</li>
+						<li>Contención epistémica en red privada</li>
+						<li>Soporte TAM dedicado 24/7</li>
+						<li>Integración directa con Sentinel Git</li>
+						<li>SLA Crítico 99.99%</li>
 					</ul>
-					<a href="/pilot-scope" class="pricing-card-cta pricing-card-cta-secondary">Solicitar Demo</a>
-				</article>
-
-				<!-- Enterprise Strategic -->
-				<article class="pricing-card-custom">
-					<h3 class="pricing-card-title">Estratégico</h3>
-					<div class="pricing-card-price">Custom</div>
-					<p class="pricing-card-desc">Contratos a medida y servicios profesionales de onboarding e integración.</p>
-					<ul class="pricing-card-features">
-						<li>Volumen de spans <strong>ilimitado</strong></li>
-						<li>Retención personalizada</li>
-						<li>Seats y evaluaciones <strong>ilimitados</strong></li>
-						<li>Soporte TAM dedicado 24/7+</li>
-						<li>Auditorías y co-diseño de roadmap</li>
-						<li>SLA crítico a medida</li>
-					</ul>
-					<a href="/pilot-scope" class="pricing-card-cta pricing-card-cta-secondary">Contacto Ventas</a>
+					<a href="/pilot-scope" class="pricing-card-cta pricing-card-cta-secondary">Desplegar VPC</a>
 				</article>
 			</div>
 		</section>
@@ -318,20 +297,15 @@ proof:
 
 <style>
 /* Responsive grid */
-.pricing-grid-4 {
+.pricing-grid-3 {
 	display: grid;
 	gap: 1.5rem;
 	grid-template-columns: 1fr;
 	margin-top: 3rem;
 }
 @media (min-width: 768px) {
-	.pricing-grid-4 {
-		grid-template-columns: repeat(2, 1fr);
-	}
-}
-@media (min-width: 1200px) {
-	.pricing-grid-4 {
-		grid-template-columns: repeat(4, 1fr);
+	.pricing-grid-3 {
+		grid-template-columns: repeat(3, 1fr);
 	}
 }
 
