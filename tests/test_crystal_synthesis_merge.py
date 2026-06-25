@@ -9,7 +9,7 @@ from legacy_research.utils.result import Ok
 
 
 @pytest.mark.asyncio
-@patch("cortex.extensions.swarm.crystal_synthesis._get_synthesis_router")
+@patch("legacy_research.extensions.swarm.crystal_synthesis._get_synthesis_router")
 async def test_semantic_crystal_merge_preserves_unique_details(mock_get_router):
     """Verify that synthesizing two highly redundant crystals preserves unique details.
 

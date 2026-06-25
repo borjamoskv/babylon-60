@@ -30,7 +30,7 @@ class TestAutonomousSwarm(unittest.IsolatedAsyncioTestCase):
         mock_quota = MagicMock()
         mock_quota.acquire = AsyncMock()
 
-        with patch("cortex.extensions.llm.provider._get_quota_manager", return_value=mock_quota):
+        with patch("legacy_research.extensions.llm.provider._get_quota_manager", return_value=mock_quota):
             response = await provider.complete("system-prompt", "user-msg")
 
         self.assertEqual(response, "Sovereign execution confirmed.")

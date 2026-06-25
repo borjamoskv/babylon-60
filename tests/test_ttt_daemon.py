@@ -100,7 +100,7 @@ class TestAutonomousTrainingDaemon:
 
     @pytest.mark.asyncio
     @patch(
-        "cortex.extensions.training.ttt_engine.TTTEngine.run_nocturnal_consolidation",
+        "legacy_research.extensions.training.ttt_engine.TTTEngine.run_nocturnal_consolidation",
         new_callable=AsyncMock,
     )
     async def test_run_cycle_success(self, mock_consolidate, mock_home) -> None:
@@ -154,7 +154,7 @@ class TestAutonomousTrainingDaemon:
 
     @pytest.mark.asyncio
     @patch(
-        "cortex.extensions.training.ttt_engine.TTTEngine.run_nocturnal_consolidation",
+        "legacy_research.extensions.training.ttt_engine.TTTEngine.run_nocturnal_consolidation",
         new_callable=AsyncMock,
     )
     async def test_run_cycle_skipped(self, mock_consolidate, mock_home) -> None:
@@ -200,7 +200,7 @@ class TestAutonomousTrainingDaemon:
 
 
 class TestLLMProviderLoRARouting:
-    @patch("cortex.extensions.llm.provider.load_presets")
+    @patch("legacy_research.extensions.llm.provider.load_presets")
     @patch.dict("os.environ", {"CORTEX_LLM_MODEL": ""})
     @pytest.mark.asyncio
     async def test_vllm_routes_to_adapter_when_verified(self, mock_load_presets, mock_home) -> None:

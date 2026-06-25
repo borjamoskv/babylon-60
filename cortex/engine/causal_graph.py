@@ -78,3 +78,43 @@ class CausalDAG:
         # We need an integer representation of the root hash to seed the Fable Rollup
         root_int = int(root_event_id, 16) % (2**32 - 1)
         return hash_distance_rollup(root_int, distances)
+
+    def get_ancestors(self, event_id: str) -> set[str]:
+        """Returns the set of all ancestor event IDs (lineage)."""
+        ancestors = set()
+        queue = [event_id]
+        while queue:
+            curr = queue.pop(0)
+            if curr not in self.nodes:
+                continue
+            parent = self.nodes[curr].parent_event_id
+            if parent and parent not in ancestors:
+                ancestors.add(parent)
+                queue.append(parent)
+        return ancestors
+
+    def compute_causal_distance(self, event_a_id: str, event_b_id: str) -> float:
+        """
+        BABYLON-60 (Fase 4): Content Addressed Cognition.
+        Computes the structural causal distance between two nodes based on their topological lineage overlap.
+        Distance = 1.0 - (Intersection(Ancestors_A, Ancestors_B) / Union(Ancestors_A, Ancestors_B))
+        Returns 0.0 for identical lineage, 1.0 for completely disjoint lineage.
+        """
+        if event_a_id == event_b_id:
+            return 0.0
+            
+        ancestors_a = self.get_ancestors(event_a_id)
+        ancestors_b = self.get_ancestors(event_b_id)
+        
+        # Include the node themselves in their ancestry
+        ancestors_a.add(event_a_id)
+        ancestors_b.add(event_b_id)
+        
+        intersection = ancestors_a.intersection(ancestors_b)
+        union = ancestors_a.union(ancestors_b)
+        
+        if not union:
+            return 1.0
+            
+        jaccard_similarity = len(intersection) / len(union)
+        return 1.0 - jaccard_similarity

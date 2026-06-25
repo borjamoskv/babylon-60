@@ -159,8 +159,8 @@ def test_perms_bootstrapper_check():
 
     with (
         patch("sys.platform", "darwin"),
-        patch("cortex.extensions.ui_control.bootstrapper.ApplicationServices", mock_app_services),
-        patch("cortex.extensions.ui_control.bootstrapper.Quartz", mock_quartz),
+        patch("legacy_research.extensions.ui_control.bootstrapper.ApplicationServices", mock_app_services),
+        patch("legacy_research.extensions.ui_control.bootstrapper.Quartz", mock_quartz),
     ):
         res = PermsBootstrapper.verify_and_prompt_permissions()
         assert res["accessibility"] is True

@@ -298,7 +298,7 @@ class TestLLMFallback:
             return_value="feat(adk): initiate the autopoietic synthesis of adk ⚡"
         )
 
-        with patch("cortex.extensions.llm.provider.LLMProvider") as mock_provider_cls:
+        with patch("legacy_research.extensions.llm.provider.LLMProvider") as mock_provider_cls:
             mock_provider_instance = mock_provider_cls.return_value
             mock_provider_instance.complete = mock_complete
 
@@ -317,7 +317,7 @@ class TestLLMFallback:
         # Returns message without conventional prefix/format
         mock_complete = AsyncMock(return_value="this is a bad format commit message")
 
-        with patch("cortex.extensions.llm.provider.LLMProvider") as mock_provider_cls:
+        with patch("legacy_research.extensions.llm.provider.LLMProvider") as mock_provider_cls:
             mock_provider_instance = mock_provider_cls.return_value
             mock_provider_instance.complete = mock_complete
 
@@ -334,7 +334,7 @@ class TestLLMFallback:
         from unittest.mock import patch
 
         with patch(
-            "cortex.extensions.llm.provider.LLMProvider", side_effect=ValueError("API key missing")
+            "legacy_research.extensions.llm.provider.LLMProvider", side_effect=ValueError("API key missing")
         ):
             msg = await poet.compose_llm(
                 diff_summary="cortex/adk/core.py | 12 +++",
@@ -350,7 +350,7 @@ class TestLLMFallback:
 
         mock_complete = AsyncMock(return_value='"""Sovereign construct for test."""')
 
-        with patch("cortex.extensions.llm.provider.LLMProvider") as mock_provider_cls:
+        with patch("legacy_research.extensions.llm.provider.LLMProvider") as mock_provider_cls:
             mock_provider_instance = mock_provider_cls.return_value
             mock_provider_instance.complete = mock_complete
 
@@ -367,7 +367,7 @@ class TestLLMFallback:
         from unittest.mock import patch
 
         with patch(
-            "cortex.extensions.llm.provider.LLMProvider",
+            "legacy_research.extensions.llm.provider.LLMProvider",
             side_effect=ValueError("No network connection"),
         ):
             comment = await poet.narrate_llm(

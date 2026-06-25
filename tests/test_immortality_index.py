@@ -10,7 +10,7 @@ import pytest
 @pytest.fixture
 def mock_scanner():
     """Patch MemoryScanner to return controlled data."""
-    with patch("cortex.extensions.shannon.immortality.MemoryScanner") as mock_cls:
+    with patch("legacy_research.extensions.shannon.immortality.MemoryScanner") as mock_cls:
         scanner = AsyncMock()
         mock_cls.return_value = scanner
         yield scanner

@@ -86,32 +86,12 @@ class MemoryMixin(EngineMixinBase):
             return None
 
     def _init_vector_memory(self, db_path: Path, l1, l3) -> dict:
-        import os
-
-        use_hdc = os.environ.get("CORTEX_HDC") == "1"
-        try:
-            import numpy  # noqa: F401
-
-            numpy_installed = True
-        except ImportError:
-            numpy_installed = False
-
-        if not getattr(self, "_vec_available", False):
-            return {"proceed": False, "reason": "optional L2 skipped: sqlite-vec unavailable"}
-        if not numpy_installed:
-            return {"proceed": False, "reason": "optional L2 skipped: numpy not installed"}
-
-        auto_embed = getattr(self, "_auto_embed", True)
-        if not auto_embed or os.environ.get("CORTEX_NO_EMBED") == "1":
-            return {"proceed": False, "reason": "auto_embed=False"}
-
-        l2, encoder, l2_skip_reason = self._init_l2_dense(db_path)
-        hdc_l2, hdc_encoder = self._init_hdc(db_path) if use_hdc else (None, None)
-
+        # [C5-REAL Fase 4] Eradicating sqlite-vec in favor of Causal Distance
         return {
-            "proceed": True,
-            "components": (l2, encoder, hdc_l2, hdc_encoder),
-            "l2_skip_reason": l2_skip_reason,
+            "proceed": False,
+            "reason": "BABYLON-60 Fase 4: L2 sqlite-vec abandoned for Causal Distance (Content Addressed Cognition)",
+            "components": (None, None, None, None),
+            "l2_skip_reason": "sqlite-vec eradicated"
         }
 
     def _init_l2_dense(self, db_path: Path):

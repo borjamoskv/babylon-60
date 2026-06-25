@@ -135,8 +135,8 @@ async def test_autonomous_merge_failure_conflict(temp_repo):
 
 
 @pytest.mark.asyncio
-@patch("cortex.extensions.swarm.auto_fix.AutoFixPipeline._execute")
-@patch("cortex.extensions.swarm.auto_fix.AutoFixPipeline._autonomous_merge")
+@patch("legacy_research.extensions.swarm.auto_fix.AutoFixPipeline._execute")
+@patch("legacy_research.extensions.swarm.auto_fix.AutoFixPipeline._autonomous_merge")
 async def test_process_ghost_triggers_merge(mock_merge, mock_execute):
     """Verify that process_ghost calls _autonomous_merge on success."""
     mock_execute.return_value = {

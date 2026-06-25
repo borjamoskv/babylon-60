@@ -252,7 +252,7 @@ class TestThalamusGate:
 
         # Patch the dense retrieval to return empty (no duplicates)
         with patch(
-            "cortex.memory.thalamus._fetch_dense_results",
+            "legacy_research.memory.thalamus._fetch_dense_results",
             new_callable=AsyncMock,
             return_value=[],
         ):
@@ -277,7 +277,7 @@ class TestThalamusGate:
         existing_fact.fact_type = "general"
 
         with patch(
-            "cortex.memory.thalamus._fetch_dense_results",
+            "legacy_research.memory.thalamus._fetch_dense_results",
             new_callable=AsyncMock,
             return_value=[existing_fact],
         ):
@@ -296,7 +296,7 @@ class TestThalamusGate:
         gate = ThalamusGate(mock_manager, min_density=5)
 
         with patch(
-            "cortex.memory.thalamus._fetch_dense_results",
+            "legacy_research.memory.thalamus._fetch_dense_results",
             new_callable=AsyncMock,
             side_effect=RuntimeError("vector store down"),
         ):

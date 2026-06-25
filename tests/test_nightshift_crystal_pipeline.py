@@ -226,12 +226,12 @@ class TestExecutorNode:
         }
         with (
             patch(
-                "cortex.extensions.swarm.nightshift_pipeline.autodidact_pipeline",
+                "legacy_research.extensions.swarm.nightshift_pipeline.autodidact_pipeline",
                 new=autodidact_success_mock,
                 create=True,
             ),
             patch(
-                "cortex.extensions.skills.autodidact.actuator.autodidact_pipeline",
+                "legacy_research.extensions.skills.autodidact.actuator.autodidact_pipeline",
                 new=autodidact_success_mock,
             ),
         ):
@@ -250,7 +250,7 @@ class TestExecutorNode:
             ],
         }
         with patch(
-            "cortex.extensions.skills.autodidact.actuator.autodidact_pipeline",
+            "legacy_research.extensions.skills.autodidact.actuator.autodidact_pipeline",
             new=autodidact_failure_mock,
         ):
             result = await executor.execute(state)
@@ -271,7 +271,7 @@ class TestExecutorNode:
             raise ConnectionError("DNS failure")
 
         with patch(
-            "cortex.extensions.skills.autodidact.actuator.autodidact_pipeline",
+            "legacy_research.extensions.skills.autodidact.actuator.autodidact_pipeline",
             side_effect=ConnectionError("DNS failure"),
         ):
             result = await executor.execute(state)
@@ -353,7 +353,7 @@ class TestNightShiftPipeline:
     async def test_end_to_end_success(self, sample_targets, autodidact_success_mock) -> None:
         pipeline = NightShiftPipeline()
         with patch(
-            "cortex.extensions.skills.autodidact.actuator.autodidact_pipeline",
+            "legacy_research.extensions.skills.autodidact.actuator.autodidact_pipeline",
             new=autodidact_success_mock,
         ):
             result = await pipeline.run(targets=sample_targets)
@@ -373,7 +373,7 @@ class TestNightShiftPipeline:
     async def test_all_failures_pauses(self, sample_targets, autodidact_failure_mock) -> None:
         pipeline = NightShiftPipeline()
         with patch(
-            "cortex.extensions.skills.autodidact.actuator.autodidact_pipeline",
+            "legacy_research.extensions.skills.autodidact.actuator.autodidact_pipeline",
             new=autodidact_failure_mock,
         ):
             result = await pipeline.run(targets=sample_targets)
@@ -395,7 +395,7 @@ class TestNightShiftDaemon:
             queue_path=sample_queue_file,
         )
         with patch(
-            "cortex.extensions.skills.autodidact.actuator.autodidact_pipeline",
+            "legacy_research.extensions.skills.autodidact.actuator.autodidact_pipeline",
             new=autodidact_success_mock,
         ):
             report = await daemon.run_cycle()

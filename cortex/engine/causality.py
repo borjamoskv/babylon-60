@@ -412,6 +412,75 @@ class AsyncCausalGraph:
                 )
         return chain
 
+    async def find_causally_proximal_facts(
+        self,
+        target_fact_id: int,
+        limit: int = 10,
+        tenant_id: str = "default",
+    ) -> list[dict[str, Any]]:
+        """
+        [C5-REAL Fase 4: Content Addressed Cognition]
+        Substitutes the deprecated sqlite-vec Euclidean/Cosine search.
+        Finds facts that share the highest degree of topological ancestry with the target fact.
+        Calculates Jaccard similarity over their causal lineage directly in SQL for O(1) performance via index.
+        """
+        sql = """
+        WITH RECURSIVE target_ancestors AS (
+            SELECT parent_id as ancestor_id FROM causal_edges WHERE fact_id = ? AND tenant_id = ? AND parent_id IS NOT NULL
+            UNION
+            SELECT ce.parent_id FROM causal_edges ce
+            JOIN target_ancestors ta ON ce.fact_id = ta.ancestor_id
+            WHERE ce.tenant_id = ? AND ce.parent_id IS NOT NULL
+        ),
+        all_nodes AS (
+            SELECT DISTINCT fact_id FROM causal_edges WHERE tenant_id = ? AND fact_id != ?
+        ),
+        candidate_ancestors AS (
+            SELECT ce.fact_id, ce.parent_id as ancestor_id FROM causal_edges ce
+            WHERE ce.tenant_id = ? AND ce.parent_id IS NOT NULL
+            UNION
+            SELECT ca.fact_id, ce.parent_id FROM causal_edges ce
+            JOIN candidate_ancestors ca ON ce.fact_id = ca.ancestor_id
+            WHERE ce.tenant_id = ? AND ce.parent_id IS NOT NULL
+        ),
+        intersection_counts AS (
+            SELECT ca.fact_id, COUNT(*) as intersect_size
+            FROM candidate_ancestors ca
+            JOIN target_ancestors ta ON ca.ancestor_id = ta.ancestor_id
+            GROUP BY ca.fact_id
+        ),
+        union_counts AS (
+            SELECT ca.fact_id, COUNT(DISTINCT ancestor_id) as union_size
+            FROM (
+                SELECT fact_id, ancestor_id FROM candidate_ancestors
+                UNION ALL
+                SELECT an.fact_id, ta.ancestor_id FROM all_nodes an CROSS JOIN target_ancestors ta
+            )
+            GROUP BY fact_id
+        )
+        SELECT 
+            ic.fact_id, 
+            CAST(ic.intersect_size AS FLOAT) / uc.union_size as similarity,
+            f.content
+        FROM intersection_counts ic
+        JOIN union_counts uc ON ic.fact_id = uc.fact_id
+        JOIN facts f ON ic.fact_id = f.id
+        WHERE ic.intersect_size > 0
+        ORDER BY similarity DESC
+        LIMIT ?;
+        """
+        
+        results = []
+        async with self.conn.execute(sql, (target_fact_id, tenant_id, tenant_id, tenant_id, target_fact_id, tenant_id, tenant_id, limit)) as cursor:
+            async for row in cursor:
+                results.append({
+                    "fact_id": row[0],
+                    "causal_similarity": row[1],
+                    "causal_distance": 1.0 - row[1],
+                    "content": row[2]
+                })
+        return results
+
     async def _fact_columns(self) -> set[str]:
         cursor = await self.conn.execute("PRAGMA table_info(facts)")
         return {row[1] for row in await cursor.fetchall()}
