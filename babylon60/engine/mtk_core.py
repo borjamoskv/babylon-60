@@ -130,10 +130,14 @@ class MTKGuard:
         token = self._generate_ephemeral_token(payload)
         
         # Step 3: Open Physical DB Boundary
-        set_ephemeral_token(token)
+        from babylon60.engine.mtk_python import mtk_ephemeral_token
+        from babylon60.engine.mtk_sqlite_authorizer import mtk_active_token
+        t1 = mtk_ephemeral_token.set(token)
+        t2 = mtk_active_token.set(token)
         
         try:
             yield token
         finally:
             # Step 5: Destroy the physical capability
-            clear_ephemeral_token()
+            mtk_ephemeral_token.reset(t1)
+            mtk_active_token.reset(t2)

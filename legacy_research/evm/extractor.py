@@ -38,6 +38,19 @@ class OuroborosExtractor:
         self.topography.add_node(8453, "https://mainnet.base.org")
         self.topography.add_node(42161, "https://arb1.arbitrum.io/rpc")
         await self.topography.ping_all_nodes()
+        await self.register_agent()
+
+    async def register_agent(self) -> None:
+        """Register our agent identity in the database."""
+        conn = await self.engine._get_conn()
+        await conn.execute("CREATE TABLE IF NOT EXISTS agents (id TEXT PRIMARY KEY, public_key TEXT, name TEXT, agent_type TEXT, is_active INTEGER)")
+        cursor = await conn.execute("SELECT 1 FROM agents WHERE id = ?", (self.agent_id,))
+        if not await cursor.fetchone():
+            await conn.execute(
+                "INSERT INTO agents (id, public_key, name, agent_type, is_active) VALUES (?, ?, ?, ?, 1)",
+                (self.agent_id, self.identity.public_key_b64, "Ouroboros EVM Extractor", "ai")
+            )
+            await conn.commit()
 
     async def scan_and_extract(self, chain_id: int = 8453) -> list[dict[str, Any]]:
         """Scan target chain for MEV or bounty opportunities and extract yield."""

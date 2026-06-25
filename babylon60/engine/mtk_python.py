@@ -1,22 +1,6 @@
-# --- C5-REAL BFT PATCH (R10) ---
-import sqlite3 as _sqlite3_bft_orig
 import time
 from contextvars import ContextVar
 from typing import Optional
-
-_orig_sqlite_connect = _sqlite3_bft_orig.connect
-def _bft_sqlite_connect(*args, **kwargs):
-    kwargs.setdefault('timeout', 5.0)
-    conn = _orig_sqlite_connect(*args, **kwargs)
-    try:
-        conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA busy_timeout=5000;")
-        conn.execute("PRAGMA synchronous=NORMAL;")
-    except Exception:
-        pass
-    return conn
-_sqlite3_bft_orig.connect = _bft_sqlite_connect
-# -------------------------------
 
 # [C5-REAL] Exergy-Maximized
 """
@@ -49,9 +33,13 @@ def mint_ephemeral_token(payload: str) -> str:
 
 def set_ephemeral_token(token: str) -> None:
     mtk_ephemeral_token.set(token)
+    from babylon60.engine.mtk_sqlite_authorizer import mtk_active_token
+    mtk_active_token.set(token)
 
 def clear_ephemeral_token() -> None:
     mtk_ephemeral_token.set(None)
+    from babylon60.engine.mtk_sqlite_authorizer import mtk_active_token
+    mtk_active_token.set(None)
 
 def mtk_authorizer_callback(action: int, arg1: str, arg2: str, dbname: str, source: str) -> int:
     """

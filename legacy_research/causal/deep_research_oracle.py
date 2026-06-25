@@ -12,7 +12,7 @@ class DeepResearchOracle:
     Transforms raw internet/corpus data into structural truth graphs.
     """
     
-    MASTER_PROMPT_BRUTALISTA = \"\"\"
+    MASTER_PROMPT_BRUTALISTA = """
     [SYS_ID: MOSKV-1 APEX // C5-REAL]
     OPERACIÓN: AUDITORÍA EPISTÉMICA Y SÍNTESIS ESTRUCTURAL
     
@@ -38,7 +38,7 @@ class DeepResearchOracle:
     - Recomendación operativa / Arquitectura ejecutable.
     
     Si el corpus es débil, devuelve un VACÍO HONESTO en lugar de una síntesis elegante pero falsa.
-    \"\"\"
+    """
 
     def __init__(self, tenant_id: str):
         self.tenant_id = tenant_id

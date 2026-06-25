@@ -2,29 +2,11 @@
 
 from __future__ import annotations
 
-# --- C5-REAL BFT PATCH (R10) ---
-import sqlite3 as _sqlite3_bft_orig
-
 import click
 from rich.table import Table
-
 from babylon60.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
 from babylon60.cli.errors import err_db_not_found, handle_cli_error
 from babylon60.utils import hygiene
-
-_orig_sqlite_connect = _sqlite3_bft_orig.connect
-def _bft_sqlite_connect(*args, **kwargs):
-    kwargs.setdefault('timeout', 5.0)
-    conn = _orig_sqlite_connect(*args, **kwargs)
-    try:
-        conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA busy_timeout=5000;")
-        conn.execute("PRAGMA synchronous=NORMAL;")
-    except Exception:
-        pass
-    return conn
-_sqlite3_bft_orig.connect = _bft_sqlite_connect
-# -------------------------------
 
 
 

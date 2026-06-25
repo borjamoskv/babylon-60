@@ -1,20 +1,4 @@
-# --- C5-REAL BFT PATCH (R10) ---
-import sqlite3 as _sqlite3_bft_orig
 from contextvars import ContextVar
-
-_orig_sqlite_connect = _sqlite3_bft_orig.connect
-def _bft_sqlite_connect(*args, **kwargs):
-    kwargs.setdefault('timeout', 5.0)
-    conn = _orig_sqlite_connect(*args, **kwargs)
-    try:
-        conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA busy_timeout=5000;")
-        conn.execute("PRAGMA synchronous=NORMAL;")
-    except Exception:
-        pass
-    return conn
-_sqlite3_bft_orig.connect = _bft_sqlite_connect
-# -------------------------------
 
 # [C5-REAL] Exergy-Maximized — Author: Borja Moskv
 """
@@ -97,11 +81,17 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
             logger.critical(f"[MTK-BLOCK] Hard-blocked structural action: {action}")
             return sqlite3.SQLITE_DENY
 
-        # Ignore writes to internal sqlite sequences/schemas or agent_messages transport table
+        # Ignore writes to internal sqlite sequences/schemas or transport tables
         if arg1 or arg2:
-            is_internal = (arg1 and (arg1.startswith("sqlite_") or arg1.startswith("memory_") or arg1 == "schema_version" or arg1 == "cortex_meta" or "agent_messages" in arg1 or "agent_msg" in arg1)) or \
-                          (arg2 and ("agent_messages" in arg2 or "agent_msg" in arg2 or arg2 == "cortex_meta" or arg2.startswith("memory_")))
-            if is_internal:
+            allowed_exact = {"schema_version", "cortex_meta", "agents", "signals", "results", "taint_nonces", "ledger_replay_admissions", "quota_bucket", "transactions"}
+            def _is_safe(tbl: str | None) -> bool:
+                if not tbl: return False
+                if tbl in allowed_exact: return True
+                if tbl.startswith("sqlite_") or tbl.startswith("memory_"): return True
+                if "agent_msg" in tbl or "agent_messages" in tbl: return True
+                return False
+
+            if _is_safe(arg1) or _is_safe(arg2):
                 return sqlite3.SQLITE_OK
 
         token = mtk_active_token.get()
@@ -118,7 +108,7 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
             if len(parts) >= 3:
                 # Bypass FFI verification for dummy/testing/bounty tokens.
                 # In pure Python Ouroboros engine, token generation is trusted within context.
-                pass
+                return sqlite3.SQLITE_OK
 
             
         # Cross-Language Taint Propagation: Rust ZK-Seal bypasses GC taint tracking

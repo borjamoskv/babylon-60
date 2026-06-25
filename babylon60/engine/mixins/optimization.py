@@ -5,37 +5,8 @@
 
 from __future__ import annotations
 
-# --- C5-REAL BFT PATCH AIOSQLITE (R10) ---
-import aiosqlite as _aiosqlite_bft_orig
-
 from babylon60.utils.canonical import canonical_json, compute_tx_hash, now_iso
 from babylon60.utils.result import Err, Ok, Result
-
-_orig_aiosqlite_connect = _aiosqlite_bft_orig.connect
-def _bft_aiosqlite_connect(*args, **kwargs):
-    kwargs.setdefault('timeout', 5.0)
-    class BFTConnectionContext:
-        def __init__(self, *args, **kwargs):
-            self._conn_future = _orig_aiosqlite_connect(*args, **kwargs)
-        async def __aenter__(self):
-            self.conn = await self._conn_future.__aenter__()
-            await self.conn.execute("PRAGMA journal_mode=WAL;")
-            await self.conn.execute("PRAGMA busy_timeout=5000;")
-            await self.conn.execute("PRAGMA synchronous=NORMAL;")
-            return self.conn
-        async def __aexit__(self, exc_type, exc_val, exc_tb):
-            await self._conn_future.__aexit__(exc_type, exc_val, exc_tb)
-        def __await__(self):
-            async def _init():
-                conn = await self._conn_future
-                await conn.execute("PRAGMA journal_mode=WAL;")
-                await conn.execute("PRAGMA busy_timeout=5000;")
-                await conn.execute("PRAGMA synchronous=NORMAL;")
-                return conn
-            return _init().__await__()
-    return BFTConnectionContext(*args, **kwargs)
-_aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
-# ----------------------------------------
 
 
 
@@ -197,12 +168,14 @@ class OptimizationMixin:
             self._buffer_task = asyncio.create_task(self._buffer_worker())
         logger.info("🚀 [OPTIMIZED] Sovereign Engine optimization active (Ω₂).")
 
-    async def stop_optimizer(self):
-        """Shutdown the optimizer and flush the buffer."""
-        if self._buffer_task:
-            self._is_flushing = True
-            await self._write_buffer.put(None)
-            await self._buffer_task
+    async def stop_optimizer(self) -> None:
+        """Stop background daemon."""
+        if hasattr(self, "_buffer_task") and self._buffer_task:
+            self._buffer_task.cancel()
+            try:
+                await self._buffer_task
+            except asyncio.CancelledError:
+                pass
             self._buffer_task = None
 
         if OptimizationMixin._executor is not None:

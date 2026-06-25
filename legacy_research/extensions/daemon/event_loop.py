@@ -7,10 +7,41 @@ from datetime import datetime, timezone
 
 from cortex.extensions.daemon.models import DEFAULT_INTERVAL
 
+from typing import TYPE_CHECKING, Any
+
 logger = logging.getLogger("moskv-daemon")
 
 
 class EventLoopMixin:
+    if TYPE_CHECKING:
+        scheduler: Any
+        hot_state: Any
+        watchdog_hub: Any
+        entropic_wake_daemon: Any
+        frontier_daemon: Any
+        zero_prompting_daemon: Any
+        primitive_synthesis_daemon: Any
+        retrieval_breaker_daemon: Any
+        sentinel_oracle: Any
+        agy2_planner_daemon: Any
+        email_ingest_daemon: Any
+        sovereignty_runtime: Any
+        callback_api: Any
+        _aether_daemon: Any
+        fiat_oracle: Any
+        ast_oracle: Any
+        iot_oracle: Any
+        heartbeat_daemon: Any
+        _shutdown: bool
+        _stop_event: asyncio.Event
+        _threads: list[Any]
+        _event_bus: Any
+        def check(self) -> None: ...
+        async def _run_loop_daemon_async(self, daemon: Any, name: str, icon: str, run_method: str = "run") -> None: ...
+        async def _run_health_loop_async(self) -> None: ...
+        async def _run_neural_loop_async(self) -> None: ...
+        async def _run_lifecycle_daemon_async(self, daemon: Any, name: str, icon: str) -> None: ...
+
     def run(self, interval: int = DEFAULT_INTERVAL) -> None:
         """Run the daemon using the sovereign async loop (all subsystems as tasks)."""
         from cortex.events.loop import sovereign_run
