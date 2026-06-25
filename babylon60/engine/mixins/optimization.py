@@ -71,6 +71,8 @@ class SovereignTLRUCache:
         if key in self.cache:
             try:
                 self.order.remove(key)
+            except asyncio.CancelledError:
+                pass
             except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as exc:  # P0-PURGED
                 logger.warning("Suppressed exception: %s", exc)
         elif len(self.cache) >= self.capacity:
@@ -87,6 +89,8 @@ class SovereignTLRUCache:
         self.cache.pop(key, None)
         try:
             self.order.remove(key)
+        except asyncio.CancelledError:
+            pass
         except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as exc:  # P0-PURGED
             logger.warning("Suppressed exception: %s", exc)
         self._generate_proof(key, value, reason)
@@ -111,6 +115,8 @@ class SovereignTLRUCache:
             }
             try:
                 self.on_evict(key, value, audit)
+            except asyncio.CancelledError:
+                pass
             except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.error("SovereignTLRUCache: Eviction hook failed: %s", e)
 
@@ -160,6 +166,8 @@ class OptimizationMixin:
         try:
             async with self.session() as conn:  # type: ignore
                 await self._log_transaction(conn, "SYSTEM", "CACHE_EVICTION", detail)
+        except asyncio.CancelledError:
+            pass
         except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.error("Failed to anchor cache eviction: %s", e)
 
@@ -184,6 +192,8 @@ class OptimizationMixin:
             try:
                 for p in OptimizationMixin._executor._processes.values():
                     p.terminate()
+            except asyncio.CancelledError:
+                pass
             except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as exc:  # P0-PURGED
                 logger.warning("Suppressed exception: %s", exc)
             OptimizationMixin._executor.shutdown(wait=False, cancel_futures=True)
@@ -225,9 +235,13 @@ class OptimizationMixin:
                             future.set_result(Ok(cursor.lastrowid))
                         else:
                             future.set_result(Ok(cursor.rowcount))
+                    except asyncio.CancelledError:
+                        pass
                     except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                         future.set_result(Err(str(e)))
                 await conn.commit()
+            except asyncio.CancelledError:
+                pass
             except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 await conn.rollback()
                 for future, _, _ in batch:

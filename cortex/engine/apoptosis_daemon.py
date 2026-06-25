@@ -106,6 +106,8 @@ class ApoptosisDaemon:
                 logger.info(f"[APOPTOSIS] Poda Termodinámica exitosa. Nodos desintegrados: {purged_count}.")
                 return purged_count
                 
+        except asyncio.CancelledError:
+            pass
         except Exception as e:
             logger.error(f"[APOPTOSIS-FAIL] Falla al cruzar MTK para apoptosis: {e}")
             conn = await self.db.get_conn()

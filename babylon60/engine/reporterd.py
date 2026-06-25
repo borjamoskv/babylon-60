@@ -52,6 +52,8 @@ class ManifoldDaemon:
                             continue
                         try:
                             await client.write(f"data: {data}\n\n".encode())
+                        except asyncio.CancelledError:
+                            pass
                         except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError):  # P0-PURGED
                             dead_clients.add(client_ref)
 
@@ -88,6 +90,8 @@ class ManifoldDaemon:
             # Keep connection open indefinitely
             while True:
                 await asyncio.sleep(60)
+        except asyncio.CancelledError:
+            pass
         except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as exc:  # P0-PURGED
             logger.warning("Suppressed exception: %s", exc)
         finally:

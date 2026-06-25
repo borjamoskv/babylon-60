@@ -56,7 +56,7 @@ def _load_anti_limerence_runtime() -> tuple:
         sys.path.append(
             os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "cortex-core"))
         )
-        from ultramap import UltramapSubstrate
+        from ultramap import UltramapSubstrate  # type: ignore
 
         umap = UltramapSubstrate(capacity=10000)
         logger.info("C5-REAL: Anti-Limerence Runtime & Ultramap Endocrinology Engaged")

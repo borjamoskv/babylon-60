@@ -5,9 +5,7 @@ Enforces the Write-Path Contract (SAGA-less).
 SQLite is hooked via `mtk_authorizer_callback`.
 """
 
-import hashlib
 import sqlite3
-import time
 from contextvars import ContextVar
 from typing import Optional
 
@@ -28,6 +26,7 @@ def mint_ephemeral_token(payload: str, kernel_key: str = None) -> str:
     return cortex_rs.mint_ephemeral_token(payload, kernel_key)
 
 from cortex.engine.mtk_sqlite_authorizer import mtk_active_token, mtk_payload_hash
+
 
 def set_ephemeral_token(token: str, payload_hash: str = "") -> tuple:
     t1 = mtk_ephemeral_token.set(token)

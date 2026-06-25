@@ -141,6 +141,8 @@ class LatticeworkDaemon:
                     # Inyectar exergía matemática de vuelta al CausalScheduler
                     await self.scheduler.inject_exergy(anomaly["id"], exergy.to_float())
 
+            except asyncio.CancelledError:
+                pass
             except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.error("[LatticeworkDaemon] Fallo topológico: %s", e)
 

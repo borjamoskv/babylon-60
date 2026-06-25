@@ -74,6 +74,8 @@ class EmailIngestDaemon:
                                 "body": str(body)
                             })
             mail.logout()
+        except asyncio.CancelledError:
+            pass
         except Exception as e:
             logger.error(f"[EmailIngestDaemon] Fallo en fetch IMAP: {e}")
         return messages

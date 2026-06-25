@@ -62,6 +62,8 @@ class EntropyDaemon:
             self._task.cancel()
             try:
                 await self._task
+            except asyncio.CancelledError:
+                pass
             except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as exc:  # P0-PURGED
                 logger.warning("Suppressed exception: %s", exc)
             logger.info("[EntropyDaemon] Terminado.")
