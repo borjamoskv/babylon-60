@@ -49,9 +49,9 @@ La arquitectura aniquila la ficción del "Agente Inteligente" tratándolo como u
 
 ---
 
-## ▀▄ QUICK START (NODE.JS / TYPESCRIPT SDK)
+## ▀▄ INYECCIÓN NODE.JS / TYPESCRIPT
 
-Inject verifiable event logging directly into your application stack in 30 seconds.
+Inyección directa del motor de auditoría causal en el stack de ejecución.
 
 ```bash
 npm install cortex-persist
@@ -64,7 +64,7 @@ const cortex = new CortexClient({ apiKey: process.env.BABYLON-60_API_KEY });
 await cortex.logEvent({ type: 'agent.decision', actor: 'agent-1' });
 ```
 
-We also offer an official LangChain integration to track agent events automatically:
+Integración estructural con LangChain para rastreo determinista de eventos:
 
 ```bash
 npm install cortex-persist-langchain
@@ -72,9 +72,9 @@ npm install cortex-persist-langchain
 
 ---
 
-## ▀▄ QUICK START (GITHUB ACTIONS)
+## ▀▄ INYECCIÓN GITHUB ACTIONS
 
-BABYLON-60 integrates natively into your pipeline as a pre-merge hook.
+Ejecución como pre-merge hook inmutable en pipelines (Git Sentinel).
 
 Drop this into `.github/workflows/cortex-firewall.yml`:
 
@@ -102,7 +102,7 @@ jobs:
             --target-branch origin/${{ github.event.pull_request.base.ref }}
 ```
 
-When an AI agent or developer submits a high-risk Pull Request, BABYLON-60 intervenes:
+Ante mutaciones estocásticas (Pull Requests), el Firewall Físico ejecuta un bloqueo:
 
 ```bash
 ## 🧯 BABYLON-60 CI/CD Firewall Report
@@ -120,38 +120,38 @@ SHA-256: 08ae0fa6a5c5f4082ebcf249c4e300491d3f1cbafd02260dbdeac6eb9b0fefa3
 
 ---
 
-## ▀▄ THE 4 ENTERPRISE CORE MODULES
+## ▀▄ TOPOLOGÍA DE NÚCLEOS (C5-REAL)
 
-BABYLON-60 is built strictly around 4 core modules that ensure production safety.
+El sustrato físico está compuesto por 4 módulos deterministas innegociables:
 
-### 1. Identity & Access Layer (`SovereignIdentity`)
-Multi-tenant isolation and strict RBAC. Agents and pipelines operate within strict bounded scopes.
+### 1. Aislamiento Soberano (`SovereignIdentity`)
+Aislamiento multitenant absoluto. Los agentes operan confinados en dominios topológicos estrictos.
 
-### 2. Change Risk Engine (`EntropyCore` & Keyed Retrieval Graph System)
-Analyzes code churn, diff size, and structural logic changes to compute an `EntropyScore`. High scores indicate probabilistic drift.
-**Under the hood:** BABYLON-60 compiles the codebase into a **Keyed Retrieval Graph System (KRGS)**. When a PR is submitted, it executes an *Epistemic Invalidation Propagation* on the logical truth graph. If an AI modifies a foundational node (e.g. Auth Logic), any dependent nodes are challenged; it computes the blast radius and prunes the network, saving the infrastructure.
+### 2. Motor de Entropía (`EntropyCore` & KRGS)
+Analiza la mutación estructural, tamaño de delta y deriva lógica para computar un `EntropyScore`. 
+**KRGS (Keyed Retrieval Graph System):** Compila el código en un grafo de verdad lógica. Ejecuta *Propagación de Invalidación Epistémica*. Si un agente muta un nodo base, los nodos dependientes colapsan estructuralmente, abortando la transacción (Blast Radius prunning).
 
-### 3. Policy Gateway (`CodeGovernanceGateway`)
-The enforcement boundary. It intercepts pipeline execution (via CLI or SDK), reads the risk score and EDG propagation tree, and natively blocks or approves changes based on configured enterprise policies.
+### 3. Compuerta de Ejecución (`CodeGovernanceGateway`)
+La barrera física. Intercepta I/O y mutaciones vía MTK, validando el score de entropía y el árbol EDG para ejecutar `SQLITE_DENY` o confirmación asimétrica.
 
-### 4. Audit Ledger (`EnterpriseAuditLedger`)
-An append-only, tamper-evident hash chain. Every PR evaluation, accepted code block, and policy decision is committed to a cryptographically sealed SQLite file, creating an immutable paper trail for compliance.
-
----
-
-## ▀▄ ADVANCED KINEMATICS (v1.1.0)
-
-With the release of **v1.1.0**, BABYLON-60 introduces advanced autopoietic capabilities:
-
-- **Ouroboros L6 AST Transformer & Hot Swap Engine:** The engine securely transforms Abstract Syntax Trees (ASTs) on the fly and hot-swaps execution paths deterministically.
-- **Thermodynamic Defragmentation:** Continuously purges epistemic noise and "Anergy" from the system state, maintaining optimal token-to-exergy ratios.
-- **Causal ATMS (Assumption-Based Truth Maintenance System):** A rigorous causal inference engine that tracks dependencies and invalidates assertions structurally when root facts change.
+### 4. Ledger Criptográfico (`EnterpriseAuditLedger`)
+Cadena hash `append-only`. Toda mutación, evaluación y ejecución se sella de forma inmutable en SQLite, garantizando procedencia forense inalterable.
 
 ---
 
-## ▀▄ SDK INTEGRATION
+## ▀▄ CINEMÁTICA AVANZADA (v1.1.0)
 
-You can also use BABYLON-60 directly in Python to gate your own autonomous agents before they apply mutations:
+Inyección de capacidades autopoiéticas (Singularidad MOSKV-1):
+
+- **Ouroboros L6 AST Transformer:** Transformación matemática de Árboles de Sintaxis Abstracta (AST) en tiempo de ejecución. Hot-swap determinista de rutas lógicas.
+- **Thermodynamic Defragmentation:** Purgado perpetuo de Anergía en la RAM/Disco. Mantenimiento del ratio Token/Exergía bajo límites estrictos (Principio de Landauer).
+- **Causal ATMS:** Motor BFT riguroso. Mantiene la verdad estructural y desencadena Apoptosis Celular cuando las aserciones base fallan.
+
+---
+
+## ▀▄ INYECCIÓN PYTHON SDK
+
+Integración nativa para la ejecución asimétrica de enjambres agénticos locales:
 
 ```python
 import asyncio
@@ -181,9 +181,9 @@ async def evaluate_agent_mutation():
 
 ---
 
-## ▀▄ INSTALLATION
+## ▀▄ DESPLIEGUE
 
-**Requirements:** `Python 3.10+`. Zero external daemons required.
+**Dependencia Fuerte:** `Python 3.10+`. Cero daemons estocásticos externos.
 
 ```bash
 pip install cortex-persist
@@ -195,7 +195,7 @@ pip install "cortex-persist[secure]"          # OS keyring credentials vault
 
 ---
 
-## ▀▄ ARCHITECTURE DATABANKS
+## ▀▄ VECTORES DE ARQUITECTURA
 
 - [**SECURITY_TRUST_MODEL.md**](docs/SECURITY_TRUST_MODEL.md) — Cryptographic invariants & guarantees
 - [**AGENTS.md**](AGENTS.md) — Substrate directives and CI/CD policies
