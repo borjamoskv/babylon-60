@@ -18,9 +18,9 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
 try:
-    import cortex_core_rs
+    import cortex_core_rs # type: ignore
 except ImportError:
-    cortex_core_rs = None
+    cortex_core_rs: Any = None
 from babylon60.crypto.identity import generate_event_identity
 
 
@@ -168,8 +168,8 @@ class EnterpriseAuditLedger:
         resource: str,
         status: str = "SUCCESS",
         state_diff: str = "",
-        trace_id: str = None,
-        parent_span_id: str = None,
+        trace_id: str | None = None,
+        parent_span_id: str | None = None,
         is_code: bool = False
     ) -> str:
         """Securely logs an action. Generates triple identity and canonical hash."""
@@ -238,7 +238,7 @@ class EnterpriseAuditLedger:
         g_phi_weights_hash: str,
         hyperparameters: dict,
         previous_fitness: int,
-        trace_id: str = None,
+        trace_id: str | None = None,
         **kwargs
     ) -> str:
         """
@@ -295,7 +295,7 @@ class EnterpriseAuditLedger:
         axiom_hash: str,
         proof_signature: str,
         topology_distance: int,
-        trace_id: str = None
+        trace_id: str | None = None
     ) -> str:
         """
         [C5-REAL] Registra la asimilación de un axioma de Homotopy Type Theory.
@@ -349,7 +349,7 @@ class EnterpriseAuditLedger:
         actor_id: str,
         distance_batch_root: str,
         batch_size: int,
-        trace_id: str = None
+        trace_id: str | None = None
     ) -> str:
         """
         [C5-REAL] Merkle Cognition Tree transition via Rollup.
