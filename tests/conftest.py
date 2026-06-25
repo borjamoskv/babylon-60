@@ -4,7 +4,31 @@ from __future__ import annotations
 
 import os
 import sys
+import importlib
+from importlib.abc import Loader
+from importlib.machinery import ModuleSpec
 from pathlib import Path
+
+class RedirectLoader(Loader):
+    def create_module(self, spec):
+        cortex_name = spec.name.replace("babylon60", "cortex", 1)
+        return sys.modules[cortex_name]
+
+    def exec_module(self, module):
+        pass
+
+class BabylonRedirector:
+    def find_spec(self, fullname, path, target=None):
+        if fullname == "babylon60" or fullname.startswith("babylon60."):
+            cortex_name = fullname.replace("babylon60", "cortex", 1)
+            try:
+                mod = importlib.import_module(cortex_name)
+                return ModuleSpec(fullname, RedirectLoader(), is_package=hasattr(mod, "__path__"))
+            except ImportError:
+                return None
+        return None
+
+sys.meta_path.insert(0, BabylonRedirector())
 
 # Set environment variables for tests globally before any imports/fixtures run
 os.environ["CORTEX_TESTING"] = "1"

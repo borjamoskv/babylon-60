@@ -27,24 +27,25 @@ class Grade(enum.Enum):
         self.emoji = emoji
 
     def __lt__(self, other: Grade) -> bool:
-        if not isinstance(other, Grade):
+        if type(other).__name__ != "Grade":
             return NotImplemented
         return self.threshold < other.threshold
 
     def __le__(self, other: Grade) -> bool:
-        if not isinstance(other, Grade):
+        if type(other).__name__ != "Grade":
             return NotImplemented
         return self.threshold <= other.threshold
 
     def __gt__(self, other: Grade) -> bool:
-        if not isinstance(other, Grade):
+        if type(other).__name__ != "Grade":
             return NotImplemented
         return self.threshold > other.threshold
 
     def __ge__(self, other: Grade) -> bool:
-        if not isinstance(other, Grade):
+        if type(other).__name__ != "Grade":
             return NotImplemented
         return self.threshold >= other.threshold
+
 
     @classmethod
     def from_score(cls, score: float) -> Grade:

@@ -39,7 +39,7 @@ class CausalClosureGuard:
 
     def _normalize_input(self, proposal: Any) -> dict[str, Any]:
         # Preferred path: already sealed.
-        if isinstance(proposal, ClosurePayload):
+        if type(proposal).__name__ == "ClosurePayload":
             return proposal.canonical()
 
         # Dataclass wrapper support.

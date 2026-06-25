@@ -88,6 +88,10 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset(
         "cortex/mac_maestro/executor.py",
         "cortex/mcp/toolbox_watchdog.py",
         "cortex/extensions/moltbook/influencer_guard.py",
+        # Nodes standalone execution/visualization
+        "cortex/nodes/dag_topology_mapper.py",
+        "cortex/nodes/autodidact_exergy_nodes.py",
+        "cortex/nodes/moskv1_skills_nodes.py",
     }
 )
 
