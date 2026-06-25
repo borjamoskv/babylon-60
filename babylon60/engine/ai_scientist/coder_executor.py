@@ -22,13 +22,17 @@ class CoderExecutor:
         train_script = """
 import torch
 import time
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def run_experiment():
-    print("Initiating exergy-maximized training loop...")
+    logger.info("Initiating exergy-maximized training loop...")
     loss = 1.0
     for epoch in range(10):
         loss *= 0.8  # Simulated thermodynamic compression
-        print(f"Epoch {epoch}: Loss = {loss:.4f}")
+        logger.info(f"Epoch {epoch}: Loss = {loss:.4f}")
     return loss
 
 if __name__ == '__main__':

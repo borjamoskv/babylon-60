@@ -1,8 +1,9 @@
+import asyncio
 import fcntl
 import logging
 import os
 import time
-from contextlib import contextmanager
+from contextlib import asynccontextmanager, contextmanager
 
 logger = logging.getLogger("babylon60.engine.swarm_lock")
 
@@ -41,4 +42,36 @@ def swarm_git_lock(timeout: float = 60.0):
         fcntl.flock(lock_fd, fcntl.LOCK_UN)
         os.close(lock_fd)
         logger.info("[C5-REAL] Swarm Lock liberado.")
+
+
+@asynccontextmanager
+async def async_swarm_git_lock(timeout: float = 60.0):
+    """
+    [C5-REAL] Async Swarm Lock para Concurrencia Confiable (Axioma R10 / Ω1).
+    Versión Termodinámica sin bloqueos al Event Loop asíncrono.
+    """
+    lock_fd = os.open(LOCK_FILE, os.O_CREAT | os.O_TRUNC | os.O_WRONLY)
+    start_time = time.time()
+    
+    acquired = False
+    while time.time() - start_time < timeout:
+        try:
+            fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            acquired = True
+            break
+        except BlockingIOError:
+            await asyncio.sleep(0.5) # [C5-REAL] Espera termodinámica asíncrona pura
+            
+    if not acquired:
+        os.close(lock_fd)
+        logger.error(f"[C5-REAL FATAL] Async Swarm Deadlock: No se pudo adquirir {LOCK_FILE} tras {timeout}s.")
+        raise TimeoutError("Async Swarm Git Lock Timeout: El índice está saturado de concurrencia.")
+        
+    try:
+        logger.info("[C5-REAL] Async Swarm Lock adquirido. Dominio físico asegurado.")
+        yield
+    finally:
+        fcntl.flock(lock_fd, fcntl.LOCK_UN)
+        os.close(lock_fd)
+        logger.info("[C5-REAL] Async Swarm Lock liberado.")
 
